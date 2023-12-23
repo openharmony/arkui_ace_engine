@@ -32,6 +32,10 @@ class GridIrregularFiller {
     ACE_DISALLOW_COPY_AND_MOVE(GridIrregularFiller);
 
 public:
+    /**
+     * @brief Constructs a GridIrregularFiller object.
+     * REQUIRES: All indices prior to GridLayoutInfo::startIndex_ should already be in the GridMatrix.
+     */
     GridIrregularFiller(GridLayoutInfo* info, LayoutWrapper* wrapper);
     ~GridIrregularFiller() = default;
 
@@ -43,12 +47,35 @@ public:
     };
 
     /**
-     * @brief Fills the grid with items based on the provided parameters.
+     * @brief Fills the grid with items in the forward direction.
+     *
+     * REQUIRES: startIndex_ and startMainLineIndex_ are set to a valid starting point.
+     * EFFECT: updates GridLayoutInfo::endIndex_ and GridLayoutInfo::endMainLineIndex_ to the last filled item.
      *
      * @param params The FillParameters object containing the fill parameters.
      * @return The total length of the main axis after filling the grid.
      */
     float Fill(const FillParameters& params);
+
+    /**
+     * @brief Fills the gridMatrix in forward direction until the target GridItem is included. Measure isn't performed,
+     * and lineHeightMap_ isn't updated.
+     *
+     * EFFECT: updates GridLayoutInfo::endIndex_ to targetIdx and GridLayoutInfo::endMainLineIndex_ to the
+     * corresponding line index.
+     *
+     * @param targetIdx The target GridItem index to fill.
+     */
+    void FillMatrixOnly(int32_t targetIdx);
+
+    /**
+     * @brief Measures the GridItems in the backward direction until the target length is filled.
+     *
+     * REQUIRES: GridMatrix prior to jumpIndex_ is already filled.
+     *
+     * @param params The fill parameters for measuring GridItems.
+     */
+    void MeasureBackward(const FillParameters& params, int32_t jumpLineIdx);
 
 private:
     /**
@@ -65,15 +92,15 @@ private:
     void UpdateLength(int32_t prevRow, float mainGap);
 
     /**
-     * @brief Measures a new item and updates the grid layout information.
+     * @brief Measures a GridItem at endIndex_ and updates the grid layout information.
      *
      * @param params The FillParameters object containing the fill parameters.
-     * @param col The index of the column where the new item is being added.
+     * @param col The index of the column where the item is being added.
      */
-    void MeasureNewItem(const FillParameters& params, int32_t col);
+    void MeasureItem(const FillParameters& params, int32_t col);
 
     /**
-     * @brief Initializes the position of the filler in the grid.
+     * @brief Initializes the position of the filler in the grid to GridLayoutInfo::startIndex_.
      */
     void InitPos();
 

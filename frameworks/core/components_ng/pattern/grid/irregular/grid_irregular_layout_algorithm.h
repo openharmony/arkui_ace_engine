@@ -17,8 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_IRREGULAR_LAYOUT_ALGORITHM_H
 
 #include "base/utils/noncopyable.h"
+#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_layout_info.h"
 
 /**
  * @brief GridIrregularLayout class supports irregular grid items that take multiple rows and multiple columns.
@@ -51,6 +53,10 @@ private:
      */
     void Init(const RefPtr<GridLayoutProperty>& props);
 
+    void MeasureOnOffset(float mainSize);
+
+    void MeasureOnJump(float mainSize);
+
     /**
      * @brief Fills the content with GridItems up to the target length.
      * @param targetLen The target main-axis length to fill.
@@ -80,6 +86,18 @@ private:
      * @return True if Grid has reached the end, false otherwise.
      */
     inline bool ReachedEnd() const;
+
+    /**
+     * @brief Transforms GridLayoutInfo::scrollAlign_ into other ScrollAlign values.
+     */
+    void TransformAutoScrollAlign();
+
+    /**
+     *
+     * @param jumpIdx The GridItem index to jump to.
+     * @return The line index of the item in GridMatrix.
+     */
+    int32_t FindJumpLineIdx(int32_t jumpIdx);
 
     LayoutWrapper* wrapper_ = nullptr;
 

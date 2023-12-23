@@ -94,6 +94,21 @@ struct GridLayoutInfo {
         return totalHeight - mainGap;
     }
 
+    /**
+     * @brief Finds the index of the last item in the grid matrix, and update startIndex_ and startMainLineIndex_ to
+     * that last item.
+     *
+     */
+    void UpdateStartIdxToLastItem();
+
+    /**
+     * @brief Tries to find the item between startMainLine and endMainLine.
+     *
+     * @param target The target item to find.
+     * @return The line index of the found item.
+     */
+    int32_t FindItemInRange(int32_t target) const;
+
     void ResetPositionFlags()
     {
         reachEnd_ = false;
@@ -116,7 +131,6 @@ struct GridLayoutInfo {
     float GetContentOffset(const GridLayoutOptions& options, float mainGap) const;
     float GetContentHeight(const GridLayoutOptions& options, float mainGap) const;
     float GetCurrentLineHeight() const;
-
 
     Axis axis_ = Axis::VERTICAL;
 

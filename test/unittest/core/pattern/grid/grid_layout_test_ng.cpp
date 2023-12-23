@@ -1259,7 +1259,7 @@ HWTEST_F(GridLayoutTestNg, MeasureNewItem001, TestSize.Level1)
     GridIrregularFiller::FillParameters params {
         .crossLens = { 50.0f, 50.0f, 100.0f, 100.0f }, .crossGap = 5.0f, .mainGap = 1.0f
     };
-    filler.MeasureNewItem(params, 0);
+    filler.MeasureItem(params, 0);
 
     EXPECT_TRUE(info.lineHeightMap_.find(0) != info.lineHeightMap_.end());
     EXPECT_TRUE(info.lineHeightMap_.find(1) == info.lineHeightMap_.end());
@@ -1306,7 +1306,7 @@ HWTEST_F(GridLayoutTestNg, Fill001, TestSize.Level1)
     GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
 
     float len =
-        filler.Fill({ .crossLens = { 50.0f, 50.0f, 100.0f }, .targetLen = 1000.0f, .crossGap = 5.0f, .mainGap = 1.0f });
+        filler.Fill({ .crossLens = { 50.0f, 50.0f, 100.0f }, .crossGap = 5.0f, .mainGap = 1.0f }, 1000.0f);
 
     // all children have height 0, and UpdateLength isn't run on the last line
     EXPECT_EQ(len, 5.0f);
