@@ -229,9 +229,11 @@ abstract class ViewPU extends NativeViewPartialUpdate
       })
       .forEach((propName) => {
         const stateVar = Reflect.get(this, propName) as Object;
-        if ("notifyPropertyHasChangedPU" in stateVar) {
+        if (stateVar && typeof stateVar === 'object' && "notifyPropertyHasChangedPU" in stateVar) {
           stateMgmtConsole.debug(`... add state variable ${propName} to ${stateVar}`)
           this.ownObservedPropertiesStore_.add(stateVar as unknown as ObservedPropertyAbstractPU<any>);
+        } else {
+          stateMgmtConsole.debug(`${this.debugInfo()} ${propName} application may use an unregular naming style, or stateVar may be Non-Object.`);
         }
       });
   }
