@@ -2251,3 +2251,10 @@ let TextResponseType;
   TextResponseType[TextResponseType['LONG_PRESS'] = 1] = 'LONG_PRESS';
   TextResponseType[TextResponseType['SELECT'] = 2] = 'SELECT';
 })(TextResponseType || (TextResponseType = {}));
+
+let NativeEmbedStatus;
+(function (NativeEmbedStatus) {
+  NativeEmbedStatus['CREATE'] = 0;
+  NativeEmbedStatus['UPDATE'] = 1;
+  NativeEmbedStatus['DESTROY'] = 2;
+})(NativeEmbedStatus || (NativeEmbedStatus = {}));

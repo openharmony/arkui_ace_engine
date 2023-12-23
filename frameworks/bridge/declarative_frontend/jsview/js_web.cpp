@@ -1583,6 +1583,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("domStorageAccess", &JSWeb::DomStorageAccessEnabled);
     JSClass<JSWeb>::StaticMethod("imageAccess", &JSWeb::ImageAccessEnabled);
     JSClass<JSWeb>::StaticMethod("mixedMode", &JSWeb::MixedMode);
+    JSClass<JSWeb>::StaticMethod("enableNativeEmbedMode", &JSWeb::EnableNativeEmbedMode);
     JSClass<JSWeb>::StaticMethod("zoomAccess", &JSWeb::ZoomAccessEnabled);
     JSClass<JSWeb>::StaticMethod("geolocationAccess", &JSWeb::GeolocationAccessEnabled);
     JSClass<JSWeb>::StaticMethod("javaScriptProxy", &JSWeb::JavaScriptProxy);
@@ -1658,6 +1659,8 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onNavigationEntryCommitted", &JSWeb::OnNavigationEntryCommitted);
     JSClass<JSWeb>::StaticMethod("onControllerAttached", &JSWeb::OnControllerAttached);
     JSClass<JSWeb>::StaticMethod("onOverScroll", &JSWeb::OnOverScroll);
+    JSClass<JSWeb>::StaticMethod("onNativeEmbedLifecycleChange", &JSWeb::OnNativeEmbedLifecycleChange);
+    JSClass<JSWeb>::StaticMethod("onNativeEmbedGestureEvent", &JSWeb::OnNativeEmbedGestureEvent);
     JSClass<JSWeb>::StaticMethod("copyOptions", &JSWeb::CopyOption);
     JSClass<JSWeb>::StaticMethod("onScreenCaptureRequest", &JSWeb::OnScreenCaptureRequest);
     JSClass<JSWeb>::StaticMethod("layoutMode", &JSWeb::SetLayoutMode);
@@ -2754,6 +2757,11 @@ void JSWeb::MixedMode(int32_t mixedMode)
 void JSWeb::ZoomAccessEnabled(bool isZoomAccessEnabled)
 {
     WebModel::GetInstance()->SetZoomAccessEnabled(isZoomAccessEnabled);
+}
+
+void JSWeb::EnableNativeEmbedMode(bool isEmbedModeEnabled)
+{
+    WebModel::GetInstance()->SetNativeEmbedModeEnabled(isEmbedModeEnabled);
 }
 
 void JSWeb::GeolocationAccessEnabled(bool isGeolocationAccessEnabled)
@@ -3875,6 +3883,123 @@ void JSWeb::OnControllerAttached(const JSCallbackInfo& args)
     };
     WebModel::GetInstance()->SetOnControllerAttached(std::move(uiCallback));
 }
+
+JSRef<JSVal> EmbedLifecycleChangeToJSValue(const NativeEmbedDataInfo& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("status", static_cast<int32_t>(eventInfo.GetStatus()));
+    obj->SetProperty("surfaceId", eventInfo.GetSurfaceId());
+    obj->SetProperty("embedId", eventInfo.GetEmbedId());
+
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    JSRef<JSObject> requestObj = objectTemplate->NewInstance();
+    requestObj->SetProperty("id", eventInfo.GetEmebdInfo().id);
+    requestObj->SetProperty("type", eventInfo.GetEmebdInfo().type);
+    requestObj->SetProperty("src", eventInfo.GetEmebdInfo().src);
+    requestObj->SetProperty("width", eventInfo.GetEmebdInfo().width);
+    requestObj->SetProperty("height", eventInfo.GetEmebdInfo().height);
+    requestObj->SetProperty("url", eventInfo.GetEmebdInfo().url);
+    obj->SetPropertyObject("info", requestObj);
+
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnNativeEmbedLifecycleChange(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<NativeEmbedDataInfo, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), EmbedLifecycleChangeToJSValue);
+    auto instanceId = Container::CurrentId();
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                            const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<NativeEmbedDataInfo>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetNativeEmbedLifecycleChangeId(jsCallback);
+}
+
+JSRef<JSObject> CreateTouchInfo(const TouchLocationInfo& touchInfo, TouchEventInfo& info)
+{
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    objectTemplate->SetInternalFieldCount(1);
+    JSRef<JSObject> touchInfoObj = objectTemplate->NewInstance();
+    const OHOS::Ace::Offset& globalLocation = touchInfo.GetGlobalLocation();
+    const OHOS::Ace::Offset& localLocation = touchInfo.GetLocalLocation();
+    const OHOS::Ace::Offset& screenLocation = touchInfo.GetScreenLocation();
+    touchInfoObj->SetProperty<int32_t>("type", static_cast<int32_t>(touchInfo.GetTouchType()));
+    touchInfoObj->SetProperty<int32_t>("id", touchInfo.GetFingerId());
+    touchInfoObj->SetProperty<double>("displayX", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetX()));
+    touchInfoObj->SetProperty<double>("displayY", PipelineBase::Px2VpWithCurrentDensity(screenLocation.GetY()));
+    touchInfoObj->SetProperty<double>("windowX", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX()));
+    touchInfoObj->SetProperty<double>("windowY", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY()));
+    touchInfoObj->SetProperty<double>("screenX", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetX()));
+    touchInfoObj->SetProperty<double>("screenY", PipelineBase::Px2VpWithCurrentDensity(globalLocation.GetY()));
+    touchInfoObj->SetProperty<double>("x", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetX()));
+    touchInfoObj->SetProperty<double>("y", PipelineBase::Px2VpWithCurrentDensity(localLocation.GetY()));
+    touchInfoObj->Wrap<TouchEventInfo>(&info);
+    return touchInfoObj;
+}
+
+JSRef<JSVal> NativeEmbeadTouchToJSValue(const NativeEmbeadTouchInfo& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("embedId", eventInfo.GetEmbedId());
+    auto info = eventInfo.GetTouchEventInfo();
+    JSRef<JSObjTemplate> objectTemplate = JSRef<JSObjTemplate>::New();
+    JSRef<JSObject> eventObj = objectTemplate->NewInstance();
+    JSRef<JSArray> touchArr = JSRef<JSArray>::New();
+    JSRef<JSArray> changeTouchArr = JSRef<JSArray>::New();
+    eventObj->SetProperty("source", static_cast<int32_t>(info.GetSourceDevice()));
+    eventObj->SetProperty("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
+    auto target = CreateEventTargetObject(info);
+    eventObj->SetPropertyObject("target", target);
+    eventObj->SetProperty("pressure", info.GetForce());
+    eventObj->SetProperty("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
+    eventObj->SetProperty("targetDisplayId", static_cast<int32_t>(info.GetTargetDisplayId()));
+    eventObj->SetProperty("deviceId", static_cast<int64_t>(info.GetDeviceId()));
+    uint32_t idx = 0;
+    const std::list<TouchLocationInfo>& touchList = info.GetTouches();
+    for (const TouchLocationInfo& location : touchList) {
+        JSRef<JSObject> element = CreateTouchInfo(location, info);
+        touchArr->SetValueAt(idx++, element);
+    }
+    eventObj->SetPropertyObject("touches", touchArr);
+    idx = 0;
+    const std::list<TouchLocationInfo>& changeTouch = info.GetChangedTouches();
+    for (const TouchLocationInfo& change : changeTouch) {
+        JSRef<JSObject> element = CreateTouchInfo(change, info);
+        changeTouchArr->SetValueAt(idx++, element);
+    }
+    if (changeTouch.size() > 0) {
+        eventObj->SetProperty("type", static_cast<int32_t>(changeTouch.front().GetTouchType()));
+    }
+    eventObj->SetPropertyObject("changedTouches", changeTouchArr);
+    obj->SetPropertyObject("touchEvent", eventObj);
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnNativeEmbedGestureEvent(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<NativeEmbeadTouchInfo, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), NativeEmbeadTouchToJSValue);
+    auto instanceId = Container::CurrentId();
+    auto jsCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId](
+                            const BaseEventInfo* info) {
+        ContainerScope scope(instanceId);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<NativeEmbeadTouchInfo>(info);
+        func->Execute(*eventInfo);
+    };
+    WebModel::GetInstance()->SetNativeEmbedGestureEventId(jsCallback);
+}
+
 
 JSRef<JSVal> OverScrollEventToJSValue(const WebOnOverScrollEvent& eventInfo)
 {

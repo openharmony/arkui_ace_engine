@@ -627,6 +627,11 @@ public:
         textZoomRatioNum_ = ratio;
     }
 
+    void SetNativeEmbedModeEnabled(bool isEnabled)
+    {
+        isNativeEmbedMode_ = isEnabled;
+    }
+
     using OnCommonDialogImpl = std::function<bool(const BaseEventInfo* info)>;
     bool OnCommonDialog(const BaseEventInfo* info, DialogEventType dialogEventType) const
     {
@@ -977,6 +982,29 @@ public:
         return declaration_->GetOverScrollId();
     }
 
+    void SetNativeEmbedLifecycleChangeId(const EventMarker& embedLifecycleChangeId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetNativeEmbedLifecycleChangeId(embedLifecycleChangeId);
+    }
+
+    const EventMarker& GetNativeEmbedLifecycleChangeId() const
+    {
+        return declaration_->GetNativeEmbedLifecycleChangeId();
+    }
+
+    void SetNativeEmbedGestureEventId(const EventMarker& embedGestureEventId)
+    {
+        CHECK_NULL_VOID(declaration_);
+        declaration_->SetNativeEmbedGestureEventId(embedGestureEventId);
+    }
+
+    const EventMarker& GetNativeEmbedGestureEventId() const
+    {
+        return declaration_->GetNativeEmbedGestureEventId();
+    }
+
+
 private:
     RefPtr<WebDeclaration> declaration_;
     CreatedCallback createdCallback_ = nullptr;
@@ -1034,6 +1062,7 @@ private:
     int32_t backgroundColor_;
     bool isBackgroundColor_ = false;
     bool isNeedGestureAccess_ = true;
+    bool isNativeEmbedMode_ = false;
     OnDragFunc onDragStartId_;
     OnDropFunc onDragEnterId_;
     OnDropFunc onDragMoveId_;

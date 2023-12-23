@@ -325,7 +325,7 @@ void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
         if (info.GetSourceDevice() != SourceType::TOUCH) {
             return;
         }
-
+        pattern->touchEventInfo_ = info;
         pattern->isMouseEvent_ = false;
         const auto& changedPoint = info.GetChangedTouches().front();
         if (changedPoint.GetTouchType() == TouchType::DOWN) {
@@ -1458,6 +1458,13 @@ void WebPattern::OnVerticalScrollBarAccessEnabledUpdate(bool value)
     }
 }
 
+void WebPattern::OnNativeEmbedModeEnabledUpdate(bool value)
+{
+    if (delegate_) {
+        delegate_->UpdateNativeEmbedModeEnabled(value);
+    }
+}
+
 void WebPattern::OnScrollBarColorUpdate(const std::string& value)
 {
     if (delegate_) {
@@ -1599,6 +1606,7 @@ void WebPattern::OnModifyDone()
         if (!webAccessibilityNode_) {
             webAccessibilityNode_ = AceType::MakeRefPtr<WebAccessibilityNode>(WeakPtr<FrameNode>(host));
         }
+        delegate_->UpdateNativeEmbedModeEnabled(GetNativeEmbedModeEnabledValue(false));
     }
 
     // Initialize events such as keyboard, focus, etc.
@@ -2933,6 +2941,19 @@ void WebPattern::SetSelfAsParentOfWebCoreNode(NWeb::NWebAccessibilityNodeInfo& i
     CHECK_NULL_VOID(host);
     if (info.parentId == -1) { // root node of web core
         info.parentId = host->GetAccessibilityId();
+    }
+}
+void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo& touchEventInfo, const Offset& offset)
+{
+    touchEventInfo = touchEventInfo_;
+    TouchLocationInfo changedInfo("onTouch", touchEvent.id);
+    changedInfo.SetGlobalLocation(Offset(touchEvent.x, touchEvent.y));
+    changedInfo.SetLocalLocation(Offset(touchEvent.x, touchEvent.y));
+    changedInfo.SetScreenLocation(Offset(touchEvent.screenX - offset.GetX(), touchEvent.screenY - offset.GetY()));
+    changedInfo.SetTouchType(touchEvent.type);
+
+    for (auto item : touchEventInfo.GetChangedTouches()) {
+        item = std::move(changedInfo);
     }
 }
 } // namespace OHOS::Ace::NG

@@ -859,6 +859,20 @@ void WebClientImpl::OnScrollState(bool scrollState)
     CHECK_NULL_VOID(delegate);
     delegate->OnScrollState(scrollState);
 }
+void WebClientImpl::OnNativeEmbedLifecycleChange(const NWeb::NativeEmbedDataInfo& dataInfo)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnNativeEmbedLifecycleChange(dataInfo);
+}
+void WebClientImpl::OnNativeEmbedGestureEvent(const NWeb::NativeEmbedTouchEvent& event)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnNativeEmbedGestureEvent(event);
+}
 
 void WebClientImpl::OnRootLayerChanged(int width, int height)
 {

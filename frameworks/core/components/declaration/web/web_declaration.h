@@ -48,6 +48,8 @@ struct WebEvent : Event {
     EventMarker fullScreenExitEventId;
     EventMarker windowExitId;
     EventMarker overScrollId;
+    EventMarker nativeEmbedLifecycleChangeId;
+    EventMarker nativeEmbedGestureEventId;
 };
 
 struct WebMethod : Method {
@@ -327,6 +329,29 @@ public:
     {
         auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
         return event.overScrollId;
+    }
+
+    void SetNativeEmbedLifecycleChangeId(const EventMarker& embedLifecycleChangeId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.nativeEmbedLifecycleChangeId = embedLifecycleChangeId;
+    }
+
+    const EventMarker& GetNativeEmbedLifecycleChangeId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.nativeEmbedLifecycleChangeId;
+    }
+    void SetNativeEmbedGestureEventId(const EventMarker& embedGestureEventId)
+    {
+        auto& event = MaybeResetEvent<WebEvent>(EventTag::SPECIALIZED_EVENT);
+        event.nativeEmbedGestureEventId = embedGestureEventId;
+    }
+
+    const EventMarker& GetNativeEmbedGestureEventId() const
+    {
+        auto& event = static_cast<WebEvent&>(GetEvent(EventTag::SPECIALIZED_EVENT));
+        return event.nativeEmbedGestureEventId;
     }
 
 protected:

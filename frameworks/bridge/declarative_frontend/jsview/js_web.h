@@ -134,6 +134,9 @@ public:
     static void SetLayoutMode(int32_t layoutMode);
     static void SetNestedScroll(const JSCallbackInfo& info);
     static void OverScrollMode(int overScrollMode);
+    static void EnableNativeEmbedMode(bool isEmbedModeEnabled);
+    static void OnNativeEmbedLifecycleChange(const JSCallbackInfo& args);
+    static void OnNativeEmbedGestureEvent(const JSCallbackInfo& args);
     static void JavaScriptOnDocumentStart(const JSCallbackInfo& args);
     static void JavaScriptOnDocumentEnd(const JSCallbackInfo& args);
     // Enable or disable debugging of web content

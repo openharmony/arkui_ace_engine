@@ -362,6 +362,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ScrollBarColor, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverScrollMode, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CopyOptionMode, int32_t);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedModeEnabled, bool);
 
     void RequestFullScreen();
     void ExitFullScreen();
@@ -416,6 +417,7 @@ public:
     void UpdateJavaScriptOnDocumentEnd();
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems);
     void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems);
+    void SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo& touchEventInfo, const Offset& offset);
 #ifdef ENABLE_DRAG_FRAMEWORK
     DragRet GetDragAcceptableStatus();
 #endif
@@ -506,6 +508,7 @@ private:
     void OnScrollBarColorUpdate(const std::string& value);
     void OnOverScrollModeUpdate(const int32_t value);
     void OnCopyOptionModeUpdate(const int32_t value);
+    void OnNativeEmbedModeEnabledUpdate(bool value);
     int GetWebId();
 
     void InitEvent();
@@ -684,6 +687,7 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
     bool accessibilityState_ = false;
     RefPtr<WebAccessibilityNode> webAccessibilityNode_;
+    TouchEventInfo touchEventInfo_{"touchEvent"};
 };
 } // namespace OHOS::Ace::NG
 
