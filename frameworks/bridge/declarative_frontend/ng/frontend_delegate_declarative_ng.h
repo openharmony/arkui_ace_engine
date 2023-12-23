@@ -193,7 +193,8 @@ public:
 
     void ChangeLocale(const std::string& language, const std::string& countryOrRegion) override;
 
-    void RegisterFont(const std::string& familyName, const std::string& familySrc) override;
+    void RegisterFont(const std::string& familyName, const std::string& familySrc, const std::string& bundleName = "",
+        const std::string& moduleName = "") override;
 
     void GetSystemFontList(std::vector<std::string>& fontList) override;
 

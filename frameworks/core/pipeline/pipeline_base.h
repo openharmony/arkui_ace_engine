@@ -745,7 +745,8 @@ public:
 
     void RequestFrame();
 
-    void RegisterFont(const std::string& familyName, const std::string& familySrc);
+    void RegisterFont(const std::string& familyName, const std::string& familySrc, const std::string& bundleName = "",
+        const std::string& moduleName = "");
 
     void GetSystemFontList(std::vector<std::string>& fontList);
 
