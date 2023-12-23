@@ -28,6 +28,7 @@ void SetStars(NodeHandle node, int32_t value)
     CHECK_NULL_VOID(frameNode);
     RatingModelNG::SetStars(frameNode, value);
 }
+
 void SetRatingStepSize(NodeHandle node, double value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -39,13 +40,25 @@ void SetStarStyle(NodeHandle node,
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    RatingModelNG::SetBackgroundSrc(frameNode, backgroundUri, false);
-    RatingModelNG::SetForegroundSrc(frameNode, foregroundUri, false);
- 
-    if (secondaryUri != nullptr && secondaryUri[0] != '\0') {
-        RatingModelNG::SetSecondarySrc(frameNode, secondaryUri, false);
-    } else if (backgroundUri != nullptr && backgroundUri[0] != '\0') {
-        RatingModelNG::SetSecondarySrc(frameNode, backgroundUri, false);
+    std::string backgroundUriStr = backgroundUri;
+    if (backgroundUriStr.empty()) {
+        RatingModelNG::SetBackgroundSrc(frameNode, "", true);
+    } else {
+        RatingModelNG::SetBackgroundSrc(frameNode, backgroundUriStr, false);
+    }
+
+    std::string foregroundUriStr = foregroundUri;
+    if (foregroundUriStr.empty()) {
+        RatingModelNG::SetForegroundSrc(frameNode, "", true);
+    } else {
+        RatingModelNG::SetForegroundSrc(frameNode, foregroundUriStr, false);
+    }
+
+    std::string secondaryUriStr = secondaryUri;
+    if (!secondaryUriStr.empty()) {
+        RatingModelNG::SetSecondarySrc(frameNode, secondaryUriStr, false);
+    } else if (!backgroundUriStr.empty()) {
+        RatingModelNG::SetSecondarySrc(frameNode, backgroundUriStr, false);
     } else {
         RatingModelNG::SetSecondarySrc(frameNode, "", true);
     }
@@ -57,12 +70,14 @@ void ResetStars(NodeHandle node)
     CHECK_NULL_VOID(frameNode);
     RatingModelNG::SetStars(frameNode, STARS_DEFAULT);
 }
+
 void ResetRatingStepSize(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RatingModelNG::SetStepSize(frameNode, STEPS_DEFAULT);
 }
+
 void ResetStarStyle(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -71,6 +86,7 @@ void ResetStarStyle(NodeHandle node)
     RatingModelNG::SetForegroundSrc(frameNode, "", true);
     RatingModelNG::SetSecondarySrc(frameNode, "", true);
 }
+
 ArkUIRatingModifierAPI GetRatingModifier()
 {
     static const ArkUIRatingModifierAPI modifier = {SetStars, SetRatingStepSize, SetStarStyle,

@@ -766,6 +766,9 @@ void TabsModelNG::SetScrollable(FrameNode* frameNode, bool scrollable)
     auto swiperPaintProperty = GetSwiperPaintProperty(frameNode);
     CHECK_NULL_VOID(swiperPaintProperty);
     swiperPaintProperty->UpdateDisableSwipe(!scrollable);
+    auto tabPattern = frameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetIsDisableSwipe(!scrollable);
 }
 
 void TabsModelNG::SetTabBarWidth(FrameNode* frameNode, const Dimension& tabBarWidth)
