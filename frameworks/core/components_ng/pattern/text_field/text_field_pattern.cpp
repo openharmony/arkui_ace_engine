@@ -2456,7 +2456,6 @@ void TextFieldPattern::CloseSelectOverlay(bool animation)
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     gesture->AddTouchEvent(GetTouchListener());
-    UpdateShowMagnifier();
 }
 
 void TextFieldPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
@@ -2568,10 +2567,12 @@ void TextFieldPattern::OnHandleClosed(bool closedByGlobalEvent)
     if (closedByGlobalEvent) {
         UpdateSelectMenuVisibility(false);
     }
-    UpdateShowMagnifier();
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (GetShowMagnifier()) {
+        UpdateShowMagnifier();
+        auto tmpHost = GetHost();
+        CHECK_NULL_VOID(tmpHost);
+        tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void TextFieldPattern::InitEditingValueText(std::string content)
