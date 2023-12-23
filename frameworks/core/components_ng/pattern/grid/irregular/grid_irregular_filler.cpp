@@ -22,8 +22,6 @@
 namespace OHOS::Ace::NG {
 GridIrregularFiller::GridIrregularFiller(GridLayoutInfo* info, LayoutWrapper* wrapper) : info_(info), wrapper_(wrapper)
 {
-    // init starting pos
-    InitPos();
 }
 
 void GridIrregularFiller::InitPos()
@@ -33,7 +31,7 @@ void GridIrregularFiller::InitPos()
         // implies empty matrix
         return;
     }
-    for (auto& [col, idx] : row->second) {
+    for (const auto& [col, idx] : row->second) {
         if (idx == info_->startIndex_) {
             posY_ = info_->startMainLineIndex_;
             // to land on the first item after advancing once
@@ -41,6 +39,7 @@ void GridIrregularFiller::InitPos()
             return;
         }
     }
+    info_->endIndex_ = info_->startIndex_ - 1;
 }
 
 bool GridIrregularFiller::IsFull(float targetLen)
@@ -50,6 +49,7 @@ bool GridIrregularFiller::IsFull(float targetLen)
 
 float GridIrregularFiller::Fill(const FillParameters& params)
 {
+    InitPos();
     while (!IsFull(params.targetLen)) {
         int32_t prevRow = posY_;
         if (!FindNextItem(++info_->endIndex_)) {
@@ -61,7 +61,7 @@ float GridIrregularFiller::Fill(const FillParameters& params)
             UpdateLength(prevRow, params.mainGap);
         }
 
-        MeasureNewItem(params, posX_);
+        MeasureItem(params, posX_);
     }
     info_->endMainLineIndex_ = posY_;
     return length_;
@@ -197,13 +197,14 @@ void GridIrregularFiller::UpdateLength(int32_t prevRow, float mainGap)
     }
 }
 
-void GridIrregularFiller::MeasureNewItem(const FillParameters& params, int32_t col)
+void GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t col)
 {
     auto child = wrapper_->GetOrCreateChildByIndex(info_->endIndex_);
     auto props = AceType::DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     auto constraint = props->CreateChildConstraint();
 
     auto itemSize = GetItemSize(info_->endIndex_);
+    // should cache child constraint result
     float crossLen = 0.0f;
     for (int32_t i = 0; i < itemSize.columns; ++i) {
         crossLen += params.crossLens[i + col];
@@ -226,6 +227,61 @@ void GridIrregularFiller::MeasureNewItem(const FillParameters& params, int32_t c
     float heightPerRow = (childHeight - (params.mainGap * (itemSize.rows - 1))) / itemSize.rows;
     for (int32_t i = 0; i < itemSize.rows; ++i) {
         info_->lineHeightMap_[posY_] = std::max(info_->lineHeightMap_[posY_], heightPerRow);
+    }
+}
+
+void GridIrregularFiller::FillMatrixOnly(int32_t targetIdx)
+{
+    if (targetIdx >= wrapper_->GetTotalChildCount() || targetIdx < info_->startIndex_) {
+        return;
+    }
+
+    InitPos();
+    while (info_->endIndex_ <= targetIdx) {
+        if (!FindNextItem(++info_->endIndex_)) {
+            FillOne();
+        }
+    }
+    info_->endMainLineIndex_ = posY_;
+}
+
+void GridIrregularFiller::MeasureBackward(const FillParameters& params, int32_t jumpLineIdx)
+{
+    posY_ = jumpLineIdx;
+    // only need to record irregular items
+    std::unordered_set<int32_t> measured;
+
+    for (; posY_ >= 0 && length_ < params.targetLen; --posY_) {
+        const auto& row = info_->gridMatrix_.find(posY_)->second;
+        for (int c = 0; c < info_->crossCount_; ++c) {
+            if (row.find(c) == row.end()) {
+                continue;
+            }
+
+            if (measured.find(row.at(c)) != measured.end()) {
+                // skip all columns of a measured irregular item
+                c += GetItemSize(row.at(c)).columns - 1;
+                continue;
+            }
+
+            if (row.at(c) == -1) {
+                // measure irregular items from the bottom-left tile
+                int32_t row = posY_ - 1;
+                while (info_->gridMatrix_.at(row).at(c) == -1) {
+                    --row;
+                }
+                info_->endIndex_ = info_->gridMatrix_.at(row).at(c);
+                measured.insert(info_->endIndex_);
+
+                // skip all columns of this item
+                c += GetItemSize(info_->endIndex_).columns - 1;
+            } else {
+                info_->endIndex_ = row.at(c);
+            }
+
+            MeasureItem(params, c);
+        }
+        length_ += params.mainGap + info_->lineHeightMap_[posY_];
     }
 }
 } // namespace OHOS::Ace::NG
