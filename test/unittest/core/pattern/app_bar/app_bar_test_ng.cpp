@@ -67,6 +67,7 @@ void AppBarTestNg::SetUpTestSuite()
 
 void AppBarTestNg::TearDownTestSuite()
 {
+    MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
     MockPipelineContext::TearDown();
 }
 
@@ -559,5 +560,59 @@ HWTEST_F(AppBarTestNg, SetRowColor002, TestSize.Level1)
     std::optional<Color> NonColor = std::nullopt;
     appBar->SetRowColor(NonColor);
     EXPECT_EQ(renderContext->GetBackgroundColorValue(), originColor);
+}
+
+/**
+ * @tc.name: SetRowWidth002
+ * @tc.desc: Testing the SetRowWidth interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, SetRowWidth002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create appBar.
+     * @tc.expected: appBar is not null.
+     */
+    auto stage = AceType::MakeRefPtr<FrameNode>("stage", 1, AceType::MakeRefPtr<StagePattern>());
+    auto frameNode = AppBarView::Create(stage);
+    auto appBar = Referenced::MakeRefPtr<AppBarView>(frameNode);
+    EXPECT_NE(appBar, nullptr);
+
+    /**
+     * @tc.Construct the parameters required to call the SetRowWidth function
+     * @tc.Calling the SetRowWidth function
+     */
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    const Dimension rootWidthByPx(PipelineContext::GetCurrentRootWidth(), DimensionUnit::PX);
+    const Dimension rootWidthByVp(rootWidthByPx.ConvertToVp(), DimensionUnit::VP);
+    appBar->SetRowWidth(rootWidthByVp);
+    EXPECT_TRUE(AceApplicationInfo::GetInstance().IsRightToLeft());
+}
+
+/**
+ * @tc.name: ReverseBackButton001
+ * @tc.desc: Testing the ReverseBackButton interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, ReverseBackButton001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create appBar.
+     * @tc.expected: appBar is not null.
+     */
+    auto stage = AceType::MakeRefPtr<FrameNode>("stage", 1, AceType::MakeRefPtr<StagePattern>());
+    auto frameNode = AppBarView::Create(stage);
+    auto appBar = Referenced::MakeRefPtr<AppBarView>(frameNode);
+
+    /**
+     * @tc.Construct the parameters required to call the ReverseBackButton function
+     * @tc.Calling the ReverseBackButton function
+     */
+    auto titleBar = frameNode->GetChildAtIndex(0);
+    auto backbtn = AceType::DynamicCast<FrameNode>(titleBar->GetFirstChild());
+    auto renderContext = backbtn->GetRenderContext();
+    appBar->ReverseBackButton();
+    renderContext->UpdateTransformScale(VectorF(1.0f, 1.0f));
+    EXPECT_EQ(renderContext->GetTransformScale(), VectorF(1.0f, 1.0f));
 }
 } // namespace OHOS::Ace::NG
