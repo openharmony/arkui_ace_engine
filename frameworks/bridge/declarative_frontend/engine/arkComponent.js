@@ -16754,12 +16754,49 @@ globalThis.Polyline.attributeModifier = function (modifier) {
 /// <reference path='./import.ts' />
 class ArkPolygonComponent extends ArkCommonShapeComponent {
   points(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, PolygonPointsModifier.identity, PolygonPointsModifier, value);
+    return this;
   }
   monopolizeEvents(monopolize) {
     throw new Error('Method not implemented.');
   }
 }
+class PolygonPointsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    let xPoint = [];
+    let yPoint = [];
+    if (Array.isArray(this.value)) {
+      for (let i = 0; i <= this.value.length; i++) {
+        let item = this.value[i];
+        if (!Array.isArray(item)) {
+          continue;
+        }
+        if (item.length < ARRAY_LENGTH || isUndefined(item[0]) || isUndefined(item[1])) {
+          reset = true;
+          break;
+        }
+        xPoint.push(item[0]);
+        yPoint.push(item[1]);
+      }
+    }
+    else {
+      reset = true;
+    }
+    if (reset) {
+      GetUINativeModule().polygon.resetPolygonPoints(node);
+    }
+    else {
+      GetUINativeModule().polygon.setPolygonPoints(node, xPoint, yPoint);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+PolygonPointsModifier.identity = Symbol('polygonPoints');
 // @ts-ignore
 globalThis.Polygon.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();

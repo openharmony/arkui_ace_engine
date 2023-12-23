@@ -65,6 +65,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_video_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_line_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_path_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_polygon_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_polyline_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_qrcode_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_water_flow_modifier.h"
@@ -165,6 +166,7 @@ static struct ArkUINodeAPI impl = {
     GetColumnSplitModifier,
     GetLineModifier,
     GetPathModifier,
+    GetPolygonModifier,
     GetPolylineModifier,
     GetSpanModifier,
     GetImageAnimatorModifier,

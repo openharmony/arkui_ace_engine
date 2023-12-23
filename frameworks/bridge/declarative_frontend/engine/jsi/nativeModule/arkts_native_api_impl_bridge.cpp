@@ -70,6 +70,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_split_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_line_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_path_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polygon_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polyline_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_qrcode_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_side_bar_container_bridge.h"
@@ -1123,6 +1124,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterPanelAttributes(object, vm);
     RegisterLineAttributes(object, vm);
     RegisterPathAttributes(object, vm);
+    RegisterPolygonAttributes(object, vm);
     RegisterPolylineAttributes(object, vm);
     RegisterSideBarContainerAttributes(object, vm);
     RegisterCalendarPickerAttributes(object, vm);
@@ -1812,6 +1814,16 @@ void ArkUINativeModule::RegisterPathAttributes(Local<panda::ObjectRef> object, E
     path->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPathCommands"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PathBridge::ResetPathCommands));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "path"), path);
+}
+
+void ArkUINativeModule::RegisterPolygonAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
+{
+    auto polygon = panda::ObjectRef::New(vm);
+    polygon->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPolygonPoints"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PolygonBridge::SetPolygonPoints));
+    polygon->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPolygonPoints"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PolygonBridge::ResetPolygonPoints));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "polygon"), polygon);
 }
 
 void ArkUINativeModule::RegisterPolylineAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
