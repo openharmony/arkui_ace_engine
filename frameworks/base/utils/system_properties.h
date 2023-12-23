@@ -384,9 +384,7 @@ public:
 
     static int32_t GetJankFrameThreshold();
 
-    static bool GetTitleStyleEnabled() {
-        return changeTitleStyleEnabled_;
-    }
+    static bool GetTitleStyleEnabled();
 
     static std::string GetCustomTitleFilePath();
 
@@ -433,7 +431,6 @@ private:
     static bool extSurfaceEnabled_;
     static uint32_t dumpFrameCount_;
     static bool resourceDecoupling_;
-    static bool changeTitleStyleEnabled_;
 };
 
 } // namespace OHOS::Ace

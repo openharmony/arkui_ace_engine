@@ -70,7 +70,6 @@ bool SystemProperties::downloadByNetworkEnabled_ = false;
 bool SystemProperties::gpuUploadEnabled_ = false;
 bool SystemProperties::isHookModeEnabled_ = false;
 bool SystemProperties::astcEnabled_ = false;
-bool SystemProperties::changeTitleStyleEnabled_ = false;
 int SystemProperties::astcMax_ = 0;
 int SystemProperties::astcPsnr_ = 0;
 bool SystemProperties::extSurfaceEnabled_ = false;
@@ -226,6 +225,11 @@ bool SystemProperties::GetDebugPixelMapSaveEnabled()
 bool SystemProperties::GetResourceDecoupling()
 {
     return true;
+}
+
+bool SystemProperties::GetTitleStyleEnabled()
+{
+    return false;
 }
 
 int32_t SystemProperties::GetJankFrameThreshold()
