@@ -40,7 +40,7 @@ const RectF GetFirstBoxRect(const std::vector<RectF>& boxes, const RectF& conten
         }
     }
     return boxes.front();
-}
+} // Obtains the first line in the visible area of the text box, including the truncated part.
 
 const RectF GetLastBoxRect(const std::vector<RectF>& boxes, const RectF& contentRect, const float textStartY)
 {
@@ -50,7 +50,7 @@ const RectF GetLastBoxRect(const std::vector<RectF>& boxes, const RectF& content
         }
     }
     return boxes.back();
-}
+} // Obtains the last line in the visible area of the text box, including the truncated part.
 
 RefPtr<FrameNode> TextDragPattern::CreateDragNode(const RefPtr<FrameNode>& hostNode)
 {
