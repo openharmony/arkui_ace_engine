@@ -19,6 +19,7 @@
 #define private public
 #include "core/components_ng/render/line_painter.h"
 #include "core/components/common/properties/color.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/shape/line_paint_property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/shape_painter.h"
@@ -31,10 +32,12 @@ using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace {
+const double START_VALUE = 10.0;
+const double END_VALUE = 30.0;
 const Dimension TEST {0.0, DimensionUnit::PX};
 const NG::OffsetF OFFSET_TEST {1, 1};
-const std::pair<Dimension, Dimension> START_POINT = {10.0_vp, 10.0_vp};
-const std::pair<Dimension, Dimension> END_POINT = {30.0_vp, 30.0_vp};
+static constexpr NG::ShapePoint START_POINT = ShapePoint(10.0, 10.0);
+static constexpr NG::ShapePoint END_POINT = ShapePoint(30.0, 30.0);
 }
 
 class LinePainterTestNg : public testing::Test {};
@@ -63,6 +66,8 @@ HWTEST_F(LinePainterTestNg, LinePainterTestNg001, TestSize.Level1)
     NG::LinePainter::DrawLine(canvas, linePaintProperty, OFFSET_TEST);
     bool result = NG::ShapePainter::SetPen(pen, linePaintProperty);
     EXPECT_TRUE(result);
+    EXPECT_EQ(linePaintProperty.GetStartPointValue().first.ConvertToPx(), START_VALUE);
+    EXPECT_EQ(linePaintProperty.GetEndPointValue().first.ConvertToPx(), END_VALUE);
 
     /**
      * @tc.steps3: call DrawLine and UpdateStrokeWidth with TEST.
