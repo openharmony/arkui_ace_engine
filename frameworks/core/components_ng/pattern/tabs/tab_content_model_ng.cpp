@@ -256,7 +256,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     if (myIndex == indicator) {
-        textLayoutProperty->UpdateTextColor(tabTheme->GetActiveIndicatorColor());
+        textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOnColor());
     } else {
         textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOffColor());
     }
