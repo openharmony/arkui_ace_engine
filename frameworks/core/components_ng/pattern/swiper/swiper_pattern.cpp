@@ -3809,6 +3809,10 @@ void SwiperPattern::OnCustomContentTransition(int32_t toIndex)
         UpdateCurrentIndex(fromIndex);
         oldIndex_ = fromIndex;
 
+        AnimationCallbackInfo info;
+        info.currentOffset = GetCustomPropertyOffset();
+        FireAnimationEndEvent(fromIndex, info);
+
         currentProxyInAnimation_->SetHasOnChanged(true);
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -3829,6 +3833,12 @@ void SwiperPattern::TriggerCustomContentTransitionEvent(int32_t fromIndex, int32
 
     auto tabContentAnimatedTransition = (*onCustomContentTransition_)(fromIndex, toIndex);
     auto transition = tabContentAnimatedTransition.transition;
+
+    if (!transition) {
+        OnCustomAnimationFinish(fromIndex, toIndex, false);
+        return;
+    }
+
     auto proxy = AceType::MakeRefPtr<TabContentTransitionProxy>();
     proxy->SetFromIndex(fromIndex);
     proxy->SetToIndex(toIndex);
