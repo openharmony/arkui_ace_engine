@@ -472,6 +472,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
     auto recvTime = GetSysTimestamp();
+    postEventManager_->CheckNeedReissueCancelEvent(recvTime);
     static const std::string abilityName = AceApplicationInfo::GetInstance().GetProcessName().empty()
                                                ? AceApplicationInfo::GetInstance().GetPackageName()
                                                : AceApplicationInfo::GetInstance().GetProcessName();
@@ -842,6 +843,7 @@ void PipelineContext::SetupRootElement()
         DynamicCast<FrameNode>(installationFree_ ? stageNode->GetParent()->GetParent() : stageNode->GetParent()));
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
+    postEventManager_ = MakeRefPtr<PostEventManager>();
     dragDropManager_ = MakeRefPtr<DragDropManager>();
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(
         DynamicCast<FrameNode>(installationFree_ ? stageNode->GetParent()->GetParent() : stageNode->GetParent()));
@@ -896,6 +898,7 @@ void PipelineContext::SetupSubRootElement()
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
+    postEventManager_ = MakeRefPtr<PostEventManager>();
 }
 
 const RefPtr<StageManager>& PipelineContext::GetStageManager()
@@ -2960,5 +2963,10 @@ void PipelineContext::SubscribeContainerModalButtonsRectChange(
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_VOID(containerPattern);
     containerPattern->SubscribeContainerModalButtonsRectChange(std::move(callback));
+}
+
+const RefPtr<PostEventManager>& PipelineContext::GetPostEventManager()
+{
+    return postEventManager_;
 }
 } // namespace OHOS::Ace::NG

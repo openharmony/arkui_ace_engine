@@ -34,6 +34,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
+#include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
@@ -550,6 +551,7 @@ public:
 
     bool IsDragging() const override;
     void SetIsDragging(bool isDragging) override;
+    const RefPtr<PostEventManager>& GetPostEventManager();
 
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
     void SetContainerModalTitleHeight(int32_t height);
@@ -725,6 +727,7 @@ private:
     mutable std::mutex navigationMutex_;
     std::map<std::string, WeakPtr<FrameNode>> navigationNodes_;
     std::list<DelayedTask> delayedTasks_;
+    RefPtr<PostEventManager> postEventManager_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

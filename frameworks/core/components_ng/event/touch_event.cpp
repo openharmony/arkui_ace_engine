@@ -52,6 +52,7 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
     }
     TouchEventInfo event("touchEvent");
     event.SetTimeStamp(lastPoint.time);
+    event.SetCurrentSysTime(lastPoint.currentSysTime);
     event.SetPointerEvent(lastPoint.pointerEvent);
     TouchLocationInfo changedInfo("onTouch", lastPoint.id);
     PointF lastLocalPoint(lastPoint.x, lastPoint.y);

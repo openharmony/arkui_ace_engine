@@ -32,6 +32,7 @@ public:
     void MarkDirty(const JSCallbackInfo& info);
     void FinishUpdateFunc(const JSCallbackInfo& info);
     void BuildNode(const JSCallbackInfo& info);
+    void PostTouchEvent(const JSCallbackInfo& info);
 
     RefPtr<NG::UINode> GetViewNode() const
     {

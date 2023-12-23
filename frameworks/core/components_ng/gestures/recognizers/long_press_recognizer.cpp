@@ -118,15 +118,17 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         "Long press recognizer receives %{public}d touch down event, begin to detect long press event", event.id);
     int32_t curDuration = duration_;
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    int64_t currentTimeStamp = GetSysTimestamp();
-    int64_t eventTimeStamp = static_cast<int64_t>(event.time.time_since_epoch().count());
-    if (currentTimeStamp > eventTimeStamp) {
-        TAG_LOGI(
-            AceLogTag::ACE_GESTURE, "CurrentTimeStamp is larger than eventTimeStamp, need to minus time spent waiting");
-        // nanoseconds to millisceond.
-        curDuration = curDuration - static_cast<int32_t>((currentTimeStamp - eventTimeStamp) / (1000 * 1000));
-        if (curDuration < 0) {
-            curDuration = 0;
+    if (!IsPostEventResult()) {
+        int64_t currentTimeStamp = GetSysTimestamp();
+        int64_t eventTimeStamp = static_cast<int64_t>(event.time.time_since_epoch().count());
+        if (currentTimeStamp > eventTimeStamp) {
+            TAG_LOGI(AceLogTag::ACE_GESTURE,
+                "CurrentTimeStamp is larger than eventTimeStamp, need to minus time spent waiting");
+            // nanoseconds to millisceond.
+            curDuration = curDuration - static_cast<int32_t>((currentTimeStamp - eventTimeStamp) / (1000 * 1000));
+            if (curDuration < 0) {
+                curDuration = 0;
+            }
         }
     }
 #endif
