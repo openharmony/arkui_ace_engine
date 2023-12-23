@@ -3062,7 +3062,12 @@ void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bo
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto pageNode = pipeline->GetStageManager()->GetLastPage();
-    CHECK_NULL_VOID(pageNode);
+    if (pageNode == nullptr) {
+        auto parent = customKeyboard->GetParent();
+        CHECK_NULL_VOID(parent);
+        parent->RemoveChild(customKeyboard);
+        return;
+    }
     auto pageHeight = pageNode->GetGeometryNode()->GetFrameSize().Height();
     if (isTransitionIn) {
         context->OnTransformTranslateUpdate({ 0.0f, pageHeight, 0.0f });
@@ -3087,9 +3092,7 @@ void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bo
                 TaskExecutor::TaskType::UI);
         });
         context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
-        AnimationUtils::Animate(
-            option,
-            [context, pageHeight]() {
+        AnimationUtils::Animate(option, [context, pageHeight]() {
                 if (context) {
                     context->OnTransformTranslateUpdate({ 0.0f, pageHeight, 0.0f });
                 }
