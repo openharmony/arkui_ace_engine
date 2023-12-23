@@ -3212,6 +3212,15 @@ int32_t RichEditorPattern::DeleteValueSetTextSpan(
     spanResult.SetValue(spanItem->content);
     spanResult.SetOffsetInSpan(currentPosition - contentStartPosition);
     spanResult.SetEraseLength(eraseLength);
+    spanResult.SetFontColor(spanItem->GetTextStyle()->GetTextColor().ColorToString());
+    spanResult.SetFontSize(spanItem->GetTextStyle()->GetFontSize().Value());
+    spanResult.SetFontStyle(spanItem->GetTextStyle()->GetFontStyle());
+    spanResult.SetFontWeight((int32_t)(spanItem->GetTextStyle()->GetFontWeight()));
+    if (!spanItem->GetTextStyle()->GetFontFamilies().empty()) {
+        spanResult.SetFontFamily(spanItem->GetTextStyle()->GetFontFamilies().at(0));
+    }
+    spanResult.SetColor(spanItem->GetTextStyle()->GetTextDecorationColor().ColorToString());
+    spanResult.SetTextDecoration(spanItem->GetTextStyle()->GetTextDecoration());
     return eraseLength;
 }
 

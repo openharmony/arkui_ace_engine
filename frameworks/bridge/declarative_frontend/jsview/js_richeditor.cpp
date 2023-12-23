@@ -443,7 +443,7 @@ JSRef<JSVal> JSRichEditor::CreateJsAboutToDelet(const NG::RichEditorDeleteValue&
 void JSRichEditor::CreateTextStyleObj(JSRef<JSObject>& textStyleObj, const NG::RichEditorAbstractSpanResult& spanResult)
 {
     JSRef<JSObject> decorationObj = JSRef<JSObject>::New();
-    decorationObj->SetProperty<TextDecoration>("type", spanResult.GetTextDecoration());
+    decorationObj->SetProperty<int32_t>("type", (int32_t)(spanResult.GetTextDecoration()));
     decorationObj->SetProperty<std::string>("color", spanResult.GetColor());
     textStyleObj->SetProperty<std::string>("fontColor", spanResult.GetFontColor());
     textStyleObj->SetProperty<double>("fontSize", spanResult.GetFontSize());
@@ -458,7 +458,7 @@ void JSRichEditor::CreateImageStyleObj(
 {
     JSRef<JSArray> imageSize = JSRef<JSArray>::New();
     imageSize->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(spanResult.GetSizeWidth())));
-    imageSize->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(spanResult.GetSizeHeight())));
+    imageSize->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(spanResult.GetSizeHeight())));
     imageStyleObj->SetPropertyObject("size", imageSize);
     imageStyleObj->SetProperty<int32_t>("verticalAlign", static_cast<int32_t>(spanResult.GetVerticalAlign()));
     imageStyleObj->SetProperty<int32_t>("objectFit", static_cast<int32_t>(spanResult.GetObjectFit()));
