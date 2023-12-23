@@ -140,6 +140,11 @@ public:
         int32_t duration, const AnimationFinishCallback& callback);
     NavigationMode GetNavigationMode();
 
+    void SetIsOnAnimation(bool isOnAnimation)
+    {
+        isOnAnimation_ = isOnAnimation;
+    }
+
 private:
     bool UpdateNavDestinationVisibility(const RefPtr<NavDestinationGroupNode>& navDestination,
         const RefPtr<UINode>& remainChild, int32_t index, size_t destinationSize);

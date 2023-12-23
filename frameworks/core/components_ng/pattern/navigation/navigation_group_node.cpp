@@ -129,6 +129,7 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
         navDestinationPattern->SetName(childNode.first);
         navDestinationPattern->SetNavDestinationNode(uiNode);
         SetBackButtonEvent(navDestination);
+        navDestination->SetIndex(i);
         auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
         CHECK_NULL_VOID(eventHub);
         if (!eventHub->GetOnStateChange()) {
