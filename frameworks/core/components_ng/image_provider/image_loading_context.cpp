@@ -454,4 +454,8 @@ const std::string ImageLoadingContext::GetCurrentLoadingState()
     }
 }
 
+int32_t ImageLoadingContext::GetFrameCount() const
+{
+    return imageObj_ ? imageObj_->GetFrameCount() : 0;
+}
 } // namespace OHOS::Ace::NG
