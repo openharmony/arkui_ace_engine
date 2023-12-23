@@ -345,4 +345,37 @@ float GridLayoutInfo::GetCurrentLineHeight() const
     }
     return 0.0f;
 }
+
+void GridLayoutInfo::UpdateStartIdxToLastItem()
+{   
+    // find last index in gridMatrix
+    for (auto line = gridMatrix_.rbegin(); line != gridMatrix_.rend(); ++line) {
+        const auto& row = line->second;
+        for (auto c = row.rbegin(); c != row.rend(); ++c) {
+            if (c->second != -1) {
+                startIndex_ = c->second;
+                startMainLineIndex_ = line->first;
+                return;
+            }
+        }
+    }
+    startIndex_ = 0;
+    startMainLineIndex_ = 0;
+}
+
+int32_t GridLayoutInfo::FindItemInRange(int32_t target) const
+{
+    if (gridMatrix_.empty()) {
+        return -1;
+    }
+    for (int r = startMainLineIndex_; r <= endMainLineIndex_; ++r) {
+        const auto& row = gridMatrix_.at(r);
+        for (auto it : row) {
+            if (it.second == target) {
+                return r;
+            }
+        }
+    }
+    return -1;
+}
 } // namespace OHOS::Ace::NG
