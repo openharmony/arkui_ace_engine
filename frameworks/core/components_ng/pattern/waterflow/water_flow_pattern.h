@@ -117,6 +117,11 @@ public:
         layoutInfo_.restoreOffset_ = restoreOffset;
     }
 
+    void SetScrollAlign(ScrollAlign align)
+    {
+        layoutInfo_.align_ = align;
+    }
+
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     Rect GetItemRect(int32_t index) const override;
