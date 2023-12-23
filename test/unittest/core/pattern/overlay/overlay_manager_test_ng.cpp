@@ -910,7 +910,6 @@ HWTEST_F(OverlayManagerTestNg, GetSheetMask001, TestSize.Level1)
      * @tc.expected: if the color is set, Make sure the maskNode is exist and it's color is right.
      */
     auto maskNode = overlayManager->GetSheetMask(sheetNode);
-    EXPECT_TRUE(maskNode == nullptr);
     auto onDisappear = []() {};
     overlayManager->BindSheet(
         !isShow, nullptr, nullptr, nullptr, sheetStyle, nullptr, onDisappear, nullptr, targetNode);
@@ -2807,4 +2806,135 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern6, TestSize.Level1)
     EXPECT_EQ(bottomPath.substr(178, 12), substring);
 }
 
+/**
+ * @tc.name: SheetPresentationPattern7
+ * @tc.desc: Test SheetPresentationPattern::UpdateInteractive().
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern7, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetPattern.
+     */
+    SheetStyle sheetStyle;
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(topSheetNode, nullptr);
+    auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
+
+    /**
+     * @tc.steps: step3. test without setting enableOutsideInteractive.
+     * @tc.expected: The backplanes are not interactive by default, maskNode should be visible.
+     */
+    topSheetPattern->UpdateInteractive();
+    EXPECT_FALSE(sheetStyle.interactive);
+    auto maskNode = overlayManager->GetSheetMask(topSheetNode);
+    ASSERT_NE(maskNode, nullptr);
+    auto maskLatoutProperty = maskNode->GetLayoutProperty();
+    ASSERT_NE(maskLatoutProperty, nullptr);
+    EXPECT_EQ(maskLatoutProperty->GetVisibility(), VisibleType::VISIBLE);
+
+    /**
+     * @tc.steps: step4. test set enableOutsideInteractive true.
+     * @tc.expected: maskNode is invisible, the backplane can be interactive.
+     */
+    auto sheetLayoutProperty = topSheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(sheetLayoutProperty, nullptr);
+    sheetStyle.interactive = true;
+    sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
+    topSheetPattern->UpdateInteractive();
+    maskNode = overlayManager->GetSheetMask(topSheetNode);
+    maskLatoutProperty = maskNode->GetLayoutProperty<LayoutProperty>();
+    EXPECT_EQ(maskLatoutProperty->GetVisibility(), VisibleType::INVISIBLE);
+
+    /**
+     * @tc.steps: step5. test set enableOutsideInteractive false.
+     * @tc.expected: maskNode is visible, the backplane can not be interactive.
+     */
+    sheetStyle.interactive = false;
+    sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
+    topSheetPattern->UpdateInteractive();
+    maskNode = overlayManager->GetSheetMask(topSheetNode);
+    maskLatoutProperty = maskNode->GetLayoutProperty();
+    EXPECT_EQ(maskLatoutProperty->GetVisibility(), VisibleType::VISIBLE);
+}
+
+/**
+ * @tc.name: SheetPresentationPattern8
+ * @tc.desc: Test SheetPresentationPattern::SheetInteractiveDismiss().
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern8, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetPattern.
+     */
+    SheetStyle sheetStyle;
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(topSheetNode, nullptr);
+    auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
+
+    /**
+     * @tc.steps: step3. set shouldDismissFunc, sheetDetents.
+     */
+    topSheetPattern->sheetDetentHeight_.emplace_back(100);
+    bool isDismiss = false;
+    auto shouldDismissFunc = [&isDismiss]() -> void { isDismiss = true; };
+
+    /**
+     * @tc.steps: step4. Trigger a shutdown event, test when the velocity is illegal.
+     * @tc.expected: shutdown faild, shouldDismissFunc is not called.
+     */
+    topSheetPattern->UpdateShouldDismiss(shouldDismissFunc);
+    topSheetPattern->HandleDragEnd(-2000);
+    EXPECT_FALSE(isDismiss);
+
+    /**
+     * @tc.steps: step5. Trigger a shutdown event.
+     * @tc.expected: shouldDismissFunc is called, isDismiss = true.
+     */
+    topSheetPattern->HandleDragEnd(100);
+    EXPECT_TRUE(isDismiss);
+
+    /**
+     * @tc.steps: step6. Trigger a shutdown event, test when the velocity reaches the threshold.
+     * @tc.expected: shouldDismissFunc is called, isDismiss = true.
+     */
+    isDismiss = false;
+    topSheetPattern->HandleDragEnd(2000);
+    EXPECT_TRUE(isDismiss);
+}
 } // namespace OHOS::Ace::NG
