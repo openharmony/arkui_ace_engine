@@ -199,6 +199,7 @@ void ScrollModelNG::SetScrollSnap(FrameNode* frameNode, ScrollSnapAlign scrollSn
     pattern->SetIntervalSize(intervalSize);
     pattern->SetSnapPaginations(snapPaginations);
     pattern->SetEnableSnapToSide(enableSnapToSide);
+    pattern->SetEnablePaging(ScrollPagingStatus::INVALID);
 }
 
 void ScrollModelNG::SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled)
