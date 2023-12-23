@@ -218,6 +218,24 @@ float MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>
     return static_cast<float>(contentWrapper->GetGeometryNode()->GetFrameSize().Height());
 }
 
+float GetSafeAreaHeight(LayoutWrapper* LayoutWrapper)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, 0.0f);
+    auto safeArea = pipeline->GetSafeArea();
+    auto safeAreaHeight = safeArea.top_.Length();
+    auto hostNode = LayoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(hostNode, 0.0f);
+    auto geometryNode = hostNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 0.0f);
+    auto parentGlobalOffset = hostNode->GetParentGlobalOffsetDuringLayout();
+    auto frame = geometryNode->GetFrameRect() + parentGlobalOffset;
+    if (!safeArea.top_.IsOverlapped(frame.Top())) {
+        safeAreaHeight = 0.0f;
+    }
+    return safeAreaHeight;
+}
+
 float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostNode,
     const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty)
 {
@@ -230,7 +248,7 @@ float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hos
     auto titleBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_RETURN(titleBarWrapper, 0.0f);
     auto geometryNode = titleBarWrapper->GetGeometryNode();
-    auto titleBarOffset = OffsetF(0.0f, 0.0f);
+    auto titleBarOffset = OffsetF(0.0f, 0.0f + GetSafeAreaHeight(layoutWrapper));
     geometryNode->SetMarginFrameOffset(titleBarOffset);
     titleBarWrapper->Layout();
     return geometryNode->GetFrameSize().Height();
@@ -248,12 +266,12 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostN
     CHECK_NULL_VOID(contentWrapper);
     auto geometryNode = contentWrapper->GetGeometryNode();
     if (!navBarLayoutProperty->GetHideTitleBar().value_or(false)) {
-        auto contentOffset = OffsetF(geometryNode->GetFrameOffset().GetX(), titlebarHeight);
+        auto contentOffset = OffsetF(geometryNode->GetFrameOffset().GetX(), titlebarHeight + GetSafeAreaHeight(layoutWrapper));
         geometryNode->SetMarginFrameOffset(contentOffset);
         contentWrapper->Layout();
         return;
     }
-    auto contentOffset = OffsetF(0.0f, 0.0f);
+    auto contentOffset = OffsetF(0.0f, 0.0f + GetSafeAreaHeight(layoutWrapper));
     geometryNode->SetMarginFrameOffset(contentOffset);
     contentWrapper->Layout();
 }
@@ -275,7 +293,7 @@ float LayoutToolBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& host
         return 0.0f;
     }
 
-    auto toolBarOffsetY = layoutWrapper->GetGeometryNode()->GetFrameSize().Height() - toolbarHeight;
+    auto toolBarOffsetY = layoutWrapper->GetGeometryNode()->GetFrameSize().Height() - toolbarHeight + GetSafeAreaHeight(layoutWrapper);
     auto toolBarOffset = OffsetF(geometryNode->GetFrameOffset().GetX(), static_cast<float>(toolBarOffsetY));
     geometryNode->SetMarginFrameOffset(toolBarOffset);
     toolBarWrapper->Layout();
@@ -299,7 +317,7 @@ void LayoutToolBarDivider(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
     auto dividerOffsetY = layoutWrapper->GetGeometryNode()->GetFrameSize().Height() - toolbarHeight -
-                          theme->GetToolBarDividerWidth().ConvertToPx();
+                          theme->GetToolBarDividerWidth().ConvertToPx() + GetSafeAreaHeight(layoutWrapper);
     auto toolBarDividerOffset =
         OffsetF(dividerGeometryNode->GetFrameOffset().GetX(), static_cast<float>(dividerOffsetY));
     dividerGeometryNode->SetFrameOffset(toolBarDividerOffset);
@@ -372,5 +390,4 @@ void NavBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     float toolbarHeight = LayoutToolBar(layoutWrapper, hostNode, navBarLayoutProperty);
     LayoutToolBarDivider(layoutWrapper, hostNode, navBarLayoutProperty, toolbarHeight);
 }
-
 } // namespace OHOS::Ace::NG

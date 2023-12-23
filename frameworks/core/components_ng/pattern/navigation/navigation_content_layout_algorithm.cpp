@@ -37,6 +37,24 @@ void NavigationContentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     PerformMeasureSelfWithChildList(layoutWrapper, { children });
 }
 
+float GetSafeAreaHeight(LayoutWrapper* LayoutWrapper)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, 0.0f);
+    auto safeArea = pipeline->GetSafeArea();
+    auto safeAreaHeight = safeArea.top_.Length();
+    auto hostNode = LayoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(hostNode, 0.0f);
+    auto geometryNode = hostNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 0.0f);
+    auto parentGlobalOffset = hostNode->GetParentGlobalOffsetDuringLayout();
+    auto frame = geometryNode->GetFrameRect() + parentGlobalOffset;
+    if (!safeArea.top_.IsOverlapped(frame.Top())) {
+        safeAreaHeight = 0.0f;
+    }
+    return safeAreaHeight;
+}
+
 void NavigationContentLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     // update child position.
@@ -51,12 +69,22 @@ void NavigationContentLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
     }
     // Update child position.
+    auto safeAreaHeight = GetSafeAreaHeight(layoutWrapper);
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild(false)) {
         if (child->IsActive()) {
             SizeF childSize = child->GetGeometryNode()->GetMarginFrameSize();
             auto translate = Alignment::GetAlignPosition(size, childSize, align) + paddingOffset;
             child->GetGeometryNode()->SetMarginFrameOffset(translate);
             child->Layout();
+
+            auto childNode = child->GetHostNode();
+            CHECK_NULL_VOID(childNode);
+            auto childGeo = child->GetGeometryNode();
+            CHECK_NULL_VOID(childGeo);
+            auto offset = childGeo->GetFrameOffset();
+            offset.SetY(offset.GetY() + safeAreaHeight);
+            childGeo->SetFrameOffset(offset);
+            childNode->ForceSyncGeometryNode();
         }
     }
     // Update content position.
