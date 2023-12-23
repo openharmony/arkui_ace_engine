@@ -273,12 +273,16 @@ public:
     }
 
     RefPtr<UINode> CacheItem(int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& cache,
-        const std::optional<LayoutConstraintF>& itemConstraint)
+        const std::optional<LayoutConstraintF>& itemConstraint, int64_t deadline, bool& isTimeout)
     {
         ACE_SCOPED_TRACE("Builder:BuildLazyItem [%d]", index);
         auto itemInfo = OnGetChildByIndex(index, expiringItem_);
         CHECK_NULL_RETURN(itemInfo.second, nullptr);
         cache.try_emplace(itemInfo.first, LazyForEachCacheChild(index, itemInfo.second));
+        if (!itemInfo.second->RenderCustomChild(deadline)) {
+            isTimeout = true;
+            return itemInfo.second;
+        }
         ProcessOffscreenNode(itemInfo.second, false);
         ViewStackProcessor::GetInstance()->SetPredict(itemInfo.second);
         itemInfo.second->Build(nullptr);
@@ -339,7 +343,7 @@ public:
 
         for (auto& [key, node] : expiringItem_) {
             auto iter = idleIndexes.find(node.first);
-            if (iter != idleIndexes.end() && node.second) {
+            if (iter != idleIndexes.end() && node.second && node.first != preBuildingIndex_) {
                 ProcessOffscreenNode(node.second, false);
                 cache.try_emplace(key, std::move(node));
                 cachedItems_.try_emplace(node.first, LazyForEachChild(key, nullptr));
@@ -353,9 +357,16 @@ public:
         for (auto index : idleIndexes) {
             if (GetSysTimestamp() > deadline) {
                 result = false;
-                continue;
+                break;
             }
-            auto uiNode = CacheItem(index, cache, itemConstraint);
+            bool isTimeout = false;
+            preBuildingIndex_ = -1;
+            auto uiNode = CacheItem(index, cache, itemConstraint, deadline, isTimeout);
+            if (isTimeout) {
+                preBuildingIndex_ = index;
+                result = false;
+                break;
+            }
             if (!canRunLongPredictTask && itemConstraint) {
                 result = false;
                 continue;
@@ -462,6 +473,7 @@ private:
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;
     int32_t cacheCount_ = 0;
+    int32_t preBuildingIndex_ = -1;
     bool needTransition = false;
     bool isLoop_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(LazyForEachBuilder);

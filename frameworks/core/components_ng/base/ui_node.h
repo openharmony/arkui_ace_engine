@@ -290,6 +290,8 @@ public:
     virtual void OnWindowHide() {}
     virtual void Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos);
 
+    virtual bool RenderCustomChild(int64_t deadline);
+
     virtual void OnWindowFocused() {}
 
     virtual void OnWindowUnfocused() {}

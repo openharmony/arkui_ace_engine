@@ -1566,6 +1566,9 @@ void ListLayoutAlgorithm::PostIdleTask(RefPtr<FrameNode> frameNode, const ListPr
                 break;
             }
             auto wrapper = frameNode->GetOrCreateChildByIndex(*it, false);
+            if (wrapper && wrapper->GetHostNode() && !wrapper->GetHostNode()->RenderCustomChild(deadline)) {
+                break;
+            }
             needMarkDirty |= PredictBuildItem(wrapper, param.layoutConstraint);
             param.items.erase(it++);
         }
