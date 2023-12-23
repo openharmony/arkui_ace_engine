@@ -37,6 +37,9 @@ public:
     virtual void Create(const uint32_t& unicode) = 0;
     virtual void SetFontSize(const Dimension& value) = 0;
     virtual void SetFontWeight(FontWeight value) = 0;
+    virtual void SetFontColor(std::vector<Color>& symbolColor) = 0;
+    virtual void SetSymbolRenderingStrategy(const uint32_t renderingStrategy) = 0;
+    virtual void SetSymbolEffect(const uint32_t effectStrategy) = 0;
 
 private:
     static std::unique_ptr<SymbolSpanModel> instance_;
