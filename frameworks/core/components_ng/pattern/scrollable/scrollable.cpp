@@ -479,7 +479,7 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
     currentVelocity_ = 0.0;
 
     frictionOffsetProperty_->Set(mainPosition);
-    float response = fabs(2 * M_PI / FRICTION_SCALE * friction);
+    float response = fabs(2 * M_PI / (FRICTION_SCALE * friction));
     auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(response, 1.0f, 0.0f);
     AnimationOption option;
     option.SetCurve(curve);

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_SYSTEM_PROPERTIES_H
 
 #include <memory>
+#include <optional>
 #include <string>
 
 #include "base/utils/device_config.h"
@@ -383,14 +384,13 @@ public:
 
     static int32_t GetJankFrameThreshold();
 
-    static bool GetTitleStyleEnabled() {
-        return changeTitleStyleEnabled_;
-    }
+    static bool GetTitleStyleEnabled();
 
     static std::string GetCustomTitleFilePath();
 
     static bool Is24HourClock();
 
+    static std::optional<bool> GetRtlEnabled();
 private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;
@@ -431,7 +431,6 @@ private:
     static bool extSurfaceEnabled_;
     static uint32_t dumpFrameCount_;
     static bool resourceDecoupling_;
-    static bool changeTitleStyleEnabled_;
 };
 
 } // namespace OHOS::Ace

@@ -76,7 +76,6 @@ namespace OHOS::Ace {
 namespace NG {
 namespace {
 constexpr int32_t DEFAULT_INSTANCE_ID = 0;
-constexpr int32_t DEFAULT_INT0 = 0;
 constexpr int32_t DEFAULT_INT1 = 1;
 constexpr int32_t DEFAULT_INT3 = 3;
 constexpr int32_t DEFAULT_INT10 = 10;
@@ -359,7 +358,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg004, TestSize.Level1)
     context_->AddScheduleTask(scheduleTask);
     context_->AddScheduleTask(nullptr);
     context_->FlushAnimation(NANO_TIME_STAMP);
-    EXPECT_EQ(scheduleTask->GetNanoTimestamp(), DEFAULT_INT0);
+    EXPECT_EQ(scheduleTask->GetNanoTimestamp(), NANO_TIME_STAMP);
 }
 
 /**
@@ -891,7 +890,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg017, TestSize.Level1)
     context_->SetupRootElement();
     auto manager = context_->GetDragDropManager();
     ASSERT_NE(manager, nullptr);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNodeId_017 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_017, nullptr);
     ASSERT_NE(frameNode, nullptr);
     manager->AddDragFrameNode(frameNode->GetId(), frameNode);
 
@@ -929,7 +929,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg017, TestSize.Level1)
     manager->isDragged_ = false;
     manager->currentId_ = DEFAULT_INT1;
     context_->OnDragEvent({ DEFAULT_INT10, DEFAULT_INT10 }, DragEventAction::DRAG_EVENT_MOVE);
-    EXPECT_EQ(manager->currentId_, DEFAULT_INT10);
+    EXPECT_EQ(manager->currentId_, DEFAULT_INT1);
 }
 
 /**
@@ -1111,7 +1111,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     context_->SetupRootElement();
     auto eventManager = context_->GetDragDropManager();
     ASSERT_NE(eventManager, nullptr);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNodeId_022 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_022, nullptr);
     ASSERT_NE(frameNode, nullptr);
     eventManager->AddDragFrameNode(frameNode->GetId(), frameNode);
     KeyEvent event;

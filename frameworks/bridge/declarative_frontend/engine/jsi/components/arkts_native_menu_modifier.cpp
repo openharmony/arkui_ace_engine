@@ -31,6 +31,8 @@ const int NUM_2 = 2;
 const int NUM_3 = 3;
 static const char* ERR_CODE = "-1";
 const std::string DEFAULT_FONT_WEIGHT = "normal";
+const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
+const Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 void SetMenuFontColor(NodeHandle node, uint32_t color)
 {
@@ -71,10 +73,14 @@ void SetMenuFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
 
     if (styleVal >= 0 && styleVal < static_cast<int32_t>(FONT_STYLES.size())) {
         MenuModelNG::SetFontStyle(frameNode, FONT_STYLES[styleVal]);
+    } else {
+        MenuModelNG::SetFontStyle(frameNode, DEFAULT_FONT_STYLE);
     }
 
     if (res[NUM_2] != ERR_CODE) {
         MenuModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(res[NUM_2]));
+    } else {
+        MenuModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(DEFAULT_FONT_FAMILY));
     }
 }
 void ResetMenuFont(NodeHandle node)
@@ -85,6 +91,8 @@ void ResetMenuFont(NodeHandle node)
     FontWeight fontWeight = StringUtils::StringToFontWeight(DEFAULT_FONT_WEIGHT);
     MenuModelNG::SetFontSize(frameNode, fontSize);
     MenuModelNG::SetFontWeight(frameNode, fontWeight);
+    MenuModelNG::SetFontStyle(frameNode, DEFAULT_FONT_STYLE);
+    MenuModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(DEFAULT_FONT_FAMILY));
 }
 void SetRadius(NodeHandle node, const double* values, const int* units)
 {

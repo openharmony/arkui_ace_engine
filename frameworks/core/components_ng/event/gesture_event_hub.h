@@ -209,6 +209,15 @@ public:
         touchEventActuator_->ReplaceTouchEvent(std::move(touchEventFunc));
     }
 
+    // Set by node container.
+    void SetOnTouchEvent(TouchEventFunc&& touchEventFunc)
+    {
+        if (!touchEventActuator_) {
+            touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
+        }
+        touchEventActuator_->SetOnTouchEvent(std::move(touchEventFunc));
+    }
+
     void AddTouchEvent(const RefPtr<TouchEventImpl>& touchEvent)
     {
         if (!touchEventActuator_) {

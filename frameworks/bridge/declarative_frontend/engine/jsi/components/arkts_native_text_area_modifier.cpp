@@ -284,7 +284,7 @@ void ResetTextAreaFontColor(NodeHandle node)
     CHECK_NULL_VOID(frameNode);
     int32_t textColor = 0;
     auto theme = ArkTSUtils::GetTheme<TextFieldTheme>();
-    textColor = theme->GetTextColor().GetValue();
+    textColor = static_cast<int32_t>(theme->GetTextColor().GetValue());
     TextFieldModelNG::SetTextColor(frameNode, Color(textColor));
 }
 

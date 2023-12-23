@@ -183,6 +183,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
         }
 
         if (info.GetSourceDevice() == SourceType::MOUSE) {
+            frameNode->MarkModifyDone();
             auto pattern = frameNode->GetPattern<TextBase>();
             if (gestureHub->GetTextDraggable() && pattern) {
                 if (!pattern->IsSelected() || pattern->GetMouseStatus() == MouseStatus::MOVE) {
@@ -546,7 +547,7 @@ OffsetF DragEventActuator::GetFloatImageOffset(const RefPtr<FrameNode>& frameNod
     return OffsetF(offsetX, offsetY);
 }
 
-void DragEventActuator::UpdatePreviewPositionAndScale(const RefPtr<FrameNode> imageNode, const OffsetF& frameOffset)
+void DragEventActuator::UpdatePreviewPositionAndScale(const RefPtr<FrameNode>& imageNode, const OffsetF& frameOffset)
 {
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
@@ -557,12 +558,12 @@ void DragEventActuator::UpdatePreviewPositionAndScale(const RefPtr<FrameNode> im
     imageContext->UpdateClickEffectLevel(clickEffectInfo);
 }
 
-void DragEventActuator::CreatePreviewNode(const RefPtr<FrameNode> frameNode, OHOS::Ace::RefPtr<FrameNode>& imageNode)
+void DragEventActuator::CreatePreviewNode(const RefPtr<FrameNode>& frameNode, OHOS::Ace::RefPtr<FrameNode>& imageNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto pixelMap = frameNode->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
-    auto frameOffset = frameNode->GetGlobalOffset();
+    auto frameOffset = frameNode->GetOffsetInScreen();
     imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() {return AceType::MakeRefPtr<ImagePattern>(); });
     CHECK_NULL_VOID(imageNode);
@@ -583,7 +584,7 @@ void DragEventActuator::CreatePreviewNode(const RefPtr<FrameNode> frameNode, OHO
     imageNode->CreateLayoutTask();
 }
 
-void DragEventActuator::SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode> imageNode)
+void DragEventActuator::SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>& imageNode)
 {
     if (imageNode->IsPreviewNeedScale()) {
         auto imageContext = imageNode->GetRenderContext();
@@ -593,8 +594,8 @@ void DragEventActuator::SetPreviewDefaultAnimateProperty(const RefPtr<FrameNode>
     }
 }
 
-void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager> manager, const RefPtr<GestureEventHub> gestureHub,
-    const RefPtr<FrameNode> imageNode)
+void DragEventActuator::MountPixelMap(const RefPtr<OverlayManager>& manager, const RefPtr<GestureEventHub>& gestureHub,
+    const RefPtr<FrameNode>& imageNode)
 {
     CHECK_NULL_VOID(manager);
     CHECK_NULL_VOID(imageNode);
@@ -684,6 +685,8 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
         manager->MountPixelMapToRootNode(columnNode);
     }
     imageNode->MarkModifyDone();
+    imageNode->SetLayoutDirtyMarked(true);
+    imageNode->CreateLayoutTask();
     auto focusHub = frameNode->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     bool hasContextMenu = focusHub->FindContextMenuOnKeyEvent(OnKeyEventType::CONTEXT_MENU);
@@ -932,7 +935,7 @@ void DragEventActuator::HideTextAnimation(bool startDrag, double globalX, double
     auto pixelMap = gestureHub->GetPixelMap();
     float scale = 1.0f;
     if (pixelMap) {
-        scale = static_cast<float>(frameNode->GetPreviewScaleVal());
+        scale = gestureHub->GetPixelMapScale(pixelMap->GetHeight(), pixelMap->GetWidth());
     }
     auto context = dragNode->GetRenderContext();
     CHECK_NULL_VOID(context);

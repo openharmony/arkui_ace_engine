@@ -16,6 +16,7 @@
 
 #define private public
 #define protected public
+#include "test/mock/core/common/mock_resource_adapter.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
@@ -23,7 +24,6 @@
 
 #include "base/log/log_wrapper.h"
 #include "core/components/container_modal/container_modal_constants.h"
-#include "test/mock/core/common/mock_resource_adapter.h"
 #include "core/components/theme/theme_constants.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -510,5 +510,88 @@ HWTEST_F(ContainerModelTestNg, AccessibilityProperty001, TestSize.Level1)
 {
     CreateContainerModal();
     EXPECT_EQ(accessibilityProperty_->GetText(), "");
+}
+
+/**
+ * @tc.name: VisibleTest009
+ * @tc.desc: Test SetContainerModalTitleVisible.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, VisibleTest009, TestSize.Level1)
+{
+    CreateContainerModal();
+    auto customRow = pattern_->GetCustomTitleRow();
+    ASSERT_NE(customRow, nullptr);
+    auto customLayoutProperty = customRow->GetLayoutProperty();
+    ASSERT_NE(customLayoutProperty, nullptr);
+
+    pattern_->windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
+    pattern_->SetContainerModalTitleVisible(true, true);
+    EXPECT_EQ(customLayoutProperty->GetVisibility(), VisibleType::VISIBLE);
+    pattern_->SetContainerModalTitleVisible(false, false);
+    EXPECT_EQ(customLayoutProperty->GetVisibility(), VisibleType::GONE);
+
+    pattern_->windowMode_ = WindowMode::WINDOW_MODE_FULLSCREEN;
+    pattern_->SetContainerModalTitleVisible(true, true);
+    EXPECT_EQ(customLayoutProperty->GetVisibility(), VisibleType::GONE);
+    pattern_->SetContainerModalTitleVisible(false, false);
+    EXPECT_EQ(customLayoutProperty->GetVisibility(), VisibleType::GONE);
+}
+
+/**
+ * @tc.name: TitleHeightTest010
+ * @tc.desc: Test SetContainerModalHeight and GetContainerModalTitleHeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, TitleHeightTest010, TestSize.Level1)
+{
+    CreateContainerModal();
+
+    pattern_->windowMode_ = WindowMode::WINDOW_MODE_FLOATING;
+    const int32_t height1 = -1;
+    const int32_t height2 = 100;
+
+    pattern_->SetContainerModalTitleVisible(true, true);
+    pattern_->SetContainerModalTitleHeight(height1);
+    EXPECT_EQ(pattern_->GetContainerModalTitleHeight(), 0);
+
+    pattern_->SetContainerModalTitleVisible(false, false);
+    EXPECT_EQ(pattern_->GetContainerModalTitleHeight(), 0);
+
+    pattern_->SetContainerModalTitleHeight(height2);
+    EXPECT_EQ(pattern_->GetContainerModalTitleHeight(), height2);
+
+    pattern_->SetContainerModalTitleVisible(true, true);
+    EXPECT_EQ(pattern_->GetContainerModalTitleHeight(), height2);
+}
+
+/**
+ * @tc.name: ButtonsRectTest011
+ * @tc.desc: Test function about ButtonsRect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, ButtonsRectTest011, TestSize.Level1)
+{
+    CreateContainerModal();
+    RectF containerModalRect;
+    RectF buttonsRect;
+    pattern_->GetContainerModalButtonsRect(containerModalRect, buttonsRect);
+
+    auto column = pattern_->GetColumnNode();
+    ASSERT_NE(column, nullptr);
+    EXPECT_EQ(containerModalRect, column->GetGeometryNode()->GetFrameRect());
+
+    auto buttonsRow = pattern_->GetControlButtonRow();
+    ASSERT_NE(buttonsRow, nullptr);
+    auto children = buttonsRow->GetChildren();
+    auto firstButtonRect = AceType::DynamicCast<FrameNode>(children.front())->GetGeometryNode()->GetFrameRect();
+    auto lastButtonRect = AceType::DynamicCast<FrameNode>(children.back())->GetGeometryNode()->GetFrameRect();
+    EXPECT_EQ(buttonsRect, firstButtonRect.CombineRectT(lastButtonRect));
+
+    bool callbackTriggered = false;
+    auto callback = [&callbackTriggered](RectF&, RectF&) { callbackTriggered = true; };
+    pattern_->SubscribeContainerModalButtonsRectChange(std::move(callback));
+    pattern_->CallButtonsRectChange();
+    EXPECT_TRUE(callbackTriggered);
 }
 } // namespace OHOS::Ace::NG

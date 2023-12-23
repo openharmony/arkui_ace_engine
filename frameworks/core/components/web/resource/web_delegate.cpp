@@ -1682,6 +1682,7 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onTouchIconUrlV2_ = useNewPipe ? eventHub->GetOnTouchIconUrlEvent() : nullptr;
         onAudioStateChangedV2_ = GetAudioStateChangedCallback(useNewPipe, eventHub);
         onFirstContentfulPaintV2_ = useNewPipe ? eventHub->GetOnFirstContentfulPaintEvent() : nullptr;
+        onSafeBrowsingCheckResultV2_ = useNewPipe ? eventHub->GetOnSafeBrowsingCheckResultEvent() : nullptr;
         onOverScrollV2_ = useNewPipe ? eventHub->GetOnOverScrollEvent()
                                      : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                            webCom->GetOverScrollId(), oldContext);
@@ -4896,6 +4897,14 @@ void WebDelegate::OnFirstContentfulPaint(int64_t navigationStartTick, int64_t fi
     if (onFirstContentfulPaintV2_) {
         onFirstContentfulPaintV2_(
             std::make_shared<FirstContentfulPaintEvent>(navigationStartTick, firstContentfulPaintMs));
+    }
+}
+
+void WebDelegate::OnSafeBrowsingCheckResult(int threat_type)
+{
+    if (onSafeBrowsingCheckResultV2_) {
+        onSafeBrowsingCheckResultV2_(
+            std::make_shared<SafeBrowsingCheckResultEvent>(threat_type));
     }
 }
 

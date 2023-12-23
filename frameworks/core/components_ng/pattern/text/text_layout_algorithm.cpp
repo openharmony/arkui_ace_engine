@@ -354,6 +354,9 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
         if (symbolTextStyle.GetRenderStrategy() < 0) {
             symbolTextStyle.SetRenderStrategy(0);
         }
+        if (symbolTextStyle.GetEffectStrategy() < 0) {
+            symbolTextStyle.SetEffectStrategy(0);
+        }
         paragraph_->PushStyle(symbolTextStyle);
         paragraph_->AddSymbol(symbolSourceInfo->GetUnicode());
         paragraph_->PopStyle();

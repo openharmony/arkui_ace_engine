@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ImageAnimatorImagesModifier extends ModifierWithKey<Array<ImageFrameInfo>> {
   constructor(value: Array<ImageFrameInfo>) {
     super(value);
@@ -21,14 +21,13 @@ class ImageAnimatorImagesModifier extends ModifierWithKey<Array<ImageFrameInfo>>
   static identity: Symbol = Symbol('imageAnimatorImages');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().imageAnimator.resetImages(node);
+      getUINativeModule().imageAnimator.resetImages(node);
     } else {
       let arkImageFrame: ArkImageFrameInfoToArray = this.convertImageFrames(this.value);
-      if (!arkImageFrame)
-      {
-        GetUINativeModule().imageAnimator.resetImages(node);
+      if (!arkImageFrame) {
+        getUINativeModule().imageAnimator.resetImages(node);
       } else {
-        GetUINativeModule().imageAnimator.setImages(node, arkImageFrame.arrSrc,
+        getUINativeModule().imageAnimator.setImages(node, arkImageFrame.arrSrc,
           arkImageFrame.arrWidth, arkImageFrame.arrHeight, arkImageFrame.arrTop, arkImageFrame.arrLeft,
           arkImageFrame.arrDuration, arkImageFrame.arrSrc.length);
       }
@@ -43,7 +42,7 @@ class ImageAnimatorImagesModifier extends ModifierWithKey<Array<ImageFrameInfo>>
       let checkItemEqual: Boolean = false;
 
       for (let i: number = 0; i < this.value.length; i++) {
-        checkItemEqual = this.isEqual(this.stageValue[i], this.value[i])
+        checkItemEqual = this.isEqual(this.stageValue[i], this.value[i]);
         if (!checkItemEqual) {
           checkDiff = !checkItemEqual;
           break;
@@ -60,8 +59,7 @@ class ImageAnimatorImagesModifier extends ModifierWithKey<Array<ImageFrameInfo>>
       one.left === another.left &&
       one.duration === another.duration)) {
       return true;
-    }
-    else {
+    } else {
       return !isBaseOrResourceEqual(one.src, another.src);
     }
   }
@@ -102,9 +100,9 @@ class ImageAnimatorDurationModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('imageAnimatorDuration');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().imageAnimator.resetDuration(node);
+      getUINativeModule().imageAnimator.resetDuration(node);
     } else {
-      GetUINativeModule().imageAnimator.setDuration(node, this.value);
+      getUINativeModule().imageAnimator.setDuration(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -119,9 +117,9 @@ class ImageAnimatorReverseModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('imageAnimatorReverse');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().imageAnimator.resetReverse(node);
+      getUINativeModule().imageAnimator.resetReverse(node);
     } else {
-      GetUINativeModule().imageAnimator.setReverse(node, this.value);
+      getUINativeModule().imageAnimator.setReverse(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -136,9 +134,9 @@ class ImageAnimatorStateModifier extends ModifierWithKey<AnimationStatus> {
   static identity: Symbol = Symbol('imageAnimatorState');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().imageAnimator.resetState(node);
+      getUINativeModule().imageAnimator.resetState(node);
     } else {
-      GetUINativeModule().imageAnimator.setState(node, this.value);
+      getUINativeModule().imageAnimator.setState(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -153,9 +151,9 @@ class ImageAnimatorFixedSizeModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('imageAnimatorFixedSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().imageAnimator.resetFixedSize(node);
+      getUINativeModule().imageAnimator.resetFixedSize(node);
     } else {
-      GetUINativeModule().imageAnimator.setFixedSize(node, this.value);
+      getUINativeModule().imageAnimator.setFixedSize(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -170,9 +168,9 @@ class ImageAnimatorFillModeModifier extends ModifierWithKey<FillMode> {
   static identity: Symbol = Symbol('imageAnimatorFillMode');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().imageAnimator.resetFillMode(node);
+      getUINativeModule().imageAnimator.resetFillMode(node);
     } else {
-      GetUINativeModule().imageAnimator.setFillMode(node, this.value);
+      getUINativeModule().imageAnimator.setFillMode(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -187,9 +185,9 @@ class ImageAnimatorIterationsModeModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('imageAnimatorIterationsMode');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().imageAnimator.resetIterations(node);
+      getUINativeModule().imageAnimator.resetIterations(node);
     } else {
-      GetUINativeModule().imageAnimator.setIterations(node, this.value);
+      getUINativeModule().imageAnimator.setIterations(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -261,7 +259,7 @@ class ArkImageAnimatorComponent extends ArkComponent implements CommonMethod<Ima
 // @ts-ignore
 globalThis.ImageAnimator.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkImageAnimatorComponent(nativeNode);
   });

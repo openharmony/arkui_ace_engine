@@ -86,7 +86,7 @@ void ConvertKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent, KeyEvent& e
 
 void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, PointerEvent& event);
 
-void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
+void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t instanceId);
 
 } // namespace OHOS::Ace::Platform
 

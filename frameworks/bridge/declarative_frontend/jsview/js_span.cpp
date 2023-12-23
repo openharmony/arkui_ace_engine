@@ -279,9 +279,7 @@ void JSSpan::SetTextShadow(const JSCallbackInfo& info)
     }
     std::vector<Shadow> shadows;
     ParseTextShadowFromShadowObject(info[0], shadows);
-    if (!shadows.empty()) {
-        SpanModel::GetInstance()->SetTextShadow(shadows);
-    }
+    SpanModel::GetInstance()->SetTextShadow(shadows);
 }
 
 void JSSpan::JSBind(BindingTarget globalObj)

@@ -1654,6 +1654,7 @@ void JSWeb::JSBind(BindingTarget globalObj)
     JSClass<JSWeb>::StaticMethod("onAudioStateChanged", &JSWeb::OnAudioStateChanged);
     JSClass<JSWeb>::StaticMethod("mediaOptions", &JSWeb::MediaOptions);
     JSClass<JSWeb>::StaticMethod("onFirstContentfulPaint", &JSWeb::OnFirstContentfulPaint);
+    JSClass<JSWeb>::StaticMethod("onSafeBrowsingCheckResult", &JSWeb::OnSafeBrowsingCheckResult);
     JSClass<JSWeb>::StaticMethod("onNavigationEntryCommitted", &JSWeb::OnNavigationEntryCommitted);
     JSClass<JSWeb>::StaticMethod("onControllerAttached", &JSWeb::OnControllerAttached);
     JSClass<JSWeb>::StaticMethod("onOverScroll", &JSWeb::OnOverScroll);
@@ -3784,6 +3785,38 @@ void JSWeb::OnFirstContentfulPaint(const JSCallbackInfo& args)
         });
     };
     WebModel::GetInstance()->SetFirstContentfulPaintId(std::move(uiCallback));
+}
+
+JSRef<JSVal> SafeBrowsingCheckResultEventToJSValue(const SafeBrowsingCheckResultEvent& eventInfo)
+{
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    obj->SetProperty("threatType", eventInfo.GetThreatType());
+    return JSRef<JSVal>::Cast(obj);
+}
+
+void JSWeb::OnSafeBrowsingCheckResult(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto jsFunc = AceType::MakeRefPtr<JsEventFunction<SafeBrowsingCheckResultEvent, 1>>(
+        JSRef<JSFunc>::Cast(args[0]), SafeBrowsingCheckResultEventToJSValue);
+
+    auto instanceId = Container::CurrentId();
+    auto uiCallback = [execCtx = args.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
+                          const std::shared_ptr<BaseEventInfo>& info) {
+        ContainerScope scope(instanceId);
+        auto context = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->UpdateCurrentActiveNode(node);
+        context->PostAsyncEvent([execCtx, postFunc = func, info]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            auto* eventInfo = TypeInfoHelper::DynamicCast<SafeBrowsingCheckResultEvent>(info.get());
+            postFunc->Execute(*eventInfo);
+        });
+    };
+    WebModel::GetInstance()->SetSafeBrowsingCheckResultId(std::move(uiCallback));
 }
 
 JSRef<JSVal> NavigationEntryCommittedEventToJSValue(const NavigationEntryCommittedEvent& eventInfo)

@@ -35,7 +35,7 @@ void UIDisplaySync::CheckRate(int32_t vsyncRate, int32_t refreshRateMode)
 void UIDisplaySync::UpdateData(uint64_t nanoTimestamp, int32_t vsyncPeriod)
 {
     SetTimestampData(nanoTimestamp);
-    uint64_t targetTimestamp = nanoTimestamp + vsyncPeriod * data_->rate_;
+    uint64_t targetTimestamp = nanoTimestamp + static_cast<uint64_t>(vsyncPeriod * data_->rate_);
     SetTargetTimestampData(targetTimestamp);
 }
 
@@ -61,15 +61,15 @@ void UIDisplaySync::OnFrame()
                      "Preferred[%d] VSyncRate[%d] Rate[%d] noSkip[%d]",
                      GetId(), data_->timestamp_, data_->targetTimestamp_,
                      data_->rateRange_->preferred_, sourceVsyncRate_, data_->rate_, data_->noSkip_);
-    if (IsEnabled() && data_->noSkip_ && data_->onFrame_) {
+    if (data_->noSkip_ && data_->onFrame_) {
         data_->onFrame_();
     }
 
-    if (IsEnabled() && data_->noSkip_ && data_->onFrameWithData_) {
+    if (data_->noSkip_ && data_->onFrameWithData_) {
         data_->onFrameWithData_(data_);
     }
 
-    if (IsEnabled() && data_->noSkip_ && data_->onFrameWithTimestamp_) {
+    if (data_->noSkip_ && data_->onFrameWithTimestamp_) {
         data_->onFrameWithTimestamp_(data_->timestamp_);
     }
 

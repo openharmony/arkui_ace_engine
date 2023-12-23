@@ -109,15 +109,13 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
 
 bool CheckWhetherNeedToHideToolbar(const RefPtr<NavBarNode>& hostNode, const SizeF& navigationSize)
 {
-    if (!hostNode->IsNavbarUseToolbarConfiguration() || hostNode->GetPrevMenuIsCustomValue(false)) {
+    if (hostNode->GetPrevMenuIsCustomValue(false)) {
         return false;
     }
 
     auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(hostNode->GetToolBarNode());
     CHECK_NULL_RETURN(toolbarNode, false);
-    auto containerNode = toolbarNode->GetToolbarContainerNode();
-    CHECK_NULL_RETURN(containerNode, false);
-    if (containerNode->GetChildren().empty()) {
+    if (!toolbarNode->HasValidContent()) {
         return true;
     }
 

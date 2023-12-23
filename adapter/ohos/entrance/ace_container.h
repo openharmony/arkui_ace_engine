@@ -91,6 +91,8 @@ public:
 
     void Destroy() override;
 
+    bool IsKeyboard() override;
+
     void DestroyView() override;
 
     static bool Register();

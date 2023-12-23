@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "core/components_ng/pattern/custom/custom_title_node.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -753,5 +754,373 @@ HWTEST_F(CustomTestNg, CustomTest014, TestSize.Level1)
     test.Layout(AceType::RawPtr(layoutWrapper));
     auto host = AceType::DynamicCast<CustomMeasureLayoutNode>(layoutWrapper->GetHostNode());
     ASSERT_NE(host, nullptr);
+}
+
+/**
+ * @tc.name: CustomTest015
+ * @tc.desc: Build Custom node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create customNode.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+
+    /**
+     * @tc.steps: step2. Create ExtraInfo and Call Build.
+     * @tc.expected: Build Seccuss
+     */
+    ExtraInfo extraTemp;
+    extraTemp.line = CHILD_COUNT_0;
+    extraTemp.page = TEST_TAG;
+    std::list<ExtraInfo> ListextraInfos;
+    ListextraInfos.push_back(extraTemp);
+    std::shared_ptr<std::list<ExtraInfo>> extraInfos = std::make_unique<std::list<ExtraInfo>>(ListextraInfos);
+    customNode->Build(extraInfos);
+    EXPECT_EQ(customNode->extraInfos_.size(), 1);
+    EXPECT_EQ(customNode->extraInfos_.front().line, CHILD_COUNT_0);
+    EXPECT_EQ(customNode->extraInfos_.front().page, TEST_TAG);
+}
+
+/**
+ * @tc.name: CustomTest016
+ * @tc.desc: Build Render.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create customNode.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+
+    /**
+     * @tc.steps: step2. Create renderFunction and Call Render.
+     * @tc.expected: Add Child Success
+     */
+    auto renderFunction = [&]() -> RefPtr<UINode> {
+        RefPtr<UINode> uiNode =
+            CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId() + 1, TEST_TAG);
+        return uiNode;
+    };
+    customNode->renderFunction_ = renderFunction;
+    customNode->Render();
+    EXPECT_EQ(customNode->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: CustomTest017
+ * @tc.desc: FlushReload.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create customNode.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+
+    /**
+     * @tc.steps: step2. Create completeReloadFunc_ and Call FlushReload.
+     * @tc.expected: Add Child Success
+     */
+    auto renderFunction = [&]() -> RefPtr<UINode> {
+        RefPtr<UINode> uiNode =
+            CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId() + 1, TEST_TAG);
+        return uiNode;
+    };
+    customNode->completeReloadFunc_ = renderFunction;
+    customNode->FlushReload();
+    EXPECT_EQ(customNode->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: CustomTest018
+ * @tc.desc: AdjustLayoutWrapperTree.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TabContent and push it to view stack processor.
+     * @tc.expected: Make TabContent as CustomNode parent.
+     */
+    auto frameNode = CreateNode(V2::TAB_CONTENT_ITEM_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. Invoke CustomNode Create function.
+     * @tc.expected: Create CustomNode.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    EXPECT_TRUE(customNode != nullptr && customNode->GetTag() == V2::JS_VIEW_ETS_TAG);
+
+    /**
+     * @tc.steps: step3. Create Parent LayoutWrapperNode.
+     */
+    auto pattern = frameNode->GetPattern<Pattern>();
+    auto layoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto parentLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+
+    /**
+     * @tc.steps: step4. set renderFunction, add child to customNode and invoke Measure function.
+     * @tc.expected: parentLayoutWrapper's childCount is one.
+     */
+    RefPtr<AceType> view;
+    auto renderFunc = [&view]() -> RefPtr<AceType> { return nullptr; };
+    auto renderFunction = [internalRender = std::move(renderFunc)]() -> RefPtr<UINode> {
+        auto uiNode = internalRender();
+        return AceType::DynamicCast<UINode>(uiNode);
+    };
+    auto customNode2 = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId() + 1, TEST_TAG);
+    auto customNode3 = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId() + 2, TEST_TAG);
+    customNode2->AddChild(customNode3);
+    customNode->AddChild(customNode2);
+    customNode->SetRenderFunction(std::move(renderFunction));
+    customNode->AdjustLayoutWrapperTree(parentLayoutWrapper, false, false);
+
+    auto textFrameNode = CreateNode(V2::TEXT_ETS_TAG);
+    textFrameNode->MountToParent(customNode);
+    layoutAlgorithm->Measure(AceType::RawPtr(parentLayoutWrapper));
+    EXPECT_EQ(parentLayoutWrapper->GetTotalChildCount(), CHILD_COUNT_1);
+}
+
+/**
+ * @tc.name: CustomTest019
+ * @tc.desc: CreateLayoutWrapper.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = CreateNode(V2::TAB_CONTENT_ITEM_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. Create CustomNode and Call CreateLayoutWrapper.
+     * @tc.expected: Create successful.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    auto node = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    node->isLayoutDirtyMarked_ = true;
+    customNode->AddChild(node);
+    RefPtr<LayoutWrapperNode> layoutWrapperNode = customNode->CreateLayoutWrapper(true, true);
+    EXPECT_NE(layoutWrapperNode, nullptr);
+    EXPECT_FALSE(node->isLayoutDirtyMarked_);
+}
+
+/**
+ * @tc.name: CustomTest020
+ * @tc.desc: Test cast to FireRecycleSelf.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CustomNodeBase through customNode.
+     */
+    RefPtr<CustomNode> customNode =
+        CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+
+    /**
+     * @tc.steps: step2. Create frameNode and frameNode2 and Add Child to customNode.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    customNode->AddChild(frameNode);
+    auto frameNode2 = AceType::MakeRefPtr<FrameNode>("test2", 2, AceType::MakeRefPtr<Pattern>());
+    frameNode2->layoutProperty_ = AceType::MakeRefPtr<LayoutProperty>();
+    auto geo = AceType::MakeRefPtr<GeometryTransition>(TEST_TAG, true);
+    frameNode2->layoutProperty_->geometryTransition_ = AceType::WeakClaim(AceType::RawPtr(geo));
+    customNode->AddChild(frameNode2);
+
+    /**
+     * @tc.steps: step3. Create customBase and Call FireRecycleSelf.
+     * @tc.expected: Excute successful.
+     */
+    RefPtr<CustomNodeBase> customBase = customNode;
+    std::string strTest = "";
+    auto callback = [&]() { strTest = "test"; };
+    customBase->SetAppearFunction(callback);
+    customBase->FireRecycleSelf();
+    EXPECT_EQ(customBase->recyclePatterns_.size(), 2);
+}
+
+/**
+ * @tc.name: CustomTest021
+ * @tc.desc: Test cast to SetOnDumpInfoFunc.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create CustomNodeBase through customNode.
+     */
+    RefPtr<CustomNodeBase> customNode =
+        CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+
+    /**
+     * @tc.steps: step2. Create CallBack.
+     */
+    std::vector<std::string> vctOut;
+    auto callback = [&](const std::vector<std::string>& vctTemp) { vctOut.assign(vctTemp.begin(), vctTemp.end()); };
+
+    /**
+     * @tc.steps: step3. Call SetOnDumpInfoFunc.
+     * @tc.expected: Excute successful and return is equal tith vctTemp.
+     */
+    customNode->SetOnDumpInfoFunc(callback);
+    std::vector<std::string> vctTemp = { "test1", "test2" };
+    customNode->onDumpInfoFunc_(vctTemp);
+    EXPECT_EQ(vctOut.size(), 2);
+}
+
+/**
+ * @tc.name: CustomTest022
+ * @tc.desc: Test cast to CustomNodeLayoutAlgorithm.Measure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create test.
+     * @tc.expected: Make Text as CustomNode parent.
+     */
+    CustomNodeLayoutAlgorithm test = CustomNodeLayoutAlgorithm(
+        []() { return AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>()); });
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper, customNode.
+     */
+    auto customNode = CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(
+        ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    auto layoutWrapper = customNode->CreateLayoutWrapper();
+    auto renderfunction = []() { return AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>()); };
+    test.renderFunction_ = renderfunction;
+
+    /**
+     * @tc.steps: step3. Create frameNode and add two Children.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = static_cast<ElementIdType>(1);
+    stack->reservedNodeId_ = static_cast<ElementIdType>(1);
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode("dummyNode", nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto frameChild1 =
+        FrameNode::GetOrCreateFrameNode("Child1", nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    auto frameChild2 =
+        FrameNode::GetOrCreateFrameNode("Child2", nodeId, []() { return AceType::MakeRefPtr<Pattern>(); });
+    frameNode->AddChild(frameChild1);
+    frameNode->AddChild(frameChild2);
+
+    /**
+     * @tc.steps: step4. Set up the created frameNode.
+     */
+    ElementRegister::GetInstance()->itemMap_[nodeId] = frameNode;
+
+    /**
+     * @tc.steps: step5. Call Measure.
+     * @tc.expected: customNode add a Child and buildItem is equal with child
+     */
+    test.Measure(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(customNode->GetChildren().size(), 2);
+    EXPECT_EQ(test.buildItem_, frameChild1);
+}
+
+/**
+ * @tc.name: CustomTest023
+ * @tc.desc: Test cast to CustomNodeLayoutAlgorithm.Layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create test.
+     */
+    CustomNodeLayoutAlgorithm test = CustomNodeLayoutAlgorithm(
+        []() { return AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>()); });
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapper, customNode, set LayoutFunction and invoke Layout.
+     */
+    auto customNode = CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(
+        ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    auto layoutWrapper = customNode->CreateLayoutWrapper();
+
+    /**
+     * @tc.steps: step3. Create LayoutWrapperNode and add to layoutWrapper.
+     */
+    auto node = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutNode =
+        AceType::MakeRefPtr<LayoutWrapperNode>(node, geometryNode, node->GetLayoutProperty());
+    layoutWrapper->AppendChild(layoutNode);
+
+    /**
+     * @tc.steps: step4. Call Layout.
+     * @tc.expected: cachedList_ size is equal with layoutWrapper and active set success.
+     */
+    test.Layout(AceType::RawPtr(layoutWrapper));
+    EXPECT_EQ(layoutWrapper->cachedList_.size(), 1);
+    for (const auto& child : layoutWrapper->cachedList_) {
+        EXPECT_TRUE(child->IsActive());
+    }
+}
+
+/**
+ * @tc.name: CustomTest024
+ * @tc.desc: Test cast to CustomNodePattern.OnDirtyLayoutWrapperSwap.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create FrameNode and CustomNodePattern.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    WeakPtr<FrameNode> weakNode1 = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    RefPtr<CustomNodePattern> pattern = AceType::MakeRefPtr<CustomNodePattern>();
+    pattern->AttachToFrameNode(weakNode1);
+    EXPECT_NE(pattern->GetHost(), nullptr);
+
+    /**
+     * @tc.steps: step2. Create LayoutWrapperNode and SetLayoutAlgorithm.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutNode =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto rowLayoutAlgorithm1 = AceType::MakeRefPtr<LayoutAlgorithm>();
+    RefPtr<CustomNodeLayoutAlgorithm> rowLayoutAlgorithm2 = AceType::MakeRefPtr<CustomNodeLayoutAlgorithm>(nullptr);
+    auto frameNode2 = AceType::MakeRefPtr<FrameNode>("test2", 2, AceType::MakeRefPtr<Pattern>());
+    rowLayoutAlgorithm2->buildItem_ = frameNode2;
+
+    auto temp = AceType::MakeRefPtr<LayoutAlgorithmWrapper>(rowLayoutAlgorithm1);
+    temp->SetLayoutAlgorithm(rowLayoutAlgorithm2);
+    layoutNode->SetLayoutAlgorithm(temp);
+
+    /**
+     * @tc.steps: step3. Call OnDirtyLayoutWrapperSwap.
+     * @tc.expected: result id false and framenode add a child seccuss
+     */
+    DirtySwapConfig dirtyConfig;
+    bool bResult = pattern->OnDirtyLayoutWrapperSwap(layoutNode, dirtyConfig);
+    EXPECT_FALSE(bResult);
+    EXPECT_EQ(frameNode->GetChildren().size(), 1);
+}
+
+/**
+ * @tc.name: CustomTest025
+ * @tc.desc: Test cast to CustomTitleNode.CreateCustomTitleNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest025, TestSize.Level1)
+{
+    RefPtr<CustomTitleNode> customTitleNode = CustomTitleNode::CreateCustomTitleNode(1, "test");
+    EXPECT_EQ(customTitleNode->tag_, V2::JS_VIEW_ETS_TAG);
+    EXPECT_EQ(customTitleNode->nodeId_, 1);
+    EXPECT_EQ(customTitleNode->viewKey_, "test");
 }
 } // namespace OHOS::Ace::NG

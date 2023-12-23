@@ -56,9 +56,20 @@ public:
         return isNewToolbar_;
     }
 
+    void SetHasValidContent(bool has)
+    {
+        hasValidContent_ = has;
+    }
+
+    bool HasValidContent() const
+    {
+        return hasValidContent_;
+    }
+
 private:
     RefPtr<UINode> toolbarContainerNode_;
     bool isNewToolbar_ = false;
+    bool hasValidContent_ = false;
 };
 } // namespace OHOS::Ace::NG
 

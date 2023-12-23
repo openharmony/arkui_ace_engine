@@ -23,7 +23,10 @@
 #include "bridge/common/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector.h"
+#include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -87,10 +90,18 @@ void ComponentSnapshot::Get(const std::string& componentId, JsCallback&& callbac
 void ComponentSnapshot::Create(
     const RefPtr<AceType>& customNode, JsCallback&& callback, bool enableInspector, const int32_t delayTime)
 {
-    auto node = AceType::DynamicCast<FrameNode>(customNode);
-    if (!node) {
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto stackNode = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, nodeId, AceType::MakeRefPtr<StackPattern>());
+    auto uiNode = AceType::DynamicCast<UINode>(customNode);
+    if (!uiNode) {
         callback(nullptr, Framework::ERROR_CODE_INTERNAL_ERROR, nullptr);
         return;
+    }
+    auto node = AceType::DynamicCast<FrameNode>(customNode);
+    if (!node) {
+        stackNode->AddChild(uiNode);
+        node = stackNode;
     }
 
     FrameNode::ProcessOffscreenNode(node);

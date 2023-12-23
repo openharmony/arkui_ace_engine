@@ -87,7 +87,7 @@ ArkUINativeModuleValue TextInputBridge::SetMaxLines(ArkUIRuntimeCallInfo *runtim
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
     if (secondArg->IsNumber()) {
-        uint32_t value = secondArg->Int32Value(vm);
+        uint32_t value = secondArg->Uint32Value(vm);
         GetArkUIInternalNodeAPI()->GetTextInputModifier().SetTextInputMaxLines(nativeNode, value);
     } else {
         GetArkUIInternalNodeAPI()->GetTextInputModifier().ResetTextInputMaxLines(nativeNode);

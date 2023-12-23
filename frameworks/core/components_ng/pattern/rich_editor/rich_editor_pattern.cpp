@@ -361,6 +361,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
         CloseSelectOverlay();
         ResetSelection();
     }
+    FlushTextForDisplay();
     return spanIndex;
 }
 
@@ -425,6 +426,7 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
         CloseSelectOverlay();
         ResetSelection();
     }
+    FlushTextForDisplay();
     placeholderSpanNode->MarkModifyDone();
     placeholderSpanNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
@@ -513,6 +515,7 @@ int32_t RichEditorPattern::AddTextSpanOperation(const TextSpanOptions& options, 
         ResetSelection();
     }
     SpanNodeFission(spanNode);
+    FlushTextForDisplay();
     return spanIndex;
 }
 
@@ -634,6 +637,7 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options)
     if (childrens.empty() || GetTextContentLength() == 0) {
         SetCaretPosition(0);
     }
+    FlushTextForDisplay();
 }
 
 void RichEditorPattern::DeleteSpanByRange(int32_t start, int32_t end, SpanPositionInfo info)
@@ -2006,9 +2010,33 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard)
 
 std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
 {
-    auto pipeline = GetHost()->GetContext();
+    auto tmpHost = GetHost();
+    CHECK_NULL_RETURN(tmpHost, {});
+    auto pipeline = tmpHost->GetContext();
     CHECK_NULL_RETURN(pipeline, {});
     auto windowRect = pipeline->GetCurrentWindowRect();
+    double positionY = (tmpHost->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset()).GetY() + windowRect.Top();
+    double height = frameRect_.Height();
+    auto uiExtMgr = pipeline->GetUIExtensionManager();
+    if (uiExtMgr && uiExtMgr->IsWindowTypeUIExtension(pipeline)) {
+        // find the direct child of the dialog.
+        auto parent = tmpHost->GetParent();
+        RefPtr<UINode> child = tmpHost;
+        while (parent && parent->GetTag() != V2::DIALOG_COMPONENT_TAG) {
+            child = parent;
+            parent = parent->GetParent();
+        }
+        if (AceType::DynamicCast<FrameNode>(parent)) {
+            auto childOfDialog = AceType::DynamicCast<FrameNode>(child);
+            if (childOfDialog) {
+                positionY = (childOfDialog->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset()).GetY() +
+                            windowRect.Top();
+                height = childOfDialog->GetTransformRectRelativeToWindow().Height();
+            }
+        }
+        height = positionY + height > windowRect.Bottom() ? windowRect.Bottom() - positionY : height;
+    }
+
     float caretHeight = 0.0f;
     OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
     if (NearZero(caretHeight)) {
@@ -2025,8 +2053,8 @@ std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
         .cursorInfo = cursorInfo,
         .range = { .start = textSelector_.GetStart(), .end = textSelector_.GetEnd() },
         .windowId = pipeline->GetFocusWindowId(),
-        .positionY = (GetHost()->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset()).GetY(),
-        .height = frameRect_.Height() };
+        .positionY = positionY,
+        .height = height };
     return textConfig;
 }
 #else
@@ -4714,6 +4742,44 @@ void RichEditorPattern::StopAutoScroll()
     auto scrollBar = GetScrollBar();
     if (scrollBar) {
         scrollBar->PlayScrollBarDisappearAnimation();
+    }
+}
+
+void RichEditorPattern::FlushTextForDisplay()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    const auto& children = host->GetChildren();
+    if (children.empty()) {
+        return;
+    }
+    imageCount_ = 0;
+    std::stack<RefPtr<UINode>> nodes;
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        nodes.push(*iter);
+    }
+    if (!nodes.empty()) {
+        textForDisplay_.clear();
+    }
+    while (!nodes.empty()) {
+        auto current = nodes.top();
+        nodes.pop();
+        if (!current) {
+            continue;
+        }
+        auto spanNode = DynamicCast<SpanNode>(current);
+        if (spanNode && current->GetTag() != V2::PLACEHOLDER_SPAN_ETS_TAG) {
+            textForDisplay_.append(spanNode->GetSpanItem()->content);
+        } else if (current->GetTag() == V2::IMAGE_ETS_TAG || current->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
+            imageCount_++;
+        }
+        if (current->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
+            continue;
+        }
+        const auto& nextChildren = current->GetChildren();
+        for (auto iter = nextChildren.rbegin(); iter != nextChildren.rend(); ++iter) {
+            nodes.push(*iter);
+        }
     }
 }
 

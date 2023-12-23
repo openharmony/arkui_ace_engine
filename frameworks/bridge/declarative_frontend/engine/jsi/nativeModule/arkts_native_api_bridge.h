@@ -46,6 +46,7 @@ private:
     static void RegisterPanelAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterLineAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterPathAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterPolygonAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterPolylineAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSideBarContainerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterCalendarPickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -71,6 +72,7 @@ private:
     static void RegisterScrollAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterGridItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterProgressAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
+    static void RegisterPluginAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterCommonShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterRectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);

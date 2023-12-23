@@ -342,7 +342,7 @@ public:
         return scrollSource_;
     }
 
-    int32_t GetCurrentVelocity() const
+    float GetCurrentVelocity() const
     {
         return currentVelocity_;
     }
@@ -522,7 +522,7 @@ private:
     void SelectWithScroll();
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     float GetOutOfScrollableOffset() const;
-    float GetOffsetWithLimit(float offset) const;
+    virtual float GetOffsetWithLimit(float offset) const;
     void LimitMouseEndOffset();
     void UpdateBorderRadius();
 
@@ -629,6 +629,8 @@ private:
     float currentVelocity_ = 0.0f;
     float lastPosition_ = 0.0f;
     float finalPosition_ = 0.0f;
+    uint32_t runningAnimationCount_ = 0;
+
     RefPtr<Animator> hotzoneAnimator_;
     float lastHonezoneOffsetPct_ = 0.0f;
     RefPtr<BezierVariableVelocityMotion> velocityMotion_;

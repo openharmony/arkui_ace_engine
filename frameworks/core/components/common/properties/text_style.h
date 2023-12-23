@@ -521,7 +521,7 @@ public:
         return renderColors_;
     }
 
-    int32_t GetEffectStrategy()
+    int32_t GetEffectStrategy() const
     {
         return effectStrategy_;
     }

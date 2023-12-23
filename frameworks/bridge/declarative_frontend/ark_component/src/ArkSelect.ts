@@ -105,10 +105,9 @@ class FontModifier extends ModifierWithKey<Font> {
   static identity: Symbol = Symbol('selectFont');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().select.resetFont(node);
-    }
-    else {
-      GetUINativeModule().select.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      getUINativeModule().select.resetFont(node);
+    } else {
+      getUINativeModule().select.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
 
@@ -128,10 +127,9 @@ class OptionFontModifier extends ModifierWithKey<Font> {
   static identity: Symbol = Symbol('selectOptionFont');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().select.resetOptionFont(node);
-    }
-    else {
-      GetUINativeModule().select.setOptionFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      getUINativeModule().select.resetOptionFont(node);
+    } else {
+      getUINativeModule().select.setOptionFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
 
@@ -144,17 +142,16 @@ class OptionFontModifier extends ModifierWithKey<Font> {
   }
 }
 
-class SelectedOptionFontModifier extends ModifierWithKey<Font>{
+class SelectedOptionFontModifier extends ModifierWithKey<Font> {
   constructor(value: Font) {
     super(value);
   }
   static identity: Symbol = Symbol('selectSelectedOptionFont');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().select.resetSelectedOptionFont(node);
-    }
-    else {
-      GetUINativeModule().select.setSelectedOptionFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      getUINativeModule().select.resetSelectedOptionFont(node);
+    } else {
+      getUINativeModule().select.setSelectedOptionFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
 
@@ -167,17 +164,16 @@ class SelectedOptionFontModifier extends ModifierWithKey<Font>{
   }
 }
 
-class MenuAlignModifier extends ModifierWithKey<ArkMenuAlignType>{
+class MenuAlignModifier extends ModifierWithKey<ArkMenuAlignType> {
   constructor(value: ArkMenuAlignType) {
     super(value);
   }
   static identity: Symbol = Symbol('selectMenuAlign');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().select.resetMenuAlign(node);
-    }
-    else {
-      GetUINativeModule().select.setMenuAlign(node, this.value.alignType, this.value.dx, this.value.dy);
+      getUINativeModule().select.resetMenuAlign(node);
+    } else {
+      getUINativeModule().select.setMenuAlign(node, this.value.alignType, this.value.dx, this.value.dy);
     }
   }
 
@@ -199,17 +195,16 @@ class MenuAlignModifier extends ModifierWithKey<ArkMenuAlignType>{
   }
 }
 
-class ArrowPositionModifier extends ModifierWithKey<ArrowPosition>{
+class ArrowPositionModifier extends ModifierWithKey<ArrowPosition> {
   constructor(value: ArrowPosition) {
     super(value);
   }
   static identity: Symbol = Symbol('selectArrowPosition');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().select.resetArrowPosition(node);
-    }
-    else {
-      GetUINativeModule().select.setArrowPosition(node, this.value);
+      getUINativeModule().select.resetArrowPosition(node);
+    } else {
+      getUINativeModule().select.setArrowPosition(node, this.value);
     }
   }
 
@@ -217,7 +212,7 @@ class ArrowPositionModifier extends ModifierWithKey<ArrowPosition>{
     return this.stageValue !== this.value;
   }
 }
-class SpaceModifier extends ModifierWithKey<Length>{
+class SpaceModifier extends ModifierWithKey<Length> {
   constructor(value: Length) {
     super(value);
   }
@@ -225,10 +220,9 @@ class SpaceModifier extends ModifierWithKey<Length>{
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().select.resetSpace(node);
-    }
-    else {
-      GetUINativeModule().select.setSpace(node, this.value);
+      getUINativeModule().select.resetSpace(node);
+    } else {
+      getUINativeModule().select.setSpace(node, this.value);
     }
   }
 
@@ -244,10 +238,9 @@ class ValueModifier extends ModifierWithKey<ResourceStr> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().select.resetValue(node);
-    }
-    else {
-      GetUINativeModule().select.setValue(node, this.value);
+      getUINativeModule().select.resetValue(node);
+    } else {
+      getUINativeModule().select.setValue(node, this.value);
     }
   }
 
@@ -263,10 +256,9 @@ class SelectedModifier extends ModifierWithKey<number | Resource> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().select.resetSelected(node);
-    }
-    else {
-      GetUINativeModule().select.setSelected(node, this.value);
+      getUINativeModule().select.resetSelected(node);
+    } else {
+      getUINativeModule().select.setSelected(node, this.value);
     }
   }
 
@@ -282,10 +274,9 @@ class SelectFontColorModifier extends ModifierWithKey<ResourceColor> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().select.resetFontColor(node);
-    }
-    else {
-      GetUINativeModule().select.setFontColor(node, this.value);
+      getUINativeModule().select.resetFontColor(node);
+    } else {
+      getUINativeModule().select.setFontColor(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -300,10 +291,9 @@ class SelectedOptionBgColorModifier extends ModifierWithKey<ResourceColor> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().select.resetSelectedOptionBgColor(node);
-    }
-    else {
-      GetUINativeModule().select.setSelectedOptionBgColor(node, this.value);
+      getUINativeModule().select.resetSelectedOptionBgColor(node);
+    } else {
+      getUINativeModule().select.setSelectedOptionBgColor(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -318,17 +308,16 @@ class OptionBgColorModifier extends ModifierWithKey<ResourceColor> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().select.resetOptionBgColor(node);
-    }
-    else {
-      GetUINativeModule().select.setOptionBgColor(node, this.value);
+      getUINativeModule().select.resetOptionBgColor(node);
+    } else {
+      getUINativeModule().select.setOptionBgColor(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-class OptionFontColorModifier extends ModifierWithKey<ResourceColor>{
+class OptionFontColorModifier extends ModifierWithKey<ResourceColor> {
   constructor(value: ResourceColor) {
     super(value);
   }
@@ -336,17 +325,16 @@ class OptionFontColorModifier extends ModifierWithKey<ResourceColor>{
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().select.resetOptionFontColor(node);
-    }
-    else {
-      GetUINativeModule().select.setOptionFontColor(node, this.value);
+      getUINativeModule().select.resetOptionFontColor(node);
+    } else {
+      getUINativeModule().select.setOptionFontColor(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-class SelectedOptionFontColorModifier extends ModifierWithKey<ResourceColor>{
+class SelectedOptionFontColorModifier extends ModifierWithKey<ResourceColor> {
   constructor(value: ResourceColor) {
     super(value);
   }
@@ -354,10 +342,9 @@ class SelectedOptionFontColorModifier extends ModifierWithKey<ResourceColor>{
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().select.resetSelectedOptionFontColor(node);
-    }
-    else {
-      GetUINativeModule().select.setSelectedOptionFontColor(node, this.value);
+      getUINativeModule().select.resetSelectedOptionFontColor(node);
+    } else {
+      getUINativeModule().select.setSelectedOptionFontColor(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -368,7 +355,7 @@ class SelectedOptionFontColorModifier extends ModifierWithKey<ResourceColor>{
 // @ts-ignore
 globalThis.Select.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkSelectComponent(nativeNode);
   });

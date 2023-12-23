@@ -18,20 +18,20 @@ class ListItemSelectedModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('listItemSelected');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().listItem.resetListItemSelected(node);
+      getUINativeModule().listItem.resetListItemSelected(node);
     } else {
-      GetUINativeModule().listItem.setListItemSelected(node, this.value!);
+      getUINativeModule().listItem.setListItemSelected(node, this.value!);
     }
-  }  
+  }
 }
 
 class ListItemSelectableModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('listItemSelectable');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().listItem.resetSelectable(node);
+      getUINativeModule().listItem.resetSelectable(node);
     } else {
-      GetUINativeModule().listItem.setSelectable(node, this.value!);
+      getUINativeModule().listItem.setSelectable(node, this.value!);
     }
   }
 }
@@ -67,10 +67,10 @@ class ArkListItemComponent extends ArkComponent implements ListItemAttribute {
 // @ts-ignore
 globalThis.ListItem.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkListItemComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

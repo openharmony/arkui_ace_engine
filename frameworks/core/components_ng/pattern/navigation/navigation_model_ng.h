@@ -61,6 +61,8 @@ public:
     RefPtr<NG::NavigationStack> GetNavigationStack() override;
     void SetMenuCount(int32_t menuCount) override;
     void SetOnNavigationModeChange(std::function<void(NG::NavigationMode)>&& onModeChange) override;
+    void SetCustomTransition(NavigationTransitionEvent&& animationTransition) override;
+    void SetIsCustomAnimation(bool isCustom) override;
     static void SetHideToolBar(FrameNode* frameNode, bool hideToolBar);
     static void SetMinContentWidth(FrameNode* frameNode, const Dimension& value);
     static void SetMinNavBarWidth(FrameNode* frameNode, const Dimension& value);

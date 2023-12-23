@@ -446,13 +446,13 @@ class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
 // @ts-ignore
 globalThis.XComponent.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkXComponentComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};
 
 class XComponentOpacityModifier extends ModifierWithKey<number | Resource> {
   constructor(value: number | Resource) {
@@ -461,19 +461,14 @@ class XComponentOpacityModifier extends ModifierWithKey<number | Resource> {
   static identity: Symbol = Symbol('xComponentOpacity');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().xComponent.resetOpacity(node);
-    }
-    else {
-      GetUINativeModule().xComponent.setOpacity(node, this.value);
+      getUINativeModule().xComponent.resetOpacity(node);
+    } else {
+      getUINativeModule().xComponent.setOpacity(node, this.value);
     }
   }
-  
+
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -484,17 +479,13 @@ class XComponentBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('xComponentBackgroundColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().xComponent.resetBackgroundColor(node);
+      getUINativeModule().xComponent.resetBackgroundColor(node);
     } else {
-      GetUINativeModule().xComponent.setBackgroundColor(node, this.value);
+      getUINativeModule().xComponent.setBackgroundColor(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }

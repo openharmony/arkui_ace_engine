@@ -20,6 +20,7 @@
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_navigation_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
@@ -35,6 +36,7 @@
 namespace OHOS::Ace {
 std::unique_ptr<NavigationModel> NavigationModel::instance_ = nullptr;
 std::mutex NavigationModel::mutex_;
+constexpr int32_t NAVIGATION_ANIMATION_TIMEOUT = 1000; // ms
 
 NavigationModel* NavigationModel::GetInstance()
 {
@@ -244,6 +246,7 @@ void JSNavigation::Create(const JSCallbackInfo& info)
 
 void JSNavigation::JSBind(BindingTarget globalObj)
 {
+    JsNavigationTransitionProxy::JSBind(globalObj);
     JSClass<JSNavigation>::Declare("Navigation");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSNavigation>::StaticMethod("create", &JSNavigation::Create);
@@ -271,6 +274,7 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSNavigation>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSNavigation>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSNavigation>::StaticMethod("customNavContentTransition", &JSNavigation::SetCustomNavContentTransition);
     JSClass<JSNavigation>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -668,5 +672,62 @@ void JSNavigation::SetOnNavigationModeChange(const JSCallbackInfo& info)
     };
     NavigationModel::GetInstance()->SetOnNavigationModeChange(std::move(onModeChange));
     info.ReturnSelf();
+}
+
+void JSNavigation::SetCustomNavContentTransition(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0 || !info[0]->IsFunction()) {
+        NavigationModel::GetInstance()->SetIsCustomAnimation(false);
+        return;
+    }
+    RefPtr<JsNavigationFunction> jsNavigationFunction =
+        AceType::MakeRefPtr<JsNavigationFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onNavigationAnimation = [execCtx = info.GetExecutionContext(), func = std::move(jsNavigationFunction)](
+                                     NG::NavContentInfo from, NG::NavContentInfo to,
+                                     NG::NavigationOperation operation) -> NG::NavigationTransition {
+        NG::NavigationTransition transition;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, transition);
+        auto ret = func->Execute(from, to, operation);
+        if (!ret->IsObject()) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "custom transition is invalid, do default animation");
+            transition.isValid = false;
+            return transition;
+        }
+
+        auto transitionObj = JSRef<JSObject>::Cast(ret);
+        JSRef<JSVal> time = transitionObj->GetProperty("timeout");
+        if (time->IsNumber()) {
+            auto timeout = time->ToNumber<int32_t>();
+            transition.timeout = ((timeout >= 0)  && (timeout <= NAVIGATION_ANIMATION_TIMEOUT)) ?
+                timeout : NAVIGATION_ANIMATION_TIMEOUT;
+        } else {
+            transition.timeout = NAVIGATION_ANIMATION_TIMEOUT;
+        }
+        JSRef<JSVal> transitionContext = transitionObj->GetProperty("transition");
+        auto jsOnTransition = AceType::MakeRefPtr<JsNavigationFunction>(JSRef<JSFunc>::Cast(transitionContext));
+        if (transitionContext->IsFunction()) {
+            auto onTransition = [execCtx, func = std::move(jsOnTransition)](
+                                    const RefPtr<NG::NavigationTransitionProxy>& proxy) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("transition");
+                func->Execute(proxy);
+            };
+            transition.transition = std::move(onTransition);
+        }
+        JSRef<JSVal> endCallback = transitionObj->GetProperty("onTransitionEnd");
+        if (endCallback->IsFunction()) {
+            auto onEndedCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(endCallback));
+            auto onEndTransition = [execCtx, func = std::move(onEndedCallback)](bool isSuccess) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("onTransitionEnded");
+                JSRef<JSVal> successVal = JSRef<JSVal>::Make(ToJSValue(isSuccess));
+                func->ExecuteJS(1, &successVal);
+            };
+            transition.endCallback = std::move(onEndTransition);
+        }
+        return transition;
+    };
+    NavigationModel::GetInstance()->SetIsCustomAnimation(true);
+    NavigationModel::GetInstance()->SetCustomTransition(onNavigationAnimation);
 }
 } // namespace OHOS::Ace::Framework

@@ -404,7 +404,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
    * and add this component to the list of components who are dependent on this property
    */
   protected recordPropertyDependentUpdate() : void {
-    const elmtId = this.getRenderingElmtId();
+    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
     if (elmtId < 0) {
       // not access recording 
       return;

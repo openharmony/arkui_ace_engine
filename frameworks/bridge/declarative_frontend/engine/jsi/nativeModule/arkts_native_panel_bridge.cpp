@@ -50,10 +50,14 @@ ArkUINativeModuleValue PanelBridge::SetPanelMode(ArkUIRuntimeCallInfo* runtimeCa
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> modeArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    int32_t mode = secondArg->Int32Value(vm);
-    GetArkUIInternalNodeAPI()->GetPanelModifier().SetPanelMode(nativeNode, mode);
+    if (modeArg->IsNumber()) {
+        int32_t mode = modeArg->Int32Value(vm);
+        GetArkUIInternalNodeAPI()->GetPanelModifier().SetPanelMode(nativeNode, mode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelMode(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -72,10 +76,14 @@ ArkUINativeModuleValue PanelBridge::SetPanelType(ArkUIRuntimeCallInfo* runtimeCa
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> typeArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    int32_t type = secondArg->Int32Value(vm);
-    GetArkUIInternalNodeAPI()->GetPanelModifier().SetPanelType(nativeNode, type);
+    if (typeArg->IsNumber()) {
+        int32_t type = typeArg->Int32Value(vm);
+        GetArkUIInternalNodeAPI()->GetPanelModifier().SetPanelType(nativeNode, type);
+    } else {
+        GetArkUIInternalNodeAPI()->GetPanelModifier().ResetPanelType(nativeNode);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -223,15 +231,15 @@ ArkUINativeModuleValue PanelBridge::SetShowCloseIcon(ArkUIRuntimeCallInfo* runti
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> showCloseArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    if (secondArg->IsNull()) {
-        GetArkUIInternalNodeAPI()->GetPanelModifier().SetShowCloseIcon(nativeNode, false);
+    if (showCloseArg->IsNull()) {
+        GetArkUIInternalNodeAPI()->GetPanelModifier().ResetShowCloseIcon(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     bool boolValue = false;
-    if (secondArg->IsBoolean()) {
-        boolValue = secondArg->ToBoolean(vm)->Value();
+    if (showCloseArg->IsBoolean()) {
+        boolValue = showCloseArg->ToBoolean(vm)->Value();
     }
     GetArkUIInternalNodeAPI()->GetPanelModifier().SetShowCloseIcon(nativeNode, boolValue);
     return panda::JSValueRef::Undefined(vm);
@@ -252,15 +260,15 @@ ArkUINativeModuleValue PanelBridge::SetDragBar(ArkUIRuntimeCallInfo* runtimeCall
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> dragBarArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    if (secondArg->IsNull()) {
-        GetArkUIInternalNodeAPI()->GetPanelModifier().SetShowCloseIcon(nativeNode, false);
+    if (dragBarArg->IsNull()) {
+        GetArkUIInternalNodeAPI()->GetPanelModifier().ResetDragBar(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    bool boolValue = false;
-    if (secondArg->IsBoolean()) {
-        boolValue = secondArg->ToBoolean(vm)->Value();
+    bool boolValue = true;
+    if (dragBarArg->IsBoolean()) {
+        boolValue = dragBarArg->ToBoolean(vm)->Value();
     }
     GetArkUIInternalNodeAPI()->GetPanelModifier().SetDragBar(nativeNode, boolValue);
     return panda::JSValueRef::Undefined(vm);
@@ -281,14 +289,18 @@ ArkUINativeModuleValue PanelBridge::SetShow(ArkUIRuntimeCallInfo* runtimeCallInf
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> showArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN) &&
-        (secondArg->IsUndefined() || secondArg->IsNull())) {
+        (showArg->IsUndefined() || showArg->IsNull())) {
         GetArkUIInternalNodeAPI()->GetPanelModifier().SetShow(nativeNode, true);
         return panda::JSValueRef::Undefined(vm);
     } else {
-        GetArkUIInternalNodeAPI()->GetPanelModifier().SetShow(nativeNode, secondArg->ToBoolean(vm)->Value());
+        bool boolValue = true;
+        if (showArg->IsBoolean()) {
+            boolValue = showArg->ToBoolean(vm)->Value();
+        }
+        GetArkUIInternalNodeAPI()->GetPanelModifier().SetShow(nativeNode, boolValue);
         return panda::JSValueRef::Undefined(vm);
     }
 }

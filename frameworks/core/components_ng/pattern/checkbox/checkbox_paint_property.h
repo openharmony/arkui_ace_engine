@@ -29,21 +29,21 @@ namespace OHOS::Ace::NG {
 class CheckBoxPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(CheckBoxPaintProperty, PaintProperty)
 private:
-    RefPtr<FrameNode> host_;
+    WeakPtr<FrameNode> host_;
 
 public:
     CheckBoxPaintProperty() = default;
 
     ~CheckBoxPaintProperty() override = default;
 
-    void SetHost(const RefPtr<FrameNode>& host)
+    void SetHost(const WeakPtr<FrameNode>& host)
     {
         host_ = host;
     }
 
     RefPtr<FrameNode> GetHost() const
     {
-        return host_;
+        return host_.Upgrade();
     }
     RefPtr<PaintProperty> Clone() const override
     {

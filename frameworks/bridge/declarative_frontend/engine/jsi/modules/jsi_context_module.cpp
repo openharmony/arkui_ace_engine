@@ -48,10 +48,21 @@ std::shared_ptr<JsValue> JsiContextModule::GetContext(const std::shared_ptr<JsRu
     }
 #endif
     auto it = contexts_.find(currentInstance);
-    if (it == contexts_.end()) {
-        return runtime->NewUndefined();
+    if (it != contexts_.end()) {
+        return it->second;
     }
-    return it->second;
+
+    // Try to get the active container.
+    auto container = Container::GetActive();
+    if (container) {
+        currentInstance = container->GetInstanceId();
+        it = contexts_.find(currentInstance);
+        if (it != contexts_.end()) {
+            return it->second;
+        }
+    }
+
+    return runtime->NewUndefined();
 }
 
 void JsiContextModule::InitContextModule(const std::shared_ptr<JsRuntime>& runtime, std::shared_ptr<JsValue> moduleObj)

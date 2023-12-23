@@ -529,6 +529,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         }
         txtStyle.symbol.SetRenderColor(symbolColors);
         txtStyle.symbol.SetRenderMode(textStyle.GetRenderStrategy());
+        txtStyle.symbol.SetSymbolEffect(textStyle.GetEffectStrategy());
     }
     txtStyle.baseline = ConvertTxtTextBaseline(textStyle.GetTextBaseline());
     txtStyle.decoration = ConvertTxtTextDecoration(textStyle.GetTextDecoration());

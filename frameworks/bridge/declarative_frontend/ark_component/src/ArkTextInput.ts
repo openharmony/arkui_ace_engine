@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class TextInputStyleModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
@@ -21,9 +21,9 @@ class TextInputStyleModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('textInputStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textInput.resetStyle(node);
+      getUINativeModule().textInput.resetStyle(node);
     } else {
-      GetUINativeModule().textInput.setStyle(node, this.value!);
+      getUINativeModule().textInput.setStyle(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -37,9 +37,9 @@ class TextInputMaxLengthModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('textInputMaxLength');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textInput.resetMaxLength(node);
+      getUINativeModule().textInput.resetMaxLength(node);
     } else {
-      GetUINativeModule().textInput.setMaxLength(node, this.value!);
+      getUINativeModule().textInput.setMaxLength(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -53,9 +53,9 @@ class TextInputMaxLinesModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('textInputMaxLines');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textInput.resetMaxLines(node);
+      getUINativeModule().textInput.resetMaxLines(node);
     } else {
-      GetUINativeModule().textInput.setMaxLines(node, this.value!);
+      getUINativeModule().textInput.setMaxLines(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -69,9 +69,9 @@ class TextInputShowPasswordIconModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('textInputShowPasswordIcon');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textInput.resetShowPasswordIcon(node);
+      getUINativeModule().textInput.resetShowPasswordIcon(node);
     } else {
-      GetUINativeModule().textInput.setShowPasswordIcon(node, this.value!);
+      getUINativeModule().textInput.setShowPasswordIcon(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -85,9 +85,9 @@ class TextInputTextAlignModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('textInputTextAlign');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textInput.resetTextAlign(node);
+      getUINativeModule().textInput.resetTextAlign(node);
     } else {
-      GetUINativeModule().textInput.setTextAlign(node, this.value!);
+      getUINativeModule().textInput.setTextAlign(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -103,9 +103,9 @@ class TextInputPlaceholderFontModifier extends ModifierWithKey<Font> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textInput.resetPlaceholderFont(node);
+      getUINativeModule().textInput.resetPlaceholderFont(node);
     } else {
-      GetUINativeModule().textInput.setPlaceholderFont(node, this.value.size,
+      getUINativeModule().textInput.setPlaceholderFont(node, this.value.size,
         this.value.weight, this.value.family, this.value.style);
     }
   }
@@ -138,9 +138,9 @@ class TextInputPlaceholderColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('textInputPlaceholderColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textInput.resetPlaceholderColor(node);
+      getUINativeModule().textInput.resetPlaceholderColor(node);
     } else {
-      GetUINativeModule().textInput.setPlaceholderColor(node, this.value!);
+      getUINativeModule().textInput.setPlaceholderColor(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -155,9 +155,9 @@ class TextInputPasswordIconModifier extends ModifierWithKey<PasswordIcon> {
   static identity: Symbol = Symbol('textInputPasswordIcon');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textInput.resetPasswordIcon(node);
+      getUINativeModule().textInput.resetPasswordIcon(node);
     } else {
-      GetUINativeModule().textInput.setPasswordIcon(node, this.value.onIconSrc, this.value.offIconSrc);
+      getUINativeModule().textInput.setPasswordIcon(node, this.value.onIconSrc, this.value.offIconSrc);
     }
   }
   checkObjectDiff(): boolean {
@@ -173,9 +173,9 @@ class TextInputSelectedBackgroundColorModifier extends ModifierWithKey<ResourceC
   static identity: Symbol = Symbol('textInputSelectedBackgroundColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textInput.resetSelectedBackgroundColor(node);
+      getUINativeModule().textInput.resetSelectedBackgroundColor(node);
     } else {
-      GetUINativeModule().textInput.setSelectedBackgroundColor(node, this.value!);
+      getUINativeModule().textInput.setSelectedBackgroundColor(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -190,9 +190,9 @@ class TextInputSelectionMenuHiddenModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('textInputSelectionMenuHidden');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textInput.resetSelectionMenuHidden(node);
+      getUINativeModule().textInput.resetSelectionMenuHidden(node);
     } else {
-      GetUINativeModule().textInput.setSelectionMenuHidden(node, this.value!);
+      getUINativeModule().textInput.setSelectionMenuHidden(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -206,9 +206,9 @@ class TextInputShowUnderlineModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('textInputShowUnderLine');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textInput.resetShowUnderline(node);
+      getUINativeModule().textInput.resetShowUnderline(node);
     } else {
-      GetUINativeModule().textInput.setShowUnderline(node, this.value!);
+      getUINativeModule().textInput.setShowUnderline(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -222,9 +222,9 @@ class TextInputShowErrorModifier extends ModifierWithKey<string | undefined> {
   static identity: Symbol = Symbol('textInputShowError');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textInput.resetShowError(node);
+      getUINativeModule().textInput.resetShowError(node);
     } else {
-      GetUINativeModule().textInput.setShowError(node, this.value!);
+      getUINativeModule().textInput.setShowError(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -238,9 +238,9 @@ class TextInputTypeModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('textInputType');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textInput.resetType(node);
+      getUINativeModule().textInput.resetType(node);
     } else {
-      GetUINativeModule().textInput.setType(node, this.value!);
+      getUINativeModule().textInput.setType(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -255,9 +255,9 @@ class TextInputCaretPositionModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('textInputCaretPosition');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textInput.resetCaretPosition(node);
+      getUINativeModule().textInput.resetCaretPosition(node);
     } else {
-      GetUINativeModule().textInput.setCaretPosition(node, this.value);
+      getUINativeModule().textInput.setCaretPosition(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -272,9 +272,9 @@ class TextInputCopyOptionModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('textInputCopyOption');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textInput.resetCopyOption(node);
+      getUINativeModule().textInput.resetCopyOption(node);
     } else {
-      GetUINativeModule().textInput.setCopyOption(node, this.value);
+      getUINativeModule().textInput.setCopyOption(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -289,9 +289,9 @@ class TextInputEnableKeyboardOnFocusModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('textInputEnableKeyboardOnFocus');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textInput.resetEnableKeyboardOnFocus(node);
+      getUINativeModule().textInput.resetEnableKeyboardOnFocus(node);
     } else {
-      GetUINativeModule().textInput.setEnableKeyboardOnFocus(node, this.value);
+      getUINativeModule().textInput.setEnableKeyboardOnFocus(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -306,15 +306,15 @@ class TextInputCaretStyleModifier extends ModifierWithKey<CaretStyle> {
   static identity: Symbol = Symbol('textInputCaretStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textInput.resetCaretStyle(node);
+      getUINativeModule().textInput.resetCaretStyle(node);
     } else {
-      GetUINativeModule().textInput.setCaretStyle(node, this.value!.width);
+      getUINativeModule().textInput.setCaretStyle(node, this.value!.width);
     }
   }
 
   checkObjectDiff(): boolean {
     if (isObject(this.stageValue) && isObject(this.value)) {
-      return !isBaseOrResourceEqual(this.stageValue.width, this.value.width)
+      return !isBaseOrResourceEqual(this.stageValue.width, this.value.width);
     } else {
       return true;
     }
@@ -328,9 +328,9 @@ class TextInputEnterKeyTypeModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('textInputEnterKeyType');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textInput.resetEnterKeyType(node);
+      getUINativeModule().textInput.resetEnterKeyType(node);
     } else {
-      GetUINativeModule().textInput.setEnterKeyType(node, this.value);
+      getUINativeModule().textInput.setEnterKeyType(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -345,9 +345,9 @@ class TextInputBarStateModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('textInputBarState');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textInput.resetBarState(node);
+      getUINativeModule().textInput.resetBarState(node);
     } else {
-      GetUINativeModule().textInput.setBarState(node, this.value);
+      getUINativeModule().textInput.setBarState(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -362,9 +362,9 @@ class TextInputCaretColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('textinputCaretColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textInput.resetCaretColor(node);
+      getUINativeModule().textInput.resetCaretColor(node);
     } else {
-      GetUINativeModule().textInput.setCaretColor(node, this.value!);
+      getUINativeModule().textInput.setCaretColor(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -378,9 +378,9 @@ class TextInputFontColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('textInputFontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textInput.resetFontColor(node);
+      getUINativeModule().textInput.resetFontColor(node);
     } else {
-      GetUINativeModule().textInput.setFontColor(node, this.value!);
+      getUINativeModule().textInput.setFontColor(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -397,9 +397,9 @@ class TextInputFontSizeModifier extends ModifierWithKey<Length> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textInput.resetFontSize(node);
+      getUINativeModule().textInput.resetFontSize(node);
     } else {
-      GetUINativeModule().textInput.setFontSize(node, this.value!);
+      getUINativeModule().textInput.setFontSize(node, this.value!);
     }
   }
 
@@ -414,9 +414,9 @@ class TextInputFontStyleModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('textInputFontStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textInput.resetFontStyle(node);
+      getUINativeModule().textInput.resetFontStyle(node);
     } else {
-      GetUINativeModule().textInput.setFontStyle(node, this.value!);
+      getUINativeModule().textInput.setFontStyle(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -431,9 +431,9 @@ class TextInputFontWeightModifier extends ModifierWithKey<number | string> {
   static identity: Symbol = Symbol('textInputFontWeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textInput.resetFontWeight(node);
+      getUINativeModule().textInput.resetFontWeight(node);
     } else {
-      GetUINativeModule().textInput.setFontWeight(node, this.value!);
+      getUINativeModule().textInput.setFontWeight(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -448,9 +448,9 @@ class TextInputFontFamilyModifier extends ModifierWithKey<ResourceStr> {
   static identity: Symbol = Symbol('textInputFontFamily');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textInput.resetFontFamily(node);
+      getUINativeModule().textInput.resetFontFamily(node);
     } else {
-      GetUINativeModule().textInput.setFontFamily(node, this.value!);
+      getUINativeModule().textInput.setFontFamily(node, this.value!);
     }
   }
 
@@ -458,7 +458,7 @@ class TextInputFontFamilyModifier extends ModifierWithKey<ResourceStr> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute>{
+class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute> {
   constructor(nativePtr: KNode) {
     super(nativePtr);
   }
@@ -466,16 +466,16 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     throw new Error('Method not implemented.');
   }
   onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
   selectAll(value: boolean): TextInputAttribute {
-    throw new Error('Method not implemented.')
+    throw new Error('Method not implemented.');
   }
   enableAutoFill(value: boolean): TextInputAttribute {
-    throw new Error('Method not implemented.')
+    throw new Error('Method not implemented.');
   }
   passwordRules(value: string): TextInputAttribute {
-    throw new Error('Method not implemented.')
+    throw new Error('Method not implemented.');
   }
   showCounter(value: boolean): TextInputAttribute {
     throw new Error('Method not implemented.');
@@ -651,10 +651,10 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
 // @ts-ignore
 globalThis.TextInput.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTextInputComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

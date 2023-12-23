@@ -72,6 +72,11 @@ public:
 
     virtual void Destroy() = 0;
 
+    virtual bool IsKeyboard()
+    {
+        return false;
+    }
+
     virtual void DestroyView() {}
 
     // Get the instance id of this container

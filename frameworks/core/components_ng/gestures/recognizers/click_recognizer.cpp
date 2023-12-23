@@ -48,7 +48,9 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
     PointF localPoint(event.x, event.y);
     auto frameNode = GetAttachedNode();
     if (!frameNode.Invalid()) {
-        NGGestureRecognizer::Transform(localPoint, frameNode);
+        if (!IsPostEventResult()) {
+            NGGestureRecognizer::Transform(localPoint, frameNode);
+        }
         auto host = frameNode.Upgrade();
         CHECK_NULL_RETURN(host, false);
         auto renderContext = host->GetRenderContext();

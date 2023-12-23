@@ -86,7 +86,7 @@ private:
     bool CheckNavDestinationNodeInUINode(RefPtr<NG::UINode> node);
     int32_t GetSize() const;
     static std::string ConvertParamToString(const JSRef<JSVal>& param);
-    static void ParseJsObject(std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj);
+    static void ParseJsObject(std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj, int32_t depthLimit);
 };
 } // namespace OHOS::Ace::Framework
 

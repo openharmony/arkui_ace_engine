@@ -423,7 +423,7 @@ ArkUINativeModuleValue SearchBridge::SetSearchIcon(ArkUIRuntimeCallInfo* runtime
 
     Color color;
     if (ArkTSUtils::ParseJsColorAlpha(vm, threeArg, color)) {
-        value.color = color.GetValue();
+        value.color = static_cast<int32_t>(color.GetValue());
     } else {
         value.color = INVALID_COLOR_VALUE;
     }
@@ -486,9 +486,9 @@ ArkUINativeModuleValue SearchBridge::SetSearchButton(ArkUIRuntimeCallInfo* runti
 
     Color fontColor;
     if (ArkTSUtils::ParseJsColorAlpha(vm, fourArg, fontColor)) {
-        value.fontColor = fontColor.GetValue();
+        value.fontColor = static_cast<int32_t>(fontColor.GetValue());
     } else {
-        value.fontColor = theme->GetSearchButtonTextColor().GetValue();
+        value.fontColor = static_cast<int32_t>(theme->GetSearchButtonTextColor().GetValue());
     }
     GetArkUIInternalNodeAPI()->GetSearchModifier().SetSearchSearchButton(nativeNode, &value);
     return panda::JSValueRef::Undefined(vm);

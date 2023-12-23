@@ -16,13 +16,13 @@
 #include "core/components/plugin/plugin_sub_container.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
+#include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/js_frontend/engine/common/js_engine_loader.h"
 #include "core/common/ace_engine.h"
 #include "core/common/asset_manager_impl.h"
 #include "core/common/container_scope.h"
 #include "core/common/plugin_manager.h"
-#include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "core/components/plugin/hap_asset_provider_impl.h"
 #include "core/components/plugin/plugin_element.h"
 #include "core/components/plugin/plugin_window.h"
@@ -48,13 +48,11 @@ void PluginSubContainer::Initialize()
 
     auto outSidePipelineContext = outSidePipelineContext_.Upgrade();
     if (!outSidePipelineContext) {
-        LOGE("no pipeline context for create plugin component container.");
         return;
     }
 
     auto executor = outSidePipelineContext->GetTaskExecutor();
     if (!executor) {
-        LOGE("could not got main pipeline executor");
         return;
     }
 
@@ -62,13 +60,11 @@ void PluginSubContainer::Initialize()
 
     frontend_ = AceType::MakeRefPtr<PluginFrontend>();
     if (!frontend_) {
-        LOGE("PluginSubContainer::Initialize:frontend_ is nullptr");
         return;
     }
 
     auto container = AceEngine::Get().GetContainer(outSidePipelineContext->GetInstanceId());
     if (!container) {
-        LOGE("no container for create plugin component container.");
         return;
     }
 
@@ -86,7 +82,6 @@ void PluginSubContainer::Initialize()
         jsEngine = loader->CreateJsEngine(instanceId_);
     }
     if (!jsEngine) {
-        LOGE("PluginSubContainer::Initialize:jsEngine is nullptr");
         return;
     }
     if (!PluginManager::GetInstance().GetAceAbility()) {
@@ -109,12 +104,10 @@ void PluginSubContainer::Destroy()
         frontend_.Reset();
     }
     if (!pipelineContext_) {
-        LOGE("no context find for inner plugin");
         return;
     }
 
     if (!taskExecutor_) {
-        LOGE("no taskExecutor find for inner plugin");
         return;
     }
 
@@ -141,9 +134,6 @@ void PluginSubContainer::UpdateRootElementSize()
             rootWidth = pluginInfo->width;
             rootHeight = pluginInfo->height;
         }
-        LOGI("PluginSubContainer::UpdateRootElementSize: pluginInfo->widt:%{public}lf,"
-             "pluginInfo->height:%{public}lf",
-            pluginInfo->width.Value(), pluginInfo->height.Value());
     } else {
         auto pluginComponent = AceType::DynamicCast<PluginComponent>(pluginComponent_);
         if (pluginComponent) {
@@ -153,7 +143,6 @@ void PluginSubContainer::UpdateRootElementSize()
     }
 
     if (rootWidth_ == rootWidth && rootHeight_ == rootHeight) {
-        LOGE("size not changed, should not change");
         return;
     }
     surfaceWidth_ = outSidePipelineContext_.Upgrade()->NormalizeToPx(rootWidth);
@@ -166,7 +155,6 @@ void PluginSubContainer::UpdateRootElementSize()
 void PluginSubContainer::UpdateSurfaceSize()
 {
     if (!taskExecutor_) {
-        LOGE("update surface size fail could not post task to ui thread");
         return;
     }
     auto weakContext = AceType::WeakClaim(AceType::RawPtr(pipelineContext_));
@@ -174,11 +162,9 @@ void PluginSubContainer::UpdateSurfaceSize()
         [weakContext, surfaceWidth = surfaceWidth_, surfaceHeight = surfaceHeight_]() {
             auto context = weakContext.Upgrade();
             if (context == nullptr) {
-                LOGE("context is nullptr");
                 return;
             }
             if (NearZero(surfaceWidth) && NearZero(surfaceHeight)) {
-                LOGE("surface is zero, should not update");
                 return;
             }
             context->OnSurfaceChanged(surfaceWidth, surfaceHeight);
@@ -215,7 +201,6 @@ void PluginSubContainer::RunDecompressedPlugin(const std::string& hapPath, const
             ContainerScope scope(instance);
             auto context = weakContext.Upgrade();
             if (context == nullptr) {
-                LOGE("context or root box is nullptr");
                 return;
             }
             context->SetupRootElement();
@@ -278,7 +263,6 @@ void PluginSubContainer::RunPlugin(const std::string& path, const std::string& m
             ContainerScope scope(instanceId_);
             auto context = weakContext.Upgrade();
             if (context == nullptr) {
-                LOGE("context or root box is nullptr");
                 return;
             }
             context->SetupRootElement();
@@ -304,17 +288,14 @@ void PluginSubContainer::RunPlugin(const std::string& path, const std::string& m
 
     auto plugin = AceType::DynamicCast<PluginElement>(GetPluginElement().Upgrade());
     if (!plugin) {
-        LOGE("set draw delegate could not get plugin element");
         return;
     }
     auto renderNode = plugin->GetRenderNode();
     if (!renderNode) {
-        LOGE("set draw delegate could not get render node");
         return;
     }
     auto pluginRender = AceType::DynamicCast<RenderPlugin>(renderNode);
     if (!pluginRender) {
-        LOGE("set draw delegate could not get render plugin");
         return;
     }
     pipelineContext_->SetDrawDelegate(pluginRender->GetDrawDelegate());
@@ -323,8 +304,7 @@ void PluginSubContainer::RunPlugin(const std::string& path, const std::string& m
     frontend_->RunPage(source, data);
 }
 
-void PluginSubContainer::SetPluginComponentTheme(
-    const std::string& path, const RefPtr<AssetManager>& assetManager)
+void PluginSubContainer::SetPluginComponentTheme(const std::string& path, const RefPtr<AssetManager>& assetManager)
 {
     ResourceInfo pluginResourceInfo;
     ResourceConfiguration resConfig;
@@ -349,7 +329,6 @@ void PluginSubContainer::SetPluginComponentTheme(
             [weakTheme, weakAsset]() {
                 auto themeManager = weakTheme.Upgrade();
                 if (themeManager == nullptr) {
-                    LOGE("themeManager or aceView is null!");
                     return;
                 }
                 themeManager->ParseSystemTheme();
@@ -424,7 +403,6 @@ void PluginSubContainer::UpdatePlugin(const std::string& content)
     ContainerScope scope(instanceId_);
 
     if (!frontend_) {
-        LOGE("update plugin fial due to could not find plugin front end");
         return;
     }
     frontend_->UpdatePlugin(content);
