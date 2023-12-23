@@ -1104,6 +1104,13 @@ var SymbolRenderingStrategy;
   SymbolRenderingStrategy[SymbolRenderingStrategy["MULTIPLE_OPACITY"] = 2] = "MULTIPLE_OPACITY";
 })(SymbolRenderingStrategy || (SymbolRenderingStrategy = {}));
 
+var SymbolEffectStrategy;
+(function (SymbolEffectStrategy) {
+  SymbolEffectStrategy[SymbolEffectStrategy["NONE"] = 0] = "NONE";
+  SymbolEffectStrategy[SymbolEffectStrategy["SCALE"] = 1] = "SCALE";
+  SymbolEffectStrategy[SymbolEffectStrategy["HIERARCHICAL"] = 2] = "HIERARCHICAL";
+})(SymbolEffectStrategy || (SymbolEffectStrategy = {}));
+
 var RichEditorSpanType;
 (function (RichEditorSpanType) {
   RichEditorSpanType[RichEditorSpanType["TEXT"] = 0] = "TEXT";

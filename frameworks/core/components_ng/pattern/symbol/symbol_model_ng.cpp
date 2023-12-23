@@ -52,4 +52,9 @@ void SymbolModelNG::SetFontColor(std::vector<Color>& symbolColor)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolColorList, symbolColor);
 }
+
+void SymbolModelNG::SetSymbolEffect(const std::uint32_t effectStrategy)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolEffectStrategy, effectStrategy);
+}
 } // namespace OHOS::Ace::NG
