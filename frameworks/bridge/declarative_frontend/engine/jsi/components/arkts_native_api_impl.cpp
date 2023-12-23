@@ -65,6 +65,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_video_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_line_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_path_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_polygon_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_polyline_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_qrcode_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_water_flow_modifier.h"
@@ -87,7 +88,12 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_timer_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_loading_progress_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_clock_modifier.h"
-
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_plugin_modifier.h"
+#endif
+#ifdef XCOMPONENT_SUPPORTED
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_xcomponent_modifier.h"
+#endif
 #ifdef FORM_SUPPORTED
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_form_component_modifier.h"
 #endif
@@ -160,6 +166,7 @@ static struct ArkUINodeAPI impl = {
     GetColumnSplitModifier,
     GetLineModifier,
     GetPathModifier,
+    GetPolygonModifier,
     GetPolylineModifier,
     GetSpanModifier,
     GetImageAnimatorModifier,
@@ -191,7 +198,12 @@ static struct ArkUINodeAPI impl = {
     GetLoadingProgressModifier,
     GetTextClockModifier,
     GetTextTimerModifier,
-
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+    GetPluginModifier,
+#endif
+#ifdef XCOMPONENT_SUPPORTED
+    GetXComponentModifier,
+#endif
 #ifdef FORM_SUPPORTED
     GetFormComponentModifier,
 #endif

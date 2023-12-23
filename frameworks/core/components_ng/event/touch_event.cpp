@@ -41,7 +41,7 @@ bool TouchEventActuator::HandleEvent(const TouchEvent& point)
 
 bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
 {
-    if (touchEvents_.empty() && !userCallback_) {
+    if (touchEvents_.empty() && !userCallback_ && !onTouchEventCallback_) {
         return true;
     }
     TouchEvent lastPoint;
@@ -141,11 +141,13 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
         // actuator->userCallback_ may be overwritten in its invoke so we copy it first
         auto userCallback = userCallback_;
         (*userCallback)(event);
-        if (event.IsStopPropagation()) {
-            return false;
-        }
     }
-    return true;
+    if (onTouchEventCallback_) {
+        // actuator->onTouchEventCallback_ may be overwritten in its invoke so we copy it first
+        auto onTouchEventCallback = onTouchEventCallback_;
+        (*onTouchEventCallback)(event);
+    }
+    return !event.IsStopPropagation();
 }
 
 bool TouchEventActuator::ShouldResponse()

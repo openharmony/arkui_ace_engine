@@ -386,6 +386,10 @@ void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, const std::st
     textNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateContent(rightLabel);
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateFontSize(stepperTheme->GetTextStyle().GetFontSize());
+    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateAdaptMinFontSize(stepperTheme->GetMinFontSize());
+    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateAdaptMaxFontSize(
+        stepperTheme->GetTextStyle().GetFontSize());
+    textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateMaxLines(stepperTheme->GetTextMaxLines());
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateFontWeight(stepperTheme->GetTextStyle().GetFontWeight());
     auto textColor = stepperTheme->GetTextStyle().GetTextColor();
     textNode->GetLayoutProperty<TextLayoutProperty>()->UpdateTextColor(textColor);

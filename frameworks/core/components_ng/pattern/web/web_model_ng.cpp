@@ -794,6 +794,14 @@ void WebModelNG::SetTouchIconUrlId(OnWebAsyncFunc&& touchIconUrlId)
     webEventHub->SetOnTouchIconUrlEvent(std::move(touchIconUrlId));
 }
 
+void WebModelNG::SetSafeBrowsingCheckResultId(
+    std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckResultId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnSafeBrowsingCheckResultEvent(std::move(safeBrowsingCheckResultId));
+}
+
 void WebModelNG::SetDarkMode(WebDarkMode mode)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();

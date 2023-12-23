@@ -157,8 +157,12 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
     auto theme = pipelineContext->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
     CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
-    ParseJsDimensionFp(info[0], fontSize);
-    if (fontSize.IsNonPositive() || fontSize.Unit() == DimensionUnit::PERCENT) {
+    if (!ParseJsDimensionFpNG(info[0], fontSize, false)) {
+        fontSize = theme->GetTextStyle().GetFontSize();
+        TextModel::GetInstance()->SetFontSize(fontSize);
+        return;
+    }
+    if (fontSize.IsNegative()) {
         fontSize = theme->GetTextStyle().GetFontSize();
     }
     TextModel::GetInstance()->SetFontSize(fontSize);
@@ -192,9 +196,7 @@ void JSText::SetTextShadow(const JSCallbackInfo& info)
     }
     std::vector<Shadow> shadows;
     ParseTextShadowFromShadowObject(info[0], shadows);
-    if (!shadows.empty()) {
-        TextModel::GetInstance()->SetTextShadow(shadows);
-    }
+    TextModel::GetInstance()->SetTextShadow(shadows);
 }
 
 void JSText::SetTextOverflow(const JSCallbackInfo& info)
@@ -279,7 +281,8 @@ void JSText::SetMaxLines(const JSCallbackInfo& info)
 void JSText::SetTextIndent(const JSCallbackInfo& info)
 {
     CalcDimension value;
-    if (!ParseJsDimensionFp(info[0], value)) {
+    if (!ParseJsDimensionFpNG(info[0], value)) {
+        value.Reset();
         TextModel::GetInstance()->SetTextIndent(value);
         return;
     }
@@ -314,7 +317,11 @@ void JSText::SetAlign(const JSCallbackInfo& info)
 void JSText::SetLineHeight(const JSCallbackInfo& info)
 {
     CalcDimension value;
-    ParseJsDimensionFp(info[0], value);
+    if (!ParseJsDimensionFpNG(info[0], value)) {
+        value.Reset();
+        TextModel::GetInstance()->SetLineHeight(value);
+        return;
+    }
     if (value.IsNegative()) {
         value.Reset();
     }
@@ -348,6 +355,8 @@ void JSText::SetLetterSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
     if (!ParseJsDimensionFpNG(info[0], value, false)) {
+        value.Reset();
+        TextModel::GetInstance()->SetLetterSpacing(value);
         return;
     }
     TextModel::GetInstance()->SetLetterSpacing(value);
@@ -364,7 +373,9 @@ void JSText::SetTextCase(int32_t value)
 void JSText::SetBaselineOffset(const JSCallbackInfo& info)
 {
     CalcDimension value;
-    if (!ParseJsDimensionFp(info[0], value)) {
+    if (!ParseJsDimensionFpNG(info[0], value, false)) {
+        value.Reset();
+        TextModel::GetInstance()->SetBaselineOffset(value);
         return;
     }
     TextModel::GetInstance()->SetBaselineOffset(value);

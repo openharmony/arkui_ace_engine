@@ -139,7 +139,8 @@ void WindowSceneHelper::IsWindowSceneCloseKeyboard(RefPtr<FrameNode> frameNode)
     TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SCB/Keep/Need(%{public}d/%{public}d/%{public}d)",
         isWindowScene, saveKeyboard, isNeedKeyBoard);
     if (isWindowScene && !saveKeyboard && !isNeedKeyBoard) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "WindowSceneFrameNode not NeedSoftKeyboard.");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "scbFrameNode(%{public}s/%{public}d) notNeedSoftKeyboard.",
+            frameNode->GetTag().c_str(), frameNode->GetId());
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
             inputMethod->RequestHideInput();
@@ -157,7 +158,8 @@ void WindowSceneHelper::IsCloseKeyboard(RefPtr<FrameNode> frameNode)
     CHECK_NULL_VOID(curPattern);
     bool isNeedKeyBoard = curPattern->NeedSoftKeyboard();
     if (!isNeedKeyBoard) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "FrameNode not NeedSoftKeyboard.");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "FrameNode(%{public}s/%{public}d) notNeedSoftKeyboard.",
+            frameNode->GetTag().c_str(), frameNode->GetId());
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
             inputMethod->RequestHideInput();
@@ -165,6 +167,23 @@ void WindowSceneHelper::IsCloseKeyboard(RefPtr<FrameNode> frameNode)
         }
     }
 #endif
+}
+
+void CaculatePoint(const RefPtr<FrameNode>& node, const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
+{
+    CHECK_NULL_VOID(node);
+    CHECK_NULL_VOID(pointerEvent);
+
+    auto pointerId = pointerEvent->GetPointerId();
+    auto renderContext = node->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto rect = renderContext->GetPaintRectWithoutTransform();
+    MMI::PointerEvent::PointerItem item;
+    if (pointerEvent->GetPointerItem(pointerId, item)) {
+        item.SetWindowX(static_cast<int32_t>(item.GetWindowX() + rect.GetX()));
+        item.SetWindowY(static_cast<int32_t>(item.GetWindowY() + rect.GetY()));
+        pointerEvent->UpdatePointerItem(pointerId, item);
+    }
 }
 
 void WindowSceneHelper::InjectPointerEvent(const std::string& targetNodeName,
@@ -196,13 +215,15 @@ void WindowSceneHelper::InjectPointerEvent(RefPtr<FrameNode> node,
 
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
+    CaculatePoint(node, pointerEvent);
     if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
             "PointerEvent Process to inject, eventInfo: id:%{public}d, "
             "WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
-            "ViewPosX = %{public}d, ViewPosY = %{public}d",
+            "ViewPosX = %{public}d, ViewPosY = %{public}d. node: id:%{public}d, type:%{public}s",
             pointerEvent->GetId(), container->GetWindowId(), container->GetViewWidth(),
-            container->GetViewHeight(), container->GetViewPosX(), container->GetViewPosY());
+            container->GetViewHeight(), container->GetViewPosX(), container->GetViewPosY(),
+            node->GetId(), node->GetTag().c_str());
     }
     auto aceView = static_cast<OHOS::Ace::Platform::AceViewOhos*>(container->GetView());
     CHECK_NULL_VOID(aceView);

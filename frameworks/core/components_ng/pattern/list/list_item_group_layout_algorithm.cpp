@@ -644,7 +644,8 @@ void ListItemGroupLayoutAlgorithm::MeasureForward(LayoutWrapper* layoutWrapper,
 
     currentStartPos = startPos - spaceWidth_;
     currentIndex = startIndex;
-    while (currentIndex > 0  && GreatOrEqual(currentStartPos, startPos_ - referencePos_)) {
+    float th = std::max(startPos_ - referencePos_, headerMainSize_);
+    while (currentIndex > 0  && GreatNotEqual(currentStartPos, th)) {
         currentEndPos = currentStartPos;
         int32_t count = MeasureALineBackward(layoutWrapper, layoutConstraint, currentIndex,
             currentEndPos, currentStartPos);

@@ -39,14 +39,14 @@ void GridIrregularLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     GridLayoutRangeSolver solver(&info, wrapper_);
     auto res = solver.FindStartingRow(mainGap_);
 
-    firstRowPos_ = res.pos;
     info.startMainLineIndex_ = res.row;
+    info.currentOffset_ = res.pos;
     // on init, gridMatrix_ is empty
     if (info.gridMatrix_.find(res.row) != info.gridMatrix_.end()) {
         info.startIndex_ = info.gridMatrix_[res.row][0];
     }
 
-    FillWithItems(mainSize + res.height);
+    FillWithItems(mainSize - res.pos);
 
     wrapper_->SetCacheCount(static_cast<int32_t>(props->GetCachedCountValue(1) * info.crossCount_));
 }
@@ -55,10 +55,9 @@ void GridIrregularLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     wrapper_ = layoutWrapper;
 
-    RemoveOutOfBoundChildren();
+    wrapper_->RemoveAllChildInRenderTree();
 
-    float mainOffset = firstRowPos_ + gridLayoutInfo_.currentOffset_;
-    LayoutChildren(mainOffset);
+    LayoutChildren(gridLayoutInfo_.currentOffset_);
 
     UpdateLayoutInfo();
 }
@@ -139,7 +138,7 @@ void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
 {
     auto& info = gridLayoutInfo_;
 
-    info.reachStart_ = info.currentOffset_ >= 0.0f;
+    info.reachStart_ = info.startIndex_ == 0 && info.currentOffset_ >= 0;
     // GridLayoutInfo::reachEnd_ has a different meaning
     info.reachEnd_ = info.endIndex_ == wrapper_->GetTotalChildCount() - 1;
 
@@ -147,34 +146,6 @@ void GridIrregularLayoutAlgorithm::UpdateLayoutInfo()
 
     info.lastMainSize_ = wrapper_->GetGeometryNode()->GetContentSize().MainSize(info.axis_);
     info.totalHeightOfItemsInView_ = info.GetTotalHeightOfItemsInView(mainGap_);
-}
-
-void GridIrregularLayoutAlgorithm::RemoveOutOfBoundChildren()
-{
-    wrapper_->RemoveAllChildInRenderTree();
-    return;
-    // try to optimize and remove only the children that are going out of bound
-    int32_t idx = gridLayoutInfo_.startIndex_;
-    // remove above
-    while (idx > 0) {
-        auto child = wrapper_->GetChildByIndex(--idx);
-        if (!child || !child->IsActive()) {
-            // no more children to remove
-            break;
-        }
-        wrapper_->RemoveChildInRenderTree(idx);
-    }
-
-    // remove below
-    idx = gridLayoutInfo_.endIndex_;
-    while (idx < wrapper_->GetTotalChildCount() - 1) {
-        auto child = wrapper_->GetChildByIndex(++idx);
-        if (!child || !child->IsActive()) {
-            // no more children to remove
-            break;
-        }
-        wrapper_->RemoveChildInRenderTree(idx);
-    }
 }
 
 void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset)
@@ -194,6 +165,8 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset)
 
             auto offset = info.axis_ == Axis::HORIZONTAL ? OffsetF { mainOffset, crossPos[c] }
                                                          : OffsetF { crossPos[c], mainOffset };
+            // alignment translate
+
             child->GetGeometryNode()->SetMarginFrameOffset(offset);
             child->Layout();
         }

@@ -2120,7 +2120,8 @@ HWTEST_F(NavigationTestNg, NavigationModelNG007, TestSize.Level1)
     ASSERT_NE(navigation, nullptr);
     auto navigationPattern = navigation->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
-    ASSERT_NE(AceType::DynamicCast<NavBarNode>(navigation->GetNavBarNode()), nullptr);
+    auto narBarNode = AceType::DynamicCast<NavBarNode>(navigation->GetNavBarNode());
+    ASSERT_NE(narBarNode, nullptr);
     /**
      * @tc.steps: step2. construct correct arguments of navigationPattern->CheckTopNavPathChange then call it.
      * @tc.expected: check whether the properties is correct.
@@ -2130,6 +2131,12 @@ HWTEST_F(NavigationTestNg, NavigationModelNG007, TestSize.Level1)
     auto newTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
 
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 102, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+    narBarNode->titleBarNode_ = titleBarNode;
+    preTopNavDestination->titleBarNode_ = titleBarNode;
+    newTopNavDestination->titleBarNode_ = titleBarNode;
     navigationPattern->SetNavigationMode(NavigationMode::STACK);
     navigationPattern->TransitionWithAnimation(nullptr, nullptr, false);
     navigationPattern->TransitionWithAnimation(preTopNavDestination, nullptr, false);

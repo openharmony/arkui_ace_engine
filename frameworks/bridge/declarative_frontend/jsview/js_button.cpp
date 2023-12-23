@@ -196,7 +196,7 @@ void JSButton::GetFontContent(JSRef<JSVal>& font, ButtonParameters& buttonParame
     }
 
     JSRef<JSVal> weight = obj->GetProperty("weight");
-    if (weight->IsString()) {
+    if (weight->IsString() || weight->IsNumber()) {
         buttonParameters.fontWeight = ConvertStrToFontWeight(weight->ToString());
     }
 

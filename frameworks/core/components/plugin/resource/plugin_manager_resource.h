@@ -49,8 +49,8 @@ public:
 
     void Release(const std::function<void(bool)>& onRelease = nullptr);
 
-    void CallResRegisterMethod(const Method& method, const std::string& param,
-                               const std::function<void(std::string&)>& callback = nullptr);
+    void CallResRegisterMethod(
+        const Method& method, const std::string& param, const std::function<void(std::string&)>& callback = nullptr);
 
     int64_t GetId() const
     {

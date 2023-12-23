@@ -105,16 +105,6 @@ DisplaySync* GetDisplaySync(napi_env env, napi_callback_info info)
     return displaySync;
 }
 
-DisplaySync* GetDisplaySync(napi_env env, napi_value thisVar)
-{
-    DisplaySync* displaySync = nullptr;
-    napi_unwrap(env, thisVar, reinterpret_cast<void**>(&displaySync));
-    if (displaySync->thisVarRef_ == nullptr) {
-        displaySync->Initialize(env, thisVar);
-    }
-    return displaySync;
-}
-
 void CreateTimeInfoJsObject(const napi_env env, RefPtr<DisplaySyncData> displaySyncData,
                             napi_value& intervalInfo)
 {
@@ -216,9 +206,6 @@ void DisplaySync::Initialize(napi_env env, napi_value thisVar)
     if (!scope) {
         return;
     }
-    if (!env_) {
-        env_ = env;
-    }
     napi_create_reference(env, thisVar, 1, &thisVarRef_);
     napi_close_handle_scope(env, scope);
 }
@@ -236,6 +223,7 @@ void DisplaySync::NapiSerializer(napi_env& env, napi_value& jsDisplaySync)
         [](napi_env env, void* data, void* hint) {
             DisplaySync* displaySync = static_cast<DisplaySync*>(data);
             if (displaySync) {
+                displaySync->Destroy(env);
                 delete displaySync;
             }
         },
@@ -277,13 +265,24 @@ void DisplaySync::RegisterOnFrameCallback(
     });
 }
 
-void DisplaySync::UnRegisterOnFrameCallback(size_t argc, napi_ref& onFrameRef)
+void DisplaySync::UnRegisterOnFrameCallback(napi_env env, size_t argc, napi_ref& onFrameRef)
 {
     if (argc >= 1) {
-        napi_delete_reference(env_, onFrameRef);
+        napi_delete_reference(env, onFrameRef);
         GetUIDisplaySync()->UnRegisterOnFrame();
     }
     return;
+}
+
+void DisplaySync::Destroy(napi_env env)
+{
+    if (onFrameRef_ != nullptr) {
+        napi_delete_reference(env, onFrameRef_);
+    }
+
+    if (thisVarRef_ != nullptr) {
+        napi_delete_reference(env, thisVarRef_);
+    }
 }
 
 napi_value JSOnFrame_On(napi_env env, napi_callback_info info)
@@ -299,7 +298,7 @@ napi_value JSOnFrame_On(napi_env env, napi_callback_info info)
     size_t argc = ParseArgs(env, info, thisVar, cb, callbackType);
     NAPI_ASSERT(env, (argc == ARGC_NUM_SIZE && thisVar != nullptr && cb != nullptr), "Invalid arguments");
 
-    DisplaySync* displaySync = GetDisplaySync(env, thisVar);
+    DisplaySync* displaySync = GetDisplaySync(env, info);
     if (!displaySync) {
         napi_close_handle_scope(env, scope);
         return NapiGetUndefined(env);
@@ -317,12 +316,12 @@ napi_value JSOnFrame_Off(napi_env env, napi_callback_info info)
     napi_value cb = nullptr;
     CallbackType callbackType = CallbackType::UNKNOW;
     size_t argc = ParseArgs(env, info, thisVar, cb, callbackType);
-    DisplaySync* displaySync = GetDisplaySync(env, thisVar);
+    DisplaySync* displaySync = GetDisplaySync(env, info);
     if (!displaySync) {
         return NapiGetUndefined(env);
     }
     if (callbackType == CallbackType::ONFRAME) {
-        displaySync->UnRegisterOnFrameCallback(argc, displaySync->onFrameRef_);
+        displaySync->UnRegisterOnFrameCallback(env, argc, displaySync->onFrameRef_);
     }
     return NapiGetUndefined(env);
 }

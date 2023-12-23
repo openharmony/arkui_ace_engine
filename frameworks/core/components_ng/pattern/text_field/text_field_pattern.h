@@ -201,7 +201,7 @@ public:
 
     void InsertValue(const std::string& insertValue) override;
     void InsertValueOperation(const std::string& insertValue);
-    void UpdateCounterTextColor();
+    void UpdateOverCounterColor();
     void UpdateCounterMargin();
     void CleanCounterNode();
     void UltralimitShake();
@@ -230,10 +230,6 @@ public:
     void SetCounterState(bool counterChange)
     {
         counterChange_ = counterChange;
-    }
-    void SetCounterMargin(bool CounterMargin)
-    {
-        hasCounterMargin_ = CounterMargin;
     }
 
     float GetTextOrPlaceHolderFontSize();
@@ -1268,7 +1264,6 @@ private:
     bool contChange_ = false;
     bool counterChange_ = false;
     WeakPtr<LayoutWrapper> counterTextNode_;
-    bool hasCounterMargin_ = false;
     bool isCursorAlwaysDisplayed_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
@@ -1371,6 +1366,7 @@ private:
     bool isShowMagnifier_ = false;
     OffsetF localOffset_;
     bool isTouchCaret_ = false;
+    bool needSelectAll_ = false;
 };
 } // namespace OHOS::Ace::NG
 

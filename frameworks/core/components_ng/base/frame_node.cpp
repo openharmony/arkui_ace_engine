@@ -2398,24 +2398,10 @@ std::vector<RefPtr<FrameNode>> FrameNode::GetNodesById(const std::unordered_set<
     return nodes;
 }
 
-double FrameNode::GetMaxWidthWithColumnType(GridColumnType gridColumnType)
-{
-    RefPtr<GridColumnInfo> columnInfo = GridSystemManager::GetInstance().GetInfoByType(gridColumnType);
-    if (columnInfo->GetParent()) {
-        columnInfo->GetParent()->BuildColumnWidth();
-    }
-    auto gridSizeType = GridSystemManager::GetInstance().GetCurrentSize();
-    if (gridSizeType > GridSizeType::LG) {
-        gridSizeType = GridSizeType::LG;
-    }
-    auto columns = columnInfo->GetColumns(gridSizeType);
-    return columnInfo->GetWidth(columns);
-}
-
 double FrameNode::GetPreviewScaleVal() const
 {
     double scale = 1.0;
-    auto maxWidth = GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
+    auto maxWidth = GridSystemManager::GetInstance().GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
     auto geometryNode = GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, scale);
     auto width = geometryNode->GetFrameRect().Width();
@@ -2881,12 +2867,14 @@ bool FrameNode::CheckNeedForceMeasureAndLayout()
     return CheckNeedMeasure(flag) || CheckNeedLayout(flag);
 }
 
-OffsetF FrameNode::GetGlobalOffset()
+OffsetF FrameNode::GetOffsetInScreen()
 {
     auto frameOffset = GetPaintRectOffset();
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF(0.0f, 0.0f));
-    auto windowOffset = pipelineContext->GetWindow()->GetCurrentWindowRect().GetOffset();
+    auto window = pipelineContext->GetWindow();
+    CHECK_NULL_RETURN(window, OffsetF(0.0f, 0.0f));
+    auto windowOffset = window->GetCurrentWindowRect().GetOffset();
     frameOffset += OffsetT<float> { windowOffset.GetX(), windowOffset.GetY() };
     return frameOffset;
 }

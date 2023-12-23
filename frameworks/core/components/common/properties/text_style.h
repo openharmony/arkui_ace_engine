@@ -501,17 +501,27 @@ public:
         effectStrategy_ = effectStrategy;
     }
 
+    void SetSymbolColorList(const std::vector<Color>& renderColors)
+    {
+        renderColors_ = renderColors;
+    }
+
     std::vector<Color> GetRenderColors()
     {
         return renderColors_;
     }
 
-    int32_t GetRenderStrategy()
+    int32_t GetRenderStrategy() const
     {
         return renderStrategy_;
     }
 
-    int32_t GetEffectStrategy()
+    const std::vector<Color>& GetSymbolColorList() const
+    {
+        return renderColors_;
+    }
+
+    int32_t GetEffectStrategy() const
     {
         return effectStrategy_;
     }

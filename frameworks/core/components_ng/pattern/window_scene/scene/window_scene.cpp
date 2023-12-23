@@ -19,6 +19,7 @@
 #include "transaction/rs_sync_transaction_controller.h"
 #include "ui/rs_surface_node.h"
 
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -49,7 +50,7 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
     session_->SetNeedSnapshot(true);
     RegisterLifecycleListener();
     callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
-        LOGI("RSSurfaceNode buffer available callback");
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "RSSurfaceNode buffer available callback");
         auto session = weakSession.promote();
         CHECK_NULL_VOID(session);
         session->SetBufferAvailable(true);
@@ -74,6 +75,29 @@ void WindowScene::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     CHECK_NULL_VOID(session_);
     session_->SetUINodeId(host->GetAccessibilityId());
+    session_->AttachToFrameNode(true);
+    auto responseRegionCallback = [weakThis = WeakClaim(this), weakSession = wptr(session_)](
+        const std::vector<DimensionRect>& responseRegion) {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        auto session = weakSession.promote();
+        CHECK_NULL_VOID(session);
+        std::vector<Rosen::Rect> hotAreas;
+        for (auto& rect : responseRegion) {
+            Rosen::Rect windowRect {
+                .posX_ = std::round(rect.GetOffset().GetX().Value()),
+                .posY_ = std::round(rect.GetOffset().GetY().Value()),
+                .width_ = std::round(rect.GetWidth().Value()),
+                .height_ = std::round(rect.GetHeight().Value()),
+            };
+            hotAreas.push_back(windowRect);
+        }
+        session->SetTouchHotAreas(hotAreas);
+    };
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    if (gestureHub) {
+        gestureHub->SetResponseRegionFunc(responseRegionCallback);
+    }
 
     if (!IsMainWindow()) {
         auto surfaceNode = session_->GetSurfaceNode();
@@ -87,15 +111,20 @@ void WindowScene::OnAttachToFrameNode()
 
     auto surfaceNode = session_->GetLeashWinSurfaceNode();
     CHECK_NULL_VOID(surfaceNode);
-
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
     context->SetRSNode(surfaceNode);
     surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
 
     RegisterFocusCallback();
-
     WindowPattern::OnAttachToFrameNode();
+}
+
+void WindowScene::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(session_);
+    session_->SetUINodeId(0);
+    session_->AttachToFrameNode(false);
 }
 
 void WindowScene::RegisterFocusCallback()
@@ -171,7 +200,7 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
 
 void WindowScene::BufferAvailableCallback()
 {
-    auto uiTask = [weakThis = WeakClaim(this)]() {
+    auto uiTask = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
 
@@ -200,6 +229,10 @@ void WindowScene::BufferAvailableCallback()
         host->RemoveChild(self->startingNode_);
         self->startingNode_.Reset();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        auto session = weakSession.promote();
+        CHECK_NULL_VOID(session);
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "BufferAvailableCallback remove starting window node finished "
+            "id:%{public}d name:%{public}s", session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str());
     };
 
     ContainerScope scope(instanceId_);
@@ -212,9 +245,9 @@ void WindowScene::OnActivation()
 {
     auto uiTask = [weakThis = WeakClaim(this)]() {
         auto self = weakThis.Upgrade();
-        CHECK_NULL_VOID(self);
+        CHECK_NULL_VOID(self && self->session_);
 
-        if (self->session_ && self->session_->GetShowRecent() &&
+        if (self->session_->GetShowRecent() &&
             self->session_->GetSessionState() == Rosen::SessionState::STATE_DISCONNECT && self->snapshotNode_) {
             auto host = self->GetHost();
             CHECK_NULL_VOID(host);
@@ -224,19 +257,20 @@ void WindowScene::OnActivation()
             self->CreateStartingNode();
             host->AddChild(self->startingNode_);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-            return;
-        }
-
-        if (self->session_ && self->session_->GetShowRecent() &&
+        } else if (self->session_->GetShowRecent() &&
             self->session_->GetSessionState() != Rosen::SessionState::STATE_DISCONNECT && self->startingNode_) {
             auto surfaceNode = self->session_->GetSurfaceNode();
             CHECK_NULL_VOID(surfaceNode);
             auto host = self->GetHost();
             CHECK_NULL_VOID(host);
             host->AddChild(self->contentNode_, 0);
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnActivation add content node in recent finished "
+                "id:%{public}d name:%{public}s", self->session_->GetPersistentId(),
+                self->session_->GetSessionInfo().bundleName_.c_str());
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             surfaceNode->SetBufferAvailableCallback(self->callback_);
         }
+        self->session_->SetShowRecent(false);
     };
 
     ContainerScope scope(instanceId_);
@@ -263,6 +297,8 @@ void WindowScene::OnConnect()
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         host->AddChild(self->contentNode_, 0);
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnConnect add content node finished id:%{public}d name:%{public}s",
+            self->session_->GetPersistentId(), self->session_->GetSessionInfo().bundleName_.c_str());
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
         surfaceNode->SetBufferAvailableCallback(self->callback_);

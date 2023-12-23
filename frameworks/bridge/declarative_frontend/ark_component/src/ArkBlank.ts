@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class BlankColorModifier extends ModifierWithKey<ResourceColor> {
   constructor(value: ResourceColor) {
     super(value);
@@ -21,17 +21,13 @@ class BlankColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('blankColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().blank.resetColor(node);
+      getUINativeModule().blank.resetColor(node);
     } else {
-      GetUINativeModule().blank.setColor(node, this.value!);
+      getUINativeModule().blank.setColor(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -48,10 +44,10 @@ class ArkBlankComponent extends ArkComponent implements CommonMethod<BlankAttrib
 // @ts-ignore
 globalThis.Blank.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkBlankComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

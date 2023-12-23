@@ -31,18 +31,16 @@ void PluginManagerResource::Release(const std::function<void(bool)>& onRelease)
 {
     auto context = context_.Upgrade();
     if (!context) {
-        LOGE("fail to release resource due to context is null");
         return;
     }
 
     auto resRegister = context->GetPlatformResRegister();
-    auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(),
-                                                         TaskExecutor::TaskType::PLATFORM);
+    auto platformTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::PLATFORM);
     auto weakRes = AceType::WeakClaim(AceType::RawPtr(resRegister));
     auto releaseTask = [weak = WeakClaim(this), weakRes, onRelease] {
         auto resource = weak.Upgrade();
         if (!resource || resource->id_ == INVALID_ID) {
-            LOGW("plugin manager resource has released");
+            TAG_LOGW(AceLogTag::ACE_PLUGIN_COMPONENT, "plugin manager resource has released");
             return;
         }
 
@@ -73,7 +71,6 @@ void PluginManagerResource::CallResRegisterMethod(
 
     auto context = context_.Upgrade();
     if (!context) {
-        LOGE("fail to get context to call res register method");
         return;
     }
 
@@ -84,7 +81,6 @@ void PluginManagerResource::CallResRegisterMethod(
     platformTaskExecutor.PostTask([method, param, weakRes, callback] {
         auto resRegister = weakRes.Upgrade();
         if (resRegister == nullptr) {
-            LOGE("resRegister is nullptr");
             return;
         }
         std::string result;
@@ -154,7 +150,7 @@ std::string PluginManagerResource::MakeEventHash(const std::string& event) const
     eventHash += event;
     eventHash += std::string(PLUGIN_MANAGER_PARAM_BEGIN);
 
-    LOGI("MakeEventHash  hash:%{public}s", eventHash.c_str());
+    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "MakeEventHash  hash:%{public}s", eventHash.c_str());
 
     return eventHash;
 }

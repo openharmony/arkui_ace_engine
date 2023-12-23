@@ -683,7 +683,6 @@ export struct ComposeListItem {
           this.frontColor = TOUCH_DOWN_COLOR
         }
         if (event.type == TouchType.Up) {
-          this.isActive = !this.isActive
           this.frontColor = this.isActive ? ACTIVED_COLOR : Color.Transparent.toString()
         }
       })

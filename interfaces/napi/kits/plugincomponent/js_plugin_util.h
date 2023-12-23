@@ -77,7 +77,7 @@ napi_value AceStringToKVObject(napi_env env, const std::string& jsonString);
 
 bool AceUnwrapArrayComplexFromJS(napi_env env, napi_value param, ACEComplexArrayData& value);
 
-void AceSetNamedPropertyByString(napi_env env, napi_value jsObject, const char *objName, const char *propName);
+void AceSetNamedPropertyByString(napi_env env, napi_value jsObject, const char* objName, const char* propName);
 
 bool AceIsSameFuncFromJS(ACECallbackInfo& left, ACECallbackInfo& right);
 /**
@@ -211,5 +211,5 @@ void AceCompleteAsyncCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* asyncCal
  * @param asyncCallbackInfo Point to asynchronous processing of data.
  */
 void AceCompletePromiseCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* asyncCallbackInfo);
-}  // namespace OHOS::Ace::Napi
-#endif  // OHOS_NAPI_ACE_PLUGIN_UTIL_H
+} // namespace OHOS::Ace::Napi
+#endif // OHOS_NAPI_ACE_PLUGIN_UTIL_H

@@ -1905,7 +1905,7 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent002, TestSize.Level1)
     event.pressedCodes.clear();
     event.pressedCodes.emplace_back(event.code);
     auto ret = pattern_->OnKeyEvent(event);
-    EXPECT_FALSE(ret) << "KeyCode: " + std::to_string(static_cast<int>(event.code));
+    EXPECT_TRUE(ret) << "KeyCode: " + std::to_string(static_cast<int>(event.code));
 }
 
 /**
@@ -2945,6 +2945,58 @@ HWTEST_F(TextFieldControllerTest, CreateNodePaintMethod001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CreateNodePaintMethod002
+ * @tc.desc: Test textfield to create paint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, CreateNodePaintMethod002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CreateNodePaintMethod
+     * tc.expected: step2. Check if the value is created.
+     */
+    pattern_->SetIsCustomFont(true);
+    auto paint = pattern_->CreateNodePaintMethod();
+    EXPECT_TRUE(pattern_->textFieldContentModifier_->GetIsCustomFont());
+}
+
+/**
+ * @tc.name: CreateNodePaintMethod003
+ * @tc.desc: Test textfield to create paint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, CreateNodePaintMethod003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CreateNodePaintMethod
+     * tc.expected: step2. Check if the value is created.
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    EXPECT_TRUE(pattern_->IsNormalInlineState());
+    pattern_->UpdateScrollBarOffset();
+
+    auto paint = AceType::DynamicCast<TextFieldPaintMethod>(pattern_->CreateNodePaintMethod());
+    auto inlineScrollRect = pattern_->GetScrollBar()->GetActiveRect();
+    EXPECT_EQ(inlineScrollRect, Rect(720, 0, 0, 50));
+    EXPECT_NE(pattern_->textFieldContentModifier_, nullptr);
+}
+
+/**
  * @tc.name: CursorInContentRegion001
  * @tc.desc: Test textfield if the cursor in content.
  * @tc.type: FUNC
@@ -3005,8 +3057,12 @@ HWTEST_F(TextFieldControllerTest, OnModifyDone001, TestSize.Level1)
     EXPECT_TRUE(layoutProperty_->GetShowUnderlineValue(false));
     layoutProperty_->UpdateShowUnderline(false);
     pattern_->OnModifyDone();
+    pattern_->HandleBlurEvent();
     GetFocus();
     EXPECT_FALSE(layoutProperty_->GetShowUnderlineValue(false));
+    auto focusHub = pattern_->GetFocusHub();
+    EXPECT_NE(focusHub->onFocusInternal_, nullptr);
+    EXPECT_NE(focusHub->onBlurInternal_, nullptr);
 }
 
 /**
@@ -3552,6 +3608,7 @@ HWTEST_F(TextFieldUXTest, testCaretPosition001, TestSize.Level1)
     selection.baseOffset = value.text.length();
     value.selection = selection;
     pattern_->UpdateEditingValue(std::make_shared<TextEditingValue>(value));
+    pattern_->UpdateSelectionOffset();
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), value.text.length());
 }
@@ -3904,5 +3961,52 @@ HWTEST_F(TextFieldUXTest, HandleOnTab001, TestSize.Level1)
      */
     pattern_->focusIndex_ = FocuseIndex::TEXT;
     EXPECT_TRUE(pattern_->HandleOnTab(false));
+}
+
+/**
+ * @tc.name: ConvertTouchOffsetToCaretPosition001
+ * @tc.desc: test testInput caretStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, ConvertTouchOffsetToCaretPosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCaretStyle(DEFAULT_CARET_STYLE);
+    });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Set caretPosition and call ConvertTouchOffsetToCaretPosition
+     */
+    pattern_->SetCaretPosition(2);
+    int32_t caretPosition = pattern_->ConvertTouchOffsetToCaretPosition(Offset(0.0, 0.0));
+    EXPECT_EQ(caretPosition, 0);
+    caretPosition = pattern_->ConvertTouchOffsetToCaretPositionNG(Offset(0.0, 0.0));
+    EXPECT_EQ(caretPosition, 0);
+}
+
+/**
+ * @tc.name: HandleOnUndoAction001
+ * @tc.desc: test testInput caretStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleOnUndoAction001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Set caretPosition and call ConvertTouchOffsetToCaretPosition
+     */
+    pattern_->SetCaretPosition(5);
+    pattern_->UpdateEditingValueToRecord();
+    pattern_->HandleOnUndoAction();
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 0);
 }
 } // namespace OHOS::Ace::NG

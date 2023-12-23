@@ -216,11 +216,6 @@ template("ace_core_source_set") {
       "common/ime/text_input_proxy.cpp",
       "common/ime/text_input_type.cpp",
 
-      # flutter impl
-      "common/flutter/flutter_asset_manager.cpp",
-      "common/flutter/flutter_task_executor.cpp",
-      "common/flutter/flutter_thread_model.cpp",
-
       # recorder
       "common/recorder/event_config.cpp",
       "common/recorder/event_controller.cpp",
@@ -228,10 +223,6 @@ template("ace_core_source_set") {
       "common/recorder/exposure_processor.cpp",
       "common/recorder/node_data_cache.cpp",
     ]
-
-    if (!(defined(config.enable_rosen_backend) && config.enable_rosen_backend)) {
-      sources += [ "common/flutter/flutter_window.cpp" ]
-    }
 
     if (platform == "ohos" || platform == "ohos_ng") {
       sources -= [ "common/anr_thread.cpp" ]
@@ -270,18 +261,6 @@ template("ace_core_source_set") {
     ]
 
     external_deps = []
-
-    if (is_ohos) {
-      sources += [
-        "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
-        "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
-      ]
-    } else {
-      sources += [
-        "$flutter_root/engine/flutter/common/task_runners.cc",
-        "$flutter_root/engine/flutter/shell/common/thread_host.cc",
-      ]
-    }
 
     if (defined(config.build_for_preview) && config.build_for_preview) {
       sources -= [ "common/task_runner_adapter_impl.cpp" ]
@@ -577,7 +556,6 @@ template("ace_core_source_set") {
     if ((current_os == "mingw" || current_os == "mac" ||
          current_os == "linux") && defined(config.enable_rosen_backend) &&
         config.enable_rosen_backend) {
-      sources -= [ "common/flutter/flutter_asset_manager.cpp" ]
       sources += [
         # rs impl
         "common/rosen/rosen_asset_manager.cpp",
@@ -801,11 +779,6 @@ template("ace_core_ng_source_set") {
       "components_v2/inspector/inspector_constants.cpp",
       "components_v2/inspector/utils.cpp",
 
-      # flutter impl
-      "common/flutter/flutter_asset_manager.cpp",
-      "common/flutter/flutter_task_executor.cpp",
-      "common/flutter/flutter_thread_model.cpp",
-
       #declaration
       "components/declaration/common/declaration.cpp",
 
@@ -858,12 +831,6 @@ template("ace_core_ng_source_set") {
 
     if (is_arkui_x) {
       deps += [ "$ace_flutter_engine_root:flutter_for_ng" ]
-    }
-    if (is_ohos) {
-      sources += [
-        "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner.cc",
-        "$flutter_root/engine/flutter/shell/platform/ohos/platform_task_runner_adapter.cc",
-      ]
     }
 
     if (defined(config.build_for_preview) && config.build_for_preview) {

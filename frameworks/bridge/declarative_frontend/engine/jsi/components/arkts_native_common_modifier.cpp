@@ -14,16 +14,18 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_common_modifier.h"
 
+#include "base/geometry/ng/vector.h"
+#include "base/utils/system_properties.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/animation_option.h"
+#include "core/components/common/properties/decoration.h"
+#include "core/components/declaration/common/declaration.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/pipeline/base/element_register.h"
-#include "frameworks/core/components/common/properties/decoration.h"
-#include "frameworks/core/components/declaration/common/declaration.h"
-#include "frameworks/core/image/image_source_info.h"
-#include "frameworks/core/components/common/properties/animation_option.h"
-#include "frameworks/base/geometry/ng/vector.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
+#include "core/image/image_source_info.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -734,9 +736,27 @@ void ResetBorderStyle(NodeHandle node)
     ViewAbstract::SetBorderStyle(frameNode, BorderStyle::SOLID);
 }
 
+bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
+{
+    if (shadowStyle == ShadowStyle::None) {
+        return true;
+    }
+
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    CHECK_NULL_RETURN(shadowTheme, false);
+    auto colorMode = SystemProperties::GetColorMode();
+    shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+    return true;
+}
+
 /**
  * @param shadows shadow value
- * shadows[0] : BlurRadius, shadows[1] : SpreadRadius
+ * shadows[0] : BlurRadius, shadows[1] : 1: has ColorStrategy; 2: has Color
  * shadows[2] : OffsetX, offset[3] : OffsetY
  * shadows[4] : ShadowType, shadows[5] : Color, shadows[6] : IsFilled
  * @param length shadows length
@@ -746,21 +766,32 @@ void SetBackShadow(NodeHandle node, const double *shadows, int32_t length)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     if (length == NUM_1) {
+        Shadow shadow;
         auto shadowStyle = static_cast<ShadowStyle>(shadows[NUM_0]);
-        auto shadow = Shadow::CreateShadow(shadowStyle);
-        ViewAbstract::SetBackShadow(frameNode, shadow);
+        auto style = static_cast<ShadowStyle>(shadowStyle);
+        if (GetShadowFromTheme(style, shadow)) {
+            ViewAbstract::SetBackShadow(frameNode, shadow);
+        }
     }
     if (length != NUM_7) {
         return;
     }
     auto blurRadius = shadows[NUM_0];                        // BlurRadius
-    auto spreadRadius = shadows[NUM_1];                      // SpreadRadius
+    auto hasColorValue = static_cast<int32_t>(shadows[NUM_1]); // 1: has ColorStrategy; 2: has Color
     auto offsetX = shadows[NUM_2];                           // OffsetX
     auto offsetY = shadows[NUM_3];                           // OffsetY
     auto shadowType = static_cast<uint32_t>(shadows[NUM_4]); // ShadowType
     auto color = static_cast<uint32_t>(shadows[NUM_5]);      // Color
     auto isFilled = static_cast<uint32_t>(shadows[NUM_6]);   // IsFilled
-    Shadow shadow(blurRadius, spreadRadius, Offset(offsetX, offsetY), Color(color));
+    Shadow shadow;
+    shadow.SetBlurRadius(blurRadius);
+    shadow.SetOffsetX(offsetX);
+    shadow.SetOffsetY(offsetY);
+    if (hasColorValue == 1) { // 1: has ColorStrategy
+        shadow.SetShadowColorStrategy(static_cast<ShadowColorStrategy>(color));
+    } else if (hasColorValue == 2) { // 2: has Color
+        shadow.SetColor(Color(color));
+    }
     shadow.SetShadowType(static_cast<ShadowType>(shadowType));
     shadow.SetIsFilled(static_cast<bool>(isFilled));
     ViewAbstract::SetBackShadow(frameNode, shadow);
@@ -2430,10 +2461,10 @@ void SetExpandSafeArea(NodeHandle node, const char* typeStr, const char* edgesSt
         safeAreaType |= StringUtils::StringToInt(type);
         safeAreaTypeStr.erase(0, pos + delimiter.length());
     }
-    safeAreaType |= StringUtils::StringToInt(safeAreaTypeStr);
+    safeAreaType |= StringUtils::StringToUint(safeAreaTypeStr);
     while ((pos = safeAreaEdgeStr.find(delimiter)) != std::string::npos) {
         edges = safeAreaEdgeStr.substr(0, pos);
-        safeAreaEdge |= StringUtils::StringToInt(edges);
+        safeAreaEdge |= StringUtils::StringToUint(edges);
         safeAreaEdgeStr.erase(0, pos + delimiter.length());
     }
     safeAreaEdge |= StringUtils::StringToInt(safeAreaEdgeStr);

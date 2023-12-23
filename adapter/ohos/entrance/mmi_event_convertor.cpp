@@ -21,6 +21,7 @@
 
 #include "base/utils/utils.h"
 #include "core/pipeline/pipeline_base.h"
+#include "adapter/ohos/entrance/ace_container.h"
 
 namespace OHOS::Ace::Platform {
 namespace {
@@ -367,8 +368,18 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     event.targetWindowId = pointerItem.GetTargetWindowId();
 }
 
-void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+void LogPointInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, int32_t instanceId)
 {
+    if (pointerEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN) {
+        auto container = Platform::AceContainer::GetContainer(instanceId);
+        if (container) {
+            auto pipelineContext = container->GetPipelineContext();
+            if (pipelineContext) {
+                uint32_t windowId = pipelineContext->GetWindowId();
+                LOGI("pointdown windowId: %{public}u", windowId);
+            }
+        }
+    }
     if (SystemProperties::GetDebugEnabled()) {
         LOGI("point source: %{public}d", pointerEvent->GetSourceType());
         auto actionId = pointerEvent->GetPointerId();

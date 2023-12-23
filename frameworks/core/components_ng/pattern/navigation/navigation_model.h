@@ -23,8 +23,11 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
+#include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
 
 namespace OHOS::Ace {
+using NavigationTransitionEvent = std::function<NG::NavigationTransition(
+    NG::NavContentInfo from, NG::NavContentInfo to, NG::NavigationOperation operation)>;
 class NavigationModel {
 public:
     static NavigationModel* GetInstance();
@@ -34,8 +37,8 @@ public:
     virtual void SetNavigationStack() = 0;
     virtual void SetNavigationStack(RefPtr<NG::NavigationStack>&& navigationStack) = 0;
     virtual void SetNavigationStackProvided(bool provided) = 0;
-    virtual bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const std::string& subtitle,
-        const std::string& title) = 0;
+    virtual bool ParseCommonTitle(
+        bool hasSubTitle, bool hasMainTitle, const std::string& subtitle, const std::string& title) = 0;
     virtual void SetTitle(const std::string& title, bool hasSubTitle = false) = 0;
     virtual void SetCustomTitle(const RefPtr<AceType>& customNode) = 0;
     virtual void SetTitleHeight(const Dimension& height, bool isValid = true) = 0;
@@ -69,6 +72,8 @@ public:
     virtual void SetNavDestination(std::function<void(std::string)>&& builder) = 0;
     virtual RefPtr<NG::NavigationStack> GetNavigationStack() = 0;
     virtual void SetMenuCount(int32_t menuCount) = 0;
+    virtual void SetCustomTransition(NavigationTransitionEvent&& animationTransition);
+    virtual void SetIsCustomAnimation(bool isCustom);
 
 private:
     static std::unique_ptr<NavigationModel> instance_;

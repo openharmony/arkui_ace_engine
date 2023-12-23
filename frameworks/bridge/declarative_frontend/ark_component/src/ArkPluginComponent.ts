@@ -14,7 +14,7 @@
  */
 
 /// <reference path='./import.ts' />
-class ArkPluginComponentComponent extends ArkComponent implements PluginComponentAttribute {
+class ArkPluginComponent extends ArkComponent implements PluginComponentAttribute {
   constructor(nativePtr: KNode) {
     super(nativePtr);
   }
@@ -27,15 +27,91 @@ class ArkPluginComponentComponent extends ArkComponent implements PluginComponen
   monopolizeEvents(monopolize: boolean): this {
     throw new Error('Method not implemented.');
   }
+  size(value: SizeOptions): this {
+    modifierWithKey(this._modifiersWithKeys, PluginSizeModifier.identity, PluginSizeModifier, value);
+    return this;
+  }
+  width(value: Length): this {
+    modifierWithKey(this._modifiersWithKeys, PluginWidthModifier.identity, PluginWidthModifier, value);
+    return this;
+  }
+
+  height(value: Length): this {
+    modifierWithKey(this._modifiersWithKeys, PluginHeightModifier.identity, PluginHeightModifier, value);
+    return this;
+  }
+}
+
+class PluginWidthModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('pluginWidth');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().plugin.resetWidth(node);
+    } else {
+      getUINativeModule().plugin.setWidth(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
+  }
+}
+
+class PluginHeightModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('pluginHeight');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().plugin.resetHeight(node);
+    } else {
+      getUINativeModule().plugin.setHeight(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else {
+      return true;
+    }
+  }
+}
+
+class PluginSizeModifier extends ModifierWithKey<SizeOptions> {
+  constructor(value: SizeOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('size');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().plugin.resetSize(node);
+    } else {
+      getUINativeModule().plugin.setSize(node, this.value.width, this.value.height);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+      !isBaseOrResourceEqual(this.stageValue.height, this.value.height);
+  }
 }
 
 // @ts-ignore
 globalThis.PluginComponent.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
-    return new ArkPluginComponentComponent(nativeNode);
+    return new ArkPluginComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

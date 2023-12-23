@@ -21,22 +21,33 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/patternlock/patternlock_layout_algorithm.h"
 #include "core/components_ng/pattern/patternlock/patternlock_model_ng.h"
 #include "core/components_ng/pattern/patternlock/patternlock_paint_method.h"
 #include "core/components_ng/pattern/patternlock/patternlock_paint_property.h"
 #include "core/components_ng/pattern/patternlock/patternlock_pattern.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/common/mock_theme_manager.h"
+#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
+#include "core/components_ng/pattern/scroll/scroll_model_ng.h"
+#include "core/components_ng/pattern/scroll/scroll_pattern.h"
 #include "core/components_v2/pattern_lock/pattern_lock_component.h"
 #include "core/components_v2/pattern_lock/pattern_lock_theme.h"
+#include "test/mock/base/mock_task_executor.h"
+#include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/unittest/core/pattern/test_ng.h"
 
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 namespace {
+constexpr float SCROLL_WIDTH = 480.f;
+constexpr float SCROLL_HEIGHT = 800.f;
+constexpr float PATTERNLOCK_WIDTH = 400.f;
+constexpr float PATTERNLOCK_HEIGHT = 400.f;
 constexpr Dimension SIDE_LENGTH = 300.0_vp;
 constexpr Dimension CIRCLE_RADIUS = 14.0_vp;
 const Color REGULAR_COLOR = Color::BLACK;
@@ -75,7 +86,7 @@ struct TestProperty {
     std::optional<bool> autoReset = std::nullopt;
 };
 
-class PatternLockTestNg : public testing::Test {
+class PatternLockTestNg : public TestNG {
 public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
@@ -85,12 +96,17 @@ public:
 
 void PatternLockTestNg::SetUpTestSuite()
 {
-    MockPipelineContext::SetUp();
+    TestNG::SetUpTestSuite();
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto scrollBarTheme = AceType::MakeRefPtr<ScrollBarTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(scrollBarTheme));
+    MockPipelineContext::GetCurrentContext()->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
 }
 
 void PatternLockTestNg::TearDownTestSuite()
 {
-    MockPipelineContext::TearDown();
+    TestNG::TearDownTestSuite();
 }
 
 /**
@@ -1166,6 +1182,82 @@ HWTEST_F(PatternLockTestNg, PatternLockPatternTest017, TestSize.Level1)
     auto calculateOffsetResult = CONTENT_OFFSET_FLOAT + CONTENT_SIZE_FLOAT / PATTERN_LOCK_COL_COUNT /
                                                             RADIUS_TO_DIAMETER * (RADIUS_TO_DIAMETER - 1);
     EXPECT_EQ(pattern->cellCenter_, OffsetF(calculateOffsetResult, calculateOffsetResult));
+}
+
+/**
+ * @tc.name: PatternLockPatternTest018
+ * @tc.desc: Test PatternLock in scrollNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PatternLockTestNg, PatternLockPatternTest018, TestSize.Level1)
+{
+    ScrollModelNG model;
+    model.Create();
+    ViewAbstract::SetWidth(CalcLength(SCROLL_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(SCROLL_HEIGHT));
+    {
+        ColumnModelNG colModel;
+        colModel.Create(Dimension(0), nullptr, "");
+        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+        ViewAbstract::SetHeight(CalcLength(SCROLL_HEIGHT + 100));
+        PaddingProperty padding;
+        padding.top = CalcLength(100);
+        ViewAbstract::SetPadding(padding);
+        {
+            PatternLockModelNG patternLockModelNG;
+            patternLockModelNG.Create();
+            ViewAbstract::SetWidth(CalcLength(PATTERNLOCK_WIDTH));
+            ViewAbstract::SetHeight(CalcLength(PATTERNLOCK_HEIGHT));
+            ViewStackProcessor::GetInstance()->Pop();
+        }
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    auto scrollNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    FlushLayoutTask(scrollNode);
+
+    /**
+     * @tc.steps: step1. because colNode padding, patternLockNode offsetY is 100
+     */
+    auto colNode = GetChildFrameNode(scrollNode, 0);
+    auto patternLockNode = GetChildFrameNode(colNode, 0);
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    auto patternLockPattern = patternLockNode->GetPattern<PatternLockPattern>();
+    EXPECT_TRUE(IsEqual(patternLockNode->GetGeometryNode()->GetFrameOffset(), OffsetF(40, 100)));
+
+    /**
+     * @tc.steps: step3. Call OnTouchDown
+     * @tc.expected: cellCenter_ is equal to locationInfo
+     */
+    auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(patternLockNode->renderContext_);
+    mockRenderContext->rect_ = RectF(40, 100, PATTERNLOCK_WIDTH, PATTERNLOCK_HEIGHT);
+
+    TouchLocationInfo locationInfo(0);
+    locationInfo.SetGlobalLocation(Offset(200, 200));
+    patternLockPattern->OnTouchDown(locationInfo);
+    EXPECT_TRUE(IsEqual(patternLockPattern->cellCenter_, OffsetF(160, 100)));
+
+    locationInfo.SetGlobalLocation(Offset(300, 300));
+    patternLockPattern->OnTouchMove(locationInfo);
+    EXPECT_TRUE(IsEqual(patternLockPattern->cellCenter_, OffsetF(260, 200)));
+    patternLockPattern->OnTouchUp();
+
+    /**
+     * @tc.steps: step2. Scroll view and Call OnTouchDown
+     * @tc.expected: cellCenter_ is equal to locationInfo
+     */
+    scrollPattern->UpdateCurrentOffset(-100, SCROLL_FROM_UPDATE); // scroll view
+    FlushLayoutTask(scrollNode);
+    EXPECT_EQ(scrollPattern->GetTotalOffset(), 100);
+    mockRenderContext->rect_ = RectF(40, 0, PATTERNLOCK_WIDTH, PATTERNLOCK_HEIGHT);
+
+    locationInfo.SetGlobalLocation(Offset(200, 200));
+    patternLockPattern->OnTouchDown(locationInfo);
+    EXPECT_TRUE(IsEqual(patternLockPattern->cellCenter_, OffsetF(160, 200)));
+
+    locationInfo.SetGlobalLocation(Offset(300, 300));
+    patternLockPattern->OnTouchMove(locationInfo);
+    EXPECT_TRUE(IsEqual(patternLockPattern->cellCenter_, OffsetF(260, 300)));
+    patternLockPattern->OnTouchUp();
 }
 
 /**

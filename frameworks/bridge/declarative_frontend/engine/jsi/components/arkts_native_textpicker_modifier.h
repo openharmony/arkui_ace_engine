@@ -24,16 +24,14 @@ ArkUITextpickerModifierAPI GetTextpickerModifier();
 void GetPickerTextStyle(uint32_t color, const char* fontInfo, int32_t styleVal, NG::PickerTextStyle& textStyle);
 void SetSelectedIndexSingle(FrameNode* frameNode, uint32_t* selectedValues, const int32_t size);
 void SetSelectedIndexMulti(FrameNode* frameNode, uint32_t* selectedValues, const int32_t size);
-void SetSelectedIndexMultiInternal(
-    FrameNode* frameNode, uint32_t count,
-    std::vector<NG::TextCascadePickerOptions>& options,
-    std::vector<uint32_t>& selectedValues);
+void SetSelectedIndexMultiInternal(FrameNode* frameNode, uint32_t count,
+    std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues);
+void SetSelectedIndexSingleInternal(const std::vector<NG::TextCascadePickerOptions>& options, uint32_t count,
+    uint32_t& selectedValue, std::vector<uint32_t>& selectedValues);
 void SetSelectedInternal(
-    uint32_t count, std::vector<NG::TextCascadePickerOptions>& options,
-    std::vector<uint32_t>& selectedValues);
+    uint32_t count, std::vector<NG::TextCascadePickerOptions>& options, std::vector<uint32_t>& selectedValues);
 void ProcessCascadeSelected(
-    const std::vector<NG::TextCascadePickerOptions>& options, uint32_t index,
-    std::vector<uint32_t>& selectedValues);
+    const std::vector<NG::TextCascadePickerOptions>& options, uint32_t index, std::vector<uint32_t>& selectedValues);
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_TEXT_PICKER_MODIFIER_H

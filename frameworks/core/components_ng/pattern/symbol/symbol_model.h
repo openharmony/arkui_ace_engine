@@ -40,6 +40,9 @@ public:
     virtual void Create(const uint32_t& id) = 0;
     virtual void SetFontWeight(const Ace::FontWeight& value) = 0;
     virtual void SetFontSize(const CalcDimension& value) = 0;
+    virtual void SetSymbolRenderingStrategy(const std::uint32_t renderingStrategy) = 0;
+    virtual void SetFontColor(std::vector<Color>& symbolColor) = 0;
+    virtual void SetSymbolEffect(const std::uint32_t effectStrategy) = 0;
 
 private:
     static std::unique_ptr<SymbolModel> instance_;

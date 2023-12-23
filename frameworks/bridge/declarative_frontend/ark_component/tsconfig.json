@@ -40,7 +40,6 @@
         "src/ArkNavDestination.ts",
         "src/ArkCounter.ts",
         "src/ArkCheckboxGroup.ts",
-        "src/ArkColor.ts",
         "src/ArkPanel.ts",
         "src/ArkNavigation.ts",
         "src/ArkNavRouter.ts",

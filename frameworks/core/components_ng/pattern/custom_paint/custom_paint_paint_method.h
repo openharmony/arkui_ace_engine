@@ -304,6 +304,14 @@ public:
         }
     }
 
+    void FlushUITasks()
+    {
+        auto context = context_.Upgrade();
+        if (context) {
+            context->FlushUITasks();
+        }
+    }
+
     void SaveMatrix();
     void RestoreMatrix();
     void ResetTransformMatrix();

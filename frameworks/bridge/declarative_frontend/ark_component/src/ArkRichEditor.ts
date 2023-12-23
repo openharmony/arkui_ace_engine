@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 
 class RichEditorCopyOptionsModifier extends ModifierWithKey<CopyOptions> {
   constructor(value: CopyOptions) {
@@ -22,9 +22,9 @@ class RichEditorCopyOptionsModifier extends ModifierWithKey<CopyOptions> {
   static identity: Symbol = Symbol('richEditorCopyOptions');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().richEditor.resetCopyOptions(node);
+      getUINativeModule().richEditor.resetCopyOptions(node);
     } else {
-      GetUINativeModule().richEditor.setCopyOptions(node, this.value!);
+      getUINativeModule().richEditor.setCopyOptions(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -32,7 +32,7 @@ class RichEditorCopyOptionsModifier extends ModifierWithKey<CopyOptions> {
   }
 }
 
-class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEditorAttribute>{
+class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEditorAttribute> {
   constructor(nativePtr: KNode) {
     super(nativePtr);
   }
@@ -80,12 +80,11 @@ class ArkRichEditorComponent extends ArkComponent implements CommonMethod<RichEd
 // @ts-ignore
 globalThis.RichEditor.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
 
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkRichEditorComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-
-}
+};

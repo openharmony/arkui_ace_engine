@@ -13,18 +13,26 @@
  * limitations under the License.
  */
 
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 /// <reference path="./ArkCommonShape.ts" />
-class ShapeViewPortModifier extends ModifierWithKey<{ x?: string | number | undefined; y?: string | number | undefined; width?: string | number | undefined; height?: string | number | undefined; }> {
-  constructor(value: { x?: string | number | undefined; y?: string | number | undefined; width?: string | number | undefined; height?: string | number | undefined; }) {
+class ShapeViewPortModifier extends ModifierWithKey<{
+  x?: string | number |
+  undefined; y?: string | number | undefined; width?: string | number |
+  undefined; height?: string | number | undefined;
+}> {
+  constructor(value: {
+    x?: string | number | undefined; y?: string |
+    number | undefined; width?: string | number | undefined;
+    height?: string | number | undefined;
+  }) {
     super(value);
   }
   static identity: Symbol = Symbol('shapeViewPort');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().shape.resetShapeViewPort(node);
+      getUINativeModule().shape.resetShapeViewPort(node);
     } else {
-      GetUINativeModule().shape.setShapeViewPort(node, this.value.x, this.value.y, this.value.width, this.value.height);
+      getUINativeModule().shape.setShapeViewPort(node, this.value.x, this.value.y, this.value.width, this.value.height);
     }
   }
   checkObjectDiff(): boolean {
@@ -39,9 +47,9 @@ class ShapeMeshModifier extends ModifierWithKey<ArkMesh> {
   static identity: Symbol = Symbol('shapeMesh');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().shape.resetShapeMesh(node);
+      getUINativeModule().shape.resetShapeMesh(node);
     } else {
-      GetUINativeModule().shape.setShapeMesh(node, this.value.value, this.value.column, this.value.row);
+      getUINativeModule().shape.setShapeMesh(node, this.value.value, this.value.column, this.value.row);
     }
   }
   checkObjectDiff(): boolean {
@@ -52,7 +60,11 @@ class ArkShapeComponent extends ArkCommonShapeComponent implements ShapeAttribut
   constructor(nativePtr: KNode) {
     super(nativePtr);
   }
-  viewPort(value: { x?: string | number | undefined; y?: string | number | undefined; width?: string | number | undefined; height?: string | number | undefined; }): this {
+  viewPort(value: {
+    x?: string | number | undefined;
+    y?: string | number | undefined; width?: string | number | undefined;
+    height?: string | number | undefined;
+  }): this {
     if (value === null) {
       value = undefined;
     }
@@ -74,10 +86,10 @@ class ArkShapeComponent extends ArkCommonShapeComponent implements ShapeAttribut
 // @ts-ignore
 globalThis.Shape.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, ()=> {
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
     return new ArkShapeComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

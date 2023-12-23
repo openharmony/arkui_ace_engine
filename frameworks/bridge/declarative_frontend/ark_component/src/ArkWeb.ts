@@ -129,7 +129,11 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   onHttpErrorReceive(callback: (event?: { request: WebResourceRequest; response: WebResourceResponse; } | undefined) => void): this {
     throw new Error('Method not implemented.');
   }
-  onDownloadStart(callback: (event?: { url: string; userAgent: string; contentDisposition: string; mimetype: string; contentLength: number; } | undefined) => void): this {
+  onDownloadStart(callback: (event?: {
+    url: string;
+    userAgent: string; contentDisposition: string;
+    mimetype: string; contentLength: number;
+  } | undefined) => void): this {
     throw new Error('Method not implemented.');
   }
   onRefreshAccessedHistory(callback: (event?: { url: string; isRefreshed: boolean; } | undefined) => void): this {
@@ -191,7 +195,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   onSslErrorEventReceive(callback: (event: { handler: SslErrorHandler; error: SslError; }) => void): this {
     throw new Error('Method not implemented.');
   }
-  onClientAuthenticationRequest(callback: (event: { handler: ClientAuthenticationHandler; host: string; port: number; keyTypes: string[]; issuers: string[]; }) => void): this {
+  onClientAuthenticationRequest(callback: (event: {
+    handler: ClientAuthenticationHandler;
+    host: string; port: number; keyTypes: string[]; issuers: string[];
+  }) => void): this {
     throw new Error('Method not implemented.');
   }
   onWindowNew(callback: (event: { isAlert: boolean; isUserTrigger: boolean; targetUrl: string; handler: ControllerHandler; }) => void): this {
@@ -295,10 +302,10 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
 // @ts-ignore
 globalThis.Web.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkWebComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

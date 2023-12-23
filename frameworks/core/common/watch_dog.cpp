@@ -355,18 +355,24 @@ void ThreadWatcher::RawReport(RawEventType type) const
     std::string message;
     int32_t tid = 0;
     auto taskExecutor = taskExecutor_.Upgrade();
-    if (!taskExecutor) {
-        return;
-    }
-    if (type == RawEventType::FREEZE &&
-        (type_ == TaskExecutor::TaskType::JS || (useUIAsJSThread_ && (type_ == TaskExecutor::TaskType::UI)))) {
-        taskExecutor->PostSyncTask([&message, instanceId = instanceId_] {
-            auto engine = EngineHelper::GetEngine(instanceId);
+    if (taskExecutor) {
+        if (type == RawEventType::FREEZE &&
+            (type_ == TaskExecutor::TaskType::JS || (useUIAsJSThread_ && (type_ == TaskExecutor::TaskType::UI)))) {
+            auto m = std::make_shared<std::mutex>();
+            std::lock_guard lk(*m);
+            auto engine = EngineHelper::GetEngine(instanceId_);
             message = engine ? engine->GetStacktraceMessage() : "";
-        },
-            TaskExecutor::TaskType::JS);
+                
+            taskExecutor->PostTask(
+                [engine, m]() mutable {
+                    std::lock_guard lk(*m);
+                    engine.Reset();
+                },
+                TaskExecutor::TaskType::JS);
+        }
+        tid = taskExecutor->GetTid(type_);
     }
-    tid = taskExecutor->GetTid(type_);
+    
     std::string threadInfo = "Blocked thread id = " + std::to_string(tid) + "\n";
     threadInfo += "JSVM instance id = " + std::to_string(instanceId_) + "\n";
     message = threadInfo + message;

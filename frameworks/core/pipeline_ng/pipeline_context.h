@@ -257,6 +257,8 @@ public:
 
     void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) override;
     void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) override;
+    void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) override;
+
     void UpdateDisplayAvailableRect(const Rect& displayAvailableRect)
     {
         displayAvailableRect_ = displayAvailableRect;
@@ -705,6 +707,7 @@ private:
     std::function<void()> focusOnNodeCallback_;
 
     std::optional<bool> needSoftKeyboard_ ;
+    std::optional<bool> windowFocus_ ;
 
     std::unique_ptr<MouseEvent> lastMouseEvent_;
 

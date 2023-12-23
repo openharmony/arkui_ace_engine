@@ -84,7 +84,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
     PaddingProperty padding;
-    if (isShow) {
+    if (isShow && customTitleSettedShow_) {
         padding = { CalcLength(CONTENT_PADDING), CalcLength(CONTENT_PADDING), std::nullopt,
             CalcLength(CONTENT_PADDING) };
     }
@@ -530,16 +530,13 @@ void ContainerModalPattern::SetCloseButtonStatus(bool isEnabled)
 
 void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto column = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0));
-    CHECK_NULL_VOID(column);
-
     customTitleSettedShow_ = customTitleSettedShow;
-    auto customTitleRow = AceType::DynamicCast<FrameNode>(column->GetChildAtIndex(0));
+    auto customTitleRow = GetCustomTitleRow();
     CHECK_NULL_VOID(customTitleRow);
-    auto customTitleLayoutProperty = customTitleRow->GetLayoutProperty<LinearLayoutProperty>();
+    auto customTitleLayoutProperty = customTitleRow->GetLayoutProperty();
     CHECK_NULL_VOID(customTitleLayoutProperty);
+    auto containerModalLayoutProperty = GetHost()->GetLayoutProperty();
+    PaddingProperty padding;
     if (customTitleLayoutProperty->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE &&
         !customTitleSettedShow) {
         customTitleLayoutProperty->UpdateVisibility(VisibleType::GONE);
@@ -547,17 +544,24 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
                windowMode_ != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
                windowMode_ != WindowMode::WINDOW_MODE_SPLIT_SECONDARY && customTitleSettedShow) {
         customTitleLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        padding = { CalcLength(CONTENT_PADDING), CalcLength(CONTENT_PADDING), std::nullopt,
+            CalcLength(CONTENT_PADDING) };
     }
+    containerModalLayoutProperty->UpdatePadding(padding);
 
     floatingTitleSettedShow_ = floatingTitleSettedShow;
-    auto floatingTitleRow = AceType::DynamicCast<FrameNode>(column->GetChildAtIndex(1));
+    auto floatingTitleRow = GetFloatingTitleRow();
     CHECK_NULL_VOID(floatingTitleRow);
-    auto floatingTitleLayoutProperty = floatingTitleRow->GetLayoutProperty<LinearLayoutProperty>();
+    auto floatingTitleLayoutProperty = floatingTitleRow->GetLayoutProperty();
     CHECK_NULL_VOID(floatingTitleLayoutProperty);
     if (floatingTitleLayoutProperty->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE &&
         !floatingTitleSettedShow) {
         floatingTitleLayoutProperty->UpdateVisibility(VisibleType::GONE);
     }
+
+    auto buttonsRow = GetControlButtonRow();
+    CHECK_NULL_VOID(buttonsRow);
+    buttonsRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
 }
 
 void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
@@ -586,16 +590,23 @@ int32_t ContainerModalPattern::GetContainerModalTitleHeight()
 
 bool ContainerModalPattern::GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons)
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto containerModalRect = host->GetGeometryNode()->GetFrameRect();
-    containerModal = containerModalRect;
-    auto controlButtonsRow = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(2));
+    auto column = GetColumnNode();
+    CHECK_NULL_RETURN(column, false);
+    auto columnRect = column->GetGeometryNode()->GetFrameRect();
+    containerModal = columnRect;
+
+    auto controlButtonsRow = GetControlButtonRow();
     CHECK_NULL_RETURN(controlButtonsRow, false);
     auto children = controlButtonsRow->GetChildren();
     auto firstButtonRect = AceType::DynamicCast<FrameNode>(children.front())->GetGeometryNode()->GetFrameRect();
     auto lastButtonRect = AceType::DynamicCast<FrameNode>(children.back())->GetGeometryNode()->GetFrameRect();
     buttons = firstButtonRect.CombineRectT(lastButtonRect);
+
+    if (controlButtonsRow->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+        buttons.SetLeft(containerModal.Width() - TITLE_PADDING_END.ConvertToPx() - buttons.Width());
+        buttons.SetTop((titleHeight_ - TITLE_BUTTON_SIZE).ConvertToPx() / 2.0f);
+    }
+
     return true;
 }
 

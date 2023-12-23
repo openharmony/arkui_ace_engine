@@ -45,6 +45,13 @@ void NodeContainerModelNG::SetOnResize(std::function<void(const SizeF& size)>&& 
     pattern->SetOnResize(std::move(resizeFunc));
 }
 
+void NodeContainerModelNG::SetOnTouchEvent(TouchEventFunc &&touchEventFunc)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnTouchEvent(std::move(touchEventFunc));
+}
+
 void NodeContainerModelNG::BindController(std::function<void()>&& resetFunc)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

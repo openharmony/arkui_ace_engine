@@ -14,8 +14,6 @@
  */
 
 /// <reference path='./import.ts' />
-const NAV_ROUTE_MODE_RANGE = 2;
-const NAV_ROUTE_MODE_DEFAULT = 0;
 class ArkNavRouterComponent extends ArkComponent implements NavRouterAttribute {
   constructor(nativePtr: KNode) {
     super(nativePtr);
@@ -24,25 +22,21 @@ class ArkNavRouterComponent extends ArkComponent implements NavRouterAttribute {
     throw new Error('Method not implemented.');
   }
   mode(mode: NavRouteMode): NavRouterAttribute {
-    if (isNumber(mode) && mode >= NAV_ROUTE_MODE_DEFAULT && mode <= NAV_ROUTE_MODE_RANGE) {
-      modifier(this._modifiers, NavRouterModeModifier, mode);
-    } else {
-      modifier(this._modifiers, NavRouterModeModifier, NAV_ROUTE_MODE_DEFAULT);
-    }
+    modifierWithKey(this._modifiersWithKeys, NavRouterModeModifier.identity, NavRouterModeModifier, mode);
     return this;
   }
 }
 
-class NavRouterModeModifier extends Modifier<number> {
+class NavRouterModeModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
   static identity: Symbol = Symbol('mode');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().navRouter.resetMode(node);
+      getUINativeModule().navRouter.resetMode(node);
     } else {
-      GetUINativeModule().navRouter.setMode(node, this.value);
+      getUINativeModule().navRouter.setMode(node, this.value);
     }
   }
 }
@@ -50,10 +44,10 @@ class NavRouterModeModifier extends Modifier<number> {
 // @ts-ignore
 globalThis.NavRouter.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkNavRouterComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

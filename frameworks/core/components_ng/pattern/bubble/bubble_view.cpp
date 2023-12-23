@@ -455,6 +455,15 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     }
     popupLayoutProp->UpdateShowInSubWindow(param->IsShowInSubWindow());
     popupLayoutProp->UpdateBlockEvent(param->IsBlockEvent());
+    if (param->GetErrorArrowHeight()) {
+        popupLayoutProp->ResetArrowHeight();
+    }
+    if (param->GetErrorArrowWidth()) {
+        popupLayoutProp->ResetArrowWidth();
+    }
+    if (param->GetErrorRadius()) {
+        popupLayoutProp->ResetRadius();
+    }
     if (param->GetArrowHeight().has_value()) {
         popupLayoutProp->UpdateArrowHeight(param->GetArrowHeight().value());
     }

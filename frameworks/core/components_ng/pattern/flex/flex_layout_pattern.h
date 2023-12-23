@@ -53,7 +53,7 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::SCOPE, true, FocusStyleType::OUTER_BORDER };
+        return { FocusType::SCOPE, true };
     }
 
     ScopeFocusAlgorithm GetScopeFocusAlgorithm() override

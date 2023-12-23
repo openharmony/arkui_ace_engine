@@ -850,6 +850,8 @@ public:
 
     virtual void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) {}
 
+    virtual void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) {}
+
     virtual void SetEnableKeyBoardAvoidMode(bool value) {}
 
     virtual bool IsEnableKeyBoardAvoidMode() {

@@ -26,6 +26,7 @@
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 
 namespace OHOS::Ace::NG {
+class RosenRenderContext;
 class ColorAnimatableArithmetic : public Rosen::RSAnimatableArithmetic<ColorAnimatableArithmetic> {
 public:
     ColorAnimatableArithmetic() = default;
@@ -64,7 +65,7 @@ private:
 
 class [[deprecated]] GradientStyleModifier : public Rosen::RSBackgroundStyleModifier {
 public:
-    GradientStyleModifier() = default;
+    explicit GradientStyleModifier(const WeakPtr<RosenRenderContext>& context) : renderContext_(context) {}
     ~GradientStyleModifier() override = default;
 
     void Draw(RSDrawingContext& context) const override;
@@ -77,18 +78,13 @@ public:
     Gradient GetGradient() const;
     void SetGradient(const Gradient& gradient);
 
-    void SetCornerRadius(const Rosen::Vector4f& borderRadius)
-    {
-        borderRadius_ = borderRadius;
-    }
-
 private:
+    WeakPtr<RosenRenderContext> renderContext_;
     // Animatable
     std::shared_ptr<Rosen::RSAnimatableProperty<ColorAnimatableArithmetic>> colors_;
     std::shared_ptr<Rosen::RSAnimatableProperty<ColorStopAnimatableArithmetic>> colorStops_;
     // No animatable
     std::shared_ptr<Rosen::RSProperty<Gradient>> gradient_;
-    std::optional<Rosen::Vector4f> borderRadius_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_GRADIENT_STYLE_MODIFIER_H
