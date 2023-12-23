@@ -24,6 +24,8 @@
 #include "base/memory/referenced.h"
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/color.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
@@ -154,6 +156,8 @@ public:
     uint32_t unicode = 0;
     std::unique_ptr<FontStyle> fontStyle = std::make_unique<FontStyle>();
     std::unique_ptr<TextLineStyle> textLineStyle = std::make_unique<TextLineStyle>();
+    // for text background style
+    std::optional<TextBackgroundStyle> backgroundStyle;
     GestureEventFunc onClick;
     GestureEventFunc onLongPress;
     [[deprecated]] std::list<RefPtr<SpanItem>> children;
@@ -230,16 +234,52 @@ enum class PropertyInfo {
     SYMBOL_EFFECT_STRATEGY,
 };
 
-class ACE_EXPORT SpanNode : public UINode {
-    DECLARE_ACE_TYPE(SpanNode, UINode);
+class ACE_EXPORT BaseSpan : public virtual AceType {
+    DECLARE_ACE_TYPE(BaseSpan, AceType);
+
+public:
+    explicit BaseSpan(int32_t id) : groupId_(id) {}
+    virtual void MarkTextDirty() = 0;
+    virtual void SetTextBackgroundStyle(const TextBackgroundStyle& style);
+    virtual void UpdateTextBackgroundFromParent(const std::optional<TextBackgroundStyle>& style)
+    {
+        textBackgroundStyle_ = style;
+    }
+
+    const std::optional<TextBackgroundStyle> GetTextBackgroundStyle()
+    {
+        return textBackgroundStyle_;
+    }
+
+    void SetHasTextBackgroundStyle(bool hasStyle)
+    {
+        hasTextBackgroundStyle_ = hasStyle;
+    }
+
+    bool HasTextBackgroundStyle()
+    {
+        return hasTextBackgroundStyle_;
+    }
+
+private:
+    std::optional<TextBackgroundStyle> textBackgroundStyle_;
+    int32_t groupId_ = 0;
+    bool hasTextBackgroundStyle_ = false;
+};
+
+class ACE_EXPORT SpanNode : public UINode, public BaseSpan {
+    DECLARE_ACE_TYPE(SpanNode, UINode, BaseSpan);
 
 public:
     static RefPtr<SpanNode> GetOrCreateSpanNode(int32_t nodeId);
     static RefPtr<SpanNode> GetOrCreateSpanNode(const std::string& tag, int32_t nodeId);
 
-    explicit SpanNode(int32_t nodeId) : UINode(V2::SPAN_ETS_TAG, nodeId) {}
-    explicit SpanNode(const std::string& tag, int32_t nodeId) : UINode(tag, nodeId) {}
+    explicit SpanNode(int32_t nodeId) : UINode(V2::SPAN_ETS_TAG, nodeId), BaseSpan(nodeId) {}
+    explicit SpanNode(const std::string& tag, int32_t nodeId) : UINode(tag, nodeId), BaseSpan(nodeId) {}
     ~SpanNode() override = default;
+
+    void SetTextBackgroundStyle(const TextBackgroundStyle& style) override;
+    void UpdateTextBackgroundFromParent(const std::optional<TextBackgroundStyle>& style) override;
 
     bool IsAtomicNode() const override
     {
@@ -316,6 +356,7 @@ public:
     }
 
     void RequestTextFlushDirty();
+    static void RequestTextFlushDirty(const RefPtr<UINode>& node);
     // The function is only used for fast preview.
     void FastPreviewUpdateChildDone() override
     {
@@ -330,6 +371,11 @@ public:
     void CleanPropertyInfo()
     {
         propertyInfo_.clear();
+    }
+
+    void MarkTextDirty() override
+    {
+        RequestTextFlushDirty();
     }
 
     std::set<PropertyInfo> CalculateInheritPropertyInfo()
@@ -429,6 +475,7 @@ public:
     int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder, double width,
         double height, VerticalAlign verticalAlign) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override {};
+    void UpdatePlaceholderBackgroundStyle(const RefPtr<FrameNode>& imageNode);
     ACE_DISALLOW_COPY_AND_MOVE(ImageSpanItem);
 };
 
@@ -466,6 +513,38 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(ImageSpanNode);
 };
 
+class ACE_EXPORT ContainerSpanNode : public UINode, public BaseSpan {
+    DECLARE_ACE_TYPE(ContainerSpanNode, UINode, BaseSpan);
+
+public:
+    static RefPtr<ContainerSpanNode> GetOrCreateSpanNode(int32_t nodeId)
+    {
+        auto spanNode = ElementRegister::GetInstance()->GetSpecificItemById<ContainerSpanNode>(nodeId);
+        if (spanNode) {
+            spanNode->SetHasTextBackgroundStyle(false);
+            return spanNode;
+        }
+        spanNode = MakeRefPtr<ContainerSpanNode>(nodeId);
+        ElementRegister::GetInstance()->AddUINode(spanNode);
+        return spanNode;
+    }
+
+    explicit ContainerSpanNode(int32_t nodeId) : UINode(V2::CONTAINER_SPAN_ETS_TAG, nodeId), BaseSpan(nodeId) {}
+    ~ContainerSpanNode() override = default;
+
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+
+    void MarkTextDirty() override
+    {
+        SpanNode::RequestTextFlushDirty(Claim(this));
+    }
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(ContainerSpanNode);
+};
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_FOR_EACH_NODE_H

@@ -17,6 +17,7 @@
 
 #include <optional>
 
+#include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
 #include "core/common/font_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -144,7 +145,13 @@ void SpanNode::MountToParagraph()
 
 void SpanNode::RequestTextFlushDirty()
 {
-    auto parent = GetParent();
+    RequestTextFlushDirty(Claim<UINode>(this));
+}
+
+void SpanNode::RequestTextFlushDirty(const RefPtr<UINode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto parent = node->GetParent();
     while (parent) {
         auto textNode = DynamicCast<FrameNode>(parent);
         if (textNode) {
@@ -157,6 +164,18 @@ void SpanNode::RequestTextFlushDirty()
         }
         parent = parent->GetParent();
     }
+}
+
+void SpanNode::SetTextBackgroundStyle(const TextBackgroundStyle& style)
+{
+    BaseSpan::SetTextBackgroundStyle(style);
+    spanItem_->backgroundStyle = GetTextBackgroundStyle();
+}
+
+void SpanNode::UpdateTextBackgroundFromParent(const std::optional<TextBackgroundStyle>& style)
+{
+    BaseSpan::UpdateTextBackgroundFromParent(style);
+    spanItem_->backgroundStyle = GetTextBackgroundStyle();
 }
 
 int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
@@ -195,6 +214,9 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
     auto spanContent = GetSpanContent(content);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, -1);
+    if (textStyle.has_value()) {
+        textStyle->SetTextBackgroundStyle(backgroundStyle);
+    }
     if (pattern->NeedShowAIDetect() && !aiSpanMap.empty()) {
         UpdateTextStyleForAISpan(spanContent, builder, textStyle);
     } else {
@@ -436,10 +458,19 @@ int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
     }
     // ImageSpan should ignore decoration styles
     textStyle.SetTextDecoration(TextDecoration::NONE);
+    textStyle.SetTextBackgroundStyle(backgroundStyle);
     builder->PushStyle(textStyle);
     int32_t index = builder->AddPlaceholder(run);
     builder->PopStyle();
     return index;
+}
+
+void ImageSpanItem::UpdatePlaceholderBackgroundStyle(const RefPtr<FrameNode>& imageNode)
+{
+    CHECK_NULL_VOID(imageNode);
+    auto property = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    backgroundStyle = property->GetPlaceHolderStyle();
 }
 
 void SpanItem::GetIndex(int32_t& start, int32_t& end) const
@@ -461,5 +492,13 @@ int32_t PlaceholderSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNo
     int32_t index = builder->AddPlaceholder(run);
     builder->PopStyle();
     return index;
+}
+
+void BaseSpan::SetTextBackgroundStyle(const TextBackgroundStyle& style)
+{
+    textBackgroundStyle_ = style;
+    textBackgroundStyle_->groupId = groupId_;
+    SetHasTextBackgroundStyle(style.backgroundColor.has_value() || style.backgroundRadius.has_value());
+    MarkTextDirty();
 }
 } // namespace OHOS::Ace::NG
