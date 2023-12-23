@@ -58,9 +58,9 @@ class GaugeIndicatorModifier extends ModifierWithKey<GaugeIndicatorOptions> {
   static identity: Symbol = Symbol('gaugeIndicator');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().gauge.resetGaugeIndicator(node, this.value);
+      getUINativeModule().gauge.resetGaugeIndicator(node, this.value);
     } else {
-      GetUINativeModule().gauge.setGaugeIndicator(node, this.value.icon, this.value.space);
+      getUINativeModule().gauge.setGaugeIndicator(node, this.value.icon, this.value.space);
     }
   }
 
@@ -74,9 +74,9 @@ class GaugeColorsModifier extends ModifierWithKey<ResourceColor | LinearGradient
   static identity = Symbol('gaugeColors');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().gauge.resetGaugeColors(node);
+      getUINativeModule().gauge.resetGaugeColors(node);
     } else {
-      GetUINativeModule().gauge.setGaugeColors(node, this.value!);
+      getUINativeModule().gauge.setGaugeColors(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -88,9 +88,9 @@ class GaugeVauleModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('gaugeVaule');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().gauge.resetGaugeVaule(node);
+      getUINativeModule().gauge.resetGaugeVaule(node);
     } else {
-      GetUINativeModule().gauge.setGaugeVaule(node, this.value);
+      getUINativeModule().gauge.setGaugeVaule(node, this.value);
     }
   }
 
@@ -103,9 +103,9 @@ class GaugeStartAngleModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('gaugeStartAngle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().gauge.resetGaugeStartAngle(node);
+      getUINativeModule().gauge.resetGaugeStartAngle(node);
     } else {
-      GetUINativeModule().gauge.setGaugeStartAngle(node, this.value);
+      getUINativeModule().gauge.setGaugeStartAngle(node, this.value);
     }
   }
 
@@ -118,9 +118,9 @@ class GaugeEndAngleModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('gaugeEndAngle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().gauge.resetGaugeEndAngle(node);
+      getUINativeModule().gauge.resetGaugeEndAngle(node);
     } else {
-      GetUINativeModule().gauge.setGaugeEndAngle(node, this.value);
+      getUINativeModule().gauge.setGaugeEndAngle(node, this.value);
     }
   }
 
@@ -133,9 +133,9 @@ class GaugeStrokeWidthModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('gaugeStrokeWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().gauge.resetGaugeStrokeWidth(node);
+      getUINativeModule().gauge.resetGaugeStrokeWidth(node);
     } else {
-      GetUINativeModule().gauge.setGaugeStrokeWidth(node, this.value);
+      getUINativeModule().gauge.setGaugeStrokeWidth(node, this.value);
     }
   }
 
@@ -148,9 +148,9 @@ class GaugeTrackShadowModifier extends ModifierWithKey<GaugeShadowOptions> {
   static identity: Symbol = Symbol('gaugeTrackShadow');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().gauge.resetGaugeTrackShadow(node);
+      getUINativeModule().gauge.resetGaugeTrackShadow(node);
     } else {
-      GetUINativeModule().gauge.setGaugeTrackShadow(node, this.value, this.value.radius, this.value.offsetX, this.value.offsetY);
+      getUINativeModule().gauge.setGaugeTrackShadow(node, this.value, this.value.radius, this.value.offsetX, this.value.offsetY);
     }
   }
 
@@ -162,10 +162,10 @@ class GaugeTrackShadowModifier extends ModifierWithKey<GaugeShadowOptions> {
 // @ts-ignore
 globalThis.Gauge.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, ()=> {
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
     return new ArkGaugeComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

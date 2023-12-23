@@ -21,9 +21,9 @@ class ListEditModeModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('editMode');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().list.resetEditMode(node);
+      getUINativeModule().list.resetEditMode(node);
     } else {
-      GetUINativeModule().list.setEditMode(node, this.value!);
+      getUINativeModule().list.setEditMode(node, this.value!);
     }
   }
 }
@@ -35,9 +35,9 @@ class ListMultiSelectableModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('listMultiSelectable');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().list.resetMultiSelectable(node);
+      getUINativeModule().list.resetMultiSelectable(node);
     } else {
-      GetUINativeModule().list.setMultiSelectable(node, this.value!);
+      getUINativeModule().list.setMultiSelectable(node, this.value!);
     }
   }
 }
@@ -49,9 +49,9 @@ class ListAlignListItemModifier extends ModifierWithKey<ListItemAlign> {
   static identity: Symbol = Symbol('listAlignListItem');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().list.resetAlignListItem(node);
+      getUINativeModule().list.resetAlignListItem(node);
     } else {
-      GetUINativeModule().list.setAlignListItem(node, this.value!);
+      getUINativeModule().list.setAlignListItem(node, this.value!);
     }
   }
 }
@@ -63,9 +63,9 @@ class ListScrollSnapAlignModifier extends ModifierWithKey<ScrollSnapAlign> {
   static identity: Symbol = Symbol('listScrollSnapAlign');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().list.resetScrollSnapAlign(node);
+      getUINativeModule().list.resetScrollSnapAlign(node);
     } else {
-      GetUINativeModule().list.setScrollSnapAlign(node, this.value!);
+      getUINativeModule().list.setScrollSnapAlign(node, this.value!);
     }
   }
 }
@@ -77,9 +77,9 @@ class ListDividerModifier extends ModifierWithKey<DividerStyle> {
   static identity: Symbol = Symbol('listDivider');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().list.resetDivider(node);
+      getUINativeModule().list.resetDivider(node);
     } else {
-      GetUINativeModule().list.setDivider(node, this.value?.strokeWidth!, this.value?.color, this.value?.startMargin, this.value?.endMargin);
+      getUINativeModule().list.setDivider(node, this.value?.strokeWidth!, this.value?.color, this.value?.startMargin, this.value?.endMargin);
     }
   }
 
@@ -98,9 +98,11 @@ class ChainAnimationOptionsModifier extends ModifierWithKey<ChainAnimationOption
   static identity: Symbol = Symbol('chainAnimationOptions');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().list.resetChainAnimationOptions(node);
+      getUINativeModule().list.resetChainAnimationOptions(node);
     } else {
-      GetUINativeModule().list.setChainAnimationOptions(node, this.value?.minSpace!, this.value?.maxSpace!, this.value?.conductivity, this.value?.intensity, this.value?.edgeEffect, this.value?.stiffness, this.value?.damping);
+      getUINativeModule().list.setChainAnimationOptions(node, this.value?.minSpace!,
+        this.value?.maxSpace!, this.value?.conductivity, this.value?.intensity,
+        this.value?.edgeEffect, this.value?.stiffness, this.value?.damping);
     }
   }
 
@@ -119,9 +121,9 @@ class ListChainAnimationModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('listChainAnimation');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().list.resetChainAnimation(node);
+      getUINativeModule().list.resetChainAnimation(node);
     } else {
-      GetUINativeModule().list.setChainAnimation(node, this.value!);
+      getUINativeModule().list.setChainAnimation(node, this.value!);
     }
   }
 }
@@ -133,9 +135,9 @@ class ListCachedCountModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('listCachedCount');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().list.resetCachedCount(node);
+      getUINativeModule().list.resetCachedCount(node);
     } else {
-      GetUINativeModule().list.setCachedCount(node, this.value!);
+      getUINativeModule().list.setCachedCount(node, this.value!);
     }
   }
 }
@@ -147,9 +149,9 @@ class ListEnableScrollInteractionModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('listEnableScrollInteraction');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().list.resetEnableScrollInteraction(node);
+      getUINativeModule().list.resetEnableScrollInteraction(node);
     } else {
-      GetUINativeModule().list.setEnableScrollInteraction(node, this.value!);
+      getUINativeModule().list.setEnableScrollInteraction(node, this.value!);
     }
   }
 }
@@ -161,9 +163,9 @@ class ListStickyModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('listSticky');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().list.resetSticky(node);
+      getUINativeModule().list.resetSticky(node);
     } else {
-      GetUINativeModule().list.setSticky(node, this.value!);
+      getUINativeModule().list.setSticky(node, this.value!);
     }
   }
 }
@@ -175,9 +177,9 @@ class ListEdgeEffectModifier extends ModifierWithKey<ArkListEdgeEffect> {
   static identity: Symbol = Symbol('listEdgeEffect');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().list.resetListEdgeEffect(node);
+      getUINativeModule().list.resetListEdgeEffect(node);
     } else {
-      GetUINativeModule().list.setListEdgeEffect(node, this.value.value!, this.value.options?.alwaysEnabled);
+      getUINativeModule().list.setListEdgeEffect(node, this.value.value!, this.value.options?.alwaysEnabled);
     }
   }
   checkObjectDiff(): boolean {
@@ -193,9 +195,9 @@ class ListListDirectionModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('listListDirection');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().list.resetListDirection(node);
+      getUINativeModule().list.resetListDirection(node);
     } else {
-      GetUINativeModule().list.setListDirection(node, this.value!);
+      getUINativeModule().list.setListDirection(node, this.value!);
     }
   }
 }
@@ -207,12 +209,12 @@ class ListFrictionModifier extends ModifierWithKey<number | Resource> {
   static identity: Symbol = Symbol('listFriction');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().list.resetListFriction(node);
+      getUINativeModule().list.resetListFriction(node);
     } else {
       if (!isNumber(this.value) && !isResource(this.value)) {
-        GetUINativeModule().list.resetListFriction(node);
+        getUINativeModule().list.resetListFriction(node);
       } else {
-        GetUINativeModule().list.setListFriction(node, this.value);
+        getUINativeModule().list.setListFriction(node, this.value);
       }
     }
   }
@@ -229,9 +231,9 @@ class ListNestedScrollModifier extends ModifierWithKey<NestedScrollOptions> {
   static identity: Symbol = Symbol('listNestedScroll');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().list.resetListNestedScroll(node);
+      getUINativeModule().list.resetListNestedScroll(node);
     } else {
-      GetUINativeModule().list.setListNestedScroll(node, this.value?.scrollForward, this.value?.scrollBackward);
+      getUINativeModule().list.setListNestedScroll(node, this.value?.scrollForward, this.value?.scrollBackward);
     }
   }
 }
@@ -243,9 +245,9 @@ class ListScrollBarModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('listScrollBar');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().list.resetListScrollBar(node);
+      getUINativeModule().list.resetListScrollBar(node);
     } else {
-      GetUINativeModule().list.setListScrollBar(node, this.value!);
+      getUINativeModule().list.setListScrollBar(node, this.value!);
     }
   }
 }
@@ -257,9 +259,9 @@ class ListLanesModifier extends ModifierWithKey<ArkLanesOpt> {
   static identity: Symbol = Symbol('listLanes');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().list.resetListLanes(node);
+      getUINativeModule().list.resetListLanes(node);
     } else {
-      GetUINativeModule().list.setListLanes(node, this.value.lanesNum,
+      getUINativeModule().list.setListLanes(node, this.value.lanesNum,
         this.value.minLength, this.value.maxLength, this.value.gutter);
     }
   }
@@ -406,10 +408,10 @@ class ArkListComponent extends ArkComponent implements ListAttribute {
 // @ts-ignore
 globalThis.List.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkListComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

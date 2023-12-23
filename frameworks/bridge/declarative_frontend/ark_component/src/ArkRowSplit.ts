@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 
 class RowSplitResizeableModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
@@ -22,9 +22,9 @@ class RowSplitResizeableModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('rowSplitResizeable');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().rowSplit.resetResizeable(node);
+      getUINativeModule().rowSplit.resetResizeable(node);
     } else {
-      GetUINativeModule().rowSplit.setResizeable(node, this.value);
+      getUINativeModule().rowSplit.setResizeable(node, this.value);
     }
   }
 }
@@ -38,13 +38,13 @@ class ArkRowSplitComponent extends ArkComponent implements RowSplitAttribute {
     return this;
   }
   monopolizeEvents(monopolize: boolean): this {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
 }
 // @ts-ignore
 globalThis.RowSplit.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkRowSplitComponent(nativeNode);
   });

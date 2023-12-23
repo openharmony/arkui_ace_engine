@@ -47,9 +47,9 @@ class DataPanelStrokeWidthModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('dataPanelStrokeWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().dataPanel.resetDataPanelStrokeWidth(node);
+      getUINativeModule().dataPanel.resetDataPanelStrokeWidth(node);
     } else {
-      GetUINativeModule().dataPanel.setDataPanelStrokeWidth(node, this.value);
+      getUINativeModule().dataPanel.setDataPanelStrokeWidth(node, this.value);
     }
   }
 
@@ -62,9 +62,9 @@ class DataPanelCloseEffectModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('dataPanelCloseEffect');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().dataPanel.resetCloseEffect(node);
+      getUINativeModule().dataPanel.resetCloseEffect(node);
     } else {
-      GetUINativeModule().dataPanel.setCloseEffect(node, this.value);
+      getUINativeModule().dataPanel.setCloseEffect(node, this.value);
     }
   }
 
@@ -77,9 +77,9 @@ class DataPanelTrackBackgroundColorModifier extends ModifierWithKey<ResourceColo
   static identity: Symbol = Symbol('dataPanelTrackBackgroundColorModifier');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().dataPanel.resetDataPanelTrackBackgroundColor(node);
+      getUINativeModule().dataPanel.resetDataPanelTrackBackgroundColor(node);
     } else {
-      GetUINativeModule().dataPanel.setDataPanelTrackBackgroundColor(node, this.value);
+      getUINativeModule().dataPanel.setDataPanelTrackBackgroundColor(node, this.value);
     }
   }
 
@@ -92,11 +92,11 @@ class DataPanelTrackShadowModifier extends ModifierWithKey<DataPanelShadowOption
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       if (this.value === null) {
-        GetUINativeModule().dataPanel.setDataPanelTrackShadow(node, null);
+        getUINativeModule().dataPanel.setDataPanelTrackShadow(node, null);
       }
-      GetUINativeModule().dataPanel.resetDataPanelTrackShadow(node);
+      getUINativeModule().dataPanel.resetDataPanelTrackShadow(node);
     } else {
-      GetUINativeModule().dataPanel.setDataPanelTrackShadow(node, this.value!);
+      getUINativeModule().dataPanel.setDataPanelTrackShadow(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -107,9 +107,10 @@ class DataPanelValueColorsModifier extends ModifierWithKey<Array<ResourceColor |
   static identity = Symbol('dataPanelValueColors');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().dataPanel.resetDataPanelValueColors(node);
+      getUINativeModule().dataPanel.resetDataPanelValueColors(node);
+      return;
     } else {
-      GetUINativeModule().dataPanel.setDataPanelValueColors(node, this.value!);
+      getUINativeModule().dataPanel.setDataPanelValueColors(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -119,10 +120,10 @@ class DataPanelValueColorsModifier extends ModifierWithKey<Array<ResourceColor |
 // @ts-ignore
 globalThis.DataPanel.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, ()=> {
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
     return new ArkDataPanelComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

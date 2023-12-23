@@ -34,9 +34,9 @@ class NavRouterModeModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('mode');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().navRouter.resetMode(node);
+      getUINativeModule().navRouter.resetMode(node);
     } else {
-      GetUINativeModule().navRouter.setMode(node, this.value);
+      getUINativeModule().navRouter.setMode(node, this.value);
     }
   }
 }
@@ -44,10 +44,10 @@ class NavRouterModeModifier extends ModifierWithKey<number> {
 // @ts-ignore
 globalThis.NavRouter.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkNavRouterComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

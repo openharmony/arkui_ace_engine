@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ImageColorFilterModifier extends ModifierWithKey<ColorFilter> {
   constructor(value: ColorFilter) {
     super(value);
@@ -21,9 +21,9 @@ class ImageColorFilterModifier extends ModifierWithKey<ColorFilter> {
   static identity: Symbol = Symbol('imageColorFilter');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().image.resetColorFilter(node);
+      getUINativeModule().image.resetColorFilter(node);
     } else {
-      GetUINativeModule().image.setColorFilter(node, this.value!);
+      getUINativeModule().image.setColorFilter(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -38,9 +38,9 @@ class ImageFillColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('imageFillColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().image.resetFillColor(node);
+      getUINativeModule().image.resetFillColor(node);
     } else {
-      GetUINativeModule().image.setFillColor(node, this.value!);
+      getUINativeModule().image.setFillColor(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -55,9 +55,9 @@ class ImageAltModifier extends ModifierWithKey<ResourceStr> {
   static identity: Symbol = Symbol('imageAlt');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().image.resetAlt(node);
+      getUINativeModule().image.resetAlt(node);
     } else {
-      GetUINativeModule().image.setAlt(node, this.value!);
+      getUINativeModule().image.setAlt(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -72,9 +72,9 @@ class ImageCopyOptionModifier extends ModifierWithKey<CopyOptions> {
   static identity: Symbol = Symbol('imageCopyOption');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().image.resetCopyOption(node);
+      getUINativeModule().image.resetCopyOption(node);
     } else {
-      GetUINativeModule().image.setCopyOption(node, this.value!);
+      getUINativeModule().image.setCopyOption(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -89,9 +89,9 @@ class ImageAutoResizeModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('imageAutoResize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().image.resetAutoResize(node);
+      getUINativeModule().image.resetAutoResize(node);
     } else {
-      GetUINativeModule().image.setAutoResize(node, this.value!);
+      getUINativeModule().image.setAutoResize(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -106,9 +106,9 @@ class ImageFitOriginalSizeModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('imageFitOriginalSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().image.resetFitOriginalSize(node);
+      getUINativeModule().image.resetFitOriginalSize(node);
     } else {
-      GetUINativeModule().image.setFitOriginalSize(node, this.value!);
+      getUINativeModule().image.setFitOriginalSize(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -123,9 +123,9 @@ class ImageDraggableModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('imageDraggable');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().image.resetDraggable(node);
+      getUINativeModule().image.resetDraggable(node);
     } else {
-      GetUINativeModule().image.setDraggable(node, this.value!);
+      getUINativeModule().image.setDraggable(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -140,9 +140,9 @@ class ImageInterpolationModifier extends ModifierWithKey<ImageInterpolation> {
   static identity: Symbol = Symbol('imageInterpolation');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().image.resetImageInterpolation(node);
+      getUINativeModule().image.resetImageInterpolation(node);
     } else {
-      GetUINativeModule().image.setImageInterpolation(node, this.value!);
+      getUINativeModule().image.setImageInterpolation(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -154,17 +154,17 @@ class ImageSourceSizeModifier extends ModifierWithKey<{ width: number; height: n
   constructor(value: { width: number; height: number }) {
     super(value);
   }
-  static identity: Symbol = Symbol("imageSourceSize");
+  static identity: Symbol = Symbol('imageSourceSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().image.resetSourceSize(node);
+      getUINativeModule().image.resetSourceSize(node);
     } else {
-      GetUINativeModule().image.setSourceSize(node, this.value.width, this.value.height);
+      getUINativeModule().image.setSourceSize(node, this.value.width, this.value.height);
     }
   }
   checkObjectDiff(): boolean {
     return this.stageValue.width !== this.value.width ||
-      this.stageValue.height !== this.value.height
+      this.stageValue.height !== this.value.height;
   }
 }
 
@@ -175,9 +175,9 @@ class ImageMatchTextDirectionModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('imageMatchTextDirection');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().image.resetMatchTextDirection(node);
+      getUINativeModule().image.resetMatchTextDirection(node);
     } else {
-      GetUINativeModule().image.setMatchTextDirection(node, this.value!);
+      getUINativeModule().image.setMatchTextDirection(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -192,9 +192,9 @@ class ImageObjectRepeatModifier extends ModifierWithKey<ImageRepeat> {
   static identity: Symbol = Symbol('imageObjectRepeat');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().image.resetObjectRepeat(node);
+      getUINativeModule().image.resetObjectRepeat(node);
     } else {
-      GetUINativeModule().image.setObjectRepeat(node, this.value!);
+      getUINativeModule().image.setObjectRepeat(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -209,9 +209,9 @@ class ImageRenderModeModifier extends ModifierWithKey<ImageRenderMode> {
   static identity: Symbol = Symbol('imageRenderMode');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().image.resetRenderMode(node);
+      getUINativeModule().image.resetRenderMode(node);
     } else {
-      GetUINativeModule().image.setRenderMode(node, this.value!);
+      getUINativeModule().image.setRenderMode(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -226,9 +226,9 @@ class ImageSyncLoadModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('imageSyncLoad');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().image.resetSyncLoad(node);
+      getUINativeModule().image.resetSyncLoad(node);
     } else {
-      GetUINativeModule().image.setSyncLoad(node, this.value!);
+      getUINativeModule().image.setSyncLoad(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -243,9 +243,9 @@ class ImageObjectFitModifier extends ModifierWithKey<ImageFit> {
   static identity: Symbol = Symbol('imageObjectFit');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().image.resetObjectFit(node);
+      getUINativeModule().image.resetObjectFit(node);
     } else {
-      GetUINativeModule().image.setObjectFit(node, this.value!);
+      getUINativeModule().image.setObjectFit(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -256,15 +256,15 @@ class ImageBorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses>
   constructor(value: Length | BorderRadiuses) {
     super(value);
   }
-  static identity: Symbol = Symbol("imageBorderRadius");
+  static identity: Symbol = Symbol('imageBorderRadius');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().image.resetBorderRadius(node);
+      getUINativeModule().image.resetBorderRadius(node);
     } else {
       if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
-        GetUINativeModule().image.setBorderRadius(node, this.value, this.value, this.value, this.value);
+        getUINativeModule().image.setBorderRadius(node, this.value, this.value, this.value, this.value);
       } else {
-        GetUINativeModule().image.setBorderRadius(node,
+        getUINativeModule().image.setBorderRadius(node,
           (this.value as BorderRadiuses).topLeft,
           (this.value as BorderRadiuses).topRight,
           (this.value as BorderRadiuses).bottomLeft,
@@ -291,7 +291,7 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
     super(nativePtr);
   }
   onGestureJudgeBegin(callback): this {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
   draggable(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ImageDraggableModifier.identity, ImageDraggableModifier, value);
@@ -394,7 +394,7 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
 // @ts-ignore
 globalThis.Image.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkImageComponent(nativeNode);
   });

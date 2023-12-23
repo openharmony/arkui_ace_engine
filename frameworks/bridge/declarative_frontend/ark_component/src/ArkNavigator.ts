@@ -19,25 +19,25 @@ class ArkNavigatorComponent extends ArkComponent implements NavigatorAttribute {
   constructor(nativePtr: KNode) {
     super(nativePtr);
   }
-  active(value: boolean): NavigatorAttribute {
-    modifier(this._modifiers, ActiveModifier, value);
+  active(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, ActiveModifier.identity, ActiveModifier, value);
     return this;
   }
-  type(value: NavigationType): NavigatorAttribute {
-    modifier(this._modifiers, TypeModifier, value);
+  type(value: NavigationType): this {
+    modifierWithKey(this._modifiersWithKeys, TypeModifier.identity, TypeModifier, value);
     return this;
   }
-  target(value: string): NavigatorAttribute {
-    modifier(this._modifiers, TargetModifier, value);
+  target(value: string): this {
+    modifierWithKey(this._modifiersWithKeys, TargetModifier.identity, TargetModifier, value);
     return this;
   }
-  params(value: object): NavigatorAttribute {
-    modifier(this._modifiers, ParamsModifier, JSON.stringify(value));
+  params(value: object): this {
+    modifierWithKey(this._modifiersWithKeys, ParamsModifier.identity, ParamsModifier, JSON.stringify(value));
     return this;
   }
 }
 
-class ParamsModifier extends Modifier<string> {
+class ParamsModifier extends ModifierWithKey<string> {
   constructor(value: string) {
     super(value);
   }
@@ -45,14 +45,14 @@ class ParamsModifier extends Modifier<string> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().navigator.resetParams(node);
+      getUINativeModule().navigator.resetParams(node);
     } else {
-      GetUINativeModule().navigator.setParams(node, this.value);
+      getUINativeModule().navigator.setParams(node, this.value);
     }
   }
 }
 
-class TypeModifier extends Modifier<number> {
+class TypeModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -60,14 +60,14 @@ class TypeModifier extends Modifier<number> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().navigator.resetType(node);
+      getUINativeModule().navigator.resetType(node);
     } else {
-      GetUINativeModule().navigator.setType(node, this.value);
+      getUINativeModule().navigator.setType(node, this.value);
     }
   }
 }
 
-class ActiveModifier extends Modifier<boolean> {
+class ActiveModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -75,14 +75,14 @@ class ActiveModifier extends Modifier<boolean> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().navigator.resetActive(node);
+      getUINativeModule().navigator.resetActive(node);
     } else {
-      GetUINativeModule().navigator.setActive(node, this.value);
+      getUINativeModule().navigator.setActive(node, this.value);
     }
   }
 }
 
-class TargetModifier extends Modifier<string> {
+class TargetModifier extends ModifierWithKey<string> {
   constructor(value: string) {
     super(value);
   }
@@ -90,9 +90,9 @@ class TargetModifier extends Modifier<string> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().navigator.resetTarget(node);
+      getUINativeModule().navigator.resetTarget(node);
     } else {
-      GetUINativeModule().navigator.setTarget(node, this.value);
+      getUINativeModule().navigator.setTarget(node, this.value);
     }
   }
 }
@@ -100,10 +100,10 @@ class TargetModifier extends Modifier<string> {
 // @ts-ignore
 globalThis.Navigator.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkNavigatorComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

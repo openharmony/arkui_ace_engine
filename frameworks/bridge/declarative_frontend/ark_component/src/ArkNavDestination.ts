@@ -45,19 +45,19 @@ class HideTitleBarModifier extends ModifierWithKey<boolean> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().navDestination.resetHideTitleBar(node);
+      getUINativeModule().navDestination.resetHideTitleBar(node);
     } else {
-      GetUINativeModule().navDestination.setHideTitleBar(node, this.value!);
+      getUINativeModule().navDestination.setHideTitleBar(node, this.value!);
     }
   }
 }
 //@ts-ignore
 globalThis.NavDestination.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkNavDestinationComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

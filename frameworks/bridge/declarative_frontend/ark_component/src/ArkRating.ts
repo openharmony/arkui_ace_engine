@@ -15,49 +15,51 @@
 
 /// <reference path='./import.ts' />
 
-class RatingStarsModifier extends Modifier<number> {
+class RatingStarsModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
   static identity: Symbol = Symbol('ratingStars');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
-      GetUINativeModule().rating.resetStars(node);
-    }
-    else {
-      GetUINativeModule().rating.setStars(node, this.value);
+      getUINativeModule().rating.resetStars(node);
+    } else {
+      getUINativeModule().rating.setStars(node, this.value);
     }
   }
 }
 
-class RatingStepSizeModifier extends Modifier<number> {
+class RatingStepSizeModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
   static identity: Symbol = Symbol('ratingStepSize');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
-      GetUINativeModule().rating.resetStepSize(node);
-    }
-    else {
-      GetUINativeModule().rating.setStepSize(node, this.value);
+      getUINativeModule().rating.resetStepSize(node);
+    } else {
+      getUINativeModule().rating.setStepSize(node, this.value);
     }
   }
 }
 
-class RatingStarStyleModifier extends Modifier<ArkStarStyle> {
+class RatingStarStyleModifier extends ModifierWithKey<ArkStarStyle> {
   constructor(value: ArkStarStyle) {
     super(value);
   }
   static identity: Symbol = Symbol('ratingStarStyle');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
-      GetUINativeModule().rating.resetStarStyle(node);
-    }
-    else {
-      GetUINativeModule().rating.setStarStyle(node,
+      getUINativeModule().rating.resetStarStyle(node);
+    } else {
+      getUINativeModule().rating.setStarStyle(node,
         this.value?.backgroundUri, this.value?.foregroundUri, this.value?.secondaryUri);
     }
+  }
+
+  checkObjectDiff(): boolean {
+    return this.stageValue?.backgroundUri !== this.value?.backgroundUri ||
+      this.stageValue?.foregroundUri !== this.value?.foregroundUri || this.stageValue?.secondaryUri !== this.value?.secondaryUri;
   }
 }
 
@@ -69,19 +71,11 @@ class ArkRatingComponent extends ArkComponent implements RatingAttribute {
     throw new Error('Method not implemented.');
   }
   stars(value: number): this {
-    if (!isUndefined(value)) {
-      modifier(this._modifiers, RatingStarsModifier, value);
-    } else {
-      modifier(this._modifiers, RatingStarsModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, RatingStarsModifier.identity, RatingStarsModifier, value);
     return this;
   }
   stepSize(value: number): this {
-    if (isNumber(value)) {
-      modifier(this._modifiers, RatingStepSizeModifier, value);
-    } else {
-      modifier(this._modifiers, RatingStepSizeModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, RatingStepSizeModifier.identity, RatingStepSizeModifier, value);
     return this;
   }
   starStyle(value: { backgroundUri: string; foregroundUri: string; secondaryUri?: string | undefined; }): this {
@@ -91,9 +85,9 @@ class ArkRatingComponent extends ArkComponent implements RatingAttribute {
       starStyle.foregroundUri = value.foregroundUri;
       starStyle.secondaryUri = value.secondaryUri;
 
-      modifier(this._modifiers, RatingStarStyleModifier, starStyle);
+      modifierWithKey(this._modifiersWithKeys, RatingStarStyleModifier.identity, RatingStarStyleModifier, value);
     } else {
-      modifier(this._modifiers, RatingStarStyleModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, RatingStarStyleModifier.identity, RatingStarStyleModifier, undefined);
     }
     return this;
   }
@@ -104,10 +98,10 @@ class ArkRatingComponent extends ArkComponent implements RatingAttribute {
 // @ts-ignore
 globalThis.Rating.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkRatingComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

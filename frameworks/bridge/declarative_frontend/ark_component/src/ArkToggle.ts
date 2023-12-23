@@ -40,9 +40,9 @@ class ToggleSelectedColorModifier extends ModifierWithKey<ResourceColor> {
   static identity = Symbol('toggleSelectedColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().toggle.resetSelectedColor(node);
+      getUINativeModule().toggle.resetSelectedColor(node);
     } else {
-      GetUINativeModule().toggle.setSelectedColor(node, this.value);
+      getUINativeModule().toggle.setSelectedColor(node, this.value);
     }
   }
 
@@ -57,9 +57,9 @@ class ToggleSwitchPointColorModifier extends ModifierWithKey<ResourceColor> {
   static identity = Symbol('toggleSwitchPointColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().toggle.resetSwitchPointColor(node);
+      getUINativeModule().toggle.resetSwitchPointColor(node);
     } else {
-      GetUINativeModule().toggle.setSwitchPointColor(node, this.value);
+      getUINativeModule().toggle.setSwitchPointColor(node, this.value);
     }
   }
 
@@ -70,11 +70,11 @@ class ToggleSwitchPointColorModifier extends ModifierWithKey<ResourceColor> {
 // @ts-ignore
 globalThis.Toggle.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkToggleComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};
 

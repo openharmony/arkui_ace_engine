@@ -63,9 +63,9 @@ class TextClockFormatModifier extends ModifierWithKey<string> {
   static identity: Symbol = Symbol('textClockFormat');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textClock.resetFormat(node);
+      getUINativeModule().textClock.resetFormat(node);
     } else {
-      GetUINativeModule().textClock.setFormat(node, this.value);
+      getUINativeModule().textClock.setFormat(node, this.value);
     }
   }
 }
@@ -77,9 +77,9 @@ class TextClockFontColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('textClockFontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textClock.resetFontColor(node);
+      getUINativeModule().textClock.resetFontColor(node);
     } else {
-      GetUINativeModule().textClock.setFontColor(node, this.value);
+      getUINativeModule().textClock.setFontColor(node, this.value);
     }
   }
 
@@ -95,9 +95,9 @@ class TextClockFontSizeModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('textClockFontSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textClock.resetFontSize(node);
+      getUINativeModule().textClock.resetFontSize(node);
     } else {
-      GetUINativeModule().textClock.setFontSize(node, this.value);
+      getUINativeModule().textClock.setFontSize(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -112,9 +112,9 @@ class TextClockFontStyleModifier extends ModifierWithKey<FontStyle> {
   static identity: Symbol = Symbol('textClockFontStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textClock.resetFontStyle(node);
+      getUINativeModule().textClock.resetFontStyle(node);
     } else {
-      GetUINativeModule().textClock.setFontStyle(node, this.value!);
+      getUINativeModule().textClock.setFontStyle(node, this.value!);
     }
   }
 }
@@ -126,9 +126,9 @@ class TextClockFontWeightModifier extends ModifierWithKey<number | FontWeight | 
   static identity: Symbol = Symbol('textClockFontWeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textClock.resetFontWeight(node);
+      getUINativeModule().textClock.resetFontWeight(node);
     } else {
-      GetUINativeModule().textClock.setFontWeight(node, this.value!);
+      getUINativeModule().textClock.setFontWeight(node, this.value!);
     }
   }
 }
@@ -140,9 +140,9 @@ class TextClockFontFamilyModifier extends ModifierWithKey<ResourceStr> {
   static identity: Symbol = Symbol('textClockFontFamily');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textClock.resetFontFamily(node);
+      getUINativeModule().textClock.resetFontFamily(node);
     } else {
-      GetUINativeModule().textClock.setFontFamily(node, this.value!);
+      getUINativeModule().textClock.setFontFamily(node, this.value!);
     }
   }
 
@@ -154,10 +154,10 @@ class TextClockFontFamilyModifier extends ModifierWithKey<ResourceStr> {
 // @ts-ignore
 globalThis.TextClock.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTextClockComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};
