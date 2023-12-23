@@ -658,6 +658,7 @@ private:
     int32_t dragRecordSize_ = -1;
     std::optional<TextResponseType> textResponseType_;
     RefPtr<TextController> textController_;
+    TextSpanType oldSelectedType_ = TextSpanType::NONE;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG

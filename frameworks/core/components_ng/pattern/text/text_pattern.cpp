@@ -290,6 +290,7 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     textResponseType_ = TextResponseType::LONG_PRESS;
     UpdateSelectionSpanType(std::min(textSelector_.baseOffset, textSelector_.destinationOffset),
         std::max(textSelector_.baseOffset, textSelector_.destinationOffset));
+    oldSelectedType_ = selectedType_.value_or(TextSpanType::NONE);
     CalculateHandleOffsetAndShowOverlay();
     CloseSelectOverlay(true);
     ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true);
@@ -362,6 +363,12 @@ void TextPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
         } else if (!IsSelectAll() && selectMenuInfo_.showCopyAll == false) {
             selectMenuInfo_.showCopyAll = true;
             selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
+        }
+        if (!selectOverlayProxy_->IsClosed() && selectedType_.has_value() &&
+            oldSelectedType_ != selectedType_.value()) {
+            oldSelectedType_ = selectedType_.value();
+            CloseSelectOverlay();
+            ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true);
         }
         return;
     }
@@ -516,10 +523,10 @@ void TextPattern::ShowSelectOverlay(
         CHECK_NULL_VOID(pattern);
         pattern->HandleOnSelectAll();
     };
-    selectInfo.onClose = [weak = WeakClaim(this)](bool closedByGlobalEvent) {
+    selectInfo.onClose = [weak = WeakClaim(this), isUsingMouse](bool closedByGlobalEvent) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        if (closedByGlobalEvent) {
+        if (closedByGlobalEvent && !isUsingMouse) {
             pattern->ResetSelection();
             pattern->RemoveAreaChangeInner();
         }
@@ -1007,7 +1014,10 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
     }
 
     CHECK_NULL_VOID(paragraph_);
-    auto end = paragraph_->GetGlyphIndexByCoordinate(textOffset);
+    auto end = -1;
+    if (IsSelected()) {
+        end = paragraph_->GetGlyphIndexByCoordinate(textOffset);
+    }
     HandleSelectionChange(textSelector_.baseOffset, end);
 
     if (IsSelected() && oldMouseStatus == MouseStatus::MOVE && IsSelectedBindSelectionMenu()) {
@@ -1920,6 +1930,12 @@ void TextPattern::ActSetSelection(int32_t start, int32_t end)
     start = start > textSize ? textSize : start;
     end = end > textSize ? textSize : end;
     if (start >= end) {
+        SelectOverlayInfo selectInfo;
+        selectInfo.firstHandle.paintRect = textSelector_.firstHandle;
+        selectInfo.secondHandle.paintRect = textSelector_.secondHandle;
+        CheckHandles(selectInfo.firstHandle);
+        CheckHandles(selectInfo.secondHandle);
+        FireOnSelectionChange(-1, -1);
         return;
     }
     HandleSelectionChange(start, end);
@@ -2638,7 +2654,7 @@ void TextPattern::HandleSelectionChange(int32_t start, int32_t end)
 
     UpdateSelectionSpanType(start, end);
     textSelector_.Update(start, end);
-    FireOnSelectionChange(start, end);
+    FireOnSelectionChange(std::min(start, end), std::max(start, end));
 }
 
 bool TextPattern::IsSelectedBindSelectionMenu()
