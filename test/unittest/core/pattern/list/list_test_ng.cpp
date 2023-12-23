@@ -5668,14 +5668,14 @@ HWTEST_F(ListTestNg, Pattern005, TestSize.Level1)
      * @tc.expected: Would stop.
      */
     pattern_->AnimateTo(0, 0, nullptr, true);
-    EXPECT_TRUE(pattern_->IsAnimationStop());
+    EXPECT_TRUE(pattern_->AnimateStoped());
     double offset = 100.0;
     pattern_->OnScrollPosition(offset, SCROLL_FROM_START);
     EXPECT_FALSE(pattern_->scrollAbort_);
     pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
     EXPECT_FALSE(pattern_->scrollAbort_);
     EXPECT_TRUE(IsEqualTotalOffset(0));
-    EXPECT_TRUE(pattern_->IsAnimationStop());
+    EXPECT_TRUE(pattern_->AnimateStoped());
 
     /**
      * @tc.steps: step2. When has animator_ and stop, call OnScrollCallback.

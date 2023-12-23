@@ -845,7 +845,7 @@ void ScrollablePattern::StopAnimate()
     if (animator_ && !animator_->IsStopped()) {
         animator_->Stop();
     }
-    if (!IsAnimationStop()) {
+    if (!isAnimationStop_) {
         StopAnimation(springAnimation_);
         StopAnimation(curveAnimation_);
     }
@@ -868,7 +868,7 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
         scrollAbort_ = true;
         StopScrollable();
     }
-    if (!IsAnimationStop()) {
+    if (!isAnimationStop_) {
         currVelocity = GetCurrentVelocity();
         StopAnimation(springAnimation_);
         StopAnimation(curveAnimation_);
@@ -1215,7 +1215,7 @@ void ScrollablePattern::SelectWithScroll()
         return;
     }
 
-    if (!IsAnimationStop()) {
+    if (!isAnimationStop_) {
         StopAnimation(springAnimation_);
         StopAnimation(curveAnimation_);
     }

@@ -1631,7 +1631,9 @@ void ListPattern::SetChainAnimation()
         chainAnimation_->SetAnimationCallback([weak = AceType::WeakClaim(this)]() {
             auto list = weak.Upgrade();
             CHECK_NULL_VOID(list);
-            list->MarkDirtyNodeSelf();
+            if (list->IsScrollableAnimationNotRunning()) {
+                list->MarkDirtyNodeSelf();
+            }
         });
     }
 }

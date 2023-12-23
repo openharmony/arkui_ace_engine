@@ -347,11 +347,6 @@ public:
         return currentVelocity_;
     }
 
-    int32_t IsAnimationStop() const
-    {
-        return isAnimationStop_;
-    }
-
     ScrollState GetScrollState() const;
 
     static ScrollState GetScrollState(int32_t scrollSource);
@@ -407,6 +402,18 @@ public:
     void SetAlwaysEnabled(bool alwaysEnabled)
     {
         edgeEffectAlwaysEnabled_ = alwaysEnabled;
+    }
+
+    bool IsScrollableAnimationNotRunning()
+    {
+        if (scrollableEvent_) {
+            auto scrollable = scrollableEvent_->GetScrollable();
+            if (scrollable) {
+                return scrollable->IsAnimationNotRunning();
+            }
+            return false;
+        }
+        return false;
     }
 
     float GetFinalPosition() const
@@ -625,7 +632,7 @@ private:
     std::shared_ptr<AnimationUtils::Animation> springAnimation_;
     std::shared_ptr<AnimationUtils::Animation> curveAnimation_;
     std::chrono::high_resolution_clock::time_point lastTime_;
-    bool isAnimationStop_ = true;
+    bool isAnimationStop_ = true; // graphic animation flag
     float currentVelocity_ = 0.0f;
     float lastPosition_ = 0.0f;
     float finalPosition_ = 0.0f;
