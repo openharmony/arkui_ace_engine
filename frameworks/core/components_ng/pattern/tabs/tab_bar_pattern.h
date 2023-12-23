@@ -390,9 +390,9 @@ private:
     void UpdateIndicatorCurrentOffset(float offset);
 
     void GetInnerFocusPaintRect(RoundRect& paintRect);
-    void PaintFocusState();
+    void PaintFocusState(bool needMarkDirty = true);
     void FocusIndexChange(int32_t index);
-    void UpdateGradientRegions();
+    void UpdateGradientRegions(bool needMarkDirty = true);
 
     float GetSpace(int32_t indicator);
     float CalculateFrontChildrenMainSize(int32_t indicator);

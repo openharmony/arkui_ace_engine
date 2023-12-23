@@ -542,6 +542,11 @@ public:
         customAnimationToIndex_ = toIndex;
     }
 
+    std::optional<int32_t> GetCustomAnimationToIndex() const
+    {
+        return customAnimationToIndex_;
+    }
+
     void SetCustomContentTransition(std::function<TabContentAnimatedTransition(int32_t, int32_t)>&& event)
     {
         onCustomContentTransition_ =
@@ -555,6 +560,7 @@ public:
 
     void SetSwiperEventCallback(bool disableSwipe);
     void UpdateSwiperPanEvent(bool disableSwipe);
+    bool IsUseCustomAnimation() const;
 
 private:
     void OnModifyDone() override;
@@ -687,7 +693,6 @@ private:
     void OnAnimationTranslateZero(int32_t nextIndex, bool stopAutoPlay);
     void UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus);
     void TriggerCustomContentTransitionEvent(int32_t fromIndex, int32_t toIndex);
-    bool IsUseCustomAnimation() const;
 
     /**
      * @brief Stops animations when the scroll starts.
