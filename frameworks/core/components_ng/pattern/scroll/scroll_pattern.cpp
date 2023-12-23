@@ -256,7 +256,7 @@ OverScrollOffset ScrollPattern::GetOverScrollOffset(double delta) const
 
     auto endPos = currentOffset_;
     auto newEndPos = endPos + delta;
-    auto endRefences = -scrollableDistance_;
+    auto endRefences =  GreatOrEqual(scrollableDistance_, 0.0f) ? -scrollableDistance_ : 0;
     if (endPos < endRefences && newEndPos < endRefences) {
         offset.end = delta;
     }
