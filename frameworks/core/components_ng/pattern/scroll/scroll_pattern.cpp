@@ -670,10 +670,10 @@ std::optional<float> ScrollPattern::CalePredictSnapOffset(float delta, float dra
     std::optional<float> predictSnapOffset;
     CHECK_NULL_RETURN(!snapOffsets_.empty(), predictSnapOffset);
     CHECK_NULL_RETURN(GetScrollSnapAlign() != ScrollSnapAlign::NONE, predictSnapOffset);
-    if (enablePagingStatus_ == ScrollPagingStatus::VALID) {
-        delta = GetPagingDelta(dragDistance, velocity);
-    }
     float finalPosition = currentOffset_ + delta;
+    if (enablePagingStatus_ == ScrollPagingStatus::VALID) {
+        finalPosition = GetPagingOffset(delta, dragDistance, velocity);
+    }
     if (!IsSnapToInterval()) {
         if (!enableSnapToSide_.first) {
             if (GreatNotEqual(finalPosition, *(snapOffsets_.begin() + 1)) ||
@@ -745,7 +745,6 @@ void ScrollPattern::CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign)
     float temp = static_cast<int32_t>(extentMainSize / intervalSize) * intervalSize;
     switch (scrollSnapAlign) {
         case ScrollSnapAlign::START:
-            start = 0.0f;
             end = -temp;
             break;
         case ScrollSnapAlign::CENTER:
@@ -773,6 +772,10 @@ void ScrollPattern::CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign)
     }
     if (GreatNotEqual(end, -scrollableDistance_)) {
         snapOffsets_.emplace_back(end);
+    }
+    if (enablePagingStatus_ == ScrollPagingStatus::VALID &&
+        !snapOffsets_.empty() && !NearEqual(*(snapOffsets_.rbegin()), -scrollableDistance_)) {
+        snapOffsets_.emplace_back(-scrollableDistance_);
     }
 }
 
@@ -882,6 +885,17 @@ float ScrollPattern::GetSelectScrollWidth()
     return finalWidth;
 }
 
+float ScrollPattern::GetPagingOffset(float delta, float dragDistance, float velocity)  const
+{
+    float head = 0.0f;
+    float tail = -scrollableDistance_;
+    auto pagingPosition = currentOffset_ + GetPagingDelta(dragDistance, velocity);
+    auto finalPosition = currentOffset_ + delta;
+    auto useFinalPosition = (GreatOrEqual(pagingPosition, head) && !GreatOrEqual(finalPosition, head)) ||
+                      (LessOrEqual(pagingPosition, tail) && !LessOrEqual(finalPosition, tail));
+    return useFinalPosition ? finalPosition : pagingPosition;
+}
+
 float ScrollPattern::GetPagingDelta(float dragDistance, float velocity)  const
 {
     auto dragDistanceThreshold = viewPortLength_ * 0.5f;
@@ -897,6 +911,10 @@ float ScrollPattern::GetPagingDelta(float dragDistance, float velocity)  const
         return - dragDistance + (GreatNotEqual(direction, 0.f) ? viewPortLength_ : -viewPortLength_);
     }
     // The direction of dragDistance is opposite to the direction of velocity
+    if (GreatOrEqual(std::abs(dragDistance), dragDistanceThreshold) &&
+        LessNotEqual(std::abs(velocity), SCROLL_PAGING_SPEED_THRESHOLD)) {
+        return - dragDistance + (GreatNotEqual(dragDistance, 0.f) ? viewPortLength_ : -viewPortLength_);
+    }
     return - dragDistance;
 }
 } // namespace OHOS::Ace::NG
