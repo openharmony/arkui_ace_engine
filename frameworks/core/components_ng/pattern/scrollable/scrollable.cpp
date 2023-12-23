@@ -767,11 +767,18 @@ void Scrollable::StartSpringMotion(
         return;
     }
     currentPos_ = mainPosition;
+    bool validPos = false;
     if (mainPosition > initExtent.Trailing() || NearEqual(mainPosition, initExtent.Trailing(), 0.01f)) {
         finalPosition_ = extent.Trailing();
+        validPos = true;
     } else if (mainPosition <  initExtent.Leading() || NearEqual(mainPosition, initExtent.Leading(), 0.01f)) {
         finalPosition_ = extent.Leading();
+        validPos = true;
     }
+    if (!validPos) {
+        return;
+    }
+
     if (scrollMotionFRCSceneCallback_) {
         scrollMotionFRCSceneCallback_(GetCurrentVelocity(), NG::SceneStatus::START);
     }
