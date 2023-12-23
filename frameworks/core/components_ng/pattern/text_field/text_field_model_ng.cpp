@@ -42,6 +42,7 @@ void TextFieldModelNG::CreateNode(
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(textFieldLayoutProperty);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    pattern->SetModifyDoneStatus(false);
     auto textValue = pattern->GetTextValue();
     if (SystemProperties::GetDebugEnabled()) {
         LOGI("TextFieldModelNG::GetOrCreateNode with text %{public}s, current text %{public}s",

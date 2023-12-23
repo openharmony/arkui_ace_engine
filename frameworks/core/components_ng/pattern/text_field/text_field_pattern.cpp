@@ -681,6 +681,7 @@ void TextFieldPattern::HandleFocusEvent()
         underlineWidth_ = TYPING_UNDERLINE_WIDTH;
         renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
     }
+    selectController_->FireSelectEvent();
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                  : PROPERTY_UPDATE_MEASURE);
 }
@@ -2028,6 +2029,8 @@ void TextFieldPattern::OnModifyDone()
     HandleInputCounterBorder(originLength, maxlength);
     preInputStyle_ = inputStyle;
     Register2DragDropManager();
+    isModifyDone_ = true;
+    selectController_->FireSelectEvent();
 }
 
 void TextFieldPattern::OnAfterModifyDone()
@@ -3728,6 +3731,7 @@ void TextFieldPattern::Delete(int32_t start, int32_t end)
     SwapIfLarger(start, end);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Handle Delete within [%{public}d, %{public}d]", start, end);
     contentController_->erase(start, end - start);
+    UpdateSelection(start);
     selectController_->MoveCaretToContentRect(start);
     CloseSelectOverlay(true);
     StartTwinkling();
