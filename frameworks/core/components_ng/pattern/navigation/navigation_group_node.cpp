@@ -63,7 +63,7 @@ constexpr int32_t OPACITY_BACKBUTTON_IN_DURATION = 200;
 constexpr int32_t OPACITY_BACKBUTTON_OUT_DURATION = 67;
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 450;
 constexpr int32_t DEFAULT_REPLACE_DURATION = 150;
-const RefPtr<CubicCurve> bezierCurve = AceType::MakeRefPtr<CubicCurve>(0.23f, 0.07f, 0.0f, 1.0f);
+const RefPtr<InterpolatingSpring> springCurve = AceType::MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f);
 const RefPtr<CubicCurve> replaceCurve = AceType::MakeRefPtr<CubicCurve>(0.33, 0.0, 0.67, 1.0);
 } // namespace
 RefPtr<NavigationGroupNode> NavigationGroupNode::GetOrCreateGroupNode(
@@ -425,7 +425,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
     }
 
     /* start transition animation */
-    AnimationOption option = CreateAnimationOption(bezierCurve, FillMode::FORWARDS, DEFAULT_ANIMATION_DURATION,
+    AnimationOption option = CreateAnimationOption(springCurve, FillMode::FORWARDS, DEFAULT_ANIMATION_DURATION,
         callback);
     AnimationUtils::Animate(option, [preNode, preTitleNode, preFrameSize, curNode, curTitleNode]() {
         PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
@@ -506,7 +506,6 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             auto onFinishCallback = [weakPreNode, weakPreTitle, weakCurNode, weakNavigation, isNavBar, preFrameSize,
                 mode] {
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
-                TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation end");
                 auto navigation = weakNavigation.Upgrade();
                 CHECK_NULL_VOID(navigation);
 
@@ -566,7 +565,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
     curTitleNode->GetRenderContext()->UpdateTranslateInXY({ curFrameSize.Width() * HALF, 0.0f });
 
     /* start transition animation */
-    AnimationOption option = CreateAnimationOption(bezierCurve, FillMode::FORWARDS, DEFAULT_ANIMATION_DURATION,
+    AnimationOption option = CreateAnimationOption(springCurve, FillMode::FORWARDS, DEFAULT_ANIMATION_DURATION,
         callback);
     AnimationUtils::Animate(option, [preNode, preTitleNode, curNode, curTitleNode, preFrameSize, curFrameSize,
         mode]() {
