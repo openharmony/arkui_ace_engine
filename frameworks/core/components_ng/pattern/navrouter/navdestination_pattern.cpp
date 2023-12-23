@@ -149,10 +149,14 @@ void NavDestinationPattern::OnModifyDone()
     auto renderContext = hostNode->GetRenderContext();
     do {
         if (renderContext->GetBackgroundColor().has_value()) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Background already has color: %{public}s",
+                renderContext->GetBackgroundColor()->ColorToString().c_str());
             break;
         }
         if (hostNode->GetNavDestinationMode() == NavDestinationMode::DIALOG) {
             renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set dialog background color: %{public}s",
+                renderContext->GetBackgroundColor()->ColorToString().c_str());
             break;
         }
         auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -164,6 +168,8 @@ void NavDestinationPattern::OnModifyDone()
             break;
         }
         renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set default background color: %{public}s",
+            renderContext->GetBackgroundColor()->ColorToString().c_str());
     } while (0);
     auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navDestinationLayoutProperty);
