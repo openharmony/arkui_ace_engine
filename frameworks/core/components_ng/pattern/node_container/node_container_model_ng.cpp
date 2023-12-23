@@ -25,6 +25,8 @@ void NodeContainerModelNG::Create()
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         "NodeContainer", nodeId, []() { return AceType::MakeRefPtr<NodeContainerPattern>(); });
     stack->Push(frameNode);
+
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::TOP_LEFT);
 }
 
 void NodeContainerModelNG::SetMakeFunction(std::function<RefPtr<UINode>()>&& makeFunc)

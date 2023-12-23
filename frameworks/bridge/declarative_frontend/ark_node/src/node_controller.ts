@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-/// <reference path="./builder_node.ts" />
 const arkUINativeModule = globalThis.getArkUINativeModule();
 function GetUINativeModule() {
   if (arkUINativeModule) {
@@ -23,20 +22,20 @@ function GetUINativeModule() {
 }
 
 abstract class NodeController {
-    nodeContainerId_: number;
-    constructor() {
-        this.nodeContainerId_ = -1;
-    }
+  nodeContainerId_: number;
+  constructor() {
+    this.nodeContainerId_ = -1;
+  }
 
-    abstract makeNode(UIContext: UIContext): BaseNode
-    aboutToResize(size: Size) { }
-    aboutToAppear() { }
-    aboutToDisappear() { }
-    onTouchEvent(event: TouchEvent) { }
+  abstract makeNode(UIContext: UIContext): FrameNode | null;
+  aboutToResize(size: Size) { }
+  aboutToAppear() { }
+  aboutToDisappear() { }
+  onTouchEvent(event: TouchEvent) { }
 
-    rebuild() {
-        if (this.nodeContainerId_ >= 0) {
-           GetUINativeModule().nodeContainer.rebuild(this.nodeContainerId_);
-        }
+  rebuild() {
+    if (this.nodeContainerId_ >= 0) {
+      GetUINativeModule().nodeContainer.rebuild(this.nodeContainerId_);
     }
+  }
 }

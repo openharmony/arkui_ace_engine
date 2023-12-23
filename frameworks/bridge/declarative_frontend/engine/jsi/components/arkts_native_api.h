@@ -1546,6 +1546,20 @@ struct ArkUIXComponentModifierAPI {
 };
 #endif
 
+struct ArkUIRenderNodeModifierAPI {
+    void (*AppendChild)(NodeHandle node, NodeHandle child);
+    void (*InsertChildAfter)(NodeHandle node, NodeHandle child, NodeHandle sibling);
+    void (*RemoveChild)(NodeHandle node, NodeHandle child);
+    void (*ClearChildren)(NodeHandle node);
+    void (*SetClipToFrame)(NodeHandle node, bool useClip);
+    void (*SetRotation)(NodeHandle node, double rotationX, double rotationY, double rotationZ);
+    void (*SetShadowColor)(NodeHandle node, uint32_t color);
+    void (*SetShadowOffset)(NodeHandle node, double offsetX, double offsetY);
+    void (*SetShadowAlpha)(NodeHandle node, float alpha);
+    void (*SetShadowElevation)(NodeHandle node, float elevation);
+    void (*SetShadowRadius)(NodeHandle node, float radius);
+};
+
 struct ArkUINodeAPI {
     NodeHandle (*GetFrameNodeById)(int nodeId);
     int64_t (*GetUIState)(NodeHandle node);
@@ -1620,6 +1634,8 @@ struct ArkUINodeAPI {
     ArkUILoadingProgressModifierAPI (*GetLoadingProgressModifier)();
     ArkUITextClockModifierAPI (*GetTextClockModifier)();
     ArkUITextTimerModifierAPI (*GetTextTimerModifier)();
+    ArkUIRenderNodeModifierAPI (*GetRenderNodeModifier)();
+
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     ArkUIPluginModifierAPI (*GetPluginModifier)();
 #endif

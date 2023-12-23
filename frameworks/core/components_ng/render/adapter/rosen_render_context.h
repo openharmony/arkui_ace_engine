@@ -311,6 +311,14 @@ public:
 
     void SetBackgroundShader(const std::shared_ptr<Rosen::RSShader>& shader);
 
+    // used in arkts_native_render_node_modifier set property directly to rsNode
+    void SetRotation(float rotationX, float rotationY, float rotationZ) override;
+    void SetShadowColor(uint32_t color) override;
+    void SetShadowOffset(float offsetX, float offsetY) override;
+    void SetShadowAlpha(float alpha) override;
+    void SetShadowElevation(float elevation) override;
+    void SetShadowRadius(float radius) override;
+
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;

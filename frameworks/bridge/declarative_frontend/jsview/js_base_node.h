@@ -16,6 +16,8 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_BASE_NODE_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_BASE_NODE_H
 
+#include "base/memory/ace_type.h"
+#include "bridge/declarative_frontend/engine/js_types.h"
 #include "core/components_ng/base/ui_node.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings_defines.h"
 
@@ -29,10 +31,10 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void ConstructorCallback(const JSCallbackInfo& info);
     static void DestructorCallback(JSBaseNode* node);
-    void MarkDirty(const JSCallbackInfo& info);
     void FinishUpdateFunc(const JSCallbackInfo& info);
     void BuildNode(const JSCallbackInfo& info);
     void PostTouchEvent(const JSCallbackInfo& info);
+    void CreateRenderNode(const JSCallbackInfo& info);
 
     RefPtr<NG::UINode> GetViewNode() const
     {
@@ -42,6 +44,5 @@ public:
 protected:
     RefPtr<NG::UINode> viewNode_;
 };
-
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_BASE_NODE_H

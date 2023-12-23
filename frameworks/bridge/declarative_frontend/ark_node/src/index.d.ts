@@ -23,16 +23,19 @@ declare interface TouchEvent {
 declare type UpdateFunc = (elmtId: number, isFirstRender: boolean) => void;
 
 interface UpdateFuncRecord {
+
     updateFunc: UpdateFunc;
     componentName: string;
-    node?: object
+    node?: object;
 }
 
-declare function wrapBuilder<Args extends Object[]>(builder: (...args: Args) => void): WrappedBuilder<Args>;
+declare function wrapBuilder<Args extends Object[]>(
+    builder: (...args: Args) => void
+): WrappedBuilder<Args>;
 
 declare class WrappedBuilder<Args extends Object[]> {
     builder: (...args: Args) => void;
-    constructor(builder: (...args: Args) => void)
+    constructor(builder: (...args: Args) => void);
 }
 
 declare class ViewStackProcessor {
@@ -47,8 +50,8 @@ declare class __JSScopeUtil__ {
 }
 
 declare interface Size {
-    width: number
-    height: number
+    width: number;
+    height: number;
 }
 
 declare abstract class ViewPU { }
