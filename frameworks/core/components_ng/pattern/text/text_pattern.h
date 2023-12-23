@@ -631,6 +631,7 @@ private:
     void UpdateSelectionSpanType(int32_t selectStart, int32_t selectEnd);
     int32_t GetSelectionSpanItemIndex(const MouseInfo& info);
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
+    void RedisplaySelectOverlay();
     // to check if drag is in progress
 
     bool isMeasureBoundary_ = false;
