@@ -624,6 +624,8 @@ private:
     void ActSetSelection(int32_t start, int32_t end);
     void SetAccessibilityAction();
     void CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpanHasClick);
+    void CollectContainerSpanNodes(const RefPtr<UINode>& node, bool& isSpanHasClick);
+    void UpdateContainerChildren(const RefPtr<ContainerSpanNode>& parent, const RefPtr<UINode>& child);
     RefPtr<RenderContext> GetRenderContext();
     void ProcessBoundRectByTextShadow(RectF& rect);
     void FireOnSelectionChange(int32_t start, int32_t end);

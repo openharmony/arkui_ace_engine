@@ -25,6 +25,7 @@
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/text/text_styles.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
 
@@ -50,6 +51,9 @@ public:
     virtual void SetLineHeight(const Dimension& value) = 0;
     virtual void SetOnClick(std::function<void(const BaseEventInfo* info)>&& click) = 0;
     virtual void ClearOnClick() = 0;
+
+    virtual void CreateContainSpan() {};
+    virtual void SetTextBackgroundStyle(const TextBackgroundStyle& style) {};
 
 private:
     static std::unique_ptr<SpanModel> instance_;

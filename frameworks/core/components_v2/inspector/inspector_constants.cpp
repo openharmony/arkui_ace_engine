@@ -572,4 +572,8 @@ const char SYMBOL_ETS_TAG[] = "SymbolGlyph";
 // DynamicComponent
 const char DYNAMIC_COMPONENT_TAG[] = "DynamicComponent";
 const char DYNAMIC_COMPONENT_ETS_TAG[] = "DynamicComponent";
+
+// ContainerSpan
+const char CONTAINER_SPAN_COMPONENT_TAG[] = "ContainerSpanComponent";
+const char CONTAINER_SPAN_ETS_TAG[] = "ContainerSpan";
 } // namespace OHOS::Ace::V2

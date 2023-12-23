@@ -18,9 +18,11 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/text/span_node.h"
 
 namespace OHOS::Ace::NG {
 void ImageSpanView::SetObjectFit(ImageFit value)
@@ -36,5 +38,21 @@ void ImageSpanView::SetVerticalAlign(VerticalAlign verticalAlign)
 void ImageSpanView::SetVerticalAlign(FrameNode* frameNode, VerticalAlign verticalAlign)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, VerticalAlign, verticalAlign, frameNode);
+}
+
+void ImageSpanView::SetPlaceHolderStyle(TextBackgroundStyle& style)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    style.groupId = frameNode->GetId();
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, PlaceHolderStyle, style);
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, HasPlaceHolderStyle,
+        style.backgroundColor.has_value() || style.backgroundRadius.has_value());
+    SpanNode::RequestTextFlushDirty(frameNode);
+}
+
+void ImageSpanView::Create()
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, HasPlaceHolderStyle, false);
 }
 } // namespace OHOS::Ace::NG

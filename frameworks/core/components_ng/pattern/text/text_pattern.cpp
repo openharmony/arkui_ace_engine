@@ -39,6 +39,7 @@
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_event_hub.h"
@@ -2194,13 +2195,59 @@ void TextPattern::CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpa
             placeholderCount_++;
             AddChildSpanItem(current);
             textForAI_.append("\n");
+        } else if (current->GetTag() == V2::CONTAINER_SPAN_ETS_TAG) {
+            CollectContainerSpanNodes(current, isSpanHasClick);
         }
-        if (current->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
+        if (current->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG || current->GetTag() == V2::CONTAINER_SPAN_ETS_TAG) {
             continue;
         }
         const auto& nextChildren = current->GetChildren();
         for (auto iter = nextChildren.rbegin(); iter != nextChildren.rend(); ++iter) {
             nodes.push(*iter);
+        }
+    }
+}
+
+void TextPattern::CollectContainerSpanNodes(const RefPtr<UINode>& node, bool& isSpanHasClick)
+{
+    auto containerNode = DynamicCast<ContainerSpanNode>(node);
+    CHECK_NULL_VOID(containerNode);
+    const auto& children = containerNode->GetChildren();
+    if (children.empty()) {
+        return;
+    }
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        UpdateContainerChildren(containerNode, *iter);
+    }
+    std::stack<RefPtr<UINode>> nodes;
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        nodes.push(*iter);
+    }
+    CollectSpanNodes(nodes, isSpanHasClick);
+}
+
+void TextPattern::UpdateContainerChildren(const RefPtr<ContainerSpanNode>& parent, const RefPtr<UINode>& child)
+{
+    CHECK_NULL_VOID(parent);
+    CHECK_NULL_VOID(child);
+    auto baseSpan = DynamicCast<BaseSpan>(child);
+    if (baseSpan) {
+        if (baseSpan->HasTextBackgroundStyle()) {
+            return;
+        }
+        baseSpan->UpdateTextBackgroundFromParent(parent->GetTextBackgroundStyle());
+        return;
+    }
+    if (child->GetTag() == V2::IMAGE_ETS_TAG) {
+        auto imageNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(imageNode);
+        auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        if (imageLayoutProperty->GetHasPlaceHolderStyleValue(false)) {
+            return;
+        }
+        if (parent->GetTextBackgroundStyle().has_value()) {
+            imageLayoutProperty->UpdatePlaceHolderStyle(parent->GetTextBackgroundStyle().value());
         }
     }
 }
@@ -2297,9 +2344,10 @@ void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
         }
         auto imageNode = DynamicCast<FrameNode>(child);
         if (imageNode) {
-            spans_.emplace_back(MakeRefPtr<ImageSpanItem>());
-            spans_.back()->imageNodeId = imageNode->GetId();
-
+            auto imageSpanItem = MakeRefPtr<ImageSpanItem>();
+            imageSpanItem->imageNodeId = imageNode->GetId();
+            imageSpanItem->UpdatePlaceholderBackgroundStyle(imageNode);
+            spans_.emplace_back(imageSpanItem);
             auto gesture = imageNode->GetOrCreateGestureEventHub();
             CHECK_NULL_VOID(gesture);
             gesture->SetHitTestMode(HitTestMode::HTMNONE);
