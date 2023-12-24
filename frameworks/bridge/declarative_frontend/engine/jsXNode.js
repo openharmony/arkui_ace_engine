@@ -580,6 +580,11 @@ class RenderNode extends __JSBaseNode__ {
     getNodePtr() {
         return this.nodePtr;
     }
+    draw(context) {
+    }
+    invalidate() {
+        GetUINativeModule().renderNode.invalidate(this.nodePtr);
+    }
 }
 
 export default { NodeController, BuilderNode, BaseNode, RenderNode, FrameNode };

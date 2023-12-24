@@ -19,10 +19,8 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 
-#if !defined(PREVIEW)
 #include "napi/native_api.h"
 #include "native_engine/native_engine.h"
-#endif
 
 #if !defined(PREVIEW)
 namespace OHOS::Rosen {
@@ -35,7 +33,6 @@ class WantWrap;
 #endif
 
 namespace OHOS::Ace::Framework {
-#if !defined(PREVIEW)
 class ScopeRAII {
 public:
     explicit ScopeRAII(napi_env env) : env_(env)
@@ -51,7 +48,7 @@ private:
     napi_env env_;
     napi_handle_scope scope_;
 };
-
+#if !defined(PREVIEW)
 RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj);
 const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj);
 RefPtr<PixelMap> GetDrawablePixmap(JSRef<JSVal> obj);
