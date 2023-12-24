@@ -42,7 +42,7 @@ void UIObserver::RegisterNavigationCallback(
         specifiedCNavigationListeners_[navigationId] = std::list<std::shared_ptr<UIObserverListener>>({ listener });
         return;
     }
-    auto holder = specifiedCNavigationListeners_[navigationId];
+    auto& holder = specifiedCNavigationListeners_[navigationId];
     if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
         return;
     }
@@ -75,7 +75,7 @@ void UIObserver::UnRegisterNavigationCallback(std::string navigationId, napi_val
     if (specifiedCNavigationListeners_.find(navigationId) == specifiedCNavigationListeners_.end()) {
         return;
     }
-    auto holder = specifiedCNavigationListeners_[navigationId];
+    auto& holder = specifiedCNavigationListeners_[navigationId];
     if (cb == nullptr) {
         holder.clear();
         return;
@@ -104,7 +104,7 @@ void UIObserver::HandleNavigationStateChange(std::string navigationId, std::stri
         return;
     }
 
-    auto holder = specifiedCNavigationListeners_[navigationId];
+    auto& holder = specifiedCNavigationListeners_[navigationId];
 
     for (const auto& listener : holder) {
         listener->OnNavigationStateChange(navigationId, navDestinationName, state);
