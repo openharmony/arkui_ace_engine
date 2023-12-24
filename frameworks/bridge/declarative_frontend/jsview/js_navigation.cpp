@@ -63,6 +63,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 constexpr int32_t TITLE_MODE_RANGE = 2;
 constexpr int32_t NAVIGATION_MODE_RANGE = 2;
+constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t NAV_BAR_POSITION_RANGE = 1;
 constexpr int32_t DEFAULT_NAV_BAR_WIDTH = 240;
 constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
@@ -749,7 +750,7 @@ void JSNavigation::JsExpandSafeArea(const JSCallbackInfo& info)
         }
         opts.type = NG::SAFE_AREA_TYPE_SYSTEM;
     }
-    if (info.Length() >= 2 && info[1]->IsArray()) {
+    if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsArray()) {
         auto paramArray = JSRef<JSArray>::Cast(info[1]);
         uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
         for (size_t i = 0; i < paramArray->Length(); ++i) {
