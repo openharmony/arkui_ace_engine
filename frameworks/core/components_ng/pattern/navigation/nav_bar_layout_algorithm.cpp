@@ -266,7 +266,8 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostN
     CHECK_NULL_VOID(contentWrapper);
     auto geometryNode = contentWrapper->GetGeometryNode();
     if (!navBarLayoutProperty->GetHideTitleBar().value_or(false)) {
-        auto contentOffset = OffsetF(geometryNode->GetFrameOffset().GetX(), titlebarHeight + GetSafeAreaHeight(layoutWrapper));
+        auto OffsetY = titlebarHeight + GetSafeAreaHeight(layoutWrapper);
+        auto contentOffset = OffsetF(geometryNode->GetFrameOffset().GetX(), OffsetY);
         geometryNode->SetMarginFrameOffset(contentOffset);
         contentWrapper->Layout();
         return;
@@ -293,7 +294,8 @@ float LayoutToolBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& host
         return 0.0f;
     }
 
-    auto toolBarOffsetY = layoutWrapper->GetGeometryNode()->GetFrameSize().Height() - toolbarHeight + GetSafeAreaHeight(layoutWrapper);
+    auto toolBarOffsetY = 
+        layoutWrapper->GetGeometryNode()->GetFrameSize().Height() - toolbarHeight + GetSafeAreaHeight(layoutWrapper);
     auto toolBarOffset = OffsetF(geometryNode->GetFrameOffset().GetX(), static_cast<float>(toolBarOffsetY));
     geometryNode->SetMarginFrameOffset(toolBarOffset);
     toolBarWrapper->Layout();
