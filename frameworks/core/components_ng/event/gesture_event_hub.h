@@ -546,6 +546,11 @@ public:
         panEventActuator_->SetIsAllowMouse(isAllowMouse);
     }
 
+    const RefPtr<ClickEventActuator>& GetUserClickEventActuator()
+    {
+        return userParallelClickEventActuator_;
+    }
+
 #ifdef ENABLE_DRAG_FRAMEWORK
     int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
     OnDragCallbackCore GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
@@ -579,6 +584,11 @@ public:
     bool GetMonopolizeEvents() const;
 
     void SetMonopolizeEvents(bool monopolizeEvents);
+    virtual RefPtr<NGGestureRecognizer> PackInnerRecognizer(
+        const Offset& offset, std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, int32_t touchId,
+        const RefPtr<TargetComponent>& targetComponent);
+    bool parallelCombineClick = false;
+    RefPtr<ParallelRecognizer> innerParallelRecognizer_;
 
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -599,6 +609,7 @@ private:
     RefPtr<ScrollableActuator> scrollableActuator_;
     RefPtr<TouchEventActuator> touchEventActuator_;
     RefPtr<ClickEventActuator> clickEventActuator_;
+    RefPtr<ClickEventActuator> userParallelClickEventActuator_;
     RefPtr<LongPressEventActuator> longPressEventActuator_;
     RefPtr<PanEventActuator> panEventActuator_;
     RefPtr<DragEventActuator> dragEventActuator_;

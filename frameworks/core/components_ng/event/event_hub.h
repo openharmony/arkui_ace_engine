@@ -61,9 +61,14 @@ public:
     const RefPtr<GestureEventHub>& GetOrCreateGestureEventHub()
     {
         if (!gestureEventHub_) {
-            gestureEventHub_ = MakeRefPtr<GestureEventHub>(WeakClaim(this));
+            gestureEventHub_ = CreateGestureEventHub();
         }
         return gestureEventHub_;
+    }
+
+    virtual RefPtr<GestureEventHub> CreateGestureEventHub()
+    {
+        return MakeRefPtr<GestureEventHub>(WeakClaim(this));
     }
 
     const RefPtr<GestureEventHub>& GetGestureEventHub() const
