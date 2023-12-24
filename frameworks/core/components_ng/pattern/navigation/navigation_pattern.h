@@ -314,6 +314,8 @@ public:
         onTransition_ = std::move(navigationAnimation);
     }
 
+    bool NeedRecalculateSafeArea() override;
+
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath, bool isPopPage);

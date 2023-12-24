@@ -131,6 +131,8 @@ public:
         return { FocusType::SCOPE, true };
     }
 
+    void UpdateNeedRecalculateSafeArea() override;
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 

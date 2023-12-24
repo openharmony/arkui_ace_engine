@@ -133,7 +133,7 @@ void NavigationPattern::OnAttachToFrameNode()
     if (theme && theme->GetNavBarUnfocusEffectEnable()) {
         pipelineContext->AddWindowFocusChangedCallback(host->GetId());
     }
-    SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_BOTTOM, .type = SAFE_AREA_TYPE_SYSTEM };
+    SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_ALL, .type = SAFE_AREA_TYPE_SYSTEM };
     host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
 }
 
@@ -938,6 +938,8 @@ RefPtr<FrameNode> NavigationPattern::GetDividerNode() const
         if (dividerNode->GetTag() == V2::DIVIDER_ETS_TAG) {
             dividerFrameNode = AceType::DynamicCast<FrameNode>(dividerNode);
             CHECK_NULL_RETURN(dividerFrameNode, nullptr);
+            SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_ALL, .type = SAFE_AREA_TYPE_SYSTEM };
+            dividerFrameNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
             break;
         }
     }
@@ -1219,4 +1221,11 @@ NavigationTransition NavigationPattern::ExecuteTransition(const RefPtr<NavDestin
     return onTransition_(preInfo, topInfo, operation);
 }
 
+bool NavigationPattern::NeedRecalculateSafeArea()
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, true);
+    bool isFixHeight = hostNode->GetLayoutProperty()->HasFixedHeight();
+    return !isFixHeight;
+}
 } // namespace OHOS::Ace::NG

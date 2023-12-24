@@ -48,6 +48,7 @@ public:
     static void SetBackButtonIcon(const JSCallbackInfo& info);
     static void SetOnNavBarStateChange(const JSCallbackInfo& info);
     static void SetNavDestination(const JSCallbackInfo& info);
+    static void JsExpandSafeArea(const JSCallbackInfo& info);
 
     static void ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<RefPtr<AceType>>& items);
     static void ParseBarItems(
