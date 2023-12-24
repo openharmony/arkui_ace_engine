@@ -1030,6 +1030,14 @@ void RichEditorPattern::UpdateTextStyle(
         spanNode->UpdateTextShadow(textStyle.GetTextShadows());
         spanNode->AddPropertyInfo(PropertyInfo::TEXTSHADOW);
     }
+    if (updateSpanStyle.updateSymbolColor.has_value()) {
+        spanNode->UpdateSymbolColorList(textStyle.GetSymbolColorList());
+        spanNode->AddPropertyInfo(PropertyInfo::SYMBOL_COLOR);
+    }
+    if (updateSpanStyle.updateSymbolRenderingStrategy.has_value()) {
+        spanNode->UpdateSymbolRenderingStrategy(textStyle.GetRenderStrategy());
+        spanNode->AddPropertyInfo(PropertyInfo::SYMBOL_RENDERING_STRATEGY);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
 }

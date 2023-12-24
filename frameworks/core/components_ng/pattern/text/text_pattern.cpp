@@ -57,8 +57,10 @@ namespace {
 constexpr int32_t AI_TEXT_MAX_LENGTH = 300;
 constexpr int32_t AI_TEXT_GAP = 100;
 constexpr int32_t AI_DELAY_TIME = 300;
+constexpr double DIMENSION_VALUE = 16.0;
 constexpr const char COPY_ACTION[] = "copy";
 constexpr const char SELECT_ACTION[] = "select";
+constexpr const char SYMBOL_COLOR[] = "BLACK";
 constexpr int32_t API_PROTEXTION_GREATER_NINE = 9;
 // uncertainty range when comparing selectedTextBox to contentRect
 constexpr float BOX_EPSILON = 0.5f;
@@ -243,6 +245,11 @@ SelectionInfo TextPattern::GetSpansInfo(int32_t start, int32_t end, GetSpansMeth
             }
         } else if (uinode->GetTag() == V2::SPAN_ETS_TAG) {
             ResultObject resultObject = GetTextResultObject(uinode, index, realStart, realEnd);
+            if (!resultObject.valueString.empty()) {
+                resultObjects.emplace_back(resultObject);
+            }
+        } else if (uinode->GetTag() == V2::SYMBOL_SPAN_ETS_TAG) {
+            ResultObject resultObject = GetSymbolSpanResultObject(uinode, index, realStart, realEnd);
             if (!resultObject.valueString.empty()) {
                 resultObjects.emplace_back(resultObject);
             }
@@ -1557,6 +1564,63 @@ ResultObject TextPattern::GetTextResultObject(RefPtr<UINode> uinode, int32_t ind
         resultObject.textStyle = GetTextStyleObject(spanNode);
     }
     return resultObject;
+}
+
+ResultObject TextPattern::GetSymbolSpanResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end)
+{
+    bool selectFlag = false;
+    ResultObject resultObject;
+    if (!DynamicCast<SpanNode>(uinode)) {
+        return resultObject;
+    }
+    auto spanItem = DynamicCast<SpanNode>(uinode)->GetSpanItem();
+    int32_t itemLength = StringUtils::ToWstring(spanItem->content).length();
+    int32_t endPosition = std::min(GetTextContentLength(), spanItem->position);
+    int32_t startPosition = endPosition - itemLength;
+
+    if (startPosition >= start && endPosition <= end) {
+        selectFlag = true;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = 0;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
+    } else if (startPosition < start && endPosition <= end && endPosition > start) {
+        selectFlag = true;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = start - startPosition;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
+    } else if (startPosition >= start && startPosition < end && endPosition >= end) {
+        selectFlag = true;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = 0;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = end - startPosition;
+    } else if (startPosition <= start && endPosition >= end) {
+        selectFlag = true;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = start - startPosition;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = end - startPosition;
+    }
+    if (selectFlag) {
+        resultObject.spanPosition.spanIndex = index;
+        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
+        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
+        resultObject.type = SelectSpanType::TYPESYMBOLSPAN;
+        resultObject.valueString = std::to_string(spanItem->unicode);
+        auto spanNode = DynamicCast<SpanNode>(uinode);
+        resultObject.symbolSpanStyle = GetSymbolSpanStyleObject(spanNode);
+    }
+    return resultObject;
+}
+
+SymbolSpanStyle TextPattern::GetSymbolSpanStyleObject(const RefPtr<SpanNode>& node)
+{
+    SymbolSpanStyle symbolSpanStyle;
+    std::string symbolColorValue;
+    auto symbolColors = node->GetSymbolColorList();
+    for (const auto& color : *symbolColors) {
+        symbolColorValue += color.ColorToString() + ",";
+    }
+    symbolColorValue = symbolColorValue.substr(0, symbolColorValue.size() - 1);
+    symbolSpanStyle.symbolColor = !symbolColorValue.empty() ? symbolColorValue : SYMBOL_COLOR;
+    symbolSpanStyle.fontSize = node->GetFontSizeValue(Dimension(DIMENSION_VALUE, DimensionUnit::VP)).ConvertToVp();
+    symbolSpanStyle.fontWeight = static_cast<int32_t>(node->GetFontWeightValue(FontWeight::NORMAL));
+    symbolSpanStyle.renderingStrategy = node->GetSymbolRenderingStrategy();
+    return symbolSpanStyle;
 }
 
 ResultObject TextPattern::GetImageResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end)

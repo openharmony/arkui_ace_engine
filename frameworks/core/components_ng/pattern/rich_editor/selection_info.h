@@ -43,11 +43,19 @@ enum RichEditorSpanRange : int32_t {
 enum SelectSpanType : int32_t {
     TYPESPAN,
     TYPEIMAGE,
+    TYPESYMBOLSPAN,
 };
 
 struct SpanPosition {
     int32_t spanIndex = 0;
     int32_t spanRange[2] = { 0, 0 };
+};
+
+struct SymbolSpanStyle {
+    double fontSize = 0.0;
+    std::string symbolColor;
+    int32_t fontWeight = 0;
+    std::optional<uint32_t> renderingStrategy;
 };
 
 struct TextStyleResult {
@@ -74,6 +82,7 @@ struct ResultObject {
     RefPtr<PixelMap> valuePixelMap;
     TextStyleResult textStyle;
     ImageStyleResult imageStyle;
+    SymbolSpanStyle symbolSpanStyle;
 };
 
 struct Selection {
