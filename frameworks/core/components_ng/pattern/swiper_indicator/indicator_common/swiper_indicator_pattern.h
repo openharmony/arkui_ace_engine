@@ -81,7 +81,8 @@ public:
             auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
             CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
             dotIndicatorModifier_->SetAnimationDuration(swiperPattern->GetDuration());
-            dotIndicatorModifier_->SetLongPointHeadCurve(swiperPattern->GetCurveIncludeMotion());
+            dotIndicatorModifier_->SetLongPointHeadCurve(
+                swiperPattern->GetCurveIncludeMotion(), swiperPattern->GetMotionVelocity());
             auto paintMethod = MakeRefPtr<DotIndicatorPaintMethod>(dotIndicatorModifier_);
             paintMethod->SetAxis(swiperPattern->GetDirection());
             paintMethod->SetCurrentIndex(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex()));

@@ -1407,6 +1407,9 @@ void SwiperPattern::HandleTouchBottomLoop()
 
 void SwiperPattern::CalculateGestureState(float additionalOffset, float currentTurnPageRate)
 {
+    if (gestureState_ == GestureState::GESTURE_STATE_INIT) {
+        return;
+    }
     gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
     if (GreatNotEqual(additionalOffset, 0.0f)) {
         gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
@@ -1415,10 +1418,10 @@ void SwiperPattern::CalculateGestureState(float additionalOffset, float currentT
     } else if ((GetLoopIndex(currentFirstIndex_) == GetLoopIndex(currentIndex_)) &&
                GreatNotEqual(std::abs(currentTurnPageRate), std::abs(turnPageRate_))) {
         gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    } else if (currentTurnPageRate == 0 && turnPageRate_ == 0) {
+        gestureState_ = GestureState::GESTURE_STATE_NONE;
     } else if (GetLoopIndex(currentFirstIndex_) != GetLoopIndex(currentIndex_)) {
         gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
-    } else if (currentTurnPageRate == 0 && turnPageRate_ == 0) {
-        gestureState_ = GestureState::GESTURE_STATE_FOLLOW;
     }
     return;
 }
@@ -1922,7 +1925,6 @@ void SwiperPattern::OnPropertyTranslateAnimationFinish(const OffsetF& offset)
         // force stop.
         return;
     }
-    StopIndicatorAnimation();
 
     usePropertyAnimation_ = false;
     // reset translate.
