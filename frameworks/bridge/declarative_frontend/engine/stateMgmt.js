@@ -5338,7 +5338,7 @@ class ViewPU extends NativeViewPartialUpdate {
                 stateMgmtConsole.applicationError(`${this.debugInfo()}: State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
             }
             this.syncInstanceId();
-            if (dependentElmtIds.size && this.isInitialRenderDone) {
+            if (dependentElmtIds.size && !this.isFirstRender()) {
                 if (!this.dirtDescendantElementIds_.size && !this.runReuse_) {
                     // mark ComposedElement dirty when first elmtIds are added
                     // do not need to do this every time
@@ -5375,7 +5375,7 @@ class ViewPU extends NativeViewPartialUpdate {
                 const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate();
                 if (changedElmtIds) {
                     const varName = stateLinkPropVar.info();
-                    if (changedElmtIds.size && this.isInitialRenderDone) {
+                    if (changedElmtIds.size && !this.isFirstRender()) {
                         for (const elmtId of changedElmtIds) {
                             this.dirtDescendantElementIds_.add(elmtId);
                         }
