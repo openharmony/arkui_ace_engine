@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
-#include "base/log/ace_trace.h"
-#include "core/components_ng/pattern/scrollable/scrollable_item.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item_pool.h"
+
+#include "base/log/ace_trace.h"
+#include "base/utils/utils.h"
+#include "core/components_ng/pattern/scrollable/scrollable_item.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t MAX_SIZE = 10;
@@ -26,14 +28,14 @@ ScrollableItemPool& ScrollableItemPool::GetInstance()
     return pool;
 }
 
-RefPtr<ScrollableItem> ScrollableItemPool::Allocate(const std::string& tag, int32_t nodeId, const PatternCreator& patternCreator)
+RefPtr<ScrollableItem> ScrollableItemPool::Allocate(
+    const std::string& tag, int32_t nodeId, const PatternCreator& patternCreator)
 {
     ACE_SCOPED_TRACE("ScrollableItemPool::Allocate");
     if (pool_.find(tag) == pool_.end() || (pool_.find(tag) != pool_.end() && pool_[tag].empty())) {
-        ACE_SCOPED_TRACE("Create ScrollableItem");
         auto node = ScrollableItem::GetOrCreateScrollableItem(tag, nodeId, patternCreator);
-        node->SetCustomDeleter(ObjectPoolDeleter<ScrollableItem>{ this });
-        node->SetReleaseState(false);
+        node->SetCustomDeleter(ObjectPoolDeleter<ScrollableItem> { this });
+        node->SetMaybeRelease(false);
         return node;
     }
     auto node = pool_[tag].back();
@@ -46,21 +48,18 @@ RefPtr<ScrollableItem> ScrollableItemPool::Allocate(const std::string& tag, int3
 void ScrollableItemPool::Deallocate(ScrollableItem* obj)
 {
     ACE_SCOPED_TRACE("ScrollableItemPool::Deallocate");
+    CHECK_NULL_VOID(obj);
     auto tag = obj->GetTag();
     if (pool_.find(tag) == pool_.end()) {
-        ACE_SCOPED_TRACE("Init Pool");
-        pool_[tag] = {obj};
+        pool_[tag] = { obj };
+        obj->Clean(true);
         return;
     }
     if (pool_[tag].size() < size_) {
-        ACE_SCOPED_TRACE("Insert Item");
         pool_[tag].emplace_back(obj);
         obj->Clean(true);
         return;
     }
-    {
-        ACE_SCOPED_TRACE("Item Pool Full");
-        delete obj;
-    }
+    delete obj;
 }
 } // namespace OHOS::Ace::NG

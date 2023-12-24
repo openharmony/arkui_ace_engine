@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "base/utils/system_properties.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
 
@@ -43,6 +44,9 @@ RefPtr<ScrollableItem> ScrollableItem::GetOrCreateScrollableItem(
 // return false to deallocate the ScrollableItem
 bool ScrollableItem::MaybeRelease()
 {
+    if (!SystemProperties::GetEnableScrollableItemPool()) {
+        return true;
+    }
     deleter_(this);
     return maybeRelease_;
 }

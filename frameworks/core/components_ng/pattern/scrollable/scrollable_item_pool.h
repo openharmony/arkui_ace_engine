@@ -16,9 +16,16 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_ITEM_POOL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_ITEM_POOL_H
 
+#include <functional>
+#include <unordered_map>
+#include <vector>
+
+#include "base/memory/referenced.h"
+
 namespace OHOS::Ace::NG {
-using PatternCreator = std::function<RefPtr<Pattern>(void)>;
 class ScrollableItem;
+class Pattern;
+using PatternCreator = std::function<RefPtr<Pattern>(void)>;
 class ScrollableItemPool {
 public:
     static ScrollableItemPool& GetInstance();
@@ -28,7 +35,7 @@ public:
 
 private:
     explicit ScrollableItemPool(int32_t size) : size_(size) {}
-    std::map<std::string, std::vector<ScrollableItem*>> pool_;
+    std::unordered_map<std::string, std::vector<ScrollableItem*>> pool_;
     int32_t size_;
 };
 

@@ -33,7 +33,7 @@ public:
 
     bool MaybeRelease() override;
 
-    void SetReleaseState(bool state)
+    void SetMaybeRelease(bool state)
     {
         maybeRelease_ = state;
     }

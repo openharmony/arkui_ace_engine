@@ -391,6 +391,12 @@ public:
     static bool Is24HourClock();
 
     static std::optional<bool> GetRtlEnabled();
+
+    static bool GetEnableScrollableItemPool()
+    {
+        return enableScrollableItemPool_;
+    }
+
 private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;
@@ -431,6 +437,7 @@ private:
     static bool extSurfaceEnabled_;
     static uint32_t dumpFrameCount_;
     static bool resourceDecoupling_;
+    static bool enableScrollableItemPool_;
 };
 
 } // namespace OHOS::Ace
