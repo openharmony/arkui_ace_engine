@@ -26,10 +26,10 @@ class ArkMenuItemGroupComponent extends ArkComponent implements MenuItemGroupAtt
 // @ts-ignore
 globalThis.MenuItemGroup.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkMenuItemGroupComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

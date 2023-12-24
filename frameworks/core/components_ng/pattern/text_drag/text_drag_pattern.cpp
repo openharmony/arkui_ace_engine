@@ -32,6 +32,26 @@ bool TextDragPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     return true;
 }
 
+const RectF GetFirstBoxRect(const std::vector<RectF>& boxes, const RectF& contentRect, const float textStartY)
+{
+    for (const auto& box : boxes) {
+        if (box.Bottom() + textStartY > contentRect.Top() + BOX_EPSILON) {
+            return box;
+        }
+    }
+    return boxes.front();
+} // Obtains the first line in the visible area of the text box, including the truncated part.
+
+const RectF GetLastBoxRect(const std::vector<RectF>& boxes, const RectF& contentRect, const float textStartY)
+{
+    for (const auto& box : boxes) {
+        if (box.Bottom() + textStartY > contentRect.Bottom() + BOX_EPSILON) {
+            return box;
+        }
+    }
+    return boxes.back();
+} // Obtains the last line in the visible area of the text box, including the truncated part.
+
 RefPtr<FrameNode> TextDragPattern::CreateDragNode(const RefPtr<FrameNode>& hostNode)
 {
     CHECK_NULL_RETURN(hostNode, nullptr);
@@ -70,15 +90,14 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& hostPa
     float bothOffset = TEXT_DRAG_OFFSET.ConvertToPx() * 2; // 2 : double
     auto boxes = hostPattern->GetTextBoxes();
     CHECK_NULL_RETURN(!boxes.empty(), {});
-    auto boxFirst = boxes.front();
-    auto boxLast = boxes.back();
+    auto boxFirst = GetFirstBoxRect(boxes, contentRect, textStartY);
+    auto boxLast = GetLastBoxRect(boxes, contentRect, textStartY);
     float leftHandleX = boxFirst.Left() + textStartX;
     float leftHandleY = boxFirst.Top() + textStartY;
     float rightHandleX = boxLast.Right() + textStartX;
     float rightHandleY = boxLast.Top() + textStartY;
     float lastLineHeight = boxLast.Height();
     bool oneLineSelected = (leftHandleY == rightHandleY);
-    float height = rightHandleY - leftHandleY + lastLineHeight;
     if (oneLineSelected) {
         if (leftHandleX < contentRect.Left()) {
             leftHandleX = contentRect.Left();
@@ -86,23 +105,10 @@ TextDragData TextDragPattern::CalculateTextDragData(RefPtr<TextDragBase>& hostPa
         if (rightHandleX > contentRect.Right()) {
             rightHandleX = contentRect.Right();
         }
-        if (lineHeight > contentRect.Height()) {
-            height = contentRect.Height();
-        }
-    } else {
-        if (leftHandleY < contentRect.Top() - BOX_EPSILON) {
-            height -= contentRect.Top() - leftHandleY;
-            leftHandleX = contentRect.Left();
-            leftHandleY = contentRect.Top();
-        }
-        if ((boxLast.Bottom() + textStartY) > contentRect.Bottom()) {
-            height -= rightHandleY + lastLineHeight - contentRect.Bottom();
-            rightHandleX = contentRect.Right();
-            rightHandleY = contentRect.Bottom() - lastLineHeight;
-        }
     }
     auto hostGlobalOffset = hostPattern->GetParentGlobalOffset();
     float width = rightHandleX - leftHandleX;
+    float height = rightHandleY - leftHandleY + lastLineHeight;
     float globalX = leftHandleX + hostGlobalOffset.GetX() - TEXT_DRAG_OFFSET.ConvertToPx();
     float globalY = leftHandleY + hostGlobalOffset.GetY() - TEXT_DRAG_OFFSET.ConvertToPx();
     if (oneLineSelected) {

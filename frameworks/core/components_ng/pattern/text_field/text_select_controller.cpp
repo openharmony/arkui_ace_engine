@@ -171,7 +171,15 @@ void TextSelectController::UpdateSelectByOffset(const Offset& localOffset)
         pos -= 1;
     }
 
-    bool smartSelect = AdjustWordSelection(pos, start, end, localOffset);
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textFiled = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textFiled);
+    bool smartSelect = false;
+    if (!textFiled->IsUsingMouse()) {
+        smartSelect = AdjustWordSelection(pos, start, end, localOffset);
+    }
+    
     if (!smartSelect && !paragraph_->GetWordBoundary(pos, start, end)) {
         start = pos;
         end = std::min(static_cast<int32_t>(contentController_->GetWideText().length()),
@@ -412,14 +420,14 @@ void TextSelectController::UpdateSecondHandleOffset()
     secondHandleInfo_.rect.SetHeight(caretMetrics.height);
 }
 
-void TextSelectController::UpdateCaretOffset()
+void TextSelectController::UpdateCaretOffset(TextAffinity textAffinity)
 {
     if (contentController_->IsEmpty()) {
         caretInfo_.rect = CalculateEmptyValueCaretRect();
         return;
     }
     CaretMetricsF caretMetrics;
-    CalcCaretMetricsByPosition(GetCaretIndex(), caretMetrics, TextAffinity::DOWNSTREAM);
+    CalcCaretMetricsByPosition(GetCaretIndex(), caretMetrics, textAffinity);
 
     RectF caretRect;
     caretRect.SetOffset(caretMetrics.offset);
@@ -443,7 +451,7 @@ void TextSelectController::UpdateSecondHandleInfoByMouseOffset(const Offset& loc
     auto index = ConvertTouchOffsetToPosition(localOffset);
     MoveSecondHandleToContentRect(index);
     caretInfo_.index = index;
-    UpdateCaretOffset();
+    UpdateCaretOffset(TextAffinity::UPSTREAM);
 }
 
 void TextSelectController::MoveSecondHandleByKeyBoard(int32_t index)

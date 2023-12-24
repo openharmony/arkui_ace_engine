@@ -17,8 +17,10 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PLUGIN_COMPONENT_CALLBACK_H
 
 #include <memory>
-#include "core/components/plugin/plugin_component_template.h"
+
 #include "want.h"
+
+#include "core/components/plugin/plugin_component_template.h"
 
 namespace OHOS::Ace {
 enum class CallBackType {
@@ -36,9 +38,9 @@ public:
     virtual void OnPushEvent(const AAFwk::Want& want, const PluginComponentTemplate& pluginTemplate,
         const std::string& data, const std::string& extraData) = 0;
     virtual void OnRequestEvent(const AAFwk::Want& want, const std::string& name, const std::string& data) = 0;
-    virtual void OnRequestCallBack(const PluginComponentTemplate& pluginTemplate,
-        const std::string& data, const std::string& extraData) = 0;
-    virtual int32_t GetContainerId() = 0 ;
+    virtual void OnRequestCallBack(
+        const PluginComponentTemplate& pluginTemplate, const std::string& data, const std::string& extraData) = 0;
+    virtual int32_t GetContainerId() = 0;
     ACE_DISALLOW_COPY_AND_MOVE(PluginComponentCallBack);
 };
 } // namespace OHOS::Ace

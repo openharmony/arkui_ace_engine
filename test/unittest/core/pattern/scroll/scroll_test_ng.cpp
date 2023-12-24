@@ -711,10 +711,14 @@ HWTEST_F(ScrollTestNg, Event006, TestSize.Level1)
      * @tc.steps: step1. When animte stop
      * @tc.expected: onScrollStop would not be trigger
      */
-    float endValue = pattern_->springMotion_->GetEndValue();
-    pattern_->springMotion_->NotifyListener(endValue);
+    float endValue = pattern_->GetFinalPosition();
+    pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue,
+            SCROLL_FROM_ANIMATION_CONTROLLER);
     // when out of scrollable distance, will trigger animator stop
-    pattern_->springMotion_->NotifyListener(pattern_->GetTotalOffset() + 1);
+    pattern_->UpdateCurrentOffset(-1, SCROLL_FROM_ANIMATION_CONTROLLER);
+    if (pattern_->IsAtBottom()) {
+        pattern_->StopAnimation(pattern_->springAnimation_);
+    }
     FlushLayoutTask(frameNode_);
     EXPECT_TRUE(isStopTrigger);
 }
@@ -2589,10 +2593,10 @@ HWTEST_F(ScrollTestNg, Pattern002, TestSize.Level1)
      */
     CreateWithContent();
     accessibilityProperty_->actionScrollForwardImpl_();
-    ASSERT_NE(pattern_->animator_, nullptr);
-    pattern_->animator_ = nullptr;
+    ASSERT_NE(pattern_->springAnimation_, nullptr);
+    pattern_->springAnimation_ = nullptr;
     accessibilityProperty_->actionScrollBackwardImpl_();
-    ASSERT_NE(pattern_->animator_, nullptr);
+    ASSERT_NE(pattern_->springAnimation_, nullptr);
 
     /**
      * @tc.steps: step2. Test SetAccessibilityAction with unScrollable scroll, scrollableDistance_ <= 0
@@ -3099,5 +3103,46 @@ HWTEST_F(ScrollTestNg, ScrollTo001, TestSize.Level1)
     pattern_->ScrollTo(-1);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetTotalOffset(), 0);
+}
+
+/**
+ * @tc.name: AnimateTo001
+ * @tc.desc: Test AnimateTo
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, AnimateTo001, TestSize.Level1)
+{
+    CreateWithContent([](ScrollModelNG model) {});
+    auto smooth = false;
+    pattern_->isAnimationStop_ = false;
+    pattern_->AnimateTo(ITEM_HEIGHT * TOTAL_LINE_NUMBER, 1.f, Curves::LINEAR, smooth);
+    EXPECT_TRUE(pattern_->isAnimationStop_);
+}
+
+/**
+ * @tc.name: PlaySpringAnimation001
+ * @tc.desc: Test PlaySpringAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, PlaySpringAnimation001, TestSize.Level1)
+{
+    CreateWithContent([](ScrollModelNG model) {});
+    auto smooth = false;
+    pattern_->isAnimationStop_ = false;
+    pattern_->AnimateTo(ITEM_HEIGHT * TOTAL_LINE_NUMBER, 1.f, Curves::LINEAR, smooth);
+    EXPECT_TRUE(pattern_->isAnimationStop_);
+}
+
+/**
+ * @tc.name: StopAnimation001
+ * @tc.desc: Test StopAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, StopAnimation001, TestSize.Level1)
+{
+    CreateWithContent([](ScrollModelNG model) {});
+    std::shared_ptr<AnimationUtils::Animation> animation;
+    pattern_->StopAnimation(animation);
+    ASSERT_NE(animation, nullptr);
 }
 } // namespace OHOS::Ace::NG

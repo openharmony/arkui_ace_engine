@@ -177,4 +177,188 @@ HWTEST_F(GradientPropertyTestNg, gradientPropertyTest003, TestSize.Level1)
     EXPECT_EQ(gradient.colors_.size(), 1);
     gradient.ClearColors();
 }
+
+/**
+ * @tc.name: gradientPropertyTest004
+ * @tc.desc: LinearGradientToJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(GradientPropertyTestNg, gradientPropertyTest004, TestSize.Level1)
+{
+    Gradient gradient = Gradient();
+    gradient.type_ = GradientType::RADIAL;
+    auto linearJson = gradient.LinearGradientToJson();
+    EXPECT_TRUE(linearJson);
+
+    gradient.type_ = GradientType::LINEAR;
+    linearJson = gradient.LinearGradientToJson();
+    auto str = linearJson->GetString("angle");
+    EXPECT_EQ(str, "");
+
+    LinearGradient linearGradient;
+    gradient.SetLinearGradient(linearGradient);
+    linearJson = gradient.LinearGradientToJson();
+    str = linearJson->GetString("angle");
+    EXPECT_EQ(str, "");
+    str = linearJson->GetString("direction");
+    EXPECT_EQ(str, "GradientDirection.None");
+}
+
+/**
+ * @tc.name: gradientPropertyTest005
+ * @tc.desc: LinearGradientToJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(GradientPropertyTestNg, gradientPropertyTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Gradient and set type != SWEEP.
+     */
+    Gradient gradient = Gradient();
+    gradient.type_ = GradientType::RADIAL;
+    auto sweepJson = gradient.SweepGradientToJson();
+    EXPECT_TRUE(sweepJson);
+
+    /**
+     * @tc.steps: step1. set type == SWEEP.
+     */
+    gradient.type_ = GradientType::SWEEP;
+    sweepJson = gradient.SweepGradientToJson();
+    auto str = sweepJson->GetString("start");
+    EXPECT_EQ(str, "");
+
+    /**
+     * @tc.steps: step3. set radialCenterX  false and radialCenterY false.
+     */
+    SweepGradient sweepGradient;
+    gradient.SetSweepGradient(sweepGradient);
+    sweepJson = gradient.SweepGradientToJson();
+    auto jsonTemp = sweepJson->GetValue("center");
+    str = jsonTemp->GetString("0");
+    EXPECT_EQ(str, "");
+    str = jsonTemp->GetString("1");
+    EXPECT_EQ(str, "");
+
+    /**
+     * @tc.steps: step4. set radialCenterX  false and radialCenterY true.
+     */
+    SweepGradient sweepGradient1;
+    sweepGradient1.centerY = std::make_optional(TEST_LENGTH2);
+    gradient.SetSweepGradient(sweepGradient1);
+    sweepJson = gradient.SweepGradientToJson();
+    jsonTemp = sweepJson->GetValue("center");
+    str = jsonTemp->GetString("0");
+    EXPECT_EQ(str, "");
+    str = jsonTemp->GetString("1");
+    EXPECT_EQ(str, "");
+
+    /**
+     * @tc.steps: step5. set radialCenterX  true and radialCenterY false.
+     */
+    SweepGradient sweepGradient2;
+    sweepGradient2.centerX = std::make_optional(TEST_LENGTH1);
+    gradient.SetSweepGradient(sweepGradient2);
+    sweepJson = gradient.SweepGradientToJson();
+    jsonTemp = sweepJson->GetValue("center");
+    str = jsonTemp->GetString("0");
+    EXPECT_EQ(str, "");
+    str = jsonTemp->GetString("1");
+    EXPECT_EQ(str, "");
+
+    /**
+     * @tc.steps: step6. set radialCenterX  true and radialCenterY true.
+     */
+    sweepGradient.centerX = std::make_optional(TEST_LENGTH1);
+    sweepGradient.centerY = std::make_optional(TEST_LENGTH2);
+    gradient.SetSweepGradient(sweepGradient);
+    sweepJson = gradient.SweepGradientToJson();
+    jsonTemp = sweepJson->GetValue("center");
+    str = jsonTemp->GetString("0");
+    EXPECT_EQ(str, TEST_LENGTH1.ToString());
+    str = jsonTemp->GetString("1");
+    EXPECT_EQ(str, TEST_LENGTH2.ToString());
+    str = sweepJson->GetString("start");
+    EXPECT_EQ(str, "");
+    str = sweepJson->GetString("end");
+    EXPECT_EQ(str, "");
+}
+
+/**
+ * @tc.name: gradientPropertyTest006
+ * @tc.desc: LinearGradientToJson
+ * @tc.type: FUNC
+ */
+HWTEST_F(GradientPropertyTestNg, gradientPropertyTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Gradient and set type != RADIAL.
+     */
+    Gradient gradient = Gradient();
+    gradient.type_ = GradientType::SWEEP;
+    auto radialJson = gradient.RadialGradientToJson();
+    EXPECT_TRUE(radialJson);
+
+    /**
+     * @tc.steps: step1. Set type == RADIAL.
+     */
+    gradient.type_ = GradientType::RADIAL;
+    radialJson = gradient.RadialGradientToJson();
+    auto str = radialJson->GetString("radius");
+    EXPECT_EQ(str, "");
+
+    /**
+     * @tc.steps: step3. set radialCenterX false and radialCenterY false.
+     */
+    GradientColor color(Color::BLACK);
+    gradient.AddColor(color);
+    RadialGradient radialGradient;
+    gradient.SetRadialGradient(radialGradient);
+    radialJson = gradient.RadialGradientToJson();
+    auto jsonTemp = radialJson->GetValue("center");
+    str = jsonTemp->GetString("0");
+    EXPECT_EQ(str, "");
+    str = jsonTemp->GetString("1");
+    EXPECT_EQ(str, "");
+
+    /**
+     * @tc.steps: step4. set radialCenterX true and radialCenterY false.
+     */
+    RadialGradient radialGradient1;
+    radialGradient1.radialCenterX = std::make_optional(TEST_LENGTH3);
+    gradient.SetRadialGradient(radialGradient1);
+    radialJson = gradient.RadialGradientToJson();
+    jsonTemp = radialJson->GetValue("center");
+    str = jsonTemp->GetString("0");
+    EXPECT_EQ(str, "");
+    str = jsonTemp->GetString("1");
+    EXPECT_EQ(str, "");
+
+    /**
+     * @tc.steps: step5. set radialCenterX false and radialCenterY true.
+     */
+    RadialGradient radialGradient2;
+    radialGradient2.radialCenterY = std::make_optional(TEST_LENGTH4);
+    gradient.SetRadialGradient(radialGradient2);
+    radialJson = gradient.RadialGradientToJson();
+    jsonTemp = radialJson->GetValue("center");
+    str = jsonTemp->GetString("0");
+    EXPECT_EQ(str, "");
+    str = jsonTemp->GetString("1");
+    EXPECT_EQ(str, "");
+
+    /**
+     * @tc.steps: step6. set radialCenterX true and radialCenterY true.
+     */
+    radialGradient.radialCenterX = std::make_optional(TEST_LENGTH3);
+    radialGradient.radialCenterY = std::make_optional(TEST_LENGTH4);
+    gradient.SetRadialGradient(radialGradient);
+    radialJson = gradient.RadialGradientToJson();
+    jsonTemp = radialJson->GetValue("center");
+    str = jsonTemp->GetString("0");
+    EXPECT_EQ(str, TEST_LENGTH3.ToString());
+    str = jsonTemp->GetString("1");
+    EXPECT_EQ(str, TEST_LENGTH4.ToString());
+    str = radialJson->GetString("radius");
+    EXPECT_EQ(str, "");
+}
 } // namespace OHOS::Ace::NG

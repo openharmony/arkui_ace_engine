@@ -65,6 +65,10 @@ public:
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
     void SetDraggable(bool draggable) override;
     void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems) override;
+    void BindSelectionMenu(TextSpanType& spanType, TextResponseType& responseType, std::function<void()>& buildFunc,
+        SelectMenuParam& menuParam) override;
+    void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
+    RefPtr<TextControllerBase> GetTextController() override;
 
     static void SetFontWeight(FrameNode* frameNode, Ace::FontWeight value);
     static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);

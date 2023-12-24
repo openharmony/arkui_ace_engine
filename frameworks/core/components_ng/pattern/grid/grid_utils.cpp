@@ -46,24 +46,28 @@ std::string GridUtils::ParseArgs(const std::string& args)
     return rowsArgs;
 }
 
-float GridUtils::GetMainGap(const RefPtr<GridLayoutProperty>& gridLayoutProperty, const SizeF& frameSize, Axis axis)
+namespace {
+inline float GetRowGap(const RefPtr<GridLayoutProperty>& props, float frameHeight)
 {
-    auto scale = gridLayoutProperty->GetLayoutConstraint()->scaleProperty;
-    auto rowsGap =
-        ConvertToPx(gridLayoutProperty->GetRowsGap().value_or(0.0_vp), scale, frameSize.Height()).value_or(0);
-    auto columnsGap =
-        ConvertToPx(gridLayoutProperty->GetColumnsGap().value_or(0.0_vp), scale, frameSize.Width()).value_or(0);
-    return axis == Axis::HORIZONTAL ? columnsGap : rowsGap;
+    auto scale = props->GetLayoutConstraint()->scaleProperty;
+    return ConvertToPx(props->GetRowsGap().value_or(0.0_vp), scale, frameHeight).value_or(0);
 }
 
-float GridUtils::GetCrossGap(const RefPtr<GridLayoutProperty>& gridLayoutProperty, const SizeF& frameSize, Axis axis)
+inline float GetColumnGap(const RefPtr<GridLayoutProperty>& props, float frameWidth)
 {
-    auto scale = gridLayoutProperty->GetLayoutConstraint()->scaleProperty;
-    auto rowsGap =
-        ConvertToPx(gridLayoutProperty->GetRowsGap().value_or(0.0_vp), scale, frameSize.Height()).value_or(0);
-    auto columnsGap =
-        ConvertToPx(gridLayoutProperty->GetColumnsGap().value_or(0.0_vp), scale, frameSize.Width()).value_or(0);
-    return axis == Axis::HORIZONTAL ? rowsGap : columnsGap;
+    auto scale = props->GetLayoutConstraint()->scaleProperty;
+    return ConvertToPx(props->GetColumnsGap().value_or(0.0_vp), scale, frameWidth).value_or(0);
+}
+} // namespace
+
+float GridUtils::GetMainGap(const RefPtr<GridLayoutProperty>& props, const SizeF& frameSize, Axis axis)
+{
+    return axis == Axis::HORIZONTAL ? GetColumnGap(props, frameSize.Width()) : GetRowGap(props, frameSize.Height());
+}
+
+float GridUtils::GetCrossGap(const RefPtr<GridLayoutProperty>& props, const SizeF& frameSize, Axis axis)
+{
+    return axis == Axis::HORIZONTAL ? GetRowGap(props, frameSize.Height()) : GetColumnGap(props, frameSize.Width());
 }
 
 } // namespace OHOS::Ace::NG

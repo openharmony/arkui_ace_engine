@@ -68,6 +68,7 @@ private:
     double defaultPickerItemHeight_ = 0.0;
     bool isDefaultPickerItemHeight_ = false;
     int32_t halfDisplayCounts_ = 0;
+    void InitGradient(const float& gradientPercent, const RefPtr<FrameNode> stackNode);
 
     ACE_DISALLOW_COPY_AND_MOVE(TextPickerLayoutAlgorithm);
 };

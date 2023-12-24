@@ -15,7 +15,6 @@
 
 #include "core/components_ng/pattern/patternlock/patternlock_pattern.h"
 
-#include "core/components/test/unittest/image/image_test_utils.h"
 #include "core/components_ng/pattern/patternlock/patternlock_paint_property.h"
 #include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/property/calc_length.h"

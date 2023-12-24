@@ -74,6 +74,11 @@ public:
         resizeFunc_(size);
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 private:
     std::function<void()> resetFunc_;

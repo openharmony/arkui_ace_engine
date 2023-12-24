@@ -60,7 +60,6 @@ struct LoadCallback {
     FailedCallback failedCallback;
 };
 
-class FlutterRenderImage;
 class ImageProvider {
 public:
     static void TryLoadImageInfo(const RefPtr<PipelineBase>& context, const std::string& src,

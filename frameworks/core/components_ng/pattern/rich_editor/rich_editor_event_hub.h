@@ -17,7 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RICH_EDITOR_RICH_EDITOR_EVENT_HUB_H
 
 #include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
+#include "core/components_ng/pattern/rich_editor/selection_info.h"
 
 namespace OHOS::Ace::NG {
 class TextInsertValueInfo {

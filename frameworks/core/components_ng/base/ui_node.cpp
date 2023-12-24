@@ -675,6 +675,16 @@ RefPtr<LayoutWrapperNode> UINode::CreateLayoutWrapper(bool forceMeasure, bool fo
     return frameChild ? frameChild->CreateLayoutWrapper(forceMeasure, forceLayout) : nullptr;
 }
 
+bool UINode::RenderCustomChild(int64_t deadline)
+{
+    for (const auto& child : GetChildren()) {
+        if (child && !child->RenderCustomChild(deadline)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void UINode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
 {
     for (const auto& child : GetChildren()) {
@@ -944,8 +954,8 @@ std::string UINode::GetCurrentCustomNodeInfo()
             auto custom = DynamicCast<CustomNode>(parent);
             auto list = custom->GetExtraInfos();
             for (const auto& child : list) {
-                extraInfo.append("    ").append(child.page).append(":")
-                    .append(std::to_string(child.line)).append("\n");
+                extraInfo.append("    ").append("at (").append(child.page).append(":")
+                    .append(std::to_string(child.line)).append(")\n");
             }
             break;
         }

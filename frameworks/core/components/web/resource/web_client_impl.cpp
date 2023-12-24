@@ -783,6 +783,14 @@ void WebClientImpl::OnFirstContentfulPaint(int64_t navigationStartTick, int64_t 
     delegate->OnFirstContentfulPaint(navigationStartTick, firstContentfulPaintMs);
 }
 
+void WebClientImpl::OnSafeBrowsingCheckResult(int threat_type)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnSafeBrowsingCheckResult(threat_type);
+}
+
 void WebClientImpl::OnCompleteSwapWithNewSize()
 {
     ContainerScope scope(instanceId_);
@@ -850,6 +858,20 @@ void WebClientImpl::OnScrollState(bool scrollState)
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     delegate->OnScrollState(scrollState);
+}
+void WebClientImpl::OnNativeEmbedLifecycleChange(const NWeb::NativeEmbedDataInfo& dataInfo)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnNativeEmbedLifecycleChange(dataInfo);
+}
+void WebClientImpl::OnNativeEmbedGestureEvent(const NWeb::NativeEmbedTouchEvent& event)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnNativeEmbedGestureEvent(event);
 }
 
 void WebClientImpl::OnRootLayerChanged(int width, int height)

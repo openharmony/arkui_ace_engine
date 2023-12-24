@@ -110,6 +110,17 @@ RefPtr<SpanNode> SpanNode::GetOrCreateSpanNode(int32_t nodeId)
     return spanNode;
 }
 
+RefPtr<SpanNode> SpanNode::GetOrCreateSpanNode(const std::string& tag, int32_t nodeId)
+{
+    auto spanNode = ElementRegister::GetInstance()->GetSpecificItemById<SpanNode>(nodeId);
+    if (spanNode) {
+        return spanNode;
+    }
+    spanNode = MakeRefPtr<SpanNode>(tag, nodeId);
+    ElementRegister::GetInstance()->AddUINode(spanNode);
+    return spanNode;
+}
+
 void SpanNode::MountToParagraph()
 {
     auto parent = GetParent();
@@ -171,15 +182,18 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
     auto spanContent = GetSpanContent(content);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, -1);
-    auto textLayoutProp = pattern->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_RETURN(textLayoutProp, -1);
-    if (textLayoutProp->GetCopyOptionValue(CopyOptions::None) != CopyOptions::None && pattern->GetTextDetectEnable() &&
-        !aiSpanMap.empty()) {
+    if (pattern->NeedShowAIDetect() && !aiSpanMap.empty()) {
         UpdateTextStyleForAISpan(spanContent, builder, textStyle);
     } else {
         UpdateTextStyle(spanContent, builder, textStyle);
     }
     textStyle_ = textStyle;
+
+    auto symbolUnicode = GetSymbolUnicode();
+    if (symbolUnicode != 0) {
+        builder->AddSymbol(symbolUnicode);
+    }
+
     for (const auto& child : children) {
         if (child) {
             if (!aiSpanMap.empty()) {
@@ -206,17 +220,14 @@ void SpanItem::UpdateTextStyleForAISpan(
     int32_t preEnd = spanStart;
     while (!aiSpanMap.empty()) {
         auto aiSpan = aiSpanMap.begin()->second;
-        if (aiSpan.start >= position) {
+        if (aiSpan.start >= position || preEnd >= position) {
             break;
-        }
-        if (aiSpan.end <= spanStart) {
-            aiSpanMap.erase(aiSpanMap.begin());
-            continue;
         }
         int32_t aiSpanStartInSpan = std::max(spanStart, aiSpan.start);
         int32_t aiSpanEndInSpan = std::min(position, aiSpan.end);
-        if (aiSpanStartInSpan < preEnd) {
+        if (aiSpan.end <= spanStart || aiSpanStartInSpan < preEnd) {
             TAG_LOGI(AceLogTag::ACE_TEXT, "Error prediction");
+            aiSpanMap.erase(aiSpanMap.begin());
             continue;
         }
         if (preEnd < aiSpanStartInSpan) {
@@ -360,6 +371,11 @@ std::string SpanItem::GetSpanContent(const std::string& rawContent)
 std::string SpanItem::GetSpanContent()
 {
     return content;
+}
+
+uint32_t SpanItem::GetSymbolUnicode()
+{
+    return unicode;
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK

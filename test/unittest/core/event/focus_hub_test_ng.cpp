@@ -356,23 +356,38 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg008, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
+     * @tc.expected: The default value of focusable_ is false.
      */
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    EXPECT_FALSE(focusHub->focusable_);
 
     /**
-     * @tc.steps2: call the function SetFocusable with true
+     * @tc.steps2: Set focusable_ to true implicitly.
+     * @tc.expected: The value of focusable_ is true.
+     */
+    focusHub->SetFocusable(true, false);
+    EXPECT_TRUE(focusHub->focusable_);
+
+    /**
+     * @tc.steps3:Set focusable_ to false explicitly.
+     * @tc.expected: The value of focusable_ is false.
+     */
+    focusHub->SetFocusable(false);
+
+    /**
+     * @tc.steps4:Set focusable_ to true implicitly.
+     * @tc.expected: The value of focusable_ is false.
+     */
+    focusHub->SetFocusable(true, false);
+    EXPECT_FALSE(focusHub->focusable_);
+
+    /**
+     * @tc.steps5:Set focusable_ to true explicitly.
      * @tc.expected: The value of focusable_ is true.
      */
     focusHub->SetFocusable(true);
     EXPECT_TRUE(focusHub->focusable_);
-
-    /**
-     * @tc.steps3: call the function SetFocusable with false
-     * @tc.expected: The value of focusable_ is false.
-     */
-    focusHub->SetFocusable(false);
-    EXPECT_FALSE(focusHub->focusable_);
 }
 
 /**
@@ -3071,37 +3086,6 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0081, TestSize.Level1)
 }
 
 /**
- * @tc.name: FocusHubTestNg082
- * @tc.desc: Test the function RefreshParentFocusable.
- * @tc.type: FUNC
- */
-HWTEST_F(FocusHubTestNg, FocusHubTestNg0082, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: create focusHub and construct allNodes.
-     */
-    auto frameNode = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
-    frameNode->GetOrCreateFocusHub();
-    auto focusHub = frameNode->GetFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-
-    auto frameNode1 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
-    frameNode1->GetOrCreateFocusHub();
-    auto focusHub1 = frameNode1->GetFocusHub();
-
-    auto frameNode2 = FrameNode::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
-    frameNode2->GetOrCreateFocusHub();
-    auto focusHub2 = frameNode2->GetFocusHub();
-
-    focusHub1->parentFocusable_ = false;
-    focusHub->focusType_ = FocusType::SCOPE;
-    frameNode->children_.push_back(frameNode1);
-    frameNode->children_.push_back(frameNode2);
-    focusHub->RefreshParentFocusable(true);
-    ASSERT_TRUE(focusHub1->parentFocusable_);
-}
-
-/**
  * @tc.name: FocusHubTestNg083
  * @tc.desc: Test the function FocusToHeadOrTailChild.
  * @tc.type: FUNC
@@ -3572,13 +3556,7 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0099, TestSize.Level1)
     frameNode->children_.push_back(frameNode1);
     auto rootScope = focusHub->GetChildren().front();
     rootScope->focusType_ = FocusType::SCOPE;
-    focusHub->SetEnabledNode(true);
-    ASSERT_TRUE(focusHub->currentFocus_ == false);
-    focusHub->SetEnabledScope(true);
     ASSERT_TRUE(focusHub->IsFocusableNode());
-    focusHub->SetShowNode(true);
-    ASSERT_TRUE(focusHub->currentFocus_ == false);
-    focusHub->SetShowScope(true);
     ASSERT_TRUE(focusHub->currentFocus_ == false);
     EXPECT_TRUE(focusHub->GetFrameNode() != nullptr);
     EXPECT_TRUE(focusHub->GetGeometryNode() != nullptr);
@@ -3590,6 +3568,35 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0099, TestSize.Level1)
     ASSERT_FALSE(focusHub->HandleFocusOnMainView());
     focusHub->GetMainViewRootScope()->focusDepend_ = FocusDependence::SELF;
     ASSERT_TRUE(focusHub->HandleFocusOnMainView());
+}
+
+/**
+ * @tc.name: FocusHubTestNg0100
+ * @tc.desc: Test the function IsImplicitFocusableScope.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0100, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->SetEnabled(true);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+
+    /**
+     * @tc.steps2: Set focusHub to scope type.
+     * @tc.expected: The default value of focusable_ is false.
+     */
+    focusHub->focusType_ = FocusType::SCOPE;
+    EXPECT_FALSE(focusHub->IsImplicitFocusableScope());
+
+    /**
+     * @tc.steps3: Set focusable_ to true implicitly.
+     * @tc.expected: The value of focusable_ is true.
+     */
+    focusHub->SetFocusable(true, false);
+    EXPECT_TRUE(focusHub->IsImplicitFocusableScope());
 }
 
 /**
@@ -3613,11 +3620,11 @@ HWTEST_F(FocusHubTestNg, LostFocusToViewRoot001, TestSize.Level1)
 }
 
 /*
- * @tc.name: SetEnabledNode01
- * @tc.desc: Test the function SetEnabledScope and SetEnabledScope.
+ * @tc.name: SetEnabled01
+ * @tc.desc: Test the function SetEnabled.
  * @tc.type: FUNC
  */
-HWTEST_F(FocusHubTestNg, SetEnabledScope001, TestSize.Level1)
+HWTEST_F(FocusHubTestNg, SetEnabled001, TestSize.Level1)
 {
     /**
      * @tc.steps1: create focusHub and construct allNodes.
@@ -3627,17 +3634,9 @@ HWTEST_F(FocusHubTestNg, SetEnabledScope001, TestSize.Level1)
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
 
-    focusHub->SetEnabledNode(true);
-    ASSERT_TRUE(focusHub->currentFocus_ == false);
+    focusHub->currentFocus_ = true;
 
-    focusHub->SetEnabledScope(true);
-    ASSERT_TRUE(focusHub->IsFocusableNode());
-
-    focusHub->SetShowNode(true);
-    ASSERT_TRUE(focusHub->currentFocus_ == false);
-
-    focusHub->SetShowScope(true);
-    ASSERT_TRUE(focusHub->currentFocus_ == false);
-    ASSERT_FALSE(focusHub->HandleFocusOnMainView());
+    focusHub->SetEnabled(false);
+    ASSERT_FALSE(focusHub->currentFocus_);
 }
 } // namespace OHOS::Ace::NG

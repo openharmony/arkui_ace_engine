@@ -1474,7 +1474,10 @@ bool JsiPaEngine::OnShare(int64_t formId, OHOS::AAFwk::WantParams& wantParams)
     }
 
     const std::vector<shared_ptr<JsValue>> argv = { runtime->NewString(std::to_string(formId)) };
-    auto func = GetPaFunc("onShare");
+    auto func = GetPaFunc("onShareForm");
+    if (func == nullptr) {
+        func = GetPaFunc("onShare");
+    }
     auto result = CallFuncWithDefaultThis(func, argv);
     if (result == nullptr) {
         LOGE("JsiPaEngine Call function result is nullptr!");

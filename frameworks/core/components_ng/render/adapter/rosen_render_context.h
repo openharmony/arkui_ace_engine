@@ -242,6 +242,8 @@ public:
 
     void GetPointWithRevert(PointF& point) override;
 
+    void GetPointTransform(PointF& point) override;
+
     void GetPointWithTransform(PointF& point) override;
 
     void ClearDrawCommands() override;
@@ -306,6 +308,8 @@ public:
     void SetFrameGravity(OHOS::Rosen::Gravity gravity) override;
 
     int32_t CalcExpectedFrameRate(const std::string& scene, float speed) override;
+
+    void SetBackgroundShader(const std::shared_ptr<Rosen::RSShader>& shader);
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -481,6 +485,7 @@ private:
     float RoundValueToPixelGrid(float value, bool forceCeil, bool forceFloor);
     void RoundToPixelGrid(float absoluteLeft, float absoluteTop);
     Matrix4 GetRevertMatrix();
+    Matrix4 GetMatrix();
     bool IsUniRenderEnabled() override;
 
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
@@ -522,6 +527,7 @@ private:
     std::shared_ptr<Rosen::RSProperty<Rosen::Vector2f>> pivotProperty_;
     std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;
     std::shared_ptr<OverlayTextModifier> modifier_ = nullptr;
+    std::shared_ptr<GradientStyleModifier> gradientStyleModifier_;
 
     // translate modifiers for developer
     std::shared_ptr<Rosen::RSTranslateModifier> translateXY_;

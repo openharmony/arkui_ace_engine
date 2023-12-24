@@ -31,7 +31,7 @@
 #include "test/mock/core/render/mock_render_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
-#include "core/components/scroll/scrollable.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/event_hub.h"
@@ -4741,8 +4741,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleClick002, TestSize.Level1)
     RefPtr<Scrollable> scrollable = AceType::MakeRefPtr<Scrollable>();
     ASSERT_NE(scrollable, nullptr);
     scrollable->SetAxis(Axis::HORIZONTAL);
-    scrollable->springController_ = nullptr;
-    scrollable->controller_ = nullptr;
     auto scrollableEvent = AceType::MakeRefPtr<ScrollableEvent>(Axis::HORIZONTAL);
     scrollableEvent->SetAxis(Axis::VERTICAL);
     scrollableEvent->SetScrollable(scrollable);
@@ -4770,7 +4768,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleClick002, TestSize.Level1)
     springController->status_ = Animator::Status::RUNNING;
     for (int i = 0; i <= 1; i++) {
         tabBarPattern->HandleClick(info);
-        scrollable->springController_ = springController;
         tabBarPattern->scrollableEvent_ = scrollableEvent;
     }
 
@@ -5292,8 +5289,6 @@ HWTEST_F(TabsTestNg, TabBarPatternInitScrollable002, TestSize.Level1)
     auto scrollable = AceType::MakeRefPtr<Scrollable>();
     ASSERT_NE(scrollable, nullptr);
     scrollable->SetAxis(Axis::HORIZONTAL);
-    scrollable->springController_ = nullptr;
-    scrollable->controller_ = nullptr;
     auto scrollableEvent = AceType::MakeRefPtr<ScrollableEvent>(Axis::HORIZONTAL);
     scrollableEvent->SetAxis(Axis::VERTICAL);
     scrollableEvent->SetScrollable(scrollable);
@@ -9072,8 +9067,6 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleClick005, TestSize.Level1)
     RefPtr<Scrollable> scrollable = AceType::MakeRefPtr<Scrollable>();
     ASSERT_NE(scrollable, nullptr);
     scrollable->SetAxis(Axis::HORIZONTAL);
-    scrollable->springController_ = nullptr;
-    scrollable->controller_ = nullptr;
     auto scrollableEvent = AceType::MakeRefPtr<ScrollableEvent>(Axis::HORIZONTAL);
     scrollableEvent->SetAxis(Axis::VERTICAL);
     scrollableEvent->SetScrollable(scrollable);
@@ -9188,11 +9181,7 @@ HWTEST_F(TabsTestNg, TabBarPatternHandleClick006, TestSize.Level1)
     info.deviceType_ = SourceType::MOUSE;
     tabBarPattern->scrollableEvent_->scrollable_ = AceType::MakeRefPtr<Scrollable>();
     auto scrollable = tabBarPattern->scrollableEvent_->GetScrollable();
-    scrollable->springController_ = AceType::MakeRefPtr<Animator>("test");
-    scrollable->springController_->status_ = Animator::Status::PAUSED;
-    tabBarPattern->HandleClick(info);
-    EXPECT_NE(tabBarPattern->scrollableEvent_->GetScrollable(), nullptr);
-    EXPECT_NE(tabBarPattern->scrollableEvent_->GetScrollable()->IsSpringStopped(), false);
+
     layoutProperty->UpdateTabBarMode(TabBarMode::FIXED);
     tabBarPattern->HandleClick(info);
     EXPECT_NE(tabBarPattern->scrollableEvent_->GetScrollable(), nullptr);

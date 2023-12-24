@@ -72,6 +72,11 @@ public:
 
     virtual void Destroy() = 0;
 
+    virtual bool IsKeyboard()
+    {
+        return false;
+    }
+
     virtual void DestroyView() {}
 
     // Get the instance id of this container
@@ -323,6 +328,16 @@ public:
         isFRSCardContainer_ = isFRSCardContainer;
     }
 
+    bool IsDynamicRender() const
+    {
+        return isDynamicRender_;
+    }
+
+    void SetIsDynamicRender(bool isDynamicRender)
+    {
+        isDynamicRender_ = isDynamicRender;
+    }
+
     void SetPageUrlChecker(const RefPtr<PageUrlChecker>& pageUrlChecker)
     {
         pageUrlChecker_ = pageUrlChecker;
@@ -438,6 +453,7 @@ protected:
     std::mutex stateMutex_;
     Frontend::State state_ = Frontend::State::UNDEFINE;
     bool isFRSCardContainer_ = false;
+    bool isDynamicRender_ = false;
 
 private:
     std::string moduleName_;

@@ -123,7 +123,7 @@ struct DragDropBaseInfo {
 using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
 using OnDragDropFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
 using OnChildTouchTestFunc = std::function<TouchResult(const std::vector<TouchTestInfo>& touchInfo)>;
-
+using OnReponseRegionFunc = std::function<void(const std::vector<DimensionRect>&)>;
 struct DragDropInfo {
     RefPtr<UINode> customNode;
     RefPtr<PixelMap> pixelMap;
@@ -207,6 +207,15 @@ public:
             touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
         }
         touchEventActuator_->ReplaceTouchEvent(std::move(touchEventFunc));
+    }
+
+    // Set by node container.
+    void SetOnTouchEvent(TouchEventFunc&& touchEventFunc)
+    {
+        if (!touchEventActuator_) {
+            touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
+        }
+        touchEventActuator_->SetOnTouchEvent(std::move(touchEventFunc));
     }
 
     void AddTouchEvent(const RefPtr<TouchEventImpl>& touchEvent)
@@ -401,11 +410,19 @@ public:
         return mouseResponseRegion_;
     }
 
+    void SetResponseRegionFunc(const OnReponseRegionFunc& func)
+    {
+        responseRegionFunc_ = func;
+    }
+
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
     {
         responseRegion_ = responseRegion;
         if (!responseRegion_.empty()) {
             isResponseRegion_ = true;
+        }
+        if (responseRegionFunc_) {
+            responseRegionFunc_(responseRegion_);
         }
     }
 
@@ -431,6 +448,10 @@ public:
     {
         responseRegion_.emplace_back(responseRect);
         isResponseRegion_ = true;
+
+        if (responseRegionFunc_) {
+            responseRegionFunc_(responseRegion_);
+        }
     }
 
     void RemoveLastResponseRect()
@@ -442,6 +463,10 @@ public:
         responseRegion_.pop_back();
         if (responseRegion_.empty()) {
             isResponseRegion_ = false;
+        }
+
+        if (responseRegionFunc_) {
+            responseRegionFunc_(responseRegion_);
         }
     }
 
@@ -527,7 +552,7 @@ public:
     void GenerateMousePixelMap(const GestureEvent& info);
     OffsetF GetPixelMapOffset(
         const GestureEvent& info, const SizeF& size, const float scale = 1.0f, const bool needScale = false) const;
-    float GetPixelMapScale(const DragPreviewOption& option, const int32_t height, const int32_t width) const;
+    float GetPixelMapScale(const int32_t height, const int32_t width) const;
     bool IsPixelMapNeedScale() const;
 #endif // ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
@@ -606,6 +631,7 @@ private:
     GestureEvent gestureInfoForWeb_;
     bool isReceivedDragGestureInfo_ = false;
     OnChildTouchTestFunc onChildTouchTestFunc_;
+    OnReponseRegionFunc responseRegionFunc_;
 
     GestureJudgeFunc gestureJudgeFunc_;
     GestureJudgeFunc gestureJudgeNativeFunc_;

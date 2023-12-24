@@ -20,7 +20,7 @@ const NAVIGATION_MODE_RANGE = 2;
 const DEFAULT_NAV_BAR_WIDTH = 240;
 const MIN_NAV_BAR_WIDTH_DEFAULT = '240vp';
 const MAX_NAV_BAR_WIDTH_DEFAULT = '40%';
-const NAVIGATION_TITLE_MODE_DEFAULT = 0
+const NAVIGATION_TITLE_MODE_DEFAULT = 0;
 const DEFAULT_UNIT = 'vp';
 
 class ArkNavigationComponent extends ArkComponent implements NavigationAttribute {
@@ -31,8 +31,8 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     modifierWithKey(this._modifiersWithKeys, NavBarWidthModifier.identity, NavBarWidthModifier, value);
     return this;
   }
-  navBarPosition(value: NavBarPosition): NavigationAttribute {
-    modifier(this._modifiers, NavBarPositionModifier, value);
+  navBarPosition(value: number): NavigationAttribute {
+    modifierWithKey(this._modifiersWithKeys, NavBarPositionModifier.identity, NavBarPositionModifier, value);
     return this;
   }
   navBarWidthRange(value: [Dimension, Dimension]): NavigationAttribute {
@@ -44,35 +44,35 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
 
     return this;
   }
-  mode(value: NavigationMode): NavigationAttribute {
-    modifier(this._modifiers, ModeModifier, value);
+  mode(value: number): NavigationAttribute {
+    modifierWithKey(this._modifiersWithKeys, ModeModifier.identity, ModeModifier, value);
     return this;
   }
   backButtonIcon(value: any): NavigationAttribute {
     modifierWithKey(this._modifiersWithKeys, BackButtonIconModifier.identity, BackButtonIconModifier, value);
-    return this
+    return this;
   }
   hideNavBar(value: boolean): NavigationAttribute {
-    modifier(this._modifiers, HideNavBarModifier, isBoolean(value) ? value : false);
+    modifierWithKey(this._modifiersWithKeys, HideNavBarModifier.identity, HideNavBarModifier, value);
     return this;
   }
   title(value: any): NavigationAttribute {
     throw new Error('Method not implemented.');
   }
   subTitle(value: string): NavigationAttribute {
-    modifier(this._modifiers, SubTitleModifier, value);
+    modifierWithKey(this._modifiersWithKeys, SubTitleModifier.identity, SubTitleModifier, value);
     return this;
   }
   hideTitleBar(value: boolean): NavigationAttribute {
-    modifier(this._modifiers, NavigationHideTitleBarModifier, isBoolean(value) ? value : false);
+    modifierWithKey(this._modifiersWithKeys, NavigationHideTitleBarModifier.identity, NavigationHideTitleBarModifier, value);
     return this;
   }
   hideBackButton(value: boolean): NavigationAttribute {
-    modifier(this._modifiers, HideBackButtonModifier, isBoolean(value) ? value : false);
+    modifierWithKey(this._modifiersWithKeys, HideBackButtonModifier.identity, HideBackButtonModifier, value);
     return this;
   }
   titleMode(value: NavigationTitleMode): NavigationAttribute {
-    modifier(this._modifiers, TitleModeModifier, value);
+    modifierWithKey(this._modifiersWithKeys, TitleModeModifier.identity, TitleModeModifier, value);
     return this;
   }
   menus(value: any): NavigationAttribute {
@@ -85,7 +85,7 @@ class ArkNavigationComponent extends ArkComponent implements NavigationAttribute
     throw new Error('Method not implemented.');
   }
   hideToolBar(value: boolean): NavigationAttribute {
-    modifier(this._modifiers, HideToolBarModifier, isBoolean(value) ? value : false);
+    modifierWithKey(this._modifiersWithKeys, HideToolBarModifier.identity, HideToolBarModifier, value);
     return this;
   }
   onTitleModeChange(callback: (titleMode: NavigationTitleMode) => void): NavigationAttribute {
@@ -109,19 +109,14 @@ class BackButtonIconModifier extends ModifierWithKey<boolean | object> {
   static identity: Symbol = Symbol('backButtonIcon');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().navigation.resetBackButtonIcon(node);
-    }
-    else {
-      GetUINativeModule().navigation.setBackButtonIcon(node, this.value);
+      getUINativeModule().navigation.resetBackButtonIcon(node);
+    } else {
+      getUINativeModule().navigation.setBackButtonIcon(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -132,18 +127,14 @@ class NavBarWidthRangeModifier extends ModifierWithKey<[Dimension, Dimension]> {
   static identity: Symbol = Symbol('navBarWidthRange');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().navigation.resetNavBarWidthRange(node);
+      getUINativeModule().navigation.resetNavBarWidthRange(node);
     } else {
-      GetUINativeModule().navigation.setNavBarWidthRange(node, this.value);
+      getUINativeModule().navigation.setNavBarWidthRange(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -155,18 +146,14 @@ class MinContentWidthModifier extends ModifierWithKey<Dimension> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().navigation.resetMinContentWidth(node);
+      getUINativeModule().navigation.resetMinContentWidth(node);
     } else {
-      GetUINativeModule().navigation.setMinContentWidth(node, this.value);
+      getUINativeModule().navigation.setMinContentWidth(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -178,22 +165,18 @@ class NavBarWidthModifier extends ModifierWithKey<Length> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().navigation.resetNavBarWidth(node);
+      getUINativeModule().navigation.resetNavBarWidth(node);
     } else {
-      GetUINativeModule().navigation.setNavBarWidth(node, this.value);
+      getUINativeModule().navigation.setNavBarWidth(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
-class NavBarPositionModifier extends Modifier<number> {
+class NavBarPositionModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -201,14 +184,14 @@ class NavBarPositionModifier extends Modifier<number> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().navigation.resetNavBarPosition(node);
+      getUINativeModule().navigation.resetNavBarPosition(node);
     } else {
-      GetUINativeModule().navigation.setNavBarPosition(node, this.value);
+      getUINativeModule().navigation.setNavBarPosition(node, this.value);
     }
   }
 }
 
-class ModeModifier extends Modifier<number> {
+class ModeModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -216,14 +199,14 @@ class ModeModifier extends Modifier<number> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().navigation.resetMode(node);
+      getUINativeModule().navigation.resetMode(node);
     } else {
-      GetUINativeModule().navigation.setMode(node, this.value);
+      getUINativeModule().navigation.setMode(node, this.value);
     }
   }
 }
 
-class HideToolBarModifier extends Modifier<boolean> {
+class HideToolBarModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -231,14 +214,14 @@ class HideToolBarModifier extends Modifier<boolean> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().navigation.resetHideToolBar(node);
+      getUINativeModule().navigation.resetHideToolBar(node);
     } else {
-      GetUINativeModule().navigation.setHideToolBar(node, this.value);
+      getUINativeModule().navigation.setHideToolBar(node, this.value);
     }
   }
 }
 
-class TitleModeModifier extends Modifier<number> {
+class TitleModeModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
   }
@@ -246,14 +229,14 @@ class TitleModeModifier extends Modifier<number> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().navigation.resetTitleMode(node);
+      getUINativeModule().navigation.resetTitleMode(node);
     } else {
-      GetUINativeModule().navigation.setTitleMode(node, this.value);
+      getUINativeModule().navigation.setTitleMode(node, this.value);
     }
   }
 }
 
-class HideBackButtonModifier extends Modifier<boolean> {
+class HideBackButtonModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -261,14 +244,14 @@ class HideBackButtonModifier extends Modifier<boolean> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().navigation.resetHideBackButton(node);
+      getUINativeModule().navigation.resetHideBackButton(node);
     } else {
-      GetUINativeModule().navigation.setHideBackButton(node, this.value);
+      getUINativeModule().navigation.setHideBackButton(node, this.value);
     }
   }
 }
 
-class SubTitleModifier extends Modifier<string> {
+class SubTitleModifier extends ModifierWithKey<string> {
   constructor(value: string) {
     super(value);
   }
@@ -276,14 +259,14 @@ class SubTitleModifier extends Modifier<string> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().navigation.resetSubTitle(node);
+      getUINativeModule().navigation.resetSubTitle(node);
     } else {
-      GetUINativeModule().navigation.setSubTitle(node, this.value);
+      getUINativeModule().navigation.setSubTitle(node, this.value);
     }
   }
 }
 
-class NavigationHideTitleBarModifier extends Modifier<boolean> {
+class NavigationHideTitleBarModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -291,14 +274,14 @@ class NavigationHideTitleBarModifier extends Modifier<boolean> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().navigation.resetHideTitleBar(node);
+      getUINativeModule().navigation.resetHideTitleBar(node);
     } else {
-      GetUINativeModule().navigation.setHideTitleBar(node, this.value);
+      getUINativeModule().navigation.setHideTitleBar(node, this.value);
     }
   }
 }
 
-class HideNavBarModifier extends Modifier<boolean> {
+class HideNavBarModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -306,9 +289,9 @@ class HideNavBarModifier extends Modifier<boolean> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().navigation.resetHideNavBar(node);
+      getUINativeModule().navigation.resetHideNavBar(node);
     } else {
-      GetUINativeModule().navigation.setHideNavBar(node, this.value);
+      getUINativeModule().navigation.setHideNavBar(node, this.value);
     }
   }
 }
@@ -316,10 +299,10 @@ class HideNavBarModifier extends Modifier<boolean> {
 // @ts-ignore
 globalThis.Navigation.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkNavigationComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

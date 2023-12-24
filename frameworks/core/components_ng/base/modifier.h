@@ -284,6 +284,8 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(NodeAnimatablePropertyBase);
 };
 
+using FinishCallback = std::function<void()>;
+
 template<typename T, typename S>
 class NodeAnimatableProperty : public NodeAnimatablePropertyBase {
     DECLARE_ACE_TYPE(NodeAnimatableProperty, NodeAnimatablePropertyBase);
@@ -313,6 +315,8 @@ public:
         }
         return {};
     }
+    void AnimateWithVelocity(const AnimationOption& option, T value, T velocity,
+        const FinishCallback& finishCallback);
 private:
     ACE_DISALLOW_COPY_AND_MOVE(NodeAnimatableProperty);
 };

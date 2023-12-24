@@ -646,6 +646,10 @@ bool NavigationModelNG::CreateNavBarNodeChildsIfNeeded(const RefPtr<NavBarNode>&
         ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TOOL_BAR_ETS_TAG, toolBarNodeId);
         auto toolBarNode = NavToolbarNode::GetOrCreateToolbarNode(
             V2::TOOL_BAR_ETS_TAG, toolBarNodeId, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+        toolBarNode->MarkModifyDone();
+        auto property = toolBarNode->GetLayoutProperty();
+        CHECK_NULL_RETURN(property, false);
+        property->UpdateVisibility(VisibleType::GONE);
         navBarNode->AddChild(toolBarNode);
         navBarNode->SetToolBarNode(toolBarNode);
         navBarNode->SetPreToolBarNode(toolBarNode);
@@ -674,24 +678,22 @@ bool NavigationModelNG::CreateContentNodeIfNeeded(const RefPtr<NavigationGroupNo
 
 bool NavigationModelNG::CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode)
 {
-    if (navigationGroupNode->GetDividerNode()) {
-        return true;
+    if (!navigationGroupNode->GetDividerNode()) {
+        int32_t dividerNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::DIVIDER_ETS_TAG, dividerNodeId);
+        auto dividerNode = FrameNode::GetOrCreateFrameNode(
+            V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+        navigationGroupNode->AddChild(dividerNode);
+        navigationGroupNode->SetDividerNode(dividerNode);
+
+        auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
+        CHECK_NULL_RETURN(dividerLayoutProperty, false);
+        dividerLayoutProperty->UpdateStrokeWidth(DIVIDER_WIDTH);
+        dividerLayoutProperty->UpdateVertical(true);
+        auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
+        CHECK_NULL_RETURN(dividerRenderProperty, false);
+        dividerRenderProperty->UpdateDividerColor(DIVIDER_COLOR);
     }
-
-    int32_t dividerNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::DIVIDER_ETS_TAG, dividerNodeId);
-    auto dividerNode = FrameNode::GetOrCreateFrameNode(
-        V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
-    navigationGroupNode->AddChild(dividerNode);
-    navigationGroupNode->SetDividerNode(dividerNode);
-
-    auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
-    CHECK_NULL_RETURN(dividerLayoutProperty, false);
-    dividerLayoutProperty->UpdateStrokeWidth(DIVIDER_WIDTH);
-    dividerLayoutProperty->UpdateVertical(true);
-    auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
-    CHECK_NULL_RETURN(dividerRenderProperty, false);
-    dividerRenderProperty->UpdateDividerColor(DIVIDER_COLOR);
 
     return true;
 }
@@ -1107,11 +1109,15 @@ void NavigationModelNG::SetCustomToolBar(const RefPtr<AceType>& customNode)
         }
     }
     navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
-    auto toolBarNode = navBarNode->GetToolBarNode();
+    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetToolBarNode());
     CHECK_NULL_VOID(toolBarNode);
     toolBarNode->Clean();
     customToolBar->MountToParent(toolBarNode);
     navBarNode->UpdatePrevToolBarIsCustom(true);
+    toolBarNode->SetHasValidContent(true);
+    auto property = toolBarNode->GetLayoutProperty();
+    CHECK_NULL_VOID(property);
+    property->UpdateVisibility(VisibleType::VISIBLE);
 }
 
 bool NavigationModelNG::NeedSetItems()
@@ -1138,7 +1144,7 @@ void NavigationModelNG::SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems)
         }
         navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
     }
-    auto toolBarNode = AceType::DynamicCast<FrameNode>(navBarNode->GetPreToolBarNode());
+    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetPreToolBarNode());
     CHECK_NULL_VOID(toolBarNode);
     auto rowProperty = toolBarNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(rowProperty);
@@ -1150,6 +1156,9 @@ void NavigationModelNG::SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems)
         UpdateBarItemNodeWithItem(barItemNode, toolBarItem);
         toolBarNode->AddChild(barItemNode);
     }
+    bool hasValidContent = !toolBarNode->GetChildren().empty();
+    toolBarNode->SetHasValidContent(hasValidContent);
+    rowProperty->UpdateVisibility(hasValidContent ? VisibleType::VISIBLE : VisibleType::GONE);
     navBarNode->SetToolBarNode(toolBarNode);
     navBarNode->SetPreToolBarNode(toolBarNode);
     navBarNode->UpdatePrevToolBarIsCustom(false);
@@ -1204,6 +1213,10 @@ void NavigationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolB
             containerNode->AddChild(toolBarItemNode);
         }
     }
+
+    bool hasValidContent = !containerNode->GetChildren().empty();
+    toolBarNode->SetHasValidContent(hasValidContent);
+    rowProperty->UpdateVisibility(hasValidContent ? VisibleType::VISIBLE : VisibleType::GONE);
 
     if (needMoreButton) {
         int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -1668,16 +1681,26 @@ void NavigationModelNG::SetTitleMode(FrameNode* frameNode, NG::NavigationTitleMo
 void NavigationModelNG::PutComponentInsideNavigator(
     NavigationGroupNode* navigationGroupNode, const RefPtr<NavBarNode>& navBarNode)
 {
-    // put component inside navigator pattern to trigger back navigation
-    auto navigator = FrameNode::CreateFrameNode(
-        V2::NAVIGATOR_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<NavigatorPattern>());
-    auto hub = navigator->GetEventHub<NavigatorEventHub>();
-    CHECK_NULL_VOID(hub);
-    hub->SetType(NavigatorType::BACK);
-    navigator->MarkModifyDone();
     auto backButtonNode = FrameNode::CreateFrameNode(
         V2::BACK_BUTTON_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ButtonPattern>());
     CHECK_NULL_VOID(backButtonNode);
+    auto gestureEventHub = backButtonNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    auto context = PipelineContext::GetCurrentContext();
+    auto clickCallback = [weakContext = WeakPtr<PipelineContext>(context)](GestureEvent& /* info */) {
+        auto context = weakContext.Upgrade();
+        CHECK_NULL_VOID(context);
+        bool result = context->OnBackPressed();
+        if (!result) {
+            auto delegate = EngineHelper::GetCurrentDelegate();
+            CHECK_NULL_VOID(delegate);
+            delegate->Back("");
+        }
+    };
+    gestureEventHub->AddClickEvent(AceType::MakeRefPtr<ClickEvent>(clickCallback));
+    auto buttonPattern = backButtonNode->GetPattern<ButtonPattern>();
+    CHECK_NULL_VOID(buttonPattern);
+    buttonPattern->SetSkipColorConfigurationUpdate();
     auto backButtonLayoutProperty = backButtonNode->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(backButtonLayoutProperty);
     backButtonLayoutProperty->UpdateUserDefinedIdealSize(
@@ -1716,13 +1739,30 @@ void NavigationModelNG::PutComponentInsideNavigator(
     backButtonImageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     backButtonImageNode->MountToParent(backButtonNode);
     backButtonImageNode->MarkModifyDone();
-    backButtonNode->MountToParent(navigator);
     backButtonNode->MarkModifyDone();
     auto hasBackButton = navBarNode->GetBackButton();
     if (hasBackButton) {
         hasBackButton->Clean();
     }
-    navBarNode->SetBackButton(navigator);
+    navBarNode->SetBackButton(backButtonNode);
     navBarNode->UpdateBackButtonNodeOperation(ChildNodeOperation::ADD);
+}
+
+void NavigationModelNG::SetIsCustomAnimation(bool isCustom)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsCustomAnimation(isCustom);
+}
+
+void NavigationModelNG::SetCustomTransition(NavigationTransitionEvent&& customTransition)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNavigationTransition(std::move(customTransition));
 }
 } // namespace OHOS::Ace::NG

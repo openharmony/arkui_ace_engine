@@ -67,6 +67,8 @@ struct ImageAnalyzerConfig {
 struct ImageAnalyzerInnerConfig {
     float contentWidth = 0.0f;
     float contentHeight = 0.0f;
+    double borderWidth[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+    double padding[4] = {0.0f, 0.0f, 0.0f, 0.0f};
     ImageFit imageFit = ImageFit::COVER;
     Matrix4 transformMat = Matrix4::CreateIdentity();
 };

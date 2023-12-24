@@ -16,7 +16,6 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 ace_unittest("navigation_test_ng") {
   type = "new"
   sources = [
-    "$ace_root/test/mock/core/common/mock_layout_inspector.cpp",
     "bar_item_test_ng.cpp",
     "nav_bar_test_ng.cpp",
     "navdestination_test_ng.cpp",

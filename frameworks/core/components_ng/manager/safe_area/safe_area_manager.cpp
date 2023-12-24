@@ -15,8 +15,10 @@
 #include "safe_area_manager.h"
 
 #include "base/utils/utils.h"
+#include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/pipeline_ng/pipeline_context.h"
+
 namespace OHOS::Ace::NG {
 bool SafeAreaManager::UpdateCutoutSafeArea(const SafeAreaInsets& safeArea)
 {
@@ -30,6 +32,15 @@ bool SafeAreaManager::UpdateSystemSafeArea(const SafeAreaInsets& safeArea)
         return false;
     }
     systemSafeArea_ = safeArea;
+    return true;
+}
+
+bool SafeAreaManager::UpdateNavArea(const SafeAreaInsets& safeArea)
+{
+    if (navSafeArea_ == safeArea) {
+        return false;
+    }
+    navSafeArea_ = safeArea;
     return true;
 }
 
@@ -59,7 +70,7 @@ SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& op
         res = res.Combine(cutoutSafeArea_);
     }
     if (opts.type & SAFE_AREA_TYPE_SYSTEM) {
-        res = res.Combine(systemSafeArea_);
+        res = res.Combine(systemSafeArea_).Combine(navSafeArea_);
     }
     if (keyboardSafeAreaEnabled_ && (opts.type & SAFE_AREA_TYPE_KEYBOARD)) {
         res.bottom_ = res.bottom_.Combine(keyboardInset_);
@@ -121,7 +132,7 @@ SafeAreaInsets SafeAreaManager::GetSafeArea() const
     if (ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_)) {
         return {};
     }
-    return systemSafeArea_.Combine(cutoutSafeArea_);
+    return systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
 }
 
 float SafeAreaManager::GetKeyboardOffset() const
@@ -130,5 +141,20 @@ float SafeAreaManager::GetKeyboardOffset() const
         return 0.0f;
     }
     return keyboardOffset_;
+}
+
+OffsetF SafeAreaManager::GetWindowWrapperOffset()
+{
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, OffsetF());
+    auto windowManager = pipelineContext->GetWindowManager();
+    auto isContainerModal = pipelineContext->GetWindowModal() == WindowModal::CONTAINER_MODAL && windowManager &&
+                            windowManager->GetWindowMode() == WindowMode::WINDOW_MODE_FLOATING;
+    if (isContainerModal) {
+        auto wrapperOffset = OffsetF(static_cast<float>((CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx()),
+            static_cast<float>((CONTAINER_TITLE_HEIGHT + CONTAINER_BORDER_WIDTH).ConvertToPx()));
+        return wrapperOffset;
+    }
+    return OffsetF();
 }
 } // namespace OHOS::Ace::NG

@@ -288,6 +288,13 @@ private:
     }
 };
 
+class TaskWrapper {
+public:
+    virtual void Call(const TaskExecutor::Task& task) = 0;
+
+    virtual ~TaskWrapper() = default;
+};
+
 class SingleTaskExecutor final {
 public:
     using Task = TaskExecutor::Task;

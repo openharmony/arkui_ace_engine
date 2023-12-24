@@ -1514,6 +1514,33 @@ Matrix4 RosenRenderContext::GetRevertMatrix()
     return Matrix4::Invert(translateMat * rotationMat * scaleMat);
 }
 
+Matrix4 RosenRenderContext::GetMatrix()
+{
+    auto center = rsNode_->GetStagingProperties().GetPivot();
+    int32_t degree = rsNode_->GetStagingProperties().GetRotation();
+    if (rsNode_->GetType() == RSUINodeType::DISPLAY_NODE && degree != 0) {
+        degree = 0;
+        return Matrix4();
+    }
+
+    auto translate = rsNode_->GetStagingProperties().GetTranslate();
+    auto scale = rsNode_->GetStagingProperties().GetScale();
+
+    RectF rect = GetPaintRectWithoutTransform();
+    auto centOffset = OffsetF(center[0] * rect.Width(), center[1] * rect.Height());
+    auto centerPos = rect.GetOffset() + centOffset;
+
+    auto translateMat = Matrix4::CreateTranslate(translate[0], translate[1], 0);
+    auto rotationMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
+                       Matrix4::CreateRotate(degree, 0, 0, 1) *
+                       Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
+    auto scaleMat = Matrix4::CreateTranslate(centerPos.GetX(), centerPos.GetY(), 0) *
+                    Matrix4::CreateScale(scale[0], scale[1], 1) *
+                    Matrix4::CreateTranslate(-centerPos.GetX(), -centerPos.GetY(), 0);
+
+    return translateMat * rotationMat * scaleMat;
+}
+
 Matrix4 RosenRenderContext::GetLocalTransformMatrix()
 {
     auto invertMat = GetRevertMatrix();
@@ -1529,6 +1556,15 @@ void RosenRenderContext::GetPointWithRevert(PointF& point)
     auto invertPoint = invertMat * tmp;
     point.SetX(invertPoint.GetX());
     point.SetY(invertPoint.GetY());
+}
+
+void RosenRenderContext::GetPointTransform(PointF& point)
+{
+    auto transformMat = GetMatrix();
+    Point tmp(point.GetX(), point.GetY());
+    auto transformPoint = transformMat * tmp;
+    point.SetX(transformPoint.GetX());
+    point.SetY(transformPoint.GetY());
 }
 
 void RosenRenderContext::GetPointWithTransform(PointF& point)
@@ -3147,6 +3183,12 @@ std::shared_ptr<Rosen::RSTransitionEffect> RosenRenderContext::GetRSTransitionWi
     return effect;
 }
 
+void RosenRenderContext::SetBackgroundShader(const std::shared_ptr<Rosen::RSShader>& shader)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetBackgroundShader(shader);
+}
+
 void RosenRenderContext::PaintGradient(const SizeF& frameSize)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -3161,12 +3203,11 @@ void RosenRenderContext::PaintGradient(const SizeF& frameSize)
     if (gradientProperty->HasSweepGradient()) {
         gradient = gradientProperty->GetSweepGradientValue();
     }
-#ifndef USE_ROSEN_DRAWING
-    auto shader = SkiaDecorationPainter::CreateGradientShader(gradient, frameSize);
-#else
-    auto shader = DrawingDecorationPainter::CreateGradientShader(gradient, frameSize);
-#endif
-    rsNode_->SetBackgroundShader(RSShader::CreateRSShader(shader));
+    if (!gradientStyleModifier_) {
+        gradientStyleModifier_ = std::make_shared<GradientStyleModifier>(WeakClaim(this));
+        rsNode_->AddModifier(gradientStyleModifier_);
+    }
+    gradientStyleModifier_->SetGradient(gradient);
 }
 
 void RosenRenderContext::OnLinearGradientUpdate(const NG::Gradient& gradient)

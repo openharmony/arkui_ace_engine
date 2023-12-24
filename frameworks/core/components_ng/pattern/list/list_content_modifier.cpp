@@ -26,12 +26,14 @@ ListContentModifier::ListContentModifier(const OffsetF& clipOffset, const SizeF&
     clipOffset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(clipOffset);
     clipSize_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(clipSize);
     clip_ = AceType::MakeRefPtr<PropertyBool>(true);
-    flushDivider_ = AceType::MakeRefPtr<PropertyBool>(true);
+    RefPtr<ListDividerArithmetic> lda = AceType::MakeRefPtr<ListDividerArithmetic>();
+    dividerList_ = AceType::MakeRefPtr<AnimatableArithmeticProperty>(
+        AceType::DynamicCast<CustomAnimatableArithmetic>(lda));
 
     AttachProperty(clipOffset_);
     AttachProperty(clipSize_);
     AttachProperty(clip_);
-    AttachProperty(flushDivider_);
+    AttachProperty(dividerList_);
 }
 
 void ListContentModifier::onDraw(DrawingContext& context)
@@ -43,73 +45,20 @@ void ListContentModifier::onDraw(DrawingContext& context)
             offset.GetX() + size.Width(), offset.GetY() + size.Height());
         context.canvas.ClipRect(clipRect, RSClipOp::INTERSECT);
     }
-    if (dividerInfo_.has_value()) {
-        PaintDivider(dividerInfo_.value(), itemPosition_, context.canvas);
-    }
-}
 
-void ListContentModifier::PaintDivider(
-    const DividerInfo& dividerInfo, const PositionMap& itemPosition, RSCanvas& canvas)
-{
-    float fSpacingTotal = (dividerInfo.lanes - 1) * dividerInfo.laneGutter;
-    float laneLen =
-        (dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes - dividerInfo.startMargin - dividerInfo.endMargin;
-    float crossLen = dividerInfo.crossSize - dividerInfo.startMargin - dividerInfo.endMargin;
-    DividerPainter dividerPainter(
-        dividerInfo.constrainStrokeWidth, crossLen, dividerInfo.isVertical, dividerInfo.color, LineCap::SQUARE);
-
-    int32_t lanes = dividerInfo.lanes;
-    int32_t laneIdx = 0;
-    bool lastIsItemGroup = false;
-    bool isFirstItem = (itemPosition.begin()->first == 0);
-    std::list<int32_t> lastLineIndex;
-
-    for (const auto& child : itemPosition) {
-        if (!isFirstItem) {
-            float divOffset = (dividerInfo.space + dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
-            float mainPos = child.second.startPos - divOffset + dividerInfo.mainPadding;
-            float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
-            if (lanes > 1 && !lastIsItemGroup && !child.second.isGroup) {
-                crossPos +=
-                    laneIdx * ((dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes + dividerInfo.laneGutter);
-                dividerPainter.SetDividerLength(laneLen);
-            } else {
-                dividerPainter.SetDividerLength(crossLen);
+    CHECK_NULL_VOID(dividerList_);
+    auto dividerlist = dividerList_->Get();
+    CHECK_NULL_VOID(dividerlist);
+    auto lda = AceType::DynamicCast<ListDividerArithmetic>(dividerlist);
+    CHECK_NULL_VOID(lda);
+    auto dividerMap = lda->GetDividerMap();
+    if (!dividerMap.empty()) {
+        DividerPainter dividerPainter(width_, 0, isVertical_, color_, LineCap::SQUARE);
+        for (auto child : dividerMap) {
+            if (child.second.length > 0) {
+                dividerPainter.SetDividerLength(child.second.length);
+                dividerPainter.DrawLine(context.canvas, child.second.offset);
             }
-            OffsetF offset = dividerInfo.isVertical ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
-            if (dividerPainter.GetDividerLength() > 0) {
-                dividerPainter.DrawLine(canvas, offset);
-            }
-        }
-        if (laneIdx == 0 || child.second.isGroup) {
-            lastLineIndex.clear();
-        }
-        lastLineIndex.emplace_back(child.first);
-        lastIsItemGroup = child.second.isGroup;
-        laneIdx = (lanes <= 1 || (laneIdx + 1) >= lanes || child.second.isGroup) ? 0 : laneIdx + 1;
-        isFirstItem = isFirstItem ? laneIdx > 0 : false;
-    }
-    if (!lastLineIndex.empty() && *lastLineIndex.rbegin() < dividerInfo.totalItemCount - 1) {
-        int32_t laneIdx = 0;
-        for (auto index : lastLineIndex) {
-            if (index + lanes >= dividerInfo.totalItemCount) {
-                break;
-            }
-            float divOffset = (dividerInfo.space - dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
-            float mainPos = itemPosition.at(index).endPos + divOffset + dividerInfo.mainPadding;
-            float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
-            if (lanes > 1 && !itemPosition.at(index).isGroup) {
-                crossPos +=
-                    laneIdx * ((dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes + dividerInfo.laneGutter);
-                dividerPainter.SetDividerLength(laneLen);
-            } else {
-                dividerPainter.SetDividerLength(crossLen);
-            }
-            OffsetF offset = dividerInfo.isVertical ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
-            if (dividerPainter.GetDividerLength() > 0) {
-                dividerPainter.DrawLine(canvas, offset);
-            }
-            laneIdx++;
         }
     }
 }

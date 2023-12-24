@@ -86,8 +86,6 @@ bool UnwrapNameFromJS(napi_env env, napi_value param, const std::string& key, AC
 {
     napi_value jsValue = AceGetPropertyValueByPropertyName(env, param, key.c_str(), napi_string);
     if (jsValue == nullptr) {
-        TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "%{public}s called, Params(%{public}s) is not string.", __func__,
-            key.c_str());
         return false;
     }
 
@@ -101,8 +99,6 @@ bool UnwrapKVObjectFromJS(
 {
     napi_value jsValue = AceGetPropertyValueByPropertyName(env, param, key.c_str(), napi_object);
     if (jsValue == nullptr) {
-        TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "%{public}s called, Params(%{public}s) is not object.", __func__,
-            key.c_str());
         return false;
     }
 
@@ -302,7 +298,7 @@ void AceRequestCompleteAsyncCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* a
         asyncCallbackInfo->jsParamList.paramList.GetStringValue("data"),
         asyncCallbackInfo->jsParamList.paramList.GetStringValue("jsonPath"));
     if (param != nullptr) {
-        TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "%{public}s called, pWant = %{public}s:%{public}s", __func__,
+        TAG_LOGD(AceLogTag::ACE_PLUGIN_COMPONENT, "Want = %{public}s:%{public}s",
             asyncCallbackInfo->wantStage.GetElement().GetBundleName().c_str(),
             asyncCallbackInfo->wantStage.GetElement().GetAbilityName().c_str());
         bool ret = JSPluginCallbackMgr::Instance().RegisterRequestEvent(
@@ -395,7 +391,7 @@ void AceRequestPromiseAsyncCallbackWork(napi_env env, ACEAsyncJSCallbackInfo* as
     asyncCallbackInfo->onRequestCallbackOK = false;
 
     if (param != nullptr) {
-        TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "%{public}s called, pWant = %{public}s:%{public}s", __func__,
+        TAG_LOGD(AceLogTag::ACE_PLUGIN_COMPONENT, "Want = %{public}s:%{public}s",
             asyncCallbackInfo->wantStage.GetElement().GetBundleName().c_str(),
             asyncCallbackInfo->wantStage.GetElement().GetAbilityName().c_str());
         JSPluginCallbackMgr::Instance().RegisterRequestEvent(

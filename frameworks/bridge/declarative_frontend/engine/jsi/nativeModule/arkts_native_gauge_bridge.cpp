@@ -37,18 +37,6 @@ void ResetColor(void* nativeNode)
 }
 }
 
-template<typename T>
-RefPtr<T> GetTheme()
-{
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, nullptr);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    return themeManager->GetTheme<T>();
-}
-
 void SortColorStopOffset(std::vector<NG::ColorStopArray>& colors)
 {
     for (auto& colorStopArray : colors) {
@@ -68,7 +56,7 @@ void SortColorStopOffset(std::vector<NG::ColorStopArray>& colors)
 void ConvertResourceColor(const EcmaVM* vm, const Local<JSValueRef>& item, std::vector<NG::ColorStopArray>& colors)
 {
     Color color;
-    if (!ArkTSUtils::ParseJsColor(vm, item, color)) {
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, item, color)) {
         color = ERROR_COLOR;
     }
     NG::ColorStopArray colorStopArray;
@@ -216,7 +204,7 @@ ArkUINativeModuleValue GaugeBridge::SetColors(ArkUIRuntimeCallInfo* runtimeCallI
     auto colors = std::make_unique<uint32_t[]>(length);
     auto weights = std::make_unique<float[]>(length);
 
-    auto theme = GetTheme<ProgressTheme>();
+    auto theme = ArkTSUtils::GetTheme<ProgressTheme>();
     for (int32_t i = 0; i < length; i++) {
         auto jsValue = jsColor->GetValueAt(vm, jsArg, i);
         if (!jsValue->IsArray(vm)) {
@@ -226,7 +214,7 @@ ArkUINativeModuleValue GaugeBridge::SetColors(ArkUIRuntimeCallInfo* runtimeCallI
         auto handle = panda::CopyableGlobal<panda::ArrayRef>(vm, jsValue);
         float weight = handle->GetValueAt(vm, jsValue, 1)->ToNumber(vm)->Value();
         Color selectedColor;
-        if (!ArkTSUtils::ParseJsColor(vm, handle->GetValueAt(vm, jsValue, 1), selectedColor)) {
+        if (!ArkTSUtils::ParseJsColorAlpha(vm, handle->GetValueAt(vm, jsValue, 1), selectedColor)) {
             selectedColor = ERROR_COLOR;
         }
         colors[i] = selectedColor.GetValue();

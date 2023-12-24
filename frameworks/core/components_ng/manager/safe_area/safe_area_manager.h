@@ -40,6 +40,14 @@ public:
     bool UpdateSystemSafeArea(const SafeAreaInsets& safeArea);
 
     /**
+     * @brief Updates the navigation indictor safe area.
+     *
+     * @param safeArea The new navigation indictor safe area.
+     * @return True if the system safe area was modified, false otherwise.
+     */
+    bool UpdateNavArea(const SafeAreaInsets& safeArea);
+
+    /**
      * @brief Retrieves the system safe area insets.
      *
      * This function returns the safe area insets of the system, which represents the portion of the screen that is
@@ -126,6 +134,8 @@ public:
         return safeAreaCurve_;
     }
 
+    OffsetF GetWindowWrapperOffset();
+
     bool SetIsFullScreen(bool value);
     bool SetIsNeedAvoidWindow(bool value);
     bool SetIgnoreSafeArea(bool value);
@@ -155,6 +165,7 @@ private:
 
     SafeAreaInsets systemSafeArea_;
     SafeAreaInsets cutoutSafeArea_;
+    SafeAreaInsets navSafeArea_;
     // keyboard is bottom direction only
     SafeAreaInsets::Inset keyboardInset_;
 

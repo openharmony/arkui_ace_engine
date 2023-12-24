@@ -41,8 +41,11 @@ ohos_unittest("parse_test_ng") {
   sources = [ "parse_test_ng.cpp" ]
 
   if (ace_use_rosen_drawing) {
-    defines = [ "ACE_ENABLE_GPU" ]
-    include_dirs = [ "//third_party/flutter/skia" ]
+    defines = [
+      "ACE_ENABLE_GPU",
+      "NEW_SKIA",
+    ]
+    include_dirs = [ "//third_party/skia" ]
   }
 
   deps = [

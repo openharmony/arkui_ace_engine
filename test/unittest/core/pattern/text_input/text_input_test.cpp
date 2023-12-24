@@ -91,6 +91,8 @@ constexpr int32_t DEFAULT_RETURN_VALUE = -1;
 const std::string DEFAULT_TEXT = "abcdefghijklmnopqrstuvwxyz";
 const std::string HELLO_TEXT = "hello";
 const std::string DEFAULT_PLACE_HOLDER = "please input text here";
+const std::string LOWERCASE_FILTER = "[a-z]";
+const std::string NUMBER_FILTER = "^[0-9]*$";
 const Color DEFAULT_PLACE_HODER_COLOR = Color::RED;
 const Color DEFAULT_SELECTED_BACKFROUND_COLOR = Color::BLUE;
 const Color DEFAULT_CARET_COLOR = Color::BLACK;
@@ -910,6 +912,78 @@ HWTEST_F(TextInputCursorTest, OnHandleMove003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnHandleMove004
+ * @tc.desc: Test the clip board interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCursorTest, OnHandleMove004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Initialize text input and Move the handles and then do handle selection.
+     */
+    std::vector<CaretMoveIntent> select = { CaretMoveIntent::LeftWord, CaretMoveIntent::RightWord,
+        CaretMoveIntent::Home, CaretMoveIntent::End };
+    CreateTextField(DEFAULT_PLACE_HOLDER, DEFAULT_PLACE_HOLDER);
+
+    /**
+     * @tc.steps: Move the handles and selection leftword "please".
+     *            Verify the selection data.
+     */
+    pattern_->HandleSetSelection(6, 6, false);
+    pattern_->HandleSelect(select[0]);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 6);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 0);
+
+    /**
+     * @tc.steps: Move the handles and selection rightword "input".
+     *            Verify the selection data.
+     */
+    pattern_->HandleSetSelection(7, 7, false);
+    pattern_->HandleSelect(select[1]);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 7);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 13);
+}
+
+/**
+ * @tc.name: OnHandleMove005
+ * @tc.desc: Test the clip board interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputCursorTest, OnHandleMove005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Initialize text input and Move the handles and then do handle selection.
+     */
+    int32_t start = 6;
+    int32_t end = 6;
+    std::vector<CaretMoveIntent> select = { CaretMoveIntent::LeftWord, CaretMoveIntent::RightWord,
+        CaretMoveIntent::Home, CaretMoveIntent::End };
+    CreateTextField(DEFAULT_PLACE_HOLDER, DEFAULT_PLACE_HOLDER);
+
+    /**
+     * @tc.steps: Move the handles and selection home.
+     *            Verify the selection data.
+     */
+    pattern_->HandleSetSelection(start, end, false);
+    pattern_->HandleSelect(select[2]);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 0);
+
+    /**
+     * @tc.steps: Move the handles and selection end.
+     *            Verify the selection data.
+     */
+    pattern_->HandleSetSelection(start, end, false);
+    pattern_->HandleSelect(select[3]);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, start);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 22);
+}
+
+/**
  * @tc.name: CursonMoveLeftTest001
  * @tc.desc: Test the curson move left
  * @tc.type: FUNC
@@ -1524,6 +1598,217 @@ HWTEST_F(TextFieldControllerTest, TextFiledControllerTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: KeyEventChar001
+ * @tc.desc: Test symbols key input
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEventChar001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    CreateTextField();
+    GetFocus();
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    event.pressedCodes = presscodes;
+    const std::unordered_map<KeyCode, wchar_t> symbols = {
+        { KeyCode::KEY_GRAVE, L'`' },
+        { KeyCode::KEY_MINUS, L'-' },
+        { KeyCode::KEY_EQUALS, L'=' },
+        { KeyCode::KEY_LEFT_BRACKET, L'[' },
+        { KeyCode::KEY_RIGHT_BRACKET, L']' },
+        { KeyCode::KEY_BACKSLASH, L'\\' },
+        { KeyCode::KEY_SEMICOLON, L';' },
+        { KeyCode::KEY_APOSTROPHE, L'\'' },
+        { KeyCode::KEY_COMMA, L',' },
+        { KeyCode::KEY_PERIOD, L'.' },
+        { KeyCode::KEY_SLASH, L'/' },
+        { KeyCode::KEY_SPACE, L' ' },
+        { KeyCode::KEY_NUMPAD_DIVIDE, L'/' },
+        { KeyCode::KEY_NUMPAD_MULTIPLY, L'*' },
+        { KeyCode::KEY_NUMPAD_SUBTRACT, L'-' },
+        { KeyCode::KEY_NUMPAD_ADD, L'+' },
+        { KeyCode::KEY_NUMPAD_DOT, L'.' },
+        { KeyCode::KEY_NUMPAD_COMMA, L',' },
+        { KeyCode::KEY_NUMPAD_EQUALS, L'=' },
+    };
+    /**
+     * @tc.expected: Calling the keyboard event interface
+     */
+    std::string result;
+    for (auto code : symbols) {
+        event.pressedCodes.clear();
+        event.pressedCodes.push_back(code.first);
+        event.code = code.first;
+        auto ret = pattern_->OnKeyEvent(event);
+        FlushLayoutTask(frameNode_);
+        std::wstring appendElement(1, code.second);
+        result.append(StringUtils::ToString(appendElement));
+        EXPECT_EQ(pattern_->GetTextValue(), result);
+        EXPECT_TRUE(ret);
+    }
+}
+
+/**
+ * @tc.name: KeyEventChar001
+ * @tc.desc: Test shift + symbols key input
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEventChar002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    CreateTextField();
+    GetFocus();
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    event.pressedCodes = presscodes;
+    std::vector<KeyCode> shiftCodes = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_SHIFT_RIGHT };
+    const std::unordered_map<KeyCode, wchar_t> symbols = {
+        { KeyCode::KEY_GRAVE, L'~' },
+        { KeyCode::KEY_MINUS, L'_' },
+        { KeyCode::KEY_EQUALS, L'+' },
+        { KeyCode::KEY_LEFT_BRACKET, L'{' },
+        { KeyCode::KEY_RIGHT_BRACKET, L'}' },
+        { KeyCode::KEY_BACKSLASH, L'|' },
+        { KeyCode::KEY_SEMICOLON, L':' },
+        { KeyCode::KEY_APOSTROPHE, L'\"' },
+        { KeyCode::KEY_COMMA, L'<' },
+        { KeyCode::KEY_PERIOD, L'>' },
+        { KeyCode::KEY_SLASH, L'?' },
+    };
+    /**
+     * @tc.expected: Calling the keyboard event interface
+     */
+    std::string result;
+    for (auto shift : shiftCodes) {
+        for (auto code : symbols) {
+            event.pressedCodes.clear();
+            event.pressedCodes.push_back(shift);
+            event.pressedCodes.push_back(code.first);
+            event.code = code.first;
+            auto ret = pattern_->OnKeyEvent(event);
+            FlushLayoutTask(frameNode_);
+            std::wstring appendElement(1, code.second);
+            result.append(StringUtils::ToString(appendElement));
+            EXPECT_EQ(pattern_->GetTextValue(), result);
+            EXPECT_TRUE(ret);
+        }
+    }
+}
+
+/**
+ * @tc.name: KeyEventChar003
+ * @tc.desc: Test uppercase letters input
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEventChar003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    CreateTextField();
+    GetFocus();
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    event.pressedCodes = presscodes;
+    std::vector<KeyCode> shiftCodes = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_SHIFT_RIGHT };
+    const std::unordered_map<KeyCode, wchar_t> symbols = {
+        { KeyCode::KEY_A, 'A' },
+        { KeyCode::KEY_B, 'B' },
+        { KeyCode::KEY_C, 'C' },
+        { KeyCode::KEY_X, 'X' },
+        { KeyCode::KEY_Y, 'Y' },
+        { KeyCode::KEY_Z, 'Z' },
+    };
+    /**
+     * @tc.expected: lowercase to uppercase
+     */
+    std::string result;
+    for (auto shift : shiftCodes) {
+        for (auto code : symbols) {
+            event.pressedCodes.clear();
+            EXPECT_EQ(event.pressedCodes.size(), 0);
+            event.pressedCodes.push_back(shift);
+            event.pressedCodes.push_back(code.first);
+            event.code = code.first;
+            auto ret = pattern_->OnKeyEvent(event);
+            FlushLayoutTask(frameNode_);
+            std::wstring appendElement(1, code.second);
+            result.append(StringUtils::ToString(appendElement));
+            EXPECT_EQ(pattern_->GetTextValue(), result);
+            EXPECT_TRUE(ret);
+        }
+    }
+}
+
+/**
+ * @tc.name: KeyEventChar004
+ * @tc.desc: Test Shift + 0-9 symbols input
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEventChar004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    CreateTextField();
+    GetFocus();
+    /**
+     * @tc.steps: step2. Create keyboard events
+     */
+    KeyEvent event;
+    event.action = KeyAction::DOWN;
+    std::vector<KeyCode> presscodes = {};
+    std::vector<KeyCode> shiftCodes = { KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_SHIFT_RIGHT };
+    const std::unordered_map<KeyCode, wchar_t> symbols = {
+        { KeyCode::KEY_0, ')' },
+        { KeyCode::KEY_1, '!' },
+        { KeyCode::KEY_2, '@' },
+        { KeyCode::KEY_3, '#' },
+        { KeyCode::KEY_4, '$' },
+        { KeyCode::KEY_5, '%' },
+        { KeyCode::KEY_6, '^' },
+        { KeyCode::KEY_7, '&' },
+        { KeyCode::KEY_8, '*' },
+        { KeyCode::KEY_9, '(' },
+    };
+    /**
+     * @tc.expected: shift + number to input
+     */
+    std::string result;
+    for (auto shift : shiftCodes) {
+        for (auto code : symbols) {
+            event.pressedCodes.clear();
+            EXPECT_EQ(event.pressedCodes.size(), 0);
+            event.pressedCodes.push_back(shift);
+            event.pressedCodes.push_back(code.first);
+            event.code = code.first;
+            auto ret = pattern_->OnKeyEvent(event);
+            FlushLayoutTask(frameNode_);
+            std::wstring appendElement(1, code.second);
+            result.append(StringUtils::ToString(appendElement));
+            EXPECT_EQ(pattern_->GetTextValue(), result);
+            EXPECT_TRUE(ret);
+        }
+    }
+}
+
+/**
  * @tc.name: KeyEvent001
  * @tc.desc: Test KeyEvent selections
  * @tc.type: FUNC
@@ -1620,7 +1905,7 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent002, TestSize.Level1)
     event.pressedCodes.clear();
     event.pressedCodes.emplace_back(event.code);
     auto ret = pattern_->OnKeyEvent(event);
-    EXPECT_FALSE(ret) << "KeyCode: " + std::to_string(static_cast<int>(event.code));
+    EXPECT_TRUE(ret) << "KeyCode: " + std::to_string(static_cast<int>(event.code));
 }
 
 /**
@@ -1872,6 +2157,31 @@ HWTEST_F(TextFieldKeyEventTest, KeyEvent008, TestSize.Level1)
 
     pattern_->PerformAction(TextInputAction::DONE, true);
     EXPECT_FALSE(pattern_->GetCursorVisible());
+}
+
+/**
+ * @tc.name: KeyEvent009
+ * @tc.desc: Test KeyEvent enter
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldKeyEventTest, KeyEvent009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize textInput and get focus
+     */
+    auto onSubmit = [](int32_t textFieldKey, NG::TextFieldCommonEvent& commonEvent) {
+        commonEvent.SetKeepEditable(true);
+        EXPECT_TRUE(commonEvent.keepEditable_);
+        EXPECT_EQ(commonEvent.text_, "abcdefghijklmnopqrstuvwxyz");
+    };
+    CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER, [&](TextFieldModel& model) -> void {
+        model.SetInputStyle(DEFAULT_INPUT_STYLE);
+        model.SetOnSubmit(onSubmit);
+    });
+    GetFocus();
+    auto focushHub = pattern_->GetFocusHub();
+    pattern_->PerformAction(TextInputAction::BEGIN, true);
+    EXPECT_TRUE(focushHub->currentFocus_);
 }
 
 /**
@@ -2539,5 +2849,1164 @@ HWTEST_F(TextFieldUXTest, AdjustWordCursorAndSelect01, TestSize.Level1)
     mockDataDetectorMgr.AdjustWordSelection(pos, content, start, end);
     EXPECT_EQ(start, -1);
     EXPECT_EQ(end, -1);
+}
+
+/**
+ * @tc.name: TextFieldFilter001
+ * @tc.desc: Test textfield filter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, TextFieldFilter001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "");
+
+    /**
+     * @tc.steps: step2. assign filter as lowercase filter
+     */
+    layoutProperty_->UpdateInputFilter(LOWERCASE_FILTER);
+    pattern_->InsertValue("X");
+    EXPECT_EQ(pattern_->GetInputFilter(), LOWERCASE_FILTER);
+}
+
+/**
+ * @tc.name: TextFieldFilter002
+ * @tc.desc: Test textfield filter.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, TextFieldFilter002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "");
+
+    /**
+     * @tc.steps: step2. assign filter as number filter
+     */
+    layoutProperty_->UpdateInputFilter(NUMBER_FILTER);
+    auto numStr = "1";
+    pattern_->InsertValue(numStr);
+    EXPECT_EQ(pattern_->GetInputFilter(), NUMBER_FILTER);
+}
+
+/**
+ * @tc.name: TextFieldPatternOnTextInputScroll001
+ * @tc.desc: Verify that the AddScrollEvent interface calls normally and exits without exception.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, TextFieldPatternOnTextInputScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Call the OnTextInputScroll.
+     * @tc.expected: step2. Check the value set in OnTextInputScroll.
+     */
+    layoutProperty_->UpdateMaxLines(2);
+    pattern_->OnTextInputScroll(0.0f);
+    layoutProperty_->UpdateMaxLines(1);
+    pattern_->textRect_.x_ = 10.0f;
+    pattern_->textRect_.width_ = 200.0f;
+    pattern_->contentRect_.x_ = 20.0f;
+    pattern_->contentRect_.width_ = 100.0f;
+    pattern_->OnTextInputScroll(-1000.0f);
+    pattern_->isSingleHandle_ = false;
+    pattern_->OnTextInputScroll(0.0f);
+    pattern_->isSingleHandle_ = true;
+    pattern_->OnTextInputScroll(0.0f);
+    EXPECT_EQ(pattern_->selectController_->GetCaretRect().GetX(), -90.0f);
+    EXPECT_EQ(pattern_->textRect_.GetOffset(), OffsetF(pattern_->currentOffset_, pattern_->textRect_.GetY()));
+}
+
+/**
+ * @tc.name: CreateNodePaintMethod001
+ * @tc.desc: Test textfield to create paint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, CreateNodePaintMethod001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. call CreateNodePaintMethod
+     * tc.expected: step2. Check if the value is created.
+     */
+    auto paint = pattern_->CreateNodePaintMethod();
+    EXPECT_NE(pattern_->GetContentModifier(), nullptr);
+}
+
+/**
+ * @tc.name: CreateNodePaintMethod002
+ * @tc.desc: Test textfield to create paint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, CreateNodePaintMethod002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CreateNodePaintMethod
+     * tc.expected: step2. Check if the value is created.
+     */
+    pattern_->SetIsCustomFont(true);
+    auto paint = pattern_->CreateNodePaintMethod();
+    EXPECT_TRUE(pattern_->textFieldContentModifier_->GetIsCustomFont());
+}
+
+/**
+ * @tc.name: CreateNodePaintMethod003
+ * @tc.desc: Test textfield to create paint.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, CreateNodePaintMethod003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CreateNodePaintMethod
+     * tc.expected: step2. Check if the value is created.
+     */
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    pattern_->OnModifyDone();
+    EXPECT_TRUE(pattern_->IsNormalInlineState());
+    pattern_->UpdateScrollBarOffset();
+
+    auto paint = AceType::DynamicCast<TextFieldPaintMethod>(pattern_->CreateNodePaintMethod());
+    auto inlineScrollRect = pattern_->GetScrollBar()->GetActiveRect();
+    EXPECT_EQ(inlineScrollRect, Rect(720, 0, 0, 50));
+    EXPECT_NE(pattern_->textFieldContentModifier_, nullptr);
+}
+
+/**
+ * @tc.name: CursorInContentRegion001
+ * @tc.desc: Test textfield if the cursor in content.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, CursorInContentRegion001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. call CursorInContentRegion
+     * tc.expected: step2. Check the cursor position.
+     */
+    GetFocus();
+    EXPECT_TRUE(pattern_->CursorInContentRegion());
+}
+
+/**
+ * @tc.name: OffsetInContentRegion
+ * @tc.desc: Test textfield if the cursor in content.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, OffsetInContentRegion, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. call CursorInContentRegion
+     * tc.expected: step2. Check the offset position.
+     */
+    EXPECT_TRUE(pattern_->OffsetInContentRegion(Offset(1.0f, 1.0f)));
+}
+
+/**
+ * @tc.name: OnModifyDone001
+ * @tc.desc: Test the OnModifyDone.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, OnModifyDone001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input.
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.steps: step2. Set showUnderLine. Call function OnModifyDone.
+     * @tc.expected: Check the showUnderLine set successfully.
+     */
+    layoutProperty_->UpdateShowUnderline(true);
+    pattern_->OnModifyDone();
+    GetFocus();
+    EXPECT_TRUE(layoutProperty_->GetShowUnderlineValue(false));
+    layoutProperty_->UpdateShowUnderline(false);
+    pattern_->OnModifyDone();
+    pattern_->HandleBlurEvent();
+    GetFocus();
+    EXPECT_FALSE(layoutProperty_->GetShowUnderlineValue(false));
+    auto focusHub = pattern_->GetFocusHub();
+    EXPECT_NE(focusHub->onFocusInternal_, nullptr);
+    EXPECT_NE(focusHub->onBlurInternal_, nullptr);
+}
+
+/**
+ * @tc.name: MaxLength001
+ * @tc.desc: test textInput maxLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, MaxLength001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default text
+     * @tc.expected: maxLength is 1000000
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. test  default maxLength.
+     */
+    EXPECT_EQ(pattern_->GetMaxLength(), 1000000);
+}
+
+/**
+ * @tc.name: MaxLength002
+ * @tc.desc: test textInput maxLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, MaxLength002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with set maxLength 20
+     * @tc.expected: maxLength is 20
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetMaxLength(5);
+    });
+    TextEditingValue value;
+    TextSelection selection;
+    value.text = "1234567890";
+    selection.baseOffset = value.text.length();
+    value.selection = selection;
+    pattern_->UpdateEditingValue(std::make_shared<TextEditingValue>(value));
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.step: step2. test maxLength
+     */
+    EXPECT_EQ(pattern_->GetTextValue().compare("12345"), 0);
+    EXPECT_EQ(pattern_->GetMaxLength(), 5);
+}
+
+/**
+ * @tc.name: MaxLength003
+ * @tc.desc: test testIput maxLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, MaxLength003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with set maxLength 0
+     * @tc.expected: maxLength is 0
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetMaxLength(0);
+    });
+    TextEditingValue value;
+    TextSelection selection;
+    value.text = "1234567890";
+    selection.baseOffset = value.text.length();
+    value.selection = selection;
+    pattern_->UpdateEditingValue(std::make_shared<TextEditingValue>(value));
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.step: step2. test maxLength
+     */
+    EXPECT_EQ(pattern_->GetTextValue().compare(""), 0);
+    EXPECT_EQ(pattern_->GetMaxLength(), 0);
+}
+
+/**
+ * @tc.name: MaxLength004
+ * @tc.desc: test testInput maxLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, MaxLength004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with reset maxLength
+     * @tc.expected: maxLength is 1000000
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.ResetMaxLength();
+    });
+
+    /**
+     * @tc.step: step2. test maxLength
+     */
+    EXPECT_EQ(pattern_->GetMaxLength(), 1000000);
+}
+
+/**
+ * @tc.name: MaxLength005
+ * @tc.desc: test testInput maxLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, MaxLength005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with set maxLength -1
+     * @tc.expected: maxLength is -1
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetMaxLength(-1);
+    });
+    TextEditingValue value;
+    TextSelection selection;
+    value.text = "1234567890";
+    selection.baseOffset = value.text.length();
+    value.selection = selection;
+    pattern_->UpdateEditingValue(std::make_shared<TextEditingValue>(value));
+    FlushLayoutTask(frameNode_);
+
+    /**
+     * @tc.step: step2. test maxLength
+     */
+    EXPECT_EQ(pattern_->GetTextValue().compare("1234567890"), 0);
+    EXPECT_EQ(pattern_->GetMaxLength(), -1);
+}
+
+/**
+ * @tc.name: MaxLength006
+ * @tc.desc: test testInput maxLength
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, MaxLength006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with set maxLength 1000023
+     * @tc.expected: maxLength is 1000023
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetMaxLength(1000023);
+    });
+
+    /**
+     * @tc.step: step2. test maxLength
+     */
+    EXPECT_EQ(pattern_->GetMaxLength(), 1000023);
+}
+
+/**
+ * @tc.name: CopyOption001
+ * @tc.desc: test testInput CopyOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, CopyOption001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with default copyOption
+     * @tc.expected: Default CopyOption is Distributed
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. test default copyOption
+     */
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->AllowCopy(), true);
+    EXPECT_EQ(pattern_->GetCopyOptionString(), "CopyOptions.Distributed");
+}
+
+/**
+ * @tc.name: CopyOption002
+ * @tc.desc: test testInput CopyOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, CopyOption002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node with set copyOption
+     * @tc.expected: CopyOption is Local
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCopyOption(CopyOptions::Local);
+    });
+
+    /**
+     * @tc.step: step2. Test CopyOption
+     */
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->AllowCopy(), true);
+    EXPECT_EQ(pattern_->GetCopyOptionString(), "CopyOptions.Local");
+}
+
+/**
+ * @tc.name: CopyOption003
+ * @tc.desc: test testInput CopyOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, CopyOption003, TestSize.Level1)
+{
+     /**
+     * @tc.steps: Create Text filed node with set copyOption
+     * @tc.expected: CopyOption is inApp
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCopyOption(CopyOptions::InApp);
+    });
+
+    /**
+     * @tc.step: step2. Test CopyOption
+     */
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->AllowCopy(), true);
+    EXPECT_EQ(pattern_->GetCopyOptionString(), "CopyOptions.InApp");
+}
+
+/**
+ * @tc.name: CopyOption004
+ * @tc.desc: test testInput CopyOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, CopyOption004, TestSize.Level1)
+{
+     /**
+     * @tc.steps: Create Text filed node with set copyOption
+     * @tc.expected: CopyOption is none
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCopyOption(CopyOptions::None);
+    });
+
+    /**
+     * @tc.step: step2. Test CopyOption
+     */
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->AllowCopy(), false);
+    EXPECT_EQ(pattern_->GetCopyOptionString(), "CopyOptions.None");
+}
+
+/**
+ * @tc.name: enableAutoFill001
+ * @tc.desc: test testInput enableAutoFill
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, enableAutoFill001, TestSize.Level1)
+{
+     /**
+     * @tc.steps: Create Text filed node
+     * @tc.expected: enableAutoFill is true
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetEnableAutoFill(true);
+    });
+
+    /**
+     * @tc.step: step2. Test default enableAutoFill
+     */
+    pattern_->CheckAutoFill();
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetEnableAutoFill(), true);
+}
+
+/**
+ * @tc.name: enableAutoFill002
+ * @tc.desc: test testInput enableAutoFill
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, enableAutoFill002, TestSize.Level1)
+{
+     /**
+     * @tc.steps: Create Text filed node
+     * @tc.expected: enableAutoFill is false
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetEnableAutoFill(false);
+    });
+
+    /**
+     * @tc.step: step2. Test enableAutoFill
+     */
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetEnableAutoFill(), false);
+}
+
+/**
+ * @tc.name: testMaxLines001
+ * @tc.desc: test testInput maxLines
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testMaxLines001, TestSize.Level1)
+{
+     /**
+     * @tc.steps: Create Text filed node
+     * @tc.expected: maxLines is 5
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetMaxViewLines(5);
+    });
+
+    /**
+     * @tc.step: step2. Test maxLines
+     */
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetMaxViewLines(), 5);
+}
+
+/**
+ * @tc.name: testBarState001
+ * @tc.desc: test testInput barState
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testBarState001, TestSize.Level1)
+{
+     /**
+     * @tc.steps: Create Text filed node
+     * @tc.expected: barState is DisplayMode::OFF
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetBarState(DisplayMode::OFF);
+    });
+
+    /**
+     * @tc.step: step2. Test barState
+     */
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetDisplayMode(), DisplayMode::OFF);
+}
+
+/**
+ * @tc.name: testBarState002
+ * @tc.desc: test testInput barState
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testBarState002, TestSize.Level1)
+{
+     /**
+     * @tc.steps: Create Text filed node
+     * @tc.expected: barState is DisplayMode::AUTO
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetBarState(DisplayMode::AUTO);
+    });
+
+    /**
+     * @tc.step: step2. Test barState
+     */
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetDisplayMode(), DisplayMode::AUTO);
+}
+
+/**
+ * @tc.name: testBarState003
+ * @tc.desc: test testInput barState
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testBarState003, TestSize.Level1)
+{
+     /**
+     * @tc.steps: Create Text filed node
+     * @tc.expected: barState is DisplayMode::ON
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetBarState(DisplayMode::ON);
+    });
+
+    /**
+     * @tc.step: step2. Test barState
+     */
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetDisplayMode(), DisplayMode::ON);
+}
+
+/**
+ * @tc.name: testSelectionMenuHidden001
+ * @tc.desc: test testInput selectionMenuHidden
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testSelectionMenuHidden001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     * @tc.expected: selectionMenuHidden is DisplayMode::ON
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetSelectionMenuHidden(false);
+    });
+
+    /**
+     * @tc.step: step2. Set selectionMenuHidden
+     */
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetSelectionMenuHidden(), false);
+
+    /**
+     * @tc.step: step3. Set selectionMenuHidden
+     */
+    layoutProperty_->UpdateSelectionMenuHidden(true);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetSelectionMenuHidden(), true);
+}
+
+/**
+ * @tc.name: testEnableKeyboardOnFocus001
+ * @tc.desc: test testInput EnableKeyboardOnFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testEnableKeyboardOnFocus001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     * @tc.expected: selectionMenuHidden is true
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. default enableKeyboardOnFocus
+     */
+    pattern_->RequestKeyboardOnFocus();
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->needToRequestKeyboardOnFocus_, true);
+
+    /**
+     * @tc.step: step3. Set enableKeyboardOnFocus
+     */
+    pattern_->SetNeedToRequestKeyboardOnFocus(false);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->needToRequestKeyboardOnFocus_, false);
+}
+
+/**
+ * @tc.name: testTextAlign001
+ * @tc.desc: test testInput textAlign
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testTextAlign001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     * @tc.expected: textAlign is TextAlign::START
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. Set textAlign
+     */
+    layoutProperty_->UpdateTextAlign(TextAlign::LEFT);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetTextAlign(), TextAlign::LEFT);
+
+    /**
+     * @tc.step: step3. Set textAlign
+     */
+    layoutProperty_->UpdateTextAlign(TextAlign::RIGHT);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetTextAlign(), TextAlign::RIGHT);
+
+    /**
+     * @tc.step: step4. Set textAlign
+     */
+    layoutProperty_->UpdateTextAlign(TextAlign::CENTER);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetTextAlign(), TextAlign::CENTER);
+
+    /**
+     * @tc.step: step5. Set textAlign
+     */
+    layoutProperty_->UpdateTextAlign(TextAlign::JUSTIFY);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetTextAlign(), TextAlign::JUSTIFY);
+
+    /**
+     * @tc.step: step6. Set textAlign
+     */
+    layoutProperty_->UpdateTextAlign(TextAlign::START);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetTextAlign(), TextAlign::START);
+
+    /**
+     * @tc.step: step7. Set textAlign
+     */
+    layoutProperty_->UpdateTextAlign(TextAlign::END);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetTextAlign(), TextAlign::END);
+}
+
+/**
+ * @tc.name: testShowUnderline001
+ * @tc.desc: test testInput showUnderline
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testShowUnderline001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     * @tc.expected: showUnderline is true
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowUnderline(true);
+    });
+
+    /**
+     * @tc.step: step2. Set showUnderline
+     */
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetShowUnderline(), true);
+
+    /**
+     * @tc.step: step2. Set showUnderline
+     */
+    layoutProperty_->UpdateShowUnderline(false);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetShowUnderline(), false);
+}
+
+/**
+ * @tc.name: testCaretPosition001
+ * @tc.desc: test testInput caretPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testCaretPosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     * @tc.expected: caretPosition is 10
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. Set caretPosition
+     */
+    pattern_->SetCaretPosition(10);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 10);
+
+    /**
+     * @tc.step: step3. Set caretPosition
+     */
+    pattern_->SetCaretPosition(5);
+    TextEditingValue value;
+    TextSelection selection;
+    value.text = "1234567890987654321";
+    selection.baseOffset = value.text.length();
+    value.selection = selection;
+    pattern_->UpdateEditingValue(std::make_shared<TextEditingValue>(value));
+    pattern_->UpdateSelectionOffset();
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), value.text.length());
+}
+
+/**
+ * @tc.name: testShowPasswordIcon001
+ * @tc.desc: test testInput showPasswordIcon
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testShowPasswordIcon001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     * @tc.expected: showPasswordIcon is false
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetShowPasswordIcon(false);
+    });
+
+    /**
+     * @tc.step: step2. Set showPasswordIcon
+     */
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->GetCaretUpdateType(), CaretUpdateType::NONE);
+    EXPECT_EQ(layoutProperty_->GetShowPasswordIcon(), false);
+
+     /**
+     * @tc.step: step3. Set showPasswordIcon
+     */
+    layoutProperty_->UpdateShowPasswordIcon(true);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetShowPasswordIcon(), true);
+}
+
+/**
+ * @tc.name: testType001
+ * @tc.desc: test testInput type
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testType001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     * @tc.expected: type is TextInputType::TEXT
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. Set type
+     */
+    layoutProperty_->UpdateTextInputType(TextInputType::BEGIN);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetTextInputType(), TextInputType::BEGIN);
+
+    /**
+     * @tc.step: step3. Set type
+     */
+    layoutProperty_->UpdateTextInputType(TextInputType::UNSPECIFIED);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetTextInputType(), TextInputType::UNSPECIFIED);
+
+    /**
+     * @tc.step: step4. Set type
+     */
+    layoutProperty_->UpdateTextInputType(TextInputType::TEXT);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetTextInputType(), TextInputType::TEXT);
+
+    /**
+     * @tc.step: step5. Set type
+     */
+    layoutProperty_->UpdateTextInputType(TextInputType::MULTILINE);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetTextInputType(), TextInputType::MULTILINE);
+
+    /**
+     * @tc.step: step6. Set type
+     */
+    layoutProperty_->UpdateTextInputType(TextInputType::NUMBER);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetTextInputType(), TextInputType::NUMBER);
+
+    /**
+     * @tc.step: step7. Set type
+     */
+    layoutProperty_->UpdateTextInputType(TextInputType::PHONE);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetTextInputType(), TextInputType::PHONE);
+
+    /**
+     * @tc.step: step8. Set type
+     */
+    layoutProperty_->UpdateTextInputType(TextInputType::DATETIME);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetTextInputType(), TextInputType::DATETIME);
+
+    /**
+     * @tc.step: step9. Set type
+     */
+    layoutProperty_->UpdateTextInputType(TextInputType::EMAIL_ADDRESS);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetTextInputType(), TextInputType::EMAIL_ADDRESS);
+
+    /**
+     * @tc.step: step10. Set type
+     */
+    layoutProperty_->UpdateTextInputType(TextInputType::URL);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetTextInputType(), TextInputType::URL);
+
+    /**
+     * @tc.step: step11. Set type
+     */
+    layoutProperty_->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetTextInputType(), TextInputType::VISIBLE_PASSWORD);
+
+    /**
+     * @tc.step: step12. Set type
+     */
+    layoutProperty_->UpdateTextInputType(TextInputType::END);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(layoutProperty_->GetTextInputType(), TextInputType::END);
+}
+
+/**
+ * @tc.name: testEnterKeyType001
+ * @tc.desc: test testInput enterKeyType
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testEnterKeyType001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     */
+    CreateTextField(DEFAULT_TEXT);
+
+    /**
+     * @tc.step: step2. Set enterKeyType
+     */
+    pattern_->UpdateTextInputAction(TextInputAction::GO);
+    frameNode_->MarkModifyDone();
+    EXPECT_STREQ(pattern_->TextInputActionToString().c_str(), "EnterKeyType.Go");
+
+    /**
+     * @tc.step: step3. Set enterKeyType
+     */
+    pattern_->UpdateTextInputAction(TextInputAction::SEARCH);
+    frameNode_->MarkModifyDone();
+    EXPECT_STREQ(pattern_->TextInputActionToString().c_str(), "EnterKeyType.Search");
+
+    /**
+     * @tc.step: step4. Set enterKeyType
+     */
+    pattern_->UpdateTextInputAction(TextInputAction::SEND);
+    frameNode_->MarkModifyDone();
+    EXPECT_STREQ(pattern_->TextInputActionToString().c_str(), "EnterKeyType.Send");
+
+    /**
+     * @tc.step: step4. Set enterKeyType
+     */
+    pattern_->UpdateTextInputAction(TextInputAction::DONE);
+    frameNode_->MarkModifyDone();
+    EXPECT_STREQ(pattern_->TextInputActionToString().c_str(), "EnterKeyType.Done");
+
+    /**
+     * @tc.step: step4. Set enterKeyType
+     */
+    pattern_->UpdateTextInputAction(TextInputAction::NEXT);
+    frameNode_->MarkModifyDone();
+    EXPECT_STREQ(pattern_->TextInputActionToString().c_str(), "EnterKeyType.Next");
+
+    /**
+     * @tc.step: step4. Set enterKeyType
+     */
+    pattern_->UpdateTextInputAction(TextInputAction::BEGIN);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->GetTextInputActionValue(), TextInputAction::BEGIN);
+
+    /**
+     * @tc.step: step4. Set enterKeyType
+     */
+    pattern_->UpdateTextInputAction(TextInputAction::UNSPECIFIED);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->GetTextInputActionValue(), TextInputAction::UNSPECIFIED);
+
+    /**
+     * @tc.step: step4. Set enterKeyType
+     */
+    pattern_->UpdateTextInputAction(TextInputAction::NONE);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->GetTextInputActionValue(), TextInputAction::NONE);
+
+    /**
+     * @tc.step: step4. Set enterKeyType
+     */
+    pattern_->UpdateTextInputAction(TextInputAction::PREVIOUS);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->GetTextInputActionValue(), TextInputAction::PREVIOUS);
+
+    /**
+     * @tc.step: step4. Set enterKeyType
+     */
+    pattern_->UpdateTextInputAction(TextInputAction::END);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->GetTextInputActionValue(), TextInputAction::END);
+}
+
+/**
+ * @tc.name: testStyle001
+ * @tc.desc: test testInput style
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     */
+    CreateTextField(DEFAULT_TEXT);
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+
+    /**
+     * @tc.step: step2. Set style
+     */
+    paintProperty->UpdateInputStyle(InputStyle::DEFAULT);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(paintProperty->GetInputStyle(), InputStyle::DEFAULT);
+
+    /**
+     * @tc.step: step3. Set style
+     */
+    paintProperty->UpdateInputStyle(InputStyle::INLINE);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(paintProperty->GetInputStyle(), InputStyle::INLINE);
+}
+
+/**
+ * @tc.name: testSelectedBackgroundColor001
+ * @tc.desc: test testInput selectedBackgroundColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testSelectedBackgroundColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetSelectedBackgroundColor(DEFAULT_SELECTED_BACKFROUND_COLOR);
+    });
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+
+    /**
+     * @tc.step: step2. Set selectedBackgroundColor
+     */
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(paintProperty->GetSelectedBackgroundColor(), Color::BLUE);
+
+    /**
+     * @tc.step: step3. Set selectedBackgroundColor
+     */
+    paintProperty->UpdateSelectedBackgroundColor(Color::RED);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(paintProperty->GetSelectedBackgroundColor(), Color::RED);
+}
+
+/**
+ * @tc.name: testCaretStyle001
+ * @tc.desc: test testInput caretStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, testCaretStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text filed node
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCaretStyle(DEFAULT_CARET_STYLE);
+    });
+    auto paintProperty = frameNode_->GetPaintProperty<TextFieldPaintProperty>();
+
+    /**
+     * @tc.step: step2. Set caretStyle
+     */
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(paintProperty->GetCursorWidth().value().Value(), 3.0);
+}
+
+/**
+ * @tc.name: HandleOnEscape001
+ * @tc.desc: Test let handle on escape after selectAll
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleOnEscape001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and get focus
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. Create selectOverlayProxy
+     */
+    pattern_->ProcessOverlay(true, true, true);
+
+
+    /**
+     * @tc.steps: step3. Press esc
+     */
+    KeyEvent event;
+    event.code = KeyCode::KEY_ESCAPE;
+    pattern_->OnKeyEvent(event);
+
+    /**
+     * @tc.steps: step4. escape when select all value
+     */
+    pattern_->HandleOnSelectAll(true);
+    EXPECT_FALSE(pattern_->HandleOnEscape());
+}
+
+/**
+ * @tc.name: HandleOnTab001
+ * @tc.desc: Test HandleOnTab
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleOnTab001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize show password icon text input.
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::VISIBLE_PASSWORD);
+        model.SetShowPasswordIcon(true);
+        model.SetCleanNodeStyle(CleanNodeStyle::CONSTANT);
+    });
+
+    /**
+     * @tc.steps: step2. Text input request focus.
+     */
+    GetFocus();
+
+    /**
+     * @tc.steps: step3. Test update focus backward when handleOnTab.
+     */
+    pattern_->focusIndex_ = FocuseIndex::UNIT;
+    EXPECT_TRUE(pattern_->HandleOnTab(true));
+
+    /**
+     * @tc.steps: step4. Test update focus forward when handleOnTab.
+     */
+    pattern_->focusIndex_ = FocuseIndex::TEXT;
+    EXPECT_TRUE(pattern_->HandleOnTab(false));
+}
+
+/**
+ * @tc.name: ConvertTouchOffsetToCaretPosition001
+ * @tc.desc: test testInput caretStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, ConvertTouchOffsetToCaretPosition001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetCaretStyle(DEFAULT_CARET_STYLE);
+    });
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Set caretPosition and call ConvertTouchOffsetToCaretPosition
+     */
+    pattern_->SetCaretPosition(2);
+    int32_t caretPosition = pattern_->ConvertTouchOffsetToCaretPosition(Offset(0.0, 0.0));
+    EXPECT_EQ(caretPosition, 0);
+    caretPosition = pattern_->ConvertTouchOffsetToCaretPositionNG(Offset(0.0, 0.0));
+    EXPECT_EQ(caretPosition, 0);
+}
+
+/**
+ * @tc.name: HandleOnUndoAction001
+ * @tc.desc: test testInput caretStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, HandleOnUndoAction001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Create Text field node
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.step: step2. Set caretPosition and call ConvertTouchOffsetToCaretPosition
+     */
+    pattern_->SetCaretPosition(5);
+    pattern_->UpdateEditingValueToRecord();
+    pattern_->HandleOnUndoAction();
+    EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), 0);
 }
 } // namespace OHOS::Ace::NG

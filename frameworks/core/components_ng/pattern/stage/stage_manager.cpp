@@ -30,6 +30,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
@@ -140,6 +141,18 @@ void StageManager::StopPageTransition()
     }
 }
 
+void StageManager::PageChangeCloseKeyboard()
+{
+    // close keyboard
+#if defined (ENABLE_STANDARD_INPUT)
+    // If pushpage, close it
+    if (Container::CurrentId() == CONTAINER_ID_DIVIDE_SIZE) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "StageManager FrameNode notNeedSoftKeyboard.");
+        FocusHub::PushPageCloseKeyboard();
+    }
+#endif
+}
+
 bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bool needTransition)
 {
     CHECK_NULL_RETURN(stageNode_, false);
@@ -182,6 +195,10 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
             stage->PerformanceCheck(pageNode, endTime - startTime);
         });
     }
+
+    // close keyboard
+    PageChangeCloseKeyboard();
+
     if (needTransition) {
         pipeline->AddAfterLayoutTask([weakStage = WeakClaim(this), weakIn = WeakPtr<FrameNode>(node),
                                          weakOut = WeakPtr<FrameNode>(outPageNode)]() {
@@ -237,6 +254,9 @@ bool StageManager::PopPage(bool needShowNext, bool needTransition)
         FirePageShow(newPageNode, needTransition ? PageTransitionType::ENTER_POP : PageTransitionType::NONE);
         inPageNode = AceType::DynamicCast<FrameNode>(newPageNode);
     }
+
+    // close keyboard
+    PageChangeCloseKeyboard();
 
     auto outPageNode = AceType::DynamicCast<FrameNode>(pageNode);
     if (needTransition) {

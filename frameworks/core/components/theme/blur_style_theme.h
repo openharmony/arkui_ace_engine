@@ -46,8 +46,8 @@ protected:
     BlurStyleTheme() = default;
 
 private:
-    static int32_t GetKeyOfBlurStyle(BlurStyle style, ThemeColorMode colorMode);
-    std::unordered_map<int32_t, BlurParameter> blurParams_;
+    static uint32_t GetKeyOfBlurStyle(BlurStyle style, ThemeColorMode colorMode);
+    std::unordered_map<uint32_t, BlurParameter> blurParams_;
 };
 
 } // namespace OHOS::Ace

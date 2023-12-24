@@ -139,16 +139,15 @@ public:
         if (unselectedColor_) {
             unselectedColor_->Set(unselectedColor);
         }
-
-        if (touchBottomPointColor_) {
-            touchBottomPointColor_->Set(LinearColor(unselectedColor));
-        }
     }
 
     void SetSelectedColor(const Color& selectedColor)
     {
         if (selectedColor_) {
             selectedColor_->Set(LinearColor(selectedColor));
+        }
+        if (touchBottomPointColor_) {
+            touchBottomPointColor_->Set(LinearColor(selectedColor));
         }
     }
 

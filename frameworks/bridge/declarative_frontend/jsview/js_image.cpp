@@ -207,9 +207,11 @@ void JSImage::Create(const JSCallbackInfo& info)
         return;
     }
 
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    bool isCard = context->IsFormRender();
+    bool isCard = context->IsFormRender() && !container->IsDynamicRender();
 
     // Interim programme
     std::string bundleName;
@@ -582,7 +584,7 @@ void JSImage::AnalyzerConfig(const JSCallbackInfo &info)
     
     auto paramObject = JSRef<JSObject>::Cast(configParams);
     JSRef<JSVal> typeVal = paramObject->GetProperty("types");
-    JSRef<JSVal> showButtonVal = paramObject->GetProperty("showAIbutton");
+    JSRef<JSVal> showButtonVal = paramObject->GetProperty("showAIButton");
     JSRef<JSVal> marginVal = paramObject->GetProperty("aiButtonOffset");
     JSRef<JSVal> textOpVal = paramObject->GetProperty("textOptions");
     JSRef<JSVal> subjectOpVal = paramObject->GetProperty("subjectOptions");

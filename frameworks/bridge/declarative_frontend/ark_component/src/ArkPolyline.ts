@@ -45,7 +45,7 @@ class PolylinePointsModifier extends ModifierWithKey<Array<any>> {
           reset = true;
           break;
         }
-        
+
         xPoint.push(item[0]);
         yPoint.push(item[1]);
       }
@@ -54,9 +54,9 @@ class PolylinePointsModifier extends ModifierWithKey<Array<any>> {
     }
 
     if (reset) {
-      GetUINativeModule().polyline.resetPoints(node);
+      getUINativeModule().polyline.resetPoints(node);
     } else {
-      GetUINativeModule().polyline.setPoints(node, xPoint, yPoint);
+      getUINativeModule().polyline.setPoints(node, xPoint, yPoint);
     }
   }
 
@@ -68,10 +68,10 @@ class PolylinePointsModifier extends ModifierWithKey<Array<any>> {
 // @ts-ignore
 globalThis.Polyline.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkPolylineComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

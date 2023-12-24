@@ -64,7 +64,6 @@ void RosenRenderPlugin::NotifyPaintFinish()
         auto density = context->GetDensity();
         auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(context);
         if (!rosenRenderContext) {
-            LOGE("RosenRenderContext is nullptr.");
             return;
         }
         auto rsNode = rosenRenderContext->GetRSNode();

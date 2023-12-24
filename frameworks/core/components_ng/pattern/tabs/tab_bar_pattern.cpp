@@ -25,7 +25,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/scroll/scrollable.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -428,14 +428,29 @@ bool TabBarPattern::OnKeyEventWithoutClick(const KeyEvent& event)
 
 void TabBarPattern::FocusIndexChange(int32_t index)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
     auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
-    if (GetAnimationDuration().has_value()) {
-        swiperController_->SwipeTo(index);
+    CHECK_NULL_VOID(tabBarLayoutProperty);
+    if (tabsPattern->GetIsCustomAnimation()) {
+        OnCustomContentTransition(indicator_, index);
+        tabBarLayoutProperty->UpdateIndicator(index);
+        PaintFocusState(false);
     } else {
-        swiperController_->SwipeToWithoutAnimation(index);
+        if (GetAnimationDuration().has_value()) {
+            swiperController_->SwipeTo(index);
+        } else {
+            swiperController_->SwipeToWithoutAnimation(index);
+        }
+
+        tabBarLayoutProperty->UpdateIndicator(index);
+        PaintFocusState();
     }
-    tabBarLayoutProperty->UpdateIndicator(index);
-    PaintFocusState();
+
     UpdateTextColor(index);
 }
 
@@ -480,7 +495,7 @@ void TabBarPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
         static_cast<RSScalar>(radius.ConvertToPx()));
 }
 
-void TabBarPattern::PaintFocusState()
+void TabBarPattern::PaintFocusState(bool needMarkDirty)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -492,7 +507,9 @@ void TabBarPattern::PaintFocusState()
     CHECK_NULL_VOID(focusHub);
     focusHub->PaintInnerFocusState(focusRect);
 
-    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (needMarkDirty) {
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void TabBarPattern::OnModifyDone()
@@ -601,11 +618,12 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (indicator > totalCount - 1 || indicator < 0) {
         indicator = 0;
     }
-    if (!isAnimating_ && !IsMaskAnimationExecuted()) {
+    if (!swiperPattern->IsUseCustomAnimation() && !isAnimating_ && !IsMaskAnimationExecuted()) {
         UpdateIndicator(indicator);
     }
-    UpdateGradientRegions();
-    if (isTouchingSwiper_ && layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
+    UpdateGradientRegions(!swiperPattern->IsUseCustomAnimation());
+    if (!swiperPattern->IsUseCustomAnimation() && isTouchingSwiper_ &&
+        layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
         ApplyTurnPageRateToIndicator(turnPageRate_);
     }
     return false;
@@ -1193,7 +1211,7 @@ void TabBarPattern::UpdateIndicator(int32_t indicator)
     }
 }
 
-void TabBarPattern::UpdateGradientRegions()
+void TabBarPattern::UpdateGradientRegions(bool needMarkDirty)
 {
     auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -1223,7 +1241,10 @@ void TabBarPattern::UpdateGradientRegions()
             }
         }
     }
-    tarBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+
+    if (needMarkDirty) {
+        tarBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void TabBarPattern::UpdateTextColor(int32_t indicator)
@@ -1249,7 +1270,7 @@ void TabBarPattern::UpdateTextColor(int32_t indicator)
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
         if (columnNode->GetId() == selectedColumnId) {
-            textLayoutProperty->UpdateTextColor(tabTheme->GetActiveIndicatorColor());
+            textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOnColor());
         } else {
             textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOffColor());
         }

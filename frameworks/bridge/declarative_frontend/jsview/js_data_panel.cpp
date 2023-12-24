@@ -115,7 +115,7 @@ void JSDataPanel::Create(const JSCallbackInfo& info)
     }
 
     size_t dataPanelType = 0;
-    size_t type = jsObj->GetPropertyValue<int32_t>("type", static_cast<int32_t>(ChartType::RAINBOW));
+    int32_t type = jsObj->GetPropertyValue<int32_t>("type", static_cast<int32_t>(ChartType::RAINBOW));
     if (type == static_cast<int32_t>(ChartType::LINE)) {
         dataPanelType = 1;
     }
@@ -206,37 +206,34 @@ void JSDataPanel::ShadowOption(const JSCallbackInfo& info)
         DataPanelModel::GetInstance()->SetShadowOption(shadow);
         return;
     }
-    if (!info[0]->IsObject()) {
-        return;
-    }
-    auto paramObject = JSRef<JSObject>::Cast(info[0]);
-    JSRef<JSVal> jsRadius = paramObject->GetProperty("radius");
-    JSRef<JSVal> jsOffsetX = paramObject->GetProperty("offsetX");
-    JSRef<JSVal> jsOffsetY = paramObject->GetProperty("offsetY");
-
     RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
-    double radius = 0.0;
-    if (!ParseJsDouble(jsRadius, radius)) {
-        radius = theme->GetTrackShadowRadius().ConvertToVp();
-    }
-
-    if (NonPositive(radius)) {
-        radius = theme->GetTrackShadowRadius().ConvertToVp();
-    }
-
-    double offsetX = 0.0;
-    if (!ParseJsDouble(jsOffsetX, offsetX)) {
-        offsetX = theme->GetTrackShadowOffsetX().ConvertToVp();
-    }
-
-    double offsetY = 0.0;
-    if (!ParseJsDouble(jsOffsetY, offsetY)) {
-        offsetY = theme->GetTrackShadowOffsetY().ConvertToVp();
-    }
-
+    double radius = theme->GetTrackShadowRadius().ConvertToVp();
+    double offsetX = theme->GetTrackShadowOffsetX().ConvertToVp();
+    double offsetY = theme->GetTrackShadowOffsetY().ConvertToVp();
     std::vector<OHOS::Ace::NG::Gradient> shadowColors;
-    auto colors = paramObject->GetProperty("colors");
-    if (!colors->IsEmpty() && colors->IsArray()) {
+    ConvertThemeColor(shadowColors);
+    if (info[0]->IsObject()) {
+        auto paramObject = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> jsRadius = paramObject->GetProperty("radius");
+        JSRef<JSVal> jsOffsetX = paramObject->GetProperty("offsetX");
+        JSRef<JSVal> jsOffsetY = paramObject->GetProperty("offsetY");
+        ParseJsDouble(jsRadius, radius);
+        if (NonPositive(radius)) {
+            radius = theme->GetTrackShadowRadius().ConvertToVp();
+        }
+        ParseJsDouble(jsOffsetX, offsetX);
+        ParseJsDouble(jsOffsetY, offsetY);
+
+        auto colors = paramObject->GetProperty("colors");
+        if (!colors->IsArray()) {
+            shadow.radius = radius;
+            shadow.offsetX = offsetX;
+            shadow.offsetY = offsetY;
+            shadow.colors = shadowColors;
+            DataPanelModel::GetInstance()->SetShadowOption(shadow);
+            return;
+        }
+        shadowColors.clear();
         auto colorsArray = JSRef<JSArray>::Cast(colors);
         for (size_t i = 0; i < colorsArray->Length(); ++i) {
             auto item = colorsArray->GetValueAt(i);

@@ -24,8 +24,9 @@
 #include "core/components_ng/image_provider/image_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace {
-
-constexpr int32_t MAXIMUM_WAITING_PERIOD = 5;
+// For sync download tasks, this period may cause image not able to be loaded.
+// System detects appFreeze after 3s, which has higher priority
+constexpr int32_t MAXIMUM_WAITING_PERIOD = 2800;
 using NetStackRequest = NetStack::HttpClient::HttpClientRequest;
 using NetStackResponse = NetStack::HttpClient::HttpClientResponse;
 using NetStackError = NetStack::HttpClient::HttpClientError;
@@ -101,8 +102,8 @@ bool DownloadManagerV2::DownloadSync(DownloadCallback&& downloadCallback, const 
     auto task = session.CreateTask(httpReq);
     std::shared_ptr<DownloadCondition> downloadCondition = std::make_shared<DownloadCondition>();
     task->OnSuccess([downloadCondition](const NetStackRequest& request, const NetStackResponse& response) {
-        TAG_LOGI(AceLogTag::ACE_DOWNLOAD_MANAGER,
-            "Sync Http task of url %{private}s success", request.GetURL().c_str());
+        TAG_LOGI(
+            AceLogTag::ACE_DOWNLOAD_MANAGER, "Sync Http task of url %{private}s success", request.GetURL().c_str());
         {
             CHECK_NULL_VOID(downloadCondition);
             std::unique_lock<std::mutex> taskLock(downloadCondition->downloadMutex);
@@ -112,14 +113,15 @@ bool DownloadManagerV2::DownloadSync(DownloadCallback&& downloadCallback, const 
         downloadCondition->cv.notify_all();
     });
     task->OnCancel([downloadCondition](const NetStackRequest& request, const NetStackResponse& response) {
-        TAG_LOGI(AceLogTag::ACE_DOWNLOAD_MANAGER,
-            "Sync Http task of url %{private}s cancelled", request.GetURL().c_str());
+        TAG_LOGI(AceLogTag::ACE_DOWNLOAD_MANAGER, "Sync Http task of url %{private}s cancelled",
+            request.GetURL().c_str());
         {
             CHECK_NULL_VOID(downloadCondition);
             std::unique_lock<std::mutex> taskLock(downloadCondition->downloadMutex);
             downloadCondition->errorMsg.append("Http task of url ");
             downloadCondition->errorMsg.append(request.GetURL());
             downloadCondition->errorMsg.append(" cancelled by netStack");
+            downloadCondition->downloadSuccess = false;
         }
         downloadCondition->cv.notify_all();
     });
@@ -138,6 +140,7 @@ bool DownloadManagerV2::DownloadSync(DownloadCallback&& downloadCallback, const 
             downloadCondition->errorMsg.append(std::to_string(responseCode));
             downloadCondition->errorMsg.append(", msg from netStack: ");
             downloadCondition->errorMsg.append(error.GetErrorMessage());
+            downloadCondition->downloadSuccess = false;
         }
         downloadCondition->cv.notify_all();
     });
@@ -148,11 +151,17 @@ bool DownloadManagerV2::DownloadSync(DownloadCallback&& downloadCallback, const 
             url.c_str());
         return result;
     }
-    std::unique_lock<std::mutex> downloadlock(downloadCondition->downloadMutex);
-    // condition_variable is waiting for any of the success, cancel or failed to respond in sync mode
-    downloadCondition->cv.wait_for(downloadlock, std::chrono::seconds(MAXIMUM_WAITING_PERIOD));
-    downloadlock.unlock();
-    if (downloadCondition->downloadSuccess) {
+    {
+        std::unique_lock<std::mutex> downloadLock(downloadCondition->downloadMutex);
+        // condition_variable is waiting for any of the success, cancel or failed to respond in sync mode
+        downloadCondition->cv.wait_for(downloadLock, std::chrono::milliseconds(MAXIMUM_WAITING_PERIOD),
+            [downloadCondition] { return downloadCondition ? downloadCondition->downloadSuccess.has_value() : false; });
+    }
+    if (!downloadCondition->downloadSuccess.has_value()) {
+        TAG_LOGI(AceLogTag::ACE_DOWNLOAD_MANAGER,
+            "Sync Task of netstack with url %{private}s maximum waiting period exceed", url.c_str());
+    }
+    if (downloadCondition->downloadSuccess.value_or(false)) {
         downloadCallback.successCallback(std::move(downloadCondition->dataOut));
     } else {
         downloadCallback.failCallback(downloadCondition->errorMsg);

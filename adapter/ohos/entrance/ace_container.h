@@ -79,11 +79,19 @@ public:
         std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
         std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
         bool useCurrentEventRunner = false, bool isSubContainer = false, bool useNewPipeline = false);
+
+    AceContainer(int32_t instanceId, FrontendType type, std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
+        std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
+        std::shared_ptr<TaskWrapper> taskWrapper, bool useCurrentEventRunner = false, bool isSubContainer = false,
+        bool useNewPipeline = false);
+
     ~AceContainer() override;
 
     void Initialize() override;
 
     void Destroy() override;
+
+    bool IsKeyboard() override;
 
     void DestroyView() override;
 
@@ -526,7 +534,7 @@ private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
     void InitializeCallback();
-    void InitializeTask();
+    void InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper = nullptr);
     void InitWindowCallback();
     bool IsFontFileExistInPath(std::string path);
     std::string GetFontFamilyName(std::string path);

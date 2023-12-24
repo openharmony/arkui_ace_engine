@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class RowAlignItemsModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
@@ -21,9 +21,9 @@ class RowAlignItemsModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('rowAlignItems');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().row.resetAlignItems(node);
+      getUINativeModule().row.resetAlignItems(node);
     } else {
-      GetUINativeModule().row.setAlignItems(node, this.value!);
+      getUINativeModule().row.setAlignItems(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -38,9 +38,9 @@ class RowJustifyContentlModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('rowJustifyContent');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().row.resetJustifyContent(node);
+      getUINativeModule().row.resetJustifyContent(node);
     } else {
-      GetUINativeModule().row.setJustifyContent(node, this.value!);
+      getUINativeModule().row.setJustifyContent(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -64,17 +64,17 @@ class ArkRowComponent extends ArkComponent implements RowAttribute {
     throw new Error('Method not implemented.');
   }
   monopolizeEvents(monopolize: boolean): this {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
 }
 
 // @ts-ignore
 globalThis.Row.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkRowComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

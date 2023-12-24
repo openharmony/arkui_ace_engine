@@ -794,6 +794,14 @@ void WebModelNG::SetTouchIconUrlId(OnWebAsyncFunc&& touchIconUrlId)
     webEventHub->SetOnTouchIconUrlEvent(std::move(touchIconUrlId));
 }
 
+void WebModelNG::SetSafeBrowsingCheckResultId(
+    std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& safeBrowsingCheckResultId)
+{
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnSafeBrowsingCheckResultEvent(std::move(safeBrowsingCheckResultId));
+}
+
 void WebModelNG::SetDarkMode(WebDarkMode mode)
 {
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
@@ -820,6 +828,13 @@ void WebModelNG::SetVerticalScrollBarAccessEnabled(bool isVerticalScrollBarAcces
     auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
     CHECK_NULL_VOID(webPattern);
     webPattern->UpdateVerticalScrollBarAccessEnabled(isVerticalScrollBarAccessEnabled);
+}
+
+void WebModelNG::SetNativeEmbedModeEnabled(bool isEmbedModeEnabled)
+{
+    auto webPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<WebPattern>();
+    CHECK_NULL_VOID(webPattern);
+    webPattern->UpdateNativeEmbedModeEnabled(isEmbedModeEnabled);
 }
 
 void WebModelNG::SetOnControllerAttached(std::function<void()>&& callback)
@@ -874,6 +889,24 @@ void WebModelNG::SetOverScrollId(std::function<void(const BaseEventInfo* info)>&
     auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnOverScrollEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnNativeEmbedLifecycleChangeEvent(std::move(uiCallback));
+}
+
+void WebModelNG::SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto func = jsCallback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webEventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnNativeEmbedGestureEvent(std::move(uiCallback));
 }
 
 void WebModelNG::SetLayoutMode(WebLayoutMode mode)

@@ -86,12 +86,7 @@ void ResetDimension(NodeHandle node)
     FormModelNG::SetDimension(frameNode, DEFAULT_FORM_DIM);
 }
 
-void ResetModuleName(NodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    FormModelNG::SetModuleName(frameNode, "");
-}
+void ResetModuleName(NodeHandle node) {}
 
 void ResetFormSize(NodeHandle node)
 {

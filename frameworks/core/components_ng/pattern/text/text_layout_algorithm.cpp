@@ -166,17 +166,23 @@ void TextLayoutAlgorithm::FontRegisterCallback(const RefPtr<FrameNode>& frameNod
     CHECK_NULL_VOID(pipeline);
     auto fontManager = pipeline->GetFontManager();
     if (fontManager) {
+        bool isCustomFont = false;
         for (const auto& familyName : textStyle.GetFontFamilies()) {
-            fontManager->RegisterCallbackNG(frameNode, familyName, callback);
+            bool customFont = fontManager->RegisterCallbackNG(frameNode, familyName, callback);
+            if (customFont) {
+                isCustomFont = true;
+            }
         }
         fontManager->AddVariationNodeNG(frameNode);
+        if (isCustomFont || fontManager->IsDefaultFontChanged()) {
+            auto pattern = frameNode->GetPattern<TextPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetIsCustomFont(true);
+            auto modifier = DynamicCast<TextContentModifier>(pattern->GetContentModifier());
+            CHECK_NULL_VOID(modifier);
+            modifier->SetIsCustomFont(true);
+        }
     }
-    auto pattern = frameNode->GetPattern<TextPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetIsCustomFont(true);
-    auto modifier = DynamicCast<TextContentModifier>(pattern->GetContentModifier());
-    CHECK_NULL_VOID(modifier);
-    modifier->SetIsCustomFont(true);
 }
 
 void TextLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -302,6 +308,9 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, L
     int32_t wTextForAILength = static_cast<int32_t>(wTextForAI.length());
     int32_t preEnd = 0;
     for (auto kv : pattern->GetAISpanMap()) {
+        if (preEnd >= wTextForAILength) {
+            break;
+        }
         auto aiSpan = kv.second;
         if (aiSpan.start < preEnd) {
             TAG_LOGI(AceLogTag::ACE_TEXT, "Error prediction");
@@ -328,7 +337,6 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
 {
     auto frameNode = layoutWrapper->GetHostNode();
     auto pipeline = frameNode->GetContext();
-    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto pattern = frameNode->GetPattern<TextPattern>();
     auto paraStyle = GetParagraphStyle(textStyle, content);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && spanItemChildren_.empty()) {
@@ -336,6 +344,25 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
     }
     paragraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
     CHECK_NULL_RETURN(paragraph_, false);
+    if (frameNode->GetTag() == V2::SYMBOL_ETS_TAG) {
+        auto layoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
+        CHECK_NULL_RETURN(layoutProperty, false);
+        auto symbolSourceInfo = layoutProperty->GetSymbolSourceInfo();
+        CHECK_NULL_RETURN(symbolSourceInfo, false);
+        TextStyle symbolTextStyle = textStyle;
+        symbolTextStyle.isSymbolGlyph_ = true;
+        if (symbolTextStyle.GetRenderStrategy() < 0) {
+            symbolTextStyle.SetRenderStrategy(0);
+        }
+        if (symbolTextStyle.GetEffectStrategy() < 0) {
+            symbolTextStyle.SetEffectStrategy(0);
+        }
+        paragraph_->PushStyle(symbolTextStyle);
+        paragraph_->AddSymbol(symbolSourceInfo->GetUnicode());
+        paragraph_->PopStyle();
+        paragraph_->Build();
+        return true;
+    }
     paragraph_->PushStyle(textStyle);
     CHECK_NULL_RETURN(pattern, -1);
     if (spanItemChildren_.empty()) {
@@ -343,7 +370,7 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
             auto dragContents = pattern->GetDragContents();
             CreateParagraphDrag(textStyle, dragContents, content);
         } else {
-            if (pattern->GetTextDetectEnable() && !pattern->GetAISpanMap().empty()) {
+            if (pattern->NeedShowAIDetect()) {
                 UpdateParagraphForAISpan(textStyle, layoutWrapper);
             } else {
                 StringUtils::TransformStrCase(content, static_cast<int32_t>(textStyle.GetTextCase()));

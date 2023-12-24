@@ -57,9 +57,9 @@ class TextTimerFontColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('fontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textTimer.resetFontColor(node);
+      getUINativeModule().textTimer.resetFontColor(node);
     } else {
-      GetUINativeModule().textTimer.setFontColor(node, this.value);
+      getUINativeModule().textTimer.setFontColor(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -71,9 +71,9 @@ class TextTimerFontSizeModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('fontSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textTimer.resetFontSize(node);
+      getUINativeModule().textTimer.resetFontSize(node);
     } else {
-      GetUINativeModule().textTimer.setFontSize(node, this.value);
+      getUINativeModule().textTimer.setFontSize(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -85,9 +85,9 @@ class TextTimerFontWeightModifier extends ModifierWithKey<number | FontWeight | 
   static identity: Symbol = Symbol('fontWeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textTimer.resetFontWeight(node);
+      getUINativeModule().textTimer.resetFontWeight(node);
     } else {
-      GetUINativeModule().textTimer.setFontWeight(node, this.value);
+      getUINativeModule().textTimer.setFontWeight(node, this.value);
     }
   }
 }
@@ -96,9 +96,9 @@ class TextTimerFontStyleModifier extends ModifierWithKey<FontStyle> {
   static identity: Symbol = Symbol('fontStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textTimer.resetFontStyle(node);
+      getUINativeModule().textTimer.resetFontStyle(node);
     } else {
-      GetUINativeModule().textTimer.setFontStyle(node, this.value);
+      getUINativeModule().textTimer.setFontStyle(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -110,9 +110,9 @@ class TextTimerFontFamilyModifier extends ModifierWithKey<string | Resource> {
   static identity: Symbol = Symbol('fontFamily');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textTimer.resetFontFamily(node);
+      getUINativeModule().textTimer.resetFontFamily(node);
     } else {
-      GetUINativeModule().textTimer.setFontFamily(node, this.value);
+      getUINativeModule().textTimer.setFontFamily(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -124,10 +124,9 @@ class TextTimerFormatModifier extends ModifierWithKey<string> {
   static identity: Symbol = Symbol('textTimerFormat');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textTimer.resetFormat(node);
-    }
-    else {
-      GetUINativeModule().textTimer.setFormat(node, this.value);
+      getUINativeModule().textTimer.resetFormat(node);
+    } else {
+      getUINativeModule().textTimer.setFormat(node, this.value);
     }
   }
 }
@@ -135,10 +134,10 @@ class TextTimerFormatModifier extends ModifierWithKey<string> {
 // @ts-ignore
 globalThis.TextTimer.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTextTimerComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

@@ -39,18 +39,6 @@ public:
 
     ~DisplaySync()
     {
-        if (env_ == nullptr) {
-            return;
-        }
-
-        if (onFrameRef_ != nullptr) {
-            napi_delete_reference(env_, onFrameRef_);
-        }
-
-        if (thisVarRef_ != nullptr) {
-            napi_delete_reference(env_, thisVarRef_);
-        }
-
         if (uiDisplaySync_) {
             uiDisplaySync_->DelFromPipelineOnContainer();
         }
@@ -60,7 +48,8 @@ public:
     void NapiSerializer(napi_env& env, napi_value& result);
     void RegisterOnFrameCallback(napi_value cb, napi_ref& onFrameRef, CallbackType callbackType,
                                  napi_env env, napi_handle_scope scope);
-    void UnRegisterOnFrameCallback(size_t argc, napi_ref& onFrameRef);
+    void UnRegisterOnFrameCallback(napi_env env, size_t argc, napi_ref& onFrameRef);
+    void Destroy(napi_env env);
 
     RefPtr<UIDisplaySync> GetUIDisplaySync() const
     {
@@ -82,7 +71,6 @@ public:
 
 private:
     RefPtr<UIDisplaySync> uiDisplaySync_;
-    napi_env env_ = nullptr;
 };
 } // namespace OHOS::Ace::Napi
 

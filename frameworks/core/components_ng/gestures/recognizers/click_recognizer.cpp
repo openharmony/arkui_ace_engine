@@ -48,7 +48,9 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
     PointF localPoint(event.x, event.y);
     auto frameNode = GetAttachedNode();
     if (!frameNode.Invalid()) {
-        NGGestureRecognizer::Transform(localPoint, frameNode);
+        if (!IsPostEventResult()) {
+            NGGestureRecognizer::Transform(localPoint, frameNode);
+        }
         auto host = frameNode.Upgrade();
         CHECK_NULL_RETURN(host, false);
         auto renderContext = host->GetRenderContext();
@@ -183,7 +185,9 @@ void ClickRecognizer::HandleTouchDownEvent(const TouchEvent& event)
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         }
     }
-    focusPoint_ = ComputeFocusPoint();
+    if (currentTouchPointsNum_ == fingers_) {
+        focusPoint_ = ComputeFocusPoint();
+    }
 }
 
 void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
@@ -210,8 +214,8 @@ void ClickRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     auto isUpInRegion = IsPointInRegion(event);
     if (fingersId_.find(event.id) != fingersId_.end()) {
         fingersId_.erase(event.id);
+        --currentTouchPointsNum_;
     }
-    --currentTouchPointsNum_;
     if (currentTouchPointsNum_ == 0) {
         responseRegionBuffer_.clear();
     }

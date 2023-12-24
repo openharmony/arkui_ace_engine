@@ -94,6 +94,7 @@ if (defined(global_parts_info.graphic_graphic_3d)) {
 }
 
 window_scene_support = true
+dynamic_component_support = true
 
 if (defined(preview_support) && preview_support) {
   defines += [ "PREVIEW" ]
@@ -181,6 +182,17 @@ if (defined(global_parts_info.multimedia_media_library)) {
   defines += [ "MEDIA_LIBRARY_EXISTS" ]
 } else {
   media_library_exists = false
+}
+
+if (defined(global_parts_info.hiviewdfx_hichecker)) {
+  hichecker_exists = true
+  defines += [ "HICHECKER_EXISTS" ]
+} else {
+  hichecker_exists = false
+}
+
+if (dynamic_component_support) {
+  defines += [ "DYNAMIC_COMPONENT_SUPPORT" ]
 }
 
 cflags_cc = [

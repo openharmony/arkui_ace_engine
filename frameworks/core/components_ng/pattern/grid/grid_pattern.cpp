@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_utils.h"
+#include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -72,17 +73,15 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     }
 
     // If only set one of rowTemplate and columnsTemplate, use scrollable layout algorithm.
+    RefPtr<GridScrollLayoutAlgorithm> result;
     if (!gridLayoutProperty->GetLayoutOptions().has_value()) {
-        auto result = MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
-        result->SetCanOverScroll(CanOverScroll(GetScrollSource()));
-        result->SetScrollSource(GetScrollSource());
-        return result;
+        result = MakeRefPtr<GridScrollLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
     } else {
-        auto result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
-        result->SetCanOverScroll(CanOverScroll(GetScrollSource()));
-        result->SetScrollSource(GetScrollSource());
-        return result;
+        result = MakeRefPtr<GridScrollWithOptionsLayoutAlgorithm>(gridLayoutInfo_, crossCount, mainCount);
     }
+    result->SetCanOverScroll(CanOverScroll(GetScrollSource()));
+    result->SetScrollSource(GetScrollSource());
+    return result;
 }
 
 RefPtr<NodePaintMethod> GridPattern::CreateNodePaintMethod()
@@ -480,18 +479,13 @@ void GridPattern::AdjustingTargetPos(float targetPos, int32_t rowIndex, float li
             targetPos = targetPos - gridLayoutInfo_.lastMainSize_ + lineHeight;
             break;
         case ScrollAlign::AUTO:
-            if ((rowIndex < gridLayoutInfo_.endMainLineIndex_) && (rowIndex > gridLayoutInfo_.startMainLineIndex_)) {
+            if ((gridLayoutInfo_.startMainLineIndex_ == rowIndex) && (rowIndex == gridLayoutInfo_.endMainLineIndex_)) {
                 return;
             }
-            if (rowIndex >= gridLayoutInfo_.endMainLineIndex_) {
-                float mainGap = GetMainGap();
-                auto totalViewHeight = gridLayoutInfo_.GetTotalHeightOfItemsInView(mainGap);
-                float tmpPos = gridLayoutInfo_.currentOffset_;
-                tmpPos = tmpPos - (totalViewHeight - gridLayoutInfo_.lastMainSize_ + tmpPos);
-                for (int32_t i = gridLayoutInfo_.endMainLineIndex_ + 1; i <= rowIndex; ++i) {
-                    tmpPos = tmpPos - (mainGap + gridLayoutInfo_.lineHeightMap_[i]);
-                }
-                targetPos = -tmpPos;
+            if ((gridLayoutInfo_.startMainLineIndex_ < rowIndex) && (rowIndex < gridLayoutInfo_.endMainLineIndex_)) {
+                return;
+            } else if (rowIndex >= gridLayoutInfo_.endMainLineIndex_) {
+                targetPos = targetPos - gridLayoutInfo_.lastMainSize_ + lineHeight;
             }
             break;
     }
@@ -919,7 +913,7 @@ WeakPtr<FocusHub> GridPattern::SearchIrregularFocusableChild(int32_t tarMainInde
         auto childCrossSpan = hasIrregularItemInfo ? irregularInfo.value().crossSpan
                                                    : childItemProperty->GetCrossSpan(gridLayoutInfo_.axis_);
         auto childMainSpan = hasIrregularItemInfo ? irregularInfo.value().mainSpan
-                                                   : childItemProperty->GetMainSpan(gridLayoutInfo_.axis_);
+                                                  : childItemProperty->GetMainSpan(gridLayoutInfo_.axis_);
 
         GridItemIndexInfo childInfo;
         childInfo.mainIndex = childMainIndex;

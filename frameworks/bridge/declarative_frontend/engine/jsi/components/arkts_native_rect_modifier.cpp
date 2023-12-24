@@ -18,7 +18,9 @@
 #include "core/components_ng/pattern/shape/rect_model_ng.h"
 
 namespace OHOS::Ace::NG {
-
+namespace {
+constexpr uint32_t VALID_RADIUS_PAIR_FLAG = 1;
+} // namespace
 void SetRectRadiusWidth(NodeHandle node, double radiusWidthValue, int32_t radiusWidthUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -52,13 +54,16 @@ void ResetRectRadiusHeight(NodeHandle node)
     RectModelNG::SetRadiusHeight(frameNode, defaultDimension);
 }
 
-void SetRectRadiusWithArray(
-    NodeHandle node, double* radiusValues, int32_t* radiusUnits, bool* radiusValidPairs, int32_t radiusValidPairsSize)
+void SetRectRadiusWithArray(NodeHandle node, double* radiusValues, int32_t* radiusUnits, uint32_t* radiusValidPairs,
+    size_t radiusValidPairsSize)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    for (int index = 0; index < radiusValidPairsSize; index++) {
-        if (radiusValidPairs[index]) {
+    CHECK_NULL_VOID(radiusValues);
+    CHECK_NULL_VOID(radiusUnits);
+    CHECK_NULL_VOID(radiusValidPairs);
+    for (size_t index = 0; index < radiusValidPairsSize; index++) {
+        if (radiusValidPairs[index] == VALID_RADIUS_PAIR_FLAG) {
             int xIndex = index * 2;
             int yIndex = xIndex + 1;
             auto radiusX = CalcDimension(radiusValues[xIndex], (DimensionUnit)radiusUnits[xIndex]);

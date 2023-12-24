@@ -40,36 +40,19 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     InitHierarchicalParameters();
     auto pipelineContext = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
-    float windowsOffsetY = static_cast<float>(windowGlobalRect.GetOffset().GetY());
-    if (hierarchicalParameters_ || !Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        windowsOffsetY = 0.0f;
-    }
     InitializePadding(layoutWrapper);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         ModifySubMenuWrapper(layoutWrapper);
     }
-    auto menuItemSize = parentMenuItem->GetGeometryNode()->GetFrameSize();
-    position_ = GetSubMenuPosition(parentMenuItem);
-    float x = HorizontalLayoutSubMenu(size, position_.GetX(), menuItemSize);
-    x = std::clamp(x, paddingStart_, wrapperSize_.Width() - menuItemSize.Width() - paddingEnd_);
-    float y = 0.0f;
-    if (hierarchicalParameters_ || !Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        y = VerticalLayoutSubMenu(size, position_.GetY(), menuItemSize);
-    } else {
-        y = VerticalLayoutSubMenuHalfScreen(size, position_.GetY(), menuItemSize);
-    }
-    y = std::clamp(
-        y, windowsOffsetY + paddingTop_, windowsOffsetY + wrapperSize_.Height() - size.Height() - paddingBottom_);
     const auto& geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    geometryNode->SetMarginFrameOffset(NG::OffsetF(x, y));
-
+    OffsetF position = MenuLayoutAvoidAlgorithm(parentMenuItem, size);
+    geometryNode->SetMarginFrameOffset(position);
     if (parentMenuItem) {
         auto parentPattern = parentMenuItem->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(parentPattern);
-        auto topLeftPoint = OffsetF(x, y);
-        auto bottomRightPoint = OffsetF(x + size.Width(), y + size.Height());
+        auto topLeftPoint = position;
+        auto bottomRightPoint = position + OffsetF(size.Width(), size.Height());
 
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
@@ -92,6 +75,36 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto child = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(child);
     child->Layout();
+}
+
+OffsetF SubMenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<FrameNode>& parentMenuItem, const SizeF& size)
+{
+    auto pipelineContext = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, NG::OffsetF(0.0f, 0.0f));
+    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+    float windowsOffsetY = static_cast<float>(windowGlobalRect.GetOffset().GetY());
+    auto menuItemSize = parentMenuItem->GetGeometryNode()->GetFrameSize();
+    position_ = GetSubMenuPosition(parentMenuItem);
+    float x = HorizontalLayoutSubMenu(size, position_.GetX(), menuItemSize);
+    x = std::clamp(x, paddingStart_, wrapperSize_.Width() - menuItemSize.Width() - paddingEnd_);
+    float y = 0.0f;
+    if (hierarchicalParameters_ || !Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        windowsOffsetY = 0.0f;
+        y = VerticalLayoutSubMenu(size, position_.GetY(), menuItemSize);
+    } else {
+        y = VerticalLayoutSubMenuHalfScreen(size, position_.GetY(), menuItemSize);
+    }
+    y = std::clamp(
+        y, windowsOffsetY + paddingTop_, windowsOffsetY + wrapperSize_.Height() - size.Height() - paddingBottom_);
+
+    if (hierarchicalParameters_) {
+        auto displayAvailableRect = pipelineContext->GetDisplayAvailableRect();
+        float availableOffsetY = displayAvailableRect.GetOffset().GetY();
+        float wrapperHeight = displayAvailableRect.Height();
+        y = std::clamp(
+            y, availableOffsetY + paddingTop_, availableOffsetY + wrapperHeight - size.Height() - paddingBottom_);
+    }
+    return NG::OffsetF(x, y);
 }
 
 OffsetF SubMenuLayoutAlgorithm::GetSubMenuPosition(const RefPtr<FrameNode>& parentMenuItem)

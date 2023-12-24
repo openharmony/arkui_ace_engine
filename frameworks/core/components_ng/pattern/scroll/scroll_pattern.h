@@ -300,13 +300,13 @@ private:
     void ValidateOffset(int32_t source);
     void HandleScrollPosition(float scroll, int32_t scrollState);
     void SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scrollEffect) override;
-    void AddScrollEdgeEffect(RefPtr<ScrollEdgeEffect> scrollEffect);
     void UpdateScrollBarOffset() override;
     void SetAccessibilityAction();
     bool SetScrollProperties(const RefPtr<LayoutWrapper>& dirty);
     void ScrollSnapTrigger();
     void CheckScrollable();
     OffsetF GetOffsetToScroll(const RefPtr<FrameNode>& childFrame) const;
+    float GetPagingOffset(float delta, float dragDistance, float velocity)  const;
     float GetPagingDelta(float dragDistance, float velocity) const;
 
     float currentOffset_ = 0.0f;

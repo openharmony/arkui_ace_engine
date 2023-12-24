@@ -35,5 +35,5 @@ bool AceUnwrapWantParams(napi_env env, napi_value param, AAFwk::WantParams& want
 
 napi_value AceWrapWant(napi_env env, const Want& want);
 bool AceUnwrapWant(napi_env env, napi_value param, Want& want);
-}  // namespace OHOS::Ace::Napi
-#endif  // OHOS_NAPI_ACE_PLUGIN_WANT_H
+} // namespace OHOS::Ace::Napi
+#endif // OHOS_NAPI_ACE_PLUGIN_WANT_H

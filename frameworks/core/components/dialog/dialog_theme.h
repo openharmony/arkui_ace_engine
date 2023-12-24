@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DIALOG_DIALOG_THEME_H
 
 #include "base/utils/system_properties.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/radius.h"
@@ -110,6 +111,14 @@ public:
                 dialogPattern->GetAttr<Dimension>("dialog_padding_actions_top", 8.0_vp),
                 dialogPattern->GetAttr<Dimension>("dialog_padding_actions_right", 16.0_vp),
                 dialogPattern->GetAttr<Dimension>("dialog_padding_actions_bottom", 16.0_vp));
+            theme->buttonWithContentPadding_ =
+                dialogPattern->GetAttr<Dimension>("dialog_buttonwithcontent_padding", 8.0_vp);
+            if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+                theme->expandDisplay_ = false;
+            } else {
+                std::string expandDisplay = dialogPattern->GetAttr<std::string>("dialog_expand_display", "");
+                theme->expandDisplay_ = (expandDisplay == "true");
+            }
             if (SystemProperties::GetDeviceType() != DeviceType::CAR) {
                 return;
             }
@@ -534,6 +543,16 @@ public:
     {
         return multipleDialogDisplay_;
     }
+
+    bool GetExpandDisplay() const
+    {
+        return expandDisplay_;
+    }
+
+    const Dimension& GetButtonWithContentPadding() const
+    {
+        return buttonWithContentPadding_;
+    }
 protected:
     DialogTheme() = default;
 
@@ -604,6 +623,8 @@ private:
     Dimension mutiButtonPaddingHorizontal_;
     Dimension mutiButtonPaddingVertical_;
     std::string multipleDialogDisplay_;
+    bool expandDisplay_ = false;
+    Dimension buttonWithContentPadding_;
 };
 
 } // namespace OHOS::Ace

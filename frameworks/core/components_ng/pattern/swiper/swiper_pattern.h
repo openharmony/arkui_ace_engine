@@ -542,6 +542,11 @@ public:
         customAnimationToIndex_ = toIndex;
     }
 
+    std::optional<int32_t> GetCustomAnimationToIndex() const
+    {
+        return customAnimationToIndex_;
+    }
+
     void SetCustomContentTransition(std::function<TabContentAnimatedTransition(int32_t, int32_t)>&& event)
     {
         onCustomContentTransition_ =
@@ -555,6 +560,7 @@ public:
 
     void SetSwiperEventCallback(bool disableSwipe);
     void UpdateSwiperPanEvent(bool disableSwipe);
+    bool IsUseCustomAnimation() const;
 
 private:
     void OnModifyDone() override;
@@ -600,7 +606,7 @@ private:
     // use property animation feature
     void PlayPropertyTranslateAnimation(
         float translate, int32_t nextIndex, float velocity = 0.0f, bool stopAutoPlay = false);
-    void StopPropertyTranslateAnimation(bool isBeforeCreateLayoutWrapper = false);
+    void StopPropertyTranslateAnimation(bool isFinishAnimation, bool isBeforeCreateLayoutWrapper = false);
     void UpdateOffsetAfterPropertyAnimation(float offset);
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
     void PlayIndicatorTranslateAnimation(float translate);
@@ -646,7 +652,7 @@ private:
     void PostTranslateTask(uint32_t delayTime);
     void RegisterVisibleAreaChange();
     bool NeedAutoPlay() const;
-    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool forceStop = false);
+    void OnTranslateFinish(int32_t nextIndex, bool restartAutoPlay, bool isFinishAnimation, bool forceStop = false);
     bool IsShowArrow() const;
     void SaveArrowProperty(const RefPtr<FrameNode>& arrowNode);
     RefPtr<FocusHub> GetFocusHubChild(std::string childFrameName);
@@ -687,7 +693,6 @@ private:
     void OnAnimationTranslateZero(int32_t nextIndex, bool stopAutoPlay);
     void UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus);
     void TriggerCustomContentTransitionEvent(int32_t fromIndex, int32_t toIndex);
-    bool IsUseCustomAnimation() const;
 
     /**
      * @brief Stops animations when the scroll starts.

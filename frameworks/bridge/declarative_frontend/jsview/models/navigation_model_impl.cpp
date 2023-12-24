@@ -278,4 +278,8 @@ void NavigationModelImpl::SetMenuCount(int32_t menuCount)
         navigationContainer->SetMenuCount(menuCount);
     }
 }
+
+void NavigationModelImpl::SetCustomTransition(NavigationTransitionEvent&& animationTransition) {}
+
+void NavigationModelImpl::SetIsCustomAnimation(bool isCustom) {}
 } // namespace OHOS::Ace::Framework

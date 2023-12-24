@@ -40,7 +40,7 @@ namespace {
 constexpr float PARAGRAPH_SAVE_BOUNDARY = 1.0f;
 constexpr uint32_t INLINE_DEFAULT_VIEW_MAXLINE = 3;
 constexpr uint32_t COUNTER_TEXT_MAXLINE = 1;
-constexpr int32_t INVAILD_VALUE = -1;
+constexpr int32_t DEFAULT_MODE = -1;
 constexpr int32_t SHOW_COUNTER_PERCENT = 100;
 } // namespace
 void TextFieldLayoutAlgorithm::ConstructTextStyles(
@@ -84,14 +84,12 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(
 {
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(frameNode, std::nullopt);
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_RETURN(pipeline, std::nullopt);
     auto textFieldLayoutProperty = DynamicCast<TextFieldLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_RETURN(textFieldLayoutProperty, std::nullopt);
-    auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
-    CHECK_NULL_RETURN(textFieldTheme, std::nullopt);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_RETURN(pattern, std::nullopt);
+    auto textFieldTheme = pattern->GetTheme();
+    CHECK_NULL_RETURN(textFieldTheme, std::nullopt);
 
     float contentWidth = 0.0f;
     auto safeBoundary = textFieldTheme->GetInlineBorderWidth().ConvertToPx() * 2;
@@ -106,7 +104,8 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(
         paragraph_->Layout(contentConstraint.maxSize.Width());
         contentWidth = ConstraintWithMinWidth(contentConstraint, layoutWrapper, paragraph_);
         // calc inline status in advance
-        auto widthOffSet = pattern->GetPaddingLeft() + pattern->GetPaddingRight() - safeBoundary;
+        auto widthOffSet = contentConstraint.selfIdealSize.Width().has_value()?
+            pattern->GetPaddingLeft() + pattern->GetPaddingRight() - safeBoundary : 0.0f - safeBoundary;
         inlineParagraph_->Layout(contentConstraint.maxSize.Width() + widthOffSet
             - safeBoundary - PARAGRAPH_SAVE_BOUNDARY);
         auto longestLine = std::ceil(inlineParagraph_->GetLongestLine());
@@ -265,18 +264,18 @@ void TextFieldLayoutAlgorithm::UpdateCounterNode(
 
     std::string counterText = "";
     TextStyle countTextStyle = (textLength != maxLength) ? theme->GetCountTextStyle() : theme->GetOverCountTextStyle();
-    auto counterType = textFieldLayoutProperty->GetSetCounterValue(INVAILD_VALUE);
+    auto counterType = textFieldLayoutProperty->GetSetCounterValue(DEFAULT_MODE);
     uint32_t limitsize = maxLength * counterType / SHOW_COUNTER_PERCENT;
-    if ((pattern->GetCounterState() == true) && textLength == maxLength && (counterType != INVAILD_VALUE)) {
+    if ((pattern->GetCounterState() == true) && textLength == maxLength && (counterType != DEFAULT_MODE)) {
         countTextStyle = theme->GetOverCountTextStyle();
         counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
         countTextStyle.SetTextColor(theme->GetOverCounterColor());
         pattern->SetCounterState(false);
-    } else if ((textLength >= limitsize) && (counterType != INVAILD_VALUE)) {
+    } else if ((textLength >= limitsize) && (counterType != DEFAULT_MODE)) {
         countTextStyle = theme->GetCountTextStyle();
         counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
         countTextStyle.SetTextColor(theme->GetDefaultCounterColor());
-    } else if (textFieldLayoutProperty->GetShowCounterValue(false) && counterType == INVAILD_VALUE) {
+    } else if (textFieldLayoutProperty->GetShowCounterValue(false) && counterType == DEFAULT_MODE) {
         counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
     }
     textLayoutProperty->UpdateContent(counterText);
@@ -500,17 +499,23 @@ void TextFieldLayoutAlgorithm::FontRegisterCallback(
     CHECK_NULL_VOID(pipeline);
     auto fontManager = pipeline->GetFontManager();
     if (fontManager) {
+        bool isCustomFont = false;
         for (const auto& familyName : fontFamilies) {
-            fontManager->RegisterCallbackNG(frameNode, familyName, callback);
+            bool customFont = fontManager->RegisterCallbackNG(frameNode, familyName, callback);
+            if (customFont) {
+                isCustomFont = true;
+            }
         }
         fontManager->AddVariationNodeNG(frameNode);
+        if (isCustomFont || fontManager->IsDefaultFontChanged()) {
+            auto pattern = frameNode->GetPattern<TextFieldPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetIsCustomFont(true);
+            auto modifier = DynamicCast<TextFieldContentModifier>(pattern->GetContentModifier());
+            CHECK_NULL_VOID(modifier);
+            modifier->SetIsCustomFont(true);
+        }
     }
-    auto pattern = frameNode->GetPattern<TextFieldPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetIsCustomFont(true);
-    auto modifier = DynamicCast<TextFieldContentModifier>(pattern->GetContentModifier());
-    CHECK_NULL_VOID(modifier);
-    modifier->SetIsCustomFont(true);
 }
 
 ParagraphStyle TextFieldLayoutAlgorithm::GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const

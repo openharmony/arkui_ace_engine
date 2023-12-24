@@ -573,34 +573,6 @@ HWTEST_F(RefreshTestNg, OnKeyEvent002, TestSize.Level1)
 }
 
 /**
- * @tc.name: UpdateRefreshDraw001
- * @tc.desc: Test UpdateRefreshDraw
- * @tc.type: FUNC
- */
-HWTEST_F(RefreshTestNg, UpdateRefreshDraw001, TestSize.Level1)
-{
-    Create([](RefreshModelNG model) { model.SetCustomBuilder(CreateCustomNode()); });
-    pattern_->UpdateRefreshDraw();
-    pattern_->updatePerFrame_ = true;
-    pattern_->UpdateRefreshDraw();
-    pattern_->updatePerFrame_ = true;
-    pattern_->isRefreshing_ = true;
-    pattern_->scrollOffset_ = OffsetF(0, TRIGGER_REFRESH_DISTANCE.ConvertToPx() - 1);
-    pattern_->UpdateRefreshDraw();
-
-    pattern_->updatePerFrame_ = true;
-    pattern_->isRefreshing_ = false;
-    pattern_->scrollOffset_ = OffsetF(0, TRIGGER_REFRESH_DISTANCE.ConvertToPx() - 1);
-    pattern_->UpdateRefreshDraw();
-    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
-
-    pattern_->updatePerFrame_ = true;
-    pattern_->scrollOffset_ = OffsetF(0, TRIGGER_REFRESH_DISTANCE.ConvertToPx());
-    pattern_->UpdateRefreshDraw();
-    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::OVER_DRAG);
-}
-
-/**
  * @tc.name: VersionElevenDrag001
  * @tc.desc: Test Drag
  * @tc.type: FUNC

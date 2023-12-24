@@ -255,11 +255,14 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     // Update property of text.
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    if (myIndex == indicator) {
-        textLayoutProperty->UpdateTextColor(tabTheme->GetActiveIndicatorColor());
-    } else {
-        textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOffColor());
+    if (!swiperPattern->IsUseCustomAnimation() || !swiperPattern->GetCustomAnimationToIndex().has_value()) {
+        if (myIndex == indicator) {
+            textLayoutProperty->UpdateTextColor(tabTheme->GetActiveIndicatorColor());
+        } else {
+            textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOffColor());
+        }
     }
+
     auto textRenderContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(textRenderContext);
     textRenderContext->UpdateClipEdge(true);

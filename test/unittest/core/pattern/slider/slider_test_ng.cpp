@@ -110,6 +110,11 @@ constexpr float CONTENT_HEIGHT = 50.0f;
 constexpr float HOT_BLOCK_SHADOW_WIDTH = 3.0f;
 constexpr Dimension BUBBLE_TO_SLIDER_DISTANCE = 10.0_vp;
 constexpr Dimension TRACK_BORDER_RADIUS = 5.0_px;
+constexpr Dimension BUBBLE_VERTICAL_WIDTH = 62.0_vp;
+constexpr Dimension BUBBLE_VERTICAL_HEIGHT = 32.0_vp;
+constexpr Dimension BUBBLE_HORIZONTAL_WIDTH = 48.0_vp;
+constexpr Dimension BUBBLE_HORIZONTAL_HEIGHT = 40.0_vp;
+const OffsetF SLIDER_GLOBAL_OFFSET = { 200.0f, 200.0f };
 } // namespace
 class SliderTestNg : public testing::Test {
 public:
@@ -1112,6 +1117,60 @@ HWTEST_F(SliderTestNg, SliderModelNgTest002, TestSize.Level2)
     EXPECT_TRUE(sliderLayoutProperty->GetBlockSize().has_value());
     sliderModelNG.SetBlockSize(Dimension(0.0), Dimension(0.0));
     EXPECT_FALSE(sliderLayoutProperty->GetBlockSize().has_value());
+}
+
+/**
+ * @tc.name: SliderTipModifierTest001
+ * @tc.desc: TEST slider_tip_modifier onDraw
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderTestNg, SliderTipModifierTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and sliderTipModifier.
+     */
+    RefPtr<SliderPattern> sliderPattern = AceType::MakeRefPtr<SliderPattern>();
+    ASSERT_NE(sliderPattern, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode(V2::SLIDER_ETS_TAG, -1, sliderPattern);
+    ASSERT_NE(frameNode, nullptr);
+    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(sliderLayoutProperty, nullptr);
+    SliderTipModifier sliderTipModifier(
+        [sliderPattern]() { return sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()); });
+    /**
+     * @tc.steps: step2. set sliderTipModifier attribute and call onDraw function.
+     */
+    sliderTipModifier.SetSliderGlobalOffset(SLIDER_GLOBAL_OFFSET);
+    sliderTipModifier.tipFlag_ = AceType::MakeRefPtr<PropertyBool>(true);
+    auto offset = static_cast<float>(BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx());
+    Testing::MockCanvas canvas;
+    MockCanvasFunction(canvas);
+    DrawingContext context { canvas, SLIDER_WIDTH, SLIDER_HEIGHT };
+    sliderTipModifier.onDraw(context);
+    EXPECT_EQ(sliderTipModifier.vertex_.GetY(), 0 - offset);
+    EXPECT_EQ(sliderTipModifier.isMask_, false);
+    EXPECT_EQ(sliderTipModifier.UpdateOverlayRect(SizeF()), true);
+    sliderTipModifier.SetSliderGlobalOffset(OffsetF());
+    sliderTipModifier.onDraw(context);
+    EXPECT_EQ(sliderTipModifier.vertex_.GetY(), offset);
+    EXPECT_EQ(sliderTipModifier.isMask_, true);
+    EXPECT_EQ(sliderTipModifier.UpdateOverlayRect(SizeF()), true);
+    EXPECT_EQ(sliderTipModifier.bubbleSize_,
+        SizeF(BUBBLE_HORIZONTAL_WIDTH.ConvertToPx(), BUBBLE_HORIZONTAL_HEIGHT.ConvertToPx()));
+
+    sliderPattern->direction_ = Axis::VERTICAL;
+    sliderTipModifier.SetDirection(Axis::VERTICAL);
+    sliderTipModifier.onDraw(context);
+    EXPECT_EQ(sliderTipModifier.vertex_.GetX(), offset);
+    EXPECT_EQ(sliderTipModifier.isMask_, true);
+    EXPECT_EQ(sliderTipModifier.UpdateOverlayRect(SizeF()), true);
+    sliderTipModifier.SetSliderGlobalOffset(SLIDER_GLOBAL_OFFSET);
+    sliderTipModifier.onDraw(context);
+    EXPECT_EQ(sliderTipModifier.vertex_.GetX(), 0 - offset);
+    EXPECT_EQ(sliderTipModifier.isMask_, false);
+    EXPECT_EQ(sliderTipModifier.UpdateOverlayRect(SizeF()), true);
+    EXPECT_EQ(sliderTipModifier.bubbleSize_,
+        SizeF(BUBBLE_VERTICAL_WIDTH.ConvertToPx(), BUBBLE_VERTICAL_HEIGHT.ConvertToPx()));
 }
 
 /**
@@ -2121,17 +2180,17 @@ HWTEST_F(SliderTestNg, SliderPatternTest007, TestSize.Level1)
      */
     auto offset = BUBBLE_TO_SLIDER_DISTANCE.ConvertToPx();
     sliderPattern->direction_ = Axis::HORIZONTAL;
-    ASSERT_EQ(sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()), OffsetF(0, -offset));
+    ASSERT_EQ(sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()).first, OffsetF(0, -offset));
     sliderPattern->direction_ = Axis::VERTICAL;
-    ASSERT_EQ(sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()), OffsetF(-offset, 0));
+    ASSERT_EQ(sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()).first, OffsetF(-offset, 0));
 
     sliderPattern->sliderContentModifier_ =
         AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
     sliderLayoutProperty->UpdateSliderMode(SliderModelNG::SliderMode::INSET);
     sliderPattern->direction_ = Axis::HORIZONTAL;
-    ASSERT_EQ(sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()), OffsetF(0, -offset));
+    ASSERT_EQ(sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()).first, OffsetF(0, -offset));
     sliderPattern->direction_ = Axis::VERTICAL;
-    ASSERT_EQ(sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()), OffsetF(-offset, 0));
+    ASSERT_EQ(sliderPattern->GetBubbleVertexPosition(OffsetF(), 0.0f, SizeF()).first, OffsetF(-offset, 0));
 }
 
 /**

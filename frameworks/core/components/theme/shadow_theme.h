@@ -104,13 +104,12 @@ protected:
     ShadowTheme() = default;
 
 private:
-    static int32_t GetKeyOfShadowStyle(ShadowStyle style, ColorMode colorMode)
+    static uint32_t GetKeyOfShadowStyle(ShadowStyle style, ColorMode colorMode)
     {
-        const static int32_t SHIFT_NUMBER = 8;
-        return (static_cast<int32_t>(colorMode) << SHIFT_NUMBER) + static_cast<int32_t>(style);
+        return (static_cast<uint32_t>(colorMode) << 8) + static_cast<uint32_t>(style); // can hold 2^8 shadowStyle enums
     }
 
-    std::unordered_map<int32_t, Shadow> shadowStyles_;
+    std::unordered_map<uint32_t, Shadow> shadowStyles_;
 };
 
 } // namespace OHOS::Ace

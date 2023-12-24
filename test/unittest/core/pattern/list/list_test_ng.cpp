@@ -440,20 +440,17 @@ void ListTestNg::ScrollSnap(float offset, float velocity)
 {
     pattern_->OnScrollSnapCallback(offset, velocity);
     FlushLayoutTask(frameNode_);
-    auto motion = pattern_->scrollableEvent_->GetScrollable()->scrollSnapMotion_;
-    if (motion) {
-        float endValue = motion->GetEndValue();
-        pattern_->ScrollBy(-endValue);
-        FlushLayoutTask(frameNode_);
-    }
+    float endValue = pattern_->scrollableEvent_->GetScrollable()->GetSnapFinalPosition();
+    pattern_->ScrollBy(-endValue);
+    FlushLayoutTask(frameNode_);
 }
 
 void ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 {
     pattern_->ScrollToIndex(index, smooth, align);
     FlushLayoutTask(frameNode_);
-    if (smooth && pattern_->springMotion_) {
-        float endValue = pattern_->springMotion_->GetEndValue();
+    if (smooth) {
+        float endValue = pattern_->GetFinalPosition();
         pattern_->ScrollTo(endValue);
         FlushLayoutTask(frameNode_);
     }
@@ -463,8 +460,8 @@ void ListTestNg::ScrollToItemInGroup(int32_t index, int32_t indexInGroup, bool s
 {
     pattern_->ScrollToItemInGroup(index, indexInGroup, smooth, align);
     FlushLayoutTask(frameNode_);
-    if (smooth && pattern_->springMotion_) {
-        float endValue = pattern_->springMotion_->GetEndValue();
+    if (smooth) {
+        float endValue = pattern_->GetFinalPosition();
         pattern_->ScrollTo(endValue);
         FlushLayoutTask(frameNode_);
     }
@@ -637,10 +634,10 @@ AssertionResult ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlig
     float startOffset = pattern_->GetTotalOffset();
     pattern_->ScrollToIndex(index, smooth, align);
     FlushLayoutTask(frameNode_);
-    if (smooth && pattern_->springMotion_) {
+    if (smooth) {
         // Straight to the end of the anmiation
         // can not exceed scrollableDistance if is not spring
-        float endValue = pattern_->springMotion_->GetEndValue();
+        float endValue = pattern_->GetFinalPosition();
         float scrollableDistance = pattern_->GetScrollableDistance();
         float two = 2.f;
         if (GreatNotEqual(endValue - startOffset * two, scrollableDistance)) {
@@ -649,7 +646,8 @@ AssertionResult ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlig
         if (LessNotEqual(endValue, 0)) {
             endValue = 0;
         }
-        pattern_->springMotion_->NotifyListener(endValue);
+        pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue,
+            SCROLL_FROM_ANIMATION_CONTROLLER);
         FlushLayoutTask(frameNode_);
     }
     float currentOffset = pattern_->GetTotalOffset();
@@ -665,10 +663,10 @@ AssertionResult ListTestNg::ScrollToItemInGroup(
     float startOffset = pattern_->GetTotalOffset();
     pattern_->ScrollToItemInGroup(index, indexInGroup, smooth, align);
     FlushLayoutTask(frameNode_);
-    if (smooth && pattern_->springMotion_) {
+    if (smooth) {
         // Straight to the end of the anmiation
         // can not exceed scrollableDistance if is not spring
-        float endValue = pattern_->springMotion_->GetEndValue();
+        float endValue = pattern_->GetFinalPosition();
         float scrollableDistance = pattern_->GetScrollableDistance();
         float two = 2.f;
         if (GreatNotEqual(endValue - startOffset * two, scrollableDistance)) {
@@ -677,7 +675,8 @@ AssertionResult ListTestNg::ScrollToItemInGroup(
         if (LessNotEqual(endValue, 0)) {
             endValue = 0;
         }
-        pattern_->springMotion_->NotifyListener(endValue);
+        pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue,
+            SCROLL_FROM_ANIMATION_CONTROLLER);
         FlushLayoutTask(frameNode_);
     }
     float currentOffset = pattern_->GetTotalOffset();
@@ -4512,8 +4511,10 @@ HWTEST_F(ListTestNg, PaintMethod001, TestSize.Level1)
      */
     CreateWithItem([](ListModelNG model) {});
     UpdateContentModifier();
-    auto dividerInfo = pattern_->listContentModifier_->dividerInfo_;
-    EXPECT_FALSE(dividerInfo.has_value());
+    auto dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
+    auto lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
+    auto dividerMap = lda->GetDividerMap();
+    EXPECT_TRUE(dividerMap.empty());
 
     /**
      * @tc.steps: step2. Set chainAnimation and divider
@@ -4525,8 +4526,10 @@ HWTEST_F(ListTestNg, PaintMethod001, TestSize.Level1)
         model.SetChainAnimation(true);
     });
     UpdateContentModifier();
-    dividerInfo = pattern_->listContentModifier_->dividerInfo_;
-    EXPECT_FALSE(dividerInfo.has_value());
+    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
+    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
+    dividerMap = lda->GetDividerMap();
+    EXPECT_TRUE(dividerMap.empty());
 
     /**
      * @tc.steps: step3. Set divider strokeWidth less than zero
@@ -4536,8 +4539,10 @@ HWTEST_F(ListTestNg, PaintMethod001, TestSize.Level1)
     itemDivider.strokeWidth = Dimension(-1);
     CreateWithItem([itemDivider](ListModelNG model) { model.SetDivider(itemDivider); });
     UpdateContentModifier();
-    dividerInfo = pattern_->listContentModifier_->dividerInfo_;
-    EXPECT_FALSE(dividerInfo.has_value());
+    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
+    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
+    dividerMap = lda->GetDividerMap();
+    EXPECT_TRUE(dividerMap.empty());
 
     /**
      * @tc.steps: step4. Set divider strokeWidth Unit as PERCENT
@@ -4547,8 +4552,10 @@ HWTEST_F(ListTestNg, PaintMethod001, TestSize.Level1)
     itemDivider.strokeWidth = Dimension(STROKE_WIDTH, DimensionUnit::PERCENT);
     CreateWithItem([itemDivider](ListModelNG model) { model.SetDivider(itemDivider); });
     UpdateContentModifier();
-    dividerInfo = pattern_->listContentModifier_->dividerInfo_;
-    EXPECT_FALSE(dividerInfo.has_value());
+    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
+    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
+    dividerMap = lda->GetDividerMap();
+    EXPECT_TRUE(dividerMap.empty());
 
     /**
      * @tc.steps: step5. Not create item
@@ -4557,8 +4564,10 @@ HWTEST_F(ListTestNg, PaintMethod001, TestSize.Level1)
     itemDivider = ITEM_DIVIDER;
     Create([itemDivider](ListModelNG model) { model.SetDivider(itemDivider); });
     UpdateContentModifier();
-    dividerInfo = pattern_->listContentModifier_->dividerInfo_;
-    EXPECT_FALSE(dividerInfo.has_value());
+    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
+    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
+    dividerMap = lda->GetDividerMap();
+    EXPECT_TRUE(dividerMap.empty());
 
     /**
      * @tc.steps: step6. Set divider strokeWidth greater than contentSize(LIST_HEIGHT)
@@ -4568,8 +4577,10 @@ HWTEST_F(ListTestNg, PaintMethod001, TestSize.Level1)
     itemDivider.strokeWidth = Dimension(LIST_HEIGHT + 1);
     CreateWithItem([itemDivider](ListModelNG model) { model.SetDivider(itemDivider); });
     UpdateContentModifier();
-    dividerInfo = pattern_->listContentModifier_->dividerInfo_;
-    EXPECT_FALSE(dividerInfo.has_value());
+    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
+    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
+    dividerMap = lda->GetDividerMap();
+    EXPECT_TRUE(dividerMap.empty());
 
     /**
      * @tc.steps: step7. Set divider startMargin + endMargin equal to crossSize(LIST_WIDTH)
@@ -4580,8 +4591,10 @@ HWTEST_F(ListTestNg, PaintMethod001, TestSize.Level1)
     itemDivider.endMargin = Dimension(LIST_WIDTH / 2);
     CreateWithItem([itemDivider](ListModelNG model) { model.SetDivider(itemDivider); });
     UpdateContentModifier();
-    dividerInfo = pattern_->listContentModifier_->dividerInfo_;
-    EXPECT_FALSE(dividerInfo.has_value());
+    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
+    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
+    dividerMap = lda->GetDividerMap();
+    EXPECT_TRUE(dividerMap.empty());
 
     /**
      * @tc.steps: step8. Set divider startMargin + endMargin greater than crossSize(LIST_WIDTH)
@@ -4592,10 +4605,13 @@ HWTEST_F(ListTestNg, PaintMethod001, TestSize.Level1)
     itemDivider.endMargin = Dimension(LIST_WIDTH / 2 + 1);
     CreateWithItem([itemDivider](ListModelNG model) { model.SetDivider(itemDivider); });
     UpdateContentModifier();
-    dividerInfo = pattern_->listContentModifier_->dividerInfo_;
-    EXPECT_TRUE(dividerInfo.has_value());
-    EXPECT_EQ(dividerInfo.value().startMargin, 0.f);
-    EXPECT_EQ(dividerInfo.value().endMargin, 0.f);
+    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
+    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
+    dividerMap = lda->GetDividerMap();
+    EXPECT_FALSE(dividerMap.empty());
+    for (auto child : dividerMap) {
+        EXPECT_EQ(child.second.offset.GetX(), 0.f);
+    }
 
     /**
      * @tc.steps: step9. Set divider startMargin + endMargin less than crossSize(LIST_WIDTH)
@@ -4604,10 +4620,13 @@ HWTEST_F(ListTestNg, PaintMethod001, TestSize.Level1)
     itemDivider = ITEM_DIVIDER;
     CreateWithItem([itemDivider](ListModelNG model) { model.SetDivider(itemDivider); });
     UpdateContentModifier();
-    dividerInfo = pattern_->listContentModifier_->dividerInfo_;
-    EXPECT_TRUE(dividerInfo.has_value());
-    EXPECT_EQ(dividerInfo.value().startMargin, ITEM_DIVIDER.startMargin.ConvertToPx());
-    EXPECT_EQ(dividerInfo.value().endMargin, ITEM_DIVIDER.endMargin.ConvertToPx());
+    dividerList_ = pattern_->listContentModifier_->dividerList_->Get();
+    lda = AceType::DynamicCast<ListDividerArithmetic>(dividerList_);
+    dividerMap = lda->GetDividerMap();
+    EXPECT_FALSE(dividerMap.empty());
+    for (auto child : dividerMap) {
+        EXPECT_EQ(child.second.offset.GetX(), ITEM_DIVIDER.startMargin.ConvertToPx());
+    }
 }
 
 /**
@@ -5010,15 +5029,15 @@ HWTEST_F(ListTestNg, Pattern002, TestSize.Level1)
     CreateWithItem([](ListModelNG model) {});
 
     pattern_->AnimateTo(0, 0, nullptr, true);
-    EXPECT_NE(pattern_->animator_, nullptr);
+    EXPECT_NE(pattern_->springAnimation_, nullptr);
 
-    pattern_->animator_->Pause();
+    pattern_->StopAnimate();
     pattern_->AnimateTo(0, 0, nullptr, true);
-    EXPECT_NE(pattern_->animator_, nullptr);
+    EXPECT_NE(pattern_->springAnimation_, nullptr);
 
-    pattern_->animator_->Stop();
-    pattern_->AnimateTo(0, 0, nullptr, true);
-    EXPECT_NE(pattern_->animator_, nullptr);
+    pattern_->StopAnimate();
+    pattern_->AnimateTo(0, 0, nullptr, false);
+    EXPECT_NE(pattern_->curveAnimation_, nullptr);
 }
 
 /**
@@ -5649,14 +5668,14 @@ HWTEST_F(ListTestNg, Pattern005, TestSize.Level1)
      * @tc.expected: Would stop.
      */
     pattern_->AnimateTo(0, 0, nullptr, true);
-    pattern_->animator_->Resume();
-    EXPECT_TRUE(pattern_->animator_->IsRunning());
-    pattern_->OnScrollPosition(100.f, SCROLL_FROM_START);
-    EXPECT_TRUE(pattern_->scrollAbort_);
+    EXPECT_TRUE(pattern_->AnimateStoped());
+    double offset = 100.0;
+    pattern_->OnScrollPosition(offset, SCROLL_FROM_START);
+    EXPECT_FALSE(pattern_->scrollAbort_);
     pattern_->OnScrollCallback(100.f, SCROLL_FROM_START);
-    EXPECT_TRUE(pattern_->scrollAbort_);
+    EXPECT_FALSE(pattern_->scrollAbort_);
     EXPECT_TRUE(IsEqualTotalOffset(0));
-    EXPECT_TRUE(pattern_->animator_->IsStopped());
+    EXPECT_TRUE(pattern_->AnimateStoped());
 
     /**
      * @tc.steps: step2. When has animator_ and stop, call OnScrollCallback.
@@ -6215,9 +6234,9 @@ HWTEST_F(ListTestNg, ListPattern_UpdateScrollSnap001, TestSize.Level1)
     CreateWithItem([](ListModelNG model) {});
     pattern_->AnimateTo(0, 0, nullptr, true);
     pattern_->UpdateScrollSnap();
-    EXPECT_FALSE(pattern_->predictSnapOffset_.has_value());
+    EXPECT_TRUE(pattern_->predictSnapOffset_.has_value());
 
-    pattern_->animator_->Stop();
+    pattern_->StopAnimate();
     pattern_->UpdateScrollSnap();
     EXPECT_EQ(pattern_->predictSnapOffset_.value(), 0.0);
 }

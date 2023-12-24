@@ -64,50 +64,10 @@ CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
         dividerPainter.DrawLine(canvas, offset);
         OffsetF offsetY = OffsetF(dividerMargin, downLine);
         dividerPainter.DrawLine(canvas, offsetY);
-        if (enabled) {
-            picker->PaintGradient(canvas, frameRect);
-        } else {
+        if (!enabled) {
             picker->PaintDisable(canvas, frameRect.Width(), frameRect.Height());
         }
     };
-}
-
-void TextPickerPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& frameRect)
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<PickerTheme>();
-    double gradientHeight = pipeline->NormalizeToPx(theme->GetGradientHeight());
-    if (NearZero(gradientHeight)) {
-        return;
-    }
-
-    auto height = static_cast<float>((frameRect.Height() - theme->GetDividerSpacing().ConvertToPx()) / 2);
-    // Paint gradient rect over the picker content.
-    RSBrush topBrush;
-    RSRect rect(0.0f, 0.0f, frameRect.Right() - frameRect.Left(), frameRect.Bottom() - frameRect.Top());
-    RSPoint topStartPoint;
-    topStartPoint.SetX(0.0f);
-    topStartPoint.SetY(0.0f);
-    RSPoint topEndPoint;
-    topEndPoint.SetX(0.0f);
-    topEndPoint.SetY(frameRect.Height());
-    auto textPickerPattern = DynamicCast<TextPickerPattern>(pattern_.Upgrade());
-    Color endColor = textPickerPattern ? textPickerPattern->GetBackgroundColor() : Color::WHITE;
-    Color middleColor = endColor.ChangeAlpha(0);
-    if (NearZero(frameRect.Bottom())) {
-        return;
-    }
-    std::vector<float> topPos { 0.0f, height / frameRect.Bottom(), (frameRect.Bottom() - height) / frameRect.Bottom(),
-        1.0f };
-    std::vector<RSColorQuad> topColors { endColor.GetValue(), middleColor.GetValue(), middleColor.GetValue(),
-        endColor.GetValue() };
-    topBrush.SetShaderEffect(
-        RSShaderEffect::CreateLinearGradient(topStartPoint, topEndPoint, topColors, topPos, RSTileMode::CLAMP));
-    canvas.DetachPen().AttachBrush(topBrush);
-    canvas.DrawRect(rect);
-    canvas.DetachBrush();
-    canvas.Restore();
 }
 
 void TextPickerPaintMethod::PaintDisable(RSCanvas& canvas, double X, double Y)

@@ -484,6 +484,49 @@ public:
         return ellipsisMode_;
     }
 
+    bool isSymbolGlyph_ = false;
+
+    void SetRenderColors(std::vector<Color>& renderColors)
+    {
+        renderColors_ = renderColors ;
+    }
+
+    void SetRenderStrategy(int32_t renderStrategy)
+    {
+        renderStrategy_ = renderStrategy;
+    }
+
+    void SetEffectStrategy(int32_t effectStrategy)
+    {
+        effectStrategy_ = effectStrategy;
+    }
+
+    void SetSymbolColorList(const std::vector<Color>& renderColors)
+    {
+        renderColors_ = renderColors;
+    }
+
+    std::vector<Color> GetRenderColors()
+    {
+        return renderColors_;
+    }
+
+    int32_t GetRenderStrategy() const
+    {
+        return renderStrategy_;
+    }
+
+    const std::vector<Color>& GetSymbolColorList() const
+    {
+        return renderColors_;
+    }
+
+    int32_t GetEffectStrategy() const
+    {
+        return effectStrategy_;
+    }
+
+
 private:
     std::vector<std::string> fontFamilies_;
     std::unordered_map<std::string, int32_t> fontFeatures_;
@@ -520,6 +563,11 @@ private:
     WordBreak wordBreak_ { WordBreak::BREAK_WORD };
     TextCase textCase_ { TextCase::NORMAL };
     EllipsisMode ellipsisMode_ = EllipsisMode::TAIL;
+
+    // for Symbol
+    std::vector<Color> renderColors_;
+    int32_t renderStrategy_ = 0;
+    int32_t effectStrategy_ = 0;
 };
 
 namespace StringUtils {

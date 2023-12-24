@@ -39,6 +39,7 @@ namespace {
 float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostNode,
     const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty, const SizeF& navigationSize)
 {
+    CHECK_NULL_RETURN(hostNode, 0.0f);
     auto titleBarNode = hostNode->GetTitleBarNode();
     CHECK_NULL_RETURN(titleBarNode, 0.0f);
     auto index = hostNode->GetChildIndexById(titleBarNode->GetId());
@@ -88,16 +89,11 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
     }
 
     // FREE 和 FULL 模式，有subtitle
-    auto titleBar = AceType::DynamicCast<TitleBarNode>(titleBarNode);
-    auto titlePattern = titleBar->GetPattern<TitleBarPattern>();
-    auto overDragOffset = titlePattern->GetOverDragOffset();
-    auto isTitleCustom = hostNode->GetPrevTitleIsCustomValue(false);
     if (hostNode->GetSubtitle()) {
         if (NearZero(titleBarHeight)) {
             titleBarHeight = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
         }
-        auto doubleTitleBarHeight = isTitleCustom ? titleBarHeight : overDragOffset / 6.0f + titleBarHeight;
-        constraint.selfIdealSize = OptionalSizeF(navigationSize.Width(), doubleTitleBarHeight);
+        constraint.selfIdealSize = OptionalSizeF(navigationSize.Width(), titleBarHeight);
         titleBarWrapper->Measure(constraint);
         return titleBarHeight;
     }
@@ -106,23 +102,20 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
     if (NearZero(titleBarHeight)) {
         titleBarHeight = static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
     }
-    auto singleTitleBarHeight = isTitleCustom ? titleBarHeight : overDragOffset / 6.0f + titleBarHeight;
-    constraint.selfIdealSize = OptionalSizeF(navigationSize.Width(), singleTitleBarHeight);
+    constraint.selfIdealSize = OptionalSizeF(navigationSize.Width(), titleBarHeight);
     titleBarWrapper->Measure(constraint);
     return titleBarHeight;
 }
 
 bool CheckWhetherNeedToHideToolbar(const RefPtr<NavBarNode>& hostNode, const SizeF& navigationSize)
 {
-    if (!hostNode->IsNavbarUseToolbarConfiguration() || hostNode->GetPrevMenuIsCustomValue(false)) {
+    if (hostNode->GetPrevMenuIsCustomValue(false)) {
         return false;
     }
 
     auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(hostNode->GetToolBarNode());
     CHECK_NULL_RETURN(toolbarNode, false);
-    auto containerNode = toolbarNode->GetToolbarContainerNode();
-    CHECK_NULL_RETURN(containerNode, false);
-    if (containerNode->GetChildren().empty()) {
+    if (!toolbarNode->HasValidContent()) {
         return true;
     }
 

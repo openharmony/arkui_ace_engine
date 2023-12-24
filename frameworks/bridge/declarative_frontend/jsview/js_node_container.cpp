@@ -134,6 +134,7 @@ RefPtr<NG::UINode> JSNodeContainer::GetNodeByNodeController(
     SetOnAppearFunc(object, execCtx);
     SetOnDisappearFunc(object, execCtx);
     SetOnResizeFunc(object, execCtx);
+    SetOnTouchEventFunc(object, execCtx);
 
     return baseNode->GetViewNode();
 }
@@ -162,6 +163,21 @@ void JSNodeContainer::SetOnDisappearFunc(const JSRef<JSObject>& object, JsiExecu
         func->Execute();
     };
     ViewAbstractModel::GetInstance()->SetOnDisAppear(onDisappear);
+}
+
+void JSNodeContainer::SetOnTouchEventFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx)
+{
+    auto onTouchEventCallback = object->GetProperty("onTouchEvent");
+    CHECK_NULL_VOID(onTouchEventCallback->IsFunction());
+    RefPtr<JsTouchFunction> jsOnTouchFunc =
+        AceType::MakeRefPtr<JsTouchFunction>(JSRef<JSFunc>::Cast(onTouchEventCallback));
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onTouch = [execCtx, func = std::move(jsOnTouchFunc), node = frameNode](TouchEventInfo& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(info);
+    };
+    NodeContainerModel::GetInstance()->SetOnTouchEvent(std::move(onTouch));
 }
 
 void JSNodeContainer::SetOnResizeFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx)

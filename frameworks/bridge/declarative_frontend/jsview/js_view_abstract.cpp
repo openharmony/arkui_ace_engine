@@ -67,6 +67,7 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/invert.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/components/common/properties/shadow_config.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -140,7 +141,7 @@ constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 constexpr float MAX_ANGLE = 360.0f;
 constexpr float DEFAULT_BIAS = 0.5f;
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "address" };
+const std::vector<std::string> TEXT_DETECT_TYPES = { "phoneNum", "url", "email", "location" };
 const std::vector<std::string> RESOURCE_HEADS = { "app", "sys" };
 const std::string SHEET_HEIGHT_MEDIUM = "medium";
 const std::string SHEET_HEIGHT_LARGE = "large";
@@ -646,7 +647,7 @@ RefPtr<NG::ChainedTransitionEffect> ParseChainedTransition(
         auto pipelineContext = container->GetPipelineContext();
         CHECK_NULL_RETURN(pipelineContext, nullptr);
         auto animationOptionResult = std::make_shared<AnimationOption>(
-            JSViewContext::CreateAnimation(propAnimationOption, nullptr, pipelineContext->IsFormRender()));
+            JSViewContext::CreateAnimation(propAnimationOption, pipelineContext->IsFormRender()));
         // The maximum of the form-animation-playback duration value is 1000 ms.
         if (pipelineContext->IsFormRender() && pipelineContext->IsFormAnimation()) {
             auto formAnimationTimeInterval = GetFormAnimationTimeInterval(pipelineContext);
@@ -755,6 +756,33 @@ void SetPlacementOnTopVal(const JSRef<JSObject>& popupObj, const RefPtr<PopupPar
     JSRef<JSVal> placementOnTopVal = popupObj->GetProperty("placementOnTop");
     if (placementOnTopVal->IsBoolean() && popupParam) {
         popupParam->SetPlacement(placementOnTopVal->ToBoolean() ? Placement::TOP : Placement::BOTTOM);
+    }
+}
+
+void GetShadowFromStyle(ShadowStyle shadowStyle, Shadow& shadow)
+{
+    switch (shadowStyle) {
+        case ShadowStyle::OuterDefaultXS:
+            shadow = ShadowConfig::DefaultShadowXS;
+            break;
+        case ShadowStyle::OuterDefaultSM:
+            shadow = ShadowConfig::DefaultShadowS;
+            break;
+        case ShadowStyle::OuterDefaultMD:
+            shadow = ShadowConfig::DefaultShadowM;
+            break;
+        case ShadowStyle::OuterDefaultLG:
+            shadow = ShadowConfig::DefaultShadowL;
+            break;
+        case ShadowStyle::OuterFloatingSM:
+            shadow = ShadowConfig::FloatingShadowS;
+            break;
+        case ShadowStyle::OuterFloatingMD:
+            shadow = ShadowConfig::FloatingShadowM;
+            break;
+        default:
+            shadow = ShadowConfig::DefaultShadowM;
+            break;
     }
 }
 
@@ -903,41 +931,58 @@ void ParsePopupCommonParam(
 
     auto arrowWidthVal = popupObj->GetProperty("arrowWidth");
     if (!arrowWidthVal->IsNull()) {
+        bool setError = true;
         CalcDimension arrowWidth;
         if (JSViewAbstract::ParseJsDimensionVp(arrowWidthVal, arrowWidth)) {
-            if (arrowWidth.Value() > 0) {
+            if (arrowWidth.Value() > 0 && arrowWidth.Unit() != DimensionUnit::PERCENT) {
                 popupParam->SetArrowWidth(arrowWidth);
+                setError = false;
             }
         }
+        popupParam->SetErrorArrowWidth(setError);
     }
 
     auto arrowHeightVal = popupObj->GetProperty("arrowHeight");
     if (!arrowHeightVal->IsNull()) {
+        bool setError = true;
         CalcDimension arrowHeight;
         if (JSViewAbstract::ParseJsDimensionVp(arrowHeightVal, arrowHeight)) {
-            if (arrowHeight.Value() > 0) {
+            if (arrowHeight.Value() > 0 && arrowHeight.Unit() != DimensionUnit::PERCENT) {
                 popupParam->SetArrowHeight(arrowHeight);
+                setError = false;
             }
         }
+        popupParam->SetErrorArrowHeight(setError);
     }
 
     auto radiusVal = popupObj->GetProperty("radius");
     if (!radiusVal->IsNull()) {
+        bool setError = true;
         CalcDimension radius;
         if (JSViewAbstract::ParseJsDimensionVp(radiusVal, radius)) {
-            if (radius.Value() > 0) {
+            if (radius.Value() >= 0) {
                 popupParam->SetRadius(radius);
+                setError = false;
             }
         }
+        popupParam->SetErrorRadius(setError);
     }
 
     auto shadowVal = popupObj->GetProperty("shadow");
     Shadow shadow;
-    JSViewAbstract::GetShadowFromTheme(ShadowStyle::OuterFloatingMD, shadow);
-    if (shadowVal->IsObject() || shadowVal->IsNumber()) {
+    if (shadowVal->IsObject()) {
         JSViewAbstract::ParseShadowProps(shadowVal, shadow);
+        popupParam->SetShadow(shadow);
+    } else if (shadowVal->IsNumber()) {
+        int32_t shadowStyle = 0;
+        if (JSViewAbstract::ParseJsInteger<int32_t>(shadowVal, shadowStyle)) {
+            auto style = static_cast<ShadowStyle>(shadowStyle);
+            GetShadowFromStyle(style, shadow);
+            popupParam->SetShadow(shadow);
+        }
+    } else if (shadowVal->IsUndefined()) {
+        popupParam->SetShadow(ShadowConfig::DefaultShadowM);
     }
-    popupParam->SetShadow(shadow);
 }
 
 void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
@@ -3956,6 +4001,12 @@ bool JSViewAbstract::ParseJsDimensionFp(const JSRef<JSVal>& jsValue, CalcDimensi
     return ParseJsDimension(jsValue, result, DimensionUnit::FP);
 }
 
+bool JSViewAbstract::ParseJsDimensionFpNG(const JSRef<JSVal>& jsValue, CalcDimension& result, bool isSupportPercent)
+{
+    // the 'fp' unit is used for text scenes.
+    return ParseJsDimensionNG(jsValue, result, DimensionUnit::FP, isSupportPercent);
+}
+
 bool JSViewAbstract::ParseJsDimensionPx(const JSRef<JSVal>& jsValue, CalcDimension& result)
 {
     return ParseJsDimension(jsValue, result, DimensionUnit::PX);
@@ -4168,6 +4219,61 @@ bool JSViewAbstract::ParseJsShadowColorStrategy(const JSRef<JSVal>& jsValue, Sha
             strategy = ShadowColorStrategy::PRIMARY;
             return true;
         }
+    }
+    return false;
+}
+
+bool JSViewAbstract::ParseJsSymbolId(const JSRef<JSVal>& jsValue, std::uint32_t& symbolId)
+{
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    JSRef<JSVal> resId = jsObj->GetProperty("id");
+    if (resId->IsNull() || !resId->IsNumber()) {
+        return false;
+    }
+    auto resourceObject = GetResourceObject(jsObj);
+    if (!resourceObject) {
+        return false;
+    }
+    auto resourceWrapper = CreateResourceWrapper(jsObj, resourceObject);
+    if (!resourceWrapper) {
+        return false;
+    }
+    
+    auto symbol = resourceWrapper->GetSymbolById(resId->ToNumber<uint32_t>());
+    if (!symbol) {
+        return false;
+    }
+    symbolId = symbol;
+    return true;
+}
+
+bool JSViewAbstract::ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector<Color>& result)
+{
+    if (!jsValue->IsArray()) {
+        return false;
+    }
+    if (jsValue->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(jsValue);
+        for (size_t i = 0; i < array->Length(); i++) {
+            JSRef<JSVal> value = array->GetValueAt(i);
+            if (!value->IsNumber() && !value->IsString() && !value->IsObject()) {
+                return false;
+            }
+            if (value->IsNumber()) {
+                result.emplace_back(Color(ColorAlphaAdapt(value->ToNumber<uint32_t>())));
+                continue;
+            } else if (value->IsString()) {
+                Color color;
+                Color::ParseColorString(value->ToString(), color);
+                result.emplace_back(color);
+                continue;
+            } else {
+                Color color;
+                ParseJsColorFromResource(value, color);
+                result.emplace_back(color);
+            }
+        }
+        return true;
     }
     return false;
 }
@@ -4731,12 +4837,13 @@ void JSViewAbstract::JsSetDragPreviewOptions(const JSCallbackInfo& info)
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     auto mode = obj->GetProperty("mode");
     if (!mode->IsNumber()) {
+        ViewAbstractModel::GetInstance()->SetDragPreviewOptions({NG::DragPreviewMode::AUTO});
         return;
     }
     int32_t dragPreviewMode = mode->ToNumber<int>();
     if (!(dragPreviewMode >= static_cast<int32_t>(NG::DragPreviewMode::AUTO) &&
             dragPreviewMode <= static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE))) {
-        return;
+        dragPreviewMode = static_cast<int32_t>(NG::DragPreviewMode::AUTO);
     }
     NG::DragPreviewOption option {static_cast<NG::DragPreviewMode>(dragPreviewMode)};
     ViewAbstractModel::GetInstance()->SetDragPreviewOptions(option);
@@ -5860,6 +5967,7 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
     auto backgroundBlurStyle = paramObj->GetProperty("blurStyle");
     auto showCloseIcon = paramObj->GetProperty("showClose");
     auto type = paramObj->GetProperty("preferType");
+    auto interactive = paramObj->GetProperty("enableOutsideInteractive");
 
     std::vector<NG::SheetHeight> detents;
     if (ParseSheetDetents(sheetDetents, detents)) {
@@ -5876,6 +5984,10 @@ void JSViewAbstract::ParseSheetStyle(const JSRef<JSObject>& paramObj, NG::SheetS
         if (ParseJsBool(showCloseIcon, showClose)) {
             sheetStyle.showCloseIcon = showClose;
         }
+    }
+    bool isInteractive = false;
+    if (ParseJsBool(interactive, isInteractive)) {
+        sheetStyle.interactive = isInteractive;
     }
     if (showDragBar->IsNull() || showDragBar->IsUndefined()) {
         sheetStyle.showDragBar = true;
@@ -6012,7 +6124,7 @@ bool JSViewAbstract::ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, Blu
     if (args->IsNumber()) {
         auto sheetBlurStyle = args->ToNumber<int32_t>();
         if (sheetBlurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
-            sheetBlurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
+            sheetBlurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
             blurStyleOptions.blurStyle = static_cast<BlurStyle>(sheetBlurStyle);
         } else {
             return false;

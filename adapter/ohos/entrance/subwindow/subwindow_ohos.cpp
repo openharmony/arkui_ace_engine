@@ -513,10 +513,12 @@ void SubwindowOhos::ShowPreviewNG()
 
 void SubwindowOhos::HidePreviewNG()
 {
+#ifdef ENABLE_DRAG_FRAMEWORK
     auto overlayManager = GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->RemovePixelMap();
     overlayManager->RemoveEventColumn();
+#endif
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto pipeline = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -585,6 +587,20 @@ void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t target
     HidePixelMap(false, 0, 0, false);
     HideFilter();
 #endif // ENABLE_DRAG_FRAMEWORK
+}
+
+
+void SubwindowOhos::UpdateHideMenuOffsetNG(const NG::OffsetF& offset)
+{
+    ContainerScope scope(childContainerId_);
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto overlay = pipelineContext->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    if (overlay->IsContextMenuDragHideFinished()) {
+        return;
+    }
+    overlay->UpdateContextMenuDisappearPosition(offset);
 }
 
 void SubwindowOhos::ClearMenuNG(bool inWindow, bool showAnimation)
@@ -1157,6 +1173,53 @@ void SubwindowOhos::ShowDialog(const PromptDialogAttr& dialogAttr, const std::ve
     } else {
         ShowDialogForAbility(dialogAttr, buttons, std::move(callback), callbacks);
     }
+}
+
+void SubwindowOhos::OpenCustomDialogForAbility(const PromptDialogAttr& dialogAttr,
+    std::function<void(int32_t)>&& callback)
+{
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "open custom dialog");
+    SubwindowManager::GetInstance()->SetCurrentSubwindow(AceType::Claim(this));
+
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    if (!aceContainer) {
+        return;
+    }
+
+    auto engine = EngineHelper::GetEngine(aceContainer->GetInstanceId());
+    auto delegate = engine->GetFrontend();
+    if (!delegate) {
+        return;
+    }
+    delegate->OpenCustomDialog(dialogAttr, std::move(callback));
+}
+
+void SubwindowOhos::OpenCustomDialogForService(const PromptDialogAttr& dialogAttr,
+    std::function<void(int32_t)>&& callback)
+{
+    // temporary not support
+    LOGW("temporary not support for service by promptAction with CustomBuilder");
+}
+
+void SubwindowOhos::OpenCustomDialog(const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback)
+{
+    if (parentContainerId_ >= MIN_PA_SERVICE_ID || parentContainerId_ < 0) {
+        OpenCustomDialogForService(dialogAttr, std::move(callback));
+    } else {
+        OpenCustomDialogForAbility(dialogAttr, std::move(callback));
+    }
+}
+
+void SubwindowOhos::CloseCustomDialog(const int32_t dialogId)
+{
+    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
+    CHECK_NULL_VOID(aceContainer);
+    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
+    CHECK_NULL_VOID(context);
+    auto overlay = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlay);
+    ContainerScope scope(childContainerId_);
+    return overlay->CloseCustomDialog(dialogId);
 }
 
 void SubwindowOhos::ShowActionMenuForAbility(

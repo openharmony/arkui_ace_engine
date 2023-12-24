@@ -73,6 +73,8 @@ public:
     bool GetRawFileDescription(const std::string& rawfileName, RawfileDescription& rawfileDescription) const override;
     bool GetMediaById(const int32_t& resId, std::string& mediaPath) const override;
     uint32_t GetResourceLimitKeys() const override;
+    uint32_t GetSymbolByName(const char* resName) const override;
+    uint32_t GetSymbolById(uint32_t resId) const override;
 
 private:
     std::string GetActualResourceName(const std::string& resName) const;
