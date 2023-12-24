@@ -28,6 +28,9 @@ public:
 
     void SetFontSize(const Dimension& value) override;
     void SetFontWeight(FontWeight value) override;
+    void SetFontColor(std::vector<Color>& symbolColor) override;
+    void SetSymbolRenderingStrategy(const uint32_t renderingStrategy) override;
+    void SetSymbolEffect(const uint32_t effectStrategy) override;
 
     static void SetFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetFontWeight(FrameNode* frameNode, FontWeight value);

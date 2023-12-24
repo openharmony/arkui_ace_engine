@@ -76,6 +76,29 @@ void JSSymbolSpan::SetFontWeight(const std::string& value)
     SymbolSpanModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
 }
 
+void JSSymbolSpan::SetFontColor(const JSCallbackInfo& info)
+{
+    std::vector<Color> symbolColor;
+    if (!ParseJsSymbolColor(info[0], symbolColor)) {
+        return;
+    }
+    SymbolSpanModel::GetInstance()->SetFontColor(symbolColor);
+}
+
+void JSSymbolSpan::SetSymbolRenderingStrategy(const JSCallbackInfo& info)
+{
+    uint32_t strategy = 0;
+    ParseJsInteger(info[0], strategy);
+    SymbolSpanModel::GetInstance()->SetSymbolRenderingStrategy(strategy);
+}
+
+void JSSymbolSpan::SetSymbolEffect(const JSCallbackInfo& info)
+{
+    uint32_t strategy = 0;
+    ParseJsInteger(info[0], strategy);
+    SymbolSpanModel::GetInstance()->SetSymbolEffect(strategy);
+}
+
 void JSSymbolSpan::Create(const JSCallbackInfo& info)
 {
     uint32_t symbolId = 0;
@@ -93,6 +116,9 @@ void JSSymbolSpan::JSBind(BindingTarget globalObj)
     JSClass<JSSymbolSpan>::StaticMethod("create", &JSSymbolSpan::Create, opt);
     JSClass<JSSymbolSpan>::StaticMethod("fontSize", &JSSymbolSpan::SetFontSize, opt);
     JSClass<JSSymbolSpan>::StaticMethod("fontWeight", &JSSymbolSpan::SetFontWeight, opt);
+    JSClass<JSSymbolSpan>::StaticMethod("fontColor", &JSSymbolSpan::SetFontColor, opt);
+    JSClass<JSSymbolSpan>::StaticMethod("renderingStrategy", &JSSymbolSpan::SetSymbolRenderingStrategy, opt);
+    JSClass<JSSymbolSpan>::StaticMethod("effectStrategy", &JSSymbolSpan::SetSymbolEffect, opt);
     JSClass<JSSymbolSpan>::InheritAndBind<JSContainerBase>(globalObj);
 }
 } // namespace OHOS::Ace::Framework
