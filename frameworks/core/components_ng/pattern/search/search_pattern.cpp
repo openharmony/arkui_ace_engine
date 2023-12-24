@@ -667,9 +667,16 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
             (event.pressedCodes.size() == 1 && event.code == KeyCode::KEY_TAB)) {
             return false;
         }
+        if (focusChoice_ == FocusChoice::SEARCH_BUTTON && event.code == KeyCode::KEY_DPAD_RIGHT) {
+            return true;
+        }
     }
 
-    return textFieldPattern->OnKeyEvent(event);
+    if (focusChoice_ == FocusChoice::SEARCH) {
+        return textFieldPattern->OnKeyEvent(event);
+    } else {
+        return true;
+    }
 }
 
 void SearchPattern::PaintFocusState()
