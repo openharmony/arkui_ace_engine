@@ -87,6 +87,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rect_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_group_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_timer_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_render_node_bridge.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_plugin_bridge.h"
 #endif
@@ -1122,6 +1123,7 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterNavRouterAttributes(object, vm);
     RegisterNavigatorAttributes(object, vm);
     RegisterNodeContainerAttributes(object, vm);
+    RegisterRenderNodeAttributes(object, vm);
     RegisterPanelAttributes(object, vm);
     RegisterLineAttributes(object, vm);
     RegisterPathAttributes(object, vm);
@@ -1819,6 +1821,8 @@ void ArkUINativeModule::RegisterRenderNodeAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetShadowElevation));
     renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShadowRadius"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetShadowRadius));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "invalidate"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::Invalidate));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "renderNode"), renderNode);
 }
 

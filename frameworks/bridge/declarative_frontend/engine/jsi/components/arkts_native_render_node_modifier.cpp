@@ -18,6 +18,7 @@
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/render_node/render_node_pattern.h"
 #include "core/components_ng/render/render_context.h"
 
 namespace OHOS::Ace::NG {
@@ -126,11 +127,19 @@ void SetShadowRadius(NodeHandle node, float radius)
     renderContext->SetShadowRadius(radius);
 }
 
+void Invalidate(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RenderNodePattern>();
+    pattern->Invalidate();
+}
+
 ArkUIRenderNodeModifierAPI GetRenderNodeModifier()
 {
     static const ArkUIRenderNodeModifierAPI modifier = { AppendChild, InsertChildAfter, RemoveChild, ClearChildren,
         SetClipToFrame, SetRotation, SetShadowColor, SetShadowOffset, SetShadowAlpha, SetShadowElevation,
-        SetShadowRadius };
+        SetShadowRadius, Invalidate };
 
     return modifier;
 }

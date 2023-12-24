@@ -314,6 +314,8 @@ build_component_ng("pattern_ng") {
     "refresh/refresh_pattern.cpp",
     "relative_container/relative_container_layout_algorithm.cpp",
     "relative_container/relative_container_view.cpp",
+    "render_node/render_node_layout_algorithm.cpp",
+    "render_node/render_node_pattern.cpp",
     "rendering_context/rendering_context_model_ng.cpp",
     "rich_editor_drag/rich_editor_drag_overlay_modifier.cpp",
     "rich_editor_drag/rich_editor_drag_paint_method.cpp",

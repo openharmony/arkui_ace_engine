@@ -1558,6 +1558,7 @@ struct ArkUIRenderNodeModifierAPI {
     void (*SetShadowAlpha)(NodeHandle node, float alpha);
     void (*SetShadowElevation)(NodeHandle node, float elevation);
     void (*SetShadowRadius)(NodeHandle node, float radius);
+    void (*Invalidate)(NodeHandle node);
 };
 
 struct ArkUINodeAPI {

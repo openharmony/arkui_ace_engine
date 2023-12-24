@@ -16,8 +16,12 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_BASE_NODE_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_BASE_NODE_H
 
+#include <functional>
+#include "base/geometry/size.h"
 #include "base/memory/ace_type.h"
+#include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings_defines.h"
 

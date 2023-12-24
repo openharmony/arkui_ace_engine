@@ -15,12 +15,21 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RENDER_NODE_RENDER_NODE_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RENDER_NODE_RENDER_NODE_PATTERN_H
+#include <functional>
 
+#include "base/memory/referenced.h"
+#include "base/utils/utils.h"
+#include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/pattern.h"
-#include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
-#include "core/components_ng/pattern/stack/stack_layout_property.h"
+#include "core/components_ng/pattern/render_node/render_node_layout_algorithm.h"
+#include "core/components_ng/pattern/render_node/render_node_layout_property.h"
+#include "core/components_ng/pattern/render_node/render_node_modifier.h"
+#include "core/components_ng/pattern/render_node/render_node_paint_method.h"
+#include "core/components_ng/pattern/render_node/render_node_paint_property.h"
 
 namespace OHOS::Ace::NG {
+using DrawCallback = std::function<void(DrawingContext)>;
+
 class ACE_EXPORT RenderNodePattern : public Pattern {
     DECLARE_ACE_TYPE(RenderNodePattern, Pattern);
 
@@ -30,12 +39,12 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<StackLayoutAlgorithm>();
+        return MakeRefPtr<RenderNodeLayoutAlgorithm>();
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
-        return MakeRefPtr<StackLayoutProperty>();
+        return MakeRefPtr<RenderNodeLayoutProperty>();
     }
 
     bool IsAtomicNode() const override
@@ -52,6 +61,48 @@ public:
     {
         return true;
     }
+
+    void SetDrawCallback(std::function<void(DrawingContext& context)>&& drawCallback)
+    {
+        drawCallback_ = drawCallback;
+    }
+
+    RefPtr<PaintProperty> CreatePaintProperty() override
+    {
+        auto renderNodePaintProperty = MakeRefPtr<RenderNodePaintProperty>();
+        renderNodePaintProperty->UpdateRenderNodeState(false);
+        return renderNodePaintProperty;
+    }
+
+    RefPtr<NodePaintMethod> CreateNodePaintMethod() override
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, nullptr);
+        auto paintProperty = host->GetPaintProperty<RenderNodePaintProperty>();
+        paintProperty->SetHost(host);
+
+        if (!renderNodeModifier_) {
+            renderNodeModifier_ = AceType::MakeRefPtr<RenderNodeModifier>(drawCallback_);
+        }
+        auto paintMethod = AceType::MakeRefPtr<RenderNodePaintMethod>(renderNodeModifier_);
+        return paintMethod;
+    }
+
+    void Invalidate()
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto paintProperty = host->GetPaintProperty<RenderNodePaintProperty>();
+        auto renderNodeState = paintProperty->GetRenderNodeState();
+        paintProperty->UpdateRenderNodeState(!renderNodeState.value_or(false));
+    }
+
+private:
+    void OnModifyDone() override;
+
+    std::function<void(DrawingContext& context)> drawCallback_;
+    RefPtr<RenderNodeModifier> renderNodeModifier_;
 };
 } // namespace OHOS::Ace::NG
+
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RENDER_NODE_RENDER_NODE_PATTERN_H
