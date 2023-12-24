@@ -131,7 +131,8 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGrou
         return;
     }
 
-    auto contentOffset = OffsetT<float>(geometryNode->GetFrameOffset().GetX(), titlebarHeight + GetSafeAreaHeight(layoutWrapper));
+    auto OffsetY = titlebarHeight + GetSafeAreaHeight(layoutWrapper);
+    auto contentOffset = OffsetT<float>(geometryNode->GetFrameOffset().GetX(), OffsetY);
     geometryNode->SetMarginFrameOffset(contentOffset);
     contentWrapper->Layout();
 }
