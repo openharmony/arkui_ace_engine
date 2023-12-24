@@ -44,12 +44,6 @@ const std::string SCROLLABLE_MULTI_TASK_SCENE = "scrollable_multi_task_scene";
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
 
-#ifndef WEARABLE_PRODUCT
-constexpr double MAX_VELOCITY = 800000.0;
-#else
-constexpr double MAX_VELOCITY = 5000.0;
-#endif
-
 RefPtr<PaintProperty> ScrollablePattern::CreatePaintProperty()
 {
     auto defaultDisplayMode = GetDefaultScrollBarDisplayMode();
