@@ -928,6 +928,7 @@ void TextFieldPattern::HandleBlurEvent()
         RestorePreInlineStates();
     }
     needToRequestKeyboardInner_ = false;
+    isLongPress_ = false;
     isFocusedBeforeClick_ = false;
     UpdateShowMagnifier();
     CloseSelectOverlay(true);
