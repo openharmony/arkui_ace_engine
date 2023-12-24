@@ -40,15 +40,11 @@ constexpr uint32_t DRAG_INTERVAL_TIME = 900;
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
 constexpr double VELOCITY_SCALE = 1.0;
-constexpr double MAX_VELOCITY = 800000.0;
-constexpr double MIN_VELOCITY = -800000.0;
 constexpr double ADJUSTABLE_VELOCITY = 3000.0;
 #else
 constexpr double DISTANCE_EPSILON = 1.0;
 constexpr double FRICTION = 0.9;
 constexpr double VELOCITY_SCALE = 0.8;
-constexpr double MAX_VELOCITY = 5000.0;
-constexpr double MIN_VELOCITY = -5000.0;
 constexpr double ADJUSTABLE_VELOCITY = 0.0;
 #endif
 constexpr float FRICTION_SCALE = -4.2f;
@@ -401,7 +397,8 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     touchUp_ = false;
     scrollPause_ = false;
     lastVelocity_ = info.GetMainVelocity();
-    double correctVelocity = std::clamp(info.GetMainVelocity(), MIN_VELOCITY + slipFactor_, MAX_VELOCITY - slipFactor_);
+    double correctVelocity =
+        std::clamp(info.GetMainVelocity(), -maxFlingVelocity_ + slipFactor_, maxFlingVelocity_ - slipFactor_);
     SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     correctVelocity = correctVelocity * sVelocityScale_ * GetGain(GetDragOffset());
     currentVelocity_ = correctVelocity;

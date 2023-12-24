@@ -39,6 +39,7 @@ public:
 
     static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled);
     static void SetScrollBarMode(FrameNode* frameNode, int32_t displayNumber);
+    static void SetMaxFlingSpeed(double max);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SCROLLABLE_SCROLLABLE_MODEL_H

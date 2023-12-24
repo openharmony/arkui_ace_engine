@@ -313,7 +313,7 @@ void JSScroll::JSBind(BindingTarget globalObj)
     JSClass<JSScroll>::StaticMethod("scrollSnap", &JSScroll::SetScrollSnap);
     JSClass<JSScroll>::StaticMethod("clip", &JSScrollable::JsClip);
     JSClass<JSScroll>::StaticMethod("enablePaging", &JSScroll::SetEnablePaging);
-    JSClass<JSScroll>::InheritAndBind<JSContainerBase>(globalObj);
+    JSClass<JSScroll>::InheritAndBind<JSScrollableBase>(globalObj);
 }
 
 void JSScroll::SetScrollBar(const JSCallbackInfo& args)

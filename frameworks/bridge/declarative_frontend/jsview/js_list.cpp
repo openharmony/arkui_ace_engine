@@ -698,7 +698,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("onItemDrop", &JSList::ItemDropCallback);
     JSClass<JSList>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
-    JSClass<JSList>::InheritAndBind<JSContainerBase>(globalObj);
+    JSClass<JSList>::InheritAndBind<JSScrollableBase>(globalObj);
 }
 
 void JSListScroller::JSBind(BindingTarget globalObj)

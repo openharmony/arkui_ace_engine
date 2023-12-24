@@ -43,8 +43,10 @@
 namespace OHOS::Ace::NG {
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
+constexpr double MAX_VELOCITY = 800000.0;
 #else
 constexpr double FRICTION = 0.9;
+constexpr double MAX_VELOCITY = 5000.0;
 #endif
 enum class ModalSheetCoordinationMode : char {
     UNKNOWN = 0,
@@ -259,6 +261,8 @@ public:
     {
         return friction_;
     }
+
+    void SetMaxFlingVelocity(double max);
 
     void StopAnimate();
     bool AnimateRunning() const
@@ -601,6 +605,7 @@ private:
     bool isCoordEventNeedSpring_ = true;
     double scrollBarOutBoundaryExtent_ = 0.0;
     double friction_ = FRICTION;
+    double maxFlingVelocity_ = MAX_VELOCITY;
     // scroller
     RefPtr<Animator> animator_;
     bool scrollAbort_ = false;

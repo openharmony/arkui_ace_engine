@@ -397,6 +397,7 @@ void ScrollablePattern::AddScrollEvent()
     };
     scrollable->SetScrollEndCallback(std::move(scrollEnd));
     scrollable->SetUnstaticFriction(friction_);
+    scrollable->SetMaxFlingVelocity(maxFlingVelocity_);
 
     auto scrollSnap = [weak = WeakClaim(this)](double targetOffset, double velocity) -> bool {
         auto pattern = weak.Upgrade();
@@ -770,6 +771,17 @@ void ScrollablePattern::SetFriction(double friction)
     CHECK_NULL_VOID(scrollableEvent_);
     auto scrollable = scrollableEvent_->GetScrollable();
     scrollable->SetUnstaticFriction(friction_);
+}
+
+void ScrollablePattern::SetMaxFlingVelocity(double max)
+{
+    if (LessOrEqual(max, 0.0f)) {
+        max = MAX_VELOCITY;
+    }
+    maxFlingVelocity_ = max;
+    CHECK_NULL_VOID(scrollableEvent_);
+    auto scrollable = scrollableEvent_->GetScrollable();
+    scrollable->SetMaxFlingVelocity(max);
 }
 
 void ScrollablePattern::GetParentNavigation()
