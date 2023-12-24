@@ -17,8 +17,8 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NODE_CONTAINER_NODE_CONTAINER_PATTERN_H
 
 #include "base/utils/noncopyable.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
+#include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
+#include "core/components_ng/pattern/stack/stack_layout_property.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -31,12 +31,12 @@ public:
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
-        return MakeRefPtr<LinearLayoutProperty>(true);
+        return MakeRefPtr<StackLayoutProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<LinearLayoutAlgorithm>();
+        return MakeRefPtr<StackLayoutAlgorithm>();
     }
 
     void RemakeNode();
@@ -77,6 +77,11 @@ public:
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
+    }
+
+    bool IsAtomicNode() const override
+    {
+        return false;
     }
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;

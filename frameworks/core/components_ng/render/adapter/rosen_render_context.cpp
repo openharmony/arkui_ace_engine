@@ -4445,4 +4445,39 @@ bool RosenRenderContext::IsUniRenderEnabled()
     return Rosen::RSSystemProperties::GetUniRenderEnabled();
 }
 
+void RosenRenderContext::SetRotation(float rotationX, float rotationY, float rotationZ)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetRotation(rotationX, rotationY, rotationZ);
+}
+
+void RosenRenderContext::SetShadowColor(uint32_t color)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetShadowColor(color);
+}
+
+void RosenRenderContext::SetShadowOffset(float offsetX, float offsetY)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetShadowOffset(offsetX, offsetY);
+}
+
+void RosenRenderContext::SetShadowAlpha(float alpha)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetShadowAlpha(alpha);
+}
+
+void RosenRenderContext::SetShadowElevation(float elevation)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetShadowElevation(elevation);
+}
+
+void RosenRenderContext::SetShadowRadius(float radius)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetShadowElevation(radius);
+}
 } // namespace OHOS::Ace::NG

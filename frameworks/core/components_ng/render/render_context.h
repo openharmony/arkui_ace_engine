@@ -248,6 +248,14 @@ public:
     virtual void OnTransformCenterUpdate(const DimensionOffset& value) {}
     virtual void OnOffsetUpdate(const OffsetT<Dimension>& value) {}
 
+    // used in arkts_native_render_node_modifier set property directly to rsNode
+    virtual void SetRotation(float rotationX, float rotationY, float rotationZ) {}
+    virtual void SetShadowColor(uint32_t color) {}
+    virtual void SetShadowOffset(float offsetX, float offsetY) {}
+    virtual void SetShadowAlpha(float alpha) {}
+    virtual void SetShadowElevation(float elevation) {}
+    virtual void SetShadowRadius(float radius) {}
+
     virtual RectF GetPaintRectWithTransform()
     {
         return {};

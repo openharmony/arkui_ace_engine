@@ -43,6 +43,7 @@
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_panel_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_pattern_lock_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_progress_modifier.h"
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_render_node_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_area_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_text_input_modifier.h"
 #include "bridge/declarative_frontend/engine/jsi/components/arkts_native_swiper_modifier.h"
@@ -198,6 +199,8 @@ static struct ArkUINodeAPI impl = {
     GetLoadingProgressModifier,
     GetTextClockModifier,
     GetTextTimerModifier,
+    GetRenderNodeModifier,
+
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     GetPluginModifier,
 #endif

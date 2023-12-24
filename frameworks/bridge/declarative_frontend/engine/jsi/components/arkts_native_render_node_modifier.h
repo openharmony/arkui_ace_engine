@@ -12,10 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-declare class ForEach {
-    static create(): void;
-    static pop(): void;
-    static setIdArray(elmtId: number, newIdArray: string[], diffIndexArray: number[], duplicateIds: number[]): void;
-    static createNewChildStart(id: string, parentNode: BaseNode): void;
-    static createNewChildFinish(id: string, parentNode: BaseNode): void;
-  }
+
+#ifndef FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_RENDER_NODE_MODIFIER_H
+#define FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_RENDER_NODE_MODIFIER_H
+
+#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+
+namespace OHOS::Ace::NG {
+ArkUIRenderNodeModifierAPI GetRenderNodeModifier();
+} // namespace OHOS::Ace::NG
+
+#endif // FRAMEWORKS_INTERFACE_INNER_API_COMPONENTS_ARKTS_NATIVE_RENDER_NODE_MODIFIER_H

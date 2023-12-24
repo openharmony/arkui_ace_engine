@@ -1,12 +1,14 @@
 {
-    "include":[
+    "include": [
         "src/index.d.ts",
         "src/for_each.d.ts",
     ],
     "files": [
         "src/base_node.ts",
         "src/builder_node.ts",
-        "src/node_controller.ts"
+        "src/node_controller.ts",
+        "src/frame_node.ts",
+        "src/render_node.ts",
     ],
     "compilerOptions": {
         "module": "none",

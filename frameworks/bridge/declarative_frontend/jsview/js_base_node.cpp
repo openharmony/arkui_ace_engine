@@ -19,11 +19,9 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
+#include "frameworks/core/components_ng/pattern/render_node/render_node_pattern.h"
 
 namespace OHOS::Ace::Framework {
-namespace {
-const char* DIRTY_FLAG[] = { "UPDATE_PROPERTY", "UPDATE_CONTENT" };
-} // namespace
 
 void JSBaseNode::BuildNode(const JSCallbackInfo& info)
 {
@@ -47,6 +45,8 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         }
         viewNode_ = NG::ViewStackProcessor::GetInstance()->Finish();
     }
+    EcmaVM* vm = info.GetVm();
+    info.SetReturnValue(JSRef<JSVal>::Make(panda::NativePointerRef::New(vm, AceType::RawPtr(viewNode_))));
 }
 
 void JSBaseNode::ConstructorCallback(const JSCallbackInfo& info)
@@ -61,15 +61,6 @@ void JSBaseNode::DestructorCallback(JSBaseNode* node)
     if (node != nullptr) {
         node->DecRefCount();
     }
-}
-
-void JSBaseNode::MarkDirty(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1 || !info[0]->IsNumber()) {
-        return;
-    }
-    auto flag = info[0]->ToNumber<uint32_t>();
-    LOGI("markDirty DirtyFlag.%{public}s", DIRTY_FLAG[flag]);
 }
 
 void JSBaseNode::FinishUpdateFunc(const JSCallbackInfo& info)
@@ -178,12 +169,24 @@ void JSBaseNode::PostTouchEvent(const JSCallbackInfo& info)
     info.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
 }
 
+void JSBaseNode::CreateRenderNode(const JSCallbackInfo& info)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    const std::string nodeTag = "RenderNode";
+    auto frameNode = NG::FrameNode::GetOrCreateFrameNode(
+        nodeTag, nodeId, []() { return AceType::MakeRefPtr<NG::RenderNodePattern>(); });
+    viewNode_ = frameNode;
+    void* ptr = AceType::RawPtr(viewNode_);
+    EcmaVM* vm = info.GetVm();
+    info.SetReturnValue(JSRef<JSVal>::Make(panda::NativePointerRef::New(vm, ptr)));
+}
+
 void JSBaseNode::JSBind(BindingTarget globalObj)
 {
     JSClass<JSBaseNode>::Declare("__JSBaseNode__");
 
-    JSClass<JSBaseNode>::CustomMethod("build", &JSBaseNode::BuildNode);
-    JSClass<JSBaseNode>::CustomMethod("markDirty", &JSBaseNode::MarkDirty);
+    JSClass<JSBaseNode>::CustomMethod("create", &JSBaseNode::BuildNode);
+    JSClass<JSBaseNode>::CustomMethod("createRenderNode", &JSBaseNode::CreateRenderNode);
     JSClass<JSBaseNode>::CustomMethod("finishUpdateFunc", &JSBaseNode::FinishUpdateFunc);
     JSClass<JSBaseNode>::CustomMethod("postTouchEvent", &JSBaseNode::PostTouchEvent);
 

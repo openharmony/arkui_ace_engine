@@ -13,15 +13,10 @@
  * limitations under the License.
  */
 
-declare class __JSBaseNode__ {
-    build(builder: any, params: Object): void;
-    markDirty(flag: DirtyFlag): void;
-}
-
-enum DirtyFlag {
-    UPDATE_PROPERTY = 0,
-    UPDATE_CONTENT,
-}
-
-class BaseNode extends __JSBaseNode__ {
+declare class ForEach {
+  static create(): void;
+  static pop(): void;
+  static setIdArray(elmtId: number, newIdArray: string[], diffIndexArray: number[], duplicateIds: number[]): void;
+  static createNewChildStart(id: string, parentNode: BaseNode): void;
+  static createNewChildFinish(id: string, parentNode: BaseNode): void;
 }
