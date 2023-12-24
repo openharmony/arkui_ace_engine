@@ -1416,7 +1416,7 @@ void ScrollablePattern::NotifyMoved(bool value)
 void ScrollablePattern::ProcessSpringEffect(float velocity)
 {
     CHECK_NULL_VOID(InstanceOf<ScrollSpringEffect>(scrollEffect_));
-    if (!OutBoundaryCallback() && !GetCanOverScroll()) {
+    if ((!OutBoundaryCallback() && !GetCanOverScroll()) || !IsOutOfBoundary(true)) {
         return;
     }
     scrollEffect_->ProcessScrollOver(velocity);
@@ -1543,7 +1543,7 @@ ScrollResult ScrollablePattern::HandleScrollSelfFirst(float& offset, int32_t sou
     }
     // triggering overScroll, parent always handle it first
     auto overRes = parent->HandleScroll(result.remain, source, NestedState::CHILD_OVER_SCROLL);
-    offset += std::abs(overOffset) < std::abs(result.remain) ? overOffset : overRes.remain;
+    offset += LessNotEqual(std::abs(overOffset), std::abs(result.remain)) ? overOffset : overRes.remain;
     SetCanOverScroll((!NearZero(overOffset) || NearZero(offset)) && overRes.reachEdge);
     return { 0, GetCanOverScroll() };
 }
