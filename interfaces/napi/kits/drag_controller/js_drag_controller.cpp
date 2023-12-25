@@ -528,6 +528,11 @@ void HandleSuccess(DragControllerAsyncCtx* asyncCtx, const DragNotifyMsg& dragNo
         LOGW("container is null. %{public}d", asyncCtx->instanceId);
         return;
     }
+    if (dragStatus == DragStatus::ENDED) {
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->ResetDragging();
+    }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostSyncTask(

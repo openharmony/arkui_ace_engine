@@ -121,6 +121,7 @@ public:
     MOCK_METHOD0(GetOverlayManager, const RefPtr<NG::OverlayManager>());
     MOCK_CONST_METHOD0(IsDragging, bool());
     MOCK_METHOD1(SetIsDragging, void(bool isDragging));
+    MOCK_METHOD0(ResetDragging, void());
 
     static RefPtr<MockPipelineContext> pipeline_;
 

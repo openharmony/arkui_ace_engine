@@ -551,6 +551,7 @@ public:
 
     bool IsDragging() const override;
     void SetIsDragging(bool isDragging) override;
+    void ResetDragging() override;
     const RefPtr<PostEventManager>& GetPostEventManager();
 
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);

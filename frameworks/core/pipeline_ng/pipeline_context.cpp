@@ -2900,6 +2900,12 @@ void PipelineContext::SetIsDragging(bool isDragging)
     eventManager_->SetIsDragging(isDragging);
 }
 
+void PipelineContext::ResetDragging()
+{
+    CHECK_NULL_VOID(dragDropManager_);
+    dragDropManager_->ResetDragging();
+}
+
 void PipelineContext::SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow)
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
