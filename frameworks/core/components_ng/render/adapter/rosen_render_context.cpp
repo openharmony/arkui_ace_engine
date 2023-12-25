@@ -2689,10 +2689,10 @@ void RosenRenderContext::RebuildFrame(FrameNode* /*self*/, const std::list<RefPt
     RequestNextFrame();
 }
 
-std::list<std::shared_ptr<Rosen::RSNode>> RosenRenderContext::GetChildrenRSNodes(
-    const std::list<RefPtr<FrameNode>>& frameChildren)
+std::vector<std::shared_ptr<Rosen::RSNode>> RosenRenderContext::GetChildrenRSNodes(
+    const std::list<RefPtr<FrameNode>>& frameChildren, std::unordered_map<Rosen::NodeId, bool>& nodeIdMap)
 {
-    std::list<std::shared_ptr<Rosen::RSNode>> rsNodes;
+    std::vector<std::shared_ptr<Rosen::RSNode>> rsNodes;
     for (const auto& child : frameChildren) {
         if (!child) {
             continue;
@@ -2702,7 +2702,11 @@ std::list<std::shared_ptr<Rosen::RSNode>> RosenRenderContext::GetChildrenRSNodes
             continue;
         }
         auto rsnode = rosenRenderContext->GetRSNode();
-        if (rsnode) {
+        if (!rsnode) {
+            continue;
+        }
+        auto result = nodeIdMap.try_emplace(rsnode->GetId(), false);
+        if (result.second) {
             rsNodes.emplace_back(rsnode);
         }
     }
@@ -2712,17 +2716,44 @@ std::list<std::shared_ptr<Rosen::RSNode>> RosenRenderContext::GetChildrenRSNodes
 void RosenRenderContext::ReCreateRsNodeTree(const std::list<RefPtr<FrameNode>>& children)
 {
     CHECK_NULL_VOID(rsNode_);
-    auto nowRSNodes = GetChildrenRSNodes(children);
-    std::vector<OHOS::Rosen::NodeId> childNodeIds;
+    // now rsNode's children, key is id of rsNode, value means whether the node exists in previous children of rsNode.
+    std::unordered_map<Rosen::NodeId, bool> childNodeMap;
+    auto nowRSNodes = GetChildrenRSNodes(children, childNodeMap);
+    std::vector<Rosen::NodeId> childNodeIds;
     for (auto& child : nowRSNodes) {
         childNodeIds.emplace_back(child->GetId());
     }
     if (childNodeIds == rsNode_->GetChildren()) {
         return;
     }
-    rsNode_->ClearChildren();
-    for (const auto& rsnode : nowRSNodes) {
-        rsNode_->AddChild(rsnode, -1);
+    if (childNodeIds.empty()) {
+        rsNode_->ClearChildren();
+        return;
+    }
+
+    // save a copy of previous children because for loop will delete child
+    auto preChildNodeIds = rsNode_->GetChildren();
+    for (auto nodeId : preChildNodeIds) {
+        auto iter = childNodeMap.find(nodeId);
+        if (iter == childNodeMap.end()) {
+            rsNode_->RemoveChildByNodeId(nodeId);
+        } else {
+            iter->second = true;
+        }
+    }
+    for (size_t index = 0; index != childNodeIds.size(); ++index) {
+        auto nodeId = rsNode_->GetChildIdByIndex(index);
+        if (!(nodeId.has_value() && nodeId.value() == childNodeIds[index])) {
+            auto iter = childNodeMap.find(childNodeIds[index]);
+            if (iter == childNodeMap.end()) {
+                continue;
+            }
+            if (iter->second) {
+                rsNode_->MoveChild(nowRSNodes[index], index);
+            } else {
+                rsNode_->AddChild(nowRSNodes[index], index);
+            }
+        }
     }
 }
 
