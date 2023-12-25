@@ -476,6 +476,17 @@ void MenuItemPattern::OnHover(bool isHover)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void MenuItemPattern::OnVisibleChange(bool isVisible)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto parentNode = host->GetParent();
+    CHECK_NULL_VOID(parentNode);
+    if (parentNode->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
+        parentNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
+}
+
 bool MenuItemPattern::OnKeyEvent(const KeyEvent& event)
 {
     if (event.action != KeyAction::DOWN) {
