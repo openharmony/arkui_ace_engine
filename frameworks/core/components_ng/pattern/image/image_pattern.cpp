@@ -973,10 +973,10 @@ void ImagePattern::UpdateAnalyzerUIConfig(const RefPtr<GeometryNode>& geometryNo
 {
     bool isUIConfigUpdate = false;
     CHECK_NULL_VOID(geometryNode);
-    if (analyzerUIConfig_.contentWidth != geometryNode->GetFrameSize().Width() ||
-        analyzerUIConfig_.contentHeight != geometryNode->GetFrameSize().Height()) {
-        analyzerUIConfig_.contentWidth = geometryNode->GetFrameSize().Width();
-        analyzerUIConfig_.contentHeight = geometryNode->GetFrameSize().Height();
+    if (analyzerUIConfig_.contentWidth != geometryNode->GetContentSize().Width() ||
+        analyzerUIConfig_.contentHeight != geometryNode->GetContentSize().Height()) {
+        analyzerUIConfig_.contentWidth = geometryNode->GetContentSize().Width();
+        analyzerUIConfig_.contentHeight = geometryNode->GetContentSize().Height();
         isUIConfigUpdate = true;
     }
 
