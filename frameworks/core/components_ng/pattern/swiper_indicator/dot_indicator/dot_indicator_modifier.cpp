@@ -592,13 +592,14 @@ void DotIndicatorModifier::PlayTouchBottomAnimation(const std::vector<std::pair<
         // x0:0.33, y0:0, x1:0.67, y1:1
         optionOpacity.SetCurve(AceType::MakeRefPtr<CubicCurve>(0.33, 0, 0.67, 1));
         optionOpacity.SetDuration(100);
-        selectedColor_->Set(LinearColor(selectedColor_->Get().BlendOpacity(0)));
+        isSelectedColorAnimEnd_ = false;
         AnimationUtils::StartAnimation(optionOpacity, [&]() {
             selectedColor_->Set(LinearColor(selectedColor_->Get().BlendOpacity(1.0)));
             touchBottomPointColor_->Set(LinearColor(touchBottomPointColor_->Get().BlendOpacity(0)));
         }, [&]() {
             touchBottomPointColor_->Set(LinearColor(unselectedColor_->Get()));
             isTouchBottomLoop_ = false;
+            isSelectedColorAnimEnd_ = true;
         });
         AnimationUtils::StartAnimation(optionBottom, [&, longPointCenterX]() {
             longPointLeftCenterX_->Set(longPointCenterX[1].first);

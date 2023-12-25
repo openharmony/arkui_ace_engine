@@ -483,9 +483,10 @@ void DotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* paintWrapper)
 std::pair<int32_t, int32_t> DotIndicatorPaintMethod::GetStartAndEndIndex(int32_t index)
 {
     int32_t startCurrentIndex = index;
-    int32_t endCurrentIndex = NearEqual(turnPageRate_, 0.0f) || LessOrEqual(turnPageRate_, -1.0f) ||
-        GreatOrEqual(turnPageRate_, 1.0f) ? endCurrentIndex = index :
-        (LessNotEqual(turnPageRate_, 0.0f) ? index + 1 : index - 1);
+    int32_t endCurrentIndex = NearEqual(turnPageRate_, 0.0f) || LessOrEqualHighPrecision(turnPageRate_, -1.0f) ||
+                                      GreatOrEqualHighPrecision(turnPageRate_, 1.0f)
+                                  ? endCurrentIndex = index
+                                  : (LessNotEqualHighPrecision(turnPageRate_, 0.0f) ? index + 1 : index - 1);
     if (endCurrentIndex == -1) {
         endCurrentIndex = itemCount_ - 1;
     } else if (endCurrentIndex == itemCount_) {
