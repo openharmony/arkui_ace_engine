@@ -155,12 +155,14 @@ struct ArkUIAPIEvent_SinglePointer
     Arkoala_Int32 state; // 0 - down, 1 - up, 2 - move
 };
 
+#define ARKOALA_MAX_MULTIPOINTER_ARGS_COUNT 10
+
 struct ArkUIAPIEvent_MultiPointer
 {
     Arkoala_Int32 count;
-    Arkoala_Int32 xs[10];
-    Arkoala_Int32 ys[10];
-    Arkoala_Int32 state[10];
+    Arkoala_Int32 xs[ARKOALA_MAX_MULTIPOINTER_ARGS_COUNT];
+    Arkoala_Int32 ys[ARKOALA_MAX_MULTIPOINTER_ARGS_COUNT];
+    Arkoala_Int32 state[ARKOALA_MAX_MULTIPOINTER_ARGS_COUNT];
 };
 
 struct ArkUIAPIEvent_TextInput
@@ -169,19 +171,22 @@ struct ArkUIAPIEvent_TextInput
     Arkoala_Int32 nativeStringHigh;
 };
 
+// Change version if changing these constants.
+#define ARKOALA_MAX_CALLBACK_ARGS_COUNT 10
+#define ARKOALA_MAX_ASYNC_EVENT_ARGS_COUNT 12
 
 struct ArkUIAPIEvent_Callback
 {
     Arkoala_Int32 id;
     Arkoala_Int32 numArgs;
     Arkoala_Int32 continuationId;
-    ArkUIAPIEvent_CallbackArg args[10];
+    ArkUIAPIEvent_CallbackArg args[ARKOALA_MAX_CALLBACK_ARGS_COUNT];
 };
 
 struct ArkUIAPIEvent_ComponentAsyncEvent
 {
     Arkoala_Int32 subKind;
-    Arkoala_Int32 data[12];
+    Arkoala_Int32 data[ARKOALA_MAX_ASYNC_EVENT_ARGS_COUNT];
 };
 
 struct ArkUIAPIEvent_GestureAsyncEvent
@@ -195,9 +200,7 @@ struct ArkUIAPIEvent_GestureAsyncEvent
     Arkoala_Int32 pinchCenterX;
     Arkoala_Int32 pinchCenterY;
     Arkoala_Int32 speed;
-    // Arkoala_Int32 fingerList[5];
     Arkoala_Int32 timestamp;
-    // Arkoala_Int32 target[6];
     Arkoala_Int32 source;
     Arkoala_Int32 pressure;
     Arkoala_Int32 tiltX;
