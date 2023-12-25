@@ -13,7 +13,18 @@
  * limitations under the License.
  */
 
+enum NodeRenderType {
+  RENDER_TYPE_DISPLAY = 0,
+  RENDER_TYPE_TEXTURE,
+}
+
+declare interface RenderOptions {
+  selfIdealSize?: Size,
+  type?: NodeRenderType,
+  surfaceId?: string
+}
 declare class __JSBaseNode__ {
+  constructor(options?: RenderOptions);
   create(builder: (...args: Object[]) => void, params: Object): number | null;
   createRenderNode(): number | null;
 }
@@ -21,8 +32,8 @@ declare class __JSBaseNode__ {
 class BaseNode extends __JSBaseNode__ {
   protected instanceId_?: number;
   protected nodePtr_: number | null;
-  constructor(uiContext: UIContext) {
-    super();
+  constructor(uiContext: UIContext, options?: RenderOptions) {
+    super(options);
     var instanceId: number = -1;
     if (uiContext === undefined) {
       throw Error("BuilderNode constructor error, param uiContext error");

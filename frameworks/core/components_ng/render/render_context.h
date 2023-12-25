@@ -336,6 +336,11 @@ public:
         isModalRootNode_ = isModalRootNode;
     }
 
+    void SetIsNeedRebuildRSTree(bool isNeedRebuildRSTree)
+    {
+        isNeedRebuildRSTree_ = isNeedRebuildRSTree;
+    }
+
     std::optional<BlurStyleOption> GetBackBlurStyle() const
     {
         return GetBackground() ? GetBackground()->propBlurStyleOption : std::nullopt;
@@ -547,12 +552,18 @@ public:
         return true;
     }
 
+    virtual bool DoTextureExport(uint64_t /* surfaceId */)
+    {
+        return false;
+    }
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;
     ShareId shareId_;
     bool isModalRootNode_ = false;
     bool isSynced_ = false;
+    bool isNeedRebuildRSTree_ = true;
 
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}
