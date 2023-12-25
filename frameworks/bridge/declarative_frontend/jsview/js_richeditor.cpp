@@ -827,6 +827,7 @@ void JSRichEditorController::ParseTextDecoration(
         if (!color->IsNull() && JSContainerBase::ParseJsColor(color, decorationColor)) {
             updateSpanStyle.updateTextDecorationColor = decorationColor;
             style.SetTextDecorationColor(decorationColor);
+            updateSpanStyle.hasResourceDecorationColor = color->IsObject();
         }
     }
 }
@@ -1029,6 +1030,7 @@ void JSRichEditorController::AddTextSpan(const JSCallbackInfo& args)
             ParseJsTextStyle(styleObject, style, updateSpanStyle_);
             options.style = style;
             options.hasResourceFontColor = updateSpanStyle_.hasResourceFontColor;
+            options.hasResourceDecorationColor = updateSpanStyle_.hasResourceDecorationColor;
         }
         auto paraStyle = spanObject->GetProperty("paragraphStyle");
         auto paraStyleObj = JSRef<JSObject>::Cast(paraStyle);

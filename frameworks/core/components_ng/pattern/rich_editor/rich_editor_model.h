@@ -131,6 +131,7 @@ struct UpdateSpanStyle {
     std::optional<OHOS::Ace::NG::MarginProperty> marginProp = std::nullopt;
     std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
     bool hasResourceFontColor = false;
+    bool hasResourceDecorationColor = false;
 };
 
 struct UpdateParagraphStyle {
@@ -155,6 +156,7 @@ struct TextSpanOptions : SpanOptionBase {
     std::optional<UpdateParagraphStyle> paraStyle;
     UserGestureOptions userGestureOption;
     bool hasResourceFontColor = false;
+    bool hasResourceDecorationColor = false;
 };
 
 struct SymbolSpanOptions : SpanOptionBase {

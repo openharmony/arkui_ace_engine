@@ -496,6 +496,7 @@ int32_t RichEditorPattern::AddTextSpanOperation(const TextSpanOptions& options, 
     spanItem->content = options.value;
     spanItem->SetTextStyle(options.style);
     spanItem->hasResourceFontColor = options.hasResourceFontColor;
+    spanItem->hasResourceDecorationColor = options.hasResourceDecorationColor;
     AddSpanItem(spanItem, offset);
     if (options.paraStyle) {
         int32_t start = 0;
@@ -2114,6 +2115,7 @@ void RichEditorPattern::OnColorConfigurationUpdate()
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
+    textLayoutProperty->UpdateTextDecorationColor(theme->GetTextStyle().GetTextColor());
     for (auto span : spans) {
         auto spanNode = DynamicCast<SpanNode>(span);
         if (!spanNode) {
@@ -2125,6 +2127,9 @@ void RichEditorPattern::OnColorConfigurationUpdate()
         }
         if (spanItem->hasResourceFontColor) {
             spanNode->UpdateTextColor(theme->GetTextStyle().GetTextColor());
+        }
+        if (spanItem->hasResourceDecorationColor) {
+            spanNode->UpdateTextDecorationColor(theme->GetTextStyle().GetTextColor());
         }
     }
 }
@@ -2436,6 +2441,7 @@ void RichEditorPattern::CreateTextSpanNode(
     spanNode->MountToParent(host, info.GetSpanIndex());
     auto spanItem = spanNode->GetSpanItem();
     spanItem->hasResourceFontColor = true;
+    spanItem->hasResourceDecorationColor = true;
     spanNode->UpdateContent(insertValue);
     AddSpanItem(spanItem, info.GetSpanIndex());
     if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
