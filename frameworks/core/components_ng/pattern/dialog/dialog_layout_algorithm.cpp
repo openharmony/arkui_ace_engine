@@ -476,6 +476,17 @@ bool DialogLayoutAlgorithm::SetAlignmentSwitch(const SizeF& maxSize, const SizeF
         }
         return true;
     }
+
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto displayInfo = container->GetDisplayInfo();
+    CHECK_NULL_RETURN(displayInfo, false);
+    auto foldStatus = displayInfo->GetFoldStatus();
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && foldStatus == FoldStatus::EXPAND) {
+        topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / 2.0;
+        return true;
+    }
+
     bool version10OrLarger = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN);
     if (version10OrLarger && SystemProperties::GetDeviceType() == DeviceType::PHONE) {
         if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
