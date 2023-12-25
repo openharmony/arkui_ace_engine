@@ -2943,17 +2943,19 @@ void WebPattern::SetSelfAsParentOfWebCoreNode(NWeb::NWebAccessibilityNodeInfo& i
         info.parentId = host->GetAccessibilityId();
     }
 }
-void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo& touchEventInfo, const Offset& offset)
+
+void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo& touchEventInfo)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto offset = host->GetOffsetRelativeToWindow();
     touchEventInfo = touchEventInfo_;
     TouchLocationInfo changedInfo("onTouch", touchEvent.id);
-    changedInfo.SetGlobalLocation(Offset(touchEvent.x, touchEvent.y));
     changedInfo.SetLocalLocation(Offset(touchEvent.x, touchEvent.y));
-    changedInfo.SetScreenLocation(Offset(touchEvent.screenX - offset.GetX(), touchEvent.screenY - offset.GetY()));
+    changedInfo.SetGlobalLocation(Offset(touchEvent.x + offset.GetX(), touchEvent.y + offset.GetY()));
+    changedInfo.SetScreenLocation(Offset(touchEvent.x + offset.GetX(), touchEvent.y + offset.GetY()));
     changedInfo.SetTouchType(touchEvent.type);
 
-    for (auto item : touchEventInfo.GetChangedTouches()) {
-        item = std::move(changedInfo);
-    }
+    touchEventInfo.AddChangedTouchLocationInfo(std::move(changedInfo));
 }
 } // namespace OHOS::Ace::NG
