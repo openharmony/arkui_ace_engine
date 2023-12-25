@@ -101,6 +101,9 @@ struct UpdateSpanStyle {
         updateTextDecorationColor.reset();
         updateTextShadows.reset();
 
+        updateSymbolColor.reset();
+        updateSymbolRenderingStrategy.reset();
+
         updateImageWidth.reset();
         updateImageHeight.reset();
         updateImageVerticalAlign.reset();
@@ -117,6 +120,9 @@ struct UpdateSpanStyle {
     std::optional<TextDecoration> updateTextDecoration = std::nullopt;
     std::optional<Color> updateTextDecorationColor = std::nullopt;
     std::optional<std::vector<Shadow>> updateTextShadows = std::nullopt;
+
+    std::optional<std::vector<Color>> updateSymbolColor = std::nullopt;
+    std::optional<uint32_t> updateSymbolRenderingStrategy = std::nullopt;
 
     std::optional<CalcDimension> updateImageWidth = std::nullopt;
     std::optional<CalcDimension> updateImageHeight = std::nullopt;
