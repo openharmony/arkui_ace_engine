@@ -23,6 +23,8 @@
 #include "core/components_ng/pattern/list/list_item_layout_property.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable_item.h"
+#include "core/components_ng/pattern/scrollable/scrollable_item_pool.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -38,7 +40,7 @@ void ListItemModelNG::Create(std::function<void(int32_t)>&& deepRenderFunc, V2::
         return ViewStackProcessor::GetInstance()->Finish();
     };
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::LIST_ITEM_ETS_TAG, nodeId);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
+    auto frameNode = ScrollableItemPool::GetInstance().Allocate(V2::LIST_ITEM_ETS_TAG, nodeId,
         [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender)), itemStyle = listItemStyle]() {
             return AceType::MakeRefPtr<ListItemPattern>(shallowBuilder, itemStyle);
         });
@@ -132,8 +134,8 @@ void ListItemModelNG::SetDeleteArea(std::function<void()>&& builderAction, OnDel
             startNode = NG::ViewStackProcessor::GetInstance()->Finish();
         }
         pattern->SetStartNode(startNode);
-        InstallSwiperCallBack(eventHub, std::move(onDelete), std::move(onEnterDeleteArea),
-            std::move(onExitDeleteArea), std::move(onStateChange), isStartArea);
+        InstallSwiperCallBack(eventHub, std::move(onDelete), std::move(onEnterDeleteArea), std::move(onExitDeleteArea),
+            std::move(onStateChange), isStartArea);
         ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, length);
     } else {
         RefPtr<NG::UINode> endNode;
@@ -143,18 +145,15 @@ void ListItemModelNG::SetDeleteArea(std::function<void()>&& builderAction, OnDel
             endNode = NG::ViewStackProcessor::GetInstance()->Finish();
         }
         pattern->SetEndNode(endNode);
-        InstallSwiperCallBack(eventHub, std::move(onDelete), std::move(onEnterDeleteArea),
-            std::move(onExitDeleteArea), std::move(onStateChange), isStartArea);
+        InstallSwiperCallBack(eventHub, std::move(onDelete), std::move(onEnterDeleteArea), std::move(onExitDeleteArea),
+            std::move(onStateChange), isStartArea);
         ACE_UPDATE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length);
     }
 }
 
-void ListItemModelNG::InstallSwiperCallBack(RefPtr<ListItemEventHub> eventHub,
-                                            OnDeleteEvent&& onDelete,
-                                            OnEnterDeleteAreaEvent&& onEnterDeleteArea,
-                                            OnExitDeleteAreaEvent&& onExitDeleteArea,
-                                            OnStateChangedEvent&& onStateChange,
-                                            bool isStartArea)
+void ListItemModelNG::InstallSwiperCallBack(RefPtr<ListItemEventHub> eventHub, OnDeleteEvent&& onDelete,
+    OnEnterDeleteAreaEvent&& onEnterDeleteArea, OnExitDeleteAreaEvent&& onExitDeleteArea,
+    OnStateChangedEvent&& onStateChange, bool isStartArea)
 {
     CHECK_NULL_VOID(eventHub);
     if (isStartArea) {

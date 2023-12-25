@@ -80,6 +80,7 @@ bool SystemProperties::rosenBackendEnabled_ = false;
 #else
 bool SystemProperties::rosenBackendEnabled_ = true;
 #endif
+bool SystemProperties::enableScrollableItemPool_ = false;
 
 void SystemProperties::InitDeviceType(DeviceType type)
 {
