@@ -257,7 +257,8 @@ ArkUINativeModuleValue TextpickerBridge::SetDefaultPickerItemHeight(ArkUIRuntime
 
     CalcDimension height;
     if (itemHeightValue->IsNumber() || itemHeightValue->IsString()) {
-        if (!ArkTSUtils::ParseJsDimensionNG(vm, itemHeightValue, height, DimensionUnit::FP, false)) {
+        if (!ArkTSUtils::ParseJsDimensionFp(vm, itemHeightValue, height)) {
+            GetArkUIInternalNodeAPI()->GetTextpickerModifier().ResetTextpickerDefaultPickerItemHeight(nativeNode);
             return panda::JSValueRef::Undefined(vm);
         }
     }

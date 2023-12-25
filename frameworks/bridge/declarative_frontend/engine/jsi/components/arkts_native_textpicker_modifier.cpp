@@ -60,26 +60,7 @@ void ResetTextpickerCanLoop(NodeHandle node)
     TextPickerModelNG::SetCanLoop(frameNode, true);
 }
 
-void ResetTextpickerSelected(NodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-
-    if (TextPickerModel::GetInstance()->IsSingle()) {
-        TextPickerModelNG::SetSelected(frameNode, 0);
-    } else {
-        std::vector<uint32_t> selectedValues;
-        std::vector<NG::TextCascadePickerOptions> options;
-        TextPickerModel::GetInstance()->GetMultiOptions(options);
-        auto count = TextPickerModel::GetInstance()->IsCascade() ?
-            TextPickerModel::GetInstance()->GetMaxCount() : options.size();
-        for (uint32_t i = 0; i < count; i++) {
-            selectedValues.emplace_back(0);
-        }
-        TextPickerModelNG::SetSelecteds(frameNode, selectedValues);
-        TextPickerModelNG::SetHasSelectAttr(frameNode, false);
-    }
-}
+void ResetTextpickerSelected(NodeHandle node) {}
 
 void SetTextpickerSelectedIndex(NodeHandle node, uint32_t* values, int32_t size)
 {
@@ -281,7 +262,13 @@ void SetTextpickerDefaultPickerItemHeight(NodeHandle node, double dVal, int32_t 
         frameNode, Dimension(dVal, static_cast<DimensionUnit>(dUnit)));
 }
 
-void ResetTextpickerDefaultPickerItemHeight(NodeHandle node) {}
+void ResetTextpickerDefaultPickerItemHeight(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto height = Dimension(0.0);
+    TextPickerModelNG::SetDefaultPickerItemHeight(frameNode, height);
+}
 
 void GetPickerTextStyle(uint32_t color, const char* fontInfo, int32_t styleVal, NG::PickerTextStyle& textStyle)
 {
