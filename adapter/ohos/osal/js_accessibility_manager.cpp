@@ -1148,7 +1148,7 @@ static void UpdateWebAccessibilityElementInfo(
 }
 
 void UpdateWebAccessibilityElementInfo(const NWeb::NWebAccessibilityNodeInfo& node,
-    const CommonProperty& commonProperty, AccessibilityElementInfo& nodeInfo)
+    const CommonProperty& commonProperty, AccessibilityElementInfo& nodeInfo, const RefPtr<NG::FrameNode>& webNode)
 {
     nodeInfo.SetParent(node.parentId);
     for (const auto& child : node.childIds) {
@@ -1161,11 +1161,12 @@ void UpdateWebAccessibilityElementInfo(const NWeb::NWebAccessibilityNodeInfo& no
     nodeInfo.SetFocused(node.focused);
     nodeInfo.SetAccessibilityFocus(node.accessibilityFocus);
     nodeInfo.SetVisible(node.visible);
-    if (node.visible) {
-        auto left = node.rectX + commonProperty.windowLeft;
-        auto top = node.rectY + commonProperty.windowTop;
-        auto right = node.rectX + node.rectWidth + commonProperty.windowLeft;
-        auto bottom = node.rectY + node.rectHeight + commonProperty.windowTop;
+    if (node.visible && webNode) {
+        auto webRect = webNode->GetTransformRectRelativeToWindow();
+        auto left = webRect.Left() + node.rectX + commonProperty.windowLeft;
+        auto top = webRect.Top() + node.rectY + commonProperty.windowTop;
+        auto right = webRect.Left() + node.rectX + node.rectWidth + commonProperty.windowLeft;
+        auto bottom = webRect.Top() + node.rectY + node.rectHeight + commonProperty.windowTop;
         Accessibility::Rect bounds { left, top, right, bottom };
         nodeInfo.SetRectInScreen(bounds);
     }
@@ -1219,7 +1220,8 @@ void UpdateVirtualNodeAccessibilityElementInfo(
     if (node->GetTag() == V2::WEB_CORE_TAG) {
         auto webAccessibilityNode = AceType::DynamicCast<NG::WebAccessibilityNode>(node);
         CHECK_NULL_VOID(webAccessibilityNode);
-        UpdateWebAccessibilityElementInfo(webAccessibilityNode->GetAccessibilityNodeInfo(), commonProperty, nodeInfo);
+        UpdateWebAccessibilityElementInfo(webAccessibilityNode->GetAccessibilityNodeInfo(), commonProperty, nodeInfo,
+            webAccessibilityNode->GetWebNode());
         return;
     }
 #endif
@@ -1272,7 +1274,8 @@ void UpdateAccessibilityElementInfo(
     if (node->GetTag() == V2::WEB_CORE_TAG) {
         auto webAccessibilityNode = AceType::DynamicCast<NG::WebAccessibilityNode>(node);
         CHECK_NULL_VOID(webAccessibilityNode);
-        UpdateWebAccessibilityElementInfo(webAccessibilityNode->GetAccessibilityNodeInfo(), commonProperty, nodeInfo);
+        UpdateWebAccessibilityElementInfo(webAccessibilityNode->GetAccessibilityNodeInfo(), commonProperty, nodeInfo,
+            webAccessibilityNode->GetWebNode());
         return;
     }
 #endif
