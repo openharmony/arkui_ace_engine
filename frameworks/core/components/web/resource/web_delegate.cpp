@@ -2296,13 +2296,6 @@ void WebDelegate::SetWebCallBack()
             }
             return std::string();
         });
-        webController->SetIsIncognitoModeImpl([weak = WeakClaim(this)]() {
-            auto delegate = weak.Upgrade();
-            if (delegate) {
-                return delegate->IsIncognitoMode();
-            }
-            return false;
-        });
     } else {
         TAG_LOGW(AceLogTag::ACE_WEB, "web controller is nullptr");
     }
@@ -2332,7 +2325,7 @@ void WebDelegate::InitWebViewWithWindow()
             delegate->nweb_ =
                 OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
                     delegate->window_.GetRefPtr(), initArgs,
-                    delegate->IsIncognitoMode());
+                    delegate->incognitoMode_);
             if (delegate->nweb_ == nullptr) {
                 delegate->window_ = nullptr;
                 return;
@@ -5192,14 +5185,6 @@ void WebDelegate::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t heigh
     if (nweb_) {
         nweb_->SetDrawRect(x, y, width, height);
     }
-}
-
-bool WebDelegate::IsIncognitoMode() const
-{
-    if (nweb_) {
-        return nweb_->IsIncognitoMode();
-    }
-    return false;
 }
 #endif
 

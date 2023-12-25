@@ -720,7 +720,6 @@ private:
     void RunJsProxyCallback();
     void RegisterConfigObserver();
     void UnRegisterConfigObserver();
-    bool IsIncognitoMode() const;
 
     // Backward and forward
     void Backward();
