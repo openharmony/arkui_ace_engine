@@ -481,7 +481,8 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
     AnimationOption option;
     option.SetCurve(curve);
     option.SetDuration(CUSTOM_SPRING_ANIMATION_DURION);
-
+    option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
+    frictionOffsetProperty_->SetThresholdType(ThresholdType::LAYOUT);
     frictionOffsetProperty_->AnimateWithVelocity(option, finalPosition_, initVelocity_,
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
@@ -618,6 +619,8 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
         GetSnapProperty();
     }
     snapOffsetProperty_->Set(currentPos_);
+    option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
+    snapOffsetProperty_->SetThresholdType(ThresholdType::LAYOUT);
     snapOffsetProperty_->AnimateWithVelocity(option, endPos_, scrollSnapVelocity,
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
@@ -649,6 +652,8 @@ void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scro
         GetSnapProperty();
     }
     snapOffsetProperty_->Set(currentPos_);
+    option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
+    snapOffsetProperty_->SetThresholdType(ThresholdType::LAYOUT);
     snapOffsetProperty_->AnimateWithVelocity(option, endPos_, scrollSnapVelocity,
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
@@ -788,6 +793,8 @@ void Scrollable::StartSpringMotion(
     auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(DEFAULT_SPRING_RESPONSE, DEFAULT_SPRING_DAMP, 0.0f);
     option.SetCurve(curve);
     option.SetDuration(CUSTOM_SPRING_ANIMATION_DURION);
+    option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
+    springOffsetProperty_->SetThresholdType(ThresholdType::LAYOUT);
     springOffsetProperty_->AnimateWithVelocity(
         option, finalPosition_, mainVelocity,
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
@@ -977,6 +984,8 @@ void Scrollable::UpdateScrollSnapEndWithOffset(double offset)
         }
         updateSnapAnimationCount_++;
         endPos_ -= offset;
+        option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
+        snapOffsetProperty_->SetThresholdType(ThresholdType::LAYOUT);
         AnimationUtils::StartAnimation(
             option,
             [weak = AceType::WeakClaim(this)]() {
