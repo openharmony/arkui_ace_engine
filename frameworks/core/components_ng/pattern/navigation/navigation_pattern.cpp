@@ -26,6 +26,7 @@
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
@@ -929,20 +930,16 @@ void NavigationPattern::OnHover(bool isHover)
 
 RefPtr<FrameNode> NavigationPattern::GetDividerNode() const
 {
-    RefPtr<FrameNode> dividerFrameNode;
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
-    auto children = host->GetChildren();
-    for (auto begin = children.begin(); begin != children.end(); begin++) {
-        auto dividerNode = *begin;
-        if (dividerNode->GetTag() == V2::DIVIDER_ETS_TAG) {
-            dividerFrameNode = AceType::DynamicCast<FrameNode>(dividerNode);
-            CHECK_NULL_RETURN(dividerFrameNode, nullptr);
-            SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_ALL, .type = SAFE_AREA_TYPE_SYSTEM };
-            dividerFrameNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
-            break;
-        }
-    }
+    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(host);
+    CHECK_NULL_RETURN(navigationNode, nullptr);
+    auto dividerFrameNode = AceType::DynamicCast<FrameNode>(navigationNode->GetDividerNode());
+    CHECK_NULL_RETURN(dividerFrameNode, nullptr);
+
+    SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_ALL, .type = SAFE_AREA_TYPE_SYSTEM };
+    dividerFrameNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+
     return dividerFrameNode;
 }
 
@@ -1227,5 +1224,16 @@ bool NavigationPattern::NeedRecalculateSafeArea()
     CHECK_NULL_RETURN(hostNode, true);
     bool isFixHeight = hostNode->GetLayoutProperty()->HasFixedHeight();
     return !isFixHeight;
+}
+
+void NavigationPattern::OnColorConfigurationUpdate()
+{
+    auto dividerNode = GetDividerNode();
+    CHECK_NULL_VOID(dividerNode);
+    auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
+    CHECK_NULL_VOID(dividerRenderProperty);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    dividerRenderProperty->UpdateDividerColor(theme->GetNavigationDividerColor());
 }
 } // namespace OHOS::Ace::NG

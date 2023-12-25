@@ -149,6 +149,8 @@ struct TestProperty {
  */
 HWTEST_F(NavigationTestNg, NavigationPatternTest001, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
+
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);

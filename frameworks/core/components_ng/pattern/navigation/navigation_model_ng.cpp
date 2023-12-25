@@ -692,7 +692,9 @@ bool NavigationModelNG::CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNo
         dividerLayoutProperty->UpdateVertical(true);
         auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
         CHECK_NULL_RETURN(dividerRenderProperty, false);
-        dividerRenderProperty->UpdateDividerColor(DIVIDER_COLOR);
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_RETURN(theme, false);
+        dividerRenderProperty->UpdateDividerColor(theme->GetNavigationDividerColor());
     }
 
     return true;
