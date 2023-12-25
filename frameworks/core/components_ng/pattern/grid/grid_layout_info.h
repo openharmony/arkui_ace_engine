@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/grid/grid_layout_options.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t EMPTY_JUMP_INDEX = -2;
 
 // Try not to add more variables in [GridLayoutInfo] because the more state variables, the more problematic and the
 // harder it is to maintain
@@ -132,7 +133,7 @@ struct GridLayoutInfo {
     int32_t startMainLineIndex_ = 0;
     int32_t endMainLineIndex_ = 0;
 
-    int32_t jumpIndex_ = -1;
+    int32_t jumpIndex_ = EMPTY_JUMP_INDEX;
     int32_t crossCount_ = 0;
     int32_t childrenCount_ = 0;
     ScrollAlign scrollAlign_ = ScrollAlign::AUTO;
