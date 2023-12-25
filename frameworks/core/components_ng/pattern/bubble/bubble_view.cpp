@@ -246,7 +246,6 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
             renderContext->UpdateBackgroundColor(backgroundColor);
             renderContext->UpdateBackBlurStyle(styleOption);
         }
-        renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
         if (param->GetShadow().has_value()) {
             renderContext->UpdateBackShadow(param->GetShadow().value());
         }
