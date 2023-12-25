@@ -115,6 +115,7 @@ struct GridLayoutInfo {
     float GetContentHeight(float mainGap) const;
     float GetContentOffset(const GridLayoutOptions& options, float mainGap) const;
     float GetContentHeight(const GridLayoutOptions& options, float mainGap) const;
+    float GetCurrentLineHeight() const;
 
     Axis axis_ = Axis::VERTICAL;
 
