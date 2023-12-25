@@ -110,8 +110,6 @@ template("build_component_plugin") {
         "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include",
       ]
 
-      configs += [ "$ace_flutter_engine_root:flutter_config" ]
-
       # TODO: new skia configs
 
       if (is_arkui_x) {

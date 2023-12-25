@@ -249,10 +249,7 @@ template("ace_core_source_set") {
       sources += [ "common/hdc_register.cpp" ]
     }
 
-    configs = [
-      "$ace_root:ace_config",
-      "$ace_flutter_engine_root:flutter_config",
-    ]
+    configs = [ "$ace_root:ace_config" ]
 
     deps = [
       "$skia_root_new:skia_$platform",
@@ -817,10 +814,7 @@ template("ace_core_ng_source_set") {
       sources -= [ "common/anr_thread.cpp" ]
     }
 
-    configs = [
-      "$ace_root:ace_config",
-      "$ace_flutter_engine_root:flutter_config",
-    ]
+    configs = [ "$ace_root:ace_config" ]
 
     deps = [
       "$ace_root/frameworks/core/components/theme:build_theme_code",
@@ -828,10 +822,6 @@ template("ace_core_ng_source_set") {
       "pipeline_ng:ace_core_pipeline_ng_$platform",
     ]
     external_deps = []
-
-    if (is_arkui_x) {
-      deps += [ "$ace_flutter_engine_root:flutter_for_ng" ]
-    }
 
     if (defined(config.build_for_preview) && config.build_for_preview) {
       sources -= [ "common/task_runner_adapter_impl.cpp" ]
