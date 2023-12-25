@@ -70,6 +70,7 @@ struct DataBase {
     int64_t beginVsyncTime {0};
     int64_t endVsyncTime {0};
     int64_t maxFrameTime {0};
+    bool needReportRs {false};
     bool isDisplayAnimator {false};
     PerfSourceType sourceType {UNKNOWN_SOURCE};
     PerfActionType actionType {UNKNOWN_ACTION};
@@ -93,6 +94,7 @@ public:
     void Report(const std::string& sceneId, int64_t vsyncTime, bool isRsRender);
     bool IsTimeOut(int64_t nowTime);
     bool IsFirstFrame();
+    bool IsDisplayAnimator(const std::string& sceneId);
     void Reset();
 public:
     int64_t inputTime {0};
@@ -105,6 +107,7 @@ public:
     int32_t seqMissFrames {0};
     bool isSuccessive {false};
     bool isFirstFrame {false};
+    bool needReportRs {false};
     bool isDisplayAnimator {false};
     std::string sceneId {""};
     PerfActionType actionType {UNKNOWN_ACTION};
