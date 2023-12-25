@@ -105,7 +105,6 @@ void PixelMapImage::DrawToRSCanvas(
     auto config = GetPaintConfig();
     RSSamplingOptions options;
     ImagePainterUtils::AddFilter(brush, options, config);
-    auto radii = ImagePainterUtils::ToRSRadius(radiusXY);
     std::vector<RSPoint> radius;
     static const int pointCount = 4;
     for (int i = 0; i < pointCount; i++) {
@@ -116,13 +115,9 @@ void PixelMapImage::DrawToRSCanvas(
     recordingCanvas.Scale(config.scaleX_, config.scaleY_);
 
     CHECK_NULL_VOID_NOLOG(pixelMap_->GetPixelMapSharedPtr());
-    RSPoint pointRadius[pointCount] = {};
-    for (int i = 0; i < pointCount; i++) {
-        pointRadius[i] = radius[i];
-    }
+    auto radii = ImagePainterUtils::ToRSRadius(radiusXY);
     Rosen::Drawing::AdaptiveImageInfo rsImageInfo = { static_cast<int32_t>(config.imageFit_),
-        static_cast<int32_t>(config.imageRepeat_), { pointRadius[0], pointRadius[1], pointRadius[2], pointRadius[3] },
-        1.0, 0, 0, 0 };
+        static_cast<int32_t>(config.imageRepeat_), radii, 1.0, 0, 0, 0 };
     recordingCanvas.AttachBrush(brush);
     recordingCanvas.DrawPixelMapWithParm(pixelMap->GetPixelMapSharedPtr(), rsImageInfo, options);
     recordingCanvas.DetachBrush();

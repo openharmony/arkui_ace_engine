@@ -244,7 +244,6 @@ void CanvasPaintMethod::DrawImage(
         PaintShadow(path, shadow_, rsCanvas, &imageBrush_, nullptr);
     }
 
-    RSRect bounds = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
     switch (canvasImage.flag) {
         case 0: {
             if (globalState_.GetType() == CompositeOperation::SOURCE_OVER) {
@@ -254,6 +253,7 @@ void CanvasPaintMethod::DrawImage(
             } else {
                 RSBrush compositeOperationpBrush;
                 InitPaintBlend(compositeOperationpBrush);
+                RSRect bounds = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
                 RSSaveLayerOps layerOps(&bounds, &compositeOperationpBrush);
                 rsCanvas_->SaveLayer(layerOps);
                 rsCanvas_->AttachBrush(imageBrush_);
@@ -273,6 +273,7 @@ void CanvasPaintMethod::DrawImage(
             } else {
                 RSBrush compositeOperationpBrush;
                 InitPaintBlend(compositeOperationpBrush);
+                RSRect bounds = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
                 RSSaveLayerOps layerOps(&bounds, &compositeOperationpBrush);
                 rsCanvas_->SaveLayer(layerOps);
                 rsCanvas_->AttachBrush(imageBrush_);
@@ -296,6 +297,7 @@ void CanvasPaintMethod::DrawImage(
             } else {
                 RSBrush compositeOperationpBrush;
                 InitPaintBlend(compositeOperationpBrush);
+                RSRect bounds = RSRect(0, 0, lastLayoutSize_.Width(), lastLayoutSize_.Height());
                 RSSaveLayerOps layerOps(&bounds, &compositeOperationpBrush);
                 rsCanvas_->SaveLayer(layerOps);
                 rsCanvas_->AttachBrush(imageBrush_);
