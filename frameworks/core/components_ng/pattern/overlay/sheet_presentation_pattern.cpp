@@ -557,10 +557,6 @@ void SheetPresentationPattern::ChangeScrollHeight(float height)
     auto operationHeight = perationGeometryNode->GetFrameSize().Height();
     auto scrollNode = DynamicCast<FrameNode>(host->GetChildAtIndex(1));
     CHECK_NULL_VOID(scrollNode);
-    auto builderNode = DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
-    CHECK_NULL_VOID(builderNode);
-    auto builderGeometryNode = builderNode->GetGeometryNode();
-    CHECK_NULL_VOID(builderGeometryNode);
     auto scrollProps = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
     CHECK_NULL_VOID(scrollProps);
     auto scrollHeight = height - operationHeight;
@@ -569,8 +565,7 @@ void SheetPresentationPattern::ChangeScrollHeight(float height)
         auto sheetHeight = geometryNode->GetFrameSize().Height();
         scrollHeight = sheetHeight - operationHeight;
     }
-    scrollProps->UpdateUserDefinedIdealSize(CalcSize(CalcLength(geometryNode->GetFrameSize().Width()),
-        CalcLength(scrollHeight)));
+    scrollProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(scrollHeight)));
     scrollNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
