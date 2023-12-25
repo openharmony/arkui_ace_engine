@@ -261,7 +261,6 @@ void ImagePattern::SetImagePaintConfig(
     };
     config.imageFit_ = layoutProps->GetImageFit().value_or(ImageFit::COVER);
     config.isSvg_ = isSvg;
-
     auto host = GetHost();
     if (!host) {
         canvasImage->SetPaintConfig(config);
@@ -812,6 +811,13 @@ void ImagePattern::DumpInfo()
     if (loadingCtx_) {
         auto currentLoadImageState = loadingCtx_->GetCurrentLoadingState();
         DumpLog::GetInstance().AddDesc(std::string("currentLoadImageState : ").append(currentLoadImageState));
+        DumpLog::GetInstance().AddDesc(std::string("rawImageSize: ").append(loadingCtx_->GetImageSize().ToString()));
+    }
+    auto imageRenderProperty = GetPaintProperty<ImageRenderProperty>();
+    if (imageRenderProperty && imageRenderProperty->HasImageResizableSlice() &&
+        imageRenderProperty->GetImageResizableSliceValue({}).Valid()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("reslzable slice: ").append(imageRenderProperty->GetImageResizableSliceValue({}).ToString()));
     }
 }
 

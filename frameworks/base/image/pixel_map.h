@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_IMAGE_ACE_PIXEL_MAP_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_IMAGE_ACE_PIXEL_MAP_H
 
+#include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 
 namespace OHOS {
@@ -45,6 +46,38 @@ enum class AlphaType : int32_t {
     IMAGE_ALPHA_TYPE_OPAQUE = 1,   // image pixels are stored as opaque.
     IMAGE_ALPHA_TYPE_PREMUL = 2,   // image have alpha component, and all pixels have premultiplied by alpha value.
     IMAGE_ALPHA_TYPE_UNPREMUL = 3, // image have alpha component, and all pixels stored without premultiply alpha value.
+};
+
+struct ImageResizableSlice {
+    ImageResizableSlice() = default;
+    ~ImageResizableSlice() = default;
+    Dimension left;
+    Dimension right;
+    Dimension top;
+    Dimension bottom;
+    std::string ToString() const
+    {
+        std::string result;
+        result.append("ImageResizableSlice: {");
+        result.append("left: ");
+        result.append(left.ToString());
+        result.append(", right: ");
+        result.append(right.ToString());
+        result.append(", top: ");
+        result.append(top.ToString());
+        result.append(", bottom: ");
+        result.append(bottom.ToString());
+        result.append("}");
+        return result;
+    }
+    bool operator==(const ImageResizableSlice& slice) const
+    {
+        return left == slice.left && right == slice.right && top == slice.top && bottom == slice.bottom;
+    }
+    bool Valid() const
+    {
+        return left.IsValid() || right.IsValid() || top.IsValid() || bottom.IsValid();
+    }
 };
 
 class ACE_EXPORT PixelMap : public AceType {

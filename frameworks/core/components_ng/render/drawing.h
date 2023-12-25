@@ -118,6 +118,7 @@ using RSSize = Rosen::Drawing::Size;
 using RSSrcRectConstraint = Rosen::Drawing::SrcRectConstraint;
 using RSPixmap = Rosen::Drawing::Pixmap;
 using RSImageInfo = Rosen::Drawing::ImageInfo;
+using RSRectI = Rosen::Drawing::RectI;
 #endif
 #ifndef USE_GRAPHIC_TEXT_GINE
 using RSPathEffect = rosen::PathEffect;

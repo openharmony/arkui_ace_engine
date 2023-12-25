@@ -94,6 +94,9 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
     config.imageInterpolation_ = renderProps->GetImageInterpolation().value_or(ImageInterpolation::NONE);
     config.imageRepeat_ = renderProps->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
     config.smoothEdge_ = renderProps->GetSmoothEdge().value_or(0.0f);
+    if (renderProps) {
+        config.resizableSlice_ = renderProps->GetImageResizableSliceValue({});
+    }
     auto pipelineCtx = PipelineBase::GetCurrentContext();
     bool isRightToLeft = pipelineCtx && pipelineCtx->IsRightToLeft();
     config.flipHorizontally_ = isRightToLeft && renderProps->GetMatchTextDirection().value_or(false);

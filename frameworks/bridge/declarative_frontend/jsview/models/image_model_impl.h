@@ -45,6 +45,7 @@ public:
     void SetImageRenderMode(ImageRenderMode imageRenderMode) override;
     bool IsSrcSvgImage() override;
     void SetAutoResize(bool autoResize) override;
+    void SetResizableSlice(const ImageResizableSlice& slice) override {};
     void SetSyncMode(bool syncMode) override;
     void SetColorFilterMatrix(const std::vector<float>& matrix) override;
     void SetDraggable(bool draggable) override {}

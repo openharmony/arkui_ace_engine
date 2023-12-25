@@ -42,6 +42,7 @@ struct ImagePaintConfig {
     bool flipHorizontally_ = false;
     bool isSvg_ = false;
     std::vector<ObscuredReasons> obscuredReasons_;
+    ImageResizableSlice resizableSlice_;
 };
 
 // CanvasImage is interface for drawing image.
