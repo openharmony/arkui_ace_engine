@@ -81,7 +81,7 @@ public:
 
     bool IsAtomicNode() const override
     {
-        return false;
+        return true;
     }
 
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
