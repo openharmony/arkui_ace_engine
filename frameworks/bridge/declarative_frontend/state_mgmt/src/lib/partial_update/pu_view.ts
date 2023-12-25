@@ -321,11 +321,29 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   aboutToRecycle(): void {}
 
+  private setDeleteStatusRecursively(): void {
+    if (!this.childrenWeakrefMap_.size) {
+      return;
+    }
+    this.childrenWeakrefMap_.forEach((value: WeakRef<ViewPU>) => {
+      let child: ViewPU = value.deref();
+      if (child) {
+        child.isDeleting_ = true;
+        child.setDeleteStatusRecursively();
+      }
+    })
+  }
+
   // super class will call this function from
   // its aboutToBeDeleted implementation
   protected aboutToBeDeletedInternal(): void {
     stateMgmtConsole.debug(`${this.debugInfo()}: aboutToBeDeletedInternal`);
-
+    // if this.isDeleting_ is true already, it may be set delete status recursively by its parent, so it is not necessary
+    // to set and resursively set its children any more
+    if (!this.isDeleting_) {
+      this.isDeleting_ = true;
+      this.setDeleteStatusRecursively();
+    }
     // tell UINodeRegisterProxy that all elmtIds under
     // this ViewPU should be treated as already unregistered
 
@@ -361,7 +379,6 @@ abstract class ViewPU extends NativeViewPartialUpdate
       this.parent_.removeChild(this);
     }
     this.localStoragebackStore_ = undefined;
-    this.isDeleting_ = true;
   }
 
   public purgeDeleteElmtId(rmElmtId : number ) : boolean {
