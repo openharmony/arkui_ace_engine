@@ -231,7 +231,7 @@ SelectionInfo TextPattern::GetSpansInfo(int32_t start, int32_t end, GetSpansMeth
     selection.SetSelectionStart(realStart);
     // Verify that realStart, realEnd, and spans_ are valid
     if (realStart > length || realEnd < 0 || spans_.empty() || (start > length && end > length) ||
-        realStart == realEnd) {
+        (method == GetSpansMethod::ONSELECT && realStart == realEnd)) {
         selection.SetResultObjectList(resultObjects);
         return selection;
     }
