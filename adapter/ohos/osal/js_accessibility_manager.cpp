@@ -439,27 +439,6 @@ void SortExtensionAccessibilityInfo(std::list<AccessibilityElementInfo>& infos, 
     SortAccessibilityInfosByBreadth(input, accessibilityIdQueue, infos);
 }
 
-void CalculateExtensionUIRect(const AccessibilityElementInfo& parentInfo, AccessibilityElementInfo& info,
-    int32_t uiExtensionOffset)
-{
-    auto subOffset = uiExtensionOffset / NG::UI_EXTENSION_ID_FACTOR;
-    auto isFirstLayer = ((info.GetAccessibilityId() / subOffset) % NG::UI_EXTENSION_ID_FACTOR) > 0;
-    subOffset = subOffset / NG::UI_EXTENSION_ID_FACTOR;
-    auto isSecondLayer = ((info.GetAccessibilityId() / subOffset) % NG::UI_EXTENSION_ID_FACTOR) > 0;
-    if (isFirstLayer && (!isSecondLayer)) {
-        Accessibility::Rect bounds {
-            info.GetRectInScreen().GetLeftTopXScreenPostion() +
-                parentInfo.GetRectInScreen().GetLeftTopXScreenPostion(),
-            info.GetRectInScreen().GetLeftTopYScreenPostion() +
-                parentInfo.GetRectInScreen().GetLeftTopYScreenPostion(),
-            info.GetRectInScreen().GetRightBottomXScreenPostion() +
-                parentInfo.GetRectInScreen().GetLeftTopXScreenPostion(),
-            info.GetRectInScreen().GetRightBottomYScreenPostion() +
-                parentInfo.GetRectInScreen().GetLeftTopYScreenPostion()};
-        info.SetRectInScreen(bounds);
-    }
-}
-
 void ConvertExtensionAccessibilityId(AccessibilityElementInfo& info, const RefPtr<NG::FrameNode>& extensionNode,
     int32_t uiExtensionOffset, AccessibilityElementInfo& parentInfo)
 {
@@ -479,7 +458,6 @@ void ConvertExtensionAccessibilityId(AccessibilityElementInfo& info, const RefPt
             parentInfo.AddChild(child);
         }
     }
-    CalculateExtensionUIRect(parentInfo, info, uiExtensionOffset);
 }
 
 void ConvertExtensionAccessibilityNodeId(std::list<AccessibilityElementInfo>& infos,
