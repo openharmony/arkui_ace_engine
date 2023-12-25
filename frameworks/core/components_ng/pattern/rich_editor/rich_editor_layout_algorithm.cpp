@@ -30,12 +30,10 @@ RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>>
     while (it != spans.end()) {
         auto span = *it;
         // only checking the last char
-        if (StringUtils::ToWstring(span->content).back() == L'\n') {
-            if (std::next(it) != spans.end()) {
-                span->MarkNeedRemoveNewLine(true);
-            } else {
-                span->MarkNeedRemoveNewLine(false);
-            }
+        std::wstring content = StringUtils::ToWstring(span->content);
+        if (content.back() == L'\n') {
+            bool needRemoveNewLine = content.length() > 1 && std::next(it) != spans.end();
+            span->MarkNeedRemoveNewLine(needRemoveNewLine);
             std::list<RefPtr<SpanItem>> newGroup;
             newGroup.splice(newGroup.begin(), spans, spans.begin(), std::next(it));
             spans_.push_back(std::move(newGroup));
