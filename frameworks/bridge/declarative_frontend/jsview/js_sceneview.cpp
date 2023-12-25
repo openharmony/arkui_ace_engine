@@ -165,24 +165,40 @@ void JSSceneView::Create(const JSCallbackInfo& info)
 {
     const auto& length = info.Length();
     std::string srcPath("");
-
     int surfaceData = 0;
-    if (length >= 2) { // 2: info size
-        surfaceData = info[1]->ToNumber<int32_t>();
-    }
-    auto surfaceType =
-        (surfaceData == 0) ? OHOS::Render3D::SurfaceType::SURFACE_TEXTURE : OHOS::Render3D::SurfaceType::SURFACE_WINDOW;
-
-    if (length >= 1) {
-        ParseJsMedia(info[0], srcPath);
-    }
-
     std::string bundleName;
     std::string moduleName;
-    GetJsMediaBundleInfo(info[0], bundleName, moduleName);
+
+    Render3D::SurfaceType surfaceType = OHOS::Render3D::SurfaceType::SURFACE_TEXTURE;
+    if (length == 2) { // 2: info size
+        surfaceData = info[1]->ToNumber<int32_t>();
+        ParseJsMedia(info[0], srcPath);
+        GetJsMediaBundleInfo(info[0], bundleName, moduleName);
+    } else if (length == 1) {
+        if (!ParseJsMedia(info[0], srcPath)) {
+            // SceneOptions
+            JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+            auto scene = jsObj->GetProperty("scene");
+            if (!scene->IsNull()) {
+                ParseJsMedia(scene, srcPath);
+                GetJsMediaBundleInfo(scene, bundleName, moduleName);
+            }
+            auto type = jsObj->GetProperty("modelType");
+            if (!type->IsNull()) {
+                surfaceData = type->ToNumber<int32_t>();
+            }
+        }
+    }
+
+    surfaceType = (surfaceData == 0) ? OHOS::Render3D::SurfaceType::SURFACE_TEXTURE :
+        OHOS::Render3D::SurfaceType::SURFACE_WINDOW;
+
     std::string ohosPath("");
     SetOhosPath(srcPath, ohosPath);
-    ModelView::GetInstance()->Create(ohosPath, bundleName, moduleName, surfaceType);
+    LOGD("srcPath after ParseJsMedia(): %s bundleName: %s, moduleName %s", ohosPath.c_str(),
+        bundleName.c_str(), moduleName.c_str());
+    ModelView::GetInstance()->Create(bundleName, moduleName, surfaceType);
+    ModelView::GetInstance()->SetModelSource(ohosPath);
 }
 
 void JSSceneView::JsCamera(const JSCallbackInfo& info)
@@ -561,14 +577,10 @@ void JSSceneView::JsShaderInputBuffer(const JSCallbackInfo& info)
     }
 
     auto modelView = ModelView::GetInstance();
-    auto bufferOpt = modelView->GetShaderInputBuffer();
     std::shared_ptr<OHOS::Render3D::ShaderInputBuffer> buffer = nullptr;
-    if (bufferOpt.has_value() && !bufferOpt.value()) {
-        buffer = bufferOpt.value();
-    } else {
-        buffer = std::make_shared<OHOS::Render3D::ShaderInputBuffer>();
-    }
 
+    // same shader input buffer would be rejected to update for nearEqual check
+    buffer = std::make_shared<OHOS::Render3D::ShaderInputBuffer>();
     if (!buffer->Alloc(length)) {
         return;
     }

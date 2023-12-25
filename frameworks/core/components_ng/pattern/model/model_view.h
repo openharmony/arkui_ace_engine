@@ -38,9 +38,10 @@ class ModelView {
 public:
     static ModelView* GetInstance();
     virtual ~ModelView() = default;
-    virtual void Create(const std::string& src, const std::string& bundleName, const std::string& moduleName,
+    virtual void Create(const std::string& bundleName, const std::string& moduleName,
         Render3D::SurfaceType surfaceType) = 0;
     virtual void SetBackground(const std::string& src) = 0;
+    virtual void SetModelSource(const std::string& src) = 0;
     virtual void SetHandleCameraMove(bool value) = 0;
     virtual void SetTransparent(bool value) = 0;
     virtual void SetCameraPosition(AnimatableFloat x, AnimatableFloat y, AnimatableFloat z,
