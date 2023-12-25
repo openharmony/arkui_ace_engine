@@ -634,6 +634,7 @@ private:
     int32_t GetSelectionSpanItemIndex(const MouseInfo& info);
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     void RedisplaySelectOverlay();
+    void ProcessBoundRectByTextMarquee(RectF& rect);
     // to check if drag is in progress
 
     bool isMeasureBoundary_ = false;

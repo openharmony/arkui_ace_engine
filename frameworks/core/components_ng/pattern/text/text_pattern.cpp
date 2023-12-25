@@ -2543,6 +2543,28 @@ void TextPattern::ProcessBoundRectByTextShadow(RectF& rect)
         leftOffsetX, upOffsetY, rect.Width() + rightOffsetX - leftOffsetX, rect.Height() + downOffsetY - upOffsetY);
 }
 
+void TextPattern::ProcessBoundRectByTextMarquee(RectF& rect)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textLayoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    if (!(textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE)) {
+        return;
+    }
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameSize();
+    CHECK_NULL_VOID(paragraph_);
+    if (paragraph_->GetTextWidth() < frameSize.Width()) {
+        return;
+    }
+    auto relativeSelfLeftOffsetX =
+        std::max(-1 * host->GetOffsetRelativeToWindow().GetX(), rect.GetOffset().GetX() - paragraph_->GetTextWidth());
+    rect.SetLeft(relativeSelfLeftOffsetX);
+    rect.SetWidth(frameSize.Width() + paragraph_->GetTextWidth() - relativeSelfLeftOffsetX);
+}
+
 RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
 {
     if (!contentMod_) {
@@ -2570,6 +2592,7 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
         boundsRect.SetWidth(boundsWidth);
         boundsRect.SetHeight(boundsHeight);
         ProcessBoundRectByTextShadow(boundsRect);
+        ProcessBoundRectByTextMarquee(boundsRect);
         if (!context->GetClipEdge().value() && (LessNotEqual(frameSize.Width(), boundsRect.Width()) ||
                                                    LessNotEqual(frameSize.Height(), boundsRect.Height()))) {
             boundsWidth = std::max(frameSize.Width(), boundsRect.Width());
