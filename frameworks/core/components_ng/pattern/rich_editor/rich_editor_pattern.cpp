@@ -512,6 +512,11 @@ int32_t RichEditorPattern::AddTextSpanOperation(const TextSpanOptions& options, 
         auto tmpLongPressFunc = options.userGestureOption.onLongPress;
         spanItem->SetLongPressEvent(std::move(tmpLongPressFunc));
     }
+    if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
+        SetCaretPosition(options.offset.value() + 1);
+    } else {
+        SetCaretPosition(GetTextContentLength());
+    }
     if (!isPaste && textSelector_.IsValid()) {
         CloseSelectOverlay();
         ResetSelection();
