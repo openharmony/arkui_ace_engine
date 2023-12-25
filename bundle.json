@@ -73,7 +73,8 @@
                 "camera_framework",
                 "media_library",
                 "app_file_service",
-                "ets_utils"
+                "ets_utils",
+                "ffrt"
             ],
             "third_party": [
                 "json",
