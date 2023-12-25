@@ -530,14 +530,6 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         child->Measure(childConstraint);
         auto childSize = child->GetGeometryNode()->GetMarginFrameSize();
         idealHeight += childSize.Height();
-        auto childWidth = childSize.Width();
-        if (childWidth < MIN_MENU_WIDTH.ConvertToPx()) {
-            RefPtr<GridColumnInfo> columnInfo;
-            columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
-            columnInfo->GetParent()->BuildColumnWidth(wrapperSize_.Width());
-            idealWidth = static_cast<float>(columnInfo->GetWidth(MIN_GRID_COUNTS));
-            menuLayoutProperty->UpdateMenuWidth(Dimension((double)idealWidth, DimensionUnit::VP));
-        }
         idealWidth = std::max(idealWidth, childSize.Width());
     }
     idealSize.SetHeight(idealHeight);
