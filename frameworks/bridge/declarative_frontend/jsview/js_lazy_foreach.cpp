@@ -113,7 +113,7 @@ enum {
     PARAM_UPDATE_CHANGEDNODE,
 
     MIN_PARAM_SIZE = PARAM_KEY_GENERATOR,
-    MAX_PARAM_SIZE,
+    MAX_PARAM_SIZE = 6,
 };
 
 bool ParseAndVerifyParams(const JSCallbackInfo& info, JSRef<JSVal> (&params)[MAX_PARAM_SIZE])
@@ -185,8 +185,8 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
         };
     }
 
-    if (!params[PARAM_KEY_GENERATOR]->IsUndefined()) {
-        updateChangedNodeFlag = params[PARAM_KEY_GENERATOR]->ToBoolean();
+    if (!params[PARAM_UPDATE_CHANGEDNODE]->IsUndefined()) {
+        updateChangedNodeFlag = params[PARAM_UPDATE_CHANGEDNODE]->ToBoolean();
     }
 
     const auto& actuator = CreateActuator(viewId);

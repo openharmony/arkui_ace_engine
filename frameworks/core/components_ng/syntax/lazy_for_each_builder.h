@@ -339,18 +339,7 @@ public:
             CheckCacheIndex(idleIndexes, count);
         }
 
-        for (auto& [key, node] : expiringItem_) {
-            auto iter = idleIndexes.find(node.first);
-            if (iter != idleIndexes.end() && node.second) {
-                ProcessOffscreenNode(node.second, false);
-                cache.try_emplace(key, std::move(node));
-                cachedItems_.try_emplace(node.first, LazyForEachChild(key, nullptr));
-                idleIndexes.erase(iter);
-            } else {
-                NotifyDataDeleted(node.second);
-                ProcessOffscreenNode(node.second, true);
-            }
-        }
+        ProcessCachedIndex(cache, idleIndexes);
 
         bool result = true;
         for (auto index : idleIndexes) {
@@ -381,6 +370,23 @@ public:
         }
         expiringItem_.swap(cache);
         return result;
+    }
+
+    void ProcessCachedIndex(std::unordered_map<std::string, LazyForEachCacheChild>& cache,
+        std::unordered_set<int32_t>& idleIndexes)
+    {
+        for (auto& [key, node] : expiringItem_) {
+            auto iter = idleIndexes.find(node.first);
+            if (iter != idleIndexes.end() && node.second) {
+                ProcessOffscreenNode(node.second, false);
+                cache.try_emplace(key, std::move(node));
+                cachedItems_.try_emplace(node.first, LazyForEachChild(key, nullptr));
+                idleIndexes.erase(iter);
+            } else {
+                NotifyDataDeleted(node.second);
+                ProcessOffscreenNode(node.second, true);
+            }
+        }
     }
 
     void ProcessOffscreenNode(RefPtr<UINode> uiNode, bool remove)
