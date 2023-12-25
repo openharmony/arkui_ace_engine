@@ -631,6 +631,7 @@ enum class GestureJudgeResult {
 };
 
 enum class GestureTypeName {
+    UNKNOWN = -1,
     TAP_GESTURE = 0,
     LONG_PRESS_GESTURE = 1,
     PAN_GESTURE = 2,
