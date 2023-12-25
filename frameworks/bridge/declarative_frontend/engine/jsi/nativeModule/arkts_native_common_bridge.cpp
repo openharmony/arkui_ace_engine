@@ -2931,9 +2931,16 @@ ArkUINativeModuleValue CommonBridge::SetMotionPath(ArkUIRuntimeCallInfo *runtime
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
-    std::string pathStringValue = runtimeCallInfo->GetCallArgRef(NUM_1)->ToString(vm)->ToString();
-    float fromValue = runtimeCallInfo->GetCallArgRef(NUM_2)->ToNumber(vm)->Value();
-    float toValue = runtimeCallInfo->GetCallArgRef(NUM_3)->ToNumber(vm)->Value();
+    auto pathArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    auto fromArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    auto toArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    auto rotatableArg = runtimeCallInfo->GetCallArgRef(NUM_4);
+    std::string pathStringValue;
+    if (pathArg->IsString()) {
+        pathStringValue = pathArg->ToString(vm)->ToString();
+    }
+    float fromValue = (fromArg->IsNumber()) ? fromArg->ToNumber(vm)->Value() : 0.0f;
+    float toValue = (toArg->IsNumber()) ? toArg->ToNumber(vm)->Value() : 1.0f;
     if (fromValue > 1.0f || fromValue < 0.0f) {
         fromValue = 0.0f;
     }
@@ -2942,7 +2949,7 @@ ArkUINativeModuleValue CommonBridge::SetMotionPath(ArkUIRuntimeCallInfo *runtime
     } else if (toValue < fromValue) {
         toValue = fromValue;
     }
-    bool rotatableValue = runtimeCallInfo->GetCallArgRef(NUM_4)->ToBoolean(vm)->Value();
+    bool rotatableValue = (rotatableArg->IsBoolean()) ? rotatableArg->ToBoolean(vm)->Value() : false;
     GetArkUIInternalNodeAPI()->GetCommonModifier().SetMotionPath(nativeNode, pathStringValue.c_str(), fromValue,
         toValue, rotatableValue);
     return panda::JSValueRef::Undefined(vm);
