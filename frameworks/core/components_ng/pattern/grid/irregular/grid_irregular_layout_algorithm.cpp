@@ -143,23 +143,7 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
     info.startIndex_ = info.jumpIndex_;
     info.jumpIndex_ = EMPTY_JUMP_INDEX;
 
-    GridIrregularFiller filler(&info, wrapper_);
-    switch (info.scrollAlign_) {
-        case ScrollAlign::START:
-            filler.Fill({ crossLens_, mainSize, crossGap_, mainGap_ });
-            break;
-        case ScrollAlign::CENTER: {
-            GridIrregularFiller::FillParameters params { crossLens_, mainSize / 2.0f, crossGap_, mainGap_ };
-            filler.Fill(params);
-            filler.MeasureBackward(params, jumpLineIdx);
-            break;
-        }
-        case ScrollAlign::END:
-            filler.MeasureBackward({ crossLens_, mainSize, crossGap_, mainGap_ }, jumpLineIdx);
-            break;
-        default:
-            break;
-    }
+    PrepareLineHeight(mainSize, jumpLineIdx);
 
     GridLayoutRangeSolver solver(&info, wrapper_);
     auto res = solver.FindRangeOnJump(jumpLineIdx, mainGap_);
@@ -290,5 +274,27 @@ int32_t GridIrregularLayoutAlgorithm::FindJumpLineIdx(int32_t jumpIdx)
         }
     }
     return -1;
+}
+
+void GridIrregularLayoutAlgorithm::PrepareLineHeight(float mainSize, int32_t jumpLineIdx)
+{
+    auto& info = gridLayoutInfo_;
+    GridIrregularFiller filler(&info, wrapper_);
+    switch (info.scrollAlign_) {
+        case ScrollAlign::START:
+            filler.Fill({ crossLens_, mainSize, crossGap_, mainGap_ });
+            break;
+        case ScrollAlign::CENTER: {
+            GridIrregularFiller::FillParameters params { crossLens_, mainSize / 2.0f, crossGap_, mainGap_ };
+            filler.Fill(params);
+            filler.MeasureBackward(params, jumpLineIdx);
+            break;
+        }
+        case ScrollAlign::END:
+            filler.MeasureBackward({ crossLens_, mainSize, crossGap_, mainGap_ }, jumpLineIdx);
+            break;
+        default:
+            break;
+    }
 }
 } // namespace OHOS::Ace::NG

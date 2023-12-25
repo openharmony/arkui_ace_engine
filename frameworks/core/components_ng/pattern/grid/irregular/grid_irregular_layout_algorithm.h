@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_GRID_GRID_IRREGULAR_LAYOUT_ALGORITHM_H
 
 #include "base/utils/noncopyable.h"
-#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
@@ -98,6 +97,14 @@ private:
      * @return The line index of the item in GridMatrix.
      */
     int32_t FindJumpLineIdx(int32_t jumpIdx);
+
+    /**
+     * @brief Prepares GridLayoutInfo::lineHeightMap_ using GridIrregularFiller.
+     *
+     * @param mainSize The main-axis length of the grid.
+     * @param jumpLineIdx The line index to jump to.
+     */
+    void PrepareLineHeight(float mainSize, int32_t jumpLineIdx);
 
     LayoutWrapper* wrapper_ = nullptr;
 
