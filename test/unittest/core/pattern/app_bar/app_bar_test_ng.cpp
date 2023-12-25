@@ -589,7 +589,7 @@ HWTEST_F(AppBarTestNg, Test004, TestSize.Level1)
     EXPECT_NE(buttonLayoutProperty, nullptr);
 
     /**
-     * @tc.steps: step2. Testing margins and textAlign 
+     * @tc.steps: step2. Testing margins and textAlign
      */
     constexpr Dimension MARGIN_TEXT_LEFT = 24.0_vp;
     constexpr Dimension MARGIN_TEXT_RIGHT = 84.0_vp;
