@@ -31,5 +31,6 @@ group("advanced_ui_component") {
     "tabtitlebar/interfaces:tabtitlebar",
     "toolbar/interfaces:toolbar",
     "treeview/interfaces:treeview",
+    "gridobjectsortcomponent/interfaces:gridobjectsortcomponent",
   ]
 }
