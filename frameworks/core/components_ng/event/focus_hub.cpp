@@ -1098,8 +1098,16 @@ void FocusHub::IsCloseKeyboard(RefPtr<FrameNode> frameNode)
             frameNode->GetTag().c_str(), frameNode->GetId());
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
-            inputMethod->RequestHideInput();
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
+            MiscServices::PanelInfo curKeyboardPanelInfo;
+            curKeyboardPanelInfo.panelType = MiscServices::PanelType::SOFT_KEYBOARD;
+            curKeyboardPanelInfo.panelFlag = MiscServices::PanelFlag::FLG_FIXED;
+            bool curIsShown = false;
+            auto infApiRes = inputMethod->IsPanelShown(curKeyboardPanelInfo, curIsShown);
+            if (infApiRes || curIsShown) {
+                TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Shown.");
+                inputMethod->RequestHideInput();
+                TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
+            }
         }
     }
 #endif

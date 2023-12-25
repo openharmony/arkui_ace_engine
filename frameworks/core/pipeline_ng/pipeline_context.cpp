@@ -133,7 +133,10 @@ bool PipelineContext::NeedSoftKeyboard()
     auto pattern = focusNode->GetPattern();
     CHECK_NULL_RETURN(pattern, false);
     bool isNeed = pattern->NeedSoftKeyboard();
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "need soft keyboard: %{public}d", isNeed);
+#ifdef WINDOW_SCENE_SUPPORTED
+    isNeed = WindowSceneHelper::GetNeedKeyboardOnFocusFlag(focusNode);
+#endif
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "need soft keyboard %{public}d", isNeed);
     return isNeed;
 }
 
