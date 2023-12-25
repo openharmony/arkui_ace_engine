@@ -1187,6 +1187,54 @@ void UpdateChildrenOfAccessibilityElementInfo(
     }
 }
 
+void UpdateVirtualNodeChildAccessibilityElementInfo(
+    const RefPtr<NG::FrameNode>& node, const CommonProperty& commonProperty,
+    AccessibilityElementInfo& nodeParentInfo, AccessibilityElementInfo& nodeInfo,
+    const RefPtr<NG::PipelineContext>& ngPipeline)
+{
+    CHECK_NULL_VOID(node);
+#ifdef WEB_SUPPORTED
+    if (node->GetTag() == V2::WEB_CORE_TAG) {
+        auto webAccessibilityNode = AceType::DynamicCast<NG::WebAccessibilityNode>(node);
+        CHECK_NULL_VOID(webAccessibilityNode);
+        UpdateWebAccessibilityElementInfo(webAccessibilityNode->GetAccessibilityNodeInfo(), commonProperty, nodeInfo,
+            webAccessibilityNode->GetWebNode());
+        return;
+    }
+#endif
+    nodeInfo.SetParent(GetParentId(node));
+    UpdateChildrenOfAccessibilityElementInfo(node, commonProperty, nodeInfo);
+
+    nodeInfo.SetAccessibilityId(node->GetAccessibilityId());
+    nodeInfo.SetComponentType(node->GetTag());
+
+    nodeInfo.SetEnabled(node->GetFocusHub() ? node->GetFocusHub()->IsEnabled() : true);
+    nodeInfo.SetFocused(node->GetFocusHub() ? node->GetFocusHub()->IsCurrentFocus() : false);
+    nodeInfo.SetAccessibilityFocus(node->GetRenderContext()->GetAccessibilityFocus().value_or(false));
+    nodeInfo.SetInspectorKey(node->GetInspectorId().value_or(""));
+    nodeInfo.SetVisible(node->IsVisible());
+    if (node->IsVisible()) {
+        auto virtualNodeRect = node->GetTransformRectRelativeToWindow();
+        auto left = nodeParentInfo.GetRectInScreen().GetLeftTopXScreenPostion();
+        auto top = nodeParentInfo.GetRectInScreen().GetLeftTopYScreenPostion();
+        auto right = nodeParentInfo.GetRectInScreen().GetLeftTopXScreenPostion() + virtualNodeRect.Width();
+        auto bottom = nodeParentInfo.GetRectInScreen().GetLeftTopYScreenPostion() + virtualNodeRect.Height();
+        Accessibility::Rect bounds { left, top, right, bottom };
+        nodeInfo.SetRectInScreen(bounds);
+    }
+    nodeInfo.SetWindowId(commonProperty.windowId);
+    nodeInfo.SetPageId(node->GetPageId());
+    nodeInfo.SetPagePath(commonProperty.pagePath);
+    nodeInfo.SetBundleName(AceApplicationInfo::GetInstance().GetPackageName());
+
+    if (nodeInfo.IsEnabled()) {
+        nodeInfo.SetFocusable(node->GetFocusHub() ? node->GetFocusHub()->IsFocusable() : false);
+        nodeInfo.SetPopupSupported(IsPopupSupported(ngPipeline, node->GetId()));
+    }
+    nodeInfo.SetComponentResourceId(node->GetInspectorId().value_or(""));
+    UpdateAccessibilityElementInfo(node, nodeInfo);
+}
+
 void UpdateVirtualNodeAccessibilityElementInfo(
     const RefPtr<NG::FrameNode>& parent, const RefPtr<NG::FrameNode>& node,
     const CommonProperty& commonProperty, AccessibilityElementInfo& nodeInfo,
@@ -1344,24 +1392,28 @@ void GetChildrenFromFrameNode(const RefPtr<NG::FrameNode>& node,
 }
 
 void UpdateVirtualNodeInfo(std::list<AccessibilityElementInfo>& infos, AccessibilityElementInfo& nodeInfo,
-    const RefPtr<NG::UINode>& uiNode, const RefPtr<NG::UINode>& uiParentNode, const CommonProperty& commonProperty,
+    const RefPtr<NG::UINode>& uiVirtualNode, const CommonProperty& commonProperty,
     const RefPtr<NG::PipelineContext>& ngPipeline)
 {
-    CHECK_NULL_VOID(uiNode);
-    auto frameNodeParent = AceType::DynamicCast<NG::FrameNode>(uiParentNode);
-    CHECK_NULL_VOID(frameNodeParent);
-    for (const auto& item : uiNode->GetChildren()) {
+    AccessibilityElementInfo virtualInfo;
+    for (const auto& item : uiVirtualNode->GetChildren()) {
         auto frameNodeChild = AceType::DynamicCast<NG::FrameNode>(item);
         if (frameNodeChild == nullptr) {
             continue;
         }
-        AccessibilityElementInfo virtualInfo;
-        UpdateVirtualNodeAccessibilityElementInfo(frameNodeParent, frameNodeChild,
-            commonProperty, virtualInfo, ngPipeline);
-        virtualInfo.SetParent(frameNodeParent->GetAccessibilityId());
+        UpdateVirtualNodeChildAccessibilityElementInfo(frameNodeChild, commonProperty,
+            nodeInfo, virtualInfo, ngPipeline);
+        virtualInfo.SetParent(uiVirtualNode->GetAccessibilityId());
         nodeInfo.AddChild(frameNodeChild->GetAccessibilityId());
         infos.push_back(virtualInfo);
-        UpdateVirtualNodeInfo(infos, virtualInfo, item, uiParentNode, commonProperty, ngPipeline);
+        auto virtualNodeRect = frameNodeChild->GetTransformRectRelativeToWindow();
+        auto left = nodeInfo.GetRectInScreen().GetLeftTopXScreenPostion();
+        auto top = nodeInfo.GetRectInScreen().GetLeftTopYScreenPostion() + virtualNodeRect.Height();
+        auto right = left + virtualNodeRect.Width();
+        auto bottom = top + virtualNodeRect.Height();
+        Accessibility::Rect bounds { left, top, right, bottom };
+        nodeInfo.SetRectInScreen(bounds);
+        UpdateVirtualNodeInfo(infos, virtualInfo, item, commonProperty, ngPipeline);
     }
 }
 
@@ -1384,9 +1436,9 @@ void UpdateCacheInfoNG(std::list<AccessibilityElementInfo>& infos, const RefPtr<
         if (parent.index() == 0) {
             // Handle the parent when its type is FrameNode
             RefPtr<NG::FrameNode> frameNodeParent = std::get<0>(parent);
-            UpdateAccessibilityElementInfo(frameNodeParent, commonProperty, nodeInfo, ngPipeline);
             auto accessibilityProperty = frameNodeParent->GetAccessibilityProperty<NG::AccessibilityProperty>();
             auto uiVirtualNode = accessibilityProperty->GetAccessibilityVirtualNode();
+            UpdateAccessibilityElementInfo(frameNodeParent, commonProperty, nodeInfo, ngPipeline);
             if (uiVirtualNode != nullptr) {
                 auto virtualNode = AceType::DynamicCast<NG::FrameNode>(uiVirtualNode);
                 if (virtualNode == nullptr) {
@@ -1396,12 +1448,18 @@ void UpdateCacheInfoNG(std::list<AccessibilityElementInfo>& infos, const RefPtr<
                 UpdateVirtualNodeAccessibilityElementInfo(frameNodeParent, virtualNode,
                     commonProperty, virtualInfo, ngPipeline);
                 virtualInfo.SetParent(frameNodeParent->GetAccessibilityId());
+                auto childIds = nodeInfo.GetChildIds();
+                for (auto& child : childIds) {
+                    nodeInfo.RemoveChild(child);
+                }
                 nodeInfo.AddChild(virtualNode->GetAccessibilityId());
                 infos.push_back(virtualInfo);
                 auto uiParentNode = AceType::DynamicCast<NG::UINode>(frameNodeParent);
                 if (!uiVirtualNode->GetChildren().empty()) {
-                    UpdateVirtualNodeInfo(infos, virtualInfo, uiVirtualNode, uiParentNode, commonProperty, ngPipeline);
+                    UpdateVirtualNodeInfo(infos, virtualInfo, uiVirtualNode, commonProperty, ngPipeline);
                 }
+                infos.push_back(nodeInfo);
+                continue;
             }
             if (frameNodeParent->GetTag() != V2::UI_EXTENSION_COMPONENT_TAG) {
                 UpdateAccessibilityElementInfo(frameNodeParent, commonProperty, nodeInfo, ngPipeline);
