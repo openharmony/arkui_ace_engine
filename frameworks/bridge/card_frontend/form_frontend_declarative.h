@@ -44,6 +44,7 @@ public:
     void OnMediaFeatureUpdate();
 
     void RunPage(const std::string& url, const std::string& params) override;
+    void RunDynamicPage(const std::string& url, const std::string& params, const std::string& entryPoint) override;
 
     void SetErrorEventHandler(
         std::function<void(const std::string&, const std::string&)>&& errorCallback) override;
@@ -53,7 +54,8 @@ public:
 
     void SetLoadCardCallBack(const WeakPtr<PipelineBase>& outSidePipelineContext)
     {
-        const auto& loadCallback = [outSidePipelineContext](const std::string& url, int64_t cardId) -> bool {
+        const auto& loadCallback = [outSidePipelineContext](
+                                       const std::string& url, int64_t cardId, const std::string& entryPoint) -> bool {
             auto context = outSidePipelineContext.Upgrade();
             if (!context) {
                 return false;
@@ -69,7 +71,7 @@ public:
             if (!jsEngine) {
                 return false;
             }
-            return jsEngine->LoadCard(url, cardId);
+            return jsEngine->LoadCard(url, cardId, entryPoint);
         };
 
         auto delegate = AceType::DynamicCast<Framework::FormFrontendDelegateDeclarative>(delegate_);

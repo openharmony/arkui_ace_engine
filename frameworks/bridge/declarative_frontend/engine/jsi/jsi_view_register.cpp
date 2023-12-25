@@ -291,6 +291,17 @@ panda::Local<panda::JSValueRef> JsRegisterNamedRoute(panda::JsiRuntimeCallInfo* 
     if (!firstArg->IsFunction()) {
         return panda::JSValueRef::Undefined(vm);
     }
+#ifdef DYNAMIC_COMPONENT_SUPPORT
+    auto container = Container::Current();
+    if (container && container->IsDynamicRender()) {
+        LOGD("load dynamic component card through named route");
+        panda::Local<panda::FunctionRef> objSupplier = firstArg;
+        std::vector<Local<JSValueRef>> argv;
+        auto obj = objSupplier->Call(vm, JSNApi::GetGlobalObject(vm), argv.data(), 0);
+        UpdateCardRootComponent(obj->ToObject(vm));
+        return panda::JSValueRef::Undefined(vm);
+    }
+#endif
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     if (!secondArg->IsString()) {
         return panda::JSValueRef::Undefined(vm);

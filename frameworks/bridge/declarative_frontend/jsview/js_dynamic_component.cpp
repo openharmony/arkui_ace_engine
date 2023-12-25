@@ -26,7 +26,6 @@
 #include "base/memory/ace_type.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/utils.h"
-#include "base/want/want_wrap.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
@@ -54,48 +53,56 @@ void JSDynamicComponent::JSBind(BindingTarget globalObj)
 
 void JSDynamicComponent::Create(const JSCallbackInfo& info)
 {
-    auto hapPath = info[0];
+    if (!info[0]->IsObject()) {
+        LOGW("DynamicComponent arg is invalid");
+        return;
+    }
+    auto dynamicComponentArg = JSRef<JSObject>::Cast(info[0]);
+    auto hapPath = dynamicComponentArg->GetProperty("hapPath");
     if (!hapPath->IsString()) {
         LOGW("hap path is invalid");
         return;
     }
-    auto abcPath = info[1];
+    auto abcPath = dynamicComponentArg->GetProperty("abcPath");
     if (!abcPath->IsString()) {
         LOGW("abc path is invalid");
         return;
     }
-    RefPtr<OHOS::Ace::WantWrap> want = nullptr;
+    auto entryPoint = dynamicComponentArg->GetProperty("entryPoint");
+    if (!entryPoint->IsString()) {
+        LOGW("entry point is invalid");
+        return;
+    }
 
     auto hostEngine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_VOID(hostEngine);
     NativeEngine* hostNativeEngine = hostEngine->GetNativeEngine();
-    napi_env hostEnv = reinterpret_cast<napi_env>(hostNativeEngine);
-
-    auto jsWorker = info[3];
+    auto jsWorker = dynamicComponentArg->GetProperty("worker");
     panda::Local<JsiValue> value = jsWorker.Get().GetLocalHandle();
     JSValueWrapper valueWrapper = value;
     napi_value nativeValue = hostNativeEngine->ValueToNapiValue(valueWrapper);
-
     Worker* worker = nullptr;
-    napi_unwrap(hostEnv, nativeValue, reinterpret_cast<void**>(&worker));
+    napi_unwrap(reinterpret_cast<napi_env>(hostNativeEngine), nativeValue, reinterpret_cast<void**>(&worker));
     LOGD("worker running=%{public}d,  worker name=%{public}s", worker->IsRunning(), worker->GetName().c_str());
     auto hapPathStr = hapPath->ToString();
     auto abcPathStr = abcPath->ToString();
+    auto entryPointStr = entryPoint->ToString();
+
     UIExtensionModel::GetInstance()->Create();
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto instanceId = Container::CurrentId();
 
     worker->RegisterCallbackForWorkerEnv([instanceId, weak = AceType::WeakClaim(AceType::RawPtr(frameNode)), hapPathStr,
-                                             abcPathStr, want](napi_env env) {
+                                             abcPathStr, entryPointStr](napi_env env) {
         ContainerScope scope(instanceId);
         auto container = Container::Current();
         container->GetTaskExecutor()->PostTask(
-            [weak, hapPathStr, abcPathStr, want, env]() {
+            [weak, hapPathStr, abcPathStr, entryPointStr, env]() {
                 auto frameNode = weak.Upgrade();
                 CHECK_NULL_VOID(frameNode);
                 UIExtensionModel::GetInstance()->InitializeDynamicComponent(
-                    frameNode, hapPathStr, abcPathStr, want, env);
+                    frameNode, hapPathStr, abcPathStr, entryPointStr, env);
             },
             TaskExecutor::TaskType::UI);
     });
