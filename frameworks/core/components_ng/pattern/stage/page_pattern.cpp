@@ -164,6 +164,11 @@ void PagePattern::OnShow()
     // Do not invoke onPageShow unless the initialRender function has been executed.
     CHECK_NULL_VOID(isRenderDone_);
     CHECK_NULL_VOID(!isOnShow_);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    if (pageInfo_) {
+        context->FirePageChanged(pageInfo_->GetPageId(), true);
+    }
     auto container = Container::Current();
     if (!container || !container->WindowIsShow()) {
         LOGW("no need to trigger onPageShow callback when not in the foreground");
@@ -197,6 +202,11 @@ void PagePattern::OnHide()
 {
     CHECK_NULL_VOID(isOnShow_);
     JankFrameReport::GetInstance().FlushRecord();
+    auto context = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    if (pageInfo_) {
+        context->FirePageChanged(pageInfo_->GetPageId(), false);
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetJSViewActive(false);

@@ -82,6 +82,15 @@ NavigationGroupNode::~NavigationGroupNode()
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
+    auto stageManager = context->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    RefPtr<FrameNode> pageNode = stageManager->GetLastPage();
+    CHECK_NULL_VOID(pageNode);
+    auto pagePattern = pageNode->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    CHECK_NULL_VOID(pagePattern->GetPageInfo());
+    int32_t pageId = pagePattern->GetPageInfo()->GetPageId();
+    context->RemoveNavigationStateCallback(pageId, GetId());
     context->DeleteNavigationNode(curId_);
 }
 

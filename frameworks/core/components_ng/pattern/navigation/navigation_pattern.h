@@ -300,7 +300,7 @@ public:
 
     static void FireNavigationStateChange(const RefPtr<UINode>& node, bool show);
 
-    void NotifyDialogChange(bool isShow);
+    void NotifyDialogChange(bool isShow, bool isNavigationChanged);
     void NotifyPageHide(const std::string& pageName);
     void DumpInfo() override;
 
@@ -344,7 +344,7 @@ private:
         const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty);
     bool UpdateTitleModeChangeEventHub(const RefPtr<NavigationGroupNode>& hostNode);
     void NotifyPageShow(const std::string& pageName);
-    RefPtr<UINode> FireNavDestinationStateChange(bool show);
+    int32_t FireNavDestinationStateChange(bool show);
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
     RefPtr<NavigationStack> navigationStack_;
