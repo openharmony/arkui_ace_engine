@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/jsview/js_base_node.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/node_container/node_container_pattern.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/core/common/container_scope.h"
@@ -89,6 +90,9 @@ void JSNodeContainer::Create(const JSCallbackInfo& info)
     if (child) {
         frameNode->RemoveChildAtIndex(0);
         frameNode->AddChild(child);
+        auto pattern = frameNode->GetPattern<NG::NodeContainerPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnAddBaseNode();
     } else {
         frameNode->RemoveChildAtIndex(0);
     }

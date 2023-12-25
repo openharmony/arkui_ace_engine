@@ -30,6 +30,8 @@ class JSBaseNode : public AceType {
     DECLARE_ACE_TYPE(JSBaseNode, AceType)
 public:
     JSBaseNode() = default;
+    JSBaseNode(NodeRenderType renderType, const std::string& surfaceId) : renderType_(renderType), surfaceId_(surfaceId)
+    {}
     ~JSBaseNode() override = default;
 
     static void JSBind(BindingTarget globalObj);
@@ -47,6 +49,10 @@ public:
 
 protected:
     RefPtr<NG::UINode> viewNode_;
+
+private:
+    NodeRenderType renderType_ = NodeRenderType::RENDER_TYPE_DISPLAY;
+    std::string surfaceId_;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_BASE_NODE_H

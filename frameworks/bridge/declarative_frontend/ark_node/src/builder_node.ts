@@ -20,8 +20,8 @@ class BuilderNode extends BaseNode {
   private uiContext_: UIContext;
   private frameNode_: FrameNode;
 
-  constructor(uiContext: UIContext) {
-    super(uiContext);
+  constructor(uiContext: UIContext, options?: RenderOptions) {
+    super(uiContext, options);
     this.uiContext_ = uiContext;
     this.updateFuncByElmtId = new Map();
   }
