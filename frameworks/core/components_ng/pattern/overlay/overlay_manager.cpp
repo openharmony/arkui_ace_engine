@@ -869,6 +869,7 @@ void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo)
     auto paintProperty = popupNode->GetPaintProperty<BubbleRenderProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto isTypeWithOption = paintProperty->GetPrimaryButtonShow().value_or(false);
+    auto isUseCustom = paintProperty->GetUseCustom().value_or(false);
 
     auto rootNode = rootNodeWeak_.Upgrade();
     auto container = Container::Current();
@@ -893,7 +894,8 @@ void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo)
 
     auto popupPattern = popupNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(popupPattern);
-    if (isTypeWithOption && !isShowInSubWindow) {
+    if ((isTypeWithOption && !isShowInSubWindow) ||
+        (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) && isUseCustom)) {
         BlurLowerNode(popupNode);
         auto onFinish = [popupNodeWk = WeakPtr<FrameNode>(popupNode), weak = WeakClaim(this)]() {
             auto overlayManager = weak.Upgrade();
@@ -924,6 +926,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     auto paintProperty = popupNode->GetPaintProperty<BubbleRenderProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto isTypeWithOption = paintProperty->GetPrimaryButtonShow().value_or(false);
+    auto isUseCustom = paintProperty->GetUseCustom().value_or(false);
 
     auto rootNode = rootNodeWeak_.Upgrade();
     auto container = Container::Current();
@@ -944,13 +947,14 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
         return;
     }
     popupPattern->SetTransitionStatus(TransitionStatus::EXITING);
-    if (isTypeWithOption && !isShowInSubWindow) {
+    if ((isTypeWithOption && !isShowInSubWindow) ||
+        (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) && isUseCustom)) {
         ResetLowerNodeFocusable(popupNode);
     }
     // detach popupNode after exiting animation
     popupMap_[targetId].isCurrentOnShow = false;
     popupPattern->StartExitingAnimation(
-        [isShowInSubWindow, isTypeWithOption, popupNodeWk = WeakPtr<FrameNode>(popupNode),
+        [isShowInSubWindow, isTypeWithOption, isUseCustom, popupNodeWk = WeakPtr<FrameNode>(popupNode),
             rootNodeWk = WeakPtr<UINode>(rootNode), weak = WeakClaim(this)]() {
             auto rootNode = rootNodeWk.Upgrade();
             auto popupNode = popupNodeWk.Upgrade();
@@ -963,7 +967,8 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
             popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
             rootNode->RemoveChild(popupNode);
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            if (isTypeWithOption && !isShowInSubWindow) {
+            if ((isTypeWithOption && !isShowInSubWindow) ||
+                (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) && isUseCustom)) {
                 overlayManager->BlurOverlayNode(popupNode);
             }
             if (isShowInSubWindow) {
