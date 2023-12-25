@@ -52,6 +52,7 @@ public:
     const RectF& GetDstRect() const;
     const RectF& GetSrcRect() const;
     ImageFit GetImageFit() const;
+    int32_t GetFrameCount() const;
 
     RefPtr<CanvasImage> MoveCanvasImage();
 
