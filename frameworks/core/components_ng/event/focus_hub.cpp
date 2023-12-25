@@ -1256,15 +1256,14 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
         return false;
     }
 
-    bool stateStylesResult = false;
-    if (isNeedStateStyles) {
+    if (isNeedStateStyles && HasFocusStateStyle()) {
         // do focus state style.
         CheckFocusStateStyle(true);
-        stateStylesResult = true;
+        return true;
     }
 
     if (focusStyleType_ == FocusStyleType::NONE) {
-        return stateStylesResult;
+        return false;
     }
 
     if (focusStyleType_ == FocusStyleType::CUSTOM_REGION) {
