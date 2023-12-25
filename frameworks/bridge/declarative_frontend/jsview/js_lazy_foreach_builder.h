@@ -74,7 +74,8 @@ public:
         }
     }
 
-    void UpdateDependElmtIds(RefPtr<NG::UINode>& node, JSRef<JSVal>& jsElmtIds, std::string key) {
+    std::string UpdateDependElmtIds(RefPtr<NG::UINode>& node, JSRef<JSVal>& jsElmtIds, std::string key)
+    {
         std::string lastKey;
         if (jsElmtIds->IsArray()) {
             JSRef<JSArray> jsElmtIdArray = JSRef<JSArray>::Cast(jsElmtIds);
@@ -90,7 +91,8 @@ public:
         return lastKey;
     }
 
-    JSRef<JSVal> SetToJSVal(std::set<uint32_t> elmtIds) {
+    JSRef<JSVal> SetToJSVal(std::set<uint32_t> elmtIds)
+    {
         JSRef<JSArray> jsElmtIdArray = JSRef<JSArray>::New();
         int32_t count = 0;
         for (auto& elmtId : elmtIds) {
@@ -175,7 +177,7 @@ public:
 
 private:
     std::map<int32_t, RefPtr<NG::UINode>> changedLazyForEachNodes_;
-    std::map<RefPtr<NG::UINode>, std::pair<std::set<uint32_t>, std::string>> dependElementIds;
+    std::map<RefPtr<NG::UINode>, std::pair<std::set<uint32_t>, std::string>> dependElementIds_;
 };
 
 } // namespace OHOS::Ace::Framework
