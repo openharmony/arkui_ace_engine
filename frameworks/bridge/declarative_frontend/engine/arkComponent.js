@@ -16786,10 +16786,10 @@ class PolygonPointsModifier extends ModifierWithKey {
       reset = true;
     }
     if (reset) {
-      GetUINativeModule().polygon.resetPolygonPoints(node);
+      getUINativeModule().polygon.resetPolygonPoints(node);
     }
     else {
-      GetUINativeModule().polygon.setPolygonPoints(node, xPoint, yPoint);
+      getUINativeModule().polygon.setPolygonPoints(node, xPoint, yPoint);
     }
   }
   checkObjectDiff() {
