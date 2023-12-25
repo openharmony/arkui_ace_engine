@@ -46,6 +46,7 @@
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
 #include "core/components_ng/pattern/tabs/tab_content_pattern.h"
+#include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -90,6 +91,8 @@ constexpr int32_t LG_COLUMN_NUM = 12;
 constexpr int32_t XS_COLUMN_NUM = 2;
 constexpr int32_t PLATFORM_VERSION_10 = 10;
 constexpr int32_t PLATFORM_VERSION_11 = 11;
+constexpr int32_t INDEX_ZERO = 0;
+constexpr int32_t INDEX_ONE = 1;
 } // namespace
 
 class TabsTestNg : public testing::Test {
@@ -10869,5 +10872,124 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmUpdateChildConstraint003, TestSize.Lev
     tabBarProperty->UpdateTabBarMode(TabBarMode::FIXED_START);
     tabBarLayoutAlgorithm->UpdateChildConstraint(childConstraint, tabBarProperty, ideaSize, childCount, axis);
     EXPECT_EQ(tabBarProperty->GetTabBarMode().value(), TabBarMode::FIXED_START);
+}
+
+/**
+ * @tc.name: CustomAnimationTest001
+ * @tc.desc: test custom animation disable swipe
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, CustomAnimationTest001, TestSize.Level1)
+{
+    const std::string text_test = "text_test";
+
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, INDEX_ONE, nullptr, nullptr);
+    tabsModel.SetIsCustomAnimation(true);
+    tabsModel.SetOnCustomAnimation([](int32_t from, int32_t to) -> TabContentAnimatedTransition {
+        TabContentAnimatedTransition transitionInfo;
+        transitionInfo.transition = [](const RefPtr<TabContentTransitionProxy>& proxy) {};
+        return transitionInfo;
+    });
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsNode, nullptr);
+    EXPECT_EQ(tabsNode->GetTag(), V2::TABS_ETS_TAG);
+
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_SWIPER_INDEX));
+    EXPECT_EQ(swiperNode->GetTag(), V2::SWIPER_ETS_TAG);
+
+    TabContentModelNG tabContentModel;
+    SelectedMode selectedMode = SelectedMode::INDICATOR;
+    tabContentModel.Create();
+    tabContentModel.SetSelectedMode(selectedMode);
+    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabContentFrameNode, nullptr);
+    EXPECT_EQ(tabContentFrameNode->GetTag(), V2::TAB_CONTENT_ITEM_ETS_TAG);
+    auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(tabContentPattern, nullptr);
+    EXPECT_EQ(tabContentPattern->GetSelectedMode(), SelectedMode::INDICATOR);
+    tabContentFrameNode->GetTabBarItemId();
+    tabContentFrameNode->MountToParent(swiperNode);
+    tabContentPattern->SetTabBar(text_test, "", nullptr);
+    EXPECT_EQ(tabContentPattern->GetTabBarParam().GetText(), text_test);
+    tabContentModel.AddTabBarItem(tabContentFrameNode, DEFAULT_NODE_SLOT, true);
+
+    TabContentModelNG tabContentModel2;
+    tabContentModel2.Create();
+    tabContentModel2.SetSelectedMode(selectedMode);
+    auto tabContentFrameNode2 = AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabContentFrameNode2, nullptr);
+    EXPECT_EQ(tabContentFrameNode2->GetTag(), V2::TAB_CONTENT_ITEM_ETS_TAG);
+    auto tabContentPattern2 = tabContentFrameNode2->GetPattern<TabContentPattern>();
+    ASSERT_NE(tabContentPattern2, nullptr);
+    EXPECT_EQ(tabContentPattern2->GetSelectedMode(), SelectedMode::INDICATOR);
+    tabContentFrameNode2->GetTabBarItemId();
+    tabContentFrameNode2->MountToParent(swiperNode);
+    tabContentPattern2->SetTabBar(text_test, "", nullptr);
+    EXPECT_EQ(tabContentPattern2->GetTabBarParam().GetText(), text_test);
+    tabContentModel2.AddTabBarItem(tabContentFrameNode2, DEFAULT_NODE_SLOT, true);
+
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+    tabBarLayoutProperty->UpdateAxis(Axis::VERTICAL);
+    EXPECT_EQ(tabBarLayoutProperty->GetAxisValue(), Axis::VERTICAL);
+    tabBarPattern->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
+    tabBarPattern->tabItemOffsets_ = { { 0.0f, 0.0f }, { 10.0f, 10.0f } };
+
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    ASSERT_NE(swiperLayoutProperty, nullptr);
+    swiperLayoutProperty->UpdateIndex(INDEX_ONE);
+
+    GestureEvent info;
+    Offset offset(1, 1);
+    info.SetLocalLocation(offset);
+    tabBarLayoutProperty->UpdateAxis(Axis::HORIZONTAL);
+    tabBarPattern->HandleClick(info);
+
+    EXPECT_EQ(swiperPattern->IsDisableSwipe(), true);
+    EXPECT_EQ(swiperPattern->customAnimationToIndex_.has_value(), true);
+
+    swiperPattern->OnCustomAnimationFinish(INDEX_ONE, INDEX_ZERO, false);
+    EXPECT_EQ(swiperPattern->customAnimationToIndex_.has_value(), false);
+
+    swiperPattern->SwipeTo(INDEX_ONE);
+    EXPECT_EQ(swiperPattern->customAnimationToIndex_.has_value(), true);
+}
+
+/**
+ * @tc.name: CustomAnimationTest002
+ * @tc.desc: test custom animation set undefined
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, CustomAnimationTest002, TestSize.Level1)
+{
+    TabsModelNG model;
+    model.Create(BarPosition::START, 0, nullptr, nullptr);
+    model.SetIsCustomAnimation(false);
+
+    for (int32_t index = 0; index < 3; index++) {
+        TabContentModelNG tabContentModel;
+        tabContentModel.Create();
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(element);
+
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_SWIPER_INDEX));
+    ASSERT_NE(swiperNode, nullptr);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+
+    EXPECT_EQ(swiperPattern->IsDisableSwipe(), false);
 }
 } // namespace OHOS::Ace::NG
