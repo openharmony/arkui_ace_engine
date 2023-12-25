@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ARKTS_FRONTEND_ARKOALA_API_H
+#define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ARKTS_FRONTEND_ARKOALA_API_H
 
 #define ARKUI_FULL_API_VERSION 54
 #define ARKUI_BASIC_API_VERSION 1
@@ -1185,14 +1186,7 @@ struct ArkUIGraphicsCanvasAPI {
                     Arkoala_Float32 startAngle, Arkoala_Float32 sweepAngle, Arkoala_Bool includeCenter, ArkUIPaintHandle paint);
     void (*drawRect)(ArkUICanvasHandle canvas, Arkoala_Float32 left, Arkoala_Float32 top, Arkoala_Float32 right, Arkoala_Float32 bottom, ArkUIPaintHandle paint);
     void (*drawOval)(ArkUICanvasHandle canvas, Arkoala_Float32 left, Arkoala_Float32 top, Arkoala_Float32 right, Arkoala_Float32 bottom, ArkUIPaintHandle paint);
-    void (*drawCircle)(ArkUICanvasHandle canvas, Arkoala_Float32 x, Arkoala_Float32 y, Arkoala_Float32 radius, ArkUIPaintHandle paintPtr);
-    void (*drawRRect)(ArkUICanvasHandle canvas, Arkoala_Float32 left, Arkoala_Float32 top, Arkoala_Float32 right, Arkoala_Float32 bottom,
-                      Arkoala_Float32* jradii, Arkoala_Int32 jradiiSize, ArkUIPaintHandle paintPtr);
-    void (*drawDRRect)(ArkUICanvasHandle canvas,
-                       Arkoala_Float32 ol, Arkoala_Float32 ot, Arkoala_Float32 oright, Arkoala_Float32 ob, Arkoala_Float32* ojradii, Arkoala_Int32 ojradiiSize,
-                       Arkoala_Float32 il, Arkoala_Float32 it, Arkoala_Float32 ir, Arkoala_Float32 ib, Arkoala_Float32* ijradii, Arkoala_Int32 ijradiiSize,
-                       ArkUIPaintHandle paint);
-    void (*drawString)(ArkUICanvasHandle canvas, Arkoala_CharPtr string, Arkoala_Float32 x, Arkoala_Float32 y, ArkUIFontHandle font, ArkUIPaintHandle paint);
+    void (*drawCircle)(ArkUICanvasHandle canvas, Arkoala_Float32 x, Arkoaframeworks/bridge/common/dom/dom_badge.hkoala_Float32 x, Arkoala_Float32 y, ArkUIFontHandle font, ArkUIPaintHandle paint);
 };
 
 struct ArkUIGraphicsPaintAPI {
@@ -1222,3 +1216,5 @@ struct ArkUIGraphicsAPI
     const ArkUIGraphicsPaintAPI* (*getPaintAPI)();
     const ArkUIGraphicsFontAPI* (*getFontAPI)();
 };
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ARKTS_FRONTEND_ARKOALA_API_H

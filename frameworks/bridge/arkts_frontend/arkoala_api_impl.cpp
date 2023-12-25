@@ -16,11 +16,10 @@
 // This file here is just a reference of how node manipulation
 // API could be implemented. Real implementation shall be in
 // OpenHarmony repo.
-#include <stdlib.h>
+#include <cstdlib>
 
 #include "arkoala_api.h"
 
-// #define DLL_EXPORT __declspec(dllexport)
 extern "C" ACE_FORCE_EXPORT ArkUIAnyAPI* GetArkUINodeAPI(ArkUIAPIVariantKind kind, int version)
 {
     switch (kind) {
