@@ -1169,10 +1169,10 @@ class MotionPathModifier extends ModifierWithKey {
       getUINativeModule().common.resetMotionPath(node);
     }
     else {
-      let path = '';
-      let rotatable = false;
-      let from = 0.0;
-      let to = 1.0;
+      let path;
+      let rotatable;
+      let from;
+      let to;
       if (isString(this.value.path)) {
         path = this.value.path;
       }
