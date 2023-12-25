@@ -26,15 +26,15 @@ es2abc_gen_abc("gen_gridobjectsortcomponent_abc") {
 }
 
 gen_js_obj("gridobjectsortcomponent_abc") {
-  input = get_label_info(":gen_gridobjectsortcomponent_abc", "target_out_dir") +
-          "/gridobjectsortcomponent.abc"
+  input = get_label_info(":gen_gridobjectsortcomponent_abc",
+                         "target_out_dir") + "/gridobjectsortcomponent.abc"
   output = target_out_dir + "/gridobjectsortcomponent_abc.o"
   dep = ":gen_gridobjectsortcomponent_abc"
 }
 
 gen_obj("gridobjectsortcomponent_abc_preview") {
-  input = get_label_info(":gen_gridobjectsortcomponent_abc", "target_out_dir") +
-          "/gridobjectsortcomponent.abc"
+  input = get_label_info(":gen_gridobjectsortcomponent_abc",
+                         "target_out_dir") + "/gridobjectsortcomponent.abc"
   output = target_out_dir + "/gridobjectsortcomponent_abc.c"
   snapshot_dep = [ ":gen_gridobjectsortcomponent_abc" ]
 }
