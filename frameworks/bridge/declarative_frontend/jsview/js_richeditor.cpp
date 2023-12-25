@@ -1348,8 +1348,9 @@ bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObj
         } else if (sizeVal->IsUndefined()) {
             std::string resWidthStr;
             if (JSContainerBase::ParseJsString(lm, resWidthStr)) {
-                Dimension resWidth = Dimension::FromString(resWidthStr);
-                style.leadingMargin->size = NG::SizeF(resWidth.Value(), 0.0);
+                CalcDimension width;
+                JSContainerBase::ParseJsDimensionVp(lm, width);
+                style.leadingMargin->size = NG::SizeF(width.ConvertToPx(), 0.0);
             }
         }
     } else if (!lm->IsNull()) {
