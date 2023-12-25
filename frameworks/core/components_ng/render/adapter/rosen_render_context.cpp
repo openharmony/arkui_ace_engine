@@ -599,6 +599,7 @@ LoadSuccessNotifyTask RosenRenderContext::CreateBgImageLoadSuccessCallback()
 
 void RosenRenderContext::PaintBackground()
 {
+    CHECK_NULL_VOID(rsNode_);
     if (InstanceOf<PixelMapImage>(bgImage_)) {
         PaintPixmapBgImage();
 #ifndef USE_ROSEN_DRAWING
@@ -656,6 +657,7 @@ void RosenRenderContext::OnBackgroundImagePositionUpdate(const BackgroundImagePo
 
 void RosenRenderContext::SetBackBlurFilter()
 {
+    CHECK_NULL_VOID(rsNode_);
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     const auto& background = GetBackground();
@@ -681,6 +683,7 @@ void RosenRenderContext::SetBackBlurFilter()
 
 void RosenRenderContext::SetFrontBlurFilter()
 {
+    CHECK_NULL_VOID(rsNode_);
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     const auto& foreground = GetForeground();
@@ -707,6 +710,7 @@ void RosenRenderContext::SetFrontBlurFilter()
 
 void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle)
 {
+    CHECK_NULL_VOID(rsNode_);
     const auto& groupProperty = GetOrCreateBackground();
     if (groupProperty->CheckBlurStyleOption(bgBlurStyle)) {
         // Same with previous value.
@@ -726,6 +730,7 @@ void RosenRenderContext::UpdateBackBlurStyle(const std::optional<BlurStyleOption
 
 void RosenRenderContext::UpdateBackgroundEffect(const std::optional<EffectOption>& effectOption)
 {
+    CHECK_NULL_VOID(rsNode_);
     const auto& groupProperty = GetOrCreateBackground();
     if (groupProperty->CheckEffectOption(effectOption)) {
         return;
@@ -755,6 +760,7 @@ void RosenRenderContext::UpdateBackgroundEffect(const std::optional<EffectOption
 
 void RosenRenderContext::UpdateFrontBlurStyle(const std::optional<BlurStyleOption>& fgBlurStyle)
 {
+    CHECK_NULL_VOID(rsNode_);
     const auto& groupProperty = GetOrCreateForeground();
     if (groupProperty->CheckBlurStyleOption(fgBlurStyle)) {
         // Same with previous value.
@@ -1493,6 +1499,7 @@ std::pair<RectF, bool> RosenRenderContext::GetPaintRectWithTranslate()
 
 Matrix4 RosenRenderContext::GetRevertMatrix()
 {
+    CHECK_NULL_RETURN(rsNode_, {});
     auto center = rsNode_->GetStagingProperties().GetPivot();
     int32_t degree = rsNode_->GetStagingProperties().GetRotation();
     if (rsNode_->GetType() == RSUINodeType::DISPLAY_NODE && degree != 0) {
@@ -1520,6 +1527,7 @@ Matrix4 RosenRenderContext::GetRevertMatrix()
 
 Matrix4 RosenRenderContext::GetMatrix()
 {
+    CHECK_NULL_RETURN(rsNode_, {});
     auto center = rsNode_->GetStagingProperties().GetPivot();
     int32_t degree = rsNode_->GetStagingProperties().GetRotation();
     if (rsNode_->GetType() == RSUINodeType::DISPLAY_NODE && degree != 0) {
@@ -1573,6 +1581,7 @@ void RosenRenderContext::GetPointTransform(PointF& point)
 
 void RosenRenderContext::GetPointWithTransform(PointF& point)
 {
+    CHECK_NULL_VOID(rsNode_);
     // TODO: add rotation and center support
     auto translate = rsNode_->GetStagingProperties().GetTranslate();
     auto scale = rsNode_->GetStagingProperties().GetScale();
@@ -2563,6 +2572,7 @@ void RosenRenderContext::PaintFocusState(const RoundRect& paintRect, const Dimen
 void RosenRenderContext::PaintFocusState(
     const Dimension& focusPaddingVp, const Color& paintColor, const Dimension& paintWidth)
 {
+    CHECK_NULL_VOID(rsNode_);
     const auto& bounds = rsNode_->GetStagingProperties().GetBounds();
     const auto& radius = rsNode_->GetStagingProperties().GetCornerRadius();
 
@@ -2884,6 +2894,7 @@ void RosenRenderContext::UpdateBackBlurRadius(const Dimension& radius)
 
 void RosenRenderContext::UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption)
 {
+    CHECK_NULL_VOID(rsNode_);
     const auto& groupProperty = GetOrCreateBackground();
     if (groupProperty->CheckBlurRadius(radius)) {
         // Same with previous value
@@ -2910,6 +2921,7 @@ void RosenRenderContext::UpdateFrontBlurRadius(const Dimension& radius)
 
 void RosenRenderContext::UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption)
 {
+    CHECK_NULL_VOID(rsNode_);
     const auto& groupProperty = GetOrCreateForeground();
     if (groupProperty->CheckBlurRadius(radius)) {
         // Same with previous value
@@ -3044,6 +3056,7 @@ bool RosenRenderContext::RectIsNull()
 template<typename T, typename D>
 void RosenRenderContext::SetGraphicModifier(std::shared_ptr<T>& modifier, D data)
 {
+    CHECK_NULL_VOID(rsNode_);
     if (!modifier) {
         modifier = std::make_shared<T>();
         rsNode_->AddModifier(modifier);
@@ -3061,12 +3074,14 @@ void RosenRenderContext::SetGraphicModifier(std::shared_ptr<T>& modifier, D data
 void RosenRenderContext::AddModifier(const std::shared_ptr<Rosen::RSModifier>& modifier)
 {
     CHECK_NULL_VOID(modifier);
+    CHECK_NULL_VOID(rsNode_);
     rsNode_->AddModifier(modifier);
 }
 
 void RosenRenderContext::RemoveModifier(const std::shared_ptr<Rosen::RSModifier>& modifier)
 {
     CHECK_NULL_VOID(modifier);
+    CHECK_NULL_VOID(rsNode_);
     rsNode_->RemoveModifier(modifier);
 }
 
@@ -3277,6 +3292,7 @@ void RosenRenderContext::OnSweepGradientUpdate(const NG::Gradient& gradient)
 
 void RosenRenderContext::PaintClipShape(const std::unique_ptr<ClipProperty>& clip, const SizeF& frameSize)
 {
+    CHECK_NULL_VOID(rsNode_);
     auto basicShape = clip->GetClipShapeValue();
 #ifndef USE_ROSEN_DRAWING
     auto skPath = SkiaDecorationPainter::SkiaCreateSkPath(basicShape, frameSize);
@@ -3307,6 +3323,7 @@ void RosenRenderContext::PaintClipShape(const std::unique_ptr<ClipProperty>& cli
 
 void RosenRenderContext::PaintClipMask(const std::unique_ptr<ClipProperty>& clip, const SizeF& frameSize)
 {
+    CHECK_NULL_VOID(rsNode_);
     auto basicShape = clip->GetClipMaskValue();
 #ifndef USE_ROSEN_DRAWING
     auto skPath = SkiaDecorationPainter::SkiaCreateSkPath(basicShape, frameSize);
@@ -3349,6 +3366,7 @@ void RosenRenderContext::PaintClip(const SizeF& frameSize)
 
 void RosenRenderContext::PaintProgressMask()
 {
+    CHECK_NULL_VOID(rsNode_);
     if (!moonProgressModifier_) {
         moonProgressModifier_ = AceType::MakeRefPtr<MoonProgressModifier>();
         auto modifierAdapter =
@@ -3847,6 +3865,7 @@ void RosenRenderContext::UpdateMouseSelectWithRect(const RectF& rect, const Colo
 
 void RosenRenderContext::PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor)
 {
+    CHECK_NULL_VOID(rsNode_);
     if (mouseSelectModifier_) {
         mouseSelectModifier_->SetSelectRect(rect);
         return;
@@ -4361,6 +4380,7 @@ void RosenRenderContext::RegisterSharedTransition(const RefPtr<RenderContext>& o
     if (!otherContext) {
         return;
     }
+    CHECK_NULL_VOID(rsNode_);
     RSNode::RegisterTransitionPair(rsNode_->GetId(), otherContext->rsNode_->GetId());
 }
 
@@ -4371,6 +4391,7 @@ void RosenRenderContext::UnregisterSharedTransition(const RefPtr<RenderContext>&
         // the paired node is already destroyed, we don't need to unregister it, Rosen will handle it.
         return;
     }
+    CHECK_NULL_VOID(rsNode_);
     RSNode::UnregisterTransitionPair(rsNode_->GetId(), otherContext->rsNode_->GetId());
 }
 
@@ -4392,7 +4413,7 @@ void RosenRenderContext::PaintRSBgImage()
     auto image = DynamicCast<NG::DrawingImage>(bgImage_);
 #endif
     CHECK_NULL_VOID(bgLoadingCtx_ && image);
-
+    CHECK_NULL_VOID(rsNode_);
     auto rosenImage = std::make_shared<Rosen::RSImage>();
     auto compressData = image->GetCompressData();
     if (compressData) {
@@ -4407,6 +4428,7 @@ void RosenRenderContext::PaintRSBgImage()
 
 void RosenRenderContext::PaintPixmapBgImage()
 {
+    CHECK_NULL_VOID(rsNode_);
     auto image = DynamicCast<NG::PixelMapImage>(bgImage_);
     CHECK_NULL_VOID(bgLoadingCtx_ && image);
     auto pixmap = image->GetPixelMap();
@@ -4438,6 +4460,7 @@ void RosenRenderContext::OnRenderFitUpdate(RenderFit renderFit)
 
 void RosenRenderContext::SetContentRectToFrame(RectF rect)
 {
+    CHECK_NULL_VOID(rsNode_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto&& padding = host->GetGeometryNode()->GetPadding();
