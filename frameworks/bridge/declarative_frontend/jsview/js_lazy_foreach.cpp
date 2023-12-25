@@ -110,6 +110,7 @@ enum {
     PARAM_DATA_SOURCE,
     PARAM_ITEM_GENERATOR,
     PARAM_KEY_GENERATOR,
+    PARAM_UPDATE_CHANGEDNODE,
 
     MIN_PARAM_SIZE = PARAM_KEY_GENERATOR,
     MAX_PARAM_SIZE,
@@ -134,6 +135,9 @@ bool ParseAndVerifyParams(const JSCallbackInfo& info, JSRef<JSVal> (&params)[MAX
         return false;
     }
     if (info.Length() > MIN_PARAM_SIZE && !info[PARAM_KEY_GENERATOR]->IsFunction()) {
+        return false;
+    }
+    if (info.Length() > MIN_PARAM_SIZE + 1 && !info[PARAM_UPDATE_CHANGEDNODE]->IsBoolean()) {
         return false;
     }
 
@@ -168,6 +172,8 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
     JSRef<JSObject> dataSourceObj = JSRef<JSObject>::Cast(params[PARAM_DATA_SOURCE]);
     JSRef<JSFunc> itemGenerator = JSRef<JSFunc>::Cast(params[PARAM_ITEM_GENERATOR]);
     ItemKeyGenerator keyGenFunc;
+    bool updateChangedNodeFlag = false;
+
     if (params[PARAM_KEY_GENERATOR]->IsUndefined()) {
         keyGenFunc = [viewId](const JSRef<JSVal>&, size_t index) { return viewId + "-" + std::to_string(index); };
     } else {
@@ -179,11 +185,16 @@ void JSLazyForEach::Create(const JSCallbackInfo& info)
         };
     }
 
+    if (!params[PARAM_KEY_GENERATOR]->IsUndefined()) {
+        updateChangedNodeFlag = params[PARAM_KEY_GENERATOR]->ToBoolean();
+    }
+
     const auto& actuator = CreateActuator(viewId);
     actuator->SetJSExecutionContext(info.GetExecutionContext());
     actuator->SetParentViewObj(parentViewObj);
     actuator->SetDataSourceObj(dataSourceObj);
     actuator->SetItemGenerator(itemGenerator, std::move(keyGenFunc));
+    actuator->SetUpdateChangedNodeFlag(updateChangedNodeFlag);
     LazyForEachModel::GetInstance()->Create(actuator);
 }
 

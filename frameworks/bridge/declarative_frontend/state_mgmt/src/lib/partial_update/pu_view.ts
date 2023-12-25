@@ -1179,6 +1179,24 @@ abstract class ViewPU extends NativeViewPartialUpdate
     stateMgmtProfiler.end();
   }
 
+  public UpdateLazyForEachElements(elmtIds: Array<number>) : void {
+    if (!Array.isArray(elmtIds)) {
+      return;
+    }
+    Array.from(elmtIds).sort(ViewPU.compareNumber).forEach((elmtId: number) => {
+      const entry: UpdateFuncRecord | undefined = this.updateFuncByElmtId.get(elmtId);
+      const updateFunc: UpdateFunc = entry ? entry.getUpdateFunc() : undefined;
+      if (typeof updateFunc !== "function") {
+        stateMgmtConsole.debug(`${this.debugInfo()}: update function of elmtId ${elmtId} not found, internal error!`);
+      } else {
+        this.isRenderInProgress = true;
+        updateFunc(elmtId, false);
+        this.finishUpdateFunc(elmtId);
+        this.isRenderInProgress = false;
+      }
+    })
+  }
+
   /**
      * CreateStorageLink and CreateStorageLinkPU are used by the implementation of @StorageLink and
      * @LocalStotrageLink in full update and partial update solution respectively.

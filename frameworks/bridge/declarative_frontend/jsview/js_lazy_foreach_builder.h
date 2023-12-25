@@ -33,7 +33,11 @@ class JSLazyForEachBuilder : public NG::LazyForEachBuilder, public JSLazyForEach
 
 public:
     JSLazyForEachBuilder() = default;
-    ~JSLazyForEachBuilder() override = default;
+    ~JSLazyForEachBuilder()
+    {
+        changedLazyForEachNodes_.clear();
+        dependElementIds_.clear();
+    };
 
     int32_t OnGetTotalCount() override
     {
@@ -44,15 +48,56 @@ public:
     {
         auto totalIndex = GetTotalIndexCount();
         auto* stack = NG::ViewStackProcessor::GetInstance();
-        JSRef<JSVal> params[2];
+        JSRef<JSVal> params[3];
         for (auto index = 0; index < totalIndex; index++) {
             params[0] = CallJSFunction(getDataFunc_, dataSourceObj_, index);
             params[1] = JSRef<JSVal>::Make(ToJSValue(index));
+            params[2] = JSRef<JSVal>::Make(ToJSValue(true));
             std::string key = keyGenFunc_(params[0], index);
             stack->PushKey(key);
-            itemGenFunc_->Call(JSRef<JSObject>(), 2, params);
+            itemGenFunc_->Call(JSRef<JSObject>(), 3, params);
             stack->PopKey();
         }
+    }
+
+    void NotifyDataChanged(size_t index, RefPtr<NG::UINode>& lazyForEachNode, bool isRebuild) override
+    {
+        if (updateChangedNodeFlag_ && !isRebuild) {
+            changedLazyForEachNodes_[index] = lazyForEachNode;
+        }
+    }
+
+    void NotifyDataDeleted(RefPtr<NG::UINode>& lazyForEachNode) override
+    {
+        if (updateChangedNodeFlag_) {
+            dependElementIds_.erase(lazyForEachNode);
+        }
+    }
+
+    void UpdateDependElmtIds(RefPtr<NG::UINode>& node, JSRef<JSVal>& jsElmtIds, std::string key) {
+        std::string lastKey;
+        if (jsElmtIds->IsArray()) {
+            JSRef<JSArray> jsElmtIdArray = JSRef<JSArray>::Cast(jsElmtIds);
+            for (size_t i = 0; i < jsElmtIdArray->Length(); i++) {
+                JSRef<JSVal> jsElmtId = jsElmtIdArray->GetValueAt(i);
+                if (jsElmtId->IsNumber()) {
+                    dependElementIds_[node].insert(jsElmtId->ToNumber<uint32_t>());
+                }
+            }
+            lastKey = dependElementIds_[node].second;
+            dependElementIds_[node].second = key;
+        }
+        return lastKey;
+    }
+
+    JSRef<JSVal> SetToJSVal(std::set<uint32_t> elmtIds) {
+        JSRef<JSArray> jsElmtIdArray = JSRef<JSArray>::New();
+        int32_t count = 0;
+        for (auto& elmtId : elmtIds) {
+            jsElmtIdArray->SetValueAt(count, JSRef<JSVal>::Make(ToJSValue(elmtId)));
+            count++;
+        }
+        return JSRef<JSVal>::Cast(jsElmtIdArray);
     }
 
     std::pair<std::string, RefPtr<NG::UINode>> OnGetChildByIndex(
@@ -64,7 +109,7 @@ public:
             return info;
         }
 
-        JSRef<JSVal> params[2];
+        JSRef<JSVal> params[4];
         params[0] = CallJSFunction(getDataFunc_, dataSourceObj_, index);
         params[1] = JSRef<JSVal>::Make(ToJSValue(index));
         std::string key = keyGenFunc_(params[0], index);
@@ -76,19 +121,38 @@ public:
             return info;
         }
 
+        auto nodeIter = changedLazyForEachNodes_.find(index);
+        if (updateChangedNodeFlag_ && nodeIter != changedLazyForEachNodes_.end()) {
+            RefPtr<NG::UINode> lazyForEachNode = nodeIter->second;
+            info.first = key;
+            info.second = lazyForEachNode;
+            params[2] = JSRef<JSVal>::Make(ToJSValue(false));
+            params[3] = SetToJSVal(dependElementIds_[lazyForEachNode].first);
+
+            auto jsElmtIds = itemGenFunc_->Call(JSRef<JSObject>(), 4, params);
+            std::string lastKey = UpdateDependElmtIds(info.second, jsElmtIds, key);
+            changedLazyForEachNodes_.erase(nodeIter);
+            cachedItems.erase(lastKey);
+            return info;
+        }
+
         NG::ScopedViewStackProcessor scopedViewStackProcessor;
         auto* viewStack = NG::ViewStackProcessor::GetInstance();
         if (parentView_) {
             parentView_->MarkLazyForEachProcess(key);
         }
         viewStack->PushKey(key);
-        itemGenFunc_->Call(JSRef<JSObject>(), 2, params);
+        params[2] = JSRef<JSVal>::Make(ToJSValue(true));
+        JSRef<JSVal> jsElmtIds = itemGenFunc_->Call(JSRef<JSObject>(), 3, params);
         viewStack->PopKey();
         if (parentView_) {
             parentView_->ResetLazyForEachProcess();
         }
         info.first = key;
         info.second = viewStack->Finish();
+        if (updateChangedNodeFlag_) {
+            UpdateDependElmtIds(info.second, jsElmtIds, key);
+        }
         return info;
     }
 
@@ -108,6 +172,10 @@ public:
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(JSLazyForEachBuilder);
+
+private:
+    std::map<int32_t, RefPtr<NG::UINode>> changedLazyForEachNodes_;
+    std::map<RefPtr<NG::UINode>, std::pair<std::set<uint32_t>, std::string>> dependElementIds;
 };
 
 } // namespace OHOS::Ace::Framework

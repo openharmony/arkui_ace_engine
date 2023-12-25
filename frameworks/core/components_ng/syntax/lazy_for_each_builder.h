@@ -129,6 +129,7 @@ public:
             for (auto& [oldindex, child] : temp) {
                 if (static_cast<size_t>(oldindex) == index) {
                     node = child.second;
+                    NotifyDataDeleted(node);
                 } else {
                     cachedItems_.try_emplace(
                         index > static_cast<size_t>(oldindex) ? oldindex : oldindex - 1, std::move(child));
@@ -154,6 +155,7 @@ public:
         auto keyIter = cachedItems_.find(index);
         if (keyIter != cachedItems_.end()) {
             if (keyIter->second.second) {
+                NotifyDataChanged(index, keyIter->second.second, false);
                 expiringItem_.try_emplace(
                     keyIter->second.first, LazyForEachCacheChild(-1, std::move(keyIter->second.second)));
             }
@@ -345,6 +347,7 @@ public:
                 cachedItems_.try_emplace(node.first, LazyForEachChild(key, nullptr));
                 idleIndexes.erase(iter);
             } else {
+                NotifyDataDeleted(node.second);
                 ProcessOffscreenNode(node.second, true);
             }
         }
@@ -454,6 +457,10 @@ protected:
         int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& cachedItems) = 0;
 
     virtual void OnExpandChildrenOnInitialInNG() = 0;
+
+    virtual void NotifyDataChanged(size_t index, RefPtr<UINode>& lazyForEachNode, bool isRebuild = true) = 0;
+
+    virtual void NotifyDataDeleted(RefPtr<UINode>& lazyForEachNode) = 0;
 
 private:
     std::map<int32_t, LazyForEachChild> cachedItems_;
