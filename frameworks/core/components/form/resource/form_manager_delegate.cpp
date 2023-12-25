@@ -192,10 +192,12 @@ void FormManagerDelegate::OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo
     TAG_LOGI(AceLogTag::ACE_FORM, "Form OnSurfaceCreate formId: %{public}s, isDynamic: %{public}d",
         std::to_string(formInfo.formId).c_str(), formInfo.isDynamic);
     if (!rsSurfaceNode) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "rsSurfaceNode is null");
         return;
     }
 
     if (!onFormSurfaceNodeCallback_) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "onFormSurfaceNodeCallback is null");
         return;
     }
 
