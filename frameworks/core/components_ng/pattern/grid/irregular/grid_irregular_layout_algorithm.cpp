@@ -168,13 +168,7 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
     info.startMainLineIndex_ = res.startRow;
     info.startIndex_ = info.gridMatrix_[res.startRow][0];
     info.endMainLineIndex_ = res.endRow;
-    const auto& lastRow = info.gridMatrix_[res.endRow];
-    for (auto it = lastRow.rbegin(); it != lastRow.rend(); ++it) {
-        if (it->second != -1) {
-            info.endIndex_ = it->second;
-            break;
-        }
-    }
+    info.endIndex_ = res.endIdx;    
 }
 
 void GridIrregularLayoutAlgorithm::FillWithItems(float targetLen)
@@ -238,8 +232,8 @@ void GridIrregularLayoutAlgorithm::LayoutChildren(float mainOffset)
             auto alignPos =
                 Alignment::GetAlignPosition(blockSize, child->GetGeometryNode()->GetMarginFrameSize(), align);
 
-            OffsetF offset = info.axis_ == Axis::HORIZONTAL ? OffsetF { crossPos[c], mainOffset }
-                                                            : OffsetF { mainOffset, crossPos[c] };
+            OffsetF offset = info.axis_ == Axis::HORIZONTAL ? OffsetF { mainOffset, crossPos[c] }
+                                                            : OffsetF { crossPos[c], mainOffset };
             child->GetGeometryNode()->SetMarginFrameOffset(offset + alignPos);
             child->Layout();
         }

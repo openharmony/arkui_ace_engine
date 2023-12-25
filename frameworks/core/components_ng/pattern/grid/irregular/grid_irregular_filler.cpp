@@ -21,8 +21,7 @@
 
 namespace OHOS::Ace::NG {
 GridIrregularFiller::GridIrregularFiller(GridLayoutInfo* info, LayoutWrapper* wrapper) : info_(info), wrapper_(wrapper)
-{
-}
+{}
 
 void GridIrregularFiller::InitPos()
 {

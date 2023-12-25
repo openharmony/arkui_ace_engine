@@ -347,7 +347,7 @@ float GridLayoutInfo::GetCurrentLineHeight() const
 }
 
 void GridLayoutInfo::UpdateStartIdxToLastItem()
-{   
+{
     // find last index in gridMatrix
     for (auto line = gridMatrix_.rbegin(); line != gridMatrix_.rend(); ++line) {
         const auto& row = line->second;
