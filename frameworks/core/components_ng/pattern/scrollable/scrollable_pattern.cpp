@@ -34,7 +34,8 @@ namespace {
 constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
 constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
 constexpr float CUSTOM_ANIMATION_DURATION = 1000.0;
-constexpr uint32_t MILLOS_PER_SECONDS = 1000;
+constexpr uint32_t MILLOS_PER_NANO_SECONDS = 1000 * 1000 * 1000;
+constexpr uint64_t MIN_DIFF_VSYNC = 1000 * 1000; // min is 1ms
 constexpr uint32_t MIN_DIFF_TIME = 1;
 const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
 const std::string SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
@@ -923,10 +924,11 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
                 if (pattern->runningAnimationCount_ > 0) {
                     return;
                 }
-                pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
-                    SceneStatus::END);
                 pattern->StopAnimation(pattern->curveAnimation_);
+                pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
+                    SceneStatus::END);   
         });
+        NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::START);
     }
     FireOnScrollStart();
 }
@@ -963,9 +965,9 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
             if (pattern->runningAnimationCount_ > 0) {
                 return;
             }
+            pattern->StopAnimation(pattern->springAnimation_);
             pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
                 SceneStatus::END);
-            pattern->StopAnimation(pattern->springAnimation_);
     });
     NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::START);
 }
@@ -982,13 +984,14 @@ void ScrollablePattern::InitSpringOffsetProperty()
         if (pattern->isAnimationStop_) {
             return;
         }
-        high_resolution_clock::time_point currentTime = high_resolution_clock::now();
-        milliseconds diff = std::chrono::duration_cast<milliseconds>(currentTime - pattern->lastTime_);
-        if (diff.count() > MIN_DIFF_TIME) {
-            pattern->currentVelocity_ = (offset - pattern->lastPosition_) /
-                diff.count() * MILLOS_PER_SECONDS;
+        auto context = OHOS::ACE::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        uint64_t currentVsync = context.GetVsyncTime();
+        uint64_t diff = currentVsync - scroll->lastVsyncTime_;
+        if (diff < MIN_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
+            scroll->currentVelocity_ = (position - scroll->lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
         }
-        pattern->lastTime_ = currentTime;
+        scroll->lastVsyncTime_ = currentVsync;
         pattern->lastPosition_ = offset;
         pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
             SceneStatus::RUNNING);
@@ -1013,14 +1016,17 @@ void ScrollablePattern::InitCurveOffsetProperty(float position)
         if (pattern->isAnimationStop_) {
             return;
         }
-        high_resolution_clock::time_point currentTime = high_resolution_clock::now();
-        milliseconds diff = std::chrono::duration_cast<milliseconds>(currentTime - pattern->lastTime_);
-        if (diff.count() > MIN_DIFF_TIME) {
-            pattern->currentVelocity_ = (offset - pattern->lastPosition_) /
-                diff.count() * MILLOS_PER_SECONDS;
+        auto context = OHOS::ACE::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        uint64_t currentVsync = context.GetVsyncTime();
+        uint64_t diff = currentVsync - scroll->lastVsyncTime_;
+        if (diff < MIN_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
+            scroll->currentVelocity_ = (position - scroll->lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
         }
-        pattern->lastTime_ = currentTime;
+        scroll->lastVsyncTime_ = currentVsync;
         pattern->lastPosition_ = offset;
+        pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
+            SceneStatus::RUNNING);
         if (!pattern->UpdateCurrentOffset(pattern->GetTotalOffset() - offset, SCROLL_FROM_ANIMATION_CONTROLLER)) {
             if ((pattern->IsAtTop() && LessOrEqual(position, pattern->GetTotalOffset())) ||
                 (pattern->IsAtBottom() && GreatOrEqual(position, pattern->GetTotalOffset()))) {

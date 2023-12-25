@@ -1041,6 +1041,16 @@ public:
         return onFocus_;
     }
 
+    uint64_t GetVsyncTime() const
+    {
+        return vsyncTime_;
+    }
+
+    void SetVsyncTime(uint64_t time)
+    {
+        vsyncTime_ = time;
+    }
+
     virtual void UpdateCurrentActiveNode(const WeakPtr<NG::FrameNode>& node) {}
 
     virtual std::string GetCurrentExtraInfo() { return ""; }
@@ -1226,6 +1236,7 @@ private:
     int64_t formAnimationStartTime_ = 0;
     bool isFormAnimation_ = false;
     bool halfLeading_ = false;
+    uint64_t vsyncTime_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

@@ -636,7 +636,7 @@ private:
     RefPtr<NodeAnimatablePropertyFloat> curveOffsetProperty_;
     std::shared_ptr<AnimationUtils::Animation> springAnimation_;
     std::shared_ptr<AnimationUtils::Animation> curveAnimation_;
-    std::chrono::high_resolution_clock::time_point lastTime_;
+    uint64_t lastVsyncTime_ = 0;
     bool isAnimationStop_ = true; // graphic animation flag
     float currentVelocity_ = 0.0f;
     float lastPosition_ = 0.0f;
