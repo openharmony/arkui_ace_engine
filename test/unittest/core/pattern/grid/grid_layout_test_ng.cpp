@@ -1233,11 +1233,51 @@ HWTEST_F(GridLayoutTestNg, FillOne002, TestSize.Level1)
 }
 
 /**
- * @tc.name: IrregularFiller::MeasureNewItem001
- * @tc.desc: Test IrregularFiller::MeasureNewItem
+ * @tc.name: IrregularFiller::MeasureItem001
+ * @tc.desc: Test IrregularFiller::MeasureItem
  * @tc.type: FUNC
  */
-HWTEST_F(GridLayoutTestNg, MeasureNewItem001, TestSize.Level1)
+HWTEST_F(GridLayoutTestNg, MeasureItem001, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.irregularIndexes = {
+        0,
+    };
+    auto onGetIrregularSizeByIndex = [](int32_t index) -> GridItemSize { return { .columns = 1, .rows = 2 }; };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+    Create([option](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetLayoutOptions(option);
+        CreateRowItem(10);
+    });
+
+    GridLayoutInfo info;
+    info.crossCount_ = 4;
+    GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
+
+    info.endIndex_ = 0;
+
+    GridIrregularFiller::FillParameters params {
+        .crossLens = { 50.0f, 50.0f, 100.0f, 100.0f }, .crossGap = 5.0f, .mainGap = 1.0f
+    };
+    filler.MeasureItem(params, 0, 0);
+
+    EXPECT_TRUE(info.lineHeightMap_.find(0) != info.lineHeightMap_.end());
+    EXPECT_TRUE(info.lineHeightMap_.find(1) != info.lineHeightMap_.end());
+    auto child = frameNode_->GetChildByIndex(0);
+    ASSERT_TRUE(child);
+    auto constraint = *child->GetGeometryNode()->GetParentLayoutConstraint();
+    EXPECT_EQ(constraint.maxSize.Width(), 50.0f);
+    EXPECT_EQ(*constraint.selfIdealSize.Width(), 50.0f);
+    EXPECT_EQ(constraint.percentReference.Width(), 50.0f);
+}
+
+/**
+ * @tc.name: IrregularFiller::MeasureItem002
+ * @tc.desc: Test IrregularFiller::MeasureItem
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, MeasureItem002, TestSize.Level1)
 {
     GridLayoutOptions option;
     option.irregularIndexes = {
@@ -1259,7 +1299,7 @@ HWTEST_F(GridLayoutTestNg, MeasureNewItem001, TestSize.Level1)
     GridIrregularFiller::FillParameters params {
         .crossLens = { 50.0f, 50.0f, 100.0f, 100.0f }, .crossGap = 5.0f, .mainGap = 1.0f
     };
-    filler.MeasureItem(params, 0);
+    filler.MeasureItem(params, 0, 0);
 
     EXPECT_TRUE(info.lineHeightMap_.find(0) != info.lineHeightMap_.end());
     EXPECT_TRUE(info.lineHeightMap_.find(1) == info.lineHeightMap_.end());
@@ -1735,7 +1775,7 @@ HWTEST_F(GridLayoutTestNg, Layout001, TestSize.Level1)
     algorithm->crossLens_ = { 50.0f, 50.0f, 50.0f };
     auto& info = algorithm->gridLayoutInfo_;
     info.gridMatrix_ = {
-        { 0, { { 0, 0 }, { 0, -1 }, { 2, -1 } } }, // 0 | 0 | 0
+        { 0, { { 0, 0 }, { 1, -1 }, { 2, -1 } } }, // 0 | 0 | 0
         { 1, { { 0, 2 }, { 1, 3 }, { 2, 4 } } },   // 2 | 3 | 4
         { 2, { { 0, 5 }, { 1, 6 }, { 2, 7 } } },   // 5 | 6 | 7
         { 3, { { 0, 8 }, { 1, -1 }, { 2, 9 } } },  // 8 | 6 | 9
@@ -1763,7 +1803,7 @@ HWTEST_F(GridLayoutTestNg, LayoutInfo001, TestSize.Level1)
 {
     GridLayoutInfo info;
     info.gridMatrix_ = {
-        { 0, { { 0, 0 }, { 0, -1 }, { 2, -1 } } },
+        { 0, { { 0, 0 }, { 1, -1 }, { 2, -1 } } },
         { 1, { { 0, 2 }, { 1, 3 }, { 2, 4 } } },
         { 2, { { 0, 5 }, { 1, 6 }, { 2, -1 } } },
         { 3, { { 0, 7 }, { 1, -1 }, { 2, 9 } } },
@@ -1788,7 +1828,7 @@ HWTEST_F(GridLayoutTestNg, LayoutInfo002, TestSize.Level1)
 {
     GridLayoutInfo info;
     info.gridMatrix_ = {
-        { 0, { { 0, 0 }, { 0, -1 }, { 2, -1 } } },
+        { 0, { { 0, 0 }, { 1, -1 }, { 2, -1 } } },
         { 1, { { 0, 2 }, { 1, 3 }, { 2, -1 } } },
         { 2, { { 0, 5 }, { 1, -1 }, { 2, -1 } } },
         { 3, { { 0, 7 }, { 1, -1 }, { 2, -1 } } },
@@ -1827,8 +1867,8 @@ HWTEST_F(GridLayoutTestNg, FillMatrixOnly001, TestSize.Level1)
         return { .rows = 1, .columns = 2 };
     };
 
-    decltype(info.gridMatrix_) expected = {
-        { 0, { { 0, 0 }, { 0, -1 }, { 2, 1 } } },   // 0 | 0 | 1
+    decltype(GridLayoutInfo::gridMatrix_) expected = {
+        { 0, { { 0, 0 }, { 1, -1 }, { 2, 1 } } },   // 0 | 0 | 1
         { 1, { { 0, 2 }, { 1, -1 }, { 2, -1 } } },  // 2 | 2 | 2
         { 2, { { 0, -1 }, { 1, -1 }, { 2, -1 } } }, // 2 | 2 | 2
         { 3, { { 0, 3 }, { 1, 4 }, { 2, 5 } } },    // 3 | 4 | 5
@@ -1840,13 +1880,14 @@ HWTEST_F(GridLayoutTestNg, FillMatrixOnly001, TestSize.Level1)
     Create([option](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr");
         model.SetLayoutOptions(option);
+        CreateColItem(7);
     });
 
     GridLayoutInfo info;
     info.crossCount_ = 3;
     // partially filled
     info.gridMatrix_ = {
-        { 0, { { 0, 0 }, { 0, -1 }, { 2, 1 } } },   // 0 | 0 | 1
+        { 0, { { 0, 0 }, { 1, -1 }, { 2, 1 } } }, // 0 | 0 | 1
     };
 
     GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
@@ -1857,4 +1898,157 @@ HWTEST_F(GridLayoutTestNg, FillMatrixOnly001, TestSize.Level1)
     EXPECT_EQ(info.endMainLineIndex_, 4);
 }
 
+/**
+ * @tc.name: GridIrregularLayout::MeasureBackward001
+ * @tc.desc: Test GridIrregularFiller::MeasureBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, MeasureBackward001, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.irregularIndexes = {
+        0, // [2 x 1]
+        2, // [3 x 2]
+        5, // [1 x 3]
+        6, // [2 x 1]
+    };
+    auto onGetIrregularSizeByIndex = [](int32_t index) -> GridItemSize {
+        if (index == 2) {
+            return { .rows = 2, .columns = 3 };
+        }
+        if (index == 5) {
+            return { .rows = 3, .columns = 1 };
+        }
+        return { .rows = 1, .columns = 2 };
+    };
+
+    GridLayoutInfo info;
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, -1 }, { 2, 1 } } },   // 0 | 0 | 1
+        { 1, { { 0, 2 }, { 1, -1 }, { 2, -1 } } },  // 2 | 2 | 2
+        { 2, { { 0, -1 }, { 1, -1 }, { 2, -1 } } }, // 2 | 2 | 2
+        { 3, { { 0, 3 }, { 1, 4 }, { 2, 5 } } },    // 3 | 4 | 5
+        { 4, { { 0, 6 }, { 1, -1 }, { 2, -1 } } },  // 6 | 6 | 5
+        { 5, { { 2, -1 } } }                        // x | x | 5
+    };
+    info.crossCount_ = 3;
+
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+    Create([option](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions(option);
+        CreateRowItem(10);
+    });
+
+    GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
+    filler.MeasureBackward({ { 50.0f, 50.0f, 50.0f }, 1000.0f, 5.0f, 5.0f }, 5);
+
+    EXPECT_EQ(filler.length_, 30.0f);
+    EXPECT_EQ(info.lineHeightMap_.size(), 6);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::FindRangeOnJump001
+ * @tc.desc: Test GridLayoutRangeFinder::FindRangeOnJump
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, FindRangeOnJump001, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.irregularIndexes = {
+        0,  // [2 x 1]
+        1,  // [1 x 3]
+        2,  // [2 x 1]
+        5,  // [1 x 4]
+        7,  // [1 x 2]
+        9,  // [1 x 2]
+        10, // [1 x 2]
+    };
+    auto onGetIrregularSizeByIndex = [](int32_t index) -> GridItemSize {
+        switch (index) {
+            case 0:
+                return { .columns = 2, .rows = 1 };
+            case 1:
+                return { .columns = 1, .rows = 3 };
+            case 2:
+                return { .columns = 2, .rows = 1 };
+            case 5:
+                return { .columns = 1, .rows = 4 };
+            default:
+                return { .columns = 1, .rows = 2 };
+        }
+    };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+
+    GridLayoutInfo info;
+    info.crossCount_ = 3;
+    info.lineHeightMap_ = { { 0, 50.0f }, { 1, 100.0f }, { 2, 50.0f }, { 3, 50.0f }, { 4, 80.0f }, { 5, 75.0f },
+        { 6, 10.0f } };
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, -1 }, { 2, 1 } } },   // 0 | 0 | 1
+        { 1, { { 0, 2 }, { 1, -1 }, { 2, -1 } } },  // 2 | 2 | 1
+        { 2, { { 0, 3 }, { 1, 4 }, { 2, -1 } } },   // 3 | 4 | 1
+        { 3, { { 0, 5 }, { 1, 6 }, { 2, 7 } } },    // 5 | 6 | 7
+        { 4, { { 0, -1 }, { 1, 8 }, { 2, -1 } } },  // 5 | 8 | 7
+        { 5, { { 0, -1 }, { 1, 9 }, { 2, 10 } } },  // 5 | 9 | 10
+        { 6, { { 0, -1 }, { 1, -1 }, { 2, -1 } } }, // 5 | 9 | 10
+    };
+
+    Create([option](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions(option);
+    });
+    frameNode_->GetGeometryNode()->SetContentSize({ 500.0f, 250.0f });
+
+    GridLayoutRangeSolver solver(&info, AceType::RawPtr(frameNode_));
+
+    info.scrollAlign_ = ScrollAlign::START;
+    auto res = solver.FindRangeOnJump(2, 5.0f);
+    EXPECT_EQ(res.startRow, 0);
+    EXPECT_EQ(res.pos, -160.0f);
+    EXPECT_EQ(res.endIdx, 10);
+    EXPECT_EQ(res.endRow, 5);
+
+    info.scrollAlign_ = ScrollAlign::CENTER;
+    res = solver.FindRangeOnJump(4, 5.0f);
+    EXPECT_EQ(res.startRow, 0);
+    EXPECT_EQ(res.pos, -185.0f);
+    EXPECT_EQ(res.endIdx, 10);
+    EXPECT_EQ(res.endRow, 5);
+
+    info.scrollAlign_ = ScrollAlign::END;
+    res = solver.FindRangeOnJump(4, 5.0f);
+    EXPECT_EQ(res.startRow, 0);
+    EXPECT_EQ(res.pos, -100.0f);
+    EXPECT_EQ(res.endIdx, 8);
+    EXPECT_EQ(res.endRow, 4);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::SolveForwardForEndIdx001
+ * @tc.desc: Test GridLayoutRangeFinder::SolveForwardForEndIdx
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, SolveForwardForEndIdx001, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.lineHeightMap_ = { { 0, 50.0f }, { 1, 100.0f }, { 2, 50.0f }, { 3, 50.0f }, { 4, 80.0f } };
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, -1 }, { 2, 1 } } },   // 0 | 0 | 1
+        { 1, { { 0, 2 }, { 1, -1 }, { 2, -1 } } },  // 2 | 2 | 2
+        { 2, { { 0, -1 }, { 1, -1 }, { 2, -1 } } }, // 2 | 2 | 2
+        { 3, { { 0, 3 }, { 1, 4 }, { 2, 5 } } },    // 3 | 4 | 5
+        { 4, { { 0, 6 }, { 1, -1 }, { 2, -1 } } },  // 6 | 6 | 5
+    };
+
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions({});
+    });
+
+    GridLayoutRangeSolver solver(&info, AceType::RawPtr(frameNode_));
+    auto [endLineIdx, endIdx] = solver.SolveForwardForEndIdx(5.0f, 250.0f, 1);
+    EXPECT_EQ(endIdx, 6);
+    EXPECT_EQ(endLineIdx, 4);
+}
 } // namespace OHOS::Ace::NG

@@ -45,20 +45,33 @@ GridLayoutRangeSolver::RangeInfo GridLayoutRangeSolver::FindRangeOnJump(int32_t 
     */
     switch (info_->scrollAlign_) {
         case ScrollAlign::START: {
+            auto topRows = CheckMultiRow(jumpLineIdx);
+            float offset = 0.0f;
+            for (int i = 1; i < topRows; ++i) {
+                offset -= info_->lineHeightMap_.at(jumpLineIdx - i) + mainGap;
+            }
             auto [endLineIdx, endIdx] = SolveForwardForEndIdx(mainGap, mainSize, jumpLineIdx);
-            return { jumpLineIdx, 0.0f, endLineIdx, endIdx };
+            return { jumpLineIdx - topRows + 1, offset, endLineIdx, endIdx };
         }
         case ScrollAlign::CENTER: {
             // align by item center
             float halfMainSize = mainSize / 2.0f;
             float halfLine = info_->lineHeightMap_.at(jumpLineIdx) / 2.0f;
             auto [endLineIdx, endIdx] = SolveForwardForEndIdx(mainGap, halfMainSize + halfLine, jumpLineIdx);
-            auto backwardRes = SolveBackward(mainGap, halfMainSize - halfLine, jumpLineIdx);
-            return { backwardRes.row, backwardRes.pos, endLineIdx, endIdx };
+            auto res = SolveBackward(mainGap, halfMainSize - halfLine, jumpLineIdx);
+            return { res.row, res.pos, endLineIdx, endIdx };
         }
         case ScrollAlign::END: {
             auto res = SolveBackward(mainGap, mainSize - info_->lineHeightMap_.at(jumpLineIdx), jumpLineIdx);
-            return { res.row, res.pos, jumpLineIdx };
+            int32_t endIdx = 0;
+            const auto& lastRow = info_->gridMatrix_.at(jumpLineIdx);
+            for (auto it = lastRow.rbegin(); it != lastRow.rend(); ++it) {
+                if (it->second != -1) {
+                    endIdx = it->second;
+                    break;
+                }
+            }
+            return { res.row, res.pos, jumpLineIdx, endIdx };
         }
         default:
             return {};
@@ -115,8 +128,8 @@ std::pair<int32_t, float> GridLayoutRangeSolver::AddNextRows(float mainGap, int3
 
 std::pair<int32_t, int32_t> GridLayoutRangeSolver::SolveForwardForEndIdx(float mainGap, float targetLen, int32_t idx)
 {
-    float len = info_->lineHeightMap_.at(idx++);
-    while (len < targetLen && idx < info_->lineHeightMap_.rbegin()->first) {
+    float len = 0.0f;
+    while (len < targetLen && idx <= info_->lineHeightMap_.rbegin()->first) {
         len += info_->lineHeightMap_.at(idx++) + mainGap;
     }
     --idx;

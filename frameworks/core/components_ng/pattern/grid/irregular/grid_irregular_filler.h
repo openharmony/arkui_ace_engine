@@ -95,9 +95,10 @@ private:
      * @brief Measures a GridItem at endIndex_ and updates the grid layout information.
      *
      * @param params The FillParameters object containing the fill parameters.
-     * @param col The index of the column where the item is being added.
+     * @param col The column index where the item is being added.
+     * @param row The row index where the item is being added.
      */
-    void MeasureItem(const FillParameters& params, int32_t col);
+    void MeasureItem(const FillParameters& params, int32_t col, int32_t row);
 
     /**
      * @brief Initializes the position of the filler in the grid to GridLayoutInfo::startIndex_.

@@ -60,7 +60,7 @@ float GridIrregularFiller::Fill(const FillParameters& params)
             UpdateLength(prevRow, params.mainGap);
         }
 
-        MeasureItem(params, posX_);
+        MeasureItem(params, posX_, posY_);
     }
     info_->endMainLineIndex_ = posY_;
     return length_;
@@ -196,7 +196,7 @@ void GridIrregularFiller::UpdateLength(int32_t prevRow, float mainGap)
     }
 }
 
-void GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t col)
+void GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t col, int32_t row)
 {
     auto child = wrapper_->GetOrCreateChildByIndex(info_->endIndex_);
     auto props = AceType::DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
@@ -225,7 +225,7 @@ void GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t col)
     // spread height to each row. May be buggy?
     float heightPerRow = (childHeight - (params.mainGap * (itemSize.rows - 1))) / itemSize.rows;
     for (int32_t i = 0; i < itemSize.rows; ++i) {
-        info_->lineHeightMap_[posY_] = std::max(info_->lineHeightMap_[posY_], heightPerRow);
+        info_->lineHeightMap_[row + i] = std::max(info_->lineHeightMap_[row + i], heightPerRow);
     }
 }
 
@@ -236,7 +236,7 @@ void GridIrregularFiller::FillMatrixOnly(int32_t targetIdx)
     }
 
     InitPos();
-    while (info_->endIndex_ <= targetIdx) {
+    while (info_->endIndex_ < targetIdx) {
         if (!FindNextItem(++info_->endIndex_)) {
             FillOne();
         }
@@ -272,15 +272,15 @@ void GridIrregularFiller::MeasureBackward(const FillParameters& params, int32_t 
                 info_->endIndex_ = info_->gridMatrix_.at(row).at(c);
                 measured.insert(info_->endIndex_);
 
-                // skip all columns of this item
-                c += GetItemSize(info_->endIndex_).columns - 1;
+                MeasureItem(params, c, row);
             } else {
                 info_->endIndex_ = row.at(c);
+                MeasureItem(params, c, posY_);
             }
-
-            MeasureItem(params, c);
+            // skip all columns of this item
+            c += GetItemSize(info_->endIndex_).columns - 1;
         }
-        length_ += params.mainGap + info_->lineHeightMap_[posY_];
+        length_ += params.mainGap + info_->lineHeightMap_.at(posY_);
     }
 }
 } // namespace OHOS::Ace::NG
