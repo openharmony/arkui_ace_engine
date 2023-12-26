@@ -1012,51 +1012,7 @@ void ImagePattern::UpdateAnalyzerUIConfig(const RefPtr<GeometryNode>& geometryNo
         isUIConfigUpdate = true;
     }
 
-    UpdatePaddingAndBorderWidth(isUIConfigUpdate);
-}
-
-void ImagePattern::UpdatePaddingAndBorderWidth(bool isUIConfigUpdate)
-{
-    bool needUpdateUIConfig = isUIConfigUpdate;
-    auto layoutProps = GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(layoutProps);
-    if (layoutProps->GetPaddingProperty()) {
-        auto&& padding = layoutProps->GetPaddingProperty();
-        double topPadding = padding->top.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
-        double bottomPadding = padding->bottom.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
-        double leftPadding = padding->left.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
-        double rightPadding = padding->right.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
-        auto& [configTopPadding, configBottomPadding, configLeftPadding, configRightPadding] =
-            analyzerUIConfig_.padding;
-        if (configTopPadding != topPadding || configBottomPadding != bottomPadding || configLeftPadding !=
-            leftPadding || configRightPadding != rightPadding) {
-            configTopPadding = topPadding;
-            configBottomPadding = bottomPadding;
-            configLeftPadding = leftPadding;
-            configRightPadding = rightPadding;
-            needUpdateUIConfig = true;
-        }
-    }
-
-    if (layoutProps->GetBorderWidthProperty()) {
-        auto&& border = layoutProps->GetBorderWidthProperty();
-        double borderTop = border->topDimen.value_or(Dimension(0)).ConvertToPx();
-        double borderBottom = border->bottomDimen.value_or(Dimension(0)).ConvertToPx();
-        double borderLeft = border->leftDimen.value_or(Dimension(0)).ConvertToPx();
-        double borderRight = border->rightDimen.value_or(Dimension(0)).ConvertToPx();
-        auto& [configBorderTop, configBorderBottom, configBorderLeft, configBorderRight] =
-            analyzerUIConfig_.borderWidth;
-        if (configBorderTop != borderTop || configBorderBottom != borderBottom || configBorderLeft !=
-            borderLeft || configBorderRight != borderRight) {
-            configBorderTop = borderTop;
-            configBorderBottom = borderBottom;
-            configBorderLeft = borderLeft;
-            configBorderRight = borderRight;
-            needUpdateUIConfig = true;
-        }
-    }
-
-    if (needUpdateUIConfig) {
+    if (isUIConfigUpdate) {
         ImageAnalyzerMgr::GetInstance().UpdateInnerConfig(&overlayData_, &analyzerUIConfig_);
     }
 }
