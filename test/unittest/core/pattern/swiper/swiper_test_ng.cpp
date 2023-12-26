@@ -10752,7 +10752,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnScrollEnd001, TestSize.Level1)
     EXPECT_CALL(*mockScroll, OnScrollEndRecursive).Times(1);
     pattern_->enableNestedScroll_ = true;
     pattern_->parent_ = mockScroll;
-    pattern_->OnScrollEndRecursive();
+    pattern_->OnScrollEndRecursive(std::nullopt);
     EXPECT_FALSE(pattern_->childScrolling_);
 
     pattern_->NotifyParentScrollEnd();

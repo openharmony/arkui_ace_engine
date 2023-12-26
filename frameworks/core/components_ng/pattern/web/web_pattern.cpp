@@ -2641,12 +2641,12 @@ void WebPattern::OnScrollStartRecursive(float position)
     isFirstFlingScrollVelocity_ = true;
 }
 
-void WebPattern::OnScrollEndRecursive()
+void WebPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollEndRecursive");
     auto parent = parent_.Upgrade();
     if (parent) {
-        parent->OnScrollEndRecursive();
+        parent->OnScrollEndRecursive(std::nullopt);
     }
 }
 
@@ -2673,7 +2673,7 @@ void WebPattern::OnScrollState(bool scrollState)
 {
     scrollState_ = scrollState;
     if (!scrollState) {
-        OnScrollEndRecursive();
+        OnScrollEndRecursive(std::nullopt);
     }
 }
 

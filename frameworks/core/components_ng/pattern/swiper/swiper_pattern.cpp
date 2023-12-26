@@ -3433,14 +3433,14 @@ void SwiperPattern::NotifyParentScrollStart(float position)
     parent_ = parent;
 }
 
-void SwiperPattern::OnScrollEndRecursive()
+void SwiperPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
 {
     if (IsDisableSwipe()) {
         return;
     }
     // in case child didn't call swiper's HandleScrollVelocity
     if (!AnimationRunning()) {
-        HandleDragEnd(0.0f);
+        HandleDragEnd(velocity.value_or(0.0f));
     }
 
     childScrolling_ = false;
@@ -3450,7 +3450,7 @@ void SwiperPattern::NotifyParentScrollEnd()
 {
     auto parent = parent_.Upgrade();
     if (parent && enableNestedScroll_) {
-        parent->OnScrollEndRecursive();
+        parent->OnScrollEndRecursive(std::nullopt);
     }
 }
 

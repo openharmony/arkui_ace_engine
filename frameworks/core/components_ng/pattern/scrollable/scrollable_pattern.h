@@ -543,7 +543,7 @@ private:
     ScrollResult HandleScroll(float offset, int32_t source, NestedState state = NestedState::GESTURE) override;
     bool HandleScrollVelocity(float velocity) override;
 
-    void OnScrollEndRecursive() override;
+    void OnScrollEndRecursive(const std::optional<float>& velocity) override;
     void OnScrollStartRecursive(float position) override;
 
     ScrollResult HandleScrollParentFirst(float& offset, int32_t source, NestedState state);

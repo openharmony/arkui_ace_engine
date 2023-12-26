@@ -312,7 +312,7 @@ public:
     ScrollResult HandleScroll(float offset, int32_t source, NestedState state) override;
     bool HandleScrollVelocity(float velocity) override;
     void OnScrollStartRecursive(float position) override;
-    void OnScrollEndRecursive() override;
+    void OnScrollEndRecursive(const std::optional<float>& velocity) override;
     Axis GetParentAxis();
     RefPtr<NestableScrollContainer> WebSearchParent();
     void SetNestedScroll(const NestedScrollOptions& nestedOpt);
