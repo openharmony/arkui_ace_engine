@@ -480,7 +480,7 @@ void SelectPattern::SetValue(const std::string& value)
 
 void SelectPattern::SetFontSize(const Dimension& value)
 {
-    if (value.IsNonPositive()) {
+    if (value.IsNegative()) {
         return;
     }
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();
