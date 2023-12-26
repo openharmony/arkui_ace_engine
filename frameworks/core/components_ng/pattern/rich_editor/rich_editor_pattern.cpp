@@ -3390,6 +3390,13 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
 }
 
+bool RichEditorPattern::IsScrollBarPressed(const MouseInfo& info)
+{
+    auto scrollBar = GetScrollBar();
+    Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
+    return scrollBar->InBarTouchRegion(point);
+}
+
 void RichEditorPattern::HandleMouseLeftButton(const MouseInfo& info)
 {
     if (info.GetAction() == MouseAction::MOVE) {
@@ -3422,7 +3429,7 @@ void RichEditorPattern::HandleMouseLeftButton(const MouseInfo& info)
         host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     } else if (info.GetAction() == MouseAction::PRESS) {
         isMousePressed_ = true;
-        if (BetweenSelectedPosition(info.GetGlobalLocation())) {
+        if (IsScrollBarPressed(info) || BetweenSelectedPosition(info.GetGlobalLocation())) {
             blockPress_ = true;
             return;
         }
