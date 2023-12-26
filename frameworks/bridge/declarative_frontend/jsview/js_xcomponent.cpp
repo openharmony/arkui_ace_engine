@@ -24,6 +24,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
+#include "frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -148,6 +149,36 @@ void JSXComponent::Create(const JSCallbackInfo& info)
     }
 }
 
+void* JSXComponent::Create(const XComponentParams& params)
+{
+    JSXComponent* jsXComponent = new JSXComponent();
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(XComponentModel::GetInstance()->Create(
+        params.elmtId, (float)params.width, (float)params.height,
+        params.xcomponentId, static_cast<XComponentType>(params.xcomponentType), params.libraryName,
+        nullptr));
+    // XComponentModel::GetInstance()->SetSoPath(params.libraryName);
+    jsXComponent->SetFrameNode(frameNode);
+
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto pipelineContext = AccessibilityManager::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto taskExecutor = pipelineContext->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, nullptr);
+    ContainerScope scope(ContainerScope::CurrentId());
+    taskExecutor->PostTask(
+        [container, frameNode]() {
+            auto xcPattern = AceType::DynamicCast<NG::XComponentPattern>(frameNode->GetPattern());
+            if (xcPattern->GetXcomponentInit()) {
+                xcPattern->XComponentSizeInit(); // 加载so, 触发onload（event)
+                xcPattern->SetXcomponentInit(true);
+            }
+        },
+    TaskExecutor::TaskType::JS);
+
+    return jsXComponent;
+}
+
 void JSXComponent::JsOnLoad(const JSCallbackInfo& args)
 {
     if (args.Length() < 1 || !args[0]->IsFunction()) {
@@ -164,6 +195,49 @@ void JSXComponent::JsOnLoad(const JSCallbackInfo& args)
         func->ExecuteNew(keys, "");
     };
     XComponentModel::GetInstance()->SetOnLoad(std::move(onLoad));
+}
+
+void JSXComponent::RegisterOnCreate(const JsiExecutionContext& execCtx, const Local<JSValueRef>& func)
+{
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(frameNode_);
+    CHECK_NULL_VOID(frameNode);
+
+    if (!func->IsFunction()) {
+        return;
+    }
+
+    auto jsFunc = panda::Global<panda::FunctionRef>(execCtx.vm_, Local<panda::FunctionRef>(func));
+    auto onLoad = [execCtx, funcRef = std::move(jsFunc), node = frameNode](
+                      const std::string& xcomponentId) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("XComponent.onLoad");
+         // 通过xcomponentclient 获取context
+        std::vector<Local<JSValueRef>> argv;
+        JSRef<JSVal> jsVal;
+        if (XComponentClient::GetInstance().GetJSVal(xcomponentId, jsVal)) {
+            argv.emplace_back(jsVal->GetLocalHandle());
+        }
+        funcRef->Call(execCtx.vm_, JSNApi::GetGlobalObject(execCtx.vm_), argv.data(), argv.size());
+    };
+    XComponentModel::GetInstance()->RegisterOnCreate(frameNode, std::move(onLoad));
+}
+
+void JSXComponent::RegisterOnDestroy(const JsiExecutionContext& execCtx, const Local<JSValueRef>& func)
+{
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(frameNode_);
+    CHECK_NULL_VOID(frameNode);
+
+    if (!func->IsFunction()) {
+        return;
+    }
+
+    auto jsFunc = panda::Global<panda::FunctionRef>(execCtx.vm_, Local<panda::FunctionRef>(func));
+    auto onDestroy = [execCtx, funcRef = std::move(jsFunc), node = frameNode]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("XComponent.onDestroy");
+        funcRef->Call(execCtx.vm_, JSNApi::GetGlobalObject(execCtx.vm_), nullptr, 0);
+    };
+    XComponentModel::GetInstance()->RegisterOnDestroy(frameNode, std::move(onDestroy));
 }
 
 void JSXComponent::JsOnDestroy(const JSCallbackInfo& args)

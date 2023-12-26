@@ -25,9 +25,14 @@ class ACE_EXPORT XComponentModelNG : public OHOS::Ace::XComponentModel {
 public:
     void Create(const std::string& id, XComponentType type, const std::string& libraryname,
         const std::shared_ptr<InnerXComponentController>& xcomponentController) override;
+    RefPtr<AceType> Create(int32_t nodeId, float width, float height,
+        const std::string& id, XComponentType type, const std::string& libraryname,
+        const std::shared_ptr<InnerXComponentController>& xcomponentController) override;
     void SetSoPath(const std::string& soPath) override;
     void SetOnLoad(LoadEvent&& onLoad) override;
     void SetOnDestroy(DestroyEvent&& onDestroy) override;
+    void RegisterOnCreate(RefPtr<AceType> node, LoadEvent&& onLoad) override;
+    void RegisterOnDestroy(RefPtr<AceType> node, DestroyEvent&& onDestroy) override;
     bool IsTexture() override;
     void SetDetachCallback(DetachCallback&& onDetach) override;
 

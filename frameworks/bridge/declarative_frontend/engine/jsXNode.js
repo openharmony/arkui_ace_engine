@@ -632,4 +632,28 @@ class RenderNode extends __JSBaseNode__ {
     }
 }
 
-export default { NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, NodeRenderType };
+class XComponentNode extends FrameNode {
+    constructor(uiContext, options, id, type, libraryname) {
+        super(uiContext);
+        this.renderOptions = options;
+        this.elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
+        var node = GetUINativeModule().xcomponentNode;
+        this.nativeModule = node.create(this.elmtId, options, id, type, libraryname)
+        node.registerOnCreateCallback(this.nativeModule, this.onCreate)
+        node.registerOnDestroyCallback(this.nativeModule, this.onDestroy)
+        this.nodePtr_ = node.getFrameNode(this.nativeModule)
+        super.setNodePtr(this.nodePtr_);
+    }
+    onCreate(event) {
+    }
+    onDestroy() {
+    }
+    setRenderType(type) {
+        this.renderOptions.type = type;
+    }
+    getRenderType() {
+        return this.renderOptions.type;
+    }
+}
+
+export default { NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, NodeRenderType, XComponentNode };

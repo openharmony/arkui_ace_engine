@@ -128,16 +128,18 @@ XComponentPattern::XComponentPattern(const std::string& id, XComponentType type,
     : id_(id), type_(type), libraryname_(libraryname), xcomponentController_(xcomponentController)
 {}
 
-void XComponentPattern::OnAttachToFrameNode()
+void XComponentPattern::CreateSurface(int32_t instanceId, float width, float height)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    initSize_.SetWidth(width);
+    initSize_.SetHeight(height);
+    instanceId_ = (instanceId <= 0) ? Container::CurrentId() : instanceId;
     auto renderContext = host->GetRenderContext();
     if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
         renderContext->SetClipToFrame(true);
         renderContext->SetClipToBounds(true);
         renderSurface_ = RenderSurface::Create();
-        instanceId_ = Container::CurrentId();
         renderSurface_->SetInstanceId(instanceId_);
         if (type_ == XComponentType::SURFACE) {
             renderContextForSurface_ = RenderContext::Create();
@@ -169,6 +171,12 @@ void XComponentPattern::OnAttachToFrameNode()
         SetMethodCall();
     }
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+}
+
+void XComponentPattern::OnAttachToFrameNode()
+{
+    instanceId_ = Container::CurrentId();
+    CreateSurface(instanceId_);
 }
 
 void XComponentPattern::OnAreaChangedInner()

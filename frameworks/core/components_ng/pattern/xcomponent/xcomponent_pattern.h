@@ -211,6 +211,17 @@ public:
         });
     }
 
+    void SetXcomponentInit(bool isInit)
+    {
+        hasXComponentInit_ = isInit;
+    }
+
+    bool GetXcomponentInit()
+    {
+        return hasXComponentInit_;
+    }
+
+    void CreateSurface(int32_t instanceId = -1, float width = 0, float height = 0);
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

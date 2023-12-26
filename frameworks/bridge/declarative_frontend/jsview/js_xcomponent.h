@@ -17,13 +17,27 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_XCOMPONENT_H
 
 #include "core/common/container.h"
+
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 
 namespace OHOS::Ace::Framework {
+
+struct XComponentParams {
+    int32_t elmtId = -1;
+    int32_t renderType = 0;
+    std::string surfaceId = "";
+    int32_t width = 0;
+    int32_t height = 0;
+    std::string xcomponentId = "";
+    int32_t xcomponentType = 0;
+    std::string libraryName= "";
+};
+
 class XComponentClient {
 public:
     using GetJSValCallback = std::function<bool(JSRef<JSVal>& param)>;
@@ -138,6 +152,22 @@ public:
     static void JsOpacity(const JSCallbackInfo& args);
     static void OmitEvent(const JSCallbackInfo& args);
     static void OmitAttribute(const JSCallbackInfo& args);
+
+    // For xcomponent node
+    static void* Create(const XComponentParams& params);
+public:
+    void RegisterOnCreate(const JsiExecutionContext& execCtx, const Local<JSValueRef>& func);
+    void RegisterOnDestroy(const JsiExecutionContext& execCtx, const Local<JSValueRef>& func);
+    void SetFrameNode(RefPtr<AceType> frameNode)
+    {
+        frameNode_ = frameNode;
+    }
+    RefPtr<AceType> GetFrameNode()
+    {
+        return frameNode_;
+    }
+private:
+    RefPtr<AceType> frameNode_;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_XCOMPONENT_H
