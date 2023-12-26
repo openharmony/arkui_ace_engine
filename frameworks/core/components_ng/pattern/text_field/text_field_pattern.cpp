@@ -2376,7 +2376,7 @@ bool TextFieldPattern::OnPreShowSelectOverlay(
 #else
     isSupportCameraInput_ = false;
 #endif
-    overlayInfo.menuInfo.showCameraInput = !IsSelected() && isSupportCameraInput_;
+    overlayInfo.menuInfo.showCameraInput = !IsSelected() && isSupportCameraInput_ && !customKeyboardBuilder_;
     auto gesture = host->GetOrCreateGestureEventHub();
     gesture->RemoveTouchEvent(GetTouchListener());
     return true;
