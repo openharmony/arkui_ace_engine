@@ -306,6 +306,19 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
         UpdateAnalyzerUIConfig(dirty->GetGeometryNode());
     }
 
+    // SetUsingContentRectForRenderFrame is set for image paint
+    auto frameNode = GetHost();
+    CHECK_NULL_RETURN(frameNode, false);
+    auto overlayNode = frameNode->GetOverlayNode();
+    if (overlayNode) {
+        auto geometryNode = frameNode->GetGeometryNode();
+        auto offset = geometryNode->GetContentOffset();
+        auto renderContext = overlayNode->GetRenderContext();
+        if (renderContext) {
+            renderContext->SetRenderFrameOffset(offset);
+        }
+    }
+
     return image_;
 }
 
@@ -427,8 +440,12 @@ void ImagePattern::OnModifyDone()
         mouseEvent_ = nullptr;
     }
 
-    if (!IsSupportImageAnalyzerFeature() && isAnalyzerOverlayBuild_) {
-        DeleteAnalyzerOverlay();
+    if (isAnalyzerOverlayBuild_) {
+        if (!IsSupportImageAnalyzerFeature()) {
+            DeleteAnalyzerOverlay();
+        } else {
+            UpdateAnalyzerOverlayLayout();
+        }
     }
 }
 
@@ -916,11 +933,7 @@ void ImagePattern::CreateAnalyzerOverlay()
     overlayNode->SetActive(true);
     isAnalyzerOverlayBuild_ = true;
 
-    auto layoutProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
-    CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
-    
+    UpdateAnalyzerOverlayLayout();    
     auto renderContext = overlayNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateZIndex(INT32_MAX);
@@ -1059,5 +1072,22 @@ void ImagePattern::UpdatePaddingAndBorderWidth(bool isUIConfigUpdate)
     if (needUpdateUIConfig) {
         ImageAnalyzerMgr::GetInstance().UpdateInnerConfig(&overlayData_, &analyzerUIConfig_);
     }
+}
+
+void ImagePattern::UpdateAnalyzerOverlayLayout()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    auto overlayNode = host->GetOverlayNode();
+    CHECK_NULL_VOID(overlayNode);
+    auto overlayLayoutProperty = overlayNode->GetLayoutProperty();
+    CHECK_NULL_VOID(overlayLayoutProperty);
+    overlayLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    overlayLayoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
+    layoutProperty->SetOverlayOffset(Dimension(padding.Offset().GetX()), Dimension(padding.Offset().GetY()));
+    overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 } // namespace OHOS::Ace::NG
