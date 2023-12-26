@@ -312,7 +312,7 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
             dialogProperties_.windowScene = parent;
         }
     }
-
+    dialogProperties_.isSysBlurStyle = false;
     CustomDialogControllerModel::GetInstance()->SetOpenDialog(dialogProperties_, dialogs_, pending_, isShown_,
         std::move(cancelTask), std::move(buildFunc), dialogComponent_, customDialog_, dialogOperation_);
     return;
