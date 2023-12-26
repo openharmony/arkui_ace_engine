@@ -119,7 +119,7 @@ void DragDropManager::CreateDragWindow(const GestureEvent& info, uint32_t width,
 #if !defined(PREVIEW)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto rect = pipeline->GetCurrentWindowRect();
+    auto rect = pipeline->GetDisplayWindowRectInfo();
     dragWindow_ = DragWindow::CreateDragWindow("APP_DRAG_WINDOW",
         static_cast<int32_t>(info.GetGlobalPoint().GetX()) + rect.Left(),
         static_cast<int32_t>(info.GetGlobalPoint().GetY()) + rect.Top(), width, height);
