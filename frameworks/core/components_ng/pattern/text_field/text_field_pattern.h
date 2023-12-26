@@ -157,6 +157,11 @@ public:
         return true;
     }
 
+    bool GetNeedToRequestKeyboardOnFocus() const
+    {
+        return needToRequestKeyboardOnFocus_;
+    }
+
     bool CheckBlurReason();
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;

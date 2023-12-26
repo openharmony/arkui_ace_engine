@@ -145,10 +145,16 @@ void StageManager::PageChangeCloseKeyboard()
 {
     // close keyboard
 #if defined (ENABLE_STANDARD_INPUT)
-    // If pushpage, close it
     if (Container::CurrentId() == CONTAINER_ID_DIVIDE_SIZE) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "StageManager FrameNode notNeedSoftKeyboard.");
-        FocusHub::PushPageCloseKeyboard();
+        auto container = Container::Current();
+        if (!container) {
+            return;
+        }
+        if (!container->IsScenceBoardWindow()) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Container not ScenceBoardWindow.");
+            FocusHub::PushPageCloseKeyboard();
+        }
     }
 #endif
 }
