@@ -231,32 +231,9 @@ RefPtr<UINode> NavigationGroupNode::GetNavDestinationNode(RefPtr<UINode> uiNode)
     return nullptr;
 }
 
-void NavigationGroupNode::AddBackButtonIconToNavDestination(const RefPtr<UINode>& navDestinationNode)
-{
-    auto navigationNode = AceType::WeakClaim(this).Upgrade();
-    auto navigationLayoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
-    CHECK_NULL_VOID(navigationLayoutProperty);
-    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationNode);
-    auto navDestinationLayoutProperty = navDestination->GetLayoutProperty<NavDestinationLayoutProperty>();
-    CHECK_NULL_VOID(navDestinationLayoutProperty);
-
-    // back button icon
-    if (navigationLayoutProperty->HasNoPixMap()) {
-        if (navigationLayoutProperty->HasImageSource()) {
-            navDestinationLayoutProperty->UpdateImageSource(navigationLayoutProperty->GetImageSourceValue());
-        }
-        if (navigationLayoutProperty->HasPixelMap()) {
-            navDestinationLayoutProperty->UpdatePixelMap(navigationLayoutProperty->GetPixelMapValue());
-        }
-        navDestinationLayoutProperty->UpdateNoPixMap(navigationLayoutProperty->GetNoPixMapValue());
-        navDestination->MarkModifyDone();
-    }
-}
-
 void NavigationGroupNode::SetBackButtonEvent(
     const RefPtr<NavDestinationGroupNode>& navDestination, const RefPtr<NavRouterPattern>& navRouterPattern)
 {
-    AddBackButtonIconToNavDestination(navDestination);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestination->GetTitleBarNode());
     CHECK_NULL_VOID(titleBarNode);
     auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());

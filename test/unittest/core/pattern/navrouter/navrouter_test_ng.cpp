@@ -1458,56 +1458,10 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0030, TestSize.Level1)
 
 /**
  * @tc.name: NavrouterTestNg0031
- * @tc.desc: Test NavigationGroupNode::AddBackButtonIconToNavDestination.
- * @tc.type: FUNC
- */
-HWTEST_F(NavrouterTestNg, NavrouterTestNg0031, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create navigation.
-     */
-    auto navRouterPattern = AceType::MakeRefPtr<NavRouterPattern>();
-    auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
-        "parentNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
-    auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
-        "NavDestination", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        "contentNode", 23, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    navDestination->contentNode_ = contentNode;
-    auto preNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
-        V2::NAVDESTINATION_VIEW_ETS_TAG, 33, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    auto preContentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
-        "preContentNode", 34, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    preNavDestination->contentNode_ = preContentNode;
-    auto navBar =
-        NavBarNode::GetOrCreateNavBarNode("navBarNode", 33, []() { return AceType::MakeRefPtr<NavBarPattern>(); });
-    auto preDestinationTitleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
-        "titleBarNode", 55, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
-    auto destinationTitleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
-        "titleBarNode", 66, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
-    auto backButton = FrameNode::CreateFrameNode("BackButton", 77, AceType::MakeRefPtr<ButtonPattern>());
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    auto pattern = navigation->GetPattern<NavigationPattern>();
-    /**
-     * @tc.steps: step2. call navigation->NavTransitionOutAnimation.
-     */
-    navigation->GetLayoutProperty<NavigationLayoutProperty>()->propNoPixMap_ = false;
-    navigation->GetLayoutProperty<NavigationLayoutProperty>()->propImageSource_ = std::nullopt;
-    navigation->GetLayoutProperty<NavigationLayoutProperty>()->propPixelMap_ = std::nullopt;
-    navigation->AddBackButtonIconToNavDestination(navDestination);
-    navigation->GetLayoutProperty<NavigationLayoutProperty>()->propImageSource_ = ImageSourceInfo();
-    auto mockPixelMap = AceType::MakeRefPtr<MockPixelMap>();
-    navigation->GetLayoutProperty<NavigationLayoutProperty>()->propPixelMap_ = mockPixelMap;
-    navigation->AddBackButtonIconToNavDestination(navDestination);
-    ASSERT_FALSE(navDestination->GetLayoutProperty<NavDestinationLayoutProperty>()->GetNoPixMapValue());
-}
-
-/**
- * @tc.name: NavrouterTestNg0032
  * @tc.desc: Test NavBarPattern::OnModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(NavrouterTestNg, NavrouterTestNg0032, TestSize.Level1)
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0031, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create navBar.
@@ -1599,11 +1553,11 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0032, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavrouterTestNg0033
+ * @tc.name: NavrouterTestNg0032
  * @tc.desc: Test TitleBarPattern::OnModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(NavrouterTestNg, NavrouterTestNg0033, TestSize.Level1)
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0032, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create navBar.
@@ -1710,11 +1664,11 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0033, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavrouterTestNg0034
+ * @tc.name: NavrouterTestNg0033
  * @tc.desc: Test TitleBarPattern::OnModifyDone.
  * @tc.type: FUNC
  */
-HWTEST_F(NavrouterTestNg, NavrouterTestNg0034, TestSize.Level1)
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0033, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create navBar titleBarNode etc.
@@ -1790,11 +1744,11 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0034, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavrouterTestNg0035
+ * @tc.name: NavrouterTestNg0034
  * @tc.desc: Test TitleBarLayoutAlgorithm::Measure.
  * @tc.type: FUNC
  */
-HWTEST_F(NavrouterTestNg, NavrouterTestNg0035, TestSize.Level1)
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0034, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create navBar titleBarNode etc, construct layoutWrapper.
@@ -2004,11 +1958,11 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0035, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavrouterTestNg0036
+ * @tc.name: NavrouterTestNg0035
  * @tc.desc: Test TitleBarLayoutAlgorithm::Layout.
  * @tc.type: FUNC
  */
-HWTEST_F(NavrouterTestNg, NavrouterTestNg0036, TestSize.Level1)
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0035, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create navBar titleBarNode etc, construct layoutWrapper.
@@ -2263,11 +2217,11 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0036, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavrouterTestNg0037
+ * @tc.name: NavrouterTestNg0036
  * @tc.desc: Test NavigationStack.
  * @tc.type: FUNC
  */
-HWTEST_F(NavrouterTestNg, NavrouterTestNg0037, TestSize.Level1)
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0036, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create navigationStack.
@@ -2328,11 +2282,11 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0037, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavrouterTestNg0038
+ * @tc.name: NavrouterTestNg0037
  * @tc.desc: Test NavigationStack.
  * @tc.type: FUNC
  */
-HWTEST_F(NavrouterTestNg, NavrouterTestNg0038, TestSize.Level1)
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0037, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create navigationStack.
@@ -2352,11 +2306,11 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0038, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavrouterTestNg0039
+ * @tc.name: NavrouterTestNg0038
  * @tc.desc: Test BarItemPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(NavrouterTestNg, NavrouterTestNg0039, TestSize.Level1)
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0038, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create BarItemNode.
@@ -2397,11 +2351,11 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0039, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavrouterTestNg0040
+ * @tc.name: NavrouterTestNg0039
  * @tc.desc: Test BarItemPattern.
  * @tc.type: FUNC
  */
-HWTEST_F(NavrouterTestNg, NavrouterTestNg0040, TestSize.Level1)
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0039, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create BarItemNode.
@@ -2477,11 +2431,11 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0040, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavrouterTestNg0041
+ * @tc.name: NavrouterTestNg0040
  * @tc.desc: Test BarItemLayoutAlgorithm::Layout.
  * @tc.type: FUNC
  */
-HWTEST_F(NavrouterTestNg, NavrouterTestNg0041, TestSize.Level1)
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0040, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create BarItemNode.
@@ -2541,11 +2495,11 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0041, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavrouterTestNg0042
+ * @tc.name: NavrouterTestNg0041
  * @tc.desc: Test TitleBarLayoutAlgorithm::LayoutMenu
  * @tc.type: FUNC
  */
-HWTEST_F(NavrouterTestNg, NavrouterTestNg0042, TestSize.Level1)
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0041, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create titleBarNode.
@@ -2581,11 +2535,11 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0042, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavrouterTestNg0043
+ * @tc.name: NavrouterTestNg0042
  * @tc.desc: Test TitleBarLayoutAlgorithm::LayoutSubtitle
  * @tc.type: FUNC
  */
-HWTEST_F(NavrouterTestNg, NavrouterTestNg0043, TestSize.Level1)
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0042, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create titleBarNode.
@@ -2628,11 +2582,11 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0043, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavrouterTestNg0044
+ * @tc.name: NavrouterTestNg0043
  * @tc.desc: Test TitleBarLayoutAlgorithm::LayoutTitle
  * @tc.type: FUNC
  */
-HWTEST_F(NavrouterTestNg, NavrouterTestNg0044, TestSize.Level1)
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0043, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create titleBarNode.
@@ -2724,11 +2678,11 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0044, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavrouterTestNg0045
+ * @tc.name: NavrouterTestNg0044
  * @tc.desc: Test TitleBarLayoutAlgorithm::LayoutBackButton
  * @tc.type: FUNC
  */
-HWTEST_F(NavrouterTestNg, NavrouterTestNg0045, TestSize.Level1)
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0044, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create titleBarNode.
@@ -2768,11 +2722,11 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0045, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavrouterTestNg0046
+ * @tc.name: NavrouterTestNg0045
  * @tc.desc: Test TitleBarLayoutAlgorithm::MeasureTitle
  * @tc.type: FUNC
  */
-HWTEST_F(NavrouterTestNg, NavrouterTestNg0046, TestSize.Level1)
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0045, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create titleBarNode.
@@ -2832,11 +2786,11 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0046, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavrouterTestNg0047
+ * @tc.name: NavrouterTestNg0046
  * @tc.desc: Test TitleBarLayoutAlgorithm::LayoutTitle
  * @tc.type: FUNC
  */
-HWTEST_F(NavrouterTestNg, NavrouterTestNg0047, TestSize.Level1)
+HWTEST_F(NavrouterTestNg, NavrouterTestNg0046, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create titleBarNode.
