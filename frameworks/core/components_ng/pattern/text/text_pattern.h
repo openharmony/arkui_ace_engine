@@ -92,6 +92,11 @@ public:
 
     bool IsAtomicNode() const override
     {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        if (host->GetTag() == V2::SYMBOL_ETS_TAG) {
+            return true;
+        }
         return false;
     }
 
