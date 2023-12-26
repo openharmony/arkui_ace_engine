@@ -50,7 +50,7 @@ private:
         const RefPtr<FolderStackLayoutProperty>& folderStackLayoutProperty, const SizeF& size);
     void RangeCalculation(const RefPtr<FolderStackGroupNode>& hostNode,
         const RefPtr<FolderStackLayoutProperty>& folderStackLayoutProperty, const SizeF& size);
-    bool IsFullWindow(SizeF& frameSize, const RefPtr<FolderStackLayoutProperty>& folderStackLayoutProperty);
+    bool IsFullWindow(SizeF& frameSize, const RefPtr<FolderStackLayoutProperty>& folderStackLayoutProperty, LayoutWrapper* layoutWrapper);
     static NG::OffsetF CalculateStackAlignment(
         const NG::SizeF& parentSize, const NG::SizeF& childSize, const Alignment& alignment);
     void AdjustNodeTree(const RefPtr<FolderStackGroupNode>& hostNode);
