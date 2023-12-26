@@ -3166,7 +3166,12 @@ void RichEditorPattern::CalcDeleteValueObj(int32_t currentPosition, int32_t leng
         if ((*it)->placeholderIndex >= 0) {
             RichEditorAbstractSpanResult spanResult;
             spanResult.SetSpanIndex(std::distance(spans_.begin(), it));
-            auto eraseLength = DeleteValueSetImageSpan(*it, spanResult);
+            int32_t eraseLength = 0;
+            if (AceType::InstanceOf<ImageSpanItem>(*it)) {
+                eraseLength = DeleteValueSetImageSpan(*it, spanResult);
+            } else {
+                eraseLength = DeleteValueSetBuilderSpan(*it, spanResult);
+            }
             currentPosition += eraseLength;
             length -= eraseLength;
             info.SetRichEditorDeleteSpans(spanResult);
@@ -3213,6 +3218,26 @@ int32_t RichEditorPattern::DeleteValueSetImageSpan(
         spanResult.SetVerticalAlign(imageLayoutProperty->GetVerticalAlignValue());
     }
     return IMAGE_SPAN_LENGTH;
+}
+
+int32_t RichEditorPattern::DeleteValueSetBuilderSpan(
+    const RefPtr<SpanItem>& spanItem, RichEditorAbstractSpanResult& spanResult)
+{
+    spanResult.SetSpanType(SpanResultType::IMAGE);
+    spanResult.SetSpanRangeEnd(spanItem->position);
+    spanResult.SetSpanRangeStart(spanItem->position - 1);
+    spanResult.SetEraseLength(1);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 1);
+    auto uiNode = host->GetChildAtIndex(spanResult.GetSpanIndex());
+    CHECK_NULL_RETURN(uiNode, 1);
+    auto builderNode = AceType::DynamicCast<FrameNode>(uiNode);
+    CHECK_NULL_RETURN(builderNode, 1);
+    auto geometryNode = builderNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 1);
+    spanResult.SetSizeWidth(geometryNode->GetMarginFrameSize().Width());
+    spanResult.SetSizeHeight(geometryNode->GetMarginFrameSize().Height());
+    return 1;
 }
 
 int32_t RichEditorPattern::DeleteValueSetTextSpan(
