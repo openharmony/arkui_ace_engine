@@ -1400,10 +1400,6 @@ void TextPattern::InitDragEvent()
     CHECK_NULL_VOID(eventHub);
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    if (eventHub->HasOnDragStart()) {
-        gestureHub->SetTextDraggable(false);
-        return;
-    }
     gestureHub->InitDragDropEvent();
     gestureHub->SetTextDraggable(true);
     gestureHub->SetThumbnailCallback(GetThumbnailCallback());
