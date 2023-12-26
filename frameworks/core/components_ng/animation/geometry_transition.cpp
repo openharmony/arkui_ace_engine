@@ -165,6 +165,9 @@ void GeometryTransition::Build(const WeakPtr<FrameNode>& frameNode, bool isNodeI
             MarkLayoutDirty(inNode, 1);
         } else {
             hasInAnim_ = false;
+            inNode->SetLayoutPriority(0);
+            inNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+            inNode->GetGeometryNode()->SetFrameSize(SizeF());
         }
         if (!hasOutAnim_) {
             follow = OnFollowWithoutTransition(true);
