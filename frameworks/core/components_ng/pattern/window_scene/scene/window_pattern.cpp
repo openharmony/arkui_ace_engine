@@ -174,7 +174,6 @@ void WindowPattern::CreateStartingNode()
     auto backgroundColor = SystemProperties::GetColorMode() == ColorMode::DARK ? COLOR_BLACK : COLOR_WHITE;
     const auto& sessionInfo = session_->GetSessionInfo();
     Rosen::SceneSessionManager::GetInstance().GetStartupPage(sessionInfo, startupPagePath, backgroundColor);
-    LOGI("startup page path %{public}s, background color %{public}x", startupPagePath.c_str(), backgroundColor);
 
     startingNode_->GetRenderContext()->UpdateBackgroundColor(Color(backgroundColor));
     imageLayoutProperty->UpdateImageSourceInfo(
@@ -207,8 +206,10 @@ void WindowPattern::CreateSnapshotNode(std::optional<std::shared_ptr<Media::Pixe
         auto imageCache = pipelineContext->GetImageCache();
         CHECK_NULL_VOID(imageCache);
         auto snapshotSize = session_->GetScenePersistence()->GetSnapshotSize();
-        auto cacheKey = ImageUtils::GenerateImageKey(sourceInfo, SizeF(snapshotSize.first, snapshotSize.second));
-        imageCache->ClearCacheImage(cacheKey);
+        imageCache->ClearCacheImage(
+            ImageUtils::GenerateImageKey(sourceInfo, SizeF(snapshotSize.first, snapshotSize.second)));
+        imageCache->ClearCacheImage(
+            ImageUtils::GenerateImageKey(sourceInfo, SizeF(snapshotSize.second, snapshotSize.first)));
         imageCache->ClearCacheImage(sourceInfo.GetKey());
     }
     imageLayoutProperty->UpdateImageFit(ImageFit::FILL);
