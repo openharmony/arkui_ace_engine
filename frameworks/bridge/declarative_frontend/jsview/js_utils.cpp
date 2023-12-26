@@ -41,17 +41,14 @@ namespace {} // namespace
 RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
 {
     if (!obj->IsObject()) {
-        LOGE("info[0] is not an object when try CreatePixelMapFromNapiValue");
         return nullptr;
     }
     auto engine = EngineHelper::GetCurrentEngine();
     if (!engine) {
-        LOGE("CreatePixelMapFromNapiValue engine is null");
         return nullptr;
     }
     auto* nativeEngine = engine->GetNativeEngine();
     if (nativeEngine == nullptr) {
-        LOGE("nativeEngine is nullptr.");
         return nullptr;
     }
 #ifdef USE_ARK_ENGINE
@@ -64,13 +61,11 @@ RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj)
 
     PixelMapNapiEntry pixelMapNapiEntry = JsEngine::GetPixelMapNapiEntry();
     if (!pixelMapNapiEntry) {
-        LOGE("pixelMapNapiEntry is null");
         return nullptr;
     }
 
     void* pixmapPtrAddr = pixelMapNapiEntry(reinterpret_cast<napi_env>(nativeEngine), napiValue);
     if (pixmapPtrAddr == nullptr) {
-        LOGE("Failed to get pixmap pointer");
         return nullptr;
     }
     return PixelMap::CreatePixelMap(pixmapPtrAddr);

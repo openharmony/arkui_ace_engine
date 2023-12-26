@@ -341,7 +341,6 @@ public:
     // Release the UINode hold on the JS object and trigger the delete phase.
     void JSResetRecycleCustomNode(const JSCallbackInfo& info)
     {
-        LOGI("JSResetRecycleCustomNode %d", recycleCustomNode_->RefCount());
         recycleCustomNode_.Reset();
     }
 

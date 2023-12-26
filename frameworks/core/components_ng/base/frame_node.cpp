@@ -1566,25 +1566,19 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentRevertPoint, int32_t 
     auto clip = renderContext->GetClipEdge().value_or(false);
     if (!InResponseRegionList(revertPoint, responseRegionList) || !GetTouchable()) {
         if (clip) {
-            if (SystemProperties::GetDebugEnabled()) {
-                LOGI("TouchTest: frameNode use clip, point is out of region in %{public}s", GetTag().c_str());
-            }
+            LOGD("TouchTest: frameNode use clip, point is out of region in %{public}s", GetTag().c_str());
             return true;
         }
         for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
             const auto& child = iter->Upgrade();
             if (child && !child->IsOutOfTouchTestRegion(subRevertPoint, sourceType)) {
-                if (SystemProperties::GetDebugEnabled()) {
-                    LOGI("TouchTest: point is out of region in %{public}s, but is in child region", GetTag().c_str());
-                }
+                LOGD("TouchTest: point is out of region in %{public}s, but is in child region", GetTag().c_str());
                 isInChildRegion = true;
                 break;
             }
         }
         if (!isInChildRegion) {
-            if (SystemProperties::GetDebugEnabled()) {
-                LOGI("TouchTest: point is out of region in %{public}s", GetTag().c_str());
-            }
+            LOGD("TouchTest: point is out of region in %{public}s", GetTag().c_str());
             return true;
         }
     }

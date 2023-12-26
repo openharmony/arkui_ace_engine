@@ -40,7 +40,6 @@ void FontManager::RegisterFont(
     for (auto iter = fontLoaders_.begin(); iter != fontLoaders_.end(); ++iter) {
         auto& fontLoader = *iter;
         if (fontLoader->GetFamilyName() == familyName) {
-            LOGI("Font is already loaded!");
             return;
         }
     }

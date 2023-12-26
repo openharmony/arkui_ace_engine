@@ -61,7 +61,6 @@ void JSPersistent::Set(const JSCallbackInfo& args)
     return;
 #endif
     if (args.Length() < 2 || !args[0]->IsString() || args[1]->IsUndefined() || args[1]->IsNull()) {
-        LOGW("JSPersistent: Fail to set persistent data, args too few");
         return;
     }
     std::string key = args[0]->ToString();
@@ -69,7 +68,6 @@ void JSPersistent::Set(const JSCallbackInfo& args)
     std::string value = serializedValue->ToString(args.GetVm())->ToString();
     auto container = Container::Current();
     if (!container) {
-        LOGW("container is null");
         return;
     }
     auto executor = container->GetTaskExecutor();
@@ -94,13 +92,11 @@ void JSPersistent::Get(const JSCallbackInfo& args)
     return;
 #endif
     if (args.Length() < 1 || !args[0]->IsString()) {
-        LOGW("JSPersistent: Failed to Get persistent data, args too few");
         return;
     }
     std::string key = args[0]->ToString();
     auto container = Container::Current();
     if (!container) {
-        LOGW("container is null");
         return;
     }
     auto executor = container->GetTaskExecutor();
@@ -122,13 +118,11 @@ void JSPersistent::Delete(const JSCallbackInfo& args)
     return;
 #endif
     if (args.Length() < 1 || !args[0]->IsString()) {
-        LOGW("JSPersistent: Fail to Delete persistent data, args too few");
         return;
     }
     std::string key = args[0]->ToString();
     auto container = Container::Current();
     if (!container) {
-        LOGW("container is null");
         return;
     }
     auto executor = container->GetTaskExecutor();
@@ -144,7 +138,6 @@ void JSPersistent::Clear(const JSCallbackInfo& args)
 #endif
     auto container = Container::Current();
     if (!container) {
-        LOGW("container is null");
         return;
     }
     auto executor = container->GetTaskExecutor();

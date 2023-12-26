@@ -417,7 +417,6 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
         "DispatchTouchEvent id:%d, pointX=%f pointY=%f type=%d", point.id, point.x, point.y, (int)point.type);
     const auto iter = touchTestResults_.find(point.id);
     if (iter == touchTestResults_.end()) {
-        LOGI("the %{public}d touch test result does not exist!", point.id);
         return false;
     }
 

@@ -195,8 +195,8 @@ bool CheckJSCallbackInfo(
                 break;
         }
     }
-    if (SystemProperties::GetDebugEnabled() && !typeVerified) {
-        LOGW("%{public}s: info[0] is not a [%{public}s]", callerName.c_str(),
+    if (!typeVerified) {
+        LOGD("%{public}s: info[0] is not a [%{public}s]", callerName.c_str(),
             unrecognizedType.substr(0, unrecognizedType.size() - 1).c_str());
     }
     return typeVerified || infoTypes.size() == 0;
@@ -741,7 +741,6 @@ void SetPopupMessageOptions(const JSRef<JSObject> messageOptionsObj, const RefPt
         if (fontStyleValue->IsNumber()) {
             int32_t value = fontStyleValue->ToNumber<int32_t>();
             if (value < 0 || value >= static_cast<int32_t>(FONT_STYLES.size())) {
-                LOGI("Text fontStyle(%d) is invalid value", value);
                 return;
             }
             if (popupParam) {
@@ -2583,7 +2582,6 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAppearValue));
         auto onAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAppearFunc), node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            LOGI("About to call onAppear method.");
             ACE_SCORING_EVENT("onAppear");
             PipelineContext::SetCallBackNode(node);
             func->Execute();
@@ -2598,7 +2596,6 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
         auto onDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc),
                                node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            LOGI("About to call onDisappear method.");
             ACE_SCORING_EVENT("onDisappear");
             PipelineContext::SetCallBackNode(node);
             func->Execute();
@@ -6978,7 +6975,6 @@ bool JSViewAbstract::ParseDataDetectorConfig(
         JSRef<JSVal> value = array->GetValueAt(i);
         auto index = value->ToNumber<int32_t>();
         if (index < 0 || index >= static_cast<int32_t>(TEXT_DETECT_TYPES.size())) {
-            LOGI("Text detect types(%d) is invalid value", index);
             return false;
         }
         if (i != 0) {
@@ -7022,8 +7018,6 @@ void JSViewAbstract::GetJsAngle(
         angle = static_cast<float>(StringUtils::StringToDegree(value->ToString()));
     } else if (value->IsNumber()) {
         angle = value->ToNumber<float>();
-    } else {
-        LOGE("Invalid value type");
     }
 }
 
