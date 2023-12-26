@@ -632,8 +632,12 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     }
     if (event.code == KeyCode::KEY_DPAD_RIGHT || (event.pressedCodes.size() == 1 && event.code == KeyCode::KEY_TAB)) {
         if (focusChoice_ == FocusChoice::SEARCH && (isAllTextSelected || isTextEmpty || isOnlyTabPressed)) {
-            if (NearZero(cancelButtonSize_.Height()) && !isSearchButtonEnabled_) {
-                return event.code == KeyCode::KEY_DPAD_RIGHT; // go outside of search only if tab pressed
+            if (NearZero(cancelButtonSize_.Height()) && !isSearchButtonEnabled_ &&
+                event.code == KeyCode::KEY_DPAD_RIGHT) {
+                return true;
+            } else if (NearZero(cancelButtonSize_.Height()) && !isSearchButtonEnabled_) {
+                textFieldPattern->CloseKeyboard(true);
+                return false;
             }
             if (NearZero(cancelButtonSize_.Height())) {
                 focusChoice_ = FocusChoice::SEARCH_BUTTON;
