@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_BASE_H
 
 #include "base/memory/ace_type.h"
+#include "core/common/container.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_client.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
@@ -131,6 +132,19 @@ public:
     }
 
     virtual void ScrollToSafeArea() const {}
+
+    static void UpdateKeyboardOffset(double positionY, double height)
+    {
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto keyboardArea = container->GetKeyboardSafeArea();
+        auto keyboardLength = keyboardArea.bottom_.Length();
+        Rect keyboardRect;
+        keyboardRect.SetRect(0, keyboardArea.bottom_.start, 0, keyboardLength);
+        context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height);
+    }
 
 protected:
     TextSelector textSelector_;

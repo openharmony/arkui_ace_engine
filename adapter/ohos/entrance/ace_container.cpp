@@ -1726,6 +1726,17 @@ NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaTyp
     return {};
 }
 
+NG::SafeAreaInsets AceContainer::GetKeyboardSafeArea()
+{
+    CHECK_NULL_RETURN(uiWindow_, {});
+    Rosen::AvoidArea avoidArea;
+    Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(Rosen::AvoidAreaType::TYPE_KEYBOARD, avoidArea);
+    if (ret == Rosen::WMError::WM_OK) {
+        return ConvertAvoidArea(avoidArea);
+    }
+    return {};
+}
+
 std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextByModule(
     const std::string& bundle, const std::string& module)
 {

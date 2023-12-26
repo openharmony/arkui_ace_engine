@@ -162,6 +162,11 @@ public:
         return {};
     }
 
+    virtual NG::SafeAreaInsets GetKeyboardSafeArea()
+    {
+        return {};
+    }
+
     virtual std::string GetHapPath() const
     {
         return {};

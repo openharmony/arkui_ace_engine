@@ -485,6 +485,8 @@ public:
 
     NG::SafeAreaInsets GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type);
 
+    NG::SafeAreaInsets GetKeyboardSafeArea() override;
+
     // ArkTSCard
     void UpdateFormData(const std::string& data);
     void UpdateFormSharedImage(const std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>>& imageDataMap);
