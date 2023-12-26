@@ -4334,7 +4334,7 @@ void RichEditorPattern::UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& se
     isSupportCameraInput =
         inputMethod && inputMethod->IsInputTypeSupported(MiscServices::InputType::CAMERA_INPUT);
 #endif
-    selectInfo.menuInfo.showCameraInput = !IsSelected() && isSupportCameraInput;
+    selectInfo.menuInfo.showCameraInput = !IsSelected() && isSupportCameraInput && !customKeyboardBuilder_;
     selectInfo.menuInfo.menuIsShow = hasValue || hasData || selectInfo.menuInfo.showCameraInput;
     selectMenuInfo_ = selectInfo.menuInfo;
 }
@@ -5042,6 +5042,7 @@ void RichEditorPattern::HandleOnCameraInput()
     if (!inputMethod) {
         return;
     }
+    StartTwinkling();
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (imeShown_) {
         inputMethod->StartInputType(MiscServices::InputType::CAMERA_INPUT);
