@@ -58,7 +58,7 @@ ArkUINativeModuleValue RatingBridge::SetRatingStepSize(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    
+
     if (secondArg->IsNull() || !secondArg->IsNumber()) {
         GetArkUIInternalNodeAPI()->GetRatingModifier().ResetRatingStepSize(nativeNode);
         return panda::JSValueRef::Undefined(vm);

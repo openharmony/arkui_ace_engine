@@ -54,7 +54,7 @@ ArkUINativeModuleValue RadioBridge::SetRadioStyle(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> uncheckedBorderColor = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> indicatorColor = runtimeCallInfo->GetCallArgRef(NUM_3);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    
+
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, panda::NativePointerRef::New(vm, nullptr));
     auto radioTheme = pipeline->GetTheme<RadioTheme>();
