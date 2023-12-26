@@ -306,19 +306,6 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
         UpdateAnalyzerUIConfig(dirty->GetGeometryNode());
     }
 
-    // SetUsingContentRectForRenderFrame is set for image paint
-    auto frameNode = GetHost();
-    CHECK_NULL_RETURN(frameNode, false);
-    auto overlayNode = frameNode->GetOverlayNode();
-    if (overlayNode) {
-        auto geometryNode = frameNode->GetGeometryNode();
-        auto offset = geometryNode->GetContentOffset();
-        auto renderContext = overlayNode->GetRenderContext();
-        if (renderContext) {
-            renderContext->SetRenderFrameOffset(offset);
-        }
-    }
-
     return image_;
 }
 
@@ -445,6 +432,18 @@ void ImagePattern::OnModifyDone()
             DeleteAnalyzerOverlay();
         } else {
             UpdateAnalyzerOverlayLayout();
+        }
+    }
+
+    // SetUsingContentRectForRenderFrame is set for image paint
+    auto overlayNode = host->GetOverlayNode();
+    if (overlayNode) {
+        auto layoutProperty = host->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        auto padding = layoutProperty->CreatePaddingAndBorder();
+        auto renderContext = overlayNode->GetRenderContext();
+        if (renderContext) {
+            renderContext->SetRenderFrameOffset({-padding.Offset().GetX(), -padding.Offset().GetY()});
         }
     }
 }
@@ -933,7 +932,7 @@ void ImagePattern::CreateAnalyzerOverlay()
     overlayNode->SetActive(true);
     isAnalyzerOverlayBuild_ = true;
 
-    UpdateAnalyzerOverlayLayout();    
+    UpdateAnalyzerOverlayLayout();
     auto renderContext = overlayNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateZIndex(INT32_MAX);
@@ -1087,7 +1086,12 @@ void ImagePattern::UpdateAnalyzerOverlayLayout()
     CHECK_NULL_VOID(overlayLayoutProperty);
     overlayLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     overlayLayoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
-    layoutProperty->SetOverlayOffset(Dimension(padding.Offset().GetX()), Dimension(padding.Offset().GetY()));
+    overlayLayoutProperty->SetOverlayOffset(Dimension(padding.Offset().GetX()), Dimension(padding.Offset().GetY()));
     overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+
+    auto renderContext = overlayNode->GetRenderContext();
+    if (renderContext) {
+        renderContext->SetRenderFrameOffset({-padding.Offset().GetX(), -padding.Offset().GetY()});
+    }
 }
 } // namespace OHOS::Ace::NG

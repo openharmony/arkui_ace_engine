@@ -419,9 +419,7 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
         rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     }
     if (frameOffset_.has_value()) {
-        rsNode_->SetBounds(paintRect.GetX() - frameOffset_->GetX(), paintRect.GetY() - frameOffset_->GetY(),
-            paintRect.Width(), paintRect.Height());
-        rsNode_->SetFrame(paintRect.GetX() - frameOffset_->GetX(), paintRect.GetY() - frameOffset_->GetY(),
+        rsNode_->SetFrame(paintRect.GetX() + frameOffset_->GetX(), paintRect.GetY() + frameOffset_->GetY(),
             paintRect.Width(), paintRect.Height());
     }
     if (!isSynced_) {
@@ -2386,6 +2384,10 @@ void RosenRenderContext::SetPositionToRSNode()
         SetContentRectToFrame(rect);
     } else {
         rsNode_->SetFrame(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+    }
+    if (frameOffset_.has_value()) {
+        rsNode_->SetFrame(rect.GetX() + frameOffset_->GetX(), rect.GetY() + frameOffset_->GetY(),
+            rect.Width(), rect.Height());
     }
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
 }

@@ -491,6 +491,10 @@ void UINode::DumpTree(int32_t depth)
     for (const auto& [item, index] : disappearingChildren_) {
         item->DumpTree(depth + 1);
     }
+    auto frameNode = AceType::DynamicCast<FrameNode>(this);
+    if (frameNode && frameNode->GetOverlayNode()) {
+        frameNode->GetOverlayNode()->DumpTree(depth + 1);
+    }
 }
 
 bool UINode::DumpTreeById(int32_t depth, const std::string& id)
