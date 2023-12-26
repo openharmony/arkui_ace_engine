@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef ARKOALA_API_H
-#define ARKOALA_API_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ARKTS_FRONTEND_ARKOALA_API_H
+#define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ARKTS_FRONTEND_ARKOALA_API_H
 
 #define ARKUI_FULL_API_VERSION 62
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
@@ -128,7 +128,7 @@ enum ArkUIAPIValueKind {
   ValueKind_Float64 = 3,
 };
 
-enum ArkUIAPIEvent_CallbackType {
+enum ArkUIAPIEventCallbackType {
   Void = 0,
   Int32 = 1,
   Float32 = 2,
@@ -152,13 +152,13 @@ enum ArkUIVMKind {
 
 // Current implementation assumes that each argument is 4 bytes,
 // fix decodeEvent() in TS if it will change.
-union ArkUIAPIEvent_CallbackArg {
+union ArkUIAPIEventCallbackArg {
   Arkoala_Int32 i32;
   Arkoala_Uint32 u32;
   Arkoala_Float32 f32;
 };
 
-struct ArkUIAPIEvent_SinglePointer {
+struct ArkUIAPIEventSinglePointer {
   Arkoala_Int32 x;
   Arkoala_Int32 y;
   Arkoala_Int32 state; // 0 - down, 1 - up, 2 - move
@@ -166,35 +166,35 @@ struct ArkUIAPIEvent_SinglePointer {
 
 #define ARKUI_MULTIPOINTER_ARGS_COUNT 10
 
-struct ArkUIAPIEvent_MultiPointer {
+struct ArkUIAPIEventMultiPointer {
   Arkoala_Int32 count;
   Arkoala_Int32 xs[ARKUI_MULTIPOINTER_ARGS_COUNT];
   Arkoala_Int32 ys[ARKUI_MULTIPOINTER_ARGS_COUNT];
   Arkoala_Int32 state[ARKUI_MULTIPOINTER_ARGS_COUNT];
 };
 
-struct ArkUIAPIEvent_TextInput {
+struct ArkUIAPIEventTextInput {
   Arkoala_Int32 nativeStringLow;
   Arkoala_Int32 nativeStringHigh;
 };
 
 #define ARKUI_CALLBACK_ARGS_COUNT 10
 
-struct ArkUIAPIEvent_Callback {
+struct ArkUIAPIEventCallback {
   Arkoala_Int32 id;
   Arkoala_Int32 numArgs;
   Arkoala_Int32 continuationId;
-  ArkUIAPIEvent_CallbackArg args[ARKUI_CALLBACK_ARGS_COUNT];
+  ArkUIAPIEventCallbackArg args[ARKUI_CALLBACK_ARGS_COUNT];
 };
 
 #define ARKUI_ASYNC_EVENT_ARGS_COUNT 12
 
-struct ArkUIAPIEvent_ComponentAsyncEvent {
+struct ArkUIAPIEventComponentAsyncEvent {
   Arkoala_Int32 subKind;
   Arkoala_Int32 data[ARKUI_ASYNC_EVENT_ARGS_COUNT];
 };
 
-struct ArkUIAPIEvent_GestureAsyncEvent {
+struct ArkUIAPIEventGestureAsyncEvent {
   Arkoala_Int32 subKind;
   Arkoala_Int32 repeat;
   Arkoala_Int32 x;
@@ -220,12 +220,12 @@ struct ArkUIAPIEvent {
                       // binary layout.
   Arkoala_Int32 nodeId;
   union {
-    ArkUIAPIEvent_SinglePointer singlePointer;
-    ArkUIAPIEvent_MultiPointer multiPointer;
-    ArkUIAPIEvent_Callback callback;
-    ArkUIAPIEvent_ComponentAsyncEvent componentAsyncEvent;
-    ArkUIAPIEvent_TextInput textInputEvent;
-    ArkUIAPIEvent_GestureAsyncEvent gestureAsyncEvent;
+    ArkUIAPIEventSinglePointer singlePointer;
+    ArkUIAPIEventMultiPointer multiPointer;
+    ArkUIAPIEventCallback callback;
+    ArkUIAPIEventComponentAsyncEvent componentAsyncEvent;
+    ArkUIAPIEventTextInput textInputEvent;
+    ArkUIAPIEventGestureAsyncEvent gestureAsyncEvent;
   };
 };
 
@@ -240,7 +240,7 @@ struct ArkUIAPIAnimationSpec {
 struct ArkUIAPICallbackMethod {
   Arkoala_Int32 (*CallInt)(ArkUIVMContext vmContext, Arkoala_Int32 methodId,
                            Arkoala_Int32 numArgs,
-                           ArkUIAPIEvent_CallbackArg *args);
+                           ArkUIAPIEventCallbackArg *args);
 };
 
 struct ArkUIBorderOptions {
@@ -1269,7 +1269,7 @@ struct ArkUIBasicAPI {
 
   /// Continuations on native side.
   void (*callContinuation)(Arkoala_Int32 continuationId, Arkoala_Int32 argCount,
-                           ArkUIAPIEvent_CallbackArg *args);
+                           ArkUIAPIEventCallbackArg *args);
 };
 
 struct ArkUIAnimationAPI {
@@ -1458,4 +1458,4 @@ struct ArkUIGraphicsAPI {
   const ArkUIGraphicsFontAPI *(*getFontAPI)();
 };
 
-#endif // ARKOALA_API_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ARKTS_FRONTEND_ARKOALA_API_H
