@@ -891,13 +891,13 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             overlayManager->RemovePixelMap();
             pipeline->FlushPipelineImmediately();
         }
-        dragDropManager->FireOnEditableTextComponent(frameNode, DragEventType::ENTER);
     } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
         if (!dragDropManager->IsNeedScaleDragPreview()) {
             InteractionInterface::GetInstance()->SetDragWindowVisible(true);
         }
         dragDropManager->SetIsDragWindowShow(true);
     }
+    dragDropManager->FireOnEditableTextComponent(frameNode, DragEventType::ENTER);
     dragDropProxy_ = dragDropManager->CreateFrameworkDragDropProxy();
     if (!dragDropProxy_) {
         return;

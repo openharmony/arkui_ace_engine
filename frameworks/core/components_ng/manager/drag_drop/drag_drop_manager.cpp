@@ -1337,6 +1337,7 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
 void DragDropManager::FireOnEditableTextComponent(const RefPtr<FrameNode>& frameNode,
     DragEventType type)
 {
+    CHECK_NULL_VOID(frameNode);
     auto frameTag = frameNode->GetTag();
     if (!IsEditableTextComponent(frameTag)) {
         if (SystemProperties::GetDebugEnabled()) {
