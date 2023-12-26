@@ -303,6 +303,7 @@ private:
     bool isSelectedColorAnimEnd_ = true;
     RefPtr<AnimatablePropertyColor> touchBottomPointColor_;
     bool isTouchBottomLoop_ = false;
+    bool ifNeedFinishCallback_ = false;
     std::optional<int32_t> normalToHoverIndex_ = std::nullopt;
     std::optional<int32_t> hoverToNormalIndex_ = std::nullopt;
     bool longPointIsHover_ = false;

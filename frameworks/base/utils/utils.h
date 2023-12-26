@@ -156,9 +156,8 @@ inline bool LessOrEqual(double left, double right)
     return (left - right) < epsilon;
 }
 
-inline bool LessOrEqualHighPrecision(double left, double right)
+inline bool LessOrEqualCustomPrecision(double left, double right, double epsilon = 0.000001f)
 {
-    constexpr double epsilon = 0.000001f;
     return (left - right) < epsilon;
 }
 
@@ -168,9 +167,8 @@ inline bool LessNotEqual(double left, double right)
     return (left - right) < epsilon;
 }
 
-inline bool LessNotEqualHighPrecision(double left, double right)
+inline bool LessNotEqualCustomPrecision(double left, double right, double epsilon = -0.000001f)
 {
-    constexpr double epsilon = -0.000001f;
     return (left - right) < epsilon;
 }
 
@@ -180,9 +178,8 @@ inline bool GreatOrEqual(double left, double right)
     return (left - right) > epsilon;
 }
 
-inline bool GreatOrEqualHighPrecision(double left, double right)
+inline bool GreatOrEqualCustomPrecision(double left, double right, double epsilon = -0.000001f)
 {
-    constexpr double epsilon = -0.000001f;
     return (left - right) > epsilon;
 }
 
@@ -192,9 +189,8 @@ inline bool GreatNotEqual(double left, double right)
     return (left - right) > epsilon;
 }
 
-inline bool GreatNotEqualHighPrecision(double left, double right)
+inline bool GreatNotEqualCustomPrecision(double left, double right, double epsilon = 0.000001f)
 {
-    constexpr double epsilon = 0.000001f;
     return (left - right) > epsilon;
 }
 
