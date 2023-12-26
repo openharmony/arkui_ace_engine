@@ -3419,6 +3419,7 @@ void SwiperPattern::OnScrollStartRecursive(float position)
         return;
     }
     childScrolling_ = true;
+    gestureSwipeIndex_ = currentIndex_;
     StopAnimationOnScrollStart(false);
     NotifyParentScrollStart(position);
 }
