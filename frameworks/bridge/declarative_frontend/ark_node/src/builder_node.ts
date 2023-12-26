@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
+/// <reference path="../../state_mgmt/src/lib/partial_update/pu_viewstack_processor.d.ts" />
 
 class BuilderNode extends BaseNode {
   private updateFuncByElmtId?: Map<number, UpdateFunc | UpdateFuncRecord>;
@@ -26,15 +27,16 @@ class BuilderNode extends BaseNode {
     this.updateFuncByElmtId = new Map();
   }
 
-  getCardId(): number {
+  public getCardId(): number {
     return -1;
   }
 
-  addChild(child: ViewPU): boolean {
+  public addChild(child: ViewPU): boolean {
     return false;
   }
+  public updateStateVarsOfChildByElmtId(elmtId, params: Object): void { }
 
-  build(builder: WrappedBuilder<Object[]>, params: Object) {
+  public build(builder: WrappedBuilder<Object[]>, params: Object) {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     this.params_ = params;
     this.updateFuncByElmtId.clear();
@@ -45,8 +47,38 @@ class BuilderNode extends BaseNode {
     this.frameNode_.setNodePtr(this.nodePtr_);
     __JSScopeUtil__.restoreInstanceId();
   }
+  public update(param: Object) {
+    __JSScopeUtil__.syncInstanceId(this.instanceId_);
+    this.purgeDeletedElmtIds();
+    this.params_ = param;
+    Array.from(this.updateFuncByElmtId.keys()).sort((a: number, b: number): number => {
+      return (a < b) ? -1 : (a > b) ? 1 : 0;
+    }).forEach(elmtId => this.UpdateElement(elmtId));
+    __JSScopeUtil__.restoreInstanceId();
+  }
+  private UpdateElement(elmtId: number): void {
+    // do not process an Element that has been marked to be deleted
+    const obj: UpdateFunc | UpdateFuncRecord | undefined = this.updateFuncByElmtId.get(elmtId);
+    const updateFunc = (typeof obj === "object") ? obj.updateFunc : null;
+    if (typeof updateFunc === "function") {
+      updateFunc(elmtId, /* isFirstRender */ false);
+      this.finishUpdateFunc();
+    }
+  }
 
-  getFrameNode(): FrameNode | null {
+  protected purgeDeletedElmtIds(): void {
+    UINodeRegisterProxy.obtainDeletedElmtIds();
+    UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
+  }
+  public purgeDeleteElmtId(rmElmtId: number): boolean {
+    const result = this.updateFuncByElmtId.delete(rmElmtId);
+    if (result) {
+      UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(rmElmtId);
+    }
+    return result;
+  }
+
+  public getFrameNode(): FrameNode | null {
     if (
       this.frameNode_ !== undefined &&
       this.frameNode_ !== null &&
@@ -59,27 +91,24 @@ class BuilderNode extends BaseNode {
 
   public observeComponentCreation(func: (arg0: number, arg1: boolean) => void) {
     var elmId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
-    func(elmId, true);
+    UINodeRegisterProxy.ElementIdToOwningViewPU_.set(elmId, new WeakRef(this));
+    try {
+      func(elmId, true);
+    } catch (error) {
+      // avoid the incompatible change that move set function before updateFunc.
+      UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(elmId);
+      throw error;
+    }
   }
 
-  public observeComponentCreation2(
-    compilerAssignedUpdateFunc: UpdateFunc,
-    classObject: { prototype: Object; pop?: () => void }
-  ): void {
-    const _componentName: string =
-      classObject && "name" in classObject
-        ? (Reflect.get(classObject, "name") as string)
-        : "unspecified UINode";
+  public observeComponentCreation2(compilerAssignedUpdateFunc: UpdateFunc, classObject: { prototype: Object; pop?: () => void }): void {
+    const _componentName: string = classObject && "name" in classObject ? (Reflect.get(classObject, "name") as string) : "unspecified UINode";
     const _popFunc: () => void =
       classObject && "pop" in classObject ? classObject.pop! : () => { };
-    const updateFunc = (
-      elmtId: number,
-      isFirstRender: boolean,
-      instanceId: number = this.instanceId_
-    ) => {
-      __JSScopeUtil__.syncInstanceId(instanceId);
+    const updateFunc = (elmtId: number, isFirstRender: boolean) => {
+      __JSScopeUtil__.syncInstanceId(this.instanceId_);
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-      compilerAssignedUpdateFunc(elmtId, isFirstRender);
+      compilerAssignedUpdateFunc(elmtId, isFirstRender, this.params_);
       if (!isFirstRender) {
         _popFunc();
       }
@@ -94,11 +123,13 @@ class BuilderNode extends BaseNode {
       updateFunc: updateFunc,
       componentName: _componentName,
     });
+    UINodeRegisterProxy.ElementIdToOwningViewPU_.set(elmtId, new WeakRef(this));
     try {
       updateFunc(elmtId, /* is first render */ true);
     } catch (error) {
       // avoid the incompatible change that move set function before updateFunc.
       this.updateFuncByElmtId.delete(elmtId);
+      UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(elmtId);
       throw error;
     }
   }
@@ -190,6 +221,7 @@ class BuilderNode extends BaseNode {
     // removedChildElmtIds will be filled with the elmtIds of all childten and their children will be deleted in response to if .. else chnage
     var removedChildElmtIds = new Array();
     If.branchId(branchId, removedChildElmtIds);
+    this.purgeDeletedElmtIds();
 
     branchfunc();
   }

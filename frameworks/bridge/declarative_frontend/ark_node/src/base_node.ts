@@ -27,6 +27,7 @@ declare class __JSBaseNode__ {
   constructor(options?: RenderOptions);
   create(builder: (...args: Object[]) => void, params: Object): number | null;
   createRenderNode(): number | null;
+  finishUpdateFunc(): void;
 }
 
 class BaseNode extends __JSBaseNode__ {
@@ -36,11 +37,11 @@ class BaseNode extends __JSBaseNode__ {
     super(options);
     var instanceId: number = -1;
     if (uiContext === undefined) {
-      throw Error("BuilderNode constructor error, param uiContext error");
+      throw Error("Node constructor error, param uiContext error");
     } else {
       if (!(typeof uiContext === "object") || !("instanceId_" in uiContext)) {
         throw Error(
-          "BuilderNode constructor error, param uiContext is invalid"
+          "Node constructor error, param uiContext is invalid"
         );
       }
       instanceId = uiContext.instanceId_;
