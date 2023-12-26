@@ -88,9 +88,9 @@ void JSListItemGroup::Create(const JSCallbackInfo& args)
 
 void JSListItemGroup::SetDivider(const JSCallbackInfo& args)
 {
+    V2::ItemDivider divider;
     if (args.Length() >= 1 && args[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
-        V2::ItemDivider divider;
         if (!ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth)) {
             LOGW("Invalid strokeWidth of divider");
             divider.strokeWidth.Reset();
@@ -104,10 +104,8 @@ void JSListItemGroup::SetDivider(const JSCallbackInfo& args)
         }
         ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin);
         ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin);
-
-        ListItemGroupModel::GetInstance()->SetDivider(divider);
     }
-
+    ListItemGroupModel::GetInstance()->SetDivider(divider);
     args.ReturnSelf();
 }
 
