@@ -30,26 +30,7 @@ struct Index {
   @State appLabel: string = '';
   @State appTitle: string = '';
   @State appLabelColor: Color = 0xff000000;
-  @State appIcon: LayeredDrawableDescriptor = new LayeredDrawableDescriptor();
   @State pixelMap：image.PixelMap = undefined;
-
-  aboutToAppear() {
-    const context = getContext(this);
-    try {
-      this.appLabel = context.resourceManager.getStringSync(context.applicationInfo.labelId);
-    } catch (error) {
-      let code = (error as BusinessError).code;
-      let message = (error as BusinessError).message;
-      console.error(`get appLabel failed, error code: ${code}, message: ${message}.`);
-    }
-    try {
-      this.appIcon = (context.resourceManager.getDrawableDescriptor(context.applicationInfo.iconId) as LayeredDrawableDescriptor);
-    } catch (error) {
-      let code = (error as BusinessError).code;
-      let message = (error as BusinessError).message;
-      console.error(`get appIcon failed, error code: ${code}, message: ${message}.`);
-    }
-  }
 
   onWindowFocused() {
     this.appLabelColor = 0xff000000;
@@ -69,7 +50,7 @@ struct Index {
 
   build() {
     Row() {
-      Image(this.pixelMap ? this.pixelMap : this.appIcon)
+      Image(this.pixelMap)
         .id("enhanceAppIcon")
         .height(TITLE_ICON_SIZE)
         .width(TITLE_ICON_SIZE)
