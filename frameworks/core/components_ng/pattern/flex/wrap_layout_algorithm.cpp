@@ -22,6 +22,7 @@
 #include "base/log/ace_trace.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/base/frame_node.h"
@@ -32,7 +33,6 @@
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/measure_utils.h"
-#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 
@@ -178,9 +178,6 @@ void WrapLayoutAlgorithm::StretchItemsInContent(LayoutWrapper* layoutWrapper, co
     }
     auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     for (const auto& item : content.itemList) {
-        if (UserDefinedCrossAxisSize(item) && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-            continue;
-        }
         auto itemCrossAxisLength = GetItemCrossAxisLength(item->GetGeometryNode());
         // if content cross axis size is larger than item cross axis size,
         // measure items again with content cross axis size as ideal size
@@ -347,13 +344,13 @@ void WrapLayoutAlgorithm::LayoutWholeWrap(
     AddPaddingToStartPosition(startPosition);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         if (isFlexReverse_) {
-            AddExtraSpaceToStartPosition(startPosition, isHorizontal_ ?
-                -frameSize_.Width() : -frameSize_.Height(), true);
+            AddExtraSpaceToStartPosition(
+                startPosition, isHorizontal_ ? -frameSize_.Width() : -frameSize_.Height(), true);
         }
     } else {
         if (isReverse_) {
-            AddExtraSpaceToStartPosition(startPosition, isHorizontal_ ?
-                -frameSize_.Width() : -frameSize_.Height(), true);
+            AddExtraSpaceToStartPosition(
+                startPosition, isHorizontal_ ? -frameSize_.Width() : -frameSize_.Height(), true);
         }
     }
     // if cross axis size is not set, cross axis size is as large as children cross axis size sum
@@ -598,12 +595,12 @@ void WrapLayoutAlgorithm::LayoutContent(const ContentInfo& content, const Offset
         if (isHorizontal_) {
             offset = OffsetF(itemMainAxisOffset, itemCrossAxisOffset);
             contentMainAxisSpan = item->GetMarginFrameSize().Width() + static_cast<float>(spacing_.ConvertToPx()) +
-                                spaceBetweenItemsOnMainAxis.GetX();
+                                  spaceBetweenItemsOnMainAxis.GetX();
             contentStartPosition.AddX(isReverse ? -contentMainAxisSpan : contentMainAxisSpan);
         } else {
             offset = OffsetF(itemCrossAxisOffset, itemMainAxisOffset);
             contentMainAxisSpan = item->GetMarginFrameSize().Height() + static_cast<float>(spacing_.ConvertToPx()) +
-                                spaceBetweenItemsOnMainAxis.GetY();
+                                  spaceBetweenItemsOnMainAxis.GetY();
             contentStartPosition.AddY(isReverse ? -contentMainAxisSpan : contentMainAxisSpan);
         }
         itemWrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
@@ -661,19 +658,6 @@ void WrapLayoutAlgorithm::CalcFlexGrowLayout(
         }
         itemWrapper->Measure(layoutConstraintValue);
     }
-}
-
-bool WrapLayoutAlgorithm::UserDefinedCrossAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const
-{
-    CHECK_NULL_RETURN(layoutWrapper, false);
-    if (layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint()) {
-        auto userDefinedIdealSize = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint()->selfIdealSize;
-        if (userDefinedIdealSize.has_value()) {
-            return isHorizontal_ ? userDefinedIdealSize->Height().has_value()
-                                 : userDefinedIdealSize->Width().has_value();
-        }
-    }
-    return false;
 }
 
 } // namespace OHOS::Ace::NG
