@@ -433,6 +433,8 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
 
     if (curNode) {
         auto curFrameSize = curNode->GetGeometryNode()->GetFrameSize();
+        curNode->GetRenderContext()->ClipWithRRect(
+            RectF(0.0f, 0.0f, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
         curNode->GetRenderContext()->UpdateTranslateInXY({ -curFrameSize.Width() * PARENT_PAGE_OFFSET, 0.0f });
         curTitleNode->GetRenderContext()->UpdateTranslateInXY({ curFrameSize.Width() * PARENT_TITLE_OFFSET, 0.0f });
     }
@@ -507,25 +509,19 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
 
     /* Create animation callback */
     AnimationFinishCallback callback = [weakPreNode = WeakPtr<FrameNode>(preNode),
-        weakPreTitle = WeakPtr<FrameNode>(preTitleNode), weakNavigation = WeakClaim(this),
+        weakNavigation = WeakClaim(this),
         weakCurNode = WeakPtr<FrameNode>(curNode),
-        isNavBar, id = Container::CurrentId(), preFrameSize, curFrameSize, mode] {
+        isNavBar, id = Container::CurrentId()] {
             ContainerScope scope(id);
             auto context = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(context);
             auto taskExecutor = context->GetTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);
             // animation finish event should be posted to UI thread
-            auto onFinishCallback = [weakPreNode, weakPreTitle, weakCurNode, weakNavigation, isNavBar, preFrameSize,
-                mode] {
+            auto onFinishCallback = [weakPreNode, weakCurNode, weakNavigation, isNavBar] {
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
                 auto navigation = weakNavigation.Upgrade();
                 CHECK_NULL_VOID(navigation);
-
-                auto preTitle = weakPreTitle.Upgrade();
-                if (preTitle) {
-                    preTitle->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-                }
                 auto preNode = weakPreNode.Upgrade();
                 CHECK_NULL_VOID(preNode);
                 bool needSetInvisible = false;
@@ -553,12 +549,15 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                         }
                     }
                 }
-                preNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
 
                 navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
-                navigation->isOnAnimation_ = false;
                 auto curNode = weakCurNode.Upgrade();
                 CHECK_NULL_VOID(curNode);
+                if (AceType::DynamicCast<NavDestinationGroupNode>(curNode)->GetTransitionType() !=
+                    PageTransitionType::ENTER_PUSH) {
+                    return;
+                }
+                navigation->isOnAnimation_ = false;
                 curNode->GetRenderContext()->ClipWithRRect(
                     RectF(0.0f, 0.0f, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
             };
