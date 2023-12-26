@@ -32,11 +32,12 @@ RefPtr<RenderContext> GetRenderContext(UINode* UiNode)
 
 void AppendChild(NodeHandle node, NodeHandle child)
 {
-    auto* uiNode = reinterpret_cast<UINode*>(node);
+    auto* currentNode = reinterpret_cast<UINode*>(node);
     auto* childNode = reinterpret_cast<UINode*>(child);
     auto childRef = Referenced::Claim<UINode>(childNode);
-    auto childNumber = uiNode->GetChildren().size();
-    uiNode->AddChild(childRef, childNumber);
+    auto childNumber = currentNode->GetChildren().size();
+    currentNode->AddChild(childRef, childNumber);
+    currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 
 void InsertChildAfter(NodeHandle node, NodeHandle child, NodeHandle sibling)
@@ -50,6 +51,7 @@ void InsertChildAfter(NodeHandle node, NodeHandle child, NodeHandle sibling)
         auto index = currentNode->GetChildIndex(Referenced::Claim<UINode>(siblingNode));
         currentNode->AddChild(Referenced::Claim<UINode>(childNode), index + 1);
     }
+    currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 
 void RemoveChild(NodeHandle node, NodeHandle child)
@@ -57,12 +59,14 @@ void RemoveChild(NodeHandle node, NodeHandle child)
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto* childNode = reinterpret_cast<UINode*>(child);
     currentNode->RemoveChild(Referenced::Claim<UINode>(childNode));
+    currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 
 void ClearChildren(NodeHandle node)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     currentNode->Clean();
+    currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 
 void SetClipToFrame(NodeHandle node, bool useClip)
