@@ -335,7 +335,7 @@ private:
         if (parameterType == ParameterType::DRAGITEMINFO_ARRAY) {
             OnMultipleComplete(dragCtx);
         } else if (parameterType == ParameterType::MIX) {
-            int arrayLenth = dragCtx->customBuilderList.size();
+            int32_t arrayLenth = static_cast<int32_t>(dragCtx->customBuilderList.size());
             for (auto customBuilderValue: dragCtx->customBuilderList) {
                 napi_value cb = nullptr;
                 napi_get_reference_value(dragCtx->env, customBuilderValue, &cb);
