@@ -34,14 +34,14 @@ constexpr int32_t BACKWARD_INITIAL_VALUE = 0;
 bool ParsePagination(const EcmaVM* vm, const Local<JSValueRef>& paginationValue, std::vector<double>& vPaginationValue,
     std::vector<int32_t>& vPaginationUnit)
 {
-    int32_t pLength = 0;
+    uint32_t pLength = 0;
     if (paginationValue->IsArray(vm)) {
         auto paginationArray = panda::Local<panda::ArrayRef>(paginationValue);
         pLength = paginationArray->Length(vm);
         if (pLength <= 0) {
             return false;
         }
-        for (int32_t i = 0; i < pLength; i++) {
+        for (uint32_t i = 0; i < pLength; i++) {
             CalcDimension dims;
             Local<JSValueRef> xValue = panda::ArrayRef::GetValueAt(vm, paginationArray, i);
             if (!ArkTSUtils::ParseJsDimensionVpNG(vm, xValue, dims, true)) {
@@ -171,7 +171,7 @@ ArkUINativeModuleValue ScrollBridge::SetScrollSnap(ArkUIRuntimeCallInfo* runtime
     if (!paginationValue->IsArray(vm)) {
         isArray = false;
     }
-    int32_t pLength = vPaginationValue.size();
+    auto pLength = vPaginationValue.size();
     vPaginationUnit.push_back(snapAlign);
     vPaginationUnit.push_back(static_cast<int32_t>(enableSnapToStartValue->ToBoolean(vm)->Value()));
     vPaginationUnit.push_back(static_cast<int32_t>(enableSnapToEndValue->ToBoolean(vm)->Value()));

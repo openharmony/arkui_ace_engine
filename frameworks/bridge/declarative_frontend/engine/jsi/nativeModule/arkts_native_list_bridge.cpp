@@ -261,7 +261,7 @@ ArkUINativeModuleValue ListBridge::SetListEdgeEffect(ArkUIRuntimeCallInfo* runti
     if (secondArg->IsUndefined() || secondArg->IsNull()) {
         effect = static_cast<int32_t>(EdgeEffect::SPRING);
     } else {
-        effect = secondArg->Uint32Value(vm);
+        effect = secondArg->Int32Value(vm);
     }
     if (effect < static_cast<int32_t>(EdgeEffect::SPRING) || effect > static_cast<int32_t>(EdgeEffect::NONE)) {
         effect = static_cast<int32_t>(EdgeEffect::SPRING);

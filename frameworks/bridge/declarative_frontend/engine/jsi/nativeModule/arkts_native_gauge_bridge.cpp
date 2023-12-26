@@ -200,12 +200,12 @@ ArkUINativeModuleValue GaugeBridge::SetColors(ArkUIRuntimeCallInfo* runtimeCallI
         return panda::JSValueRef::Undefined(vm);
     }
     auto jsColor = panda::CopyableGlobal<panda::ArrayRef>(vm, jsArg);
-    int32_t length = jsColor->Length(vm);
+    size_t length = jsColor->Length(vm);
     auto colors = std::make_unique<uint32_t[]>(length);
     auto weights = std::make_unique<float[]>(length);
 
     auto theme = ArkTSUtils::GetTheme<ProgressTheme>();
-    for (int32_t i = 0; i < length; i++) {
+    for (size_t i = 0; i < length; i++) {
         auto jsValue = jsColor->GetValueAt(vm, jsArg, i);
         if (!jsValue->IsArray(vm)) {
             ResetColor(nativeNode);

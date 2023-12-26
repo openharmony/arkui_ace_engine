@@ -67,7 +67,7 @@ ArkUINativeModuleValue TextTimerBridge::SetFontSize(ArkUIRuntimeCallInfo* runtim
         GetArkUIInternalNodeAPI()->GetTextTimerModifier().ResetFontSize(nativeNode);
     } else {
         GetArkUIInternalNodeAPI()->GetTextTimerModifier().SetFontSize(
-            nativeNode, fontSize.Value(), static_cast<int>(fontSize.Unit()));
+            nativeNode, fontSize.Value(), static_cast<int32_t>(fontSize.Unit()));
     }
     return panda::JSValueRef::Undefined(vm);
 }
