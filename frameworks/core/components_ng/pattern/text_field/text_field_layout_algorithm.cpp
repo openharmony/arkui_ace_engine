@@ -62,6 +62,8 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
         textContent = pattern->GetTextValue();
         if (!pattern->IsTextArea() && isInlineStyle) {
             textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
+        } else {
+            textStyle.SetTextOverflow(TextOverflow::CLIP);
         }
     } else {
         UpdatePlaceholderTextStyle(
@@ -640,6 +642,7 @@ void TextFieldLayoutAlgorithm::SetPropertyToModifier(
     modifier->SetFontWeight(textStyle.GetFontWeight());
     modifier->SetTextColor(textStyle.GetTextColor());
     modifier->SetFontStyle(textStyle.GetFontStyle());
+    modifier->SetTextOverflow(textStyle.GetTextOverflow());
 }
 
 void TextFieldLayoutAlgorithm::UpdateUnitLayout(LayoutWrapper* layoutWrapper)

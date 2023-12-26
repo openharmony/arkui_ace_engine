@@ -5812,7 +5812,11 @@ void TextFieldPattern::OnObscuredChanged(bool isObscured)
 
 void TextFieldPattern::CreateHandles()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    showSelect_ = true;
     ProcessOverlay(true, false, false);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextFieldPattern::NotifyOnEditChanged(bool isChanged)

@@ -125,6 +125,7 @@ void TextFieldContentModifier::SetDefaultAnimatablePropertyValue()
     SetDefaultFontWeight(textStyle);
     SetDefaultTextColor(textStyle);
     SetDefaultFontStyle(textStyle);
+    SetDefaultTextOverflow(textStyle);
 }
 
 void TextFieldContentModifier::SetDefaultPropertyValue()
@@ -206,6 +207,12 @@ void TextFieldContentModifier::SetDefaultFontStyle(const TextStyle& textStyle)
     AttachProperty(fontStyle_);
 }
 
+void TextFieldContentModifier::SetDefaultTextOverflow(const TextStyle& textStyle)
+{
+    textOverflow_ = AceType::MakeRefPtr<PropertyInt>(static_cast<int32_t>(textStyle.GetTextOverflow()));
+    AttachProperty(textOverflow_);
+}
+
 void TextFieldContentModifier::ModifyTextStyle(TextStyle& textStyle)
 {
     if (fontSize_.has_value() && fontSizeFloat_) {
@@ -246,6 +253,14 @@ void TextFieldContentModifier::SetTextColor(const Color& value)
     CHECK_NULL_VOID(animatableTextColor_);
     animatableTextColor_->Set(LinearColor(value));
 }
+
+void TextFieldContentModifier::SetTextOverflow(const TextOverflow value)
+{
+    if (textOverflow_->Get() != static_cast<int32_t>(value)) {
+        textOverflow_->Set(static_cast<int32_t>(value));
+    }
+}
+
 
 void TextFieldContentModifier::SetFontStyle(const OHOS::Ace::FontStyle& value)
 {
