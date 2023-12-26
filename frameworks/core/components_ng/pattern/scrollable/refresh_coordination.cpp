@@ -81,6 +81,6 @@ bool RefreshCoordination::IsRefreshInScroll() const
     CHECK_NULL_RETURN(refreshNode, false);
     auto pattern = refreshNode->GetPattern<RefreshPattern>();
     CHECK_NULL_RETURN(pattern, false);
-    return GreatNotEqual(pattern->GetScrollOffsetValue().GetY(), 0.0);
+    return GreatNotEqual(pattern->GetScrollOffsetValue(), 0.0);
 }
 } // namespace OHOS::Ace::NG
