@@ -179,7 +179,7 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
         textStyle = themeTextStyle;
         textStyle->SetHalfLeading(pipelineContext->GetHalfLeading());
         if (symbolUnicode != 0) {
-            themeTextStyle.isSymbolGlyph_ = true;
+            UpdateSymbolSpanColor(themeTextStyle);
         }
         builder->PushStyle(themeTextStyle);
     }
@@ -209,6 +209,16 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
         builder->PopStyle();
     }
     return -1;
+}
+
+void SpanItem::UpdateSymbolSpanColor(TextStyle& symbolSpanStyle)
+{
+    symbolSpanStyle.isSymbolGlyph_ = true;
+    if (symbolSpanStyle.GetSymbolColorList().empty()) {
+        std::vector<Color> symbolColor;
+        symbolColor.emplace_back(symbolSpanStyle.GetTextColor());
+        symbolSpanStyle.SetSymbolColorList(symbolColor);
+    }
 }
 
 void SpanItem::UpdateTextStyleForAISpan(
