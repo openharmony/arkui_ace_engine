@@ -146,6 +146,15 @@ private:
      */
     GridItemSize GetItemSize(int32_t idx);
 
+    /**
+     * @brief Finds the top row index of an item in the grid.
+     *
+     * @param row The row index of the item's bottom-left tile.
+     * @param col The column index of the item's bottom-left tile.
+     * @return The top row index of the GridItem.
+     */
+    int32_t FindItemTopRow(int32_t row, int32_t col) const;
+
     float length_ = 0.0f; /**< The current main-axis length filled. */
 
     int32_t posY_ = 0;  /**< The current row index in the grid. */

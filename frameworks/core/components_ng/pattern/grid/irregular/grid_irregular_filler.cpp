@@ -263,24 +263,25 @@ void GridIrregularFiller::MeasureBackward(const FillParameters& params, int32_t 
                 continue;
             }
 
-            if (row.at(c) == -1) {
-                // measure irregular items from the bottom-left tile
-                int32_t row = posY_ - 1;
-                while (info_->gridMatrix_.at(row).at(c) == -1) {
-                    --row;
-                }
-                info_->endIndex_ = info_->gridMatrix_.at(row).at(c);
+            int32_t topRow = FindItemTopRow(posY_, c);
+            info_->endIndex_ = info_->gridMatrix_.at(topRow).at(c);
+            MeasureItem(params, c, topRow);
+            if (topRow < posY_) {
+                // measure irregular items only once from the bottom-left tile
                 measured.insert(info_->endIndex_);
-
-                MeasureItem(params, c, row);
-            } else {
-                info_->endIndex_ = row.at(c);
-                MeasureItem(params, c, posY_);
             }
             // skip all columns of this item
             c += GetItemSize(info_->endIndex_).columns - 1;
         }
         length_ += params.mainGap + info_->lineHeightMap_.at(posY_);
     }
+}
+
+int32_t GridIrregularFiller::FindItemTopRow(int32_t row, int32_t col) const
+{
+    while (info_->gridMatrix_.at(row).at(col) == -1) {
+        --row;
+    }
+    return row;
 }
 } // namespace OHOS::Ace::NG

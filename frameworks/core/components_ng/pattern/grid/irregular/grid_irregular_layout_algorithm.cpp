@@ -152,7 +152,7 @@ void GridIrregularLayoutAlgorithm::MeasureOnJump(float mainSize)
     info.startMainLineIndex_ = res.startRow;
     info.startIndex_ = info.gridMatrix_[res.startRow][0];
     info.endMainLineIndex_ = res.endRow;
-    info.endIndex_ = res.endIdx;    
+    info.endIndex_ = res.endIdx;
 }
 
 void GridIrregularLayoutAlgorithm::FillWithItems(float targetLen)
