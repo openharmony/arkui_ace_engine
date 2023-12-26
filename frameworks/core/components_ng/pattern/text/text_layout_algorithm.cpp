@@ -166,17 +166,23 @@ void TextLayoutAlgorithm::FontRegisterCallback(const RefPtr<FrameNode>& frameNod
     CHECK_NULL_VOID(pipeline);
     auto fontManager = pipeline->GetFontManager();
     if (fontManager) {
+        bool isCustomFont = false;
         for (const auto& familyName : textStyle.GetFontFamilies()) {
-            fontManager->RegisterCallbackNG(frameNode, familyName, callback);
+            bool customFont = fontManager->RegisterCallbackNG(frameNode, familyName, callback);
+            if (customFont) {
+                isCustomFont = true;
+            }
         }
         fontManager->AddVariationNodeNG(frameNode);
+        if (isCustomFont || fontManager->IsDefaultFontChanged()) {
+            auto pattern = frameNode->GetPattern<TextPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetIsCustomFont(true);
+            auto modifier = DynamicCast<TextContentModifier>(pattern->GetContentModifier());
+            CHECK_NULL_VOID(modifier);
+            modifier->SetIsCustomFont(true);
+        }
     }
-    auto pattern = frameNode->GetPattern<TextPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetIsCustomFont(true);
-    auto modifier = DynamicCast<TextContentModifier>(pattern->GetContentModifier());
-    CHECK_NULL_VOID(modifier);
-    modifier->SetIsCustomFont(true);
 }
 
 void TextLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
