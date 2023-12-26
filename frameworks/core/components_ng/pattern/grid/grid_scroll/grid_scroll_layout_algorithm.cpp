@@ -329,7 +329,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     auto haveNewLineAtStart = FillBlankAtStart(mainSize, crossSize, layoutWrapper);
     if (gridLayoutInfo_.reachStart_) {
         auto offset = gridLayoutInfo_.currentOffset_;
-        if (!canOverScroll_) {
+        if (!canOverScroll_ && !isDataReload_) {
             gridLayoutInfo_.currentOffset_ = 0.0;
             gridLayoutInfo_.prevOffset_ = 0.0;
         }
@@ -350,7 +350,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
             }
         }
     }
-
+    isDataReload_ = false;
     layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
 }
 
@@ -381,6 +381,13 @@ void GridScrollLayoutAlgorithm::ReloadToStartIndex(float mainSize, float crossSi
     }
     TAG_LOGI(AceLogTag::ACE_GRID, "data reload end, startIndex_:%{public}d, startMainLineIndex_:%{public}d",
         gridLayoutInfo_.startIndex_, gridLayoutInfo_.startMainLineIndex_);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto gridPattern = host->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(gridPattern);
+    if (gridPattern->IsScrollableSpringMotionRunning()) {
+        isDataReload_ = true;
+    }
 }
 
 bool GridScrollLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
@@ -445,7 +452,7 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize)
     }
 
     // Step3. modify [currentOffset_]
-    if (!canOverScroll_) {
+    if (!canOverScroll_ && !isDataReload_) {
         float realOffsetToMoveUp = lengthOfItemsInViewport - mainSize + gridLayoutInfo_.prevOffset_;
         gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.prevOffset_ - realOffsetToMoveUp;
         gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
