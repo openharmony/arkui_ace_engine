@@ -32,5 +32,6 @@ group("advanced_ui_component") {
     "toolbar/interfaces:toolbar",
     "treeview/interfaces:treeview",
     "gridobjectsortcomponent/interfaces:gridobjectsortcomponent",
+    "exceptionprompt/interfaces:exceptionprompt",
   ]
 }
