@@ -418,6 +418,10 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
     } else {
         rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height());
     }
+    if (frameOffset_.has_value()) {
+        rsNode_->SetFrame(paintRect.GetX() + frameOffset_->GetX(), paintRect.GetY() + frameOffset_->GetY(),
+            paintRect.Width(), paintRect.Height());
+    }
     if (!isSynced_) {
         isSynced_ = true;
         auto borderRadius = GetBorderRadius();
@@ -2380,6 +2384,10 @@ void RosenRenderContext::SetPositionToRSNode()
         SetContentRectToFrame(rect);
     } else {
         rsNode_->SetFrame(rect.GetX(), rect.GetY(), rect.Width(), rect.Height());
+    }
+    if (frameOffset_.has_value()) {
+        rsNode_->SetFrame(rect.GetX() + frameOffset_->GetX(), rect.GetY() + frameOffset_->GetY(),
+            rect.Width(), rect.Height());
     }
     ElementRegister::GetInstance()->ReSyncGeometryTransition(GetHost());
 }
@@ -4550,5 +4558,10 @@ void RosenRenderContext::SetShadowRadius(float radius)
 {
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetShadowElevation(radius);
+}
+
+void RosenRenderContext::SetRenderFrameOffset(const OffsetF& offset)
+{
+    frameOffset_ = offset;
 }
 } // namespace OHOS::Ace::NG

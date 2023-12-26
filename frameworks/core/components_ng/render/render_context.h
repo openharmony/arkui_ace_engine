@@ -551,6 +551,7 @@ public:
     {
         return true;
     }
+    virtual void SetRenderFrameOffset(const OffsetF& offset) {}
 
     virtual bool DoTextureExport(uint64_t /* surfaceId */)
     {

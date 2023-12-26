@@ -206,6 +206,7 @@ private:
     void UpdateAnalyzerOverlay();
     void DeleteAnalyzerOverlay();
     bool IsSupportImageAnalyzerFeature();
+    void UpdateAnalyzerOverlayLayout();
 
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::NONE;

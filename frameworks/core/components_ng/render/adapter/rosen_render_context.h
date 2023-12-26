@@ -320,6 +320,7 @@ public:
     void SetShadowAlpha(float alpha) override;
     void SetShadowElevation(float elevation) override;
     void SetShadowRadius(float radius) override;
+    void SetRenderFrameOffset(const OffsetF& offset) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -541,6 +542,8 @@ private:
 
     // translate modifiers for developer
     std::shared_ptr<Rosen::RSTranslateModifier> translateXY_;
+
+    std::optional<OffsetF> frameOffset_;
 
     // graphics modifiers
     struct GraphicModifiers {
