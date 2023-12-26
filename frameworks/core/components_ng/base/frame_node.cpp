@@ -3186,4 +3186,16 @@ OffsetF FrameNode::CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp)
     }
 }
 
+RefPtr<FrameNode> FrameNode::GetNodeContainer()
+{
+    if (GetTag() == "NodeContainer") {
+        return Claim(this);
+    }
+    auto parent = GetParent();
+    while (parent && parent->GetTag() != "NodeContainer") {
+        parent = parent->GetParent();
+    }
+    return AceType::DynamicCast<FrameNode>(parent);
+}
+
 } // namespace OHOS::Ace::NG

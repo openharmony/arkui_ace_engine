@@ -74,16 +74,14 @@ void RenderingContext2DModifier::onDraw(DrawingContext& drawingContext)
     if (drawCmdList->IsEmpty()) {
         return;
     }
-    if (recordingCanvas.GetDrawingType() == Rosen::Drawing::DrawingType::RECORDING) {
-        recordingCanvasDrawSize_.SetWidth(
-            static_cast<RSRecordingCanvas&>(recordingCanvas).GetDrawCmdList()->GetWidth());
-        recordingCanvasDrawSize_.SetHeight(
-            static_cast<RSRecordingCanvas&>(recordingCanvas).GetDrawCmdList()->GetHeight());
-        drawCmdSize_.SetWidth(drawCmdList->GetWidth());
-        drawCmdSize_.SetHeight(drawCmdList->GetHeight());
-        static_cast<RSRecordingCanvas&>(recordingCanvas).GetDrawCmdList()->SetWidth(drawCmdList->GetWidth());
-        static_cast<RSRecordingCanvas&>(recordingCanvas).GetDrawCmdList()->SetHeight(drawCmdList->GetHeight());
-    }
+    recordingCanvasDrawSize_.SetWidth(
+        static_cast<RSRecordingCanvas&>(recordingCanvas).GetDrawCmdList()->GetWidth());
+    recordingCanvasDrawSize_.SetHeight(
+        static_cast<RSRecordingCanvas&>(recordingCanvas).GetDrawCmdList()->GetHeight());
+    drawCmdSize_.SetWidth(drawCmdList->GetWidth());
+    drawCmdSize_.SetHeight(drawCmdList->GetHeight());
+    static_cast<RSRecordingCanvas&>(recordingCanvas).GetDrawCmdList()->SetWidth(drawCmdList->GetWidth());
+    static_cast<RSRecordingCanvas&>(recordingCanvas).GetDrawCmdList()->SetHeight(drawCmdList->GetHeight());
     drawCmdList->Playback(recordingCanvas);
     rsRecordingCanvas_->Clear();
 #endif

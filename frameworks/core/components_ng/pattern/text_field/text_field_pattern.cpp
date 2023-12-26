@@ -681,6 +681,7 @@ void TextFieldPattern::HandleFocusEvent()
         underlineWidth_ = TYPING_UNDERLINE_WIDTH;
         renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
     }
+    selectController_->FireSelectEvent();
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                  : PROPERTY_UPDATE_MEASURE);
 }
@@ -2029,6 +2030,8 @@ void TextFieldPattern::OnModifyDone()
     HandleInputCounterBorder(originLength, maxlength);
     preInputStyle_ = inputStyle;
     Register2DragDropManager();
+    isModifyDone_ = true;
+    selectController_->FireSelectEvent();
 }
 
 void TextFieldPattern::OnAfterModifyDone()
@@ -2237,6 +2240,13 @@ void TextFieldPattern::UpdateCaretPositionWithClamp(const int32_t& pos)
 
 void TextFieldPattern::ProcessOverlay(bool isUpdateMenu, bool animation, bool isShowMenu, bool isHiddenHandle)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->HasFontSize() && NearZero(layoutProperty->GetFontSize()->Value())) {
+        return;
+    }
     selectController_->CalculateHandleOffset();
     ShowSelectOverlayParams showOverlayParams = {
         .animation = animation, .isShowMenu = isShowMenu, .isUpdateMenu = isUpdateMenu
@@ -2257,8 +2267,6 @@ void TextFieldPattern::ProcessOverlay(bool isUpdateMenu, bool animation, bool is
         ShowSelectOverlay(showOverlayParams);
     }
     if (isHiddenHandle) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         auto selectManager = context->GetSelectOverlayManager();
@@ -2373,7 +2381,7 @@ bool TextFieldPattern::OnPreShowSelectOverlay(
 #else
     isSupportCameraInput_ = false;
 #endif
-    overlayInfo.menuInfo.showCameraInput = !IsSelected() && isSupportCameraInput_;
+    overlayInfo.menuInfo.showCameraInput = !IsSelected() && isSupportCameraInput_ && !customKeyboardBuilder_;
     auto gesture = host->GetOrCreateGestureEventHub();
     gesture->RemoveTouchEvent(GetTouchListener());
     return true;
@@ -2458,7 +2466,6 @@ void TextFieldPattern::CloseSelectOverlay(bool animation)
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     gesture->AddTouchEvent(GetTouchListener());
-    UpdateShowMagnifier();
 }
 
 void TextFieldPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
@@ -2570,10 +2577,12 @@ void TextFieldPattern::OnHandleClosed(bool closedByGlobalEvent)
     if (closedByGlobalEvent) {
         UpdateSelectMenuVisibility(false);
     }
-    UpdateShowMagnifier();
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (GetShowMagnifier()) {
+        UpdateShowMagnifier();
+        auto tmpHost = GetHost();
+        CHECK_NULL_VOID(tmpHost);
+        tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void TextFieldPattern::InitEditingValueText(std::string content)
@@ -3729,6 +3738,7 @@ void TextFieldPattern::Delete(int32_t start, int32_t end)
     SwapIfLarger(start, end);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Handle Delete within [%{public}d, %{public}d]", start, end);
     contentController_->erase(start, end - start);
+    UpdateSelection(start);
     selectController_->MoveCaretToContentRect(start);
     CloseSelectOverlay(true);
     StartTwinkling();

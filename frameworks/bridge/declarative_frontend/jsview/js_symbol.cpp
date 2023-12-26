@@ -58,6 +58,10 @@ void JSSymbol::JSBind(BindingTarget globalObj)
 void JSSymbol::Create(const JSCallbackInfo& info)
 {
     uint32_t symbolId;
+    if (info[0]->IsUndefined()) {
+        SymbolModel::GetInstance()->Create(0);
+        return;
+    }
     ParseJsSymbolId(info[0], symbolId);
 
     SymbolModel::GetInstance()->Create(symbolId);

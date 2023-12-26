@@ -496,6 +496,7 @@ int32_t RichEditorPattern::AddTextSpanOperation(const TextSpanOptions& options, 
     spanItem->content = options.value;
     spanItem->SetTextStyle(options.style);
     spanItem->hasResourceFontColor = options.hasResourceFontColor;
+    spanItem->hasResourceDecorationColor = options.hasResourceDecorationColor;
     AddSpanItem(spanItem, offset);
     if (options.paraStyle) {
         int32_t start = 0;
@@ -2114,6 +2115,7 @@ void RichEditorPattern::OnColorConfigurationUpdate()
     auto textLayoutProperty = GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
+    textLayoutProperty->UpdateTextDecorationColor(theme->GetTextStyle().GetTextColor());
     for (auto span : spans) {
         auto spanNode = DynamicCast<SpanNode>(span);
         if (!spanNode) {
@@ -2125,6 +2127,9 @@ void RichEditorPattern::OnColorConfigurationUpdate()
         }
         if (spanItem->hasResourceFontColor) {
             spanNode->UpdateTextColor(theme->GetTextStyle().GetTextColor());
+        }
+        if (spanItem->hasResourceDecorationColor) {
+            spanNode->UpdateTextDecorationColor(theme->GetTextStyle().GetTextColor());
         }
     }
 }
@@ -2436,6 +2441,7 @@ void RichEditorPattern::CreateTextSpanNode(
     spanNode->MountToParent(host, info.GetSpanIndex());
     auto spanItem = spanNode->GetSpanItem();
     spanItem->hasResourceFontColor = true;
+    spanItem->hasResourceDecorationColor = true;
     spanNode->UpdateContent(insertValue);
     AddSpanItem(spanItem, info.GetSpanIndex());
     if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
@@ -3160,7 +3166,12 @@ void RichEditorPattern::CalcDeleteValueObj(int32_t currentPosition, int32_t leng
         if ((*it)->placeholderIndex >= 0) {
             RichEditorAbstractSpanResult spanResult;
             spanResult.SetSpanIndex(std::distance(spans_.begin(), it));
-            auto eraseLength = DeleteValueSetImageSpan(*it, spanResult);
+            int32_t eraseLength = 0;
+            if (AceType::InstanceOf<ImageSpanItem>(*it)) {
+                eraseLength = DeleteValueSetImageSpan(*it, spanResult);
+            } else {
+                eraseLength = DeleteValueSetBuilderSpan(*it, spanResult);
+            }
             currentPosition += eraseLength;
             length -= eraseLength;
             info.SetRichEditorDeleteSpans(spanResult);
@@ -3207,6 +3218,26 @@ int32_t RichEditorPattern::DeleteValueSetImageSpan(
         spanResult.SetVerticalAlign(imageLayoutProperty->GetVerticalAlignValue());
     }
     return IMAGE_SPAN_LENGTH;
+}
+
+int32_t RichEditorPattern::DeleteValueSetBuilderSpan(
+    const RefPtr<SpanItem>& spanItem, RichEditorAbstractSpanResult& spanResult)
+{
+    spanResult.SetSpanType(SpanResultType::IMAGE);
+    spanResult.SetSpanRangeEnd(spanItem->position);
+    spanResult.SetSpanRangeStart(spanItem->position - 1);
+    spanResult.SetEraseLength(1);
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 1);
+    auto uiNode = host->GetChildAtIndex(spanResult.GetSpanIndex());
+    CHECK_NULL_RETURN(uiNode, 1);
+    auto builderNode = AceType::DynamicCast<FrameNode>(uiNode);
+    CHECK_NULL_RETURN(builderNode, 1);
+    auto geometryNode = builderNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 1);
+    spanResult.SetSizeWidth(geometryNode->GetMarginFrameSize().Width());
+    spanResult.SetSizeHeight(geometryNode->GetMarginFrameSize().Height());
+    return 1;
 }
 
 int32_t RichEditorPattern::DeleteValueSetTextSpan(
@@ -4328,7 +4359,7 @@ void RichEditorPattern::UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& se
     isSupportCameraInput =
         inputMethod && inputMethod->IsInputTypeSupported(MiscServices::InputType::CAMERA_INPUT);
 #endif
-    selectInfo.menuInfo.showCameraInput = !IsSelected() && isSupportCameraInput;
+    selectInfo.menuInfo.showCameraInput = !IsSelected() && isSupportCameraInput && !customKeyboardBuilder_;
     selectInfo.menuInfo.menuIsShow = hasValue || hasData || selectInfo.menuInfo.showCameraInput;
     selectMenuInfo_ = selectInfo.menuInfo;
 }
@@ -5036,6 +5067,7 @@ void RichEditorPattern::HandleOnCameraInput()
     if (!inputMethod) {
         return;
     }
+    StartTwinkling();
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     if (imeShown_) {
         inputMethod->StartInputType(MiscServices::InputType::CAMERA_INPUT);

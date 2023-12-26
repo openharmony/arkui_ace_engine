@@ -231,7 +231,7 @@ SelectionInfo TextPattern::GetSpansInfo(int32_t start, int32_t end, GetSpansMeth
     selection.SetSelectionStart(realStart);
     // Verify that realStart, realEnd, and spans_ are valid
     if (realStart > length || realEnd < 0 || spans_.empty() || (start > length && end > length) ||
-        realStart == realEnd) {
+        (method == GetSpansMethod::ONSELECT && realStart == realEnd)) {
         selection.SetResultObjectList(resultObjects);
         return selection;
     }
@@ -250,6 +250,11 @@ SelectionInfo TextPattern::GetSpansInfo(int32_t start, int32_t end, GetSpansMeth
             }
         } else if (uinode->GetTag() == V2::SYMBOL_SPAN_ETS_TAG) {
             ResultObject resultObject = GetSymbolSpanResultObject(uinode, index, realStart, realEnd);
+            if (!resultObject.valueString.empty()) {
+                resultObjects.emplace_back(resultObject);
+            }
+        } else if (uinode->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
+            ResultObject resultObject = GetBuilderResultObject(uinode, index, realStart, realEnd);
             if (!resultObject.valueString.empty()) {
                 resultObjects.emplace_back(resultObject);
             }
@@ -2825,5 +2830,32 @@ int32_t TextPattern::GetSelectionSpanItemIndex(const MouseInfo& info)
         }
     }
     return -1;
+}
+
+ResultObject TextPattern::GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t index, int32_t start, int32_t end)
+{
+    int32_t itemLength = 1;
+    ResultObject resultObject;
+    if (!DynamicCast<FrameNode>(uiNode) || !GetSpanItemByIndex(index)) {
+        return resultObject;
+    }
+    int32_t endPosition = std::min(GetTextContentLength(), GetSpanItemByIndex(index)->position);
+    int32_t startPosition = endPosition - itemLength;
+    if ((start <= startPosition) && (end >= endPosition)) {
+        auto builderNode = DynamicCast<FrameNode>(uiNode);
+        CHECK_NULL_RETURN(builderNode, resultObject);
+        resultObject.spanPosition.spanIndex = index;
+        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
+        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = 0;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
+        resultObject.type = SelectSpanType::TYPEIMAGE;
+        auto geometryNode = builderNode->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, resultObject);
+        resultObject.imageStyle.size[RichEditorImageSize::SIZEWIDTH] = geometryNode->GetMarginFrameSize().Width();
+        resultObject.imageStyle.size[RichEditorImageSize::SIZEHEIGHT] = geometryNode->GetMarginFrameSize().Height();
+        resultObject.valueString = " ";
+    }
+    return resultObject;
 }
 } // namespace OHOS::Ace::NG

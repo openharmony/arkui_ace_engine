@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+const display = requireNapi('display');
 const mediaquery = requireNapi('mediaquery');
 
 export const defaultTheme = {
@@ -49,6 +50,7 @@ export const defaultTheme = {
     },
     button: {
         margin: { top: 16, bottom: 16, left: 16, right: 16 },
+        padding: { top: 4, bottom: 4, left: 4, right: 4 },
         fontSize: {
             id: -1,
             type: 10002,
@@ -513,10 +515,9 @@ export class PopupComponent extends ViewPU {
     }
 
     getMessageFontColor() {
-        var t, e, o, i, n, s, r, l;
-        let h;
-        h = this.message.fontColor ? this.message.fontColor : "" !== this.icon.image && void 0 !== this.icon.image || "" !== this.title.text && void 0 !== this.title.text || "" !== (null === (e = null === (t = this.buttons) || void 0 === t ? void 0 : t[0]) || void 0 === e ? void 0 : e.text) && void 0 !== (null === (i = null === (o = this.buttons) || void 0 === o ? void 0 : o[0]) || void 0 === i ? void 0 : i.text) || "" !== (null === (s = null === (n = this.buttons) || void 0 === n ? void 0 : n[1]) || void 0 === s ? void 0 : s.text) && void 0 !== (null === (l = null === (r = this.buttons) || void 0 === r ? void 0 : r[1]) || void 0 === l ? void 0 : l.text) ? this.theme.message.fontColor : this.theme.message.plainFontColor;
-        return h
+        let t;
+        t = this.message.fontColor ? this.message.fontColor : "" !== this.title.text && void 0 !== this.title.text ? this.theme.message.fontColor : this.theme.message.plainFontColor;
+        return t
     }
 
     getMessagePadding() {
@@ -546,15 +547,19 @@ export class PopupComponent extends ViewPU {
 
     getButtonMargin() {
         return {
-            top: this.theme.button.textMargin.top / 2,
-            bottom: this.theme.button.textMargin.bottom / 2,
-            left: this.theme.button.margin.left / 2,
-            right: this.theme.button.margin.right / 2
+            top: this.theme.button.textMargin.top / 2 - 4,
+            bottom: this.theme.button.textMargin.bottom / 2 - 4,
+            left: this.theme.button.margin.left / 2 - 4,
+            right: this.theme.button.margin.right / 2 - 4
         }
     }
 
     getButtonTextMargin() {
         return { top: this.theme.button.textMargin.bottom / 2 }
+    }
+
+    getButtonTextPadding() {
+        return this.theme.button.padding
     }
 
     getButtonHoverColor() {
@@ -647,11 +652,23 @@ export class PopupComponent extends ViewPU {
         return h
     }
 
+    getApplyMaxSize() {
+        let t;
+        let e;
+        let o;
+        let i = display.getDefaultDisplaySync();
+        t = i.width > 400 ? 400 : i.width - 40 - 40;
+        e = i.height > 480 ? 480 : i.height - 40 - 40;
+        o = { maxWidth: t, maxHeight: e };
+        return o
+    }
+
     initialRender() {
         this.observeComponentCreation2(((t, e) => {
             Row.create();
             Row.alignItems(VerticalAlign.Top);
             Row.padding(this.getWindowsPadding());
+            Row.constraintSize(this.getApplyMaxSize());
             Row.onAreaChange(((t, e) => {
                 this.applyHeight = e.height
             }))
@@ -696,7 +713,8 @@ export class PopupComponent extends ViewPU {
                     Text.textOverflow({ overflow: TextOverflow.Ellipsis });
                     Text.fontWeight(this.getTitleFontWeight());
                     Text.fontSize(this.getTitleFontSize());
-                    Text.fontColor(this.getTitleFontColor())
+                    Text.fontColor(this.getTitleFontColor());
+                    Text.constraintSize({ minHeight: this.getCloseButtonHeight() })
                 }), Text);
                 Text.pop();
                 this.observeComponentCreation2(((t, e) => {
@@ -770,6 +788,7 @@ export class PopupComponent extends ViewPU {
                         this.observeComponentCreation2(((t, e) => {
                             Button.createWithChild();
                             Button.margin(this.getButtonMargin());
+                            Button.padding(this.getButtonTextPadding());
                             Button.backgroundColor(ObservedObject.GetRawObject(this.firstButtonBackgroundColor));
                             Button.onHover((t => {
                                 this.firstButtonBackgroundColor = t ? this.getButtonHoverColor() : this.getButtonBackgroundColor()
@@ -802,6 +821,7 @@ export class PopupComponent extends ViewPU {
                         this.observeComponentCreation2(((t, e) => {
                             Button.createWithChild();
                             Button.margin(this.getButtonMargin());
+                            Button.padding(this.getButtonTextPadding());
                             Button.backgroundColor(ObservedObject.GetRawObject(this.secondButtonBackgroundColor));
                             Button.onHover((t => {
                                 this.secondButtonBackgroundColor = t ? this.getButtonHoverColor() : this.getButtonBackgroundColor()
@@ -910,6 +930,7 @@ export class PopupComponent extends ViewPU {
                         this.observeComponentCreation2(((t, e) => {
                             Button.createWithChild();
                             Button.margin(this.getButtonMargin());
+                            Button.padding(this.getButtonTextPadding());
                             Button.backgroundColor(ObservedObject.GetRawObject(this.firstButtonBackgroundColor));
                             Button.onHover((t => {
                                 this.firstButtonBackgroundColor = t ? this.getButtonHoverColor() : this.getButtonBackgroundColor()
@@ -942,6 +963,7 @@ export class PopupComponent extends ViewPU {
                         this.observeComponentCreation2(((t, e) => {
                             Button.createWithChild();
                             Button.margin(this.getButtonMargin());
+                            Button.padding(this.getButtonTextPadding());
                             Button.backgroundColor(ObservedObject.GetRawObject(this.secondButtonBackgroundColor));
                             Button.onHover((t => {
                                 this.secondButtonBackgroundColor = t ? this.getButtonHoverColor() : this.getButtonBackgroundColor()

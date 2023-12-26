@@ -1465,8 +1465,8 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset)
     turnPageRate_ = (currentTurnPageRate == FLT_MAX ? turnPageRate_ : currentTurnPageRate);
 
     touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
-    if (!IsLoop() && ((currentFirstIndex_ == 0 && GreatNotEqual(turnPageRate_, 0.0f)) ||
-                        (currentFirstIndex_ == TotalCount() - 1 && LessNotEqual(turnPageRate_, 0.0f)))) {
+    if (!IsLoop() && ((currentFirstIndex_ == 0 && GreatNotEqualHighPrecision(turnPageRate_, 0.0f)) ||
+                         (currentFirstIndex_ == TotalCount() - 1 && LessNotEqualHighPrecision(turnPageRate_, 0.0f)))) {
         return;
     }
     HandleTouchBottomLoop();

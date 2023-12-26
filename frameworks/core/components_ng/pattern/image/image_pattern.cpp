@@ -217,6 +217,7 @@ void ImagePattern::OnImageLoadSuccess()
     if (!IsSupportImageAnalyzerFeature() && isAnalyzerOverlayBuild_) {
         DeleteAnalyzerOverlay();
     }
+    UpdateAnalyzerOverlay();
     CreateAnalyzerOverlay();
     host->MarkNeedRenderOnly();
 }
@@ -888,7 +889,50 @@ void ImagePattern::SetImageAnalyzerConfig(const ImageAnalyzerConfig &config)
 
 void ImagePattern::CreateAnalyzerOverlay()
 {
-    if (!IsSupportImageAnalyzerFeature()) {
+    if (!IsSupportImageAnalyzerFeature() || isAnalyzerOverlayBuild_) {
+        return;
+    }
+
+    auto pixelMap = image_->GetPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    napi_value pixelmapNapiVal = ConvertPixmapNapi(pixelMap);
+    auto frameNode = GetHost();
+    auto overlayNode = frameNode->GetOverlayNode();
+
+    auto layoutProps = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    analyzerUIConfig_.imageFit = layoutProps->GetImageFit().value_or(ImageFit::COVER);
+    auto buildNodeFunction = [this, &pixelmapNapiVal]() -> RefPtr<UINode> {
+        ScopedViewStackProcessor builderViewStackProcessor;
+        ImageAnalyzerMgr::GetInstance().BuildNodeFunc(
+            pixelmapNapiVal, &analyzerConfig_, &analyzerUIConfig_, &overlayData_);
+        auto customNode = ViewStackProcessor::GetInstance()->Finish();
+        return customNode;
+    };
+    overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunction());
+    CHECK_NULL_VOID(overlayNode);
+    frameNode->SetOverlayNode(overlayNode);
+    overlayNode->SetParent(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    overlayNode->SetActive(true);
+    isAnalyzerOverlayBuild_ = true;
+
+    auto layoutProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
+    
+    auto renderContext = overlayNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateZIndex(INT32_MAX);
+    auto focusHub = overlayNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(false);
+    overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void ImagePattern::UpdateAnalyzerOverlay()
+{
+    if (!IsSupportImageAnalyzerFeature() || !isAnalyzerOverlayBuild_) {
         return;
     }
     auto pixelMap = image_->GetPixelMap();
@@ -896,42 +940,9 @@ void ImagePattern::CreateAnalyzerOverlay()
     napi_value pixelmapNapiVal = ConvertPixmapNapi(pixelMap);
     auto frameNode = GetHost();
     auto overlayNode = frameNode->GetOverlayNode();
-
-    if (!isAnalyzerOverlayBuild_) {
-        auto layoutProps = GetLayoutProperty<ImageLayoutProperty>();
-        CHECK_NULL_VOID(layoutProps);
-        analyzerUIConfig_.imageFit = layoutProps->GetImageFit().value_or(ImageFit::COVER);
-        auto buildNodeFunction = [this, &pixelmapNapiVal]() -> RefPtr<UINode> {
-            ScopedViewStackProcessor builderViewStackProcessor;
-            ImageAnalyzerMgr::GetInstance().BuildNodeFunc(
-                pixelmapNapiVal, &analyzerConfig_, &analyzerUIConfig_, &overlayData_);
-            auto customNode = ViewStackProcessor::GetInstance()->Finish();
-            return customNode;
-        };
-        overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunction());
-        CHECK_NULL_VOID(overlayNode);
-        frameNode->SetOverlayNode(overlayNode);
-        overlayNode->SetParent(AceType::WeakClaim(AceType::RawPtr(frameNode)));
-        overlayNode->SetActive(true);
-        isAnalyzerOverlayBuild_ = true;
-
-        auto layoutProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
-        CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
-        
-        auto renderContext = overlayNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->UpdateZIndex(INT32_MAX);
-        auto focusHub = overlayNode->GetOrCreateFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusHub->SetFocusable(false);
-        overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    } else {
-        ImageAnalyzerMgr::GetInstance().UpdateImage(
-            &overlayData_, pixelmapNapiVal, &analyzerConfig_, &analyzerUIConfig_);
-        overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    }
+    ImageAnalyzerMgr::GetInstance().UpdateImage(
+        &overlayData_, pixelmapNapiVal, &analyzerConfig_, &analyzerUIConfig_);
+    overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void ImagePattern::DeleteAnalyzerOverlay()

@@ -12,9 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+var NodeRenderType;
+(function (NodeRenderType) {
+    NodeRenderType[NodeRenderType["RENDER_TYPE_DISPLAY"] = 0] = "RENDER_TYPE_DISPLAY";
+    NodeRenderType[NodeRenderType["RENDER_TYPE_TEXTURE"] = 1] = "RENDER_TYPE_TEXTURE";
+})(NodeRenderType || (NodeRenderType = {}));
 class BaseNode extends __JSBaseNode__ {
-    constructor(uiContext) {
-        super();
+    constructor(uiContext, options) {
+        super(options);
         var instanceId = -1;
         if (uiContext === undefined) {
             throw Error("BuilderNode constructor error, param uiContext error");
@@ -44,8 +49,8 @@ class BaseNode extends __JSBaseNode__ {
  */
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
 class BuilderNode extends BaseNode {
-    constructor(uiContext) {
-        super(uiContext);
+    constructor(uiContext, options) {
+        super(uiContext, options);
         this.uiContext_ = uiContext;
         this.updateFuncByElmtId = new Map();
     }
@@ -587,4 +592,4 @@ class RenderNode extends __JSBaseNode__ {
     }
 }
 
-export default { NodeController, BuilderNode, BaseNode, RenderNode, FrameNode };
+export default { NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, NodeRenderType };

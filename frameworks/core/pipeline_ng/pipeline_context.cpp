@@ -472,7 +472,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     CHECK_RUN_ON(UI);
     ACE_FUNCTION_TRACE();
     auto recvTime = GetSysTimestamp();
-    postEventManager_->CheckNeedReissueCancelEvent(recvTime);
     static const std::string abilityName = AceApplicationInfo::GetInstance().GetProcessName().empty()
                                                ? AceApplicationInfo::GetInstance().GetPackageName()
                                                : AceApplicationInfo::GetInstance().GetProcessName();
@@ -2898,6 +2897,12 @@ void PipelineContext::SetIsDragging(bool isDragging)
         return;
     }
     eventManager_->SetIsDragging(isDragging);
+}
+
+void PipelineContext::ResetDragging()
+{
+    CHECK_NULL_VOID(dragDropManager_);
+    dragDropManager_->ResetDragging();
 }
 
 void PipelineContext::SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow)

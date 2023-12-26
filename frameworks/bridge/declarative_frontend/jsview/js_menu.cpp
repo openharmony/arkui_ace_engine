@@ -135,13 +135,12 @@ void JSMenu::SetWidth(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], width)) {
         return;
     }
-
+    bool percentTag = width.ToString().find('%') != std::string::npos;
     auto menuWidthToPx = width.ConvertToPx();
     auto minMenuWidthToPx = MIN_MENU_WIDTH.ConvertToPx();
-    if (menuWidthToPx < minMenuWidthToPx) {
+    if ((menuWidthToPx < minMenuWidthToPx) && !percentTag) {
         return;
     }
-
     MenuModel::GetInstance()->SetWidth(width);
 }
 

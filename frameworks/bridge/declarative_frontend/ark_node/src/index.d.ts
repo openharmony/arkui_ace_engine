@@ -23,7 +23,6 @@ declare interface TouchEvent {
 declare type UpdateFunc = (elmtId: number, isFirstRender: boolean) => void;
 
 interface UpdateFuncRecord {
-
     updateFunc: UpdateFunc;
     componentName: string;
     node?: object;

@@ -182,7 +182,8 @@ void DrawDrawingImage(RSCanvas* canvas, const std::shared_ptr<RSImage>& drawingI
     auto dstRect = RSRect(0, 0, width, height);
     RSSamplingOptions sampling;
     canvas->AttachBrush(brush);
-    canvas->DrawImageRect(*drawingImage, srcRect, dstRect, sampling);
+    canvas->DrawImageRect(
+        *drawingImage, srcRect, dstRect, sampling, Drawing::SrcRectConstraint::FAST_SRC_RECT_CONSTRAINT);
     canvas->DetachBrush();
 }
 #endif

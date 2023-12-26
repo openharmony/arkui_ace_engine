@@ -51,7 +51,6 @@ JSRef<JSObject> JsTouchFunction::CreateJSEventInfo(TouchEventInfo& info)
     JSRef<JSArray> touchArr = JSRef<JSArray>::New();
     JSRef<JSArray> changeTouchArr = JSRef<JSArray>::New();
     eventObj->SetProperty<double>("source", static_cast<int32_t>(info.GetSourceDevice()));
-    eventObj->SetProperty<double>("currentSysTime", static_cast<double>(info.GetCurrentSysTime()));
     eventObj->SetProperty<double>("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
     auto target = CreateEventTargetObject(info);
     eventObj->SetPropertyObject("target", target);

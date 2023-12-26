@@ -26,6 +26,7 @@
 #include "include/core/SkRefCnt.h"
 #include "render_service_client/core/animation/rs_particle_params.h"
 #include "render_service_client/core/ui/rs_node.h"
+#include "render_service_client/core/ui/rs_texture_export.h"
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/offset_t.h"
@@ -224,6 +225,7 @@ public:
     void ClearChildren() override;
     void SetBounds(float positionX, float positionY, float width, float height) override;
     void OnTransformTranslateUpdate(const TranslateOptions& value) override;
+    bool DoTextureExport(uint64_t surfaceId) override;
 
     RectF GetPaintRectWithTransform() override;
 
@@ -560,6 +562,8 @@ private:
     bool isTouchUpFinished_ = true;
 
     bool useContentRectForRSFrame_;
+
+    std::shared_ptr<Rosen::RSTextureExport> rsTextureExport_;
 
     template<typename Modifier, typename PropertyType>
     friend class PropertyTransitionEffectTemplate;

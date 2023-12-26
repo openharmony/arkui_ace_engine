@@ -3166,8 +3166,7 @@ void JsiEngine::RegisterInitWorkerFunc()
         };
         bool debugMode = AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint();
         panda::JSNApi::DebugOption debugOption = { libraryPath.c_str(), debugMode };
-        JSNApi::NotifyDebugMode(
-            tid, vm, libraryPath.c_str(), debugOption, tid, workerPostTask, debugVersion, debugMode);
+        JSNApi::NotifyDebugMode(tid, vm, debugOption, tid, workerPostTask, debugVersion);
 #endif
         instance->RegisterConsoleModule(arkNativeEngine);
         // load jsfwk

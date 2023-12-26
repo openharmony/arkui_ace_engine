@@ -706,6 +706,18 @@ void UINode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
     }
 }
 
+void UINode::CreateExportTextureInfoIfNeeded()
+{
+    if (!exportTextureInfo_) {
+        exportTextureInfo_ = MakeRefPtr<ExportTextureInfo>();
+    }
+}
+
+bool UINode::IsNeedExportTexture() const
+{
+    return exportTextureInfo_ && exportTextureInfo_->GetCurrentRenderType() == NodeRenderType::RENDER_TYPE_TEXTURE;
+}
+
 void UINode::SetActive(bool active)
 {
     for (const auto& child : GetChildren()) {

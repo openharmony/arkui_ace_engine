@@ -2303,13 +2303,6 @@ void WebDelegate::SetWebCallBack()
             }
             return std::string();
         });
-        webController->SetIsIncognitoModeImpl([weak = WeakClaim(this)]() {
-            auto delegate = weak.Upgrade();
-            if (delegate) {
-                return delegate->IsIncognitoMode();
-            }
-            return false;
-        });
     } else {
         TAG_LOGW(AceLogTag::ACE_WEB, "web controller is nullptr");
     }
@@ -2339,7 +2332,7 @@ void WebDelegate::InitWebViewWithWindow()
             delegate->nweb_ =
                 OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
                     delegate->window_.GetRefPtr(), initArgs,
-                    delegate->IsIncognitoMode());
+                    delegate->incognitoMode_);
             if (delegate->nweb_ == nullptr) {
                 delegate->window_ = nullptr;
                 return;
@@ -5228,14 +5221,6 @@ void WebDelegate::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t heigh
         nweb_->SetDrawRect(x, y, width, height);
     }
 }
-
-bool WebDelegate::IsIncognitoMode() const
-{
-    if (nweb_) {
-        return nweb_->IsIncognitoMode();
-    }
-    return false;
-}
 #endif
 
 std::string WebDelegate::GetUrlStringParam(const std::string& param, const std::string& name) const
@@ -5596,14 +5581,13 @@ void WebDelegate::OnOverScroll(float xOffset, float yOffset)
         TaskExecutor::TaskType::JS);
 }
 
-void WebDelegate::SetTouchEventInfo(
-    const OHOS::NWeb::NativeEmbedTouchEvent& touchEvent, TouchEventInfo& touchEventInfo)
+void WebDelegate::SetTouchEventInfo(const OHOS::NWeb::NativeEmbedTouchEvent& touchEvent, TouchEventInfo& touchEventInfo)
 {
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     TouchEvent event{touchEvent.id, touchEvent.x, touchEvent.y, touchEvent.screenX, touchEvent.screenY,
         static_cast<OHOS::Ace::TouchType>(touchEvent.type)};
-    webPattern->SetTouchEventInfo(event, touchEventInfo, Offset(touchEvent.offsetX, touchEvent.offsetY));
+    webPattern->SetTouchEventInfo(event, touchEventInfo);
 }
 
 void WebDelegate::OnNativeEmbedLifecycleChange(const OHOS::NWeb::NativeEmbedDataInfo& dataInfo)

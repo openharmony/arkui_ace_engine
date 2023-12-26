@@ -1045,6 +1045,15 @@ public:
     bool HasFocus() const;
     void StopTwinkling();
 
+    bool IsModifyDone()
+    {
+        return isModifyDone_;
+    }
+    void SetModifyDoneStatus(bool value)
+    {
+        isModifyDone_ = value;
+    }
+
     const TimeStamp& GetLastClickTime()
     {
         return lastClickTimeStamp_;
@@ -1367,6 +1376,7 @@ private:
     OffsetF localOffset_;
     bool isTouchCaret_ = false;
     bool needSelectAll_ = false;
+    bool isModifyDone_ = false;
 };
 } // namespace OHOS::Ace::NG
 

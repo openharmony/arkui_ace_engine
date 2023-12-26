@@ -231,10 +231,9 @@ void ImageAnimatorPattern::OnModifyDone()
     }
     GenerateCachedImages();
     auto index = nowImageIndex_;
-    if ((status_ == Animator::Status::IDLE || status_ == Animator::Status::STOPPED) && firstUpdateEvent_) {
+    if ((status_ == Animator::Status::IDLE || status_ == Animator::Status::STOPPED) && !firstUpdateEvent_) {
         index = isReverse_ ? (size - 1) : 0;
     }
-    SetShowingIndex(index);
 
     if (imagesChangedFlag_) {
         animator_->ClearInterpolators();
@@ -253,6 +252,7 @@ void ImageAnimatorPattern::OnModifyDone()
         case Animator::Status::IDLE:
             animator_->Cancel();
             ResetFormAnimationFlag();
+            SetShowingIndex(index);
             break;
         case Animator::Status::PAUSED:
             animator_->Pause();
