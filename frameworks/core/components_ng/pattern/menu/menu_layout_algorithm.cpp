@@ -1526,6 +1526,8 @@ void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, L
 {
     auto pipelineContext = GetCurrentPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
+    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
 
     float maxAvailableHeight = 0;
     if (hierarchicalParameters_) {
@@ -1537,11 +1539,15 @@ void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, L
         auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
         auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
+#if defined(PREVIEW)
+        if (menuPattern->IsSelectOverlayCustomMenu()) {
+            windowGlobalRect.SetHeight(constraint.maxSize.Height());
+        }
+#endif
         maxAvailableHeight = windowGlobalRect.Height() - top - bottom;
     }
     float maxSpaceHeight = maxAvailableHeight * HEIGHT_CONSTRAINT_FACTOR;
 	
-    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
     if (menuPattern->IsHeightModifiedBySelect()) {
         auto menuLayoutProps = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
         auto selectModifiedHeight = menuLayoutProps->GetSelectModifiedHeight().value();
