@@ -46,6 +46,7 @@ public:
     static JSRef<JSObject> CreateJSSpanResultObject(const ResultObject& resultObject);
     static JSRef<JSVal> CreateJSSelection(const SelectionInfo& selectInfo);
     static JSRef<JSObject> CreateJSTextStyleResult(const TextStyleResult& textStyleResult);
+    static JSRef<JSObject> CreateJSSymbolSpanStyleResult(const SymbolSpanStyle& symbolSpanStyle);
     static JSRef<JSObject> CreateJSImageStyleResult(const ImageStyleResult& imageStyleResult);
     static JSRef<JSObject> CreateParagraphStyleResult(const ParagraphInfo& info);
 
@@ -84,11 +85,14 @@ public:
     }
     void AddImageSpan(const JSCallbackInfo& args);
     void AddTextSpan(const JSCallbackInfo& args);
+    void AddSymbolSpan(const JSCallbackInfo& args);
     void AddPlaceholderSpan(const JSCallbackInfo& args);
     void ParseOptions(const JSCallbackInfo& args, SpanOptionBase& placeholderSpan);
     void DeleteSpans(const JSCallbackInfo& args);
     ImageSpanAttribute ParseJsImageSpanAttribute(JSRef<JSObject> imageAttribute);
     void ParseJsTextStyle(
+        const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
+    void ParseJsSymbolSpanStyle(
         const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle);
     ImageSpanOptions CreateJsImageOptions(const JSCallbackInfo& args);
     void SetCaretOffset(const JSCallbackInfo& args);

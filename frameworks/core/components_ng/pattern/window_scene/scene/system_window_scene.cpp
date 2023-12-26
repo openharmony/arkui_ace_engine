@@ -15,8 +15,11 @@
 
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 
+#include "ui/rs_canvas_node.h"
 #include "ui/rs_surface_node.h"
 
+#include "adapter/ohos/entrance/mmi_event_convertor.h"
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/pattern/window_scene/scene/window_event_process.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -69,18 +72,15 @@ void SystemWindowScene::OnAttachToFrameNode()
     session_->SetUINodeId(host->GetAccessibilityId());
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
-    context->SetRSNode(surfaceNode);
-    surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
 
-    auto gestureHub = host->GetOrCreateGestureEventHub();
-    auto touchCallback = [weakSession = wptr(session_)](TouchEventInfo& info) {
-        auto session = weakSession.promote();
-        CHECK_NULL_VOID(session);
-        const auto pointerEvent = info.GetPointerEvent();
-        CHECK_NULL_VOID(pointerEvent);
-        session->TransferPointerEvent(pointerEvent);
-    };
-    gestureHub->SetTouchEvent(std::move(touchCallback));
+    if (!session_->IsSystemInput()) {
+        context->SetRSNode(surfaceNode);
+        surfaceNode->SetBoundsChangedCallback(boundsChangedCallback_);
+    } else {
+        auto rsNode = Rosen::RSCanvasNode::Create();
+        context->SetRSNode(rsNode);
+        rsNode->SetBoundsChangedCallback(boundsChangedCallback_);
+    }
 
     auto mouseEventHub = host->GetOrCreateInputEventHub();
     auto mouseCallback = [weakThis = WeakClaim(this), weakSession = wptr(session_)](MouseInfo& info) {
@@ -102,6 +102,75 @@ void SystemWindowScene::OnAttachToFrameNode()
     mouseEventHub->SetMouseEvent(std::move(mouseCallback));
 
     RegisterFocusCallback();
+    RegisterEventCallback();
+    RegisterResponseRegionCallback();
+}
+
+void SystemWindowScene::RegisterEventCallback()
+{
+    CHECK_NULL_VOID(session_);
+    auto pointerEventCallback =
+        [weakThis = WeakClaim(this), instanceId = instanceId_](std::shared_ptr<MMI::PointerEvent> PointerEvent) {
+            ContainerScope Scope(instanceId);
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            pipelineContext->PostAsyncEvent([weakThis, PointerEvent]() {
+                auto self = weakThis.Upgrade();
+                auto host = self->GetHost();
+                CHECK_NULL_VOID(host);
+                WindowSceneHelper::InjectPointerEvent(host, PointerEvent);
+            },
+                TaskExecutor::TaskType::UI);
+    };
+    session_->SetNotifySystemSessionPointerEventFunc(std::move(pointerEventCallback));
+
+    auto keyEventCallback = [instanceId = instanceId_](std::shared_ptr<MMI::KeyEvent> KeyEvent) {
+        ContainerScope Scope(instanceId);
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->PostAsyncEvent([KeyEvent]() {
+            WindowSceneHelper::InjectKeyEvent(KeyEvent);
+        },
+            TaskExecutor::TaskType::UI);
+    };
+    session_->SetNotifySystemSessionKeyEventFunc(std::move(keyEventCallback));
+}
+
+void SystemWindowScene::RegisterResponseRegionCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+
+    auto touchCallback = [weakSession = wptr(session_)](TouchEventInfo& info) {
+        auto session = weakSession.promote();
+        CHECK_NULL_VOID(session);
+        const auto pointerEvent = info.GetPointerEvent();
+        CHECK_NULL_VOID(pointerEvent);
+        session->TransferPointerEvent(pointerEvent);
+    };
+    gestureHub->SetTouchEvent(std::move(touchCallback));
+
+    auto responseRegionCallback = [weakThis = WeakClaim(this), weakSession = wptr(session_)](
+        const std::vector<DimensionRect>& responseRegion) {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        auto session = weakSession.promote();
+        CHECK_NULL_VOID(session);
+        std::vector<Rosen::Rect> hotAreas;
+        for (auto& rect : responseRegion) {
+            Rosen::Rect windowRect {
+                .posX_ = std::round(rect.GetOffset().GetX().Value()),
+                .posY_ = std::round(rect.GetOffset().GetY().Value()),
+                .width_ = std::round(rect.GetWidth().Value()),
+                .height_ = std::round(rect.GetHeight().Value()),
+            };
+            hotAreas.push_back(windowRect);
+        }
+        session->SetTouchHotAreas(hotAreas);
+    };
+    gestureHub->SetResponseRegionFunc(responseRegionCallback);
 }
 
 void SystemWindowScene::RegisterFocusCallback()

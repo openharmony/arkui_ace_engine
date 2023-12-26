@@ -237,12 +237,16 @@ HWTEST_F(AppBarTestNg, AppBarSetIconColor008, TestSize.Level1)
     auto faBtn = atom->GetLastChild();
     auto faIcon = AceType::DynamicCast<FrameNode>(faBtn->GetFirstChild());
     auto property = faIcon->GetLayoutProperty<ImageLayoutProperty>();
-    auto originColor = property->GetImageSourceInfo()->GetFillColor();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
+    ASSERT_NE(appBarTheme, nullptr);
+
     appBar->SetIconColor(Color::RED);
     EXPECT_EQ(property->GetImageSourceInfo()->GetFillColor(), Color::RED);
     std::optional<Color> NonColor = std::nullopt;
     appBar->SetIconColor(NonColor);
-    EXPECT_EQ(property->GetImageSourceInfo()->GetFillColor(), originColor);
+    EXPECT_EQ(property->GetImageSourceInfo()->GetFillColor(), appBarTheme->GetTextColor());
 }
 
 /**
@@ -297,14 +301,14 @@ HWTEST_F(AppBarTestNg, AppBarWithNavigation0010, TestSize.Level1)
     auto uiFaButton = appBar->atom_->GetLastChild();
     auto uiFaIcon = uiFaButton->GetFirstChild();
     auto faIcon = AceType::DynamicCast<FrameNode>(uiFaIcon);
+    auto property = backIcon->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(property, nullptr);
     /**
      * @tc.The parameters required to construct SetEachIconColor
      * @tc.Calling the SetEachIconColor function
      */
     appBar->SetEachIconColor(backIcon, Color::WHITE, InternalResource::ResourceId::APP_BAR_BACK_SVG);
-    auto titleBar = AceType::DynamicCast<FrameNode>(atom->GetFirstChild());
-    auto renderContext = titleBar->GetRenderContext();
-    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::WHITE);
+    EXPECT_EQ(property->GetImageSourceInfo()->GetFillColor(), Color::WHITE);
 }
 
 /**
@@ -392,35 +396,6 @@ HWTEST_F(AppBarTestNg, BuildFaButton002, TestSize.Level1)
      * @tc.expected: appBar is not null.
      */
     ASSERT_TRUE(appBar->BuildBarTitle() != nullptr);
-}
-
-/**
- * @tc.steps: step1. Create AtomicServicePattern001.
- * @tc.expected: atomic is not null.
- */
-HWTEST_F(AppBarTestNg, AtomicServicePattern001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create atomic.
-     * @tc.expected: appBar is not null.
-     */
-    auto atomic = AceType::MakeRefPtr<AtomicServicePattern>();
-    auto host = atomic->GetHost();
-    auto rowChild = host->GetFirstChild();
-    auto labelChild = AccessibilityManager::DynamicCast<FrameNode>(rowChild->GetChildAtIndex(1));
-    auto textLayoutProperty = labelChild->GetLayoutProperty<TextLayoutProperty>();
-    auto pipelineContext = PipelineContext::GetCurrentContext();
-    auto themeManager = pipelineContext->GetThemeManager();
-    auto themeConstants = themeManager->GetThemeConstants();
-    /**
-     * @tc.steps: step1. Calling the OnLanguageConfiguration Update interface
-     * @tc.expected:Judging equality
-     */
-    SpanModelNG spanModelNG;
-    spanModelNG.Create("hello world");
-    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
-    atomic->OnLanguageConfigurationUpdate();
-    ASSERT_EQ(spanNode->spanItem_->content, themeConstants->GetString(pipelineContext->GetAppLabelId()));
 }
 
 /**

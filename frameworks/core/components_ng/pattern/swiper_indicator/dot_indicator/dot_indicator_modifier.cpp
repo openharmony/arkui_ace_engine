@@ -146,7 +146,7 @@ void DotIndicatorModifier::PaintContent(DrawingContext& context, ContentProperty
             PaintUnselectedIndicator(canvas, center, itemHalfSizes, false, LinearColor(unselectedColor_->Get()));
         } else {
             selectedCenter = center;
-            PaintUnselectedIndicator(canvas, center, itemHalfSizes, true, LinearColor(unselectedColor_->Get()));
+            PaintUnselectedIndicator(canvas, center, itemHalfSizes, false, LinearColor(unselectedColor_->Get()));
         }
     }
 
@@ -371,6 +371,7 @@ void DotIndicatorModifier::UpdateNormalToHoverPaintProperty(
     AnimationOption option;
     option.SetDuration(COMPONENT_DILATE_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
+    StopAnimation();
     AnimationUtils::Animate(option, [weak = WeakClaim(this), hoverItemHalfSizes, vectorBlackPointCenterX,
         longPointCenterX]() {
         auto modifier = weak.Upgrade();
@@ -386,6 +387,7 @@ void DotIndicatorModifier::UpdateHoverToNormalPaintProperty(
     AnimationOption option;
     option.SetDuration(COMPONENT_SHRINK_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
+    StopAnimation();
     AnimationUtils::Animate(option, [weak = WeakClaim(this), margin, normalItemHalfSizes, vectorBlackPointCenterX,
         longPointCenterX]() {
         auto modifier = weak.Upgrade();
@@ -401,6 +403,7 @@ void DotIndicatorModifier::UpdateNormalToPressPaintProperty(
     AnimationOption option;
     option.SetDuration(COMPONENT_DILATE_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
+    StopAnimation();
     AnimationUtils::Animate(option, [weak = WeakClaim(this), hoverItemHalfSizes, vectorBlackPointCenterX,
         longPointCenterX]() {
         auto modifier = weak.Upgrade();
@@ -416,6 +419,7 @@ void DotIndicatorModifier::UpdatePressToNormalPaintProperty(
     AnimationOption option;
     option.SetDuration(COMPONENT_SHRINK_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
+    StopAnimation();
     AnimationUtils::Animate(option, [weak = WeakClaim(this), margin, normalItemHalfSizes, vectorBlackPointCenterX,
         longPointCenterX]() {
         auto modifier = weak.Upgrade();
@@ -480,7 +484,12 @@ void DotIndicatorModifier::UpdateAllPointCenterXAnimation(GestureState gestureSt
 
     // normal page turning
     AnimationOption optionHead;
-    optionHead.SetCurve(headCurve_);
+    RefPtr<Curve> curve = headCurve_;
+    if (InstanceOf<LinearCurve>(curve)) {
+        // mass:1, stiffness:228, damping:30
+        curve = AceType::MakeRefPtr<InterpolatingSpring>(motionVelocity_, 1, 228, 30);
+    }
+    optionHead.SetCurve(curve);
     optionHead.SetDuration(animationDuration_);
 
     AnimationOption optionTail;
@@ -496,15 +505,17 @@ void DotIndicatorModifier::UpdateAllPointCenterXAnimation(GestureState gestureSt
     }
 
     if (longPointLeftAnimEnd_) {
+        longPointLeftAnimEnd_ = false;
         AnimationUtils::Animate(
             optionLeft, [&]() { longPointLeftCenterX_->Set(longPointCenterX.first); },
             [&]() { longPointLeftAnimEnd_ = true; });
     }
 
     if (longPointRightAnimEnd_) {
-        AnimationUtils::Animate(optionRight,
-                                [&]() { longPointRightCenterX_->Set(longPointCenterX.second); },
-                                [&]() { longPointRightAnimEnd_ = true; });
+        longPointRightAnimEnd_ = false;
+        AnimationUtils::Animate(
+            optionRight, [&]() { longPointRightCenterX_->Set(longPointCenterX.second); },
+            [&]() { longPointRightAnimEnd_ = true; });
     }
 }
 
@@ -581,11 +592,10 @@ void DotIndicatorModifier::PlayTouchBottomAnimation(const std::vector<std::pair<
         // x0:0.33, y0:0, x1:0.67, y1:1
         optionOpacity.SetCurve(AceType::MakeRefPtr<CubicCurve>(0.33, 0, 0.67, 1));
         optionOpacity.SetDuration(100);
-        touchBottomPointColor_->Set(LinearColor(selectedColor_->Get()));
-        selectedColor_->Set(LinearColor(selectedColor_->Get().BlendOpacity(0.1)));
+        selectedColor_->Set(LinearColor(selectedColor_->Get().BlendOpacity(0)));
         AnimationUtils::StartAnimation(optionOpacity, [&]() {
             selectedColor_->Set(LinearColor(selectedColor_->Get().BlendOpacity(1.0)));
-            touchBottomPointColor_->Set(LinearColor(touchBottomPointColor_->Get().BlendOpacity(0.1)));
+            touchBottomPointColor_->Set(LinearColor(touchBottomPointColor_->Get().BlendOpacity(0)));
         }, [&]() {
             touchBottomPointColor_->Set(LinearColor(unselectedColor_->Get()));
             isTouchBottomLoop_ = false;
@@ -601,6 +611,7 @@ void DotIndicatorModifier::PlayTouchBottomAnimation(const std::vector<std::pair<
     if (longPointLeftAnimEnd_ && longPointRightAnimEnd_) {
         longPointLeftAnimEnd_ = false;
         longPointRightAnimEnd_ = false;
+        touchBottomPointColor_->Set(LinearColor(selectedColor_->Get()));
         AnimationUtils::StartAnimation(optionBottom, [&, longPointCenterX]() {
             longPointLeftCenterX_->Set(longPointCenterX[0].first);
             longPointRightCenterX_->Set(longPointCenterX[0].second);
@@ -622,7 +633,12 @@ void DotIndicatorModifier::PlayLongPointAnimation(const std::vector<std::pair<fl
     }
     // normal page turning
     AnimationOption optionHead;
-    optionHead.SetCurve(headCurve_);
+    RefPtr<Curve> curve = headCurve_;
+    if (InstanceOf<LinearCurve>(curve)) {
+        // mass:1, stiffness:228, damping:30
+        curve = AceType::MakeRefPtr<InterpolatingSpring>(motionVelocity_, 1, 228, 30);
+    }
+    optionHead.SetCurve(curve);
     optionHead.SetDuration(animationDuration_);
 
     AnimationOption optionTail;
@@ -665,7 +681,7 @@ void DotIndicatorModifier::StopAnimation()
 {
     AnimationUtils::StopAnimation(blackPointsAnimation_);
     AnimationUtils::StopAnimation(longPointLeftAnimation_);
-    longPointRightAnimEnd_ = true;
+    longPointLeftAnimEnd_ = true;
     AnimationUtils::StopAnimation(longPointRightAnimation_);
     longPointRightAnimEnd_ = true;
 }

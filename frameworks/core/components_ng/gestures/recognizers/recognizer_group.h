@@ -147,6 +147,18 @@ public:
         refereeState_ = RefereeState::READY;
         disposal_ = GestureDisposal::NONE;
     }
+
+    void SetIsPostEventResultRecursively(bool isPostEventResult)
+    {
+        for (const auto& item : recognizers_) {
+            item->SetIsPostEventResult(isPostEventResult);
+            auto group = AceType::DynamicCast<RecognizerGroup>(item);
+            if (group) {
+                group->SetIsPostEventResultRecursively(isPostEventResult);
+            }
+        }
+    }
+
 protected:
     void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override;
     void OnFinishGestureReferee(int32_t touchId, bool isBlocked = false) override;

@@ -83,6 +83,7 @@
                 "bounds_checking_function",
                 "curl",
                 "cJSON",
+                "css-what",
                 "jsframework",
                 "opencl-headers",
                 "libuv",

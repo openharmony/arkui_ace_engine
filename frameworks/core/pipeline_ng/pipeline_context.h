@@ -34,6 +34,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
 #include "core/components_ng/manager/full_screen/full_screen_manager.h"
+#include "core/components_ng/manager/post_event/post_event_manager.h"
 #include "core/components_ng/manager/safe_area/safe_area_manager.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
@@ -76,8 +77,13 @@ public:
 
     static float GetCurrentRootHeight();
 
+    // handle close keyboard
     RefPtr<FrameNode> HandleFocusNode();
     void IsCloseSCBKeyboard();
+    void SetNeedSoftKeyboard(std::optional<bool> flag)
+    {
+        needSoftKeyboard_ = flag;
+    }
 
     void SetupRootElement() override;
 
@@ -252,6 +258,8 @@ public:
 
     void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) override;
     void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) override;
+    void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) override;
+
     void UpdateDisplayAvailableRect(const Rect& displayAvailableRect)
     {
         displayAvailableRect_ = displayAvailableRect;
@@ -543,6 +551,8 @@ public:
 
     bool IsDragging() const override;
     void SetIsDragging(bool isDragging) override;
+    void ResetDragging() override;
+    const RefPtr<PostEventManager>& GetPostEventManager();
 
     void SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow);
     void SetContainerModalTitleHeight(int32_t height);
@@ -699,6 +709,9 @@ private:
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
 
+    std::optional<bool> needSoftKeyboard_ ;
+    std::optional<bool> windowFocus_ ;
+
     std::unique_ptr<MouseEvent> lastMouseEvent_;
 
     std::unordered_map<int32_t, WeakPtr<FrameNode>> storeNode_;
@@ -715,6 +728,7 @@ private:
     mutable std::mutex navigationMutex_;
     std::map<std::string, WeakPtr<FrameNode>> navigationNodes_;
     std::list<DelayedTask> delayedTasks_;
+    RefPtr<PostEventManager> postEventManager_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

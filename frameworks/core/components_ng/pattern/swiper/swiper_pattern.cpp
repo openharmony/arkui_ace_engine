@@ -303,6 +303,7 @@ void SwiperPattern::BeforeCreateLayoutWrapper()
     } else {
         if (oldIndex != userSetCurrentIndex) {
             currentIndex_ = userSetCurrentIndex;
+            propertyAnimationIndex_ = GetLoopIndex(propertyAnimationIndex_);
         }
     }
     if (oldIndex_ != currentIndex_ || (itemPosition_.empty() && !isVoluntarilyClear_)) {
@@ -638,6 +639,11 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             OnIndexChange();
         }
         jumpIndex_.reset();
+        auto delayTime = GetInterval() - GetDuration();
+        delayTime = std::clamp(delayTime, 0, delayTime);
+        if (NeedAutoPlay() && isUserFinish_) {
+            PostTranslateTask(delayTime);
+        }
     } else if (targetIndex_) {
         auto targetIndexValue = IsLoop() ? targetIndex_.value() : GetLoopIndex(targetIndex_.value());
         auto iter = itemPosition_.find(targetIndexValue);
@@ -1401,15 +1407,20 @@ void SwiperPattern::HandleTouchBottomLoop()
 
 void SwiperPattern::CalculateGestureState(float additionalOffset, float currentTurnPageRate)
 {
-    gestureState_ = GestureState::GESTURE_STATE_FOLLOW;
+    if (gestureState_ == GestureState::GESTURE_STATE_INIT) {
+        return;
+    }
+    gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
     if (GreatNotEqual(additionalOffset, 0.0f)) {
         gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
     } else if (LessNotEqual(additionalOffset, 0.0f)) {
         gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
     } else if ((GetLoopIndex(currentFirstIndex_) == GetLoopIndex(currentIndex_)) &&
-               (std::abs(currentTurnPageRate) > std::abs(turnPageRate_))) {
+               GreatNotEqual(std::abs(currentTurnPageRate), std::abs(turnPageRate_))) {
         gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
-    } else {
+    } else if (currentTurnPageRate == 0 && turnPageRate_ == 0) {
+        gestureState_ = GestureState::GESTURE_STATE_NONE;
+    } else if (GetLoopIndex(currentFirstIndex_) != GetLoopIndex(currentIndex_)) {
         gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
     }
     return;
@@ -1455,7 +1466,7 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset)
 
     touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     if (!IsLoop() && ((currentFirstIndex_ == 0 && GreatNotEqual(turnPageRate_, 0.0f)) ||
-                         (currentFirstIndex_ == TotalCount() - 1 && LessNotEqual(turnPageRate_, 0.0f)))) {
+                        (currentFirstIndex_ == TotalCount() - 1 && LessNotEqual(turnPageRate_, 0.0f)))) {
         return;
     }
     HandleTouchBottomLoop();
@@ -1914,7 +1925,6 @@ void SwiperPattern::OnPropertyTranslateAnimationFinish(const OffsetF& offset)
         // force stop.
         return;
     }
-    StopIndicatorAnimation();
 
     usePropertyAnimation_ = false;
     // reset translate.
@@ -3801,6 +3811,10 @@ void SwiperPattern::OnCustomContentTransition(int32_t toIndex)
         UpdateCurrentIndex(fromIndex);
         oldIndex_ = fromIndex;
 
+        AnimationCallbackInfo info;
+        info.currentOffset = GetCustomPropertyOffset();
+        FireAnimationEndEvent(fromIndex, info);
+
         currentProxyInAnimation_->SetHasOnChanged(true);
     }
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -3821,6 +3835,12 @@ void SwiperPattern::TriggerCustomContentTransitionEvent(int32_t fromIndex, int32
 
     auto tabContentAnimatedTransition = (*onCustomContentTransition_)(fromIndex, toIndex);
     auto transition = tabContentAnimatedTransition.transition;
+
+    if (!transition) {
+        OnCustomAnimationFinish(fromIndex, toIndex, false);
+        return;
+    }
+
     auto proxy = AceType::MakeRefPtr<TabContentTransitionProxy>();
     proxy->SetFromIndex(fromIndex);
     proxy->SetToIndex(toIndex);

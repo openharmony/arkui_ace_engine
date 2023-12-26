@@ -168,7 +168,6 @@ void ScreenPattern::InputManagerUpdateDisplayInfo(RectF paintRect,
         .windowsInfo = { windowInfo },
         .displaysInfo = g_displayInfoVector
     };
-    MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
 }
 
 void ScreenPattern::DeduplicateDisplayInfo()

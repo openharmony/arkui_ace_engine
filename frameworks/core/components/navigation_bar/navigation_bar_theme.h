@@ -121,7 +121,7 @@ public:
             auto navBarUnfocusEffectEnable = pattern->GetAttr<std::string>("section_unfocus_effect_enable", "0");
             theme->navBarUnfocusEffectEnable_ = StringUtils::StringToInt(navBarUnfocusEffectEnable);
             theme->navBarUnfocusColor_ = pattern->GetAttr<Color>("section_unfocus_color", Color::TRANSPARENT);
-            theme->toolbarBlurColor_ = pattern->GetAttr<Color>("toolbar_background_blur_color", Color(0x19E6E6E6));
+            theme->backgroundBlurColor_ = pattern->GetAttr<Color>("background_blur_color", Color(0x19E6E6E6));
         }
     };
 
@@ -362,9 +362,9 @@ public:
     {
         return navBarUnfocusColor_;
     }
-    const Color& GetToolbarBlurColor() const
+    const Color& GetBackgroundBlurColor() const
     {
-        return toolbarBlurColor_;
+        return backgroundBlurColor_;
     }
 protected:
     NavigationBarTheme() = default;
@@ -430,7 +430,7 @@ private:
     Color navigationGroupColor_ = Color::TRANSPARENT;
     uint32_t navBarUnfocusEffectEnable_ = 0;
     Color navBarUnfocusColor_ = Color::TRANSPARENT;
-    Color toolbarBlurColor_;
+    Color backgroundBlurColor_;
 };
 
 } // namespace OHOS::Ace

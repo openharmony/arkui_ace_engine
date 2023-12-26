@@ -1682,11 +1682,18 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onTouchIconUrlV2_ = useNewPipe ? eventHub->GetOnTouchIconUrlEvent() : nullptr;
         onAudioStateChangedV2_ = GetAudioStateChangedCallback(useNewPipe, eventHub);
         onFirstContentfulPaintV2_ = useNewPipe ? eventHub->GetOnFirstContentfulPaintEvent() : nullptr;
+        onSafeBrowsingCheckResultV2_ = useNewPipe ? eventHub->GetOnSafeBrowsingCheckResultEvent() : nullptr;
         onOverScrollV2_ = useNewPipe ? eventHub->GetOnOverScrollEvent()
                                      : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                            webCom->GetOverScrollId(), oldContext);
         onScreenCaptureRequestV2_ = useNewPipe ? eventHub->GetOnScreenCaptureRequestEvent() : nullptr;
         onNavigationEntryCommittedV2_ = useNewPipe ? eventHub->GetOnNavigationEntryCommittedEvent() : nullptr;
+        OnNativeEmbedLifecycleChangeV2_ = useNewPipe ? eventHub->GetOnNativeEmbedLifecycleChangeEvent()
+                                            : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                                webCom->GetNativeEmbedLifecycleChangeId(), oldContext);
+        OnNativeEmbedGestureEventV2_ = useNewPipe ? eventHub->GetOnNativeEmbedGestureEvent()
+                                            : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                                webCom->GetNativeEmbedGestureEventId(), oldContext);
     }
     return true;
 }
@@ -2296,13 +2303,6 @@ void WebDelegate::SetWebCallBack()
             }
             return std::string();
         });
-        webController->SetIsIncognitoModeImpl([weak = WeakClaim(this)]() {
-            auto delegate = weak.Upgrade();
-            if (delegate) {
-                return delegate->IsIncognitoMode();
-            }
-            return false;
-        });
     } else {
         TAG_LOGW(AceLogTag::ACE_WEB, "web controller is nullptr");
     }
@@ -2332,7 +2332,7 @@ void WebDelegate::InitWebViewWithWindow()
             delegate->nweb_ =
                 OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
                     delegate->window_.GetRefPtr(), initArgs,
-                    delegate->IsIncognitoMode());
+                    delegate->incognitoMode_);
             if (delegate->nweb_ == nullptr) {
                 delegate->window_ = nullptr;
                 return;
@@ -3480,6 +3480,26 @@ void WebDelegate::UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEn
                 std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
                 if (setting) {
                     setting->PutVerticalScrollBarAccess(isVerticalScrollBarAccessEnabled);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
+void WebDelegate::UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    isEmbedModeEnabled_ = isEmbedModeEnabled;
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isEmbedModeEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->SetNativeEmbedMode(isEmbedModeEnabled);
                 }
             }
         },
@@ -4899,6 +4919,14 @@ void WebDelegate::OnFirstContentfulPaint(int64_t navigationStartTick, int64_t fi
     }
 }
 
+void WebDelegate::OnSafeBrowsingCheckResult(int threat_type)
+{
+    if (onSafeBrowsingCheckResultV2_) {
+        onSafeBrowsingCheckResultV2_(
+            std::make_shared<SafeBrowsingCheckResultEvent>(threat_type));
+    }
+}
+
 void WebDelegate::OnDataResubmitted(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler)
 {
     auto param = std::make_shared<DataResubmittedEvent>(AceType::MakeRefPtr<DataResubmittedOhos>(handler));
@@ -5192,14 +5220,6 @@ void WebDelegate::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t heigh
     if (nweb_) {
         nweb_->SetDrawRect(x, y, width, height);
     }
-}
-
-bool WebDelegate::IsIncognitoMode() const
-{
-    if (nweb_) {
-        return nweb_->IsIncognitoMode();
-    }
-    return false;
 }
 #endif
 
@@ -5556,6 +5576,61 @@ void WebDelegate::OnOverScroll(float xOffset, float yOffset)
             auto onOverScrollV2 = delegate->onOverScrollV2_;
             if (onOverScrollV2) {
                 onOverScrollV2(std::make_shared<WebOnOverScrollEvent>(xOffset, yOffset));
+            }
+        },
+        TaskExecutor::TaskType::JS);
+}
+
+void WebDelegate::SetTouchEventInfo(const OHOS::NWeb::NativeEmbedTouchEvent& touchEvent, TouchEventInfo& touchEventInfo)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    TouchEvent event{touchEvent.id, touchEvent.x, touchEvent.y, touchEvent.screenX, touchEvent.screenY,
+        static_cast<OHOS::Ace::TouchType>(touchEvent.type)};
+    webPattern->SetTouchEventInfo(event, touchEventInfo);
+}
+
+void WebDelegate::OnNativeEmbedLifecycleChange(const OHOS::NWeb::NativeEmbedDataInfo& dataInfo)
+{
+    if (!isEmbedModeEnabled_) {
+        return;
+    }
+    auto embedInfo = dataInfo.info;
+    auto status = static_cast<OHOS::Ace::NativeEmbedStatus>(dataInfo.status);
+    auto surfaceId = dataInfo.surfaceId;
+    auto embedId = dataInfo.embedId;
+    EmbedInfo info = {embedInfo.id, embedInfo.type,
+                      embedInfo.src, embedInfo.url, embedInfo.width, embedInfo.height};
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), status, surfaceId, embedId, info]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto OnNativeEmbedLifecycleChangeV2_ = delegate->OnNativeEmbedLifecycleChangeV2_;
+            if (OnNativeEmbedLifecycleChangeV2_) {
+                OnNativeEmbedLifecycleChangeV2_(
+                    std::make_shared<NativeEmbedDataInfo>(status, surfaceId, embedId, info));
+            }
+        },
+        TaskExecutor::TaskType::JS);
+}
+void WebDelegate::OnNativeEmbedGestureEvent(const OHOS::NWeb::NativeEmbedTouchEvent& event)
+{
+    auto context = context_.Upgrade();
+    TouchEventInfo touchEventInfo("touchEvent");
+    auto embedId = event.embedId;
+    SetTouchEventInfo(event, touchEventInfo);
+    CHECK_NULL_VOID(context);
+    TAG_LOGD(AceLogTag::ACE_WEB, "hit Emebed gusture event notify");
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), embedId, touchEventInfo]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto OnNativeEmbedGestureEventV2_ = delegate->OnNativeEmbedGestureEventV2_;
+            if (OnNativeEmbedGestureEventV2_) {
+                OnNativeEmbedGestureEventV2_(
+                    std::make_shared<NativeEmbeadTouchInfo>(embedId, touchEventInfo));
             }
         },
         TaskExecutor::TaskType::JS);

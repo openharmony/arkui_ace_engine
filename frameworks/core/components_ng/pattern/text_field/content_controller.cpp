@@ -25,6 +25,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 const std::string DIGIT_WHITE_LIST = "[0-9]";
+const std::string DIGIT_DECIMAL_WHITE_LIST = "[0-9.]";
 const std::string PHONE_WHITE_LIST = R"([\d\-\+\*\#]+)";
 const std::string EMAIL_WHITE_LIST = "[\\w.\\@]";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
@@ -59,12 +60,12 @@ std::string ContentController::PreprocessString(int32_t startIndex, int32_t endI
     return tmp;
 }
 
-void ContentController::InsertValue(int32_t index, const std::string& value)
+bool ContentController::InsertValue(int32_t index, const std::string& value)
 {
-    ReplaceSelectedValue(index, index, value);
+    return ReplaceSelectedValue(index, index, value);
 }
 
-void ContentController::ReplaceSelectedValue(int32_t startIndex, int32_t endIndex, const std::string& value)
+bool ContentController::ReplaceSelectedValue(int32_t startIndex, int32_t endIndex, const std::string& value)
 {
     FormatIndex(startIndex, endIndex);
     auto tmp = PreprocessString(startIndex, endIndex, value);
@@ -72,6 +73,7 @@ void ContentController::ReplaceSelectedValue(int32_t startIndex, int32_t endInde
     content_ = StringUtils::ToString(wideText.substr(0, startIndex)) + tmp +
                StringUtils::ToString(wideText.substr(endIndex, static_cast<int32_t>(wideText.length()) - endIndex));
     FilterValue();
+    return !tmp.empty();
 }
 
 std::string ContentController::GetSelectedValue(int32_t startIndex, int32_t endIndex)
@@ -131,6 +133,9 @@ void ContentController::FilterTextInputStyle(bool& textChanged, std::string& res
             textChanged |= FilterWithAscii(result);
             break;
         }
+        case TextInputType::NUMBER_DECIMAL:
+            textChanged |= FilterWithEvent(DIGIT_DECIMAL_WHITE_LIST, result);
+            textChanged |= FilterWithDecimal(result);
         default: {
             break;
         }
@@ -147,7 +152,8 @@ void ContentController::FilterValue()
     CHECK_NULL_VOID(textField);
     auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
 
-    bool hasInputFilter = property->GetInputFilter().has_value() && !content_.empty();
+    bool hasInputFilter = property->GetInputFilter().has_value() &&
+        !property->GetInputFilter().value().empty() && !content_.empty();
     if (!hasInputFilter) {
         FilterTextInputStyle(textChanged, result);
     } else {
@@ -243,6 +249,26 @@ bool ContentController::FilterWithAscii(std::string& result)
         LOGI("FilterWithAscii Error text %{private}s", errorText.c_str());
     }
     return textChange;
+}
+
+bool ContentController::FilterWithDecimal(std::string& result)
+{
+    auto valueToUpdate = result;
+    bool first = true;
+    std::replace_if(
+        result.begin(), result.end(),
+        [&first](const char c) {
+            if (c == '.' && !first) {
+                return true;
+            }
+            if (c == '.') {
+                first = false;
+            }
+            return false;
+        },
+        ' ');
+    result.erase(std::remove(result.begin(), result.end(), ' '), result.end());
+    return result != valueToUpdate;
 }
 
 bool ContentController::FilterWithEvent(const std::string& filter, std::string& result)

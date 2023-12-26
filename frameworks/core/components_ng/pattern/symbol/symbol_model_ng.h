@@ -25,6 +25,9 @@ public:
     void Create(const std::uint32_t& unicode) override;
     void SetFontWeight(const Ace::FontWeight& value) override;
     void SetFontSize(const CalcDimension& value) override;
+    void SetSymbolRenderingStrategy(const std::uint32_t renderingStrategy) override;
+    void SetFontColor(std::vector<Color>& symbolColor) override;
+    void SetSymbolEffect(const std::uint32_t effectStrategy) override;
 };
 } // namespace OHOS::Ace::NG
 

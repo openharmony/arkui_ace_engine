@@ -148,4 +148,9 @@ const std::string ImageLoadingContext::GetCurrentLoadingState()
 {
     return "UNLOADED";
 }
+
+int32_t ImageLoadingContext::GetFrameCount() const
+{
+    return 1;
+}
 } // namespace OHOS::Ace::NG

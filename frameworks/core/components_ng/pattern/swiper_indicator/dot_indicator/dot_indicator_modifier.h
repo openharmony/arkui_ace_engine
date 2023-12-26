@@ -139,16 +139,15 @@ public:
         if (unselectedColor_) {
             unselectedColor_->Set(unselectedColor);
         }
-
-        if (touchBottomPointColor_) {
-            touchBottomPointColor_->Set(LinearColor(unselectedColor));
-        }
     }
 
     void SetSelectedColor(const Color& selectedColor)
     {
         if (selectedColor_) {
             selectedColor_->Set(LinearColor(selectedColor));
+        }
+        if (touchBottomPointColor_) {
+            touchBottomPointColor_->Set(LinearColor(selectedColor));
         }
     }
 
@@ -255,9 +254,10 @@ public:
         const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState,
         TouchBottomTypeLoop touchBottomTypeLoop);
     void StopAnimation();
-    void SetLongPointHeadCurve(RefPtr<Curve> curve)
+    void SetLongPointHeadCurve(RefPtr<Curve> curve, float motionVelocity)
     {
         headCurve_ = curve;
+        motionVelocity_ = motionVelocity;
     }
 
 private:
@@ -294,6 +294,7 @@ private:
     std::shared_ptr<AnimationUtils::Animation> longPointLeftAnimation_;
     std::shared_ptr<AnimationUtils::Animation> longPointRightAnimation_;
     RefPtr<Curve> headCurve_;
+    float motionVelocity_ = 0;
 
     float centerY_ = 0;
     Axis axis_ = Axis::HORIZONTAL;

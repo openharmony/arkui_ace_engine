@@ -79,6 +79,24 @@ float MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinat
     return contentWrapper->GetGeometryNode()->GetFrameSize().Height();
 }
 
+float GetSafeAreaHeight(LayoutWrapper* LayoutWrapper)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, 0.0f);
+    auto safeArea = pipeline->GetSafeArea();
+    auto safeAreaHeight = safeArea.top_.Length();
+    auto hostNode = LayoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(hostNode, 0.0f);
+    auto geometryNode = hostNode->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 0.0f);
+    auto parentGlobalOffset = hostNode->GetParentGlobalOffsetDuringLayout();
+    auto frame = geometryNode->GetFrameRect() + parentGlobalOffset;
+    if (!safeArea.top_.IsOverlapped(frame.Top())) {
+        safeAreaHeight = 0.0f;
+    }
+    return safeAreaHeight;
+}
+
 float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGroupNode>& hostNode,
     const RefPtr<NavDestinationLayoutProperty>& navDestinationLayoutProperty)
 {
@@ -91,7 +109,7 @@ float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGr
     auto titleBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_RETURN(titleBarWrapper, 0.0f);
     auto geometryNode = titleBarWrapper->GetGeometryNode();
-    auto titleBarOffset = OffsetT<float>(0.0f, 0.0f);
+    auto titleBarOffset = OffsetT<float>(0.0f, 0.0f + GetSafeAreaHeight(layoutWrapper));
     geometryNode->SetMarginFrameOffset(titleBarOffset);
     titleBarWrapper->Layout();
     return geometryNode->GetFrameSize().Height();
@@ -107,13 +125,14 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGrou
     CHECK_NULL_VOID(contentWrapper);
     auto geometryNode = contentWrapper->GetGeometryNode();
     if (navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) {
-        auto contentOffset = OffsetT<float>(0.0f, 0.0f);
+        auto contentOffset = OffsetT<float>(0.0f, 0.0f + GetSafeAreaHeight(layoutWrapper));
         geometryNode->SetMarginFrameOffset(contentOffset);
         contentWrapper->Layout();
         return;
     }
 
-    auto contentOffset = OffsetT<float>(geometryNode->GetFrameOffset().GetX(), titlebarHeight);
+    auto OffsetY = titlebarHeight + GetSafeAreaHeight(layoutWrapper);
+    auto contentOffset = OffsetT<float>(geometryNode->GetFrameOffset().GetX(), OffsetY);
     geometryNode->SetMarginFrameOffset(contentOffset);
     contentWrapper->Layout();
 }
@@ -138,18 +157,15 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float contentChildHeight =
         MeasureContentChild(layoutWrapper, hostNode, navDestinationLayoutProperty, size, titleBarHeight);
     size.SetHeight(titleBarHeight + contentChildHeight);
+
+    // to avoid zero-height of navDestination
     if (titleBarHeight + contentChildHeight == 0) {
-        auto parent = hostNode->GetParent();
-        CHECK_NULL_VOID(parent);
-        auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(parent->GetParent());
-        CHECK_NULL_VOID(navigationGroupNode);
-        auto navBarNode = AceType::DynamicCast<FrameNode>(navigationGroupNode->GetNavBarNode());
-        CHECK_NULL_VOID(navBarNode);
-        auto geometryNode = navBarNode->GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        auto navBarHeight = geometryNode->GetFrameSize().Height();
-        size.SetHeight(navBarHeight);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto height = pipeline->GetRootHeight();
+        size.SetHeight(height);
     }
+
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 }
 

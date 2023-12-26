@@ -69,9 +69,9 @@ class FormComponentModuleNameModifier extends ModifierWithKey<string> {
   static identity: Symbol = Symbol('formComponentModuleName');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().formComponent.resetModuleName(node);
+      getUINativeModule().formComponent.resetModuleName(node);
     } else {
-      GetUINativeModule().formComponent.setModuleName(node, this.value!);
+      getUINativeModule().formComponent.setModuleName(node, this.value!);
     }
   }
 }
@@ -83,9 +83,9 @@ class FormComponentDimensionModifier extends ModifierWithKey<FormDimension> {
   static identity: Symbol = Symbol('formComponentDimension');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().formComponent.resetDimension(node);
+      getUINativeModule().formComponent.resetDimension(node);
     } else {
-      GetUINativeModule().formComponent.setDimension(node, this.value);
+      getUINativeModule().formComponent.setDimension(node, this.value);
     }
   }
 
@@ -101,9 +101,9 @@ class FormComponentAllowUpdateModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('formComponentAllowUpdate');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().formComponent.resetAllowUpdate(node);
+      getUINativeModule().formComponent.resetAllowUpdate(node);
     } else {
-      GetUINativeModule().formComponent.setAllowUpdate(node, this.value!);
+      getUINativeModule().formComponent.setAllowUpdate(node, this.value!);
     }
   }
 }
@@ -115,9 +115,9 @@ class FormComponentSizeModifier extends ModifierWithKey<{ width: Length; height:
   static identity: Symbol = Symbol('formComponentSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().formComponent.resetSize(node);
+      getUINativeModule().formComponent.resetSize(node);
     } else {
-      GetUINativeModule().formComponent.setSize(node, this.value.width, this.value.height);
+      getUINativeModule().formComponent.setSize(node, this.value.width, this.value.height);
     }
   }
 
@@ -135,9 +135,9 @@ class FormComponentVisibilityModifier extends ModifierWithKey<Visibility> {
   static identity: Symbol = Symbol('formComponentVisibility');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().formComponent.resetVisibility(node);
+      getUINativeModule().formComponent.resetVisibility(node);
     } else {
-      GetUINativeModule().formComponent.setVisibility(node, this.value);
+      getUINativeModule().formComponent.setVisibility(node, this.value);
     }
   }
 }
@@ -145,10 +145,10 @@ class FormComponentVisibilityModifier extends ModifierWithKey<Visibility> {
 // @ts-ignore
 globalThis.FormComponent.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkFormComponentComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

@@ -1070,10 +1070,7 @@ export class ComposeListItem extends ViewPU {
       }));
       Flex.onTouch((e => {
         e.type == TouchType.Down && this.canTouch && (this.frontColor = "#1a000000");
-        if (e.type == TouchType.Up) {
-          this.isActive = !this.isActive;
-          this.frontColor = this.isActive ? "#1a0a59f7" : Color.Transparent.toString()
-        }
+        e.type == TouchType.Up && (this.frontColor = this.isActive ? "#1a0a59f7" : Color.Transparent.toString())
       }));
       t || Flex.pop();
       ViewStackProcessor.StopGetAccessRecording()

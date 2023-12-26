@@ -125,6 +125,10 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
         return;
     }
 
+    if (host->GetPattern() && !host->GetPattern()->NeedRecalculateSafeArea()) {
+        return;
+    }
+
     if ((opts->edges & SAFE_AREA_EDGE_BOTTOM) && (opts->type & SAFE_AREA_TYPE_KEYBOARD) && isFocusOnPage) {
         ExpandIntoKeyboard();
     }
@@ -166,7 +170,7 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
     // restore to local offset
     frame -= parentGlobalOffset;
     auto diff = geometryNode->GetFrameOffset() - frame.GetOffset();
-    if (!diff.NonOffset()) {
+    if (!diff.NonOffset() && host->GetNeedAdjustOffset()) {
         // children's position should remain the same.
         AdjustChildren(diff);
     }

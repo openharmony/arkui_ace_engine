@@ -197,6 +197,7 @@ public:
                            std::shared_ptr<NWeb::NWebSelectPopupMenuCallback> callback) override;
     void OnAudioStateChanged(bool playing) override;
     void OnFirstContentfulPaint(int64_t navigationStartTick, int64_t firstContentfulPaintMs) override;
+    void OnSafeBrowsingCheckResult(int threat_type) override;
     void OnCompleteSwapWithNewSize() override;
     void OnResizeNotWork() override;
     void OnGetTouchHandleHotZone(NWeb::TouchHandleHotZone& hotZone) override;
@@ -212,6 +213,8 @@ public:
     void OnScrollState(bool scrollState) override;
     void OnRootLayerChanged(int width, int height) override;
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity) override;
+    void OnNativeEmbedLifecycleChange(const NWeb::NativeEmbedDataInfo& dataInfo) override;
+    void OnNativeEmbedGestureEvent(const NWeb::NativeEmbedTouchEvent& event) override;
 
     void SetWebDelegate(const WeakPtr<WebDelegate>& delegate)
     {

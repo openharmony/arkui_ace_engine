@@ -221,14 +221,9 @@ bool IsExtSurfaceEnabled()
 #endif
 }
 
-bool IsTitleStyleEnabled()
+bool IsEnableScrollableItemPool()
 {
-    return system::GetBoolParameter("persist.ace.title.style.enabled", false);
-}
-
-bool IsFlutterDecouplingEnabled()
-{
-    return system::GetBoolParameter("persist.ace.flutter.decoupling.enabled", false);
+    return system::GetBoolParameter("persist.ace.scrollablepool.enabled", false);
 }
 } // namespace
 
@@ -271,8 +266,7 @@ int32_t SystemProperties::astcPsnr_ = GetAstcPsnrProp();
 ACE_WEAK_SYM bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
 ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount();
 bool SystemProperties::resourceDecoupling_ = GetResourceDecoupling();
-ACE_WEAK_SYM bool SystemProperties::changeTitleStyleEnabled_ = IsTitleStyleEnabled();
-bool SystemProperties::flutterDecouplingEnabled_ = IsFlutterDecouplingEnabled();
+bool SystemProperties::enableScrollableItemPool_ = IsEnableScrollableItemPool();
 
 bool SystemProperties::IsSyscapExist(const char* cap)
 {
@@ -502,6 +496,11 @@ bool SystemProperties::GetResourceDecoupling()
     return system::GetBoolParameter("persist.sys.arkui.resource.decoupling", true);
 }
 
+bool SystemProperties::GetTitleStyleEnabled()
+{
+    return system::GetBoolParameter("persist.ace.title.style.enabled", false);
+}
+
 int32_t SystemProperties::GetJankFrameThreshold()
 {
     return system::GetIntParameter<int>("persist.sys.arkui.perf.threshold", DEFAULT_THRESHOLD_JANK);
@@ -515,5 +514,16 @@ ACE_WEAK_SYM std::string SystemProperties::GetCustomTitleFilePath()
 ACE_WEAK_SYM bool SystemProperties::Is24HourClock()
 {
     return Global::I18n::LocaleConfig::Is24HourClock();
+}
+
+std::optional<bool> SystemProperties::GetRtlEnabled()
+{
+    const std::string emptyParam("none");
+    auto ret = system::GetParameter("debug.ace.rtl.enabled", emptyParam);
+    if (ret == emptyParam) {
+        return std::nullopt;
+    } else {
+        return (ret == "true") ? true : false;
+    }
 }
 } // namespace OHOS::Ace

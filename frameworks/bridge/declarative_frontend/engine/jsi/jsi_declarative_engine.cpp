@@ -1135,23 +1135,6 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     CardScope cardScope(cardId);
-
-    if (container->IsDynamicRender()) {
-        CHECK_NULL_RETURN(runtime_, false);
-        auto engine = reinterpret_cast<NativeEngine*>(runtime_);
-        CHECK_NULL_RETURN(engine, false);
-        auto vm = engine->GetEcmaVm();
-        CHECK_NULL_RETURN(vm, false);
-        panda::TryCatch trycatch(vm);
-        [[maybe_unused]] napi_value result = engine->RunScript(fileName.c_str());
-        if (!trycatch.HasCaught()) {
-            return true;
-        } else {
-            engine->lastException_ = trycatch.GetException();
-            return false;
-        }
-    }
-
     std::string abcPath;
     std::vector<uint8_t> content;
     if (container->IsFRSCardContainer()) {
@@ -1212,6 +1195,25 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
         return false;
     }
     return true;
+}
+
+bool JsiDeclarativeEngine::ExecuteDynamicAbc(const std::string& fileName, const std::string& entryPoint)
+{
+    CHECK_NULL_RETURN(runtime_, false);
+    auto engine = reinterpret_cast<NativeEngine*>(runtime_);
+    CHECK_NULL_RETURN(engine, false);
+    auto vm = engine->GetEcmaVm();
+    CHECK_NULL_RETURN(vm, false);
+    panda::TryCatch trycatch(vm);
+
+    char* entry = entryPoint.empty() ? nullptr : const_cast<char*>(entryPoint.c_str());
+    [[maybe_unused]] napi_value result = engine->RunScript(fileName.c_str(), entry);
+    if (!trycatch.HasCaught()) {
+        return true;
+    } else {
+        engine->lastException_ = trycatch.GetException();
+        return false;
+    }
 }
 
 bool JsiDeclarativeEngine::UpdateRootComponent()
@@ -1528,10 +1530,12 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, 
     return true;
 }
 
-bool JsiDeclarativeEngine::LoadCard(const std::string& url, int64_t cardId)
+bool JsiDeclarativeEngine::LoadCard(const std::string& url, int64_t cardId, const std::string& entryPoint)
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadCard");
-    return ExecuteCardAbc(url, cardId);
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    return container->IsDynamicRender() ? ExecuteDynamicAbc(url, entryPoint) : ExecuteCardAbc(url, cardId);
 }
 
 #if defined(PREVIEW)

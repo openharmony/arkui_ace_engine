@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 /// <reference path="./ArkComponent.ts" />
 const FontWeightMap = {
   0: 'lighter',
@@ -31,7 +31,7 @@ const FontWeightMap = {
   700: '700',
   800: '800',
   900: '900',
-}
+};
 
 class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
   constructor(nativePtr: KNode) {
@@ -44,7 +44,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     modifierWithKey(this._modifiersWithKeys, ButtonBackgroundColorModifier.identity, ButtonBackgroundColorModifier, value);
     return this;
   }
-  type (value: ButtonType): this {
+  type(value: ButtonType): this {
     modifierWithKey(this._modifiersWithKeys, ButtonTypeModifier.identity, ButtonTypeModifier, value);
     return this;
   }
@@ -73,7 +73,7 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     return this;
   }
   labelStyle(value: LabelStyle): this {
-    modifierWithKey(this._modifiersWithKeys, ButtonLabelStyleModifier.identity,ButtonLabelStyleModifier, value);
+    modifierWithKey(this._modifiersWithKeys, ButtonLabelStyleModifier.identity, ButtonLabelStyleModifier, value);
     return this;
   }
   borderRadius(value: Length | BorderRadiuses): this {
@@ -85,21 +85,17 @@ class ButtonBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   constructor(value: ResourceColor) {
     super(value);
   }
-  static identity: Symbol = Symbol("buttonBackgroundColor");
+  static identity: Symbol = Symbol('buttonBackgroundColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().button.resetBackgroundColor(node);
+      getUINativeModule().button.resetBackgroundColor(node);
     } else {
-      GetUINativeModule().button.setBackgroundColor(node, this.value);
+      getUINativeModule().button.setBackgroundColor(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 class ButtonStateEffectModifier extends ModifierWithKey<boolean> {
@@ -109,10 +105,9 @@ class ButtonStateEffectModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('buttonStateEffect');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().button.resetStateEffect(node);
-    }
-    else {
-      GetUINativeModule().button.setStateEffect(node, this.value);
+      getUINativeModule().button.resetStateEffect(node);
+    } else {
+      getUINativeModule().button.setStateEffect(node, this.value);
     }
   }
 }
@@ -123,10 +118,9 @@ class ButtonFontStyleModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('buttonFontStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().button.resetFontStyle(node);
-    }
-    else {
-      GetUINativeModule().button.setFontStyle(node, this.value);
+      getUINativeModule().button.resetFontStyle(node);
+    } else {
+      getUINativeModule().button.setFontStyle(node, this.value);
     }
   }
 }
@@ -136,20 +130,14 @@ class ButtonFontFamilyModifier extends ModifierWithKey<string | Resource> {
   }
   static identity: Symbol = Symbol('buttonFontFamily');
   applyPeer(node: KNode, reset: boolean): void {
-      if (reset) {
-        GetUINativeModule().button.resetFontFamily(node);
-      }
-      else {
-        GetUINativeModule().button.setFontFamily(node, this.value);
-      }
+    if (reset) {
+      getUINativeModule().button.resetFontFamily(node);
+    } else {
+      getUINativeModule().button.setFontFamily(node, this.value);
+    }
   }
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 class ButtonLabelStyleModifier extends ModifierWithKey<LabelStyle> {
@@ -159,41 +147,38 @@ class ButtonLabelStyleModifier extends ModifierWithKey<LabelStyle> {
   static identity: Symbol = Symbol('buttonLabelStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-        GetUINativeModule().button.resetLabelStyle(node);
-    }
-    else {
+      getUINativeModule().button.resetLabelStyle(node);
+    } else {
       let textOverflow = this.value.overflow; // number(enum) -> Ace::TextOverflow
       let maxLines = this.value.maxLines; // number -> uint32_t
       let minFontSize = this.value.minFontSize; // number | string | Resource -> Dimension
       let maxFontSize = this.value.maxFontSize; // number | string | Resource -> Dimension
       let heightAdaptivePolicy = this.value.heightAdaptivePolicy; // number(enum) -> Ace::TextHeightAdaptivePolicy
-      let fontSize = undefined; // number | string | Resource -> Dimension
-      let fontWeight = undefined; // number | string | Ace::FontWeight -> string -> Ace::FontWeight
-      let fontStyle = undefined; // number(enum) -> Ace::FontStyle
-      let fontFamily = undefined; // string -> std::vector<std::string>
-      if (isObject(this.value.font))
-      {
+      let fontSize; // number | string | Resource -> Dimension
+      let fontWeight; // number | string | Ace::FontWeight -> string -> Ace::FontWeight
+      let fontStyle; // number(enum) -> Ace::FontStyle
+      let fontFamily; // string -> std::vector<std::string>
+      if (isObject(this.value.font)) {
         fontSize = this.value.font.size;
         fontStyle = this.value.font.style;
         fontFamily = this.value.font.family;
         fontWeight = this.value.font.weight;
       }
-      GetUINativeModule().button.setLabelStyle(node, textOverflow, maxLines, minFontSize, maxFontSize,
+      getUINativeModule().button.setLabelStyle(node, textOverflow, maxLines, minFontSize, maxFontSize,
         heightAdaptivePolicy, fontSize, fontWeight, fontStyle, fontFamily);
     }
   }
   checkObjectDiff(): boolean {
     if (isResource(this.stageValue) && isResource(this.value)) {
       return !isResourceEqual(this.stageValue, this.value);
-    }else if(!isResource(this.stageValue) && !isResource(this.value)){
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
       return !(this.value.overflow === this.stageValue.overflow &&
         this.value.maxLines === this.stageValue.maxLines &&
         this.value.minFontSize === this.stageValue.minFontSize &&
-        this.value.maxFontSize === this.stageValue.maxFontSize  &&
+        this.value.maxFontSize === this.stageValue.maxFontSize &&
         this.value.heightAdaptivePolicy === this.stageValue.heightAdaptivePolicy &&
-        this.value.font === this.stageValue.font)
-    }
-    else {
+        this.value.font === this.stageValue.font);
+    } else {
       return true;
     }
   }
@@ -205,10 +190,9 @@ class ButtonTypeModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('buttonType');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().button.resetType(node);
-    }
-    else {
-      GetUINativeModule().button.setType(node, this.value);
+      getUINativeModule().button.resetType(node);
+    } else {
+      getUINativeModule().button.setType(node, this.value);
     }
   }
 }
@@ -219,20 +203,14 @@ class ButtonFontColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('buttonFontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().button.resetFontColor(node);
-    }
-    else {
-      GetUINativeModule().button.setFontColor(node, this.value);
+      getUINativeModule().button.resetFontColor(node);
+    } else {
+      getUINativeModule().button.setFontColor(node, this.value);
     }
   }
-  
+
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } 
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 class ButtonFontSizeModifier extends ModifierWithKey<Length> {
@@ -242,20 +220,14 @@ class ButtonFontSizeModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('buttonFontSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().button.resetFontSize(node);
-    }
-    else {
-      GetUINativeModule().button.setFontSize(node, this.value);
+      getUINativeModule().button.resetFontSize(node);
+    } else {
+      getUINativeModule().button.setFontSize(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 class ButtonFontWeightModifier extends ModifierWithKey<string | number | FontWeight> {
@@ -265,10 +237,9 @@ class ButtonFontWeightModifier extends ModifierWithKey<string | number | FontWei
   static identity: Symbol = Symbol('buttonFontWeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().button.resetFontWeight(node);
-    }
-    else {
-      GetUINativeModule().button.setFontWeight(node, this.value);
+      getUINativeModule().button.resetFontWeight(node);
+    } else {
+      getUINativeModule().button.setFontWeight(node, this.value);
     }
   }
 }
@@ -280,12 +251,12 @@ class ButtonBorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses
   static identity: Symbol = Symbol('buttonBorderRadius');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().button.resetButtonBorderRadius(node);
+      getUINativeModule().button.resetButtonBorderRadius(node);
     } else {
       if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
-        GetUINativeModule().button.setButtonBorderRadius(node, this.value, this.value, this.value, this.value);
+        getUINativeModule().button.setButtonBorderRadius(node, this.value, this.value, this.value, this.value);
       } else {
-        GetUINativeModule().button.setButtonBorderRadius(node,
+        getUINativeModule().button.setButtonBorderRadius(node,
           (this.value as BorderRadiuses).topLeft,
           (this.value as BorderRadiuses).topRight,
           (this.value as BorderRadiuses).bottomLeft,
@@ -310,10 +281,10 @@ class ButtonBorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses
 // @ts-ignore
 globalThis.Button.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, ()=> {
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
     return new ArkButtonComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

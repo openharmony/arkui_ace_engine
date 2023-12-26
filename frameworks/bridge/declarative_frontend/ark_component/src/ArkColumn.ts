@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ColumnAlignItemsModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
@@ -21,9 +21,9 @@ class ColumnAlignItemsModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('columnAlignItems');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().column.resetAlignItems(node);
+      getUINativeModule().column.resetAlignItems(node);
     } else {
-      GetUINativeModule().column.setAlignItems(node, this.value!);
+      getUINativeModule().column.setAlignItems(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -38,9 +38,9 @@ class ColumnJustifyContentModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('columnJustifyContent');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().column.resetJustifyContent(node);
+      getUINativeModule().column.resetJustifyContent(node);
     } else {
-      GetUINativeModule().column.setJustifyContent(node, this.value!);
+      getUINativeModule().column.setJustifyContent(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -48,7 +48,7 @@ class ColumnJustifyContentModifier extends ModifierWithKey<number> {
   }
 }
 
-class ArkColumnComponent extends ArkComponent implements CommonMethod<ColumnAttribute>{
+class ArkColumnComponent extends ArkComponent implements CommonMethod<ColumnAttribute> {
   constructor(nativePtr: KNode) {
     super(nativePtr);
   }
@@ -64,16 +64,16 @@ class ArkColumnComponent extends ArkComponent implements CommonMethod<ColumnAttr
     throw new Error('Method not implemented.');
   }
   monopolizeEvents(monopolize: boolean): this {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
 }
 // @ts-ignore
 globalThis.Column.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkColumnComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

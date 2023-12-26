@@ -100,7 +100,8 @@ public:
     virtual void Initialize(
         OHOS::Rosen::Window* window, const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) = 0;
     virtual void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage) = 0;
-    virtual void InitializeDynamic(const std::string& hapPath, const std::string& abcPath) = 0;
+    virtual void InitializeDynamic(
+        const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint) {};
 
     // UIExtensionAbility initialize for focusWindow ID
     virtual void Initialize(

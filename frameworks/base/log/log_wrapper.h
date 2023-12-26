@@ -128,6 +128,8 @@ enum class AceLogTag : uint8_t {
     ACE_SIDEBAR,              // C03938
     ACE_GEOMETRY_TRANSITION,  // C03939
     ACE_DOWNLOAD_MANAGER,     // C03940
+    ACE_WINDOW_SCENE,         // C03941
+    ACE_NODE_CONTAINER,       // C03942
 
     FORM_RENDER = 255, // C039FF FormRenderer
     END = 256,         // Last one, do not use

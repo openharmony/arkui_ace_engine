@@ -95,6 +95,7 @@ void ResetTextAlign(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetTextAlign(frameNode, OHOS::Ace::TextAlign::START);
 }
 void SetFontColor(NodeHandle node, uint32_t color)
 {

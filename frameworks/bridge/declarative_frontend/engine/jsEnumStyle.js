@@ -802,6 +802,7 @@ var InputType;
   InputType[InputType["SCREEN_LOCK_PASSWORD"] = 9] = "SCREEN_LOCK_PASSWORD";
   InputType[InputType["USER_NAME"] = 10] = "USER_NAME";
   InputType[InputType["NEW_PASSWORD"] = 11] = "NEW_PASSWORD";
+  InputType[InputType["NUMBER_DECIMAL"] = 12] = "NUMBER_DECIMAL";
 })(InputType || (InputType = {}));
 
 var SearchType;
@@ -827,6 +828,8 @@ var EnterKeyType;
   EnterKeyType[EnterKeyType["Send"] = 4] = "Send";
   EnterKeyType[EnterKeyType["Next"] = 5] = "Next";
   EnterKeyType[EnterKeyType["Done"] = 6] = "Done";
+  EnterKeyType[EnterKeyType["PREVIOUS"] = 7] = "PREVIOUS";
+  EnterKeyType[EnterKeyType["NEW_LINE"] = 8] = "NEW_LINE";
 })(EnterKeyType || (EnterKeyType = {}));
 
 var ItemState
@@ -875,6 +878,13 @@ var NavDestinationMode;
   NavDestinationMode[NavDestinationMode["STANDARD"] = 0] = "STANDARD";
   NavDestinationMode[NavDestinationMode["DIALOG"] = 1] = "DIALOG";
 }(NavDestinationMode || (NavDestinationMode = {})));
+
+let NavigationOperation;
+(function(NavigationOperation) {
+  NavigationOperation[NavigationOperation.PUSH = 1] = "PUSH";
+  NavigationOperation[NavigationOperation.POP = 2] = "POP";
+  NavigationOperation[NavigationOperation.REPLACE = 3] = "REPLACE";
+}(NavigationOperation || (NavigationOperation = {})));
 
 var ResponseType;
 (function (ResponseType) {
@@ -1086,6 +1096,20 @@ var CopyOptions;
   CopyOptions[CopyOptions["LocalDevice"] = 2] = "LocalDevice";
   CopyOptions[CopyOptions["CROSS_DEVICE"] = 3] = "CrossDevice";
 })(CopyOptions || (CopyOptions = {}));
+
+var SymbolRenderingStrategy;
+(function (SymbolRenderingStrategy) {
+  SymbolRenderingStrategy[SymbolRenderingStrategy["SINGLE"] = 0] = "SINGLE";
+  SymbolRenderingStrategy[SymbolRenderingStrategy["MULTIPLE_COLOR"] = 1] = "MULTIPLE_COLOR";
+  SymbolRenderingStrategy[SymbolRenderingStrategy["MULTIPLE_OPACITY"] = 2] = "MULTIPLE_OPACITY";
+})(SymbolRenderingStrategy || (SymbolRenderingStrategy = {}));
+
+var SymbolEffectStrategy;
+(function (SymbolEffectStrategy) {
+  SymbolEffectStrategy[SymbolEffectStrategy["NONE"] = 0] = "NONE";
+  SymbolEffectStrategy[SymbolEffectStrategy["SCALE"] = 1] = "SCALE";
+  SymbolEffectStrategy[SymbolEffectStrategy["HIERARCHICAL"] = 2] = "HIERARCHICAL";
+})(SymbolEffectStrategy || (SymbolEffectStrategy = {}));
 
 var RichEditorSpanType;
 (function (RichEditorSpanType) {
@@ -1638,15 +1662,15 @@ class NavPathStack {
     this.isReplace = 0;
   }
   push(info, animated) {
-    this.pushPath(info, animated)
+    this.pushPath(info, animated);
   }
   pushPathByName(name, param, animated) {
     this.pathArray.push(new NavPathInfo(name, param));
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
-      this.animated = true
-      return
+      this.animated = true;
+      return;
     }
     this.animated = animated
   }
@@ -1655,8 +1679,8 @@ class NavPathStack {
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
-      this.animated = true
-      return
+      this.animated = true;
+      return;
     }
     this.animated = animated
   }
@@ -1668,8 +1692,8 @@ class NavPathStack {
     this.isReplace = 1;
     this.changeFlag = this.changeFlag + 1;
     if (animated === undefined) {
-      this.animated = true
-      return
+      this.animated = true;
+      return;
     }
     this.animated = animated
   }
@@ -1681,10 +1705,10 @@ class NavPathStack {
     this.pathArray.push(new NavPathInfo(name, param));
     this.changeFlag = this.changeFlag + 1;
     if (animated === undefined) {
-      this.animated = true
-      return
+      this.animated = true;
+      return;
     }
-    this.animated = animated
+    this.animated = animated;
   }
   setIsReplace(value) {
     this.isReplace = value;
@@ -1700,14 +1724,14 @@ class NavPathStack {
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
-      this.animated = true
-      return pathInfo
+      this.animated = true;
+      return pathInfo;
     }
     this.animated = animated
     return pathInfo;
   }
   popTo(name, animated) {
-    popToName(name, animated)
+    popToName(name, animated);
   }
   popToName(name, animated) {
     let index = this.pathArray.findIndex(element => element.name === name);
@@ -1718,8 +1742,8 @@ class NavPathStack {
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
-      this.animated = true
-      return index
+      this.animated = true;
+      return index;
     }
     this.animated = animated
     return index;
@@ -1732,10 +1756,10 @@ class NavPathStack {
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
-      this.animated = true
-      return
+      this.animated = true;
+      return;
     }
-    this.animated = animated
+    this.animated = animated;
   }
   moveToTop(name, animated) {
     let index = this.pathArray.findIndex(element => element.name === name);
@@ -1747,10 +1771,10 @@ class NavPathStack {
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
-      this.animated = true
-      return index
+      this.animated = true;
+      return index;
     }
-    this.animated = animated
+    this.animated = animated;
     return index;
   }
   moveIndexToTop(index, animated) {
@@ -1762,20 +1786,20 @@ class NavPathStack {
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
-      this.animated = true
-      return
+      this.animated = true;
+      return;
     }
-    this.animated = animated
+    this.animated = animated;
   }
   clear(animated) {
     this.pathArray.splice(0);
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
-      this.animated = true
-      return
+      this.animated = true;
+      return;
     }
-    this.animated = animated
+    this.animated = animated;
   }
   removeName(name) {
     let removed = false;
@@ -1838,7 +1862,7 @@ class NavPathStack {
     return this.pathArray.length;
   }
   disableAnimation(disableAnimation) {
-    this.disableAllAnimation = disableAnimation
+    this.disableAllAnimation = disableAnimation;
   }
 }
 
@@ -2227,3 +2251,10 @@ let TextResponseType;
   TextResponseType[TextResponseType['LONG_PRESS'] = 1] = 'LONG_PRESS';
   TextResponseType[TextResponseType['SELECT'] = 2] = 'SELECT';
 })(TextResponseType || (TextResponseType = {}));
+
+let NativeEmbedStatus;
+(function (NativeEmbedStatus) {
+  NativeEmbedStatus['CREATE'] = 0;
+  NativeEmbedStatus['UPDATE'] = 1;
+  NativeEmbedStatus['DESTROY'] = 2;
+})(NativeEmbedStatus || (NativeEmbedStatus = {}));

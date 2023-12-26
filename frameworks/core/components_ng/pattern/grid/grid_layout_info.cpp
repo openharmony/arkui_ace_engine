@@ -142,18 +142,7 @@ void GridLayoutInfo::UpdateEndIndex(float overScrollOffset, float mainSize, floa
 
 float GridLayoutInfo::GetCurrentOffsetOfRegularGrid(float mainGap) const
 {
-    float lineHeight = 0.0f;
-    for (const auto& item : lineHeightMap_) {
-        auto line = gridMatrix_.find(item.first);
-        if (line == gridMatrix_.end()) {
-            continue;
-        }
-        if (line->second.empty()) {
-            continue;
-        }
-        lineHeight = item.second;
-        break;
-    }
+    float lineHeight = GetCurrentLineHeight();
     auto lines = startIndex_ / crossCount_;
     return lines * (lineHeight + mainGap) - currentOffset_;
 }
@@ -196,18 +185,7 @@ float GridLayoutInfo::GetContentOffset(float mainGap) const
 float GridLayoutInfo::GetContentHeight(float mainGap) const
 {
     if (!hasBigItem_) {
-        float lineHeight = 0.0f;
-        for (const auto& item : lineHeightMap_) {
-            auto line = gridMatrix_.find(item.first);
-            if (line == gridMatrix_.end()) {
-                continue;
-            }
-            if (line->second.empty()) {
-                continue;
-            }
-            lineHeight = item.second;
-            break;
-        }
+        float lineHeight = GetCurrentLineHeight();
         auto lines = (childrenCount_) / crossCount_;
         if (childrenCount_ % crossCount_ == 0) {
             return lines * lineHeight + (lines - 1) * mainGap;
@@ -334,11 +312,37 @@ float GridLayoutInfo::GetContentHeight(const GridLayoutOptions& options, float m
         totalHeight += irregularHeight + mainGap;
         totalHeight +=
             (*(index)-lastIndex) > 1 ? ((*(index)-1 - lastIndex) / crossCount_ + 1) * (regularHeight + mainGap) : 0;
-        totalHeight = *(index);
+        lastIndex = *(index);
     }
 
-    totalHeight += ((childrenCount_ - 1 - lastIndex) / crossCount_ + 1) * (regularHeight + mainGap);
+    totalHeight += (childrenCount_ - 1 > lastIndex)
+                       ? ((childrenCount_ - 1 - lastIndex) / crossCount_) * (regularHeight + mainGap)
+                       : 0;
     totalHeight -= mainGap;
     return totalHeight;
+}
+
+float GridLayoutInfo::GetCurrentLineHeight() const
+{
+    auto currentLineHeight = lineHeightMap_.find(startMainLineIndex_);
+    auto currentLineMatrix = gridMatrix_.find(startMainLineIndex_);
+    // if current line exist, find it
+    if (currentLineHeight != lineHeightMap_.end() && currentLineMatrix != gridMatrix_.end() &&
+        !currentLineMatrix->second.empty()) {
+        return currentLineHeight->second;
+    }
+
+    // otherwise return the first line in cache
+    for (const auto& item : lineHeightMap_) {
+        auto line = gridMatrix_.find(item.first);
+        if (line == gridMatrix_.end()) {
+            continue;
+        }
+        if (line->second.empty()) {
+            continue;
+        }
+        return item.second;
+    }
+    return 0.0f;
 }
 } // namespace OHOS::Ace::NG

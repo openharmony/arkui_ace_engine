@@ -179,7 +179,7 @@ void TextSelectController::UpdateSelectByOffset(const Offset& localOffset)
     if (!textFiled->IsUsingMouse()) {
         smartSelect = AdjustWordSelection(pos, start, end, localOffset);
     }
-    
+
     if (!smartSelect && !paragraph_->GetWordBoundary(pos, start, end)) {
         start = pos;
         end = std::min(static_cast<int32_t>(contentController_->GetWideText().length()),
@@ -420,14 +420,14 @@ void TextSelectController::UpdateSecondHandleOffset()
     secondHandleInfo_.rect.SetHeight(caretMetrics.height);
 }
 
-void TextSelectController::UpdateCaretOffset()
+void TextSelectController::UpdateCaretOffset(TextAffinity textAffinity)
 {
     if (contentController_->IsEmpty()) {
         caretInfo_.rect = CalculateEmptyValueCaretRect();
         return;
     }
     CaretMetricsF caretMetrics;
-    CalcCaretMetricsByPosition(GetCaretIndex(), caretMetrics, TextAffinity::DOWNSTREAM);
+    CalcCaretMetricsByPosition(GetCaretIndex(), caretMetrics, textAffinity);
 
     RectF caretRect;
     caretRect.SetOffset(caretMetrics.offset);
@@ -451,7 +451,7 @@ void TextSelectController::UpdateSecondHandleInfoByMouseOffset(const Offset& loc
     auto index = ConvertTouchOffsetToPosition(localOffset);
     MoveSecondHandleToContentRect(index);
     caretInfo_.index = index;
-    UpdateCaretOffset();
+    UpdateCaretOffset(TextAffinity::UPSTREAM);
 }
 
 void TextSelectController::MoveSecondHandleByKeyBoard(int32_t index)
@@ -472,7 +472,7 @@ void TextSelectController::FireSelectEvent()
     }
 
     if (GetSecondIndex().has_value()) {
-        needReport |= GetFirstIndex().value() != secondHandleInfo_.index;
+        needReport |= GetSecondIndex().value() != secondHandleInfo_.index;
     }
 
     auto pattern = pattern_.Upgrade();
@@ -482,11 +482,12 @@ void TextSelectController::FireSelectEvent()
     auto eventHub = textFiled->GetEventHub<TextFieldEventHub>();
     CHECK_NULL_VOID(eventHub);
 
-    if (needReport) {
+    if (needReport && textFiled->IsModifyDone() && textFiled->HasFocus()) {
         UpdateFirstIndex(firstHandleInfo_.index);
         UpdateSecondIndex(secondHandleInfo_.index);
         onAccessibilityCallback_();
-        eventHub->FireOnSelectionChange(firstHandleInfo_.index, secondHandleInfo_.index);
+        eventHub->FireOnSelectionChange(std::min(firstHandleInfo_.index, secondHandleInfo_.index),
+            std::max(firstHandleInfo_.index, secondHandleInfo_.index));
     }
 }
 

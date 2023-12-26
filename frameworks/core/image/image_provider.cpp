@@ -275,8 +275,7 @@ std::shared_ptr<RSData> ImageProvider::LoadImageRawDataFromFileCache(
     const RefPtr<PipelineBase> context, const std::string key, const std::string suffix)
 {
     ACE_FUNCTION_TRACE();
-    std::string cacheFilePath = ImageFileCache::GetInstance().GetImageCacheFilePath(key) + suffix;
-    auto data = ImageFileCache::GetInstance().GetDataFromCacheFile(cacheFilePath);
+    auto data = ImageFileCache::GetInstance().GetDataFromCacheFile(key, suffix);
     if (data) {
 #ifndef USE_ROSEN_DRAWING
         const auto* skData = reinterpret_cast<const sk_sp<SkData>*>(data->GetDataWrapper());

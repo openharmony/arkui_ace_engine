@@ -267,6 +267,12 @@ class UIContext {
         this.observer_ = new UIObserver();
         return this.observer_;
     }
+
+    keyframeAnimateTo(param, keyframes) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.keyframeAnimateTo(param, keyframes);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 class ComponentUtils {
     /**

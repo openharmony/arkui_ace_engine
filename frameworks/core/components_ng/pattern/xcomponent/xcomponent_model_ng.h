@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_XCOMPONENT_XCOMPONENT_MODEL_NG_H
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_model.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -29,6 +30,8 @@ public:
     void SetOnDestroy(DestroyEvent&& onDestroy) override;
     bool IsTexture() override;
     void SetDetachCallback(DetachCallback&& onDetach) override;
+
+    static bool IsTexture(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

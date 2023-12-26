@@ -32,28 +32,24 @@ class HyperlinkColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('hyperlinkColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().hyperlink.resetColor(node);
+      getUINativeModule().hyperlink.resetColor(node);
     } else {
-      GetUINativeModule().hyperlink.setColor(node, this.value!);
+      getUINativeModule().hyperlink.setColor(node, this.value!);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
 // @ts-ignore
 globalThis.Hyperlink.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkHyperlinkComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

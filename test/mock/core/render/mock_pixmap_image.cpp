@@ -45,4 +45,6 @@ RefPtr<CanvasImage> PixelMapImage::QueryFromCache(const std::string& key)
 void PixelMapImage::DrawToRSCanvas(
     RSCanvas& canvas, const RSRect& /* srcRect */, const RSRect& /* dstRect */, const BorderRadiusArray& radiusXY)
 {}
+
+void PixelMapImage::DrawRect(RSCanvas& canvas, const RSRect& dstRect) {}
 } // namespace OHOS::Ace::NG

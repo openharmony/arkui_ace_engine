@@ -123,7 +123,7 @@ struct DragDropBaseInfo {
 using OnDragStartFunc = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
 using OnDragDropFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
 using OnChildTouchTestFunc = std::function<TouchResult(const std::vector<TouchTestInfo>& touchInfo)>;
-
+using OnReponseRegionFunc = std::function<void(const std::vector<DimensionRect>&)>;
 struct DragDropInfo {
     RefPtr<UINode> customNode;
     RefPtr<PixelMap> pixelMap;
@@ -207,6 +207,15 @@ public:
             touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
         }
         touchEventActuator_->ReplaceTouchEvent(std::move(touchEventFunc));
+    }
+
+    // Set by node container.
+    void SetOnTouchEvent(TouchEventFunc&& touchEventFunc)
+    {
+        if (!touchEventActuator_) {
+            touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
+        }
+        touchEventActuator_->SetOnTouchEvent(std::move(touchEventFunc));
     }
 
     void AddTouchEvent(const RefPtr<TouchEventImpl>& touchEvent)
@@ -401,11 +410,19 @@ public:
         return mouseResponseRegion_;
     }
 
+    void SetResponseRegionFunc(const OnReponseRegionFunc& func)
+    {
+        responseRegionFunc_ = func;
+    }
+
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
     {
         responseRegion_ = responseRegion;
         if (!responseRegion_.empty()) {
             isResponseRegion_ = true;
+        }
+        if (responseRegionFunc_) {
+            responseRegionFunc_(responseRegion_);
         }
     }
 
@@ -431,6 +448,10 @@ public:
     {
         responseRegion_.emplace_back(responseRect);
         isResponseRegion_ = true;
+
+        if (responseRegionFunc_) {
+            responseRegionFunc_(responseRegion_);
+        }
     }
 
     void RemoveLastResponseRect()
@@ -442,6 +463,10 @@ public:
         responseRegion_.pop_back();
         if (responseRegion_.empty()) {
             isResponseRegion_ = false;
+        }
+
+        if (responseRegionFunc_) {
+            responseRegionFunc_(responseRegion_);
         }
     }
 
@@ -521,6 +546,11 @@ public:
         panEventActuator_->SetIsAllowMouse(isAllowMouse);
     }
 
+    const RefPtr<ClickEventActuator>& GetUserClickEventActuator()
+    {
+        return userParallelClickEventActuator_;
+    }
+
 #ifdef ENABLE_DRAG_FRAMEWORK
     int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
     OnDragCallbackCore GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
@@ -554,6 +584,11 @@ public:
     bool GetMonopolizeEvents() const;
 
     void SetMonopolizeEvents(bool monopolizeEvents);
+    virtual RefPtr<NGGestureRecognizer> PackInnerRecognizer(
+        const Offset& offset, std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, int32_t touchId,
+        const RefPtr<TargetComponent>& targetComponent);
+    bool parallelCombineClick = false;
+    RefPtr<ParallelRecognizer> innerParallelRecognizer_;
 
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -574,6 +609,7 @@ private:
     RefPtr<ScrollableActuator> scrollableActuator_;
     RefPtr<TouchEventActuator> touchEventActuator_;
     RefPtr<ClickEventActuator> clickEventActuator_;
+    RefPtr<ClickEventActuator> userParallelClickEventActuator_;
     RefPtr<LongPressEventActuator> longPressEventActuator_;
     RefPtr<PanEventActuator> panEventActuator_;
     RefPtr<DragEventActuator> dragEventActuator_;
@@ -606,6 +642,7 @@ private:
     GestureEvent gestureInfoForWeb_;
     bool isReceivedDragGestureInfo_ = false;
     OnChildTouchTestFunc onChildTouchTestFunc_;
+    OnReponseRegionFunc responseRegionFunc_;
 
     GestureJudgeFunc gestureJudgeFunc_;
     GestureJudgeFunc gestureJudgeNativeFunc_;

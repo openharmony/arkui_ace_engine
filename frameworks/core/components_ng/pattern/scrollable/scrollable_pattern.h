@@ -43,8 +43,10 @@
 namespace OHOS::Ace::NG {
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
+constexpr double MAX_VELOCITY = 800000.0;
 #else
 constexpr double FRICTION = 0.9;
+constexpr double MAX_VELOCITY = 5000.0;
 #endif
 enum class ModalSheetCoordinationMode : char {
     UNKNOWN = 0,
@@ -260,6 +262,8 @@ public:
         return friction_;
     }
 
+    void SetMaxFlingVelocity(double max);
+
     void StopAnimate();
     bool AnimateRunning() const
     {
@@ -342,14 +346,9 @@ public:
         return scrollSource_;
     }
 
-    int32_t GetCurrentVelocity() const
+    float GetCurrentVelocity() const
     {
         return currentVelocity_;
-    }
-
-    int32_t IsAnimationStop() const
-    {
-        return isAnimationStop_;
     }
 
     ScrollState GetScrollState() const;
@@ -407,6 +406,18 @@ public:
     void SetAlwaysEnabled(bool alwaysEnabled)
     {
         edgeEffectAlwaysEnabled_ = alwaysEnabled;
+    }
+
+    bool IsScrollableAnimationNotRunning()
+    {
+        if (scrollableEvent_) {
+            auto scrollable = scrollableEvent_->GetScrollable();
+            if (scrollable) {
+                return scrollable->IsAnimationNotRunning();
+            }
+            return false;
+        }
+        return false;
     }
 
     float GetFinalPosition() const
@@ -493,12 +504,11 @@ protected:
 private:
     virtual void OnScrollEndCallback() {};
 
-    void DraggedDownScrollEndProcess();
     void RegisterScrollBarEventTask();
-    bool OnScrollPosition(double offset, int32_t source);
+    bool OnScrollPosition(double& offset, int32_t source);
     void SetParentScrollable();
     void ProcessNavBarReactOnStart();
-    bool ProcessNavBarReactOnUpdate(float offset);
+    float ProcessNavBarReactOnUpdate(float offset);
     void ProcessNavBarReactOnEnd();
     void InitSpringOffsetProperty();
     void InitCurveOffsetProperty(float position);
@@ -523,11 +533,9 @@ private:
     void SelectWithScroll();
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     float GetOutOfScrollableOffset() const;
-    float GetOffsetWithLimit(float offset) const;
+    virtual float GetOffsetWithLimit(float offset) const;
     void LimitMouseEndOffset();
     void UpdateBorderRadius();
-
-    bool ProcessAssociatedScroll(double offset, int32_t source);
 
     /******************************************************************************
      * NestableScrollContainer implementations
@@ -575,9 +583,10 @@ private:
     float GetVelocity() const;
     bool NeedSplitScroll(OverScrollOffset& overOffsets, int32_t source);
     RefreshCoordinationMode CoordinateWithRefresh(double& offset, int32_t source, bool isAtTop);
-    bool CoordinateWithNavigation(bool isAtTop, bool isDraggedDown, double& offset, int32_t source);
+    bool CoordinateWithNavigation(double& offset, int32_t source, bool isAtTop);
     void NotifyFRCSceneInfo(const std::string& scene, double velocity, SceneStatus sceneStatus);
     ModalSheetCoordinationMode CoordinateWithSheet(double& offset, int32_t source, bool isAtTop);
+    bool NeedCoordinateScrollWithNavigation(double offset, int32_t source, const OverScrollOffset& overOffsets);
 
     Axis axis_;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -596,6 +605,7 @@ private:
     bool isCoordEventNeedSpring_ = true;
     double scrollBarOutBoundaryExtent_ = 0.0;
     double friction_ = FRICTION;
+    double maxFlingVelocity_ = MAX_VELOCITY;
     // scroller
     RefPtr<Animator> animator_;
     bool scrollAbort_ = false;
@@ -627,10 +637,12 @@ private:
     std::shared_ptr<AnimationUtils::Animation> springAnimation_;
     std::shared_ptr<AnimationUtils::Animation> curveAnimation_;
     std::chrono::high_resolution_clock::time_point lastTime_;
-    bool isAnimationStop_ = true;
+    bool isAnimationStop_ = true; // graphic animation flag
     float currentVelocity_ = 0.0f;
     float lastPosition_ = 0.0f;
     float finalPosition_ = 0.0f;
+    uint32_t runningAnimationCount_ = 0;
+
     RefPtr<Animator> hotzoneAnimator_;
     float lastHonezoneOffsetPct_ = 0.0f;
     RefPtr<BezierVariableVelocityMotion> velocityMotion_;

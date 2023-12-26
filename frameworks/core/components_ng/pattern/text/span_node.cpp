@@ -110,6 +110,17 @@ RefPtr<SpanNode> SpanNode::GetOrCreateSpanNode(int32_t nodeId)
     return spanNode;
 }
 
+RefPtr<SpanNode> SpanNode::GetOrCreateSpanNode(const std::string& tag, int32_t nodeId)
+{
+    auto spanNode = ElementRegister::GetInstance()->GetSpecificItemById<SpanNode>(nodeId);
+    if (spanNode) {
+        return spanNode;
+    }
+    spanNode = MakeRefPtr<SpanNode>(tag, nodeId);
+    ElementRegister::GetInstance()->AddUINode(spanNode);
+    return spanNode;
+}
+
 void SpanNode::MountToParagraph()
 {
     auto parent = GetParent();
@@ -153,6 +164,7 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
 {
     CHECK_NULL_RETURN(builder, -1);
     std::optional<TextStyle> textStyle;
+    auto symbolUnicode = GetSymbolUnicode();
     if (fontStyle || textLineStyle) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, -1);
@@ -166,6 +178,9 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
         }
         textStyle = themeTextStyle;
         textStyle->SetHalfLeading(pipelineContext->GetHalfLeading());
+        if (symbolUnicode != 0) {
+            UpdateSymbolSpanColor(themeTextStyle);
+        }
         builder->PushStyle(themeTextStyle);
     }
     auto spanContent = GetSpanContent(content);
@@ -177,6 +192,11 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
         UpdateTextStyle(spanContent, builder, textStyle);
     }
     textStyle_ = textStyle;
+
+    if (symbolUnicode != 0) {
+        builder->AddSymbol(symbolUnicode);
+    }
+
     for (const auto& child : children) {
         if (child) {
             if (!aiSpanMap.empty()) {
@@ -191,6 +211,16 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
     return -1;
 }
 
+void SpanItem::UpdateSymbolSpanColor(TextStyle& symbolSpanStyle)
+{
+    symbolSpanStyle.isSymbolGlyph_ = true;
+    if (symbolSpanStyle.GetSymbolColorList().empty()) {
+        std::vector<Color> symbolColor;
+        symbolColor.emplace_back(symbolSpanStyle.GetTextColor());
+        symbolSpanStyle.SetSymbolColorList(symbolColor);
+    }
+}
+
 void SpanItem::UpdateTextStyleForAISpan(
     const std::string& spanContent, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle)
 {
@@ -203,17 +233,14 @@ void SpanItem::UpdateTextStyleForAISpan(
     int32_t preEnd = spanStart;
     while (!aiSpanMap.empty()) {
         auto aiSpan = aiSpanMap.begin()->second;
-        if (aiSpan.start >= position) {
+        if (aiSpan.start >= position || preEnd >= position) {
             break;
-        }
-        if (aiSpan.end <= spanStart) {
-            aiSpanMap.erase(aiSpanMap.begin());
-            continue;
         }
         int32_t aiSpanStartInSpan = std::max(spanStart, aiSpan.start);
         int32_t aiSpanEndInSpan = std::min(position, aiSpan.end);
-        if (aiSpanStartInSpan < preEnd) {
+        if (aiSpan.end <= spanStart || aiSpanStartInSpan < preEnd) {
             TAG_LOGI(AceLogTag::ACE_TEXT, "Error prediction");
+            aiSpanMap.erase(aiSpanMap.begin());
             continue;
         }
         if (preEnd < aiSpanStartInSpan) {
@@ -357,6 +384,11 @@ std::string SpanItem::GetSpanContent(const std::string& rawContent)
 std::string SpanItem::GetSpanContent()
 {
     return content;
+}
+
+uint32_t SpanItem::GetSymbolUnicode()
+{
+    return unicode;
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK

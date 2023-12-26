@@ -214,6 +214,9 @@ void ImagePattern::OnImageLoadSuccess()
     altDstRect_.reset();
     altSrcRect_.reset();
 
+    if (!IsSupportImageAnalyzerFeature() && isAnalyzerOverlayBuild_) {
+        DeleteAnalyzerOverlay();
+    }
     UpdateAnalyzerOverlay();
     CreateAnalyzerOverlay();
     host->MarkNeedRenderOnly();
@@ -976,7 +979,8 @@ bool ImagePattern::IsSupportImageAnalyzerFeature()
     ImageRepeat repeat = imageRenderProperty->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
 
     return isEnabled && !hasObscured && isEnableAnalyzer_ && ImageAnalyzerMgr::GetInstance().IsImageAnalyzerSupported()
-        && image_ && !loadingCtx_->GetSourceInfo().IsSvg() && repeat == ImageRepeat::NO_REPEAT;
+        && image_ && !loadingCtx_->GetSourceInfo().IsSvg() && repeat == ImageRepeat::NO_REPEAT
+        && loadingCtx_->GetFrameCount() == 1;
 }
 
 void ImagePattern::UpdateAnalyzerUIConfig(const RefPtr<GeometryNode>& geometryNode)

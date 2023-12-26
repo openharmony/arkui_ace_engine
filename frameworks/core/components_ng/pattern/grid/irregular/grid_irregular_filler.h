@@ -52,7 +52,7 @@ public:
 
 private:
     /**
-     * @brief Fills in one GridItem into the Grid.
+     * @brief Fills one GridItem into the Grid.
      */
     void FillOne();
 
@@ -106,9 +106,9 @@ private:
      *
      * @param it An iterator pointing to the current row or column in the grid layout information.
      * @param itemWidth The width of the item.
-     * @return True if the item can fit, false otherwise.
+     * @return The cross-axis index where the item can fit. Returns -1 if it can't fit on the current row.
      */
-    inline bool ItemCanFit(const decltype(GridLayoutInfo::gridMatrix_)::iterator& it, int32_t itemWidth);
+    int32_t FitItem(const decltype(GridLayoutInfo::gridMatrix_)::iterator& it, int32_t itemWidth);
 
     /**
      * @brief Gets the size of an item at the specified index.

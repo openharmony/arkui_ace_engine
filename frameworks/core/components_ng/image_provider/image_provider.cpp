@@ -289,7 +289,9 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(const ImageSourceInfo& src, 
         return nullptr;
     }
     if (frameCount > 1) {
-        return MakeRefPtr<AnimatedImageObject>(src, size, data);
+        auto imageObject = MakeRefPtr<AnimatedImageObject>(src, size, data);
+        imageObject->SetFrameCount(frameCount);
+        return imageObject;
     }
     return MakeRefPtr<StaticImageObject>(src, size, data);
 }

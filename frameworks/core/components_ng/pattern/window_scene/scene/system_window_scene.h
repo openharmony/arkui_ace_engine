@@ -41,6 +41,8 @@ private:
     void OnAttachToFrameNode() override;
     void OnBoundsChanged(const Rosen::Vector4f& bounds);
     void RegisterFocusCallback();
+    void RegisterEventCallback();
+    void RegisterResponseRegionCallback();
 
     int32_t instanceId_ = Container::CurrentId();
     sptr<Rosen::Session> session_;

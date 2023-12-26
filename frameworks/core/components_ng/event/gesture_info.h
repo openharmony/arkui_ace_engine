@@ -80,7 +80,7 @@ public:
 
 private:
     std::optional<std::string> tag_;
-    GestureTypeName type_;
+    GestureTypeName type_ = GestureTypeName::UNKNOWN;
     InputEventType inputEventType_ = InputEventType::TOUCH_SCREEN;
     bool isSystemGesture_ = false;
 };

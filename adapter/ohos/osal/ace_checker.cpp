@@ -15,10 +15,12 @@
 
 #include "base/log/ace_checker.h"
 
+#ifdef HICHECKER_EXISTS
 #include "caution.h"
 #include "hichecker.h"
 #include "parameter.h"
 #include "parameters.h"
+#endif
 
 #include "base/log/log.h"
 
@@ -43,6 +45,7 @@ int32_t AceChecker::nodeTimeout_ = NODE_TIMEOUT;
 int32_t AceChecker::foreachItems_ = FOREACH_ITEMS;
 int32_t AceChecker::flexLayouts_ = FLEX_LAYOUTS;
 
+#ifdef HICHECKER_EXISTS
 bool AceChecker::IsPerformanceCheckEnabled()
 {
     return HiviewDFX::HiChecker::Contains(HiviewDFX::Rule::RULE_CHECK_ARKUI_PERFORMANCE);
@@ -70,4 +73,14 @@ void AceChecker::InitPerformanceParameters()
     AceChecker::foreachItems_ = system::GetIntParameter<int>("arkui.performancecheck.9904.foreachitems", FOREACH_ITEMS);
     AceChecker::flexLayouts_ = system::GetIntParameter<int>("arkui.performancecheck.9905.flexlayouts", FLEX_LAYOUTS);
 }
+#else
+bool AceChecker::IsPerformanceCheckEnabled()
+{
+    return false;
+}
+
+void AceChecker::NotifyCaution(const std::string& tag) {}
+void AceChecker::InitPerformanceParameters() {}
+#endif
+
 } // namespace OHOS::Ace

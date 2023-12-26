@@ -195,8 +195,8 @@ struct TouchEvent final {
                 point.screenY = point.screenY - offsetY;
             });
             return { pointId, x - offsetX, y - offsetY, screenX - offsetX, screenY - offsetY, type, pullType, time,
-                size, force, tiltX, tiltY, deviceId, targetDisplayId, sourceType, sourceTool, isInterpolated,
-                temp, pointerEvent, enhanceData };
+                size, force, tiltX, tiltY, deviceId, targetDisplayId, sourceType, sourceTool, isInterpolated, temp,
+                pointerEvent, enhanceData };
         }
 
         std::for_each(temp.begin(), temp.end(), [scale, offsetX, offsetY](auto&& point) {
@@ -652,6 +652,17 @@ public:
     {
         return targetComponent_;
     }
+
+    void SetIsPostEventResult(bool isPostEventResult)
+    {
+        isPostEventResult_ = isPostEventResult;
+    }
+
+    bool IsPostEventResult() const
+    {
+        return isPostEventResult_;
+    }
+
 private:
     virtual bool ShouldResponse() { return true; };
 
@@ -666,6 +677,7 @@ protected:
     WeakPtr<NG::FrameNode> node_ = nullptr;
     Axis direction_ = Axis::NONE;
     RefPtr<NG::TargetComponent> targetComponent_;
+    bool isPostEventResult_ = false;
 };
 
 using TouchTestResult = std::list<RefPtr<TouchEventTarget>>;
@@ -717,6 +729,29 @@ private:
     std::list<TouchLocationInfo> touches_;
     std::list<TouchLocationInfo> changedTouches_;
     std::list<TouchLocationInfo> history_;
+};
+
+class NativeEmbeadTouchInfo : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(NativeEmbeadTouchInfo, BaseEventInfo);
+
+public:
+    NativeEmbeadTouchInfo(const std::string& embedId, const TouchEventInfo & touchEventInfo)
+        : BaseEventInfo("NativeEmbeadTouchInfo"), embedId_(embedId), touchEvent_(touchEventInfo) {}
+    ~NativeEmbeadTouchInfo() override = default;
+
+    const std::string& GetEmbedId() const
+    {
+        return embedId_;
+    }
+
+    const TouchEventInfo& GetTouchEventInfo() const
+    {
+        return touchEvent_;
+    }
+
+private:
+    std::string embedId_;
+    TouchEventInfo touchEvent_;
 };
 
 using TouchEventFunc = std::function<void(TouchEventInfo&)>;

@@ -79,7 +79,8 @@ public:
 
     void SetLoadCardCallBack(WeakPtr<PipelineBase> outSidePipelineContext) override
     {
-        const auto& loadCallback = [outSidePipelineContext](const std::string& url, int64_t cardId) -> bool {
+        const auto& loadCallback = [outSidePipelineContext](
+                                       const std::string& url, int64_t cardId, const std::string& entryPoint) -> bool {
             auto context = outSidePipelineContext.Upgrade();
             if (!context) {
                 return false;
@@ -99,7 +100,7 @@ public:
                 return false;
             }
 
-            return jsEngine->LoadCard(url, cardId);
+            return jsEngine->LoadCard(url, cardId, entryPoint);
         };
         delegate_->SetLoadCardCallBack(loadCallback);
     }

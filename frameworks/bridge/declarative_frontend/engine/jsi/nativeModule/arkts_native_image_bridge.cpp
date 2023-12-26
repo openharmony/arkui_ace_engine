@@ -170,7 +170,7 @@ ArkUINativeModuleValue ImageBridge::SetObjectFit(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     if (secondArg->IsNumber()) {
-        int32_t objectFitValue = secondArg->Uint32Value(vm);
+        int32_t objectFitValue = secondArg->Int32Value(vm);
         GetArkUIInternalNodeAPI()->GetImageModifier().SetObjectFit(nativeNode, objectFitValue);
     } else {
         GetArkUIInternalNodeAPI()->GetImageModifier().ResetObjectFit(nativeNode);

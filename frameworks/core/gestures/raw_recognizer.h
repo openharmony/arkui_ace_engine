@@ -90,6 +90,7 @@ public:
         coordinateOffset_ = coordinateOffset;
     }
 
+    bool isFirstTrack_ = true;
 private:
     TouchEventInfo CreateTouchEventInfo(
         const std::string& type, const TouchEvent& point, bool ignoreCurrent = false) const;
@@ -98,7 +99,6 @@ private:
     CatchTouchEventCallback catcheventCallbacks_[EventStage::SIZE][EventType::SIZE];
     TouchEvent lastPoint_;
     Offset coordinateOffset_;
-    bool isFirstTrack_ = true;
 };
 
 } // namespace OHOS::Ace

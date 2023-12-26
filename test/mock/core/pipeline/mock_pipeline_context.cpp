@@ -376,6 +376,7 @@ void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId) {}
 
 void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) {};
 void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) {};
+void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) {};
 void PipelineContext::SetEnableKeyBoardAvoidMode(bool value) {};
 bool PipelineContext::IsEnableKeyBoardAvoidMode()
 {
@@ -448,6 +449,8 @@ bool PipelineContext::IsDragging() const
 }
 
 void PipelineContext::SetIsDragging(bool isDragging) {}
+
+void PipelineContext::ResetDragging() {}
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 

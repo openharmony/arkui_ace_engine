@@ -16,10 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WATER_FLOW_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_WATER_FLOW_H
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
+#include "bridge/declarative_frontend/jsview/js_scrollable_base.h"
 
 namespace OHOS::Ace::Framework {
-class JSWaterFlow : public JSContainerBase {
+class JSWaterFlow : public JSScrollableBase {
 public:
     static void Create(const JSCallbackInfo& args);
     static void JSBind(BindingTarget globalObj);

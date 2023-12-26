@@ -68,8 +68,8 @@ public:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     // for DynamicComponent
-    void InitializeDynamicComponent(const std::string& hapPath, const std::string& abcPath,
-        const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime);
+    void InitializeDynamicComponent(
+        const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint, void* runtime);
     bool OnDirtyLayoutWrapperSwapForDynamicComponent(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config);
 
     void OnConnect();

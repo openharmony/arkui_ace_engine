@@ -35,7 +35,7 @@ using LoadPageCallback = std::function<bool(const std::string&,
     const std::function<void(const std::string&, int32_t)>&)>;
 using LoadPageByBufferCallback = std::function<bool(
     const std::shared_ptr<std::vector<uint8_t>>& content,  const std::function<void(const std::string&, int32_t)>&)>;
-using LoadCardCallback = std::function<bool(const std::string&, int64_t cardId)>;
+using LoadCardCallback = std::function<bool(const std::string&, int64_t cardId, const std::string&)>;
 using LoadNamedRouterCallback = std::function<bool(const std::string&, bool isTriggeredByJs)>;
 using UpdateRootComponentCallback = std::function<bool()>;
 #if defined(PREVIEW)
@@ -66,7 +66,8 @@ public:
     void RunPage(const std::string& url, const std::string& params);
     void RunPage(const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params);
     void RunPageByNamedRouter(const std::string& name, const std::string& params);
-    void RunCard(const std::string& url, const std::string& params, int64_t cardId);
+    void RunCard(const std::string& url, const std::string& params, int64_t cardId,
+        const std::string& entryPoint = "");
 
     void SetManifestParser(const RefPtr<Framework::ManifestParser>& manifestParser)
     {
@@ -193,7 +194,7 @@ private:
     static bool OnCleanPageStack();
 
     void LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params, int64_t cardId,
-        bool isRestore = false, bool needHideLast = true);
+        bool isRestore = false, bool needHideLast = true, const std::string& entryPoint = "");
 
     RefPtr<Framework::ManifestParser> manifestParser_;
 

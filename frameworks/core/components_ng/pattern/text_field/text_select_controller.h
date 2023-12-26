@@ -189,7 +189,7 @@ public:
     void UpdateSecondHandleInfoByMouseOffset(const Offset& localOffset);
     void MoveSecondHandleByKeyBoard(int32_t index);
     void UpdateSelectByOffset(const Offset& localOffset);
-    void UpdateCaretOffset();
+    void UpdateCaretOffset(TextAffinity textAffinity = TextAffinity::DOWNSTREAM);
     void UpdateCaretOffset(const OffsetF& offset);
     void UpdateFirstHandleOffset();
     void UpdateSecondHandleOffset();

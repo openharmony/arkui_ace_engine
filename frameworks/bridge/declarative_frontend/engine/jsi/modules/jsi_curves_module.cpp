@@ -143,13 +143,13 @@ bool CreateInterpolatingSpring(const shared_ptr<JsRuntime>& runtime, const share
     float mass = static_cast<float>(argv[1]->IsNumber(runtime) ? argv[1]->ToDouble(runtime) : 1.0);
     float stiffness = static_cast<float>(argv[2]->IsNumber(runtime) ? argv[2]->ToDouble(runtime) : 1.0);
     float damping = static_cast<float>(argv[3]->IsNumber(runtime) ? argv[3]->ToDouble(runtime) : 1.0);
-    if (LessNotEqual(mass, 0)) {
+    if (LessOrEqual(mass, 0)) {
         mass = 1.0;
     }
-    if (LessNotEqual(stiffness, 0)) {
+    if (LessOrEqual(stiffness, 0)) {
         stiffness = 1.0;
     }
-    if (LessNotEqual(damping, 0)) {
+    if (LessOrEqual(damping, 0)) {
         damping = 1.0;
     }
     curve = AceType::MakeRefPtr<InterpolatingSpring>(velocity, mass, stiffness, damping);
@@ -222,7 +222,7 @@ bool CreateSpringMotionCurve(const shared_ptr<JsRuntime>& runtime, const shared_
     float blendDuration = ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_BLEND_DURATION;
     if (argc > 0 && argv[0]->IsNumber(runtime)) {
         response = static_cast<float>(argv[0]->ToDouble(runtime));
-        if (LessNotEqual(response, 0)) {
+        if (LessOrEqual(response, 0)) {
             response = ResponsiveSpringMotion::DEFAULT_SPRING_MOTION_RESPONSE;
         }
     }
@@ -253,7 +253,7 @@ bool CreateResponsiveSpringMotionCurve(const shared_ptr<JsRuntime>& runtime, con
     float blendDuration = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_BLEND_DURATION;
     if (argc > 0 && argv[0]->IsNumber(runtime)) {
         response = static_cast<float>(argv[0]->ToDouble(runtime));
-        if (LessNotEqual(response, 0)) {
+        if (LessOrEqual(response, 0)) {
             response = ResponsiveSpringMotion::DEFAULT_RESPONSIVE_SPRING_MOTION_RESPONSE;
         }
     }

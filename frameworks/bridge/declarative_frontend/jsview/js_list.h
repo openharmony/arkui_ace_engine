@@ -17,7 +17,7 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_LIST_H
 
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
-#include "bridge/declarative_frontend/jsview/js_container_base.h"
+#include "bridge/declarative_frontend/jsview/js_scrollable_base.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 
 namespace OHOS::Ace::Framework {
@@ -33,7 +33,7 @@ public:
     void CloseAllSwipeActions(const JSCallbackInfo& args);
 };
 
-class JSList : public JSContainerBase {
+class JSList : public JSScrollableBase {
 public:
     static void JSBind(BindingTarget globalObj);
     static void SetScroller(RefPtr<JSScroller> scroller);

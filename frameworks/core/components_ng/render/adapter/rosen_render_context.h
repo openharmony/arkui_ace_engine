@@ -26,6 +26,7 @@
 #include "include/core/SkRefCnt.h"
 #include "render_service_client/core/animation/rs_particle_params.h"
 #include "render_service_client/core/ui/rs_node.h"
+#include "render_service_client/core/ui/rs_texture_export.h"
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/offset_t.h"
@@ -207,8 +208,8 @@ public:
     void ResetSharedTranslate() override;
     void ResetPageTransitionEffect() override;
 
-    static std::list<std::shared_ptr<Rosen::RSNode>> GetChildrenRSNodes(
-        const std::list<RefPtr<FrameNode>>& frameChildren);
+    static std::vector<std::shared_ptr<Rosen::RSNode>> GetChildrenRSNodes(
+        const std::list<RefPtr<FrameNode>>& frameChildren, std::unordered_map<Rosen::NodeId, bool>& nodeIdMap);
 
     // if translate params use percent dimension, frameSize should be given correctly
     static std::shared_ptr<Rosen::RSTransitionEffect> GetRSTransitionWithoutType(
@@ -224,6 +225,7 @@ public:
     void ClearChildren() override;
     void SetBounds(float positionX, float positionY, float width, float height) override;
     void OnTransformTranslateUpdate(const TranslateOptions& value) override;
+    bool DoTextureExport(uint64_t surfaceId) override;
 
     RectF GetPaintRectWithTransform() override;
 
@@ -241,6 +243,8 @@ public:
     Matrix4 GetLocalTransformMatrix() override;
 
     void GetPointWithRevert(PointF& point) override;
+
+    void GetPointTransform(PointF& point) override;
 
     void GetPointWithTransform(PointF& point) override;
 
@@ -306,6 +310,16 @@ public:
     void SetFrameGravity(OHOS::Rosen::Gravity gravity) override;
 
     int32_t CalcExpectedFrameRate(const std::string& scene, float speed) override;
+
+    void SetBackgroundShader(const std::shared_ptr<Rosen::RSShader>& shader);
+
+    // used in arkts_native_render_node_modifier set property directly to rsNode
+    void SetRotation(float rotationX, float rotationY, float rotationZ) override;
+    void SetShadowColor(uint32_t color) override;
+    void SetShadowOffset(float offsetX, float offsetY) override;
+    void SetShadowAlpha(float alpha) override;
+    void SetShadowElevation(float elevation) override;
+    void SetShadowRadius(float radius) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -481,6 +495,7 @@ private:
     float RoundValueToPixelGrid(float value, bool forceCeil, bool forceFloor);
     void RoundToPixelGrid(float absoluteLeft, float absoluteTop);
     Matrix4 GetRevertMatrix();
+    Matrix4 GetMatrix();
     bool IsUniRenderEnabled() override;
 
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
@@ -522,6 +537,7 @@ private:
     std::shared_ptr<Rosen::RSProperty<Rosen::Vector2f>> pivotProperty_;
     std::unique_ptr<SharedTransitionModifier> sharedTransitionModifier_;
     std::shared_ptr<OverlayTextModifier> modifier_ = nullptr;
+    std::shared_ptr<GradientStyleModifier> gradientStyleModifier_;
 
     // translate modifiers for developer
     std::shared_ptr<Rosen::RSTranslateModifier> translateXY_;
@@ -546,6 +562,8 @@ private:
     bool isTouchUpFinished_ = true;
 
     bool useContentRectForRSFrame_;
+
+    std::shared_ptr<Rosen::RSTextureExport> rsTextureExport_;
 
     template<typename Modifier, typename PropertyType>
     friend class PropertyTransitionEffectTemplate;

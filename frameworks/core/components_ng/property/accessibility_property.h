@@ -373,15 +373,12 @@ public:
 
     void SaveAccessibilityVirtualNode(const RefPtr<UINode>& node)
     {
-        accessibilityVirtualNodes_.push_back(node);
+        accessibilityVirtualNode_ = node;
     }
 
     RefPtr<UINode> GetAccessibilityVirtualNode()
     {
-        if (!accessibilityVirtualNodes_.empty()) {
-            return accessibilityVirtualNodes_.back();
-        }
-        return nullptr;
+        return accessibilityVirtualNode_;
     }
 
     std::string GetAccessibilityText(bool isParentGroup = false);
@@ -416,7 +413,7 @@ protected:
     ActionSelectImpl actionSelectImpl_;
     ActionClearSelectionImpl actionClearSelectionImpl_;
     bool accessibilityGroup_ = false;
-    std::list<RefPtr<UINode>> accessibilityVirtualNodes_;
+    RefPtr<UINode> accessibilityVirtualNode_;
     std::optional<std::string> accessibilityText_;
     std::optional<std::string> accessibilityDescription_;
     std::optional<std::string> accessibilityLevel_;

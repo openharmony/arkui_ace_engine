@@ -58,7 +58,7 @@ float ListLanesLayoutAlgorithm::MeasureAndGetChildHeight(LayoutWrapper* layoutWr
         auto listLayoutProperty =
             AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
         // true: layout forward, true: layout all group items.
-        SetListItemGroupParam(wrapper, 0.0f, true, listLayoutProperty, true);
+        SetListItemGroupParam(wrapper, childIndex, 0.0f, true, listLayoutProperty, true);
         wrapper->Measure(groupLayoutConstraint_);
     } else {
         wrapper->Measure(childLayoutConstraint_);
@@ -94,7 +94,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
                         wrapper->GetHostNode()->GetParent()->GetId() : 0);
             }
             auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-            SetListItemGroupParam(wrapper, startPos, true, listLayoutProperty, GroupNeedAllLayout());
+            SetListItemGroupParam(wrapper, currentIndex, startPos, true, listLayoutProperty, false);
             wrapper->Measure(groupLayoutConstraint_);
         } else {
             if (wrapper->GetHostNode()) {
@@ -112,7 +112,9 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineForward(LayoutWrapper* layoutWrappe
     if (cnt > 0) {
         endPos = startPos + mainLen;
         for (int32_t i = 0; i < cnt; i++) {
-            SetItemInfo(currentIndex - i, { startPos, endPos, isGroup });
+            auto wrap = layoutWrapper->GetOrCreateChildByIndex(currentIndex - i);
+            int32_t id = wrap->GetHostNode()->GetId();
+            SetItemInfo(currentIndex - i, { id, startPos, endPos, isGroup });
         }
     }
     return cnt;
@@ -150,7 +152,7 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
                         wrapper->GetHostNode()->GetParent()->GetId() : 0);
             }
             auto listLayoutProperty = AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
-            SetListItemGroupParam(wrapper, endPos, false, listLayoutProperty, GroupNeedAllLayout());
+            SetListItemGroupParam(wrapper, currentIndex, endPos, false, listLayoutProperty, false);
             wrapper->Measure(groupLayoutConstraint_);
         } else {
             if (wrapper->GetHostNode()) {
@@ -168,7 +170,9 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
     if (cnt > 0) {
         startPos = endPos - mainLen;
         for (int32_t i = 0; i < cnt; i++) {
-            SetItemInfo(currentIndex + i, { startPos, endPos, isGroup });
+            auto wrap = layoutWrapper->GetOrCreateChildByIndex(currentIndex + i);
+            int32_t id = wrap->GetHostNode()->GetId();
+            SetItemInfo(currentIndex + i, { id, startPos, endPos, isGroup });
         }
     }
     return cnt;

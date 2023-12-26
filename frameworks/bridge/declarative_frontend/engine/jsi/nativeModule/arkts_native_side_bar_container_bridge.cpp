@@ -150,7 +150,7 @@ ArkUINativeModuleValue SideBarContainerBridge::SetControlButton(ArkUIRuntimeCall
     if (ArkTSUtils::ParseJsMedia(vm, iconsSwitchingArg, iconsSwitching)) {
         iconsStruct.SwitchingIconInfo = iconsSwitching.c_str();
     }
-    GetArkUIInternalNodeAPI()->GetSideBarContainerModifier().SetControlButton(nativeNode, values, &iconsStruct);
+    GetArkUIInternalNodeAPI()->GetSideBarContainerModifier().SetControlButton(nativeNode, values, NUM_4, &iconsStruct);
     return panda::JSValueRef::Undefined(vm);
 }
 

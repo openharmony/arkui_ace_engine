@@ -185,5 +185,18 @@ enum class NavRouteMode {
     PUSH,
     REPLACE,
 };
+
+enum class NavigationOperation {
+    PUSH = 1,
+    POP,
+    REPLACE,
+};
+
+struct NavContentInfo {
+    std::string name;
+    int32_t index = 0;
+    NavDestinationMode mode;
+};
+
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_NAVIGATION_NAVIGATION_DECLARATION_H

@@ -20,8 +20,10 @@
 #include <condition_variable>
 #include <mutex>
 #include <string>
-#include "core/components/plugin/plugin_component_callback.h"
+
 #include "js_plugin_data.h"
+
+#include "core/components/plugin/plugin_component_callback.h"
 
 namespace OHOS::Ace::Napi {
 using namespace OHOS::Ace;
@@ -33,13 +35,14 @@ struct OnPluginUvWorkData {
     std::string data;
     std::string extraData;
     std::string name;
-    void *that = nullptr;
+    void* that = nullptr;
 };
 
 class AceJSPluginRequestParam {
 public:
-    AceJSPluginRequestParam(const AAFwk::Want& want, const std::string name, const std::string data,
-        const std::string jsonPath) : want_(want), name_(name), data_(data), jsonPath_(jsonPath)
+    AceJSPluginRequestParam(
+        const AAFwk::Want& want, const std::string name, const std::string data, const std::string jsonPath)
+        : want_(want), name_(name), data_(data), jsonPath_(jsonPath)
     {}
     ~AceJSPluginRequestParam() = default;
     bool operator==(const AceJSPluginRequestParam& param) const;
@@ -76,8 +79,8 @@ public:
 private:
     void DestroyAllResource(void);
     void SendRequestEventResult(napi_value jsObject);
-    napi_value MakeCallbackParamForRequest(const PluginComponentTemplate& pluginTemplate,
-        const std::string& data, const std::string& extraData);
+    napi_value MakeCallbackParamForRequest(
+        const PluginComponentTemplate& pluginTemplate, const std::string& data, const std::string& extraData);
     napi_value MakePluginTemplateObject(const PluginComponentTemplate& pluginTemplate);
     void OnPushEventInner(const OnPluginUvWorkData* workData);
     void OnRequestEventInner(const OnPluginUvWorkData* workData);
@@ -89,7 +92,7 @@ private:
     std::shared_ptr<AceJSPluginRequestParam> requestParam_ = nullptr;
     static std::atomic_size_t uuid_;
     OnPluginUvWorkData uvWorkData_;
-    ACEAsyncJSCallbackInfo *asyncJSCallbackInfo_ = nullptr;
+    ACEAsyncJSCallbackInfo* asyncJSCallbackInfo_ = nullptr;
 };
-}  // namespace OHOS::Ace::Napi
-#endif  // OHOS_NAPI_ACE_PLUGIN_CALLBACK_H
+} // namespace OHOS::Ace::Napi
+#endif // OHOS_NAPI_ACE_PLUGIN_CALLBACK_H

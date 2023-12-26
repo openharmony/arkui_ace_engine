@@ -53,6 +53,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_radio_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rating_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_render_node_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_row_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_row_split_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_search_bridge.h"
@@ -70,6 +71,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_split_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_line_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_path_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polygon_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polyline_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_qrcode_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_side_bar_container_bridge.h"
@@ -85,7 +87,13 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rect_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_list_item_group_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_timer_bridge.h"
-
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_render_node_bridge.h"
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_plugin_bridge.h"
+#endif
+#ifdef XCOMPONENT_SUPPORTED
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_xcomponent_bridge.h"
+#endif
 #ifdef FORM_SUPPORTED
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_form_component_bridge.h"
 #endif
@@ -1115,9 +1123,11 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterNavRouterAttributes(object, vm);
     RegisterNavigatorAttributes(object, vm);
     RegisterNodeContainerAttributes(object, vm);
+    RegisterRenderNodeAttributes(object, vm);
     RegisterPanelAttributes(object, vm);
     RegisterLineAttributes(object, vm);
     RegisterPathAttributes(object, vm);
+    RegisterPolygonAttributes(object, vm);
     RegisterPolylineAttributes(object, vm);
     RegisterSideBarContainerAttributes(object, vm);
     RegisterCalendarPickerAttributes(object, vm);
@@ -1155,6 +1165,13 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterTextClockAttributes(object, vm);
     RegisterListItemAttributes(object, vm);
     RegisterTextTimerAttributes(object, vm);
+    RegisterRenderNodeAttributes(object, vm);
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+    RegisterPluginAttributes(object, vm);
+#endif
+#ifdef XCOMPONENT_SUPPORTED
+    RegisterXComponentAttributes(object, vm);
+#endif
 
 #ifdef FORM_SUPPORTED
     RegisterFormAttributes(object, vm);
@@ -1779,7 +1796,37 @@ void ArkUINativeModule::RegisterNodeContainerAttributes(Local<panda::ObjectRef> 
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "nodeContainer"), nodeContainer);
 }
 
-void ArkUINativeModule::RegisterLineAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
+void ArkUINativeModule::RegisterRenderNodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto renderNode = panda::ObjectRef::New(vm);
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "appendChild"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::AppendChild));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "insertChildAfter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::InsertChildAfter));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "removeChild"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::RemoveChild));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "clearChildren"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::ClearChildren));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setClipToFrame"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetClipToFrame));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRotation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetRotation));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShadowColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetShadowColor));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShadowOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetShadowOffset));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShadowAlpha"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetShadowAlpha));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShadowElevation"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetShadowElevation));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShadowRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetShadowRadius));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "invalidate"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::Invalidate));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "renderNode"), renderNode);
+}
+
+void ArkUINativeModule::RegisterLineAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto line = panda::ObjectRef::New(vm);
     line->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStartPoint"),
@@ -1801,6 +1848,16 @@ void ArkUINativeModule::RegisterPathAttributes(Local<panda::ObjectRef> object, E
     path->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPathCommands"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PathBridge::ResetPathCommands));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "path"), path);
+}
+
+void ArkUINativeModule::RegisterPolygonAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
+{
+    auto polygon = panda::ObjectRef::New(vm);
+    polygon->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPolygonPoints"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PolygonBridge::SetPolygonPoints));
+    polygon->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPolygonPoints"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PolygonBridge::ResetPolygonPoints));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "polygon"), polygon);
 }
 
 void ArkUINativeModule::RegisterPolylineAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
@@ -2348,6 +2405,25 @@ void ArkUINativeModule::RegisterProgressAttributes(Local<panda::ObjectRef> objec
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "progress"), progress);
 }
 
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+void ArkUINativeModule::RegisterPluginAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
+{
+    auto plugin = panda::ObjectRef::New(vm);
+    plugin->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PluginBridge::SetSize));
+    plugin->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PluginBridge::ResetSize));
+    plugin->Set(vm, panda::StringRef::NewFromUtf8(vm, "setWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PluginBridge::SetWidth));
+    plugin->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PluginBridge::ResetWidth));
+    plugin->Set(vm, panda::StringRef::NewFromUtf8(vm, "setHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PluginBridge::SetHeight));
+    plugin->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PluginBridge::ResetHeight));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "plugin"), plugin);
+}
+#endif
 
 void ArkUINativeModule::RegisterCommonShapeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
@@ -2694,4 +2770,19 @@ void ArkUINativeModule::RegisterTextTimerAttributes(Local<panda::ObjectRef> obje
         panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), TextTimerBridge::ResetFormat));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textTimer"), textTimer);
 }
+#ifdef XCOMPONENT_SUPPORTED
+void ArkUINativeModule::RegisterXComponentAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
+{
+    auto xComponent = panda::ObjectRef::New(vm);
+    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::SetBackgroundColor));
+    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::ResetBackgroundColor));
+    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOpacity"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::SetOpacity));
+    xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOpacity"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::ResetOpacity));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "xComponent"), xComponent);
+}
+#endif
 } // namespace OHOS::Ace::NG

@@ -113,6 +113,8 @@ public:
 
     void OnAttachToMainTree() override;
 
+    void DumpInfo() override;
+
 private:
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;

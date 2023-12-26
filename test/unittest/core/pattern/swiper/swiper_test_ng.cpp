@@ -10852,29 +10852,34 @@ HWTEST_F(SwiperTestNg, CalculateGestureState001, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
     EXPECT_EQ(pattern_->TotalCount(), 4);
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
     pattern_->CalculateGestureState(1.0f, 0.0f);
     EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_RELEASE_LEFT);
 
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
     pattern_->CalculateGestureState(-1.0f, 0.0f);
     EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_RELEASE_RIGHT);
 
     pattern_->currentFirstIndex_ = 0;
     pattern_->currentIndex_ = 0;
     pattern_->turnPageRate_ = -1.0f;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
     pattern_->CalculateGestureState(0.0f, -1.1f);
     EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_RIGHT);
 
     pattern_->currentFirstIndex_ = 0;
     pattern_->currentIndex_ = 1;
     pattern_->turnPageRate_ = -1.0f;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
     pattern_->CalculateGestureState(0.0f, -1.1f);
     EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
 
     pattern_->currentFirstIndex_ = 0;
     pattern_->currentIndex_ = 0;
     pattern_->turnPageRate_ = -1.0f;
+    pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
     pattern_->CalculateGestureState(0.0f, -0.9f);
-    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
+    EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_RIGHT);
 }
 
 /**

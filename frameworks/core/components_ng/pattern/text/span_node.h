@@ -151,6 +151,7 @@ public:
     int32_t imageNodeId = -1;
     std::string inspectId;
     std::string content;
+    uint32_t unicode = 0;
     std::unique_ptr<FontStyle> fontStyle = std::make_unique<FontStyle>();
     std::unique_ptr<TextLineStyle> textLineStyle = std::make_unique<TextLineStyle>();
     GestureEventFunc onClick;
@@ -162,6 +163,7 @@ public:
     // to have normal spacing between paragraphs, remove \n from every paragraph except the last one.
     bool needRemoveNewLine = false;
     bool hasResourceFontColor = false;
+    bool hasResourceDecorationColor = false;
     std::optional<LeadingMargin> leadingMargin;
 #ifdef ENABLE_DRAG_FRAMEWORK
     int32_t selectedStart = -1;
@@ -169,6 +171,7 @@ public:
 #endif // ENABLE_DRAG_FRAMEWORK
     virtual int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
         double width = 0.0f, double height = 0.0f, VerticalAlign verticalAlign = VerticalAlign::BASELINE);
+    virtual void UpdateSymbolSpanColor(TextStyle& symbolSpanStyle);
     virtual void UpdateTextStyleForAISpan(
         const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
     virtual void UpdateTextStyle(
@@ -204,8 +207,8 @@ public:
         onLongPress = std::move(onLongPress_);
     }
     std::string GetSpanContent(const std::string& rawContent);
-    
     std::string GetSpanContent();
+    uint32_t GetSymbolUnicode();
 
 private:
     std::optional<TextStyle> textStyle_;
@@ -226,6 +229,9 @@ enum class PropertyInfo {
     LEADING_MARGIN,
     NONE,
     TEXTSHADOW,
+    SYMBOL_COLOR,
+    SYMBOL_RENDERING_STRATEGY,
+    SYMBOL_EFFECT_STRATEGY,
 };
 
 class ACE_EXPORT SpanNode : public UINode {
@@ -233,8 +239,10 @@ class ACE_EXPORT SpanNode : public UINode {
 
 public:
     static RefPtr<SpanNode> GetOrCreateSpanNode(int32_t nodeId);
+    static RefPtr<SpanNode> GetOrCreateSpanNode(const std::string& tag, int32_t nodeId);
 
     explicit SpanNode(int32_t nodeId) : UINode(V2::SPAN_ETS_TAG, nodeId) {}
+    explicit SpanNode(const std::string& tag, int32_t nodeId) : UINode(tag, nodeId) {}
     ~SpanNode() override = default;
 
     bool IsAtomicNode() const override
@@ -245,6 +253,15 @@ public:
     const RefPtr<SpanItem>& GetSpanItem() const
     {
         return spanItem_;
+    }
+
+    void UpdateContent(const uint32_t& unicode)
+    {
+        if (spanItem_->unicode == unicode) {
+            return;
+        }
+        spanItem_->unicode = unicode;
+        RequestTextFlushDirty();
     }
 
     void UpdateContent(const std::string& content)
@@ -277,6 +294,9 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(TextCase, TextCase);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextShadow, std::vector<Shadow>);
     DEFINE_SPAN_FONT_STYLE_ITEM(LetterSpacing, Dimension);
+    DEFINE_SPAN_FONT_STYLE_ITEM(SymbolColorList, std::vector<Color>);
+    DEFINE_SPAN_FONT_STYLE_ITEM(SymbolRenderingStrategy, uint32_t);
+    DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectStrategy, uint32_t);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LeadingMargin, LeadingMargin);
@@ -322,7 +342,8 @@ public:
         const std::set<PropertyInfo> propertyInfoContainer = { PropertyInfo::FONTSIZE, PropertyInfo::FONTCOLOR,
             PropertyInfo::FONTSTYLE, PropertyInfo::FONTWEIGHT, PropertyInfo::FONTFAMILY, PropertyInfo::TEXTDECORATION,
             PropertyInfo::TEXTCASE, PropertyInfo::LETTERSPACE, PropertyInfo::LINEHEIGHT, PropertyInfo::TEXT_ALIGN,
-            PropertyInfo::LEADING_MARGIN, PropertyInfo::TEXTSHADOW };
+            PropertyInfo::LEADING_MARGIN, PropertyInfo::TEXTSHADOW, PropertyInfo::SYMBOL_COLOR,
+            PropertyInfo::SYMBOL_RENDERING_STRATEGY, PropertyInfo::SYMBOL_EFFECT_STRATEGY };
         set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(), propertyInfo_.begin(),
             propertyInfo_.end(), inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
         return inheritPropertyInfo;

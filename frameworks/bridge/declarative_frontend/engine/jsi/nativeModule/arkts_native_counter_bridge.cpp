@@ -21,14 +21,14 @@ ArkUINativeModuleValue CounterBridge::SetEnableInc(ArkUIRuntimeCallInfo* runtime
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    if (secondArg->IsUndefined() || !secondArg->IsBoolean()) {
-        GetArkUIInternalNodeAPI()->GetCounterModifier().SetEnableInc(nativeNode, true);
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> flagArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    if (flagArg->IsUndefined() || !flagArg->IsBoolean()) {
+        GetArkUIInternalNodeAPI()->GetCounterModifier().ReSetEnableInc(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    bool flag = secondArg->ToBoolean(vm)->Value();
+    bool flag = flagArg->ToBoolean(vm)->Value();
     GetArkUIInternalNodeAPI()->GetCounterModifier().SetEnableInc(nativeNode, flag);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -47,14 +47,14 @@ ArkUINativeModuleValue CounterBridge::SetEnableDec(ArkUIRuntimeCallInfo* runtime
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    if (secondArg->IsUndefined() || !secondArg->IsBoolean()) {
-        GetArkUIInternalNodeAPI()->GetCounterModifier().SetEnableDec(nativeNode, true);
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> flagArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    if (flagArg->IsUndefined() || !flagArg->IsBoolean()) {
+        GetArkUIInternalNodeAPI()->GetCounterModifier().ReSetEnableDec(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    bool flag = secondArg->ToBoolean(vm)->Value();
+    bool flag = flagArg->ToBoolean(vm)->Value();
     GetArkUIInternalNodeAPI()->GetCounterModifier().SetEnableDec(nativeNode, flag);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -68,4 +68,4 @@ ArkUINativeModuleValue CounterBridge::ResetEnableDec(ArkUIRuntimeCallInfo* runti
     GetArkUIInternalNodeAPI()->GetCounterModifier().ReSetEnableDec(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
-}
+} // namespace OHOS::Ace::NG

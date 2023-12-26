@@ -145,6 +145,7 @@
 #include "bridge/declarative_frontend/jsview/js_stepper_item.h"
 #include "bridge/declarative_frontend/jsview/js_swiper.h"
 #include "bridge/declarative_frontend/jsview/js_symbol.h"
+#include "bridge/declarative_frontend/jsview/js_symbol_span.h"
 #include "bridge/declarative_frontend/jsview/js_tab_content.h"
 #include "bridge/declarative_frontend/jsview/js_tabs.h"
 #include "bridge/declarative_frontend/jsview/js_tabs_controller.h"
@@ -172,6 +173,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_dump_log.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/js_value.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_scrollable_base.h"
 
 #ifdef REMOTE_WINDOW_SUPPORTED
 #include "bridge/declarative_frontend/jsview/js_remote_window.h"
@@ -543,6 +545,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "__Common__", JSCommonView::JSBind },
     { "LinearGradient", JSLinearGradient::JSBind },
     { "FormLink", JSFormLink::JSBind },
+    { "SymbolSpan", JSSymbolSpan::JSBind },
 };
 
 static const std::unordered_map<std::string, std::function<void(BindingTarget)>> bindFuncs = {
@@ -765,6 +768,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "NodeContainer", JSNodeContainer::JSBind },
     { "__JSBaseNode__", JSBaseNode::JSBind },
     { "SymbolGlyph", JSSymbol::JSBind },
+    { "SymbolSpan", JSSymbolSpan::JSBind },
 };
 
 void RegisterAllModule(BindingTarget globalObj)
@@ -946,6 +950,7 @@ void JsBindFormViews(BindingTarget globalObj, const std::unordered_set<std::stri
     if (!isReload) {
         JSViewAbstract::JSBind(globalObj);
         JSContainerBase::JSBind(globalObj);
+        JSScrollableBase::JSBind(globalObj);
         JSShapeAbstract::JSBind(globalObj);
         JSView::JSBind(globalObj);
         JSDumpLog::JSBind(globalObj);
@@ -978,6 +983,7 @@ void JsBindViews(BindingTarget globalObj)
 {
     JSViewAbstract::JSBind(globalObj);
     JSContainerBase::JSBind(globalObj);
+    JSScrollableBase::JSBind(globalObj);
     JSShapeAbstract::JSBind(globalObj);
     JSView::JSBind(globalObj);
     JSDumpLog::JSBind(globalObj);

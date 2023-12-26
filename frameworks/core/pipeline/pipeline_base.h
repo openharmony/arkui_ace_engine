@@ -850,6 +850,8 @@ public:
 
     virtual void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) {}
 
+    virtual void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) {}
+
     virtual void SetEnableKeyBoardAvoidMode(bool value) {}
 
     virtual bool IsEnableKeyBoardAvoidMode() {
@@ -1068,6 +1070,8 @@ public:
     }
 
     virtual void SetIsDragging(bool isDragging) {}
+
+    virtual void ResetDragging() {}
 
 protected:
     virtual bool MaybeRelease() override;

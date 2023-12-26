@@ -47,7 +47,14 @@ std::string FormFrontendDeclarative::GetFormSrcPath(const std::string& uri, cons
 
 void FormFrontendDeclarative::RunPage(const std::string& url, const std::string& params)
 {
-    TAG_LOGI(AceLogTag::ACE_FORM, "FormFrontendDeclarative run page url = %{public}s", url.c_str());
+    RunDynamicPage(url, params, "");
+}
+
+void FormFrontendDeclarative::RunDynamicPage(
+    const std::string& url, const std::string& params, const std::string& entryPoint)
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "FormFrontendDeclarative run page url = %{public}s, entryPoint = %{public}s",
+        url.c_str(), entryPoint.c_str());
     std::string urlPath = GetFormSrcPath(url, FILE_TYPE_BIN);
     if (urlPath.empty()) {
         return;
@@ -60,7 +67,7 @@ void FormFrontendDeclarative::RunPage(const std::string& url, const std::string&
         container->SetCardFrontend(AceType::WeakClaim(this), cardId_);
         auto delegate = AceType::DynamicCast<Framework::FormFrontendDelegateDeclarative>(delegate_);
         if (delegate) {
-            delegate->RunCard(urlPath, params, "", cardId_);
+            delegate->RunCard(urlPath, params, "", cardId_, entryPoint);
         }
     }
 }

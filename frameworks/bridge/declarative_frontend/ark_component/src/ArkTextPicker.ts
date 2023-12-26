@@ -22,20 +22,13 @@ class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute
     throw new Error('Method not implemented.');
   }
   defaultPickerItemHeight(value: string | number): this {
-    if (isResource(value)) {
-      modifier(this._modifiers, TextpickerDefaultPickerItemHeightModifier, undefined);
-    }
-    else {
-      modifier(this._modifiers, TextpickerDefaultPickerItemHeightModifier, value);
-    }
+    modifierWithKey(
+      this._modifiersWithKeys, TextpickerDefaultPickerItemHeightModifier.identity, TextpickerDefaultPickerItemHeightModifier, value);
     return this;
   }
   canLoop(value: boolean): this {
-    if (isUndefined(value)) {
-      modifier(this._modifiers, TextpickerCanLoopModifier, undefined);
-    } else {
-      modifier(this._modifiers, TextpickerCanLoopModifier, value);
-    }
+    modifierWithKey(
+      this._modifiersWithKeys, TextpickerCanLoopModifier.identity, TextpickerCanLoopModifier, value);
     return this;
   }
   disappearTextStyle(value: PickerTextStyle): this {
@@ -63,51 +56,49 @@ class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute
     throw new Error('Method not implemented.');
   }
   selectedIndex(value: number | number[]): this {
-    let input = new ArkSelectedIndices();
-
-    if (!Array.isArray(value)) {
-      if (!isNumber(value)) {
-        modifier(this._modifiers, TextpickerSelectedIndexModifier, undefined);
-        return this;
-      }
-      input.selectedValues[0] = value;
-    } else {
-      input.selectedValues = value;
-    }
-
-    modifier(this._modifiers, TextpickerSelectedIndexModifier, input);
+    modifierWithKey(
+      this._modifiersWithKeys, TextpickerSelectedIndexModifier.identity, TextpickerSelectedIndexModifier, value);
     return this;
   }
 }
 
-class TextpickerCanLoopModifier extends Modifier<boolean> {
+class TextpickerCanLoopModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
   static identity: Symbol = Symbol('textpickerCanLoop');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textpicker.resetCanLoop(node);
-    }
-    else {
-      GetUINativeModule().textpicker.setCanLoop(node, this.value);
+      getUINativeModule().textpicker.resetCanLoop(node);
+    } else {
+      getUINativeModule().textpicker.setCanLoop(node, this.value);
     }
   }
 }
 
-class TextpickerSelectedIndexModifier extends Modifier<ArkSelectedIndices> {
-  constructor(value: ArkSelectedIndices) {
+class TextpickerSelectedIndexModifier extends ModifierWithKey<number | number[]> {
+  constructor(value: number | number[]) {
     super(value);
   }
   static identity: Symbol = Symbol('textpickerSelectedIndex');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textpicker.resetSelectedIndex(node);
-    }
-    else {
-      GetUINativeModule().textpicker.setSelectedIndex(node, this.value.selectedValues);
+      getUINativeModule().textpicker.resetSelectedIndex(node);
+    } else {
+      getUINativeModule().textpicker.setSelectedIndex(node, this.value);
     }
   }
+
+  checkObjectDiff(): boolean {
+    if (Array.isArray(this.stageValue) && Array.isArray(this.value)) {
+      return !deepCompareArrays(this.stageValue, this.value);
+    } else if (Array.isArray(this.stageValue) || Array.isArray(this.value)) {
+      return true;
+    } else {
+      return this.stageValue !== this.value;
+    }
+  }
+
 }
 
 class TextpickerTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
@@ -117,10 +108,9 @@ class TextpickerTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
   static identity: Symbol = Symbol('textpickerTextStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textpicker.resetTextStyle(node);
-    }
-    else {
-      GetUINativeModule().textpicker.setTextStyle(node, this.value?.color ?? undefined,
+      getUINativeModule().textpicker.resetTextStyle(node);
+    } else {
+      getUINativeModule().textpicker.setTextStyle(node, this.value?.color ?? undefined,
         this.value?.font?.size ?? undefined,
         this.value?.font?.weight ?? undefined,
         this.value?.font?.family ?? undefined,
@@ -147,10 +137,9 @@ class TextpickerSelectedTextStyleModifier extends ModifierWithKey<PickerTextStyl
   static identity: Symbol = Symbol('textpickerSelectedTextStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textpicker.resetSelectedTextStyle(node);
-    }
-    else {
-      GetUINativeModule().textpicker.setSelectedTextStyle(node, this.value?.color ?? undefined,
+      getUINativeModule().textpicker.resetSelectedTextStyle(node);
+    } else {
+      getUINativeModule().textpicker.setSelectedTextStyle(node, this.value?.color ?? undefined,
         this.value?.font?.size ?? undefined,
         this.value?.font?.weight ?? undefined,
         this.value?.font?.family ?? undefined,
@@ -177,10 +166,9 @@ class TextpickerDisappearTextStyleModifier extends ModifierWithKey<PickerTextSty
   static identity: Symbol = Symbol('textpickerDisappearTextStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textpicker.resetDisappearTextStyle(node);
-    }
-    else {
-      GetUINativeModule().textpicker.setDisappearTextStyle(node, this.value?.color ?? undefined,
+      getUINativeModule().textpicker.resetDisappearTextStyle(node);
+    } else {
+      getUINativeModule().textpicker.setDisappearTextStyle(node, this.value?.color ?? undefined,
         this.value?.font?.size ?? undefined,
         this.value?.font?.weight ?? undefined,
         this.value?.font?.family ?? undefined,
@@ -200,17 +188,16 @@ class TextpickerDisappearTextStyleModifier extends ModifierWithKey<PickerTextSty
   }
 }
 
-class TextpickerDefaultPickerItemHeightModifier extends Modifier<number | string> {
+class TextpickerDefaultPickerItemHeightModifier extends ModifierWithKey<number | string> {
   constructor(value: number | string) {
     super(value);
   }
   static identity: Symbol = Symbol('textpickerDefaultPickerItemHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().textpicker.resetDefaultPickerItemHeight(node);
-    }
-    else {
-      GetUINativeModule().textpicker.setDefaultPickerItemHeight(node, this.value);
+      getUINativeModule().textpicker.resetDefaultPickerItemHeight(node);
+    } else {
+      getUINativeModule().textpicker.setDefaultPickerItemHeight(node, this.value);
     }
   }
 }
@@ -218,7 +205,7 @@ class TextpickerDefaultPickerItemHeightModifier extends Modifier<number | string
 // @ts-ignore
 globalThis.TextPicker.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTextPickerComponent(nativeNode);
   });

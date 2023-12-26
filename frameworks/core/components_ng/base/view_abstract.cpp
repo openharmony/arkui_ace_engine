@@ -1338,7 +1338,7 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam> &&params, const Re
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
-    if (expandDisplay) {
+    if (expandDisplay && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset, menuParam.isAboveApps);
         return;
     }
@@ -1363,7 +1363,7 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode> &customNode, cons
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset, menuParam.isAboveApps);
         return;
     }
-    if (menuParam.type == MenuType::MENU && expandDisplay) {
+    if (menuParam.type == MenuType::MENU && expandDisplay && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
         bool isShown = SubwindowManager::GetInstance()->GetShown();
         if (!isShown) {
             SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset, menuParam.isAboveApps);

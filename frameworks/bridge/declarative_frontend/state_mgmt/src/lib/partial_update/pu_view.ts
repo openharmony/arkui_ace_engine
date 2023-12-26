@@ -145,7 +145,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   private extraInfo_:ExtraInfo = undefined;
 
   // @Provide'd variables by this class and its ancestors
-  protected providedVars_: ProvidedVarsMapPU;
+  protected providedVars_: ProvidedVarsMapPU = new Map<string, ObservedPropertyAbstractPU<any>>();
 
   // Set of dependent elmtIds that need partial update
   // during next re-render
@@ -229,9 +229,11 @@ abstract class ViewPU extends NativeViewPartialUpdate
       })
       .forEach((propName) => {
         const stateVar = Reflect.get(this, propName) as Object;
-        if ("notifyPropertyHasChangedPU" in stateVar) {
+        if (stateVar && typeof stateVar === 'object' && "notifyPropertyHasChangedPU" in stateVar) {
           stateMgmtConsole.debug(`... add state variable ${propName} to ${stateVar}`)
           this.ownObservedPropertiesStore_.add(stateVar as unknown as ObservedPropertyAbstractPU<any>);
+        } else {
+          stateMgmtConsole.debug(`${this.debugInfo()} ${propName} application may use an unregular naming style, or stateVar may be Non-Object.`);
         }
       });
   }
@@ -278,11 +280,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
   constructor(parent: ViewPU, localStorage: LocalStorage, elmtId : number = -1, extraInfo : ExtraInfo = undefined) {
     super();
     // if set use the elmtId also as the ViewPU object's subscribable id.
-    // these matching is requiremrnt for updateChildViewById(elmtId) being able to
+    // these matching is requirement for updateChildViewById(elmtId) being able to
     // find the child ViewPU object by given elmtId
     this.id_= elmtId == -1 ? SubscriberManager.MakeId() : elmtId;
-    this.providedVars_ = parent ? new Map(parent.providedVars_)
-      : new Map<string, ObservedPropertyAbstractPU<any>>();
 
     this.localStoragebackStore_ = undefined;
     stateMgmtConsole.debug(`ViewPU constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
@@ -321,11 +321,29 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   aboutToRecycle(): void {}
 
+  private setDeleteStatusRecursively(): void {
+    if (!this.childrenWeakrefMap_.size) {
+      return;
+    }
+    this.childrenWeakrefMap_.forEach((value: WeakRef<ViewPU>) => {
+      let child: ViewPU = value.deref();
+      if (child) {
+        child.isDeleting_ = true;
+        child.setDeleteStatusRecursively();
+      }
+    })
+  }
+
   // super class will call this function from
   // its aboutToBeDeleted implementation
   protected aboutToBeDeletedInternal(): void {
     stateMgmtConsole.debug(`${this.debugInfo()}: aboutToBeDeletedInternal`);
-
+    // if this.isDeleting_ is true already, it may be set delete status recursively by its parent, so it is not necessary
+    // to set and resursively set its children any more
+    if (!this.isDeleting_) {
+      this.isDeleting_ = true;
+      this.setDeleteStatusRecursively();
+    }
     // tell UINodeRegisterProxy that all elmtIds under
     // this ViewPU should be treated as already unregistered
 
@@ -361,7 +379,6 @@ abstract class ViewPU extends NativeViewPartialUpdate
       this.parent_.removeChild(this);
     }
     this.localStoragebackStore_ = undefined;
-    this.isDeleting_ = true;
   }
 
   public purgeDeleteElmtId(rmElmtId : number ) : boolean {
@@ -677,7 +694,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
       this.syncInstanceId();
 
-      if (dependentElmtIds.size && this.isInitialRenderDone) {
+      if (dependentElmtIds.size && !this.isFirstRender()) {
         if (!this.dirtDescendantElementIds_.size && !this.runReuse_) {
           // mark ComposedElement dirty when first elmtIds are added
           // do not need to do this every time
@@ -718,7 +735,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate();
       if (changedElmtIds) {
         const varName = stateLinkPropVar.info();
-        if (changedElmtIds.size && this.isInitialRenderDone) {
+        if (changedElmtIds.size && !this.isFirstRender()) {
           for (const elmtId of changedElmtIds) {
             this.dirtDescendantElementIds_.add(elmtId);
           }
@@ -761,12 +778,19 @@ abstract class ViewPU extends NativeViewPartialUpdate
    *        decorator param
    * @param store the backing store object for this variable (not the get/set variable!)
    */
-  protected addProvidedVar<T>(providedPropName: string, store: ObservedPropertyAbstractPU<T>) {
-    if (this.providedVars_.has(providedPropName)) {
-      throw new ReferenceError(`${this.constructor.name}: duplicate @Provide property with name ${providedPropName}.
-      Property with this name is provided by one of the ancestor Views already.`);
+  protected addProvidedVar<T>(providedPropName: string, store: ObservedPropertyAbstractPU<T>, allowOverride : boolean = false) {
+    if (!allowOverride && this.findProvide(providedPropName)) {
+      throw new ReferenceError(`${this.constructor.name}: duplicate @Provide property with name ${providedPropName}. Property with this name is provided by one of the ancestor Views already. @Provide override not allowed.`);
     }
     this.providedVars_.set(providedPropName, store);
+  }
+
+  /*
+    findProvide finds @Provided property recursively by traversing ViewPU's towards that of the UI tree root @Component:
+    if 'this' ViewPU has a @Provide("providedPropName") return it, otherwise ask from its parent ViewPU.
+  */
+  public findProvide(providedPropName: string): ObservedPropertyAbstractPU<any> | undefined {
+    return this.providedVars_.get(providedPropName) || (this.parent_ && this.parent_.findProvide(providedPropName));
   }
 
   /**
@@ -782,7 +806,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
    */
   protected initializeConsume<T>(providedPropName: string,
     consumeVarName: string): ObservedPropertyAbstractPU<T> {
-    let providedVarStore : ObservedPropertyAbstractPU<any> = this.providedVars_.get(providedPropName);
+    let providedVarStore : ObservedPropertyAbstractPU<any> = this.findProvide(providedPropName);
     if (providedVarStore === undefined) {
       throw new ReferenceError(`${this.debugInfo()} missing @Provide property with name ${providedPropName}.
           Fail to resolve @Consume(${providedPropName}).`);

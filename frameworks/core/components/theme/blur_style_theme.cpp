@@ -89,10 +89,9 @@ BlurParameter BlurStyleTheme::Builder::ParseBlurParam(
     return param;
 }
 
-int32_t BlurStyleTheme::GetKeyOfBlurStyle(BlurStyle style, ThemeColorMode colorMode)
+uint32_t BlurStyleTheme::GetKeyOfBlurStyle(BlurStyle style, ThemeColorMode colorMode)
 {
-    constexpr static int32_t shiftNumber = 8; // can hold 2^8 blurStyle enums
-    return (static_cast<int32_t>(colorMode) << shiftNumber) + static_cast<int32_t>(style);
+    return (static_cast<uint32_t>(colorMode) << 8) + static_cast<uint32_t>(style); // can hold 2^8 blurStyle enums
 }
 
 std::optional<BlurParameter> BlurStyleTheme::GetBlurParameter(BlurStyle style, ThemeColorMode colorMode) const

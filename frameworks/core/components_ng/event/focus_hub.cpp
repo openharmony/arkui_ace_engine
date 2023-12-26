@@ -69,6 +69,15 @@ RefPtr<FocusHub> FocusHub::GetParentFocusHub() const
     return parentNode ? parentNode->GetFocusHub() : nullptr;
 }
 
+RefPtr<FocusHub> FocusHub::GetRootFocusHub()
+{
+    RefPtr<FocusHub> parent = AceType::Claim(this);
+    while (parent->GetParentFocusHub()) {
+        parent = parent->GetParentFocusHub();
+    }
+    return parent;
+}
+
 std::string FocusHub::GetFrameName() const
 {
     auto frameNode = GetFrameNode();
@@ -103,6 +112,9 @@ std::list<RefPtr<FocusHub>>::iterator FocusHub::FlushChildrenFocusHub(std::list<
 
 bool FocusHub::HandleKeyEvent(const KeyEvent& keyEvent)
 {
+    bool shiftTabPressed = keyEvent.IsShiftWith(KeyCode::KEY_TAB);
+    bool leftArrowPressed = keyEvent.code == KeyCode::KEY_DPAD_LEFT;
+    hasBackwardMovement_ = keyEvent.action == KeyAction::DOWN && (shiftTabPressed || leftArrowPressed);
     if (!IsCurrentFocus()) {
         return false;
     }
@@ -227,7 +239,7 @@ RefPtr<FocusHub> FocusHub::GetChildMainView()
         if (frameName == V2::PAGE_ETS_TAG || frameName == V2::DIALOG_ETS_TAG || frameName == V2::MODAL_PAGE_TAG ||
             frameName == V2::MENU_ETS_TAG || frameName == V2::SHEET_PAGE_TAG || frameName == V2::POPUP_ETS_TAG ||
             frameName == V2::WINDOW_SCENE_ETS_TAG) {
-            if (!curFocusMainView && child->IsCurrentFocus()) {
+            if (!curFocusMainView && child->IsCurrentFocus() && child->IsFocusableNode()) {
                 curFocusMainView = child;
             }
             if (!focusableMainView && child->IsFocusableNode()) {
@@ -1048,6 +1060,14 @@ void FocusHub::OnFocus()
     } else if (focusType_ == FocusType::SCOPE) {
         OnFocusScope();
     }
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto curPattern = frameNode->GetPattern<NG::Pattern>();
+    CHECK_NULL_VOID(curPattern);
+    bool isNeedKeyboard = curPattern->NeedSoftKeyboard();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->SetNeedSoftKeyboard(isNeedKeyboard);
 }
 
 void FocusHub::OnBlur()
@@ -1056,6 +1076,13 @@ void FocusHub::OnBlur()
         OnBlurNode();
     } else if (focusType_ == FocusType::SCOPE) {
         OnBlurScope();
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    if (blurReason_ != BlurReason::WINDOW_BLUR) {
+        pipeline->SetNeedSoftKeyboard(false);
+    } else {
+        pipeline->SetNeedSoftKeyboard(std::nullopt);
     }
 }
 
@@ -1067,12 +1094,26 @@ void FocusHub::IsCloseKeyboard(RefPtr<FrameNode> frameNode)
     CHECK_NULL_VOID(curPattern);
     bool isNeedKeyBoard = curPattern->NeedSoftKeyboard();
     if (!isNeedKeyBoard) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "FrameNode not NeedSoftKeyboard.");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "FrameNode(%{public}s/%{public}d) notNeedSoftKeyboard.",
+            frameNode->GetTag().c_str(), frameNode->GetId());
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
-            inputMethod->Close();
+            inputMethod->RequestHideInput();
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
         }
+    }
+#endif
+}
+
+void FocusHub::PushPageCloseKeyboard()
+{
+#if defined (ENABLE_STANDARD_INPUT)
+    // If pushpage, close it
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "PageChange CloseKeyboard FrameNode notNeedSoftKeyboard.");
+    auto inputMethod = MiscServices::InputMethodController::GetInstance();
+    if (inputMethod) {
+        inputMethod->Close();
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "PageChange CloseKeyboard SoftKeyboard Closes Successfully.");
     }
 #endif
 }
@@ -1106,30 +1147,6 @@ void FocusHub::OnFocusNode()
     CHECK_NULL_VOID(pipeline);
     if (frameNode->GetFocusType() == FocusType::NODE) {
         pipeline->SetFocusNode(frameNode);
-#if defined (ENABLE_STANDARD_INPUT)
-    // If in window,focus pattern does not need softkeyboard, close it.
-        IsCloseKeyboard(frameNode);
-#endif
-    }
-
-    if (frameNode->GetFocusType() == FocusType::SCOPE) {
-#if defined (ENABLE_STANDARD_INPUT)
-        // If in window,focus pattern does not need softkeyboard, close it.
-        auto hadFocusChild = false;
-        std::list<RefPtr<FocusHub>> focusNodes = GetChildren();
-        for (const auto& item : focusNodes) {
-            if (item->IsCurrentFocus()) {
-                hadFocusChild = true;
-                break;
-            }
-        }
-        if (!hadFocusChild) {
-            auto isSystem_ = WindowSceneHelper::IsWindowScene(frameNode);
-            if (!isSystem_) {
-                IsCloseKeyboard(frameNode);
-            }
-        }
-#endif
     }
 }
 
@@ -1252,15 +1269,14 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
         return false;
     }
 
-    bool stateStylesResult = false;
-    if (isNeedStateStyles) {
+    if (isNeedStateStyles && HasFocusStateStyle()) {
         // do focus state style.
         CheckFocusStateStyle(true);
-        stateStylesResult = true;
+        return true;
     }
 
     if (focusStyleType_ == FocusStyleType::NONE) {
-        return stateStylesResult;
+        return false;
     }
 
     if (focusStyleType_ == FocusStyleType::CUSTOM_REGION) {
@@ -1833,6 +1849,28 @@ bool FocusHub::HandleFocusByTabIndex(const KeyEvent& event)
         }
     }
     return GoToFocusByTabNodeIdx(tabIndexNodes, curTabFocusIndex);
+}
+
+bool FocusHub::HasBackwardFocusMovementInChildren()
+{
+    std::list<RefPtr<FocusHub>> children;
+    FlushChildrenFocusHub(children);
+    for (auto child : children) {
+        if (child->HasBackwardFocusMovement()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void FocusHub::ClearBackwardFocusMovementFlagInChildren()
+{
+    std::list<RefPtr<FocusHub>> children;
+    FlushChildrenFocusHub(children);
+    for (auto child : children) {
+        child->ClearBackwardFocusMovementFlag();
+        child->ClearBackwardFocusMovementFlagInChildren();
+    }
 }
 
 double FocusHub::GetProjectAreaOnRect(const RectF& rect, const RectF& projectRect, FocusStep step)

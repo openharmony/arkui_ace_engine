@@ -85,12 +85,18 @@ float LayoutNavBar(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
         auto navBarOffset =
             OffsetT<float>(navigationGeometryNode->GetFrameSize().Width() - geometryNode->GetFrameSize().Width(),
                 geometryNode->GetFrameOffset().GetY());
+        const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
+        navBarOffset.AddX(padding.left.value_or(0));
+        navBarOffset.AddY(padding.top.value_or(0));
         geometryNode->SetMarginFrameOffset(navBarOffset);
         navBarWrapper->Layout();
         returnNavBarOffset = navBarOffset;
         return geometryNode->GetFrameSize().Width();
     }
     auto navBarOffset = OffsetT<float>(0.0f, 0.0f);
+    const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
+    navBarOffset.AddX(padding.left.value_or(0));
+    navBarOffset.AddY(padding.top.value_or(0));
     geometryNode->SetMarginFrameOffset(navBarOffset);
     navBarWrapper->Layout();
     returnNavBarOffset = navBarOffset;
@@ -115,6 +121,9 @@ float LayoutDivider(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNo
     } else {
         dividerOffset = OffsetT<float>(navBarWidth, geometryNode->GetFrameOffset().GetY());
     }
+    const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
+    dividerOffset.AddX(padding.left.value_or(0));
+    dividerOffset.AddY(padding.top.value_or(0));
     geometryNode->SetMarginFrameOffset(dividerOffset);
     dividerWrapper->Layout();
     return geometryNode->GetFrameSize().Width();
@@ -147,11 +156,17 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
         (navigationLayoutProperty->GetHideNavBar().value_or(false) &&
             navigationLayoutAlgorithm->GetNavigationMode() == NavigationMode::SPLIT)) {
         auto contentOffset = OffsetT<float>(0.0f, 0.0f);
+        const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
+        contentOffset.AddX(padding.left.value_or(0));
+        contentOffset.AddY(padding.top.value_or(0));
         geometryNode->SetMarginFrameOffset(contentOffset);
         contentWrapper->Layout();
         return;
     }
     auto contentOffset = OffsetT<float>(navBarWidth + dividerWidth, geometryNode->GetFrameOffset().GetY());
+    const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
+    contentOffset.AddX(padding.left.value_or(0));
+    contentOffset.AddY(padding.top.value_or(0));
     geometryNode->SetMarginFrameOffset(contentOffset);
     contentWrapper->Layout();
 }
@@ -449,6 +464,10 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto size =
         CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT).ConvertToSizeT();
     FitScrollFullWindow(size);
+    if (IsAutoHeight(navigationLayoutProperty)) {
+        SetNavigationHeight(layoutWrapper, size);
+    }
+    layoutWrapper->GetGeometryNode()->SetFrameSize(size);
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
     if (ifNeedInit_) {
@@ -464,10 +483,6 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     MeasureNavBar(layoutWrapper, hostNode, navigationLayoutProperty, navBarSize_);
     MeasureContentChild(layoutWrapper, hostNode, navigationLayoutProperty, contentSize_);
     MeasureDivider(layoutWrapper, hostNode, navigationLayoutProperty, dividerSize_);
-    if (IsAutoHeight(navigationLayoutProperty)) {
-        SetNavigationHeight(layoutWrapper, size);
-    }
-    layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 }
 
 void NavigationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
@@ -481,6 +496,9 @@ void NavigationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     float navBarWidth = LayoutNavBar(layoutWrapper, hostNode, navigationLayoutProperty, navBarPosition, navBarOffset);
     float dividerWidth = LayoutDivider(layoutWrapper, hostNode, navigationLayoutProperty, navBarWidth, navBarPosition);
     LayoutContent(layoutWrapper, hostNode, navigationLayoutProperty, navBarWidth, dividerWidth, navBarPosition);
+    const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
+    navBarOffset.AddX(padding.left.value_or(0));
+    navBarOffset.AddY(padding.top.value_or(0));
     navBarOffset_ = navBarOffset;
 }
 

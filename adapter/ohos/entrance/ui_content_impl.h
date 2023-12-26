@@ -32,7 +32,6 @@
 #include "base/thread/task_executor.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/asset_manager_impl.h"
-#include "core/common/flutter/flutter_asset_manager.h"
 #include "core/components/common/properties/popup_param.h"
 
 namespace OHOS::Accessibility {
@@ -56,7 +55,8 @@ public:
     void Initialize(OHOS::Rosen::Window* window,
         const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) override;
     void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override;
-    void InitializeDynamic(const std::string& hapPath, const std::string& abcPath) override;
+    void InitializeDynamic(
+        const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint) override;
     void Initialize(
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override;
     void Foreground() override;

@@ -92,4 +92,11 @@ void XComponentModelNG::SetDetachCallback(DetachCallback&& onDetach)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetDetachEvent(std::move(onDetach));
 }
+
+bool XComponentModelNG::IsTexture(FrameNode *frameNode)
+{
+    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    return layoutProperty->GetXComponentTypeValue() == XComponentType::TEXTURE;
+}
 } // namespace OHOS::Ace::NG

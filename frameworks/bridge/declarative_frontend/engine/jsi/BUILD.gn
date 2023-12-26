@@ -184,12 +184,14 @@ template("declarative_js_engine_ark") {
       "components/arkts_native_panel_modifier.cpp",
       "components/arkts_native_path_modifier.cpp",
       "components/arkts_native_pattern_lock_modifier.cpp",
+      "components/arkts_native_polygon_modifier.cpp",
       "components/arkts_native_polyline_modifier.cpp",
       "components/arkts_native_progress_modifier.cpp",
       "components/arkts_native_qrcode_modifier.cpp",
       "components/arkts_native_radio_modifier.cpp",
       "components/arkts_native_rating_modifier.cpp",
       "components/arkts_native_rect_modifier.cpp",
+      "components/arkts_native_render_node_modifier.cpp",
       "components/arkts_native_rich_editor_modifier.cpp",
       "components/arkts_native_row_modifier.cpp",
       "components/arkts_native_row_split_modifier.cpp",
@@ -268,12 +270,14 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_panel_bridge.cpp",
       "nativeModule/arkts_native_path_bridge.cpp",
       "nativeModule/arkts_native_pattern_lock_bridge.cpp",
+      "nativeModule/arkts_native_polygon_bridge.cpp",
       "nativeModule/arkts_native_polyline_bridge.cpp",
       "nativeModule/arkts_native_progress_bridge.cpp",
       "nativeModule/arkts_native_qrcode_bridge.cpp",
       "nativeModule/arkts_native_radio_bridge.cpp",
       "nativeModule/arkts_native_rating_bridge.cpp",
       "nativeModule/arkts_native_rect_bridge.cpp",
+      "nativeModule/arkts_native_render_node_bridge.cpp",
       "nativeModule/arkts_native_rich_editor_bridge.cpp",
       "nativeModule/arkts_native_row_bridge.cpp",
       "nativeModule/arkts_native_row_split_bridge.cpp",
@@ -304,6 +308,23 @@ template("declarative_js_engine_ark") {
     deps = []
     external_deps = []
 
+    if (defined(config.xcomponent_components_support) &&
+        config.xcomponent_components_support) {
+      sources += [
+        "components/arkts_native_xcomponent_modifier.cpp",
+        "nativeModule/arkts_native_xcomponent_bridge.cpp",
+      ]
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/xcomponent:ace_core_components_xcomponent_pattern_ng_$platform" ]
+      if (is_ohos_standard_system) {
+        deps += [ "$ace_root/interfaces/inner_api/xcomponent_controller:ace_xcomponent_controller" ]
+        external_deps = [
+          "c_utils:utils",
+          "graphic_2d:librender_service_client",
+          "hilog:libhilog",
+        ]
+      }
+    }
+
     if (defined(config.form_components_support) &&
         config.form_components_support) {
       sources += [
@@ -323,6 +344,29 @@ template("declarative_js_engine_ark") {
           "input:libmmi-client",
           "ipc:ipc_core",
         ]
+      }
+    }
+
+    if (defined(config.plugin_components_support) &&
+        config.plugin_components_support) {
+      sources += [
+        "components/arkts_native_plugin_modifier.cpp",
+        "nativeModule/arkts_native_plugin_bridge.cpp",
+      ]
+      deps += [
+        "${ace_root}/frameworks/core/components_ng/pattern/plugin:ace_core_components_plugin_pattern_ng_$platform",
+        "${ace_root}/interfaces/inner_api/ui_service_manager:ui_service_mgr",
+      ]
+      external_deps += [
+        "ability_base:want",
+        "ability_runtime:app_manager",
+        "bundle_framework:appexecfwk_core",
+        "c_utils:utils",
+        "graphic_2d:librender_service_client",
+        "ipc:ipc_core",
+      ]
+      if (os_account_exists) {
+        external_deps += [ "os_account:os_account_innerkits" ]
       }
     }
 

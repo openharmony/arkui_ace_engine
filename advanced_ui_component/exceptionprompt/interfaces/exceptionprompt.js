@@ -37,17 +37,17 @@ export class ExceptionPrompt extends ViewPU {
             bundleName: "",
             moduleName: ""
         };
-        this.onTextClick = () => {
+        this.onTipClick = () => {
         };
-        this.onConfigure = () => {
+        this.onActionTextClick = () => {
         };
         this.setInitiallyProvidedValue(o)
     }
 
     setInitiallyProvidedValue(e) {
         void 0 !== e.touchBackgroundColor && (this.touchBackgroundColor = e.touchBackgroundColor);
-        void 0 !== e.onTextClick && (this.onTextClick = e.onTextClick);
-        void 0 !== e.onConfigure && (this.onConfigure = e.onConfigure)
+        void 0 !== e.onTipClick && (this.onTipClick = e.onTipClick);
+        void 0 !== e.onActionTextClick && (this.onActionTextClick = e.onActionTextClick)
     }
 
     updateStateVars(e) {
@@ -147,7 +147,7 @@ export class ExceptionPrompt extends ViewPU {
             Flex.width("100%");
             Flex.height("100%");
             Flex.onClick((() => {
-                this.onTextClick()
+                this.onTipClick()
             }));
             o || Flex.pop();
             ViewStackProcessor.StopGetAccessRecording()
@@ -218,12 +218,12 @@ export class ExceptionPrompt extends ViewPU {
         this.observeComponentCreation(((e, o) => {
             ViewStackProcessor.StartGetAccessRecordingFor(e);
             If.create();
-            this.options.isTouchShow ? this.ifElseBranchUpdateFunction(0, (() => {
+            this.options.actionText ? this.ifElseBranchUpdateFunction(0, (() => {
                 this.observeComponentCreation(((e, o) => {
                     ViewStackProcessor.StartGetAccessRecordingFor(e);
                     Button.createWithChild({ stateEffect: !0, type: ButtonType.Normal });
                     Button.backgroundColor(this.touchBackgroundColor);
-                    Button.width(this.options.isTouchShow ? 120 : 0);
+                    Button.width(this.options.actionText ? 120 : 0);
                     Button.height(32);
                     Button.borderRadius({
                         id: -1,
@@ -257,7 +257,7 @@ export class ExceptionPrompt extends ViewPU {
                                 bundleName: "",
                                 moduleName: ""
                             };
-                            this.onConfigure()
+                            this.onActionTextClick()
                         } else e.type === TouchType.Up && (this.touchBackgroundColor = {
                             id: -1,
                             type: 10001,
@@ -277,7 +277,7 @@ export class ExceptionPrompt extends ViewPU {
                 }));
                 this.observeComponentCreation(((e, o) => {
                     ViewStackProcessor.StartGetAccessRecordingFor(e);
-                    Text.create(this.options.touchText);
+                    Text.create(this.options.actionText);
                     Text.fontSize({
                         id: -1,
                         type: 10002,
@@ -344,8 +344,8 @@ export class ExceptionPrompt extends ViewPU {
             ViewStackProcessor.StartGetAccessRecordingFor(e);
             Column.create();
             Column.width("100%");
-            Column.height(this.options.isTouchShow ? 58 : 48);
-            Column.position({ y: this.options.positionTop });
+            Column.height(this.options.actionText ? 58 : 48);
+            Column.position({ y: this.options.marginTop });
             Column.zIndex(999);
             o || Column.pop();
             ViewStackProcessor.StopGetAccessRecording()
@@ -353,39 +353,39 @@ export class ExceptionPrompt extends ViewPU {
         this.observeComponentCreation(((e, o) => {
             ViewStackProcessor.StartGetAccessRecordingFor(e);
             Stack.create();
-            Stack.padding(this.options.marginState === MarginType.DEFAULT_MARGIN ? {
-                                                                                       left: {
-                                                                                           id: -1,
-                                                                                           type: 10002,
-                                                                                           params: ["sys.float.ohos_id_card_margin_start"],
-                                                                                           bundleName: "",
-                                                                                           moduleName: ""
-                                                                                       },
-                                                                                       right: {
-                                                                                           id: -1,
-                                                                                           type: 10002,
-                                                                                           params: ["sys.float.ohos_id_card_margin_end"],
-                                                                                           bundleName: "",
-                                                                                           moduleName: ""
-                                                                                       }
-                                                                                   } : {
-                                                                                           left: {
-                                                                                               id: -1,
-                                                                                               type: 10002,
-                                                                                               params: ["sys.float.ohos_id_max_padding_start"],
-                                                                                               bundleName: "",
-                                                                                               moduleName: ""
-                                                                                           },
-                                                                                           right: {
-                                                                                               id: -1,
-                                                                                               type: 10002,
-                                                                                               params: ["sys.float.ohos_id_max_padding_end"],
-                                                                                               bundleName: "",
-                                                                                               moduleName: ""
-                                                                                           }
-                                                                                       });
-            Stack.transition(TransitionEffect.OPACITY.animation({ duration: this.options.isShow ? 250 : 200 }));
-            Stack.visibility(this.options.isShow ? Visibility.Visible : Visibility.None);
+            Stack.padding(this.options.marginType === MarginType.DEFAULT_MARGIN ? {
+                                                                                      left: {
+                                                                                          id: -1,
+                                                                                          type: 10002,
+                                                                                          params: ["sys.float.ohos_id_card_margin_start"],
+                                                                                          bundleName: "",
+                                                                                          moduleName: ""
+                                                                                      },
+                                                                                      right: {
+                                                                                          id: -1,
+                                                                                          type: 10002,
+                                                                                          params: ["sys.float.ohos_id_card_margin_end"],
+                                                                                          bundleName: "",
+                                                                                          moduleName: ""
+                                                                                      }
+                                                                                  } : {
+                                                                                          left: {
+                                                                                              id: -1,
+                                                                                              type: 10002,
+                                                                                              params: ["sys.float.ohos_id_max_padding_start"],
+                                                                                              bundleName: "",
+                                                                                              moduleName: ""
+                                                                                          },
+                                                                                          right: {
+                                                                                              id: -1,
+                                                                                              type: 10002,
+                                                                                              params: ["sys.float.ohos_id_max_padding_end"],
+                                                                                              bundleName: "",
+                                                                                              moduleName: ""
+                                                                                          }
+                                                                                      });
+            Stack.transition(TransitionEffect.OPACITY.animation({ duration: this.options.isShown ? 250 : 200 }));
+            Stack.visibility(this.options.isShown ? Visibility.Visible : Visibility.None);
             o || Stack.pop();
             ViewStackProcessor.StopGetAccessRecording()
         }));
@@ -399,4 +399,9 @@ export class ExceptionPrompt extends ViewPU {
     rerender() {
         this.updateDirtyElements()
     }
+}
+
+export default {
+    MarginType,
+    ExceptionPrompt
 }

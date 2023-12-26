@@ -614,7 +614,6 @@ struct ArkUIRowSplitModifierAPI {
 struct ArkUITextpickerModifierAPI {
     void (*SetTextpickerBackgroundColor)(NodeHandle node, uint32_t color);
     void (*SetTextpickerCanLoop)(NodeHandle node, bool value);
-    void (*SetTextpickerSelected)(NodeHandle node, uint32_t index);
     void (*SetTextpickerSelectedIndex)(NodeHandle node, uint32_t *values, int32_t size);
     void (*SetTextpickerTextStyle)(NodeHandle node, uint32_t color, const char *fontInfo, int32_t styleVal);
     void (*SetTextpickerSelectedTextStyle)(NodeHandle node, uint32_t color, const char *fontInfo, int32_t styleVal);
@@ -760,6 +759,7 @@ struct ArkUIPanelModifierAPI {
     void (*SetPanelType)(NodeHandle node, int32_t type);
     void (*ResetPanelType)(NodeHandle node);
     void (*SetPanelCustomHeight)(NodeHandle node, double value, int unit);
+    void (*SetPanelCustomHeightByString)(NodeHandle node, const char* value);
     void (*ResetPanelCustomHeight)(NodeHandle node);
     void (*SetShowCloseIcon)(NodeHandle node, bool value);
     void (*ResetShowCloseIcon)(NodeHandle node);
@@ -957,6 +957,11 @@ struct ArkUIPathModifierAPI {
     void (*ResetPathCommands)(NodeHandle node);
 };
 
+struct ArkUIPolygonModifierAPI {
+    void (*SetPolygonPoints)(NodeHandle node, const double* pointX, const double* pointY, int32_t length);
+    void (*ResetPolygonPoints)(NodeHandle node);
+};
+
 struct ArkUIPolylineModifierAPI {
     void (*SetPoints)(NodeHandle node, const double* pointX, const double* pointY, int32_t length);
     void (*ResetPoints)(NodeHandle node);
@@ -1006,7 +1011,8 @@ struct ArkUISideBarContainerModifierAPI {
     void (*ResetSideBarWidth)(NodeHandle node);
     void (*SetMinSideBarWidth)(NodeHandle node, double value, int32_t unit);
     void (*ResetMinSideBarWidth)(NodeHandle node);
-    void (*SetControlButton)(NodeHandle node, double* values, const struct IconsStruct* sideBarWidth);
+    void (*SetControlButton)(
+        NodeHandle node, double* values, int32_t valueLength, const struct IconsStruct* sideBarWidth);
     void (*ResetControlButton)(NodeHandle node);
     void (*SetShowControlButton)(NodeHandle node, bool isShow);
     void (*ResetShowControlButton)(NodeHandle node);
@@ -1357,6 +1363,17 @@ struct ArkUIProgressModifierAPI {
     void (*ResetProgressBackgroundColor)(NodeHandle node);
 };
 
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+struct ArkUIPluginModifierAPI {
+    void (*SetPluginWidth)(NodeHandle node, double widthVal, int32_t widthUnit);
+    void (*SetPluginHeight)(NodeHandle node, double heightVal, int32_t heightUnit);
+    void (*SetPluginSize)(NodeHandle node, double widthVal, double heightVal, int32_t widthUnit, int32_t heightUnit);
+    void (*ResetPluginWidth)(NodeHandle node);
+    void (*ResetPluginHeight)(NodeHandle node);
+    void (*ResetPluginSize)(NodeHandle node);
+};
+#endif
+
 struct ArkUIListModifierAPI {
     void (*SetListLanes)(NodeHandle node, int32_t lanesNum, const struct ArkUIDimensionType *minLength,
         const struct ArkUIDimensionType *maxLength, const struct ArkUIDimensionType *gutter);
@@ -1478,8 +1495,8 @@ struct ArkUIRectModifierAPI {
     void (*ResetRectRadiusWidth)(NodeHandle node);
     void (*SetRectRadiusHeight)(NodeHandle node, double radiusHeightValue, int32_t radiusHeightUnit);
     void (*ResetRectRadiusHeight)(NodeHandle node);
-    void (*SetRectRadiusWithArray)(NodeHandle node, double* radiusValues, int32_t* radiusUnits, bool* radiusValidPairs,
-        int32_t radiusValidPairsSize);
+    void (*SetRectRadiusWithArray)(NodeHandle node, double* radiusValues, int32_t* radiusUnits,
+        uint32_t* radiusValidPairs, size_t radiusValidPairsSize);
     void (*SetRectRadiusWithValue)(NodeHandle node, double radiusValue, int32_t radiusUnit);
     void (*ResetRectRadius)(NodeHandle node);
 };
@@ -1519,6 +1536,29 @@ struct ArkUITextClockModifierAPI {
     void (*ResetFontWeight)(NodeHandle node);
     void (*SetFontFamily)(NodeHandle node, const char *fontFamily);
     void (*ResetFontFamily)(NodeHandle node);
+};
+#ifdef XCOMPONENT_SUPPORTED
+struct ArkUIXComponentModifierAPI {
+    void (*SetXComponentBackgroundColor)(NodeHandle node, uint32_t color);
+    void (*ResetXComponentBackgroundColor)(NodeHandle node);
+    void (*SetXComponentOpacity)(NodeHandle node, double opacity);
+    void (*ResetXComponentOpacity)(NodeHandle node);
+};
+#endif
+
+struct ArkUIRenderNodeModifierAPI {
+    void (*AppendChild)(NodeHandle node, NodeHandle child);
+    void (*InsertChildAfter)(NodeHandle node, NodeHandle child, NodeHandle sibling);
+    void (*RemoveChild)(NodeHandle node, NodeHandle child);
+    void (*ClearChildren)(NodeHandle node);
+    void (*SetClipToFrame)(NodeHandle node, bool useClip);
+    void (*SetRotation)(NodeHandle node, double rotationX, double rotationY, double rotationZ);
+    void (*SetShadowColor)(NodeHandle node, uint32_t color);
+    void (*SetShadowOffset)(NodeHandle node, double offsetX, double offsetY);
+    void (*SetShadowAlpha)(NodeHandle node, float alpha);
+    void (*SetShadowElevation)(NodeHandle node, float elevation);
+    void (*SetShadowRadius)(NodeHandle node, float radius);
+    void (*Invalidate)(NodeHandle node);
 };
 
 struct ArkUINodeAPI {
@@ -1563,6 +1603,7 @@ struct ArkUINodeAPI {
     ArkUIColumnSplitModifierAPI (*GetColumnSplitModifier)();
     ArkUILineModifierAPI (*GetLineModifier)();
     ArkUIPathModifierAPI (*GetPathModifier)();
+    ArkUIPolygonModifierAPI (*GetPolygonModifier)();
     ArkUIPolylineModifierAPI (*GetPolylineModifier)();
     ArkUISpanModifierAPI (*GetSpanModifier)();
     ArkUIImageAnimatorModifierAPI (*GetImageAnimatorModifier)();
@@ -1594,7 +1635,14 @@ struct ArkUINodeAPI {
     ArkUILoadingProgressModifierAPI (*GetLoadingProgressModifier)();
     ArkUITextClockModifierAPI (*GetTextClockModifier)();
     ArkUITextTimerModifierAPI (*GetTextTimerModifier)();
+    ArkUIRenderNodeModifierAPI (*GetRenderNodeModifier)();
 
+#ifdef PLUGIN_COMPONENT_SUPPORTED
+    ArkUIPluginModifierAPI (*GetPluginModifier)();
+#endif
+#ifdef XCOMPONENT_SUPPORTED
+    ArkUIXComponentModifierAPI (*GetXComponentModifier)();
+#endif
 #ifdef FORM_SUPPORTED
     ArkUIFormComponentModifierAPI (*GetFormComponentModifier)();
 #endif
