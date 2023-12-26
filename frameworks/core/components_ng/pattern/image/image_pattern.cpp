@@ -930,7 +930,8 @@ void ImagePattern::CreateAnalyzerOverlay()
     overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
-void ImagePattern::UpdateAnalyzerOverlay() {
+void ImagePattern::UpdateAnalyzerOverlay()
+{
     if (!IsSupportImageAnalyzerFeature() || !isAnalyzerOverlayBuild_) {
         return;
     }
