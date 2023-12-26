@@ -203,6 +203,7 @@ private:
     void UpdateAnalyzerUIConfig(const RefPtr<GeometryNode>& geometryNode);
     void UpdatePaddingAndBorderWidth(bool isUIConfigUpdate);
     void CreateAnalyzerOverlay();
+    void UpdateAnalyzerOverlay();
     void DeleteAnalyzerOverlay();
     bool IsSupportImageAnalyzerFeature();
 
