@@ -155,6 +155,7 @@ private:
     std::map<int32_t, float> itemsCrossPosition_;
     bool canOverScroll_ = false;
     int32_t scrollSource_ = SCROLL_FROM_NONE;
+    bool isDataReload_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollLayoutAlgorithm);
 };

@@ -427,6 +427,14 @@ public:
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
 
+    bool IsScrollableSpringMotionRunning()
+    {
+        CHECK_NULL_RETURN(scrollableEvent_, false);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_RETURN(scrollable, false);
+        return scrollable->IsSpringMotionRunning();
+    }
+
 protected:
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const
     {
