@@ -2442,6 +2442,7 @@ void UIContentImpl::DestroyCustomPopupUIExtension(int32_t nodeId)
 
 void UIContentImpl::SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow)
 {
+    ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
@@ -2455,6 +2456,7 @@ void UIContentImpl::SetContainerModalTitleVisible(bool customTitleSettedShow, bo
 
 void UIContentImpl::SetContainerModalTitleHeight(int32_t height)
 {
+    ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
