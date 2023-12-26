@@ -626,7 +626,7 @@ void RosenRenderContext::PaintBackground()
 void RosenRenderContext::OnBackgroundImageUpdate(const ImageSourceInfo& src)
 {
     CHECK_NULL_VOID(rsNode_);
-    if (src.GetSrc().empty()) {
+    if (src.GetSrc().empty() && src.GetPixmap() == nullptr) {
         return;
     }
     if (!bgLoadingCtx_ || src != bgLoadingCtx_->GetSourceInfo()) {

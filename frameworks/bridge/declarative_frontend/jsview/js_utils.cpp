@@ -203,4 +203,19 @@ napi_value ConvertPixmapNapi(const RefPtr<PixelMap>& pixelMap)
     return napiValue;
 }
 #endif
+
+bool IsDrawable(const JSRef<JSVal>& jsValue)
+{
+    if (!jsValue->IsObject()) {
+        return false;
+    }
+    JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
+    if (jsObj->IsUndefined()) {
+        return false;
+    }
+
+    // if jsObject has function getPixelMap, it's a DrawableDescriptor object
+    JSRef<JSVal> func = jsObj->GetProperty("getPixelMap");
+    return (!func->IsNull() && func->IsFunction());
+}
 } // namespace OHOS::Ace::Framework
