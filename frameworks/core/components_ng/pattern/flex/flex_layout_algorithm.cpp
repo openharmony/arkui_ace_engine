@@ -653,11 +653,8 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
                 continue;
             }
             if (GetSelfAlign(childLayoutWrapper) == FlexAlign::STRETCH) {
-                if (!UserDefinedCrossAxisSize(childLayoutWrapper) &&
-                    Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-                    UpdateLayoutConstraintOnCrossAxis(child.layoutConstraint, crossAxisSize);
-                    child.needSecondMeasure = true;
-                }
+                UpdateLayoutConstraintOnCrossAxis(child.layoutConstraint, crossAxisSize);
+                child.needSecondMeasure = true;
             }
             if (LessOrEqual(totalFlexWeight_, 0.0f) &&
                 (!isInfiniteLayout_ || GreatNotEqual(MainAxisMinValue(layoutWrapper), 0.0f) ||
@@ -1120,19 +1117,6 @@ FlexAlign FlexLayoutAlgorithm::GetSelfAlign(const RefPtr<LayoutWrapper>& layoutW
         return crossAxisAlign;
     }
     return flexItemProperty->GetAlignSelf().value_or(crossAxisAlign);
-}
-
-bool FlexLayoutAlgorithm::UserDefinedCrossAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const
-{
-    CHECK_NULL_RETURN(layoutWrapper, false);
-    if (layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint()) {
-        auto userDefinedIdealSize = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint()->selfIdealSize;
-        if (userDefinedIdealSize.has_value()) {
-            return IsHorizontal(direction_) ? userDefinedIdealSize->Height().has_value()
-                                            : userDefinedIdealSize->Width().has_value();
-        }
-    }
-    return false;
 }
 
 } // namespace OHOS::Ace::NG
