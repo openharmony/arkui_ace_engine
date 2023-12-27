@@ -4194,6 +4194,10 @@ bool JSViewAbstract::ParseJsShadowColorStrategy(const JSRef<JSVal>& jsValue, Sha
 
 bool JSViewAbstract::ParseJsSymbolId(const JSRef<JSVal>& jsValue, std::uint32_t& symbolId)
 {
+    if (jsValue->IsNull() || jsValue->IsUndefined()) {
+        symbolId = 0;
+        return false;
+    }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (resId->IsNull() || !resId->IsNumber()) {
