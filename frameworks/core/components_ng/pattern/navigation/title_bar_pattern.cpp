@@ -739,6 +739,7 @@ void TitleBarPattern::UpdateTitleFontSize(const Dimension& tempTitleFontSize)
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateFontSize(tempTitleFontSize);
     textLayoutProperty->UpdateAdaptMaxFontSize(tempTitleFontSize);
+    textLayoutProperty->ResetAdaptMinFontSize();
     titleNode->MarkModifyDone();
 }
 
