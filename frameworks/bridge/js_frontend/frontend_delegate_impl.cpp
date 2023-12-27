@@ -1817,6 +1817,11 @@ bool FrontendDelegateImpl::GetSystemFont(const std::string& fontName, FontInfo& 
     return pipelineContextHolder_.Get()->GetSystemFont(fontName, fontInfo);
 }
 
+void FrontendDelegateImpl::GetUIFontConfig(FontConfigJsonInfo& fontConfigJsonInfo)
+{
+    pipelineContextHolder_.Get()->GetUIFontConfig(fontConfigJsonInfo);
+}
+
 void FrontendDelegateImpl::HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback)
 {
     if (src.empty() || !callback) {

@@ -241,12 +241,119 @@ static napi_value JSgetFontByName(napi_env env, napi_callback_info info)
     return result;
 }
 
+static napi_value GetUIFontGenericInfo(napi_env env, const FontConfigJsonInfo& fontConfigJsonInfo)
+{
+    napi_value genericSetResult = nullptr;
+    napi_create_array(env, &genericSetResult);
+    int32_t index = 0;
+    for (const FontGenericInfo& generic: fontConfigJsonInfo.genericSet) {
+        napi_value genericResult = nullptr;
+        napi_create_object(env, &genericResult);
+        napi_value familyResult = nullptr;
+        napi_create_string_utf8(env, generic.familyName.c_str(), generic.familyName.length(), &familyResult);
+        napi_value aliasSetResult = nullptr;
+        napi_create_array(env, &aliasSetResult);
+        int32_t index2 = 0;
+        for (const AliasInfo& alias: generic.aliasSet) {
+            napi_value aliasResult = nullptr;
+            napi_create_object(env, &aliasResult);
+            napi_value familyNameResult = nullptr;
+            napi_create_string_utf8(env, alias.familyName.c_str(), alias.familyName.length(), &familyNameResult);
+            napi_value weightResult = nullptr;
+            napi_create_int32(env, alias.weight, &weightResult);
+            napi_set_named_property(env, aliasResult, "name", familyNameResult);
+            napi_set_named_property(env, aliasResult, "weight", weightResult);
+            napi_set_element(env, aliasSetResult, index2++, aliasResult);
+        }
+        index2 = 0;
+        napi_value adjustSetResult = nullptr;
+        napi_create_array(env, &adjustSetResult);
+        for (const AdjustInfo& adjust: generic.adjustSet) {
+            napi_value adjustResult = nullptr;
+            napi_create_object(env, &adjustResult);
+            napi_value weightResult = nullptr;
+            napi_create_int32(env, adjust.origValue, &weightResult);
+            napi_value toResult = nullptr;
+            napi_create_int32(env, adjust.newValue, &toResult);
+            napi_set_named_property(env, adjustResult, "weight", weightResult);
+            napi_set_named_property(env, adjustResult, "to", toResult);
+            napi_set_element(env, adjustSetResult, index2++, adjustResult);
+        }
+        napi_set_named_property(env, genericResult, "family", familyResult);
+        napi_set_named_property(env, genericResult, "alias", aliasSetResult);
+        napi_set_named_property(env, genericResult, "adjust", adjustSetResult);
+        napi_set_element(env, genericSetResult, index++, genericResult);
+    }
+    return genericSetResult;
+}
+
+static napi_value GetUIFontFallbackInfo(napi_env env, const FontConfigJsonInfo& fontConfigJsonInfo)
+{
+    napi_value fallbackGroupSetResult = nullptr;
+    napi_create_array(env, &fallbackGroupSetResult);
+    int32_t index = 0;
+    for (const FallbackGroup& fallbackGroup: fontConfigJsonInfo.fallbackGroupSet) {
+        napi_value fallbackGroupResult = nullptr;
+        napi_create_object(env, &fallbackGroupResult);
+        napi_value fontSetNameResult = nullptr;
+        napi_create_string_utf8(env, fallbackGroup.groupName.c_str(),
+            fallbackGroup.groupName.length(), &fontSetNameResult);
+        napi_value fallbackListResult = nullptr;
+        napi_create_array(env, &fallbackListResult);
+        int32_t index2 = 0;
+        for (const FallbackInfo& fallback: fallbackGroup.fallbackInfoSet) {
+            napi_value fallbackResult = nullptr;
+            napi_create_object(env, &fallbackResult);
+            napi_value familyResult = nullptr;
+            napi_create_string_utf8(env, fallback.familyName.c_str(), fallback.familyName.length(), &familyResult);
+            napi_value languageResult = nullptr;
+            napi_create_string_utf8(env, fallback.font.c_str(), fallback.font.length(), &languageResult);
+
+            napi_set_named_property(env, fallbackResult, "language", languageResult);
+            napi_set_named_property(env, fallbackResult, "family", familyResult);
+            napi_set_element(env, fallbackListResult, index2++, fallbackResult);
+        }
+        napi_set_named_property(env, fallbackGroupResult, "fontSetName", fontSetNameResult);
+        napi_set_named_property(env, fallbackGroupResult, "fallback", fallbackListResult);
+        napi_set_element(env, fallbackGroupSetResult, index++, fallbackGroupResult);
+    }
+    return fallbackGroupSetResult;
+}
+
+static napi_value JsGetUIFontConfig(napi_env env, napi_callback_info info)
+{
+    FontConfigJsonInfo fontConfigJsonInfo;
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (!delegate) {
+        return nullptr;
+    }
+    delegate->GetUIFontConfig(fontConfigJsonInfo);
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+    napi_value fontDirSetResult = nullptr;
+    napi_create_array(env, &fontDirSetResult);
+    int32_t index = 0;
+    for (const std::string& fontDir : fontConfigJsonInfo.fontDirSet) {
+        napi_value fontDirResult = nullptr;
+        napi_create_string_utf8(env, fontDir.c_str(), fontDir.length(), &fontDirResult);
+        napi_set_element(env, fontDirSetResult, index++, fontDirResult);
+    }
+    napi_value genericSetResult = GetUIFontGenericInfo(env, fontConfigJsonInfo);
+    napi_value fallbackGroupSetResult = GetUIFontFallbackInfo(env, fontConfigJsonInfo);
+
+    napi_set_named_property(env, result, "fontDir", fontDirSetResult);
+    napi_set_named_property(env, result, "generic", genericSetResult);
+    napi_set_named_property(env, result, "fallbackGroups", fallbackGroupSetResult);
+    return result;
+}
+
 static napi_value FontExport(napi_env env, napi_value exports)
 {
     napi_property_descriptor fontDesc[] = {
         DECLARE_NAPI_FUNCTION("registerFont", JSRegisterFont),
         DECLARE_NAPI_FUNCTION("getSystemFontList", JSgetSystemFontList),
-        DECLARE_NAPI_FUNCTION("getFontByName", JSgetFontByName)
+        DECLARE_NAPI_FUNCTION("getFontByName", JSgetFontByName),
+        DECLARE_NAPI_FUNCTION("getUIFontConfig", JsGetUIFontConfig)
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(fontDesc) / sizeof(fontDesc[0]), fontDesc));
     return exports;

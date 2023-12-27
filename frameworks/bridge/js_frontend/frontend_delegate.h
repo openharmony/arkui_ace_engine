@@ -218,6 +218,8 @@ public:
 
     virtual bool GetSystemFont(const std::string& fontName, FontInfo& fontInfo) = 0;
 
+    virtual void GetUIFontConfig(FontConfigJsonInfo& fontConfigJsonInfo) {}
+
     virtual SingleTaskExecutor GetAnimationJsTask() = 0;
 
     virtual SingleTaskExecutor GetUiTask() = 0;
