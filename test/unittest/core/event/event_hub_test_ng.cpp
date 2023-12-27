@@ -16,6 +16,8 @@
 #include "gtest/gtest.h"
 
 #define private public
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -23,7 +25,6 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -376,9 +377,8 @@ HWTEST_F(EventHubTestNg, EventHubDragEventsTest006, TestSize.Level1)
      * @tc.steps: step7. Set EventHub Customer OnDragEnd event and fire it.
      * @tc.expected: OnDragEnd is invoked and the temp values are assigned with correct values.
      */
-    auto OnDragEnd = [&dragEventType](const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */) {
-        dragEventType = DRAG_END_EVENT_TYPE;
-    };
+    auto OnDragEnd = [&dragEventType](
+                         const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */) { dragEventType = DRAG_END_EVENT_TYPE; };
     eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_END, OnDragEnd);
     eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_END, dragEvent);
     EXPECT_EQ(dragEventType, DRAG_END_EVENT_TYPE);
@@ -644,14 +644,14 @@ HWTEST_F(EventHubTestNg, EventHubTest002, TestSize.Level1)
      * @tc.steps: step3. construct OnDragFunc.
      */
     std::string dragEventType;
-    auto OnDragFunc = [&dragEventType](const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */,
+    auto onDragFunc = [&dragEventType](const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */,
                           const std::string& eventType) { dragEventType = eventType; };
-	auto cstmOnDragFunc = OnDragFunc;
+
     /**
      * @tc.steps: step4. Calling the default branch in SetCustomerOnDragFunc.
      * @tc.expected: eventHub->customerOnDragEnd_ is false.
      */
-    eventHub->SetCustomerOnDragFunc(DragFuncType(10), cstmOnDragFunc);
+    eventHub->SetCustomerOnDragFunc(DragFuncType(10), onDragFunc);
     EXPECT_FALSE(eventHub->customerOnDragEnd_);
 }
 
@@ -680,15 +680,14 @@ HWTEST_F(EventHubTestNg, EventHubTest003, TestSize.Level1)
      * @tc.steps: step3. construct OnDragFunc.
      */
     std::string dragEventType;
-    auto OnDragFunc = [&dragEventType](
+    auto onDragFunc = [&dragEventType](
                           const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */) { dragEventType = DRAG_END_EVENT_TYPE; };
-	auto cstmOnDragFunc = OnDragFunc;
-	
+
     /**
      * @tc.steps: step4. Call SetCustomerOnDragFunc with OnDragFunc.
      * @tc.expected: eventHub->customerOnDragEnter_ is false.
      */
-    eventHub->SetCustomerOnDragFunc(DragFuncType(10), cstmOnDragFunc);
+    eventHub->SetCustomerOnDragFunc(DragFuncType(10), onDragFunc);
     EXPECT_FALSE(eventHub->customerOnDragEnter_);
 }
 
