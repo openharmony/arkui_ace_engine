@@ -253,7 +253,7 @@ std::pair<float, float> PipelineContext::LinearInterpolation(const std::tuple<fl
     if (nanoTimeStamp == std::get<INDEX_TIME>(history) || nanoTimeStamp == std::get<INDEX_TIME>(current)) {
         return std::make_pair(0.0f, 0.0f);
     }
-    if (std::get<INDEX_TIME>(current) < std::get<INDEX_TIME>(history)) {
+    if (std::get<INDEX_TIME>(current) <= std::get<INDEX_TIME>(history)) {
         return std::make_pair(0.0f, 0.0f);
     }
     if (std::get<INDEX_TIME>(current) - std::get<INDEX_TIME>(history) > INTERPOLATION_THRESHOLD) {
