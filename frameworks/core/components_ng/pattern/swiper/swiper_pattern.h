@@ -756,6 +756,7 @@ private:
     void HandleTouchBottomLoop();
     void CalculateGestureState(float additionalOffset, float currentTurnPageRate);
     void StopIndicatorAnimation();
+    RefPtr<FrameNode> GetCurrentFrameNode(int32_t currentIndex) const;
 
     WeakPtr<NestableScrollContainer> parent_;
     /**
