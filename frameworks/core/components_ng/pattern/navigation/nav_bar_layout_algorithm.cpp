@@ -295,7 +295,7 @@ float LayoutToolBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& host
     }
 
     auto toolBarOffsetY =
-        layoutWrapper->GetGeometryNode()->GetFrameSize().Height() - toolbarHeight + GetSafeAreaHeight(layoutWrapper);
+        layoutWrapper->GetGeometryNode()->GetFrameSize().Height() - toolbarHeight;
     auto toolBarOffset = OffsetF(geometryNode->GetFrameOffset().GetX(), static_cast<float>(toolBarOffsetY));
     geometryNode->SetMarginFrameOffset(toolBarOffset);
     toolBarWrapper->Layout();

@@ -47,7 +47,7 @@ public:
     {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_BOTTOM, .type = SAFE_AREA_TYPE_SYSTEM };
+        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
 
         SetBackgroundAndBlur();
@@ -56,6 +56,28 @@ public:
     void OnColorConfigurationUpdate() override
     {
         SetBackgroundAndBlur();
+    }
+
+     void UpdateNeedRecalculateSafeArea() override
+    {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto safeArea = pipeline->GetSafeArea();
+        auto safeAreaHeight = safeArea.top_.Length();
+        auto hostNode = GetHost();
+        CHECK_NULL_VOID(hostNode);
+        auto parent = hostNode->GetAncestorNodeOfFrame();
+        CHECK_NULL_VOID(parent);
+        auto parentGlobalOffset = parent->GetParentGlobalOffsetDuringLayout();
+        auto geometryNode = parent->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto frame = geometryNode->GetFrameRect() + parentGlobalOffset;
+        if (!safeArea.top_.IsOverlapped(frame.Top())) {
+            safeAreaHeight = 0.0f;
+        }
+        OffsetF offset(geometryNode->GetFrameOffset().GetX(), geometryNode->GetFrameOffset().GetY() + safeAreaHeight);
+        geometryNode->SetFrameOffset(offset);
+        hostNode->ForceSyncGeometryNode();
     }
 
 private:

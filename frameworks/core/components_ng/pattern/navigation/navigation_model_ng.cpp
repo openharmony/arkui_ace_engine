@@ -686,6 +686,9 @@ bool NavigationModelNG::CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNo
         navigationGroupNode->AddChild(dividerNode);
         navigationGroupNode->SetDividerNode(dividerNode);
 
+        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
+        dividerNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+
         auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
         CHECK_NULL_RETURN(dividerLayoutProperty, false);
         dividerLayoutProperty->UpdateStrokeWidth(DIVIDER_WIDTH);
@@ -694,7 +697,8 @@ bool NavigationModelNG::CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNo
         CHECK_NULL_RETURN(dividerRenderProperty, false);
         auto theme = NavigationGetTheme();
         CHECK_NULL_RETURN(theme, false);
-        dividerRenderProperty->UpdateDividerColor(theme->GetNavigationDividerColor());
+        dividerRenderProperty->UpdateDividerColor(Color::TRANSPARENT);
+        dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
     }
 
     return true;
