@@ -97,11 +97,11 @@ void UIExtensionModelNG::Create()
 }
 
 void UIExtensionModelNG::InitializeDynamicComponent(const RefPtr<FrameNode>& frameNode, const std::string& hapPath,
-    const std::string& abcPath, const RefPtr<OHOS::Ace::WantWrap>& wantWrap, void* runtime)
+    const std::string& abcPath, const std::string& entryPoint, void* runtime)
 {
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->InitializeDynamicComponent(hapPath, abcPath, wantWrap, runtime);
+    pattern->InitializeDynamicComponent(hapPath, abcPath, entryPoint, runtime);
 }
 
 void UIExtensionModelNG::SetOnRemoteReady(std::function<void(const RefPtr<UIExtensionProxy>&)>&& onRemoteReady)

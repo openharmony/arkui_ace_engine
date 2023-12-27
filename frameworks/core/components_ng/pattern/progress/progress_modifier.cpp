@@ -962,13 +962,9 @@ void ProgressModifier::PaintRingProgressOrShadow(
     RSCanvas& canvas, const RingProgressData& ringProgressData, bool isShadow) const
 {
     PointF centerPt = ringProgressData.centerPt;
-    auto radius = ringProgressData.radius;
     auto angle = ringProgressData.angle;
-    auto thickness = ringProgressData.thickness;
-    double halfThickness = thickness / 2;
+    float additionalAngle = CalcRingProgressAdditionalAngle();
 
-    std::vector<RSColorQuad> colors;
-    std::vector<float> pos;
     auto gradient = SortGradientColorsByOffset(ringProgressColors_->Get().GetGradient());
     auto gradientColors = gradient.GetColors();
     // Fault protection processing, if gradientColors is empty, set to default colors.
@@ -987,17 +983,8 @@ void ProgressModifier::PaintRingProgressOrShadow(
         gradientColors.emplace_back(beginColor);
     }
 
-    for (size_t i = 0; i < gradientColors.size(); i++) {
-        colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
-        pos.emplace_back(gradientColors[i].GetDimension().Value());
-    }
-
-    RSPen pen;
-    pen.SetWidth(thickness);
-    pen.SetAntiAlias(true);
-    RSBrush endCirclePaint;
-    endCirclePaint.SetAntiAlias(true);
-    endCirclePaint.SetColor(gradientColors.back().GetLinearColor().GetValue());
+    RSBrush brush;
+    brush.SetAntiAlias(true);
 
     if (isShadow) {
         centerPt = centerPt + OffsetF(RING_SHADOW_OFFSET_X, RING_SHADOW_OFFSET_Y);
@@ -1009,45 +996,160 @@ void ProgressModifier::PaintRingProgressOrShadow(
         filter.SetImageFilter(RSRecordingImageFilter::CreateBlurImageFilter(
             ringProgressData.shadowBlurSigma, ringProgressData.shadowBlurSigma, RSTileMode::DECAL, nullptr));
 #endif
-        pen.SetFilter(filter);
-        endCirclePaint.SetFilter(filter);
+        brush.SetFilter(filter);
     }
 
-    RSRect edgeRect(centerPt.GetX() - halfThickness, centerPt.GetY() - radius - halfThickness,
-        centerPt.GetX() + halfThickness, centerPt.GetY() - radius + halfThickness);
+    if (LessOrEqual(angle + additionalAngle * INT32_TWO, ANGLE_360)) {
+        PaintWhole(canvas, brush, ringProgressData, gradientColors);
+    } else {
+        PaintBeginHalf(canvas, brush, ringProgressData, gradientColors);
+        PaintEndHalf(canvas, brush, ringProgressData, gradientColors);
+    }
+}
+
+void ProgressModifier::PaintWhole(RSCanvas& canvas, RSBrush& brush, const RingProgressData& ringProgressData,
+    std::vector<GradientColor>& gradientColors) const
+{
+    PointF centerPt = ringProgressData.centerPt;
+    auto radius = ringProgressData.radius;
+    auto angle = ringProgressData.angle;
+    auto thickness = ringProgressData.thickness;
+    double halfThickness = thickness / 2;
     float additionalAngle = CalcRingProgressAdditionalAngle();
-    if (GreatNotEqual(angle + additionalAngle * INT32_TWO, ANGLE_360)) {
-        additionalAngle = (ANGLE_360 - angle) / INT32_TWO;
+    double radAngle = angle / ANGLE_180 * PI_NUM;
+    double radAdditionalAngle = additionalAngle / ANGLE_180 * PI_NUM;
+    double sinPointOutside = std::sin(radAngle + radAdditionalAngle) * (radius - halfThickness);
+    double cosPointOutside = std::cos(radAngle + radAdditionalAngle) * (radius - halfThickness);
+    double sinPointStart = std::sin(radAdditionalAngle) * radius;
+    double cosPointStart = std::cos(radAdditionalAngle) * radius;
+
+    std::vector<RSColorQuad> colors;
+    std::vector<float> pos;
+    for (size_t i = 0; i < gradientColors.size(); i++) {
+        colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
+        pos.emplace_back(gradientColors[i].GetDimension().Value());
     }
 
-    // Paint progress arc
+    RSPath path;
+#ifndef USE_ROSEN_DRAWING
+    brush.SetShaderEffect(RSShaderEffect::CreateSweepGradient(ToRSPoint(PointF(centerPt.GetX(), centerPt.GetY())),
+        colors, pos, RSTileMode::CLAMP, 0, angle + additionalAngle * INT32_TWO, nullptr));
+#else
+    brush.SetShaderEffect(
+        RSRecordingShaderEffect::CreateSweepGradient(ToRSPoint(PointF(centerPt.GetX(), centerPt.GetY())), colors, pos,
+            RSTileMode::CLAMP, 0, angle + additionalAngle * INT32_TWO, nullptr));
+#endif
+    path.ArcTo(centerPt.GetX() + cosPointStart - halfThickness, centerPt.GetY() + sinPointStart - halfThickness,
+        centerPt.GetX() + cosPointStart + halfThickness, centerPt.GetY() + sinPointStart + halfThickness,
+        ANGLE_180 + additionalAngle, ANGLE_180);
+    path.ArcTo(centerPt.GetX() - radius - halfThickness, centerPt.GetY() - radius - halfThickness,
+        centerPt.GetX() + radius + halfThickness, centerPt.GetY() + radius + halfThickness, additionalAngle, angle);
+    path.ArcTo(halfThickness, halfThickness, 0.0f, RSPathDirection::CW_DIRECTION, centerPt.GetX() + cosPointOutside,
+        centerPt.GetY() + sinPointOutside);
+    path.ArcTo(centerPt.GetX() - radius + halfThickness, centerPt.GetY() - radius + halfThickness,
+        centerPt.GetX() + radius - halfThickness, centerPt.GetY() + radius - halfThickness, additionalAngle + angle,
+        -angle);
+    path.Close();
     canvas.Save();
     canvas.Rotate(-ANGLE_90 - additionalAngle, centerPt.GetX(), centerPt.GetY());
+    canvas.AttachBrush(brush);
+    canvas.DrawPath(path);
+    canvas.DetachBrush();
+    canvas.Restore();
+}
+
+void ProgressModifier::PaintBeginHalf(RSCanvas& canvas, RSBrush& brush, const RingProgressData& ringProgressData,
+    std::vector<GradientColor>& gradientColors) const
+{
+    PointF centerPt = ringProgressData.centerPt;
+    auto radius = ringProgressData.radius;
+    auto angle = ringProgressData.angle;
+    auto thickness = ringProgressData.thickness;
+    double halfThickness = thickness / 2;
+    float additionalAngle = CalcRingProgressAdditionalAngle();
+
+    std::vector<RSColorQuad> colors;
+    std::vector<float> pos;
+    for (size_t i = 0; i < gradientColors.size(); i++) {
+        colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
+        pos.emplace_back(gradientColors[i].GetDimension().Value());
+    }
+    colors.emplace_back(gradientColors[0].GetLinearColor().GetValue());
+    pos.emplace_back((ANGLE_360 - additionalAngle) / ANGLE_360);
+
+    RSPath beginPath;
+    RSPath path;
 #ifndef USE_ROSEN_DRAWING
-    pen.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
-        ToRSPoint(PointF(centerPt.GetX(), centerPt.GetY())), colors, pos, RSTileMode::CLAMP, 0, angle, nullptr));
+    brush.SetShaderEffect(RSShaderEffect::CreateSweepGradient(ToRSPoint(PointF(centerPt.GetX(), centerPt.GetY())),
+        colors, pos, RSTileMode::CLAMP, 0, angle, nullptr));
 #else
-    pen.SetShaderEffect(RSRecordingShaderEffect::CreateSweepGradient(
+    brush.SetShaderEffect(RSRecordingShaderEffect::CreateSweepGradient(
         ToRSPoint(PointF(centerPt.GetX(), centerPt.GetY())), colors, pos, RSTileMode::CLAMP, 0, angle, nullptr));
 #endif
-    pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
-    canvas.AttachPen(pen);
-    canvas.DrawArc(
-        { centerPt.GetX() - radius, centerPt.GetY() - radius, centerPt.GetX() + radius, centerPt.GetY() + radius },
-        additionalAngle, angle);
-    canvas.DetachPen();
-    canvas.Restore();
+    beginPath.MoveTo(centerPt.GetX() + radius - halfThickness, centerPt.GetY());
+    beginPath.ArcTo(centerPt.GetX() + radius - halfThickness, centerPt.GetY() - halfThickness,
+        centerPt.GetX() + radius + halfThickness, centerPt.GetY() + halfThickness, ANGLE_180, ANGLE_180);
+    beginPath.ArcTo(centerPt.GetX() - radius - halfThickness, centerPt.GetY() - radius - halfThickness,
+        centerPt.GetX() + radius + halfThickness, centerPt.GetY() + radius + halfThickness, 0, ANGLE_180);
+    beginPath.LineTo(centerPt.GetX() - radius + halfThickness, centerPt.GetY());
+    beginPath.ArcTo(centerPt.GetX() - radius + halfThickness, centerPt.GetY() - radius + halfThickness,
+        centerPt.GetX() + radius - halfThickness, centerPt.GetY() + radius - halfThickness, ANGLE_180, -ANGLE_180);
+    beginPath.Close();
 
-    additionalAngle = CalcRingProgressAdditionalAngle();
-    if (GreatNotEqual(angle + additionalAngle * INT32_TWO, ANGLE_360)) {
-        // Paint end-side semicircle
-        canvas.Save();
-        canvas.Rotate(angle, centerPt.GetX(), centerPt.GetY());
-        canvas.AttachBrush(endCirclePaint);
-        canvas.DrawArc(edgeRect, -ANGLE_90, ANGLE_180);
-        canvas.DetachBrush();
-        canvas.Restore();
+    canvas.Save();
+    canvas.Rotate(-ANGLE_90, centerPt.GetX(), centerPt.GetY());
+    canvas.AttachBrush(brush);
+    canvas.DrawPath(beginPath);
+    canvas.DetachBrush();
+    canvas.Restore();
+}
+
+void ProgressModifier::PaintEndHalf(RSCanvas& canvas, RSBrush& brush, const RingProgressData& ringProgressData,
+    std::vector<GradientColor>& gradientColors) const
+{
+    PointF centerPt = ringProgressData.centerPt;
+    auto radius = ringProgressData.radius;
+    auto angle = ringProgressData.angle;
+    auto thickness = ringProgressData.thickness;
+    double halfThickness = thickness / 2;
+    float additionalAngle = CalcRingProgressAdditionalAngle();
+    double radArc = (angle - ANGLE_180) / ANGLE_180 * PI_NUM;
+    double sinPointOutside = std::sin(radArc) * (radius - halfThickness);
+    double cosPointOutside = std::cos(radArc) * (radius - halfThickness);
+
+    std::vector<RSColorQuad> colors;
+    std::vector<float> pos;
+    colors.emplace_back(gradientColors[1].GetLinearColor().GetValue());
+    pos.emplace_back(additionalAngle / ANGLE_360);
+    for (size_t i = 0; i < gradientColors.size(); i++) {
+        colors.emplace_back(gradientColors[i].GetLinearColor().GetValue());
+        pos.emplace_back(gradientColors[i].GetDimension().Value());
     }
+
+    RSPath endPath;
+#ifndef USE_ROSEN_DRAWING
+    brush.SetShaderEffect(RSShaderEffect::CreateSweepGradient(
+        ToRSPoint(PointF(centerPt.GetX(), centerPt.GetY())), colors, pos, RSTileMode::CLAMP, 0, angle, nullptr));
+#else
+    brush.SetShaderEffect(RSRecordingShaderEffect::CreateSweepGradient(
+        ToRSPoint(PointF(centerPt.GetX(), centerPt.GetY())), colors, pos, RSTileMode::CLAMP, 0, angle, nullptr));
+#endif
+    endPath.MoveTo(centerPt.GetX() - radius + halfThickness, centerPt.GetY());
+    endPath.LineTo(centerPt.GetX() - radius - halfThickness, centerPt.GetY());
+    endPath.ArcTo(centerPt.GetX() - radius - halfThickness, centerPt.GetY() - radius - halfThickness,
+        centerPt.GetX() + radius + halfThickness, centerPt.GetY() + radius + halfThickness, ANGLE_180,
+        angle - ANGLE_180);
+    endPath.ArcTo(halfThickness, halfThickness, 0.0f, RSPathDirection::CW_DIRECTION, centerPt.GetX() - cosPointOutside,
+        centerPt.GetY() - sinPointOutside);
+    endPath.ArcTo(centerPt.GetX() - radius + halfThickness, centerPt.GetY() - radius + halfThickness,
+        centerPt.GetX() + radius - halfThickness, centerPt.GetY() + radius - halfThickness, angle, ANGLE_180 - angle);
+    endPath.Close();
+    canvas.Save();
+    canvas.Rotate(-ANGLE_90, centerPt.GetX(), centerPt.GetY());
+    canvas.AttachBrush(brush);
+    canvas.DrawPath(endPath);
+    canvas.DetachBrush();
+    canvas.Restore();
 }
 
 Gradient ProgressModifier::SortGradientColorsByOffset(const Gradient& gradient) const

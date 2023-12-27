@@ -55,6 +55,11 @@ public:
     {
         return rect_;
     }
+    void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle)
+    {
+        const auto& groupProperty = GetOrCreateBackground();
+        groupProperty->propBlurStyleOption = bgBlurStyle;
+    }
 
     RectF rect_;
     Color blendColor_ = Color::TRANSPARENT;

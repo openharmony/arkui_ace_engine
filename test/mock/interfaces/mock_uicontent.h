@@ -36,7 +36,8 @@ public:
     MOCK_METHOD3(InitializeByName, void(OHOS::Rosen::Window* window, const std::string& name, napi_value storage));
     MOCK_METHOD4(Initialize,
         void(OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowID));
-    MOCK_METHOD2(InitializeDynamic, void(const std::string& hapPath, const std::string& abcPath));
+    MOCK_METHOD3(
+        InitializeDynamic, void(const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint));
     MOCK_METHOD0(Foreground, void());
     MOCK_METHOD0(Background, void());
     MOCK_METHOD0(Focus, void());

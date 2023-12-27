@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_POPUP_CONFIG_H
 #define FOUNDATION_ACE_INTERFACE_INNERKITS_ACE_POPUP_CONFIG_H
  
+#include <optional>
 #include <string>
  
 namespace OHOS::Ace {

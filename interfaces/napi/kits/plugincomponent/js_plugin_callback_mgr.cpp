@@ -13,12 +13,11 @@
  * limitations under the License.
  */
 #include "js_plugin_callback_mgr.h"
+
 #include "core/components/plugin/plugin_component_manager.h"
 
 namespace OHOS::Ace::Napi {
-JSPluginCallbackMgr::JSPluginCallbackMgr()
-{
-}
+JSPluginCallbackMgr::JSPluginCallbackMgr() {}
 
 JSPluginCallbackMgr::~JSPluginCallbackMgr()
 {
@@ -77,8 +76,8 @@ bool JSPluginCallbackMgr::RegisterRequestEvent(napi_env env, const AAFwk::Want& 
         pPluginComponentCallback->SetWant(want);
         pPluginComponentCallback->SetRequestParam(param);
         eventList_.insert(std::make_pair(pPluginComponentCallback->GetID(), pPluginComponentCallback));
-        PluginComponentManager::GetInstance()->RegisterCallBack(want, pPluginComponentCallback,
-            CallBackType::RequestCallBack);
+        PluginComponentManager::GetInstance()->RegisterCallBack(
+            want, pPluginComponentCallback, CallBackType::RequestCallBack);
         return true;
     } else {
         return false;
@@ -109,4 +108,4 @@ void JSPluginCallbackMgr::UnregisterCallBack(napi_env env, const AAFwk::Want& wa
 {
     PluginComponentManager::GetInstance()->UnregisterCallBack(want);
 }
-}  // namespace OHOS::Ace::Napi
+} // namespace OHOS::Ace::Napi

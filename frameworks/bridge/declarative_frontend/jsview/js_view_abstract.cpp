@@ -67,6 +67,7 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/invert.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/components/common/properties/shadow_config.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -646,7 +647,7 @@ RefPtr<NG::ChainedTransitionEffect> ParseChainedTransition(
         auto pipelineContext = container->GetPipelineContext();
         CHECK_NULL_RETURN(pipelineContext, nullptr);
         auto animationOptionResult = std::make_shared<AnimationOption>(
-            JSViewContext::CreateAnimation(propAnimationOption, nullptr, pipelineContext->IsFormRender()));
+            JSViewContext::CreateAnimation(propAnimationOption, pipelineContext->IsFormRender()));
         // The maximum of the form-animation-playback duration value is 1000 ms.
         if (pipelineContext->IsFormRender() && pipelineContext->IsFormAnimation()) {
             auto formAnimationTimeInterval = GetFormAnimationTimeInterval(pipelineContext);
@@ -903,39 +904,52 @@ void ParsePopupCommonParam(
 
     auto arrowWidthVal = popupObj->GetProperty("arrowWidth");
     if (!arrowWidthVal->IsNull()) {
+        bool setError = true;
         CalcDimension arrowWidth;
         if (JSViewAbstract::ParseJsDimensionVp(arrowWidthVal, arrowWidth)) {
-            if (arrowWidth.Value() > 0) {
+            if (arrowWidth.Value() > 0 && arrowWidth.Unit() != DimensionUnit::PERCENT) {
                 popupParam->SetArrowWidth(arrowWidth);
+                setError = false;
             }
         }
+        popupParam->SetErrorArrowWidth(setError);
     }
 
     auto arrowHeightVal = popupObj->GetProperty("arrowHeight");
     if (!arrowHeightVal->IsNull()) {
+        bool setError = true;
         CalcDimension arrowHeight;
         if (JSViewAbstract::ParseJsDimensionVp(arrowHeightVal, arrowHeight)) {
-            if (arrowHeight.Value() > 0) {
+            if (arrowHeight.Value() > 0 && arrowHeight.Unit() != DimensionUnit::PERCENT) {
                 popupParam->SetArrowHeight(arrowHeight);
+                setError = false;
             }
         }
+        popupParam->SetErrorArrowHeight(setError);
     }
 
     auto radiusVal = popupObj->GetProperty("radius");
     if (!radiusVal->IsNull()) {
+        bool setError = true;
         CalcDimension radius;
         if (JSViewAbstract::ParseJsDimensionVp(radiusVal, radius)) {
-            if (radius.Value() > 0) {
+            if (radius.Value() >= 0) {
                 popupParam->SetRadius(radius);
+                setError = false;
             }
         }
+        popupParam->SetErrorRadius(setError);
     }
 
     auto shadowVal = popupObj->GetProperty("shadow");
     Shadow shadow;
-    JSViewAbstract::GetShadowFromTheme(ShadowStyle::OuterFloatingMD, shadow);
     if (shadowVal->IsObject() || shadowVal->IsNumber()) {
-        JSViewAbstract::ParseShadowProps(shadowVal, shadow);
+        auto ret = JSViewAbstract::ParseShadowProps(shadowVal, shadow);
+        if (!ret) {
+            JSViewAbstract::GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow);
+        }
+    } else {
+        JSViewAbstract::GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow);
     }
     popupParam->SetShadow(shadow);
 }
@@ -6079,7 +6093,7 @@ bool JSViewAbstract::ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, Blu
     if (args->IsNumber()) {
         auto sheetBlurStyle = args->ToNumber<int32_t>();
         if (sheetBlurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
-            sheetBlurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
+            sheetBlurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
             blurStyleOptions.blurStyle = static_cast<BlurStyle>(sheetBlurStyle);
         } else {
             return false;

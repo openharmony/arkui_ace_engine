@@ -22,6 +22,7 @@ build_component_ng("manager_ng") {
     "drag_drop/drag_drop_proxy.cpp",
     "frame_rate/frame_rate_manager.cpp",
     "full_screen/full_screen_manager.cpp",
+    "post_event/post_event_manager.cpp",
     "safe_area/safe_area_manager.cpp",
     "select_overlay/select_overlay_client.cpp",
     "select_overlay/select_overlay_manager.cpp",

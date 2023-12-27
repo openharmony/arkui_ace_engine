@@ -501,8 +501,6 @@ public:
 
     static std::vector<RefPtr<FrameNode>> GetNodesById(const std::unordered_set<int32_t>& set);
 
-    static double GetMaxWidthWithColumnType(GridColumnType gridColumnType);
-
     double GetPreviewScaleVal() const;
 
     bool IsPreviewNeedScale() const;
@@ -637,9 +635,10 @@ public:
     {
         return localMat_;
     }
-    OffsetF GetGlobalOffset();
+    OffsetF GetOffsetInScreen();
     RefPtr<PixelMap> GetPixelMap();
     RefPtr<FrameNode> GetPageNode();
+    RefPtr<FrameNode> GetNodeContainer();
     void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
     void NotifyFillRequestFailed(int32_t errCode);
 
@@ -668,6 +667,16 @@ public:
     void SetCachedGlobalOffset(const std::pair<uint64_t, OffsetF>& timestampOffset)
     {
         cachedGlobalOffset_ = timestampOffset;
+    }
+
+    void SetNeedAdjustOffset(bool needAdjustOffset)
+    {
+        needAdjustOffset_ = needAdjustOffset;
+    }
+
+    bool GetNeedAdjustOffset() const
+    {
+        return needAdjustOffset_;
     }
 
 private:
@@ -810,6 +819,8 @@ private:
     friend class Pattern;
 
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);
+
+    bool needAdjustOffset_ = true;
 };
 } // namespace OHOS::Ace::NG
 

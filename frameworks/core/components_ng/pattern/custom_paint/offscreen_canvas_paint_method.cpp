@@ -984,10 +984,11 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, Rosen:
         ConvertTxtStyle(strokeState_.GetTextStyle(), context_, txtStyle);
 #ifndef USE_GRAPHIC_TEXT_GINE
         txtStyle.font_size = strokeState_.GetTextStyle().GetFontSize().Value();
+        if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
 #else
         txtStyle.fontSize = strokeState_.GetTextStyle().GetFontSize().Value();
+        if (strokeState_.GetGradient().IsValid()) {
 #endif
-        if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
             UpdatePaintShader(OffsetF(0, 0), &pen, nullptr, strokeState_.GetGradient());
         }
         if (hasShadow) {

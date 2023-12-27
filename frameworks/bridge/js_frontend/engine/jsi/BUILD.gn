@@ -100,6 +100,7 @@ template("js_engine_ark") {
     } else if (defined(config.build_for_android) && config.build_for_android) {
       deps += [
         ":gen_obj_src_abc_strip_native_min",
+        "//third_party/css-what:css_what_sources",
         "//third_party/jsframework:ark_build",
       ]
     } else if (defined(config.build_for_ios) && config.build_for_ios) {
@@ -107,10 +108,16 @@ template("js_engine_ark") {
         ":gen_obj_src_abc_strip_native_min",
         "//foundation/arkui/napi:ace_napi_static",
       ]
-      deps += [ "//third_party/jsframework:ark_build" ]
+      deps += [
+        "//third_party/css-what:css_what_sources",
+        "//third_party/jsframework:ark_build",
+      ]
       external_deps += [ "napi:ace_napi" ]
     } else {
-      deps += [ "//third_party/jsframework:ark_build" ]
+      deps += [
+        "//third_party/css-what:css_what_sources",
+        "//third_party/jsframework:ark_build",
+      ]
       external_deps += [
         "image_framework:image",
         "image_framework:image_native",

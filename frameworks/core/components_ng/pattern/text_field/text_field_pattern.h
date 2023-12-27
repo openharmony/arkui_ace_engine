@@ -157,6 +157,11 @@ public:
         return true;
     }
 
+    bool GetNeedToRequestKeyboardOnFocus() const
+    {
+        return needToRequestKeyboardOnFocus_;
+    }
+
     bool CheckBlurReason();
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
@@ -201,7 +206,7 @@ public:
 
     void InsertValue(const std::string& insertValue) override;
     void InsertValueOperation(const std::string& insertValue);
-    void UpdateCounterTextColor();
+    void UpdateOverCounterColor();
     void UpdateCounterMargin();
     void CleanCounterNode();
     void UltralimitShake();
@@ -230,10 +235,6 @@ public:
     void SetCounterState(bool counterChange)
     {
         counterChange_ = counterChange;
-    }
-    void SetCounterMargin(bool CounterMargin)
-    {
-        hasCounterMargin_ = CounterMargin;
     }
 
     float GetTextOrPlaceHolderFontSize();
@@ -1049,6 +1050,15 @@ public:
     bool HasFocus() const;
     void StopTwinkling();
 
+    bool IsModifyDone()
+    {
+        return isModifyDone_;
+    }
+    void SetModifyDoneStatus(bool value)
+    {
+        isModifyDone_ = value;
+    }
+
     const TimeStamp& GetLastClickTime()
     {
         return lastClickTimeStamp_;
@@ -1268,7 +1278,6 @@ private:
     bool contChange_ = false;
     bool counterChange_ = false;
     WeakPtr<LayoutWrapper> counterTextNode_;
-    bool hasCounterMargin_ = false;
     bool isCursorAlwaysDisplayed_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
@@ -1372,6 +1381,7 @@ private:
     OffsetF localOffset_;
     bool isTouchCaret_ = false;
     bool needSelectAll_ = false;
+    bool isModifyDone_ = false;
 };
 } // namespace OHOS::Ace::NG
 

@@ -482,14 +482,23 @@ void UIContentImpl::InitializeByName(OHOS::Rosen::Window* window, const std::str
     InitializeInner(window, name, storage, true);
 }
 
-void UIContentImpl::InitializeDynamic(const std::string& hapPath, const std::string& abcPath)
+void UIContentImpl::InitializeDynamic(
+    const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint)
 {
     isDynamicRender_ = true;
     hapPath_ = hapPath;
     auto env = reinterpret_cast<napi_env>(runtime_);
     CHECK_NULL_VOID(env);
     taskWrapper_ = std::make_shared<NG::UVTaskWrapperImpl>(env);
-    InitializeInner(nullptr, abcPath, nullptr, false);
+
+    CommonInitializeForm(nullptr, abcPath, nullptr);
+
+    LOGI("Initialize DynamicComponent startUrl = %{public}s, entryPoint = %{public}s", startUrl_.c_str(),
+        entryPoint.c_str());
+    Platform::AceContainer::RunDynamicPage(instanceId_, startUrl_, "", entryPoint);
+    auto distributedUI = std::make_shared<NG::DistributedUI>();
+    uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
+    Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
 }
 
 void UIContentImpl::Initialize(
@@ -1371,6 +1380,7 @@ void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& con
         window_->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
         pipeline->UpdateSystemSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM));
         pipeline->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
+        pipeline->UpdateNavSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
     }
 }
 
@@ -2442,6 +2452,7 @@ void UIContentImpl::DestroyCustomPopupUIExtension(int32_t nodeId)
 
 void UIContentImpl::SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow)
 {
+    ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
@@ -2455,6 +2466,7 @@ void UIContentImpl::SetContainerModalTitleVisible(bool customTitleSettedShow, bo
 
 void UIContentImpl::SetContainerModalTitleHeight(int32_t height)
 {
+    ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(

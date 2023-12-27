@@ -3779,7 +3779,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
      * and add this component to the list of components who are dependent on this property
      */
     recordPropertyDependentUpdate() {
-        const elmtId = this.getRenderingElmtId();
+        const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
         if (elmtId < 0) {
             // not access recording 
             return;
@@ -4989,9 +4989,12 @@ class ViewPU extends NativeViewPartialUpdate {
         })
             .forEach((propName) => {
             const stateVar = Reflect.get(this, propName);
-            if ("notifyPropertyHasChangedPU" in stateVar) {
+            if (stateVar && typeof stateVar === 'object' && "notifyPropertyHasChangedPU" in stateVar) {
                 
                 this.ownObservedPropertiesStore_.add(stateVar);
+            }
+            else {
+                
             }
         });
     }
@@ -5025,10 +5028,28 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     aboutToReuse(params) { }
     aboutToRecycle() { }
+    setDeleteStatusRecursively() {
+        if (!this.childrenWeakrefMap_.size) {
+            return;
+        }
+        this.childrenWeakrefMap_.forEach((value) => {
+            let child = value.deref();
+            if (child) {
+                child.isDeleting_ = true;
+                child.setDeleteStatusRecursively();
+            }
+        });
+    }
     // super class will call this function from
     // its aboutToBeDeleted implementation
     aboutToBeDeletedInternal() {
         
+        // if this.isDeleting_ is true already, it may be set delete status recursively by its parent, so it is not necessary
+        // to set and resursively set its children any more
+        if (!this.isDeleting_) {
+            this.isDeleting_ = true;
+            this.setDeleteStatusRecursively();
+        }
         // tell UINodeRegisterProxy that all elmtIds under
         // this ViewPU should be treated as already unregistered
         
@@ -5056,7 +5077,6 @@ class ViewPU extends NativeViewPartialUpdate {
             this.parent_.removeChild(this);
         }
         this.localStoragebackStore_ = undefined;
-        this.isDeleting_ = true;
     }
     purgeDeleteElmtId(rmElmtId) {
         
@@ -5335,7 +5355,7 @@ class ViewPU extends NativeViewPartialUpdate {
                 stateMgmtConsole.applicationError(`${this.debugInfo()}: State variable '${varName}' has changed during render! It's illegal to change @Component state while build (initial render or re-render) is on-going. Application error!`);
             }
             this.syncInstanceId();
-            if (dependentElmtIds.size && this.isInitialRenderDone) {
+            if (dependentElmtIds.size && !this.isFirstRender()) {
                 if (!this.dirtDescendantElementIds_.size && !this.runReuse_) {
                     // mark ComposedElement dirty when first elmtIds are added
                     // do not need to do this every time
@@ -5372,7 +5392,7 @@ class ViewPU extends NativeViewPartialUpdate {
                 const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate();
                 if (changedElmtIds) {
                     const varName = stateLinkPropVar.info();
-                    if (changedElmtIds.size && this.isInitialRenderDone) {
+                    if (changedElmtIds.size && !this.isFirstRender()) {
                         for (const elmtId of changedElmtIds) {
                             this.dirtDescendantElementIds_.add(elmtId);
                         }

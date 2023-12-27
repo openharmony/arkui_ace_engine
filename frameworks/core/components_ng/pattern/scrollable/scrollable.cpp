@@ -40,22 +40,18 @@ constexpr uint32_t DRAG_INTERVAL_TIME = 900;
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
 constexpr double VELOCITY_SCALE = 1.0;
-constexpr double MAX_VELOCITY = 800000.0;
-constexpr double MIN_VELOCITY = -800000.0;
 constexpr double ADJUSTABLE_VELOCITY = 3000.0;
 #else
 constexpr double DISTANCE_EPSILON = 1.0;
 constexpr double FRICTION = 0.9;
 constexpr double VELOCITY_SCALE = 0.8;
-constexpr double MAX_VELOCITY = 5000.0;
-constexpr double MIN_VELOCITY = -5000.0;
 constexpr double ADJUSTABLE_VELOCITY = 0.0;
 #endif
 constexpr float FRICTION_SCALE = -4.2f;
 constexpr uint32_t CUSTOM_SPRING_ANIMATION_DURION = 1000;
 constexpr uint32_t MILLOS_PER_SECONDS = 1000;
 constexpr float DEFAULT_THRESHOLD = 0.75f;
-constexpr float DEFAULT_SPRING_RESPONSE = 0.42f;
+constexpr float DEFAULT_SPRING_RESPONSE = 0.416f;
 constexpr float DEFAULT_SPRING_DAMP = 0.99f;
 constexpr uint32_t MIN_DIFF_TIME = 1;
 #ifdef OHOS_PLATFORM
@@ -401,7 +397,8 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     touchUp_ = false;
     scrollPause_ = false;
     lastVelocity_ = info.GetMainVelocity();
-    double correctVelocity = std::clamp(info.GetMainVelocity(), MIN_VELOCITY + slipFactor_, MAX_VELOCITY - slipFactor_);
+    double correctVelocity =
+        std::clamp(info.GetMainVelocity(), -maxFlingVelocity_ + slipFactor_, maxFlingVelocity_ - slipFactor_);
     SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     correctVelocity = correctVelocity * sVelocityScale_ * GetGain(GetDragOffset());
     currentVelocity_ = correctVelocity;
@@ -479,7 +476,7 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
     currentVelocity_ = 0.0;
 
     frictionOffsetProperty_->Set(mainPosition);
-    float response = fabs(2 * M_PI / FRICTION_SCALE * friction);
+    float response = fabs(2 * M_PI / (FRICTION_SCALE * friction));
     auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(response, 1.0f, 0.0f);
     AnimationOption option;
     option.SetCurve(curve);
@@ -767,11 +764,18 @@ void Scrollable::StartSpringMotion(
         return;
     }
     currentPos_ = mainPosition;
+    bool validPos = false;
     if (mainPosition > initExtent.Trailing() || NearEqual(mainPosition, initExtent.Trailing(), 0.01f)) {
         finalPosition_ = extent.Trailing();
+        validPos = true;
     } else if (mainPosition <  initExtent.Leading() || NearEqual(mainPosition, initExtent.Leading(), 0.01f)) {
         finalPosition_ = extent.Leading();
+        validPos = true;
     }
+    if (!validPos) {
+        return;
+    }
+
     if (scrollMotionFRCSceneCallback_) {
         scrollMotionFRCSceneCallback_(GetCurrentVelocity(), NG::SceneStatus::START);
     }

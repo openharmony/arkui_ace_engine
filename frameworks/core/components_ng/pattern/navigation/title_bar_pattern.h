@@ -238,6 +238,8 @@ private:
     float CalculateHandledOffsetMaxTitle(float offset, float lastCordScrollOffset);
     float CalculateHandledOffsetBetweenMinAndMaxTitle(float offset, float lastCordScrollOffset);
 
+    void SetBackgroundAndBlur();
+
     RefPtr<PanEvent> panEvent_;
     RefPtr<SpringMotion> springMotion_;
     RefPtr<Animator> springController_;

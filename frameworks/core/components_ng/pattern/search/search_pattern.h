@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/search/search_paint_method.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -47,6 +48,14 @@ public:
     bool NeedSoftKeyboard() const override
     {
         return true;
+    }
+
+    bool GetNeedToRequestKeyboardOnFocus()
+    {
+        auto pattern = textField_->GetPattern();
+        CHECK_NULL_RETURN(pattern, false);
+        auto curPattern = DynamicCast<TextFieldPattern>(pattern);
+        return curPattern->GetNeedToRequestKeyboardOnFocus();
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -142,9 +151,11 @@ private:
     void OnAfterModifyDone() override;
     void InitButtonAndImageClickEvent();
     void InitCancelButtonClickEvent();
+    void InitTextFieldClickEvent();
     void InitSearchController();
     void OnClickButtonAndImage();
     void OnClickCancelButton();
+    void OnClickTextField();
     void HandleCaretPosition(int32_t caretPosition);
     int32_t HandleGetCaretIndex();
     NG::OffsetF HandleGetCaretPosition();
@@ -178,7 +189,7 @@ private:
     void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
         int32_t duration, const RefPtr<Curve>& curve);
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
-    void HandleFocusEvent();
+    void HandleFocusEvent(bool backwardFocusMovement);
     void HandleBlurEvent();
     void InitClickEvent();
     void HandleClickEvent(GestureEvent& info);
@@ -195,6 +206,7 @@ private:
     RefPtr<ClickEvent> imageClickListener_;
     RefPtr<ClickEvent> buttonClickListener_;
     RefPtr<ClickEvent> cancelButtonClickListener_;
+    RefPtr<ClickEvent> textFieldClickListener_;
     RefPtr<TextFieldController> searchController_;
     FocusChoice focusChoice_ = FocusChoice::SEARCH;
 

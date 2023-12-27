@@ -34,12 +34,18 @@ class ModelPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(ModelPaintProperty, PaintProperty)
 
 public:
-    ModelPaintProperty() {
+    ModelPaintProperty()
+    {
         // Initialize model lights to empty vector;
         propModelLights_ = std::vector<RefPtr<ModelLight>> {};
         propModelAnimations_ = std::vector<std::shared_ptr<Render3D::GLTFAnimation>> {};
         propModelGeometries_ = std::vector<std::shared_ptr<Render3D::Geometry>> {};
         propModelImageTexturePaths_ = std::vector<std::string> {};
+        propShaderPath_ = std::string {};
+        propModelShaderInputBuffer_ = nullptr;
+        propModelCustomRender_ = nullptr;
+        propModelSource_ = std::string {};
+        propModelBackground_ = std::string{};
     };
 
     ~ModelPaintProperty() override = default;

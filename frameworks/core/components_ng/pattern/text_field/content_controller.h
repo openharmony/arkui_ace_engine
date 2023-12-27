@@ -32,8 +32,8 @@ class ContentController : public virtual AceType {
 public:
     explicit ContentController(const WeakPtr<Pattern>& pattern) : pattern_(pattern) {}
     ~ContentController() override = default;
-    void InsertValue(int32_t index, const std::string& value);
-    void ReplaceSelectedValue(int32_t startIndex, int32_t endIndex, const std::string& value);
+    bool InsertValue(int32_t index, const std::string& value);
+    bool ReplaceSelectedValue(int32_t startIndex, int32_t endIndex, const std::string& value);
     std::string GetSelectedValue(int32_t startIndex, int32_t endIndex);
     std::string GetValueBeforeIndex(int32_t index);
     std::string GetValueAfterIndex(int32_t index);

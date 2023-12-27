@@ -30,6 +30,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/system_properties.h"
 #include "core/common/ace_application_info.h"
+#include "core/components/common/layout/screen_system_manager.h"
 #include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/frame_scene_status.h"
@@ -56,6 +57,8 @@ const RefPtr<FrameNode> FRAME_NODE = FrameNode::CreateFrameNode("one", 1, AceTyp
 const RefPtr<FrameNode> FRAME_NODE2 = FrameNode::CreateFrameNode("two", 2, AceType::MakeRefPtr<Pattern>());
 const RefPtr<FrameNode> FRAME_NODE3 =
     FrameNode::CreateFrameNode("three", 3, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+const RefPtr<FrameNode> FRAME_NODE_WEB_ETS_TAG =
+    FrameNode::CreateFrameNode(V2::WEB_ETS_TAG, 5, AceType::MakeRefPtr<LinearLayoutPattern>(false));
 std::string srcimages = "";
 
 const std::string NAME = "propertyName";
@@ -65,6 +68,15 @@ const std::function<void(float)> onCallbackEvent = [](float) {};
 const float CONTAINER_WIDTH = 600.0f;
 const float CONTAINER_HEIGHT = 1000.0f;
 const SizeF CONTAINER_SIZE(CONTAINER_WIDTH, CONTAINER_HEIGHT);
+
+const float CONTAINER_WIDTH_HUGE = 1260.0f;
+const SizeF CONTAINER_SIZE_HUGE(CONTAINER_WIDTH_HUGE, CONTAINER_HEIGHT);
+
+const float CONTAINER_WIDTH_SMALL = 10.0f;
+const SizeF CONTAINER_SIZE_SMALL(CONTAINER_WIDTH_SMALL, CONTAINER_HEIGHT);
+
+const float CONTAINER_WIDTH_ZERO = 0.0f;
+const SizeF CONTAINER_SIZE_ZERO(CONTAINER_WIDTH_ZERO, CONTAINER_WIDTH_ZERO);
 
 const OffsetF OFFSETF { 1.0, 1.0 };
 const float DEFAULT_X = 10;
@@ -591,7 +603,6 @@ HWTEST_F(FrameNodeTestNg, FrameNodeToJsonValue007, TestSize.Level1)
     FRAME_NODE->eventHub_->focusHub_ = nullptr;
     auto jsonValue2 = JsonUtil::Create(true);
     FRAME_NODE->ToJsonValue(jsonValue2);
-    FRAME_NODE->eventHub_ = nullptr;
     FRAME_NODE->FromJson(jsonValue2);
     EXPECT_TRUE(jsonValue2);
 }
@@ -2249,12 +2260,108 @@ HWTEST_F(FrameNodeTestNg, CollectTouchInfos003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FrameNodeTestNg_GetPreviewScaleVal001
+ * @tc.desc: Test frame node method GetPreviewScaleVal
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetPreviewScaleVal001, TestSize.Level1)
+{
+    auto frameNode = FRAME_NODE;
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    frameNode->isActive_ = true;
+    frameNode->eventHub_->SetEnabled(true);
+    SystemProperties::debugEnabled_ = true;
+
+    /**
+     * @tc.steps: step2. call GetPreviewScaleVal
+     * @tc.expected: expect GetPreviewScaleVal return scale value.
+     */
+    auto geometryNode = frameNode->GetGeometryNode();
+    geometryNode->SetFrameSize(CONTAINER_SIZE_ZERO);
+    EXPECT_FLOAT_EQ(frameNode->GetPreviewScaleVal(), 1.0f);
+
+    double screenWidth = 1216.0;
+    ScreenSystemManager::GetInstance().SetWindowInfo(screenWidth, 1.0, 1.0);
+    geometryNode->SetFrameSize(CONTAINER_SIZE_SMALL);
+    EXPECT_FLOAT_EQ(frameNode->GetPreviewScaleVal(), 1.0f);
+
+    /**
+     * @tc.steps: step3. set a large size and call GetPreviewScaleVal.
+     * @tc.expected: expect GetPreviewScaleVal return scale value.
+     */
+    geometryNode->SetFrameSize(CONTAINER_SIZE_HUGE);
+    EXPECT_LT(frameNode->GetPreviewScaleVal(), 1.0f);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_GetPreviewScaleVal002
+ * @tc.desc: Test frame node method GetPreviewScaleVal
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetPreviewScaleVal002, TestSize.Level1)
+{
+    auto frameNode = FRAME_NODE;
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    frameNode->isActive_ = true;
+    frameNode->eventHub_->SetEnabled(true);
+    SystemProperties::debugEnabled_ = true;
+
+    /**
+     * @tc.steps: step2. set frame size to huge and drag preview options to disable scale then call GetPreviewScaleVal
+     * @tc.expected: expect GetPreviewScaleVal return scale value.
+     */
+    auto geometryNode = frameNode->GetGeometryNode();
+    geometryNode->SetFrameSize(CONTAINER_SIZE_HUGE);
+    NG::DragPreviewOption option { static_cast<NG::DragPreviewMode>(NG::DragPreviewMode::DISABLE_SCALE) };
+    frameNode->SetDragPreviewOptions(option);
+    EXPECT_FLOAT_EQ(frameNode->GetPreviewScaleVal(), 1.0f);
+
+    /**
+     * @tc.steps: step3. set set drag preview options to auto and call GetPreviewScaleVal.
+     * @tc.expected: expect GetPreviewScaleVal return scale value.
+     */
+    option = { static_cast<NG::DragPreviewMode>(NG::DragPreviewMode::AUTO) };
+    frameNode->SetDragPreviewOptions(option);
+    EXPECT_LT(frameNode->GetPreviewScaleVal(), 1.0f);
+}
+
+/**
+ * @tc.name: FrameNodeTestNg_GetPreviewScaleVal003
+ * @tc.desc: Test frame node method GetPreviewScaleVal
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, GetPreviewScaleVal003, TestSize.Level1)
+{
+    auto frameNode = FRAME_NODE_WEB_ETS_TAG;
+    /**
+     * @tc.steps: step1. initialize parameters.
+     */
+    frameNode->isActive_ = true;
+    frameNode->eventHub_->SetEnabled(true);
+    SystemProperties::debugEnabled_ = true;
+
+    /**
+     * @tc.steps: step2. call GetPreviewScaleVal
+     * @tc.expected: expect GetPreviewScaleVal return scale value.
+     */
+    auto geometryNode = frameNode->GetGeometryNode();
+    geometryNode->SetFrameSize(CONTAINER_SIZE_HUGE);
+
+    EXPECT_FLOAT_EQ(frameNode->GetPreviewScaleVal(), 1.0f);
+}
+
+/**
  * @tc.name: FrameNodeTestNg_IsPreviewNeedScale001
  * @tc.desc: Test frame node method IsPreviewNeedScale
  * @tc.type: FUNC
  */
 HWTEST_F(FrameNodeTestNg, IsPreviewNeedScale001, TestSize.Level1)
 {
+    auto frameNode = FRAME_NODE;
     /**
      * @tc.steps: step1. initialize parameters.
      */
@@ -2266,23 +2373,24 @@ HWTEST_F(FrameNodeTestNg, IsPreviewNeedScale001, TestSize.Level1)
      * @tc.steps: step2. call IsPreviewNeedScale
      * @tc.expected: expect IsPreviewNeedScale return false.
      */
+    auto geometryNode = frameNode->GetGeometryNode();
+    geometryNode->SetFrameSize(CONTAINER_SIZE_SMALL);
     EXPECT_FALSE(FRAME_NODE->IsPreviewNeedScale());
 
     /**
      * @tc.steps: step2. set a large size and call IsPreviewNeedScale.
      * @tc.expected: expect IsPreviewNeedScale return true.
      */
-    auto geometryNode = FRAME_NODE->GetGeometryNode();
-    geometryNode->SetFrameSize(CONTAINER_SIZE);
+    geometryNode->SetFrameSize(CONTAINER_SIZE_HUGE);
     EXPECT_TRUE(FRAME_NODE->IsPreviewNeedScale());
 }
 
 /**
- * @tc.name: FrameNodeTestNg_GetGlobalOffset001
- * @tc.desc: Test frame node method GetGlobalOffset
+ * @tc.name: FrameNodeTestNg_GetOffsetInScreen001
+ * @tc.desc: Test frame node method GetOffsetInScreen
  * @tc.type: FUNC
  */
-HWTEST_F(FrameNodeTestNg, GetGlobalOffset001, TestSize.Level1)
+HWTEST_F(FrameNodeTestNg, GetOffsetInScreen001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. initialize parameters.
@@ -2296,10 +2404,10 @@ HWTEST_F(FrameNodeTestNg, GetGlobalOffset001, TestSize.Level1)
     FRAME_NODE->renderContext_ = mockRenderContext;
 
     /**
-     * @tc.steps: step2. call GetGlobalOffset.
-     * @tc.expected: expect GetGlobalOffset return the result which is not (0, 0).
+     * @tc.steps: step2. call GetOffsetInScreen.
+     * @tc.expected: expect GetOffsetInScreen return the result which is not (0, 0).
      */
-    EXPECT_NE(FRAME_NODE->GetGlobalOffset(), OffsetF(0.0f, 0.0f));
+    EXPECT_EQ(FRAME_NODE->GetOffsetInScreen(), OffsetF(0.0f, 0.0f));
 }
 
 /**
@@ -2344,5 +2452,103 @@ HWTEST_F(FrameNodeTestNg, GetPixelMap001, TestSize.Level1)
     gestureHub->SetPixelMap(nullptr);
     // mockRenderContext->pixelMap_ = pixelMap;
     EXPECT_EQ(FRAME_NODE->GetPixelMap(), nullptr);
+}
+
+/**
+ * @tc.name: FindChildByNameTest001
+ * @tc.desc: Test FindChildByName with one tree
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FindChildByNameTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and set the parent and children.
+     */
+    const std::string parentNodeName = "nodeParent";
+    const std::string thisNodeName = "nodeThis";
+    const std::string childrenNodeName = "nodeChildren";
+    const std::string testChildNodeName = "test";
+    auto nodeParent = FrameNode::CreateFrameNode(parentNodeName, 10, AceType::MakeRefPtr<Pattern>(), true);
+    auto nodeThis = FrameNode::CreateFrameNode(thisNodeName, 20, AceType::MakeRefPtr<Pattern>());
+    auto nodeChildren = FrameNode::CreateFrameNode(childrenNodeName, 30, AceType::MakeRefPtr<Pattern>());
+
+    /**
+     * @tc.steps: step1. Set the node's relation.
+     */
+    nodeParent->AddChild(nodeThis);
+    nodeParent->AddChild(nodeChildren);
+
+    /**
+     * @tc.steps: step3. Init inspectorId.
+     */
+    nodeParent->UpdateInspectorId(parentNodeName);
+    nodeChildren->UpdateInspectorId(childrenNodeName);
+    nodeThis->UpdateInspectorId(thisNodeName);
+
+    /**
+     * @tc.steps: step4. Traversal the frameNodeTree.
+     */
+    auto finalResult = FrameNode::FindChildByName(nodeParent, childrenNodeName);
+    EXPECT_EQ(finalResult, nodeChildren);
+
+    auto noChildResult = FrameNode::FindChildByName(nodeParent, testChildNodeName);
+    EXPECT_EQ(noChildResult, nullptr);
+
+    nodeParent->Clean();
+    auto noHaveResult = FrameNode::FindChildByName(nodeParent, childrenNodeName);
+    EXPECT_EQ(noHaveResult, nullptr);
+}
+
+/**
+ * @tc.name: FindChildByNameTest002
+ * @tc.desc: Test FindChildByName with two tree
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FindChildByNameTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and set the parent and children.
+     */
+    const std::string parentNodeName = "nodeParent";
+    const std::string nodeOneName = "nodeOne";
+    const std::string nodeOneChildName = "nodeOneChildren";
+    const std::string nodeTwoName = "nodeTwo";
+    const std::string nodeTwoChildName = "nodeTwoChildren";
+    const std::string testChildNodeName = "test";
+    auto nodeParent = FrameNode::CreateFrameNode(parentNodeName, 10, AceType::MakeRefPtr<Pattern>(), true);
+    auto nodeOne = FrameNode::CreateFrameNode(nodeOneName, 20, AceType::MakeRefPtr<Pattern>());
+    auto nodeOneChildren = FrameNode::CreateFrameNode(nodeOneChildName, 30, AceType::MakeRefPtr<Pattern>());
+    auto nodeTwo = FrameNode::CreateFrameNode(nodeTwoName, 40, AceType::MakeRefPtr<Pattern>());
+    auto nodeTwoChildren = FrameNode::CreateFrameNode(nodeTwoChildName, 50, AceType::MakeRefPtr<Pattern>());
+
+    /**
+     * @tc.steps: step1. Set the node's relation.
+     */
+    nodeParent->AddChild(nodeOne);
+    nodeParent->AddChild(nodeTwo);
+    nodeOne->AddChild(nodeOneChildren);
+    nodeTwo->AddChild(nodeTwoChildren);
+
+    /**
+     * @tc.steps: step3. Init inspectorId.
+     */
+    nodeParent->UpdateInspectorId(parentNodeName);
+    nodeOne->UpdateInspectorId(nodeOneName);
+    nodeOneChildren->UpdateInspectorId(nodeOneChildName);
+    nodeTwo->UpdateInspectorId(nodeTwoName);
+    nodeTwoChildren->UpdateInspectorId(nodeTwoChildName);
+
+    /**
+     * @tc.steps: step4. Traversal the frameNodeTree.
+     */
+    auto finalResult = FrameNode::FindChildByName(nodeParent, nodeOneChildName);
+    EXPECT_EQ(finalResult, nodeOneChildren);
+
+    auto noChildResult = FrameNode::FindChildByName(nodeParent, testChildNodeName);
+    EXPECT_EQ(noChildResult, nullptr);
+
+    nodeParent->Clean();
+    auto noHaveResult = FrameNode::FindChildByName(nodeParent, nodeTwoChildName);
+    EXPECT_EQ(noHaveResult, nullptr);
 }
 } // namespace OHOS::Ace::NG

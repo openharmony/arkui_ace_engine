@@ -21,6 +21,7 @@
 #include "base/utils/utils.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/common/interaction/interaction_interface.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/grid/grid_event_hub.h"
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
@@ -118,7 +119,7 @@ void DragDropManager::CreateDragWindow(const GestureEvent& info, uint32_t width,
 #if !defined(PREVIEW)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto rect = pipeline->GetCurrentWindowRect();
+    auto rect = pipeline->GetDisplayWindowRectInfo();
     dragWindow_ = DragWindow::CreateDragWindow("APP_DRAG_WINDOW",
         static_cast<int32_t>(info.GetGlobalPoint().GetX()) + rect.Left(),
         static_cast<int32_t>(info.GetGlobalPoint().GetY()) + rect.Top(), width, height);
@@ -1204,7 +1205,7 @@ void DragDropManager::UpdateVelocityTrackerPoint(const Point& point, bool isEnd)
 }
 
 #ifdef ENABLE_DRAG_FRAMEWORK
-bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager> overlayManager,
+bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager>& overlayManager,
     DragPreviewInfo& dragPreviewInfo)
 {
     if (!overlayManager->GetHasPixelMap()) {
@@ -1214,7 +1215,7 @@ bool DragDropManager::GetDragPreviewInfo(const RefPtr<OverlayManager> overlayMan
     if (!imageNode) {
         return false;
     }
-    double maxWidth = FrameNode::GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
+    double maxWidth = GridSystemManager::GetInstance().GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
     auto width = imageNode->GetGeometryNode()->GetFrameRect().Width();
     dragPreviewInfo.scale = static_cast<float>(imageNode->GetPreviewScaleVal());
     dragPreviewInfo.height = imageNode->GetGeometryNode()->GetFrameRect().Height();
@@ -1308,7 +1309,7 @@ void DragDropManager::DoDragMoveAnimate(const PointerEvent& pointerEvent)
         option.GetOnFinishEvent());
 }
 
-void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager> overlayManager, const GestureEvent& event)
+void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlayManager, const GestureEvent& event)
 {
     CHECK_NULL_VOID(overlayManager);
     if (!(GetDragPreviewInfo(overlayManager, info_)) || !IsNeedScaleDragPreview()) {
@@ -1336,6 +1337,7 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager> overlayM
 void DragDropManager::FireOnEditableTextComponent(const RefPtr<FrameNode>& frameNode,
     DragEventType type)
 {
+    CHECK_NULL_VOID(frameNode);
     auto frameTag = frameNode->GetTag();
     if (!IsEditableTextComponent(frameTag)) {
         if (SystemProperties::GetDebugEnabled()) {

@@ -54,7 +54,7 @@ void NavDestinationModelNG::Create()
         }
     }
     // content node
-    if (!navDestinationNode->GetTitleBarNode()) {
+    if (!navDestinationNode->GetContentNode()) {
         int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
         ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId);
         auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId,
@@ -137,15 +137,6 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
     auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(backButtonImageLayoutProperty);
 
-    auto navDestinationEventHub = navDestinationNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(navDestinationEventHub);
-    auto paintProperty = backButtonImageNode->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    if (!navDestinationEventHub->IsEnabled()) {
-        paintProperty->UpdateSvgFillColor(theme->GetBackButtonIconColor().BlendOpacity(theme->GetAlphaDisabled()));
-    } else {
-        paintProperty->UpdateSvgFillColor(theme->GetBackButtonIconColor());
-    }
     backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     backButtonImageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     backButtonNode->AddChild(backButtonImageNode);
@@ -266,6 +257,24 @@ void NavDestinationModelNG::SetTitle(const std::string& title, bool hasSubTitle)
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     navDestinationNode->SetTitle(titleNode);
     navDestinationNode->UpdatePrevTitleIsCustom(false);
+}
+
+void NavDestinationModelNG::SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
+    const std::string& bundleName, const std::string& moduleName)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    ImageSourceInfo imageSourceInfo(src, bundleName, moduleName);
+    titleBarLayoutProperty->UpdateImageSource(imageSourceInfo);
+    titleBarLayoutProperty->UpdateNoPixMap(noPixMap);
+    titleBarLayoutProperty->UpdatePixelMap(pixMap);
+    titleBarNode->MarkModifyDone();
 }
 
 void NavDestinationModelNG::SetSubtitle(const std::string& subtitle)

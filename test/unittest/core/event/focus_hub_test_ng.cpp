@@ -356,23 +356,38 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg008, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters.
+     * @tc.expected: The default value of focusable_ is false.
      */
     auto eventHub = AceType::MakeRefPtr<EventHub>();
     auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+    EXPECT_FALSE(focusHub->focusable_);
 
     /**
-     * @tc.steps2: call the function SetFocusable with true
+     * @tc.steps2: Set focusable_ to true implicitly.
+     * @tc.expected: The value of focusable_ is true.
+     */
+    focusHub->SetFocusable(true, false);
+    EXPECT_TRUE(focusHub->focusable_);
+
+    /**
+     * @tc.steps3:Set focusable_ to false explicitly.
+     * @tc.expected: The value of focusable_ is false.
+     */
+    focusHub->SetFocusable(false);
+
+    /**
+     * @tc.steps4:Set focusable_ to true implicitly.
+     * @tc.expected: The value of focusable_ is false.
+     */
+    focusHub->SetFocusable(true, false);
+    EXPECT_FALSE(focusHub->focusable_);
+
+    /**
+     * @tc.steps5:Set focusable_ to true explicitly.
      * @tc.expected: The value of focusable_ is true.
      */
     focusHub->SetFocusable(true);
     EXPECT_TRUE(focusHub->focusable_);
-
-    /**
-     * @tc.steps3: call the function SetFocusable with false
-     * @tc.expected: The value of focusable_ is false.
-     */
-    focusHub->SetFocusable(false);
-    EXPECT_FALSE(focusHub->focusable_);
 }
 
 /**
@@ -3553,6 +3568,35 @@ HWTEST_F(FocusHubTestNg, FocusHubTestNg0099, TestSize.Level1)
     ASSERT_FALSE(focusHub->HandleFocusOnMainView());
     focusHub->GetMainViewRootScope()->focusDepend_ = FocusDependence::SELF;
     ASSERT_TRUE(focusHub->HandleFocusOnMainView());
+}
+
+/**
+ * @tc.name: FocusHubTestNg0100
+ * @tc.desc: Test the function IsImplicitFocusableScope.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, FocusHubTestNg0100, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->SetEnabled(true);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(eventHub);
+
+    /**
+     * @tc.steps2: Set focusHub to scope type.
+     * @tc.expected: The default value of focusable_ is false.
+     */
+    focusHub->focusType_ = FocusType::SCOPE;
+    EXPECT_FALSE(focusHub->IsImplicitFocusableScope());
+
+    /**
+     * @tc.steps3: Set focusable_ to true implicitly.
+     * @tc.expected: The value of focusable_ is true.
+     */
+    focusHub->SetFocusable(true, false);
+    EXPECT_TRUE(focusHub->IsImplicitFocusableScope());
 }
 
 /**

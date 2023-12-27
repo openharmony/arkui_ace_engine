@@ -21,9 +21,9 @@ class TextStyleModifier extends ModifierWithKey<PickerTextStyle> {
   static identity: Symbol = Symbol('textStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().calendarPicker.resetTextStyle(node);
+      getUINativeModule().calendarPicker.resetTextStyle(node);
     } else {
-      GetUINativeModule().calendarPicker.setTextStyle(node,
+      getUINativeModule().calendarPicker.setTextStyle(node,
         this.value?.color ?? undefined,
         this.value?.font?.size ?? undefined,
         this.value?.font?.weight ?? undefined);
@@ -47,9 +47,9 @@ class EdgeAlignModifier extends ModifierWithKey<ArkEdgeAlign> {
   static identity: Symbol = Symbol('edgeAlign');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().calendarPicker.resetEdgeAlign(node);
+      getUINativeModule().calendarPicker.resetEdgeAlign(node);
     } else {
-      GetUINativeModule().calendarPicker.setEdgeAlign(node,
+      getUINativeModule().calendarPicker.setEdgeAlign(node,
         this.value?.alignType ?? undefined,
         this.value?.offset?.dx ?? undefined,
         this.value?.offset?.dy ?? undefined);
@@ -91,10 +91,10 @@ class ArkCalendarPickerComponent extends ArkComponent implements CalendarPickerA
 // @ts-ignore
 globalThis.CalendarPicker.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkCalendarPickerComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

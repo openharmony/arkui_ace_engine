@@ -86,6 +86,8 @@ private:
     DialogAlignment alignment_ = DialogAlignment::DEFAULT;
     TouchingBoundaryType touchingBoundaryFlag_ = TouchingBoundaryType::NotTouchBoundary;
 
+    bool expandDisplay_ = false;
+
     ACE_DISALLOW_COPY_AND_MOVE(DialogLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

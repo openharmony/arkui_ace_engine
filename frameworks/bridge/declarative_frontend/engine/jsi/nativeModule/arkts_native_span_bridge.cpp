@@ -129,7 +129,7 @@ ArkUINativeModuleValue SpanBridge::SetFontStyle(ArkUIRuntimeCallInfo *runtimeCal
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
     if (secondArg->IsNumber()) {
-        int32_t value = secondArg->Uint32Value(vm);
+        int32_t value = secondArg->Int32Value(vm);
         if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
             GetArkUIInternalNodeAPI()->GetSpanModifier().SetSpanFontStyle(nativeNode, value);
         } else {

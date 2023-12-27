@@ -139,7 +139,7 @@ void TaskExecutorImpl::InitPlatformThread(bool useCurrentEventRunner, bool isSta
 void TaskExecutorImpl::InitJsThread(bool newThread)
 {
     if (newThread) {
-        platformRunner_ = TaskRunnerAdapterFactory::Create(false, GenJsThreadName());
+        jsRunner_ = TaskRunnerAdapterFactory::Create(false, GenJsThreadName());
     } else {
         jsRunner_ = uiRunner_;
     }

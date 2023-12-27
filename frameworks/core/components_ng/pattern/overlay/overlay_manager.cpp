@@ -559,6 +559,10 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
             [rootWeak, menuWK, id, weak]() {
                 auto menu = menuWK.Upgrade();
                 CHECK_NULL_VOID(menu);
+                auto menuNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
+                CHECK_NULL_VOID(menuNode);
+                auto menuPattern = menuNode->GetPattern<MenuPattern>();
+                CHECK_NULL_VOID(menuPattern);
                 auto root = rootWeak.Upgrade();
                 auto overlayManager = weak.Upgrade();
                 CHECK_NULL_VOID(overlayManager);
@@ -575,7 +579,8 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
                 auto theme = pipeline->GetTheme<SelectTheme>();
                 CHECK_NULL_VOID(theme);
                 auto expandDisplay = theme->GetExpandDisplay();
-                if ((menuWrapperPattern && menuWrapperPattern->IsContextMenu()) || expandDisplay) {
+                if (((menuWrapperPattern && menuWrapperPattern->IsContextMenu()) || expandDisplay) &&
+                    (menuPattern->GetTargetTag() != V2::SELECT_ETS_TAG)) {
                     SubwindowManager::GetInstance()->ClearMenuNG(id);
                     overlayManager->ResetContextMenuDragHideFinished();
                     return;
@@ -864,6 +869,7 @@ void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo)
     auto paintProperty = popupNode->GetPaintProperty<BubbleRenderProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto isTypeWithOption = paintProperty->GetPrimaryButtonShow().value_or(false);
+    auto isUseCustom = paintProperty->GetUseCustom().value_or(false);
 
     auto rootNode = rootNodeWeak_.Upgrade();
     auto container = Container::Current();
@@ -888,7 +894,8 @@ void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo)
 
     auto popupPattern = popupNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(popupPattern);
-    if (isTypeWithOption && !isShowInSubWindow) {
+    if ((isTypeWithOption && !isShowInSubWindow) ||
+        (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) && isUseCustom)) {
         BlurLowerNode(popupNode);
         auto onFinish = [popupNodeWk = WeakPtr<FrameNode>(popupNode), weak = WeakClaim(this)]() {
             auto overlayManager = weak.Upgrade();
@@ -919,6 +926,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     auto paintProperty = popupNode->GetPaintProperty<BubbleRenderProperty>();
     CHECK_NULL_VOID(paintProperty);
     auto isTypeWithOption = paintProperty->GetPrimaryButtonShow().value_or(false);
+    auto isUseCustom = paintProperty->GetUseCustom().value_or(false);
 
     auto rootNode = rootNodeWeak_.Upgrade();
     auto container = Container::Current();
@@ -939,13 +947,14 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
         return;
     }
     popupPattern->SetTransitionStatus(TransitionStatus::EXITING);
-    if (isTypeWithOption && !isShowInSubWindow) {
+    if ((isTypeWithOption && !isShowInSubWindow) ||
+        (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) && isUseCustom)) {
         ResetLowerNodeFocusable(popupNode);
     }
     // detach popupNode after exiting animation
     popupMap_[targetId].isCurrentOnShow = false;
     popupPattern->StartExitingAnimation(
-        [isShowInSubWindow, isTypeWithOption, popupNodeWk = WeakPtr<FrameNode>(popupNode),
+        [isShowInSubWindow, isTypeWithOption, isUseCustom, popupNodeWk = WeakPtr<FrameNode>(popupNode),
             rootNodeWk = WeakPtr<UINode>(rootNode), weak = WeakClaim(this)]() {
             auto rootNode = rootNodeWk.Upgrade();
             auto popupNode = popupNodeWk.Upgrade();
@@ -958,7 +967,8 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
             popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
             rootNode->RemoveChild(popupNode);
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-            if (isTypeWithOption && !isShowInSubWindow) {
+            if ((isTypeWithOption && !isShowInSubWindow) ||
+                (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) && isUseCustom)) {
                 overlayManager->BlurOverlayNode(popupNode);
             }
             if (isShowInSubWindow) {
@@ -3057,7 +3067,12 @@ void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bo
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto pageNode = pipeline->GetStageManager()->GetLastPage();
-    CHECK_NULL_VOID(pageNode);
+    if (pageNode == nullptr) {
+        auto parent = customKeyboard->GetParent();
+        CHECK_NULL_VOID(parent);
+        parent->RemoveChild(customKeyboard);
+        return;
+    }
     auto pageHeight = pageNode->GetGeometryNode()->GetFrameSize().Height();
     if (isTransitionIn) {
         context->OnTransformTranslateUpdate({ 0.0f, pageHeight, 0.0f });
@@ -3082,9 +3097,7 @@ void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bo
                 TaskExecutor::TaskType::UI);
         });
         context->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
-        AnimationUtils::Animate(
-            option,
-            [context, pageHeight]() {
+        AnimationUtils::Animate(option, [context, pageHeight]() {
                 if (context) {
                     context->OnTransformTranslateUpdate({ 0.0f, pageHeight, 0.0f });
                 }
@@ -3499,7 +3512,7 @@ SizeF OverlayManager::CaculateMenuSize(
     auto fontweight = StringUtils::FontWeightToString(textStyle.GetFontWeight());
     measureContext.fontWeight = fontweight;
     auto fontFamilies = textStyle.GetFontFamilies();
-    measureContext.fontWeight = V2::ConvertFontFamily(fontFamilies);
+    measureContext.fontFamily = V2::ConvertFontFamily(fontFamilies);
     auto measureSize = MeasureUtil::MeasureTextSize(measureContext);
     auto selectTheme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(selectTheme, SizeF());

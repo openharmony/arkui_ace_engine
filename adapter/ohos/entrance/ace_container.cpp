@@ -218,6 +218,14 @@ void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper)
     }
 }
 
+bool AceContainer::IsKeyboard()
+{
+    if (uiWindow_ == nullptr) {
+        return false;
+    }
+    return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
+}
+
 void AceContainer::Initialize()
 {
     ContainerScope scope(instanceId_);
@@ -974,6 +982,18 @@ bool AceContainer::RunPage(
     return true;
 }
 
+bool AceContainer::RunDynamicPage(
+    int32_t instanceId, const std::string& content, const std::string& params, const std::string& entryPoint)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, false);
+    ContainerScope scope(instanceId);
+    auto front = container->GetFrontend();
+    CHECK_NULL_RETURN(front, false);
+    front->RunDynamicPage(content, params, entryPoint);
+    return true;
+}
+
 bool AceContainer::PushPage(int32_t instanceId, const std::string& content, const std::string& params)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
@@ -1720,6 +1740,17 @@ NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaTyp
     CHECK_NULL_RETURN(uiWindow_, {});
     Rosen::AvoidArea avoidArea;
     Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(type, avoidArea);
+    if (ret == Rosen::WMError::WM_OK) {
+        return ConvertAvoidArea(avoidArea);
+    }
+    return {};
+}
+
+NG::SafeAreaInsets AceContainer::GetKeyboardSafeArea()
+{
+    CHECK_NULL_RETURN(uiWindow_, {});
+    Rosen::AvoidArea avoidArea;
+    Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(Rosen::AvoidAreaType::TYPE_KEYBOARD, avoidArea);
     if (ret == Rosen::WMError::WM_OK) {
         return ConvertAvoidArea(avoidArea);
     }

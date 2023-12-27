@@ -3371,7 +3371,7 @@ HWTEST_F(TextTestNg, HandleMouseEvent002, TestSize.Level1)
     info.action_ = MouseAction::PRESS;
     pattern->HandleMouseEvent(info);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
-    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 1);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 3);
 }
 
 /**
@@ -4857,5 +4857,127 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator004, TestSize.Level1)
     textModelNG.SetOnCopy(Event);
     eventHub->SetOnCopy(std::move(Event));
     EXPECT_TRUE(eventHub->onCopy_);
+}
+
+/**
+ * @tc.name: BindSelectionMenu001
+ * @tc.desc: Test BindSelectionMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, BindSelectionMenu001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto pattern = textFrameNode->GetPattern<TextPattern>();
+    int32_t callBack1 = 0;
+    int32_t callBack2 = 0;
+    int32_t callBack3 = 0;
+    std::function<void()> buildFunc = [&callBack1]() {
+        callBack1 = 1;
+        return;
+    };
+    std::function<void(int32_t, int32_t)> onAppear = [&callBack2](int32_t a, int32_t b) {
+        callBack2 = 2;
+        return;
+    };
+    std::function<void()> onDisappear = [&callBack3]() {
+        callBack3 = 3;
+        return;
+    };
+
+    auto key = std::make_pair(TextSpanType::MIXED, TextResponseType::RIGHT_CLICK);
+    std::shared_ptr<SelectionMenuParams> params1 = std::make_shared<SelectionMenuParams>(
+        TextSpanType::MIXED, buildFunc, onAppear, onDisappear, TextResponseType::RIGHT_CLICK);
+    pattern->selectionMenuMap_[key] = params1;
+
+    std::function<void()> nullFunc = nullptr;
+
+    pattern->BindSelectionMenu(TextSpanType::MIXED, TextResponseType::RIGHT_CLICK, nullFunc, onAppear, onDisappear);
+    EXPECT_TRUE(pattern->selectionMenuMap_.empty());
+
+    pattern->selectionMenuMap_[key] = params1;
+    pattern->BindSelectionMenu(TextSpanType::MIXED, TextResponseType::RIGHT_CLICK, buildFunc, onAppear, onDisappear);
+    EXPECT_FALSE(pattern->selectionMenuMap_.empty());
+
+    pattern->BindSelectionMenu(TextSpanType::IMAGE, TextResponseType::RIGHT_CLICK, buildFunc, onAppear, onDisappear);
+    EXPECT_FALSE(pattern->selectionMenuMap_.empty());
+}
+
+/**
+ * @tc.name: CloseSelectionMenu001
+ * @tc.desc: Test CloseSelectionMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, CloseSelectionMenu001, TestSize.Level1)
+{
+    auto textFrameNode =
+        FrameNode::GetOrCreateFrameNode(V2::TOAST_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, CREATE_VALUE);
+    auto pattern = textFrameNode->GetPattern<TextPattern>();
+    pattern->SetTextController(AceType::MakeRefPtr<TextController>());
+    pattern->GetTextController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
+    auto textController = pattern->GetTextController();
+    textController->CloseSelectionMenu();
+    int32_t callBack1 = 0;
+    int32_t callBack2 = 0;
+    int32_t callBack3 = 0;
+    std::function<void()> buildFunc = [&callBack1]() {
+        callBack1 = 1;
+        return;
+    };
+
+    std::function<void(int32_t, int32_t)> onAppear = [&callBack2](int32_t a, int32_t b) {
+        callBack2 = 2;
+        return;
+    };
+    std::function<void()> onDisappear = [&callBack3]() {
+        callBack3 = 3;
+        return;
+    };
+    pattern->BindSelectionMenu(TextSpanType::MIXED, TextResponseType::LONG_PRESS, buildFunc, onAppear, onDisappear);
+    GestureEvent info;
+    info.localLocation_ = Offset(1, 1);
+    // copyOption = None
+    pattern->HandleLongPress(info);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
+    pattern->copyOption_ = CopyOptions::Distributed;
+    pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
+    pattern->textForDisplay_ = CREATE_VALUE;
+    pattern->textSelector_.Update(0, 20);
+
+    pattern->ShowSelectOverlay(pattern->textSelector_.firstHandle, pattern->textSelector_.secondHandle);
+
+    auto isClosed = pattern->selectOverlayProxy_->IsClosed();
+    EXPECT_FALSE(isClosed);
+    textController = pattern->GetTextController();
+    textController->CloseSelectionMenu();
+    isClosed = pattern->selectOverlayProxy_->IsClosed();
+    EXPECT_TRUE(isClosed);
+}
+
+/**
+ * @tc.name: OnTextSelectionChange001
+ * @tc.desc: Test onTextSelectionChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnTextSelectionChange001, TestSize.Level1)
+{
+    auto textFrameNode =
+        FrameNode::GetOrCreateFrameNode(V2::TOAST_ETS_TAG, 2, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, CREATE_VALUE);
+    auto pattern = textFrameNode->GetPattern<TextPattern>();
+    pattern->SetTextController(AceType::MakeRefPtr<TextController>());
+    pattern->GetTextController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
+    pattern->textForDisplay_ = CREATE_VALUE;
+    pattern->selectOverlayProxy_ = nullptr;
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    pattern->paragraph_ = paragraph;
+    pattern->HandleOnSelectAll();
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), pattern->textForDisplay_.length());
+
+    pattern->ResetSelection();
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
 }
 } // namespace OHOS::Ace::NG

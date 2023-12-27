@@ -69,6 +69,11 @@ public:
         return showMode == ToastShowMode::DEFAULT;
     }
 
+    bool AvoidKeyboard() const override
+    {
+        return IsDefaultToast();
+    }
+
 private:
     void BeforeCreateLayoutWrapper() override;
     void UpdateToastSize(const RefPtr<FrameNode>& toast);

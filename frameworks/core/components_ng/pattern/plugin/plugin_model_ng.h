@@ -28,6 +28,10 @@ public:
     void SetData(const std::string& data) override;
     void SetWidth(const Dimension& width) override;
     void SetHeight(const Dimension& height) override;
+
+    static void SetPluginSize(FrameNode* frameNode, const Dimension& width, const Dimension& height);
+    static void SetWidth(FrameNode* frameNode, const Dimension& width);
+    static void SetHeight(FrameNode* frameNode, const Dimension& height);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_PLUGIN_PLUGIN_MODEL_NG_H

@@ -306,6 +306,7 @@ private:
     void ScrollSnapTrigger();
     void CheckScrollable();
     OffsetF GetOffsetToScroll(const RefPtr<FrameNode>& childFrame) const;
+    float GetPagingOffset(float delta, float dragDistance, float velocity)  const;
     float GetPagingDelta(float dragDistance, float velocity) const;
 
     float currentOffset_ = 0.0f;

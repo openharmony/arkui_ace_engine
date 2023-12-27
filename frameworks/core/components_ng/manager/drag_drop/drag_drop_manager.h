@@ -248,7 +248,7 @@ public:
 #ifdef ENABLE_DRAG_FRAMEWORK
     bool IsNeedScaleDragPreview();
     void DoDragMoveAnimate(const PointerEvent& pointerEvent);
-    void DoDragStartAnimation(const RefPtr<OverlayManager> overlayManager, const GestureEvent& event);
+    void DoDragStartAnimation(const RefPtr<OverlayManager>& overlayManager, const GestureEvent& event);
 #endif
 
 private:
@@ -258,7 +258,7 @@ private:
     Offset CalcDragMoveOffset(
         const OHOS::Ace::Dimension& preserverHeight, int32_t x, int32_t y, const DragPreviewInfo& info);
     bool GetDragPreviewInfo(
-        const OHOS::Ace::RefPtr<OHOS::Ace::NG::OverlayManager> overlayManager, DragPreviewInfo& dragPreviewInfo);
+        const OHOS::Ace::RefPtr<OHOS::Ace::NG::OverlayManager>& overlayManager, DragPreviewInfo& dragPreviewInfo);
 #endif
     RefPtr<FrameNode> FindDragFrameNodeByPosition(float globalX, float globalY, DragType dragType, bool findDrop);
     void FireOnDragEvent(

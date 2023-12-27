@@ -149,7 +149,8 @@ void PageRouterManager::RunPageByNamedRouter(const std::string& name, const std:
     LoadPage(GenerateNextPageId(), info);
 }
 
-void PageRouterManager::RunCard(const std::string& url, const std::string& params, int64_t cardId)
+void PageRouterManager::RunCard(
+    const std::string& url, const std::string& params, int64_t cardId, const std::string& entryPoint)
 {
     CHECK_RUN_ON(JS);
     RouterPageInfo info { url };
@@ -161,7 +162,7 @@ void PageRouterManager::RunCard(const std::string& url, const std::string& param
         info.url = manifestParser_->GetRouter()->GetEntry("");
     }
 #endif
-    LoadCard(0, info, params, cardId);
+    LoadCard(0, info, params, cardId, false, true, entryPoint);
 }
 
 void PageRouterManager::Push(const RouterPageInfo& target)
@@ -946,7 +947,7 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
 }
 
 void PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params,
-    int64_t cardId, bool /*isRestore*/, bool needHideLast)
+    int64_t cardId, bool /* isRestore */, bool needHideLast, const std::string& entryPoint)
 {
     CHECK_RUN_ON(JS);
     auto entryPageInfo = AceType::MakeRefPtr<EntryPageInfo>(pageId, target.url, target.path, params);
@@ -959,7 +960,7 @@ void PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, c
     if (!loadCard_) {
         return;
     }
-    auto result = loadCard_(target.url, cardId);
+    auto result = loadCard_(target.url, cardId, entryPoint);
     if (!result) {
         pageRouterStack_.pop_back();
         return;

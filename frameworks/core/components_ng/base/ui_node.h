@@ -30,6 +30,7 @@
 #include "base/view_data/view_data_wrap.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/event/touch_event.h"
@@ -290,6 +291,8 @@ public:
     virtual void OnWindowHide() {}
     virtual void Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos);
 
+    virtual bool RenderCustomChild(int64_t deadline);
+
     virtual void OnWindowFocused() {}
 
     virtual void OnWindowUnfocused() {}
@@ -499,6 +502,15 @@ public:
     static int32_t GenerateAccessibilityId();
 
     NodeStatus GetNodeStatus() const;
+    const RefPtr<ExportTextureInfo>& GetExportTextureInfo() const
+    {
+        return exportTextureInfo_;
+    }
+
+    void CreateExportTextureInfoIfNeeded();
+
+    bool IsNeedExportTexture() const;
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -570,6 +582,7 @@ private:
     bool isDisappearing_ = false;
     bool isBuildByJS_ = false;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
+    RefPtr<ExportTextureInfo> exportTextureInfo_;
 
     int32_t childrenUpdatedFrom_ = -1;
     static thread_local int32_t currentAccessibilityId_;

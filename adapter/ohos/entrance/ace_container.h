@@ -91,6 +91,8 @@ public:
 
     void Destroy() override;
 
+    bool IsKeyboard() override;
+
     void DestroyView() override;
 
     static bool Register();
@@ -377,6 +379,8 @@ public:
     static bool RunPage(
         int32_t instanceId, const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params);
     static bool PushPage(int32_t instanceId, const std::string& content, const std::string& params);
+    static bool RunDynamicPage(
+        int32_t instanceId, const std::string& content, const std::string& params, const std::string& entryPoint);
     static bool OnBackPressed(int32_t instanceId);
     static void OnShow(int32_t instanceId);
     static void OnHide(int32_t instanceId);
@@ -484,6 +488,8 @@ public:
     }
 
     NG::SafeAreaInsets GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type);
+
+    NG::SafeAreaInsets GetKeyboardSafeArea() override;
 
     // ArkTSCard
     void UpdateFormData(const std::string& data);

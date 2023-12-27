@@ -146,11 +146,24 @@ void RelativeContainerLayoutAlgorithm::DetermineTopologicalOrder(LayoutWrapper* 
 void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    if (layoutWrapper->GetAllChildrenWithBuild().empty()) {
-        return;
-    }
     auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(relativeContainerLayoutProperty);
+    auto& calcLayoutConstraint = relativeContainerLayoutProperty->GetCalcLayoutConstraint();
+    CHECK_NULL_VOID(calcLayoutConstraint);
+    auto selfIdealSize = calcLayoutConstraint->selfIdealSize;
+    if (layoutWrapper->GetAllChildrenWithBuild().empty()) {
+        padding_ = relativeContainerLayoutProperty->CreatePaddingAndBorder();
+        if (selfIdealSize->Width()->GetDimension().Unit() == DimensionUnit::AUTO) {
+            layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(padding_.Width(),
+                layoutWrapper->GetGeometryNode()->GetFrameSize().Height()));
+        }
+        if (selfIdealSize->Height()->GetDimension().Unit() == DimensionUnit::AUTO) {
+            layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(
+                layoutWrapper->GetGeometryNode()->GetFrameSize().Width(), padding_.Height()));
+        }
+        return;
+    }
+
     DetermineTopologicalOrder(layoutWrapper);
     if (SystemProperties::GetDebugEnabled()) {
         std::string result = "[";
@@ -194,9 +207,6 @@ void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         CalcOffsetParam(layoutWrapper, nodeName);
     }
 
-    auto& calcLayoutConstraint = relativeContainerLayoutProperty->GetCalcLayoutConstraint();
-    CHECK_NULL_VOID(calcLayoutConstraint);
-    auto selfIdealSize = calcLayoutConstraint->selfIdealSize;
     if (selfIdealSize->Width()->GetDimension().Unit() == DimensionUnit::AUTO ||
         selfIdealSize->Height()->GetDimension().Unit() == DimensionUnit::AUTO) {
         MeasureSelf(layoutWrapper);
@@ -523,10 +533,10 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
     }
 
     if (childIdealWidth.has_value()) {
-        childConstraint.selfIdealSize.SetWidth(childIdealWidth.value());
+        childConstraint.selfIdealSize.SetWidth(childIdealWidth.value() && !horizontalHasIdealSize);
     }
     if (childIdealHeight.has_value()) {
-        childConstraint.selfIdealSize.SetHeight(childIdealHeight.value());
+        childConstraint.selfIdealSize.SetHeight(childIdealHeight.value() && !verticalHasIdealSize);
     }
     childWrapper->Measure(childConstraint);
 }

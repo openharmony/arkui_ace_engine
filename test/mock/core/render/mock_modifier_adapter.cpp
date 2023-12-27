@@ -14,7 +14,15 @@
  */
 
 #include "core/components_ng/render/modifier_adapter.h"
+#include "core/components_ng/base/modifier.h"
 
 namespace OHOS::Ace::NG {
-void ModifierAdapter::RemoveModifier(int32_t modifierId) {}
+void ModifierAdapter::RemoveModifier(int32_t modifierId)
+{
+}
+template<>
+void NodeAnimatableProperty<float, AnimatablePropertyFloat>::AnimateWithVelocity(
+    const AnimationOption &option, float value, float velocity, const FinishCallback &finishCallback)
+{
+}
 } // namespace OHOS::Ace::NG

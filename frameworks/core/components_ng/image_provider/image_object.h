@@ -37,10 +37,12 @@ public:
     const SizeF& GetImageSize() const;
     const ImageSourceInfo& GetSourceInfo() const;
     const RefPtr<ImageData>& GetData() const;
+    int32_t GetFrameCount() const;
 
     void SetData(const RefPtr<ImageData>& data);
     void SetImageSize(const SizeF& imageSize);
     virtual void ClearData();
+    void SetFrameCount(int32_t frameCount);
 
     virtual RefPtr<ImageObject> Clone() = 0;
 
@@ -57,6 +59,7 @@ protected:
     SizeF imageSize_ { -1.0, -1.0 };
     // no longer needed after making canvas image
     RefPtr<ImageData> data_;
+    int32_t frameCount_ = 1;
 
     ACE_DISALLOW_COPY_AND_MOVE(ImageObject);
 };

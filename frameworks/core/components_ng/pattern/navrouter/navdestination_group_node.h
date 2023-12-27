@@ -143,6 +143,16 @@ public:
         return mode_;
     }
 
+    void SetIndex(int32_t index)
+    {
+        index_ = index;
+    }
+
+    int32_t GetIndex() const
+    {
+        return index_;
+    }
+
 private:
     RefPtr<UINode> title_;
     RefPtr<UINode> subtitle_;
@@ -150,7 +160,7 @@ private:
     RefPtr<UINode> contentNode_;
     NavDestinationBackButtonEvent backButtonEvent_;
     bool isOnAnimation_ = false;
-
+    int32_t index_ = -1;
     PageTransitionType transitionType_ = PageTransitionType::NONE;
     NavDestinationMode mode_ = NavDestinationMode::STANDARD;
 };

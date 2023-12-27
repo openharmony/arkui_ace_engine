@@ -29,21 +29,9 @@ namespace {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 
-template<typename T>
-RefPtr<T> GetTheme()
-{
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, nullptr);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, nullptr);
-    auto themeManager = pipelineContext->GetThemeManager();
-    CHECK_NULL_RETURN(themeManager, nullptr);
-    return themeManager->GetTheme<T>();
-}
-
 void ConvertThemeColor(std::vector<OHOS::Ace::NG::Gradient>& colors)
 {
-    RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
+    RefPtr<DataPanelTheme> theme = ArkTSUtils::GetTheme<DataPanelTheme>();
     auto themeColors = theme->GetColorsArray();
     for (const auto& item : themeColors) {
         OHOS::Ace::NG::Gradient gradient;
@@ -194,7 +182,7 @@ ArkUINativeModuleValue DataPanelBridge::SetTrackShadow(ArkUIRuntimeCallInfo* run
     auto jsRadius = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "radius"));
     auto jsOffsetX = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "offsetX"));
     auto jsOffsetY = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "offsetY"));
-    RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
+    RefPtr<DataPanelTheme> theme = ArkTSUtils::GetTheme<DataPanelTheme>();
     double radius = 0.0;
     if (!ArkTSUtils::ParseJsDouble(vm, jsRadius, radius)) {
         radius = theme->GetTrackShadowRadius().ConvertToVp();
@@ -274,7 +262,7 @@ ArkUINativeModuleValue DataPanelBridge::SetDataPanelTrackBackgroundColor(ArkUIRu
 
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
-        RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
+        RefPtr<DataPanelTheme> theme = ArkTSUtils::GetTheme<DataPanelTheme>();
         color = theme->GetBackgroundColor();
     }
     GetArkUIInternalNodeAPI()->GetDataPanelModifier().SetDataPanelTrackBackgroundColor(nativeNode, color.GetValue());
@@ -299,7 +287,7 @@ ArkUINativeModuleValue DataPanelBridge::SetDataPanelStrokeWidth(ArkUIRuntimeCall
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(1);
 
-    RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
+    RefPtr<DataPanelTheme> theme = ArkTSUtils::GetTheme<DataPanelTheme>();
 
     CalcDimension strokeWidth;
 

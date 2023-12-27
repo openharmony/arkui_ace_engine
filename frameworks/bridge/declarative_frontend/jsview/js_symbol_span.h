@@ -30,6 +30,9 @@ public:
 
     static void SetFontSize(const JSCallbackInfo& info);
     static void SetFontWeight(const std::string& value);
+    static void SetFontColor(const JSCallbackInfo& info);
+    static void SetSymbolRenderingStrategy(const JSCallbackInfo& info);
+    static void SetSymbolEffect(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 

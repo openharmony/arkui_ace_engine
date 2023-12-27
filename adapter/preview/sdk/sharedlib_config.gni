@@ -416,6 +416,18 @@ napi_modules = [
         part_name = "ace_engine"
         lib_names = [ "popup" ]
       },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/gridobjectsortcomponent/interfaces:gridobjectsortcomponent"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "gridobjectsortcomponent" ]
+      },
+      {
+        label = "//foundation/arkui/ace_engine/advanced_ui_component/exceptionprompt/interfaces:exceptionprompt"
+        subsystem_name = "arkui"
+        part_name = "ace_engine"
+        lib_names = [ "exceptionprompt" ]
+      },
     ]
   },
 ]

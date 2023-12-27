@@ -119,7 +119,7 @@ void DotIndicatorPaintMethod::UpdateNormalIndicator(
         GetLongPointAnimationStateSecondCenter(paintWrapper, pointCenterX);
         dotIndicatorModifier_->PlayIndicatorAnimation(
             vectorBlackPointCenterX_, pointCenterX, gestureState_, touchBottomTypeLoop_);
-    } else {
+    } else if (gestureState_ != GestureState::GESTURE_STATE_NONE) {
         dotIndicatorModifier_->UpdateNormalPaintProperty(
             normalMargin_, itemHalfSizes, vectorBlackPointCenterX_, longPointCenterX_);
     }
@@ -348,20 +348,23 @@ std::tuple<float, float, float> DotIndicatorPaintMethod::GetMoveRate()
         if (rateAbs < TOUCH_BOTTOM_FOLLOW_THRESHOLD) {
             rateAbs = TOUCH_BOTTOM_FOLLOW_THRESHOLD;
         }
-        longPointLeftCenterMoveRate = longPointRightCenterMoveRate = (1.0 - rateAbs);
+        longPointLeftCenterMoveRate = longPointRightCenterMoveRate =
+            // x0:0.33, y0:0, x1:0.67, y1:1
+            CubicCurve(0.33, 0, 0.67, 1).MoveInternal(1.0 - rateAbs);
     } else if (touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT) {
         auto rateAbs = std::abs(turnPageRate_);
         if (rateAbs > TOUCH_BOTTOM_FOLLOW_THRESHOLD) {
             rateAbs = TOUCH_BOTTOM_FOLLOW_THRESHOLD;
         }
-        longPointLeftCenterMoveRate = longPointRightCenterMoveRate = rateAbs;
+        // x0:0.33, y0:0, x1:0.67, y1:1
+        longPointLeftCenterMoveRate = longPointRightCenterMoveRate = CubicCurve(0.33, 0, 0.67, 1).MoveInternal(rateAbs);
     } else if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT) {
-        longPointLeftCenterMoveRate = LinearCurve().MoveInternal(std::abs(turnPageRate_));
-        longPointRightCenterMoveRate = LinearCurve().MoveInternal(std::abs(turnPageRate_)) +
+        longPointLeftCenterMoveRate =std::abs(turnPageRate_);
+        longPointRightCenterMoveRate = std::abs(turnPageRate_) +
                                        ((1 - longPointLeftCenterMoveRate) * LONG_POINT_TAIL_RATIO);
     } else if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
-        longPointRightCenterMoveRate = LinearCurve().MoveInternal(std::abs(turnPageRate_));
-        longPointLeftCenterMoveRate = LinearCurve().MoveInternal(std::abs(turnPageRate_)) * LONG_POINT_TAIL_RATIO;
+        longPointRightCenterMoveRate = std::abs(turnPageRate_);
+        longPointLeftCenterMoveRate = std::abs(turnPageRate_) * LONG_POINT_TAIL_RATIO;
     }
     return { blackPointCenterMoveRate, longPointLeftCenterMoveRate, longPointRightCenterMoveRate };
 }
@@ -480,9 +483,10 @@ void DotIndicatorPaintMethod::UpdateBackground(const PaintWrapper* paintWrapper)
 std::pair<int32_t, int32_t> DotIndicatorPaintMethod::GetStartAndEndIndex(int32_t index)
 {
     int32_t startCurrentIndex = index;
-    int32_t endCurrentIndex = NearEqual(turnPageRate_, 0.0f) || LessOrEqual(turnPageRate_, -1.0f) ||
-        GreatOrEqual(turnPageRate_, 1.0f) ? endCurrentIndex = index :
-        (LessNotEqual(turnPageRate_, 0.0f) ? index + 1 : index - 1);
+    int32_t endCurrentIndex = NearEqual(turnPageRate_, 0.0f) || LessOrEqualHighPrecision(turnPageRate_, -1.0f) ||
+                                      GreatOrEqualHighPrecision(turnPageRate_, 1.0f)
+                                  ? endCurrentIndex = index
+                                  : (LessNotEqualHighPrecision(turnPageRate_, 0.0f) ? index + 1 : index - 1);
     if (endCurrentIndex == -1) {
         endCurrentIndex = itemCount_ - 1;
     } else if (endCurrentIndex == itemCount_) {
@@ -556,12 +560,12 @@ std::pair<float, float> DotIndicatorPaintMethod::ForwardCalculation(
             startCenterX += itemWidth;
         } else {
             if (IsCustomSizeValue_) {
-                startVectorBlackPointCenterX[i] = startCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+                startVectorBlackPointCenterX[i] = startCenterX + itemHalfSizes[ITEM_HALF_WIDTH];
                 pointCenter.startLongPointLeftCenterX = startCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
                 pointCenter.startLongPointRightCenterX = pointCenter.startLongPointLeftCenterX;
                 startCenterX += selectedItemWidth;
             } else {
-                startVectorBlackPointCenterX[i] = startCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+                startVectorBlackPointCenterX[i] = startCenterX + itemHalfSizes[ITEM_HALF_WIDTH];
                 pointCenter.startLongPointLeftCenterX = startCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
                 pointCenter.startLongPointRightCenterX = pointCenter.startLongPointLeftCenterX + selectedItemWidth;
                 startCenterX += selectedItemWidth * TWOFOLD;
@@ -572,12 +576,12 @@ std::pair<float, float> DotIndicatorPaintMethod::ForwardCalculation(
             endCenterX += itemWidth;
         } else {
             if (IsCustomSizeValue_) {
-                endVectorBlackPointCenterX[i] = endCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+                endVectorBlackPointCenterX[i] = endCenterX + itemHalfSizes[ITEM_HALF_WIDTH];
                 pointCenter.endLongPointLeftCenterX = endCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
                 pointCenter.endLongPointRightCenterX = pointCenter.endLongPointLeftCenterX;
                 endCenterX += selectedItemWidth;
             } else {
-                endVectorBlackPointCenterX[i] = endCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
+                endVectorBlackPointCenterX[i] = endCenterX + itemHalfSizes[ITEM_HALF_WIDTH];
                 pointCenter.endLongPointLeftCenterX = endCenterX + itemHalfSizes[SELECTED_ITEM_HALF_WIDTH];
                 pointCenter.endLongPointRightCenterX = pointCenter.endLongPointLeftCenterX + selectedItemWidth;
                 endCenterX += selectedItemWidth * TWOFOLD;

@@ -113,4 +113,13 @@ void ScrollableModelNG::SetScrollBarMode(FrameNode* frameNode, int32_t displayNu
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode,
         static_cast<DisplayMode>(displayNumber), frameNode);
 }
+
+void ScrollableModelNG::SetMaxFlingSpeed(double max)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollablePattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetMaxFlingVelocity(max);
+}
 } // namespace OHOS::Ace::NG

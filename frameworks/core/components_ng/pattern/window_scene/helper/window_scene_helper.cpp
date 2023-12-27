@@ -22,6 +22,8 @@
 #include "core/common/container.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "session/host/include/session.h"
 
@@ -127,6 +129,22 @@ bool WindowSceneHelper::IsFocusWindowSceneCloseKeyboard(RefPtr<FrameNode> focuse
     return isWindowSceneSaveKeyboardFlag;
 }
 
+bool WindowSceneHelper::GetNeedKeyboardOnFocusFlag(const RefPtr<FrameNode> frameNode)
+{
+    bool isNeed = true;
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_RETURN(pattern, true);
+    if (frameNode->GetTag() == V2::TEXTAREA_ETS_TAG || frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG) {
+        auto curPattern = AceType::DynamicCast<TextFieldPattern>(pattern);
+        isNeed = curPattern->GetNeedToRequestKeyboardOnFocus();
+    } else if (frameNode->GetTag() == V2::SEARCH_ETS_TAG) {
+        auto curPattern = AceType::DynamicCast<SearchPattern>(pattern);
+        isNeed = curPattern->GetNeedToRequestKeyboardOnFocus();
+    }
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Need to Request Keyboard On Focus Flag:(%{public}d)", isNeed);
+    return isNeed;
+}
+
 void WindowSceneHelper::IsWindowSceneCloseKeyboard(RefPtr<FrameNode> frameNode)
 {
 #if defined (ENABLE_STANDARD_INPUT)
@@ -139,11 +157,20 @@ void WindowSceneHelper::IsWindowSceneCloseKeyboard(RefPtr<FrameNode> frameNode)
     TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SCB/Keep/Need(%{public}d/%{public}d/%{public}d)",
         isWindowScene, saveKeyboard, isNeedKeyBoard);
     if (isWindowScene && !saveKeyboard && !isNeedKeyBoard) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "WindowSceneFrameNode not NeedSoftKeyboard.");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "scbFrameNode(%{public}s/%{public}d) notNeedSoftKeyboard.",
+            frameNode->GetTag().c_str(), frameNode->GetId());
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
-            inputMethod->RequestHideInput();
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
+            MiscServices::PanelInfo curKeyboardPanelInfo;
+            curKeyboardPanelInfo.panelType = MiscServices::PanelType::SOFT_KEYBOARD;
+            curKeyboardPanelInfo.panelFlag = MiscServices::PanelFlag::FLG_FIXED;
+            bool curIsShown = false;
+            auto infApiRes = inputMethod->IsPanelShown(curKeyboardPanelInfo, curIsShown);
+            if (infApiRes || curIsShown) {
+                TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Shown.");
+                inputMethod->RequestHideInput();
+                TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
+            }
         }
     }
 #endif
@@ -157,7 +184,8 @@ void WindowSceneHelper::IsCloseKeyboard(RefPtr<FrameNode> frameNode)
     CHECK_NULL_VOID(curPattern);
     bool isNeedKeyBoard = curPattern->NeedSoftKeyboard();
     if (!isNeedKeyBoard) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "FrameNode not NeedSoftKeyboard.");
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "FrameNode(%{public}s/%{public}d) notNeedSoftKeyboard.",
+            frameNode->GetTag().c_str(), frameNode->GetId());
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
             inputMethod->RequestHideInput();
@@ -178,8 +206,10 @@ void CaculatePoint(const RefPtr<FrameNode>& node, const std::shared_ptr<OHOS::MM
     auto rect = renderContext->GetPaintRectWithoutTransform();
     MMI::PointerEvent::PointerItem item;
     if (pointerEvent->GetPointerItem(pointerId, item)) {
-        item.SetWindowX(static_cast<int32_t>(item.GetWindowX() + rect.GetX()));
-        item.SetWindowY(static_cast<int32_t>(item.GetWindowY() + rect.GetY()));
+        PointF tmp(item.GetWindowX() + rect.GetX(), item.GetWindowY() + rect.GetY());
+        renderContext->GetPointTransform(tmp);
+        item.SetWindowX(static_cast<int32_t>(std::round(tmp.GetX())));
+        item.SetWindowY(static_cast<int32_t>(std::round(tmp.GetY())));
         pointerEvent->UpdatePointerItem(pointerId, item);
     }
 }

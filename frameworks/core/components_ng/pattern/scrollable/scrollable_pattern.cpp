@@ -397,6 +397,7 @@ void ScrollablePattern::AddScrollEvent()
     };
     scrollable->SetScrollEndCallback(std::move(scrollEnd));
     scrollable->SetUnstaticFriction(friction_);
+    scrollable->SetMaxFlingVelocity(maxFlingVelocity_);
 
     auto scrollSnap = [weak = WeakClaim(this)](double targetOffset, double velocity) -> bool {
         auto pattern = weak.Upgrade();
@@ -772,6 +773,17 @@ void ScrollablePattern::SetFriction(double friction)
     scrollable->SetUnstaticFriction(friction_);
 }
 
+void ScrollablePattern::SetMaxFlingVelocity(double max)
+{
+    if (LessOrEqual(max, 0.0f)) {
+        max = MAX_VELOCITY;
+    }
+    maxFlingVelocity_ = max;
+    CHECK_NULL_VOID(scrollableEvent_);
+    auto scrollable = scrollableEvent_->GetScrollable();
+    scrollable->SetMaxFlingVelocity(max);
+}
+
 void ScrollablePattern::GetParentNavigation()
 {
     if (navBarPattern_) {
@@ -845,7 +857,7 @@ void ScrollablePattern::StopAnimate()
     if (animator_ && !animator_->IsStopped()) {
         animator_->Stop();
     }
-    if (!IsAnimationStop()) {
+    if (!isAnimationStop_) {
         StopAnimation(springAnimation_);
         StopAnimation(curveAnimation_);
     }
@@ -868,7 +880,7 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
         scrollAbort_ = true;
         StopScrollable();
     }
-    if (!IsAnimationStop()) {
+    if (!isAnimationStop_) {
         currVelocity = GetCurrentVelocity();
         StopAnimation(springAnimation_);
         StopAnimation(curveAnimation_);
@@ -878,6 +890,7 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
         animator_->Stop();
     }
     finalPosition_ = position;
+    runningAnimationCount_++;
     if (smooth) {
         PlaySpringAnimation(position, DEFAULT_SCROLL_TO_VELOCITY, DEFAULT_SCROLL_TO_MASS, DEFAULT_SCROLL_TO_STIFFNESS,
             DEFAULT_SCROLL_TO_DAMPING);
@@ -906,6 +919,10 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
                 ContainerScope scope(id);
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
+                pattern->runningAnimationCount_--;
+                if (pattern->runningAnimationCount_ > 0) {
+                    return;
+                }
                 pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
                     SceneStatus::END);
                 pattern->StopAnimation(pattern->curveAnimation_);
@@ -942,6 +959,10 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
             ContainerScope scope(id);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            pattern->runningAnimationCount_--;
+            if (pattern->runningAnimationCount_ > 0) {
+                return;
+            }
             pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
                 SceneStatus::END);
             pattern->StopAnimation(pattern->springAnimation_);
@@ -958,6 +979,9 @@ void ScrollablePattern::InitSpringOffsetProperty()
     auto propertyCallback = [weak = AceType::WeakClaim(this)](float offset) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (pattern->isAnimationStop_) {
+            return;
+        }
         high_resolution_clock::time_point currentTime = high_resolution_clock::now();
         milliseconds diff = std::chrono::duration_cast<milliseconds>(currentTime - pattern->lastTime_);
         if (diff.count() > MIN_DIFF_TIME) {
@@ -986,6 +1010,9 @@ void ScrollablePattern::InitCurveOffsetProperty(float position)
     auto propertyCallback = [weak = AceType::WeakClaim(this), position](float offset) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+        if (pattern->isAnimationStop_) {
+            return;
+        }
         high_resolution_clock::time_point currentTime = high_resolution_clock::now();
         milliseconds diff = std::chrono::duration_cast<milliseconds>(currentTime - pattern->lastTime_);
         if (diff.count() > MIN_DIFF_TIME) {
@@ -1200,7 +1227,7 @@ void ScrollablePattern::SelectWithScroll()
         return;
     }
 
-    if (!IsAnimationStop()) {
+    if (!isAnimationStop_) {
         StopAnimation(springAnimation_);
         StopAnimation(curveAnimation_);
     }
@@ -1418,7 +1445,7 @@ void ScrollablePattern::NotifyMoved(bool value)
 void ScrollablePattern::ProcessSpringEffect(float velocity)
 {
     CHECK_NULL_VOID(InstanceOf<ScrollSpringEffect>(scrollEffect_));
-    if (!OutBoundaryCallback() && !GetCanOverScroll()) {
+    if ((!OutBoundaryCallback() && !GetCanOverScroll()) || !IsOutOfBoundary(true)) {
         return;
     }
     scrollEffect_->ProcessScrollOver(velocity);
@@ -1545,7 +1572,7 @@ ScrollResult ScrollablePattern::HandleScrollSelfFirst(float& offset, int32_t sou
     }
     // triggering overScroll, parent always handle it first
     auto overRes = parent->HandleScroll(result.remain, source, NestedState::CHILD_OVER_SCROLL);
-    offset += std::abs(overOffset) < std::abs(result.remain) ? overOffset : overRes.remain;
+    offset += LessNotEqual(std::abs(overOffset), std::abs(result.remain)) ? overOffset : overRes.remain;
     SetCanOverScroll((!NearZero(overOffset) || NearZero(offset)) && overRes.reachEdge);
     return { 0, GetCanOverScroll() };
 }

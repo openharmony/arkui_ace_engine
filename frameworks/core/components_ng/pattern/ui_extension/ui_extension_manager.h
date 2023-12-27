@@ -32,10 +32,10 @@ enum class WSError;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t UI_EXTENSION_UNKNOW_ID = 0;
-constexpr int32_t UI_EXTENSION_ID_FIRST_MAX = 210;
+constexpr int32_t UI_EXTENSION_ID_FIRST_MAX = 21;
 constexpr int32_t UI_EXTENSION_ID_OTHER_MAX = 9;
-constexpr int32_t UI_EXTENSION_OFFSET_MAX = 10000000;
-constexpr int32_t UI_EXTENSION_OFFSET_MIN = 100000;
+constexpr int32_t UI_EXTENSION_OFFSET_MAX = 100000000;
+constexpr int32_t UI_EXTENSION_OFFSET_MIN = 1000000;
 constexpr int32_t UI_EXTENSION_ID_FACTOR = 10;
 constexpr int32_t UI_EXTENSION_LEVEL_MAX = 3;
 constexpr int32_t UI_EXTENSION_ROOT_ID = -1;

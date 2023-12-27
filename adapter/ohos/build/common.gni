@@ -184,6 +184,13 @@ if (defined(global_parts_info.multimedia_media_library)) {
   media_library_exists = false
 }
 
+if (defined(global_parts_info.hiviewdfx_hichecker)) {
+  hichecker_exists = true
+  defines += [ "HICHECKER_EXISTS" ]
+} else {
+  hichecker_exists = false
+}
+
 if (dynamic_component_support) {
   defines += [ "DYNAMIC_COMPONENT_SUPPORT" ]
 }

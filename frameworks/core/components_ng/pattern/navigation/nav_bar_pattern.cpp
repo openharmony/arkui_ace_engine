@@ -48,6 +48,7 @@
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -515,7 +516,7 @@ void MountToolBar(const RefPtr<NavBarNode>& hostNode)
     CHECK_NULL_VOID(hostNode->GetToolBarNode());
     auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
-    auto toolBarNode = AceType::DynamicCast<FrameNode>(hostNode->GetToolBarNode());
+    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(hostNode->GetToolBarNode());
     CHECK_NULL_VOID(toolBarNode);
     auto toolBarLayoutProperty = toolBarNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(toolBarLayoutProperty);
@@ -525,12 +526,10 @@ void MountToolBar(const RefPtr<NavBarNode>& hostNode)
         hostNode->AddChild(hostNode->GetToolBarNode());
     }
 
-    if (navBarLayoutProperty->GetHideToolBar().value_or(false)) {
+    if (navBarLayoutProperty->GetHideToolBar().value_or(false) || !toolBarNode->HasValidContent()) {
         toolBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        toolBarNode->SetActive(false);
     } else {
         toolBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-        toolBarNode->SetActive(true);
     }
 }
 } // namespace
@@ -546,7 +545,8 @@ void NavBarPattern::OnAttachToFrameNode()
     if (theme && theme->GetNavBarUnfocusEffectEnable()) {
         pipelineContext->AddWindowFocusChangedCallback(host->GetId());
     }
-    SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_BOTTOM, .type = SAFE_AREA_TYPE_SYSTEM };
+    host->SetNeedAdjustOffset(false);
+    SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_ALL, .type = SAFE_AREA_TYPE_SYSTEM };
     host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
 }
 
@@ -774,5 +774,27 @@ bool NavBarPattern::CanCoordScrollUp(float offset) const
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_RETURN(titlePattern, false);
     return Negative(offset) && titlePattern->IsCurrentMaxTitle();
+}
+
+void NavBarPattern::UpdateNeedRecalculateSafeArea()
+{
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto safeArea = pipeline->GetSafeArea();
+    auto geometryNode = hostNode->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto parentGlobalOffset = hostNode->GetParentGlobalOffsetDuringLayout();
+    auto frame = geometryNode->GetFrameRect() + parentGlobalOffset;
+    if (!safeArea.top_.IsOverlapped(frame.Top())) {
+        auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+        CHECK_NULL_VOID(titleBarNode);
+        auto geometryNode = titleBarNode->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
+        auto offset = OffsetF(0.0f, 0.0f);
+        geometryNode->SetFrameOffset(offset);
+        titleBarNode->ForceSyncGeometryNode();
+    }
 }
 } // namespace OHOS::Ace::NG

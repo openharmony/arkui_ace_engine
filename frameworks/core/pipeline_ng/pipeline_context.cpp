@@ -133,7 +133,10 @@ bool PipelineContext::NeedSoftKeyboard()
     auto pattern = focusNode->GetPattern();
     CHECK_NULL_RETURN(pattern, false);
     bool isNeed = pattern->NeedSoftKeyboard();
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "need soft keyboard: %{public}d", isNeed);
+#ifdef WINDOW_SCENE_SUPPORTED
+    isNeed = WindowSceneHelper::GetNeedKeyboardOnFocusFlag(focusNode);
+#endif
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "need soft keyboard %{public}d", isNeed);
     return isNeed;
 }
 
@@ -431,6 +434,13 @@ RefPtr<FrameNode> PipelineContext::HandleFocusNode()
 
 void PipelineContext::IsCloseSCBKeyboard()
 {
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    if (container->IsKeyboard()) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "focus in keyboard.");
+        return;
+    }
+
     RefPtr<FrameNode> curFrameNode = HandleFocusNode();
     if (curFrameNode == nullptr) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "curFrameNode null.");
@@ -442,10 +452,17 @@ void PipelineContext::IsCloseSCBKeyboard()
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "In SCBWindow, close keyboard.");
         WindowSceneHelper::IsWindowSceneCloseKeyboard(curFrameNode);
     } else {
+        if (windowFocus_.has_value() && windowFocus_.value()) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "In page, focusOnNodeCallback_.");
+            windowFocus_.reset();
+            focusOnNodeCallback_();
+        }
+
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "In page, be ready to close keyboard.");
         if (needSoftKeyboard_.has_value() && !needSoftKeyboard_.value()) {
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "In page, close keyboard.");
             FocusHub::IsCloseKeyboard(curFrameNode);
+            needSoftKeyboard_ = std::nullopt;
         }
     }
 #else
@@ -479,7 +496,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     bool hasRunningAnimation = window_->FlushAnimation(nanoTimestamp);
     FlushTouchEvents();
     FlushBuild();
-    auto isDirtyLayoutNodesEmpty = taskScheduler_->IsDirtyLayoutNodesEmpty();
     if (isFormRender_ && drawDelegate_ && rootNode_) {
         auto renderContext = AceType::DynamicCast<NG::RenderContext>(rootNode_->GetRenderContext());
         drawDelegate_->DrawRSFrame(renderContext);
@@ -523,9 +539,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     }
     // Close input method in the SCB window.
     IsCloseSCBKeyboard();
-    if (!isDirtyLayoutNodesEmpty) {
-        HandleOnAreaChangeEvent(nanoTimestamp);
-    }
+    HandleOnAreaChangeEvent(nanoTimestamp);
     HandleVisibleAreaChangeEvent();
     if (isNeedFlushMouseEvent_) {
         FlushMouseEvent();
@@ -831,6 +845,7 @@ void PipelineContext::SetupRootElement()
         DynamicCast<FrameNode>(installationFree_ ? stageNode->GetParent()->GetParent() : stageNode->GetParent()));
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
+    postEventManager_ = MakeRefPtr<PostEventManager>();
     dragDropManager_ = MakeRefPtr<DragDropManager>();
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(
         DynamicCast<FrameNode>(installationFree_ ? stageNode->GetParent()->GetParent() : stageNode->GetParent()));
@@ -885,6 +900,7 @@ void PipelineContext::SetupSubRootElement()
     fullScreenManager_ = MakeRefPtr<FullScreenManager>(rootNode_);
     selectOverlayManager_ = MakeRefPtr<SelectOverlayManager>(rootNode_);
     dragDropManager_ = MakeRefPtr<DragDropManager>();
+    postEventManager_ = MakeRefPtr<PostEventManager>();
 }
 
 const RefPtr<StageManager>& PipelineContext::GetStageManager()
@@ -1294,18 +1310,6 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
 
         auto manager = DynamicCast<TextFieldManagerNG>(context->PipelineBase::GetTextFieldManager());
         CHECK_NULL_VOID(manager);
-        float uiExtensionHeight = 0.0f;
-        if (manager) {
-            uiExtensionHeight = static_cast<float>(manager->GetHeight());
-            if (uiExtensionHeight == 0) {
-                LOGE("UIExtension Component Height equals zero");
-                return;
-            }
-            if (positionY + height > uiExtensionHeight) {
-                height = uiExtensionHeight - positionY;
-            }
-            positionY += static_cast<float>(manager->GetClickPosition().GetY());
-        }
         SizeF rootSize { static_cast<float>(context->rootWidth_), static_cast<float>(context->rootHeight_) };
         float keyboardOffset = context->safeAreaManager_->GetKeyboardOffset();
         float positionYWithOffset = positionY - keyboardOffset;
@@ -1317,11 +1321,11 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
                               : keyboardHeight;
         if (NearZero(keyboardHeight)) {
             context->safeAreaManager_->UpdateKeyboardOffset(0.0f);
+        } else if (positionYWithOffset + height > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0f) {
+            context->safeAreaManager_->UpdateKeyboardOffset(-offsetFix);
         } else if (LessOrEqual(rootSize.Height() - positionYWithOffset - height, height) &&
                    LessOrEqual(rootSize.Height() - positionYWithOffset, keyboardHeight)) {
             context->safeAreaManager_->UpdateKeyboardOffset(-keyboardHeight);
-        } else if (positionYWithOffset + height > (rootSize.Height() - keyboardHeight) && offsetFix > 0.0f) {
-            context->safeAreaManager_->UpdateKeyboardOffset(-offsetFix);
         } else if ((positionYWithOffset + height > rootSize.Height() - keyboardHeight &&
                        positionYWithOffset < rootSize.Height() - keyboardHeight && height < keyboardHeight / 2.0f) &&
                    NearZero(context->rootNode_->GetGeometryNode()->GetFrameOffset().GetY())) {
@@ -2252,7 +2256,8 @@ void PipelineContext::WindowFocus(bool isFocus)
             }
         }
         if (focusOnNodeCallback_) {
-            focusOnNodeCallback_();
+            windowFocus_ = true;
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "windowfocus focusOnNodeCallback_.");
         }
     }
     FlushWindowFocusChangedCallback(isFocus);
@@ -2506,6 +2511,7 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
         }
     }
     if (action == DragEventAction::DRAG_EVENT_START_FOR_CONTROLLER) {
+        manager->RequireSummary();
         manager->OnDragStart(pointerEvent.GetPoint());
         return;
     }
@@ -2896,6 +2902,12 @@ void PipelineContext::SetIsDragging(bool isDragging)
     eventManager_->SetIsDragging(isDragging);
 }
 
+void PipelineContext::ResetDragging()
+{
+    CHECK_NULL_VOID(dragDropManager_);
+    dragDropManager_->ResetDragging();
+}
+
 void PipelineContext::SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow)
 {
     if (windowModal_ != WindowModal::CONTAINER_MODAL) {
@@ -2960,5 +2972,10 @@ void PipelineContext::SubscribeContainerModalButtonsRectChange(
     auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_VOID(containerPattern);
     containerPattern->SubscribeContainerModalButtonsRectChange(std::move(callback));
+}
+
+const RefPtr<PostEventManager>& PipelineContext::GetPostEventManager()
+{
+    return postEventManager_;
 }
 } // namespace OHOS::Ace::NG

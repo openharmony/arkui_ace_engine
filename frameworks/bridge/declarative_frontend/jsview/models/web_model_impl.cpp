@@ -571,4 +571,30 @@ void WebModelImpl::SetOverScrollId(std::function<void(const BaseEventInfo* info)
 
     webComponent->SetOverScrollId(eventMarker);
 }
+
+void WebModelImpl::SetNativeEmbedModeEnabled(bool isEmbedModeEnabled)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    webComponent->SetNativeEmbedModeEnabled(isEmbedModeEnabled);
+}
+
+void WebModelImpl::SetNativeEmbedLifecycleChangeId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    auto eventMarker = EventMarker(std::move(jsCallback));
+
+    webComponent->SetNativeEmbedLifecycleChangeId(eventMarker);
+}
+
+void WebModelImpl::SetNativeEmbedGestureEventId(std::function<void(const BaseEventInfo* info)>&& jsCallback)
+{
+    auto webComponent = AceType::DynamicCast<WebComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    CHECK_NULL_VOID(webComponent);
+    auto eventMarker = EventMarker(std::move(jsCallback));
+
+    webComponent->SetNativeEmbedGestureEventId(eventMarker);
+}
+
 } // namespace OHOS::Ace::Framework

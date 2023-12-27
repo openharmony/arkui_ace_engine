@@ -1071,6 +1071,8 @@ public:
 
     virtual void SetIsDragging(bool isDragging) {}
 
+    virtual void ResetDragging() {}
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()

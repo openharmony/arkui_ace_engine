@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CONNECT_SERVER_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CONNECT_SERVER_MANAGER_H
 
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <unordered_map>

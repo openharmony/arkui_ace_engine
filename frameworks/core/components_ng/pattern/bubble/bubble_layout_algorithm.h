@@ -131,10 +131,10 @@ private:
     void InitCaretTargetSizeAndPosition();
     void InitProps(const RefPtr<BubbleLayoutProperty>& layoutProp, bool showInSubWindow);
     void InitArrowState(const RefPtr<BubbleLayoutProperty>& layoutProp);
-    OffsetF GetPositionWithPlacement(
+    OffsetF GetPositionWithPlacementNew(
         const SizeF& childSize, const OffsetF& topPosition, const OffsetF& bottomPosition, OffsetF& arrowPosition);
-    OffsetF GetChildPosition(const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& bubbleProp);
-    OffsetF FitToScreen(
+    OffsetF GetChildPositionNew(const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& bubbleProp);
+    OffsetF FitToScreenNew(
         const OffsetF& position, size_t step, size_t& i, const SizeF& childSize, bool didNeedArrow = false);
     bool GetIfNeedArrow(const RefPtr<BubbleLayoutProperty>& bubbleProp, const SizeF& childSize);
     void UpdateChildPosition(OffsetF& childOffset);
@@ -166,6 +166,16 @@ private:
     void UpdateArrowOffset(const std::optional<Dimension>& offset, const Placement& placement);
     void BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, RefPtr<BubbleLayoutProperty> bubbleProp,
         RefPtr<FrameNode> bubbleNode, bool showInSubWindow);
+
+    OffsetF GetChildPosition(
+        const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp, bool UseArrowOffset);
+    void InitArrowTopAndBottomPosition(OffsetF& topArrowPosition, OffsetF& bottomArrowPosition, OffsetF& topPosition,
+        OffsetF& bottomPosition, const SizeF& childSize);
+    void GetPositionWithPlacement(
+        OffsetF& childPosition, OffsetF& arrowPosition, const SizeF& childSize, Placement placement);
+    ErrorPositionType GetErrorPositionType(const OffsetF& childOffset, const SizeF& childSize);
+    OffsetF FitToScreen(const OffsetF& fitPosition, const SizeF& childSize);
+    SizeF GetPopupMaxWidthAndHeight(bool showInSubWindow);
     ArrowOfTargetOffset arrowOfTargetOffset_ = ArrowOfTargetOffset::NONE;
     Dimension arrowOffset_;
 
@@ -193,7 +203,7 @@ private:
     Placement placement_ = Placement::BOTTOM;
     Dimension targetSpace_;
     Dimension borderRadius_;
-
+    Dimension userSetTargetSpace_;
     bool showArrow_ = false;
     bool enableArrow_ = false;
     float scaledBubbleSpacing_ = 0.0f;
@@ -212,6 +222,10 @@ private:
     std::map<Placement, PlacementFunc> placementFuncMap_;
     std::string clipPath_;
     RefPtr<FrameNode> clipFrameNode_;
+    SizeF layoutChildSize_;
+    SizeF measureChildSizeLast_;
+    SizeF measureChildSizeAfter_;
+    SizeF measureChildSizeBefore_;
     ACE_DISALLOW_COPY_AND_MOVE(BubbleLayoutAlgorithm);
     // top right bottom left
     std::vector<float> arrowOffsetsFromClip_ = { 0.0f, 0.0f, 0.0f, 0.0f };

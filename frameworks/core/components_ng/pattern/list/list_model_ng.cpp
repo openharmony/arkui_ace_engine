@@ -453,7 +453,6 @@ void ListModelNG::SetListScrollBar(FrameNode* frameNode, int32_t barState)
         displayNumber = barState;
     }
     ScrollableModelNG::SetScrollBarMode(frameNode, displayNumber);
-    
 }
 
 void ListModelNG::SetLanes(FrameNode* frameNode, int32_t lanes)

@@ -27,6 +27,7 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void SetHideTitleBar(bool hide);
     static void SetTitle(const JSCallbackInfo& info);
+    static void SetBackButtonIcon(const JSCallbackInfo& info);
     static void SetOnShown(const JSCallbackInfo& info);
     static void SetOnHidden(const JSCallbackInfo& info);
     static void SetOnBackPressed(const JSCallbackInfo& info);

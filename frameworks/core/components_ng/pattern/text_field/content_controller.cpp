@@ -60,12 +60,12 @@ std::string ContentController::PreprocessString(int32_t startIndex, int32_t endI
     return tmp;
 }
 
-void ContentController::InsertValue(int32_t index, const std::string& value)
+bool ContentController::InsertValue(int32_t index, const std::string& value)
 {
-    ReplaceSelectedValue(index, index, value);
+    return ReplaceSelectedValue(index, index, value);
 }
 
-void ContentController::ReplaceSelectedValue(int32_t startIndex, int32_t endIndex, const std::string& value)
+bool ContentController::ReplaceSelectedValue(int32_t startIndex, int32_t endIndex, const std::string& value)
 {
     FormatIndex(startIndex, endIndex);
     auto tmp = PreprocessString(startIndex, endIndex, value);
@@ -73,6 +73,7 @@ void ContentController::ReplaceSelectedValue(int32_t startIndex, int32_t endInde
     content_ = StringUtils::ToString(wideText.substr(0, startIndex)) + tmp +
                StringUtils::ToString(wideText.substr(endIndex, static_cast<int32_t>(wideText.length()) - endIndex));
     FilterValue();
+    return !tmp.empty();
 }
 
 std::string ContentController::GetSelectedValue(int32_t startIndex, int32_t endIndex)
@@ -151,7 +152,8 @@ void ContentController::FilterValue()
     CHECK_NULL_VOID(textField);
     auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
 
-    bool hasInputFilter = property->GetInputFilter().has_value() && !content_.empty();
+    bool hasInputFilter = property->GetInputFilter().has_value() &&
+        !property->GetInputFilter().value().empty() && !content_.empty();
     if (!hasInputFilter) {
         FilterTextInputStyle(textChanged, result);
     } else {

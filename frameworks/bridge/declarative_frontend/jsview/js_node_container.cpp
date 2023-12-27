@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/jsview/js_base_node.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/node_container/node_container_pattern.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/core/common/container_scope.h"
@@ -29,9 +30,10 @@
 
 namespace OHOS::Ace {
 namespace {
-const char*  NODE_CONTAINER_ID = "nodeContainerId_";
+const char* NODE_CONTAINER_ID = "nodeContainerId_";
+const char* NODEPTR_OF_UINODE = "nodePtr_";
 constexpr int32_t INVALID_NODE_CONTAINER_ID = -1;
-}
+} // namespace
 
 std::unique_ptr<NodeContainerModel> NodeContainerModel::instance_;
 std::mutex NodeContainerModel::mutex_;
@@ -88,29 +90,24 @@ void JSNodeContainer::Create(const JSCallbackInfo& info)
     if (child) {
         frameNode->RemoveChildAtIndex(0);
         frameNode->AddChild(child);
+        auto pattern = frameNode->GetPattern<NG::NodeContainerPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->OnAddBaseNode();
     } else {
         frameNode->RemoveChildAtIndex(0);
     }
     frameNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 
-RefPtr<NG::UINode> JSNodeContainer::GetNodeByNodeController(
-    const JSRef<JSObject>& object, JsiExecutionContext execCtx)
+RefPtr<NG::UINode> JSNodeContainer::GetNodeByNodeController(const JSRef<JSObject>& object, JsiExecutionContext execCtx)
 {
     // get the function to makeNode
     JSRef<JSVal> jsMakeNodeFunc = object->GetProperty("makeNode");
     if (!jsMakeNodeFunc->IsFunction()) {
         return nullptr;
     }
-    auto context = GetCurrentContext();
+
     auto jsFunc = JSRef<JSFunc>::Cast(jsMakeNodeFunc);
-    JSRef<JSVal> result = jsFunc->Call(object, 1, &context);
-    if (result.IsEmpty() || result->IsNull() || !result->IsObject()) {
-        return nullptr;
-    }
-    panda::Local<ObjectRef> obj = result.Get().GetLocalHandle();
-    auto baseNode = static_cast<JSBaseNode*>(obj->GetNativePointerField(0));
-    CHECK_NULL_RETURN(baseNode, nullptr);
     RefPtr<JsFunction> jsMake = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), jsFunc);
     NodeContainerModel::GetInstance()->SetMakeFunction([func = std::move(jsMake), execCtx]() -> RefPtr<NG::UINode> {
         JAVASCRIPT_EXECUTION_SCOPE(execCtx);
@@ -121,21 +118,41 @@ RefPtr<NG::UINode> JSNodeContainer::GetNodeByNodeController(
         auto context = frontend->GetContextValue();
         auto jsVal = JsConverter::ConvertNapiValueToJsVal(context);
         JSRef<JSVal> result = func->ExecuteJS(1, &jsVal);
-        if (result.IsEmpty() || result->IsNull() || !result->IsObject()) {
+        if (result.IsEmpty() || !result->IsObject()) {
             return nullptr;
         }
-        panda::Local<ObjectRef> obj = result.Get().GetLocalHandle();
-        CHECK_NULL_RETURN(obj->GetNativePointerFieldCount(), nullptr);
-        auto baseNode = static_cast<JSBaseNode*>(obj->GetNativePointerField(0));
-        CHECK_NULL_RETURN(baseNode, nullptr);
-        return baseNode->GetViewNode();
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(result);
+        JSRef<JSVal> nodeptr = obj->GetProperty(NODEPTR_OF_UINODE);
+        if (nodeptr.IsEmpty()) {
+            return nullptr;
+        }
+        const auto* vm = nodeptr->GetEcmaVM();
+        auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
+        auto* uiNode = reinterpret_cast<NG::UINode*>(node);
+        CHECK_NULL_RETURN(uiNode, nullptr);
+        return AceType::Claim(uiNode);
     });
 
     SetOnAppearFunc(object, execCtx);
     SetOnDisappearFunc(object, execCtx);
     SetOnResizeFunc(object, execCtx);
+    SetOnTouchEventFunc(object, execCtx);
 
-    return baseNode->GetViewNode();
+    auto context = GetCurrentContext();
+    JSRef<JSVal> result = jsFunc->Call(object, 1, &context);
+    if (result.IsEmpty() || !result->IsObject()) {
+        return nullptr;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(result);
+    JSRef<JSVal> nodeptr = obj->GetProperty(NODEPTR_OF_UINODE);
+    if (nodeptr.IsEmpty()) {
+        return nullptr;
+    }
+    const auto* vm = nodeptr->GetEcmaVM();
+    auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
+    auto* uiNode = reinterpret_cast<NG::UINode*>(node);
+    CHECK_NULL_RETURN(uiNode, nullptr);
+    return AceType::Claim(uiNode);
 }
 
 void JSNodeContainer::SetOnAppearFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx)
@@ -162,6 +179,21 @@ void JSNodeContainer::SetOnDisappearFunc(const JSRef<JSObject>& object, JsiExecu
         func->Execute();
     };
     ViewAbstractModel::GetInstance()->SetOnDisAppear(onDisappear);
+}
+
+void JSNodeContainer::SetOnTouchEventFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx)
+{
+    auto onTouchEventCallback = object->GetProperty("onTouchEvent");
+    CHECK_NULL_VOID(onTouchEventCallback->IsFunction());
+    RefPtr<JsTouchFunction> jsOnTouchFunc =
+        AceType::MakeRefPtr<JsTouchFunction>(JSRef<JSFunc>::Cast(onTouchEventCallback));
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onTouch = [execCtx, func = std::move(jsOnTouchFunc), node = frameNode](TouchEventInfo& info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        PipelineContext::SetCallBackNode(node);
+        func->Execute(info);
+    };
+    NodeContainerModel::GetInstance()->SetOnTouchEvent(std::move(onTouch));
 }
 
 void JSNodeContainer::SetOnResizeFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx)

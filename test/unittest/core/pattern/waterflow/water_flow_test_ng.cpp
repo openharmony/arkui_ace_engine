@@ -35,7 +35,7 @@
 #include "base/utils/utils.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/scroll/scrollable.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"

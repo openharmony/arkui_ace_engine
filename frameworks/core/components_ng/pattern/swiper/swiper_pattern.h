@@ -229,8 +229,13 @@ public:
         return turnPageRate_;
     }
 
-    GestureState GetGestureState() const
+    GestureState GetGestureState()
     {
+        if (gestureState_ == GestureState::GESTURE_STATE_INIT) {
+            gestureState_ = GestureState::GESTURE_STATE_NONE;
+            return GestureState::GESTURE_STATE_INIT;
+        }
+
         return gestureState_;
     }
 
@@ -542,6 +547,11 @@ public:
         customAnimationToIndex_ = toIndex;
     }
 
+    std::optional<int32_t> GetCustomAnimationToIndex() const
+    {
+        return customAnimationToIndex_;
+    }
+
     void SetCustomContentTransition(std::function<TabContentAnimatedTransition(int32_t, int32_t)>&& event)
     {
         onCustomContentTransition_ =
@@ -555,6 +565,11 @@ public:
 
     void SetSwiperEventCallback(bool disableSwipe);
     void UpdateSwiperPanEvent(bool disableSwipe);
+    bool IsUseCustomAnimation() const;
+    float GetMotionVelocity()
+    {
+        return motionVelocity_;
+    }
 
 private:
     void OnModifyDone() override;
@@ -687,7 +702,6 @@ private:
     void OnAnimationTranslateZero(int32_t nextIndex, bool stopAutoPlay);
     void UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus);
     void TriggerCustomContentTransitionEvent(int32_t fromIndex, int32_t toIndex);
-    bool IsUseCustomAnimation() const;
 
     /**
      * @brief Stops animations when the scroll starts.
@@ -786,7 +800,7 @@ private:
     float currentOffset_ = 0.0f;
     float fadeOffset_ = 0.0f;
     float turnPageRate_ = 0.0f;
-    GestureState gestureState_ = GestureState::GESTURE_STATE_FOLLOW;
+    GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     TouchBottomTypeLoop touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     float touchBottomRate_ = 1.0f;
     float currentIndexOffset_ = 0.0f;

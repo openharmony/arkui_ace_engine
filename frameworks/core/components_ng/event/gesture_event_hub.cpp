@@ -25,6 +25,7 @@
 #include "core/common/container.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/common/interaction/interaction_interface.h"
+#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/click_event.h"
@@ -96,6 +97,15 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
     }
     if (clickEventActuator_) {
         clickEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
+    }
+    if (userParallelClickEventActuator_) {
+        auto clickRecognizer = userParallelClickEventActuator_->GetClickRecognizer();
+        if (clickRecognizer) {
+            clickRecognizer->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::CLICK, true));
+            clickRecognizer->SetOnAction(userParallelClickEventActuator_->GetClickEvent());
+            clickRecognizer->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
+            clickRecognizer->SetGetEventTargetImpl(getEventTargetImpl);
+        }
     }
     if (panEventActuator_) {
         panEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
@@ -172,6 +182,31 @@ void GestureEventHub::OnModifyDone()
     }
 }
 
+RefPtr<NGGestureRecognizer> GestureEventHub::PackInnerRecognizer(
+    const Offset& offset, std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, int32_t touchId,
+    const RefPtr<TargetComponent>& targetComponent)
+{
+    RefPtr<NGGestureRecognizer> current;
+    // Pack inner recognizer include self inner recognizer and children.
+    if (innerRecognizers.size() == 1) {
+        current = *innerRecognizers.begin();
+    } else if (innerRecognizers.size() > 1) {
+        if (!innerExclusiveRecognizer_) {
+            innerExclusiveRecognizer_ = AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(innerRecognizers));
+        } else {
+            innerExclusiveRecognizer_->AddChildren(innerRecognizers);
+        }
+        innerExclusiveRecognizer_->SetCoordinateOffset(offset);
+        innerExclusiveRecognizer_->BeginReferee(touchId);
+        auto host = GetFrameNode();
+        innerExclusiveRecognizer_->AttachFrameNode(WeakPtr<FrameNode>(host));
+        innerExclusiveRecognizer_->SetTargetComponent(targetComponent);
+        current = innerExclusiveRecognizer_;
+    }
+
+    return current;
+}
+
 void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
     std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
     const RefPtr<TargetComponent>& targetComponent)
@@ -186,23 +221,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
 
     auto offset = Offset(coordinateOffset.GetX(), coordinateOffset.GetY());
     RefPtr<NGGestureRecognizer> current;
-
-    // Pack inner recognizer include self inner recognizer and children.
-    if (innerRecognizers.size() == 1) {
-        current = *innerRecognizers.begin();
-    } else if (innerRecognizers.size() > 1) {
-        if (!innerExclusiveRecognizer_) {
-            innerExclusiveRecognizer_ = AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(innerRecognizers));
-        } else {
-            innerExclusiveRecognizer_->AddChildren(innerRecognizers);
-        }
-        innerExclusiveRecognizer_->SetCoordinateOffset(offset);
-        innerExclusiveRecognizer_->BeginReferee(touchId);
-        innerExclusiveRecognizer_->AttachFrameNode(WeakPtr<FrameNode>(host));
-        innerExclusiveRecognizer_->SetTargetComponent(targetComponent);
-        current = innerExclusiveRecognizer_;
-    }
-
+    current = PackInnerRecognizer(offset, innerRecognizers, touchId, targetComponent);
     auto geometryNode = host->GetGeometryNode();
     auto size = geometryNode->GetFrameSize();
     auto context = host->GetContext();
@@ -398,7 +417,7 @@ bool GestureEventHub::IsPixelMapNeedScale() const
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
     auto width = pixelMap_->GetWidth();
-    auto maxWidth = FrameNode::GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
+    auto maxWidth = GridSystemManager::GetInstance().GetMaxWidthWithColumnType(GridColumnType::DRAG_PANEL);
     if (frameNode->GetTag() == V2::WEB_ETS_TAG ||
         frameNode->GetDragPreviewOption().mode == DragPreviewMode::DISABLE_SCALE || width == 0 || width < maxWidth) {
         return false;
@@ -625,6 +644,9 @@ void GestureEventHub::GenerateMousePixelMap(const GestureEvent& info)
         CHECK_NULL_VOID(pattern);
         auto dragNode = pattern->MoveDragNode();
         CHECK_NULL_VOID(dragNode);
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->FlushPipelineImmediately();
         context = dragNode->GetRenderContext();
     } else {
         context = frameNode->GetRenderContext();
@@ -802,7 +824,9 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         auto taskScheduler = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
         GenerateMousePixelMap(info);
-        pixelMap = pixelMap_->GetPixelMapSharedPtr();
+        if (pixelMap_) {
+            pixelMap = pixelMap_->GetPixelMapSharedPtr();
+        }
     } else {
         CHECK_NULL_VOID(pixelMap_);
         if (pixelMap == nullptr) {
@@ -867,14 +891,13 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
             overlayManager->RemovePixelMap();
             pipeline->FlushPipelineImmediately();
         }
-        dragDropManager->FireOnEditableTextComponent(frameNode, DragEventType::ENTER);
-    } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON &&
-               (dragDropInfo.pixelMap || dragDropInfo.customNode)) {
+    } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
         if (!dragDropManager->IsNeedScaleDragPreview()) {
             InteractionInterface::GetInstance()->SetDragWindowVisible(true);
         }
         dragDropManager->SetIsDragWindowShow(true);
     }
+    dragDropManager->FireOnEditableTextComponent(frameNode, DragEventType::ENTER);
     dragDropProxy_ = dragDropManager->CreateFrameworkDragDropProxy();
     if (!dragDropProxy_) {
         return;
@@ -971,14 +994,23 @@ void GestureEventHub::CheckClickActuator()
         clickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
         clickEventActuator_->SetOnAccessibility(GetOnAccessibilityEventFunc());
     }
+
+    if (parallelCombineClick && !userParallelClickEventActuator_) {
+        userParallelClickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
+        userParallelClickEventActuator_->SetOnAccessibility(GetOnAccessibilityEventFunc());
+    }
 }
 
 void GestureEventHub::SetUserOnClick(GestureEventFunc&& clickEvent)
 {
     CheckClickActuator();
-    clickEventActuator_->SetUserCallback(std::move(clickEvent));
-
-    SetFocusClickEvent(clickEventActuator_->GetClickEvent());
+    if (parallelCombineClick) {
+        userParallelClickEventActuator_->SetUserCallback(std::move(clickEvent));
+        SetFocusClickEvent(userParallelClickEventActuator_->GetClickEvent());
+    } else {
+        clickEventActuator_->SetUserCallback(std::move(clickEvent));
+        SetFocusClickEvent(clickEventActuator_->GetClickEvent());
+    }
 }
 
 void GestureEventHub::SetOnGestureJudgeBegin(GestureJudgeFunc&& gestureJudgeFunc)

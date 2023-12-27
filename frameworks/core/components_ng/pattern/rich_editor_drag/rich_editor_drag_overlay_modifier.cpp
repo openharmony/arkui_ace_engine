@@ -32,7 +32,7 @@ void RichEditorDragOverlayModifier::onDraw(DrawingContext& context)
 {
     auto pattern = DynamicCast<RichEditorDragPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(pattern);
-    auto canvas = context.canvas;
+    auto& canvas = context.canvas;
     Color color(TEXT_DRAG_COLOR_BG);
     RSBrush brush;
     brush.SetColor(ToRSColor(color));

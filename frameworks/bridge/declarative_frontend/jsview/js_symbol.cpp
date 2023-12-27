@@ -51,12 +51,20 @@ void JSSymbol::JSBind(BindingTarget globalObj)
     JSClass<JSSymbol>::StaticMethod("fontSize", &JSSymbol::SetFontSize, opt);
     JSClass<JSSymbol>::StaticMethod("renderingStrategy", &JSSymbol::SetSymbolRenderingStrategy, opt);
     JSClass<JSSymbol>::StaticMethod("fontColor", &JSSymbol::SetFontColor, opt);
+    JSClass<JSSymbol>::StaticMethod("effectStrategy", &JSSymbol::SetSymbolEffect, opt);
+    JSClass<JSSymbol>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSSymbol>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSSymbol>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSymbol>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSSymbol::Create(const JSCallbackInfo& info)
 {
     uint32_t symbolId;
+    if (info[0]->IsUndefined()) {
+        SymbolModel::GetInstance()->Create(0);
+        return;
+    }
     ParseJsSymbolId(info[0], symbolId);
 
     SymbolModel::GetInstance()->Create(symbolId);
@@ -96,5 +104,12 @@ void JSSymbol::SetFontColor(const JSCallbackInfo& info)
         return;
     }
     SymbolModel::GetInstance()->SetFontColor(symbolColor);
+}
+
+void JSSymbol::SetSymbolEffect(const JSCallbackInfo& info)
+{
+    uint32_t strategy = 0;
+    ParseJsInteger(info[0], strategy);
+    SymbolModel::GetInstance()->SetSymbolEffect(strategy);
 }
 } // namespace OHOS::Ace::Framework

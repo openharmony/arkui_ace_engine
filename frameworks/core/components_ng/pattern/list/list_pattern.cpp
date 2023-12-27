@@ -585,6 +585,18 @@ void ListPattern::GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) con
     }
 }
 
+float ListPattern::GetOffsetWithLimit(float offset) const
+{
+    auto currentOffset = GetTotalOffset() + contentStartOffset_;
+    if (Positive(offset)) {
+        return std::min(currentOffset, offset);
+    } else if (Negative(offset)) {
+        auto remainHeight = GetTotalHeight() - currentOffset;
+        return std::max(offset, -remainHeight);
+    }
+    return 0;
+}
+
 OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
 {
     OverScrollOffset offset = { 0, 0 };
@@ -1558,7 +1570,7 @@ float ListPattern::GetTotalHeight() const
 {
     auto currentOffset = GetTotalOffset();
     if (endIndex_ >= maxListItemIndex_) {
-        return currentOffset + endMainPos_;
+        return currentOffset + endMainPos_ + contentEndOffset_;
     }
     if (itemPosition_.empty()) {
         return 0.0f;
@@ -1566,7 +1578,7 @@ float ListPattern::GetTotalHeight() const
     int32_t remainCount = maxListItemIndex_ - endIndex_;
     float itemsSize = itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
     float remainOffset = itemsSize / itemPosition_.size() * remainCount - spaceWidth_;
-    return currentOffset + endMainPos_ + remainOffset;
+    return currentOffset + endMainPos_ + remainOffset + contentEndOffset_;
 }
 
 void ListPattern::SetChainAnimation()
@@ -1619,7 +1631,9 @@ void ListPattern::SetChainAnimation()
         chainAnimation_->SetAnimationCallback([weak = AceType::WeakClaim(this)]() {
             auto list = weak.Upgrade();
             CHECK_NULL_VOID(list);
-            list->MarkDirtyNodeSelf();
+            if (list->IsScrollableAnimationNotRunning()) {
+                list->MarkDirtyNodeSelf();
+            }
         });
     }
 }
@@ -1636,7 +1650,8 @@ void ListPattern::SetChainAnimationOptions(const ChainAnimationOptions& options)
         }
         float maxSpace = options.maxSpace.ConvertToPx();
         float minSpace = options.minSpace.ConvertToPx();
-        if (GreatNotEqual(minSpace, maxSpace)) {
+        if (Negative(minSpace) || Negative(maxSpace) || GreatNotEqual(minSpace, space) ||
+            LessNotEqual(maxSpace, space) || GreatNotEqual(minSpace, maxSpace)) {
             minSpace = space;
             maxSpace = space;
         }

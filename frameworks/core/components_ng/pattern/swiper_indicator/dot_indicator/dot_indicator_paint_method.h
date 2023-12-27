@@ -173,7 +173,7 @@ private:
     int32_t itemCount_ = 0;
     int32_t displayCount_ = 1;
     float turnPageRate_ = 0.0f;
-    GestureState gestureState_ = GestureState::GESTURE_STATE_FOLLOW;
+    GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     TouchBottomTypeLoop touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     PointAnimationStage pointAnimationStage_ = PointAnimationStage::STATE_SHRINKT_TO_BLACK_POINT;
     float touchBottomRate_ = 0.0f;

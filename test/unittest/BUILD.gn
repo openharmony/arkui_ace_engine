@@ -232,6 +232,7 @@ ohos_source_set("ace_components_manager") {
     "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/manager/frame_rate/frame_rate_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/full_screen/full_screen_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/post_event/post_event_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/safe_area/safe_area_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_client.cpp",
     "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_manager.cpp",
@@ -455,11 +456,12 @@ source_set("ace_components_mock") {
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "$ace_root/test/mock/core/common/mock_data_detector_mgr.cpp",
     "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
+    "$ace_root/test/mock/core/common/mock_frame_report.cpp",
     "$ace_root/test/mock/core/common/mock_image_analyzer_mgr.cpp",
     "$ace_root/test/mock/core/common/mock_interaction.cpp",
+    "$ace_root/test/mock/core/common/mock_layout_inspector.cpp",
     "$ace_root/test/mock/core/common/mock_motion_path_evaluator.cpp",
-    "$ace_root/test/mock/core/common/mock_scrollable.cpp",
-    "$ace_root/test/mock/core/common/mock_scrollable_ng.cpp",
+    "$ace_root/test/mock/core/common/mock_raw_recognizer.cpp",
     "$ace_root/test/mock/core/common/mock_theme_constants.cpp",
     "$ace_root/test/mock/core/common/mock_theme_utils.cpp",
     "$ace_root/test/mock/core/event/mock_time_event_proxy.cpp",
@@ -484,7 +486,6 @@ source_set("ace_components_mock") {
   ]
   deps = [
     "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "//foundation/arkui/napi:ace_napi",
     "//third_party/googletest:gmock_main",
   ]
   configs += [ ":ace_unittest_config" ]
@@ -808,12 +809,16 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/nestable_scroll_container.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/refresh_coordination.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_controller.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_item.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_item_pool.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_paint_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_utils.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/search_event_hub.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/search/search_gesture_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/search_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/search_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/search_node.cpp",
@@ -987,6 +992,5 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "//third_party/bounds_checking_function:libsec_static",
   ]
-  external_deps = [ "napi:ace_napi" ]
   configs = [ ":ace_unittest_config" ]
 }

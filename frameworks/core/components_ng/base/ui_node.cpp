@@ -491,6 +491,10 @@ void UINode::DumpTree(int32_t depth)
     for (const auto& [item, index] : disappearingChildren_) {
         item->DumpTree(depth + 1);
     }
+    auto frameNode = AceType::DynamicCast<FrameNode>(this);
+    if (frameNode && frameNode->GetOverlayNode()) {
+        frameNode->GetOverlayNode()->DumpTree(depth + 1);
+    }
 }
 
 bool UINode::DumpTreeById(int32_t depth, const std::string& id)
@@ -675,6 +679,16 @@ RefPtr<LayoutWrapperNode> UINode::CreateLayoutWrapper(bool forceMeasure, bool fo
     return frameChild ? frameChild->CreateLayoutWrapper(forceMeasure, forceLayout) : nullptr;
 }
 
+bool UINode::RenderCustomChild(int64_t deadline)
+{
+    for (const auto& child : GetChildren()) {
+        if (child && !child->RenderCustomChild(deadline)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void UINode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
 {
     for (const auto& child : GetChildren()) {
@@ -694,6 +708,18 @@ void UINode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
             child->Build(extraInfos);
         }
     }
+}
+
+void UINode::CreateExportTextureInfoIfNeeded()
+{
+    if (!exportTextureInfo_) {
+        exportTextureInfo_ = MakeRefPtr<ExportTextureInfo>();
+    }
+}
+
+bool UINode::IsNeedExportTexture() const
+{
+    return exportTextureInfo_ && exportTextureInfo_->GetCurrentRenderType() == NodeRenderType::RENDER_TYPE_TEXTURE;
 }
 
 void UINode::SetActive(bool active)

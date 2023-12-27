@@ -1550,6 +1550,7 @@ void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialo
         .isModal = dialogAttr.isModal,
         .maskRect = dialogAttr.maskRect,
         .customBuilder = dialogAttr.customBuilder,
+        .isSysBlurStyle = false,
     };
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();

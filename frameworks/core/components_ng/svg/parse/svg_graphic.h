@@ -82,11 +82,16 @@ protected:
                 filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
                     RSBlurType::NORMAL, static_cast<double>(smoothEdge), false
                 ));
-                strokePen_.SetFilter(filter);
+                auto tmpFillBrush = fillBrush_;
+                tmpFillBrush.SetFilter(filter);
+                rsCanvas_->AttachBrush(tmpFillBrush);
+                rsCanvas_->DrawPath(path_);
+                rsCanvas_->DetachBrush();
+            } else {
+                rsCanvas_->AttachBrush(fillBrush_);
+                rsCanvas_->DrawPath(path_);
+                rsCanvas_->DetachBrush();
             }
-            rsCanvas_->AttachBrush(fillBrush_);
-            rsCanvas_->DrawPath(path_);
-            rsCanvas_->DetachBrush();
         }
 #endif
     }
@@ -114,11 +119,16 @@ protected:
                 filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
                     RSBlurType::NORMAL, static_cast<double>(smoothEdge), false
                 ));
-                strokePen_.SetFilter(filter);
+                auto tmpStrokePen = strokePen_;
+                tmpStrokePen.SetFilter(filter);
+                rsCanvas_->AttachPen(tmpStrokePen);
+                rsCanvas_->DrawPath(path_);
+                rsCanvas_->DetachPen();
+            } else {
+                rsCanvas_->AttachPen(strokePen_);
+                rsCanvas_->DrawPath(path_);
+                rsCanvas_->DetachPen();
             }
-            rsCanvas_->AttachPen(strokePen_);
-            rsCanvas_->DrawPath(path_);
-            rsCanvas_->DetachPen();
         }
 #endif
     }

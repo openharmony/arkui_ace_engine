@@ -116,8 +116,15 @@ void JSGridItem::ForceRebuild(bool forceRebuild)
     GridItemModel::GetInstance()->SetForceRebuild(forceRebuild);
 }
 
-void JSGridItem::SetSelectable(bool selectable)
+void JSGridItem::SetSelectable(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
+    bool selectable = true;
+    if (info[0]->IsBoolean()) {
+        selectable = info[0]->ToBoolean();
+    }
     GridItemModel::GetInstance()->SetSelectable(selectable);
 }
 

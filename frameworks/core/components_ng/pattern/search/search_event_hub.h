@@ -20,6 +20,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/search/search_gesture_event_hub.h"
 #include "core/common/recorder/event_recorder.h"
 
 namespace OHOS::Ace::NG {
@@ -112,6 +113,11 @@ public:
     void SetOnChangeEvent(ChangeAndSubmitEvent&& onChangeEvent)
     {
         onValueChangeEvent_ = std::move(onChangeEvent);
+    }
+
+    RefPtr<GestureEventHub> CreateGestureEventHub() override
+    {
+        return MakeRefPtr<SearchGestureEventHub>(WeakClaim(this));
     }
 
 private:

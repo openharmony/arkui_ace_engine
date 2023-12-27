@@ -164,6 +164,7 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
 {
     CHECK_NULL_RETURN(builder, -1);
     std::optional<TextStyle> textStyle;
+    auto symbolUnicode = GetSymbolUnicode();
     if (fontStyle || textLineStyle) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, -1);
@@ -177,6 +178,9 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
         }
         textStyle = themeTextStyle;
         textStyle->SetHalfLeading(pipelineContext->GetHalfLeading());
+        if (symbolUnicode != 0) {
+            UpdateSymbolSpanColor(themeTextStyle);
+        }
         builder->PushStyle(themeTextStyle);
     }
     auto spanContent = GetSpanContent(content);
@@ -189,7 +193,6 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
     }
     textStyle_ = textStyle;
 
-    auto symbolUnicode = GetSymbolUnicode();
     if (symbolUnicode != 0) {
         builder->AddSymbol(symbolUnicode);
     }
@@ -206,6 +209,16 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
         builder->PopStyle();
     }
     return -1;
+}
+
+void SpanItem::UpdateSymbolSpanColor(TextStyle& symbolSpanStyle)
+{
+    symbolSpanStyle.isSymbolGlyph_ = true;
+    if (symbolSpanStyle.GetSymbolColorList().empty()) {
+        std::vector<Color> symbolColor;
+        symbolColor.emplace_back(symbolSpanStyle.GetTextColor());
+        symbolSpanStyle.SetSymbolColorList(symbolColor);
+    }
 }
 
 void SpanItem::UpdateTextStyleForAISpan(
