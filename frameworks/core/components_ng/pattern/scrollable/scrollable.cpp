@@ -1049,8 +1049,8 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSnapProperty()
         uint64_t diff = currentVsync - scroll->lastVsyncTime_;
         if (diff < MIN_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
             scroll->snapVelocity_ = (position - scroll->currentPos_) / diff * MILLOS_PER_NANO_SECONDS;
-         }
-         scroll->lastVsyncTime_ = currentVsync;
+        }
+        scroll->lastVsyncTime_ = currentVsync;
         if (!scroll->isSnapScrollAnimationStop_) {
             scroll->ProcessScrollSnapMotion(position);
         } else if (!scroll->isSnapAnimationStop_) {
