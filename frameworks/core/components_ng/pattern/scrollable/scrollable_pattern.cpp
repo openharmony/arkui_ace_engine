@@ -372,7 +372,7 @@ void ScrollablePattern::AddScrollEvent()
     scrollable->SetOverScrollCallback([weak = WeakClaim(this)](float velocity) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
-        return pattern->HandleOverScroll(velocity);
+        return pattern->HandleOverScroll(!pattern->IsReverse() ? velocity : -velocity);
     });
 
     auto scrollStart = [weak = WeakClaim(this)](float position) {
@@ -1635,8 +1635,8 @@ ScrollResult ScrollablePattern::HandleScroll(float offset, int32_t source, Neste
 {
     ScrollResult result = { 0, false };
     auto parent = parent_.Upgrade();
-    auto overOffsets = GetOverScrollOffset(offset);
-    float backOverOffset = offset > 0 ? overOffsets.end : overOffsets.start;
+    auto overOffsets = GetOverScrollOffset(!IsReverse() ? offset : -offset);
+    float backOverOffset = (!IsReverse() ? offset > 0 : offset < 0) ? overOffsets.end : overOffsets.start;
     if (NearZero(offset) || !NearZero(backOverOffset)) {
         ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
         ExecuteScrollFrameBegin(offset, scrollState);
