@@ -926,7 +926,7 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
                 }
                 pattern->StopAnimation(pattern->curveAnimation_);
                 pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
-                    SceneStatus::END);   
+                    SceneStatus::END);
         });
         NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::START);
     }
