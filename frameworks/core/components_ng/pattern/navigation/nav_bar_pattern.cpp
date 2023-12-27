@@ -540,19 +540,24 @@ void NavBarPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
+    host->SetNeedAdjustOffset(false);
+    SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
+    host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
+
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
     if (theme && theme->GetNavBarUnfocusEffectEnable()) {
         pipelineContext->AddWindowFocusChangedCallback(host->GetId());
     }
-    host->SetNeedAdjustOffset(false);
-    SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
-    host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
 }
 
 void NavBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID(!panEvent_);
+    if (isHideTitlebar_ || titleMode_ != NavigationTitleMode::FREE) {
+        gestureHub->RemovePanEvent(panEvent_);
+        return;
+    }
 
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
@@ -560,7 +565,7 @@ void NavBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         pattern->HandleOnDragStart(info.GetOffsetY());
     };
 
-    auto actionUpdateTask = [weak = WeakClaim(this), this](const GestureEvent& info) {
+    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleOnDragUpdate(info.GetOffsetY());
@@ -578,8 +583,9 @@ void NavBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         pattern->HandleOnDragEnd();
     };
 
-    if (panEvent_) {
-        gestureHub->RemovePanEvent(panEvent_);
+    if (!panEvent_) {
+        panEvent_ = MakeRefPtr<PanEvent>(std::move(actionStartTask), std::move(actionUpdateTask),
+            std::move(actionEndTask), std::move(actionCancelTask));
     }
 
     panEvent_ = MakeRefPtr<PanEvent>(
@@ -625,6 +631,9 @@ void NavBarPattern::HandleOnDragEnd()
 
 void NavBarPattern::OnCoordScrollStart()
 {
+    if (isHideTitlebar_ || titleMode_ != NavigationTitleMode::FREE) {
+        return;
+    }
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
@@ -636,17 +645,23 @@ void NavBarPattern::OnCoordScrollStart()
 
 float NavBarPattern::OnCoordScrollUpdate(float offset)
 {
+    if (isHideTitlebar_ || titleMode_ != NavigationTitleMode::FREE) {
+        return 0.0f;
+    }
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
-    CHECK_NULL_RETURN(hostNode, false);
+    CHECK_NULL_RETURN(hostNode, 0.0f);
     auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_RETURN(titleNode, false);
+    CHECK_NULL_RETURN(titleNode, 0.0f);
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_RETURN(titlePattern, false);
+    CHECK_NULL_RETURN(titlePattern, 0.0f);
     return titlePattern->OnCoordScrollUpdate(offset);
 }
 
 void NavBarPattern::OnCoordScrollEnd()
 {
+    if (isHideTitlebar_ || titleMode_ != NavigationTitleMode::FREE) {
+        return;
+    }
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
@@ -664,12 +679,11 @@ void NavBarPattern::OnModifyDone()
     MountToolBar(hostNode);
     auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
-    isHideToolbar_ = navBarLayoutProperty->GetHideToolBar().value_or(false);
-    RegistOritationListener();
-    // if current mode is not free, doesn't have animation
-    if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
-        return;
-    }
+    isHideToolbar_ = navBarLayoutProperty->GetHideToolBarValue(false);
+    isHideTitlebar_ = navBarLayoutProperty->GetHideTitleBarValue(false);
+    titleMode_ = navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+
+    // drag navbar to update title bar height.
     auto gesture = hostNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     InitPanEvent(gesture);
@@ -702,44 +716,12 @@ void NavBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
     }
 }
 
-void NavBarPattern::RegistOritationListener()
-{
-    if (isOritationListenerRegisted_) {
-        return;
-    }
-    isOritationListenerRegisted_ = true;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddWindowSizeChangeCallback(host->GetId());
-}
-
 void NavBarPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
-    isOritationListenerRegisted_ = false;
-}
-
-bool NavBarPattern::IsTitleModeFree()
-{
-    auto frameNode = GetHost();
-    CHECK_NULL_RETURN(frameNode, false);
-    auto navBarLayoutProperty = frameNode->GetLayoutProperty<NavBarLayoutProperty>();
-    CHECK_NULL_RETURN(navBarLayoutProperty, false);
-    return navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE;
-}
-
-bool NavBarPattern::IsTitleBarHide()
-{
-    auto frameNode = GetHost();
-    CHECK_NULL_RETURN(frameNode, false);
-    auto navBarLayoutProperty = frameNode->GetLayoutProperty<NavBarLayoutProperty>();
-    CHECK_NULL_RETURN(navBarLayoutProperty, false);
-    return navBarLayoutProperty->GetHideTitleBar().value_or(false);
 }
 
 void NavBarPattern::WindowFocus(bool isFocus)
