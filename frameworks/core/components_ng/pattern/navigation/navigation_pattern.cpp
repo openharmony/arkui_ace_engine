@@ -134,7 +134,7 @@ void NavigationPattern::OnAttachToFrameNode()
     if (theme && theme->GetNavBarUnfocusEffectEnable()) {
         pipelineContext->AddWindowFocusChangedCallback(host->GetId());
     }
-    SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_ALL, .type = SAFE_AREA_TYPE_SYSTEM };
+    SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
     host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
 }
 
@@ -936,10 +936,6 @@ RefPtr<FrameNode> NavigationPattern::GetDividerNode() const
     CHECK_NULL_RETURN(navigationNode, nullptr);
     auto dividerFrameNode = AceType::DynamicCast<FrameNode>(navigationNode->GetDividerNode());
     CHECK_NULL_RETURN(dividerFrameNode, nullptr);
-
-    SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_ALL, .type = SAFE_AREA_TYPE_SYSTEM };
-    dividerFrameNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
-
     return dividerFrameNode;
 }
 
@@ -1230,10 +1226,8 @@ void NavigationPattern::OnColorConfigurationUpdate()
 {
     auto dividerNode = GetDividerNode();
     CHECK_NULL_VOID(dividerNode);
-    auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
-    CHECK_NULL_VOID(dividerRenderProperty);
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-    dividerRenderProperty->UpdateDividerColor(theme->GetNavigationDividerColor());
+    dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
 }
 } // namespace OHOS::Ace::NG
