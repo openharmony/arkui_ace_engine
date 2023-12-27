@@ -1526,6 +1526,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     HandleEtsCardTouchEvent(point);
 
     auto scalePoint = point.CreateScalePoint(GetViewScale());
+    ResSchedReport::GetInstance().OnTouchEvent(scalePoint.type);
     if (scalePoint.type != TouchType::MOVE && scalePoint.type != TouchType::PULL_MOVE) {
         eventManager_->GetEventTreeRecord().AddTouchPoint(scalePoint);
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
