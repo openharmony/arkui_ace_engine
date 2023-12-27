@@ -988,8 +988,8 @@ void ScrollablePattern::InitSpringOffsetProperty()
         CHECK_NULL_VOID(context);
         uint64_t currentVsync = context.GetVsyncTime();
         uint64_t diff = currentVsync - pattern->lastVsyncTime_;
-        if (MIN_DIFF_VSYNC < diff < MIN_VSYNC_DIFF_TIME) {
-            pattern->currentVelocity_ = (position - pattern->lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
+        if (diff < MIN_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
+            pattern->currentVelocity_ = (offset - pattern->lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
             pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->currentVelocity_,
                 SceneStatus::RUNNING);
         }
@@ -1020,8 +1020,8 @@ void ScrollablePattern::InitCurveOffsetProperty(float position)
         CHECK_NULL_VOID(context);
         uint64_t currentVsync = context.GetVsyncTime();
         uint64_t diff = currentVsync - pattern->lastVsyncTime_;
-        if (MIN_DIFF_VSYNC < diff < MIN_VSYNC_DIFF_TIME) {
-            pattern->currentVelocity_ = (position - pattern->lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
+        if (diff < MIN_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
+            pattern->currentVelocity_ = (offset - pattern->lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
             pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->currentVelocity_,
                 SceneStatus::RUNNING);
         }
