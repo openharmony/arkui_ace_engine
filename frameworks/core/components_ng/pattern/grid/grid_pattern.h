@@ -250,8 +250,12 @@ private:
     double GetNearestDistanceFromChildToCurFocusItemInMainAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     double GetNearestDistanceFromChildToCurFocusItemInCrossAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     void ResetAllDirectionsStep();
-    void ScrollToTargrtIndex(int32_t index);
-    void AdjustingTargetPos(float targetPos, int32_t rowIndex, float lineHeight);
+    bool AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
+    bool GetGridItemAnimatePos(
+        int32_t index, ScrollAlign align, float& targetPos, GridLayoutInfo& gcrollGridLayoutInfo);
+    bool GetLineIndexByIndex(
+        std::map<int32_t, std::map<int32_t, int32_t>> gridMatrix_, int32_t& targetIndex, int32_t& targetLineIndex);
+    float GetTotalHeight(std::map<int32_t, float>& heightMap, int32_t targetLineIndex);
 
     float animatorOffset_ = 0.0f;
     float prevHeight_ = 0;
