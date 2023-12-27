@@ -212,7 +212,8 @@ public:
 
     virtual void OnMediaQueryUpdate(bool isSynchronous = false) = 0;
 
-    virtual void RegisterFont(const std::string& familyName, const std::string& familySrc) = 0;
+    virtual void RegisterFont(const std::string& familyName, const std::string& familySrc,
+        const std::string& bundleName = "", const std::string& moduleName = "") = 0;
 
     virtual void GetSystemFontList(std::vector<std::string>& fontList) = 0;
 

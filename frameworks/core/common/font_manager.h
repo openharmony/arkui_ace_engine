@@ -39,8 +39,8 @@ public:
 
     static RefPtr<FontManager> Create();
 
-    void RegisterFont(
-        const std::string& familyName, const std::string& familySrc, const RefPtr<PipelineBase>& context);
+    void RegisterFont(const std::string& familyName, const std::string& familySrc, const RefPtr<PipelineBase>& context,
+        const std::string& bundleName = "", const std::string& moduleName = "");
     void GetSystemFontList(std::vector<std::string>& fontList);
     bool GetSystemFont(const std::string& fontName, FontInfo& fontInfo);
     bool RegisterCallback(

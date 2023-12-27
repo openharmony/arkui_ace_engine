@@ -267,10 +267,11 @@ void PipelineBase::SetTextFieldManager(const RefPtr<ManagerInterface>& manager)
     textFieldManager_ = manager;
 }
 
-void PipelineBase::RegisterFont(const std::string& familyName, const std::string& familySrc)
+void PipelineBase::RegisterFont(const std::string& familyName, const std::string& familySrc,
+    const std::string& bundleName, const std::string& moduleName)
 {
     if (fontManager_) {
-        fontManager_->RegisterFont(familyName, familySrc, AceType::Claim(this));
+        fontManager_->RegisterFont(familyName, familySrc, AceType::Claim(this), bundleName, moduleName);
     }
 }
 
