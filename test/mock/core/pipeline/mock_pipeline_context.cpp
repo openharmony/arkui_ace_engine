@@ -36,6 +36,7 @@ uint64_t UITaskScheduler::frameId_ = 0;
 void MockPipelineContext::SetUp()
 {
     pipeline_ = AceType::MakeRefPtr<MockPipelineContext>();
+    pipeline_->eventManager_ = AceType::MakeRefPtr<EventManager>();
     pipeline_->rootWidth_ = DISPLAY_WIDTH;
     pipeline_->rootHeight_ = DISPLAY_HEIGHT;
     pipeline_->SetupRootElement();
