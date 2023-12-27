@@ -165,12 +165,8 @@ void SheetPresentationPattern::InitPanEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto titleColumn = DynamicCast<FrameNode>(host->GetFirstChild());
-    CHECK_NULL_VOID(titleColumn);
-    auto sheetDragBar = DynamicCast<FrameNode>(titleColumn->GetFirstChild());
-    CHECK_NULL_VOID(sheetDragBar);
 
-    auto hub = titleColumn->GetEventHub<EventHub>();
+    auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
@@ -299,7 +295,7 @@ void SheetPresentationPattern::HandleDragEnd(float dragVelocity)
             SheetTransition(true, std::abs(dragVelocity));
         }
     } else {
-        if (GreatOrEqual(currentOffset_, 0.0f)) {
+        if (GreatOrEqual(dragVelocity, 0.0f)) {
             if (NearZero(downHeight)) {
                 SheetInteractiveDismiss(true, std::abs(dragVelocity));
             } else {
