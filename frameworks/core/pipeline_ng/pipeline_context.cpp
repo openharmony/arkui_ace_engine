@@ -2260,6 +2260,7 @@ void PipelineContext::WindowFocus(bool isFocus)
             windowFocus_ = true;
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "windowfocus focusOnNodeCallback_.");
         }
+        RequestFrame();
     }
     FlushWindowFocusChangedCallback(isFocus);
 }
