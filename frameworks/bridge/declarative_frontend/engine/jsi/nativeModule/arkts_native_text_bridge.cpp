@@ -584,7 +584,7 @@ ArkUINativeModuleValue TextBridge::SetHeightAdaptivePolicy(ArkUIRuntimeCallInfo*
     if (secondArg->IsNumber()
         && secondArg->Int32Value(vm) >= static_cast<int32_t>(TextHeightAdaptivePolicy::MAX_LINES_FIRST)
         && secondArg->Int32Value(vm) <= static_cast<int32_t>(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST)) {
-        uint32_t value = secondArg->Int32Value(vm);
+        auto value = secondArg->Int32Value(vm);
         GetArkUIInternalNodeAPI()->GetTextModifier().SetTextHeightAdaptivePolicy(nativeNode, value);
     } else {
         GetArkUIInternalNodeAPI()->GetTextModifier().ResetTextHeightAdaptivePolicy(nativeNode);

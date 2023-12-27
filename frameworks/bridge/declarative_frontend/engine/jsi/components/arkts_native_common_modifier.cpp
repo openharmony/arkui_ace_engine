@@ -398,7 +398,7 @@ void SetBorderImageWidth(RefPtr<BorderImage>& borderImage,
     const std::vector<BorderImageDirection> directions,
     const StringAndDouble* options, int32_t optionsLength, int32_t& offset)
 {
-    for (unsigned int index = 0; index < NUM_12; index += NUM_3) {
+    for (int32_t index = 0; index < NUM_12; index += NUM_3) {
         std::optional<CalcDimension> optDimension;
         SetCalcDimension(optDimension, options, optionsLength, offset + index);
         if (optDimension.has_value()) {
@@ -1346,7 +1346,7 @@ void ResetForegroundBlurStyle(NodeHandle node)
  * @param stopsLength stops length
  * @param directionValue direction value
  */
-void SetLinearGradientBlur(NodeHandle node, double blurRadius, const double *stops, int32_t stopsLength,
+void SetLinearGradientBlur(NodeHandle node, double blurRadius, const double *stops, size_t stopsLength,
     int32_t directionValue)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1355,7 +1355,7 @@ void SetLinearGradientBlur(NodeHandle node, double blurRadius, const double *sto
     std::vector<std::pair<float, float>> fractionStops;
     if ((stopsLength & 0x1) == 0) {
         float tmpPos = -1.0f;
-        for (int32_t index = 0; index < stopsLength; index += NUM_2) {
+        for (size_t index = 0; index < stopsLength; index += NUM_2) {
             auto first = stops[index];
             auto second = stops[index + NUM_1];
             std::pair<float, float> fractionStop;
@@ -2458,7 +2458,7 @@ void SetExpandSafeArea(NodeHandle node, const char* typeStr, const char* edgesSt
     std::string edges;
     while ((pos = safeAreaTypeStr.find(delimiter)) != std::string::npos) {
         type = safeAreaTypeStr.substr(0, pos);
-        safeAreaType |= StringUtils::StringToInt(type);
+        safeAreaType |= StringUtils::StringToUint(type);
         safeAreaTypeStr.erase(0, pos + delimiter.length());
     }
     safeAreaType |= StringUtils::StringToUint(safeAreaTypeStr);
@@ -2467,7 +2467,7 @@ void SetExpandSafeArea(NodeHandle node, const char* typeStr, const char* edgesSt
         safeAreaEdge |= StringUtils::StringToUint(edges);
         safeAreaEdgeStr.erase(0, pos + delimiter.length());
     }
-    safeAreaEdge |= StringUtils::StringToInt(safeAreaEdgeStr);
+    safeAreaEdge |= StringUtils::StringToUint(safeAreaEdgeStr);
     opts.type = safeAreaType;
     opts.edges = safeAreaEdge;
     ViewAbstract::UpdateSafeAreaExpandOpts(frameNode, opts);
@@ -2592,8 +2592,8 @@ void ResetKey(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    std::string key = "";
-    ViewAbstract::SetInspectorId(frameNode, key);
+    std::string defaultStr = "";
+    ViewAbstract::SetInspectorId(frameNode, defaultStr);
 }
 
 void SetRestoreId(NodeHandle node, uint32_t id)

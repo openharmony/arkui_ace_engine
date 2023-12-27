@@ -264,7 +264,7 @@ struct ArkUICommonModifierAPI {
     void (*SetForegroundBlurStyle)(
         NodeHandle node, int32_t blurStyle, int32_t colorMode, int32_t adaptiveColor, double scale);
     void (*ResetForegroundBlurStyle)(NodeHandle node);
-    void (*SetLinearGradientBlur)(NodeHandle node, double blurRadius, const double *stops, int32_t stopsLength,
+    void (*SetLinearGradientBlur)(NodeHandle node, double blurRadius, const double *stops, size_t stopsLength,
         int32_t directionValue);
     void (*ResetLinearGradientBlur)(NodeHandle node);
     void (*SetBackgroundBlurStyle)(NodeHandle node, int32_t blurStyle, int32_t colorMode, int32_t adaptiveColor,

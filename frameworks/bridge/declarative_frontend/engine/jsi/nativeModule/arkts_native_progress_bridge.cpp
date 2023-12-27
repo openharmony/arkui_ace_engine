@@ -154,7 +154,7 @@ ArkUINativeModuleValue ProgressBridge::SetProgressColor(ArkUIRuntimeCallInfo* ru
         GetArkUIInternalNodeAPI()->GetProgressModifier().SetProgressColor(nativeNode, color.GetValue());
     } else if (ConvertProgressResourceColor(vm, colorArg, gradient)) {
         ArkUIGradientType gradientObj;
-        int32_t colorlength = gradient.GetColors().size();
+        auto colorlength = gradient.GetColors().size();
         std::vector<uint32_t> colorValues;
         std::vector<ArkUILengthType> offsetValues;
         if (colorlength <= 0) {
