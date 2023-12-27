@@ -22,6 +22,7 @@
 
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/js_frontend/engine/common/js_engine.h"
+#include "core/common/font_manager.h"
 
 namespace OHOS::Ace::Napi {
 namespace {
