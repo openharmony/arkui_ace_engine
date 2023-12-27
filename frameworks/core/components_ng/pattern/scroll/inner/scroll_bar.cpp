@@ -584,7 +584,7 @@ void ScrollBar::ProcessFrictionMotionStop()
 void ScrollBar::OnCollectTouchTarget(
     const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {
-    if (panRecognizer_) {
+    if (panRecognizer_ && isScrollable_) {
         panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
         panRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
         result.emplace_front(panRecognizer_);
