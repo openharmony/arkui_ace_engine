@@ -474,7 +474,7 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
     // Resets values.
     currentPos_ = mainPosition;
     currentVelocity_ = 0.0;
-
+    lastPosition_ = currentPos_;
     frictionOffsetProperty_->Set(mainPosition);
     float response = fabs(2 * M_PI / (FRICTION_SCALE * friction));
     auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(response, 1.0f, 0.0f);
@@ -624,7 +624,6 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
             CHECK_NULL_VOID(scroll);
             if (scroll->updateSnapAnimationCount_ == 0) {
                 scroll->isSnapScrollAnimationStop_ = true;
-                scroll->snapVelocity_ = 0.0f;
                 scroll->ProcessScrollSnapStop();
             }
     });
@@ -654,7 +653,6 @@ void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scro
             auto scroll = weak.Upgrade();
             CHECK_NULL_VOID(scroll);
             scroll->isSnapAnimationStop_ = true;
-            scroll->snapVelocity_ = 0.0f;
             scroll->ProcessScrollMotionStop(false);
             auto context = scroll->GetContext().Upgrade();
             CHECK_NULL_VOID(context && scroll->Idle());
@@ -856,13 +854,13 @@ void Scrollable::ProcessSpringMotion(double position)
     CHECK_NULL_VOID(context);
     uint64_t currentVsync = context.GetVsyncTime();
     uint64_t diff = currentVsync - lastVsyncTime_;
-    if (diff < MIN_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
+    if (MIN_DIFF_VSYNC < diff < MIN_VSYNC_DIFF_TIME) {
         currentVelocity_ = (position - currentPos_) / diff * MILLOS_PER_NANO_SECONDS;
+        if (scrollMotionFRCSceneCallback_) {
+            scrollMotionFRCSceneCallback_(currentVelocity_, NG::SceneStatus::RUNNING);
+        }
     }
     lastVsyncTime_ = currentVsync;
-    if (scrollMotionFRCSceneCallback_) {
-        scrollMotionFRCSceneCallback_(currentVelocity_, NG::SceneStatus::RUNNING);
-    }
     if (NearEqual(currentPos_, position)) {
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
     } else {
@@ -882,12 +880,6 @@ void Scrollable::ProcessSpringMotion(double position)
 void Scrollable::ProcessScrollMotion(double position)
 {
     currentVelocity_ = frictionVelocity_;
-    if (!isFrictionAnimationStop_ && scrollMotionFRCSceneCallback_) {
-        scrollMotionFRCSceneCallback_(currentVelocity_, NG::SceneStatus::RUNNING);
-    }
-    if ((!isSnapAnimationStop_ || !isSnapScrollAnimationStop_) && scrollMotionFRCSceneCallback_) {
-        scrollMotionFRCSceneCallback_(snapVelocity_, NG::SceneStatus::RUNNING);
-    }
     if (needScrollSnapToSideCallback_) {
         needScrollSnapChange_ = needScrollSnapToSideCallback_(position - currentPos_);
     }
@@ -994,7 +986,6 @@ void Scrollable::UpdateScrollSnapEndWithOffset(double offset)
                 // avoid current animation being interrupted by the prev animation's finish callback
                 if (scroll->updateSnapAnimationCount_ == 0) {
                     scroll->isSnapScrollAnimationStop_ = true;
-                    scroll->snapVelocity_ = 0.0f;
                     scroll->ProcessScrollSnapStop();
                 }
         });
@@ -1014,8 +1005,11 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetFrictionProperty()
         CHECK_NULL_VOID(context);
         uint64_t currentVsync = context.GetVsyncTime();
         uint64_t diff = currentVsync - scroll->lastVsyncTime_;
-        if (diff < MIN_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
+        if (MIN_DIFF_VSYNC < diff < MIN_VSYNC_DIFF_TIME) {
             scroll->frictionVelocity_ = (position - scroll->lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
+            if (scroll->scrollMotionFRCSceneCallback_) {
+                scroll->scrollMotionFRCSceneCallback_(scroll->frictionVelocity_, NG::SceneStatus::RUNNING);
+            }
          }
         scroll->lastVsyncTime_ = currentVsync;
         scroll->lastPosition_ = position;
@@ -1050,8 +1044,11 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSnapProperty()
         CHECK_NULL_VOID(context);
         uint64_t currentVsync = context.GetVsyncTime();
         uint64_t diff = currentVsync - scroll->lastVsyncTime_;
-        if (diff < MIN_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
+        if (MIN_DIFF_VSYNC < diff < MIN_VSYNC_DIFF_TIME) {
             scroll->snapVelocity_ = (position - scroll->currentPos_) / diff * MILLOS_PER_NANO_SECONDS;
+            if (scroll->scrollMotionFRCSceneCallback_) {
+                scroll->scrollMotionFRCSceneCallback_(scroll->snapVelocity_, NG::SceneStatus::RUNNING);
+            }
         }
         scroll->lastVsyncTime_ = currentVsync;
         if (!scroll->isSnapScrollAnimationStop_) {
@@ -1078,7 +1075,7 @@ void Scrollable::StopFrictionAnimation()
                 CHECK_NULL_VOID(scroll);
                 scroll->frictionOffsetProperty_->Set(0.0f);
             },
-            nullptr);
+        nullptr);
     }
 }
 
