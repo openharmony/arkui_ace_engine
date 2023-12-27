@@ -238,7 +238,7 @@ SelectionInfo TextPattern::GetSpansInfo(int32_t start, int32_t end, GetSpansMeth
     auto host = GetHost();
     const auto& children = host->GetChildren();
     for (const auto& uinode : children) {
-        if (uinode->GetTag() == V2::IMAGE_ETS_TAG || uinode->GetTag() == V2::SYMBOL_SPAN_ETS_TAG) {
+        if (uinode->GetTag() == V2::IMAGE_ETS_TAG) {
             ResultObject resultObject = GetImageResultObject(uinode, index, realStart, realEnd);
             if (!resultObject.valueString.empty() || resultObject.valuePixelMap) {
                 resultObjects.emplace_back(resultObject);
