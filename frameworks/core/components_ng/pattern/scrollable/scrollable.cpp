@@ -285,13 +285,13 @@ void Scrollable::StopScrollable()
     }
 }
 
-void Scrollable::HandleScrollEnd()
+void Scrollable::HandleScrollEnd(const std::optional<float>& velocity)
 {
     // priority:
     //  1. onScrollEndRec_ (would internally call onScrollEnd)
     //  2. scrollEndCallback_
     if (onScrollEndRec_) {
-        onScrollEndRec_();
+        onScrollEndRec_(velocity);
         return;
     }
     if (scrollEndCallback_) {
@@ -418,7 +418,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
                 return;
             }
         }
-        HandleScrollEnd();
+        HandleScrollEnd(correctVelocity);
         currentVelocity_ = 0.0;
 #ifdef OHOS_PLATFORM
         ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
@@ -729,7 +729,7 @@ void Scrollable::OnAnimateStop()
         scrollMotionFRCSceneCallback_(GetCurrentVelocity(), NG::SceneStatus::END);
     }
     if (moved_) {
-        HandleScrollEnd();
+        HandleScrollEnd(std::nullopt);
     }
     currentVelocity_ = 0.0;
     if (isTouching_ || isDragUpdateStop_) {
@@ -839,7 +839,7 @@ void Scrollable::ProcessScrollMotionStop()
             return;
         }
         moved_ = false;
-        HandleScrollEnd();
+        HandleScrollEnd(std::nullopt);
 #ifdef OHOS_PLATFORM
         ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
         if (FrameReport::GetInstance().GetEnable()) {

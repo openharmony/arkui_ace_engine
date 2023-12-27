@@ -383,10 +383,10 @@ void ScrollablePattern::AddScrollEvent()
     };
     scrollable->SetOnScrollStartRec(std::move(scrollStart));
 
-    auto scrollEndRec = [weak = WeakClaim(this)]() {
+    auto scrollEndRec = [weak = WeakClaim(this)](const std::optional<float>& velocity) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->OnScrollEndRecursive();
+        pattern->OnScrollEndRecursive(velocity);
     };
     scrollable->SetOnScrollEndRec(std::move(scrollEndRec));
 
@@ -1740,12 +1740,12 @@ void ScrollablePattern::OnScrollStartRecursive(float position)
     }
 }
 
-void ScrollablePattern::OnScrollEndRecursive()
+void ScrollablePattern::OnScrollEndRecursive(const std::optional<float>& velocity)
 {
     OnScrollEnd();
     auto parent = parent_.Upgrade();
     if (parent && nestedScroll_.NeedParent()) {
-        parent->OnScrollEndRecursive();
+        parent->OnScrollEndRecursive(velocity);
     }
 }
 
