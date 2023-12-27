@@ -18,6 +18,7 @@
 #include <memory>
 
 #include "gtest/gtest.h"
+#include "core/components/scroll/scroll_controller_base.h"
 
 #define protected public
 #define private public
@@ -1537,28 +1538,52 @@ HWTEST_F(WaterFlowTestNg, ScrollToIndex002, TestSize.Level1)
         CreateItem(30);
     });
 
-    pattern_->ScrollToIndex(3);
+    pattern_->ScrollToIndex(3, false, ScrollAlign::AUTO);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 0);
     EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, 0);
     EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, 0);
 
-    pattern_->ScrollToIndex(15);
+    pattern_->ScrollToIndex(15, false, ScrollAlign::START);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 15);
     EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, 0);
     EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -1100);
 
-    pattern_->ScrollToIndex(LAST_ITEM);
+    pattern_->ScrollToIndex(LAST_ITEM, false, ScrollAlign::START);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 19);
     EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, -100);
     EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -1500);
 
-    pattern_->ScrollToIndex(0);
+    pattern_->ScrollToIndex(0, false, ScrollAlign::START);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 0);
     EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, 0);
     EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, 0);
+
+    pattern_->ScrollToIndex(15, false, ScrollAlign::AUTO);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 7);
+    EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -500);
+
+    pattern_->ScrollToIndex(7, false, ScrollAlign::CENTER);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 3);
+    EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -200);
+
+    pattern_->ScrollToIndex(14, false, ScrollAlign::END);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 3);
+    EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, -100);
+    EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -300);
+
+    pattern_->ScrollToIndex(2, false, ScrollAlign::AUTO);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 1);
+    EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, -100);
+    EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -100);
 }
 } // namespace OHOS::Ace::NG
