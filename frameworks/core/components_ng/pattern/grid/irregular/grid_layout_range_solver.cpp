@@ -30,27 +30,67 @@ Result GridLayoutRangeSolver::FindStartingRow(float mainGap)
     // Negative offset implies scrolling down, so we can start from the previous startIndex_.
     // Otherwise, we have to restart from Row 0 because of irregular items.
     if (info_->currentOffset_ <= 0.0f) {
-        return SolveForward(mainGap);
+        return SolveForward(mainGap, -info_->currentOffset_, info_->startMainLineIndex_);
     }
-    return SolveBackward(mainGap);
+    return SolveBackward(mainGap, info_->currentOffset_, info_->startMainLineIndex_);
 }
 
-Result GridLayoutRangeSolver::SolveForward(float mainGap)
+GridLayoutRangeSolver::RangeInfo GridLayoutRangeSolver::FindRangeOnJump(int32_t jumpLineIdx, float mainGap)
 {
-    int32_t idx = info_->startMainLineIndex_;
-    float start = -info_->currentOffset_;
+    auto mainSize = wrapper_->GetGeometryNode()->GetContentSize().MainSize(info_->axis_);
+    /*
+    Notice that  finding the first line in ScrollAlign::END is the same as having the jumpLine matching the top of the
+    viewport and applying a positive whole-page offset, so we can directly use SolveBackward. But for
+    ScrollAlign::START, we have to change SolveForward a bit to find the ending row.
+    */
+    switch (info_->scrollAlign_) {
+        case ScrollAlign::START: {
+            auto topRows = CheckMultiRow(jumpLineIdx);
+            float offset = 0.0f;
+            for (int i = 1; i < topRows; ++i) {
+                offset -= info_->lineHeightMap_.at(jumpLineIdx - i) + mainGap;
+            }
+            auto [endLineIdx, endIdx] = SolveForwardForEndIdx(mainGap, mainSize, jumpLineIdx);
+            return { jumpLineIdx - topRows + 1, offset, endLineIdx, endIdx };
+        }
+        case ScrollAlign::CENTER: {
+            // align by item center
+            float halfMainSize = mainSize / 2.0f;
+            float halfLine = info_->lineHeightMap_.at(jumpLineIdx) / 2.0f;
+            auto [endLineIdx, endIdx] = SolveForwardForEndIdx(mainGap, halfMainSize + halfLine, jumpLineIdx);
+            auto res = SolveBackward(mainGap, halfMainSize - halfLine, jumpLineIdx);
+            return { res.row, res.pos, endLineIdx, endIdx };
+        }
+        case ScrollAlign::END: {
+            auto res = SolveBackward(mainGap, mainSize - info_->lineHeightMap_.at(jumpLineIdx), jumpLineIdx);
+            int32_t endIdx = 0;
+            const auto& lastRow = info_->gridMatrix_.at(jumpLineIdx);
+            for (auto it = lastRow.rbegin(); it != lastRow.rend(); ++it) {
+                if (it->second != -1) {
+                    endIdx = it->second;
+                    break;
+                }
+            }
+            return { res.row, res.pos, jumpLineIdx, endIdx };
+        }
+        default:
+            return {};
+    }
+}
 
+Result GridLayoutRangeSolver::SolveForward(float mainGap, float targetLen, int32_t idx)
+{
     float len = 0.0f;
-    while (len < start) {
+    while (len < targetLen) {
         auto [newRows, addLen] = AddNextRows(mainGap, idx);
-        if (len + addLen > start) {
+        if (len + addLen > targetLen) {
             break;
         }
         len += addLen;
         idx += newRows;
     }
 
-    return { idx, info_->currentOffset_ + len };
+    return { idx, len - targetLen };
 }
 
 std::pair<int32_t, float> GridLayoutRangeSolver::AddNextRows(float mainGap, int32_t idx)
@@ -86,18 +126,37 @@ std::pair<int32_t, float> GridLayoutRangeSolver::AddNextRows(float mainGap, int3
     return { rowCnt, len };
 }
 
-Result GridLayoutRangeSolver::SolveBackward(float mainGap)
+std::pair<int32_t, int32_t> GridLayoutRangeSolver::SolveForwardForEndIdx(float mainGap, float targetLen, int32_t idx)
 {
-    int32_t idx = info_->startMainLineIndex_;
+    float len = 0.0f;
+    while (len < targetLen && idx <= info_->lineHeightMap_.rbegin()->first) {
+        len += info_->lineHeightMap_.at(idx++) + mainGap;
+    }
+    --idx;
+
+    for (int r = idx; r >= 0; --r) {
+        const auto& row = info_->gridMatrix_.at(r);
+        for (auto it = row.rbegin(); it != row.rend(); ++it) {
+            if (it->second != -1) {
+                return { idx, it->second };
+            }
+        }
+    }
+    // should never reach here
+    return {};
+}
+
+Result GridLayoutRangeSolver::SolveBackward(float mainGap, float targetLen, int32_t idx)
+{
     float len = 0;
-    while (idx > 0 && len < info_->currentOffset_) {
+    while (idx > 0 && len < targetLen) {
         len += info_->lineHeightMap_.at(--idx) + mainGap;
     }
 
     auto rowCnt = CheckMultiRow(idx);
     idx -= rowCnt - 1;
 
-    float newOffset = info_->currentOffset_ - len;
+    float newOffset = targetLen - len;
     for (int i = 0; i < rowCnt - 1; ++i) {
         newOffset -= info_->lineHeightMap_.at(idx + i) + mainGap;
     }
