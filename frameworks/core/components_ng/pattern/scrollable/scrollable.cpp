@@ -1077,7 +1077,6 @@ void Scrollable::StopFrictionAnimation()
             },
             nullptr);
     }
-    frictionVelocity_ = 0.0f;
 }
 
 void Scrollable::StopSpringAnimation()
@@ -1117,6 +1116,5 @@ void Scrollable::StopSnapAnimation()
             },
             nullptr);
     }
-    snapVelocity_ = 0.0f;
 }
 } // namespace OHOS::Ace::NG
