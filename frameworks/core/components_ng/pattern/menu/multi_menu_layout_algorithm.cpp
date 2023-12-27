@@ -19,7 +19,9 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/grid_system_manager.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/layout/box_layout_algorithm.h"
+#include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -37,6 +39,13 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, childConstraint.maxSize);
     if (layoutConstraint->selfIdealSize.Width().has_value()) {
         // when Menu is set self ideal width, make children node adaptively fill up.
+        if (layoutConstraint->selfIdealSize.Width().value() < MIN_MENU_WIDTH.ConvertToPx()) {
+            RefPtr<GridColumnInfo> columnInfo;
+            columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
+            columnInfo->GetParent()->BuildColumnWidth();
+            auto minWidth = static_cast<float>(columnInfo->GetWidth(MENU_MIN_GRID_COUNTS));
+            layoutConstraint->selfIdealSize.SetWidth(minWidth);
+        }
         auto idealWidth =
             std::max(layoutConstraint->minSize.Width(),
                 std::min(layoutConstraint->maxSize.Width(), layoutConstraint->selfIdealSize.Width().value())) -
