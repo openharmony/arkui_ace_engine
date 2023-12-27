@@ -200,6 +200,18 @@ public:
         }
     }
 
+    void SetOnSelectionChange(std::function<void(const BaseEventInfo*)>&& func)
+    {
+        OnSelectionChange_ = std::move(func);
+    }
+
+    void FireOnSelectionChange(BaseEventInfo* value)
+    {
+        if (OnSelectionChange_) {
+            OnSelectionChange_(value);
+        }
+    }
+
     void SetTimestamp(long long timestamp)
     {
         timestamp_ = timestamp;
@@ -222,6 +234,7 @@ private:
     std::function<void(NG::TextCommonEvent&)> onPaste_;
     std::function<void()> onReady_;
     std::function<void(const BaseEventInfo*)> onSelect_;
+    std::function<void(const BaseEventInfo*)> OnSelectionChange_;
     std::function<bool(const RichEditorInsertValue&)> aboutToIMEInput_;
     std::function<void(const RichEditorAbstractSpanResult&)> onIMEIputComplete_;
     std::function<bool(const RichEditorDeleteValue&)> aboutToDelete_;

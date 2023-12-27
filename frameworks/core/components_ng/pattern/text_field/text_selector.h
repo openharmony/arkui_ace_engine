@@ -88,13 +88,15 @@ struct TextSelector {
 
     void Update(int32_t base, int32_t destination)
     {
-        if ((baseOffset != base) || (destinationOffset != destination)) {
-            if ((baseOffset != destinationOffset) || (base != destination)) {
-                FireAccessibilityCallback();
-            }
+        if (base == baseOffset && destination == destinationOffset) {
+            return;
         }
+        bool isChanged = baseOffset != destinationOffset || base != destination;
         baseOffset = base;
         destinationOffset = destination;
+        if (isChanged) {
+            FireAccessibilityCallback();
+        }
     }
 
     // Usually called when none is selected.

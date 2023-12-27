@@ -115,6 +115,19 @@ private:
     Selection selection_;
 };
 
+class SelectionRangeInfo : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(SelectionRangeInfo, BaseEventInfo);
+
+public:
+    SelectionRangeInfo(int32_t start, int32_t end) : BaseEventInfo("SelectionRangeInfo"), start_(start), end_(end) {};
+
+    ~SelectionRangeInfo() = default;
+
+    int32_t start_;
+
+    int32_t end_;
+};
+
 struct ParagraphInfo {
     // style
     RefPtr<PixelMap> leadingMarginPixmap;

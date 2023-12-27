@@ -963,14 +963,33 @@ OffsetF RichEditorPattern::CalcCursorOffsetByPosition(
 
 bool RichEditorPattern::SetCaretPosition(int32_t pos)
 {
-    auto lastCaretPosition = caretPosition_;
-    caretPosition_ = std::clamp(pos, 0, GetTextContentLength());
+    auto correctPos = std::clamp(pos, 0, GetTextContentLength());
     ResetLastClickOffset();
-    if (caretPosition_ == pos) {
+    if (pos == correctPos) {
+        if (caretVisible_ && caretPosition_ != correctPos && !textSelector_.IsValid()) {
+            FireOnSelectionChange(correctPos, correctPos);
+        }
+        caretPosition_ = correctPos;
         return true;
     }
-    caretPosition_ = lastCaretPosition;
     return false;
+}
+
+void RichEditorPattern::FireOnSelectionChange(int32_t start, int32_t end)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "range=[%{public}d,%{public}d]", start, end);
+    if (start < 0 || end < 0) {
+        return;
+    }
+    if (start > end) {
+        std::swap(start, end);
+    }
+    auto eventHub = host->GetEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto rangeInfo = SelectionRangeInfo(start, end);
+    eventHub->FireOnSelectionChange(&rangeInfo);
 }
 
 bool RichEditorPattern::GetCaretVisible() const
@@ -1281,6 +1300,10 @@ void RichEditorPattern::ScheduleCaretTwinkling()
 void RichEditorPattern::StartTwinkling()
 {
     caretTwinklingTask_.Cancel();
+    // Fire on selecion change when caret invisible -> visible
+    if (!caretVisible_) {
+        FireOnSelectionChange(caretPosition_, caretPosition_);
+    }
     caretVisible_ = true;
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
@@ -1757,12 +1780,17 @@ void RichEditorPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestur
     longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
     gestureHub->SetLongPressEvent(longPressEvent_);
 
-    auto onTextSelectorChange = [weak = WeakClaim(this)]() {
+    auto onTextSelectorChange = [weak = WeakClaim(this), &selector = textSelector_]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto frameNode = pattern->GetHost();
         CHECK_NULL_VOID(frameNode);
         frameNode->OnAccessibilityEvent(AccessibilityEventType::TEXT_SELECTION_UPDATE);
+        auto start = selector.GetStart();
+        auto end = selector.GetEnd();
+        if (start != end) {
+            pattern->FireOnSelectionChange(start, end);
+        }
     };
     textSelector_.SetOnAccessibility(std::move(onTextSelectorChange));
 }
