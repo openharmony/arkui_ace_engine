@@ -1226,11 +1226,8 @@ void NavigationPattern::OnColorConfigurationUpdate()
 {
     auto dividerNode = GetDividerNode();
     CHECK_NULL_VOID(dividerNode);
-    auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
-    CHECK_NULL_VOID(dividerRenderProperty);
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
-    dividerRenderProperty->UpdateDividerColor(Color::TRANSPARENT);
     dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
 }
 } // namespace OHOS::Ace::NG
