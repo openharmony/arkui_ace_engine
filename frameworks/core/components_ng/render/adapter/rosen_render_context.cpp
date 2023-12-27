@@ -4557,7 +4557,7 @@ void RosenRenderContext::SetShadowElevation(float elevation)
 void RosenRenderContext::SetShadowRadius(float radius)
 {
     CHECK_NULL_VOID(rsNode_);
-    rsNode_->SetShadowElevation(radius);
+    rsNode_->SetShadowRadius(radius);
 }
 
 void RosenRenderContext::SetRenderFrameOffset(const OffsetF& offset)
