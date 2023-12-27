@@ -49,4 +49,15 @@ T CountLimitLRU::GetCacheObjWithCountLimitLRU(const std::string& key, std::list<
     }
     return nullptr;
 }
+
+template<typename T>
+void CountLimitLRU::RemoveCacheObjFromCountLimitLRU(const std::string& key, std::list<CacheNode<T>>& cacheList,
+    std::unordered_map<std::string, typename std::list<CacheNode<T>>::iterator>& cache)
+{
+    auto iter = cache.find(key);
+    if (iter != cache.end()) {
+        cacheList.erase(iter->second);
+        cache.erase(key);
+    }
+}
 } // namespace OHOS::Ace

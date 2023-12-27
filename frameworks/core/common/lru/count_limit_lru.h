@@ -43,6 +43,10 @@ public:
     template<typename T>
     static T GetCacheObjWithCountLimitLRU(const std::string& key, std::list<CacheNode<T>>& cacheList,
         std::unordered_map<std::string, typename std::list<CacheNode<T>>::iterator>& cache);
+
+    template<typename T>
+    static void RemoveCacheObjFromCountLimitLRU(const std::string& key, std::list<CacheNode<T>>& cacheList,
+        std::unordered_map<std::string, typename std::list<CacheNode<T>>::iterator>& cache);
 };
 } // namespace OHOS::Ace
 
