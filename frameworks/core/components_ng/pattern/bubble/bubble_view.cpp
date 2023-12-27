@@ -185,6 +185,8 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
         if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
             popupPaintProp->UpdateAutoCancel(false);
         }
+        combinedChild->MountToParent(columnNode);
+        child = columnNode;
     } else {
         auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -541,7 +543,6 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
     textPadding.top = CalcLength(padding.Top());
     textLayoutProps->UpdatePadding(textPadding);
     textLayoutProps->UpdateAlignSelf(FlexAlign::FLEX_START);
-    textLayoutProps->UpdateTextColor(popupTheme->GetFontSecondaryColor());
     UpdateTextProperties(param, textLayoutProps);
     message->MarkModifyDone();
     auto pipelineContext = PipelineBase::GetCurrentContext();
