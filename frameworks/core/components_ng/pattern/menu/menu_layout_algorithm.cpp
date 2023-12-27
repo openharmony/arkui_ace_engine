@@ -355,7 +355,7 @@ void MenuLayoutAlgorithm::InitWrapperRect(
     const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern)
 {
     auto constraint = props->GetLayoutConstraint();
-    // has minus navgation bar height
+    // has minus navgation bar height(AvoidAreaType.TYPE_NAVIGATION_INDICATOR)
     auto wrapperIdealSize =
         CreateIdealSize(constraint.value(), Axis::FREE, props->GetMeasureType(MeasureType::MATCH_PARENT), true);
     auto pipelineContext = GetCurrentPipelineContext();
@@ -363,15 +363,15 @@ void MenuLayoutAlgorithm::InitWrapperRect(
     auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
     wrapperRect_.SetRect(0, 0, wrapperIdealSize.Width(), wrapperIdealSize.Height());
     auto safeAreaManager = pipelineContext->GetSafeAreaManager();
-    // system safeArea only include status bar,now the bottom is 0
+    // system safeArea(AvoidAreaType.TYPE_SYSTEM) only include status bar,now the bottom is 0
     auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
     auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         if (hierarchicalParameters_) {
-            // wrapperRect_= windowGlobalRect-dock -statusbar
+            // wrapperRect_= windowGlobalRect- dock -statusbar
             wrapperRect_ = pipelineContext->GetDisplayAvailableRect();
         } else {
-            // wrapperIdealSize.Height = windowGlobalRect.Height()-navigation bar,no AR to avoid navigation bar
+            // wrapperIdealSize.Height = windowGlobalRect.Height()-navigation_indicator.height,no AR to avoid navigation
             wrapperRect_.SetRect(0, top, windowGlobalRect.Width(), windowGlobalRect.Height() - top - bottom);
         }
     }
