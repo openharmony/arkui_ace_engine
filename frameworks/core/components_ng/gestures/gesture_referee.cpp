@@ -156,6 +156,13 @@ void GestureScope::Close(bool isBlocked)
     for (const auto& weak : recognizers_) {
         auto recognizer = weak.Upgrade();
         if (recognizer) {
+            auto weakGroup = recognizer->GetGestureGroup();
+            auto group = weakGroup.Upgrade();
+            while (group) {
+                recognizer = group;
+                weakGroup = group->GetGestureGroup();
+                group = weakGroup.Upgrade();
+            }
             recognizer->FinishReferee(static_cast<int32_t>(touchId_), isBlocked);
         }
     }
