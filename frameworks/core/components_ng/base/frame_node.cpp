@@ -2563,8 +2563,8 @@ void FrameNode::UpdatePercentSensitive()
 // This will call child and self measure process.
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
-    ACE_LAYOUT_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", GetTag().c_str(),
-        GetId(), GetParent() ? GetParent()->GetId() : 0);
+    ACE_LAYOUT_SCOPED_TRACE("Measure[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
+        GetId(), GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
     isLayoutComplete_ = false;
     if (!oldGeometryNode_) {
         oldGeometryNode_ = geometryNode_->Clone();
@@ -2646,8 +2646,8 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 // Called to perform layout children.
 void FrameNode::Layout()
 {
-    ACE_LAYOUT_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", GetTag().c_str(),
-        GetId(), GetParent() ? GetParent()->GetId() : 0);
+    ACE_LAYOUT_SCOPED_TRACE("Layout[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
+        GetId(), GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
     int64_t time = GetSysTimestamp();
     OffsetNodeToSafeArea();
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();
