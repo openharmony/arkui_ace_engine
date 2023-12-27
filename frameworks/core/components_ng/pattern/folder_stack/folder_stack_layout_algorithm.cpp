@@ -105,7 +105,6 @@ void FolderStackLayoutAlgorithm::LayoutHoverStack(LayoutWrapper* layoutWrapper,
 void FolderStackLayoutAlgorithm::LayoutControlPartsStack(LayoutWrapper* layoutWrapper,
     const RefPtr<FolderStackGroupNode>& hostNode, const RefPtr<FolderStackLayoutProperty>& folderStackLayoutProperty)
 {
-    
     auto folderStackGeometryNode = layoutWrapper->GetGeometryNode();
     auto layoutDirection = layoutWrapper->GetLayoutProperty()->GetLayoutDirection();
     if (layoutDirection == TextDirection::AUTO) {
@@ -239,7 +238,6 @@ bool FolderStackLayoutAlgorithm::IsFullWindow(
     auto windowMode = windowManager->GetWindowMode();
     auto realWidth = frameSize.Width() + padding.Width();
     auto realHeight = frameSize.Height() + padding.Height();
-
     if (!NearEqual(realWidth, pipeline->GetRootWidth() - safeArea.left_.Length() - safeArea.right_.Length()) ||
         !NearEqual(realHeight, pipeline->GetRootHeight() - safeArea.top_.Length() - safeArea.bottom_.Length()) ||
         windowMode != WindowMode::WINDOW_MODE_FULLSCREEN) {
