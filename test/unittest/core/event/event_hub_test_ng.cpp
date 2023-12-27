@@ -646,12 +646,12 @@ HWTEST_F(EventHubTestNg, EventHubTest002, TestSize.Level1)
     std::string dragEventType;
     auto OnDragFunc = [&dragEventType](const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */,
                           const std::string& eventType) { dragEventType = eventType; };
-
+	auto cstmOnDragFunc = OnDragFunc;
     /**
      * @tc.steps: step4. Calling the default branch in SetCustomerOnDragFunc.
      * @tc.expected: eventHub->customerOnDragEnd_ is false.
      */
-    eventHub->SetCustomerOnDragFunc(DragFuncType(10), OnDragFunc);
+    eventHub->SetCustomerOnDragFunc(DragFuncType(10), cstmOnDragFunc);
     EXPECT_FALSE(eventHub->customerOnDragEnd_);
 }
 
@@ -682,12 +682,13 @@ HWTEST_F(EventHubTestNg, EventHubTest003, TestSize.Level1)
     std::string dragEventType;
     auto OnDragFunc = [&dragEventType](
                           const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */) { dragEventType = DRAG_END_EVENT_TYPE; };
-
+	auto cstmOnDragFunc = OnDragFunc;
+	
     /**
      * @tc.steps: step4. Call SetCustomerOnDragFunc with OnDragFunc.
      * @tc.expected: eventHub->customerOnDragEnter_ is false.
      */
-    eventHub->SetCustomerOnDragFunc(DragFuncType(10), OnDragFunc);
+    eventHub->SetCustomerOnDragFunc(DragFuncType(10), cstmOnDragFunc);
     EXPECT_FALSE(eventHub->customerOnDragEnter_);
 }
 
@@ -763,7 +764,7 @@ HWTEST_F(EventHubTestNg, EventHubTest005, TestSize.Level1)
     EXPECT_NE(eventHub, nullptr);
 
     /**
-     * @tc.steps: step7. Call SetSupportedStates with UI_STATE_PRESSED.
+     * @tc.steps: step2. Call SetSupportedStates with UI_STATE_PRESSED.
      * @tc.expected: eventHub->stateStyleMgr_ is true.
      */
     eventHub->stateStyleMgr_ = nullptr;

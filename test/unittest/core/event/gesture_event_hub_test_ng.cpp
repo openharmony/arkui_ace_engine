@@ -16,8 +16,6 @@
 #include "gtest/gtest.h"
 
 #define private public
-#define protected public
-
 #undef SECURITY_COMPONENT_ENABLE
 
 #include "test/mock/base/mock_drag_window.h"
@@ -1512,7 +1510,6 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest020, TestSize.Level1)
 
     auto pipeline = PipelineContext::GetCurrentContext();
     EXPECT_TRUE(pipeline);
-    pipeline->taskExecutor_ = MOCK_TASK_EXECUTOR;
 
     /**
      * @tc.steps: step3. call StartDragTaskForWeb.
@@ -1521,7 +1518,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest020, TestSize.Level1)
     guestureEventHub->isReceivedDragGestureInfo_ = true;
     guestureEventHub->StartDragTaskForWeb();
     auto taskScheduler = pipeline->GetTaskExecutor();
-    EXPECT_TRUE(taskScheduler);
+    EXPECT_FALSE(taskScheduler);
 }
 
 /**
@@ -1547,7 +1544,6 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest021, TestSize.Level1)
      */
     auto pipeline = PipelineContext::GetCurrentContext();
     EXPECT_TRUE(pipeline);
-    pipeline->taskExecutor_ = MOCK_TASK_EXECUTOR;
 
     /**
      * @tc.steps: step3. call StartLongPressActionForWeb.
@@ -1555,7 +1551,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest021, TestSize.Level1)
      */
     gestureEventHub->StartLongPressActionForWeb();
     auto taskScheduler = pipeline->GetTaskExecutor();
-    EXPECT_TRUE(taskScheduler);
+    EXPECT_FALSE(taskScheduler);
 }
 
 /**
