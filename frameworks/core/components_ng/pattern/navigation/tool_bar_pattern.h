@@ -69,12 +69,14 @@ public:
         auto parent = hostNode->GetAncestorNodeOfFrame();
         CHECK_NULL_VOID(parent);
         auto parentGlobalOffset = parent->GetParentGlobalOffsetDuringLayout();
-        auto geometryNode = parent->GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        auto frame = geometryNode->GetFrameRect() + parentGlobalOffset;
+        auto parentGeometryNode = parent->GetGeometryNode();
+        CHECK_NULL_VOID(parentGeometryNode);
+        auto frame = parentGeometryNode->GetFrameRect() + parentGlobalOffset;
         if (!safeArea.top_.IsOverlapped(frame.Top())) {
             safeAreaHeight = 0.0f;
         }
+        auto geometryNode = hostNode->GetGeometryNode();
+        CHECK_NULL_VOID(geometryNode);
         OffsetF offset(geometryNode->GetFrameOffset().GetX(), geometryNode->GetFrameOffset().GetY() + safeAreaHeight);
         geometryNode->SetFrameOffset(offset);
         hostNode->ForceSyncGeometryNode();
