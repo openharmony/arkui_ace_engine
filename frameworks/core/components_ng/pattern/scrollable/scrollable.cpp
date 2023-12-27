@@ -1010,7 +1010,7 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetFrictionProperty()
             if (scroll->scrollMotionFRCSceneCallback_) {
                 scroll->scrollMotionFRCSceneCallback_(scroll->frictionVelocity_, NG::SceneStatus::RUNNING);
             }
-         }
+        }
         scroll->lastVsyncTime_ = currentVsync;
         scroll->lastPosition_ = position;
         scroll->ProcessScrollMotion(position);
@@ -1075,7 +1075,7 @@ void Scrollable::StopFrictionAnimation()
                 CHECK_NULL_VOID(scroll);
                 scroll->frictionOffsetProperty_->Set(0.0f);
             },
-        nullptr);
+            nullptr);
     }
 }
 
