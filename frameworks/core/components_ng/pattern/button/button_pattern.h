@@ -300,6 +300,8 @@ private:
     bool IsNeedToHandleHoverOpacity();
     Color backgroundColor_;
     Color focusBorderColor_;
+    Color themeBgColor_;
+    Color themeTextColor_;
     bool isSetClickedColor_ = false;
     ComponentButtonType buttonType_ = ComponentButtonType::BUTTON;
 
