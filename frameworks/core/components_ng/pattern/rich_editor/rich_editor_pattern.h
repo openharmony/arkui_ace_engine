@@ -141,7 +141,13 @@ public:
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
     void InsertValue(const std::string& insertValue) override;
-    std::wstring InsertValueOperation(const std::string& insertValue);
+    void InsertValueOperation(const std::string& insertValue, OperationRecord* const record = nullptr);
+    void InsertValueAfterBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, RefPtr<SpanNode>& spanNode,
+        const TextInsertValueInfo& info, const std::string& insertValue);
+    void InsertDiffStyleValueInSpan(
+        RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue);
+    void InsertValueWithoutSpan(
+        RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue);
     void InsertValueByPaste(const std::string& insertValue);
     bool IsLineSeparatorInLast(RefPtr<SpanNode>& spanNode);
     void InsertValueToSpanNode(
@@ -192,6 +198,8 @@ public:
     OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight,
         bool downStreamFirst = false, bool needLineHighest = true);
     void CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
+    void CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
+    void CopyTextSpanLineStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
     int32_t TextSpanSplit(int32_t position);
     SpanPositionInfo GetSpanPositionInfo(int32_t position);
     std::function<ImageSourceInfo()> CreateImageSourceInfo(const ImageSpanOptions& options);
