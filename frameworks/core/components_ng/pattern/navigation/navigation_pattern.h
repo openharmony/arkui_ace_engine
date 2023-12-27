@@ -187,6 +187,8 @@ public:
 
     void OnVisibleChange(bool isVisible) override;
 
+    void OnColorConfigurationUpdate() override;
+
     Dimension GetMinNavBarWidthValue() const
     {
         return minNavBarWidthValue_;
@@ -255,7 +257,7 @@ public:
     {
         return initNavBarWidthValue_;
     }
-    
+
     void SetIfNeedInit(bool ifNeedInit)
     {
         ifNeedInit_ = ifNeedInit;
