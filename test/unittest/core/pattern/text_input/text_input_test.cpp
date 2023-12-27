@@ -1558,6 +1558,61 @@ HWTEST_F(TextFieldControllerTest, ContentController003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ContentController004
+ * @tc.desc: Test ContentController in different input filter
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, ContentController004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Initialize text field node
+     */
+    CreateTextField();
+    GetFocus();
+
+    /**
+     * @tc.expected: Set text type is NUMBER_DECIMAL
+     */
+    layoutProperty_->UpdateTextInputType(TextInputType::NUMBER_DECIMAL);
+
+    /**
+     * @tc.expected: when the text point more then one, FilterWithDecimal return true,
+     * @tc.expected: and the value update only one point
+     */
+    std::string text = "3.1.4.";
+    pattern_->contentController_->InsertValue(0, text);
+    EXPECT_TRUE(pattern_->contentController_->FilterWithDecimal(text));
+    EXPECT_EQ(pattern_->GetTextValue(), "3.14");
+}
+
+/**
+ * @tc.name: ContentController005
+ * @tc.desc: Test ContentController in different input filter
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, ContentController005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Initialize text field node
+     */
+    CreateTextField();
+    GetFocus();
+
+    /**
+     * @tc.expected: Set text type is NUMBER_DECIMAL
+     */
+    layoutProperty_->UpdateTextInputType(TextInputType::NUMBER_DECIMAL);
+
+    /**
+     * @tc.expected: when the text have one point, FilterWithDecimal return false
+     */
+    std::string text = "3.14";
+    pattern_->contentController_->InsertValue(0, text);
+    EXPECT_FALSE(pattern_->contentController_->FilterWithDecimal(text));
+    EXPECT_EQ(pattern_->GetTextValue(), "3.14");
+}
+
+/**
  * @tc.name: TextFiledControllerTest001
  * @tc.desc: Test TextFieldController GetTextContentLinesNum
  * @tc.type: FUNC
