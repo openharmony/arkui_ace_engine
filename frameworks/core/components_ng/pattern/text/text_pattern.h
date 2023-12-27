@@ -588,7 +588,7 @@ protected:
     std::optional<TextStyle> textStyle_;
     std::list<RefPtr<SpanItem>> spans_;
     float baselineOffset_ = 0.0f;
-    int32_t imageCount_ = 0;
+    int32_t placeholderCount_ = 0;
     SelectMenuInfo selectMenuInfo_;
     std::vector<RectF> dragBoxes_;
 
