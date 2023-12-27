@@ -15,7 +15,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_tabs_bridge.h"
 
 #include "base/utils/utils.h"
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/common/properties/color.h"
 #include "frameworks/bridge/common/utils/utils.h"

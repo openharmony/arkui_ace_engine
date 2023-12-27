@@ -572,6 +572,10 @@ template("ace_core_source_set") {
     }
 
     external_deps += [ "napi:ace_napi" ]
+
+    # arkoala C interface
+    deps += [ "$ace_root/frameworks/core/interfaces/native:ace_core_interfaces_native_node_$platform" ]
+
     cflags_cc = []
     cflags_cc += invoker.cflags_cc
   }

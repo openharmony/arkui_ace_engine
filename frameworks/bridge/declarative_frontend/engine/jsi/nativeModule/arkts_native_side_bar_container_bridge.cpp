@@ -16,7 +16,7 @@
 
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {

@@ -15,7 +15,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_gauge_bridge.h"
 
 #include "base/geometry/dimension.h"
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 #include "core/components/common/properties/color.h"

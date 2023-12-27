@@ -14,7 +14,7 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_row_bridge.h"
 #include "base/geometry/dimension.h"
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "core/interfaces/native/node/api.h"
 
 namespace OHOS::Ace::NG {
 ArkUINativeModuleValue RowBridge::SetAlignItems(ArkUIRuntimeCallInfo* runtimeCallInfo)
