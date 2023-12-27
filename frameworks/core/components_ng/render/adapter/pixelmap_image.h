@@ -47,6 +47,9 @@ public:
         RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) override;
     void DrawRect(RSCanvas& canvas, const RSRect& dstRect);
 
+    bool DrawImageNine(
+        RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY);
+
     static RefPtr<CanvasImage> QueryFromCache(const std::string& key);
 
     bool HasData() const override
