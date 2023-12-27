@@ -40,7 +40,6 @@ void FontManager::RegisterFont(const std::string& familyName, const std::string&
     for (auto iter = fontLoaders_.begin(); iter != fontLoaders_.end(); ++iter) {
         auto& fontLoader = *iter;
         if (fontLoader->GetFamilyName() == familyName) {
-            LOGI("Font is already loaded!");
             return;
         }
     }
