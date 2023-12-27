@@ -616,6 +616,38 @@ HWTEST_F(GridLayoutTestNg, GridScrollWithOptions006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GridLayoutInfo::GetContentHeight001
+ * @tc.desc: test GetContentHeight while changing childrenCount_
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GetContentHeight001, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.lineHeightMap_ = { { 0, 5.0f }, { 1, 5.0f }, { 2, 5.0f }, { 3, 5.0f }, { 4, 10.0f }, { 5, 10.0f },
+        { 6, 10.0f } };
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 0, 1 } } },
+        { 1, { { 0, 2 } } },
+        { 2, { { 0, 3 }, { 2, 4 } } },
+        { 3, { { 0, 5 } } },
+        { 4, { { 0, 6 }, { 1, 7 } } },
+        { 5, { { 0, 8 } } },
+        { 6, { { 0, 9 }, { 1, 2 } } },
+    };
+
+    GridLayoutOptions option {
+        .irregularIndexes = { 2, 3, 5, 8 },
+    };
+
+    info.childrenCount_ = 10;
+    EXPECT_EQ(info.GetContentHeight(option, 1.0f), 41.0f);
+    info.childrenCount_ = 5;
+    EXPECT_EQ(info.GetContentHeight(option, 1.0f), 17.0f);
+    info.childrenCount_ = 2;
+    EXPECT_EQ(info.GetContentHeight(option, 1.0f), 5.0f);
+}
+
+/**
  * @tc.name: SearchIrregularFocusableChildInScroll001
  * @tc.desc: Test the function when the gridItem cannot be focused
  * @tc.type: FUNC
