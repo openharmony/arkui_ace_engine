@@ -852,12 +852,14 @@ void Scrollable::ProcessSpringMotion(double position)
 {
     TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Current Pos is %{public}lf, position is %{public}lf",
         currentPos_, position);
-    high_resolution_clock::time_point currentTime = high_resolution_clock::now();
-    milliseconds diff = std::chrono::duration_cast<milliseconds>(currentTime - lastTime_);
-    if (diff.count() > MIN_DIFF_TIME) {
-        currentVelocity_ = (position - currentPos_) / diff.count() * MILLOS_PER_SECONDS;
+    auto context = OHOS::ACE::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    uint64_t currentVsync = context.GetVsyncTime();
+    uint64_t diff = currentVsync - lastVsyncTime_;
+    if (diff < MIN_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
+        currentVelocity_ = (position - currentPos_) / diff * MILLOS_PER_NANO_SECONDS;
     }
-    lastTime_ = currentTime;
+    lastVsyncTime_ = currentVsync;
     if (scrollMotionFRCSceneCallback_) {
         scrollMotionFRCSceneCallback_(currentVelocity_, NG::SceneStatus::RUNNING);
     }
@@ -1008,13 +1010,14 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetFrictionProperty()
         if (scroll->isFrictionAnimationStop_ || scroll->isTouching_) {
             return;
         }
-        high_resolution_clock::time_point currentTime = high_resolution_clock::now();
-        milliseconds diff = std::chrono::duration_cast<milliseconds>(currentTime - scroll->lastTime_);
-        if (diff.count() > MIN_DIFF_TIME) {
-            scroll->frictionVelocity_ = (position - scroll->lastPosition_) /
-                diff.count() * MILLOS_PER_SECONDS;
-        }
-        scroll->lastTime_ = currentTime;
+        auto context = OHOS::ACE::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        uint64_t currentVsync = context.GetVsyncTime();
+        uint64_t diff = currentVsync - scroll->lastVsyncTime_;
+        if (diff < MIN_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
+            scroll->frictionVelocity_ = (position - scroll->lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
+         }
+        scroll->lastVsyncTime_ = currentVsync;
         scroll->lastPosition_ = position;
         scroll->ProcessScrollMotion(position);
     };
