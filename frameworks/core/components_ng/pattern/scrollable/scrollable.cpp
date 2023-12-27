@@ -850,11 +850,11 @@ void Scrollable::ProcessSpringMotion(double position)
 {
     TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Current Pos is %{public}lf, position is %{public}lf",
         currentPos_, position);
-    auto context = OHOS::ACE::PipelineContext::GetCurrentContext();
+    auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    uint64_t currentVsync = context.GetVsyncTime();
+    uint64_t currentVsync = context->GetVsyncTime();
     uint64_t diff = currentVsync - lastVsyncTime_;
-    if (MIN_DIFF_VSYNC < diff < MIN_VSYNC_DIFF_TIME) {
+    if (diff < MIN_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
         currentVelocity_ = (position - currentPos_) / diff * MILLOS_PER_NANO_SECONDS;
         if (scrollMotionFRCSceneCallback_) {
             scrollMotionFRCSceneCallback_(currentVelocity_, NG::SceneStatus::RUNNING);
@@ -1001,11 +1001,11 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetFrictionProperty()
         if (scroll->isFrictionAnimationStop_ || scroll->isTouching_) {
             return;
         }
-        auto context = OHOS::ACE::PipelineContext::GetCurrentContext();
+        auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
-        uint64_t currentVsync = context.GetVsyncTime();
+        uint64_t currentVsync = context->GetVsyncTime();
         uint64_t diff = currentVsync - scroll->lastVsyncTime_;
-        if (MIN_DIFF_VSYNC < diff < MIN_VSYNC_DIFF_TIME) {
+        if (diff < MIN_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
             scroll->frictionVelocity_ = (position - scroll->lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
             if (scroll->scrollMotionFRCSceneCallback_) {
                 scroll->scrollMotionFRCSceneCallback_(scroll->frictionVelocity_, NG::SceneStatus::RUNNING);
@@ -1040,11 +1040,11 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSnapProperty()
         if (scroll->isSnapScrollAnimationStop_ && scroll->isSnapAnimationStop_) {
             return;
         }
-        auto context = OHOS::ACE::PipelineContext::GetCurrentContext();
+        auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
-        uint64_t currentVsync = context.GetVsyncTime();
+        uint64_t currentVsync = context->GetVsyncTime();
         uint64_t diff = currentVsync - scroll->lastVsyncTime_;
-        if (MIN_DIFF_VSYNC < diff < MIN_VSYNC_DIFF_TIME) {
+        if (diff < MIN_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
             scroll->snapVelocity_ = (position - scroll->currentPos_) / diff * MILLOS_PER_NANO_SECONDS;
             if (scroll->scrollMotionFRCSceneCallback_) {
                 scroll->scrollMotionFRCSceneCallback_(scroll->snapVelocity_, NG::SceneStatus::RUNNING);
