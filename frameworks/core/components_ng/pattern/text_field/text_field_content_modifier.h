@@ -59,12 +59,14 @@ public:
     void SetShowErrorState(bool value);
     void SetShowUnderlineState(bool value);
     void SetFontReady(bool value);
+    void SetTextOverflow(const TextOverflow value);
 
 private:
     void SetDefaultFontSize(const TextStyle& textStyle);
     void SetDefaultFontWeight(const TextStyle& textStyle);
     void SetDefaultTextColor(const TextStyle& textStyle);
     void SetDefaultFontStyle(const TextStyle& textStyle);
+    void SetDefaultTextOverflow(const TextStyle& textStyle);
     void SetDefaultPropertyValue();
 
     WeakPtr<Pattern> pattern_;
@@ -93,6 +95,7 @@ private:
     RefPtr<PropertyBool> showUnderline_;
     RefPtr<PropertyInt> fontStyle_;
     RefPtr<PropertyBool> fontReady_;
+    RefPtr<PropertyInt> textOverflow_;
 
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldContentModifier);
 };
