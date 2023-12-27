@@ -54,6 +54,7 @@ namespace {
 
 // TODO use theme.
 constexpr int32_t MIN_TURN_PAGE_VELOCITY = 1200;
+constexpr int32_t NEW_MIN_TURN_PAGE_VELOCITY = 780;
 constexpr Dimension INDICATOR_BORDER_RADIUS = 16.0_vp;
 
 constexpr Dimension SWIPER_MARGIN = 16.0_vp;
@@ -1780,7 +1781,9 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDista
     auto direction = GreatNotEqual(velocity, 0.0);
     auto dragThresholdFlag = direction ? firstItemInfoInVisibleArea.second.endPos > firstItemLength / 2
                                        : firstItemInfoInVisibleArea.second.endPos < firstItemLength / 2;
-    if ((!onlyDistance && std::abs(velocity) > MIN_TURN_PAGE_VELOCITY) || dragThresholdFlag) {
+    auto turnVelocity = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_MIN_TURN_PAGE_VELOCITY
+                                                                                           : MIN_TURN_PAGE_VELOCITY;
+    if ((!onlyDistance && std::abs(velocity) > turnVelocity) || dragThresholdFlag) {
         nextIndex = direction ? firstItemInfoInVisibleArea.first : firstItemInfoInVisibleArea.first + 1;
     } else {
         nextIndex = direction ? firstItemInfoInVisibleArea.first + 1 : firstItemInfoInVisibleArea.first;
