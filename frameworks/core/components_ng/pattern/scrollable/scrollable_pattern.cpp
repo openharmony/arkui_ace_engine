@@ -926,7 +926,7 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
                 }
                 pattern->StopAnimation(pattern->curveAnimation_);
                 pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
-                    SceneStatus::END);
+                    SceneStatus::END);   
         });
         NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::START);
     }
@@ -987,14 +987,14 @@ void ScrollablePattern::InitSpringOffsetProperty()
         auto context = OHOS::ACE::PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         uint64_t currentVsync = context.GetVsyncTime();
-        uint64_t diff = currentVsync - scroll->lastVsyncTime_;
-        if (diff < MIN_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
-            scroll->currentVelocity_ = (position - scroll->lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
+        uint64_t diff = currentVsync - pattern->lastVsyncTime_;
+        if (MIN_DIFF_VSYNC < diff < MIN_VSYNC_DIFF_TIME) {
+            pattern->currentVelocity_ = (position - pattern->lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
+            pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->currentVelocity_,
+                SceneStatus::RUNNING);
         }
-        scroll->lastVsyncTime_ = currentVsync;
+        pattern->lastVsyncTime_ = currentVsync;
         pattern->lastPosition_ = offset;
-        pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
-            SceneStatus::RUNNING);
         if (!pattern->UpdateCurrentOffset(pattern->GetTotalOffset() - offset,
             SCROLL_FROM_ANIMATION_CONTROLLER)) {
             pattern->StopAnimation(pattern->springAnimation_);
@@ -1019,11 +1019,13 @@ void ScrollablePattern::InitCurveOffsetProperty(float position)
         auto context = OHOS::ACE::PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         uint64_t currentVsync = context.GetVsyncTime();
-        uint64_t diff = currentVsync - scroll->lastVsyncTime_;
-        if (diff < MIN_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
-            scroll->currentVelocity_ = (position - scroll->lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
+        uint64_t diff = currentVsync - pattern->lastVsyncTime_;
+        if (MIN_DIFF_VSYNC < diff < MIN_VSYNC_DIFF_TIME) {
+            pattern->currentVelocity_ = (position - pattern->lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
+            pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->currentVelocity_,
+                SceneStatus::RUNNING);
         }
-        scroll->lastVsyncTime_ = currentVsync;
+        pattern->lastVsyncTime_ = currentVsync;
         pattern->lastPosition_ = offset;
         pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
             SceneStatus::RUNNING);
