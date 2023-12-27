@@ -226,6 +226,7 @@ public:
     void SetBounds(float positionX, float positionY, float width, float height) override;
     void OnTransformTranslateUpdate(const TranslateOptions& value) override;
     bool DoTextureExport(uint64_t surfaceId) override;
+    bool StopTextureExport() override;
 
     RectF GetPaintRectWithTransform() override;
 

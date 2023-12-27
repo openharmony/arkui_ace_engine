@@ -47,6 +47,12 @@ declare interface Size {
     height: number;
 }
 
+declare enum XComponentType {
+    SURFACE = 0,
+    COMPONENT,
+    TEXTURE
+}
+
 declare abstract class ViewPU { }
 
 
@@ -62,12 +68,12 @@ declare class WeakRef<T extends Object> {
     deref(): T;
 }
 
-type RemovedElementInfo = { elmtId : number, tag : string };
+type RemovedElementInfo = { elmtId: number, tag: string };
 
 declare class UINodeRegisterProxy {
-    public static instance_: UINodeRegisterProxy ;
+    public static instance_: UINodeRegisterProxy;
     public removeElementsInfo_: Array<RemovedElementInfo>;
-    public static ElementIdToOwningViewPU_: Map<number, WeakRef<BuilderNode>> ;
+    public static ElementIdToOwningViewPU_: Map<number, WeakRef<BuilderNode>>;
     public unregisterElmtIdsFromViewPUs(): void;
     private obtainDeletedElmtIds(): void;
     public static unregisterElmtIdsFromViewPUs(): void;

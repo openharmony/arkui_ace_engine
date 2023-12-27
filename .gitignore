@@ -2,7 +2,6 @@
 .vscode/
 *.iml
 .idea/
-tags
 CMakeLists.txt
 adapter/*
 !adapter/ohos/

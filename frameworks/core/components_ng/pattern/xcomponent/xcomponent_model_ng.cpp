@@ -36,27 +36,24 @@ void XComponentModelNG::Create(const std::string& id, XComponentType type, const
     ACE_UPDATE_LAYOUT_PROPERTY(XComponentLayoutProperty, XComponentType, type);
 }
 
-RefPtr<AceType> XComponentModelNG::Create(int32_t nodeId, float width, float height,
-    const std::string& id, XComponentType type, const std::string& libraryname,
+RefPtr<AceType> XComponentModelNG::Create(int32_t nodeId, float width, float height, const std::string& id,
+    XComponentType type, const std::string& libraryname,
     const std::shared_ptr<InnerXComponentController>& xcomponentController)
 {
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::XCOMPONENT_ETS_TAG, nodeId);
+    auto calcWidth = CalcLength(width, DimensionUnit::VP);
+    auto calcHeight = CalcLength(height, DimensionUnit::VP);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::XCOMPONENT_ETS_TAG, nodeId, [id, type, libraryname, xcomponentController]() {
-            return AceType::MakeRefPtr<XComponentPattern>(id, type, libraryname, xcomponentController);
+        V2::XCOMPONENT_ETS_TAG, nodeId, [id, type, libraryname, xcomponentController, calcWidth, calcHeight]() {
+            return AceType::MakeRefPtr<XComponentPattern>(id, type, libraryname, xcomponentController,
+                calcWidth.GetDimension().ConvertToPx(), calcHeight.GetDimension().ConvertToPx());
         });
 
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
     if (layoutProperty) {
         layoutProperty->UpdateXComponentType(type);
-    }
-
-    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
-    xcPattern->SetSoPath(libraryname); // libraryname == soPath???
-    if (!xcPattern->GetXcomponentInit()) {
-        xcPattern->CreateSurface(0, width, height);
-        xcPattern->SetXcomponentInit(true);
+        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(calcWidth, calcHeight));
     }
     return frameNode;
 }
@@ -97,7 +94,7 @@ void XComponentModelNG::SetOnDestroy(DestroyEvent&& onDestroy)
     eventHub->SetOnDestroy(std::move(onDestroy));
 }
 
-void XComponentModelNG::RegisterOnCreate(RefPtr<AceType> node, LoadEvent&& onLoad)
+void XComponentModelNG::RegisterOnCreate(const RefPtr<AceType>& node, LoadEvent&& onLoad)
 {
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
     CHECK_NULL_VOID(frameNode);
@@ -110,7 +107,7 @@ void XComponentModelNG::RegisterOnCreate(RefPtr<AceType> node, LoadEvent&& onLoa
     eventHub->SetOnLoad(std::move(onLoad));
 }
 
-void XComponentModelNG::RegisterOnDestroy(RefPtr<AceType> node, DestroyEvent&& onDestroy)
+void XComponentModelNG::RegisterOnDestroy(const RefPtr<AceType>& node, DestroyEvent&& onDestroy)
 {
     auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
     CHECK_NULL_VOID(frameNode);

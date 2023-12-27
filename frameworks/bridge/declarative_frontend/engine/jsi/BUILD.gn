@@ -230,7 +230,6 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_toggle_bridge.cpp",
       "nativeModule/arkts_native_video_bridge.cpp",
       "nativeModule/arkts_native_water_flow_bridge.cpp",
-      "nativeModule/arkts_native_xcomponent_node_bridge.cpp",
       "nativeModule/arkts_utils.cpp",
     ]
 
@@ -239,7 +238,10 @@ template("declarative_js_engine_ark") {
 
     if (defined(config.xcomponent_components_support) &&
         config.xcomponent_components_support) {
-      sources += [ "nativeModule/arkts_native_xcomponent_bridge.cpp" ]
+      sources += [
+        "nativeModule/arkts_native_xcomponent_bridge.cpp",
+        "nativeModule/arkts_native_xcomponent_node_bridge.cpp",
+      ]
       deps += [ "$ace_root/frameworks/core/components_ng/pattern/xcomponent:ace_core_components_xcomponent_pattern_ng_$platform" ]
       if (is_ohos_standard_system) {
         deps += [ "$ace_root/interfaces/inner_api/xcomponent_controller:ace_xcomponent_controller" ]

@@ -1828,24 +1828,6 @@ void ArkUINativeModule::RegisterRenderNodeAttributes(Local<panda::ObjectRef> obj
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "renderNode"), renderNode);
 }
 
-void ArkUINativeModule::RegisterXComponentNodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-    auto xcomponentNode = panda::ObjectRef::New(vm);
-    xcomponentNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "create"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentNodeBridge::Create));
-    xcomponentNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRenderType"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentNodeBridge::SetRenderType));
-    xcomponentNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getRenderType"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentNodeBridge::GetRenderType));
-    xcomponentNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getFrameNode"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentNodeBridge::GetFrameNode));
-    xcomponentNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "registerOnCreateCallback"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentNodeBridge::RegisterOnCreateCallback));
-    xcomponentNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "registerOnDestroyCallback"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentNodeBridge::RegisterOnDestroyCallback));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "xcomponentNode"), xcomponentNode);
-}
-
 void ArkUINativeModule::RegisterLineAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto line = panda::ObjectRef::New(vm);
@@ -2803,6 +2785,22 @@ void ArkUINativeModule::RegisterXComponentAttributes(Local<panda::ObjectRef> obj
     xComponent->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOpacity"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentBridge::ResetOpacity));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "xComponent"), xComponent);
+}
+
+void ArkUINativeModule::RegisterXComponentNodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto xcomponentNode = panda::ObjectRef::New(vm);
+    xcomponentNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "create"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentNodeBridge::Create));
+    xcomponentNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "getFrameNode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentNodeBridge::GetFrameNode));
+    xcomponentNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "registerOnCreateCallback"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentNodeBridge::RegisterOnCreateCallback));
+    xcomponentNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "registerOnDestroyCallback"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentNodeBridge::RegisterOnDestroyCallback));
+    xcomponentNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "changeRenderType"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), XComponentNodeBridge::ChangeRenderType));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "xcomponentNode"), xcomponentNode);
 }
 #endif
 } // namespace OHOS::Ace::NG

@@ -17,9 +17,7 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_XCOMPONENT_H
 
 #include "core/common/container.h"
-
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
@@ -29,13 +27,13 @@ namespace OHOS::Ace::Framework {
 
 struct XComponentParams {
     int32_t elmtId = -1;
+    int32_t xcomponentType = 0;
     int32_t renderType = 0;
-    std::string surfaceId = "";
     int32_t width = 0;
     int32_t height = 0;
-    std::string xcomponentId = "";
-    int32_t xcomponentType = 0;
-    std::string libraryName= "";
+    std::string xcomponentId;
+    std::string surfaceId;
+    std::string libraryName;
 };
 
 class XComponentClient {
@@ -155,17 +153,19 @@ public:
 
     // For xcomponent node
     static void* Create(const XComponentParams& params);
-public:
+
     void RegisterOnCreate(const JsiExecutionContext& execCtx, const Local<JSValueRef>& func);
     void RegisterOnDestroy(const JsiExecutionContext& execCtx, const Local<JSValueRef>& func);
     void SetFrameNode(RefPtr<AceType> frameNode)
     {
         frameNode_ = frameNode;
     }
-    RefPtr<AceType> GetFrameNode()
+    RefPtr<AceType> GetFrameNode() const
     {
         return frameNode_;
     }
+    bool ChangeRenderType(int32_t renderType);
+
 private:
     RefPtr<AceType> frameNode_;
 };

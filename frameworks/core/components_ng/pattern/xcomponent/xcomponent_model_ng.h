@@ -31,8 +31,8 @@ public:
     void SetSoPath(const std::string& soPath) override;
     void SetOnLoad(LoadEvent&& onLoad) override;
     void SetOnDestroy(DestroyEvent&& onDestroy) override;
-    void RegisterOnCreate(RefPtr<AceType> node, LoadEvent&& onLoad) override;
-    void RegisterOnDestroy(RefPtr<AceType> node, DestroyEvent&& onDestroy) override;
+    void RegisterOnCreate(const RefPtr<AceType>& node, LoadEvent&& onLoad) override;
+    void RegisterOnDestroy(const RefPtr<AceType>& node, DestroyEvent&& onDestroy) override;
     bool IsTexture() override;
     void SetDetachCallback(DetachCallback&& onDetach) override;
 

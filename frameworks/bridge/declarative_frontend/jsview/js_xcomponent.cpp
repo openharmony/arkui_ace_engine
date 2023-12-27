@@ -17,6 +17,7 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/referenced.h"
+#include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
@@ -151,32 +152,43 @@ void JSXComponent::Create(const JSCallbackInfo& info)
 
 void* JSXComponent::Create(const XComponentParams& params)
 {
-    JSXComponent* jsXComponent = new JSXComponent();
-    auto frameNode = AceType::DynamicCast<NG::FrameNode>(XComponentModel::GetInstance()->Create(
-        params.elmtId, (float)params.width, (float)params.height,
-        params.xcomponentId, static_cast<XComponentType>(params.xcomponentType), params.libraryName,
-        nullptr));
-    // XComponentModel::GetInstance()->SetSoPath(params.libraryName);
+    auto* jsXComponent = new JSXComponent();
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(XComponentModel::GetInstance()->Create(params.elmtId,
+        static_cast<float>(params.width), static_cast<float>(params.height), params.xcomponentId,
+        static_cast<XComponentType>(params.xcomponentType), params.libraryName, nullptr));
     jsXComponent->SetFrameNode(frameNode);
+    auto pattern = frameNode->GetPattern<NG::XComponentPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    pattern->SetRenderType(static_cast<NodeRenderType>(params.renderType));
+    pattern->SetExportTextureSurfaceId(params.surfaceId);
 
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, nullptr);
-    auto pipelineContext = AccessibilityManager::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    auto pipelineContext = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     auto taskExecutor = pipelineContext->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, nullptr);
-    ContainerScope scope(ContainerScope::CurrentId());
     taskExecutor->PostTask(
-        [container, frameNode]() {
-            auto xcPattern = AceType::DynamicCast<NG::XComponentPattern>(frameNode->GetPattern());
-            if (xcPattern->GetXcomponentInit()) {
-                xcPattern->XComponentSizeInit(); // 加载so, 触发onload（event)
-                xcPattern->SetXcomponentInit(true);
-            }
+        [weak = AceType::WeakClaim(AceType::RawPtr(frameNode))]() {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            auto xcPattern = frameNode->GetPattern<NG::XComponentPattern>();
+            CHECK_NULL_VOID(xcPattern);
+            xcPattern->XComponentSizeInit();
+            xcPattern->SetXcomponentInit(true);
         },
-    TaskExecutor::TaskType::JS);
+        TaskExecutor::TaskType::JS);
 
     return jsXComponent;
+}
+
+bool JSXComponent::ChangeRenderType(int32_t renderType)
+{
+    auto xcFrameNode = AceType::DynamicCast<NG::FrameNode>(frameNode_);
+    CHECK_NULL_RETURN(xcFrameNode, false);
+    auto pattern = xcFrameNode->GetPattern<NG::XComponentPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    return pattern->ChangeRenderType(static_cast<NodeRenderType>(renderType));
 }
 
 void JSXComponent::JsOnLoad(const JSCallbackInfo& args)
@@ -207,11 +219,11 @@ void JSXComponent::RegisterOnCreate(const JsiExecutionContext& execCtx, const Lo
     }
 
     auto jsFunc = panda::Global<panda::FunctionRef>(execCtx.vm_, Local<panda::FunctionRef>(func));
-    auto onLoad = [execCtx, funcRef = std::move(jsFunc), node = frameNode](
+    auto onLoad = [execCtx, funcRef = std::move(jsFunc), node = AceType::WeakClaim(AceType::RawPtr(frameNode))](
                       const std::string& xcomponentId) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("XComponent.onLoad");
-         // 通过xcomponentclient 获取context
+        ACE_SCORING_EVENT("XComponentNode.onCreate");
+        PipelineContext::SetCallBackNode(node);
         std::vector<Local<JSValueRef>> argv;
         JSRef<JSVal> jsVal;
         if (XComponentClient::GetInstance().GetJSVal(xcomponentId, jsVal)) {
@@ -232,9 +244,10 @@ void JSXComponent::RegisterOnDestroy(const JsiExecutionContext& execCtx, const L
     }
 
     auto jsFunc = panda::Global<panda::FunctionRef>(execCtx.vm_, Local<panda::FunctionRef>(func));
-    auto onDestroy = [execCtx, funcRef = std::move(jsFunc), node = frameNode]() {
+    auto onDestroy = [execCtx, funcRef = std::move(jsFunc), node = AceType::WeakClaim(AceType::RawPtr(frameNode))]() {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-        ACE_SCORING_EVENT("XComponent.onDestroy");
+        ACE_SCORING_EVENT("XComponentNode.onDestroy");
+        PipelineContext::SetCallBackNode(node);
         funcRef->Call(execCtx.vm_, JSNApi::GetGlobalObject(execCtx.vm_), nullptr, 0);
     };
     XComponentModel::GetInstance()->RegisterOnDestroy(frameNode, std::move(onDestroy));

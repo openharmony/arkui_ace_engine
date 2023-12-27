@@ -50,7 +50,8 @@ class XComponentPattern : public Pattern {
 public:
     XComponentPattern() = default;
     XComponentPattern(const std::string& id, XComponentType type, const std::string& libraryname,
-        const std::shared_ptr<InnerXComponentController>& xcomponentController);
+        const std::shared_ptr<InnerXComponentController>& xcomponentController, float initWidth = 0.0f,
+        float initHeight = 0.0f);
     ~XComponentPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -216,12 +217,17 @@ public:
         hasXComponentInit_ = isInit;
     }
 
-    bool GetXcomponentInit()
+    void CreateSurface(int32_t instanceId = -1);
+
+    bool ChangeRenderType(NodeRenderType renderType);
+
+    void SetRenderType(NodeRenderType renderType)
     {
-        return hasXComponentInit_;
+        renderType_ = renderType;
     }
 
-    void CreateSurface(int32_t instanceId = -1, float width = 0, float height = 0);
+    void SetExportTextureSurfaceId(const std::string& surfaceId);
+
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -249,6 +255,10 @@ private:
     void HandleSetExpectedRateRangeEvent();
     void HandleOnFrameEvent();
     void HandleUnregisterOnFrameEvent();
+    bool ExportTextureAvailable();
+    void AddAfterLayoutTaskForExportTexture();
+    bool DoTextureExport();
+    bool StopTextureExport();
 
     std::vector<OH_NativeXComponent_HistoricalPoint> SetHistoryPoint(const std::list<TouchLocationInfo>& touchInfoList);
     std::string id_;
@@ -280,6 +290,8 @@ private:
     OffsetF globalPosition_;
     SizeF drawSize_;
     RefPtr<UIDisplaySync> displaySync_ = AceType::MakeRefPtr<UIDisplaySync>();
+    NodeRenderType renderType_ = NodeRenderType::RENDER_TYPE_DISPLAY;
+    uint64_t exportTextureSurfaceId_ = 0U;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
 #endif
