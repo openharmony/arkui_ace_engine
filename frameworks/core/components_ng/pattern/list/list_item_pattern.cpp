@@ -94,6 +94,7 @@ bool ListItemPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
+    isLayouted_ = true;
     if (!HasStartNode() && !HasEndNode()) {
         return false;
     }
@@ -911,6 +912,23 @@ void ListItemPattern::InitDisableEvent()
             renderContext->UpdateOpacity(UserDefineOpacity);
         }
     }
+}
+
+bool ListItemPattern::GetLayouted() const
+{
+    return isLayouted_;
+}
+
+float ListItemPattern::GetEstimateHeight(float estimateHeight) const
+{
+    if (!isLayouted_) {
+        return estimateHeight;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, estimateHeight);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, estimateHeight);
+    return GetMainAxisSize(geometryNode->GetMarginFrameSize(), axis_);
 }
 } // namespace OHOS::Ace::NG
 

@@ -195,6 +195,9 @@ public:
         }
     }
 
+    bool GetLayouted() const;
+    float GetEstimateHeight(float estimateHeight) const;
+
 protected:
     void OnModifyDone() override;
 
@@ -271,6 +274,7 @@ private:
     bool isPressed_ = false;
     std::optional<double> enableOpacity_;
     OnFinishFunc onFinishEvent_;
+    bool isLayouted_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(ListItemPattern);
 };
