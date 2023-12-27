@@ -905,7 +905,7 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
             CHECK_NULL_RETURN(pattern, 0.0f);
             return pattern->GetCurrentVelocity();
         });
-
+        curveOffsetProperty_->SetThresholdType(ThresholdType::LAYOUT);
         curveOffsetProperty_->Set(GetTotalOffset());
         curveAnimation_ = AnimationUtils::StartAnimation(
             option,
@@ -946,6 +946,7 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<SpringCurve>(velocity, mass, stiffness, damping);
     InitOption(option, CUSTOM_ANIMATION_DURATION, curve);
+    springOffsetProperty_->SetThresholdType(ThresholdType::LAYOUT);
     springOffsetProperty_->Set(GetTotalOffset());
     springAnimation_ = AnimationUtils::StartAnimation(
         option,
@@ -1044,6 +1045,7 @@ void ScrollablePattern::InitOption(AnimationOption &option, float duration, cons
     } else {
         option.SetDuration(CUSTOM_ANIMATION_DURATION);
     }
+    option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
 }
 
 void ScrollablePattern::StopAnimation(std::shared_ptr<AnimationUtils::Animation> animation)
