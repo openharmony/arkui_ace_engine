@@ -321,6 +321,13 @@ public:
 
     void RemoveWindowSizeChangeCallback(int32_t nodeId);
 
+    void AddNavigationStateCallback(
+        int32_t pageId, int32_t nodeId, const std::function<void()>& callback, bool isOnShow);
+
+    void RemoveNavigationStateCallback(int32_t pageId, int32_t nodeId);
+
+    void FirePageChanged(int32_t pageId, bool isOnShow);
+
     bool HasDifferentDirectionGesture() const;
 
     bool IsKeyInPressed(KeyCode tarCode) const
@@ -674,6 +681,8 @@ private:
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
     std::unordered_set<int32_t> onFormVisibleChangeNodeIds_;
+    std::unordered_map<int32_t, std::list<std::pair<int32_t, std::function<void()>>>> pageIdOnShowMap_;
+    std::unordered_map<int32_t, std::list<std::pair<int32_t, std::function<void()>>>> pageIdOnHideMap_;
 
     RefPtr<StageManager> stageManager_;
     RefPtr<OverlayManager> overlayManager_;

@@ -3331,7 +3331,7 @@ HWTEST_F(NavigationTestNg, NavDestinationDialogTest002, TestSize.Level1)
     config.skipMeasure = true;
     config.skipLayout = true;
     navigationPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    navigationPattern->NotifyDialogChange(true);
+    navigationPattern->NotifyDialogChange(true, true);
     auto navDestinationPatternA = AceType::DynamicCast<NavDestinationPattern>(navDestinationA->GetPattern());
     EXPECT_NE(navDestinationPatternA, nullptr);
     auto navDestinationPatternB = AceType::DynamicCast<NavDestinationPattern>(navDestinationB->GetPattern());
