@@ -985,7 +985,7 @@ void ScrollablePattern::InitSpringOffsetProperty()
         if (pattern->isAnimationStop_) {
             return;
         }
-        auto context = OHOS::ACE::PipelineContext::GetCurrentContext();
+        auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         uint64_t currentVsync = context->GetVsyncTime();
         uint64_t diff = currentVsync - pattern->lastVsyncTime_;
@@ -1017,7 +1017,7 @@ void ScrollablePattern::InitCurveOffsetProperty(float position)
         if (pattern->isAnimationStop_) {
             return;
         }
-        auto context = OHOS::ACE::PipelineContext::GetCurrentContext();
+        auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         uint64_t currentVsync = context->GetVsyncTime();
         uint64_t diff = currentVsync - pattern->lastVsyncTime_;
