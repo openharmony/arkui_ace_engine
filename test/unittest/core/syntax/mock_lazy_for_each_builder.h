@@ -44,6 +44,8 @@ protected:
             AceType::MakeRefPtr<NG::FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<NG::Pattern>()) };
     }
     void OnExpandChildrenOnInitialInNG() override {}
+    void NotifyDataChanged(size_t index, RefPtr<NG::UINode>& lazyForEachNode, bool isRebuild = true) override {};
+    void NotifyDataDeleted(RefPtr<NG::UINode>& lazyForEachNode) override {};
 };
 } // namespace OHOS::Ace::Framework
 
