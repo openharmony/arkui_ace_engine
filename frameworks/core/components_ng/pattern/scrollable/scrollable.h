@@ -180,7 +180,7 @@ public:
         return canOverScroll_;
     }
 
-    void ProcessScrollMotionStop();
+    void ProcessScrollMotionStop(bool StopFriction);
 
     bool DispatchEvent(const TouchEvent& point) override
     {
