@@ -46,9 +46,8 @@ void RefreshLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
         if (HasCustomBuilderIndex() && index == customBuilderIndex_.value_or(0)) {
             auto builderLayoutConstraint = layoutConstraint;
-            auto customBaseHeight = layoutProperty->GetBuilderMeasureBaseHeight().value_or(0.0f);
             builderLayoutConstraint.UpdateIllegalSelfIdealSizeWithCheck(
-                CalculateBuilderSize(child, builderLayoutConstraint, customBaseHeight));
+                CalculateBuilderSize(child, builderLayoutConstraint, builderBaseHeight_));
             child->Measure(builderLayoutConstraint);
             ++index;
             continue;
@@ -131,10 +130,7 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
         auto paddingOffsetChild = paddingOffset;
         auto alignChild = align;
         if (!HasCustomBuilderIndex()) {
-            if (index == layoutWrapper->GetTotalChildCount() - 2) {
-                paddingOffsetChild += layoutProperty->GetShowTimeOffsetValue();
-                alignChild = Alignment::TOP_CENTER;
-            } else if (index == layoutWrapper->GetTotalChildCount() - 1) {
+            if (index == layoutWrapper->GetTotalChildCount() - 1) {
                 alignChild = Alignment::TOP_CENTER;
             }
         } else {
@@ -144,14 +140,14 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
                 auto geometryNode = builderChild->GetGeometryNode();
                 CHECK_NULL_VOID(geometryNode);
                 auto builderHeight = geometryNode->GetMarginFrameSize().Height();
-                auto customBaseHeight = layoutProperty->GetBuilderMeasureBaseHeight().value_or(0.0f);
                 alignChild = Alignment::TOP_CENTER;
                 if (index == customBuilderIndex_.value_or(0)) {
                     auto builderOffset =
-                        NearEqual(builderHeight, customBaseHeight) ? 0.0f : (customBaseHeight - builderHeight);
+                        NearEqual(builderHeight, builderBaseHeight_) ? 0.0f : (builderBaseHeight_ - builderHeight);
                     paddingOffsetChild += OffsetF(0.0f, builderOffset);
                 } else {
-                    auto scrollOffset = NearEqual(builderHeight, customBaseHeight) ? builderHeight : customBaseHeight;
+                    auto scrollOffset =
+                        NearEqual(builderHeight, builderBaseHeight_) ? builderHeight : builderBaseHeight_;
                     paddingOffsetChild += OffsetF(0.0f, scrollOffset);
                 }
                 auto translate =
@@ -168,9 +164,7 @@ void RefreshLayoutAlgorithm::PerformLayout(LayoutWrapper* layoutWrapper)
                 CHECK_NULL_VOID(geometryNode);
                 customBuilderHeight = geometryNode->GetMarginFrameSize().Height();
             } else {
-                auto paintProperty = pattern->GetPaintProperty<RefreshRenderProperty>();
-                CHECK_NULL_VOID(paintProperty);
-                auto refreshingProp = paintProperty->GetIsRefreshing().value_or(false);
+                auto refreshingProp = layoutProperty->GetIsRefreshing().value_or(false);
                 if (refreshingProp) {
                     auto distance = static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx());
                     auto refreshingPosition = Positive(customBuilderHeight) ? distance + customBuilderHeight : 0.0f;

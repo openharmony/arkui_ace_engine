@@ -25,7 +25,6 @@ public:
     static void ParseCustomBuilder(const JSCallbackInfo& info);
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);
-    static void Pop();
     static void OnStateChange(const JSCallbackInfo& args);
     static void OnRefreshing(const JSCallbackInfo& args);
     static void ParsFrictionData(const JsiRef<JsiValue>& value);
