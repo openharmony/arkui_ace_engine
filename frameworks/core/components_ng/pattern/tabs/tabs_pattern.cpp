@@ -232,11 +232,25 @@ void TabsPattern::UpdateSwiperDisableSwipe(bool disableSwipe)
     swiperPattern->SetSwiperEventCallback(disableSwipe);
 }
 
+void TabsPattern::SetSwiperPaddingAndBorder()
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto layoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    swiperPattern->SetTabsPaddingAndBorder(layoutProperty->CreatePaddingAndBorder());
+}
+
 void TabsPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
 
     UpdateSwiperDisableSwipe(isCustomAnimation_ ? true : isDisableSwipe_);
+    SetSwiperPaddingAndBorder();
 
     if (onChangeEvent_) {
         return;

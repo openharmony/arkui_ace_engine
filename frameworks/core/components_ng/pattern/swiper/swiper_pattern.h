@@ -571,6 +571,11 @@ public:
         return motionVelocity_;
     }
 
+    void SetTabsPaddingAndBorder(const PaddingPropertyF& tabsPaddingAndBorder)
+    {
+        tabsPaddingAndBorder_ = tabsPaddingAndBorder;
+    }
+
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -890,6 +895,7 @@ private:
     std::set<int32_t> needUnmountIndexs_;
     std::optional<int32_t> customAnimationToIndex_;
     RefPtr<TabContentTransitionProxy> currentProxyInAnimation_;
+    PaddingPropertyF tabsPaddingAndBorder_;
 };
 } // namespace OHOS::Ace::NG
 

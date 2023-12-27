@@ -618,9 +618,10 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (indicator > totalCount - 1 || indicator < 0) {
         indicator = 0;
     }
-    if (!swiperPattern->IsUseCustomAnimation() && !isAnimating_ && !IsMaskAnimationExecuted()) {
+    if ((!swiperPattern->IsUseCustomAnimation() || isFirstLayout_) && !isAnimating_ && !IsMaskAnimationExecuted()) {
         UpdateIndicator(indicator);
     }
+    isFirstLayout_ = false;
     UpdateGradientRegions(!swiperPattern->IsUseCustomAnimation());
     if (!swiperPattern->IsUseCustomAnimation() && isTouchingSwiper_ &&
         layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
