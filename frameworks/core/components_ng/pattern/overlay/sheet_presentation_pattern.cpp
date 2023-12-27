@@ -113,7 +113,6 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
             // After rotation, if need to avoid the keyboard, trigger the avoidance behavior
             AvoidSafeArea();
         }
-        SetColumnMinSize();
     }
     InitialLayoutProps();
     UpdateDragBarStatus();
