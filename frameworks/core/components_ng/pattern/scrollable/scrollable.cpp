@@ -54,7 +54,7 @@ constexpr uint64_t MIN_DIFF_VSYNC = 1000 * 1000; // min is 1ms
 constexpr float DEFAULT_THRESHOLD = 0.75f;
 constexpr float DEFAULT_SPRING_RESPONSE = 0.416f;
 constexpr float DEFAULT_SPRING_DAMP = 0.99f;
-constexpr uint32_t MIN_VSYNC_DIFF_TIME = 200000000 // 60 fps diff;
+constexpr uint32_t MAX_VSYNC_DIFF_TIME = 100 * 1000 * 1000; // max 100 ms
 #ifdef OHOS_PLATFORM
 constexpr int64_t INCREASE_CPU_TIME_ONCE = 4000000000; // 4s(unit: ns)
 #endif
@@ -854,7 +854,7 @@ void Scrollable::ProcessSpringMotion(double position)
     CHECK_NULL_VOID(context);
     uint64_t currentVsync = context->GetVsyncTime();
     uint64_t diff = currentVsync - lastVsyncTime_;
-    if (diff < MIN_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
+    if (diff < MAX_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
         currentVelocity_ = (position - currentPos_) / diff * MILLOS_PER_NANO_SECONDS;
         if (scrollMotionFRCSceneCallback_) {
             scrollMotionFRCSceneCallback_(currentVelocity_, NG::SceneStatus::RUNNING);
@@ -1005,7 +1005,7 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetFrictionProperty()
         CHECK_NULL_VOID(context);
         uint64_t currentVsync = context->GetVsyncTime();
         uint64_t diff = currentVsync - scroll->lastVsyncTime_;
-        if (diff < MIN_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
+        if (diff < MAX_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
             scroll->frictionVelocity_ = (position - scroll->lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
             if (scroll->scrollMotionFRCSceneCallback_) {
                 scroll->scrollMotionFRCSceneCallback_(scroll->frictionVelocity_, NG::SceneStatus::RUNNING);
@@ -1044,7 +1044,7 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSnapProperty()
         CHECK_NULL_VOID(context);
         uint64_t currentVsync = context->GetVsyncTime();
         uint64_t diff = currentVsync - scroll->lastVsyncTime_;
-        if (diff < MIN_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
+        if (diff < MAX_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
             scroll->snapVelocity_ = (position - scroll->currentPos_) / diff * MILLOS_PER_NANO_SECONDS;
             if (scroll->scrollMotionFRCSceneCallback_) {
                 scroll->scrollMotionFRCSceneCallback_(scroll->snapVelocity_, NG::SceneStatus::RUNNING);
