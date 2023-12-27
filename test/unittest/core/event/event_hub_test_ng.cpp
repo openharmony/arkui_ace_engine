@@ -16,8 +16,6 @@
 #include "gtest/gtest.h"
 
 #define private public
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -25,6 +23,7 @@
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -377,8 +376,9 @@ HWTEST_F(EventHubTestNg, EventHubDragEventsTest006, TestSize.Level1)
      * @tc.steps: step7. Set EventHub Customer OnDragEnd event and fire it.
      * @tc.expected: OnDragEnd is invoked and the temp values are assigned with correct values.
      */
-    auto OnDragEnd = [&dragEventType](
-                         const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */) { dragEventType = DRAG_END_EVENT_TYPE; };
+    auto OnDragEnd = [&dragEventType](const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */) {
+        dragEventType = DRAG_END_EVENT_TYPE;
+    };
     eventHub->SetCustomerOnDragFunc(DragFuncType::DRAG_END, OnDragEnd);
     eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_END, dragEvent);
     EXPECT_EQ(dragEventType, DRAG_END_EVENT_TYPE);
