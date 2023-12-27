@@ -22,6 +22,8 @@ constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr double STROKE_MITERLIMIT_DEFAULT = 4.0f;
 constexpr double DEFAULT_OPACITY = 1.0;
+constexpr double MIN_OPACITY = 0.0;
+constexpr uint32_t TRANSPARENT_COLOR = 0x00000000;
 
 ArkUINativeModuleValue CommonShapeBridge::SetStrokeDashArray(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
@@ -100,6 +102,10 @@ ArkUINativeModuleValue CommonShapeBridge::SetFill(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    if (secondArg->IsString() && secondArg->ToString(vm)->ToString() == "none") {
+        GetArkUIInternalNodeAPI()->GetCommonShapeModifier().SetFill(nativeNode, TRANSPARENT_COLOR);
+        return panda::JSValueRef::Undefined(vm);
+    }
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetFill(nativeNode);
@@ -239,6 +245,12 @@ ArkUINativeModuleValue CommonShapeBridge::SetFillOpacity(ArkUIRuntimeCallInfo* r
         if (!ArkTSUtils::ParseJsDouble(vm, secondArg, opacity)) {
             GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetFillOpacity(nativeNode);
         } else {
+            if (opacity > DEFAULT_OPACITY) {
+                opacity = DEFAULT_OPACITY;
+            }
+            if (opacity < MIN_OPACITY) {
+                opacity = MIN_OPACITY;
+            }
             GetArkUIInternalNodeAPI()->GetCommonShapeModifier().SetFillOpacity(nativeNode, opacity);
         }
     }
@@ -269,6 +281,12 @@ ArkUINativeModuleValue CommonShapeBridge::SetStrokeOpacity(ArkUIRuntimeCallInfo*
         if (!ArkTSUtils::ParseJsDouble(vm, secondArg, opacity)) {
             GetArkUIInternalNodeAPI()->GetCommonShapeModifier().ResetStrokeOpacity(nativeNode);
         } else {
+            if (opacity > DEFAULT_OPACITY) {
+                opacity = DEFAULT_OPACITY;
+            }
+            if (opacity < MIN_OPACITY) {
+                opacity = MIN_OPACITY;
+            }
             GetArkUIInternalNodeAPI()->GetCommonShapeModifier().SetStrokeOpacity(nativeNode, opacity);
         }
     }
