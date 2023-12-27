@@ -26,6 +26,16 @@ bool TouchEventActuator::DispatchEvent(const TouchEvent& point)
     return true;
 }
 
+void TouchEventActuator::OnFlushTouchEventsBegin()
+{
+    isFlushTouchEventsEnd_ = false;
+}
+
+void TouchEventActuator::OnFlushTouchEventsEnd()
+{
+    isFlushTouchEventsEnd_ = true;
+}
+
 bool TouchEventActuator::HandleEvent(const TouchEvent& point)
 {
     auto attachedNode = GetAttachedNode();
@@ -132,6 +142,10 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
         event.SetTiltY(lastPoint.tiltY.value());
     }
     event.SetSourceTool(lastPoint.sourceTool);
+    if (isFlushTouchEventsEnd_) {
+        event.SetTouchEventsEnd(true);
+        isFlushTouchEventsEnd_ = false;
+    }
     for (auto& impl : touchEvents_) {
         if (impl) {
             (*impl)(event);

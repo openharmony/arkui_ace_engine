@@ -5026,6 +5026,14 @@ void WebDelegate::HandleTouchMove(const int32_t& id, const double& x, const doub
     }
 }
 
+void WebDelegate::HandleTouchMove(const std::list<OHOS::NWeb::TouchPointInfo>& touchPointInfoList, bool from_overlay)
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->OnTouchMove(touchPointInfoList, from_overlay);
+    }
+}
+
 void WebDelegate::HandleTouchCancel()
 {
     ACE_DCHECK(nweb_ != nullptr);

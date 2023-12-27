@@ -77,6 +77,9 @@ public:
         }
     }
 
+    void OnFlushTouchEventsBegin() override;
+    void OnFlushTouchEventsEnd() override;
+
     void AddTouchEvent(const RefPtr<TouchEventImpl>& touchEvent)
     {
         if (touchEvents_.empty()) {
@@ -111,6 +114,7 @@ private:
     std::list<RefPtr<TouchEventImpl>> touchEvents_;
     RefPtr<TouchEventImpl> userCallback_;
     RefPtr<TouchEventImpl> onTouchEventCallback_;
+    bool isFlushTouchEventsEnd_ = false;
 };
 
 } // namespace OHOS::Ace::NG

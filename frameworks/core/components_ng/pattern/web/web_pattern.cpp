@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/web/web_pattern.h"
 
 #include <securec.h>
+#include <algorithm>
 
 #include "display_manager.h"
 #include "file_uri.h"
@@ -1775,16 +1776,32 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
     }
     CHECK_NULL_VOID(delegate_);
     std::list<TouchInfo> touchInfos;
-    if (!ParseTouchInfo(info, touchInfos)) {
+
+    touchEventInfoList_.emplace_back(info);
+    for (const auto& touchEventInfo : touchEventInfoList_) {
+        ParseTouchInfo(touchEventInfo, touchInfos);
+    }
+
+    if (touchInfos.empty()) {
         return;
     }
+    if (!info.GetTouchEventsEnd()) {
+        return;
+    }
+    touchEventInfoList_.clear();
+
+    std::list<OHOS::NWeb::TouchPointInfo> touchPointInfoList {};
     for (auto& touchPoint : touchInfos) {
         if (fromOverlay) {
             touchPoint.x -= webOffset_.GetX();
             touchPoint.y -= webOffset_.GetY();
         }
-        delegate_->HandleTouchMove(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
+        touchPointInfoList.emplace_back(OHOS::NWeb::TouchPointInfo{touchPoint.id, touchPoint.x, touchPoint.y});
     }
+    touchPointInfoList.sort([](const OHOS::NWeb::TouchPointInfo& point1, const OHOS::NWeb::TouchPointInfo& point2) {
+        return point1.id_ < point2.id_;
+    });
+    delegate_->HandleTouchMove(touchPointInfoList, fromOverlay);
 }
 
 void WebPattern::HandleTouchCancel(const TouchEventInfo& /*info*/)

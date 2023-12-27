@@ -724,11 +724,21 @@ public:
         return pointerEvent_;
     }
 
+    void SetTouchEventsEnd(bool isTouchEventsEnd)
+    {
+        isTouchEventsEnd_ = isTouchEventsEnd;
+    }
+
+    bool GetTouchEventsEnd() const
+    {
+        return isTouchEventsEnd_;
+    }
 private:
     std::shared_ptr<MMI::PointerEvent> pointerEvent_;
     std::list<TouchLocationInfo> touches_;
     std::list<TouchLocationInfo> changedTouches_;
     std::list<TouchLocationInfo> history_;
+    bool isTouchEventsEnd_ {false};
 };
 
 class NativeEmbeadTouchInfo : public BaseEventInfo {
