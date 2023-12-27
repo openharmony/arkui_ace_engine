@@ -467,6 +467,7 @@ private:
     bool changeByClick_ = false;
     bool needSetCentered_ = false;
     float scrollMargin_ = 0.0f;
+    bool isFirstLayout_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
 };
 } // namespace OHOS::Ace::NG
