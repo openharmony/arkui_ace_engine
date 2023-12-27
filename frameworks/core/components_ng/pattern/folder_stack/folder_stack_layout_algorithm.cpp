@@ -229,6 +229,7 @@ bool FolderStackLayoutAlgorithm::IsFullWindow(
     auto host = layoutWrapper->GetHostNode();
     CHECK_NULL_RETURN(host, false);
     auto parent = AceType::DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_RETURN(parent, false);
     auto padding = parent->GetLayoutProperty()->CreatePaddingAndBorder();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
