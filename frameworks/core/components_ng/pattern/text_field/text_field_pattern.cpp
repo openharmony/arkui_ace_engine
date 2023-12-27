@@ -3504,10 +3504,9 @@ bool TextFieldPattern::CursorMoveLeftOperation()
     }
     auto originCaretPosition = selectController_->GetCaretIndex();
     if (IsSelected()) {
-        selectController_->UpdateCaretIndex(
-            selectController_->GetEndIndex() - GetGraphemeClusterLength(contentController_->GetWideText(),
-                                                   selectController_->GetSecondHandleIndex(), true));
+        selectController_->UpdateCaretIndex(selectController_->GetStartIndex());
         CloseSelectOverlay();
+        StartTwinkling();
     } else {
         UpdateCaretPositionWithClamp(
             selectController_->GetCaretIndex() -
@@ -3602,6 +3601,7 @@ bool TextFieldPattern::CursorMoveRightOperation()
     if (IsSelected()) {
         CloseSelectOverlay();
         selectController_->UpdateCaretIndex(selectController_->GetEndIndex());
+        StartTwinkling();
     } else {
         UpdateCaretPositionWithClamp(
             selectController_->GetCaretIndex() +
