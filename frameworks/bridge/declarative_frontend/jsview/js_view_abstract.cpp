@@ -1941,11 +1941,9 @@ void JSViewAbstract::JsFlexBasis(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], value)) {
         value.SetUnit(DimensionUnit::AUTO);
     }
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-        // flexbasis don't support percent case.
-        if (value.Unit() == DimensionUnit::PERCENT) {
-            value.SetUnit(DimensionUnit::AUTO);
-        }
+    // flexbasis don't support percent case.
+    if (value.Unit() == DimensionUnit::PERCENT) {
+        value.SetUnit(DimensionUnit::AUTO);
     }
     ViewAbstractModel::GetInstance()->SetFlexBasis(value);
 }
