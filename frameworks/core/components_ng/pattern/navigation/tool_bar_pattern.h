@@ -58,7 +58,7 @@ public:
         SetBackgroundAndBlur();
     }
 
-     void UpdateNeedRecalculateSafeArea() override
+    void UpdateNeedRecalculateSafeArea() override
     {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
