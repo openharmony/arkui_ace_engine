@@ -688,6 +688,22 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                 CHECK_NULL_VOID(navigationLayoutProperty);
                 auto navigationStack = navigationStackWeak.Upgrade();
                 CHECK_NULL_VOID(navigationStack);
+                // considering navBar visibility
+                auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+                CHECK_NULL_VOID(navBarNode);
+                auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+                CHECK_NULL_VOID(navBarLayoutProperty);
+                bool isSetInvisible =
+                    (navigationGroupNode->GetNeedSetInvisible() && navigationStack->Size() != 0) ? true : false;
+                if (navigationLayoutProperty->GetHideNavBar().value_or(false) ||
+                    (pattern->GetNavigationMode() == NavigationMode::STACK && isSetInvisible)) {
+                    navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
+                    navBarNode->SetActive(false);
+                } else {
+                    navBarNode->GetRenderContext()->UpdateOpacity(1.0f);
+                    navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+                    navBarNode->SetActive(true);
+                }
                 auto navigationContentNode = AceType::DynamicCast<FrameNode>(navigationGroupNode->GetContentNode());
                 CHECK_NULL_VOID(navigationContentNode);
                 auto navDestinationNode =
@@ -704,22 +720,6 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                         pattern->NotifyDialogChange(true);
                         pattern->isChanged_ = false;
                     }
-                }
-                // considering navBar visibility
-                auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
-                CHECK_NULL_VOID(navBarNode);
-                auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
-                CHECK_NULL_VOID(navBarLayoutProperty);
-                bool isSetInvisible =
-                    (navigationGroupNode->GetNeedSetInvisible() && navigationStack->Size() != 0) ? true : false;
-                if (navigationLayoutProperty->GetHideNavBar().value_or(false) ||
-                    (pattern->GetNavigationMode() == NavigationMode::STACK && isSetInvisible)) {
-                    navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-                    navBarNode->SetActive(false);
-                } else {
-                    navBarNode->GetRenderContext()->UpdateOpacity(1.0f);
-                    navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-                    navBarNode->SetActive(true);
                 }
                 if (navDestinationNode->GetChildren().size() <= EMPTY_DESTINATION_CHILD_SIZE &&
                     navDestinationPattern->GetBackButtonState()) {
