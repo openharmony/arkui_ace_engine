@@ -84,7 +84,7 @@ OffsetF SubMenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<FrameNode>
     auto menuItemSize = parentMenuItem->GetGeometryNode()->GetFrameSize();
     position_ = GetSubMenuPosition(parentMenuItem);
     float x = HorizontalLayoutSubMenu(size, position_.GetX(), menuItemSize);
-    x = std::clamp(x, paddingStart_, wrapperSize_.Width() - menuItemSize.Width() - paddingEnd_);
+    x = std::clamp(x, paddingStart_, wrapperSize_.Width() - size.Width() - paddingEnd_);
     float y = 0.0f;
     if (hierarchicalParameters_ || !Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         y = VerticalLayoutSubMenu(size, position_.GetY(), menuItemSize);
