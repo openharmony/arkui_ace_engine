@@ -72,8 +72,8 @@ struct KeyboardAnimationConfig {
     uint32_t durationOut_ = 0;
 };
 
-class FontInfo;
-class FontConfigJsonInfo;
+struct FontInfo;
+struct FontConfigJsonInfo;
 class Frontend;
 class OffscreenCanvas;
 class Window;
