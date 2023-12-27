@@ -20,7 +20,6 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
-#include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/stage/page_info.h"
@@ -402,11 +401,7 @@ void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
     auto context = frameNode->GetRenderContext();
     CHECK_NULL_VOID(context);
     rectangle.localOffset = context->GetPaintRectWithTransform().GetOffset();
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        rectangle.windowOffset = frameNode->GetTransformRelativeOffset();
-    } else {
-        rectangle.windowOffset = frameNode->GetOffsetRelativeToWindow();
-    }
+    rectangle.windowOffset = frameNode->GetTransformRelativeOffset();
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     rectangle.screenRect = pipeline->GetCurrentWindowRect();
