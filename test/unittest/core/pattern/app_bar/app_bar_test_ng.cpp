@@ -67,6 +67,7 @@ void AppBarTestNg::SetUpTestSuite()
 
 void AppBarTestNg::TearDownTestSuite()
 {
+    MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
     MockPipelineContext::TearDown();
 }
 
@@ -559,5 +560,109 @@ HWTEST_F(AppBarTestNg, SetRowColor002, TestSize.Level1)
     std::optional<Color> NonColor = std::nullopt;
     appBar->SetRowColor(NonColor);
     EXPECT_EQ(renderContext->GetBackgroundColorValue(), originColor);
+}
+
+/**
+ * @tc.name: Test004
+ * @tc.desc: Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, Test004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create appBar when direction is Rtl.
+     * @tc.expected: appBar is not null.
+     */
+    auto test = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    auto atom = AppBarView::Create(test);
+    auto appBar = Referenced::MakeRefPtr<AppBarView>(atom);
+    EXPECT_NE(appBar, nullptr);
+    auto titleBar = AceType::DynamicCast<FrameNode>(atom->GetFirstChild());
+    EXPECT_NE(titleBar, nullptr);
+
+    auto label = AceType::DynamicCast<FrameNode>(titleBar->GetLastChild());
+    auto textLayoutProperty = label->GetLayoutProperty<TextLayoutProperty>();
+    EXPECT_NE(textLayoutProperty, nullptr);
+    auto backButton = AceType::DynamicCast<FrameNode>(titleBar->GetFirstChild());
+    auto buttonLayoutProperty = backButton->GetLayoutProperty();
+    EXPECT_NE(buttonLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. Testing margins and textAlign
+     */
+    constexpr Dimension MARGIN_TEXT_LEFT = 24.0_vp;
+    constexpr Dimension MARGIN_TEXT_RIGHT = 84.0_vp;
+    constexpr Dimension MARGIN_BUTTON = 12.0_vp;
+    constexpr Dimension MARGIN_BACK_BUTTON_RIGHT = -20.0_vp;
+    EXPECT_EQ(textLayoutProperty->GetTextAlign(), OHOS::Ace::TextAlign::RIGHT);
+    EXPECT_EQ(textLayoutProperty->GetMarginProperty()->left.value(), CalcLength(MARGIN_TEXT_RIGHT));
+    EXPECT_EQ(textLayoutProperty->GetMarginProperty()->right.value(), CalcLength(MARGIN_TEXT_LEFT));
+    EXPECT_EQ(buttonLayoutProperty->GetMarginProperty()->left.value(), CalcLength(MARGIN_BACK_BUTTON_RIGHT));
+    EXPECT_EQ(buttonLayoutProperty->GetMarginProperty()->right.value(), CalcLength(MARGIN_BUTTON));
+}
+
+/**
+ * @tc.name: SetRowWidth002
+ * @tc.desc: Testing the SetRowWidth interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, SetRowWidth002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create appBar.
+     * @tc.expected: appBar is not null.
+     */
+    auto stage = AceType::MakeRefPtr<FrameNode>("stage", 1, AceType::MakeRefPtr<StagePattern>());
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    auto frameNode = AppBarView::Create(stage);
+    auto appBar = Referenced::MakeRefPtr<AppBarView>(frameNode);
+    EXPECT_NE(appBar, nullptr);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipeline, nullptr);
+    auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
+    auto butttonRadius = appBarTheme->GetIconCornerRadius();
+    Dimension positionLeftX = appBarTheme->GetIconSize() - butttonRadius;
+    Dimension positionY = (appBarTheme->GetAppBarHeight() / 2.0f) - appBarTheme->GetIconSize();
+
+    auto faButton = AceType::DynamicCast<FrameNode>(appBar->atom_->GetLastChild());
+    auto geometryNode = faButton->GetGeometryNode();
+    EXPECT_NE(geometryNode, nullptr);
+    /**
+     * @tc.Construct the parameters required to call the SetRowWidth function
+     * @tc.Calling the SetRowWidth function when direction is Rtl
+     */
+    const Dimension rootWidthByPx(PipelineContext::GetCurrentRootWidth(), DimensionUnit::PX);
+    const Dimension rootWidthByVp(rootWidthByPx.ConvertToVp(), DimensionUnit::VP);
+    appBar->SetRowWidth(rootWidthByVp);
+    EXPECT_EQ(geometryNode->GetFrameOffset(), OffsetF(positionLeftX.Value(), positionY.Value()));
+}
+
+/**
+ * @tc.name: ReverseBackButton001
+ * @tc.desc: Testing the ReverseBackButton interface
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, ReverseBackButton001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create appBar.
+     * @tc.expected: appBar is not null.
+     */
+    auto stage = AceType::MakeRefPtr<FrameNode>("stage", 1, AceType::MakeRefPtr<StagePattern>());
+    auto frameNode = AppBarView::Create(stage);
+    auto appBar = Referenced::MakeRefPtr<AppBarView>(frameNode);
+
+    /**
+     * @tc.Construct the parameters required to call the ReverseBackButton function
+     * @tc.Calling the ReverseBackButton function
+     */
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    auto titleBar = frameNode->GetChildAtIndex(0);
+    auto backbtn = AceType::DynamicCast<FrameNode>(titleBar->GetFirstChild());
+    auto renderContext = backbtn->GetRenderContext();
+    appBar->ReverseBackButton();
+    EXPECT_EQ(renderContext->GetTransformScale(), VectorF(-1.0f, 1.0f));
 }
 } // namespace OHOS::Ace::NG
