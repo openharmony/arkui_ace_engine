@@ -155,6 +155,9 @@ void GridPattern::OnModifyDone()
     }
     
     Register2DragDropManager();
+    if (IsNeedInitClickEventRecorder()) {
+        Pattern::InitClickEventRecorder();
+    }
 }
 
 void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
