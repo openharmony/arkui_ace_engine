@@ -2118,26 +2118,33 @@ void JSViewAbstract::JsBackgroundColor(const JSCallbackInfo& info)
 void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
 {
     std::string src;
-    if (info[0]->IsString()) {
-        src = info[0]->ToString();
-    } else if (!ParseJsMedia(info[0], src)) {
-        return;
-    }
     std::string bundle;
     std::string module;
+    RefPtr<PixelMap> pixmap = nullptr;
     GetJsMediaBundleInfo(info[0], bundle, module);
+    if (info[0]->IsString()) {
+        src = info[0]->ToString();
+        ViewAbstractModel::GetInstance()->SetBackgroundImage(
+            ImageSourceInfo { src, bundle, module }, GetThemeConstants());
+    } else if (ParseJsMedia(info[0], src)) {
+        ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo { src, bundle, module }, nullptr);
+    } else {
+#if defined(PIXEL_MAP_SUPPORTED)
+        if (IsDrawable(info[0])) {
+            pixmap = GetDrawablePixmap(info[0]);
+        } else {
+            pixmap = CreatePixelMapFromNapiValue(info[0]);
+        }
+#endif
+        CHECK_NULL_VOID(pixmap);
+        ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo { pixmap }, nullptr);
+    }
 
     int32_t repeatIndex = 0;
     if (info.Length() == 2 && info[1]->IsNumber()) {
         repeatIndex = info[1]->ToNumber<int32_t>();
     }
     auto repeat = static_cast<ImageRepeat>(repeatIndex);
-    if (info[0]->IsString()) {
-        ViewAbstractModel::GetInstance()->SetBackgroundImage(
-            ImageSourceInfo { src, bundle, module }, GetThemeConstants());
-    } else {
-        ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo { src, bundle, module }, nullptr);
-    }
     ViewAbstractModel::GetInstance()->SetBackgroundImageRepeat(repeat);
 }
 
