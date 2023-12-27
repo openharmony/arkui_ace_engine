@@ -264,14 +264,18 @@ void JSList::SetSticky(int32_t sticky)
     ListModel::GetInstance()->SetSticky(static_cast<V2::StickyStyle>(sticky));
 }
 
-void JSList::SetContentStartOffset(float startOffset)
+void JSList::SetContentStartOffset(const JSCallbackInfo& info)
 {
-    ListModel::GetInstance()->SetContentStartOffset(startOffset);
+    double value = 0.0;
+    ParseJsDouble(info[0], value);
+    ListModel::GetInstance()->SetContentStartOffset(value);
 }
 
-void JSList::SetContentEndOffset(float endOffset)
+void JSList::SetContentEndOffset(const JSCallbackInfo& info)
 {
-    ListModel::GetInstance()->SetContentEndOffset(endOffset);
+    double value = 0.0;
+    ParseJsDouble(info[0], value);
+    ListModel::GetInstance()->SetContentEndOffset(value);
 }
 
 void JSList::SetScrollSnapAlign(int32_t scrollSnapAlign)
