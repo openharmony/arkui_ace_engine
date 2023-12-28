@@ -65,12 +65,13 @@ public:
     void SetDrawCallback(std::function<void(DrawingContext& context)>&& drawCallback)
     {
         drawCallback_ = drawCallback;
+        renderNodeModifier_ = AceType::MakeRefPtr<RenderNodeModifier>(drawCallback_);
     }
 
     RefPtr<PaintProperty> CreatePaintProperty() override
     {
         auto renderNodePaintProperty = MakeRefPtr<RenderNodePaintProperty>();
-        renderNodePaintProperty->UpdateRenderNodeState(false);
+        renderNodePaintProperty->UpdateRenderNodeFlag(0);
         return renderNodePaintProperty;
     }
 
@@ -90,11 +91,8 @@ public:
 
     void Invalidate()
     {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto paintProperty = host->GetPaintProperty<RenderNodePaintProperty>();
-        auto renderNodeState = paintProperty->GetRenderNodeState();
-        paintProperty->UpdateRenderNodeState(!renderNodeState.value_or(false));
+        CHECK_NULL_VOID(renderNodeModifier_);
+        renderNodeModifier_->Modify();
     }
 
 private:

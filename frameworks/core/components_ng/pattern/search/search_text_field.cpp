@@ -50,7 +50,6 @@ TextInputAction SearchTextFieldPattern::GetDefaultTextInputAction() const
     return TextInputAction::SEARCH;
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 void SearchTextFieldPattern::InitDragEvent()
 {
     auto host = GetHost();
@@ -61,5 +60,4 @@ void SearchTextFieldPattern::InitDragEvent()
     CHECK_NULL_VOID(gestureHub);
     gestureHub->SetTextDraggable(true);
 }
-#endif
 } // namespace OHOS::Ace::NG

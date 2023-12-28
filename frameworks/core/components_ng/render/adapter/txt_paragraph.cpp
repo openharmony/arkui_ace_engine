@@ -144,7 +144,7 @@ int32_t TxtParagraph::AddPlaceholder(const PlaceholderRun& span)
 #else
     builder_->AppendPlaceholder(txtSpan);
 #endif
-    auto position = placeholderIndex_ + text_.length() + 1;
+    auto position = static_cast<size_t>(placeholderIndex_) + text_.length() + 1;
     placeholderPosition_.emplace_back(position);
     return ++placeholderIndex_;
 }
@@ -327,9 +327,9 @@ int32_t TxtParagraph::GetGlyphIndexByCoordinate(const Offset& offset)
 bool TxtParagraph::CalCulateAndCheckPreIsPlaceholder(int32_t index, int32_t& extent)
 {
     for (auto placeholderIndex : placeholderPosition_) {
-        if (placeholderIndex == index) {
+        if (placeholderIndex == static_cast<size_t>(index)) {
             return true;
-        } else if (placeholderIndex < extent) {
+        } else if (placeholderIndex < static_cast<size_t>(extent)) {
             extent--;
         }
     }

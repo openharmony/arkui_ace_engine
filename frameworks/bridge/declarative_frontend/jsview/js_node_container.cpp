@@ -123,7 +123,7 @@ RefPtr<NG::UINode> JSNodeContainer::GetNodeByNodeController(const JSRef<JSObject
         }
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(result);
         JSRef<JSVal> nodeptr = obj->GetProperty(NODEPTR_OF_UINODE);
-        if (nodeptr.IsEmpty() || !nodeptr->IsObject()) {
+        if (nodeptr.IsEmpty()) {
             return nullptr;
         }
         const auto* vm = nodeptr->GetEcmaVM();

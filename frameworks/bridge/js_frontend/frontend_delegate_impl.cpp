@@ -1802,9 +1802,10 @@ RefPtr<JsAcePage> FrontendDelegateImpl::GetPage(int32_t pageId) const
     return itPage->second;
 }
 
-void FrontendDelegateImpl::RegisterFont(const std::string& familyName, const std::string& familySrc)
+void FrontendDelegateImpl::RegisterFont(const std::string& familyName, const std::string& familySrc,
+    const std::string& bundleName, const std::string& moduleName)
 {
-    pipelineContextHolder_.Get()->RegisterFont(familyName, familySrc);
+    pipelineContextHolder_.Get()->RegisterFont(familyName, familySrc, bundleName, moduleName);
 }
 
 void FrontendDelegateImpl::GetSystemFontList(std::vector<std::string>& fontList)

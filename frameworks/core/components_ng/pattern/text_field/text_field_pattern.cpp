@@ -80,9 +80,7 @@
 #include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
 #endif
 #endif
-#ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/udmf/udmf_client.h"
-#endif
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -687,6 +685,7 @@ void TextFieldPattern::HandleFocusEvent()
         underlineWidth_ = TYPING_UNDERLINE_WIDTH;
         renderContext->UpdateBorderRadius({ radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() });
     }
+    selectController_->FireSelectEvent();
     host->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
                                                                                  : PROPERTY_UPDATE_MEASURE);
 }
@@ -1385,7 +1384,6 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 void TextFieldPattern::InitDragEvent()
 {
     auto host = GetHost();
@@ -1441,10 +1439,12 @@ std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::strin
         }
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_RETURN(layoutProperty, itemInfo);
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         if (pattern->SelectOverlayIsOn() || pattern->imeAttached_ || pattern->showSelect_) {
             pattern->CloseHandleAndSelect();
             pattern->CloseKeyboard(true);
         }
+#endif
         pattern->dragStatus_ = DragStatus::DRAGGING;
         pattern->showSelect_ = false;
         pattern->selectionMode_ = SelectionMode::SELECT;
@@ -1606,6 +1606,7 @@ void TextFieldPattern::ClearDragDropEvent()
     CHECK_NULL_VOID(host);
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetTextDraggable(false);
     gestureHub->SetIsTextDraggable(false);
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1616,7 +1617,6 @@ void TextFieldPattern::ClearDragDropEvent()
     eventHub->SetOnDragEnd(nullptr);
     eventHub->SetOnDrop(nullptr);
 }
-#endif
 
 void TextFieldPattern::InitTouchEvent()
 {
@@ -1931,10 +1931,8 @@ void TextFieldPattern::OnModifyDone()
     InitSelectOverlay();
     InitDisableColor();
     ProcessResponseArea();
-#ifdef ENABLE_DRAG_FRAMEWORK
     InitDragEvent();
     Register2DragDropManager();
-#endif
     context->AddOnAreaChangeNode(host->GetId());
     if (!clipboard_ && context) {
         clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
@@ -2036,6 +2034,8 @@ void TextFieldPattern::OnModifyDone()
     HandleInputCounterBorder(originLength, maxlength);
     preInputStyle_ = inputStyle;
     Register2DragDropManager();
+    isModifyDone_ = true;
+    selectController_->FireSelectEvent();
 }
 
 void TextFieldPattern::OnAfterModifyDone()
@@ -2207,13 +2207,11 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-#ifdef ENABLE_DRAG_FRAMEWORK
     if (BetweenSelectedPosition(info.GetGlobalLocation())) {
         gestureHub->SetIsTextDraggable(true);
         return;
     }
     gestureHub->SetIsTextDraggable(false);
-#endif
     isLongPress_ = true;
     auto focusHub = GetFocusHub();
     if (!focusHub->IsCurrentFocus()) {
@@ -2244,6 +2242,13 @@ void TextFieldPattern::UpdateCaretPositionWithClamp(const int32_t& pos)
 
 void TextFieldPattern::ProcessOverlay(bool isUpdateMenu, bool animation, bool isShowMenu, bool isHiddenHandle)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (layoutProperty->HasFontSize() && NearZero(layoutProperty->GetFontSize()->Value())) {
+        return;
+    }
     selectController_->CalculateHandleOffset();
     ShowSelectOverlayParams showOverlayParams = {
         .animation = animation, .isShowMenu = isShowMenu, .isUpdateMenu = isUpdateMenu
@@ -2264,8 +2269,6 @@ void TextFieldPattern::ProcessOverlay(bool isUpdateMenu, bool animation, bool is
         ShowSelectOverlay(showOverlayParams);
     }
     if (isHiddenHandle) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
         auto context = host->GetContext();
         CHECK_NULL_VOID(context);
         auto selectManager = context->GetSelectOverlayManager();
@@ -2380,7 +2383,7 @@ bool TextFieldPattern::OnPreShowSelectOverlay(
 #else
     isSupportCameraInput_ = false;
 #endif
-    overlayInfo.menuInfo.showCameraInput = !IsSelected() && isSupportCameraInput_;
+    overlayInfo.menuInfo.showCameraInput = !IsSelected() && isSupportCameraInput_ && !customKeyboardBuilder_;
     auto gesture = host->GetOrCreateGestureEventHub();
     gesture->RemoveTouchEvent(GetTouchListener());
     return true;
@@ -2465,7 +2468,6 @@ void TextFieldPattern::CloseSelectOverlay(bool animation)
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     gesture->AddTouchEvent(GetTouchListener());
-    UpdateShowMagnifier();
 }
 
 void TextFieldPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
@@ -2577,10 +2579,12 @@ void TextFieldPattern::OnHandleClosed(bool closedByGlobalEvent)
     if (closedByGlobalEvent) {
         UpdateSelectMenuVisibility(false);
     }
-    UpdateShowMagnifier();
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    if (GetShowMagnifier()) {
+        UpdateShowMagnifier();
+        auto tmpHost = GetHost();
+        CHECK_NULL_VOID(tmpHost);
+        tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void TextFieldPattern::InitEditingValueText(std::string content)
@@ -2912,6 +2916,7 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
             CloseCustomKeyboard();
         }
         inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
+        UpdateKeyboardOffset(textConfig.positionY, textConfig.height);
 #else
         if (!HasConnection()) {
             TextInputConfiguration config;
@@ -3736,6 +3741,7 @@ void TextFieldPattern::Delete(int32_t start, int32_t end)
     SwapIfLarger(start, end);
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Handle Delete within [%{public}d, %{public}d]", start, end);
     contentController_->erase(start, end - start);
+    UpdateSelection(start);
     selectController_->MoveCaretToContentRect(start);
     CloseSelectOverlay(true);
     StartTwinkling();
@@ -5806,7 +5812,11 @@ void TextFieldPattern::OnObscuredChanged(bool isObscured)
 
 void TextFieldPattern::CreateHandles()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    showSelect_ = true;
     ProcessOverlay(true, false, false);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextFieldPattern::NotifyOnEditChanged(bool isChanged)
@@ -6148,7 +6158,6 @@ void TextFieldPattern::ShowMenu()
     ProcessOverlay(true, true, true);
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 void TextFieldPattern::HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent)
 {
     auto host = GetHost();
@@ -6220,5 +6229,4 @@ void TextFieldPattern::HandleOnDragStatusCallback(
             break;
     }
 }
-#endif // ENABLE_DRAG_FRAMEWORK
 } // namespace OHOS::Ace::NG

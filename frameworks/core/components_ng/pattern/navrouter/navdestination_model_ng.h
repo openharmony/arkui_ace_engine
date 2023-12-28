@@ -26,6 +26,8 @@ public:
     void Create(std::function<void()>&& deepRenderFunc) override;
     void SetHideTitleBar(bool hideTitleBar) override;
     void SetTitle(const std::string& title, bool hasSubTitle) override;
+    void SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
+        const std::string& bundleName, const std::string& moduleName) override;
     void SetSubtitle(const std::string& subtitle) override;
     void SetCustomTitle(const RefPtr<AceType>& customNode) override;
     void SetTitleHeight(int32_t height) override;

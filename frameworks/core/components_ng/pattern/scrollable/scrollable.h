@@ -163,7 +163,7 @@ public:
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(const GestureEvent& info);
-    void HandleScrollEnd();
+    void HandleScrollEnd(const std::optional<float>& velocity);
     bool HandleOverScroll(double velocity);
     ScrollResult HandleScroll(double offset, int32_t source, NestedState state);
 
@@ -329,7 +329,7 @@ public:
     {
         onScrollStartRec_ = std::move(func);
     }
-    void SetOnScrollEndRec(std::function<void()>&& func)
+    void SetOnScrollEndRec(std::function<void(const std::optional<float>&)>&& func)
     {
         onScrollEndRec_ = std::move(func);
     }
@@ -507,7 +507,7 @@ private:
     // ScrollablePattern::onScrollStartRecursive
     std::function<void(float)> onScrollStartRec_;
     // ScrollablePattern::onScrollEndRecursive
-    std::function<void()> onScrollEndRec_;
+    std::function<void(const std::optional<float>&)> onScrollEndRec_;
 
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     bool canOverScroll_ = true;

@@ -155,6 +155,9 @@ void GridPattern::OnModifyDone()
     }
     
     Register2DragDropManager();
+    if (IsNeedInitClickEventRecorder()) {
+        Pattern::InitClickEventRecorder();
+    }
 }
 
 void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
@@ -405,12 +408,8 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
                         (gridLayoutInfo.endIndex_ != gridLayoutInfo_.endIndex_);
     bool offsetEnd = gridLayoutInfo_.offsetEnd_;
     gridLayoutInfo_ = gridLayoutInfo;
+    AnimateToTarget(scrollAlign_, layoutAlgorithmWrapper);
 
-    if (targetIndex_.has_value()) {
-        ScrollToTargrtIndex(targetIndex_.value());
-        targetIndex_.reset();
-        scrollAlign_ = ScrollAlign::AUTO;
-    }
     if (gridLayoutInfo_.startIndex_ == 0 && NearZero(gridLayoutInfo_.currentOffset_)) {
         gridLayoutInfo_.reachStart_ = true;
     }
@@ -433,63 +432,6 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     MarkSelectedItems();
     isInitialized_ = true;
     return false;
-}
-
-void GridPattern::ScrollToTargrtIndex(int32_t index)
-{
-    if (index == LAST_ITEM) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto totalItemCount = host->TotalChildCount();
-        index = totalItemCount - 1;
-    }
-    int32_t targetRow = -1;
-    for (const auto& rowIndex : gridLayoutInfo_.gridMatrix_) {
-        for (const auto& columnIndex : rowIndex.second) {
-            if (columnIndex.second == index) {
-                targetRow = rowIndex.first;
-                break;
-            }
-        }
-    }
-    float mainGap = GetMainGap();
-    float targetPos = 0.0f;
-    if (targetRow == -1) {
-        return;
-    }
-    for (const auto& rowIndex : gridLayoutInfo_.lineHeightMap_) {
-        if (targetRow == rowIndex.first) {
-            AdjustingTargetPos(targetPos, rowIndex.first, rowIndex.second);
-            targetIndex_.reset();
-            return;
-        }
-        targetPos = targetPos + rowIndex.second + mainGap;
-    }
-}
-void GridPattern::AdjustingTargetPos(float targetPos, int32_t rowIndex, float lineHeight)
-{
-    switch (scrollAlign_) {
-        case ScrollAlign::START:;
-        case ScrollAlign::NONE:break;
-        case ScrollAlign::CENTER:
-            // Centered layout requires subtracting half of the window size+ target row height
-            targetPos = targetPos - ((gridLayoutInfo_.lastMainSize_ - lineHeight) * HALF);
-            break;
-        case ScrollAlign::END:
-            targetPos = targetPos - gridLayoutInfo_.lastMainSize_ + lineHeight;
-            break;
-        case ScrollAlign::AUTO:
-            if ((gridLayoutInfo_.startMainLineIndex_ == rowIndex) && (rowIndex == gridLayoutInfo_.endMainLineIndex_)) {
-                return;
-            }
-            if ((gridLayoutInfo_.startMainLineIndex_ < rowIndex) && (rowIndex < gridLayoutInfo_.endMainLineIndex_)) {
-                return;
-            } else if (rowIndex >= gridLayoutInfo_.endMainLineIndex_) {
-                targetPos = targetPos - gridLayoutInfo_.lastMainSize_ + lineHeight;
-            }
-            break;
-    }
-    AnimateTo(targetPos, -1, nullptr, true);
 }
 
 void GridPattern::CheckScrollable()
@@ -1785,12 +1727,13 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
     StopAnimate();
-    if ((index >= 0) || (index == LAST_ITEM)) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    int32_t totalChildCount = host->TotalChildCount();
+    if (((index >= 0) && (index < totalChildCount)) || (index == LAST_ITEM)) {
         if (smooth) {
             targetIndex_ = index;
             scrollAlign_ = align;
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         } else {
             UpdateStartIndex(index, align);
@@ -1798,4 +1741,99 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
     }
     FireAndCleanScrollingListener();
 }
+
+// Use the index to get the line number where the iten is located
+bool GridPattern::GetLineIndexByIndex(
+    std::map<int32_t, std::map<int32_t, int32_t>> gridMatrix_, int32_t& targetIndex, int32_t& targetLineIndex)
+{
+    for (auto [lineIndex, lineMap] : gridMatrix_) {
+        for (auto [crossIndex, index] : lineMap) {
+            if (index == targetIndex) {
+                targetLineIndex = lineIndex;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// get the total height of all rows before the targetLineIndex
+float GridPattern::GetTotalHeight(std::map<int32_t, float>& heightMap, int32_t targetLineIndex)
+{
+    auto targetPos = 0.f;
+    for (auto [lineIndex, lineHeight] : heightMap) {
+        if (targetLineIndex > lineIndex) {
+            targetPos += lineHeight + GetMainGap();
+        } else {
+            break;
+        }
+    }
+    return targetPos;
+}
+
+// Based on the index, align gets the position to scroll to
+bool GridPattern::GetGridItemAnimatePos(
+    int32_t targetIndex, ScrollAlign align, float& targetPos, GridLayoutInfo& gcrollGridLayoutInfo)
+{
+    int32_t targetLineIndex = -1;
+    auto matrix = gcrollGridLayoutInfo.gridMatrix_;
+    auto heightMap = gcrollGridLayoutInfo.lineHeightMap_;
+
+    // Pre-check
+    // Get the line number where the index is located. If targetIndex does not exist, it is returned.
+    CHECK_NULL_RETURN(GetLineIndexByIndex(matrix, targetIndex, targetLineIndex), false);
+
+    // Get the total height of the targetPos from row 0 to targetLineIndex-1.
+    targetPos = GetTotalHeight(heightMap, targetLineIndex);
+
+    // Find the target row and get the altitude information
+    auto targetItem = heightMap.find(targetLineIndex);
+
+    // Make sure that the target line has height information
+    CHECK_NULL_RETURN(targetItem != heightMap.end(), false);
+    auto targetLineHeight = targetItem->second;
+
+    // Depending on align, calculate where you need to scroll to
+    switch (scrollAlign_) {
+        case ScrollAlign::START:
+        case ScrollAlign::NONE:
+            break;
+        case ScrollAlign::CENTER: {
+            targetPos -= ((gcrollGridLayoutInfo.lastMainSize_ - targetLineHeight) * HALF);
+            break;
+        }
+        case ScrollAlign::END: {
+            targetPos -= (gcrollGridLayoutInfo.lastMainSize_ - targetLineHeight);
+            break;
+        }
+        case ScrollAlign::AUTO: {
+            if (gridLayoutInfo_.startMainLineIndex_ > targetLineIndex) {
+            } else if (targetLineIndex > gridLayoutInfo_.endMainLineIndex_) {
+                targetPos -= (gridLayoutInfo_.lastMainSize_ - targetLineHeight);
+            } else {
+                return false;
+            }
+            break;
+        }
+    }
+    return true;
+}
+
+// Turn on the scrolling animation and scroll to the item where the index is located
+bool GridPattern::AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper)
+{
+    if (targetIndex_.has_value()) {
+        auto gridScrollLayoutAlgorithm =
+            DynamicCast<GridScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+        auto scrollGridLayoutInfo = gridScrollLayoutAlgorithm->GetScrollGridLayoutInfo();
+
+        float targetPos = 0.0f;
+        // Based on the index, align gets the position to scroll to
+        CHECK_NULL_RETURN(GetGridItemAnimatePos(targetIndex_.value(), align, targetPos, scrollGridLayoutInfo), false);
+        AnimateTo(targetPos, -1, nullptr, true);
+        targetIndex_.reset();
+    }
+    return true;
+}
+
 } // namespace OHOS::Ace::NG

@@ -82,6 +82,15 @@ NavigationGroupNode::~NavigationGroupNode()
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
+    auto stageManager = context->GetStageManager();
+    CHECK_NULL_VOID(stageManager);
+    RefPtr<FrameNode> pageNode = stageManager->GetLastPage();
+    CHECK_NULL_VOID(pageNode);
+    auto pagePattern = pageNode->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    CHECK_NULL_VOID(pagePattern->GetPageInfo());
+    int32_t pageId = pagePattern->GetPageInfo()->GetPageId();
+    context->RemoveNavigationStateCallback(pageId, GetId());
     context->DeleteNavigationNode(curId_);
 }
 
@@ -231,32 +240,9 @@ RefPtr<UINode> NavigationGroupNode::GetNavDestinationNode(RefPtr<UINode> uiNode)
     return nullptr;
 }
 
-void NavigationGroupNode::AddBackButtonIconToNavDestination(const RefPtr<UINode>& navDestinationNode)
-{
-    auto navigationNode = AceType::WeakClaim(this).Upgrade();
-    auto navigationLayoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
-    CHECK_NULL_VOID(navigationLayoutProperty);
-    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(navDestinationNode);
-    auto navDestinationLayoutProperty = navDestination->GetLayoutProperty<NavDestinationLayoutProperty>();
-    CHECK_NULL_VOID(navDestinationLayoutProperty);
-
-    // back button icon
-    if (navigationLayoutProperty->HasNoPixMap()) {
-        if (navigationLayoutProperty->HasImageSource()) {
-            navDestinationLayoutProperty->UpdateImageSource(navigationLayoutProperty->GetImageSourceValue());
-        }
-        if (navigationLayoutProperty->HasPixelMap()) {
-            navDestinationLayoutProperty->UpdatePixelMap(navigationLayoutProperty->GetPixelMapValue());
-        }
-        navDestinationLayoutProperty->UpdateNoPixMap(navigationLayoutProperty->GetNoPixMapValue());
-        navDestination->MarkModifyDone();
-    }
-}
-
 void NavigationGroupNode::SetBackButtonEvent(
     const RefPtr<NavDestinationGroupNode>& navDestination, const RefPtr<NavRouterPattern>& navRouterPattern)
 {
-    AddBackButtonIconToNavDestination(navDestination);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestination->GetTitleBarNode());
     CHECK_NULL_VOID(titleBarNode);
     auto backButtonNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
@@ -433,6 +419,8 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
 
     if (curNode) {
         auto curFrameSize = curNode->GetGeometryNode()->GetFrameSize();
+        curNode->GetRenderContext()->ClipWithRRect(
+            RectF(0.0f, 0.0f, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
         curNode->GetRenderContext()->UpdateTranslateInXY({ -curFrameSize.Width() * PARENT_PAGE_OFFSET, 0.0f });
         curTitleNode->GetRenderContext()->UpdateTranslateInXY({ curFrameSize.Width() * PARENT_TITLE_OFFSET, 0.0f });
     }
@@ -507,25 +495,19 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
 
     /* Create animation callback */
     AnimationFinishCallback callback = [weakPreNode = WeakPtr<FrameNode>(preNode),
-        weakPreTitle = WeakPtr<FrameNode>(preTitleNode), weakNavigation = WeakClaim(this),
+        weakNavigation = WeakClaim(this),
         weakCurNode = WeakPtr<FrameNode>(curNode),
-        isNavBar, id = Container::CurrentId(), preFrameSize, curFrameSize, mode] {
+        isNavBar, id = Container::CurrentId()] {
             ContainerScope scope(id);
             auto context = PipelineContext::GetCurrentContext();
             CHECK_NULL_VOID(context);
             auto taskExecutor = context->GetTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);
             // animation finish event should be posted to UI thread
-            auto onFinishCallback = [weakPreNode, weakPreTitle, weakCurNode, weakNavigation, isNavBar, preFrameSize,
-                mode] {
+            auto onFinishCallback = [weakPreNode, weakCurNode, weakNavigation, isNavBar] {
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
                 auto navigation = weakNavigation.Upgrade();
                 CHECK_NULL_VOID(navigation);
-
-                auto preTitle = weakPreTitle.Upgrade();
-                if (preTitle) {
-                    preTitle->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
-                }
                 auto preNode = weakPreNode.Upgrade();
                 CHECK_NULL_VOID(preNode);
                 bool needSetInvisible = false;
@@ -553,12 +535,15 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                         }
                     }
                 }
-                preNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
 
                 navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
-                navigation->isOnAnimation_ = false;
                 auto curNode = weakCurNode.Upgrade();
                 CHECK_NULL_VOID(curNode);
+                if (AceType::DynamicCast<NavDestinationGroupNode>(curNode)->GetTransitionType() !=
+                    PageTransitionType::ENTER_PUSH) {
+                    return;
+                }
+                navigation->isOnAnimation_ = false;
                 curNode->GetRenderContext()->ClipWithRRect(
                     RectF(0.0f, 0.0f, REMOVE_CLIP_SIZE, REMOVE_CLIP_SIZE), RadiusF(EdgeF(0.0f, 0.0f)));
             };

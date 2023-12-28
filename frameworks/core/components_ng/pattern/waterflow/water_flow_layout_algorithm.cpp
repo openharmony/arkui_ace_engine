@@ -133,20 +133,8 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         if (crossIndex == -1) {
             // jump to out of cache
         } else {
-            auto item = layoutInfo_.waterFlowItems_[crossIndex][layoutInfo_.jumpIndex_];
-            // first line
-            if (layoutInfo_.currentOffset_ + item.first < 0 &&
-                layoutInfo_.currentOffset_ + item.first + item.second > 0) {
-                layoutInfo_.currentOffset_ = -item.first;
-            } else if (layoutInfo_.currentOffset_ + item.first < mainSize_ &&
-                       layoutInfo_.currentOffset_ + item.first + item.second > mainSize_) {
-                // last line
-                layoutInfo_.currentOffset_ = mainSize_ - (item.first + item.second);
-            } else if (layoutInfo_.currentOffset_ + item.first + item.second < 0 ||
-                       layoutInfo_.currentOffset_ + item.first > mainSize_) {
-                // out of viewport
-                layoutInfo_.currentOffset_ = -item.first;
-            }
+            JumpToTargetAlign(layoutInfo_.waterFlowItems_[crossIndex][layoutInfo_.jumpIndex_]);
+            layoutInfo_.align_ = ScrollAlign::AUTO;
             layoutInfo_.jumpIndex_ = EMPTY_JUMP_INDEX;
         }
     } else {
@@ -385,10 +373,11 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
             }
         }
         if (layoutInfo_.jumpIndex_ == currentIndex) {
-            layoutInfo_.currentOffset_ =
-                -(layoutInfo_.waterFlowItems_[position.crossIndex][currentIndex].first) + layoutInfo_.restoreOffset_;
+            JumpToTargetAlign(layoutInfo_.waterFlowItems_[position.crossIndex][currentIndex]);
+            layoutInfo_.currentOffset_ += layoutInfo_.restoreOffset_;
             // restoreOffSet only be used once
             layoutInfo_.restoreOffset_ = 0.0f;
+            layoutInfo_.align_ = ScrollAlign::AUTO;
             layoutInfo_.jumpIndex_ = EMPTY_JUMP_INDEX;
             layoutInfo_.itemStart_ = false;
         }
@@ -451,5 +440,30 @@ float WaterFlowLayoutAlgorithm::MeasuerFooter(LayoutWrapper* layoutWrapper)
     footer->Measure(footerConstraint);
     auto itemSize = footer->GetGeometryNode()->GetMarginFrameSize();
     return GetMainAxisSize(itemSize, axis_);
+}
+
+void WaterFlowLayoutAlgorithm::JumpToTargetAlign(const std::pair<float, float>& item)
+{
+    ScrollAlign align = layoutInfo_.align_;
+    switch (align) {
+        case ScrollAlign::START:
+            layoutInfo_.currentOffset_ = -item.first;
+            break;
+        case ScrollAlign::END:
+            layoutInfo_.currentOffset_ = mainSize_ - (item.first + item.second);
+            break;
+        case ScrollAlign::AUTO:
+            if (layoutInfo_.currentOffset_ + item.first + item.second < 0) {
+                layoutInfo_.currentOffset_ = -item.first;
+            } else if (layoutInfo_.currentOffset_ + item.first > mainSize_) {
+                layoutInfo_.currentOffset_ = mainSize_ - (item.first + item.second);
+            }
+            break;
+        case ScrollAlign::CENTER:
+            layoutInfo_.currentOffset_ = -item.first + (mainSize_ - item.second) / 2;
+            break;
+        default:
+            break;
+    }
 }
 } // namespace OHOS::Ace::NG

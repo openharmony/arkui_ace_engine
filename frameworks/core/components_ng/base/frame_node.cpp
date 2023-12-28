@@ -338,9 +338,7 @@ FrameNode::~FrameNode()
         auto dragManager = pipeline->GetDragDropManager();
         if (dragManager) {
             dragManager->RemoveDragFrameNode(GetId());
-#ifdef ENABLE_DRAG_FRAMEWORK
             dragManager->UnRegisterDragStatusListener(GetId());
-#endif // ENABLE_DRAG_FRAMEWORK
         }
         auto frameRateManager = pipeline->GetFrameRateManager();
         if (frameRateManager) {
@@ -1566,25 +1564,19 @@ bool FrameNode::IsOutOfTouchTestRegion(const PointF& parentRevertPoint, int32_t 
     auto clip = renderContext->GetClipEdge().value_or(false);
     if (!InResponseRegionList(revertPoint, responseRegionList) || !GetTouchable()) {
         if (clip) {
-            if (SystemProperties::GetDebugEnabled()) {
-                LOGI("TouchTest: frameNode use clip, point is out of region in %{public}s", GetTag().c_str());
-            }
+            LOGD("TouchTest: frameNode use clip, point is out of region in %{public}s", GetTag().c_str());
             return true;
         }
         for (auto iter = frameChildren_.rbegin(); iter != frameChildren_.rend(); ++iter) {
             const auto& child = iter->Upgrade();
             if (child && !child->IsOutOfTouchTestRegion(subRevertPoint, sourceType)) {
-                if (SystemProperties::GetDebugEnabled()) {
-                    LOGI("TouchTest: point is out of region in %{public}s, but is in child region", GetTag().c_str());
-                }
+                LOGD("TouchTest: point is out of region in %{public}s, but is in child region", GetTag().c_str());
                 isInChildRegion = true;
                 break;
             }
         }
         if (!isInChildRegion) {
-            if (SystemProperties::GetDebugEnabled()) {
-                LOGI("TouchTest: point is out of region in %{public}s", GetTag().c_str());
-            }
+            LOGD("TouchTest: point is out of region in %{public}s", GetTag().c_str());
             return true;
         }
     }
@@ -2563,8 +2555,8 @@ void FrameNode::UpdatePercentSensitive()
 // This will call child and self measure process.
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
-    ACE_LAYOUT_SCOPED_TRACE("Measure[%s][self:%d][parent:%d]", GetTag().c_str(),
-        GetId(), GetParent() ? GetParent()->GetId() : 0);
+    ACE_LAYOUT_SCOPED_TRACE("Measure[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
+        GetId(), GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
     isLayoutComplete_ = false;
     if (!oldGeometryNode_) {
         oldGeometryNode_ = geometryNode_->Clone();
@@ -2646,8 +2638,8 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 // Called to perform layout children.
 void FrameNode::Layout()
 {
-    ACE_LAYOUT_SCOPED_TRACE("Layout[%s][self:%d][parent:%d]", GetTag().c_str(),
-        GetId(), GetParent() ? GetParent()->GetId() : 0);
+    ACE_LAYOUT_SCOPED_TRACE("Layout[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
+        GetId(), GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
     int64_t time = GetSysTimestamp();
     OffsetNodeToSafeArea();
     const auto& geometryTransition = layoutProperty_->GetGeometryTransition();

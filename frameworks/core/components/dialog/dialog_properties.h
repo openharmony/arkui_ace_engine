@@ -178,6 +178,7 @@ struct DialogProperties {
     DialogButtonDirection buttonDirection = DialogButtonDirection::AUTO;
     bool isMask = false;
     bool isModal = true;
+    bool isSysBlurStyle = true;           // init use sysBlurStyle
     std::function<void()> customBuilder;
 
 #ifndef NG_BUILD

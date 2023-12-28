@@ -42,9 +42,7 @@
 #include "form_info.h"
 #endif
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/udmf/udmf_client.h"
-#endif // ENABLE_DRAG_FRAMEWORK
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -728,6 +726,7 @@ void FormPattern::FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSur
     auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
+    TAG_LOGI(AceLogTag::ACE_FORM, "VisibleType: %{public}d", static_cast<int32_t>(visible));
     layoutProperty->UpdateVisibility(visible);
 
     isLoaded_ = true;
@@ -1030,7 +1029,6 @@ void FormPattern::EnableDrag()
                          const std::string& /* extraParams */) -> DragDropInfo {
         DragDropInfo info;
 
-#ifdef ENABLE_DRAG_FRAMEWORK
         auto form = weak.Upgrade();
         CHECK_NULL_RETURN(form, info);
         auto subcontainer = form->GetSubContainer();
@@ -1039,7 +1037,6 @@ void FormPattern::EnableDrag()
         RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
         UdmfClient::GetInstance()->AddFormRecord(unifiedData, subcontainer->GetRunningCardId(), form->cardInfo_);
         event->SetData(unifiedData);
-#endif // ENABLE_DRAG_FRAMEWORK
 
         info.extraInfo = "card drag";
         return info;

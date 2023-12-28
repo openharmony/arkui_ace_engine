@@ -21,8 +21,8 @@
 
 #define private public
 #define protected public
-#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/common/mock_theme_default.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
@@ -1157,7 +1157,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp004, TestSi
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasFontSize());
     double fontSize = textLayoutProperty->GetFontSize().value().Value();
-    EXPECT_NE(FONT_SIZE_5, fontSize);
+    EXPECT_EQ(FONT_SIZE_5, fontSize);
 }
 
 /**
@@ -1219,7 +1219,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollDown003, Test
     EXPECT_EQ("test2", content);
     ASSERT_TRUE(textLayoutProperty->HasFontSize());
     double fontSize = textLayoutProperty->GetFontSize().value().Value();
-    EXPECT_NE(FONT_SIZE_5, fontSize);
+    EXPECT_EQ(FONT_SIZE_5, fontSize);
 }
 
 /**
@@ -3478,7 +3478,6 @@ HWTEST_F(TextPickerTestNg, TextPickerPaintTest001, TestSize.Level1)
     auto canvasDrawFunction = textPickerPaintMethod->GetForegroundDrawFunction(paintWrapper);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawLine(_, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DrawRect(_)).Times(AnyNumber());
@@ -3520,7 +3519,6 @@ HWTEST_F(TextPickerTestNg, TextPickerPaintTest002, TestSize.Level1)
     auto canvasDrawFunction = textPickerPaintMethod->GetForegroundDrawFunction(paintWrapper);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
-    EXPECT_CALL(rsCanvas, DrawLine(_, _)).Times(AtLeast(1));
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));

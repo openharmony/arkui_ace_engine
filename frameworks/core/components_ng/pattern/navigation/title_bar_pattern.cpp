@@ -33,20 +33,88 @@ namespace {
 constexpr int32_t DEFAULT_ANIMATION_DURATION = 200;
 constexpr int32_t TITLE_RATIO = 2;
 
+void HandlePlatformVersionAboveTen(
+    const RefPtr<FrameNode>& backButtonNode, const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty)
+{
+    // API >= 10
+    auto backButtonImageNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetChildren().front());
+    CHECK_NULL_VOID(backButtonImageNode);
+    RefPtr<ImageLayoutProperty> backButtonImageLayoutProperty =
+        backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(backButtonImageLayoutProperty);
+
+    bool noPixelMap = titleBarLayoutProperty->GetNoPixMapValue();
+    if (noPixelMap && titleBarLayoutProperty->HasImageSource()) {
+        backButtonImageLayoutProperty->UpdateImageSourceInfo(titleBarLayoutProperty->GetImageSourceValue());
+        backButtonImageNode->MarkModifyDone();
+        return;
+    }
+
+    if (!noPixelMap &&  titleBarLayoutProperty->HasPixelMap()) {
+        auto pixelMap = titleBarLayoutProperty->GetPixelMapValue();
+        backButtonImageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
+        backButtonImageNode->MarkModifyDone();
+    }
+}
+
+void HandlePlatformVersionBelowTen(
+    const RefPtr<FrameNode>& backButtonNode, const RefPtr<TitleBarLayoutProperty>& titleBarLayoutProperty)
+{
+    // API < 10
+    RefPtr<ImageLayoutProperty> backButtonImageLayoutProperty =
+        backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(backButtonImageLayoutProperty);
+    if (titleBarLayoutProperty->HasImageSource()) {
+        backButtonImageLayoutProperty->UpdateImageSourceInfo(titleBarLayoutProperty->GetImageSourceValue());
+        backButtonNode->MarkModifyDone();
+    }
+}
+
+void HandleDefaultIconForNavDestination(
+    const RefPtr<TitleBarNode>& hostNode, const RefPtr<FrameNode>& backButtonImageNode)
+{
+    auto navDestinationNode = AceType::DynamicCast<FrameNode>(hostNode->GetParent());
+    CHECK_NULL_VOID(navDestinationNode);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    auto navDestinationEventHub = navDestinationNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(navDestinationEventHub);
+    auto paintProperty = backButtonImageNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    // If use defalut icon, need to set fill-color
+    if (!navDestinationEventHub->IsEnabled()) {
+        paintProperty->UpdateSvgFillColor(theme->GetBackButtonIconColor().BlendOpacity(theme->GetAlphaDisabled()));
+    } else {
+        paintProperty->UpdateSvgFillColor(theme->GetBackButtonIconColor());
+    }
+    backButtonImageNode->MarkModifyDone();
+}
+
 void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
 {
     auto titleBarLayoutProperty = hostNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
     auto backButtonNode = AceType::DynamicCast<FrameNode>(hostNode->GetBackButton());
     CHECK_NULL_VOID(backButtonNode);
-    if (titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR) == TitleBarParentType::NAVBAR) {
-        auto backButtonImageNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetChildren().front());
-        CHECK_NULL_VOID(backButtonImageNode);
+    auto backButtonImageNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetChildren().front());
+    CHECK_NULL_VOID(backButtonImageNode);
+    auto parentType = titleBarLayoutProperty->GetTitleBarParentTypeValue(TitleBarParentType::NAVBAR);
+    if (parentType == TitleBarParentType::NAVBAR) {
         auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(backButtonImageLayoutProperty);
-        if (titleBarLayoutProperty->HasNoPixMap() && titleBarLayoutProperty->HasImageSource()) {
-            backButtonImageLayoutProperty->UpdateImageSourceInfo(titleBarLayoutProperty->GetImageSourceValue());
+
+        if (titleBarLayoutProperty->HasNoPixMap()) {
+            bool noPixelMap = titleBarLayoutProperty->GetNoPixMapValue();
+            if (noPixelMap && titleBarLayoutProperty->HasImageSource()) {
+                backButtonImageLayoutProperty->UpdateImageSourceInfo(titleBarLayoutProperty->GetImageSourceValue());
+            }
+            if (!noPixelMap && titleBarLayoutProperty->HasPixelMap()) {
+                auto pixelMap = titleBarLayoutProperty->GetPixelMapValue();
+                backButtonImageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(pixelMap));
+                backButtonImageNode->MarkModifyDone();
+            }
         }
+
         auto navBarNode = AceType::DynamicCast<FrameNode>(hostNode->GetParent());
         CHECK_NULL_VOID(navBarNode);
         auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
@@ -59,29 +127,18 @@ void MountBackButton(const RefPtr<TitleBarNode>& hostNode)
         backButtonImageNode->MarkModifyDone();
         return;
     }
-    if (!titleBarLayoutProperty->HasNoPixMap()) {
-        backButtonNode->MarkModifyDone();
-        return;
-    }
-    RefPtr<ImageLayoutProperty> backButtonImageLayoutProperty;
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-        backButtonImageLayoutProperty = backButtonNode->GetLayoutProperty<ImageLayoutProperty>();
-    } else {
-        auto backButtonImageNode = AceType::DynamicCast<FrameNode>(backButtonNode->GetChildren().front());
-        CHECK_NULL_VOID(backButtonImageNode);
-        backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
-    }
-    CHECK_NULL_VOID(backButtonImageLayoutProperty);
-    if (titleBarLayoutProperty->HasImageSource()) {
-        backButtonImageLayoutProperty->UpdateImageSourceInfo(titleBarLayoutProperty->GetImageSourceValue());
-        backButtonNode->MarkModifyDone();
-        return;
-    }
 
-    if (titleBarLayoutProperty->HasPixelMap()) {
-        // TODO: use pixelMap
+    if (!titleBarLayoutProperty->HasNoPixMap()) {
+        if (parentType == TitleBarParentType::NAV_DESTINATION) {
+            HandleDefaultIconForNavDestination(hostNode, backButtonImageNode);
+        }
         backButtonNode->MarkModifyDone();
         return;
+    }
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+        HandlePlatformVersionBelowTen(backButtonNode, titleBarLayoutProperty);
+    } else {
+        HandlePlatformVersionAboveTen(backButtonNode, titleBarLayoutProperty);
     }
 }
 
@@ -739,6 +796,7 @@ void TitleBarPattern::UpdateTitleFontSize(const Dimension& tempTitleFontSize)
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateFontSize(tempTitleFontSize);
     textLayoutProperty->UpdateAdaptMaxFontSize(tempTitleFontSize);
+    textLayoutProperty->ResetAdaptMinFontSize();
     titleNode->MarkModifyDone();
 }
 

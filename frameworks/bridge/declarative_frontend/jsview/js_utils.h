@@ -49,9 +49,7 @@ private:
     napi_handle_scope scope_;
 };
 #if !defined(PREVIEW)
-RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj);
 const std::shared_ptr<Rosen::RSNode> CreateRSNodeFromNapiValue(JSRef<JSVal> obj);
-RefPtr<PixelMap> GetDrawablePixmap(JSRef<JSVal> obj);
 RefPtr<OHOS::Ace::WantWrap> CreateWantWrapFromNapiValue(JSRef<JSVal> obj);
 #endif
 
@@ -62,5 +60,8 @@ napi_value ConvertPixmapNapi(const RefPtr<PixelMap>& pixelMap);
 
 bool IsDisableEventVersion();
 void ParseTextShadowFromShadowObject(const JSRef<JSVal>& shadowObject, std::vector<Shadow>& shadows);
+bool IsDrawable(const JSRef<JSVal>& jsValue);
+RefPtr<PixelMap> GetDrawablePixmap(JSRef<JSVal> obj);
+RefPtr<PixelMap> CreatePixelMapFromNapiValue(JSRef<JSVal> obj);
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_UTILS_H

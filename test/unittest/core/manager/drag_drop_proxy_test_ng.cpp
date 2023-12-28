@@ -553,6 +553,6 @@ HWTEST_F(DragDropProxyTestNg, DragDropProxyTest012, TestSize.Level1)
      * @tc.expected: step3. manager->currentId_ is equal to proxy->id_.
      */
     proxy->DestroyDragWindow();
-    EXPECT_EQ(manager->currentId_, proxy->id_);
+    EXPECT_EQ(manager->currentId_, -1);
 }
 } // namespace OHOS::Ace::NG

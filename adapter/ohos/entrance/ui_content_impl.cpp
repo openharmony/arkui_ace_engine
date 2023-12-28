@@ -224,7 +224,7 @@ public:
 
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override
     {
-        LOGI("UIContent OnAvoidAreaChanged type:%{public}d, topRect: avoidArea:x:%{public}d, y:%{public}d, "
+        LOGD("Avoid area changed, type:%{public}d, topRect: avoidArea:x:%{public}d, y:%{public}d, "
              "width:%{public}d, height%{public}d; bottomRect: avoidArea:x:%{public}d, y:%{public}d, "
              "width:%{public}d, height%{public}d",
             type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
@@ -321,9 +321,6 @@ public:
                 action = DragEventAction::DRAG_EVENT_START;
                 break;
         }
-#ifndef ENABLE_DRAG_FRAMEWORK
-        aceView->ProcessDragEvent(x, y, action);
-#endif // ENABLE_DRAG_FRAMEWORK
     }
 
 private:
@@ -371,7 +368,7 @@ public:
         taskExecutor->PostTask(
             [instanceId = instanceId_] {
                 SubwindowManager::GetInstance()->ClearMenu();
-                SubwindowManager::GetInstance()->ClearMenuNG(instanceId, false, true);
+                SubwindowManager::GetInstance()->ClearMenuNG(instanceId, true, true);
                 SubwindowManager::GetInstance()->ClearPopupInSubwindow(instanceId);
             },
             TaskExecutor::TaskType::UI);
@@ -1380,6 +1377,7 @@ void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& con
         window_->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
         pipeline->UpdateSystemSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM));
         pipeline->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
+        pipeline->UpdateNavSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
     }
 }
 
@@ -1439,9 +1437,8 @@ void UIContentImpl::ReloadForm(const std::string& url)
 
 void UIContentImpl::Focus()
 {
-    LOGI("UIContentImpl: window focus");
+    LOGI("%{public}s window focus", bundleName_.c_str());
     Platform::AceContainer::OnActive(instanceId_);
-
     CHECK_NULL_VOID(window_);
     std::string windowName = window_->GetWindowName();
     Recorder::EventRecorder::Get().SetFocusContainerInfo(windowName, instanceId_);
@@ -1449,14 +1446,13 @@ void UIContentImpl::Focus()
 
 void UIContentImpl::UnFocus()
 {
-    LOGI("UIContentImpl: window unFocus");
+    LOGI("%{public}s window unfocus", bundleName_.c_str());
     Platform::AceContainer::OnInactive(instanceId_);
 }
 
 void UIContentImpl::Destroy()
 {
-    LOGI("UIContentImpl: window destroy");
-
+    LOGI("%{public}s window destroy", bundleName_.c_str());
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     // stop performance check and output json file
@@ -2451,6 +2447,7 @@ void UIContentImpl::DestroyCustomPopupUIExtension(int32_t nodeId)
 
 void UIContentImpl::SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow)
 {
+    ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
@@ -2464,6 +2461,7 @@ void UIContentImpl::SetContainerModalTitleVisible(bool customTitleSettedShow, bo
 
 void UIContentImpl::SetContainerModalTitleHeight(int32_t height)
 {
+    ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(

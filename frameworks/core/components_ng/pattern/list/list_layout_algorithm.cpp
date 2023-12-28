@@ -629,6 +629,9 @@ void ListLayoutAlgorithm::CheckJumpToIndex()
         int32_t items = -currentDelta_ / averageHeight;
         targetIndex -= items;
         currentDelta_ += items * averageHeight;
+        if (targetIndex <= 0) {
+            currentDelta_ = 0;
+        }
     }
     jumpIndex_ = std::clamp(targetIndex, 0, totalItemCount_ - 1);
 }

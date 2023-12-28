@@ -34,4 +34,18 @@ bool Frontend::MaybeRelease()
         return !taskExecutor_->PostTask([this] { delete this; }, TaskExecutor::TaskType::JS);
     }
 }
+
+std::string Frontend::stateToString(int state)
+{
+    static const char* stateMap[7] = {
+        "ON_CREATE",
+        "ON_DESTROY",
+        "ON_SHOW",
+        "ON_HIDE",
+        "ON_ACTIVE",
+        "ON_INACTIVE",
+        "UNDEFINE",
+    };
+    return stateMap[state];
+}
 } // namespace OHOS::Ace

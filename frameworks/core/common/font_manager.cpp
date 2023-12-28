@@ -30,8 +30,8 @@ namespace OHOS::Ace {
 
 float FontManager::fontWeightScale_ = 1.0f;
 
-void FontManager::RegisterFont(
-    const std::string& familyName, const std::string& familySrc, const RefPtr<PipelineBase>& context)
+void FontManager::RegisterFont(const std::string& familyName, const std::string& familySrc,
+    const RefPtr<PipelineBase>& context, const std::string& bundleName, const std::string& moduleName)
 {
     if (std::find(std::begin(fontNames_), std::end(fontNames_), familyName) == std::end(fontNames_)) {
         fontNames_.emplace_back(familyName);
@@ -40,13 +40,12 @@ void FontManager::RegisterFont(
     for (auto iter = fontLoaders_.begin(); iter != fontLoaders_.end(); ++iter) {
         auto& fontLoader = *iter;
         if (fontLoader->GetFamilyName() == familyName) {
-            LOGI("Font is already loaded!");
             return;
         }
     }
     RefPtr<FontLoader> fontLoader = FontLoader::Create(familyName, familySrc);
     fontLoaders_.emplace_back(fontLoader);
-    fontLoader->AddFont(context);
+    fontLoader->AddFont(context, bundleName, moduleName);
 
     fontLoader->SetVariationChanged([weak = WeakClaim(this), familyName]() {
         auto fontManager = weak.Upgrade();

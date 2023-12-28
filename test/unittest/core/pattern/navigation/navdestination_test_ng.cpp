@@ -19,6 +19,8 @@
 #define private public
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
+#include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
@@ -156,5 +158,34 @@ HWTEST_F(NavdestinationTestNg, NavdestinationTest004, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
     auto navigationGroupNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     ASSERT_NE(navigationGroupNode, nullptr);
+}
+
+/**
+ * @tc.name: NavDestinationTest005
+ * @tc.desc: Test SetBackButtonIcon.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavdestinationTestNg, NavdestinationTest005, TestSize.Level1)
+{
+    MockPipelineContextGetTheme();
+    NavDestinationModelNG navDestinationModelNG;
+    auto builderFunc = []() {};
+    std::string imageSource = "src";
+    bool noPixMap = true;
+    RefPtr<PixelMap> pixMap = nullptr;
+    navDestinationModelNG.Create(std::move(builderFunc));
+    navDestinationModelNG.SetBackButtonIcon(imageSource, noPixMap, pixMap, "", "");
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    ASSERT_NE(navDestinationNode, nullptr);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    ASSERT_NE(titleBarNode, nullptr);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    ASSERT_NE(titleBarLayoutProperty, nullptr);
+    ASSERT_EQ(titleBarLayoutProperty->GetPixelMap(), nullptr);
+    ASSERT_TRUE(titleBarLayoutProperty->GetNoPixMap());
+    ImageSourceInfo imageSourceInfo = titleBarLayoutProperty->GetImageSourceValue();
+    ASSERT_EQ(imageSourceInfo.GetSrc(), imageSource);
 }
 } // namespace OHOS::Ace::NG

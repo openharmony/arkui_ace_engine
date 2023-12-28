@@ -189,10 +189,6 @@ void JSBaseNode::PostTouchEvent(const JSCallbackInfo& info)
         TimeStamp time(nanoseconds);
         touchEvent.time = time;
     }
-    auto currentSysTimeJsVal = obj->GetProperty("currentSysTime");
-    if (currentSysTimeJsVal->IsNumber()) {
-        touchEvent.currentSysTime = static_cast<int64_t>(currentSysTimeJsVal->ToNumber<double>());
-    }
     auto deviceIdJsVal = obj->GetProperty("deviceId");
     if (deviceIdJsVal->IsNumber()) {
         touchEvent.deviceId = deviceIdJsVal->ToNumber<int32_t>();

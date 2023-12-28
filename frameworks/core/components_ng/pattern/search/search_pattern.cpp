@@ -619,6 +619,7 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
             return true;
         }
         if (focusChoice_ == FocusChoice::SEARCH && event.IsShiftWith(KeyCode::KEY_TAB)) {
+            textFieldPattern->CloseKeyboard(true);
             return false;
         }
         if (focusChoice_ == FocusChoice::SEARCH && !isAllTextSelected && !isTextEmpty) {
@@ -631,8 +632,12 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     }
     if (event.code == KeyCode::KEY_DPAD_RIGHT || (event.pressedCodes.size() == 1 && event.code == KeyCode::KEY_TAB)) {
         if (focusChoice_ == FocusChoice::SEARCH && (isAllTextSelected || isTextEmpty || isOnlyTabPressed)) {
-            if (NearZero(cancelButtonSize_.Height()) && !isSearchButtonEnabled_) {
-                return event.code == KeyCode::KEY_DPAD_RIGHT; // go outside of search only if tab pressed
+            if (NearZero(cancelButtonSize_.Height()) && !isSearchButtonEnabled_ &&
+                event.code == KeyCode::KEY_DPAD_RIGHT) {
+                return true;
+            } else if (NearZero(cancelButtonSize_.Height()) && !isSearchButtonEnabled_) {
+                textFieldPattern->CloseKeyboard(true);
+                return false;
             }
             if (NearZero(cancelButtonSize_.Height())) {
                 focusChoice_ = FocusChoice::SEARCH_BUTTON;
@@ -665,6 +670,7 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
         }
         if (focusChoice_ == FocusChoice::SEARCH_BUTTON &&
             (event.pressedCodes.size() == 1 && event.code == KeyCode::KEY_TAB)) {
+            textFieldPattern->CloseKeyboard(true);
             return false;
         }
         if (focusChoice_ == FocusChoice::SEARCH_BUTTON && event.code == KeyCode::KEY_DPAD_RIGHT) {
@@ -695,8 +701,11 @@ void SearchPattern::PaintFocusState()
         } else {
             textFieldPattern->HandleFocusEvent(); // Show caret
         }
-    } else if (textFieldPattern->IsSelected() || textFieldPattern->GetCursorVisible()) {
-        textFieldPattern->HandleSetSelection(0, 0, false); // Clear text selection & caret if focus has gone
+    } else {
+        if (textFieldPattern->IsSelected() || textFieldPattern->GetCursorVisible()) {
+            textFieldPattern->HandleSetSelection(0, 0, false); // Clear text selection & caret if focus has gone
+        }
+        textFieldPattern->CloseKeyboard(true);
     }
 
     auto context = PipelineContext::GetCurrentContext();

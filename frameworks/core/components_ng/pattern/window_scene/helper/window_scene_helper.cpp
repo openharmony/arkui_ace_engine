@@ -22,6 +22,8 @@
 #include "core/common/container.h"
 #include "core/components_ng/pattern/window_scene/scene/system_window_scene.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/search/search_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "session/host/include/session.h"
 
@@ -125,6 +127,22 @@ bool WindowSceneHelper::IsFocusWindowSceneCloseKeyboard(RefPtr<FrameNode> focuse
     isWindowSceneSaveKeyboardFlag = window2patternSession->GetSCBKeepKeyboardFlag();
 
     return isWindowSceneSaveKeyboardFlag;
+}
+
+bool WindowSceneHelper::GetNeedKeyboardOnFocusFlag(const RefPtr<FrameNode> frameNode)
+{
+    bool isNeed = true;
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_RETURN(pattern, true);
+    if (frameNode->GetTag() == V2::TEXTAREA_ETS_TAG || frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG) {
+        auto curPattern = AceType::DynamicCast<TextFieldPattern>(pattern);
+        isNeed = curPattern->GetNeedToRequestKeyboardOnFocus();
+    } else if (frameNode->GetTag() == V2::SEARCH_ETS_TAG) {
+        auto curPattern = AceType::DynamicCast<SearchPattern>(pattern);
+        isNeed = curPattern->GetNeedToRequestKeyboardOnFocus();
+    }
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Need to Request Keyboard On Focus Flag:(%{public}d)", isNeed);
+    return isNeed;
 }
 
 void WindowSceneHelper::IsWindowSceneCloseKeyboard(RefPtr<FrameNode> frameNode)

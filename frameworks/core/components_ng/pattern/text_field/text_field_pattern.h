@@ -157,6 +157,11 @@ public:
         return true;
     }
 
+    bool GetNeedToRequestKeyboardOnFocus() const
+    {
+        return needToRequestKeyboardOnFocus_;
+    }
+
     bool CheckBlurReason();
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
@@ -1045,6 +1050,15 @@ public:
     bool HasFocus() const;
     void StopTwinkling();
 
+    bool IsModifyDone()
+    {
+        return isModifyDone_;
+    }
+    void SetModifyDoneStatus(bool value)
+    {
+        isModifyDone_ = value;
+    }
+
     const TimeStamp& GetLastClickTime()
     {
         return lastClickTimeStamp_;
@@ -1060,7 +1074,6 @@ public:
 
 protected:
     virtual void InitDragEvent();
-#endif
 
 private:
     void GetTextSelectRectsInRangeAndWillChange();
@@ -1075,7 +1088,6 @@ private:
     void InitTouchEvent();
     void InitLongPressEvent();
     void InitClickEvent();
-#ifdef ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragStart();
     std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragDrop();
@@ -1084,7 +1096,6 @@ private:
     void HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
     void HandleCursorOnDragLeaved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
     void HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& notifyDragEvent);
-#endif
     int32_t UpdateCaretPositionOnHandleMove(const OffsetF& localOffset);
     bool HasStateStyle(UIState state) const;
 
@@ -1375,6 +1386,7 @@ private:
     OffsetF localOffset_;
     bool isTouchCaret_ = false;
     bool needSelectAll_ = false;
+    bool isModifyDone_ = false;
 };
 } // namespace OHOS::Ace::NG
 

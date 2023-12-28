@@ -5581,14 +5581,13 @@ void WebDelegate::OnOverScroll(float xOffset, float yOffset)
         TaskExecutor::TaskType::JS);
 }
 
-void WebDelegate::SetTouchEventInfo(
-    const OHOS::NWeb::NativeEmbedTouchEvent& touchEvent, TouchEventInfo& touchEventInfo)
+void WebDelegate::SetTouchEventInfo(const OHOS::NWeb::NativeEmbedTouchEvent& touchEvent, TouchEventInfo& touchEventInfo)
 {
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
     TouchEvent event{touchEvent.id, touchEvent.x, touchEvent.y, touchEvent.screenX, touchEvent.screenY,
         static_cast<OHOS::Ace::TouchType>(touchEvent.type)};
-    webPattern->SetTouchEventInfo(event, touchEventInfo, Offset(touchEvent.offsetX, touchEvent.offsetY));
+    webPattern->SetTouchEventInfo(event, touchEventInfo);
 }
 
 void WebDelegate::OnNativeEmbedLifecycleChange(const OHOS::NWeb::NativeEmbedDataInfo& dataInfo)

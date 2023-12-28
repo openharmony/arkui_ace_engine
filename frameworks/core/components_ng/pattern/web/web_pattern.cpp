@@ -45,18 +45,12 @@
 #include "frameworks/base/utils/system_properties.h"
 #include "frameworks/core/components_ng/base/ui_node.h"
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 #include "base/geometry/rect.h"
-#include "base/msdp/device_status/interfaces/innerkits/interaction/include/interaction_manager.h"
 #include "core/common/ace_engine_ext.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/common/udmf/unified_data.h"
-#endif
 
 namespace OHOS::Ace::NG {
-#ifdef ENABLE_DRAG_FRAMEWORK
-using namespace Msdp::DeviceStatus;
-#endif // ENABLE_DRAG_FRAMEWORK
 namespace {
 const std::string IMAGE_POINTER_CONTEXT_MENU_PATH = "etc/webview/ohos_nweb/context-menu.svg";
 const std::string IMAGE_POINTER_ALIAS_PATH = "etc/webview/ohos_nweb/alias.svg";
@@ -2641,12 +2635,12 @@ void WebPattern::OnScrollStartRecursive(float position)
     isFirstFlingScrollVelocity_ = true;
 }
 
-void WebPattern::OnScrollEndRecursive()
+void WebPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollEndRecursive");
     auto parent = parent_.Upgrade();
     if (parent) {
-        parent->OnScrollEndRecursive();
+        parent->OnScrollEndRecursive(std::nullopt);
     }
 }
 
@@ -2673,7 +2667,7 @@ void WebPattern::OnScrollState(bool scrollState)
 {
     scrollState_ = scrollState;
     if (!scrollState) {
-        OnScrollEndRecursive();
+        OnScrollEndRecursive(std::nullopt);
     }
 }
 
@@ -2943,17 +2937,19 @@ void WebPattern::SetSelfAsParentOfWebCoreNode(NWeb::NWebAccessibilityNodeInfo& i
         info.parentId = host->GetAccessibilityId();
     }
 }
-void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo& touchEventInfo, const Offset& offset)
+
+void WebPattern::SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo& touchEventInfo)
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto offset = host->GetOffsetRelativeToWindow();
     touchEventInfo = touchEventInfo_;
     TouchLocationInfo changedInfo("onTouch", touchEvent.id);
-    changedInfo.SetGlobalLocation(Offset(touchEvent.x, touchEvent.y));
     changedInfo.SetLocalLocation(Offset(touchEvent.x, touchEvent.y));
-    changedInfo.SetScreenLocation(Offset(touchEvent.screenX - offset.GetX(), touchEvent.screenY - offset.GetY()));
+    changedInfo.SetGlobalLocation(Offset(touchEvent.x + offset.GetX(), touchEvent.y + offset.GetY()));
+    changedInfo.SetScreenLocation(Offset(touchEvent.x + offset.GetX(), touchEvent.y + offset.GetY()));
     changedInfo.SetTouchType(touchEvent.type);
 
-    for (auto item : touchEventInfo.GetChangedTouches()) {
-        item = std::move(changedInfo);
-    }
+    touchEventInfo.AddChangedTouchLocationInfo(std::move(changedInfo));
 }
 } // namespace OHOS::Ace::NG

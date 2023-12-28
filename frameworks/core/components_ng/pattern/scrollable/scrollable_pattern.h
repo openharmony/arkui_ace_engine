@@ -427,6 +427,14 @@ public:
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
 
+    bool IsScrollableSpringMotionRunning()
+    {
+        CHECK_NULL_RETURN(scrollableEvent_, false);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_RETURN(scrollable, false);
+        return scrollable->IsSpringMotionRunning();
+    }
+
 protected:
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const
     {
@@ -543,7 +551,7 @@ private:
     ScrollResult HandleScroll(float offset, int32_t source, NestedState state = NestedState::GESTURE) override;
     bool HandleScrollVelocity(float velocity) override;
 
-    void OnScrollEndRecursive() override;
+    void OnScrollEndRecursive(const std::optional<float>& velocity) override;
     void OnScrollStartRecursive(float position) override;
 
     ScrollResult HandleScrollParentFirst(float& offset, int32_t source, NestedState state);

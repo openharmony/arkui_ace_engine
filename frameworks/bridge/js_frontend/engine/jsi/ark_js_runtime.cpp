@@ -139,8 +139,7 @@ void ArkJSRuntime::StartDebuggerForSocketPair(std::string& option, uint32_t sock
 {
     CHECK_NULL_VOID(vm_);
     int identifierId = ParseHdcRegisterOption(option);
-    panda::JSNApi::DebugOption debugOption = { libPath_.c_str(), isDebugMode_ };
-    panda::JSNApi::StartDebuggerForSocketPair(identifierId, debugOption, socketFd, debuggerPostTask_);
+    panda::JSNApi::StartDebuggerForSocketPair(identifierId, socketFd);
 }
 #endif
 
@@ -164,11 +163,11 @@ bool ArkJSRuntime::StartDebugger()
 
         HdcRegister::Get().StartHdcRegister(instanceId_, callback);
         ConnectServerManager::Get().SetDebugMode();
-        JSNApi::DebugOption debugOption = { libPath_.c_str(), isDebugMode_ };
+        bool isDebugApp = AceApplicationInfo::GetInstance().IsDebugVersion();
+        JSNApi::DebugOption debugOption = { libPath_.c_str(), isDebugApp ? isDebugMode_ : false };
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
         ConnectServerManager::Get().AddInstance(gettid(), language_);
-        ret = JSNApi::NotifyDebugMode(gettid(), vm_, libPath_.c_str(), debugOption, gettid(), debuggerPostTask_,
-            AceApplicationInfo::GetInstance().IsDebugVersion(), isDebugMode_);
+        ret = JSNApi::NotifyDebugMode(gettid(), vm_, debugOption, gettid(), debuggerPostTask_, isDebugApp);
 #elif defined(ANDROID_PLATFORM)
         ret = JSNApi::StartDebugger(vm_, debugOption, instanceId_, debuggerPostTask_);
 #endif

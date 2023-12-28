@@ -285,20 +285,30 @@ RefPtr<FocusHub> FocusHub::GetCurrentMainView()
 RefPtr<FocusHub> FocusHub::GetMainViewRootScope()
 {
     auto frameName = GetFrameName();
-    int32_t rootScopeDeepth = 0;
+    std::list<int32_t> rootScopeDeepth;
     if (frameName == V2::MENU_ETS_TAG) {
         rootScopeDeepth = DEEPTH_OF_MENU;
     } else if (frameName == V2::DIALOG_ETS_TAG) {
         rootScopeDeepth = DEEPTH_OF_DIALOG;
     } else if (frameName == V2::POPUP_ETS_TAG) {
         rootScopeDeepth = DEEPTH_OF_POPUP;
+    } else if (frameName == V2::SHEET_PAGE_TAG) {
+        rootScopeDeepth = DEEPTH_OF_SHEET_PAGE;
     } else {
         rootScopeDeepth = DEEPTH_OF_PAGE;
     }
     RefPtr<FocusHub> rootScope = AceType::Claim(this);
-    for (int32_t i = 0; i < rootScopeDeepth; ++i) {
+    for (const auto& index : rootScopeDeepth) {
         CHECK_NULL_RETURN(rootScope, nullptr);
-        rootScope = rootScope->GetChildren().front();
+        auto children = rootScope->GetChildren();
+        auto iter = children.begin();
+        std::advance(iter, index);
+        if (iter == children.end()) {
+            TAG_LOGI(AceLogTag::ACE_FOCUS, "Index: %{public}d of %{public}s/%{public}d 's children is invalid.", index,
+                rootScope->GetFrameName().c_str(), rootScope->GetFrameId());
+            return nullptr;
+        }
+        rootScope = *iter;
     }
     CHECK_NULL_RETURN(rootScope, nullptr);
     if (rootScope->GetFocusType() != FocusType::SCOPE) {
@@ -694,8 +704,8 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
         TAG_LOGD(AceLogTag::ACE_FOCUS,
             "OnKeyEvent: Node %{public}s/%{public}d will not handle KeyEvent(code:%{public}d, action:%{public}d). "
             "Because its child %{public}s/%{public}d already has consumed this event.",
-            GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action,
-            lastFocusNode->GetFrameName().c_str(), lastFocusNode->GetFrameId());
+            GetFrameName().c_str(), GetFrameId(), keyEvent.code, keyEvent.action, lastFocusNode->GetFrameName().c_str(),
+            lastFocusNode->GetFrameId());
         return true;
     }
 
@@ -1098,8 +1108,16 @@ void FocusHub::IsCloseKeyboard(RefPtr<FrameNode> frameNode)
             frameNode->GetTag().c_str(), frameNode->GetId());
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
-            inputMethod->RequestHideInput();
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
+            MiscServices::PanelInfo curKeyboardPanelInfo;
+            curKeyboardPanelInfo.panelType = MiscServices::PanelType::SOFT_KEYBOARD;
+            curKeyboardPanelInfo.panelFlag = MiscServices::PanelFlag::FLG_FIXED;
+            bool curIsShown = false;
+            auto infApiRes = inputMethod->IsPanelShown(curKeyboardPanelInfo, curIsShown);
+            if (infApiRes || curIsShown) {
+                TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Shown.");
+                inputMethod->RequestHideInput();
+                TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
+            }
         }
     }
 #endif

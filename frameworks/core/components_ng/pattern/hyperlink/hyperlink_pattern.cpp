@@ -17,9 +17,7 @@
 
 #include "base/json/json_util.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
-#ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/udmf/udmf_client.h"
-#endif
 
 namespace OHOS::Ace::NG {
 void HyperlinkPattern::OnAttachToFrameNode() {}
@@ -42,7 +40,6 @@ void HyperlinkPattern::EnableDrag()
         json->Put("title", content.c_str());
         auto param = json->ToString();
         info.extraInfo = param;
-#ifdef ENABLE_DRAG_FRAMEWORK
         RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
         if (content.empty()) {
             UdmfClient::GetInstance()->AddLinkRecord(unifiedData, address, "");
@@ -50,7 +47,6 @@ void HyperlinkPattern::EnableDrag()
             UdmfClient::GetInstance()->AddLinkRecord(unifiedData, address, content);
         }
         event->SetData(unifiedData);
-#endif
         return info;
     };
     auto eventHub = GetHost()->GetEventHub<EventHub>();

@@ -39,58 +39,8 @@ constexpr int32_t FONT_INFO_INDEX_SYMBOLIC = 9;
 constexpr int32_t FONT_INFO_INDEX_MAX = 10;
 }
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-static bool ParseFamilyName(napi_env env, napi_value familyNameNApi, std::string& familyName, napi_valuetype valueType)
-{
-    napi_typeof(env, familyNameNApi, &valueType);
-    if (valueType == napi_string) {
-        size_t nameLen = 0;
-        napi_get_value_string_utf8(env, familyNameNApi, nullptr, 0, &nameLen);
-        std::unique_ptr<char[]> name = std::make_unique<char[]>(nameLen + 1);
-        napi_get_value_string_utf8(env, familyNameNApi, name.get(), nameLen + 1, &nameLen);
-        familyName = name.get();
-    } else if (valueType == napi_object) {
-        ResourceInfo recv;
-        if (!ParseResourceParam(env, familyNameNApi, recv)) {
-            return false;
-        }
-        if (!ParseString(recv, familyName)) {
-            return false;
-        }
-    } else {
-        return false;
-    }
-    return true;
-}
-
-static bool ParseFamilySrc(napi_env env, napi_value familySrcNApi, std::string& familySrc, napi_valuetype& valueType)
-{
-    napi_typeof(env, familySrcNApi, &valueType);
-    if (valueType == napi_string) {
-        size_t srcLen = 0;
-        napi_get_value_string_utf8(env, familySrcNApi, nullptr, 0, &srcLen);
-        std::unique_ptr<char[]> src = std::make_unique<char[]>(srcLen + 1);
-        napi_get_value_string_utf8(env, familySrcNApi, src.get(), srcLen + 1, &srcLen);
-        familySrc = src.get();
-    } else if (valueType == napi_object) {
-        ResourceInfo recv;
-        if (!ParseResourceParam(env, familySrcNApi, recv)) {
-            NapiThrow(env, "Can not parse resource info from input params.", Framework::ERROR_CODE_INTERNAL_ERROR);
-            return false;
-        }
-
-        if (!ParseString(recv, familySrc)) {
-            NapiThrow(env, "Can not get familySrc from resource manager.", Framework::ERROR_CODE_INTERNAL_ERROR);
-            return false;
-        }
-    } else {
-        return false;
-    }
-    return true;
-}
-#else
-static bool ParseFamilyNameOrSrc(
-    napi_env env, napi_value familyNameOrSrcNApi, std::string& familyNameOrSrc, napi_valuetype valueType)
+static bool ParseFamilyNameOrSrc(napi_env env, napi_value familyNameOrSrcNApi, std::string& familyNameOrSrc,
+    napi_valuetype valueType, ResourceInfo& info)
 {
     napi_typeof(env, familyNameOrSrcNApi, &valueType);
     if (valueType == napi_string) {
@@ -100,11 +50,10 @@ static bool ParseFamilyNameOrSrc(
         napi_get_value_string_utf8(env, familyNameOrSrcNApi, name.get(), nameLen + 1, &nameLen);
         familyNameOrSrc = name.get();
     } else if (valueType == napi_object) {
-        ResourceInfo recv;
-        if (!ParseResourceParam(env, familyNameOrSrcNApi, recv)) {
+        if (!ParseResourceParam(env, familyNameOrSrcNApi, info)) {
             return false;
         }
-        if (!ParseString(recv, familyNameOrSrc)) {
+        if (!ParseString(info, familyNameOrSrc)) {
             return false;
         }
     } else {
@@ -112,7 +61,6 @@ static bool ParseFamilyNameOrSrc(
     }
     return true;
 }
-#endif
 
 static napi_value JSRegisterFont(napi_env env, napi_callback_info info)
 {
@@ -135,28 +83,24 @@ static napi_value JSRegisterFont(napi_env env, napi_callback_info info)
     } else {
         return nullptr;
     }
-#ifndef USE_GRAPHIC_TEXT_GINE
-    if (!ParseFamilyName(env, familyNameNApi, familyName, valueType)) {
-#else
-    if (!ParseFamilyNameOrSrc(env, familyNameNApi, familyName, valueType)) {
-#endif
+
+    ResourceInfo resourceInfo;
+    if (!ParseFamilyNameOrSrc(env, familyNameNApi, familyName, valueType, resourceInfo)) {
         return nullptr;
     }
-#ifndef USE_GRAPHIC_TEXT_GINE
-    if (!ParseFamilySrc(env, familySrcNApi, familySrc, valueType)) {
-#else
-    if (!ParseFamilyNameOrSrc(env, familySrcNApi, familySrc, valueType)) {
-#endif
+    if (!ParseFamilyNameOrSrc(env, familySrcNApi, familySrc, valueType, resourceInfo)) {
         return nullptr;
     }
 
+    std::string bundleName = resourceInfo.bundleName.has_value() ? resourceInfo.bundleName.value() : "";
+    std::string moduleName = resourceInfo.moduleName.has_value() ? resourceInfo.moduleName.value() : "";
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (!delegate) {
         TAG_LOGW(AceLogTag::ACE_FONT, "can not get delegate.");
         return nullptr;
     }
     TAG_LOGI(AceLogTag::ACE_FONT, "begin to register font.");
-    delegate->RegisterFont(familyName, familySrc);
+    delegate->RegisterFont(familyName, familySrc, bundleName, moduleName);
     return nullptr;
 }
 

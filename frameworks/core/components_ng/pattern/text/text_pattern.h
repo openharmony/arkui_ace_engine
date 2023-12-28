@@ -92,6 +92,11 @@ public:
 
     bool IsAtomicNode() const override
     {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        if (host->GetTag() == V2::SYMBOL_ETS_TAG) {
+            return true;
+        }
         return false;
     }
 
@@ -295,7 +300,6 @@ public:
     }
     virtual void OnColorConfigurationUpdate() override;
 
-#ifdef ENABLE_DRAG_FRAMEWORK
     NG::DragDropInfo OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
     DragDropInfo OnDragStartNoChild(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
     void InitDragEvent();
@@ -306,7 +310,7 @@ public:
     void OnDragEndNoChild();
     void CloseOperate();
     void OnDragMove(const RefPtr<Ace::DragEvent>& event);
-#endif
+
     std::string GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const;
     TextStyleResult GetTextStyleObject(const RefPtr<SpanNode>& node);
     SymbolSpanStyle GetSymbolSpanStyleObject(const RefPtr<SpanNode>& node);
@@ -634,6 +638,8 @@ private:
     int32_t GetSelectionSpanItemIndex(const MouseInfo& info);
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     void RedisplaySelectOverlay();
+    void ProcessBoundRectByTextMarquee(RectF& rect);
+    ResultObject GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t index, int32_t start, int32_t end);
     // to check if drag is in progress
 
     bool isMeasureBoundary_ = false;

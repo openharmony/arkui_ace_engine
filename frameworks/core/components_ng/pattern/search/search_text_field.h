@@ -30,9 +30,7 @@ public:
     bool IsSearchParentNode() const;
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
     TextInputAction GetDefaultTextInputAction() const override;
-#ifdef ENABLE_DRAG_FRAMEWORK
     void InitDragEvent() override;
-#endif
 };
 } // namespace OHOS::Ace::NG
 

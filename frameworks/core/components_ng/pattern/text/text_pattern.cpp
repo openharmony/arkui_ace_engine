@@ -47,10 +47,8 @@
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/property/property.h"
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/ace_engine_ext.h"
 #include "core/common/udmf/udmf_client.h"
-#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -253,6 +251,11 @@ SelectionInfo TextPattern::GetSpansInfo(int32_t start, int32_t end, GetSpansMeth
             if (!resultObject.valueString.empty()) {
                 resultObjects.emplace_back(resultObject);
             }
+        } else if (uinode->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
+            ResultObject resultObject = GetBuilderResultObject(uinode, index, realStart, realEnd);
+            if (!resultObject.valueString.empty()) {
+                resultObjects.emplace_back(resultObject);
+            }
         }
         index++;
     }
@@ -282,14 +285,10 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     if (IsDraggable(info.GetLocalLocation())) {
         dragBoxes_ = GetTextBoxes();
         // prevent long press event from being triggered when dragging
-#ifdef ENABLE_DRAG_FRAMEWORK
         gestureHub->SetIsTextDraggable(true);
-#endif
         return;
     }
-#ifdef ENABLE_DRAG_FRAMEWORK
     gestureHub->SetIsTextDraggable(false);
-#endif
     auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
@@ -1211,7 +1210,6 @@ void TextPattern::HandlePanEnd(const GestureEvent& info)
     }
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams)
 {
     DragDropInfo itemInfo;
@@ -1400,10 +1398,6 @@ void TextPattern::InitDragEvent()
     CHECK_NULL_VOID(eventHub);
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-    if (eventHub->HasOnDragStart()) {
-        gestureHub->SetTextDraggable(false);
-        return;
-    }
     gestureHub->InitDragDropEvent();
     gestureHub->SetTextDraggable(true);
     gestureHub->SetThumbnailCallback(GetThumbnailCallback());
@@ -1466,8 +1460,6 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
         }
     };
 }
-
-#endif // ENABLE_DRAG_FRAMEWORK
 
 std::string TextPattern::GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const
 {
@@ -1768,11 +1760,7 @@ void TextPattern::OnModifyDone()
         }
         InitLongPressEvent(gestureEventHub);
         if (host->IsDraggable()) {
-#ifdef ENABLE_DRAG_FRAMEWORK
             InitDragEvent();
-#else
-            InitPanEvent(gestureEventHub);
-#endif
         }
         InitMouseEvent();
         InitTouchEvent();
@@ -2543,6 +2531,28 @@ void TextPattern::ProcessBoundRectByTextShadow(RectF& rect)
         leftOffsetX, upOffsetY, rect.Width() + rightOffsetX - leftOffsetX, rect.Height() + downOffsetY - upOffsetY);
 }
 
+void TextPattern::ProcessBoundRectByTextMarquee(RectF& rect)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textLayoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    if (!(textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE)) {
+        return;
+    }
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameSize = geometryNode->GetFrameSize();
+    CHECK_NULL_VOID(paragraph_);
+    if (paragraph_->GetTextWidth() < frameSize.Width()) {
+        return;
+    }
+    auto relativeSelfLeftOffsetX =
+        std::max(-1 * host->GetOffsetRelativeToWindow().GetX(), rect.GetOffset().GetX() - paragraph_->GetTextWidth());
+    rect.SetLeft(relativeSelfLeftOffsetX);
+    rect.SetWidth(frameSize.Width() + paragraph_->GetTextWidth() - relativeSelfLeftOffsetX);
+}
+
 RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
 {
     if (!contentMod_) {
@@ -2570,6 +2580,7 @@ RefPtr<NodePaintMethod> TextPattern::CreateNodePaintMethod()
         boundsRect.SetWidth(boundsWidth);
         boundsRect.SetHeight(boundsHeight);
         ProcessBoundRectByTextShadow(boundsRect);
+        ProcessBoundRectByTextMarquee(boundsRect);
         if (!context->GetClipEdge().value() && (LessNotEqual(frameSize.Width(), boundsRect.Width()) ||
                                                    LessNotEqual(frameSize.Height(), boundsRect.Height()))) {
             boundsWidth = std::max(frameSize.Width(), boundsRect.Width());
@@ -2802,5 +2813,32 @@ int32_t TextPattern::GetSelectionSpanItemIndex(const MouseInfo& info)
         }
     }
     return -1;
+}
+
+ResultObject TextPattern::GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t index, int32_t start, int32_t end)
+{
+    int32_t itemLength = 1;
+    ResultObject resultObject;
+    if (!DynamicCast<FrameNode>(uiNode) || !GetSpanItemByIndex(index)) {
+        return resultObject;
+    }
+    int32_t endPosition = std::min(GetTextContentLength(), GetSpanItemByIndex(index)->position);
+    int32_t startPosition = endPosition - itemLength;
+    if ((start <= startPosition) && (end >= endPosition)) {
+        auto builderNode = DynamicCast<FrameNode>(uiNode);
+        CHECK_NULL_RETURN(builderNode, resultObject);
+        resultObject.spanPosition.spanIndex = index;
+        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
+        resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGESTART] = 0;
+        resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = itemLength;
+        resultObject.type = SelectSpanType::TYPEIMAGE;
+        auto geometryNode = builderNode->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, resultObject);
+        resultObject.imageStyle.size[RichEditorImageSize::SIZEWIDTH] = geometryNode->GetMarginFrameSize().Width();
+        resultObject.imageStyle.size[RichEditorImageSize::SIZEHEIGHT] = geometryNode->GetMarginFrameSize().Height();
+        resultObject.valueString = " ";
+    }
+    return resultObject;
 }
 } // namespace OHOS::Ace::NG

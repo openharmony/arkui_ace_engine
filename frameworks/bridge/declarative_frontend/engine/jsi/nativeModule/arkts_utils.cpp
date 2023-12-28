@@ -721,7 +721,7 @@ bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM *vm, const Local<JSValueR
             }
             Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
             auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
-            if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::MEDIA)) {
+            if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::MEDIA)) {
                 result = resourceWrapper->GetMediaPathByName(param->ToString(vm)->ToString());
                 return true;
             }
@@ -788,9 +788,13 @@ bool ArkTSUtils::ParseJsString(const EcmaVM* vm, const Local<JSValueRef>& jsValu
 }
 
 std::string GetReplaceContentStr(
-    const EcmaVM* vm, int pos, const std::string& type, Local<panda::ArrayRef> params, int32_t containCount)
+    const EcmaVM* vm, int32_t pos, const std::string& type, Local<panda::ArrayRef> params, int32_t containCount)
 {
-    auto item = panda::ArrayRef::GetValueAt(vm, params, pos + containCount);
+    int32_t index = pos + containCount;
+    if (index < 0) {
+        return std::string();
+    }
+    auto item = panda::ArrayRef::GetValueAt(vm, params, static_cast<uint32_t>(index));
     if (type == "d") {
         if (item->IsNumber()) {
             return std::to_string(item->ToNumber(vm)->Value());
@@ -826,7 +830,7 @@ void ReplaceHolder(const EcmaVM* vm, std::string& originStr, const Local<panda::
             firstMatch = false;
             shortHolderType = pos.length() == 0;
         } else {
-            if (shortHolderType ^ (pos.length() == 0)) {
+            if (static_cast<uint32_t>(shortHolderType) ^ static_cast<uint32_t>(pos.length() == 0)) {
                 return;
             }
         }

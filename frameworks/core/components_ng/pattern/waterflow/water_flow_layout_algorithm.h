@@ -57,6 +57,7 @@ private:
     }
     float MeasuerFooter(LayoutWrapper* layoutWrapper);
     void LayoutFooter(LayoutWrapper* layoutWrapper, const OffsetF& childFrameOffset, bool reverse);
+    void JumpToTargetAlign(const std::pair<float, float>& item);
 
     std::map<int32_t, float> itemsCrossSize_;
     std::map<int32_t, float> itemsCrossPosition_;

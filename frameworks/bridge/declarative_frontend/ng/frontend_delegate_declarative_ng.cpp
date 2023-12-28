@@ -542,9 +542,10 @@ void FrontendDelegateDeclarativeNG::ChangeLocale(const std::string& language, co
         TaskExecutor::TaskType::PLATFORM);
 }
 
-void FrontendDelegateDeclarativeNG::RegisterFont(const std::string& familyName, const std::string& familySrc)
+void FrontendDelegateDeclarativeNG::RegisterFont(const std::string& familyName, const std::string& familySrc,
+    const std::string& bundleName, const std::string& moduleName)
 {
-    pipelineContextHolder_.Get()->RegisterFont(familyName, familySrc);
+    pipelineContextHolder_.Get()->RegisterFont(familyName, familySrc, bundleName, moduleName);
 }
 
 void FrontendDelegateDeclarativeNG::GetSystemFontList(std::vector<std::string>& fontList)

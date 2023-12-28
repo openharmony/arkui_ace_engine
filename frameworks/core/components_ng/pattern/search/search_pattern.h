@@ -28,6 +28,7 @@
 #include "core/components_ng/pattern/search/search_paint_method.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_layout_property.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
 
@@ -47,6 +48,14 @@ public:
     bool NeedSoftKeyboard() const override
     {
         return true;
+    }
+
+    bool GetNeedToRequestKeyboardOnFocus()
+    {
+        auto pattern = textField_->GetPattern();
+        CHECK_NULL_RETURN(pattern, false);
+        auto curPattern = DynamicCast<TextFieldPattern>(pattern);
+        return curPattern->GetNeedToRequestKeyboardOnFocus();
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override

@@ -54,6 +54,7 @@ public:
     virtual void SetImageRenderMode(ImageRenderMode imageRenderMode) = 0;
     virtual bool IsSrcSvgImage() = 0;
     virtual void SetAutoResize(bool autoResize) = 0;
+    virtual void SetResizableSlice(const ImageResizableSlice& slice) = 0;
     virtual void SetSyncMode(bool syncMode) = 0;
     virtual void SetColorFilterMatrix(const std::vector<float> &matrix) = 0;
     virtual void SetDraggable(bool draggable) = 0;

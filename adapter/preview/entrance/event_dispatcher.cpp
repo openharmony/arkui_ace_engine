@@ -178,17 +178,15 @@ static void GetMouseEventAction(int32_t action, OHOS::Ace::MouseEvent& mouseEven
         case OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE:
             mouseEvent.action = MouseAction::MOVE;
             break;
-#ifdef ENABLE_DRAG_FRAMEWORK
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_DOWN:
-            events.action = MouseAction::PRESS;
+            mouseEvent.action = MouseAction::PRESS;
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_MOVE:
-            events.action = MouseAction::MOVE;
+            mouseEvent.action = MouseAction::MOVE;
             break;
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP:
-            events.action = MouseAction::RELEASE;
+            mouseEvent.action = MouseAction::RELEASE;
             break;
-#endif // ENABLE_DRAG_FRAMEWORK
         default:
             mouseEvent.action = MouseAction::NONE;
             break;
@@ -228,8 +226,7 @@ static void GetMouseEventButton(int32_t button, Ace::MouseEvent& mouseEvent)
     }
 }
 
-static void ConvertMouseEvent(
-    const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ace::MouseEvent& mouseEvent)
+static void ConvertMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, Ace::MouseEvent& mouseEvent)
 {
     mouseEvent.id = pointerEvent->id;
     mouseEvent.x = pointerEvent->x;

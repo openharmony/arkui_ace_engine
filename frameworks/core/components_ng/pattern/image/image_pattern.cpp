@@ -39,10 +39,8 @@
 #if defined(PIXEL_MAP_SUPPORTED)
 #include "foundation/multimedia/image_framework/interfaces/kits/js/common/include/pixel_map_napi.h"
 #endif
-#ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/ace_engine_ext.h"
 #include "core/common/udmf/udmf_client.h"
-#endif
 
 namespace OHOS::Ace::NG {
 napi_value ConvertPixmapNapi(const RefPtr<PixelMap>& pixelMap)
@@ -217,6 +215,7 @@ void ImagePattern::OnImageLoadSuccess()
     if (!IsSupportImageAnalyzerFeature() && isAnalyzerOverlayBuild_) {
         DeleteAnalyzerOverlay();
     }
+    UpdateAnalyzerOverlay();
     CreateAnalyzerOverlay();
     host->MarkNeedRenderOnly();
 }
@@ -261,7 +260,6 @@ void ImagePattern::SetImagePaintConfig(
     };
     config.imageFit_ = layoutProps->GetImageFit().value_or(ImageFit::COVER);
     config.isSvg_ = isSvg;
-
     auto host = GetHost();
     if (!host) {
         canvasImage->SetPaintConfig(config);
@@ -426,8 +424,24 @@ void ImagePattern::OnModifyDone()
         mouseEvent_ = nullptr;
     }
 
-    if (!IsSupportImageAnalyzerFeature() && isAnalyzerOverlayBuild_) {
-        DeleteAnalyzerOverlay();
+    if (isAnalyzerOverlayBuild_) {
+        if (!IsSupportImageAnalyzerFeature()) {
+            DeleteAnalyzerOverlay();
+        } else {
+            UpdateAnalyzerOverlayLayout();
+        }
+    }
+
+    // SetUsingContentRectForRenderFrame is set for image paint
+    auto overlayNode = host->GetOverlayNode();
+    if (overlayNode) {
+        auto layoutProperty = host->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        auto padding = layoutProperty->CreatePaddingAndBorder();
+        auto renderContext = overlayNode->GetRenderContext();
+        if (renderContext) {
+            renderContext->SetRenderFrameOffset({-padding.Offset().GetX(), -padding.Offset().GetY()});
+        }
     }
 }
 
@@ -619,10 +633,7 @@ void ImagePattern::EnableDrag()
         DragDropInfo info;
         auto imagePattern = weak.Upgrade();
         CHECK_NULL_RETURN(imagePattern && imagePattern->loadingCtx_, info);
-
-#ifdef ENABLE_DRAG_FRAMEWORK
         AceEngineExt::GetInstance().DragStartExt();
-#endif
         imagePattern->UpdateDragEvent(event);
         info.extraInfo = imagePattern->loadingCtx_->GetSourceInfo().GetSrc();
         return info;
@@ -812,6 +823,13 @@ void ImagePattern::DumpInfo()
     if (loadingCtx_) {
         auto currentLoadImageState = loadingCtx_->GetCurrentLoadingState();
         DumpLog::GetInstance().AddDesc(std::string("currentLoadImageState : ").append(currentLoadImageState));
+        DumpLog::GetInstance().AddDesc(std::string("rawImageSize: ").append(loadingCtx_->GetImageSize().ToString()));
+    }
+    auto imageRenderProperty = GetPaintProperty<ImageRenderProperty>();
+    if (imageRenderProperty && imageRenderProperty->HasImageResizableSlice() &&
+        imageRenderProperty->GetImageResizableSliceValue({}).Valid()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("reslzable slice: ").append(imageRenderProperty->GetImageResizableSliceValue({}).ToString()));
     }
 }
 
@@ -830,7 +848,6 @@ void ImagePattern::DumpAdvanceInfo()
 
 void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
 {
-#ifdef ENABLE_DRAG_FRAMEWORK
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
     CHECK_NULL_VOID(loadingCtx_ && image_);
     if (loadingCtx_->GetSourceInfo().IsPixmap()) {
@@ -847,7 +864,6 @@ void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
         UdmfClient::GetInstance()->AddImageRecord(unifiedData, loadingCtx_->GetSourceInfo().GetSrc());
     }
     event->SetData(unifiedData);
-#endif
 }
 
 void ImagePattern::OnLanguageConfigurationUpdate()
@@ -888,7 +904,46 @@ void ImagePattern::SetImageAnalyzerConfig(const ImageAnalyzerConfig &config)
 
 void ImagePattern::CreateAnalyzerOverlay()
 {
-    if (!IsSupportImageAnalyzerFeature()) {
+    if (!IsSupportImageAnalyzerFeature() || isAnalyzerOverlayBuild_) {
+        return;
+    }
+
+    auto pixelMap = image_->GetPixelMap();
+    CHECK_NULL_VOID(pixelMap);
+    napi_value pixelmapNapiVal = ConvertPixmapNapi(pixelMap);
+    auto frameNode = GetHost();
+    auto overlayNode = frameNode->GetOverlayNode();
+
+    auto layoutProps = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    analyzerUIConfig_.imageFit = layoutProps->GetImageFit().value_or(ImageFit::COVER);
+    auto buildNodeFunction = [this, &pixelmapNapiVal]() -> RefPtr<UINode> {
+        ScopedViewStackProcessor builderViewStackProcessor;
+        ImageAnalyzerMgr::GetInstance().BuildNodeFunc(
+            pixelmapNapiVal, &analyzerConfig_, &analyzerUIConfig_, &overlayData_);
+        auto customNode = ViewStackProcessor::GetInstance()->Finish();
+        return customNode;
+    };
+    overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunction());
+    CHECK_NULL_VOID(overlayNode);
+    frameNode->SetOverlayNode(overlayNode);
+    overlayNode->SetParent(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    overlayNode->SetActive(true);
+    isAnalyzerOverlayBuild_ = true;
+
+    UpdateAnalyzerOverlayLayout();
+    auto renderContext = overlayNode->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    renderContext->UpdateZIndex(INT32_MAX);
+    auto focusHub = overlayNode->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->SetFocusable(false);
+    overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void ImagePattern::UpdateAnalyzerOverlay()
+{
+    if (!IsSupportImageAnalyzerFeature() || !isAnalyzerOverlayBuild_) {
         return;
     }
     auto pixelMap = image_->GetPixelMap();
@@ -896,42 +951,9 @@ void ImagePattern::CreateAnalyzerOverlay()
     napi_value pixelmapNapiVal = ConvertPixmapNapi(pixelMap);
     auto frameNode = GetHost();
     auto overlayNode = frameNode->GetOverlayNode();
-
-    if (!isAnalyzerOverlayBuild_) {
-        auto layoutProps = GetLayoutProperty<ImageLayoutProperty>();
-        CHECK_NULL_VOID(layoutProps);
-        analyzerUIConfig_.imageFit = layoutProps->GetImageFit().value_or(ImageFit::COVER);
-        auto buildNodeFunction = [this, &pixelmapNapiVal]() -> RefPtr<UINode> {
-            ScopedViewStackProcessor builderViewStackProcessor;
-            ImageAnalyzerMgr::GetInstance().BuildNodeFunc(
-                pixelmapNapiVal, &analyzerConfig_, &analyzerUIConfig_, &overlayData_);
-            auto customNode = ViewStackProcessor::GetInstance()->Finish();
-            return customNode;
-        };
-        overlayNode = AceType::DynamicCast<FrameNode>(buildNodeFunction());
-        CHECK_NULL_VOID(overlayNode);
-        frameNode->SetOverlayNode(overlayNode);
-        overlayNode->SetParent(AceType::WeakClaim(AceType::RawPtr(frameNode)));
-        overlayNode->SetActive(true);
-        isAnalyzerOverlayBuild_ = true;
-
-        auto layoutProperty = AceType::DynamicCast<LayoutProperty>(overlayNode->GetLayoutProperty());
-        CHECK_NULL_VOID(layoutProperty);
-        layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
-        layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
-        
-        auto renderContext = overlayNode->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        renderContext->UpdateZIndex(INT32_MAX);
-        auto focusHub = overlayNode->GetOrCreateFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusHub->SetFocusable(false);
-        overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    } else {
-        ImageAnalyzerMgr::GetInstance().UpdateImage(
-            &overlayData_, pixelmapNapiVal, &analyzerConfig_, &analyzerUIConfig_);
-        overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-    }
+    ImageAnalyzerMgr::GetInstance().UpdateImage(
+        &overlayData_, pixelmapNapiVal, &analyzerConfig_, &analyzerUIConfig_);
+    overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void ImagePattern::DeleteAnalyzerOverlay()
@@ -1001,52 +1023,30 @@ void ImagePattern::UpdateAnalyzerUIConfig(const RefPtr<GeometryNode>& geometryNo
         isUIConfigUpdate = true;
     }
 
-    UpdatePaddingAndBorderWidth(isUIConfigUpdate);
+    if (isUIConfigUpdate) {
+        ImageAnalyzerMgr::GetInstance().UpdateInnerConfig(&overlayData_, &analyzerUIConfig_);
+    }
 }
 
-void ImagePattern::UpdatePaddingAndBorderWidth(bool isUIConfigUpdate)
+void ImagePattern::UpdateAnalyzerOverlayLayout()
 {
-    bool needUpdateUIConfig = isUIConfigUpdate;
-    auto layoutProps = GetLayoutProperty<ImageLayoutProperty>();
-    CHECK_NULL_VOID(layoutProps);
-    if (layoutProps->GetPaddingProperty()) {
-        auto&& padding = layoutProps->GetPaddingProperty();
-        double topPadding = padding->top.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
-        double bottomPadding = padding->bottom.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
-        double leftPadding = padding->left.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
-        double rightPadding = padding->right.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
-        auto& [configTopPadding, configBottomPadding, configLeftPadding, configRightPadding] =
-            analyzerUIConfig_.padding;
-        if (configTopPadding != topPadding || configBottomPadding != bottomPadding || configLeftPadding !=
-            leftPadding || configRightPadding != rightPadding) {
-            configTopPadding = topPadding;
-            configBottomPadding = bottomPadding;
-            configLeftPadding = leftPadding;
-            configRightPadding = rightPadding;
-            needUpdateUIConfig = true;
-        }
-    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto layoutProperty = host->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    auto overlayNode = host->GetOverlayNode();
+    CHECK_NULL_VOID(overlayNode);
+    auto overlayLayoutProperty = overlayNode->GetLayoutProperty();
+    CHECK_NULL_VOID(overlayLayoutProperty);
+    overlayLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    overlayLayoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
+    overlayLayoutProperty->SetOverlayOffset(Dimension(padding.Offset().GetX()), Dimension(padding.Offset().GetY()));
+    overlayNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
-    if (layoutProps->GetBorderWidthProperty()) {
-        auto&& border = layoutProps->GetBorderWidthProperty();
-        double borderTop = border->topDimen.value_or(Dimension(0)).ConvertToPx();
-        double borderBottom = border->bottomDimen.value_or(Dimension(0)).ConvertToPx();
-        double borderLeft = border->leftDimen.value_or(Dimension(0)).ConvertToPx();
-        double borderRight = border->rightDimen.value_or(Dimension(0)).ConvertToPx();
-        auto& [configBorderTop, configBorderBottom, configBorderLeft, configBorderRight] =
-            analyzerUIConfig_.borderWidth;
-        if (configBorderTop != borderTop || configBorderBottom != borderBottom || configBorderLeft !=
-            borderLeft || configBorderRight != borderRight) {
-            configBorderTop = borderTop;
-            configBorderBottom = borderBottom;
-            configBorderLeft = borderLeft;
-            configBorderRight = borderRight;
-            needUpdateUIConfig = true;
-        }
-    }
-
-    if (needUpdateUIConfig) {
-        ImageAnalyzerMgr::GetInstance().UpdateInnerConfig(&overlayData_, &analyzerUIConfig_);
+    auto renderContext = overlayNode->GetRenderContext();
+    if (renderContext) {
+        renderContext->SetRenderFrameOffset({-padding.Offset().GetX(), -padding.Offset().GetY()});
     }
 }
 } // namespace OHOS::Ace::NG

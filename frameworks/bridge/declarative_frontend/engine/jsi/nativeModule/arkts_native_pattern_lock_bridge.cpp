@@ -16,7 +16,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "core/interfaces/native/node/api.h"
 #include "core/components/common/layout/constants.h"
 #include "core/pipeline/pipeline_base.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"

@@ -83,7 +83,6 @@ void JSRefresh::JSBind(BindingTarget globalObj)
     JSClass<JSRefresh>::Declare("Refresh");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSRefresh>::StaticMethod("create", &JSRefresh::Create, opt);
-    JSClass<JSRefresh>::StaticMethod("pop", &JSRefresh::Pop);
     JSClass<JSRefresh>::StaticMethod("onStateChange", &JSRefresh::OnStateChange);
     JSClass<JSRefresh>::StaticMethod("onRefreshing", &JSRefresh::OnRefreshing);
     JSClass<JSRefresh>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
@@ -94,7 +93,7 @@ void JSRefresh::JSBind(BindingTarget globalObj)
 
 void JSRefresh::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
+    if (!info[0]->IsObject()) {
         return;
     }
     RefPtr<RefreshTheme> theme = GetTheme<RefreshTheme>();
@@ -106,15 +105,7 @@ void JSRefresh::Create(const JSCallbackInfo& info)
     auto jsOffset = paramObject->GetProperty("offset");
     auto friction = paramObject->GetProperty("friction");
     RefreshModel::GetInstance()->Create();
-    RefreshModel::GetInstance()->SetLoadingDistance(theme->GetLoadingDistance());
-    RefreshModel::GetInstance()->SetRefreshDistance(theme->GetRefreshDistance());
-    RefreshModel::GetInstance()->SetProgressDistance(theme->GetProgressDistance());
-    RefreshModel::GetInstance()->SetProgressDiameter(theme->GetProgressDiameter());
-    RefreshModel::GetInstance()->SetMaxDistance(theme->GetMaxDistance());
-    RefreshModel::GetInstance()->SetShowTimeDistance(theme->GetShowTimeDistance());
-    RefreshModel::GetInstance()->SetTextStyle(theme->GetTextStyle());
     RefreshModel::GetInstance()->SetProgressColor(theme->GetProgressColor());
-    RefreshModel::GetInstance()->SetProgressBackgroundColor(theme->GetBackgroundColor());
 
     if (refreshing->IsBoolean()) {
         RefreshModel::GetInstance()->SetRefreshing(refreshing->ToBoolean());
@@ -128,7 +119,6 @@ void JSRefresh::Create(const JSCallbackInfo& info)
         if (LessNotEqual(offset.Value(), 0.0) || offset.Unit() == DimensionUnit::PERCENT) {
             RefreshModel::GetInstance()->SetRefreshDistance(theme->GetRefreshDistance());
         } else {
-            RefreshModel::GetInstance()->SetUseOffset(true);
             RefreshModel::GetInstance()->SetIndicatorOffset(offset);
         }
     }
@@ -138,13 +128,13 @@ void JSRefresh::Create(const JSCallbackInfo& info)
 
 void JSRefresh::ParseCustomBuilder(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1 || !info[0]->IsObject()) {
+    if (!info[0]->IsObject()) {
         return;
     }
     auto paramObject = JSRef<JSObject>::Cast(info[0]);
     auto builder = paramObject->GetProperty("builder");
+    RefPtr<NG::UINode> customNode;
     if (builder->IsFunction()) {
-        RefPtr<NG::UINode> customNode;
         {
             NG::ScopedViewStackProcessor builderViewStackProcessor;
             JsFunction Jsfunc(info.This(), JSRef<JSObject>::Cast(builder));
@@ -152,17 +142,14 @@ void JSRefresh::ParseCustomBuilder(const JSCallbackInfo& info)
             customNode = NG::ViewStackProcessor::GetInstance()->Finish();
         }
         RefreshModel::GetInstance()->SetCustomBuilder(customNode);
+    } else {
+        RefreshModel::GetInstance()->SetCustomBuilder(customNode);
     }
-}
-
-void JSRefresh::Pop()
-{
-    RefreshModel::GetInstance()->Pop();
 }
 
 void JSRefresh::OnStateChange(const JSCallbackInfo& args)
 {
-    if (args.Length() < 1 || !args[0]->IsFunction()) {
+    if (!args[0]->IsFunction()) {
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
@@ -180,7 +167,7 @@ void JSRefresh::OnStateChange(const JSCallbackInfo& args)
 
 void JSRefresh::OnRefreshing(const JSCallbackInfo& args)
 {
-    if (args.Length() < 1 || !args[0]->IsFunction()) {
+    if (!args[0]->IsFunction()) {
         return;
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(args[0]));
@@ -208,9 +195,6 @@ void JSRefresh::ParsFrictionData(const JsiRef<JsiValue>& friction)
         frictionNumber = friction->ToNumber<int32_t>();
         if (frictionNumber < 0 || frictionNumber > MAX_FRICTION) {
             frictionNumber = DEFAULT_FRICTION;
-        }
-        if (friction->ToNumber<int32_t>() <= 0) {
-            RefreshModel::GetInstance()->IsRefresh(true);
         }
     }
     RefreshModel::GetInstance()->SetFriction(frictionNumber);

@@ -20,7 +20,7 @@ declare class UIContext {
 declare interface TouchEvent {
 }
 
-declare type UpdateFunc = (elmtId: number, isFirstRender: boolean) => void;
+declare type UpdateFunc = (elmtId: number, isFirstRender: boolean, param?: Object) => void;
 
 interface UpdateFuncRecord {
     updateFunc: UpdateFunc;
@@ -37,12 +37,6 @@ declare class WrappedBuilder<Args extends Object[]> {
     constructor(builder: (...args: Args) => void);
 }
 
-declare class ViewStackProcessor {
-    static AllocateNewElmetIdForNextComponent(): number;
-    static StartGetAccessRecordingFor(elmId: number): void;
-    static StopGetAccessRecording(): void;
-}
-
 declare class __JSScopeUtil__ {
     static syncInstanceId(instanceId: number): void;
     static restoreInstanceId(): void;
@@ -54,3 +48,28 @@ declare interface Size {
 }
 
 declare abstract class ViewPU { }
+
+
+/**
+ * WeakRef
+ * ref to an Object that does not prevent the Object from getting GC'ed
+ * current version of tsc does not know about WeakRef
+ * but Ark runtime supports it
+ *
+ */
+declare class WeakRef<T extends Object> {
+    constructor(o: T);
+    deref(): T;
+}
+
+type RemovedElementInfo = { elmtId : number, tag : string };
+
+declare class UINodeRegisterProxy {
+    public static instance_: UINodeRegisterProxy ;
+    public removeElementsInfo_: Array<RemovedElementInfo>;
+    public static ElementIdToOwningViewPU_: Map<number, WeakRef<BuilderNode>> ;
+    public unregisterElmtIdsFromViewPUs(): void;
+    private obtainDeletedElmtIds(): void;
+    public static unregisterElmtIdsFromViewPUs(): void;
+    public static obtainDeletedElmtIds(): void;
+}

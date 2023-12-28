@@ -67,6 +67,7 @@ constexpr float ITEM_WIDTH = SCROLL_WIDTH / VIEW_LINE_NUMBER;
 constexpr float ITEM_HEIGHT = SCROLL_HEIGHT / VIEW_LINE_NUMBER;
 constexpr float VERTICAL_SCROLLABLE_DISTANCE = (TOTAL_LINE_NUMBER - VIEW_LINE_NUMBER) * ITEM_HEIGHT;
 constexpr float NORMAL_WIDTH = 4.f;
+constexpr float SCROLL_PAGING_SPEED_THRESHOLD = 1200.0f;
 } // namespace
 
 class ScrollTestNg : public TestNG {
@@ -3144,5 +3145,137 @@ HWTEST_F(ScrollTestNg, StopAnimation001, TestSize.Level1)
     std::shared_ptr<AnimationUtils::Animation> animation;
     pattern_->StopAnimation(animation);
     ASSERT_NE(animation, nullptr);
+}
+
+/**
+ * @tc.name: EnablePaging001
+ * @tc.desc: Test enablePaging
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, EnablePaging001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scroll and initialize related properties.
+     */
+    CreateWithContent([](ScrollModelNG model) {
+        model.SetEnablePaging(true);
+    });
+    auto viewPortLength = pattern_->GetMainContentSize();
+    pattern_->scrollableDistance_ = viewPortLength * 10;
+    pattern_->currentOffset_ = - viewPortLength * 5 - 10.0f;
+    SizeF viewPortExtent(SCROLL_WIDTH, viewPortLength * 11);
+    pattern_->viewPortExtent_ = viewPortExtent;
+    pattern_->SetIntervalSize(Dimension(static_cast<double>(viewPortLength)));
+    pattern_->CaleSnapOffsets();
+
+    /**
+     * @tc.steps: step2. dragDistance and dragSpeed less than threshold
+     * @tc.expected: predictSnapOffset.value() less than 0
+     */
+    auto dragDistance = viewPortLength * 0.5 - 1;
+    auto dragSpeed = SCROLL_PAGING_SPEED_THRESHOLD - 1;
+    auto predictSnapOffset =
+                pattern_->CalePredictSnapOffset(0.f, dragDistance, dragSpeed);
+    EXPECT_TRUE(predictSnapOffset.has_value());
+    EXPECT_LT(predictSnapOffset.value(), 0);
+
+    /**
+     * @tc.steps: step3. dragDistance and dragSpeed larger than threshold
+     * @tc.expected: the absolute value of predictSnapOffset.value() less than viewPortLength
+     */
+    dragDistance = viewPortLength * 0.5 * 5;
+    dragSpeed = SCROLL_PAGING_SPEED_THRESHOLD * 5;
+    predictSnapOffset = pattern_->CalePredictSnapOffset(0.f, dragDistance, dragSpeed);
+    EXPECT_TRUE(predictSnapOffset.has_value());
+    EXPECT_LT(abs(predictSnapOffset.value()), viewPortLength);
+    EXPECT_GT(predictSnapOffset.value(), 0);
+
+    /**
+     * @tc.steps: step4. dragDistance equals threshold and dragSpeed less than threshold
+     * @tc.expected: the absolute value of predictSnapOffset.value() less than viewPortLength
+     */
+    dragDistance = viewPortLength * 0.5;
+    dragSpeed = SCROLL_PAGING_SPEED_THRESHOLD - 1;
+    predictSnapOffset = pattern_->CalePredictSnapOffset(0.f, dragDistance, dragSpeed);
+    EXPECT_TRUE(predictSnapOffset.has_value());
+    EXPECT_LT(abs(predictSnapOffset.value()), viewPortLength);
+    EXPECT_GT(predictSnapOffset.value(), 0);
+
+
+     /**
+     * @tc.steps: step5. dragDistance less than threshold and dragSpeed equals threshold
+     * @tc.expected: the absolute value of predictSnapOffset.value() less than viewPortLength
+     */
+    dragDistance = viewPortLength * 0.5 - 1;
+    dragSpeed = SCROLL_PAGING_SPEED_THRESHOLD;
+    predictSnapOffset = pattern_->CalePredictSnapOffset(0.f, dragDistance, dragSpeed);
+    EXPECT_TRUE(predictSnapOffset.has_value());
+    EXPECT_LT(abs(predictSnapOffset.value()), viewPortLength);
+    EXPECT_GT(predictSnapOffset.value(), 0);
+}
+
+/**
+ * @tc.name: EnablePaging002
+ * @tc.desc: Test enablePaging
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, EnablePaging002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scroll and set enablePaging.
+     * @tc.expected: the value of GetEnablePaging() if VALID
+     */
+    CreateWithContent([](ScrollModelNG model) {
+        model.SetEnablePaging(true);
+    });
+    EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::VALID);
+
+    /**
+     * @tc.steps: step2. Create scroll, first set enablePaging and than set snap.
+     * @tc.expected: the value of GetEnablePaging() if INVALID
+     */
+    Dimension intervalSize = Dimension(10.f);
+    std::vector<Dimension> snapPaginations = {
+        Dimension(10.f),
+        Dimension(20.f),
+        Dimension(30.f),
+    };
+    std::pair<bool, bool> enableSnapToSide = { false, false };
+    auto scrollSnapAlign = ScrollSnapAlign::START;
+    CreateWithContent([scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide](ScrollModelNG model) {
+        model.SetEnablePaging(true);
+        model.SetScrollSnap(scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide);
+    });
+    EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::INVALID);
+
+    /**
+     * @tc.steps: step3. Create scroll, first set snap and than set enablePaging.
+     * @tc.expected: the value of GetEnablePaging() if INVALID
+     */
+    CreateWithContent([scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide](ScrollModelNG model) {
+        model.SetScrollSnap(scrollSnapAlign, intervalSize, snapPaginations, enableSnapToSide);
+        model.SetEnablePaging(true);
+    });
+    EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::INVALID);
+
+    /**
+     * @tc.steps: step4. Create scroll, set enablePaging true and than set enablePaging false.
+     * @tc.expected: the value of GetEnablePaging() if NONE
+     */
+    CreateWithContent([](ScrollModelNG model) {
+        model.SetEnablePaging(true);
+        model.SetEnablePaging(false);
+    });
+    EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::NONE);
+
+    /**
+     * @tc.steps: step5. Create scroll, set enablePaging false and than set enablePaging true.
+     * @tc.expected: the value of GetEnablePaging() if VALID
+     */
+    CreateWithContent([](ScrollModelNG model) {
+        model.SetEnablePaging(false);
+        model.SetEnablePaging(true);
+    });
+    EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::VALID);
 }
 } // namespace OHOS::Ace::NG

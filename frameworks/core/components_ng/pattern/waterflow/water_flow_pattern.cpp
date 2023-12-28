@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 
 #include "base/utils/utils.h"
+#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm.h"
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
 
@@ -388,6 +389,7 @@ void WaterFlowPattern::OnRestoreInfo(const std::string& restoreInfo)
     UpdateStartIndex(info->GetInt("beginIndex"));
     Dimension dimension(info->GetDouble("offset"), DimensionUnit::VP);
     SetRestoreOffset(dimension.ConvertToPx());
+    SetScrollAlign(ScrollAlign::START);
 }
 
 Rect WaterFlowPattern::GetItemRect(int32_t index) const
@@ -406,9 +408,10 @@ Rect WaterFlowPattern::GetItemRect(int32_t index) const
         itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
 }
 
-void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign /* align */)
+void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
+    SetScrollAlign(align);
     StopAnimate();
     if ((index >= 0) || (index == LAST_ITEM)) {
         if (smooth) {

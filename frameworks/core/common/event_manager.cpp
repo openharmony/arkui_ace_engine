@@ -403,7 +403,6 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
     CheckTouchEvent(event);
     ContainerScope scope(instanceId_);
     TouchEvent point = event;
-#ifdef ENABLE_DRAG_FRAMEWORK
     if (point.type == TouchType::PULL_MOVE || point.pullType == TouchType::PULL_MOVE) {
         isDragging_ = false;
         point.type = TouchType::CANCEL;
@@ -412,12 +411,10 @@ bool EventManager::DispatchTouchEvent(const TouchEvent& event)
         isDragging_ = false;
         point.type = TouchType::UP;
     }
-#endif // ENABLE_DRAG_FRAMEWORK
     ACE_SCOPED_TRACE(
         "DispatchTouchEvent id:%d, pointX=%f pointY=%f type=%d", point.id, point.x, point.y, (int)point.type);
     const auto iter = touchTestResults_.find(point.id);
     if (iter == touchTestResults_.end()) {
-        LOGI("the %{public}d touch test result does not exist!", point.id);
         return false;
     }
 

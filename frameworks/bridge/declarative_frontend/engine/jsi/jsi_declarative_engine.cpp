@@ -1038,8 +1038,7 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
         };
         bool debugMode = AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint();
         panda::JSNApi::DebugOption debugOption = { libraryPath.c_str(), debugMode };
-        JSNApi::NotifyDebugMode(
-            tid, vm, libraryPath.c_str(), debugOption, tid, workerPostTask, debugVersion, debugMode);
+        JSNApi::NotifyDebugMode(tid, vm, debugOption, tid, workerPostTask, debugVersion);
 #endif
         instance->InitConsoleModule(arkNativeEngine);
 
@@ -1883,8 +1882,8 @@ void JsiDeclarativeEngine::DestroyApplication(const std::string& packageName)
 
 void JsiDeclarativeEngine::UpdateApplicationState(const std::string& packageName, Frontend::State state)
 {
-    LOGI("Update application state, packageName %{public}s, state: %{public}d", packageName.c_str(),
-        static_cast<int32_t>(state));
+    LOGI("Update application state %{public}s, state: %{public}s", packageName.c_str(),
+        Frontend::stateToString(state).c_str());
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
     if (!runtime) {
         return;

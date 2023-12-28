@@ -29,28 +29,27 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT RefreshModelNG : public RefreshModel {
 public:
     void Create() override;
-    void Pop() override;
     void SetRefreshing(bool isRefreshing) override;
-    void SetRefreshDistance(const Dimension& refreshDistance) override;
-    void SetUseOffset(bool isUseOffset) override;
     void SetIndicatorOffset(const Dimension& indicatorOffset) override;
     void SetFriction(int32_t friction) override;
-    void IsRefresh(bool isRefresh) override;
-
-    void SetLoadingDistance(const Dimension& loadingDistance) override;
-    void SetProgressDistance(const Dimension& progressDistance) override;
-    void SetProgressDiameter(const Dimension& progressDiameter) override;
-    void SetMaxDistance(const Dimension& maxDistance) override;
-    void SetIsShowLastTime(bool IsShowLastTime) override;
-    void SetShowTimeDistance(const Dimension& showTimeDistance) override;
-
-    void SetTextStyle(const TextStyle& textStyle) override;
     void SetProgressColor(const Color& progressColor) override;
-    void SetProgressBackgroundColor(const Color& backgroundColor) override;
     void SetOnStateChange(StateChangeEvent&& stateChange) override;
     void SetOnRefreshing(RefreshingEvent&& refreshing) override;
     void SetChangeEvent(ChangeEvent&& changeEvent) override;
     void SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder) override;
+    // @deprecated
+    void Pop() override {}
+    void SetRefreshDistance(const Dimension& refreshDistance) override {}
+    void SetUseOffset(bool isUseOffset) override {}
+    void IsRefresh(bool isRefresh) override {}
+    void SetLoadingDistance(const Dimension& loadingDistance) override {}
+    void SetProgressDistance(const Dimension& progressDistance) override {}
+    void SetProgressDiameter(const Dimension& progressDiameter) override {}
+    void SetMaxDistance(const Dimension& maxDistance) override {}
+    void SetIsShowLastTime(bool IsShowLastTime) override {}
+    void SetShowTimeDistance(const Dimension& showTimeDistance) override {}
+    void SetTextStyle(const TextStyle& textStyle) override {}
+    void SetProgressBackgroundColor(const Color& backgroundColor) override {}
 };
 } // namespace OHOS::Ace::NG
 

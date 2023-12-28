@@ -142,7 +142,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::Create(RefPtr<FrameNode>& content)
     auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
     CHECK_NULL_RETURN(containerPattern, nullptr);
     containerModalNode->MarkModifyDone();
-    containerPattern->InitContainerEvent();
+    containerPattern->Init();
     return containerModalNode;
 }
 

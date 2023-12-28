@@ -285,8 +285,11 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     itemsCrossPosition_.clear();
     UpdateGridLayoutInfo(layoutWrapper, mainSize);
     if (gridLayoutInfo_.targetIndex_.has_value()) {
-        UpdateGridMatrix(layoutWrapper, gridLayoutInfo_.targetIndex_.value(), crossSize);
+        // Complete the gridLayoutInfo to get a complete set of data from 0 to targetIndex for the GridView. Make sure
+        // that the index of the matrix_ and heightMap_ is incremented from 0 to targetIndex and sequentially
+        SupplyAllData2ZeroIndex(mainSize, crossSize, layoutWrapper);
         gridLayoutInfo_.targetIndex_.reset();
+        return;
     }
     SkipLargeOffset(mainSize, layoutWrapper);
 
@@ -329,7 +332,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     auto haveNewLineAtStart = FillBlankAtStart(mainSize, crossSize, layoutWrapper);
     if (gridLayoutInfo_.reachStart_) {
         auto offset = gridLayoutInfo_.currentOffset_;
-        if (!canOverScroll_) {
+        if (!canOverScroll_ && !isDataReload_) {
             gridLayoutInfo_.currentOffset_ = 0.0;
             gridLayoutInfo_.prevOffset_ = 0.0;
         }
@@ -350,7 +353,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
             }
         }
     }
-
+    isDataReload_ = false;
     layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
 }
 
@@ -381,6 +384,13 @@ void GridScrollLayoutAlgorithm::ReloadToStartIndex(float mainSize, float crossSi
     }
     TAG_LOGI(AceLogTag::ACE_GRID, "data reload end, startIndex_:%{public}d, startMainLineIndex_:%{public}d",
         gridLayoutInfo_.startIndex_, gridLayoutInfo_.startMainLineIndex_);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto gridPattern = host->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(gridPattern);
+    if (gridPattern->IsScrollableSpringMotionRunning()) {
+        isDataReload_ = true;
+    }
 }
 
 bool GridScrollLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
@@ -445,7 +455,7 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize)
     }
 
     // Step3. modify [currentOffset_]
-    if (!canOverScroll_) {
+    if (!canOverScroll_ && !isDataReload_) {
         float realOffsetToMoveUp = lengthOfItemsInViewport - mainSize + gridLayoutInfo_.prevOffset_;
         gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.prevOffset_ - realOffsetToMoveUp;
         gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
@@ -706,72 +716,6 @@ void GridScrollLayoutAlgorithm::UpdateGridLayoutInfo(LayoutWrapper* layoutWrappe
         default:
             ScrollToIndexAuto(layoutWrapper, mainSize, targetIndex);
     }
-}
-
-void GridScrollLayoutAlgorithm::UpdateGridMatrix(LayoutWrapper* layoutWrapper, int32_t index, float crossSize)
-{
-    auto totalItemCount = layoutWrapper->GetTotalChildCount();
-    if (gridLayoutInfo_.targetIndex_.value() == LAST_ITEM) {
-        gridLayoutInfo_.childrenCount_ = totalItemCount;
-        gridLayoutInfo_.targetIndex_ = gridLayoutInfo_.childrenCount_ - 1;
-    }
-    if (totalItemCount < index) {
-        return;
-    }
-    int32_t indexCount = index + 1;
-    int32_t mainCount = indexCount / crossCount_;
-    if (indexCount % crossCount_ != 0) {
-        mainCount++;
-    }
-    float mainSize = gridLayoutInfo_.lastMainSize_;
-    auto frameSize = axis_ == Axis::VERTICAL ? SizeF(crossSize, mainSize) : SizeF(mainSize, crossSize);
-    int32_t currentIndex = 0;
-    for (int32_t currentMainIndex = 0; (currentMainIndex < mainCount) && (currentIndex < totalItemCount);
-         ++currentMainIndex) {
-        float mainLength = 0.0;
-        for (int32_t currentCrossIndex = 0; (currentCrossIndex < crossCount_) && (currentIndex < totalItemCount);
-             ++currentCrossIndex) {
-            auto childLayoutWrapper = layoutWrapper->GetOrCreateChildByIndex(currentIndex);
-            if (!childLayoutWrapper) {
-                break;
-            }
-            AdjustRowColSpan(childLayoutWrapper, layoutWrapper, currentIndex);
-            int32_t state = CheckGridPlacedState(currentIndex, currentMainIndex, currentCrossIndex, index);
-            if (state == SUCCESSFULLY) { // This position can correctly place the current index
-                // Determine row height based on the height of calculated nodes
-                CalculateNodeHeight(layoutWrapper, childLayoutWrapper, frameSize, currentCrossIndex, mainLength);
-                currentIndex++;
-            } else if (state == currentIndex) {
-                // This position is already occupied by the current index,but need update mainLength;
-                CalculateNodeHeight(layoutWrapper, childLayoutWrapper, frameSize, currentCrossIndex, mainLength);
-                indexCount++;
-                currentIndex++;
-            } else { // The current position cannot be placed
-                indexCount++;
-            }
-        }
-        mainCount = indexCount / crossCount_;
-        if (indexCount % crossCount_ != 0) {
-            mainCount++;
-        }
-        gridLayoutInfo_.lineHeightMap_[currentMainIndex] = mainLength;
-    }
-}
-
-void GridScrollLayoutAlgorithm::CalculateNodeHeight(LayoutWrapper* layoutWrapper,
-    const RefPtr<LayoutWrapper>& childLayoutWrapper, const SizeF& frameSize, int currentCrossIndex, float& mainLength)
-{
-    auto mainSpan = axis_ == Axis::VERTICAL ? currentItemRowSpan_ : currentItemColSpan_;
-    auto crossSpan = axis_ == Axis::VERTICAL ? currentItemColSpan_ : currentItemRowSpan_;
-    MeasureChild(layoutWrapper, frameSize, childLayoutWrapper, currentCrossIndex, crossSpan);
-    auto itemSize = childLayoutWrapper->GetGeometryNode()->GetMarginFrameSize();
-    float lineHeight = 0.0;
-    if (mainSpan == 1) {
-        lineHeight = GetMainAxisSize(itemSize, gridLayoutInfo_.axis_);
-    } else {
-        lineHeight = GetMainAxisSize(itemSize, gridLayoutInfo_.axis_) / mainSpan;
-    }
-    mainLength = std::max(lineHeight, mainLength);
 }
 
 void GridScrollLayoutAlgorithm::ScrollToIndexAuto(LayoutWrapper* layoutWrapper, float mainSize, int32_t targetIndex)
@@ -1505,59 +1449,6 @@ void GridScrollLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper, const
     childLayoutWrapper->Measure(childConstraint);
 }
 
-int32_t GridScrollLayoutAlgorithm::CheckGridPlacedState(int32_t index, int32_t main, int32_t cross, int32_t targetIndex)
-{
-    auto mainSpan = axis_ == Axis::VERTICAL ? currentItemRowSpan_ : currentItemColSpan_;
-    auto crossSpan = axis_ == Axis::VERTICAL ? currentItemColSpan_ : currentItemRowSpan_;
-    // If start position is already exist in gridMatrix, place grid item fail.
-    auto mainIter = gridLayoutInfo_.gridMatrix_.find(main);
-    if (mainIter != gridLayoutInfo_.gridMatrix_.end()) {
-        auto crossIter = mainIter->second.find(cross);
-        if (crossIter != mainIter->second.end()) {
-            return gridLayoutInfo_.gridMatrix_[main][cross];
-        }
-    }
-
-    // If cross length of grid item if out of range,  place grid item fail.
-    if ((cross + crossSpan) > static_cast<int32_t>(crossCount_)) {
-        return POSITION_SMALL; // The width of the index that needs to be placed is too wide to be placed
-    }
-
-    // If any grid item is already exist in gridMatrix, place grid item fail.
-    for (int32_t i = 0; i < mainSpan; i++) {
-        mainIter = gridLayoutInfo_.gridMatrix_.find(i + main);
-        if (mainIter == gridLayoutInfo_.gridMatrix_.end()) {
-            continue;
-        }
-        for (int32_t j = 0; j < crossSpan; j++) {
-            auto crossIter = mainIter->second.find(j + cross);
-            if (crossIter != mainIter->second.end()) {
-                return OCCUPIED; // The back of this position is occupied and cannot place the current index
-            }
-        }
-    }
-
-    // Padding grid matrix for grid item's range.
-    for (int32_t i = main; i < main + mainSpan; ++i) {
-        std::map<int32_t, int32_t> mainMap;
-        auto iter = gridLayoutInfo_.gridMatrix_.find(i);
-        if (iter != gridLayoutInfo_.gridMatrix_.end()) {
-            mainMap = iter->second;
-        }
-        for (int32_t j = cross; j < cross + crossSpan; ++j) {
-            mainMap.emplace(std::make_pair(j, index));
-        }
-        gridLayoutInfo_.gridMatrix_[i] = mainMap;
-    }
-    lastCross_ = cross + crossSpan;
-    // Successfully placed and index == targetIndex, Update startIndex_ and startMainLineIndex_.
-    if (index == targetIndex) {
-        gridLayoutInfo_.startMainLineIndex_ = main;
-        gridLayoutInfo_.UpdateStartIndexByStartLine();
-    }
-    return SUCCESSFULLY; // This position can be placed
-}
-
 bool GridScrollLayoutAlgorithm::CheckGridPlaced(
     int32_t index, int32_t main, int32_t cross, int32_t mainSpan, int32_t crossSpan)
 {
@@ -1661,6 +1552,51 @@ int32_t GridScrollLayoutAlgorithm::GetStartingItem(LayoutWrapper* layoutWrapper,
         }
     }
     return firstIndex;
+}
+
+void GridScrollLayoutAlgorithm::SupplyAllData2ZeroIndex(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
+{
+    // Save the global variable at this moment.
+    auto tempGridLayoutInfo = gridLayoutInfo_;
+
+    // When the data is supplied again, there is an update of the original global variable gridLayoutInfo_. Therefore,
+    // each time you supply the data, you must re-complete the data based on the current screen data
+    auto startLineIndex = tempGridLayoutInfo.startMainLineIndex_;
+    auto startIndex = tempGridLayoutInfo.startIndex_;
+    auto endLineIndex = tempGridLayoutInfo.endMainLineIndex_;
+    auto endIndex = tempGridLayoutInfo.endIndex_;
+    auto targetIndex = tempGridLayoutInfo.targetIndex_;
+    // Remove redundant data that is visible off-screen. This is the key to completing data accurately
+    DeleteItemsOutOfScope(gridLayoutInfo_.lineHeightMap_, startLineIndex, endLineIndex);
+    DeleteItemsOutOfScope(gridLayoutInfo_.gridMatrix_, startLineIndex, endLineIndex);
+
+    // The continuous grid information is saved and used in the GridPattern to calculate the scroll distance
+    // Complete all data with indexes from startIndex to 0
+    if (startIndex > 0) {
+        // The start line when completing the data
+        currentMainLineIndex_ = startLineIndex;
+        float lineHeight = 0.0f;
+        do {
+            lineHeight = FillNewLineForward(crossSize, mainSize, layoutWrapper);
+            gridLayoutInfo_.lineHeightMap_[currentMainLineIndex_] = lineHeight;
+        } while (GreatOrEqual(lineHeight, 0.0));
+    }
+
+    // Complete the data from endIndex+1 to targetIndex_
+    if (endIndex < targetIndex) {
+        // The start line when completing the data
+        currentMainLineIndex_ = endLineIndex;
+        float lineHeight = 0.0f;
+        int32_t targetLineIndex = 0;
+        do {
+            lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
+            gridLayoutInfo_.lineHeightMap_[currentMainLineIndex_] = lineHeight;
+        } while (!(LessNotEqual(lineHeight, 0.0) || IsIndexInMatrix(targetIndex.value(), targetLineIndex)));
+    }
+
+    // Once the data is completed, the global variables need to be returned
+    scrollGridLayoutInfo_ = gridLayoutInfo_;
+    gridLayoutInfo_ = tempGridLayoutInfo;
 }
 
 // only for debug use

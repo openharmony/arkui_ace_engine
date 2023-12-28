@@ -47,6 +47,11 @@ FormRenderer::FormRenderer(const std::shared_ptr<OHOS::AbilityRuntime::Context> 
     uiContent_ = UIContent::Create(context_.get(), &nativeEngine, true);
 }
 
+FormRenderer::~FormRenderer()
+{
+    HILOG_DEBUG("called");
+}
+
 void FormRenderer::InitUIContent(const OHOS::AAFwk::Want& want, const OHOS::AppExecFwk::FormJsInfo& formJsInfo)
 {
     HILOG_INFO("InitUIContent width = %{public}f , height = %{public}f.", width_, height_);

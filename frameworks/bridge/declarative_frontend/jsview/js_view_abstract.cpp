@@ -195,8 +195,8 @@ bool CheckJSCallbackInfo(
                 break;
         }
     }
-    if (SystemProperties::GetDebugEnabled() && !typeVerified) {
-        LOGW("%{public}s: info[0] is not a [%{public}s]", callerName.c_str(),
+    if (!typeVerified) {
+        LOGD("%{public}s: info[0] is not a [%{public}s]", callerName.c_str(),
             unrecognizedType.substr(0, unrecognizedType.size() - 1).c_str());
     }
     return typeVerified || infoTypes.size() == 0;
@@ -741,7 +741,6 @@ void SetPopupMessageOptions(const JSRef<JSObject> messageOptionsObj, const RefPt
         if (fontStyleValue->IsNumber()) {
             int32_t value = fontStyleValue->ToNumber<int32_t>();
             if (value < 0 || value >= static_cast<int32_t>(FONT_STYLES.size())) {
-                LOGI("Text fontStyle(%d) is invalid value", value);
                 return;
             }
             if (popupParam) {
@@ -756,33 +755,6 @@ void SetPlacementOnTopVal(const JSRef<JSObject>& popupObj, const RefPtr<PopupPar
     JSRef<JSVal> placementOnTopVal = popupObj->GetProperty("placementOnTop");
     if (placementOnTopVal->IsBoolean() && popupParam) {
         popupParam->SetPlacement(placementOnTopVal->ToBoolean() ? Placement::TOP : Placement::BOTTOM);
-    }
-}
-
-void GetShadowFromStyle(ShadowStyle shadowStyle, Shadow& shadow)
-{
-    switch (shadowStyle) {
-        case ShadowStyle::OuterDefaultXS:
-            shadow = ShadowConfig::DefaultShadowXS;
-            break;
-        case ShadowStyle::OuterDefaultSM:
-            shadow = ShadowConfig::DefaultShadowS;
-            break;
-        case ShadowStyle::OuterDefaultMD:
-            shadow = ShadowConfig::DefaultShadowM;
-            break;
-        case ShadowStyle::OuterDefaultLG:
-            shadow = ShadowConfig::DefaultShadowL;
-            break;
-        case ShadowStyle::OuterFloatingSM:
-            shadow = ShadowConfig::FloatingShadowS;
-            break;
-        case ShadowStyle::OuterFloatingMD:
-            shadow = ShadowConfig::FloatingShadowM;
-            break;
-        default:
-            shadow = ShadowConfig::DefaultShadowM;
-            break;
     }
 }
 
@@ -970,19 +942,15 @@ void ParsePopupCommonParam(
 
     auto shadowVal = popupObj->GetProperty("shadow");
     Shadow shadow;
-    if (shadowVal->IsObject()) {
-        JSViewAbstract::ParseShadowProps(shadowVal, shadow);
-        popupParam->SetShadow(shadow);
-    } else if (shadowVal->IsNumber()) {
-        int32_t shadowStyle = 0;
-        if (JSViewAbstract::ParseJsInteger<int32_t>(shadowVal, shadowStyle)) {
-            auto style = static_cast<ShadowStyle>(shadowStyle);
-            GetShadowFromStyle(style, shadow);
-            popupParam->SetShadow(shadow);
+    if (shadowVal->IsObject() || shadowVal->IsNumber()) {
+        auto ret = JSViewAbstract::ParseShadowProps(shadowVal, shadow);
+        if (!ret) {
+            JSViewAbstract::GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow);
         }
-    } else if (shadowVal->IsUndefined()) {
-        popupParam->SetShadow(ShadowConfig::DefaultShadowM);
+    } else {
+        JSViewAbstract::GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow);
     }
+    popupParam->SetShadow(shadow);
 }
 
 void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
@@ -1986,11 +1954,9 @@ void JSViewAbstract::JsFlexBasis(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], value)) {
         value.SetUnit(DimensionUnit::AUTO);
     }
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-        // flexbasis don't support percent case.
-        if (value.Unit() == DimensionUnit::PERCENT) {
-            value.SetUnit(DimensionUnit::AUTO);
-        }
+    // flexbasis don't support percent case.
+    if (value.Unit() == DimensionUnit::PERCENT) {
+        value.SetUnit(DimensionUnit::AUTO);
     }
     ViewAbstractModel::GetInstance()->SetFlexBasis(value);
 }
@@ -2149,26 +2115,33 @@ void JSViewAbstract::JsBackgroundColor(const JSCallbackInfo& info)
 void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
 {
     std::string src;
-    if (info[0]->IsString()) {
-        src = info[0]->ToString();
-    } else if (!ParseJsMedia(info[0], src)) {
-        return;
-    }
     std::string bundle;
     std::string module;
+    RefPtr<PixelMap> pixmap = nullptr;
     GetJsMediaBundleInfo(info[0], bundle, module);
+    if (info[0]->IsString()) {
+        src = info[0]->ToString();
+        ViewAbstractModel::GetInstance()->SetBackgroundImage(
+            ImageSourceInfo { src, bundle, module }, GetThemeConstants());
+    } else if (ParseJsMedia(info[0], src)) {
+        ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo { src, bundle, module }, nullptr);
+    } else {
+#if defined(PIXEL_MAP_SUPPORTED)
+        if (IsDrawable(info[0])) {
+            pixmap = GetDrawablePixmap(info[0]);
+        } else {
+            pixmap = CreatePixelMapFromNapiValue(info[0]);
+        }
+#endif
+        CHECK_NULL_VOID(pixmap);
+        ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo { pixmap }, nullptr);
+    }
 
     int32_t repeatIndex = 0;
     if (info.Length() == 2 && info[1]->IsNumber()) {
         repeatIndex = info[1]->ToNumber<int32_t>();
     }
     auto repeat = static_cast<ImageRepeat>(repeatIndex);
-    if (info[0]->IsString()) {
-        ViewAbstractModel::GetInstance()->SetBackgroundImage(
-            ImageSourceInfo { src, bundle, module }, GetThemeConstants());
-    } else {
-        ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo { src, bundle, module }, nullptr);
-    }
     ViewAbstractModel::GetInstance()->SetBackgroundImageRepeat(repeat);
 }
 
@@ -2583,7 +2556,6 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAppearValue));
         auto onAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAppearFunc), node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            LOGI("About to call onAppear method.");
             ACE_SCORING_EVENT("onAppear");
             PipelineContext::SetCallBackNode(node);
             func->Execute();
@@ -2598,7 +2570,6 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
         auto onDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc),
                                node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            LOGI("About to call onDisappear method.");
             ACE_SCORING_EVENT("onDisappear");
             PipelineContext::SetCallBackNode(node);
             func->Execute();
@@ -4225,6 +4196,10 @@ bool JSViewAbstract::ParseJsShadowColorStrategy(const JSRef<JSVal>& jsValue, Sha
 
 bool JSViewAbstract::ParseJsSymbolId(const JSRef<JSVal>& jsValue, std::uint32_t& symbolId)
 {
+    if (jsValue->IsNull() || jsValue->IsUndefined()) {
+        symbolId = 0;
+        return false;
+    }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (resId->IsNull() || !resId->IsNumber()) {
@@ -6978,7 +6953,6 @@ bool JSViewAbstract::ParseDataDetectorConfig(
         JSRef<JSVal> value = array->GetValueAt(i);
         auto index = value->ToNumber<int32_t>();
         if (index < 0 || index >= static_cast<int32_t>(TEXT_DETECT_TYPES.size())) {
-            LOGI("Text detect types(%d) is invalid value", index);
             return false;
         }
         if (i != 0) {
@@ -7022,8 +6996,6 @@ void JSViewAbstract::GetJsAngle(
         angle = static_cast<float>(StringUtils::StringToDegree(value->ToString()));
     } else if (value->IsNumber()) {
         angle = value->ToNumber<float>();
-    } else {
-        LOGE("Invalid value type");
     }
 }
 

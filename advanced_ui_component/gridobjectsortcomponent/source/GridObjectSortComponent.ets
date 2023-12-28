@@ -34,7 +34,6 @@ const IMAGE_DEFAULT = 56;
 const TEXT_PADDING_LEFT_RIGHT = 12;
 const COMMON_BEZIER = curves.cubicBezierCurve(0.33, 0, 0.67, 1);
 
-
 // declaring interface, enum, class
 export interface GridObjectSortComponentItem {
   id: number | string;
@@ -956,10 +955,10 @@ export struct GridObjectSortComponent {
       // main
       Scroll() {
         Column() {
-          // top
+          // showArea
           SubHeader({ secondaryTitle: this.options.showAreaTitle || $r('sys.string.ohos_grid_edit_subtitle_sort') })
           this.EditTagBuilder()
-          // bottom
+          // addArea
           SubHeader({ secondaryTitle: this.options.addAreaTitle || $r('sys.string.ohos_grid_edit_subtitle_add') })
           this.AddTagBuilder()
         }
