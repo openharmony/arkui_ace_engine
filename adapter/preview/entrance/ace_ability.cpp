@@ -307,6 +307,7 @@ void AceAbility::InitializeAppInfo()
         compileMode_ = hapModuleInfo->GetCompileMode();
         compatibleVersion_ = appInfo->GetMinAPIVersion();
         auto targetVersion = appInfo->GetTargetAPIVersion();
+        AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(targetVersion));
         auto releaseType = appInfo->GetApiReleaseType();
         bool enablePartialUpdate = hapModuleInfo->GetPartialUpdateFlag();
         // only app should have menubar, card don't need
