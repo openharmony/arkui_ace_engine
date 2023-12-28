@@ -197,6 +197,7 @@ void TextSelectController::UpdateSelectByOffset(const Offset& localOffset)
         UpdateHandleIndex(GetCaretIndex());
     }
     if (IsSelected()) {
+        MoveFirstHandleToContentRect(GetFirstHandleIndex());
         MoveSecondHandleToContentRect(GetSecondHandleIndex());
     } else {
         MoveCaretToContentRect(GetCaretIndex());
