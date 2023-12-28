@@ -2771,6 +2771,11 @@ void FrontendDelegateDeclarative::GetSystemFontList(std::vector<std::string>& fo
     pipelineContextHolder_.Get()->GetSystemFontList(fontList);
 }
 
+void FrontendDelegateDeclarative::GetUIFontConfig(FontConfigJsonInfo& fontConfigJsonInfo)
+{
+    pipelineContextHolder_.Get()->GetUIFontConfig(fontConfigJsonInfo);
+}
+
 bool FrontendDelegateDeclarative::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
 {
     return pipelineContextHolder_.Get()->GetSystemFont(fontName, fontInfo);

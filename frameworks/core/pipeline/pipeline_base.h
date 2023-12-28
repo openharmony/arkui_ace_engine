@@ -72,19 +72,8 @@ struct KeyboardAnimationConfig {
     uint32_t durationOut_ = 0;
 };
 
-struct FontInfo {
-    std::string path;
-    std::string postScriptName;
-    std::string fullName;
-    std::string family;
-    std::string subfamily;
-    uint32_t weight = 0;
-    uint32_t width = 0;
-    bool italic = false;
-    bool monoSpace = false;
-    bool symbolic = false;
-};
-
+struct FontInfo;
+struct FontConfigJsonInfo;
 class Frontend;
 class OffscreenCanvas;
 class Window;
@@ -751,6 +740,8 @@ public:
     void GetSystemFontList(std::vector<std::string>& fontList);
 
     bool GetSystemFont(const std::string& fontName, FontInfo& fontInfo);
+
+    void GetUIFontConfig(FontConfigJsonInfo& fontConfigJsonInfo);
 
     void TryLoadImageInfo(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& loadCallback);
 

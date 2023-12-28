@@ -23,6 +23,7 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #ifdef TEXGINE_SUPPORT_FOR_OHOS
 #include "foundation/graphic/graphic_2d/rosen/modules/texgine/src/font_parser.h"
+#include "foundation/graphic/graphic_2d/rosen/modules/texgine/src/font_config.h"
 #endif
 #endif
 
@@ -76,6 +77,49 @@ void FontManager::GetSystemFontList(std::vector<std::string>& fontList)
     for (size_t i = 0; i < systemFontList.size(); ++i) {
         std::string fontName = systemFontList[i].fullName;
         fontList.emplace_back(fontName);
+    }
+#endif
+#endif
+}
+
+void FontManager::GetUIFontConfig(FontConfigJsonInfo& info)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+#ifdef TEXGINE_SUPPORT_FOR_OHOS
+    Rosen::TextEngine::FontConfigJson fontConfigJson;
+    fontConfigJson.ParseFile();
+    auto rosenInfo = fontConfigJson.GetFontConfigJsonInfo();
+    // rosenInfo to FontConfigJsonInfo
+    for (size_t i = 0; i < rosenInfo->fontDirSet.size(); ++i) {
+        info.fontDirSet.emplace_back(rosenInfo->fontDirSet[i]);
+    }
+    for (size_t i = 0; i < rosenInfo->genericSet.size(); ++i) {
+        FontGenericInfo genericInfo;
+        genericInfo.familyName = rosenInfo->genericSet[i].familyName;
+        for (size_t j = 0; j < rosenInfo->genericSet[i].aliasSet.size(); ++j) {
+            AliasInfo aliasInfo;
+            aliasInfo.familyName = rosenInfo->genericSet[i].aliasSet[j].familyName;
+            aliasInfo.weight = rosenInfo->genericSet[i].aliasSet[j].weight;
+            genericInfo.aliasSet.emplace_back(aliasInfo);
+        }
+        for (size_t j = 0; j < rosenInfo->genericSet[i].adjustSet.size(); ++j) {
+            AdjustInfo adjustInfo;
+            adjustInfo.origValue = rosenInfo->genericSet[i].adjustSet[j].origValue;
+            adjustInfo.newValue = rosenInfo->genericSet[i].adjustSet[j].newValue;
+            genericInfo.adjustSet.emplace_back(adjustInfo);
+        }
+        info.genericSet.emplace_back(genericInfo);
+    }
+    for (size_t i = 0; i < rosenInfo->fallbackGroupSet.size(); ++i) {
+        FallbackGroup fallbackGroupInfo;
+        fallbackGroupInfo.groupName = rosenInfo->fallbackGroupSet[i].groupName;
+        for (size_t j = 0; j < rosenInfo->fallbackGroupSet[i].fallbackInfoSet.size(); ++j) {
+            FallbackInfo fallbackInfo;
+            fallbackInfo.familyName = rosenInfo->fallbackGroupSet[i].fallbackInfoSet[j].familyName;
+            fallbackInfo.font = rosenInfo->fallbackGroupSet[i].fallbackInfoSet[j].font;
+            fallbackGroupInfo.fallbackInfoSet.emplace_back(fallbackInfo);
+        }
+        info.fallbackGroupSet.emplace_back(fallbackGroupInfo);
     }
 #endif
 #endif
