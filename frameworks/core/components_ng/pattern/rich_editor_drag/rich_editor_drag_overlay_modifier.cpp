@@ -65,7 +65,7 @@ void RichEditorDragOverlayModifier::PaintImage(DrawingContext& context)
 {
     auto pattern = DynamicCast<RichEditorDragPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(pattern);
-    auto canvas = context.canvas;
+    auto& canvas = context.canvas;
     size_t index = 0;
     auto imageChildren = pattern->GetImageChildren();
     auto rectsForPlaceholders = pattern->GetRectsForPlaceholders();
