@@ -40,14 +40,14 @@ struct FontInfo {
 };
 
 typedef struct AdjustInfo {
-    int origValue;
-    int newValue;
+    int origValue = 0;
+    int newValue = 0;
 } AdjustInfo;
 using AdjustSet = std::vector<AdjustInfo>;
 
 typedef struct AliasInfo {
     std::string familyName;
-    int weight;
+    int weight = 0;
 } AliasInfo;
 using AliasSet = std::vector<AliasInfo>;
 
