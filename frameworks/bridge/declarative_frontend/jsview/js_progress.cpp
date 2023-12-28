@@ -142,10 +142,9 @@ void JSProgress::SetColor(const JSCallbackInfo& info)
         Color endColor;
         Color beginColor;
         if (info[0]->IsNull() || info[0]->IsUndefined() || !ParseJsColor(info[0], colorVal)) {
-            if (g_progressType == ProgressType::RING) {
-                endColor = theme->GetRingProgressEndSideColor();
-                beginColor = theme->GetRingProgressBeginSideColor();
-            } else if (g_progressType == ProgressType::CAPSULE) {
+            endColor = theme->GetRingProgressEndSideColor();
+            beginColor = theme->GetRingProgressBeginSideColor();
+            if (g_progressType == ProgressType::CAPSULE) {
                 colorVal = theme->GetCapsuleSelectColor();
             } else {
                 colorVal = theme->GetTrackSelectedColor();
