@@ -608,6 +608,7 @@ void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp)
         FrameReport::GetInstance().BeginFlushAnimation();
     }
 
+    scheduleTasks_.clear();
     GetOrCreateUIDisplaySyncManager()->DispatchFunc(nanoTimestamp);
 
     if (FrameReport::GetInstance().GetEnable()) {
@@ -624,22 +625,6 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
     ACE_FUNCTION_TRACE();
     if (scheduleTasks_.empty()) {
         return;
-    }
-
-    if (FrameReport::GetInstance().GetEnable()) {
-        FrameReport::GetInstance().BeginFlushAnimation();
-    }
-
-    decltype(scheduleTasks_) temp(std::move(scheduleTasks_));
-    for (const auto& [id, weakTask] : temp) {
-        auto task = weakTask.Upgrade();
-        if (task) {
-            task->OnFrame(nanoTimestamp);
-        }
-    }
-
-    if (FrameReport::GetInstance().GetEnable()) {
-        FrameReport::GetInstance().EndFlushAnimation();
     }
 }
 

@@ -397,6 +397,8 @@ public:
         return enableScrollableItemPool_;
     }
 
+    static bool GetDisplaySyncSkipEnabled();
+
 private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;

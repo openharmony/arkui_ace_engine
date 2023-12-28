@@ -41,6 +41,7 @@ void Scheduler::Start()
         CHECK_NULL_VOID(scheduler);
         scheduler->OnFrame(nanoTimestamp);
     });
+    displaySync_->AddToPipeline(context_);
 }
 
 void Scheduler::Stop()
@@ -55,6 +56,7 @@ void Scheduler::Stop()
     }
     isRunning_ = false;
     context->RemoveScheduleTask(scheduleId_);
+    displaySync_->DelFromPipeline(context_);
     scheduleId_ = 0;
 }
 

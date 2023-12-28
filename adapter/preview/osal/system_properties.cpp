@@ -247,4 +247,9 @@ bool SystemProperties::Is24HourClock()
 {
     return false;
 }
+
+bool SystemProperties::GetDisplaySyncSkipEnabled()
+{
+    return true;
+}
 } // namespace OHOS::Ace

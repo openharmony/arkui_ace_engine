@@ -526,4 +526,9 @@ std::optional<bool> SystemProperties::GetRtlEnabled()
         return (ret == "true") ? true : false;
     }
 }
+
+bool SystemProperties::GetDisplaySyncSkipEnabled()
+{
+    return system::GetBoolParameter("debug.ace.displaySyncSkip.enabled", true);
+}
 } // namespace OHOS::Ace

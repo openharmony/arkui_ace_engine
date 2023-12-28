@@ -106,4 +106,9 @@ std::string SystemProperties::GetCustomTitleFilePath()
 {
     return {};
 }
+
+bool SystemProperties::GetDisplaySyncSkipEnabled()
+{
+    return true;
+}
 } // namespace OHOS::Ace
