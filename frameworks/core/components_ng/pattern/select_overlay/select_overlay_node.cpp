@@ -549,6 +549,13 @@ void SelectOverlayNode::CreateCustomSelectOverlay(const std::shared_ptr<SelectOv
             return AceType::MakeRefPtr<MenuPattern>(id, V2::MENU_ETS_TAG, MenuType::SELECT_OVERLAY_CUSTOM_MENU);
         });
     selectMenu_->MountToParent(Claim(this));
+    auto eventHub = selectMenu_->GetEventHub<EventHub>();
+    if (eventHub && info->menuCallback.onAppear) {
+        eventHub->SetOnAppear(std::move(info->menuCallback.onAppear));
+    }
+    if (eventHub && info->menuCallback.onDisappear) {
+        eventHub->SetOnDisappear(std::move(info->menuCallback.onDisappear));
+    }
     auto pattern = selectMenu_->GetPattern<MenuPattern>();
     auto renderContext = selectMenu_->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
