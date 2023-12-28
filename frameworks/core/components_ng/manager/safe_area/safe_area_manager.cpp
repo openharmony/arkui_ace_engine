@@ -63,7 +63,7 @@ bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight)
 SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& opts) const
 {
     SafeAreaInsets res;
-    if (ignoreSafeArea_ || !isFullScreen_) {
+    if (ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_)) {
         return res;
     }
     if (opts.type & SAFE_AREA_TYPE_CUTOUT) {
