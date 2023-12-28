@@ -71,6 +71,16 @@ void JSNodeContainer::Create(const JSCallbackInfo& info)
     }
     auto object = JSRef<JSObject>::Cast(info[0]);
 
+    JSObject firstArg = JSRef<JSObject>::Cast(info[0]).Get();
+    auto nodeContainerId = frameNode->GetId();
+    // check if it's the same object, and if it is, return it;
+    auto insideId = firstArg->GetProperty(NODE_CONTAINER_ID);
+    if (insideId->IsNumber()) {
+        auto id = insideId->ToNumber<int32_t>();
+        if (id == nodeContainerId) {
+            return;
+        }
+    }
     // clear the nodeContainerId_ in pre controller;
     NodeContainerModel::GetInstance()->ResetController();
 
@@ -84,8 +94,7 @@ void JSNodeContainer::Create(const JSCallbackInfo& info)
     auto execCtx = info.GetExecutionContext();
     auto child = GetNodeByNodeController(object, execCtx);
     // set the nodeContainerId_ to nodeController
-    JSObject firstArg = JSRef<JSObject>::Cast(info[0]).Get();
-    firstArg->SetProperty(NODE_CONTAINER_ID, frameNode->GetId());
+    firstArg->SetProperty(NODE_CONTAINER_ID, nodeContainerId);
 
     if (child) {
         frameNode->RemoveChildAtIndex(0);
