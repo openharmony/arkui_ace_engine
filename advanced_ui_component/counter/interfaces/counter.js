@@ -864,12 +864,12 @@ export class CounterComponent extends ViewPU {
         if (void 0 !== this.dateStyleOptions.year && this.dateStyleOptions.year >= this.minYear &&
             this.dateStyleOptions.year <= this.maxYear) {
             if (void 0 === this.year) {
-                this.year = CounterConstant.COUNTER_MIN_YEAR;
+                this.year = this.dateStyleOptions.year;
                 let e = new DateData(this.year, this.month, this.day);
                 null === (t = this.onDateChange) || void 0 === t || t.call(this, e)
             }
         } else {
-            this.year = this.dateStyleOptions.year;
+            this.year = CounterConstant.COUNTER_MIN_YEAR;
             let e = new DateData(this.year, this.month, this.day);
             null === (t = this.onDateChange) || void 0 === t || t.call(this, e)
         }
@@ -877,24 +877,24 @@ export class CounterComponent extends ViewPU {
             this.dateStyleOptions.month <= CounterConstant.COUNTER_MAX_MONTH &&
             this.dateStyleOptions.month >= CounterConstant.COUNTER_MIN_MONTH) {
             if (void 0 === this.month) {
-                this.month = CounterConstant.COUNTER_INITIAL_MONTH;
+                this.month = this.dateStyleOptions.month;
                 let t = new DateData(this.year, this.month, this.day);
                 null === (e = this.onDateChange) || void 0 === e || e.call(this, t)
             }
         } else {
-            this.month = this.dateStyleOptions.month;
+            this.month = CounterConstant.COUNTER_INITIAL_MONTH;
             let t = new DateData(this.year, this.month, this.day);
             null === (e = this.onDateChange) || void 0 === e || e.call(this, t)
         }
         if (void 0 !== this.dateStyleOptions.day && this.dateStyleOptions.day <= this.getDayNumber() &&
             this.dateStyleOptions.day >= CounterConstant.COUNTER_MIN_DAY) {
             if (void 0 === this.month) {
-                this.day = CounterConstant.COUNTER_INITIAL_DAY;
+                this.day = this.dateStyleOptions.day;
                 let t = new DateData(this.year, this.month, this.day);
                 null === (o = this.onDateChange) || void 0 === o || o.call(this, t)
             }
         } else {
-            this.day = this.dateStyleOptions.day;
+            this.day = CounterConstant.COUNTER_INITIAL_DAY;
             let t = new DateData(this.year, this.month, this.day);
             null === (o = this.onDateChange) || void 0 === o || o.call(this, t)
         }
