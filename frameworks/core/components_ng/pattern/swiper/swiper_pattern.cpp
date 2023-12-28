@@ -1714,15 +1714,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
         if (currentIndex_ != nextIndex) {
             UpdateCurrentIndex(nextIndex);
             do {
-                auto host = GetHost();
-                if (!host) {
-                    break;
-                }
-                auto curChild = host->GetChildAtIndex(currentIndex_);
-                if (!curChild) {
-                    break;
-                }
-                auto curChildFrame = AceType::DynamicCast<FrameNode>(curChild);
+                auto curChildFrame = GetCurrentFrameNode(currentIndex_);
                 if (!curChildFrame) {
                     break;
                 }
@@ -2160,15 +2152,7 @@ void SwiperPattern::OnSpringAndFadeAnimationFinish()
     if (GetLoopIndex(currentIndex_) != GetLoopIndex(nextIndex_)) {
         UpdateCurrentIndex(nextIndex_);
         do {
-            auto host = GetHost();
-            if (!host) {
-                break;
-            }
-            auto curChild = host->GetChildAtIndex(currentIndex_);
-            if (!curChild) {
-                break;
-            }
-            auto curChildFrame = AceType::DynamicCast<FrameNode>(curChild);
+            auto curChildFrame = GetCurrentFrameNode(currentIndex_);
             if (!curChildFrame) {
                 break;
             }
@@ -2901,15 +2885,7 @@ void SwiperPattern::TriggerAnimationEndOnForceStop()
             TriggerAnimationEndOnSwipeToRight();
         }
         do {
-            auto host = GetHost();
-            if (!host) {
-                break;
-            }
-            auto curChild = host->GetChildAtIndex(currentIndex_);
-            if (!curChild) {
-                break;
-            }
-            auto curChildFrame = AceType::DynamicCast<FrameNode>(curChild);
+            auto curChildFrame = GetCurrentFrameNode(currentIndex_);
             if (!curChildFrame) {
                 break;
             }
@@ -3387,11 +3363,7 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
     } else {
         UpdateCurrentIndex(nextIndex);
         do {
-            auto curChild = host->GetChildAtIndex(currentIndex_);
-            if (!curChild) {
-                break;
-            }
-            auto curChildFrame = AceType::DynamicCast<FrameNode>(curChild);
+            auto curChildFrame = GetCurrentFrameNode(currentIndex_);
             if (!curChildFrame) {
                 break;
             }
@@ -3960,5 +3932,14 @@ void SwiperPattern::UpdateSwiperPanEvent(bool disableSwipe)
         gestureHub->RemovePanEvent(panEvent_);
         panEvent_.Reset();
     }
+}
+
+RefPtr<FrameNode> SwiperPattern::GetCurrentFrameNode(int32_t currentIndex) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto currentLayoutWrapper = host->GetChildByIndex(GetLoopIndex(currentIndex));
+    CHECK_NULL_RETURN(currentLayoutWrapper, nullptr);
+    return currentLayoutWrapper->GetHostNode();
 }
 } // namespace OHOS::Ace::NG
