@@ -1915,9 +1915,9 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
         } else if (parsedConfig.direction == "vertical") {
             resDirection = DeviceOrientation::PORTRAIT;
         }
-        if (SystemProperties::GetDeviceOrientation() != resDirection) {
+        if (orientation_ != resDirection) {
             configurationChange.directionUpdate = true;
-            SystemProperties::SetDeviceOrientation(resDirection == DeviceOrientation::PORTRAIT ? 0 : 1);
+            orientation_ = resDirection;
         }
         resConfig.SetOrientation(resDirection);
     }
