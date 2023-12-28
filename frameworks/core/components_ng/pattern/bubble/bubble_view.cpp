@@ -496,7 +496,6 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
             renderContext->UpdateBackgroundColor(popupPaintProp->GetBackgroundColor().value_or(Color::TRANSPARENT));
             renderContext->UpdateBackBlurStyle(styleOption);
         }
-        renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
     }
 }
 

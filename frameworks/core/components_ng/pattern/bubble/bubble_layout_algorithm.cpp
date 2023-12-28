@@ -2057,6 +2057,7 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(
         arrowPosition_ = topArrowPosition;
         arrowPlacement_ = Placement::TOP;
     } else {
+        placement_ = Placement::BOTTOM;
         fitPosition = bottomPosition;
         arrowPosition_ = bottomArrowPosition;
         arrowPlacement_ = Placement::BOTTOM;
@@ -2076,6 +2077,7 @@ OffsetF BubbleLayoutAlgorithm::GetChildPosition(
     fitPosition = fitPosition == topPosition ? bottomPosition : topPosition;
     arrowPosition_ = arrowPlacement_ == Placement::TOP ? bottomArrowPosition : topArrowPosition;
     arrowPlacement_ = arrowPlacement_ == Placement::TOP ? Placement::BOTTOM : Placement::TOP;
+    placement_ = arrowPlacement_ == Placement::TOP ? Placement::BOTTOM : Placement::TOP;
 
     childPosition = FitToScreen(fitPosition, childSize);
     if (UseArrowOffset) {
@@ -2140,12 +2142,12 @@ void BubbleLayoutAlgorithm::GetPositionWithPlacement(
             break;
         case Placement::TOP_LEFT:
             childPosition = OffsetF(targetOffset_.GetX() - marginRight,
-                targetOffset_.GetY() - childSize.Height() - bubbleSpacing - marginBottom - targetSpace);
+                targetOffset_.GetY() - childSize.Height() - bubbleSpacing - marginBottom - targetSpace - arrowHeight_);
             arrowPosition = childPosition + OffsetF(radius + arrowHalfWidth, childSize.Height() + bubbleSpacing);
             break;
         case Placement::TOP_RIGHT:
             childPosition = OffsetF(targetOffset_.GetX() + targetSize_.Width() - childSize.Width() + marginLeft,
-                targetOffset_.GetY() - childSize.Height() - targetSpace - bubbleSpacing - marginBottom);
+                targetOffset_.GetY() - childSize.Height() - targetSpace - bubbleSpacing - marginBottom - arrowHeight_);
             arrowPosition = childPosition + OffsetF(radius + arrowHalfWidth, childSize.Height() + bubbleSpacing);
             break;
         case Placement::BOTTOM:
@@ -2157,47 +2159,47 @@ void BubbleLayoutAlgorithm::GetPositionWithPlacement(
             break;
         case Placement::BOTTOM_LEFT:
             childPosition = OffsetF(targetOffset_.GetX() - marginRight,
-                targetOffset_.GetY() + targetSize_.Height() + targetSpace + bubbleSpacing + marginTop);
+                targetOffset_.GetY() + targetSize_.Height() + targetSpace + bubbleSpacing + marginTop + arrowHeight_);
             arrowPosition = childPosition + OffsetF(radius + arrowHalfWidth, -bubbleSpacing);
             break;
         case Placement::BOTTOM_RIGHT:
             childPosition = OffsetF(targetOffset_.GetX() + targetSize_.Width() - childSize.Width() + marginLeft,
-                targetOffset_.GetY() + targetSize_.Height() + targetSpace + bubbleSpacing + marginTop);
+                targetOffset_.GetY() + targetSize_.Height() + targetSpace + bubbleSpacing + marginTop + arrowHeight_);
             arrowPosition = childPosition + OffsetF(radius + arrowHalfWidth, -bubbleSpacing);
             break;
         case Placement::LEFT:
             childPosition =
-                OffsetF(targetOffset_.GetX() - targetSpace - bubbleSpacing - childSize.Width() - marginRight,
+                OffsetF(targetOffset_.GetX() - targetSpace - bubbleSpacing - childSize.Width() - marginRight - arrowHeight_,
                     targetOffset_.GetY() + targetSize_.Height() / HALF - childSize.Height() / HALF);
             arrowPosition = childPosition + OffsetF(childSize_.Width() + bubbleSpacing, radius + arrowHalfWidth);
             break;
         case Placement::LEFT_TOP:
             childPosition =
-                OffsetF(targetOffset_.GetX() - targetSpace - bubbleSpacing - childSize.Width() - marginRight,
+                OffsetF(targetOffset_.GetX() - targetSpace - bubbleSpacing - childSize.Width() - marginRight - arrowHeight_,
                     targetOffset_.GetY() - marginBottom);
             arrowPosition = childPosition + OffsetF(childSize_.Width() + bubbleSpacing, radius + arrowHalfWidth);
             break;
         case Placement::LEFT_BOTTOM:
             childPosition =
-                OffsetF(targetOffset_.GetX() - targetSpace - bubbleSpacing - childSize.Width() - marginRight,
+                OffsetF(targetOffset_.GetX() - targetSpace - bubbleSpacing - childSize.Width() - marginRight - arrowHeight_,
                     targetOffset_.GetY() + targetSize_.Height() - childSize.Height() - marginTop);
             arrowPosition = childPosition + OffsetF(childSize_.Width() + bubbleSpacing, radius + arrowHalfWidth);
             break;
         case Placement::RIGHT:
             childPosition =
-                OffsetF(targetOffset_.GetX() + targetSize_.Width() + targetSpace + bubbleSpacing + marginLeft,
+                OffsetF(targetOffset_.GetX() + targetSize_.Width() + targetSpace + bubbleSpacing + marginLeft + arrowHeight_,
                     targetOffset_.GetY() + targetSize_.Height() / HALF - childSize.Height() / HALF);
             arrowPosition = childPosition + OffsetF(-bubbleSpacing, radius + arrowHalfWidth);
             break;
         case Placement::RIGHT_TOP:
             childPosition =
-                OffsetF(targetOffset_.GetX() + targetSize_.Width() + targetSpace + bubbleSpacing + marginLeft,
+                OffsetF(targetOffset_.GetX() + targetSize_.Width() + targetSpace + bubbleSpacing + marginLeft + arrowHeight_,
                     targetOffset_.GetY() - marginBottom);
             arrowPosition = childPosition + OffsetF(-bubbleSpacing, radius + arrowHalfWidth);
             break;
         case Placement::RIGHT_BOTTOM:
             childPosition =
-                OffsetF(targetOffset_.GetX() + targetSize_.Width() + targetSpace + bubbleSpacing + marginLeft,
+                OffsetF(targetOffset_.GetX() + targetSize_.Width() + targetSpace + bubbleSpacing + marginLeft + arrowHeight_,
                     targetOffset_.GetY() + targetSize_.Height() - childSize.Height() - marginTop);
             arrowPosition = childPosition + OffsetF(-bubbleSpacing, radius + arrowHalfWidth);
             break;
