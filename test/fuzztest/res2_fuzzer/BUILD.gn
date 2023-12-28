@@ -33,6 +33,7 @@ ohos_fuzztest("Res2FuzzTest") {
 
   sources = [
     "$ace_root/adapter/ohos/entrance/file_asset_provider_impl.cpp",
+    "$ace_root/frameworks/base/utils/utils.cpp",
     "$ace_root/frameworks/core/common/asset_manager_impl.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
     "$ace_root/frameworks/core/components/theme/theme_attributes.cpp",
