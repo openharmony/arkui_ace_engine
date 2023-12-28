@@ -463,10 +463,14 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
             CHECK_NULL_VOID(textLayoutProperty);
             if (textLayoutProperty->GetCalcLayoutConstraint() &&
                 textLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.has_value()) {
-                auto selfIdealSize = textLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
-                if ((selfIdealSize->Width().has_value() && selfIdealSize->Width()->GetDimension().ConvertToPx() <= 0) ||
-                    (selfIdealSize->Height().has_value() &&
-                        selfIdealSize->Height()->GetDimension().ConvertToPx() <= 0)) {
+                auto selfIdealSizeWidth = textLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Width();
+                auto selfIdealSizeHeight = textLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height();
+                auto constraint = textLayoutProperty->GetLayoutConstraint();
+                if ((selfIdealSizeWidth.has_value() && NearZero(selfIdealSizeWidth->GetDimension().ConvertToPxWithSize(
+                                                           constraint->percentReference.Width()))) ||
+                    (selfIdealSizeHeight.has_value() &&
+                        NearZero(selfIdealSizeHeight->GetDimension().ConvertToPxWithSize(
+                            constraint->percentReference.Height())))) {
                     return;
                 }
             }
