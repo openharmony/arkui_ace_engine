@@ -176,7 +176,6 @@ std::function<float(float)> ParseCallBackFunction(const JSRef<JSObject>& curveOb
 
 struct KeyframeParam {
     int32_t duration = 0;
-    float fraction = 0.0f;
     RefPtr<Curve> curve;
     std::function<void()> animationClosure;
 };
@@ -537,12 +536,8 @@ void JSViewContext::JSKeyframeAnimateTo(const JSCallbackInfo& info)
     }
     overallAnimationOption.SetDuration(totalDuration);
     // actual curve is in keyframe, this curve will not be effective
+    AceTraceBeginWithArgs("animation duration%d", totalDuration);
     overallAnimationOption.SetCurve(Curves::EASE_IN_OUT);
-    int32_t currentDuration = 0;
-    for (auto& keyframe : keyframes) {
-        currentDuration += keyframe.duration;
-        keyframe.fraction = totalDuration > 0 ? static_cast<float>(currentDuration) / totalDuration : 1.0f;
-    }
     pipelineContext->FlushBuild();
     pipelineContext->OpenImplicitAnimation(
         overallAnimationOption, overallAnimationOption.GetCurve(), overallAnimationOption.GetOnFinishEvent());
@@ -550,8 +545,8 @@ void JSViewContext::JSKeyframeAnimateTo(const JSCallbackInfo& info)
         if (!keyframe.animationClosure) {
             continue;
         }
-        AceTraceBeginWithArgs("keyframe %f", keyframe.fraction);
-        AnimationUtils::AddKeyFrame(keyframe.fraction, keyframe.curve, [&keyframe, &pipelineContext]() {
+        AceTraceBeginWithArgs("keyframe duration%d", keyframe.duration);
+        AnimationUtils::AddDurationKeyFrame(keyframe.duration, keyframe.curve, [&keyframe, &pipelineContext]() {
             keyframe.animationClosure();
             pipelineContext->FlushBuild();
             if (!pipelineContext->IsLayouting()) {
