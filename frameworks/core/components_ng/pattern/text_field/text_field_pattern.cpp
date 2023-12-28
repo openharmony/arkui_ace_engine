@@ -2025,6 +2025,7 @@ void TextFieldPattern::OnModifyDone()
         inlineFocusState_ = false;
         RestorePreInlineStates();
         UpdateSelection(0);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     auto maxlength = GetMaxLength();
     auto originLength = static_cast<int32_t>(contentController_->GetWideText().length());
@@ -5024,7 +5025,9 @@ void TextFieldPattern::ApplyUnderlineStates()
         idealSize.SetHeight(height);
         layoutProperty->UpdateUserDefinedIdealSize(idealSize);
     }
-    layoutProperty->UpdateFontSize(theme->GetUnderlineFontSize());
+    if (!layoutProperty->HasFontSize()) {
+        layoutProperty->UpdateFontSize(theme->GetUnderlineFontSize());
+    }
     if (!layoutProperty->HasTextColor()) {
         layoutProperty->UpdateTextColor(theme->GetUnderlineTextColor());
     }
