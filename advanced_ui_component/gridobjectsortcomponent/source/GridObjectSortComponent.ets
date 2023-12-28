@@ -26,7 +26,6 @@ const COL_IMAGE_TEXT = 3;
 const COL_TEXT = 4;
 const BLOCK_TEXT_HEIGHT = 46;
 const BLOCK_IMAGE_TEXT_HEIGHT = 124;
-const COLUMNS_GAP_TEXT = 8;
 const ROW_GAP = 16;
 const DURATION = 300;
 const ICON_SIZE = 24;
@@ -75,7 +74,8 @@ class MenuItem {
 }
 
 // common text structure
-@Extend(Text) function blockTextStyle(width: number = 65) {
+@Extend(Text)
+function blockTextStyle(width: number = 65) {
   .fontColor($r('sys.color.ohos_id_color_text_primary'))
   .backgroundColor($r('sys.color.ohos_id_color_button_normal'))
   .fontSize($r('sys.float.ohos_id_text_size_button3'))
@@ -130,10 +130,11 @@ export struct GridObjectSortComponent {
   @State endX: number = 0;
   @State endY: number = 0;
   @State unSelectedIndex: number = 0;
+  @State clickAddBtn: boolean = false;
   @State selectedIndex: number = -1;
   @State gridHeight: number = 0;
   @State clickRemoveBtn: boolean = false;
-  @State clickAddBtn: boolean = false;
+  @State addAreaLongPressGesture: boolean = false;
   // current column, text: 4 column  , image_text: 3 column
   private colNum: number = this.options.type === GridObjectSortComponentType.IMAGE_TEXT ? COL_IMAGE_TEXT : COL_TEXT;
   private arraySelectIsChange: number = 0;
@@ -252,6 +253,7 @@ export struct GridObjectSortComponent {
     const removeCol = Math.trunc(removeIndex % col)
     const insertCol = remainder
     let xNew = Math.abs(insertCol - removeCol) * (this.blockWidth + 14)
+
     if (insertCol < removeCol) {
       xNew = -xNew
     } else if (insertCol > removeCol) {
@@ -259,6 +261,7 @@ export struct GridObjectSortComponent {
     } else {
       xNew = 0
     }
+
     let yNew = 0
     let removeRow = Math.trunc(removeIndex / this.colNum)
     const subTitleHeight: number = 57
@@ -276,6 +279,7 @@ export struct GridObjectSortComponent {
     const removeCol = Math.trunc(removeIndex % col)
     const insertCol = remainder
     let xNew = Math.abs(insertCol - removeCol) * (this.blockWidth + 14)
+
     if (insertCol < removeCol) {
       xNew = -xNew
     } else if (insertCol > removeCol) {
@@ -283,6 +287,7 @@ export struct GridObjectSortComponent {
     } else {
       xNew = 0
     }
+
     let yNew = 0
     let removeRow = Math.trunc(removeIndex / this.colNum)
     const num = len % col === 0 ? 0 : 1
@@ -347,8 +352,7 @@ export struct GridObjectSortComponent {
       if (val.id === content.id) {
         currentIndex = i;
       }
-      ;
-    })
+    });
     this.selectedIndex = currentIndex;
     setTimeout(() => {
       this.scaleIcon = 1;
@@ -367,11 +371,11 @@ export struct GridObjectSortComponent {
     if (index >= this.insertIndex) {
       // item  newline
       if (Math.trunc(index % gridCol) === gridCol - 1) {
-        x = x - (this.blockWidth * (gridCol - 1)) - (this.options.type === GridObjectSortComponentType.IMAGE_TEXT ? (8 * (gridCol - 1)) - 8 : -((8 * (gridCol - 1)) - 16))
+        x = x - this.blockWidth * (gridCol - 1) - TEXT_PADDING_LEFT_RIGHT * (gridCol - 1)
         y = y + this.blockHeight
       } else {
         // right move
-        x = x + this.blockWidth + COLUMNS_GAP_TEXT * (gridCol - 1) - (this.options.type === GridObjectSortComponentType.IMAGE_TEXT ? 4 : 8);
+        x = x + this.blockWidth +  TEXT_PADDING_LEFT_RIGHT
       }
     }
     if (!this.isStartDrag) {
@@ -395,6 +399,7 @@ export struct GridObjectSortComponent {
     }
     return num
   }
+
   // calculated altitude
   getGridHeight(data: GridObjectSortComponentItem[], state?: string): number {
     let height = 0
@@ -411,14 +416,15 @@ export struct GridObjectSortComponent {
     return height
   }
 
+  // top item position
   getXY(data: GridObjectSortComponentItem[], index: number, currentClickIndex: number): PositionXY {
     let xNew = 0
     let yNew = 0
     if (!this.isStartDrag) {
       if (this.clickRemoveBtn) {
         if (index === currentClickIndex) {
-          xNew = this.getAddItemGridPosition(this.unSelected, currentClickIndex).x;
-          yNew = this.getAddItemGridPosition(this.unSelected, currentClickIndex).y;
+          xNew = this.getAddItemGridPosition(this.unSelected, currentClickIndex).x
+          yNew = this.getAddItemGridPosition(this.unSelected, currentClickIndex).y
         } else {
           xNew = this.getCoveringGridPosition(data, index, currentClickIndex).x
           yNew = this.getCoveringGridPosition(data, index, currentClickIndex).y
@@ -445,7 +451,7 @@ export struct GridObjectSortComponent {
       } else {
         if (this.arrayUnSelectIsChange !== 2) {
             xNew = (index) % this.colNum === 0 ? (this.blockWidth + 16) * (this.colNum - 1) : -this.blockWidth - 14
-            yNew = (index) % this.colNum === 0 ?  -this.blockHeight : 0
+            yNew = (index) % this.colNum === 0 ? -this.blockHeight : 0
         }
       }
     }
@@ -592,12 +598,11 @@ export struct GridObjectSortComponent {
             this.unSelectedIndex = index
             this.endX = endPosition.x
             this.endY = endPosition.y
-
-            this.clickAddBtn = true
             this.arrayUnSelectIsChange = 1
+            this.clickAddBtn = true
             setTimeout(() => {
-              this.scaleIcon = 1
               this.arrayUnSelectIsChange = 2
+              this.scaleIcon = 1
               this.selected.push(content);
               this.unSelected.splice(index, 1)
               this.endX = 0
@@ -703,7 +708,7 @@ export struct GridObjectSortComponent {
             } else {
               Flex({ justifyContent: FlexAlign.Start, alignItems: ItemAlign.Center }) {
                 if (!(this.addIconShow && item.id === this.content.id)) {
-                  Image($r("sys.media.ic_public_add"))
+                  Image($r("sys.media.ohos_ic_public_add"))
                     .fillColor($r('sys.color.ohos_id_color_text_secondary'))
                     .width(16)
                     .margin({ right: 4 })
@@ -759,17 +764,16 @@ export struct GridObjectSortComponent {
               this.scaleAddItemNinetyPercent = 0.9
             }
             if (event.type === TouchType.Up) {
+              this.isTouchDown = false
+              this.scaleAddItemNinetyPercent = 1
+              if (this.clickAddBtn || this.addAreaLongPressGesture ||  (!this.gridComState && this.options.type === GridObjectSortComponentType.IMAGE_TEXT)) return
               animateTo({
                 duration: DURATION,
                 curve: COMMON_BEZIER
               }, () => {
                 this.addIconShow = true
               })
-              this.isTouchDown = false
-              this.scaleAddItemNinetyPercent = 1
-              if (this.clickAddBtn || (!this.gridComState && this.options.type === GridObjectSortComponentType.IMAGE_TEXT)) return
-              if(this.options.type === GridObjectSortComponentType.TEXT)
-              {
+              if(this.options.type === GridObjectSortComponentType.TEXT) {
                 this.scaleAddIcon = 1
               }
               this.scaleIcon = 0
@@ -787,9 +791,9 @@ export struct GridObjectSortComponent {
               setTimeout(() => {
                 this.scaleIcon = 1
                 this.scaleAddIcon = 0
-                this.arrayUnSelectIsChange = 2
                 this.selected.push(item);
                 this.unSelected.splice(index, 1)
+                this.arrayUnSelectIsChange = 2
 
                 this.endX = 0
                 this.endY = 0
@@ -810,9 +814,13 @@ export struct GridObjectSortComponent {
               .onAction((event: GestureEvent) => {
                 if (!this.gridComState) {
                   animateTo({ duration: DURATION }, () => {
+                    this.addAreaLongPressGesture = true
                     this.gridComState = true
                   })
                 }
+              })
+              .onActionEnd(() =>{
+                this.addAreaLongPressGesture = false
               })
           )
         }
