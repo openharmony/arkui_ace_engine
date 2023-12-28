@@ -645,7 +645,9 @@ public:
 
     void SetTargetComponent(const RefPtr<NG::TargetComponent>& targetComponent)
     {
-        targetComponent_ = targetComponent;
+        if (!targetComponent_) {
+            targetComponent_ = targetComponent;
+        }
     }
 
     RefPtr<NG::TargetComponent> GetTargetComponent()

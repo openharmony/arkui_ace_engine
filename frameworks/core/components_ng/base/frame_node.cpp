@@ -1610,10 +1610,6 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     const PointF& parentRevertPoint, const TouchRestrict& touchRestrict, TouchTestResult& result, int32_t touchId,
     bool isDispatch)
 {
-    auto targetComponent = MakeRefPtr<TargetComponent>();
-    targetComponent->SetNode(WeakClaim(this));
-    AddJudgeToTargetComponent(targetComponent);
-
     if (!isActive_ || !eventHub_->IsEnabled() || bypass_) {
         if (SystemProperties::GetDebugEnabled()) {
             LOGI("%{public}s is inActive, need't do touch test", GetTag().c_str());
@@ -1664,6 +1660,16 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
             return HitTestResult::OUT_OF_REGION;
         }
     }
+
+    RefPtr<TargetComponent> targetComponent;
+    if (targetComponent_.Upgrade()) {
+        targetComponent = targetComponent_.Upgrade();
+    } else {
+        targetComponent = MakeRefPtr<TargetComponent>();
+        targetComponent_ = targetComponent;
+    }
+    targetComponent->SetNode(WeakClaim(this));
+    AddJudgeToTargetComponent(targetComponent);
 
     HitTestResult testResult = HitTestResult::OUT_OF_REGION;
     bool preventBubbling = false;
