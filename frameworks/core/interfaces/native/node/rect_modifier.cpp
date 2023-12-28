@@ -64,8 +64,8 @@ void SetRectRadiusWithArray(NodeHandle node, double* radiusValues, int32_t* radi
     CHECK_NULL_VOID(radiusValidPairs);
     for (size_t index = 0; index < radiusValidPairsSize; index++) {
         if (radiusValidPairs[index] == VALID_RADIUS_PAIR_FLAG) {
-            int xIndex = index * 2;
-            int yIndex = xIndex + 1;
+            uint32_t xIndex = index * 2;
+            uint32_t yIndex = xIndex + 1;
             auto radiusX = CalcDimension(radiusValues[xIndex], (DimensionUnit)radiusUnits[xIndex]);
             auto radiusY = CalcDimension(radiusValues[yIndex], (DimensionUnit)radiusUnits[yIndex]);
             RectModelNG::SetRadiusValue(frameNode, radiusX, radiusY, index);

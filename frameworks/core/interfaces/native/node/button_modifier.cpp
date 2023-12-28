@@ -28,6 +28,7 @@
 #include "frameworks/core/components/button/button_theme.h"
 
 namespace OHOS::Ace::NG {
+namespace {
 constexpr int32_t DEFAULT_BUTTON_TYPE = (int32_t)ButtonType::CAPSULE;
 constexpr bool DEFAULT_STATE_EFFECT = true;
 constexpr Ace::FontWeight DEFAULT_FONT_WEIGHT = Ace::FontWeight::NORMAL;
@@ -44,6 +45,7 @@ constexpr uint32_t INDEX_DIMENSION_FONT_SIZE_2 = 2;
 constexpr uint32_t INDEX_STRING_ARRAY_COUNT = 0;
 constexpr uint32_t INDEX_VALUE_ARRAY_COUNT = 1;
 constexpr uint32_t INDEX_DIMENSION_ARRAY_COUNT = 2;
+constexpr uint32_t INDEX_INVALID_FONT_FAMILY_0 = 0;
 const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
 constexpr int32_t OFFSET_1 = 1;
 constexpr int32_t OFFSET_2 = 2;
@@ -85,6 +87,7 @@ const std::vector<FontWeight> BUTTON_FONT_WEIGHTS = {
     FontWeight::NORMAL,
     FontWeight::REGULAR,
 };
+} // namespace
 
 void SetOptionalBorderRadius(
     std::optional<Dimension>& optioalDimension, const double* values, int32_t valuesSize, int32_t& offset)
@@ -359,7 +362,8 @@ void SetButtonStringParameters(
     if (stringParameters[INDEX_STRING_FONT_FAMILY_1] != nullptr && INDEX_STRING_FONT_FAMILY_1 < dataCount) {
         std::string familiesStr = stringParameters[INDEX_STRING_FONT_FAMILY_1];
         std::vector<std::string> fontFamilyResult = Framework::ConvertStrToFontFamilies(familiesStr);
-        if (fontFamilyResult.size() == 1 && fontFamilyResult[0].compare(NONE_FONT_FAMILY) == 0) {
+        if (fontFamilyResult.size() == 1 &&
+            fontFamilyResult[INDEX_INVALID_FONT_FAMILY_0].compare(NONE_FONT_FAMILY) == 0) {
             return;
         }
         buttonParameters.fontFamily = fontFamilyResult;

@@ -14,14 +14,14 @@
  */
 #include "core/interfaces/native/node/qrcode_modifier.h"
 
-#include "core/pipeline/base/element_register.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/qrcode/qrcode_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
+#include "core/pipeline/base/element_register.h"
 
 namespace OHOS::Ace::NG {
-constexpr uint32_t DEFAULT_COLOR = 0xff182431;
 constexpr uint32_t DEFAULT_BG_COLOR = 0xffffffff;
 constexpr double DEFAULT_OPACITY = 1.0;
 
@@ -36,7 +36,10 @@ void ResetQRColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    QRCodeModelNG::SetQRCodeColor(frameNode, Color(DEFAULT_COLOR));
+    RefPtr<QrcodeTheme> qrcodeTheme = GetTheme<QrcodeTheme>();
+    CHECK_NULL_VOID(qrcodeTheme);
+    Color qrcodeColor = qrcodeTheme->GetQrcodeColor();
+    QRCodeModelNG::SetQRCodeColor(frameNode, qrcodeColor);
 }
 
 void SetQRBackgroundColor(NodeHandle node, uint32_t color)

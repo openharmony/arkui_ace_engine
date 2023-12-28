@@ -1051,7 +1051,7 @@ void GetJsAngle(const EcmaVM* vm, const Local<JSValueRef>& angleArg, std::option
 
 void ParseCenterDimension(const EcmaVM* vm, const Local<JSValueRef>& centerArg, CalcDimension& centerDimension)
 {
-    if (!ArkTSUtils::ParseJsDimensionVp(vm, centerArg, centerDimension)) {
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, centerArg, centerDimension, false)) {
         centerDimension = Dimension(0.5f, DimensionUnit::PERCENT);
     }
 }
