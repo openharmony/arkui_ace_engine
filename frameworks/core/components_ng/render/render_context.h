@@ -294,6 +294,8 @@ public:
 
     virtual void DumpInfo() {}
 
+    virtual void DumpAdvanceInfo() {}
+
     void ObscuredToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
     void SetSharedTransitionOptions(const std::shared_ptr<SharedTransitionOption>& option)
