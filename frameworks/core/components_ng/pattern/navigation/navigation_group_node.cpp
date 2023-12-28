@@ -495,6 +495,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
 
     /* Create animation callback */
     AnimationFinishCallback callback = [weakPreNode = WeakPtr<FrameNode>(preNode),
+        weakPreTitle = WeakPtr<FrameNode>(preTitleNode),
         weakNavigation = WeakClaim(this),
         weakCurNode = WeakPtr<FrameNode>(curNode),
         isNavBar, id = Container::CurrentId()] {
@@ -504,12 +505,17 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             auto taskExecutor = context->GetTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);
             // animation finish event should be posted to UI thread
-            auto onFinishCallback = [weakPreNode, weakCurNode, weakNavigation, isNavBar] {
+            auto onFinishCallback = [weakPreNode, weakPreTitle, weakCurNode, weakNavigation, isNavBar] {
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
                 auto navigation = weakNavigation.Upgrade();
                 CHECK_NULL_VOID(navigation);
                 auto preNode = weakPreNode.Upgrade();
                 CHECK_NULL_VOID(preNode);
+                auto preTitle = weakPreTitle.Upgrade();
+                if (preTitle) {
+                    preTitle->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+                }
+                preNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
                 bool needSetInvisible = false;
                 if (isNavBar) {
                     needSetInvisible = AceType::DynamicCast<NavBarNode>(preNode)->GetTransitionType() ==
