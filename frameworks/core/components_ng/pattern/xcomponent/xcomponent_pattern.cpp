@@ -20,6 +20,7 @@
 #include "base/ressched/ressched_report.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
 #ifdef NG_BUILD
 #include "bridge/declarative_frontend/ng/declarative_frontend_ng.h"
@@ -124,20 +125,23 @@ OH_NativeXComponent_KeyEvent ConvertNativeXComponentKeyEvent(const KeyEvent& eve
 } // namespace
 
 XComponentPattern::XComponentPattern(const std::string& id, XComponentType type, const std::string& libraryname,
-    const std::shared_ptr<InnerXComponentController>& xcomponentController)
+    const std::shared_ptr<InnerXComponentController>& xcomponentController, float initWidth, float initHeight)
     : id_(id), type_(type), libraryname_(libraryname), xcomponentController_(xcomponentController)
-{}
+{
+    initSize_.SetWidth(initWidth);
+    initSize_.SetHeight(initHeight);
+}
 
-void XComponentPattern::OnAttachToFrameNode()
+void XComponentPattern::CreateSurface(int32_t instanceId)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    instanceId_ = (instanceId <= 0) ? Container::CurrentId() : instanceId;
     auto renderContext = host->GetRenderContext();
     if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
         renderContext->SetClipToFrame(true);
         renderContext->SetClipToBounds(true);
         renderSurface_ = RenderSurface::Create();
-        instanceId_ = Container::CurrentId();
         renderSurface_->SetInstanceId(instanceId_);
         if (type_ == XComponentType::SURFACE) {
             renderContextForSurface_ = RenderContext::Create();
@@ -169,6 +173,12 @@ void XComponentPattern::OnAttachToFrameNode()
         SetMethodCall();
     }
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+}
+
+void XComponentPattern::OnAttachToFrameNode()
+{
+    instanceId_ = Container::CurrentId();
+    CreateSurface(instanceId_);
 }
 
 void XComponentPattern::OnAreaChangedInner()
@@ -296,6 +306,9 @@ bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     if (type_ == XComponentType::TEXTURE) {
         renderSurface_->SetSurfaceDefaultSize(
             static_cast<int32_t>(drawSize_.Width()), static_cast<int32_t>(drawSize_.Height()));
+    }
+    if (type_ == XComponentType::SURFACE && renderType_ == NodeRenderType::RENDER_TYPE_TEXTURE) {
+        AddAfterLayoutTaskForExportTexture();
     }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -804,4 +817,97 @@ void XComponentPattern::HandleUnregisterOnFrameEvent()
     displaySync_->DelFromPipelineOnContainer();
 }
 
+bool XComponentPattern::DoTextureExport()
+{
+    CHECK_NULL_RETURN(handlingSurfaceRenderContext_, false);
+    if (!ExportTextureAvailable()) {
+        return false;
+    }
+    if (!handlingSurfaceRenderContext_->DoTextureExport(exportTextureSurfaceId_)) {
+        TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "DoTextureExport fail");
+        return false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    renderContext->SetIsNeedRebuildRSTree(false);
+    return true;
+}
+
+bool XComponentPattern::StopTextureExport()
+{
+    CHECK_NULL_RETURN(handlingSurfaceRenderContext_, false);
+    if (!handlingSurfaceRenderContext_->StopTextureExport()) {
+        TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "StopTextureExport fail");
+        return false;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    renderContext->ClearChildren();
+    renderContext->AddChild(handlingSurfaceRenderContext_, 0);
+    renderContext->SetIsNeedRebuildRSTree(true);
+    return true;
+}
+
+void XComponentPattern::AddAfterLayoutTaskForExportTexture()
+{
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->DoTextureExport();
+    });
+}
+
+bool XComponentPattern::ExportTextureAvailable()
+{
+    auto host = GetHost();
+    auto parnetNodeContainer = host->GetNodeContainer();
+    CHECK_NULL_RETURN(parnetNodeContainer, false);
+    auto parent = parnetNodeContainer->GetAncestorNodeOfFrame();
+    CHECK_NULL_RETURN(parent, false);
+    auto ancestorNodeContainer = parent->GetNodeContainer();
+    CHECK_NULL_RETURN(ancestorNodeContainer, true);
+    auto ancestorViewNode = ancestorNodeContainer->GetChildAtIndex(0);
+    CHECK_NULL_RETURN(ancestorViewNode, true);
+    auto parnetExportTextureInfo = ancestorViewNode->GetExportTextureInfo();
+    CHECK_NULL_RETURN(parnetExportTextureInfo, true);
+    return parnetExportTextureInfo->GetCurrentRenderType() != NodeRenderType::RENDER_TYPE_TEXTURE;
+}
+
+bool XComponentPattern::ChangeRenderType(NodeRenderType renderType)
+{
+    if (type_ != XComponentType::SURFACE) {
+        return renderType == NodeRenderType::RENDER_TYPE_DISPLAY;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    if (!host->GetNodeContainer()) {
+        renderType_ = renderType;
+        return true;
+    }
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    if (renderType == NodeRenderType::RENDER_TYPE_TEXTURE) {
+        if (DoTextureExport()) {
+            renderType_ = renderType;
+            return true;
+        }
+    } else {
+        if (StopTextureExport()) {
+            renderType_ = renderType;
+            return true;
+        }
+    }
+    return false;
+}
+
+void XComponentPattern::SetExportTextureSurfaceId(const std::string& surfaceId)
+{
+    exportTextureSurfaceId_ = StringUtils::StringToLongUint(surfaceId);
+}
 } // namespace OHOS::Ace::NG
