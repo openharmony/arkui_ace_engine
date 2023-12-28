@@ -248,7 +248,6 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
             renderContext->UpdateBackgroundColor(backgroundColor);
             renderContext->UpdateBackBlurStyle(styleOption);
         }
-        renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
         if (param->GetShadow().has_value()) {
             renderContext->UpdateBackShadow(param->GetShadow().value());
         }
@@ -496,7 +495,6 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
             renderContext->UpdateBackgroundColor(popupPaintProp->GetBackgroundColor().value_or(Color::TRANSPARENT));
             renderContext->UpdateBackBlurStyle(styleOption);
         }
-        renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
     }
 }
 
