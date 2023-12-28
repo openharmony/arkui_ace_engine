@@ -402,6 +402,9 @@ private:
     void FireOnSelect(int32_t selectStart, int32_t selectEnd);
     void MouseRightFocus(const MouseInfo& info);
     bool IsScrollBarPressed(const MouseInfo& info);
+    void HandleMouseLeftButtonMove(const MouseInfo& info);
+    void HandleMouseLeftButtonPress(const MouseInfo& info);
+    void HandleMouseLeftButtonRelease(const MouseInfo& info);
     void HandleMouseLeftButton(const MouseInfo& info);
     void HandleMouseRightButton(const MouseInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
