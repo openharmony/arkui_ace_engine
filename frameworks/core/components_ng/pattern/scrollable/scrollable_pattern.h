@@ -662,6 +662,7 @@ private:
     void HandleMoveEventInComp(const PointF& point);
     void HandleLeaveHotzoneEvent();
     bool isVertical() const;
+    void AddHotZoneSenceInterface(SceneStatus scene);
 };
 } // namespace OHOS::Ace::NG
 

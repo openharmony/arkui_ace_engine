@@ -40,6 +40,7 @@ const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
 const std::string SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
 const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
 const std::string SCROLLABLE_MULTI_TASK_SCENE = "scrollable_multi_task_scene";
+const std::string SCROLL_IN_HOTZONE_SCENE = "scroll_in_hotzone_scene";
 } // namespace
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
@@ -1991,7 +1992,13 @@ void ScrollablePattern::HotZoneScroll(const float offsetPct)
         animator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            pattern->AddHotZoneSenceInterface(SceneStatus::END);
             pattern->OnAnimateStop();
+        });
+        animator_->AddStartListener([weak = AceType::WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->AddHotZoneSenceInterface(SceneStatus::START);
         });
     }
 
@@ -2018,6 +2025,7 @@ void ScrollablePattern::HotZoneScroll(const float offsetPct)
             CHECK_NULL_VOID(pattern);
             pattern->UpdateCurrentOffset(offset, SCROLL_FROM_AXIS);
             pattern->UpdateMouseStart(offset);
+            pattern->AddHotZoneSenceInterface(SceneStatus::RUNNING);
         });
         velocityMotion_->ReInit(offsetPct);
     } else {
@@ -2137,5 +2145,12 @@ bool ScrollablePattern::NeedCoordinateScrollWithNavigation(
     }
     return (GreatNotEqual(overOffsets.start, 0.0) || navBarPattern_->CanCoordScrollUp(offset)) &&
            (axis_ == Axis::VERTICAL) && (source != SCROLL_FROM_ANIMATION_SPRING);
+}
+
+void ScrollablePattern::AddHotZoneSenceInterface(SceneStatus scene)
+{
+    CHECK_NULL_VOID(velocityMotion_);
+    auto velocity = velocityMotion_->GetCurrentVelocity();
+    NotifyFRCSceneInfo(SCROLL_IN_HOTZONE_SCENE, velocity, scene);
 }
 } // namespace OHOS::Ace::NG
