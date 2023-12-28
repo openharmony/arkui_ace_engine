@@ -351,7 +351,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
         SetCaretPosition(options.offset.value() + 1);
     } else {
-        imageCount_++;
+        placeholderCount_++;
         SetCaretPosition(GetTextContentLength());
     }
     if (!isPaste && textSelector_.IsValid()) {
@@ -416,7 +416,7 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
     if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
         SetCaretPosition(options.offset.value() + 1);
     } else {
-        imageCount_++;
+        placeholderCount_++;
         SetCaretPosition(GetTextContentLength());
     }
     if (textSelector_.IsValid()) {
@@ -1748,7 +1748,7 @@ bool RichEditorPattern::HandleUserLongPressEvent(GestureEvent& info)
 
 void RichEditorPattern::HandleMenuCallbackOnSelectAll()
 {
-    auto textSize = static_cast<int32_t>(GetWideText().length()) + imageCount_;
+    auto textSize = static_cast<int32_t>(GetWideText().length()) + placeholderCount_;
     textSelector_.Update(0, textSize);
     CalculateHandleOffsetAndShowOverlay();
     if (IsShowSelectMenuUsingMouse()) {
@@ -4375,7 +4375,7 @@ float RichEditorPattern::GetLineHeight() const
 
 void RichEditorPattern::UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& selectInfo, bool isCopyAll)
 {
-    auto hasValue = (static_cast<int32_t>(GetWideText().length()) + imageCount_) > 0;
+    auto hasValue = (static_cast<int32_t>(GetWideText().length()) + placeholderCount_) > 0;
     bool isShowItem = copyOption_ != CopyOptions::None;
     selectInfo.menuInfo.showCopy = isShowItem && hasValue && textSelector_.IsValid() &&
                                     !textSelector_.StartEqualToDest();
@@ -4833,7 +4833,7 @@ void RichEditorPattern::FlushTextForDisplay()
     if (children.empty()) {
         return;
     }
-    imageCount_ = 0;
+    placeholderCount_ = 0;
     std::stack<RefPtr<UINode>> nodes;
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         nodes.push(*iter);
@@ -4851,7 +4851,7 @@ void RichEditorPattern::FlushTextForDisplay()
         if (spanNode && current->GetTag() != V2::PLACEHOLDER_SPAN_ETS_TAG) {
             textForDisplay_.append(spanNode->GetSpanItem()->content);
         } else if (current->GetTag() == V2::IMAGE_ETS_TAG || current->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
-            imageCount_++;
+            placeholderCount_++;
         }
         if (current->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
             continue;
