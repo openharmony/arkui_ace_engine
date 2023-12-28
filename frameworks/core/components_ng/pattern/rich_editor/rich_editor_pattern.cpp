@@ -2235,14 +2235,14 @@ bool RichEditorPattern::CloseCustomKeyboard()
 void RichEditorPattern::InsertValue(const std::string& insertValue)
 {
     OperationRecord record;
-    record.beforeCaretPosition = caretPosition_;
+    record.beforeCaretPosition = caretPosition_ + moveLength_;
     if (textSelector_.IsValid()) {
         record.beforeCaretPosition = textSelector_.GetTextStart();
     }
     record.addText = insertValue;
     ClearRedoOperationRecords();
     InsertValueOperation(insertValue, &record);
-    record.afterCaretPosition = caretPosition_ + StringUtils::ToWstring(insertValue).length();
+    record.afterCaretPosition = caretPosition_ + moveLength_;
     AddOperationRecord(record);
 }
 
@@ -2265,7 +2265,7 @@ void RichEditorPattern::InsertValueOperation(const std::string& insertValue, Ope
     CalcInsertValueObj(info);
     if (isSelector) {
         std::wstring deleteText = DeleteForwardOperation(textSelector_.GetTextEnd() - textSelector_.GetTextStart());
-        if (record) {
+        if (record && deleteText.length() != 0) {
             record->deleteText = StringUtils::ToString(deleteText);
         }
         CloseSelectOverlay();
@@ -2598,7 +2598,7 @@ std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length)
     }
     auto start =
         std::clamp(static_cast<int32_t>(caretPosition_ - length), 0, static_cast<int32_t>(GetTextContentLength()));
-    std::wstring deleteText = wss.str().substr(start, length);
+    std::wstring deleteText = wss.str().substr(start, caretPosition_ - start);
     RichEditorDeleteValue info;
     info.SetRichEditorDeleteDirection(RichEditorDeleteDirection::BACKWARD);
     if (caretPosition_ == 0) {
@@ -2649,7 +2649,9 @@ std::wstring RichEditorPattern::DeleteForwardOperation(int32_t length)
     for (auto iter = spans_.cbegin(); iter != spans_.cend(); iter++) {
         wss << StringUtils::ToWstring((*iter)->content);
     }
-    std::wstring deleteText = wss.str().substr(caretPosition_, length);
+    auto end =
+        std::clamp(static_cast<int32_t>(caretPosition_ + length), 0, static_cast<int32_t>(GetTextContentLength()));
+    std::wstring deleteText = wss.str().substr(caretPosition_, end - caretPosition_);
     if (caretPosition_ == GetTextContentLength()) {
         return deleteText;
     }
@@ -3140,6 +3142,7 @@ void RichEditorPattern::HandleOnRedoAction()
         SetCaretPosition(value.beforeCaretPosition);
         DeleteForwardOperation(StringUtils::ToWstring(value.deleteText.value_or("")).length());
         InsertValueOperation(value.addText.value_or(""));
+        operationRecords_.push_back(value);
         return;
     }
     if (value.deleteText.has_value()) {
@@ -3834,7 +3837,7 @@ void RichEditorPattern::HandleOnCopy()
 void RichEditorPattern::ResetAfterPaste()
 {
     OperationRecord record;
-    record.beforeCaretPosition = caretPosition_;
+    record.beforeCaretPosition = caretPosition_ + moveLength_;
     auto pasteStr = GetPasteStr();
     record.addText = pasteStr;
     SetCaretSpanIndex(-1);
@@ -3850,7 +3853,7 @@ void RichEditorPattern::ResetAfterPaste()
     }
     InsertValueByPaste(pasteStr);
     ClearPasteStr();
-    record.afterCaretPosition = caretPosition_ + StringUtils::ToWstring(pasteStr).length();
+    record.afterCaretPosition = caretPosition_ + moveLength_;
     ClearRedoOperationRecords();
     AddOperationRecord(record);
 }
