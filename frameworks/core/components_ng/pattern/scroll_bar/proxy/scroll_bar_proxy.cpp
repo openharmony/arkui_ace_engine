@@ -61,7 +61,7 @@ void ScrollBarProxy::RegisterScrollBar(const WeakPtr<ScrollBarPattern>& scrollBa
     scrollBars_.emplace_back(scrollBar);
 }
 
-void ScrollBarProxy::UnRegisterScrollableNode(const WeakPtr<Pattern>& scrollableNode)
+void ScrollBarProxy::UnRegisterScrollableNode(const WeakPtr<ScrollablePattern>& scrollableNode)
 {
     auto iter = std::find_if(scrollableNodes_.begin(), scrollableNodes_.end(),
         [&scrollableNode](const ScrollableNodeInfo& info) { return scrollableNode == info.scrollableNode; });
@@ -117,7 +117,7 @@ void ScrollBarProxy::NotifyScrollStop() const
     }
 }
 
-void ScrollBarProxy::NotifyScrollBar(const WeakPtr<Pattern>& weakScrollableNode) const
+void ScrollBarProxy::NotifyScrollBar(const WeakPtr<ScrollablePattern>& weakScrollableNode) const
 {
     auto scrollable = weakScrollableNode.Upgrade();
     if (!scrollable || !CheckScrollable(scrollable)) {
@@ -134,7 +134,7 @@ void ScrollBarProxy::NotifyScrollBar(const WeakPtr<Pattern>& weakScrollableNode)
         }
 
         scrollBar->SetControlDistance(controlDistance);
-        scrollBar->SetScrollOffset(scrollOffset);
+        scrollBar->SetScrollOffset(!scrollable->IsReverse() ? scrollOffset : controlDistance - scrollOffset);
         auto host = scrollBar->GetHost();
         host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     }

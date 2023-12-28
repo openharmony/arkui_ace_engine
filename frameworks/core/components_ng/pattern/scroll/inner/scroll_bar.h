@@ -492,6 +492,16 @@ public:
         return dragEndPosition_ - dragStartPosition_;
     }
 
+    void SetReverse(bool reverse)
+    {
+        isReverse_ = reverse;
+    }
+
+    bool IsReverse()
+    {
+        return isReverse_;
+    }
+
 protected:
     void InitTheme();
 
@@ -556,6 +566,7 @@ private:
     bool normalWidthUpdate_ = false;
     bool isUserNormalWidth_ = false;
     bool needAdaptAnimation_ = false;
+    bool isReverse_ = false;
 
     Offset paintOffset_;
     Size viewPortSize_;
