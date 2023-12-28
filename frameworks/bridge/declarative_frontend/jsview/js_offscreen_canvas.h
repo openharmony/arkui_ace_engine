@@ -17,27 +17,28 @@
 #define FOUNDATION_ACE_FRAMEWORK_JAVASCRIPT_BRIDGE_JS_VIEW_JS_OFFSCREEN_CANVAS_H
 
 #include "bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
+#include "core/common/ace_engine.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 
 namespace OHOS::Ace::Framework {
 
-class JSOffscreenCanvas :  public AceType, public JSInteractableView, public JSViewAbstract {
+class JSOffscreenCanvas : public AceType, public JSInteractableView, public JSViewAbstract {
     DECLARE_ACE_TYPE(JSOffscreenCanvas, AceType);
 public:
     JSOffscreenCanvas() = default;
     ~JSOffscreenCanvas() override = default;
 
-    static void JSBind(BindingTarget globalObj);
-    static void Constructor(const JSCallbackInfo& args);
-    static void Destructor(JSOffscreenCanvas* controller);
+    static void JSBind(BindingTarget globalObj, void* nativeEngine);
+    static napi_value Constructor(napi_env env, napi_callback_info info);
+    static napi_value InitOffscreenCanvas(napi_env env);
+    static napi_value JsTransferToImageBitmap(napi_env env, napi_callback_info info);
+    static napi_value JsGetContext(napi_env env, napi_callback_info info);
+    static napi_value JsGetWidth(napi_env env, napi_callback_info info);
+    static napi_value JsGetHeight(napi_env env, napi_callback_info info);
+    static napi_value JsSetHeight(napi_env env, napi_callback_info info);
+    static napi_value JsSetWidth(napi_env env, napi_callback_info info);
 
-    void JsGetWidth(const JSCallbackInfo& info);
-    void JsGetHeight(const JSCallbackInfo& info);
-    void JsSetHeight(const JSCallbackInfo& info);
-    void JsSetWidth(const JSCallbackInfo& info);
-    void JsTransferToImageBitmap(const JSCallbackInfo& info);
-    void JsGetContext(const JSCallbackInfo& info);
     void JsCreateRadialGradient(const JSCallbackInfo& info) {}
     void JsFillRect(const JSCallbackInfo& info) {}
     void JsStrokeRect(const JSCallbackInfo& info) {}
@@ -141,18 +142,40 @@ public:
         return height_;
     }
 
+    RefPtr<PipelineBase> GetContext() const
+    {
+        if (instanceId_ == -1) {
+            return nullptr;
+        }
+        auto container = AceEngine::Get().GetContainer(instanceId_);
+        if (container == nullptr) {
+            return nullptr;
+        }
+        auto context = container->GetPipelineContext();
+        return context;
+    }
+
     enum class ContextType {
         CONTEXT_2D = 0,
     };
 
     ACE_DISALLOW_COPY_AND_MOVE(JSOffscreenCanvas);
 private:
-    JSRef<JSObject> CreateContext2d(double width, double height);
+    napi_value CreateContext2d(napi_env env, double width, double height);
+    napi_value onTransferToImageBitmap(napi_env env);
+    napi_value onGetContext(napi_env env, napi_callback_info info);
+    napi_value OnGetWidth(napi_env env);
+    napi_value OnGetHeight(napi_env env);
+    napi_value OnSetWidth(napi_env env, napi_callback_info info);
+    napi_value OnSetHeight(napi_env env, napi_callback_info info);
+    void SetLocalThreadVm(napi_env env);
+
     RefPtr<NG::OffscreenCanvasPattern> offscreenCanvasPattern_;
     RefPtr<JSOffscreenRenderingContext> offscreenCanvasContext_;
     RefPtr<JSRenderingContextSettings> offscreenCanvasSettings_;
     double width_ = 0.0f;
     double height_ = 0.0f;
+    int32_t instanceId_ = -1;
     ContextType contextType_;
 };
 

@@ -711,6 +711,24 @@ RefPtr<CanvasPath2D> JSCanvasRenderer::JsMakePath2D(const JSCallbackInfo& info)
     return AceType::MakeRefPtr<CanvasPath2D>();
 }
 
+JSRenderImage* JSCanvasRenderer::UnwrapNapiImage(const JSRef<JSObject> jsObject)
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (engine == nullptr) {
+        return nullptr;
+    }
+    JSRenderImage* jsImage = nullptr;
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    panda::Local<JsiValue> value = jsObject.Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    void* native = nullptr;
+    napi_unwrap(env, napiValue, &native);
+    jsImage = reinterpret_cast<JSRenderImage*>(native);
+    return jsImage;
+}
+
 void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
 {
     CanvasImage image;
@@ -721,7 +739,7 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         return;
     }
-    JSRenderImage* jsImage = JSRef<JSObject>::Cast(info[0])->Unwrap<JSRenderImage>();
+    JSRenderImage* jsImage = UnwrapNapiImage(info[0]);
     if (jsImage) {
         isImage = true;
         std::string imageValue = jsImage->GetSrc();
@@ -730,6 +748,7 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
         imgHeight = jsImage->GetHeight();
 
         auto closeCallback = [weak = AceType::WeakClaim(this), imageValue]() {
+            LOGI("Image bitmap close called.");
             auto jsCanvasRenderer = weak.Upgrade();
             CHECK_NULL_VOID(jsCanvasRenderer);
             jsCanvasRenderer->JsCloseImageBitmap(imageValue);
@@ -815,7 +834,7 @@ void JSCanvasRenderer::JsCreatePattern(const JSCallbackInfo& info)
         return;
     }
     if (info[0]->IsObject()) {
-        auto* jsImage = JSRef<JSObject>::Cast(info[0])->Unwrap<JSRenderImage>();
+        JSRenderImage* jsImage = UnwrapNapiImage(info[0]);
         if (jsImage == nullptr) {
             return;
         }

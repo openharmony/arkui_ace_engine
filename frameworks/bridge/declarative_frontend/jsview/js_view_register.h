@@ -26,7 +26,7 @@ namespace OHOS::Ace::Framework {
 /**
  * register C++ classes that are to be exposed to JS
  */
-void JsRegisterViews(BindingTarget globalObj);
+void JsRegisterViews(BindingTarget globalObj, void* nativeEngine = nullptr);
 void JsRegisterFormViews(
     BindingTarget globalObj, const std::unordered_set<std::string>& formModuleList, bool isReload = false);
 
