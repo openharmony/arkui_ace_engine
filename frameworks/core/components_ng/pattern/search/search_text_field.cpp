@@ -43,6 +43,7 @@ void SearchTextFieldPattern::PerformAction(TextInputAction action, bool forceClo
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateSubmitEvent(GetTextValue());
     CloseKeyboard(forceCloseKeyboard);
+    FocusHub::LostFocusToViewRoot();
 }
 
 TextInputAction SearchTextFieldPattern::GetDefaultTextInputAction() const

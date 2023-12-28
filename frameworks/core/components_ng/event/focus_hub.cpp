@@ -239,10 +239,10 @@ RefPtr<FocusHub> FocusHub::GetChildMainView()
         if (frameName == V2::PAGE_ETS_TAG || frameName == V2::DIALOG_ETS_TAG || frameName == V2::MODAL_PAGE_TAG ||
             frameName == V2::MENU_ETS_TAG || frameName == V2::SHEET_PAGE_TAG || frameName == V2::POPUP_ETS_TAG ||
             frameName == V2::WINDOW_SCENE_ETS_TAG) {
-            if (!curFocusMainView && child->IsCurrentFocus() && child->IsFocusableNode()) {
+            if (!curFocusMainView && child->IsCurrentFocus() && child->IsFocusable()) {
                 curFocusMainView = child;
             }
-            if (!focusableMainView && child->IsFocusableNode()) {
+            if (!focusableMainView && child->IsFocusable()) {
                 focusableMainView = child;
             }
         }
