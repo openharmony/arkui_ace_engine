@@ -33,6 +33,10 @@ ImageAnalyzerLoader::~ImageAnalyzerLoader()
 
 bool ImageAnalyzerLoader::Init(std::string libPath)
 {
+    if (libPath.empty()) {
+        TAG_LOGE(AceLogTag::ACE_IMAGE, "lib path is empty");
+        return false;
+    }
     libraryHandle_ = dlopen(libPath.c_str(), 0);
     if (libraryHandle_ == nullptr) {
         TAG_LOGE(AceLogTag::ACE_IMAGE, " Could not dlopen %s: %s", libPath.c_str(), dlerror());
