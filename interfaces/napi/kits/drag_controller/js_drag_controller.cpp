@@ -1353,7 +1353,7 @@ static napi_value JSCreateDragAction(napi_env env, napi_callback_info info)
     }
 
     napi_value result = nullptr;
-    napi_get_cb_info(env, info, nullptr, nullptr, &result, nullptr);
+    napi_create_object(env, &result);
     DragAction* dragAction = new (std::nothrow) DragAction(dragAsyncContext);
     dragAction->NapiSerializer(env, result);
     dragAsyncContext->dragAction = dragAction;
@@ -1366,7 +1366,7 @@ static napi_value JSGetDragPreview(napi_env env, napi_callback_info info)
 {
     DragPreview* dragPreview = new DragPreview();
     napi_value result = nullptr;
-    napi_get_cb_info(env, info, nullptr, nullptr, &result, nullptr);
+    napi_create_object(env, &result);
     dragPreview->NapiSerializer(env, result);
     return result;
 }
