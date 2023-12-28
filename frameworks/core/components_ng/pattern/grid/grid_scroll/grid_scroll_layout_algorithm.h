@@ -113,7 +113,7 @@ private:
     bool CheckGridPlaced(int32_t index, int32_t main, int32_t cross, int32_t mainSpan, int32_t crossSpan);
     LayoutConstraintF CreateChildConstraint(float mainSize, float crossSize,
         const RefPtr<GridLayoutProperty>& gridLayoutProperty, int32_t crossStart, int32_t crossSpan) const;
-    void ModifyCurrentOffsetWhenReachEnd(float mainSize);
+    void ModifyCurrentOffsetWhenReachEnd(float mainSize, LayoutWrapper* layoutWrapper);
     void InitialItemsCrossSize(
         const RefPtr<GridLayoutProperty>& layoutProperty, const SizeF& frameSize, int32_t childrenCount);
     bool IsIndexInMatrix(int32_t index, int32_t& startLine);
@@ -172,7 +172,6 @@ private:
     std::map<int32_t, float> itemsCrossPosition_;
     bool canOverScroll_ = false;
     int32_t scrollSource_ = SCROLL_FROM_NONE;
-    bool isDataReload_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollLayoutAlgorithm);
 };

@@ -282,6 +282,10 @@ void GridScrollLayoutAlgorithm::InitialItemsCrossSize(
 void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
 {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto gridPattern = host->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(gridPattern);
     itemsCrossPosition_.clear();
     UpdateGridLayoutInfo(layoutWrapper, mainSize);
     if (gridLayoutInfo_.targetIndex_.has_value()) {
@@ -325,14 +329,14 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     // Step2: When done measure items in record, request new items to fill blank at end
     FillBlankAtEnd(mainSize, crossSize, layoutWrapper, mainLength);
     if (gridLayoutInfo_.reachEnd_) { // If it reaches end when [FillBlankAtEnd], modify [currentOffset_]
-        ModifyCurrentOffsetWhenReachEnd(mainSize);
+        ModifyCurrentOffsetWhenReachEnd(mainSize, layoutWrapper);
     }
 
     // Step3: Check if need to fill blank at start (in situation of grid items moving down)
     auto haveNewLineAtStart = FillBlankAtStart(mainSize, crossSize, layoutWrapper);
     if (gridLayoutInfo_.reachStart_) {
         auto offset = gridLayoutInfo_.currentOffset_;
-        if (!canOverScroll_ && !isDataReload_) {
+        if (!gridPattern->IsScrollableSpringMotionRunning() && !canOverScroll_) {
             gridLayoutInfo_.currentOffset_ = 0.0;
             gridLayoutInfo_.prevOffset_ = 0.0;
         }
@@ -349,11 +353,10 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
         if (UseCurrentLines(mainSize, crossSize, layoutWrapper, mainLength)) {
             FillBlankAtEnd(mainSize, crossSize, layoutWrapper, mainLength);
             if (gridLayoutInfo_.reachEnd_) {
-                ModifyCurrentOffsetWhenReachEnd(mainSize);
+                ModifyCurrentOffsetWhenReachEnd(mainSize, layoutWrapper);
             }
         }
     }
-    isDataReload_ = false;
     layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
 }
 
@@ -384,13 +387,6 @@ void GridScrollLayoutAlgorithm::ReloadToStartIndex(float mainSize, float crossSi
     }
     TAG_LOGI(AceLogTag::ACE_GRID, "data reload end, startIndex_:%{public}d, startMainLineIndex_:%{public}d",
         gridLayoutInfo_.startIndex_, gridLayoutInfo_.startMainLineIndex_);
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto gridPattern = host->GetPattern<GridPattern>();
-    CHECK_NULL_VOID(gridPattern);
-    if (gridPattern->IsScrollableSpringMotionRunning()) {
-        isDataReload_ = true;
-    }
 }
 
 bool GridScrollLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
@@ -419,8 +415,12 @@ bool GridScrollLayoutAlgorithm::FillBlankAtStart(float mainSize, float crossSize
 
 // When a moving up event comes, the [currentOffset_] may have been reduced too much than the items really need to
 // be moved up, so we need to modify [currentOffset_] according to previous position.
-void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize)
+void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, LayoutWrapper* layoutWrapper)
 {
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto gridPattern = host->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(gridPattern);
     // use original size in order to add end spacing
     mainSize -= gridLayoutInfo_.contentEndPadding_;
     // Step1. Calculate total length of all items with main gap in viewport.
@@ -455,7 +455,7 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize)
     }
 
     // Step3. modify [currentOffset_]
-    if (!canOverScroll_ && !isDataReload_) {
+    if (!gridPattern->IsScrollableSpringMotionRunning() && !canOverScroll_) {
         float realOffsetToMoveUp = lengthOfItemsInViewport - mainSize + gridLayoutInfo_.prevOffset_;
         gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.prevOffset_ - realOffsetToMoveUp;
         gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
