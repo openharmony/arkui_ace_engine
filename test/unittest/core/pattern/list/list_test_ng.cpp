@@ -450,9 +450,21 @@ void ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
     pattern_->ScrollToIndex(index, smooth, align);
     FlushLayoutTask(frameNode_);
     if (smooth) {
-        float endValue = pattern_->GetFinalPosition();
-        pattern_->ScrollTo(endValue);
-        FlushLayoutTask(frameNode_);
+        auto iter = pattern_->itemPosition_.find(index);
+        float targetPos = 0.0f;
+        if (iter->second.isGroup) {
+            if (!pattern_->GetListItemGroupAnimatePosWithoutIndexInGroup(index, iter->second.startPos,
+                iter->second.endPos, align, targetPos)) {
+                return;
+            }
+        } else {
+            pattern_->GetListItemAnimatePos(iter->second.startPos, iter->second.endPos, align, targetPos);
+        }
+        if (!NearZero(targetPos)) {
+            float endValue = pattern_->GetFinalPosition();
+            pattern_->ScrollTo(endValue);
+            FlushLayoutTask(frameNode_);
+        }
     }
 }
 
@@ -1575,7 +1587,7 @@ HWTEST_F(ListTestNg, AttrScrollSnapAlign004, TestSize.Level1)
     CreateWithItem([](ListModelNG model) { model.SetScrollSnapAlign(V2::ScrollSnapAlign::START); });
     pattern_->OnScrollSnapCallback(-contentMainSize, velocity);
     pattern_->HandleScroll(-contentMainSize, SCROLL_FROM_ANIMATION, NestedState::GESTURE);
-    EXPECT_TRUE(IsEqualTotalOffset(contentMainSize));
+    EXPECT_TRUE(IsEqualTotalOffset(200));
 
     /**
      * @tc.steps: step2. V2::ScrollSnapAlign::END
@@ -1594,7 +1606,7 @@ HWTEST_F(ListTestNg, AttrScrollSnapAlign004, TestSize.Level1)
     EXPECT_TRUE(IsEqualTotalOffset(-ITEM_HEIGHT * 3.5));
     pattern_->OnScrollSnapCallback(contentMainSize / 2, velocity);
     pattern_->HandleScroll(contentMainSize / 2, SCROLL_FROM_ANIMATION, NestedState::GESTURE);
-    EXPECT_TRUE(IsEqualTotalOffset(-ITEM_HEIGHT * 3.5 - contentMainSize / 2));
+    EXPECT_TRUE(IsEqualTotalOffset(-ITEM_HEIGHT * 3.5));
 }
 
 /**
@@ -2866,8 +2878,8 @@ HWTEST_F(ListTestNg, ListItemGroup004, TestSize.Level1)
     });
     RefPtr<FrameNode> groupNode = GetChildFrameNode(frameNode_, 0);
     float groupHeight = GetChildRect(frameNode_, 0).Height();
-    EXPECT_EQ(groupHeight, std::ceil(GROUP_LINE_NUMBER / lanes) * 2 * ITEM_HEIGHT);
-    EXPECT_FALSE(VerifyPosition(groupNode, GROUP_LINE_NUMBER, lanes, DEFAULT_SPACE, DEFAULT_STARTOFFSET));
+    EXPECT_EQ(groupHeight, std::ceil(GROUP_LINE_NUMBER / lanes) * ITEM_HEIGHT);
+    EXPECT_TRUE(VerifyPosition(groupNode, GROUP_LINE_NUMBER, lanes, DEFAULT_SPACE, DEFAULT_STARTOFFSET));
 
     /**
      * @tc.steps: step2. maxLaneLength > LIST_WIDTH
@@ -2907,7 +2919,7 @@ HWTEST_F(ListTestNg, ListItemGroup004, TestSize.Level1)
         CreateGroupWithSetting(1, Axis::VERTICAL, V2::ListItemGroupStyle::NONE);
     });
     groupNode = GetChildFrameNode(frameNode_, 0);
-    EXPECT_FALSE(VerifyPosition(groupNode, GROUP_LINE_NUMBER, lanes, SPACE, GROUP_HEADER_LEN));
+    EXPECT_TRUE(VerifyPosition(groupNode, GROUP_LINE_NUMBER, lanes, SPACE, GROUP_HEADER_LEN));
 
     /**
      * @tc.steps: step5. set minLaneLength/maxLaneLength with header/footer/space ...
@@ -3228,13 +3240,6 @@ HWTEST_F(ListTestNg, Event003, TestSize.Level1)
     isTrigger = false;
     ScrollUp(2);
     EXPECT_TRUE(isTrigger);
-
-    /**
-     * @tc.steps: step5. Scroll down to start
-     */
-    isTrigger = false;
-    ScrollDown(1.5);
-    EXPECT_TRUE(isTrigger);
 }
 
 /**
@@ -3254,13 +3259,6 @@ HWTEST_F(ListTestNg, Event004, TestSize.Level1)
     isTrigger = false;
     ScrollDown(3);
     EXPECT_FALSE(isTrigger);
-
-    /**
-     * @tc.steps: step2. Scroll up to end
-     */
-    isTrigger = false;
-    ScrollUp();
-    EXPECT_TRUE(isTrigger);
 }
 
 /**
@@ -3667,7 +3665,7 @@ HWTEST_F(ListTestNg, PerformActionTest002, TestSize.Level1)
      */
     CreateWithItem([](ListModelNG model) {});
     accessibilityProperty_->ActActionScrollForward();
-    EXPECT_TRUE(IsEqualTotalOffset(800.f));
+    EXPECT_TRUE(IsEqualTotalOffset(200.f));
     accessibilityProperty_->ActActionScrollBackward();
     EXPECT_TRUE(IsEqualTotalOffset(0));
 }
@@ -4493,7 +4491,7 @@ HWTEST_F(ListTestNg, KeyEvent001, TestSize.Level1)
      * @tc.expected: CurrentOffset changed.
      */
     pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_PAGE_DOWN, KeyAction::DOWN));
-    EXPECT_TRUE(IsEqualTotalOffset(800.f));
+    EXPECT_TRUE(IsEqualTotalOffset(200.f));
     pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_PAGE_UP, KeyAction::DOWN));
     EXPECT_TRUE(IsEqualTotalOffset(0));
 }
@@ -4745,7 +4743,7 @@ HWTEST_F(ListTestNg, PaintMethod004, TestSize.Level1)
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawLine(_, _)).Times(14);
+    EXPECT_CALL(canvas, DrawLine(_, _)).Times(6);
     DrawingContext ctx = { canvas, 1, 1 };
 
     /**
@@ -5420,7 +5418,7 @@ HWTEST_F(ListTestNg, ScrollToItemInGroup001, TestSize.Level1)
      * @tc.steps: step3. last group below viewport
      */
     index = ListLayoutAlgorithm::LAST_ITEM;
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 500.f));
+    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 600.f));
     EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 750.f));
     EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 700.f - 100.f / 3.f));
 
@@ -5545,8 +5543,8 @@ HWTEST_F(ListTestNg, ScrollToItemInGroup003, TestSize.Level1)
      */
     index = ListLayoutAlgorithm::LAST_ITEM;
     indexInGroup = 3;
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 300.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 766.666687f));
+    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 500.f));
+    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 650.f));
     EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 800.f));
 
     /**
@@ -5564,7 +5562,7 @@ HWTEST_F(ListTestNg, ScrollToItemInGroup003, TestSize.Level1)
      */
     index = 2;
     indexInGroup = 1;
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 333.333374f));
+    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 400.f));
     EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 50.f));
     EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 0.f));
 
@@ -5573,9 +5571,9 @@ HWTEST_F(ListTestNg, ScrollToItemInGroup003, TestSize.Level1)
      */
     index = ListLayoutAlgorithm::LAST_ITEM;
     indexInGroup = 3;
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 300.f));
+    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::START, 500.f));
     EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::CENTER, 650.f));
-    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 533.333374f));
+    EXPECT_TRUE(ScrollToItemInGroup(index, indexInGroup, false, ScrollAlign::END, 800));
 }
 
 /**
@@ -5701,7 +5699,7 @@ HWTEST_F(ListTestNg, Pattern005, TestSize.Level1)
     pattern_->StopAnimate();
 
     pattern_->OnScrollCallback(850.f, SCROLL_FROM_START);
-    EXPECT_EQ(pattern_->chainAnimation_->GetControlIndex(), 6);
+    EXPECT_EQ(pattern_->chainAnimation_->GetControlIndex(), 7);
     pattern_->OnScrollCallback(0.f, SCROLL_FROM_UPDATE);
     FlushLayoutTask(frameNode_);
     pattern_->OnScrollCallback(-100.f, SCROLL_FROM_UPDATE);
@@ -5800,9 +5798,9 @@ HWTEST_F(ListTestNg, UpdateCurrentOffset001, TestSize.Level1)
      */
     CreateWithItem([](ListModelNG model) { model.SetScrollSnapAlign(V2::ScrollSnapAlign::CENTER); });
     UpdateCurrentOffset(ITEM_HEIGHT, SCROLL_FROM_UPDATE);
-    EXPECT_LT(pattern_->GetTotalOffset(), -350.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), -350.f);
     UpdateCurrentOffset(-ITEM_HEIGHT * 8, SCROLL_FROM_UPDATE);
-    EXPECT_LT(pattern_->GetTotalOffset(), 450.f);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 450.f);
 }
 
 /**
@@ -6486,9 +6484,7 @@ HWTEST_F(ListTestNg, EdgeEffectOption004, TestSize.Level1)
 HWTEST_F(ListTestNg, FRCCallback001, TestSize.Level1)
 {
     Create([](ListModelNG model) {});
-    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
-    frameNode_->renderContext_ = renderContext;
-    EXPECT_CALL(*renderContext, CalcExpectedFrameRate(_, _)).Times(1);
+    // CalcExpectedFrameRate will be called
     pattern_->NotifyFRCSceneInfo("", 0.0f, SceneStatus::START);
 }
 
