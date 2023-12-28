@@ -92,7 +92,7 @@ OffsetF SubMenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<FrameNode>
         y = VerticalLayoutSubMenuHalfScreen(size, position_.GetY(), menuItemSize);
     }
     float yMinAvoid = wrapperRect_.Top() + paddingTop_;
-    float yMaxAvoid = wrapperRect_.Bottom() - paddingBottom_ - Size.Height();
+    float yMaxAvoid = wrapperRect_.Bottom() - paddingBottom_ - size.Height();
     y = std::clamp(y, yMinAvoid, yMaxAvoid);
     return NG::OffsetF(x, y);
 }
