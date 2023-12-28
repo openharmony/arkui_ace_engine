@@ -64,9 +64,7 @@ void ViewAbstractModelNG::BindMenu(
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(targetNode);
     auto targetId = targetNode->GetId();
-#ifdef ENABLE_DRAG_FRAMEWORK
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
-#endif // ENABLE_DRAG_FRAMEWORK
     auto pipelineContext = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto overlayManager = pipelineContext->GetOverlayManager();
@@ -189,11 +187,9 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
         CHECK_NULL_VOID(inputHub);
         inputHub->BindContextMenu(std::move(event));
     } else if (type == ResponseType::LONG_PRESS) {
-#ifdef ENABLE_DRAG_FRAMEWORK
         auto gestureHub = targetNode->GetEventHub<EventHub>()->GetGestureEventHub();
         CHECK_NULL_VOID(gestureHub);
         gestureHub->SetPreviewMode(menuParam.previewMode);
-#endif
         // create or show menu on long press
         auto event = [builderF = buildFunc, weakTarget, menuParam, previewBuildFunc](const GestureEvent& info) mutable {
             auto containerId = Container::CurrentId();
@@ -228,10 +224,7 @@ void ViewAbstractModelNG::BindContextMenu(ResponseType type, std::function<void(
                 TaskExecutor::TaskType::PLATFORM);
         };
         auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
-#ifdef ENABLE_DRAG_FRAMEWORK
         ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true);
-#endif // ENABLE_DRAG_FRAMEWORK
-
         hub->SetLongPressEvent(longPress, false, true, LONG_PRESS_DURATION);
     } else {
         return;

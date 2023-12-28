@@ -13,24 +13,15 @@
  * limitations under the License.
  */
 
-#include "mock_canvas_image.h"
+#include "core/common/ace_engine_ext.h"
 
-#include "base/image/pixel_map.h"
-
-namespace OHOS::Ace::NG {
-RefPtr<CanvasImage> CanvasImage::Create(void* rawImage)
+namespace OHOS::Ace {
+AceEngineExt& AceEngineExt::GetInstance()
 {
-    return nullptr;
+    static AceEngineExt instance;
+    return instance;
 }
 
-RefPtr<CanvasImage> CanvasImage::Create()
-{
-    return nullptr;
-}
+void AceEngineExt::DragStartExt() {}
 
-RefPtr<CanvasImage> CanvasImage::Create(const RefPtr<PixelMap>& pixelMap)
-{
-    return nullptr;
-}
-
-} // namespace OHOS::Ace::NG
+} // namespace OHOS::Ace

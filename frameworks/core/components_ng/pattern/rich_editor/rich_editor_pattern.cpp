@@ -67,10 +67,8 @@
 #endif
 #endif
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/ace_engine_ext.h"
 #include "core/common/udmf/udmf_client.h"
-#endif
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -136,7 +134,6 @@ void RichEditorPattern::OnModifyDone()
     if (textDetectEnable_ && (aiDetectTypesChanged_ || !aiDetectInitialized_)) {
         TextPattern::StartAITask();
     }
-#ifdef ENABLE_DRAG_FRAMEWORK
     if (host->IsDraggable() && copyOption_ != CopyOptions::None) {
         InitDragDropEvent();
         AddDragFrameNodeToManager(host);
@@ -145,7 +142,6 @@ void RichEditorPattern::OnModifyDone()
         RemoveDragFrameNodeFromManager(host);
     }
     Register2DragDropManager();
-#endif // ENABLE_DRAG_FRAMEWORK
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 
     auto eventHub = host->GetEventHub<EventHub>();
@@ -1664,14 +1660,10 @@ bool RichEditorPattern::JudgeDraggable(GestureEvent& info)
     if (BetweenSelectedPosition(info.GetGlobalLocation())) {
         dragBoxes_ = GetTextBoxes();
         // prevent long press event from being triggered when dragging
-#ifdef ENABLE_DRAG_FRAMEWORK
         gestureHub->SetIsTextDraggable(true);
-#endif
         return true;
     }
-#ifdef ENABLE_DRAG_FRAMEWORK
     gestureHub->SetIsTextDraggable(false);
-#endif
     return false;
 }
 
@@ -1785,7 +1777,6 @@ void RichEditorPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestur
     textSelector_.SetOnAccessibility(std::move(onTextSelectorChange));
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 void RichEditorPattern::InitDragDropEvent()
 {
     auto host = GetHost();
@@ -1890,8 +1881,6 @@ void RichEditorPattern::OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event)
     auto localOffset = OffsetF(touchX, touchY) - parentGlobalOffset_;
     AutoScrollByEdgeDetection(param, localOffset, EdgeDetectionStrategy::IN_BOUNDARY);
 }
-
-#endif // ENABLE_DRAG_FRAMEWORK
 
 bool RichEditorPattern::SelectOverlayIsOn()
 {
@@ -3966,7 +3955,6 @@ void RichEditorPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle
     AutoScrollByEdgeDetection(param, localOffset, EdgeDetectionStrategy::OUT_BOUNDARY);
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 std::function<void(Offset)> RichEditorPattern::GetThumbnailCallback()
 {
     return [wk = WeakClaim(this)](const Offset& point) {
@@ -3991,7 +3979,6 @@ std::function<void(Offset)> RichEditorPattern::GetThumbnailCallback()
         }
     };
 }
-#endif
 
 void RichEditorPattern::CreateHandles()
 {
@@ -4989,7 +4976,6 @@ RefPtr<FocusHub> RichEditorPattern::GetFocusHub() const
     return focusHub;
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 void RichEditorPattern::HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent)
 {
     auto host = GetHost();
@@ -5061,7 +5047,6 @@ void RichEditorPattern::HandleOnDragStatusCallback(
             break;
     }
 }
-#endif // ENABLE_DRAG_FRAMEWORK
 
 void RichEditorPattern::HandleOnCameraInput()
 {

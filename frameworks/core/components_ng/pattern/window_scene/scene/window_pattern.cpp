@@ -221,7 +221,6 @@ void WindowPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent
     CHECK_NULL_VOID(session_);
     CHECK_NULL_VOID(pointerEvent);
     session_->TransferPointerEvent(pointerEvent);
-#ifdef ENABLE_DRAG_FRAMEWORK
     if (pointerEvent->GetPointerAction() >= MMI::PointerEvent::POINTER_ACTION_PULL_DOWN &&
         pointerEvent->GetPointerAction() <= MMI::PointerEvent::POINTER_ACTION_PULL_UP) {
         auto pipeline = PipelineContext::GetCurrentContext();
@@ -231,7 +230,6 @@ void WindowPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent
             manager->SetIsWindowConsumed(true);
         }
     }
-#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void WindowPattern::DispatchKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent)

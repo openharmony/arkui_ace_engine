@@ -58,7 +58,6 @@ public:
     void GetVelocityX(const JSCallbackInfo& args);
     void GetVelocityY(const JSCallbackInfo& args);
     void GetVelocity(const JSCallbackInfo& args);
-#ifdef ENABLE_DRAG_FRAMEWORK
     void SetData(const JSCallbackInfo& args);
     void GetData(const JSCallbackInfo& args);
     void GetSummary(const JSCallbackInfo& args);
@@ -71,7 +70,6 @@ public:
     void GetDragInfo(const JSCallbackInfo& args);
     void SetDragBehavior(const JSCallbackInfo& args);
     void GetDragBehavior(const JSCallbackInfo& args);
-#endif
     void SetDragEvent(const RefPtr<DragEvent>& dragEvent)
     {
         dragEvent_ = dragEvent;
@@ -85,9 +83,8 @@ public:
 private:
     static void Constructor(const JSCallbackInfo& args);
     static void Destructor(JsDragEvent* dragEvent);
-#ifdef ENABLE_DRAG_FRAMEWORK
     JSRef<JSObject> CreateRectangle(const Rect& info);
-#endif
+
     RefPtr<DragEvent> dragEvent_;
     JSRef<JSObject> jsPasteData_;
 };

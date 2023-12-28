@@ -122,6 +122,7 @@ public:
     MOCK_CONST_METHOD0(IsDragging, bool());
     MOCK_METHOD1(SetIsDragging, void(bool isDragging));
     MOCK_METHOD0(ResetDragging, void());
+    MOCK_CONST_METHOD0(HasFloatTitle, bool());
 
     static RefPtr<MockPipelineContext> pipeline_;
 

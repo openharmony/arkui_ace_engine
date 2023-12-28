@@ -97,9 +97,7 @@ void LayoutProperty::Reset()
     measureType_.reset();
     layoutDirection_.reset();
     propVisibility_.reset();
-#ifdef ENABLE_DRAG_FRAMEWORK
     propIsBindOverlay_.reset();
-#endif // ENABLE_DRAG_FRAMEWORK
     CleanDirty();
 }
 
@@ -194,9 +192,7 @@ void LayoutProperty::UpdateLayoutProperty(const LayoutProperty* layoutProperty)
     measureType_ = layoutProperty->measureType_;
     layoutDirection_ = layoutProperty->layoutDirection_;
     propertyChangeFlag_ = layoutProperty->propertyChangeFlag_;
-#ifdef ENABLE_DRAG_FRAMEWORK
     propIsBindOverlay_ = layoutProperty->propIsBindOverlay_;
-#endif // ENABLE_DRAG_FRAMEWORK
     isOverlayNode_ = layoutProperty->isOverlayNode_;
     overlayOffsetX_ = layoutProperty->overlayOffsetX_;
     overlayOffsetY_ = layoutProperty->overlayOffsetY_;

@@ -54,10 +54,7 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
-
-#ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/udmf/udmf_client.h"
-#endif
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t SECONDS_PER_HOUR = 3600;
@@ -1463,7 +1460,6 @@ void VideoPattern::EnableDrag()
     if (layoutProperty->HasPosterImageInfo()) {
         imageSrcBefore = layoutProperty->GetPosterImageInfo().value().GetSrc();
     }
-#ifdef ENABLE_DRAG_FRAMEWORK
     auto dragEnd = [wp = WeakClaim(this), videoSrcBefore](
                        const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto videoPattern = wp.Upgrade();
@@ -1494,54 +1490,6 @@ void VideoPattern::EnableDrag()
         CHECK_NULL_VOID(frameNode);
         frameNode->MarkModifyDone();
     };
-#else
-    auto dragEnd = [wp = WeakClaim(this), videoSrcBefore, imageSrcBefore](
-                       const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
-        if (extraParams.empty()) {
-            TAG_LOGW(AceLogTag::ACE_VIDEO, "extraParams is empty");
-            return;
-        }
-        auto videoPattern = wp.Upgrade();
-        CHECK_NULL_VOID(videoPattern);
-        auto videoLayoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
-        CHECK_NULL_VOID(videoLayoutProperty);
-        auto json = JsonUtil::ParseJsonString(extraParams);
-        std::string key = "extraInfo";
-        std::string extraInfo = json->GetString(key);
-        if (extraInfo.empty()) {
-            TAG_LOGW(AceLogTag::ACE_VIDEO, "extraInfo is empty");
-            return;
-        }
-        int index = extraInfo.find("::");
-        if (index < 0 || index == extraInfo.length() - 2) {
-            TAG_LOGW(AceLogTag::ACE_VIDEO, "video source is empty");
-            return;
-        }
-        std::string videoSrc = extraInfo.substr(index + 2); // 2 :the length of "::"
-        std::string imageSrc = "";
-        if (index != 0) {
-            imageSrc = extraInfo.substr(0, index);
-        }
-
-        bool isInitialState = videoPattern->IsInitialState();
-        if ((!isInitialState && videoSrc == videoSrcBefore) ||
-            (isInitialState && videoSrc == videoSrcBefore && imageSrc == imageSrcBefore)) {
-            return;
-        }
-
-        videoPattern->SetIsDragEndAutoPlay(true);
-        videoLayoutProperty->UpdateVideoSource(videoSrc);
-        ImageSourceInfo imageSourceInfo = ImageSourceInfo(imageSrc);
-        videoLayoutProperty->UpdatePosterImageInfo(imageSourceInfo);
-
-        if (!isInitialState) {
-            videoPattern->SetIsStop(true);
-        }
-        auto frameNode = videoPattern->GetHost();
-        CHECK_NULL_VOID(frameNode);
-        frameNode->MarkModifyDone();
-    };
-#endif
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnDrop(std::move(dragEnd));

@@ -105,7 +105,6 @@ public:
 
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
-#ifdef ENABLE_DRAG_FRAMEWORK
     void SetThumbnailCallback(std::function<void(Offset)>&& callback);
     void SetFilter(const RefPtr<DragEventActuator>& actuator);
     static void UpdatePreviewPositionAndScale(const RefPtr<FrameNode>& imageNode, const OffsetF& frameOffset);
@@ -126,7 +125,6 @@ public:
     bool IsAllowedDrag();
     void SetTextPixelMap(const RefPtr<GestureEventHub>& gestureHub);
     OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode);
-#endif // ENABLE_DRAG_FRAMEWORK
     PanDirection GetDirection() const
     {
         return direction_;

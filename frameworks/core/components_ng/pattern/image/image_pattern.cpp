@@ -39,10 +39,8 @@
 #if defined(PIXEL_MAP_SUPPORTED)
 #include "foundation/multimedia/image_framework/interfaces/kits/js/common/include/pixel_map_napi.h"
 #endif
-#ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/ace_engine_ext.h"
 #include "core/common/udmf/udmf_client.h"
-#endif
 
 namespace OHOS::Ace::NG {
 napi_value ConvertPixmapNapi(const RefPtr<PixelMap>& pixelMap)
@@ -635,10 +633,7 @@ void ImagePattern::EnableDrag()
         DragDropInfo info;
         auto imagePattern = weak.Upgrade();
         CHECK_NULL_RETURN(imagePattern && imagePattern->loadingCtx_, info);
-
-#ifdef ENABLE_DRAG_FRAMEWORK
         AceEngineExt::GetInstance().DragStartExt();
-#endif
         imagePattern->UpdateDragEvent(event);
         info.extraInfo = imagePattern->loadingCtx_->GetSourceInfo().GetSrc();
         return info;
@@ -853,7 +848,6 @@ void ImagePattern::DumpAdvanceInfo()
 
 void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
 {
-#ifdef ENABLE_DRAG_FRAMEWORK
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
     CHECK_NULL_VOID(loadingCtx_ && image_);
     if (loadingCtx_->GetSourceInfo().IsPixmap()) {
@@ -870,7 +864,6 @@ void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
         UdmfClient::GetInstance()->AddImageRecord(unifiedData, loadingCtx_->GetSourceInfo().GetSrc());
     }
     event->SetData(unifiedData);
-#endif
 }
 
 void ImagePattern::OnLanguageConfigurationUpdate()

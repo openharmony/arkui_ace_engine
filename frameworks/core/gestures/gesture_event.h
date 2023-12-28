@@ -222,7 +222,6 @@ public:
     {
         return inputEventType_;
     }
-#ifdef ENABLE_DRAG_FRAMEWORK
     void SetPointerId(int32_t pointerId)
     {
         pointerId_ = pointerId;
@@ -232,7 +231,6 @@ public:
     {
         return pointerId_;
     }
-#endif // ENABLE_DRAG_FRAMEWORK
 #ifdef SECURITY_COMPONENT_ENABLE
     void SetDisplayX(double displayX)
     {
@@ -286,9 +284,7 @@ private:
     double speed_ = 0.0;
     double mainSpeed_ = 0.0;
     double mainDelta_ = 0.0;
-#ifdef ENABLE_DRAG_FRAMEWORK
     int32_t pointerId_ = 0;
-#endif // ENABLE_DRAG_FRAMEWORK
 #ifdef SECURITY_COMPONENT_ENABLE
     double displayX_ = 0.0;
     double displayY_ = 0.0;

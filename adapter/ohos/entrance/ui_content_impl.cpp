@@ -321,9 +321,6 @@ public:
                 action = DragEventAction::DRAG_EVENT_START;
                 break;
         }
-#ifndef ENABLE_DRAG_FRAMEWORK
-        aceView->ProcessDragEvent(x, y, action);
-#endif // ENABLE_DRAG_FRAMEWORK
     }
 
 private:

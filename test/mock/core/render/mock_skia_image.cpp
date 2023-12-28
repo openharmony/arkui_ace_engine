@@ -21,11 +21,6 @@
 
 namespace OHOS::Ace::NG {
 
-RefPtr<CanvasImage> CanvasImage::Create(void* rawImage)
-{
-    return nullptr;
-}
-
 #ifndef USE_ROSEN_DRAWING
 RefPtr<CanvasImage> SkiaImage::Clone()
 #else

@@ -84,11 +84,9 @@ constexpr int32_t TOAST_ANIMATION_DURATION = 100;
 constexpr int32_t MENU_ANIMATION_DURATION = 150;
 constexpr float TOAST_ANIMATION_POSITION = 15.0f;
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 constexpr float PIXELMAP_DRAG_SCALE = 1.0f;
 constexpr int32_t PIXELMAP_ANIMATION_DURATION = 250;
 constexpr float PIXELMAP_ANIMATION_DEFAULT_LIMIT_SCALE = 0.5f;
-#endif // ENABLE_DRAG_FRAMEWORK
 
 constexpr int32_t FULL_MODAL_ALPHA_ANIMATION_DURATION = 200;
 
@@ -974,11 +972,9 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
         });
     popupNode->OnAccessibilityEvent(
         AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-#ifdef ENABLE_DRAG_FRAMEWORK
     RemoveEventColumn();
     RemovePixelMapAnimation(false, 0, 0);
     RemoveFilter();
-#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 RefPtr<FrameNode> OverlayManager::HidePopupWithoutAnimation(int32_t targetId, const PopupInfo& popupInfo)
@@ -1251,7 +1247,6 @@ void OverlayManager::HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, b
     pattern->SetShow(false);
     PopMenuAnimation(menu);
     menu->OnAccessibilityEvent(AccessibilityEventType::CHANGE, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_SUBTREE);
-#ifdef ENABLE_DRAG_FRAMEWORK
     RemoveEventColumn();
     if (isMenuOnTouch) {
         RemovePixelMap();
@@ -1259,7 +1254,6 @@ void OverlayManager::HideMenu(const RefPtr<FrameNode>& menu, int32_t targetId, b
         RemovePixelMapAnimation(false, 0, 0);
     }
     RemoveFilterAnimation();
-#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void OverlayManager::HideAllMenus()
@@ -3166,7 +3160,6 @@ RefPtr<UINode> OverlayManager::FindWindowScene(RefPtr<FrameNode> targetNode)
     return parent;
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 void OverlayManager::MountFilterToWindowScene(const RefPtr<FrameNode>& columnNode, const RefPtr<UINode>& windowScene)
 {
     CHECK_NULL_VOID(windowScene);
@@ -3339,6 +3332,9 @@ void OverlayManager::UpdatePixelMapScale(float& scale)
     CHECK_NULL_VOID(pixelMap);
     int32_t height = pixelMap->GetHeight();
     int32_t width = pixelMap->GetWidth();
+    if (height == 0 || width == 0) {
+        return;
+    }
     int32_t deviceWidth = SystemProperties::GetDeviceWidth();
     int32_t deviceHeight = SystemProperties::GetDeviceHeight();
     int32_t maxDeviceLength = std::max(deviceHeight, deviceWidth);
@@ -3428,7 +3424,6 @@ void OverlayManager::RemoveEventColumn()
     rootNode->RemoveChild(columnNode);
     hasEvent_ = false;
 }
-#endif // ENABLE_DRAG_FRAMEWORK
 
 int32_t OverlayManager::CreateModalUIExtension(
     const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, bool isProhibitBack)

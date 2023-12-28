@@ -81,9 +81,9 @@ public:
     bool ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
 
     bool ProcessRotationEvent(float rotationValue);
-#ifdef ENABLE_DRAG_FRAMEWORK
+
     void ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-#endif // ENABLE_DRAG_FRAMEWORK
+
     void ProcessDragEvent(int32_t x, int32_t y, const DragEventAction& action);
 
     int32_t GetInstanceId() const override
