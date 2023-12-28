@@ -5850,7 +5850,7 @@ globalThis.Span.attributeModifier = function (modifier) {
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkSpanComponent(nativeNode);
   });
-  applyUIAttributes(modifier, nativeNode, component);
+  modifier.applyNormalAttribute(component);
   component.applyModifierPatch();
 };
 
