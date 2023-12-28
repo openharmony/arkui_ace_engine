@@ -1068,7 +1068,6 @@ public:
     {
         lastTextRect_ = textRect;
     }
-#ifdef ENABLE_DRAG_FRAMEWORK
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
 
