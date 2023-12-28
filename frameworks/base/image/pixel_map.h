@@ -49,8 +49,6 @@ enum class AlphaType : int32_t {
 };
 
 struct ImageResizableSlice {
-    ImageResizableSlice() = default;
-    ~ImageResizableSlice() = default;
     Dimension left;
     Dimension right;
     Dimension top;
