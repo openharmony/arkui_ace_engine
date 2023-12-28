@@ -1356,7 +1356,7 @@ bool FocusHub::PaintAllFocusState()
     return false;
 }
 
-bool FocusHub::PaintInnerFocusState(const RoundRect& paintRect)
+bool FocusHub::PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate)
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
@@ -1364,7 +1364,7 @@ bool FocusHub::PaintInnerFocusState(const RoundRect& paintRect)
     CHECK_NULL_RETURN(frameNode, false);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
-    if (!context->GetIsFocusActive() || !IsNeedPaintFocusState()) {
+    if (!forceUpdate && (!context->GetIsFocusActive() || !IsNeedPaintFocusState())) {
         return false;
     }
     auto appTheme = context->GetTheme<AppTheme>();
