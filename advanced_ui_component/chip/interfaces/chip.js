@@ -171,9 +171,9 @@ export function Chip(e, i = null) {
 }
 
 export class ChipComponent extends ViewPU {
-    constructor(e, i, t, o = -1, s = void 0) {
+    constructor(e, i, t, o = -1, h = void 0) {
         super(e, t, o);
-        "function" == typeof s && (this.paramsGenerator_ = s);
+        "function" == typeof h && (this.paramsGenerator_ = h);
         this.theme = defaultTheme;
         this.__chipSize = new SynchedPropertyObjectOneWayPU(i.chipSize, this, "chipSize");
         this.__allowClose = new SynchedPropertySimpleOneWayPU(i.allowClose, this, "allowClose");
@@ -184,7 +184,6 @@ export class ChipComponent extends ViewPU {
         this.__chipNodeRadius = new SynchedPropertyObjectOneWayPU(i.chipNodeRadius, this, "chipNodeRadius");
         this.__chipEnabled = new SynchedPropertySimpleOneWayPU(i.chipEnabled, this, "chipEnabled");
         this.__isHover = new ObservedPropertySimplePU(!1, this, "isHover");
-        this.__isPressed = new ObservedPropertySimplePU(!1, this, "isPressed");
         this.__chipScale = new ObservedPropertyObjectPU({ x: 1, y: 1 }, this, "chipScale");
         this.__chipOpacity = new ObservedPropertySimplePU(1, this, "chipOpacity");
         this.__chipBlendColor = new ObservedPropertyObjectPU(Color.Transparent, this, "chipBlendColor");
@@ -212,7 +211,6 @@ export class ChipComponent extends ViewPU {
         void 0 === e.chipNodeRadius && this.__chipNodeRadius.set(void 0);
         void 0 === e.chipEnabled && this.__chipEnabled.set(!0);
         void 0 !== e.isHover && (this.isHover = e.isHover);
-        void 0 !== e.isPressed && (this.isPressed = e.isPressed);
         void 0 !== e.chipScale && (this.chipScale = e.chipScale);
         void 0 !== e.chipOpacity && (this.chipOpacity = e.chipOpacity);
         void 0 !== e.chipBlendColor && (this.chipBlendColor = e.chipBlendColor);
@@ -249,7 +247,6 @@ export class ChipComponent extends ViewPU {
         this.__chipNodeRadius.purgeDependencyOnElmtId(e);
         this.__chipEnabled.purgeDependencyOnElmtId(e);
         this.__isHover.purgeDependencyOnElmtId(e);
-        this.__isPressed.purgeDependencyOnElmtId(e);
         this.__chipScale.purgeDependencyOnElmtId(e);
         this.__chipOpacity.purgeDependencyOnElmtId(e);
         this.__chipBlendColor.purgeDependencyOnElmtId(e);
@@ -270,7 +267,6 @@ export class ChipComponent extends ViewPU {
         this.__chipNodeRadius.aboutToBeDeleted();
         this.__chipEnabled.aboutToBeDeleted();
         this.__isHover.aboutToBeDeleted();
-        this.__isPressed.aboutToBeDeleted();
         this.__chipScale.aboutToBeDeleted();
         this.__chipOpacity.aboutToBeDeleted();
         this.__chipBlendColor.aboutToBeDeleted();
@@ -353,14 +349,6 @@ export class ChipComponent extends ViewPU {
 
     set isHover(e) {
         this.__isHover.set(e)
-    }
-
-    get isPressed() {
-        return this.__isPressed.get()
-    }
-
-    set isPressed(e) {
-        this.__isPressed.set(e)
     }
 
     get chipScale() {
@@ -458,55 +446,55 @@ export class ChipComponent extends ViewPU {
                 return e;
             case "object":
                 try {
-                    return px2vp(getContext(this).resourceManager.getNumber(e.id))
+                    return -1 !== e.id ? px2vp(getContext(this).resourceManager.getNumber(e.id)) : px2vp(getContext(this).resourceManager.getNumberByName(e.params[0].split(".")[2]))
                 } catch (e) {
                     return Number.NEGATIVE_INFINITY
                 }
             case "string":
                 let o = new RegExp("(-?\\d+(?:\\.\\d+)?)_?(fp|vp|px|lpx|%)?$", "i");
-                let s = e.match(o);
-                if (!s) return Number.NEGATIVE_INFINITY;
-                let h = Number(null !== (i = null == s ? void 0 : s[1]) && void 0 !== i ? i : 0);
-                switch ((null !== (t = null == s ? void 0 : s[2]) && void 0 !== t ? t : "vp").toLowerCase()) {
+                let h = e.match(o);
+                if (!h) return Number.NEGATIVE_INFINITY;
+                let s = Number(null !== (i = null == h ? void 0 : h[1]) && void 0 !== i ? i : 0);
+                switch ((null !== (t = null == h ? void 0 : h[2]) && void 0 !== t ? t : "vp").toLowerCase()) {
                     case "px":
-                        h = px2vp(h);
+                        s = px2vp(s);
                         break;
                     case "fp":
-                        h = px2vp(fp2px(h));
+                        s = px2vp(fp2px(s));
                         break;
                     case "lpx":
-                        h = px2vp(lpx2px(h));
+                        s = px2vp(lpx2px(s));
                         break;
                     case "%":
-                        h = Number.NEGATIVE_INFINITY
+                        s = Number.NEGATIVE_INFINITY
                 }
-                return h;
+                return s;
             default:
                 return Number.NEGATIVE_INFINITY
         }
     }
 
     getLabelMargin() {
-        var e, i, t, o, s, h, n, l;
-        let r = { left: 0, right: 0 };
-        void 0 !== (null === (i = null === (e = this.label) || void 0 === e ? void 0 : e.labelMargin) || void 0 === i ? void 0 : i.left) && this.toVp(this.label.labelMargin.left) >= 0 ? r.left = null === (o = null === (t = this.label) || void 0 === t ? void 0 : t.labelMargin) || void 0 === o ? void 0 : o.left : this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL ? r.left = this.theme.label.smallMargin.left : r.left = this.theme.label.normalMargin.left;
-        void 0 !== (null === (h = null === (s = this.label) || void 0 === s ? void 0 : s.labelMargin) || void 0 === h ? void 0 : h.right) && this.toVp(this.label.labelMargin.right) >= 0 ? r.right = null === (l = null === (n = this.label) || void 0 === n ? void 0 : n.labelMargin) || void 0 === l ? void 0 : l.right : this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL ? r.right = this.theme.label.smallMargin.right : r.right = this.theme.label.normalMargin.right;
-        return r
+        var e, i, t, o, h, s, n, l, r, a;
+        let d = { left: 0, right: 0 };
+        void 0 !== (null === (i = null === (e = this.label) || void 0 === e ? void 0 : e.labelMargin) || void 0 === i ? void 0 : i.left) && this.toVp(this.label.labelMargin.left) >= 0 ? d.left = null === (o = null === (t = this.label) || void 0 === t ? void 0 : t.labelMargin) || void 0 === o ? void 0 : o.left : (null === (h = this.prefixIcon) || void 0 === h ? void 0 : h.src) && (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL ? d.left = this.theme.label.smallMargin.left : d.left = this.theme.label.normalMargin.left);
+        void 0 !== (null === (n = null === (s = this.label) || void 0 === s ? void 0 : s.labelMargin) || void 0 === n ? void 0 : n.right) && this.toVp(this.label.labelMargin.right) >= 0 ? d.right = null === (r = null === (l = this.label) || void 0 === l ? void 0 : l.labelMargin) || void 0 === r ? void 0 : r.right : ((null === (a = this.suffixIcon) || void 0 === a ? void 0 : a.src) || this.useDefaultSuffixIcon) && (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL ? d.right = this.theme.label.smallMargin.right : d.right = this.theme.label.normalMargin.right);
+        return d
     }
 
     getSuffixIconSize() {
-        var e, i, t, o, s, h, n, l, r, d, a, c;
+        var e, i, t, o, h, s, n, l, r, a, d, c;
         let p = { width: 0, height: 0 };
-        void 0 !== (null === (i = null === (e = this.suffixIcon) || void 0 === e ? void 0 : e.size) || void 0 === i ? void 0 : i.width) && this.toVp(null === (o = null === (t = this.suffixIcon) || void 0 === t ? void 0 : t.size) || void 0 === o ? void 0 : o.width) >= 0 ? p.width = null === (h = null === (s = this.suffixIcon) || void 0 === s ? void 0 : s.size) || void 0 === h ? void 0 : h.width : this.getSuffixIconSrc() ? p.width = this.theme.suffixIcon.size.width : p.width = 0;
-        void 0 !== (null === (l = null === (n = this.suffixIcon) || void 0 === n ? void 0 : n.size) || void 0 === l ? void 0 : l.height) && this.toVp(null === (d = null === (r = this.suffixIcon) || void 0 === r ? void 0 : r.size) || void 0 === d ? void 0 : d.height) >= 0 ? p.height = null === (c = null === (a = this.suffixIcon) || void 0 === a ? void 0 : a.size) || void 0 === c ? void 0 : c.height : this.getSuffixIconSrc() ? p.height = this.theme.suffixIcon.size.height : p.height = 0;
+        void 0 !== (null === (i = null === (e = this.suffixIcon) || void 0 === e ? void 0 : e.size) || void 0 === i ? void 0 : i.width) && this.toVp(null === (o = null === (t = this.suffixIcon) || void 0 === t ? void 0 : t.size) || void 0 === o ? void 0 : o.width) >= 0 ? p.width = null === (s = null === (h = this.suffixIcon) || void 0 === h ? void 0 : h.size) || void 0 === s ? void 0 : s.width : this.getSuffixIconSrc() ? p.width = this.theme.suffixIcon.size.width : p.width = 0;
+        void 0 !== (null === (l = null === (n = this.suffixIcon) || void 0 === n ? void 0 : n.size) || void 0 === l ? void 0 : l.height) && this.toVp(null === (a = null === (r = this.suffixIcon) || void 0 === r ? void 0 : r.size) || void 0 === a ? void 0 : a.height) >= 0 ? p.height = null === (c = null === (d = this.suffixIcon) || void 0 === d ? void 0 : d.size) || void 0 === c ? void 0 : c.height : this.getSuffixIconSrc() ? p.height = this.theme.suffixIcon.size.height : p.height = 0;
         return p
     }
 
     getPrefixIconSize() {
-        var e, i, t, o, s, h, n, l, r, d, a, c, p, u;
+        var e, i, t, o, h, s, n, l, r, a, d, c, p, u;
         let f = { width: 0, height: 0 };
-        void 0 !== (null === (i = null === (e = this.prefixIcon) || void 0 === e ? void 0 : e.size) || void 0 === i ? void 0 : i.width) && this.toVp(null === (o = null === (t = this.prefixIcon) || void 0 === t ? void 0 : t.size) || void 0 === o ? void 0 : o.width) >= 0 ? f.width = null === (h = null === (s = this.prefixIcon) || void 0 === s ? void 0 : s.size) || void 0 === h ? void 0 : h.width : (null === (n = this.prefixIcon) || void 0 === n ? void 0 : n.src) ? f.width = this.theme.prefixIcon.size.width : f.width = 0;
-        void 0 !== (null === (r = null === (l = this.prefixIcon) || void 0 === l ? void 0 : l.size) || void 0 === r ? void 0 : r.height) && this.toVp(null === (a = null === (d = this.prefixIcon) || void 0 === d ? void 0 : d.size) || void 0 === a ? void 0 : a.height) >= 0 ? f.height = null === (p = null === (c = this.prefixIcon) || void 0 === c ? void 0 : c.size) || void 0 === p ? void 0 : p.height : (null === (u = this.prefixIcon) || void 0 === u ? void 0 : u.src) ? f.height = this.theme.prefixIcon.size.height : f.height = 0;
+        void 0 !== (null === (i = null === (e = this.prefixIcon) || void 0 === e ? void 0 : e.size) || void 0 === i ? void 0 : i.width) && this.toVp(null === (o = null === (t = this.prefixIcon) || void 0 === t ? void 0 : t.size) || void 0 === o ? void 0 : o.width) >= 0 ? f.width = null === (s = null === (h = this.prefixIcon) || void 0 === h ? void 0 : h.size) || void 0 === s ? void 0 : s.width : (null === (n = this.prefixIcon) || void 0 === n ? void 0 : n.src) ? f.width = this.theme.prefixIcon.size.width : f.width = 0;
+        void 0 !== (null === (r = null === (l = this.prefixIcon) || void 0 === l ? void 0 : l.size) || void 0 === r ? void 0 : r.height) && this.toVp(null === (d = null === (a = this.prefixIcon) || void 0 === a ? void 0 : a.size) || void 0 === d ? void 0 : d.height) >= 0 ? f.height = null === (p = null === (c = this.prefixIcon) || void 0 === c ? void 0 : c.size) || void 0 === p ? void 0 : p.height : (null === (u = this.prefixIcon) || void 0 === u ? void 0 : u.src) ? f.height = this.theme.prefixIcon.size.height : f.height = 0;
         return f
     }
 
@@ -582,22 +570,22 @@ export class ChipComponent extends ViewPU {
     }
 
     handleTouch(e) {
-        if (this.getChipEnable()) {
-            this.isPressed = e.type === TouchType.Down;
-            this.isHover ? e.type === TouchType.Down ? Context.animateTo({ curve: Curve.Sharp, duration: 100 }, (() => {
-                this.chipBlendColor = this.theme.chipNode.pressedBlendColor;
-                this.chipOpacity = this.theme.chipNode.opacity.pressed
-            })) : e.type === TouchType.Up && Context.animateTo({ curve: Curve.Sharp, duration: 100 }, (() => {
-                this.chipBlendColor = this.theme.chipNode.hoverBlendColor;
-                this.chipOpacity = this.theme.chipNode.opacity.hover
-            })) : e.type === TouchType.Down ? Context.animateTo({ curve: Curve.Friction, duration: 350 }, (() => {
-                this.chipBlendColor = this.theme.chipNode.pressedBlendColor;
-                this.chipOpacity = this.theme.chipNode.opacity.pressed
-            })) : e.type === TouchType.Up && Context.animateTo({ curve: Curve.Friction, duration: 350 }, (() => {
-                this.chipBlendColor = Color.Transparent;
-                this.chipOpacity = this.theme.chipNode.opacity.normal
-            }))
-        }
+        this.getChipEnable() && (this.isHover ? e.type === TouchType.Down ? Context.animateTo({
+            curve: Curve.Sharp,
+            duration: 100
+        }, (() => {
+            this.chipBlendColor = this.theme.chipNode.pressedBlendColor;
+            this.chipOpacity = this.theme.chipNode.opacity.pressed
+        })) : e.type === TouchType.Up && Context.animateTo({ curve: Curve.Sharp, duration: 100 }, (() => {
+            this.chipBlendColor = this.theme.chipNode.hoverBlendColor;
+            this.chipOpacity = this.theme.chipNode.opacity.hover
+        })) : e.type === TouchType.Down ? Context.animateTo({ curve: Curve.Friction, duration: 350 }, (() => {
+            this.chipBlendColor = this.theme.chipNode.pressedBlendColor;
+            this.chipOpacity = this.theme.chipNode.opacity.pressed
+        })) : e.type === TouchType.Up && Context.animateTo({ curve: Curve.Friction, duration: 350 }, (() => {
+            this.chipBlendColor = Color.Transparent;
+            this.chipOpacity = this.theme.chipNode.opacity.normal
+        })))
     }
 
     hoverAnimate(e) {
@@ -693,7 +681,7 @@ export class ChipComponent extends ViewPU {
             this.chipNodeOnFocus && !this.suffixIconOnFocus ? this.ifElseBranchUpdateFunction(0, (() => {
                 this.observeComponentCreation2(((e, i) => {
                     Stack.create();
-                    Stack.borderRadius(this.getChipNodeRadius());
+                    Stack.borderRadius(this.toVp(this.getChipNodeRadius()) + 4);
                     Stack.size(this.getFocusOverlaySize());
                     Stack.borderColor(this.theme.chipNode.focusOutlineColor);
                     Stack.borderWidth(this.theme.chipNode.borderWidth)
@@ -731,6 +719,7 @@ export class ChipComponent extends ViewPU {
     chipBuilder(e = null) {
         this.observeComponentCreation2(((e, i) => {
             Row.create();
+            Row.alignItems(VerticalAlign.Center);
             Row.justifyContent(FlexAlign.Center);
             Row.clip(!1);
             Row.padding(this.getChipNodePadding());
@@ -775,7 +764,8 @@ export class ChipComponent extends ViewPU {
                     Image.objectFit(ImageFit.Cover);
                     Image.focusable(!1);
                     Image.flexShrink(0);
-                    Image.visibility(this.getVisibility())
+                    Image.visibility(this.getVisibility());
+                    Image.draggable(!1)
                 }), Image)
             })) : this.ifElseBranchUpdateFunction(1, (() => {
             }))
@@ -795,7 +785,8 @@ export class ChipComponent extends ViewPU {
             Text.flexShrink(1);
             Text.focusable(!0);
             Text.textAlign(TextAlign.Center);
-            Text.visibility(this.getVisibility())
+            Text.visibility(this.getVisibility());
+            Text.draggable(!1)
         }), Text);
         Text.pop();
         this.observeComponentCreation2(((e, i) => {
@@ -808,6 +799,7 @@ export class ChipComponent extends ViewPU {
             Image.objectFit(ImageFit.Cover);
             Image.flexShrink(0);
             Image.visibility(this.getVisibility());
+            Image.draggable(!1);
             ViewStackProcessor.visualState("focused");
             Image.borderColor(this.theme.chipNode.focusOutlineColor);
             Image.borderWidth(this.getSuffixIconFocusable() ? this.theme.chipNode.borderWidth : 0);
