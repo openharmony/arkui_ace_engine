@@ -75,7 +75,6 @@ RefPtr<FrameNode> ContainerModalView::Create(RefPtr<FrameNode>& content)
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     ACE_LAYOUT_SCOPED_TRACE("Create[ContainerModal][self:%d]", nodeId);
     auto containerModalNode = FrameNode::CreateFrameNode("ContainerModal", nodeId, MakeRefPtr<ContainerModalPattern>());
-    containerModalNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto stack = FrameNode::CreateFrameNode(
         V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<StackPattern>());
     auto column = FrameNode::CreateFrameNode(
@@ -86,23 +85,12 @@ RefPtr<FrameNode> ContainerModalView::Create(RefPtr<FrameNode>& content)
     column->AddChild(BuildTitle(containerModalNode));
     stack->AddChild(content);
     column->AddChild(stack);
-    content->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-    content->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(1.0, DimensionUnit::PERCENT)));
     containerModalNode->AddChild(column);
     containerModalNode->AddChild(BuildTitle(containerModalNode, true));
     containerModalNode->AddChild(AddControlButtons(controlButtonsRow));
 
-    CHECK_NULL_RETURN(stack->GetLayoutProperty(), nullptr);
-    stack->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    CHECK_NULL_RETURN(column->GetLayoutProperty(), nullptr);
-    column->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    CHECK_NULL_RETURN(controlButtonsRow->GetLayoutProperty(), nullptr);
-    controlButtonsRow->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-
     auto containerPattern = containerModalNode->GetPattern<ContainerModalPattern>();
     CHECK_NULL_RETURN(containerPattern, nullptr);
-    containerModalNode->MarkModifyDone();
     containerPattern->Init();
 
     return containerModalNode;
@@ -138,12 +126,6 @@ RefPtr<FrameNode> ContainerModalView::BuildTitleRow(bool isFloatingTitle)
     auto containerTitleRow = FrameNode::CreateFrameNode(
         V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), MakeRefPtr<LinearLayoutPattern>(false));
     containerTitleRow->UpdateInspectorId("ContainerModalTitleRow");
-    auto layoutProperty = containerTitleRow->GetLayoutProperty<LinearLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, nullptr);
-    layoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));
-    layoutProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
-    layoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
     if (isFloatingTitle) {
         auto renderContext = containerTitleRow->GetRenderContext();
         CHECK_NULL_RETURN(renderContext, nullptr);
@@ -158,12 +140,6 @@ RefPtr<FrameNode> ContainerModalView::AddControlButtons(RefPtr<FrameNode>& contr
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, nullptr);
-    auto layoutProperty = controlButtonsRow->GetLayoutProperty<LinearLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, nullptr);
-    layoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));
-    layoutProperty->UpdateMainAxisAlign(FlexAlign::FLEX_END);
-    layoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
 
     // add leftSplit / maxRecover / minimize / close button
     controlButtonsRow->AddChild(BuildControlButton(InternalResource::ResourceId::CONTAINER_MODAL_WINDOW_SPLIT_LEFT,

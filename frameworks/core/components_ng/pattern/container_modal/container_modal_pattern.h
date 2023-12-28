@@ -129,6 +129,13 @@ public:
         return AceType::DynamicCast<FrameNode>(columnNode->GetChildren().back());
     }
 
+    RefPtr<FrameNode> GetContentNode()
+    {
+        auto stack = GetStackNode();
+        CHECK_NULL_RETURN(stack, nullptr);
+        return AceType::DynamicCast<FrameNode>(stack->GetChildren().front());
+    }
+
     RefPtr<CustomTitleNode> GetFloatingTitleNode()
     {
         auto row = GetFloatingTitleRow();
@@ -184,8 +191,10 @@ private:
     void WindowFocus(bool isFocus);
     void SetTitleButtonHide(
         const RefPtr<FrameNode>& controlButtonsNode, bool hideSplit, bool hideMaximize, bool hideMinimize);
+    CalcLength GetControlButtonRowWidth();
     void InitTitle();
     void InitContainerEvent();
+    void InitLayoutProperty();
 
     std::string appLabel_;
     RefPtr<PanEvent> panEvent_ = nullptr;
