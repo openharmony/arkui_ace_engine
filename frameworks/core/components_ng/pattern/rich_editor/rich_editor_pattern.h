@@ -141,7 +141,13 @@ public:
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
     void InsertValue(const std::string& insertValue) override;
-    std::wstring InsertValueOperation(const std::string& insertValue);
+    void InsertValueOperation(const std::string& insertValue, OperationRecord* const record = nullptr);
+    void InsertValueAfterBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, RefPtr<SpanNode>& spanNode,
+        const TextInsertValueInfo& info, const std::string& insertValue);
+    void InsertDiffStyleValueInSpan(
+        RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue);
+    void InsertValueWithoutSpan(
+        RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue);
     void InsertValueByPaste(const std::string& insertValue);
     bool IsLineSeparatorInLast(RefPtr<SpanNode>& spanNode);
     void InsertValueToSpanNode(
@@ -192,6 +198,8 @@ public:
     OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight,
         bool downStreamFirst = false, bool needLineHighest = true);
     void CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
+    void CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
+    void CopyTextSpanLineStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
     int32_t TextSpanSplit(int32_t position);
     SpanPositionInfo GetSpanPositionInfo(int32_t position);
     std::function<ImageSourceInfo()> CreateImageSourceInfo(const ImageSpanOptions& options);
@@ -277,11 +285,9 @@ public:
     void CloseSelectOverlay() override;
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
-#ifdef ENABLE_DRAG_FRAMEWORK
     std::function<void(Offset)> GetThumbnailCallback() override;
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
-#endif
     void ResetSelection();
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
@@ -401,6 +407,7 @@ private:
     std::string GetPositionSpansText(int32_t position, int32_t& startSpan);
     void FireOnSelect(int32_t selectStart, int32_t selectEnd);
     void MouseRightFocus(const MouseInfo& info);
+    bool IsScrollBarPressed(const MouseInfo& info);
     void HandleMouseLeftButton(const MouseInfo& info);
     void HandleMouseRightButton(const MouseInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
@@ -409,7 +416,6 @@ private:
     void UseHostToUpdateTextFieldManager();
     void UpdateTextFieldManager(const Offset& offset, float height);
     void ScrollToSafeArea() const override;
-#ifdef ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     void onDragDropAndLeave();
     void ClearDragDropEvent();
@@ -436,7 +442,6 @@ private:
     void HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
     void HandleCursorOnDragLeaved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
     void HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& notifyDragEvent);
-#endif // ENABLE_DRAG_FRAMEWORK
 
     int32_t GetParagraphLength(const std::list<RefPtr<UINode>>& spans) const;
     // REQUIRES: 0 <= start < end
@@ -554,9 +559,7 @@ private:
     RectF frameRect_;
     std::optional<struct UpdateSpanStyle> typingStyle_;
     std::optional<TextStyle> typingTextStyle_;
-#ifdef ENABLE_DRAG_FRAMEWORK
     std::list<ResultObject> dragResultObjects_;
-#endif // ENABLE_DRAG_FRAMEWORK
 
     std::function<void()> customKeyboardBuilder_;
     Offset selectionMenuOffset_;

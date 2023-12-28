@@ -49,7 +49,6 @@ void TimePickerRowPattern::OnAttachToFrameNode()
 
 bool TimePickerRowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    CHECK_NULL_RETURN(config.frameSizeChange, false);
     CHECK_NULL_RETURN(dirty, false);
     SetButtonIdeaSize();
     return true;

@@ -80,9 +80,7 @@
 #include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
 #endif
 #endif
-#ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/udmf/udmf_client.h"
-#endif
 
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
@@ -1379,7 +1377,6 @@ void TextFieldPattern::UpdateCaretByTouchMove(const TouchEventInfo& info)
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 void TextFieldPattern::InitDragEvent()
 {
     auto host = GetHost();
@@ -1435,10 +1432,12 @@ std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::strin
         }
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_RETURN(layoutProperty, itemInfo);
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         if (pattern->SelectOverlayIsOn() || pattern->imeAttached_ || pattern->showSelect_) {
             pattern->CloseHandleAndSelect();
             pattern->CloseKeyboard(true);
         }
+#endif
         pattern->dragStatus_ = DragStatus::DRAGGING;
         pattern->showSelect_ = false;
         pattern->selectionMode_ = SelectionMode::SELECT;
@@ -1600,6 +1599,7 @@ void TextFieldPattern::ClearDragDropEvent()
     CHECK_NULL_VOID(host);
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetTextDraggable(false);
     gestureHub->SetIsTextDraggable(false);
     auto eventHub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1610,7 +1610,6 @@ void TextFieldPattern::ClearDragDropEvent()
     eventHub->SetOnDragEnd(nullptr);
     eventHub->SetOnDrop(nullptr);
 }
-#endif
 
 void TextFieldPattern::InitTouchEvent()
 {
@@ -1925,10 +1924,8 @@ void TextFieldPattern::OnModifyDone()
     InitSelectOverlay();
     InitDisableColor();
     ProcessResponseArea();
-#ifdef ENABLE_DRAG_FRAMEWORK
     InitDragEvent();
     Register2DragDropManager();
-#endif
     context->AddOnAreaChangeNode(host->GetId());
     if (!clipboard_ && context) {
         clipboard_ = ClipboardProxy::GetInstance()->GetClipboard(context->GetTaskExecutor());
@@ -2203,13 +2200,11 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
-#ifdef ENABLE_DRAG_FRAMEWORK
     if (BetweenSelectedPosition(info.GetGlobalLocation())) {
         gestureHub->SetIsTextDraggable(true);
         return;
     }
     gestureHub->SetIsTextDraggable(false);
-#endif
     isLongPress_ = true;
     auto focusHub = GetFocusHub();
     if (!focusHub->IsCurrentFocus()) {
@@ -6159,7 +6154,6 @@ void TextFieldPattern::ShowMenu()
     ProcessOverlay(true, true, true);
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 void TextFieldPattern::HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent)
 {
     auto host = GetHost();
@@ -6231,5 +6225,4 @@ void TextFieldPattern::HandleOnDragStatusCallback(
             break;
     }
 }
-#endif // ENABLE_DRAG_FRAMEWORK
 } // namespace OHOS::Ace::NG

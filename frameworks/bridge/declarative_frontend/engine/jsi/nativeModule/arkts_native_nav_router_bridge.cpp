@@ -14,7 +14,7 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_nav_router_bridge.h"
 
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "core/interfaces/native/node/api.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t CALL_ARG_0 = 0;

@@ -336,11 +336,8 @@ void SpanItem::UpdateTextStyle(
             builder->PopStyle();
         }
     };
-#ifdef ENABLE_DRAG_FRAMEWORK
     if (!IsDragging()) {
-#endif // ENABLE_DRAG_FRAMEWORK
         updateTextAction(content, textStyle);
-#ifdef ENABLE_DRAG_FRAMEWORK
     } else {
         if (content.empty()) {
             return;
@@ -367,7 +364,6 @@ void SpanItem::UpdateTextStyle(
             updateTextAction(StringUtils::Str16ToStr8(afterSelectedText), textStyle);
         }
     }
-#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 std::string SpanItem::GetSpanContent(const std::string& rawContent)
@@ -391,7 +387,6 @@ uint32_t SpanItem::GetSymbolUnicode()
     return unicode;
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 void SpanItem::StartDrag(int32_t start, int32_t end)
 {
     selectedStart = std::max(0, start);
@@ -409,7 +404,6 @@ bool SpanItem::IsDragging()
 {
     return selectedStart >= 0 && selectedEnd >= 0;
 }
-#endif // ENABLE_DRAG_FRAMEWORK
 
 int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
     const RefPtr<Paragraph>& builder, double width, double height, VerticalAlign verticalAlign)

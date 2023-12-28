@@ -686,13 +686,16 @@ bool NavigationModelNG::CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNo
         navigationGroupNode->AddChild(dividerNode);
         navigationGroupNode->SetDividerNode(dividerNode);
 
+        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
+        dividerNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+
         auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
         CHECK_NULL_RETURN(dividerLayoutProperty, false);
         dividerLayoutProperty->UpdateStrokeWidth(DIVIDER_WIDTH);
         dividerLayoutProperty->UpdateVertical(true);
-        auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
-        CHECK_NULL_RETURN(dividerRenderProperty, false);
-        dividerRenderProperty->UpdateDividerColor(DIVIDER_COLOR);
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_RETURN(theme, false);
+        dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
     }
 
     return true;

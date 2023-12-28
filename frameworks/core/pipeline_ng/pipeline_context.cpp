@@ -256,7 +256,7 @@ std::pair<float, float> PipelineContext::LinearInterpolation(const std::tuple<fl
     if (nanoTimeStamp == std::get<INDEX_TIME>(history) || nanoTimeStamp == std::get<INDEX_TIME>(current)) {
         return std::make_pair(0.0f, 0.0f);
     }
-    if (std::get<INDEX_TIME>(current) < std::get<INDEX_TIME>(history)) {
+    if (std::get<INDEX_TIME>(current) <= std::get<INDEX_TIME>(history)) {
         return std::make_pair(0.0f, 0.0f);
     }
     if (std::get<INDEX_TIME>(current) - std::get<INDEX_TIME>(history) > INTERPOLATION_THRESHOLD) {
@@ -1526,6 +1526,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     HandleEtsCardTouchEvent(point);
 
     auto scalePoint = point.CreateScalePoint(GetViewScale());
+    ResSchedReport::GetInstance().OnTouchEvent(scalePoint.type);
     if (scalePoint.type != TouchType::MOVE && scalePoint.type != TouchType::PULL_MOVE) {
         eventManager_->GetEventTreeRecord().AddTouchPoint(scalePoint);
         TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
@@ -2483,6 +2484,76 @@ void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId)
     onWindowSizeChangeCallbacks_.remove(nodeId);
 }
 
+void PipelineContext::AddNavigationStateCallback(
+    int32_t pageId, int32_t nodeId, const std::function<void()>& callback, bool isOnShow)
+{
+    CHECK_RUN_ON(UI);
+    if (isOnShow) {
+        auto it = pageIdOnShowMap_.find(pageId);
+        if (it != pageIdOnShowMap_.end()) {
+            it->second.push_back({nodeId, callback});
+        } else {
+            std::list<std::pair<int32_t, std::function<void()>>> callbacks;
+            callbacks.push_back({nodeId, callback});
+            pageIdOnShowMap_[pageId] = std::move(callbacks);
+        }
+    } else {
+        auto it = pageIdOnHideMap_.find(pageId);
+        if (it != pageIdOnHideMap_.end()) {
+            it->second.push_back({nodeId, callback});
+        } else {
+            std::list<std::pair<int32_t, std::function<void()>>> callbacks;
+            callbacks.push_back({nodeId, callback});
+            pageIdOnHideMap_[pageId] = std::move(callbacks);
+        }
+    }
+}
+
+void PipelineContext::RemoveNavigationStateCallback(int32_t pageId, int32_t nodeId)
+{
+    CHECK_RUN_ON(UI);
+    auto it = pageIdOnShowMap_.find(pageId);
+    if (it != pageIdOnShowMap_.end() && !it->second.empty()) {
+        for (auto iter = it->second.begin(); iter != it->second.end();) {
+            if (iter->first == nodeId) {
+                iter = it->second.erase(iter);
+            } else {
+                iter++;
+            }
+        }
+    }
+    it = pageIdOnHideMap_.find(pageId);
+    if (it != pageIdOnHideMap_.end() && !it->second.empty()) {
+        for (auto iter = it->second.begin(); iter != it->second.end();) {
+            if (iter->first == nodeId) {
+                iter = it->second.erase(iter);
+            } else {
+                iter++;
+            }
+        }
+    }
+}
+
+void PipelineContext::FirePageChanged(int32_t pageId, bool isOnShow)
+{
+    CHECK_RUN_ON(UI);
+    if (isOnShow) {
+        auto it = pageIdOnShowMap_.find(pageId);
+        if (it != pageIdOnShowMap_.end() && !it->second.empty()) {
+            for (auto [nodeId, callback] : it->second) {
+                callback();
+            }
+        }
+    } else {
+        auto it = pageIdOnHideMap_.find(pageId);
+        if (it != pageIdOnHideMap_.end() && !it->second.empty()) {
+            for (auto [nodeId, callback] : it->second) {
+                callback();
+            }
+        }
+    }
+}
+
 void PipelineContext::FlushWindowSizeChangeCallback(int32_t width, int32_t height, WindowSizeChangeReason type)
 {
     auto iter = onWindowSizeChangeCallbacks_.begin();
@@ -2502,7 +2573,6 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
     std::string extraInfo;
-#ifdef ENABLE_DRAG_FRAMEWORK
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
         if (!manager->IsDragged() && manager->IsWindowConsumed()) {
@@ -2522,34 +2592,22 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
         manager->OnDragOut();
         return;
     }
-#endif // ENABLE_DRAG_FRAMEWORK
 
-#ifdef ENABLE_DRAG_FRAMEWORK
     if (action == DragEventAction::DRAG_EVENT_START) {
         manager->RequireSummary();
     }
     extraInfo = manager->GetExtraInfo();
-#else
-    manager->GetExtraInfoFromClipboard(extraInfo);
-#endif // ENABLE_DRAG_FRAMEWORK
     if (action == DragEventAction::DRAG_EVENT_END) {
         manager->OnDragEnd(pointerEvent, extraInfo);
-#ifndef ENABLE_DRAG_FRAMEWORK
-        manager->RestoreClipboardData();
-#endif // ENABLE_DRAG_FRAMEWORK
-#ifdef ENABLE_DRAG_FRAMEWORK
         SubwindowManager::GetInstance()->HidePreviewNG();
         auto overlayManager = GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->RemovePixelMap();
-#endif
         return;
     }
-#ifdef ENABLE_DRAG_FRAMEWORK
     if (action == DragEventAction::DRAG_EVENT_MOVE) {
         manager->DoDragMoveAnimate(pointerEvent);
     }
-#endif
     manager->OnDragMove(pointerEvent, extraInfo);
 }
 
@@ -2888,9 +2946,7 @@ bool PipelineContext::IsDragging() const
         return false;
     }
     bool isDragging = dragDropManager_->IsDragging();
-#ifdef ENABLE_DRAG_FRAMEWORK
     isDragging = (isDragging || dragDropManager_->IsMsdpDragging());
-#endif
     return isDragging;
 }
 

@@ -10730,8 +10730,12 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnScrollStart001, TestSize.Level1)
     EXPECT_CALL(*mockScroll, GetAxis).Times(1).WillOnce(Return(Axis::HORIZONTAL));
     pattern_->enableNestedScroll_ = true;
     pattern_->isDragging_ = false;
+    pattern_->currentIndex_ = 3;
+    EXPECT_EQ(pattern_->gestureSwipeIndex_, 0);
+
     pattern_->OnScrollStartRecursive(5.0f);
     EXPECT_TRUE(pattern_->childScrolling_);
+    EXPECT_EQ(pattern_->gestureSwipeIndex_, 3);
 }
 
 /**
@@ -10748,7 +10752,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnScrollEnd001, TestSize.Level1)
     EXPECT_CALL(*mockScroll, OnScrollEndRecursive).Times(1);
     pattern_->enableNestedScroll_ = true;
     pattern_->parent_ = mockScroll;
-    pattern_->OnScrollEndRecursive();
+    pattern_->OnScrollEndRecursive(std::nullopt);
     EXPECT_FALSE(pattern_->childScrolling_);
 
     pattern_->NotifyParentScrollEnd();

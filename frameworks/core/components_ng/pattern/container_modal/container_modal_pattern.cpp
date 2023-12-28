@@ -636,4 +636,28 @@ void ContainerModalPattern::CallButtonsRectChange()
         },
         TaskExecutor::TaskType::JS);
 }
+
+void ContainerModalPattern::InitTitle()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto themeConstants = themeManager->GetThemeConstants();
+    CHECK_NULL_VOID(themeConstants);
+    auto id = pipeline->GetWindowManager()->GetAppIconId();
+    auto pixelMap = themeConstants->GetPixelMap(id);
+    if (pixelMap) {
+        RefPtr<PixelMap> icon = PixelMap::CreatePixelMap(&pixelMap);
+        SetAppIcon(icon);
+    } else {
+        LOGW("Cannot get pixelmap, try media path."); // use themeConstants GetMediaPath
+    }
+    SetAppTitle(themeConstants->GetString(pipeline->GetWindowManager()->GetAppLabelId()));
+}
+
+void ContainerModalPattern::Init()
+{
+    InitContainerEvent();
+    InitTitle();
+}
 } // namespace OHOS::Ace::NG

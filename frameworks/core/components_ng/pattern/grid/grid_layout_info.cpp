@@ -254,19 +254,19 @@ float GridLayoutInfo::GetContentOffset(const GridLayoutOptions& options, float m
     // get line count
     float totalOffset =
         (firstIrregularIndex >= 1) ? ((firstIrregularIndex - 1) / crossCount_ + 1) * (regularHeight + mainGap) : 0;
-    for (auto index = options.irregularIndexes.begin(); index != options.irregularIndexes.end(); ++index) {
-        if (startIndex_ < *(index)) {
+    for (int32_t idx : options.irregularIndexes) {
+        if (startIndex_ < idx) {
             totalOffset += ((startIndex_ - lastIndex - 1) / crossCount_) * (regularHeight + mainGap);
-            lastIndex = *(index);
+            lastIndex = idx;
             break;
         }
-        if (startIndex_ > *(index)) {
+        if (startIndex_ > idx) {
             totalOffset += irregularHeight + mainGap;
         }
         totalOffset +=
-            (*(index)-1 > lastIndex) ? ((*(index)-1 - lastIndex - 1) / crossCount_ + 1) * (regularHeight + mainGap) : 0;
-        lastIndex = *(index);
-        if (startIndex_ == *(index)) {
+            (idx - 1 > lastIndex) ? ((idx - 1 - lastIndex - 1) / crossCount_ + 1) * (regularHeight + mainGap) : 0;
+        lastIndex = idx;
+        if (startIndex_ == idx) {
             break;
         }
     }
@@ -308,11 +308,14 @@ float GridLayoutInfo::GetContentHeight(const GridLayoutOptions& options, float m
     auto lastIndex = firstIrregularIndex;
     float totalHeight =
         (firstIrregularIndex >= 1) ? ((firstIrregularIndex - 1) / crossCount_ + 1) * (regularHeight + mainGap) : 0;
-    for (auto index = options.irregularIndexes.begin(); index != options.irregularIndexes.end(); ++index) {
+    for (int32_t idx : options.irregularIndexes) {
+        if (idx >= childrenCount_) {
+            break;
+        }
         totalHeight += irregularHeight + mainGap;
         totalHeight +=
-            (*(index)-lastIndex) > 1 ? ((*(index)-1 - lastIndex) / crossCount_ + 1) * (regularHeight + mainGap) : 0;
-        lastIndex = *(index);
+            (idx - lastIndex) > 1 ? ((idx - 1 - lastIndex) / crossCount_ + 1) * (regularHeight + mainGap) : 0;
+        lastIndex = idx;
     }
 
     totalHeight += (childrenCount_ - 1 > lastIndex)
@@ -344,5 +347,38 @@ float GridLayoutInfo::GetCurrentLineHeight() const
         return item.second;
     }
     return 0.0f;
+}
+
+void GridLayoutInfo::UpdateStartIdxToLastItem()
+{
+    // find last index in gridMatrix
+    for (auto line = gridMatrix_.rbegin(); line != gridMatrix_.rend(); ++line) {
+        const auto& row = line->second;
+        for (auto c = row.rbegin(); c != row.rend(); ++c) {
+            if (c->second != -1) {
+                startIndex_ = c->second;
+                startMainLineIndex_ = line->first;
+                return;
+            }
+        }
+    }
+    startIndex_ = 0;
+    startMainLineIndex_ = 0;
+}
+
+int32_t GridLayoutInfo::FindItemInRange(int32_t target) const
+{
+    if (gridMatrix_.empty()) {
+        return -1;
+    }
+    for (int r = startMainLineIndex_; r <= endMainLineIndex_; ++r) {
+        const auto& row = gridMatrix_.at(r);
+        for (auto it : row) {
+            if (it.second == target) {
+                return r;
+            }
+        }
+    }
+    return -1;
 }
 } // namespace OHOS::Ace::NG

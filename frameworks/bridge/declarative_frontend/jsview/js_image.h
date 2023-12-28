@@ -59,6 +59,7 @@ public:
 
     static void EnableAnalyzer(bool isEnableAnalyzer);
     static void AnalyzerConfig(const JSCallbackInfo &info);
+    static void JsImageResizable(const JSCallbackInfo& info);
 
 protected:
     static void SetBorder(const Border& border);

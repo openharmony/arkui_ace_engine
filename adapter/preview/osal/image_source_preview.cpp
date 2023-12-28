@@ -27,6 +27,11 @@ RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size)
     return nullptr;
 }
 
+RefPtr<ImageSource> ImageSource::Create(const std::string& filePath)
+{
+    return nullptr;
+}
+
 bool ImageSource::IsAstc(const uint8_t* data, size_t size)
 {
     return false;
@@ -48,6 +53,11 @@ RefPtr<PixelMap> ImageSourcePreview::CreatePixelMap(const Size& size)
 }
 
 RefPtr<PixelMap> ImageSourcePreview::CreatePixelMap(uint32_t index, const Size& size)
+{
+    return nullptr;
+}
+
+RefPtr<PixelMap> ImageSourcePreview::CreatePixelMap()
 {
     return nullptr;
 }

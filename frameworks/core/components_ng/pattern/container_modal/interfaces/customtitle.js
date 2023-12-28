@@ -26,7 +26,6 @@ export class Index extends ViewPU {
     this.__appLabel = new ObservedPropertySimplePU('', this, "appLabel");
     this.__appTitle = new ObservedPropertySimplePU('', this, "appTitle");
     this.__textColor = new ObservedPropertySimplePU(0xff000000, this, "textColor");
-    this.__appIcon = new ObservedPropertyObjectPU(new LayeredDrawableDescriptor(), this, "appIcon");
     this.__pixelMap = new ObservedPropertyObjectPU(undefined, this, "pixelMap");
     this.setInitiallyProvidedValue(params);
   }
@@ -40,9 +39,6 @@ export class Index extends ViewPU {
     if (params.appTitle !== undefined) {
       this.appTitle = params.appTitle;
     }
-    if (params.appIcon !== undefined) {
-      this.appIcon = params.appIcon;
-    }
     if (params.pixelMap !== undefined) {
       this.pixelMap = params.pixelMap;
     }
@@ -53,14 +49,12 @@ export class Index extends ViewPU {
     this.__textColor.purgeDependencyOnElmtId(rmElmtId);
     this.__appLabel.purgeDependencyOnElmtId(rmElmtId);
     this.__appTitle.purgeDependencyOnElmtId(rmElmtId);
-    this.__appIcon.purgeDependencyOnElmtId(rmElmtId);
     this.__pixelMap.purgeDependencyOnElmtId(rmElmtId);
   }
   aboutToBeDeleted() {
     this.__textColor.aboutToBeDeleted();
     this.__appLabel.aboutToBeDeleted();
     this.__appTitle.aboutToBeDeleted();
-    this.__appIcon.aboutToBeDeleted();
     this.__pixelMap.aboutToBeDeleted();
     SubscriberManager.Get().delete(this.id__());
     this.aboutToBeDeletedInternal();
@@ -83,36 +77,11 @@ export class Index extends ViewPU {
   set appTitle(newValue) {
       this.__appTitle.set(newValue);
   }
-  get appIcon() {
-    return this.__appIcon.get();
-  }
-  set appIcon(newValue) {
-    this.__appIcon.set(newValue);
-  }
   get pixelMap() {
     return this.__pixelMap.get();
   }
   set pixelMap(newValue) {
     this.__pixelMap.set(newValue);
-  }
-  aboutToAppear() {
-    const context = getContext(this);
-    try {
-      this.appLabel = context.resourceManager.getStringSync(context.applicationInfo.labelId);
-    }
-    catch (error) {
-      let code = error.code;
-      let message = error.message;
-      console.error(`get appLabel failed, error code: ${code}, message: ${message}.`);
-    }
-    try {
-      this.appIcon = context.resourceManager.getDrawableDescriptor(context.applicationInfo.iconId);
-    }
-    catch (error) {
-      let code = error.code;
-      let message = error.message;
-      console.error(`get appIcon failed, error code: ${code}, message: ${message}.`);
-    }
   }
   onWindowFocused() {
     this.textColor = 0xff000000;
@@ -143,7 +112,7 @@ export class Index extends ViewPU {
     });
     this.observeComponentCreation((elmtId, isInitialRender) => {
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-      Image.create(this.pixelMap ? this.pixelMap : this.appIcon);
+      Image.create(this.pixelMap);
       Image.id("enhanceAppIcon");
       Image.height(TITLE_ICON_SIZE);
       Image.width(TITLE_ICON_SIZE);

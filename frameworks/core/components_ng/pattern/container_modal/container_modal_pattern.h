@@ -60,7 +60,7 @@ public:
 
     virtual void OnWindowForceUnfocused();
 
-    void InitContainerEvent();
+    void Init();
 
     void ShowTitle(bool isShow, bool hasDeco = true, bool needUpdate = false);
 
@@ -182,9 +182,10 @@ protected:
 
 private:
     void WindowFocus(bool isFocus);
-
     void SetTitleButtonHide(
         const RefPtr<FrameNode>& controlButtonsNode, bool hideSplit, bool hideMaximize, bool hideMinimize);
+    void InitTitle();
+    void InitContainerEvent();
 
     std::string appLabel_;
     RefPtr<PanEvent> panEvent_ = nullptr;

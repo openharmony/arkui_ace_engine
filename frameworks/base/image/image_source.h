@@ -29,6 +29,7 @@ public:
 
     static RefPtr<ImageSource> Create(int32_t fd);
     static RefPtr<ImageSource> Create(const uint8_t* data, uint32_t size);
+    static RefPtr<ImageSource> Create(const std::string& filePath);
     static bool IsAstc(const uint8_t* data, size_t size);
     static Size GetASTCInfo(const uint8_t* data, size_t size);
 
@@ -36,6 +37,7 @@ public:
 
     virtual RefPtr<PixelMap> CreatePixelMap(const Size& size) = 0;
     virtual RefPtr<PixelMap> CreatePixelMap(uint32_t index, const Size& size) = 0;
+    virtual RefPtr<PixelMap> CreatePixelMap() = 0;
     virtual Size GetImageSize() = 0;
 };
 } // namespace OHOS::Ace

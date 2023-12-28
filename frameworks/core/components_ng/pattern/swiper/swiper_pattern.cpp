@@ -54,6 +54,7 @@ namespace {
 
 // TODO use theme.
 constexpr int32_t MIN_TURN_PAGE_VELOCITY = 1200;
+constexpr int32_t NEW_MIN_TURN_PAGE_VELOCITY = 780;
 constexpr Dimension INDICATOR_BORDER_RADIUS = 16.0_vp;
 
 constexpr Dimension SWIPER_MARGIN = 16.0_vp;
@@ -1465,8 +1466,8 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset)
     turnPageRate_ = (currentTurnPageRate == FLT_MAX ? turnPageRate_ : currentTurnPageRate);
 
     touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
-    if (!IsLoop() && ((currentFirstIndex_ == 0 && GreatNotEqualHighPrecision(turnPageRate_, 0.0f)) ||
-                         (currentFirstIndex_ == TotalCount() - 1 && LessNotEqualHighPrecision(turnPageRate_, 0.0f)))) {
+    if (!IsLoop() && ((currentFirstIndex_ == 0 && GreatNotEqualCustomPrecision(turnPageRate_, 0.0f)) ||
+        (currentFirstIndex_ == TotalCount() - 1 && LessNotEqualCustomPrecision(turnPageRate_, 0.0f)))) {
         return;
     }
     HandleTouchBottomLoop();
@@ -1713,15 +1714,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
         if (currentIndex_ != nextIndex) {
             UpdateCurrentIndex(nextIndex);
             do {
-                auto host = GetHost();
-                if (!host) {
-                    break;
-                }
-                auto curChild = host->GetChildAtIndex(currentIndex_);
-                if (!curChild) {
-                    break;
-                }
-                auto curChildFrame = AceType::DynamicCast<FrameNode>(curChild);
+                auto curChildFrame = GetCurrentFrameNode(currentIndex_);
                 if (!curChildFrame) {
                     break;
                 }
@@ -1780,7 +1773,9 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDista
     auto direction = GreatNotEqual(velocity, 0.0);
     auto dragThresholdFlag = direction ? firstItemInfoInVisibleArea.second.endPos > firstItemLength / 2
                                        : firstItemInfoInVisibleArea.second.endPos < firstItemLength / 2;
-    if ((!onlyDistance && std::abs(velocity) > MIN_TURN_PAGE_VELOCITY) || dragThresholdFlag) {
+    auto turnVelocity = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_MIN_TURN_PAGE_VELOCITY
+                                                                                           : MIN_TURN_PAGE_VELOCITY;
+    if ((!onlyDistance && std::abs(velocity) > turnVelocity) || dragThresholdFlag) {
         nextIndex = direction ? firstItemInfoInVisibleArea.first : firstItemInfoInVisibleArea.first + 1;
     } else {
         nextIndex = direction ? firstItemInfoInVisibleArea.first + 1 : firstItemInfoInVisibleArea.first;
@@ -2157,15 +2152,7 @@ void SwiperPattern::OnSpringAndFadeAnimationFinish()
     if (GetLoopIndex(currentIndex_) != GetLoopIndex(nextIndex_)) {
         UpdateCurrentIndex(nextIndex_);
         do {
-            auto host = GetHost();
-            if (!host) {
-                break;
-            }
-            auto curChild = host->GetChildAtIndex(currentIndex_);
-            if (!curChild) {
-                break;
-            }
-            auto curChildFrame = AceType::DynamicCast<FrameNode>(curChild);
+            auto curChildFrame = GetCurrentFrameNode(currentIndex_);
             if (!curChildFrame) {
                 break;
             }
@@ -2898,15 +2885,7 @@ void SwiperPattern::TriggerAnimationEndOnForceStop()
             TriggerAnimationEndOnSwipeToRight();
         }
         do {
-            auto host = GetHost();
-            if (!host) {
-                break;
-            }
-            auto curChild = host->GetChildAtIndex(currentIndex_);
-            if (!curChild) {
-                break;
-            }
-            auto curChildFrame = AceType::DynamicCast<FrameNode>(curChild);
+            auto curChildFrame = GetCurrentFrameNode(currentIndex_);
             if (!curChildFrame) {
                 break;
             }
@@ -3309,8 +3288,9 @@ float SwiperPattern::GetCustomPropertyOffset() const
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, 0.0);
     auto paddingAndBorder = layoutProperty->CreatePaddingAndBorder();
-    auto paddingAndBorderValue =
-        GetDirection() == Axis::HORIZONTAL ? paddingAndBorder.left.value_or(0.0) : paddingAndBorder.top.value_or(0.0);
+    auto paddingAndBorderValue = GetDirection() == Axis::HORIZONTAL
+                                     ? paddingAndBorder.left.value_or(0.0) + tabsPaddingAndBorder_.left.value_or(0.0)
+                                     : paddingAndBorder.top.value_or(0.0) + tabsPaddingAndBorder_.top.value_or(0.0);
 
     auto preMarginPX = GetPrevMargin();
     if (layoutProperty->GetPrevMargin().has_value() && preMarginPX > 0.0) {
@@ -3383,11 +3363,7 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
     } else {
         UpdateCurrentIndex(nextIndex);
         do {
-            auto curChild = host->GetChildAtIndex(currentIndex_);
-            if (!curChild) {
-                break;
-            }
-            auto curChildFrame = AceType::DynamicCast<FrameNode>(curChild);
+            auto curChildFrame = GetCurrentFrameNode(currentIndex_);
             if (!curChildFrame) {
                 break;
             }
@@ -3421,6 +3397,7 @@ void SwiperPattern::OnScrollStartRecursive(float position)
         return;
     }
     childScrolling_ = true;
+    gestureSwipeIndex_ = currentIndex_;
     StopAnimationOnScrollStart(false);
     NotifyParentScrollStart(position);
 }
@@ -3434,14 +3411,14 @@ void SwiperPattern::NotifyParentScrollStart(float position)
     parent_ = parent;
 }
 
-void SwiperPattern::OnScrollEndRecursive()
+void SwiperPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
 {
     if (IsDisableSwipe()) {
         return;
     }
     // in case child didn't call swiper's HandleScrollVelocity
     if (!AnimationRunning()) {
-        HandleDragEnd(0.0f);
+        HandleDragEnd(velocity.value_or(0.0f));
     }
 
     childScrolling_ = false;
@@ -3451,7 +3428,7 @@ void SwiperPattern::NotifyParentScrollEnd()
 {
     auto parent = parent_.Upgrade();
     if (parent && enableNestedScroll_) {
-        parent->OnScrollEndRecursive();
+        parent->OnScrollEndRecursive(std::nullopt);
     }
 }
 
@@ -3955,5 +3932,14 @@ void SwiperPattern::UpdateSwiperPanEvent(bool disableSwipe)
         gestureHub->RemovePanEvent(panEvent_);
         panEvent_.Reset();
     }
+}
+
+RefPtr<FrameNode> SwiperPattern::GetCurrentFrameNode(int32_t currentIndex) const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto currentLayoutWrapper = host->GetChildByIndex(GetLoopIndex(currentIndex));
+    CHECK_NULL_RETURN(currentLayoutWrapper, nullptr);
+    return currentLayoutWrapper->GetHostNode();
 }
 } // namespace OHOS::Ace::NG

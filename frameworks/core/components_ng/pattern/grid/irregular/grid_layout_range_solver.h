@@ -38,20 +38,48 @@ public:
         int32_t row; /**< Row index of the starting row. */
         float pos;   /**< Main position of the starting row in ViewBox. The new currentOffset_ */
     };
-
     /**
-     * @brief Finds the starting row.
+     * @brief Finds the starting row based on GridLayoutInfo::currentOffset_.
      *
      * @param mainGap The main-axis gap between GridItems.
      * @return The StartingRowInfo object containing the starting row information.
      */
     StartingRowInfo FindStartingRow(float mainGap);
 
+    struct RangeInfo {
+        int32_t startRow; /**< Row index of the starting row. */
+        float pos;        /**< Main position of the starting row in ViewBox. The new currentOffset_ */
+        int32_t endRow;   /**< Row index of the last row in layout range. */
+        int32_t endIdx;   /**< index of the last GridItem in layout range. */
+    };
+    /**
+     * @brief Finds the layout range when jumping to a new index.
+     *
+     * @param jumpLineIdx The index of the jump line.
+     * @param mainGap The main gap between rows.
+     * @return The layout range info after jumping to the target line.
+     */
+    RangeInfo FindRangeOnJump(int32_t jumpLineIdx, float mainGap);
+
 private:
     /**
-     * @brief Find the starting row going forward, when currentOffset_ is negative (scrolling down).
+     * @brief Find the starting row after offsetting by [targetLen] going forward (scrolling down).
+     *
+     * @param mainGap The gap length between rows.
+     * @param targetLen The target length to offset.
+     * @param idx The index of the current starting row
      */
-    StartingRowInfo SolveForward(float mainGap);
+    StartingRowInfo SolveForward(float mainGap, float targetLen, int32_t idx);
+
+    /**
+     * @brief Solves the forward end index for a given target length and starting line index.
+     *
+     * @param mainGap The main gap between grid items.
+     * @param targetLen The target length for the forward traversal.
+     * @param idx The starting line index.
+     * @return { ending line index, ending GridItem index }
+     */
+    std::pair<int32_t, int32_t> SolveForwardForEndIdx(float mainGap, float targetLen, int32_t idx);
 
     /**
      * @brief Adds the next rows to the layout in SolveForward.
@@ -65,9 +93,13 @@ private:
     std::pair<int32_t, float> AddNextRows(float mainGap, int32_t idx);
 
     /**
-     * @brief Find the starting row going backward, when currentOffset_ is positive (scrolling up).
+     * @brief Find the new starting row after offsetting by [targetLen] going backward (scrolling up).
+     *
+     * @param mainGap The gap length between rows.
+     * @param targetLen The target length to offset.
+     * @param idx The index of the current starting row
      */
-    StartingRowInfo SolveBackward(float mainGap);
+    StartingRowInfo SolveBackward(float mainGap, float targetLen, int32_t idx);
 
     /**
      * @brief Looks for multi-row items in the row.

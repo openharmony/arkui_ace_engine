@@ -36,14 +36,11 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/gestures/gesture_info.h"
 
-#ifdef ENABLE_DRAG_FRAMEWORK
-namespace OHOS::Msdp::DeviceStatus {
-struct DragNotifyMsg;
-}
 namespace OHOS::Ace {
+struct DragNotifyMsg;
 class UnifiedData;
 }
-#endif
+
 enum class MenuPreviewMode {
     NONE,
     IMAGE,
@@ -130,10 +127,7 @@ struct DragDropInfo {
     std::string extraInfo;
 };
 
-#ifdef ENABLE_DRAG_FRAMEWORK
-using DragNotifyMsg = Msdp::DeviceStatus::DragNotifyMsg;
 using DragNotifyMsgCore = OHOS::Ace::DragNotifyMsg;
-using OnDragCallback = std::function<void(const DragNotifyMsg&)>;
 using OnDragCallbackCore = std::function<void(const DragNotifyMsgCore&)>;
 constexpr float PIXELMAP_WIDTH_RATE = -0.5f;
 constexpr float PIXELMAP_HEIGHT_RATE = -0.2f;
@@ -142,7 +136,7 @@ constexpr float PIXELMAP_DRAG_WGR_TEXT_SCALE = 2.0f;
 constexpr float PIXELMAP_DRAG_WGR_SCALE = 3.0f;
 constexpr float DEFALUT_DRAG_PPIXELMAP_SCALE = 1.05f;
 constexpr float PIXELMAP_DRAG_DEFAULT_HEIGHT = -28.0f;
-#endif
+
 class EventHub;
 
 // The gesture event hub is mainly used to handle common gesture events.
@@ -480,14 +474,12 @@ public:
         touchable_ = touchable;
     }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
     void SetThumbnailCallback(std::function<void(Offset)>&& callback)
     {
         if (dragEventActuator_) {
             dragEventActuator_->SetThumbnailCallback(std::move(callback));
         }
     }
-#endif // ENABLE_DRAG_FRAMEWORK
 
     bool GetTextDraggable() const
     {
@@ -551,7 +543,6 @@ public:
         return userParallelClickEventActuator_;
     }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
     int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
     OnDragCallbackCore GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
     void GenerateMousePixelMap(const GestureEvent& info);
@@ -559,7 +550,6 @@ public:
         const GestureEvent& info, const SizeF& size, const float scale = 1.0f, const bool needScale = false) const;
     float GetPixelMapScale(const int32_t height, const int32_t width) const;
     bool IsPixelMapNeedScale() const;
-#endif // ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     void HandleOnDragStart(const GestureEvent& info);
     void HandleOnDragUpdate(const GestureEvent& info);

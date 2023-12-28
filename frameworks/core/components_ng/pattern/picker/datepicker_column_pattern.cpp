@@ -300,7 +300,10 @@ void DatePickerColumnPattern::PlayHoverAnimation(const Color& color)
 bool DatePickerColumnPattern::OnDirtyLayoutWrapperSwap(
     const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    CHECK_NULL_RETURN(config.frameSizeChange, false);
+    bool isChange =
+        config.frameSizeChange || config.frameOffsetChange || config.contentSizeChange || config.contentOffsetChange;
+
+    CHECK_NULL_RETURN(isChange, false);
     CHECK_NULL_RETURN(dirty, false);
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);

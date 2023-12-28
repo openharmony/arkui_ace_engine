@@ -39,10 +39,8 @@
 #if defined(PIXEL_MAP_SUPPORTED)
 #include "foundation/multimedia/image_framework/interfaces/kits/js/common/include/pixel_map_napi.h"
 #endif
-#ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/ace_engine_ext.h"
 #include "core/common/udmf/udmf_client.h"
-#endif
 
 namespace OHOS::Ace::NG {
 napi_value ConvertPixmapNapi(const RefPtr<PixelMap>& pixelMap)
@@ -262,7 +260,6 @@ void ImagePattern::SetImagePaintConfig(
     };
     config.imageFit_ = layoutProps->GetImageFit().value_or(ImageFit::COVER);
     config.isSvg_ = isSvg;
-
     auto host = GetHost();
     if (!host) {
         canvasImage->SetPaintConfig(config);
@@ -636,10 +633,7 @@ void ImagePattern::EnableDrag()
         DragDropInfo info;
         auto imagePattern = weak.Upgrade();
         CHECK_NULL_RETURN(imagePattern && imagePattern->loadingCtx_, info);
-
-#ifdef ENABLE_DRAG_FRAMEWORK
         AceEngineExt::GetInstance().DragStartExt();
-#endif
         imagePattern->UpdateDragEvent(event);
         info.extraInfo = imagePattern->loadingCtx_->GetSourceInfo().GetSrc();
         return info;
@@ -829,6 +823,13 @@ void ImagePattern::DumpInfo()
     if (loadingCtx_) {
         auto currentLoadImageState = loadingCtx_->GetCurrentLoadingState();
         DumpLog::GetInstance().AddDesc(std::string("currentLoadImageState : ").append(currentLoadImageState));
+        DumpLog::GetInstance().AddDesc(std::string("rawImageSize: ").append(loadingCtx_->GetImageSize().ToString()));
+    }
+    auto imageRenderProperty = GetPaintProperty<ImageRenderProperty>();
+    if (imageRenderProperty && imageRenderProperty->HasImageResizableSlice() &&
+        imageRenderProperty->GetImageResizableSliceValue({}).Valid()) {
+        DumpLog::GetInstance().AddDesc(
+            std::string("reslzable slice: ").append(imageRenderProperty->GetImageResizableSliceValue({}).ToString()));
     }
 }
 
@@ -847,7 +848,6 @@ void ImagePattern::DumpAdvanceInfo()
 
 void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
 {
-#ifdef ENABLE_DRAG_FRAMEWORK
     RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
     CHECK_NULL_VOID(loadingCtx_ && image_);
     if (loadingCtx_->GetSourceInfo().IsPixmap()) {
@@ -864,7 +864,6 @@ void ImagePattern::UpdateDragEvent(const RefPtr<OHOS::Ace::DragEvent>& event)
         UdmfClient::GetInstance()->AddImageRecord(unifiedData, loadingCtx_->GetSourceInfo().GetSrc());
     }
     event->SetData(unifiedData);
-#endif
 }
 
 void ImagePattern::OnLanguageConfigurationUpdate()

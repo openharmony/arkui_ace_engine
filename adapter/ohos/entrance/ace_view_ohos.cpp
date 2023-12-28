@@ -114,16 +114,12 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
             pointerAction <= MMI::PointerEvent::POINTER_ACTION_AXIS_END) {
             view->ProcessAxisEvent(pointerEvent, node);
         } else {
-#ifdef ENABLE_DRAG_FRAMEWORK
             view->ProcessDragEvent(pointerEvent);
-#endif // ENABLE_DRAG_FRAMEWORK
             view->ProcessMouseEvent(pointerEvent, node);
         }
     } else {
         // touch event
-#ifdef ENABLE_DRAG_FRAMEWORK
         view->ProcessDragEvent(pointerEvent);
-#endif // ENABLE_DRAG_FRAMEWORK
         int32_t instanceId = view->GetInstanceId();
         auto container = Platform::AceContainer::GetContainer(instanceId);
         CHECK_NULL_VOID(container);
@@ -286,7 +282,6 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
     }
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     DragEventAction action;
@@ -327,7 +322,6 @@ void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& poi
             break;
     }
 }
-#endif // ENABLE_DRAG_FRAMEWORK
 
 void AceViewOhos::ProcessDragEvent(int32_t x, int32_t y, const DragEventAction& action)
 {

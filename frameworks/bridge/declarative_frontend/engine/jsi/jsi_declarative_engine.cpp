@@ -398,6 +398,7 @@ void JsiDeclarativeEngineInstance::InitAceModule()
         PreloadStateManagement(runtime_);
         PreloadJsEnums(runtime_);
         PreloadArkComponent(runtime_);
+        PreloadUIContent(runtime_);
     }
 #if defined(PREVIEW)
     std::string jsMockSystemPluginString(_binary_jsMockSystemPlugin_abc_start,
@@ -1882,8 +1883,8 @@ void JsiDeclarativeEngine::DestroyApplication(const std::string& packageName)
 
 void JsiDeclarativeEngine::UpdateApplicationState(const std::string& packageName, Frontend::State state)
 {
-    LOGI("Update application state, packageName %{public}s, state: %{public}d", packageName.c_str(),
-        static_cast<int32_t>(state));
+    LOGI("Update application state %{public}s, state: %{public}s", packageName.c_str(),
+        Frontend::stateToString(state).c_str());
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
     if (!runtime) {
         return;

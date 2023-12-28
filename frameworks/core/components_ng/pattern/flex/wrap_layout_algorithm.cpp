@@ -48,8 +48,6 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto flexProp = AceType::DynamicCast<FlexLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(flexProp);
     direction_ = flexProp->GetWrapDirection().value_or(WrapDirection::HORIZONTAL);
-    flexDirection_ = flexProp->GetFlexDirection().value_or(FlexDirection::ROW);
-
     // alignment for alignContent, alignment when cross axis has extra space
     alignment_ = flexProp->GetAlignment().value_or(WrapAlignment::START);
     // alignment for justifyContent, main axis alignment
@@ -58,8 +56,6 @@ void WrapLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     crossAlignment_ = flexProp->GetCrossAlignment().value_or(WrapAlignment::START);
     isHorizontal_ = direction_ == WrapDirection::HORIZONTAL || direction_ == WrapDirection::HORIZONTAL_REVERSE;
     isReverse_ = direction_ == WrapDirection::HORIZONTAL_REVERSE || direction_ == WrapDirection::VERTICAL_REVERSE;
-    flexDirection_ = flexProp->GetFlexDirection().value_or(FlexDirection::ROW);
-    isFlexReverse_ = flexDirection_ == FlexDirection::ROW_REVERSE || flexDirection_ == FlexDirection::COLUMN_REVERSE;
     PerformLayoutInitialize(flexProp);
     totalMainLength_ = 0.0f;
     totalCrossLength_ = 0.0f;
@@ -261,60 +257,30 @@ float WrapLayoutAlgorithm::GetItemCrossAxisLength(const RefPtr<GeometryNode>& it
 
 void WrapLayoutAlgorithm::AddPaddingToStartPosition(OffsetF& startPosition) const
 {
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        switch (direction_) {
-            // horizontal or vertical will start from top left
-            case WrapDirection::HORIZONTAL:
-                startPosition.AddX(isFlexReverse_ ? -padding_.left.value_or(0.0f) : padding_.left.value_or(0.0f));
-                startPosition.AddY(padding_.top.value_or(0.0f));
-                break;
-            case WrapDirection::VERTICAL:
-                startPosition.AddX(padding_.left.value_or(0.0f));
-                startPosition.AddY(isFlexReverse_ ? -padding_.top.value_or(0.0f) : padding_.top.value_or(0.0f));
-                break;
-            case WrapDirection::HORIZONTAL_REVERSE:
-                startPosition.AddX(isFlexReverse_ ? -padding_.right.value_or(0.0f) : padding_.right.value_or(0.0f));
-                startPosition.AddY(padding_.top.value_or(0.0f));
-                break;
-            case WrapDirection::VERTICAL_REVERSE:
-                startPosition.AddX(padding_.left.value_or(0.0f));
-                startPosition.AddY(isFlexReverse_ ? -padding_.bottom.value_or(0.0f) : padding_.bottom.value_or(0.0f));
-                break;
-            default:
-                break;
-        }
-    } else {
-        switch (direction_) {
-            // horizontal or vertical will start from top left
-            case WrapDirection::HORIZONTAL:
-            case WrapDirection::VERTICAL:
-                startPosition.AddX(padding_.left.value_or(0.0f));
-                startPosition.AddY(padding_.top.value_or(0.0f));
-                break;
-            case WrapDirection::HORIZONTAL_REVERSE:
-                startPosition.AddX(-padding_.right.value_or(0.0f));
-                startPosition.AddY(padding_.top.value_or(0.0f));
-                break;
-            case WrapDirection::VERTICAL_REVERSE:
-                startPosition.AddX(padding_.left.value_or(0.0f));
-                startPosition.AddY(-padding_.bottom.value_or(0.0f));
-                break;
-            default:
-                break;
-        }
+    switch (direction_) {
+        // horizontal or vertical will start from top left
+        case WrapDirection::HORIZONTAL:
+        case WrapDirection::VERTICAL:
+            startPosition.AddX(padding_.left.value_or(0.0f));
+            startPosition.AddY(padding_.top.value_or(0.0f));
+            break;
+        case WrapDirection::HORIZONTAL_REVERSE:
+            startPosition.AddX(-padding_.right.value_or(0.0f));
+            startPosition.AddY(padding_.top.value_or(0.0f));
+            break;
+        case WrapDirection::VERTICAL_REVERSE:
+            startPosition.AddX(padding_.left.value_or(0.0f));
+            startPosition.AddY(-padding_.bottom.value_or(0.0f));
+            break;
+        default:
+            LOGW("Unknown direction");
     }
 }
 
 void WrapLayoutAlgorithm::AddExtraSpaceToStartPosition(OffsetF& startPosition, float extraSpace, bool onMainAxis) const
 {
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        if (isFlexReverse_) {
-            extraSpace = -extraSpace;
-        }
-    } else {
-        if (isReverse_) {
-            extraSpace = -extraSpace;
-        }
+    if (isReverse_) {
+        extraSpace = -extraSpace;
     }
     if (onMainAxis) {
         if (isHorizontal_) {
@@ -342,16 +308,8 @@ void WrapLayoutAlgorithm::LayoutWholeWrap(
     const auto& layoutProp = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProp);
     AddPaddingToStartPosition(startPosition);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        if (isFlexReverse_) {
-            AddExtraSpaceToStartPosition(
-                startPosition, isHorizontal_ ? -frameSize_.Width() : -frameSize_.Height(), true);
-        }
-    } else {
-        if (isReverse_) {
-            AddExtraSpaceToStartPosition(
-                startPosition, isHorizontal_ ? -frameSize_.Width() : -frameSize_.Height(), true);
-        }
+    if (isReverse_) {
+        AddExtraSpaceToStartPosition(startPosition, isHorizontal_ ? -frameSize_.Width() : -frameSize_.Height(), true);
     }
     // if cross axis size is not set, cross axis size is as large as children cross axis size sum
     // no need to set alignment_.
@@ -363,17 +321,14 @@ void WrapLayoutAlgorithm::LayoutWholeWrap(
         (isHorizontal_ && !hasIdealHeight_)) {
         return;
     }
+
     auto crossAxisRemainSpace = crossLengthLimit_ - totalCrossLength_;
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        if (isFlexReverse_) {
-            crossAxisRemainSpace = -crossAxisRemainSpace;
-        }
-    } else {
-        if (isReverse_) {
-            crossAxisRemainSpace = -crossAxisRemainSpace;
-        }
+
+    if (isReverse_) {
+        crossAxisRemainSpace = -crossAxisRemainSpace;
     }
     // switch align content enum, alignment when extra space exists in container extra spaces
+
     switch (alignment_) {
         case WrapAlignment::START:
             break;
@@ -453,11 +408,6 @@ void WrapLayoutAlgorithm::TraverseContent(const OffsetF& startPosition, const Of
     OffsetF contentPosition(startPosition.GetX(), startPosition.GetY());
     auto contentSpace = static_cast<float>(contentSpace_.ConvertToPx());
     auto spaceBetween = isHorizontal_ ? spaceBetweenContentsOnCrossAxis.GetY() : spaceBetweenContentsOnCrossAxis.GetX();
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        if (isReverse_ != isFlexReverse_) {
-            std::reverse(std::begin(contentList_), std::end(contentList_));
-        }
-    }
     for (const auto& content : contentList_) {
         LayoutContent(content, contentPosition);
         if (isHorizontal_) {
@@ -575,10 +525,6 @@ void WrapLayoutAlgorithm::LayoutContent(const ContentInfo& content, const Offset
     FlexItemProperties flexItemProperties;
     GetFlexItemProperties(content, flexItemProperties);
     float remainSpace = mainLengthLimit_ - currentMainLength_;
-    bool isReverse = isReverse_;
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        isReverse = isFlexReverse_;
-    }
     for (const auto& itemWrapper : content.itemList) {
         auto item = itemWrapper->GetGeometryNode();
         if (GreatNotEqual(remainSpace, 0.0f)) {
@@ -586,7 +532,7 @@ void WrapLayoutAlgorithm::LayoutContent(const ContentInfo& content, const Offset
         }
         // calc start position and between space
         auto itemMainAxisOffset = isHorizontal_ ? contentStartPosition.GetX() : contentStartPosition.GetY();
-        if (isReverse) {
+        if (isReverse_) {
             itemMainAxisOffset -= GetItemMainAxisLength(item);
         }
         auto itemCrossAxisOffset = CalcItemCrossAxisOffset(content, contentStartPosition, item);
@@ -596,12 +542,12 @@ void WrapLayoutAlgorithm::LayoutContent(const ContentInfo& content, const Offset
             offset = OffsetF(itemMainAxisOffset, itemCrossAxisOffset);
             contentMainAxisSpan = item->GetMarginFrameSize().Width() + static_cast<float>(spacing_.ConvertToPx()) +
                                   spaceBetweenItemsOnMainAxis.GetX();
-            contentStartPosition.AddX(isReverse ? -contentMainAxisSpan : contentMainAxisSpan);
+            contentStartPosition.AddX(isReverse_ ? -contentMainAxisSpan : contentMainAxisSpan);
         } else {
             offset = OffsetF(itemCrossAxisOffset, itemMainAxisOffset);
             contentMainAxisSpan = item->GetMarginFrameSize().Height() + static_cast<float>(spacing_.ConvertToPx()) +
                                   spaceBetweenItemsOnMainAxis.GetY();
-            contentStartPosition.AddY(isReverse ? -contentMainAxisSpan : contentMainAxisSpan);
+            contentStartPosition.AddY(isReverse_ ? -contentMainAxisSpan : contentMainAxisSpan);
         }
         itemWrapper->GetGeometryNode()->SetMarginFrameOffset(offset);
     }

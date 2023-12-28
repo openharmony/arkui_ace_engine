@@ -265,6 +265,52 @@ void JSImage::JsBorder(const JSCallbackInfo& info)
     ImageModel::GetInstance()->SetBackBorder();
 }
 
+void JSImage::JsImageResizable(const JSCallbackInfo& info)
+{
+    auto infoObj = info[0];
+    ImageResizableSlice sliceResult;
+    if (!infoObj->IsObject()) {
+        ImageModel::GetInstance()->SetResizableSlice(sliceResult);
+        return;
+    }
+    JSRef<JSObject> resizableObject = JSRef<JSObject>::Cast(infoObj);
+    if (resizableObject->IsEmpty()) {
+        ImageModel::GetInstance()->SetResizableSlice(sliceResult);
+        return;
+    }
+    auto sliceValue = resizableObject->GetProperty("slice");
+    JSRef<JSObject> sliceObj = JSRef<JSObject>::Cast(sliceValue);
+    if (sliceObj->IsEmpty()) {
+        ImageModel::GetInstance()->SetResizableSlice(sliceResult);
+        return;
+    }
+    static std::array<std::string, 4> keys = { "left", "right", "top", "bottom" };
+    for (uint32_t i = 0; i < keys.size(); i++) {
+        auto sliceSize = sliceObj->GetProperty(keys.at(i).c_str());
+        CalcDimension sliceDimension;
+        if (!ParseJsDimensionVp(sliceSize, sliceDimension)) {
+            continue;
+        }
+        switch (static_cast<BorderImageDirection>(i)) {
+            case BorderImageDirection::LEFT:
+                sliceResult.left = sliceDimension;
+                break;
+            case BorderImageDirection::RIGHT:
+                sliceResult.right = sliceDimension;
+                break;
+            case BorderImageDirection::TOP:
+                sliceResult.top = sliceDimension;
+                break;
+            case BorderImageDirection::BOTTOM:
+                sliceResult.bottom = sliceDimension;
+                break;
+            default:
+                break;
+        }
+    }
+    ImageModel::GetInstance()->SetResizableSlice(sliceResult);
+}
+
 void JSImage::JsBorderRadius(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsBorderRadius(info);
@@ -492,6 +538,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSImage>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSImage>::StaticMethod("autoResize", &JSImage::SetAutoResize);
+    JSClass<JSImage>::StaticMethod("resizable", &JSImage::JsImageResizable);
 
     JSClass<JSImage>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSImage>::StaticMethod("onHover", &JSInteractableView::JsOnHover);

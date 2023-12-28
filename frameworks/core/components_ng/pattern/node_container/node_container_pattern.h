@@ -18,9 +18,10 @@
 
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/node_container/node_container_layout_algorithm.h"
+#include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
 #include "core/components_ng/pattern/stack/stack_layout_property.h"
-#include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
 class NodeContainerPattern : virtual public Pattern {
@@ -37,7 +38,7 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<StackLayoutAlgorithm>();
+        return MakeRefPtr<NodeContainerLayoutAlgorithm>();
     }
 
     void RemakeNode();

@@ -86,6 +86,9 @@ constexpr int32_t START_YEAR_BEFORE = 1990;
 constexpr int32_t SELECTED_YEAR = 2000;
 constexpr int32_t END_YEAR = 2090;
 constexpr float MINUS_HEIGHT = -5.0f;
+const std::string LONGEST_CONTENT = "新建文件夹";
+constexpr int32_t MENU_SIZE = 5;
+const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 } // namespace
 class OverlayManagerTestNg : public testing::Test {
 public:
@@ -2936,5 +2939,116 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern8, TestSize.Level1)
     isDismiss = false;
     topSheetPattern->HandleDragEnd(2000);
     EXPECT_TRUE(isDismiss);
+}
+
+/**
+ * @tc.name: CaculateMenuSize
+ * @tc.desc: Test OverlayManager::CaculateMenuSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, CaculateMenuSize, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and toast node.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto uiExtId = ElementRegister::GetInstance()->MakeUniqueId();
+
+    auto uiExtNode = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, uiExtId, AceType::MakeRefPtr<DialogPattern>(AceType::MakeRefPtr<DialogTheme>(), nullptr));
+    ASSERT_NE(uiExtNode, nullptr);
+
+    auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(1, LONGEST_CONTENT, MenuType::MENU));
+    auto previewNode = FrameNode::CreateFrameNode(V2::MENU_PREVIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPreviewPattern>());
+    ASSERT_NE(menuNode, nullptr);
+
+    menuNode->MountToParent(menuWrapperNode);
+    previewNode->MountToParent(menuWrapperNode);
+    menuWrapperNode->MountToParent(rootNode);
+
+    /**
+     * @tc.steps: step2. set theme.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else {
+            return nullptr;
+        }
+    });
+    /**
+     * @tc.steps: step3. create overlayManager and call CaculateMenuSize.
+     * @tc.expected: idealSize is (0, 0).
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    auto idealSize = overlayManager->CaculateMenuSize(menuNode, LONGEST_CONTENT, MENU_SIZE);
+    EXPECT_NE(idealSize.Width(), 0);
+    EXPECT_NE(idealSize.Height(), 0);
+}
+
+/**
+ * @tc.name: BindUIExtensionToMenu
+ * @tc.desc: Test OverlayManager::BindUIExtensionToMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, BindUIExtensionToMenu, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and toast node.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto uiExtId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtNode = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, uiExtId, AceType::MakeRefPtr<DialogPattern>(AceType::MakeRefPtr<DialogTheme>(), nullptr));
+    ASSERT_NE(uiExtNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create overlayManager and call BindUIExtensionToMenu.
+     * @tc.expected: return is not nullptr.
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    EXPECT_NE(overlayManager->BindUIExtensionToMenu(uiExtNode, rootNode, LONGEST_CONTENT, MENU_SIZE), nullptr);
+}
+
+/**
+ * @tc.name: ShowUIExtensionMenu
+ * @tc.desc: Test OverlayManager::ShowUIExtensionMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, ShowUIExtensionMenu, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and toast node.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto baseFrameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto uiExtId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtNode = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, uiExtId, AceType::MakeRefPtr<DialogPattern>(AceType::MakeRefPtr<DialogTheme>(), nullptr));
+    ASSERT_NE(uiExtNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowUIExtensionMenu.
+     * @tc.expected: ShowUIExtensionMenu return true.
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    
+    RectF handleRect(3.0, 3.0, 100.0f, 75.0f);
+    EXPECT_TRUE(overlayManager->ShowUIExtensionMenu(uiExtNode, handleRect, LONGEST_CONTENT, MENU_SIZE, baseFrameNode));
 }
 } // namespace OHOS::Ace::NG

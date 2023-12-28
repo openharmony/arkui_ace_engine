@@ -187,7 +187,7 @@ RefPtr<FrameNode> SheetView::CreateScrollNode()
     paintProps->UpdateScrollBarMode(DisplayMode::OFF);
     auto pattern = scroll->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
-    pattern->SetEdgeEffect(EdgeEffect::SPRING, pattern->GetAlwaysEnabled());
+    pattern->SetEdgeEffect(EdgeEffect::SPRING, false);
     props->UpdateAlignment(Alignment::TOP_CENTER);
     scroll->MarkModifyDone();
     return scroll;

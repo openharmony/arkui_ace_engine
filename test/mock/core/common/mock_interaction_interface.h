@@ -35,10 +35,13 @@ public:
         std::function<void(const OHOS::Ace::DragNotifyMsg&)> callback), (override));
 
     MOCK_METHOD(int32_t, UpdateDragStyle, (DragCursorStyleCore style), (override));
+    
+    MOCK_METHOD(int32_t, UpdatePreviewStyle, (const PreviewStyle& previewStyle), (override));
 
-#ifdef ENABLE_DRAG_FRAMEWORK
+    MOCK_METHOD(int32_t, UpdatePreviewStyleWithAnimation, (const PreviewStyle& previewStyle,
+        const PreviewAnimation& animation), (override));
+
     MOCK_METHOD(int32_t, StopDrag, (DragDropRet result), (override));
-#endif
 
     MOCK_METHOD(int32_t, GetUdKey, (std::string& udKey), (override));
 

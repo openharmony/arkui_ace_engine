@@ -73,7 +73,8 @@ public:
     Frontend() = default;
     ~Frontend() override;
 
-    enum class State { ON_CREATE, ON_DESTROY, ON_SHOW, ON_HIDE, ON_ACTIVE, ON_INACTIVE, UNDEFINE };
+    enum State : uint8_t { ON_CREATE = 0, ON_DESTROY, ON_SHOW, ON_HIDE, ON_ACTIVE, ON_INACTIVE, UNDEFINE };
+    static std::string stateToString(int state);
 
     static RefPtr<Frontend> Create();
     static RefPtr<Frontend> CreateDefault();

@@ -290,6 +290,13 @@ bool PipelineBase::GetSystemFont(const std::string& fontName, FontInfo& fontInfo
     return false;
 }
 
+void PipelineBase::GetUIFontConfig(FontConfigJsonInfo& fontConfigJsonInfo)
+{
+    if (fontManager_) {
+        fontManager_->GetUIFontConfig(fontConfigJsonInfo);
+    }
+}
+
 void PipelineBase::HyperlinkStartAbility(const std::string& address) const
 {
     CHECK_RUN_ON(UI);

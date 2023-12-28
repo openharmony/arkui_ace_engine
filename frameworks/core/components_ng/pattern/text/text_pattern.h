@@ -300,7 +300,6 @@ public:
     }
     virtual void OnColorConfigurationUpdate() override;
 
-#ifdef ENABLE_DRAG_FRAMEWORK
     NG::DragDropInfo OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
     DragDropInfo OnDragStartNoChild(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
     void InitDragEvent();
@@ -311,7 +310,7 @@ public:
     void OnDragEndNoChild();
     void CloseOperate();
     void OnDragMove(const RefPtr<Ace::DragEvent>& event);
-#endif
+
     std::string GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const;
     TextStyleResult GetTextStyleObject(const RefPtr<SpanNode>& node);
     SymbolSpanStyle GetSymbolSpanStyleObject(const RefPtr<SpanNode>& node);

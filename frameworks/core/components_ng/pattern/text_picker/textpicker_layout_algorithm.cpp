@@ -111,9 +111,10 @@ void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         textPickerPattern->SetResizeFlag(true);
     }
 
-    pickerItemHeight_ = pickerHeight;
     frameSize.SetWidth(pickerWidth);
     frameSize.SetHeight(pickerHeight);
+    textPickerPattern->CheckAndUpdateColumnSize(frameSize);
+    pickerItemHeight_ = frameSize.Height();
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize);
     auto layoutChildConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {

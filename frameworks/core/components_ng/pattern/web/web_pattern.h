@@ -312,7 +312,7 @@ public:
     ScrollResult HandleScroll(float offset, int32_t source, NestedState state) override;
     bool HandleScrollVelocity(float velocity) override;
     void OnScrollStartRecursive(float position) override;
-    void OnScrollEndRecursive() override;
+    void OnScrollEndRecursive(const std::optional<float>& velocity) override;
     Axis GetParentAxis();
     RefPtr<NestableScrollContainer> WebSearchParent();
     void SetNestedScroll(const NestedScrollOptions& nestedOpt);
@@ -418,9 +418,7 @@ public:
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems);
     void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems);
     void SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo& touchEventInfo);
-#ifdef ENABLE_DRAG_FRAMEWORK
     DragRet GetDragAcceptableStatus();
-#endif
     Offset GetDragOffset() const;
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
     void OnScrollState(bool scrollState);
