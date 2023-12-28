@@ -594,19 +594,38 @@ bool ContainerModalPattern::GetContainerModalButtonsRect(RectF& containerModal, 
     CHECK_NULL_RETURN(column, false);
     auto columnRect = column->GetGeometryNode()->GetFrameRect();
     containerModal = columnRect;
+    if (columnRect.Width() == 0) {
+        LOGW("Get rect of buttons failed, the rect is measuring.");
+        return false;
+    }
 
     auto controlButtonsRow = GetControlButtonRow();
     CHECK_NULL_RETURN(controlButtonsRow, false);
     auto children = controlButtonsRow->GetChildren();
-    auto firstButtonRect = AceType::DynamicCast<FrameNode>(children.front())->GetGeometryNode()->GetFrameRect();
-    auto lastButtonRect = AceType::DynamicCast<FrameNode>(children.back())->GetGeometryNode()->GetFrameRect();
+    RectF firstButtonRect;
+    RectF lastButtonRect;
+    for (auto& child : children) {
+        auto node = AceType::DynamicCast<FrameNode>(child);
+        if (node->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+            continue;
+        }
+        auto rect = node->GetGeometryNode()->GetFrameRect();
+        if (firstButtonRect.Width() == 0) {
+            firstButtonRect = rect;
+        }
+        lastButtonRect = rect;
+    }
     buttons = firstButtonRect.CombineRectT(lastButtonRect);
-
-    if (controlButtonsRow->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
-        buttons.SetLeft(containerModal.Width() - TITLE_PADDING_END.ConvertToPx() - buttons.Width());
-        buttons.SetTop((titleHeight_ - TITLE_BUTTON_SIZE).ConvertToPx() / 2.0f);
+    if (buttons.Width() == 0) {
+        LOGW("Get rect of buttons failed, buttons are hidden");
+        return false;
     }
 
+    auto widthByPx = (TITLE_PADDING_START + TITLE_PADDING_END).ConvertToPx() + buttons.Width();
+    buttons.SetLeft(containerModal.Width() - widthByPx);
+    buttons.SetTop(0);
+    buttons.SetWidth(widthByPx);
+    buttons.SetHeight(titleHeight_.ConvertToPx());
     return true;
 }
 
