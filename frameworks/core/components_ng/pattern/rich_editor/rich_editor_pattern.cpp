@@ -2442,6 +2442,8 @@ RefPtr<SpanNode> RichEditorPattern::InsertValueToBeforeSpan(
             CopyTextSpanStyle(spanNodeBefore, spanNodeAfter);
             auto spanItemAfter = spanNodeAfter->GetSpanItem();
             spanItemAfter->position = textTemp.length();
+            spanItemAfter->hasResourceFontColor = spanItem->hasResourceFontColor;
+            spanItemAfter->hasResourceDecorationColor = spanItem->hasResourceDecorationColor;
             AddSpanItem(spanItemAfter, host->GetChildIndex(spanNodeBefore) + 1);
             SpanNodeFission(spanNodeAfter);
             return spanNodeAfter;
