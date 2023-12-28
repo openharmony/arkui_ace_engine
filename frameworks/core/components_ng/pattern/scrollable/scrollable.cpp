@@ -302,6 +302,9 @@ void Scrollable::HandleScrollEnd(const std::optional<float>& velocity)
 void Scrollable::HandleDragStart(const OHOS::Ace::GestureEvent& info)
 {
     ACE_FUNCTION_TRACE();
+    if (info.GetSourceTool() == SourceTool::TOUCHPAD) {
+        isTouching_ = true;
+    }
     currentVelocity_ = info.GetMainVelocity();
     if (dragFRCSceneCallback_) {
         dragFRCSceneCallback_(currentVelocity_, NG::SceneStatus::START);
@@ -380,7 +383,7 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
 #endif
     auto mainDelta = info.GetMainDelta();
     JankFrameReport::GetInstance().RecordFrameUpdate();
-    auto source = info.GetInputEventType() == InputEventType::AXIS ? SCROLL_FROM_AXIS : SCROLL_FROM_UPDATE;
+    auto source = IsMouseWheelScroll(info) ? SCROLL_FROM_AXIS : SCROLL_FROM_UPDATE;
     HandleScroll(mainDelta, source, NestedState::GESTURE);
 }
 
@@ -409,7 +412,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
         dragEndCallback_();
     }
     double mainPosition = GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY()));
-    if (!moved_ || info.GetInputEventType() == InputEventType::AXIS) {
+    if (!moved_ || IsMouseWheelScroll(info)) {
         if (calePredictSnapOffsetCallback_) {
             std::optional<float> predictSnapOffset = calePredictSnapOffsetCallback_(0.0f, 0.0f, 0.0f);
             if (predictSnapOffset.has_value() && !NearZero(predictSnapOffset.value())) {
@@ -1124,5 +1127,10 @@ void Scrollable::StopSnapAnimation()
             nullptr);
     }
     snapVelocity_ = 0.0f;
+}
+
+inline bool Scrollable::IsMouseWheelScroll(const GestureEvent& info)
+{
+    return info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() != SourceTool::TOUCHPAD;
 }
 } // namespace OHOS::Ace::NG
