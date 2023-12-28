@@ -183,6 +183,15 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
         }
         builder->PushStyle(themeTextStyle);
     }
+
+    if (symbolUnicode != 0) {
+        builder->AddSymbol(symbolUnicode);
+        if (fontStyle || textLineStyle) {
+            builder->PopStyle();
+        }
+        return -1;
+    }
+
     auto spanContent = GetSpanContent(content);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, -1);
@@ -192,10 +201,6 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
         UpdateTextStyle(spanContent, builder, textStyle);
     }
     textStyle_ = textStyle;
-
-    if (symbolUnicode != 0) {
-        builder->AddSymbol(symbolUnicode);
-    }
 
     for (const auto& child : children) {
         if (child) {

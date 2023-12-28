@@ -184,7 +184,8 @@ JSRef<JSObject> JSRichEditor::CreateJSSymbolSpanStyleResult(const SymbolSpanStyl
     symbolSpanStyleObj->SetProperty<std::string>("fontColor", symbolSpanStyle.symbolColor);
     symbolSpanStyleObj->SetProperty<double>("fontSize", symbolSpanStyle.fontSize);
     symbolSpanStyleObj->SetProperty<int32_t>("fontWeight", symbolSpanStyle.fontWeight);
-    symbolSpanStyleObj->SetProperty<std::optional<uint32_t>>("renderingStrategy", symbolSpanStyle.renderingStrategy);
+    symbolSpanStyleObj->SetProperty<uint32_t>("renderingStrategy", symbolSpanStyle.renderingStrategy);
+    symbolSpanStyleObj->SetProperty<uint32_t>("effectStrategy", symbolSpanStyle.effectStrategy);
 
     return symbolSpanStyleObj;
 }
@@ -768,7 +769,7 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
     }
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
-    if (!fontSize->IsNull() && JSContainerBase::ParseJsDimensionFp(fontSize, size) &&
+    if (!fontSize->IsNull() && JSContainerBase::ParseJsDimensionFpNG(fontSize, size, false) &&
         !size.IsNegative() && size.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
@@ -790,9 +791,15 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
     }
     JSRef<JSVal> renderingStrategy = styleObject->GetProperty("renderingStrategy");
     uint32_t symbolRenderStrategy;
-    if (!renderingStrategy->IsNull() && renderingStrategy->IsNumber()) {
+    if (!renderingStrategy->IsNull() && JSContainerBase::ParseJsInteger(renderingStrategy, symbolRenderStrategy)) {
         updateSpanStyle.updateSymbolRenderingStrategy = symbolRenderStrategy;
         style.SetRenderStrategy(symbolRenderStrategy);
+    }
+    JSRef<JSVal> effectStrategy = styleObject->GetProperty("effectStrategy");
+    uint32_t symbolEffectStrategy;
+    if (!renderingStrategy->IsNull() && JSContainerBase::ParseJsInteger(effectStrategy, symbolEffectStrategy)) {
+        updateSpanStyle.updateSymbolEffectStrategy = symbolEffectStrategy;
+        style.SetRenderStrategy(symbolEffectStrategy);
     }
 }
 
@@ -1080,7 +1087,7 @@ void JSRichEditorController::AddSymbolSpan(const JSCallbackInfo& args)
             CHECK_NULL_VOID(pipelineContext);
             auto theme = pipelineContext->GetTheme<TextTheme>();
             TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
-            ParseJsTextStyle(styleObject, style, updateSpanStyle_);
+            ParseJsSymbolSpanStyle(styleObject, style, updateSpanStyle_);
             options.style = style;
         }
     }

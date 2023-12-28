@@ -566,6 +566,12 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
         spanNode->AddPropertyInfo(PropertyInfo::FONTSIZE);
         spanNode->UpdateFontWeight(options.style.value().GetFontWeight());
         spanNode->AddPropertyInfo(PropertyInfo::FONTWEIGHT);
+        spanNode->UpdateSymbolColorList(options.style.value().GetSymbolColorList());
+        spanNode->AddPropertyInfo(PropertyInfo::SYMBOL_COLOR);
+        spanNode->UpdateSymbolRenderingStrategy(options.style.value().GetRenderStrategy());
+        spanNode->AddPropertyInfo(PropertyInfo::SYMBOL_RENDERING_STRATEGY);
+        spanNode->UpdateSymbolEffectStrategy(options.style.value().GetEffectStrategy());
+        spanNode->AddPropertyInfo(PropertyInfo::SYMBOL_EFFECT_STRATEGY);
     }
     auto spanItem = spanNode->GetSpanItem();
     spanItem->content = options.symbolId;

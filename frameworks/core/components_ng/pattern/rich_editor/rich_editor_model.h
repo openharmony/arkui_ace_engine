@@ -103,6 +103,7 @@ struct UpdateSpanStyle {
 
         updateSymbolColor.reset();
         updateSymbolRenderingStrategy.reset();
+        updateSymbolEffectStrategy.reset();
 
         updateImageWidth.reset();
         updateImageHeight.reset();
@@ -123,6 +124,7 @@ struct UpdateSpanStyle {
 
     std::optional<std::vector<Color>> updateSymbolColor = std::nullopt;
     std::optional<uint32_t> updateSymbolRenderingStrategy = std::nullopt;
+    std::optional<uint32_t> updateSymbolEffectStrategy = std::nullopt;
 
     std::optional<CalcDimension> updateImageWidth = std::nullopt;
     std::optional<CalcDimension> updateImageHeight = std::nullopt;
