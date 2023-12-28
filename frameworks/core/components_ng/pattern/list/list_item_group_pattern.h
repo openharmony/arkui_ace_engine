@@ -173,6 +173,9 @@ public:
         return footerMainSize_;
     }
 
+    float GetEstimateOffset(float height, const std::pair<float, float>& targetPos) const;
+    float GetEstimateHeight(float& averageHeight) const;
+
 private:
     bool IsNeedInitClickEventRecorder() const override
     {

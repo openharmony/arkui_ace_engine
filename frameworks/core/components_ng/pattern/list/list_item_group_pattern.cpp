@@ -107,6 +107,23 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     return listLayoutProperty && listLayoutProperty->GetDivider().has_value() && !itemPosition_.empty();
 }
 
+float ListItemGroupPattern::GetEstimateOffset(float height, const std::pair<float, float>& targetPos) const
+{
+    return height - targetPos.first;
+}
+
+float ListItemGroupPattern::GetEstimateHeight(float& averageHeight) const
+{
+    if (itemPosition_.empty()) {
+        auto host = GetHost();
+        auto totalItem = host->GetTotalChildCount();
+        return averageHeight * totalItem;
+    }
+    auto totalHeight = (itemPosition_.rbegin()->second.second - itemPosition_.begin()->second.first + spaceWidth_);
+    averageHeight = totalHeight / itemPosition_.size();
+    return averageHeight * itemTotalCount_ + headerMainSize_ + footerMainSize_;
+}
+
 void ListItemGroupPattern::CheckListDirectionInCardStyle()
 {
     if (axis_ == Axis::HORIZONTAL && listItemGroupStyle_ == V2::ListItemGroupStyle::CARD) {
