@@ -102,6 +102,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     dialogLayoutProp->UpdateShowInSubWindow(param.isShowInSubWindow);
     dialogLayoutProp->UpdateDialogButtonDirection(param.buttonDirection);
     dialogLayoutProp->UpdateIsModal(param.isModal);
+    dialogLayoutProp->UpdateIsScenceBoardDialog(param.isScenceBoardDialog);
     // create gray background
     auto dialogContext = dialog->GetRenderContext();
     CHECK_NULL_RETURN(dialogContext, dialog);
@@ -111,7 +112,9 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     } else {
         dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
     }
-
+    if (dialogLayoutProp->GetIsScenceBoardDialog().value_or(false)) {
+        dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
+    }
     // set onCancel callback
     auto hub = dialog->GetEventHub<DialogEventHub>();
     CHECK_NULL_RETURN(hub, nullptr);
