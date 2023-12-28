@@ -781,6 +781,12 @@ void RichEditorPattern::CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanN
     CHECK_NULL_VOID(source);
     CHECK_NULL_VOID(target);
 
+    CopyTextSpanFontStyle(source, target);
+    CopyTextSpanLineStyle(source, target);
+}
+
+void RichEditorPattern::CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target)
+{
     if (source->HasFontSize()) {
         target->UpdateFontSize(source->GetFontSizeValue(Dimension()));
         target->AddPropertyInfo(PropertyInfo::FONTSIZE);
@@ -825,7 +831,10 @@ void RichEditorPattern::CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanN
         target->UpdateLetterSpacing(source->GetLetterSpacingValue(Dimension()));
         target->AddPropertyInfo(PropertyInfo::LETTERSPACE);
     }
+}
 
+void RichEditorPattern::CopyTextSpanLineStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target)
+{
     if (source->HasLineHeight()) {
         target->UpdateLineHeight(source->GetLineHeightValue(Dimension()));
         target->AddPropertyInfo(PropertyInfo::LINEHEIGHT);
@@ -834,6 +843,11 @@ void RichEditorPattern::CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanN
     if (source->HasTextShadow()) {
         target->UpdateTextShadow(source->GetTextShadowValue({Shadow()}));
         target->AddPropertyInfo(PropertyInfo::TEXTSHADOW);
+    }
+    
+    if (source->HasLeadingMargin()) {
+        target->UpdateLeadingMargin(source->GetLeadingMarginValue({}));
+        target->AddPropertyInfo(PropertyInfo::LEADING_MARGIN);
     }
 }
 
@@ -2227,36 +2241,33 @@ void RichEditorPattern::InsertValue(const std::string& insertValue)
     }
     record.addText = insertValue;
     ClearRedoOperationRecords();
-    auto deleteText = InsertValueOperation(insertValue);
-    record.deleteText = StringUtils::ToString(deleteText);
+    InsertValueOperation(insertValue, &record);
     record.afterCaretPosition = caretPosition_ + StringUtils::ToWstring(insertValue).length();
     AddOperationRecord(record);
 }
 
-std::wstring RichEditorPattern::InsertValueOperation(const std::string& insertValue)
+void RichEditorPattern::InsertValueOperation(const std::string& insertValue, OperationRecord* const record)
 {
-    std::wstring deleteText;
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Insert value '%{public}s'", insertValue.c_str());
     }
-    bool isSelector = false;
-    if (textSelector_.IsValid()) {
+    bool isSelector = textSelector_.IsValid();
+    if (isSelector) {
         SetCaretPosition(textSelector_.GetTextStart());
-        isSelector = true;
     }
 
     std::string insertValueTemp = insertValue;
-    bool isLineSeparator = false;
-    if (insertValueTemp == std::string("\n")) {
-        isLineSeparator = true;
-    }
+    bool isLineSeparator = insertValueTemp == std::string("\n");
 
     auto isInsert = BeforeIMEInsertValue(insertValueTemp);
-    CHECK_NULL_RETURN(isInsert, deleteText);
+    CHECK_NULL_VOID(isInsert);
     TextInsertValueInfo info;
     CalcInsertValueObj(info);
     if (isSelector) {
-        deleteText = DeleteForwardOperation(textSelector_.GetTextEnd() - textSelector_.GetTextStart());
+        std::wstring deleteText = DeleteForwardOperation(textSelector_.GetTextEnd() - textSelector_.GetTextStart());
+        if (record) {
+            record->deleteText = StringUtils::ToString(deleteText);
+        }
         CloseSelectOverlay();
         ResetSelection();
     }
@@ -2264,50 +2275,22 @@ std::wstring RichEditorPattern::InsertValueOperation(const std::string& insertVa
         StartTwinkling();
     }
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, deleteText);
+    CHECK_NULL_VOID(host);
     RefPtr<SpanNode> spanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(info.GetSpanIndex()));
-    if (spanNode == nullptr && info.GetSpanIndex() == 0) {
-        CreateTextSpanNode(spanNode, info, insertValueTemp);
-        return deleteText;
-    }
-    if (spanNode == nullptr && info.GetSpanIndex() != 0) {
-        auto spanNodeBefore = DynamicCast<SpanNode>(host->GetChildAtIndex(info.GetSpanIndex() - 1));
-        if (spanNodeBefore == nullptr) {
-            CreateTextSpanNode(spanNode, info, insertValueTemp);
-            return deleteText;
-        }
-        if (typingStyle_.has_value() && !HasSameTypingStyle(spanNodeBefore)) {
-            CreateTextSpanNode(spanNode, info, insertValueTemp);
-            return deleteText;
-        }
-        auto spanNodeGet = InsertValueToBeforeSpan(spanNodeBefore, insertValueTemp);
-        bool isCreate = spanNodeBefore->GetId() != spanNodeGet->GetId();
-        AfterIMEInsertValue(
-            spanNodeGet, static_cast<int32_t>(StringUtils::ToWstring(insertValueTemp).length()), isCreate);
-        return deleteText;
+    if (spanNode == nullptr) {
+        InsertValueWithoutSpan(spanNode, info, insertValueTemp);
+        return;
     }
     if (info.GetOffsetInSpan() == 0) {
         auto spanNodeBefore = DynamicCast<SpanNode>(host->GetChildAtIndex(info.GetSpanIndex() - 1));
         if (spanNodeBefore != nullptr && !IsLineSeparatorInLast(spanNodeBefore)) {
-            if (typingStyle_.has_value() && !HasSameTypingStyle(spanNodeBefore)) {
-                CreateTextSpanNode(spanNode, info, insertValueTemp);
-                return deleteText;
-            }
-            auto spanNodeGet = InsertValueToBeforeSpan(spanNodeBefore, insertValueTemp);
-            bool isCreate = spanNodeBefore->GetId() != spanNodeGet->GetId();
-            AfterIMEInsertValue(
-                spanNodeGet, static_cast<int32_t>(StringUtils::ToWstring(insertValueTemp).length()), isCreate);
-            return deleteText;
+            InsertValueAfterBeforeSpan(spanNodeBefore, spanNode, info, insertValueTemp);
+            return;
         }
     }
     if (typingStyle_.has_value() && !HasSameTypingStyle(spanNode)) {
-        TextSpanOptions options;
-        options.value = insertValueTemp;
-        options.offset = caretPosition_;
-        options.style = typingTextStyle_;
-        AddTextSpanOperation(options);
-        AfterIMEInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValueTemp).length()), true);
-        return deleteText;
+        InsertDiffStyleValueInSpan(spanNode, info, insertValueTemp);
+        return;
     }
     if (!isLineSeparator) {
         InsertValueToSpanNode(spanNode, insertValueTemp, info);
@@ -2315,7 +2298,52 @@ std::wstring RichEditorPattern::InsertValueOperation(const std::string& insertVa
         SpanNodeFission(spanNode, insertValueTemp, info);
     }
     AfterIMEInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValueTemp).length()), false);
-    return deleteText;
+}
+
+void RichEditorPattern::InsertValueWithoutSpan(
+    RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (info.GetSpanIndex() == 0) {
+        CreateTextSpanNode(spanNode, info, insertValue);
+        return;
+    }
+    auto spanNodeBefore = DynamicCast<SpanNode>(host->GetChildAtIndex(info.GetSpanIndex() - 1));
+    if (spanNodeBefore == nullptr) {
+        CreateTextSpanNode(spanNode, info, insertValue);
+        return;
+    }
+    InsertValueAfterBeforeSpan(spanNodeBefore, spanNode, info, insertValue);
+}
+
+void RichEditorPattern::InsertValueAfterBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, RefPtr<SpanNode>& spanNode,
+    const TextInsertValueInfo& info, const std::string& insertValue)
+{
+    if (typingStyle_.has_value() && !HasSameTypingStyle(spanNodeBefore)) {
+        CreateTextSpanNode(spanNode, info, insertValue);
+        CopyTextSpanLineStyle(spanNodeBefore, spanNode);
+        return;
+    }
+    auto spanNodeGet = InsertValueToBeforeSpan(spanNodeBefore, insertValue);
+    bool isCreate = spanNodeBefore->GetId() != spanNodeGet->GetId();
+    AfterIMEInsertValue(
+        spanNodeGet, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()), isCreate);
+}
+
+void RichEditorPattern::InsertDiffStyleValueInSpan(
+    RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    TextSpanOptions options;
+    options.value = insertValue;
+    options.offset = caretPosition_;
+    options.style = typingTextStyle_;
+    auto newSpanIndex = AddTextSpanOperation(options);
+    auto newSpanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(newSpanIndex));
+    CopyTextSpanLineStyle(spanNode, newSpanNode);
+    AfterIMEInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()), true);
 }
 
 bool RichEditorPattern::IsLineSeparatorInLast(RefPtr<SpanNode>& spanNode)
