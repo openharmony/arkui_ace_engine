@@ -4127,6 +4127,9 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
             },
             false);
     } else {
+        if (transitionEffect_->HasDisappearTransition()) {
+            return;
+        }
         // Re-use current implicit animation timing params, only replace the finish callback function.
         // The finish callback function will perform all the necessary cleanup work.
         // Important Note on timing:
