@@ -247,7 +247,20 @@ void WindowScene::OnActivation()
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self && self->session_);
 
-        if (self->session_->GetShowRecent() &&
+        if (self->destroyed_) {
+            self->destroyed_ = false;
+            auto host = self->GetHost();
+            CHECK_NULL_VOID(host);
+            host->RemoveChild(self->startingNode_);
+            host->RemoveChild(self->contentNode_);
+            host->RemoveChild(self->snapshotNode_);
+            self->startingNode_.Reset();
+            self->contentNode_.Reset();
+            self->snapshotNode_.Reset();
+            self->session_->SetNeedSnapshot(true);
+            self->OnAttachToFrameNode();
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        } else if (self->session_->GetShowRecent() &&
             self->session_->GetSessionState() == Rosen::SessionState::STATE_DISCONNECT && self->snapshotNode_) {
             auto host = self->GetHost();
             CHECK_NULL_VOID(host);
@@ -340,6 +353,7 @@ void WindowScene::OnDisconnect()
     auto uiTask = [weakThis = WeakClaim(this), snapshot]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
+        self->destroyed_ = true;
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
