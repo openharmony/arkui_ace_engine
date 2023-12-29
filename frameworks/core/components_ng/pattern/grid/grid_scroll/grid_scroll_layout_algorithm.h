@@ -53,14 +53,6 @@ public:
         return scrollGridLayoutInfo_;
     }
 
-    void SetTarget(std::optional<int32_t> targetIndex, ScrollAlign align)
-    {
-        if (targetIndex.has_value()) {
-            gridLayoutInfo_.targetIndex_ = targetIndex.value();
-            gridLayoutInfo_.scrollAlign_ = align;
-        }
-    }
-
     template<class T>
     void DeleteItemsOutOfScope(std::map<int32_t, T>& map, int32_t startLineIndex, int32_t endLineIndex)
     {
