@@ -376,6 +376,9 @@ void TextPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
             CloseSelectOverlay();
             ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true);
         }
+        if (!selectOverlayProxy_->IsMenuShow()) {
+            selectOverlayProxy_->ShowOrHiddenMenu(false);
+        }
         return;
     }
     ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true);
@@ -2040,8 +2043,12 @@ void TextPattern::RedisplaySelectOverlay()
 {
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         CalculateHandleOffsetAndShowOverlay();
-        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
-        selectOverlayProxy_->ShowOrHiddenMenu(true);
+        if (selectOverlayProxy_->IsMenuShow()) {
+            ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+        } else {
+            ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+            selectOverlayProxy_->ShowOrHiddenMenu(true);
+        }
     }
 }
 
@@ -2247,6 +2254,8 @@ void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int3
     if (newWidth == prevWidth && newHeight == prevHeight) {
         return;
     }
+    CHECK_NULL_VOID(selectOverlayProxy_);
+    selectOverlayProxy_->ShowOrHiddenMenu(true);
 }
 
 void TextPattern::InitSurfacePositionChangedCallback()
