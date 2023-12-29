@@ -47,10 +47,8 @@
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/property/property.h"
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/ace_engine_ext.h"
 #include "core/common/udmf/udmf_client.h"
-#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -144,7 +142,7 @@ void TextPattern::InitSelection(const Offset& pos)
     int32_t end = 0;
     if (!paragraph_->GetWordBoundary(extend, start, end)) {
         start = extend;
-        end = std::min(static_cast<int32_t>(GetWideText().length()) + imageCount_,
+        end = std::min(static_cast<int32_t>(GetWideText().length()) + placeholderCount_,
             extend + GetGraphemeClusterLength(GetWideText(), extend));
     }
     HandleSelectionChange(start, end);
@@ -268,7 +266,7 @@ SelectionInfo TextPattern::GetSpansInfo(int32_t start, int32_t end, GetSpansMeth
 int32_t TextPattern::GetTextContentLength()
 {
     if (!spans_.empty()) {
-        return static_cast<int32_t>(GetWideText().length()) + imageCount_;
+        return static_cast<int32_t>(GetWideText().length()) + placeholderCount_;
     }
     return 0;
 }
@@ -287,14 +285,10 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     if (IsDraggable(info.GetLocalLocation())) {
         dragBoxes_ = GetTextBoxes();
         // prevent long press event from being triggered when dragging
-#ifdef ENABLE_DRAG_FRAMEWORK
         gestureHub->SetIsTextDraggable(true);
-#endif
         return;
     }
-#ifdef ENABLE_DRAG_FRAMEWORK
     gestureHub->SetIsTextDraggable(false);
-#endif
     auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
     Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
         info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
@@ -393,7 +387,7 @@ void TextPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
 bool TextPattern::IsSelectAll()
 {
     return textSelector_.GetTextStart() == 0 &&
-           textSelector_.GetTextEnd() == static_cast<int32_t>(GetWideText().length()) + imageCount_;
+           textSelector_.GetTextEnd() == static_cast<int32_t>(GetWideText().length()) + placeholderCount_;
 }
 std::wstring TextPattern::GetWideText() const
 {
@@ -554,7 +548,7 @@ void TextPattern::ShowSelectOverlay(
 
 void TextPattern::HandleOnSelectAll()
 {
-    auto textSize = static_cast<int32_t>(GetWideText().length()) + imageCount_;
+    auto textSize = static_cast<int32_t>(GetWideText().length()) + placeholderCount_;
     HandleSelectionChange(0, textSize);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -1216,7 +1210,6 @@ void TextPattern::HandlePanEnd(const GestureEvent& info)
     }
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams)
 {
     DragDropInfo itemInfo;
@@ -1467,8 +1460,6 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
         }
     };
 }
-
-#endif // ENABLE_DRAG_FRAMEWORK
 
 std::string TextPattern::GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const
 {
@@ -1752,6 +1743,8 @@ void TextPattern::OnModifyDone()
         if (textCache != textForDisplay_) {
             host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
             aiDetectInitialized_ = false;
+            CloseSelectOverlay();
+            ResetSelection();
         }
         textForAI_ = textForDisplay_;
         if (textDetectEnable_ && (aiDetectTypesChanged_ || !aiDetectInitialized_)) {
@@ -1769,11 +1762,7 @@ void TextPattern::OnModifyDone()
         }
         InitLongPressEvent(gestureEventHub);
         if (host->IsDraggable()) {
-#ifdef ENABLE_DRAG_FRAMEWORK
             InitDragEvent();
-#else
-            InitPanEvent(gestureEventHub);
-#endif
         }
         InitMouseEvent();
         InitTouchEvent();
@@ -1989,7 +1978,7 @@ void TextPattern::OnAfterModifyDone()
 void TextPattern::ActSetSelection(int32_t start, int32_t end)
 {
     int32_t min = 0;
-    int32_t textSize = static_cast<int32_t>(GetWideText().length()) + imageCount_;
+    int32_t textSize = static_cast<int32_t>(GetWideText().length()) + placeholderCount_;
     start = start < min ? min : start;
     end = end < min ? min : end;
     start = start > textSize ? textSize : start;
@@ -2107,10 +2096,10 @@ void TextPattern::PreCreateLayoutWrapper()
         return;
     }
 
-    imageCount_ = 0;
     // When dirty areas are marked because of child node changes, the text rendering node tree is reset.
     const auto& children = host->GetChildren();
     if (children.empty()) {
+        placeholderCount_ = 0;
         return;
     }
     spans_.clear();
@@ -2131,6 +2120,8 @@ void TextPattern::InitSpanItem(std::stack<RefPtr<UINode>> nodes)
     CHECK_NULL_VOID(host);
     std::string textCache;
     std::string textForAICache;
+    int32_t oldPlaceholderCount = placeholderCount_;
+    placeholderCount_ = 0;
     if (!nodes.empty()) {
         textCache = textForDisplay_;
         textForAICache = textForAI_;
@@ -2140,6 +2131,10 @@ void TextPattern::InitSpanItem(std::stack<RefPtr<UINode>> nodes)
 
     bool isSpanHasClick = false;
     CollectSpanNodes(nodes, isSpanHasClick);
+    if (oldPlaceholderCount != placeholderCount_) {
+        CloseSelectOverlay();
+        ResetSelection();
+    }
 
     if (textCache != textForDisplay_) {
         host->OnAccessibilityEvent(AccessibilityEventType::TEXT_CHANGE, textCache, textForDisplay_);
@@ -2151,6 +2146,8 @@ void TextPattern::InitSpanItem(std::stack<RefPtr<UINode>> nodes)
             }
             Recorder::NodeDataCache::Get().PutString(item->inspectId, item->content);
         }
+        CloseSelectOverlay();
+        ResetSelection();
     }
     if (isSpanHasClick) {
         auto gestureEventHub = host->GetOrCreateGestureEventHub();
@@ -2186,7 +2183,7 @@ void TextPattern::CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpa
                 isSpanHasClick = true;
             }
         } else if (current->GetTag() == V2::IMAGE_ETS_TAG || current->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
-            imageCount_++;
+            placeholderCount_++;
             AddChildSpanItem(current);
             textForAI_.append("\n");
         }

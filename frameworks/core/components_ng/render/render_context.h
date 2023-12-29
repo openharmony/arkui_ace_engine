@@ -558,6 +558,11 @@ public:
         return false;
     }
 
+    virtual bool StopTextureExport()
+    {
+        return false;
+    }
+
 protected:
     RenderContext() = default;
     std::shared_ptr<SharedTransitionOption> sharedTransitionOption_;

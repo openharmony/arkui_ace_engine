@@ -38,7 +38,7 @@ RefPtr<NG::FrameNode> DataDetectorMgr::CreateUIExtensionMenu(
 bool DataDetectorMgr::ShowUIExtensionMenu(const std::map<std::string, std::string>& paramaters, NG::RectF safeArea,
     std::function<void(const std::string&)> onClickMenu, const RefPtr<NG::FrameNode>& targetNode)
 {
-    return false;
+    return true;
 }
 
 void DataDetectorMgr::ResponseBestMatchItem(const std::map<std::string, std::string>& paramaters, const AISpan& aiSpan)

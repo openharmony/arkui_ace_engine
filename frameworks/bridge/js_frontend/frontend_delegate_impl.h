@@ -306,6 +306,8 @@ public:
 
     bool GetSystemFont(const std::string& fontName, FontInfo& fontInfo) override;
 
+    void GetUIFontConfig(FontConfigJsonInfo& fontConfigJsonInfo) override;
+
     void HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback) override;
 
     void RequestAnimationFrame(const std::string& callbackId) override;

@@ -24,6 +24,18 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_xcomponent_controller.h"
 
 namespace OHOS::Ace::Framework {
+
+struct XComponentParams {
+    int32_t elmtId = -1;
+    int32_t xcomponentType = 0;
+    int32_t renderType = 0;
+    int32_t width = 0;
+    int32_t height = 0;
+    std::string xcomponentId;
+    std::string surfaceId;
+    std::string libraryName;
+};
+
 class XComponentClient {
 public:
     using GetJSValCallback = std::function<bool(JSRef<JSVal>& param)>;
@@ -138,6 +150,24 @@ public:
     static void JsOpacity(const JSCallbackInfo& args);
     static void OmitEvent(const JSCallbackInfo& args);
     static void OmitAttribute(const JSCallbackInfo& args);
+
+    // For xcomponent node
+    static void* Create(const XComponentParams& params);
+
+    void RegisterOnCreate(const JsiExecutionContext& execCtx, const Local<JSValueRef>& func);
+    void RegisterOnDestroy(const JsiExecutionContext& execCtx, const Local<JSValueRef>& func);
+    void SetFrameNode(RefPtr<AceType> frameNode)
+    {
+        frameNode_ = frameNode;
+    }
+    RefPtr<AceType> GetFrameNode() const
+    {
+        return frameNode_;
+    }
+    bool ChangeRenderType(int32_t renderType);
+
+private:
+    RefPtr<AceType> frameNode_;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_XCOMPONENT_H

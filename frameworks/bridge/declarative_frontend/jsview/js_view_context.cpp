@@ -530,13 +530,7 @@ void JSViewContext::JSKeyframeAnimateTo(const JSCallbackInfo& info)
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     auto overallAnimationOption = ParseKeyframeOverallParam(info.GetExecutionContext(), obj);
     auto keyframes = ParseKeyframes(info.GetExecutionContext(), keyframeArr);
-    int32_t totalDuration = 0;
-    for (const auto& keyframe : keyframes) {
-        totalDuration += keyframe.duration;
-    }
-    overallAnimationOption.SetDuration(totalDuration);
     // actual curve is in keyframe, this curve will not be effective
-    AceTraceBeginWithArgs("animation duration%d", totalDuration);
     overallAnimationOption.SetCurve(Curves::EASE_IN_OUT);
     pipelineContext->FlushBuild();
     pipelineContext->OpenImplicitAnimation(

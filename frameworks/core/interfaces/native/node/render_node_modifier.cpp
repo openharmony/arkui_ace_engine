@@ -35,8 +35,7 @@ void AppendChild(NodeHandle node, NodeHandle child)
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto* childNode = reinterpret_cast<UINode*>(child);
     auto childRef = Referenced::Claim<UINode>(childNode);
-    auto childNumber = currentNode->GetChildren().size();
-    currentNode->AddChild(childRef, childNumber);
+    currentNode->AddChild(childRef);
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 
@@ -44,13 +43,10 @@ void InsertChildAfter(NodeHandle node, NodeHandle child, NodeHandle sibling)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     auto* childNode = reinterpret_cast<UINode*>(child);
-    if (sibling == nullptr) {
-        currentNode->AddChild(Referenced::Claim<UINode>(childNode));
-    } else {
-        auto* siblingNode = reinterpret_cast<UINode*>(sibling);
-        auto index = currentNode->GetChildIndex(Referenced::Claim<UINode>(siblingNode));
-        currentNode->AddChild(Referenced::Claim<UINode>(childNode), index + 1);
-    }
+    auto index = -1;
+    auto* siblingNode = reinterpret_cast<UINode*>(sibling);
+    index = currentNode->GetChildIndex(Referenced::Claim<UINode>(siblingNode));
+    currentNode->AddChild(Referenced::Claim<UINode>(childNode), index + 1);
     currentNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
 }
 

@@ -3816,7 +3816,22 @@ bool RosenRenderContext::DoTextureExport(uint64_t surfaceId)
     if (!rsTextureExport_) {
         rsTextureExport_ = std::make_shared<Rosen::RSTextureExport>(rsNode_, surfaceId);
     }
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    if (rsSurfaceNode) {
+        rsSurfaceNode->SetTextureExport(true);
+    }
     return rsTextureExport_->DoTextureExport();
+}
+
+bool RosenRenderContext::StopTextureExport()
+{
+    CHECK_NULL_RETURN(rsNode_, false);
+    auto rsSurfaceNode = rsNode_->ReinterpretCastTo<Rosen::RSSurfaceNode>();
+    CHECK_NULL_RETURN(rsSurfaceNode, false);
+    CHECK_NULL_RETURN(rsTextureExport_, false);
+    rsTextureExport_->StopTextureExport();
+    rsSurfaceNode->SetTextureExport(false);
+    return true;
 }
 
 void RosenRenderContext::ClearDrawCommands()

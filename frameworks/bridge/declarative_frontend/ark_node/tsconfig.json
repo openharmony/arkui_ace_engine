@@ -9,6 +9,7 @@
         "src/node_controller.ts",
         "src/frame_node.ts",
         "src/render_node.ts",
+        "src/xcomponent_node.ts",
     ],
     "compilerOptions": {
         "module": "none",

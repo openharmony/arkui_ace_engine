@@ -23,9 +23,7 @@
 #include "core/event/ace_events.h"
 #include "core/gestures/velocity.h"
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/udmf/unified_data.h"
-#endif
 
 namespace OHOS::Ace {
 
@@ -210,7 +208,6 @@ public:
         return isGetDataSuccess_;
     }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
     void SetData(const RefPtr<UnifiedData>& unifiedData);
 
     RefPtr<UnifiedData>& GetData();
@@ -218,8 +215,6 @@ public:
     void SetDragInfo(const RefPtr<UnifiedData>& dragInfo);
 
     RefPtr<UnifiedData>& GetDragInfo();
-#endif
-
     void SetVelocity(const Velocity& velocity)
     {
         velocity_ = velocity;
@@ -245,10 +240,8 @@ private:
     bool useCustomAnimation_ = false;
     bool isGetDataSuccess_ = false;
     bool copy_ = true;
-#ifdef ENABLE_DRAG_FRAMEWORK
     RefPtr<UnifiedData> unifiedData_;
     RefPtr<UnifiedData> dragInfo_;
-#endif
     Velocity velocity_;
 };
 

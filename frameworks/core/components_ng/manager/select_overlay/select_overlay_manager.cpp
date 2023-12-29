@@ -34,7 +34,6 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
             auto proxy = MakeRefPtr<SelectOverlayProxy>(current->GetId());
             return proxy;
         }
-        NotifyOverlayClosed(true);
         DestroySelectOverlay(current->GetId());
     }
     selectOverlayInfo_ = info;

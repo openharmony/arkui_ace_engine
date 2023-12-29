@@ -291,6 +291,9 @@ void JSImage::JsImageResizable(const JSCallbackInfo& info)
         if (!ParseJsDimensionVp(sliceSize, sliceDimension)) {
             continue;
         }
+        if (!sliceDimension.IsValid()) {
+            continue;
+        }
         switch (static_cast<BorderImageDirection>(i)) {
             case BorderImageDirection::LEFT:
                 sliceResult.left = sliceDimension;

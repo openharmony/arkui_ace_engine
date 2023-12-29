@@ -580,4 +580,194 @@ HWTEST_F(EventHubTestNg, SetCurrentUIState002, TestSize.Level1)
     EXPECT_EQ(eventHub->GetCurrentUIState(),
         UI_STATE_SELECTED | UI_STATE_NORMAL | UI_STATE_PRESSED | UI_STATE_FOCUSED | UI_STATE_DISABLED);
 }
+
+/**
+ * @tc.name: EventHubTest001
+ * @tc.desc: Default branch in test FireCustomerOnDragFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Create DragEvent.
+     * @tc.expected: DragEvent is not null.
+     */
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    EXPECT_NE(dragEvent, nullptr);
+
+    /**
+     * @tc.steps: step3. Calling DRAG in FirecustomerOnDragFunc_ CustomerOnDragEnd in END_ Empty branch.
+     * @tc.expected: retFlag is false.
+     */
+    eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_END, dragEvent, DRAG_DROP_EVENT_TYPE);
+    auto retFlag = eventHub->HasCustomerOnDrop();
+    EXPECT_FALSE(retFlag);
+
+    /**
+     * @tc.steps: step4. Calling the default branch in FirecustomerOnDragFunc.
+     * @tc.expected: retFlag is false.
+     */
+    eventHub->FireCustomerOnDragFunc(DragFuncType(10), dragEvent, DRAG_DROP_EVENT_TYPE);
+    retFlag = eventHub->HasCustomerOnDrop();
+    EXPECT_FALSE(retFlag);
+}
+
+/**
+ * @tc.name: EventHubTest002
+ * @tc.desc: Default Branch in Test SetCustomerOnDragFunc(OnDragFunc)
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Create DragEvent.
+     * @tc.expected: DragEvent is not null.
+     */
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    EXPECT_NE(dragEvent, nullptr);
+
+    /**
+     * @tc.steps: step3. construct OnDragFunc.
+     */
+    std::string dragEventType;
+    auto onDragFunc = [&dragEventType](const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */,
+                          const std::string& eventType) { dragEventType = eventType; };
+
+    /**
+     * @tc.steps: step4. Calling the default branch in SetCustomerOnDragFunc.
+     * @tc.expected: eventHub->customerOnDragEnd_ is false.
+     */
+    eventHub->SetCustomerOnDragFunc(DragFuncType(10), onDragFunc);
+    EXPECT_FALSE(eventHub->customerOnDragEnd_);
+}
+
+/**
+ * @tc.name: EventHubTest003
+ * @tc.desc: Default Branch in Test SetCustomerOnDragFunc(OnNewDragFunc)
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Create DragEvent.
+     * @tc.expected: DragEvent is not null.
+     */
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    EXPECT_NE(dragEvent, nullptr);
+
+    /**
+     * @tc.steps: step3. construct OnDragFunc.
+     */
+    std::string dragEventType;
+    auto onDragFunc = [&dragEventType](
+                          const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */) { dragEventType = DRAG_END_EVENT_TYPE; };
+
+    /**
+     * @tc.steps: step4. Call SetCustomerOnDragFunc with OnDragFunc.
+     * @tc.expected: eventHub->customerOnDragEnter_ is false.
+     */
+    eventHub->SetCustomerOnDragFunc(DragFuncType(10), onDragFunc);
+    EXPECT_FALSE(eventHub->customerOnDragEnter_);
+}
+
+/**
+ * @tc.name: EventHubTest004
+ * @tc.desc: Test MarkModifyDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Update SupportedState in eventHub using UI_STATE_PRESSED.
+     */
+    eventHub->AddSupportedState(UI_STATE_PRESSED);
+    eventHub->SetSupportedStates(UI_STATE_PRESSED);
+
+    /**
+     * @tc.steps: step3. Call MarkModifyDone, stateStyleMgr_->HasStateStyle(UI_STATE_PRESSED) is a true branch.
+     * @tc.expected: retFlag is true.
+     */
+    eventHub->MarkModifyDone();
+    bool retFlag = eventHub->stateStyleMgr_->HasStateStyle(UI_STATE_PRESSED);
+    EXPECT_TRUE(retFlag);
+
+    /**
+     * @tc.steps: step4. Update SupportedState in eventHub using UI_STATE_DISABLED.
+     */
+    eventHub->AddSupportedState(UI_STATE_DISABLED);
+    eventHub->SetSupportedStates(UI_STATE_DISABLED);
+
+    /**
+     * @tc.steps: step5. Call MarkModifyDone, stateStyleMgr_->HasStateStyle(UI_STATE_DISABLED) is a true branch.
+     * @tc.expected: retFlag is true.
+     */
+    eventHub->MarkModifyDone();
+    retFlag = eventHub->stateStyleMgr_->HasStateStyle(UI_STATE_DISABLED);
+    EXPECT_TRUE(retFlag);
+
+    /**
+     * @tc.steps: step6. Update SupportedState in eventHub using UI_STATE_DISABLED.
+     */
+    eventHub->AddSupportedState(UI_STATE_DISABLED);
+    eventHub->SetSupportedStates(UI_STATE_DISABLED);
+    eventHub->SetEnabled(false);
+
+    /**
+     * @tc.steps: step7. Call MarkModifyDone, enabled_ is a false branch.
+     * @tc.expected: eventHub->IsEnabled() return value is false.
+     */
+    eventHub->MarkModifyDone();
+    EXPECT_FALSE(eventHub->IsEnabled());
+}
+
+/**
+ * @tc.name: EventHubTest005
+ * @tc.desc: stateStyleMgr_ in Test SetSupportedStates is a fake branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventHubTestNg, EventHubTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventHub.
+     * @tc.expected: eventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_NE(eventHub, nullptr);
+
+    /**
+     * @tc.steps: step2. Call SetSupportedStates with UI_STATE_PRESSED.
+     * @tc.expected: eventHub->stateStyleMgr_ is true.
+     */
+    eventHub->stateStyleMgr_ = nullptr;
+    eventHub->SetSupportedStates(UI_STATE_PRESSED);
+    EXPECT_TRUE(eventHub->stateStyleMgr_);
+}
 } // namespace OHOS::Ace::NG

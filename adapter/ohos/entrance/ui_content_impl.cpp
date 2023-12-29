@@ -321,9 +321,6 @@ public:
                 action = DragEventAction::DRAG_EVENT_START;
                 break;
         }
-#ifndef ENABLE_DRAG_FRAMEWORK
-        aceView->ProcessDragEvent(x, y, action);
-#endif // ENABLE_DRAG_FRAMEWORK
     }
 
 private:
@@ -371,7 +368,7 @@ public:
         taskExecutor->PostTask(
             [instanceId = instanceId_] {
                 SubwindowManager::GetInstance()->ClearMenu();
-                SubwindowManager::GetInstance()->ClearMenuNG(instanceId, false, true);
+                SubwindowManager::GetInstance()->ClearMenuNG(instanceId, true, true);
                 SubwindowManager::GetInstance()->ClearPopupInSubwindow(instanceId);
             },
             TaskExecutor::TaskType::UI);

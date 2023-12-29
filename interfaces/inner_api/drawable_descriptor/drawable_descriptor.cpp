@@ -221,6 +221,29 @@ void LayeredDrawableDescriptor::SetDensity(uint32_t density)
     density_ = density;
 }
 
+void LayeredDrawableDescriptor::InitLayeredParam(std::pair<std::unique_ptr<uint8_t[]>, size_t> &foregroundInfo,
+    std::pair<std::unique_ptr<uint8_t[]>, size_t> &backgroundInfo)
+{
+    Media::SourceOptions opts;
+    uint32_t errorCode = 0;
+    auto foreground = Media::ImageSource::CreateImageSource(foregroundInfo.first.get(), foregroundInfo.second, opts,
+        errorCode);
+    if (errorCode == 0) {
+        Media::DecodeOptions decodeOpts;
+        decodeOpts.desiredPixelFormat = Media::PixelFormat::BGRA_8888;
+        auto pixelMapPtr = foreground->CreatePixelMap(decodeOpts, errorCode);
+        foreground_ = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
+    }
+    auto background = Media::ImageSource::CreateImageSource(backgroundInfo.first.get(), backgroundInfo.second, opts,
+        errorCode);
+    if (errorCode == 0) {
+        Media::DecodeOptions decodeOpts;
+        decodeOpts.desiredPixelFormat = Media::PixelFormat::BGRA_8888;
+        auto pixelMapPtr = background->CreatePixelMap(decodeOpts, errorCode);
+        background_ = std::shared_ptr<Media::PixelMap>(pixelMapPtr.release());
+    }
+}
+
 bool LayeredDrawableDescriptor::GetMaskByPath()
 {
     if (maskPath_.empty()) {

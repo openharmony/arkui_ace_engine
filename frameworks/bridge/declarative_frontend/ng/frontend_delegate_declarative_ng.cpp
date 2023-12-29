@@ -558,6 +558,11 @@ bool FrontendDelegateDeclarativeNG::GetSystemFont(const std::string& fontName, F
     return pipelineContextHolder_.Get()->GetSystemFont(fontName, fontInfo);
 }
 
+void FrontendDelegateDeclarativeNG::GetUIFontConfig(FontConfigJsonInfo& fontConfigJsonInfo)
+{
+    pipelineContextHolder_.Get()->GetUIFontConfig(fontConfigJsonInfo);
+}
+
 double FrontendDelegateDeclarativeNG::MeasureText(const MeasureContext& context)
 {
     return MeasureUtil::MeasureText(context);

@@ -106,7 +106,7 @@ const char* GetDeclarativeSharedLibrary()
 void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, const RefPtr<AssetManager>& assetManager,
     const ColorScheme& colorScheme, const ResourceInfo& resourceInfo,
     const std::shared_ptr<OHOS::AbilityRuntime::Context>& context,
-    const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& abilityInfo)
+    const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& abilityInfo, bool clearCache = false)
 {
     auto resourceAdapter = ResourceAdapter::CreateV2();
     resourceAdapter->Init(resourceInfo);
@@ -118,20 +118,24 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     themeManager->LoadCustomTheme(assetManager);
     themeManager->LoadResourceThemes();
 
+    if (clearCache) {
+        ResourceManager::GetInstance().Reset();
+    }
+
     auto defaultBundleName = "";
     auto defaultModuleName = "";
-    ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter);
+    ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter, true);
     if (context) {
         auto bundleName = context->GetBundleName();
         auto moduleName = context->GetHapModuleInfo()->name;
         if (!bundleName.empty() && !moduleName.empty()) {
-            ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
+            ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter, true);
         }
     } else if (abilityInfo) {
         auto bundleName = abilityInfo->bundleName;
         auto moduleName = abilityInfo->moduleName;
         if (!bundleName.empty() && !moduleName.empty()) {
-            ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
+            ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter, true);
         }
     }
 }
@@ -1850,7 +1854,7 @@ float AceContainer::GetSmallWindowScale() const
         if (!window) {
             continue;
         }
-        if (window->wid_ == windowId) {
+        if (window->wid_ == static_cast<int32_t>(windowId)) {
             scale = window->scaleVal_;
             break;
         }
@@ -1911,9 +1915,9 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
         } else if (parsedConfig.direction == "vertical") {
             resDirection = DeviceOrientation::PORTRAIT;
         }
-        if (SystemProperties::GetDeviceOrientation() != resDirection) {
+        if (orientation_ != resDirection) {
             configurationChange.directionUpdate = true;
-            SystemProperties::SetDeviceOrientation(resDirection == DeviceOrientation::PORTRAIT ? 0 : 1);
+            orientation_ = resDirection;
         }
         resConfig.SetOrientation(resDirection);
     }
@@ -2086,7 +2090,8 @@ void AceContainer::UpdateResource()
     if (SystemProperties::GetResourceDecoupling()) {
         auto context = runtimeContext_.lock();
         auto abilityInfo = abilityInfo_.lock();
-        InitResourceAndThemeManager(pipelineContext_, assetManager_, colorScheme_, resourceInfo_, context, abilityInfo);
+        InitResourceAndThemeManager(
+            pipelineContext_, assetManager_, colorScheme_, resourceInfo_, context, abilityInfo, true);
     } else {
         ThemeConstants::InitDeviceType();
         auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();

@@ -81,29 +81,19 @@ OffsetF SubMenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<FrameNode>
 {
     auto pipelineContext = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, NG::OffsetF(0.0f, 0.0f));
-    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
-    float windowsOffsetY = static_cast<float>(windowGlobalRect.GetOffset().GetY());
     auto menuItemSize = parentMenuItem->GetGeometryNode()->GetFrameSize();
     position_ = GetSubMenuPosition(parentMenuItem);
     float x = HorizontalLayoutSubMenu(size, position_.GetX(), menuItemSize);
     x = std::clamp(x, paddingStart_, wrapperSize_.Width() - size.Width() - paddingEnd_);
     float y = 0.0f;
     if (hierarchicalParameters_ || !Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        windowsOffsetY = 0.0f;
         y = VerticalLayoutSubMenu(size, position_.GetY(), menuItemSize);
     } else {
         y = VerticalLayoutSubMenuHalfScreen(size, position_.GetY(), menuItemSize);
     }
-    y = std::clamp(
-        y, windowsOffsetY + paddingTop_, windowsOffsetY + wrapperSize_.Height() - size.Height() - paddingBottom_);
-
-    if (hierarchicalParameters_) {
-        auto displayAvailableRect = pipelineContext->GetDisplayAvailableRect();
-        float availableOffsetY = displayAvailableRect.GetOffset().GetY();
-        float wrapperHeight = displayAvailableRect.Height();
-        y = std::clamp(
-            y, availableOffsetY + paddingTop_, availableOffsetY + wrapperHeight - size.Height() - paddingBottom_);
-    }
+    float yMinAvoid = wrapperRect_.Top() + paddingTop_;
+    float yMaxAvoid = wrapperRect_.Bottom() - paddingBottom_ - size.Height();
+    y = std::clamp(y, yMinAvoid, yMaxAvoid);
     return NG::OffsetF(x, y);
 }
 

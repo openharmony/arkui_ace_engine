@@ -16,9 +16,14 @@
 #include "base/geometry/size.h"
 #include "base/utils/measure_util.h"
 
+namespace {
+    constexpr float TEXT_SIZE_WIDTH = 10.0f;
+    constexpr float TEXT_SIZE_HEIGHT = 10.0f;
+}
+
 namespace OHOS::Ace {
 Size MeasureUtil::MeasureTextSize(const MeasureContext& context)
 {
-    return Size(0.0, 0.0);
+    return Size(TEXT_SIZE_WIDTH, TEXT_SIZE_HEIGHT);
 }
 } // namespace OHOS::Ace

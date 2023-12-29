@@ -2260,6 +2260,7 @@ void PipelineContext::WindowFocus(bool isFocus)
             windowFocus_ = true;
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "windowfocus focusOnNodeCallback_.");
         }
+        RequestFrame();
     }
     FlushWindowFocusChangedCallback(isFocus);
 }
@@ -2573,7 +2574,6 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
     auto manager = GetDragDropManager();
     CHECK_NULL_VOID(manager);
     std::string extraInfo;
-#ifdef ENABLE_DRAG_FRAMEWORK
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
         if (!manager->IsDragged() && manager->IsWindowConsumed()) {
@@ -2593,34 +2593,22 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
         manager->OnDragOut();
         return;
     }
-#endif // ENABLE_DRAG_FRAMEWORK
 
-#ifdef ENABLE_DRAG_FRAMEWORK
     if (action == DragEventAction::DRAG_EVENT_START) {
         manager->RequireSummary();
     }
     extraInfo = manager->GetExtraInfo();
-#else
-    manager->GetExtraInfoFromClipboard(extraInfo);
-#endif // ENABLE_DRAG_FRAMEWORK
     if (action == DragEventAction::DRAG_EVENT_END) {
         manager->OnDragEnd(pointerEvent, extraInfo);
-#ifndef ENABLE_DRAG_FRAMEWORK
-        manager->RestoreClipboardData();
-#endif // ENABLE_DRAG_FRAMEWORK
-#ifdef ENABLE_DRAG_FRAMEWORK
         SubwindowManager::GetInstance()->HidePreviewNG();
         auto overlayManager = GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
         overlayManager->RemovePixelMap();
-#endif
         return;
     }
-#ifdef ENABLE_DRAG_FRAMEWORK
     if (action == DragEventAction::DRAG_EVENT_MOVE) {
         manager->DoDragMoveAnimate(pointerEvent);
     }
-#endif
     manager->OnDragMove(pointerEvent, extraInfo);
 }
 
@@ -2959,9 +2947,7 @@ bool PipelineContext::IsDragging() const
         return false;
     }
     bool isDragging = dragDropManager_->IsDragging();
-#ifdef ENABLE_DRAG_FRAMEWORK
     isDragging = (isDragging || dragDropManager_->IsMsdpDragging());
-#endif
     return isDragging;
 }
 

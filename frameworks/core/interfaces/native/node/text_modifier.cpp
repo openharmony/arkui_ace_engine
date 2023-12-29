@@ -79,6 +79,7 @@ void ResetFontStyle(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    TextModelNG::SetItalicFontStyle(frameNode, OHOS::Ace::FontStyle::NORMAL);
 }
 
 void SetTextAlign(NodeHandle node, uint32_t testAlign)

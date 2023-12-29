@@ -35,20 +35,14 @@
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/utils/system_properties.h"
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 #include "base/geometry/rect.h"
-#include "base/msdp/device_status/interfaces/innerkits/interaction/include/interaction_manager.h"
 #include "core/common/ace_engine_ext.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/common/udmf/unified_data.h"
-#endif
 
 #include "core/components_ng/pattern/web/cross_platform/web_delegate_cross.h"
 
 namespace OHOS::Ace::NG {
-#ifdef ENABLE_DRAG_FRAMEWORK
-using namespace Msdp::DeviceStatus;
-#endif // ENABLE_DRAG_FRAMEWORK
 
 constexpr int32_t SINGLE_CLICK_NUM = 1;
 constexpr int32_t DOUBLE_CLICK_NUM = 2;
@@ -130,9 +124,7 @@ void WebPattern::InitEvent()
     CHECK_NULL_VOID(gestureHub);
 
     InitTouchEvent(gestureHub);
-#ifdef ENABLE_DRAG_FRAMEWORK
     InitDragEvent(gestureHub);
-#endif
     InitPanEvent(gestureHub);
 
     auto inputHub = eventHub->GetOrCreateInputEventHub();
@@ -156,7 +148,6 @@ void WebPattern::InitEvent()
 
 void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-#ifdef ENABLE_DRAG_FRAMEWORK
     if (panEvent_) {
         return;
     }
@@ -173,10 +164,8 @@ void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     panEvent_ = MakeRefPtr<PanEvent>(
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
-#endif
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 void WebPattern::HandleDragMove(const GestureEvent& event)
 {
     if (event.GetInputEventType() == InputEventType::AXIS) {
@@ -186,7 +175,6 @@ void WebPattern::HandleDragMove(const GestureEvent& event)
             event.GetDelta().GetX() * DEFAULT_AXIS_RATIO, event.GetDelta().GetY() * DEFAULT_AXIS_RATIO);
     }
 }
-#endif
 
 void WebPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
@@ -280,7 +268,6 @@ void WebPattern::HandleMouseEvent(MouseInfo& info)
 void WebPattern::WebOnMouseEvent(const MouseInfo& info)
 {}
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 void WebPattern::ResetDragAction()
 {
     auto frameNode = GetHost();
@@ -317,7 +304,6 @@ Offset WebPattern::GetDragOffset() const
 
     return webDragOffset;
 }
-#endif
 
 bool WebPattern::HandleDoubleClickEvent(const MouseInfo& info)
 {
@@ -358,7 +344,6 @@ void WebPattern::SendDoubleClickEvent(const MouseClickInfo& info)
     delegate_->OnMouseEvent(info.x, info.y, MouseButton::LEFT_BUTTON, MouseAction::PRESS, DOUBLE_CLICK_NUM);
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 bool WebPattern::GenerateDragDropInfo(NG::DragDropInfo& dragDropInfo)
 {
     if (delegate_) {
@@ -738,7 +723,6 @@ void WebPattern::ClearDragData()
         delegate_->dragData_->SetLinkTitle(linkTitle);
     }
 }
-#endif
 
 void WebPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
@@ -1388,9 +1372,7 @@ void WebPattern::HandleTouchDown(const TouchEventInfo& info, bool fromOverlay)
 
 void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
 {
-#ifdef ENABLE_DRAG_FRAMEWORK
     ResetDragAction();
-#endif
     CHECK_NULL_VOID(delegate_);
     std::list<TouchInfo> touchInfos;
     if (!ParseTouchInfo(info, touchInfos)) {
@@ -1410,7 +1392,6 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
 
 void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
 {
-#ifdef ENABLE_DRAG_FRAMEWORK
     if (isDragging_) {
         return;
     }
@@ -1421,7 +1402,6 @@ void WebPattern::HandleTouchMove(const TouchEventInfo& info, bool fromOverlay)
     if (manager->IsDragged()) {
         return;
     }
-#endif
     CHECK_NULL_VOID(delegate_);
     std::list<TouchInfo> touchInfos;
     if (!ParseTouchInfo(info, touchInfos)) {

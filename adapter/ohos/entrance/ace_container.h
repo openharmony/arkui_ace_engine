@@ -586,6 +586,8 @@ private:
     int32_t parentId_ = 0;
     bool useStageModel_ = false;
 
+    DeviceOrientation orientation_ = DeviceOrientation::ORIENTATION_UNDEFINED;
+
     mutable std::mutex frontendMutex_;
     mutable std::mutex pipelineMutex_;
     mutable std::mutex destructMutex_;

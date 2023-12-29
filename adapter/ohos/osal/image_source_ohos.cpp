@@ -46,6 +46,19 @@ RefPtr<ImageSource> ImageSource::Create(const uint8_t* data, uint32_t size)
     return MakeRefPtr<ImageSourceOhos>(std::move(src));
 }
 
+RefPtr<ImageSource> ImageSource::Create(const std::string& filePath)
+{
+    Media::SourceOptions opts;
+    opts.formatHint = "image/svg+xml";
+    uint32_t errorCode = 0;
+    auto src = Media::ImageSource::CreateImageSource(filePath, opts, errorCode);
+    if (errorCode != Media::SUCCESS) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE, "create image source failed, errorCode = %{public}u", errorCode);
+        return nullptr;
+    }
+    return MakeRefPtr<ImageSourceOhos>(std::move(src));
+}
+
 bool ImageSource::IsAstc(const uint8_t* data, size_t size)
 {
     return Media::ImageSource::IsASTC(data, size);
@@ -88,6 +101,19 @@ RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap(uint32_t index, const Size& siz
         return nullptr;
     }
     return PixelMap::Create(std::move(pixmap));
+}
+
+RefPtr<PixelMap> ImageSourceOhos::CreatePixelMap()
+{
+    uint32_t errorCode;
+    Media::DecodeOptions decodeOpts;
+    auto pixelMap = imageSource_->CreatePixelMap(decodeOpts, errorCode);
+    if (errorCode != Media::SUCCESS) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "create PixelMap from ImageSource failed, errorCode = %{public}u", errorCode);
+        return nullptr;
+    }
+    return PixelMap::Create(std::move(pixelMap));
 }
 
 ImageSource::Size ImageSourceOhos::GetImageSize()

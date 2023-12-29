@@ -659,5 +659,53 @@ void ContainerModalPattern::Init()
 {
     InitContainerEvent();
     InitTitle();
+    InitLayoutProperty();
+}
+
+void ContainerModalPattern::InitLayoutProperty()
+{
+    auto containerModal = GetHost();
+    containerModal->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+
+    auto column = GetColumnNode();
+    column->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+
+    auto content = GetContentNode();
+    auto contentProperty = content->GetLayoutProperty();
+    contentProperty->UpdateMeasureType(MeasureType::MATCH_CONTENT);
+    contentProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(1.0, DimensionUnit::PERCENT)));
+
+    auto stack = GetStackNode();
+    stack->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+
+    auto buttonsRow = GetControlButtonRow();
+    auto buttonsRowProperty = buttonsRow->GetLayoutProperty<LinearLayoutProperty>();
+    buttonsRowProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    buttonsRowProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));
+    buttonsRowProperty->UpdateMainAxisAlign(FlexAlign::FLEX_END);
+    buttonsRowProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
+
+    auto titleRow = GetCustomTitleRow();
+    auto titleRowProperty = titleRow->GetLayoutProperty<LinearLayoutProperty>();
+    titleRowProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    titleRowProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));
+    titleRowProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+    titleRowProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    PaddingProperty padding { std::nullopt, GetControlButtonRowWidth(), std::nullopt, std::nullopt };
+    titleRowProperty->UpdatePadding(padding);
+
+    containerModal->MarkModifyDone();
+}
+
+CalcLength ContainerModalPattern::GetControlButtonRowWidth()
+{
+    auto row = GetControlButtonRow();
+    int32_t buttonNum = row->GetChildren().size();
+
+    return CalcLength(TITLE_ELEMENT_MARGIN_HORIZONTAL * (buttonNum - 1) + TITLE_BUTTON_SIZE * buttonNum +
+                      TITLE_PADDING_START + TITLE_PADDING_END);
 }
 } // namespace OHOS::Ace::NG

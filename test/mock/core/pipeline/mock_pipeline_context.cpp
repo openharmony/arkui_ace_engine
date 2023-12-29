@@ -585,5 +585,11 @@ void PipelineBase::SetTextFieldManager(const RefPtr<ManagerInterface>& manager)
 {
     textFieldManager_ = manager;
 }
+
+bool PipelineBase::HasFloatTitle() const
+{
+    return true;
+}
+
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

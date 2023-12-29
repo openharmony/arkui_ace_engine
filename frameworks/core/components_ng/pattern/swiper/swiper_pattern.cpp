@@ -178,7 +178,6 @@ void SwiperPattern::StopAndResetSpringAnimation()
         jumpIndex_ = currentIndex_;
         springAnimationIsRunning_ = false;
     }
-    UpdateItemRenderGroup(false);
 }
 
 void SwiperPattern::OnLoopChange()

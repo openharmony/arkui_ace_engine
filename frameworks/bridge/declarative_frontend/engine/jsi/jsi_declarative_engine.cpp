@@ -398,6 +398,7 @@ void JsiDeclarativeEngineInstance::InitAceModule()
         PreloadStateManagement(runtime_);
         PreloadJsEnums(runtime_);
         PreloadArkComponent(runtime_);
+        PreloadUIContent(runtime_);
     }
 #if defined(PREVIEW)
     std::string jsMockSystemPluginString(_binary_jsMockSystemPlugin_abc_start,

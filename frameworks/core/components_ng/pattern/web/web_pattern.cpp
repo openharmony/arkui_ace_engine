@@ -45,21 +45,16 @@
 #include "frameworks/base/utils/system_properties.h"
 #include "frameworks/core/components_ng/base/ui_node.h"
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 #include "base/geometry/rect.h"
-#include "base/msdp/device_status/interfaces/innerkits/interaction/include/interaction_manager.h"
 #include "core/common/ace_engine_ext.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/common/udmf/unified_data.h"
-#endif
 
 namespace OHOS::Ace::NG {
-#ifdef ENABLE_DRAG_FRAMEWORK
-using namespace Msdp::DeviceStatus;
-#endif // ENABLE_DRAG_FRAMEWORK
 namespace {
 const std::string IMAGE_POINTER_CONTEXT_MENU_PATH = "etc/webview/ohos_nweb/context-menu.svg";
 const std::string IMAGE_POINTER_ALIAS_PATH = "etc/webview/ohos_nweb/alias.svg";
+constexpr int32_t UPDATE_WEB_LAYOUT_DELAY_TIME = 20;
 const LinearEnumMapNode<OHOS::NWeb::CursorType, MouseFormat> g_cursorTypeMap[] = {
     { OHOS::NWeb::CursorType::CT_CROSS, MouseFormat::CROSS },
     { OHOS::NWeb::CursorType::CT_HAND, MouseFormat::HAND_POINTING },
@@ -1149,6 +1144,29 @@ bool WebPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, co
     return false;
 }
 
+void WebPattern::UpdateLayoutAfterKerboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight)
+{
+    if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
+        return;
+    }
+
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "KerboardShow height:%{public}d, keyboard:%{public}f, offset:%{public}f, oldWebHeight:%{public}f",
+        height, keyboard, GetCoordinatePoint()->GetY(), oldWebHeight);
+
+    if (GreatOrEqual(height, keyboard + GetCoordinatePoint()->GetY())) {
+        double newHeight = height - keyboard - GetCoordinatePoint()->GetY();
+        if (GreatOrEqual(newHeight, oldWebHeight)) {
+            newHeight = oldWebHeight;
+        }
+        if (NearEqual(newHeight, oldWebHeight)) {
+            return;
+        }
+        drawSize_.SetHeight(newHeight);
+        UpdateWebLayoutSize(width, height);
+    }
+}
+
 void WebPattern::OnAreaChangedInner()
 {
     auto offset = OffsetF(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
@@ -1694,9 +1712,22 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
         if (height - GetCoordinatePoint()->GetY() < keyboard) {
             return true;
         }
-        drawSize_.SetHeight(height - keyboard - GetCoordinatePoint()->GetY());
-        UpdateWebLayoutSize(width, height);
         isVirtualKeyBoardShow_ = VkState::VK_SHOW;
+        auto frameNode = GetHost();
+        CHECK_NULL_RETURN(frameNode, false);
+        frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(context, false);
+        context->SetRootRect(width, height, 0);
+        auto taskExecutor = context->GetTaskExecutor();
+        CHECK_NULL_RETURN(taskExecutor, false);
+        taskExecutor->PostDelayedTask(
+            [weak = WeakClaim(this), width, height, keyboard, oldWebHeight = drawSize_.Height()]() {
+                auto webPattern = weak.Upgrade();
+                CHECK_NULL_VOID(webPattern);
+                webPattern->UpdateLayoutAfterKerboardShow(width, height, keyboard, oldWebHeight);
+            },
+            TaskExecutor::TaskType::UI, UPDATE_WEB_LAYOUT_DELAY_TIME);
     }
     return true;
 }

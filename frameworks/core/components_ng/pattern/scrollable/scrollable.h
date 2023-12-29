@@ -453,6 +453,14 @@ private:
     float GetFrictionVelocityByFinalPosition(float final, float position, float signum, float friction,
         float threshold = DEFAULT_MULTIPLIER);
 
+    /**
+     * @brief Checks if the scroll event is caused by a mouse wheel.
+     *
+     * @param info The GestureEvent containing the scroll event information.
+     * @return true if the scroll event is caused by a mouse wheel, false otherwise.
+     */
+    static inline bool IsMouseWheelScroll(const GestureEvent& info);
+
     ScrollPositionCallback callback_;
     ScrollEventCallback scrollEnd_;
     ScrollEventCallback scrollEndCallback_;

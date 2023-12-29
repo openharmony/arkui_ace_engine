@@ -30,6 +30,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr uint32_t PRESS_STYLE_DELAY = 300;
+constexpr uint32_t PRESS_CANCEL_STYLE_DELAY = 64;
 }
 
 StateStyleManager::StateStyleManager(WeakPtr<FrameNode> frameNode) : host_(std::move(frameNode)) {}
@@ -54,18 +55,13 @@ const RefPtr<TouchEventImpl>& StateStyleManager::GetPressedListener()
         auto lastPoint = changeTouches.back();
         const auto& type = lastPoint.GetTouchType();
         if (type == TouchType::DOWN) {
-            if (!stateStyleMgr->HandleScrollingParent()) {
-                stateStyleMgr->UpdateCurrentUIState(UI_STATE_PRESSED);
-            } else {
-                stateStyleMgr->PostPressStyleTask(PRESS_STYLE_DELAY);
-                stateStyleMgr->PendingPressedState();
-            }
+            stateStyleMgr->HandleTouchDown();
             stateStyleMgr->pointerId_.insert(lastPoint.GetFingerId());
         }
         if ((type == TouchType::UP) || (type == TouchType::CANCEL)) {
             stateStyleMgr->pointerId_.erase(lastPoint.GetFingerId());
             if (stateStyleMgr->pointerId_.size() == 0) {
-                stateStyleMgr->ResetPressedState();
+                stateStyleMgr->HandleTouchUp();
             }
         }
         if ((type == TouchType::MOVE) &&
@@ -81,6 +77,32 @@ const RefPtr<TouchEventImpl>& StateStyleManager::GetPressedListener()
     };
     pressedFunc_ = MakeRefPtr<TouchEventImpl>(std::move(pressedCallback));
     return pressedFunc_;
+}
+
+void StateStyleManager::HandleTouchDown()
+{
+    if (!HandleScrollingParent()) {
+        UpdateCurrentUIState(UI_STATE_PRESSED);
+    } else {
+        if (IsPressedCancelStatePending()) {
+            ResetPressedCancelState();
+        }
+        PostPressStyleTask(PRESS_STYLE_DELAY);
+        PendingPressedState();
+    }
+}
+
+void StateStyleManager::HandleTouchUp()
+{
+    if (IsPressedStatePending()) {
+        DeletePressStyleTask();
+        ResetPressedPendingState();
+        UpdateCurrentUIState(UI_STATE_PRESSED);
+        PostPressCancelStyleTask(PRESS_CANCEL_STYLE_DELAY);
+        PendingCancelPressedState();
+    } else if (!IsPressedCancelStatePending()) {
+        ResetPressedState();
+    }
 }
 
 void StateStyleManager::FireStateFunc()
@@ -140,6 +162,28 @@ void StateStyleManager::PostPressStyleTask(uint32_t delayTime)
     taskExecutor->PostDelayedTask(pressStyleTask_, TaskExecutor::TaskType::UI, delayTime);
 }
 
+void StateStyleManager::PostPressCancelStyleTask(uint32_t delayTime)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    if (IsPressedStatePending() || IsPressedCancelStatePending()) {
+        return;
+    }
+
+    auto weak = AceType::WeakClaim(this);
+    pressCancelStyleTask_.Reset([weak = WeakClaim(this)] {
+        auto stateStyleMgr = weak.Upgrade();
+        CHECK_NULL_VOID(stateStyleMgr);
+        stateStyleMgr->ResetPressedCancelPendingState();
+        stateStyleMgr->ResetCurrentUIState(UI_STATE_PRESSED);
+    });
+
+    taskExecutor->PostDelayedTask(pressCancelStyleTask_, TaskExecutor::TaskType::UI, delayTime);
+}
+
 bool StateStyleManager::HandleScrollingParent()
 {
     auto node = host_.Upgrade();
@@ -152,7 +196,7 @@ bool StateStyleManager::HandleScrollingParent()
         stateStyleMgr->pointerId_.clear();
         stateStyleMgr->ResetPressedPendingState();
         if (stateStyleMgr->pressStyleTask_) {
-            stateStyleMgr->CancelPressStyleTask();
+            stateStyleMgr->DeletePressStyleTask();
         }
     };
 

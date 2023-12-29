@@ -44,7 +44,6 @@ constexpr uint32_t SELECTED_ITEM_HALF_WIDTH = 2;
 constexpr uint32_t SELECTED_ITEM_HALF_HEIGHT = 3;
 constexpr float TOUCH_BOTTOM_BACKGROUND_WIDTH_MULTIPLE = 1.225f;
 constexpr float TOUCH_BOTTOM_DOT_WIDTH_MULTIPLE = 0.0125f;
-constexpr float TOUCH_BOTTOM_FOLLOW_THRESHOLD = 0.5f;
 constexpr float LONG_POINT_TAIL_RATIO = 0.5f;
 
 constexpr int TWOFOLD = 2;
@@ -119,7 +118,7 @@ void DotIndicatorPaintMethod::UpdateNormalIndicator(
         GetLongPointAnimationStateSecondCenter(paintWrapper, pointCenterX);
         dotIndicatorModifier_->PlayIndicatorAnimation(
             vectorBlackPointCenterX_, pointCenterX, gestureState_, touchBottomTypeLoop_);
-    } else if (gestureState_ != GestureState::GESTURE_STATE_NONE) {
+    } else {
         dotIndicatorModifier_->UpdateNormalPaintProperty(
             normalMargin_, itemHalfSizes, vectorBlackPointCenterX_, longPointCenterX_);
     }
@@ -345,17 +344,11 @@ std::tuple<float, float, float> DotIndicatorPaintMethod::GetMoveRate()
         longPointRightCenterMoveRate = 1;
     } else if (touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT) {
         auto rateAbs = std::abs(turnPageRate_);
-        if (rateAbs < TOUCH_BOTTOM_FOLLOW_THRESHOLD) {
-            rateAbs = TOUCH_BOTTOM_FOLLOW_THRESHOLD;
-        }
         longPointLeftCenterMoveRate = longPointRightCenterMoveRate =
             // x0:0.33, y0:0, x1:0.67, y1:1
             CubicCurve(0.33, 0, 0.67, 1).MoveInternal(1.0 - rateAbs);
     } else if (touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT) {
         auto rateAbs = std::abs(turnPageRate_);
-        if (rateAbs > TOUCH_BOTTOM_FOLLOW_THRESHOLD) {
-            rateAbs = TOUCH_BOTTOM_FOLLOW_THRESHOLD;
-        }
         // x0:0.33, y0:0, x1:0.67, y1:1
         longPointLeftCenterMoveRate = longPointRightCenterMoveRate = CubicCurve(0.33, 0, 0.67, 1).MoveInternal(rateAbs);
     } else if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT) {
