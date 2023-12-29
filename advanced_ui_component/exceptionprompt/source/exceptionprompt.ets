@@ -178,7 +178,7 @@ export struct ExceptionPrompt {
       .visibility(this.options.isShown ? Visibility.Visible : Visibility.None)
     }
     .width('100%')
-    .height(this.messageHeight())
+    .height(this.getMessageHeight())
     .position({ y: this.options.marginTop })
     .zIndex(ZINDEX_NUM)
   }
