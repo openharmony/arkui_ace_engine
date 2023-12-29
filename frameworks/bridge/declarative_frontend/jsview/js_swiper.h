@@ -60,6 +60,7 @@ protected:
     static void SetDisplayArrow(const JSCallbackInfo& info);
     static SwiperParameters GetDotIndicatorInfo(const JSRef<JSObject>& obj);
     static SwiperDigitalParameters GetDigitIndicatorInfo(const JSRef<JSObject>& obj);
+    static std::optional<Dimension> ParseIndicatorDimension(const JSRef<JSVal>& value);
     static void SetIsIndicatorCustomSize(const Dimension& dimPosition, bool parseOk);
     static bool GetArrowInfo(const JSRef<JSObject>& obj, SwiperArrowParameters& swiperArrowParameters);
     static void SetNestedScroll(const JSCallbackInfo& info);
