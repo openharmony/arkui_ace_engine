@@ -394,6 +394,12 @@ struct ArkUICommonModifierAPI {
     void (*ResetObscured)(NodeHandle node);
     void (*SetResponseRegion)(NodeHandle node, const double* values, const int32_t* units, int32_t length);
     void (*ResetResponseRegion)(NodeHandle node);
+    void (*SetBackgroundEffect)(NodeHandle node, const OHOS::Ace::EffectOption &effectOption);
+    void (*ResetBackgroundEffect)(NodeHandle node);
+    void (*SetBackgroundBrightness)(NodeHandle node, float rate, float lightUpDegree);
+    void (*ResetBackgroundBrightness)(NodeHandle node);
+    void (*SetDragPreviewOptions)(NodeHandle node, int32_t dragPreviewMode);
+    void (*ResetDragPreviewOptions)(NodeHandle node);
     void (*SetMouseResponseRegion)(NodeHandle node, const double* values, const int32_t* units, int32_t length);
     void (*ResetMouseResponseRegion)(NodeHandle node);
     void (*SetEnabled)(NodeHandle node, bool value);
