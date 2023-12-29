@@ -138,7 +138,7 @@ void TextSelectController::UpdateCaretInfoByOffset(const Offset& localOffset)
     UpdateCaretIndex(index);
     if (!contentController_->IsEmpty()) {
         UpdateCaretRectByPositionNearTouchOffset(index, localOffset);
-        MoveHandleToContentRect(caretInfo_.rect, 0.0f, true);
+        MoveHandleToContentRect(caretInfo_.rect, 0.0f);
         UpdateRecordCaretIndex(caretInfo_.index);
     } else {
         caretInfo_.rect = CalculateEmptyValueCaretRect();
@@ -270,8 +270,7 @@ std::vector<RectF> TextSelectController::GetSelectedRects() const
     return selectedRects;
 }
 
-void TextSelectController::MoveHandleToContentRect(
-    RectF& handleRect, float boundaryAdjustment, bool isAdjustUnconditionally) const
+void TextSelectController::MoveHandleToContentRect(RectF& handleRect, float boundaryAdjustment) const
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
@@ -305,10 +304,11 @@ void TextSelectController::MoveHandleToContentRect(
         }
     }
     textFiled->SetTextRect(textRect);
-    AdjustHandleAtEdge(handleRect, isAdjustUnconditionally);
+    textFiled->UpdateLastTextRect(textRect);
+    AdjustHandleAtEdge(handleRect);
 }
 
-void TextSelectController::AdjustHandleAtEdge(RectF& handleRect, bool isAdjustUnconditionally) const
+void TextSelectController::AdjustHandleAtEdge(RectF& handleRect) const
 {
     auto pattern = pattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
@@ -365,6 +365,9 @@ void TextSelectController::MoveSecondHandleToContentRect(int32_t index)
 
 void TextSelectController::MoveCaretToContentRect(int32_t index, TextAffinity textAffinity, bool isEditorValueChanged)
 {
+    // Don't need to change the cursor position when the edit content is not changed.
+    CHECK_NULL_VOID(isEditorValueChanged);
+    
     index = std::clamp(index, 0, static_cast<int32_t>(contentController_->GetWideText().length()));
     CaretMetricsF CaretMetrics;
     caretInfo_.index = index;
@@ -457,9 +460,13 @@ void TextSelectController::UpdateSecondHandleInfoByMouseOffset(const Offset& loc
 
 void TextSelectController::MoveSecondHandleByKeyBoard(int32_t index)
 {
+    index = std::clamp(index, 0, static_cast<int32_t>(contentController_->GetWideText().length()));
     MoveSecondHandleToContentRect(index);
     caretInfo_.index = index;
-    UpdateCaretOffset();
+    UpdateCaretOffset(HasReverse() ? TextAffinity::DOWNSTREAM : TextAffinity::UPSTREAM);
+    auto caretRect = GetCaretRect();
+    MoveHandleToContentRect(caretRect);
+    caretInfo_.rect = caretRect;
 }
 
 void TextSelectController::FireSelectEvent()
