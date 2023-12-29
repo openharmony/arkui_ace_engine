@@ -145,7 +145,7 @@ float GridLayoutInfo::GetCurrentOffsetOfRegularGrid(float mainGap) const
     float defaultHeight = GetCurrentLineHeight();
     auto lines = startIndex_ / crossCount_;
     float res = 0.0f;
-    for (int i = 0 ;i < lines; ++i) {
+    for (int i = 0; i < lines; ++i) {
         auto it = lineHeightMap_.find(i);
         res += (it != lineHeightMap_.end() ? it->second : defaultHeight) + mainGap;
     }
@@ -200,7 +200,8 @@ float GridLayoutInfo::GetContentHeight(float mainGap) const
         if (childrenCount_ % crossCount_ == 0) {
             return res - mainGap;
         }
-        return res + lineHeight;
+        auto lastLine = lineHeightMap_.find(lines);
+        return res + (lastLine != lineHeightMap_.end() ? lastLine->second : lineHeight);
     }
     float heightSum = 0;
     int32_t itemCount = 0;

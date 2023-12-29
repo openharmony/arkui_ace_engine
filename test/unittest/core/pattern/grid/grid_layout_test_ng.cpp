@@ -648,6 +648,45 @@ HWTEST_F(GridLayoutTestNg, GetContentHeight001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GridLayoutInfo::GetCurrentOffsetOfRegularGrid001
+ * @tc.desc: test GetCurrentOffsetOfRegularGrid with varying lineHeights
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GetCurrentOffsetOfRegularGrid001, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.lineHeightMap_ = { { 0, 5.0f }, { 1, 5.0f }, { 2, 5.0f }, { 3, 5.0f }, { 4, 10.0f }, { 5, 10.0f },
+        { 6, 10.0f } };
+    info.startIndex_ = 16;
+    info.startMainLineIndex_ = 5;
+    info.crossCount_ = 3;
+
+    EXPECT_EQ(info.GetCurrentOffsetOfRegularGrid(1.0f), 35.0f);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::GetContentHeightRegular001
+ * @tc.desc: test GetContentHeight with regular children but different line heights
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GetContentHeightRegular001, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.hasBigItem_ = false;
+    info.lineHeightMap_ = { { 0, 5.0f }, { 1, 5.0f }, { 2, 5.0f }, { 3, 5.0f }, { 4, 10.0f }, { 5, 10.0f },
+        { 6, 10.0f } };
+    info.startIndex_ = 10;
+    info.startMainLineIndex_ = 5;
+    info.crossCount_ = 2;
+
+    info.childrenCount_ = 14;
+    EXPECT_EQ(info.GetContentHeight(1.0f), 56.0f);
+
+    info.childrenCount_ = 13;
+    EXPECT_EQ(info.GetContentHeight(1.0f), 56.0f);
+}
+
+/**
  * @tc.name: SearchIrregularFocusableChildInScroll001
  * @tc.desc: Test the function when the gridItem cannot be focused
  * @tc.type: FUNC
