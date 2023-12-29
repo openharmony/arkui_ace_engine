@@ -383,7 +383,7 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
     }
 }
 
-void JsBindViews(BindingTarget globalObj)
+void JsBindViews(BindingTarget globalObj, void* nativeEngine)
 {
     JSViewAbstract::JSBind(globalObj);
     JSViewStackProcessor::JSBind(globalObj);
@@ -468,7 +468,7 @@ void JsBindViews(BindingTarget globalObj)
     JSRect::JSBind(globalObj);
     JSAnimator::JSBind(globalObj);
     JSCanvas::JSBind(globalObj);
-    JSOffscreenCanvas::JSBind(globalObj);
+    JSOffscreenCanvas::JSBind(globalObj, nativeEngine);
     JSListItemGroup::JSBind(globalObj);
     JSLoadingProgress::JSBind(globalObj);
     JSImageAnimator::JSBind(globalObj);
@@ -517,7 +517,7 @@ void JsBindViews(BindingTarget globalObj)
     JSSwiperController::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
     JSCanvasGradient::JSBind(globalObj);
-    JSRenderImage::JSBind(globalObj);
+    JSRenderImage::JSBind(globalObj, nativeEngine);
     JSCanvasImageData::JSBind(globalObj);
     JSRenderingContextSettings::JSBind(globalObj);
     JSMatrix2d::JSBind(globalObj);
