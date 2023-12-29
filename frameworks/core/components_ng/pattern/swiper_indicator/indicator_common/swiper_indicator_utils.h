@@ -121,10 +121,10 @@ private:
                                     float swiperWidth, float indicatorWidth, const Axis& direction)
     {
         float offsetX = 0.0f;
-        if (left.has_value() && !NearZero(left.value().Value())) {
+        if (left.has_value() && GreatOrEqual(left.value().Value(), 0)) {
             auto leftValue = GetValidEdgeLength(swiperWidth, indicatorWidth, left.value());
             offsetX = leftValue + swiperPaddingLeft + borderWidthLeft;
-        } else if (right.has_value() && !NearZero(right.value().Value())) {
+        } else if (right.has_value() && GreatOrEqual(right.value().Value(), 0)) {
             auto rightValue = GetValidEdgeLength(swiperWidth, indicatorWidth, right.value());
             offsetX = swiperWidth - indicatorWidth - rightValue - swiperPaddingRight - borderWidthRight;
         } else {
@@ -144,10 +144,10 @@ private:
                                     float swiperHeight, float indicatorHeight, const Axis& direction)
     {
         float offsetY = 0.0f;
-        if (top.has_value() && !NearZero(top.value().Value())) {
+        if (top.has_value() && GreatOrEqual(top.value().Value(), 0)) {
             auto topValue = GetValidEdgeLength(swiperHeight, indicatorHeight, top.value());
             offsetY = topValue + swiperPaddingTop + borderWidthTop;
-        } else if (bottom.has_value() && !NearZero(bottom.value().Value())) {
+        } else if (bottom.has_value() && GreatOrEqual(bottom.value().Value(), 0)) {
             auto bottomValue = GetValidEdgeLength(swiperHeight, indicatorHeight, bottom.value());
             offsetY = swiperHeight - indicatorHeight - bottomValue - swiperPaddingBottom - borderWidthBottom;
         } else {
