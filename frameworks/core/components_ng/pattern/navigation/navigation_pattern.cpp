@@ -740,11 +740,9 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                 if (navigationLayoutProperty->GetHideNavBar().value_or(false) ||
                     (pattern->GetNavigationMode() == NavigationMode::STACK && isSetInvisible)) {
                     navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-                    navBarNode->SetActive(false);
                 } else {
                     navBarNode->GetRenderContext()->UpdateOpacity(1.0f);
                     navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-                    navBarNode->SetActive(true);
                 }
                 auto navigationContentNode = AceType::DynamicCast<FrameNode>(navigationGroupNode->GetContentNode());
                 CHECK_NULL_VOID(navigationContentNode);
@@ -762,6 +760,12 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                         pattern->NotifyDialogChange(true, true);
                         pattern->isChanged_ = false;
                     }
+                }
+                if (navigationLayoutProperty->GetHideNavBar().value_or(false) ||
+                    (pattern->GetNavigationMode() == NavigationMode::STACK && isSetInvisible)) {
+                    navBarNode->SetActive(false);
+                } else {
+                    navBarNode->SetActive(true);
                 }
                 if (navDestinationNode->GetChildren().size() <= EMPTY_DESTINATION_CHILD_SIZE &&
                     navDestinationPattern->GetBackButtonState()) {
