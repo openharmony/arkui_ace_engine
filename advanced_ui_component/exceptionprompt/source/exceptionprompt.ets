@@ -47,7 +47,7 @@ export struct ExceptionPrompt {
     // Click Set Network to open the Set network pop-up interface
   }
 
-  messageHeight() {
+  getMessageHeight() {
     let height = DEFAULT_HEIGHT
     if (this.options.marginType === MarginType.DEFAULT_MARGIN) {
       if (this.options.tip && JSON.stringify(this.options.tip)
