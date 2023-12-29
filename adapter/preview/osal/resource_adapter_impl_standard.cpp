@@ -507,4 +507,11 @@ std::string ResourceAdapterImpl::GetActualResourceName(const std::string& resNam
     }
     return resName.substr(index + 1, resName.length() - index - 1);
 }
+
+uint32_t ResourceAdapterImpl::GetSymbolById(uint32_t resId) const
+{
+    uint32_t result = 0;
+    resourceManager_->GetSymbolById(resId, result);
+    return result;
+}
 } // namespace OHOS::Ace

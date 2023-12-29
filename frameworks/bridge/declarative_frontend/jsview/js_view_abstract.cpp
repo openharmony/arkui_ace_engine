@@ -4244,7 +4244,6 @@ bool JSViewAbstract::ParseJsSymbolId(const JSRef<JSVal>& jsValue, std::uint32_t&
     if (!resourceWrapper) {
         return false;
     }
-    
     auto symbol = resourceWrapper->GetSymbolById(resId->ToNumber<uint32_t>());
     if (!symbol) {
         return false;
