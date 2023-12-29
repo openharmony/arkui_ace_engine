@@ -475,6 +475,7 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
     currentPos_ = mainPosition;
     currentVelocity_ = 0.0;
     lastPosition_ = currentPos_;
+    frictionVelocity_ = initVelocity_;
     frictionOffsetProperty_->Set(mainPosition);
     float response = fabs(2 * M_PI / (FRICTION_SCALE * friction));
     auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(response, 1.0f, 0.0f);
