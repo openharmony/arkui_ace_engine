@@ -143,6 +143,7 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
     }
     event.SetSourceTool(lastPoint.sourceTool);
     if (isFlushTouchEventsEnd_) {
+        // trigger callback of the last touch event during one vsync period
         event.SetTouchEventsEnd(true);
         isFlushTouchEventsEnd_ = false;
     }

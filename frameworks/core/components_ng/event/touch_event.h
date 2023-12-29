@@ -114,6 +114,8 @@ private:
     std::list<RefPtr<TouchEventImpl>> touchEvents_;
     RefPtr<TouchEventImpl> userCallback_;
     RefPtr<TouchEventImpl> onTouchEventCallback_;
+    // isFlushTouchEventsEnd_ means the last one touch event info during one vsync period, used only for web_pattern
+    // if isFlushTouchEventsEnd_ is true, web_pattern start to send touch event list to chromium
     bool isFlushTouchEventsEnd_ = false;
 };
 
