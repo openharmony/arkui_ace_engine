@@ -75,7 +75,7 @@ export class ExceptionPrompt extends ViewPU {
         this.__options.set(e)
     }
 
-    messageHeight() {
+    getMessageHeight() {
         let e = 48;
             this.options.marginType === MarginType.DEFAULT_MARGIN ? (this.options.tip && JSON.stringify(this.options.tip).length > 20 || this.options.actionText && JSON.stringify(this.options.tip).length > 14) && (e = 72) : this.options.marginType === MarginType.FIT_MARGIN && (this.options.tip && JSON.stringify(this.options.tip).length > 18 || this.options.actionText && JSON.stringify(this.options.tip).length > 12) && (e = 72);
         return e
@@ -319,7 +319,7 @@ export class ExceptionPrompt extends ViewPU {
         this.observeComponentCreation2(((e, o) => {
             Column.create();
             Column.width("100%");
-            Column.height(this.messageHeight());
+            Column.height(this.getMessageHeight());
             Column.position({ y: this.options.marginTop });
             Column.zIndex(999);
         }),Column);
