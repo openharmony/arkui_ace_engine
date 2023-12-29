@@ -40,6 +40,7 @@
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/input_event_hub.h"
+#include "core/components_ng/event/target_component.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -770,6 +771,7 @@ private:
     RefPtr<GeometryNode> oldGeometryNode_;
     std::optional<bool> skipMeasureContent_;
     std::unique_ptr<FramePorxy> frameProxy_;
+    WeakPtr<TargetComponent> targetComponent_;
 
     bool needSyncRenderTree_ = false;
 
