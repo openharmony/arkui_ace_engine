@@ -230,6 +230,11 @@ bool IsFlutterDecouplingEnabled()
 {
     return system::GetBoolParameter("persist.ace.flutter.decoupling.enabled", false);
 }
+
+bool IsResourceDecoupling()
+{
+    return system::GetBoolParameter("persist.sys.arkui.resource.decoupling", true);
+}
 } // namespace
 
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
@@ -270,7 +275,7 @@ int32_t SystemProperties::astcMax_ = GetAstcMaxErrorProp();
 int32_t SystemProperties::astcPsnr_ = GetAstcPsnrProp();
 ACE_WEAK_SYM bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
 ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount();
-bool SystemProperties::resourceDecoupling_ = GetResourceDecoupling();
+bool SystemProperties::resourceDecoupling_ = IsResourceDecoupling();
 ACE_WEAK_SYM bool SystemProperties::changeTitleStyleEnabled_ = IsTitleStyleEnabled();
 bool SystemProperties::flutterDecouplingEnabled_ = IsFlutterDecouplingEnabled();
 
@@ -391,7 +396,7 @@ void SystemProperties::InitDeviceInfo(
     downloadByNetworkEnabled_ = system::GetParameter(ENABLE_DOWNLOAD_BY_NETSTACK_KEY, "true") == "true";
     animationScale_ = std::atof(system::GetParameter(ANIMATION_SCALE_KEY, "1").c_str());
     WatchParameter(ANIMATION_SCALE_KEY, OnAnimationScaleChanged, nullptr);
-    resourceDecoupling_ = GetResourceDecoupling();
+    resourceDecoupling_ = IsResourceDecoupling();
 
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
@@ -499,7 +504,7 @@ bool SystemProperties::IsFormAnimationLimited()
 
 bool SystemProperties::GetResourceDecoupling()
 {
-    return system::GetBoolParameter("persist.sys.arkui.resource.decoupling", true);
+    return resourceDecoupling_;
 }
 
 int32_t SystemProperties::GetJankFrameThreshold()
