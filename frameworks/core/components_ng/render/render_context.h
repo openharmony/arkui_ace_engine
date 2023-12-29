@@ -204,7 +204,7 @@ public:
         return false;
     }
 
-    virtual bool HasTransition() const
+    virtual bool HasDisappearTransition() const
     {
         return false;
     }
