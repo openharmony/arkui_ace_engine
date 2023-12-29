@@ -529,7 +529,7 @@ int32_t RichEditorPattern::AddSymbolSpan(const SymbolSpanOptions& options, bool 
     record.beforeCaretPosition = options.offset.value_or(static_cast<int32_t>(GetTextContentLength()));
     record.addText = " ";
     ClearRedoOperationRecords();
-    record.afterCaretPosition = record.beforeCaretPosition + std::to_string(options.symbolId).length();
+    record.afterCaretPosition = record.beforeCaretPosition + 1;
     AddOperationRecord(record);
     return AddSymbolSpanOperation(options, isPaste, index);
 }
@@ -569,7 +569,7 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
         spanNode->AddPropertyInfo(PropertyInfo::FONTWEIGHT);
     }
     auto spanItem = spanNode->GetSpanItem();
-    spanItem->content = options.symbolId;
+    spanItem->content = " ";
     spanItem->SetTextStyle(options.style);
     AddSpanItem(spanItem, offset);
     SpanNodeFission(spanNode);
