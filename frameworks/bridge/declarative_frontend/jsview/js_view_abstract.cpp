@@ -1239,11 +1239,13 @@ void JSViewAbstract::JsOpacity(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], opacity)) {
         return;
     }
-
-    if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
-        opacity = 1.0;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        if (opacity > 1.0 || LessNotEqual(opacity, 0.0)) {
+            opacity = 1.0;
+        }
+    } else {
+        opacity = std::clamp(opacity, 0.0, 1.0);
     }
-
     ViewAbstractModel::GetInstance()->SetOpacity(opacity);
 }
 
@@ -1448,8 +1450,12 @@ NG::TransitionOptions JSViewAbstract::ParseJsTransition(const JSRef<JSVal>& tran
     if (jsObj->HasProperty("opacity")) {
         double opacity = 1.0;
         ParseJsDouble(jsObj->GetProperty("opacity"), opacity);
-        if (opacity > 1.0 || LessNotEqual(opacity, 0.0)) {
-            opacity = 1.0;
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            if (opacity > 1.0 || LessNotEqual(opacity, 0.0)) {
+                opacity = 1.0;
+            }
+        } else {
+            opacity = std::clamp(opacity, 0.0, 1.0);
         }
         transitionOption.UpdateOpacity(static_cast<float>(opacity));
         hasEffect = true;
