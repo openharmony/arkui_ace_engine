@@ -27,6 +27,13 @@
 
 namespace OHOS::Ace::NG {
 
+struct DelayedTask {
+    WeakPtr<NGGestureRecognizer> recognizer;
+    int64_t timeStamp = 0;
+    int32_t time = 0;
+    std::function<void()> task;
+};
+
 enum class RefereeState { READY, DETECTING, PENDING, PENDING_BLOCKED, SUCCEED_BLOCKED, SUCCEED, FAIL };
 
 class ACE_EXPORT NGGestureRecognizer : public TouchEventTarget {
