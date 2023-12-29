@@ -240,6 +240,10 @@ public:
     void UpdateTranslateInXY(const OffsetF& offset) override;
     OffsetF GetShowingTranslateProperty() override;
 
+    void CancelTranslateXYAnimation() override;
+
+    OffsetF GetTranslateXYProperty() override;
+
     Matrix4 GetLocalTransformMatrix() override;
 
     void GetPointWithRevert(PointF& point) override;

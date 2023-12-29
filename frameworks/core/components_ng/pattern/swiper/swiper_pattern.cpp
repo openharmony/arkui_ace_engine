@@ -1947,14 +1947,30 @@ void SwiperPattern::StopPropertyTranslateAnimation(bool isFinishAnimation, bool 
         return;
     }
     usePropertyAnimation_ = false;
+
     // Stop CurrentAnimationProperty.
+    AnimationOption option;
+    option.SetDuration(0);
+    option.SetCurve(Curves::LINEAR);
+    auto propertyUpdateCallback = [weak = WeakClaim(this)]() {
+        auto swiper = weak.Upgrade();
+        CHECK_NULL_VOID(swiper);
+        for (auto& item : swiper->itemPositionInAnimation_) {
+            auto frameNode = item.second.node;
+            if (!frameNode) {
+                continue;
+            }
+            frameNode->GetRenderContext()->CancelTranslateXYAnimation();
+        }
+    };
+    AnimationUtils::Animate(option, propertyUpdateCallback);
     OffsetF currentOffset;
     for (auto& item : itemPositionInAnimation_) {
         auto frameNode = item.second.node;
         if (!frameNode) {
             continue;
         }
-        currentOffset = frameNode->GetRenderContext()->GetShowingTranslateProperty();
+        currentOffset = frameNode->GetRenderContext()->GetTranslateXYProperty();
         frameNode->GetRenderContext()->UpdateTranslateInXY(OffsetF());
         item.second.finialOffset = OffsetF();
     }
