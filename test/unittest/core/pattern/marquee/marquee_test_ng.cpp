@@ -21,11 +21,14 @@
 
 #define private public
 #define protected public
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "base/json/json_util.h"
 #include "core/animation/animator.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/marquee/marquee_theme.h"
+#include "core/components/theme/theme_manager_impl.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/marquee/marquee_layout_property.h"
@@ -34,6 +37,7 @@
 #include "core/components_ng/pattern/marquee/marquee_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/render/animation_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
@@ -67,6 +71,7 @@ struct TestProperty {
     std::optional<Color> textColor = std::nullopt;
     std::optional<Ace::FontWeight> fontWeight = std::nullopt;
     std::optional<std::vector<std::string>> fontFamily = std::nullopt;
+    std::optional<bool> allowScale = std::nullopt;
 };
 
 class MarqueeTestNg : public testing::Test {
@@ -117,6 +122,9 @@ RefPtr<FrameNode> MarqueeTestNg::CreateMarqueeParagraph(const TestProperty& test
     }
     if (testProperty.fontFamily.has_value()) {
         marqueeModel.SetFontFamily(testProperty.fontFamily.value());
+    }
+    if (testProperty.allowScale.has_value()) {
+        marqueeModel.SetAllowScale(testProperty.allowScale.value());
     }
 
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish(); // MarqueeView pop
@@ -869,5 +877,686 @@ HWTEST_F(MarqueeTestNg, MarqueeTest0011, TestSize.Level1)
     pattern->OnModifyDone();
     EXPECT_TRUE(CheckMeasureFlag(marqueeLayoutProperty->GetPropertyChangeFlag()));
     EXPECT_TRUE(CheckMeasureFlag(textLayoutProperty->GetPropertyChangeFlag()));
+}
+
+/**
+ * @tc.name: MarqueeTest012
+ * @tc.desc: Test Marquee Measure and Layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, MarqueeTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create and get marquee frameNode.
+     */
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    frameNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create marquee layoutWrapper and set marquee layoutAlgorithm.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper = LayoutWrapperNode(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto pattern = frameNode->GetPattern<MarqueePattern>();
+    auto marqueeLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(marqueeLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step3. create and get marquee children frameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<GeometryNode> textGeometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> const textLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, textGeometryNode, textFrameNode->GetLayoutProperty());
+    textLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(CHILD_WIDTH_600), CalcLength(CHILD_HEIGHT_50)));
+    auto textLayoutAlgorithm = textFrameNode->GetPattern<Pattern>()->CreateLayoutAlgorithm();
+    textLayoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(textLayoutAlgorithm));
+
+    /**
+     * @tc.steps: step4. create child layout constraint and update it.
+     */
+    auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.maxSize = CONTAINER_SIZE;
+    textLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    frameNode->AddChild(textFrameNode);
+    layoutWrapper.AppendChild(textLayoutWrapper);
+
+    /**
+     * @tc.steps: step5. set MeasureType is MATCH_PARENT.
+     */
+    layoutWrapper.GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+
+    /**
+     * @tc.steps: step6. call the measure function of marquee to calculate the size.
+     * @tc.expected: step6. return is 0.
+     */
+    marqueeLayoutAlgorithm->Measure(&layoutWrapper);
+    SizeF oTemp = layoutWrapper.GetGeometryNode()->GetFrameSize();
+    EXPECT_EQ(oTemp.Width(), 0);
+    EXPECT_EQ(oTemp.Height(), 0);
+
+    /**
+     * @tc.steps: step7. set layoutConstraint and call Measure.
+     * @tc.expected: step7. return is equal with minSize.
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.minSize = SizeF(600, 200);
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(SizeF(MARQUEE_WIDTH_500, MARQUEE_HEIGHT_100));
+    layoutWrapper.layoutProperty_->layoutConstraint_ = layoutConstraint;
+    marqueeLayoutAlgorithm->Measure(&layoutWrapper);
+    oTemp = layoutWrapper.GetGeometryNode()->GetFrameSize();
+    EXPECT_EQ(oTemp.Width(), 600);
+    EXPECT_EQ(oTemp.Height(), 200);
+
+    /**
+     * @tc.steps: step8. set positionProperty_ and call Layout.
+     */
+    layoutWrapper.layoutProperty_->positionProperty_ = std::make_unique<PositionProperty>();
+    marqueeLayoutAlgorithm->Layout(&layoutWrapper);
+    OffsetF offTemp = textLayoutWrapper->GetGeometryNode()->GetMarginFrameOffset();
+    EXPECT_EQ(offTemp.GetX(), 0);
+    EXPECT_EQ(offTemp.GetY(), 75);
+}
+
+/**
+ * @tc.name: MarqueeTest013
+ * @tc.desc: Test MarqueeModelNG.Create
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, MarqueeTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and add two Children.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = static_cast<ElementIdType>(1);
+    stack->reservedNodeId_ = static_cast<ElementIdType>(1);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::MARQUEE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    auto frameChild1 =
+        FrameNode::GetOrCreateFrameNode("Child1", nodeId, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    frameChild1->SetLayoutProperty(textLayoutProperty);
+    auto frameChild2 =
+        FrameNode::GetOrCreateFrameNode("Child2", nodeId, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    frameNode->AddChild(frameChild1);
+    frameNode->AddChild(frameChild2);
+
+    /**
+     * @tc.steps: step2. Set up the created frameNode.
+     */
+    ElementRegister::GetInstance()->itemMap_[nodeId] = frameNode;
+
+    /**
+     * @tc.steps: step3. Call Create.
+     * @tc.expected: step3. Create Successful and first child update successful.
+     */
+    MarqueeModelNG marqueeModel;
+    marqueeModel.Create();
+    EXPECT_NE(ViewStackProcessor::GetInstance()->GetMainElementNode(), nullptr);
+    auto& groupProperty = textLayoutProperty->GetOrCreateTextLineStyle();
+    EXPECT_EQ(groupProperty->GetMaxLinesValue(), 1);
+}
+/**
+ * @tc.name: MarqueeTest014
+ * @tc.desc: Test MarqueeModelNG setFun of MarqueePaintProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, MarqueeTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and add two Children.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = static_cast<ElementIdType>(1);
+    stack->reservedNodeId_ = static_cast<ElementIdType>(1);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::MARQUEE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    RefPtr<PaintProperty> paintProperty = AceType::MakeRefPtr<MarqueePaintProperty>();
+    frameNode->paintProperty_ = paintProperty;
+
+    /**
+     * @tc.steps: step2. Set up the created frameNode.
+     */
+    ElementRegister::GetInstance()->itemMap_[nodeId] = frameNode;
+
+    /**
+     * @tc.steps: step3. Call Create.
+     */
+    MarqueeModelNG marqueeModel;
+    marqueeModel.Create();
+    auto castMarqueePaintProperty = AceType::DynamicCast<MarqueePaintProperty>(frameNode->paintProperty_);
+
+    /**
+     * @tc.steps: step4. Call Set Function.
+     * @tc.expected: step4. All Set Successful.
+     */
+    marqueeModel.SetPlayerStatus(true);
+    EXPECT_EQ(castMarqueePaintProperty->GetPlayerStatus(), true);
+    marqueeModel.SetPlayerStatus(std::nullopt);
+    EXPECT_FALSE(castMarqueePaintProperty->HasPlayerStatus());
+
+    marqueeModel.SetScrollAmount(2.0);
+    EXPECT_EQ(castMarqueePaintProperty->GetScrollAmount(), 2.0);
+    marqueeModel.SetScrollAmount(std::nullopt);
+    EXPECT_FALSE(castMarqueePaintProperty->HasScrollAmount());
+
+    marqueeModel.SetLoop(2);
+    EXPECT_EQ(castMarqueePaintProperty->GetLoop(), 2);
+    marqueeModel.SetLoop(std::nullopt);
+    EXPECT_FALSE(castMarqueePaintProperty->HasLoop());
+
+    marqueeModel.SetDirection(MarqueeDirection::LEFT);
+    EXPECT_EQ(castMarqueePaintProperty->GetDirection(), MarqueeDirection::LEFT);
+    marqueeModel.SetDirection(std::nullopt);
+    EXPECT_FALSE(castMarqueePaintProperty->HasDirection());
+    ViewStackProcessor::instance = nullptr;
+}
+
+/**
+ * @tc.name: MarqueeTest015
+ * @tc.desc: Test MarqueeModelNG setFun of MarqueeLayoutProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, MarqueeTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNod.
+     */
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = static_cast<ElementIdType>(1);
+    stack->reservedNodeId_ = static_cast<ElementIdType>(1);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::MARQUEE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    RefPtr<MarqueeLayoutProperty> marqueeLayoutProperty = AceType::MakeRefPtr<MarqueeLayoutProperty>();
+    frameNode->SetLayoutProperty(marqueeLayoutProperty);
+
+    /**
+     * @tc.steps: step2. Set up the created frameNode.
+     */
+    ElementRegister::GetInstance()->itemMap_[nodeId] = frameNode;
+
+    /**
+     * @tc.steps: step3. Call Create.
+     */
+    MarqueeModelNG marqueeModel;
+    marqueeModel.Create();
+
+    /**
+     * @tc.steps: step4. Call Set Function.
+     * @tc.expected: step4. All Set Successful.
+     */
+    marqueeModel.SetFontSize(Dimension(2.0));
+    EXPECT_EQ(marqueeLayoutProperty->GetFontSize(), Dimension(2.0));
+    marqueeModel.SetFontSize(std::nullopt);
+    EXPECT_FALSE(marqueeLayoutProperty->HasFontSize());
+
+    marqueeModel.SetTextColor(Color(2));
+    EXPECT_EQ(marqueeLayoutProperty->GetFontColor(), Color(2));
+    marqueeModel.SetTextColor(std::nullopt);
+    EXPECT_FALSE(marqueeLayoutProperty->HasFontColor());
+
+    marqueeModel.SetFontWeight(Ace::FontWeight::W200);
+    EXPECT_EQ(marqueeLayoutProperty->GetFontWeight(), Ace::FontWeight::W200);
+    marqueeModel.SetFontWeight(std::nullopt);
+    EXPECT_FALSE(marqueeLayoutProperty->HasFontWeight());
+
+    std::vector<std::string> fontFamily = { "test1", "test2" };
+    marqueeModel.SetFontFamily(fontFamily);
+    EXPECT_EQ(marqueeLayoutProperty->GetFontFamily(), fontFamily);
+    marqueeModel.SetFontFamily(std::nullopt);
+    EXPECT_FALSE(marqueeLayoutProperty->HasFontFamily());
+
+    marqueeModel.SetAllowScale(true);
+    EXPECT_EQ(marqueeLayoutProperty->GetAllowScale(), true);
+    marqueeModel.SetAllowScale(std::nullopt);
+    EXPECT_FALSE(marqueeLayoutProperty->HasAllowScale());
+
+    marqueeModel.SetValue("test");
+    EXPECT_EQ(marqueeLayoutProperty->GetSrcValue(), "test");
+    marqueeModel.SetValue(std::nullopt);
+    EXPECT_FALSE(marqueeLayoutProperty->HasSrc());
+    ViewStackProcessor::instance = nullptr;
+}
+
+/**
+ * @tc.name: MarqueeTest016
+ * @tc.desc: Test MarqueeModelNG setFun of MarqueeLayoutProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, MarqueeTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    RefPtr<Pattern> pattern = AceType::MakeRefPtr<MarqueePattern>();
+    FrameNode frameNode = FrameNode(V2::MARQUEE_ETS_TAG, 1, pattern);
+    RefPtr<MarqueeLayoutProperty> marqueeLayoutProperty = AceType::MakeRefPtr<MarqueeLayoutProperty>();
+    frameNode.SetLayoutProperty(marqueeLayoutProperty);
+
+    /**
+     * @tc.steps: step2. Call Create.
+     */
+    MarqueeModelNG marqueeModel;
+    marqueeModel.Create();
+
+    /**
+     * @tc.steps: step4. Call Set Function.
+     * @tc.expected: step4. All Set Successful.
+     */
+    marqueeModel.SetFontSize(&frameNode, Dimension(2.0));
+    EXPECT_EQ(marqueeLayoutProperty->GetFontSize(), Dimension(2.0));
+    marqueeModel.SetFontSize(&frameNode, std::nullopt);
+    EXPECT_FALSE(marqueeLayoutProperty->HasFontSize());
+
+    marqueeModel.SetTextColor(&frameNode, Color(2));
+    EXPECT_EQ(marqueeLayoutProperty->GetFontColor(), Color(2));
+    marqueeModel.SetTextColor(&frameNode, std::nullopt);
+    EXPECT_FALSE(marqueeLayoutProperty->HasFontColor());
+
+    marqueeModel.SetFontWeight(&frameNode, Ace::FontWeight::W200);
+    EXPECT_EQ(marqueeLayoutProperty->GetFontWeight(), Ace::FontWeight::W200);
+    marqueeModel.SetFontWeight(&frameNode, std::nullopt);
+    EXPECT_FALSE(marqueeLayoutProperty->HasFontWeight());
+
+    std::vector<std::string> fontFamily = { "test1", "test2" };
+    marqueeModel.SetFontFamily(&frameNode, fontFamily);
+    EXPECT_EQ(marqueeLayoutProperty->GetFontFamily(), fontFamily);
+    marqueeModel.SetFontFamily(&frameNode, std::nullopt);
+    EXPECT_FALSE(marqueeLayoutProperty->HasFontFamily());
+
+    marqueeModel.SetAllowScale(&frameNode, true);
+    EXPECT_EQ(marqueeLayoutProperty->GetAllowScale(), true);
+    marqueeModel.SetAllowScale(&frameNode, false);
+    EXPECT_FALSE(marqueeLayoutProperty->HasAllowScale());
+}
+
+/**
+ * @tc.name: MarqueeTest017
+ * @tc.desc: Test MarqueePattern.OnModifyDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, MarqueeTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and add two Children.
+     */
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    auto frameChild1 =
+        FrameNode::GetOrCreateFrameNode("Child1", 2, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    frameChild1->SetLayoutProperty(textLayoutProperty);
+    auto frameChild2 =
+        FrameNode::GetOrCreateFrameNode("Child2", 3, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    frameNode->AddChild(frameChild1);
+    frameNode->AddChild(frameChild2);
+
+    /**
+     * @tc.steps: step2. Create MarqueePattern and create MarqueeLayoutProperty with some parameters.
+     */
+    auto pattern = frameNode->GetPattern<MarqueePattern>();
+    pattern->AttachToFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+
+    /**
+     * @tc.steps: step3. Create themeManager.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto textTheme = AceType::MakeRefPtr<TextTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textTheme));
+
+    /**
+     * @tc.steps: step4. Create themeManager without marqueeLayoutProperty and call OnModifyDone.
+     */
+    RefPtr<MarqueeLayoutProperty> marqueeLayoutProperty = AceType::MakeRefPtr<MarqueeLayoutProperty>();
+    frameNode->SetLayoutProperty(marqueeLayoutProperty);
+    RefPtr<MarqueePaintProperty> marqueePaintProperty = AceType::MakeRefPtr<MarqueePaintProperty>();
+    frameNode->paintProperty_ = marqueePaintProperty;
+    pattern->OnModifyDone();
+    EXPECT_FALSE(pattern->measureChanged_);
+    EXPECT_FALSE(textLayoutProperty->HasFontFamily());
+
+    /**
+     * @tc.steps: step5. UpdatePlayerStatus true and set animation and call OnModifyDone.
+     */
+    marqueePaintProperty->UpdatePlayerStatus(true);
+    float start = 0.0f;
+    int32_t playCount = 0;
+    bool needSecondPlay = false;
+    pattern->PlayMarqueeAnimation(start, playCount, needSecondPlay);
+    pattern->OnModifyDone();
+    EXPECT_NE(pattern->animation_, nullptr);
+    EXPECT_TRUE(marqueePaintProperty->GetPlayerStatusValue());
+
+    /**
+     * @tc.steps: step6. Create themeManager with marqueeLayoutProperty values and call OnModifyDone.
+     */
+    marqueeLayoutProperty->UpdateSrc("test");
+    marqueeLayoutProperty->UpdateFontSize(Dimension(2.0));
+    marqueeLayoutProperty->UpdateFontWeight(Ace::FontWeight::W200);
+    std::vector<std::string> fontFamily = { "test1", "test2" };
+    marqueeLayoutProperty->UpdateFontFamily(fontFamily);
+    marqueeLayoutProperty->UpdateFontColor(Color(2));
+    frameNode->SetLayoutProperty(marqueeLayoutProperty);
+    pattern->OnModifyDone();
+    EXPECT_EQ(textLayoutProperty->GetContentValue(), "test");
+    EXPECT_EQ(textLayoutProperty->GetFontSize().value(), Dimension(2.0));
+    EXPECT_EQ(textLayoutProperty->GetFontWeight().value(), Ace::FontWeight::W200);
+    EXPECT_EQ(textLayoutProperty->GetFontFamily().value(), fontFamily);
+    EXPECT_EQ(textLayoutProperty->GetTextColor().value(), Color(2));
+    EXPECT_TRUE(pattern->measureChanged_);
+}
+
+/**
+ * @tc.name: MarqueeTest018
+ * @tc.desc: Test MarqueePattern.CalculateEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, MarqueeTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and add a Child.
+     */
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    auto frameChild1 =
+        FrameNode::GetOrCreateFrameNode("Child1", 2, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    frameChild1->SetLayoutProperty(textLayoutProperty);
+    RefPtr<GeometryNode> geo1 = AceType::MakeRefPtr<GeometryNode>();
+    geo1->SetFrameSize(SizeF(2, 2));
+    frameNode->SetGeometryNode(geo1);
+    RefPtr<GeometryNode> geo2 = AceType::MakeRefPtr<GeometryNode>();
+    geo2->SetFrameSize(SizeF(5, 5));
+    frameChild1->SetGeometryNode(geo2);
+    frameNode->AddChild(frameChild1);
+
+    /**
+     * @tc.steps: step2. Create MarqueePattern and create MarqueeLayoutProperty.
+     */
+    auto pattern = frameNode->GetPattern<MarqueePattern>();
+    pattern->AttachToFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    RefPtr<MarqueeLayoutProperty> marqueeLayoutProperty = AceType::MakeRefPtr<MarqueeLayoutProperty>();
+    marqueeLayoutProperty->positionProperty_ = std::make_unique<PositionProperty>();
+    frameNode->SetLayoutProperty(marqueeLayoutProperty);
+
+    /**
+     * @tc.steps: step3. Create MarqueePaintProperty.
+     */
+    RefPtr<MarqueePaintProperty> marqueePaintProperty = AceType::MakeRefPtr<MarqueePaintProperty>();
+    frameNode->paintProperty_ = marqueePaintProperty;
+    auto padding = marqueeLayoutProperty->CreatePaddingAndBorder();
+
+    /**
+     * @tc.steps: step4. Call CalculateEnd with MarqueeDirection is right.
+     */
+    marqueePaintProperty->UpdateDirection(MarqueeDirection::RIGHT);
+    float end = pattern->CalculateEnd();
+    float expect = 2 - padding.left.value_or(0);
+    EXPECT_EQ(end, expect);
+
+    /**
+     * @tc.steps: step5. Call CalculateEnd with positionProperty_ with MarqueeDirection is left.
+     */
+    marqueePaintProperty->UpdateDirection(MarqueeDirection::LEFT);
+    Alignment align;
+    align.horizontal_ = 0.0f;
+    marqueeLayoutProperty->positionProperty_->UpdateAlignment(align);
+    end = pattern->CalculateEnd();
+    expect = (2 + 5) * 0.5 * -1;
+    EXPECT_EQ(end, expect);
+
+    /**
+     * @tc.steps: step6. Call CalculateEnd with positionProperty_ and direction is right.
+     */
+    marqueePaintProperty->UpdateDirection(MarqueeDirection::RIGHT);
+    end = pattern->CalculateEnd();
+    expect = (2 + 5) * 0.5;
+    EXPECT_EQ(end, expect);
+
+    /**
+     * @tc.steps: step7. Call CalculateEnd with positionProperty_ and direction is left and align is 1.
+     */
+    align.horizontal_ = 1.0f;
+    marqueeLayoutProperty->positionProperty_->UpdateAlignment(align);
+    marqueePaintProperty->UpdateDirection(MarqueeDirection::LEFT);
+    end = pattern->CalculateEnd();
+    expect = -1 * 2 + padding.right.value_or(0);
+    EXPECT_EQ(end, expect);
+
+    /**
+     * @tc.steps: step8. Call CalculateEnd with positionProperty_ and direction is right and align is 1.
+     */
+    marqueePaintProperty->UpdateDirection(MarqueeDirection::RIGHT);
+    end = pattern->CalculateEnd();
+    expect = 5 + padding.right.value_or(0);
+    EXPECT_EQ(end, expect);
+}
+
+/**
+ * @tc.name: MarqueeTest019
+ * @tc.desc: Test MarqueePattern.StartMarqueeAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, MarqueeTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and add a Child.
+     */
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    auto frameChild1 =
+        FrameNode::GetOrCreateFrameNode("Child1", 2, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    frameChild1->SetLayoutProperty(textLayoutProperty);
+    RefPtr<GeometryNode> geo1 = AceType::MakeRefPtr<GeometryNode>();
+    geo1->SetFrameSize(SizeF(2, 2));
+    frameNode->SetGeometryNode(geo1);
+    RefPtr<GeometryNode> geo2 = AceType::MakeRefPtr<GeometryNode>();
+    geo2->SetFrameSize(SizeF(5, 5));
+    frameChild1->SetGeometryNode(geo2);
+    frameNode->AddChild(frameChild1);
+
+    /**
+     * @tc.steps: step2. Create MarqueePattern and create MarqueePaintProperty.
+     */
+    auto pattern = frameNode->GetPattern<MarqueePattern>();
+    pattern->AttachToFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    RefPtr<MarqueeLayoutProperty> marqueeLayoutProperty = AceType::MakeRefPtr<MarqueeLayoutProperty>();
+    frameNode->SetLayoutProperty(marqueeLayoutProperty);
+    RefPtr<MarqueePaintProperty> marqueePaintProperty = AceType::MakeRefPtr<MarqueePaintProperty>();
+    frameNode->paintProperty_ = marqueePaintProperty;
+    Alignment align;
+    align.horizontal_ = 0.0f;
+    marqueeLayoutProperty->positionProperty_ = std::make_unique<PositionProperty>();
+    marqueeLayoutProperty->positionProperty_->UpdateAlignment(align);
+    marqueePaintProperty->UpdateDirection(MarqueeDirection::RIGHT);
+
+    /**
+     * @tc.steps: step3. Call StartMarqueeAnimation.
+     * @tc.expected: step3. Set the end successfully.
+     */
+    pattern->StartMarqueeAnimation();
+    auto renderContext = frameChild1->GetRenderContext();
+    TranslateOptions temp = renderContext->GetTransformTranslate().value();
+    TranslateOptions result { 3.5f, 0.0f, 0.0f };
+    EXPECT_EQ(temp.x.calcvalue_, result.x.calcvalue_);
+
+    /**
+     * @tc.steps: step4. Call StartMarqueeAnimation again with isFormRender_ is true.
+     * @tc.expected: step4. Set the end successfully.
+     */
+    MockPipelineContext::GetCurrent()->SetIsFormRender(true);
+    pattern->StartMarqueeAnimation();
+    temp = renderContext->GetTransformTranslate().value();
+    EXPECT_EQ(temp.x.calcvalue_, result.x.calcvalue_);
+}
+
+/**
+ * @tc.name: MarqueeTest020
+ * @tc.desc: Test MarqueePattern.CalculateStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, MarqueeTest020, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and add a Child.
+     */
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    auto frameChild1 =
+        FrameNode::GetOrCreateFrameNode("Child1", 2, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    frameChild1->SetLayoutProperty(textLayoutProperty);
+    RefPtr<GeometryNode> geo1 = AceType::MakeRefPtr<GeometryNode>();
+    geo1->SetFrameSize(SizeF(2, 2));
+    frameNode->SetGeometryNode(geo1);
+    RefPtr<GeometryNode> geo2 = AceType::MakeRefPtr<GeometryNode>();
+    geo2->SetFrameSize(SizeF(5, 5));
+    frameChild1->SetGeometryNode(geo2);
+    frameNode->AddChild(frameChild1);
+
+    /**
+     * @tc.steps: step2. Create MarqueePattern and create MarqueeLayoutProperty.
+     */
+    auto pattern = frameNode->GetPattern<MarqueePattern>();
+    pattern->AttachToFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    RefPtr<MarqueeLayoutProperty> marqueeLayoutProperty = AceType::MakeRefPtr<MarqueeLayoutProperty>();
+    marqueeLayoutProperty->positionProperty_ = std::make_unique<PositionProperty>();
+    frameNode->SetLayoutProperty(marqueeLayoutProperty);
+
+    /**
+     * @tc.steps: step3. Create MarqueePaintProperty.
+     */
+    RefPtr<MarqueePaintProperty> marqueePaintProperty = AceType::MakeRefPtr<MarqueePaintProperty>();
+    frameNode->paintProperty_ = marqueePaintProperty;
+    auto padding = marqueeLayoutProperty->CreatePaddingAndBorder();
+
+    /**
+     * @tc.steps: step4. Call CalculateStart with MarqueeDirection is right.
+     */
+    marqueePaintProperty->UpdateDirection(MarqueeDirection::RIGHT);
+    float start = pattern->CalculateStart();
+    float expect = -5 - padding.left.value_or(0);
+    EXPECT_EQ(start, expect);
+
+    /**
+     * @tc.steps: step5. Call CalculateStart with positionProperty_ with MarqueeDirection is left.
+     */
+    marqueePaintProperty->UpdateDirection(MarqueeDirection::LEFT);
+    Alignment align;
+    align.horizontal_ = 0.0f;
+    marqueeLayoutProperty->positionProperty_->UpdateAlignment(align);
+    start = pattern->CalculateStart();
+    expect = (2 + 5) * 0.5;
+    EXPECT_EQ(start, expect);
+
+    /**
+     * @tc.steps: step6. Call CalculateStart with positionProperty_ and direction is right.
+     */
+    marqueePaintProperty->UpdateDirection(MarqueeDirection::RIGHT);
+    start = pattern->CalculateStart();
+    expect = (2 + 5) * 0.5 * -1;
+    EXPECT_EQ(start, expect);
+
+    /**
+     * @tc.steps: step7. Call CalculateStart with positionProperty_ and direction is left and align is 1.
+     */
+    align.horizontal_ = 1.0f;
+    marqueeLayoutProperty->positionProperty_->UpdateAlignment(align);
+    marqueePaintProperty->UpdateDirection(MarqueeDirection::LEFT);
+    start = pattern->CalculateStart();
+    expect = 5 + padding.right.value_or(0);
+    EXPECT_EQ(start, expect);
+
+    /**
+     * @tc.steps: step8. Call CalculateStart with positionProperty_ and direction is right and align is 1.
+     */
+    marqueePaintProperty->UpdateDirection(MarqueeDirection::RIGHT);
+    start = pattern->CalculateStart();
+    expect = -2 + padding.right.value_or(0);
+    EXPECT_EQ(start, expect);
+}
+/**
+ * @tc.name: MarqueeTest021
+ * @tc.desc: Test MarqueePattern.OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, MarqueeTest021, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and add a Child.
+     */
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+
+    /**
+     * @tc.steps: step2. Create MarqueePattern.
+     */
+    auto pattern = frameNode->GetPattern<MarqueePattern>();
+    pattern->AttachToFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+
+    /**
+     * @tc.steps: step3. Call OnDetachFromFrameNode.
+     */
+    FrameNode frameNode2 = FrameNode(V2::MARQUEE_ETS_TAG, 2, pattern);
+    pattern->OnDetachFromFrameNode(&frameNode2);
+    pattern->OnWindowSizeChanged(0, 0, WindowSizeChangeReason::MAXIMIZE);
+    EXPECT_FALSE(pattern->isOritationListenerRegisted_);
+    EXPECT_FALSE(pattern->isRegistedAreaCallback_);
+    EXPECT_TRUE(pattern->measureChanged_);
+
+    /**
+     * @tc.steps: step4. Call RegistOritationListener.
+     */
+    pattern->RegistOritationListener();
+    EXPECT_TRUE(pattern->isOritationListenerRegisted_);
+}
+
+/**
+ * @tc.name: MarqueeTest022
+ * @tc.desc: Test MarqueePattern.OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(MarqueeTestNg, MarqueeTest022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode and add a Child.
+     */
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::MARQUEE_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    auto frameChild1 =
+        FrameNode::GetOrCreateFrameNode("Child1", 2, []() { return AceType::MakeRefPtr<MarqueePattern>(); });
+    auto textLayoutProperty = AceType::MakeRefPtr<TextLayoutProperty>();
+    frameChild1->SetLayoutProperty(textLayoutProperty);
+    frameChild1->paintProperty_ = AceType::MakeRefPtr<PaintProperty>();
+    frameNode->AddChild(frameChild1);
+
+    /**
+     * @tc.steps: step2. Create MarqueePattern.
+     */
+    auto pattern = frameNode->GetPattern<MarqueePattern>();
+    pattern->AttachToFrameNode(AceType::WeakClaim(AceType::RawPtr(frameNode)));
+
+    /**
+     * @tc.steps: step3. Create themeManager.
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto marqueeTheme = AceType::MakeRefPtr<MarqueeTheme>();
+    marqueeTheme->textColor_ = Color(2);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(marqueeTheme));
+
+    /**
+     * @tc.steps: step4. Create OnColorConfigurationUpdate.
+     * @tc.expected: step4. Update color successfully.
+     */
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_EQ(frameChild1->layoutProperty_->propertyChangeFlag_, PROPERTY_UPDATE_MEASURE_SELF);
+    EXPECT_EQ(textLayoutProperty->GetTextColorValue(Color(0)), Color(2));
 }
 } // namespace OHOS::Ace::NG
