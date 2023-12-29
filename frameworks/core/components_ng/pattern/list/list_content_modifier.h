@@ -26,12 +26,6 @@
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
-struct DividerPainterInfo {
-    float constrainStrokeWidth = 0.0f;
-    bool isVertical = true;
-    Color color = Color::TRANSPARENT;
-};
-
 class ListContentModifier : public ContentModifier {
     DECLARE_ACE_TYPE(ListContentModifier, ContentModifier);
 public:
@@ -57,11 +51,9 @@ public:
 
     void SetDividerPainter(float width, bool isVertical, Color color)
     {
-        dividerPainterInfo_ = {
-            .constrainStrokeWidth = width,
-            .isVertical = isVertical,
-            .color = color
-        };
+        width_ = width;
+        isVertical_ = isVertical;
+        color_ = color;
     }
 
     void SetDividerMap(const DividerMap& dividerMap)
@@ -71,27 +63,15 @@ public:
         dividerList_->Set(AceType::DynamicCast<CustomAnimatableArithmetic>(lda));
     }
 
-    void ResetDividerPainterInfo()
-    {
-        if (dividerPainterInfo_.has_value()) {
-            dividerPainterInfo_.reset();
-            FlushDivider();
-        }
-    }
-
-    void FlushDivider()
-    {
-        flushDivider_->Set(!flushDivider_->Get());
-    }
-
 private:
     RefPtr<AnimatableArithmeticProperty> dividerList_;
     RefPtr<AnimatablePropertyOffsetF> clipOffset_;
     RefPtr<AnimatablePropertySizeF> clipSize_;
     RefPtr<PropertyBool> clip_;
-    RefPtr<PropertyBool> flushDivider_;
 
-    std::optional<DividerPainterInfo> dividerPainterInfo_;
+    float width_ = 0.0f;
+    bool isVertical_ = true;
+    Color color_ = Color::TRANSPARENT;
 
     ACE_DISALLOW_COPY_AND_MOVE(ListContentModifier);
 };
