@@ -35,8 +35,6 @@ struct GridItemIndexInfo {
     int32_t crossEnd = -1;
 };
 
-constexpr float HALF = 0.5f;
-
 class ACE_EXPORT GridPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(GridPattern, ScrollablePattern);
 
