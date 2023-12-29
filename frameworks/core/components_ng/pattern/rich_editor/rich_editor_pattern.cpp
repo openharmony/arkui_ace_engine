@@ -442,7 +442,8 @@ int32_t RichEditorPattern::AddTextSpan(const TextSpanOptions& options, bool isPa
     return AddTextSpanOperation(options, isPaste, index);
 }
 
-int32_t RichEditorPattern::AddTextSpanOperation(const TextSpanOptions& options, bool isPaste, int32_t index)
+int32_t RichEditorPattern::AddTextSpanOperation(
+    const TextSpanOptions& options, bool isPaste, int32_t index, bool needLeadingMargin)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, -1);
@@ -454,7 +455,7 @@ int32_t RichEditorPattern::AddTextSpanOperation(const TextSpanOptions& options, 
     int32_t spanIndex = 0;
     int32_t offset = -1;
     if (options.offset.has_value()) {
-        offset = TextSpanSplit(options.offset.value());
+        offset = TextSpanSplit(options.offset.value(), needLeadingMargin);
         if (offset == -1) {
             spanIndex = host->GetChildren().size();
         } else {
@@ -776,13 +777,13 @@ SpanPositionInfo RichEditorPattern::GetSpanPositionInfo(int32_t position)
     return spanPositionInfo;
 }
 
-void RichEditorPattern::CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target)
+void RichEditorPattern::CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target, bool needLeadingMargin)
 {
     CHECK_NULL_VOID(source);
     CHECK_NULL_VOID(target);
 
     CopyTextSpanFontStyle(source, target);
-    CopyTextSpanLineStyle(source, target);
+    CopyTextSpanLineStyle(source, target, needLeadingMargin);
 }
 
 void RichEditorPattern::CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target)
@@ -833,7 +834,8 @@ void RichEditorPattern::CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<S
     }
 }
 
-void RichEditorPattern::CopyTextSpanLineStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target)
+void RichEditorPattern::CopyTextSpanLineStyle(
+    RefPtr<SpanNode>& source, RefPtr<SpanNode>& target, bool needLeadingMargin)
 {
     if (source->HasLineHeight()) {
         target->UpdateLineHeight(source->GetLineHeightValue(Dimension()));
@@ -845,13 +847,13 @@ void RichEditorPattern::CopyTextSpanLineStyle(RefPtr<SpanNode>& source, RefPtr<S
         target->AddPropertyInfo(PropertyInfo::TEXTSHADOW);
     }
     
-    if (source->HasLeadingMargin()) {
+    if (needLeadingMargin && source->HasLeadingMargin()) {
         target->UpdateLeadingMargin(source->GetLeadingMarginValue({}));
         target->AddPropertyInfo(PropertyInfo::LEADING_MARGIN);
     }
 }
 
-int32_t RichEditorPattern::TextSpanSplit(int32_t position)
+int32_t RichEditorPattern::TextSpanSplit(int32_t position, bool needLeadingMargin)
 {
     int32_t spanIndex = 0;
     int32_t spanStart = 0;
@@ -900,7 +902,7 @@ int32_t RichEditorPattern::TextSpanSplit(int32_t position)
     spanNode->UpdateContent(StringUtils::ToString(newContent));
     newSpanNode->UpdateContent(StringUtils::ToString(deleteContent));
 
-    CopyTextSpanStyle(spanNode, newSpanNode);
+    CopyTextSpanStyle(spanNode, newSpanNode, needLeadingMargin);
     newSpanNode->MountToParent(host, spanIndex);
 
     return spanIndex + 1;
@@ -1135,12 +1137,12 @@ void RichEditorPattern::UpdateSpanStyle(
             continue;
         }
         if (spanStart < start && start < spanEnd) {
-            TextSpanSplit(start);
+            TextSpanSplit(start, true);
             --it;
             continue;
         }
         if (spanStart < end && end < spanEnd) {
-            TextSpanSplit(end);
+            TextSpanSplit(end, true);
             --(--it);
             continue;
         }
@@ -2322,7 +2324,7 @@ void RichEditorPattern::InsertValueAfterBeforeSpan(RefPtr<SpanNode>& spanNodeBef
 {
     if (typingStyle_.has_value() && !HasSameTypingStyle(spanNodeBefore)) {
         CreateTextSpanNode(spanNode, info, insertValue);
-        CopyTextSpanLineStyle(spanNodeBefore, spanNode);
+        CopyTextSpanLineStyle(spanNodeBefore, spanNode, true);
         return;
     }
     auto spanNodeGet = InsertValueToBeforeSpan(spanNodeBefore, insertValue);
@@ -2340,9 +2342,9 @@ void RichEditorPattern::InsertDiffStyleValueInSpan(
     options.value = insertValue;
     options.offset = caretPosition_;
     options.style = typingTextStyle_;
-    auto newSpanIndex = AddTextSpanOperation(options);
+    auto newSpanIndex = AddTextSpanOperation(options, false, -1,  true);
     auto newSpanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(newSpanIndex));
-    CopyTextSpanLineStyle(spanNode, newSpanNode);
+    CopyTextSpanLineStyle(spanNode, newSpanNode, true);
     AfterIMEInsertValue(spanNode, static_cast<int32_t>(StringUtils::ToWstring(insertValue).length()), true);
 }
 
