@@ -301,13 +301,6 @@ private:
     bool needResetChild_ = false;
 }; // namespace OHOS::Ace::NG
 
-#define ACE_WITH_ROOT_TRACE(fmt, ...) \
-    AceScopedTraceFlag aceWithRootTraceFlag(isRootNode_, fmt, ##__VA_ARGS__)
-
-#define ACE_LAYOUT_WITH_ROOT_TRACE(fmt, ...) \
-    AceScopedTraceFlag aceLayoutWithRootTraceFlag(SystemProperties::GetLayoutTraceEnabled() && \
-        !isRootNode_, fmt, ##__VA_ARGS__)
-
 FrameNode::FrameNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
     : UINode(tag, nodeId, isRoot), LayoutWrapper(WeakClaim(this)), pattern_(pattern),
       frameProxy_(std::make_unique<FramePorxy>(this))
@@ -1079,9 +1072,13 @@ void FrameNode::CreateLayoutTask(bool forceUseMainThread)
     UpdateLayoutPropertyFlag();
     SetSkipSyncGeometryNode(false);
     {
-        ACE_LAYOUT_SCOPED_TRACE("CreateLayoutTask[%s][self:%d][parent:%d]", GetTag().c_str(), GetId(),
+        ACE_SCOPED_TRACE("CreateTaskMeasure[%s][self:%d][parent:%d]", GetTag().c_str(), GetId(),
             GetParent() ? GetParent()->GetId() : 0);
         Measure(GetLayoutConstraint());
+    }
+    {
+        ACE_SCOPED_TRACE("CreateTaskLayout[%s][self:%d][parent:%d]", GetTag().c_str(), GetId(),
+            GetParent() ? GetParent()->GetId() : 0);
         Layout();
     }
     SetRootMeasureNode(false);
@@ -2571,9 +2568,7 @@ void FrameNode::UpdatePercentSensitive()
 // This will call child and self measure process.
 void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint)
 {
-    ACE_WITH_ROOT_TRACE("Measure[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
-        GetId(), GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
-    ACE_LAYOUT_WITH_ROOT_TRACE("Measure[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
+    ACE_LAYOUT_SCOPED_TRACE("Measure[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
         GetId(), GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
     isLayoutComplete_ = false;
     if (!oldGeometryNode_) {
@@ -2656,9 +2651,7 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
 // Called to perform layout children.
 void FrameNode::Layout()
 {
-    ACE_WITH_ROOT_TRACE("Layout[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
-        GetId(), GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
-    ACE_LAYOUT_WITH_ROOT_TRACE("Layout[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
+    ACE_LAYOUT_SCOPED_TRACE("Layout[%s][self:%d][parent:%d][key:%s]", GetTag().c_str(),
         GetId(), GetParent() ? GetParent()->GetId() : 0, GetInspectorIdValue("").c_str());
     int64_t time = GetSysTimestamp();
     OffsetNodeToSafeArea();
