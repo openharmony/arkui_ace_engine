@@ -56,8 +56,8 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
         return;
     }
     if (isLayouting_) {
-        LOGW("you are already in flushing layout!");
-        return;
+        LOGF("you are already in flushing layout!");
+        abort();
     }
     isLayouting_ = true;
     auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
