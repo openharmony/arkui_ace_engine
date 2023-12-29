@@ -12,12 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import curves from '@ohos.curves';
+
 const START_TIME = 250;
 const END_TIME = 200;
 const BORDER_RADIUS = 12;
 const OPACITY_NUM = 0.18;
 const DEFAULT_HEIGHT = 48;
-const FIT_HEIGHT = 58;
+const FIT_HEIGHT = 72;
 const ZINDEX_NUM = 999;
 
 export enum MarginType {
@@ -43,6 +45,27 @@ export struct ExceptionPrompt {
   }
   onActionTextClick: () => void = () => {
     // Click Set Network to open the Set network pop-up interface
+  }
+
+  messageHeight() {
+    let height = DEFAULT_HEIGHT
+    if (this.options.marginType === MarginType.DEFAULT_MARGIN) {
+      if (this.options.tip && JSON.stringify(this.options.tip)
+        .length > 20 || this.options.actionText && JSON.stringify(this.options.tip)
+        .length > 14) {
+        height = FIT_HEIGHT
+      }
+
+    } else if (this.options.marginType === MarginType.FIT_MARGIN) {
+      if (this.options.tip && JSON.stringify(this.options.tip)
+        .length > 18 || this.options.actionText && JSON.stringify(this.options.tip)
+        .length > 12) {
+
+        height = FIT_HEIGHT
+      }
+    }
+
+    return height
   }
 
   @Builder FirstBuilder() {
@@ -71,13 +94,13 @@ export struct ExceptionPrompt {
         Image(this.options.icon??$r('sys.media.ohos_ic_public_fail'))
           .width("24vp")
           .height('24vp')
-          .objectFit(ImageFit.Contain)
           .fillColor($r('sys.color.ohos_id_color_warning'))
         Text(this.options.tip)
           .fontSize($r('sys.float.ohos_id_text_size_body1'))
           .fontColor($r('sys.color.ohos_id_color_warning'))
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .maxLines(2)
+          .lineHeight(24)
           .margin({ left: $r('sys.float.ohos_id_dialog_margin_end'), right: $r('sys.float.ohos_id_dialog_margin_end') })
       }
       .width('100%')
@@ -103,7 +126,7 @@ export struct ExceptionPrompt {
           }
         }
         .backgroundColor(this.touchBackgroundColor)
-        .width(this.options.actionText ? 120 : 0)
+        .width(this.options.actionText ? 142 : 0)
         .height(32)
         .borderRadius($r('sys.float.ohos_id_corner_radius_subtab'))
         .padding({
@@ -140,21 +163,22 @@ export struct ExceptionPrompt {
         this.TextBuilder()
       }
       .padding(this.options.marginType === MarginType.DEFAULT_MARGIN ? {
-                                                                          left: $r('sys.float.ohos_id_card_margin_start'),
-                                                                          right: $r('sys.float.ohos_id_card_margin_end')
-                                                                        } : {
-                                                                              left: $r('sys.float.ohos_id_max_padding_start'),
-                                                                              right: $r('sys.float.ohos_id_max_padding_end')
-                                                                            })
+                                                                         left: $r('sys.float.ohos_id_card_margin_start'),
+                                                                         right: $r('sys.float.ohos_id_card_margin_end')
+                                                                       } : {
+                                                                             left: $r('sys.float.ohos_id_max_padding_start'),
+                                                                             right: $r('sys.float.ohos_id_max_padding_end')
+                                                                           })
       .transition(
         TransitionEffect.OPACITY.animation({
+          curve: curves.cubicBezierCurve(0.33, 0, 0.67, 1),
           duration: this.options.isShown ? START_TIME : END_TIME
         })
       )
       .visibility(this.options.isShown ? Visibility.Visible : Visibility.None)
     }
     .width('100%')
-    .height(this.options.actionText ? FIT_HEIGHT : DEFAULT_HEIGHT)
+    .height(this.messageHeight())
     .position({ y: this.options.marginTop })
     .zIndex(ZINDEX_NUM)
   }

@@ -12,12 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+const curves = requireNativeModule('ohos.curves');
+
 const START_TIME = 250;
 const END_TIME = 200;
 const BORDER_RADIUS = 12;
 const OPACITY_NUM = .18;
 const DEFAULT_HEIGHT = 48;
-const FIT_HEIGHT = 58;
+const FIT_HEIGHT = 72;
 const ZINDEX_NUM = 999;
 
 export var MarginType;
@@ -27,8 +29,9 @@ export var MarginType;
 }(MarginType || (MarginType = {}));
 
 export class ExceptionPrompt extends ViewPU {
-    constructor(e, o, t, i = -1) {
+    constructor(e, o, t, i = -1, n = void 0) {
         super(e, t, i);
+        "function" == typeof n && (this.paramsGenerator_ = n);
         this.__options = new SynchedPropertyObjectOneWayPU(o.options, this, "options");
         this.touchBackgroundColor = {
             id: -1,
@@ -72,9 +75,13 @@ export class ExceptionPrompt extends ViewPU {
         this.__options.set(e)
     }
 
+    messageHeight() {
+        let e = 48;
+            this.options.marginType === MarginType.DEFAULT_MARGIN ? (this.options.tip && JSON.stringify(this.options.tip).length > 20 || this.options.actionText && JSON.stringify(this.options.tip).length > 14) && (e = 72) : this.options.marginType === MarginType.FIT_MARGIN && (this.options.tip && JSON.stringify(this.options.tip).length > 18 || this.options.actionText && JSON.stringify(this.options.tip).length > 12) && (e = 72);
+        return e
+    }
     FirstBuilder(e = null) {
-        this.observeComponentCreation(((e, o) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(e);
+        this.observeComponentCreation2(((e, o) => {
             Column.create();
             Column.height("100%");
             Column.width("100%");
@@ -85,16 +92,13 @@ export class ExceptionPrompt extends ViewPU {
                 params: ["sys.color.ohos_id_color_background"],
                 bundleName: "",
                 moduleName: ""
-            });
-            o || Column.pop();
-            ViewStackProcessor.StopGetAccessRecording()
-        }));
+            })
+        }), Column);
         Column.pop()
     }
 
     SecondBuilder(e = null) {
-        this.observeComponentCreation(((e, o) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(e);
+        this.observeComponentCreation2(((e, o) => {
             Column.create();
             Column.height("100%");
             Column.width("100%");
@@ -107,16 +111,13 @@ export class ExceptionPrompt extends ViewPU {
                 moduleName: ""
             });
             Column.opacity(.18);
-            Column.zIndex(999);
-            o || Column.pop();
-            ViewStackProcessor.StopGetAccessRecording()
-        }));
+            Column.zIndex(999)
+        }), Column);
         Column.pop()
     }
 
     TextBuilder(e = null) {
-        this.observeComponentCreation(((e, o) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(e);
+        this.observeComponentCreation2(((e, o) => {
             Flex.create({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center });
             Flex.padding({
                 left: {
@@ -138,23 +139,17 @@ export class ExceptionPrompt extends ViewPU {
             Flex.zIndex(999);
             Flex.width("100%");
             Flex.height("100%");
-            o || Flex.pop();
-            ViewStackProcessor.StopGetAccessRecording()
-        }));
-        this.observeComponentCreation(((e, o) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(e);
+        }),Flex);
+        this.observeComponentCreation2(((e, o) => {
             Flex.create({ alignItems: ItemAlign.Center });
             Flex.width("100%");
             Flex.height("100%");
             Flex.onClick((() => {
                 this.onTipClick()
             }));
-            o || Flex.pop();
-            ViewStackProcessor.StopGetAccessRecording()
-        }));
-        this.observeComponentCreation(((e, o) => {
+        }),Flex);
+        this.observeComponentCreation2(((e, o) => {
             var t;
-            ViewStackProcessor.StartGetAccessRecordingFor(e);
             Image.create(null !== (t = this.options.icon) && void 0 !== t ? t : {
                                                                                     id: -1,
                                                                                     type: 2e4,
@@ -164,7 +159,6 @@ export class ExceptionPrompt extends ViewPU {
                                                                                 });
             Image.width("24vp");
             Image.height("24vp");
-            Image.objectFit(ImageFit.Contain);
             Image.fillColor({
                 id: -1,
                 type: 10001,
@@ -172,11 +166,8 @@ export class ExceptionPrompt extends ViewPU {
                 bundleName: "",
                 moduleName: ""
             });
-            o || Image.pop();
-            ViewStackProcessor.StopGetAccessRecording()
-        }));
-        this.observeComponentCreation(((e, o) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(e);
+        }),Image);
+        this.observeComponentCreation2(((e, o) => {
             Text.create(this.options.tip);
             Text.fontSize({
                 id: -1,
@@ -194,6 +185,7 @@ export class ExceptionPrompt extends ViewPU {
             });
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.maxLines(2);
+            Text.lineHeight(24);
             Text.margin({
                 left: {
                     id: -1,
@@ -210,20 +202,16 @@ export class ExceptionPrompt extends ViewPU {
                     moduleName: ""
                 }
             });
-            o || Text.pop();
-            ViewStackProcessor.StopGetAccessRecording()
-        }));
+        }),Text);
         Text.pop();
         Flex.pop();
-        this.observeComponentCreation(((e, o) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(e);
+        this.observeComponentCreation2(((e, o) => {
             If.create();
             this.options.actionText ? this.ifElseBranchUpdateFunction(0, (() => {
-                this.observeComponentCreation(((e, o) => {
-                    ViewStackProcessor.StartGetAccessRecordingFor(e);
+                this.observeComponentCreation2(((e, o) => {
                     Button.createWithChild({ stateEffect: !0, type: ButtonType.Normal });
                     Button.backgroundColor(this.touchBackgroundColor);
-                    Button.width(this.options.actionText ? 120 : 0);
+                    Button.width(this.options.actionText ? 142 : 0);
                     Button.height(32);
                     Button.borderRadius({
                         id: -1,
@@ -266,17 +254,11 @@ export class ExceptionPrompt extends ViewPU {
                             moduleName: ""
                         })
                     }));
-                    o || Button.pop();
-                    ViewStackProcessor.StopGetAccessRecording()
-                }));
-                this.observeComponentCreation(((e, o) => {
-                    ViewStackProcessor.StartGetAccessRecordingFor(e);
+                }),Button);
+                this.observeComponentCreation2(((e, o) => {
                     Row.create();
-                    o || Row.pop();
-                    ViewStackProcessor.StopGetAccessRecording()
-                }));
-                this.observeComponentCreation(((e, o) => {
-                    ViewStackProcessor.StartGetAccessRecordingFor(e);
+                }),Row);
+                this.observeComponentCreation2(((e, o) => {
                     Text.create(this.options.actionText);
                     Text.fontSize({
                         id: -1,
@@ -304,12 +286,9 @@ export class ExceptionPrompt extends ViewPU {
                         }
                     });
                     Text.textAlign(TextAlign.End);
-                    o || Text.pop();
-                    ViewStackProcessor.StopGetAccessRecording()
-                }));
+                }),Text);
                 Text.pop();
-                this.observeComponentCreation(((e, o) => {
-                    ViewStackProcessor.StartGetAccessRecordingFor(e);
+                this.observeComponentCreation2(((e, o) => {
                     Image.create({
                         id: -1,
                         type: 2e4,
@@ -326,32 +305,25 @@ export class ExceptionPrompt extends ViewPU {
                         bundleName: "",
                         moduleName: ""
                     });
-                    o || Image.pop();
-                    ViewStackProcessor.StopGetAccessRecording()
-                }));
+                }),Image);
                 Row.pop();
                 Button.pop()
-            })) : If.branchId(1);
-            o || If.pop();
-            ViewStackProcessor.StopGetAccessRecording()
-        }));
+            })) :this.ifElseBranchUpdateFunction(1, (() => {
+            }));
+        }), If);
         If.pop();
         Flex.pop()
     }
 
     initialRender() {
-        this.observeComponentCreation(((e, o) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(e);
+        this.observeComponentCreation2(((e, o) => {
             Column.create();
             Column.width("100%");
-            Column.height(this.options.actionText ? 58 : 48);
+            Column.height(this.messageHeight());
             Column.position({ y: this.options.marginTop });
             Column.zIndex(999);
-            o || Column.pop();
-            ViewStackProcessor.StopGetAccessRecording()
-        }));
-        this.observeComponentCreation(((e, o) => {
-            ViewStackProcessor.StartGetAccessRecordingFor(e);
+        }),Column);
+        this.observeComponentCreation2(((e, o) => {
             Stack.create();
             Stack.padding(this.options.marginType === MarginType.DEFAULT_MARGIN ? {
                                                                                       left: {
@@ -384,11 +356,12 @@ export class ExceptionPrompt extends ViewPU {
                                                                                               moduleName: ""
                                                                                           }
                                                                                       });
-            Stack.transition(TransitionEffect.OPACITY.animation({ duration: this.options.isShown ? 250 : 200 }));
+            Stack.transition(TransitionEffect.OPACITY.animation({
+                curve: curves.cubicBezierCurve(.33, 0, .67, 1),
+                duration: this.options.isShown ? 250 : 200
+            }));
             Stack.visibility(this.options.isShown ? Visibility.Visible : Visibility.None);
-            o || Stack.pop();
-            ViewStackProcessor.StopGetAccessRecording()
-        }));
+        }),Stack);
         this.FirstBuilder.bind(this)();
         this.SecondBuilder.bind(this)();
         this.TextBuilder.bind(this)();
@@ -400,7 +373,6 @@ export class ExceptionPrompt extends ViewPU {
         this.updateDirtyElements()
     }
 }
-
 export default {
     MarginType,
     ExceptionPrompt
