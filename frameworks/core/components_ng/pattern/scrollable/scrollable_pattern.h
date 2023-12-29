@@ -65,6 +65,9 @@ public:
     ~ScrollablePattern()
     {
         UnRegister2DragDropManager();
+        if (scrollBarProxy_) {
+            scrollBarProxy_->UnRegisterScrollableNode(AceType::WeakClaim(this));
+        }
     }
 
     bool IsAtomicNode() const override
