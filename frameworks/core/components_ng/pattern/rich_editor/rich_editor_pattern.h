@@ -168,6 +168,7 @@ public:
     {
         FocusHub::LostFocusToViewRoot();
     }
+    void ClearOperationRecords();
     void ClearRedoOperationRecords();
     void AddOperationRecord(const OperationRecord& record);
     void HandleOnEnter() override
