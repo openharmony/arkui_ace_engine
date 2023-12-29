@@ -1945,9 +1945,11 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     }
     if (event.code == KeyCode::KEY_ESCAPE) {
         auto manager = GetDragDropManager();
-        if (manager) {
+        if (manager && manager->IsMsdpDragging()) {
             manager->SetIsDragCancel(true);
             manager->OnDragEnd(PointerEvent(0, 0), "");
+            manager->SetIsDragCancel(false);
+            return true;
         }
     }
 
@@ -2587,10 +2589,9 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
         return;
     }
     if (action == DragEventAction::DRAG_EVENT_OUT) {
-        manager->OnDragMoveOut(pointerEvent, extraInfo);
+        manager->OnDragMoveOut(pointerEvent);
         manager->ClearSummary();
         manager->ClearExtraInfo();
-        manager->OnDragOut();
         return;
     }
 
@@ -2600,10 +2601,6 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
     extraInfo = manager->GetExtraInfo();
     if (action == DragEventAction::DRAG_EVENT_END) {
         manager->OnDragEnd(pointerEvent, extraInfo);
-        SubwindowManager::GetInstance()->HidePreviewNG();
-        auto overlayManager = GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->RemovePixelMap();
         return;
     }
     if (action == DragEventAction::DRAG_EVENT_MOVE) {

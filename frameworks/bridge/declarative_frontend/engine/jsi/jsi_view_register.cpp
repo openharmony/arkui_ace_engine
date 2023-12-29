@@ -1250,7 +1250,7 @@ void JsRegisterFormViews(BindingTarget globalObj, const std::unordered_set<std::
 }
 #endif
 
-void JsRegisterViews(BindingTarget globalObj)
+void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     if (!runtime) {
@@ -1327,7 +1327,7 @@ void JsRegisterViews(BindingTarget globalObj)
     cursorControlObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "restoreDefault"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RestoreDefault));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "cursorControl"), cursorControlObj);
-    JsBindViews(globalObj);
+    JsBindViews(globalObj, nativeEngine);
 
     JSObjectTemplate toggleType;
     toggleType.Constant("Checkbox", 0);

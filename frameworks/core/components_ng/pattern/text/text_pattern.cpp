@@ -236,7 +236,7 @@ SelectionInfo TextPattern::GetSpansInfo(int32_t start, int32_t end, GetSpansMeth
     auto host = GetHost();
     const auto& children = host->GetChildren();
     for (const auto& uinode : children) {
-        if (uinode->GetTag() == V2::IMAGE_ETS_TAG || uinode->GetTag() == V2::SYMBOL_SPAN_ETS_TAG) {
+        if (uinode->GetTag() == V2::IMAGE_ETS_TAG) {
             ResultObject resultObject = GetImageResultObject(uinode, index, realStart, realEnd);
             if (!resultObject.valueString.empty() || resultObject.valuePixelMap) {
                 resultObjects.emplace_back(resultObject);
@@ -375,6 +375,9 @@ void TextPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
             oldSelectedType_ = selectedType_.value();
             CloseSelectOverlay();
             ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true);
+        }
+        if (!selectOverlayProxy_->IsMenuShow()) {
+            selectOverlayProxy_->ShowOrHiddenMenu(false);
         }
         return;
     }
@@ -2040,8 +2043,12 @@ void TextPattern::RedisplaySelectOverlay()
 {
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         CalculateHandleOffsetAndShowOverlay();
-        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
-        selectOverlayProxy_->ShowOrHiddenMenu(true);
+        if (selectOverlayProxy_->IsMenuShow()) {
+            ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+        } else {
+            ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+            selectOverlayProxy_->ShowOrHiddenMenu(true);
+        }
     }
 }
 
@@ -2247,6 +2254,8 @@ void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int3
     if (newWidth == prevWidth && newHeight == prevHeight) {
         return;
     }
+    CHECK_NULL_VOID(selectOverlayProxy_);
+    selectOverlayProxy_->ShowOrHiddenMenu(true);
 }
 
 void TextPattern::InitSurfacePositionChangedCallback()

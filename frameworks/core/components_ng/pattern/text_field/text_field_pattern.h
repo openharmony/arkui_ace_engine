@@ -1063,6 +1063,11 @@ public:
     {
         return lastClickTimeStamp_;
     }
+
+    void UpdateLastTextRect(const RectF& textRect)
+    {
+        lastTextRect_ = textRect;
+    }
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
 
@@ -1302,6 +1307,9 @@ private:
     bool isCounterIdealheight_ = false;
     float maxFrameOffsetY_ = 0.0f;
     float maxFrameHeight_ = 0.0f;
+
+    // Only used to record the content area drawn last time.
+    RectF lastTextRect_;
 
     CancelableCallback<void()> cursorTwinklingTask_;
 

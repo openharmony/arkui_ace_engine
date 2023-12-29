@@ -96,6 +96,8 @@ public:
         jsonCancelButton->Put("icon", jsonIconOptions->ToString().c_str());
         json->Put("cancelButton", jsonCancelButton->ToString().c_str());
         json->Put("selectAll", propSelectAllValue_.value_or(false));
+        json->Put("passwordRules", propPasswordRules_.value_or("").c_str());
+        json->Put("enableAutoFill", propEnableAutoFill_.value_or(true));
     }
 
     ACE_DEFINE_PROPERTY_GROUP(FontStyle, FontStyle);

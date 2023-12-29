@@ -164,7 +164,12 @@ void DialogLayoutAlgorithm::AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper
     auto dialogPattern = hostNode->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
     if (dialogPattern->GetTitle().empty() && dialogPattern->GetSubtitle().empty()) {
-        scroll->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+            GreatNotEqual(textLayoutAlgorithm->GetLineCount(), 1)) {
+            scroll->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER_LEFT);
+        } else {
+            scroll->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
+        }
     } else {
         scroll->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER_LEFT);
     }

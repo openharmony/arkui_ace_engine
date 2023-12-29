@@ -46,6 +46,12 @@ public:
     void CombineWith(const RefPtr<RosenTransitionEffect>& effect);
     virtual void SetAnimationOption(const std::shared_ptr<AnimationOption>& option);
 
+    // If disappearing effect is non Identity, return true
+    virtual bool HasDisappearTransition() const
+    {
+        return true;
+    }
+
     static RefPtr<RosenTransitionEffect> ConvertToRosenTransitionEffect(const RefPtr<ChainedTransitionEffect>& effect);
     static bool UpdateRosenTransitionEffect(
         const RefPtr<RosenTransitionEffect>& rosenEffect, const RefPtr<ChainedTransitionEffect>& chainedEffect);

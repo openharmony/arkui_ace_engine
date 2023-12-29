@@ -23,20 +23,24 @@
 namespace OHOS::Ace::Framework {
 class JSCanvasRenderer;
 
+void BindNativeFunction(napi_env env, napi_value object, const char* name, napi_callback func);
+void* GetNapiCallbackInfoAndThis(napi_env env, napi_callback_info info);
+
 class JSRenderImage : public Referenced {
 public:
     JSRenderImage();
     ~JSRenderImage() override = default;
 
-    static void JSBind(BindingTarget globalObj);
-    static void Constructor(const JSCallbackInfo& args);
-    static void Destructor(JSRenderImage* scroller);
+    static void JSBind(BindingTarget globalObj, void* nativeEngine = nullptr);
 
-    void JsSetWidth(const JSCallbackInfo& info);
-    void JsSetHeight(const JSCallbackInfo& info);
-    void JsGetWidth(const JSCallbackInfo& info);
-    void JsGetHeight(const JSCallbackInfo& info);
-    void JsClose(const JSCallbackInfo& info);
+    static napi_value InitImageBitmap(napi_env env);
+    static napi_value Constructor(napi_env env, napi_callback_info info);
+    static napi_value JsClose(napi_env env, napi_callback_info info);
+    static napi_value JsSetWidth(napi_env env, napi_callback_info info);
+    static napi_value JsSetHeight(napi_env env, napi_callback_info info);
+    static napi_value JsGetWidth(napi_env env, napi_callback_info info);
+    static napi_value JsGetHeight(napi_env env, napi_callback_info info);
+
     double GetWidth();
     double GetHeight();
     std::string GetSrc();
@@ -45,6 +49,11 @@ public:
     ACE_DISALLOW_COPY_AND_MOVE(JSRenderImage);
 
 private:
+    napi_value OnClose();
+    napi_value OnGetWidth(napi_env env);
+    napi_value OnGetHeight(napi_env env);
+    napi_value OnSetWidth();
+    napi_value OnSetHeight();
     std::string src_;
     std::list<std::function<void()>> closeCallbacks_;
     double width_ = 0;

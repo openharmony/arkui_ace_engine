@@ -23,6 +23,7 @@
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -65,7 +66,7 @@ const RefPtr<TouchEventImpl>& StateStyleManager::GetPressedListener()
             }
         }
         if ((type == TouchType::MOVE) &&
-                (stateStyleMgr->IsCurrentStateOn(UI_STATE_PRESSED) || stateStyleMgr->IsPressedStatePending())) {
+            (stateStyleMgr->IsCurrentStateOn(UI_STATE_PRESSED) || stateStyleMgr->IsPressedStatePending())) {
             int32_t sourceType = static_cast<int32_t>(touches.front().GetSourceDevice());
             if (stateStyleMgr->IsOutOfPressedRegion(sourceType, lastPoint.GetGlobalLocation())) {
                 stateStyleMgr->pointerId_.erase(lastPoint.GetFingerId());
@@ -122,6 +123,14 @@ void StateStyleManager::FireStateFunc()
                 CHECK_NULL_VOID(navDestinationGroupNode);
                 customNode = navDestinationGroupNode->GetNavDestinationCustomNode();
             }
+
+            auto parentFrameNode = DynamicCast<FrameNode>(parent);
+            auto parentPattern = parentFrameNode ? parentFrameNode->GetPattern<PopupBasePattern>() : nullptr;
+            if (parentFrameNode && InstanceOf<PopupBasePattern>(parentPattern)) {
+                parent = ElementRegister::GetInstance()->GetUINodeById(parentPattern->GetTargetId());
+                continue;
+            }
+
             if (customNode) {
                 break;
             }

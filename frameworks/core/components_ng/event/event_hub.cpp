@@ -82,6 +82,20 @@ GetEventTargetImpl EventHub::CreateGetEventTargetImpl() const
     return impl;
 }
 
+void EventHub::PostEnabledTask()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto eventHub = weak.Upgrade();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->UpdateCurrentUIState(UI_STATE_DISABLED);
+        }, TaskExecutor::TaskType::UI);
+}
+
 void EventHub::MarkModifyDone()
 {
     if (stateStyleMgr_) {
@@ -93,7 +107,7 @@ void EventHub::MarkModifyDone()
             if (enabled_) {
                 stateStyleMgr_->ResetCurrentUIState(UI_STATE_DISABLED);
             } else {
-                stateStyleMgr_->UpdateCurrentUIState(UI_STATE_DISABLED);
+                PostEnabledTask();
             }
         }
     }

@@ -102,7 +102,7 @@ public:
 
     const EcmaVM* GetEcmaVm() const
     {
-        return vm_ != nullptr ? vm_ : GetThreadVm();
+        return GetThreadVm() ? GetThreadVm() : vm_;
     }
 
     const EcmaVM* GetThreadVm() const
