@@ -26,6 +26,7 @@ ListContentModifier::ListContentModifier(const OffsetF& clipOffset, const SizeF&
     clipOffset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(clipOffset);
     clipSize_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(clipSize);
     clip_ = AceType::MakeRefPtr<PropertyBool>(true);
+    flushDivider_ = AceType::MakeRefPtr<PropertyBool>(true);
     RefPtr<ListDividerArithmetic> lda = AceType::MakeRefPtr<ListDividerArithmetic>();
     dividerList_ = AceType::MakeRefPtr<AnimatableArithmeticProperty>(
         AceType::DynamicCast<CustomAnimatableArithmetic>(lda));
@@ -33,6 +34,7 @@ ListContentModifier::ListContentModifier(const OffsetF& clipOffset, const SizeF&
     AttachProperty(clipOffset_);
     AttachProperty(clipSize_);
     AttachProperty(clip_);
+    AttachProperty(flushDivider_);
     AttachProperty(dividerList_);
 }
 
@@ -52,13 +54,13 @@ void ListContentModifier::onDraw(DrawingContext& context)
     auto lda = AceType::DynamicCast<ListDividerArithmetic>(dividerlist);
     CHECK_NULL_VOID(lda);
     auto dividerMap = lda->GetDividerMap();
-    if (!dividerMap.empty()) {
-        DividerPainter dividerPainter(width_, 0, isVertical_, color_, LineCap::SQUARE);
+    if (!dividerMap.empty() && dividerPainterInfo_.has_value()) {
+        auto dpInfo = dividerPainterInfo_.value();
+        DividerPainter dividerPainter(
+            dpInfo.constrainStrokeWidth, 0, dpInfo.isVertical, dpInfo.color, LineCap::SQUARE);
         for (auto child : dividerMap) {
-            if (child.second.length > 0) {
-                dividerPainter.SetDividerLength(child.second.length);
-                dividerPainter.DrawLine(context.canvas, child.second.offset);
-            }
+            dividerPainter.SetDividerLength(child.second.length);
+            dividerPainter.DrawLine(context.canvas, child.second.offset);
         }
     }
 }

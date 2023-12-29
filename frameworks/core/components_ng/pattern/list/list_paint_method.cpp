@@ -53,6 +53,7 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     if (!divider_.strokeWidth.IsValid() || totalItemCount_ <= 0 ||
         divider_.strokeWidth.Unit() == DimensionUnit::PERCENT ||
         GreatOrEqual(divider_.strokeWidth.ConvertToPx(), contentSize)) {
+        listContentModifier_->ResetDividerPainterInfo();
         return;
     }
     Axis axis = vertical_ ? Axis::HORIZONTAL : Axis::VERTICAL;
@@ -143,6 +144,7 @@ void ListPaintMethod::UpdateDividerList(const DividerInfo& dividerInfo)
         }
     }
     listContentModifier_->SetDividerMap(std::move(dividerMap));
+    listContentModifier_->FlushDivider();
 }
 
 void ListPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
