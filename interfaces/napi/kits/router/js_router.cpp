@@ -413,11 +413,16 @@ static napi_value JSRouterBack(napi_env env, napi_callback_info info)
 static napi_value JSRouterClear(napi_env env, napi_callback_info info)
 {
     auto delegate = EngineHelper::GetCurrentDelegate();
-    if (!delegate) {
+    auto defaultDelegate = EngineHelper::GetDefaultDelegate();
+    if (!delegate && !defaultDelegate) {
         NapiThrow(env, "UI execution context not found.", Framework::ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
     }
-    delegate->Clear();
+    if (delegate) {
+        delegate->Clear();
+    } else {
+        defaultDelegate->Clear();
+    }
     return nullptr;
 }
 
