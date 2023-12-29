@@ -3461,87 +3461,104 @@ bool RichEditorPattern::IsScrollBarPressed(const MouseInfo& info)
     return scrollBar->InBarTouchRegion(point);
 }
 
+void RichEditorPattern::HandleMouseLeftButtonMove(const MouseInfo& info)
+{
+    if (blockPress_ || !leftMousePress_) {
+        return;
+    }
+    auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+    Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
+        info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
+
+    mouseStatus_ = MouseStatus::MOVE;
+    if (isFirstMouseSelect_) {
+        int32_t extend = paragraphs_.GetIndex(textOffset);
+        textSelector_.Update(textSelector_.baseOffset, extend);
+        isFirstMouseSelect_ = false;
+    } else {
+        int32_t extend = paragraphs_.GetIndex(textOffset);
+        textSelector_.Update(textSelector_.baseOffset, extend);
+        auto position = paragraphs_.GetIndex(textOffset);
+        AdjustCursorPosition(position);
+        SetCaretPosition(position);
+        AutoScrollParam param = {
+            .autoScrollEvent = AutoScrollEvent::MOUSE, .showScrollbar = true, .eventOffset = info.GetLocalLocation()
+        };
+        AutoScrollByEdgeDetection(param, OffsetF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY()),
+            EdgeDetectionStrategy::OUT_BOUNDARY);
+    }
+
+    isMouseSelect_ = true;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void RichEditorPattern::HandleMouseLeftButtonPress(const MouseInfo& info)
+{
+    isMousePressed_ = true;
+    if (IsScrollBarPressed(info) || BetweenSelectedPosition(info.GetGlobalLocation())) {
+        blockPress_ = true;
+        return;
+    }
+    auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
+    Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
+        info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
+    int32_t extend = paragraphs_.GetIndex(textOffset);
+    textSelector_.Update(extend);
+    leftMousePress_ = true;
+    mouseStatus_ = MouseStatus::PRESSED;
+    blockPress_ = false;
+    caretUpdateType_ = CaretUpdateType::PRESSED;
+    UseHostToUpdateTextFieldManager();
+
+    auto position = paragraphs_.GetIndex(textOffset);
+    AdjustCursorPosition(position);
+    auto focusHub = GetHost()->GetOrCreateFocusHub();
+    if (focusHub && focusHub->RequestFocusImmediately()) {
+        float caretHeight = 0.0f;
+        SetCaretPosition(position);
+        OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight, false, false);
+        MoveCaretToContentRect();
+        CHECK_NULL_VOID(overlayMod_);
+        DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(caretOffset, caretHeight);
+        StartTwinkling();
+        if (overlayMod_) {
+            RequestKeyboard(false, true, true);
+        }
+    }
+    UseHostToUpdateTextFieldManager();
+}
+
+void RichEditorPattern::HandleMouseLeftButtonRelease(const MouseInfo& info)
+{
+    blockPress_ = false;
+    leftMousePress_ = false;
+    auto oldMouseStatus = mouseStatus_;
+    mouseStatus_ = MouseStatus::RELEASED;
+    isMouseSelect_ = false;
+    isMousePressed_ = false;
+    isFirstMouseSelect_ = true;
+    auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
+    auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
+    FireOnSelect(selectStart, selectEnd);
+    StopAutoScroll();
+    if (textSelector_.IsValid() && !textSelector_.StartEqualToDest() && IsSelectedBindSelectionMenu() &&
+        oldMouseStatus == MouseStatus::MOVE) {
+        selectionMenuOffsetByMouse_ = OffsetF(static_cast<float>(info.GetGlobalLocation().GetX()),
+            static_cast<float>(info.GetGlobalLocation().GetY()));
+        ShowSelectOverlay(RectF(), RectF(), false, TextResponseType::SELECTED_BY_MOUSE);
+    }
+}
+
 void RichEditorPattern::HandleMouseLeftButton(const MouseInfo& info)
 {
     if (info.GetAction() == MouseAction::MOVE) {
-        if (blockPress_ || !leftMousePress_) {
-            return;
-        }
-        auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
-        Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
-            info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
-
-        mouseStatus_ = MouseStatus::MOVE;
-        if (isFirstMouseSelect_) {
-            int32_t extend = paragraphs_.GetIndex(textOffset);
-            textSelector_.Update(textSelector_.baseOffset, extend);
-            isFirstMouseSelect_ = false;
-        } else {
-            int32_t extend = paragraphs_.GetIndex(textOffset);
-            textSelector_.Update(textSelector_.baseOffset, extend);
-            SetCaretPosition(std::max(textSelector_.baseOffset, extend));
-            AutoScrollParam param = {
-                .autoScrollEvent = AutoScrollEvent::MOUSE, .showScrollbar = true, .eventOffset = info.GetLocalLocation()
-            };
-            AutoScrollByEdgeDetection(param, OffsetF(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY()),
-                EdgeDetectionStrategy::OUT_BOUNDARY);
-        }
-
-        isMouseSelect_ = true;
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        HandleMouseLeftButtonMove(info);
     } else if (info.GetAction() == MouseAction::PRESS) {
-        isMousePressed_ = true;
-        if (IsScrollBarPressed(info) || BetweenSelectedPosition(info.GetGlobalLocation())) {
-            blockPress_ = true;
-            return;
-        }
-        auto textPaintOffset = GetTextRect().GetOffset() - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
-        Offset textOffset = { info.GetLocalLocation().GetX() - textPaintOffset.GetX(),
-            info.GetLocalLocation().GetY() - textPaintOffset.GetY() };
-        int32_t extend = paragraphs_.GetIndex(textOffset);
-        textSelector_.Update(extend);
-        leftMousePress_ = true;
-        mouseStatus_ = MouseStatus::PRESSED;
-        blockPress_ = false;
-        caretUpdateType_ = CaretUpdateType::PRESSED;
-        UseHostToUpdateTextFieldManager();
-
-        auto position = paragraphs_.GetIndex(textOffset);
-        AdjustCursorPosition(position);
-        auto focusHub = GetHost()->GetOrCreateFocusHub();
-        if (focusHub && focusHub->RequestFocusImmediately()) {
-            float caretHeight = 0.0f;
-            SetCaretPosition(position);
-            OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight, false, false);
-            MoveCaretToContentRect();
-            CHECK_NULL_VOID(overlayMod_);
-            DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(caretOffset, caretHeight);
-            StartTwinkling();
-            if (overlayMod_) {
-                RequestKeyboard(false, true, true);
-            }
-        }
-        UseHostToUpdateTextFieldManager();
+        HandleMouseLeftButtonPress(info);
     } else if (info.GetAction() == MouseAction::RELEASE) {
-        blockPress_ = false;
-        leftMousePress_ = false;
-        auto oldMouseStatus = mouseStatus_;
-        mouseStatus_ = MouseStatus::RELEASED;
-        isMouseSelect_ = false;
-        isMousePressed_ = false;
-        isFirstMouseSelect_ = true;
-        auto selectStart = std::min(textSelector_.baseOffset, textSelector_.destinationOffset);
-        auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
-        FireOnSelect(selectStart, selectEnd);
-        StopAutoScroll();
-        if (textSelector_.IsValid() && !textSelector_.StartEqualToDest() && IsSelectedBindSelectionMenu() &&
-            oldMouseStatus == MouseStatus::MOVE) {
-            selectionMenuOffsetByMouse_ = OffsetF(static_cast<float>(info.GetGlobalLocation().GetX()),
-                static_cast<float>(info.GetGlobalLocation().GetY()));
-            ShowSelectOverlay(RectF(), RectF(), false, TextResponseType::SELECTED_BY_MOUSE);
-        }
+        HandleMouseLeftButtonRelease(info);
     }
 }
 
