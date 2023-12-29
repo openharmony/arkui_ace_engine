@@ -1316,6 +1316,11 @@ void OverlayManager::CleanMenuInSubWindowWithAnimation()
     menuWrapperPattern->SetMenuHide();
     if (menuWrapperPattern->GetPreviewMode() == MenuPreviewMode::NONE) {
         CleanMenuInSubWindow();
+        menuWrapperPattern->CallMenuDisappearCallback();
+        auto mainPipeline = PipelineContext::GetMainPipelineContext();
+        if (mainPipeline && menuWrapperPattern->GetMenuDisappearCallback()) {
+            mainPipeline->FlushPipelineImmediately();
+        }
         return;
     }
     ClearMenuAnimation(menu);
