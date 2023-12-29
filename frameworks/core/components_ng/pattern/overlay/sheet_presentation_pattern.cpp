@@ -367,6 +367,9 @@ float SheetPresentationPattern::InitialSingleGearHeight(NG::SheetStyle& sheetSty
     if (sheetStyle.sheetMode.has_value()) {
         if (sheetStyle.sheetMode == SheetMode::MEDIUM) {
             sheetHeight = pageHeight_ * MEDIUM_SIZE;
+            if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+                sheetHeight = pageHeight_ * MEDIUM_SIZE_PRE;
+            }
         } else if (sheetStyle.sheetMode == SheetMode::LARGE) {
             sheetHeight = largeHeight;
         } else if (sheetStyle.sheetMode == SheetMode::AUTO) {
@@ -579,6 +582,11 @@ void SheetPresentationPattern::UpdateDragBarStatus()
     CHECK_NULL_VOID(sheetDragBar);
     auto dragBarLayoutProperty = sheetDragBar->GetLayoutProperty();
     CHECK_NULL_VOID(dragBarLayoutProperty);
+    if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        dragBarLayoutProperty->UpdateVisibility(showDragIndicator ? VisibleType::VISIBLE : VisibleType::GONE);
+        sheetDragBar->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        return;
+    }
     auto sheetType = GetSheetType();
     if (((sheetType == SheetType::SHEET_BOTTOM) || (sheetType == SheetType::SHEET_BOTTOMPC)) &&
         (sheetDetentHeight_.size() > 1)) {
@@ -666,6 +674,9 @@ void SheetPresentationPattern::UpdateSheetTitle()
 
 void SheetPresentationPattern::UpdateInteractive()
 {
+    if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
@@ -743,6 +754,10 @@ void SheetPresentationPattern::InitSheetDetents()
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
     auto sheetType = GetSheetType();
     auto sheetFrameHeight = geometryNode->GetFrameSize().Height();
+    auto mediumSize = MEDIUM_SIZE;
+    if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        mediumSize = MEDIUM_SIZE_PRE;
+    }
     switch (sheetType) {
         case SheetType::SHEET_BOTTOM:
         case SheetType::SHEET_BOTTOMPC:
@@ -754,7 +769,7 @@ void SheetPresentationPattern::InitSheetDetents()
             for (auto iter : sheetStyle.detents) {
                 if (iter.sheetMode.has_value()) {
                     if (iter.sheetMode == SheetMode::MEDIUM) {
-                        height = pageHeight_ * MEDIUM_SIZE;
+                        height = pageHeight_ * mediumSize;
                     } else if (iter.sheetMode == SheetMode::LARGE) {
                         height = largeHeight;
                     } else if (iter.sheetMode == SheetMode::AUTO) {
@@ -806,6 +821,9 @@ void SheetPresentationPattern::HandleFitContontChange(float height)
 
 SheetType SheetPresentationPattern::GetSheetType()
 {
+    if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        return SHEET_BOTTOM;
+    }
     SheetType sheetType = SheetType::SHEET_BOTTOM;
     auto rootHeight = PipelineContext::GetCurrentRootHeight();
     auto rootWidth = PipelineContext::GetCurrentRootWidth();
