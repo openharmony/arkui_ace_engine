@@ -1926,4 +1926,35 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest009, TestSize.Level1)
         EXPECT_EQ(targetOffset, OffsetF(0.0f, 0.0f));
     }
 }
+
+/**
+ * @tc.name: BubbleBorderTest001
+ * @tc.desc: Test BubbleBorderOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BubbleBorderTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the BubblePaintMethod.
+     */
+    BubblePaintMethod bubblePaintMethod;
+
+    /**
+     * @tc.steps: step2. Set condition.
+     */
+    bubblePaintMethod.SetShowArrow(true);
+    bubblePaintMethod.enableArrow_ = true;
+    bubblePaintMethod.isFillTheGap_ = false;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
+
+    /**
+     * @tc.steps: step3. Excute function for border offset.
+     */
+    if (popupTheme->GetPopupDoubleBorderEnable()) {
+        if (bubblePaintMethod.needPaintInnerBorder_) {
+            EXPECT_EQ(bubblePaintMethod.GetBorderOffset(), -bubblePaintMethod.innerBorderWidth_);
+        }
+    }
+}
 } // namespace OHOS::Ace::NG
