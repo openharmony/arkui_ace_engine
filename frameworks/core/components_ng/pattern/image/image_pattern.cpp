@@ -36,7 +36,7 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
-#if defined(PIXEL_MAP_SUPPORTED)
+#if defined(PIXEL_MAP_SUPPORTED) && !defined(ANDROID_PLATFORM)
 #include "foundation/multimedia/image_framework/interfaces/kits/js/common/include/pixel_map_napi.h"
 #endif
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -47,7 +47,7 @@
 namespace OHOS::Ace::NG {
 napi_value ConvertPixmapNapi(const RefPtr<PixelMap>& pixelMap)
 {
-#if defined(PIXEL_MAP_SUPPORTED)
+#if defined(PIXEL_MAP_SUPPORTED) && !defined(ANDROID_PLATFORM)
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_RETURN(engine, {});
     NativeEngine* nativeEngine = engine->GetNativeEngine();

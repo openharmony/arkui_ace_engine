@@ -280,7 +280,10 @@ public:
     static bool IsCurrentUseNewPipeline()
     {
         auto container = Current();
+#ifdef OHOS_STANDARD_SYSTEM
         return container ? container->useNewPipeline_ : AceForwardCompatibility::IsUseNG();
+#endif
+        return container ? container->useNewPipeline_ : false;
     }
 
     // SetCurrentUsePartialUpdate is called when initial render on a page

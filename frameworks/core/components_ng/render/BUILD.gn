@@ -94,7 +94,9 @@ build_component_ng("render_ng") {
   }
 
   if (!enable_player_framework) {
-    rosen_sources -= [ "adapter/rosen_media_player.cpp" ]
+    if (current_os == "ohos") {
+      rosen_sources -= [ "adapter/rosen_media_player.cpp" ]
+    }
   } else {
     sources += [ "adapter/media_player_impl.cpp" ]
   }

@@ -66,13 +66,20 @@ const std::vector<int32_t> DEFAULT_ORIGN_GEAR {0, 2000, 4000, 6000, 8000};
 
 WebPattern::WebPattern() = default;
 
-WebPattern::WebPattern(std::string webSrc, const RefPtr<WebController>& webController, WebType type)
-    : webSrc_(std::move(webSrc)), webController_(webController), type_(type)
+WebPattern::WebPattern(const std::string& webSrc,
+                       const RefPtr<WebController>& webController,
+                       WebType type,
+                       bool incognitoMode)
+    : webSrc_(std::move(webSrc)), webController_(webController), type_(type),
+      incognitoMode_(incognitoMode)
 {}
 
-WebPattern::WebPattern(std::string webSrc, const SetWebIdCallback& setWebIdCallback, WebType type)
-    : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback), type_(type)
-{}
+WebPattern::WebPattern(const std::string& webSrc,
+                       const SetWebIdCallback& setWebIdCallback,
+                       WebType type,
+                       bool incognitoMode)
+    : webSrc_(std::move(webSrc)), setWebIdCallback_(setWebIdCallback), type_(type),
+      incognitoMode_(incognitoMode) {}
 
 WebPattern::~WebPattern()
 {
@@ -981,6 +988,11 @@ void WebPattern::OnDarkModeUpdate(WebDarkMode mode)
     }
 }
 
+void WebPattern::OnCopyOptionModeUpdate(int32_t mode)
+{
+    // cross platform is not support now;
+}
+
 void WebPattern::OnForceDarkAccessUpdate(bool access)
 {
     if (delegate_) {
@@ -1162,6 +1174,11 @@ void WebPattern::OnVerticalScrollBarAccessEnabledUpdate(bool value)
     if (delegate_) {
         delegate_->UpdateVerticalScrollBarAccess(value);
     }
+}
+
+void WebPattern::OnNativeEmbedModeEnabledUpdate(bool value)
+{
+    // cross platform is not support now;
 }
 
 void WebPattern::OnScrollBarColorUpdate(const std::string& value)
@@ -1664,6 +1681,6 @@ void WebPattern::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height
 RefPtr<NodePaintMethod> WebPattern::CreateNodePaintMethod()
 {
     // cross platform is not support now;
-    return MakeRefPtr<WebPaintMethod>(RenderSurface::Create());
+    return nullptr;
 }
 } // namespace OHOS::Ace::NG
