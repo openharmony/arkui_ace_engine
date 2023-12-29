@@ -68,6 +68,9 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
             buildFunc->ExecuteJS();
         }
         viewNode_ = NG::ViewStackProcessor::GetInstance()->Finish();
+        if (viewNode_) {
+            viewNode_->Build(nullptr);
+        }
     }
     if (viewNode_ && EXPORT_TEXTURE_SUPPORT_TYPES.count(viewNode_->GetTag()) > 0) {
         viewNode_->CreateExportTextureInfoIfNeeded();
