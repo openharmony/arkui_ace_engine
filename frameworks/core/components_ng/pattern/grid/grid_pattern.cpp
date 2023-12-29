@@ -1749,7 +1749,7 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
     FireAndCleanScrollingListener();
 }
 
-// Turn on the scrolling animation and scroll to the item where the index is located
+// Turn on the scrolling animation
 void GridPattern::AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper)
 {
     if (targetIndex_.has_value()) {
@@ -1758,7 +1758,7 @@ void GridPattern::AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapp
     }
 }
 
-// Turn on the scrolling animation and scroll to the item where the index is located
+// scroll to the item where the index is located
 bool GridPattern::AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper)
 {
     auto gridScrollLayoutAlgorithm =
