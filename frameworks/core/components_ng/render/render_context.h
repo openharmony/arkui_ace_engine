@@ -296,7 +296,7 @@ public:
 
     virtual void CancelTranslateXYAnimation() {}
 
-    virtual OffsetF GetPropertyOffset()
+    virtual OffsetF GetTranslateXYProperty()
     {
         return OffsetF();
     }
