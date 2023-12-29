@@ -1614,7 +1614,8 @@ SymbolSpanStyle TextPattern::GetSymbolSpanStyleObject(const RefPtr<SpanNode>& no
     symbolSpanStyle.symbolColor = !symbolColorValue.empty() ? symbolColorValue : SYMBOL_COLOR;
     symbolSpanStyle.fontSize = node->GetFontSizeValue(Dimension(DIMENSION_VALUE, DimensionUnit::VP)).ConvertToVp();
     symbolSpanStyle.fontWeight = static_cast<int32_t>(node->GetFontWeightValue(FontWeight::NORMAL));
-    symbolSpanStyle.renderingStrategy = node->GetSymbolRenderingStrategy();
+    symbolSpanStyle.renderingStrategy = node->GetSymbolRenderingStrategyValue(0);
+    symbolSpanStyle.effectStrategy = node->GetSymbolEffectStrategyValue(0);
     return symbolSpanStyle;
 }
 

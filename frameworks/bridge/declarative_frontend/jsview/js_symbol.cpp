@@ -72,13 +72,18 @@ void JSSymbol::Create(const JSCallbackInfo& info)
 
 void JSSymbol::SetFontSize(const JSCallbackInfo& info)
 {
-    CalcDimension fontSize;
-    if (!ParseJsDimensionFp(info[0], fontSize)) {
+    if (info.Length() < 1) {
+        return;
+    }
+    auto theme = GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
+    if (!ParseJsDimensionFpNG(info[0], fontSize, false)) {
+        fontSize = theme->GetTextStyle().GetFontSize();
+        SymbolModel::GetInstance()->SetFontSize(fontSize);
         return;
     }
     if (fontSize.IsNegative()) {
-        auto theme = GetTheme<TextTheme>();
-        CHECK_NULL_VOID(theme);
         fontSize = theme->GetTextStyle().GetFontSize();
     }
 
