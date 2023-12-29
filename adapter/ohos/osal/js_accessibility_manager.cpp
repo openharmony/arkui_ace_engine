@@ -3820,9 +3820,7 @@ void FilterAccessibilityElementByFocusable(std::list<AccessibilityElementInfo>& 
             filterIds.insert(element.GetAccessibilityId());
             continue;
         }
-        if (element.IsFocusable()) {
-            elementList.emplace_back(element);
-        }
+        elementList.emplace_back(element);
         if (element.GetAccessibilityId() == elementId) {
             focusElement = element;
         }
