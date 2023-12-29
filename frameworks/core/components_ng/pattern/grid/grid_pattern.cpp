@@ -1306,7 +1306,6 @@ float GridPattern::EstimateHeight() const
         if (!layoutProperty->GetLayoutOptions().has_value()) {
             return info.GetContentOffset(mainGap);
         }
-
         return info.GetContentOffset(layoutProperty->GetLayoutOptions().value(), mainGap);
     }
 }
