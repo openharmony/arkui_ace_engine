@@ -1654,7 +1654,7 @@ ScrollResult ScrollablePattern::HandleScroll(float offset, int32_t source, Neste
     if (NearZero(offset) || !NearZero(backOverOffset)) {
         ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
         ExecuteScrollFrameBegin(offset, scrollState);
-    } else if (parent && ((offset < 0 && nestedScroll_.forward == NestedScrollMode::PARENT_FIRST) ||
+    } else if (parent && !IsScrollSnap() && ((offset < 0 && nestedScroll_.forward == NestedScrollMode::PARENT_FIRST) ||
                              (offset > 0 && nestedScroll_.backward == NestedScrollMode::PARENT_FIRST))) {
         result = HandleScrollParentFirst(offset, source, state);
     } else if (parent && ((offset < 0 && nestedScroll_.forward == NestedScrollMode::SELF_FIRST) ||

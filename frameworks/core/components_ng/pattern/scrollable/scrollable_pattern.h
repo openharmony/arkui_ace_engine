@@ -435,6 +435,12 @@ public:
         return scrollable->IsSpringMotionRunning();
     }
 
+    virtual bool IsScrollSnap()
+    {
+        // When setting snap or enablePaging in scroll, the PARENT_FIRST in nestedScroll_ is invalid
+        return false;
+    }
+
 protected:
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const
     {
