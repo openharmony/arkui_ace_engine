@@ -396,7 +396,7 @@ std::optional<Dimension> JSSwiper::ParseIndicatorDimension(const JSRef<JSVal>& v
     }
     CalcDimension dimPosition;
     auto parseOk = ParseJsDimensionVp(value, dimPosition);
-    indicatorDimension = (parseOk && dimPosition.ConvertToPx() >= 0.0f) ? dimPosition : 0.0_vp;
+    indicatorDimension = parseOk && dimPosition.ConvertToPx() >= 0.0f ? dimPosition : 0.0_vp;
     return indicatorDimension;
 }
 
@@ -430,17 +430,14 @@ SwiperParameters JSSwiper::GetDotIndicatorInfo(const JSRef<JSObject>& obj)
     bool parseItemHOk =
         ParseJsDimensionVp(itemHeightValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
     swiperParameters.itemHeight = parseItemHOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
-    bool parseSeleItemWOk =
+    bool parseSelectedItemWOk =
         ParseJsDimensionVp(selectedItemWidthValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
-    swiperParameters.selectedItemWidth = parseSeleItemWOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
-    bool parseSeleItemHOk =
+    swiperParameters.selectedItemWidth = parseSelectedItemWOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
+    bool parseSelectedItemHOk =
         ParseJsDimensionVp(selectedItemHeightValue, dimPosition) && (dimPosition.Unit() != DimensionUnit::PERCENT);
-    swiperParameters.selectedItemHeight = parseSeleItemHOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
-    if (parseSeleItemWOk == false && parseSeleItemHOk == false && parseItemWOk == false && parseItemHOk == false) {
-        SwiperModel::GetInstance()->SetIsIndicatorCustomSize(false);
-    } else {
-        SwiperModel::GetInstance()->SetIsIndicatorCustomSize(true);
-    }
+    swiperParameters.selectedItemHeight = parseSelectedItemHOk && dimPosition > 0.0_vp ? dimPosition : defaultSize;
+    SwiperModel::GetInstance()->SetIsIndicatorCustomSize(
+        parseSelectedItemWOk || parseSelectedItemHOk || parseItemWOk || parseItemHOk);
     if (maskValue->IsBoolean()) {
         auto mask = maskValue->ToBoolean();
         swiperParameters.maskValue = mask;
