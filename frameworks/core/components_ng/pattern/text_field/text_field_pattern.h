@@ -1071,6 +1071,7 @@ public:
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
 
+    void ContentFireOnChangeEvent();
 protected:
     virtual void InitDragEvent();
 
@@ -1135,7 +1136,6 @@ private:
     void AfterSelection();
 
     void FireEventHubOnChange(const std::string& text);
-    void FireOnChangeIfNeeded();
     // The return value represents whether the editor content has change.
     bool FireOnTextChangeEvent();
 

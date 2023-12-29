@@ -48,7 +48,6 @@ public:
 
 private:
     WeakPtr<Pattern> pattern_;
-    bool IsTextSelectionIllegal(int32_t& selectionStart, int32_t& selectionEnd);
 };
 
 } // namespace OHOS::Ace::NG
