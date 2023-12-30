@@ -70,9 +70,12 @@ napi_value AttachImageBitmap(napi_env env, void* value, void*)
     double height = image->GetHeight();
     napi_value jsHeight = nullptr;
     napi_create_double(env, height, &jsHeight);
+    napi_value isImageBitmap = nullptr;
+    napi_create_int32(env, 1, &isImageBitmap);
 
     napi_set_named_property(env, imageBitmap, "width", jsWidth);
     napi_set_named_property(env, imageBitmap, "height", jsHeight);
+    napi_set_named_property(env, imageBitmap, "isImageBitmap", isImageBitmap);
     BindNativeFunction(env, imageBitmap, "close", JSRenderImage::JsClose);
 
     napi_coerce_to_native_binding_object(env, imageBitmap, DetachImageBitmap, AttachImageBitmap, value, nullptr);
@@ -139,11 +142,15 @@ napi_value JSRenderImage::InitImageBitmap(napi_env env)
 {
     napi_value object = nullptr;
     napi_create_object(env, &object);
+    napi_value isImageBitmap = nullptr;
+    napi_create_object(env, &isImageBitmap);
+    napi_create_int32(env, 1, &isImageBitmap);
 
     napi_property_descriptor desc[] = {
         DECLARE_NAPI_GETTER_SETTER("width", JsGetWidth, JsSetWidth),
         DECLARE_NAPI_GETTER_SETTER("height", JsGetHeight, JsSetHeight),
         DECLARE_NAPI_FUNCTION("close", JsClose),
+        DECLARE_NAPI_PROPERTY("isImageBitmap", isImageBitmap),
     };
     napi_status status = napi_define_class(
         env, "ImageBitmap", NAPI_AUTO_LENGTH, Constructor, nullptr, sizeof(desc) / sizeof(*desc), desc, &object);
