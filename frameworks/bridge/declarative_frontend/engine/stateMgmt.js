@@ -3779,7 +3779,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
      * and add this component to the list of components who are dependent on this property
      */
     recordPropertyDependentUpdate() {
-        const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+        const elmtId = this.getRenderingElmtId();
         if (elmtId < 0) {
             // not access recording 
             return;
@@ -4885,10 +4885,10 @@ class ViewPU extends NativeViewPartialUpdate {
         this.isRenderInProgress = false;
         // flag for initial rendering being done
         this.isInitialRenderDone = false;
-        // indicates the currently rendered or rendered UINode's elmtId
+        // indicates the currently rendered or rendered UINode's elmtIds
         // or -1 if none is currently rendering
-        // isRenderInProgress==true always when renderingOfElementIdOnGoing_>=0 
-        this.currentlyRenderedElmtId_ = -1;
+        // isRenderInProgress == true always when currentlyRenderedElmtIdStack_.length >= 0 
+        this.currentlyRenderedElmtIdStack_ = new Array();
         // flag if active of inActive
         // inActive means updates are delayed
         this.isActive_ = true;
@@ -5526,7 +5526,7 @@ class ViewPU extends NativeViewPartialUpdate {
      * set in observeComponentCreation(2)
      */
     getCurrentlyRenderedElmtId() {
-        return ViewPU.renderingPaused ? -1 : this.currentlyRenderedElmtId_;
+        return ViewPU.renderingPaused || this.currentlyRenderedElmtIdStack_.length == 0 ? -1 : this.currentlyRenderedElmtIdStack_.slice(-1)[0];
     }
     static pauseRendering() {
         ViewPU.renderingPaused = true;
@@ -5543,9 +5543,9 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         const updateFunc = (elmtId, isFirstRender) => {
             
-            this.currentlyRenderedElmtId_ = elmtId;
+            this.currentlyRenderedElmtIdStack_.push(elmtId);
             compilerAssignedUpdateFunc(elmtId, isFirstRender);
-            this.currentlyRenderedElmtId_ = -1;
+            this.currentlyRenderedElmtIdStack_.pop();
             
         };
         const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
@@ -5581,12 +5581,12 @@ class ViewPU extends NativeViewPartialUpdate {
             this.syncInstanceId();
             
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-            this.currentlyRenderedElmtId_ = elmtId;
+            this.currentlyRenderedElmtIdStack_.push(elmtId);
             compilerAssignedUpdateFunc(elmtId, isFirstRender);
             if (!isFirstRender) {
                 _popFunc();
             }
-            this.currentlyRenderedElmtId_ = -1;
+            this.currentlyRenderedElmtIdStack_.pop();
             ViewStackProcessor.StopGetAccessRecording();
             
             this.restoreInstanceId();
