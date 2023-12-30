@@ -18,8 +18,10 @@
 #include <memory>
 
 #include "accessibility_event_info.h"
+#include "refbase.h"
 #include "session_manager/include/extension_session_manager.h"
 #include "ui/rs_surface_node.h"
+#include "wm/wm_common.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
@@ -86,8 +88,7 @@ public:
             TaskExecutor::TaskType::UI);
     }
 
-    void OnAccessibilityEvent(
-        const Accessibility::AccessibilityEventInfo& info, int32_t uiExtensionOffset) override
+    void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int32_t uiExtensionOffset) override
     {
         ContainerScope scope(instanceId_);
         auto pipeline = PipelineBase::GetCurrentContext();
@@ -211,6 +212,21 @@ void SessionWrapperImpl::InitAllCallback()
                 pattern->FireAsyncCallbacks();
             },
             TaskExecutor::TaskType::UI);
+    };
+    sessionCallbacks->notifyGetAvoidAreaByTypeFunc_ = [weak = hostPattern_, taskExecutor](
+                                                          Rosen::AvoidAreaType type) -> Rosen::AvoidArea {
+        Rosen::AvoidArea avoidArea;
+        taskExecutor->PostSyncTask(
+            [weak, &avoidArea, type]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                auto instanceId = pattern->GetInstanceId();
+                auto container = Platform::AceContainer::GetContainer(instanceId);
+                CHECK_NULL_VOID(container);
+                avoidArea = container->GetAvoidAreaByType(type);
+            },
+            TaskExecutor::TaskType::UI);
+        return avoidArea;
     };
 }
 /************************************************ End: Initialization *************************************************/
@@ -440,4 +456,12 @@ int32_t SessionWrapperImpl::SendDataSync(const AAFwk::WantParams& wantParams, AA
 }
 /************************************************ End: The interface to send the data for ArkTS ***********************/
 
+/************************************************ Begin: The interface to control the avoid area **********************/
+void SessionWrapperImpl::NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const
+{
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "AvoidArea: session = %{public}s", session_ ? "non-null" : "null");
+    CHECK_NULL_VOID(session_);
+    session_->UpdateAvoidArea(sptr<Rosen::AvoidArea>::MakeSptr(avoidArea), static_cast<Rosen::AvoidAreaType>(type));
+}
+/************************************************ End: The interface to control the avoid area ************************/
 } // namespace OHOS::Ace::NG

@@ -26,8 +26,9 @@
 #include "core/common/container.h"
 
 namespace OHOS::Rosen {
+class AvoidArea;
 enum class WSError;
-}
+} // namespace OHOS::Rosen
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -54,11 +55,33 @@ public:
     const RefPtr<FrameNode> GetFocusUiExtensionNode();
     bool IsWrapExtensionAbilityId(int32_t elementId);
     bool IsWindowTypeUIExtension(const RefPtr<PipelineBase>& pipeline);
-    bool SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
-        int32_t uiExtensionOffset, const RefPtr<PipelineBase>& pipeline);
+    bool SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo, int32_t uiExtensionOffset,
+        const RefPtr<PipelineBase>& pipeline);
     std::pair<int32_t, int32_t> UnWrapExtensionAbilityId(int32_t extensionOffset, int32_t elementId);
     int32_t ApplyExtensionId();
     void RecycleExtensionId(int32_t id);
+
+    /**
+     * @brief Create a UIExtensionComponent object on the page and save it in the UIExtension management object
+     *
+     * @param uiExtension The UIExtensionComponent pattern object
+     */
+    void AddAliveUIExtension(int32_t nodeId, const WeakPtr<UIExtensionPattern>& uiExtension);
+
+    /**
+     * @brief Clear the UIExtensionComponent to be destroyed
+     *
+     * @param nodeId The UIExtensionComponent Id
+     */
+    void RemoveDestroyedUIExtension(int32_t nodeId);
+
+    /**
+     * @brief Transfer the original avoid area and avoid area type to the UIExtensionAbility
+     *
+     * @param avoidArea The original avoid area
+     * @param type The original aovid areatype
+     */
+    void TransferOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type);
 
 private:
     class UIExtensionIdUtility {
@@ -77,6 +100,7 @@ private:
     };
 
     WeakPtr<UIExtensionPattern> uiExtensionFocused_;
+    std::map<int32_t, OHOS::Ace::WeakPtr<UIExtensionPattern>> aliveUIExtensions_;
     std::unique_ptr<UIExtensionIdUtility> extensionIdUtility_ = std::make_unique<UIExtensionIdUtility>();
 };
 } // namespace OHOS::Ace::NG

@@ -105,4 +105,27 @@ void UIExtensionManager::RecycleExtensionId(int32_t id)
     CHECK_NULL_VOID(extensionIdUtility_);
     extensionIdUtility_->RecycleExtensionId(id);
 }
+
+void UIExtensionManager::AddAliveUIExtension(int32_t nodeId, const WeakPtr<UIExtensionPattern>& uiExtension)
+{
+    aliveUIExtensions_.try_emplace(nodeId, uiExtension);
+}
+
+void UIExtensionManager::TransferOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type)
+{
+    for (const auto& it : aliveUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        if (uiExtension) {
+            uiExtension->DispatchOriginAvoidArea(avoidArea, type);
+        }
+    }
+}
+
+void UIExtensionManager::RemoveDestroyedUIExtension(int32_t nodeId)
+{
+    auto it = aliveUIExtensions_.find(nodeId);
+    if (it != aliveUIExtensions_.end()) {
+        aliveUIExtensions_.erase(nodeId);
+    }
+}
 } // namespace OHOS::Ace::NG
