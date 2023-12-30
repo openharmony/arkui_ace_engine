@@ -591,6 +591,8 @@ private:
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitHoverMouseEvent();
     // Init on key event
+    void InitOnFocusInternal(const RefPtr<FocusHub>& focusHub);
+    void HandleFocusInternal();
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     void FlushFocus(const RefPtr<FrameNode>& curShowFrame);
@@ -812,6 +814,7 @@ private:
     float currentIndexOffset_ = 0.0f;
     int32_t gestureSwipeIndex_ = 0;
     int32_t currentFirstIndex_ = 0;
+    int32_t currentFocusIndex_ = 0;
 
     bool moveDirection_ = false;
     bool indicatorDoingAnimation_ = false;

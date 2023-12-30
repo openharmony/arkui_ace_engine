@@ -243,6 +243,7 @@ void SwiperPattern::OnModifyDone()
     auto focusHub = host->GetFocusHub();
     if (focusHub) {
         InitOnKeyEvent(focusHub);
+        InitOnFocusInternal(focusHub);
     }
 
     SetSwiperEventCallback(IsDisableSwipe());
@@ -633,6 +634,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
             auto curChildFrame = curChild->GetHostNode();
             CHECK_NULL_RETURN(curChildFrame, false);
             FlushFocus(curChildFrame);
+            currentFocusIndex_ = GetLoopIndex(currentIndex_);
         }
         currentIndexOffset_ = 0.0f;
         if (isNotInit) {
@@ -1237,6 +1239,22 @@ void SwiperPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
     gestureHub->AddTouchEvent(touchEvent_);
 }
 
+void SwiperPattern::InitOnFocusInternal(const RefPtr<FocusHub>& focusHub)
+{
+    auto focusTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        if (pattern) {
+            pattern->HandleFocusInternal();
+        }
+    };
+    focusHub->SetOnFocusInternal(std::move(focusTask));
+}
+
+void SwiperPattern::HandleFocusInternal()
+{
+    currentFocusIndex_ = currentIndex_;
+}
+
 void SwiperPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto onKeyEvent = [wp = WeakClaim(this)](const KeyEvent& event) -> bool {
@@ -1256,12 +1274,29 @@ bool SwiperPattern::OnKeyEvent(const KeyEvent& event)
     }
     if ((GetDirection() == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_LEFT) ||
         (GetDirection() == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP)) {
-        ShowPrevious();
+        auto onlyFlushFocus = GetDisplayCount() > 1 && currentFocusIndex_ > GetLoopIndex(currentIndex_);
+        if (onlyFlushFocus) {
+            currentFocusIndex_ = GetLoopIndex(currentFocusIndex_ - 1);
+            FlushFocus(GetCurrentFrameNode(currentFocusIndex_));
+        } else {
+            ShowPrevious();
+            currentFocusIndex_ = GetLoopIndex(currentFocusIndex_ - 1);
+        }
+
         return true;
     }
     if ((GetDirection() == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT) ||
         (GetDirection() == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
-        ShowNext();
+        auto onlyFlushFocus =
+            GetDisplayCount() > 1 && currentFocusIndex_ < GetLoopIndex(currentIndex_ + GetDisplayCount() - 1);
+        if (onlyFlushFocus) {
+            currentFocusIndex_ = GetLoopIndex(currentFocusIndex_ + 1);
+            FlushFocus(GetCurrentFrameNode(currentFocusIndex_));
+        } else {
+            ShowNext();
+            currentFocusIndex_ = GetLoopIndex(currentFocusIndex_ + 1);
+        }
+
         return true;
     }
     return false;
@@ -1718,6 +1753,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
                     break;
                 }
                 FlushFocus(curChildFrame);
+                currentFocusIndex_ = GetLoopIndex(currentIndex_);
             } while (0);
             OnIndexChange();
             oldIndex_ = currentIndex_;
@@ -2156,6 +2192,7 @@ void SwiperPattern::OnSpringAndFadeAnimationFinish()
                 break;
             }
             FlushFocus(curChildFrame);
+            currentFocusIndex_ = GetLoopIndex(currentIndex_);
         } while (0);
         OnIndexChange();
         oldIndex_ = currentIndex_;
@@ -2899,6 +2936,7 @@ void SwiperPattern::TriggerAnimationEndOnForceStop()
                 break;
             }
             FlushFocus(curChildFrame);
+            currentFocusIndex_ = GetLoopIndex(currentIndex_);
         } while (0);
 
         OnIndexChange();
@@ -3372,7 +3410,7 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
     } else {
         UpdateCurrentIndex(nextIndex);
         do {
-            auto curChildFrame = GetCurrentFrameNode(currentIndex_);
+            auto curChildFrame = GetCurrentFrameNode(currentFocusIndex_);
             if (!curChildFrame) {
                 break;
             }
