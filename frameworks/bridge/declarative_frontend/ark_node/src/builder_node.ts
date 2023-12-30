@@ -20,6 +20,7 @@ class BuilderNode extends BaseNode {
   private params_: Object;
   private uiContext_: UIContext;
   private frameNode_: FrameNode;
+  private childrenWeakrefMap_ = new Map<number, WeakRef<ViewPU>>();
 
   constructor(uiContext: UIContext, options?: RenderOptions) {
     super(uiContext, options);
@@ -32,10 +33,28 @@ class BuilderNode extends BaseNode {
   }
 
   public addChild(child: ViewPU): boolean {
-    return false;
+    if (this.childrenWeakrefMap_.has(child.id__())) {
+      return false;
+    }
+    this.childrenWeakrefMap_.set(child.id__(), new WeakRef(child));
+    return true;
   }
-  public updateStateVarsOfChildByElmtId(elmtId, params: Object): void { }
-
+  public getChildById(id: number) {
+    const childWeakRef = this.childrenWeakrefMap_.get(id);
+    return childWeakRef ? childWeakRef.deref() : undefined;
+  }
+  public updateStateVarsOfChildByElmtId(elmtId, params: Object, updateParams: Object): void {
+    if (elmtId < 0) {
+      return;
+    }
+    let child: ViewPU = this.getChildById(elmtId);
+    if (!child) {
+      return;
+    }
+    if (typeof child.aboutToUpdate === "function") {
+      child.aboutToUpdate(updateParams);
+    }
+  }
   public build(builder: WrappedBuilder<Object[]>, params: Object) {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     this.params_ = params;

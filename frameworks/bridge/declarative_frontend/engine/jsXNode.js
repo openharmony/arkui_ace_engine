@@ -52,6 +52,7 @@ class BaseNode extends __JSBaseNode__ {
 class BuilderNode extends BaseNode {
     constructor(uiContext, options) {
         super(uiContext, options);
+        this.childrenWeakrefMap_ = new Map();
         this.uiContext_ = uiContext;
         this.updateFuncByElmtId = new Map();
     }
@@ -59,9 +60,28 @@ class BuilderNode extends BaseNode {
         return -1;
     }
     addChild(child) {
-        return false;
+        if (this.childrenWeakrefMap_.has(child.id__())) {
+            return false;
+        }
+        this.childrenWeakrefMap_.set(child.id__(), new WeakRef(child));
+        return true;
     }
-    updateStateVarsOfChildByElmtId(elmtId, params) { }
+    getChildById(id) {
+        const childWeakRef = this.childrenWeakrefMap_.get(id);
+        return childWeakRef ? childWeakRef.deref() : undefined;
+    }
+    updateStateVarsOfChildByElmtId(elmtId, params, updateParams) {
+        if (elmtId < 0) {
+            return;
+        }
+        let child = this.getChildById(elmtId);
+        if (!child) {
+            return;
+        }
+        if (typeof child.aboutToUpdate === "function") {
+            child.aboutToUpdate(updateParams);
+        }
+    }
     build(builder, params) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         this.params_ = params;
