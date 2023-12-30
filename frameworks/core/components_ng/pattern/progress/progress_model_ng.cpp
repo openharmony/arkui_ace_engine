@@ -50,16 +50,8 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
     auto progressFocusNode = frameNode->GetFocusHub();
     CHECK_NULL_VOID(progressFocusNode);
     if (type == ProgressType::CAPSULE) {
-        ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Color, theme->GetCapsuleSelectColor());
-        ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BorderColor, theme->GetBorderColor());
-        ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, theme->GetCapsuleBgColor());
         progressFocusNode->SetFocusable(true);
-    } else if (type == ProgressType::RING) {
-        ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, theme->GetRingProgressBgColor());
-        progressFocusNode->SetFocusable(false);
     } else {
-        ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, theme->GetTrackBgColor());
-        ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Color, theme->GetTrackSelectedColor());
         progressFocusNode->SetFocusable(false);
     }
 
