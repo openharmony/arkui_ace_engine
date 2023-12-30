@@ -1007,7 +1007,7 @@ void TextPattern::HandleMouseLeftPressAction(const MouseInfo& info, const Offset
     mouseStatus_ = MouseStatus::PRESSED;
     CHECK_NULL_VOID(paragraph_);
     auto start = paragraph_->GetGlyphIndexByCoordinate(textOffset);
-    HandleSelectionChange(start, start);
+    textSelector_.Update(start, start);
 }
 
 void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset)
@@ -1025,7 +1025,7 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
 
     CHECK_NULL_VOID(paragraph_);
     auto end = -1;
-    if (IsSelected()) {
+    if (IsSelected() || textSelector_.baseOffset != -1) {
         end = paragraph_->GetGlyphIndexByCoordinate(textOffset);
     }
     HandleSelectionChange(textSelector_.baseOffset, end);
@@ -2802,7 +2802,7 @@ void TextPattern::HandleSelectionChange(int32_t start, int32_t end)
         return;
     }
 
-    UpdateSelectionSpanType(start, end);
+    UpdateSelectionSpanType(std::min(start, end), std::max(start, end));
     textSelector_.Update(start, end);
     FireOnSelectionChange(std::min(start, end), std::max(start, end));
 }
