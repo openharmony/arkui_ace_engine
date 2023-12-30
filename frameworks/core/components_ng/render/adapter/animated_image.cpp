@@ -249,7 +249,7 @@ void AnimatedRSImage::DecodeImpl(uint32_t idx)
 #ifndef USE_ROSEN_DRAWING
         currentFrame_ = SkImage::MakeFromBitmap(bitmap);
 #else
-        currentFrame_ = std::shared_ptr<RSImage>();
+        currentFrame_ = std::make_shared<RSImage>();
         currentFrame_->BuildFromBitmap(bitmap);
 #endif
     }
