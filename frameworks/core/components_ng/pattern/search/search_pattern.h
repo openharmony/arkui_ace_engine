@@ -174,6 +174,8 @@ private:
     void RemoveDragFrameNodeFromManager();
     void InitButtonTouchEvent(RefPtr<TouchEventImpl>& touchEvent, int32_t childId);
     void InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t childId);
+    void HandleEnabled();
+    void InitButtonMouseAndTouchEvent();
     void SetMouseStyle(MouseFormat format);
     void OnButtonTouchDown(int32_t childId);
     void OnButtonTouchUp(int32_t childId);
