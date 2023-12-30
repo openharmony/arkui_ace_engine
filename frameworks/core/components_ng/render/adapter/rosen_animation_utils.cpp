@@ -109,6 +109,11 @@ void AnimationUtils::AddKeyFrame(float fraction, const PropertyCallback& callbac
     Rosen::RSNode::AddKeyFrame(fraction, callback);
 }
 
+void AnimationUtils::AddDurationKeyFrame(int duration, const RefPtr<Curve>& curve, const PropertyCallback& callback)
+{
+    Rosen::RSNode::AddDurationKeyFrame(duration, NativeCurveHelper::ToNativeCurve(curve), callback);
+}
+
 std::shared_ptr<AnimationUtils::Animation> AnimationUtils::StartAnimation(const AnimationOption& option,
     const PropertyCallback& callback, const FinishCallback& finishCallback, const RepeatCallback& repeatCallback)
 {
