@@ -18,6 +18,7 @@
 #ifdef FLUTTER_2_5
 #include "ace_shell/shell/common/window_manager.h"
 #endif
+#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -117,6 +118,17 @@ void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(props);
     const auto& dstSize = layoutWrapper->GetGeometryNode()->GetContentSize();
     bool autoResize = props->GetAutoResize().value_or(true);
+    // add API version protection
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        autoResize = props->GetAutoResize().value_or(false);
+    }
+    auto container = Container::Current();
+    // If the default value is set to false, the ScenceBoard memory increases.
+    // Therefore the default value is different in the ScenceBoard.
+    if (container && container->IsScenceBoardWindow()) {
+        autoResize = props->GetAutoResize().value_or(true);
+    }
+
     ImageFit imageFit = props->GetImageFit().value_or(ImageFit::COVER);
     const std::optional<SizeF>& sourceSize = props->GetSourceSize();
     auto loadingCtx = loadingCtx_.Upgrade();
