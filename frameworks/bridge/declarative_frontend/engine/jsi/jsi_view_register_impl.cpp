@@ -57,6 +57,7 @@
 #include "bridge/declarative_frontend/jsview/js_column_split.h"
 #include "bridge/declarative_frontend/jsview/js_common_view.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
+#include "bridge/declarative_frontend/jsview/js_container_span.h"
 #include "bridge/declarative_frontend/jsview/js_counter.h"
 #include "bridge/declarative_frontend/jsview/js_data_panel.h"
 #include "bridge/declarative_frontend/jsview/js_datepicker.h"
@@ -765,6 +766,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "__JSBaseNode__", JSBaseNode::JSBind },
     { "SymbolGlyph", JSSymbol::JSBind },
     { "SymbolSpan", JSSymbolSpan::JSBind },
+    { "ContainerSpan",  JSContainerSpan::JSBind},
 };
 
 void RegisterAllModule(BindingTarget globalObj, void* nativeEngine)

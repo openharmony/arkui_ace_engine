@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_LAYOUT_PROPERTY_H
 
 #include "core/common/ace_application_info.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/image/image_source_info.h"
@@ -132,6 +133,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImageSizeStyle, SourceSize, SizeF, PROPERTY_UPDATE_LAYOUT);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(ImageSizeStyle, FitOriginalSize, bool, PROPERTY_UPDATE_BY_CHILD_REQUEST);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(VerticalAlign, VerticalAlign, PROPERTY_UPDATE_MEASURE);
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PlaceHolderStyle, TextBackgroundStyle, PROPERTY_UPDATE_NORMAL);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(HasPlaceHolderStyle, bool, PROPERTY_UPDATE_NORMAL);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(ImageLayoutProperty);

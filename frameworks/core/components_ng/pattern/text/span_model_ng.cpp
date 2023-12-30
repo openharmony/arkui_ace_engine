@@ -18,6 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -234,4 +235,18 @@ void SpanModelNG::SetFont(FrameNode* frameNode, const Font& value)
     }
 }
 
+void SpanModelNG::CreateContainSpan()
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto spanNode = ContainerSpanNode::GetOrCreateSpanNode(nodeId);
+    stack->Push(spanNode);
+}
+
+void SpanModelNG::SetTextBackgroundStyle(const TextBackgroundStyle& style)
+{
+    auto baseSpan = AceType::DynamicCast<BaseSpan>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    CHECK_NULL_VOID(baseSpan);
+    baseSpan->SetTextBackgroundStyle(style);
+}
 } // namespace OHOS::Ace::NG

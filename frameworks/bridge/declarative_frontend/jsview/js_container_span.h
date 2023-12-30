@@ -13,22 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_IMAGE_SPAN_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_IMAGE_SPAN_H
+#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CONTAINER_SPAN_H
+#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CONTAINER_SPAN_H
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_interactable_view.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include <functional>
+#include <optional>
+#include "base/geometry/calc_dimension.h"
+#include "base/geometry/dimension.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
+#include "frameworks/core/components/common/properties/text_style.h"
 
 namespace OHOS::Ace::Framework {
-class JSImageSpan : public JSViewAbstract {
+
+class JSContainerSpan : public JSContainerBase {
 public:
-    static void Create(const JSCallbackInfo& info);
-    static void SetObjectFit(const JSCallbackInfo& info);
-    static void SetVerticalAlign(int32_t verticalAlign);
-    static void SetTextBackgroundStyle(const JSCallbackInfo& info);
-    static void GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName);
     static void JSBind(BindingTarget globalObj);
+    static void Create(const JSCallbackInfo& info);
+    static void SetTextBackgroundStyle(const JSCallbackInfo& info);
+    static TextBackgroundStyle ParseTextBackgroundStyle(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_IMAGE_SPAN_H
+
+#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_CONTAINER_SPAN_H
