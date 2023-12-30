@@ -53,8 +53,10 @@ declare enum XComponentType {
     TEXTURE
 }
 
-declare abstract class ViewPU { }
-
+declare abstract class ViewPU {
+    id__(): number;
+    aboutToUpdate?: (updateParams: Object) => void;
+}
 
 /**
  * WeakRef
