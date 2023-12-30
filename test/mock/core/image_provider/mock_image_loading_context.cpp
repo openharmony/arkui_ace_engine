@@ -118,6 +118,16 @@ void ImageLoadingContext::SetAutoResize(bool needResize)
     autoResize_ = needResize;
 }
 
+bool ImageLoadingContext::GetIsOnSystemColorChange() const
+{
+    return isSystemColorChange_;
+}
+
+void ImageLoadingContext::SetIsSystemColorChange(bool isSystemColorChange)
+{
+    isSystemColorChange_ = isSystemColorChange;
+}
+
 const SizeF& ImageLoadingContext::GetDstSize() const
 {
     return dstSize_;

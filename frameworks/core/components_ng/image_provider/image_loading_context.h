@@ -61,11 +61,13 @@ public:
     bool GetAutoResize() const;
     std::optional<SizeF> GetSourceSize() const;
     bool NeedAlt() const;
+    bool GetIsOnSystemColorChange() const;
 
     /* interfaces to set properties */
     void SetImageFit(ImageFit imageFit);
     void SetAutoResize(bool needResize);
     void SetSourceSize(const std::optional<SizeF>& sourceSize = std::nullopt);
+    void SetIsSystemColorChange(bool isSystemColorChange);
 
     // callbacks that will be called by ImageProvider when load process finishes
     void DataReadyCallback(const RefPtr<ImageObject>& imageObj);
@@ -115,6 +117,7 @@ private:
 
     bool autoResize_ = true;
     bool syncLoad_ = false;
+    bool isSystemColorChange_ = false;
 
     RectF srcRect_;
     RectF dstRect_;

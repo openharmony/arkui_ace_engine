@@ -104,7 +104,8 @@ private:
     static RefPtr<ImageObject> QueryThumbnailCache(const ImageSourceInfo& src);
 
     // helper function to create image object from ImageSourceInfo
-    static void CreateImageObjHelper(const ImageSourceInfo& src, bool sync = false);
+    static void CreateImageObjHelper(const ImageSourceInfo& src, const WeakPtr<ImageLoadingContext>& ctx,
+        bool sync = false);
 
     static void MakeCanvasImageHelper(const RefPtr<ImageObject>& obj, const SizeF& targetSize, const std::string& key,
         bool forceResize, bool sync = false);

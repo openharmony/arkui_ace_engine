@@ -303,6 +303,16 @@ void ImageLoadingContext::LoadImageData()
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_DATA);
 }
 
+void ImageLoadingContext::SetIsSystemColorChange(bool isSystemColorChange)
+{
+    isSystemColorChange_ = isSystemColorChange;
+}
+
+bool ImageLoadingContext::GetIsOnSystemColorChange() const
+{
+    return isSystemColorChange_;
+}
+
 int32_t ImageLoadingContext::RoundUp(int32_t value)
 {
     CHECK_NULL_RETURN(imageObj_, -1);

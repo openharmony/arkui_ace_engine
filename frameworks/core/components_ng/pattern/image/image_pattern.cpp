@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/image/image_source_info.h"
 #define NAPI_VERSION 8
 
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -886,7 +887,13 @@ void ImagePattern::OnColorConfigurationUpdate()
     UpdateInternalResource(src);
 
     LoadImage(src);
+    loadingCtx_->SetIsSystemColorChange(true);
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
+        auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
+        if (altLoadingCtx_->GetSourceInfo() == altImageSourceInfo) {
+            altLoadingCtx_.Reset();
+        }
+        altLoadingCtx_->SetIsSystemColorChange(true);
         LoadAltImage(imageLayoutProperty);
     }
 }
