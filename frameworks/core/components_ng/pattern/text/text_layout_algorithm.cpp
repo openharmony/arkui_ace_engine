@@ -35,6 +35,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
 /**
  * The baseline information needs to be calculated based on contentOffsetY.
  */
@@ -270,6 +271,14 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
             child->position = spanTextLength + 1;
             spanTextLength += 1;
             iterItems++;
+        } else if (child->unicode != 0) {
+            child->aiSpanMap = aiSpanMap;
+            child->SetIsParentText(frameNode->GetTag() == V2::TEXT_ETS_TAG);
+            child->UpdateSymbolSpanParagraph(frameNode, paragraph_);
+            aiSpanMap = child->aiSpanMap;
+            child->position = spanTextLength + SYMBOL_SPAN_LENGTH;
+            child->content = "  ";
+            spanTextLength += SYMBOL_SPAN_LENGTH;
         } else {
             child->aiSpanMap = aiSpanMap;
             child->UpdateParagraph(frameNode, paragraph_);

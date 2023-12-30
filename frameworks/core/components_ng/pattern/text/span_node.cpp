@@ -85,7 +85,7 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         json->Put(
             "textCase", V2::ConvertWrapTextCaseToStirng(fontStyle->GetTextCase().value_or(TextCase::NORMAL)).c_str());
         json->Put("fontColor", fontStyle->GetForegroundColor()
-            .value_or(fontStyle->GetTextColor().value_or(Color::BLACK)).ColorToString().c_str());
+                                   .value_or(fontStyle->GetTextColor().value_or(Color::BLACK)).ColorToString().c_str());
         json->Put("fontStyle", GetFontStyleInJson(fontStyle->GetItalicFontStyle()).c_str());
         json->Put("fontWeight", GetFontWeightInJson(fontStyle->GetFontWeight()).c_str());
         json->Put("fontFamily", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str());
@@ -238,10 +238,44 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
     return -1;
 }
 
+void SpanItem::UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder)
+{
+    CHECK_NULL_VOID(builder);
+    std::optional<TextStyle> textStyle;
+    auto symbolUnicode = GetSymbolUnicode();
+    if (fontStyle || textLineStyle) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        TextStyle themeTextStyle =
+            CreateTextStyleUsingTheme(fontStyle, textLineStyle, pipelineContext->GetTheme<TextTheme>());
+        if (frameNode) {
+            FontRegisterCallback(frameNode, themeTextStyle);
+        }
+        if (NearZero(themeTextStyle.GetFontSize().Value())) {
+            return;
+        }
+        textStyle = themeTextStyle;
+        textStyle->SetHalfLeading(pipelineContext->GetHalfLeading());
+        if (symbolUnicode != 0) {
+            UpdateSymbolSpanColor(themeTextStyle);
+        }
+        builder->PushStyle(themeTextStyle);
+    }
+    textStyle_ = textStyle;
+
+    if (symbolUnicode != 0) {
+        builder->AddSymbol(symbolUnicode);
+    }
+
+    if (fontStyle || textLineStyle) {
+        builder->PopStyle();
+    }
+}
+
 void SpanItem::UpdateSymbolSpanColor(TextStyle& symbolSpanStyle)
 {
     symbolSpanStyle.isSymbolGlyph_ = true;
-    if (symbolSpanStyle.GetSymbolColorList().empty()) {
+    if (GetIsParentText() && symbolSpanStyle.GetSymbolColorList().empty()) {
         std::vector<Color> symbolColor;
         symbolColor.emplace_back(symbolSpanStyle.GetTextColor());
         symbolSpanStyle.SetSymbolColorList(symbolColor);
@@ -271,8 +305,8 @@ void SpanItem::UpdateTextStyleForAISpan(
             continue;
         }
         if (preEnd < aiSpanStartInSpan) {
-            auto beforeContent = StringUtils::ToString(
-                wSpanContent.substr(preEnd - spanStart, aiSpanStartInSpan- preEnd));
+            auto beforeContent =
+                StringUtils::ToString(wSpanContent.substr(preEnd - spanStart, aiSpanStartInSpan - preEnd));
             UpdateTextStyle(beforeContent, builder, textStyle);
         }
         std::optional<TextStyle> aiSpanTextStyle = textStyle;
@@ -432,8 +466,8 @@ bool SpanItem::IsDragging()
     return selectedStart >= 0 && selectedEnd >= 0;
 }
 
-int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
-    const RefPtr<Paragraph>& builder, double width, double height, VerticalAlign verticalAlign)
+int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */, const RefPtr<Paragraph>& builder,
+    double width, double height, VerticalAlign verticalAlign)
 {
     CHECK_NULL_RETURN(builder, -1);
     PlaceholderRun run;

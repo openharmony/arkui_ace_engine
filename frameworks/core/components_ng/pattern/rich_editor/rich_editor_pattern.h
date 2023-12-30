@@ -315,9 +315,8 @@ public:
         }
         customKeyboardBuilder_ = keyboardBuilder;
     }
-    void BindSelectionMenu(TextResponseType type, TextSpanType richEditorType,
-        std::function<void()>& menuBuilder, std::function<void(int32_t, int32_t)>& onAppear,
-        std::function<void()>& onDisappear);
+    void BindSelectionMenu(TextResponseType type, TextSpanType richEditorType, std::function<void()>& menuBuilder,
+        std::function<void(int32_t, int32_t)>& onAppear, std::function<void()>& onDisappear);
     void ClearSelectionMenu()
     {
         selectionMenuMap_.clear();
@@ -467,6 +466,7 @@ private:
     void CalcDeleteValueObj(int32_t currentPosition, int32_t length, RichEditorDeleteValue& info);
     int32_t DeleteValueSetBuilderSpan(const RefPtr<SpanItem>& spanItem, RichEditorAbstractSpanResult& spanResult);
     int32_t DeleteValueSetImageSpan(const RefPtr<SpanItem>& spanItem, RichEditorAbstractSpanResult& spanResult);
+    int32_t DeleteValueSetSymbolSpan(const RefPtr<SpanItem>& spanItem, RichEditorAbstractSpanResult& spanResult);
     int32_t DeleteValueSetTextSpan(const RefPtr<SpanItem>& spanItem, int32_t currentPosition, int32_t length,
         RichEditorAbstractSpanResult& spanResult);
     void DeleteByDeleteValueInfo(const RichEditorDeleteValue& info);

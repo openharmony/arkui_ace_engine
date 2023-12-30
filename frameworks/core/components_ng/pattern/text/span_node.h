@@ -171,6 +171,7 @@ public:
     std::optional<LeadingMargin> leadingMargin;
     int32_t selectedStart = -1;
     int32_t selectedEnd = -1;
+    void UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder);
     virtual int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
         double width = 0.0f, double height = 0.0f, VerticalAlign verticalAlign = VerticalAlign::BASELINE);
     virtual void UpdateSymbolSpanColor(TextStyle& symbolSpanStyle);
@@ -206,12 +207,21 @@ public:
     {
         onLongPress = std::move(onLongPress_);
     }
+    void SetIsParentText(bool isText)
+    {
+        isParentText = isText;
+    }
+    bool GetIsParentText()
+    {
+        return isParentText;
+    }
     std::string GetSpanContent(const std::string& rawContent);
     std::string GetSpanContent();
     uint32_t GetSymbolUnicode();
 
 private:
     std::optional<TextStyle> textStyle_;
+    bool isParentText = false;
 };
 
 

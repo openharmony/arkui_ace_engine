@@ -47,8 +47,8 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_layout_property.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_overlay_modifier.h"
-#include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
+#include "core/components_ng/pattern/rich_editor/selection_info.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_base.h"
@@ -82,6 +82,7 @@ constexpr float CARET_WIDTH = 1.5f;
 constexpr float DEFAULT_CARET_HEIGHT = 18.5f;
 #endif
 constexpr int32_t IMAGE_SPAN_LENGTH = 1;
+constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
 constexpr int32_t RICH_EDITOR_TWINKLING_INTERVAL_MS = 500;
 constexpr float DEFAULT_TEXT_SIZE = 16.0f;
 constexpr int32_t AUTO_SCROLL_INTERVAL = 15;
@@ -174,6 +175,7 @@ void RichEditorPattern::HandleEnabled()
 
 void RichEditorPattern::BeforeCreateLayoutWrapper()
 {
+    moveLength_ = 0;
     TextPattern::PreCreateLayoutWrapper();
 }
 
@@ -349,7 +351,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
         spanItem->SetLongPressEvent(std::move(tmpLongPressFunc));
     }
     if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
-        SetCaretPosition(options.offset.value() + 1);
+        SetCaretPosition(options.offset.value() + 1 + moveLength_);
     } else {
         placeholderCount_++;
         SetCaretPosition(GetTextContentLength());
@@ -414,7 +416,7 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
     spanItem->content = " ";
     AddSpanItem(spanItem, offset);
     if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
-        SetCaretPosition(options.offset.value() + 1);
+        SetCaretPosition(options.offset.value() + 1 + moveLength_);
     } else {
         placeholderCount_++;
         SetCaretPosition(GetTextContentLength());
@@ -510,7 +512,7 @@ int32_t RichEditorPattern::AddTextSpanOperation(
         spanItem->SetLongPressEvent(std::move(tmpLongPressFunc));
     }
     if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
-        SetCaretPosition(options.offset.value() + 1);
+        SetCaretPosition(options.offset.value() + 1 + moveLength_);
     } else {
         SetCaretPosition(GetTextContentLength());
     }
@@ -575,9 +577,15 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
         spanNode->AddPropertyInfo(PropertyInfo::SYMBOL_EFFECT_STRATEGY);
     }
     auto spanItem = spanNode->GetSpanItem();
-    spanItem->content = " ";
+    spanItem->content = "  ";
     spanItem->SetTextStyle(options.style);
     AddSpanItem(spanItem, offset);
+    FlushTextForDisplay();
+    if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
+        SetCaretPosition(options.offset.value() + SYMBOL_SPAN_LENGTH + moveLength_);
+    } else {
+        SetCaretPosition(GetTextContentLength());
+    }
     SpanNodeFission(spanNode);
     return spanIndex;
 }
@@ -770,6 +778,12 @@ SpanPositionInfo RichEditorPattern::GetSpanPositionInfo(int32_t position)
                    position) &&
                (position < spanItem->position);
     });
+    if (it != spans_.end() && (*it)->unicode != 0 && (*it)->position - caretPosition_ + moveLength_ == 1) {
+        it++;
+        moveLength_++;
+        position++;
+    }
+
     // the position is at the end
     if (it == spans_.end()) {
         return spanPositionInfo;
@@ -2285,7 +2299,7 @@ void RichEditorPattern::InsertValueOperation(const std::string& insertValue, Ope
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     RefPtr<SpanNode> spanNode = DynamicCast<SpanNode>(host->GetChildAtIndex(info.GetSpanIndex()));
-    if (spanNode == nullptr) {
+    if (spanNode == nullptr || spanNode->GetSpanItem()->unicode != 0) {
         InsertValueWithoutSpan(spanNode, info, insertValueTemp);
         return;
     }
@@ -2318,7 +2332,7 @@ void RichEditorPattern::InsertValueWithoutSpan(
         return;
     }
     auto spanNodeBefore = DynamicCast<SpanNode>(host->GetChildAtIndex(info.GetSpanIndex() - 1));
-    if (spanNodeBefore == nullptr) {
+    if (spanNodeBefore == nullptr || spanNodeBefore->GetSpanItem()->unicode != 0) {
         CreateTextSpanNode(spanNode, info, insertValue);
         return;
     }
@@ -3190,6 +3204,10 @@ void RichEditorPattern::CalcInsertValueObj(TextInsertValueInfo& info)
                        caretPosition) &&
                    (caretPosition < spanItem->position);
         });
+    if (it != spans_.end() && (*it)->unicode != 0 && (*it)->position - caretPosition_ + moveLength_ == 1) {
+        it++;
+        moveLength_++;
+    }
     info.SetSpanIndex(std::distance(spans_.begin(), it));
     if (it == spans_.end()) {
         info.SetOffsetInSpan(0);
@@ -3208,11 +3226,13 @@ void RichEditorPattern::CalcDeleteValueObj(int32_t currentPosition, int32_t leng
                    (caretPosition < spanItem->position);
         });
     while (it != spans_.end() && length > 0) {
-        if ((*it)->placeholderIndex >= 0) {
+        if ((*it)->placeholderIndex >= 0 || (*it)->unicode != 0) {
             RichEditorAbstractSpanResult spanResult;
             spanResult.SetSpanIndex(std::distance(spans_.begin(), it));
             int32_t eraseLength = 0;
-            if (AceType::InstanceOf<ImageSpanItem>(*it)) {
+            if ((*it)->unicode != 0) {
+                eraseLength = DeleteValueSetSymbolSpan(*it, spanResult);
+            } else if (AceType::InstanceOf<ImageSpanItem>(*it)) {
                 eraseLength = DeleteValueSetImageSpan(*it, spanResult);
             } else {
                 eraseLength = DeleteValueSetBuilderSpan(*it, spanResult);
@@ -3230,6 +3250,20 @@ void RichEditorPattern::CalcDeleteValueObj(int32_t currentPosition, int32_t leng
         }
         std::advance(it, 1);
     }
+}
+
+int32_t RichEditorPattern::DeleteValueSetSymbolSpan(
+    const RefPtr<SpanItem>& spanItem, RichEditorAbstractSpanResult& spanResult)
+{
+    spanResult.SetSpanType(SpanResultType::SYMBOL);
+    spanResult.SetSpanRangeEnd(spanItem->position);
+    spanResult.SetSpanRangeStart(spanItem->position - SYMBOL_SPAN_LENGTH);
+    if (GetCaretPosition() < spanItem->position) {
+        spanResult.SetEraseLength(1);
+    } else {
+        spanResult.SetEraseLength(SYMBOL_SPAN_LENGTH);
+    }
+    return SYMBOL_SPAN_LENGTH;
 }
 
 int32_t RichEditorPattern::DeleteValueSetImageSpan(
@@ -3320,7 +3354,9 @@ void RichEditorPattern::DeleteByDeleteValueInfo(const RichEditorDeleteValue& inf
     CHECK_NULL_VOID(host);
     std::list<RefPtr<UINode>> deleteNode;
     std::set<int32_t, std::greater<int32_t>> deleteNodes;
+    auto caretMoveLength = 0;
     for (const auto& it : deleteSpans) {
+        caretMoveLength += it.GetEraseLength();
         switch (it.GetType()) {
             case SpanResultType::TEXT: {
                 auto ui_node = host->GetChildAtIndex(it.GetSpanIndex());
@@ -3343,6 +3379,9 @@ void RichEditorPattern::DeleteByDeleteValueInfo(const RichEditorDeleteValue& inf
             case SpanResultType::IMAGE:
                 deleteNodes.emplace(it.GetSpanIndex());
                 break;
+            case SpanResultType::SYMBOL:
+                deleteNodes.emplace(it.GetSpanIndex());
+                break;
             default:
                 break;
         }
@@ -3351,8 +3390,7 @@ void RichEditorPattern::DeleteByDeleteValueInfo(const RichEditorDeleteValue& inf
         host->RemoveChildAtIndex(index);
     }
     if (info.GetRichEditorDeleteDirection() == RichEditorDeleteDirection::BACKWARD) {
-        SetCaretPosition(
-            std::clamp(caretPosition_ - info.GetLength(), 0, static_cast<int32_t>(GetTextContentLength())));
+        SetCaretPosition(std::clamp(caretPosition_ - caretMoveLength, 0, static_cast<int32_t>(GetTextContentLength())));
     }
     int32_t spanTextLength = 0;
     for (auto& span : spans_) {

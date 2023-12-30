@@ -26,6 +26,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 const std::u16string ELLIPSIS = u"\u2026";
+const std::u16string SYMBOL_TRANS = u"\uF0001";
 constexpr char16_t NEWLINE_CODE = u'\n';
 constexpr float TEXT_SPLIT_RATIO = 0.6f;
 } // namespace
@@ -125,6 +126,7 @@ void TxtParagraph::AddSymbol(const std::uint32_t& symbolId)
     if (!builder_) {
         CreateBuilder();
     }
+    text_ += SYMBOL_TRANS;
     builder_->AppendSymbol(symbolId);
 }
 
