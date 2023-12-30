@@ -580,7 +580,7 @@ void SheetPresentationPattern::UpdateDragBarStatus()
     auto dragBarLayoutProperty = sheetDragBar->GetLayoutProperty();
     CHECK_NULL_VOID(dragBarLayoutProperty);
     auto sheetType = GetSheetType();
-    if (((sheetType == SheetType::SHEET_BOTTOM) || (sheetType == SheetType::SHEET_BOTTOMPC)) &&
+    if (((sheetType == SheetType::SHEET_BOTTOM) || (sheetType == SheetType::SHEET_BOTTOM_FREE_WINDOW)) &&
         (sheetDetentHeight_.size() > 1)) {
         if (sheetStyle.isTitleBuilder.has_value()) {
             dragBarLayoutProperty->UpdateVisibility(showDragIndicator ? VisibleType::VISIBLE : VisibleType::INVISIBLE);
@@ -745,7 +745,7 @@ void SheetPresentationPattern::InitSheetDetents()
     auto sheetFrameHeight = geometryNode->GetFrameSize().Height();
     switch (sheetType) {
         case SheetType::SHEET_BOTTOM:
-        case SheetType::SHEET_BOTTOMPC:
+        case SheetType::SHEET_BOTTOM_FREE_WINDOW:
             if (sheetStyle.detents.size() <= 0) {
                 height = InitialSingleGearHeight(sheetStyle);
                 sheetDetentHeight_.emplace_back(height);
@@ -840,7 +840,7 @@ SheetType SheetPresentationPattern::GetSheetType()
                 sheetType = SheetType::SHEET_CENTER;
             }
         } else {
-            sheetType = SheetType::SHEET_BOTTOMPC;
+            sheetType = SheetType::SHEET_BOTTOM_FREE_WINDOW;
         }
     }
     return sheetType;
@@ -1253,7 +1253,7 @@ void SheetPresentationPattern::ProcessColumnRect(float height)
         sheetOffsetY = pageHeight_ - height;
         sheetWidth = sheetSize.Width();
         sheetHeight = sheetSize.Height();
-    } else if ((sheetType == SheetType::SHEET_BOTTOM) || (sheetType == SheetType::SHEET_BOTTOMPC)) {
+    } else if ((sheetType == SheetType::SHEET_BOTTOM) || (sheetType == SheetType::SHEET_BOTTOM_FREE_WINDOW)) {
         sheetOffsetY = pageHeight_ - height;
         sheetWidth = sheetMaxWidth_;
         sheetHeight = height;
