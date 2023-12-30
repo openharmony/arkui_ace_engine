@@ -71,8 +71,7 @@ template("ace_ohos_standard_source_set") {
 
     configs = [
       "$ace_root:ace_config",
-      "$ace_flutter_engine_root:flutter_config",
-      "$ace_flutter_engine_root/icu:icu_config_$platform",
+      "//third_party/icu/icu4c:icu_config",
     ]
 
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
@@ -94,10 +93,7 @@ template("ace_ohos_standard_source_set") {
       "//third_party/node/src",
     ]
 
-    deps = [
-      "$ace_flutter_engine_root:flutter_engine_common_$platform",
-      "$skia_root_new:skia_$platform",
-    ]
+    deps = [ "$skia_root_new:skia_$platform" ]
 
     deps += [
       "$ace_root/adapter/ohos/capability:ace_capability_ohos",

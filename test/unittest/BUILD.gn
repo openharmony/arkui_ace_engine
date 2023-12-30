@@ -411,19 +411,7 @@ ohos_source_set("ace_core_extra") {
 
 ohos_source_set("ace_engine_unittest_flutter_deps") {
   testonly = true
-  sources = [ "$ace_root/test/mock/core/common/mock_flutter_window.cpp" ]
-  public_configs = [ "$ace_flutter_engine_root:flutter_config" ]
-  public_deps = [
-    "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_ohos",
-    "$skia_root_new:skia_ohos",
-  ]
-  if (enable_graphic_text_gine) {
-    public_deps -= [ "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_ohos" ]
-    public_deps += [
-      "$ace_flutter_engine_root:flutter_engine_fml_ohos",
-      "$ace_flutter_engine_root/icu:ace_libicu_ohos",
-    ]
-  }
+  public_deps = [ "$skia_root_new:skia_ohos" ]
   cflags_cc = [ "-Wno-thread-safety-attributes" ]
   external_deps = [ "eventhandler:libeventhandler" ]
 }

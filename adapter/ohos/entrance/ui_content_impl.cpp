@@ -21,7 +21,7 @@
 #include "ability_context.h"
 #include "ability_info.h"
 #include "configuration.h"
-#include "init_data.h"
+#include "ohos/init_data.h"
 #include "ipc_skeleton.h"
 #include "js_runtime_utils.h"
 #include "locale_config.h"
