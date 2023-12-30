@@ -393,6 +393,8 @@ void NavigationPattern::CheckTopNavPathChange(
         TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
         navigationStack_->UpdateAnimatedValue(true);
     } else {
+        // before the animation of navDes replacing, update the zIndex of the previous navDes node
+        UpdatePreNavDesZIndex(preTopNavDestination, newTopNavDestination);
         // transition with animation need to run after layout task
         context->AddAfterLayoutTask(
             [preTopNavDestination, newTopNavDestination, isPopPage, weakNavigationPattern = WeakClaim(this)]() {
@@ -1282,5 +1284,27 @@ void NavigationPattern::OnColorConfigurationUpdate()
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
     dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
+}
+
+void NavigationPattern::UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNavDestination,
+    const RefPtr<FrameNode> &newTopNavDestination)
+{
+    auto replaceVal = navigationStack_->GetReplaceValue();
+    if (replaceVal != 0 && preTopNavDestination && newTopNavDestination) {
+        auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+        CHECK_NULL_VOID(hostNode);
+        auto navigationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
+        CHECK_NULL_VOID(navigationContentNode);
+        auto newDesNodeContext = newTopNavDestination->GetRenderContext();
+        CHECK_NULL_VOID(newDesNodeContext);
+        std::optional<int32_t> newNodeZIndex = newDesNodeContext->GetZIndex();
+        auto preDesNodeContext = preTopNavDestination->GetRenderContext();
+        CHECK_NULL_VOID(preDesNodeContext);
+        preDesNodeContext->UpdateZIndex(newNodeZIndex.value_or(0) - 1);
+        navigationContentNode->RebuildRenderContextTree();
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->RequestFrame();
+    }
 }
 } // namespace OHOS::Ace::NG
