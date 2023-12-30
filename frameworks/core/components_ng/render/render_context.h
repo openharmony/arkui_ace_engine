@@ -293,6 +293,14 @@ public:
     {
         return OffsetF();
     }
+
+    virtual void CancelTranslateXYAnimation() {}
+
+    virtual OffsetF GetTranslateXYProperty()
+    {
+        return OffsetF();
+    }
+
     // update translateXY in backend.
     virtual void UpdateTranslateInXY(const OffsetF& offset) {}
 
