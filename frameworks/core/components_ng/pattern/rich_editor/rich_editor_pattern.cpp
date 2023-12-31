@@ -1407,12 +1407,9 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
 
 void RichEditorPattern::HandleDoubleClickEvent(OHOS::Ace::GestureEvent& info)
 {
-    bool isUsingMouse = info.GetSourceDevice() == SourceType::MOUSE;
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "in double HandleDoubleClickEvent,use mouse:%{public}d", info.GetSourceDevice());
-    if (!isUsingMouse) {
-        caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
-        HandleDoubleClickOrLongPress(info);
-    }
+    caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
+    HandleDoubleClickOrLongPress(info);
 }
 
 bool RichEditorPattern::HandleUserGestureEvent(
@@ -1727,7 +1724,14 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
         CloseSelectOverlay();
     }
     selectionMenuOffset_ = info.GetGlobalLocation();
-    ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+    if (info.GetSourceDevice() != SourceType::MOUSE || caretUpdateType_ != CaretUpdateType::DOUBLE_CLICK) {
+        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+        StopTwinkling();
+    } else if (selectStart == selectEnd) {
+        StartTwinkling();
+    } else {
+        StopTwinkling();
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     auto eventHub = host->GetEventHub<RichEditorEventHub>();
     CHECK_NULL_VOID(eventHub);
@@ -1739,7 +1743,6 @@ void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
     if (overlayMod_) {
         RequestKeyboard(false, true, true);
     }
-    StopTwinkling();
 }
 
 bool RichEditorPattern::HandleUserLongPressEvent(GestureEvent& info)
