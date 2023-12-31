@@ -27,12 +27,14 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "base/window/drag_window.h"
+#include "core/common/ace_engine_ext.h"
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/font_manager.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/common/udmf/udmf_client.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -48,9 +50,6 @@
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/property/property.h"
 
-#include "core/common/ace_engine_ext.h"
-#include "core/common/udmf/udmf_client.h"
-
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t AI_TEXT_MAX_LENGTH = 300;
@@ -65,9 +64,8 @@ constexpr int32_t API_PROTEXTION_GREATER_NINE = 9;
 constexpr float BOX_EPSILON = 0.5f;
 constexpr float DOUBLECLICK_INTERVAL_MS = 300.0f;
 constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
-const std::pair<std::string, std::string> UI_EXTENSION_TYPE = {
-    "ability.want.params.uiExtensionType", "sys/commonUI"
-};
+const std::u16string SYMBOL_TRANS = u"\uF0001";
+const std::pair<std::string, std::string> UI_EXTENSION_TYPE = { "ability.want.params.uiExtensionType", "sys/commonUI" };
 const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
     { TextDataDetectType::PHONE_NUMBER, "phoneNum" }, { TextDataDetectType::URL, "url" },
     { TextDataDetectType::EMAIL, "email" }, { TextDataDetectType::ADDRESS, "location" }
@@ -2105,13 +2103,14 @@ void TextPattern::PreCreateLayoutWrapper()
         return;
     }
 
+    spans_.clear();
+
     // When dirty areas are marked because of child node changes, the text rendering node tree is reset.
     const auto& children = host->GetChildren();
     if (children.empty()) {
         placeholderCount_ = 0;
         return;
     }
-    spans_.clear();
 
     // Depth-first iterates through all host's child nodes to collect the SpanNode object, building a text rendering
     // tree.
@@ -2182,7 +2181,11 @@ void TextPattern::CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpa
             continue;
         }
         auto spanNode = DynamicCast<SpanNode>(current);
-        if (spanNode && current->GetTag() != V2::PLACEHOLDER_SPAN_ETS_TAG) {
+        if (spanNode && current->GetTag() == V2::SYMBOL_SPAN_ETS_TAG) {
+            spanNode->CleanSpanItemChildren();
+            spanNode->MountToParagraph();
+            textForDisplay_.append(StringUtils::Str16ToStr8(SYMBOL_TRANS));
+        } else if (spanNode && current->GetTag() != V2::PLACEHOLDER_SPAN_ETS_TAG) {
             spanNode->CleanSpanItemChildren();
             UpdateChildProperty(spanNode);
             spanNode->MountToParagraph();

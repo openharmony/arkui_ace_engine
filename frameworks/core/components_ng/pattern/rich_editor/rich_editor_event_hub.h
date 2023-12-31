@@ -69,7 +69,7 @@ private:
     std::string insertValue_;
 };
 
-enum class SpanResultType { TEXT, IMAGE };
+enum class SpanResultType { TEXT, IMAGE, SYMBOL };
 
 class RichEditorAbstractSpanResult {
 public:
