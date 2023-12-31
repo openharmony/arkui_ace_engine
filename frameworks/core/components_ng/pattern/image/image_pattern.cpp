@@ -298,7 +298,15 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
-    
+
+    if (loadingCtx_) {
+        auto renderProp = GetPaintProperty<ImageRenderProperty>();
+        if (renderProp && renderProp->HasImageResizableSlice() && image_) {
+            loadingCtx_->ResizableCalcDstSize();
+            SetImagePaintConfig(image_, loadingCtx_->GetSrcRect(), loadingCtx_->GetDstRect(), false);
+        }
+    }
+
     if (IsSupportImageAnalyzerFeature()) {
         UpdateAnalyzerUIConfig(dirty->GetGeometryNode());
     }
