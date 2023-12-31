@@ -1572,7 +1572,7 @@ void ListLayoutAlgorithm::PostIdleTask(RefPtr<FrameNode> frameNode, const ListPr
             if (wrapper && wrapper->GetHostNode() && !wrapper->GetHostNode()->RenderCustomChild(deadline)) {
                 break;
             }
-            needMarkDirty |= PredictBuildItem(wrapper, param.layoutConstraint);
+            needMarkDirty = PredictBuildItem(wrapper, param.layoutConstraint) || needMarkDirty;
             param.items.erase(it++);
         }
         if (needMarkDirty) {
