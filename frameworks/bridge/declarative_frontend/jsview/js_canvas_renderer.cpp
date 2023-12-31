@@ -723,6 +723,16 @@ JSRenderImage* JSCanvasRenderer::UnwrapNapiImage(const JSRef<JSObject> jsObject)
     panda::Local<JsiValue> value = jsObject.Get().GetLocalHandle();
     JSValueWrapper valueWrapper = value;
     napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    napi_value isImageBitmap = nullptr;
+    if (napi_get_named_property(env, napiValue, "isImageBitmap", &isImageBitmap) == napi_ok) {
+        int32_t value = 0;
+        napi_get_value_int32(env, isImageBitmap, &value);
+        if (!value) {
+            return nullptr;
+        }
+    } else {
+        return nullptr;
+    }
     void* native = nullptr;
     napi_unwrap(env, napiValue, &native);
     jsImage = reinterpret_cast<JSRenderImage*>(native);

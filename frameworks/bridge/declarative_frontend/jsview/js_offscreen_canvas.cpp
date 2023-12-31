@@ -44,6 +44,18 @@ napi_value AttachOffscreenCanvas(napi_env env, void* value, void*)
         LOGW("Invalid context.");
         return nullptr;
     }
+    JSOffscreenCanvas::SetLocalThreadVm(env);
+    napi_value global = nullptr;
+    napi_status status = napi_get_global(env, &global);
+    if (status != napi_ok) {
+        return nullptr;
+    }
+    BindingTarget bindingTarget = NapiValueToLocalValue(global);
+    JSOffscreenRenderingContext::JSBind(bindingTarget);
+    JSCanvasGradient::JSBind(bindingTarget);
+    JSCanvasPattern::JSBind(bindingTarget);
+    JSMatrix2d::JSBind(bindingTarget);
+
     napi_value offscreenCanvas = nullptr;
     napi_create_object(env, &offscreenCanvas);
     napi_value width = nullptr;
@@ -120,7 +132,9 @@ napi_value JSOffscreenCanvas::Constructor(napi_env env, napi_callback_info info)
     double fHeight = 0.0;
     auto workCanvas = new (std::nothrow) JSOffscreenCanvas();
     auto context = PipelineBase::GetCurrentContext();
-    workCanvas->instanceId_ = context->GetInstanceId();
+    if (context != nullptr) {
+        workCanvas->instanceId_ = context->GetInstanceId();
+    }
     if (napi_get_value_double(env, argv[0], &fWidth) == napi_ok) {
         fWidth = PipelineBase::Vp2PxWithCurrentDensity(fWidth);
         workCanvas->SetWidth(round(fWidth));
@@ -304,7 +318,7 @@ napi_value JSOffscreenCanvas::onGetContext(napi_env env, napi_callback_info info
             panda::Local<panda::ObjectRef> localValue = NapiValueToLocalValue(argv[1]);
             JSObject jsObject(localValue);
             offscreenCanvasSettings_ = jsObject.Unwrap<JSRenderingContextSettings>();
-            if (offscreenCanvasSettings_ != nullptr) {
+            if (offscreenCanvasSettings_ != nullptr && offscreenCanvasContext_ != nullptr) {
                 bool anti = offscreenCanvasSettings_->GetAntialias();
                 offscreenCanvasContext_->SetAnti(anti);
                 offscreenCanvasContext_->SetAntiAlias();
@@ -328,17 +342,11 @@ void JSOffscreenCanvas::SetLocalThreadVm(napi_env env)
 
 napi_value JSOffscreenCanvas::CreateContext2d(napi_env env, double width, double height)
 {
-    SetLocalThreadVm(env);
     napi_value global = nullptr;
     napi_status status = napi_get_global(env, &global);
     if (status != napi_ok) {
         return nullptr;
     }
-    BindingTarget bindingTarget = NapiValueToLocalValue(global);
-    JSOffscreenRenderingContext::JSBind(bindingTarget);
-    JSCanvasGradient::JSBind(bindingTarget);
-    JSCanvasPattern::JSBind(bindingTarget);
-    JSMatrix2d::JSBind(bindingTarget);
     napi_value constructor = nullptr;
     status = napi_get_named_property(env, global, "OffscreenCanvasRenderingContext2D", &constructor);
     if (status != napi_ok) {
@@ -351,8 +359,13 @@ napi_value JSOffscreenCanvas::CreateContext2d(napi_env env, double width, double
     if (status != napi_ok) {
         return nullptr;
     }
-    offscreenCanvasPattern_ = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(
-        GetContext(), static_cast<int32_t>(width), static_cast<int32_t>(height));
+    if (instanceId_ != -1) {
+        offscreenCanvasPattern_ = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(
+            GetContext(), static_cast<int32_t>(width), static_cast<int32_t>(height));
+    } else {
+        offscreenCanvasPattern_ = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(
+            static_cast<int32_t>(width), static_cast<int32_t>(height));
+    }
     if (offscreenCanvasPattern_ == nullptr) {
         return thisVal;
     }

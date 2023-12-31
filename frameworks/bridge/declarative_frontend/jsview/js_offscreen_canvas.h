@@ -38,6 +38,7 @@ public:
     static napi_value JsGetHeight(napi_env env, napi_callback_info info);
     static napi_value JsSetHeight(napi_env env, napi_callback_info info);
     static napi_value JsSetWidth(napi_env env, napi_callback_info info);
+    static void SetLocalThreadVm(napi_env env);
 
     void JsCreateRadialGradient(const JSCallbackInfo& info) {}
     void JsFillRect(const JSCallbackInfo& info) {}
@@ -168,7 +169,6 @@ private:
     napi_value OnGetHeight(napi_env env);
     napi_value OnSetWidth(napi_env env, napi_callback_info info);
     napi_value OnSetHeight(napi_env env, napi_callback_info info);
-    void SetLocalThreadVm(napi_env env);
 
     RefPtr<NG::OffscreenCanvasPattern> offscreenCanvasPattern_;
     RefPtr<JSOffscreenRenderingContext> offscreenCanvasContext_;
