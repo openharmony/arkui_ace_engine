@@ -412,6 +412,9 @@ private:
     void GetIndicatorStyle(IndicatorStyle& indicatorStyle);
     float GetLeftPadding() const;
     void HandleBottomTabBarAnimation(int32_t index);
+    void TriggerTranslateAnimation(
+        const RefPtr<TabBarLayoutProperty>& layoutProperty, int32_t index, int32_t indicator);
+    void UpdatePaintIndicator(int32_t indicator, bool needMarkDirty);
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
