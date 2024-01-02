@@ -24,30 +24,73 @@
 class RecycleManager {
   // key: recycle node name
   // value: recycle node JS object
-  private cachedRecycleNodes: Map<string, Array<ViewPU>> = undefined
+  private cachedRecycleNodes_: Map<string, Array<ViewPU>> = undefined
+  private biMap_: BidirectionalMap = undefined
 
   constructor() {
-    this.cachedRecycleNodes = new Map<string, Array<ViewPU>>();
+    this.cachedRecycleNodes_ = new Map<string, Array<ViewPU>>();
+    this.biMap_ = new BidirectionalMap();
+  }
+
+  public updateNodeId(oldElmtId: number, newElmtId: number): void {
+    this.biMap_.delete(oldElmtId);
+    this.biMap_.add([oldElmtId, newElmtId]);
+  }
+
+  public proxyNodeId(oldElmtId: number): number {
+    const proxy = this.biMap_.get(oldElmtId);
+    if (!proxy) {
+      return oldElmtId;
+    }
+    return proxy;
   }
 
   public pushRecycleNode(name: string, node: ViewPU): void {
-    if (!this.cachedRecycleNodes.get(name)) {
-      this.cachedRecycleNodes.set(name, new Array<ViewPU>());
+    if (!this.cachedRecycleNodes_.get(name)) {
+      this.cachedRecycleNodes_.set(name, new Array<ViewPU>());
     }
-    this.cachedRecycleNodes.get(name)?.push(node);
+    this.cachedRecycleNodes_.get(name)?.push(node);
   }
 
   public popRecycleNode(name: string): ViewPU {
-    return this.cachedRecycleNodes.get(name)?.pop();
+    return this.cachedRecycleNodes_.get(name)?.pop();
   }
 
   // When parent JS View is deleted, release all cached nodes
   public purgeAllCachedRecycleNode(): void {
-    this.cachedRecycleNodes.forEach((nodes, _) => {
+    this.cachedRecycleNodes_.forEach((nodes, _) => {
       nodes.forEach((node) => {
         node.resetRecycleCustomNode();
       })
     })
-    this.cachedRecycleNodes.clear();
+    this.cachedRecycleNodes_.clear();
+  }
+}
+
+class BidirectionalMap {
+  private fwdMap_: Map<number, number> = undefined
+  private revMap_: Map<number, number> = undefined
+
+  constructor() {
+    this.fwdMap_ = new Map<number, number>();
+    this.revMap_ = new Map<number, number>();
+  }
+
+  delete(key: number) {
+    if (!this.fwdMap_[key]) {
+      return;
+    }
+    const rev = this.fwdMap_[key];
+    this.fwdMap_.delete(key);
+    this.revMap_.delete(rev);
+  }
+
+  get(key: number): number | undefined {
+    return this.fwdMap_[key] || this.revMap_[key]
+  }
+
+  add(pair: [number, number]) {
+    this.fwdMap_[pair[0]] = pair[1]
+    this.revMap_[pair[1]] = pair[0]
   }
 }

@@ -4896,7 +4896,7 @@ class ViewPU extends NativeViewPartialUpdate {
         // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU has not been GC.
         this.isDeleting_ = false;
         this.watchedProps = new Map();
-        this.recycleManager = undefined;
+        this.recycleManager_ = undefined;
         this.isCompFreezeAllowed = false;
         this.extraInfo_ = undefined;
         // @Provide'd variables by this class and its ancestors
@@ -5363,7 +5363,12 @@ class ViewPU extends NativeViewPartialUpdate {
                 }
                 
                 for (const elmtId of dependentElmtIds) {
-                    this.dirtDescendantElementIds_.add(elmtId);
+                    if (this.hasRecycleManager()) {
+                        this.dirtDescendantElementIds_.add(this.recycleManager_.proxyNodeId(elmtId));
+                    }
+                    else {
+                        this.dirtDescendantElementIds_.add(elmtId);
+                    }
                 }
                 
             }
@@ -5493,7 +5498,12 @@ class ViewPU extends NativeViewPartialUpdate {
             // ascending order ensures parent nodes will be updated before their children
             // prior cleanup ensure no already deleted Elements have their update func executed
             Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => {
-                this.UpdateElement(elmtId);
+                if (this.hasRecycleManager()) {
+                    this.UpdateElement(this.recycleManager_.proxyNodeId(elmtId));
+                }
+                else {
+                    this.UpdateElement(elmtId);
+                }
                 this.dirtDescendantElementIds_.delete(elmtId);
             });
             if (this.dirtDescendantElementIds_.size) {
@@ -5610,23 +5620,23 @@ class ViewPU extends NativeViewPartialUpdate {
         
     }
     getOrCreateRecycleManager() {
-        if (!this.recycleManager) {
-            this.recycleManager = new RecycleManager;
+        if (!this.recycleManager_) {
+            this.recycleManager_ = new RecycleManager;
         }
-        return this.recycleManager;
+        return this.recycleManager_;
     }
     getRecycleManager() {
-        return this.recycleManager;
+        return this.recycleManager_;
     }
     hasRecycleManager() {
-        return !(this.recycleManager === undefined);
+        return !(this.recycleManager_ === undefined);
     }
     initRecycleManager() {
-        if (this.recycleManager) {
+        if (this.recycleManager_) {
             stateMgmtConsole.error(`${this.debugInfo()}: init recycleManager multiple times. Internal error.`);
             return;
         }
-        this.recycleManager = new RecycleManager;
+        this.recycleManager_ = new RecycleManager;
     }
     /**
      * @function observeRecycleComponentCreation
@@ -5650,24 +5660,16 @@ class ViewPU extends NativeViewPartialUpdate {
         // if there is a suitable recycle node, run a recycle update function.
         const newElmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
         const oldElmtId = node.id__();
-        // store the current id and origin id, used for dirty element sort in {compareNumber}
-        recycleUpdateFunc(newElmtId, /* is first render */ true, node);
-        const oldEntry = this.updateFuncByElmtId.get(oldElmtId);
-        this.updateFuncByElmtId.delete(oldElmtId);
-        this.updateFuncByElmtId.set(newElmtId, {
-            updateFunc: compilerAssignedUpdateFunc,
-            classObject: oldEntry && oldEntry.getComponentClass(),
-            node: oldEntry && oldEntry.getNode()
-        });
-        node.updateId(newElmtId);
-        node.updateRecycleElmtId(oldElmtId, newElmtId);
-        SubscriberManager.UpdateRecycleElmtId(oldElmtId, newElmtId);
+        this.recycleManager_.updateNodeId(oldElmtId, newElmtId);
+        recycleUpdateFunc(oldElmtId, /* is first render */ true, node);
     }
     aboutToReuseInternal() {
         this.runReuse_ = true;
         stateMgmtTrace.scopedTrace(() => {
             if (this.paramsGenerator_ && typeof this.paramsGenerator_ == "function") {
-                this.aboutToReuse(this.paramsGenerator_());
+                const params = this.paramsGenerator_();
+                this.updateStateVars(params);
+                this.aboutToReuse(params);
             }
         }, "aboutToReuse", this.constructor.name);
         this.updateDirtyElements();
@@ -6084,28 +6086,64 @@ class RecycleManager {
     constructor() {
         // key: recycle node name
         // value: recycle node JS object
-        this.cachedRecycleNodes = undefined;
-        this.cachedRecycleNodes = new Map();
+        this.cachedRecycleNodes_ = undefined;
+        this.biMap_ = undefined;
+        this.cachedRecycleNodes_ = new Map();
+        this.biMap_ = new BidirectionalMap();
+    }
+    updateNodeId(oldElmtId, newElmtId) {
+        this.biMap_.delete(oldElmtId);
+        this.biMap_.add([oldElmtId, newElmtId]);
+    }
+    proxyNodeId(oldElmtId) {
+        const proxy = this.biMap_.get(oldElmtId);
+        if (!proxy) {
+            return oldElmtId;
+        }
+        return proxy;
     }
     pushRecycleNode(name, node) {
         var _a;
-        if (!this.cachedRecycleNodes.get(name)) {
-            this.cachedRecycleNodes.set(name, new Array());
+        if (!this.cachedRecycleNodes_.get(name)) {
+            this.cachedRecycleNodes_.set(name, new Array());
         }
-        (_a = this.cachedRecycleNodes.get(name)) === null || _a === void 0 ? void 0 : _a.push(node);
+        (_a = this.cachedRecycleNodes_.get(name)) === null || _a === void 0 ? void 0 : _a.push(node);
     }
     popRecycleNode(name) {
         var _a;
-        return (_a = this.cachedRecycleNodes.get(name)) === null || _a === void 0 ? void 0 : _a.pop();
+        return (_a = this.cachedRecycleNodes_.get(name)) === null || _a === void 0 ? void 0 : _a.pop();
     }
     // When parent JS View is deleted, release all cached nodes
     purgeAllCachedRecycleNode() {
-        this.cachedRecycleNodes.forEach((nodes, _) => {
+        this.cachedRecycleNodes_.forEach((nodes, _) => {
             nodes.forEach((node) => {
                 node.resetRecycleCustomNode();
             });
         });
-        this.cachedRecycleNodes.clear();
+        this.cachedRecycleNodes_.clear();
+    }
+}
+class BidirectionalMap {
+    constructor() {
+        this.fwdMap_ = undefined;
+        this.revMap_ = undefined;
+        this.fwdMap_ = new Map();
+        this.revMap_ = new Map();
+    }
+    delete(key) {
+        if (!this.fwdMap_[key]) {
+            return;
+        }
+        const rev = this.fwdMap_[key];
+        this.fwdMap_.delete(key);
+        this.revMap_.delete(rev);
+    }
+    get(key) {
+        return this.fwdMap_[key] || this.revMap_[key];
+    }
+    add(pair) {
+        this.fwdMap_[pair[0]] = pair[1];
+        this.revMap_[pair[1]] = pair[0];
     }
 }
 /*
