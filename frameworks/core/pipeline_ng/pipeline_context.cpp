@@ -1596,6 +1596,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
                     auto gesture = recognizer->CreateGestureFromRecognizer();
                     if (gesture) {
                         serializedGesture_.data = std::vector<char>(gesture->SizeofMe());
+                        gesture->Serialize(serializedGesture_.data.data());
                     }
                     break;
                 }
