@@ -20,6 +20,7 @@
 #include "interfaces/inner_api/form_render/include/form_renderer_delegate_proxy.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_dispatcher_proxy.h"
 #include "test/mock/interfaces/mock_i_remote_object.h"
+#include "core/event/touch_event.h"
 #undef private
 #undef protected
 

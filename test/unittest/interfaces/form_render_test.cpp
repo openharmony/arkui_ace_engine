@@ -24,6 +24,7 @@
 #include "interfaces/inner_api/form_render/include/form_renderer_delegate_impl.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_group.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "core/event/touch_event.h"
 
 using namespace testing;
 using namespace testing::ext;
