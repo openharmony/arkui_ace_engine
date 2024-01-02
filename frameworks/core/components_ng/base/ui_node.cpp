@@ -281,6 +281,10 @@ void UINode::DoAddChild(
 
     child->SetParent(Claim(this));
     child->SetDepth(GetDepth() + 1);
+    if (nodeStatus_ != NodeStatus::NORMAL_NODE) {
+        child->UpdateNodeStatus(nodeStatus_);
+    }
+
     if (!silently && onMainTree_) {
         child->AttachToMainTree(!allowTransition);
     }
@@ -1020,5 +1024,17 @@ bool UINode::SetParentLayoutConstraint(const SizeF& size) const
     auto children = GetChildren();
     return std::any_of(children.begin(), children.end(),
         [size](const RefPtr<UINode>& child) { return child->SetParentLayoutConstraint(size); });
+}
+
+void UINode::UpdateNodeStatus(NodeStatus nodeStatus)
+{
+    nodeStatus_ = nodeStatus;
+    for (const auto& child : children_) {
+        if (child->GetNodeStatus() == nodeStatus_) {
+            continue;
+        }
+        child->OnAttachToBuilderNode(nodeStatus_);
+        child->UpdateNodeStatus(nodeStatus_);
+    }
 }
 } // namespace OHOS::Ace::NG

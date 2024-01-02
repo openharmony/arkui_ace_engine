@@ -350,6 +350,7 @@ public:
 
     void OnDetachFromMainTree(bool recursive) override;
     void OnAttachToMainTree(bool recursive) override;
+    void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
 
     void OnVisibleChange(bool isVisible) override;
 

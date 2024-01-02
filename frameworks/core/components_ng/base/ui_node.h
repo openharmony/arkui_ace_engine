@@ -508,6 +508,8 @@ public:
     static int64_t GenerateAccessibilityId();
 
     NodeStatus GetNodeStatus() const;
+    void UpdateNodeStatus(NodeStatus nodeStatus);
+
     const RefPtr<ExportTextureInfo>& GetExportTextureInfo() const
     {
         return exportTextureInfo_;
@@ -553,7 +555,7 @@ protected:
     // Mount to the main tree to display.
     virtual void OnAttachToMainTree(bool recursive = false);
     virtual void OnDetachFromMainTree(bool recursive = false);
-
+    virtual void OnAttachToBuilderNode(NodeStatus nodeStatus) {}
     // run offscreen process.
     virtual void OnOffscreenProcess(bool recursive) {}
 
