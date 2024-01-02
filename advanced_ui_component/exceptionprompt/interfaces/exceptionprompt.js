@@ -21,6 +21,10 @@ const OPACITY_NUM = .18;
 const DEFAULT_HEIGHT = 48;
 const FIT_HEIGHT = 72;
 const ZINDEX_NUM = 999;
+const DEFAULT_MARGIN_TIP_UNACTION_TEXT_LENGTH = 18;
+const DEFAULT_MARGIN_TIP_ACTION_TEXT_LENGTH = 12;
+const FIT_MARGIN_TIP_UNACTION_TEXT_LENGTH = 16;
+const FIT_MARGIN_TIP_ACTION_TEXT_LENGTH = 10;
 
 export var MarginType;
 !function(e){
@@ -77,9 +81,10 @@ export class ExceptionPrompt extends ViewPU {
 
     getMessageHeight() {
         let e = 48;
-            this.options.marginType === MarginType.DEFAULT_MARGIN ? (this.options.tip && JSON.stringify(this.options.tip).length > 20 || this.options.actionText && JSON.stringify(this.options.tip).length > 14) && (e = 72) : this.options.marginType === MarginType.FIT_MARGIN && (this.options.tip && JSON.stringify(this.options.tip).length > 18 || this.options.actionText && JSON.stringify(this.options.tip).length > 12) && (e = 72);
+            this.options.marginType === MarginType.DEFAULT_MARGIN ? (this.options.tip && this.options.tip.toString().length > 18 || this.options.actionText && this.options.tip && this.options.tip.toString().length > 12) && (e = 72) : this.options.marginType === MarginType.FIT_MARGIN && (this.options.tip && this.options.tip.toString().length > 16 || this.options.actionText && this.options.tip && this.options.tip.toString().length > 10) && (e = 72);
         return e
     }
+
     FirstBuilder(e = null) {
         this.observeComponentCreation2(((e, o) => {
             Column.create();
@@ -139,7 +144,7 @@ export class ExceptionPrompt extends ViewPU {
             Flex.zIndex(999);
             Flex.width("100%");
             Flex.height("100%");
-        }),Flex);
+        }), Flex);
         this.observeComponentCreation2(((e, o) => {
             Flex.create({ alignItems: ItemAlign.Center });
             Flex.width("100%");
@@ -147,7 +152,7 @@ export class ExceptionPrompt extends ViewPU {
             Flex.onClick((() => {
                 this.onTipClick()
             }));
-        }),Flex);
+        }), Flex);
         this.observeComponentCreation2(((e, o) => {
             var t;
             Image.create(null !== (t = this.options.icon) && void 0 !== t ? t : {
@@ -166,7 +171,7 @@ export class ExceptionPrompt extends ViewPU {
                 bundleName: "",
                 moduleName: ""
             });
-        }),Image);
+        }), Image);
         this.observeComponentCreation2(((e, o) => {
             Text.create(this.options.tip);
             Text.fontSize({
@@ -202,7 +207,7 @@ export class ExceptionPrompt extends ViewPU {
                     moduleName: ""
                 }
             });
-        }),Text);
+        }), Text);
         Text.pop();
         Flex.pop();
         this.observeComponentCreation2(((e, o) => {
@@ -211,7 +216,7 @@ export class ExceptionPrompt extends ViewPU {
                 this.observeComponentCreation2(((e, o) => {
                     Button.createWithChild({ stateEffect: !0, type: ButtonType.Normal });
                     Button.backgroundColor(this.touchBackgroundColor);
-                    Button.width(this.options.actionText ? 142 : 0);
+                    Button.width(this.options.actionText ? 144 : 0);
                     Button.height(32);
                     Button.borderRadius({
                         id: -1,
@@ -254,10 +259,10 @@ export class ExceptionPrompt extends ViewPU {
                             moduleName: ""
                         })
                     }));
-                }),Button);
+                }), Button);
                 this.observeComponentCreation2(((e, o) => {
                     Row.create();
-                }),Row);
+                }), Row);
                 this.observeComponentCreation2(((e, o) => {
                     Text.create(this.options.actionText);
                     Text.fontSize({
@@ -286,7 +291,7 @@ export class ExceptionPrompt extends ViewPU {
                         }
                     });
                     Text.textAlign(TextAlign.End);
-                }),Text);
+                }), Text);
                 Text.pop();
                 this.observeComponentCreation2(((e, o) => {
                     Image.create({
@@ -305,10 +310,10 @@ export class ExceptionPrompt extends ViewPU {
                         bundleName: "",
                         moduleName: ""
                     });
-                }),Image);
+                }), Image);
                 Row.pop();
                 Button.pop()
-            })) :this.ifElseBranchUpdateFunction(1, (() => {
+            })) : this.ifElseBranchUpdateFunction(1, (() => {
             }));
         }), If);
         If.pop();
@@ -322,7 +327,7 @@ export class ExceptionPrompt extends ViewPU {
             Column.height(this.getMessageHeight());
             Column.position({ y: this.options.marginTop });
             Column.zIndex(999);
-        }),Column);
+        }), Column);
         this.observeComponentCreation2(((e, o) => {
             Stack.create();
             Stack.padding(this.options.marginType === MarginType.DEFAULT_MARGIN ? {
@@ -361,7 +366,7 @@ export class ExceptionPrompt extends ViewPU {
                 duration: this.options.isShown ? 250 : 200
             }));
             Stack.visibility(this.options.isShown ? Visibility.Visible : Visibility.None);
-        }),Stack);
+        }), Stack);
         this.FirstBuilder.bind(this)();
         this.SecondBuilder.bind(this)();
         this.TextBuilder.bind(this)();
@@ -373,6 +378,7 @@ export class ExceptionPrompt extends ViewPU {
         this.updateDirtyElements()
     }
 }
+
 export default {
     MarginType,
     ExceptionPrompt
