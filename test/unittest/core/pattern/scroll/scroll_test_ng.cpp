@@ -2033,6 +2033,68 @@ HWTEST_F(ScrollTestNg, ScrollBar008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollBar009
+ * @tc.desc: Test scrollbar width.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollBar009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scroll model and set the width, height
+     * @tc.expected: Check the scrollBar property value.
+     */
+    CreateWithContent([](ScrollModelNG model) { model.SetDisplayMode(static_cast<int32_t>(DisplayMode::ON)); });
+
+    RefPtr<ScrollBar> scrollBar = pattern_->GetScrollBar();
+    pattern_->CreateScrollBarOverlayModifier();
+    auto barRect = scrollBar->GetBarRect();
+    auto activeRect = scrollBar->GetActiveRect();
+    EXPECT_FLOAT_EQ(barRect.x_ + barRect.width_, SCROLL_WIDTH);
+    EXPECT_FLOAT_EQ(activeRect.x_ + activeRect.width_, SCROLL_WIDTH);
+    EXPECT_FLOAT_EQ(barRect.height_, SCROLL_HEIGHT);
+
+    /**
+     * @tc.steps: step1.set the width
+     * @tc.expected: Check the scrollBar property value.
+     */
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(300.f));
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(500.f));
+    FlushLayoutTask(frameNode_);
+
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
+    layoutWrapper->layoutAlgorithm_->SetNeedMeasure();
+    layoutWrapper->layoutAlgorithm_->SetNeedLayout();
+    auto layoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(pattern_->currentOffset_);
+    layoutWrapper->layoutAlgorithm_->SetLayoutAlgorithm(layoutAlgorithm);
+    auto childLayoutConstraint = layoutProperty_->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize = { 300.f, 625.0f };
+    auto colNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    ASSERT_NE(colNode, nullptr);
+    RefPtr<LayoutWrapperNode> colLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(colNode, colNode->GetGeometryNode(), colNode->GetLayoutProperty());
+    colLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    colLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(CalcLength(300.f), CalcLength(62.5f)));
+    layoutWrapper->AppendChild(colLayoutWrapper);
+
+    DirtySwapConfig config;
+    pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    auto paint = AceType::MakeRefPtr<ScrollPaintMethod>();
+    paint->SetScrollBar(scrollBar);
+    paint->SetScrollBarOverlayModifier(pattern_->GetScrollBarOverlayModifier());
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
+    paint->UpdateOverlayModifier(Referenced::RawPtr(paintWrapper));
+
+    barRect = scrollBar->GetBarRect();
+    activeRect = scrollBar->GetActiveRect();
+    EXPECT_FLOAT_EQ(barRect.x_ + barRect.width_, 300.f);
+    EXPECT_FLOAT_EQ(activeRect.x_ + activeRect.width_, 300.f);
+    EXPECT_FLOAT_EQ(barRect.height_, 500.f);
+    EXPECT_FLOAT_EQ(pattern_->scrollBarOverlayModifier_->barX_->Get(), 296.f);
+}
+
+/**
  * @tc.name: Measure001
  * @tc.desc: Test Measure
  * @tc.type: FUNC
@@ -3054,6 +3116,34 @@ HWTEST_F(ScrollTestNg, Measure002, TestSize.Level1)
     auto expectSize = SizeF(defaultWidth, ITEM_HEIGHT * TOTAL_LINE_NUMBER);
     EXPECT_NE(scrollSize, expectSize) << "scrollSize: " << scrollSize.ToString()
                                       << " expectSize: " << expectSize.ToString();
+}
+
+/**
+ * @tc.name: Measure003
+ * @tc.desc: Test ScrollLayoutAlgorithm Measure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, Measure003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scroll without children
+     */
+    Create();
+    auto scrollSize = frameNode_->GetGeometryNode()->GetFrameSize();
+    auto expectSize = SizeF(SCROLL_WIDTH, SCROLL_HEIGHT);
+    EXPECT_TRUE(IsEqual(scrollSize, expectSize));
+
+    /**
+     * @tc.steps: step1. set idealSize
+     * @tc.expected: The frameSize would be idealSize
+     */
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(300.f));
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(500.f));
+    FlushLayoutTask(frameNode_);
+
+    scrollSize = frameNode_->GetGeometryNode()->GetFrameSize();
+    expectSize = SizeF(300.f, 500.f);
+    EXPECT_TRUE(IsEqual(scrollSize, expectSize));
 }
 
 /**
