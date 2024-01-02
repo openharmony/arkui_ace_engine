@@ -96,6 +96,7 @@ void AppBarView::iniBehavior()
             titleBar->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
         }
     });
+    UpdateRowLayout();
 }
 
 RefPtr<FrameNode> AppBarView::BuildBarTitle()
