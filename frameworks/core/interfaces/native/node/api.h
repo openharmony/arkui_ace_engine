@@ -404,6 +404,12 @@ struct ArkUICommonModifierAPI {
     void (*ResetMouseResponseRegion)(NodeHandle node);
     void (*SetEnabled)(NodeHandle node, bool value);
     void (*ResetEnabled)(NodeHandle node);
+    void (*SetUseShadowBatching)(NodeHandle node, bool value);
+    void (*ResetUseShadowBatching)(NodeHandle node);
+    void (*SetBlendMode)(NodeHandle node, int32_t blendModeValue, int32_t blendApplyTypeValue);
+    void (*ResetBlendMode)(NodeHandle node);
+    void (*SetMonopolizeEvents)(NodeHandle node, bool value);
+    void (*ResetMonopolizeEvents)(NodeHandle node);
     void (*SetDraggable)(NodeHandle node, bool value);
     void (*ResetDraggable)(NodeHandle node);
     void (*SetAccessibilityGroup)(NodeHandle node, bool value);
@@ -1497,6 +1503,10 @@ struct ArkUIListModifierAPI {
     void (*ResetAlignListItem)(NodeHandle node);
     void (*SetScrollSnapAlign)(NodeHandle node, int32_t scrollSnapAlign);
     void (*ResetScrollSnapAlign)(NodeHandle node);
+    void (*SetContentStartOffset)(NodeHandle node, float startOffset);
+    void (*ResetContentStartOffset)(NodeHandle node);
+    void (*SetContentEndOffset)(NodeHandle node, float endOffset);
+    void (*ResetContentEndOffset)(NodeHandle node);
     void (*ListSetDivider)(
         NodeHandle node, const uint32_t color, const double* values, const int32_t* units, int32_t length);
     void (*ListResetDivider)(NodeHandle node);

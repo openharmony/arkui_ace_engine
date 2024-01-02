@@ -505,6 +505,16 @@ void ListModelNG::SetScrollSnapAlign(FrameNode* frameNode, V2::ScrollSnapAlign s
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ScrollSnapAlign, scrollSnapAlign, frameNode);
 }
 
+void ListModelNG::SetContentStartOffset(FrameNode* frameNode, float startOffset)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ContentStartOffset, startOffset, frameNode);
+}
+
+void ListModelNG::SetContentEndOffset(FrameNode* frameNode, float endOffset)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ContentEndOffset, endOffset, frameNode);
+}
+
 void ListModelNG::SetDivider(FrameNode* frameNode, const V2::ItemDivider& divider)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Divider, divider, frameNode);

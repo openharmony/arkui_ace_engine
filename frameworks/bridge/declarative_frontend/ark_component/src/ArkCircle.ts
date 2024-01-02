@@ -15,9 +15,6 @@
 
 /// <reference path='./import.ts' />
 class ArkCircleComponent extends ArkCommonShapeComponent implements CircleAttribute {
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
 }
 
 // @ts-ignore

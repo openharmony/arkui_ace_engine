@@ -19,9 +19,6 @@ class ArkPolygonComponent extends ArkCommonShapeComponent implements PolygonAttr
     modifierWithKey(this._modifiersWithKeys, PolygonPointsModifier.identity, PolygonPointsModifier, value);
     return this;
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
 }
 
 class PolygonPointsModifier extends ModifierWithKey<Array<any>> {

@@ -38,9 +38,6 @@ class ArkDataPanelComponent extends ArkComponent implements DataPanelAttribute {
     modifierWithKey(this._modifiersWithKeys, DataPanelTrackShadowModifier.identity, DataPanelTrackShadowModifier, value);
     return this;
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
 }
 
 class DataPanelStrokeWidthModifier extends ModifierWithKey<Length> {

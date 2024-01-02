@@ -18,6 +18,7 @@
 #include "base/utils/system_properties.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
+#include "core/components/common/properties/blend_mode.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/declaration/common/declaration.h"
 #include "core/components/theme/shadow_theme.h"
@@ -2792,6 +2793,52 @@ void ResetEnabled(NodeHandle node)
     ViewAbstract::SetEnabled(frameNode, true);
 }
 
+void SetUseShadowBatching(NodeHandle node, bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetUseShadowBatching(frameNode, value);
+}
+
+void ResetUseShadowBatching(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetUseShadowBatching(frameNode, false);
+}
+
+void SetBlendMode(NodeHandle node, int32_t blendModeValue, int32_t blendApplyTypeValue)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    OHOS::Ace::BlendMode blendMode = static_cast<OHOS::Ace::BlendMode>(blendModeValue);
+    OHOS::Ace::BlendApplyType blendApplyType = static_cast<OHOS::Ace::BlendApplyType>(blendApplyTypeValue);
+    ViewAbstractModelNG::SetBlendMode(frameNode, blendMode);
+    ViewAbstractModelNG::SetBlendApplyType(frameNode, blendApplyType);
+}
+
+void ResetBlendMode(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetBlendMode(frameNode, OHOS::Ace::BlendMode::NONE);
+    ViewAbstractModelNG::SetBlendApplyType(frameNode, OHOS::Ace::BlendApplyType::FAST);
+}
+
+void SetMonopolizeEvents(NodeHandle node, bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetMonopolizeEvents(frameNode, value);
+}
+
+void ResetMonopolizeEvents(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstractModelNG::SetMonopolizeEvents(frameNode, false);
+}
+
 void SetDraggable(NodeHandle node, bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -3083,6 +3130,8 @@ ArkUICommonModifierAPI GetCommonModifier()
         SetBackgroundEffect, ResetBackgroundEffect, SetBackgroundBrightness, ResetBackgroundBrightness,
         SetDragPreviewOptions, ResetDragPreviewOptions,
         SetMouseResponseRegion, ResetMouseResponseRegion, SetEnabled, ResetEnabled,
+        SetUseShadowBatching, ResetUseShadowBatching, SetBlendMode, ResetBlendMode,
+        SetMonopolizeEvents, ResetMonopolizeEvents,
         SetDraggable, ResetDraggable, SetAccessibilityGroup, ResetAccessibilityGroup, SetHoverEffect, ResetHoverEffect,
         SetOutlineColor, ResetOutlineColor, SetOutlineRadius, ResetOutlineRadius,
         SetOutlineWidth, ResetOutlineWidth, SetOutlineStyle, ResetOutlineStyle, SetOutline, ResetOutline,

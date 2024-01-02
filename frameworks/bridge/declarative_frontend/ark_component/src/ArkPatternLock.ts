@@ -200,9 +200,6 @@ class ArkPatternLockComponent extends ArkComponent implements PatternLockAttribu
   onDotConnect(callback: any): PatternLockAttribute {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
 }
 // @ts-ignore
 globalThis.PatternLock.attributeModifier = function (modifier) {

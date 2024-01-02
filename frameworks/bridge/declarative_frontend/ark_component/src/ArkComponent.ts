@@ -1297,6 +1297,20 @@ class GeometryTransitionModifier extends ModifierWithKey<string> {
   }
 }
 
+class BlendModeModifier extends ModifierWithKey<ArkBlendMode> {
+  constructor(value: ArkBlendMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('blendMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBlendMode(node);
+    } else {
+      getUINativeModule().common.setBlendMode(node, this.value.blendMode, this.value.blendApplyType);
+    }
+  }
+}
+
 class ClipModifier extends ModifierWithKey<boolean | object> {
   constructor(value: boolean | object) {
     super(value);
@@ -2205,6 +2219,36 @@ class EnabledModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class UseShadowBatchingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('useShadowBatching');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetUseShadowBatching(node);
+
+    } else {
+      getUINativeModule().common.setUseShadowBatching(node, this.value);
+    }
+  }
+}
+
+class MonopolizeEventsModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('monopolizeEvents');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetMonopolizeEvents(node);
+
+    } else {
+      getUINativeModule().common.setMonopolizeEvents(node, this.value);
+    }
+  }
+}
+
 class DraggableModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
@@ -3080,6 +3124,16 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  useShadowBatching(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, UseShadowBatchingModifier.identity, UseShadowBatchingModifier, value);
+    return this;
+  }
+
+  monopolizeEvents(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, MonopolizeEventsModifier.identity, MonopolizeEventsModifier, value);
+    return this;
+  }
+
   useSizeType(value: {
     xs?: number | { span: number; offset: number };
     sm?: number | { span: number; offset: number };
@@ -3305,8 +3359,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     throw new Error('Method not implemented.');
   }
 
-  blendMode(value: BlendMode): this {
-    throw new Error('Method not implemented.');
+  blendMode(blendMode: BlendMode, blendApplyType?: BlendApplyType): this {
+    let arkBlendMode = new ArkBlendMode();
+    arkBlendMode.blendMode = blendMode;
+    arkBlendMode.blendApplyType = blendApplyType;
+    modifierWithKey(this._modifiersWithKeys, BlendModeModifier.identity, BlendModeModifier, arkBlendMode);
+    return this;
   }
 
   clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {

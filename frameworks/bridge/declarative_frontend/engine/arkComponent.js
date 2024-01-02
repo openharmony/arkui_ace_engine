@@ -1240,6 +1240,20 @@ class GeometryTransitionModifier extends ModifierWithKey {
   }
 }
 GeometryTransitionModifier.identity = Symbol('geometryTransition');
+class BlendModeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetBlendMode(node);
+    }
+    else {
+      getUINativeModule().common.setBlendMode(node, this.value.blendMode, this.value.blendApplyType);
+    }
+  }
+}
+BlendModeModifier.identity = Symbol('blendMode');
 class ClipModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -2146,6 +2160,34 @@ class EnabledModifier extends ModifierWithKey {
   }
 }
 EnabledModifier.identity = Symbol('enabled');
+class UseShadowBatchingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetUseShadowBatching(node);
+    }
+    else {
+      getUINativeModule().common.setUseShadowBatching(node, this.value);
+    }
+  }
+}
+UseShadowBatchingModifier.identity = Symbol('useShadowBatching');
+class MonopolizeEventsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetMonopolizeEvents(node);
+    }
+    else {
+      getUINativeModule().common.setMonopolizeEvents(node, this.value);
+    }
+  }
+}
+MonopolizeEventsModifier.identity = Symbol('monopolizeEvents');
 class DraggableModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -2971,6 +3013,14 @@ class ArkComponent {
     }
     return this;
   }
+  useShadowBatching(value) {
+    modifierWithKey(this._modifiersWithKeys, UseShadowBatchingModifier.identity, UseShadowBatchingModifier, value);
+    return this;
+  }
+  monopolizeEvents(value) {
+    modifierWithKey(this._modifiersWithKeys, MonopolizeEventsModifier.identity, MonopolizeEventsModifier, value);
+    return this;
+  }
   useSizeType(value) {
     throw new Error('Method not implemented.');
   }
@@ -3161,8 +3211,12 @@ class ArkComponent {
   bindContentCover(isShow, builder, type) {
     throw new Error('Method not implemented.');
   }
-  blendMode(value) {
-    throw new Error('Method not implemented.');
+  blendMode(blendMode, blendApplyType) {
+    let arkBlendMode = new ArkBlendMode();
+    arkBlendMode.blendMode = blendMode;
+    arkBlendMode.blendApplyType = blendApplyType;
+    modifierWithKey(this._modifiersWithKeys, BlendModeModifier.identity, BlendModeModifier, arkBlendMode);
+    return this;
   }
   clip(value) {
     modifierWithKey(this._modifiersWithKeys, ClipModifier.identity, ClipModifier, value);
@@ -3374,9 +3428,6 @@ class ArkColumnComponent extends ArkComponent {
   pointLight(value) {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
 }
 // @ts-ignore
 globalThis.Column.attributeModifier = function (modifier) {
@@ -3436,9 +3487,6 @@ class ArkColumnSplitComponent extends ArkComponent {
   divider(value) {
     modifierWithKey(this._modifiersWithKeys, ColumnSplitDividerModifier.identity, ColumnSplitDividerModifier, value);
     return this;
-  }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
   }
 }
 // @ts-ignore
@@ -3561,9 +3609,6 @@ class ArkFlexComponent extends ArkComponent {
   pointLight(value) {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
 }
 // @ts-ignore
 globalThis.Flex.attributeModifier = function (modifier) {
@@ -3604,9 +3649,6 @@ class ArkGridRowComponent extends ArkComponent {
   alignItems(value) {
     modifierWithKey(this._modifiersWithKeys, GridRowAlignItemsModifier.identity, GridRowAlignItemsModifier, value);
     return this;
-  }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
   }
 }
 // @ts-ignore
@@ -3741,9 +3783,6 @@ class ArkGridComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   onScrollFrameBegin(event) {
-    throw new Error('Method not implemented.');
-  }
-  monopolizeEvents(monopolize) {
     throw new Error('Method not implemented.');
   }
   clip(value) {
@@ -4944,9 +4983,6 @@ class ArkImageAnimatorComponent extends ArkComponent {
   onFinish(event) {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
 }
 // @ts-ignore
 globalThis.ImageAnimator.attributeModifier = function (modifier) {
@@ -5197,9 +5233,6 @@ class ArkPatternLockComponent extends ArkComponent {
   onDotConnect(callback) {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
 }
 // @ts-ignore
 globalThis.PatternLock.attributeModifier = function (modifier) {
@@ -5333,9 +5366,6 @@ class ArkRowComponent extends ArkComponent {
   pointLight(value) {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
 }
 // @ts-ignore
 globalThis.Row.attributeModifier = function (modifier) {
@@ -5363,6 +5393,23 @@ class RowSplitResizeableModifier extends ModifierWithKey {
   }
 }
 RowSplitResizeableModifier.identity = Symbol('rowSplitResizeable');
+class RowSplitClipModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetClipWithEdge(node);
+    }
+    else {
+      getUINativeModule().common.setClipWithEdge(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return true;
+  }
+}
+RowSplitClipModifier.identity = Symbol('rowSplitClip');
 class ArkRowSplitComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
@@ -5371,8 +5418,9 @@ class ArkRowSplitComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, RowSplitResizeableModifier.identity, RowSplitResizeableModifier, value);
     return this;
   }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
+  clip(value) {
+    modifierWithKey(this._modifiersWithKeys, RowSplitClipModifier.identity, RowSplitClipModifier, value);
+    return this;
   }
 }
 // @ts-ignore
@@ -8459,9 +8507,6 @@ class ArkVideoComponent extends ArkComponent {
   onError(callback) {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
 }
 // @ts-ignore
 globalThis.Video.attributeModifier = function (modifier) {
@@ -9044,6 +9089,15 @@ class ArkKeyBoardShortCut {
   isEqual(another) {
     return (this.value === another.value) && (this.keys === another.keys) &&
       (this.action === another.action);
+  }
+}
+class ArkBlendMode {
+  constructor() {
+    this.blendMode = undefined;
+    this.blendApplyType = undefined;
+  }
+  isEqual(another) {
+    return (this.blendMode === another.blendMode) && (this.blendApplyType === another.blendApplyType);
   }
 }
 class ArkAlignStyle {
@@ -13419,9 +13473,6 @@ class ArkCalendarPickerComponent extends ArkComponent {
   onChange(callback) {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
   padding(value) {
     let arkValue = new ArkPadding();
     if (value !== null && value !== undefined) {
@@ -13548,9 +13599,6 @@ class ArkDataPanelComponent extends ArkComponent {
   trackShadow(value) {
     modifierWithKey(this._modifiersWithKeys, DataPanelTrackShadowModifier.identity, DataPanelTrackShadowModifier, value);
     return this;
-  }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
   }
 }
 class DataPanelStrokeWidthModifier extends ModifierWithKey {
@@ -14005,9 +14053,6 @@ class ArkGaugeComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, GaugeIndicatorModifier.identity, GaugeIndicatorModifier, value);
     return this;
   }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
 }
 class GaugeIndicatorModifier extends ModifierWithKey {
   applyPeer(node, reset) {
@@ -14338,9 +14383,6 @@ class ArkMenuComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, RadiusModifier.identity, RadiusModifier, value);
     return this;
   }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
 }
 // @ts-ignore
 globalThis.Menu.attributeModifier = function (modifier) {
@@ -14494,9 +14536,6 @@ class ArkMenuItemGroupComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
   }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
 }
 // @ts-ignore
 globalThis.MenuItemGroup.attributeModifier = function (modifier) {
@@ -14518,9 +14557,6 @@ class ArkPluginComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   onError(callback) {
-    throw new Error('Method not implemented.');
-  }
-  monopolizeEvents(monopolize) {
     throw new Error('Method not implemented.');
   }
   size(value) {
@@ -14625,9 +14661,6 @@ class ArkProgressComponent extends ArkComponent {
   style(value) {
     modifierWithKey(this._modifiersWithKeys, ProgressStyleModifier.identity, ProgressStyleModifier, value);
     return this;
-  }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
   }
   backgroundColor(value) {
     modifierWithKey(this._modifiersWithKeys, ProgressBackgroundColorModifier.identity, ProgressBackgroundColorModifier, value);
@@ -14744,9 +14777,6 @@ class ArkQRCodeComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, QRContentOpacityModifier.identity, QRContentOpacityModifier, value);
     return this;
   }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
 }
 class QRColorModifier extends ModifierWithKey {
   constructor(value) {
@@ -14821,9 +14851,6 @@ class ArkRichTextComponent extends ArkComponent {
   onComplete(callback) {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
 }
 // @ts-ignore
 globalThis.RichText.attributeModifier = function (modifier) {
@@ -14840,9 +14867,6 @@ globalThis.RichText.attributeModifier = function (modifier) {
 class ArkScrollBarComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
-  }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
   }
 }
 // @ts-ignore
@@ -14876,9 +14900,6 @@ class ArkStepperComponent extends ArkComponent {
   onPrevious(callback) {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
 }
 // @ts-ignore
 globalThis.Stepper.attributeModifier = function (modifier) {
@@ -14904,9 +14925,6 @@ class ArkStepperItemComponent extends ArkComponent {
     return this;
   }
   status(value) {
-    throw new Error('Method not implemented.');
-  }
-  monopolizeEvents(monopolize) {
     throw new Error('Method not implemented.');
   }
 }
@@ -14971,9 +14989,6 @@ class ArkTextClockComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   fontFeature(value) {
-    throw new Error('Method not implemented.');
-  }
-  monopolizeEvents(monopolize) {
     throw new Error('Method not implemented.');
   }
 }
@@ -15473,9 +15488,6 @@ class ArkWebComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   nestedScroll(value) {
-    throw new Error('Method not implemented.');
-  }
-  monopolizeEvents(monopolize) {
     throw new Error('Method not implemented.');
   }
 }
@@ -16264,9 +16276,6 @@ class ArkBadgeComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
   }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
 }
 // @ts-ignore
 globalThis.Badge.attributeModifier = function (modifier) {
@@ -16284,9 +16293,6 @@ class ArkFlowItemComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
   }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
 }
 // @ts-ignore
 globalThis.FlowItem.attributeModifier = function (modifier) {
@@ -16303,9 +16309,6 @@ globalThis.FlowItem.attributeModifier = function (modifier) {
 class ArkFormLinkComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
-  }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
   }
 }
 // @ts-ignore
@@ -16418,9 +16421,6 @@ class ArkGridItemComponent extends ArkComponent {
     return this;
   }
   onSelect(event) {
-    throw new Error('Method not implemented.');
-  }
-  monopolizeEvents(monopolize) {
     throw new Error('Method not implemented.');
   }
 }
@@ -16548,6 +16548,34 @@ class ListScrollSnapAlignModifier extends ModifierWithKey {
   }
 }
 ListScrollSnapAlignModifier.identity = Symbol('listScrollSnapAlign');
+class ContentStartOffsetModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.resetContentStartOffset(node);
+    }
+    else {
+      getUINativeModule().list.setContentStartOffset(node, this.value);
+    }
+  }
+}
+ContentStartOffsetModifier.identity = Symbol('contentStartOffset');
+class ContentEndOffsetModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().list.resetContentEndOffset(node);
+    }
+    else {
+      getUINativeModule().list.setContentEndOffset(node, this.value);
+    }
+  }
+}
+ContentEndOffsetModifier.identity = Symbol('contentEndOffset');
 class ListDividerModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -16803,10 +16831,12 @@ class ArkListComponent extends ArkComponent {
     return this;
   }
   contentStartOffset(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ContentStartOffsetModifier.identity, ContentStartOffsetModifier, value);
+    return this;
   }
   contentEndOffset(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ContentEndOffsetModifier.identity, ContentEndOffsetModifier, value);
+    return this;
   }
   divider(value) {
     modifierWithKey(this._modifiersWithKeys, ListDividerModifier.identity, ListDividerModifier, value);
@@ -16894,9 +16924,6 @@ class ArkListComponent extends ArkComponent {
   onScrollFrameBegin(event) {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
 }
 // @ts-ignore
 globalThis.List.attributeModifier = function (modifier) {
@@ -16956,9 +16983,6 @@ class ArkListItemComponent extends ArkComponent {
   onSelect(event) {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
 }
 // @ts-ignore
 globalThis.ListItem.attributeModifier = function (modifier) {
@@ -17006,9 +17030,6 @@ class ArkListItemGroupComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ListItemGroupDividerModifier.identity, ListItemGroupDividerModifier, value);
     return this;
   }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
 }
 // @ts-ignore
 globalThis.ListItemGroup.attributeModifier = function (modifier) {
@@ -17025,9 +17046,6 @@ globalThis.ListItemGroup.attributeModifier = function (modifier) {
 class ArkRelativeContainerComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
-  }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
   }
 }
 // @ts-ignore
@@ -17137,9 +17155,6 @@ class ArkSwiperComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   nestedScroll(value) {
-    throw new Error('Method not implemented.');
-  }
-  monopolizeEvents(monopolize) {
     throw new Error('Method not implemented.');
   }
 }
@@ -17934,9 +17949,6 @@ class ArkTabContentComponent extends ArkComponent {
   tabBar(value) {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
   size(value) {
     modifierWithKey(this._modifiersWithKeys, TabContentSizeModifier.identity, TabContentSizeModifier, value);
     return this;
@@ -18257,9 +18269,6 @@ class ArkWaterFlowComponent extends ArkComponent {
   onScrollFrameBegin(event) {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
   clip(value) {
     modifierWithKey(this._modifiersWithKeys, WaterFlowClipModifier.identity, WaterFlowClipModifier, value);
     return this;
@@ -18507,9 +18516,6 @@ AntiAliasModifier.identity = Symbol('antiAlias');
 
 /// <reference path='./import.ts' />
 class ArkCircleComponent extends ArkCommonShapeComponent {
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
 }
 // @ts-ignore
 globalThis.Circle.attributeModifier = function (modifier) {
@@ -18524,9 +18530,6 @@ globalThis.Circle.attributeModifier = function (modifier) {
 
 /// <reference path='./import.ts' />
 class ArkEllipseComponent extends ArkCommonShapeComponent {
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
 }
 // @ts-ignore
 globalThis.Ellipse.attributeModifier = function (modifier) {
@@ -18663,9 +18666,6 @@ class ArkPolygonComponent extends ArkCommonShapeComponent {
   points(value) {
     modifierWithKey(this._modifiersWithKeys, PolygonPointsModifier.identity, PolygonPointsModifier, value);
     return this;
-  }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
   }
 }
 class PolygonPointsModifier extends ModifierWithKey {
@@ -18911,9 +18911,6 @@ class ArkCanvasComponent extends ArkComponent {
   onReady(event) {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
 }
 // @ts-ignore
 globalThis.Canvas.attributeModifier = function (modifier) {
@@ -18954,9 +18951,6 @@ globalThis.GridContainer.attributeModifier = function (modifier) {
 
 /// <reference path='./import.ts' />
 class ArkEffectComponentComponent extends ArkComponent {
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
 }
 // @ts-ignore
 if (globalThis.EffectComponent !== undefined) {
@@ -18974,9 +18968,6 @@ if (globalThis.EffectComponent !== undefined) {
 
 /// <reference path='./import.ts' />
 class ArkRemoteWindowComponent extends ArkComponent {
-  monopolizeEvents(monopolize) {
-    throw new Error('Method not implemented.');
-  }
 }
 // @ts-ignore
 if (globalThis.RemoteWindow !== undefined) {

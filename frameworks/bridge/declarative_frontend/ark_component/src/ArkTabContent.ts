@@ -23,9 +23,6 @@ class ArkTabContentComponent extends ArkComponent implements TabContentAttribute
   tabBar(value: unknown): this {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
   size(value: SizeOptions): this {
     modifierWithKey(this._modifiersWithKeys, TabContentSizeModifier.identity, TabContentSizeModifier, value);
     return this;
