@@ -526,6 +526,11 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
 void SheetPresentationPattern::SheetInteractiveDismiss(bool isDragClose, float dragVelocity)
 {
     if (hasShouldDismiss()) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->SetDismissTargetId(targetId_);
         if (isDragClose) {
             ProcessColumnRect(height_);
             ChangeScrollHeight(height_);
