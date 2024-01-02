@@ -394,8 +394,11 @@ void FocusHub::LostSelfFocus()
 void FocusHub::RemoveSelf(BlurReason reason)
 {
     TAG_LOGD(AceLogTag::ACE_FOCUS, "Node %{public}s/%{public}d remove self.", GetFrameName().c_str(), GetFrameId());
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto screenNode = pipeline ? pipeline->GetScreenNode() : nullptr;
+    auto screenFocusHub = screenNode ? screenNode->GetFocusHub() : nullptr;
     auto parent = GetParentFocusHub();
-    if (parent) {
+    if (parent && parent != screenFocusHub) {
         parent->RemoveChild(AceType::Claim(this), reason);
     } else {
         LostFocus(reason);

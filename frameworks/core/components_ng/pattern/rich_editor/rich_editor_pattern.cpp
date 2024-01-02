@@ -2694,6 +2694,7 @@ bool RichEditorPattern::OnBackPressed()
     }
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     CloseKeyboard(true);
+    FocusHub::LostFocusToViewRoot();
 #if defined(ANDROID_PLATFORM)
     return false;
 #else
