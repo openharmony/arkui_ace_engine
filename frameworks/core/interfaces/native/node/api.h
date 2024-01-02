@@ -512,6 +512,16 @@ struct ArkUIToggleModifierAPI {
     void (*ResetToggleSelectedColor)(NodeHandle node);
     void (*SetToggleSwitchPointColor)(NodeHandle node, uint32_t switchPointColor);
     void (*ResetToggleSwitchPointColor)(NodeHandle node);
+    void (*SetToggleHeight)(NodeHandle node, double value, int32_t unit);
+    void (*ResetToggleHeight)(NodeHandle node);
+    void (*SetToggleResponseRegion)(NodeHandle node, const double* values, const int32_t* units, uint32_t length);
+    void (*ResetToggleResponseRegion)(NodeHandle node);
+    void (*SetTogglePadding)(NodeHandle node, const double* values, const uint32_t length);
+    void (*ResetTogglePadding)(NodeHandle node);
+    void (*SetToggleBackgroundColor)(NodeHandle node, uint32_t color);
+    void (*ResetToggleBackgroundColor)(NodeHandle node);
+    void (*SetToggleHoverEffect)(NodeHandle node, int32_t hoverEffectValue);
+    void (*ResetToggleHoverEffect)(NodeHandle node);
 };
 
 struct ArkUINavDestinationModifierAPI {

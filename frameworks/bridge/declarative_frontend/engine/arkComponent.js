@@ -3476,6 +3476,23 @@ class ColumnSplitResizeableModifier extends ModifierWithKey {
   }
 }
 ColumnSplitResizeableModifier.identity = Symbol('columnSplitResizeable');
+class ColumnSplitClipModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetClipWithEdge(node);
+    }
+    else {
+      getUINativeModule().common.setClipWithEdge(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return true;
+  }
+}
+ColumnSplitClipModifier.identity = Symbol('columnSplitClip');
 class ArkColumnSplitComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
@@ -3486,6 +3503,10 @@ class ArkColumnSplitComponent extends ArkComponent {
   }
   divider(value) {
     modifierWithKey(this._modifiersWithKeys, ColumnSplitDividerModifier.identity, ColumnSplitDividerModifier, value);
+    return this;
+  }
+  clip(value) {
+    modifierWithKey(this._modifiersWithKeys, ColumnSplitClipModifier.identity, ColumnSplitClipModifier, value);
     return this;
   }
 }
@@ -10109,6 +10130,26 @@ class ArkToggleComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ToggleSwitchPointColorModifier.identity, ToggleSwitchPointColorModifier, value);
     return this;
   }
+  height(value) {
+    modifierWithKey(this._modifiersWithKeys, ToggleHeightModifier.identity, ToggleHeightModifier, value);
+    return this;
+  }
+  responseRegion(value) {
+    modifierWithKey(this._modifiersWithKeys, ToggleResponseRegionModifier.identity, ToggleResponseRegionModifier, value);
+    return this;
+  }
+  padding(value) {
+    modifierWithKey(this._modifiersWithKeys, TogglePaddingModifier.identity, TogglePaddingModifier, value);
+    return this;
+  }
+  backgroundColor(value) {
+    modifierWithKey(this._modifiersWithKeys, ToggleBackgroundColorModifier.identity, ToggleBackgroundColorModifier, value);
+    return this;
+  }
+  hoverEffect(value) {
+    modifierWithKey(this._modifiersWithKeys, ToggleHoverEffectModifier.identity, ToggleHoverEffectModifier, value);
+    return this;
+  }
 }
 class ToggleSelectedColorModifier extends ModifierWithKey {
   constructor(value) {
@@ -10144,6 +10185,158 @@ class ToggleSwitchPointColorModifier extends ModifierWithKey {
   }
 }
 ToggleSwitchPointColorModifier.identity = Symbol('toggleSwitchPointColor');
+class ToggleHeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().toggle.resetHeight(node);
+    }
+    else {
+      getUINativeModule().toggle.setHeight(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+ToggleHeightModifier.identity = Symbol('toggleHeight');
+class ToggleResponseRegionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    let _a, _b, _c, _d, _e, _f, _g, _h;
+    if (reset) {
+      getUINativeModule().toggle.resetResponseRegion(node);
+    }
+    else {
+      let responseRegion = [];
+      if (Array.isArray(this.value)) {
+        for (let i = 0; i < this.value.length; i++) {
+          responseRegion.push((_a = this.value[i].x) !== null && _a !== void 0 ? _a : 'PLACEHOLDER');
+          responseRegion.push((_b = this.value[i].y) !== null && _b !== void 0 ? _b : 'PLACEHOLDER');
+          responseRegion.push((_c = this.value[i].width) !== null && _c !== void 0 ? _c : 'PLACEHOLDER');
+          responseRegion.push((_d = this.value[i].height) !== null && _d !== void 0 ? _d : 'PLACEHOLDER');
+        }
+      }
+      else {
+        responseRegion.push((_e = this.value.x) !== null && _e !== void 0 ? _e : 'PLACEHOLDER');
+        responseRegion.push((_f = this.value.y) !== null && _f !== void 0 ? _f : 'PLACEHOLDER');
+        responseRegion.push((_g = this.value.width) !== null && _g !== void 0 ? _g : 'PLACEHOLDER');
+        responseRegion.push((_h = this.value.height) !== null && _h !== void 0 ? _h : 'PLACEHOLDER');
+      }
+      getUINativeModule().toggle.setResponseRegion(node, responseRegion, responseRegion.length);
+    }
+  }
+  checkObjectDiff() {
+    if (Array.isArray(this.stageValue) && Array.isArray(this.value)) {
+      if (this.value.length !== this.stageValue.length) {
+        return true;
+      }
+      else {
+        for (let i = 0; i < this.value.length; i++) {
+          if (!(isBaseOrResourceEqual(this.stageValue[i].x, this.value[i].x) &&
+            isBaseOrResourceEqual(this.stageValue[i].y, this.value[i].y) &&
+            isBaseOrResourceEqual(this.stageValue[i].width, this.value[i].width) &&
+            isBaseOrResourceEqual(this.stageValue[i].height, this.value[i].height))) {
+            return true;
+          }
+        }
+        return false;
+      }
+    }
+    else if (typeof this.stageValue === 'object' && typeof this.value === 'object') {
+      return !(this.stageValue.x === this.value.x &&
+        this.stageValue.y === this.value.y &&
+        this.stageValue.height === this.value.height &&
+        this.stageValue.width === this.value.width);
+    }
+    else {
+      return true;
+    }
+  }
+}
+ToggleResponseRegionModifier.identity = Symbol('toggleResponseRegion');
+class TogglePaddingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().toggle.resetPadding(node);
+    }
+    else {
+      let top = undefined;
+      let right = undefined;
+      let bottom = undefined;
+      let left = undefined;
+      if (isLengthType(this.value) || isResource(this.value)) {
+        top = this.value;
+        right = this.value;
+        bottom = this.value;
+        left = this.value;
+      }
+      else if (typeof this.value === 'object') {
+        top = this.value.top;
+        right = this.value.right;
+        bottom = this.value.bottom;
+        left = this.value.left;
+      }
+      getUINativeModule().toggle.setPadding(node, top, right, bottom, left);
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      if (typeof this.stageValue === 'object' && typeof this.value === 'object') {
+        return !(this.stageValue.left === this.value.left &&
+          this.stageValue.right === this.value.right &&
+          this.stageValue.top === this.value.top &&
+          this.stageValue.bottom === this.value.bottom);
+      }
+      else {
+        return !(this.stageValue === this.value);
+      }
+    }
+    return true;
+  }
+}
+TogglePaddingModifier.identity = Symbol('togglePadding');
+class ToggleBackgroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().toggle.resetBackgroundColor(node);
+    }
+    else {
+      getUINativeModule().toggle.setBackgroundColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+ToggleBackgroundColorModifier.identity = Symbol('toggleBackgroundColor');
+class ToggleHoverEffectModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().toggle.resetHoverEffect(node);
+    }
+    else {
+      getUINativeModule().toggle.setHoverEffect(node, this.value);
+    }
+  }
+}
+ToggleHoverEffectModifier.identity = Symbol('toggleHoverEffect');
 // @ts-ignore
 globalThis.Toggle.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
