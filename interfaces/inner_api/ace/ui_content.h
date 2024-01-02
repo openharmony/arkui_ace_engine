@@ -83,6 +83,7 @@ class NativeEngine;
 typedef struct napi_value__* napi_value;
 
 namespace OHOS::Ace {
+struct SerializedGesture;
 class ACE_FORCE_EXPORT UIContent {
 public:
     static std::unique_ptr<UIContent> Create(
@@ -177,6 +178,7 @@ public:
     virtual void SetActionEventHandler(std::function<void(const std::string&)>&& actionCallback) {};
     virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) {};
     virtual void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& callback) {};
+
 
     // for distribute UI source
     virtual SerializeableObjectArray DumpUITree()
@@ -298,7 +300,7 @@ public:
     virtual void FocusMoveSearch(
         int32_t elementId, int32_t direction,
         int32_t baseParent, Accessibility::AccessibilityElementInfo& output) {};
-        
+
     virtual bool NotifyExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
         int32_t action, int32_t offset)
     {
@@ -328,12 +330,14 @@ public:
     {
         return 0;
     }
- 
+
     /**
      * @description: Destroy the custom popup.
      * @param config Indicates the ID of the UI node which bind the pupop
      */
     virtual void DestroyCustomPopupUIExtension(int32_t nodeId) {}
+
+    virtual SerializedGesture GetFormSerializedGesture() = 0;
 };
 
 } // namespace OHOS::Ace

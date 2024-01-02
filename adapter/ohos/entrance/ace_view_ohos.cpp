@@ -361,7 +361,7 @@ void AceViewOhos::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& poi
         pointerEvent->MarkProcessed();
     };
     ConvertAxisEvent(pointerEvent, event);
-    
+
     /* The first step of axis event of mouse is equivalent to touch event START + UPDATE.
      * Create a fake UPDATE event here to adapt to axis event of mouse.
      * e.g {START, END} turns into {START, UPDATE, END}.

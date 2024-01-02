@@ -42,7 +42,8 @@ public:
      * @brief Dispatcher pointer event.
      * @param pointerEvent The pointer event info.
      */
-    void DispatchPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override;
+    void DispatchPointerEvent(
+        const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, SerializedGesture& serializedGesture) override;
     /**
      * @brief Set AllowUpdate.
      * @param allowUpdate The allowUpdate.

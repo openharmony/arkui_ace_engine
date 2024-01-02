@@ -63,7 +63,7 @@ public:
 
     const RefPtr<SubContainer>& GetSubContainer() const;
 
-    void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
+    void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, SerializedGesture& serializedGesture);
 
     void OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap);
 
@@ -148,7 +148,7 @@ private:
     int32_t scopeId_;
     std::string localeTag_ = AceApplicationInfo::GetInstance().GetLocaleTag();
     std::vector<std::string> formLinkInfos_;
-
+    
     bool isJsCard_ = true;
 };
 

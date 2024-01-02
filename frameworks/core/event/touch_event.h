@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_TOUCH_EVENT_H
 
 #include <list>
+#include <vector>
 
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
@@ -769,6 +770,10 @@ private:
 using TouchEventFunc = std::function<void(TouchEventInfo&)>;
 using OnTouchEventCallback = std::function<void(const TouchEventInfo&)>;
 using CatchTouchEventCallback = std::function<void()>;
+struct SerializedGesture {
+    int32_t size = 0;
+    std::vector<char> data;
+};
 
 } // namespace OHOS::Ace
 

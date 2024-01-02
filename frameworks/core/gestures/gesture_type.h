@@ -27,6 +27,8 @@ enum class GestureType {
     TOUCH_CANCEL,
     TOUCH_END,
     REMOTE_MESSAGE,
+	PAN,
+	GROUP,
 };
 
 } // namespace OHOS::Ace

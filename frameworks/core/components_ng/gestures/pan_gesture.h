@@ -42,6 +42,7 @@ public:
             gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::PAN_GESTURE);
         }
     };
+
     explicit PanGesture(RefPtr<PanGestureOption> panGestureOption)
     {
         panGestureOption_ = panGestureOption;
@@ -53,13 +54,70 @@ public:
     };
     ~PanGesture() override = default;
 
+    void MoveTo(const char* c)
+    {
+        *(int32_t*)(c) = fingers_;
+        c += sizeof(int32_t);
+        *(GesturePriority*)(c) = priority_;
+        c += sizeof(GesturePriority);
+        *(GestureMask*)(c) = gestureMask_;
+        c += sizeof(GestureMask);
+        *(PanDirection*)(c) = direction_;
+        c += sizeof(PanDirection);
+        *(double*)(c) = distance_;
+        c += sizeof(double);
+        double* d = (double*)c;
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                d[i * 4 + j] = matrix.Get(i, j);
+            }
+        }
+    };
+
+    virtual int32_t SizeofMe() override
+    {
+        return sizeof(int32_t) + sizeof(GestureType) + sizeof(PanDirection) + sizeof(double) + sizeof(Matrix4) +
+               Gesture::SizeofMe();
+    };
+
+    int Serialize(const char* panGesture) override
+    {
+        int sizePan = SizeofMe();
+        panGesture = SetHeader(panGesture, GestureType::PAN, sizePan);
+        MoveTo(panGesture);
+        return sizePan;
+    };
+
+    virtual int32_t Deserialize(char* p) override
+    {
+        p += sizeof(GestureType) + sizeof(int32_t);
+        fingers_ = *(int32_t*)(p);
+        p += sizeof(int32_t);
+        priority_ = *(GesturePriority*)(p);
+        p += sizeof(GesturePriority);
+        gestureMask_ = *(GestureMask*)(p);
+        p += sizeof(GestureMask);
+        direction_ = *(PanDirection*)(p);
+        p += sizeof(PanDirection);
+        distance_ = *(double*)(p);
+        p += sizeof(double);
+        double* d = (double*)p;
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                matrix.Set(i, j, d[i * 4 + j]);
+            }
+        }
+        return SizeofMe();
+    };
+
 protected:
-    RefPtr<NGGestureRecognizer> CreateRecognizer() override;
+    RefPtr<NGGestureRecognizer> CreateRecognizer() override; //todo: 反序列化生成识别器的时候需要设置矩阵。
 
 private:
     PanDirection direction_;
     double distance_ = 0.0;
     RefPtr<PanGestureOption> panGestureOption_;
+	Matrix4 matrix;
 };
 
 } // namespace OHOS::Ace::NG

@@ -25,6 +25,7 @@
 
 namespace OHOS {
 namespace Ace {
+struct SerializedGesture;
 /**
  * @class IFormRendererDispatcher
  * IFormRendererDispatcher interface is used to form render dispatcher.
@@ -40,7 +41,7 @@ public:
      * @param pointerEvent The pointer event info.
      */
     virtual void DispatchPointerEvent(
-        const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) = 0;
+        const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, SerializedGesture& serializedGesture) = 0;
     /**
      * @brief Set AllowUpdate.
      * @param allowUpdate The allowUpdate.

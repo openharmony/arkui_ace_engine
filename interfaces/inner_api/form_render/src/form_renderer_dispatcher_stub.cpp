@@ -18,6 +18,7 @@
 #include "errors.h"
 #include "form_renderer_hilog.h"
 #include "ipc_skeleton.h"
+#include "core/event/touch_event.h" // todo
 
 namespace OHOS {
 namespace Ace {
@@ -73,9 +74,11 @@ int32_t FormRendererDispatcherStub::HandleDispatchPointerEvent(MessageParcel &da
         HILOG_ERROR("%{public}s, Read Pointer Event failed.", __func__);
         return ERR_INVALID_VALUE;
     }
-
-    DispatchPointerEvent(pointerEvent);
-    reply.WriteInt32(ERR_OK);
+    SerializedGesture serializedGesture;
+    DispatchPointerEvent(pointerEvent, serializedGesture);
+    reply.WriteInt32((int32_t)(true));
+    reply.WriteInt32(serializedGesture.size);
+    reply.WriteRawData(serializedGesture.data.data(), serializedGesture.size);
     return ERR_OK;
 }
 

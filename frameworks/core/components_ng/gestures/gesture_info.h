@@ -23,6 +23,8 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/event/gesture_info.h"
 #include "core/gestures/gesture_event.h"
+#include "core/gestures/gesture_info.h"
+#include "core/gestures/gesture_type.h"
 #include "core/gestures/velocity.h"
 #include "core/gestures/velocity_tracker.h"
 
@@ -98,6 +100,29 @@ public:
         } else {
             gestureInfo_ = MakeRefPtr<GestureInfo>(tag);
         }
+    }
+
+    virtual int32_t SizeofMe()
+    {
+        return 0;
+    }
+
+    virtual int32_t Serialize(const char* p)
+    {
+        return 0;
+    }
+    virtual int32_t Deserialize(char* p)
+    {
+        return 0;
+    }
+
+    const char* SetHeader(const char* p, GestureType type, int32_t len)
+    {
+        *(GestureType*)(p) = type;
+        p += sizeof(GestureType);
+        *(int32_t*)(p) = len;
+        p += sizeof(int32_t);
+        return p;
     }
 
     virtual RefPtr<NGGestureRecognizer> CreateRecognizer() = 0;

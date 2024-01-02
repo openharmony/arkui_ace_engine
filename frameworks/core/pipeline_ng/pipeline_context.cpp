@@ -1533,8 +1533,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     } while (false);
 #endif
 
-    HandleEtsCardTouchEvent(point);
+    SerializedGesture etsSerializedGesture;
+    if (point.type != TouchType::DOWN) {
+        HandleEtsCardTouchEvent(point, etsSerializedGesture);
+    }
 
+    auto oriPoint = point;
     auto scalePoint = point.CreateScalePoint(GetViewScale());
     ResSchedReport::GetInstance().OnTouchEvent(scalePoint.type);
     if (scalePoint.type != TouchType::MOVE && scalePoint.type != TouchType::PULL_MOVE) {
@@ -1556,6 +1560,46 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
         eventManager_->TouchTest(scalePoint, node, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
+        touchTestResults_ = eventManager_->touchTestResults_;
+
+        HandleEtsCardTouchEvent(oriPoint, etsSerializedGesture);
+
+        if (etsSerializedGesture.size != 0) {
+            GestureGroup rebirth(GestureMode::Exclusive);
+	        rebirth.Deserialize(etsSerializedGesture.data.data());
+            auto recognizer = rebirth.CreateRecognizer();
+            if (recognizer) {
+                recognizer->SetInnerFlag(true);
+                recognizer->BeginReferee(scalePoint.id, true);
+                std::list<RefPtr<NGGestureRecognizer>> combined;
+                combined.emplace_back(recognizer);
+                for (auto iter = touchTestResults_[point.id].begin(); iter != touchTestResults_[point.id].end(); iter++) {
+                    auto outRecognizer = AceType::DynamicCast<NGGestureRecognizer>(*iter);
+                    if (outRecognizer) {
+                        combined.emplace_back(outRecognizer);
+                        touchTestResults_[point.id].erase(iter);
+                        break;
+                    }
+                }
+                auto exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(combined));
+                exclusiveRecognizer->AttachFrameNode(node);
+                exclusiveRecognizer->BeginReferee(scalePoint.id);
+                touchTestResults_[point.id].emplace_back(exclusiveRecognizer);
+                eventManager_->touchTestResults_ = touchTestResults_;
+            }
+        }
+        if (IsFormRender() && touchTestResults_.find(point.id) != touchTestResults_.end()) {
+            for (const auto& touchResult : touchTestResults_[point.id]) {
+                auto recognizer = AceType::DynamicCast<NG::RecognizerGroup>(touchResult);
+                if (recognizer) {
+                    auto gesture = recognizer->CreateGestureFromRecognizer();
+                    if (gesture) {
+                        serializedGesture_.data = std::vector<char>(gesture->SizeofMe());
+                        serializedGesture_.size = gesture->Serialize(serializedGesture_.data.data());
+                    }
+                }
+            }
+        }
         for (const auto& weakContext : touchPluginPipelineContext_) {
             auto pipelineContext = DynamicCast<OHOS::Ace::PipelineBase>(weakContext.Upgrade());
             if (!pipelineContext) {
@@ -1571,7 +1615,6 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         // restore instance Id.
         eventManager_->SetInstanceId(GetInstanceId());
     }
-
     auto rootOffset = GetRootRect().GetOffset();
     eventManager_->HandleGlobalEventNG(scalePoint, selectOverlayManager_, rootOffset);
 
@@ -1580,6 +1623,15 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     }
 
     if (scalePoint.type == TouchType::MOVE) {
+        if (eventManager_->GetInnerFlag() && !cancelSended_) {
+            for (auto& touchResult : touchTestResults_) {
+                auto mockScalePoint = scalePoint;
+                mockScalePoint.id = touchResult.first;
+                mockScalePoint.type = TouchType::CANCEL;
+                eventManager_->DispatchTouchEvent(mockScalePoint);
+            }
+            cancelSended_ = true;
+        }
         touchEvents_.emplace_back(point);
         auto container = Container::Current();
         if (container && container->IsScenceBoardWindow() && IsWindowSceneConsumed()) {
@@ -3043,4 +3095,9 @@ const RefPtr<PostEventManager>& PipelineContext::GetPostEventManager()
 {
     return postEventManager_;
 }
+
+const SerializedGesture& PipelineContext::GetSerializedGesture() const {
+    return serializedGesture_;
+}
+
 } // namespace OHOS::Ace::NG
