@@ -74,14 +74,6 @@ void TabBarPattern::OnAttachToFrameNode()
     renderContext->SetClipToFrame(true);
     host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(
         SafeAreaExpandOpts { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM });
-
-    BlurStyleOption styleOption;
-    styleOption.blurStyle = BlurStyle::COMPONENT_THICK;
-
-    if (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        renderContext -> UpdateBackBlurStyle(styleOption);
-    }
-
     swiperController_->SetTabBarFinishCallback([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
