@@ -21,6 +21,10 @@ const OPACITY_NUM = 0.18;
 const DEFAULT_HEIGHT = 48;
 const FIT_HEIGHT = 72;
 const ZINDEX_NUM = 999;
+const DEFAULT_MARGIN_TIP_UNACTION_TEXT_LENGTH = 18;
+const DEFAULT_MARGIN_TIP_ACTION_TEXT_LENGTH = 12;
+const FIT_MARGIN_TIP_UNACTION_TEXT_LENGTH = 16;
+const FIT_MARGIN_TIP_ACTION_TEXT_LENGTH = 10;
 
 export enum MarginType {
   DEFAULT_MARGIN = 0,
@@ -50,16 +54,16 @@ export struct ExceptionPrompt {
   getMessageHeight() {
     let height = DEFAULT_HEIGHT
     if (this.options.marginType === MarginType.DEFAULT_MARGIN) {
-      if (this.options.tip && JSON.stringify(this.options.tip)
-        .length > 20 || this.options.actionText && JSON.stringify(this.options.tip)
-        .length > 14) {
+      if (this.options.tip && this.options.tip.toString()
+        .length > DEFAULT_MARGIN_TIP_UNACTION_TEXT_LENGTH || this.options.actionText && this.options.tip && this.options.tip.toString()
+        .length > DEFAULT_MARGIN_TIP_ACTION_TEXT_LENGTH) {
         height = FIT_HEIGHT
       }
 
     } else if (this.options.marginType === MarginType.FIT_MARGIN) {
-      if (this.options.tip && JSON.stringify(this.options.tip)
-        .length > 18 || this.options.actionText && JSON.stringify(this.options.tip)
-        .length > 12) {
+      if ((this.options.tip && this.options.tip.toString()
+        .length > FIT_MARGIN_TIP_UNACTION_TEXT_LENGTH) || this.options.actionText && this.options.tip && this.options.tip.toString()
+        .length > FIT_MARGIN_TIP_ACTION_TEXT_LENGTH) {
 
         height = FIT_HEIGHT
       }
@@ -126,7 +130,7 @@ export struct ExceptionPrompt {
           }
         }
         .backgroundColor(this.touchBackgroundColor)
-        .width(this.options.actionText ? 142 : 0)
+        .width(this.options.actionText ? 144 : 0)
         .height(32)
         .borderRadius($r('sys.float.ohos_id_corner_radius_subtab'))
         .padding({
