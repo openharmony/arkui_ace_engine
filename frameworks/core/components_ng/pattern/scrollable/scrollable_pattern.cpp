@@ -1447,7 +1447,7 @@ void ScrollablePattern::NotifyMoved(bool value)
 void ScrollablePattern::ProcessSpringEffect(float velocity)
 {
     CHECK_NULL_VOID(InstanceOf<ScrollSpringEffect>(scrollEffect_));
-    if ((!OutBoundaryCallback() && !GetCanOverScroll()) || !IsOutOfBoundary(true)) {
+    if (!OutBoundaryCallback() && !GetCanOverScroll()) {
         return;
     }
     scrollEffect_->ProcessScrollOver(velocity);
@@ -1681,7 +1681,7 @@ bool ScrollablePattern::HandleScrollVelocity(float velocity)
         }
         return false;
     }
-    return HandleOverScroll(velocity);
+    return HandleOverScroll(velocity) || GetEdgeEffect() == EdgeEffect::FADE;
 }
 
 bool ScrollablePattern::HandleOverScroll(float velocity)
