@@ -29,16 +29,21 @@ void StackModelNG::Create()
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::STACK_ETS_TAG, nodeId);
-    auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::STACK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StackPattern>(); });
-    stack->Push(frameNode);
-    frameNode->SetExclusiveEventForChild(true);
+    stack->Push(CreateFrameNode(nodeId));
 }
 
 void StackModelNG::Create(Alignment alignment)
 {
     Create();
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
+}
+
+RefPtr<FrameNode> StackModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::STACK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StackPattern>(); });
+    frameNode->SetExclusiveEventForChild(true);
+    return frameNode;
 }
 
 void StackModelNG::SetAlignment(Alignment alignment)
