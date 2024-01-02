@@ -48,9 +48,6 @@
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/event/touch_event.h"
-#ifdef WINDOW_SCENE_SUPPORTED
-#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
-#endif
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT PipelineContext : public PipelineBase {
