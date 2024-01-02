@@ -304,11 +304,9 @@ void ScrollablePattern::OnScrollEnd()
 
     // Now: HandleOverScroll moved to ScrollablePattern and renamed HandleScrollVelocity, directly
     // calls OnScrollEnd in ScrollablePattern
-    if (isRefreshInReactive_) {
-        if (refreshCoordination_) {
-            isRefreshInReactive_ = false;
-            refreshCoordination_->OnScrollEnd(GetVelocity());
-        }
+    if (refreshCoordination_) {
+        isRefreshInReactive_ = false;
+        refreshCoordination_->OnScrollEnd(GetVelocity());
     }
     if (isSheetInReactive_) {
         isSheetInReactive_ = false;
