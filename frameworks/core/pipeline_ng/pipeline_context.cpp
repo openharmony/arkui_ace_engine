@@ -1566,7 +1566,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
 
         if (etsSerializedGesture.size != 0) {
             GestureGroup rebirth(GestureMode::Exclusive);
-	        rebirth.Deserialize(etsSerializedGesture.data.data());
+            rebirth.Deserialize(etsSerializedGesture.data.data());
             auto recognizer = rebirth.CreateRecognizer();
             if (recognizer) {
                 recognizer->SetInnerFlag(true);

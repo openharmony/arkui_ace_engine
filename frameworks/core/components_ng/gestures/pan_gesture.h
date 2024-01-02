@@ -117,7 +117,7 @@ private:
     PanDirection direction_;
     double distance_ = 0.0;
     RefPtr<PanGestureOption> panGestureOption_;
-	Matrix4 matrix;
+    Matrix4 matrix;
 };
 
 } // namespace OHOS::Ace::NG
