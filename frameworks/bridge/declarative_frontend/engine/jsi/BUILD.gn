@@ -92,6 +92,8 @@ template("declarative_js_engine_ark") {
       defines += [ "APP_USE_ARM64" ]
     } else if (target_cpu == "arm") {
       defines += [ "APP_USE_ARM" ]
+    } else if (target_cpu == "riscv64") {
+      defines += [ "APP_USE_RISCV64" ]
     }
 
     configs = [ "$ace_root:ace_config" ]

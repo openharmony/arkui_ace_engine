@@ -18,7 +18,7 @@
 #include "frame_trace.h"
 
 namespace OHOS::Ace {
-#ifdef __aarch64__
+#if defined(__aarch64__) || (defined(__riscv) && __riscv_xlen == 64)
 const char* FRAME_TRACE_SO_PATH = "/system/lib64/libframe_trace_intf.z.so";
 #else
 const char* FRAME_TRACE_SO_PATH = "/system/lib/libframe_trace_intf.z.so";

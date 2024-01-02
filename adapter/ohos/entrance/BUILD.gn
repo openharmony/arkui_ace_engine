@@ -53,6 +53,8 @@ template("ace_ohos_standard_source_set") {
 
     if (target_cpu == "arm64") {
       defines += [ "_ARM64_" ]
+    } else if (target_cpu == "riscv64") {
+      defines += [ "_RISCV64_" ]
     }
     if (current_os == "ohos" && current_cpu == "x86_64") {
       defines += [ "SIMULATOR_64" ]
