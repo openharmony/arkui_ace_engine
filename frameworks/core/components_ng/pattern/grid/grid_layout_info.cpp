@@ -394,7 +394,7 @@ int32_t GridLayoutInfo::FindItemInRange(int32_t target) const
 }
 
 // Use the index to get the line number where the item is located
-bool GridLayoutInfo::GetLineIndexByIndex(int32_t targetIndex, int32_t& targetLineIndex)
+bool GridLayoutInfo::GetLineIndexByIndex(int32_t targetIndex, int32_t& targetLineIndex) const
 {
     for (auto [lineIndex, lineMap] : gridMatrix_) {
         for (auto [crossIndex, index] : lineMap) {

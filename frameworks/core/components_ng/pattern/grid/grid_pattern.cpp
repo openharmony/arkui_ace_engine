@@ -1292,7 +1292,9 @@ float GridPattern::EstimateHeight() const
 {
     // During the scrolling animation, the exact current position is used. Other times use the estimated location
     if (isSmoothScrolling_) {
-        return scrollGridLayoutInfo_.GetTotalHeightFromZeroIndex(gridLayoutInfo_.startMainLineIndex_, GetMainGap()) +
+        auto lineIndex = 0;
+        scrollGridLayoutInfo_.GetLineIndexByIndex(gridLayoutInfo_.startIndex_, lineIndex);
+        return scrollGridLayoutInfo_.GetTotalHeightFromZeroIndex(lineIndex, GetMainGap()) +
                std::abs(gridLayoutInfo_.currentOffset_);
     } else {
         auto host = GetHost();
@@ -1306,6 +1308,7 @@ float GridPattern::EstimateHeight() const
         if (!layoutProperty->GetLayoutOptions().has_value()) {
             return info.GetContentOffset(mainGap);
         }
+
         return info.GetContentOffset(layoutProperty->GetLayoutOptions().value(), mainGap);
     }
 }
