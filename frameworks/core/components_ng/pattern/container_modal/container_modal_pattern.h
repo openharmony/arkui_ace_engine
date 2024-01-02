@@ -195,6 +195,7 @@ private:
     void InitTitle();
     void InitContainerEvent();
     void InitLayoutProperty();
+    void InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow);
 
     std::string appLabel_;
     RefPtr<PanEvent> panEvent_ = nullptr;
