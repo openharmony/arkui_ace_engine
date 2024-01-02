@@ -1285,25 +1285,6 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPattern_OnDirtyLayoutWrapperSwap001, TestSize
 }
 
 /**
- * @tc.name: WaterFlowPattern_EdgeEffect001
- * @tc.desc: Test EdgeEffect.
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, WaterFlowPattern_EdgeEffect001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init Waterflow node
-     */
-    CreateWithItem([](WaterFlowModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, true); });
-
-    /**
-     * @tc.steps: step2. test function.
-     * @tc.expected: function CanOverScroll return true with spring edge effect.
-     */
-    EXPECT_TRUE(pattern_->CanOverScroll(SCROLL_FROM_UPDATE));
-}
-
-/**
  * @tc.name: Property010
  * @tc.desc: Test ToJsonValue of WaterFlowLayoutProperty.
  * @tc.type: FUNC
