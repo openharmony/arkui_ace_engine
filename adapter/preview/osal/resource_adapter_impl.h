@@ -48,6 +48,7 @@ public:
     bool GetIdByName(const std::string& resName, const std::string& resType, uint32_t& resId) const override;
     std::string GetMediaPath(uint32_t resId) override;
     std::string GetRawfile(const std::string& fileName) override;
+    uint32_t GetSymbolById(uint32_t resId) const override;
 
 private:
     bool ConvertToGlobalResourceType(const std::string& resTypeName, Global::Resource::ResourceType& resType) const;
