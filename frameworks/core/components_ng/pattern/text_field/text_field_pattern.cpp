@@ -1289,10 +1289,14 @@ void TextFieldPattern::FireEventHubOnChange(const std::string& text)
 
 void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
+    auto touchType = info.GetTouches().front().GetTouchType();
+    if (touchType == TouchType::UP) {
+        RequestKeyboardAfterLongPress();
+    }
     if (SelectOverlayIsOn() && !isTouchCaret_) {
         return;
     }
-    auto touchType = info.GetTouches().front().GetTouchType();
+
     if (touchType == TouchType::DOWN) {
         HandleTouchDown(info.GetTouches().front().GetLocalLocation());
     } else if (touchType == TouchType::UP) {
@@ -1356,14 +1360,6 @@ void TextFieldPattern::HandleTouchUp()
             }
         }
     }
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    if (isLongPress_ && !imeShown_ && !isCustomKeyboardAttached_ && HasFocus()) {
-        if (RequestKeyboard(false, true, true)) {
-            NotifyOnEditChanged(true);
-        }
-    }
-    isLongPress_ = false;
-#endif
 }
 
 void TextFieldPattern::HandleTouchMove(const TouchEventInfo& info)
@@ -2385,8 +2381,6 @@ bool TextFieldPattern::OnPreShowSelectOverlay(
     isSupportCameraInput_ = false;
 #endif
     overlayInfo.menuInfo.showCameraInput = !IsSelected() && isSupportCameraInput_ && !customKeyboardBuilder_;
-    auto gesture = host->GetOrCreateGestureEventHub();
-    gesture->RemoveTouchEvent(GetTouchListener());
     return true;
 }
 
@@ -6231,5 +6225,15 @@ void TextFieldPattern::HandleOnDragStatusCallback(
         default:
             break;
     }
+}
+
+void TextFieldPattern::RequestKeyboardAfterLongPress()
+{
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    if (isLongPress_ && HasFocus() && RequestKeyboard(false, true, true)) {
+        NotifyOnEditChanged(true);
+    }
+    isLongPress_ = false;
+#endif
 }
 } // namespace OHOS::Ace::NG
