@@ -111,7 +111,7 @@ public:
     };
 
 protected:
-    RefPtr<NGGestureRecognizer> CreateRecognizer() override; //todo: 反序列化生成识别器的时候需要设置矩阵。
+    RefPtr<NGGestureRecognizer> CreateRecognizer() override;
 
 private:
     PanDirection direction_;
