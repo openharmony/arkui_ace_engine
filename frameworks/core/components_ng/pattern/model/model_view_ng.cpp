@@ -164,7 +164,7 @@ void ModelViewNG::AddCustomRender(const std::shared_ptr<Render3D::CustomRenderDe
         return;
     }
 
-    const auto& curCustomRender = paintProperty->GetModelCustomRenderValue({ });
+    const auto curCustomRender = paintProperty->GetModelCustomRenderValue({ });
     if (!curCustomRender || (curCustomRender->GetUri() != customRender->GetUri())) {
         ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelCustomRender, customRender);
     }
