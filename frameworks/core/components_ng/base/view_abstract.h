@@ -24,14 +24,10 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/geometry/ng/vector.h"
-#include "base/geometry/offset.h"
 #include "base/memory/referenced.h"
-#include "base/subwindow/subwindow_manager.h"
-#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/layout/grid_layout_info.h"
 #include "core/components/common/properties/alignment.h"
-#include "core/components/common/properties/clip_path.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/motion_path_option.h"
 #include "core/components/common/properties/placement.h"
@@ -157,7 +153,7 @@ public:
 
     // decoration
     static void SetBackdropBlur(const Dimension &radius, const BlurOption &blurOption);
-    static void SetLinearGradientBlur(NG::LinearGradientBlurPara blurPara);
+    static void SetLinearGradientBlur(const NG::LinearGradientBlurPara& blurPara);
     static void SetDynamicLightUp(float rate, float lightUpDegree);
     static void SetFrontBlur(const Dimension &radius, const BlurOption &blurOption);
     static void SetBackShadow(const Shadow &shadow);
@@ -334,10 +330,10 @@ public:
     // global light
     static void SetLightPosition(
         const CalcDimension& positionX, const CalcDimension& positionY, const CalcDimension& positionZ);
-    static void SetLightIntensity(const float value);
-    static void SetLightIlluminated(const uint32_t value);
+    static void SetLightIntensity(float value);
+    static void SetLightIlluminated(uint32_t value);
     static void SetIlluminatedBorderWidth(const Dimension& value);
-    static void SetBloom(const float value);
+    static void SetBloom(float value);
 
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetWidth(FrameNode* frameNode, const CalcLength& width);
@@ -380,7 +376,7 @@ public:
     static void SetHasBorderImageRepeat(FrameNode* frameNode, bool tag);
     static void SetBorderImageGradient(FrameNode* frameNode, const NG::Gradient& gradient);
     static void SetForegroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& fgBlurStyle);
-    static void SetLinearGradientBlur(FrameNode* frameNode, NG::LinearGradientBlurPara blurPara);
+    static void SetLinearGradientBlur(FrameNode* frameNode, const NG::LinearGradientBlurPara& blurPara);
     static void SetBackgroundBlurStyle(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle);
     static void SetBackgroundImagePosition(FrameNode* frameNode, const BackgroundImagePosition& bgImgPosition);
     static void SetBackgroundImageSize(FrameNode* frameNode, const BackgroundImageSize& bgImgSize);
@@ -408,16 +404,16 @@ public:
     static void SetTouchable(FrameNode* frameNode, bool touchable);
     static void SetDefaultFocus(FrameNode* frameNode, bool isSet);
     static void SetDisplayIndex(FrameNode* frameNode, int32_t value);
-    static void SetOffset(FrameNode *frameNode, const OffsetT<Dimension> &value);
-    static void MarkAnchor(FrameNode *frameNode, const OffsetT<Dimension> &value);
-    static void SetVisibility(FrameNode *frameNode, VisibleType visible);
-    static void SetMargin(FrameNode *frameNode, const CalcLength &value);
-    static void SetMargin(FrameNode *frameNode, const PaddingProperty &value);
-    static void SetPadding(FrameNode *frameNode, const CalcLength &value);
-    static void SetPadding(FrameNode *frameNode, const PaddingProperty &value);
+    static void SetOffset(FrameNode* frameNode, const OffsetT<Dimension>& value);
+    static void MarkAnchor(FrameNode* frameNode, const OffsetT<Dimension>& value);
+    static void SetVisibility(FrameNode* frameNode, VisibleType visible);
+    static void SetMargin(FrameNode* frameNode, const CalcLength& value);
+    static void SetMargin(FrameNode* frameNode, const PaddingProperty& value);
+    static void SetPadding(FrameNode* frameNode, const CalcLength& value);
+    static void SetPadding(FrameNode* frameNode, const PaddingProperty& value);
     static void SetLayoutDirection(FrameNode* frameNode, TextDirection value);
     static void UpdateSafeAreaExpandOpts(FrameNode* frameNode, const SafeAreaExpandOpts& opts);
-    static void SetAspectRatio(FrameNode *frameNode, float ratio);
+    static void SetAspectRatio(FrameNode* frameNode, float ratio);
     static void SetAlignSelf(FrameNode* frameNode, FlexAlign value);
     static void SetFlexBasis(FrameNode* frameNode, const Dimension& value);
     static void ResetFlexShrink(FrameNode* frameNode);
@@ -431,14 +427,14 @@ public:
     static void SetMinHeight(FrameNode* frameNode, const CalcLength& minHeight);
     static void SetMaxHeight(FrameNode* frameNode, const CalcLength& maxHeight);
     static void SetAlignRules(FrameNode* frameNode, const std::map<AlignDirection, AlignRule>& alignRules);
-    static void SetGrid(FrameNode* frameNode,
-        std::optional<int32_t> span, std::optional<int32_t> offset, GridSizeType type = GridSizeType::UNDEFINED);
+    static void SetGrid(FrameNode* frameNode, std::optional<int32_t> span, std::optional<int32_t> offset,
+        GridSizeType type = GridSizeType::UNDEFINED);
     static void ResetAspectRatio(FrameNode* frameNode);
     static void SetAllowDrop(FrameNode* frameNode, const std::set<std::string>& allowDrop);
     static void SetInspectorId(FrameNode* frameNode, const std::string& inspectorId);
     static void SetRestoreId(FrameNode* frameNode, int32_t restoreId);
     static void SetTabIndex(FrameNode* frameNode, int32_t index);
-    static void SetObscured(FrameNode* frameNode, const std::vector< ObscuredReasons>& reasons);
+    static void SetObscured(FrameNode* frameNode, const std::vector<ObscuredReasons>& reasons);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
     static void SetMouseResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& mouseResponseRegion);
     static void SetSharedTransition(

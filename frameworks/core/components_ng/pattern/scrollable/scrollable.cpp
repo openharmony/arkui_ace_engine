@@ -39,9 +39,7 @@ constexpr uint32_t DRAG_INTERVAL_TIME = 900;
 
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
-constexpr double NEW_FRICTION = 0.7;
 constexpr double VELOCITY_SCALE = 1.0;
-constexpr double NEW_VELOCITY_SCALE = 1.5;
 constexpr double ADJUSTABLE_VELOCITY = 3000.0;
 #else
 constexpr double DISTANCE_EPSILON = 1.0;
@@ -64,8 +62,8 @@ using std::chrono::milliseconds;
 } // namespace
 
 // Static Functions.
-std::optional<double> Scrollable::sFriction_ = std::nullopt;
-std::optional<double> Scrollable::sVelocityScale_ = std::nullopt;
+double Scrollable::sFriction_ = FRICTION;
+double Scrollable::sVelocityScale_ = VELOCITY_SCALE;
 
 void Scrollable::SetVelocityScale(double sVelocityScale)
 {
@@ -81,20 +79,6 @@ void Scrollable::SetFriction(double sFriction)
         return;
     }
     sFriction_ = sFriction;
-}
-
-Scrollable::Scrollable(ScrollPositionCallback&& callback, Axis axis) : callback_(std::move(callback)), axis_(axis)
-{
-    friction_ = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_FRICTION : FRICTION;
-    velocityScale_ =
-        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_VELOCITY_SCALE : VELOCITY_SCALE;
-}
-
-Scrollable::Scrollable(const ScrollPositionCallback& callback, Axis axis) : callback_(callback), axis_(axis)
-{
-    friction_ = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_FRICTION : FRICTION;
-    velocityScale_ =
-        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_VELOCITY_SCALE : VELOCITY_SCALE;
 }
 
 Scrollable::~Scrollable()
@@ -418,7 +402,7 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     lastVelocity_ = info.GetMainVelocity();
     double correctVelocity = info.GetMainVelocity();
     SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
-    correctVelocity = correctVelocity * sVelocityScale_.value_or(velocityScale_) * GetGain(GetDragOffset());
+    correctVelocity = correctVelocity * sVelocityScale_ * GetGain(GetDragOffset());
     // Apply max fling velocity limit, it must be calculated after all fling velocity gain.
     correctVelocity = std::clamp(correctVelocity, -maxFlingVelocity_ + slipFactor_, maxFlingVelocity_ - slipFactor_);
     currentVelocity_ = correctVelocity;
@@ -470,7 +454,7 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
     StopSnapController();
     TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "The position of scroll motion is %{public}lf, velocity is %{public}lf",
         mainPosition, correctVelocity);
-    float friction = sFriction_.value_or(friction_);
+    float friction = friction_ > 0 ? friction_ : sFriction_;
     initVelocity_ = correctVelocity;
     finalPosition_ = mainPosition + correctVelocity / (friction * -FRICTION_SCALE);
 
@@ -614,7 +598,7 @@ void Scrollable::FixScrollMotion(float position, float initVelocity)
     if (frictionOffsetProperty_ && needCenterFix_ && watchFixCallback_) {
         float finalPosition = watchFixCallback_(GetFinalPosition(), position);
         if (!NearEqual(finalPosition, GetFinalPosition(), DISTANCE_EPSILON)) {
-            float friction = sFriction_.value_or(friction_);
+            float friction = friction_ > 0 ? friction_ : sFriction_;
             float velocity = GetFrictionVelocityByFinalPosition(finalPosition, position, friction, signum);
 
             // fix again when velocity is less than velocity threshold

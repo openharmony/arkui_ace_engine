@@ -384,6 +384,10 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
 {
     CHECK_NULL_VOID(context);
     context_ = context->weak_from_this();
+    bundleName_ = context->GetBundleName();
+    auto hapModuleInfo = context->GetHapModuleInfo();
+    CHECK_NULL_VOID(hapModuleInfo);
+    moduleName_ = hapModuleInfo->name;
 }
 
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard)
@@ -1401,7 +1405,7 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
 
 void UIContentImpl::Foreground()
 {
-    LOGI("UIContentImpl: window foreground");
+    LOGI("[%{public}s][%{public}s]: window foreground", bundleName_.c_str(), moduleName_.c_str());
     Platform::AceContainer::OnShow(instanceId_);
     // set the flag isForegroundCalled to be true
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -1417,7 +1421,7 @@ void UIContentImpl::Foreground()
 
 void UIContentImpl::Background()
 {
-    LOGI("UIContentImpl: window background");
+    LOGI("[%{public}s][%{public}s]: window background", bundleName_.c_str(), moduleName_.c_str());
     Platform::AceContainer::OnHide(instanceId_);
 
     CHECK_NULL_VOID(window_);

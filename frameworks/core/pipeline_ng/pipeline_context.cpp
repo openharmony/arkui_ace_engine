@@ -1843,6 +1843,7 @@ void PipelineContext::DumpPipelineInfo() const
     if (window_) {
         DumpLog::GetInstance().Print(1, "DisplayRefreshRate: " + std::to_string(window_->GetRefreshRate()));
         DumpLog::GetInstance().Print(1, "LastRequestVsyncTime: " + std::to_string(window_->GetLastRequestVsyncTime()));
+        DumpLog::GetInstance().Print(1, "NowTime: " + std::to_string(GetSysTimestamp()));
     }
     if (!dumpFrameInfos_.empty()) {
         DumpLog::GetInstance().Print("==================================FrameTask==================================");
@@ -3104,4 +3105,20 @@ const SerializedGesture& PipelineContext::GetSerializedGesture() const
     return serializedGesture_;
 }
 
+bool PipelineContext::PrintVsyncInfoIfNeed() const
+{
+    if (dumpFrameInfos_.empty()) {
+        return false;
+    }
+    auto lastFrameInfo = dumpFrameInfos_.back();
+    const uint64_t timeout = 1000000000; // unit is ns, 1s
+    if (lastFrameInfo.frameRecvTime_ < window_->GetLastRequestVsyncTime() &&
+        GetSysTimestamp() - window_->GetLastRequestVsyncTime() >= timeout) {
+        LOGW("lastRequestVsyncTime is %{public}" PRIu64 ", now time is %{public}" PRId64
+             ", timeout, window foreground:%{public}d, lastReceiveVsync info:%{public}s",
+            window_->GetLastRequestVsyncTime(), GetSysTimestamp(), onShow_, lastFrameInfo.GetTimeInfo().c_str());
+        return true;
+    }
+    return false;
+}
 } // namespace OHOS::Ace::NG

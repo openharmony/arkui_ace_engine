@@ -33,6 +33,7 @@
 #include "adapter/preview/external/multimodalinput/key_event.h"
 #include "adapter/preview/external/multimodalinput/pointer_event.h"
 #include "frameworks/base/utils/macros.h"
+#include "frameworks/core/common/window_animation_config.h"
 
 namespace OHOS::Rosen {
 class Window;
@@ -79,7 +80,8 @@ public:
 
     void OnConfigurationChanged(const DeviceConfig& newConfig);
     void SurfaceChanged(
-        const DeviceOrientation& orientation, const double& resolution, int32_t& width, int32_t& height);
+        const DeviceOrientation& orientation, const double& resolution, int32_t& width, int32_t& height,
+        WindowSizeChangeReason type = WindowSizeChangeReason::UNDEFINED);
     void ReplacePage(const std::string& url, const std::string& params);
     void LoadDocument(const std::string& url, const std::string& componentName, SystemParams& systemParams);
 

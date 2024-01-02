@@ -18,13 +18,15 @@
 
 #include "base/utils/macros.h"
 #include "core/components_ng/pattern/stack/stack_model.h"
-#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
+
+class FrameNode;
 
 class ACE_EXPORT StackModelNG : public StackModel {
 public:
     void Create(Alignment align) override;
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId); //override;
     void SetStackFit(StackFit fit) override {}
     void SetOverflow(Overflow overflow) override {}
     void SetAlignment(Alignment align) override;
