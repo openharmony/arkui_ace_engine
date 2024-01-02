@@ -1229,6 +1229,7 @@ private:
     void ScrollToSafeArea() const override;
     void RecordSubmitEvent() const;
     void UpdateCancelNode();
+    void RequestKeyboardAfterLongPress();
 
     RectF frameRect_;
     RectF contentRect_;
