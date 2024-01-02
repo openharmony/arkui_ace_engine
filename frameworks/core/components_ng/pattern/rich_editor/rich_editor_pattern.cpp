@@ -3244,7 +3244,6 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
         isMousePressed_ = false;
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         if (isLongPress_) {
-            RequestKeyboard(false, true, true);
             isLongPress_ = false;
         }
 #endif
