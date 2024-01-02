@@ -60,12 +60,13 @@ void JSPersistent::Set(const JSCallbackInfo& args)
         "emulator or a real device instead.");
     return;
 #endif
-    if (args.Length() < 2 || !args[0]->IsString() || !args[1]->IsString()) {
+    if (args.Length() < 2 || !args[0]->IsString() || args[1]->IsUndefined() || args[1]->IsNull()) {
         LOGW("JSPersistent: Fail to set persistent data, args too few");
         return;
     }
     std::string key = args[0]->ToString();
-    std::string value = args[1]->ToString();
+    auto serializedValue = JSON::Stringify(args.GetVm(), args[1].Get().GetLocalHandle());
+    std::string value = serializedValue->ToString(args.GetVm())->ToString();
     auto container = Container::Current();
     if (!container) {
         LOGW("container is null");
@@ -73,6 +74,7 @@ void JSPersistent::Set(const JSCallbackInfo& args)
     }
     auto executor = container->GetTaskExecutor();
     if(!StorageProxy::GetInstance()->GetStorage(executor)) {
+        LOGW("no storage available");
         return;
     }
     StorageProxy::GetInstance()->GetStorage(executor)->SetString(key, value);
@@ -104,9 +106,13 @@ void JSPersistent::Get(const JSCallbackInfo& args)
     }
     auto executor = container->GetTaskExecutor();
     std::string value = StorageProxy::GetInstance()->GetStorage(executor)->GetString(key);
-    auto returnValue = JSVal(ToJSValue(value));
-    auto returnPtr = JSRef<JSVal>::Make(returnValue);
-    args.SetReturnValue(returnPtr);
+    if (value.empty()) {
+        args.SetReturnValue(JSVal::Undefined());
+        return;
+    }
+    JSRef<JSObject> obj = JSRef<JSObject>::New();
+    JSRef<JSVal> ret = obj->ToJsonObject(value.c_str());
+    args.SetReturnValue(ret);
 }
 
 void JSPersistent::Delete(const JSCallbackInfo& args)
