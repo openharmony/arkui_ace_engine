@@ -66,7 +66,7 @@
 #define ACE_UPDATE_NODE_RENDER_CONTEXT(name, value, frameNode)                  \
     do {                                                                        \
         CHECK_NULL_VOID(frameNode);                                             \
-        auto target = frameNode->GetRenderContext();                            \
+        const auto& target = frameNode->GetRenderContext();                     \
         if (target) {                                                           \
             target->Update##name(value);                                        \
         }                                                                       \
