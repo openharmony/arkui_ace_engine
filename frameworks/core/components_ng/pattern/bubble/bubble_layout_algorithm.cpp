@@ -368,6 +368,7 @@ void BubbleLayoutAlgorithm::BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, Ref
     childSize_ = SizeF(childShowWidth, childShowHeight);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         childOffset_ = GetChildPosition(childSize_, bubbleProp, UseArrowOffset); // bubble's offset
+        placement_ = arrowPlacement_;
         UpdateChildPosition(childOffset_);
         if (arrowPlacement_ == Placement::TOP) {
             if (bCaretMode_) {
@@ -964,13 +965,17 @@ void BubbleLayoutAlgorithm::UpdateChildPosition(OffsetF& childOffset)
 {
     double arrowWidth = BUBBLE_ARROW_WIDTH.ConvertToPx();
     double twoRadiusPx = borderRadius_.ConvertToPx() * 2.0;
+    float movingDistance = BUBBLE_ARROW_HEIGHT.ConvertToPx() + BUBBLE_ARROW_HEIGHT.ConvertToPx();
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
+        movingDistance = BUBBLE_ARROW_HEIGHT.ConvertToPx();
+    }
     switch (placement_) {
         case Placement::TOP:
         case Placement::TOP_LEFT:
         case Placement::TOP_RIGHT:
             showArrow_ = GreatOrEqual(childSize_.Width() - twoRadiusPx, arrowWidth);
             if (!showArrow_ || !enableArrow_) {
-                childOffset += OffsetF(0.0, BUBBLE_ARROW_HEIGHT.ConvertToPx() + BUBBLE_ARROW_HEIGHT.ConvertToPx());
+                childOffset += OffsetF(0.0, movingDistance);
             }
             break;
         case Placement::BOTTOM:
@@ -978,7 +983,7 @@ void BubbleLayoutAlgorithm::UpdateChildPosition(OffsetF& childOffset)
         case Placement::BOTTOM_RIGHT:
             showArrow_ = GreatOrEqual(childSize_.Width() - twoRadiusPx, arrowWidth);
             if (!showArrow_ || !enableArrow_) {
-                childOffset += OffsetF(0.0, -(BUBBLE_ARROW_HEIGHT.ConvertToPx() + BUBBLE_ARROW_HEIGHT.ConvertToPx()));
+                childOffset += OffsetF(0.0, -(movingDistance));
             }
             break;
         case Placement::LEFT:
@@ -986,7 +991,7 @@ void BubbleLayoutAlgorithm::UpdateChildPosition(OffsetF& childOffset)
         case Placement::LEFT_BOTTOM:
             showArrow_ = GreatOrEqual(childSize_.Height() - twoRadiusPx, arrowWidth);
             if (!showArrow_ || !enableArrow_) {
-                childOffset += OffsetF(BUBBLE_ARROW_HEIGHT.ConvertToPx() + BUBBLE_ARROW_HEIGHT.ConvertToPx(), 0.0);
+                childOffset += OffsetF(movingDistance, 0.0);
             }
             break;
         case Placement::RIGHT:
@@ -994,7 +999,7 @@ void BubbleLayoutAlgorithm::UpdateChildPosition(OffsetF& childOffset)
         case Placement::RIGHT_BOTTOM:
             showArrow_ = GreatOrEqual(childSize_.Height() - twoRadiusPx, arrowWidth);
             if (!showArrow_ || !enableArrow_) {
-                childOffset += OffsetF(-(BUBBLE_ARROW_HEIGHT.ConvertToPx() + BUBBLE_ARROW_HEIGHT.ConvertToPx()), 0.0);
+                childOffset += OffsetF(-(movingDistance), 0.0);
             }
             break;
         default:
