@@ -378,7 +378,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
 
     // Only used in OnDirtyLayoutWrapperSwap.
     lastTextRect_= textRect;
-    
+
     parentGlobalOffset_ = textFieldLayoutAlgorithm->GetParentGlobalOffset();
     inlineMeasureItem_ = textFieldLayoutAlgorithm->GetInlineMeasureItem();
     isEditorValueChanged |= FireOnTextChangeEvent();
@@ -2120,6 +2120,9 @@ bool TextFieldPattern::FireOnTextChangeEvent()
         [weak = WeakClaim(this)] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            if (pattern->HasFocus()) {
+                return;
+            }
             pattern->ScrollToSafeArea();
         },
         TaskExecutor::TaskType::UI);
