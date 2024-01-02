@@ -229,16 +229,19 @@ RefPtr<NG::ImageData> ImageLoader::LoadImageDataFromFileCache(const std::string&
 }
 
 // NG ImageLoader entrance
-RefPtr<NG::ImageData> ImageLoader::GetImageData(const ImageSourceInfo& src, const WeakPtr<PipelineBase>& context)
+RefPtr<NG::ImageData> ImageLoader::GetImageData(
+    const ImageSourceInfo& src, const WeakPtr<PipelineBase>& context, bool queryCache)
 {
     ACE_FUNCTION_TRACE();
     if (src.IsPixmap()) {
         return LoadDecodedImageData(src, context);
     }
 #ifndef USE_ROSEN_DRAWING
-    auto cachedData = ImageLoader::QueryImageDataFromImageCache(src);
-    if (cachedData) {
-        return NG::ImageData::MakeFromDataWrapper(&cachedData);
+    if (queryCache) {
+        auto cachedData = ImageLoader::QueryImageDataFromImageCache(src);
+        if (cachedData) {
+            return NG::ImageData::MakeFromDataWrapper(&cachedData);
+        }
     }
     auto skData = LoadImageData(src, context);
     CHECK_NULL_RETURN(skData, nullptr);
@@ -248,9 +251,11 @@ RefPtr<NG::ImageData> ImageLoader::GetImageData(const ImageSourceInfo& src, cons
 #else
     std::shared_ptr<RSData> rsData = nullptr;
     do {
-        rsData = ImageLoader::QueryImageDataFromImageCache(src);
-        if (rsData) {
-            break;
+        if (queryCache) {
+            rsData = ImageLoader::QueryImageDataFromImageCache(src);
+            if (rsData) {
+                break;
+            }
         }
         rsData = LoadImageData(src, context);
         CHECK_NULL_RETURN(rsData, nullptr);
