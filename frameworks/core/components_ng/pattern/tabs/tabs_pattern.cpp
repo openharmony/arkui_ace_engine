@@ -97,7 +97,7 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
             }
         }
         /* js callback */
-        if (jsEvent) {
+        if (jsEvent && tabsNode->IsOnMainTree()) {
             TabContentChangeEvent eventInfo(index);
             jsEvent(&eventInfo);
 
