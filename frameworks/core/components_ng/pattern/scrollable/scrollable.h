@@ -118,20 +118,12 @@ public:
         if (panRecognizerNG_) {
             panRecognizerNG_->SetCoordinateOffset(offset);
         }
-
-        if (rawRecognizer_) {
-            rawRecognizer_->SetCoordinateOffset(offset);
-        }
     }
 
     void OnCollectTouchTarget(TouchTestResult& result)
     {
         if (panRecognizerNG_) {
             result.emplace_back(panRecognizerNG_);
-        }
-
-        if (rawRecognizer_) {
-            result.emplace_back(rawRecognizer_);
         }
     }
 
@@ -190,9 +182,6 @@ public:
     {
         if (!available_) {
             return true;
-        }
-        if (rawRecognizer_) {
-            return rawRecognizer_->HandleEvent(event);
         }
         return true;
     }
@@ -479,7 +468,6 @@ private:
     // used for ng structure.
     RefPtr<NG::PanRecognizer> panRecognizerNG_;
 
-    RefPtr<RawRecognizer> rawRecognizer_;
     WeakPtr<PipelineBase> context_;
     double currentPos_ = 0.0;
     double currentVelocity_ = 0.0;

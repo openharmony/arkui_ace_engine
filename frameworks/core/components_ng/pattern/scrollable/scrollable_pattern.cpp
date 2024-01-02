@@ -446,6 +446,39 @@ void ScrollablePattern::AddScrollEvent()
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(GetAxis());
     scrollableEvent_->SetScrollable(scrollable);
     gestureHub->AddScrollableEvent(scrollableEvent_);
+    InitTouchEvent(gestureHub);
+}
+
+void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
+{
+    // use TouchEvent to receive next touch down event to stop animation.
+    if (touchEvent_) {
+        return;
+    }
+    auto touchTask = [weak = WeakClaim(this)](const TouchEventInfo& info) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern && pattern->scrollableEvent_);
+        auto scrollable = pattern->scrollableEvent_->GetScrollable();
+        CHECK_NULL_VOID(scrollable);
+        switch (info.GetTouches().front().GetTouchType()) {
+            case TouchType::DOWN:
+                scrollable->HandleTouchDown();
+                break;
+            case TouchType::UP:
+                scrollable->HandleTouchUp();
+                break;
+            case TouchType::CANCEL:
+                scrollable->HandleTouchCancel();
+                break;
+            default:
+                break;
+        }
+    };
+    if (touchEvent_) {
+        gestureHub->RemoveTouchEvent(touchEvent_);
+    }
+    touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
+    gestureHub->AddTouchEvent(touchEvent_);
 }
 
 void ScrollablePattern::SetEdgeEffect(EdgeEffect edgeEffect)

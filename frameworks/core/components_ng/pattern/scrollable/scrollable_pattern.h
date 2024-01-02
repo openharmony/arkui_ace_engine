@@ -530,6 +530,7 @@ private:
 
     void OnAttachToFrameNode() override;
     void AttachAnimatableProperty(RefPtr<Scrollable> scrollable);
+    void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
 
     // select with mouse
     virtual void MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
@@ -603,6 +604,7 @@ private:
 
     Axis axis_;
     RefPtr<ScrollableEvent> scrollableEvent_;
+    RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
     RefPtr<RefreshCoordination> refreshCoordination_;
     int32_t scrollSource_ = SCROLL_FROM_NONE;
