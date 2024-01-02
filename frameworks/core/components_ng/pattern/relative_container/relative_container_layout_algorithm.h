@@ -64,6 +64,7 @@ private:
 
     void UpdateVerticalTwoAlignValues(TwoAlignedValues& twoAlignedValues, AlignRule alignRule);
     void UpdateHorizontalTwoAlignValues(TwoAlignedValues& twoAlignedValues, AlignRule alignRule);
+    void UpdateSizeWhenChildrenEmpty(LayoutWrapper* layoutWrapper);
 
     bool isHorizontalRelyOnContainer_ = false;
     bool isVerticalRelyOnContainer_ = false;
