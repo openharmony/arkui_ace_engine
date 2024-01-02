@@ -85,7 +85,8 @@ class NavigationController;
 enum class FrontendType;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AceVsyncCallback = std::function<void(uint64_t, uint32_t)>;
-using EtsCardTouchEventCallback = std::function<void(const TouchEvent&, SerializedGesture& serializedGesture)>;
+using EtsCardTouchEventCallback = std::function<void(const TouchEvent&,
+    SerializedGesture& serializedGesture)>;
 
 class ACE_FORCE_EXPORT PipelineBase : public AceType {
     DECLARE_ACE_TYPE(PipelineBase, AceType);
@@ -1069,7 +1070,10 @@ public:
 
     virtual void ResetDragging() {}
 
-    virtual const SerializedGesture& GetSerializedGesture() const { return serializedGesture_; }
+    virtual const SerializedGesture& GetSerializedGesture() const
+    {
+        return serializedGesture_;
+    }
 
 protected:
     virtual bool MaybeRelease() override;

@@ -791,7 +791,8 @@ void PipelineBase::AddEtsCardTouchEventCallback(int32_t pointId, EtsCardTouchEve
     etsCardTouchEventCallback_[pointId] = std::move(callback);
 }
 
-void PipelineBase::HandleEtsCardTouchEvent(const TouchEvent& point, SerializedGesture& serializedGesture)
+void PipelineBase::HandleEtsCardTouchEvent(const TouchEvent& point,
+    SerializedGesture& serializedGesture)
 {
     if (point.id < 0) {
         return;

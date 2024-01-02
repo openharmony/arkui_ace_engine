@@ -26,7 +26,8 @@ FormRendererDispatcherProxy::FormRendererDispatcherProxy(const sptr<IRemoteObjec
     : IRemoteProxy<IFormRendererDispatcher>(impl) {}
 
 void FormRendererDispatcherProxy::DispatchPointerEvent(
-    const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, SerializedGesture& serializedGesture)
+    const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent,
+    SerializedGesture& serializedGesture)
 {
     if (pointerEvent == nullptr) {
         HILOG_ERROR("%{public}s, pointerEvent is null", __func__);

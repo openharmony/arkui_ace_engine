@@ -594,7 +594,9 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
 #endif
 }
 
-void FormManagerDelegate::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, SerializedGesture& serializedGesture)
+void FormManagerDelegate::DispatchPointerEvent(const
+    std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    SerializedGesture& serializedGesture)
 {
     if (!isDynamic_) {
         return;
@@ -621,7 +623,6 @@ void FormManagerDelegate::DispatchPointerEvent(const std::shared_ptr<MMI::Pointe
         return;
     }
     formRendererDispatcher_->DispatchPointerEvent(pointerEvent, serializedGesture);
-
 }
 
 void FormManagerDelegate::SetAllowUpdate(bool allowUpdate)

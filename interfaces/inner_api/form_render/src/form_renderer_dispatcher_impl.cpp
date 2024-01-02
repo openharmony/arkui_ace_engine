@@ -33,7 +33,8 @@ FormRendererDispatcherImpl::FormRendererDispatcherImpl(
 {}
 
 void FormRendererDispatcherImpl::DispatchPointerEvent(
-    const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, SerializedGesture& serializedGesture)
+    const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent,
+    SerializedGesture& serializedGesture)
 {
     auto handler = eventHandler_.lock();
     if (!handler) {

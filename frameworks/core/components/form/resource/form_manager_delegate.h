@@ -101,7 +101,8 @@ public:
     void OnActionEventHandle(const std::string& action);
     void SetAllowUpdate(bool allowUpdate);
     void OnActionEvent(const std::string& action);
-    void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent, SerializedGesture& serializedGesture);
+    void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        SerializedGesture& serializedGesture);
     void AddRenderDelegate();
     void RegisterRenderDelegateEvent();
     void OnFormError(const std::string& code, const std::string& msg);

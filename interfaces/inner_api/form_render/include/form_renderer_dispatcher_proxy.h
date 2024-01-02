@@ -33,7 +33,8 @@ public:
     virtual ~FormRendererDispatcherProxy() = default;
 
     void DispatchPointerEvent(
-        const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, SerializedGesture& serializedGesture) override;
+        const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent,
+        SerializedGesture& serializedGesture) override;
 
     void SetAllowUpdate(bool allowUpdate) override;
 

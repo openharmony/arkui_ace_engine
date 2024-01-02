@@ -116,7 +116,8 @@ HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& paren
     return testResult;
 }
 
-void FormNode::DispatchPointerEvent(const TouchEvent& touchEvent, SerializedGesture& serializedGesture)
+void FormNode::DispatchPointerEvent(const TouchEvent& touchEvent,
+    SerializedGesture& serializedGesture)
 {
     auto pattern = GetPattern<FormPattern>();
     CHECK_NULL_VOID(pattern);
