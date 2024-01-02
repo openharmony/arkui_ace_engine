@@ -46,7 +46,7 @@ class ACE_EXPORT ViewAbstractModelNG : public ViewAbstractModel {
 public:
     ~ViewAbstractModelNG() override = default;
 
-    static void CreateCustomMenu(std::function<void()>& buildFunc, const RefPtr<NG::FrameNode>& targetNode,
+    static void CreateCustomMenu(const std::function<void()>& buildFunc, const RefPtr<NG::FrameNode>& targetNode,
         const MenuType& menuType, const NG::OffsetF& offset, const MenuParam& menuParam = MenuParam());
 
     void SetWidth(const CalcDimension& width) override
