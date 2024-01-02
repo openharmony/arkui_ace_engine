@@ -38,6 +38,7 @@ public:
     static void ConstructorCallback(const JSCallbackInfo& info);
     static void DestructorCallback(JSBaseNode* node);
     void FinishUpdateFunc(const JSCallbackInfo& info);
+    void Create(const JSCallbackInfo& info);
     void BuildNode(const JSCallbackInfo& info);
     void PostTouchEvent(const JSCallbackInfo& info);
     void CreateRenderNode(const JSCallbackInfo& info);
