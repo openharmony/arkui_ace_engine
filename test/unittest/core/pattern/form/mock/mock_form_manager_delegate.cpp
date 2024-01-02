@@ -68,7 +68,8 @@ void FormManagerDelegate::AddActionEventHandle(const ActionEventHandle& callback
 
 void FormManagerDelegate::SetAllowUpdate(bool allowUpdate) {}
 
-void FormManagerDelegate::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
+void FormManagerDelegate::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    SerializedGesture& serializedGesture) {}
 
 void FormManagerDelegate::NotifySurfaceChange(float width, float height) {}
 

@@ -43,7 +43,8 @@ bool DispatcherProxyAPI(const std::string data, size_t size)
     sptr<IRemoteObject> impl = new MockIRemoteObject();
     FormRendererDispatcherProxy dispatcherProxy(impl);
     std::shared_ptr<OHOS::MMI::PointerEvent> pointEvent;
-    dispatcherProxy.DispatchPointerEvent(pointEvent);
+    SerializedGesture serializedGesture;
+    dispatcherImpl.DispatchPointerEvent(pointEvent, serializedGesture);
     dispatcherProxy.SetAllowUpdate(true);
     return true;
 }
