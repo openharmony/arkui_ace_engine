@@ -19,6 +19,8 @@
 
 #include "base/geometry/ng/offset_t.h"
 #include "base/memory/ace_type.h"
+#include "base/thread/task_executor.h"
+#include "base/utils/utils.h"
 #include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/components/common/properties/placement.h"
@@ -31,7 +33,7 @@ namespace {
 constexpr int32_t LONG_PRESS_DURATION = 800;
 } // namespace
 
-void ViewAbstractModelNG::CreateCustomMenu(std::function<void()>& buildFunc, const RefPtr<NG::FrameNode>& targetNode,
+void ViewAbstractModelNG::CreateCustomMenu(const std::function<void()>& buildFunc, const RefPtr<NG::FrameNode>& targetNode,
     const MenuType& menuType, const NG::OffsetF& offset, const MenuParam& menuParam)
 {
     NG::ScopedViewStackProcessor builderViewStackProcessor;
@@ -113,35 +115,57 @@ void ViewAbstractModelNG::BindContextMenu(
     CHECK_NULL_VOID(hub);
     auto weakTarget = AceType::WeakClaim(AceType::RawPtr(targetNode));
     if (type == ResponseType::RIGHT_CLICK) {
-        OnMouseEventFunc event = [builder = buildFunc, weakTarget, menuParam, menuType](MouseInfo& info) mutable {
-            auto targetNode = weakTarget.Upgrade();
-            CHECK_NULL_VOID(targetNode);
-            NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
-                info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
-            auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto windowRect = pipelineContext->GetDisplayWindowRectInfo();
-            menuPosition += NG::OffsetF { windowRect.Left(), windowRect.Top() };
+        OnMouseEventFunc event = [builderF = buildFunc, weakTarget, menuParam, menuType](MouseInfo& info) mutable {
+            auto containerId = Container::CurrentId();
+            auto taskExecutor = Container::CurrentTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
             if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
-                CreateCustomMenu(builder, targetNode, menuType, menuPosition, menuParam);
                 info.SetStopPropagation(true);
             }
+            taskExecutor->PostTask(
+                [containerId, builder = builderF, weakTarget, menuParam, info, menuType]() mutable {
+                    auto targetNode = weakTarget.Upgrade();
+                    CHECK_NULL_VOID(targetNode);
+                    NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
+                        info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
+                    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+                    CHECK_NULL_VOID(pipelineContext);
+                    auto windowRect = pipelineContext->GetDisplayWindowRectInfo();
+                    menuPosition += NG::OffsetF { windowRect.Left(), windowRect.Top() };
+                    if (info.GetButton() == MouseButton::RIGHT_BUTTON && info.GetAction() == MouseAction::RELEASE) {
+                        NG::ViewAbstractModelNG::CreateCustomMenu(
+                            builder, targetNode, menuType, menuPosition, menuParam);
+                    }
+                },
+                TaskExecutor::TaskType::PLATFORM);
         };
         auto inputHub = targetNode->GetOrCreateInputEventHub();
         CHECK_NULL_VOID(inputHub);
         inputHub->BindContextMenu(std::move(event));
     } else if (type == ResponseType::LONG_PRESS) {
+#ifdef ENABLE_DRAG_FRAMEWORK
+        auto gestureHub = targetNode->GetEventHub<EventHub>()->GetGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->SetPreviewMode(menuParam.previewMode);
+#endif
         // create or show menu on long press
-        auto event = [builder = buildFunc, weakTarget, menuParam, menuType](const GestureEvent& info) mutable {
-            auto targetNode = weakTarget.Upgrade();
-            CHECK_NULL_VOID(targetNode);
-            NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
-                info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
-            auto pipelineContext = NG::PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto windowRect = pipelineContext->GetDisplayWindowRectInfo();
-            menuPosition += NG::OffsetF { windowRect.Left(), windowRect.Top() };
-            CreateCustomMenu(builder, targetNode, menuType, menuPosition, menuParam);
+        auto event = [builderF = buildFunc, weakTarget, menuParam, menuType](const GestureEvent& info) mutable {
+            auto containerId = Container::CurrentId();
+            auto taskExecutor = Container::CurrentTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(
+                [containerId, builder = builderF, weakTarget, menuParam, info, menuType]() mutable {
+                    auto targetNode = weakTarget.Upgrade();
+                    CHECK_NULL_VOID(targetNode);
+                    NG::OffsetF menuPosition { info.GetGlobalLocation().GetX() + menuParam.positionOffset.GetX(),
+                        info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
+                    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+                    CHECK_NULL_VOID(pipelineContext);
+                    auto windowRect = pipelineContext->GetDisplayWindowRectInfo();
+                    menuPosition += NG::OffsetF { windowRect.Left(), windowRect.Top() };
+                    NG::ViewAbstractModelNG::CreateCustomMenu(builder, targetNode, menuType, menuPosition, menuParam);
+                },
+                TaskExecutor::TaskType::PLATFORM);
         };
         auto longPress = AceType::MakeRefPtr<NG::LongPressEvent>(std::move(event));
 #ifdef ENABLE_DRAG_FRAMEWORK
@@ -292,8 +316,8 @@ void ViewAbstractModelNG::RegisterContextMenuKeyEvent(const RefPtr<FrameNode>& t
 {
     auto focusHub = targetNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
-    auto onKeyEvent = [wp = AceType::WeakClaim(AceType::RawPtr(targetNode)), builder = buildFunc,
-                          param = menuParam, type = menuType](const KeyEvent& event) mutable -> bool {
+    auto onKeyEvent = [wp = AceType::WeakClaim(AceType::RawPtr(targetNode)), builder = buildFunc, param = menuParam,
+                          type = menuType](const KeyEvent& event) mutable -> bool {
         if (event.action != KeyAction::DOWN) {
             return false;
         }
@@ -338,8 +362,8 @@ void ViewAbstractModelNG::BindSheet(bool isShow, std::function<void(const std::s
     };
     targetNode->PushDestroyCallback(destructor);
 
-    overlayManager->BindSheet(isShow, std::move(callback), std::move(buildNodeFunc), sheetStyle,
-        std::move(onAppear), std::move(onDisappear), targetNode->GetId());
+    overlayManager->BindSheet(isShow, std::move(callback), std::move(buildNodeFunc), sheetStyle, std::move(onAppear),
+        std::move(onDisappear), targetNode->GetId());
 }
 
 void ViewAbstractModelNG::SetAccessibilityGroup(bool accessible)
