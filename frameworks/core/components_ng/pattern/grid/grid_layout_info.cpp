@@ -142,9 +142,14 @@ void GridLayoutInfo::UpdateEndIndex(float overScrollOffset, float mainSize, floa
 
 float GridLayoutInfo::GetCurrentOffsetOfRegularGrid(float mainGap) const
 {
-    float lineHeight = GetCurrentLineHeight();
+    float defaultHeight = GetCurrentLineHeight();
     auto lines = startIndex_ / crossCount_;
-    return lines * (lineHeight + mainGap) - currentOffset_;
+    float res = 0.0f;
+    for (int i = 0; i < lines; ++i) {
+        auto it = lineHeightMap_.find(i);
+        res += (it != lineHeightMap_.end() ? it->second : defaultHeight) + mainGap;
+    }
+    return res - currentOffset_;
 }
 
 float GridLayoutInfo::GetContentOffset(float mainGap) const
@@ -186,11 +191,17 @@ float GridLayoutInfo::GetContentHeight(float mainGap) const
 {
     if (!hasBigItem_) {
         float lineHeight = GetCurrentLineHeight();
+        float res = 0.0f;
         auto lines = (childrenCount_) / crossCount_;
-        if (childrenCount_ % crossCount_ == 0) {
-            return lines * lineHeight + (lines - 1) * mainGap;
+        for (int i = 0; i < lines; ++i) {
+            auto it = lineHeightMap_.find(i);
+            res += (it != lineHeightMap_.end() ? it->second : lineHeight) + mainGap;
         }
-        return (lines + 1) * lineHeight + lines * mainGap;
+        if (childrenCount_ % crossCount_ == 0) {
+            return res - mainGap;
+        }
+        auto lastLine = lineHeightMap_.find(lines);
+        return res + (lastLine != lineHeightMap_.end() ? lastLine->second : lineHeight);
     }
     float heightSum = 0;
     int32_t itemCount = 0;
