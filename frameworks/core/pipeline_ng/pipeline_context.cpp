@@ -1625,15 +1625,6 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     }
 
     if (scalePoint.type == TouchType::MOVE) {
-        if (eventManager_->GetInnerFlag() && !cancelSended_) {
-            for (auto& touchResult : touchTestResults_) {
-                auto mockScalePoint = scalePoint;
-                mockScalePoint.id = touchResult.first;
-                mockScalePoint.type = TouchType::CANCEL;
-                eventManager_->DispatchTouchEvent(mockScalePoint);
-            }
-            cancelSended_ = true;
-        }
         touchEvents_.emplace_back(point);
         auto container = Container::Current();
         if (container && container->IsScenceBoardWindow() && IsWindowSceneConsumed()) {
@@ -1676,7 +1667,6 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         touchPluginPipelineContext_.clear();
         RemoveEtsCardTouchEventCallback(point.id);
         ResetDraggingStatus(scalePoint);
-        cancelSended_ = false;
     }
 
     hasIdleTasks_ = true;

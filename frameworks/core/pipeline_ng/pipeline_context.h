@@ -721,7 +721,6 @@ private:
     bool isWindowSceneConsumed_ = false;
     bool isDensityChanged_ = false;
     bool isBeforeDragHandleAxis_ = false;
-    bool cancelSended_ = false;
     WeakPtr<FrameNode> activeNode_;
 
     RefPtr<FrameNode> focusNode_;
