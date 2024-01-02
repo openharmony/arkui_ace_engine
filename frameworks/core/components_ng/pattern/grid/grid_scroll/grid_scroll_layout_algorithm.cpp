@@ -543,8 +543,8 @@ OffsetF GridScrollLayoutAlgorithm::CalculateLargeItemOffset(
 bool GridScrollLayoutAlgorithm::NeedAdjust(const RefPtr<GridItemLayoutProperty>& itemLayoutProperty)
 {
     bool needAdjust = false;
-    auto main = axis_ == Axis::VERTICAL ? mainCount_: crossCount_;
-    auto cross = axis_ == Axis::VERTICAL ? crossCount_: mainCount_;
+    auto main = axis_ == Axis::VERTICAL ? mainCount_ : crossCount_;
+    auto cross = axis_ == Axis::VERTICAL ? crossCount_ : mainCount_;
     if (itemLayoutProperty->GetRowStart().has_value()) {
         currentItemRowStart_ = itemLayoutProperty->GetRowStart().value_or(-1);
         if ((currentItemRowStart_ < 0) || (currentItemRowStart_ >= static_cast<int32_t>(main))) {
@@ -832,6 +832,8 @@ float GridScrollLayoutAlgorithm::MeasureRecordedItems(float mainSize, float cros
 bool GridScrollLayoutAlgorithm::UseCurrentLines(
     float mainSize, float crossSize, LayoutWrapper* layoutWrapper, float& mainLength)
 {
+    auto& info = gridLayoutInfo_;
+    bool cacheValid = true;
     bool runOutOfRecord = false;
     // Measure grid items row by row
     int32_t tempEndIndex = -1;
@@ -874,7 +876,13 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
         }
 
         if (GreatOrEqual(cellAveLength_, 0.0)) { // Means at least one item has been measured
-            gridLayoutInfo_.lineHeightMap_[currentMainLineIndex_] = cellAveLength_;
+            auto it = info.lineHeightMap_.find(currentMainLineIndex_);
+            if (it != info.lineHeightMap_.end() && it->second != cellAveLength_) {
+                // Invalidate cache when item height changes, so that a future line jump would correctly
+                // recalculate lineHeights instead of using bad cache values.
+                cacheValid = false;
+            }
+            info.lineHeightMap_[currentMainLineIndex_] = cellAveLength_;
             mainLength += (cellAveLength_ + mainGap_);
         }
         // If a line moves up out of viewport, update [startIndex_], [currentOffset_] and [startMainLineIndex_]
@@ -896,6 +904,10 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     gridLayoutInfo_.reachEnd_ = gridLayoutInfo_.endIndex_ == layoutWrapper->GetTotalChildCount() - 1;
     if (!gridLayoutInfo_.reachEnd_) {
         gridLayoutInfo_.offsetEnd_ = false;
+    }
+    if (!cacheValid) {
+        info.ClearMapsForward(info.endMainLineIndex_ + 1);
+        info.ClearMapsBackward(info.startMainLineIndex_);
     }
     return runOutOfRecord;
 }
