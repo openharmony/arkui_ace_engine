@@ -1573,7 +1573,8 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
                 recognizer->BeginReferee(scalePoint.id, true);
                 std::list<RefPtr<NGGestureRecognizer>> combined;
                 combined.emplace_back(recognizer);
-                for (auto iter = touchTestResults_[point.id].begin(); iter != touchTestResults_[point.id].end(); iter++) {
+                for (auto iter = touchTestResults_[point.id].begin();
+                    iter != touchTestResults_[point.id].end(); iter++) {
                     auto outRecognizer = AceType::DynamicCast<NGGestureRecognizer>(*iter);
                     if (outRecognizer) {
                         combined.emplace_back(outRecognizer);
@@ -3096,7 +3097,8 @@ const RefPtr<PostEventManager>& PipelineContext::GetPostEventManager()
     return postEventManager_;
 }
 
-const SerializedGesture& PipelineContext::GetSerializedGesture() const {
+const SerializedGesture& PipelineContext::GetSerializedGesture() const
+{
     return serializedGesture_;
 }
 
