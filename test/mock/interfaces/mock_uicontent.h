@@ -22,6 +22,7 @@
 #include "ui_content.h"
 #include "iremote_object.h"
 #include "accessibility_element_info.h"
+#include "core/event/touch_event.h"
 
 namespace OHOS {
 namespace Ace {
