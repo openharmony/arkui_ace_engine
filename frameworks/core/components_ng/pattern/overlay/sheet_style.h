@@ -40,7 +40,7 @@ enum SheetType {
     SHEET_CENTER,
     SHEET_POPUP,
     SHEET_BOTTOMLANDSPACE,
-    SHEET_BOTTOMPC,
+    SHEET_BOTTOM_FREE_WINDOW,
 };
 
 struct SheetHeight {

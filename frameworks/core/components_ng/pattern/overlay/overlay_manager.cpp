@@ -2840,7 +2840,7 @@ void OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<Frame
     auto sheetType = sheetPattern->GetSheetType();
     switch (sheetType) {
         case SheetType::SHEET_BOTTOM:
-        case SheetType::SHEET_BOTTOMPC:
+        case SheetType::SHEET_BOTTOM_FREE_WINDOW:
             if (sheetStyle.detents.size() > 0) {
                 ComputeDetentsSheetOffset(sheetStyle, sheetNode);
             } else {
