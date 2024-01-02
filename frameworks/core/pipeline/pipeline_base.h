@@ -1068,6 +1068,11 @@ public:
 
     virtual void ResetDragging() {}
 
+    virtual bool PrintVsyncInfoIfNeed() const
+    {
+        return false;
+    }
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
