@@ -402,7 +402,7 @@ private:
     }
     bool HasDisappearTransition() const override
     {
-        return transitionEffect_ != nullptr && !transitionEffect_->HasDisappearTransition();
+        return transitionEffect_ != nullptr && transitionEffect_->HasDisappearTransition();
     }
     void OnTransitionInFinish();
     void OnTransitionOutFinish();
