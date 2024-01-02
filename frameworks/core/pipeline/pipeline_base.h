@@ -1072,6 +1072,8 @@ public:
     virtual const SerializedGesture& GetSerializedGesture() const
     {
         return serializedGesture_;
+    }
+    
     virtual bool PrintVsyncInfoIfNeed() const
     {
         return false;
