@@ -1997,6 +1997,7 @@ void OverlayManager::BlurOverlayNode(const RefPtr<FrameNode>& currentOverlay, bo
             if (currentOverlay != overlay &&
                 (InstanceOf<DialogPattern>(pattern) || InstanceOf<MenuWrapperPattern>(pattern) ||
                     InstanceOf<SheetPresentationPattern>(pattern) || InstanceOf<ModalPresentationPattern>(pattern)) &&
+                overlay->GetTag() != V2::SELECT_OVERLAY_ETS_TAG &&
                 !overlay->IsRemoving()) {
                 // Focus returns to the previous in the overlay
                 FocusOverlayNode(overlay, isInSubWindow);
