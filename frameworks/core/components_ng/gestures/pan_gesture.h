@@ -56,17 +56,17 @@ public:
 
     void SerializeTo(const char* buffer)
     {
-        *(static_cast<int32_t*>(buffer)) = fingers_;
+        *(int32_t*)(buffer) = fingers_;
         buffer += sizeof(int32_t);
-        *(static_cast<GesturePriority*>(buffer)) = priority_;
+        *(GesturePriority*)(buffer) = priority_;
         buffer += sizeof(GesturePriority);
-        *(static_cast<GestureMask*>(buffer)) = gestureMask_;
+        *(GestureMask*)(buffer) = gestureMask_;
         buffer += sizeof(GestureMask);
-        *(static_cast<PanDirection*>(buffer)) = direction_;
+        *(PanDirection*)(buffer) = direction_;
         buffer += sizeof(PanDirection);
-        *(static_cast<double*>(buffer)) = distance_;
+        *(double*)(buffer) = distance_;
         buffer += sizeof(double);
-        double* d = static_cast<double*>(buffer);
+        double* d = (double*)buffer;
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 d[i * 4 + j] = matrix_.Get(i, j);
@@ -91,17 +91,17 @@ public:
     virtual int32_t Deserialize(char* buffer) override
     {
         buffer += sizeof(GestureType) + sizeof(int32_t);
-        fingers_ = *(static_cast<int32_t*>(buffer))
+        fingers_ = *(int32_t*)(buffer);
         buffer += sizeof(int32_t);
-        priority_ = *(static_cast<GesturePriority*>(buffer));
+        priority_ = *(GesturePriority*)(buffer);
         buffer += sizeof(GesturePriority);
-        gestureMask_ = *(static_cast<GestureMask*>(buffer)) ;
+        gestureMask_ = *(GestureMask*)(buffer);
         buffer += sizeof(GestureMask);
-        direction_ = *(static_cast<PanDirection*>(buffer));
+        direction_ = *(PanDirection*)(buffer);
         buffer += sizeof(PanDirection);
-        distance_ = *(static_cast<double*>(buffer));
+        distance_ = *(double*)(buffer);
         buffer += sizeof(double);
-        double* d = static_cast<double*>(buffer);
+        double* d = (double*)buffer;
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 matrix_.Set(i, j, d[i * 4 + j]);

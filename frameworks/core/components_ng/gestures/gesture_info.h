@@ -118,9 +118,9 @@ public:
 
     const char* SetHeader(const char* buffer, GestureType type, int32_t len)
     {
-        *(static_cast<GestureType*>(buffer)) = type;
+        *(GestureType*)(buffer) = type;
         buffer += sizeof(GestureType);
-        *(static_cast<int32_t*>(buffer)) = len;
+        *(int32_t*)(buffer) = len;
         buffer += sizeof(int32_t);
         return buffer;
     }

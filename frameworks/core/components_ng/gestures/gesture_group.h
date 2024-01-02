@@ -57,7 +57,7 @@ public:
     {
         auto total = SizeofMe();
         buffer = SetHeader(buffer, GestureType::GROUP, total);
-        *(static_cast<GestureMode*>(buffer)) = mode_;
+        *(GestureMode*)buffer = mode_;
         buffer += sizeof(GestureMode);
 
         for (auto& i : gestures_) {
@@ -87,11 +87,11 @@ public:
         total -= sizeof(int32_t);
         total -= sizeof(GestureType);
         buffer += sizeof(GestureType) + sizeof(int32_t);
-        mode_ = *(static_cast<GestureMode*>(buffer));
+        mode_ = *(GestureMode*)(buffer);
         total -= sizeof(GestureMode);
         buffer += sizeof(GestureMode);
         while (total != 0) {
-            auto gesture = MakeGesture(*(static_cast<GestureType*>(buffer)));
+            auto gesture = MakeGesture(*(GestureType*)buffer);
             auto len = gesture->Deserialize(buffer);
             gestures_.push_back(gesture);
             buffer += len;

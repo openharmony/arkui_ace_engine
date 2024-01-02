@@ -1564,7 +1564,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
 
         HandleEtsCardTouchEvent(oriPoint, etsSerializedGesture);
 
-        if (etsSerializedGesture.size != 0) {
+        if (etsSerializedGesture.data.size() != 0) {
             GestureGroup rebirth(GestureMode::Exclusive);
             rebirth.Deserialize(etsSerializedGesture.data.data());
             auto recognizer = rebirth.CreateRecognizer();
@@ -1596,7 +1596,6 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
                     auto gesture = recognizer->CreateGestureFromRecognizer();
                     if (gesture) {
                         serializedGesture_.data = std::vector<char>(gesture->SizeofMe());
-                        serializedGesture_.size = gesture->Serialize(serializedGesture_.data.data());
                     }
                     break;
                 }
