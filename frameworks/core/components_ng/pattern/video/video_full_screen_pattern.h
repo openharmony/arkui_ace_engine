@@ -25,7 +25,7 @@ class VideoFullScreenPattern : public VideoPattern {
     DECLARE_ACE_TYPE(VideoFullScreenPattern, VideoPattern);
 
 public:
-    VideoFullScreenPattern() = default;
+    VideoFullScreenPattern() = delete;
     explicit VideoFullScreenPattern(const RefPtr<VideoControllerV2>& videoController) : VideoPattern(videoController) {}
     ~VideoFullScreenPattern() override = default;
     void InitFullScreenParam(const RefPtr<VideoPattern>& video, const RefPtr<RenderSurface>& renderSurface,
