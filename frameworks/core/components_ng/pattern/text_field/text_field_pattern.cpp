@@ -378,7 +378,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
 
     // Only used in OnDirtyLayoutWrapperSwap.
     lastTextRect_= textRect;
-    
+
     parentGlobalOffset_ = textFieldLayoutAlgorithm->GetParentGlobalOffset();
     inlineMeasureItem_ = textFieldLayoutAlgorithm->GetInlineMeasureItem();
     isEditorValueChanged |= FireOnTextChangeEvent();
@@ -2129,6 +2129,15 @@ bool TextFieldPattern::FireOnTextChangeEvent()
         },
         TaskExecutor::TaskType::UI);
     return true;
+}
+
+void TextFieldPattern::ContentFireOnChangeEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireOnChange(contentController_->GetTextValue());
 }
 
 void TextFieldPattern::FilterInitializeText()
