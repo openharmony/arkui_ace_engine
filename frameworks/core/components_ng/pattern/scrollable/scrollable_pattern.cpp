@@ -652,6 +652,10 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
     auto displayMode = property->GetScrollBarMode().value_or(DisplayMode::AUTO);
     SetScrollBar(displayMode);
     if (scrollBar_) {
+        auto barColor = property->GetScrollBarColor();
+        if (barColor) {
+            scrollBar_->SetForegroundColor(barColor.value());
+        }
         auto barWidth = property->GetScrollBarWidth();
         if (barWidth) {
             scrollBar_->SetInactiveWidth(barWidth.value());
@@ -661,17 +665,6 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
             scrollBar_->SetIsUserNormalWidth(true);
         } else {
             scrollBar_->SetIsUserNormalWidth(false);
-        }
-        auto barColor = property->GetScrollBarColor();
-        if (barColor) {
-            scrollBar_->SetForegroundColor(barColor.value());
-        } else {
-            auto pipelineContext = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
-            CHECK_NULL_VOID(theme);
-            scrollBar_->SetForegroundColor(theme->GetForegroundColor());
-            scrollBar_->SetBackgroundColor(theme->GetBackgroundColor());
         }
     }
 }
