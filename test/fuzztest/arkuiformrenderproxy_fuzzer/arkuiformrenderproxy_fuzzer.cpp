@@ -44,7 +44,7 @@ bool DispatcherProxyAPI(const std::string data, size_t size)
     FormRendererDispatcherProxy dispatcherProxy(impl);
     std::shared_ptr<OHOS::MMI::PointerEvent> pointEvent;
     SerializedGesture serializedGesture;
-    dispatcherImpl.DispatchPointerEvent(pointEvent, serializedGesture);
+    dispatcherProxy.DispatchPointerEvent(pointEvent, serializedGesture);
     dispatcherProxy.SetAllowUpdate(true);
     return true;
 }
