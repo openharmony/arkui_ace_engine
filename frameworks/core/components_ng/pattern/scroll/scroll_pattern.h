@@ -279,6 +279,11 @@ public:
         return enablePagingStatus_;
     }
 
+    bool IsScrollSnap() override
+    {
+        return !snapOffsets_.empty() && GetScrollSnapAlign() != ScrollSnapAlign::NONE;
+    }
+
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
 

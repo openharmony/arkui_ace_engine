@@ -41,6 +41,7 @@ void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 bool SystemProperties::traceEnabled_ = false;
 bool SystemProperties::svgTraceEnable_ = false;
 bool SystemProperties::layoutTraceEnable_ = false;
+bool SystemProperties::buildTraceEnable_ = false;
 bool SystemProperties::accessibilityEnabled_ = false;
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;

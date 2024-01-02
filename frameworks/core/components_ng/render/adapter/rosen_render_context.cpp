@@ -1658,6 +1658,26 @@ OffsetF RosenRenderContext::GetShowingTranslateProperty()
     return offset;
 }
 
+void RosenRenderContext::CancelTranslateXYAnimation()
+{
+    CHECK_NULL_VOID(translateXY_);
+    auto property = std::static_pointer_cast<RSAnimatableProperty<Vector2f>>(translateXY_->GetProperty());
+    CHECK_NULL_VOID(property);
+    property->RequestCancelAnimation();
+}
+
+OffsetF RosenRenderContext::GetTranslateXYProperty()
+{
+    OffsetF offset;
+    CHECK_NULL_RETURN(translateXY_, offset);
+    auto property = std::static_pointer_cast<RSAnimatableProperty<Vector2f>>(translateXY_->GetProperty());
+    CHECK_NULL_RETURN(property, offset);
+    auto translate = property->Get();
+    offset.SetX(translate[0]);
+    offset.SetY(translate[1]);
+    return offset;
+}
+
 void RosenRenderContext::NotifyTransitionInner(const SizeF& frameSize, bool isTransitionIn)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -4142,6 +4162,9 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
             },
             false);
     } else {
+        if (!transitionEffect_->HasDisappearTransition()) {
+            return;
+        }
         // Re-use current implicit animation timing params, only replace the finish callback function.
         // The finish callback function will perform all the necessary cleanup work.
         // Important Note on timing:

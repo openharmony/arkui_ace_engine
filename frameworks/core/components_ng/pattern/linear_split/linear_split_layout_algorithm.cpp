@@ -29,6 +29,9 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double SPLIT_HEIGHT_RATE = 2.0;
+constexpr double DEFAULT_DRAG_REGION_RATE = 2.0;
+constexpr Dimension DEFAULT_DRAG_REGION_HALF = 10.0_vp;
+constexpr double HALF_SPLIT_HEIGHT = 2.0;
 } // namespace
 
 void LinearSplitLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -306,14 +309,17 @@ void LinearSplitLayoutAlgorithm::LayoutRowSplit(
 {
     auto padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     auto parentHeight = layoutWrapper->GetGeometryNode()->GetFrameSize().Height() - padding.Height();
-    int32_t index = 0;
     bool isFirstSetPos = false;
     if (childrenDragPos_.empty()) {
         childrenDragPos_ = std::vector<float>(visibleChildCount_ + 1, 0.0f);
         isFirstSetPos = true;
     }
-
     splitLength_ = parentHeight;
+
+    if (padding.top.has_value()) {
+        childOffsetCross = padding.top.value();
+    }
+    int32_t index = 0;
     for (const auto& item : layoutWrapper->GetAllChildrenWithBuild()) {
         if (GreatOrEqual(index, static_cast<int32_t>(childrenDragPos_.size()))) {
             return;
@@ -321,35 +327,29 @@ void LinearSplitLayoutAlgorithm::LayoutRowSplit(
         if (item->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
             continue;
         }
-        if (padding.top.has_value()) {
-            childOffsetCross = padding.top.value();
-        }
+        auto childMargin = item->GetLayoutProperty()->CreateMargin();
+        float marginWidth = childMargin.left.value_or(0.f) + childMargin.right.value_or(0.f);
+        childrenConstrains_[index] = GetItemMinSize(item, layoutWrapper) + marginWidth;
         if (isFirstSetPos) {
             childrenDragPos_[index] = childOffsetMain;
         } else {
             childOffsetMain = childrenDragPos_[index];
         }
-        auto childMargin = item->GetLayoutProperty()->CreateMargin();
-        float marginWidth = childMargin.left.value_or(0.f) + childMargin.right.value_or(0.f);
-        childrenConstrains_[index] = GetItemMinSize(item, layoutWrapper) + marginWidth;
         item->GetGeometryNode()->SetMarginFrameOffset(OffsetF(childOffsetMain, childOffsetCross));
-        childOffsetMain += item->GetGeometryNode()->GetMarginFrameSize().Width();
-        if (index < visibleChildCount_ - 1) {
-            if (!isFirstSetPos) {
-                childOffsetMain = childrenDragPos_[index + 1] - static_cast<float>(DEFAULT_SPLIT_HEIGHT);
-            }
-            childrenOffset_.emplace_back(childOffsetMain, childOffsetCross);
-            splitRects_.emplace_back(childOffsetMain - DEFAULT_SPLIT_HEIGHT, childOffsetCross,
-                DEFAULT_SPLIT_HEIGHT * SPLIT_HEIGHT_RATE, parentHeight);
-        }
-        childOffsetMain += static_cast<float>(DEFAULT_SPLIT_HEIGHT);
-        index++;
         item->Layout();
-    }
-    if (GreatOrEqual(index, static_cast<int32_t>(childrenDragPos_.size()))) {
-        return;
+        childOffsetMain +=
+            item->GetGeometryNode()->GetMarginFrameSize().Width() + static_cast<float>(DEFAULT_SPLIT_HEIGHT);
+        if (index < visibleChildCount_ - 1) {
+            splitRects_.emplace_back(childOffsetMain - DEFAULT_SPLIT_HEIGHT - DEFAULT_DRAG_REGION_HALF.ConvertToPx(),
+                childOffsetCross, DEFAULT_DRAG_REGION_HALF.ConvertToPx() * DEFAULT_DRAG_REGION_RATE, parentHeight);
+            childrenOffset_.emplace_back(childOffsetMain - HALF_SPLIT_HEIGHT, childOffsetCross);
+        }
+        index++;
     }
     if (isFirstSetPos) {
+        if (GreatOrEqual(index, static_cast<int32_t>(childrenDragPos_.size()))) {
+            return;
+        }
         childrenDragPos_[index] = childOffsetMain - static_cast<float>(DEFAULT_SPLIT_HEIGHT);
     }
 }
@@ -366,6 +366,10 @@ void LinearSplitLayoutAlgorithm::LayoutColumnSplit(
         isFirstSetPos = true;
     }
     splitLength_ = parentWidth;
+
+    if (padding.left.has_value()) {
+        childOffsetMain = padding.left.value();
+    }
     int32_t index = 0;
     for (const auto& item : layoutWrapper->GetAllChildrenWithBuild()) {
         if (GreatOrEqual(index, static_cast<int32_t>(childrenDragPos_.size()))) {
@@ -374,40 +378,30 @@ void LinearSplitLayoutAlgorithm::LayoutColumnSplit(
         if (item->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
             continue;
         }
-        if (padding.left.has_value()) {
-            childOffsetMain = padding.left.value();
-        }
+        ColumnSplitChildConstrain(layoutWrapper, item, index);
         if (isFirstSetPos) {
             childrenDragPos_[index] = childOffsetCross;
             if (index != 0) {
-                childrenDragPos_[index] -= endMargin;
+                childOffsetCross += startMargin;
             }
         } else {
             childOffsetCross = childrenDragPos_[index];
-            if (index != 0) {
-                childOffsetCross += endMargin;
-            }
         }
-        ColumnSplitChildConstrain(layoutWrapper, item, index);
         item->GetGeometryNode()->SetMarginFrameOffset(OffsetF(childOffsetMain, childOffsetCross));
-        childOffsetCross += item->GetGeometryNode()->GetMarginFrameSize().Height();
-        if (index < visibleChildCount_ - 1) {
-            childOffsetCross += startMargin;
-            if (!isFirstSetPos) {
-                childOffsetCross = childrenDragPos_[index + 1] - static_cast<float>(DEFAULT_SPLIT_HEIGHT);
-            }
-            childrenOffset_.emplace_back(childOffsetMain, childOffsetCross);
-            splitRects_.emplace_back(childOffsetMain, childOffsetCross - DEFAULT_SPLIT_HEIGHT, parentWidth,
-                DEFAULT_SPLIT_HEIGHT * SPLIT_HEIGHT_RATE);
-        }
-        childOffsetCross += static_cast<float>(DEFAULT_SPLIT_HEIGHT) + endMargin;
-        index++;
         item->Layout();
-    }
-    if (GreatOrEqual(index, static_cast<int32_t>(childrenDragPos_.size()))) {
-        return;
+        childOffsetCross += item->GetGeometryNode()->GetMarginFrameSize().Height() + endMargin +
+                            static_cast<float>(DEFAULT_SPLIT_HEIGHT);
+        if (index < visibleChildCount_ - 1) {
+            splitRects_.emplace_back(childOffsetMain, childOffsetCross - DEFAULT_DRAG_REGION_HALF.ConvertToPx(),
+                parentWidth, DEFAULT_DRAG_REGION_HALF.ConvertToPx() * DEFAULT_DRAG_REGION_RATE);
+            childrenOffset_.emplace_back(childOffsetMain, childOffsetCross - HALF_SPLIT_HEIGHT);
+        }
+        index++;
     }
     if (isFirstSetPos) {
+        if (GreatOrEqual(index, static_cast<int32_t>(childrenDragPos_.size()))) {
+            return;
+        }
         childrenDragPos_[index] = childOffsetCross - static_cast<float>(DEFAULT_SPLIT_HEIGHT) - endMargin;
     }
 }

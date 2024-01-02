@@ -393,6 +393,8 @@ void NavigationPattern::CheckTopNavPathChange(
         TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
         navigationStack_->UpdateAnimatedValue(true);
     } else {
+        // before the animation of navDes replacing, update the zIndex of the previous navDes node
+        UpdatePreNavDesZIndex(preTopNavDestination, newTopNavDestination);
         // transition with animation need to run after layout task
         context->AddAfterLayoutTask(
             [preTopNavDestination, newTopNavDestination, isPopPage, weakNavigationPattern = WeakClaim(this)]() {
@@ -740,11 +742,9 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                 if (navigationLayoutProperty->GetHideNavBar().value_or(false) ||
                     (pattern->GetNavigationMode() == NavigationMode::STACK && isSetInvisible)) {
                     navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-                    navBarNode->SetActive(false);
                 } else {
                     navBarNode->GetRenderContext()->UpdateOpacity(1.0f);
                     navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-                    navBarNode->SetActive(true);
                 }
                 auto navigationContentNode = AceType::DynamicCast<FrameNode>(navigationGroupNode->GetContentNode());
                 CHECK_NULL_VOID(navigationContentNode);
@@ -762,6 +762,12 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                         pattern->NotifyDialogChange(true, true);
                         pattern->isChanged_ = false;
                     }
+                }
+                if (navigationLayoutProperty->GetHideNavBar().value_or(false) ||
+                    (pattern->GetNavigationMode() == NavigationMode::STACK && isSetInvisible)) {
+                    navBarNode->SetActive(false);
+                } else {
+                    navBarNode->SetActive(true);
                 }
                 if (navDestinationNode->GetChildren().size() <= EMPTY_DESTINATION_CHILD_SIZE &&
                     navDestinationPattern->GetBackButtonState()) {
@@ -1278,5 +1284,27 @@ void NavigationPattern::OnColorConfigurationUpdate()
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
     dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
+}
+
+void NavigationPattern::UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNavDestination,
+    const RefPtr<FrameNode> &newTopNavDestination)
+{
+    auto replaceVal = navigationStack_->GetReplaceValue();
+    if (replaceVal != 0 && preTopNavDestination && newTopNavDestination) {
+        auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+        CHECK_NULL_VOID(hostNode);
+        auto navigationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
+        CHECK_NULL_VOID(navigationContentNode);
+        auto newDesNodeContext = newTopNavDestination->GetRenderContext();
+        CHECK_NULL_VOID(newDesNodeContext);
+        std::optional<int32_t> newNodeZIndex = newDesNodeContext->GetZIndex();
+        auto preDesNodeContext = preTopNavDestination->GetRenderContext();
+        CHECK_NULL_VOID(preDesNodeContext);
+        preDesNodeContext->UpdateZIndex(newNodeZIndex.value_or(0) - 1);
+        navigationContentNode->RebuildRenderContextTree();
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->RequestFrame();
+    }
 }
 } // namespace OHOS::Ace::NG

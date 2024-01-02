@@ -241,6 +241,10 @@ public:
     void UpdateTranslateInXY(const OffsetF& offset) override;
     OffsetF GetShowingTranslateProperty() override;
 
+    void CancelTranslateXYAnimation() override;
+
+    OffsetF GetTranslateXYProperty() override;
+
     Matrix4 GetLocalTransformMatrix() override;
 
     void GetPointWithRevert(PointF& point) override;
@@ -401,9 +405,9 @@ private:
     {
         return disappearingTransitionCount_ > 0;
     }
-    bool HasTransition() const override
+    bool HasDisappearTransition() const override
     {
-        return transitionEffect_ != nullptr;
+        return transitionEffect_ != nullptr && transitionEffect_->HasDisappearTransition();
     }
     void OnTransitionInFinish();
     void OnTransitionOutFinish();

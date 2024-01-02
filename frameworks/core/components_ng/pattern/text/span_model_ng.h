@@ -53,6 +53,9 @@ public:
     static void SetTextColor(FrameNode* frameNode, const Color& value);
     static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
     static void SetFont(FrameNode* frameNode, const Font& value);
+
+    void CreateContainSpan() override;
+    void SetTextBackgroundStyle(const TextBackgroundStyle& style) override;
 };
 } // namespace OHOS::Ace::NG
 

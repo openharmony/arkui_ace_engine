@@ -36,14 +36,10 @@ template("ace_core_apng_source_set") {
       "apng_image_player.cpp",
     ]
 
-    configs += [
-      "$ace_root:ace_config",
-      "$ace_flutter_engine_root:flutter_config",
-    ]
+    configs += [ "$ace_root:ace_config" ]
     defines += [ "APNG_IMAGE_SUPPORT" ]
 
     deps = [
-      "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform",
       "$skia_root_new:skia_$platform",
       "../../pipeline:ace_core_pipeline_$platform",
       "../../pipeline_ng:ace_core_pipeline_ng_$platform",

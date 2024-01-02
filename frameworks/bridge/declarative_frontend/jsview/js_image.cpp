@@ -563,6 +563,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("opacity", &JSImage::JsOpacity);
     JSClass<JSImage>::StaticMethod("blur", &JSImage::JsBlur);
     JSClass<JSImage>::StaticMethod("transition", &JSImage::JsTransition);
+    JSClass<JSImage>::StaticMethod("pointLight", &JSViewAbstract::JsPointLight, opt);
     JSClass<JSImage>::InheritAndBind<JSViewAbstract>(globalObj);
 
     JSClass<JSColorFilter>::Declare("ColorFilter");

@@ -91,20 +91,6 @@ RefPtr<DragDropProxy> DragDropManager::CreateTextDragDropProxy()
     return MakeRefPtr<DragDropProxy>(currentId_);
 }
 
-void DragDropManager::OnDragOut()
-{
-    if (IsNeedScaleDragPreview()) {
-        InteractionInterface::GetInstance()->SetDragWindowVisible(true);
-        auto containerId = Container::CurrentId();
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
-        CHECK_NULL_VOID(subwindow);
-        auto overlayManager = subwindow->GetOverlayManager();
-        overlayManager->RemovePixelMap();
-        SubwindowManager::GetInstance()->HidePreviewNG();
-        info_.scale = -1.0;
-    }
-}
-
 void DragDropManager::CreateDragWindow(const GestureEvent& info, uint32_t width, uint32_t height)
 {
 #if !defined(PREVIEW)
@@ -179,6 +165,16 @@ void DragDropManager::UpdatePixelMapPosition(int32_t globalX, int32_t globalY)
             Dimension(globalY - height * PIXELMAP_POSITION_HEIGHT * scale - height / 2.0f + height * scale / 2.0f)));
         imageContext->OnModifyDone();
     }
+}
+
+void DragDropManager::HideDragPreviewOverlay()
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(manager);
+    manager->RemovePixelMap();
+    SubwindowManager::GetInstance()->HidePreviewNG();
 }
 
 RefPtr<FrameNode> DragDropManager::FindTargetInChildNodes(
@@ -438,9 +434,9 @@ void DragDropManager::PrintDragFrameNode(const Point& point, const RefPtr<FrameN
     }
 }
 
-void DragDropManager::OnDragMoveOut(const PointerEvent& pointerEvent, const std::string& extraInfo)
+void DragDropManager::OnDragMoveOut(const PointerEvent& pointerEvent)
 {
-    Point point  = pointerEvent.GetPoint();
+    Point point = pointerEvent.GetPoint();
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
         if (IsDragged() && IsWindowConsumed()) {
@@ -455,11 +451,21 @@ void DragDropManager::OnDragMoveOut(const PointerEvent& pointerEvent, const std:
         FireOnDragEvent(preTargetFrameNode_, point, DragEventType::LEAVE, extraInfo_);
         preTargetFrameNode_ = nullptr;
     }
+    if (IsNeedScaleDragPreview()) {
+        InteractionInterface::GetInstance()->SetDragWindowVisible(true);
+        auto containerId = Container::CurrentId();
+        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
+        CHECK_NULL_VOID(subwindow);
+        auto overlayManager = subwindow->GetOverlayManager();
+        overlayManager->RemovePixelMap();
+        SubwindowManager::GetInstance()->HidePreviewNG();
+        info_.scale = -1.0;
+    }
 }
 
 void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::string& extraInfo)
 {
-    Point point  = pointerEvent.GetPoint();
+    Point point = pointerEvent.GetPoint();
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
         if (IsDragged() && IsWindowConsumed()) {
@@ -511,7 +517,7 @@ void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::st
 
 void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::string& extraInfo)
 {
-    Point point  = pointerEvent.GetPoint();
+    Point point = pointerEvent.GetPoint();
     dragDropState_ = DragDropMgrState::IDLE;
     preTargetFrameNode_ = nullptr;
     hasNotifiedTransformation_ = false;
@@ -521,6 +527,7 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
             return;
         }
     }
+    HideDragPreviewOverlay();
     if (isDragCancel_) {
         if (SystemProperties::GetDebugEnabled()) {
             TAG_LOGI(AceLogTag::ACE_DRAG, "DragDropManager is dragCancel, finish drag. WindowId is %{public}d.",

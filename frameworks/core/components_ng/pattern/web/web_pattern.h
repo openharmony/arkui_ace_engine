@@ -117,7 +117,7 @@ public:
     }
 
     bool NeedSoftKeyboard() const override;
-    
+
     void UpdateScrollOffset(SizeF frameSize) override;
 
     RefPtr<EventHub> CreateEventHub() override
@@ -687,6 +687,7 @@ private:
     bool accessibilityState_ = false;
     RefPtr<WebAccessibilityNode> webAccessibilityNode_;
     TouchEventInfo touchEventInfo_{"touchEvent"};
+    std::vector<TouchEventInfo> touchEventInfoList_ {};
 };
 } // namespace OHOS::Ace::NG
 

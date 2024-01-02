@@ -758,33 +758,6 @@ void SetPlacementOnTopVal(const JSRef<JSObject>& popupObj, const RefPtr<PopupPar
     }
 }
 
-void GetShadowFromStyle(ShadowStyle shadowStyle, Shadow& shadow)
-{
-    switch (shadowStyle) {
-        case ShadowStyle::OuterDefaultXS:
-            shadow = ShadowConfig::DefaultShadowXS;
-            break;
-        case ShadowStyle::OuterDefaultSM:
-            shadow = ShadowConfig::DefaultShadowS;
-            break;
-        case ShadowStyle::OuterDefaultMD:
-            shadow = ShadowConfig::DefaultShadowM;
-            break;
-        case ShadowStyle::OuterDefaultLG:
-            shadow = ShadowConfig::DefaultShadowL;
-            break;
-        case ShadowStyle::OuterFloatingSM:
-            shadow = ShadowConfig::FloatingShadowS;
-            break;
-        case ShadowStyle::OuterFloatingMD:
-            shadow = ShadowConfig::FloatingShadowM;
-            break;
-        default:
-            shadow = ShadowConfig::DefaultShadowM;
-            break;
-    }
-}
-
 void ParsePopupCommonParam(
     const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
 {
@@ -967,21 +940,17 @@ void ParsePopupCommonParam(
         popupParam->SetErrorRadius(setError);
     }
 
-    auto shadowVal = popupObj->GetProperty("shadow");
     Shadow shadow;
-    if (shadowVal->IsObject()) {
-        JSViewAbstract::ParseShadowProps(shadowVal, shadow);
-        popupParam->SetShadow(shadow);
-    } else if (shadowVal->IsNumber()) {
-        int32_t shadowStyle = 0;
-        if (JSViewAbstract::ParseJsInteger<int32_t>(shadowVal, shadowStyle)) {
-            auto style = static_cast<ShadowStyle>(shadowStyle);
-            GetShadowFromStyle(style, shadow);
-            popupParam->SetShadow(shadow);
+    auto shadowVal = popupObj->GetProperty("shadow");
+    if (shadowVal->IsObject() || shadowVal->IsNumber()) {
+        auto ret = JSViewAbstract::ParseShadowProps(shadowVal, shadow);
+        if (!ret) {
+            JSViewAbstract::GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow);
         }
-    } else if (shadowVal->IsUndefined()) {
-        popupParam->SetShadow(ShadowConfig::DefaultShadowM);
+    } else {
+        JSViewAbstract::GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow);
     }
+    popupParam->SetShadow(shadow);
 }
 
 void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
@@ -1239,11 +1208,13 @@ void JSViewAbstract::JsOpacity(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], opacity)) {
         return;
     }
-
-    if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
-        opacity = 1.0;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        if (opacity > 1.0 || LessNotEqual(opacity, 0.0)) {
+            opacity = 1.0;
+        }
+    } else {
+        opacity = std::clamp(opacity, 0.0, 1.0);
     }
-
     ViewAbstractModel::GetInstance()->SetOpacity(opacity);
 }
 
@@ -1448,8 +1419,12 @@ NG::TransitionOptions JSViewAbstract::ParseJsTransition(const JSRef<JSVal>& tran
     if (jsObj->HasProperty("opacity")) {
         double opacity = 1.0;
         ParseJsDouble(jsObj->GetProperty("opacity"), opacity);
-        if (opacity > 1.0 || LessNotEqual(opacity, 0.0)) {
-            opacity = 1.0;
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            if (opacity > 1.0 || LessNotEqual(opacity, 0.0)) {
+                opacity = 1.0;
+            }
+        } else {
+            opacity = std::clamp(opacity, 0.0, 1.0);
         }
         transitionOption.UpdateOpacity(static_cast<float>(opacity));
         hasEffect = true;
@@ -4244,7 +4219,6 @@ bool JSViewAbstract::ParseJsSymbolId(const JSRef<JSVal>& jsValue, std::uint32_t&
     if (!resourceWrapper) {
         return false;
     }
-    
     auto symbol = resourceWrapper->GetSymbolById(resId->ToNumber<uint32_t>());
     if (!symbol) {
         return false;

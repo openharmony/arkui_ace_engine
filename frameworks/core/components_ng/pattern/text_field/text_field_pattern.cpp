@@ -365,16 +365,23 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (!IsDragging()) {
         dragParagraph_ = paragraph_;
     }
+    bool isEditorValueChanged = false;
     auto textRect = textFieldLayoutAlgorithm->GetTextRect();
     if (!(needToRefreshSelectOverlay_ &&
             (!NearEqual(paragraphWidth, paragraphWidth_) || !NearEqual(textRect.GetSize(), textRect_.GetSize())))) {
         needToRefreshSelectOverlay_ = false;
     }
+    isEditorValueChanged = !NearEqual(textRect.GetSize(), lastTextRect_.GetSize()) ||
+                           !NearEqual(textRect.GetOffset(), lastTextRect_.GetOffset());
     paragraphWidth_ = paragraphWidth;
     textRect_ = textRect;
+
+    // Only used in OnDirtyLayoutWrapperSwap.
+    lastTextRect_= textRect;
+    
     parentGlobalOffset_ = textFieldLayoutAlgorithm->GetParentGlobalOffset();
     inlineMeasureItem_ = textFieldLayoutAlgorithm->GetInlineMeasureItem();
-    bool isEditorValueChanged = FireOnTextChangeEvent();
+    isEditorValueChanged |= FireOnTextChangeEvent();
     UpdateCancelNode();
     UpdateSelectController();
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
@@ -472,7 +479,6 @@ void TextFieldPattern::UpdateCaretRect(bool isEditorValueChanged)
         CloseSelectOverlay(true);
         return;
     }
-
     selectController_->MoveCaretToContentRect(
         selectController_->GetCaretIndex(), TextAffinity::DOWNSTREAM, isEditorValueChanged);
 }
@@ -782,6 +788,7 @@ void TextFieldPattern::CursorMove(CaretMoveIntent direction)
 
 void TextFieldPattern::HandleSelect(CaretMoveIntent direction)
 {
+    CloseSelectOverlay();
     switch (direction) {
         case CaretMoveIntent::Left: {
             HandleSelectionLeft();
@@ -878,6 +885,16 @@ void TextFieldPattern::InitFocusEvent()
         }
     };
     focusHub->SetInnerFocusPaintRectCallback(getInnerPaintRectCallback);
+    auto windowFocusTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (!pattern->HasFocus()) {
+            pattern->HandleBlurEvent();
+        }
+    };
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->SetOnWindowFocused(windowFocusTask);
     focusEventInitialized_ = true;
 }
 
@@ -900,6 +917,9 @@ void TextFieldPattern::HandleBlurEvent()
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextField %{public}d OnBlur", host->GetId());
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
+    if (!context->GetOnFoucs()) {
+        return;
+    }
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     if (textFieldManager) {
         textFieldManager->ClearOnFocusTextField();
@@ -1695,8 +1715,8 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
         } else {
             ProcessOverlay(true, true);
         }
-    } else if (!contentController_->IsEmpty() && info.GetSourceDevice() != SourceType::MOUSE
-        && !IsNormalInlineState()) {
+    } else if (!contentController_->IsEmpty() && info.GetSourceDevice() != SourceType::MOUSE &&
+               !IsNormalInlineState()) {
         if (GetNakedCharPosition() >= 0) {
             DelayProcessOverlay(true, true, false);
         } else if (needSelectAll_) {
@@ -3945,7 +3965,6 @@ void TextFieldPattern::OnAreaChangedInner()
     if (parentGlobalOffset != parentGlobalOffset_) {
         parentGlobalOffset_ = parentGlobalOffset;
         UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
-        selectController_->UpdateCaretOffset();
         selectController_->CalculateHandleOffset();
         if (SelectOverlayIsOn()) {
             ProcessOverlay(false);
@@ -4168,10 +4187,8 @@ void TextFieldPattern::AfterSelection()
     ResetObscureTickCountDown();
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
-    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    tmpHost->MarkDirtyNode(layoutProperty->GetMaxLinesValue(Infinity<float>()) <= 1 ? PROPERTY_UPDATE_MEASURE_SELF
-                                                                                    : PROPERTY_UPDATE_MEASURE);
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    showSelect_ = IsSelected();
 }
 
 void TextFieldPattern::HandleSelectionUp()

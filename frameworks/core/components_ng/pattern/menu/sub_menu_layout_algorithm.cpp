@@ -164,18 +164,17 @@ float SubMenuLayoutAlgorithm::VerticalLayoutSubMenuHalfScreen(
 // return submenu vertical offset
 float SubMenuLayoutAlgorithm::VerticalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize)
 {
-    float wrapperHeight = wrapperSize_.Height();
-    float bottomSpace = wrapperHeight - position;
+    float bottomSpace = wrapperRect_.Bottom() - position - paddingBottom_;
     // line up top of subMenu with top of the menuItem
     if (bottomSpace >= size.Height()) {
         return position;
     }
     // line up bottom of menu with bottom of the screen
-    if (size.Height() < wrapperHeight) {
-        return wrapperHeight - size.Height();
+    if (size.Height() < wrapperRect_.Height()) {
+        return wrapperRect_.Bottom() - size.Height() - paddingBottom_;
     }
     // can't fit in screen, line up with top of the screen
-    return 0.0f;
+    return wrapperRect_.Top() + paddingTop_;
 }
 
 // returns submenu horizontal offset

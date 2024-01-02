@@ -856,10 +856,6 @@ void JSViewPartialUpdate::CreateRecycle(const JSCallbackInfo& info)
     if (recycle) {
         auto node = view->GetCachedRecycleNode();
         node->SetRecycleRenderFunc(std::move(recycleUpdateFunc));
-        auto newElmtId = ViewStackModel::GetInstance()->GetElmtIdToAccountFor();
-        auto uiNode = AceType::DynamicCast<NG::UINode>(node);
-        ElementRegister::GetInstance()->UpdateRecycleElmtId(uiNode->GetId(), newElmtId);
-        uiNode->UpdateRecycleElmtId(newElmtId);
         ViewStackModel::GetInstance()->Push(node, true);
     } else {
         ViewStackModel::GetInstance()->Push(view->CreateViewNode(), true);

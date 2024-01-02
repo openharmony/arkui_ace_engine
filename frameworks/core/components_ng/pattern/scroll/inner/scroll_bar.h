@@ -57,6 +57,7 @@ public:
 
     bool InBarTouchRegion(const Point& point) const;
     bool InBarHoverRegion(const Point& point) const;
+    bool InBarRectRegion(const Point& point) const;
     bool NeedScrollBar() const;
     bool NeedPaint() const;
     void UpdateScrollBarRegion(

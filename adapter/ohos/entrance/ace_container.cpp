@@ -72,6 +72,7 @@
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -1761,6 +1762,17 @@ NG::SafeAreaInsets AceContainer::GetKeyboardSafeArea()
     return {};
 }
 
+Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
+{
+    CHECK_NULL_RETURN(uiWindow_, {});
+    Rosen::AvoidArea avoidArea;
+    Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(type, avoidArea);
+    if (ret == Rosen::WMError::WM_OK) {
+        return avoidArea;
+    }
+    return {};
+}
+
 std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextByModule(
     const std::string& bundle, const std::string& module)
 {
@@ -1915,10 +1927,7 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
         } else if (parsedConfig.direction == "vertical") {
             resDirection = DeviceOrientation::PORTRAIT;
         }
-        if (orientation_ != resDirection) {
-            configurationChange.directionUpdate = true;
-            orientation_ = resDirection;
-        }
+        configurationChange.directionUpdate = true;
         resConfig.SetOrientation(resDirection);
     }
     if (!parsedConfig.densitydpi.empty()) {

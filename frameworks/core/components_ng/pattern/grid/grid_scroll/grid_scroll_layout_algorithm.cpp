@@ -293,7 +293,6 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
         // that the index of the matrix_ and heightMap_ is incremented from 0 to targetIndex and sequentially
         SupplyAllData2ZeroIndex(mainSize, crossSize, layoutWrapper);
         gridLayoutInfo_.targetIndex_.reset();
-        return;
     }
     SkipLargeOffset(mainSize, layoutWrapper);
 
@@ -1578,7 +1577,6 @@ void GridScrollLayoutAlgorithm::SupplyAllData2ZeroIndex(float mainSize, float cr
         float lineHeight = 0.0f;
         do {
             lineHeight = FillNewLineForward(crossSize, mainSize, layoutWrapper);
-            gridLayoutInfo_.lineHeightMap_[currentMainLineIndex_] = lineHeight;
         } while (GreatOrEqual(lineHeight, 0.0));
     }
 
@@ -1590,7 +1588,6 @@ void GridScrollLayoutAlgorithm::SupplyAllData2ZeroIndex(float mainSize, float cr
         int32_t targetLineIndex = 0;
         do {
             lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
-            gridLayoutInfo_.lineHeightMap_[currentMainLineIndex_] = lineHeight;
         } while (!(LessNotEqual(lineHeight, 0.0) || IsIndexInMatrix(targetIndex.value(), targetLineIndex)));
     }
 
