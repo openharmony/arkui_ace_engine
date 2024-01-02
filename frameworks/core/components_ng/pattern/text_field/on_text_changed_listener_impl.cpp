@@ -317,5 +317,19 @@ void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelS
         };
         PostTaskToUI(task);
     }
+    KeyBoardInfo keyboardInfo;
+    if (info.panelInfo.panelType == MiscServices::PanelType::SOFT_KEYBOARD) {
+        keyboardInfo.keyBoardType = KeyBoardType::SOFT_KEYBOARD;
+    } else if (info.panelInfo.panelType == MiscServices::PanelType::STATUS_BAR) {
+        keyboardInfo.keyBoardType = KeyBoardType::STATUS_BAR;
+    }
+    keyboardInfo.visible = info.visible;
+    auto task = [textField = pattern_, keyboardInfo] {
+        auto client = textField.Upgrade();
+        CHECK_NULL_VOID(client);
+        ContainerScope scope(client->GetInstanceId());
+        client->NotifyKeyboardInfo(keyboardInfo);
+    };
+    PostTaskToUI(task);
 }
 } // namespace OHOS::Ace::NG
