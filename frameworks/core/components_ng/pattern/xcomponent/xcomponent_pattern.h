@@ -217,7 +217,7 @@ public:
         hasXComponentInit_ = isInit;
     }
 
-    void CreateSurface(int32_t instanceId = -1);
+    void Initialize(int32_t instanceId = -1);
 
     bool ChangeRenderType(NodeRenderType renderType);
 
@@ -227,6 +227,8 @@ public:
     }
 
     void SetExportTextureSurfaceId(const std::string& surfaceId);
+    void FireExternalEvent(RefPtr<NG::PipelineContext> context,
+        const std::string& componentId, const uint32_t nodeId, const bool isDestroy);
 
 private:
     void OnAttachToFrameNode() override;
@@ -235,6 +237,7 @@ private:
     void OnRebuildFrame() override;
     void OnAreaChangedInner() override;
 
+    void InitNativeNodeCallbacks();
     void InitEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleTouchEvent(const TouchEventInfo& info);

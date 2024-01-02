@@ -388,8 +388,8 @@ RefPtr<FrameNode> FrameNode::CreateFrameNode(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
 {
     auto frameNode = MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot);
-    frameNode->InitializePatternAndContext();
     ElementRegister::GetInstance()->AddUINode(frameNode);
+    frameNode->InitializePatternAndContext();
     return frameNode;
 }
 
