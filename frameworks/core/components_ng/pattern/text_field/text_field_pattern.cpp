@@ -1665,11 +1665,9 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
             return;
         }
     }
-    TimeStamp clickTimeStamp = info.GetTimeStamp();
-    std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout = clickTimeStamp - lastClickTimeStamp_;
-    lastClickTimeStamp_ = info.GetTimeStamp();
+
     isUsingMouse_ = info.GetSourceDevice() == SourceType::MOUSE;
-    if (timeout.count() >= DOUBLECLICK_MIN_INTERVAL_MS && timeout.count() < DOUBLECLICK_INTERVAL_MS) {
+    if (CheckClickLocation(info)) {
         HandleDoubleClickEvent(info); // 注册手势事件
     } else {
         HandleSingleClickEvent(info);
@@ -1680,6 +1678,26 @@ void TextFieldPattern::HandleClickEvent(GestureEvent& info)
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
     isFocusedBeforeClick_ = false;
+}
+
+bool TextFieldPattern::CheckClickLocation(GestureEvent& info)
+{
+    TimeStamp clickTimeStamp = info.GetTimeStamp();
+    std::chrono::duration<float, std::ratio<1, SECONDS_TO_MILLISECONDS>> timeout = clickTimeStamp - lastClickTimeStamp_;
+    lastClickTimeStamp_ = info.GetTimeStamp();
+
+    Offset location = info.GetLocalLocation();
+    auto range = selectController_->GetSelectRangeByOffset(location);
+    int32_t start = range.first;
+    int32_t end = range.second;
+
+    auto last_range = selectController_->GetSelectRangeByOffset(clickLocation_);
+    int32_t last_start = last_range.first;
+    int32_t last_end = last_range.second;
+    clickLocation_ = location;
+
+    return timeout.count() >= DOUBLECLICK_MIN_INTERVAL_MS && timeout.count() < DOUBLECLICK_INTERVAL_MS &&
+           start == last_start && end == last_end;
 }
 
 void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)

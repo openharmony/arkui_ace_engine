@@ -771,6 +771,7 @@ public:
     bool OnBackPressed() override;
     void CheckScrollable();
     void HandleClickEvent(GestureEvent& info);
+    bool CheckClickLocation(GestureEvent& info);
     void HandleDoubleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
 
@@ -1386,6 +1387,7 @@ private:
     bool isTouchCaret_ = false;
     bool needSelectAll_ = false;
     bool isModifyDone_ = false;
+    Offset clickLocation_;
 };
 } // namespace OHOS::Ace::NG
 
