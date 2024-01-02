@@ -70,9 +70,9 @@ class Scrollable : public TouchEventTarget {
     DECLARE_ACE_TYPE(Scrollable, TouchEventTarget);
 
 public:
-    Scrollable() = default;
-    Scrollable(ScrollPositionCallback&& callback, Axis axis) : callback_(std::move(callback)), axis_(axis) {}
-    Scrollable(const ScrollPositionCallback& callback, Axis axis) : callback_(callback), axis_(axis) {}
+    Scrollable();
+    Scrollable(ScrollPositionCallback&& callback, Axis axis);
+    Scrollable(const ScrollPositionCallback& callback, Axis axis);
     ~Scrollable() override;
 
     static void SetVelocityScale(double sVelocityScale);
@@ -494,8 +494,8 @@ private:
     bool isDragUpdateStop_ = false;
     int32_t nodeId_ = 0;
     double slipFactor_ = 0.0;
-    static double sFriction_;
-    static double sVelocityScale_;
+    static std::optional<double> sFriction_;
+    static std::optional<double> sVelocityScale_;
     bool continuousDragStatus_ = false;
     CancelableCallback<void()> task_;
     int32_t dragCount_ = 0;
@@ -504,6 +504,7 @@ private:
     double dragEndPosition_ = 0.0;
     double lastVelocity_ = 0.0;
     double friction_ = -1.0;
+    double velocityScale_ = 0.0;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
 #endif

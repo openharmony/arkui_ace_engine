@@ -43,6 +43,7 @@
 namespace OHOS::Ace::NG {
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
+constexpr double NEW_FRICTION = 0.7;
 constexpr double MAX_VELOCITY = 800000.0;
 #else
 constexpr double FRICTION = 0.9;
@@ -57,10 +58,8 @@ class ScrollablePattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(ScrollablePattern, NestableScrollContainer);
 
 public:
-    ScrollablePattern() = default;
-    ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled)
-        : edgeEffect_(edgeEffect), edgeEffectAlwaysEnabled_(alwaysEnabled)
-    {}
+    ScrollablePattern();
+    ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled);
 
     ~ScrollablePattern()
     {
@@ -612,7 +611,7 @@ private:
     bool isSheetInReactive_ = false;
     bool isCoordEventNeedSpring_ = true;
     double scrollBarOutBoundaryExtent_ = 0.0;
-    double friction_ = FRICTION;
+    double friction_ = 0.0;
     double maxFlingVelocity_ = MAX_VELOCITY;
     // scroller
     RefPtr<Animator> animator_;
