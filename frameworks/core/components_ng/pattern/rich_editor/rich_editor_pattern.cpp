@@ -1587,7 +1587,9 @@ void RichEditorPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 
 bool RichEditorPattern::CheckBlurReason()
 {
-    auto curFocusHub = GetFocusHub();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto curFocusHub = host->GetFocusHub();
     CHECK_NULL_RETURN(curFocusHub, false);
     auto curBlurReason = curFocusHub->GetBlurReason();
     if (curBlurReason == BlurReason::FRAME_DESTROY) {
@@ -2220,7 +2222,9 @@ bool RichEditorPattern::RequestCustomKeyboard()
 #if defined(ENABLE_STANDARD_INPUT)
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (inputMethod) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "RequestCKeyboard,close softkeyboard.");
         inputMethod->RequestHideInput();
+        inputMethod->Close();
     }
 #else
     if (HasConnection()) {

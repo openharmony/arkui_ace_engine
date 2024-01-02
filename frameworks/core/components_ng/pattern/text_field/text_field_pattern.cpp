@@ -967,6 +967,15 @@ bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
         isFocusedBeforeClick_ = false;
         HandleOnSelectAll(true);
     }
+    if (!needToRequestKeyboardOnFocus_) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "External Keyboard, Reattach.");
+        CloseKeyboard(true);
+        auto focusHub = GetFocusHub();
+        if (!focusHub->IsFocusable()) {
+            focusHub->RequestFocusImmediately();
+        }
+        StartTwinkling();
+    }
     return TextInputClient::HandleKeyEvent(event);
 }
 
@@ -3052,6 +3061,7 @@ bool TextFieldPattern::RequestCustomKeyboard()
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (inputMethod) {
         inputMethod->RequestHideInput();
+        inputMethod->Close();
     }
 #else
     if (HasConnection()) {
