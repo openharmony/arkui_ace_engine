@@ -1026,7 +1026,9 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
     if (IsSelected() || textSelector_.baseOffset != -1) {
         end = paragraph_->GetGlyphIndexByCoordinate(textOffset);
     }
-    HandleSelectionChange(textSelector_.baseOffset, end);
+    if (isMousePressed_ || oldMouseStatus == MouseStatus::MOVE) {
+        HandleSelectionChange(textSelector_.baseOffset, end);
+    }
 
     if (IsSelected() && oldMouseStatus == MouseStatus::MOVE && IsSelectedBindSelectionMenu()) {
         mouseReleaseOffset_ = OffsetF(
@@ -1043,10 +1045,12 @@ void TextPattern::HandleMouseLeftMoveAction(const MouseInfo& info, const Offset&
         dragBoxes_ = GetTextBoxes();
         return;
     }
-    mouseStatus_ = MouseStatus::MOVE;
-    CHECK_NULL_VOID(paragraph_);
-    auto end = paragraph_->GetGlyphIndexByCoordinate(textOffset);
-    HandleSelectionChange(textSelector_.baseOffset, end);
+    if (isMousePressed_) {
+        mouseStatus_ = MouseStatus::MOVE;
+        CHECK_NULL_VOID(paragraph_);
+        auto end = paragraph_->GetGlyphIndexByCoordinate(textOffset);
+        HandleSelectionChange(textSelector_.baseOffset, end);
+    }
 }
 
 void TextPattern::HandleMouseRightButton(const MouseInfo& info, const Offset& textOffset)
