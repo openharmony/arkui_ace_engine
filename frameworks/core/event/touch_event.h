@@ -771,7 +771,6 @@ using TouchEventFunc = std::function<void(TouchEventInfo&)>;
 using OnTouchEventCallback = std::function<void(const TouchEventInfo&)>;
 using CatchTouchEventCallback = std::function<void()>;
 struct SerializedGesture {
-    int32_t size = 0;
     std::vector<char> data;
 };
 

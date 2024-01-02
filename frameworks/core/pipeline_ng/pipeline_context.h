@@ -574,7 +574,6 @@ public:
     void SubscribeContainerModalButtonsRectChange(
         std::function<void(RectF& containerModal, RectF& buttons)>&& callback);
 
-    bool cancelSended_ = false;
     const SerializedGesture& GetSerializedGesture() const override;
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -697,14 +696,14 @@ private:
     RefPtr<FullScreenManager> fullScreenManager_;
     RefPtr<SelectOverlayManager> selectOverlayManager_;
     RefPtr<DragDropManager> dragDropManager_;
-    RefPtr<SharedOverlayManager> sharedTransitionManager_;
+    RefPtr<SharedOverlayManager> sharedTransitionManager_;#ifdef
+#ifdef WINDOW_SCENE_SUPPORTED
+    RefPtr<UIExtensionManager> uiExtensionManager_;
+#endif
     RefPtr<SafeAreaManager> safeAreaManager_ = MakeRefPtr<SafeAreaManager>();
     RefPtr<FrameRateManager> frameRateManager_ = MakeRefPtr<FrameRateManager>();
     Rect displayAvailableRect_;
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
-#ifdef WINDOW_SCENE_SUPPORTED
-    RefPtr<UIExtensionManager> uiExtensionManager_ = MakeRefPtr<UIExtensionManager>();
-#endif
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
     WeakPtr<FrameNode> dirtyDefaultFocusNode_;
@@ -722,6 +721,7 @@ private:
     bool isWindowSceneConsumed_ = false;
     bool isDensityChanged_ = false;
     bool isBeforeDragHandleAxis_ = false;
+    bool cancelSended_ = false;
     WeakPtr<FrameNode> activeNode_;
 
     RefPtr<FrameNode> focusNode_;

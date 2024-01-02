@@ -1598,6 +1598,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
                         serializedGesture_.data = std::vector<char>(gesture->SizeofMe());
                         serializedGesture_.size = gesture->Serialize(serializedGesture_.data.data());
                     }
+                    break;
                 }
             }
         }
@@ -1675,6 +1676,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         touchPluginPipelineContext_.clear();
         RemoveEtsCardTouchEventCallback(point.id);
         ResetDraggingStatus(scalePoint);
+        cancelSended_ = false;
     }
 
     hasIdleTasks_ = true;

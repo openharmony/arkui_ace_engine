@@ -224,7 +224,7 @@ public:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, TouchTestResult> postEventTouchTestResults_;
 
-    void SetInnerFlag(const bool value)
+    void SetInnerFlag(bool value)
     {
         innerEventWin_ = value;
     }

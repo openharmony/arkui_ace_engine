@@ -53,16 +53,16 @@ public:
         return total;
     }
 
-    virtual int32_t Serialize(const char* p) override
+    virtual int32_t Serialize(const char* buffer) override
     {
         auto total = SizeofMe();
-        p = SetHeader(p, GestureType::GROUP, total);
-        *(GestureMode*)p = mode_;
-        p += sizeof(GestureMode);
+        buffer = SetHeader(buffer, GestureType::GROUP, total);
+        *(static_cast<GestureMode*>(buffer)) = mode_;
+        buffer += sizeof(GestureMode);
 
         for (auto& i : gestures_) {
-            int32_t len = i->Serialize(p);
-            p += len;
+            int32_t len = i->Serialize(buffer);
+            buffer += len;
         }
         return total;
     }
@@ -79,22 +79,22 @@ public:
         return nullptr;
     }
 
-    virtual int32_t Deserialize(char* p) override
+    virtual int32_t Deserialize(char* buffer) override
     {
-        int32_t* plen = reinterpret_cast<int32_t*>(p + sizeof(GestureType));
+        int32_t* plen = reinterpret_cast<int32_t*>(buffer + sizeof(GestureType));
         int32_t total = *plen;
         auto ret = total;
         total -= sizeof(int32_t);
         total -= sizeof(GestureType);
-        p += sizeof(GestureType) + sizeof(int32_t);
-        mode_ = *(GestureMode*)(p);
+        buffer += sizeof(GestureType) + sizeof(int32_t);
+        mode_ = *(static_cast<GestureMode*>(buffer));
         total -= sizeof(GestureMode);
-        p += sizeof(GestureMode);
+        buffer += sizeof(GestureMode);
         while (total != 0) {
-            auto gesture = MakeGesture(*(GestureType*)p);
-            auto len = gesture->Deserialize(p);
+            auto gesture = MakeGesture(*(static_cast<GestureType*>(buffer)));
+            auto len = gesture->Deserialize(buffer);
             gestures_.push_back(gesture);
-            p += len;
+            buffer += len;
             total -= len;
         }
         return ret;

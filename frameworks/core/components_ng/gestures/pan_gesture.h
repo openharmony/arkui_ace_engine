@@ -54,22 +54,22 @@ public:
     };
     ~PanGesture() override = default;
 
-    void MoveTo(const char* c)
+    void SerializeTo(const char* buffer)
     {
-        *(int32_t*)(c) = fingers_;
-        c += sizeof(int32_t);
-        *(GesturePriority*)(c) = priority_;
-        c += sizeof(GesturePriority);
-        *(GestureMask*)(c) = gestureMask_;
-        c += sizeof(GestureMask);
-        *(PanDirection*)(c) = direction_;
-        c += sizeof(PanDirection);
-        *(double*)(c) = distance_;
-        c += sizeof(double);
-        double* d = (double*)c;
+        *(static_cast<int32_t*>(buffer)) = fingers_;
+        buffer += sizeof(int32_t);
+        *(static_cast<GesturePriority*>(buffer)) = priority_;
+        buffer += sizeof(GesturePriority);
+        *(static_cast<GestureMask*>(buffer)) = gestureMask_;
+        buffer += sizeof(GestureMask);
+        *(static_cast<PanDirection*>(buffer)) = direction_;
+        buffer += sizeof(PanDirection);
+        *(static_cast<double*>(buffer)) = distance_;
+        buffer += sizeof(double);
+        double* d = static_cast<double*>(buffer);
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                d[i * 4 + j] = matrix.Get(i, j);
+                d[i * 4 + j] = matrix_.Get(i, j);
             }
         }
     };
@@ -80,31 +80,31 @@ public:
                Gesture::SizeofMe();
     };
 
-    int Serialize(const char* panGesture) override
+    int32_t Serialize(const char* panGesture) override
     {
         int sizePan = SizeofMe();
         panGesture = SetHeader(panGesture, GestureType::PAN, sizePan);
-        MoveTo(panGesture);
+        SerializeTo(panGesture);
         return sizePan;
     };
 
-    virtual int32_t Deserialize(char* p) override
+    virtual int32_t Deserialize(char* buffer) override
     {
-        p += sizeof(GestureType) + sizeof(int32_t);
-        fingers_ = *(int32_t*)(p);
-        p += sizeof(int32_t);
-        priority_ = *(GesturePriority*)(p);
-        p += sizeof(GesturePriority);
-        gestureMask_ = *(GestureMask*)(p);
-        p += sizeof(GestureMask);
-        direction_ = *(PanDirection*)(p);
-        p += sizeof(PanDirection);
-        distance_ = *(double*)(p);
-        p += sizeof(double);
-        double* d = (double*)p;
+        buffer += sizeof(GestureType) + sizeof(int32_t);
+        fingers_ = *(static_cast<int32_t*>(buffer))
+        buffer += sizeof(int32_t);
+        priority_ = *(static_cast<GesturePriority*>(buffer));
+        buffer += sizeof(GesturePriority);
+        gestureMask_ = *(static_cast<GestureMask*>(buffer)) ;
+        buffer += sizeof(GestureMask);
+        direction_ = *(static_cast<PanDirection*>(buffer));
+        buffer += sizeof(PanDirection);
+        distance_ = *(static_cast<double*>(buffer));
+        buffer += sizeof(double);
+        double* d = static_cast<double*>(buffer);
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                matrix.Set(i, j, d[i * 4 + j]);
+                matrix_.Set(i, j, d[i * 4 + j]);
             }
         }
         return SizeofMe();
@@ -117,7 +117,7 @@ private:
     PanDirection direction_;
     double distance_ = 0.0;
     RefPtr<PanGestureOption> panGestureOption_;
-    Matrix4 matrix;
+    Matrix4 matrix_;
 };
 
 } // namespace OHOS::Ace::NG

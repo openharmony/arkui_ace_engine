@@ -182,7 +182,7 @@ public:
 
     void SetGeometryNode(const RefPtr<GeometryNode>& node);
 
-const RefPtr<RenderContext>& GetRenderContext() const
+    const RefPtr<RenderContext>& GetRenderContext() const
     {
         return renderContext_;
     }

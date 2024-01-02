@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_PIPELINE_PIPELINE_BASE_H
 
 #include <atomic>
-#include <condition_variable>
 #include <functional>
 #include <memory>
 #include <optional>

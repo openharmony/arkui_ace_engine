@@ -18,7 +18,7 @@
 #include "errors.h"
 #include "form_renderer_hilog.h"
 #include "ipc_skeleton.h"
-#include "core/event/touch_event.h" // todo
+#include "core/event/touch_event.h"
 
 namespace OHOS {
 namespace Ace {
@@ -76,9 +76,8 @@ int32_t FormRendererDispatcherStub::HandleDispatchPointerEvent(MessageParcel &da
     }
     SerializedGesture serializedGesture;
     DispatchPointerEvent(pointerEvent, serializedGesture);
-    reply.WriteInt32((int32_t)(true));
-    reply.WriteInt32(serializedGesture.size);
-    reply.WriteRawData(serializedGesture.data.data(), serializedGesture.size);
+    reply.WriteInt32(serializedGesture.data.size());
+    reply.WriteRawData(serializedGesture.data.data(), serializedGesture.data.size());
     return ERR_OK;
 }
 

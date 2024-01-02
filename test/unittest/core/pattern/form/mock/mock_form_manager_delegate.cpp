@@ -14,6 +14,7 @@
  */
 
 #include "core/components/form/resource/form_manager_delegate.h"
+#include "core/event/touch_event.h"
 
 namespace OHOS::Ace {
 FormManagerDelegate::~FormManagerDelegate() = default;

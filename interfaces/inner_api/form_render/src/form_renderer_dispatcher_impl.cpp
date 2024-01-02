@@ -12,15 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <chrono>
-#include <condition_variable>
-#include <mutex>
-
 #include "form_renderer_dispatcher_impl.h"
 
 #include "form_renderer.h"
 #include "form_renderer_hilog.h"
-#include "core/components_ng/gestures/gesture_group.h"
 #include "core/components_ng/gestures/gesture_group.h"
 
 namespace OHOS {
@@ -41,7 +36,6 @@ void FormRendererDispatcherImpl::DispatchPointerEvent(
         HILOG_ERROR("eventHandler is nullptr");
         return;
     }
-    serializedGesture.size = 0;
     serializedGesture.data.clear();
 
     if (pointerEvent && pointerEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN) {

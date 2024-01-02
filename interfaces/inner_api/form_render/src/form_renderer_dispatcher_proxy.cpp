@@ -51,11 +51,14 @@ void FormRendererDispatcherProxy::DispatchPointerEvent(
         static_cast<uint32_t>(IFormRendererDispatcher::Message::DISPATCH_POINTER_EVENT),
         data, reply, option);
 
-    int32_t result;
-    reply.ReadInt32(result);
-    reply.ReadInt32(serializedGesture.size);
-    auto buffer = static_cast<const char*>(reply.ReadRawData(serializedGesture.size));
-    serializedGesture.data = std::vector<char>(buffer, buffer + serializedGesture.size);
+    int32_t size = 0;
+    reply.ReadInt32(size);
+    if (size < 0) {
+        HILOG_ERROR("Serialized gesture size is not valid!");
+    } else {
+        auto buffer = static_cast<const char*>(reply.ReadRawData(size));
+        serializedGesture.data = std::vector<char>(buffer, buffer + size);
+    }
 
     if (error != ERR_OK) {
         HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
