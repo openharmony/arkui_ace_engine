@@ -95,6 +95,7 @@ public:
     MOCK_METHOD2(GetContainerModalButtonsRect, bool(Rosen::Rect& containerModal, Rosen::Rect& buttons));
     MOCK_METHOD1(SubscribeContainerModalButtonsRectChange, void(
         std::function<void(Rosen::Rect& containerModal, Rosen::Rect& buttons)>&& callback));
+    MOCK_METHOD0(GetFormSerializedGesture, SerializedGesture());
 
 #ifndef PREVIEW
     MOCK_METHOD4(
