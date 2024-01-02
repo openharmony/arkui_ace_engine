@@ -44,12 +44,6 @@ const std::string SCROLLABLE_MULTI_TASK_SCENE = "scrollable_multi_task_scene";
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
 
-ScrollablePattern::ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled)
-    : edgeEffect_(edgeEffect), edgeEffectAlwaysEnabled_(alwaysEnabled)
-{
-    friction_ = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_FRICTION : FRICTION;
-}
-
 RefPtr<PaintProperty> ScrollablePattern::CreatePaintProperty()
 {
     auto defaultDisplayMode = GetDefaultScrollBarDisplayMode();
@@ -771,7 +765,7 @@ void ScrollablePattern::SetNestedScroll(const NestedScrollOptions& nestedOpt)
 void ScrollablePattern::SetFriction(double friction)
 {
     if (LessOrEqual(friction, 0.0)) {
-        friction = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_FRICTION : FRICTION;
+        friction = FRICTION;
     }
     friction_ = friction;
     CHECK_NULL_VOID(scrollableEvent_);
