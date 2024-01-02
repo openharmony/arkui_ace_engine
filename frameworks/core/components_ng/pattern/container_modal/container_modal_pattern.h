@@ -149,6 +149,11 @@ public:
         return false;
     }
 
+    void OnLanguageConfigurationUpdate() override
+    {
+        InitTitle();
+    }
+
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)
     {
