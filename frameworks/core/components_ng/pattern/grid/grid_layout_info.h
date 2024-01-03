@@ -133,7 +133,7 @@ struct GridLayoutInfo {
     float GetContentHeight(const GridLayoutOptions& options, float mainGap) const;
     float GetCurrentLineHeight() const;
 
-    bool GetLineIndexByIndex(int32_t targetIndex, int32_t& targetLineIndex);
+    bool GetLineIndexByIndex(int32_t targetIndex, int32_t& targetLineIndex) const;
     float GetTotalHeightFromZeroIndex(int32_t targetLineIndex, float mainGap) const;
 
     bool GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayoutInfo, int32_t targetIndex, ScrollAlign align,
