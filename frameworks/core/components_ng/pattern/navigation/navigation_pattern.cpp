@@ -886,7 +886,8 @@ void NavigationPattern::HandleDragUpdate(float xOffset)
 
     float minNavBarWidthPx = minNavBarWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
     float maxNavBarWidthPx = maxNavBarWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
-    float minContentWidthPx = minContentWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
+    float minContentWidthPx = userSetMinContentFlag_ && !userSetNavBarRangeFlag_ ?
+        minContentWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f)) : 0.0f;
     auto dividerWidth = static_cast<float>(DIVIDER_WIDTH.ConvertToPx());
 
     auto navigationPosition = navigationLayoutProperty->GetNavBarPosition().value_or(NavBarPosition::START);
