@@ -200,12 +200,12 @@ int32_t UIDisplaySync::GetRefreshRateMode() const
     return refreshRateMode_;
 }
 
-bool UIDisplaySync::IsEnabled() const
+bool UIDisplaySync::IsAutoRefreshRateMode() const
 {
     return refreshRateMode_ == static_cast<int32_t>(RefreshRateMode::REFRESHRATE_MODE_AUTO);
 }
 
-bool UIDisplaySync::IsDisabled() const
+bool UIDisplaySync::IsNonAutoRefreshRateMode() const
 {
     return refreshRateMode_ != static_cast<int32_t>(RefreshRateMode::REFRESHRATE_MODE_AUTO);
 }

@@ -177,8 +177,8 @@ public:
 
     void SetRefreshRateMode(int32_t refreshRateMode);
     int32_t GetRefreshRateMode() const;
-    bool IsEnabled() const;
-    bool IsDisabled() const;
+    bool IsAutoRefreshRateMode() const;
+    bool IsNonAutoRefreshRateMode() const;
 
     UIDisplaySync();
     ~UIDisplaySync() noexcept override;

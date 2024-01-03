@@ -55,9 +55,16 @@ ace_unittest("shared_overlay_manager_test_ng") {
   sources = [ "shared_overlay_manager_test_ng.cpp" ]
 }
 
+ace_unittest("display_sync_manager_test_ng") {
+  type = "new"
+  module_output = "manager"
+  sources = [ "display_sync_manager_test.cpp" ]
+}
+
 group("core_manager_unittest") {
   testonly = true
   deps = [
+    ":display_sync_manager_test_ng",
     ":drag_drop_manager_test_ng",
     ":drag_drop_proxy_test_ng",
     ":full_screen_manager_test_ng",
