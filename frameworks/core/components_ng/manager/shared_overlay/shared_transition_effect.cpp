@@ -243,6 +243,21 @@ bool SharedTransitionExchange::SetVisibleToDest(VisibleType type)
     return true;
 }
 
+void SharedTransitionExchange::DestRequestDefaultFocus()
+{
+    if (destVisible_ != VisibleType::VISIBLE) {
+        return;
+    }
+    auto dest = dest_.Upgrade();
+    CHECK_NULL_VOID(dest);
+    auto page = dest->GetPageNode();
+    CHECK_NULL_VOID(page);
+    auto pageFocusHub = page->GetFocusHub();
+    CHECK_NULL_VOID(pageFocusHub);
+    pageFocusHub->SetParentFocusable(true);
+    pageFocusHub->RequestFocusWithDefaultFocusFirstly();
+}
+
 SharedTransitionStatic::SharedTransitionStatic(
     const ShareId& shareId, const std::shared_ptr<SharedTransitionOption>& sharedOption)
     : SharedTransitionEffect(shareId, sharedOption)
