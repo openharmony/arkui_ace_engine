@@ -378,7 +378,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
 
     // Only used in OnDirtyLayoutWrapperSwap.
     lastTextRect_= textRect;
-    
+
     parentGlobalOffset_ = textFieldLayoutAlgorithm->GetParentGlobalOffset();
     inlineMeasureItem_ = textFieldLayoutAlgorithm->GetInlineMeasureItem();
     isEditorValueChanged |= FireOnTextChangeEvent();
@@ -967,6 +967,15 @@ bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
         isFocusedBeforeClick_ = false;
         HandleOnSelectAll(true);
     }
+    if (!needToRequestKeyboardOnFocus_) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "External Keyboard, Reattach.");
+        CloseKeyboard(true);
+        auto focusHub = GetFocusHub();
+        if (!focusHub->IsFocusable()) {
+            focusHub->RequestFocusImmediately();
+        }
+        StartTwinkling();
+    }
     return TextInputClient::HandleKeyEvent(event);
 }
 
@@ -1302,10 +1311,14 @@ void TextFieldPattern::FireEventHubOnChange(const std::string& text)
 
 void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
+    auto touchType = info.GetTouches().front().GetTouchType();
+    if (touchType == TouchType::UP) {
+        RequestKeyboardAfterLongPress();
+    }
     if (SelectOverlayIsOn() && !isTouchCaret_) {
         return;
     }
-    auto touchType = info.GetTouches().front().GetTouchType();
+
     if (touchType == TouchType::DOWN) {
         HandleTouchDown(info.GetTouches().front().GetLocalLocation());
     } else if (touchType == TouchType::UP) {
@@ -1369,14 +1382,6 @@ void TextFieldPattern::HandleTouchUp()
             }
         }
     }
-#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    if (isLongPress_ && !imeShown_ && !isCustomKeyboardAttached_ && HasFocus()) {
-        if (RequestKeyboard(false, true, true)) {
-            NotifyOnEditChanged(true);
-        }
-    }
-    isLongPress_ = false;
-#endif
 }
 
 void TextFieldPattern::HandleTouchMove(const TouchEventInfo& info)
@@ -2126,6 +2131,15 @@ bool TextFieldPattern::FireOnTextChangeEvent()
     return true;
 }
 
+void TextFieldPattern::ContentFireOnChangeEvent()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->FireOnChange(contentController_->GetTextValue());
+}
+
 void TextFieldPattern::FilterInitializeText()
 {
     if (HasInputOperation()) {
@@ -2398,8 +2412,6 @@ bool TextFieldPattern::OnPreShowSelectOverlay(
     isSupportCameraInput_ = false;
 #endif
     overlayInfo.menuInfo.showCameraInput = !IsSelected() && isSupportCameraInput_ && !customKeyboardBuilder_;
-    auto gesture = host->GetOrCreateGestureEventHub();
-    gesture->RemoveTouchEvent(GetTouchListener());
     return true;
 }
 
@@ -3052,6 +3064,7 @@ bool TextFieldPattern::RequestCustomKeyboard()
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (inputMethod) {
         inputMethod->RequestHideInput();
+        inputMethod->Close();
     }
 #else
     if (HasConnection()) {
@@ -4424,6 +4437,7 @@ bool TextFieldPattern::OnBackPressed()
 
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     CloseKeyboard(true);
+    FocusHub::LostFocusToViewRoot();
 #if defined(ANDROID_PLATFORM)
     return false;
 #else
@@ -6244,5 +6258,15 @@ void TextFieldPattern::HandleOnDragStatusCallback(
         default:
             break;
     }
+}
+
+void TextFieldPattern::RequestKeyboardAfterLongPress()
+{
+#if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
+    if (isLongPress_ && HasFocus() && RequestKeyboard(false, true, true)) {
+        NotifyOnEditChanged(true);
+    }
+    isLongPress_ = false;
+#endif
 }
 } // namespace OHOS::Ace::NG

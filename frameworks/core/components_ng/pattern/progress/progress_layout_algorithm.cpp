@@ -57,38 +57,30 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
         progressTheme ? progressTheme->GetRingDiameter().ConvertToPx() : DEFALT_RING_DIAMETER.ConvertToPx();
     float width_ =
         progressTheme ? progressTheme->GetTrackWidth().ConvertToPx() : contentConstraint.percentReference.Width();
-    if (contentConstraint.selfIdealSize.Width()) {
-        width_ = contentConstraint.selfIdealSize.Width().value();
-    }
-    float height_ = strokeWidth_;
-    if (contentConstraint.selfIdealSize.Height()) {
-        height_ = contentConstraint.selfIdealSize.Height().value();
-    }
+    auto selfIdealWidth = contentConstraint.selfIdealSize.Width();
+    auto selfIdealHeight = contentConstraint.selfIdealSize.Height();
+    width_ = selfIdealWidth.value_or(width_);
+    float height_ = selfIdealHeight.value_or(strokeWidth_);
     if (type_ == ProgressType::RING || type_ == ProgressType::SCALE || type_ == ProgressType::MOON) {
-        if (!contentConstraint.selfIdealSize.Width() && !contentConstraint.selfIdealSize.Height()) {
-            width_ = diameter;
+        if (!selfIdealHeight) {
+            if (!selfIdealWidth) {
+                width_ = diameter;
+            }
             height_ = width_;
-        }
-        if (contentConstraint.selfIdealSize.Width() && !contentConstraint.selfIdealSize.Height()) {
-            height_ = width_;
-        }
-        if (contentConstraint.selfIdealSize.Height() && !contentConstraint.selfIdealSize.Width()) {
+        } else {
+            if (selfIdealWidth) {
+                height_ = std::min(width_, height_);
+            }
             width_ = height_;
         }
-        if (contentConstraint.selfIdealSize.Height() && contentConstraint.selfIdealSize.Width()) {
-            width_ = std::min(width_, height_);
-            height_ = width_;
-        }
-    }
-    if (type_ == ProgressType::CAPSULE) {
-        if (!contentConstraint.selfIdealSize.Width()) {
+    } else if (type_ == ProgressType::CAPSULE) {
+        if (!selfIdealWidth) {
             width_ = contentConstraint.percentReference.Width();
         }
-        if (!contentConstraint.selfIdealSize.Height()) {
+        if (!selfIdealHeight) {
             height_ = contentConstraint.parentIdealSize.Height().value_or(GetChildHeight(layoutWrapper, width_));
         }
-    }
-    if (type_ == ProgressType::LINEAR) {
+    } else if (type_ == ProgressType::LINEAR) {
         if (width_ >= height_) {
             height_ = std::min(height_, strokeWidth_);
         } else {
@@ -113,30 +105,29 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContentForApiNine(
     float diameter =
         progressTheme ? progressTheme->GetRingDiameter().ConvertToPx() : DEFALT_RING_DIAMETER.ConvertToPx();
     float width_ = progressTheme ? progressTheme->GetTrackWidth().ConvertToPx() : contentConstraint.maxSize.Width();
-    if (contentConstraint.selfIdealSize.Width()) {
-        width_ = contentConstraint.selfIdealSize.Width().value();
+    auto selfIdealWidth = contentConstraint.selfIdealSize.Width();
+    auto selfIdealHeight = contentConstraint.selfIdealSize.Height();
+    if (selfIdealWidth) {
+        width_ = selfIdealWidth.value();
     }
     float height_ = strokeWidth_ * 2.0f;
-    if (contentConstraint.selfIdealSize.Height()) {
-        height_ = contentConstraint.selfIdealSize.Height().value();
+    if (selfIdealHeight) {
+        height_ = selfIdealHeight.value();
     }
     if (type_ == ProgressType::RING || type_ == ProgressType::SCALE || type_ == ProgressType::MOON) {
-        if (!contentConstraint.selfIdealSize.Width() && !contentConstraint.selfIdealSize.Height()) {
+        if (!selfIdealWidth && !selfIdealHeight) {
             width_ = diameter;
             height_ = width_;
-        }
-        if (contentConstraint.selfIdealSize.Width() && !contentConstraint.selfIdealSize.Height()) {
+        } else if (selfIdealWidth && !selfIdealHeight) {
             height_ = width_;
-        }
-        if (contentConstraint.selfIdealSize.Height() && !contentConstraint.selfIdealSize.Width()) {
+        } else if (selfIdealHeight && !selfIdealWidth) {
             width_ = height_;
         }
-    }
-    if (type_ == ProgressType::CAPSULE) {
-        if (!contentConstraint.selfIdealSize.Height()) {
+    } else if (type_ == ProgressType::CAPSULE) {
+        if (!selfIdealHeight) {
             height_ = diameter;
         }
-        if (!contentConstraint.selfIdealSize.Width()) {
+        if (!selfIdealWidth) {
             width_ = diameter;
         }
     }

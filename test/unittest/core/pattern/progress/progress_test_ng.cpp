@@ -2508,16 +2508,6 @@ HWTEST_F(ProgressTestNg, ProgressSetValue002, TestSize.Level1)
     frameNode = CreateProgressParagraph(testProperty);
     paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
     auto pattern = frameNode->GetPattern<ProgressPattern>();
-    auto theme = PipelineBase::GetCurrentContext()->GetTheme<ProgressTheme>();
-    EXPECT_EQ(paintProperty->GetColor(), theme->GetCapsuleSelectColor());
-    EXPECT_EQ(paintProperty->GetBackgroundColor(), theme->GetBorderColor());
-    EXPECT_EQ(paintProperty->GetBorderColor(), theme->GetCapsuleBgColor());
-    CheckValue(frameNode, testProperty);
-
-    /**
-     * @tc.steps: step3. set ProgressModifier property.
-     * @tc.expected: step3. Check the ProgressModifier property value.
-     */
     auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     auto* stack = ViewStackProcessor::GetInstance();

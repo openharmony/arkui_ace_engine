@@ -394,8 +394,11 @@ void FocusHub::LostSelfFocus()
 void FocusHub::RemoveSelf(BlurReason reason)
 {
     TAG_LOGD(AceLogTag::ACE_FOCUS, "Node %{public}s/%{public}d remove self.", GetFrameName().c_str(), GetFrameId());
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto screenNode = pipeline ? pipeline->GetScreenNode() : nullptr;
+    auto screenFocusHub = screenNode ? screenNode->GetFocusHub() : nullptr;
     auto parent = GetParentFocusHub();
-    if (parent) {
+    if (parent && parent != screenFocusHub) {
         parent->RemoveChild(AceType::Claim(this), reason);
     } else {
         LostFocus(reason);
@@ -1108,16 +1111,9 @@ void FocusHub::IsCloseKeyboard(RefPtr<FrameNode> frameNode)
             frameNode->GetTag().c_str(), frameNode->GetId());
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
-            MiscServices::PanelInfo curKeyboardPanelInfo;
-            curKeyboardPanelInfo.panelType = MiscServices::PanelType::SOFT_KEYBOARD;
-            curKeyboardPanelInfo.panelFlag = MiscServices::PanelFlag::FLG_FIXED;
-            bool curIsShown = false;
-            auto infApiRes = inputMethod->IsPanelShown(curKeyboardPanelInfo, curIsShown);
-            if (infApiRes || curIsShown) {
-                TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Shown.");
-                inputMethod->RequestHideInput();
-                TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
-            }
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
+            inputMethod->RequestHideInput();
+            inputMethod->Close();
         }
     }
 #endif

@@ -45,12 +45,6 @@ const std::string SCROLL_IN_HOTZONE_SCENE = "scroll_in_hotzone_scene";
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
 
-ScrollablePattern::ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled)
-    : edgeEffect_(edgeEffect), edgeEffectAlwaysEnabled_(alwaysEnabled)
-{
-    friction_ = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_FRICTION : FRICTION;
-}
-
 RefPtr<PaintProperty> ScrollablePattern::CreatePaintProperty()
 {
     auto defaultDisplayMode = GetDefaultScrollBarDisplayMode();
@@ -310,11 +304,9 @@ void ScrollablePattern::OnScrollEnd()
 
     // Now: HandleOverScroll moved to ScrollablePattern and renamed HandleScrollVelocity, directly
     // calls OnScrollEnd in ScrollablePattern
-    if (isRefreshInReactive_) {
-        if (refreshCoordination_) {
-            isRefreshInReactive_ = false;
-            refreshCoordination_->OnScrollEnd(GetVelocity());
-        }
+    if (refreshCoordination_) {
+        isRefreshInReactive_ = false;
+        refreshCoordination_->OnScrollEnd(GetVelocity());
     }
     if (isSheetInReactive_) {
         isSheetInReactive_ = false;
@@ -779,7 +771,7 @@ void ScrollablePattern::SetNestedScroll(const NestedScrollOptions& nestedOpt)
 void ScrollablePattern::SetFriction(double friction)
 {
     if (LessOrEqual(friction, 0.0)) {
-        friction = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_FRICTION : FRICTION;
+        friction = FRICTION;
     }
     friction_ = friction;
     CHECK_NULL_VOID(scrollableEvent_);
@@ -1461,7 +1453,7 @@ void ScrollablePattern::NotifyMoved(bool value)
 void ScrollablePattern::ProcessSpringEffect(float velocity)
 {
     CHECK_NULL_VOID(InstanceOf<ScrollSpringEffect>(scrollEffect_));
-    if ((!OutBoundaryCallback() && !GetCanOverScroll()) || !IsOutOfBoundary(true)) {
+    if (!OutBoundaryCallback() && !GetCanOverScroll()) {
         return;
     }
     scrollEffect_->ProcessScrollOver(velocity);
@@ -1695,7 +1687,7 @@ bool ScrollablePattern::HandleScrollVelocity(float velocity)
         }
         return false;
     }
-    return HandleOverScroll(velocity);
+    return HandleOverScroll(velocity) || GetEdgeEffect() == EdgeEffect::FADE;
 }
 
 bool ScrollablePattern::HandleOverScroll(float velocity)

@@ -1658,5 +1658,5 @@ struct ArkUINodeAPI {
     ArkUIFormComponentModifierAPI (*GetFormComponentModifier)();
 #endif
 };
-ArkUINodeAPI* GetArkUIInternalNodeAPI(void);
+ArkUINodeAPI* GetArkUIInternalNodeAPI();
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_API_H

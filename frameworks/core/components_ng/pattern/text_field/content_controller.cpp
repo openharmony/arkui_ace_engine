@@ -73,6 +73,11 @@ bool ContentController::ReplaceSelectedValue(int32_t startIndex, int32_t endInde
     content_ = StringUtils::ToString(wideText.substr(0, startIndex)) + tmp +
                StringUtils::ToString(wideText.substr(endIndex, static_cast<int32_t>(wideText.length()) - endIndex));
     FilterValue();
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto textField = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_RETURN(textField, false);
+    textField->ContentFireOnChangeEvent();
     return !tmp.empty();
 }
 
@@ -171,6 +176,7 @@ void ContentController::FilterValue()
     if (GreatNotEqual(textWidth, maxLength)) {
         content_ = StringUtils::ToString(GetWideText().substr(0, maxLength));
     }
+    textField->ContentFireOnChangeEvent();
 }
 
 std::string ContentController::RemoveErrorTextFromValue(const std::string& value, const std::string& errorText)
@@ -294,6 +300,11 @@ void ContentController::erase(int32_t startIndex, int32_t length)
 {
     auto wideText = GetWideText().erase(startIndex, length);
     content_ = StringUtils::ToString(wideText);
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textField = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textField);
+    textField->ContentFireOnChangeEvent();
 }
 
 std::string ContentController::GetValueBeforeIndex(int32_t index)

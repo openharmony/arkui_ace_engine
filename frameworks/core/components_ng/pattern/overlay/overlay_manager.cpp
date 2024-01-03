@@ -2545,19 +2545,27 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
     maskLayoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto maskRenderContext = maskNode->GetRenderContext();
     CHECK_NULL_VOID(maskRenderContext);
-    maskRenderContext->UpdateBackgroundColor(sheetStyle.maskColor.value_or(sheetTheme->GetMaskColor()));
+    if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        if (sheetStyle.maskColor.has_value()) {
+            maskRenderContext->UpdateBackgroundColor(sheetStyle.maskColor.value());
+        } else {
+            maskLayoutProps->UpdateVisibility(VisibleType::INVISIBLE);
+        }
+    } else {
+        maskRenderContext->UpdateBackgroundColor(sheetStyle.maskColor.value_or(sheetTheme->GetMaskColor()));
+        auto eventConfirmHub = maskNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(eventConfirmHub);
+        sheetMaskClickEvent_ = AceType::MakeRefPtr<NG::ClickEvent>(
+            [weak = AceType::WeakClaim(AceType::RawPtr(sheetNode))](const GestureEvent& /* info */) {
+                auto sheet = weak.Upgrade();
+                CHECK_NULL_VOID(sheet);
+                auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
+                CHECK_NULL_VOID(sheetPattern);
+                sheetPattern->SheetInteractiveDismiss(false);
+            });
+        eventConfirmHub->AddClickEvent(sheetMaskClickEvent_);
+    }
     maskNode->MountToParent(rootNode);
-    auto eventConfirmHub = maskNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(eventConfirmHub);
-    sheetMaskClickEvent_ = AceType::MakeRefPtr<NG::ClickEvent>(
-        [weak = AceType::WeakClaim(AceType::RawPtr(sheetNode))](const GestureEvent& /* info */) {
-            auto sheet = weak.Upgrade();
-            CHECK_NULL_VOID(sheet);
-            auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
-            CHECK_NULL_VOID(sheetPattern);
-            sheetPattern->SheetInteractiveDismiss(false);
-        });
-    eventConfirmHub->AddClickEvent(sheetMaskClickEvent_);
     PlaySheetMaskTransition(maskNode, true);
     auto columnNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -2840,7 +2848,7 @@ void OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<Frame
     auto sheetType = sheetPattern->GetSheetType();
     switch (sheetType) {
         case SheetType::SHEET_BOTTOM:
-        case SheetType::SHEET_BOTTOMPC:
+        case SheetType::SHEET_BOTTOM_FREE_WINDOW:
             if (sheetStyle.detents.size() > 0) {
                 ComputeDetentsSheetOffset(sheetStyle, sheetNode);
             } else {
@@ -2875,6 +2883,9 @@ void OverlayManager::ComputeSingleGearSheetOffset(NG::SheetStyle& sheetStyle, Re
     if (sheetStyle.sheetMode.has_value()) {
         if (sheetStyle.sheetMode == SheetMode::MEDIUM) {
             sheetHeight_ = sheetMaxHeight * MEDIUM_SIZE;
+            if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+                sheetHeight_ = sheetMaxHeight * MEDIUM_SIZE_PRE;
+            }
         } else if (sheetStyle.sheetMode == SheetMode::LARGE) {
             sheetHeight_ = largeHeight;
         } else if (sheetStyle.sheetMode == SheetMode::AUTO) {
@@ -2915,6 +2926,9 @@ void OverlayManager::ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPt
     if (selection.sheetMode.has_value()) {
         if (selection.sheetMode == SheetMode::MEDIUM) {
             sheetHeight_ = sheetMaxHeight * MEDIUM_SIZE;
+            if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+                sheetHeight_ = sheetMaxHeight * MEDIUM_SIZE_PRE;
+            }
         } else if (selection.sheetMode == SheetMode::LARGE) {
             sheetHeight_ = largeHeight;
         } else if (selection.sheetMode == SheetMode::AUTO) {

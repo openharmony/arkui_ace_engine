@@ -235,6 +235,7 @@ RefPtr<UINode> NavigationGroupNode::GetNavDestinationNode(RefPtr<UINode> uiNode)
             continue;
         }
     }
+    CHECK_NULL_RETURN(uiNode, nullptr);
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "get navDestination node failed: id: %{public}d, %{public}s",
         uiNode->GetId(), uiNode->GetTag().c_str());
     return nullptr;

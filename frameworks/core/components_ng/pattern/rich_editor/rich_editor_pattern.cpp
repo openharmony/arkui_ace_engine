@@ -1587,7 +1587,9 @@ void RichEditorPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 
 bool RichEditorPattern::CheckBlurReason()
 {
-    auto curFocusHub = GetFocusHub();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto curFocusHub = host->GetFocusHub();
     CHECK_NULL_RETURN(curFocusHub, false);
     auto curBlurReason = curFocusHub->GetBlurReason();
     if (curBlurReason == BlurReason::FRAME_DESTROY) {
@@ -2220,7 +2222,9 @@ bool RichEditorPattern::RequestCustomKeyboard()
 #if defined(ENABLE_STANDARD_INPUT)
     auto inputMethod = MiscServices::InputMethodController::GetInstance();
     if (inputMethod) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "RequestCKeyboard,close softkeyboard.");
         inputMethod->RequestHideInput();
+        inputMethod->Close();
     }
 #else
     if (HasConnection()) {
@@ -2722,6 +2726,7 @@ bool RichEditorPattern::OnBackPressed()
     }
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     CloseKeyboard(true);
+    FocusHub::LostFocusToViewRoot();
 #if defined(ANDROID_PLATFORM)
     return false;
 #else
@@ -3495,7 +3500,6 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
         isMousePressed_ = false;
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         if (isLongPress_) {
-            RequestKeyboard(false, true, true);
             isLongPress_ = false;
         }
 #endif
