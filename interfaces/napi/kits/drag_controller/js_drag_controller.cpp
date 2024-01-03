@@ -709,6 +709,10 @@ void StartDragService(DragControllerAsyncCtx* asyncCtx)
     if (asyncCtx->dragState == DragState::SENDING) {
         asyncCtx->dragState = DragState::SUCCESS;
         Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(asyncCtx->env, &scope);
+        HandleOnDragStart(asyncCtx);
+        napi_close_handle_scope(asyncCtx->env, scope);
     }
 }
 
