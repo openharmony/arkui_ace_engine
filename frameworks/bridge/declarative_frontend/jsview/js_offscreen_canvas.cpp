@@ -80,6 +80,8 @@ napi_value AttachOffscreenCanvas(napi_env env, void* value, void*)
     return offscreenCanvas;
 }
 
+double JSOffscreenCanvas::dipScale_ = 1.0;
+
 napi_value JSOffscreenCanvas::InitOffscreenCanvas(napi_env env)
 {
     napi_value object = nullptr;
@@ -130,6 +132,7 @@ napi_value JSOffscreenCanvas::Constructor(napi_env env, napi_callback_info info)
     auto context = PipelineBase::GetCurrentContext();
     if (context != nullptr) {
         workCanvas->instanceId_ = context->GetInstanceId();
+        workCanvas->dipScale_ = context->GetDipScale();
     }
     if (napi_get_value_double(env, argv[0], &fWidth) == napi_ok) {
         fWidth = PipelineBase::Vp2PxWithCurrentDensity(fWidth);
@@ -382,5 +385,19 @@ napi_value JSOffscreenCanvas::CreateContext2d(napi_env env, double width, double
     offscreenCanvasContext_->SetOffscreenPattern(offscreenCanvasPattern_);
     offscreenCanvasContext_->AddOffscreenCanvasPattern(offscreenCanvasPattern_);
     return thisVal;
+}
+
+double JSOffscreenCanvas::ConvertToPxValue(Dimension dimension)
+{
+    if (dimension.Unit() == DimensionUnit::NONE) {
+        return dimension.Value();
+    }
+    if (dimension.Unit() == DimensionUnit::PX) {
+        return dimension.Value();
+    }
+    if (dimension.Unit() == DimensionUnit::VP) {
+        return dimension.Value() * dipScale_;
+    }
+    return 0.0;
 }
 } // namespace OHOS::Ace::Framework
