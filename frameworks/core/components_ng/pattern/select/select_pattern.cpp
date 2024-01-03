@@ -152,8 +152,12 @@ void SelectPattern::ShowSelectMenu()
     }
     
     auto offset = GetHost()->GetPaintRectOffset();
-    offset.AddY(selectSize_.Height() + CALIBERATE_Y.ConvertToPx());
-    offset.AddX(-CALIBERATE_X.ConvertToPx());
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        offset.AddY(selectSize_.Height() + CALIBERATE_Y.ConvertToPx());
+        offset.AddX(-CALIBERATE_X.ConvertToPx());
+    } else {
+        offset.AddY(selectSize_.Height());
+    }
     
     overlayManager->ShowMenu(GetHost()->GetId(), offset, menuWrapper_);
 }

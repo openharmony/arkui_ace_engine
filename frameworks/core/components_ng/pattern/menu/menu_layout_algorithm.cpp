@@ -1548,13 +1548,16 @@ void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, L
 #endif
         maxAvailableHeight = windowGlobalRect.Height() - top - bottom;
     }
-    float maxSpaceHeight = maxAvailableHeight * HEIGHT_CONSTRAINT_FACTOR;
-	
-    if (menuPattern->IsHeightModifiedBySelect()) {
-        auto menuLayoutProps = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
-        auto selectModifiedHeight = menuLayoutProps->GetSelectModifiedHeight().value();
-        if (selectModifiedHeight < maxSpaceHeight) {
-            maxSpaceHeight = selectModifiedHeight;
+    float maxSpaceHeight = maxAvailableHeight;
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        maxSpaceHeight = maxAvailableHeight * HEIGHT_CONSTRAINT_FACTOR;
+    
+        if (menuPattern->IsHeightModifiedBySelect()) {
+            auto menuLayoutProps = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+            auto selectModifiedHeight = menuLayoutProps->GetSelectModifiedHeight().value();
+            if (selectModifiedHeight < maxSpaceHeight) {
+                maxSpaceHeight = selectModifiedHeight;
+            }
         }
     }
     constraint.maxSize.SetHeight(maxSpaceHeight);
