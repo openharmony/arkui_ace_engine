@@ -91,7 +91,8 @@ private:
         CHECK_NULL_VOID(renderContext);
         auto theme = NavigationGetTheme();
         CHECK_NULL_VOID(theme);
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        if (SystemProperties::GetNavigationBlurEnabled() &&
+            Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
             renderContext->UpdateBackgroundColor(theme->GetBackgroundBlurColor());
 
             BlurStyleOption blur;

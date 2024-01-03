@@ -164,6 +164,11 @@ bool IsDebugEnabled()
     return (system::GetParameter("persist.ace.debug.enabled", "0") == "1");
 }
 
+bool IsNavigationBlurEnabled()
+{
+    return (system::GetParameter("persist.ace.navigation.blur.enabled", "0") == "1");
+}
+
 bool IsGpuUploadEnabled()
 {
     return (system::GetParameter("persist.ace.gpuupload.enabled", "0") == "1" ||
@@ -278,6 +283,7 @@ ACE_WEAK_SYM bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
 ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount();
 bool SystemProperties::enableScrollableItemPool_ = IsEnableScrollableItemPool();
 bool SystemProperties::resourceDecoupling_ = IsResourceDecoupling();
+bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
 
 bool SystemProperties::IsSyscapExist(const char* cap)
 {
@@ -398,6 +404,8 @@ void SystemProperties::InitDeviceInfo(
     animationScale_ = std::atof(system::GetParameter(ANIMATION_SCALE_KEY, "1").c_str());
     WatchParameter(ANIMATION_SCALE_KEY, OnAnimationScaleChanged, nullptr);
     resourceDecoupling_ = IsResourceDecoupling();
+
+    navigationBlurEnabled_ = IsNavigationBlurEnabled();
 
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
@@ -542,5 +550,10 @@ std::optional<bool> SystemProperties::GetRtlEnabled()
 bool SystemProperties::GetDisplaySyncSkipEnabled()
 {
     return system::GetBoolParameter("debug.ace.displaySyncSkip.enabled", true);
+}
+
+bool SystemProperties::GetNavigationBlurEnabled()
+{
+    return navigationBlurEnabled_;
 }
 } // namespace OHOS::Ace
