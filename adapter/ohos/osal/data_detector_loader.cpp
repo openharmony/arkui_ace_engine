@@ -18,11 +18,19 @@
 #include "base/log/log_wrapper.h"
 #include "core/common/ai/data_detector_loader.h"
 namespace OHOS::Ace {
+namespace {
+#ifdef __aarch64__
+constexpr char AI_ADAPTER_SO_PATH[] = "system/lib64/libai_text_analyzer_innerapi.z.so";
+#else
+constexpr char AI_ADAPTER_SO_PATH[] = "system/lib/libai_text_analyzer_innerapi.z.so";
+#endif
+} // namespace
+
 // static
-std::shared_ptr<DataDetectorLoader> DataDetectorLoader::Load(std::string libPath)
+std::shared_ptr<DataDetectorLoader> DataDetectorLoader::Load()
 {
     auto engLib(std::make_shared<DataDetectorLoader>());
-    return engLib->Init(std::move(libPath)) ? engLib : nullptr;
+    return engLib->Init() ? engLib : nullptr;
 }
 
 DataDetectorLoader::~DataDetectorLoader()
@@ -30,9 +38,9 @@ DataDetectorLoader::~DataDetectorLoader()
     Close();
 }
 
-bool DataDetectorLoader::Init(std::string libPath)
+bool DataDetectorLoader::Init()
 {
-    mLibraryHandle_ = dlopen(libPath.c_str(), RTLD_LAZY);
+    mLibraryHandle_ = dlopen(AI_ADAPTER_SO_PATH, RTLD_LAZY);
     if (mLibraryHandle_ == nullptr) {
         return false;
     }
@@ -41,7 +49,7 @@ bool DataDetectorLoader::Init(std::string libPath)
     mDestoryDataDetectorInstance_ = (void (*)(DataDetectorInterface*))dlsym(
         mLibraryHandle_, "OHOS_ACE_destroyDataDetectorInstance");
     if (mCreateDataDetectorInstance_ == nullptr || mDestoryDataDetectorInstance_ == nullptr) {
-        LOGE("Could not find engine interface function in %s", libPath.c_str());
+        LOGE("Could not find engine interface function in %s", AI_ADAPTER_SO_PATH);
         Close();
         return false;
     }
