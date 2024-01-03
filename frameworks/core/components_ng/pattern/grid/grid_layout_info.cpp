@@ -474,7 +474,7 @@ bool GridLayoutInfo::GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayo
     return true;
 }
 
-void GridLayoutInfo::ClearMapsForward(int32_t idx)
+void GridLayoutInfo::ClearMapsToEnd(int32_t idx)
 {
     auto gridIt = gridMatrix_.lower_bound(idx);
     gridMatrix_.erase(gridIt, gridMatrix_.end());
@@ -482,7 +482,7 @@ void GridLayoutInfo::ClearMapsForward(int32_t idx)
     lineHeightMap_.erase(lineIt, lineHeightMap_.end());
 }
 
-void GridLayoutInfo::ClearMapsBackward(int32_t idx)
+void GridLayoutInfo::ClearMapsFromStart(int32_t idx)
 {
     auto gridIt = gridMatrix_.lower_bound(idx);
     gridMatrix_.erase(gridMatrix_.begin(), gridIt);

@@ -906,8 +906,8 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
         gridLayoutInfo_.offsetEnd_ = false;
     }
     if (!cacheValid) {
-        info.ClearMapsForward(info.endMainLineIndex_ + 1);
-        info.ClearMapsBackward(info.startMainLineIndex_);
+        info.ClearMapsToEnd(info.endMainLineIndex_ + 1);
+        info.ClearMapsFromStart(info.startMainLineIndex_);
     }
     return runOutOfRecord;
 }
