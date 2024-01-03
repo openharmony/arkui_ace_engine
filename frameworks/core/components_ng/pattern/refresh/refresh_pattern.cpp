@@ -437,10 +437,10 @@ void RefreshPattern::UpdateRefreshStatus(RefreshStatus newStatus)
 
 void RefreshPattern::SwitchToFinish()
 {
-    if (refreshStatus_ == RefreshStatus::REFRESH) {
-        UpdateRefreshStatus(RefreshStatus::DONE);
-    } else {
+    if (refreshStatus_ != RefreshStatus::REFRESH && refreshStatus_ != RefreshStatus::DONE) {
         UpdateRefreshStatus(RefreshStatus::INACTIVE);
+    } else {
+        UpdateRefreshStatus(RefreshStatus::DONE);
     }
 }
 
