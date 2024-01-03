@@ -153,6 +153,14 @@ public:
         return index_;
     }
 
+    bool IsCacheNode() {
+        return isCacheNode_;
+    }
+
+    void SetIsCacheNode(bool isCacheNode) {
+        isCacheNode_ = isCacheNode;
+    }
+
 private:
     RefPtr<UINode> title_;
     RefPtr<UINode> subtitle_;
@@ -160,6 +168,7 @@ private:
     RefPtr<UINode> contentNode_;
     NavDestinationBackButtonEvent backButtonEvent_;
     bool isOnAnimation_ = false;
+    bool isCacheNode_ = false;
     int32_t index_ = -1;
     PageTransitionType transitionType_ = PageTransitionType::NONE;
     NavDestinationMode mode_ = NavDestinationMode::STANDARD;

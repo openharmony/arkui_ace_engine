@@ -394,6 +394,12 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
                 if (shallowBuilder) {
                     shallowBuilder->MarkIsExecuteDeepRenderDone(false);
                 }
+
+                auto isCacheNode = preNavDesNode->IsCacheNode();
+                if (!isCacheNode && preNavDesNode->GetContentNode()) {
+                    preNavDesNode->GetContentNode()->Clean();
+                }
+
                 auto parent = preNavDesNode->GetParent();
                 CHECK_NULL_VOID(parent);
                 parent->RemoveChild(preNavDesNode);
