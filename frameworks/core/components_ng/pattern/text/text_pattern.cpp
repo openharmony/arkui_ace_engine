@@ -1877,6 +1877,8 @@ void TextPattern::ParseAIResult(const TextDataDetectResult& result, int32_t star
     if (startPos + AI_TEXT_MAX_LENGTH >= static_cast<int32_t>(StringUtils::ToWstring(textForAI_).length())) {
         aiDetectInitialized_ = true;
         aiDetectTypesChanged_ = false;
+
+        // process with overlapping entities, leaving only the earlier ones
         int32_t preEnd = 0;
         auto aiSpanIterator = aiSpanMap_.begin();
         while (aiSpanIterator != aiSpanMap_.end()) {
@@ -1929,8 +1931,13 @@ void TextPattern::ParseAIJson(
             TAG_LOGI(AceLogTag::ACE_TEXT, "The charOffset is error");
             continue;
         }
+        int32_t start = startPos + charOffset;
+        if (aiSpanMap_.find(start) != aiSpanMap_.end() && aiSpanMap_[start].content.length() >= oriText.length()) {
+            // both entities start at the same position, leaving the longer one
+            continue;
+        }
         AISpan aiSpan;
-        aiSpan.start = startPos + charOffset;
+        aiSpan.start = start;
         aiSpan.end = end;
         aiSpan.content = oriText;
         aiSpan.type = type;
