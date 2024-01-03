@@ -231,7 +231,6 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
         if (!isSingleRange && optionsMultiContentCheckErr && optionsCascadeContentCheckErr) {
             param.result.clear();
             param.options.clear();
-            return;
         }
         auto theme = GetTheme<PickerTheme>();
         CHECK_NULL_VOID(theme);
