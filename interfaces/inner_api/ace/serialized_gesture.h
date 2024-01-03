@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace {
 struct SerializedGesture {
-    std::vecotor<char> data;
+    std::vector<char> data;
 };
 } // namespace OHOS::Ace
 

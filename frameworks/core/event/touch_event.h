@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_EVENT_TOUCH_EVENT_H
 
 #include <list>
-#include <vector>
 
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"

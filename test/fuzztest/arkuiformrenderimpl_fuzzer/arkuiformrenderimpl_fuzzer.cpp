@@ -19,7 +19,6 @@
 #define protected public
 #include "interfaces/inner_api/form_render/include/form_renderer_delegate_impl.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_dispatcher_impl.h"
-#include "core/event/touch_event.h"
 #undef private
 #undef protected
 

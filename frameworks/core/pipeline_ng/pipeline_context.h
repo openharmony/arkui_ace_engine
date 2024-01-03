@@ -47,7 +47,6 @@
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
-#include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT PipelineContext : public PipelineBase {
