@@ -671,6 +671,10 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
             return true;
         }
         if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
+            if (!NearZero(cancelButtonSize_.Height()) && (!isSearchButtonEnabled_) &&
+                (event.code == KeyCode::KEY_DPAD_RIGHT)) {
+                return false; // Go out of Search
+            }
             if (isOnlyOneFocusableComponent && isOnlyTabPressed && !isSearchButtonEnabled_) {
                 focusChoice_ = FocusChoice::SEARCH;
                 PaintFocusState();
@@ -693,8 +697,9 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
             textFieldPattern->CloseKeyboard(true);
             return false;
         }
-        if (focusChoice_ == FocusChoice::SEARCH_BUTTON && event.code == KeyCode::KEY_DPAD_RIGHT) {
-            return true;
+        if (focusChoice_ == FocusChoice::SEARCH_BUTTON && isSearchButtonEnabled_ &&
+            (event.code == KeyCode::KEY_DPAD_RIGHT)) {
+            return false; // Go out of Search
         }
     }
 
