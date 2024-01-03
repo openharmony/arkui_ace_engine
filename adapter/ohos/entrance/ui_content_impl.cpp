@@ -21,11 +21,11 @@
 #include "ability_context.h"
 #include "ability_info.h"
 #include "configuration.h"
-#include "ohos/init_data.h"
 #include "ipc_skeleton.h"
 #include "js_runtime_utils.h"
 #include "locale_config.h"
 #include "native_reference.h"
+#include "ohos/init_data.h"
 #include "service_extension_context.h"
 #include "wm_common.h"
 
@@ -236,16 +236,10 @@ public:
         CHECK_NULL_VOID(pipeline);
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        switch (type) {
-            case Rosen::AvoidAreaType::TYPE_SYSTEM:
-                systemSafeArea_ = ConvertAvoidArea(avoidArea);
-                break;
-            case Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR:
-                navigationBar_ = ConvertAvoidArea(avoidArea);
-                break;
-            default:
-                // cutout doesn't affect layout
-                return;
+        if (type == Rosen::AvoidAreaType::TYPE_SYSTEM) {
+            systemSafeArea_ = ConvertAvoidArea(avoidArea);
+        } else if (type == Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
+            navigationBar_ = ConvertAvoidArea(avoidArea);
         }
         auto safeArea = systemSafeArea_;
         auto navSafeArea = navigationBar_;
@@ -254,7 +248,7 @@ public:
             [pipeline, safeArea, navSafeArea, type, avoidArea] {
                 if (type == Rosen::AvoidAreaType::TYPE_SYSTEM) {
                     pipeline->UpdateSystemSafeArea(safeArea);
-                } else {
+                } else if (type == Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
                     pipeline->UpdateNavSafeArea(navSafeArea);
                 }
                 // for ui extension component
