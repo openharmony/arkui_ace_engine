@@ -920,6 +920,7 @@ public:
         customKeyboardBuilder_ = keyboardBuilder;
     }
 
+    void DumpInfo() override;
     void DumpAdvanceInfo() override;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
     void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;

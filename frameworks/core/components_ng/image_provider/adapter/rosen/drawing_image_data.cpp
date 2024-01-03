@@ -118,4 +118,9 @@ std::pair<SizeF, int32_t> DrawingImageData::Parse() const
     }
     return { imageSize, codec->getFrameCount() };
 }
+
+std::string DrawingImageData::ToString() const
+{
+    return "DrawingImageData Size" + std::to_string(rsData_->GetSize()) + "(B)";
+}
 } // namespace OHOS::Ace::NG

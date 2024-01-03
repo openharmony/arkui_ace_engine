@@ -5562,6 +5562,26 @@ bool TextFieldPattern::CheckHandleVisible(const RectF& paintRect)
     return visibleContentRect.IsInRegion(bottomPoint) && visibleContentRect.IsInRegion(topPoint);
 }
 
+void TextFieldPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc(std::string("HasFocus:").append(std::to_string(HasFocus())));
+#if defined(ENABLE_STANDARD_INPUT)
+    auto miscTextConfig = GetMiscTextConfig();
+    CHECK_NULL_VOID(miscTextConfig.has_value());
+    MiscServices::TextConfig textConfig = miscTextConfig.value();
+    DumpLog::GetInstance().AddDesc(std::string("RequestKeyboard calling window :")
+                                       .append(std::to_string(textConfig.windowId))
+                                       .append(std::string("inputType:"))
+                                       .append(std::to_string(textConfig.inputAttribute.inputPattern)));
+#endif
+    DumpLog::GetInstance().AddDesc(textSelector_.ToString());
+    if (customKeyboardBuilder_) {
+        DumpLog::GetInstance().AddDesc(std::string("CustomKeyboard: true")
+                                           .append(", Attached: ")
+                                           .append(std::to_string(isCustomKeyboardAttached_)));
+    }
+}
+
 void TextFieldPattern::DumpAdvanceInfo()
 {
     if (customKeyboardBuilder_) {
@@ -6198,8 +6218,8 @@ void TextFieldPattern::HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& no
         }
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-        "In OnDragMoved, the dragging node is moving in the textField, id:%{public}d", host->GetId());
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "In OnDragMoved, the dragging node is moving in the textField, id:%{public}d",
+        host->GetId());
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
@@ -6211,8 +6231,8 @@ void TextFieldPattern::HandleCursorOnDragLeaved(const RefPtr<NotifyDragEvent>& n
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
-        "In OnDragLeaved, the dragging node has left from the textField, id:%{public}d", host->GetId());
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "In OnDragLeaved, the dragging node has left from the textField, id:%{public}d",
+        host->GetId());
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->LostFocus();
@@ -6227,8 +6247,10 @@ void TextFieldPattern::HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& no
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     if (!isCursorAlwaysDisplayed_) {
-        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "In OnDragEnded,"
-            " the released location is not in the current textField, id:%{public}d", host->GetId());
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD,
+            "In OnDragEnded,"
+            " the released location is not in the current textField, id:%{public}d",
+            host->GetId());
         focusHub->LostFocus();
         StopTwinkling();
         return;
