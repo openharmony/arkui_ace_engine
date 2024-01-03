@@ -492,7 +492,7 @@ void TextLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             continue;
         }
         child->SetActive(true);
-        auto rect = rectsForPlaceholders.at(index);
+        auto rect = rectsForPlaceholders.at(index) - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
         auto geometryNode = child->GetGeometryNode();
         if (!geometryNode) {
             ++index;
