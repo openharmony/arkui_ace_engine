@@ -47,6 +47,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/constants.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/base/mock_drag_window.h"
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 
@@ -74,19 +75,18 @@ public:
     void GetInstance();
 
     void Create(const std::function<void(GridModelNG)>& callback = nullptr);
-    static void CreateItem(int32_t count = 10, float width = NULL_VALUE, float height = NULL_VALUE,
-        bool focusable = false, GridItemStyle gridItemStyle = GridItemStyle::NONE);
-    static void CreateColItem(
-        int32_t count, bool focusable = false, GridItemStyle gridItemStyle = GridItemStyle::NONE);
-    static void CreateRowItem(
-        int32_t count, bool focusable = false, GridItemStyle gridItemStyle = GridItemStyle::NONE);
+    static void CreateItem(int32_t itemNumber = 10, float width = NULL_VALUE, float height = NULL_VALUE,
+        GridItemStyle gridItemStyle = GridItemStyle::NONE);
+    static void CreateColItem(int32_t itemNumber, GridItemStyle gridItemStyle = GridItemStyle::NONE);
+    static void CreateRowItem(int32_t itemNumber, GridItemStyle gridItemStyle = GridItemStyle::NONE);
+    static void CreateFixedItem(int32_t itemNumber, GridItemStyle gridItemStyle = GridItemStyle::NONE);
     static void CreateBigItem(int32_t rowStart = NULL_VALUE, int32_t rowEnd = NULL_VALUE,
         int32_t colStart = NULL_VALUE, int32_t colEnd = NULL_VALUE, float width = NULL_VALUE,
         float height = NULL_VALUE);
     static void CreateBigColItem(int32_t colStart, int32_t colEnd);
     static void CreateBigRowItem(int32_t rowStart, int32_t rowEnd);
+    void ScrollTo(float position);
     void UpdateCurrentOffset(float offset, int32_t source = SCROLL_FROM_UPDATE);
-    AssertionResult IsEqualCurrentOffset(float expectOffset);
     
     RefPtr<FrameNode> frameNode_;
     RefPtr<GridPattern> pattern_;
