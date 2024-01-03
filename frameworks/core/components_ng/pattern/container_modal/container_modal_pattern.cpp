@@ -687,7 +687,14 @@ void ContainerModalPattern::InitLayoutProperty()
     buttonsRowProperty->UpdateMainAxisAlign(FlexAlign::FLEX_END);
     buttonsRowProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
 
-    auto titleRow = GetCustomTitleRow();
+    InitTitleRowLayoutProperty(GetCustomTitleRow());
+    InitTitleRowLayoutProperty(GetFloatingTitleRow());
+
+    containerModal->MarkModifyDone();
+}
+
+void ContainerModalPattern::InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow)
+{
     auto titleRowProperty = titleRow->GetLayoutProperty<LinearLayoutProperty>();
     titleRowProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     titleRowProperty->UpdateUserDefinedIdealSize(
@@ -696,8 +703,6 @@ void ContainerModalPattern::InitLayoutProperty()
     titleRowProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
     PaddingProperty padding { std::nullopt, GetControlButtonRowWidth(), std::nullopt, std::nullopt };
     titleRowProperty->UpdatePadding(padding);
-
-    containerModal->MarkModifyDone();
 }
 
 CalcLength ContainerModalPattern::GetControlButtonRowWidth()
