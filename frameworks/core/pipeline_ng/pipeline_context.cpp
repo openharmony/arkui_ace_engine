@@ -882,6 +882,9 @@ void PipelineContext::SetupSubRootElement()
         }
     }
 #endif
+#ifdef WINDOW_SCENE_SUPPORTED
+    uiExtensionManager_ = MakeRefPtr<UIExtensionManager>();
+#endif
     // the subwindow for overlay not need stage
     stageManager_ = MakeRefPtr<StageManager>(nullptr);
     overlayManager_ = MakeRefPtr<OverlayManager>(rootNode_);
