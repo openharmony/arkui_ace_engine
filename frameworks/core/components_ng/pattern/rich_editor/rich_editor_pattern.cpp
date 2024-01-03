@@ -5225,4 +5225,12 @@ bool RichEditorPattern::NeedShowAIDetect()
 {
     return textDetectEnable_ && !aiSpanMap_.empty() && enabled_ && copyOption_ != CopyOptions::None && !HasFocus();
 }
+
+void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("enableDataDetector", textDetectEnable_ ? "true" : "false");
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("types", "");
+    json->Put("dataDetectorConfig", jsonValue->ToString().c_str());
+}
 } // namespace OHOS::Ace::NG

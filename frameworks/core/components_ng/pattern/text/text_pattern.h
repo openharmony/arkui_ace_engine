@@ -642,6 +642,7 @@ private:
     void RedisplaySelectOverlay();
     void ProcessBoundRectByTextMarquee(RectF& rect);
     ResultObject GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t index, int32_t start, int32_t end);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     // to check if drag is in progress
 
     bool isMeasureBoundary_ = false;
