@@ -382,6 +382,11 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             auto onFinishCallback = [weakPreNode, weakPreTitle, weakNavigation, weakPreBackIcon, preFrameSize]() {
                 TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation end");
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
+                auto navigation = weakNavigation.Upgrade();
+                if (navigation) {
+                    navigation->isOnAnimation_ = false;
+                    navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+                }
                 auto preNavDesNode = weakPreNode.Upgrade();
                 CHECK_NULL_VOID(preNavDesNode);
                 if (preNavDesNode->GetTransitionType() != PageTransitionType::EXIT_POP) {
@@ -407,11 +412,6 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
                 auto context = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(context);
                 context->MarkNeedFlushMouseEvent();
-
-                auto navigation = weakNavigation.Upgrade();
-                CHECK_NULL_VOID(navigation);
-                navigation->isOnAnimation_ = false;
-                navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
             };
             taskExecutor->PostTask(onFinishCallback, TaskExecutor::TaskType::UI);
         };
