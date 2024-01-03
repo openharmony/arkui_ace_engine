@@ -73,6 +73,9 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         exportTextureInfo->SetSurfaceId(surfaceId_);
         exportTextureInfo->SetCurrentRenderType(renderType_);
     }
+    if (size_.IsValid()) {
+        viewNode_->SetParentLayoutConstraint(size_.ConvertToSizeT());
+    }
     if (viewNode_) {
         viewNode_->Build(nullptr);
     }
@@ -142,8 +145,21 @@ void JSBaseNode::ConstructorCallback(const JSCallbackInfo& info)
 {
     std::string surfaceId;
     NodeRenderType renderType = NodeRenderType::RENDER_TYPE_DISPLAY;
+    NG::OptionalSizeF selfIdealSize;
     if (info.Length() > 0 && info[0]->IsObject()) {
         auto renderOption = JSRef<JSObject>::Cast(info[0]);
+        auto size = renderOption->GetProperty("selfIdealSize");
+        if (size->IsObject()) {
+            auto sizeObj = JSRef<JSObject>::Cast(size);
+            auto width = sizeObj->GetProperty("width");
+            auto widthValue = width->IsNumber() ? width->ToNumber<float>() : 0.0f;
+            widthValue = LessNotEqual(widthValue, 0.0f) ? 0.0f : widthValue;
+            auto height = sizeObj->GetProperty("height");
+            auto heightValue = height->IsNumber() ? height->ToNumber<float>() : 0.0f;
+            heightValue = LessNotEqual(heightValue, 0.0f) ? 0.0f : heightValue;
+            selfIdealSize.SetWidth(PipelineBase::Vp2PxWithCurrentDensity(widthValue));
+            selfIdealSize.SetHeight(PipelineBase::Vp2PxWithCurrentDensity(heightValue));
+        }
         auto type = renderOption->GetProperty("type");
         if (type->IsNumber()) {
             renderType = static_cast<NodeRenderType>(type->ToNumber<uint32_t>());
@@ -153,7 +169,7 @@ void JSBaseNode::ConstructorCallback(const JSCallbackInfo& info)
             surfaceId = id->ToString();
         }
     }
-    auto instance = AceType::MakeRefPtr<JSBaseNode>(renderType, surfaceId);
+    auto instance = AceType::MakeRefPtr<JSBaseNode>(selfIdealSize, renderType, surfaceId);
     instance->IncRefCount();
     info.SetReturnValue(AceType::RawPtr(instance));
 }

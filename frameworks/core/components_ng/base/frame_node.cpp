@@ -3228,4 +3228,13 @@ void FrameNode::InitLastArea()
     }
 }
 
+bool FrameNode::SetParentLayoutConstraint(const SizeF& size) const
+{
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.UpdatePercentReference(size);
+    layoutConstraint.UpdateMaxSizeWithCheck(size);
+    layoutConstraint.UpdateIllegalParentIdealSizeWithCheck(OptionalSize(size));
+    layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
+    return true;
+}
 } // namespace OHOS::Ace::NG
