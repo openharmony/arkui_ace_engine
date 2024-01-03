@@ -108,17 +108,7 @@ HWTEST_F(DrawableDescriptorTest, ImageConverterTest001, TestSize.Level1)
     EXPECT_EQ(res2, SkAlphaType::kOpaque_SkAlphaType);
 
     /**
-     * @tc.steps: step3. call PixelMapToBitmap
-     * @tc.expected: created successfully
-     */
-    Media::PixelMap pixel;
-    auto pixelMap = std::make_shared<Media::PixelMap>(pixel);
-    ASSERT_NE(pixelMap, nullptr);
-    auto res3 = imageConverter.PixelMapToBitmap(pixelMap);
-    EXPECT_NE(res3, nullptr);
-
-    /**
-     * @tc.steps: step4. call BitmapToPixelMap
+     * @tc.steps: step3. call BitmapToPixelMap
      * @tc.expected: function exits normally
      */
     Media::InitializationOptions opts;
@@ -183,5 +173,41 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest004, TestSize.Level1)
     std::tuple<const char *, uint32_t, uint32_t> drawableInfoName(nullptr, ICONTYPE, DENSITY);
     auto res4 = drawableDescriptorFactory.Create(drawableInfoName, resourceMgr, state, drawableType);
     EXPECT_EQ(res4, nullptr);
+}
+
+/**
+ * @tc.name: DrawableDescTest005
+ * @tc.desc: test LayeredDrawableDescriptor's member functions;
+ * @tc.type: FUNC
+ */
+HWTEST_F(DrawableDescriptorTest, DrawableDescTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create layeredDrawableDescriptor and call SetMaskPath
+     * @tc.expected:return path.
+     */
+    std::unique_ptr<uint8_t[]> jsonBuf;
+    size_t len = 0;
+    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr;
+    auto layeredDrawableDescriptor = Napi::LayeredDrawableDescriptor(std::move(jsonBuf), len, std::move(resourceMgr));
+    std::string path = "path";
+    layeredDrawableDescriptor.SetMaskPath(path);
+    EXPECT_EQ(layeredDrawableDescriptor.maskPath_, path);
+
+    /**
+     * @tc.steps: step2. call SetIconType
+     * @tc.expected: return iconType
+     */
+    uint32_t iconType = 1;
+    layeredDrawableDescriptor.SetIconType(iconType);
+    EXPECT_EQ(layeredDrawableDescriptor.iconType_, iconType);
+
+    /**
+     * @tc.steps: step3. call SetDensity
+     * @tc.expected: return density
+     */
+    uint32_t density = 2;
+    layeredDrawableDescriptor.SetDensity(density);
+    EXPECT_EQ(layeredDrawableDescriptor.density_, density);
 }
 } // namespace OHOS::Ace

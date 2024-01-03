@@ -141,6 +141,7 @@ ohos_unittest("drawable_descriptor_test") {
 
   sources = [
     "$ace_root/interfaces/inner_api/drawable_descriptor/drawable_descriptor.cpp",
+    "$ace_root/interfaces/inner_api/drawable_descriptor/drawable_descriptor.h",
     "$ace_root/interfaces/inner_api/drawable_descriptor/image_converter.cpp",
     "drawable_descriptor_test.cpp",
   ]
