@@ -239,6 +239,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
                     groupRecognizer->SetCoordinateOffset(offset);
                     groupRecognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
                     groupRecognizer->SetTargetComponent(targetComponent);
+                    groupRecognizer->SetSize(size.Height(), size.Width());
                 }
             }
         }
