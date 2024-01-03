@@ -1015,6 +1015,10 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetFrictionProperty()
         if (scroll->isFrictionAnimationStop_ || scroll->isTouching_) {
             return;
         }
+        float offset = std::fabs(position - scroll->lastPosition_);
+        if (LessOrEqual(offset, 0.1f)) {
+            scroll->StopFrictionAnimation();
+        }
         auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         uint64_t currentVsync = context->GetVsyncTime();
