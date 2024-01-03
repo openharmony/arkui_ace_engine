@@ -17,26 +17,19 @@ const curves = requireNativeModule('ohos.curves');
 const START_TIME = 250;
 const END_TIME = 200;
 const BORDER_RADIUS = 12;
-const OPACITY_NUM = .18;
-const DEFAULT_HEIGHT = 48;
-const FIT_HEIGHT = 72;
-const ZINDEX_NUM = 999;
-const DEFAULT_MARGIN_TIP_UNACTION_TEXT_LENGTH = 18;
-const DEFAULT_MARGIN_TIP_ACTION_TEXT_LENGTH = 12;
-const FIT_MARGIN_TIP_UNACTION_TEXT_LENGTH = 16;
-const FIT_MARGIN_TIP_ACTION_TEXT_LENGTH = 10;
+const ZINDEX_NUM = 9;
 
 export var MarginType;
-!function(e){
-    e[e.DEFAULT_MARGIN=0] = "DEFAULT_MARGIN";
-    e[e.FIT_MARGIN=1] = "FIT_MARGIN"
+!function(o){
+    o[o.DEFAULT_MARGIN=0] = "DEFAULT_MARGIN";
+    o[o.FIT_MARGIN=1] = "FIT_MARGIN"
 }(MarginType || (MarginType = {}));
 
 export class ExceptionPrompt extends ViewPU {
-    constructor(e, o, t, i = -1, n = void 0) {
-        super(e, t, i);
-        "function" == typeof n && (this.paramsGenerator_ = n);
-        this.__options = new SynchedPropertyObjectOneWayPU(o.options, this, "options");
+    constructor(o, e, t, i = -1, a = void 0) {
+        super(o, t, i);
+        "function" == typeof a && (this.paramsGenerator_ = a);
+        this.__options = new SynchedPropertyObjectOneWayPU(e.options, this, "options");
         this.touchBackgroundColor = {
             id: -1,
             type: 10001,
@@ -48,21 +41,21 @@ export class ExceptionPrompt extends ViewPU {
         };
         this.onActionTextClick = () => {
         };
-        this.setInitiallyProvidedValue(o)
+        this.setInitiallyProvidedValue(e)
     }
 
-    setInitiallyProvidedValue(e) {
-        void 0 !== e.touchBackgroundColor && (this.touchBackgroundColor = e.touchBackgroundColor);
-        void 0 !== e.onTipClick && (this.onTipClick = e.onTipClick);
-        void 0 !== e.onActionTextClick && (this.onActionTextClick = e.onActionTextClick)
+    setInitiallyProvidedValue(o) {
+        void 0 !== o.touchBackgroundColor && (this.touchBackgroundColor = o.touchBackgroundColor);
+        void 0 !== o.onTipClick && (this.onTipClick = o.onTipClick);
+        void 0 !== o.onActionTextClick && (this.onActionTextClick = o.onActionTextClick)
     }
 
-    updateStateVars(e) {
-        this.__options.reset(e.options)
+    updateStateVars(o) {
+        this.__options.reset(o.options)
     }
 
-    purgeVariableDependenciesOnElmtId(e) {
-        this.__options.purgeDependencyOnElmtId(e)
+    purgeVariableDependenciesOnElmtId(o) {
+        this.__options.purgeDependencyOnElmtId(o)
     }
 
     aboutToBeDeleted() {
@@ -75,20 +68,58 @@ export class ExceptionPrompt extends ViewPU {
         return this.__options.get()
     }
 
-    set options(e) {
-        this.__options.set(e)
+    set options(o) {
+        this.__options.set(o)
     }
 
-    getMessageHeight() {
-        let e = 48;
-            this.options.marginType === MarginType.DEFAULT_MARGIN ? (this.options.tip && this.options.tip.toString().length > 18 || this.options.actionText && this.options.tip && this.options.tip.toString().length > 12) && (e = 72) : this.options.marginType === MarginType.FIT_MARGIN && (this.options.tip && this.options.tip.toString().length > 16 || this.options.actionText && this.options.tip && this.options.tip.toString().length > 10) && (e = 72);
-        return e
-    }
-
-    FirstBuilder(e = null) {
-        this.observeComponentCreation2(((e, o) => {
+    initialRender() {
+        this.observeComponentCreation2(((o, e) => {
             Column.create();
-            Column.height("100%");
+            Column.width("100%");
+            Column.position({ y: this.options.marginTop });
+            Column.zIndex(9)
+        }), Column);
+        this.observeComponentCreation2(((o, e) => {
+            Column.create();
+            Column.padding(this.options.marginType === MarginType.DEFAULT_MARGIN ? {
+                                                                                       left: {
+                                                                                           id: -1,
+                                                                                           type: 10002,
+                                                                                           params: ["sys.float.ohos_id_card_margin_start"],
+                                                                                           bundleName: "",
+                                                                                           moduleName: ""
+                                                                                       },
+                                                                                       right: {
+                                                                                           id: -1,
+                                                                                           type: 10002,
+                                                                                           params: ["sys.float.ohos_id_card_margin_end"],
+                                                                                           bundleName: "",
+                                                                                           moduleName: ""
+                                                                                       }
+                                                                                   } : {
+                                                                                           left: {
+                                                                                               id: -1,
+                                                                                               type: 10002,
+                                                                                               params: ["sys.float.ohos_id_max_padding_start"],
+                                                                                               bundleName: "",
+                                                                                               moduleName: ""
+                                                                                           },
+                                                                                           right: {
+                                                                                               id: -1,
+                                                                                               type: 10002,
+                                                                                               params: ["sys.float.ohos_id_max_padding_end"],
+                                                                                               bundleName: "",
+                                                                                               moduleName: ""
+                                                                                           }
+                                                                                       });
+            Column.transition(TransitionEffect.OPACITY.animation({
+                curve: curves.cubicBezierCurve(.33, 0, .67, 1),
+                duration: this.options.isShown ? 250 : 200
+            }));
+            Column.visibility(this.options.isShown ? Visibility.Visible : Visibility.None)
+        }), Column);
+        this.observeComponentCreation2(((o, e) => {
+            Column.create();
             Column.width("100%");
             Column.borderRadius(12);
             Column.backgroundColor({
@@ -99,32 +130,16 @@ export class ExceptionPrompt extends ViewPU {
                 moduleName: ""
             })
         }), Column);
-        Column.pop()
-    }
-
-    SecondBuilder(e = null) {
-        this.observeComponentCreation2(((e, o) => {
+        this.observeComponentCreation2(((o, e) => {
             Column.create();
-            Column.height("100%");
             Column.width("100%");
             Column.borderRadius(12);
-            Column.backgroundColor({
-                id: -1,
-                type: 10001,
-                params: ["sys.color.ohos_id_color_warning"],
-                bundleName: "",
-                moduleName: ""
-            });
-            Column.opacity(.18);
-            Column.zIndex(999)
+            Column.backgroundColor("#fdd9d9");
+            Column.zIndex(9)
         }), Column);
-        Column.pop()
-    }
-
-    TextBuilder(e = null) {
-        this.observeComponentCreation2(((e, o) => {
-            Flex.create({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center });
-            Flex.padding({
+        this.observeComponentCreation2(((o, e) => {
+            Column.create();
+            Column.padding({
                 left: {
                     id: -1,
                     type: 10002,
@@ -138,22 +153,43 @@ export class ExceptionPrompt extends ViewPU {
                     params: ["sys.float.ohos_id_text_paragraph_margin_s"],
                     bundleName: "",
                     moduleName: ""
+                },
+                top: {
+                    id: -1,
+                    type: 10002,
+                    params: ["sys.float.ohos_id_default_padding_start"],
+                    bundleName: "",
+                    moduleName: ""
+                },
+                bottom: {
+                    id: -1,
+                    type: 10002,
+                    params: ["sys.float.ohos_id_default_padding_end"],
+                    bundleName: "",
+                    moduleName: ""
+                }
+            })
+        }), Column);
+        this.observeComponentCreation2(((o, e) => {
+            Flex.create({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center })
+        }), Flex);
+        this.observeComponentCreation2(((o, e) => {
+            Row.create();
+            Row.padding({
+                right: {
+                    id: -1,
+                    type: 10002,
+                    params: ["sys.float.ohos_id_default_padding_end"],
+                    bundleName: "",
+                    moduleName: ""
                 }
             });
-            Flex.position({});
-            Flex.zIndex(999);
-            Flex.width("100%");
-            Flex.height("100%");
-        }), Flex);
-        this.observeComponentCreation2(((e, o) => {
-            Flex.create({ alignItems: ItemAlign.Center });
-            Flex.width("100%");
-            Flex.height("100%");
-            Flex.onClick((() => {
+            Row.width("100%");
+            Row.onClick((() => {
                 this.onTipClick()
-            }));
-        }), Flex);
-        this.observeComponentCreation2(((e, o) => {
+            }))
+        }), Row);
+        this.observeComponentCreation2(((o, e) => {
             var t;
             Image.create(null !== (t = this.options.icon) && void 0 !== t ? t : {
                                                                                     id: -1,
@@ -170,9 +206,9 @@ export class ExceptionPrompt extends ViewPU {
                 params: ["sys.color.ohos_id_color_warning"],
                 bundleName: "",
                 moduleName: ""
-            });
+            })
         }), Image);
-        this.observeComponentCreation2(((e, o) => {
+        this.observeComponentCreation2(((o, e) => {
             Text.create(this.options.tip);
             Text.fontSize({
                 id: -1,
@@ -206,18 +242,18 @@ export class ExceptionPrompt extends ViewPU {
                     bundleName: "",
                     moduleName: ""
                 }
-            });
+            })
         }), Text);
         Text.pop();
-        Flex.pop();
-        this.observeComponentCreation2(((e, o) => {
+        Row.pop();
+        this.observeComponentCreation2(((o, e) => {
             If.create();
             this.options.actionText ? this.ifElseBranchUpdateFunction(0, (() => {
-                this.observeComponentCreation2(((e, o) => {
+                this.observeComponentCreation2(((o, e) => {
                     Button.createWithChild({ stateEffect: !0, type: ButtonType.Normal });
                     Button.backgroundColor(this.touchBackgroundColor);
                     Button.width(this.options.actionText ? 144 : 0);
-                    Button.height(32);
+                    Button.height(24);
                     Button.borderRadius({
                         id: -1,
                         type: 10002,
@@ -241,8 +277,8 @@ export class ExceptionPrompt extends ViewPU {
                             moduleName: ""
                         }
                     });
-                    Button.onTouch((e => {
-                        if (e.type === TouchType.Down) {
+                    Button.onTouch((o => {
+                        if (o.type === TouchType.Down) {
                             this.touchBackgroundColor = {
                                 id: -1,
                                 type: 10001,
@@ -251,19 +287,19 @@ export class ExceptionPrompt extends ViewPU {
                                 moduleName: ""
                             };
                             this.onActionTextClick()
-                        } else e.type === TouchType.Up && (this.touchBackgroundColor = {
+                        } else o.type === TouchType.Up && (this.touchBackgroundColor = {
                             id: -1,
                             type: 10001,
                             params: ["sys.color.ohos_id_color_sub_background_transparent"],
                             bundleName: "",
                             moduleName: ""
                         })
-                    }));
+                    }))
                 }), Button);
-                this.observeComponentCreation2(((e, o) => {
-                    Row.create();
+                this.observeComponentCreation2(((o, e) => {
+                    Row.create()
                 }), Row);
-                this.observeComponentCreation2(((e, o) => {
+                this.observeComponentCreation2(((o, e) => {
                     Text.create(this.options.actionText);
                     Text.fontSize({
                         id: -1,
@@ -290,10 +326,10 @@ export class ExceptionPrompt extends ViewPU {
                             moduleName: ""
                         }
                     });
-                    Text.textAlign(TextAlign.End);
+                    Text.textAlign(TextAlign.End)
                 }), Text);
                 Text.pop();
-                this.observeComponentCreation2(((e, o) => {
+                this.observeComponentCreation2(((o, e) => {
                     Image.create({
                         id: -1,
                         type: 2e4,
@@ -309,68 +345,19 @@ export class ExceptionPrompt extends ViewPU {
                         params: ["sys.color.ohos_id_color_tertiary"],
                         bundleName: "",
                         moduleName: ""
-                    });
+                    })
                 }), Image);
                 Row.pop();
                 Button.pop()
             })) : this.ifElseBranchUpdateFunction(1, (() => {
-            }));
+            }))
         }), If);
         If.pop();
-        Flex.pop()
-    }
-
-    initialRender() {
-        this.observeComponentCreation2(((e, o) => {
-            Column.create();
-            Column.width("100%");
-            Column.height(this.getMessageHeight());
-            Column.position({ y: this.options.marginTop });
-            Column.zIndex(999);
-        }), Column);
-        this.observeComponentCreation2(((e, o) => {
-            Stack.create();
-            Stack.padding(this.options.marginType === MarginType.DEFAULT_MARGIN ? {
-                                                                                      left: {
-                                                                                          id: -1,
-                                                                                          type: 10002,
-                                                                                          params: ["sys.float.ohos_id_card_margin_start"],
-                                                                                          bundleName: "",
-                                                                                          moduleName: ""
-                                                                                      },
-                                                                                      right: {
-                                                                                          id: -1,
-                                                                                          type: 10002,
-                                                                                          params: ["sys.float.ohos_id_card_margin_end"],
-                                                                                          bundleName: "",
-                                                                                          moduleName: ""
-                                                                                      }
-                                                                                  } : {
-                                                                                          left: {
-                                                                                              id: -1,
-                                                                                              type: 10002,
-                                                                                              params: ["sys.float.ohos_id_max_padding_start"],
-                                                                                              bundleName: "",
-                                                                                              moduleName: ""
-                                                                                          },
-                                                                                          right: {
-                                                                                              id: -1,
-                                                                                              type: 10002,
-                                                                                              params: ["sys.float.ohos_id_max_padding_end"],
-                                                                                              bundleName: "",
-                                                                                              moduleName: ""
-                                                                                          }
-                                                                                      });
-            Stack.transition(TransitionEffect.OPACITY.animation({
-                curve: curves.cubicBezierCurve(.33, 0, .67, 1),
-                duration: this.options.isShown ? 250 : 200
-            }));
-            Stack.visibility(this.options.isShown ? Visibility.Visible : Visibility.None);
-        }), Stack);
-        this.FirstBuilder.bind(this)();
-        this.SecondBuilder.bind(this)();
-        this.TextBuilder.bind(this)();
-        Stack.pop();
+        Flex.pop();
+        Column.pop();
+        Column.pop();
+        Column.pop();
+        Column.pop();
         Column.pop()
     }
 
