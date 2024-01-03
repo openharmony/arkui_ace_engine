@@ -2125,6 +2125,9 @@ bool TextFieldPattern::FireOnTextChangeEvent()
         [weak = WeakClaim(this)] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            if (pattern->HasFocus()) {
+                return;
+            }
             pattern->ScrollToSafeArea();
         },
         TaskExecutor::TaskType::UI);
