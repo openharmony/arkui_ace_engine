@@ -404,6 +404,17 @@ struct ArkUICommonModifierAPI {
     void (*ResetAccessibilityGroup)(NodeHandle node);
     void (*SetHoverEffect)(NodeHandle node, int32_t hoverEffectValue);
     void (*ResetHoverEffect)(NodeHandle node);
+    void (*SetOutlineColor)(NodeHandle node, const uint32_t* values, int32_t valuesSize);
+    void (*ResetOutlineColor)(NodeHandle node);
+    void (*SetOutlineRadius)(NodeHandle node, const double* values, int32_t valuesSize);
+    void (*ResetOutlineRadius)(NodeHandle node);
+    void (*SetOutlineWidth)(NodeHandle node, const double* values, int32_t valuesSize);
+    void (*ResetOutlineWidth)(NodeHandle node);
+    void (*SetOutlineStyle)(NodeHandle node, const uint32_t* values, int32_t valuesSize);
+    void (*ResetOutlineStyle)(NodeHandle node);
+    void (*SetOutline)(NodeHandle node, const double* values, int32_t valuesSize, const uint32_t* colorAndStyle,
+        int32_t colorAndStyleSize);
+    void (*ResetOutline)(NodeHandle node);
     void (*SetClickEffect)(NodeHandle node, const int32_t level, float scaleValue);
     void (*ResetClickEffect)(NodeHandle node);
     void (*SetKeyBoardShortCut)(NodeHandle node, const char* value, const int32_t* keysIntArray, int32_t length);
@@ -1217,6 +1228,8 @@ struct ArkUIDatePickerModifierAPI {
     void (*ResetDisappearTextStyle)(NodeHandle node);
     void (*SetLunar)(NodeHandle node, bool isLunar);
     void (*ResetLunar)(NodeHandle node);
+    void (*SetDatePickerBackgroundColor)(NodeHandle node, uint32_t color);
+    void (*ResetDatePickerBackgroundColor)(NodeHandle node);
 };
 
 struct ArkUIAlphabetIndexerModifierAPI {

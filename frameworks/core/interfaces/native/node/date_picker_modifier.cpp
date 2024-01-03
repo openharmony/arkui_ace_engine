@@ -178,11 +178,26 @@ void ResetLunar(NodeHandle node)
     DatePickerModelNG::SetShowLunar(frameNode, false);
 }
 
+void SetDatePickerBackgroundColor(NodeHandle node, uint32_t color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetBackgroundColor(frameNode, Color(color));
+}
+
+void ResetDatePickerBackgroundColor(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    DatePickerModelNG::SetBackgroundColor(frameNode, Color(Color::TRANSPARENT));
+}
+
 ArkUIDatePickerModifierAPI GetDatePickerModifier()
 {
     static const ArkUIDatePickerModifierAPI modifier = { SetSelectedTextStyle, ResetSelectedTextStyle,
         SetDatePickerTextStyle, ResetDatePickerTextStyle, SetDisappearTextStyle,
-        ResetDisappearTextStyle, SetLunar, ResetLunar };
+        ResetDisappearTextStyle, SetLunar, ResetLunar,
+        SetDatePickerBackgroundColor, ResetDatePickerBackgroundColor };
 
     return modifier;
 }

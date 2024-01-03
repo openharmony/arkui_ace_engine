@@ -345,6 +345,14 @@ public:
     static void SetBorderWidth(FrameNode* frameNode, const Dimension& value);
     static void SetBorderColor(FrameNode* frameNode, const BorderColorProperty& value);
     static void SetBorderColor(FrameNode* frameNode, const Color& value);
+    static void SetOuterBorderColor(FrameNode* frameNode, const Color& value);
+    static void SetOuterBorderColor(FrameNode* frameNode, const BorderColorProperty& value);
+    static void SetOuterBorderRadius(FrameNode* frameNode, const Dimension& value);
+    static void SetOuterBorderRadius(FrameNode* frameNode, const BorderRadiusProperty& value);
+    static void SetOuterBorderWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetOuterBorderWidth(FrameNode* frameNode, const BorderWidthProperty& value);
+    static void SetOuterBorderStyle(FrameNode* frameNode, const BorderStyleProperty& value);
+    static void SetOuterBorderStyle(FrameNode* frameNode, const BorderStyle& value);
     static void SetBorderStyle(FrameNode* frameNode, const BorderStyle& value);
     static void SetBorderStyle(FrameNode* frameNode, const BorderStyleProperty& value);
     static void SetBackShadow(FrameNode* frameNode, const Shadow& shadow);

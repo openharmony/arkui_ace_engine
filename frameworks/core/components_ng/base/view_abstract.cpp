@@ -596,12 +596,25 @@ void ViewAbstract::SetOuterBorderRadius(const Dimension& value)
     ACE_UPDATE_RENDER_CONTEXT(OuterBorderRadius, borderRadius);
 }
 
+void ViewAbstract::SetOuterBorderRadius(FrameNode* frameNode, const Dimension& value)
+{
+    BorderRadiusProperty borderRadius;
+    borderRadius.SetRadius(value);
+    borderRadius.multiValued = false;
+    ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderRadius, borderRadius, frameNode);
+}
+
 void ViewAbstract::SetOuterBorderRadius(const BorderRadiusProperty& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(OuterBorderRadius, value);
+}
+
+void ViewAbstract::SetOuterBorderRadius(FrameNode* frameNode, const BorderRadiusProperty& value)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderRadius, value, frameNode);
 }
 
 void ViewAbstract::SetOuterBorderColor(const Color& value)
@@ -614,12 +627,24 @@ void ViewAbstract::SetOuterBorderColor(const Color& value)
     ACE_UPDATE_RENDER_CONTEXT(OuterBorderColor, borderColor);
 }
 
+void ViewAbstract::SetOuterBorderColor(FrameNode* frameNode, const Color& value)
+{
+    BorderColorProperty borderColor;
+    borderColor.SetColor(value);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderColor, borderColor, frameNode);
+}
+
 void ViewAbstract::SetOuterBorderColor(const BorderColorProperty& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(OuterBorderColor, value);
+}
+
+void ViewAbstract::SetOuterBorderColor(FrameNode* frameNode, const BorderColorProperty& value)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderColor, value, frameNode);
 }
 
 void ViewAbstract::SetOuterBorderWidth(const Dimension& value)
@@ -636,12 +661,28 @@ void ViewAbstract::SetOuterBorderWidth(const Dimension& value)
     ACE_UPDATE_RENDER_CONTEXT(OuterBorderWidth, borderWidth);
 }
 
+void ViewAbstract::SetOuterBorderWidth(FrameNode* frameNode, const Dimension& value)
+{
+    BorderWidthProperty borderWidth;
+    if (Negative(value.Value())) {
+        borderWidth.SetBorderWidth(Dimension(0));
+    } else {
+        borderWidth.SetBorderWidth(value);
+    }
+    ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderWidth, borderWidth, frameNode);
+}
+
 void ViewAbstract::SetOuterBorderWidth(const BorderWidthProperty& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
         return;
     }
     ACE_UPDATE_RENDER_CONTEXT(OuterBorderWidth, value);
+}
+
+void ViewAbstract::SetOuterBorderWidth(FrameNode* frameNode, const BorderWidthProperty& value)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderWidth, value, frameNode);
 }
 
 void ViewAbstract::SetOuterBorderStyle(const BorderStyleProperty& value)
@@ -652,6 +693,11 @@ void ViewAbstract::SetOuterBorderStyle(const BorderStyleProperty& value)
     ACE_UPDATE_RENDER_CONTEXT(OuterBorderStyle, value);
 }
 
+void ViewAbstract::SetOuterBorderStyle(FrameNode* frameNode, const BorderStyleProperty& value)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderStyle, value, frameNode);
+}
+
 void ViewAbstract::SetOuterBorderStyle(const BorderStyle& value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -660,6 +706,13 @@ void ViewAbstract::SetOuterBorderStyle(const BorderStyle& value)
     BorderStyleProperty borderStyle;
     borderStyle.SetBorderStyle(value);
     ACE_UPDATE_RENDER_CONTEXT(OuterBorderStyle, borderStyle);
+}
+
+void ViewAbstract::SetOuterBorderStyle(FrameNode* frameNode, const BorderStyle& value)
+{
+    BorderStyleProperty borderStyle;
+    borderStyle.SetBorderStyle(value);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(OuterBorderStyle, borderStyle, frameNode);
 }
 
 void ViewAbstract::DisableOnClick()
