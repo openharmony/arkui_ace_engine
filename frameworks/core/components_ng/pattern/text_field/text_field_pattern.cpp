@@ -967,15 +967,6 @@ bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
         isFocusedBeforeClick_ = false;
         HandleOnSelectAll(true);
     }
-    if (!needToRequestKeyboardOnFocus_) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "External Keyboard, Reattach.");
-        CloseKeyboard(true);
-        auto focusHub = GetFocusHub();
-        if (!focusHub->IsFocusable()) {
-            focusHub->RequestFocusImmediately();
-        }
-        StartTwinkling();
-    }
     return TextInputClient::HandleKeyEvent(event);
 }
 
@@ -3991,6 +3982,14 @@ void TextFieldPattern::OnAreaChangedInner()
 
 void TextFieldPattern::RequestKeyboardOnFocus()
 {
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    if (HasFocus() && !needToRequestKeyboardOnFocus_ && needToRequestKeyboardInner_ && textFieldManager->GetImeShow()) {
+        if (!RequestKeyboard(false, true, true)) {
+            return;
+        }
+    }
     if (!needToRequestKeyboardOnFocus_ || !needToRequestKeyboardInner_) {
         return;
     }
@@ -6271,5 +6270,16 @@ void TextFieldPattern::RequestKeyboardAfterLongPress()
     }
     isLongPress_ = false;
 #endif
+}
+
+void TextFieldPattern::NotifyKeyboardInfo(const KeyBoardInfo& info)
+{
+    if (!HasFocus()) {
+        return;
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    textFieldManager->SetImeShow(info.visible);
 }
 } // namespace OHOS::Ace::NG

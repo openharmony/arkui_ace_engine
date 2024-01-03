@@ -514,6 +514,7 @@ public:
 
     void CloseSelectOverlay() override;
     void CloseSelectOverlay(bool animation);
+    void NotifyKeyboardInfo(const KeyBoardInfo &info) override;
     void SetInputMethodStatus(bool keyboardShown) override
     {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
