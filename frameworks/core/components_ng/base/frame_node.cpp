@@ -899,7 +899,7 @@ void FrameNode::SetOnAreaChangeCallback(OnAreaChangedFunc&& callback)
 
 void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
 {
-    if (!IsOnMainTree()) {
+    if (!IsActive()) {
         return;
     }
     if (eventHub_->HasOnAreaChanged() && lastFrameRect_ && lastParentOffsetToWindow_) {
