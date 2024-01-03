@@ -176,6 +176,7 @@ public:
         destVisible_ = type;
     }
     bool SetVisibleToDest(VisibleType type);
+    void DestRequestDefaultFocus();
 
 private:
     bool CreateTranslateAnimation(const RefPtr<FrameNode>& src, const RefPtr<FrameNode>& dest);
