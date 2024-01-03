@@ -347,6 +347,8 @@ private:
     bool UpdateTitleModeChangeEventHub(const RefPtr<NavigationGroupNode>& hostNode);
     void NotifyPageShow(const std::string& pageName);
     int32_t FireNavDestinationStateChange(bool show);
+    void UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNavDestination,
+        const RefPtr<FrameNode> &newTopNavDestination);
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
     RefPtr<NavigationStack> navigationStack_;

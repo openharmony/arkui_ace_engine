@@ -44,6 +44,7 @@ public:
         const FinishCallback& finishCallback = nullptr, const RepeatCallback& repeatCallback = nullptr);
     static void AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const PropertyCallback& callback);
     static void AddKeyFrame(float fraction, const PropertyCallback& callback);
+    static void AddDurationKeyFrame(int duration, const RefPtr<Curve>& curve, const PropertyCallback& callback);
 
     // Similar to Animate, but reuses current options and replaces callback
     static void AnimateWithCurrentOptions(

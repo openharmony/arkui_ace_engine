@@ -15,6 +15,7 @@
 
 #include <string>
 
+#include "base/log/ace_trace.h"
 #include "ecmascript/napi/include/jsnapi.h"
 #include "jsi_bindings.h"
 
@@ -410,6 +411,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::InternalMemberFunctionCallback(pand
     if (binding == nullptr) {
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
+    ACE_BUILD_SCOPED_TRACE("[%s][%s]", ThisJSClass::JSName(), binding->Name());
     auto fnPtr = static_cast<FunctionBinding<T, panda::Local<panda::JSValueRef>, Args...>*>(binding)->Get();
     (instance->*fnPtr)(runtimeCallInfo);
 }
@@ -428,7 +430,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::InternalJSMemberFunctionCallback(
     if (binding == nullptr) {
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
-
+    ACE_BUILD_SCOPED_TRACE("[%s][%s]", ThisJSClass::JSName(), binding->Name());
     auto fnPtr = static_cast<FunctionBinding<T, void, const JSCallbackInfo&>*>(binding)->Get();
     JsiCallbackInfo info(runtimeCallInfo);
     (instance->*fnPtr)(info);
@@ -454,7 +456,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::MethodCallback(panda::JsiRuntimeCal
     if (binding == nullptr) {
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
-
+    ACE_BUILD_SCOPED_TRACE("[%s][%s]", ThisJSClass::JSName(), binding->Name());
     auto fnPtr = static_cast<FunctionBinding<Class, R, Args...>*>(binding)->Get();
     auto tuple = __detail__::ToTuple<std::decay_t<Args>...>(runtimeCallInfo);
     bool returnSelf = binding->Options() & MethodOptions::RETURN_SELF;
@@ -493,6 +495,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSMethodCallback(panda::JsiRuntimeC
     if (binding == nullptr) {
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
+    ACE_BUILD_SCOPED_TRACE("[%s][%s]", ThisJSClass::JSName(), binding->Name());
     JsiCallbackInfo info(runtimeCallInfo);
     auto fnPtr = static_cast<FunctionBinding<Class, R, Args...>*>(binding)->Get();
     (instance->*fnPtr)(info);
@@ -508,7 +511,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::StaticMethodCallback(panda::JsiRunt
     if (binding == nullptr) {
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
-
+    ACE_BUILD_SCOPED_TRACE("[%s][%s]", ThisJSClass::JSName(), binding->Name());
     auto fnPtr = static_cast<StaticFunctionBinding<R, Args...>*>(binding)->Get();
     auto tuple = __detail__::ToTuple<std::decay_t<Args>...>(runtimeCallInfo);
     bool returnSelf = binding->Options() & MethodOptions::RETURN_SELF;
@@ -544,6 +547,7 @@ panda::Local<panda::JSValueRef> JsiClass<C>::JSStaticMethodCallback(panda::JsiRu
     if (binding == nullptr) {
         return panda::Local<panda::JSValueRef>(panda::JSValueRef::Undefined(vm));
     }
+    ACE_BUILD_SCOPED_TRACE("[%s][%s]", ThisJSClass::JSName(), binding->Name());
     auto fnPtr = static_cast<StaticFunctionBinding<void, const JSCallbackInfo&>*>(binding)->Get();
     JsiCallbackInfo info(runtimeCallInfo);
     fnPtr(info);

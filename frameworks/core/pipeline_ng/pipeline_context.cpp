@@ -67,11 +67,10 @@
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
-#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
+#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/safe_area_insets.h"
-#include "core/components_ng/pattern/window_scene/helper/window_scene_helper.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_events.h"
 #include "core/event/touch_event.h"
@@ -493,6 +492,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     ProcessDelayTasks();
     DispatchDisplaySync(nanoTimestamp);
     FlushAnimation(nanoTimestamp);
+    SetVsyncTime(nanoTimestamp);
     bool hasRunningAnimation = window_->FlushAnimation(nanoTimestamp);
     FlushTouchEvents();
     FlushBuild();
@@ -840,6 +840,9 @@ void PipelineContext::SetupRootElement()
         }
     }
 #endif
+#ifdef WINDOW_SCENE_SUPPORTED
+    uiExtensionManager_ = MakeRefPtr<UIExtensionManager>();
+#endif
     stageManager_ = MakeRefPtr<StageManager>(stageNode);
     overlayManager_ = MakeRefPtr<OverlayManager>(
         DynamicCast<FrameNode>(installationFree_ ? stageNode->GetParent()->GetParent() : stageNode->GetParent()));
@@ -1145,6 +1148,14 @@ void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea)
     if (safeAreaManager_->UpdateNavArea(navSafeArea)) {
         AnimateOnSafeAreaUpdate();
     }
+}
+
+void PipelineContext::UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type)
+{
+#ifdef WINDOW_SCENE_SUPPORTED
+    CHECK_NULL_VOID(uiExtensionManager_);
+    uiExtensionManager_->TransferOriginAvoidArea(avoidArea, type);
+#endif
 }
 
 void PipelineContext::SetEnableKeyBoardAvoidMode(bool value)
@@ -1778,6 +1789,7 @@ void PipelineContext::DumpPipelineInfo() const
     if (window_) {
         DumpLog::GetInstance().Print(1, "DisplayRefreshRate: " + std::to_string(window_->GetRefreshRate()));
         DumpLog::GetInstance().Print(1, "LastRequestVsyncTime: " + std::to_string(window_->GetLastRequestVsyncTime()));
+        DumpLog::GetInstance().Print(1, "NowTime: " + std::to_string(GetSysTimestamp()));
     }
     if (!dumpFrameInfos_.empty()) {
         DumpLog::GetInstance().Print("==================================FrameTask==================================");
@@ -1945,9 +1957,11 @@ bool PipelineContext::OnKeyEvent(const KeyEvent& event)
     }
     if (event.code == KeyCode::KEY_ESCAPE) {
         auto manager = GetDragDropManager();
-        if (manager) {
+        if (manager && manager->IsMsdpDragging()) {
             manager->SetIsDragCancel(true);
             manager->OnDragEnd(PointerEvent(0, 0), "");
+            manager->SetIsDragCancel(false);
+            return true;
         }
     }
 
@@ -2409,6 +2423,9 @@ void PipelineContext::Destroy()
     dirtyFocusScope_.Reset();
     needRenderNode_.clear();
     dirtyDefaultFocusNode_.Reset();
+#ifdef WINDOW_SCENE_SUPPORTED
+    uiExtensionManager_.Reset();
+#endif
     PipelineBase::Destroy();
 }
 
@@ -2587,10 +2604,9 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
         return;
     }
     if (action == DragEventAction::DRAG_EVENT_OUT) {
-        manager->OnDragMoveOut(pointerEvent, extraInfo);
+        manager->OnDragMoveOut(pointerEvent);
         manager->ClearSummary();
         manager->ClearExtraInfo();
-        manager->OnDragOut();
         return;
     }
 
@@ -2600,10 +2616,6 @@ void PipelineContext::OnDragEvent(const PointerEvent& pointerEvent, DragEventAct
     extraInfo = manager->GetExtraInfo();
     if (action == DragEventAction::DRAG_EVENT_END) {
         manager->OnDragEnd(pointerEvent, extraInfo);
-        SubwindowManager::GetInstance()->HidePreviewNG();
-        auto overlayManager = GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        overlayManager->RemovePixelMap();
         return;
     }
     if (action == DragEventAction::DRAG_EVENT_MOVE) {
@@ -2822,8 +2834,7 @@ void PipelineContext::RemoveIsFocusActiveUpdateEvent(const RefPtr<FrameNode>& no
     }
 }
 
-std::shared_ptr<NavigationController> PipelineContext::GetNavigationController(
-    const std::string& id)
+std::shared_ptr<NavigationController> PipelineContext::GetNavigationController(const std::string& id)
 {
     std::lock_guard lock(navigationMutex_);
     auto iter = navigationNodes_.find(id);
@@ -2839,8 +2850,7 @@ std::shared_ptr<NavigationController> PipelineContext::GetNavigationController(
     return navigationPattern->GetNavigationController();
 }
 
-void PipelineContext::AddOrReplaceNavigationNode(
-    const std::string& id, const WeakPtr<FrameNode>& node)
+void PipelineContext::AddOrReplaceNavigationNode(const std::string& id, const WeakPtr<FrameNode>& node)
 {
     std::lock_guard lock(navigationMutex_);
     auto frameNode = node.Upgrade();
@@ -3034,5 +3044,22 @@ void PipelineContext::SubscribeContainerModalButtonsRectChange(
 const RefPtr<PostEventManager>& PipelineContext::GetPostEventManager()
 {
     return postEventManager_;
+}
+
+bool PipelineContext::PrintVsyncInfoIfNeed() const
+{
+    if (dumpFrameInfos_.empty()) {
+        return false;
+    }
+    auto lastFrameInfo = dumpFrameInfos_.back();
+    const uint64_t timeout = 1000000000; // unit is ns, 1s
+    if (lastFrameInfo.frameRecvTime_ < window_->GetLastRequestVsyncTime() &&
+        GetSysTimestamp() - window_->GetLastRequestVsyncTime() >= timeout) {
+        LOGW("lastRequestVsyncTime is %{public}" PRIu64 ", now time is %{public}" PRId64
+             ", timeout, window foreground:%{public}d, lastReceiveVsync info:%{public}s",
+            window_->GetLastRequestVsyncTime(), GetSysTimestamp(), onShow_, lastFrameInfo.GetTimeInfo().c_str());
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

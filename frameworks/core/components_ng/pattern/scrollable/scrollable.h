@@ -180,7 +180,7 @@ public:
         return canOverScroll_;
     }
 
-    void ProcessScrollMotionStop();
+    void ProcessScrollMotionStop(bool StopFriction);
 
     bool DispatchEvent(const TouchEvent& point) override
     {
@@ -530,7 +530,7 @@ private:
     DragFRCSceneCallback dragFRCSceneCallback_;
     ScrollMotionFRCSceneCallback scrollMotionFRCSceneCallback_;
 
-    std::chrono::high_resolution_clock::time_point lastTime_;
+    uint64_t lastVsyncTime_ = 0;
     RefPtr<NodeAnimatablePropertyFloat> frictionOffsetProperty_;
     float finalPosition_ = 0.0f;
     float lastPosition_ = 0.0f;

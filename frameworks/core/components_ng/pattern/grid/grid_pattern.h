@@ -35,8 +35,6 @@ struct GridItemIndexInfo {
     int32_t crossEnd = -1;
 };
 
-constexpr float HALF = 0.5f;
-
 class ACE_EXPORT GridPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(GridPattern, ScrollablePattern);
 
@@ -185,6 +183,8 @@ public:
     }
 
     void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::AUTO) override;
+    void AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
+    bool AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
     int32_t GetOriginalIndex() const;
     int32_t GetCrossCount() const;
     int32_t GetChildrenCount() const;
@@ -238,7 +238,6 @@ private:
     void UpdateRectOfDraggedInItem(int32_t insertIndex);
     void SetAccessibilityAction();
 
-    GridLayoutInfo gridLayoutInfo_;
     void ProcessEvent(bool indexChanged, float finalOffset);
     void MarkDirtyNodeSelf();
     void OnScrollEndCallback() override;
@@ -250,12 +249,6 @@ private:
     double GetNearestDistanceFromChildToCurFocusItemInMainAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     double GetNearestDistanceFromChildToCurFocusItemInCrossAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     void ResetAllDirectionsStep();
-    bool AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
-    bool GetGridItemAnimatePos(
-        int32_t index, ScrollAlign align, float& targetPos, GridLayoutInfo& gcrollGridLayoutInfo);
-    bool GetLineIndexByIndex(
-        std::map<int32_t, std::map<int32_t, int32_t>> gridMatrix_, int32_t& targetIndex, int32_t& targetLineIndex);
-    float GetTotalHeight(std::map<int32_t, float>& heightMap, int32_t targetLineIndex);
 
     float animatorOffset_ = 0.0f;
     float prevHeight_ = 0;
@@ -278,7 +271,9 @@ private:
     std::optional<int32_t> targetIndex_;
     std::pair<std::optional<float>, std::optional<float>> scrollbarInfo_;
     GridItemIndexInfo curFocusIndexInfo_;
-
+    bool isSmoothScrolling_ = false;
+    GridLayoutInfo scrollGridLayoutInfo_;
+    GridLayoutInfo gridLayoutInfo_;
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);
 };
 

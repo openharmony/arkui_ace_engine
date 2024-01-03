@@ -27,18 +27,21 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "base/window/drag_window.h"
+#include "core/common/ace_engine_ext.h"
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/common/font_manager.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/common/udmf/udmf_client.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
+#include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/rich_editor_drag/rich_editor_drag_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_property.h"
 #include "core/components_ng/pattern/text/text_event_hub.h"
@@ -46,9 +49,6 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
 #include "core/components_ng/property/property.h"
-
-#include "core/common/ace_engine_ext.h"
-#include "core/common/udmf/udmf_client.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -64,9 +64,8 @@ constexpr int32_t API_PROTEXTION_GREATER_NINE = 9;
 constexpr float BOX_EPSILON = 0.5f;
 constexpr float DOUBLECLICK_INTERVAL_MS = 300.0f;
 constexpr uint32_t SECONDS_TO_MILLISECONDS = 1000;
-const std::pair<std::string, std::string> UI_EXTENSION_TYPE = {
-    "ability.want.params.uiExtensionType", "sys/commonUI"
-};
+const std::u16string SYMBOL_TRANS = u"\uF0001";
+const std::pair<std::string, std::string> UI_EXTENSION_TYPE = { "ability.want.params.uiExtensionType", "sys/commonUI" };
 const std::unordered_map<TextDataDetectType, std::string> TEXT_DETECT_MAP = {
     { TextDataDetectType::PHONE_NUMBER, "phoneNum" }, { TextDataDetectType::URL, "url" },
     { TextDataDetectType::EMAIL, "email" }, { TextDataDetectType::ADDRESS, "location" }
@@ -236,7 +235,7 @@ SelectionInfo TextPattern::GetSpansInfo(int32_t start, int32_t end, GetSpansMeth
     auto host = GetHost();
     const auto& children = host->GetChildren();
     for (const auto& uinode : children) {
-        if (uinode->GetTag() == V2::IMAGE_ETS_TAG || uinode->GetTag() == V2::SYMBOL_SPAN_ETS_TAG) {
+        if (uinode->GetTag() == V2::IMAGE_ETS_TAG) {
             ResultObject resultObject = GetImageResultObject(uinode, index, realStart, realEnd);
             if (!resultObject.valueString.empty() || resultObject.valuePixelMap) {
                 resultObjects.emplace_back(resultObject);
@@ -375,6 +374,9 @@ void TextPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
             oldSelectedType_ = selectedType_.value();
             CloseSelectOverlay();
             ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true);
+        }
+        if (!selectOverlayProxy_->IsMenuShow()) {
+            selectOverlayProxy_->ShowOrHiddenMenu(false);
         }
         return;
     }
@@ -1003,7 +1005,7 @@ void TextPattern::HandleMouseLeftPressAction(const MouseInfo& info, const Offset
     mouseStatus_ = MouseStatus::PRESSED;
     CHECK_NULL_VOID(paragraph_);
     auto start = paragraph_->GetGlyphIndexByCoordinate(textOffset);
-    HandleSelectionChange(start, start);
+    textSelector_.Update(start, start);
 }
 
 void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset)
@@ -1021,7 +1023,7 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
 
     CHECK_NULL_VOID(paragraph_);
     auto end = -1;
-    if (IsSelected()) {
+    if (IsSelected() || textSelector_.baseOffset != -1) {
         end = paragraph_->GetGlyphIndexByCoordinate(textOffset);
     }
     HandleSelectionChange(textSelector_.baseOffset, end);
@@ -1611,7 +1613,8 @@ SymbolSpanStyle TextPattern::GetSymbolSpanStyleObject(const RefPtr<SpanNode>& no
     symbolSpanStyle.symbolColor = !symbolColorValue.empty() ? symbolColorValue : SYMBOL_COLOR;
     symbolSpanStyle.fontSize = node->GetFontSizeValue(Dimension(DIMENSION_VALUE, DimensionUnit::VP)).ConvertToVp();
     symbolSpanStyle.fontWeight = static_cast<int32_t>(node->GetFontWeightValue(FontWeight::NORMAL));
-    symbolSpanStyle.renderingStrategy = node->GetSymbolRenderingStrategy();
+    symbolSpanStyle.renderingStrategy = node->GetSymbolRenderingStrategyValue(0);
+    symbolSpanStyle.effectStrategy = node->GetSymbolEffectStrategyValue(0);
     return symbolSpanStyle;
 }
 
@@ -2040,8 +2043,12 @@ void TextPattern::RedisplaySelectOverlay()
 {
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         CalculateHandleOffsetAndShowOverlay();
-        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
-        selectOverlayProxy_->ShowOrHiddenMenu(true);
+        if (selectOverlayProxy_->IsMenuShow()) {
+            ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+        } else {
+            ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+            selectOverlayProxy_->ShowOrHiddenMenu(true);
+        }
     }
 }
 
@@ -2096,13 +2103,14 @@ void TextPattern::PreCreateLayoutWrapper()
         return;
     }
 
+    spans_.clear();
+
     // When dirty areas are marked because of child node changes, the text rendering node tree is reset.
     const auto& children = host->GetChildren();
     if (children.empty()) {
         placeholderCount_ = 0;
         return;
     }
-    spans_.clear();
 
     // Depth-first iterates through all host's child nodes to collect the SpanNode object, building a text rendering
     // tree.
@@ -2173,7 +2181,11 @@ void TextPattern::CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpa
             continue;
         }
         auto spanNode = DynamicCast<SpanNode>(current);
-        if (spanNode && current->GetTag() != V2::PLACEHOLDER_SPAN_ETS_TAG) {
+        if (spanNode && current->GetTag() == V2::SYMBOL_SPAN_ETS_TAG) {
+            spanNode->CleanSpanItemChildren();
+            spanNode->MountToParagraph();
+            textForDisplay_.append(StringUtils::Str16ToStr8(SYMBOL_TRANS));
+        } else if (spanNode && current->GetTag() != V2::PLACEHOLDER_SPAN_ETS_TAG) {
             spanNode->CleanSpanItemChildren();
             UpdateChildProperty(spanNode);
             spanNode->MountToParagraph();
@@ -2186,13 +2198,59 @@ void TextPattern::CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpa
             placeholderCount_++;
             AddChildSpanItem(current);
             textForAI_.append("\n");
+        } else if (current->GetTag() == V2::CONTAINER_SPAN_ETS_TAG) {
+            CollectContainerSpanNodes(current, isSpanHasClick);
         }
-        if (current->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
+        if (current->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG || current->GetTag() == V2::CONTAINER_SPAN_ETS_TAG) {
             continue;
         }
         const auto& nextChildren = current->GetChildren();
         for (auto iter = nextChildren.rbegin(); iter != nextChildren.rend(); ++iter) {
             nodes.push(*iter);
+        }
+    }
+}
+
+void TextPattern::CollectContainerSpanNodes(const RefPtr<UINode>& node, bool& isSpanHasClick)
+{
+    auto containerNode = DynamicCast<ContainerSpanNode>(node);
+    CHECK_NULL_VOID(containerNode);
+    const auto& children = containerNode->GetChildren();
+    if (children.empty()) {
+        return;
+    }
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        UpdateContainerChildren(containerNode, *iter);
+    }
+    std::stack<RefPtr<UINode>> nodes;
+    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+        nodes.push(*iter);
+    }
+    CollectSpanNodes(nodes, isSpanHasClick);
+}
+
+void TextPattern::UpdateContainerChildren(const RefPtr<ContainerSpanNode>& parent, const RefPtr<UINode>& child)
+{
+    CHECK_NULL_VOID(parent);
+    CHECK_NULL_VOID(child);
+    auto baseSpan = DynamicCast<BaseSpan>(child);
+    if (baseSpan) {
+        if (baseSpan->HasTextBackgroundStyle()) {
+            return;
+        }
+        baseSpan->UpdateTextBackgroundFromParent(parent->GetTextBackgroundStyle());
+        return;
+    }
+    if (child->GetTag() == V2::IMAGE_ETS_TAG) {
+        auto imageNode = DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(imageNode);
+        auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(imageLayoutProperty);
+        if (imageLayoutProperty->GetHasPlaceHolderStyleValue(false)) {
+            return;
+        }
+        if (parent->GetTextBackgroundStyle().has_value()) {
+            imageLayoutProperty->UpdatePlaceHolderStyle(parent->GetTextBackgroundStyle().value());
         }
     }
 }
@@ -2247,6 +2305,8 @@ void TextPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int3
     if (newWidth == prevWidth && newHeight == prevHeight) {
         return;
     }
+    CHECK_NULL_VOID(selectOverlayProxy_);
+    selectOverlayProxy_->ShowOrHiddenMenu(true);
 }
 
 void TextPattern::InitSurfacePositionChangedCallback()
@@ -2287,9 +2347,10 @@ void TextPattern::AddChildSpanItem(const RefPtr<UINode>& child)
         }
         auto imageNode = DynamicCast<FrameNode>(child);
         if (imageNode) {
-            spans_.emplace_back(MakeRefPtr<ImageSpanItem>());
-            spans_.back()->imageNodeId = imageNode->GetId();
-
+            auto imageSpanItem = MakeRefPtr<ImageSpanItem>();
+            imageSpanItem->imageNodeId = imageNode->GetId();
+            imageSpanItem->UpdatePlaceholderBackgroundStyle(imageNode);
+            spans_.emplace_back(imageSpanItem);
             auto gesture = imageNode->GetOrCreateGestureEventHub();
             CHECK_NULL_VOID(gesture);
             gesture->SetHitTestMode(HitTestMode::HTMNONE);
@@ -2744,7 +2805,7 @@ void TextPattern::HandleSelectionChange(int32_t start, int32_t end)
         return;
     }
 
-    UpdateSelectionSpanType(start, end);
+    UpdateSelectionSpanType(std::min(start, end), std::max(start, end));
     textSelector_.Update(start, end);
     FireOnSelectionChange(std::min(start, end), std::max(start, end));
 }

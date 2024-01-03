@@ -47,6 +47,7 @@ public:
         paintProperty->propBarRightPoint_ = CloneBarRightPoint();
         paintProperty->propDragOffset_ = CloneDragOffset();
         paintProperty->propOpacity_ = CloneOpacity();
+        paintProperty->propBarWidth_ = CloneBarWidth();
         return paintProperty;
     }
 
@@ -58,6 +59,7 @@ public:
         ResetBarRightPoint();
         ResetDragOffset();
         ResetOpacity();
+        ResetBarWidth();
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarLeftPoint, OffsetT<Dimension>, PROPERTY_UPDATE_RENDER);
@@ -65,6 +67,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarRightPoint, OffsetT<Dimension>, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DragOffset, OffsetF, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Opacity, float, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarWidth, Dimension, PROPERTY_UPDATE_RENDER);
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(SheetDragBarPaintProperty);

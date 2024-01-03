@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/refresh/refresh_animation_state.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
+#include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
 class LoadingProgressModifier : public ContentModifier {
@@ -90,6 +91,7 @@ public:
     void CloseAnimation(float date, float cometLen, float cometOpacity, float cometScale);
 
 private:
+    void AdjustMatrix(RSCamera3D& camera, RSMatrix& matrix);
     float GetCurentCometOpacity(float baseOpacity, uint32_t index, uint32_t totalNumber);
     float GetCurentCometAngle(float baseAngle, uint32_t index, uint32_t totalNumber);
     uint32_t GetCometNumber();

@@ -452,7 +452,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     }
     
     // preload js views
-    JsRegisterViews(JSNApi::GetGlobalObject(vm));
+    JsRegisterViews(JSNApi::GetGlobalObject(vm), runtime);
 
     // preload aceConsole
     shared_ptr<JsValue> global = arkRuntime->GetGlobal();

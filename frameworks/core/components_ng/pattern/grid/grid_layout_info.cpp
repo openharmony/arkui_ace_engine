@@ -142,9 +142,14 @@ void GridLayoutInfo::UpdateEndIndex(float overScrollOffset, float mainSize, floa
 
 float GridLayoutInfo::GetCurrentOffsetOfRegularGrid(float mainGap) const
 {
-    float lineHeight = GetCurrentLineHeight();
+    float defaultHeight = GetCurrentLineHeight();
     auto lines = startIndex_ / crossCount_;
-    return lines * (lineHeight + mainGap) - currentOffset_;
+    float res = 0.0f;
+    for (int i = 0; i < lines; ++i) {
+        auto it = lineHeightMap_.find(i);
+        res += (it != lineHeightMap_.end() ? it->second : defaultHeight) + mainGap;
+    }
+    return res - currentOffset_;
 }
 
 float GridLayoutInfo::GetContentOffset(float mainGap) const
@@ -186,11 +191,17 @@ float GridLayoutInfo::GetContentHeight(float mainGap) const
 {
     if (!hasBigItem_) {
         float lineHeight = GetCurrentLineHeight();
+        float res = 0.0f;
         auto lines = (childrenCount_) / crossCount_;
-        if (childrenCount_ % crossCount_ == 0) {
-            return lines * lineHeight + (lines - 1) * mainGap;
+        for (int i = 0; i < lines; ++i) {
+            auto it = lineHeightMap_.find(i);
+            res += (it != lineHeightMap_.end() ? it->second : lineHeight) + mainGap;
         }
-        return (lines + 1) * lineHeight + lines * mainGap;
+        if (childrenCount_ % crossCount_ == 0) {
+            return res - mainGap;
+        }
+        auto lastLine = lineHeightMap_.find(lines);
+        return res + (lastLine != lineHeightMap_.end() ? lastLine->second : lineHeight);
     }
     float heightSum = 0;
     int32_t itemCount = 0;
@@ -380,5 +391,86 @@ int32_t GridLayoutInfo::FindItemInRange(int32_t target) const
         }
     }
     return -1;
+}
+
+// Use the index to get the line number where the item is located
+bool GridLayoutInfo::GetLineIndexByIndex(int32_t targetIndex, int32_t& targetLineIndex) const
+{
+    for (auto [lineIndex, lineMap] : gridMatrix_) {
+        for (auto [crossIndex, index] : lineMap) {
+            if (index == targetIndex) {
+                targetLineIndex = lineIndex;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+// get the total height of all rows from zero before the targetLineIndex
+float GridLayoutInfo::GetTotalHeightFromZeroIndex(int32_t targetLineIndex, float mainGap) const
+{
+    auto targetPos = 0.f;
+    for (auto [lineIndex, lineHeight] : lineHeightMap_) {
+        if (targetLineIndex > lineIndex) {
+            targetPos += lineHeight + mainGap;
+        } else {
+            break;
+        }
+    }
+    return targetPos;
+}
+
+// Based on the index from zero and align, gets the position to scroll to
+bool GridLayoutInfo::GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayoutInfo, int32_t targetIndex,
+    ScrollAlign align, float mainGap, float& targetPos)
+{
+    int32_t startMainLineIndex = currentGridLayoutInfo.startMainLineIndex_;
+    int32_t endMainLineIndex = currentGridLayoutInfo.endMainLineIndex_;
+    float lastMainSize = currentGridLayoutInfo.lastMainSize_;
+    int32_t targetLineIndex = -1;
+    // Pre-check
+    // Get the line number where the index is located. If targetIndex does not exist, it is returned.
+    CHECK_NULL_RETURN(GetLineIndexByIndex(targetIndex, targetLineIndex), false);
+
+    // Get the total height of the targetPos from row 0 to targetLineIndex-1.
+    targetPos = GetTotalHeightFromZeroIndex(targetLineIndex, mainGap);
+
+    // Find the target row and get the altitude information
+    auto targetItem = lineHeightMap_.find(targetLineIndex);
+
+    // Make sure that the target line has height information
+    CHECK_NULL_RETURN(targetItem != lineHeightMap_.end(), false);
+    auto targetLineHeight = targetItem->second;
+
+    // Depending on align, calculate where you need to scroll to
+    switch (align) {
+        case ScrollAlign::START:
+        case ScrollAlign::NONE:
+            break;
+        case ScrollAlign::CENTER: {
+            targetPos -= ((lastMainSize - targetLineHeight) * HALF);
+            break;
+        }
+        case ScrollAlign::END: {
+            targetPos -= (lastMainSize - targetLineHeight);
+            break;
+        }
+        case ScrollAlign::AUTO: {
+            // When the row height is greater than the screen height and occupies the entire screen height, do nothing
+            if (startMainLineIndex == targetLineIndex && endMainLineIndex == targetLineIndex) {
+                return false;
+            }
+
+            if (startMainLineIndex >= targetLineIndex) {
+            } else if (targetLineIndex >= endMainLineIndex) {
+                targetPos -= (lastMainSize - targetLineHeight);
+            } else {
+                return false;
+            }
+            break;
+        }
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG

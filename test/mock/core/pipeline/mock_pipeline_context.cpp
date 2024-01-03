@@ -457,6 +457,13 @@ bool PipelineContext::IsDragging() const
 void PipelineContext::SetIsDragging(bool isDragging) {}
 
 void PipelineContext::ResetDragging() {}
+
+void PipelineContext::UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
+
+bool PipelineContext::PrintVsyncInfoIfNeed() const
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
@@ -590,6 +597,5 @@ bool PipelineBase::HasFloatTitle() const
 {
     return true;
 }
-
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

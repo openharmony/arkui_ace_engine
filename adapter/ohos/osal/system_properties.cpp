@@ -92,6 +92,11 @@ bool IsLayoutTraceEnabled()
     return (system::GetParameter("persist.ace.trace.layout.enabled", "false") == "true");
 }
 
+bool IsBuildTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.build.enabled", "false") == "true");
+}
+
 bool IsDeveloperModeOn()
 {
     return (system::GetParameter("const.security.developermode.state", "false") == "true");
@@ -225,11 +230,17 @@ bool IsEnableScrollableItemPool()
 {
     return system::GetBoolParameter("persist.ace.scrollablepool.enabled", false);
 }
+
+bool IsResourceDecoupling()
+{
+    return system::GetBoolParameter("persist.sys.arkui.resource.decoupling", true);
+}
 } // namespace
 
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
 bool SystemProperties::layoutTraceEnable_ = IsLayoutTraceEnabled() && IsDeveloperModeOn();
+bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && IsDeveloperModeOn();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
@@ -265,8 +276,8 @@ int32_t SystemProperties::astcMax_ = GetAstcMaxErrorProp();
 int32_t SystemProperties::astcPsnr_ = GetAstcPsnrProp();
 ACE_WEAK_SYM bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
 ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount();
-bool SystemProperties::resourceDecoupling_ = GetResourceDecoupling();
 bool SystemProperties::enableScrollableItemPool_ = IsEnableScrollableItemPool();
+bool SystemProperties::resourceDecoupling_ = IsResourceDecoupling();
 
 bool SystemProperties::IsSyscapExist(const char* cap)
 {
@@ -378,6 +389,7 @@ void SystemProperties::InitDeviceInfo(
     traceEnabled_ = IsTraceEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
     layoutTraceEnable_ = IsLayoutTraceEnabled() && IsDeveloperModeOn();
+    buildTraceEnable_ = IsBuildTraceEnabled() && IsDeveloperModeOn();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     rosenBackendEnabled_ = IsRosenBackendEnabled();
     isHookModeEnabled_ = IsHookModeEnabled();
@@ -385,7 +397,7 @@ void SystemProperties::InitDeviceInfo(
     downloadByNetworkEnabled_ = system::GetParameter(ENABLE_DOWNLOAD_BY_NETSTACK_KEY, "true") == "true";
     animationScale_ = std::atof(system::GetParameter(ANIMATION_SCALE_KEY, "1").c_str());
     WatchParameter(ANIMATION_SCALE_KEY, OnAnimationScaleChanged, nullptr);
-    resourceDecoupling_ = GetResourceDecoupling();
+    resourceDecoupling_ = IsResourceDecoupling();
 
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
@@ -493,7 +505,7 @@ bool SystemProperties::IsFormAnimationLimited()
 
 bool SystemProperties::GetResourceDecoupling()
 {
-    return system::GetBoolParameter("persist.sys.arkui.resource.decoupling", true);
+    return resourceDecoupling_;
 }
 
 bool SystemProperties::GetTitleStyleEnabled()

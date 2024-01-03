@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/image/image_source_info.h"
 #define NAPI_VERSION 8
 
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -298,7 +299,15 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
-    
+
+    if (loadingCtx_) {
+        auto renderProp = GetPaintProperty<ImageRenderProperty>();
+        if (renderProp && renderProp->HasImageResizableSlice() && image_) {
+            loadingCtx_->ResizableCalcDstSize();
+            SetImagePaintConfig(image_, loadingCtx_->GetSrcRect(), loadingCtx_->GetDstRect(), false);
+        }
+    }
+
     if (IsSupportImageAnalyzerFeature()) {
         UpdateAnalyzerUIConfig(dirty->GetGeometryNode());
     }
@@ -886,7 +895,13 @@ void ImagePattern::OnColorConfigurationUpdate()
     UpdateInternalResource(src);
 
     LoadImage(src);
+    loadingCtx_->SetIsSystemColorChange(true);
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
+        auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
+        if (altLoadingCtx_->GetSourceInfo() == altImageSourceInfo) {
+            altLoadingCtx_.Reset();
+        }
+        altLoadingCtx_->SetIsSystemColorChange(true);
         LoadAltImage(imageLayoutProperty);
     }
 }

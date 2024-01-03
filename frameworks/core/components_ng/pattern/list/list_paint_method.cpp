@@ -53,6 +53,8 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     if (!divider_.strokeWidth.IsValid() || totalItemCount_ <= 0 ||
         divider_.strokeWidth.Unit() == DimensionUnit::PERCENT ||
         GreatOrEqual(divider_.strokeWidth.ConvertToPx(), contentSize)) {
+        ListDividerArithmetic::DividerMap dividerMap;
+        listContentModifier_->SetDividerMap(std::move(dividerMap));
         return;
     }
     Axis axis = vertical_ ? Axis::HORIZONTAL : Axis::VERTICAL;

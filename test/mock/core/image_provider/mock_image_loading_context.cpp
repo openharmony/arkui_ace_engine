@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/image_provider/image_loading_context.h"
 #include "test/mock/core/render/mock_canvas_image.h"
+
+#include "core/components_ng/image_provider/image_loading_context.h"
 
 namespace OHOS::Ace::NG {
 ImageLoadingContext::ImageLoadingContext(const ImageSourceInfo& src, LoadNotifier&& loadNotifier, bool syncLoad)
@@ -80,8 +81,8 @@ RefPtr<CanvasImage> ImageLoadingContext::MoveCanvasImage()
 
 void ImageLoadingContext::LoadImageData() {}
 
-bool ImageLoadingContext::MakeCanvasImageIfNeed(
-    const SizeF& dstSize, bool incomingNeedResize, ImageFit incomingImageFit, const std::optional<SizeF>& sourceSize)
+bool ImageLoadingContext::MakeCanvasImageIfNeed(const SizeF& dstSize, bool incomingNeedResize,
+    ImageFit incomingImageFit, const std::optional<SizeF>& sourceSize, bool hasValidSlice)
 {
     dstSize_ = dstSize;
     imageFit_ = incomingImageFit;
@@ -118,6 +119,16 @@ void ImageLoadingContext::SetAutoResize(bool needResize)
     autoResize_ = needResize;
 }
 
+bool ImageLoadingContext::GetIsOnSystemColorChange() const
+{
+    return isSystemColorChange_;
+}
+
+void ImageLoadingContext::SetIsSystemColorChange(bool isSystemColorChange)
+{
+    isSystemColorChange_ = isSystemColorChange;
+}
+
 const SizeF& ImageLoadingContext::GetDstSize() const
 {
     return dstSize_;
@@ -143,6 +154,7 @@ bool ImageLoadingContext::NeedAlt() const
 void ImageLoadingContext::ResetLoading() {}
 void ImageLoadingContext::ResumeLoading() {}
 void ImageLoadingContext::DownloadImage() {}
+void ImageLoadingContext::ResizableCalcDstSize() {}
 
 const std::string ImageLoadingContext::GetCurrentLoadingState()
 {

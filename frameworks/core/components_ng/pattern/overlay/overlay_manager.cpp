@@ -1316,6 +1316,11 @@ void OverlayManager::CleanMenuInSubWindowWithAnimation()
     menuWrapperPattern->SetMenuHide();
     if (menuWrapperPattern->GetPreviewMode() == MenuPreviewMode::NONE) {
         CleanMenuInSubWindow();
+        menuWrapperPattern->CallMenuDisappearCallback();
+        auto mainPipeline = PipelineContext::GetMainPipelineContext();
+        if (mainPipeline && menuWrapperPattern->GetMenuDisappearCallback()) {
+            mainPipeline->FlushPipelineImmediately();
+        }
         return;
     }
     ClearMenuAnimation(menu);
@@ -1811,7 +1816,7 @@ bool OverlayManager::RemoveModalInOverlay()
         auto modalPattern = AceType::DynamicCast<ModalPresentationPattern>(pattern);
         CHECK_NULL_RETURN(modalPattern, false);
         auto modalTransition = modalPattern->GetType();
-        if (modalTransition == ModalTransition::NONE || builder->GetRenderContext()->HasTransition()) {
+        if (modalTransition == ModalTransition::NONE || builder->GetRenderContext()->HasDisappearTransition()) {
             // Fire shown event of navdestination under the disappeared modal
             FireNavigationStateChange(rootNode, true);
         }
@@ -1849,7 +1854,7 @@ bool OverlayManager::RemoveAllModalInOverlay()
             auto modalPattern = topModalNode->GetPattern<ModalPresentationPattern>();
             CHECK_NULL_RETURN(modalPattern, false);
             auto modalTransition = modalPattern->GetType();
-            if (modalTransition == ModalTransition::NONE || builder->GetRenderContext()->HasTransition()) {
+            if (modalTransition == ModalTransition::NONE || builder->GetRenderContext()->HasDisappearTransition()) {
                 // Fire shown event of navdestination under the disappeared modal
                 FireNavigationStateChange(rootNode, true);
             }
@@ -1872,7 +1877,7 @@ bool OverlayManager::ModalExitProcess(const RefPtr<FrameNode>& topModalNode)
         auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetFirstChild());
         CHECK_NULL_RETURN(builder, false);
         auto modalTransition = topModalNode->GetPattern<ModalPresentationPattern>()->GetType();
-        if (builder->GetRenderContext()->HasTransition()) {
+        if (builder->GetRenderContext()->HasDisappearTransition()) {
             if (!topModalNode->GetPattern<ModalPresentationPattern>()->IsExecuteOnDisappear()) {
                 topModalNode->GetPattern<ModalPresentationPattern>()->OnDisappear();
                 // Fire hidden event of navdestination on the disappeared modal
@@ -1885,7 +1890,7 @@ bool OverlayManager::ModalExitProcess(const RefPtr<FrameNode>& topModalNode)
             PlayDefaultModalTransition(topModalNode, false);
         } else if (modalTransition == ModalTransition::ALPHA) {
             PlayAlphaModalTransition(topModalNode, false);
-        } else if (!builder->GetRenderContext()->HasTransition()) {
+        } else if (!builder->GetRenderContext()->HasDisappearTransition()) {
             topModalNode->GetPattern<ModalPresentationPattern>()->OnDisappear();
             // Fire hidden event of navdestination on the disappeared modal
             FireNavigationStateChange(rootNode, false, topModalNode);
@@ -1896,7 +1901,7 @@ bool OverlayManager::ModalExitProcess(const RefPtr<FrameNode>& topModalNode)
     } else if (topModalNode->GetTag() == V2::SHEET_PAGE_TAG) {
         auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetLastChild());
         CHECK_NULL_RETURN(builder, false);
-        if (builder->GetRenderContext()->HasTransition()) {
+        if (builder->GetRenderContext()->HasDisappearTransition()) {
             if (!topModalNode->GetPattern<SheetPresentationPattern>()->IsExecuteOnDisappear()) {
                 topModalNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
             }
@@ -1992,6 +1997,7 @@ void OverlayManager::BlurOverlayNode(const RefPtr<FrameNode>& currentOverlay, bo
             if (currentOverlay != overlay &&
                 (InstanceOf<DialogPattern>(pattern) || InstanceOf<MenuWrapperPattern>(pattern) ||
                     InstanceOf<SheetPresentationPattern>(pattern) || InstanceOf<ModalPresentationPattern>(pattern)) &&
+                overlay->GetTag() != V2::SELECT_OVERLAY_ETS_TAG &&
                 !overlay->IsRemoving()) {
                 // Focus returns to the previous in the overlay
                 FocusOverlayNode(overlay, isInSubWindow);
@@ -2223,7 +2229,7 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
         }
         auto builder = AceType::DynamicCast<FrameNode>(topModalNode->GetFirstChild());
         CHECK_NULL_VOID(builder);
-        if (builder->GetRenderContext()->HasTransition()) {
+        if (builder->GetRenderContext()->HasDisappearTransition()) {
             if (!topModalNode->GetPattern<ModalPresentationPattern>()->IsExecuteOnDisappear()) {
                 topModalNode->GetPattern<ModalPresentationPattern>()->OnDisappear();
                 // Fire hidden event of navdestination on the disappeared modal
@@ -2241,7 +2247,7 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
             PlayDefaultModalTransition(topModalNode, false);
         } else if (modalTransition == ModalTransition::ALPHA) {
             PlayAlphaModalTransition(topModalNode, false);
-        } else if (!builder->GetRenderContext()->HasTransition()) {
+        } else if (!builder->GetRenderContext()->HasDisappearTransition()) {
             if (!modalPresentationPattern->IsExecuteOnDisappear()) {
                 modalPresentationPattern->OnDisappear();
                 // Fire hidden event of navdestination on the disappeared modal
@@ -2254,7 +2260,7 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
         if (!modalList_.empty()) {
             modalList_.pop_back();
         }
-        if (modalTransition == ModalTransition::NONE || builder->GetRenderContext()->HasTransition()) {
+        if (modalTransition == ModalTransition::NONE || builder->GetRenderContext()->HasDisappearTransition()) {
             // Fire shown event of navdestination under the disappeared modal
             FireNavigationStateChange(rootNode, true);
         }
@@ -2539,19 +2545,27 @@ void OverlayManager::OnBindSheet(bool isShow, std::function<void(const std::stri
     maskLayoutProps->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto maskRenderContext = maskNode->GetRenderContext();
     CHECK_NULL_VOID(maskRenderContext);
-    maskRenderContext->UpdateBackgroundColor(sheetStyle.maskColor.value_or(sheetTheme->GetMaskColor()));
+    if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        if (sheetStyle.maskColor.has_value()) {
+            maskRenderContext->UpdateBackgroundColor(sheetStyle.maskColor.value());
+        } else {
+            maskLayoutProps->UpdateVisibility(VisibleType::INVISIBLE);
+        }
+    } else {
+        maskRenderContext->UpdateBackgroundColor(sheetStyle.maskColor.value_or(sheetTheme->GetMaskColor()));
+        auto eventConfirmHub = maskNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(eventConfirmHub);
+        sheetMaskClickEvent_ = AceType::MakeRefPtr<NG::ClickEvent>(
+            [weak = AceType::WeakClaim(AceType::RawPtr(sheetNode))](const GestureEvent& /* info */) {
+                auto sheet = weak.Upgrade();
+                CHECK_NULL_VOID(sheet);
+                auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
+                CHECK_NULL_VOID(sheetPattern);
+                sheetPattern->SheetInteractiveDismiss(false);
+            });
+        eventConfirmHub->AddClickEvent(sheetMaskClickEvent_);
+    }
     maskNode->MountToParent(rootNode);
-    auto eventConfirmHub = maskNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(eventConfirmHub);
-    sheetMaskClickEvent_ = AceType::MakeRefPtr<NG::ClickEvent>(
-        [weak = AceType::WeakClaim(AceType::RawPtr(sheetNode))](const GestureEvent& /* info */) {
-            auto sheet = weak.Upgrade();
-            CHECK_NULL_VOID(sheet);
-            auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
-            CHECK_NULL_VOID(sheetPattern);
-            sheetPattern->SheetInteractiveDismiss(false);
-        });
-    eventConfirmHub->AddClickEvent(sheetMaskClickEvent_);
     PlaySheetMaskTransition(maskNode, true);
     auto columnNode = FrameNode::CreateFrameNode(V2::SHEET_WRAPPER_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -2594,7 +2608,7 @@ void OverlayManager::CloseSheet(int32_t targetId)
     CHECK_NULL_VOID(scrollNode);
     auto builder = AceType::DynamicCast<FrameNode>(scrollNode->GetChildAtIndex(0));
     CHECK_NULL_VOID(builder);
-    if (builder->GetRenderContext()->HasTransition()) {
+    if (builder->GetRenderContext()->HasDisappearTransition()) {
         if (!sheetNode->GetPattern<SheetPresentationPattern>()->IsExecuteOnDisappear()) {
             sheetNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
         }
@@ -2834,7 +2848,7 @@ void OverlayManager::ComputeSheetOffset(NG::SheetStyle& sheetStyle, RefPtr<Frame
     auto sheetType = sheetPattern->GetSheetType();
     switch (sheetType) {
         case SheetType::SHEET_BOTTOM:
-        case SheetType::SHEET_BOTTOMPC:
+        case SheetType::SHEET_BOTTOM_FREE_WINDOW:
             if (sheetStyle.detents.size() > 0) {
                 ComputeDetentsSheetOffset(sheetStyle, sheetNode);
             } else {
@@ -2869,6 +2883,9 @@ void OverlayManager::ComputeSingleGearSheetOffset(NG::SheetStyle& sheetStyle, Re
     if (sheetStyle.sheetMode.has_value()) {
         if (sheetStyle.sheetMode == SheetMode::MEDIUM) {
             sheetHeight_ = sheetMaxHeight * MEDIUM_SIZE;
+            if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+                sheetHeight_ = sheetMaxHeight * MEDIUM_SIZE_PRE;
+            }
         } else if (sheetStyle.sheetMode == SheetMode::LARGE) {
             sheetHeight_ = largeHeight;
         } else if (sheetStyle.sheetMode == SheetMode::AUTO) {
@@ -2909,6 +2926,9 @@ void OverlayManager::ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPt
     if (selection.sheetMode.has_value()) {
         if (selection.sheetMode == SheetMode::MEDIUM) {
             sheetHeight_ = sheetMaxHeight * MEDIUM_SIZE;
+            if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+                sheetHeight_ = sheetMaxHeight * MEDIUM_SIZE_PRE;
+            }
         } else if (selection.sheetMode == SheetMode::LARGE) {
             sheetHeight_ = largeHeight;
         } else if (selection.sheetMode == SheetMode::AUTO) {

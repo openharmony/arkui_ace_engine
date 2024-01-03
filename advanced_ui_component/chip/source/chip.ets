@@ -199,7 +199,6 @@ export struct ChipComponent {
   @Prop chipNodeRadius: Dimension | undefined = void (0)
   @Prop chipEnabled: boolean = true
   @State isHover: boolean = false
-  @State isPressed: boolean = false
   @State chipScale: ScaleOptions = { x: 1, y: 1 }
   @State chipOpacity: number = 1
   @State chipBlendColor: ResourceColor = Color.Transparent
@@ -255,7 +254,13 @@ export struct ChipComponent {
         return value as number
       case 'object':
         try {
-          return px2vp(getContext(this).resourceManager.getNumber((value as Resource).id))
+          if ((value as Resource).id !== -1) {
+            return px2vp(getContext(this).resourceManager.getNumber((value as Resource).id))
+          } else {
+            return px2vp(getContext(this)
+              .resourceManager
+              .getNumberByName(((value.params as string[])[0]).split('.')[2]))
+          }
         } catch (error) {
           return Number.NEGATIVE_INFINITY
         }
@@ -295,7 +300,7 @@ export struct ChipComponent {
     let labelMargin: Margin = { left: 0, right: 0 }
     if (this.label?.labelMargin?.left !== void (0) && this.toVp(this.label.labelMargin.left) >= 0) {
       labelMargin.left = this.label?.labelMargin?.left
-    } else {
+    } else if (this.prefixIcon?.src) {
       if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
         labelMargin.left = this.theme.label.smallMargin.left
       } else {
@@ -304,12 +309,13 @@ export struct ChipComponent {
     }
     if (this.label?.labelMargin?.right !== void (0) && this.toVp(this.label.labelMargin.right) >= 0) {
       labelMargin.right = this.label?.labelMargin?.right
-    } else {
+    } else if (this.suffixIcon?.src || this.useDefaultSuffixIcon) {
       if (this.isChipSizeEnum() && this.chipSize == ChipSize.SMALL) {
         labelMargin.right = this.theme.label.smallMargin.right
       } else {
         labelMargin.right = this.theme.label.normalMargin.right
       }
+
     }
     return labelMargin
   }
@@ -436,7 +442,6 @@ export struct ChipComponent {
     if (!this.getChipEnable()) {
       return
     }
-    this.isPressed = (event.type === TouchType.Down)
     if (this.isHover) {
       if (event.type === TouchType.Down) {
         animateTo({ curve: Curve.Sharp, duration: 100 }, () => {
@@ -556,7 +561,7 @@ export struct ChipComponent {
     Stack() {
       if (this.chipNodeOnFocus && !this.suffixIconOnFocus) {
         Stack()
-          .borderRadius(this.getChipNodeRadius())
+          .borderRadius(this.toVp(this.getChipNodeRadius()) + 4)
           .size(this.getFocusOverlaySize())
           .borderColor(this.theme.chipNode.focusOutlineColor)
           .borderWidth(this.theme.chipNode.borderWidth)
@@ -623,7 +628,7 @@ export struct ChipComponent {
           .focusable(false)
           .flexShrink(0)
           .visibility(this.getVisibility())
-
+          .draggable(false)
       }
 
       Text(this.label?.text ?? "")
@@ -639,6 +644,7 @@ export struct ChipComponent {
         .focusable(true)
         .textAlign(TextAlign.Center)
         .visibility(this.getVisibility())
+        .draggable(false)
 
       Image(this.getSuffixIconSrc())
         .opacity(this.getChipNodeOpacity())
@@ -649,6 +655,7 @@ export struct ChipComponent {
         .objectFit(ImageFit.Cover)
         .flexShrink(0)
         .visibility(this.getVisibility())
+        .draggable(false)
         .stateStyles({
           focused: this.suffixIconFocusStyles,
           normal: this.suffixIconNormalStyles,
@@ -674,6 +681,7 @@ export struct ChipComponent {
           }
         })
     }
+    .alignItems(VerticalAlign.Center)
     .justifyContent(FlexAlign.Center)
     .clip(false)
     .padding(this.getChipNodePadding())

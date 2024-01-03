@@ -96,7 +96,7 @@ if (is_ohos_standard_system) {
     sources = [
       "//base/global/system_resources/fonts",
       "//foundation/arkui/ace_engine/adapter/preview/sdk/fontconfig.json",
-      "//third_party/icu/ohos_icu4j/data/icudt69l.dat",
+      "//third_party/icu/ohos_icu4j/data/icudt72l.dat",
     ]
 
     foreach(item, common_bin) {

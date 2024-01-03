@@ -38,7 +38,7 @@ public:
 
     // return true if calling MakeCanvasImage is necessary
     bool MakeCanvasImageIfNeed(const SizeF& dstSize, bool autoResize, ImageFit imageFit,
-        const std::optional<SizeF>& sourceSize = std::nullopt);
+        const std::optional<SizeF>& sourceSize = std::nullopt, bool hasValidSlice = false);
 
     /* interfaces to drive image loading */
     void LoadImageData();
@@ -61,17 +61,20 @@ public:
     bool GetAutoResize() const;
     std::optional<SizeF> GetSourceSize() const;
     bool NeedAlt() const;
+    bool GetIsOnSystemColorChange() const;
 
     /* interfaces to set properties */
     void SetImageFit(ImageFit imageFit);
     void SetAutoResize(bool needResize);
     void SetSourceSize(const std::optional<SizeF>& sourceSize = std::nullopt);
+    void SetIsSystemColorChange(bool isSystemColorChange);
 
     // callbacks that will be called by ImageProvider when load process finishes
     void DataReadyCallback(const RefPtr<ImageObject>& imageObj);
     void SuccessCallback(const RefPtr<CanvasImage>& canvasImage);
     void FailCallback(const std::string& errorMsg);
     const std::string GetCurrentLoadingState();
+    void ResizableCalcDstSize();
 
 private:
 #define DEFINE_SET_NOTIFY_TASK(loadResult)                                            \
@@ -115,6 +118,7 @@ private:
 
     bool autoResize_ = true;
     bool syncLoad_ = false;
+    bool isSystemColorChange_ = false;
 
     RectF srcRect_;
     RectF dstRect_;

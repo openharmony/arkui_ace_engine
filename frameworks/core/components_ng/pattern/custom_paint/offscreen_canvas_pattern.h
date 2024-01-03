@@ -29,6 +29,7 @@ class ACE_EXPORT OffscreenCanvasPattern : public Pattern {
 
 public:
     OffscreenCanvasPattern(int32_t width, int32_t height);
+    OffscreenCanvasPattern(const RefPtr<PipelineBase> context, int32_t width, int32_t height);
     ~OffscreenCanvasPattern() override = default;
 
     void FillRect(const Rect& rect);

@@ -71,6 +71,8 @@ private:
     void InitClickEvent();
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void OnClick();
+    void CreatePropertyCallback();
+    void StopAnimation();
 
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ClickEvent> clickListener_;
@@ -79,8 +81,11 @@ private:
     OffsetF downPoint_;
     float dragOffsetX_ = 0.0f;
     float dragOffsetY_ = 0.0f;
+    bool isDown_ = false;
 
     ClickArrowCallback clickArrowCallback_;
+
+    RefPtr<NodeAnimatablePropertyFloat> property_;
 
     ACE_DISALLOW_COPY_AND_MOVE(SheetDragBarPattern);
 };

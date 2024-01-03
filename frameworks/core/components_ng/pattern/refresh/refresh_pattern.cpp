@@ -51,7 +51,6 @@ constexpr float LOADING_ANIMATION_DURATION = 350;
 constexpr float MAX_OFFSET = 100000.0f;
 constexpr float HALF = 0.5f;
 constexpr float BASE_SCALE = 0.707f; // std::sqrt(2)/2
-constexpr float FAKE_VALUE = 0.01f;
 constexpr Dimension TRIGGER_LOADING_DISTANCE = 16.0_vp;
 constexpr Dimension TRIGGER_REFRESH_DISTANCE = 64.0_vp;
 constexpr Dimension MAX_SCROLL_DISTANCE = 128.0_vp;
@@ -287,6 +286,10 @@ void RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
 {
     UpdateDragFRCSceneInfo(REFRESH_DRAG_SCENE, mainSpeed, SceneStatus::RUNNING);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        // If dragging does not expand the refresh, there is no need to continue executing the code
+        if (NearZero(scrollOffset_) && NonPositive(delta)) {
+            return;
+        }
         scrollOffset_ = std::clamp(scrollOffset_ + delta * DEFAULT_FRICTION * PERCENT, 0.0f, MAX_OFFSET);
         if (!isSourceFromAnimation_) {
             if (isRefreshing_) {
@@ -555,8 +558,6 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
     auto dealSpeed = 0.0f;
     if (!NearEqual(scrollOffset_, targetOffset)) {
         dealSpeed = speed / (targetOffset - scrollOffset_);
-    } else {
-        targetOffset = targetOffset + FAKE_VALUE;
     }
     if (!isSourceFromAnimation_ && refreshStatus_ == RefreshStatus::OVER_DRAG) {
         UpdateRefreshStatus(RefreshStatus::REFRESH);

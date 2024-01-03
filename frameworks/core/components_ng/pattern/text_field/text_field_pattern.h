@@ -1063,9 +1063,15 @@ public:
     {
         return lastClickTimeStamp_;
     }
+
+    void UpdateLastTextRect(const RectF& textRect)
+    {
+        lastTextRect_ = textRect;
+    }
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
 
+    void ContentFireOnChangeEvent();
 protected:
     virtual void InitDragEvent();
 
@@ -1130,7 +1136,6 @@ private:
     void AfterSelection();
 
     void FireEventHubOnChange(const std::string& text);
-    void FireOnChangeIfNeeded();
     // The return value represents whether the editor content has change.
     bool FireOnTextChangeEvent();
 
@@ -1224,6 +1229,7 @@ private:
     void ScrollToSafeArea() const override;
     void RecordSubmitEvent() const;
     void UpdateCancelNode();
+    void RequestKeyboardAfterLongPress();
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1302,6 +1308,9 @@ private:
     bool isCounterIdealheight_ = false;
     float maxFrameOffsetY_ = 0.0f;
     float maxFrameHeight_ = 0.0f;
+
+    // Only used to record the content area drawn last time.
+    RectF lastTextRect_;
 
     CancelableCallback<void()> cursorTwinklingTask_;
 

@@ -37,11 +37,16 @@ constexpr Dimension MAX_DRAG_Y = 5.0_vp;
 constexpr float SCALE = 1.5;
 constexpr int32_t DOWN_DURATION = 150;
 constexpr int32_t RESET_DURATION = 250;
+constexpr Dimension BAR_WIDTH = 4.0_vp;
 
 // For DragBar Initial State Point.
 const OffsetT<Dimension> POINT_L_INITIAL = OffsetT<Dimension>(8.0_vp, 12.0_vp);  // Left Point position.
 const OffsetT<Dimension> POINT_C_INITIAL = OffsetT<Dimension>(32.0_vp, 12.0_vp); // Center Point position.
 const OffsetT<Dimension> POINT_R_INITIAL = OffsetT<Dimension>(56.0_vp, 12.0_vp); // Right Point position.
+
+const OffsetT<Dimension> POINT_L_TOUCH = OffsetT<Dimension>(6.0_vp, 12.0_vp);  // Left Point position.
+const OffsetT<Dimension> POINT_C_TOUCH = OffsetT<Dimension>(32.0_vp, 12.0_vp); // Center Point position.
+const OffsetT<Dimension> POINT_R_TOUCH = OffsetT<Dimension>(58.0_vp, 12.0_vp); // Right Point position.
 } // namespace
 
 void SheetDragBarPattern::OnModifyDone()
@@ -78,6 +83,7 @@ void SheetDragBarPattern::UpdateDrawPoint()
     paintProperty->UpdateBarLeftPoint(leftPoint);
     paintProperty->UpdateBarCenterPoint(centerPoint);
     paintProperty->UpdateBarRightPoint(rightPoint);
+    paintProperty->UpdateBarWidth(BAR_WIDTH);
 }
 
 void SheetDragBarPattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -124,19 +130,45 @@ void SheetDragBarPattern::OnClick()
 
 void SheetDragBarPattern::ScaleAnimation(bool isDown)
 {
+    CreatePropertyCallback();
+    CHECK_NULL_VOID(property_);
+    StopAnimation();
+    auto weak = AceType::WeakClaim(this);
+    isDown_ = isDown;
     AnimationOption option;
     option.SetCurve(Curves::SHARP);
     option.SetFillMode(FillMode::FORWARDS);
+    if (isDown) {
+        option.SetDuration(DOWN_DURATION);
+    } else {
+        option.SetDuration(RESET_DURATION);
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = host->GetRenderContext();
-    if (isDown) {
-        option.SetDuration(DOWN_DURATION);
-        context->ScaleAnimation(option, 1.0f, SCALE);
-    } else {
-        option.SetDuration(RESET_DURATION);
-        context->ScaleAnimation(option, SCALE, 1.0f);
-    }
+    CHECK_NULL_VOID(context);
+    context->AttachNodeAnimatableProperty(property_);
+    AnimationUtils::Animate(
+        option,
+        [weak]() {
+            auto ref = weak.Upgrade();
+            CHECK_NULL_VOID(ref);
+            ref->property_->Set(1.0f);
+        });
+}
+
+void SheetDragBarPattern::StopAnimation()
+{
+    auto weak = AceType::WeakClaim(this);
+    AnimationOption option;
+    option.SetCurve(Curves::LINEAR);
+    option.SetDuration(0);
+    option.SetDelay(0);
+    AnimationUtils::Animate(option, [weak]() {
+        auto ref = weak.Upgrade();
+        CHECK_NULL_VOID(ref);
+        ref->property_->Set(0.0);
+    });
 }
 
 void SheetDragBarPattern::HandleTouchEvent(const TouchEventInfo& info)
@@ -169,5 +201,50 @@ void SheetDragBarPattern::MarkDirtyNode(PropertyChangeFlag extraFlag)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(extraFlag);
+}
+
+void SheetDragBarPattern::CreatePropertyCallback()
+{
+    if (property_) {
+        return;
+    }
+    auto weak = AceType::WeakClaim(this);
+    auto propertyCallback = [weak](float scale) {
+        if (NearZero(scale)) {
+            return;
+        }
+        auto ref = weak.Upgrade();
+        CHECK_NULL_VOID(ref);
+        auto paintProperty = ref->GetPaintProperty<SheetDragBarPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        auto barWidth = paintProperty->GetBarWidth().value_or(BAR_WIDTH);
+        if (ref->isDown_) {
+            OffsetT<Dimension> leftPoint = POINT_L_INITIAL;
+            OffsetT<Dimension> rightPoint = POINT_R_INITIAL;
+            auto widthValue = BAR_WIDTH.Value() + BAR_WIDTH.Value() * (SCALE - 1.0f) * scale;
+            auto leftX = POINT_L_TOUCH.GetX().Value() - POINT_L_INITIAL.GetX().Value();
+            auto rightX = POINT_R_TOUCH.GetX().Value() - POINT_R_INITIAL.GetX().Value();
+            leftPoint.SetX(Dimension(POINT_L_INITIAL.GetX().Value() + leftX * scale, DimensionUnit::VP));
+            rightPoint.SetX(Dimension(POINT_R_INITIAL.GetX().Value() + rightX * scale, DimensionUnit::VP));
+            barWidth.SetValue(widthValue);
+            paintProperty->UpdateBarWidth(barWidth);
+            paintProperty->UpdateBarLeftPoint(leftPoint);
+            paintProperty->UpdateBarRightPoint(rightPoint);
+        } else {
+            OffsetT<Dimension> leftPoint = POINT_L_TOUCH;
+            OffsetT<Dimension> rightPoint = POINT_R_TOUCH;
+            auto widthValue = BAR_WIDTH.Value() * SCALE + BAR_WIDTH.Value() * (1.0f - SCALE) * scale;
+            auto leftX = POINT_L_INITIAL.GetX().Value() - POINT_L_TOUCH.GetX().Value();
+            auto rightX = POINT_R_INITIAL.GetX().Value() - POINT_R_TOUCH.GetX().Value();
+            leftPoint.SetX(Dimension(POINT_L_TOUCH.GetX().Value() + leftX * scale, DimensionUnit::VP));
+            rightPoint.SetX(Dimension(POINT_R_TOUCH.GetX().Value() + rightX * scale, DimensionUnit::VP));
+            barWidth.SetValue(widthValue);
+            paintProperty->UpdateBarWidth(barWidth);
+            paintProperty->UpdateBarLeftPoint(leftPoint);
+            paintProperty->UpdateBarRightPoint(rightPoint);
+        }
+        ref->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    };
+    property_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
 }
 } // namespace OHOS::Ace::NG

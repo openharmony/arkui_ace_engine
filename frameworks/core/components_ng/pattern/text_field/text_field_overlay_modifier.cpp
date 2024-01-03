@@ -94,11 +94,7 @@ void TextFieldOverlayModifier::onDraw(DrawingContext& context)
     PaintScrollBar(context);
     PaintEdgeEffect(frameSize_->Get(), context.canvas);
     PaintUnderline(context.canvas);
-#ifndef USE_ROSEN_DRAWING
-#ifdef ENABLE_ROSEN_BACKEND
     PaintMagnifier(context);
-#endif
-#endif
 }
 
 void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const

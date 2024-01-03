@@ -94,9 +94,9 @@ common_bin = [
     part_name = "graphic_2d"
   },
   {
-    label = "//third_party/flutter/glfw:glfw"
+    label = "//third_party/glfw:glfw"
     subsystem_name = "thirdparty"
-    part_name = "flutter"
+    part_name = "glfw"
   },
   {
     label = "//foundation/graphic/graphic_2d/rosen/modules/texgine:libtexgine"
@@ -114,9 +114,9 @@ common_bin = [
     part_name = "jsoncpp"
   },
   {
-    label = "//third_party/flutter/build/skia:skia_shared"
+    label = "//third_party/skia:skia_canvaskit"
     subsystem_name = "thirdparty"
-    part_name = "flutter"
+    part_name = "skia"
   },
   {
     label = "//arkcompiler/ets_runtime:libark_jsruntime"
@@ -189,16 +189,6 @@ if (enable_graphic_text_gine) {
       label = "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text:rosen_text"
       subsystem_name = "graphic"
       part_name = "graphic_2d"
-    },
-  ]
-}
-
-if (defined(use_new_skia) && use_new_skia) {
-  common_bin += [
-    {
-      label = "//third_party/skia:skia_canvaskit"
-      subsystem_name = "thirdparty"
-      part_name = "skia"
     },
   ]
 }

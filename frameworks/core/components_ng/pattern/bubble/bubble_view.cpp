@@ -242,13 +242,15 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
             renderContext->UpdateBackgroundColor(
                 popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
         } else {
-            BlurStyleOption styleOption;
-            styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
             auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(Color::TRANSPARENT);
             renderContext->UpdateBackgroundColor(backgroundColor);
-            renderContext->UpdateBackBlurStyle(styleOption);
+            if (!popupPaintProp->GetBackgroundColor().has_value() ||
+                popupPaintProp->GetBackgroundColor().value() == Color::TRANSPARENT) {
+                BlurStyleOption styleOption;
+                styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
+                renderContext->UpdateBackBlurStyle(styleOption);
+            }
         }
-        renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
         if (param->GetShadow().has_value()) {
             renderContext->UpdateBackShadow(param->GetShadow().value());
         }
@@ -327,11 +329,14 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
             columnRenderContext->UpdateBackgroundColor(
                 popupPaintProps->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
         } else {
-            BlurStyleOption styleOption;
-            styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
-            columnRenderContext->UpdateBackgroundColor(
-                popupPaintProps->GetBackgroundColor().value_or(Color::TRANSPARENT));
-            columnRenderContext->UpdateBackBlurStyle(styleOption);
+            auto backgroundColor = popupPaintProps->GetBackgroundColor().value_or(Color::TRANSPARENT);
+            columnRenderContext->UpdateBackgroundColor(backgroundColor);
+            if (!popupPaintProps->GetBackgroundColor().has_value() ||
+                popupPaintProps->GetBackgroundColor().value() == Color::TRANSPARENT) {
+                BlurStyleOption styleOption;
+                styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
+                columnRenderContext->UpdateBackBlurStyle(styleOption);
+            }
         }
         if (param->GetShadow().has_value()) {
             columnRenderContext->UpdateBackShadow(param->GetShadow().value());
@@ -491,10 +496,14 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
             renderContext->UpdateBackgroundColor(
                 popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
         } else {
-            BlurStyleOption styleOption;
-            styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
-            renderContext->UpdateBackgroundColor(popupPaintProp->GetBackgroundColor().value_or(Color::TRANSPARENT));
-            renderContext->UpdateBackBlurStyle(styleOption);
+            auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(Color::TRANSPARENT);
+            renderContext->UpdateBackgroundColor(backgroundColor);
+            if (!popupPaintProp->GetBackgroundColor().has_value() ||
+                popupPaintProp->GetBackgroundColor().value() == Color::TRANSPARENT) {
+                BlurStyleOption styleOption;
+                styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
+                renderContext->UpdateBackBlurStyle(styleOption);
+            }
         }
     }
 }

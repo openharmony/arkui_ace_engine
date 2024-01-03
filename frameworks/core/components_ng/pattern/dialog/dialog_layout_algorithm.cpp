@@ -155,6 +155,9 @@ void DialogLayoutAlgorithm::AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper
 {
     auto text = scroll->GetAllChildrenWithBuild().front();
     CHECK_NULL_VOID(text);
+    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(text->GetLayoutProperty());
+    CHECK_NULL_VOID(textLayoutProperty);
+    textLayoutProperty->UpdateWordBreak(WordBreak::BREAK_ALL);
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(text->GetLayoutAlgorithm());
     CHECK_NULL_VOID(layoutAlgorithmWrapper);
     auto textLayoutAlgorithm = DynamicCast<TextLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
@@ -164,7 +167,12 @@ void DialogLayoutAlgorithm::AnalysisLayoutOfContent(LayoutWrapper* layoutWrapper
     auto dialogPattern = hostNode->GetPattern<DialogPattern>();
     CHECK_NULL_VOID(dialogPattern);
     if (dialogPattern->GetTitle().empty() && dialogPattern->GetSubtitle().empty()) {
-        scroll->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+            GreatNotEqual(textLayoutAlgorithm->GetLineCount(), 1)) {
+            scroll->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER_LEFT);
+        } else {
+            scroll->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
+        }
     } else {
         scroll->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER_LEFT);
     }

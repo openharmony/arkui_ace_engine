@@ -26,6 +26,7 @@
 
 namespace OHOS::Ace::NG {
 constexpr int32_t EMPTY_JUMP_INDEX = -2;
+constexpr float HALF = 0.5f;
 
 // Try not to add more variables in [GridLayoutInfo] because the more state variables, the more problematic and the
 // harder it is to maintain
@@ -132,6 +133,11 @@ struct GridLayoutInfo {
     float GetContentHeight(const GridLayoutOptions& options, float mainGap) const;
     float GetCurrentLineHeight() const;
 
+    bool GetLineIndexByIndex(int32_t targetIndex, int32_t& targetLineIndex) const;
+    float GetTotalHeightFromZeroIndex(int32_t targetLineIndex, float mainGap) const;
+
+    bool GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayoutInfo, int32_t targetIndex, ScrollAlign align,
+        float mainGap, float& targetPos);
     Axis axis_ = Axis::VERTICAL;
 
     float currentOffset_ = 0.0f; // offset on the current top GridItem on [startMainLineIndex_]

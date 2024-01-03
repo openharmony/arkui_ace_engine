@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 
-#include "hilog_wrapper.h"
+#include "base/log/log.h"
 #include "js_runtime.h"
 #include "js_runtime_utils.h"
 
@@ -99,7 +99,7 @@ public:
         napi_get_undefined(env, &recv);
         napi_call_function(env, recv, jsFunction_->GetNapiValue(), args_.size(), args_.data(), &result);
         if (engine->HasPendingException()) {
-            HILOG_ERROR("Pending exception after CallFUnction in JsTimer. Handle uncaught exception here.");
+            LOGE("Pending exception after CallFUnction in JsTimer. Handle uncaught exception here.");
             engine->HandleUncaughtException();
         }
     }
@@ -129,7 +129,7 @@ napi_value StartTimeoutOrInterval(napi_env env, napi_callback_info info, bool is
     napi_value result = nullptr;
     napi_get_undefined(env, &result);
     if (env == nullptr || info == nullptr) {
-        HILOG_ERROR("StartTimeoutOrInterval, engine or callback info is nullptr.");
+        LOGE("StartTimeoutOrInterval, engine or callback info is nullptr.");
         return result;
     }
 
@@ -146,13 +146,13 @@ napi_value StartTimeoutOrInterval(napi_env env, napi_callback_info info, bool is
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, argv[0], &valueType);
     if (valueType != napi_function) {
-        HILOG_ERROR("first param is not napi_function");
+        LOGE("first param is not napi_function");
         delete[] argv;
         return result;
     }
     napi_typeof(env, argv[1], &valueType);
     if (valueType != napi_number) {
-        HILOG_ERROR("second param is not napi_number");
+        LOGE("second param is not napi_number");
         delete[] argv;
         return result;
     }
@@ -200,7 +200,7 @@ napi_value StopTimeoutOrInterval(napi_env env, napi_callback_info info)
 {
     napi_value result = nullptr;
     if (env == nullptr || info == nullptr) {
-        HILOG_ERROR("Stop timeout or interval failed with engine or callback info is nullptr.");
+        LOGE("Stop timeout or interval failed with engine or callback info is nullptr.");
         return result;
     }
 
@@ -213,7 +213,7 @@ napi_value StopTimeoutOrInterval(napi_env env, napi_callback_info info)
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, argv[0], &valueType);
     if (valueType != napi_number && argc < 1) {
-        HILOG_ERROR("Clear callback timer failed with invalid parameter.");
+        LOGE("Clear callback timer failed with invalid parameter.");
         return result;
     }
 
@@ -233,14 +233,14 @@ napi_value StopTimeoutOrInterval(napi_env env, napi_callback_info info)
 
 void InitTimerModule(napi_env env)
 {
-    HILOG_INFO("InitTimerModule begin.");
+    LOGI("InitTimerModule begin.");
     AbilityRuntime::HandleScope handleScope(env);
     napi_value globalObj;
     napi_get_global(env, &globalObj);
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, globalObj, &valueType);
     if (valueType != napi_object) {
-        HILOG_ERROR("global is not NativeObject");
+        LOGE("global is not NativeObject");
         return;
     }
 

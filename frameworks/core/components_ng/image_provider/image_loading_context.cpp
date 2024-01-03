@@ -262,6 +262,25 @@ void ImageLoadingContext::OnMakeCanvasImage()
     imageObj_->MakeCanvasImage(Claim(this), targetSize, userDefinedSize.has_value(), syncLoad_);
 }
 
+void ImageLoadingContext::ResizableCalcDstSize()
+{
+    auto userDefinedSize = GetSourceSize();
+    if (userDefinedSize) {
+        ImagePainter::ApplyImageFit(imageFit_, *userDefinedSize, dstSize_, srcRect_, dstRect_);
+        return;
+    }
+    auto imageSize = GetImageSize();
+    // calculate the srcRect based on original image size
+    ImagePainter::ApplyImageFit(imageFit_, imageSize, dstSize_, srcRect_, dstRect_);
+
+    bool isPixelMapResource = (SrcType::DATA_ABILITY_DECODED == GetSourceInfo().GetSrcType());
+    if (autoResize_ && !isPixelMapResource) {
+        SizeF targetSize = CalculateTargetSize(srcRect_.GetSize(), dstRect_.GetSize(), imageSize);
+        // calculate real srcRect used for paint based on resized image size
+        ImagePainter::ApplyImageFit(imageFit_, targetSize, dstSize_, srcRect_, dstRect_);
+    }
+}
+
 void ImageLoadingContext::DataReadyCallback(const RefPtr<ImageObject>& imageObj)
 {
     CHECK_NULL_VOID(imageObj);
@@ -303,6 +322,16 @@ void ImageLoadingContext::LoadImageData()
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_DATA);
 }
 
+void ImageLoadingContext::SetIsSystemColorChange(bool isSystemColorChange)
+{
+    isSystemColorChange_ = isSystemColorChange;
+}
+
+bool ImageLoadingContext::GetIsOnSystemColorChange() const
+{
+    return isSystemColorChange_;
+}
+
 int32_t ImageLoadingContext::RoundUp(int32_t value)
 {
     CHECK_NULL_RETURN(imageObj_, -1);
@@ -314,8 +343,8 @@ int32_t ImageLoadingContext::RoundUp(int32_t value)
     return res;
 }
 
-bool ImageLoadingContext::MakeCanvasImageIfNeed(
-    const SizeF& dstSize, bool autoResize, ImageFit imageFit, const std::optional<SizeF>& sourceSize)
+bool ImageLoadingContext::MakeCanvasImageIfNeed(const SizeF& dstSize, bool autoResize, ImageFit imageFit,
+    const std::optional<SizeF>& sourceSize, bool hasValidSlice)
 {
     bool res = autoResize != autoResize_ || imageFit != imageFit_ || sourceSize != GetSourceSize();
 
@@ -326,6 +355,9 @@ bool ImageLoadingContext::MakeCanvasImageIfNeed(
         res |= RoundUp(dstSize.Width()) != sizeLevel_;
     } else if (dstSize_ == SizeF()) {
         res |= dstSize.IsPositive();
+    }
+    if (!res && hasValidSlice) {
+        dstSize_ = dstSize;
     }
     CHECK_NULL_RETURN(res, res);
     if (stateManager_->GetCurrentState() == ImageLoadingState::MAKE_CANVAS_IMAGE) {

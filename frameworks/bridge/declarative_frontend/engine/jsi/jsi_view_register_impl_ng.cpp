@@ -50,6 +50,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_column_split.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_common_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_counter.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_data_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_datepicker.h"
@@ -383,7 +384,7 @@ void JsUINodeRegisterCleanUp(BindingTarget globalObj)
     }
 }
 
-void JsBindViews(BindingTarget globalObj)
+void JsBindViews(BindingTarget globalObj, void* nativeEngine)
 {
     JSViewAbstract::JSBind(globalObj);
     JSViewStackProcessor::JSBind(globalObj);
@@ -468,7 +469,7 @@ void JsBindViews(BindingTarget globalObj)
     JSRect::JSBind(globalObj);
     JSAnimator::JSBind(globalObj);
     JSCanvas::JSBind(globalObj);
-    JSOffscreenCanvas::JSBind(globalObj);
+    JSOffscreenCanvas::JSBind(globalObj, nativeEngine);
     JSListItemGroup::JSBind(globalObj);
     JSLoadingProgress::JSBind(globalObj);
     JSImageAnimator::JSBind(globalObj);
@@ -517,7 +518,7 @@ void JsBindViews(BindingTarget globalObj)
     JSSwiperController::JSBind(globalObj);
     JSCalendarController::JSBind(globalObj);
     JSCanvasGradient::JSBind(globalObj);
-    JSRenderImage::JSBind(globalObj);
+    JSRenderImage::JSBind(globalObj, nativeEngine);
     JSCanvasImageData::JSBind(globalObj);
     JSRenderingContextSettings::JSBind(globalObj);
     JSMatrix2d::JSBind(globalObj);
@@ -554,6 +555,7 @@ void JsBindViews(BindingTarget globalObj)
     JSKeyboardAvoid::JSBind(globalObj);
     JSSymbol::JSBind(globalObj);
     JSSymbolSpan::JSBind(globalObj);
+    JSContainerSpan::JSBind(globalObj);
 #ifdef USE_COMPONENTS_LIB
     JSBindLibs("arkui.qrcode", "QRCode");
     JSBindLibs("arkui.relativeContainer", "RelativeContainer");

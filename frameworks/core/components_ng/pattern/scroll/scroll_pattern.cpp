@@ -668,8 +668,7 @@ bool ScrollPattern::ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
 std::optional<float> ScrollPattern::CalePredictSnapOffset(float delta, float dragDistance, float velocity)
 {
     std::optional<float> predictSnapOffset;
-    CHECK_NULL_RETURN(!snapOffsets_.empty(), predictSnapOffset);
-    CHECK_NULL_RETURN(GetScrollSnapAlign() != ScrollSnapAlign::NONE, predictSnapOffset);
+    CHECK_NULL_RETURN(IsScrollSnap(), predictSnapOffset);
     float finalPosition = currentOffset_ + delta;
     if (enablePagingStatus_ == ScrollPagingStatus::VALID) {
         finalPosition = GetPagingOffset(delta, dragDistance, velocity);

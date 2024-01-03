@@ -17,6 +17,7 @@
 
 #include <optional>
 
+#include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
 #include "core/common/font_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -84,7 +85,7 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         json->Put(
             "textCase", V2::ConvertWrapTextCaseToStirng(fontStyle->GetTextCase().value_or(TextCase::NORMAL)).c_str());
         json->Put("fontColor", fontStyle->GetForegroundColor()
-            .value_or(fontStyle->GetTextColor().value_or(Color::BLACK)).ColorToString().c_str());
+                                   .value_or(fontStyle->GetTextColor().value_or(Color::BLACK)).ColorToString().c_str());
         json->Put("fontStyle", GetFontStyleInJson(fontStyle->GetItalicFontStyle()).c_str());
         json->Put("fontWeight", GetFontWeightInJson(fontStyle->GetFontWeight()).c_str());
         json->Put("fontFamily", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str());
@@ -144,7 +145,13 @@ void SpanNode::MountToParagraph()
 
 void SpanNode::RequestTextFlushDirty()
 {
-    auto parent = GetParent();
+    RequestTextFlushDirty(Claim<UINode>(this));
+}
+
+void SpanNode::RequestTextFlushDirty(const RefPtr<UINode>& node)
+{
+    CHECK_NULL_VOID(node);
+    auto parent = node->GetParent();
     while (parent) {
         auto textNode = DynamicCast<FrameNode>(parent);
         if (textNode) {
@@ -157,6 +164,18 @@ void SpanNode::RequestTextFlushDirty()
         }
         parent = parent->GetParent();
     }
+}
+
+void SpanNode::SetTextBackgroundStyle(const TextBackgroundStyle& style)
+{
+    BaseSpan::SetTextBackgroundStyle(style);
+    spanItem_->backgroundStyle = GetTextBackgroundStyle();
+}
+
+void SpanNode::UpdateTextBackgroundFromParent(const std::optional<TextBackgroundStyle>& style)
+{
+    BaseSpan::UpdateTextBackgroundFromParent(style);
+    spanItem_->backgroundStyle = GetTextBackgroundStyle();
 }
 
 int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
@@ -183,19 +202,27 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
         }
         builder->PushStyle(themeTextStyle);
     }
+
+    if (symbolUnicode != 0) {
+        builder->AddSymbol(symbolUnicode);
+        if (fontStyle || textLineStyle) {
+            builder->PopStyle();
+        }
+        return -1;
+    }
+
     auto spanContent = GetSpanContent(content);
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_RETURN(pattern, -1);
+    if (textStyle.has_value()) {
+        textStyle->SetTextBackgroundStyle(backgroundStyle);
+    }
     if (pattern->NeedShowAIDetect() && !aiSpanMap.empty()) {
         UpdateTextStyleForAISpan(spanContent, builder, textStyle);
     } else {
         UpdateTextStyle(spanContent, builder, textStyle);
     }
     textStyle_ = textStyle;
-
-    if (symbolUnicode != 0) {
-        builder->AddSymbol(symbolUnicode);
-    }
 
     for (const auto& child : children) {
         if (child) {
@@ -211,10 +238,44 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
     return -1;
 }
 
+void SpanItem::UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder)
+{
+    CHECK_NULL_VOID(builder);
+    std::optional<TextStyle> textStyle;
+    auto symbolUnicode = GetSymbolUnicode();
+    if (fontStyle || textLineStyle) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        TextStyle themeTextStyle =
+            CreateTextStyleUsingTheme(fontStyle, textLineStyle, pipelineContext->GetTheme<TextTheme>());
+        if (frameNode) {
+            FontRegisterCallback(frameNode, themeTextStyle);
+        }
+        if (NearZero(themeTextStyle.GetFontSize().Value())) {
+            return;
+        }
+        textStyle = themeTextStyle;
+        textStyle->SetHalfLeading(pipelineContext->GetHalfLeading());
+        if (symbolUnicode != 0) {
+            UpdateSymbolSpanColor(themeTextStyle);
+        }
+        builder->PushStyle(themeTextStyle);
+    }
+    textStyle_ = textStyle;
+
+    if (symbolUnicode != 0) {
+        builder->AddSymbol(symbolUnicode);
+    }
+
+    if (fontStyle || textLineStyle) {
+        builder->PopStyle();
+    }
+}
+
 void SpanItem::UpdateSymbolSpanColor(TextStyle& symbolSpanStyle)
 {
     symbolSpanStyle.isSymbolGlyph_ = true;
-    if (symbolSpanStyle.GetSymbolColorList().empty()) {
+    if (GetIsParentText() && symbolSpanStyle.GetSymbolColorList().empty()) {
         std::vector<Color> symbolColor;
         symbolColor.emplace_back(symbolSpanStyle.GetTextColor());
         symbolSpanStyle.SetSymbolColorList(symbolColor);
@@ -244,8 +305,8 @@ void SpanItem::UpdateTextStyleForAISpan(
             continue;
         }
         if (preEnd < aiSpanStartInSpan) {
-            auto beforeContent = StringUtils::ToString(
-                wSpanContent.substr(preEnd - spanStart, aiSpanStartInSpan- preEnd));
+            auto beforeContent =
+                StringUtils::ToString(wSpanContent.substr(preEnd - spanStart, aiSpanStartInSpan - preEnd));
             UpdateTextStyle(beforeContent, builder, textStyle);
         }
         std::optional<TextStyle> aiSpanTextStyle = textStyle;
@@ -405,8 +466,8 @@ bool SpanItem::IsDragging()
     return selectedStart >= 0 && selectedEnd >= 0;
 }
 
-int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
-    const RefPtr<Paragraph>& builder, double width, double height, VerticalAlign verticalAlign)
+int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */, const RefPtr<Paragraph>& builder,
+    double width, double height, VerticalAlign verticalAlign)
 {
     CHECK_NULL_RETURN(builder, -1);
     PlaceholderRun run;
@@ -431,10 +492,19 @@ int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
     }
     // ImageSpan should ignore decoration styles
     textStyle.SetTextDecoration(TextDecoration::NONE);
+    textStyle.SetTextBackgroundStyle(backgroundStyle);
     builder->PushStyle(textStyle);
     int32_t index = builder->AddPlaceholder(run);
     builder->PopStyle();
     return index;
+}
+
+void ImageSpanItem::UpdatePlaceholderBackgroundStyle(const RefPtr<FrameNode>& imageNode)
+{
+    CHECK_NULL_VOID(imageNode);
+    auto property = imageNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    backgroundStyle = property->GetPlaceHolderStyle();
 }
 
 void SpanItem::GetIndex(int32_t& start, int32_t& end) const
@@ -456,5 +526,13 @@ int32_t PlaceholderSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNo
     int32_t index = builder->AddPlaceholder(run);
     builder->PopStyle();
     return index;
+}
+
+void BaseSpan::SetTextBackgroundStyle(const TextBackgroundStyle& style)
+{
+    textBackgroundStyle_ = style;
+    textBackgroundStyle_->groupId = groupId_;
+    SetHasTextBackgroundStyle(style.backgroundColor.has_value() || style.backgroundRadius.has_value());
+    MarkTextDirty();
 }
 } // namespace OHOS::Ace::NG

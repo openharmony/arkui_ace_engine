@@ -515,6 +515,7 @@ void GridPattern::MarkDirtyNodeSelf()
 
 void GridPattern::OnScrollEndCallback()
 {
+    isSmoothScrolling_ = false;
     SetScrollSource(SCROLL_FROM_ANIMATION);
     scrollStop_ = true;
     MarkDirtyNodeSelf();
@@ -1289,19 +1290,27 @@ void GridPattern::ScrollTo(float position)
 
 float GridPattern::EstimateHeight() const
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, 0.0);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, 0.0);
-    const auto& info = gridLayoutInfo_;
-    auto viewScopeSize = geometryNode->GetPaddingSize();
-    auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
-    auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
-    if (!layoutProperty->GetLayoutOptions().has_value()) {
-        return info.GetContentOffset(mainGap);
-    }
+    // During the scrolling animation, the exact current position is used. Other times use the estimated location
+    if (isSmoothScrolling_) {
+        auto lineIndex = 0;
+        scrollGridLayoutInfo_.GetLineIndexByIndex(gridLayoutInfo_.startIndex_, lineIndex);
+        return scrollGridLayoutInfo_.GetTotalHeightFromZeroIndex(lineIndex, GetMainGap()) +
+               std::abs(gridLayoutInfo_.currentOffset_);
+    } else {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, 0.0);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, 0.0);
+        const auto& info = gridLayoutInfo_;
+        auto viewScopeSize = geometryNode->GetPaddingSize();
+        auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+        auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
+        if (!layoutProperty->GetLayoutOptions().has_value()) {
+            return info.GetContentOffset(mainGap);
+        }
 
-    return info.GetContentOffset(layoutProperty->GetLayoutOptions().value(), mainGap);
+        return info.GetContentOffset(layoutProperty->GetLayoutOptions().value(), mainGap);
+    }
 }
 
 float GridPattern::GetAverageHeight() const
@@ -1742,98 +1751,33 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
     FireAndCleanScrollingListener();
 }
 
-// Use the index to get the line number where the iten is located
-bool GridPattern::GetLineIndexByIndex(
-    std::map<int32_t, std::map<int32_t, int32_t>> gridMatrix_, int32_t& targetIndex, int32_t& targetLineIndex)
-{
-    for (auto [lineIndex, lineMap] : gridMatrix_) {
-        for (auto [crossIndex, index] : lineMap) {
-            if (index == targetIndex) {
-                targetLineIndex = lineIndex;
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-// get the total height of all rows before the targetLineIndex
-float GridPattern::GetTotalHeight(std::map<int32_t, float>& heightMap, int32_t targetLineIndex)
-{
-    auto targetPos = 0.f;
-    for (auto [lineIndex, lineHeight] : heightMap) {
-        if (targetLineIndex > lineIndex) {
-            targetPos += lineHeight + GetMainGap();
-        } else {
-            break;
-        }
-    }
-    return targetPos;
-}
-
-// Based on the index, align gets the position to scroll to
-bool GridPattern::GetGridItemAnimatePos(
-    int32_t targetIndex, ScrollAlign align, float& targetPos, GridLayoutInfo& gcrollGridLayoutInfo)
-{
-    int32_t targetLineIndex = -1;
-    auto matrix = gcrollGridLayoutInfo.gridMatrix_;
-    auto heightMap = gcrollGridLayoutInfo.lineHeightMap_;
-
-    // Pre-check
-    // Get the line number where the index is located. If targetIndex does not exist, it is returned.
-    CHECK_NULL_RETURN(GetLineIndexByIndex(matrix, targetIndex, targetLineIndex), false);
-
-    // Get the total height of the targetPos from row 0 to targetLineIndex-1.
-    targetPos = GetTotalHeight(heightMap, targetLineIndex);
-
-    // Find the target row and get the altitude information
-    auto targetItem = heightMap.find(targetLineIndex);
-
-    // Make sure that the target line has height information
-    CHECK_NULL_RETURN(targetItem != heightMap.end(), false);
-    auto targetLineHeight = targetItem->second;
-
-    // Depending on align, calculate where you need to scroll to
-    switch (scrollAlign_) {
-        case ScrollAlign::START:
-        case ScrollAlign::NONE:
-            break;
-        case ScrollAlign::CENTER: {
-            targetPos -= ((gcrollGridLayoutInfo.lastMainSize_ - targetLineHeight) * HALF);
-            break;
-        }
-        case ScrollAlign::END: {
-            targetPos -= (gcrollGridLayoutInfo.lastMainSize_ - targetLineHeight);
-            break;
-        }
-        case ScrollAlign::AUTO: {
-            if (gridLayoutInfo_.startMainLineIndex_ > targetLineIndex) {
-            } else if (targetLineIndex > gridLayoutInfo_.endMainLineIndex_) {
-                targetPos -= (gridLayoutInfo_.lastMainSize_ - targetLineHeight);
-            } else {
-                return false;
-            }
-            break;
-        }
-    }
-    return true;
-}
-
-// Turn on the scrolling animation and scroll to the item where the index is located
-bool GridPattern::AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper)
+// Turn on the scrolling animation
+void GridPattern::AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper)
 {
     if (targetIndex_.has_value()) {
-        auto gridScrollLayoutAlgorithm =
-            DynamicCast<GridScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
-        auto scrollGridLayoutInfo = gridScrollLayoutAlgorithm->GetScrollGridLayoutInfo();
-
-        float targetPos = 0.0f;
-        // Based on the index, align gets the position to scroll to
-        CHECK_NULL_RETURN(GetGridItemAnimatePos(targetIndex_.value(), align, targetPos, scrollGridLayoutInfo), false);
-        AnimateTo(targetPos, -1, nullptr, true);
+        AnimateToTargetImp(align, layoutAlgorithmWrapper);
         targetIndex_.reset();
     }
+}
+
+// scroll to the item where the index is located
+bool GridPattern::AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper)
+{
+    auto gridScrollLayoutAlgorithm =
+        DynamicCast<GridScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    scrollGridLayoutInfo_ = gridScrollLayoutAlgorithm->GetScrollGridLayoutInfo();
+
+    float targetPos = 0.0f;
+    // Based on the index, align gets the position to scroll to
+
+    auto sucess = scrollGridLayoutInfo_.GetGridItemAnimatePos(
+        gridLayoutInfo_, targetIndex_.value(), align, GetMainGap(), targetPos);
+    CHECK_NULL_RETURN(sucess, false);
+
+    isSmoothScrolling_ = true;
+    AnimateTo(targetPos, -1, nullptr, true);
     return true;
 }
+
 
 } // namespace OHOS::Ace::NG

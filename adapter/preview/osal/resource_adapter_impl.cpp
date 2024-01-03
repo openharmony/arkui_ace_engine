@@ -477,4 +477,11 @@ std::string ResourceAdapterImpl::GetRawfile(const std::string& fileName)
     return "resource://RAWFILE/assets/" + moduleName + "/resources/rawfile/" + fileName;
 #endif
 }
+
+uint32_t ResourceAdapterImpl::GetSymbolById(uint32_t resId) const
+{
+    uint32_t result = 0;
+    resourceManger_->GetSymbolById(resId, result);
+    return result;
+}
 } // namespace OHOS::Ace

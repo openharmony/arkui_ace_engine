@@ -55,7 +55,8 @@ struct SymbolSpanStyle {
     double fontSize = 0.0;
     std::string symbolColor;
     int32_t fontWeight = 0;
-    std::optional<uint32_t> renderingStrategy;
+    uint32_t renderingStrategy;
+    uint32_t effectStrategy;
 };
 
 struct TextStyleResult {

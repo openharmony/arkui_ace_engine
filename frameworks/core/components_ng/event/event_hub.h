@@ -477,6 +477,8 @@ public:
 
     void HandleInternalOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, const std::string& extraParams);
 
+    void PostEnabledTask();
+
 protected:
     virtual void OnModifyDone() {}
 

@@ -36,6 +36,7 @@ bool SystemProperties::isHookModeEnabled_ = false;
 bool SystemProperties::rosenBackendEnabled_ = true;
 bool SystemProperties::windowAnimationEnabled_ = true;
 bool SystemProperties::layoutTraceEnable_ = false;
+bool SystemProperties::buildTraceEnable_ = false;
 double SystemProperties::resolution_ = 0.0;
 constexpr float defaultAnimationScale = 1.0f;
 bool SystemProperties::extSurfaceEnabled_ = false;

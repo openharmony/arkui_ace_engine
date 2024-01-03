@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,12 @@
  * limitations under the License.
  */
 
-#include "flutter/lib/ui/window/window.h"
-#include "flutter/runtime/window_manager.h"
+#pragma once
 
-namespace flutter {
-Window* WindowManager::GetWindow(int32_t instance_id)
-{
-    return nullptr;
-}
+#include "basic_node.h"
 
-void Window::ScheduleFrame() {}
-} // namespace flutter
+namespace OHOS::Ace::NodeModel {
+
+void SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, const char* value);
+
+}; // namespace OHOS::Ace::NodeModel

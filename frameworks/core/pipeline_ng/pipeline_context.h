@@ -28,8 +28,8 @@
 #include "base/memory/referenced.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/frontend.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_manager.h"
 #include "core/components_ng/manager/frame_rate/frame_rate_manager.h"
@@ -39,14 +39,14 @@
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/manager/shared_overlay/shared_overlay_manager.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#ifdef WINDOW_SCENE_SUPPORTED
+#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
+#endif
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
-#ifdef WINDOW_SCENE_SUPPORTED
-#include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
-#endif
 
 namespace OHOS::Ace::NG {
 class ACE_EXPORT PipelineContext : public PipelineBase {
@@ -259,6 +259,7 @@ public:
     void UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) override;
     void UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) override;
     void UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) override;
+    void UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) override;
 
     void UpdateDisplayAvailableRect(const Rect& displayAvailableRect)
     {
@@ -568,6 +569,9 @@ public:
     void SubscribeContainerModalButtonsRectChange(
         std::function<void(RectF& containerModal, RectF& buttons)>&& callback);
 
+    // return value means whether it has printed info
+    bool PrintVsyncInfoIfNeed() const override;
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr);
@@ -690,12 +694,12 @@ private:
     RefPtr<SelectOverlayManager> selectOverlayManager_;
     RefPtr<DragDropManager> dragDropManager_;
     RefPtr<SharedOverlayManager> sharedTransitionManager_;
+#ifdef WINDOW_SCENE_SUPPORTED
+    RefPtr<UIExtensionManager> uiExtensionManager_;
+#endif
     RefPtr<SafeAreaManager> safeAreaManager_ = MakeRefPtr<SafeAreaManager>();
     RefPtr<FrameRateManager> frameRateManager_ = MakeRefPtr<FrameRateManager>();
     Rect displayAvailableRect_;
-#ifdef WINDOW_SCENE_SUPPORTED
-    RefPtr<UIExtensionManager> uiExtensionManager_ = MakeRefPtr<UIExtensionManager>();
-#endif
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
     WeakPtr<FrameNode> dirtyDefaultFocusNode_;

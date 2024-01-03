@@ -34,12 +34,14 @@ namespace {
 constexpr Color SELECT_FILL_COLOR = Color(0x1A000000);
 constexpr Color SELECT_STROKE_COLOR = Color(0x33FFFFFF);
 constexpr float CUSTOM_ANIMATION_DURATION = 1000.0;
-constexpr uint32_t MILLOS_PER_SECONDS = 1000;
-constexpr uint32_t MIN_DIFF_TIME = 1;
+constexpr uint32_t MILLOS_PER_NANO_SECONDS = 1000 * 1000 * 1000;
+constexpr uint64_t MIN_DIFF_VSYNC = 1000 * 1000; // min is 1ms
+constexpr uint32_t MAX_VSYNC_DIFF_TIME = 100 * 1000 * 1000; //max 100ms
 const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
 const std::string SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
 const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
 const std::string SCROLLABLE_MULTI_TASK_SCENE = "scrollable_multi_task_scene";
+const std::string SCROLL_IN_HOTZONE_SCENE = "scroll_in_hotzone_scene";
 } // namespace
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
@@ -314,11 +316,9 @@ void ScrollablePattern::OnScrollEnd()
 
     // Now: HandleOverScroll moved to ScrollablePattern and renamed HandleScrollVelocity, directly
     // calls OnScrollEnd in ScrollablePattern
-    if (isRefreshInReactive_) {
-        if (refreshCoordination_) {
-            isRefreshInReactive_ = false;
-            refreshCoordination_->OnScrollEnd(GetVelocity());
-        }
+    if (refreshCoordination_) {
+        isRefreshInReactive_ = false;
+        refreshCoordination_->OnScrollEnd(GetVelocity());
     }
     if (isSheetInReactive_) {
         isSheetInReactive_ = false;
@@ -383,7 +383,7 @@ void ScrollablePattern::AddScrollEvent()
     scrollable->SetOverScrollCallback([weak = WeakClaim(this)](float velocity) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
-        return pattern->HandleOverScroll(velocity);
+        return pattern->HandleOverScroll(!pattern->IsReverse() ? velocity : -velocity);
     });
 
     auto scrollStart = [weak = WeakClaim(this)](float position) {
@@ -662,10 +662,6 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
     auto displayMode = property->GetScrollBarMode().value_or(DisplayMode::AUTO);
     SetScrollBar(displayMode);
     if (scrollBar_) {
-        auto barColor = property->GetScrollBarColor();
-        if (barColor) {
-            scrollBar_->SetForegroundColor(barColor.value());
-        }
         auto barWidth = property->GetScrollBarWidth();
         if (barWidth) {
             scrollBar_->SetInactiveWidth(barWidth.value());
@@ -675,6 +671,17 @@ void ScrollablePattern::SetScrollBar(const std::unique_ptr<ScrollBarProperty>& p
             scrollBar_->SetIsUserNormalWidth(true);
         } else {
             scrollBar_->SetIsUserNormalWidth(false);
+        }
+        auto barColor = property->GetScrollBarColor();
+        if (barColor) {
+            scrollBar_->SetForegroundColor(barColor.value());
+        } else {
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto theme = pipelineContext->GetTheme<ScrollBarTheme>();
+            CHECK_NULL_VOID(theme);
+            scrollBar_->SetForegroundColor(theme->GetForegroundColor());
+            scrollBar_->SetBackgroundColor(theme->GetBackgroundColor());
         }
     }
 }
@@ -934,10 +941,11 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
                 if (pattern->runningAnimationCount_ > 0) {
                     return;
                 }
+                pattern->StopAnimation(pattern->curveAnimation_);
                 pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
                     SceneStatus::END);
-                pattern->StopAnimation(pattern->curveAnimation_);
         });
+        NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::START);
     }
     FireOnScrollStart();
 }
@@ -975,9 +983,9 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
             if (pattern->runningAnimationCount_ > 0) {
                 return;
             }
+            pattern->StopAnimation(pattern->springAnimation_);
             pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
                 SceneStatus::END);
-            pattern->StopAnimation(pattern->springAnimation_);
     });
     NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, GetCurrentVelocity(), SceneStatus::START);
 }
@@ -994,16 +1002,17 @@ void ScrollablePattern::InitSpringOffsetProperty()
         if (pattern->isAnimationStop_) {
             return;
         }
-        high_resolution_clock::time_point currentTime = high_resolution_clock::now();
-        milliseconds diff = std::chrono::duration_cast<milliseconds>(currentTime - pattern->lastTime_);
-        if (diff.count() > MIN_DIFF_TIME) {
-            pattern->currentVelocity_ = (offset - pattern->lastPosition_) /
-                diff.count() * MILLOS_PER_SECONDS;
+        auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        uint64_t currentVsync = context->GetVsyncTime();
+        uint64_t diff = currentVsync - pattern->lastVsyncTime_;
+        if (diff < MAX_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
+            pattern->currentVelocity_ = (offset - pattern->lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
+            pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->currentVelocity_,
+                SceneStatus::RUNNING);
         }
-        pattern->lastTime_ = currentTime;
+        pattern->lastVsyncTime_ = currentVsync;
         pattern->lastPosition_ = offset;
-        pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
-            SceneStatus::RUNNING);
         if (!pattern->UpdateCurrentOffset(pattern->GetTotalOffset() - offset,
             SCROLL_FROM_ANIMATION_CONTROLLER)) {
             pattern->StopAnimation(pattern->springAnimation_);
@@ -1025,14 +1034,19 @@ void ScrollablePattern::InitCurveOffsetProperty(float position)
         if (pattern->isAnimationStop_) {
             return;
         }
-        high_resolution_clock::time_point currentTime = high_resolution_clock::now();
-        milliseconds diff = std::chrono::duration_cast<milliseconds>(currentTime - pattern->lastTime_);
-        if (diff.count() > MIN_DIFF_TIME) {
-            pattern->currentVelocity_ = (offset - pattern->lastPosition_) /
-                diff.count() * MILLOS_PER_SECONDS;
+        auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        uint64_t currentVsync = context->GetVsyncTime();
+        uint64_t diff = currentVsync - pattern->lastVsyncTime_;
+        if (diff < MAX_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
+            pattern->currentVelocity_ = (offset - pattern->lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
+            pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->currentVelocity_,
+                SceneStatus::RUNNING);
         }
-        pattern->lastTime_ = currentTime;
+        pattern->lastVsyncTime_ = currentVsync;
         pattern->lastPosition_ = offset;
+        pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
+            SceneStatus::RUNNING);
         if (!pattern->UpdateCurrentOffset(pattern->GetTotalOffset() - offset, SCROLL_FROM_ANIMATION_CONTROLLER)) {
             if ((pattern->IsAtTop() && LessOrEqual(position, pattern->GetTotalOffset())) ||
                 (pattern->IsAtBottom() && GreatOrEqual(position, pattern->GetTotalOffset()))) {
@@ -1458,7 +1472,7 @@ void ScrollablePattern::NotifyMoved(bool value)
 void ScrollablePattern::ProcessSpringEffect(float velocity)
 {
     CHECK_NULL_VOID(InstanceOf<ScrollSpringEffect>(scrollEffect_));
-    if ((!OutBoundaryCallback() && !GetCanOverScroll()) || !IsOutOfBoundary(true)) {
+    if (!OutBoundaryCallback() && !GetCanOverScroll()) {
         return;
     }
     scrollEffect_->ProcessScrollOver(velocity);
@@ -1660,12 +1674,12 @@ ScrollResult ScrollablePattern::HandleScroll(float offset, int32_t source, Neste
 {
     ScrollResult result = { 0, false };
     auto parent = parent_.Upgrade();
-    auto overOffsets = GetOverScrollOffset(offset);
-    float backOverOffset = offset > 0 ? overOffsets.end : overOffsets.start;
+    auto overOffsets = GetOverScrollOffset(!IsReverse() ? offset : -offset);
+    float backOverOffset = (!IsReverse() ? offset > 0 : offset < 0) ? overOffsets.end : overOffsets.start;
     if (NearZero(offset) || !NearZero(backOverOffset)) {
         ScrollState scrollState = source == SCROLL_FROM_ANIMATION ? ScrollState::FLING : ScrollState::SCROLL;
         ExecuteScrollFrameBegin(offset, scrollState);
-    } else if (parent && ((offset < 0 && nestedScroll_.forward == NestedScrollMode::PARENT_FIRST) ||
+    } else if (parent && !IsScrollSnap() && ((offset < 0 && nestedScroll_.forward == NestedScrollMode::PARENT_FIRST) ||
                              (offset > 0 && nestedScroll_.backward == NestedScrollMode::PARENT_FIRST))) {
         result = HandleScrollParentFirst(offset, source, state);
     } else if (parent && ((offset < 0 && nestedScroll_.forward == NestedScrollMode::SELF_FIRST) ||
@@ -1692,7 +1706,7 @@ bool ScrollablePattern::HandleScrollVelocity(float velocity)
         }
         return false;
     }
-    return HandleOverScroll(velocity);
+    return HandleOverScroll(velocity) || GetEdgeEffect() == EdgeEffect::FADE;
 }
 
 bool ScrollablePattern::HandleOverScroll(float velocity)
@@ -2002,7 +2016,13 @@ void ScrollablePattern::HotZoneScroll(const float offsetPct)
         animator_->AddStopListener([weak = AceType::WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            pattern->AddHotZoneSenceInterface(SceneStatus::END);
             pattern->OnAnimateStop();
+        });
+        animator_->AddStartListener([weak = AceType::WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->AddHotZoneSenceInterface(SceneStatus::START);
         });
     }
 
@@ -2029,6 +2049,7 @@ void ScrollablePattern::HotZoneScroll(const float offsetPct)
             CHECK_NULL_VOID(pattern);
             pattern->UpdateCurrentOffset(offset, SCROLL_FROM_AXIS);
             pattern->UpdateMouseStart(offset);
+            pattern->AddHotZoneSenceInterface(SceneStatus::RUNNING);
         });
         velocityMotion_->ReInit(offsetPct);
     } else {
@@ -2148,5 +2169,12 @@ bool ScrollablePattern::NeedCoordinateScrollWithNavigation(
     }
     return (GreatNotEqual(overOffsets.start, 0.0) || navBarPattern_->CanCoordScrollUp(offset)) &&
            (axis_ == Axis::VERTICAL) && (source != SCROLL_FROM_ANIMATION_SPRING);
+}
+
+void ScrollablePattern::AddHotZoneSenceInterface(SceneStatus scene)
+{
+    CHECK_NULL_VOID(velocityMotion_);
+    auto velocity = velocityMotion_->GetCurrentVelocity();
+    NotifyFRCSceneInfo(SCROLL_IN_HOTZONE_SCENE, velocity, scene);
 }
 } // namespace OHOS::Ace::NG
