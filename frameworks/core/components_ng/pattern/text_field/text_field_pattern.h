@@ -1360,6 +1360,7 @@ private:
     bool isFocusedBeforeClick_ = false;
     bool isCustomKeyboardAttached_ = false;
     std::function<void()> customKeyboardBuilder_;
+    RefPtr<OverlayManager> keyboardOverlay_;
     bool isCustomFont_ = false;
     bool hasClicked_ = false;
     bool isDoubleClick_ = false;

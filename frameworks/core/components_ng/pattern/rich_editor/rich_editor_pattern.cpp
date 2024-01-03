@@ -2245,6 +2245,7 @@ bool RichEditorPattern::RequestCustomKeyboard()
     CHECK_NULL_RETURN(overlayManager, false);
     overlayManager->BindKeyboard(customKeyboardBuilder_, frameNode->GetId());
     isCustomKeyboardAttached_ = true;
+    keyboardOverlay_ = overlayManager;
     return true;
 }
 
@@ -2252,12 +2253,8 @@ bool RichEditorPattern::CloseCustomKeyboard()
 {
     auto frameNode = GetHost();
     CHECK_NULL_RETURN(frameNode, false);
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto overlayManager = pipeline->GetOverlayManager();
-    CHECK_NULL_RETURN(overlayManager, false);
-    overlayManager->CloseKeyboard(frameNode->GetId());
+    CHECK_NULL_RETURN(keyboardOverlay_, false);
+    keyboardOverlay_->CloseKeyboard(frameNode->GetId());
     isCustomKeyboardAttached_ = false;
     return true;
 }
