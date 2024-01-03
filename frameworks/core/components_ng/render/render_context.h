@@ -255,6 +255,12 @@ public:
     virtual void SetShadowAlpha(float alpha) {}
     virtual void SetShadowElevation(float elevation) {}
     virtual void SetShadowRadius(float radius) {}
+    virtual void SetScale(float scaleX, float scaleY) {}
+    virtual void SetBackgroundColor(uint32_t colorValue) {}
+    virtual void SetRenderPivot(float pivotX, float pivotY) {}
+    virtual void SetFrame(float positionX, float positionY, float width, float height) {}
+    virtual void SetOpacity(float opacity) {}
+    virtual void SetTranslate(float translateX, float translateY, float translateZ) {}
 
     virtual RectF GetPaintRectWithTransform()
     {

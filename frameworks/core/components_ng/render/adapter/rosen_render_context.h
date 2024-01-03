@@ -326,6 +326,12 @@ public:
     void SetShadowElevation(float elevation) override;
     void SetShadowRadius(float radius) override;
     void SetRenderFrameOffset(const OffsetF& offset) override;
+    void SetScale(float scaleX, float scaleY) override;
+    void SetBackgroundColor(uint32_t colorValue) override;
+    void SetRenderPivot(float pivotX, float pivotY) override;
+    void SetFrame(float positionX, float positionY, float width, float height) override;
+    void SetOpacity(float opacity) override;
+    void SetTranslate(float translateX, float translateY, float translateZ) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
