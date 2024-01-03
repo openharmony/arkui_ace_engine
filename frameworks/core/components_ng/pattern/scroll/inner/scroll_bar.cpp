@@ -205,6 +205,7 @@ void ScrollBar::SetRectTrickRegion(
     // Avoid crossing the top or bottom boundary.
     double activeMainOffset = std::min(offsetScale_ * lastMainOffset, barRegionSize_ - activeSize)
                                 + NormalizeToPx(startReservedHeight_);
+    activeMainOffset = !isReverse_ ? activeMainOffset : barRegionSize_ - activeSize - activeMainOffset;
     bool canUseAnimation = !isOutOfBoundary_ && !positionModeUpdate_;
     double inactiveSize = 0.0;
     double inactiveMainOffset = 0.0;
