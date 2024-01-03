@@ -913,6 +913,7 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
             return pattern->GetCurrentVelocity();
         });
         curveOffsetProperty_->SetThresholdType(ThresholdType::LAYOUT);
+        isAnimationStop_ = false;
         curveOffsetProperty_->Set(GetTotalOffset());
         curveAnimation_ = AnimationUtils::StartAnimation(
             option,
@@ -920,7 +921,6 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 pattern->curveOffsetProperty_->Set(position);
-                pattern->isAnimationStop_ = false;
             },
             [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
                 ContainerScope scope(id);
@@ -955,6 +955,7 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
     auto curve = AceType::MakeRefPtr<SpringCurve>(velocity, mass, stiffness, damping);
     InitOption(option, CUSTOM_ANIMATION_DURATION, curve);
     springOffsetProperty_->SetThresholdType(ThresholdType::LAYOUT);
+    isAnimationStop_ = false;
     springOffsetProperty_->Set(GetTotalOffset());
     springAnimation_ = AnimationUtils::StartAnimation(
         option,
@@ -962,7 +963,6 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->springOffsetProperty_->Set(position);
-            pattern->isAnimationStop_ = false;
         },
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
