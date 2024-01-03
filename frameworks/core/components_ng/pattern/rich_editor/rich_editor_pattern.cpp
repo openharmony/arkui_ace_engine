@@ -4696,7 +4696,11 @@ void RichEditorPattern::MoveCaretToContentRect()
     float caretHeight = 0.0f;
     auto caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight, true);
     if (LessNotEqual(caretOffset.GetY(), contentRect.GetY())) {
-        OnScrollCallback(contentRect.GetY() - caretOffset.GetY(), SCROLL_FROM_NONE);
+        if (LessOrEqual(caretOffset.GetX(), GetTextRect().GetX())) {
+            OnScrollCallback(contentRect.GetY() - caretOffset.GetY() + caretHeight, SCROLL_FROM_NONE);
+        } else {
+            OnScrollCallback(contentRect.GetY() - caretOffset.GetY(), SCROLL_FROM_NONE);
+        }
     } else if (GreatNotEqual(caretOffset.GetY() + caretHeight, contentRect.Bottom())) {
         OnScrollCallback(contentRect.Bottom() - caretOffset.GetY() - caretHeight, SCROLL_FROM_NONE);
     }
