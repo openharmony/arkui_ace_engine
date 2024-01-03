@@ -47,7 +47,7 @@ RefPtr<FrameNode> ScrollModelNG::CreateScroll(int32_t nodeId)
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::SCROLL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ScrollPattern>(); });
     auto pattern = frameNode->GetPattern<ScrollablePattern>();
-    pattern->SetEdgeEffect(EdgeEffect::NONE, true);
+    pattern->SetAlwaysEnabled(true);
     auto positionController = AceType::MakeRefPtr<NG::ScrollableController>();
     pattern->SetPositionController(positionController);
     positionController->SetScrollPattern(pattern);
