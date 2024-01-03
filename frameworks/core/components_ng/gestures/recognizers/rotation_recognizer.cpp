@@ -54,7 +54,9 @@ void RotationRecognizer::OnAccepted()
 void RotationRecognizer::OnRejected()
 {
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Rotation gesture has been rejected");
-    refereeState_ = RefereeState::FAIL;
+    if (refereeState_ != RefereeState::SUCCEED) {
+        refereeState_ = RefereeState::FAIL;
+    }
 }
 
 void RotationRecognizer::HandleTouchDownEvent(const TouchEvent& event)
