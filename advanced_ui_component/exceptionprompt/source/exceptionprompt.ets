@@ -45,89 +45,86 @@ export struct ExceptionPrompt {
     // Click Set Network to open the Set network pop-up interface
   }
 
+  @Builder
+  TextBuilder() {
+    Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign
+      .Center }) {
+      Row() {
+        Image(this.options.icon ?? $r('sys.media.ohos_ic_public_fail'))
+          .width("24vp")
+          .height('24vp')
+          .fillColor($r('sys.color.ohos_id_color_warning'))
+        Text(this.options.tip)
+          .fontSize($r('sys.float.ohos_id_text_size_body1'))
+          .fontColor($r('sys.color.ohos_id_color_warning'))
+          .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .maxLines(2)
+          .lineHeight(24)
+          .margin({
+            left: $r('sys.float.ohos_id_dialog_margin_end'),
+            right: $r('sys.float.ohos_id_dialog_margin_end')
+          })
+      }
+      .padding({ right: $r('sys.float.ohos_id_default_padding_end') })
+      .width('100%')
+      .onClick(() => {
+        this.onTipClick() //Click the callback of the prompt text
+      })
+
+      if (this.options.actionText) {
+        Button({ stateEffect: true, type: ButtonType.Normal }) {
+          Row() {
+            Text(this.options.actionText)
+              .fontSize($r('sys.float.ohos_id_text_size_body2'))
+              .fontColor($r('sys.color.ohos_id_color_text_secondary'))
+              .maxLines(1)
+              .padding(0)
+              .margin({ right: $r('sys.float.ohos_id_text_paragraph_margin_s') })
+              .textAlign(TextAlign.End)
+            Image($r('sys.media.ohos_ic_public_arrow_right'))
+              .width('12vp')
+              .height('24vp')
+              .fillColor($r('sys.color.ohos_id_color_tertiary'))
+          }
+        }
+        .backgroundColor(this.touchBackgroundColor)
+        .width(this.options.actionText ? 144 : 0)
+        .height(24)
+        .borderRadius($r('sys.float.ohos_id_corner_radius_subtab'))
+        .padding({
+          right: $r('sys.float.ohos_id_elements_margin_vertical_l'),
+          left: $r('sys.float.ohos_id_elements_margin_vertical_l')
+        })
+        .onTouch((event) => {
+
+          if (event.type === TouchType.Down) {
+            this.touchBackgroundColor = $r('sys.color.ohos_id_color_click_effect')
+            this.onActionTextClick() //Click the icon button on the right for the callback
+          } else if (event.type === TouchType.Up) {
+            this.touchBackgroundColor = $r('sys.color.ohos_id_color_sub_background_transparent')
+          }
+        })
+
+      }
+    }
+    .padding({
+      left: $r('sys.float.ohos_id_notification_margin_start'),
+      right: $r('sys.float.ohos_id_text_paragraph_margin_s'),
+      top: $r('sys.float.ohos_id_default_padding_start'),
+      bottom: $r('sys.float.ohos_id_default_padding_end')
+    })
+  }
+
   build() {
-    Column() {
+    Row() {
       Column() {
         Column() {
-          Column() {
-            Column() {
-              Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign
-                .Center }) {
-                Row() {
-                  Image(this.options.icon ?? $r('sys.media.ohos_ic_public_fail'))
-                    .width("24vp")
-                    .height('24vp')
-                    .fillColor($r('sys.color.ohos_id_color_warning'))
-                  Text(this.options.tip)
-                    .fontSize($r('sys.float.ohos_id_text_size_body1'))
-                    .fontColor($r('sys.color.ohos_id_color_warning'))
-                    .textOverflow({ overflow: TextOverflow.Ellipsis })
-                    .maxLines(2)
-                    .lineHeight(24)
-                    .margin({
-                      left: $r('sys.float.ohos_id_dialog_margin_end'),
-                      right: $r('sys.float.ohos_id_dialog_margin_end')
-                    })
-                }
-                .padding({ right: $r('sys.float.ohos_id_default_padding_end') })
-                .width('100%')
-                .onClick(() => {
-                  this.onTipClick() //Click the callback of the prompt text
-                })
-
-                if (this.options.actionText) {
-                  Button({ stateEffect: true, type: ButtonType.Normal }) {
-                    Row() {
-                      Text(this.options.actionText)
-                        .fontSize($r('sys.float.ohos_id_text_size_body2'))
-                        .fontColor($r('sys.color.ohos_id_color_text_secondary'))
-                        .maxLines(1)
-                        .padding(0)
-                        .margin({ right: $r('sys.float.ohos_id_text_paragraph_margin_s') })
-                        .textAlign(TextAlign.End)
-                      Image($r('sys.media.ohos_ic_public_arrow_right'))
-                        .width('12vp')
-                        .height('24vp')
-                        .fillColor($r('sys.color.ohos_id_color_tertiary'))
-                    }
-                  }
-                  .backgroundColor(this.touchBackgroundColor)
-                  .width(this.options.actionText ? 144 : 0)
-                  .height(24)
-                  .borderRadius($r('sys.float.ohos_id_corner_radius_subtab'))
-                  .padding({
-                    right: $r('sys.float.ohos_id_elements_margin_vertical_l'),
-                    left: $r('sys.float.ohos_id_elements_margin_vertical_l')
-                  })
-                  .onTouch((event) => {
-
-                    if (event.type === TouchType.Down) {
-                      this.touchBackgroundColor = $r('sys.color.ohos_id_color_click_effect')
-                      this.onActionTextClick() //Click the icon button on the right for the callback
-                    } else if (event.type === TouchType.Up) {
-                      this.touchBackgroundColor = $r('sys.color.ohos_id_color_sub_background_transparent')
-                    }
-                  })
-
-                }
-              }
-            }
-            .padding({
-              left: $r('sys.float.ohos_id_notification_margin_start'),
-              right: $r('sys.float.ohos_id_text_paragraph_margin_s'),
-              top: $r('sys.float.ohos_id_default_padding_start'),
-              bottom: $r('sys.float.ohos_id_default_padding_end')
-            })
-          }
-          .width('100%')
-          .borderRadius(BORDER_RADIUS)
-          .backgroundColor('#fdd9d9')
-          .zIndex(ZINDEX_NUM)
-
+          this.TextBuilder()
         }
         .width('100%')
         .borderRadius(BORDER_RADIUS)
-        .backgroundColor($r('sys.color.ohos_id_color_background'))
+        .backgroundColor('#fdd9d9')
+        .zIndex(ZINDEX_NUM)
       }
       .padding(this.options.marginType === MarginType.DEFAULT_MARGIN ? {
                                                                          left: $r('sys.float.ohos_id_card_margin_start'),
