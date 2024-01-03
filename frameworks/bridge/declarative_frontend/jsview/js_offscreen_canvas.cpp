@@ -58,12 +58,8 @@ napi_value AttachOffscreenCanvas(napi_env env, void* value, void*)
 
     napi_value offscreenCanvas = nullptr;
     napi_create_object(env, &offscreenCanvas);
-    napi_value width = nullptr;
-    napi_value height = nullptr;
-    double widthVal = workCanvas->GetWidth();
-    double heightVal = workCanvas->GetHeight();
-    napi_create_double(env, widthVal, &width);
-    napi_create_double(env, heightVal, &height);
+    napi_value width = workCanvas->OnGetWidth(env);
+    napi_value height = workCanvas->OnGetHeight(env);
 
     napi_set_named_property(env, offscreenCanvas, "width", width);
     napi_set_named_property(env, offscreenCanvas, "height", height);
