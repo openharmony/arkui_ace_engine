@@ -1478,7 +1478,7 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
         CHECK_NULL_VOID(host);
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        if (layoutProperty->GetIsDisabledValue(false)) {
+        if (layoutProperty->GetIsDisabledValue(false) || pattern->IsNormalInlineState()) {
             return;
         }
         if (extraParams.empty()) {
@@ -6163,6 +6163,9 @@ void TextFieldPattern::ShowMenu()
 
 void TextFieldPattern::HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent)
 {
+    if (IsNormalInlineState()) {
+        return;
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (isCursorAlwaysDisplayed_) {
