@@ -567,6 +567,7 @@ private:
     std::list<ResultObject> dragResultObjects_;
 
     std::function<void()> customKeyboardBuilder_;
+    RefPtr<OverlayManager> keyboardOverlay_;
     Offset selectionMenuOffset_;
     // add for scroll
     RectF richTextRect_;

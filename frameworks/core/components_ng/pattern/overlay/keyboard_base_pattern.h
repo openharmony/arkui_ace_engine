@@ -39,6 +39,8 @@ public:
         return targetId_;
     }
 
+    void DumpInfo() override;
+
 private:
     int32_t targetId_ = -1;
 };
