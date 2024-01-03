@@ -73,9 +73,10 @@ int32_t FormRendererDispatcherStub::HandleDispatchPointerEvent(MessageParcel &da
         HILOG_ERROR("%{public}s, Read Pointer Event failed.", __func__);
         return ERR_INVALID_VALUE;
     }
-
-    DispatchPointerEvent(pointerEvent);
-    reply.WriteInt32(ERR_OK);
+    SerializedGesture serializedGesture;
+    DispatchPointerEvent(pointerEvent, serializedGesture);
+    reply.WriteInt32(serializedGesture.data.size());
+    reply.WriteRawData(serializedGesture.data.data(), serializedGesture.data.size());
     return ERR_OK;
 }
 

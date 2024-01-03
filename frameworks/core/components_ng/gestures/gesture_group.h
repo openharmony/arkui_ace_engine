@@ -24,6 +24,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/gestures/gesture_info.h"
+#include "core/components_ng/gestures/pan_gesture.h"
 
 namespace OHOS::Ace::NG {
 
@@ -40,7 +41,64 @@ public:
         gestures_.emplace_back(gesture);
     }
 
-protected:
+    int32_t SizeofMe() override
+    {
+        int32_t total = 0;
+        for (auto& i : gestures_) {
+            total += i->SizeofMe();
+        }
+        total += sizeof(int32_t);
+        total += sizeof(GestureType);
+        total += sizeof(GestureMode);
+        return total;
+    }
+
+    virtual int32_t Serialize(const char* buffer) override
+    {
+        auto total = SizeofMe();
+        buffer = SetHeader(buffer, GestureType::GROUP, total);
+        *(GestureMode*)buffer = mode_;
+        buffer += sizeof(GestureMode);
+
+        for (auto& i : gestures_) {
+            int32_t len = i->Serialize(buffer);
+            buffer += len;
+        }
+        return total;
+    }
+
+    RefPtr<Gesture> MakeGesture(GestureType type)
+    {
+        if (type == GestureType::PAN) {
+            PanDirection panDirection;
+            panDirection.type = PanDirection::VERTICAL;
+            return AceType::MakeRefPtr<PanGesture>(1, panDirection, 0);
+        } else if (type == GestureType::GROUP) {
+            return AceType::MakeRefPtr<GestureGroup>(GestureMode::Parallel);
+        }
+        return nullptr;
+    }
+
+    virtual int32_t Deserialize(char* buffer) override
+    {
+        int32_t* plen = reinterpret_cast<int32_t*>(buffer + sizeof(GestureType));
+        int32_t total = *plen;
+        auto ret = total;
+        total -= sizeof(int32_t);
+        total -= sizeof(GestureType);
+        buffer += sizeof(GestureType) + sizeof(int32_t);
+        mode_ = *(GestureMode*)(buffer);
+        total -= sizeof(GestureMode);
+        buffer += sizeof(GestureMode);
+        while (total != 0) {
+            auto gesture = MakeGesture(*(GestureType*)buffer);
+            auto len = gesture->Deserialize(buffer);
+            gestures_.push_back(gesture);
+            buffer += len;
+            total -= len;
+        }
+        return ret;
+    }
     RefPtr<NGGestureRecognizer> CreateRecognizer() override;
 
 private:

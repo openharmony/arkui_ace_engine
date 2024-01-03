@@ -103,6 +103,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     if (refereeNG_->QueryAllDone(touchPoint.id)) {
         refereeNG_->CleanGestureScope(touchPoint.id);
         if (touchTestResults_.empty() && refereeNG_->QueryAllDone()) {
+            innerEventWin_ = false;
             responseCtrl_->Reset();
             refereeNG_->CleanAll();
         }

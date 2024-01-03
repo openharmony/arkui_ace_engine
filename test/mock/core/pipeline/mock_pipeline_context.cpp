@@ -464,6 +464,12 @@ bool PipelineContext::PrintVsyncInfoIfNeed() const
 {
     return false;
 }
+
+const SerializedGesture& PipelineContext::GetSerializedGesture() const
+{
+    return serializedGesture_;
+}
+
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 

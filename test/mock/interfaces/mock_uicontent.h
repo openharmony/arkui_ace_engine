@@ -1,3 +1,4 @@
+
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +23,7 @@
 #include "ui_content.h"
 #include "iremote_object.h"
 #include "accessibility_element_info.h"
+#include "serialized_gesture.h"
 
 namespace OHOS {
 namespace Ace {
@@ -94,6 +96,7 @@ public:
     MOCK_METHOD2(GetContainerModalButtonsRect, bool(Rosen::Rect& containerModal, Rosen::Rect& buttons));
     MOCK_METHOD1(SubscribeContainerModalButtonsRectChange, void(
         std::function<void(Rosen::Rect& containerModal, Rosen::Rect& buttons)>&& callback));
+    MOCK_METHOD0(GetFormSerializedGesture, SerializedGesture());
 
 #ifndef PREVIEW
     MOCK_METHOD4(

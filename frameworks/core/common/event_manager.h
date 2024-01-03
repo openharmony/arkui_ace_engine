@@ -221,9 +221,21 @@ public:
     }
 
     void CheckTouchEvent(TouchEvent touchEvent);
-private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     std::unordered_map<size_t, TouchTestResult> postEventTouchTestResults_;
+
+    void SetInnerFlag(bool value)
+    {
+        innerEventWin_ = value;
+    }
+
+    bool GetInnerFlag() const
+    {
+        return innerEventWin_;
+    }
+
+private:
+    bool innerEventWin_ = false;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
     MouseTestResult currMouseTestResults_;
     MouseTestResult pressMouseTestResults_;

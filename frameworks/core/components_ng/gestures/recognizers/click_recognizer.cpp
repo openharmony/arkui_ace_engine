@@ -432,4 +432,8 @@ RefPtr<GestureSnapshot> ClickRecognizer::Dump() const
     return info;
 }
 
+RefPtr<Gesture> ClickRecognizer::CreateGestureFromRecognizer() const
+{
+    return AceType::MakeRefPtr<TapGesture>(count_, fingers_);
+}
 } // namespace OHOS::Ace::NG

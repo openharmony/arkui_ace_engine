@@ -242,6 +242,8 @@ public:
     void SubscribeContainerModalButtonsRectChange(
         std::function<void(Rosen::Rect& containerModal, Rosen::Rect& buttons)>&& callback) override;
 
+    SerializedGesture GetFormSerializedGesture() override;
+
 private:
     void InitializeInner(
         OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage, bool isNamedRouter);

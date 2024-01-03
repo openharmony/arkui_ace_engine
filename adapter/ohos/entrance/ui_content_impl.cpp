@@ -1441,6 +1441,15 @@ void UIContentImpl::ReloadForm(const std::string& url)
     Platform::AceContainer::RunPage(instanceId_, startUrl_, "");
 }
 
+SerializedGesture UIContentImpl::GetFormSerializedGesture()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, SerializedGesture{});
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, SerializedGesture{});
+    return pipelineContext->GetSerializedGesture();
+}
+
 void UIContentImpl::Focus()
 {
     LOGI("%{public}s window focus", bundleName_.c_str());
@@ -2298,7 +2307,8 @@ void UIContentImpl::RemoveOldPopInfoIfExsited(bool isShowInSubWindow, int32_t no
     }
 }
 
-RefPtr<PopupParam> UIContentImpl::CreateCustomPopupParam(bool isShow, const CustomPopupUIExtensionConfig& config)
+RefPtr<PopupParam> UIContentImpl::CreateCustomPopupParam(
+    bool isShow, const CustomPopupUIExtensionConfig& config)
 {
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
     popupParam->SetIsShow(isShow);
@@ -2349,8 +2359,8 @@ RefPtr<PopupParam> UIContentImpl::CreateCustomPopupParam(bool isShow, const Cust
     return popupParam;
 }
 
-void UIContentImpl::OnPopupStateChange(
-    const std::string& event, const CustomPopupUIExtensionConfig& config, int32_t nodeId)
+void UIContentImpl::OnPopupStateChange(const std::string& event,
+    const CustomPopupUIExtensionConfig& config, int32_t nodeId)
 {
     if (config.onStateChange) {
         config.onStateChange(event);
@@ -2372,8 +2382,8 @@ void UIContentImpl::OnPopupStateChange(
     customPopupConfigMap_.erase(nodeId);
 }
 
-int32_t UIContentImpl::CreateCustomPopupUIExtension(
-    const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config)
+int32_t UIContentImpl::CreateCustomPopupUIExtension(const AAFwk::Want& want,
+    const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config)
 {
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
@@ -2404,8 +2414,9 @@ int32_t UIContentImpl::CreateCustomPopupUIExtension(
             }
             uiExtNode->MarkModifyDone();
             nodeId = targetNode->GetId();
-            popupParam->SetOnStateChange(
-                [config, nodeId, this](const std::string& event) { this->OnPopupStateChange(event, config, nodeId); });
+            popupParam->SetOnStateChange([config, nodeId, this](const std::string& event) {
+                this->OnPopupStateChange(event, config, nodeId);
+            });
 
             NG::ViewAbstract::BindPopup(popupParam, targetNode, AceType::DynamicCast<NG::UINode>(uiExtNode));
             customPopupConfigMap_[nodeId] = config;
