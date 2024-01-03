@@ -55,6 +55,7 @@
 #include "core/image/image_cache.h"
 #include "core/pipeline/container_window_manager.h"
 #include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
+#include "interfaces/inner_api/ace/serialized_gesture.h"
 
 namespace OHOS::Rosen {
 class RSTransaction;

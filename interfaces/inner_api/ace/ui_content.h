@@ -27,6 +27,7 @@
 #include "macros.h"
 #include "modal_ui_extension_config.h"
 #include "popup_ui_extension_config.h"
+#include "serialized_gesture.h"
 #include "serializeable_object.h"
 #include "viewport_config.h"
 
@@ -83,7 +84,6 @@ class NativeEngine;
 typedef struct napi_value__* napi_value;
 
 namespace OHOS::Ace {
-struct SerializedGesture;
 class ACE_FORCE_EXPORT UIContent {
 public:
     static std::unique_ptr<UIContent> Create(
@@ -337,7 +337,10 @@ public:
      */
     virtual void DestroyCustomPopupUIExtension(int32_t nodeId) {}
 
-    virtual SerializedGesture GetFormSerializedGesture() = 0;
+    virtual SerializedGesture GetFormSerializedGesture()
+    {
+        return SerializedGesture();
+    }
 };
 
 } // namespace OHOS::Ace

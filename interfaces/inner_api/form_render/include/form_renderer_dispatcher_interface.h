@@ -22,10 +22,10 @@
 #include "pointer_event.h"
 
 #include "base/utils/macros.h"
+#include "interfaces/inner_api/ace/serialized_gesture.h"
 
 namespace OHOS {
 namespace Ace {
-struct SerializedGesture;
 /**
  * @class IFormRendererDispatcher
  * IFormRendererDispatcher interface is used to form render dispatcher.
