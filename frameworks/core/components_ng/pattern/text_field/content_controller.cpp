@@ -44,10 +44,15 @@ std::string ContentController::PreprocessString(int32_t startIndex, int32_t endI
     auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
     auto selectValue = GetSelectedValue(startIndex, endIndex);
     if (property->GetTextInputType().has_value() &&
-        property->GetTextInputType().value() == TextInputType::EMAIL_ADDRESS &&
-        content_.find('@') != std::string::npos && value.find('@') != std::string::npos &&
-        GetSelectedValue(startIndex, endIndex).find('@') == std::string::npos) {
-        tmp.erase(std::remove_if(tmp.begin(), tmp.end(), [](char c) { return c == '@'; }), tmp.end());
+        (property->GetTextInputType().value() == TextInputType::NUMBER_DECIMAL ||
+        property->GetTextInputType().value() == TextInputType::EMAIL_ADDRESS)) {
+        char specialChar = property->GetTextInputType().value() == TextInputType::NUMBER_DECIMAL ?
+            '.' : '@';
+        if (content_.find(specialChar) != std::string::npos && value.find(specialChar) != std::string::npos &&
+            GetSelectedValue(startIndex, endIndex).find(specialChar) == std::string::npos) {
+            tmp.erase(
+                std::remove_if(tmp.begin(), tmp.end(), [&specialChar](char c) { return c == specialChar; }), tmp.end());
+        }
     }
     auto wideText = GetWideText();
     auto wideTmp = StringUtils::ToWstring(tmp);
