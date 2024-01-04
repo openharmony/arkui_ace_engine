@@ -196,7 +196,8 @@ public:
         double positionY = info->textFieldPositionY_;
         double height = info->textFieldHeight_;
         Rect keyboardRect = Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
-        LOGI("UIContent OccupiedAreaChange rect:%{public}s type: %{public}d", keyboardRect.ToString().c_str(), type);
+        LOGI("UIContent OccupiedAreaChange rect:%{public}s type: %{public}d, positionY:%{public}f, height:%{public}f",
+            keyboardRect.ToString().c_str(), type, positionY, height);
         if (type == OHOS::Rosen::OccupiedAreaType::TYPE_INPUT) {
             auto container = Platform::AceContainer::GetContainer(instanceId_);
             CHECK_NULL_VOID(container);

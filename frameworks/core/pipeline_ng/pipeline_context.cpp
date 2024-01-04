@@ -74,6 +74,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_events.h"
 #include "core/event/touch_event.h"
+#include "core/image/image_file_cache.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -1804,6 +1805,8 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         if (imageCache_) {
             imageCache_->DumpCacheInfo();
         }
+    } else if (params[0] == "-imagefilecache") {
+        ImageFileCache::GetInstance().DumpCacheInfo();
     }
     return true;
 }
