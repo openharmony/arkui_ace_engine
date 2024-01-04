@@ -377,7 +377,7 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     textRect_ = textRect;
 
     // Only used in OnDirtyLayoutWrapperSwap.
-    lastTextRect_= textRect;
+    lastTextRect_ = textRect;
 
     parentGlobalOffset_ = textFieldLayoutAlgorithm->GetParentGlobalOffset();
     inlineMeasureItem_ = textFieldLayoutAlgorithm->GetInlineMeasureItem();
@@ -1092,7 +1092,7 @@ void TextFieldPattern::HandleOnCopy()
     }
 
     if (!IsUsingMouse()) {
-        selectController_->UpdateCaretIndex(selectController_->GetSecondHandleIndex());
+        selectController_->MoveCaretToContentRect(selectController_->GetSecondHandleIndex(), TextAffinity::UPSTREAM);
         StartTwinkling();
     }
     auto host = GetHost();
@@ -1318,7 +1318,7 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (SelectOverlayIsOn() && !isTouchCaret_) {
         return;
     }
-
+    
     if (touchType == TouchType::DOWN) {
         HandleTouchDown(info.GetTouches().front().GetLocalLocation());
     } else if (touchType == TouchType::UP) {
@@ -4380,11 +4380,11 @@ void TextFieldPattern::HandleSelectionEnd()
 void TextFieldPattern::SetCaretPosition(int32_t position)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Set caret position to %{public}d", position);
-    selectController_->UpdateCaretIndex(position);
+    selectController_->MoveCaretToContentRect(position, TextAffinity::DOWNSTREAM);
     CloseSelectOverlay();
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
-    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextFieldPattern::SetSelectionFlag(int32_t selectionStart, int32_t selectionEnd)
@@ -4393,7 +4393,7 @@ void TextFieldPattern::SetSelectionFlag(int32_t selectionStart, int32_t selectio
         return;
     }
     if (selectionStart == selectionEnd) {
-        selectController_->UpdateCaretIndex(selectionEnd);
+        selectController_->MoveCaretToContentRect(selectionEnd, TextAffinity::DOWNSTREAM);
         StartTwinkling();
     } else {
         cursorVisible_ = false;
@@ -4407,7 +4407,7 @@ void TextFieldPattern::SetSelectionFlag(int32_t selectionStart, int32_t selectio
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 bool TextFieldPattern::OnBackPressed()
