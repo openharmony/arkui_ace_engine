@@ -5809,18 +5809,20 @@ bool TextFieldPattern::NeedPaintSelect()
     CHECK_NULL_RETURN(paintProperty, false);
     auto firstHandle = paintProperty->GetFirstHandleInfo();
     auto secondHandle = paintProperty->GetSecondHandleInfo();
+    auto caretInfo = selectController_->GetCaretInfo();
     if (!IsSelected()) {
         if (!firstHandle.has_value() || !secondHandle.has_value()) {
-            paintProperty->UpdateFirstHandleInfo(selectController_->GetCaretInfo());
-            paintProperty->UpdateSecondHandleInfo(selectController_->GetCaretInfo());
+            paintProperty->UpdateFirstHandleInfo(caretInfo);
+            paintProperty->UpdateSecondHandleInfo(caretInfo);
             return false;
         }
 
-        if (firstHandle->index != secondHandle->index) {
-            paintProperty->UpdateFirstHandleInfo(selectController_->GetCaretInfo());
-            paintProperty->UpdateSecondHandleInfo(selectController_->GetCaretInfo());
+        if (firstHandle->index != secondHandle->index || firstHandle->index != caretInfo.index) {
+            paintProperty->UpdateFirstHandleInfo(caretInfo);
+            paintProperty->UpdateSecondHandleInfo(caretInfo);
             return true;
         }
+        return false;
     }
     auto needPaint = firstHandle != selectController_->GetFirstHandleInfo() ||
                      secondHandle != selectController_->GetSecondHandleInfo();
