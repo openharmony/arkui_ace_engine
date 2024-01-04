@@ -365,23 +365,17 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (!IsDragging()) {
         dragParagraph_ = paragraph_;
     }
-    bool isEditorValueChanged = false;
     auto textRect = textFieldLayoutAlgorithm->GetTextRect();
     if (!(needToRefreshSelectOverlay_ &&
             (!NearEqual(paragraphWidth, paragraphWidth_) || !NearEqual(textRect.GetSize(), textRect_.GetSize())))) {
         needToRefreshSelectOverlay_ = false;
     }
-    isEditorValueChanged = !NearEqual(textRect.GetSize(), lastTextRect_.GetSize()) ||
-                           !NearEqual(textRect.GetOffset(), lastTextRect_.GetOffset());
     paragraphWidth_ = paragraphWidth;
     textRect_ = textRect;
 
-    // Only used in OnDirtyLayoutWrapperSwap.
-    lastTextRect_ = textRect;
-
     parentGlobalOffset_ = textFieldLayoutAlgorithm->GetParentGlobalOffset();
     inlineMeasureItem_ = textFieldLayoutAlgorithm->GetInlineMeasureItem();
-    isEditorValueChanged |= FireOnTextChangeEvent();
+    auto isEditorValueChanged = FireOnTextChangeEvent();
     UpdateCancelNode();
     UpdateSelectController();
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
@@ -999,7 +993,7 @@ void TextFieldPattern::HandleOnUndoAction()
     }
     auto textEditingValue = operationRecords_.back(); // record应该包含光标、select状态、文本
     contentController_->SetTextValue(textEditingValue.text);
-    selectController_->UpdateCaretIndex(textEditingValue.caretPosition);
+    selectController_->MoveCaretToContentRect(textEditingValue.caretPosition, TextAffinity::DOWNSTREAM);
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
     tmpHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
