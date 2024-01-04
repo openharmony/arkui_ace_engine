@@ -183,7 +183,6 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
 {
     CHECK_NULL_RETURN(builder, -1);
     std::optional<TextStyle> textStyle;
-    auto symbolUnicode = GetSymbolUnicode();
     if (fontStyle || textLineStyle) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_RETURN(pipelineContext, -1);
@@ -197,18 +196,7 @@ int32_t SpanItem::UpdateParagraph(const RefPtr<FrameNode>& frameNode,
         }
         textStyle = themeTextStyle;
         textStyle->SetHalfLeading(pipelineContext->GetHalfLeading());
-        if (symbolUnicode != 0) {
-            UpdateSymbolSpanColor(themeTextStyle);
-        }
         builder->PushStyle(themeTextStyle);
-    }
-
-    if (symbolUnicode != 0) {
-        builder->AddSymbol(symbolUnicode);
-        if (fontStyle || textLineStyle) {
-            builder->PopStyle();
-        }
-        return -1;
     }
 
     auto spanContent = GetSpanContent(content);
@@ -257,7 +245,7 @@ void SpanItem::UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, con
         textStyle = themeTextStyle;
         textStyle->SetHalfLeading(pipelineContext->GetHalfLeading());
         if (symbolUnicode != 0) {
-            UpdateSymbolSpanColor(themeTextStyle);
+            UpdateSymbolSpanColor(frameNode, themeTextStyle);
         }
         builder->PushStyle(themeTextStyle);
     }
@@ -272,13 +260,20 @@ void SpanItem::UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, con
     }
 }
 
-void SpanItem::UpdateSymbolSpanColor(TextStyle& symbolSpanStyle)
+void SpanItem::UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle)
 {
     symbolSpanStyle.isSymbolGlyph_ = true;
+    CHECK_NULL_VOID(frameNode);
     if (GetIsParentText() && symbolSpanStyle.GetSymbolColorList().empty()) {
-        std::vector<Color> symbolColor;
-        symbolColor.emplace_back(symbolSpanStyle.GetTextColor());
-        symbolSpanStyle.SetSymbolColorList(symbolColor);
+        RefPtr<LayoutProperty> layoutProperty = frameNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProperty);
+        RefPtr<TextLayoutProperty> textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutProperty);
+        CHECK_NULL_VOID(textLayoutProperty);
+        if (textLayoutProperty->GetTextColor().has_value()) {
+            std::vector<Color> symbolColor;
+            symbolColor.emplace_back(textLayoutProperty->GetTextColor().value());
+            symbolSpanStyle.SetSymbolColorList(symbolColor);
+        }
     }
 }
 
