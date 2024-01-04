@@ -2481,6 +2481,7 @@ void UIContentImpl::SetContainerModalTitleHeight(int32_t height)
 
 int32_t UIContentImpl::GetContainerModalTitleHeight()
 {
+    ContainerScope scope(instanceId_);
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, -1);
     return pipeline->GetContainerModalTitleHeight();
@@ -2490,6 +2491,7 @@ bool UIContentImpl::GetContainerModalButtonsRect(Rosen::Rect& containerModal, Ro
 {
     NG::RectF floatContainerModal;
     NG::RectF floatButtons;
+    ContainerScope scope(instanceId_);
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     if (!pipeline->GetContainerModalButtonsRect(floatContainerModal, floatButtons)) {
@@ -2503,6 +2505,7 @@ bool UIContentImpl::GetContainerModalButtonsRect(Rosen::Rect& containerModal, Ro
 void UIContentImpl::SubscribeContainerModalButtonsRectChange(
     std::function<void(Rosen::Rect& containerModal, Rosen::Rect& buttons)>&& callback)
 {
+    ContainerScope scope(instanceId_);
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
 
