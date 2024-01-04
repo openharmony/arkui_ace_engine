@@ -47,16 +47,18 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_001, TestSize.Level1)
     EXPECT_TRUE(group);
     OHOS::AAFwk::Want want;
     OHOS::AppExecFwk::FormJsInfo formJsInfo;
+    formJsInfo.bundleName = "bundleName";
+    formJsInfo.moduleName = "moduleName";
     formJsInfo.formId = 1;
     EXPECT_EQ(formJsInfo.formId, 1);
-    group->AddForm(want,formJsInfo);
+    group->AddForm(want, formJsInfo);
     GTEST_LOG_(INFO) << "FormRenderGroupTest_001 end";
 }
 /**
  * @tc.name: FormRenderGroupTest_002
  * @tc.desc: Test OnUnlock() function.
  * @tc.type: FUNC
- */ 
+ */
 HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_002, TestSize.Level1)
 {
     GTEST_LOG_(INFO) << "FormRenderGroupTest_002 start";
@@ -100,7 +102,7 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_004, TestSize.Level1)
     auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
     auto group = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
     EXPECT_TRUE(group);
-    std::string Id = "0";
+    std::string Id = "123456";
     group->DeleteForm(Id);
     GTEST_LOG_(INFO) << "FormRenderGroupTest_004 end";
 }
@@ -117,11 +119,12 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_005, TestSize.Level1)
     auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
     auto group = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
     EXPECT_TRUE(group);
-    std::string Id = "1";
+    OHOS::AAFwk::Want want;    
     OHOS::AppExecFwk::FormJsInfo formJsInfo;
     formJsInfo.bundleName = "bundleName";
     formJsInfo.moduleName = "moduleName";
-    group->DeleteForm(Id);
+    group->AddForm(want, formJsInfo);
+    group->DeleteForm();
     GTEST_LOG_(INFO) << "FormRenderGroupTest_005 end";
 }
 /**
