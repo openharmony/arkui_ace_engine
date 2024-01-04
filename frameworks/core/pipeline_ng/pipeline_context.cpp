@@ -704,9 +704,11 @@ void PipelineContext::FlushFocus()
         return;
     }
     auto rootFocusHub = rootNode_ ? rootNode_->GetFocusHub() : nullptr;
-    auto curMainView = FocusHub::GetCurrentMainView();
-    if (curMainView && curMainView->GetIsViewHasFocused() && rootFocusHub && !rootFocusHub->IsCurrentFocus()) {
-        rootFocusHub->RequestFocusImmediately();
+    if (rootFocusHub && !rootFocusHub->IsCurrentFocus()) {
+        auto curMainView = FocusHub::GetCurrentMainView();
+        if (curMainView && curMainView->GetIsViewHasFocused()) {
+            rootFocusHub->RequestFocusImmediately();
+        }
     }
 }
 
