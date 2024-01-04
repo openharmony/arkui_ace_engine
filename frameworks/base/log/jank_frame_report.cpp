@@ -183,7 +183,6 @@ void JankFrameReport::ClearFrameJankRecord()
     std::fill(frameJankRecord_.begin(), frameJankRecord_.end(), 0);
     jankFrameCount_ = 0;
     recordStatus_ = JANK_IDLE;
-    prevEndTimeStamp_ = 0;
     currentFrameUpdateCount_ = 0;
     needReport_ = false;
     hasJsAnimation_ = false;
@@ -209,7 +208,6 @@ void JankFrameReport::ClearFrameJankFlag(JankFrameFlag flag)
         recordStatus_--;
     }
     if (recordStatus_ == JANK_IDLE) {
-        prevEndTimeStamp_ = 0;
         currentFrameUpdateCount_ = 0;
     }
 }
