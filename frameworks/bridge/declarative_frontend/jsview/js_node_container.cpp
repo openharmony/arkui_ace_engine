@@ -67,6 +67,12 @@ void JSNodeContainer::Create(const JSCallbackInfo& info)
     if (info.Length() < 1 || !info[0]->IsObject() || info[0]->IsNull()) {
         frameNode->RemoveChildAtIndex(0);
         frameNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
+        NodeContainerModel::GetInstance()->ResetController();
+        NodeContainerModel::GetInstance()->SetMakeFunction(nullptr);
+        NodeContainerModel::GetInstance()->SetOnTouchEvent(nullptr);
+        NodeContainerModel::GetInstance()->SetOnResize(nullptr);
+        ViewAbstractModel::GetInstance()->SetOnAppear(nullptr);
+        ViewAbstractModel::GetInstance()->SetOnDisAppear(nullptr);
         return;
     }
     auto object = JSRef<JSObject>::Cast(info[0]);
