@@ -61,7 +61,7 @@ public:
 
     SelectionInfo GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
 
-    int32_t GetTextContentLength();
+    virtual int32_t GetTextContentLength();
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
