@@ -52,6 +52,7 @@
                 "os_account",
                 "graphic_2d",
                 "graphic_3d",
+                "graphic_surface",
                 "safwk",
                 "common_event_service",
                 "data_share",
