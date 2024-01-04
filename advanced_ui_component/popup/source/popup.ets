@@ -461,6 +461,7 @@ export struct PopupComponent {
           .width(this.getIconWidth())
           .height(this.getIconHeight())
           .margin(this.getIconMargin())
+          .fillColor(this.getIconFillColor())
           .borderRadius(this.getIconBorderRadius())
       }
       if (this.title.text !== '' && this.title.text !== void (0)) {

@@ -175,13 +175,14 @@ private:
         OffsetF& childPosition, OffsetF& arrowPosition, const SizeF& childSize, Placement placement);
     ErrorPositionType GetErrorPositionType(const OffsetF& childOffset, const SizeF& childSize);
     OffsetF FitToScreen(const OffsetF& fitPosition, const SizeF& childSize);
-    SizeF GetPopupMaxWidthAndHeight(bool showInSubWindow);
+    SizeF GetPopupMaxWidthAndHeight(bool showInSubWindow, const float& width);
     ArrowOfTargetOffset arrowOfTargetOffset_ = ArrowOfTargetOffset::NONE;
     Dimension arrowOffset_;
 
     int32_t targetNodeId_ = -1;
     std::string targetTag_;
     bool bCaretMode_ = false;
+    bool useCustom_ = false;
 
     SizeF targetSize_;
     OffsetF targetOffset_;

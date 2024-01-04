@@ -760,6 +760,7 @@ export class PopupComponent extends ViewPU {
                         Image.width(this.getIconWidth());
                         Image.height(this.getIconHeight());
                         Image.margin(this.getIconMargin());
+                        Image.fillColor(this.getIconFillColor());
                         Image.borderRadius(this.getIconBorderRadius());
                     }, Image);
                 });
