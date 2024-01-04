@@ -619,12 +619,10 @@ HWTEST_F(AppBarTestNg, UpdateRowLayout001, TestSize.Level1)
     EXPECT_NE(titleBar, nullptr);
     auto label = AceType::DynamicCast<FrameNode>(titleBar->GetLastChild());
     auto textLayoutProperty = label->GetLayoutProperty<TextLayoutProperty>();
-	
     auto backButton = AceType::DynamicCast<FrameNode>(titleBar->GetFirstChild());
     auto buttonLayoutProperty = backButton->GetLayoutProperty();
     auto renderContext = backButton->GetRenderContext();
     EXPECT_NE(renderContext, nullptr);
-
     /**
      * @tc.Calling the UpdateRowLayout function when direction is Rtl.
      */
@@ -632,17 +630,14 @@ HWTEST_F(AppBarTestNg, UpdateRowLayout001, TestSize.Level1)
     constexpr Dimension MARGIN_TEXT_RIGHT = 84.0_vp;
     constexpr Dimension MARGIN_BUTTON = 12.0_vp;
     constexpr Dimension MARGIN_BACK_BUTTON_RIGHT = -20.0_vp;
-    
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
     appBar->UpdateRowLayout();
     EXPECT_EQ(textLayoutProperty->GetTextAlign(), OHOS::Ace::TextAlign::RIGHT);
     EXPECT_EQ(textLayoutProperty->GetMarginProperty()->left.value(), CalcLength(MARGIN_TEXT_RIGHT));
     EXPECT_EQ(textLayoutProperty->GetMarginProperty()->right.value(), CalcLength(MARGIN_TEXT_LEFT));
-	
     EXPECT_EQ(buttonLayoutProperty->GetMarginProperty()->left.value(), CalcLength(MARGIN_BACK_BUTTON_RIGHT));
     EXPECT_EQ(buttonLayoutProperty->GetMarginProperty()->right.value(), CalcLength(MARGIN_BUTTON));
     EXPECT_EQ(renderContext->GetTransformScale(), VectorF(-1.0f, 1.0f));
-
     /**
      * @tc.Calling the UpdateRowLayout function when direction is Ltr.
      */
@@ -651,7 +646,6 @@ HWTEST_F(AppBarTestNg, UpdateRowLayout001, TestSize.Level1)
     EXPECT_EQ(textLayoutProperty->GetTextAlign(), OHOS::Ace::TextAlign::LEFT);
     EXPECT_EQ(textLayoutProperty->GetMarginProperty()->right.value(), CalcLength(MARGIN_TEXT_RIGHT));
     EXPECT_EQ(textLayoutProperty->GetMarginProperty()->left.value(), CalcLength(MARGIN_TEXT_LEFT));
-	
     EXPECT_EQ(buttonLayoutProperty->GetMarginProperty()->right.value(), CalcLength(MARGIN_BACK_BUTTON_RIGHT));
     EXPECT_EQ(buttonLayoutProperty->GetMarginProperty()->left.value(), CalcLength(MARGIN_BUTTON));
     EXPECT_EQ(renderContext->GetTransformScale(), VectorF(1.0f, 1.0f));	
