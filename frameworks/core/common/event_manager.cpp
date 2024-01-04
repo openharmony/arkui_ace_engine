@@ -182,7 +182,7 @@ bool EventManager::PostEventTouchTest(
         }
     }
     // For root node, the parent local point is the same as global point.
-    auto result = uiNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id);
+    uiNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id);
     for (const auto& item : hitTestResult) {
         item->SetIsPostEventResult(true);
         auto group = AceType::DynamicCast<NG::RecognizerGroup>(item);
@@ -190,8 +190,9 @@ bool EventManager::PostEventTouchTest(
             group->SetIsPostEventResultRecursively(true);
         }
     }
+    auto result = !hitTestResult.empty();
     postEventTouchTestResults_[touchPoint.id] = std::move(hitTestResult);
-    return !(static_cast<int32_t>(result) == 0);
+    return result;
 }
 
 void EventManager::TouchTest(
