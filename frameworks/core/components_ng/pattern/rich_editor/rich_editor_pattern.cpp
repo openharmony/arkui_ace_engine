@@ -264,6 +264,14 @@ std::function<ImageSourceInfo()> RichEditorPattern::CreateImageSourceInfo(const 
     return std::move(createSourceInfoFunc);
 }
 
+int32_t RichEditorPattern::GetTextContentLength()
+{
+    if (!spans_.empty()) {
+        auto it = spans_.rbegin();
+        return (*it)->position;
+    }
+    return 0;
+}
 int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool isPaste, int32_t index)
 {
     auto host = GetHost();
@@ -2553,13 +2561,13 @@ void RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
     retInfo.SetFontFamily(fontFamilyValue);
     retInfo.SetTextDecoration(spanNode->GetTextDecorationValue(TextDecoration::NONE));
     retInfo.SetColor(spanNode->GetTextDecorationColorValue(Color::BLACK).ColorToString());
-    MoveCaretAfterTextChange();
     eventHub->FireOnIMEInputComplete(retInfo);
     int32_t spanTextLength = 0;
     for (auto& span : spans_) {
         spanTextLength += StringUtils::ToWstring(span->content).length();
         span->position = spanTextLength;
     }
+    MoveCaretAfterTextChange();
 }
 
 void RichEditorPattern::ResetFirstNodeStyle()
