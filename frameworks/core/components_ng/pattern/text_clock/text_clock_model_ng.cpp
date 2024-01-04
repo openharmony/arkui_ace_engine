@@ -106,19 +106,19 @@ void InitFontDefault(const TextStyle& textStyle)
     CHECK_NULL_VOID(frameNode);
     auto textClockLayoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
     CHECK_NULL_VOID(textClockLayoutProperty);
-    if (layoutProperty->GetFontSize().has_value()) {
+    if (textClockLayoutProperty->GetFontSize().has_value()) {
         SetFontSize(textStyle.GetFontSize());
     }
-    if (layoutProperty->GetFontWeight().has_value()) {
+    if (textClockLayoutProperty->GetFontWeight().has_value()) {
         SetFontWeight(textStyle.GetFontWeight());
     }
-    if (layoutProperty->GetTextColor().has_value()) {
+    if (textClockLayoutProperty->GetTextColor().has_value()) {
         SetTextColor(textStyle.GetTextColor());
     }
-    if (layoutProperty->GetFontFamily().has_value()) {
+    if (textClockLayoutProperty->GetFontFamily().has_value()) {
         SetFontFamily(textStyle.GetFontFamilies());
     }
-    if (layoutProperty->GetItalicFontStyle().has_value()) {
+    if (textClockLayoutProperty->GetItalicFontStyle().has_value()) {
         SetItalicFontStyle(textStyle.GetFontStyle());
     }
 }
