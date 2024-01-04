@@ -762,6 +762,9 @@ public:
 
     void SetFocusType(FocusType type)
     {
+        if (focusType_ != type && type == FocusType::DISABLE) {
+            RemoveSelf(BlurReason::FOCUS_SWITCH);
+        }
         focusType_ = type;
     }
     FocusType GetFocusType() const
