@@ -3959,6 +3959,8 @@ void RichEditorPattern::HandleOnPaste()
     eventHub->FireOnPaste(event);
     if (event.IsPreventDefault()) {
         CloseSelectOverlay();
+        ResetSelection();
+        StartTwinkling();
         return;
     }
     CHECK_NULL_VOID(clipboard_);
