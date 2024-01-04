@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -2008,6 +2008,15 @@ void JsiDeclarativeEngine::GetStackTrace(std::string& trace)
         return;
     }
     panda::DFXJSNApi::BuildJsStackTrace(vm, trace);
+}
+
+std::string JsiDeclarativeEngine::GetPagePath(const std::string& url)
+{
+    auto iter = namedRouterRegisterMap_.find(url);
+    if (iter != namedRouterRegisterMap_.end()) {
+        return iter->second.pagePath;
+    }
+    return "";
 }
 
 void JsiDeclarativeEngine::SetLocalStorage(int32_t instanceId, NativeReference* nativeValue)
