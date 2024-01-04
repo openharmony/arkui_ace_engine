@@ -435,7 +435,6 @@ int32_t NavigationPattern::FireNavDestinationStateChange(bool isShow)
             auto param = Recorder::EventRecorder::Get().IsPageRecordEnable() ? navigationStack_->GetRouteParam() : "";
             eventHub->FireOnShownEvent(navDestinationPattern->GetName(), param);
             navDestinationPattern->SetIsOnShow(true);
-            curDestination->SetActive(true);
             // The change from hiding to showing of top page means the navigation return to screen,
             // so add window state callback again.
             pipeline->AddWindowStateChangedCallback(id);
@@ -443,7 +442,6 @@ int32_t NavigationPattern::FireNavDestinationStateChange(bool isShow)
             NotifyPageHide(curPath.first);
             eventHub->FireOnHiddenEvent(navDestinationPattern->GetName());
             navDestinationPattern->SetIsOnShow(false);
-            curDestination->SetActive(false);
             // The change from showing to hiding of top page means the navigation leaves from screen,
             // so remove window state callback.
             pipeline->RemoveWindowStateChangedCallback(id);
