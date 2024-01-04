@@ -498,8 +498,7 @@ void AppBarView::ReverseBackButton()
 void AppBarView::UpdateRowLayout()
 {
     bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-    if (isRtlSetted == isRtl) 
-    {
+    if (isRtlSetted == isRtl) {
         return;
     }
     CHECK_NULL_VOID(atom_);
