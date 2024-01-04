@@ -1784,7 +1784,7 @@ bool OverlayManager::RemoveModalInOverlay()
         auto sheetPattern = topModalNode->GetPattern<SheetPresentationPattern>();
         CHECK_NULL_RETURN(sheetPattern, false);
         if (sheetPattern->hasShouldDismiss()) {
-            sheetPattern->CallShouldDismiss();
+            sheetPattern->SheetInteractiveDismiss(false);
             return true;
         }
     }
@@ -2628,24 +2628,44 @@ void OverlayManager::CloseSheet(int32_t targetId)
         PlaySheetTransition(sheetNode, false);
     }
     sheetMap_.erase(targetId);
-    modalStack_.pop();
-    if (!modalList_.empty()) {
-        modalList_.pop_back();
-    }
+    RemoveSheetNode(sheetNode);
     FireModalPageHide();
     SaveLastModalNode();
 }
 
 void OverlayManager::DismissSheet()
 {
-    if (!modalStack_.empty()) {
-        auto topSheetNode = modalStack_.top().Upgrade();
-        CHECK_NULL_VOID(topSheetNode);
-        if (topSheetNode->GetTag() == V2::SHEET_PAGE_TAG) {
-            auto sheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
-            CHECK_NULL_VOID(sheetPattern);
-            sheetPattern->DismissSheet();
+    if (modalStack_.empty()) {
+        return;
+    }
+    if (sheetMap_.empty() || !sheetMap_.count(dismissTargetId_)) {
+        DeleteModal(dismissTargetId_);
+        return;
+    }
+    auto sheetNode = sheetMap_[dismissTargetId_].Upgrade();
+    CHECK_NULL_VOID(sheetNode);
+    if (sheetNode->GetTag() == V2::SHEET_PAGE_TAG) {
+        auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+        CHECK_NULL_VOID(sheetPattern);
+        sheetPattern->DismissSheet();
+    }
+}
+
+void OverlayManager::RemoveSheetNode(const RefPtr<FrameNode>& sheetNode)
+{
+    CHECK_NULL_VOID(sheetNode);
+    if (!modalList_.empty()) {
+        modalList_.remove(WeakClaim(RawPtr(sheetNode)));
+    }
+    std::vector<WeakPtr<FrameNode>> sheetVector;
+    while (!modalStack_.empty()) {
+        if (modalStack_.top() != WeakClaim(RawPtr(sheetNode))) {
+            sheetVector.push_back(modalStack_.top());
         }
+        modalStack_.pop();
+    }
+    for (auto iter : sheetVector) {
+        modalStack_.push(iter);
     }
 }
 
@@ -2957,34 +2977,38 @@ void OverlayManager::ComputeDetentsSheetOffset(NG::SheetStyle& sheetStyle, RefPt
 
 void OverlayManager::DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t targetId)
 {
-    if (!modalStack_.empty()) {
-        auto topSheetNode = modalStack_.top().Upgrade();
-        CHECK_NULL_VOID(topSheetNode);
-        if (topSheetNode->GetTag() != V2::SHEET_PAGE_TAG) {
-            return;
-        }
-        if (topSheetNode->GetPattern<SheetPresentationPattern>()->GetTargetId() != targetId) {
-            return;
-        }
-        auto rootNode = FindWindowScene(sheetNode);
-        CHECK_NULL_VOID(rootNode);
-        auto root = DynamicCast<FrameNode>(rootNode);
-        ModalPageLostFocus(topSheetNode);
-        auto maskNode = GetSheetMask(sheetNode);
-        if (maskNode) {
-            root->RemoveChild(maskNode);
-        }
-        sheetNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
-        auto sheetParent = DynamicCast<FrameNode>(sheetNode->GetParent());
-        CHECK_NULL_VOID(sheetParent);
-        root->RemoveChild(sheetParent);
-        root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-        sheetMap_.erase(targetId);
-        modalStack_.pop();
-        modalList_.pop_back();
-        FireModalPageHide();
-        SaveLastModalNode();
+    if (modalStack_.empty()) {
+        return;
     }
+    if (sheetMap_.empty() || !sheetMap_.count(targetId)) {
+        DeleteModal(targetId);
+        return;
+    }
+    auto mapSheetNode = sheetMap_[targetId].Upgrade();
+    CHECK_NULL_VOID(mapSheetNode);
+    if (mapSheetNode->GetTag() != V2::SHEET_PAGE_TAG) {
+        return;
+    }
+    if (mapSheetNode->GetPattern<SheetPresentationPattern>()->GetTargetId() != targetId) {
+        return;
+    }
+    auto rootNode = FindWindowScene(sheetNode);
+    CHECK_NULL_VOID(rootNode);
+    auto root = DynamicCast<FrameNode>(rootNode);
+    ModalPageLostFocus(mapSheetNode);
+    auto maskNode = GetSheetMask(sheetNode);
+    if (maskNode) {
+        root->RemoveChild(maskNode);
+    }
+    sheetNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
+    auto sheetParent = DynamicCast<FrameNode>(sheetNode->GetParent());
+    CHECK_NULL_VOID(sheetParent);
+    root->RemoveChild(sheetParent);
+    root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    sheetMap_.erase(targetId);
+    RemoveSheetNode(sheetNode);
+    FireModalPageHide();
+    SaveLastModalNode();
 }
 
 void OverlayManager::DeleteModal(int32_t targetId)
