@@ -1111,6 +1111,8 @@ void TextFieldPattern::HandleOnPaste()
         eventHub->FireOnPasteWithEvent(data, event);
         if (event.IsPreventDefault()) {
             textfield->CloseSelectOverlay(true);
+            textfield->selectController_->ResetHandles();
+            textfield->StartTwinkling();
             return;
         }
 
