@@ -94,7 +94,18 @@ bool DataDetectorMgr::ShowUIExtensionMenu(const std::map<std::string, std::strin
 
     auto uiExtNode = NG::UIExtensionModelNG::Create(want, callbacks);
     CHECK_NULL_RETURN(uiExtNode, false);
-    auto onReceive = [uiExtNode, aiRect, onClickMenu, targetNode](const AAFwk::WantParams& wantParams) {
+    auto onReceive = GetOnReceive(uiExtNode, aiRect, onClickMenu, targetNode);
+    auto pattern = uiExtNode->GetPattern<NG::UIExtensionPattern>();
+    CHECK_NULL_RETURN(pattern, false);
+    pattern->SetOnReceiveCallback(std::move(onReceive));
+    uiExtNode->MarkModifyDone();
+    return true;
+}
+
+std::function<void(const AAFwk::WantParams&)> DataDetectorMgr::GetOnReceive(const RefPtr<NG::FrameNode>& uiExtNode,
+    NG::RectF aiRect, std::function<void(const std::string&)> onClickMenu, const RefPtr<NG::FrameNode>& targetNode)
+{
+    return [uiExtNode, aiRect, onClickMenu, targetNode](const AAFwk::WantParams& wantParams) {
         TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "UIExtension Ability onReceive");
         CHECK_NULL_VOID(uiExtNode);
         CHECK_NULL_VOID(targetNode);
@@ -102,6 +113,18 @@ bool DataDetectorMgr::ShowUIExtensionMenu(const std::map<std::string, std::strin
         CHECK_NULL_VOID(pipeline);
         auto overlayManager = pipeline->GetOverlayManager();
         CHECK_NULL_VOID(overlayManager);
+        std::string action = wantParams.GetStringParam("action");
+        if (!action.empty() && onClickMenu) {
+            onClickMenu(action);
+        }
+        std::string closeMenu = wantParams.GetStringParam("closeMenu");
+        if (closeMenu == "true") {
+            int32_t targetId = targetNode->GetId();
+            auto menuNode = overlayManager->GetMenuNode(targetId);
+            CHECK_NULL_VOID(menuNode);
+            overlayManager->HideMenu(menuNode, targetId);
+            return;
+        }
         std::string longestContent = wantParams.GetStringParam("longestContent");
         std::string menuSizeString = wantParams.GetStringParam("menuSize");
         if (longestContent.empty() || menuSizeString.empty()) {
@@ -110,11 +133,6 @@ bool DataDetectorMgr::ShowUIExtensionMenu(const std::map<std::string, std::strin
         int32_t menuSize = static_cast<int32_t>(atoi(menuSizeString.c_str()));
         overlayManager->ShowUIExtensionMenu(uiExtNode, aiRect, longestContent, menuSize, targetNode);
     };
-    auto pattern = uiExtNode->GetPattern<NG::UIExtensionPattern>();
-    CHECK_NULL_RETURN(pattern, false);
-    pattern->SetOnReceiveCallback(std::move(onReceive));
-    uiExtNode->MarkModifyDone();
-    return true;
 }
 
 void DataDetectorMgr::ResponseBestMatchItem(const std::map<std::string, std::string>& paramaters, const AISpan& aiSpan)
