@@ -145,6 +145,7 @@ private:
     bool isSnapshot_ = false;
     bool isRegistedAreaCallback_ = false;
     RefPtr<PixelMap> pixelMap_ = nullptr;
+    int64_t snapshotTimestamp_ = 0;
     int32_t scopeId_;
     std::string localeTag_ = AceApplicationInfo::GetInstance().GetLocaleTag();
     std::vector<std::string> formLinkInfos_;
