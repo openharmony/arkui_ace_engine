@@ -469,6 +469,9 @@ void PageRouterManager::GetState(int32_t& index, std::string& name, std::string&
         name = url.substr(pos + 1);
         path = url.substr(0, pos + 1);
     }
+    if (path.size() == 0) {
+        path = "/" + url;
+    }
 }
 
 std::string PageRouterManager::GetParams() const
