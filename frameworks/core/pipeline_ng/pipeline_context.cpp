@@ -400,9 +400,9 @@ RefPtr<FrameNode> PipelineContext::HandleFocusNode()
         }
     }
     while (lastFocusNode) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "curLastFocusNodeTAG:(%{public}s).", lastFocusNode->GetFrameName().c_str());
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "curLastFocusNodeTAG:(%{public}s).", lastFocusNode->GetFrameName().c_str());
         if (!lastFocusNode->IsCurrentFocus() || !lastFocusNode->IsFocusableNode()) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Is not CurrentFocus Or not FocusableNode.");
+            TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Is not CurrentFocus Or not FocusableNode.");
             break;
         }
         std::list<RefPtr<FocusHub>> focusNodesInner = lastFocusNode->GetChildren();
@@ -414,18 +414,18 @@ RefPtr<FrameNode> PipelineContext::HandleFocusNode()
             }
         }
         if (!openBreak) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Is LastFocusNode, break.");
+            TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Is LastFocusNode, break.");
             break;
         }
     }
     if (lastFocusNode == nullptr) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "lastFocusNode is null.");
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "lastFocusNode is null.");
         return nullptr;
     }
 
     auto curFrameNode = lastFocusNode->GetFrameNode();
     if (curFrameNode == nullptr) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "lastFocusNode-curFrameNode is null.");
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "lastFocusNode-curFrameNode is null.");
         return nullptr;
     }
     return curFrameNode;
@@ -445,6 +445,9 @@ void PipelineContext::IsCloseSCBKeyboard()
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "curFrameNode null.");
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "LastFocusNode,(%{public}s/%{public}d).",
+        curFrameNode->GetTag().c_str(), curFrameNode->GetId());
+
 #ifdef WINDOW_SCENE_SUPPORTED
     auto isSystem = WindowSceneHelper::IsWindowScene(curFrameNode);
     if (isSystem) {

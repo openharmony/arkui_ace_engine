@@ -272,8 +272,8 @@ void NavigationPattern::CheckTopNavPathChange(
     // close keyboard
 #if defined (ENABLE_STANDARD_INPUT)
     if (Container::CurrentId() == CONTAINER_ID_DIVIDE_SIZE) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "pageChange notNeedSoftKeyboard.");
-        FocusHub::PushPageCloseKeyboard();
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nav notNeedSoftKeyboard.");
+        FocusHub::NavCloseKeyboard();
     }
 #endif
 
