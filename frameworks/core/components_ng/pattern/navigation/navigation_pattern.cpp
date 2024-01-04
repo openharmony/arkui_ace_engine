@@ -451,6 +451,7 @@ int32_t NavigationPattern::FireNavDestinationStateChange(bool isShow)
 
 void NavigationPattern::FireNavigationStateChange(const RefPtr<UINode>& node, bool show)
 {
+    CHECK_NULL_VOID(node);
     const auto& children = node->GetChildren();
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
