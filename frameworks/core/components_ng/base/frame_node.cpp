@@ -588,6 +588,7 @@ void FrameNode::MouseToJsonValue(std::unique_ptr<JsonValue>& json) const
 void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     bool touchable = true;
+    bool monopolizeEvents = false;
     std::string hitTestMode = "HitTestMode.Default";
     auto gestureEventHub = GetOrCreateGestureEventHub();
     std::vector<DimensionRect> responseRegion;
@@ -597,9 +598,11 @@ void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json) const
         hitTestMode = gestureEventHub->GetHitTestModeStr();
         responseRegion = gestureEventHub->GetResponseRegion();
         mouseResponseRegion = gestureEventHub->GetMouseResponseRegion();
+        monopolizeEvents = gestureEventHub->GetMonopolizeEvents();
     }
     json->Put("touchable", touchable);
     json->Put("hitTestBehavior", hitTestMode.c_str());
+    json->Put("monopolizeEvents", monopolizeEvents);
     auto jsArr = JsonUtil::CreateArray(true);
     for (int32_t i = 0; i < static_cast<int32_t>(responseRegion.size()); ++i) {
         auto iStr = std::to_string(i);
