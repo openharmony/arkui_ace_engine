@@ -527,6 +527,7 @@ void FrameNode::DumpAdvanceInfo()
     }
     if (renderContext_) {
         renderContext_->DumpInfo();
+        renderContext_->DumpAdvanceInfo();
     }
 }
 
