@@ -29,7 +29,7 @@ void NavigationContentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     std::list<RefPtr<LayoutWrapper>> children;
     for (auto index = 0; index < childSize; index++) {
         auto child = layoutWrapper->GetOrCreateChildByIndex(index, false);
-        if (child->IsActive()) {
+        if (child->GetHostNode() && child->GetHostNode()->IsVisible()) {
             child->Measure(layoutConstraint);
             children.emplace_back(child);
         }
@@ -71,14 +71,13 @@ void NavigationContentLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     // Update child position.
     auto safeAreaHeight = GetSafeAreaHeight(layoutWrapper);
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild(false)) {
-        if (child->IsActive()) {
+        auto childNode = child->GetHostNode();
+        if (childNode && childNode->IsVisible()) {
             SizeF childSize = child->GetGeometryNode()->GetMarginFrameSize();
             auto translate = Alignment::GetAlignPosition(size, childSize, align) + paddingOffset;
             child->GetGeometryNode()->SetMarginFrameOffset(translate);
             child->Layout();
 
-            auto childNode = child->GetHostNode();
-            CHECK_NULL_VOID(childNode);
             auto childGeo = child->GetGeometryNode();
             CHECK_NULL_VOID(childGeo);
             auto offset = childGeo->GetFrameOffset();
