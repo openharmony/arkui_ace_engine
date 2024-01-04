@@ -43,7 +43,7 @@ ImageSourceInfo CreateSourceInfo(const std::string &src, RefPtr<PixelMap> &pixma
 } // namespace
 
 void ImageModelNG::Create(const std::string &src, RefPtr<PixelMap> &pixMap, const std::string &bundleName,
-    const std::string &moduleName)
+    const std::string &moduleName, bool isUriPureNumber)
 {
     auto *stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -62,8 +62,9 @@ void ImageModelNG::Create(const std::string &src, RefPtr<PixelMap> &pixMap, cons
         gestureHub->InitDragDropEvent();
     }
     frameNode->SetDraggable(draggable);
-    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo,
-        CreateSourceInfo(src, pixMap, bundleName, moduleName));
+    auto srcInfo = CreateSourceInfo(src, pixMap, bundleName, moduleName);
+    srcInfo.SetIsUriPureNumber(isUriPureNumber);
+    ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo);
 }
 
 void ImageModelNG::SetAlt(const ImageSourceInfo &src)

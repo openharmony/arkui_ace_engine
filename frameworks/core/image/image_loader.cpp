@@ -635,7 +635,7 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
     std::unique_ptr<uint8_t[]> data;
     size_t dataLen = 0;
     std::string rawFile;
-    if (GetResourceId(uri, rawFile)) {
+    if (!imageSourceInfo.GetIsUriPureNumber() && GetResourceId(uri, rawFile)) {
         // must fit raw file firstly, as file name may contains number
         if (!resourceWrapper->GetRawFileData(rawFile, dataLen, data, bundleName, moudleName)) {
             TAG_LOGW(AceLogTag::ACE_IMAGE, "get image data by name failed, uri:%{private}s, rawFile:%{public}s",
@@ -651,7 +651,7 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
 #endif
     }
     uint32_t resId = 0;
-    if (GetResourceId(uri, resId)) {
+    if (!imageSourceInfo.GetIsUriPureNumber() && GetResourceId(uri, resId)) {
         if (!resourceWrapper->GetMediaData(resId, dataLen, data, bundleName, moudleName)) {
             TAG_LOGW(AceLogTag::ACE_IMAGE, "get image data by id failed, uri:%{private}s, id:%{public}u", uri.c_str(),
                 resId);

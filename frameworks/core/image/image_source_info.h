@@ -68,6 +68,10 @@ public:
     void SetFillColor(const Color& color);
     void SetBundleName(const std::string& bundleName);
     void SetModuleName(const std::string& moduleName);
+    void SetIsUriPureNumber(bool isUriPureNumber = false)
+    {
+        isUriPureNumber_ = isUriPureNumber;
+    }
     void Reset();
 
     // interfaces to get infomation from [ImageSourceInfo]
@@ -87,6 +91,10 @@ public:
     const std::optional<Color>& GetFillColor() const;
     const RefPtr<PixelMap>& GetPixmap() const;
     std::string GetKey() const;
+    bool GetIsUriPureNumber() const
+    {
+        return isUriPureNumber_;
+    }
 
     bool SupportObjCache() const;
     void SetNeedCache(bool needCache)
@@ -110,6 +118,7 @@ private:
     bool isSvg_ = false;
     bool isPng_ = false;
     bool needCache_ = true;
+    bool isUriPureNumber_ = false;
     [[deprecated("in NG")]]
     std::optional<Color> fillColor_;
 
