@@ -32,6 +32,7 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+const std::string BORDERZERO = "0.0";
 
 enum class MeasureType {
     MATCH_PARENT,
@@ -471,6 +472,16 @@ struct PaddingPropertyT<float> {
         str.append("top: [").append(top.has_value() ? std::to_string(top.value()) : "NA").append("]");
         str.append("bottom: [").append(bottom.has_value() ? std::to_string(bottom.value()) : "NA").append("]");
         return str;
+    }
+
+    std::string ToJsonString() const
+    {
+        auto jsonValue = JsonUtil::Create(true);
+        jsonValue->Put("top", top.has_value() ? std::to_string(top.value()).c_str() : BORDERZERO.c_str());
+        jsonValue->Put("right", right.has_value() ? std::to_string(right.value()).c_str() : BORDERZERO.c_str());
+        jsonValue->Put("bottom", bottom.has_value() ? std::to_string(bottom.value()).c_str() : BORDERZERO.c_str());
+        jsonValue->Put("left", left.has_value() ? std::to_string(left.value()).c_str() : BORDERZERO.c_str());
+        return jsonValue->ToString();
     }
 
     float Width() const

@@ -1504,6 +1504,10 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
     textStyle.fontFamily = !fontFamilyValue.empty() ? fontFamilyValue : defaultFontFamily.front();
     textStyle.decorationType = static_cast<int32_t>(node->GetTextDecorationValue(TextDecoration::NONE));
     textStyle.decorationColor = node->GetTextDecorationColorValue(Color::BLACK).ColorToString();
+    textStyle.textAlign = static_cast<int32_t>(node->GetTextAlignValue(TextAlign::START));
+    auto lm = node->GetLeadingMarginValue({});
+    textStyle.leadingMarginSize[RichEditorLeadingRange::LEADING_START] = Dimension(lm.size.Width()).ConvertToVp();
+    textStyle.leadingMarginSize[RichEditorLeadingRange::LEADING_END] = Dimension(lm.size.Height()).ConvertToVp();
     return textStyle;
 }
 
@@ -1661,6 +1665,17 @@ ResultObject TextPattern::GetImageResultObject(RefPtr<UINode> uinode, int32_t in
         }
         if (imageLayoutProperty->HasVerticalAlign()) {
             resultObject.imageStyle.objectFit = static_cast<int32_t>(imageLayoutProperty->GetVerticalAlignValue());
+        }
+        if (geometryNode->GetMargin()) {
+            resultObject.imageStyle.margin = geometryNode->GetMargin()->ToJsonString();
+        }
+        auto imageRenderCtx = imageNode->GetRenderContext();
+        if (imageRenderCtx->GetBorderRadius()) {
+            BorderRadiusProperty brp;
+            auto jsonObject = JsonUtil::Create(true);
+            auto jsonBorder = JsonUtil::Create(true);
+            imageRenderCtx->GetBorderRadiusValue(brp).ToJsonValue(jsonObject, jsonBorder);
+            resultObject.imageStyle.borderRadius = jsonObject->ToString();
         }
     }
     return resultObject;
