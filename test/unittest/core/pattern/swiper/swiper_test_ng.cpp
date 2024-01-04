@@ -10808,7 +10808,7 @@ HWTEST_F(SwiperTestNg, HandleTouchBottomLoop002, TestSize.Level1)
 
     pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
     pattern_->HandleTouchBottomLoop();
-    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT);
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
 
     pattern_->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
     pattern_->HandleTouchBottomLoop();
@@ -10834,7 +10834,7 @@ HWTEST_F(SwiperTestNg, HandleTouchBottomLoop003, TestSize.Level1)
     pattern_->currentIndex_ = pattern_->TotalCount() - 1;
     pattern_->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
     pattern_->HandleTouchBottomLoop();
-    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT);
+    EXPECT_EQ(pattern_->touchBottomType_, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT);
 
     pattern_->currentFirstIndex_ = pattern_->TotalCount() - 1;
     pattern_->currentIndex_ = pattern_->TotalCount() - 1;
@@ -10853,32 +10853,32 @@ HWTEST_F(SwiperTestNg, CalculateGestureState001, TestSize.Level1)
     CreateWithItem([](SwiperModelNG model) {});
     EXPECT_EQ(pattern_->TotalCount(), 4);
     pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    pattern_->CalculateGestureState(1.0f, 0.0f);
+    pattern_->CalculateGestureState(1.0f, 0.0f, 1);
     EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_RELEASE_LEFT);
 
     pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    pattern_->CalculateGestureState(-1.0f, 0.0f);
+    pattern_->CalculateGestureState(-1.0f, 0.0f, 1);
     EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_RELEASE_RIGHT);
 
     pattern_->currentFirstIndex_ = 0;
     pattern_->currentIndex_ = 0;
     pattern_->turnPageRate_ = -1.0f;
     pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    pattern_->CalculateGestureState(0.0f, -1.1f);
+    pattern_->CalculateGestureState(0.0f, -1.1f, 1);
     EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_RIGHT);
 
     pattern_->currentFirstIndex_ = 0;
     pattern_->currentIndex_ = 1;
     pattern_->turnPageRate_ = -1.0f;
     pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    pattern_->CalculateGestureState(0.0f, -1.1f);
+    pattern_->CalculateGestureState(0.0f, -1.1f, 1);
     EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_LEFT);
 
     pattern_->currentFirstIndex_ = 0;
     pattern_->currentIndex_ = 0;
     pattern_->turnPageRate_ = -1.0f;
     pattern_->gestureState_ = GestureState::GESTURE_STATE_NONE;
-    pattern_->CalculateGestureState(0.0f, -0.9f);
+    pattern_->CalculateGestureState(0.0f, -0.9f, 1);
     EXPECT_EQ(pattern_->gestureState_, GestureState::GESTURE_STATE_FOLLOW_RIGHT);
 }
 
@@ -10963,12 +10963,14 @@ HWTEST_F(SwiperTestNg, AdjustPointCenterXForTouchBottom001, TestSize.Level1)
 
     int32_t startCurrentIndex = 0;
     int32_t endCurrentIndex = totalCount - 1;
+    float selectedItemWidth = 0.0f;
 
     // shrink to black point
     paintMethod->pointAnimationStage_ = PointAnimationStage::STATE_SHRINKT_TO_BLACK_POINT;
     paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
     paintMethod->AdjustPointCenterXForTouchBottom(
-        pointCenter, endVectorBlackPointCenterX, startCurrentIndex, endCurrentIndex);
+        pointCenter, endVectorBlackPointCenterX, startCurrentIndex, endCurrentIndex, selectedItemWidth, 0);
     EXPECT_EQ(pointCenter.endLongPointRightCenterX, endVectorBlackPointCenterX[0]);
     EXPECT_EQ(pointCenter.endLongPointLeftCenterX, endVectorBlackPointCenterX[0]);
 
@@ -10976,7 +10978,7 @@ HWTEST_F(SwiperTestNg, AdjustPointCenterXForTouchBottom001, TestSize.Level1)
     paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
     pointCenter = { 0.0f, 0.0f, 0.0f, 0.0f };
     paintMethod->AdjustPointCenterXForTouchBottom(
-        pointCenter, endVectorBlackPointCenterX, startCurrentIndex, endCurrentIndex);
+        pointCenter, endVectorBlackPointCenterX, startCurrentIndex, endCurrentIndex, selectedItemWidth, 0);
     EXPECT_EQ(pointCenter.endLongPointRightCenterX, endVectorBlackPointCenterX[startCurrentIndex]);
     EXPECT_EQ(pointCenter.endLongPointLeftCenterX, endVectorBlackPointCenterX[startCurrentIndex]);
 
@@ -10986,7 +10988,7 @@ HWTEST_F(SwiperTestNg, AdjustPointCenterXForTouchBottom001, TestSize.Level1)
     paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
     pointCenter = { 0.0f, 0.0f, 0.0f, 0.0f };
     paintMethod->AdjustPointCenterXForTouchBottom(
-        pointCenter, endVectorBlackPointCenterX, startCurrentIndex, endCurrentIndex);
+        pointCenter, endVectorBlackPointCenterX, startCurrentIndex, endCurrentIndex, selectedItemWidth, 0);
     EXPECT_EQ(pointCenter.startLongPointRightCenterX, endVectorBlackPointCenterX[endCurrentIndex]);
     EXPECT_EQ(pointCenter.endLongPointLeftCenterX, endVectorBlackPointCenterX[endCurrentIndex]);
 
@@ -10995,7 +10997,7 @@ HWTEST_F(SwiperTestNg, AdjustPointCenterXForTouchBottom001, TestSize.Level1)
     paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
     pointCenter = { 0.0f, 0.0f, 0.0f, 0.0f };
     paintMethod->AdjustPointCenterXForTouchBottom(
-        pointCenter, endVectorBlackPointCenterX, startCurrentIndex, endCurrentIndex);
+        pointCenter, endVectorBlackPointCenterX, startCurrentIndex, endCurrentIndex, selectedItemWidth, 0);
     EXPECT_EQ(pointCenter.startLongPointRightCenterX, endVectorBlackPointCenterX[0]);
     EXPECT_EQ(pointCenter.endLongPointLeftCenterX, endVectorBlackPointCenterX[0]);
 }

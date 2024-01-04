@@ -231,12 +231,13 @@ public:
 
     GestureState GetGestureState()
     {
-        if (gestureState_ == GestureState::GESTURE_STATE_INIT) {
+        auto gestureState = gestureState_;
+        if (gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT ||
+            gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
             gestureState_ = GestureState::GESTURE_STATE_NONE;
-            return GestureState::GESTURE_STATE_INIT;
         }
 
-        return gestureState_;
+        return gestureState;
     }
 
     TouchBottomTypeLoop GetTouchBottomTypeLoop() const
@@ -761,7 +762,7 @@ private:
 
     inline bool ChildFirst(NestedState state);
     void HandleTouchBottomLoop();
-    void CalculateGestureState(float additionalOffset, float currentTurnPageRate);
+    void CalculateGestureState(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex);
     void StopIndicatorAnimation();
     RefPtr<FrameNode> GetCurrentFrameNode(int32_t currentIndex) const;
 
@@ -827,6 +828,7 @@ private:
     bool indicatorIsBoolean_ = true;
     bool isAtHotRegion_ = false;
     bool isDragging_ = false;
+    bool needTurn_ = false;
     /**
      * @brief Indicates whether the child NestableScrollContainer is currently scrolling and affecting Swiper.
      */

@@ -1424,11 +1424,19 @@ void SwiperPattern::HandleTouchBottomLoop()
     bool commTouchBottom = (currentFirstIndex == TotalCount() - 1);
     bool followTouchBottom = (commTouchBottom && (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT ||
                                                      gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT));
+    if (followTouchBottom) {
+        if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT) {
+            touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+        } else if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
+            touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+        }
+        return;
+    }
     bool leftReleaseTouchBottom = (commTouchBottom && (currentIndex == 0 && gestureState_ ==
         GestureState::GESTURE_STATE_RELEASE_LEFT));
     bool rightReleaseTouchBottom = ((currentFirstIndex == 0) && (currentIndex == TotalCount() - 1) &&
                                     gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT);
-    if (followTouchBottom || leftReleaseTouchBottom || rightReleaseTouchBottom) {
+    if (leftReleaseTouchBottom || rightReleaseTouchBottom) {
         if (currentIndex == 0) {
             // left bottom
             touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
@@ -1440,23 +1448,24 @@ void SwiperPattern::HandleTouchBottomLoop()
     return;
 }
 
-void SwiperPattern::CalculateGestureState(float additionalOffset, float currentTurnPageRate)
+void SwiperPattern::CalculateGestureState(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex)
 {
-    if (gestureState_ == GestureState::GESTURE_STATE_INIT) {
-        return;
+    // Keep follow hand
+    if ((preFirstIndex == 0 && currentFirstIndex_ == TotalCount() - 1) ||
+        (preFirstIndex == TotalCount() - 1 && currentFirstIndex_ == 0)) {
+        needTurn_ = true;
     }
-    gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+
     if (GreatNotEqual(additionalOffset, 0.0f)) {
         gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+        needTurn_ = false;
     } else if (LessNotEqual(additionalOffset, 0.0f)) {
         gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
-    } else if ((GetLoopIndex(currentFirstIndex_) == GetLoopIndex(currentIndex_)) &&
-               GreatNotEqual(std::abs(currentTurnPageRate), std::abs(turnPageRate_))) {
-        gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
-    } else if (currentTurnPageRate == 0 && turnPageRate_ == 0) {
-        gestureState_ = GestureState::GESTURE_STATE_NONE;
-    } else if (GetLoopIndex(currentFirstIndex_) != GetLoopIndex(currentIndex_)) {
-        gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+        needTurn_ = false;
+    } else if (GetLoopIndex(currentFirstIndex_) >= GetLoopIndex(currentIndex_)) {
+        gestureState_ = needTurn_ ? GestureState::GESTURE_STATE_FOLLOW_LEFT : GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    } else if (GetLoopIndex(currentFirstIndex_) < GetLoopIndex(currentIndex_)) {
+        gestureState_ = needTurn_ ? GestureState::GESTURE_STATE_FOLLOW_RIGHT : GestureState::GESTURE_STATE_FOLLOW_LEFT;
     }
     return;
 }
@@ -1475,6 +1484,7 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset)
         return;
     }
 
+    int32_t preFirstIndex = currentFirstIndex_;
     float currentTurnPageRate = FLT_MAX;
     for (const auto& iter : itemPosition_) {
         if (LessNotEqual((iter.second.startPos + additionalOffset), 0) &&
@@ -1496,7 +1506,7 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset)
     }
 
     currentFirstIndex_ = GetLoopIndex(currentFirstIndex_);
-    CalculateGestureState(additionalOffset, currentTurnPageRate);
+    CalculateGestureState(additionalOffset, currentTurnPageRate, preFirstIndex);
     turnPageRate_ = (currentTurnPageRate == FLT_MAX ? turnPageRate_ : currentTurnPageRate);
 
     touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
