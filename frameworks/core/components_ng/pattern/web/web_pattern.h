@@ -440,10 +440,10 @@ public:
         return rootLayerHeight_;
     }
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
-    RefPtr<WebAccessibilityNode> GetFocusedAccessibilityNode(int32_t accessibilityId, bool isAccessibilityFocus);
-    RefPtr<WebAccessibilityNode> GetAccessibilityNodeById(int32_t accessibilityId);
-    RefPtr<WebAccessibilityNode> GetAccessibilityNodeByFocusMove(int32_t accessibilityId, int32_t direction);
-    void ExecuteAction(int32_t nodeId, AceAction action) const;
+    RefPtr<WebAccessibilityNode> GetFocusedAccessibilityNode(int64_t accessibilityId, bool isAccessibilityFocus);
+    RefPtr<WebAccessibilityNode> GetAccessibilityNodeById(int64_t accessibilityId);
+    RefPtr<WebAccessibilityNode> GetAccessibilityNodeByFocusMove(int64_t accessibilityId, int32_t direction);
+    void ExecuteAction(int64_t accessibilityId, AceAction action) const;
     void SetAccessibilityState(bool state);
 
 private:
