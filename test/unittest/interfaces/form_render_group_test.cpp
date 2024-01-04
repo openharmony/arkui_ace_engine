@@ -119,7 +119,7 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_005, TestSize.Level1)
     auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
     auto group = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
     EXPECT_TRUE(group);
-    OHOS::AAFwk::Want want;    
+    OHOS::AAFwk::Want want;
     OHOS::AppExecFwk::FormJsInfo formJsInfo;
     formJsInfo.bundleName = "bundleName";
     formJsInfo.moduleName = "moduleName";
