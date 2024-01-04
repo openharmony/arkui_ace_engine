@@ -26,14 +26,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace {
-namespace {
-#ifdef __aarch64__
-const std::string AI_ADAPTER_SO_PATH = "system/lib64/libai_text_analyzer_innerapi.z.so";
-#else
-const std::string AI_ADAPTER_SO_PATH = "system/lib/libai_text_analyzer_innerapi.z.so";
-#endif
-} // namespace
-
 DataDetectorMgr& DataDetectorMgr::GetInstance()
 {
     static DataDetectorMgr instance;
@@ -42,7 +34,7 @@ DataDetectorMgr& DataDetectorMgr::GetInstance()
 
 DataDetectorMgr::DataDetectorMgr()
 {
-    auto lib = DataDetectorLoader::Load(AI_ADAPTER_SO_PATH);
+    auto lib = DataDetectorLoader::Load();
     if (lib == nullptr || (engine_ = lib->CreateDataDetector()) == nullptr) {
         engine_ = DataDetectorInstance(new DataDetectorDefault, [](DataDetectorInterface* e) {
             auto* p = reinterpret_cast<DataDetectorDefault*>(e);

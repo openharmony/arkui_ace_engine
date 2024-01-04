@@ -19,10 +19,6 @@
 #include "core/common/ai/image_analyzer_default.h"
 
 namespace OHOS::Ace {
-namespace {
-constexpr char LIB_PATH[] = "/system/lib64/libai_image_analyzer_innerapi.z.so";
-}
-
 ImageAnalyzerMgr& ImageAnalyzerMgr::GetInstance()
 {
     static ImageAnalyzerMgr instance;
@@ -31,7 +27,7 @@ ImageAnalyzerMgr& ImageAnalyzerMgr::GetInstance()
 
 ImageAnalyzerMgr::ImageAnalyzerMgr()
 {
-    auto lib = ImageAnalyzerLoader::Load(LIB_PATH);
+    auto lib = ImageAnalyzerLoader::Load();
     if (!lib || (engine_ = lib->CreateImageAnalyzer()) == nullptr) {
         engine_ = ImageAnalyzerInstance(new ImageAnalyzerDefault, [](ImageAnalyzerInterface* e) {
             auto* p = reinterpret_cast<ImageAnalyzerDefault*>(e);
