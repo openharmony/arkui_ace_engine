@@ -1854,6 +1854,14 @@ void TextPattern::InitTextDetect(int32_t startPos, std::string detectText)
     DataDetectorMgr::GetInstance().DataDetect(info, textFunc);
 }
 
+void TextPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("enableDataDetector", textDetectEnable_ ? "true" : "false");
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("types", "");
+    json->Put("dataDetectorConfig", jsonValue->ToString().c_str());
+}
+
 void TextPattern::ParseAIResult(const TextDataDetectResult& result, int32_t startPos)
 {
     auto entityMenuServiceInfoJson = JsonUtil::ParseJsonString(result.entityMenuServiceInfo);

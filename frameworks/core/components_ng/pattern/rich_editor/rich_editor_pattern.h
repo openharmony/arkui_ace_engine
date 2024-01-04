@@ -424,6 +424,7 @@ private:
     void onDragDropAndLeave();
     void ClearDragDropEvent();
     void OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
     {
