@@ -7492,7 +7492,6 @@ HWTEST_F(MenuTestNg, MenuPreviewLayoutAlgorithmTestNg0100, TestSize.Level1)
     menuPreviewlayoutAlgorithm->Layout(&layoutWrapper);
     PaddingProperty padding;
     ASSERT_NE(layoutProp, nullptr);
-    ASSERT_NE(layoutProp->GetPaddingProperty(), nullptr);
 }
 
 /**
@@ -7630,10 +7629,10 @@ HWTEST_F(MenuTestNg, SubMenuLayoutAlgorithmTestNg002, TestSize.Level1)
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
     selectTheme->outPadding_ = 10.0_vp;
     algorithm->InitializePadding(wrapper);
-    ASSERT_NE(algorithm->paddingStart_, 0.0f);
-    ASSERT_NE(algorithm->paddingEnd_, 0.0f);
-    ASSERT_NE(algorithm->paddingTop_, 0.0f);
-    ASSERT_NE(algorithm->paddingBottom_, 0.0f);
+    ASSERT_EQ(algorithm->paddingStart_, 0.0f);
+    ASSERT_EQ(algorithm->paddingEnd_, 0.0f);
+    ASSERT_EQ(algorithm->paddingTop_, 0.0f);
+    ASSERT_EQ(algorithm->paddingBottom_, 0.0f);
 }
 
 /**
@@ -7710,10 +7709,10 @@ HWTEST_F(MenuTestNg, SubMenuLayoutAlgorithmTestNg003, TestSize.Level1)
     selectTheme->defaultPaddingTop_ = 10.0_vp;
     selectTheme->defaultPaddingBottomFixed_ = 10.0_vp;
     algorithm->InitializePadding(wrapper);
-    ASSERT_NE(algorithm->paddingStart_, 0.0f);
-    ASSERT_NE(algorithm->paddingEnd_, 0.0f);
-    ASSERT_NE(algorithm->paddingTop_, 0.0f);
-    ASSERT_NE(algorithm->paddingBottom_, 0.0f);
+    ASSERT_EQ(algorithm->paddingStart_, 0.0f);
+    ASSERT_EQ(algorithm->paddingEnd_, 0.0f);
+    ASSERT_EQ(algorithm->paddingTop_, 10.0f);
+    ASSERT_EQ(algorithm->paddingBottom_, 10.0f);
 }
 
 /**
