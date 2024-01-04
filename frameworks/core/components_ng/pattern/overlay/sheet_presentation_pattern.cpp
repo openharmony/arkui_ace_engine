@@ -730,7 +730,6 @@ void SheetPresentationPattern::CheckSheetHeightChange()
             CHECK_NULL_VOID(overlayManager);
             auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
             CHECK_NULL_VOID(layoutProperty);
-            pipelineContext->FlushUITasks();
             auto sheetStyle = layoutProperty->GetSheetStyleValue();
             overlayManager->ComputeSheetOffset(sheetStyle, host);
             if (sheetType_ == SheetType::SHEET_POPUP) {
