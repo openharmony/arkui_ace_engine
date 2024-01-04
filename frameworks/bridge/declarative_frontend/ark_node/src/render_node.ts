@@ -50,7 +50,7 @@ type Transform = [
   number
 ];
 
-class RenderNode extends __JSBaseNode__ {
+class RenderNode {
   private childrenList: Array<RenderNode>;
   private nodePtr: number | null;
   private parentRenderNode: RenderNode | null;
@@ -68,9 +68,9 @@ class RenderNode extends __JSBaseNode__ {
   private shadowRadiusValue: number;
   private transformValue: Transform;
   private translationValue: Vector2;
+  private baseNode_ : __JSBaseNode__;
 
   constructor(type: string) {
-    super();
     this.nodePtr = null;
     this.childrenList = [];
     this.parentRenderNode = null;
@@ -94,7 +94,8 @@ class RenderNode extends __JSBaseNode__ {
     if (type === "FrameNode") {
       return;
     }
-    this.nodePtr = this.createRenderNode();
+    this.baseNode_ = new __JSBaseNode__();
+    this.nodePtr = this.baseNode_.createRenderNode();
   }
 
   set backgroundColor(color: number) {

@@ -32,6 +32,9 @@ class BaseNode extends __JSBaseNode__ {
         }
         this.instanceId_ = instanceId;
     }
+    getInstanceId() {
+        return this.instanceId_;
+    }
 }
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
@@ -49,7 +52,29 @@ class BaseNode extends __JSBaseNode__ {
  */
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
 /// <reference path="../../state_mgmt/src/lib/partial_update/pu_viewstack_processor.d.ts" />
-class BuilderNode extends BaseNode {
+class BuilderNode {
+    constructor(uiContext, options) {
+        let jsBuilderNode = new JSBuilderNode(uiContext, options);
+        this._JSBuilderNode = jsBuilderNode;
+        let id = Symbol("BuilderNode");
+        BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.set(id, jsBuilderNode);
+        BuilderNodeFinalizationRegisterProxy.register(this, { name: 'BuilderNode', idOfNode: id });
+    }
+    update(params) {
+        this._JSBuilderNode.update(params);
+    }
+    build(builder, params) {
+        this._JSBuilderNode.build(builder, params);
+        this.nodePtr_ = this._JSBuilderNode.getNodePtr();
+    }
+    reset() {
+        this._JSBuilderNode.reset();
+    }
+    getFrameNode() {
+        return this._JSBuilderNode.getFrameNode();
+    }
+}
+class JSBuilderNode extends BaseNode {
     constructor(uiContext, options) {
         super(uiContext, options);
         this.childrenWeakrefMap_ = new Map();
@@ -249,7 +274,47 @@ class BuilderNode extends BaseNode {
         this.purgeDeletedElmtIds();
         branchfunc();
     }
+    getNodePtr() {
+        return this.nodePtr_;
+    }
+    reset() {
+        this.nodePtr_ = null;
+        super.reset();
+        if (this.frameNode_ !== undefined && this.frameNode_ !== null) {
+            this.frameNode_.setNodePtr(null);
+        }
+    }
 }
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+class BuilderNodeFinalizationRegisterProxy {
+    constructor() {
+        this.finalizationRegistry_ = new FinalizationRegistry((heldValue) => {
+            if (heldValue.name === "BuilderNode") {
+                const builderNode = BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.get(heldValue.idOfNode);
+                BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.delete(heldValue.idOfNode);
+                builderNode.reset();
+            }
+        });
+    }
+    static register(target, heldValue) {
+        BuilderNodeFinalizationRegisterProxy.instance_.finalizationRegistry_.register(target, heldValue);
+    }
+}
+BuilderNodeFinalizationRegisterProxy.instance_ = new BuilderNodeFinalizationRegisterProxy();
+BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_ = new Map();
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -299,14 +364,14 @@ class NodeController {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class FrameNode extends BaseNode {
+class FrameNode {
     constructor(uiContext, type) {
-        super(uiContext);
         this.renderNode_ = new RenderNode("FrameNode");
         if (type == "BuilderNode") {
             return;
         }
-        this.nodePtr_ = this.createRenderNode();
+        this.baseNode_ = new BaseNode(uiContext);
+        this.nodePtr_ = this.baseNode_.createRenderNode();
         this.renderNode_.setNodePtr(this.nodePtr_);
     }
     getRenderNode() {
@@ -339,9 +404,8 @@ class FrameNode extends BaseNode {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class RenderNode extends __JSBaseNode__ {
+class RenderNode {
     constructor(type) {
-        super();
         this.nodePtr = null;
         this.childrenList = [];
         this.parentRenderNode = null;
@@ -365,7 +429,8 @@ class RenderNode extends __JSBaseNode__ {
         if (type === "FrameNode") {
             return;
         }
-        this.nodePtr = this.createRenderNode();
+        this.baseNode_ = new __JSBaseNode__();
+        this.nodePtr = this.baseNode_.createRenderNode();
     }
     set backgroundColor(color) {
         this.backgroundColorValue = this.checkUndefinedOrNullWithDefaultValue(color, 0);
