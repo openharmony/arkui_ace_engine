@@ -3489,10 +3489,17 @@ void RichEditorPattern::InitTouchEvent()
 
 void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
+    auto touchType = info.GetTouches().front().GetTouchType();
     if (SelectOverlayIsOn()) {
+        if (touchType == TouchType::MOVE) {
+            selectMenuInfo_.menuIsShow = false;
+            selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
+        } else if (touchType == TouchType::UP) {
+            selectMenuInfo_.menuIsShow = true;
+            selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
+        }
         return;
     }
-    auto touchType = info.GetTouches().front().GetTouchType();
     if (touchType == TouchType::DOWN) {
     } else if (touchType == TouchType::UP) {
         isMousePressed_ = false;
@@ -4690,7 +4697,11 @@ void RichEditorPattern::MoveCaretToContentRect(const OffsetF& caretOffset, float
         return;
     }
     if (LessNotEqual(caretOffset.GetY(), contentRect.GetY())) {
-        OnScrollCallback(contentRect.GetY() - caretOffset.GetY(), SCROLL_FROM_NONE);
+        if (LessOrEqual(caretOffset.GetX(), GetTextRect().GetX())) {
+            OnScrollCallback(contentRect.GetY() - caretOffset.GetY() + caretHeight, SCROLL_FROM_NONE);
+        } else {
+            OnScrollCallback(contentRect.GetY() - caretOffset.GetY(), SCROLL_FROM_NONE);
+        }
     } else if (GreatNotEqual(caretOffset.GetY() + caretHeight, contentRect.Bottom())) {
         OnScrollCallback(contentRect.Bottom() - caretOffset.GetY() - caretHeight, SCROLL_FROM_NONE);
     }
