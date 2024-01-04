@@ -27,6 +27,9 @@ GridLayoutRangeSolver::GridLayoutRangeSolver(GridLayoutInfo* info, LayoutWrapper
 using Result = GridLayoutRangeSolver::StartingRowInfo;
 Result GridLayoutRangeSolver::FindStartingRow(float mainGap)
 {
+    if (info_->gridMatrix_.empty()) {
+        return { 0, 0.0f };
+    }
     // Negative offset implies scrolling down, so we can start from the previous startIndex_.
     // Otherwise, we have to restart from Row 0 because of irregular items.
     if (info_->currentOffset_ <= 0.0f) {

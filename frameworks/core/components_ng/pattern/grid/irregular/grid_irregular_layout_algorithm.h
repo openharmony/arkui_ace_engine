@@ -57,12 +57,6 @@ private:
     void MeasureOnJump(float mainSize);
 
     /**
-     * @brief Fills the content with GridItems up to the target length.
-     * @param targetLen The target main-axis length to fill.
-     */
-    void FillWithItems(float targetLen);
-
-    /**
      * @brief Performs the layout of the children based on the main offset.
      * @param mainOffset The main offset of the layout.
      */
@@ -101,10 +95,13 @@ private:
     /**
      * @brief Prepares GridLayoutInfo::lineHeightMap_ using GridIrregularFiller.
      *
+     * If the algorithm identifies that mainSize can't be filled with the current scrollAlign_ and jumpLineIdx, these
+     * params will be adjusted. For instance, jumping to the last line with ScrollAlign::START isn't possible.
+     *
      * @param mainSize The main-axis length of the grid.
-     * @param jumpLineIdx The line index to jump to.
+     * @param jumpLineIdx The line index to jump to, can be adjusted during the function call.
      */
-    void PrepareLineHeight(float mainSize, int32_t jumpLineIdx);
+    void PrepareLineHeight(float mainSize, int32_t& jumpLineIdx);
 
     LayoutWrapper* wrapper_ = nullptr;
 
