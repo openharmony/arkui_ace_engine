@@ -902,7 +902,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
         endMainPos_ = currentEndPos + contentEndOffset_;
         startMainPos_ = endMainPos_ - contentMainSize_;
         auto firstItemTop = itemPosition_.begin()->second.startPos;
-        if (GreatNotEqual(firstItemTop, startMainPos_) && itemPosition_.begin()->second.isGroup) {
+        if (itemPosition_.begin()->second.isGroup) {
             AdjustPostionForListItemGroup(layoutWrapper, axis_, GetStartIndex(), true);
             firstItemTop = itemPosition_.begin()->second.startPos;
         }
