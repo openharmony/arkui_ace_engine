@@ -175,6 +175,7 @@ void WindowSceneHelper::IsWindowSceneCloseKeyboard(RefPtr<FrameNode> frameNode)
             if (infApiRes || curIsShown) {
                 TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Shown.");
                 inputMethod->RequestHideInput();
+                inputMethod->Close();
                 TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
             }
         }

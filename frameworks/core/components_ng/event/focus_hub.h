@@ -434,6 +434,8 @@ public:
 
     static void PushPageCloseKeyboard();
 
+    static void NavCloseKeyboard();
+
     BlurReason GetBlurReason() const
     {
         return blurReason_;

@@ -1112,9 +1112,22 @@ void FocusHub::IsCloseKeyboard(RefPtr<FrameNode> frameNode)
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
-            inputMethod->RequestHideInput();
             inputMethod->Close();
         }
+    }
+#endif
+}
+
+void FocusHub::NavCloseKeyboard()
+{
+#if defined (ENABLE_STANDARD_INPUT)
+    // If Nav, close it
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nav CloseKeyboard FrameNode notNeedSoftKeyboard.");
+    auto inputMethod = MiscServices::InputMethodController::GetInstance();
+    if (inputMethod) {
+        inputMethod->RequestHideInput();
+        inputMethod->Close();
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nav CloseKeyboard SoftKeyboard Closes Successfully.");
     }
 #endif
 }
