@@ -82,6 +82,7 @@ bool SystemProperties::rosenBackendEnabled_ = false;
 bool SystemProperties::rosenBackendEnabled_ = true;
 #endif
 bool SystemProperties::enableScrollableItemPool_ = false;
+bool SystemProperties::navigationBlurEnabled_ = true;
 
 void SystemProperties::InitDeviceType(DeviceType type)
 {
@@ -252,5 +253,10 @@ bool SystemProperties::Is24HourClock()
 bool SystemProperties::GetDisplaySyncSkipEnabled()
 {
     return true;
+}
+
+bool SystemProperties::GetNavigationBlurEnabled()
+{
+    return navigationBlurEnabled_;
 }
 } // namespace OHOS::Ace
