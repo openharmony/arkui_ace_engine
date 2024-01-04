@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/pattern/text/symbol_span_model_ng.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #undef private
@@ -68,6 +69,15 @@ constexpr int32_t AI_SPAN_START = 7;
 constexpr int32_t AI_SPAN_END = 18;
 constexpr int32_t AI_SPAN_START_II = 24;
 constexpr int32_t AI_SPAN_END_II = 37;
+const uint32_t SYMBOL_ID = 1;
+std::vector<Color> SYMBOL_COLOR = { Color::FromRGB(255, 100, 100) };
+std::vector<Color> SYMBOL_COLOR_LIST = { Color::FromRGB(255, 100, 100), Color::FromRGB(255, 255, 100) };
+const uint32_t RENDER_STRATEGY_SINGLE = 0;
+const uint32_t RENDER_STRATEGY_MULTI_COLOR = 1;
+const uint32_t RENDER_STRATEGY_MULTI_OPACITY = 2;
+const uint32_t EFFECT_STRATEGY_NONE = 0;
+const uint32_t EFFECT_STRATEGY_SCALE = 1;
+const uint32_t EFFECT_STRATEGY_HIERARCHICAL = 2;
 } // namespace
 
 class SpanTestNg : public testing::Test {};
@@ -803,5 +813,161 @@ HWTEST_F(SpanTestNg, UpdateTextStyleForAISpan001, TestSize.Level1)
 
     spanNode->spanItem_->UpdateTextStyleForAISpan(spanContent, paragraph, textStyle);
     EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
+}
+
+/**
+ * @tc.name: SymbolSpanPropertyTest001
+ * @tc.desc: Test fontSize and fonColor property of symbolspan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SymbolSpanPropertyTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol span node
+     */
+    SymbolSpanModelNG symbolSpanModelNG;
+    symbolSpanModelNG.Create(SYMBOL_ID);
+
+    /**
+     * @tc.steps: step2. get span node
+     */
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step3. test fontSize property
+     */
+    symbolSpanModelNG.SetFontSize(FONT_SIZE_VALUE);
+    EXPECT_EQ(spanNode->GetFontSize(), FONT_SIZE_VALUE);
+
+    /**
+     * @tc.steps: step4. test fontColor property
+     */
+    symbolSpanModelNG.SetFontColor(SYMBOL_COLOR);
+    EXPECT_EQ(spanNode->GetSymbolColorList(), SYMBOL_COLOR);
+
+    symbolSpanModelNG.SetFontColor(SYMBOL_COLOR_LIST);
+    EXPECT_EQ(spanNode->GetSymbolColorList(), SYMBOL_COLOR_LIST);
+}
+
+/**
+ * @tc.name: SymbolSpanPropertyTest002
+ * @tc.desc: Test fontWeight property of symbolspan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SymbolSpanPropertyTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol span node
+     */
+    SymbolSpanModelNG symbolSpanModelNG;
+    symbolSpanModelNG.Create(SYMBOL_ID);
+
+    /**
+     * @tc.steps: step2. get span node
+     */
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step3. test fontWeight property
+     */
+    symbolSpanModelNG.SetFontWeight(FontWeight::LIGHTER);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::LIGHTER);
+    symbolSpanModelNG.SetFontWeight(FontWeight::REGULAR);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::REGULAR);
+    symbolSpanModelNG.SetFontWeight(FontWeight::NORMAL);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::NORMAL);
+    symbolSpanModelNG.SetFontWeight(FontWeight::MEDIUM);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::MEDIUM);
+    symbolSpanModelNG.SetFontWeight(FontWeight::BOLD);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::BOLD);
+    symbolSpanModelNG.SetFontWeight(FontWeight::BOLDER);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::BOLDER);
+
+    symbolSpanModelNG.SetFontWeight(FontWeight::W100);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W100);
+    symbolSpanModelNG.SetFontWeight(FontWeight::W200);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W200);
+    symbolSpanModelNG.SetFontWeight(FontWeight::W300);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W300);
+    symbolSpanModelNG.SetFontWeight(FontWeight::W400);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W400);
+    symbolSpanModelNG.SetFontWeight(FontWeight::W500);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W500);
+    symbolSpanModelNG.SetFontWeight(FontWeight::W600);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W600);
+    symbolSpanModelNG.SetFontWeight(FontWeight::W700);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W700);
+    symbolSpanModelNG.SetFontWeight(FontWeight::W800);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W800);
+    symbolSpanModelNG.SetFontWeight(FontWeight::W900);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W900);
+}
+
+/**
+ * @tc.name: SymbolSpanPropertyTest003
+ * @tc.desc: Test render strategy and effect strategy of symbolspan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SymbolSpanPropertyTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol span node
+     */
+    SymbolSpanModelNG symbolSpanModelNG;
+    symbolSpanModelNG.Create(SYMBOL_ID);
+
+    /**
+     * @tc.steps: step2. get span node
+     */
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step3. test symbol rendering strategy property
+     */
+    symbolSpanModelNG.SetSymbolRenderingStrategy(RENDER_STRATEGY_SINGLE);
+    EXPECT_EQ(spanNode->GetSymbolRenderingStrategy(), RENDER_STRATEGY_SINGLE);
+    symbolSpanModelNG.SetSymbolRenderingStrategy(RENDER_STRATEGY_MULTI_COLOR);
+    EXPECT_EQ(spanNode->GetSymbolRenderingStrategy(), RENDER_STRATEGY_MULTI_COLOR);
+    symbolSpanModelNG.SetSymbolRenderingStrategy(RENDER_STRATEGY_MULTI_OPACITY);
+    EXPECT_EQ(spanNode->GetSymbolRenderingStrategy(), RENDER_STRATEGY_MULTI_OPACITY);
+
+    /**
+     * @tc.steps: step4. test symbol effect strategy property
+     */
+    symbolSpanModelNG.SetSymbolEffect(EFFECT_STRATEGY_NONE);
+    EXPECT_EQ(spanNode->GetSymbolEffectStrategy(), EFFECT_STRATEGY_NONE);
+    symbolSpanModelNG.SetSymbolEffect(EFFECT_STRATEGY_SCALE);
+    EXPECT_EQ(spanNode->GetSymbolEffectStrategy(), EFFECT_STRATEGY_SCALE);
+    symbolSpanModelNG.SetSymbolEffect(EFFECT_STRATEGY_HIERARCHICAL);
+    EXPECT_EQ(spanNode->GetSymbolEffectStrategy(), EFFECT_STRATEGY_HIERARCHICAL);
+}
+
+/**
+ * @tc.name: SymbolSpanCreateTest001
+ * @tc.desc: Test render strategy and effect strategy of symbolspan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SymbolSpanCreateTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol span node
+     */
+    SymbolSpanModelNG symbolSpanModelNG;
+    symbolSpanModelNG.Create(SYMBOL_ID);
+
+    /**
+     * @tc.steps: step2. get span node
+     */
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step3. test symbol id
+     */
+    auto symbolId = spanNode->spanItem_->GetSymbolUnicode();
+    EXPECT_EQ(symbolId, SYMBOL_ID);
 }
 } // namespace OHOS::Ace::NG
