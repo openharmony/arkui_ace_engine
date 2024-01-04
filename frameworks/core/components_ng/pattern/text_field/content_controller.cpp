@@ -51,7 +51,7 @@ std::string ContentController::PreprocessString(int32_t startIndex, int32_t endI
         if (content_.find(specialChar) != std::string::npos && value.find(specialChar) != std::string::npos &&
             GetSelectedValue(startIndex, endIndex).find(specialChar) == std::string::npos) {
             tmp.erase(
-                std::remove_if(tmp.begin(), tmp.end(), [&specialChar](char c){ return c == specialChar; }), tmp.end());
+                std::remove_if(tmp.begin(), tmp.end(), [&specialChar](char c) { return c == specialChar; }), tmp.end());
         }
     }
     auto wideText = GetWideText();
