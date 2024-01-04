@@ -1409,7 +1409,9 @@ void CustomPaintPaintMethod::Arc(PaintWrapper* paintWrapper, const ArcParam& par
     }
 #ifndef USE_ROSEN_DRAWING
     auto rect = SkRect::MakeLTRB(left, top, right, bottom);
-    if (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && !NearEqual(startAngle, endAngle)) {
+    if (!NearEqual(startAngle, endAngle) &&
+        (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) ||
+            NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), FULL_CIRCLE_ANGLE))) {
         // draw circle
         double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
         skPath_.arcTo(rect, SkDoubleToScalar(startAngle), SkDoubleToScalar(half), false);
@@ -1425,7 +1427,9 @@ void CustomPaintPaintMethod::Arc(PaintWrapper* paintWrapper, const ArcParam& par
 #else
     RSPoint point1(left, top);
     RSPoint point2(right, bottom);
-    if (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) && !NearEqual(startAngle, endAngle)) {
+    if (!NearEqual(startAngle, endAngle) &&
+        (NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), 0.0) ||
+            NearEqual(std::fmod(sweepAngle, FULL_CIRCLE_ANGLE), FULL_CIRCLE_ANGLE))) {
         // draw circle
         double half = GreatNotEqual(sweepAngle, 0.0) ? HALF_CIRCLE_ANGLE : -HALF_CIRCLE_ANGLE;
         rsPath_.ArcTo(point1, point2, static_cast<RSScalar>(startAngle), static_cast<RSScalar>(half));
