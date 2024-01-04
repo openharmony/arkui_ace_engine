@@ -184,29 +184,6 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
         panRecognizerNG_->SetOnActionEnd(actionEnd);
         panRecognizerNG_->SetOnActionCancel(actionCancel);
     }
-
-    // use RawRecognizer to receive next touch down event to stop animation.
-    rawRecognizer_ = AceType::MakeRefPtr<RawRecognizer>();
-
-    rawRecognizer_->SetOnTouchDown([weakScroll = AceType::WeakClaim(this)](const TouchEventInfo&) {
-        auto scroll = weakScroll.Upgrade();
-        if (scroll) {
-            scroll->HandleTouchDown();
-        }
-    });
-    rawRecognizer_->SetOnTouchUp([weakScroll = AceType::WeakClaim(this)](const TouchEventInfo&) {
-        auto scroll = weakScroll.Upgrade();
-        if (scroll) {
-            scroll->HandleTouchUp();
-        }
-    });
-    rawRecognizer_->SetOnTouchCancel([weakScroll = AceType::WeakClaim(this)](const TouchEventInfo&) {
-        auto scroll = weakScroll.Upgrade();
-        if (scroll) {
-            scroll->HandleTouchCancel();
-        }
-    });
-
     available_ = true;
 }
 
