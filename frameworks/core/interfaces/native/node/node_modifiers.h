@@ -1368,6 +1368,8 @@ struct ArkUIScrollModifier {
     void (*resetScrollScrollBarWidth)(ArkUINodeHandle node);
     void (*setScrollEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, bool alwaysEnabled);
     void (*resetScrollEdgeEffect)(ArkUINodeHandle node);
+    void (*setEnableScrollInteraction)(ArkUINodeHandle node, bool enableScrollInteraction);
+    void (*resetEnableScrollInteraction)(ArkUINodeHandle node);
 };
 
 struct ArkUIListItemModifier {

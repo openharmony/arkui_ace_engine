@@ -100,6 +100,9 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnScroll,
+    NodeModifier::SetOnScrollFrameBegin,
+    NodeModifier::SetOnScrollStart,
+    NodeModifier::SetOnScrollStop
 };
 
 const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
