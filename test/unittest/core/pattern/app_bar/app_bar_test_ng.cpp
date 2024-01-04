@@ -648,6 +648,6 @@ HWTEST_F(AppBarTestNg, UpdateRowLayout001, TestSize.Level1)
     EXPECT_EQ(textLayoutProperty->GetMarginProperty()->left.value(), CalcLength(MARGIN_TEXT_LEFT));
     EXPECT_EQ(buttonLayoutProperty->GetMarginProperty()->right.value(), CalcLength(MARGIN_BACK_BUTTON_RIGHT));
     EXPECT_EQ(buttonLayoutProperty->GetMarginProperty()->left.value(), CalcLength(MARGIN_BUTTON));
-    EXPECT_EQ(renderContext->GetTransformScale(), VectorF(1.0f, 1.0f));	
+    EXPECT_EQ(renderContext->GetTransformScale(), VectorF(1.0f, 1.0f));
 }
 } // namespace OHOS::Ace::NG
