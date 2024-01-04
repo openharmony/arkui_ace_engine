@@ -1206,18 +1206,15 @@ void WebDelegate::SetPortMessageCallback(std::string& port, std::function<void(c
     }
 }
 
-void WebDelegate::RequestFocus()
+bool WebDelegate::RequestFocus()
 {
     auto context = context_.Upgrade();
-    if (!context) {
-        return;
-    }
-    context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this)]() {
+    CHECK_NULL_RETURN(context, false);
+    bool result = false;
+    context->GetTaskExecutor()->PostSyncTask(
+        [weak = WeakClaim(this), &result]() {
             auto delegate = weak.Upgrade();
-            if (!delegate) {
-                return;
-            }
+            CHECK_NULL_VOID(delegate);
 
             if (Container::IsCurrentUseNewPipeline()) {
                 auto webPattern = delegate->webPattern_.Upgrade();
@@ -1227,14 +1224,16 @@ void WebDelegate::RequestFocus()
                 auto focusHub = eventHub->GetOrCreateFocusHub();
                 CHECK_NULL_VOID(focusHub);
 
-                focusHub->RequestFocusImmediately(true);
+                result = focusHub->RequestFocusImmediately(true);
+                return;
             }
 
             auto webCom = delegate->webComponent_.Upgrade();
             CHECK_NULL_VOID(webCom);
-            webCom->RequestFocus();
+            result = webCom->RequestFocus();
         },
         TaskExecutor::TaskType::PLATFORM);
+    return result;
 }
 
 void WebDelegate::SearchAllAsync(const std::string& searchStr)
