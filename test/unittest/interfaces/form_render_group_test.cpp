@@ -102,8 +102,8 @@ HWTEST_F(FormRenderGroupTest, FormRenderGroupTest_004, TestSize.Level1)
     auto eventHandler = std::make_shared<OHOS::AppExecFwk::EventHandler>(eventRunner);
     auto group = FormRendererGroup::Create(nullptr, nullptr, eventHandler);
     EXPECT_TRUE(group);
-    std::string Id = "123456";
-    group->DeleteForm(Id);
+    std::string id = "123456";
+    group->DeleteForm(id);
     GTEST_LOG_(INFO) << "FormRenderGroupTest_004 end";
 }
 /**
