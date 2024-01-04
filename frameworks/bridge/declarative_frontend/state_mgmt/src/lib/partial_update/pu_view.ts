@@ -115,10 +115,10 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // flag for initial rendering being done
   private isInitialRenderDone: boolean = false;
 
-  // indicates the currently rendered or rendered UINode's elmtId
+  // indicates the currently rendered or rendered UINode's elmtIds
   // or -1 if none is currently rendering
-  // isRenderInProgress==true always when renderingOfElementIdOnGoing_>=0 
-  private currentlyRenderedElmtId_ : number = -1;
+  // isRenderInProgress == true always when currentlyRenderedElmtIdStack_.length >= 0 
+  private currentlyRenderedElmtIdStack_ : Array<number> = new Array<number> ();
 
   // static flag for paused rendering
   // when paused, getCurrentlyRenderedElmtId() will return -1
@@ -897,7 +897,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
    * set in observeComponentCreation(2)
    */
   public getCurrentlyRenderedElmtId() {
-    return ViewPU.renderingPaused ? -1 : this.currentlyRenderedElmtId_;
+    return ViewPU.renderingPaused || this.currentlyRenderedElmtIdStack_.length == 0 ? -1 : this.currentlyRenderedElmtIdStack_.slice(-1)[0];
   }
 
   public static pauseRendering() {
@@ -917,9 +917,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
     }
     const updateFunc = (elmtId: number, isFirstRender: boolean) => {
       stateMgmtConsole.debug(`${this.debugInfo()}: ${isFirstRender ? `First render` : `Re-render/update`} start ....`);
-      this.currentlyRenderedElmtId_ = elmtId;
+      this.currentlyRenderedElmtIdStack_.push(elmtId);
       compilerAssignedUpdateFunc(elmtId, isFirstRender);
-      this.currentlyRenderedElmtId_ = -1;
+      this.currentlyRenderedElmtIdStack_.pop();
       stateMgmtConsole.debug(`${this.debugInfo()}: ${isFirstRender ? `First render` : `Re-render/update`} - DONE ....`);
     }
 
@@ -956,12 +956,12 @@ abstract class ViewPU extends NativeViewPartialUpdate
       this.syncInstanceId();
       stateMgmtConsole.debug(`${this.debugInfo()}: ${isFirstRender ? `First render` : `Re-render/update`} start ....`);
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-      this.currentlyRenderedElmtId_ = elmtId;
+      this.currentlyRenderedElmtIdStack_.push(elmtId);
       compilerAssignedUpdateFunc(elmtId, isFirstRender);
       if (!isFirstRender) {
         _popFunc();
       }
-      this.currentlyRenderedElmtId_ = -1;
+      this.currentlyRenderedElmtIdStack_.pop();
       ViewStackProcessor.StopGetAccessRecording();
       stateMgmtConsole.debug(`${this.debugInfo()}: ${isFirstRender ? `First render` : `Re-render/update`} - DONE ....`);
       this.restoreInstanceId();
@@ -982,7 +982,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       stateMgmtConsole.applicationError(`${this.debugInfo()} has error in update func: ${(error as Error).message}`)
       throw error;
     }
-    stateMgmtConsole.debug(`${this.debugInfo()} is initial rendering elmtId ${this.id__()}, tag: ${_componentName}, and updateFuncByElmtId size :${this.updateFuncByElmtId.size}`);
+    stateMgmtConsole.debug(`${this.debugInfo()} is initial rendering elmtId ${elmtId}, tag: ${_componentName}, and updateFuncByElmtId size :${this.updateFuncByElmtId.size}`);
   }
 
   getOrCreateRecycleManager(): RecycleManager {
