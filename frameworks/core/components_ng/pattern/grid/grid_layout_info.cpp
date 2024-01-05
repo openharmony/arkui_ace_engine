@@ -473,4 +473,20 @@ bool GridLayoutInfo::GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayo
     }
     return true;
 }
+
+void GridLayoutInfo::ClearMapsToEnd(int32_t idx)
+{
+    auto gridIt = gridMatrix_.lower_bound(idx);
+    gridMatrix_.erase(gridIt, gridMatrix_.end());
+    auto lineIt = lineHeightMap_.lower_bound(idx);
+    lineHeightMap_.erase(lineIt, lineHeightMap_.end());
+}
+
+void GridLayoutInfo::ClearMapsFromStart(int32_t idx)
+{
+    auto gridIt = gridMatrix_.lower_bound(idx);
+    gridMatrix_.erase(gridMatrix_.begin(), gridIt);
+    auto lineIt = lineHeightMap_.lower_bound(idx);
+    lineHeightMap_.erase(lineHeightMap_.begin(), lineIt);
+}
 } // namespace OHOS::Ace::NG

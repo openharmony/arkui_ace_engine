@@ -110,6 +110,20 @@ struct GridLayoutInfo {
      */
     int32_t FindItemInRange(int32_t target) const;
 
+    /**
+     * @brief clears gridMatrix_ and lineHeightMap_ starting from line [idx]
+     *
+     * @param idx starting line index
+     */
+    void ClearMapsToEnd(int32_t idx);
+
+    /**
+     * @brief clears gridMatrix_ and lineHeightMap_ in range [0, idx)
+     *
+     * @param idx ending line index, exclusive.
+     */
+    void ClearMapsFromStart(int32_t idx);
+
     void ResetPositionFlags()
     {
         reachEnd_ = false;
