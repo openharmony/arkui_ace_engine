@@ -368,7 +368,6 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
         CloseSelectOverlay();
         ResetSelection();
     }
-    FlushTextForDisplay();
     return spanIndex;
 }
 
@@ -433,7 +432,6 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
         CloseSelectOverlay();
         ResetSelection();
     }
-    FlushTextForDisplay();
     placeholderSpanNode->MarkModifyDone();
     placeholderSpanNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     host->MarkModifyDone();
@@ -529,7 +527,6 @@ int32_t RichEditorPattern::AddTextSpanOperation(
         ResetSelection();
     }
     SpanNodeFission(spanNode);
-    FlushTextForDisplay();
     return spanIndex;
 }
 
@@ -588,7 +585,6 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
     spanItem->content = "  ";
     spanItem->SetTextStyle(options.style);
     AddSpanItem(spanItem, offset);
-    FlushTextForDisplay();
     if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
         SetCaretPosition(options.offset.value() + SYMBOL_SPAN_LENGTH + moveLength_);
     } else {
@@ -663,7 +659,6 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options)
     if (childrens.empty() || GetTextContentLength() == 0) {
         SetCaretPosition(0);
     }
-    FlushTextForDisplay();
 }
 
 void RichEditorPattern::DeleteSpanByRange(int32_t start, int32_t end, SpanPositionInfo info)
@@ -2403,7 +2398,6 @@ void RichEditorPattern::InsertValueToSpanNode(
     textTemp.insert(info.GetOffsetInSpan(), insertValueTemp);
     text = StringUtils::ToString(textTemp);
     spanNode->UpdateContent(text);
-    FlushTextForDisplay();
     spanItem->position += static_cast<int32_t>(StringUtils::ToWstring(insertValue).length());
 }
 
@@ -2477,7 +2471,6 @@ RefPtr<SpanNode> RichEditorPattern::InsertValueToBeforeSpan(
             spanItemAfter->hasResourceDecorationColor = spanItem->hasResourceDecorationColor;
             AddSpanItem(spanItemAfter, host->GetChildIndex(spanNodeBefore) + 1);
             SpanNodeFission(spanNodeAfter);
-            FlushTextForDisplay();
             return spanNodeAfter;
         }
     } else {
@@ -2485,7 +2478,6 @@ RefPtr<SpanNode> RichEditorPattern::InsertValueToBeforeSpan(
         spanNodeBefore->UpdateContent(text);
         spanItem->position += static_cast<int32_t>(StringUtils::ToWstring(insertValue).length());
     }
-    FlushTextForDisplay();
     return spanNodeBefore;
 }
 
@@ -2501,7 +2493,6 @@ void RichEditorPattern::CreateTextSpanNode(
     spanItem->hasResourceFontColor = true;
     spanItem->hasResourceDecorationColor = true;
     spanNode->UpdateContent(insertValue);
-    FlushTextForDisplay();
     AddSpanItem(spanItem, info.GetSpanIndex());
     if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
         UpdateTextStyle(spanNode, typingStyle_.value(), typingTextStyle_.value());
@@ -4935,44 +4926,6 @@ void RichEditorPattern::StopAutoScroll()
     auto scrollBar = GetScrollBar();
     if (scrollBar) {
         scrollBar->PlayScrollBarDisappearAnimation();
-    }
-}
-
-void RichEditorPattern::FlushTextForDisplay()
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    const auto& children = host->GetChildren();
-    if (children.empty()) {
-        return;
-    }
-    placeholderCount_ = 0;
-    std::stack<RefPtr<UINode>> nodes;
-    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
-        nodes.push(*iter);
-    }
-    if (!nodes.empty()) {
-        textForDisplay_.clear();
-    }
-    while (!nodes.empty()) {
-        auto current = nodes.top();
-        nodes.pop();
-        if (!current) {
-            continue;
-        }
-        auto spanNode = DynamicCast<SpanNode>(current);
-        if (spanNode && current->GetTag() != V2::PLACEHOLDER_SPAN_ETS_TAG) {
-            textForDisplay_.append(spanNode->GetSpanItem()->content);
-        } else if (current->GetTag() == V2::IMAGE_ETS_TAG || current->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
-            placeholderCount_++;
-        }
-        if (current->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
-            continue;
-        }
-        const auto& nextChildren = current->GetChildren();
-        for (auto iter = nextChildren.rbegin(); iter != nextChildren.rend(); ++iter) {
-            nodes.push(*iter);
-        }
     }
 }
 
