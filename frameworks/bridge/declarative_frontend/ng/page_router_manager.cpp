@@ -211,6 +211,10 @@ void PageRouterManager::PushNamedRoute(const RouterPageInfo& target)
     CleanPageOverlay();
     if (target.routerMode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(target.url);
+        auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(target.url);
+        if (!pagePath.empty()) {
+            pageInfo = FindPageInStack(pagePath);
+        }
         if (pageInfo.second) {
             // find page in stack, move postion and update params.
             MovePageToFront(pageInfo.first, pageInfo.second, target, true);
