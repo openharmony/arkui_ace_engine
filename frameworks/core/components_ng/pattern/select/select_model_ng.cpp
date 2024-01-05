@@ -40,8 +40,6 @@ void SetSelectDefaultSize(const RefPtr<FrameNode>& select)
 }
 
 static constexpr Dimension SELECT_MARGIN_VP = 8.0_vp;
-static constexpr Dimension SELECT_MIN_SPACE = 8.0_vp;
-static constexpr Dimension SELECT_HORIZONTAL_GAP = 24.0_vp;
 } // namespace
 
 void SelectModelNG::Create(const std::vector<SelectParam>& params)
@@ -250,25 +248,7 @@ void SelectModelNG::SetWidth(Dimension& value)
     if (LessNotEqual(value.Value(), 0.0)) {
         value.SetValue(0.0);
     }
-    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
-    CHECK_NULL_VOID(pattern);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<SelectTheme>();
-    CHECK_NULL_VOID(theme);
-    
-    if (value.Unit() == DimensionUnit::PERCENT) {
-        ViewAbstract::SetWidth(NG::CalcLength(value));
-        return;
-    }
-    
-    double minWidth = 2 * pattern->GetFontSize().ConvertToVp() + SELECT_HORIZONTAL_GAP.ConvertToVp() +
-        theme->GetSpinnerWidth().ConvertToVp() + SELECT_MIN_SPACE.ConvertToVp();
-    if (value.ConvertToVp() < minWidth) {
-        pattern->SetSpace(SELECT_MIN_SPACE);
-    } else {
-        ViewAbstract::SetWidth(NG::CalcLength(value));
-    }
+    ViewAbstract::SetWidth(NG::CalcLength(value));
 }
 
 void SelectModelNG::SetHeight(Dimension& value)
