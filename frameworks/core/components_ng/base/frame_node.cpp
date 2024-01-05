@@ -328,6 +328,9 @@ FrameNode::~FrameNode()
     TriggerVisibleAreaChangeCallback(true);
     visibleAreaUserCallbacks_.clear();
     visibleAreaInnerCallbacks_.clear();
+    if (eventHub_) {
+        eventHub_->ClearOnAreaChangedInnerCallbacks();
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     if (pipeline) {
         pipeline->RemoveOnAreaChangeNode(GetId());
@@ -892,12 +895,7 @@ void FrameNode::ClearUserOnAreaChange()
 
 void FrameNode::SetOnAreaChangeCallback(OnAreaChangedFunc&& callback)
 {
-    if (!lastFrameRect_) {
-        lastFrameRect_ = std::make_unique<RectF>();
-    }
-    if (!lastParentOffsetToWindow_) {
-        lastParentOffsetToWindow_ = std::make_unique<OffsetF>();
-    }
+    InitLastArea();
     eventHub_->SetOnAreaChanged(std::move(callback));
 }
 
@@ -906,12 +904,19 @@ void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
     if (!IsActive()) {
         return;
     }
-    if (eventHub_->HasOnAreaChanged() && lastFrameRect_ && lastParentOffsetToWindow_) {
+    if ((eventHub_->HasOnAreaChanged() || eventHub_->HasInnerOnAreaChanged()) && lastFrameRect_ &&
+        lastParentOffsetToWindow_) {
         auto currFrameRect = geometryNode_->GetFrameRect();
         auto currParentOffsetToWindow = CalculateOffsetRelativeToWindow(nanoTimestamp) - currFrameRect.GetOffset();
         if (currFrameRect != *lastFrameRect_ || currParentOffsetToWindow != *lastParentOffsetToWindow_) {
-            eventHub_->FireOnAreaChanged(
-                *lastFrameRect_, *lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
+            if (eventHub_->HasInnerOnAreaChanged()) {
+                eventHub_->FireInnerOnAreaChanged(
+                    *lastFrameRect_, *lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
+            }
+            if (eventHub_->HasOnAreaChanged()) {
+                eventHub_->FireOnAreaChanged(
+                    *lastFrameRect_, *lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
+            }
             *lastFrameRect_ = currFrameRect;
             *lastParentOffsetToWindow_ = currParentOffsetToWindow;
         }
@@ -3205,6 +3210,16 @@ RefPtr<FrameNode> FrameNode::GetNodeContainer()
         parent = parent->GetParent();
     }
     return AceType::DynamicCast<FrameNode>(parent);
+}
+
+void FrameNode::InitLastArea()
+{
+    if (!lastFrameRect_) {
+        lastFrameRect_ = std::make_unique<RectF>();
+    }
+    if (!lastParentOffsetToWindow_) {
+        lastParentOffsetToWindow_ = std::make_unique<OffsetF>();
+    }
 }
 
 } // namespace OHOS::Ace::NG
