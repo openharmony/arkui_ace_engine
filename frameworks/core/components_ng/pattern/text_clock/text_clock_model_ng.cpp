@@ -100,6 +100,29 @@ void TextClockModelNG::SetFontFamily(const std::vector<std::string>& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, FontFamily, value);
 }
 
+void TextClockModelNG::InitFontDefault(const TextStyle& textStyle)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto textClockLayoutProperty = frameNode->GetLayoutProperty<TextClockLayoutProperty>();
+    CHECK_NULL_VOID(textClockLayoutProperty);
+    if (!textClockLayoutProperty->GetFontSize().has_value()) {
+        SetFontSize(textStyle.GetFontSize());
+    }
+    if (!textClockLayoutProperty->GetFontWeight().has_value()) {
+        SetFontWeight(textStyle.GetFontWeight());
+    }
+    if (!textClockLayoutProperty->GetTextColor().has_value()) {
+        SetTextColor(textStyle.GetTextColor());
+    }
+    if (!textClockLayoutProperty->GetFontFamily().has_value()) {
+        SetFontFamily(textStyle.GetFontFamilies());
+    }
+    if (!textClockLayoutProperty->GetItalicFontStyle().has_value()) {
+        SetItalicFontStyle(textStyle.GetFontStyle());
+    }
+}
+
 void TextClockModelNG::SetFormat(FrameNode* frameNode, const std::string& format)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, Format, format, frameNode);
