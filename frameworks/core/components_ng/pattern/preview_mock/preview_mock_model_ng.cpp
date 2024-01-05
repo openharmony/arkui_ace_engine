@@ -22,7 +22,7 @@
 namespace OHOS::Ace::NG {
 void PreviewMockModelNG::Create(const std::string& content)
 {
-    constexpr double DEFAULT_HEIGHT = 30;
+    constexpr double DEFAULT_HEIGHT = 150;
     const Color bgColor = Color::FromString("#808080");
     constexpr Dimension DEFAULT_FONT_SIZE = 20.0_vp;
     const std::string presentationText("Preview not available for this component.");
