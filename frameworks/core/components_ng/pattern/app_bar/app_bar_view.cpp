@@ -161,6 +161,11 @@ RefPtr<FrameNode> AppBarView::BuildBarLabel()
     textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
     textLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
     textLayoutProperty->UpdateLayoutWeight(1.0f);
+    
+    MarginProperty margin;
+    margin.left = CalcLength(MARGIN_TEXT_LEFT);
+    margin.right = CalcLength(MARGIN_TEXT_RIGHT);
+    textLayoutProperty->UpdateMargin(margin);
 	
     return appBarLabel;
 }
@@ -241,7 +246,10 @@ RefPtr<FrameNode> AppBarView::BuildIconButton(
     buttonLayoutProperty->UpdateBorderRadius(BorderRadiusProperty(butttonRadius));
     buttonLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(appBarTheme->GetIconSize() * 2), CalcLength(appBarTheme->GetIconSize() * 2)));
-
+    MarginProperty margin;
+    margin.left = CalcLength(isBackButton ? MARGIN_BUTTON : -MARGIN_BUTTON);
+    margin.right = CalcLength(isBackButton ? MARGIN_BACK_BUTTON_RIGHT : MARGIN_BUTTON);
+    buttonLayoutProperty->UpdateMargin(margin);
     buttonNode->MarkModifyDone();
     buttonNode->AddChild(imageIcon);
     return buttonNode;
@@ -493,7 +501,6 @@ void AppBarView::UpdateRowLayout()
     if (isRtlSetted == isRtl) {
         return;
     }
-
     CHECK_NULL_VOID(atom_);
     auto row = atom_->GetFirstChild();
     auto label = AceType::DynamicCast<FrameNode>(row->GetChildAtIndex(1));
