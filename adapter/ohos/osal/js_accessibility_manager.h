@@ -266,13 +266,11 @@ private:
     void ProcessParameters(Accessibility::ActionType op, const std::vector<std::string>& params,
         std::map<std::string, std::string>& paramsMap);
 
-    void SearchExtensionElementInfoNG(const SearchParameter& searchParam, const RefPtr<NG::FrameNode>& node,
-        std::list<Accessibility::AccessibilityElementInfo>& infos, Accessibility::AccessibilityElementInfo& parentInfo);
-
     void DumpTreeNodeNG(const RefPtr<NG::FrameNode>& parent, int32_t depth,
         int64_t nodeID, const CommonProperty& commonProperty);
 
-    void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output);
+    void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
+        const RefPtr<PipelineBase>& mainContext);
 
     void FindText(const RefPtr<NG::UINode>& node, std::list<Accessibility::AccessibilityElementInfo>& infos,
         const RefPtr<NG::PipelineContext>& context,
