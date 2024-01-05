@@ -344,9 +344,8 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src)
     loadingCtx_->LoadImageData();
 }
 
-void ImagePattern::LoadAltImage(const RefPtr<ImageLayoutProperty>& imageLayoutProperty)
+void ImagePattern::LoadAltImage(const ImageSourceInfo& altImageSourceInfo)
 {
-    auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
     LoadNotifier altLoadNotifier(CreateDataReadyCallbackForAlt(), CreateLoadSuccessCallbackForAlt(), nullptr);
     if (!altLoadingCtx_ || altLoadingCtx_->GetSourceInfo() != altImageSourceInfo ||
         (altLoadingCtx_ && altImageSourceInfo.IsSvg())) {
@@ -387,7 +386,8 @@ void ImagePattern::LoadImageDataIfNeed()
         });
     }
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
-        LoadAltImage(imageLayoutProperty);
+        auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
+        LoadAltImage(altImageSourceInfo);
     }
 }
 
@@ -893,16 +893,16 @@ void ImagePattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(imageLayoutProperty);
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
+    src.SetIsSystemColorChange(true);
 
     LoadImage(src);
-    loadingCtx_->SetIsSystemColorChange(true);
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
         auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
         if (altLoadingCtx_->GetSourceInfo() == altImageSourceInfo) {
             altLoadingCtx_.Reset();
         }
-        altLoadingCtx_->SetIsSystemColorChange(true);
-        LoadAltImage(imageLayoutProperty);
+        altImageSourceInfo.SetIsSystemColorChange(true);
+        LoadAltImage(altImageSourceInfo);
     }
 }
 

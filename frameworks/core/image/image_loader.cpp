@@ -230,9 +230,10 @@ RefPtr<NG::ImageData> ImageLoader::LoadImageDataFromFileCache(const std::string&
 
 // NG ImageLoader entrance
 RefPtr<NG::ImageData> ImageLoader::GetImageData(
-    const ImageSourceInfo& src, const WeakPtr<PipelineBase>& context, bool queryCache)
+    const ImageSourceInfo& src, const WeakPtr<PipelineBase>& context)
 {
     ACE_FUNCTION_TRACE();
+    bool queryCache = !src.GetIsOnSystemColorChange();
     if (src.IsPixmap()) {
         return LoadDecodedImageData(src, context);
     }

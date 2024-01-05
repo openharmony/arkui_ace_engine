@@ -21,7 +21,7 @@ namespace OHOS::Ace {
 RefPtr<MockImageLoader> g_loader;
 
 RefPtr<NG::ImageData> ImageLoader::GetImageData(
-    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context, bool /*queryCache = true*/)
+    const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context)
 {
     using namespace std::chrono_literals;
     std::this_thread::sleep_for(100ms);
