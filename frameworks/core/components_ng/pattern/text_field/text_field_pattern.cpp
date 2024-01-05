@@ -1364,7 +1364,7 @@ void TextFieldPattern::HandleTouchUp()
         if (!isOnHover_) {
             auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
-            if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
+            if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType() && !IsNormalInlineState()) {
                 renderContext->UpdateBorderRadius(borderRadius_);
             }
             if (layoutProperty->GetShowUnderlineValue(false) && HasFocus() && IsUnspecifiedOrTextType() &&
@@ -1920,10 +1920,21 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
     action_ = GetTextInputActionValue(GetDefaultTextInputAction());
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Keyboard action is %{public}d", action_);
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    // if keyboard attached and keyboard is shown, pull up keyboard again
-    if (needToResetKeyboard && (imeShown_ || isCustomKeyboardAttached_)) {
-        CloseKeyboard(true);
-        RequestKeyboard(false, true, true);
+    if (needToResetKeyboard) {
+        // if keyboard attached and keyboard is shown, pull up keyboard again
+        if (imeShown_ || isCustomKeyboardAttached_) {
+            CloseKeyboard(true);
+            RequestKeyboard(false, true, true);
+            return;
+        }
+#if defined(ENABLE_STANDARD_INPUT)
+        auto inputMethod = MiscServices::InputMethodController::GetInstance();
+        CHECK_NULL_VOID(inputMethod);
+        MiscServices::Configuration config;
+        config.SetEnterKeyType(static_cast<MiscServices::EnterKeyType>(action_));
+        config.SetTextInputType(static_cast<MiscServices::TextInputType>(keyboard_));
+        inputMethod->OnConfigurationChange(config);
+#endif
     }
 #else
     if (needToResetKeyboard && HasConnection()) {
@@ -1932,7 +1943,6 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
     }
 #endif
 }
-
 void TextFieldPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -2005,10 +2015,7 @@ void TextFieldPattern::OnModifyDone()
         if (!barState_.has_value()) {
             barState_ = barState;
         }
-        scrollBarVisible_ = true;
-        if (barState == DisplayMode::OFF) {
-            scrollBarVisible_ = false;
-        }
+        scrollBarVisible_ = barState != DisplayMode::OFF;
         SetScrollBar(barState == DisplayMode::OFF ? DisplayMode::ON : barState);
         auto scrollBar = GetScrollBar();
         if (scrollBar) {
@@ -2040,17 +2047,14 @@ void TextFieldPattern::OnModifyDone()
         isTextInput_ = true;
     }
     auto inputStyle = paintProperty->GetInputStyleValue(InputStyle::DEFAULT);
-    if (!inlineState_.saveInlineState) {
-        inlineState_.saveInlineState = false;
-        SaveInlineStates();
-    }
-    if (!HasFocus() && inlineState_.saveInlineState) {
+    if (!inlineState_.saveInlineState || !HasFocus()) {
         SaveInlineStates();
     }
     if (HasFocus() && IsNormalInlineState()) {
-        preInputStyle_ == InputStyle::DEFAULT ? ApplyInlineStates(true) : ApplyInlineStates(false);
+        ApplyInlineStates(preInputStyle_ == InputStyle::DEFAULT);
     }
-    if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
+    if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()
+        && (!IsNormalInlineState() || !HasFocus())) {
         ApplyUnderlineStates();
     }
     if (preInputStyle_ == InputStyle::INLINE && inputStyle == InputStyle::DEFAULT) {
@@ -3001,6 +3005,14 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     auto windowRect = pipeline->GetCurrentWindowRect();
     double positionY = (tmpHost->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset()).GetY() + windowRect.Top();
     double height = frameRect_.Height();
+
+    if (IsNormalInlineState()) {
+        auto manager = pipeline->GetSafeAreaManager();
+        const double HEIGHT_OFFSET = theme->GetInlineBorderWidth().ConvertToPx() * 2 + 1;
+        height = std::max(static_cast<double>(inlineMeasureItem_.inlineSizeHeight) + HEIGHT_OFFSET, height);
+        positionY += frameRect_.Height();
+    }
+
     auto uiExtMgr = pipeline->GetUIExtensionManager();
     if (uiExtMgr && uiExtMgr->IsWindowTypeUIExtension(pipeline)) {
         // find the direct child of the dialog.
