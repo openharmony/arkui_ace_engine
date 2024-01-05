@@ -694,6 +694,8 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
     }
 
     auto index = CalculateSelectedIndex(info.GetLocalLocation());
+    TAG_LOGI(AceLogTag::ACE_TABS, "Clicked tabBarIndex: %{public}d, Clicked tabBarLocation: %{public}s", index,
+        info.GetLocalLocation().ToString().c_str());
     if (index < 0 || index >= totalCount || !swiperController_ ||
         indicator_ >= static_cast<int32_t>(tabBarStyles_.size())) {
         return;
