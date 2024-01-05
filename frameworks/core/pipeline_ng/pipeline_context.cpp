@@ -452,8 +452,21 @@ void PipelineContext::IsCloseSCBKeyboard()
 #ifdef WINDOW_SCENE_SUPPORTED
     auto isSystem = WindowSceneHelper::IsWindowScene(curFrameNode);
     if (isSystem) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "In SCBWindow, close keyboard.");
-        WindowSceneHelper::IsWindowSceneCloseKeyboard(curFrameNode);
+        // Frame other window to SCB window Or inSCB window changes,hide keyboard.
+        if ((windowFocus_.has_value() && windowFocus_.value()) ||
+            curFocusNode_ != curFrameNode) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "In  windowscene change, windowscene focus.");
+            windowFocus_.reset();
+            curFocusNode_ = curFrameNode;
+            WindowSceneHelper::IsWindowSceneCloseKeyboard(curFrameNode);
+            return;
+        }
+        // In windowscene, focus change, need close keyboard.
+        if (needSoftKeyboard_.has_value() && !needSoftKeyboard_.value()) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "In windowscene, close keyboard.");
+            WindowSceneHelper::IsCloseKeyboard(curFrameNode);
+            needSoftKeyboard_ = std::nullopt;
+        }
     } else {
         if (windowFocus_.has_value() && windowFocus_.value()) {
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "In page, focusOnNodeCallback_.");
