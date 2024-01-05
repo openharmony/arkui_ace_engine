@@ -457,11 +457,26 @@ bool GridLayoutInfo::GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayo
             break;
         }
         case ScrollAlign::AUTO: {
-            // When the row height is greater than the screen height and occupies the entire screen height, do nothing
-            if (startMainLineIndex == targetLineIndex && endMainLineIndex == targetLineIndex) {
+            auto targetPosBeforeStartIndex = GetTotalHeightFromZeroIndex(startMainLineIndex, mainGap);
+            // targetPos - targetPosBeforeStartIndex:The distance between the top of the startLine row and the top of
+            // the targetLine row
+            // The distance of the targetLine row from the top of the screen
+            auto height2Top = targetPos - targetPosBeforeStartIndex - std::abs(currentGridLayoutInfo.currentOffset_);
+            // The distance of the targetLine row from the bottom of the screen
+            auto height2Bottom = std::abs(currentGridLayoutInfo.currentOffset_) + lastMainSize - targetPos +
+                                 targetPosBeforeStartIndex - targetLineHeight;
+            // This is handled when the targetLine line is the same as the endLine line. As for the period between
+            // startLine and endLine, follow the following process
+            if ((endMainLineIndex >= targetLineIndex) && (targetLineIndex < startMainLineIndex) &&
+                GreatOrEqual(height2Top, 0.f) && GreatOrEqual(height2Bottom, 0.f)) {
                 return false;
             }
-
+            // When the row height is greater than the screen height and occupies the entire screen height, do nothing
+            if ((startMainLineIndex == targetLineIndex) && (endMainLineIndex == targetLineIndex)) {
+                if ((std::abs(currentGridLayoutInfo.currentOffset_) + lastMainSize - targetLineHeight) <= 0) {
+                    return false;
+                }
+            }
             if (startMainLineIndex >= targetLineIndex) {
             } else if (targetLineIndex >= endMainLineIndex) {
                 targetPos -= (lastMainSize - targetLineHeight);
