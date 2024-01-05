@@ -74,6 +74,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/event/ace_events.h"
 #include "core/event/touch_event.h"
+#include "core/image/image_file_cache.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
@@ -400,9 +401,9 @@ RefPtr<FrameNode> PipelineContext::HandleFocusNode()
         }
     }
     while (lastFocusNode) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "curLastFocusNodeTAG:(%{public}s).", lastFocusNode->GetFrameName().c_str());
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "curLastFocusNodeTAG:(%{public}s).", lastFocusNode->GetFrameName().c_str());
         if (!lastFocusNode->IsCurrentFocus() || !lastFocusNode->IsFocusableNode()) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Is not CurrentFocus Or not FocusableNode.");
+            TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Is not CurrentFocus Or not FocusableNode.");
             break;
         }
         std::list<RefPtr<FocusHub>> focusNodesInner = lastFocusNode->GetChildren();
@@ -414,18 +415,18 @@ RefPtr<FrameNode> PipelineContext::HandleFocusNode()
             }
         }
         if (!openBreak) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Is LastFocusNode, break.");
+            TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Is LastFocusNode, break.");
             break;
         }
     }
     if (lastFocusNode == nullptr) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "lastFocusNode is null.");
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "lastFocusNode is null.");
         return nullptr;
     }
 
     auto curFrameNode = lastFocusNode->GetFrameNode();
     if (curFrameNode == nullptr) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "lastFocusNode-curFrameNode is null.");
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "lastFocusNode-curFrameNode is null.");
         return nullptr;
     }
     return curFrameNode;
@@ -445,6 +446,9 @@ void PipelineContext::IsCloseSCBKeyboard()
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "curFrameNode null.");
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "LastFocusNode,(%{public}s/%{public}d).",
+        curFrameNode->GetTag().c_str(), curFrameNode->GetId());
+
 #ifdef WINDOW_SCENE_SUPPORTED
     auto isSystem = WindowSceneHelper::IsWindowScene(curFrameNode);
     if (isSystem) {
@@ -492,6 +496,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     ProcessDelayTasks();
     DispatchDisplaySync(nanoTimestamp);
     FlushAnimation(nanoTimestamp);
+    SetVsyncTime(nanoTimestamp);
     bool hasRunningAnimation = window_->FlushAnimation(nanoTimestamp);
     FlushTouchEvents();
     FlushBuild();
@@ -607,6 +612,7 @@ void PipelineContext::DispatchDisplaySync(uint64_t nanoTimestamp)
         FrameReport::GetInstance().BeginFlushAnimation();
     }
 
+    scheduleTasks_.clear();
     GetOrCreateUIDisplaySyncManager()->DispatchFunc(nanoTimestamp);
 
     if (FrameReport::GetInstance().GetEnable()) {
@@ -623,22 +629,6 @@ void PipelineContext::FlushAnimation(uint64_t nanoTimestamp)
     ACE_FUNCTION_TRACE();
     if (scheduleTasks_.empty()) {
         return;
-    }
-
-    if (FrameReport::GetInstance().GetEnable()) {
-        FrameReport::GetInstance().BeginFlushAnimation();
-    }
-
-    decltype(scheduleTasks_) temp(std::move(scheduleTasks_));
-    for (const auto& [id, weakTask] : temp) {
-        auto task = weakTask.Upgrade();
-        if (task) {
-            task->OnFrame(nanoTimestamp);
-        }
-    }
-
-    if (FrameReport::GetInstance().GetEnable()) {
-        FrameReport::GetInstance().EndFlushAnimation();
     }
 }
 
@@ -703,9 +693,11 @@ void PipelineContext::FlushFocus()
         return;
     }
     auto rootFocusHub = rootNode_ ? rootNode_->GetFocusHub() : nullptr;
-    auto curMainView = FocusHub::GetCurrentMainView();
-    if (curMainView && curMainView->GetIsViewHasFocused() && rootFocusHub && !rootFocusHub->IsCurrentFocus()) {
-        rootFocusHub->RequestFocusImmediately();
+    if (rootFocusHub && !rootFocusHub->IsCurrentFocus()) {
+        auto curMainView = FocusHub::GetCurrentMainView();
+        if (curMainView && curMainView->GetIsViewHasFocused()) {
+            rootFocusHub->RequestFocusImmediately();
+        }
     }
 }
 
@@ -895,6 +887,9 @@ void PipelineContext::SetupSubRootElement()
             }
         }
     }
+#endif
+#ifdef WINDOW_SCENE_SUPPORTED
+    uiExtensionManager_ = MakeRefPtr<UIExtensionManager>();
 #endif
     // the subwindow for overlay not need stage
     stageManager_ = MakeRefPtr<StageManager>(nullptr);
@@ -1533,8 +1528,12 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
     } while (false);
 #endif
 
-    HandleEtsCardTouchEvent(point);
+    SerializedGesture etsSerializedGesture;
+    if (point.type != TouchType::DOWN) {
+        HandleEtsCardTouchEvent(point, etsSerializedGesture);
+    }
 
+    auto oriPoint = point;
     auto scalePoint = point.CreateScalePoint(GetViewScale());
     ResSchedReport::GetInstance().OnTouchEvent(scalePoint.type);
     if (scalePoint.type != TouchType::MOVE && scalePoint.type != TouchType::PULL_MOVE) {
@@ -1556,6 +1555,48 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         touchRestrict.sourceType = point.sourceType;
         touchRestrict.touchEvent = point;
         eventManager_->TouchTest(scalePoint, node, touchRestrict, GetPluginEventOffset(), viewScale_, isSubPipe);
+        touchTestResults_ = eventManager_->touchTestResults_;
+
+        HandleEtsCardTouchEvent(oriPoint, etsSerializedGesture);
+
+        if (etsSerializedGesture.data.size() != 0) {
+            GestureGroup rebirth(GestureMode::Exclusive);
+            rebirth.Deserialize(etsSerializedGesture.data.data());
+            auto recognizer = rebirth.CreateRecognizer();
+            if (recognizer) {
+                recognizer->SetInnerFlag(true);
+                recognizer->BeginReferee(scalePoint.id, true);
+                std::list<RefPtr<NGGestureRecognizer>> combined;
+                combined.emplace_back(recognizer);
+                for (auto iter = touchTestResults_[point.id].begin();
+                    iter != touchTestResults_[point.id].end(); iter++) {
+                    auto outRecognizer = AceType::DynamicCast<NGGestureRecognizer>(*iter);
+                    if (outRecognizer) {
+                        combined.emplace_back(outRecognizer);
+                        touchTestResults_[point.id].erase(iter);
+                        break;
+                    }
+                }
+                auto exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(combined));
+                exclusiveRecognizer->AttachFrameNode(node);
+                exclusiveRecognizer->BeginReferee(scalePoint.id);
+                touchTestResults_[point.id].emplace_back(exclusiveRecognizer);
+                eventManager_->touchTestResults_ = touchTestResults_;
+            }
+        }
+        if (IsFormRender() && touchTestResults_.find(point.id) != touchTestResults_.end()) {
+            for (const auto& touchResult : touchTestResults_[point.id]) {
+                auto recognizer = AceType::DynamicCast<NG::RecognizerGroup>(touchResult);
+                if (recognizer) {
+                    auto gesture = recognizer->CreateGestureFromRecognizer();
+                    if (gesture) {
+                        serializedGesture_.data = std::vector<char>(gesture->SizeofMe());
+                        gesture->Serialize(serializedGesture_.data.data());
+                    }
+                    break;
+                }
+            }
+        }
         for (const auto& weakContext : touchPluginPipelineContext_) {
             auto pipelineContext = DynamicCast<OHOS::Ace::PipelineBase>(weakContext.Upgrade());
             if (!pipelineContext) {
@@ -1571,7 +1612,6 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         // restore instance Id.
         eventManager_->SetInstanceId(GetInstanceId());
     }
-
     auto rootOffset = GetRootRect().GetOffset();
     eventManager_->HandleGlobalEventNG(scalePoint, selectOverlayManager_, rootOffset);
 
@@ -1765,6 +1805,8 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         if (imageCache_) {
             imageCache_->DumpCacheInfo();
         }
+    } else if (params[0] == "-imagefilecache") {
+        ImageFileCache::GetInstance().DumpCacheInfo();
     }
     return true;
 }
@@ -1788,6 +1830,7 @@ void PipelineContext::DumpPipelineInfo() const
     if (window_) {
         DumpLog::GetInstance().Print(1, "DisplayRefreshRate: " + std::to_string(window_->GetRefreshRate()));
         DumpLog::GetInstance().Print(1, "LastRequestVsyncTime: " + std::to_string(window_->GetLastRequestVsyncTime()));
+        DumpLog::GetInstance().Print(1, "NowTime: " + std::to_string(GetSysTimestamp()));
     }
     if (!dumpFrameInfos_.empty()) {
         DumpLog::GetInstance().Print("==================================FrameTask==================================");
@@ -3042,5 +3085,27 @@ void PipelineContext::SubscribeContainerModalButtonsRectChange(
 const RefPtr<PostEventManager>& PipelineContext::GetPostEventManager()
 {
     return postEventManager_;
+}
+
+const SerializedGesture& PipelineContext::GetSerializedGesture() const
+{
+    return serializedGesture_;
+}
+
+bool PipelineContext::PrintVsyncInfoIfNeed() const
+{
+    if (dumpFrameInfos_.empty()) {
+        return false;
+    }
+    auto lastFrameInfo = dumpFrameInfos_.back();
+    const uint64_t timeout = 1000000000; // unit is ns, 1s
+    if (lastFrameInfo.frameRecvTime_ < window_->GetLastRequestVsyncTime() &&
+        GetSysTimestamp() - window_->GetLastRequestVsyncTime() >= timeout) {
+        LOGW("lastRequestVsyncTime is %{public}" PRIu64 ", now time is %{public}" PRId64
+             ", timeout, window foreground:%{public}d, lastReceiveVsync info:%{public}s",
+            window_->GetLastRequestVsyncTime(), GetSysTimestamp(), onShow_, lastFrameInfo.GetTimeInfo().c_str());
+        return true;
+    }
+    return false;
 }
 } // namespace OHOS::Ace::NG

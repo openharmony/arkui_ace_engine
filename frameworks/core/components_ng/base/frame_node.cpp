@@ -527,6 +527,7 @@ void FrameNode::DumpAdvanceInfo()
     }
     if (renderContext_) {
         renderContext_->DumpInfo();
+        renderContext_->DumpAdvanceInfo();
     }
 }
 
@@ -586,6 +587,7 @@ void FrameNode::MouseToJsonValue(std::unique_ptr<JsonValue>& json) const
 void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     bool touchable = true;
+    bool monopolizeEvents = false;
     std::string hitTestMode = "HitTestMode.Default";
     auto gestureEventHub = GetOrCreateGestureEventHub();
     std::vector<DimensionRect> responseRegion;
@@ -595,9 +597,11 @@ void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json) const
         hitTestMode = gestureEventHub->GetHitTestModeStr();
         responseRegion = gestureEventHub->GetResponseRegion();
         mouseResponseRegion = gestureEventHub->GetMouseResponseRegion();
+        monopolizeEvents = gestureEventHub->GetMonopolizeEvents();
     }
     json->Put("touchable", touchable);
     json->Put("hitTestBehavior", hitTestMode.c_str());
+    json->Put("monopolizeEvents", monopolizeEvents);
     auto jsArr = JsonUtil::CreateArray(true);
     for (int32_t i = 0; i < static_cast<int32_t>(responseRegion.size()); ++i) {
         auto iStr = std::to_string(i);
@@ -899,7 +903,7 @@ void FrameNode::SetOnAreaChangeCallback(OnAreaChangedFunc&& callback)
 
 void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
 {
-    if (!IsOnMainTree()) {
+    if (!IsActive()) {
         return;
     }
     if (eventHub_->HasOnAreaChanged() && lastFrameRect_ && lastParentOffsetToWindow_) {
@@ -1092,8 +1096,8 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
     auto wrapper = CreatePaintWrapper();
     CHECK_NULL_RETURN(wrapper, std::nullopt);
     auto task = [weak = WeakClaim(this), wrapper, paintProperty = paintProperty_]() {
-        ACE_SCOPED_TRACE("FrameNode::RenderTask");
         auto self = weak.Upgrade();
+        ACE_SCOPED_TRACE("FrameNode[%s][id:%d]::RenderTask", self->GetTag().c_str(), self->GetId());
         wrapper->FlushRender();
         paintProperty->CleanDirty();
 
@@ -3028,7 +3032,7 @@ int32_t FrameNode::GetUiExtensionId()
     return -1;
 }
 
-int32_t FrameNode::WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId)
+int64_t FrameNode::WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId)
 {
     if (pattern_) {
         return pattern_->WrapExtensionAbilityId(extensionOffset, abilityId);
@@ -3036,40 +3040,40 @@ int32_t FrameNode::WrapExtensionAbilityId(int32_t extensionOffset, int32_t abili
     return -1;
 }
 
-void FrameNode::SearchExtensionElementInfoByAccessibilityIdNG(int32_t elementId, int32_t mode,
-    int32_t offset, std::list<Accessibility::AccessibilityElementInfo>& output)
+void FrameNode::SearchExtensionElementInfoByAccessibilityIdNG(int64_t elementId, int32_t mode,
+    int64_t offset, std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     if (pattern_) {
         pattern_->SearchExtensionElementInfoByAccessibilityId(elementId, mode, offset, output);
     }
 }
 
-void FrameNode::SearchElementInfosByTextNG(int32_t elementId, const std::string& text,
-    int32_t offset, std::list<Accessibility::AccessibilityElementInfo>& output)
+void FrameNode::SearchElementInfosByTextNG(int64_t elementId, const std::string& text,
+    int64_t offset, std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     if (pattern_) {
         pattern_->SearchElementInfosByText(elementId, text, offset, output);
     }
 }
 
-void FrameNode::FindFocusedExtensionElementInfoNG(int32_t elementId, int32_t focusType,
-    int32_t offset, Accessibility::AccessibilityElementInfo& output)
+void FrameNode::FindFocusedExtensionElementInfoNG(int64_t elementId, int32_t focusType,
+    int64_t offset, Accessibility::AccessibilityElementInfo& output)
 {
     if (pattern_) {
         pattern_->FindFocusedElementInfo(elementId, focusType, offset, output);
     }
 }
 
-void FrameNode::FocusMoveSearchNG(int32_t elementId, int32_t direction,
-    int32_t offset, Accessibility::AccessibilityElementInfo& output)
+void FrameNode::FocusMoveSearchNG(int64_t elementId, int32_t direction,
+    int64_t offset, Accessibility::AccessibilityElementInfo& output)
 {
     if (pattern_) {
         pattern_->FocusMoveSearch(elementId, direction, offset, output);
     }
 }
 
-bool FrameNode::TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
-    int32_t action, int32_t offset)
+bool FrameNode::TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+    int32_t action, int64_t offset)
 {
     bool isExecuted = false;
     if (pattern_) {

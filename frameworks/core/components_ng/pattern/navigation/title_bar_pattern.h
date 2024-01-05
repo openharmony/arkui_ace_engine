@@ -178,6 +178,11 @@ public:
         return GreatOrEqual(tempTitleBarHeight_, maxTitleBarHeight_);
     }
 
+    bool IsFreeTitleUpdated() const
+    {
+        return isFreeTitleUpdated_;
+    }
+
     NavigationTitleMode GetNavigationTitleMode() const
     {
         return titleMode_;
@@ -278,6 +283,8 @@ private:
     bool isOverDrag_ = true;
     bool isTitleScaleChange_ = true;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
+
+    bool isFreeTitleUpdated_ = false;
 
     float coordScrollOffset_ = 0.0f;
     float coordScrollFinalOffset_ = 0.0f;

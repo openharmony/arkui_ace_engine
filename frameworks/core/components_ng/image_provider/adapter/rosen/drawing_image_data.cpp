@@ -20,11 +20,13 @@
 
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
 
+#include "base/image/image_source.h"
 #include "base/utils/system_properties.h"
 #include "core/components_ng/image_provider/adapter/skia_svg_dom.h"
 #include "core/components_ng/svg/svg_dom.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t ASTC_FRAME_COUNT = 1;
 DrawingImageData::DrawingImageData(const void* data, size_t length)
 {
     rsData_ = std::make_shared<RSData>();
@@ -93,10 +95,17 @@ std::pair<SizeF, int32_t> DrawingImageData::Parse() const
 {
     auto rsData = GetRSData();
     CHECK_NULL_RETURN(rsData, {});
+    SizeF imageSize;
+    if (ImageSource::IsAstc(static_cast<const uint8_t*>(rsData->GetData()), rsData->GetSize())) {
+        ImageSource::Size astcSize = ImageSource::GetASTCInfo(
+            static_cast<const uint8_t*>(rsData->GetData()), rsData->GetSize());
+        imageSize.SetSizeT(SizeF(astcSize.first, astcSize.second));
+        return { imageSize, ASTC_FRAME_COUNT };
+    }
+
     auto skData = SkData::MakeWithoutCopy(rsData->GetData(), rsData_->GetSize());
     auto codec = SkCodec::MakeFromData(skData);
     CHECK_NULL_RETURN(codec, {});
-    SizeF imageSize;
     switch (codec->getOrigin()) {
         case SkEncodedOrigin::kLeftTop_SkEncodedOrigin:
         case SkEncodedOrigin::kRightTop_SkEncodedOrigin:
@@ -108,5 +117,10 @@ std::pair<SizeF, int32_t> DrawingImageData::Parse() const
             imageSize.SetSizeT(SizeF(codec->dimensions().fWidth, codec->dimensions().fHeight));
     }
     return { imageSize, codec->getFrameCount() };
+}
+
+std::string DrawingImageData::ToString() const
+{
+    return "DrawingImageData Size" + std::to_string(rsData_->GetSize()) + "(B)";
 }
 } // namespace OHOS::Ace::NG

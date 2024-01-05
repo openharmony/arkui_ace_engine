@@ -3954,7 +3954,7 @@ JSRef<JSVal> NativeEmbeadTouchToJSValue(const NativeEmbeadTouchInfo& eventInfo)
     JSRef<JSArray> touchArr = JSRef<JSArray>::New();
     JSRef<JSArray> changeTouchArr = JSRef<JSArray>::New();
     eventObj->SetProperty("source", static_cast<int32_t>(info.GetSourceDevice()));
-    eventObj->SetProperty("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
+    eventObj->SetProperty("timestamp", static_cast<double>(GetSysTimestamp()));
     auto target = CreateEventTargetObject(info);
     eventObj->SetPropertyObject("target", target);
     eventObj->SetProperty("pressure", info.GetForce());

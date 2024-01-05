@@ -152,6 +152,12 @@ private:
     static bool PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint);
     static void SyncGeometry(RefPtr<LayoutWrapper>& wrapper);
     void CompeleteItemCrossPosition(LayoutWrapper* layoutWrapper, std::map<int32_t, int32_t> items);
+    /**
+     * @brief Updates the main line during ReloadToStartIndex based on the new crossCount_.
+     *
+     * @param startIdx index of the first GridItem in viewport
+     */
+    virtual void UpdateMainLineOnReload(int32_t startIdx);
 
 protected:
     uint32_t crossCount_ = 0;

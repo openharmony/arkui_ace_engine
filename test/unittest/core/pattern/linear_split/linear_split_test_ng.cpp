@@ -50,7 +50,6 @@ const SizeF CONTAINER_SIZE(RK356_WIDTH, RK356_HEIGHT);
 const OffsetF OFFSET_TOP_LEFT = OffsetF(ZERO, ZERO);
 constexpr int32_t PLATFORM_VERSION_10 = 10;
 constexpr int32_t PLATFORM_VERSION_9 = 9;
-constexpr int32_t CALL_FRC_TIMES = 1;
 } // namespace
 
 class LinearSplitTestNg : public testing::Test {
@@ -1167,9 +1166,6 @@ HWTEST_F(LinearSplitTestNg, LinearSplitPatternTest012, TestSize.Level1)
     /**
      * @tc.steps: step2. Test FRC.
      */
-    auto renderContext = AceType::DynamicCast<MockRenderContext>(frameNode->GetRenderContext());
-    EXPECT_TRUE(!!renderContext);
-    EXPECT_CALL(*renderContext, CalcExpectedFrameRate(_, _)).Times(CALL_FRC_TIMES);
     RefPtr<LinearSplitPattern> linearSplitPattern = frameNode->GetPattern<LinearSplitPattern>();
     ASSERT_NE(linearSplitPattern, nullptr);
     linearSplitPattern->isDragedMoving_ = true;

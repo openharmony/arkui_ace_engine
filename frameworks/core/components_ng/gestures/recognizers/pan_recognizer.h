@@ -19,6 +19,7 @@
 #include <map>
 #include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
+#include "core/components_ng/gestures/pan_gesture.h"
 
 namespace OHOS::Ace::NG {
 
@@ -78,6 +79,7 @@ public:
     }
 
     virtual RefPtr<GestureSnapshot> Dump() const override;
+    RefPtr<Gesture> CreateGestureFromRecognizer() const override;
 
 private:
     enum class GestureAcceptResult {

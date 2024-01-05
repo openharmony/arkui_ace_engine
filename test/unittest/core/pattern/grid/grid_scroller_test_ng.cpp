@@ -165,7 +165,7 @@ HWTEST_F(GridScrollerTestNg, ScrollToIndex003, TestSize.Level1)
 {
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateColItem(5);
+        CreateColItem(31);
     });
     /**
      * @tc.steps: step1. Call ScrollToIndex()
@@ -334,9 +334,10 @@ HWTEST_F(GridScrollerTestNg, PositionController001, TestSize.Level1)
     Create([](GridModelNG model) {
         CreateColItem(14);
     });
+    EXPECT_FALSE(pattern_->isConfigScrollable_);
     auto controller = pattern_->positionController_;
     controller->JumpTo(1, false, ScrollAlign::START, 3);
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, NULL_VALUE);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, EMPTY_JUMP_INDEX);
     EXPECT_TRUE(IsEqualCurrentOffset(0));
 
     /**
@@ -458,11 +459,11 @@ HWTEST_F(GridScrollerTestNg, PositionController002, TestSize.Level1)
      * @tc.expected: Verify return value.
      */
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, true);
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, NULL_VALUE);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, EMPTY_JUMP_INDEX);
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, true);
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, NULL_VALUE);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, EMPTY_JUMP_INDEX);
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, true);
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, 19);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, LAST_ITEM);
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, true);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, 0);
 
@@ -514,14 +515,14 @@ HWTEST_F(GridScrollerTestNg, PositionController003, TestSize.Level1)
      * @tc.steps: step4. Test ScrollToEdge func.
      * @tc.expected: Verify return value.
      */
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, false);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, EMPTY_JUMP_INDEX);
+    controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, false);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, EMPTY_JUMP_INDEX);
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_TOP, false);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, 0);
     controller->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, 19);
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_RIGHT, false);
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, 19);
-    controller->ScrollToEdge(ScrollEdgeType::SCROLL_LEFT, false);
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, 19);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().jumpIndex_, LAST_ITEM);
 
     /**
      * @tc.steps: step5. Test ScrollPage func.

@@ -37,7 +37,7 @@ public:
     void SetOnError(std::function<void(const LoadImageFailEvent& info)>&& callback) override;
     void SetSvgAnimatorFinishEvent(std::function<void()>&& callback) override;
     void Create(const std::string& src, RefPtr<PixelMap>& pixMap, const std::string& bundleName,
-        const std::string& moduleName) override;
+        const std::string& moduleName, bool isUriPureNumber = false) override;
     void SetImageSourceSize(const std::pair<Dimension, Dimension>& size) override;
     void SetImageFill(const Color& color) override;
     void SetImageInterpolation(ImageInterpolation iterpolation) override;

@@ -43,4 +43,9 @@ void Scheduler::AddKeyFrame(float fraction, const RefPtr<Curve>& curve, const st
 {}
 
 void Scheduler::AddKeyFrame(float fraction, const std::function<void()>& propertyCallback) {}
+
+bool Scheduler::PrintVsyncInfoIfNeed() const
+{
+    return false;
+}
 } // namespace OHOS::Ace

@@ -74,6 +74,8 @@ public:
 
     void AddKeyFrame(float fraction, const std::function<void()>& propertyCallback);
 
+    bool PrintVsyncInfoIfNeed() const;
+
 private:
     int32_t scheduleId_ = 0;
     bool isRunning_ = false;

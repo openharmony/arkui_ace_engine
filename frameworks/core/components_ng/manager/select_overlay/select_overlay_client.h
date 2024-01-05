@@ -152,6 +152,7 @@ protected:
     }
 
 private:
+    bool isMenuShow_ = true;
     void RegisterParentScrollCallback(int32_t parentId, int32_t callbackId);
     std::optional<SelectOverlayInfo> GetSelectOverlayInfo(const ClientOverlayInfo& clientInfo);
     void CreateSelectOverlay(const ClientOverlayInfo& showOverlayInfo);

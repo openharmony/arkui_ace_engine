@@ -902,7 +902,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
         endMainPos_ = currentEndPos + contentEndOffset_;
         startMainPos_ = endMainPos_ - contentMainSize_;
         auto firstItemTop = itemPosition_.begin()->second.startPos;
-        if (GreatNotEqual(firstItemTop, startMainPos_) && itemPosition_.begin()->second.isGroup) {
+        if (itemPosition_.begin()->second.isGroup) {
             AdjustPostionForListItemGroup(layoutWrapper, axis_, GetStartIndex(), true);
             firstItemTop = itemPosition_.begin()->second.startPos;
         }
@@ -1358,8 +1358,7 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
 
 ListItemInfo ListLayoutAlgorithm::GetListItemGroupPosition(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index)
 {
-    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-    int32_t id = wrapper->GetHostNode()->GetId();
+    int32_t id = layoutWrapper->GetHostNode()->GetId();
     ListItemInfo pos = { id, 0, 0, true };
     auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm(true);
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, pos);

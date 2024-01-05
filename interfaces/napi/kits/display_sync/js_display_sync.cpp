@@ -224,15 +224,13 @@ void DisplaySync::NapiSerializer(napi_env& env, napi_value& jsDisplaySync)
         nullptr, nullptr);
 }
 
-void DisplaySync::RegisterOnFrameCallback(
-    napi_value cb, napi_ref& onFrameRef, CallbackType callbackType, napi_env env, napi_handle_scope scope)
+void DisplaySync::RegisterOnFrameCallback(napi_value cb, napi_ref& onFrameRef,
+    CallbackType callbackType, napi_env env)
 {
     if (onFrameRef) {
-        napi_close_handle_scope(env, scope);
         return;
     }
     napi_create_reference(env, cb, 1, &onFrameRef);
-    napi_close_handle_scope(env, scope);
 
     GetUIDisplaySync()->RegisterOnFrameWithData([env, onFrameRef] (RefPtr<DisplaySyncData> displaySyncData) {
         napi_handle_scope innerScope = nullptr;
@@ -281,11 +279,6 @@ void DisplaySync::Destroy(napi_env env)
 
 napi_value JSOnFrame_On(napi_env env, napi_callback_info info)
 {
-    napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(env, &scope);
-    if (scope == nullptr) {
-        return NapiGetUndefined(env);
-    }
     napi_value thisVar = nullptr;
     napi_value cb = nullptr;
     CallbackType callbackType = CallbackType::UNKNOW;
@@ -294,12 +287,11 @@ napi_value JSOnFrame_On(napi_env env, napi_callback_info info)
 
     DisplaySync* displaySync = GetDisplaySync(env, info);
     if (!displaySync) {
-        napi_close_handle_scope(env, scope);
         return NapiGetUndefined(env);
     }
 
     if (callbackType == CallbackType::ONFRAME) {
-        displaySync->RegisterOnFrameCallback(cb, displaySync->onFrameRef_, callbackType, env, scope);
+        displaySync->RegisterOnFrameCallback(cb, displaySync->onFrameRef_, callbackType, env);
     }
     return NapiGetUndefined(env);
 }

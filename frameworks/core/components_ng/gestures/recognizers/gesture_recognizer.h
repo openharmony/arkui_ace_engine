@@ -66,6 +66,11 @@ public:
         OnBeginGestureReferee(touchId, needUpdateChild);
     }
 
+    virtual RefPtr<Gesture> CreateGestureFromRecognizer() const
+    {
+        return nullptr;
+    }
+
     // Triggered when the Gesture referee ends a gesture referee.
     void FinishReferee(int32_t touchId, bool isBlocked = false)
     {
@@ -104,6 +109,14 @@ public:
     virtual bool ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)
     {
         return true;
+    }
+
+    virtual void SetInnerFlag(bool value) {
+        fromCardOrUIExtension_ = value;
+    }
+
+    bool GetInnerFlag() {
+        return fromCardOrUIExtension_;
     }
 
     bool DispatchEvent(const TouchEvent& point) override
@@ -307,7 +320,7 @@ protected:
     GestureMask priorityMask_ = GestureMask::Normal;
 
     bool isExternalGesture_ = false;
-
+    bool fromCardOrUIExtension_ = false;
     std::unique_ptr<GestureEventFunc> onAction_;
     std::unique_ptr<GestureEventFunc> onActionStart_;
     std::unique_ptr<GestureEventFunc> onActionUpdate_;

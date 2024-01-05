@@ -75,6 +75,7 @@ public:
     virtual void DeleteForward(int32_t length) {};
     virtual void SetInputMethodStatus(bool keyboardShown) {}
     virtual void NotifyKeyboardClosedByUser() {}
+    virtual void NotifyKeyboardInfo(const KeyBoardInfo& info) {}
     virtual std::u16string GetLeftTextOfCursor(int32_t number)
     {
         return StringUtils::DEFAULT_USTRING;

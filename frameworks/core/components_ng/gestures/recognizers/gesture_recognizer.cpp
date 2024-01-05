@@ -87,7 +87,6 @@ bool NGGestureRecognizer::ShouldResponse()
     }
     auto eventManager = GetCurrentEventManager();
     CHECK_NULL_RETURN(eventManager, true);
-
     auto frameNode = GetAttachedNode();
     auto ctrl = eventManager->GetResponseCtrl();
     CHECK_NULL_RETURN(ctrl, true);
@@ -221,9 +220,12 @@ void NGGestureRecognizer::AboutToAccept()
         OnAccepted();
         return;
     }
+
     auto eventManager = GetCurrentEventManager();
     CHECK_NULL_VOID(eventManager);
-
+    if (fromCardOrUIExtension_) {
+        eventManager->SetInnerFlag(true);
+    }
     auto frameNode = GetAttachedNode();
     auto ctrl = eventManager->GetResponseCtrl();
     CHECK_NULL_VOID(ctrl);

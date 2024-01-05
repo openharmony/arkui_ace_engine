@@ -129,11 +129,7 @@ void JSTextClock::JSBind(BindingTarget globalObj)
 void JSTextClock::SetFontDefault()
 {
     RefPtr<TextTheme> textTheme = GetTheme<TextTheme>();
-    TextClockModel::GetInstance()->SetFontSize(textTheme->GetTextStyle().GetFontSize());
-    TextClockModel::GetInstance()->SetTextColor(textTheme->GetTextStyle().GetTextColor());
-    TextClockModel::GetInstance()->SetFontFamily(textTheme->GetTextStyle().GetFontFamilies());
-    TextClockModel::GetInstance()->SetFontWeight(textTheme->GetTextStyle().GetFontWeight());
-    TextClockModel::GetInstance()->SetItalicFontStyle(textTheme->GetTextStyle().GetFontStyle());
+    TextClockModel::GetInstance()->InitFontDefault(textTheme->GetTextStyle());
 }
 
 void JSTextClock::SetTextColor(const JSCallbackInfo& info)

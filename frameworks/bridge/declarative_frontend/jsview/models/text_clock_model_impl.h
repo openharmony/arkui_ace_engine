@@ -35,7 +35,8 @@ public:
     void SetFontFamily(const std::vector<std::string>& value) override;
     void SetTextShadow(const std::vector<Shadow>& value) override {};
     void SetFontFeature(const std::unordered_map<std::string, int32_t>& value) override {};
-
+    void InitFontDefault(const TextStyle& textStyle) override;
+    
 private:
     static RefPtr<TextClockComponent> GetComponent();
 };

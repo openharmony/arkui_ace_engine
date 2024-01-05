@@ -318,10 +318,15 @@ void ClickRecognizer::DeadlineTimer(CancelableCallback<void()>& deadlineTimer, i
 Offset ClickRecognizer::ComputeFocusPoint()
 {
     Offset sumOfPoints;
+    int32_t count = 0;
     for (auto& element : touchPoints_) {
+        if (count >= fingers_) {
+            break;
+        }
         sumOfPoints = sumOfPoints + element.second.GetOffset();
+        count++;
     }
-    Offset focusPoint = sumOfPoints / touchPoints_.size();
+    Offset focusPoint = sumOfPoints / count;
     return focusPoint;
 }
 
@@ -432,4 +437,8 @@ RefPtr<GestureSnapshot> ClickRecognizer::Dump() const
     return info;
 }
 
+RefPtr<Gesture> ClickRecognizer::CreateGestureFromRecognizer() const
+{
+    return AceType::MakeRefPtr<TapGesture>(count_, fingers_);
+}
 } // namespace OHOS::Ace::NG

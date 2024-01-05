@@ -2648,14 +2648,21 @@ HWTEST_F(TextFieldUXTest, onDraw001, TestSize.Level1)
     pattern_->OnHandleMove(handleRect, false);
 
     /**
-     * @tc.steps: step3. Craete TextFieldOverlayModifier
+     * @tc.steps: step3. Test magnifier open or close
+     * @tc.expected: magnifier is open
+     */
+    auto ret = pattern_->GetShowMagnifier();
+    EXPECT_TRUE(ret);
+
+    /**
+     * @tc.steps: step4. Craete TextFieldOverlayModifier
      */
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
     auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern_, scrollEdgeEffect);
 
     /**
-     * @tc.steps: step4. Create DrawingContext
+     * @tc.steps: step5. Create DrawingContext
      */
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -2665,16 +2672,9 @@ HWTEST_F(TextFieldUXTest, onDraw001, TestSize.Level1)
     DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
 
     /**
-     * @tc.steps: step5. Do onDraw(context)
+     * @tc.steps: step6. Do onDraw(context)
      */
     textFieldOverlayModifier->onDraw(context);
-
-    /**
-     * @tc.steps: step6. Test magnifier open or close
-     * @tc.expected: magnifier is open
-     */
-    auto ret = pattern_->GetShowMagnifier();
-    EXPECT_TRUE(ret);
 
     /**
      * @tc.steps: step7. When handle move done

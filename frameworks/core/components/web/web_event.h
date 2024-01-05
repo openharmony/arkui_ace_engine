@@ -1499,7 +1499,7 @@ private:
 };
 
 struct EmbedInfo final {
-    int32_t id = 0;
+    std::string id = "";
     std::string type = "";
     std::string src = "";
     std::string url = "";

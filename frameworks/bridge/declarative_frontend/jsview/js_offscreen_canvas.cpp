@@ -58,12 +58,8 @@ napi_value AttachOffscreenCanvas(napi_env env, void* value, void*)
 
     napi_value offscreenCanvas = nullptr;
     napi_create_object(env, &offscreenCanvas);
-    napi_value width = nullptr;
-    napi_value height = nullptr;
-    double widthVal = workCanvas->GetWidth();
-    double heightVal = workCanvas->GetHeight();
-    napi_create_double(env, widthVal, &width);
-    napi_create_double(env, heightVal, &height);
+    napi_value width = workCanvas->OnGetWidth(env);
+    napi_value height = workCanvas->OnGetHeight(env);
 
     napi_set_named_property(env, offscreenCanvas, "width", width);
     napi_set_named_property(env, offscreenCanvas, "height", height);
@@ -83,6 +79,8 @@ napi_value AttachOffscreenCanvas(napi_env env, void* value, void*)
         nullptr, nullptr);
     return offscreenCanvas;
 }
+
+double JSOffscreenCanvas::dipScale_ = 1.0;
 
 napi_value JSOffscreenCanvas::InitOffscreenCanvas(napi_env env)
 {
@@ -134,6 +132,7 @@ napi_value JSOffscreenCanvas::Constructor(napi_env env, napi_callback_info info)
     auto context = PipelineBase::GetCurrentContext();
     if (context != nullptr) {
         workCanvas->instanceId_ = context->GetInstanceId();
+        workCanvas->dipScale_ = context->GetDipScale();
     }
     if (napi_get_value_double(env, argv[0], &fWidth) == napi_ok) {
         fWidth = PipelineBase::Vp2PxWithCurrentDensity(fWidth);
@@ -386,5 +385,19 @@ napi_value JSOffscreenCanvas::CreateContext2d(napi_env env, double width, double
     offscreenCanvasContext_->SetOffscreenPattern(offscreenCanvasPattern_);
     offscreenCanvasContext_->AddOffscreenCanvasPattern(offscreenCanvasPattern_);
     return thisVal;
+}
+
+double JSOffscreenCanvas::ConvertToPxValue(Dimension dimension)
+{
+    if (dimension.Unit() == DimensionUnit::NONE) {
+        return dimension.Value();
+    }
+    if (dimension.Unit() == DimensionUnit::PX) {
+        return dimension.Value();
+    }
+    if (dimension.Unit() == DimensionUnit::VP) {
+        return dimension.Value() * dipScale_;
+    }
+    return 0.0;
 }
 } // namespace OHOS::Ace::Framework

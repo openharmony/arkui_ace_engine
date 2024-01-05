@@ -1016,10 +1016,10 @@ export class ComposeListItem extends ViewPU {
   }
 
   aboutToAppear() {
-    if (null !== this.contentItem) {
-      null === this.contentItem.secondaryText && null === this.contentItem.description ? null === this.contentItem.icon ? this.itemHeight = ItemHeight.FIRST_HEIGHT : this.itemHeight = this.contentItem.iconStyle <= IconType.HEAD_SCULPTURE ? ItemHeight.SECOND_HEIGHT : ItemHeight.THIRD_HEIGHT : null === this.contentItem.description ? null === this.contentItem.icon || null !== this.contentItem.icon && this.contentItem.iconStyle <= IconType.SYSTEM_ICON ? this.itemHeight = ItemHeight.THIRD_HEIGHT : this.itemHeight = ItemHeight.FOURTH_HEIGHT : this.itemHeight = ItemHeight.FIFTH_HEIGHT;
+    if (undefined !== this.contentItem) {
+        undefined === this.contentItem.secondaryText && undefined === this.contentItem.description ? undefined === this.contentItem.icon ? this.itemHeight = ItemHeight.FIRST_HEIGHT : this.itemHeight = this.contentItem.iconStyle <= IconType.HEAD_SCULPTURE ? ItemHeight.SECOND_HEIGHT : ItemHeight.THIRD_HEIGHT : undefined === this.contentItem.description ? undefined === this.contentItem.icon || undefined !== this.contentItem.icon && this.contentItem.iconStyle <= IconType.SYSTEM_ICON ? this.itemHeight = ItemHeight.THIRD_HEIGHT : this.itemHeight = ItemHeight.FOURTH_HEIGHT : this.itemHeight = ItemHeight.FIFTH_HEIGHT;
       ICON_SIZE_MAP.get(this.contentItem.iconStyle) >= this.itemHeight && (this.itemHeight = ICON_SIZE_MAP.get(this.contentItem.iconStyle) + 32)
-    } else null === this.operateItem.image && null === this.operateItem.icon && null === this.operateItem.subIcon || (this.itemHeight = 80)
+    } else undefined === this.operateItem.image && undefined === this.operateItem.icon && undefined === this.operateItem.subIcon || (this.itemHeight = 80)
   }
 
   initialRender() {

@@ -165,7 +165,6 @@ void TextFieldPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
 
     auto selectedColor = paintProperty->GetSelectedBackgroundColorValue(theme->GetSelectedColor());
     textFieldOverlayModifier_->SetSelectedBackGroundColor(selectedColor);
-    textFieldOverlayModifier_->SetChangeSelectedRects(textFieldPattern->NeedPaintSelect());
 
     textFieldOverlayModifier_->SetUnderlineWidth(textFieldPattern->GetUnderlineWidth());
     textFieldOverlayModifier_->SetUnderlineColor(textFieldPattern->GetUnderlineColor());

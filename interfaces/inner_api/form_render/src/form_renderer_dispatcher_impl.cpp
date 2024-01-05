@@ -16,6 +16,7 @@
 
 #include "form_renderer.h"
 #include "form_renderer_hilog.h"
+#include "core/components_ng/gestures/gesture_group.h"
 
 namespace OHOS {
 namespace Ace {
@@ -26,23 +27,36 @@ FormRendererDispatcherImpl::FormRendererDispatcherImpl(
     : uiContent_(uiContent), formRenderer_(formRenderer), eventHandler_(eventHandler)
 {}
 
-void FormRendererDispatcherImpl::DispatchPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
+void FormRendererDispatcherImpl::DispatchPointerEvent(
+    const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent,
+    SerializedGesture& serializedGesture)
 {
     auto handler = eventHandler_.lock();
     if (!handler) {
         HILOG_ERROR("eventHandler is nullptr");
         return;
     }
+    serializedGesture.data.clear();
 
-    handler->PostTask([content = uiContent_, pointerEvent]() {
-        auto uiContent = content.lock();
+    if (pointerEvent && pointerEvent->GetPointerAction() == OHOS::MMI::PointerEvent::POINTER_ACTION_DOWN) {
+        auto uiContent = uiContent_.lock();
         if (!uiContent) {
             HILOG_ERROR("uiContent is nullptr");
             return;
         }
-
         uiContent->ProcessPointerEvent(pointerEvent);
-    });
+        serializedGesture = uiContent->GetFormSerializedGesture();
+    } else {
+        handler->PostTask([content = uiContent_, pointerEvent]() {
+            auto uiContent = content.lock();
+            if (!uiContent) {
+                HILOG_ERROR("uiContent is nullptr");
+                return;
+            }
+
+            uiContent->ProcessPointerEvent(pointerEvent);
+        });
+    }
 }
 
 bool FormRendererDispatcherImpl::IsAllowUpdate()

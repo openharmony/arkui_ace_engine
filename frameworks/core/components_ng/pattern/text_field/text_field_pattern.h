@@ -514,6 +514,7 @@ public:
 
     void CloseSelectOverlay() override;
     void CloseSelectOverlay(bool animation);
+    void NotifyKeyboardInfo(const KeyBoardInfo &info) override;
     void SetInputMethodStatus(bool keyboardShown) override
     {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
@@ -771,6 +772,7 @@ public:
     bool OnBackPressed() override;
     void CheckScrollable();
     void HandleClickEvent(GestureEvent& info);
+    bool CheckClickLocation(GestureEvent& info);
     void HandleDoubleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
 
@@ -919,6 +921,7 @@ public:
         customKeyboardBuilder_ = keyboardBuilder;
     }
 
+    void DumpInfo() override;
     void DumpAdvanceInfo() override;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
     void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
@@ -1064,13 +1067,10 @@ public:
         return lastClickTimeStamp_;
     }
 
-    void UpdateLastTextRect(const RectF& textRect)
-    {
-        lastTextRect_ = textRect;
-    }
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
 
+    void ContentFireOnChangeEvent();
 protected:
     virtual void InitDragEvent();
 
@@ -1135,7 +1135,6 @@ private:
     void AfterSelection();
 
     void FireEventHubOnChange(const std::string& text);
-    void FireOnChangeIfNeeded();
     // The return value represents whether the editor content has change.
     bool FireOnTextChangeEvent();
 
@@ -1229,6 +1228,7 @@ private:
     void ScrollToSafeArea() const override;
     void RecordSubmitEvent() const;
     void UpdateCancelNode();
+    void RequestKeyboardAfterLongPress();
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1308,9 +1308,6 @@ private:
     float maxFrameOffsetY_ = 0.0f;
     float maxFrameHeight_ = 0.0f;
 
-    // Only used to record the content area drawn last time.
-    RectF lastTextRect_;
-
     CancelableCallback<void()> cursorTwinklingTask_;
 
     std::list<std::unique_ptr<TextInputFormatter>> textInputFormatters_;
@@ -1328,6 +1325,7 @@ private:
     int32_t dragTextEnd_ = 0;
     RefPtr<FrameNode> dragNode_;
     DragStatus dragStatus_ = DragStatus::NONE; // The status of the dragged initiator
+    DragStatus dragRecipientStatus_ = DragStatus::NONE; // Drag the recipient's state
     RefPtr<Clipboard> clipboard_;
     std::vector<TextEditingValueNG> operationRecords_;
     std::vector<TextEditingValueNG> redoOperationRecords_;
@@ -1358,6 +1356,7 @@ private:
     bool isFocusedBeforeClick_ = false;
     bool isCustomKeyboardAttached_ = false;
     std::function<void()> customKeyboardBuilder_;
+    RefPtr<OverlayManager> keyboardOverlay_;
     bool isCustomFont_ = false;
     bool hasClicked_ = false;
     bool isDoubleClick_ = false;
@@ -1386,6 +1385,7 @@ private:
     bool isTouchCaret_ = false;
     bool needSelectAll_ = false;
     bool isModifyDone_ = false;
+    Offset clickLocation_;
 };
 } // namespace OHOS::Ace::NG
 

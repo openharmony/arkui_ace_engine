@@ -117,6 +117,20 @@ struct GridLayoutInfo {
      */
     int32_t FindItemInRange(int32_t target) const;
 
+    /**
+     * @brief clears gridMatrix_ and lineHeightMap_ starting from line [idx]
+     *
+     * @param idx starting line index
+     */
+    void ClearMapsToEnd(int32_t idx);
+
+    /**
+     * @brief clears gridMatrix_ and lineHeightMap_ in range [0, idx)
+     *
+     * @param idx ending line index, exclusive.
+     */
+    void ClearMapsFromStart(int32_t idx);
+
     void ResetPositionFlags()
     {
         reachEnd_ = false;
@@ -140,7 +154,7 @@ struct GridLayoutInfo {
     float GetContentHeight(const GridLayoutOptions& options, float mainGap) const;
     float GetCurrentLineHeight() const;
 
-    bool GetLineIndexByIndex(int32_t targetIndex, int32_t& targetLineIndex);
+    bool GetLineIndexByIndex(int32_t targetIndex, int32_t& targetLineIndex) const;
     float GetTotalHeightFromZeroIndex(int32_t targetLineIndex, float mainGap) const;
 
     bool GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayoutInfo, int32_t targetIndex, ScrollAlign align,

@@ -270,6 +270,7 @@ public:
     void OnPositionUpdate(const OffsetT<Dimension>& value) override;
     void OnZIndexUpdate(int32_t value) override;
     void DumpInfo() override;
+    void DumpAdvanceInfo() override;
     void SetClipBoundsWithCommands(const std::string& commands) override;
     void SetNeedDebugBoundary(bool flag) override
     {
@@ -326,6 +327,12 @@ public:
     void SetShadowElevation(float elevation) override;
     void SetShadowRadius(float radius) override;
     void SetRenderFrameOffset(const OffsetF& offset) override;
+    void SetScale(float scaleX, float scaleY) override;
+    void SetBackgroundColor(uint32_t colorValue) override;
+    void SetRenderPivot(float pivotX, float pivotY) override;
+    void SetFrame(float positionX, float positionY, float width, float height) override;
+    void SetOpacity(float opacity) override;
+    void SetTranslate(float translateX, float translateY, float translateZ) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -407,7 +414,7 @@ private:
     }
     bool HasDisappearTransition() const override
     {
-        return transitionEffect_ != nullptr && !transitionEffect_->HasDisappearTransition();
+        return transitionEffect_ != nullptr && transitionEffect_->HasDisappearTransition();
     }
     void OnTransitionInFinish();
     void OnTransitionOutFinish();

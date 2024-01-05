@@ -36,6 +36,7 @@
 
       OHOS_ACE_*;
       GetArkUINodeAPI;
+      GetArkUIAnyFullNodeAPI;
 
       OHOS::Ace::AceApplicationInfo::*;
       OHOS::Ace::AceScopedTrace::*;

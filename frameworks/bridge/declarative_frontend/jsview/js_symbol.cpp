@@ -66,7 +66,6 @@ void JSSymbol::Create(const JSCallbackInfo& info)
         return;
     }
     ParseJsSymbolId(info[0], symbolId);
-
     SymbolModel::GetInstance()->Create(symbolId);
 }
 

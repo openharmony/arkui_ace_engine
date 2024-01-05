@@ -246,10 +246,10 @@ public:
     }
 
     static std::unique_ptr<DrawableDescriptor> Create(std::pair<std::unique_ptr<uint8_t[]>, size_t> &foregroundInfo,
-        std::pair<std::unique_ptr<uint8_t[]>, size_t> &backgroundInfo, std::string &path, DrawableType& drawableType)
+        std::pair<std::unique_ptr<uint8_t[]>, size_t> &backgroundInfo, std::string &path, DrawableType& drawableType,
+        const std::shared_ptr<ResourceManager>& resourceMgr)
     {
         std::unique_ptr<uint8_t[]> jsonBuf;
-        std::shared_ptr<Global::Resource::ResourceManager> resourceMgr;
         drawableType = DrawableDescriptor::DrawableType::LAYERED;
         auto layeredDrawableDescriptor = std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), 0,
             resourceMgr);

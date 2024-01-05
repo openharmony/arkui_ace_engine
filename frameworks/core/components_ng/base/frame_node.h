@@ -644,17 +644,17 @@ public:
     void NotifyFillRequestFailed(int32_t errCode);
 
     int32_t GetUiExtensionId();
-    int32_t WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId);
-    void SearchExtensionElementInfoByAccessibilityIdNG(int32_t elementId, int32_t mode,
-        int32_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
-    void SearchElementInfosByTextNG(int32_t elementId, const std::string& text,
-        int32_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
-    void FindFocusedExtensionElementInfoNG(int32_t elementId, int32_t focusType,
-        int32_t offset, Accessibility::AccessibilityElementInfo& output);
-    void FocusMoveSearchNG(int32_t elementId, int32_t direction,
-        int32_t offset, Accessibility::AccessibilityElementInfo& output);
-    bool TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int32_t offset);
+    int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId);
+    void SearchExtensionElementInfoByAccessibilityIdNG(int64_t elementId, int32_t mode,
+        int64_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
+    void SearchElementInfosByTextNG(int64_t elementId, const std::string& text,
+        int64_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
+    void FindFocusedExtensionElementInfoNG(int64_t elementId, int32_t focusType,
+        int64_t offset, Accessibility::AccessibilityElementInfo& output);
+    void FocusMoveSearchNG(int64_t elementId, int32_t direction,
+        int64_t offset, Accessibility::AccessibilityElementInfo& output);
+    bool TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int64_t offset);
     std::vector<RectF> GetResponseRegionListForRecognizer(int32_t sourceType);
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 

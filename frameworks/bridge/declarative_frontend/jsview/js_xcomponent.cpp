@@ -103,7 +103,7 @@ void JSXComponent::JSBind(BindingTarget globalObj)
     JSClass<JSXComponent>::StaticMethod("pixelStretchEffect", &JSXComponent::OmitAttribute);
     JSClass<JSXComponent>::StaticMethod("linearGradientBlur", &JSXComponent::OmitAttribute);
 
-    JSClass<JSXComponent>::InheritAndBind<JSViewAbstract>(globalObj);
+    JSClass<JSXComponent>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSXComponent::Create(const JSCallbackInfo& info)

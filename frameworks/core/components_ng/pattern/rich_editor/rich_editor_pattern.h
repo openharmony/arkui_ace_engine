@@ -195,6 +195,7 @@ public:
     void HandleSelect(CaretMoveIntent direction) override;
     bool SetCaretPosition(int32_t pos);
     int32_t GetCaretPosition();
+    int32_t GetTextContentLength() override;
     bool GetCaretVisible() const;
     OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight,
         bool downStreamFirst = false, bool needLineHighest = true);
@@ -424,6 +425,7 @@ private:
     void onDragDropAndLeave();
     void ClearDragDropEvent();
     void OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
     {
@@ -494,6 +496,7 @@ private:
     float CalcDragSpeed(float hotAreaStart, float hotAreaEnd, float point);
     float MoveTextRect(float offset);
     void MoveCaretToContentRect();
+    void MoveCaretToContentRect(const OffsetF& caretOffset, float caretHeight);
     bool IsTextArea() const override
     {
         return true;
@@ -508,7 +511,6 @@ private:
     {
         return NearEqual(richTextRect_.Bottom(), contentRect_.Bottom());
     }
-    void FlushTextForDisplay();
     // ai analysis fun
     bool NeedAiAnalysis(
         const CaretUpdateType targeType, const int32_t pos, const int32_t& spanStart, const std::string& content);
@@ -567,6 +569,7 @@ private:
     std::list<ResultObject> dragResultObjects_;
 
     std::function<void()> customKeyboardBuilder_;
+    RefPtr<OverlayManager> keyboardOverlay_;
     Offset selectionMenuOffset_;
     // add for scroll
     RectF richTextRect_;

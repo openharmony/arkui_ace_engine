@@ -1570,6 +1570,12 @@ struct ArkUIRenderNodeModifierAPI {
     void (*SetShadowElevation)(NodeHandle node, float elevation);
     void (*SetShadowRadius)(NodeHandle node, float radius);
     void (*Invalidate)(NodeHandle node);
+    void (*SetScale)(NodeHandle node, float scaleX, float scaleY);
+    void (*SetRenderNodeBackgroundColor)(NodeHandle node, uint32_t colorValue);
+    void (*SetPivot)(NodeHandle node, float pivotX, float pivotY);
+    void (*SetFrame)(NodeHandle node, float positionX, float positionY, float width, float height);
+    void (*SetOpacity)(NodeHandle node, float opacity);
+    void (*SetTranslate)(NodeHandle node, float translateX, float translateY, float translateZ);
 };
 
 struct ArkUINodeAPI {
@@ -1658,5 +1664,5 @@ struct ArkUINodeAPI {
     ArkUIFormComponentModifierAPI (*GetFormComponentModifier)();
 #endif
 };
-ArkUINodeAPI* GetArkUIInternalNodeAPI(void);
+ArkUINodeAPI* GetArkUIInternalNodeAPI();
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_API_H

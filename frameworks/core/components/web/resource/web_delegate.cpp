@@ -1206,18 +1206,15 @@ void WebDelegate::SetPortMessageCallback(std::string& port, std::function<void(c
     }
 }
 
-void WebDelegate::RequestFocus()
+bool WebDelegate::RequestFocus()
 {
     auto context = context_.Upgrade();
-    if (!context) {
-        return;
-    }
-    context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this)]() {
+    CHECK_NULL_RETURN(context, false);
+    bool result = false;
+    context->GetTaskExecutor()->PostSyncTask(
+        [weak = WeakClaim(this), &result]() {
             auto delegate = weak.Upgrade();
-            if (!delegate) {
-                return;
-            }
+            CHECK_NULL_VOID(delegate);
 
             if (Container::IsCurrentUseNewPipeline()) {
                 auto webPattern = delegate->webPattern_.Upgrade();
@@ -1227,14 +1224,16 @@ void WebDelegate::RequestFocus()
                 auto focusHub = eventHub->GetOrCreateFocusHub();
                 CHECK_NULL_VOID(focusHub);
 
-                focusHub->RequestFocusImmediately(true);
+                result = focusHub->RequestFocusImmediately(true);
+                return;
             }
 
             auto webCom = delegate->webComponent_.Upgrade();
             CHECK_NULL_VOID(webCom);
-            webCom->RequestFocus();
+            result = webCom->RequestFocus();
         },
         TaskExecutor::TaskType::PLATFORM);
+    return result;
 }
 
 void WebDelegate::SearchAllAsync(const std::string& searchStr)
@@ -4374,7 +4373,7 @@ void WebDelegate::OnDownloadStart(const std::string& url, const std::string& use
         TaskExecutor::TaskType::JS);
 }
 
-void WebDelegate::OnAccessibilityEvent(int32_t accessibilityId, AccessibilityEventType eventType)
+void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEventType eventType)
 {
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
@@ -5730,17 +5729,17 @@ void WebDelegate::JavaScriptOnDocumentEnd()
     }
 }
 
-void WebDelegate::ExecuteAction(int32_t nodeId, AceAction action)
+void WebDelegate::ExecuteAction(int64_t accessibilityId, AceAction action)
 {
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     uint32_t nwebAction = static_cast<uint32_t>(action);
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), nodeId, nwebAction]() {
+        [weak = WeakClaim(this), accessibilityId, nwebAction]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
-            delegate->nweb_->ExecuteAction(nodeId, nwebAction);
+            delegate->nweb_->ExecuteAction(accessibilityId, nwebAction);
         },
         TaskExecutor::TaskType::PLATFORM);
 }
@@ -5774,21 +5773,21 @@ void WebDelegate::SetAccessibilityState(bool state)
 }
 
 bool WebDelegate::GetFocusedAccessibilityNodeInfo(
-    int32_t accessibilityId, bool isAccessibilityFocus, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const
+    int64_t accessibilityId, bool isAccessibilityFocus, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const
 {
     CHECK_NULL_RETURN(nweb_, false);
     return nweb_->GetFocusedAccessibilityNodeInfo(accessibilityId, isAccessibilityFocus, nodeInfo);
 }
 
 bool WebDelegate::GetAccessibilityNodeInfoById(
-    int32_t accessibilityId, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const
+    int64_t accessibilityId, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const
 {
     CHECK_NULL_RETURN(nweb_, false);
     return nweb_->GetAccessibilityNodeInfoById(accessibilityId, nodeInfo);
 }
 
 bool WebDelegate::GetAccessibilityNodeInfoByFocusMove(
-    int32_t accessibilityId, int32_t direction, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const
+    int64_t accessibilityId, int32_t direction, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const
 {
     CHECK_NULL_RETURN(nweb_, false);
     return nweb_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction, nodeInfo);

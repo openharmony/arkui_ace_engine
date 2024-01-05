@@ -51,16 +51,16 @@ constexpr double ADJUSTABLE_VELOCITY = 0.0;
 #endif
 constexpr float FRICTION_SCALE = -4.2f;
 constexpr uint32_t CUSTOM_SPRING_ANIMATION_DURION = 1000;
-constexpr uint32_t MILLOS_PER_SECONDS = 1000;
+constexpr uint64_t MILLOS_PER_NANO_SECONDS = 1000 * 1000 * 1000;
+constexpr uint64_t MIN_DIFF_VSYNC = 1000 * 1000; // min is 1ms
 constexpr float DEFAULT_THRESHOLD = 0.75f;
 constexpr float DEFAULT_SPRING_RESPONSE = 0.416f;
 constexpr float DEFAULT_SPRING_DAMP = 0.99f;
-constexpr uint32_t MIN_DIFF_TIME = 1;
+constexpr uint32_t MAX_VSYNC_DIFF_TIME = 100 * 1000 * 1000; // max 100 ms
 #ifdef OHOS_PLATFORM
 constexpr int64_t INCREASE_CPU_TIME_ONCE = 4000000000; // 4s(unit: ns)
 #endif
-using std::chrono::high_resolution_clock;
-using std::chrono::milliseconds;
+
 } // namespace
 
 // Static Functions.
@@ -81,6 +81,13 @@ void Scrollable::SetFriction(double sFriction)
         return;
     }
     sFriction_ = sFriction;
+}
+
+Scrollable::Scrollable()
+{
+    friction_ = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_FRICTION : FRICTION;
+    velocityScale_ =
+        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_VELOCITY_SCALE : VELOCITY_SCALE;
 }
 
 Scrollable::Scrollable(ScrollPositionCallback&& callback, Axis axis) : callback_(std::move(callback)), axis_(axis)
@@ -177,29 +184,6 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
         panRecognizerNG_->SetOnActionEnd(actionEnd);
         panRecognizerNG_->SetOnActionCancel(actionCancel);
     }
-
-    // use RawRecognizer to receive next touch down event to stop animation.
-    rawRecognizer_ = AceType::MakeRefPtr<RawRecognizer>();
-
-    rawRecognizer_->SetOnTouchDown([weakScroll = AceType::WeakClaim(this)](const TouchEventInfo&) {
-        auto scroll = weakScroll.Upgrade();
-        if (scroll) {
-            scroll->HandleTouchDown();
-        }
-    });
-    rawRecognizer_->SetOnTouchUp([weakScroll = AceType::WeakClaim(this)](const TouchEventInfo&) {
-        auto scroll = weakScroll.Upgrade();
-        if (scroll) {
-            scroll->HandleTouchUp();
-        }
-    });
-    rawRecognizer_->SetOnTouchCancel([weakScroll = AceType::WeakClaim(this)](const TouchEventInfo&) {
-        auto scroll = weakScroll.Upgrade();
-        if (scroll) {
-            scroll->HandleTouchCancel();
-        }
-    });
-
     available_ = true;
 }
 
@@ -416,10 +400,11 @@ void Scrollable::HandleDragEnd(const GestureEvent& info)
     touchUp_ = false;
     scrollPause_ = false;
     lastVelocity_ = info.GetMainVelocity();
-    double correctVelocity =
-        std::clamp(info.GetMainVelocity(), -maxFlingVelocity_ + slipFactor_, maxFlingVelocity_ - slipFactor_);
+    double correctVelocity = info.GetMainVelocity();
     SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     correctVelocity = correctVelocity * sVelocityScale_.value_or(velocityScale_) * GetGain(GetDragOffset());
+    // Apply max fling velocity limit, it must be calculated after all fling velocity gain.
+    correctVelocity = std::clamp(correctVelocity, -maxFlingVelocity_ + slipFactor_, maxFlingVelocity_ - slipFactor_);
     currentVelocity_ = correctVelocity;
 
     lastPos_ = GetDragOffset();
@@ -493,7 +478,8 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
     // Resets values.
     currentPos_ = mainPosition;
     currentVelocity_ = 0.0;
-
+    lastPosition_ = currentPos_;
+    frictionVelocity_ = initVelocity_;
     frictionOffsetProperty_->Set(mainPosition);
     float response = fabs(2 * M_PI / (FRICTION_SCALE * friction));
     auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(response, 1.0f, 0.0f);
@@ -507,9 +493,8 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
             ContainerScope scope(id);
             auto scroll = weak.Upgrade();
             CHECK_NULL_VOID(scroll);
-            scroll->frictionVelocity_ = 0.0f;
             scroll->isFrictionAnimationStop_ = true;
-            scroll->ProcessScrollMotionStop();
+            scroll->ProcessScrollMotionStop(true);
             auto context = scroll->GetContext().Upgrade();
             if (context && scroll->Idle()) {
                 AccessibilityEvent scrollEvent;
@@ -520,7 +505,7 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
     });
     isFrictionAnimationStop_ = false;
     if (scrollMotionFRCSceneCallback_) {
-        scrollMotionFRCSceneCallback_(frictionVelocity_, NG::SceneStatus::START);
+        scrollMotionFRCSceneCallback_(initVelocity_, NG::SceneStatus::START);
     }
 }
 
@@ -647,7 +632,6 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
             CHECK_NULL_VOID(scroll);
             if (scroll->updateSnapAnimationCount_ == 0) {
                 scroll->isSnapScrollAnimationStop_ = true;
-                scroll->snapVelocity_ = 0.0f;
                 scroll->ProcessScrollSnapStop();
             }
     });
@@ -679,8 +663,7 @@ void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scro
             auto scroll = weak.Upgrade();
             CHECK_NULL_VOID(scroll);
             scroll->isSnapAnimationStop_ = true;
-            scroll->snapVelocity_ = 0.0f;
-            scroll->ProcessScrollMotionStop();
+            scroll->ProcessScrollMotionStop(false);
             auto context = scroll->GetContext().Upgrade();
             CHECK_NULL_VOID(context && scroll->Idle());
             AccessibilityEvent scrollEvent;
@@ -801,7 +784,7 @@ void Scrollable::StartSpringMotion(
     }
 
     if (scrollMotionFRCSceneCallback_) {
-        scrollMotionFRCSceneCallback_(GetCurrentVelocity(), NG::SceneStatus::START);
+        scrollMotionFRCSceneCallback_(mainVelocity, NG::SceneStatus::START);
     }
     if (!springOffsetProperty_) {
         GetSpringProperty();
@@ -833,12 +816,12 @@ void Scrollable::StartSpringMotion(
     skipRestartSpring_ = false;
 }
 
-void Scrollable::ProcessScrollMotionStop()
+void Scrollable::ProcessScrollMotionStop(bool stopFriction)
 {
-    if (frictionOffsetProperty_ && scrollMotionFRCSceneCallback_) {
+    if (frictionOffsetProperty_ && stopFriction && scrollMotionFRCSceneCallback_) {
         scrollMotionFRCSceneCallback_(frictionVelocity_, NG::SceneStatus::END);
     }
-    if (snapOffsetProperty_ && scrollMotionFRCSceneCallback_) {
+    if (snapOffsetProperty_ && !stopFriction && scrollMotionFRCSceneCallback_) {
         scrollMotionFRCSceneCallback_(snapVelocity_, NG::SceneStatus::END);
     }
     if (needScrollSnapChange_ && calePredictSnapOffsetCallback_ && frictionOffsetProperty_) {
@@ -879,15 +862,17 @@ void Scrollable::ProcessSpringMotion(double position)
 {
     TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Current Pos is %{public}lf, position is %{public}lf",
         currentPos_, position);
-    high_resolution_clock::time_point currentTime = high_resolution_clock::now();
-    milliseconds diff = std::chrono::duration_cast<milliseconds>(currentTime - lastTime_);
-    if (diff.count() > MIN_DIFF_TIME) {
-        currentVelocity_ = (position - currentPos_) / diff.count() * MILLOS_PER_SECONDS;
+    auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    uint64_t currentVsync = context->GetVsyncTime();
+    uint64_t diff = currentVsync - lastVsyncTime_;
+    if (diff < MAX_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
+        currentVelocity_ = (position - currentPos_) / diff * MILLOS_PER_NANO_SECONDS;
+        if (scrollMotionFRCSceneCallback_) {
+            scrollMotionFRCSceneCallback_(currentVelocity_, NG::SceneStatus::RUNNING);
+        }
     }
-    lastTime_ = currentTime;
-    if (scrollMotionFRCSceneCallback_) {
-        scrollMotionFRCSceneCallback_(currentVelocity_, NG::SceneStatus::RUNNING);
-    }
+    lastVsyncTime_ = currentVsync;
     if (NearEqual(currentPos_, position)) {
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
     } else {
@@ -907,12 +892,6 @@ void Scrollable::ProcessSpringMotion(double position)
 void Scrollable::ProcessScrollMotion(double position)
 {
     currentVelocity_ = frictionVelocity_;
-    if (scrollMotionFRCSceneCallback_) {
-        scrollMotionFRCSceneCallback_(currentVelocity_, NG::SceneStatus::RUNNING);
-    }
-    if (snapOffsetProperty_ && scrollMotionFRCSceneCallback_) {
-        scrollMotionFRCSceneCallback_(snapVelocity_, NG::SceneStatus::RUNNING);
-    }
     if (needScrollSnapToSideCallback_) {
         needScrollSnapChange_ = needScrollSnapToSideCallback_(position - currentPos_);
     }
@@ -1021,7 +1000,6 @@ void Scrollable::UpdateScrollSnapEndWithOffset(double offset)
                 // avoid current animation being interrupted by the prev animation's finish callback
                 if (scroll->updateSnapAnimationCount_ == 0) {
                     scroll->isSnapScrollAnimationStop_ = true;
-                    scroll->snapVelocity_ = 0.0f;
                     scroll->ProcessScrollSnapStop();
                 }
         });
@@ -1037,13 +1015,21 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetFrictionProperty()
         if (scroll->isFrictionAnimationStop_ || scroll->isTouching_) {
             return;
         }
-        high_resolution_clock::time_point currentTime = high_resolution_clock::now();
-        milliseconds diff = std::chrono::duration_cast<milliseconds>(currentTime - scroll->lastTime_);
-        if (diff.count() > MIN_DIFF_TIME) {
-            scroll->frictionVelocity_ = (position - scroll->lastPosition_) /
-                diff.count() * MILLOS_PER_SECONDS;
+        float offset = std::fabs(position - scroll->lastPosition_);
+        if (LessOrEqual(offset, 0.1f)) {
+            scroll->StopFrictionAnimation();
         }
-        scroll->lastTime_ = currentTime;
+        auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        uint64_t currentVsync = context->GetVsyncTime();
+        uint64_t diff = currentVsync - scroll->lastVsyncTime_;
+        if (diff < MAX_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
+            scroll->frictionVelocity_ = (position - scroll->lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
+            if (scroll->scrollMotionFRCSceneCallback_) {
+                scroll->scrollMotionFRCSceneCallback_(scroll->frictionVelocity_, NG::SceneStatus::RUNNING);
+            }
+        }
+        scroll->lastVsyncTime_ = currentVsync;
         scroll->lastPosition_ = position;
         scroll->ProcessScrollMotion(position);
     };
@@ -1069,13 +1055,20 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSnapProperty()
     auto propertyCallback = [weak = AceType::WeakClaim(this)](float position) {
         auto scroll = weak.Upgrade();
         CHECK_NULL_VOID(scroll);
-        high_resolution_clock::time_point currentTime = high_resolution_clock::now();
-        milliseconds diff = std::chrono::duration_cast<milliseconds>(currentTime - scroll->lastTime_);
-        if (diff.count() > MIN_DIFF_TIME) {
-            scroll->snapVelocity_ = (position - scroll->currentPos_) /
-                diff.count() * MILLOS_PER_SECONDS;
+        if (scroll->isSnapScrollAnimationStop_ && scroll->isSnapAnimationStop_) {
+            return;
         }
-        scroll->lastTime_ = currentTime;
+        auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        uint64_t currentVsync = context->GetVsyncTime();
+        uint64_t diff = currentVsync - scroll->lastVsyncTime_;
+        if (diff < MAX_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
+            scroll->snapVelocity_ = (position - scroll->currentPos_) / diff * MILLOS_PER_NANO_SECONDS;
+            if (scroll->scrollMotionFRCSceneCallback_) {
+                scroll->scrollMotionFRCSceneCallback_(scroll->snapVelocity_, NG::SceneStatus::RUNNING);
+            }
+        }
+        scroll->lastVsyncTime_ = currentVsync;
         if (!scroll->isSnapScrollAnimationStop_) {
             scroll->ProcessScrollSnapMotion(position);
         } else if (!scroll->isSnapAnimationStop_) {
@@ -1102,7 +1095,6 @@ void Scrollable::StopFrictionAnimation()
             },
             nullptr);
     }
-    frictionVelocity_ = 0.0f;
 }
 
 void Scrollable::StopSpringAnimation()
@@ -1142,7 +1134,6 @@ void Scrollable::StopSnapAnimation()
             },
             nullptr);
     }
-    snapVelocity_ = 0.0f;
 }
 
 inline bool Scrollable::IsMouseWheelScroll(const GestureEvent& info)

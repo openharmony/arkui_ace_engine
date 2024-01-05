@@ -309,11 +309,7 @@ AssertionResult ScrollTestNg::IsEqualCurrentPosition(float expectOffset)
 {
     FlushLayoutTask(frameNode_);
     float currentOffset = pattern_->GetCurrentPosition();
-    if (NearEqual(currentOffset, expectOffset)) {
-        return AssertionSuccess();
-    }
-    return AssertionFailure() << "currentOffset: " << currentOffset << " != "
-                              << "expectOffset: " << expectOffset;
+    return IsEqual(currentOffset, expectOffset);
 }
 
 /**
@@ -1330,17 +1326,20 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset002, TestSize.Level1)
     EXPECT_TRUE(UpdateAndVerifyPosition(-1, -1, SCROLL_FROM_BAR_FLING));
     EXPECT_TRUE(UpdateAndVerifyPosition(1, 0, SCROLL_FROM_ROTATE));
 
-    pattern_->currentOffset_ = 10.f;
-    pattern_->UpdateCurrentOffset(-5.f, SCROLL_FROM_UPDATE);
-    EXPECT_EQ(pattern_->GetScrollBarOutBoundaryExtent(), 5.f);
+    pattern_->currentOffset_ = -10.f;
+    pattern_->UpdateScrollBarOffset();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetScrollBarOutBoundaryExtent(), 0);
 
     pattern_->currentOffset_ = -1000.f;
-    pattern_->UpdateCurrentOffset(-10.f, SCROLL_FROM_UPDATE);
+    pattern_->UpdateScrollBarOffset();
+    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetScrollBarOutBoundaryExtent(),
         -pattern_->currentOffset_ - (ITEM_HEIGHT * TOTAL_LINE_NUMBER - SCROLL_HEIGHT));
 
     pattern_->currentOffset_ = -100.f;
-    pattern_->UpdateCurrentOffset(-10.f, SCROLL_FROM_UPDATE);
+    pattern_->UpdateScrollBarOffset();
+    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetScrollBarOutBoundaryExtent(), 0.0f);
 }
 
@@ -1890,8 +1889,7 @@ HWTEST_F(ScrollTestNg, ScrollBar005, TestSize.Level1)
 
     scrollBar->SetPositionMode(PositionMode::LEFT);
     scrollBar->SetNormalWidth(Dimension(1)); // call CalcReservedHeight;
-    EXPECT_EQ(scrollBar->startReservedHeight_, Dimension(0.0));
-    EXPECT_EQ(scrollBar->endReservedHeight_, Dimension(0.0));
+    EXPECT_EQ(scrollBar->endReservedHeight_.Value(), 0);
 
     BorderRadiusProperty borderRadiusProperty;
     float radius = 13.f;
@@ -2033,6 +2031,68 @@ HWTEST_F(ScrollTestNg, ScrollBar008, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollBar009
+ * @tc.desc: Test scrollbar width.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollBar009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scroll model and set the width, height
+     * @tc.expected: Check the scrollBar property value.
+     */
+    CreateWithContent([](ScrollModelNG model) { model.SetDisplayMode(static_cast<int32_t>(DisplayMode::ON)); });
+
+    RefPtr<ScrollBar> scrollBar = pattern_->GetScrollBar();
+    pattern_->CreateScrollBarOverlayModifier();
+    auto barRect = scrollBar->GetBarRect();
+    auto activeRect = scrollBar->GetActiveRect();
+    EXPECT_FLOAT_EQ(barRect.x_ + barRect.width_, SCROLL_WIDTH);
+    EXPECT_FLOAT_EQ(activeRect.x_ + activeRect.width_, SCROLL_WIDTH);
+    EXPECT_FLOAT_EQ(barRect.height_, SCROLL_HEIGHT);
+
+    /**
+     * @tc.steps: step1.set the width
+     * @tc.expected: Check the scrollBar property value.
+     */
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(300.f));
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(500.f));
+    FlushLayoutTask(frameNode_);
+
+    RefPtr<LayoutWrapperNode> layoutWrapper = frameNode_->CreateLayoutWrapper(false, false);
+    layoutWrapper->layoutAlgorithm_->SetNeedMeasure();
+    layoutWrapper->layoutAlgorithm_->SetNeedLayout();
+    auto layoutAlgorithm = AceType::MakeRefPtr<ScrollLayoutAlgorithm>(pattern_->currentOffset_);
+    layoutWrapper->layoutAlgorithm_->SetLayoutAlgorithm(layoutAlgorithm);
+    auto childLayoutConstraint = layoutProperty_->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize = { 300.f, 625.0f };
+    auto colNode = AceType::DynamicCast<FrameNode>(frameNode_->GetChildAtIndex(0));
+    ASSERT_NE(colNode, nullptr);
+    RefPtr<LayoutWrapperNode> colLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(colNode, colNode->GetGeometryNode(), colNode->GetLayoutProperty());
+    colLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    colLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(CalcSize(CalcLength(300.f), CalcLength(62.5f)));
+    layoutWrapper->AppendChild(colLayoutWrapper);
+
+    DirtySwapConfig config;
+    pattern_->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    auto paint = AceType::MakeRefPtr<ScrollPaintMethod>();
+    paint->SetScrollBar(scrollBar);
+    paint->SetScrollBarOverlayModifier(pattern_->GetScrollBarOverlayModifier());
+    WeakPtr<RenderContext> renderContext;
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto paintWrapper = AceType::MakeRefPtr<PaintWrapper>(renderContext, geometryNode, paintProperty_);
+    paint->UpdateOverlayModifier(Referenced::RawPtr(paintWrapper));
+
+    barRect = scrollBar->GetBarRect();
+    activeRect = scrollBar->GetActiveRect();
+    EXPECT_FLOAT_EQ(barRect.x_ + barRect.width_, 300.f);
+    EXPECT_FLOAT_EQ(activeRect.x_ + activeRect.width_, 300.f);
+    EXPECT_FLOAT_EQ(barRect.height_, 500.f);
+    EXPECT_FLOAT_EQ(pattern_->scrollBarOverlayModifier_->barX_->Get(), 296.f);
+}
+
+/**
  * @tc.name: Measure001
  * @tc.desc: Test Measure
  * @tc.type: FUNC
@@ -2160,72 +2220,70 @@ HWTEST_F(ScrollTestNg, OnScrollCallback003, TestSize.Level1)
      * @tc.expected: The scrollableDistance_ is two of ITEM_HEIGHT
      */
     CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, true); });
-    EXPECT_EQ(pattern_->scrollableDistance_, ITEM_HEIGHT * 2);
+    float scrollableDistance = ITEM_HEIGHT * 2;
+    EXPECT_EQ(pattern_->scrollableDistance_, scrollableDistance);
 
     /**
      * @tc.steps: step2. scroll to above of content
      * @tc.expected: friction is not effected
      */
-    OnScrollCallback(1.f, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(1.f));
+    pattern_->OnScrollCallback(1, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->GetCurrentPosition(), 1);
 
     /**
      * @tc.steps: step3. Continue scroll up
      * @tc.expected: friction is effected, but is 1
      */
-    OnScrollCallback(1.f, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(2.f));
+    pattern_->OnScrollCallback(1, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->GetCurrentPosition(), 2);
 
     /**
      * @tc.steps: step4. Continue scroll up
      * @tc.expected: friction is effected
      */
-    OnScrollCallback(1.f, SCROLL_FROM_UPDATE);
-    double currentOffset = pattern_->GetCurrentPosition();
-    EXPECT_LT(currentOffset, 3.f);
+    pattern_->OnScrollCallback(1, SCROLL_FROM_UPDATE);
+    EXPECT_LT(pattern_->GetCurrentPosition(), 3);
 
     /**
      * @tc.steps: step5. Scroll down
      * @tc.expected: friction is not effected
      */
-    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(currentOffset - 1.f));
+    pattern_->OnScrollCallback(-1, SCROLL_FROM_UPDATE);
+    EXPECT_LT(pattern_->GetCurrentPosition(), 2);
 
     /**
      * @tc.steps: step6. Scroll to bottom for test other condition
      */
-    float scrollableDistance = ITEM_HEIGHT * 2;
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
-    EXPECT_TRUE(IsEqualCurrentPosition(-scrollableDistance));
+    EXPECT_EQ(pattern_->GetCurrentPosition(), -scrollableDistance);
 
     /**
      * @tc.steps: step7. scroll to below of content
      * @tc.expected: friction is not effected
      */
-    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(-(scrollableDistance + 1.f)));
+    pattern_->OnScrollCallback(-1, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->GetCurrentPosition(), -(scrollableDistance + 1));
 
     /**
      * @tc.steps: step8. Continue scroll down
      * @tc.expected: friction is effected, but is 1
      */
-    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(-(scrollableDistance + 2.f)));
+    pattern_->OnScrollCallback(-1, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->GetCurrentPosition(), -(scrollableDistance + 2));
 
     /**
      * @tc.steps: step9. Continue scroll down
      * @tc.expected: friction is effected
      */
-    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
-    currentOffset = pattern_->GetCurrentPosition();
-    EXPECT_GT(currentOffset, -(scrollableDistance + 3.f));
+    pattern_->OnScrollCallback(-1, SCROLL_FROM_UPDATE);
+    EXPECT_GT(pattern_->GetCurrentPosition(), -(scrollableDistance + 3));
 
     /**
      * @tc.steps: step10. Scroll up
      * @tc.expected: friction is not effected
      */
-    OnScrollCallback(1.f, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(currentOffset + 1.f));
+    pattern_->OnScrollCallback(1, SCROLL_FROM_UPDATE);
+    EXPECT_GT(pattern_->GetCurrentPosition(), -(scrollableDistance + 2));
 
     /**
      * @tc.steps: step11. scroll to middle of content
@@ -2233,8 +2291,8 @@ HWTEST_F(ScrollTestNg, OnScrollCallback003, TestSize.Level1)
      */
     ScrollToEdge(ScrollEdgeType::SCROLL_TOP);
     EXPECT_EQ(pattern_->GetCurrentPosition(), 0);
-    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(-1.f));
+    pattern_->OnScrollCallback(-1, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->GetCurrentPosition(), -1);
 }
 
 /**
@@ -2258,65 +2316,63 @@ HWTEST_F(ScrollTestNg, OnScrollCallback004, TestSize.Level1)
      * @tc.steps: step2. scroll to above of content
      * @tc.expected: friction is not effected
      */
-    OnScrollCallback(1.f, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(1.f));
+    pattern_->OnScrollCallback(1, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->GetCurrentPosition(), 1);
 
     /**
      * @tc.steps: step3. Continue scroll up
      * @tc.expected: friction is effected, but is 1
      */
-    OnScrollCallback(1.f, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(2.f));
+    pattern_->OnScrollCallback(1, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->GetCurrentPosition(), 2);
 
     /**
      * @tc.steps: step4. Continue scroll up
      * @tc.expected: friction is effected
      */
-    OnScrollCallback(1.f, SCROLL_FROM_UPDATE);
-    double currentOffset = pattern_->GetCurrentPosition();
-    EXPECT_LT(currentOffset, 3.f);
+    pattern_->OnScrollCallback(1, SCROLL_FROM_UPDATE);
+    EXPECT_LT(pattern_->GetCurrentPosition(), 3);
 
     /**
      * @tc.steps: step5. Scroll down
      * @tc.expected: friction is not effected
      */
-    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(currentOffset - 1.f));
+    pattern_->OnScrollCallback(-1, SCROLL_FROM_UPDATE);
+    EXPECT_LT(pattern_->GetCurrentPosition(), 2);
 
     /**
      * @tc.steps: step6. Scroll to bottom for test other condition
      */
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
-    EXPECT_TRUE(IsEqualCurrentPosition(0));
+    EXPECT_EQ(pattern_->GetCurrentPosition(), 0);
 
     /**
      * @tc.steps: step7. scroll to below of content
      * @tc.expected: friction is not effected
      */
-    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(-1.f));
+    pattern_->OnScrollCallback(-1, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->GetCurrentPosition(), -1);
 
     /**
      * @tc.steps: step8. Continue scroll down
      * @tc.expected: friction is effected, but is 1
      */
-    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(-2.f));
+    pattern_->OnScrollCallback(-1, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->GetCurrentPosition(), -2);
 
     /**
      * @tc.steps: step9. Continue scroll down
      * @tc.expected: friction is effected
      */
-    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
-    currentOffset = pattern_->GetCurrentPosition();
-    EXPECT_GT(currentOffset, -3.f);
+    pattern_->OnScrollCallback(-1, SCROLL_FROM_UPDATE);
+    EXPECT_GT(pattern_->GetCurrentPosition(), -3);
 
     /**
      * @tc.steps: step10. Scroll up
      * @tc.expected: friction is not effected
      */
-    OnScrollCallback(1.f, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(currentOffset + 1.f));
+    pattern_->OnScrollCallback(1, SCROLL_FROM_UPDATE);
+    EXPECT_GT(pattern_->GetCurrentPosition(), -2);
 }
 
 /**
@@ -3057,6 +3113,34 @@ HWTEST_F(ScrollTestNg, Measure002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: Measure003
+ * @tc.desc: Test ScrollLayoutAlgorithm Measure.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, Measure003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scroll without children
+     */
+    Create();
+    auto scrollSize = frameNode_->GetGeometryNode()->GetFrameSize();
+    auto expectSize = SizeF(SCROLL_WIDTH, SCROLL_HEIGHT);
+    EXPECT_TRUE(IsEqual(scrollSize, expectSize));
+
+    /**
+     * @tc.steps: step1. set idealSize
+     * @tc.expected: The frameSize would be idealSize
+     */
+    ViewAbstract::SetWidth(AceType::RawPtr(frameNode_), CalcLength(300.f));
+    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(500.f));
+    FlushLayoutTask(frameNode_);
+
+    scrollSize = frameNode_->GetGeometryNode()->GetFrameSize();
+    expectSize = SizeF(300.f, 500.f);
+    EXPECT_TRUE(IsEqual(scrollSize, expectSize));
+}
+
+/**
  * @tc.name: SelectScroll002
  * @tc.desc: Test select scroll default width.
  * @tc.type: FUNC
@@ -3144,7 +3228,7 @@ HWTEST_F(ScrollTestNg, StopAnimation001, TestSize.Level1)
     CreateWithContent([](ScrollModelNG model) {});
     std::shared_ptr<AnimationUtils::Animation> animation;
     pattern_->StopAnimation(animation);
-    ASSERT_NE(animation, nullptr);
+    EXPECT_TRUE(pattern_->isAnimationStop_);
 }
 
 /**

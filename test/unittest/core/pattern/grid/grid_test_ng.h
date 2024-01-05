@@ -25,7 +25,6 @@
 #include "base/geometry/ng/size_t.h"
 #include "base/geometry/offset.h"
 #include "base/utils/utils.h"
-#include "core/components_ng/pattern/grid/grid_layout_info.h"
 #define protected public
 #define private public
 #include "core/components/button/button_theme.h"
@@ -35,6 +34,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/grid/grid_item_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
+#include "core/components_ng/pattern/grid/grid_layout_info.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"

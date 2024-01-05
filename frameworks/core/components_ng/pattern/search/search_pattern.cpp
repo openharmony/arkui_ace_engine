@@ -175,20 +175,40 @@ void SearchPattern::OnModifyDone()
     cancelButtonLayoutProperty->UpdateLabel("");
     cancelButtonFrameNode->MarkModifyDone();
 
+    HandleEnabled();
+
     InitButtonAndImageClickEvent();
     InitCancelButtonClickEvent();
     InitTextFieldValueChangeEvent();
     InitTextFieldDragEvent();
     InitTextFieldClickEvent();
-    InitButtonMouseEvent(searchButtonMouseEvent_, BUTTON_INDEX);
-    InitButtonMouseEvent(cancelButtonMouseEvent_, CANCEL_BUTTON_INDEX);
-    InitButtonTouchEvent(searchButtonTouchListener_, BUTTON_INDEX);
-    InitButtonTouchEvent(cancelButtonTouchListener_, CANCEL_BUTTON_INDEX);
+    InitButtonMouseAndTouchEvent();
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     InitFocusEvent(focusHub);
     InitClickEvent();
+}
+
+void SearchPattern::HandleEnabled()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto searchEventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(searchEventHub);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_VOID(textFieldFrameNode);
+    auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
+    eventHub->SetEnabled(searchEventHub->IsEnabled()? true : false);
+    textFieldFrameNode->MarkModifyDone();
+}
+
+void SearchPattern::InitButtonMouseAndTouchEvent()
+{
+    InitButtonMouseEvent(searchButtonMouseEvent_, BUTTON_INDEX);
+    InitButtonMouseEvent(cancelButtonMouseEvent_, CANCEL_BUTTON_INDEX);
+    InitButtonTouchEvent(searchButtonTouchListener_, BUTTON_INDEX);
+    InitButtonTouchEvent(cancelButtonTouchListener_, CANCEL_BUTTON_INDEX);
 }
 
 void SearchPattern::InitTextFieldValueChangeEvent()
@@ -651,6 +671,10 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
             return true;
         }
         if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
+            if (!NearZero(cancelButtonSize_.Height()) && (!isSearchButtonEnabled_) &&
+                (event.code == KeyCode::KEY_DPAD_RIGHT)) {
+                return false; // Go out of Search
+            }
             if (isOnlyOneFocusableComponent && isOnlyTabPressed && !isSearchButtonEnabled_) {
                 focusChoice_ = FocusChoice::SEARCH;
                 PaintFocusState();
@@ -673,8 +697,9 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
             textFieldPattern->CloseKeyboard(true);
             return false;
         }
-        if (focusChoice_ == FocusChoice::SEARCH_BUTTON && event.code == KeyCode::KEY_DPAD_RIGHT) {
-            return true;
+        if (focusChoice_ == FocusChoice::SEARCH_BUTTON && isSearchButtonEnabled_ &&
+            (event.code == KeyCode::KEY_DPAD_RIGHT)) {
+            return false; // Go out of Search
         }
     }
 

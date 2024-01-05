@@ -229,16 +229,19 @@ RefPtr<NG::ImageData> ImageLoader::LoadImageDataFromFileCache(const std::string&
 }
 
 // NG ImageLoader entrance
-RefPtr<NG::ImageData> ImageLoader::GetImageData(const ImageSourceInfo& src, const WeakPtr<PipelineBase>& context)
+RefPtr<NG::ImageData> ImageLoader::GetImageData(
+    const ImageSourceInfo& src, const WeakPtr<PipelineBase>& context, bool queryCache)
 {
     ACE_FUNCTION_TRACE();
     if (src.IsPixmap()) {
         return LoadDecodedImageData(src, context);
     }
 #ifndef USE_ROSEN_DRAWING
-    auto cachedData = ImageLoader::QueryImageDataFromImageCache(src);
-    if (cachedData) {
-        return NG::ImageData::MakeFromDataWrapper(&cachedData);
+    if (queryCache) {
+        auto cachedData = ImageLoader::QueryImageDataFromImageCache(src);
+        if (cachedData) {
+            return NG::ImageData::MakeFromDataWrapper(&cachedData);
+        }
     }
     auto skData = LoadImageData(src, context);
     CHECK_NULL_RETURN(skData, nullptr);
@@ -248,9 +251,11 @@ RefPtr<NG::ImageData> ImageLoader::GetImageData(const ImageSourceInfo& src, cons
 #else
     std::shared_ptr<RSData> rsData = nullptr;
     do {
-        rsData = ImageLoader::QueryImageDataFromImageCache(src);
-        if (rsData) {
-            break;
+        if (queryCache) {
+            rsData = ImageLoader::QueryImageDataFromImageCache(src);
+            if (rsData) {
+                break;
+            }
         }
         rsData = LoadImageData(src, context);
         CHECK_NULL_RETURN(rsData, nullptr);
@@ -630,7 +635,7 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
     std::unique_ptr<uint8_t[]> data;
     size_t dataLen = 0;
     std::string rawFile;
-    if (GetResourceId(uri, rawFile)) {
+    if (!imageSourceInfo.GetIsUriPureNumber() && GetResourceId(uri, rawFile)) {
         // must fit raw file firstly, as file name may contains number
         if (!resourceWrapper->GetRawFileData(rawFile, dataLen, data, bundleName, moudleName)) {
             TAG_LOGW(AceLogTag::ACE_IMAGE, "get image data by name failed, uri:%{private}s, rawFile:%{public}s",
@@ -646,7 +651,7 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
 #endif
     }
     uint32_t resId = 0;
-    if (GetResourceId(uri, resId)) {
+    if (!imageSourceInfo.GetIsUriPureNumber() && GetResourceId(uri, resId)) {
         if (!resourceWrapper->GetMediaData(resId, dataLen, data, bundleName, moudleName)) {
             TAG_LOGW(AceLogTag::ACE_IMAGE, "get image data by id failed, uri:%{private}s, id:%{public}u", uri.c_str(),
                 resId);

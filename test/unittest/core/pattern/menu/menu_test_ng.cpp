@@ -4230,7 +4230,7 @@ HWTEST_F(MenuTestNg, MenuLayoutAlgorithmTestNg015, TestSize.Level1)
      */
     menuLayoutAlgorithm->targetSize_ = SizeF(0.0f, 0.0f);
     resultOffset = menuLayoutAlgorithm->MenuLayoutAvoidAlgorithm(property, menuPattern, size);
-    EXPECT_EQ(resultOffset, OffsetF(FULL_SCREEN_WIDTH - MENU_SIZE_WIDTH, FULL_SCREEN_HEIGHT - MENU_SIZE_HEIGHT));
+    EXPECT_EQ(resultOffset, OffsetF(0, FULL_SCREEN_HEIGHT - MENU_SIZE_HEIGHT));
 }
 
 /**
@@ -7492,7 +7492,6 @@ HWTEST_F(MenuTestNg, MenuPreviewLayoutAlgorithmTestNg0100, TestSize.Level1)
     menuPreviewlayoutAlgorithm->Layout(&layoutWrapper);
     PaddingProperty padding;
     ASSERT_NE(layoutProp, nullptr);
-    ASSERT_NE(layoutProp->GetPaddingProperty(), nullptr);
 }
 
 /**
@@ -7560,7 +7559,7 @@ HWTEST_F(MenuTestNg, SubMenuLayoutAlgorithmTestNg001, TestSize.Level1)
 
 /**
  * @tc.name: SubMenuLayoutAlgorithmTestNg002
- * @tc.desc: Test SubMenuLayoutAlgorithm InitializePadding function.
+ * @tc.desc: Test SubMenuLayoutAlgorithm InitializePaddingAPI11 function.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuTestNg, SubMenuLayoutAlgorithmTestNg002, TestSize.Level1)
@@ -7623,22 +7622,22 @@ HWTEST_F(MenuTestNg, SubMenuLayoutAlgorithmTestNg002, TestSize.Level1)
     ASSERT_NE(algorithm->wrapperSize_, SizeF(0, 0));
 
     /**
-     * @tc.steps: step3. call the InitializePadding method.
+     * @tc.steps: step3. call the InitializePaddingAPI11 method.
      * @tc.expected: padding is not zero
      */
     algorithm->hierarchicalParameters_ = true;
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
     selectTheme->outPadding_ = 10.0_vp;
-    algorithm->InitializePadding(wrapper);
-    ASSERT_NE(algorithm->paddingStart_, 0.0f);
-    ASSERT_NE(algorithm->paddingEnd_, 0.0f);
-    ASSERT_NE(algorithm->paddingTop_, 0.0f);
-    ASSERT_NE(algorithm->paddingBottom_, 0.0f);
+    algorithm->InitializePaddingAPI11(wrapper);
+    ASSERT_EQ(algorithm->paddingStart_, 0.0f);
+    ASSERT_EQ(algorithm->paddingEnd_, 0.0f);
+    ASSERT_EQ(algorithm->paddingTop_, 0.0f);
+    ASSERT_EQ(algorithm->paddingBottom_, 0.0f);
 }
 
 /**
  * @tc.name: SubMenuLayoutAlgorithmTestNg003
- * @tc.desc: Test SubMenuLayoutAlgorithm InitializePadding function.
+ * @tc.desc: Test SubMenuLayoutAlgorithm InitializePaddingAPI11 function.
  * @tc.type: FUNC
  */
 HWTEST_F(MenuTestNg, SubMenuLayoutAlgorithmTestNg003, TestSize.Level1)
@@ -7709,11 +7708,11 @@ HWTEST_F(MenuTestNg, SubMenuLayoutAlgorithmTestNg003, TestSize.Level1)
     selectTheme->maxPaddingEnd_ = 10.0_vp;
     selectTheme->defaultPaddingTop_ = 10.0_vp;
     selectTheme->defaultPaddingBottomFixed_ = 10.0_vp;
-    algorithm->InitializePadding(wrapper);
-    ASSERT_NE(algorithm->paddingStart_, 0.0f);
-    ASSERT_NE(algorithm->paddingEnd_, 0.0f);
-    ASSERT_NE(algorithm->paddingTop_, 0.0f);
-    ASSERT_NE(algorithm->paddingBottom_, 0.0f);
+    algorithm->InitializePaddingAPI11(wrapper);
+    ASSERT_EQ(algorithm->paddingStart_, 0.0f);
+    ASSERT_EQ(algorithm->paddingEnd_, 0.0f);
+    ASSERT_EQ(algorithm->paddingTop_, 10.0f);
+    ASSERT_EQ(algorithm->paddingBottom_, 10.0f);
 }
 
 /**

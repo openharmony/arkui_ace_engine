@@ -63,7 +63,8 @@ public:
 
     const RefPtr<SubContainer>& GetSubContainer() const;
 
-    void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
+    void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        SerializedGesture& serializedGesture);
 
     void OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap);
 

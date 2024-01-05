@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/overlay/keyboard_base_pattern.h"
 
+#include "base/log/dump_log.h"
 #include "base/utils/utils.h"
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
@@ -44,5 +45,11 @@ void KeyboardPattern::BeforeCreateLayoutWrapper()
         }
         child = child->GetChildAtIndex(0);
     }
+}
+
+void KeyboardPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc(std::string("TargetId: ")
+                                        .append(std::to_string(targetId_)));
 }
 } // namespace OHOS::Ace::NG
