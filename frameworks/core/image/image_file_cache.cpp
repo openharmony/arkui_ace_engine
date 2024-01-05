@@ -18,9 +18,10 @@
 #include <fstream>
 #include <sys/stat.h>
 
+#include "base/log/dump_log.h"
+#include "base/thread/background_task_executor.h"
 #include "core/image/image_loader.h"
 #include "core/image/image_source_info.h"
-#include "base/thread/background_task_executor.h"
 
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/image_provider/adapter/rosen/drawing_image_data.h"
@@ -74,6 +75,7 @@ std::string ImageFileCache::ConstructCacheFilePath(const std::string& fileName)
 #if !defined(PREVIEW)
     return cacheFilePath_ + SLASH + fileName;
 #elif defined(MAC_PLATFORM) || defined(LINUX_PLATFORM)
+
     return "/tmp/" + fileName;
 #elif defined(WINDOWS_PLATFORM)
     char* pathvar = getenv("TEMP");
@@ -276,5 +278,27 @@ void ImageFileCache::SetCacheFileInfo()
     cacheFileInfo_.sort();
     cacheFileSize_ = cacheFileSize;
     hasSetCacheFileInfo_ = true;
+}
+
+void ImageFileCache::DumpCacheInfo()
+{
+    auto cacheFileInfoSize = cacheFileInfo_.size();
+    auto fileLimit = static_cast<int32_t>(fileLimit_);
+    auto cacheFileSize = static_cast<int32_t>(cacheFileSize_);
+    DumpLog::GetInstance().Print("------------ImageCacheInfo------------");
+    DumpLog::GetInstance().Print("User set ImageFileCacheSize : " + std::to_string(fileLimit) + "(B)");
+    DumpLog::GetInstance().Print("cacheFileSize: " + std::to_string(cacheFileSize) + "(B)");
+    if (cacheFileInfoSize == 0) {
+        return;
+    }
+    auto totalCount = 0;
+    for (const auto& item : cacheFileInfo_) {
+        auto filePath = ConstructCacheFilePath(item.fileName);
+        auto fileSize = item.fileSize;
+        totalCount += fileSize;
+        DumpLog::GetInstance().Print(
+            "fileCache Obj of filePath: " + filePath + ", fileSize" + std::to_string(fileSize) + "(B)");
+    }
+    DumpLog::GetInstance().Print("FileCache total size: " + std::to_string(totalCount) + "(B)");
 }
 } // namespace OHOS::Ace

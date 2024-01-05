@@ -21,11 +21,11 @@
 #include "ability_context.h"
 #include "ability_info.h"
 #include "configuration.h"
-#include "ohos/init_data.h"
 #include "ipc_skeleton.h"
 #include "js_runtime_utils.h"
 #include "locale_config.h"
 #include "native_reference.h"
+#include "ohos/init_data.h"
 #include "service_extension_context.h"
 #include "wm_common.h"
 
@@ -196,7 +196,8 @@ public:
         double positionY = info->textFieldPositionY_;
         double height = info->textFieldHeight_;
         Rect keyboardRect = Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
-        LOGI("UIContent OccupiedAreaChange rect:%{public}s type: %{public}d", keyboardRect.ToString().c_str(), type);
+        LOGI("UIContent OccupiedAreaChange rect:%{public}s type: %{public}d, positionY:%{public}f, height:%{public}f",
+            keyboardRect.ToString().c_str(), type, positionY, height);
         if (type == OHOS::Rosen::OccupiedAreaType::TYPE_INPUT) {
             auto container = Platform::AceContainer::GetContainer(instanceId_);
             CHECK_NULL_VOID(container);
@@ -236,16 +237,10 @@ public:
         CHECK_NULL_VOID(pipeline);
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        switch (type) {
-            case Rosen::AvoidAreaType::TYPE_SYSTEM:
-                systemSafeArea_ = ConvertAvoidArea(avoidArea);
-                break;
-            case Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR:
-                navigationBar_ = ConvertAvoidArea(avoidArea);
-                break;
-            default:
-                // cutout doesn't affect layout
-                return;
+        if (type == Rosen::AvoidAreaType::TYPE_SYSTEM) {
+            systemSafeArea_ = ConvertAvoidArea(avoidArea);
+        } else if (type == Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
+            navigationBar_ = ConvertAvoidArea(avoidArea);
         }
         auto safeArea = systemSafeArea_;
         auto navSafeArea = navigationBar_;
@@ -254,7 +249,7 @@ public:
             [pipeline, safeArea, navSafeArea, type, avoidArea] {
                 if (type == Rosen::AvoidAreaType::TYPE_SYSTEM) {
                     pipeline->UpdateSystemSafeArea(safeArea);
-                } else {
+                } else if (type == Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
                     pipeline->UpdateNavSafeArea(navSafeArea);
                 }
                 // for ui extension component
@@ -384,6 +379,10 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
 {
     CHECK_NULL_VOID(context);
     context_ = context->weak_from_this();
+    bundleName_ = context->GetBundleName();
+    auto hapModuleInfo = context->GetHapModuleInfo();
+    CHECK_NULL_VOID(hapModuleInfo);
+    moduleName_ = hapModuleInfo->name;
 }
 
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard)
@@ -1401,7 +1400,7 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
 
 void UIContentImpl::Foreground()
 {
-    LOGI("UIContentImpl: window foreground");
+    LOGI("[%{public}s][%{public}s]: window foreground", bundleName_.c_str(), moduleName_.c_str());
     Platform::AceContainer::OnShow(instanceId_);
     // set the flag isForegroundCalled to be true
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -1417,7 +1416,7 @@ void UIContentImpl::Foreground()
 
 void UIContentImpl::Background()
 {
-    LOGI("UIContentImpl: window background");
+    LOGI("[%{public}s][%{public}s]: window background", bundleName_.c_str(), moduleName_.c_str());
     Platform::AceContainer::OnHide(instanceId_);
 
     CHECK_NULL_VOID(window_);
@@ -1435,6 +1434,15 @@ void UIContentImpl::ReloadForm(const std::string& url)
     assetManager->ReloadProvider();
     container->UpdateResource();
     Platform::AceContainer::RunPage(instanceId_, startUrl_, "");
+}
+
+SerializedGesture UIContentImpl::GetFormSerializedGesture()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, SerializedGesture{});
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, SerializedGesture{});
+    return pipelineContext->GetSerializedGesture();
 }
 
 void UIContentImpl::Focus()
@@ -2218,14 +2226,16 @@ void UIContentImpl::ProcessFormVisibleChange(bool isVisible)
 }
 
 void UIContentImpl::SearchElementInfoByAccessibilityId(
-    int32_t elementId, int32_t mode, int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
+    int64_t elementId, int32_t mode,
+    int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     container->SearchElementInfoByAccessibilityIdNG(elementId, mode, baseParent, output);
 }
 
-void UIContentImpl::SearchElementInfosByText(int32_t elementId, const std::string& text, int32_t baseParent,
+void UIContentImpl::SearchElementInfosByText(
+    int64_t elementId, const std::string& text, int64_t baseParent,
     std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -2234,7 +2244,8 @@ void UIContentImpl::SearchElementInfosByText(int32_t elementId, const std::strin
 }
 
 void UIContentImpl::FindFocusedElementInfo(
-    int32_t elementId, int32_t focusType, int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
+    int64_t elementId, int32_t focusType,
+    int64_t baseParent, Accessibility::AccessibilityElementInfo& output)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -2242,7 +2253,8 @@ void UIContentImpl::FindFocusedElementInfo(
 }
 
 void UIContentImpl::FocusMoveSearch(
-    int32_t elementId, int32_t direction, int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
+    int64_t elementId, int32_t direction,
+    int64_t baseParent, Accessibility::AccessibilityElementInfo& output)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -2250,7 +2262,7 @@ void UIContentImpl::FocusMoveSearch(
 }
 
 bool UIContentImpl::NotifyExecuteAction(
-    int32_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int32_t offset)
+    int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
@@ -2294,7 +2306,8 @@ void UIContentImpl::RemoveOldPopInfoIfExsited(bool isShowInSubWindow, int32_t no
     }
 }
 
-RefPtr<PopupParam> UIContentImpl::CreateCustomPopupParam(bool isShow, const CustomPopupUIExtensionConfig& config)
+RefPtr<PopupParam> UIContentImpl::CreateCustomPopupParam(
+    bool isShow, const CustomPopupUIExtensionConfig& config)
 {
     auto popupParam = AceType::MakeRefPtr<PopupParam>();
     popupParam->SetIsShow(isShow);
@@ -2345,8 +2358,8 @@ RefPtr<PopupParam> UIContentImpl::CreateCustomPopupParam(bool isShow, const Cust
     return popupParam;
 }
 
-void UIContentImpl::OnPopupStateChange(
-    const std::string& event, const CustomPopupUIExtensionConfig& config, int32_t nodeId)
+void UIContentImpl::OnPopupStateChange(const std::string& event,
+    const CustomPopupUIExtensionConfig& config, int32_t nodeId)
 {
     if (config.onStateChange) {
         config.onStateChange(event);
@@ -2368,8 +2381,8 @@ void UIContentImpl::OnPopupStateChange(
     customPopupConfigMap_.erase(nodeId);
 }
 
-int32_t UIContentImpl::CreateCustomPopupUIExtension(
-    const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config)
+int32_t UIContentImpl::CreateCustomPopupUIExtension(const AAFwk::Want& want,
+    const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config)
 {
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
@@ -2400,8 +2413,9 @@ int32_t UIContentImpl::CreateCustomPopupUIExtension(
             }
             uiExtNode->MarkModifyDone();
             nodeId = targetNode->GetId();
-            popupParam->SetOnStateChange(
-                [config, nodeId, this](const std::string& event) { this->OnPopupStateChange(event, config, nodeId); });
+            popupParam->SetOnStateChange([config, nodeId, this](const std::string& event) {
+                this->OnPopupStateChange(event, config, nodeId);
+            });
 
             NG::ViewAbstract::BindPopup(popupParam, targetNode, AceType::DynamicCast<NG::UINode>(uiExtNode));
             customPopupConfigMap_[nodeId] = config;
@@ -2468,6 +2482,7 @@ void UIContentImpl::SetContainerModalTitleHeight(int32_t height)
 
 int32_t UIContentImpl::GetContainerModalTitleHeight()
 {
+    ContainerScope scope(instanceId_);
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, -1);
     return pipeline->GetContainerModalTitleHeight();
@@ -2477,6 +2492,7 @@ bool UIContentImpl::GetContainerModalButtonsRect(Rosen::Rect& containerModal, Ro
 {
     NG::RectF floatContainerModal;
     NG::RectF floatButtons;
+    ContainerScope scope(instanceId_);
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     if (!pipeline->GetContainerModalButtonsRect(floatContainerModal, floatButtons)) {
@@ -2490,6 +2506,7 @@ bool UIContentImpl::GetContainerModalButtonsRect(Rosen::Rect& containerModal, Ro
 void UIContentImpl::SubscribeContainerModalButtonsRectChange(
     std::function<void(Rosen::Rect& containerModal, Rosen::Rect& buttons)>&& callback)
 {
+    ContainerScope scope(instanceId_);
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
 

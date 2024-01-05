@@ -383,7 +383,8 @@ void AceAbility::OnConfigurationChanged(const DeviceConfig& newConfig)
 }
 
 void AceAbility::SurfaceChanged(
-    const DeviceOrientation& orientation, const double& resolution, int32_t& width, int32_t& height)
+    const DeviceOrientation& orientation, const double& resolution, int32_t& width, int32_t& height,
+    WindowSizeChangeReason type)
 {
     auto container = AceContainer::GetContainerInstance(ACE_INSTANCE_ID);
     CHECK_NULL_VOID(container);
@@ -400,7 +401,7 @@ void AceAbility::SurfaceChanged(
     deviceConfig.density = resolution;
     container->UpdateDeviceConfig(deviceConfig);
     viewPtr->NotifyDensityChanged(resolution);
-    viewPtr->NotifySurfaceChanged(width, height);
+    viewPtr->NotifySurfaceChanged(width, height, type);
     if ((orientation != runArgs_.deviceConfig.orientation && configChanges_.watchOrientation) ||
         (resolution != runArgs_.deviceConfig.density && configChanges_.watchDensity) ||
         ((width != runArgs_.deviceWidth || height != runArgs_.deviceHeight) && configChanges_.watchLayout)) {

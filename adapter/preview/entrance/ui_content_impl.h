@@ -123,6 +123,11 @@ public:
         return nullptr;
     }
 
+    SerializedGesture GetFormSerializedGesture() override
+    {
+        return SerializedGesture();
+    }
+
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);
     void DestroyCallback() const;

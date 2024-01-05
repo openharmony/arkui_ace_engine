@@ -50,6 +50,7 @@ bool SystemProperties::traceEnabled_ = false;
 int32_t SystemProperties::devicePhysicalWidth_ = 0;
 int32_t SystemProperties::devicePhysicalHeight_ = 0;
 bool SystemProperties::enableScrollableItemPool_ = false;
+bool SystemProperties::navigationBlurEnabled_ = false;
 
 float SystemProperties::GetFontWeightScale()
 {
@@ -106,5 +107,15 @@ bool SystemProperties::GetTitleStyleEnabled()
 std::string SystemProperties::GetCustomTitleFilePath()
 {
     return {};
+}
+
+bool SystemProperties::GetDisplaySyncSkipEnabled()
+{
+    return true;
+}
+
+bool SystemProperties::GetNavigationBlurEnabled()
+{
+    return navigationBlurEnabled_;
 }
 } // namespace OHOS::Ace

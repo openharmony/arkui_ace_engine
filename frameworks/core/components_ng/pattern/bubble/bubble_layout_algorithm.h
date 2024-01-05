@@ -93,9 +93,20 @@ public:
     {
         return clipFrameNode_;
     }
-    const std::vector<float>& GetArrowOffsetsFromClip() const
+    
+    const std::vector<std::vector<float>>& GetArrowOffsetsFromClip() const
     {
         return arrowOffsetsFromClip_;
+    }
+
+    const float& GetArrowWidth() const
+    {
+        return realArrowWidth_;
+    }
+
+    const float& GetArrowHeight() const
+    {
+        return realArrowHeight_;
     }
 
 protected:
@@ -166,6 +177,7 @@ private:
     void UpdateArrowOffset(const std::optional<Dimension>& offset, const Placement& placement);
     void BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, RefPtr<BubbleLayoutProperty> bubbleProp,
         RefPtr<FrameNode> bubbleNode, bool showInSubWindow);
+    void SetArrowOffsetsFromClip(const int16_t index, const float offsetX, const float offsetY);
 
     OffsetF GetChildPosition(
         const SizeF& childSize, const RefPtr<BubbleLayoutProperty>& layoutProp, bool UseArrowOffset);
@@ -175,13 +187,14 @@ private:
         OffsetF& childPosition, OffsetF& arrowPosition, const SizeF& childSize, Placement placement);
     ErrorPositionType GetErrorPositionType(const OffsetF& childOffset, const SizeF& childSize);
     OffsetF FitToScreen(const OffsetF& fitPosition, const SizeF& childSize);
-    SizeF GetPopupMaxWidthAndHeight(bool showInSubWindow);
+    SizeF GetPopupMaxWidthAndHeight(bool showInSubWindow, const float& width);
     ArrowOfTargetOffset arrowOfTargetOffset_ = ArrowOfTargetOffset::NONE;
     Dimension arrowOffset_;
 
     int32_t targetNodeId_ = -1;
     std::string targetTag_;
     bool bCaretMode_ = false;
+    bool useCustom_ = false;
 
     SizeF targetSize_;
     OffsetF targetOffset_;
@@ -208,6 +221,8 @@ private:
     bool enableArrow_ = false;
     float scaledBubbleSpacing_ = 0.0f;
     float arrowHeight_ = 0.0f;
+    float realArrowWidth_ = 20.0f;
+    float realArrowHeight_ = 10.0f;
 
     float paddingStart_ = 0.0f;
     float paddingEnd_ = 0.0f;
@@ -227,8 +242,8 @@ private:
     SizeF measureChildSizeAfter_;
     SizeF measureChildSizeBefore_;
     ACE_DISALLOW_COPY_AND_MOVE(BubbleLayoutAlgorithm);
-    // top right bottom left
-    std::vector<float> arrowOffsetsFromClip_ = { 0.0f, 0.0f, 0.0f, 0.0f };
+    std::vector<std::vector<float>> arrowOffsetsFromClip_
+        = { {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f} };
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_BUBBLE_BUBBLE_LAYOUT_ALGORITHM_H

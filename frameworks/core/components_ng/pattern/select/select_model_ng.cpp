@@ -59,14 +59,16 @@ void SelectModelNG::Create(const std::vector<SelectParam>& params)
     CHECK_NULL_VOID(pattern);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    pattern->SetSelectDefaultTheme();
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        pattern->SetSelectDefaultTheme();
     
-    NG::PaddingProperty paddings;
-    paddings.top = std::nullopt;
-    paddings.bottom = std::nullopt;
-    paddings.left = NG::CalcLength(SELECT_MARGIN_VP);
-    paddings.right = NG::CalcLength(SELECT_MARGIN_VP);
-    ViewAbstract::SetPadding(paddings);
+        NG::PaddingProperty paddings;
+        paddings.top = std::nullopt;
+        paddings.bottom = std::nullopt;
+        paddings.left = NG::CalcLength(SELECT_MARGIN_VP);
+        paddings.right = NG::CalcLength(SELECT_MARGIN_VP);
+        ViewAbstract::SetPadding(paddings);
+    }
     
     pattern->BuildChild();
     // create menu node
@@ -257,6 +259,7 @@ void SelectModelNG::SetWidth(Dimension& value)
     
     if (value.Unit() == DimensionUnit::PERCENT) {
         ViewAbstract::SetWidth(NG::CalcLength(value));
+        return;
     }
     
     double minWidth = 2 * pattern->GetFontSize().ConvertToVp() + SELECT_HORIZONTAL_GAP.ConvertToVp() +

@@ -26,7 +26,7 @@
 #include "native_value.h"
 #include "node_api.h"
 
-#if defined(PIXEL_MAP_SUPPORTED)
+#if defined(ENABLE_DRAG_FRAMEWORK) && defined(PIXEL_MAP_SUPPORTED)
 #include "jsnapi.h"
 #include "pixel_map.h"
 #include "pixel_map_napi.h"
@@ -49,7 +49,7 @@
 #endif
 namespace OHOS::Ace::Napi {
 class DragAction;
-#if defined(PIXEL_MAP_SUPPORTED)
+#if defined(ENABLE_DRAG_FRAMEWORK) && defined(PIXEL_MAP_SUPPORTED)
 namespace {
 constexpr float PIXELMAP_WIDTH_RATE = -0.5f;
 constexpr float PIXELMAP_HEIGHT_RATE = -0.2f;
@@ -709,6 +709,10 @@ void StartDragService(DragControllerAsyncCtx* asyncCtx)
     if (asyncCtx->dragState == DragState::SENDING) {
         asyncCtx->dragState = DragState::SUCCESS;
         Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(asyncCtx->env, &scope);
+        HandleOnDragStart(asyncCtx);
+        napi_close_handle_scope(asyncCtx->env, scope);
     }
 }
 

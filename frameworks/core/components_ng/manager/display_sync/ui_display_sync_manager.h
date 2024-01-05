@@ -24,6 +24,7 @@
 #include "base/log/log.h"
 #include "base/utils/base_id.h"
 #include "base/log/ace_trace.h"
+#include "base/utils/system_properties.h"
 #include "ui_display_sync.h"
 
 namespace OHOS::Ace {
@@ -43,10 +44,14 @@ public:
     int32_t GetVsyncRate() const;
     bool SetVsyncPeriod(int64_t vsyncPeriod);
     int64_t GetVsyncPeriod() const;
-    void SetRefreshRateMode(int32_t refreshRateMode);
+    bool SetRefreshRateMode(int32_t refreshRateMode);
     int32_t GetRefreshRateMode() const;
     int32_t GetDisplaySyncRate() const;
     IdToDisplaySyncMap GetUIDisplaySyncMap() const;
+    void CheckSkipEnableProperty();
+    bool IsSupportSkip() const;
+    bool IsAutoRefreshRateMode() const;
+    bool IsNonAutoRefreshRateMode() const;
 
     UIDisplaySyncManager();
     ~UIDisplaySyncManager() noexcept override;
@@ -62,6 +67,8 @@ private:
     RefPtr<FrameRateRange> displaySyncRange_ = AceType::MakeRefPtr<FrameRateRange>();
 
     IdToDisplaySyncMap uiDisplaySyncMap_;
+    std::once_flag isEnablePropertyFlag_;
+    bool supportSkipEnabled_ = true;
 };
 } // namespace OHOS::Ace
 

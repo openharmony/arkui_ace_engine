@@ -51,6 +51,11 @@ PanRecognizer::PanRecognizer(int32_t fingers, const PanDirection& direction, dou
     }
 }
 
+RefPtr<Gesture> PanRecognizer::CreateGestureFromRecognizer() const
+{
+    return AceType::MakeRefPtr<PanGesture>(fingers_, direction_, distance_);
+}
+
 PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) : panGestureOption_(panGestureOption)
 {
     auto context = PipelineContext::GetCurrentContext();
@@ -105,6 +110,7 @@ void PanRecognizer::OnAccepted()
     TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan gesture has been accepted, node tag = %{public}s, id = %{public}s",
         node ? node->GetTag().c_str() : "null", node ? std::to_string(node->GetId()).c_str() : "invalid");
     refereeState_ = RefereeState::SUCCEED;
+    averageDistance_.Reset();
     SendCallbackMsg(onActionStart_);
     SendCallbackMsg(onActionUpdate_);
 }

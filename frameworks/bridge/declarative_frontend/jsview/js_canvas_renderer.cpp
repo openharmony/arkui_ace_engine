@@ -20,6 +20,7 @@
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_pattern.h"
+#include "bridge/declarative_frontend/jsview/js_offscreen_canvas.h"
 #include "bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/models/canvas_renderer_model_impl.h"
@@ -423,7 +424,7 @@ void JSCanvasRenderer::JsSetFont(const JSCallbackInfo& info)
         } else if (fontProp.find("px") != std::string::npos || fontProp.find("vp") != std::string::npos) {
             Dimension size;
             if (fontProp.find("vp") != std::string::npos) {
-                size = Dimension(StringToDimension(fontProp).ConvertToPx());
+                size = GetDimensionValue(fontProp);
             } else {
                 std::string fontSize = fontProp.substr(0, fontProp.size() - 2);
                 size = Dimension(StringToDouble(fontProp));
@@ -968,7 +969,7 @@ void JSCanvasRenderer::ParseImageData(const JSCallbackInfo& info, ImageData& ima
     if (info[1]->IsString()) {
         std::string imageDataXStr = "";
         JSViewAbstract::ParseJsString(info[1], imageDataXStr);
-        value = Dimension(StringToDimension(imageDataXStr).ConvertToPx());
+        value = GetDimensionValue(imageDataXStr);
         imageData.x = value.Value();
     } else {
         ParseJsInt(info[1], imageData.x);
@@ -977,7 +978,7 @@ void JSCanvasRenderer::ParseImageData(const JSCallbackInfo& info, ImageData& ima
     if (info[2]->IsString()) {
         std::string imageDataYStr = "";
         JSViewAbstract::ParseJsString(info[2], imageDataYStr);
-        value = Dimension(StringToDimension(imageDataYStr).ConvertToPx());
+        value = GetDimensionValue(imageDataYStr);
         imageData.y = value.Value();
     } else {
         ParseJsInt(info[2], imageData.y);
@@ -1003,7 +1004,7 @@ void JSCanvasRenderer::ParseImageDataAsStr(const JSCallbackInfo& info, ImageData
     if (info[3]->IsString()) {
         std::string imageDataDirtyXStr = "";
         JSViewAbstract::ParseJsString(info[3], imageDataDirtyXStr);
-        value = Dimension(StringToDimension(imageDataDirtyXStr).ConvertToPx());
+        value = GetDimensionValue(imageDataDirtyXStr);
         imageData.dirtyX = value.Value();
     } else {
         ParseJsInt(info[3], imageData.dirtyX);
@@ -1012,7 +1013,7 @@ void JSCanvasRenderer::ParseImageDataAsStr(const JSCallbackInfo& info, ImageData
     if (info[4]->IsString()) {
         std::string imageDataDirtyYStr = "";
         JSViewAbstract::ParseJsString(info[4], imageDataDirtyYStr);
-        value = Dimension(StringToDimension(imageDataDirtyYStr).ConvertToPx());
+        value = GetDimensionValue(imageDataDirtyYStr);
         imageData.dirtyY = value.Value();
     } else {
         ParseJsInt(info[4], imageData.dirtyY);
@@ -1021,7 +1022,7 @@ void JSCanvasRenderer::ParseImageDataAsStr(const JSCallbackInfo& info, ImageData
     if (info[5]->IsString()) {
         std::string imageDataDirtWidth = "";
         JSViewAbstract::ParseJsString(info[5], imageDataDirtWidth);
-        value = Dimension(StringToDimension(imageDataDirtWidth).ConvertToPx());
+        value = GetDimensionValue(imageDataDirtWidth);
         imageData.dirtyWidth = value.Value();
     } else {
         ParseJsInt(info[5], imageData.dirtyWidth);
@@ -1030,7 +1031,7 @@ void JSCanvasRenderer::ParseImageDataAsStr(const JSCallbackInfo& info, ImageData
     if (info[6]->IsString()) {
         std::string imageDataDirtyHeight = "";
         JSViewAbstract::ParseJsString(info[6], imageDataDirtyHeight);
-        value = Dimension(StringToDimension(imageDataDirtyHeight).ConvertToPx());
+        value = GetDimensionValue(imageDataDirtyHeight);
         imageData.dirtyHeight = value.Value();
     } else {
         ParseJsInt(info[6], imageData.dirtyHeight);
@@ -2325,6 +2326,17 @@ void JSCanvasRenderer::JsClearRect(const JSCallbackInfo& info)
         baseInfo.isOffscreen = isOffscreen_;
 
         CanvasRendererModel::GetInstance()->ClearRect(baseInfo, rect);
+    }
+}
+
+Dimension JSCanvasRenderer::GetDimensionValue(const std::string& str)
+{
+    auto context = PipelineBase::GetCurrentContext();
+    Dimension dimension = StringToDimension(str);
+    if (context == nullptr) {
+        return Dimension(JSOffscreenCanvas::ConvertToPxValue(dimension));
+    } else {
+        return Dimension(dimension.ConvertToPx());
     }
 }
 } // namespace OHOS::Ace::Framework

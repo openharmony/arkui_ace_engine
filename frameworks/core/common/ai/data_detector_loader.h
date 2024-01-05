@@ -23,7 +23,7 @@ using DataDetectorInstance = std::unique_ptr<DataDetectorInterface, std::functio
 
 class DataDetectorLoader : public std::enable_shared_from_this<DataDetectorLoader> {
 public:
-    static std::shared_ptr<DataDetectorLoader> Load(std::string libPath);
+    static std::shared_ptr<DataDetectorLoader> Load();
     ~DataDetectorLoader();
     DataDetectorLoader() = default;
 
@@ -35,7 +35,7 @@ public:
     DataDetectorInstance CreateDataDetector();
 
 private:
-    bool Init(std::string libPath);
+    bool Init();
     void Close();
 
     void *mLibraryHandle_ = nullptr;

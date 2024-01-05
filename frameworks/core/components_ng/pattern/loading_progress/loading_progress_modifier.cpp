@@ -27,7 +27,6 @@
 #include "core/components_ng/pattern/loading_progress/loading_progress_utill.h"
 #include "core/components_ng/pattern/refresh/refresh_animation_state.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
@@ -39,6 +38,8 @@ constexpr float ROTATEZ = 22.0f;
 constexpr float COUNT = 50.0f;
 constexpr float HALF = 0.5f;
 constexpr float DOUBLE = 2.0f;
+constexpr int32_t SKEWY = 3;
+constexpr int32_t SCALEY = 4;
 constexpr int32_t RING_ALPHA = 200;
 constexpr int32_t TOTAL_POINTS_COUNT = 20;
 constexpr int32_t TAIL_ANIAMTION_DURATION = 400;
@@ -160,13 +161,8 @@ void LoadingProgressModifier::DrawOrbit(
     float height = contentSize_->Get().Height();
     double angle = TOTAL_ANGLE * date / FULL_COUNT;
     RSCamera3D camera;
-    camera.Save();
-    camera.RotateYDegrees(ROTATEY);
-    camera.RotateXDegrees(ROTATEX);
-    camera.RotateZDegrees(ROTATEZ);
     RSMatrix matrix;
-    camera.ApplyToMatrix(matrix);
-    camera.Restore();
+    AdjustMatrix(camera, matrix);
     auto center = RSPoint(offset_->Get().GetX() + width / 2, offset_->Get().GetY() + height / 2);
     RSBrush brush;
     brush.SetAntiAlias(true);
@@ -203,6 +199,19 @@ void LoadingProgressModifier::DrawOrbit(
     }
     canvas.DetachBrush();
     canvas.Restore();
+}
+
+void LoadingProgressModifier::AdjustMatrix(RSCamera3D& camera, RSMatrix& matrix)
+{
+    camera.Save();
+    camera.RotateYDegrees(ROTATEY);
+    camera.RotateXDegrees(ROTATEX);
+    camera.RotateZDegrees(ROTATEZ);
+    camera.ApplyToMatrix(matrix);
+    camera.Restore();
+    auto temp = matrix.Get(SKEWY);
+    matrix.Set(RSMatrix::SKEW_Y, matrix.Get(SCALEY));
+    matrix.Set(RSMatrix::SCALE_Y, temp);
 }
 
 void LoadingProgressModifier::StartRecycleRingAnimation()

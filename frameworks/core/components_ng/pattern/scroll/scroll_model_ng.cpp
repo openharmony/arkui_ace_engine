@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -37,15 +38,20 @@ void ScrollModelNG::Create()
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SCROLL_ETS_TAG, nodeId);
+    auto frameNode = CreateScroll(nodeId);
+    stack->Push(frameNode);
+}
+
+RefPtr<FrameNode> ScrollModelNG::CreateScroll(int32_t nodeId)
+{
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::SCROLL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ScrollPattern>(); });
-    stack->Push(frameNode);
-    SetEdgeEffect(EdgeEffect::NONE, true);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
-    CHECK_NULL_VOID(pattern);
+    pattern->SetAlwaysEnabled(true);
     auto positionController = AceType::MakeRefPtr<NG::ScrollableController>();
     pattern->SetPositionController(positionController);
     positionController->SetScrollPattern(pattern);
+    return frameNode;
 }
 
 RefPtr<ScrollControllerBase> ScrollModelNG::GetOrCreateController()
@@ -59,6 +65,29 @@ RefPtr<ScrollControllerBase> ScrollModelNG::GetOrCreateController()
         pattern->SetPositionController(controller);
     }
     return pattern->GetScrollPositionController();
+}
+
+void ScrollModelNG::SetScrollController(
+    FrameNode* frameNode, const RefPtr<ScrollControllerBase>& scroller, const RefPtr<ScrollProxy>& proxy)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto scrollController = AceType::DynamicCast<NG::ScrollableController>(scroller);
+    CHECK_NULL_VOID(scrollController);
+    pattern->SetPositionController(scrollController);
+    scrollController->SetScrollPattern(pattern);
+    auto scrollBarProxy = AceType::DynamicCast<NG::ScrollBarProxy>(proxy);
+    CHECK_NULL_VOID(scrollBarProxy);
+    pattern->SetScrollBarProxy(scrollBarProxy);
+}
+
+void ScrollModelNG::SetOnScroll(FrameNode* frameNode, NG::ScrollEvent&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScroll(std::move(event));
 }
 
 RefPtr<ScrollProxy> ScrollModelNG::CreateScrollBarProxy()
@@ -92,10 +121,7 @@ void ScrollModelNG::SetOnScrollFrameBegin(OnScrollFrameBeginEvent&& event)
 void ScrollModelNG::SetOnScroll(NG::ScrollEvent&& event)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnScroll(std::move(event));
+    SetOnScroll(AceType::RawPtr(frameNode), std::move(event));
 }
 
 void ScrollModelNG::SetOnScrollEdge(NG::ScrollEdgeEvent&& event)

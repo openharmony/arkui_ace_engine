@@ -991,7 +991,8 @@ const RefPtr<SubContainer>& FormPattern::GetSubContainer() const
     return subContainer_;
 }
 
-void FormPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const
+void FormPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    SerializedGesture& serializedGesture)
 {
     CHECK_NULL_VOID(pointerEvent);
     CHECK_NULL_VOID(formManagerBridge_);
@@ -1002,12 +1003,11 @@ void FormPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>&
             pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP ||
             pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW) {
             // still dispatch 'up' event to finish this pointer event
-            formManagerBridge_->DispatchPointerEvent(pointerEvent);
+            formManagerBridge_->DispatchPointerEvent(pointerEvent, serializedGesture);
         }
         return;
     }
-
-    formManagerBridge_->DispatchPointerEvent(pointerEvent);
+    formManagerBridge_->DispatchPointerEvent(pointerEvent, serializedGesture);
 }
 
 void FormPattern::RemoveSubContainer()

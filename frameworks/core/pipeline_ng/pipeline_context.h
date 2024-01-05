@@ -559,6 +559,7 @@ public:
 
     bool IsDragging() const override;
     void SetIsDragging(bool isDragging) override;
+
     void ResetDragging() override;
     const RefPtr<PostEventManager>& GetPostEventManager();
 
@@ -568,6 +569,10 @@ public:
     bool GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons);
     void SubscribeContainerModalButtonsRectChange(
         std::function<void(RectF& containerModal, RectF& buttons)>&& callback);
+
+    const SerializedGesture& GetSerializedGesture() const override;
+    // return value means whether it has printed info
+    bool PrintVsyncInfoIfNeed() const override;
 
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
@@ -697,6 +702,7 @@ private:
     RefPtr<SafeAreaManager> safeAreaManager_ = MakeRefPtr<SafeAreaManager>();
     RefPtr<FrameRateManager> frameRateManager_ = MakeRefPtr<FrameRateManager>();
     Rect displayAvailableRect_;
+    std::unordered_map<size_t, TouchTestResult> touchTestResults_;
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
     WeakPtr<FrameNode> dirtyDefaultFocusNode_;

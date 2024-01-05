@@ -272,8 +272,8 @@ void NavigationPattern::CheckTopNavPathChange(
     // close keyboard
 #if defined (ENABLE_STANDARD_INPUT)
     if (Container::CurrentId() == CONTAINER_ID_DIVIDE_SIZE) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "pageChange notNeedSoftKeyboard.");
-        FocusHub::PushPageCloseKeyboard();
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nav notNeedSoftKeyboard.");
+        FocusHub::NavCloseKeyboard();
     }
 #endif
 
@@ -393,6 +393,8 @@ void NavigationPattern::CheckTopNavPathChange(
         TransitionWithOutAnimation(preTopNavDestination, newTopNavDestination, isPopPage);
         navigationStack_->UpdateAnimatedValue(true);
     } else {
+        // before the animation of navDes replacing, update the zIndex of the previous navDes node
+        UpdatePreNavDesZIndex(preTopNavDestination, newTopNavDestination);
         // transition with animation need to run after layout task
         context->AddAfterLayoutTask(
             [preTopNavDestination, newTopNavDestination, isPopPage, weakNavigationPattern = WeakClaim(this)]() {
@@ -452,6 +454,7 @@ int32_t NavigationPattern::FireNavDestinationStateChange(bool isShow)
 
 void NavigationPattern::FireNavigationStateChange(const RefPtr<UINode>& node, bool show)
 {
+    CHECK_NULL_VOID(node);
     const auto& children = node->GetChildren();
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
@@ -884,7 +887,8 @@ void NavigationPattern::HandleDragUpdate(float xOffset)
 
     float minNavBarWidthPx = minNavBarWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
     float maxNavBarWidthPx = maxNavBarWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
-    float minContentWidthPx = minContentWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
+    float minContentWidthPx = userSetMinContentFlag_ && !userSetNavBarRangeFlag_ ?
+        minContentWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f)) : 0.0f;
     auto dividerWidth = static_cast<float>(DIVIDER_WIDTH.ConvertToPx());
 
     auto navigationPosition = navigationLayoutProperty->GetNavBarPosition().value_or(NavBarPosition::START);
@@ -1282,5 +1286,27 @@ void NavigationPattern::OnColorConfigurationUpdate()
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
     dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
+}
+
+void NavigationPattern::UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNavDestination,
+    const RefPtr<FrameNode> &newTopNavDestination)
+{
+    auto replaceVal = navigationStack_->GetReplaceValue();
+    if (replaceVal != 0 && preTopNavDestination && newTopNavDestination) {
+        auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+        CHECK_NULL_VOID(hostNode);
+        auto navigationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
+        CHECK_NULL_VOID(navigationContentNode);
+        auto newDesNodeContext = newTopNavDestination->GetRenderContext();
+        CHECK_NULL_VOID(newDesNodeContext);
+        std::optional<int32_t> newNodeZIndex = newDesNodeContext->GetZIndex();
+        auto preDesNodeContext = preTopNavDestination->GetRenderContext();
+        CHECK_NULL_VOID(preDesNodeContext);
+        preDesNodeContext->UpdateZIndex(newNodeZIndex.value_or(0) - 1);
+        navigationContentNode->RebuildRenderContextTree();
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->RequestFrame();
+    }
 }
 } // namespace OHOS::Ace::NG

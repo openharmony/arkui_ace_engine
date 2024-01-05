@@ -1068,7 +1068,8 @@ float TitleBarPattern::CalculateHandledOffsetBetweenMinAndMaxTitle(float offset,
 
 void TitleBarPattern::SetBackgroundAndBlur()
 {
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (SystemProperties::GetNavigationBlurEnabled() &&
+        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto renderContext = host->GetRenderContext();

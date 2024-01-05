@@ -567,7 +567,7 @@ bool TxtParagraph::CalcCaretMetricsByPosition(
 }
 
 bool TxtParagraph::CalcCaretMetricsByPosition(
-    int32_t extent, CaretMetricsF& caretCaretMetric, const OffsetF& lastTouchOffset)
+    int32_t extent, CaretMetricsF& caretCaretMetric, const OffsetF& lastTouchOffset, TextAffinity& textAffinity)
 {
     CaretMetricsF metricsUpstream;
     CaretMetricsF metricsDownstream;
@@ -576,13 +576,17 @@ bool TxtParagraph::CalcCaretMetricsByPosition(
     if (downStreamSuccess || upStreamSuccess) {
         if ((metricsDownstream.offset.GetY() < lastTouchOffset.GetY()) && downStreamSuccess) {
             caretCaretMetric = metricsDownstream;
+            textAffinity = TextAffinity::DOWNSTREAM;
         } else if (upStreamSuccess) {
             caretCaretMetric = metricsUpstream;
+            textAffinity = TextAffinity::UPSTREAM;
         } else {
             caretCaretMetric = metricsDownstream;
+            textAffinity = TextAffinity::DOWNSTREAM;
         }
         return true;
     }
+    textAffinity = TextAffinity::DOWNSTREAM;
     return false;
 }
 

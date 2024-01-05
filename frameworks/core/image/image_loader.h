@@ -53,7 +53,7 @@ public:
         return nullptr;
     }
     RefPtr<NG::ImageData> GetImageData(
-        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr);
+        const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr, bool queryCache = true);
     static std::string RemovePathHead(const std::string& uri);
     static RefPtr<ImageLoader> CreateImageLoader(const ImageSourceInfo& imageSourceInfo);
 #ifndef USE_ROSEN_DRAWING

@@ -106,4 +106,16 @@ const void* SkiaImageData::GetDataWrapper() const
     return nullptr;
 }
 #endif
+
+#ifndef USE_ROSEN_DRAWING
+std::string SkiaImageData::ToString() const
+{
+    return "";
+}
+#else
+std::string DrawingImageData::ToString() const
+{
+    return "";
+}
+#endif
 } // namespace OHOS::Ace::NG

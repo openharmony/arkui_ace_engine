@@ -14,6 +14,7 @@
  */
 
 #include "core/components/form/resource/form_manager_delegate.h"
+#include "core/event/touch_event.h"
 
 namespace OHOS::Ace {
 FormManagerDelegate::~FormManagerDelegate() = default;
@@ -68,7 +69,8 @@ void FormManagerDelegate::AddActionEventHandle(const ActionEventHandle& callback
 
 void FormManagerDelegate::SetAllowUpdate(bool allowUpdate) {}
 
-void FormManagerDelegate::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) {}
+void FormManagerDelegate::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    SerializedGesture& serializedGesture) {}
 
 void FormManagerDelegate::NotifySurfaceChange(float width, float height) {}
 

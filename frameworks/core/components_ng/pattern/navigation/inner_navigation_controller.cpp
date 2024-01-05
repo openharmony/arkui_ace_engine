@@ -72,6 +72,7 @@ void InnerNavigationController::SetInPIPMode(int32_t handle)
             }
 
             navigationStack->AddCacheNode(childNode.first, uiNode);
+            navDestination->SetIsCacheNode(true);
             return;
         }
     }
@@ -131,6 +132,23 @@ void InnerNavigationController::DeletePIPMode(int32_t handle)
     auto navigationStack = navigationPattern->GetNavigationStack();
     CHECK_NULL_VOID(navigationStack);
     navigationStack->RemoveCacheNode(handle);
+
+    const auto& navDestinationNodes = navigationStack->GetAllNavDestinationNodes();
+    for (size_t i = 0; i != navDestinationNodes.size(); ++i) {
+        const auto& childNode = navDestinationNodes[i];
+        const auto& uiNode = childNode.second;
+        if (uiNode && uiNode->GetId() == handle) {
+            auto navDestination = AceType::DynamicCast<NG::NavDestinationGroupNode>(
+            NG::NavigationGroupNode::GetNavDestinationNode(uiNode));
+            if (navDestination == nullptr) {
+                TAG_LOGI(AceLogTag::ACE_NAVIGATION, "The node is not navDestination node");
+                return;
+            }
+
+            navDestination->SetIsCacheNode(false);
+            return;
+        }
+    }
 }
 } // namespace Ace
 } // namespace OHOS

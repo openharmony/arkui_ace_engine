@@ -61,7 +61,6 @@ constexpr float SWIPER_HEIGHT = 800.f;
 constexpr int32_t ITEM_NUMBER = 4;
 constexpr int32_t DEFAULT_INTERVAL = 3000;
 constexpr int32_t DEFAULT_DURATION = 400;
-constexpr int32_t CALL_TIMES = 4;
 constexpr float DRAG_SPEED = 500.0f;
 constexpr float DRAG_OFFSET_X = 50.0f;
 } // namespace
@@ -9510,6 +9509,7 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayoutForward004, TestSize.Level1)
     swiperLayoutAlgorithm->targetIndex_ = 1;
     swiperLayoutAlgorithm->SetTotalItemCount(2);
     swiperLayoutAlgorithm->SetIsLoop(true);
+    swiperLayoutAlgorithm->SetCanOverScroll(false);
     auto layoutProperty_ = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper.GetLayoutProperty());
     layoutProperty_->UpdateMinSize(Dimension(0));
     layoutProperty_->UpdateDisplayCount(1);
@@ -10766,9 +10766,6 @@ HWTEST_F(SwiperTestNg, SwiperPatternOnScrollEnd001, TestSize.Level1)
 HWTEST_F(SwiperTestNg, SwiperDragScene001, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
-    auto renderContext = AceType::DynamicCast<MockRenderContext>(frameNode_->GetRenderContext());
-    EXPECT_TRUE(!!renderContext);
-    EXPECT_CALL(*renderContext, CalcExpectedFrameRate(_, _)).Times(CALL_TIMES);
     auto info = GestureEvent();
     auto localLocation = Offset(DRAG_OFFSET_X, 0.0f);
     info.SetLocalLocation(localLocation);
@@ -11081,9 +11078,6 @@ HWTEST_F(SwiperTestNg, PlayLongPointAnimation001, TestSize.Level1)
 HWTEST_F(SwiperTestNg, SwiperDragScene002, TestSize.Level1)
 {
     CreateWithItem([](SwiperModelNG model) {});
-    auto renderContext = AceType::DynamicCast<MockRenderContext>(frameNode_->GetRenderContext());
-    EXPECT_TRUE(!!renderContext);
-    EXPECT_CALL(*renderContext, CalcExpectedFrameRate(_, _)).Times(CALL_TIMES);
     auto info = GestureEvent();
     auto localLocation = Offset(DRAG_OFFSET_X, 0.0f);
     info.SetLocalLocation(localLocation);

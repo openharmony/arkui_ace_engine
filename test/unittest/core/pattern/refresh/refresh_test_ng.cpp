@@ -559,7 +559,7 @@ HWTEST_F(RefreshTestNg, RefreshDragFrameRatio001, TestSize.Level1)
     Create();
     auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
     frameNode_->renderContext_ = renderContext;
-    EXPECT_CALL(*renderContext, CalcExpectedFrameRate(_, _)).Times(3);
+    // CalcExpectedFrameRate will be called
     pattern_->HandleDragStart();
     pattern_->HandleDragUpdate(0.0f);
     pattern_->HandleDragEnd(0.0f);

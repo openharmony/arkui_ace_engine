@@ -128,6 +128,81 @@ ohos_unittest("form_render_test") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "form_fwk:form_manager",
+    "graphic_surface:surface",
+    "hilog:libhilog",
+    "input:libmmi-client",
+    "ipc:ipc_core",
+    "napi:ace_napi",
+  ]
+}
+
+ohos_unittest("form_render_group_test") {
+  module_out_path = interface_test_output_path
+  include_dirs = [
+    "$ace_root/interfaces/inner_api/form_render/include",
+    "${accessibility_path}/interfaces/innerkits/common/include/",
+  ]
+  sources = [
+    "$ace_root/interfaces/inner_api/form_render/src/form_renderer.cpp",
+    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_impl.cpp",
+    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_proxy.cpp",
+    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_delegate_stub.cpp",
+    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_impl.cpp",
+    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_proxy.cpp",
+    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_dispatcher_stub.cpp",
+    "$ace_root/interfaces/inner_api/form_render/src/form_renderer_group.cpp",
+    "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
+    "$ace_root/test/mock/base/mock_engine_helper.cpp",
+    "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
+    "$ace_root/test/mock/base/mock_ressched_report.cpp",
+    "$ace_root/test/mock/base/mock_system_properties.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
+    "$ace_root/test/mock/core/common/mock_container.cpp",
+    "$ace_root/test/mock/core/common/mock_frame_report.cpp",
+    "$ace_root/test/mock/core/common/mock_raw_recognizer.cpp",
+    "$ace_root/test/mock/core/image_provider/mock_image_source_info.cpp",
+    "$ace_root/test/mock/core/pipeline/mock_element_register.cpp",
+    "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
+    "$ace_root/test/mock/core/render/mock_animation_utils.cpp",
+    "$ace_root/test/mock/core/render/mock_modifier_adapter.cpp",
+    "$ace_root/test/mock/core/render/mock_render_context_creator.cpp",
+    "$ace_root/test/mock/interfaces/mock_uicontent_creator.cpp",
+    "form_render_group_test.cpp",
+  ]
+
+  configs = [ "$ace_root/test/unittest:ace_unittest_config" ]
+
+  deps = [
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_components_base",
+    "$ace_root/test/unittest:ace_components_event",
+    "$ace_root/test/unittest:ace_components_gestures",
+    "$ace_root/test/unittest:ace_components_layout",
+    "$ace_root/test/unittest:ace_components_manager",
+    "$ace_root/test/unittest:ace_components_pattern",
+    "$ace_root/test/unittest:ace_components_property",
+    "$ace_root/test/unittest:ace_components_render",
+    "$ace_root/test/unittest:ace_components_syntax",
+    "$ace_root/test/unittest:ace_core_animation",
+    "$ace_root/test/unittest:ace_core_extra",
+    "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
+    "$ace_root/test/unittest:ace_unittest_log",
+    "$ace_root/test/unittest:ace_unittest_trace",
+    "$cjson_root:cjson",
+    "$graphic_2d_path/rosen/modules/render_service_client:librender_service_client",
+    "//third_party/googletest:gmock_main",
+  ]
+
+  external_deps = [
+    "ability_base:want",
+    "ability_runtime:ability_context_native",
+    "ability_runtime:ability_manager",
+    "ability_runtime:runtime",
+    "accessibility:accessibility_common",
+    "ace_engine:ace_uicontent",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "form_fwk:form_manager",
     "graphic_2d:surface",
     "hilog:libhilog",
     "input:libmmi-client",
@@ -141,6 +216,7 @@ ohos_unittest("drawable_descriptor_test") {
 
   sources = [
     "$ace_root/interfaces/inner_api/drawable_descriptor/drawable_descriptor.cpp",
+    "$ace_root/interfaces/inner_api/drawable_descriptor/drawable_descriptor.h",
     "$ace_root/interfaces/inner_api/drawable_descriptor/image_converter.cpp",
     "drawable_descriptor_test.cpp",
   ]
@@ -189,6 +265,7 @@ group("interfaces_unittest") {
   deps = [
     ":ace_forward_compatibility_test",
     ":drawable_descriptor_test",
+    ":form_render_group_test",
     ":form_render_test",
     ":ui_content_test",
     ":viewport_config_test",

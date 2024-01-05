@@ -22,6 +22,10 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 
+namespace OHOS::AAFwk {
+class WantParams;
+} // namespace OHOS::AAFwk
+
 namespace OHOS::Ace {
 struct AISpan {
     int32_t start = 0;
@@ -74,6 +78,10 @@ protected:
 private:
     DataDetectorMgr();
     DataDetectorInstance engine_ = nullptr;
+
+    std::function<void(const AAFwk::WantParams&)> GetOnReceive(
+        const RefPtr<NG::FrameNode>& uiExtNode, NG::RectF aiRect,
+        std::function<void(const std::string&)> onClickMenu, const RefPtr<NG::FrameNode>& targetNode);
 
     std::string bundleName_;
     std::string abilityName_;

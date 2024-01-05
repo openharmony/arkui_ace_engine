@@ -24,9 +24,9 @@
 
 namespace OHOS::Ace::NG {
 
-class Pattern;
+class ScrollablePattern;
 struct ScrollableNodeInfo {
-    WeakPtr<Pattern> scrollableNode;
+    WeakPtr<ScrollablePattern> scrollableNode;
     std::function<bool(double, int32_t source)> onPositionChanged;
     std::function<bool(double, int32_t source)> scrollStartCallback;
     std::function<void()> scrollEndCallback;
@@ -52,7 +52,7 @@ public:
     void RegisterScrollBar(const WeakPtr<ScrollBarPattern>& scrollBar);
 
     // UnRegister scrollable node and scroll bar.
-    void UnRegisterScrollableNode(const WeakPtr<Pattern>& scrollableNode);
+    void UnRegisterScrollableNode(const WeakPtr<ScrollablePattern>& scrollableNode);
     void UnRegisterScrollBar(const WeakPtr<ScrollBarPattern>& scrollBar);
 
     /*
@@ -74,7 +74,7 @@ public:
      * Notify scroll bar to update state, called by scrollable node.
      * @param distance absolute distance that scrollable node has scrolled.
      */
-    void NotifyScrollBar(const WeakPtr<Pattern>& weakScrollableNode) const;
+    void NotifyScrollBar(const WeakPtr<ScrollablePattern>& weakScrollableNode) const;
 
     /*
      * Start animation of ScrollBar.

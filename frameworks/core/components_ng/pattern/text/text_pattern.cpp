@@ -336,7 +336,9 @@ void TextPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
         HandleSelectionChange(start, textSelector_.destinationOffset);
     } else {
         auto end = GetHandleIndex(Offset(localOffset.GetX(),
-            localOffset.GetY() + (selectOverlayProxy_->IsHandleReverse() ? 0 : handleRect.Height())));
+            localOffset.GetY() + (selectOverlayProxy_->IsHandleReverse() || NearEqual(localOffset.GetY(), 0)
+                                         ? 0
+                                         : handleRect.Height())));
         HandleSelectionChange(textSelector_.baseOffset, end);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -465,10 +467,14 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
             CHECK_NULL_VOID(textLayoutProperty);
             if (textLayoutProperty->GetCalcLayoutConstraint() &&
                 textLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize.has_value()) {
-                auto selfIdealSize = textLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize;
-                if ((selfIdealSize->Width().has_value() && selfIdealSize->Width()->GetDimension().ConvertToPx() <= 0) ||
-                    (selfIdealSize->Height().has_value() &&
-                        selfIdealSize->Height()->GetDimension().ConvertToPx() <= 0)) {
+                auto selfIdealSizeWidth = textLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Width();
+                auto selfIdealSizeHeight = textLayoutProperty->GetCalcLayoutConstraint()->selfIdealSize->Height();
+                auto constraint = textLayoutProperty->GetLayoutConstraint();
+                if ((selfIdealSizeWidth.has_value() && NearZero(selfIdealSizeWidth->GetDimension().ConvertToPxWithSize(
+                                                           constraint->percentReference.Width()))) ||
+                    (selfIdealSizeHeight.has_value() &&
+                        NearZero(selfIdealSizeHeight->GetDimension().ConvertToPxWithSize(
+                            constraint->percentReference.Height())))) {
                     return;
                 }
             }
@@ -654,25 +660,25 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
         if (isClickOnAISpan && selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
             selectOverlayProxy_->DisableMenu(true);
         }
-        if (isClickOnSpan && textSelector_.IsValid()) {
+        if (isClickOnSpan && textSelector_.IsValid() && !isMousePressed_) {
             ResetSelection();
         }
         return;
     }
 
-    if (copyOption_ != CopyOptions::None && textDetectEnable_ && spans_.empty() && !aiSpanMap_.empty() && paragraph_) {
+    if (NeedShowAIDetect() && spans_.empty() && paragraph_) {
         for (const auto& kv : aiSpanMap_) {
             auto aiSpan = kv.second;
             isClickOnAISpan = ClickAISpan(textOffset, aiSpan);
             if (isClickOnAISpan) {
-                if (isClickOnAISpan && selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+                if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
                     selectOverlayProxy_->DisableMenu(true);
                 }
                 return;
             }
         }
     }
-    if (textSelector_.IsValid()) {
+    if (textSelector_.IsValid() && !isMousePressed_) {
         CloseSelectOverlay(true);
         ResetSelection();
     }
@@ -802,6 +808,7 @@ void TextPattern::SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc
         if (pattern->copyOption_ == CopyOptions::None) {
             return;
         }
+        pattern->CloseSelectOverlay();
         if (action == std::string(COPY_ACTION)) {
             pattern->HandleSelectionChange(aiSpan.start, aiSpan.end);
             pattern->HandleOnCopy();
@@ -1026,7 +1033,9 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
     if (IsSelected() || textSelector_.baseOffset != -1) {
         end = paragraph_->GetGlyphIndexByCoordinate(textOffset);
     }
-    HandleSelectionChange(textSelector_.baseOffset, end);
+    if (isMousePressed_ || oldMouseStatus == MouseStatus::MOVE) {
+        HandleSelectionChange(textSelector_.baseOffset, end);
+    }
 
     if (IsSelected() && oldMouseStatus == MouseStatus::MOVE && IsSelectedBindSelectionMenu()) {
         mouseReleaseOffset_ = OffsetF(
@@ -1043,10 +1052,12 @@ void TextPattern::HandleMouseLeftMoveAction(const MouseInfo& info, const Offset&
         dragBoxes_ = GetTextBoxes();
         return;
     }
-    mouseStatus_ = MouseStatus::MOVE;
-    CHECK_NULL_VOID(paragraph_);
-    auto end = paragraph_->GetGlyphIndexByCoordinate(textOffset);
-    HandleSelectionChange(textSelector_.baseOffset, end);
+    if (isMousePressed_) {
+        mouseStatus_ = MouseStatus::MOVE;
+        CHECK_NULL_VOID(paragraph_);
+        auto end = paragraph_->GetGlyphIndexByCoordinate(textOffset);
+        HandleSelectionChange(textSelector_.baseOffset, end);
+    }
 }
 
 void TextPattern::HandleMouseRightButton(const MouseInfo& info, const Offset& textOffset)
@@ -1846,6 +1857,14 @@ void TextPattern::InitTextDetect(int32_t startPos, std::string detectText)
     DataDetectorMgr::GetInstance().DataDetect(info, textFunc);
 }
 
+void TextPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    json->Put("enableDataDetector", textDetectEnable_ ? "true" : "false");
+    auto jsonValue = JsonUtil::Create(true);
+    jsonValue->Put("types", "");
+    json->Put("dataDetectorConfig", jsonValue->ToString().c_str());
+}
+
 void TextPattern::ParseAIResult(const TextDataDetectResult& result, int32_t startPos)
 {
     auto entityMenuServiceInfoJson = JsonUtil::ParseJsonString(result.entityMenuServiceInfo);
@@ -1873,6 +1892,8 @@ void TextPattern::ParseAIResult(const TextDataDetectResult& result, int32_t star
     if (startPos + AI_TEXT_MAX_LENGTH >= static_cast<int32_t>(StringUtils::ToWstring(textForAI_).length())) {
         aiDetectInitialized_ = true;
         aiDetectTypesChanged_ = false;
+
+        // process with overlapping entities, leaving only the earlier ones
         int32_t preEnd = 0;
         auto aiSpanIterator = aiSpanMap_.begin();
         while (aiSpanIterator != aiSpanMap_.end()) {
@@ -1925,8 +1946,13 @@ void TextPattern::ParseAIJson(
             TAG_LOGI(AceLogTag::ACE_TEXT, "The charOffset is error");
             continue;
         }
+        int32_t start = startPos + charOffset;
+        if (aiSpanMap_.find(start) != aiSpanMap_.end() && aiSpanMap_[start].content.length() >= oriText.length()) {
+            // both entities start at the same position, leaving the longer one
+            continue;
+        }
         AISpan aiSpan;
-        aiSpan.start = startPos + charOffset;
+        aiSpan.start = start;
         aiSpan.end = end;
         aiSpan.content = oriText;
         aiSpan.type = type;

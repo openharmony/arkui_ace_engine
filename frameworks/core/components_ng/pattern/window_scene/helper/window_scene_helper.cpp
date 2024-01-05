@@ -148,6 +148,12 @@ bool WindowSceneHelper::GetNeedKeyboardOnFocusFlag(const RefPtr<FrameNode> frame
 void WindowSceneHelper::IsWindowSceneCloseKeyboard(RefPtr<FrameNode> frameNode)
 {
 #if defined (ENABLE_STANDARD_INPUT)
+    if (frameNode->GetTag() == V2::UI_EXTENSION_COMPONENT_TAG || frameNode->GetTag() ==
+        V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "UIExtension(%{public}s/%{public}d) notNeedSoftKeyboard.",
+            frameNode->GetTag().c_str(), frameNode->GetId());
+        return;
+    }
     // If focus pattern does not need softkeyboard, close it, in windowScene.
     auto curPattern = frameNode->GetPattern<NG::Pattern>();
     CHECK_NULL_VOID(curPattern);
@@ -169,6 +175,7 @@ void WindowSceneHelper::IsWindowSceneCloseKeyboard(RefPtr<FrameNode> frameNode)
             if (infApiRes || curIsShown) {
                 TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Shown.");
                 inputMethod->RequestHideInput();
+                inputMethod->Close();
                 TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
             }
         }

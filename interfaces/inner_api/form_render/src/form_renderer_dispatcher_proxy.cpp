@@ -18,13 +18,16 @@
 #include "errors.h"
 #include "form_renderer_hilog.h"
 
+#include "core/event/touch_event.h"
+
 namespace OHOS {
 namespace Ace {
 FormRendererDispatcherProxy::FormRendererDispatcherProxy(const sptr<IRemoteObject>& impl)
     : IRemoteProxy<IFormRendererDispatcher>(impl) {}
 
 void FormRendererDispatcherProxy::DispatchPointerEvent(
-    const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent)
+    const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent,
+    SerializedGesture& serializedGesture)
 {
     if (pointerEvent == nullptr) {
         HILOG_ERROR("%{public}s, pointerEvent is null", __func__);
@@ -47,6 +50,16 @@ void FormRendererDispatcherProxy::DispatchPointerEvent(
     int error = Remote()->SendRequest(
         static_cast<uint32_t>(IFormRendererDispatcher::Message::DISPATCH_POINTER_EVENT),
         data, reply, option);
+
+    int32_t size = 0;
+    reply.ReadInt32(size);
+    if (size < 0) {
+        HILOG_ERROR("Serialized gesture size is not valid!");
+    } else {
+        auto buffer = static_cast<const char*>(reply.ReadRawData(size));
+        serializedGesture.data = std::vector<char>(buffer, buffer + size);
+    }
+
     if (error != ERR_OK) {
         HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
     }

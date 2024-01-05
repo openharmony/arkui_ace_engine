@@ -270,6 +270,7 @@ public:
     void OnPositionUpdate(const OffsetT<Dimension>& value) override;
     void OnZIndexUpdate(int32_t value) override;
     void DumpInfo() override;
+    void DumpAdvanceInfo() override;
     void SetClipBoundsWithCommands(const std::string& commands) override;
     void SetNeedDebugBoundary(bool flag) override
     {
@@ -407,7 +408,7 @@ private:
     }
     bool HasDisappearTransition() const override
     {
-        return transitionEffect_ != nullptr && !transitionEffect_->HasDisappearTransition();
+        return transitionEffect_ != nullptr && transitionEffect_->HasDisappearTransition();
     }
     void OnTransitionInFinish();
     void OnTransitionOutFinish();
