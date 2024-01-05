@@ -47,6 +47,11 @@ private:
         const RefPtr<LayoutWrapper>& itemLayoutWrapper, int32_t mainIndex, int32_t crossIndex) override
     {}
 
+    void UpdateMainLineOnReload(int32_t startIdx) override
+    {
+        /* With irregular items, mainLineIndex can't be determined by simple calculation. */
+    }
+
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollWithOptionsLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

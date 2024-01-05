@@ -361,7 +361,9 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
 
 void GridScrollLayoutAlgorithm::ReloadToStartIndex(float mainSize, float crossSize, LayoutWrapper* layoutWrapper)
 {
-    int32_t currentItemIndex = gridLayoutInfo_.startIndex_;
+    const int32_t currentItemIndex = gridLayoutInfo_.startIndex_;
+    // adjust startMainLine based on the new cross count
+    UpdateMainLineOnReload(currentItemIndex);
     auto firstItem = GetStartingItem(layoutWrapper, currentItemIndex);
     gridLayoutInfo_.startIndex_ = firstItem;
     currentMainLineIndex_ = (firstItem == 0 ? 0 : gridLayoutInfo_.startMainLineIndex_) - 1;
@@ -379,8 +381,7 @@ void GridScrollLayoutAlgorithm::ReloadToStartIndex(float mainSize, float crossSi
     gridLayoutInfo_.UpdateStartIndexByStartLine();
     // FillNewLineBackward sometimes make startIndex_ > currentItemIndex
     while (gridLayoutInfo_.startIndex_ > currentItemIndex &&
-           gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.startMainLineIndex_) !=
-            gridLayoutInfo_.gridMatrix_.end()) {
+           gridLayoutInfo_.gridMatrix_.find(gridLayoutInfo_.startMainLineIndex_) != gridLayoutInfo_.gridMatrix_.end()) {
         gridLayoutInfo_.startMainLineIndex_--;
         gridLayoutInfo_.UpdateStartIndexByStartLine();
     }
@@ -1447,7 +1448,7 @@ void GridScrollLayoutAlgorithm::MeasureChild(LayoutWrapper* layoutWrapper, const
     }
     auto oldConstraint = childLayoutProperty->GetLayoutConstraint();
     if (oldConstraint.has_value() && !NearEqual(GetCrossAxisSize(oldConstraint.value().maxSize, axis_),
-                                                GetCrossAxisSize(childConstraint.maxSize, axis_))) {
+                                         GetCrossAxisSize(childConstraint.maxSize, axis_))) {
         auto layoutAlgorithmWrapper = childLayoutWrapper->GetLayoutAlgorithm();
         if (layoutAlgorithmWrapper->SkipMeasure()) {
             layoutAlgorithmWrapper->SetNeedMeasure();
@@ -1606,6 +1607,14 @@ void GridScrollLayoutAlgorithm::SupplyAllData2ZeroIndex(float mainSize, float cr
     // Once the data is completed, the global variables need to be returned
     scrollGridLayoutInfo_ = gridLayoutInfo_;
     gridLayoutInfo_ = tempGridLayoutInfo;
+}
+
+void GridScrollLayoutAlgorithm::UpdateMainLineOnReload(int32_t startIdx)
+{
+    auto& info = gridLayoutInfo_;
+    if (!info.hasBigItem_) {
+        info.startMainLineIndex_ = startIdx / info.crossCount_;
+    }
 }
 
 // only for debug use
