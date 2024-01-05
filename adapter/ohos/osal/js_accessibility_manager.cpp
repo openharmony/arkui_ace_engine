@@ -568,6 +568,20 @@ RefPtr<NG::FrameNode> FindWebAccessibilityFocus(const RefPtr<NG::FrameNode>& fra
 }
 #endif
 
+void SetUiExtensionAbilityParentIdForFocus(const RefPtr<NG::UINode>& uiExtensionNode,
+    const int64_t uiExtensionOffset, Accessibility::AccessibilityElementInfo& info)
+{
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiExtensionNode);
+    if (frameNode) {
+        auto parentId = info.GetParentNodeId();
+        AccessibilityElementInfo parentInfo;
+        ConvertExtensionAccessibilityId(info, frameNode, uiExtensionOffset, parentInfo);
+        if (parentId == NG::UI_EXTENSION_ROOT_ID) {
+            info.SetParent(frameNode->GetAccessibilityId());
+        }
+    }
+}
+
 RefPtr<NG::FrameNode> FindAccessibilityFocus(const RefPtr<NG::UINode>& node,
     int32_t focusType, Accessibility::AccessibilityElementInfo& info,
     const int64_t uiExtensionOffset, const RefPtr<PipelineBase>& context)
@@ -598,11 +612,11 @@ RefPtr<NG::FrameNode> FindAccessibilityFocus(const RefPtr<NG::UINode>& node,
             SearchParameter transferSearchParam {NG::UI_EXTENSION_ROOT_ID, "", focusType, uiExtensionOffset};
             OHOS::Ace::Framework::FindFocusedExtensionElementInfoNG(
                 transferSearchParam, extensionNode, info);
-            if (info.GetAccessibilityId() > -1) {
-                AccessibilityElementInfo parentInfo;
-                ConvertExtensionAccessibilityId(info, extensionNode, uiExtensionOffset, parentInfo);
-                return extensionNode;
+            if (info.GetAccessibilityId() < 0) {
+                continue;
             }
+            SetUiExtensionAbilityParentIdForFocus(extensionNode, uiExtensionOffset, info);
+            return extensionNode;
         }
         auto result = FindAccessibilityFocus(child, focusType, info, uiExtensionOffset, context);
         if (result) {
@@ -691,11 +705,11 @@ RefPtr<NG::FrameNode> FindInputFocus(const RefPtr<NG::UINode>& node, int32_t foc
             SearchParameter transferSearchParam {NG::UI_EXTENSION_ROOT_ID, "", focusType, uiExtensionOffset};
             OHOS::Ace::Framework::FindFocusedExtensionElementInfoNG(
                 transferSearchParam, extensionNode, info);
-            if (info.GetAccessibilityId() > -1) {
-                AccessibilityElementInfo parentInfo;
-                ConvertExtensionAccessibilityId(info, extensionNode, uiExtensionOffset, parentInfo);
-                return extensionNode;
+            if (info.GetAccessibilityId() < 0) {
+                continue;
             }
+            SetUiExtensionAbilityParentIdForFocus(extensionNode, uiExtensionOffset, info);
+            return extensionNode;
         }
         auto childNode = FindInputFocus(focusChild->GetFrameNode(), focusType, info, uiExtensionOffset, context);
         if (childNode) {
@@ -928,6 +942,10 @@ int64_t GetParentId(const RefPtr<NG::UINode>& uiNode)
     auto parent = uiNode->GetParent();
     while (parent) {
         if (AceType::InstanceOf<NG::FrameNode>(parent)) {
+            if ((parent->GetTag() == V2::PAGE_ETS_TAG) || (parent->GetTag() == V2::STAGE_ETS_TAG)) {
+                parent = parent->GetParent();
+                continue;
+            }
             return parent->GetAccessibilityId();
         }
         parent = parent->GetParent();
@@ -1349,6 +1367,15 @@ std::list<AccessibilityElementInfo> SearchExtensionElementInfoByAccessibilityIdN
     return extensionElementInfo;
 }
 
+void UpdateUiExtensionParentIdForFocus(const RefPtr<NG::FrameNode>& rootNode, const int64_t uiExtensionOffset,
+    Accessibility::AccessibilityElementInfo& info)
+{
+    if ((uiExtensionOffset != NG::UI_EXTENSION_OFFSET_MAX) && (info.GetComponentType() != V2::ROOT_ETS_TAG) &&
+        (info.GetParentNodeId() == rootNode->GetAccessibilityId())) {
+            info.SetParent(NG::UI_EXTENSION_ROOT_ID);
+    }
+}
+
 void GetChildrenFromWebNode(
     const RefPtr<NG::FrameNode>& node, std::list<std::variant<RefPtr<NG::FrameNode>, int64_t>>& children)
 {
@@ -1417,6 +1444,24 @@ void UpdateVirtualNodeInfo(std::list<AccessibilityElementInfo>& infos, Accessibi
     }
 }
 
+void SearchExtensionElementInfoNG(const SearchParameter& searchParam,
+    const RefPtr<NG::FrameNode>& node, std::list<Accessibility::AccessibilityElementInfo>& infos,
+    Accessibility::AccessibilityElementInfo& parentInfo)
+{
+    auto extensionElementInfos = SearchExtensionElementInfoByAccessibilityIdNG(
+        searchParam.nodeId, searchParam.mode, node, searchParam.uiExtensionOffset);
+    if (extensionElementInfos.size() > 0) {
+        auto rootParentId = extensionElementInfos.front().GetParentNodeId();
+        ConvertExtensionAccessibilityNodeId(extensionElementInfos, node, searchParam.uiExtensionOffset, parentInfo);
+        if (rootParentId == NG::UI_EXTENSION_ROOT_ID) {
+            extensionElementInfos.front().SetParent(node->GetAccessibilityId());
+        }
+        for (auto& info : extensionElementInfos) {
+            infos.push_back(info);
+        }
+    }
+}
+
 void UpdateCacheInfoNG(std::list<AccessibilityElementInfo>& infos, const RefPtr<NG::FrameNode>& node,
     const CommonProperty& commonProperty, const RefPtr<NG::PipelineContext>& ngPipeline,
     const SearchParameter& searchParam)
@@ -1462,7 +1507,6 @@ void UpdateCacheInfoNG(std::list<AccessibilityElementInfo>& infos, const RefPtr<
                 continue;
             }
             if (frameNodeParent->GetTag() != V2::UI_EXTENSION_COMPONENT_TAG) {
-                UpdateAccessibilityElementInfo(frameNodeParent, commonProperty, nodeInfo, ngPipeline);
                 infos.push_back(nodeInfo);
                 GetChildrenFromFrameNode(frameNodeParent, children, commonProperty.pageId);
                 GetChildrenFromWebNode(frameNodeParent, children);
@@ -1474,13 +1518,9 @@ void UpdateCacheInfoNG(std::list<AccessibilityElementInfo>& infos, const RefPtr<
                 (frameNodeParent->GetUiExtensionId() <= NG::UI_EXTENSION_ID_OTHER_MAX)))) {
                 continue;
             }
-            std::list<AccessibilityElementInfo> extensionElementInfos = SearchExtensionElementInfoByAccessibilityIdNG(
-                -1, umode, frameNodeParent, searchParam.uiExtensionOffset);
-            ConvertExtensionAccessibilityNodeId(
-                extensionElementInfos, frameNodeParent, searchParam.uiExtensionOffset, nodeInfo);
-            for (auto& info : extensionElementInfos) {
-                infos.push_back(info);
-            }
+            auto transferParam = searchParam;
+            transferParam.nodeId = NG::UI_EXTENSION_ROOT_ID;
+            SearchExtensionElementInfoNG(transferParam, frameNodeParent, infos, nodeInfo);
         } else if (parent.index() == 1) {
             // Handle the parent when its type is WebNode
             int64_t intParent = std::get<1>(parent);
@@ -2276,13 +2316,14 @@ void JsAccessibilityManager::DumpPropertyNG(const std::vector<std::string>& para
     CHECK_NULL_VOID(frameNode);
 
     CommonProperty commonProperty;
-    GenerateCommonProperty(ngPipeline, commonProperty);
-    if (ngPipeline->GetWindowId() == pipeline->GetWindowId()) {
-        commonProperty.pageId = 0;
-        commonProperty.pagePath = "";
-    }
+    GenerateCommonProperty(ngPipeline, commonProperty, pipeline);
     AccessibilityElementInfo nodeInfo;
     UpdateAccessibilityElementInfo(frameNode, commonProperty, nodeInfo, ngPipeline);
+    if (frameNode->GetTag() == V2::UI_EXTENSION_COMPONENT_TAG) {
+        SearchParameter param {-1, "", PREFETCH_RECURSIVE_CHILDREN, NG::UI_EXTENSION_OFFSET_MAX};
+        std::list<AccessibilityElementInfo> extensionElementInfos;
+        SearchExtensionElementInfoNG(param, frameNode, extensionElementInfos, nodeInfo);
+    }
     DumpCommonPropertyNG(nodeInfo);
     DumpAccessibilityPropertyNG(nodeInfo);
     DumpLog::GetInstance().Print(0, nodeInfo.GetComponentType(), nodeInfo.GetChildCount());
@@ -2459,7 +2500,7 @@ void JsAccessibilityManager::DumpTree(int32_t depth, int64_t nodeID)
         CHECK_NULL_VOID(rootNode);
         nodeID = rootNode->GetAccessibilityId();
         CommonProperty commonProperty;
-        GenerateCommonProperty(ngPipeline, commonProperty);
+        GenerateCommonProperty(ngPipeline, commonProperty, pipeline);
         auto weak = WeakClaim(this);
         DumpTreeNodeNG(rootNode, depth, nodeID, commonProperty);
         for (auto subContext : GetSubPipelineContexts()) {
@@ -2633,28 +2674,28 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityIdNG(int64_t elemen
     CHECK_NULL_VOID(uiExtensionManager);
     if (uiExtensionManager->IsWrapExtensionAbilityId(nodeId)) {
         SearchParameter param {nodeId, "", mode, uiExtensionOffset};
-        SearchExtensionElementInfoByAccessibilityIdNG(param, rootNode, infos, context, ngPipeline);
-        return;
+        return SearchExtensionElementInfoByAccessibilityIdNG(param, rootNode, infos, context, ngPipeline);
     }
 #endif
 
+    CommonProperty commonProperty;
+    GenerateCommonProperty(ngPipeline, commonProperty, mainContext);
     auto node = GetInspectorById(rootNode, nodeId);
     CHECK_NULL_VOID(node);
+    UpdateAccessibilityElementInfo(node, commonProperty, nodeInfo, ngPipeline);
     if (node->GetTag() == V2::UI_EXTENSION_COMPONENT_TAG) {
         SearchParameter param {-1, "", mode, uiExtensionOffset};
         SearchExtensionElementInfoNG(param, node, infos, nodeInfo);
     }
-    CommonProperty commonProperty;
-    GenerateCommonProperty(ngPipeline, commonProperty);
-    if (context->GetWindowId() != mainContext->GetWindowId()) {
-        commonProperty.pageId = 0;
-        commonProperty.pagePath = "";
-    }
-    UpdateAccessibilityElementInfo(node, commonProperty, nodeInfo, ngPipeline);
     infos.push_back(nodeInfo);
     SearchParameter param {nodeId, "", mode, uiExtensionOffset};
     UpdateCacheInfoNG(infos, node, commonProperty, ngPipeline, param);
     SortExtensionAccessibilityInfo(infos, nodeInfo.GetAccessibilityId());
+    if ((infos.size() > 0) && (uiExtensionOffset != NG::UI_EXTENSION_OFFSET_MAX) &&
+        (infos.front().GetComponentType() != V2::ROOT_ETS_TAG) &&
+        (infos.front().GetParentNodeId() == rootNode->GetAccessibilityId())) {
+            infos.front().SetParent(NG::UI_EXTENSION_ROOT_ID);
+    }
 }
 
 void JsAccessibilityManager::SearchExtensionElementInfoByAccessibilityIdNG(const SearchParameter& searchParam,
@@ -2662,30 +2703,22 @@ void JsAccessibilityManager::SearchExtensionElementInfoByAccessibilityIdNG(const
     const RefPtr<PipelineBase>& context, const RefPtr<NG::PipelineContext>& ngPipeline)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
+    auto mainContext = context_.Upgrade();
+    CHECK_NULL_VOID(mainContext);
     auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
     CHECK_NULL_VOID(uiExtensionManager);
     auto unWrapIdPair = uiExtensionManager->UnWrapExtensionAbilityId(searchParam.uiExtensionOffset, searchParam.nodeId);
     int64_t childWrapId = unWrapIdPair.second;
     int64_t uiExtensionId = unWrapIdPair.first;
-    std::list<AccessibilityElementInfo> extensionElementInfos;
     auto uiExtensionNode = FindNodeFromRootByExtensionId(node, uiExtensionId);
     CHECK_NULL_VOID(uiExtensionNode);
     SearchParameter param {childWrapId, "", searchParam.mode, searchParam.uiExtensionOffset};
     AccessibilityElementInfo nodeInfo;
+    CommonProperty commonProperty;
+    GenerateCommonProperty(ngPipeline, commonProperty, mainContext);
+    UpdateAccessibilityElementInfo(uiExtensionNode, commonProperty, nodeInfo, ngPipeline);
     SearchExtensionElementInfoNG(param, uiExtensionNode, infos, nodeInfo);
 #endif
-}
-
-void JsAccessibilityManager::SearchExtensionElementInfoNG(const SearchParameter& searchParam,
-    const RefPtr<NG::FrameNode>& node, std::list<Accessibility::AccessibilityElementInfo>& infos,
-    Accessibility::AccessibilityElementInfo& parentInfo)
-{
-    auto extensionElementInfos = OHOS::Ace::Framework::SearchExtensionElementInfoByAccessibilityIdNG(
-        searchParam.nodeId, searchParam.mode, node, searchParam.uiExtensionOffset);
-    ConvertExtensionAccessibilityNodeId(extensionElementInfos, node, searchParam.uiExtensionOffset, parentInfo);
-    for (auto& info : extensionElementInfos) {
-        infos.push_back(info);
-    }
 }
 
 std::list<AccessibilityElementInfo> JsAccessibilityManager::SearchElementInfosByTextNG(
@@ -2703,6 +2736,8 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(const SearchParameter& s
     const RefPtr<PipelineBase>& context, const RefPtr<NG::PipelineContext>& ngPipeline)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
+    auto mainContext = context_.Upgrade();
+    CHECK_NULL_VOID(mainContext);
     auto uiExtensionManager = ngPipeline->GetUIExtensionManager();
     CHECK_NULL_VOID(uiExtensionManager);
     auto unWrapIdPair = uiExtensionManager->UnWrapExtensionAbilityId(searchParam.uiExtensionOffset, searchParam.nodeId);
@@ -2719,7 +2754,7 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(const SearchParameter& s
         return;
     }
     CommonProperty commonProperty;
-    GenerateCommonProperty(ngPipeline, commonProperty);
+    GenerateCommonProperty(ngPipeline, commonProperty, mainContext);
     UpdateAccessibilityElementInfo(uiExtensionNode, commonProperty, nodeInfo, ngPipeline);
     ConvertExtensionAccessibilityNodeId(extensionElementInfos, uiExtensionNode,
         searchParam.uiExtensionOffset, nodeInfo);
@@ -2778,11 +2813,7 @@ void JsAccessibilityManager::SearchElementInfosByTextNG(int64_t elementId, const
     auto node = GetInspectorById(rootNode, elementId);
     CHECK_NULL_VOID(node);
     CommonProperty commonProperty;
-    GenerateCommonProperty(ngPipeline, commonProperty);
-    if (context->GetWindowId() != mainContext->GetWindowId()) {
-        commonProperty.pageId = 0;
-        commonProperty.pagePath = "";
-    }
+    GenerateCommonProperty(ngPipeline, commonProperty, mainContext);
     SearchParameter param {0, text, 0, uiExtensionOffset};
     FindText(node, infos, ngPipeline, commonProperty, param);
 }
@@ -2944,8 +2975,7 @@ void JsAccessibilityManager::FindFocusedElementInfoNG(int64_t elementId, int32_t
     if (V2::UI_EXTENSION_COMPONENT_TAG == node->GetTag()) {
         SearchParameter transferSearchParam {NG::UI_EXTENSION_ROOT_ID, "", focusType, uiExtensionOffset};
         OHOS::Ace::Framework::FindFocusedExtensionElementInfoNG(transferSearchParam, node, info);
-        AccessibilityElementInfo parentInfo;
-        return ConvertExtensionAccessibilityId(info, node, uiExtensionOffset, parentInfo);
+        return SetUiExtensionAbilityParentIdForFocus(node, uiExtensionOffset, info);
     }
     RefPtr<NG::FrameNode> resultNode;
     if (focusType == FOCUS_TYPE_ACCESSIBILITY) {
@@ -2954,17 +2984,13 @@ void JsAccessibilityManager::FindFocusedElementInfoNG(int64_t elementId, int32_t
     if (focusType == FOCUS_TYPE_INPUT) {
         resultNode = FindInputFocus(node, focusType, info, uiExtensionOffset, context);
     }
-    CHECK_NULL_VOID(resultNode);
-    if (V2::UI_EXTENSION_COMPONENT_TAG == resultNode->GetTag()) {
+    if ((!resultNode) || (V2::UI_EXTENSION_COMPONENT_TAG == resultNode->GetTag())) {
         return;
     }
     CommonProperty commonProperty;
-    GenerateCommonProperty(ngPipeline, commonProperty);
-    if (context->GetWindowId() != mainContext->GetWindowId()) {
-        commonProperty.pageId = 0;
-        commonProperty.pagePath = "";
-    }
+    GenerateCommonProperty(ngPipeline, commonProperty, mainContext);
     UpdateAccessibilityElementInfo(resultNode, commonProperty, info, ngPipeline);
+    UpdateUiExtensionParentIdForFocus(rootNode, uiExtensionOffset, info);
 }
 
 void JsAccessibilityManager::FindFocusedExtensionElementInfoNG(const SearchParameter& searchParam,
@@ -2983,8 +3009,7 @@ void JsAccessibilityManager::FindFocusedExtensionElementInfoNG(const SearchParam
     SearchParameter transferSearchParam {elementIdPair.second, "",
         searchParam.mode, searchParam.uiExtensionOffset};
     OHOS::Ace::Framework::FindFocusedExtensionElementInfoNG(transferSearchParam, uiExtensionNode, info);
-    AccessibilityElementInfo parentInfo;
-    ConvertExtensionAccessibilityId(info, uiExtensionNode, searchParam.uiExtensionOffset, parentInfo);
+    SetUiExtensionAbilityParentIdForFocus(uiExtensionNode, searchParam.uiExtensionOffset, info);
 #endif
 }
 
@@ -3868,11 +3893,7 @@ void JsAccessibilityManager::FocusMoveSearchNG(int64_t elementId, int32_t direct
         auto resultNode = GetResultOfFocusMoveSearchNGForWeb(node, rootNode, elementId, direction);
         CHECK_NULL_VOID(resultNode);
         CommonProperty commonProperty;
-        GenerateCommonProperty(ngPipeline, commonProperty);
-        if (context->GetWindowId() != mainContext->GetWindowId()) {
-            commonProperty.pageId = 0;
-            commonProperty.pagePath = "";
-        }
+        GenerateCommonProperty(ngPipeline, commonProperty, mainContext);
         UpdateAccessibilityElementInfo(resultNode, commonProperty, info, ngPipeline);
     } else {
         info.SetValidElement(false);
@@ -3952,7 +3973,8 @@ std::string JsAccessibilityManager::GetPagePath()
     return frontend->GetPagePath();
 }
 
-void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output)
+void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
+    const RefPtr<PipelineBase>& mainContext)
 {
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
     CHECK_NULL_VOID(ngPipeline);
@@ -3965,6 +3987,10 @@ void JsAccessibilityManager::GenerateCommonProperty(const RefPtr<PipelineBase>& 
     output.windowTop = GetWindowTop(ngPipeline->GetWindowId());
     output.pageId = page->GetPageId();
     output.pagePath = GetPagePath();
+    if (context->GetWindowId() != mainContext->GetWindowId()) {
+        output.pageId = 0;
+        output.pagePath = "";
+    }
 }
 
 void JsAccessibilityManager::FindText(const RefPtr<NG::UINode>& node,
