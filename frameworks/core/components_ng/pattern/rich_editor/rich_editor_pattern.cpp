@@ -2403,6 +2403,7 @@ void RichEditorPattern::InsertValueToSpanNode(
     textTemp.insert(info.GetOffsetInSpan(), insertValueTemp);
     text = StringUtils::ToString(textTemp);
     spanNode->UpdateContent(text);
+    FlushTextForDisplay();
     spanItem->position += static_cast<int32_t>(StringUtils::ToWstring(insertValue).length());
 }
 
@@ -2476,6 +2477,7 @@ RefPtr<SpanNode> RichEditorPattern::InsertValueToBeforeSpan(
             spanItemAfter->hasResourceDecorationColor = spanItem->hasResourceDecorationColor;
             AddSpanItem(spanItemAfter, host->GetChildIndex(spanNodeBefore) + 1);
             SpanNodeFission(spanNodeAfter);
+            FlushTextForDisplay();
             return spanNodeAfter;
         }
     } else {
@@ -2483,6 +2485,7 @@ RefPtr<SpanNode> RichEditorPattern::InsertValueToBeforeSpan(
         spanNodeBefore->UpdateContent(text);
         spanItem->position += static_cast<int32_t>(StringUtils::ToWstring(insertValue).length());
     }
+    FlushTextForDisplay();
     return spanNodeBefore;
 }
 
@@ -2498,6 +2501,7 @@ void RichEditorPattern::CreateTextSpanNode(
     spanItem->hasResourceFontColor = true;
     spanItem->hasResourceDecorationColor = true;
     spanNode->UpdateContent(insertValue);
+    FlushTextForDisplay();
     AddSpanItem(spanItem, info.GetSpanIndex());
     if (typingStyle_.has_value() && typingTextStyle_.has_value()) {
         UpdateTextStyle(spanNode, typingStyle_.value(), typingTextStyle_.value());
@@ -4015,9 +4019,7 @@ void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
             auto spanNodeBefore = DynamicCast<SpanNode>(GetChildByIndex(info.GetSpanIndex() - 1));
             if (spanNodeBefore == nullptr) {
                 caretSpanIndex_ = AddTextSpanOperation(options, true);
-                return;
-            }
-            if (typingStyle_.has_value() && !HasSameTypingStyle(spanNodeBefore)) {
+            } else if (typingStyle_.has_value() && !HasSameTypingStyle(spanNodeBefore)) {
                 auto spanNode = DynamicCast<SpanNode>(child);
                 CreateTextSpanNode(spanNode, info, insertValue, false);
                 caretSpanIndex_ = info.GetSpanIndex();
