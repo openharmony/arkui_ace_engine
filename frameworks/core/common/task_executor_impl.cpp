@@ -236,15 +236,21 @@ bool TaskExecutorImpl::WillRunOnCurrentThread(TaskType type) const
 {
     switch (type) {
         case TaskType::PLATFORM:
-            return platformRunner_ ? platformRunner_->RunsTasksOnCurrentThread() : false;
+            return platformRunner_ ? (taskWrapper_ != nullptr ? taskWrapper_->WillRunOnCurrentThread()
+                                                              : platformRunner_->RunsTasksOnCurrentThread())
+                                   : false;
         case TaskType::UI:
-            return uiRunner_ ? uiRunner_->RunsTasksOnCurrentThread() : false;
+            return uiRunner_ ? (taskWrapper_ != nullptr ? taskWrapper_->WillRunOnCurrentThread()
+                                                        : uiRunner_->RunsTasksOnCurrentThread())
+                             : false;
         case TaskType::IO:
             return ioRunner_ ? ioRunner_->RunsTasksOnCurrentThread() : false;
         case TaskType::GPU:
             return gpuRunner_ ? gpuRunner_->RunsTasksOnCurrentThread() : false;
         case TaskType::JS:
-            return jsRunner_ ? jsRunner_->RunsTasksOnCurrentThread() : false;
+            return jsRunner_ ? (taskWrapper_ != nullptr ? taskWrapper_->WillRunOnCurrentThread()
+                                                        : jsRunner_->RunsTasksOnCurrentThread())
+                             : false;
         case TaskType::BACKGROUND:
             // Always return false for background tasks.
             return false;
