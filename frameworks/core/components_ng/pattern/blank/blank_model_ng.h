@@ -27,6 +27,7 @@ public:
     void SetHeight(const Dimension& height) override;
     void SetColor(const Color& color) override;
     static void SetColor(FrameNode* frameNode, const Color& color);
+    static void SetHeight(FrameNode* frameNode, const Dimension& height);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_BLANK_BLANK_MODEL_NG_H

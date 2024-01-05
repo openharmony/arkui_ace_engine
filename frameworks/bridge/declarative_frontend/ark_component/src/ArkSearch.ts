@@ -238,6 +238,24 @@ class SearchTextAlignModifier extends ModifierWithKey<TextAlign> {
   }
 }
 
+class SearchHeightModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('searchHeight');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().search.resetSearchHeight(node);
+    } else {
+      getUINativeModule().search.setSearchHeight(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttribute> {
   constructor(nativePtr: KNode) {
     super(nativePtr);
@@ -305,7 +323,6 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
     return this;
   }
   cancelButton(value: { style?: CancelButtonStyle, icon?: IconOptions }): SearchAttribute {
-
     modifierWithKey(this._modifiersWithKeys, SearchCancelButtonModifier.identity, SearchCancelButtonModifier, value);
     return this;
   }
@@ -335,6 +352,10 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
   }
   textAlign(value: TextAlign): SearchAttribute {
     modifierWithKey(this._modifiersWithKeys, SearchTextAlignModifier.identity, SearchTextAlignModifier, value);
+    return this;
+  }
+  height(value: Length): this {
+    modifierWithKey(this._modifiersWithKeys, SearchHeightModifier.identity, SearchHeightModifier, value);
     return this;
   }
 }

@@ -329,6 +329,37 @@ void ResetImageBorderRadius(NodeHandle node)
     ImageModelNG::SetBackBorder(frameNode);
 }
 
+void SetImageBorder(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetBackBorder(frameNode);
+}
+
+void ResetImageBorder(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ImageModelNG::SetBackBorder(frameNode);
+}
+
+void SetImageOpacity(NodeHandle node, double opacity)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
+        opacity = 1.0f;
+    }
+    ViewAbstract::SetOpacity(frameNode, opacity);
+}
+
+void ResetImageOpacity(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetOpacity(frameNode, 1.0f);
+}
+
 ArkUIImageModifierAPI GetImageModifier()
 {
     static const ArkUIImageModifierAPI modifier = { SetCopyOption, ResetCopyOption, SetAutoResize, ResetAutoResize,
@@ -337,9 +368,8 @@ ArkUIImageModifierAPI GetImageModifier()
         ResetMatchTextDirection, SetFillColor, ResetFillColor, SetAlt, ResetAlt, SetImageInterpolation,
         ResetImageInterpolation, SetColorFilter, ResetColorFilter, SetImageSyncLoad, ResetImageSyncLoad,
         SetImageObjectFit, ResetImageObjectFit, SetImageFitOriginalSize, ResetImageFitOriginalSize, SetImageDraggable,
-        ResetImageDraggable,
-        SetImageBorderRadius, ResetImageBorderRadius
-        };
+        ResetImageDraggable, SetImageBorderRadius, ResetImageBorderRadius, SetImageBorder, ResetImageBorder,
+        SetImageOpacity, ResetImageOpacity };
     return modifier;
 }
 } // namespace OHOS::Ace::NG

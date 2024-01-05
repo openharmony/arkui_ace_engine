@@ -817,9 +817,8 @@ void PushOuterBordeDimensionVector(const std::optional<CalcDimension>& valueDime
 void ParseOuterBorder(EcmaVM* vm, const Local<JSValueRef>& args, std::optional<CalcDimension>& optionalDimention)
 {
     CalcDimension valueDimen;
-    if (!args->IsUndefined() && ArkTSUtils::ParseJsDimensionVp(vm, args, valueDimen, false) &&
-        valueDimen.IsNonNegative()) {
-        if (valueDimen.Unit() == DimensionUnit::PERCENT) {
+    if (!args->IsUndefined() && ArkTSUtils::ParseJsDimensionVp(vm, args, valueDimen, false)) {
+        if (valueDimen.IsNegative() || valueDimen.Unit() == DimensionUnit::PERCENT) {
             valueDimen.Reset();
         }
         optionalDimention = valueDimen;
@@ -4173,6 +4172,35 @@ ArkUINativeModuleValue CommonBridge::ResetTransition(ArkUIRuntimeCallInfo* runti
 }
 
 ArkUINativeModuleValue CommonBridge::SetTransition(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (!info[1]->IsObject()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto obj = Framework::JSRef<Framework::JSObject>::Cast(info[1]);
+    if (!obj->GetProperty("successor_")->IsUndefined()) {
+        auto chainedEffect = ParseChainedTransition(obj, info.GetExecutionContext());
+        ViewAbstract::SetChainedTransition(frameNode, chainedEffect);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto options = ParseJsTransition(info[1]);
+    ViewAbstract::SetTransition(frameNode, options);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetTransitionPassThrough(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetTransitionPassThrough(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));

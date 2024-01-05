@@ -488,6 +488,9 @@ struct ArkUIButtonModifierAPI {
     void (*ResetButtonBackgroundColor)(NodeHandle node);
     void (*SetButtonBorderRadius)(NodeHandle node, const double* values, int32_t valuesSize);
     void (*ResetButtonBorderRadius)(NodeHandle node);
+    void (*SetButtonSize)(
+        NodeHandle node, double widthValue, int32_t widthUnit, double heightValue, int32_t heightUnit);
+    void (*ResetButtonSize)(NodeHandle node);
 };
 
 struct ArkUIToggleModifierAPI {
@@ -534,6 +537,8 @@ struct ArkUIImageSpanModifierAPI {
 struct ArkUIBlankModifierAPI {
     void (*SetColor)(NodeHandle node, uint32_t value);
     void (*ResetColor)(NodeHandle node);
+    void (*SetBlankHeight)(NodeHandle node, double heightValue, int32_t heightUnit);
+    void (*ResetBlankHeight)(NodeHandle node);
 };
 
 struct ArkUISearchModifierAPI {
@@ -562,6 +567,8 @@ struct ArkUISearchModifierAPI {
     void (*ResetSearchFontColor)(NodeHandle node);
     void (*SetSearchCopyOption)(NodeHandle node, uint32_t value);
     void (*ResetSearchCopyOption)(NodeHandle node);
+    void (*SetSearchHeight)(NodeHandle node, double heightValue, int32_t heightUnit);
+    void (*ResetSearchHeight)(NodeHandle node);
 };
 
 struct ArkUISelectModifierAPI {
@@ -926,6 +933,10 @@ struct ArkUIImageModifierAPI {
     void (*ResetImageDraggable)(NodeHandle node);
     void (*SetImageBorderRadius)(NodeHandle node, const double* values, const int* units, int32_t length);
     void (*ResetImageBorderRadius)(NodeHandle node);
+    void (*SetImageBorder)(NodeHandle node);
+    void (*ResetImageBorder)(NodeHandle node);
+    void (*SetImageOpacity)(NodeHandle node, double opacity);
+    void (*ResetImageOpacity)(NodeHandle node);
 };
 
 struct ArkUIVideoModifierAPI {

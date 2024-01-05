@@ -18,9 +18,11 @@
 #include "base/utils/utils.h"
 #include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/image/image_model_ng.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t INDEX_0 = 0;      // Arg Index
@@ -507,6 +509,88 @@ ArkUINativeModuleValue ImageBridge::ResetBorderRadius(ArkUIRuntimeCallInfo *runt
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetImageModifier().ResetImageBorderRadius(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageBridge::SetImageBorder(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    CommonBridge::SetBorder(runtimeCallInfo);
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // 0:node info
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetImageModifier().SetImageBorder(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageBridge::ResetImageBorder(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // 0:node info
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBorder(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageBridge::SetImageOpacity(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // 0:node info
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    if (ImageModelNG::IsSrcSvgImage(frameNode)) {
+        CommonBridge::SetOpacity(runtimeCallInfo);
+    } else {
+        Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1); // 1:value info
+        double opacity;
+        if (!ArkTSUtils::ParseJsDouble(vm, valueArg, opacity)) {
+            GetArkUIInternalNodeAPI()->GetImageModifier().ResetImageOpacity(nativeNode);
+        } else {
+            GetArkUIInternalNodeAPI()->GetImageModifier().SetImageOpacity(nativeNode, opacity);
+        }
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageBridge::ResetImageOpacity(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // 0:node info
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetImageModifier().ResetImageOpacity(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageBridge::SetImageTransition(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // 0:node info
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    if (ImageModelNG::IsSrcSvgImage(frameNode)) {
+        CommonBridge::SetTransition(runtimeCallInfo);
+    } else {
+        CommonBridge::SetTransitionPassThrough(runtimeCallInfo);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ImageBridge::ResetImageTransition(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // 0:node info
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    if (ImageModelNG::IsSrcSvgImage(frameNode)) {
+        CommonBridge::ResetTransition(runtimeCallInfo);
+    } else {
+        CommonBridge::ResetTransitionPassThrough(runtimeCallInfo);
+    }
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

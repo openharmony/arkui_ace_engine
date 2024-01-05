@@ -3212,12 +3212,32 @@ class BlankColorModifier extends ModifierWithKey {
   }
 }
 BlankColorModifier.identity = Symbol('blankColor');
+class BlankHeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().blank.resetBlankHeight(node);
+    } else {
+      getUINativeModule().blank.setBlankHeight(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+BlankHeightModifier.identity = Symbol('blankHeight');
 class ArkBlankComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
   }
   color(value) {
     modifierWithKey(this._modifiersWithKeys, BlankColorModifier.identity, BlankColorModifier, value);
+    return this;
+  }
+  height(value) {
+    modifierWithKey(this._modifiersWithKeys, BlankHeightModifier.identity, BlankHeightModifier, value);
     return this;
   }
 }
@@ -4362,6 +4382,142 @@ class ImageBorderRadiusModifier extends ModifierWithKey {
   }
 }
 ImageBorderRadiusModifier.identity = Symbol('imageBorderRadius');
+class ImageBorderModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.resetImageBorder(node);
+    } else {
+      let widthLeft;
+      let widthRight;
+      let widthTop;
+      let widthBottom;
+      if (!isUndefined(this.value.width) && this.value.width != null) {
+        if (isNumber(this.value.width) || isString(this.value.width) || isResource(this.value.width)) {
+          widthLeft = this.value.width;
+          widthRight = this.value.width;
+          widthTop = this.value.width;
+          widthBottom = this.value.width;
+        } else {
+          widthLeft = this.value.width.left;
+          widthRight = this.value.width.right;
+          widthTop = this.value.width.top;
+          widthBottom = this.value.width.bottom;
+        }
+      }
+      let leftColor;
+      let rightColor;
+      let topColor;
+      let bottomColor;
+      if (!isUndefined(this.value.color) && this.value.color != null) {
+        if (isNumber(this.value.color) || isString(this.value.color) || isResource(this.value.color)) {
+          leftColor = this.value.color;
+          rightColor = this.value.color;
+          topColor = this.value.color;
+          bottomColor = this.value.color;
+        } else {
+          leftColor = this.value.color.left;
+          rightColor = this.value.color.right;
+          topColor = this.value.color.top;
+          bottomColor = this.value.color.bottom;
+        }
+      }
+      let topLeft;
+      let topRight;
+      let bottomLeft;
+      let bottomRight;
+      if (!isUndefined(this.value.radius) && this.value.radius != null) {
+        if (isNumber(this.value.radius) || isString(this.value.radius) || isResource(this.value.radius)) {
+          topLeft = this.value.radius;
+          topRight = this.value.radius;
+          bottomLeft = this.value.radius;
+          bottomRight = this.value.radius;
+        } else {
+          topLeft = this.value.radius.topLeft;
+          topRight = this.value.radius.topRight;
+          bottomLeft = this.value.radius.bottomLeft;
+          bottomRight = this.value.radius.bottomRight;
+        }
+      }
+      let styleTop;
+      let styleRight;
+      let styleBottom;
+      let styleLeft;
+      if (!isUndefined(this.value.style) && this.value.style != null) {
+        if (isNumber(this.value.style) || isString(this.value.style) || isResource(this.value.style)) {
+          styleTop = this.value.style;
+          styleRight = this.value.style;
+          styleBottom = this.value.style;
+          styleLeft = this.value.style;
+        } else {
+          styleTop = this.value.style.top;
+          styleRight = this.value.style.right;
+          styleBottom = this.value.style.bottom;
+          styleLeft = this.value.style.left;
+        }
+      }
+      getUINativeModule().image.setImageBorder(
+        node,
+        widthLeft,
+        widthRight,
+        widthTop,
+        widthBottom,
+        leftColor,
+        rightColor,
+        topColor,
+        bottomColor,
+        topLeft,
+        topRight,
+        bottomLeft,
+        bottomRight,
+        styleTop,
+        styleRight,
+        styleBottom,
+        styleLeft
+      );
+    }
+  }
+  checkObjectDiff() {
+    return (
+      !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+      !isBaseOrResourceEqual(this.stageValue.color, this.value.color) ||
+      !isBaseOrResourceEqual(this.stageValue.radius, this.value.radius) ||
+      !isBaseOrResourceEqual(this.stageValue.style, this.value.style)
+    );
+  }
+}
+ImageBorderModifier.identity = Symbol('imageBorder');
+class ImageOpacityModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.resetImageOpacity(node);
+    } else {
+      getUINativeModule().image.setImageOpacity(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+ImageOpacityModifier.identity = Symbol('imageOpacity');
+class ImageTransitionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().image.resetImageTransition(node);
+    } else {
+      getUINativeModule().image.setImageTransition(node, this.value);
+    }
+  }
+}
+ImageTransitionModifier.identity = Symbol('imageTransition');
 class ArkImageComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
@@ -4437,6 +4593,18 @@ class ArkImageComponent extends ArkComponent {
   }
   onFinish(event) {
     throw new Error('Method not implemented.');
+  }
+  border(value) {
+    modifierWithKey(this._modifiersWithKeys, ImageBorderModifier.identity, ImageBorderModifier, value);
+    return this;
+  }
+  opacity(value) {
+    modifierWithKey(this._modifiersWithKeys, ImageOpacityModifier.identity, ImageOpacityModifier, value);
+    return this;
+  }
+  transition(value) {
+    modifierWithKey(this._modifiersWithKeys, ImageTransitionModifier.identity, ImageTransitionModifier, value);
+    return this;
   }
 }
 // @ts-ignore
@@ -5348,6 +5516,22 @@ class SearchTextAlignModifier extends ModifierWithKey {
   }
 }
 SearchTextAlignModifier.identity = Symbol('searchTextAlign');
+class SearchHeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().search.resetSearchHeight(node);
+    } else {
+      getUINativeModule().search.setSearchHeight(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SearchHeightModifier.identity = Symbol('searchHeight');
 class ArkSearchComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
@@ -5444,6 +5628,10 @@ class ArkSearchComponent extends ArkComponent {
   }
   textAlign(value) {
     modifierWithKey(this._modifiersWithKeys, SearchTextAlignModifier.identity, SearchTextAlignModifier, value);
+    return this;
+  }
+  height(value) {
+    modifierWithKey(this._modifiersWithKeys, SearchHeightModifier.identity, SearchHeightModifier, value);
     return this;
   }
 }
@@ -9000,6 +9188,14 @@ class ArkButtonComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ButtonBorderRadiusModifier.identity, ButtonBorderRadiusModifier, value);
     return this;
   }
+  border(value) {
+    modifierWithKey(this._modifiersWithKeys, ButtonBorderModifier.identity, ButtonBorderModifier, value);
+    return this;
+  }
+  size(value) {
+    modifierWithKey(this._modifiersWithKeys, ButtonSizeModifier.identity, ButtonSizeModifier, value);
+    return this;
+  }
 }
 class ButtonBackgroundColorModifier extends ModifierWithKey {
   constructor(value) {
@@ -9204,6 +9400,132 @@ class ButtonBorderRadiusModifier extends ModifierWithKey {
   }
 }
 ButtonBorderRadiusModifier.identity = Symbol('buttonBorderRadius');
+class ButtonBorderModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().button.resetButtonBorder(node);
+    } else {
+      let widthLeft;
+      let widthRight;
+      let widthTop;
+      let widthBottom;
+      if (!isUndefined(this.value.width) && this.value.width != null) {
+        if (isNumber(this.value.width) || isString(this.value.width) || isResource(this.value.width)) {
+          widthLeft = this.value.width;
+          widthRight = this.value.width;
+          widthTop = this.value.width;
+          widthBottom = this.value.width;
+        } else {
+          widthLeft = this.value.width.left;
+          widthRight = this.value.width.right;
+          widthTop = this.value.width.top;
+          widthBottom = this.value.width.bottom;
+        }
+      }
+      let leftColor;
+      let rightColor;
+      let topColor;
+      let bottomColor;
+      if (!isUndefined(this.value.color) && this.value.color != null) {
+        if (isNumber(this.value.color) || isString(this.value.color) || isResource(this.value.color)) {
+          leftColor = this.value.color;
+          rightColor = this.value.color;
+          topColor = this.value.color;
+          bottomColor = this.value.color;
+        } else {
+          leftColor = this.value.color.left;
+          rightColor = this.value.color.right;
+          topColor = this.value.color.top;
+          bottomColor = this.value.color.bottom;
+        }
+      }
+      let topLeft;
+      let topRight;
+      let bottomLeft;
+      let bottomRight;
+      if (!isUndefined(this.value.radius) && this.value.radius != null) {
+        if (isNumber(this.value.radius) || isString(this.value.radius) || isResource(this.value.radius)) {
+          topLeft = this.value.radius;
+          topRight = this.value.radius;
+          bottomLeft = this.value.radius;
+          bottomRight = this.value.radius;
+        } else {
+          topLeft = this.value.radius.topLeft;
+          topRight = this.value.radius.topRight;
+          bottomLeft = this.value.radius.bottomLeft;
+          bottomRight = this.value.radius.bottomRight;
+        }
+      }
+      let styleTop;
+      let styleRight;
+      let styleBottom;
+      let styleLeft;
+      if (!isUndefined(this.value.style) && this.value.style != null) {
+        if (isNumber(this.value.style) || isString(this.value.style) || isResource(this.value.style)) {
+          styleTop = this.value.style;
+          styleRight = this.value.style;
+          styleBottom = this.value.style;
+          styleLeft = this.value.style;
+        } else {
+          styleTop = this.value.style.top;
+          styleRight = this.value.style.right;
+          styleBottom = this.value.style.bottom;
+          styleLeft = this.value.style.left;
+        }
+      }
+      getUINativeModule().button.setButtonBorder(
+        node,
+        widthLeft,
+        widthRight,
+        widthTop,
+        widthBottom,
+        leftColor,
+        rightColor,
+        topColor,
+        bottomColor,
+        topLeft,
+        topRight,
+        bottomLeft,
+        bottomRight,
+        styleTop,
+        styleRight,
+        styleBottom,
+        styleLeft
+      );
+    }
+  }
+  checkObjectDiff() {
+    return (
+      !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+      !isBaseOrResourceEqual(this.stageValue.color, this.value.color) ||
+      !isBaseOrResourceEqual(this.stageValue.radius, this.value.radius) ||
+      !isBaseOrResourceEqual(this.stageValue.style, this.value.style)
+    );
+  }
+}
+ButtonBorderModifier.identity = Symbol('buttonBorder');
+class ButtonSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().button.resetButtonSize(node);
+    } else {
+      getUINativeModule().button.setButtonSize(node, this.value.width, this.value.height);
+    }
+  }
+  checkObjectDiff() {
+    return (
+      !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+      !isBaseOrResourceEqual(this.stageValue.height, this.value.height)
+    );
+  }
+}
+ButtonSizeModifier.identity = Symbol('buttonSize');
 // @ts-ignore
 globalThis.Button.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();

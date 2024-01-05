@@ -745,6 +745,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetCopyOption));
     search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCopyOption"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetCopyOption));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSearchHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::SetSearchHeight));
+    search->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSearchHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SearchBridge::ResetSearchHeight));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "search"), search);
 
     auto stack = panda::ObjectRef::New(vm);
@@ -770,6 +774,10 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BlankBridge::SetColor));
     blank->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BlankBridge::ResetColor));
+    blank->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBlankHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BlankBridge::SetBlankHeight));
+    blank->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBlankHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), BlankBridge::ResetBlankHeight));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "blank"), blank);
 
     auto span = panda::ObjectRef::New(vm);
@@ -1521,10 +1529,18 @@ void ArkUINativeModule::RegisterButtonAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetBackgroundColor));
     button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackgroundColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetBackgroundColor));
-    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetButtonBorderRadius"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetButtonBorderRadius));
     button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setButtonBorderRadius"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetButtonBorderRadius));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetButtonBorderRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetButtonBorderRadius));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setButtonBorder"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetButtonBorder));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetButtonBorder"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetButtonBorder));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "setButtonSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::SetButtonSize));
+    button->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetButtonSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ButtonBridge::ResetButtonSize));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "button"), button);
 }
 
@@ -1775,6 +1791,18 @@ void ArkUINativeModule::RegisterImageAttributes(Local<panda::ObjectRef> object, 
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetBorderRadius));
     image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBorderRadius"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetBorderRadius));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setImageBorder"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetImageBorder));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetImageBorder"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetImageBorder));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setImageOpacity"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetImageOpacity));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetImageOpacity"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetImageOpacity));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "setImageTransition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::SetImageTransition));
+    image->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetImageTransition"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ImageBridge::ResetImageTransition));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "image"), image);
 }
 

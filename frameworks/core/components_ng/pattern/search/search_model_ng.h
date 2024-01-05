@@ -82,6 +82,7 @@ public:
     static void SetCancelIconColor(FrameNode* frameNode, const Color& color);
     static void SetCancelIconSize(FrameNode* frameNode, const Dimension& value);
     static void SetCancelButtonStyle(FrameNode* frameNode, CancelButtonStyle style);
+    static void SetHeight(FrameNode* frameNode, const Dimension& height);
 private:
     void CreateTextField(const RefPtr<SearchNode>& parentNode,
         const std::optional<std::string>& placeholder, const std::optional<std::string>& value, bool hasTextFieldNode);
