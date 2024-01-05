@@ -629,7 +629,7 @@ public:
     void OnNativeEmbedLifecycleChange(const NWeb::NativeEmbedDataInfo& dataInfo);
     void OnNativeEmbedGestureEvent(const NWeb::NativeEmbedTouchEvent& event);
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
-    void RequestFocus();
+    bool RequestFocus();
     void SetDrawSize(const Size& drawSize);
     void SetEnhanceSurfaceFlag(const bool& isEnhanceSurface);
     EGLConfig GLGetConfig(int version, EGLDisplay eglDisplay);
