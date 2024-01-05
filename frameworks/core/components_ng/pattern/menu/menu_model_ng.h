@@ -40,6 +40,8 @@ public:
     static void SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radiusTopLeft,
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
         const std::optional<Dimension>& radiusBottomRight);
+    static void SetWidth(FrameNode* frameNode, const Dimension& width);
+
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_MODEL_NG_H

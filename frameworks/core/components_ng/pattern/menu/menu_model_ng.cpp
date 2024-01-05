@@ -155,4 +155,10 @@ void MenuModelNG::SetBorderRadius(FrameNode* frameNode, const std::optional<Dime
     borderRadius.multiValued = true;
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, BorderRadius, borderRadius, frameNode);
 }
+
+void MenuModelNG::SetWidth(FrameNode* frameNode, const Dimension& width)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, MenuWidth, width, frameNode);
+    ViewAbstract::SetWidth(frameNode, NG::CalcLength(width));
+}
 } // namespace OHOS::Ace::NG

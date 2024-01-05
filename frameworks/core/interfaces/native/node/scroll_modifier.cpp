@@ -232,13 +232,27 @@ void ResetScrollEdgeEffect(NodeHandle node)
     ScrollModelNG::SetEdgeEffect(frameNode, EdgeEffect::NONE, true);
 }
 
+void SetEnablePaging(NodeHandle node, bool enablePaging)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetEnablePaging(frameNode, enablePaging);
+}
+
+void ResetEnablePaging(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelNG::SetEnablePaging(frameNode, true);
+}
+
 ArkUIScrollModifierAPI GetScrollModifier()
 {
     static const ArkUIScrollModifierAPI modifier = { SetScrollNestedScroll, ResetScrollNestedScroll,
         SetScrollEnableScroll, ResetScrollEnableScroll, SetScrollFriction, ResetScrollFriction, SetScrollScrollSnap,
         ResetScrollScrollSnap, SetScrollScrollBar, ResetScrollScrollBar, SetScrollScrollable, ResetScrollScrollable,
         SetScrollScrollBarColor, ResetScrollScrollBarColor, SetScrollScrollBarWidth, ResetScrollScrollBarWidth,
-        SetScrollEdgeEffect, ResetScrollEdgeEffect };
+        SetScrollEdgeEffect, ResetScrollEdgeEffect, SetEnablePaging, ResetEnablePaging};
 
     return modifier;
 }
