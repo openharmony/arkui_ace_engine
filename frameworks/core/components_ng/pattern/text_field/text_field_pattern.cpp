@@ -1312,7 +1312,7 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (SelectOverlayIsOn() && !isTouchCaret_) {
         return;
     }
-    
+
     if (touchType == TouchType::DOWN) {
         HandleTouchDown(info.GetTouches().front().GetLocalLocation());
     } else if (touchType == TouchType::UP) {
@@ -1923,7 +1923,6 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
     if (needToResetKeyboard) {
         // if keyboard attached and keyboard is shown, pull up keyboard again
         if (imeShown_ || isCustomKeyboardAttached_) {
-            CloseKeyboard(true);
             RequestKeyboard(false, true, true);
             return;
         }
