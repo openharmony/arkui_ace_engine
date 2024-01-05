@@ -992,7 +992,9 @@ void SwiperPattern::FinishAnimation()
     }
     if (isUserFinish_) {
         if (swiperController_ && swiperController_->GetFinishCallback()) {
-            swiperController_->GetFinishCallback()();
+            auto finishCallback = swiperController_->GetFinishCallback();
+            finishCallback();
+            swiperController_->SetFinishCallback(nullptr);
         }
     } else {
         isUserFinish_ = true;
