@@ -236,6 +236,7 @@ private:
     OnAccessibilityCallback onAccessibilityCallback_;
     WeakPtr<Pattern> pattern_;
     TimeStamp lastAiPosTimeStamp_;
+    TextAffinity textAffinity_ = TextAffinity::DOWNSTREAM;
 };
 } // namespace OHOS::Ace::NG
 

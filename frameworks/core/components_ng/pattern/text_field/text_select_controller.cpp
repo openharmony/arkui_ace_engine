@@ -115,7 +115,7 @@ void TextSelectController::CalcCaretMetricsByPositionNearTouchOffset(
     auto textFiled = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textFiled);
     auto textRect = textFiled->GetTextRect();
-    paragraph_->CalcCaretMetricsByPosition(extent, caretMetrics, touchOffset - textRect.GetOffset());
+    paragraph_->CalcCaretMetricsByPosition(extent, caretMetrics, touchOffset - textRect.GetOffset(), textAffinity_);
     caretMetrics.offset.AddX(textRect.GetX());
     caretMetrics.offset.AddY(textRect.GetY());
     FitCaretMetricsToContentRect(caretMetrics);
@@ -315,7 +315,6 @@ void TextSelectController::MoveHandleToContentRect(RectF& handleRect, float boun
         }
     }
     textFiled->SetTextRect(textRect);
-    textFiled->UpdateLastTextRect(textRect);
     AdjustHandleAtEdge(handleRect);
 }
 
@@ -376,9 +375,9 @@ void TextSelectController::MoveSecondHandleToContentRect(int32_t index)
 
 void TextSelectController::MoveCaretToContentRect(int32_t index, TextAffinity textAffinity, bool isEditorValueChanged)
 {
-    // Don't need to change the cursor position when the edit content is not changed.
-    CHECK_NULL_VOID(isEditorValueChanged);
-    
+    if (isEditorValueChanged) {
+        textAffinity_ = textAffinity;
+    }
     index = std::clamp(index, 0, static_cast<int32_t>(contentController_->GetWideText().length()));
     CaretMetricsF CaretMetrics;
     caretInfo_.index = index;
@@ -388,7 +387,7 @@ void TextSelectController::MoveCaretToContentRect(int32_t index, TextAffinity te
         caretInfo_.rect = CalculateEmptyValueCaretRect();
         return;
     }
-    CalcCaretMetricsByPosition(GetCaretIndex(), CaretMetrics, textAffinity);
+    CalcCaretMetricsByPosition(GetCaretIndex(), CaretMetrics, textAffinity_);
     OffsetF CaretOffset = CaretMetrics.offset;
     RectF caretRect;
     caretRect.SetOffset(CaretOffset);
@@ -437,6 +436,7 @@ void TextSelectController::UpdateSecondHandleOffset()
 
 void TextSelectController::UpdateCaretOffset(TextAffinity textAffinity)
 {
+    textAffinity_ = textAffinity;
     if (contentController_->IsEmpty()) {
         caretInfo_.rect = CalculateEmptyValueCaretRect();
         return;

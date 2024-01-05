@@ -154,7 +154,8 @@ OffsetF ParagraphManager::ComputeCursorInfoByClick(
     CaretMetricsF caretCaretMetric;
     auto touchOffsetInCurrentParagraph = OffsetF(static_cast<float>(lastTouchOffset.GetX()),
         static_cast<float>(lastTouchOffset.GetY() - y));
-    paragraph->CalcCaretMetricsByPosition(relativeIndex, caretCaretMetric, touchOffsetInCurrentParagraph);
+    TextAffinity textAffinity;
+    paragraph->CalcCaretMetricsByPosition(relativeIndex, caretCaretMetric, lastTouchOffset, textAffinity);
     selectLineHeight = caretCaretMetric.height;
     return { static_cast<float>(caretCaretMetric.offset.GetX()),
             static_cast<float>(caretCaretMetric.offset.GetY() + y) };
