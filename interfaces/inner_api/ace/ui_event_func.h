@@ -31,8 +31,6 @@ using GetSimplifiedInspectorTreeFunc = void (*)(std::string&);
 
 class UIEventFunc final {
 public:
-    ~UIEventFunc();
-
     static void RegisterUIEventObserver(const std::string& config, const std::shared_ptr<UIEventObserver>& observer);
 
     static void UnregisterUIEventObserver(const std::shared_ptr<UIEventObserver>& observer);
@@ -47,6 +45,9 @@ public:
 private:
     static UIEventFunc& Get();
     UIEventFunc();
+    ~UIEventFunc();
+    UIEventFunc(const UIEventFunc&) = delete;
+    const UIEventFunc& operator=(const UIEventFunc&) = delete;
     inline void ResetFunc();
     RegisterUIEventObserverFunc registerFunc_;
     UnregisterUIEventObserverFunc unregisterFunc_;
