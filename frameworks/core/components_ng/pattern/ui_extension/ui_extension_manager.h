@@ -33,10 +33,10 @@ enum class WSError;
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t UI_EXTENSION_UNKNOW_ID = 0;
-constexpr int32_t UI_EXTENSION_ID_FIRST_MAX = 210;
+constexpr int32_t UI_EXTENSION_ID_FIRST_MAX = 21;
 constexpr int32_t UI_EXTENSION_ID_OTHER_MAX = 9;
-constexpr int64_t UI_EXTENSION_OFFSET_MAX = 10000000000000;
-constexpr int64_t UI_EXTENSION_OFFSET_MIN = 100000000000;
+constexpr int32_t UI_EXTENSION_OFFSET_MAX = 100000000;
+constexpr int32_t UI_EXTENSION_OFFSET_MIN = 1000000;
 constexpr int32_t UI_EXTENSION_ID_FACTOR = 10;
 constexpr int32_t UI_EXTENSION_LEVEL_MAX = 3;
 constexpr int32_t UI_EXTENSION_ROOT_ID = -1;
@@ -53,11 +53,11 @@ public:
     void RegisterUIExtensionInFocus(const WeakPtr<UIExtensionPattern>& uiExtensionFocused);
     bool OnBackPressed();
     const RefPtr<FrameNode> GetFocusUiExtensionNode();
-    bool IsWrapExtensionAbilityId(int64_t elementId);
+    bool IsWrapExtensionAbilityId(int32_t elementId);
     bool IsWindowTypeUIExtension(const RefPtr<PipelineBase>& pipeline);
-    bool SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
-        int64_t uiExtensionOffset, const RefPtr<PipelineBase>& pipeline);
-    std::pair<int64_t, int64_t> UnWrapExtensionAbilityId(int64_t extensionOffset, int64_t elementId);
+    bool SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo, int32_t uiExtensionOffset,
+        const RefPtr<PipelineBase>& pipeline);
+    std::pair<int32_t, int32_t> UnWrapExtensionAbilityId(int32_t extensionOffset, int32_t elementId);
     int32_t ApplyExtensionId();
     void RecycleExtensionId(int32_t id);
 

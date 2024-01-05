@@ -380,7 +380,7 @@ void AccessibilityNodeManager::ClearNodeRectInfo(RefPtr<AccessibilityNode>& node
 
 void AccessibilityNodeManager::SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) {}
 
-int64_t AccessibilityNodeManager::GenerateNextAccessibilityId()
+int32_t AccessibilityNodeManager::GenerateNextAccessibilityId()
 {
     return g_accessibilityId.fetch_add(1, std::memory_order_relaxed);
 }
@@ -770,7 +770,7 @@ bool AccessibilityNodeManager::GetDefaultAttrsByType(
 #endif
 }
 
-void AccessibilityNodeManager::DumpTree(int32_t depth, int64_t nodeID)
+void AccessibilityNodeManager::DumpTree(int32_t depth, NodeId nodeID)
 {
     if (!DumpLog::GetInstance().GetDumpFile()) {
         return;
