@@ -4714,4 +4714,40 @@ void RosenRenderContext::SetRenderFrameOffset(const OffsetF& offset)
 {
     frameOffset_ = offset;
 }
+
+void RosenRenderContext::SetScale(float scaleX, float scaleY)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetScale(scaleX, scaleY);
+}
+
+void RosenRenderContext::SetBackgroundColor(uint32_t colorValue)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetBackgroundColor(colorValue);
+}
+
+void RosenRenderContext::SetRenderPivot(float pivotX, float pivotY)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetPivot(pivotX, pivotY);
+}
+
+void RosenRenderContext::SetFrame(float positionX, float positionY, float width, float height)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetFrame(positionX, positionY, width, height);
+}
+
+void RosenRenderContext::SetOpacity(float opacity)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetAlpha(opacity);
+}
+
+void RosenRenderContext::SetTranslate(float translateX, float translateY, float translateZ)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetTranslate(translateX, translateY, translateZ);
+}
 } // namespace OHOS::Ace::NG
