@@ -660,25 +660,25 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
         if (isClickOnAISpan && selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
             selectOverlayProxy_->DisableMenu(true);
         }
-        if (isClickOnSpan && textSelector_.IsValid()) {
+        if (isClickOnSpan && textSelector_.IsValid() && !isMousePressed_) {
             ResetSelection();
         }
         return;
     }
 
-    if (copyOption_ != CopyOptions::None && textDetectEnable_ && spans_.empty() && !aiSpanMap_.empty() && paragraph_) {
+    if (NeedShowAIDetect() && spans_.empty() && paragraph_) {
         for (const auto& kv : aiSpanMap_) {
             auto aiSpan = kv.second;
             isClickOnAISpan = ClickAISpan(textOffset, aiSpan);
             if (isClickOnAISpan) {
-                if (isClickOnAISpan && selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+                if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
                     selectOverlayProxy_->DisableMenu(true);
                 }
                 return;
             }
         }
     }
-    if (textSelector_.IsValid()) {
+    if (textSelector_.IsValid() && !isMousePressed_) {
         CloseSelectOverlay(true);
         ResetSelection();
     }
@@ -808,6 +808,7 @@ void TextPattern::SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc
         if (pattern->copyOption_ == CopyOptions::None) {
             return;
         }
+        pattern->CloseSelectOverlay();
         if (action == std::string(COPY_ACTION)) {
             pattern->HandleSelectionChange(aiSpan.start, aiSpan.end);
             pattern->HandleOnCopy();

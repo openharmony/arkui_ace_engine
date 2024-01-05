@@ -3524,11 +3524,20 @@ RefPtr<FrameNode> OverlayManager::BindUIExtensionToMenu(const RefPtr<FrameNode>&
     menuLayoutProperty->UpdateMargin(MarginProperty());
     menuLayoutProperty->UpdatePadding(PaddingProperty());
     auto scollNode = DynamicCast<FrameNode>(menuNode->GetFirstChild());
-    CHECK_NULL_RETURN(scollNode, nullptr);
+    CHECK_NULL_RETURN(scollNode, menuNode);
     auto scollLayoutProperty = scollNode->GetLayoutProperty();
-    CHECK_NULL_RETURN(scollLayoutProperty, nullptr);
+    CHECK_NULL_RETURN(scollLayoutProperty, menuNode);
     scollLayoutProperty->UpdateMargin(MarginProperty());
     scollLayoutProperty->UpdatePadding(PaddingProperty());
+
+    auto destructor = [id = targetNode->GetId()]() {
+        auto pipeline = NG::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->DeleteMenu(id);
+    };
+    targetNode->PushDestroyCallback(destructor);
     return menuNode;
 }
 
