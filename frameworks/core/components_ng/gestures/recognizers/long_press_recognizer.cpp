@@ -157,6 +157,9 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 void LongPressRecognizer::HandleTouchUpEvent(const TouchEvent& /*event*/)
 {
     LOGD("long press recognizer receives touch up event");
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->RemoveGestureTask(task_);
     if (currentFingers_ < fingers_) {
         LOGW("LongPressGesture current finger number is less than requiried finger number.");
         return;
@@ -235,7 +238,15 @@ void LongPressRecognizer::DeadlineTimer(int32_t time, bool isCatchMode)
             LOGI("fail to handle overdue deadline due to context is nullptr");
         }
     };
-    deadlineTimer_.Reset(callback);
+    task_ = { WeakClaim(this), GetSysTimestamp(), time, callback };
+    context->AddGestureTask(task_);
+
+    auto&& flushCallback = []() {
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        context->RequestFrame();
+    };
+    deadlineTimer_.Reset(flushCallback);
     auto taskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
     taskExecutor.PostDelayedTask(deadlineTimer_, time);
 }
@@ -316,6 +327,9 @@ void LongPressRecognizer::OnResetStatus()
     MultiFingersRecognizer::OnResetStatus();
     timer_.Cancel();
     deadlineTimer_.Cancel();
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    context->RemoveGestureTask(task_);
 }
 
 bool LongPressRecognizer::ReconcileFrom(const RefPtr<NGGestureRecognizer>& recognizer)

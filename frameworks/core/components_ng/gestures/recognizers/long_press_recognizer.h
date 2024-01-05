@@ -125,6 +125,7 @@ private:
     bool isForDrag_ = false;
     bool isDisableMouseLeft_ = false;
     Point globalPoint_;
+    DelayedTask task_;
     OnAccessibilityEventFunc onAccessibilityEventFunc_ = nullptr;
 };
 
