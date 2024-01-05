@@ -967,6 +967,13 @@ bool TextFieldPattern::OnKeyEvent(const KeyEvent& event)
         isFocusedBeforeClick_ = false;
         HandleOnSelectAll(true);
     }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    if (event.code == KeyCode::KEY_TAB && HasFocus() && !needToRequestKeyboardOnFocus_ && needToRequestKeyboardInner_ &&
+        textFieldManager->GetImeShow()) {
+        RequestKeyboard(false, true, true);
+    }
     return TextInputClient::HandleKeyEvent(event);
 }
 
@@ -4002,14 +4009,6 @@ void TextFieldPattern::OnAreaChangedInner()
 
 void TextFieldPattern::RequestKeyboardOnFocus()
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
-    if (HasFocus() && !needToRequestKeyboardOnFocus_ && needToRequestKeyboardInner_ && textFieldManager->GetImeShow()) {
-        if (!RequestKeyboard(false, true, true)) {
-            return;
-        }
-    }
     if (!needToRequestKeyboardOnFocus_ || !needToRequestKeyboardInner_) {
         return;
     }
