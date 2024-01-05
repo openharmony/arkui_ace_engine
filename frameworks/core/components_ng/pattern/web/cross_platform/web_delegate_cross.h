@@ -347,6 +347,7 @@ public:
     void OnFocus() override;
     void OnBlur() override;
     void UpdateLocale() override;
+    void SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t height) override;
     void OnInactive() override;
     void OnActive() override;
     void ShowWebView() override;
