@@ -1335,9 +1335,6 @@ void SwiperPattern::OnVisibleChange(bool isVisible)
 
 void SwiperPattern::UpdateCurrentOffset(float offset)
 {
-    if (IsVisibleChildrenSizeLessThanSwiper() && !IsAutoFill()) {
-        return;
-    }
     if (itemPosition_.empty()) {
         return;
     }
@@ -1368,7 +1365,9 @@ bool SwiperPattern::CheckOverScroll(float offset)
             break;
         case EdgeEffect::FADE:
             if (IsOutOfBoundary(offset)) {
-                currentDelta_ = currentDelta_ - offset;
+                if (!IsVisibleChildrenSizeLessThanSwiper()) {
+                    currentDelta_ = currentDelta_ - offset;
+                }
                 auto host = GetHost();
                 CHECK_NULL_RETURN(host, false);
                 if (itemPosition_.begin()->first == 0 || itemPosition_.rbegin()->first == TotalCount() - 1) {
@@ -1706,10 +1705,6 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 void SwiperPattern::HandleDragEnd(double dragVelocity)
 {
     UpdateDragFRCSceneInfo(dragVelocity, SceneStatus::END);
-    if (IsVisibleChildrenSizeLessThanSwiper()) {
-        UpdateItemRenderGroup(false);
-        return;
-    }
     const auto& addEventCallback = swiperController_->GetAddTabBarEventCallback();
     if (addEventCallback) {
         addEventCallback();
@@ -1821,7 +1816,7 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDista
     }
 
     if (!IsLoop()) {
-        nextIndex = std::clamp(nextIndex, 0, TotalCount() - GetDisplayCount());
+        nextIndex = std::clamp(nextIndex, 0, std::max(0, TotalCount() - GetDisplayCount()));
     }
     return nextIndex;
 }
@@ -2304,7 +2299,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     });
 
     host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, currentOffset_);
-    auto delta = currentOffset_ < 0.0f ? extentPair.Leading() : extentPair.Trailing();
+    auto delta = dragVelocity < 0.0f ? extentPair.Leading() : extentPair.Trailing();
 
     // spring curve: (velocity: 0.0, mass: 1.0, stiffness: 228.0, damping: 30.0)
     auto springCurve = MakeRefPtr<SpringCurve>(0.0f, 1.0f, 228.0f, 30.0f);
