@@ -68,6 +68,7 @@ private:
     void SetDefaultFontStyle(const TextStyle& textStyle);
     void SetDefaultTextOverflow(const TextStyle& textStyle);
     void SetDefaultPropertyValue();
+    void GetFrameRectClip(RSRect& clipRect, std::vector<RSPoint>& clipRadius);
 
     WeakPtr<Pattern> pattern_;
     RefPtr<PropertyString> fontFamilyString_;
