@@ -46,8 +46,7 @@ public:
 
     void Initialize(napi_env env, napi_value thisVar);
     void NapiSerializer(napi_env& env, napi_value& result);
-    void RegisterOnFrameCallback(napi_value cb, napi_ref& onFrameRef, CallbackType callbackType,
-                                 napi_env env, napi_handle_scope scope);
+    void RegisterOnFrameCallback(napi_value cb, napi_ref& onFrameRef, CallbackType callbackType, napi_env env);
     void UnRegisterOnFrameCallback(napi_env env, size_t argc, napi_ref& onFrameRef);
     void Destroy(napi_env env);
 
