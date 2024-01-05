@@ -1944,7 +1944,6 @@ HWTEST_F(BubbleTestNg, BubbleBorderTest001, TestSize.Level1)
      */
     bubblePaintMethod.SetShowArrow(true);
     bubblePaintMethod.enableArrow_ = true;
-    bubblePaintMethod.isFillTheGap_ = false;
     auto pipelineContext = PipelineContext::GetCurrentContext();
     auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
 
@@ -1952,8 +1951,10 @@ HWTEST_F(BubbleTestNg, BubbleBorderTest001, TestSize.Level1)
      * @tc.steps: step3. Excute function for border offset.
      */
     if (popupTheme->GetPopupDoubleBorderEnable()) {
-        if (bubblePaintMethod.needPaintInnerBorder_) {
-            EXPECT_EQ(bubblePaintMethod.GetBorderOffset(), -bubblePaintMethod.innerBorderWidth_);
+        if (bubblePaintMethod.needPaintOuterBorder_) {
+            EXPECT_EQ(bubblePaintMethod.GetBorderOffset(), -bubblePaintMethod.outerBorderWidth_);
+        } else {
+            EXPECT_EQ(bubblePaintMethod.GetBorderOffset(), bubblePaintMethod.innerBorderWidth_);
         }
     }
 }
