@@ -59,10 +59,6 @@ void NavDestinationModelNG::Create()
         ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId);
         auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId,
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
-
-        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
-        contentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
-        
         navDestinationNode->AddChild(contentNode);
         navDestinationNode->SetContentNode(contentNode);
     }
@@ -192,7 +188,7 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc)
         navDestinationNode->AddChild(contentNode);
         navDestinationNode->SetContentNode(contentNode);
 
-        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
+        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
         contentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
     stack->Push(navDestinationNode);
