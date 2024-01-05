@@ -670,16 +670,6 @@ public:
         cachedGlobalOffset_ = timestampOffset;
     }
 
-    void SetNeedAdjustOffset(bool needAdjustOffset)
-    {
-        needAdjustOffset_ = needAdjustOffset;
-    }
-
-    bool GetNeedAdjustOffset() const
-    {
-        return needAdjustOffset_;
-    }
-
 private:
     void MarkNeedRender(bool isRenderBoundary);
     std::pair<float, float> ContextPositionConvertToPX(
@@ -822,7 +812,6 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);
 
-    bool needAdjustOffset_ = true;
 };
 } // namespace OHOS::Ace::NG
 

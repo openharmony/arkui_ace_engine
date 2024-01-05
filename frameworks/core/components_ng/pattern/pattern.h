@@ -377,13 +377,6 @@ public:
 
     virtual void ScrollToFocusNodeIndex(int32_t index) {}
 
-    virtual void UpdateNeedRecalculateSafeArea() {}
-
-    virtual bool NeedRecalculateSafeArea()
-    {
-        return true;
-    }
-
     // out of viewport or visible is none or gone.
     virtual void OnInActive() {}
     virtual void OnActive() {}
