@@ -134,7 +134,9 @@ bool PipelineContext::NeedSoftKeyboard()
     CHECK_NULL_RETURN(pattern, false);
     bool isNeed = pattern->NeedSoftKeyboard();
 #ifdef WINDOW_SCENE_SUPPORTED
-    isNeed = WindowSceneHelper::GetNeedKeyboardOnFocusFlag(focusNode);
+    if (isNeed) {
+        isNeed = WindowSceneHelper::GetNeedKeyboardOnFocusFlag(focusNode);
+    }
 #endif
     TAG_LOGI(AceLogTag::ACE_KEYBOARD, "need soft keyboard %{public}d", isNeed);
     return isNeed;
@@ -446,7 +448,7 @@ void PipelineContext::IsCloseSCBKeyboard()
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "curFrameNode null.");
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "LastFocusNode,(%{public}s/%{public}d).",
+    TAG_LOGD(AceLogTag::ACE_KEYBOARD, "LastFocusNode,(%{public}s/%{public}d).",
         curFrameNode->GetTag().c_str(), curFrameNode->GetId());
 
 #ifdef WINDOW_SCENE_SUPPORTED
@@ -455,7 +457,7 @@ void PipelineContext::IsCloseSCBKeyboard()
         // Frame other window to SCB window Or inSCB window changes,hide keyboard.
         if ((windowFocus_.has_value() && windowFocus_.value()) ||
             curFocusNode_ != curFrameNode) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "In  windowscene change, windowscene focus.");
+            TAG_LOGD(AceLogTag::ACE_KEYBOARD, "In  windowscene change, windowscene focus.");
             windowFocus_.reset();
             curFocusNode_ = curFrameNode;
             WindowSceneHelper::IsWindowSceneCloseKeyboard(curFrameNode);
@@ -463,20 +465,20 @@ void PipelineContext::IsCloseSCBKeyboard()
         }
         // In windowscene, focus change, need close keyboard.
         if (needSoftKeyboard_.has_value() && !needSoftKeyboard_.value()) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "In windowscene, close keyboard.");
+            TAG_LOGD(AceLogTag::ACE_KEYBOARD, "In windowscene, close keyboard.");
             WindowSceneHelper::IsCloseKeyboard(curFrameNode);
             needSoftKeyboard_ = std::nullopt;
         }
     } else {
         if (windowFocus_.has_value() && windowFocus_.value()) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "In page, focusOnNodeCallback_.");
+            TAG_LOGD(AceLogTag::ACE_KEYBOARD, "In page, focusOnNodeCallback_.");
             windowFocus_.reset();
             focusOnNodeCallback_();
         }
 
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "In page, be ready to close keyboard.");
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "In page, be ready to close keyboard.");
         if (needSoftKeyboard_.has_value() && !needSoftKeyboard_.value()) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "In page, close keyboard.");
+            TAG_LOGD(AceLogTag::ACE_KEYBOARD, "In page, close keyboard.");
             FocusHub::IsCloseKeyboard(curFrameNode);
             needSoftKeyboard_ = std::nullopt;
         }
