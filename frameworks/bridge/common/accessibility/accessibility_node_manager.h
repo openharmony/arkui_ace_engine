@@ -105,7 +105,7 @@ public:
 
     // AccessibilityNodeManager overrides functions.
     void SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) override;
-    int64_t GenerateNextAccessibilityId() override;
+    int32_t GenerateNextAccessibilityId() override;
     RefPtr<AccessibilityNode> CreateSpecializedNode(
         const std::string& tag, int32_t nodeId, int32_t parentNodeId) override;
     RefPtr<AccessibilityNode> CreateAccessibilityNode(
@@ -157,7 +157,7 @@ public:
 protected:
     virtual void DumpHandleEvent(const std::vector<std::string>& params);
     virtual void DumpProperty(const std::vector<std::string>& params);
-    virtual void DumpTree(int32_t depth, int64_t nodeID);
+    virtual void DumpTree(int32_t depth, NodeId nodeID);
 
     static bool GetDefaultAttrsByType(const std::string& type, std::unique_ptr<JsonValue>& jsonDefaultAttrs);
     mutable std::mutex mutex_;
