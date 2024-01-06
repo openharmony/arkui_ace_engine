@@ -157,4 +157,22 @@ OffsetF SafeAreaManager::GetWindowWrapperOffset()
     }
     return OffsetF();
 }
+
+void SafeAreaManager::ExpandSafeArea()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    bool isFocusOnPage = pipeline->CheckPageFocus();
+    auto iter = needExpandNodes_.begin();
+    while (iter != needExpandNodes_.end()) {
+        auto frameNode = (*iter).Upgrade();
+        if (frameNode) {
+            frameNode->SaveGeoState();
+            frameNode->ExpandSafeArea(isFocusOnPage);
+            frameNode->SyncGeometryNode();
+        }
+        ++iter;
+    }
+    ClearNeedExpandNode();
+}
 } // namespace OHOS::Ace::NG
