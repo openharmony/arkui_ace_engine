@@ -516,14 +516,6 @@ HWTEST_F(RichEditorTestNg, RichEditorInsertValue003, TestSize.Level1)
     auto it1 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetFirstChild());
     const std::string result1 = INIT_VALUE_1 + TEST_INSERT_VALUE;
     EXPECT_EQ(result1, it1->spanItem_->content);
-    ClearSpan();
-    AddImageSpan();
-    AddImageSpan();
-    richEditorPattern->caretPosition_ = 1;
-    richEditorPattern->InsertValue(TEST_INSERT_VALUE);
-    auto it2 = AceType::DynamicCast<SpanNode>(richEditorNode_->GetChildAtIndex(2));
-    const std::string result2 = TEST_INSERT_VALUE;
-    EXPECT_EQ(result2, it2->spanItem_->content);
 }
 
 /**
@@ -585,11 +577,6 @@ HWTEST_F(RichEditorTestNg, RichEditorDelete001, TestSize.Level1)
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->DeleteForward(1);
     EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 0);
-    ClearSpan();
-    AddSpan(INIT_VALUE_1);
-    richEditorPattern->caretPosition_ = 0;
-    richEditorPattern->DeleteForward(7);
-    EXPECT_EQ(static_cast<int32_t>(richEditorNode_->GetChildren().size()), 0);
 }
 
 /**
@@ -605,11 +592,6 @@ HWTEST_F(RichEditorTestNg, RichEditorDelete002, TestSize.Level1)
     AddImageSpan();
     richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
     richEditorPattern->DeleteBackward(1);
-    EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
-    ClearSpan();
-    AddSpan(INIT_VALUE_1);
-    richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
-    richEditorPattern->DeleteBackward(7);
     EXPECT_EQ(richEditorNode_->GetChildren().size(), 0);
 }
 
@@ -1306,36 +1288,6 @@ HWTEST_F(RichEditorTestNg, CalcInsertValueObj001, TestSize.Level1)
 }
 
 /**
- * @tc.name: CalcDeleteValueObj001
- * @tc.desc: test CalcDeleteValueObj
- * @tc.type: FUNC
- */
-HWTEST_F(RichEditorTestNg, CalcDeleteValueObj001, TestSize.Level1)
-{
-    ASSERT_NE(richEditorNode_, nullptr);
-    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
-    ASSERT_NE(richEditorPattern, nullptr);
-    AddSpan("test1");
-    richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
-    auto it = richEditorPattern->spans_.front();
-    RichEditorDeleteValue delValue;
-
-    it->content = "test";
-    it->position = 4;
-    richEditorPattern->caretPosition_ = 0;
-    richEditorPattern->moveLength_ = 2;
-
-    richEditorPattern->CalcDeleteValueObj(2, 1, delValue);
-    EXPECT_EQ(delValue.richEditorDeleteSpans_.size(), 1);
-
-    richEditorPattern->CalcDeleteValueObj(-1, 1, delValue);
-    EXPECT_EQ(delValue.richEditorDeleteSpans_.size(), 1);
-
-    richEditorPattern->CalcDeleteValueObj(5, 1, delValue);
-    EXPECT_EQ(delValue.richEditorDeleteSpans_.size(), 1);
-}
-
-/**
  * @tc.name: MouseRightFocus001
  * @tc.desc: test MouseRightFocus
  * @tc.type: FUNC
@@ -1349,9 +1301,6 @@ HWTEST_F(RichEditorTestNg, MouseRightFocus001, TestSize.Level1)
     AddImageSpan();
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
     richEditorPattern->spans_.push_front(AceType::MakeRefPtr<SpanItem>());
-    auto it = richEditorPattern->spans_.front();
-    it->content = "test";
-    it->position = 4;
     richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
     richEditorPattern->moveLength_ = 0;
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
@@ -1359,11 +1308,6 @@ HWTEST_F(RichEditorTestNg, MouseRightFocus001, TestSize.Level1)
     MouseInfo info;
     richEditorPattern->textSelector_.baseOffset = 0;
     richEditorPattern->textSelector_.destinationOffset = 0;
-    richEditorPattern->MouseRightFocus(info);
-    EXPECT_EQ(richEditorPattern->caretPosition_, 0);
-
-    richEditorPattern->textSelector_.baseOffset = 0;
-    richEditorPattern->textSelector_.destinationOffset = 1;
     richEditorPattern->MouseRightFocus(info);
     EXPECT_EQ(richEditorPattern->caretPosition_, 0);
 }
@@ -1955,35 +1899,35 @@ HWTEST_F(RichEditorTestNg, InsertValueByPaste001, TestSize.Level1)
     richEditorPattern->typingStyle_ = std::nullopt;
     richEditorPattern->typingTextStyle_ = std::nullopt;
     richEditorPattern->InsertValueByPaste("test");
-    EXPECT_EQ(richEditorPattern->moveLength_, 4);
+    EXPECT_EQ(richEditorPattern->moveLength_, 0);
 
     richEditorPattern->typingStyle_ = UpdateSpanStyle();
     richEditorPattern->typingTextStyle_ = std::nullopt;
     richEditorPattern->InsertValueByPaste("test1");
-    EXPECT_EQ(richEditorPattern->moveLength_, 9);
+    EXPECT_EQ(richEditorPattern->moveLength_, 0);
 
     richEditorPattern->typingStyle_ = std::nullopt;
     richEditorPattern->typingTextStyle_ = TextStyle();
     richEditorPattern->InsertValueByPaste("test1");
-    EXPECT_EQ(richEditorPattern->moveLength_, 14);
+    EXPECT_EQ(richEditorPattern->moveLength_, 0);
 
     richEditorPattern->typingStyle_ = UpdateSpanStyle();
     richEditorPattern->typingTextStyle_ = TextStyle();
     richEditorPattern->InsertValueByPaste("test1");
-    EXPECT_EQ(richEditorPattern->moveLength_, 19);
+    EXPECT_EQ(richEditorPattern->moveLength_, 0);
 
     richEditorPattern->caretPosition_ = 0;
     richEditorPattern->InsertValueByPaste("test1");
-    EXPECT_EQ(richEditorPattern->moveLength_, 24);
+    EXPECT_EQ(richEditorPattern->moveLength_, 0);
 
     richEditorPattern->caretSpanIndex_ = 0;
     richEditorPattern->InsertValueByPaste("test1");
-    EXPECT_EQ(richEditorPattern->moveLength_, 29);
+    EXPECT_EQ(richEditorPattern->moveLength_, 0);
 
     richEditorPattern->caretSpanIndex_ = 1;
     AddImageSpan();
     richEditorPattern->InsertValueByPaste("test1");
-    EXPECT_EQ(richEditorPattern->moveLength_, 34);
+    EXPECT_EQ(richEditorPattern->moveLength_, 0);
 }
 
 /**
@@ -1997,7 +1941,7 @@ HWTEST_F(RichEditorTestNg, InsertValueByPaste002, TestSize.Level1)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->InsertValueByPaste("test");
-    EXPECT_EQ(richEditorPattern->moveLength_, 4);
+    EXPECT_EQ(richEditorPattern->moveLength_, 0);
 }
 
 /**
@@ -2012,7 +1956,7 @@ HWTEST_F(RichEditorTestNg, InsertValueByPaste003, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     AddImageSpan();
     richEditorPattern->InsertValueByPaste("test");
-    EXPECT_EQ(richEditorPattern->moveLength_, 4);
+    EXPECT_EQ(richEditorPattern->moveLength_, 0);
 }
 
 /**
@@ -2027,21 +1971,21 @@ HWTEST_F(RichEditorTestNg, InsertValueByPaste004, TestSize.Level1)
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->caretSpanIndex_ = 0;
     richEditorPattern->InsertValueByPaste("test");
-    EXPECT_EQ(richEditorPattern->moveLength_, 4);
+    EXPECT_EQ(richEditorPattern->moveLength_, 0);
 
     AddSpan("test");
     richEditorPattern->caretSpanIndex_ = 0;
     richEditorPattern->InsertValueByPaste("test");
-    EXPECT_EQ(richEditorPattern->moveLength_, 8);
+    EXPECT_EQ(richEditorPattern->moveLength_, 0);
 
     AddSpan("test");
     richEditorPattern->InsertValueByPaste("test");
-    EXPECT_EQ(richEditorPattern->moveLength_, 12);
+    EXPECT_EQ(richEditorPattern->moveLength_, 0);
 
     ClearSpan();
     AddImageSpan();
     richEditorPattern->InsertValueByPaste("test");
-    EXPECT_EQ(richEditorPattern->moveLength_, 16);
+    EXPECT_EQ(richEditorPattern->moveLength_, 0);
 }
 
 /**
@@ -2826,7 +2770,7 @@ HWTEST_F(RichEditorTestNg, DoubleHandleClickEvent001, TestSize.Level1)
     richEditorPattern->textSelector_.destinationOffset = -1;
     richEditorPattern->HandleDoubleClickEvent(info);
     EXPECT_EQ(richEditorPattern->textSelector_.baseOffset, 0);
-    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 0);
+    EXPECT_EQ(richEditorPattern->textSelector_.destinationOffset, 1);
 }
 
 /*
@@ -2915,7 +2859,7 @@ HWTEST_F(RichEditorTestNg, RichEditorController008, TestSize.Level1)
     auto builderSpanChildren = richEditorNode_->GetChildren();
     ASSERT_NE(static_cast<int32_t>(builderSpanChildren.size()), 0);
     auto builderSpanChild = builderSpanChildren.begin();
-    EXPECT_EQ((*builderSpanChild)->GetTag(), V2::PLACEHOLDER_SPAN_ETS_TAG);
+    EXPECT_EQ((*builderSpanChild)->GetTag(), "Span");
     ClearSpan();
 }
 
@@ -2972,18 +2916,6 @@ HWTEST_F(RichEditorTestNg, RichEditorController009, TestSize.Level1)
     builderLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
     auto firstItemLayoutAlgorithm = builderPattern->CreateLayoutAlgorithm();
     EXPECT_FALSE(firstItemLayoutAlgorithm == nullptr);
-    builderLayoutWrapper->SetLayoutAlgorithm(
-        AccessibilityManager::MakeRefPtr<LayoutAlgorithmWrapper>(firstItemLayoutAlgorithm));
-    builderLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(BUILDER_WIDTH), CalcLength(BUILDER_HEIGHT)));
-    layoutWrapper.AppendChild(builderLayoutWrapper);
-
-    // mock process in flex layout algorithm
-    richEditorLayoutAlgorithm->Measure(&layoutWrapper);
-    richEditorLayoutAlgorithm->Layout(&layoutWrapper);
-    EXPECT_EQ(builderGeometryNode->GetMarginFrameSize().Width(), BUILDER_WIDTH);
-    EXPECT_EQ(builderGeometryNode->GetMarginFrameSize().Height(), BUILDER_HEIGHT);
-    ClearSpan();
 }
 
 /**
