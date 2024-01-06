@@ -250,7 +250,10 @@ namespace {
 // prevIdx and idx are indices of two irregular items that take up a whole line
 inline float AddLinesInBetween(int32_t prevIdx, int32_t idx, int32_t crossCount, float lineHeight)
 {
-    return (idx - prevIdx) > 1 ? ((idx - 2 - prevIdx) / crossCount + 1) * lineHeight : 0;
+    if (crossCount == 0) {
+        return 0.0f;
+    }
+    return (idx - prevIdx) > 1 ? ((idx - 2 - prevIdx) / crossCount + 1) * lineHeight : 0.0f;
 }
 } // namespace
 
