@@ -409,14 +409,15 @@ void NavigationPattern::CheckTopNavPathChange(
 int32_t NavigationPattern::FireNavDestinationStateChange(bool isShow)
 {
     const auto& navDestinationNodes = navigationStack_->GetAllNavDestinationNodes();
-    int32_t errIndex = navDestinationNodes.size();
+    auto errIndex = static_cast<int32_t>(navDestinationNodes.size());
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(hostNode, errIndex);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, errIndex);
     int32_t standardIndex = hostNode->GetLastStandardIndex();
     auto id = GetHost()->GetId();
-    for (int32_t index = navDestinationNodes.size() - 1; index >= 0 && index >= standardIndex; index--) {
+    for (int32_t index = static_cast<int32_t>(navDestinationNodes.size()) - 1; index >= 0 && index >= standardIndex;
+         index--) {
         const auto& curPath = navDestinationNodes[index];
         auto curDestination =
             AceType::DynamicCast<NavDestinationGroupNode>(hostNode->GetNavDestinationNode(curPath.second));
@@ -463,11 +464,12 @@ void NavigationPattern::FireNavigationStateChange(const RefPtr<UINode>& node, bo
             CHECK_NULL_VOID(navigationPattern);
             auto standardIndex = navigationPattern->FireNavDestinationStateChange(show);
             const auto& navDestinationNodes = navigationPattern->navigationStack_->GetAllNavDestinationNodes();
-            if (standardIndex == navDestinationNodes.size()) {
+            if (standardIndex == static_cast<int32_t>(navDestinationNodes.size())) {
                 NavigationPattern::FireNavigationStateChange(child, show);
                 continue;
             }
-            for (int32_t index = navDestinationNodes.size() - 1; index >= 0 && index >= standardIndex; index--) {
+            for (int32_t index = static_cast<int32_t>(navDestinationNodes.size()) - 1;
+                 index >= 0 && index >= standardIndex; index--) {
                 const auto& curPath = navDestinationNodes[index];
                 // Ignore node from navigation to navdestination in node tree, start from navdestination node directly.
                 NavigationPattern::FireNavigationStateChange(curPath.second, show);
@@ -1070,7 +1072,8 @@ void NavigationPattern::NotifyDialogChange(bool isShow, bool isNavigationChanged
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     const auto& navDestinationNodes = navigationStack_->GetAllNavDestinationNodes();
     int32_t standardIndex = hostNode->GetLastStandardIndex();
-    for (int32_t index = navDestinationNodes.size() - 1; index >= 0 && index >= standardIndex; index--) {
+    for (int32_t index = static_cast<int32_t>(navDestinationNodes.size()) - 1; index >= 0 && index >= standardIndex;
+         index--) {
         const auto& curPath = navDestinationNodes[index];
         auto curDestination =
             AceType::DynamicCast<NavDestinationGroupNode>(hostNode->GetNavDestinationNode(curPath.second));

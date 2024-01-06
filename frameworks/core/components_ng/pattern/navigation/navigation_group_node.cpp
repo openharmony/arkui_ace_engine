@@ -125,7 +125,7 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
     int32_t slot = 0;
     UpdateLastStandardIndex();
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "last standard page index is %{public}d", lastStandardIndex_);
-    for (int32_t i = 0; i != navDestinationNodes.size(); ++i) {
+    for (uint32_t i = 0; i != navDestinationNodes.size(); ++i) {
         const auto& childNode = navDestinationNodes[i];
         const auto& uiNode = childNode.second;
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(uiNode));
@@ -780,7 +780,7 @@ void NavigationGroupNode::UpdateLastStandardIndex()
     if (navDestinationNodes.size() == 0) {
         return;
     }
-    for (int32_t index = navDestinationNodes.size() - 1; index >= 0; index--) {
+    for (int32_t index = static_cast<int32_t>(navDestinationNodes.size()) - 1; index >= 0; index--) {
         const auto& curPath = navDestinationNodes[index];
         const auto& uiNode = curPath.second;
         if (!uiNode) {
@@ -799,7 +799,7 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
 {
     auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
-    if (index == destinationSize - 1) {
+    if (index == static_cast<int32_t>(destinationSize) - 1) {
         // process shallow builder
         navDestination->ProcessShallowBuilder();
         navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE, true);
