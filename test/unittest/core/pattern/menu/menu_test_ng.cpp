@@ -7629,10 +7629,10 @@ HWTEST_F(MenuTestNg, SubMenuLayoutAlgorithmTestNg002, TestSize.Level1)
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
     selectTheme->outPadding_ = 10.0_vp;
     algorithm->InitializePaddingAPI11(wrapper);
-    ASSERT_EQ(algorithm->paddingStart_, 0.0f);
-    ASSERT_EQ(algorithm->paddingEnd_, 0.0f);
-    ASSERT_EQ(algorithm->paddingTop_, 0.0f);
-    ASSERT_EQ(algorithm->paddingBottom_, 0.0f);
+    ASSERT_EQ(algorithm->paddingStart_, 10.0f);
+    ASSERT_EQ(algorithm->paddingEnd_, 10.0f);
+    ASSERT_EQ(algorithm->paddingTop_, 10.0f);
+    ASSERT_EQ(algorithm->paddingBottom_, 10.0f);
 }
 
 /**
@@ -7709,8 +7709,8 @@ HWTEST_F(MenuTestNg, SubMenuLayoutAlgorithmTestNg003, TestSize.Level1)
     selectTheme->defaultPaddingTop_ = 10.0_vp;
     selectTheme->defaultPaddingBottomFixed_ = 10.0_vp;
     algorithm->InitializePaddingAPI11(wrapper);
-    ASSERT_EQ(algorithm->paddingStart_, 0.0f);
-    ASSERT_EQ(algorithm->paddingEnd_, 0.0f);
+    ASSERT_EQ(algorithm->paddingStart_, 10.0f);
+    ASSERT_EQ(algorithm->paddingEnd_, 10.0f);
     ASSERT_EQ(algorithm->paddingTop_, 10.0f);
     ASSERT_EQ(algorithm->paddingBottom_, 10.0f);
 }
