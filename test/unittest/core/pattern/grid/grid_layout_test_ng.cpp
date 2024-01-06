@@ -1100,14 +1100,13 @@ HWTEST_F(GridLayoutTestNg, UpdateLength001, TestSize.Level1)
     info.lineHeightMap_[1] = 30.0f;
 
     GridIrregularFiller filler(&info, nullptr);
-    filler.posY_ = 2;
-    filler.UpdateLength(0, 5.0f);
-    EXPECT_EQ(filler.length_, 85.0f);
+    float len = 0.0f;
+    filler.UpdateLength(len, 0, 2, 5.0f);
+    EXPECT_EQ(len, 85.0f);
 
     info.lineHeightMap_[2] = 50.0f;
-    filler.posY_ = 3;
-    filler.UpdateLength(2, 10.0f);
-    EXPECT_EQ(filler.length_, 85.0f + 50.0f + 10.0f);
+    filler.UpdateLength(len, 2, 3, 10.0f);
+    EXPECT_EQ(len, 85.0f + 50.0f + 10.0f);
 }
 
 /**
@@ -1416,15 +1415,12 @@ HWTEST_F(GridLayoutTestNg, Fill001, TestSize.Level1)
     info.crossCount_ = 3;
     GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
 
-    float len =
-        filler.Fill({ .crossLens = { 50.0f, 50.0f, 100.0f }, .targetLen = 1000.0f, .crossGap = 5.0f, .mainGap = 1.0f });
+    float len = filler.Fill(
+        { .crossLens = { 50.0f, 50.0f, 100.0f }, .targetLen = 1000.0f, .crossGap = 5.0f, .mainGap = 1.0f }, 0);
 
-    // all children have height 0, and UpdateLength isn't run on the last line
-    EXPECT_EQ(len, 5.0f);
+    EXPECT_EQ(len, 6.0f);
 
-    EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 9);
-    EXPECT_EQ(info.startMainLineIndex_, 0);
     EXPECT_EQ(info.endMainLineIndex_, 6);
 
     decltype(info.gridMatrix_) cmp = {
@@ -1721,6 +1717,30 @@ HWTEST_F(GridLayoutTestNg, SolveBackward001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LayoutRangeSolver::Solve001
+ * @tc.desc: Test LayoutRangeSolver::FindStartingRow when matrix is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, Solve001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions({});
+    });
+
+    GridLayoutInfo info;
+    info.crossCount_ = 3;
+
+    info.currentOffset_ = 0.0f;
+    info.startMainLineIndex_ = 0;
+
+    GridLayoutRangeSolver solver(&info, AceType::RawPtr(frameNode_));
+    auto res = solver.FindStartingRow(5.0f);
+    EXPECT_EQ(res.pos, 0.0f);
+    EXPECT_EQ(res.row, 0);
+}
+
+/**
  * @tc.name: GridIrregularLayout::LayoutChildren001
  * @tc.desc: Test GridIrregularLayout::LayoutChildren
  * @tc.type: FUNC
@@ -1962,7 +1982,7 @@ HWTEST_F(GridLayoutTestNg, FillMatrixOnly001, TestSize.Level1)
     };
 
     GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
-    filler.FillMatrixOnly(6);
+    filler.FillMatrixOnly(0, 6);
 
     EXPECT_EQ(info.gridMatrix_, expected);
     EXPECT_EQ(info.endIndex_, 6);
@@ -2012,9 +2032,9 @@ HWTEST_F(GridLayoutTestNg, MeasureBackward001, TestSize.Level1)
     });
 
     GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
-    filler.MeasureBackward({ { 50.0f, 50.0f, 50.0f }, 1000.0f, 5.0f, 5.0f }, 5);
+    float len = filler.MeasureBackward({ { 50.0f, 50.0f, 50.0f }, 1000.0f, 5.0f, 5.0f }, 5);
 
-    EXPECT_EQ(filler.length_, 30.0f);
+    EXPECT_EQ(len, 30.0f);
     EXPECT_EQ(info.lineHeightMap_.size(), 6);
 }
 
@@ -2121,5 +2141,106 @@ HWTEST_F(GridLayoutTestNg, SolveForwardForEndIdx001, TestSize.Level1)
     auto [endLineIdx, endIdx] = solver.SolveForwardForEndIdx(5.0f, 250.0f, 1);
     EXPECT_EQ(endIdx, 6);
     EXPECT_EQ(endLineIdx, 4);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::PrepareLineHeights001
+ * @tc.desc: Test GridIrregularLayout::PrepareLineHeights001
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, PrepareLineHeights001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions({});
+        CreateColItem(15);
+    });
+
+    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
+    algorithm->wrapper_ = AceType::RawPtr(frameNode_);
+    algorithm->crossLens_ = { 1.0f, 1.0f, 1.0f };
+    auto& info = algorithm->gridLayoutInfo_;
+    // because measuring children might not generate proper heights in test, we set them manually.
+    decltype(info.lineHeightMap_) cmpH = { { 0, 200.0f }, { 1, 200.0f }, { 2, 200.0f }, { 3, 200.0f }, { 4, 200.0f } };
+    info.lineHeightMap_ = cmpH;
+    decltype(info.gridMatrix_) cmp = {
+        { 0, { { 0, 0 }, { 1, 1 }, { 2, 2 } } },
+        { 1, { { 0, 3 }, { 1, 4 }, { 2, 5 } } },
+        { 2, { { 0, 6 }, { 1, 7 }, { 2, 8 } } },
+        { 3, { { 0, 9 }, { 1, 10 }, { 2, 11 } } },
+        { 4, { { 0, 12 }, { 1, 13 }, { 2, 14 } } },
+    };
+    info.gridMatrix_ = cmp;
+
+    info.crossCount_ = 3;
+
+    info.scrollAlign_ = ScrollAlign::START;
+    int32_t idx = 0;
+    algorithm->PrepareLineHeight(70.0f, idx);
+    EXPECT_EQ(info.scrollAlign_, ScrollAlign::START);
+    EXPECT_EQ(idx, 0);
+
+    info.scrollAlign_ = ScrollAlign::START;
+    idx = 2;
+    algorithm->PrepareLineHeight(300.0f, idx);
+    EXPECT_EQ(info.scrollAlign_, ScrollAlign::START);
+    EXPECT_EQ(idx, 2);
+
+    // can't align start with idx 4
+    info.scrollAlign_ = ScrollAlign::START;
+    idx = 4;
+    algorithm->PrepareLineHeight(300.0f, idx);
+    EXPECT_EQ(info.scrollAlign_, ScrollAlign::END);
+    EXPECT_EQ(idx, 4);
+
+    // can't align center with idx 0
+    info.scrollAlign_ = ScrollAlign::CENTER;
+    idx = 0;
+    algorithm->PrepareLineHeight(350.0f, idx);
+    EXPECT_EQ(info.scrollAlign_, ScrollAlign::START);
+    EXPECT_EQ(idx, 0);
+
+    // can't align center with idx 4
+    info.scrollAlign_ = ScrollAlign::CENTER;
+    idx = 4;
+    algorithm->PrepareLineHeight(350.0f, idx);
+    EXPECT_EQ(info.scrollAlign_, ScrollAlign::END);
+    EXPECT_EQ(idx, 4);
+
+    // align center with idx 4 and len 30.0f
+    info.scrollAlign_ = ScrollAlign::CENTER;
+    idx = 4;
+    algorithm->PrepareLineHeight(30.0f, idx);
+    EXPECT_EQ(info.scrollAlign_, ScrollAlign::CENTER);
+    EXPECT_EQ(idx, 4);
+
+    // can't align end with idx 1 and len 200.0f
+    info.scrollAlign_ = ScrollAlign::END;
+    idx = 1;
+    algorithm->PrepareLineHeight(500.0f, idx);
+    EXPECT_EQ(info.scrollAlign_, ScrollAlign::START);
+    EXPECT_EQ(idx, 0);
+
+    info.scrollAlign_ = ScrollAlign::END;
+    idx = 3;
+    algorithm->PrepareLineHeight(300.0f, idx);
+    EXPECT_EQ(info.scrollAlign_, ScrollAlign::END);
+    EXPECT_EQ(idx, 3);
+
+    info.scrollAlign_ = ScrollAlign::END;
+    idx = 4;
+    algorithm->PrepareLineHeight(1000.0f, idx);
+    EXPECT_EQ(info.scrollAlign_, ScrollAlign::END);
+    EXPECT_EQ(idx, 4);
+
+    // can't align end with len 340
+    info.scrollAlign_ = ScrollAlign::END;
+    idx = 4;
+    algorithm->PrepareLineHeight(1040.0f, idx);
+    EXPECT_EQ(info.scrollAlign_, ScrollAlign::START);
+    EXPECT_EQ(idx, 0);
+
+    EXPECT_EQ(cmp, info.gridMatrix_);
+    EXPECT_EQ(cmpH, info.lineHeightMap_);
 }
 } // namespace OHOS::Ace::NG
