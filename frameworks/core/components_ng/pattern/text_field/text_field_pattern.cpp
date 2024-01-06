@@ -1329,7 +1329,8 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
     }
     if (enableTouchAndHoverEffect_ && !isMousePressed_) {
         auto lastCaretIndex = selectController_->GetCaretIndex();
-        isTouchCaret_ = RepeatClickCaret(offset, lastCaretIndex);
+        auto lastCaretRect = selectController_->GetCaretRect();
+        isTouchCaret_ = RepeatClickCaret(offset, lastCaretIndex, lastCaretRect);
         auto textfieldPaintProperty = GetPaintProperty<TextFieldPaintProperty>();
         CHECK_NULL_VOID(textfieldPaintProperty);
         auto tmpHost = GetHost();
@@ -1724,12 +1725,14 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     CHECK_NULL_VOID(host);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     auto lastCaretIndex = selectController_->GetCaretIndex();
+    auto lastCaretRect = selectController_->GetCaretRect();
     selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation());
     StartTwinkling();
     SetIsSingleHandle(true);
     CloseSelectOverlay(true);
 
-    if (RepeatClickCaret(info.GetLocalLocation(), lastCaretIndex) && info.GetSourceDevice() != SourceType::MOUSE) {
+    if (RepeatClickCaret(info.GetLocalLocation(), lastCaretIndex, lastCaretRect) &&
+        info.GetSourceDevice() != SourceType::MOUSE) {
         if (contentController_->IsEmpty()) {
             ProcessOverlay(true, true, true, true);
         } else {
@@ -5799,14 +5802,14 @@ void TextFieldPattern::UpdateSelectController()
     selectController_->UpdateParagraph(paragraph_);
 }
 
-bool TextFieldPattern::RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex)
+bool TextFieldPattern::RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex, const RectF& lastCaretRect)
 {
     auto touchDownIndex = selectController_->ConvertTouchOffsetToPosition(offset);
     if (!selectController_->CaretAtLast()) {
         return lastCaretIndex == touchDownIndex && HasFocus();
     }
     // Increase the cursor area if there is no text
-    auto caretRect = selectController_->GetCaretRect();
+    auto caretRect = lastCaretRect;
     caretRect.SetLeft(caretRect.GetX() - caretRect.Height() / 2);
     caretRect.SetWidth(caretRect.Height());
     return caretRect.IsInRegion(PointF(offset.GetX(), offset.GetY()));

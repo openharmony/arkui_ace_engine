@@ -2399,6 +2399,7 @@ HWTEST_F(TextFieldUXTest, RepeatClickCaret, TestSize.Level1)
      */
     Offset clickOffset(0.0f, 0.0f);
     int32_t lastIndex = 0;
+    RectF lastCaretRect = RectF(-1.0f, -1.0f, 2.0f, 2.0f);
 
     /**
      * @tc.steps: step3. Text input request focus
@@ -2410,7 +2411,7 @@ HWTEST_F(TextFieldUXTest, RepeatClickCaret, TestSize.Level1)
     /**
      * @tc.steps: step3. test repeat click caret
      */
-    EXPECT_TRUE(pattern_->RepeatClickCaret(clickOffset, lastIndex));
+    EXPECT_TRUE(pattern_->RepeatClickCaret(clickOffset, lastIndex, lastCaretRect));
 }
 
 /**
