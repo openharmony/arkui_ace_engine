@@ -167,7 +167,7 @@ void UIExtensionPattern::OnConnect()
 }
 
 void UIExtensionPattern::OnAccessibilityEvent(
-    const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset)
+    const Accessibility::AccessibilityEventInfo& info, int32_t uiExtensionOffset)
 {
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "The accessibility event is reported.");
     ContainerScope scope(instanceId_);
@@ -793,19 +793,19 @@ void UIExtensionPattern::DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidAr
     sessionWrapper_->NotifyOriginAvoidArea(avoidArea, type);
 }
 
-int64_t UIExtensionPattern::WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId)
+int32_t UIExtensionPattern::WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId)
 {
     return uiExtensionId_ * extensionOffset + abilityId;
 }
 
 void UIExtensionPattern::SearchExtensionElementInfoByAccessibilityId(
-    int64_t elementId, int32_t mode, int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
+    int32_t elementId, int32_t mode, int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     CHECK_NULL_VOID(sessionWrapper_);
     sessionWrapper_->SearchExtensionElementInfoByAccessibilityId(elementId, mode, baseParent, output);
 }
 
-void UIExtensionPattern::SearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
+void UIExtensionPattern::SearchElementInfosByText(int32_t elementId, const std::string& text, int32_t baseParent,
     std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     CHECK_NULL_VOID(sessionWrapper_);
@@ -813,21 +813,21 @@ void UIExtensionPattern::SearchElementInfosByText(int64_t elementId, const std::
 }
 
 void UIExtensionPattern::FindFocusedElementInfo(
-    int64_t elementId, int32_t focusType, int64_t baseParent, Accessibility::AccessibilityElementInfo& output)
+    int32_t elementId, int32_t focusType, int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
 {
     CHECK_NULL_VOID(sessionWrapper_);
     sessionWrapper_->FindFocusedElementInfo(elementId, focusType, baseParent, output);
 }
 
 void UIExtensionPattern::FocusMoveSearch(
-    int64_t elementId, int32_t direction, int64_t baseParent, Accessibility::AccessibilityElementInfo& output)
+    int32_t elementId, int32_t direction, int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
 {
     CHECK_NULL_VOID(sessionWrapper_);
     sessionWrapper_->FocusMoveSearch(elementId, direction, baseParent, output);
 }
 
 bool UIExtensionPattern::TransferExecuteAction(
-    int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset)
+    int32_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int32_t offset)
 {
     return sessionWrapper_ && sessionWrapper_->TransferExecuteAction(elementId, actionArguments, action, offset);
 }

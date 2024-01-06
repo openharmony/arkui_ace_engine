@@ -3032,7 +3032,7 @@ int32_t FrameNode::GetUiExtensionId()
     return -1;
 }
 
-int64_t FrameNode::WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId)
+int32_t FrameNode::WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId)
 {
     if (pattern_) {
         return pattern_->WrapExtensionAbilityId(extensionOffset, abilityId);
@@ -3040,40 +3040,40 @@ int64_t FrameNode::WrapExtensionAbilityId(int64_t extensionOffset, int64_t abili
     return -1;
 }
 
-void FrameNode::SearchExtensionElementInfoByAccessibilityIdNG(int64_t elementId, int32_t mode,
-    int64_t offset, std::list<Accessibility::AccessibilityElementInfo>& output)
+void FrameNode::SearchExtensionElementInfoByAccessibilityIdNG(int32_t elementId, int32_t mode,
+    int32_t offset, std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     if (pattern_) {
         pattern_->SearchExtensionElementInfoByAccessibilityId(elementId, mode, offset, output);
     }
 }
 
-void FrameNode::SearchElementInfosByTextNG(int64_t elementId, const std::string& text,
-    int64_t offset, std::list<Accessibility::AccessibilityElementInfo>& output)
+void FrameNode::SearchElementInfosByTextNG(int32_t elementId, const std::string& text,
+    int32_t offset, std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     if (pattern_) {
         pattern_->SearchElementInfosByText(elementId, text, offset, output);
     }
 }
 
-void FrameNode::FindFocusedExtensionElementInfoNG(int64_t elementId, int32_t focusType,
-    int64_t offset, Accessibility::AccessibilityElementInfo& output)
+void FrameNode::FindFocusedExtensionElementInfoNG(int32_t elementId, int32_t focusType,
+    int32_t offset, Accessibility::AccessibilityElementInfo& output)
 {
     if (pattern_) {
         pattern_->FindFocusedElementInfo(elementId, focusType, offset, output);
     }
 }
 
-void FrameNode::FocusMoveSearchNG(int64_t elementId, int32_t direction,
-    int64_t offset, Accessibility::AccessibilityElementInfo& output)
+void FrameNode::FocusMoveSearchNG(int32_t elementId, int32_t direction,
+    int32_t offset, Accessibility::AccessibilityElementInfo& output)
 {
     if (pattern_) {
         pattern_->FocusMoveSearch(elementId, direction, offset, output);
     }
 }
 
-bool FrameNode::TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
-    int32_t action, int64_t offset)
+bool FrameNode::TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+    int32_t action, int32_t offset)
 {
     bool isExecuted = false;
     if (pattern_) {

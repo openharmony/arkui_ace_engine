@@ -166,7 +166,7 @@ public:
         return nodeId_;
     }
 
-    int64_t GetAccessibilityId() const
+    int32_t GetAccessibilityId() const
     {
         return accessibilityId_;
     }
@@ -501,7 +501,7 @@ public:
     }
 
     std::string GetCurrentCustomNodeInfo();
-    static int64_t GenerateAccessibilityId();
+    static int32_t GenerateAccessibilityId();
 
     NodeStatus GetNodeStatus() const;
     const RefPtr<ExportTextureInfo>& GetExportTextureInfo() const
@@ -575,7 +575,7 @@ private:
     int32_t hostRootId_ = 0;
     int32_t hostPageId_ = 0;
     int32_t nodeId_ = 0;
-    int64_t accessibilityId_ = -1;
+    int32_t accessibilityId_ = -1;
     int32_t layoutPriority_ = 0;
     bool isRoot_ = false;
     bool onMainTree_ = false;
@@ -587,7 +587,7 @@ private:
     RefPtr<ExportTextureInfo> exportTextureInfo_;
 
     int32_t childrenUpdatedFrom_ = -1;
-    static thread_local int64_t currentAccessibilityId_;
+    static thread_local int32_t currentAccessibilityId_;
     int32_t restoreId_ = -1;
 
     bool useOffscreenProcess_ = false;

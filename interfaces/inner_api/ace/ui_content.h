@@ -286,23 +286,23 @@ public:
 
 #ifndef PREVIEW
     virtual void SearchElementInfoByAccessibilityId(
-        int64_t elementId, int32_t mode,
-        int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) {};
+        int32_t elementId, int32_t mode,
+        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) {};
 
     virtual void SearchElementInfosByText(
-        int64_t elementId, const std::string& text, int64_t baseParent,
+        int32_t elementId, const std::string& text, int32_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) {};
 
     virtual void FindFocusedElementInfo(
-        int64_t elementId, int32_t focusType,
-        int64_t baseParent, Accessibility::AccessibilityElementInfo& output) {};
+        int32_t elementId, int32_t focusType,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) {};
 
     virtual void FocusMoveSearch(
-        int64_t elementId, int32_t direction,
-        int64_t baseParent, Accessibility::AccessibilityElementInfo& output) {};
+        int32_t elementId, int32_t direction,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) {};
 
-    virtual bool NotifyExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int64_t offset)
+    virtual bool NotifyExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int32_t offset)
     {
         return false;
     }

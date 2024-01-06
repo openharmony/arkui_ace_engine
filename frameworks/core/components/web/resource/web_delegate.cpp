@@ -4373,7 +4373,7 @@ void WebDelegate::OnDownloadStart(const std::string& url, const std::string& use
         TaskExecutor::TaskType::JS);
 }
 
-void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEventType eventType)
+void WebDelegate::OnAccessibilityEvent(int32_t accessibilityId, AccessibilityEventType eventType)
 {
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
@@ -5729,17 +5729,17 @@ void WebDelegate::JavaScriptOnDocumentEnd()
     }
 }
 
-void WebDelegate::ExecuteAction(int64_t accessibilityId, AceAction action)
+void WebDelegate::ExecuteAction(int32_t nodeId, AceAction action)
 {
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     uint32_t nwebAction = static_cast<uint32_t>(action);
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), accessibilityId, nwebAction]() {
+        [weak = WeakClaim(this), nodeId, nwebAction]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
-            delegate->nweb_->ExecuteAction(accessibilityId, nwebAction);
+            delegate->nweb_->ExecuteAction(nodeId, nwebAction);
         },
         TaskExecutor::TaskType::PLATFORM);
 }
@@ -5773,21 +5773,21 @@ void WebDelegate::SetAccessibilityState(bool state)
 }
 
 bool WebDelegate::GetFocusedAccessibilityNodeInfo(
-    int64_t accessibilityId, bool isAccessibilityFocus, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const
+    int32_t accessibilityId, bool isAccessibilityFocus, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const
 {
     CHECK_NULL_RETURN(nweb_, false);
     return nweb_->GetFocusedAccessibilityNodeInfo(accessibilityId, isAccessibilityFocus, nodeInfo);
 }
 
 bool WebDelegate::GetAccessibilityNodeInfoById(
-    int64_t accessibilityId, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const
+    int32_t accessibilityId, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const
 {
     CHECK_NULL_RETURN(nweb_, false);
     return nweb_->GetAccessibilityNodeInfoById(accessibilityId, nodeInfo);
 }
 
 bool WebDelegate::GetAccessibilityNodeInfoByFocusMove(
-    int64_t accessibilityId, int32_t direction, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const
+    int32_t accessibilityId, int32_t direction, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const
 {
     CHECK_NULL_RETURN(nweb_, false);
     return nweb_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction, nodeInfo);
