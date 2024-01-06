@@ -317,6 +317,8 @@ public:
 
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
 
+    OffsetF GetPaintRectCenter() const;
+
     std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
 
     OffsetF GetPaintRectOffsetToPage() const;

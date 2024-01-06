@@ -293,7 +293,8 @@ public:
     void MarkDrivenRender(bool flag) override;
     void MarkDrivenRenderItemIndex(int32_t index) override;
     void MarkDrivenRenderFramePaintState(bool flag) override;
-    RefPtr<PixelMap> GetThumbnailPixelMap() override;
+    RefPtr<PixelMap> GetThumbnailPixelMap(bool needScale = false) override;
+    void UpdateThumbnailPixelMapScale(float& scaleX, float& scaleY) override;
     std::vector<double> transInfo_;
     std::vector<double> GetTrans() override;
 #ifndef USE_ROSEN_DRAWING
