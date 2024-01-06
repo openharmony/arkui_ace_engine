@@ -150,6 +150,7 @@ Accessibility::EventType ConvertAceEventType(AccessibilityEventType type)
         { AccessibilityEventType::PAGE_CHANGE, Accessibility::EventType::TYPE_PAGE_STATE_UPDATE },
         { AccessibilityEventType::HOVER_EXIT_EVENT, Accessibility::EventType::TYPE_VIEW_HOVER_EXIT_EVENT },
         { AccessibilityEventType::CHANGE, Accessibility::EventType::TYPE_PAGE_CONTENT_UPDATE },
+        { AccessibilityEventType::COMPONENT_CHANGE, Accessibility::EventType::TYPE_VIEW_TEXT_UPDATE_EVENT },
         { AccessibilityEventType::SCROLL_END, Accessibility::EventType::TYPE_VIEW_SCROLLED_EVENT },
         { AccessibilityEventType::TEXT_SELECTION_UPDATE,
             Accessibility::EventType::TYPE_VIEW_TEXT_SELECTION_UPDATE_EVENT },
@@ -2016,6 +2017,8 @@ bool JsAccessibilityManager::SendAccessibilitySyncEvent(
     if (!isEnabled) {
         return false;
     }
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "send accessibility event:%{public}d aid:%{public}lld",
+        eventInfo.GetEventType(), static_cast<int64_t>(eventInfo.GetAccessibilityId()));
     return client->SendEvent(eventInfo);
 }
 
@@ -2049,6 +2052,8 @@ bool JsAccessibilityManager::TransferAccessibilityAsyncEvent(
     AccessibilityEventInfo eventInfoNew = eventInfo;
     eventInfoNew.SetSource(uiExtensionOffset + eventInfo.GetViewId());
 #endif
+    TAG_LOGD(AceLogTag::ACE_ACCESSIBILITY, "send accessibility event:%{public}d aid:%{public}lld",
+        eventInfoNew.GetEventType(), static_cast<int64_t>(eventInfoNew.GetAccessibilityId()));
     return client->SendEvent(eventInfoNew);
 }
 
