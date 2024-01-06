@@ -14,12 +14,16 @@
  */
 #include "form_renderer_dispatcher_impl.h"
 
+#include <condition_variable>
+#include <mutex>
+
 #include "form_renderer.h"
 #include "form_renderer_hilog.h"
 #include "core/components_ng/gestures/gesture_group.h"
 
 namespace OHOS {
 namespace Ace {
+constexpr int32_t PROCESS_WAIT_TIME = 10;
 FormRendererDispatcherImpl::FormRendererDispatcherImpl(
     const std::shared_ptr<UIContent> uiContent,
     const std::shared_ptr<FormRenderer> formRenderer,
@@ -44,8 +48,27 @@ void FormRendererDispatcherImpl::DispatchPointerEvent(
             HILOG_ERROR("uiContent is nullptr");
             return;
         }
-        uiContent->ProcessPointerEvent(pointerEvent);
-        serializedGesture = uiContent->GetFormSerializedGesture();
+
+        struct FormSerializedResultData {
+            std::mutex mtx;
+            std::condition_variable cv;
+        };
+
+        std::shared_ptr<FormSerializedResultData> serializedResultData = std::make_shared<FormSerializedResultData>();
+        auto callback = [serializedResultData]() {
+            std::unique_lock<std::mutex> lock(serializedResultData->mtx);
+            serializedResultData->cv.notify_all();
+        };
+        {
+            std::unique_lock<std::mutex> lock(serializedResultData->mtx);
+            uiContent->ProcessPointerEventWithCallback(pointerEvent, callback);
+            if (serializedResultData->cv.wait_for(lock, std::chrono::milliseconds(PROCESS_WAIT_TIME)) ==
+                std::cv_status::timeout) {
+                HILOG_ERROR("formRender ProcessPointerEvent dispatch timeout");
+            } else {
+                serializedGesture = uiContent->GetFormSerializedGesture();
+            }
+        }
     } else {
         handler->PostTask([content = uiContent_, pointerEvent]() {
             auto uiContent = content.lock();

@@ -341,6 +341,12 @@ public:
     {
         return SerializedGesture();
     }
+
+    virtual bool ProcessPointerEventWithCallback(
+        const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, const std::function<void()>& callback)
+    {
+        return true;
+    };
 };
 
 } // namespace OHOS::Ace
