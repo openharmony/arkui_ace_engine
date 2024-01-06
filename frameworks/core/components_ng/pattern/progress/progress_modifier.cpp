@@ -1349,7 +1349,7 @@ void ProgressModifier::PaintTrailing(RSCanvas& canvas, const RingProgressData& r
 
     for (size_t i = 0; i < gradientColors.size(); i++) {
         double dimension = gradientColors[i].GetDimension().Value();
-        Color color = gradientColors[0].GetLinearColor().BlendOpacity(dimension);
+        Color color = gradientColors[i].GetLinearColor().BlendOpacity(dimension);
         colors.emplace_back(color.GetValue());
         pos.emplace_back(gradientColors[i].GetDimension().Value());
     }
