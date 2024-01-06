@@ -639,7 +639,7 @@ bool NavigationModelNG::CreateNavBarNodeChildsIfNeeded(const RefPtr<NavBarNode>&
         navBarNode->AddChild(navBarContentNode);
         navBarNode->SetNavBarContentNode(navBarContentNode);
 
-        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
+        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
         navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
 
