@@ -1299,8 +1299,9 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam> &param, const RefPtr<Frame
     if (showInSubWindow) {
         if (isShow) {
             SubwindowManager::GetInstance()->ShowPopupNG(targetId, popupInfo);
-        } else {
-            SubwindowManager::GetInstance()->HidePopupNG(targetId);
+        } else if (popupPattern) {
+            popupPattern->StartExitingAnimation(
+                [targetId]() { SubwindowManager::GetInstance()->HidePopupNG(targetId); });
         }
         return;
     }
