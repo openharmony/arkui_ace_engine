@@ -258,6 +258,16 @@ bool ImageModelNG::UpdateDragItemInfo(DragItemInfo &itemInfo)
     return false;
 }
 
+void ImageModelNG::InitImage(FrameNode *frameNode, std::string& src)
+{
+    std::string bundleName;
+    std::string moduleName;
+    RefPtr<OHOS::Ace::PixelMap> pixMapPtr;
+    auto srcInfo = CreateSourceInfo(src, pixMapPtr, bundleName, moduleName);
+    srcInfo.SetIsUriPureNumber(false);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
+}
+
 void ImageModelNG::SetCopyOption(FrameNode *frameNode, CopyOptions copyOption)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>(frameNode);

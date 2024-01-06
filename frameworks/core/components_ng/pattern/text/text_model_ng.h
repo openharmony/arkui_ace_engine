@@ -70,6 +70,7 @@ public:
     void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
     RefPtr<TextControllerBase> GetTextController() override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& content);
+    static void InitText(FrameNode* frameNode, std::string& value);
     static void SetFontWeight(FrameNode* frameNode, Ace::FontWeight value);
     static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);
     static void SetTextAlign(FrameNode* frameNode, Ace::TextAlign value);

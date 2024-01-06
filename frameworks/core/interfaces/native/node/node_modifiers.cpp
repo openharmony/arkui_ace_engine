@@ -20,7 +20,10 @@
 #include "core/interfaces/native/node/node_stack_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
 #include "core/interfaces/native/node/node_text_modifier.h"
-
+#include "core/interfaces/native/node/node_image_span_modifier.h"
+#include "core/interfaces/native/node/node_image_modifier.h"
+#include "core/interfaces/native/node/node_span_modifier.h"
+#include "core/interfaces/native/node/node_text_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -34,7 +37,7 @@ const ArkUINodeModifiers impl = {
     NodeModifier::GetTextModifier,
     nullptr,
     nullptr,
-    nullptr,
+    NodeModifier::GetImageSpanModifier,
     nullptr,
     nullptr,
     nullptr,
@@ -55,6 +58,7 @@ const ArkUINodeModifiers impl = {
     nullptr,
     nullptr,
     nullptr,
+    NodeModifier::GetImageModifier,
     nullptr,
     nullptr,
     nullptr,
@@ -65,8 +69,7 @@ const ArkUINodeModifiers impl = {
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
-    nullptr,
+    NodeModifier::GetSpanModifier,
     nullptr,
     nullptr,
     nullptr,
