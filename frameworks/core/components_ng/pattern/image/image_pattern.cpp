@@ -961,6 +961,15 @@ void ImagePattern::UpdateAnalyzerOverlay()
     if (!IsSupportImageAnalyzerFeature() || !isAnalyzerOverlayBuild_) {
         return;
     }
+
+    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    UpdateInternalResource(src);
+    if (loadingCtx_ && loadingCtx_->GetSourceInfo() == src) {
+        return;
+    }
+
     auto pixelMap = image_->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
     napi_value pixelmapNapiVal = ConvertPixmapNapi(pixelMap);
