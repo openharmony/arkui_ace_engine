@@ -23,6 +23,7 @@
 #include "accessibility_system_ability_client.h"
 
 #include "adapter/ohos/entrance/ace_application_info.h"
+#include "base/log/ace_trace.h"
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/log/log.h"
@@ -2608,8 +2609,10 @@ void JsAccessibilityManager::JsInteractionOperation::SearchElementInfoByAccessib
     CHECK_NULL_VOID(context);
     auto windowId = windowId_;
     context->GetTaskExecutor()->PostTask(
-        [jsAccessibilityManager, elementId, requestId, &callback, mode, windowId]() {
+        [weak = GetHandler(), elementId, requestId, &callback, mode, windowId]() {
+            auto jsAccessibilityManager = weak.Upgrade();
             CHECK_NULL_VOID(jsAccessibilityManager);
+            ACE_SCOPED_TRACE("SearchElementInfoByAccessibilityId");
             jsAccessibilityManager->SearchElementInfoByAccessibilityId(elementId, requestId, callback, mode, windowId);
         },
         TaskExecutor::TaskType::UI);
@@ -2625,7 +2628,7 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityId(const int64_t el
         auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
         if (ngPipeline) {
             SearchElementInfoByAccessibilityIdNG(elementId, mode, infos, pipeline, NG::UI_EXTENSION_OFFSET_MAX);
-            SetSearchElementInfoByAccessibilityIdResult(callback, infos, requestId);
+            SetSearchElementInfoByAccessibilityIdResult(callback, std::move(infos), requestId);
             return;
         }
     }
@@ -2639,7 +2642,7 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityId(const int64_t el
     CHECK_NULL_VOID(jsAccessibilityManager);
     auto node = jsAccessibilityManager->GetAccessibilityNodeFromPage(nodeId);
     if (!node) {
-        SetSearchElementInfoByAccessibilityIdResult(callback, infos, requestId);
+        SetSearchElementInfoByAccessibilityIdResult(callback, std::move(infos), requestId);
         return;
     }
 
@@ -2649,7 +2652,7 @@ void JsAccessibilityManager::SearchElementInfoByAccessibilityId(const int64_t el
     // cache parent/siblings/children infos
     UpdateCacheInfo(infos, mode, node, jsAccessibilityManager, jsAccessibilityManager->windowId_);
 
-    SetSearchElementInfoByAccessibilityIdResult(callback, infos, requestId);
+    SetSearchElementInfoByAccessibilityIdResult(callback, std::move(infos), requestId);
 }
 
 void JsAccessibilityManager::SearchElementInfoByAccessibilityIdNG(int64_t elementId, int32_t mode,
@@ -2831,8 +2834,10 @@ void JsAccessibilityManager::JsInteractionOperation::SearchElementInfosByText(co
     auto windowId = windowId_;
     if (context) {
         context->GetTaskExecutor()->PostTask(
-            [jsAccessibilityManager, elementId, text, requestId, &callback, windowId]() {
+            [weak = GetHandler(), elementId, text, requestId, &callback, windowId]() {
+                auto jsAccessibilityManager = weak.Upgrade();
                 CHECK_NULL_VOID(jsAccessibilityManager);
+                ACE_SCOPED_TRACE("SearchElementInfosByText");
                 jsAccessibilityManager->SearchElementInfosByText(elementId, text, requestId, callback, windowId);
             },
             TaskExecutor::TaskType::UI);
@@ -2856,7 +2861,7 @@ void JsAccessibilityManager::SearchElementInfosByText(const int64_t elementId, c
     if (pipeline) {
         if (AceType::InstanceOf<NG::PipelineContext>(pipeline)) {
             SearchElementInfosByTextNG(elementId, text, infos, pipeline, NG::UI_EXTENSION_OFFSET_MAX);
-            SetSearchElementInfoByTextResult(callback, infos, requestId);
+            SetSearchElementInfoByTextResult(callback, std::move(infos), requestId);
             return;
         }
     }
@@ -2877,7 +2882,7 @@ void JsAccessibilityManager::SearchElementInfosByText(const int64_t elementId, c
         }
     }
 
-    SetSearchElementInfoByTextResult(callback, infos, requestId);
+    SetSearchElementInfoByTextResult(callback, std::move(infos), requestId);
 }
 
 void JsAccessibilityManager::JsInteractionOperation::FindFocusedElementInfo(const int64_t elementId,
@@ -2889,8 +2894,10 @@ void JsAccessibilityManager::JsInteractionOperation::FindFocusedElementInfo(cons
     CHECK_NULL_VOID(context);
     auto windowId = windowId_;
     context->GetTaskExecutor()->PostTask(
-        [jsAccessibilityManager, elementId, focusType, requestId, &callback, windowId]() {
+        [weak = GetHandler(), elementId, focusType, requestId, &callback, windowId]() {
+            auto jsAccessibilityManager = weak.Upgrade();
             CHECK_NULL_VOID(jsAccessibilityManager);
+            ACE_SCOPED_TRACE("FindFocusedElementInfo");
             jsAccessibilityManager->FindFocusedElementInfo(elementId, focusType, requestId, callback, windowId);
         },
         TaskExecutor::TaskType::UI);
@@ -3066,8 +3073,10 @@ void JsAccessibilityManager::JsInteractionOperation::ExecuteAction(const int64_t
     ActionParam param { actionInfo, actionArguments };
     auto windowId = windowId_;
     context->GetTaskExecutor()->PostTask(
-        [jsAccessibilityManager, elementId, param, requestId, &callback, windowId] {
+        [weak = GetHandler(), elementId, param, requestId, &callback, windowId] {
+            auto jsAccessibilityManager = weak.Upgrade();
             CHECK_NULL_VOID(jsAccessibilityManager);
+            ACE_SCOPED_TRACE("ExecuteAction");
             jsAccessibilityManager->ExecuteAction(elementId, param, requestId, callback, windowId);
         },
         TaskExecutor::TaskType::UI);
@@ -3354,10 +3363,10 @@ void JsAccessibilityManager::JsInteractionOperation::ClearFocus()
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
     CHECK_NULL_VOID(context);
     context->GetTaskExecutor()->PostTask(
-        [jsAccessibilityManager] {
-            if (!jsAccessibilityManager) {
-                return;
-            }
+        [weak = GetHandler()] {
+            auto jsAccessibilityManager = weak.Upgrade();
+            CHECK_NULL_VOID(jsAccessibilityManager);
+            ACE_SCOPED_TRACE("ClearCurrentFocus");
             jsAccessibilityManager->ClearCurrentFocus();
         },
         TaskExecutor::TaskType::UI);
@@ -3457,7 +3466,9 @@ void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(const 
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
     CHECK_NULL_VOID(context);
     context->GetTaskExecutor()->PostTask(
-        [jsAccessibilityManager, state]() {
+        [weak = GetHandler(), state]() {
+            auto jsAccessibilityManager = weak.Upgrade();
+            CHECK_NULL_VOID(jsAccessibilityManager);
             if (state) {
                 jsAccessibilityManager->RegisterInteractionOperation(jsAccessibilityManager->GetWindowId());
             } else {
@@ -3480,8 +3491,10 @@ void JsAccessibilityManager::JsInteractionOperation::FocusMoveSearch(
     CHECK_NULL_VOID(context);
     auto windowId = windowId_;
     context->GetTaskExecutor()->PostTask(
-        [jsAccessibilityManager, elementId, direction, requestId, &callback, windowId] {
+        [weak = GetHandler(), elementId, direction, requestId, &callback, windowId] {
+            auto jsAccessibilityManager = weak.Upgrade();
             CHECK_NULL_VOID(jsAccessibilityManager);
+            ACE_SCOPED_TRACE("FocusMoveSearch");
             jsAccessibilityManager->FocusMoveSearch(elementId, direction, requestId, callback, windowId);
         },
         TaskExecutor::TaskType::UI);
@@ -3924,19 +3937,41 @@ void JsAccessibilityManager::FocusExtensionElementMoveSearchNG(const SearchParam
 
 // AccessibilitySystemAbilityClient will release callback after DeregisterElementOperator
 void JsAccessibilityManager::SetSearchElementInfoByAccessibilityIdResult(AccessibilityElementOperatorCallback& callback,
-    const std::list<AccessibilityElementInfo>& infos, const int32_t requestId)
+    std::list<AccessibilityElementInfo>&& infos, const int32_t requestId)
 {
-    if (IsRegister()) {
-        callback.SetSearchElementInfoByAccessibilityIdResult(infos, requestId);
+    if (!IsRegister()) {
+        return;
     }
+    auto context = GetPipelineContext().Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), infos = std::move(infos), &callback, requestId] {
+            auto jsAccessibilityManager = weak.Upgrade();
+            CHECK_NULL_VOID(jsAccessibilityManager);
+            if (!jsAccessibilityManager->IsRegister()) {
+                return;
+            }
+            callback.SetSearchElementInfoByAccessibilityIdResult(infos, requestId);
+        }, TaskExecutor::TaskType::BACKGROUND);
 }
 
 void JsAccessibilityManager::SetSearchElementInfoByTextResult(AccessibilityElementOperatorCallback& callback,
-    const std::list<AccessibilityElementInfo>& infos, const int32_t requestId)
+    std::list<AccessibilityElementInfo>&& infos, const int32_t requestId)
 {
-    if (IsRegister()) {
-        callback.SetSearchElementInfoByTextResult(infos, requestId);
+    if (!IsRegister()) {
+        return;
     }
+    auto context = GetPipelineContext().Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), infos = std::move(infos), &callback, requestId] {
+            auto jsAccessibilityManager = weak.Upgrade();
+            CHECK_NULL_VOID(jsAccessibilityManager);
+            if (!jsAccessibilityManager->IsRegister()) {
+                return;
+            }
+            callback.SetSearchElementInfoByTextResult(infos, requestId);
+        }, TaskExecutor::TaskType::BACKGROUND);
 }
 
 void JsAccessibilityManager::SetFindFocusedElementInfoResult(

@@ -225,10 +225,10 @@ private:
     bool ConvertActionTypeToBoolen(Accessibility::ActionType action, RefPtr<NG::FrameNode>& frameNode,
         int64_t elementId, RefPtr<NG::PipelineContext>& context);
     void SetSearchElementInfoByAccessibilityIdResult(Accessibility::AccessibilityElementOperatorCallback& callback,
-        const std::list<Accessibility::AccessibilityElementInfo>& infos, const int32_t requestId);
+        std::list<Accessibility::AccessibilityElementInfo>&& infos, const int32_t requestId);
 
     void SetSearchElementInfoByTextResult(Accessibility::AccessibilityElementOperatorCallback& callback,
-        const std::list<Accessibility::AccessibilityElementInfo>& infos, const int32_t requestId);
+        std::list<Accessibility::AccessibilityElementInfo>&& infos, const int32_t requestId);
 
     void SetFindFocusedElementInfoResult(Accessibility::AccessibilityElementOperatorCallback& callback,
         const Accessibility::AccessibilityElementInfo& info, const int32_t requestId);
