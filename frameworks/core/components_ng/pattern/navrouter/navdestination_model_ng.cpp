@@ -188,7 +188,7 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc)
         navDestinationNode->AddChild(contentNode);
         navDestinationNode->SetContentNode(contentNode);
 
-        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
+        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
         contentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
     stack->Push(navDestinationNode);
