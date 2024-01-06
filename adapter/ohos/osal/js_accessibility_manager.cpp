@@ -998,6 +998,17 @@ inline bool IsPopupSupported(const RefPtr<NG::PipelineContext>& pipeline, int64_
     return false;
 }
 
+void SetAccessibilityFocusAction(AccessibilityElementInfo& nodeInfo, const char* tag)
+{
+    if (nodeInfo.HasAccessibilityFocus()) {
+        AccessibleAction action(ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS, tag);
+        nodeInfo.AddAction(action);
+    } else {
+        AccessibleAction action(ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS, tag);
+        nodeInfo.AddAction(action);
+    }
+}
+
 void UpdateSupportAction(const RefPtr<NG::FrameNode>& node, AccessibilityElementInfo& nodeInfo)
 {
     CHECK_NULL_VOID(node);
@@ -1011,13 +1022,6 @@ void UpdateSupportAction(const RefPtr<NG::FrameNode>& node, AccessibilityElement
         }
     }
 
-    if (nodeInfo.HasAccessibilityFocus()) {
-        AccessibleAction action(ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS, "ace");
-        nodeInfo.AddAction(action);
-    } else {
-        AccessibleAction action(ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS, "ace");
-        nodeInfo.AddAction(action);
-    }
     auto eventHub = node->GetEventHub<NG::EventHub>();
     CHECK_NULL_VOID(eventHub);
     auto gestureEventHub = eventHub->GetGestureEventHub();
@@ -1080,6 +1084,7 @@ static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, Ac
     GridItemInfo gridItemInfo(row, rowSpan, column, columnSpan, heading, nodeInfo.IsSelected());
     nodeInfo.SetGridItem(gridItemInfo);
 
+    SetAccessibilityFocusAction(nodeInfo, "ace");
     if (nodeInfo.IsEnabled()) {
         nodeInfo.SetCheckable(accessibilityProperty->IsCheckable());
         nodeInfo.SetScrollable(accessibilityProperty->IsScrollable());
@@ -1129,6 +1134,7 @@ static void UpdateWebAccessibilityElementInfo(
     GridItemInfo gridItemInfo(row, rowSpan, column, columnSpan, heading, nodeInfo.IsSelected());
     nodeInfo.SetGridItem(gridItemInfo);
 
+    SetAccessibilityFocusAction(nodeInfo, "web");
     if (nodeInfo.IsEnabled()) {
         nodeInfo.SetCheckable(node.checkable);
         nodeInfo.SetScrollable(node.scrollable);
@@ -3269,7 +3275,8 @@ bool JsAccessibilityManager::ExecuteActionNG(int64_t elementId,
     }
 #endif
     auto enabled = frameNode->GetFocusHub() ? frameNode->GetFocusHub()->IsEnabled() : true;
-    if (!enabled) {
+    if (!enabled && action != ActionType::ACCESSIBILITY_ACTION_ACCESSIBILITY_FOCUS &&
+        action != ActionType::ACCESSIBILITY_ACTION_CLEAR_ACCESSIBILITY_FOCUS) {
         return result;
     }
     result = ConvertActionTypeToBoolen(action, frameNode, elementId, ngPipeline);
