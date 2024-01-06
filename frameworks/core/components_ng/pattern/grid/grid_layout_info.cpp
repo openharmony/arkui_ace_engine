@@ -242,51 +242,22 @@ float GridLayoutInfo::GetContentOffset(const GridLayoutOptions& options, float m
     if (options.getSizeByIndex) {
         return GetContentOffset(mainGap);
     }
-    auto firstIrregularIndex = *(options.irregularIndexes.begin());
-    auto lastIndex = firstIrregularIndex;
-    float irregularHeight = 0.0f;
-    float regularHeight = 0.0f;
-    for (const auto& item : lineHeightMap_) {
-        auto line = gridMatrix_.find(item.first);
-        if (line == gridMatrix_.end() || line->second.empty()) {
-            continue;
-        }
-        auto lineStart = line->second.begin()->second;
-        if (options.irregularIndexes.find(lineStart) != options.irregularIndexes.end()) {
-            irregularHeight = item.second;
-        } else {
-            regularHeight = item.second;
-        }
-        if (!(NearZero(irregularHeight) || NearZero(regularHeight))) {
-            break;
-        }
-    }
-
-    // get line count
-    float totalOffset =
-        (firstIrregularIndex >= 1) ? ((firstIrregularIndex - 1) / crossCount_ + 1) * (regularHeight + mainGap) : 0;
-    for (int32_t idx : options.irregularIndexes) {
-        if (startIndex_ < idx) {
-            totalOffset += ((startIndex_ - lastIndex - 1) / crossCount_) * (regularHeight + mainGap);
-            lastIndex = idx;
-            break;
-        }
-        if (startIndex_ > idx) {
-            totalOffset += irregularHeight + mainGap;
-        }
-        totalOffset +=
-            (idx - 1 > lastIndex) ? ((idx - 1 - lastIndex - 1) / crossCount_ + 1) * (regularHeight + mainGap) : 0;
-        lastIndex = idx;
-        if (startIndex_ == idx) {
-            break;
-        }
-    }
-    totalOffset +=
-        startIndex_ > lastIndex ? ((startIndex_ - lastIndex - 1) / crossCount_) * (regularHeight + mainGap) : 0;
-    return totalOffset - currentOffset_;
+    float prevHeight = GetContentHeight(options, startIndex_, mainGap) + mainGap;
+    return prevHeight - currentOffset_;
 }
 
-float GridLayoutInfo::GetContentHeight(const GridLayoutOptions& options, float mainGap) const
+namespace {
+// prevIdx and idx are indices of two irregular items that take up a whole line
+inline float AddLinesInBetween(int32_t prevIdx, int32_t idx, int32_t crossCount, float lineHeight)
+{
+    if (crossCount == 0) {
+        return 0.0f;
+    }
+    return (idx - prevIdx) > 1 ? ((idx - 2 - prevIdx) / crossCount + 1) * lineHeight : 0.0f;
+}
+} // namespace
+
+float GridLayoutInfo::GetContentHeight(const GridLayoutOptions& options, int32_t endIdx, float mainGap) const
 {
     if (options.irregularIndexes.empty()) {
         return GetContentHeight(mainGap);
@@ -306,9 +277,9 @@ float GridLayoutInfo::GetContentHeight(const GridLayoutOptions& options, float m
         }
         auto lineStart = line->second.begin()->second;
         if (options.irregularIndexes.find(lineStart) != options.irregularIndexes.end()) {
-            irregularHeight = item.second;
+            irregularHeight = item.second + mainGap;
         } else {
-            regularHeight = item.second;
+            regularHeight = item.second + mainGap;
         }
         if (!(NearZero(irregularHeight) || NearZero(regularHeight))) {
             break;
@@ -316,22 +287,18 @@ float GridLayoutInfo::GetContentHeight(const GridLayoutOptions& options, float m
     }
     // get line count
     auto firstIrregularIndex = *(options.irregularIndexes.begin());
+    float totalHeight = AddLinesInBetween(-1, firstIrregularIndex, crossCount_, regularHeight);
     auto lastIndex = firstIrregularIndex;
-    float totalHeight =
-        (firstIrregularIndex >= 1) ? ((firstIrregularIndex - 1) / crossCount_ + 1) * (regularHeight + mainGap) : 0;
     for (int32_t idx : options.irregularIndexes) {
-        if (idx >= childrenCount_) {
+        if (idx >= endIdx) {
             break;
         }
-        totalHeight += irregularHeight + mainGap;
-        totalHeight +=
-            (idx - lastIndex) > 1 ? ((idx - 1 - lastIndex) / crossCount_ + 1) * (regularHeight + mainGap) : 0;
+        totalHeight += irregularHeight;
+        totalHeight += AddLinesInBetween(lastIndex, idx, crossCount_, regularHeight);
         lastIndex = idx;
     }
 
-    totalHeight += (childrenCount_ - 1 > lastIndex)
-                       ? ((childrenCount_ - 1 - lastIndex) / crossCount_) * (regularHeight + mainGap)
-                       : 0;
+    totalHeight += AddLinesInBetween(lastIndex, endIdx, crossCount_, regularHeight);
     totalHeight -= mainGap;
     return totalHeight;
 }

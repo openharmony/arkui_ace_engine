@@ -617,34 +617,119 @@ HWTEST_F(GridLayoutTestNg, GridScrollWithOptions006, TestSize.Level1)
 
 /**
  * @tc.name: GridLayoutInfo::GetContentHeight001
- * @tc.desc: test GetContentHeight while changing childrenCount_
+ * @tc.desc: test GetContentHeight while changing endIndex
  * @tc.type: FUNC
  */
 HWTEST_F(GridLayoutTestNg, GetContentHeight001, TestSize.Level1)
 {
     GridLayoutInfo info;
-    info.lineHeightMap_ = { { 0, 5.0f }, { 1, 5.0f }, { 2, 5.0f }, { 3, 5.0f }, { 4, 10.0f }, { 5, 10.0f },
-        { 6, 10.0f } };
+    info.lineHeightMap_ = { { 0, 5.0f }, { 1, 10.0f }, { 2, 5.0f }, { 3, 10.0f }, { 4, 5.0f }, { 5, 5.0f },
+        { 6, 10.0f }, { 7, 5.0f } };
     info.gridMatrix_ = {
-        { 0, { { 0, 0 }, { 0, 1 } } },
-        { 1, { { 0, 2 } } },
-        { 2, { { 0, 3 }, { 2, 4 } } },
-        { 3, { { 0, 5 } } },
+        { 0, { { 0, 0 }, { 1, 1 } } },
+        { 1, { { 0, 2 }, { 1, -1 } } },
+        { 2, { { 0, 3 }, { 1, 4 } } },
+        { 3, { { 0, 5 }, { 1, -1 } } },
         { 4, { { 0, 6 }, { 1, 7 } } },
-        { 5, { { 0, 8 } } },
-        { 6, { { 0, 9 }, { 1, 2 } } },
+        { 5, { { 0, 8 }, { 1, 9 } } },
+        { 6, { { 0, 10 }, { 1, -1 } } },
+        { 7, { { 0, 11 } } },
     };
 
     GridLayoutOptions option {
-        .irregularIndexes = { 2, 3, 5, 8 },
+        .irregularIndexes = { 2, 5, 10 },
     };
 
+    info.crossCount_ = 2;
+    info.childrenCount_ = 12;
+    EXPECT_EQ(info.GetContentHeight(option, 12, 1.0f), 62.0f);
+    info.childrenCount_ = 11;
+    EXPECT_EQ(info.GetContentHeight(option, 11, 1.0f), 56.0f);
     info.childrenCount_ = 10;
-    EXPECT_EQ(info.GetContentHeight(option, 1.0f), 41.0f);
+    EXPECT_EQ(info.GetContentHeight(option, 10, 1.0f), 45.0f);
+    info.childrenCount_ = 6;
+    EXPECT_EQ(info.GetContentHeight(option, 6, 1.0f), 33.0f);
     info.childrenCount_ = 5;
-    EXPECT_EQ(info.GetContentHeight(option, 1.0f), 17.0f);
+    EXPECT_EQ(info.GetContentHeight(option, 5, 1.0f), 22.0f);
     info.childrenCount_ = 2;
-    EXPECT_EQ(info.GetContentHeight(option, 1.0f), 5.0f);
+    EXPECT_EQ(info.GetContentHeight(option, 2, 1.0f), 5.0f);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::GetContentHeight002
+ * @tc.desc: test GetContentHeight, adapted from test demo
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GetContentHeight002, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.lineHeightMap_ = { { 0, 5.0f }, { 1, 5.0f }, { 2, 5.0f } };
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, -1 }, { 2, -1 } } },
+        { 1, { { 0, 1 }, { 1, 2 }, { 2, 3 } } },
+        { 2, { { 0, 4 } } },
+    };
+
+    GridLayoutOptions option {
+        .irregularIndexes = { 0 },
+    };
+
+    info.childrenCount_ = 5;
+    info.crossCount_ = 3;
+    EXPECT_EQ(info.GetContentHeight(option, 5, 1.0f), 17.0f);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::GetContentOffset001
+ * @tc.desc: test GetContentOffset with irregular items
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GetContentOffset001, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.lineHeightMap_ = { { 0, 5.0f }, { 1, 10.0f }, { 2, 5.0f }, { 3, 10.0f }, { 4, 5.0f }, { 5, 5.0f },
+        { 6, 10.0f }, { 7, 5.0f } };
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 1 } } },
+        { 1, { { 0, 2 }, { 1, -1 } } },
+        { 2, { { 0, 3 }, { 1, 4 } } },
+        { 3, { { 0, 5 }, { 1, -1 } } },
+        { 4, { { 0, 6 }, { 1, 7 } } },
+        { 5, { { 0, 8 }, { 1, 9 } } },
+        { 6, { { 0, 10 }, { 1, -1 } } },
+        { 7, { { 0, 11 } } },
+    };
+
+    GridLayoutOptions option {
+        .irregularIndexes = { 2, 5, 10 },
+    };
+
+    info.crossCount_ = 2;
+    info.childrenCount_ = 12;
+
+    info.startIndex_ = 0;
+    info.currentOffset_ = -1.0f;
+    EXPECT_EQ(info.GetContentOffset(option, 1.0f), 1.0f);
+
+    info.startIndex_ = 2;
+    info.currentOffset_ = -1.0f;
+    EXPECT_EQ(info.GetContentOffset(option, 1.0f), 7.0f);
+
+    info.startIndex_ = 3;
+    info.currentOffset_ = -2.0f;
+    EXPECT_EQ(info.GetContentOffset(option, 1.0f), 19.0f);
+
+    info.startIndex_ = 5;
+    info.currentOffset_ = -3.0f;
+    EXPECT_EQ(info.GetContentOffset(option, 1.0f), 26.0f);
+
+    info.startIndex_ = 8;
+    info.currentOffset_ = 0.0f;
+    EXPECT_EQ(info.GetContentOffset(option, 1.0f), 40.0f);
+
+    info.startIndex_ = 10;
+    info.currentOffset_ = -6.0f;
+    EXPECT_EQ(info.GetContentOffset(option, 1.0f), 52.0f);
 }
 
 /**
