@@ -54,54 +54,67 @@ RefPtr<NGGestureRecognizer> PanGesture::CreateRecognizer()
     return panRecognizer;
 }
 
-    void PanGesture::SerializeTo(char* buff)
-    {
-        *reinterpret_cast<PanDirection*>(buff) = direction_;
-        buff += sizeof(PanDirection);
-        *reinterpret_cast<double*>(buff) = distance_;
-        buff += sizeof(double);
-        double* matrix = reinterpret_cast<double*>(buff);
-        for (int i = 0; i < Matrix4::DIMENSION; i++) {
-            for (int j = 0; j < Matrix4::DIMENSION; j++) {
-                matrix[i * Matrix4::DIMENSION + j] = matrix_.Get(i, j);
-            }
+void PanGesture::SerializeTo(char* buff)
+{
+    *reinterpret_cast<int32_t*>(buff) = fingers_;
+    buff += sizeof(int32_t);
+    *reinterpret_cast<GesturePriority*>(buff) = priority_;
+    buff += sizeof(GesturePriority);
+    *reinterpret_cast<GestureMask*>(buff) = gestureMask_;
+    buff += sizeof(GestureMask);
+    *reinterpret_cast<PanDirection*>(buff) = direction_;
+    buff += sizeof(PanDirection);
+    *reinterpret_cast<double*>(buff) = distance_;
+    buff += sizeof(double);
+    double* matrix = reinterpret_cast<double*>(buff);
+    for (int i = 0; i < Matrix4::DIMENSION; i++) {
+        for (int j = 0; j < Matrix4::DIMENSION; j++) {
+            matrix[i * Matrix4::DIMENSION + j] = matrix_.Get(i, j);
         }
     }
+}
 
-    int32_t PanGesture::SizeofMe() 
-    {
-        return sizeof(int32_t) + sizeof(GestureType) + sizeof(PanDirection) + sizeof(double) + sizeof(Matrix4) +
-               Gesture::SizeofMe();
-    }
+int32_t PanGesture::SizeofMe()
+{
+    return sizeof(int32_t) + sizeof(GestureType) + sizeof(PanDirection) + sizeof(double) + sizeof(Matrix4) +
+           sizeof(fingers_) + sizeof(priority_) + sizeof(gestureMask_);
+}
 
-    int32_t PanGesture::Serialize(char* panGesture) 
-    {
-        if (panGesture == nullptr) {
-            return -1;
-        }
-        int sizePan = SizeofMe();
-        panGesture = SetHeader(panGesture, GestureType::PAN, sizePan);
-        MoveTo(panGesture);
-        return sizePan;
+int32_t PanGesture::Serialize(char* panGesture)
+{
+    if (panGesture == nullptr) {
+        return -1;
     }
+    int sizePan = SizeofMe();
+    panGesture = SetHeader(panGesture, GestureType::PAN, sizePan);
+    SerializeTo(panGesture);
+    return sizePan;
+}
 
-    int32_t PanGesture::Deserialize(const char* buff) 
-    {
-        if (buff == nullptr) {
-            return -1;
-        }
-        buff += sizeof(GestureType) + sizeof(int32_t);
-        direction_ = *reinterpret_cast<PanDirection*>(const_cast<char*>(buff));
-        buff += sizeof(PanDirection);
-        distance_ = *reinterpret_cast<double*>(const_cast<char*>(buff));
-        buff += sizeof(double);
-        double* matrix = reinterpret_cast<double*>(const_cast<char*>(buff));
-        for (int i = 0; i < Matrix4::DIMENSION; i++) { 
-            for (int j = 0; j < Matrix4::DIMENSION; j++) {
-                matrix_.Set(i , j , matrix[i * Matrix4::DIMENSION + j]);
-            }
-        }
-        return SizeofMe();
+int32_t PanGesture::Deserialize(const char* buff)
+{
+    if (buff == nullptr) {
+        return -1;
     }
+    buff += sizeof(GestureType) + sizeof(int32_t);
+    fingers_ = *reinterpret_cast<int32_t*>(const_cast<char*>(buff));
+    buff += sizeof(int32_t);
+    priority_ = *reinterpret_cast<GesturePriority*>(const_cast<char*>(buff));
+    buff += sizeof(GesturePriority);
+    gestureMask_ = *reinterpret_cast<GestureMask*>(const_cast<char*>(buff));
+    buff += sizeof(GestureMask);
+    direction_ = *reinterpret_cast<PanDirection*>(const_cast<char*>(buff));
+    buff += sizeof(PanDirection);
+    distance_ = *reinterpret_cast<double*>(const_cast<char*>(buff));
+    buff += sizeof(double);
+    double* matrix = reinterpret_cast<double*>(const_cast<char*>(buff));
+    for (int i = 0; i < Matrix4::DIMENSION; i++) {
+        for (int j = 0; j < Matrix4::DIMENSION; j++) {
+            matrix_.Set(i, j, matrix[i * Matrix4::DIMENSION + j]);
+        }
+    }
+    return SizeofMe();
+}
+
 
 } // namespace OHOS::Ace::NG
