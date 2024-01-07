@@ -55,4 +55,83 @@ RefPtr<NGGestureRecognizer> GestureGroup::CreateRecognizer()
     return groupRecognizer;
 }
 
+    int32_t GestureGroup::Deserialize(const char* buff) 
+    {
+        if (buff == nullptr) {
+            return -1;
+        }
+        int32_t* plen = reinterpret_cast<int32_t*>(const_cast<char*>(buff) + sizeof(GestureType));
+        int32_t total = *plen;
+        if (total <= 0 || total >= MAX_BYTES_SIZE) {
+            return -1;
+        }
+        auto ret = total;
+        total -= sizeof(int32_t);
+        if (total < 0) {
+            return -1;
+        }
+        total -= sizeof(GestureType);
+        if (total < 0) {
+            return -1;
+        }
+        buff += sizeof(GestureType) + sizeof(int32_t);
+        mode_ = *reinterpret_cast<GestureMode*>(const_cast<char*>(buff));
+        total -= sizeof(GestureMode);
+        if (total < 0) {
+            return -1;
+        }
+        buff += sizeof(GestureMode);
+        while (total != 0) {
+            auto gesture = MakeGesture(*(GestureType*)buff);
+            auto len = gesture->Deserialize(buff);
+            buff += len;
+            total -= len;
+            if (total < 0) {
+                return -1;
+            }
+            gestures_.push_back(gesture);
+        }
+        return ret;
+    }
+    
+    RefPtr<Gesture> GestureGroup::MakeGesture(GestureType type)
+    {
+        if (type == GestureType::PAN) {
+            PanDirection panDirection;
+            panDirection.type = PanDirection::VERTICAL;
+            return AceType::MakeRefPtr<PanGesture>(1, panDirection, 0);
+        } else if (type == GestureType::GROUP) {
+            return AceType::MakeRefPtr<GestureGroup>(GestureMode::Parallel);
+        }
+        return nullptr;
+    }
+
+    int32_t GestureGroup::Serialize(char* buff) 
+    {
+        if (buff == nullptr) {
+            return -1;
+        }
+        auto total = SizeofMe();
+        buff = SetHeader(buff, GestureType::GROUP, total);
+        *reinterpret_cast<GestureMode*>(buff) = mode_;
+        buff += sizeof(GestureMode);
+        for (auto& i : gestures_) {
+            int32_t len = i->Serialize(buff);
+            buff += len;
+        }
+        return total;
+    }
+
+    int32_t GestureGroup::SizeofMe() 
+    {
+        int32_t total = 0;
+        for (auto& i : gestures_) {
+            total += i->SizeofMe();
+        }
+        total += sizeof(int32_t);
+        total += sizeof(GestureType);
+        total += sizeof(GestureMode);
+        return total;
+    }
+    
 } // namespace OHOS::Ace::NG
