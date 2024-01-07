@@ -240,6 +240,7 @@ void GridItemPattern::InitDisableStyle()
     } else {
         if (enableOpacity_.has_value()) {
             renderContext->UpdateOpacity(enableOpacity_.value());
+            enableOpacity_.reset();
         } else {
             renderContext->UpdateOpacity(userDefineOpacity);
         }
