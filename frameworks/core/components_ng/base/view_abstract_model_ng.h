@@ -672,6 +672,11 @@ public:
         ViewAbstract::SetBlendMode(blendMode);
     }
 
+    void SetBlendApplyType(BlendApplyType blendApplyType) override
+    {
+        ViewAbstract::SetBlendApplyType(blendApplyType);
+    }
+
     void SetColorBlend(const Color& value) override
     {
         ViewAbstract::SetColorBlend(value);

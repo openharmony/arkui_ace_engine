@@ -76,21 +76,28 @@ void TimePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto stackNode = DynamicCast<FrameNode>(columnNode->GetParent());
     CHECK_NULL_VOID(stackNode);
     auto gradientPercent = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx()) / frameSize.Height();
-    InitGradient(gradientPercent, stackNode);
+    InitGradient(gradientPercent, stackNode, columnNode);
 }
 
-void TimePickerColumnLayoutAlgorithm::InitGradient(const float& gradientPercent, const RefPtr<FrameNode> stackNode)
+void TimePickerColumnLayoutAlgorithm::InitGradient(const float& gradientPercent, const RefPtr<FrameNode> stackNode,
+    const RefPtr<FrameNode> columnNode)
 {
-    auto renderContext = stackNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
+    auto stackRenderContext = stackNode->GetRenderContext();
+    auto columnRenderContext = columnNode->GetRenderContext();
+    CHECK_NULL_VOID(stackRenderContext);
+    CHECK_NULL_VOID(columnRenderContext);
     NG::Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
     gradient.AddColor(CreatePercentGradientColor(0, Color::TRANSPARENT));
     gradient.AddColor(CreatePercentGradientColor(gradientPercent, Color::WHITE));
     gradient.AddColor(CreatePercentGradientColor(1 - gradientPercent, Color::WHITE));
     gradient.AddColor(CreatePercentGradientColor(1, Color::TRANSPARENT));
-    renderContext->UpdateLinearGradient(gradient);
-    renderContext->UpdateBackBlendMode(BlendMode::SOURCE_IN);
+
+    columnRenderContext->UpdateBackBlendMode(BlendMode::SRC_IN);
+    columnRenderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
+    stackRenderContext->UpdateLinearGradient(gradient);
+    stackRenderContext->UpdateBackBlendMode(BlendMode::SRC_OVER);
+    stackRenderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
 }
 
 void TimePickerColumnLayoutAlgorithm::MeasureText(LayoutWrapper* layoutWrapper, const SizeF& size)

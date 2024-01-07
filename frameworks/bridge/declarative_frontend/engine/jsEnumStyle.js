@@ -269,10 +269,43 @@ var Alignment;
 
 var BlendMode;
 (function (BlendMode) {
-  BlendMode[BlendMode["NORMAL"] = 0] = "NORMAL";
-  BlendMode[BlendMode["DESTINATION_IN"] = 1] = "DESTINATION_IN";
-  BlendMode[BlendMode["SOURCE_IN"] = 2] = "SOURCE_IN";
+  BlendMode[BlendMode["NONE"] = 0] = "NONE";
+  BlendMode[BlendMode["CLEAR"] = 1] = "CLEAR";
+  BlendMode[BlendMode["SRC"] = 2] = "SRC";
+  BlendMode[BlendMode["DST"] = 3] = "DST";
+  BlendMode[BlendMode["SRC_OVER"] = 4] = "SRC_OVER";
+  BlendMode[BlendMode["DST_OVER"] = 5] = "DST_OVER";
+  BlendMode[BlendMode["SRC_IN"] = 6] = "SRC_IN";
+  BlendMode[BlendMode["DST_IN"] = 7] = "DST_IN";
+  BlendMode[BlendMode["SRC_OUT"] = 8] = "SRC_OUT";
+  BlendMode[BlendMode["DST_OUT"] = 9] = "DST_OUT";
+  BlendMode[BlendMode["SRC_ATOP"] = 10] = "SRC_ATOP";
+  BlendMode[BlendMode["DST_ATOP"] = 11] = "DST_ATOP";
+  BlendMode[BlendMode["XOR"] = 12] = "XOR";
+  BlendMode[BlendMode["PLUS"] = 13] = "PLUS";
+  BlendMode[BlendMode["MODULATE"] = 14] = "MODULATE";
+  BlendMode[BlendMode["SCREEN"] = 15] = "SCREEN";
+  BlendMode[BlendMode["OVERLAY"] = 16] = "OVERLAY";
+  BlendMode[BlendMode["DARKEN"] = 17] = "DARKEN";
+  BlendMode[BlendMode["LIGHTEN"] = 18] = "LIGHTEN";
+  BlendMode[BlendMode["COLOR_DODGE"] = 19] = "COLOR_DODGE";
+  BlendMode[BlendMode["COLOR_BURN"] = 20] = "COLOR_BURN";
+  BlendMode[BlendMode["HARD_LIGHT"] = 21] = "HARD_LIGHT";
+  BlendMode[BlendMode["SOFT_LIGHT"] = 22] = "SOFT_LIGHT";
+  BlendMode[BlendMode["DIFFERENCE"] = 23] = "DIFFERENCE";
+  BlendMode[BlendMode["EXCLUSION"] = 24] = "EXCLUSION";
+  BlendMode[BlendMode["MULTIPLY"] = 25] = "MULTIPLY";
+  BlendMode[BlendMode["HUE"] = 26] = "HUE";
+  BlendMode[BlendMode["SATURATION"] = 27] = "SATURATION";
+  BlendMode[BlendMode["COLOR"] = 28] = "COLOR";
+  BlendMode[BlendMode["LUMINOSITY"] = 29] = "LUMINOSITY";
 })(BlendMode || (BlendMode = {}));
+
+var BlendApplyType;
+(function (BlendApplyType) {
+  BlendApplyType[BlendApplyType["FAST"] = 0] = "FAST";
+  BlendApplyType[BlendApplyType["OFFSCREEN"] = 1] = "OFFSCREEN";
+})(BlendApplyType || (BlendApplyType = {}));
 
 var TextOverflow;
 (function (TextOverflow) {

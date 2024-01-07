@@ -3011,18 +3011,16 @@ void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
 void RosenRenderContext::OnBackBlendModeUpdate(BlendMode blendMode)
 {
     CHECK_NULL_VOID(rsNode_);
-    Rosen::RSColorBlendModeType blendModeType = Rosen::RSColorBlendModeType::NONE;
-    switch (blendMode) {
-        case BlendMode::SOURCE_IN:
-            blendModeType = Rosen::RSColorBlendModeType::SRC_IN;
-            break;
-        case BlendMode::DESTINATION_IN:
-            blendModeType = Rosen::RSColorBlendModeType::DST_IN;
-            break;
-        default:
-            blendModeType = Rosen::RSColorBlendModeType::NONE;
-    }
-    rsNode_->SetColorBlendMode(blendModeType);
+    auto rsBlendMode = static_cast<Rosen::RSColorBlendMode>(blendMode);
+    rsNode_->SetColorBlendMode(rsBlendMode);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnBackBlendApplyTypeUpdate(BlendApplyType blendApplyType)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto rsBlendApplyType = static_cast<Rosen::RSColorBlendApplyType>(blendApplyType);
+    rsNode_->SetColorBlendApplyType(rsBlendApplyType);
     RequestNextFrame();
 }
 
@@ -4110,16 +4108,16 @@ void RosenRenderContext::DumpAdvanceInfo()
     }
     if (GetBackBlendMode().has_value()) {
         switch (GetBackBlendMode().value()) {
-            case BlendMode::NORMAL: {
-                DumpLog::GetInstance().AddDesc("BlendMode:NORMAL");
+            case BlendMode::NONE: {
+                DumpLog::GetInstance().AddDesc("BlendMode:NONE");
                 break;
             }
-            case BlendMode::DESTINATION_IN: {
-                DumpLog::GetInstance().AddDesc("BlendMode:DESTINATION_IN");
+            case BlendMode::DST: {
+                DumpLog::GetInstance().AddDesc("BlendMode:DST");
                 break;
             }
-            case BlendMode::SOURCE_IN: {
-                DumpLog::GetInstance().AddDesc("BlendMode:SOURCE_IN");
+            case BlendMode::SRC_IN: {
+                DumpLog::GetInstance().AddDesc("BlendMode:SRC_IN");
                 break;
             }
             default: {

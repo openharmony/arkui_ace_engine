@@ -158,6 +158,7 @@ public:
     static void SetFrontBlur(const Dimension &radius, const BlurOption &blurOption);
     static void SetBackShadow(const Shadow &shadow);
     static void SetBlendMode(BlendMode blendMode);
+    static void SetBlendApplyType(BlendApplyType blendApplyType);
 
     // graphics
     static void SetBrightness(const Dimension &value);
