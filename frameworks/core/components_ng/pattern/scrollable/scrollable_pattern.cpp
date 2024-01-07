@@ -1131,7 +1131,7 @@ void ScrollablePattern::OnAttachToFrameNode()
 
 void ScrollablePattern::UninitMouseEvent()
 {
-    if (!boxSelectPanEvent_) {
+    if (!boxSelectPanEvent_ || !mouseEvent_) {
         return;
     }
     auto host = GetHost();
@@ -1140,6 +1140,10 @@ void ScrollablePattern::UninitMouseEvent()
     CHECK_NULL_VOID(gestureHub);
     gestureHub->RemovePanEvent(boxSelectPanEvent_);
     boxSelectPanEvent_.Reset();
+
+    auto mouseEventHub = host->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(mouseEventHub);
+    mouseEventHub->RemoveOnMouseEvent(mouseEvent_);
     ClearMultiSelect();
     ClearInvisibleItemsSelectedStatus();
     isMouseEventInit_ = false;
@@ -1149,6 +1153,21 @@ void ScrollablePattern::InitMouseEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    // use MouseEvent to obtain press position.
+    auto mouseEventHub = host->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(mouseEventHub);
+    if (!mouseEvent_) {
+        auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
+            auto pattern = weak.Upgrade();
+            if (pattern) {
+                pattern->HandleMouseEventWithoutKeyboard(info);
+            }
+        };
+        mouseEvent_ = MakeRefPtr<InputEvent>(std::move(mouseTask));
+    }
+    mouseEventHub->AddOnMouseEvent(mouseEvent_);
+
+    // use PanGesture to handle mouse box selection.
     auto gestureHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureHub);
     if (!boxSelectPanEvent_) {
@@ -1189,15 +1208,12 @@ void ScrollablePattern::InitMouseEvent()
 
 void ScrollablePattern::HandleDragStart(const GestureEvent& info)
 {
-    auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
-    auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
-    if (!IsItemSelected(info)) {
+    if (!IsItemSelected()) {
         ClearMultiSelect();
         ClearInvisibleItemsSelectedStatus();
-        mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
         lastMouseStart_ = mouseStartOffset_;
-        mouseEndOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
-        mousePressOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+        mouseEndOffset_ = mouseStartOffset_;
+        mousePressOffset_ = mouseStartOffset_;
         totalOffsetOfMousePressed_ = mousePressOffset_.GetMainOffset(axis_) + GetTotalOffset();
         canMultiSelect_ = true;
     }
@@ -1235,6 +1251,25 @@ void ScrollablePattern::HandleDragEnd(const GestureEvent& info)
     itemToBeSelected_.clear();
     lastMouseMove_.SetLocalLocation(Offset::Zero());
 }
+
+void ScrollablePattern::HandleMouseEventWithoutKeyboard(const MouseInfo& info)
+{
+    if (info.GetButton() != MouseButton::LEFT_BUTTON) {
+        return;
+    }
+    auto mouseOffsetX = static_cast<float>(info.GetLocalLocation().GetX());
+    auto mouseOffsetY = static_cast<float>(info.GetLocalLocation().GetY());
+    auto mouseOffsetGlobalX = static_cast<float>(info.GetGlobalLocation().GetX());
+    auto mouseOffsetGlobalY = static_cast<float>(info.GetGlobalLocation().GetY());
+    if (info.GetAction() == MouseAction::PRESS) {
+        mouseStartOffset_ = OffsetF(mouseOffsetX, mouseOffsetY);
+        mouseStartOffsetGlobal_ = OffsetF(mouseOffsetGlobalX, mouseOffsetGlobalY);
+    } else if (info.GetAction() == MouseAction::RELEASE) {
+        mouseStartOffset_.Reset();
+        mouseStartOffsetGlobal_.Reset();
+    }
+}
+
 void ScrollablePattern::ClearInvisibleItemsSelectedStatus()
 {
     for (auto& item : itemToBeSelected_) {
