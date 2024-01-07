@@ -410,9 +410,8 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     gridLayoutInfo_ = gridLayoutInfo;
     AnimateToTarget(scrollAlign_, layoutAlgorithmWrapper);
 
-    if (gridLayoutInfo_.startIndex_ == 0 && NearZero(gridLayoutInfo_.currentOffset_)) {
-        gridLayoutInfo_.reachStart_ = true;
-    }
+    gridLayoutInfo_.reachStart_ = gridLayoutInfo_.startIndex_ == 0 && NearZero(gridLayoutInfo_.currentOffset_);
+
     gridLayoutInfo_.childrenCount_ = dirty->GetTotalChildCount();
     currentHeight_ = EstimateHeight();
     if (!offsetEnd && gridLayoutInfo_.offsetEnd_) {
