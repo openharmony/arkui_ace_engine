@@ -18,9 +18,10 @@
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 
 namespace OHOS::Ace {
-RefPtr<NG::FrameNode> ModalUIExtension::Create(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks)
+RefPtr<NG::FrameNode> ModalUIExtension::Create(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
+    bool isAsyncModalBinding)
 {
-    return NG::UIExtensionModelNG::Create(want, callbacks);
+    return NG::UIExtensionModelNG::Create(want, callbacks, isAsyncModalBinding);
 }
 
 int32_t ModalUIExtension::GetSessionId(const RefPtr<NG::FrameNode>& uiExtNode)
@@ -28,5 +29,14 @@ int32_t ModalUIExtension::GetSessionId(const RefPtr<NG::FrameNode>& uiExtNode)
     auto pattern = uiExtNode->GetPattern<NG::UIExtensionPattern>();
     CHECK_NULL_RETURN(pattern, 0);
     return pattern->GetSessionId();
+}
+
+void ModalUIExtension::SetBindModalCallback(const RefPtr<NG::FrameNode>& uiExtNode,
+    std::function<void()>&& bindModalCallback)
+{
+    CHECK_NULL_VOID(uiExtNode);
+    auto pattern = uiExtNode->GetPattern<NG::UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetBindModalCallback(std::move(bindModalCallback));
 }
 } // namespace OHOS::Ace

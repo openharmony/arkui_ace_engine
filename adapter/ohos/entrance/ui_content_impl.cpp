@@ -2136,7 +2136,8 @@ int32_t UIContentImpl::CreateModalUIExtension(
             CHECK_NULL_VOID(pipeline);
             auto overlay = pipeline->GetOverlayManager();
             CHECK_NULL_VOID(overlay);
-            sessionId = overlay->CreateModalUIExtension(want, callbacks, config.isProhibitBack);
+            sessionId = overlay->CreateModalUIExtension(want, callbacks,
+                config.isProhibitBack, config.isAsyncModalBinding);
         },
         TaskExecutor::TaskType::UI);
     LOGI("UIExtension create modal page end, sessionId=%{public}d", sessionId);

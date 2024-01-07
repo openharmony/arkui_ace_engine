@@ -364,8 +364,8 @@ public:
     RefPtr<UINode> FindWindowScene(RefPtr<FrameNode> targetNode);
 
     // ui extension
-    int32_t CreateModalUIExtension(
-        const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, bool isProhibitBack);
+    int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
+        bool isProhibitBack, bool isAsyncModalBinding = false);
     void CloseModalUIExtension(int32_t sessionId);
 
     RefPtr<FrameNode> BindUIExtensionToMenu(const RefPtr<FrameNode>& uiExtNode,
@@ -492,6 +492,8 @@ private:
 
     // native modal ui extension
     bool isProhibitBack_ = false;
+
+    std::unordered_map<int32_t, WeakPtr<FrameNode>> uiExtNodes_;
 
     ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);
 };
