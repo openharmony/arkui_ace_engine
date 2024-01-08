@@ -4933,9 +4933,7 @@ void TextFieldPattern::SetShowError()
         layoutProperty->UpdateTextColor(passwordModeStyle_.textColor);
         preErrorState_ = true;
     }
-    if (!IsNormalInlineState()) {
-        UpdateErrorTextMargin();
-    }
+    UpdateErrorTextMargin();
 }
 
 void TextFieldPattern::CreateErrorParagraph(const std::string& content)
@@ -4966,8 +4964,9 @@ void TextFieldPattern::UpdateErrorTextMargin()
     auto theme = GetTheme();
     CHECK_NULL_VOID(theme);
     MarginProperty errorMargin;
-    if (layoutProperty->GetShowErrorTextValue(false)) {
-        CreateErrorParagraph(layoutProperty->GetErrorTextValue(""));
+    auto errorText = layoutProperty->GetErrorTextValue("");
+    if (layoutProperty->GetShowErrorTextValue(false) && !IsNormalInlineState() && !errorText.empty()) {
+        CreateErrorParagraph(errorText);
         if (errorParagraph_) {
             errorParagraph_->Layout(std::numeric_limits<double>::infinity());
             auto errorTextMargin = ERROR_TEXT_TOP_MARGIN.ConvertToPx() +
