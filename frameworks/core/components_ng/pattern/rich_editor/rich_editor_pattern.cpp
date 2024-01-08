@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <iterator>
@@ -447,7 +448,8 @@ int32_t RichEditorPattern::AddTextSpan(const TextSpanOptions& options, bool isPa
     record.beforeCaretPosition = options.offset.value_or(static_cast<int32_t>(GetTextContentLength()));
     record.addText = options.value;
     ClearRedoOperationRecords();
-    record.afterCaretPosition = record.beforeCaretPosition + StringUtils::ToWstring(options.value).length();
+    record.afterCaretPosition =
+        record.beforeCaretPosition + static_cast<int32_t>(StringUtils::ToWstring(options.value).length());
     AddOperationRecord(record);
     return AddTextSpanOperation(options, isPaste, index);
 }
@@ -2626,9 +2628,14 @@ std::wstring RichEditorPattern::DeleteBackwardOperation(int32_t length)
     for (auto iter = spans_.cbegin(); iter != spans_.cend(); iter++) {
         wss << StringUtils::ToWstring((*iter)->content);
     }
-    auto start =
-        std::clamp(static_cast<int32_t>(caretPosition_ - length), 0, static_cast<int32_t>(GetTextContentLength()));
-    std::wstring deleteText = wss.str().substr(start, caretPosition_ - start);
+    auto textContent = wss.str();
+    if (static_cast<int32_t>(textContent.length()) != GetTextContentLength()) {
+        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "textContent length mismatch, %{public}d vs. %{public}d",
+            static_cast<int32_t>(textContent.length()), GetTextContentLength());
+    }
+    auto start = std::clamp(caretPosition_ - length, 0, static_cast<int32_t>(textContent.length()));
+    std::wstring deleteText =
+        textContent.substr(static_cast<uint32_t>(start), static_cast<uint32_t>(caretPosition_ - start));
     RichEditorDeleteValue info;
     info.SetRichEditorDeleteDirection(RichEditorDeleteDirection::BACKWARD);
     if (caretPosition_ == 0) {
@@ -2679,9 +2686,15 @@ std::wstring RichEditorPattern::DeleteForwardOperation(int32_t length)
     for (auto iter = spans_.cbegin(); iter != spans_.cend(); iter++) {
         wss << StringUtils::ToWstring((*iter)->content);
     }
-    auto end =
-        std::clamp(static_cast<int32_t>(caretPosition_ + length), 0, static_cast<int32_t>(GetTextContentLength()));
-    std::wstring deleteText = wss.str().substr(caretPosition_, end - caretPosition_);
+    auto textContent = wss.str();
+    if (static_cast<int32_t>(textContent.length()) != GetTextContentLength()) {
+        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "textContent length mismatch, %{public}d vs. %{public}d",
+            static_cast<int32_t>(textContent.length()), GetTextContentLength());
+    }
+    auto end = std::clamp(caretPosition_ + length, 0, static_cast<int32_t>(textContent.length()));
+    std::wstring deleteText = textContent.substr(
+        static_cast<uint32_t>(std::clamp(caretPosition_, 0, static_cast<int32_t>(textContent.length()))),
+        static_cast<uint32_t>(end - caretPosition_));
     if (caretPosition_ == GetTextContentLength()) {
         return deleteText;
     }
@@ -2931,11 +2944,11 @@ int32_t RichEditorPattern::GetLeftWordPosition(int32_t caretPosition)
     for (auto iter = spans_.rbegin(); iter != spans_.rend(); iter++) {
         auto span = *iter;
         auto content = StringUtils::ToWstring(span->content);
-        if (caretPosition <= span->position - content.length()) {
+        if (caretPosition <= span->position - static_cast<int32_t>(content.length())) {
             continue;
         }
         int32_t position = span->position;
-        for (int32_t i = content.length() - 1; i >= 0; i--) {
+        for (auto i = content.length() - 1; i >= 0; i--) {
             if (position-- > caretPosition) {
                 continue;
             }
@@ -2973,8 +2986,8 @@ int32_t RichEditorPattern::GetRightWordPosition(int32_t caretPosition)
         if (caretPosition > span->position) {
             continue;
         }
-        int32_t position = span->position - content.length();
-        for (int32_t i = 0; i < content.length(); i++) {
+        int32_t position = span->position - static_cast<int32_t>(content.length());
+        for (size_t i = 0; i < content.length(); i++) {
             if (position++ < caretPosition) {
                 continue;
             }
@@ -3010,11 +3023,11 @@ int32_t RichEditorPattern::GetParagraphBeginPosition(int32_t caretPosition)
     for (auto iter = spans_.rbegin(); iter != spans_.rend(); iter++) {
         auto span = *iter;
         auto content = StringUtils::ToWstring(span->content);
-        if (caretPosition <= span->position - content.length()) {
+        if (caretPosition <= span->position - static_cast<int32_t>(content.length())) {
             continue;
         }
         int32_t position = span->position;
-        for (int32_t i = content.length() - 1; i >= 0; i--) {
+        for (auto i = content.length() - 1; i >= 0; i--) {
             if (position-- > caretPosition) {
                 continue;
             }
@@ -3036,8 +3049,8 @@ int32_t RichEditorPattern::GetParagraphEndPosition(int32_t caretPosition)
         if (caretPosition > span->position) {
             continue;
         }
-        int32_t position = span->position - content.length();
-        for (int32_t i = 0; i < content.length(); i++) {
+        int32_t position = span->position - static_cast<int32_t>(content.length());
+        for (size_t i = 0; i < content.length(); i++) {
             if (position++ < caretPosition) {
                 continue;
             }
