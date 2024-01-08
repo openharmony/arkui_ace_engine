@@ -24,6 +24,8 @@
 #include "base/memory/ace_type.h"
 
 namespace OHOS {
+template<typename T>
+class sptr;
 
 namespace MMI {
 class PointerEvent;
@@ -32,6 +34,7 @@ class AxisEvent;
 } // namespace MMI
 
 namespace Rosen {
+class OccupiedAreaChangeInfo;
 class RSSurfaceNode;
 class AvoidArea;
 } // namespace Rosen
@@ -107,6 +110,7 @@ public:
 
     // The interface to control the avoid area
     virtual void NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const = 0;
+    virtual bool NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaChangeInfo> info) const = 0;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_SESSION_WRAPPER_H
