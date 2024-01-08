@@ -5118,6 +5118,7 @@ void RichEditorPattern::HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& n
     CHECK_NULL_VOID(host);
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
+    StopAutoScroll();
     if (!isCursorAlwaysDisplayed_) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "In OnDragEnded,"
             " the released location is not in the current richEditor, id:%{public}d", host->GetId());
