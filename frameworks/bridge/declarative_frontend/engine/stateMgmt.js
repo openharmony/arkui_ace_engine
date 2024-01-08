@@ -5110,7 +5110,7 @@ class ViewPU extends NativeViewPartialUpdate {
             // Call below will set this.parent_ to parent as well
             parent.addChild(this);
         }
-        else if (localStorage) {
+        if (localStorage) {
             this.localStorage_ = localStorage;
             
         }

@@ -244,9 +244,10 @@ abstract class ViewPU extends NativeViewPartialUpdate
       this.setCardId(parent.getCardId());
       // Call below will set this.parent_ to parent as well
       parent.addChild(this);
-    } else if (localStorage) {
+    }
+    if (localStorage) {
       this.localStorage_ = localStorage;
-      stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: Using LocalStorage instance provided via @Entry.`);
+      stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: Using LocalStorage instance provided via @Entry or view instance creation.`);
     }
     this.isCompFreezeAllowed = this.isCompFreezeAllowed || (this.parent_ && this.parent_.isCompFreezeAllowed);
 
