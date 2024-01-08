@@ -78,9 +78,7 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
             tabBarPattern->HandleBottomTabBarChange(index);
         }
         tabBarPattern->SetMaskAnimationByCreate(false);
-        if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::FIXED) {
-            tabBarPattern->SetIndicator(index);
-        }
+        tabBarPattern->SetIndicator(index);
         tabBarPattern->UpdateIndicator(index);
         tabBarPattern->UpdateTextColor(index);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
