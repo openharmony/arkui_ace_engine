@@ -107,14 +107,24 @@ public:
         isDisableSwipe_ = isDisableSwipe;
     }
 
-    void SetOnContentWillChange(std::function<bool(int32_t)>&& onContentWillChange)
+    void SetOnContentWillChange(std::function<bool(int32_t)>&& callback)
     {
-        contentWillChangeCallback_ = onContentWillChange;
+        callback_ = callback;
     }
 
     std::function<bool(int32_t)> GetOnContentWillChange() const
     {
-        return contentWillChangeCallback_;
+        return callback_;
+    }
+
+    void SetInterceptStatus(bool status)
+    {
+        interceptStatus_ = status;
+    }
+
+    bool GetInterceptStatus() const
+    {
+        return interceptStatus_;
     }
 
 private:
@@ -135,7 +145,8 @@ private:
     ChangeEventPtr onIndexChangeEvent_;
     AnimationStartEventPtr animationStartEvent_;
     AnimationEndEventPtr animationEndEvent_;
-    std::function<bool(int32_t)> contentWillChangeCallback_;
+    std::function<bool(int32_t)> callback_;
+    bool interceptStatus_ = false;
 };
 
 } // namespace OHOS::Ace::NG

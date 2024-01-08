@@ -40,6 +40,8 @@
 #include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_node.h"
+#include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/syntax/for_each_node.h"
@@ -845,6 +847,20 @@ void SwiperPattern::SwipeTo(int32_t index)
     auto targetIndex = IsLoop() ? index : (index < 0 || index > (TotalCount() - 1)) ? 0 : index;
     targetIndex = IsLoop() ? targetIndex : std::clamp(targetIndex, 0, TotalCount() - GetDisplayCount());
 
+    auto host = GetHost();
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    if (tabsPattern->GetInterceptStatus()) {
+        auto interceptCallback = tabsPattern->GetOnContentWillChange();
+        if (!interceptCallback(targetIndex)) {
+            LOGE("ZMH, interceptCallback return false, targetIndex:%{public}d", targetIndex);
+            return;
+        }
+        LOGE("ZMH, interceptCallback return true, targetIndex:%{public}d", targetIndex);
+    }
+
     if (IsUseCustomAnimation()) {
         OnCustomContentTransition(targetIndex);
         MarkDirtyNodeSelf();
@@ -1166,9 +1182,6 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     direction_ = GetDirection();
 
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        // 打一下速度看有无正负号
-        LOGE("ZMH, actionStartTask, GetSpeed():%{public}f, GetMainSpeed():%{public}f", info.GetSpeed(), info.GetMainSpeed());
-
         auto pattern = weak.Upgrade();
         if (pattern) {
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
@@ -1184,8 +1197,6 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     };
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        LOGE("ZMH, actionUpdateTask, GetSpeed():%{public}f, GetMainSpeed():%{public}f", info.GetSpeed(), info.GetMainSpeed());
-
         auto pattern = weak.Upgrade();
         if (pattern) {
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
@@ -1201,8 +1212,6 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        LOGE("ZMH, actionEndTask, GetSpeed():%{public}f, GetMainSpeed():%{public}f", info.GetSpeed(), info.GetMainSpeed());
-
         auto pattern = weak.Upgrade();
         if (pattern) {
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {

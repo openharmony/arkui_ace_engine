@@ -667,6 +667,7 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
 void TabBarPattern::HandleClick(const GestureEvent& info)
 {
+    LOGE("ZMH, TabBarPattern::HandleClick enter");
     if (info.GetSourceDevice() == SourceType::KEYBOARD) {
         return;
     }
@@ -698,6 +699,20 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
         indicator_ >= static_cast<int32_t>(tabBarStyles_.size())) {
         return;
     }
+    LOGE("ZMH, selected index:%{public}d", index);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    if (tabsPattern->GetInterceptStatus()) {
+        auto interceptCallback = tabsPattern->GetOnContentWillChange();
+        if (!interceptCallback(index)) {
+            LOGE("ZMH, interceptCallback return false, index:%{public}d", index);
+            return;
+        }
+        LOGE("ZMH, interceptCallback return true, index:%{public}d", index);
+    }
+
     SetSwiperCurve(DurationCubicCurve);
 
     TabBarClickEvent(index);
@@ -708,10 +723,6 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
         return;
     }
 
-    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
-    CHECK_NULL_VOID(tabsNode);
-    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
-    CHECK_NULL_VOID(tabsPattern);
     if (tabsPattern->GetIsCustomAnimation()) {
         OnCustomContentTransition(indicator_, index);
     } else {
