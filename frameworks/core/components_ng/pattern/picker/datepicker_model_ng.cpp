@@ -267,6 +267,14 @@ void DatePickerModelNG::SetBackgroundColor(const Color& color)
     datePickerPattern->SetBackgroundColor(color);
 }
 
+void DatePickerModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->SetBackgroundColor(color);
+}
+
 void DatePickerModelNG::SetChangeEvent(DateChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

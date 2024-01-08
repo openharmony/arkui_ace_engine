@@ -34,6 +34,21 @@ class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
       this._modifiersWithKeys.delete(key);
     });
   }
+  outline(value: OutlineOptions): this {
+    throw new Error('Method not implemented.');
+  }
+  outlineColor(value: ResourceColor | EdgeColors): this {
+    throw new Error('Method not implemented.');
+  }
+  outlineRadius(value: Dimension | OutlineRadiuses): this {
+    throw new Error('Method not implemented.');
+  }
+  outlineStyle(value: OutlineStyle | EdgeOutlineStyles): this {
+    throw new Error('Method not implemented.');
+  }
+  outlineWidth(value: Dimension | EdgeOutlineWidths): this {
+    throw new Error('Method not implemented.');
+  }
   width(value: Length): this {
     throw new Error('Method not implemented.');
   }
