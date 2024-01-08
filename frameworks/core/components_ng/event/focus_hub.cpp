@@ -727,6 +727,10 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
                 ret = RequestNextFocus(FocusStep::TAB, GetRect());
                 auto focusParent = GetParentFocusHub();
                 if (!focusParent || !focusParent->IsCurrentFocus()) {
+                    if (context->IsFocusWindowIdSetted()) {
+                        FocusToHeadOrTailChild(true);
+                        return false;
+                    }
                     ret = FocusToHeadOrTailChild(true);
                 }
                 context->SetIsFocusingByTab(false);
@@ -735,6 +739,10 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
                 ret = RequestNextFocus(FocusStep::SHIFT_TAB, GetRect());
                 auto focusParent = GetParentFocusHub();
                 if (!focusParent || !focusParent->IsCurrentFocus()) {
+                    if (context->IsFocusWindowIdSetted()) {
+                        FocusToHeadOrTailChild(false);
+                        return false;
+                    }
                     ret = FocusToHeadOrTailChild(false);
                 }
                 context->SetIsFocusingByTab(false);
