@@ -451,21 +451,21 @@ public:
     virtual void FireAndCleanScrollingListener() {}
     virtual void ResetDragOption() {}
 
-    virtual int32_t WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId)
+    virtual int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId)
     {
         return -1;
     }
-    
-    virtual void SearchExtensionElementInfoByAccessibilityId(int32_t elementId, int32_t mode,
-        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) {}
-    virtual void SearchElementInfosByText(int32_t elementId, const std::string& text,
-        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) {}
-    virtual void FindFocusedElementInfo(int32_t elementId, int32_t focusType,
-        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) {}
-    virtual void FocusMoveSearch(int32_t elementId, int32_t direction,
-        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) {}
+
+    virtual void SearchExtensionElementInfoByAccessibilityId(int64_t elementId, int32_t mode,
+        int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) {}
+    virtual void SearchElementInfosByText(int64_t elementId, const std::string& text,
+        int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) {}
+    virtual void FindFocusedElementInfo(int64_t elementId, int32_t focusType,
+        int64_t baseParent, Accessibility::AccessibilityElementInfo& output) {}
+    virtual void FocusMoveSearch(int64_t elementId, int32_t direction,
+        int64_t baseParent, Accessibility::AccessibilityElementInfo& output) {}
     virtual bool TransferExecuteAction(
-        int32_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int32_t offset)
+        int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset)
     {
         return false;
     }

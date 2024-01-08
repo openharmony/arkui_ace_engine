@@ -2931,7 +2931,7 @@ void WebPattern::UpdateJavaScriptOnDocumentEnd()
     }
 }
 
-RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeById(int32_t accessibilityId)
+RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeById(int64_t accessibilityId)
 {
     CHECK_NULL_RETURN(delegate_, nullptr);
     CHECK_NULL_RETURN(webAccessibilityNode_, nullptr);
@@ -2943,7 +2943,7 @@ RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeById(int32_t access
     return webAccessibilityNode_;
 }
 
-RefPtr<WebAccessibilityNode> WebPattern::GetFocusedAccessibilityNode(int32_t accessibilityId, bool isAccessibilityFocus)
+RefPtr<WebAccessibilityNode> WebPattern::GetFocusedAccessibilityNode(int64_t accessibilityId, bool isAccessibilityFocus)
 {
     CHECK_NULL_RETURN(delegate_, nullptr);
     CHECK_NULL_RETURN(webAccessibilityNode_, nullptr);
@@ -2955,7 +2955,7 @@ RefPtr<WebAccessibilityNode> WebPattern::GetFocusedAccessibilityNode(int32_t acc
     return webAccessibilityNode_;
 }
 
-RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeByFocusMove(int32_t accessibilityId, int32_t direction)
+RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeByFocusMove(int64_t accessibilityId, int32_t direction)
 {
     CHECK_NULL_RETURN(delegate_, nullptr);
     CHECK_NULL_RETURN(webAccessibilityNode_, nullptr);
@@ -2968,10 +2968,10 @@ RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeByFocusMove(int32_t
 }
 
 
-void WebPattern::ExecuteAction(int32_t nodeId, AceAction action) const
+void WebPattern::ExecuteAction(int64_t accessibilityId, AceAction action) const
 {
     CHECK_NULL_VOID(delegate_);
-    delegate_->ExecuteAction(nodeId, action);
+    delegate_->ExecuteAction(accessibilityId, action);
 }
 
 void WebPattern::SetAccessibilityState(bool state)
