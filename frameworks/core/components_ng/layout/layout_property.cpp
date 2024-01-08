@@ -19,6 +19,7 @@
 
 #include "base/geometry/ng/size_t.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
@@ -221,9 +222,16 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
         // TODO: add margin is negative case.
         marginResult_.reset();
         auto margin = CreateMargin();
-        MinusPaddingToSize(margin, layoutConstraint_->maxSize);
-        MinusPaddingToSize(margin, layoutConstraint_->minSize);
-        MinusPaddingToSize(margin, layoutConstraint_->percentReference);
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            MinusPaddingToNonNegativeSize(margin, layoutConstraint_->maxSize);
+            MinusPaddingToNonNegativeSize(margin, layoutConstraint_->minSize);
+            MinusPaddingToNonNegativeSize(margin, layoutConstraint_->percentReference);
+        } else {
+            MinusPaddingToSize(margin, layoutConstraint_->maxSize);
+            MinusPaddingToSize(margin, layoutConstraint_->minSize);
+            MinusPaddingToSize(margin, layoutConstraint_->percentReference);
+        }
+        // already has non negative protection
         MinusPaddingToSize(margin, layoutConstraint_->selfIdealSize);
         MinusPaddingToSize(margin, layoutConstraint_->parentIdealSize);
     }
@@ -1065,11 +1073,11 @@ bool LayoutProperty::ConstraintEqual(const std::optional<LayoutConstraintF>& pre
     const auto& content = contentConstraint_.value();
     if (GreaterOrEqualToInfinity(layout.maxSize.Width()) && !widthPercentSensitive_) {
         return (layout.EqualWithoutPercentWidth(preLayoutConstraint.value()) &&
-            content.EqualWithoutPercentWidth(preContentConstraint.value()));
+                content.EqualWithoutPercentWidth(preContentConstraint.value()));
     }
     if (GreaterOrEqualToInfinity(layout.maxSize.Height()) && !heightPercentSensitive_) {
         return (layout.EqualWithoutPercentHeight(preLayoutConstraint.value()) &&
-            content.EqualWithoutPercentHeight(preContentConstraint.value()));
+                content.EqualWithoutPercentHeight(preContentConstraint.value()));
     }
     return (preLayoutConstraint == layoutConstraint_ && preContentConstraint == contentConstraint_);
 }
