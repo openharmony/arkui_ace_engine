@@ -3994,7 +3994,6 @@ void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
     isTextChange_ = true;
     moveDirection_ = MoveDirection::FORWARD;
     moveLength_ += static_cast<int32_t>(StringUtils::ToWstring(insertValue).length());
-    MoveCaretAfterTextChange();
     if (caretSpanIndex_ == -1) {
         child = GetChildByIndex(info.GetSpanIndex());
         if (child && child->GetTag() == V2::SPAN_ETS_TAG) {
