@@ -371,6 +371,20 @@ void BubbleLayoutAlgorithm::BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, Ref
     auto childShowWidth = childSize_.Width() - BUBBLE_ARROW_HEIGHT.ConvertToPx() * 2;
     auto childShowHeight = childSize_.Height() - BUBBLE_ARROW_HEIGHT.ConvertToPx() * 2;
     childSize_ = SizeF(childShowWidth, childShowHeight);
+    auto littleSide = childSize_.Height() > childSize_.Width() ? childSize_.Width() : childSize_.Height();
+    auto littleSideHalf = littleSide / HALF;
+    if (borderRadius_.Unit() == DimensionUnit::PERCENT) {
+        auto value = borderRadius_.Value() * littleSideHalf;
+        borderRadius_.SetValue(value);
+        borderRadius_.SetUnit(DimensionUnit::PX);
+        border_.SetBorderRadius(Radius(borderRadius_));
+    }
+    auto borderRadius = ModifyBorderRadius(border_.BottomLeftRadius().GetY().ConvertToPx(), childSize_.Height() / 2);
+    auto borderRadius2 = ModifyBorderRadius(border_.BottomLeftRadius().GetY().ConvertToPx(), childSize_.Width() / 2);
+    float radiusPx = borderRadius < borderRadius2 ? borderRadius : borderRadius2;
+    borderRadius_.SetValue(radiusPx);
+    borderRadius_.SetUnit(DimensionUnit::PX);
+    border_.SetBorderRadius(Radius(borderRadius_));
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         childOffset_ = GetChildPosition(childSize_, bubbleProp, UseArrowOffset); // bubble's offset
         placement_ = arrowPlacement_;
@@ -1449,20 +1463,7 @@ std::string BubbleLayoutAlgorithm::ClipBubbleWithPath()
     if (!bCaretMode_) {
         arrowOffset = GetArrowOffset(arrowPlacement_);
     }
-    auto littleSide = childSize_.Height() > childSize_.Width() ? childSize_.Width() : childSize_.Height();
-    auto littleSideHalf = littleSide / HALF;
-    if (borderRadius_.Unit() == DimensionUnit::PERCENT) {
-        auto value = borderRadius_.Value() * littleSideHalf;
-        borderRadius_.SetValue(value);
-        borderRadius_.SetUnit(DimensionUnit::PX);
-        border_.SetBorderRadius(Radius(borderRadius_));
-    }
-    auto borderRadius = ModifyBorderRadius(border_.BottomLeftRadius().GetY().ConvertToPx(), childSize_.Height() / 2);
-    auto borderRadius2 = ModifyBorderRadius(border_.BottomLeftRadius().GetY().ConvertToPx(), childSize_.Width() / 2);
-    float radiusPx = borderRadius < borderRadius2 ? borderRadius : borderRadius2;
-    borderRadius_.SetValue(radiusPx);
-    borderRadius_.SetUnit(DimensionUnit::PX);
-    border_.SetBorderRadius(Radius(borderRadius_));
+    float radiusPx = borderRadius_.ConvertToPx();
     Placement arrowBuildplacement = Placement::NONE;
     if (enableArrow_ && showArrow_) {
         GetArrowBuildPlacement(arrowBuildplacement);
