@@ -113,4 +113,14 @@ void SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, const
     setterClasses[subTypeClass](node, subTypeId, value);
 }
 
+const char* GetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type)
+{
+    TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "the GetNodeAttribute  not impl");
+    return "";
+}
+void ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type)
+{
+    TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "the reset attribute not impl: %{public}d", type);
+}
+
 } // namespace OHOS::Ace::NodeModel

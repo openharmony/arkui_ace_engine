@@ -50,6 +50,12 @@ RefPtr<SwiperController> SwiperModelNG::Create()
     return pattern->GetSwiperController();
 }
 
+RefPtr<FrameNode> SwiperModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto swiperNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, nodeId, AceType::MakeRefPtr<SwiperPattern>());
+    return swiperNode;
+}
+
 void SwiperModelNG::SetDirection(Axis axis)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, Direction, axis);
