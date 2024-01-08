@@ -135,11 +135,11 @@ napi_value JSOffscreenCanvas::Constructor(napi_env env, napi_callback_info info)
     }
     if (napi_get_value_double(env, argv[0], &fWidth) == napi_ok) {
         fWidth = PipelineBase::Vp2PxWithCurrentDensity(fWidth);
-        workCanvas->SetWidth(round(fWidth));
+        workCanvas->SetWidth(fWidth);
     }
     if (napi_get_value_double(env, argv[1], &fHeight) == napi_ok) {
         fHeight = PipelineBase::Vp2PxWithCurrentDensity(fHeight);
-        workCanvas->SetHeight(round(fHeight));
+        workCanvas->SetHeight(fHeight);
     }
 
     napi_coerce_to_native_binding_object(
