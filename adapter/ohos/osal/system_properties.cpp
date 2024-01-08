@@ -43,6 +43,7 @@ constexpr char PROPERTY_DEVICE_TYPE_TABLET[] = "tablet";
 constexpr char PROPERTY_DEVICE_TYPE_TWOINONE[] = "2in1";
 constexpr char PROPERTY_DEVICE_TYPE_WATCH[] = "watch";
 constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
+constexpr char ENABLE_DEBUG_AUTOUI_KEY[] = "persist.ace.debug.autoui.enabled";
 constexpr char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstack.enabled";
 constexpr char ANIMATION_SCALE_KEY[] = "persist.sys.arkui.animationscale";
@@ -65,6 +66,11 @@ void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
     int32_t temp = deviceWidth;
     deviceWidth = deviceHeight;
     deviceHeight = temp;
+}
+
+bool IsDebugAutoUIEnabled()
+{
+    return (system::GetParameter(ENABLE_DEBUG_AUTOUI_KEY, "false") == "true");
 }
 
 bool IsDebugBoundaryEnabled()
@@ -272,6 +278,7 @@ bool SystemProperties::unZipHap_ = true;
 ACE_WEAK_SYM bool SystemProperties::rosenBackendEnabled_ = IsRosenBackendEnabled();
 ACE_WEAK_SYM bool SystemProperties::isHookModeEnabled_ = IsHookModeEnabled();
 bool SystemProperties::debugBoundaryEnabled_ = IsDebugBoundaryEnabled();
+bool SystemProperties::debugAutoUIEnabled_ = IsDebugAutoUIEnabled();
 bool SystemProperties::downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled();
 ACE_WEAK_SYM bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
 ACE_WEAK_SYM bool SystemProperties::debugEnabled_ = IsDebugEnabled();
@@ -400,6 +407,8 @@ void SystemProperties::InitDeviceInfo(
     rosenBackendEnabled_ = IsRosenBackendEnabled();
     isHookModeEnabled_ = IsHookModeEnabled();
     debugBoundaryEnabled_ = system::GetParameter(ENABLE_DEBUG_BOUNDARY_KEY, "false") == "true";
+    debugAutoUIEnabled_ = system::GetParameter(ENABLE_DEBUG_AUTOUI_KEY, "false") == "true";
+
     downloadByNetworkEnabled_ = system::GetParameter(ENABLE_DOWNLOAD_BY_NETSTACK_KEY, "true") == "true";
     animationScale_ = std::atof(system::GetParameter(ANIMATION_SCALE_KEY, "1").c_str());
     WatchParameter(ANIMATION_SCALE_KEY, OnAnimationScaleChanged, nullptr);
@@ -419,8 +428,9 @@ void SystemProperties::InitDeviceInfo(
 ACE_WEAK_SYM void SystemProperties::SetDeviceOrientation(int32_t orientation)
 {
     int32_t newOrientation = ((orientation == static_cast<int32_t>(RsOrientation::LANDSCAPE)) ||
-        (orientation == static_cast<int32_t>(RsOrientation::LANDSCAPE_INVERTED))) ?
-        ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT;
+                                 (orientation == static_cast<int32_t>(RsOrientation::LANDSCAPE_INVERTED)))
+                                 ? ORIENTATION_LANDSCAPE
+                                 : ORIENTATION_PORTRAIT;
     if (newOrientation == ORIENTATION_PORTRAIT && orientation_ != DeviceOrientation::PORTRAIT) {
         Swap(deviceWidth_, deviceHeight_);
         orientation_ = DeviceOrientation::PORTRAIT;

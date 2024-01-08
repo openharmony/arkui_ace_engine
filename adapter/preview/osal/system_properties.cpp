@@ -67,6 +67,7 @@ LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
 bool SystemProperties::unZipHap_ = true;
 bool SystemProperties::windowAnimationEnabled_ = false;
 bool SystemProperties::debugBoundaryEnabled_ = false;
+bool SystemProperties::debugAutoUIEnabled_ = false;
 bool SystemProperties::downloadByNetworkEnabled_ = false;
 bool SystemProperties::gpuUploadEnabled_ = false;
 bool SystemProperties::isHookModeEnabled_ = false;
