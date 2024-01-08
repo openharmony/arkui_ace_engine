@@ -466,6 +466,7 @@ int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
 {
     CHECK_NULL_RETURN(builder, -1);
     PlaceholderRun run;
+    textStyle = TextStyle();
     run.width = width;
     run.height = height;
     switch (verticalAlign) {
@@ -513,6 +514,7 @@ int32_t PlaceholderSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNo
     double width, double height, VerticalAlign /* verticalAlign */)
 {
     CHECK_NULL_RETURN(builder, -1);
+    textStyle = TextStyle();
     PlaceholderRun run;
     run.width = width;
     run.height = height;
