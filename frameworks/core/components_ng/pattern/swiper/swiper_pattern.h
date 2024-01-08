@@ -764,6 +764,7 @@ private:
     void CalculateGestureState(float additionalOffset, float currentTurnPageRate);
     void StopIndicatorAnimation();
     RefPtr<FrameNode> GetCurrentFrameNode(int32_t currentIndex) const;
+    bool FadeOverScroll(float offset);
 
     WeakPtr<NestableScrollContainer> parent_;
     /**

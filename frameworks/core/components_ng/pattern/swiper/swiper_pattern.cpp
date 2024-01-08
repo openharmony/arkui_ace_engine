@@ -1373,18 +1373,7 @@ bool SwiperPattern::CheckOverScroll(float offset)
             }
             break;
         case EdgeEffect::FADE:
-            if (IsOutOfBoundary(offset)) {
-                if (!IsVisibleChildrenSizeLessThanSwiper()) {
-                    currentDelta_ = currentDelta_ - offset;
-                }
-                auto host = GetHost();
-                CHECK_NULL_RETURN(host, false);
-                if (itemPosition_.begin()->first == 0 || itemPosition_.rbegin()->first == TotalCount() - 1) {
-                    auto remainOffset = GetDistanceToEdge();
-                    fadeOffset_ += (offset - remainOffset);
-                }
-                host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-                MarkDirtyNodeSelf();
+            if (FadeOverScroll(offset)) {
                 return true;
             }
             break;
@@ -1423,6 +1412,29 @@ bool SwiperPattern::SpringOverScroll(float offset)
     FireGestureSwipeEvent(GetLoopIndex(gestureSwipeIndex_), callbackInfo);
     MarkDirtyNodeSelf();
     return true;
+}
+
+bool SwiperPattern::FadeOverScroll(float offset)
+{
+    if (IsOutOfBoundary(fadeOffset_ + offset)) {
+        auto onlyUpdateFadeOffset = (itemPosition_.begin()->first == 0 && offset < 0.0f) ||
+                               (itemPosition_.rbegin()->first == TotalCount() - 1 && offset > 0.0f);
+        if (!IsVisibleChildrenSizeLessThanSwiper() && !onlyUpdateFadeOffset) {
+            currentDelta_ = currentDelta_ - offset;
+        }
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        if (itemPosition_.begin()->first == 0 || itemPosition_.rbegin()->first == TotalCount() - 1) {
+            auto remainOffset = GetDistanceToEdge();
+            fadeOffset_ += (offset - remainOffset);
+        }
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        MarkDirtyNodeSelf();
+        return true;
+    }
+
+    fadeOffset_ = 0.0f;
+    return false;
 }
 
 void SwiperPattern::HandleTouchBottomLoop()
