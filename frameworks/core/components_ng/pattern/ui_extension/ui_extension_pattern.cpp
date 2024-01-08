@@ -161,7 +161,7 @@ void UIExtensionPattern::OnConnect()
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     uiExtensionManager->AddAliveUIExtension(host->GetId(), WeakClaim(this));
     if (isFocused || isModal_) {
-        uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this));
+        uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this), sessionWrapper_);
     }
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "The UIExtensionComponent is connected.");
 }
@@ -205,11 +205,6 @@ void UIExtensionPattern::OnExtensionDied()
     }
 }
 
-bool UIExtensionPattern::OnBackPressed()
-{
-    return sessionWrapper_ && sessionWrapper_->NotifyBackPressedSync();
-}
-
 bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (componentType_ == ComponentType::DYNAMIC) {
@@ -224,11 +219,8 @@ bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     auto frameRect = geometryNode->GetFrameRect();
-    ContainerScope scope(instanceId_);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    auto curWindow = pipeline->GetCurrentWindowRect();
-    sessionWrapper_->RefreshDisplayArea(std::round(globalOffsetWithTranslate.GetX() + curWindow.Left()),
-        std::round(globalOffsetWithTranslate.GetY() + curWindow.Top()), frameRect.Width(), frameRect.Height());
+    sessionWrapper_->RefreshDisplayArea(
+        globalOffsetWithTranslate.GetX(), globalOffsetWithTranslate.GetY(), frameRect.Width(), frameRect.Height());
     return false;
 }
 
@@ -445,7 +437,7 @@ void UIExtensionPattern::HandleFocusEvent()
     }
     DispatchFocusState(true);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
-    uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this));
+    uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this), sessionWrapper_);
 }
 
 void UIExtensionPattern::HandleBlurEvent()
@@ -455,7 +447,7 @@ void UIExtensionPattern::HandleBlurEvent()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
-    uiExtensionManager->RegisterUIExtensionInFocus(nullptr);
+    uiExtensionManager->RegisterUIExtensionInFocus(nullptr, nullptr);
 }
 
 void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
@@ -791,6 +783,11 @@ void UIExtensionPattern::DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidAr
 {
     CHECK_NULL_VOID(sessionWrapper_);
     sessionWrapper_->NotifyOriginAvoidArea(avoidArea, type);
+}
+
+bool UIExtensionPattern::NotifyOccupiedAreaChangeInfo(const sptr<Rosen::OccupiedAreaChangeInfo>& info)
+{
+    return sessionWrapper_ && sessionWrapper_->NotifyOccupiedAreaChangeInfo(info);
 }
 
 int64_t UIExtensionPattern::WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId)
