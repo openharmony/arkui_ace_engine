@@ -2068,6 +2068,7 @@ void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool
         CHECK_NULL_VOID(host);
         pipeline->AddOnAreaChangeNode(host->GetId());
         selectInfo.callerFrameNode = GetHost();
+        selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
         if (!selectInfo.isUsingMouse) {
             CheckHandles(selectInfo.firstHandle);
             CheckHandles(selectInfo.secondHandle);
