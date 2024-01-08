@@ -111,7 +111,7 @@ RefPtr<FrameNode> BuildPasteButton(const std::function<void()>& callback, int32_
     buttonLayoutProperty->UpdateBackgroundRightPadding(padding.Right());
     buttonLayoutProperty->UpdateUserDefinedIdealSize(
         { std::nullopt, std::optional<CalcLength>(textOverlayTheme->GetMenuButtonHeight()) });
-    buttonPaintProperty->UpdateBackgroundColor(Color::WHITE);
+    buttonPaintProperty->UpdateBackgroundColor(Color::TRANSPARENT);
     if (callback) {
         pasteButton->GetOrCreateGestureEventHub()->SetUserOnClick([callback](GestureEvent& /* info */) {
             if (callback) {
