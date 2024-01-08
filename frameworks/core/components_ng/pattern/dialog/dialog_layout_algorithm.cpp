@@ -51,7 +51,6 @@ namespace {
 constexpr double DIALOG_HEIGHT_RATIO = 0.8;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_LANDSCAPE = 0.9;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_CAR = 0.95;
-constexpr Dimension listPaddingHeight = 48.0_vp;
 constexpr Dimension FULLSCREEN = 100.0_pct;
 constexpr Dimension MULTIPLE_DIALOG_OFFSET_X = 48.0_vp;
 constexpr Dimension MULTIPLE_DIALOG_OFFSET_Y = 48.0_vp;
@@ -134,8 +133,7 @@ void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper)
         Distribute(scrollHeight, listHeight, restHeight);
         auto childConstraint = CreateDialogChildConstraint(layoutWrapper, scrollHeight, restWidth);
         scroll->Measure(childConstraint);
-        childConstraint =
-            CreateDialogChildConstraint(layoutWrapper, listHeight + listPaddingHeight.ConvertToPx(), restWidth);
+        childConstraint = CreateDialogChildConstraint(layoutWrapper, listHeight, restWidth);
         list->Measure(childConstraint);
     } else {
         if (scroll != nullptr) {
@@ -144,8 +142,8 @@ void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper)
             scroll->Measure(childConstraint);
         }
         if (list != nullptr) {
-            auto childConstraint = CreateDialogChildConstraint(
-                layoutWrapper, std::min(restHeight, listHeight + (float)listPaddingHeight.ConvertToPx()), restWidth);
+            auto childConstraint =
+                CreateDialogChildConstraint(layoutWrapper, std::min(restHeight, listHeight), restWidth);
             list->Measure(childConstraint);
         }
     }
