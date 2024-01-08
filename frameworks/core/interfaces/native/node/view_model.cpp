@@ -51,7 +51,7 @@ void* createSpanNode(ArkUI_Int32 nodeId)
 }
 
 void* createImageSpanNode(ArkUI_Int32 nodeId)
- {
+{
     auto imageSpanNode = ImageSpanView::CreateFrameNode(nodeId);
     imageSpanNode->IncRefCount();
     return AceType::RawPtr(imageSpanNode);
@@ -116,9 +116,9 @@ void* createSwiperNode(ArkUI_Int32 nodeId)
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 {
-    static createArkUIFrameNode* createArkUIFrameNodes[] = { nullptr, createTextNode, createSpanNode, createImageSpanNode,
-        createImageNode, createToggleNode, createLoadingProgress, createTextInputNode, createStackNode,
-        createScrollNode, createListNode, createSwiperNode };
+    static createArkUIFrameNode* createArkUIFrameNodes[] = { nullptr, createTextNode, createSpanNode,
+        createImageSpanNode, createImageNode, createToggleNode, createLoadingProgress, createTextInputNode,
+        createStackNode, createScrollNode, createListNode, createSwiperNode };
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);
         return nullptr;

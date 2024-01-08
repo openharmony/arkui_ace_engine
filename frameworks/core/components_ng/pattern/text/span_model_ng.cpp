@@ -45,7 +45,7 @@ void SpanModelNG::Create(const std::string& content)
     ACE_UPDATE_SPAN_PROPERTY(Content, content, PropertyInfo::NONE);
 }
 
-RefPtr<SpanNode> SpanModelNG::CreateSpanNode(int32_t nodeId, const std::string& content) 
+RefPtr<SpanNode> SpanModelNG::CreateSpanNode(int32_t nodeId, const std::string& content)
 {
     auto spanNode = SpanNode::CreateSpanNode(nodeId);
     CHECK_NULL_RETURN(spanNode, nullptr);

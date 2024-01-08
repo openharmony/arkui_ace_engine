@@ -40,7 +40,7 @@ void ListModelNG::Create()
     stack->Push(frameNode);
 }
 
-RefPtr<FrameNode> ListModelNG::CreateFrameNode(int32_t nodeId) 
+RefPtr<FrameNode> ListModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, nodeId, AceType::MakeRefPtr<ListPattern>());
     return frameNode;
