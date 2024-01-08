@@ -1296,9 +1296,11 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
         return false;
     }
 
-    if (isNeedStateStyles && HasFocusStateStyle()) {
-        // do focus state style.
-        CheckFocusStateStyle(true);
+    if (HasFocusStateStyle()) {
+        if (isNeedStateStyles) {
+            // do focus state style.
+            CheckFocusStateStyle(true);
+        }
         return true;
     }
 
