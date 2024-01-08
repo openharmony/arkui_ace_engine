@@ -838,9 +838,7 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
         handledResults.clear();
         auto container = Container::Current();
         CHECK_NULL_RETURN(container, false);
-        if ((event.button == MouseButton::LEFT_BUTTON && !container->IsScenceBoardWindow()) ||
-            (event.button == MouseButton::LEFT_BUTTON && container->IsScenceBoardWindow() &&
-                event.pullAction != MouseAction::PULL_UP && event.pullAction != MouseAction::PULL_MOVE)) {
+        if (event.button == MouseButton::LEFT_BUTTON) {
             for (const auto& mouseTarget : pressMouseTestResults_) {
                 if (mouseTarget) {
                     handledResults.emplace_back(mouseTarget);
