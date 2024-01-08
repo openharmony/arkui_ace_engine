@@ -867,4 +867,13 @@ void TabsModelNG::SetOnCustomAnimation(TabsCustomAnimationEvent&& onCustomAnimat
     CHECK_NULL_VOID(swiperPattern);
     swiperPattern->SetCustomContentTransition(std::move(onCustomAnimation));
 }
+
+void TabsModelNG::SetOnContentWillChange(std::function<bool(int32_t)>&& onContentWillChange)
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetOnContentWillChange(std::move(onContentWillChange));
+}
 } // namespace OHOS::Ace::NG

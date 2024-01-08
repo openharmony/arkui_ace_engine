@@ -105,4 +105,10 @@ void JsTabsFunction::Execute(const RefPtr<TabContentTransitionProxy>& proxy)
     JsFunction::ExecuteJS(1, &param);
 }
 
+bool JsTabsFunction::Execute(int32_t index)
+{
+    JSRef<JSVal> params[] = { JSRef<JSVal>::Make(ToJSValue(index)) };
+    return JsFunction::ExecuteJS(1, params)->ToBoolean();
+}
+
 } // namespace OHOS::Ace::Framework

@@ -60,6 +60,7 @@ public:
     void SetBarGridAlign(const BarGridColumnOptions& BarGridColumnOptions) override;
     void SetIsCustomAnimation(bool isCustom) override;
     void SetOnCustomAnimation(TabsCustomAnimationEvent&& onCustomAnimation) override;
+    void SetOnContentWillChange(std::function<bool(int32_t)>&& onContentWillChange) override;
     static RefPtr<TabsNode> GetOrCreateTabsNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     static void SetTabBarMode(FrameNode* frameNode, TabBarMode tabBarMode);

@@ -1157,6 +1157,9 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     direction_ = GetDirection();
 
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        // 打一下速度看有无正负号
+        LOGE("ZMH, actionStartTask, GetSpeed():%{public}f, GetMainSpeed():%{public}f", info.GetSpeed(), info.GetMainSpeed());
+
         auto pattern = weak.Upgrade();
         if (pattern) {
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
@@ -1172,6 +1175,8 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     };
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        LOGE("ZMH, actionUpdateTask, GetSpeed():%{public}f, GetMainSpeed():%{public}f", info.GetSpeed(), info.GetMainSpeed());
+
         auto pattern = weak.Upgrade();
         if (pattern) {
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
@@ -1187,6 +1192,8 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
+        LOGE("ZMH, actionEndTask, GetSpeed():%{public}f, GetMainSpeed():%{public}f", info.GetSpeed(), info.GetMainSpeed());
+
         auto pattern = weak.Upgrade();
         if (pattern) {
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {

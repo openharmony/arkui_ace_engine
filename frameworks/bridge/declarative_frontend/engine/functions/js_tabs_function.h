@@ -36,6 +36,7 @@ public:
 
     JSRef<JSVal> Execute(int32_t fromIndex, int32_t toIndex);
     void Execute(const RefPtr<TabContentTransitionProxy>& proxy);
+    bool Execute(int32_t index);
 };
 
 class JsTabContentTransitionProxy : public Referenced {

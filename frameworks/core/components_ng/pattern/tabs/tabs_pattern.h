@@ -107,6 +107,16 @@ public:
         isDisableSwipe_ = isDisableSwipe;
     }
 
+    void SetOnContentWillChange(std::function<bool(int32_t)>&& onContentWillChange)
+    {
+        contentWillChangeCallback_ = onContentWillChange;
+    }
+
+    std::function<bool(int32_t)> GetOnContentWillChange() const
+    {
+        return contentWillChangeCallback_;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnAfterModifyDone() override;
@@ -125,6 +135,7 @@ private:
     ChangeEventPtr onIndexChangeEvent_;
     AnimationStartEventPtr animationStartEvent_;
     AnimationEndEventPtr animationEndEvent_;
+    std::function<bool(int32_t)> contentWillChangeCallback_;
 };
 
 } // namespace OHOS::Ace::NG
