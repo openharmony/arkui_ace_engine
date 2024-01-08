@@ -2068,7 +2068,9 @@ void TextFieldPattern::OnModifyDone()
         inlineSelectAllFlag_ = false;
         inlineFocusState_ = false;
         RestorePreInlineStates();
-        UpdateSelection(0);
+        if (!GetTextBoxes().empty()) {
+            UpdateSelection(0);
+        }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     auto maxlength = GetMaxLength();
