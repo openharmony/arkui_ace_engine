@@ -43,8 +43,10 @@ void HyperlinkPattern::EnableDrag()
         RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
         if (content.empty()) {
             UdmfClient::GetInstance()->AddLinkRecord(unifiedData, address, "");
+            UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, address);
         } else {
             UdmfClient::GetInstance()->AddLinkRecord(unifiedData, address, content);
+            UdmfClient::GetInstance()->AddPlainTextRecord(unifiedData, content);
         }
         event->SetData(unifiedData);
         return info;
