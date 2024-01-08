@@ -269,6 +269,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
         uiTaskExecutor.PostSyncTask([&videoPattern, currentPos] {
             auto video = videoPattern.Upgrade();
             CHECK_NULL_VOID(video);
+            ContainerScope scope(video->instanceId_);
             video->OnCurrentTimeChange(currentPos);
         });
     };
@@ -277,6 +278,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
         uiTaskExecutor.PostSyncTask([&videoPattern, status] {
             auto video = videoPattern.Upgrade();
             CHECK_NULL_VOID(video);
+            ContainerScope scope(video->instanceId_);
             video->OnPlayerStatus(status);
         });
     };
@@ -285,6 +287,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
         uiTaskExecutor.PostTask([&videoPattern] {
             auto video = videoPattern.Upgrade();
             CHECK_NULL_VOID(video);
+            ContainerScope scope(video->instanceId_);
             video->OnError("");
         });
     };
@@ -293,6 +296,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
         uiTaskExecutor.PostSyncTask([&videoPattern] {
             auto video = videoPattern.Upgrade();
             CHECK_NULL_VOID(video);
+            ContainerScope scope(video->instanceId_);
             video->OnResolutionChange();
         });
     };
@@ -301,6 +305,7 @@ void VideoPattern::RegisterMediaPlayerEvent()
         uiTaskExecutor.PostSyncTask([&videoPattern] {
             auto video = videoPattern.Upgrade();
             CHECK_NULL_VOID(video);
+            ContainerScope scope(video->instanceId_);
             video->OnStartRenderFrameCb();
         });
     };
@@ -802,6 +807,7 @@ void VideoPattern::OnModifyDone()
         uiTaskExecutor.PostTask([weak = WeakClaim(this)]() {
             auto videoPattern = weak.Upgrade();
             CHECK_NULL_VOID(videoPattern);
+            ContainerScope scope(videoPattern->instanceId_);
             videoPattern->UpdateMediaPlayerOnBg();
         });
     }
@@ -1184,6 +1190,7 @@ void VideoPattern::SetMethodCall()
         uiTaskExecutor.PostTask([weak]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            ContainerScope scope(pattern->instanceId_);
             auto targetPattern = pattern->GetTargetVideoPattern();
             CHECK_NULL_VOID(targetPattern);
             targetPattern->Start();
@@ -1193,6 +1200,7 @@ void VideoPattern::SetMethodCall()
         uiTaskExecutor.PostTask([weak]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            ContainerScope scope(pattern->instanceId_);
             auto targetPattern = pattern->GetTargetVideoPattern();
             CHECK_NULL_VOID(targetPattern);
             targetPattern->Pause();
@@ -1202,6 +1210,7 @@ void VideoPattern::SetMethodCall()
         uiTaskExecutor.PostTask([weak]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            ContainerScope scope(pattern->instanceId_);
             auto targetPattern = pattern->GetTargetVideoPattern();
             CHECK_NULL_VOID(targetPattern);
             targetPattern->Stop();
@@ -1211,6 +1220,7 @@ void VideoPattern::SetMethodCall()
         uiTaskExecutor.PostTask([weak, pos, seekMode]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            ContainerScope scope(pattern->instanceId_);
             auto targetPattern = pattern->GetTargetVideoPattern();
             CHECK_NULL_VOID(targetPattern);
             targetPattern->SetCurrentTime(pos, seekMode);
@@ -1220,6 +1230,7 @@ void VideoPattern::SetMethodCall()
         uiTaskExecutor.PostTask([weak, isFullScreen]() {
             auto videoPattern = weak.Upgrade();
             CHECK_NULL_VOID(videoPattern);
+            ContainerScope scope(videoPattern->instanceId_);
             if (isFullScreen) {
                 videoPattern->FullScreen();
             } else {
@@ -1246,6 +1257,7 @@ void VideoPattern::SetMethodCall()
         uiTaskExecutor.PostTask([weak]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
+            ContainerScope scope(pattern->instanceId_);
             pattern->ResetLastBoundsRect();
             auto targetPattern = pattern->GetTargetVideoPattern();
             CHECK_NULL_VOID(targetPattern);
@@ -1311,6 +1323,7 @@ void VideoPattern::FireError()
     uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
         auto videoPattern = weak.Upgrade();
         CHECK_NULL_VOID(videoPattern);
+        ContainerScope scope(videoPattern->instanceId_);
         videoPattern->OnError("");
     });
 }

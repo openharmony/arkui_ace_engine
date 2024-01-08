@@ -1066,6 +1066,7 @@ void OverlayManager::HideCustomPopups()
             auto paintProperty = popupNode->GetPaintProperty<BubbleRenderProperty>();
             CHECK_NULL_VOID(paintProperty);
             auto isTypeWithOption = paintProperty->GetPrimaryButtonShow().value_or(false);
+            popupNode->GetEventHub<BubbleEventHub>()->FireChangeEvent(false);
             // if use popup with option, skip
             if (isTypeWithOption) {
                 continue;
@@ -1292,8 +1293,12 @@ void OverlayManager::DeleteMenu(int32_t targetId)
     if (it == menuMap_.end()) {
         return;
     }
-    HideAllMenus();
-    HideMenuInSubWindow(false);
+    auto node = AceType::DynamicCast<FrameNode>(it->second);
+    if (node->GetParent()) {
+        auto id = Container::CurrentId();
+        SubwindowManager::GetInstance()->ClearMenu();
+        SubwindowManager::GetInstance()->ClearMenuNG(id);
+    }
     menuMap_.erase(it);
 }
 
@@ -3523,11 +3528,20 @@ RefPtr<FrameNode> OverlayManager::BindUIExtensionToMenu(const RefPtr<FrameNode>&
     menuLayoutProperty->UpdateMargin(MarginProperty());
     menuLayoutProperty->UpdatePadding(PaddingProperty());
     auto scollNode = DynamicCast<FrameNode>(menuNode->GetFirstChild());
-    CHECK_NULL_RETURN(scollNode, nullptr);
+    CHECK_NULL_RETURN(scollNode, menuNode);
     auto scollLayoutProperty = scollNode->GetLayoutProperty();
-    CHECK_NULL_RETURN(scollLayoutProperty, nullptr);
+    CHECK_NULL_RETURN(scollLayoutProperty, menuNode);
     scollLayoutProperty->UpdateMargin(MarginProperty());
     scollLayoutProperty->UpdatePadding(PaddingProperty());
+
+    auto destructor = [id = targetNode->GetId()]() {
+        auto pipeline = NG::PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto overlayManager = pipeline->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        overlayManager->DeleteMenu(id);
+    };
+    targetNode->PushDestroyCallback(destructor);
     return menuNode;
 }
 

@@ -136,6 +136,13 @@ private:
     void SkipRegularLines(bool forward);
     void SupplyAllData2ZeroIndex(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
 
+    /**
+     * @brief Updates the main line during ReloadToStartIndex based on the new crossCount_.
+     *
+     * @param startIdx index of the first GridItem in viewport
+     */
+    virtual void UpdateMainLineOnReload(int32_t startIdx);
+
 protected:
     uint32_t crossCount_ = 0;
     uint32_t mainCount_ = 0;

@@ -30,6 +30,7 @@
 #include "wm_common.h"
 
 #include "base/log/log_wrapper.h"
+#include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/property/safe_area_insets.h"
 
@@ -196,7 +197,8 @@ public:
         double positionY = info->textFieldPositionY_;
         double height = info->textFieldHeight_;
         Rect keyboardRect = Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
-        LOGI("UIContent OccupiedAreaChange rect:%{public}s type: %{public}d", keyboardRect.ToString().c_str(), type);
+        LOGI("UIContent OccupiedAreaChange rect:%{public}s type: %{public}d, positionY:%{public}f, height:%{public}f",
+            keyboardRect.ToString().c_str(), type, positionY, height);
         if (type == OHOS::Rosen::OccupiedAreaType::TYPE_INPUT) {
             auto container = Platform::AceContainer::GetContainer(instanceId_);
             CHECK_NULL_VOID(container);
@@ -1585,6 +1587,25 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
     return true;
 }
 
+bool UIContentImpl::ProcessPointerEventWithCallback(
+    const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, const std::function<void()>& callback)
+{
+    auto container = AceType::DynamicCast<Platform::AceContainer>(AceEngine::Get().GetContainer(instanceId_));
+    CHECK_NULL_RETURN(container, false);
+    container->SetCurPointerEvent(pointerEvent);
+    if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            "PointerEvent Process to ui_content, eventInfo: id:%{public}d, "
+            "WindowName = %{public}s, WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
+            "ViewPosX = %{public}d, ViewPosY = %{public}d",
+            pointerEvent->GetId(), container->GetWindowName().c_str(), container->GetWindowId(),
+            container->GetViewWidth(), container->GetViewHeight(), container->GetViewPosX(), container->GetViewPosY());
+    }
+    auto* aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent, nullptr, callback);
+    return true;
+}
+
 bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& touchEvent)
 {
     TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
@@ -2481,6 +2502,7 @@ void UIContentImpl::SetContainerModalTitleHeight(int32_t height)
 
 int32_t UIContentImpl::GetContainerModalTitleHeight()
 {
+    ContainerScope scope(instanceId_);
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, -1);
     return pipeline->GetContainerModalTitleHeight();
@@ -2490,6 +2512,7 @@ bool UIContentImpl::GetContainerModalButtonsRect(Rosen::Rect& containerModal, Ro
 {
     NG::RectF floatContainerModal;
     NG::RectF floatButtons;
+    ContainerScope scope(instanceId_);
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     if (!pipeline->GetContainerModalButtonsRect(floatContainerModal, floatButtons)) {
@@ -2503,6 +2526,7 @@ bool UIContentImpl::GetContainerModalButtonsRect(Rosen::Rect& containerModal, Ro
 void UIContentImpl::SubscribeContainerModalButtonsRectChange(
     std::function<void(Rosen::Rect& containerModal, Rosen::Rect& buttons)>&& callback)
 {
+    ContainerScope scope(instanceId_);
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
 

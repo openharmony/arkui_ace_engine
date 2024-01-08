@@ -27,6 +27,7 @@ public:
     void BindController(std::function<void()>&& resetFunc) override;
     void SetOnTouchEvent(TouchEventFunc &&touchEventFunc) override;
     void ResetController() override;
+    void FireMakeNode() override;
 };
 
 } // namespace OHOS::Ace::NG

@@ -336,7 +336,9 @@ void TextPattern::OnHandleMove(const RectF& handleRect, bool isFirstHandle)
         HandleSelectionChange(start, textSelector_.destinationOffset);
     } else {
         auto end = GetHandleIndex(Offset(localOffset.GetX(),
-            localOffset.GetY() + (selectOverlayProxy_->IsHandleReverse() ? 0 : handleRect.Height())));
+            localOffset.GetY() + (selectOverlayProxy_->IsHandleReverse() || NearEqual(localOffset.GetY(), 0)
+                                         ? 0
+                                         : handleRect.Height())));
         HandleSelectionChange(textSelector_.baseOffset, end);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -438,6 +440,7 @@ void TextPattern::HandleOnCopy()
         clipboard_->SetData(value, copyOption_);
     }
     ResetSelection();
+    CloseSelectOverlay(true);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<TextEventHub>();
@@ -658,25 +661,25 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
         if (isClickOnAISpan && selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
             selectOverlayProxy_->DisableMenu(true);
         }
-        if (isClickOnSpan && textSelector_.IsValid()) {
+        if (isClickOnSpan && textSelector_.IsValid() && !isMousePressed_) {
             ResetSelection();
         }
         return;
     }
 
-    if (copyOption_ != CopyOptions::None && textDetectEnable_ && spans_.empty() && !aiSpanMap_.empty() && paragraph_) {
+    if (NeedShowAIDetect() && spans_.empty() && paragraph_) {
         for (const auto& kv : aiSpanMap_) {
             auto aiSpan = kv.second;
             isClickOnAISpan = ClickAISpan(textOffset, aiSpan);
             if (isClickOnAISpan) {
-                if (isClickOnAISpan && selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
+                if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
                     selectOverlayProxy_->DisableMenu(true);
                 }
                 return;
             }
         }
     }
-    if (textSelector_.IsValid()) {
+    if (textSelector_.IsValid() && !isMousePressed_) {
         CloseSelectOverlay(true);
         ResetSelection();
     }
@@ -806,6 +809,7 @@ void TextPattern::SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc
         if (pattern->copyOption_ == CopyOptions::None) {
             return;
         }
+        pattern->CloseSelectOverlay();
         if (action == std::string(COPY_ACTION)) {
             pattern->HandleSelectionChange(aiSpan.start, aiSpan.end);
             pattern->HandleOnCopy();
@@ -2137,15 +2141,15 @@ void TextPattern::PreCreateLayoutWrapper()
 
     // Depth-first iterates through all host's child nodes to collect the SpanNode object, building a text rendering
     // tree.
-    std::stack<RefPtr<UINode>> nodes;
+    std::stack<SpanNodeInfo> nodes;
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
-        nodes.push(*iter);
+        nodes.push({ .node = *iter });
     }
 
     InitSpanItem(nodes);
 }
 
-void TextPattern::InitSpanItem(std::stack<RefPtr<UINode>> nodes)
+void TextPattern::InitSpanItem(std::stack<SpanNodeInfo> nodes)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2194,21 +2198,22 @@ void TextPattern::BeforeCreateLayoutWrapper()
     PreCreateLayoutWrapper();
 }
 
-void TextPattern::CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpanHasClick)
+void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanHasClick)
 {
     while (!nodes.empty()) {
         auto current = nodes.top();
         nodes.pop();
         // TODO: Add the judgment of display.
-        if (!current) {
+        if (!current.node) {
             continue;
         }
-        auto spanNode = DynamicCast<SpanNode>(current);
-        if (spanNode && current->GetTag() == V2::SYMBOL_SPAN_ETS_TAG) {
+        UpdateContainerChildren(current.containerSpanNode, current.node);
+        auto spanNode = DynamicCast<SpanNode>(current.node);
+        if (spanNode && current.node->GetTag() == V2::SYMBOL_SPAN_ETS_TAG) {
             spanNode->CleanSpanItemChildren();
             spanNode->MountToParagraph();
             textForDisplay_.append(StringUtils::Str16ToStr8(SYMBOL_TRANS));
-        } else if (spanNode && current->GetTag() != V2::PLACEHOLDER_SPAN_ETS_TAG) {
+        } else if (spanNode && current.node->GetTag() != V2::PLACEHOLDER_SPAN_ETS_TAG) {
             spanNode->CleanSpanItemChildren();
             UpdateChildProperty(spanNode);
             spanNode->MountToParagraph();
@@ -2217,45 +2222,29 @@ void TextPattern::CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpa
             if (spanNode->GetSpanItem()->onClick) {
                 isSpanHasClick = true;
             }
-        } else if (current->GetTag() == V2::IMAGE_ETS_TAG || current->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
+        } else if (current.node->GetTag() == V2::IMAGE_ETS_TAG ||
+                   current.node->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
             placeholderCount_++;
-            AddChildSpanItem(current);
+            AddChildSpanItem(current.node);
             textForAI_.append("\n");
-        } else if (current->GetTag() == V2::CONTAINER_SPAN_ETS_TAG) {
-            CollectContainerSpanNodes(current, isSpanHasClick);
         }
-        if (current->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG || current->GetTag() == V2::CONTAINER_SPAN_ETS_TAG) {
+        if (current.node->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG) {
             continue;
         }
-        const auto& nextChildren = current->GetChildren();
+        auto containerSpanNode =
+            current.node->GetTag() == V2::CONTAINER_SPAN_ETS_TAG ? current.node : current.containerSpanNode;
+        const auto& nextChildren = current.node->GetChildren();
         for (auto iter = nextChildren.rbegin(); iter != nextChildren.rend(); ++iter) {
-            nodes.push(*iter);
+            nodes.push({ .node = *iter, .containerSpanNode = containerSpanNode });
         }
     }
 }
 
-void TextPattern::CollectContainerSpanNodes(const RefPtr<UINode>& node, bool& isSpanHasClick)
+void TextPattern::UpdateContainerChildren(const RefPtr<UINode>& parentNode, const RefPtr<UINode>& child)
 {
-    auto containerNode = DynamicCast<ContainerSpanNode>(node);
-    CHECK_NULL_VOID(containerNode);
-    const auto& children = containerNode->GetChildren();
-    if (children.empty()) {
-        return;
-    }
-    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
-        UpdateContainerChildren(containerNode, *iter);
-    }
-    std::stack<RefPtr<UINode>> nodes;
-    for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
-        nodes.push(*iter);
-    }
-    CollectSpanNodes(nodes, isSpanHasClick);
-}
-
-void TextPattern::UpdateContainerChildren(const RefPtr<ContainerSpanNode>& parent, const RefPtr<UINode>& child)
-{
-    CHECK_NULL_VOID(parent);
     CHECK_NULL_VOID(child);
+    auto parent = DynamicCast<ContainerSpanNode>(parentNode);
+    CHECK_NULL_VOID(parent);
     auto baseSpan = DynamicCast<BaseSpan>(child);
     if (baseSpan) {
         if (baseSpan->HasTextBackgroundStyle()) {
@@ -2789,6 +2778,7 @@ void TextPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextRes
         return;
     }
 
+    selectInfo.menuInfo.menuIsShow = true;
     CopyBindSelectionMenuParams(selectInfo, menuParams);
 }
 

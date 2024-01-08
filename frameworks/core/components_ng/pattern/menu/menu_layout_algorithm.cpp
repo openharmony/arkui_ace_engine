@@ -1662,6 +1662,9 @@ float MenuLayoutAlgorithm::HorizontalLayout(const SizeF& size, float position, b
 
     // line up right side of menu with right boundary of the screen
     if (size.Width() < wrapperWidth) {
+        if (isSelectMenu) {
+            return position;
+        }
         return wrapperWidth - size.Width();
     }
 

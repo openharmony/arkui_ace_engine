@@ -84,8 +84,8 @@ public:
     bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result, bool needLineHighest = true) override;
     bool CalcCaretMetricsByPosition(
         int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity) override;
-    bool CalcCaretMetricsByPosition(
-        int32_t extent, CaretMetricsF& caretCaretMetric, const OffsetF& lastTouchOffset) override;
+    bool CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, const OffsetF& lastTouchOffset,
+        TextAffinity& textAffinity) override;
     void SetIndents(const std::vector<float>& indents) override;
     bool GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) override;
     std::u16string GetParagraphText() override;

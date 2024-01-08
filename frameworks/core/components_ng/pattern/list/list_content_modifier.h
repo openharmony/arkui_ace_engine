@@ -53,7 +53,7 @@ public:
     {
         width_ = width;
         isVertical_ = isVertical;
-        color_ = color;
+        color_->Set(LinearColor(color));
     }
 
     void SetDividerMap(const DividerMap& dividerMap)
@@ -67,11 +67,11 @@ private:
     RefPtr<AnimatableArithmeticProperty> dividerList_;
     RefPtr<AnimatablePropertyOffsetF> clipOffset_;
     RefPtr<AnimatablePropertySizeF> clipSize_;
+    RefPtr<AnimatablePropertyColor> color_;
     RefPtr<PropertyBool> clip_;
 
     float width_ = 0.0f;
     bool isVertical_ = true;
-    Color color_ = Color::TRANSPARENT;
 
     ACE_DISALLOW_COPY_AND_MOVE(ListContentModifier);
 };

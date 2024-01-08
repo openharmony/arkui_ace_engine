@@ -85,14 +85,18 @@ void CalculateOffsetOfNewline(const RefPtr<GridColLayoutProperty>& gridCol, int3
 
 } // namespace
 
-void GridRowLayoutAlgorithm::MeasureSelf(LayoutWrapper* layoutWrapper, float childHeight)
+void GridRowLayoutAlgorithm::MeasureSelf(LayoutWrapper* layoutWrapper, float childHeight, float selfHeight)
 {
     const auto& layoutProperty = DynamicCast<GridRowLayoutProperty>(layoutWrapper->GetLayoutProperty());
     auto layoutConstraint = layoutProperty->GetLayoutConstraint();
     auto padding = layoutProperty->CreatePaddingAndBorder();
 
     auto idealSize = CreateIdealSize(layoutConstraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT);
-    idealSize.SetHeight(childHeight + padding.Height());
+    if (layoutConstraint->selfIdealSize.Height()) {
+        idealSize.SetHeight(selfHeight + padding.Height());
+    } else {
+        idealSize.SetHeight(childHeight + padding.Height());
+    }
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
         idealSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize);
     } else {
@@ -261,8 +265,9 @@ void GridRowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     columnUnitWidth_ = GridContainerUtils::ProcessColumnWidth(gutterInDouble_, columnNum, maxSize.Width());
     float childrenHeight =
         MeasureChildren(layoutWrapper, columnUnitWidth_, maxSize.Height(), gutterInDouble_, sizeType, columnNum);
+    float selfHeight = maxSize.Height();
 
-    MeasureSelf(layoutWrapper, childrenHeight);
+    MeasureSelf(layoutWrapper, childrenHeight, selfHeight);
 }
 
 void GridRowLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

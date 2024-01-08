@@ -9509,6 +9509,7 @@ HWTEST_F(SwiperTestNg, SwiperLayoutAlgorithmLayoutForward004, TestSize.Level1)
     swiperLayoutAlgorithm->targetIndex_ = 1;
     swiperLayoutAlgorithm->SetTotalItemCount(2);
     swiperLayoutAlgorithm->SetIsLoop(true);
+    swiperLayoutAlgorithm->SetCanOverScroll(false);
     auto layoutProperty_ = AceType::DynamicCast<SwiperLayoutProperty>(layoutWrapper.GetLayoutProperty());
     layoutProperty_->UpdateMinSize(Dimension(0));
     layoutProperty_->UpdateDisplayCount(1);

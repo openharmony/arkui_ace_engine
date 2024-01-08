@@ -195,6 +195,7 @@ public:
     void HandleSelect(CaretMoveIntent direction) override;
     bool SetCaretPosition(int32_t pos);
     int32_t GetCaretPosition();
+    int32_t GetTextContentLength() override;
     bool GetCaretVisible() const;
     OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight,
         bool downStreamFirst = false, bool needLineHighest = true);
@@ -510,7 +511,6 @@ private:
     {
         return NearEqual(richTextRect_.Bottom(), contentRect_.Bottom());
     }
-    void FlushTextForDisplay();
     // ai analysis fun
     bool NeedAiAnalysis(
         const CaretUpdateType targeType, const int32_t pos, const int32_t& spanStart, const std::string& content);

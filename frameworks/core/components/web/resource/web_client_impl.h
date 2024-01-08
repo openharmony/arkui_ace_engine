@@ -140,7 +140,7 @@ public:
     bool OnFileSelectorShow(std::shared_ptr<NWeb::FileSelectorCallback> callback,
                             std::shared_ptr<NWeb::NWebFileSelectorParams> params) override;
 
-    void OnFocus() override;
+    bool OnFocus() override;
     void OnResourceLoadError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error) override;
     void OnHttpError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,

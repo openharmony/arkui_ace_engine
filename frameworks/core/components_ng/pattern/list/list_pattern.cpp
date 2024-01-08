@@ -1551,7 +1551,8 @@ void ListPattern::UpdateScrollBarOffset()
     auto estimatedHeight = itemsSize / itemPosition_.size() * (maxListItemIndex_ + 1) - spaceWidth_;
     if (lanes_ == 1) {
         const auto& begin = *itemPosition_.begin();
-        auto calculate = ListHeightOffsetCalculator(begin.first, {begin.second.startPos, begin.second.endPos});
+        auto calculate = ListHeightOffsetCalculator(
+            begin.first, {begin.second.startPos, begin.second.endPos}, spaceWidth_);
         if (calculate.GetEstimateHeightAndOffset(GetHost())) {
             currentOffset = calculate.GetEstimateOffset();
             estimatedHeight = calculate.GetEstimateHeight();

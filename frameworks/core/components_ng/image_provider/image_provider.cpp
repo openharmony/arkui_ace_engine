@@ -148,8 +148,7 @@ void ImageProvider::SuccessCallback(const RefPtr<CanvasImage>& canvasImage, cons
     }
 }
 
-void ImageProvider::CreateImageObjHelper(
-    const ImageSourceInfo& src, const WeakPtr<ImageLoadingContext>& ctx, bool sync)
+void ImageProvider::CreateImageObjHelper(const ImageSourceInfo& src, bool sync)
 {
     ACE_SCOPED_TRACE("CreateImageObj %s", src.ToString().c_str());
     // load image data
@@ -160,12 +159,7 @@ void ImageProvider::CreateImageObjHelper(
         return;
     }
     auto pipeline = PipelineContext::GetCurrentContext();
-    auto ctxTmp = ctx.Upgrade();
-    RefPtr<ImageData> data = imageLoader->GetImageData(
-        src, WeakClaim(RawPtr(pipeline)), !ctxTmp->GetIsOnSystemColorChange());
-    if (ctxTmp->GetIsOnSystemColorChange()) {
-        ctxTmp->SetIsSystemColorChange(false);
-    }
+    RefPtr<ImageData> data = imageLoader->GetImageData(src, WeakClaim(RawPtr(pipeline)));
     if (!data) {
         FailCallback(src.GetKey(), "Failed to load image data", sync);
         return;
@@ -253,12 +247,12 @@ void ImageProvider::CreateImageObject(const ImageSourceInfo& src, const WeakPtr<
         return;
     }
     if (sync) {
-        CreateImageObjHelper(src, ctx, true);
+        CreateImageObjHelper(src, true);
     } else {
         std::scoped_lock<std::mutex> lock(taskMtx_);
         // wrap with [CancelableCallback] and record in [tasks_] map
         CancelableCallback<void()> task;
-        task.Reset([src, ctx] { ImageProvider::CreateImageObjHelper(src, ctx); });
+        task.Reset([src] { ImageProvider::CreateImageObjHelper(src); });
         tasks_[src.GetKey()].bgTask_ = task;
         ImageUtils::PostToBg(task);
     }

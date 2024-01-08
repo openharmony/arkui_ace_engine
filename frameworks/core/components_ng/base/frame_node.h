@@ -680,6 +680,8 @@ public:
         return needAdjustOffset_;
     }
 
+    void InitLastArea();
+
 private:
     void MarkNeedRender(bool isRenderBoundary);
     std::pair<float, float> ContextPositionConvertToPX(

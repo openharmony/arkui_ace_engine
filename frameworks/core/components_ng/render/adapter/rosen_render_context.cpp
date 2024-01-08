@@ -1928,12 +1928,12 @@ void RosenRenderContext::PaintAccessibilityFocus()
     Dimension focusPaddingVp = Dimension(0.0, DimensionUnit::VP);
     constexpr uint32_t ACCESSIBILITY_FOCUS_COLOR = 0xbf39b500;
     constexpr double ACCESSIBILITY_FOCUS_WIDTH = 4.0;
+    double lineWidth = ACCESSIBILITY_FOCUS_WIDTH * PipelineBase::GetCurrentDensity();
     Color paintColor(ACCESSIBILITY_FOCUS_COLOR);
-    Dimension paintWidth(ACCESSIBILITY_FOCUS_WIDTH, DimensionUnit::PX);
+    Dimension paintWidth(lineWidth, DimensionUnit::PX);
     const auto& bounds = rsNode_->GetStagingProperties().GetBounds();
     RoundRect frameRect;
-    frameRect.SetRect(RectF(ACCESSIBILITY_FOCUS_WIDTH, ACCESSIBILITY_FOCUS_WIDTH,
-        bounds.z_ - (2 * ACCESSIBILITY_FOCUS_WIDTH), bounds.w_ - (2 * ACCESSIBILITY_FOCUS_WIDTH)));
+    frameRect.SetRect(RectF(lineWidth, lineWidth, bounds.z_ - (2 * lineWidth), bounds.w_ - (2 * lineWidth)));
     PaintFocusState(frameRect, focusPaddingVp, paintColor, paintWidth, true);
 }
 
@@ -3934,7 +3934,7 @@ void RosenRenderContext::PaintMouseSelectRect(const RectF& rect, const Color& fi
     rsNode_->AddModifier(mouseSelectModifier_);
 }
 
-void RosenRenderContext::DumpInfo() 
+void RosenRenderContext::DumpInfo()
 {
     if (rsNode_) {
         DumpLog::GetInstance().AddDesc("------------start print rsNode");
@@ -4713,5 +4713,41 @@ void RosenRenderContext::SetShadowRadius(float radius)
 void RosenRenderContext::SetRenderFrameOffset(const OffsetF& offset)
 {
     frameOffset_ = offset;
+}
+
+void RosenRenderContext::SetScale(float scaleX, float scaleY)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetScale(scaleX, scaleY);
+}
+
+void RosenRenderContext::SetBackgroundColor(uint32_t colorValue)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetBackgroundColor(colorValue);
+}
+
+void RosenRenderContext::SetRenderPivot(float pivotX, float pivotY)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetPivot(pivotX, pivotY);
+}
+
+void RosenRenderContext::SetFrame(float positionX, float positionY, float width, float height)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetFrame(positionX, positionY, width, height);
+}
+
+void RosenRenderContext::SetOpacity(float opacity)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetAlpha(opacity);
+}
+
+void RosenRenderContext::SetTranslate(float translateX, float translateY, float translateZ)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetTranslate(translateX, translateY, translateZ);
 }
 } // namespace OHOS::Ace::NG

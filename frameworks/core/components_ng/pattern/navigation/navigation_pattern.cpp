@@ -272,8 +272,8 @@ void NavigationPattern::CheckTopNavPathChange(
     // close keyboard
 #if defined (ENABLE_STANDARD_INPUT)
     if (Container::CurrentId() == CONTAINER_ID_DIVIDE_SIZE) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "pageChange notNeedSoftKeyboard.");
-        FocusHub::PushPageCloseKeyboard();
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nav notNeedSoftKeyboard.");
+        FocusHub::NavCloseKeyboard();
     }
 #endif
 
@@ -409,14 +409,15 @@ void NavigationPattern::CheckTopNavPathChange(
 int32_t NavigationPattern::FireNavDestinationStateChange(bool isShow)
 {
     const auto& navDestinationNodes = navigationStack_->GetAllNavDestinationNodes();
-    int32_t errIndex = navDestinationNodes.size();
+    auto errIndex = static_cast<int32_t>(navDestinationNodes.size());
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(hostNode, errIndex);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, errIndex);
     int32_t standardIndex = hostNode->GetLastStandardIndex();
     auto id = GetHost()->GetId();
-    for (int32_t index = navDestinationNodes.size() - 1; index >= 0 && index >= standardIndex; index--) {
+    for (int32_t index = static_cast<int32_t>(navDestinationNodes.size()) - 1; index >= 0 && index >= standardIndex;
+         index--) {
         const auto& curPath = navDestinationNodes[index];
         auto curDestination =
             AceType::DynamicCast<NavDestinationGroupNode>(hostNode->GetNavDestinationNode(curPath.second));
@@ -435,7 +436,6 @@ int32_t NavigationPattern::FireNavDestinationStateChange(bool isShow)
             auto param = Recorder::EventRecorder::Get().IsPageRecordEnable() ? navigationStack_->GetRouteParam() : "";
             eventHub->FireOnShownEvent(navDestinationPattern->GetName(), param);
             navDestinationPattern->SetIsOnShow(true);
-            curDestination->SetActive(true);
             // The change from hiding to showing of top page means the navigation return to screen,
             // so add window state callback again.
             pipeline->AddWindowStateChangedCallback(id);
@@ -443,7 +443,6 @@ int32_t NavigationPattern::FireNavDestinationStateChange(bool isShow)
             NotifyPageHide(curPath.first);
             eventHub->FireOnHiddenEvent(navDestinationPattern->GetName());
             navDestinationPattern->SetIsOnShow(false);
-            curDestination->SetActive(false);
             // The change from showing to hiding of top page means the navigation leaves from screen,
             // so remove window state callback.
             pipeline->RemoveWindowStateChangedCallback(id);
@@ -454,6 +453,7 @@ int32_t NavigationPattern::FireNavDestinationStateChange(bool isShow)
 
 void NavigationPattern::FireNavigationStateChange(const RefPtr<UINode>& node, bool show)
 {
+    CHECK_NULL_VOID(node);
     const auto& children = node->GetChildren();
     for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
         auto& child = *iter;
@@ -464,11 +464,12 @@ void NavigationPattern::FireNavigationStateChange(const RefPtr<UINode>& node, bo
             CHECK_NULL_VOID(navigationPattern);
             auto standardIndex = navigationPattern->FireNavDestinationStateChange(show);
             const auto& navDestinationNodes = navigationPattern->navigationStack_->GetAllNavDestinationNodes();
-            if (standardIndex == navDestinationNodes.size()) {
+            if (standardIndex == static_cast<int32_t>(navDestinationNodes.size())) {
                 NavigationPattern::FireNavigationStateChange(child, show);
                 continue;
             }
-            for (int32_t index = navDestinationNodes.size() - 1; index >= 0 && index >= standardIndex; index--) {
+            for (int32_t index = static_cast<int32_t>(navDestinationNodes.size()) - 1;
+                 index >= 0 && index >= standardIndex; index--) {
                 const auto& curPath = navDestinationNodes[index];
                 // Ignore node from navigation to navdestination in node tree, start from navdestination node directly.
                 NavigationPattern::FireNavigationStateChange(curPath.second, show);
@@ -732,20 +733,6 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                 CHECK_NULL_VOID(navigationLayoutProperty);
                 auto navigationStack = navigationStackWeak.Upgrade();
                 CHECK_NULL_VOID(navigationStack);
-                // considering navBar visibility
-                auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
-                CHECK_NULL_VOID(navBarNode);
-                auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
-                CHECK_NULL_VOID(navBarLayoutProperty);
-                bool isSetInvisible =
-                    (navigationGroupNode->GetNeedSetInvisible() && navigationStack->Size() != 0) ? true : false;
-                if (navigationLayoutProperty->GetHideNavBar().value_or(false) ||
-                    (pattern->GetNavigationMode() == NavigationMode::STACK && isSetInvisible)) {
-                    navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-                } else {
-                    navBarNode->GetRenderContext()->UpdateOpacity(1.0f);
-                    navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-                }
                 auto navigationContentNode = AceType::DynamicCast<FrameNode>(navigationGroupNode->GetContentNode());
                 CHECK_NULL_VOID(navigationContentNode);
                 auto navDestinationNode =
@@ -763,10 +750,20 @@ bool NavigationPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
                         pattern->isChanged_ = false;
                     }
                 }
+                // considering navBar visibility
+                auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+                CHECK_NULL_VOID(navBarNode);
+                auto navBarLayoutProperty = navBarNode->GetLayoutProperty<NavBarLayoutProperty>();
+                CHECK_NULL_VOID(navBarLayoutProperty);
+                bool isSetInvisible =
+                    (navigationGroupNode->GetNeedSetInvisible() && navigationStack->Size() != 0) ? true : false;
                 if (navigationLayoutProperty->GetHideNavBar().value_or(false) ||
                     (pattern->GetNavigationMode() == NavigationMode::STACK && isSetInvisible)) {
+                    navBarLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
                     navBarNode->SetActive(false);
                 } else {
+                    navBarNode->GetRenderContext()->UpdateOpacity(1.0f);
+                    navBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
                     navBarNode->SetActive(true);
                 }
                 if (navDestinationNode->GetChildren().size() <= EMPTY_DESTINATION_CHILD_SIZE &&
@@ -1075,7 +1072,8 @@ void NavigationPattern::NotifyDialogChange(bool isShow, bool isNavigationChanged
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     const auto& navDestinationNodes = navigationStack_->GetAllNavDestinationNodes();
     int32_t standardIndex = hostNode->GetLastStandardIndex();
-    for (int32_t index = navDestinationNodes.size() - 1; index >= 0 && index >= standardIndex; index--) {
+    for (int32_t index = static_cast<int32_t>(navDestinationNodes.size()) - 1; index >= 0 && index >= standardIndex;
+         index--) {
         const auto& curPath = navDestinationNodes[index];
         auto curDestination =
             AceType::DynamicCast<NavDestinationGroupNode>(hostNode->GetNavDestinationNode(curPath.second));

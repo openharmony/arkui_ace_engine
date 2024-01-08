@@ -197,6 +197,9 @@ void TextFieldModelNG::SetEnterKeyType(TextInputAction value)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
+    if (value == TextInputAction::UNSPECIFIED) {
+        value = pattern->IsTextArea() ? TextInputAction::NEW_LINE : TextInputAction::DONE;
+    }
     pattern->UpdateTextInputAction(value);
 }
 

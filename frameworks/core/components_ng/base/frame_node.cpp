@@ -328,6 +328,9 @@ FrameNode::~FrameNode()
     TriggerVisibleAreaChangeCallback(true);
     visibleAreaUserCallbacks_.clear();
     visibleAreaInnerCallbacks_.clear();
+    if (eventHub_) {
+        eventHub_->ClearOnAreaChangedInnerCallbacks();
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     if (pipeline) {
         pipeline->RemoveOnAreaChangeNode(GetId());
@@ -587,6 +590,7 @@ void FrameNode::MouseToJsonValue(std::unique_ptr<JsonValue>& json) const
 void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     bool touchable = true;
+    bool monopolizeEvents = false;
     std::string hitTestMode = "HitTestMode.Default";
     auto gestureEventHub = GetOrCreateGestureEventHub();
     std::vector<DimensionRect> responseRegion;
@@ -596,9 +600,11 @@ void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json) const
         hitTestMode = gestureEventHub->GetHitTestModeStr();
         responseRegion = gestureEventHub->GetResponseRegion();
         mouseResponseRegion = gestureEventHub->GetMouseResponseRegion();
+        monopolizeEvents = gestureEventHub->GetMonopolizeEvents();
     }
     json->Put("touchable", touchable);
     json->Put("hitTestBehavior", hitTestMode.c_str());
+    json->Put("monopolizeEvents", monopolizeEvents);
     auto jsArr = JsonUtil::CreateArray(true);
     for (int32_t i = 0; i < static_cast<int32_t>(responseRegion.size()); ++i) {
         auto iStr = std::to_string(i);
@@ -889,26 +895,28 @@ void FrameNode::ClearUserOnAreaChange()
 
 void FrameNode::SetOnAreaChangeCallback(OnAreaChangedFunc&& callback)
 {
-    if (!lastFrameRect_) {
-        lastFrameRect_ = std::make_unique<RectF>();
-    }
-    if (!lastParentOffsetToWindow_) {
-        lastParentOffsetToWindow_ = std::make_unique<OffsetF>();
-    }
+    InitLastArea();
     eventHub_->SetOnAreaChanged(std::move(callback));
 }
 
 void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
 {
-    if (!IsOnMainTree()) {
+    if (!IsActive()) {
         return;
     }
-    if (eventHub_->HasOnAreaChanged() && lastFrameRect_ && lastParentOffsetToWindow_) {
+    if ((eventHub_->HasOnAreaChanged() || eventHub_->HasInnerOnAreaChanged()) && lastFrameRect_ &&
+        lastParentOffsetToWindow_) {
         auto currFrameRect = geometryNode_->GetFrameRect();
         auto currParentOffsetToWindow = CalculateOffsetRelativeToWindow(nanoTimestamp) - currFrameRect.GetOffset();
         if (currFrameRect != *lastFrameRect_ || currParentOffsetToWindow != *lastParentOffsetToWindow_) {
-            eventHub_->FireOnAreaChanged(
-                *lastFrameRect_, *lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
+            if (eventHub_->HasInnerOnAreaChanged()) {
+                eventHub_->FireInnerOnAreaChanged(
+                    *lastFrameRect_, *lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
+            }
+            if (eventHub_->HasOnAreaChanged()) {
+                eventHub_->FireOnAreaChanged(
+                    *lastFrameRect_, *lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
+            }
             *lastFrameRect_ = currFrameRect;
             *lastParentOffsetToWindow_ = currParentOffsetToWindow;
         }
@@ -3202,6 +3210,16 @@ RefPtr<FrameNode> FrameNode::GetNodeContainer()
         parent = parent->GetParent();
     }
     return AceType::DynamicCast<FrameNode>(parent);
+}
+
+void FrameNode::InitLastArea()
+{
+    if (!lastFrameRect_) {
+        lastFrameRect_ = std::make_unique<RectF>();
+    }
+    if (!lastParentOffsetToWindow_) {
+        lastParentOffsetToWindow_ = std::make_unique<OffsetF>();
+    }
 }
 
 } // namespace OHOS::Ace::NG

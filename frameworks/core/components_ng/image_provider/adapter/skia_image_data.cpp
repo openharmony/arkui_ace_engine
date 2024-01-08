@@ -115,4 +115,9 @@ const void* SkiaImageData::GetDataWrapper() const
 {
     return &skData_;
 }
+
+std::string SkiaImageData::ToString() const
+{
+    return "SkiaImageData Size" + std::to_string(skData_->size()) + "(B)";
+}
 } // namespace OHOS::Ace::NG

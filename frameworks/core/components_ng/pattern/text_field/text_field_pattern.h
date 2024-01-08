@@ -921,6 +921,7 @@ public:
         customKeyboardBuilder_ = keyboardBuilder;
     }
 
+    void DumpInfo() override;
     void DumpAdvanceInfo() override;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
     void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
@@ -1066,10 +1067,6 @@ public:
         return lastClickTimeStamp_;
     }
 
-    void UpdateLastTextRect(const RectF& textRect)
-    {
-        lastTextRect_ = textRect;
-    }
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
 
@@ -1196,7 +1193,7 @@ private:
     void UpdateSelectController();
     void UpdateHandlesOffsetOnScroll(float offset);
     void CloseHandleAndSelect() override;
-    bool RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex);
+    bool RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex, const RectF& lastCaretRect);
     void PaintTextRect();
     void GetIconPaintRect(const RefPtr<TextInputResponseArea>& responseArea, RoundRect& paintRect);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
@@ -1311,9 +1308,6 @@ private:
     float maxFrameOffsetY_ = 0.0f;
     float maxFrameHeight_ = 0.0f;
 
-    // Only used to record the content area drawn last time.
-    RectF lastTextRect_;
-
     CancelableCallback<void()> cursorTwinklingTask_;
 
     std::list<std::unique_ptr<TextInputFormatter>> textInputFormatters_;
@@ -1331,6 +1325,7 @@ private:
     int32_t dragTextEnd_ = 0;
     RefPtr<FrameNode> dragNode_;
     DragStatus dragStatus_ = DragStatus::NONE; // The status of the dragged initiator
+    DragStatus dragRecipientStatus_ = DragStatus::NONE; // Drag the recipient's state
     RefPtr<Clipboard> clipboard_;
     std::vector<TextEditingValueNG> operationRecords_;
     std::vector<TextEditingValueNG> redoOperationRecords_;

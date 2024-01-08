@@ -1,17 +1,17 @@
 /*
-* Copyright (c) 2022 Huawei Device Co., Ltd.
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+* Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_PAN_GESTURE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_GESTURES_PAN_GESTURE_H
@@ -42,7 +42,6 @@ public:
             gestureInfo_ = MakeRefPtr<GestureInfo>(GestureTypeName::PAN_GESTURE);
         }
     };
-
     explicit PanGesture(RefPtr<PanGestureOption> panGestureOption)
     {
         panGestureOption_ = panGestureOption;
@@ -54,61 +53,13 @@ public:
     };
     ~PanGesture() override = default;
 
-    void SerializeTo(const char* buffer)
-    {
-        *(int32_t*)(buffer) = fingers_;
-        buffer += sizeof(int32_t);
-        *(GesturePriority*)(buffer) = priority_;
-        buffer += sizeof(GesturePriority);
-        *(GestureMask*)(buffer) = gestureMask_;
-        buffer += sizeof(GestureMask);
-        *(PanDirection*)(buffer) = direction_;
-        buffer += sizeof(PanDirection);
-        *(double*)(buffer) = distance_;
-        buffer += sizeof(double);
-        double* d = (double*)buffer;
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                d[i * 4 + j] = matrix_.Get(i, j);
-            }
-        }
-    };
+    void SerializeTo(char* buff);
+    
+    virtual int32_t SizeofMe() override;
 
-    virtual int32_t SizeofMe() override
-    {
-        return sizeof(int32_t) + sizeof(GestureType) + sizeof(PanDirection) + sizeof(double) + sizeof(Matrix4) +
-               Gesture::SizeofMe();
-    };
+    int32_t Serialize(char* panGesture) override;
 
-    int32_t Serialize(const char* panGesture) override
-    {
-        int sizePan = SizeofMe();
-        panGesture = SetHeader(panGesture, GestureType::PAN, sizePan);
-        SerializeTo(panGesture);
-        return sizePan;
-    };
-
-    virtual int32_t Deserialize(char* buffer) override
-    {
-        buffer += sizeof(GestureType) + sizeof(int32_t);
-        fingers_ = *(int32_t*)(buffer);
-        buffer += sizeof(int32_t);
-        priority_ = *(GesturePriority*)(buffer);
-        buffer += sizeof(GesturePriority);
-        gestureMask_ = *(GestureMask*)(buffer);
-        buffer += sizeof(GestureMask);
-        direction_ = *(PanDirection*)(buffer);
-        buffer += sizeof(PanDirection);
-        distance_ = *(double*)(buffer);
-        buffer += sizeof(double);
-        double* d = (double*)buffer;
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                matrix_.Set(i, j, d[i * 4 + j]);
-            }
-        }
-        return SizeofMe();
-    };
+    virtual int32_t Deserialize(const char* buff) override;
 
 protected:
     RefPtr<NGGestureRecognizer> CreateRecognizer() override;

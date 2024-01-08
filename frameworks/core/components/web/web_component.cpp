@@ -82,16 +82,18 @@ RefPtr<Element> WebComponent::CreateElement()
     return webElement;
 }
 
-void WebComponent::RequestFocus()
+bool WebComponent::RequestFocus()
 {
+    bool result = false;
 #ifndef NG_BUILD
     auto focus = focusElement_.Upgrade();
     if (focus) {
-        focus->RequestFocusImmediately();
+        result = focus->RequestFocusImmediately();
     }
 #else
     TAG_LOGW(AceLogTag::ACE_WEB, "not support focus node in new pipeline");
 #endif
+    return result;
 }
 
 } // namespace OHOS::Ace

@@ -708,6 +708,21 @@ void ListItemGroupLayoutAlgorithm::AdjustItemPosition()
     } else {
         totalMainSize_ = std::max(totalMainSize_, GetEndPosition() + footerMainSize_);
     }
+    const auto& start = *itemPosition_.begin();
+    const auto& end = *itemPosition_.rbegin();
+    if (layoutedItemInfo_.has_value()) {
+        auto& itemInfo = layoutedItemInfo_.value();
+        if (start.first <= itemInfo.startIndex || LessNotEqual(start.second.first, itemInfo.startPos)) {
+            itemInfo.startIndex = start.first;
+            itemInfo.startPos = start.second.first;
+        }
+        if (end.first >= itemInfo.endIndex || LessNotEqual(end.second.second, itemInfo.endPos)) {
+            itemInfo.endIndex = end.first;
+            itemInfo.endPos = end.second.second;
+        }
+    } else {
+        layoutedItemInfo_ = { start.first, start.second.first, end.first, end.second.second };
+    }
 }
 
 void ListItemGroupLayoutAlgorithm::CheckRecycle(

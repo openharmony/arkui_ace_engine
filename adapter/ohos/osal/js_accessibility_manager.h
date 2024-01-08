@@ -225,10 +225,10 @@ private:
     bool ConvertActionTypeToBoolen(Accessibility::ActionType action, RefPtr<NG::FrameNode>& frameNode,
         int64_t elementId, RefPtr<NG::PipelineContext>& context);
     void SetSearchElementInfoByAccessibilityIdResult(Accessibility::AccessibilityElementOperatorCallback& callback,
-        const std::list<Accessibility::AccessibilityElementInfo>& infos, const int32_t requestId);
+        std::list<Accessibility::AccessibilityElementInfo>&& infos, const int32_t requestId);
 
     void SetSearchElementInfoByTextResult(Accessibility::AccessibilityElementOperatorCallback& callback,
-        const std::list<Accessibility::AccessibilityElementInfo>& infos, const int32_t requestId);
+        std::list<Accessibility::AccessibilityElementInfo>&& infos, const int32_t requestId);
 
     void SetFindFocusedElementInfoResult(Accessibility::AccessibilityElementOperatorCallback& callback,
         const Accessibility::AccessibilityElementInfo& info, const int32_t requestId);
@@ -266,13 +266,11 @@ private:
     void ProcessParameters(Accessibility::ActionType op, const std::vector<std::string>& params,
         std::map<std::string, std::string>& paramsMap);
 
-    void SearchExtensionElementInfoNG(const SearchParameter& searchParam, const RefPtr<NG::FrameNode>& node,
-        std::list<Accessibility::AccessibilityElementInfo>& infos, Accessibility::AccessibilityElementInfo& parentInfo);
-
     void DumpTreeNodeNG(const RefPtr<NG::FrameNode>& parent, int32_t depth,
         int64_t nodeID, const CommonProperty& commonProperty);
 
-    void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output);
+    void GenerateCommonProperty(const RefPtr<PipelineBase>& context, CommonProperty& output,
+        const RefPtr<PipelineBase>& mainContext);
 
     void FindText(const RefPtr<NG::UINode>& node, std::list<Accessibility::AccessibilityElementInfo>& infos,
         const RefPtr<NG::PipelineContext>& context,
