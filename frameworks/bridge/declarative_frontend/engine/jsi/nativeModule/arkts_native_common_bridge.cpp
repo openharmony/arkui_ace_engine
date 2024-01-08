@@ -1130,10 +1130,10 @@ bool ParseCalcDimension(const EcmaVM* vm,
     std::string calc = result.CalcValue();
     if (isWidth) {
         GetArkUIInternalNodeAPI()->GetCommonModifier().SetWidth(
-            node, result.Value(), static_cast<int>(result.Unit()), calc.c_str());
+            node, result.Value(), static_cast<int32_t>(result.Unit()), calc.c_str());
     } else {
         GetArkUIInternalNodeAPI()->GetCommonModifier().SetHeight(
-            node, result.Value(), static_cast<int>(result.Unit()), calc.c_str());
+            node, result.Value(), static_cast<int32_t>(result.Unit()), calc.c_str());
     }
     return true;
 }
@@ -1362,10 +1362,10 @@ ArkUINativeModuleValue CommonBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCallI
 
         if (width.Unit() == DimensionUnit::CALC) {
             GetArkUIInternalNodeAPI()->GetCommonModifier().SetWidth(
-                nativeNode, 0, static_cast<int>(width.Unit()), width.CalcValue().c_str());
+                nativeNode, 0, static_cast<int32_t>(width.Unit()), width.CalcValue().c_str());
         } else {
             GetArkUIInternalNodeAPI()->GetCommonModifier().SetWidth(
-                nativeNode, width.Value(), static_cast<int>(width.Unit()), calcStr.c_str());
+                nativeNode, width.Value(), static_cast<int32_t>(width.Unit()), calcStr.c_str());
         }
     }
     return panda::JSValueRef::Undefined(vm);
@@ -1398,10 +1398,10 @@ ArkUINativeModuleValue CommonBridge::SetHeight(ArkUIRuntimeCallInfo* runtimeCall
         }
         if (height.Unit() == DimensionUnit::CALC) {
             GetArkUIInternalNodeAPI()->GetCommonModifier().SetHeight(
-                nativeNode, height.Value(), static_cast<int>(height.Unit()), height.CalcValue().c_str());
+                nativeNode, height.Value(), static_cast<int32_t>(height.Unit()), height.CalcValue().c_str());
         } else {
             GetArkUIInternalNodeAPI()->GetCommonModifier().SetHeight(
-                nativeNode, height.Value(), static_cast<int>(height.Unit()), calcStr.c_str());
+                nativeNode, height.Value(), static_cast<int32_t>(height.Unit()), calcStr.c_str());
         }
     }
     return panda::JSValueRef::Undefined(vm);

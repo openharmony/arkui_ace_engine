@@ -210,9 +210,9 @@ typedef void* NodeHandle;
 struct ArkUICommonModifierAPI {
     void (*SetBackgroundColor)(NodeHandle node, uint32_t color);
     void (*ResetBackgroundColor)(NodeHandle node);
-    void (*SetWidth)(NodeHandle node, double value, int unit, const char* calcVlaue);
+    void (*SetWidth)(NodeHandle node, double value, int32_t unit, const char* calcVlaue);
     void (*ResetWidth)(NodeHandle node);
-    void (*SetHeight)(NodeHandle node, double value, int unit, const char* calcVlaue);
+    void (*SetHeight)(NodeHandle node, double value, int32_t unit, const char* calcVlaue);
     void (*ResetHeight)(NodeHandle node);
     void (*SetBorderRadius)(NodeHandle node, const double *values, const int *units, int32_t length);
     void (*ResetBorderRadius)(NodeHandle node);
@@ -565,7 +565,7 @@ struct ArkUISearchModifierAPI {
 };
 
 struct ArkUISelectModifierAPI {
-    void (*SetSpace)(NodeHandle node, float value, int unit);
+    void (*SetSpace)(NodeHandle node, float value, int32_t unit);
     void (*SetValue)(NodeHandle node, const char *value);
     void (*SetSelected)(NodeHandle node, int32_t idx);
     void (*SetSelectFontColor)(NodeHandle node, const uint32_t colorVal);
@@ -574,8 +574,8 @@ struct ArkUISelectModifierAPI {
     void (*SetOptionFontColor)(NodeHandle node, const uint32_t colorVal);
     void (*SetSelectedOptionFontColor)(NodeHandle node, const uint32_t colorVal);
     void (*SetArrowPosition)(NodeHandle node, const int32_t arrowPosition);
-    void (*SetMenuAlign)(NodeHandle node, const int32_t alignType, const float *values, const int *units,
-        const int32_t size);
+    void (*SetMenuAlign)(
+        NodeHandle node, const int32_t alignType, const float* values, const int32_t* units, const int32_t size);
     void (*SetFont)(NodeHandle node, const char *fontInfo, int32_t style);
     void (*SetOptionFont)(NodeHandle node, const char *fontInfo, int32_t style);
     void (*SetSelectedOptionFont)(NodeHandle node, const char *fontInfo, int32_t style);
@@ -592,6 +592,18 @@ struct ArkUISelectModifierAPI {
     void (*ResetFont)(NodeHandle node);
     void (*ResetOptionFont)(NodeHandle node);
     void (*ResetSelectedOptionFont)(NodeHandle node);
+
+    void (*SetSelectWidth)(NodeHandle node, double value, int32_t unit, const char* calcVlaue);
+    void (*ResetSelectWidth)(NodeHandle node);
+    void (*SetSelectHeight)(NodeHandle node, double value, int32_t unit, const char* calcVlaue);
+    void (*ResetSelectHeight)(NodeHandle node);
+    void (*SetSelectSize)(NodeHandle node, const double* number, const int8_t* unit, const char** calc);
+    void (*ResetSelectSize)(NodeHandle node);
+    void (*SetOptionWidthFitTrigger)(NodeHandle node, bool trigger);
+    void (*SetOptionWidth)(NodeHandle node, const char* width);
+    void (*ResetOptionWidth)(NodeHandle node);
+    void (*SetOptionHeight)(NodeHandle node, const char* height);
+    void (*ResetOptionHeight)(NodeHandle node);
 };
 
 struct ArkUICheckboxModifierAPI {
