@@ -352,7 +352,15 @@ public:
         parentId_ = parentId;
     }
 
-    float GetSmallWindowScale() const override;
+    void SetWindowScale(float windowScale) override
+    {
+        windowScale_ = windowScale;
+    }
+
+    float GetWindowScale() const override
+    {
+        return 1.0f;
+    }
 
     int32_t GetParentId() const
     {
@@ -574,6 +582,7 @@ private:
     sptr<OHOS::Rosen::Window> uiWindow_ = nullptr;
     std::string windowName_;
     uint32_t windowId_ = OHOS::Rosen::INVALID_WINDOW_ID;
+    float windowScale_ = 1.0f;
     sptr<IRemoteObject> token_;
     sptr<IRemoteObject> parentToken_;
 

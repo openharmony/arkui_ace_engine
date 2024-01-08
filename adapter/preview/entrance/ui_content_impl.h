@@ -123,6 +123,8 @@ public:
         return nullptr;
     }
 
+    void UpdateTransform(const OHOS::Rosen::Transform& transform) override {};
+
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);
     void DestroyCallback() const;

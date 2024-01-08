@@ -53,6 +53,7 @@ enum class WindowMode : uint32_t;
 enum class MaximizeMode : uint32_t;
 class RSSurfaceNode;
 class RSTransaction;
+class Transform;
 } // namespace Rosen
 
 namespace AAFwk {
@@ -334,6 +335,8 @@ public:
      * @param config Indicates the ID of the UI node which bind the pupop
      */
     virtual void DestroyCustomPopupUIExtension(int32_t nodeId) {}
+
+    virtual void UpdateTransform(const OHOS::Rosen::Transform& transform) = 0;
 };
 
 } // namespace OHOS::Ace

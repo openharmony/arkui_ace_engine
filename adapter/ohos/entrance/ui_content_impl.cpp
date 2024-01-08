@@ -2505,4 +2505,20 @@ void UIContentImpl::SubscribeContainerModalButtonsRectChange(
     };
     pipeline->SubscribeContainerModalButtonsRectChange(std::move(wrapFunc));
 }
+
+void UIContentImpl::UpdateTransform(const OHOS::Rosen::Transform& transform)
+{
+    LOGI("UIContentImpl: UpdateTransform, window scale is %{public}f", transform.scaleX_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto windowScale = transform.scaleX_;
+    taskExecutor->PostTask(
+        [container, windowScale]() {
+            container->SetWindowScale(windowScale);
+        },
+        TaskExecutor::TaskType::UI);
+}
 } // namespace OHOS::Ace

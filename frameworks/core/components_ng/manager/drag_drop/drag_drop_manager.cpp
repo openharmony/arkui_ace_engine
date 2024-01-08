@@ -758,7 +758,7 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
 
-    auto windowScale = GetSmallWindowScale();
+    auto windowScale = GetWindowScale();
     auto windowX = globalX * windowScale;
     auto windowY = globalY * windowScale;
     UpdateDragWindowPosition(static_cast<int32_t>(windowX), static_cast<int32_t>(windowY));
@@ -799,12 +799,12 @@ void DragDropManager::OnItemDragMove(float globalX, float globalY, int32_t dragg
     preGridTargetFrameNode_ = dragFrameNode;
 }
 
-float DragDropManager::GetSmallWindowScale() const
+float DragDropManager::GetWindowScale() const
 {
     float scale = 1.0f;
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, scale);
-    scale = container->GetSmallWindowScale();
+    scale = container->GetWindowScale();
     return scale;
 }
 
@@ -813,7 +813,7 @@ void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t dragge
     dragDropState_ = DragDropMgrState::IDLE;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    auto windowScale = GetSmallWindowScale();
+    auto windowScale = GetWindowScale();
     auto windowX = globalX * windowScale;
     auto windowY = globalY * windowScale;
 

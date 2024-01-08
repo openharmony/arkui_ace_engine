@@ -598,9 +598,14 @@ float GestureEventHub::GetPixelMapScale(const int32_t height, const int32_t widt
     }
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, scale);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, scale);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_RETURN(dragDropManager, scale);
+    auto windowScale = dragDropManager->GetWindowScale();
     if (frameNode->GetDragPreviewOption().mode == DragPreviewMode::DISABLE_SCALE ||
         !(frameNode->GetTag() == V2::WEB_ETS_TAG)) {
-        return scale;
+        return scale * windowScale;
     }
     int32_t deviceHeight = SystemProperties::GetDevicePhysicalHeight();
     int32_t deviceWidth = SystemProperties::GetDevicePhysicalWidth();
@@ -621,11 +626,6 @@ float GestureEventHub::GetPixelMapScale(const int32_t height, const int32_t widt
                 static_cast<float>(minDeviceLength / PIXELMAP_DRAG_WGR_SCALE) / width);
         }
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, scale);
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_RETURN(dragDropManager, scale);
-    auto windowScale = dragDropManager->GetSmallWindowScale();
     return scale * windowScale;
 }
 

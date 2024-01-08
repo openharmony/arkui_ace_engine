@@ -1856,24 +1856,6 @@ std::string AceContainer::GetFontFamilyName(std::string path)
     return fontFamilyName;
 }
 
-float AceContainer::GetSmallWindowScale() const
-{
-    float scale = 1.0f;
-    auto windowId = GetWindowId();
-    std::vector<sptr<OHOS::Rosen::AccessibilityWindowInfo>> windowInfos;
-    OHOS::Rosen::WindowManager::GetInstance().GetAccessibilityWindowInfo(windowInfos);
-    for (auto& window : windowInfos) {
-        if (!window) {
-            continue;
-        }
-        if (window->wid_ == static_cast<int32_t>(windowId)) {
-            scale = window->scaleVal_;
-            break;
-        }
-    }
-    return scale;
-}
-
 bool AceContainer::endsWith(std::string str, std::string suffix)
 {
     if (str.length() < suffix.length()) {

@@ -241,6 +241,7 @@ public:
     bool GetContainerModalButtonsRect(Rosen::Rect& containerModal, Rosen::Rect& buttons) override;
     void SubscribeContainerModalButtonsRectChange(
         std::function<void(Rosen::Rect& containerModal, Rosen::Rect& buttons)>&& callback) override;
+    void UpdateTransform(const OHOS::Rosen::Transform& transform) override;
 
 private:
     void InitializeInner(
