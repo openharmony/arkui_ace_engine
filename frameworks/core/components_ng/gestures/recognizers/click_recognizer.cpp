@@ -43,6 +43,12 @@ constexpr int32_t DEFAULT_LONGPRESS_DURATION = 800000000;
 
 } // namespace
 
+void ClickRecognizer::ForceCleanRecognizer()
+{
+    MultiFingersRecognizer::ForceCleanRecognizer();
+    OnResetStatus();
+}
+
 bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
 {
     PointF localPoint(event.x, event.y);
