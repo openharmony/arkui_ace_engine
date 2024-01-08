@@ -1184,6 +1184,7 @@ std::vector<ParagraphInfo> RichEditorPattern::GetParagraphInfo(int32_t start, in
 {
     std::vector<ParagraphInfo> res;
     auto spanNodes = GetParagraphNodes(start, end);
+    CHECK_NULL_RETURN(!spanNodes.empty(), {});
 
     auto&& firstSpan = spanNodes.front()->GetSpanItem();
     auto paraStart = firstSpan->position - StringUtils::ToWstring(firstSpan->content).length();
