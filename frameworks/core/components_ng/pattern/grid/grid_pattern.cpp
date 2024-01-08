@@ -1290,6 +1290,9 @@ void GridPattern::ScrollTo(float position)
 
 float GridPattern::EstimateHeight() const
 {
+    if (!isConfigScrollable_) {
+        return 0.0f;
+    }
     // During the scrolling animation, the exact current position is used. Other times use the estimated location
     if (isSmoothScrolling_) {
         auto lineIndex = 0;
