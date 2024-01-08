@@ -1809,15 +1809,21 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDista
         return nextIndex;
     }
 
+    auto firstIndex = firstItemInfoInVisibleArea.first;
+    auto dragDistance = firstItemInfoInVisibleArea.second.endPos;
+    if (firstIndex == currentIndex_ && firstItemInfoInVisibleArea.second.startPos > 0) {
+        firstIndex--;
+        dragDistance = firstItemInfoInVisibleArea.second.startPos;
+    }
     auto direction = GreatNotEqual(velocity, 0.0);
-    auto dragThresholdFlag = direction ? firstItemInfoInVisibleArea.second.endPos > firstItemLength / 2
-                                       : firstItemInfoInVisibleArea.second.endPos < firstItemLength / 2;
+    auto dragThresholdFlag =
+        direction ? dragDistance > firstItemLength / 2 : firstItemInfoInVisibleArea.second.endPos < firstItemLength / 2;
     auto turnVelocity = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_MIN_TURN_PAGE_VELOCITY
                                                                                            : MIN_TURN_PAGE_VELOCITY;
     if ((!onlyDistance && std::abs(velocity) > turnVelocity) || dragThresholdFlag) {
-        nextIndex = direction ? firstItemInfoInVisibleArea.first : firstItemInfoInVisibleArea.first + 1;
+        nextIndex = direction ? firstIndex : firstItemInfoInVisibleArea.first + 1;
     } else {
-        nextIndex = direction ? firstItemInfoInVisibleArea.first + 1 : firstItemInfoInVisibleArea.first;
+        nextIndex = direction ? firstIndex + 1 : firstItemInfoInVisibleArea.first;
     }
 
     if (!IsAutoLinear() && nextIndex > currentIndex_ + GetDisplayCount()) {
