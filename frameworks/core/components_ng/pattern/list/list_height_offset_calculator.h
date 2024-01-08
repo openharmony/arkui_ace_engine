@@ -27,10 +27,11 @@ constexpr float DEFAULT_ITEM_HEIGHT = 64.f;
 }
 class ListHeightOffsetCalculator {
 public:
-    ListHeightOffsetCalculator(int32_t index, std::pair<float, float> pos)
+    ListHeightOffsetCalculator(int32_t index, std::pair<float, float> pos, float space)
     {
         targetPos_ = pos;
         targetIndex_ = index;
+        spaceWidth_ = space;
     }
 
     void GetFrameNodeEstimateHeightOffset(RefPtr<FrameNode> frameNode)
@@ -38,6 +39,9 @@ public:
         CHECK_NULL_VOID(frameNode);
         auto listItemPatten = frameNode->GetPattern<ListItemPattern>();
         if (listItemPatten) {
+            if (currentIndex_ > 0) {
+                estimateHeight_ += spaceWidth_;
+            }
             if (currentIndex_ == targetIndex_) {
                 estimateOffset_ = estimateHeight_ - targetPos_.first;
             }
@@ -52,6 +56,9 @@ public:
         }
         auto listItemGroupPatten = frameNode->GetPattern<ListItemGroupPattern>();
         if (listItemGroupPatten) {
+            if (currentIndex_ > 0) {
+                estimateHeight_ += spaceWidth_;
+            }
             if (currentIndex_ == targetIndex_) {
                 estimateOffset_ = listItemGroupPatten->GetEstimateOffset(estimateHeight_, targetPos_);
             }
@@ -101,6 +108,7 @@ private:
     std::pair<float, float> targetPos_ = { 0.0f, 0.0f };
     float estimateHeight_ = 0.0f;
     float estimateOffset_ = 0.0f;
+    float spaceWidth_ = 0.0f;
 
     float totalItemHeight_ = 0.0f;
     float totalItemCount_ = 0.0f;

@@ -24,6 +24,12 @@
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
+struct LayoutedItemInfo {
+    int32_t startIndex = 0;
+    float startPos = 0.0f;
+    int32_t endIndex = 0;
+    float endPos = 0.0f;
+};
 
 // TextLayoutAlgorithm acts as the underlying text layout.
 class ACE_EXPORT ListItemGroupLayoutAlgorithm : public LayoutAlgorithm {
@@ -187,6 +193,16 @@ public:
         return itemStartIndex_;
     }
 
+    void SetLayoutedItemInfo(const std::optional<LayoutedItemInfo>& itemInfo)
+    {
+        layoutedItemInfo_ = itemInfo;
+    }
+
+    std::optional<LayoutedItemInfo> GetLayoutedItemInfo() const
+    {
+        return layoutedItemInfo_;
+    }
+
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
     void UpdateListItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -268,6 +284,8 @@ private:
     float contentEndOffset_ = 0.0f;
     bool forwardLayout_ = true;
     bool needAllLayout_ = false;
+
+    std::optional<LayoutedItemInfo> layoutedItemInfo_;
 };
 } // namespace OHOS::Ace::NG
 
