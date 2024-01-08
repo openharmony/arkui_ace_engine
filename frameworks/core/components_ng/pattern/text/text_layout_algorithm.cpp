@@ -629,7 +629,8 @@ bool TextLayoutAlgorithm::BuildParagraph(TextStyle& textStyle, const RefPtr<Text
     // Confirmed specification: The width of the text paragraph covers the width of the component, so this code is
     // generally not allowed to be modified
     if (!contentConstraint.selfIdealSize.Width()) {
-        float paragraphNewWidth = std::min(GetTextWidth(), paragraph_->GetMaxWidth());
+        float paragraphNewWidth = std::min(std::min(GetTextWidth(), paragraph_->GetMaxWidth()) + indent_,
+            GetMaxMeasureSize(contentConstraint).Width());
         paragraphNewWidth =
             std::clamp(paragraphNewWidth, contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
         if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
@@ -651,7 +652,8 @@ bool TextLayoutAlgorithm::BuildParagraphAdaptUseMinFontSize(TextStyle& textStyle
     // Confirmed specification: The width of the text paragraph covers the width of the component, so this code is
     // generally not allowed to be modified
     if (!contentConstraint.selfIdealSize.Width()) {
-        float paragraphNewWidth = std::min(GetTextWidth(), paragraph_->GetMaxWidth());
+        float paragraphNewWidth = std::min(std::min(GetTextWidth(), paragraph_->GetMaxWidth()) + indent_,
+            GetMaxMeasureSize(contentConstraint).Width());
         paragraphNewWidth =
             std::clamp(paragraphNewWidth, contentConstraint.minSize.Width(), contentConstraint.maxSize.Width());
         if (!NearEqual(paragraphNewWidth, paragraph_->GetMaxWidth())) {
@@ -921,9 +923,10 @@ void TextLayoutAlgorithm::ApplyIndent(const TextStyle& textStyle, double width)
     } else {
         indent = width * textStyle.GetTextIndent().Value();
     }
+    indent_ = static_cast<float>(indent);
     std::vector<float> indents;
     // only indent first line
-    indents.emplace_back(static_cast<float>(indent));
+    indents.emplace_back(indent_);
     indents.emplace_back(0.0);
     paragraph_->SetIndents(indents);
 }
