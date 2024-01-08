@@ -18,6 +18,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
@@ -62,19 +63,16 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     auto& canvas = context.canvas;
     auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
-    auto offset = contentOffset_->Get();
     auto paragraph = textFieldPattern->GetParagraph();
     CHECK_NULL_VOID(paragraph);
-    auto textFrameRect = textFieldPattern->GetFrameRect();
     auto contentOffset = contentOffset_->Get();
-    auto errorParagraph = textFieldPattern->GetErrorParagraph();
     auto contentRect = textFieldPattern->GetContentRect();
     auto clipRectHeight = 0.0f;
     auto errorMargin = 0.0f;
     auto errorViewHeight = 0.0f;
-    auto textPartten = pattern_.Upgrade();
-    CHECK_NULL_VOID(textPartten);
-    auto frameNode = textPartten->GetHost();
+    auto errorParagraph = textFieldPattern->GetErrorParagraph();
+    auto textFrameRect = textFieldPattern->GetFrameRect();
+    auto frameNode = textFieldPattern->GetHost();
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
@@ -87,21 +85,18 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
     } else {
         errorMargin = 0;
     }
+    ProcessErrorParagraph(context, errorMargin);
     if (errorParagraph && showErrorState_->Get()) {
         errorViewHeight = textFrameRect.Bottom() - textFrameRect.Top() + errorMargin;
     }
     clipRectHeight = contentRect.GetY() + contentRect.Height() + errorViewHeight;
     canvas.Save();
     RSRect clipInnerRect = RSRect(contentRect.GetX(), contentRect.GetY(),
-        contentRect.Width() + contentRect.GetX() + textFieldPattern->GetInlinePadding(),
-        clipRectHeight);
+        contentRect.Width() + contentRect.GetX() + textFieldPattern->GetInlinePadding(), clipRectHeight);
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     if (paragraph) {
         paragraph->Paint(canvas, textFieldPattern->GetTextRect().GetX(),
             textFieldPattern->IsTextArea() ? textFieldPattern->GetTextRect().GetY() : contentOffset.GetY());
-    }
-    if (showErrorState_->Get() && errorParagraph && !textFieldPattern->IsDisabled()) {
-        errorParagraph->Paint(canvas, offset.GetX(), textFrameRect.Bottom() - textFrameRect.Top() + errorMargin);
     }
     canvas.Restore();
 }
@@ -261,7 +256,6 @@ void TextFieldContentModifier::SetTextOverflow(const TextOverflow value)
     }
 }
 
-
 void TextFieldContentModifier::SetFontStyle(const OHOS::Ace::FontStyle& value)
 {
     if (fontStyle_->Get() != static_cast<int32_t>(value)) {
@@ -389,5 +383,27 @@ bool TextFieldContentModifier::NeedMeasureUpdate(PropertyChangeFlag& flag)
     }
     flag &= (PROPERTY_UPDATE_MEASURE | PROPERTY_UPDATE_MEASURE_SELF | PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     return flag;
+}
+
+void TextFieldContentModifier::ProcessErrorParagraph(DrawingContext& context, float errorMargin)
+{
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto offset = contentOffset_->Get();
+    auto textFrameRect = textFieldPattern->GetFrameRect();
+    auto errorParagraph = textFieldPattern->GetErrorParagraph();
+    auto frameNode = textFieldPattern->GetHost();
+    auto& canvas = context.canvas;
+    if (showErrorState_->Get() && errorParagraph && !textFieldPattern->IsDisabled()) {
+        auto property = frameNode->GetLayoutProperty();
+        float padding = 0.0f;
+        if (property && property->GetPaddingProperty()) {
+            const auto& paddingProperty = property->GetPaddingProperty();
+            padding = paddingProperty->left.value_or(CalcLength(0.0)).GetDimension().ConvertToPx() +
+                      paddingProperty->right.value_or(CalcLength(0.0)).GetDimension().ConvertToPx();
+        }
+        errorParagraph->Layout(textFrameRect.Width() - padding);
+        errorParagraph->Paint(canvas, offset.GetX(), textFrameRect.Bottom() - textFrameRect.Top() + errorMargin);
+    }
 }
 } // namespace OHOS::Ace::NG

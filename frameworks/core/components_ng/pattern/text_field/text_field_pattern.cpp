@@ -4947,7 +4947,9 @@ void TextFieldPattern::CreateErrorParagraph(const std::string& content)
     TextStyle errorTextStyle = theme->GetErrorTextStyle();
     std::string errorText = content;
     ParagraphStyle paraStyle { .align = TextAlign::START,
+        .maxLines = 1,
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
+        .textOverflow = TextOverflow::ELLIPSIS,
         .fontSize = errorTextStyle.GetFontSize().ConvertToPx() };
     errorParagraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
     CHECK_NULL_VOID(errorParagraph_);
