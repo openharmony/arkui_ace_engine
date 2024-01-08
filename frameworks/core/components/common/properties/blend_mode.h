@@ -21,7 +21,7 @@
 namespace OHOS::Ace {
 // A style class indicates the way to render blendMode effect
 enum class BlendMode : int16_t {
-    NONE = 0, // Note: The DEFAULT blend mode is different from SRC_OVER. When using it with
+    NONE = 0, // Note: The NONE blend mode is different from SRC_OVER. When using it with
               // RSColorBlendApplyType::SAVE_LAYER, it does not create an offscreen buffer. However, when using it
               // with RSColorBlendApplyType::FAST, it does not modify the blend mode of subsequent content.
 
