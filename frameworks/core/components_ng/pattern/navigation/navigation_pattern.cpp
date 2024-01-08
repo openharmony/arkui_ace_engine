@@ -1268,14 +1268,6 @@ NavigationTransition NavigationPattern::ExecuteTransition(const RefPtr<NavDestin
     return onTransition_(preInfo, topInfo, operation);
 }
 
-bool NavigationPattern::NeedRecalculateSafeArea()
-{
-    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
-    CHECK_NULL_RETURN(hostNode, true);
-    bool isFixHeight = hostNode->GetLayoutProperty()->HasFixedHeight();
-    return !isFixHeight;
-}
-
 void NavigationPattern::OnColorConfigurationUpdate()
 {
     auto dividerNode = GetDividerNode();

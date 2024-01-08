@@ -79,24 +79,6 @@ float MeasureContentChild(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinat
     return contentWrapper->GetGeometryNode()->GetFrameSize().Height();
 }
 
-float GetSafeAreaHeight(LayoutWrapper* LayoutWrapper)
-{
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, 0.0f);
-    auto safeArea = pipeline->GetSafeArea();
-    auto safeAreaHeight = safeArea.top_.Length();
-    auto hostNode = LayoutWrapper->GetHostNode();
-    CHECK_NULL_RETURN(hostNode, 0.0f);
-    auto geometryNode = hostNode->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, 0.0f);
-    auto parentGlobalOffset = hostNode->GetParentGlobalOffsetDuringLayout();
-    auto frame = geometryNode->GetFrameRect() + parentGlobalOffset;
-    if (!safeArea.top_.IsOverlapped(frame.Top())) {
-        safeAreaHeight = 0.0f;
-    }
-    return safeAreaHeight;
-}
-
 float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGroupNode>& hostNode,
     const RefPtr<NavDestinationLayoutProperty>& navDestinationLayoutProperty)
 {
@@ -109,7 +91,7 @@ float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGr
     auto titleBarWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
     CHECK_NULL_RETURN(titleBarWrapper, 0.0f);
     auto geometryNode = titleBarWrapper->GetGeometryNode();
-    auto titleBarOffset = OffsetT<float>(0.0f, 0.0f + GetSafeAreaHeight(layoutWrapper));
+    auto titleBarOffset = OffsetT<float>(0.0f, 0.0f);
     const auto& padding = navDestinationLayoutProperty->CreatePaddingAndBorder();
     titleBarOffset.AddX(padding.left.value_or(0));
     titleBarOffset.AddY(padding.top.value_or(0));
@@ -128,7 +110,7 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGrou
     CHECK_NULL_VOID(contentWrapper);
     auto geometryNode = contentWrapper->GetGeometryNode();
     if (navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) {
-        auto contentOffset = OffsetT<float>(0.0f, 0.0f + GetSafeAreaHeight(layoutWrapper));
+        auto contentOffset = OffsetT<float>(0.0f, 0.0f);
         const auto& padding = navDestinationLayoutProperty->CreatePaddingAndBorder();
         contentOffset.AddX(padding.left.value_or(0));
         contentOffset.AddY(padding.top.value_or(0));
@@ -137,8 +119,7 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGrou
         return;
     }
 
-    auto OffsetY = titlebarHeight + GetSafeAreaHeight(layoutWrapper);
-    auto contentOffset = OffsetT<float>(0, OffsetY);
+    auto contentOffset = OffsetT<float>(0, titlebarHeight);
     const auto& padding = navDestinationLayoutProperty->CreatePaddingAndBorder();
     contentOffset.AddX(padding.left.value_or(0));
     contentOffset.AddY(padding.top.value_or(0));

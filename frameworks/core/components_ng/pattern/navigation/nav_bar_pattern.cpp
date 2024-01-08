@@ -540,7 +540,6 @@ void NavBarPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    host->SetNeedAdjustOffset(false);
     SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
     host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
@@ -756,27 +755,5 @@ bool NavBarPattern::CanCoordScrollUp(float offset) const
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_RETURN(titlePattern, false);
     return Negative(offset) && titlePattern->IsCurrentMaxTitle();
-}
-
-void NavBarPattern::UpdateNeedRecalculateSafeArea()
-{
-    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
-    CHECK_NULL_VOID(hostNode);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto safeArea = pipeline->GetSafeArea();
-    auto geometryNode = hostNode->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto parentGlobalOffset = hostNode->GetParentGlobalOffsetDuringLayout();
-    auto frame = geometryNode->GetFrameRect() + parentGlobalOffset;
-    if (!safeArea.top_.IsOverlapped(frame.Top())) {
-        auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-        CHECK_NULL_VOID(titleBarNode);
-        auto geometryNode = titleBarNode->GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        auto offset = OffsetF(0.0f, 0.0f);
-        geometryNode->SetFrameOffset(offset);
-        titleBarNode->ForceSyncGeometryNode();
-    }
 }
 } // namespace OHOS::Ace::NG
