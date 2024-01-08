@@ -1293,8 +1293,12 @@ void OverlayManager::DeleteMenu(int32_t targetId)
     if (it == menuMap_.end()) {
         return;
     }
-    HideAllMenus();
-    HideMenuInSubWindow(false);
+    auto node = AceType::DynamicCast<FrameNode>(it->second);
+    if (node->GetParent()) {
+        auto id = Container::CurrentId();
+        SubwindowManager::GetInstance()->ClearMenu();
+        SubwindowManager::GetInstance()->ClearMenuNG(id);
+    }
     menuMap_.erase(it);
 }
 
