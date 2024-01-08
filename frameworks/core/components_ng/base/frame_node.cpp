@@ -1671,7 +1671,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     {
         ACE_DEBUG_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");
         bool isOutOfRegion = IsOutOfTouchTestRegion(parentRevertPoint, static_cast<int32_t>(touchRestrict.sourceType));
-        AddFrameNodeSnapshot(!isOutOfRegion, parentId);
+        AddFrameNodeSnapshot(!isOutOfRegion, parentId, responseRegionList);
         if ((!isDispatch) && isOutOfRegion) {
             return HitTestResult::OUT_OF_REGION;
         }
@@ -3015,7 +3015,7 @@ void FrameNode::RecordExposureIfNeed(const std::string& inspectorId)
     pipeline->AddVisibleAreaChangeNode(Claim(this), exposureProcessor_->GetRatio(), callback, false);
 }
 
-void FrameNode::AddFrameNodeSnapshot(bool isHit, int32_t parentId)
+void FrameNode::AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<RectF> responseRegionList)
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -3029,7 +3029,8 @@ void FrameNode::AddFrameNodeSnapshot(bool isHit, int32_t parentId)
         .comId = propInspectorId_.value_or(""),
         .monopolizeEvents = GetMonopolizeEvents(),
         .isHit = isHit,
-        .hitTestMode = static_cast<int32_t>(GetHitTestMode())
+        .hitTestMode = static_cast<int32_t>(GetHitTestMode()),
+        .responseRegionList = responseRegionList
     };
     eventMgr->GetEventTreeRecord().AddFrameNodeSnapshot(std::move(info));
 }

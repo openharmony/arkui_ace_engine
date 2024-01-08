@@ -730,7 +730,7 @@ private:
     void UpdatePercentSensitive();
 
     void UpdateParentAbsoluteOffset();
-    void AddFrameNodeSnapshot(bool isHit, int32_t parentId);
+    void AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<RectF> responseRegionList);
 
     int32_t GetNodeExpectedRate();
 

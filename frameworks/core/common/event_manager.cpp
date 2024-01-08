@@ -163,6 +163,14 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
             .append(".");
     }
     TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "SceneBoard touch test hitted node info: %{public}s", resultInfo.c_str());
+    if (scenceBoardTouchTestResultInfo.size() == 0) {
+        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "SceneBoard touch test result is empty.");
+        std::list<std::pair<int32_t, std::string>> dumpList;
+        eventTree_.Dump(dumpList, 0);
+        for (auto& item : dumpList) {
+            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
+        }
+    }
 }
 
 bool EventManager::PostEventTouchTest(
