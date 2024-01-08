@@ -31,6 +31,7 @@ public:
     virtual void SetOnTouchEvent(TouchEventFunc &&touchEventFunc) = 0;
     virtual void BindController(std::function<void()>&& resetFunc) = 0;
     virtual void ResetController() = 0;
+    virtual void FireMakeNode() = 0;
 
 private:
     static std::unique_ptr<NodeContainerModel> instance_;

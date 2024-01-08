@@ -328,6 +328,9 @@ FrameNode::~FrameNode()
     TriggerVisibleAreaChangeCallback(true);
     visibleAreaUserCallbacks_.clear();
     visibleAreaInnerCallbacks_.clear();
+    if (eventHub_) {
+        eventHub_->ClearOnAreaChangedInnerCallbacks();
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     if (pipeline) {
         pipeline->RemoveOnAreaChangeNode(GetId());
@@ -587,6 +590,7 @@ void FrameNode::MouseToJsonValue(std::unique_ptr<JsonValue>& json) const
 void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     bool touchable = true;
+    bool monopolizeEvents = false;
     std::string hitTestMode = "HitTestMode.Default";
     auto gestureEventHub = GetOrCreateGestureEventHub();
     std::vector<DimensionRect> responseRegion;
@@ -596,9 +600,11 @@ void FrameNode::TouchToJsonValue(std::unique_ptr<JsonValue>& json) const
         hitTestMode = gestureEventHub->GetHitTestModeStr();
         responseRegion = gestureEventHub->GetResponseRegion();
         mouseResponseRegion = gestureEventHub->GetMouseResponseRegion();
+        monopolizeEvents = gestureEventHub->GetMonopolizeEvents();
     }
     json->Put("touchable", touchable);
     json->Put("hitTestBehavior", hitTestMode.c_str());
+    json->Put("monopolizeEvents", monopolizeEvents);
     auto jsArr = JsonUtil::CreateArray(true);
     for (int32_t i = 0; i < static_cast<int32_t>(responseRegion.size()); ++i) {
         auto iStr = std::to_string(i);
@@ -889,12 +895,7 @@ void FrameNode::ClearUserOnAreaChange()
 
 void FrameNode::SetOnAreaChangeCallback(OnAreaChangedFunc&& callback)
 {
-    if (!lastFrameRect_) {
-        lastFrameRect_ = std::make_unique<RectF>();
-    }
-    if (!lastParentOffsetToWindow_) {
-        lastParentOffsetToWindow_ = std::make_unique<OffsetF>();
-    }
+    InitLastArea();
     eventHub_->SetOnAreaChanged(std::move(callback));
 }
 
@@ -903,12 +904,19 @@ void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp)
     if (!IsActive()) {
         return;
     }
-    if (eventHub_->HasOnAreaChanged() && lastFrameRect_ && lastParentOffsetToWindow_) {
+    if ((eventHub_->HasOnAreaChanged() || eventHub_->HasInnerOnAreaChanged()) && lastFrameRect_ &&
+        lastParentOffsetToWindow_) {
         auto currFrameRect = geometryNode_->GetFrameRect();
         auto currParentOffsetToWindow = CalculateOffsetRelativeToWindow(nanoTimestamp) - currFrameRect.GetOffset();
         if (currFrameRect != *lastFrameRect_ || currParentOffsetToWindow != *lastParentOffsetToWindow_) {
-            eventHub_->FireOnAreaChanged(
-                *lastFrameRect_, *lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
+            if (eventHub_->HasInnerOnAreaChanged()) {
+                eventHub_->FireInnerOnAreaChanged(
+                    *lastFrameRect_, *lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
+            }
+            if (eventHub_->HasOnAreaChanged()) {
+                eventHub_->FireOnAreaChanged(
+                    *lastFrameRect_, *lastParentOffsetToWindow_, currFrameRect, currParentOffsetToWindow);
+            }
             *lastFrameRect_ = currFrameRect;
             *lastParentOffsetToWindow_ = currParentOffsetToWindow;
         }
@@ -3029,7 +3037,7 @@ int32_t FrameNode::GetUiExtensionId()
     return -1;
 }
 
-int64_t FrameNode::WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId)
+int32_t FrameNode::WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId)
 {
     if (pattern_) {
         return pattern_->WrapExtensionAbilityId(extensionOffset, abilityId);
@@ -3037,40 +3045,40 @@ int64_t FrameNode::WrapExtensionAbilityId(int64_t extensionOffset, int64_t abili
     return -1;
 }
 
-void FrameNode::SearchExtensionElementInfoByAccessibilityIdNG(int64_t elementId, int32_t mode,
-    int64_t offset, std::list<Accessibility::AccessibilityElementInfo>& output)
+void FrameNode::SearchExtensionElementInfoByAccessibilityIdNG(int32_t elementId, int32_t mode,
+    int32_t offset, std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     if (pattern_) {
         pattern_->SearchExtensionElementInfoByAccessibilityId(elementId, mode, offset, output);
     }
 }
 
-void FrameNode::SearchElementInfosByTextNG(int64_t elementId, const std::string& text,
-    int64_t offset, std::list<Accessibility::AccessibilityElementInfo>& output)
+void FrameNode::SearchElementInfosByTextNG(int32_t elementId, const std::string& text,
+    int32_t offset, std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     if (pattern_) {
         pattern_->SearchElementInfosByText(elementId, text, offset, output);
     }
 }
 
-void FrameNode::FindFocusedExtensionElementInfoNG(int64_t elementId, int32_t focusType,
-    int64_t offset, Accessibility::AccessibilityElementInfo& output)
+void FrameNode::FindFocusedExtensionElementInfoNG(int32_t elementId, int32_t focusType,
+    int32_t offset, Accessibility::AccessibilityElementInfo& output)
 {
     if (pattern_) {
         pattern_->FindFocusedElementInfo(elementId, focusType, offset, output);
     }
 }
 
-void FrameNode::FocusMoveSearchNG(int64_t elementId, int32_t direction,
-    int64_t offset, Accessibility::AccessibilityElementInfo& output)
+void FrameNode::FocusMoveSearchNG(int32_t elementId, int32_t direction,
+    int32_t offset, Accessibility::AccessibilityElementInfo& output)
 {
     if (pattern_) {
         pattern_->FocusMoveSearch(elementId, direction, offset, output);
     }
 }
 
-bool FrameNode::TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
-    int32_t action, int64_t offset)
+bool FrameNode::TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+    int32_t action, int32_t offset)
 {
     bool isExecuted = false;
     if (pattern_) {
@@ -3202,6 +3210,16 @@ RefPtr<FrameNode> FrameNode::GetNodeContainer()
         parent = parent->GetParent();
     }
     return AceType::DynamicCast<FrameNode>(parent);
+}
+
+void FrameNode::InitLastArea()
+{
+    if (!lastFrameRect_) {
+        lastFrameRect_ = std::make_unique<RectF>();
+    }
+    if (!lastParentOffsetToWindow_) {
+        lastParentOffsetToWindow_ = std::make_unique<OffsetF>();
+    }
 }
 
 } // namespace OHOS::Ace::NG

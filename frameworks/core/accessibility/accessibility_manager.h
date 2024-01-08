@@ -29,7 +29,7 @@ class AccessibilityEventInfo;
 namespace OHOS::Ace {
 
 struct AccessibilityEvent {
-    int64_t nodeId = 0;
+    int32_t nodeId = 0;
     uint32_t windowId = 0;
     WindowsContentChangeTypes windowContentChangeTypes = CONTENT_CHANGE_TYPE_INVALID;
     WindowUpdateType windowChangeTypes = WINDOW_UPDATE_INVALID;
@@ -56,7 +56,7 @@ public:
     ~AccessibilityManager() override = default;
 
     virtual void SendAccessibilityAsyncEvent(const AccessibilityEvent& accessibilityEvent) = 0;
-    virtual int64_t GenerateNextAccessibilityId() = 0;
+    virtual int32_t GenerateNextAccessibilityId() = 0;
     virtual RefPtr<AccessibilityNode> CreateSpecializedNode(
         const std::string& tag, int32_t nodeId, int32_t parentNodeId) = 0;
     virtual RefPtr<AccessibilityNode> CreateAccessibilityNode(
@@ -85,26 +85,26 @@ public:
     virtual void UpdateEventTarget(NodeId id, BaseEventInfo& info) = 0;
     virtual void SetWindowPos(int32_t left, int32_t top, int32_t windowId) = 0;
 #ifdef WINDOW_SCENE_SUPPORTED
-    virtual void SearchElementInfoByAccessibilityIdNG(int64_t elementId, int32_t mode,
+    virtual void SearchElementInfoByAccessibilityIdNG(int32_t elementId, int32_t mode,
         std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context,
-        int64_t uiExtensionOffset) = 0;
-    virtual void SearchElementInfosByTextNG(int64_t elementId, const std::string& text,
+        int32_t uiExtensionOffset) = 0;
+    virtual void SearchElementInfosByTextNG(int32_t elementId, const std::string& text,
         std::list<Accessibility::AccessibilityElementInfo>& infos, const RefPtr<PipelineBase>& context,
-        const int64_t uiExtensionOffset = 0) = 0;
-    virtual void FindFocusedElementInfoNG(int64_t elementId, int32_t focusType,
+        const int32_t uiExtensionOffset = 0) = 0;
+    virtual void FindFocusedElementInfoNG(int32_t elementId, int32_t focusType,
         Accessibility::AccessibilityElementInfo& info, const RefPtr<PipelineBase>& context,
-        const int64_t uiExtensionOffset = 0) = 0;
-    virtual void FocusMoveSearchNG(int64_t elementId, int32_t direction, Accessibility::AccessibilityElementInfo& info,
-        const RefPtr<PipelineBase>& context, const int64_t uiExtensionOffset = 0) = 0;
-    virtual bool ExecuteExtensionActionNG(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, const RefPtr<PipelineBase>& context, int64_t uiExtensionOffset) = 0;
+        const int32_t uiExtensionOffset = 0) = 0;
+    virtual void FocusMoveSearchNG(int32_t elementId, int32_t direction, Accessibility::AccessibilityElementInfo& info,
+        const RefPtr<PipelineBase>& context, const int32_t uiExtensionOffset = 0) = 0;
+    virtual bool ExecuteExtensionActionNG(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, const RefPtr<PipelineBase>& context, int32_t uiExtensionOffset) = 0;
     virtual bool TransferAccessibilityAsyncEvent(
-        const Accessibility::AccessibilityEventInfo& eventInfo, int64_t uiExtensionOffset)
+        const Accessibility::AccessibilityEventInfo& eventInfo, int32_t uiExtensionOffset)
     {
         return false;
     }
     virtual void SendExtensionAccessibilityEvent(
-        const Accessibility::AccessibilityEventInfo& eventInfo, int64_t uiExtensionOffset) {}
+        const Accessibility::AccessibilityEventInfo& eventInfo, int32_t uiExtensionOffset) {}
 #endif
     void SetVersion(AccessibilityVersion version)
     {

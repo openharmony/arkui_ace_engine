@@ -53,7 +53,7 @@ bool UIExtensionManager::OnBackPressed()
     return uiExtensionFocused->OnBackPressed();
 }
 
-bool UIExtensionManager::IsWrapExtensionAbilityId(int64_t elementId)
+bool UIExtensionManager::IsWrapExtensionAbilityId(int32_t elementId)
 {
     return elementId > UI_EXTENSION_OFFSET_MIN;
 }
@@ -67,7 +67,7 @@ bool UIExtensionManager::IsWindowTypeUIExtension(const RefPtr<PipelineBase>& pip
 }
 
 bool UIExtensionManager::SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
-    int64_t uiExtensionOffset, const RefPtr<PipelineBase>& pipeline)
+    int32_t uiExtensionOffset, const RefPtr<PipelineBase>& pipeline)
 {
     CHECK_NULL_RETURN(pipeline, false);
     auto instanceId = pipeline->GetInstanceId();
@@ -77,14 +77,14 @@ bool UIExtensionManager::SendAccessibilityEventInfo(const Accessibility::Accessi
     return ret == OHOS::Rosen::WMError::WM_OK;
 }
 
-std::pair<int64_t, int64_t> UIExtensionManager::UnWrapExtensionAbilityId(int64_t extensionOffset, int64_t elementId)
+std::pair<int32_t, int32_t> UIExtensionManager::UnWrapExtensionAbilityId(int32_t extensionOffset, int32_t elementId)
 {
     if (extensionOffset == 0) {
-        return std::pair<int64_t, int64_t>(0, 0);
+        return std::pair<int32_t, int32_t>(0, 0);
     }
-    int64_t index = elementId / extensionOffset;
-    int64_t abilityId = elementId % extensionOffset;
-    return std::pair<int64_t, int64_t>(index, abilityId);
+    int32_t index = elementId / extensionOffset;
+    int32_t abilityId = elementId % extensionOffset;
+    return std::pair<int32_t, int32_t>(index, abilityId);
 }
 
 const RefPtr<FrameNode> UIExtensionManager::GetFocusUiExtensionNode()

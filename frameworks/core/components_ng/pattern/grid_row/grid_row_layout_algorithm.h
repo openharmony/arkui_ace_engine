@@ -52,7 +52,7 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
 private:
-    void MeasureSelf(LayoutWrapper* layoutWrapper, float childHeight);
+    void MeasureSelf(LayoutWrapper* layoutWrapper, float childHeight, float selfHeight);
     float MeasureChildren(LayoutWrapper* layoutWrapper, double columnUnitWidth, double childHeightLimit,
         std::pair<double, double>& gutter, V2::GridSizeType sizeType, int32_t columnNum);
     void CalcCrossAxisAlignment(LayoutWrapper* layoutWrapper,

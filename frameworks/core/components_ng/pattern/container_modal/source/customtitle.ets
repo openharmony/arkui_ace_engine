@@ -31,13 +31,16 @@ struct Index {
   @State appTitle: string = '';
   @State appLabelColor: Color = 0xff000000;
   @State pixelMap：image.PixelMap = undefined;
+  @State iconOpacity: number = 1;
 
   onWindowFocused() {
     this.appLabelColor = 0xff000000;
+    this.iconOpacity = 1;
   }
 
   onWindowUnfocused() {
     this.appLabelColor = 0x66000000;
+    this.iconOpacity = 0.4;
   }
 
   setAppTitle(content: string ) {
@@ -57,6 +60,7 @@ struct Index {
         .interpolation(ImageInterpolation.Medium)
         .focusable(false)
         .margin({ left: TITLE_PADDING_START, right: TITLE_ELEMENT_MARGIN_HORIZONTAL })
+        .opacity(this.iconOpacity)
 
       Text(this.appTitle ? this.appTitle : this.appLabel)
         .id("enhanceAppLabel")

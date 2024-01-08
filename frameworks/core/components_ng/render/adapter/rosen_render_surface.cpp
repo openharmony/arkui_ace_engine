@@ -315,10 +315,14 @@ void RosenRenderSurface::ConsumeXComponentBuffer()
         TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "XComponent cannot acquire buffer error = %{public}d", surfaceErr);
         return;
     }
-    auto renderContext = renderContext_.Upgrade();
-    auto host = renderContext->GetHost();
-    CHECK_NULL_VOID(host);
-    auto task = [host]() { host->MarkNeedRenderOnly(); };
+
+    auto task = [weak = renderContext_]() {
+        auto renderContext = weak.Upgrade();
+        CHECK_NULL_VOID(renderContext);
+        auto host = renderContext->GetHost();
+        CHECK_NULL_VOID(host);
+        host->MarkNeedRenderOnly();
+    };
     PostTaskToUI(std::move(task));
 
     std::shared_ptr<SurfaceBufferNode> surfaceNode = nullptr;

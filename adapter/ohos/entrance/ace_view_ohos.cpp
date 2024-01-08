@@ -99,7 +99,7 @@ void AceViewOhos::SetViewportMetrics(AceViewOhos* view, const ViewportConfig& co
 }
 
 void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    const RefPtr<OHOS::Ace::NG::FrameNode>& node)
+    const RefPtr<OHOS::Ace::NG::FrameNode>& node, const std::function<void()>& callback)
 {
     CHECK_NULL_VOID(view);
     CHECK_NULL_VOID(pointerEvent);
@@ -128,7 +128,7 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
             pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP)) {
             view->ProcessMouseEvent(pointerEvent, node);
         } else {
-            view->ProcessTouchEvent(pointerEvent, node);
+            view->ProcessTouchEvent(pointerEvent, node, callback);
         }
     }
 }
@@ -259,7 +259,7 @@ void AceViewOhos::Launch()
 }
 
 void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    const RefPtr<OHOS::Ace::NG::FrameNode>& node)
+    const RefPtr<OHOS::Ace::NG::FrameNode>& node, const std::function<void()>& callback)
 {
     CHECK_NULL_VOID(pointerEvent);
     TouchEvent touchPoint = ConvertTouchEvent(pointerEvent);
@@ -267,13 +267,16 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
         ACE_SCOPED_TRACE("ProcessTouchEvent pointX=%f pointY=%f type=%d timeStamp=%lld id=%d", touchPoint.x,
             touchPoint.y, (int)touchPoint.type, touchPoint.time.time_since_epoch().count(), touchPoint.id);
     }
-    auto markProcess = [pointerEvent]() {
+    auto markProcess = [pointerEvent, finallyCallback = callback]() {
         CHECK_NULL_VOID(pointerEvent);
         if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
             TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "touchEvent markProcessed in ace_view, eventInfo: id:%{public}d",
                 pointerEvent->GetId());
         }
         pointerEvent->MarkProcessed();
+        if (finallyCallback) {
+            finallyCallback();
+        }
     };
     if (touchPoint.type != TouchType::UNKNOWN) {
         if (touchEventCallback_) {

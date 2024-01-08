@@ -107,22 +107,26 @@ public:
         return 0;
     }
 
-    virtual int32_t Serialize(const char* buffer)
-    {
-        return 0;
-    }
-    virtual int32_t Deserialize(char* buffer)
+    virtual int32_t Serialize(char* p)
     {
         return 0;
     }
 
-    const char* SetHeader(const char* buffer, GestureType type, int32_t len)
+    virtual int32_t Deserialize(const char* p)
     {
-        *(GestureType*)(buffer) = type;
-        buffer += sizeof(GestureType);
-        *(int32_t*)(buffer) = len;
-        buffer += sizeof(int32_t);
-        return buffer;
+        return 0;
+    }
+
+    char* SetHeader(char* buff, GestureType type, int32_t len)
+    {
+        if (buff == nullptr) {
+            return nullptr;
+        }
+        *reinterpret_cast<GestureType*>(buff) = type;
+        buff += sizeof(GestureType);
+        *reinterpret_cast<int32_t*>(buff) = len;
+        buff += sizeof(int32_t);
+        return buff;
     }
 
     virtual RefPtr<NGGestureRecognizer> CreateRecognizer() = 0;

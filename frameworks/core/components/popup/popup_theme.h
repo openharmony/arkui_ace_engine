@@ -297,7 +297,7 @@ private:
     Color buttonBackgroundColor_ = Color::TRANSPARENT;
     Color buttonPressColor_ = Color(0x1affffff);
     Color focusColor_ = Color::WHITE;
-    uint32_t popupDoubleBorderEnable_ = 0;
+    int32_t popupDoubleBorderEnable_ = 0;
     Color popupOuterBorderColor_ = Color::TRANSPARENT;
     Color popupInnerBorderColor_ = Color::TRANSPARENT;
 

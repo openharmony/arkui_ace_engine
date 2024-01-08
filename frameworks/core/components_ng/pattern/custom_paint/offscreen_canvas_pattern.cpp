@@ -47,6 +47,12 @@ OffscreenCanvasPattern::OffscreenCanvasPattern(const RefPtr<PipelineBase> contex
     offscreenPaintMethod_ = MakeRefPtr<OffscreenCanvasPaintMethod>(context, width, height);
 }
 
+void OffscreenCanvasPattern::UpdateSize(int32_t width, int32_t height)
+{
+    CHECK_NULL_VOID(offscreenPaintMethod_);
+    return offscreenPaintMethod_->UpdateSize(width, height);
+}
+
 bool OffscreenCanvasPattern::IsSucceed()
 {
     CHECK_NULL_RETURN(offscreenPaintMethod_, false);

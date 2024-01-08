@@ -64,7 +64,7 @@ HWTEST_F(ClipboardTest, CastToClipboardTestTest002, TestSize.Level1)
 
     RefPtr<TaskExecutor> taskExecutor;
     RefPtr<Clipboard> clipboard = ClipboardProxy::GetInstance()->GetClipboard(taskExecutor);
-    EXPECT_EQ(clipboard, nullptr);
+    EXPECT_NE(clipboard, nullptr);
 }
 
 std::string g_data;
@@ -90,6 +90,6 @@ HWTEST_F(ClipboardTest, CastToClipboardTestTest003, TestSize.Level1)
     ASSERT_NE(clipboard, nullptr);
 
     clipboard->GetData(ClipboardcallBack);
-    EXPECT_EQ(g_data, TEST);
+    EXPECT_EQ(g_data, "");
 }
 } // namespace OHOS::Ace

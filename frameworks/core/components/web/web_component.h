@@ -733,7 +733,7 @@ public:
         onSslSelectCertRequestImpl_ = std::move(impl);
     }
 
-    void RequestFocus();
+    bool RequestFocus();
 
     using OnConsoleImpl = std::function<bool(const BaseEventInfo* info)>;
     bool OnConsole(const BaseEventInfo* info) const

@@ -118,9 +118,13 @@ public:
 
     void OnNapiCallback(napi_value resultArg, const DragStatus dragStatus)
     {
+        std::vector<napi_value> cbList(cbList_.size());
         for (auto& cbRef : cbList_) {
             napi_value cb = nullptr;
             napi_get_reference_value(env_, cbRef, &cb);
+            cbList.push_back(cb);
+        }
+        for (auto& cb : cbList) {
             napi_call_function(env_, nullptr, cb, 1, &resultArg, nullptr);
         }
     }
@@ -132,10 +136,6 @@ public:
             [](napi_env env, void* data, void* hint) {
                 DragAction* dragAction = static_cast<DragAction*>(data);
                 if (dragAction != nullptr) {
-                    if (dragAction->asyncCtx_ != nullptr) {
-                        delete dragAction->asyncCtx_->dragAction;
-                        dragAction->asyncCtx_->dragAction = nullptr;
-                    }
                     dragAction->DeleteRef();
                     delete dragAction;
                 }

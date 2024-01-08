@@ -23,33 +23,30 @@ namespace OHOS::Ace::NG {
 GridIrregularFiller::GridIrregularFiller(GridLayoutInfo* info, LayoutWrapper* wrapper) : info_(info), wrapper_(wrapper)
 {}
 
-void GridIrregularFiller::InitPos()
+void GridIrregularFiller::InitPos(int32_t lineIdx)
 {
-    const auto& row = info_->gridMatrix_.find(info_->startMainLineIndex_);
+    // to land on the first item after advancing once
+    posX_ = -1;
+    posY_ = lineIdx;
+
+    const auto& row = info_->gridMatrix_.find(lineIdx);
     if (row == info_->gridMatrix_.end()) {
         // implies empty matrix
         return;
     }
-    for (const auto& [col, idx] : row->second) {
-        if (idx == info_->startIndex_) {
-            posY_ = info_->startMainLineIndex_;
-            // to land on the first item after advancing once
-            posX_ = col - 1;
-            return;
-        }
-    }
-    info_->endIndex_ = info_->startIndex_ - 1;
+    info_->endIndex_ = row->second.at(0) - 1;
 }
 
-bool GridIrregularFiller::IsFull(float targetLen)
+bool GridIrregularFiller::IsFull(float len, float targetLen)
 {
-    return length_ > targetLen || info_->endIndex_ == wrapper_->GetTotalChildCount() - 1;
+    return len > targetLen || info_->endIndex_ == wrapper_->GetTotalChildCount() - 1;
 }
 
-float GridIrregularFiller::Fill(const FillParameters& params)
+float GridIrregularFiller::Fill(const FillParameters& params, int32_t startIdx)
 {
-    InitPos();
-    while (!IsFull(params.targetLen)) {
+    InitPos(startIdx);
+    float len = 0.0f;
+    while (!IsFull(len, params.targetLen)) {
         int32_t prevRow = posY_;
         if (!FindNextItem(++info_->endIndex_)) {
             FillOne();
@@ -57,13 +54,16 @@ float GridIrregularFiller::Fill(const FillParameters& params)
 
         if (posY_ > prevRow) {
             // previous row has been filled
-            UpdateLength(prevRow, params.mainGap);
+            UpdateLength(len, prevRow, posY_, params.mainGap);
         }
 
         MeasureItem(params, posX_, posY_);
     }
     info_->endMainLineIndex_ = posY_;
-    return length_;
+
+    // add length of the last row
+    UpdateLength(len, posY_, info_->lineHeightMap_.rbegin()->first + 1, params.mainGap);
+    return len;
 }
 
 int32_t GridIrregularFiller::FitItem(const decltype(GridLayoutInfo::gridMatrix_)::iterator& it, int32_t itemWidth)
@@ -185,14 +185,14 @@ bool GridIrregularFiller::AdvancePos()
     return row.find(posX_) != row.end();
 }
 
-void GridIrregularFiller::UpdateLength(int32_t prevRow, float mainGap)
+void GridIrregularFiller::UpdateLength(float& len, int32_t prevRow, int32_t curRow, float mainGap)
 {
-    for (int32_t row = prevRow; row < posY_; ++row) {
-        length_ += info_->lineHeightMap_[row] + mainGap;
+    for (int32_t row = prevRow; row < curRow; ++row) {
+        len += info_->lineHeightMap_[row] + mainGap;
     }
     if (prevRow == info_->startMainLineIndex_) {
         // no gap on first row
-        length_ -= mainGap;
+        len -= mainGap;
     }
 }
 
@@ -229,13 +229,13 @@ void GridIrregularFiller::MeasureItem(const FillParameters& params, int32_t col,
     }
 }
 
-void GridIrregularFiller::FillMatrixOnly(int32_t targetIdx)
+void GridIrregularFiller::FillMatrixOnly(int32_t startingLine, int32_t targetIdx)
 {
     if (targetIdx >= wrapper_->GetTotalChildCount() || targetIdx < info_->startIndex_) {
         return;
     }
 
-    InitPos();
+    InitPos(startingLine);
     while (info_->endIndex_ < targetIdx) {
         if (!FindNextItem(++info_->endIndex_)) {
             FillOne();
@@ -244,13 +244,14 @@ void GridIrregularFiller::FillMatrixOnly(int32_t targetIdx)
     info_->endMainLineIndex_ = posY_;
 }
 
-void GridIrregularFiller::MeasureBackward(const FillParameters& params, int32_t jumpLineIdx)
+float GridIrregularFiller::MeasureBackward(const FillParameters& params, int32_t jumpLineIdx)
 {
+    float len = 0.0f;
     posY_ = jumpLineIdx;
     // only need to record irregular items
     std::unordered_set<int32_t> measured;
 
-    for (; posY_ >= 0 && length_ < params.targetLen; --posY_) {
+    for (; posY_ >= 0 && len < params.targetLen; --posY_) {
         const auto& row = info_->gridMatrix_.find(posY_)->second;
         for (int c = 0; c < info_->crossCount_; ++c) {
             if (row.find(c) == row.end()) {
@@ -273,8 +274,9 @@ void GridIrregularFiller::MeasureBackward(const FillParameters& params, int32_t 
             // skip all columns of this item
             c += GetItemSize(info_->endIndex_).columns - 1;
         }
-        length_ += params.mainGap + info_->lineHeightMap_.at(posY_);
+        len += params.mainGap + info_->lineHeightMap_.at(posY_);
     }
+    return len;
 }
 
 int32_t GridIrregularFiller::FindItemTopRow(int32_t row, int32_t col) const

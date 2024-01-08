@@ -1312,7 +1312,7 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
     if (SelectOverlayIsOn() && !isTouchCaret_) {
         return;
     }
-    
+
     if (touchType == TouchType::DOWN) {
         HandleTouchDown(info.GetTouches().front().GetLocalLocation());
     } else if (touchType == TouchType::UP) {
@@ -1329,7 +1329,8 @@ void TextFieldPattern::HandleTouchDown(const Offset& offset)
     }
     if (enableTouchAndHoverEffect_ && !isMousePressed_) {
         auto lastCaretIndex = selectController_->GetCaretIndex();
-        isTouchCaret_ = RepeatClickCaret(offset, lastCaretIndex);
+        auto lastCaretRect = selectController_->GetCaretRect();
+        isTouchCaret_ = RepeatClickCaret(offset, lastCaretIndex, lastCaretRect);
         auto textfieldPaintProperty = GetPaintProperty<TextFieldPaintProperty>();
         CHECK_NULL_VOID(textfieldPaintProperty);
         auto tmpHost = GetHost();
@@ -1364,7 +1365,7 @@ void TextFieldPattern::HandleTouchUp()
         if (!isOnHover_) {
             auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
-            if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
+            if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType() && !IsNormalInlineState()) {
                 renderContext->UpdateBorderRadius(borderRadius_);
             }
             if (layoutProperty->GetShowUnderlineValue(false) && HasFocus() && IsUnspecifiedOrTextType() &&
@@ -1724,12 +1725,14 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     CHECK_NULL_VOID(host);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     auto lastCaretIndex = selectController_->GetCaretIndex();
+    auto lastCaretRect = selectController_->GetCaretRect();
     selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation());
     StartTwinkling();
     SetIsSingleHandle(true);
     CloseSelectOverlay(true);
 
-    if (RepeatClickCaret(info.GetLocalLocation(), lastCaretIndex) && info.GetSourceDevice() != SourceType::MOUSE) {
+    if (RepeatClickCaret(info.GetLocalLocation(), lastCaretIndex, lastCaretRect) &&
+        info.GetSourceDevice() != SourceType::MOUSE) {
         if (contentController_->IsEmpty()) {
             ProcessOverlay(true, true, true, true);
         } else {
@@ -1920,10 +1923,20 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
     action_ = GetTextInputActionValue(GetDefaultTextInputAction());
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Keyboard action is %{public}d", action_);
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    // if keyboard attached and keyboard is shown, pull up keyboard again
-    if (needToResetKeyboard && (imeShown_ || isCustomKeyboardAttached_)) {
-        CloseKeyboard(true);
-        RequestKeyboard(false, true, true);
+    if (needToResetKeyboard) {
+        // if keyboard attached and keyboard is shown, pull up keyboard again
+        if (imeShown_ || isCustomKeyboardAttached_) {
+            RequestKeyboard(false, true, true);
+            return;
+        }
+#if defined(ENABLE_STANDARD_INPUT)
+        auto inputMethod = MiscServices::InputMethodController::GetInstance();
+        CHECK_NULL_VOID(inputMethod);
+        MiscServices::Configuration config;
+        config.SetEnterKeyType(static_cast<MiscServices::EnterKeyType>(action_));
+        config.SetTextInputType(static_cast<MiscServices::TextInputType>(keyboard_));
+        inputMethod->OnConfigurationChange(config);
+#endif
     }
 #else
     if (needToResetKeyboard && HasConnection()) {
@@ -1932,7 +1945,6 @@ void TextFieldPattern::CheckIfNeedToResetKeyboard()
     }
 #endif
 }
-
 void TextFieldPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -2005,10 +2017,7 @@ void TextFieldPattern::OnModifyDone()
         if (!barState_.has_value()) {
             barState_ = barState;
         }
-        scrollBarVisible_ = true;
-        if (barState == DisplayMode::OFF) {
-            scrollBarVisible_ = false;
-        }
+        scrollBarVisible_ = barState != DisplayMode::OFF;
         SetScrollBar(barState == DisplayMode::OFF ? DisplayMode::ON : barState);
         auto scrollBar = GetScrollBar();
         if (scrollBar) {
@@ -2040,17 +2049,14 @@ void TextFieldPattern::OnModifyDone()
         isTextInput_ = true;
     }
     auto inputStyle = paintProperty->GetInputStyleValue(InputStyle::DEFAULT);
-    if (!inlineState_.saveInlineState) {
-        inlineState_.saveInlineState = false;
-        SaveInlineStates();
-    }
-    if (!HasFocus() && inlineState_.saveInlineState) {
+    if (!inlineState_.saveInlineState || !HasFocus()) {
         SaveInlineStates();
     }
     if (HasFocus() && IsNormalInlineState()) {
-        preInputStyle_ == InputStyle::DEFAULT ? ApplyInlineStates(true) : ApplyInlineStates(false);
+        ApplyInlineStates(preInputStyle_ == InputStyle::DEFAULT);
     }
-    if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
+    if (layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()
+        && (!IsNormalInlineState() || !HasFocus())) {
         ApplyUnderlineStates();
     }
     if (preInputStyle_ == InputStyle::INLINE && inputStyle == InputStyle::DEFAULT) {
@@ -2140,7 +2146,7 @@ bool TextFieldPattern::FireOnTextChangeEvent()
         [weak = WeakClaim(this)] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            if (pattern->HasFocus()) {
+            if (!pattern->HasFocus()) {
                 return;
             }
             pattern->ScrollToSafeArea();
@@ -3001,6 +3007,14 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     auto windowRect = pipeline->GetCurrentWindowRect();
     double positionY = (tmpHost->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset()).GetY() + windowRect.Top();
     double height = frameRect_.Height();
+
+    if (IsNormalInlineState()) {
+        auto manager = pipeline->GetSafeAreaManager();
+        const double HEIGHT_OFFSET = theme->GetInlineBorderWidth().ConvertToPx() * 2 + 1;
+        height = std::max(static_cast<double>(inlineMeasureItem_.inlineSizeHeight) + HEIGHT_OFFSET, height);
+        positionY += frameRect_.Height();
+    }
+
     auto uiExtMgr = pipeline->GetUIExtensionManager();
     if (uiExtMgr && uiExtMgr->IsWindowTypeUIExtension(pipeline)) {
         // find the direct child of the dialog.
@@ -5788,14 +5802,14 @@ void TextFieldPattern::UpdateSelectController()
     selectController_->UpdateParagraph(paragraph_);
 }
 
-bool TextFieldPattern::RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex)
+bool TextFieldPattern::RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex, const RectF& lastCaretRect)
 {
     auto touchDownIndex = selectController_->ConvertTouchOffsetToPosition(offset);
     if (!selectController_->CaretAtLast()) {
         return lastCaretIndex == touchDownIndex && HasFocus();
     }
     // Increase the cursor area if there is no text
-    auto caretRect = selectController_->GetCaretRect();
+    auto caretRect = lastCaretRect;
     caretRect.SetLeft(caretRect.GetX() - caretRect.Height() / 2);
     caretRect.SetWidth(caretRect.Height());
     return caretRect.IsInRegion(PointF(offset.GetX(), offset.GetY()));

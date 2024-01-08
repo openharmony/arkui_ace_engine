@@ -1305,16 +1305,15 @@ std::pair<int32_t, int32_t> ParseRange(const JSRef<JSObject>& object)
 {
     int32_t start = -1;
     int32_t end = -1;
-    JSContainerBase::ParseJsInt32(object->GetProperty("start"), start);
-    JSContainerBase::ParseJsInt32(object->GetProperty("end"), end);
-    if (start < 0) {
+    if (!JSContainerBase::ParseJsInt32(object->GetProperty("start"), start)) {
         start = 0;
     }
-    if (end < 0) {
+    if (!JSContainerBase::ParseJsInt32(object->GetProperty("end"), end)) {
         end = INT_MAX;
     }
-    if (start > end) {
-        std::swap(start, end);
+    if (start > end || start < 0 || end < 0) {
+        start = 0;
+        end = INT_MAX;
     }
     return std::make_pair(start, end);
 }

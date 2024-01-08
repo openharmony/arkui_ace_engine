@@ -474,6 +474,7 @@ bool Color::MatchColorSpecialString(const std::string& colorStr, Color& color)
         { "gray", Color(0xffc0c0c0) },
         { "green", Color(0xff00ff00) },
         { "red", Color(0xffff0000) },
+        { "transparent", Color(0x00000000) },
         { "white", Color(0xffffffff) },
     };
 

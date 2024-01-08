@@ -72,6 +72,10 @@ public:
     {
         isUriPureNumber_ = isUriPureNumber;
     }
+    void SetIsSystemColorChange(bool isSystemColorChange = false)
+    {
+        isSystemColorChange_ = isSystemColorChange;
+    }
     void Reset();
 
     // interfaces to get infomation from [ImageSourceInfo]
@@ -94,6 +98,10 @@ public:
     bool GetIsUriPureNumber() const
     {
         return isUriPureNumber_;
+    }
+    bool GetIsOnSystemColorChange() const
+    {
+        return isSystemColorChange_;
     }
 
     bool SupportObjCache() const;
@@ -118,6 +126,7 @@ private:
     bool isSvg_ = false;
     bool isPng_ = false;
     bool needCache_ = true;
+    bool isSystemColorChange_ = false;
     bool isUriPureNumber_ = false;
     [[deprecated("in NG")]]
     std::optional<Color> fillColor_;

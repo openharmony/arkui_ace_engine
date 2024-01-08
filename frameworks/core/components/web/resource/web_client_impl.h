@@ -55,7 +55,7 @@ public:
     explicit AccessibilityEventListenerImpl(int32_t instanceId) : instanceId_(instanceId) {}
     ~AccessibilityEventListenerImpl() = default;
 
-    void OnAccessibilityEvent(int64_t accessibilityId, uint32_t eventType) override;
+    void OnAccessibilityEvent(int32_t nodeId, uint32_t eventType) override;
 
     void SetWebDelegate(const RefPtr<WebDelegate>& delegate)
     {
@@ -140,7 +140,7 @@ public:
     bool OnFileSelectorShow(std::shared_ptr<NWeb::FileSelectorCallback> callback,
                             std::shared_ptr<NWeb::NWebFileSelectorParams> params) override;
 
-    void OnFocus() override;
+    bool OnFocus() override;
     void OnResourceLoadError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,
         std::shared_ptr<OHOS::NWeb::NWebUrlResourceError> error) override;
     void OnHttpError(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request,

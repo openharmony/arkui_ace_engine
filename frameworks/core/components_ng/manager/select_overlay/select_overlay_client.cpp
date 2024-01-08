@@ -272,13 +272,14 @@ void SelectOverlayClient::OnParentScrollStartOrEnd(bool isEnd)
     auto proxy = GetSelectOverlayProxy();
     CHECK_NULL_VOID(proxy);
     if (!isEnd) {
+        isMenuShow_ = proxy->IsMenuShow();
         proxy->ShowOrHiddenMenu(true);
         return;
     }
     if (proxy->IsSingleHandle() && !proxy->IsSingleHandleMenuShow()) {
         UpdateSelectMenuInfo([](SelectMenuInfo& menuInfo) { menuInfo.menuIsShow = false; });
     } else {
-        proxy->ShowOrHiddenMenu(false);
+        proxy->ShowOrHiddenMenu(!isMenuShow_);
     }
 }
 

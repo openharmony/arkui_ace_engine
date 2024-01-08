@@ -111,9 +111,8 @@ void IndexerPattern::OnModifyDone()
         propSelect = 0;
         layoutProperty->UpdateSelected(propSelect);
     }
-    if (propSelect != lastSelectProp_) {
+    if (propSelect != selected_) {
         selected_ = propSelect;
-        lastSelectProp_ = propSelect;
         selectChanged_ = true;
         ResetStatus();
     }
@@ -443,13 +442,9 @@ void IndexerPattern::OnTouchUp(const TouchEventInfo& info)
     if (isHover_) {
         IndexerPressOutAnimation();
     }
-    auto nextSelectIndex = GetSelectChildIndex(info.GetTouches().front().GetLocalLocation());
-    auto refreshBubble = false;
-    selected_ = nextSelectIndex;
-    refreshBubble = true;
     ResetStatus();
-    ApplyIndexChanged(true, refreshBubble, true);
-    OnSelect(refreshBubble);
+    ApplyIndexChanged(true, true, true);
+    OnSelect(true);
 }
 
 void IndexerPattern::MoveIndexByOffset(const Offset& offset)

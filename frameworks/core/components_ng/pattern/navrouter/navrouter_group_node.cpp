@@ -78,6 +78,23 @@ void NavRouterGroupNode::DeleteChildFromGroup(int32_t slot)
 
 void NavRouterGroupNode::OnDetachFromMainTree(bool recursive)
 {
+    // remove node in navigation
+    do {
+        if (!navDestinationNode_) {
+            break;
+        }
+        auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(weakNavigation_.Upgrade());
+        if (!navigationNode) {
+            break;
+        }
+        auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
+        auto stack = navigationPattern->GetNavigationStack();
+        if (!stack) {
+            break;
+        }
+        auto navRouterPattern = AceType::DynamicCast<NavRouterPattern>(GetPattern());
+        stack->Remove(navRouterPattern->GetNavDestination(), navDestinationNode_);
+    } while (0);
     FrameNode::OnDetachFromMainTree(recursive);
 }
 
@@ -112,6 +129,7 @@ void NavRouterGroupNode::SetDestinationChangeEvent(const RefPtr<UINode>& parent)
 {
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(parent);
     CHECK_NULL_VOID(navigationNode);
+    weakNavigation_ = WeakPtr<NavigationGroupNode>(navigationNode);
     auto onDestinationChange = [weak = WeakClaim(this), navigation = navigationNode]() {
         auto navRouter = weak.Upgrade();
         CHECK_NULL_VOID(navRouter);
