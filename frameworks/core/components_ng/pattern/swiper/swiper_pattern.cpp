@@ -3991,6 +3991,9 @@ void SwiperPattern::UpdateSwiperPanEvent(bool disableSwipe)
     } else if (panEvent_) {
         gestureHub->RemovePanEvent(panEvent_);
         panEvent_.Reset();
+        if (isDragging_) {
+            HandleDragEnd(0.0);
+        }
     }
 }
 
