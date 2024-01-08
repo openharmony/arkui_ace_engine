@@ -1052,6 +1052,7 @@ public:
     }
     bool HasFocus() const;
     void StopTwinkling();
+    void StartTwinkling();
 
     bool IsModifyDone()
     {
@@ -1151,7 +1152,6 @@ private:
 
     void ScheduleCursorTwinkling();
     void OnCursorTwinkling();
-    void StartTwinkling();
     void CheckIfNeedToResetKeyboard();
 
     float PreferredTextHeight(bool isPlaceholder, bool isAlgorithmMeasure = false);
