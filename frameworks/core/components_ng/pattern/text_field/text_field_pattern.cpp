@@ -1726,7 +1726,9 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     auto lastCaretIndex = selectController_->GetCaretIndex();
     auto lastCaretRect = selectController_->GetCaretRect();
-    selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation());
+    if (mouseStatus_ != MouseStatus::MOVE) {
+        selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation());
+    }
     StartTwinkling();
     SetIsSingleHandle(true);
     CloseSelectOverlay(true);
