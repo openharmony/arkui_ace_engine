@@ -567,8 +567,11 @@ OffsetF GestureEventHub::GetPixelMapOffset(
                                ? frameNodeOffset_.GetX() - SystemProperties::GetDevicePhysicalWidth()
                                : frameNodeOffset_.GetX();
         auto coordinateY = frameNodeOffset_.GetY();
-        result.SetX(scale * (coordinateX - info.GetGlobalLocation().GetX()));
-        result.SetY(scale * (coordinateY - info.GetGlobalLocation().GetY()));
+        auto differentScale = (NearZero(frameNodeSize_.Width()) || NearZero(size.Width()))
+                                  ? 1.0f
+                                  : frameNodeSize_.Width() * DEFALUT_DRAG_PPIXELMAP_SCALE / size.Width();
+        result.SetX(scale * (coordinateX - info.GetGlobalLocation().GetX()) / differentScale);
+        result.SetY(scale * (coordinateY - info.GetGlobalLocation().GetY()) / differentScale);
     }
     if (result.GetX() >= 0.0f) {
         result.SetX(-1.0f);
@@ -706,8 +709,15 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     if (hostPattern && (frameTag == V2::RICH_EDITOR_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
                            frameTag == V2::TEXTINPUT_ETS_TAG || frameTag == V2::SEARCH_Field_ETS_TAG)) {
         frameNodeOffset_ = hostPattern->GetDragUpperLeftCoordinates();
+        frameNodeSize_ = SizeF(0.0f, 0.0f);
     } else {
         frameNodeOffset_ = frameNode->GetOffsetRelativeToWindow();
+        auto geometryNode = frameNode->GetGeometryNode();
+        if (geometryNode) {
+            frameNodeSize_ = geometryNode->GetFrameSize();
+        } else {
+            frameNodeSize_ = SizeF(0.0f, 0.0f);
+        }
     }
     /*
      * Users may remove frameNode in the js callback function "onDragStart "triggered below,
