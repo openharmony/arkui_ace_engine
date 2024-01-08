@@ -640,6 +640,20 @@ void ResetSwiperDuration(NodeHandle node)
     SwiperModelNG::SetDuration(frameNode, value);
 }
 
+void SetSwiperEnabled(NodeHandle node, bool enabled)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetEnabled(frameNode, enabled);
+}
+
+void ResetSwiperEnabled(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetEnabled(frameNode, false);
+}
+
 ArkUISwiperModifierAPI GetSwiperModifier()
 {
     static const ArkUISwiperModifierAPI modifier = { SetSwiperNextMargin, ResetSwiperNextMargin, SetSwiperPrevMargin,
@@ -649,7 +663,7 @@ ArkUISwiperModifierAPI GetSwiperModifier()
         ResetSwiperDisplayMode, SetSwiperItemSpace, ResetSwiperItemSpace, SetSwiperVertical, ResetSwiperVertical,
         SetSwiperLoop, ResetSwiperLoop, SetSwiperInterval, ResetSwiperInterval, SetSwiperAutoPlay, ResetSwiperAutoPlay,
         SetSwiperIndex, ResetSwiperIndex, SetSwiperIndicator, ResetSwiperIndicator, SetSwiperDuration,
-        ResetSwiperDuration };
+        ResetSwiperDuration, SetSwiperEnabled, ResetSwiperEnabled };
     return modifier;
 }
 } // namespace OHOS::Ace::NG

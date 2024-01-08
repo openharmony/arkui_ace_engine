@@ -434,6 +434,11 @@ void TextModelNG::SetLetterSpacing(FrameNode* frameNode, const Dimension& value)
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LetterSpacing, value, frameNode);
 }
 
+void TextModelNG::SetWordBreak(FrameNode* frameNode, Ace::WordBreak value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, WordBreak, value, frameNode);
+}
+
 void TextModelNG::BindSelectionMenu(TextSpanType& spanType, TextResponseType& responseType,
     std::function<void()>& buildFunc, SelectMenuParam& menuParam)
 {

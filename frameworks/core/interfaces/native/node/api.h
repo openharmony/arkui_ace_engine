@@ -453,6 +453,8 @@ struct ArkUITextModifierAPI {
     void (*ResetTextLetterSpacing)(NodeHandle node);
     void (*SetTextFont)(NodeHandle node, const struct ArkUIFontStruct *fontInfo);
     void (*ResetTextFont)(NodeHandle node);
+    void (*SetWordBreak)(NodeHandle node, const uint32_t wordBreak);
+    void (*ResetWordBreak)(NodeHandle node);
 };
 
 struct ArkUIButtonModifierAPI {
@@ -1046,6 +1048,11 @@ struct ArkUICalendarPickerModifierAPI {
     void (*ResetTextStyle)(NodeHandle node);
     void (*SetEdgeAlign)(NodeHandle node, const double* values, const int* units, int32_t size, int32_t alignType);
     void (*ResetEdgeAlign)(NodeHandle node);
+    void (*SetCalendarPickerPadding)(NodeHandle node, const struct ArkUISizeType* top,
+        const struct ArkUISizeType* right, const struct ArkUISizeType* bottom, const struct ArkUISizeType* left);
+    void (*ResetCalendarPickerPadding)(NodeHandle node);
+    void (*SetCalendarPickerBorder)(NodeHandle node, const uint32_t color);
+    void (*ResetCalendarPickerBorder)(NodeHandle node);
 };
 
 struct ArkUITextInputModifierAPI {
@@ -1131,6 +1138,8 @@ struct ArkUITabsModifierAPI {
     void (*ResetTabBarHeight)(NodeHandle node);
     void (*ResetBarAdaptiveHeight)(NodeHandle node);
     void (*ResetAnimationDuration)(NodeHandle node);
+    void (*SetTabClip)(NodeHandle node, bool clipEdge);
+    void (*ResetTabClip)(NodeHandle node);
 };
 
 struct ArkUIStepperItemModifierAPI {
@@ -1293,6 +1302,8 @@ struct ArkUISwiperModifierAPI {
     void (*ResetSwiperIndicator)(NodeHandle node);
     void (*SetSwiperDuration)(NodeHandle node, int32_t duration);
     void (*ResetSwiperDuration)(NodeHandle node);
+    void (*SetSwiperEnabled)(NodeHandle node, bool enabled);
+    void (*ResetSwiperEnabled)(NodeHandle node);
 };
 
 struct ArkUIDataPanelModifierAPI {

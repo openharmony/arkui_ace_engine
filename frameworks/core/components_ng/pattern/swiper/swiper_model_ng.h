@@ -98,6 +98,7 @@ public:
     static void SetDotIndicatorStyle(FrameNode* frameNode, const SwiperParameters& swiperParameters);
     static void SetIndicatorType(FrameNode* frameNode, SwiperIndicatorType indicatorType);
     static void SetIsIndicatorCustomSize(FrameNode* frameNode, bool isCustomSize);
+    static void SetEnabled(FrameNode* frameNode, bool enabled);
 };
 
 } // namespace OHOS::Ace::NG

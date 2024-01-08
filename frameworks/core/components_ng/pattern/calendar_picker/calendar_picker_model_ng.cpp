@@ -316,4 +316,19 @@ void CalendarPickerModelNG::SetEdgeAlign(
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogAlignType, alignType, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(CalendarPickerLayoutProperty, DialogOffset, offset, frameNode);
 }
+
+void CalendarPickerModelNG::SetPadding(FrameNode* frameNode, const PaddingProperty& padding)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pickerPattern = frameNode->GetPattern<CalendarPickerPattern>();
+    CHECK_NULL_VOID(pickerPattern);
+    if (!pickerPattern->HasContentNode()) {
+        return;
+    }
+    auto contentNode = AceType::DynamicCast<FrameNode>(frameNode->GetFirstChild());
+    CHECK_NULL_VOID(contentNode);
+    auto linearLayoutProperty = contentNode->GetLayoutProperty();
+    CHECK_NULL_VOID(linearLayoutProperty);
+    linearLayoutProperty->UpdatePadding(padding);
+}
 } // namespace OHOS::Ace::NG

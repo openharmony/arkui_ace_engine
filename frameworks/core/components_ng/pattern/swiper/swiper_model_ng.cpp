@@ -506,4 +506,9 @@ void SwiperModelNG::SetDotIndicatorStyle(FrameNode* frameNode, const SwiperParam
     CHECK_NULL_VOID(pattern);
     pattern->SetSwiperParameters(swiperParameters);
 }
+
+void SwiperModelNG::SetEnabled(FrameNode* frameNode, bool enabled)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SwiperPaintProperty, Enabled, enabled, frameNode);
+}
 } // namespace OHOS::Ace::NG

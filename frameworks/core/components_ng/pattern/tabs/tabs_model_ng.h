@@ -76,6 +76,7 @@ public:
     static void SetAnimationDuration(FrameNode* frameNode, float duration);
     static void SetBarAdaptiveHeight(FrameNode* frameNode, bool barAdaptiveHeight);
     static void SetScrollableBarModeOptions(FrameNode* frameNode, const ScrollableBarModeOptions& option);
+    static void SetClipEdge(FrameNode* frameNode, bool clipEdge);
 
 private:
     static RefPtr<TabBarLayoutProperty> GetTabBarLayoutProperty();

@@ -103,6 +103,10 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
     modifierWithKey(this._modifiersWithKeys, SwiperNextMarginModifier.identity, SwiperNextMarginModifier, value);
     return this;
   }
+  enabled(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, SwiperEnabledModifier.identity, SwiperEnabledModifier, value);
+    return this;
+  }
   onAnimationStart(event: (index: number, targetIndex: number, extraInfo: SwiperAnimationEvent) => void): this {
     throw new Error('Method not implemented.');
   }
@@ -608,6 +612,22 @@ class SwiperDurationModifier extends ModifierWithKey<number> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
+
+class SwiperEnabledModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('swiperenabled');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().swiper.resetSwiperEnabled(node);
+
+    } else {
+      getUINativeModule().swiper.setSwiperEnabled(node, this.value);
+    }
+  }
+}
+
 // @ts-ignore
 globalThis.Swiper.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
