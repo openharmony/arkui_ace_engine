@@ -19,6 +19,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
 #include "core/components_ng/render/render_context.h"
+#include "core/interfaces/native/node/api.h"
 
 namespace OHOS::Ace::NG {
 
@@ -134,11 +135,60 @@ void Invalidate(NodeHandle node)
     pattern->Invalidate();
 }
 
+void SetScale(NodeHandle node, float scaleX, float scaleY)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetScale(scaleX, scaleY);
+}
+
+void SetRenderNodeBackgroundColor(NodeHandle node, uint32_t colorValue)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetBackgroundColor(colorValue);
+}
+
+void SetPivot(NodeHandle node, float pivotX, float pivotY)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetRenderPivot(pivotX, pivotY);
+}
+
+void SetFrame(NodeHandle node, float positionX, float positionY, float width, float height)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetFrame(positionX, positionY, width, height);
+}
+
+void SetOpacity(NodeHandle node, float opacity)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetOpacity(opacity);
+}
+
+void SetTranslate(NodeHandle node, float translateX, float translateY, float translateZ)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetTranslate(translateX, translateY, translateZ);
+}
+
 ArkUIRenderNodeModifierAPI GetRenderNodeModifier()
 {
     static const ArkUIRenderNodeModifierAPI modifier = { AppendChild, InsertChildAfter, RemoveChild, ClearChildren,
         SetClipToFrame, SetRotation, SetShadowColor, SetShadowOffset, SetShadowAlpha, SetShadowElevation,
-        SetShadowRadius, Invalidate };
+        SetShadowRadius, Invalidate, SetScale, SetRenderNodeBackgroundColor, SetPivot, SetFrame,
+        SetOpacity, SetTranslate };
 
     return modifier;
 }

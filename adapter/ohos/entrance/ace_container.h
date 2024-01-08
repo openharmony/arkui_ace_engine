@@ -515,25 +515,20 @@ public:
     bool RequestAutoSave(const RefPtr<NG::FrameNode>& node) override;
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;
 
-    void SearchElementInfoByAccessibilityIdNG(
-        int64_t elementId, int32_t mode, int64_t baseParent,
+    void SearchElementInfoByAccessibilityIdNG(int32_t elementId, int32_t mode, int32_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output);
 
-    void SearchElementInfosByTextNG(
-        int64_t elementId, const std::string& text, int64_t baseParent,
+    void SearchElementInfosByTextNG(int32_t elementId, const std::string& text, int32_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output);
 
     void FindFocusedElementInfoNG(
-        int64_t elementId, int32_t focusType, int64_t baseParent,
-        Accessibility::AccessibilityElementInfo& output);
+        int32_t elementId, int32_t focusType, int32_t baseParent, Accessibility::AccessibilityElementInfo& output);
 
     void FocusMoveSearchNG(
-        int64_t elementId, int32_t direction, int64_t baseParent,
-        Accessibility::AccessibilityElementInfo& output);
+        int32_t elementId, int32_t direction, int32_t baseParent, Accessibility::AccessibilityElementInfo& output);
 
     bool NotifyExecuteAction(
-        int64_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int64_t offset);
+        int32_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int32_t offset);
 
 private:
     virtual bool MaybeRelease() override;

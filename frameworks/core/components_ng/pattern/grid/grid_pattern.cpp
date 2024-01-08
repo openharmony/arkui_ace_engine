@@ -153,7 +153,7 @@ void GridPattern::OnModifyDone()
             return grid->GetMainContentSize();
         });
     }
-    
+
     Register2DragDropManager();
     if (IsNeedInitClickEventRecorder()) {
         Pattern::InitClickEventRecorder();
@@ -358,8 +358,8 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
     if (gridLayoutInfo_.reachStart_) {
         if (source == SCROLL_FROM_UPDATE) {
-            auto friction = ScrollablePattern::CalculateFriction(
-                std::abs(gridLayoutInfo_.currentOffset_) / GetMainContentSize());
+            auto friction =
+                ScrollablePattern::CalculateFriction(std::abs(gridLayoutInfo_.currentOffset_) / GetMainContentSize());
             gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
             gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.currentOffset_ + offset * friction;
         } else {
@@ -1384,7 +1384,8 @@ void GridPattern::UpdateScrollBarOffset()
             estimatedHeight = gridLayoutInfo_.GetContentHeight(mainGap);
         } else {
             offset = info.GetContentOffset(layoutProperty->GetLayoutOptions().value(), mainGap);
-            estimatedHeight = info.GetContentHeight(layoutProperty->GetLayoutOptions().value(), mainGap);
+            estimatedHeight =
+                info.GetContentHeight(layoutProperty->GetLayoutOptions().value(), info.childrenCount_, mainGap);
         }
     }
     if (info.startMainLineIndex_ != 0 && info.startIndex_ == 0) {
@@ -1778,6 +1779,5 @@ bool GridPattern::AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWr
     AnimateTo(targetPos, -1, nullptr, true);
     return true;
 }
-
 
 } // namespace OHOS::Ace::NG

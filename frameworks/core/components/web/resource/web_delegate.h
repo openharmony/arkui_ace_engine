@@ -575,7 +575,7 @@ public:
     bool OnSslSelectCertRequest(const std::shared_ptr<BaseEventInfo>& info);
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
         const std::string& mimetype, long contentLength);
-    void OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEventType eventType);
+    void OnAccessibilityEvent(int32_t accessibilityId, AccessibilityEventType eventType);
     void OnPageError(const std::string& param);
     void OnMessage(const std::string& param);
     void OnFullScreenEnter(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler);
@@ -670,12 +670,12 @@ public:
     void SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard);
     bool ShouldVirtualKeyboardOverlay();
     void ScrollBy(float deltaX, float deltaY);
-    void ExecuteAction(int64_t accessibilityId, AceAction action);
+    void ExecuteAction(int32_t accessibilityId, AceAction action);
     bool GetFocusedAccessibilityNodeInfo(
-        int64_t accessibilityId, bool isAccessibilityFocus, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const;
-    bool GetAccessibilityNodeInfoById(int64_t accessibilityId, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const;
+        int32_t accessibilityId, bool isAccessibilityFocus, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const;
+    bool GetAccessibilityNodeInfoById(int32_t accessibilityId, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const;
     bool GetAccessibilityNodeInfoByFocusMove(
-        int64_t accessibilityId, int32_t direction, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const;
+        int32_t accessibilityId, int32_t direction, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const;
     void SetAccessibilityState(bool state);
     void UpdateAccessibilityState(bool state);
 private:

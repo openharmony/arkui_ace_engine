@@ -722,6 +722,11 @@ void GridScrollLayoutAlgorithm::ScrollToIndexAuto(LayoutWrapper* layoutWrapper, 
 {
     int32_t startLine = 0;
     if (IsIndexInMatrix(targetIndex, startLine)) {
+        auto& info = gridLayoutInfo_;
+        if (startLine == info.startMainLineIndex_ && info.startMainLineIndex_ == info.endMainLineIndex_) {
+            // startLine occupies the whole viewport
+            return;
+        }
         if (startLine < gridLayoutInfo_.endMainLineIndex_ && startLine > gridLayoutInfo_.startMainLineIndex_) {
             return;
         }

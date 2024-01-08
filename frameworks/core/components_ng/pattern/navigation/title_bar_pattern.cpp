@@ -178,6 +178,7 @@ void TitleBarPattern::InitTitleParam()
     tempTitleOffsetY_ = 0.0f;
     fontSize_.reset();
     opacity_.reset();
+    isFreeTitleUpdated_ = false;
 }
 
 bool TitleBarPattern::IsHidden()
@@ -434,6 +435,8 @@ void TitleBarPattern::ProcessTitleDragStart(float offset)
     SetDefaultSubtitleOpacity();
     auto tempOpacity = GetSubtitleOpacity();
     UpdateSubTitleOpacity(tempOpacity);
+
+    isFreeTitleUpdated_ = true;
 }
 
 void TitleBarPattern::ProcessTitleDragUpdate(float offset, float dragOffsetY)

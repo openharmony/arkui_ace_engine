@@ -30,6 +30,7 @@
 #include "wm_common.h"
 
 #include "base/log/log_wrapper.h"
+#include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/property/safe_area_insets.h"
 
@@ -1586,6 +1587,25 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
     return true;
 }
 
+bool UIContentImpl::ProcessPointerEventWithCallback(
+    const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, const std::function<void()>& callback)
+{
+    auto container = AceType::DynamicCast<Platform::AceContainer>(AceEngine::Get().GetContainer(instanceId_));
+    CHECK_NULL_RETURN(container, false);
+    container->SetCurPointerEvent(pointerEvent);
+    if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            "PointerEvent Process to ui_content, eventInfo: id:%{public}d, "
+            "WindowName = %{public}s, WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
+            "ViewPosX = %{public}d, ViewPosY = %{public}d",
+            pointerEvent->GetId(), container->GetWindowName().c_str(), container->GetWindowId(),
+            container->GetViewWidth(), container->GetViewHeight(), container->GetViewPosX(), container->GetViewPosY());
+    }
+    auto* aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent, nullptr, callback);
+    return true;
+}
+
 bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& touchEvent)
 {
     TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
@@ -2226,16 +2246,14 @@ void UIContentImpl::ProcessFormVisibleChange(bool isVisible)
 }
 
 void UIContentImpl::SearchElementInfoByAccessibilityId(
-    int64_t elementId, int32_t mode,
-    int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
+    int32_t elementId, int32_t mode, int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     container->SearchElementInfoByAccessibilityIdNG(elementId, mode, baseParent, output);
 }
 
-void UIContentImpl::SearchElementInfosByText(
-    int64_t elementId, const std::string& text, int64_t baseParent,
+void UIContentImpl::SearchElementInfosByText(int32_t elementId, const std::string& text, int32_t baseParent,
     std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -2244,8 +2262,7 @@ void UIContentImpl::SearchElementInfosByText(
 }
 
 void UIContentImpl::FindFocusedElementInfo(
-    int64_t elementId, int32_t focusType,
-    int64_t baseParent, Accessibility::AccessibilityElementInfo& output)
+    int32_t elementId, int32_t focusType, int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -2253,8 +2270,7 @@ void UIContentImpl::FindFocusedElementInfo(
 }
 
 void UIContentImpl::FocusMoveSearch(
-    int64_t elementId, int32_t direction,
-    int64_t baseParent, Accessibility::AccessibilityElementInfo& output)
+    int32_t elementId, int32_t direction, int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -2262,7 +2278,7 @@ void UIContentImpl::FocusMoveSearch(
 }
 
 bool UIContentImpl::NotifyExecuteAction(
-    int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset)
+    int32_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int32_t offset)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);

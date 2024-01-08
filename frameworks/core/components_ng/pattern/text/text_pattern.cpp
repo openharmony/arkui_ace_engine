@@ -440,6 +440,7 @@ void TextPattern::HandleOnCopy()
         clipboard_->SetData(value, copyOption_);
     }
     ResetSelection();
+    CloseSelectOverlay(true);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<TextEventHub>();
@@ -2777,6 +2778,7 @@ void TextPattern::CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextRes
         return;
     }
 
+    selectInfo.menuInfo.menuIsShow = true;
     CopyBindSelectionMenuParams(selectInfo, menuParams);
 }
 

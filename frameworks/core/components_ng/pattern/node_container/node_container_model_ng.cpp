@@ -71,4 +71,13 @@ void NodeContainerModelNG::ResetController()
     CHECK_NULL_VOID(pattern);
     pattern->ResetController();
 }
+
+void NodeContainerModelNG::FireMakeNode()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<NodeContainerPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->RemakeNode();
+}
 } // namespace OHOS::Ace::NG

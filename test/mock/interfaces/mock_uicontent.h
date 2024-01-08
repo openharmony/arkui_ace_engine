@@ -51,6 +51,8 @@ public:
     MOCK_METHOD0(DestroyUIDirector, void());
     MOCK_METHOD0(ProcessBackPressed, bool());
     MOCK_METHOD1(ProcessPointerEvent, bool(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent));
+    MOCK_METHOD2(ProcessPointerEventWithCallback,
+        bool(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, const std::function<void()>& callback));
     MOCK_METHOD1(ProcessKeyEvent, bool(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent));
     MOCK_METHOD1(ProcessAxisEvent, bool(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent));
     MOCK_METHOD1(ProcessVsyncEvent, bool(uint64_t timeStampNanos));
@@ -100,17 +102,17 @@ public:
 
 #ifndef PREVIEW
     MOCK_METHOD4(
-        SearchElementInfoByAccessibilityId, void(int64_t elementId,
-        int32_t mode, int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output));
+        SearchElementInfoByAccessibilityId, void(int32_t elementId,
+        int32_t mode, int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output));
     MOCK_METHOD4(
-        SearchElementInfosByText, void(int64_t elementId,
-        const std::string& text, int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output));
+        SearchElementInfosByText, void(int32_t elementId,
+        const std::string& text, int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output));
     MOCK_METHOD4(
-        FindFocusedElementInfo, void(int64_t elementId,
-        int32_t focusType, int64_t baseParent, Accessibility::AccessibilityElementInfo& output));
+        FindFocusedElementInfo, void(int32_t elementId,
+        int32_t focusType, int32_t baseParent, Accessibility::AccessibilityElementInfo& output));
     MOCK_METHOD4(
-        FocusMoveSearch, void(int64_t elementId, int32_t direction,
-        int64_t baseParent, Accessibility::AccessibilityElementInfo& output));
+        FocusMoveSearch, void(int32_t elementId, int32_t direction,
+        int32_t baseParent, Accessibility::AccessibilityElementInfo& output));
 #endif
     MOCK_METHOD1(GetAppPaintSize, void(OHOS::Rosen::Rect&));
     MOCK_METHOD3(CreateCustomPopupUIExtension, int32_t(const AAFwk::Want& want,

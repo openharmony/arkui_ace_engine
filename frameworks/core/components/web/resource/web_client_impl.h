@@ -55,7 +55,7 @@ public:
     explicit AccessibilityEventListenerImpl(int32_t instanceId) : instanceId_(instanceId) {}
     ~AccessibilityEventListenerImpl() = default;
 
-    void OnAccessibilityEvent(int64_t accessibilityId, uint32_t eventType) override;
+    void OnAccessibilityEvent(int32_t nodeId, uint32_t eventType) override;
 
     void SetWebDelegate(const RefPtr<WebDelegate>& delegate)
     {

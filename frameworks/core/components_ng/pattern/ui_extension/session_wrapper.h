@@ -86,16 +86,16 @@ public:
     virtual void NotifyConfigurationUpdate() = 0;
 
     // The interface about the accessibility
-    virtual bool TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int64_t offset) = 0;
-    virtual void SearchExtensionElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
+    virtual bool TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int32_t offset) = 0;
+    virtual void SearchExtensionElementInfoByAccessibilityId(int32_t elementId, int32_t mode, int32_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) = 0;
-    virtual void SearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
+    virtual void SearchElementInfosByText(int32_t elementId, const std::string& text, int32_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) = 0;
     virtual void FindFocusedElementInfo(
-        int64_t elementId, int32_t focusType, int64_t baseParent, Accessibility::AccessibilityElementInfo& output) = 0;
+        int32_t elementId, int32_t focusType, int32_t baseParent, Accessibility::AccessibilityElementInfo& output) = 0;
     virtual void FocusMoveSearch(
-        int64_t elementId, int32_t direction, int64_t baseParent, Accessibility::AccessibilityElementInfo& output) = 0;
+        int32_t elementId, int32_t direction, int32_t baseParent, Accessibility::AccessibilityElementInfo& output) = 0;
 
     // The interface to control the display area
     virtual std::shared_ptr<Rosen::RSSurfaceNode> GetSurfaceNode() const = 0;

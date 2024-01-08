@@ -511,7 +511,6 @@ private:
     {
         return NearEqual(richTextRect_.Bottom(), contentRect_.Bottom());
     }
-    void FlushTextForDisplay();
     // ai analysis fun
     bool NeedAiAnalysis(
         const CaretUpdateType targeType, const int32_t pos, const int32_t& spanStart, const std::string& content);

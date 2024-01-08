@@ -65,6 +65,7 @@ private:
     void ProcessDestinationChangeEvent();
 
     RefPtr<UINode> navDestinationNode_;
+    WeakPtr<UINode> weakNavigation_;
 };
 
 } // namespace OHOS::Ace::NG

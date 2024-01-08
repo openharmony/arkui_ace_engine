@@ -281,6 +281,13 @@ void SwiperPattern::OnAfterModifyDone()
 
 void SwiperPattern::BeforeCreateLayoutWrapper()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (host->GetChildrenUpdated() != -1 && NeedAutoPlay() && !translateTask_) {
+        StartAutoPlay();
+        host->ChildrenUpdatedFrom(-1);
+    }
+
     auto layoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     oldIndex_ = currentIndex_;
@@ -3991,6 +3998,9 @@ void SwiperPattern::UpdateSwiperPanEvent(bool disableSwipe)
     } else if (panEvent_) {
         gestureHub->RemovePanEvent(panEvent_);
         panEvent_.Reset();
+        if (isDragging_) {
+            HandleDragEnd(0.0);
+        }
     }
 }
 

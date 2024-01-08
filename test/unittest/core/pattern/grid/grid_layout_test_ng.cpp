@@ -617,34 +617,119 @@ HWTEST_F(GridLayoutTestNg, GridScrollWithOptions006, TestSize.Level1)
 
 /**
  * @tc.name: GridLayoutInfo::GetContentHeight001
- * @tc.desc: test GetContentHeight while changing childrenCount_
+ * @tc.desc: test GetContentHeight while changing endIndex
  * @tc.type: FUNC
  */
 HWTEST_F(GridLayoutTestNg, GetContentHeight001, TestSize.Level1)
 {
     GridLayoutInfo info;
-    info.lineHeightMap_ = { { 0, 5.0f }, { 1, 5.0f }, { 2, 5.0f }, { 3, 5.0f }, { 4, 10.0f }, { 5, 10.0f },
-        { 6, 10.0f } };
+    info.lineHeightMap_ = { { 0, 5.0f }, { 1, 10.0f }, { 2, 5.0f }, { 3, 10.0f }, { 4, 5.0f }, { 5, 5.0f },
+        { 6, 10.0f }, { 7, 5.0f } };
     info.gridMatrix_ = {
-        { 0, { { 0, 0 }, { 0, 1 } } },
-        { 1, { { 0, 2 } } },
-        { 2, { { 0, 3 }, { 2, 4 } } },
-        { 3, { { 0, 5 } } },
+        { 0, { { 0, 0 }, { 1, 1 } } },
+        { 1, { { 0, 2 }, { 1, -1 } } },
+        { 2, { { 0, 3 }, { 1, 4 } } },
+        { 3, { { 0, 5 }, { 1, -1 } } },
         { 4, { { 0, 6 }, { 1, 7 } } },
-        { 5, { { 0, 8 } } },
-        { 6, { { 0, 9 }, { 1, 2 } } },
+        { 5, { { 0, 8 }, { 1, 9 } } },
+        { 6, { { 0, 10 }, { 1, -1 } } },
+        { 7, { { 0, 11 } } },
     };
 
     GridLayoutOptions option {
-        .irregularIndexes = { 2, 3, 5, 8 },
+        .irregularIndexes = { 2, 5, 10 },
     };
 
+    info.crossCount_ = 2;
+    info.childrenCount_ = 12;
+    EXPECT_EQ(info.GetContentHeight(option, 12, 1.0f), 62.0f);
+    info.childrenCount_ = 11;
+    EXPECT_EQ(info.GetContentHeight(option, 11, 1.0f), 56.0f);
     info.childrenCount_ = 10;
-    EXPECT_EQ(info.GetContentHeight(option, 1.0f), 41.0f);
+    EXPECT_EQ(info.GetContentHeight(option, 10, 1.0f), 45.0f);
+    info.childrenCount_ = 6;
+    EXPECT_EQ(info.GetContentHeight(option, 6, 1.0f), 33.0f);
     info.childrenCount_ = 5;
-    EXPECT_EQ(info.GetContentHeight(option, 1.0f), 17.0f);
+    EXPECT_EQ(info.GetContentHeight(option, 5, 1.0f), 22.0f);
     info.childrenCount_ = 2;
-    EXPECT_EQ(info.GetContentHeight(option, 1.0f), 5.0f);
+    EXPECT_EQ(info.GetContentHeight(option, 2, 1.0f), 5.0f);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::GetContentHeight002
+ * @tc.desc: test GetContentHeight, adapted from test demo
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GetContentHeight002, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.lineHeightMap_ = { { 0, 5.0f }, { 1, 5.0f }, { 2, 5.0f } };
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, -1 }, { 2, -1 } } },
+        { 1, { { 0, 1 }, { 1, 2 }, { 2, 3 } } },
+        { 2, { { 0, 4 } } },
+    };
+
+    GridLayoutOptions option {
+        .irregularIndexes = { 0 },
+    };
+
+    info.childrenCount_ = 5;
+    info.crossCount_ = 3;
+    EXPECT_EQ(info.GetContentHeight(option, 5, 1.0f), 17.0f);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::GetContentOffset001
+ * @tc.desc: test GetContentOffset with irregular items
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GetContentOffset001, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.lineHeightMap_ = { { 0, 5.0f }, { 1, 10.0f }, { 2, 5.0f }, { 3, 10.0f }, { 4, 5.0f }, { 5, 5.0f },
+        { 6, 10.0f }, { 7, 5.0f } };
+    info.gridMatrix_ = {
+        { 0, { { 0, 0 }, { 1, 1 } } },
+        { 1, { { 0, 2 }, { 1, -1 } } },
+        { 2, { { 0, 3 }, { 1, 4 } } },
+        { 3, { { 0, 5 }, { 1, -1 } } },
+        { 4, { { 0, 6 }, { 1, 7 } } },
+        { 5, { { 0, 8 }, { 1, 9 } } },
+        { 6, { { 0, 10 }, { 1, -1 } } },
+        { 7, { { 0, 11 } } },
+    };
+
+    GridLayoutOptions option {
+        .irregularIndexes = { 2, 5, 10 },
+    };
+
+    info.crossCount_ = 2;
+    info.childrenCount_ = 12;
+
+    info.startIndex_ = 0;
+    info.currentOffset_ = -1.0f;
+    EXPECT_EQ(info.GetContentOffset(option, 1.0f), 1.0f);
+
+    info.startIndex_ = 2;
+    info.currentOffset_ = -1.0f;
+    EXPECT_EQ(info.GetContentOffset(option, 1.0f), 7.0f);
+
+    info.startIndex_ = 3;
+    info.currentOffset_ = -2.0f;
+    EXPECT_EQ(info.GetContentOffset(option, 1.0f), 19.0f);
+
+    info.startIndex_ = 5;
+    info.currentOffset_ = -3.0f;
+    EXPECT_EQ(info.GetContentOffset(option, 1.0f), 26.0f);
+
+    info.startIndex_ = 8;
+    info.currentOffset_ = 0.0f;
+    EXPECT_EQ(info.GetContentOffset(option, 1.0f), 40.0f);
+
+    info.startIndex_ = 10;
+    info.currentOffset_ = -6.0f;
+    EXPECT_EQ(info.GetContentOffset(option, 1.0f), 52.0f);
 }
 
 /**
@@ -1100,14 +1185,13 @@ HWTEST_F(GridLayoutTestNg, UpdateLength001, TestSize.Level1)
     info.lineHeightMap_[1] = 30.0f;
 
     GridIrregularFiller filler(&info, nullptr);
-    filler.posY_ = 2;
-    filler.UpdateLength(0, 5.0f);
-    EXPECT_EQ(filler.length_, 85.0f);
+    float len = 0.0f;
+    filler.UpdateLength(len, 0, 2, 5.0f);
+    EXPECT_EQ(len, 85.0f);
 
     info.lineHeightMap_[2] = 50.0f;
-    filler.posY_ = 3;
-    filler.UpdateLength(2, 10.0f);
-    EXPECT_EQ(filler.length_, 85.0f + 50.0f + 10.0f);
+    filler.UpdateLength(len, 2, 3, 10.0f);
+    EXPECT_EQ(len, 85.0f + 50.0f + 10.0f);
 }
 
 /**
@@ -1416,15 +1500,12 @@ HWTEST_F(GridLayoutTestNg, Fill001, TestSize.Level1)
     info.crossCount_ = 3;
     GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
 
-    float len =
-        filler.Fill({ .crossLens = { 50.0f, 50.0f, 100.0f }, .targetLen = 1000.0f, .crossGap = 5.0f, .mainGap = 1.0f });
+    float len = filler.Fill(
+        { .crossLens = { 50.0f, 50.0f, 100.0f }, .targetLen = 1000.0f, .crossGap = 5.0f, .mainGap = 1.0f }, 0);
 
-    // all children have height 0, and UpdateLength isn't run on the last line
-    EXPECT_EQ(len, 5.0f);
+    EXPECT_EQ(len, 6.0f);
 
-    EXPECT_EQ(info.startIndex_, 0);
     EXPECT_EQ(info.endIndex_, 9);
-    EXPECT_EQ(info.startMainLineIndex_, 0);
     EXPECT_EQ(info.endMainLineIndex_, 6);
 
     decltype(info.gridMatrix_) cmp = {
@@ -1721,6 +1802,30 @@ HWTEST_F(GridLayoutTestNg, SolveBackward001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LayoutRangeSolver::Solve001
+ * @tc.desc: Test LayoutRangeSolver::FindStartingRow when matrix is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, Solve001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions({});
+    });
+
+    GridLayoutInfo info;
+    info.crossCount_ = 3;
+
+    info.currentOffset_ = 0.0f;
+    info.startMainLineIndex_ = 0;
+
+    GridLayoutRangeSolver solver(&info, AceType::RawPtr(frameNode_));
+    auto res = solver.FindStartingRow(5.0f);
+    EXPECT_EQ(res.pos, 0.0f);
+    EXPECT_EQ(res.row, 0);
+}
+
+/**
  * @tc.name: GridIrregularLayout::LayoutChildren001
  * @tc.desc: Test GridIrregularLayout::LayoutChildren
  * @tc.type: FUNC
@@ -1962,7 +2067,7 @@ HWTEST_F(GridLayoutTestNg, FillMatrixOnly001, TestSize.Level1)
     };
 
     GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
-    filler.FillMatrixOnly(6);
+    filler.FillMatrixOnly(0, 6);
 
     EXPECT_EQ(info.gridMatrix_, expected);
     EXPECT_EQ(info.endIndex_, 6);
@@ -2012,9 +2117,9 @@ HWTEST_F(GridLayoutTestNg, MeasureBackward001, TestSize.Level1)
     });
 
     GridIrregularFiller filler(&info, AceType::RawPtr(frameNode_));
-    filler.MeasureBackward({ { 50.0f, 50.0f, 50.0f }, 1000.0f, 5.0f, 5.0f }, 5);
+    float len = filler.MeasureBackward({ { 50.0f, 50.0f, 50.0f }, 1000.0f, 5.0f, 5.0f }, 5);
 
-    EXPECT_EQ(filler.length_, 30.0f);
+    EXPECT_EQ(len, 30.0f);
     EXPECT_EQ(info.lineHeightMap_.size(), 6);
 }
 
@@ -2121,5 +2226,106 @@ HWTEST_F(GridLayoutTestNg, SolveForwardForEndIdx001, TestSize.Level1)
     auto [endLineIdx, endIdx] = solver.SolveForwardForEndIdx(5.0f, 250.0f, 1);
     EXPECT_EQ(endIdx, 6);
     EXPECT_EQ(endLineIdx, 4);
+}
+
+/**
+ * @tc.name: GridIrregularLayout::PrepareLineHeights001
+ * @tc.desc: Test GridIrregularLayout::PrepareLineHeights001
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, PrepareLineHeights001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        model.SetLayoutOptions({});
+        CreateColItem(15);
+    });
+
+    auto algorithm = AceType::MakeRefPtr<GridIrregularLayoutAlgorithm>(GridLayoutInfo {});
+    algorithm->wrapper_ = AceType::RawPtr(frameNode_);
+    algorithm->crossLens_ = { 1.0f, 1.0f, 1.0f };
+    auto& info = algorithm->gridLayoutInfo_;
+    // because measuring children might not generate proper heights in test, we set them manually.
+    decltype(info.lineHeightMap_) cmpH = { { 0, 200.0f }, { 1, 200.0f }, { 2, 200.0f }, { 3, 200.0f }, { 4, 200.0f } };
+    info.lineHeightMap_ = cmpH;
+    decltype(info.gridMatrix_) cmp = {
+        { 0, { { 0, 0 }, { 1, 1 }, { 2, 2 } } },
+        { 1, { { 0, 3 }, { 1, 4 }, { 2, 5 } } },
+        { 2, { { 0, 6 }, { 1, 7 }, { 2, 8 } } },
+        { 3, { { 0, 9 }, { 1, 10 }, { 2, 11 } } },
+        { 4, { { 0, 12 }, { 1, 13 }, { 2, 14 } } },
+    };
+    info.gridMatrix_ = cmp;
+
+    info.crossCount_ = 3;
+
+    info.scrollAlign_ = ScrollAlign::START;
+    int32_t idx = 0;
+    algorithm->PrepareLineHeight(70.0f, idx);
+    EXPECT_EQ(info.scrollAlign_, ScrollAlign::START);
+    EXPECT_EQ(idx, 0);
+
+    info.scrollAlign_ = ScrollAlign::START;
+    idx = 2;
+    algorithm->PrepareLineHeight(300.0f, idx);
+    EXPECT_EQ(info.scrollAlign_, ScrollAlign::START);
+    EXPECT_EQ(idx, 2);
+
+    // can't align start with idx 4
+    info.scrollAlign_ = ScrollAlign::START;
+    idx = 4;
+    algorithm->PrepareLineHeight(300.0f, idx);
+    EXPECT_EQ(info.scrollAlign_, ScrollAlign::END);
+    EXPECT_EQ(idx, 4);
+
+    // can't align center with idx 0
+    info.scrollAlign_ = ScrollAlign::CENTER;
+    idx = 0;
+    algorithm->PrepareLineHeight(350.0f, idx);
+    EXPECT_EQ(info.scrollAlign_, ScrollAlign::START);
+    EXPECT_EQ(idx, 0);
+
+    // can't align center with idx 4
+    info.scrollAlign_ = ScrollAlign::CENTER;
+    idx = 4;
+    algorithm->PrepareLineHeight(350.0f, idx);
+    EXPECT_EQ(info.scrollAlign_, ScrollAlign::END);
+    EXPECT_EQ(idx, 4);
+
+    // align center with idx 4 and len 30.0f
+    info.scrollAlign_ = ScrollAlign::CENTER;
+    idx = 4;
+    algorithm->PrepareLineHeight(30.0f, idx);
+    EXPECT_EQ(info.scrollAlign_, ScrollAlign::CENTER);
+    EXPECT_EQ(idx, 4);
+
+    // can't align end with idx 1 and len 200.0f
+    info.scrollAlign_ = ScrollAlign::END;
+    idx = 1;
+    algorithm->PrepareLineHeight(500.0f, idx);
+    EXPECT_EQ(info.scrollAlign_, ScrollAlign::START);
+    EXPECT_EQ(idx, 0);
+
+    info.scrollAlign_ = ScrollAlign::END;
+    idx = 3;
+    algorithm->PrepareLineHeight(300.0f, idx);
+    EXPECT_EQ(info.scrollAlign_, ScrollAlign::END);
+    EXPECT_EQ(idx, 3);
+
+    info.scrollAlign_ = ScrollAlign::END;
+    idx = 4;
+    algorithm->PrepareLineHeight(1000.0f, idx);
+    EXPECT_EQ(info.scrollAlign_, ScrollAlign::END);
+    EXPECT_EQ(idx, 4);
+
+    // can't align end with len 340
+    info.scrollAlign_ = ScrollAlign::END;
+    idx = 4;
+    algorithm->PrepareLineHeight(1040.0f, idx);
+    EXPECT_EQ(info.scrollAlign_, ScrollAlign::START);
+    EXPECT_EQ(idx, 0);
+
+    EXPECT_EQ(cmp, info.gridMatrix_);
+    EXPECT_EQ(cmpH, info.lineHeightMap_);
 }
 } // namespace OHOS::Ace::NG
