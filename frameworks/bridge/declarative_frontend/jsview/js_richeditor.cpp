@@ -767,6 +767,7 @@ void JSRichEditorController::ParseJsTextStyle(
 void JSRichEditorController::ParseJsSymbolSpanStyle(
     const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
 {
+    updateSpanStyle.isSymbolStyle = true;
     JSRef<JSVal> fontColor = styleObject->GetProperty("fontColor");
     std::vector<Color> symbolColor;
     if (!fontColor->IsNull() && JSContainerBase::ParseJsSymbolColor(fontColor, symbolColor)) {

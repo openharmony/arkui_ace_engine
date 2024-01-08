@@ -403,6 +403,7 @@ void TextLayoutAlgorithm::CreateParagraphDrag(const TextStyle& textStyle,
     auto style = textStyles.begin();
     ParagraphStyle paraStyle { .direction = GetTextDirection(content),
         .maxLines = style->GetMaxLines(),
+        .align = style->GetTextAlign(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = style->GetWordBreak(),
         .textOverflow = style->GetTextOverflow(),
