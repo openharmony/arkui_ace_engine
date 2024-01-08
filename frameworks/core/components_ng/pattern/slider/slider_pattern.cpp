@@ -767,11 +767,7 @@ void SliderPattern::FireChangeEvent(int32_t mode)
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (mode == SliderChangeMode::Begin) {
-        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
-    } else if (mode == SliderChangeMode::End) {
-        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
-    }
+    host->OnAccessibilityEvent(AccessibilityEventType::COMPONENT_CHANGE);
 }
 
 void SliderPattern::UpdateMarkDirtyNode(const PropertyChangeFlag& Flag)
