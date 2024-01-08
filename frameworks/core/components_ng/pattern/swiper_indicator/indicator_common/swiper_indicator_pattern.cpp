@@ -76,6 +76,10 @@ void SwiperIndicatorPattern::OnModifyDone()
         host->Clean();
     }
 
+    if (dotIndicatorModifier_) {
+        dotIndicatorModifier_->StopAnimation();
+    }
+
     auto swiperEventHub = swiperPattern->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
 

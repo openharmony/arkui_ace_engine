@@ -276,6 +276,7 @@ private:
         const LinearVector<float>& vectorBlackPointCenterX);
     void PlayTouchBottomAnimation(const std::vector<std::pair<float, float>>& longPointCenterX,
         TouchBottomTypeLoop touchBottomTypeLoop, const LinearVector<float>& vectorBlackPointCenterX);
+    void PlayOpacityAnimation();
 
     RefPtr<AnimatablePropertyColor> backgroundColor_;
     RefPtr<AnimatablePropertyVectorFloat> vectorBlackPointCenterX_;
