@@ -4186,6 +4186,9 @@ void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
     OffsetF firstHandleOffset = startOffset + textPaintOffset - rootOffset;
     OffsetF secondHandleOffset = endOffset + textPaintOffset - rootOffset;
     if (GetTextContentLength() == 0) {
+        float caretHeight = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretHeight();
+        secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretHeight / 2 };
+        secondHandleOffset = OffsetF(secondHandleOffset.GetX(), secondHandleOffset.GetY() + caretHeight / 2);
         // only show the second handle.
         firstHandlePaintSize = SizeF{};
         firstHandleOffset = OffsetF{};
