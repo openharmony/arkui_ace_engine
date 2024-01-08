@@ -5711,7 +5711,43 @@ void JSViewAbstract::JsAccessibilityText(const std::string& text)
 
 void JSViewAbstract::JsAccessibilityDescription(const std::string& description)
 {
-    ViewAbstractModel::GetInstance()->SetAccessibilityDescription(description);
+    std::pair<bool, std::string> autoEventPair(false, "");
+    std::pair<bool, std::string> descriptionPair(false, "");
+    ParseAccessibilityDescriptionJson(description, autoEventPair, descriptionPair);
+    if (descriptionPair.first) {
+        ViewAbstractModel::GetInstance()->SetAccessibilityDescription(descriptionPair.second);
+    } else {
+        ViewAbstractModel::GetInstance()->SetAccessibilityDescription(description);
+    }
+    if (autoEventPair.first) {
+        ViewAbstractModel::GetInstance()->SetAutoEventParam(autoEventPair.second);
+    }
+}
+
+void JSViewAbstract::ParseAccessibilityDescriptionJson(const std::string& description,
+    std::pair<bool, std::string>& autoEventPair, std::pair<bool, std::string>& descriptionPair)
+{
+    if (description.empty()) {
+        return;
+    }
+    if (!StartWith(description, "{") || !EndWith(description, "}")) {
+        return;
+    }
+    auto jsonObj = JsonUtil::ParseJsonString(description);
+    if (!jsonObj || !jsonObj->IsValid() || !jsonObj->IsObject()) {
+        return;
+    }
+    if (jsonObj->Contains("$autoEventParam")) {
+        auto param = jsonObj->GetValue("$autoEventParam");
+        if (param) {
+            autoEventPair = std::make_pair(true, param->ToString());
+        }
+    }
+    if (jsonObj->Contains("$accessibilityDescription")) {
+        descriptionPair = std::make_pair(true, jsonObj->GetString("$accessibilityDescription"));
+    } else if (jsonObj->Contains("$autoEventParam")) {
+        descriptionPair = std::make_pair(true, "");
+    }
 }
 
 void JSViewAbstract::JsAccessibilityImportance(const std::string& importance)

@@ -109,7 +109,11 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
             CHECK_NULL_VOID(pattern);
             auto tabBarText = pattern->GetTabBarTextByIndex(index);
             Recorder::EventParamsBuilder builder;
-            builder.SetId(inspectorId).SetType(tabsNode->GetTag()).SetIndex(index).SetText(tabBarText);
+            builder.SetId(inspectorId)
+                .SetType(tabsNode->GetTag())
+                .SetIndex(index)
+                .SetText(tabBarText)
+                .SetDescription(tabsNode->GetAutoEventParamValue(""));
             Recorder::EventRecorder::Get().OnChange(std::move(builder));
             if (!inspectorId.empty()) {
                 Recorder::NodeDataCache::Get().PutMultiple(inspectorId, tabBarText, index);

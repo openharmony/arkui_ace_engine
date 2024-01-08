@@ -267,6 +267,8 @@ public:
     static void ShowMenu(int32_t targetId, const NG::OffsetF &offset, bool isContextMenu = false);
     // inspector
     static void SetInspectorId(const std::string &inspectorId);
+    // auto event param
+    static void SetAutoEventParam(const std::string& param);
     // restore
     static void SetRestoreId(int32_t restoreId);
     // inspector debugLine

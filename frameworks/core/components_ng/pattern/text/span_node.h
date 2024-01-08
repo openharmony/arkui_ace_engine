@@ -152,6 +152,7 @@ public:
     int32_t position = -1;
     int32_t imageNodeId = -1;
     std::string inspectId;
+    std::string description;
     std::string content;
     uint32_t unicode = 0;
     std::unique_ptr<FontStyle> fontStyle = std::make_unique<FontStyle>();
@@ -327,6 +328,11 @@ public:
     void OnInspectorIdUpdate(const std::string& inspectorId) override
     {
         spanItem_->inspectId = inspectorId;
+    }
+
+    void OnAutoEventParamUpdate(const std::string& desc) override
+    {
+        spanItem_->description = desc;
     }
 
     DEFINE_SPAN_FONT_STYLE_ITEM(FontSize, Dimension);

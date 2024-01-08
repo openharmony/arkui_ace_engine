@@ -1581,6 +1581,14 @@ void ViewAbstract::SetInspectorId(const std::string &inspectorId)
     }
 }
 
+void ViewAbstract::SetAutoEventParam(const std::string& param)
+{
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    if (uiNode) {
+        uiNode->UpdateAutoEventParam(param);
+    }
+}
+
 void ViewAbstract::SetRestoreId(int32_t restoreId)
 {
     auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();

@@ -306,7 +306,11 @@ void SelectPattern::CreateSelectedCallback()
         if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
             auto inspectorId = host->GetInspectorId().value_or("");
             Recorder::EventParamsBuilder builder;
-            builder.SetId(inspectorId).SetType(host->GetTag()).SetIndex(index).SetText(value);
+            builder.SetId(inspectorId)
+                .SetType(host->GetTag())
+                .SetIndex(index)
+                .SetText(value)
+                .SetDescription(host->GetAutoEventParamValue(""));
             Recorder::EventRecorder::Get().OnChange(std::move(builder));
             if (!inspectorId.empty()) {
                 Recorder::NodeDataCache::Get().PutMultiple(inspectorId, value, index);
