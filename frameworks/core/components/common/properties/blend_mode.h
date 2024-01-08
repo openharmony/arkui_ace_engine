@@ -48,7 +48,7 @@ enum class BlendMode : int16_t {
     COLOR_BURN,  // darken destination to reflect source
     HARD_LIGHT,  // multiply or screen, depending on source
     SOFT_LIGHT,  // lighten or darken, depending on source
-    DIFFERENCE,  // rc = s + d - 2*(min(s*da, d*sa)), ra = SRC_OVER
+    DIFF,  // rc = s + d - 2*(min(s*da, d*sa)), ra = SRC_OVER
     EXCLUSION,   // rc = s + d - two(s*d), ra = SRC_OVER
     MULTIPLY,    // r = s*(1-da) + d*(1-sa) + s*d
 

@@ -292,7 +292,7 @@ var BlendMode;
   BlendMode[BlendMode["COLOR_BURN"] = 20] = "COLOR_BURN";
   BlendMode[BlendMode["HARD_LIGHT"] = 21] = "HARD_LIGHT";
   BlendMode[BlendMode["SOFT_LIGHT"] = 22] = "SOFT_LIGHT";
-  BlendMode[BlendMode["DIFFERENCE"] = 23] = "DIFFERENCE";
+  BlendMode[BlendMode["DIFF"] = 23] = "DIFF";
   BlendMode[BlendMode["EXCLUSION"] = 24] = "EXCLUSION";
   BlendMode[BlendMode["MULTIPLY"] = 25] = "MULTIPLY";
   BlendMode[BlendMode["HUE"] = 26] = "HUE";
