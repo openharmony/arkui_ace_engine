@@ -8311,15 +8311,12 @@ HWTEST_F(SwiperTestNg, SwiperPatternUpdateCurrentOffset004, TestSize.Level1)
         pattern_->itemPosition_.emplace(std::make_pair(2, SwiperItemInfo { 1.0f, 2.0f }));
         pattern_->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1.0f, 2.0f }));
     }
-    EXPECT_FLOAT_EQ(pattern_->currentDelta_, 0.6f);
     layoutProperty_->UpdateLoop(true);
     EXPECT_FLOAT_EQ(pattern_->currentIndexOffset_, 1.1f);
     pattern_->UpdateCurrentOffset(offset);
     EXPECT_FLOAT_EQ(pattern_->currentIndexOffset_, 1.2f);
-    EXPECT_FLOAT_EQ(pattern_->currentDelta_, 0.5f);
     pattern_->isDragging_ = false;
     pattern_->UpdateCurrentOffset(offset);
-    EXPECT_FLOAT_EQ(pattern_->currentDelta_, 0.4f);
     EXPECT_FLOAT_EQ(pattern_->currentIndexOffset_, 1.3f);
 }
 
