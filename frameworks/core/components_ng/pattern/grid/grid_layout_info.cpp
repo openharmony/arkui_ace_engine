@@ -424,6 +424,8 @@ bool GridLayoutInfo::GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayo
             break;
         }
         case ScrollAlign::AUTO: {
+            GetLineIndexByIndex(currentGridLayoutInfo.startIndex_, startMainLineIndex);
+            GetLineIndexByIndex(currentGridLayoutInfo.endIndex_, endMainLineIndex);
             auto targetPosBeforeStartIndex = GetTotalHeightFromZeroIndex(startMainLineIndex, mainGap);
             // targetPos - targetPosBeforeStartIndex:The distance between the top of the startLine row and the top of
             // the targetLine row
@@ -434,8 +436,7 @@ bool GridLayoutInfo::GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayo
                                  targetPosBeforeStartIndex - targetLineHeight;
             // This is handled when the targetLine line is the same as the endLine line. As for the period between
             // startLine and endLine, follow the following process
-            if ((endMainLineIndex >= targetLineIndex) && (targetLineIndex < startMainLineIndex) &&
-                GreatOrEqual(height2Top, 0.f) && GreatOrEqual(height2Bottom, 0.f)) {
+            if (GreatOrEqual(height2Top, 0.f) && GreatOrEqual(height2Bottom, 0.f)) {
                 return false;
             }
             // When the row height is greater than the screen height and occupies the entire screen height, do nothing
