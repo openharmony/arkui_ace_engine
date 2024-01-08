@@ -91,6 +91,11 @@ public:
         const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& bundleName, std::string& moduleName);
     static bool GetJsPasswordIcon(const EcmaVM *vm, const Local<JSValueRef> &jsOnIconSrc,
         const Local<JSValueRef> &jsOffIconSrc, PasswordIcon& result);
+    static void ParsePadding(
+        const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result);
+    static bool ParseResponseRegion(
+        const EcmaVM* vm, const Local<JSValueRef>& jsValue,
+        double* regionValues, int32_t* regionUnits, uint32_t length);
     template<typename T>
     static RefPtr<T> GetTheme()
     {

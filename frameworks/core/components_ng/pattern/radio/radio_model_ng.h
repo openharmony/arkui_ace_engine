@@ -40,6 +40,11 @@ public:
     static void SetCheckedBackgroundColor(FrameNode* frameNode, const Color& color);
     static void SetUncheckedBorderColor(FrameNode* frameNode, const Color& color);
     static void SetIndicatorColor(FrameNode* frameNode, const Color& color);
+    static void SetWidth(FrameNode* frameNode, const Dimension& width);
+    static void SetHeight(FrameNode* frameNode, const Dimension& height);
+    static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);
+    static void SetPadding(FrameNode* frameNode, const NG::PaddingProperty& newArgs);
+    static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
 };
 } // namespace OHOS::Ace::NG
 

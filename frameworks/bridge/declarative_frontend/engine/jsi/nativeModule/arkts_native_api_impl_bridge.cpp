@@ -1355,6 +1355,30 @@ void ArkUINativeModule::RegisterRadioAttributes(Local<panda::ObjectRef> object, 
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::SetRadioStyle));
     radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRadioStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::ResetRadioStyle));
+    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRadioWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::SetRadioWidth));
+    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRadioWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::ResetRadioWidth));
+    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRadioHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::SetRadioHeight));
+    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRadioHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::ResetRadioHeight));
+    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRadioSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::SetRadioSize));
+    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRadioSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::ResetRadioSize));
+    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRadioHoverEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::SetRadioHoverEffect));
+    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRadioHoverEffect"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::ResetRadioHoverEffect));
+    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRadioPadding"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::SetRadioPadding));
+    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRadioPadding"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::ResetRadioPadding));
+    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRadioResponseRegion"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::SetRadioResponseRegion));
+    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRadioResponseRegion"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::ResetRadioResponseRegion));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "radio"), radio);
 }
 

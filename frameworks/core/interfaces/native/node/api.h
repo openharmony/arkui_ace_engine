@@ -682,6 +682,21 @@ struct ArkUIRadioModifierAPI {
     void (*SetRadioStyle)(
         NodeHandle node, uint32_t checkedBackgroundColor, uint32_t uncheckedBorderColor, uint32_t indicatorColor);
     void (*ResetRadioStyle)(NodeHandle node);
+    void (*SetRadioWidth)(NodeHandle node, double value, uint32_t unit);
+    void (*ResetRadioWidth)(NodeHandle node);
+    void (*SetRadioHeight)(NodeHandle node, double value, uint32_t unit);
+    void (*ResetRadioHeight)(NodeHandle node);
+    void (*SetRadioSize)(
+        NodeHandle node, double widthValue, int32_t widthUnit, double heightValue, int32_t heightUnit);
+    void (*ResetRadioSize)(NodeHandle node);
+    void (*SetRadioHoverEffect)(NodeHandle node, int32_t hoverEffectValue);
+    void (*ResetRadioHoverEffect)(NodeHandle node);
+    void (*SetRadioPadding)(
+        NodeHandle node, const struct ArkUISizeType *top, const struct ArkUISizeType *right,
+            const struct ArkUISizeType *bottom, const struct ArkUISizeType *left);
+    void (*ResetRadioPadding)(NodeHandle node);
+    void (*SetRadioResponseRegion)(NodeHandle node, const double* values, const int32_t* units, uint32_t length);
+    void (*ResetRadioResponseRegion)(NodeHandle node);
 };
 
 struct ArkUIDividerModifierAPI {

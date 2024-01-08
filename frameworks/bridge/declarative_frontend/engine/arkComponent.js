@@ -9720,6 +9720,30 @@ class ArkRadioComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, RadioStyleModifier.identity, RadioStyleModifier, value);
     return this;
   }
+  width(value) {
+    modifierWithKey(this._modifiersWithKeys, RadioWidthModifier.identity, RadioWidthModifier, value);
+    return this;
+  }
+  height(value) {
+    modifierWithKey(this._modifiersWithKeys, RadioHeightModifier.identity, RadioHeightModifier, value);
+    return this;
+  }
+  size(value) {
+    modifierWithKey(this._modifiersWithKeys, RadioSizeModifier.identity, RadioSizeModifier, value);
+    return this;
+  }
+  hoverEffect(value) {
+    modifierWithKey(this._modifiersWithKeys, RadioHoverEffectModifier.identity, RadioHoverEffectModifier, value);
+    return this;
+  }
+  padding(value) {
+    modifierWithKey(this._modifiersWithKeys, RadioPaddingModifier.identity, RadioPaddingModifier, value);
+    return this;
+  }
+  responseRegion(value) {
+    modifierWithKey(this._modifiersWithKeys, RadioResponseRegionModifier.identity, RadioResponseRegionModifier, value);
+    return this;
+  }
 }
 class RadioCheckedModifier extends ModifierWithKey {
   constructor(value) {
@@ -9757,6 +9781,175 @@ class RadioStyleModifier extends ModifierWithKey {
   }
 }
 RadioStyleModifier.identity = Symbol('radioStyle');
+class RadioWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().radio.resetRadioWidth(node);
+    }
+    else {
+      getUINativeModule().radio.setRadioWidth(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+RadioWidthModifier.identity = Symbol('radioWidth');
+class RadioHeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().radio.resetRadioHeight(node);
+    }
+    else {
+      getUINativeModule().radio.setRadioHeight(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+RadioHeightModifier.identity = Symbol('radioHeight');
+class RadioSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().radio.resetRadioSize(node);
+    }
+    else {
+      getUINativeModule().radio.setRadioSize(node, this.value.width, this.value.height);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+      !isBaseOrResourceEqual(this.stageValue.height, this.value.height);
+  }
+}
+RadioSizeModifier.identity = Symbol('radioSize');
+class RadioHoverEffectModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().radio.resetRadioHoverEffect(node);
+    }
+    else {
+      getUINativeModule().radio.setRadioHoverEffect(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+RadioHoverEffectModifier.identity = Symbol('radioHoverEffect');
+class RadioPaddingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().radio.resetRadioPadding(node);
+    }
+    else {
+      let paddingTop;
+      let paddingRight;
+      let paddingBottom;
+      let paddingLeft;
+      if (this.value !== null && this.value !== undefined) {
+        if (isLengthType(this.value) || isResource(this.value)) {
+          paddingTop = this.value;
+          paddingRight = this.value;
+          paddingBottom = this.value;
+          paddingLeft = this.value;
+        }
+        else {
+          paddingTop = this.value.top;
+          paddingRight = this.value.right;
+          paddingBottom = this.value.bottom;
+          paddingLeft = this.value.left;
+        }
+      }
+      getUINativeModule().radio.setRadioPadding(node, paddingTop, paddingRight, paddingBottom, paddingLeft);
+    }
+  }
+  checkObjectDiff() {
+    if (isLengthType(this.value) || isResource(this.value)) {
+      return !isBaseOrResourceEqual(this.stageValue, this.value);
+    }
+    else {
+      return !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
+        !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
+        !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
+        !isBaseOrResourceEqual(this.stageValue.left, this.value.left);
+    }
+  }
+}
+RadioPaddingModifier.identity = Symbol('radioPadding');
+class RadioResponseRegionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    let _a, _b, _c, _d, _e, _f, _g, _h;
+    if (reset) {
+      getUINativeModule().radio.resetRadioResponseRegion(node);
+    }
+    else {
+      let responseRegion = [];
+      if (Array.isArray(this.value)) {
+        for (let i = 0; i < this.value.length; i++) {
+          responseRegion.push((_a = this.value[i].x) !== null && _a !== void 0 ? _a : 'PLACEHOLDER');
+          responseRegion.push((_b = this.value[i].y) !== null && _b !== void 0 ? _b : 'PLACEHOLDER');
+          responseRegion.push((_c = this.value[i].width) !== null && _c !== void 0 ? _c : 'PLACEHOLDER');
+          responseRegion.push((_d = this.value[i].height) !== null && _d !== void 0 ? _d : 'PLACEHOLDER');
+        }
+      }
+      else {
+        responseRegion.push((_e = this.value.x) !== null && _e !== void 0 ? _e : 'PLACEHOLDER');
+        responseRegion.push((_f = this.value.y) !== null && _f !== void 0 ? _f : 'PLACEHOLDER');
+        responseRegion.push((_g = this.value.width) !== null && _g !== void 0 ? _g : 'PLACEHOLDER');
+        responseRegion.push((_h = this.value.height) !== null && _h !== void 0 ? _h : 'PLACEHOLDER');
+      }
+      getUINativeModule().radio.setRadioResponseRegion(node, responseRegion, responseRegion.length);
+    }
+  }
+  checkObjectDiff() {
+    if (Array.isArray(this.value) && Array.isArray(this.stageValue)) {
+      if (this.value.length !== this.stageValue.length) {
+        return true;
+      }
+      else {
+        for (let i = 0; i < this.value.length; i++) {
+          if (!(isBaseOrResourceEqual(this.stageValue[i].x, this.value[i].x) &&
+            isBaseOrResourceEqual(this.stageValue[i].y, this.value[i].y) &&
+            isBaseOrResourceEqual(this.stageValue[i].width, this.value[i].width) &&
+            isBaseOrResourceEqual(this.stageValue[i].height, this.value[i].height))) {
+            return true;
+          }
+        }
+        return false;
+      }
+    }
+    else if (!Array.isArray(this.value) && !Array.isArray(this.stageValue)) {
+      return (!(isBaseOrResourceEqual(this.stageValue.x, this.value.x) &&
+        isBaseOrResourceEqual(this.stageValue.y, this.value.y) &&
+        isBaseOrResourceEqual(this.stageValue.width, this.value.width) &&
+        isBaseOrResourceEqual(this.stageValue.height, this.value.height)));
+    }
+    else {
+      return true;
+    }
+  }
+}
+RadioResponseRegionModifier.identity = Symbol('radioResponseRegion');
 // @ts-ignore
 globalThis.Radio.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
