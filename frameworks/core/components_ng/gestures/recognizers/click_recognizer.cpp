@@ -349,8 +349,12 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
         info.SetTimeStamp(time_);
         info.SetFingerList(fingerList_);
         TouchEvent touchPoint = {};
-        if (!touchPoints_.empty()) {
-            touchPoint = touchPoints_.begin()->second;
+        for (const auto& pointKeyVal : touchPoints_) {
+            auto pointVal = pointKeyVal.second;
+            if (pointVal.sourceType != SourceType::NONE) {
+                touchPoint = pointVal;
+                break;
+            }
         }
         PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
         NGGestureRecognizer::Transform(localPoint, GetAttachedNode());
