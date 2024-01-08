@@ -22,6 +22,7 @@
 #include "core/common/thread_checker.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 uint64_t UITaskScheduler::frameId_ = 0;
@@ -48,6 +49,31 @@ void UITaskScheduler::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     }
 }
 
+void UITaskScheduler::RestoreGeoState()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    if (safeAreaManager) {
+        std::set<WeakPtr<FrameNode>> geoRestoreNodes = safeAreaManager->GetGeoRestoreNodes();
+        for (auto& node : geoRestoreNodes) {
+            auto frameNode = node.Upgrade();
+            if (frameNode) {
+                frameNode->RestoreGeoState();
+            }
+        }
+    }
+}
+
+void UITaskScheduler::ExpandSafeArea()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    safeAreaManager->ExpandSafeArea();
+}
+
 void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 {
     CHECK_RUN_ON(UI);
@@ -55,6 +81,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     if (dirtyLayoutNodes_.empty()) {
         return;
     }
+    RestoreGeoState();
     if (isLayouting_) {
         LOGF("you are already in flushing layout!");
         abort();
@@ -77,6 +104,7 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
             frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::LAYOUT);
         }
     }
+    ExpandSafeArea();
     isLayouting_ = false;
 }
 

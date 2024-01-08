@@ -1315,6 +1315,14 @@ void FrameNode::MarkModifyDone()
 {
     pattern_->OnModifyDone();
     // restore info will overwrite the first setted attribute
+    auto &&opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
+    if (opts && opts->Expansive()) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto safeAreaManager = pipeline->GetSafeAreaManager();
+        CHECK_NULL_VOID(safeAreaManager);
+        safeAreaManager->AddNeedExpandNode(GetHostNode());
+    }
     if (!isRestoreInfoUsed_) {
         isRestoreInfoUsed_ = true;
         auto pipeline = PipelineContext::GetCurrentContext();
@@ -2583,7 +2591,6 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     if (!oldGeometryNode_) {
         oldGeometryNode_ = geometryNode_->Clone();
     }
-    RestoreGeoState();
     pattern_->BeforeCreateLayoutWrapper();
     GetLayoutAlgorithm(true);
 
@@ -2697,9 +2704,7 @@ void FrameNode::Layout()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     bool isFocusOnPage = pipeline->CheckPageFocus();
-    SaveGeoState();
     AvoidKeyboard(isFocusOnPage);
-    ExpandSafeArea(isFocusOnPage);
     SyncGeometryNode();
 
     UpdateParentAbsoluteOffset();
