@@ -72,6 +72,20 @@ typedef enum {
     ARKUI_NODE_LIST,
     /** 翻页容器. */
     ARKUI_NODE_SWIPER,
+    /** 多行文本 **/
+    ARKUI_NODE_TEXT_AREA,
+    /** 按钮 **/
+    ARKUI_NODE_BUTTON,
+    /** 进度条 **/
+    ARKUI_NODE_PROGRESS,
+    /** 复选框 **/
+    ARKUI_NODE_CHECKBOX,
+    /** 垂直布局容器 **/
+    ARKUI_NODE_COLUMN,
+    /** 水平布局容器 **/
+    ARKUI_NODE_ROW,
+    /** 弹性布局容器 **/
+    ARKUI_NODE_FLEX,
 } ArkUI_NodeType;
 
 #define MAX_NODE_SCOPE_NUM 1000
@@ -114,8 +128,164 @@ typedef enum {
      *
      */
     NODE_BACKGROUND_COLOR,
+    /**
+     * @note 入参格式为"图片地址url repeat参数"，repeat参数可不填写。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_IMAGE, "www.test.png norepeat");
+     * @endcode
+     */
+    NODE_BACKGROUND_IMAGE,
+    /**
+     * @note 入参为按照上右下左指定的内间距，单位为vp，如"2 3 4 5" 表示上右下左的兼具分别为2vp, 3vp, 4vp, 5vp
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_PADDING, "2 3 4 5");
+     * @endcode
+     */
+    NODE_PADDING,
+    /**
+     * @note 入参格式为字符串。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_ID, "test");
+     * @endcode
+     */
+    NODE_ID,
+    /**
+     * @note 入参格式为内容为true或false的字符串，不区分大小写。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_ENABLED, "true");
+     * @endcode
+     */
+    NODE_ENABLED,
 
+    /**
+     * @note 入参格式为#argb类型字符串，如"#FF1122FF"。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_COLOR, "#FF1122FF");
+     * @endcode
+     */
     NODE_FONT_COLOR = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT,
+    /**
+     * @note 入参格式为数字类型字符串，单位为fp。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_SIZE, "10");
+     * @endcode
+     */
+    NODE_FONT_SIZE,
+    /**
+     * @note 入参格式为FontWeight的枚举名称 Lighter,Normal,Regular,Medium,Bold,Bolder 或者是100-900之间的100倍数字
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_WEIGHT, "Normal");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_WEIGHT, "400");
+     * @endcode
+     */
+    NODE_FONT_WEIGHT,
+    /**
+     * @note 入参格式为FontStyle的枚举名称 Normal,Italic。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_STYLE, "Normal");
+     * @endcode
+     */
+    NODE_FONT_STYLE,
+    /**
+     * @note 入参格式为TextAlign的枚举名称 Start,Center,End,JUSTIFY。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_ALIGN, "Start");
+     * @endcode
+     */
+    NODE_TEXT_ALIGN,
+    
+    /**
+     * @note 入参格式为字符串。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_PLACEHOLDER, "Input");
+     * @endcode
+     */
+    NODE_TEXT_INPUT_PLACEHOLDER = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_INPUT,
+    /**
+     * @note 入参格式为字符串。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_TEXT, "Init");
+     * @endcode
+     */
+    NODE_TEXT_INPUT_TEXT,
+    /**
+     * @note 入参格式为#argb类型字符串，如"#FF1122FF"。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_CARET_COLOR, "#FF1122FF");
+     * @endcode
+     */
+    NODE_TEXT_INPUT_CARET_COLOR,
+    /**
+     * @note 入参格式为数字类型字符串，单位为vp。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_CARET_STYLE, "2");
+     * @endcode
+     */
+    NODE_TEXT_INPUT_CARET_STYLE,
+    /**
+     * @note 入参格式为内容为true或false的字符串，不区分大小写。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_SHOW_UNDERLINE, "true");
+     * @endcode
+     */
+    NODE_TEXT_INPUT_SHOW_UNDERLINE,
+    /**
+     * @note 入参格式为数字类型字符串。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_MAX_LENGTH, "50");
+     * @endcode
+     */
+    NODE_TEXT_INPUT_MAX_LENGTH,
+    /**
+     * @note 入参格式为EnterKeyType的枚举名称 Go,Search,Send,Next,Done,Previous,NewLine。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_ENTER_KEY_TYPE, "Done");
+     * @endcode
+     */
+    NODE_TEXT_INPUT_ENTER_KEY_TYPE,
+    /**
+     * @note 入参格式为#argb类型字符串，如"#FF1122FF"。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_PLACEHOLDER_COLOR, "#FF1122FF");
+     * @endcode
+     */
+    NODE_TEXT_INPUT_PLACEHOLDER_COLOR,
+    /**
+     * @note 入参格式为空格分隔的字体字符串，顺序为size weight style families，其中families为逗号分隔的字符串。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_PLACEHOLDER_FONT, "1 Bold Normal family1,family2");
+     * @endcode
+     */
+    NODE_TEXT_INPUT_PLACEHOLDER_FONT,
+    /**
+     * @note 入参格式为内容为true或false的字符串，不区分大小写。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_ENABLE_KEYBOARD_ON_FOCUS, "true");
+     * @endcode
+     */
+    NODE_TEXT_INPUT_ENABLE_KEYBOARD_ON_FOCUS,
+     /**
+     * @note 入参格式为InputType的枚举名称 Normal,Password,Email,Number,PhoneNumber,
+     * UserName,NewPassword,NumberPassword,ScreenLockPassword,NumberDecimal。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_TYPE, "Normal");
+     * @endcode
+     */
+    NODE_TEXT_INPUT_TYPE,
+    /**
+     * @note 入参格式为#argb类型字符串，如"#FF1122FF"。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_SELECTED_BACKGROUND_COLOR, "#FF1122FF");
+     * @endcode
+     */
+    NODE_TEXT_INPUT_SELECTED_BACKGROUND_COLOR,
+    /**
+     * @note 入参格式为内容为true或false的字符串，不区分大小写。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_SHOW_PASSWORD_ICON, "true");
+     * @endcode
+     */
+    NODE_TEXT_INPUT_SHOW_PASSWORD_ICON,
 
     NODE_SWIPER_LOOP = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SWIPER,
 } ArkUI_NodeAttributeType;
@@ -124,6 +294,8 @@ typedef enum {
     NODE_TOUCH_EVENT = 0,
 
     NODE_SCROLL_EVENT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SCROLL,
+
+    NODE_TEXT_INPUT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_INPUT
 } ArkUI_NodeEventType;
 
 #define MAX_COMPONENT_EVENT_ARG_NUM 12
@@ -132,11 +304,16 @@ typedef struct {
 } ArkUI_NodeComponentEvent;
 
 typedef struct {
+    ArkUI_CharPtr pStr;
+} ArkUI_StringAsyncEvent;
+
+typedef struct {
     ArkUI_Int32 kind; // Actually ArkUI_EventType, but use int for fixed binary layout.
     ArkUI_Int32 eventId;
     union {
         ArkUI_NodeTouchEvent touchEvent;
         ArkUI_NodeComponentEvent componentEvent;
+        ArkUI_StringAsyncEvent stringEvent;
     };
 } ArkUI_NodeEvent;
 

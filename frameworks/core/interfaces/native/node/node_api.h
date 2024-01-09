@@ -23,7 +23,7 @@
 extern "C" {
 #endif
 
-#define ARKUI_NODE_API_VERSION 63
+#define ARKUI_NODE_API_VERSION 64
 
 enum ArkUINodeType {
     ARKUI_TEXT = 1,
@@ -91,6 +91,10 @@ struct ArkUINodeAsyncEvent {
     ArkUIEventCallbackArg data[ARKUI_ASYNC_EVENT_ARGS_COUNT];
 };
 
+struct ArkUIStringAsyncEvent {
+    ArkUI_CharPtr pStr;
+};
+
 struct ArkUIGestureAsyncEvent {
     ArkUI_Int32 subKind;
     ArkUI_Int32 repeat;
@@ -119,6 +123,7 @@ struct ArkUINodeEvent {
     union {
         ArkUINodeAsyncEvent componentAsyncEvent;
         ArkUIGestureAsyncEvent gestureAsyncEvent;
+        ArkUIStringAsyncEvent stringAsyncEvent;
     };
 };
 

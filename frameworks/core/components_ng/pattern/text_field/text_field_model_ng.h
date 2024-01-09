@@ -124,6 +124,9 @@ public:
     static void SetShowCounter(FrameNode* frameNode, bool value);
     static void SetShowError(FrameNode* frameNode, const std::string& errorText, bool visible);
     static void SetCounterType(FrameNode* frameNode, int32_t value);
+    static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
+    static void SetTextInputText(FrameNode* frameNode, const std::string& value);
+    static void SetTextInputPlaceHolder(FrameNode* frameNode, const std::string& placeholder);
 private:
     void AddDragFrameNodeToManager() const;
     void SetDraggable(bool draggable);

@@ -15,6 +15,7 @@
 #include "node/event_converter.h"
 
 #include "basic_node.h"
+#include "node/basic_types.h"
 #include "securec.h"
 
 #include "base/log/log_wrapper.h"
@@ -27,6 +28,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type)
     switch (type) {
         case NODE_SCROLL_EVENT:
             return ON_SCROLL;
+        case NODE_TEXT_INPUT_ON_CHANGE:
+            return ON_TEXTINPUT_CHANGE;
         default:
             return -1;
     }
@@ -37,11 +40,21 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
     switch (origin->kind) {
         case ON_SCROLL: {
             if (memcpy_sp(event->componentEvent.data, MAX_COMPONENT_EVENT_ARG_NUM, origin->componentAsyncEvent.data,
-                    MAX_COMPONENT_EVENT_ARG_NUM) != 0) {
+                MAX_COMPONENT_EVENT_ARG_NUM) != 0) {
                 TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert origin event data");
                 return false;
             }
             event->kind = NODE_SCROLL_EVENT;
+            event->eventId = origin->eventId;
+            return true;
+        }
+        case ON_TEXTINPUT_CHANGE: {
+            if (memcpy_sp(&event->stringEvent.pStr, sizeof(ArkUI_CharPtr), &origin->stringAsyncEvent.pStr,
+                sizeof(ArkUI_CharPtr)) != 0) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert origin event data");
+                return false;
+            }
+            event->kind = NODE_TEXT_INPUT_ON_CHANGE;
             event->eventId = origin->eventId;
             return true;
         }
