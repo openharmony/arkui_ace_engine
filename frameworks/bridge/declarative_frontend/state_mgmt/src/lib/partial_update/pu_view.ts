@@ -298,6 +298,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       this.localStorage_ = localStorage;
       stateMgmtConsole.debug(`${this.debugInfo()}: constructor: Using LocalStorage instance provided via @Entry.`);
     }
+    this.isCompFreezeAllowed = this.isCompFreezeAllowed || (this.parent_ && this.parent_.isCompFreezeAllowed);
 
     SubscriberManager.Add(this);
     stateMgmtConsole.debug(`${this.debugInfo()}: constructor: done`);
@@ -513,7 +514,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   protected initAllowComponentFreeze(freezeState: boolean | undefined) : void {
   // set to true if freeze parameter set for this @Component to true
     // otherwise inherit from parent @Component (if it exists).
-    this.isCompFreezeAllowed = freezeState || (this.parent_ && this.parent_.isCompFreezeAllowed);
+    this.isCompFreezeAllowed = freezeState || this.isCompFreezeAllowed;
     stateMgmtConsole.debug(`${this.debugInfo()}: @Component freezeWhenInactive state is set to ${this.isCompFreezeAllowed}`);
   }
 
