@@ -104,6 +104,14 @@ void UIExtensionModelNG::InitializeDynamicComponent(const RefPtr<FrameNode>& fra
     pattern->InitializeDynamicComponent(hapPath, abcPath, entryPoint, runtime);
 }
 
+void UIExtensionModelNG::SetOnSizeChanged(std::function<void(int32_t, int32_t)>&& onSizeChanged)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnSizeChangedCallback(std::move(onSizeChanged));
+}
+
 void UIExtensionModelNG::SetOnRemoteReady(std::function<void(const RefPtr<UIExtensionProxy>&)>&& onRemoteReady)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_dynamic_component.h"
 
+#include <cstdint>
 #include <functional>
 #include <string>
 
@@ -22,6 +23,7 @@
 #include "jsnapi.h"
 #include "native_engine.h"
 
+#include "base/log/ace_scoring_log.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/thread/task_executor.h"
@@ -48,29 +50,22 @@ void JSDynamicComponent::JSBind(BindingTarget globalObj)
     JSClass<JSDynamicComponent>::Declare("DynamicComponent");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSDynamicComponent>::StaticMethod("create", &JSDynamicComponent::Create, opt);
+    JSClass<JSDynamicComponent>::StaticMethod("onSizeChanged", &JSDynamicComponent::SetOnSizeChanged, opt);
     JSClass<JSDynamicComponent>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSDynamicComponent::Create(const JSCallbackInfo& info)
 {
-    if (!info[0]->IsObject()) {
-        LOGW("DynamicComponent arg is invalid");
+    if (info.Length() < 1 || !info[0]->IsObject()) {
+        TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "DynamicComponent argument is invalid");
         return;
     }
     auto dynamicComponentArg = JSRef<JSObject>::Cast(info[0]);
-    auto hapPath = dynamicComponentArg->GetProperty("hapPath");
-    if (!hapPath->IsString()) {
-        LOGW("hap path is invalid");
-        return;
-    }
-    auto abcPath = dynamicComponentArg->GetProperty("abcPath");
-    if (!abcPath->IsString()) {
-        LOGW("abc path is invalid");
-        return;
-    }
-    auto entryPoint = dynamicComponentArg->GetProperty("entryPoint");
-    if (!entryPoint->IsString()) {
-        LOGW("entry point is invalid");
+    auto hapPathValue = dynamicComponentArg->GetProperty("hapPath");
+    auto abcPathValue = dynamicComponentArg->GetProperty("abcPath");
+    auto entryPointValue = dynamicComponentArg->GetProperty("entryPoint");
+    if (!hapPathValue->IsString() || !abcPathValue->IsString() || !entryPointValue->IsString()) {
+        TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "DynamicComponent argument type is invalid");
         return;
     }
 
@@ -83,28 +78,49 @@ void JSDynamicComponent::Create(const JSCallbackInfo& info)
     napi_value nativeValue = hostNativeEngine->ValueToNapiValue(valueWrapper);
     Worker* worker = nullptr;
     napi_unwrap(reinterpret_cast<napi_env>(hostNativeEngine), nativeValue, reinterpret_cast<void**>(&worker));
-    LOGD("worker running=%{public}d,  worker name=%{public}s", worker->IsRunning(), worker->GetName().c_str());
-    auto hapPathStr = hapPath->ToString();
-    auto abcPathStr = abcPath->ToString();
-    auto entryPointStr = entryPoint->ToString();
+    TAG_LOGD(AceLogTag::ACE_DYNAMIC_COMPONENT, "worker running=%{public}d,  worker name=%{public}s",
+        worker->IsRunning(), worker->GetName().c_str());
+    auto hapPath = hapPathValue->ToString();
+    auto abcPath = abcPathValue->ToString();
+    auto entryPoint = entryPointValue->ToString();
 
     UIExtensionModel::GetInstance()->Create();
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto instanceId = Container::CurrentId();
 
-    worker->RegisterCallbackForWorkerEnv([instanceId, weak = AceType::WeakClaim(AceType::RawPtr(frameNode)), hapPathStr,
-                                             abcPathStr, entryPointStr](napi_env env) {
+    worker->RegisterCallbackForWorkerEnv([instanceId, weak = AceType::WeakClaim(AceType::RawPtr(frameNode)), hapPath,
+                                             abcPath, entryPoint](napi_env env) {
         ContainerScope scope(instanceId);
         auto container = Container::Current();
         container->GetTaskExecutor()->PostTask(
-            [weak, hapPathStr, abcPathStr, entryPointStr, env]() {
+            [weak, hapPath, abcPath, entryPoint, env]() {
                 auto frameNode = weak.Upgrade();
                 CHECK_NULL_VOID(frameNode);
                 UIExtensionModel::GetInstance()->InitializeDynamicComponent(
-                    frameNode, hapPathStr, abcPathStr, entryPointStr, env);
+                    frameNode, hapPath, abcPath, entryPoint, env);
             },
             TaskExecutor::TaskType::UI);
     });
+}
+
+void JSDynamicComponent::SetOnSizeChanged(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1 || !info[0]->IsFunction()) {
+        TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "OnSizeChanged argument is invalid");
+        return;
+    }
+    auto execCtx = info.GetExecutionContext();
+    auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onCardSizeChanged = [execCtx, func = std::move(jsFunc)](int32_t width, int32_t height) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("DynamicComponent.onSizeChanged");
+        JSRef<JSObject> obj = JSRef<JSObject>::New();
+        obj->SetProperty<int32_t>("width", width);
+        obj->SetProperty<int32_t>("height", height);
+        auto returnValue = JSRef<JSVal>::Cast(obj);
+        func->ExecuteJS(1, &returnValue);
+    };
+    UIExtensionModel::GetInstance()->SetOnSizeChanged(std::move(onCardSizeChanged));
 }
 } // namespace OHOS::Ace::Framework

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,17 +27,18 @@
 
 namespace OHOS::Ace::NG {
 
-class DynamicComponentRendererImpl : public DynamicComponentRenderer,
-                                     public std::enable_shared_from_this<DynamicComponentRendererImpl> {
+class DynamicComponentRendererImpl : public DynamicComponentRenderer {
+    DECLARE_ACE_TYPE(DynamicComponentRendererImpl, DynamicComponentRenderer);
+
 public:
-    DynamicComponentRendererImpl(const RefPtr<FrameNode>& host, const std::string& hapPath, const std::string& abcPath,
-        const std::string& entryPoint, void* runtime);
+    explicit DynamicComponentRendererImpl(const RefPtr<FrameNode>& host, const std::string& hapPath,
+        const std::string& abcPath, const std::string& entryPoint, void* runtime);
     ~DynamicComponentRendererImpl() override = default;
 
     void CreateContent() override;
     void DestroyContent() override;
 
-    void UpdateViewportConfig(const Ace::ViewportConfig& config, Rosen::WindowSizeChangeReason reason,
+    void UpdateViewportConfig(const ViewportConfig& config, Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) override;
 
     void TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) override;
@@ -45,7 +46,10 @@ public:
 
 private:
     RefPtr<TaskExecutor> GetTaskExecutor();
-    void AttachRenderContext(int32_t hostInstanceId);
+    RefPtr<TaskExecutor> GetHostTaskExecutor();
+
+    void AttachRenderContext();
+    void RegisterSizeChangedCallback();
 
     std::string hapPath_;
     std::string abcPath_;
@@ -53,8 +57,12 @@ private:
     std::shared_ptr<UIContent> uiContent_;
     NativeEngine* runtime_ = nullptr;
     WeakPtr<FrameNode> host_;
+    int32_t hostInstanceId_ = -1;
+
+    SizeF contentSize_;
+    bool adaptive_ = false;
+
+    ACE_DISALLOW_COPY_AND_MOVE(DynamicComponentRendererImpl);
 };
-
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_DYNAMIC_COMPONENT_DYNAMIC_COMPONENT_RENDERER_H

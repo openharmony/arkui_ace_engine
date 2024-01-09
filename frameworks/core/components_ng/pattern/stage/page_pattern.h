@@ -32,6 +32,9 @@ namespace OHOS::Ace::NG {
 
 using SharedTransitionMap = std::unordered_map<ShareId, WeakPtr<FrameNode>>;
 using JSAnimatorMap = std::unordered_map<std::string, RefPtr<Framework::AnimatorInfo>>;
+
+using DynamicPageSizeCallback = std::function<void(SizeF size)>;
+
 // PagePattern is the base class for page root render node.
 class ACE_EXPORT PagePattern : public ContentRootPattern {
     DECLARE_ACE_TYPE(PagePattern, ContentRootPattern);
@@ -169,6 +172,11 @@ public:
         return autoFillNewPasswordTriggered_;
     }
 
+    void SetDynamicPageSizeCallback(DynamicPageSizeCallback&& dynamicPageSizeCallback)
+    {
+        dynamicPageSizeCallback_ = std::move(dynamicPageSizeCallback);
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void BeforeCreateLayoutWrapper() override;
@@ -188,6 +196,7 @@ private:
     std::function<bool()> OnBackPressed_;
     std::function<void()> pageTransitionFunc_;
     std::function<void()> firstBuildCallback_;
+    DynamicPageSizeCallback dynamicPageSizeCallback_;
     std::shared_ptr<std::function<void()>> pageTransitionFinish_;
     std::list<RefPtr<PageTransitionEffect>> pageTransitionEffects_;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,34 +16,34 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_DYNAMIC_COMPONENT_RENDERER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_DYNAMIC_COMPONENT_RENDERER_H
 
-#include <cstdint>
-#include <memory>
-
 #include "interfaces/inner_api/ace/ui_content.h"
 
 #include "base/memory/ace_type.h"
-#include "base/thread/task_executor.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 
-class DynamicComponentRenderer {
+class DynamicComponentRenderer : public virtual AceType {
+    DECLARE_ACE_TYPE(DynamicComponentRenderer, AceType);
+
 public:
+    DynamicComponentRenderer() = default;
     virtual ~DynamicComponentRenderer() = default;
 
-    static std::shared_ptr<DynamicComponentRenderer> Create(const RefPtr<FrameNode>& host, const std::string& hapPath,
+    static RefPtr<DynamicComponentRenderer> Create(const RefPtr<FrameNode>& host, const std::string& hapPath,
         const std::string& abcPath, const std::string& entryPoint, void* runtime);
 
     virtual void CreateContent() = 0;
     virtual void DestroyContent() = 0;
 
-    virtual void UpdateViewportConfig(const Ace::ViewportConfig& config, Rosen::WindowSizeChangeReason reason,
+    virtual void UpdateViewportConfig(const ViewportConfig& config, Rosen::WindowSizeChangeReason reason,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) = 0;
 
     virtual void TransferPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) = 0;
     virtual void TransferKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent) = 0;
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(DynamicComponentRenderer);
 };
-
 } // namespace OHOS::Ace::NG
-
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_DYNAMIC_COMPONENT_RENDERER_H

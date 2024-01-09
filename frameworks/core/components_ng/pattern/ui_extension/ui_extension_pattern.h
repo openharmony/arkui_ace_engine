@@ -76,6 +76,18 @@ public:
         const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint, void* runtime);
     bool OnDirtyLayoutWrapperSwapForDynamicComponent(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config);
 
+    void OnSizeChanged(int32_t width, int32_t height)
+    {
+        if (onSizeChanged_) {
+            onSizeChanged_(width, height);
+        }
+    }
+
+    void SetOnSizeChangedCallback(std::function<void(int32_t, int32_t)>&& callback)
+    {
+        onSizeChanged_ = std::move(callback);
+    }
+
     // The uiextension needs inputmethod by default, and is processed by its internal actual focus node.
     bool NeedSoftKeyboard() const override
     {
@@ -207,7 +219,8 @@ private:
 
     // for DynamicComponent
     ComponentType componentType_ = ComponentType::UI_EXTENSION;
-    std::shared_ptr<DynamicComponentRenderer> dynamicComponentRenderer_;
+    RefPtr<DynamicComponentRenderer> dynamicComponentRenderer_;
+    std::function<void(int32_t, int32_t)> onSizeChanged_;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };
