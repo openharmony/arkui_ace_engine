@@ -22,6 +22,7 @@
 #include "core/common/thread_checker.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -59,7 +60,7 @@ void UITaskScheduler::RestoreGeoState()
         std::set<WeakPtr<FrameNode>> geoRestoreNodes = safeAreaManager->GetGeoRestoreNodes();
         for (auto& node : geoRestoreNodes) {
             auto frameNode = node.Upgrade();
-            if (frameNode) {
+            if (frameNode && frameNode->GetTag() != V2::PAGE_ETS_TAG) {
                 frameNode->RestoreGeoState();
             }
         }
@@ -71,6 +72,7 @@ void UITaskScheduler::ExpandSafeArea()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
     safeAreaManager->ExpandSafeArea();
 }
 
