@@ -686,14 +686,13 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
     if (onClick_) {
         auto onClick = onClick_;
         onClick(info);
-
         if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
             auto host = GetHost();
             CHECK_NULL_VOID(host);
-            auto inspectorId = host->GetInspectorIdValue("");
             auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetText();
             Recorder::EventParamsBuilder builder;
-            builder.SetId(inspectorId).SetType(host->GetTag()).SetText(text);
+            builder.SetId(host->GetInspectorIdValue("")).SetType(host->GetTag()).SetText(text)
+                .SetDescription(host->GetAutoEventParamValue(""));
             Recorder::EventRecorder::Get().OnClick(std::move(builder));
         }
     }
@@ -738,7 +737,7 @@ void TextPattern::HandleSpanSingleClickEvent(
                     item->onClick(spanClickinfo);
                     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
                         Recorder::EventParamsBuilder builder;
-                        builder.SetId(item->inspectId).SetText(item->content);
+                        builder.SetId(item->inspectId).SetText(item->content).SetDescription(item->description);
                         Recorder::EventRecorder::Get().OnClick(std::move(builder));
                     }
                     isClickOnSpan = true;

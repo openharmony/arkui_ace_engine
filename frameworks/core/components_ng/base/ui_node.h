@@ -328,6 +328,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(InspectorId, std::string);
     virtual void OnInspectorIdUpdate(const std::string& /*unused*/) {}
 
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AutoEventParam, std::string);
+    virtual void OnAutoEventParamUpdate(const std::string& /*unused*/) {}
+
     template<typename T>
     RefPtr<T> FindChildNodeOfClass()
     {

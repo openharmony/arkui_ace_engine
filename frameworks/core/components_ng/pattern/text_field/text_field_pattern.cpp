@@ -3955,7 +3955,10 @@ void TextFieldPattern::RecordSubmitEvent() const
                                           TextInputType::VISIBLE_PASSWORD
                                     : false;
     Recorder::EventParamsBuilder builder;
-    builder.SetId(inspectorId).SetType(host->GetTag()).SetEventType(Recorder::EventType::SEARCH_SUBMIT);
+    builder.SetId(inspectorId)
+        .SetType(host->GetTag())
+        .SetEventType(Recorder::EventType::SEARCH_SUBMIT)
+        .SetDescription(host->GetAutoEventParamValue(""));
     if (!isPwdType) {
         builder.SetText(contentController_->GetTextValue());
     }
