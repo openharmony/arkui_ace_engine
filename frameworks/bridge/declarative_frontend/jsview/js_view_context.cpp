@@ -28,6 +28,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/models/view_context_model_impl.h"
 #include "core/common/ace_engine.h"
+#include "core/components/common/properties/animation_option.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
@@ -118,6 +119,8 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
     pipelineContext->CloseImplicitAnimation();
     if (immediately) {
         pipelineContext->FlushMessages();
+    } else {
+        pipelineContext->RequestFrame();
     }
 }
 
@@ -134,6 +137,8 @@ void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOp
     pipelineContext->CloseImplicitAnimation();
     if (immediately) {
         pipelineContext->FlushMessages();
+    } else {
+        pipelineContext->RequestFrame();
     }
 }
 
@@ -150,12 +155,125 @@ bool CheckIfSetFormAnimationDuration(const RefPtr<PipelineBase>& pipelineContext
         option.GetDuration() > (DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContext));
 }
 
+std::function<float(float)> ParseCallBackFunction(const JSRef<JSObject>& curveObj)
+{
+    std::function<float(float)> customCallBack = nullptr;
+    JSRef<JSVal> onCallBack = curveObj->GetProperty("__curveCustomFunc");
+    if (onCallBack->IsFunction()) {
+        WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        RefPtr<JsFunction> jsFuncCallBack =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCallBack));
+        customCallBack = [func = std::move(jsFuncCallBack), id = Container::CurrentId(), node = frameNode](
+                             float time) -> float {
+            ContainerScope scope(id);
+            auto pipelineContext = PipelineContext::GetCurrentContext();
+            CHECK_NULL_RETURN(pipelineContext, 1.0f);
+            pipelineContext->UpdateCurrentActiveNode(node);
+            JSRef<JSVal> params[1];
+            params[0] = JSRef<JSVal>::Make(ToJSValue(time));
+            auto result = func->ExecuteJS(1, params);
+            return result->IsNumber() ? result->ToNumber<float>() : 1.0f;
+        };
+    }
+    return customCallBack;
+}
+
+struct KeyframeParam {
+    int32_t duration = 0;
+    RefPtr<Curve> curve;
+    std::function<void()> animationClosure;
+};
+
+AnimationOption ParseKeyframeOverallParam(const JSExecutionContext& executionContext, const JSRef<JSObject>& obj)
+{
+    JSRef<JSVal> onFinish = obj->GetProperty("onFinish");
+    AnimationOption option;
+    if (onFinish->IsFunction()) {
+        RefPtr<JsFunction> jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onFinish));
+        std::function<void()> onFinishEvent = [execCtx = executionContext, func = std::move(jsFunc),
+                            id = Container::CurrentId()]() mutable {
+            CHECK_NULL_VOID(func);
+            ContainerScope scope(id);
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            func->Execute();
+            func = nullptr;
+        };
+        option.SetOnFinishEvent(onFinishEvent);
+    }
+    auto delay = obj->GetPropertyValue<int32_t>("delay", 0);
+    auto iterations = obj->GetPropertyValue<int32_t>("iterations", 1);
+    option.SetDelay(delay);
+    option.SetIteration(iterations);
+    return option;
+}
+
+std::vector<KeyframeParam> ParseKeyframes(const JSExecutionContext& executionContext, const JSRef<JSArray>& arr)
+{
+    std::vector<KeyframeParam> params;
+    for (size_t index = 0; index != arr->Length(); ++index) {
+        if (!arr->GetValueAt(index)->IsObject()) {
+            continue;
+        }
+        auto info = JSRef<JSObject>::Cast(arr->GetValueAt(index));
+        KeyframeParam param;
+
+        auto jsEventValue = info->GetProperty("event");
+        if (!jsEventValue->IsFunction()) {
+            continue;
+        }
+        param.duration = info->GetPropertyValue<int32_t>("duration", DEFAULT_DURATION);
+        if (param.duration < 0) {
+            param.duration = 0;
+        }
+        RefPtr<JsFunction> jsFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(jsEventValue));
+        param.animationClosure = [execCtx = executionContext, func = std::move(jsFunc)]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            func->Execute();
+        };
+        auto curveArgs = info->GetProperty("curve");
+        param.curve = JSViewContext::ParseCurve(curveArgs, true);
+        params.emplace_back(param);
+    }
+    return params;
+}
 } // namespace
 
-const AnimationOption JSViewContext::CreateAnimation(
-    const JSRef<JSObject>& animationArgs, const std::function<float(float)>& jsFunc, bool isForm)
+RefPtr<Curve> JSViewContext::ParseCurve(const JSRef<JSVal>& curveArgs, bool exceptSpring)
 {
-    AnimationOption option = AnimationOption();
+    RefPtr<Curve> curve;
+    if (curveArgs->IsString()) {
+        auto curveString = curveArgs->ToString();
+        if (exceptSpring) {
+            curve = CreateCurveExceptSpring(curveString);
+        } else {
+            curve = CreateCurve(curveString);
+        }
+    } else if (curveArgs->IsObject()) {
+        JSRef<JSObject> curveObject = JSRef<JSObject>::Cast(curveArgs);
+        JSRef<JSVal> curveString = curveObject->GetProperty("__curveString");
+        if (!curveString->IsString()) {
+            return Curves::EASE_IN_OUT;
+        }
+        auto aniTimFunc = curveString->ToString();
+        std::string customFuncName(DOM_ANIMATION_TIMING_FUNCTION_CUSTOM);
+        if (aniTimFunc == customFuncName) {
+            auto customCurveFunc = ParseCallBackFunction(curveObject);
+            curve = CreateCurve(customCurveFunc);
+        } else if (exceptSpring) {
+            curve = CreateCurveExceptSpring(aniTimFunc);
+        } else {
+            curve = CreateCurve(aniTimFunc);
+        }
+    } else {
+        curve = Curves::EASE_IN_OUT;
+    }
+    return curve;
+}
+
+const AnimationOption JSViewContext::CreateAnimation(const JSRef<JSObject>& animationArgs, bool isForm)
+{
+    AnimationOption option;
     // If the attribute does not exist, the default value is used.
     auto duration = animationArgs->GetPropertyValue<int32_t>("duration", DEFAULT_DURATION);
     auto delay = animationArgs->GetPropertyValue<int32_t>("delay", 0);
@@ -168,28 +286,7 @@ const AnimationOption JSViewContext::CreateAnimation(
     auto direction = StringToAnimationDirection(animationArgs->GetPropertyValue<std::string>("playMode", "normal"));
     auto finishCallbackType = static_cast<FinishCallbackType>(
         animationArgs->GetPropertyValue<int32_t>("finishCallbackType", 0));
-    RefPtr<Curve> curve;
-    auto curveArgs = animationArgs->GetProperty("curve");
-    if (curveArgs->IsString()) {
-        curve = CreateCurve(animationArgs->GetPropertyValue<std::string>("curve",
-            DOM_ANIMATION_TIMING_FUNCTION_EASE_IN_OUT));
-    } else if (curveArgs->IsObject()) {
-        JSRef<JSVal> curveString = JSRef<JSObject>::Cast(curveArgs)->GetProperty("__curveString");
-        if (!curveString->IsString()) {
-            // Default AnimationOption which is invalid.
-            return option;
-        }
-        auto aniTimFunc = curveString->ToString();
-
-        std::string customFuncName(DOM_ANIMATION_TIMING_FUNCTION_CUSTOM);
-        if (aniTimFunc == customFuncName) {
-            curve = CreateCurve(jsFunc);
-        } else {
-            curve = CreateCurve(aniTimFunc);
-        }
-    } else {
-        curve = Curves::EASE_IN_OUT;
-    }
+    auto curve = ParseCurve(animationArgs->GetProperty("curve"));
 
     // limit animation for ArkTS Form
     if (isForm) {
@@ -228,33 +325,6 @@ const AnimationOption JSViewContext::CreateAnimation(
     option.SetFinishCallbackType(finishCallbackType);
     option.SetFrameRateRange(frameRateRange);
     return option;
-}
-
-std::function<float(float)> ParseCallBackFunction(const JSRef<JSObject>& obj)
-{
-    std::function<float(float)> customCallBack = nullptr;
-    JSRef<JSVal> curveVal = obj->GetProperty("curve");
-    if (curveVal->IsObject()) {
-        JSRef<JSObject> curveobj = JSRef<JSObject>::Cast(curveVal);
-        JSRef<JSVal> onCallBack = curveobj->GetProperty("__curveCustomFunc");
-        if (onCallBack->IsFunction()) {
-            WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-            RefPtr<JsFunction> jsFuncCallBack =
-                AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onCallBack));
-            customCallBack = [func = std::move(jsFuncCallBack), id = Container::CurrentId(), node = frameNode]
-                (float time) -> float {
-                auto pipelineContext = PipelineContext::GetCurrentContext();
-                CHECK_NULL_RETURN(pipelineContext, 1.0f);
-                pipelineContext->UpdateCurrentActiveNode(node);
-                ContainerScope scope(id);
-                JSRef<JSVal> params[1];
-                params[0] = JSRef<JSVal>::Make(ToJSValue(time));
-                auto result = func->ExecuteJS(1, params);
-                return result->IsNumber() ? result->ToNumber<float>() : 1.0f;
-            };
-        }
-    }
-    return customCallBack;
 }
 
 void JSViewContext::JSAnimation(const JSCallbackInfo& info)
@@ -303,7 +373,7 @@ void JSViewContext::JSAnimation(const JSCallbackInfo& info)
         };
     }
 
-    option = CreateAnimation(obj, ParseCallBackFunction(obj), pipelineContextBase->IsFormRender());
+    option = CreateAnimation(obj, pipelineContextBase->IsFormRender());
     if (pipelineContextBase->IsFormAnimationFinishCallback() && pipelineContextBase->IsFormRender() &&
         option.GetDuration() > (DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase))) {
         option.SetDuration(DEFAULT_DURATION - GetFormAnimationTimeInterval(pipelineContextBase));
@@ -385,8 +455,7 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
         };
     }
 
-    AnimationOption option =
-        CreateAnimation(obj, ParseCallBackFunction(obj), pipelineContext->IsFormRender());
+    AnimationOption option = CreateAnimation(obj, pipelineContext->IsFormRender());
     *traceStreamPtr << "AnimateTo, Options"
                     << " duration:" << option.GetDuration()
                     << ",iteration:" << option.GetIteration()
@@ -436,12 +505,71 @@ void JSViewContext::AnimateToInner(const JSCallbackInfo& info, bool immediately)
     }
 }
 
+void JSViewContext::JSKeyframeAnimateTo(const JSCallbackInfo& info)
+{
+    ACE_FUNCTION_TRACE();
+    auto scopedDelegate = EngineHelper::GetCurrentDelegate();
+    if (!scopedDelegate) {
+        // this case usually means there is no foreground container, need to figure out the reason.
+        return;
+    }
+    if (info.Length() < 2) {
+        return;
+    }
+    if (!info[0]->IsObject()) {
+        return;
+    }
+    if (!info[1]->IsArray()) {
+        return;
+    }
+    JSRef<JSArray> keyframeArr = JSRef<JSArray>::Cast(info[1]);
+    if (keyframeArr->Length() == 0) {
+        return;
+    }
+
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
+    auto overallAnimationOption = ParseKeyframeOverallParam(info.GetExecutionContext(), obj);
+    auto keyframes = ParseKeyframes(info.GetExecutionContext(), keyframeArr);
+    int duration = 0;
+    for (auto& keyframe : keyframes) {
+        duration += keyframe.duration;
+    }
+    overallAnimationOption.SetDuration(duration);
+    // actual curve is in keyframe, this curve will not be effective
+    overallAnimationOption.SetCurve(Curves::EASE_IN_OUT);
+    pipelineContext->FlushBuild();
+    pipelineContext->OpenImplicitAnimation(
+        overallAnimationOption, overallAnimationOption.GetCurve(), overallAnimationOption.GetOnFinishEvent());
+    for (auto& keyframe : keyframes) {
+        if (!keyframe.animationClosure) {
+            continue;
+        }
+        AceTraceBeginWithArgs("keyframe duration%d", keyframe.duration);
+        AnimationUtils::AddDurationKeyFrame(keyframe.duration, keyframe.curve, [&keyframe, &pipelineContext]() {
+            keyframe.animationClosure();
+            pipelineContext->FlushBuild();
+            if (!pipelineContext->IsLayouting()) {
+                pipelineContext->FlushUITasks();
+            } else {
+                TAG_LOGI(AceLogTag::ACE_ANIMATION, "isLayouting, maybe some layout keyframe animation not generated");
+            }
+        });
+        AceTraceEnd();
+    }
+    pipelineContext->CloseImplicitAnimation();
+}
+
 void JSViewContext::JSBind(BindingTarget globalObj)
 {
     JSClass<JSViewContext>::Declare("Context");
     JSClass<JSViewContext>::StaticMethod("animation", JSAnimation);
     JSClass<JSViewContext>::StaticMethod("animateTo", JSAnimateTo);
     JSClass<JSViewContext>::StaticMethod("animateToImmediately", JSAnimateToImmediately);
+    JSClass<JSViewContext>::StaticMethod("keyframeAnimateTo", JSKeyframeAnimateTo);
     JSClass<JSViewContext>::Bind<>(globalObj);
 }
 

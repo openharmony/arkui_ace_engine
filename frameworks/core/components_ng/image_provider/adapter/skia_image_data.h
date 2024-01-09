@@ -35,6 +35,7 @@ public:
 
     std::pair<SizeF, int32_t> Parse() const;
     RefPtr<SvgDomBase> MakeSvgDom(const std::optional<Color>& svgFillColor);
+    std::string ToString() const override;
 
 private:
     sk_sp<SkData> skData_;

@@ -158,6 +158,9 @@ public:
     ACE_WEB_EVENT_PROPERTY(OnTouchIconUrl, void);
     ACE_WEB_EVENT_PROPERTY(OnOverScroll, void);
     ACE_WEB_EVENT_PROPERTY(OnNavigationEntryCommitted, void);
+    ACE_WEB_EVENT_PROPERTY(OnSafeBrowsingCheckResult, void);
+    ACE_WEB_EVENT_PROPERTY(OnNativeEmbedLifecycleChange, void);
+    ACE_WEB_EVENT_PROPERTY(OnNativeEmbedGesture, void);
 
 private:
     std::function<void(KeyEventInfo& keyEventInfo)> propOnKeyEvent_;

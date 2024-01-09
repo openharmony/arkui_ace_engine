@@ -28,6 +28,7 @@ constexpr float CURVE_MASS = 1.0f;
 constexpr float CURVE_STIFFNESS = 328.0f;
 constexpr float CURVE_DAMPING = 36.0f;
 constexpr float MEDIUM_SIZE = 0.6f;
+constexpr float MEDIUM_SIZE_PRE = 0.5f;
 constexpr float POPUP_LARGE_SIZE = 0.9f;
 enum SheetMode {
     MEDIUM,
@@ -40,7 +41,7 @@ enum SheetType {
     SHEET_CENTER,
     SHEET_POPUP,
     SHEET_BOTTOMLANDSPACE,
-    SHEET_BOTTOMPC,
+    SHEET_BOTTOM_FREE_WINDOW,
 };
 
 struct SheetHeight {

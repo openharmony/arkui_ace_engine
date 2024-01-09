@@ -67,6 +67,7 @@
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/invert.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/components/common/properties/shadow_config.h"
 #include "core/components/theme/resource_adapter.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/view_abstract_model.h"
@@ -194,8 +195,8 @@ bool CheckJSCallbackInfo(
                 break;
         }
     }
-    if (SystemProperties::GetDebugEnabled() && !typeVerified) {
-        LOGW("%{public}s: info[0] is not a [%{public}s]", callerName.c_str(),
+    if (!typeVerified) {
+        LOGD("%{public}s: info[0] is not a [%{public}s]", callerName.c_str(),
             unrecognizedType.substr(0, unrecognizedType.size() - 1).c_str());
     }
     return typeVerified || infoTypes.size() == 0;
@@ -646,7 +647,7 @@ RefPtr<NG::ChainedTransitionEffect> ParseChainedTransition(
         auto pipelineContext = container->GetPipelineContext();
         CHECK_NULL_RETURN(pipelineContext, nullptr);
         auto animationOptionResult = std::make_shared<AnimationOption>(
-            JSViewContext::CreateAnimation(propAnimationOption, nullptr, pipelineContext->IsFormRender()));
+            JSViewContext::CreateAnimation(propAnimationOption, pipelineContext->IsFormRender()));
         // The maximum of the form-animation-playback duration value is 1000 ms.
         if (pipelineContext->IsFormRender() && pipelineContext->IsFormAnimation()) {
             auto formAnimationTimeInterval = GetFormAnimationTimeInterval(pipelineContext);
@@ -740,7 +741,6 @@ void SetPopupMessageOptions(const JSRef<JSObject> messageOptionsObj, const RefPt
         if (fontStyleValue->IsNumber()) {
             int32_t value = fontStyleValue->ToNumber<int32_t>();
             if (value < 0 || value >= static_cast<int32_t>(FONT_STYLES.size())) {
-                LOGI("Text fontStyle(%d) is invalid value", value);
                 return;
             }
             if (popupParam) {
@@ -903,39 +903,52 @@ void ParsePopupCommonParam(
 
     auto arrowWidthVal = popupObj->GetProperty("arrowWidth");
     if (!arrowWidthVal->IsNull()) {
+        bool setError = true;
         CalcDimension arrowWidth;
         if (JSViewAbstract::ParseJsDimensionVp(arrowWidthVal, arrowWidth)) {
-            if (arrowWidth.Value() > 0) {
+            if (arrowWidth.Value() > 0 && arrowWidth.Unit() != DimensionUnit::PERCENT) {
                 popupParam->SetArrowWidth(arrowWidth);
+                setError = false;
             }
         }
+        popupParam->SetErrorArrowWidth(setError);
     }
 
     auto arrowHeightVal = popupObj->GetProperty("arrowHeight");
     if (!arrowHeightVal->IsNull()) {
+        bool setError = true;
         CalcDimension arrowHeight;
         if (JSViewAbstract::ParseJsDimensionVp(arrowHeightVal, arrowHeight)) {
-            if (arrowHeight.Value() > 0) {
+            if (arrowHeight.Value() > 0 && arrowHeight.Unit() != DimensionUnit::PERCENT) {
                 popupParam->SetArrowHeight(arrowHeight);
+                setError = false;
             }
         }
+        popupParam->SetErrorArrowHeight(setError);
     }
 
     auto radiusVal = popupObj->GetProperty("radius");
     if (!radiusVal->IsNull()) {
+        bool setError = true;
         CalcDimension radius;
         if (JSViewAbstract::ParseJsDimensionVp(radiusVal, radius)) {
-            if (radius.Value() > 0) {
+            if (radius.Value() >= 0) {
                 popupParam->SetRadius(radius);
+                setError = false;
             }
         }
+        popupParam->SetErrorRadius(setError);
     }
 
-    auto shadowVal = popupObj->GetProperty("shadow");
     Shadow shadow;
-    JSViewAbstract::GetShadowFromTheme(ShadowStyle::OuterFloatingMD, shadow);
+    auto shadowVal = popupObj->GetProperty("shadow");
     if (shadowVal->IsObject() || shadowVal->IsNumber()) {
-        JSViewAbstract::ParseShadowProps(shadowVal, shadow);
+        auto ret = JSViewAbstract::ParseShadowProps(shadowVal, shadow);
+        if (!ret) {
+            JSViewAbstract::GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow);
+        }
+    } else {
+        JSViewAbstract::GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow);
     }
     popupParam->SetShadow(shadow);
 }
@@ -1195,11 +1208,13 @@ void JSViewAbstract::JsOpacity(const JSCallbackInfo& info)
     if (!ParseJsDouble(info[0], opacity)) {
         return;
     }
-
-    if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
-        opacity = 1.0;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        if (opacity > 1.0 || LessNotEqual(opacity, 0.0)) {
+            opacity = 1.0;
+        }
+    } else {
+        opacity = std::clamp(opacity, 0.0, 1.0);
     }
-
     ViewAbstractModel::GetInstance()->SetOpacity(opacity);
 }
 
@@ -1404,8 +1419,12 @@ NG::TransitionOptions JSViewAbstract::ParseJsTransition(const JSRef<JSVal>& tran
     if (jsObj->HasProperty("opacity")) {
         double opacity = 1.0;
         ParseJsDouble(jsObj->GetProperty("opacity"), opacity);
-        if (opacity > 1.0 || LessNotEqual(opacity, 0.0)) {
-            opacity = 1.0;
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            if (opacity > 1.0 || LessNotEqual(opacity, 0.0)) {
+                opacity = 1.0;
+            }
+        } else {
+            opacity = std::clamp(opacity, 0.0, 1.0);
         }
         transitionOption.UpdateOpacity(static_cast<float>(opacity));
         hasEffect = true;
@@ -1941,11 +1960,9 @@ void JSViewAbstract::JsFlexBasis(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], value)) {
         value.SetUnit(DimensionUnit::AUTO);
     }
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-        // flexbasis don't support percent case.
-        if (value.Unit() == DimensionUnit::PERCENT) {
-            value.SetUnit(DimensionUnit::AUTO);
-        }
+    // flexbasis don't support percent case.
+    if (value.Unit() == DimensionUnit::PERCENT) {
+        value.SetUnit(DimensionUnit::AUTO);
     }
     ViewAbstractModel::GetInstance()->SetFlexBasis(value);
 }
@@ -2104,26 +2121,33 @@ void JSViewAbstract::JsBackgroundColor(const JSCallbackInfo& info)
 void JSViewAbstract::JsBackgroundImage(const JSCallbackInfo& info)
 {
     std::string src;
-    if (info[0]->IsString()) {
-        src = info[0]->ToString();
-    } else if (!ParseJsMedia(info[0], src)) {
-        return;
-    }
     std::string bundle;
     std::string module;
+    RefPtr<PixelMap> pixmap = nullptr;
     GetJsMediaBundleInfo(info[0], bundle, module);
+    if (info[0]->IsString()) {
+        src = info[0]->ToString();
+        ViewAbstractModel::GetInstance()->SetBackgroundImage(
+            ImageSourceInfo { src, bundle, module }, GetThemeConstants());
+    } else if (ParseJsMedia(info[0], src)) {
+        ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo { src, bundle, module }, nullptr);
+    } else {
+#if defined(PIXEL_MAP_SUPPORTED)
+        if (IsDrawable(info[0])) {
+            pixmap = GetDrawablePixmap(info[0]);
+        } else {
+            pixmap = CreatePixelMapFromNapiValue(info[0]);
+        }
+#endif
+        CHECK_NULL_VOID(pixmap);
+        ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo { pixmap }, nullptr);
+    }
 
     int32_t repeatIndex = 0;
     if (info.Length() == 2 && info[1]->IsNumber()) {
         repeatIndex = info[1]->ToNumber<int32_t>();
     }
     auto repeat = static_cast<ImageRepeat>(repeatIndex);
-    if (info[0]->IsString()) {
-        ViewAbstractModel::GetInstance()->SetBackgroundImage(
-            ImageSourceInfo { src, bundle, module }, GetThemeConstants());
-    } else {
-        ViewAbstractModel::GetInstance()->SetBackgroundImage(ImageSourceInfo { src, bundle, module }, nullptr);
-    }
     ViewAbstractModel::GetInstance()->SetBackgroundImageRepeat(repeat);
 }
 
@@ -2538,7 +2562,6 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
             AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAppearValue));
         auto onAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAppearFunc), node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            LOGI("About to call onAppear method.");
             ACE_SCORING_EVENT("onAppear");
             PipelineContext::SetCallBackNode(node);
             func->Execute();
@@ -2553,7 +2576,6 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
         auto onDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc),
                                node = frameNode]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
-            LOGI("About to call onDisappear method.");
             ACE_SCORING_EVENT("onDisappear");
             PipelineContext::SetCallBackNode(node);
             func->Execute();
@@ -4180,6 +4202,10 @@ bool JSViewAbstract::ParseJsShadowColorStrategy(const JSRef<JSVal>& jsValue, Sha
 
 bool JSViewAbstract::ParseJsSymbolId(const JSRef<JSVal>& jsValue, std::uint32_t& symbolId)
 {
+    if (jsValue->IsNull() || jsValue->IsUndefined()) {
+        symbolId = 0;
+        return false;
+    }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     JSRef<JSVal> resId = jsObj->GetProperty("id");
     if (resId->IsNull() || !resId->IsNumber()) {
@@ -4193,7 +4219,6 @@ bool JSViewAbstract::ParseJsSymbolId(const JSRef<JSVal>& jsValue, std::uint32_t&
     if (!resourceWrapper) {
         return false;
     }
-    
     auto symbol = resourceWrapper->GetSymbolById(resId->ToNumber<uint32_t>());
     if (!symbol) {
         return false;
@@ -5686,7 +5711,43 @@ void JSViewAbstract::JsAccessibilityText(const std::string& text)
 
 void JSViewAbstract::JsAccessibilityDescription(const std::string& description)
 {
-    ViewAbstractModel::GetInstance()->SetAccessibilityDescription(description);
+    std::pair<bool, std::string> autoEventPair(false, "");
+    std::pair<bool, std::string> descriptionPair(false, "");
+    ParseAccessibilityDescriptionJson(description, autoEventPair, descriptionPair);
+    if (descriptionPair.first) {
+        ViewAbstractModel::GetInstance()->SetAccessibilityDescription(descriptionPair.second);
+    } else {
+        ViewAbstractModel::GetInstance()->SetAccessibilityDescription(description);
+    }
+    if (autoEventPair.first) {
+        ViewAbstractModel::GetInstance()->SetAutoEventParam(autoEventPair.second);
+    }
+}
+
+void JSViewAbstract::ParseAccessibilityDescriptionJson(const std::string& description,
+    std::pair<bool, std::string>& autoEventPair, std::pair<bool, std::string>& descriptionPair)
+{
+    if (description.empty()) {
+        return;
+    }
+    if (!StartWith(description, "{") || !EndWith(description, "}")) {
+        return;
+    }
+    auto jsonObj = JsonUtil::ParseJsonString(description);
+    if (!jsonObj || !jsonObj->IsValid() || !jsonObj->IsObject()) {
+        return;
+    }
+    if (jsonObj->Contains("$autoEventParam")) {
+        auto param = jsonObj->GetValue("$autoEventParam");
+        if (param) {
+            autoEventPair = std::make_pair(true, param->ToString());
+        }
+    }
+    if (jsonObj->Contains("$accessibilityDescription")) {
+        descriptionPair = std::make_pair(true, jsonObj->GetString("$accessibilityDescription"));
+    } else if (jsonObj->Contains("$autoEventParam")) {
+        descriptionPair = std::make_pair(true, "");
+    }
 }
 
 void JSViewAbstract::JsAccessibilityImportance(const std::string& importance)
@@ -6079,7 +6140,7 @@ bool JSViewAbstract::ParseSheetBackgroundBlurStyle(const JSRef<JSVal>& args, Blu
     if (args->IsNumber()) {
         auto sheetBlurStyle = args->ToNumber<int32_t>();
         if (sheetBlurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
-            sheetBlurStyle <= static_cast<int>(BlurStyle::BACKGROUND_ULTRA_THICK)) {
+            sheetBlurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
             blurStyleOptions.blurStyle = static_cast<BlurStyle>(sheetBlurStyle);
         } else {
             return false;
@@ -6933,7 +6994,6 @@ bool JSViewAbstract::ParseDataDetectorConfig(
         JSRef<JSVal> value = array->GetValueAt(i);
         auto index = value->ToNumber<int32_t>();
         if (index < 0 || index >= static_cast<int32_t>(TEXT_DETECT_TYPES.size())) {
-            LOGI("Text detect types(%d) is invalid value", index);
             return false;
         }
         if (i != 0) {
@@ -6977,8 +7037,6 @@ void JSViewAbstract::GetJsAngle(
         angle = static_cast<float>(StringUtils::StringToDegree(value->ToString()));
     } else if (value->IsNumber()) {
         angle = value->ToNumber<float>();
-    } else {
-        LOGE("Invalid value type");
     }
 }
 

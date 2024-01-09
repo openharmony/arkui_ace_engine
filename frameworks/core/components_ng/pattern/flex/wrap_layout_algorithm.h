@@ -102,17 +102,14 @@ private:
     void GetFlexItemProperties(const ContentInfo& content, FlexItemProperties& flexItemProperties);
     void CalcFlexGrowLayout(
         const RefPtr<LayoutWrapper>& itemWrapper, const FlexItemProperties& flexItemProperties, float remainSpace);
-    bool UserDefinedCrossAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const;
 
     WrapDirection direction_ = WrapDirection::VERTICAL;
-    FlexDirection flexDirection_ = FlexDirection::ROW;
     WrapAlignment alignment_ = WrapAlignment::START;
     WrapAlignment mainAlignment_ = WrapAlignment::START;
     WrapAlignment crossAlignment_ = WrapAlignment::START;
 
     bool isHorizontal_ = true;
     bool isReverse_ = false;
-    bool isFlexReverse_ = false;
     bool isDialogStretch_ = false;
     float totalMainLength_ = 0.0f;
     float totalCrossLength_ = 0.0f;

@@ -56,6 +56,7 @@ public:
     }
 
     CanvasDrawFunction GetForegroundDrawFunction(PaintWrapper* paintWrapper) override;
+    void PaintDividerLines(RSCanvas& canvas, RectF contentRect, double dividerHeight);
 
 private:
     double defaultPickerItemHeight_ = 0.0;

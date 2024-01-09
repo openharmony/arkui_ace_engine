@@ -76,7 +76,7 @@ public:
             theme->backgroundColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, theme->backgroundColor_);
             theme->fontSize_ = pattern->GetAttr<Dimension>(PATTERN_TEXT_SIZE, 14.0_fp);
             theme->buttonFontSize_ = pattern->GetAttr<Dimension>(POPUP_BUTTON_TEXT_FONT_SIZE, 14.0_fp);
-            theme->fontColor_ = pattern->GetAttr<Color>("text_primary_color", Color::WHITE);
+            theme->fontColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, Color::WHITE);
             theme->buttonHoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, Color());
             theme->buttonPressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, Color());
             theme->focusColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_FOCUSED, Color());
@@ -91,6 +91,7 @@ public:
             theme->popupOuterBorderColor_ = pattern->GetAttr<Color>("popup_outer_border_color", Color::TRANSPARENT);
             theme->popupInnerBorderColor_ = pattern->GetAttr<Color>("popup_inner_border_color", Color::TRANSPARENT);
             theme->buttonFontColor_ = pattern->GetAttr<Color>("text_primary_activated_color", Color::WHITE);
+            theme->fontPrimaryColor_ = pattern->GetAttr<Color>("text_primary_color", Color::WHITE);
             theme->fontSecondaryColor_ = pattern->GetAttr<Color>("text_secondary_color", Color::WHITE);
         }
     };
@@ -275,6 +276,11 @@ public:
         return buttonFontColor_;
     }
 
+    Color GetFontPrimaryColor() const
+    {
+        return fontPrimaryColor_;
+    }
+
     Color GetFontSecondaryColor() const
     {
         return fontSecondaryColor_;
@@ -291,7 +297,7 @@ private:
     Color buttonBackgroundColor_ = Color::TRANSPARENT;
     Color buttonPressColor_ = Color(0x1affffff);
     Color focusColor_ = Color::WHITE;
-    uint32_t popupDoubleBorderEnable_ = 0;
+    int32_t popupDoubleBorderEnable_ = 0;
     Color popupOuterBorderColor_ = Color::TRANSPARENT;
     Color popupInnerBorderColor_ = Color::TRANSPARENT;
 
@@ -321,6 +327,7 @@ private:
     float opacityHover_ = 0.05f;
     float opacityPress_ = 0.1f;
     Color buttonFontColor_;
+    Color fontPrimaryColor_;
     Color fontSecondaryColor_;
 };
 

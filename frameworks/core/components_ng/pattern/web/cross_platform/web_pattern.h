@@ -330,12 +330,10 @@ public:
     void SetFullScreenExitHandler(const std::shared_ptr<FullScreenEnterEvent>& fullScreenExitHandler);
     void UpdateJavaScriptOnDocumentStart();
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems);
-#ifdef ENABLE_DRAG_FRAMEWORK
     bool NotifyStartDragTask();
     bool IsImageDrag();
     DragRet GetDragAcceptableStatus();
     Offset GetDragOffset() const;
-#endif
     void SetLayoutMode(WebLayoutMode mode)
     {
         layoutMode_ = mode;
@@ -441,7 +439,6 @@ private:
     void InitScrollUpdateListener();
     void CalculateHorizontalDrawRect(const SizeF frameSize);
     void CalculateVerticalDrawRect(const SizeF frameSize);
-#ifdef ENABLE_DRAG_FRAMEWORK
     void InitCommonDragDropEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitWebEventHubDragDropStart(const RefPtr<WebEventHub>& eventHub);
     void InitWebEventHubDragDropEnd(const RefPtr<WebEventHub>& eventHub);
@@ -458,7 +455,6 @@ private:
     void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDragLeave(int32_t x, int32_t y);
     void HandleOnDragEnd(int32_t x, int32_t y);
-#endif
     int onDragMoveCnt = 0;
     std::chrono::time_point<std::chrono::system_clock> firstMoveInTime;
     std::chrono::time_point<std::chrono::system_clock> preMoveInTime;

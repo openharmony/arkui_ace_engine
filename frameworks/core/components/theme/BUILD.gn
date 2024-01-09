@@ -36,19 +36,11 @@ template("ace_core_components_theme_set") {
     subsystem_name = ace_engine_subsystem
     part_name = ace_engine_part
     defines += invoker.defines
-    configs = [
-      "$ace_root:ace_config",
-      "$ace_flutter_engine_root:flutter_config",
-    ]
+    configs = [ "$ace_root:ace_config" ]
     deps = [
       ":build_theme_code",
-      "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform",
       "$skia_root_new:skia_$platform",
     ]
-
-    if (enable_graphic_text_gine) {
-      deps -= [ "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform" ]
-    }
 
     sources = [
       "$root_out_dir/arkui/framework/core/components/theme/theme_constants_default.cpp",

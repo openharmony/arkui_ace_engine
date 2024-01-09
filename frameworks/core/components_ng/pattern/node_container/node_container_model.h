@@ -28,8 +28,10 @@ public:
     virtual void Create() = 0;
     virtual void SetMakeFunction(std::function<RefPtr<NG::UINode>()>&& makeFunc) = 0;
     virtual void SetOnResize(std::function<void(const NG::SizeF& size)>&& resizeFunc) = 0;
+    virtual void SetOnTouchEvent(TouchEventFunc &&touchEventFunc) = 0;
     virtual void BindController(std::function<void()>&& resetFunc) = 0;
     virtual void ResetController() = 0;
+    virtual void FireMakeNode() = 0;
 
 private:
     static std::unique_ptr<NodeContainerModel> instance_;

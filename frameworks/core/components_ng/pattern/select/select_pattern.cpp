@@ -152,8 +152,12 @@ void SelectPattern::ShowSelectMenu()
     }
     
     auto offset = GetHost()->GetPaintRectOffset();
-    offset.AddY(selectSize_.Height() + CALIBERATE_Y.ConvertToPx());
-    offset.AddX(-CALIBERATE_X.ConvertToPx());
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        offset.AddY(selectSize_.Height() + CALIBERATE_Y.ConvertToPx());
+        offset.AddX(-CALIBERATE_X.ConvertToPx());
+    } else {
+        offset.AddY(selectSize_.Height());
+    }
     
     overlayManager->ShowMenu(GetHost()->GetId(), offset, menuWrapper_);
 }
@@ -302,7 +306,11 @@ void SelectPattern::CreateSelectedCallback()
         if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
             auto inspectorId = host->GetInspectorId().value_or("");
             Recorder::EventParamsBuilder builder;
-            builder.SetId(inspectorId).SetType(host->GetTag()).SetIndex(index).SetText(value);
+            builder.SetId(inspectorId)
+                .SetType(host->GetTag())
+                .SetIndex(index)
+                .SetText(value)
+                .SetDescription(host->GetAutoEventParamValue(""));
             Recorder::EventRecorder::Get().OnChange(std::move(builder));
             if (!inspectorId.empty()) {
                 Recorder::NodeDataCache::Get().PutMultiple(inspectorId, value, index);
@@ -480,7 +488,7 @@ void SelectPattern::SetValue(const std::string& value)
 
 void SelectPattern::SetFontSize(const Dimension& value)
 {
-    if (value.IsNonPositive()) {
+    if (value.IsNegative()) {
         return;
     }
     auto props = text_->GetLayoutProperty<TextLayoutProperty>();

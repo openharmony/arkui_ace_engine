@@ -23,6 +23,7 @@
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "bridge/declarative_frontend/jsview/js_navigation.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
@@ -143,6 +144,27 @@ void JSNavDestination::SetTitle(const JSCallbackInfo& info)
     }
 }
 
+void JSNavDestination::SetBackButtonIcon(const JSCallbackInfo& info)
+{
+    // srcType、pixmap、string
+    if (info.Length() < 1) {
+        return;
+    }
+    std::string src;
+    auto noPixMap = ParseJsMedia(info[0], src);
+
+    RefPtr<PixelMap> pixMap = nullptr;
+#if defined(PIXEL_MAP_SUPPORTED)
+    if (!noPixMap) {
+        pixMap = CreatePixelMapFromNapiValue(info[0]);
+    }
+#endif
+    std::string bundleName;
+    std::string moduleName;
+    GetJsMediaBundleInfo(info[0], bundleName, moduleName);
+    NavDestinationModel::GetInstance()->SetBackButtonIcon(src, noPixMap, pixMap, bundleName, moduleName);
+}
+
 void JSNavDestination::SetOnShown(const JSCallbackInfo& info)
 {
     if (!info[0]->IsFunction()) {
@@ -212,6 +234,7 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("create", &JSNavDestination::Create);
     JSClass<JSNavDestination>::StaticMethod("title", &JSNavDestination::SetTitle);
     JSClass<JSNavDestination>::StaticMethod("hideTitleBar", &JSNavDestination::SetHideTitleBar);
+    JSClass<JSNavDestination>::StaticMethod("backButtonIcon", &JSNavDestination::SetBackButtonIcon);
     JSClass<JSNavDestination>::StaticMethod("onShown", &JSNavDestination::SetOnShown);
     JSClass<JSNavDestination>::StaticMethod("onHidden", &JSNavDestination::SetOnHidden);
     JSClass<JSNavDestination>::StaticMethod("onBackPressed", &JSNavDestination::SetOnBackPressed);
@@ -220,6 +243,7 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSNavDestination>::StaticMethod("id", &JSViewAbstract::JsId);
     JSClass<JSNavDestination>::StaticMethod("mode", &JSNavDestination::SetMode);
+    JSClass<JSNavDestination>::StaticMethod("expandSafeArea", &JSNavigation::JsExpandSafeArea);
     JSClass<JSNavDestination>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

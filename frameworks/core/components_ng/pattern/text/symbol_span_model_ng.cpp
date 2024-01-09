@@ -53,6 +53,22 @@ void SymbolSpanModelNG::SetFontWeight(Ace::FontWeight value)
     ACE_UPDATE_SYMBOL_SPAN_PROPERTY(FontWeight, value, PropertyInfo::FONTWEIGHT);
 }
 
+void SymbolSpanModelNG::SetFontColor(std::vector<Color>& symbolColor)
+{
+    ACE_UPDATE_SYMBOL_SPAN_PROPERTY(SymbolColorList, symbolColor, PropertyInfo::SYMBOL_COLOR);
+}
+
+void SymbolSpanModelNG::SetSymbolRenderingStrategy(const uint32_t renderingStrategy)
+{
+    ACE_UPDATE_SYMBOL_SPAN_PROPERTY(SymbolRenderingStrategy, renderingStrategy,
+        PropertyInfo::SYMBOL_RENDERING_STRATEGY);
+}
+
+void SymbolSpanModelNG::SetSymbolEffect(const uint32_t effectStrategy)
+{
+    ACE_UPDATE_SYMBOL_SPAN_PROPERTY(SymbolEffectStrategy, effectStrategy, PropertyInfo::SYMBOL_EFFECT_STRATEGY);
+}
+
 void SymbolSpanModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)
 {
     auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);

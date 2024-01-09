@@ -78,6 +78,12 @@ private:
     void PaintRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
     void PaintRingBackground(RSCanvas& canvas, const RingProgressData& ringProgressData) const;
     void PaintRingProgressOrShadow(RSCanvas& canvas, const RingProgressData& ringProgressData, bool isShadow) const;
+    void PaintWhole(RSCanvas& canvas, RSBrush& brush, const RingProgressData& ringProgressData,
+        std::vector<GradientColor>& gradientColor) const;
+    void PaintBeginHalf(RSCanvas& canvas, RSBrush& brush, const RingProgressData& ringProgressData,
+        std::vector<GradientColor>& gradientColors) const;
+    void PaintEndHalf(RSCanvas& canvas, RSBrush& brush, const RingProgressData& ringProgressData,
+        std::vector<GradientColor>& gradientColors) const;
     void PaintRingSweeping(RSCanvas& canvas, const RingProgressData& ringProgressData) const;
     void PaintTrailing(RSCanvas& canvas, const RingProgressData& ringProgressData) const;
     void PaintScaleRing(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
@@ -104,8 +110,7 @@ private:
     void StopRingLoadingHeadAnimation();
     void StopRingLoadingTailAnimation();
     float CalcRingProgressAdditionalAngle() const;
-    float TrailingCoefficient(float base, uint32_t index, uint32_t totalPoints) const;
-    Color GenerateTrailingPointColor(const Color& headColor, uint32_t index, uint32_t totalPoints) const;
+    std::vector<GradientColor> GetRingProgressGradientColors() const;
     void GenerateLinearSweepingGradientInfo(std::vector<RSColorQuad>& colors, std::vector<float>& pos) const;
     void GenerateRingSweepingGradientInfo(std::vector<RSColorQuad>& colors, std::vector<float>& pos) const;
     Gradient CreateCapsuleGradient() const;

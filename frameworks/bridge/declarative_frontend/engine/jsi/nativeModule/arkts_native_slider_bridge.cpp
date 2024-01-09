@@ -14,7 +14,7 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_slider_bridge.h"
 
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"

@@ -390,9 +390,9 @@ private:
     void UpdateIndicatorCurrentOffset(float offset);
 
     void GetInnerFocusPaintRect(RoundRect& paintRect);
-    void PaintFocusState();
+    void PaintFocusState(bool needMarkDirty = true);
     void FocusIndexChange(int32_t index);
-    void UpdateGradientRegions();
+    void UpdateGradientRegions(bool needMarkDirty = true);
 
     float GetSpace(int32_t indicator);
     float CalculateFrontChildrenMainSize(int32_t indicator);
@@ -412,6 +412,9 @@ private:
     void GetIndicatorStyle(IndicatorStyle& indicatorStyle);
     float GetLeftPadding() const;
     void HandleBottomTabBarAnimation(int32_t index);
+    void TriggerTranslateAnimation(
+        const RefPtr<TabBarLayoutProperty>& layoutProperty, int32_t index, int32_t indicator);
+    void UpdatePaintIndicator(int32_t indicator, bool needMarkDirty);
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -467,6 +470,7 @@ private:
     bool changeByClick_ = false;
     bool needSetCentered_ = false;
     float scrollMargin_ = 0.0f;
+    bool isFirstLayout_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
 };
 } // namespace OHOS::Ace::NG

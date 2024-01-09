@@ -21,15 +21,16 @@
 #include "ability_context.h"
 #include "ability_info.h"
 #include "configuration.h"
-#include "init_data.h"
 #include "ipc_skeleton.h"
 #include "js_runtime_utils.h"
 #include "locale_config.h"
 #include "native_reference.h"
+#include "ohos/init_data.h"
 #include "service_extension_context.h"
 #include "wm_common.h"
 
 #include "base/log/log_wrapper.h"
+#include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/property/safe_area_insets.h"
 
@@ -71,7 +72,10 @@
 #include "core/common/modal_ui_extension.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/resource/resource_manager.h"
+#include "core/components_ng/base/inspector.h"
+#include "core/components_ng/base/view_abstract.h"
 #include "core/image/image_file_cache.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #ifdef FORM_SUPPORTED
 #include "core/common/form_manager.h"
 #endif
@@ -79,9 +83,6 @@
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/common/plugin_manager.h"
 #endif
-#include "core/components_ng/base/inspector.h"
-#include "core/components_ng/base/view_abstract.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #ifdef NG_BUILD
 #include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 #endif
@@ -196,16 +197,24 @@ public:
         double positionY = info->textFieldPositionY_;
         double height = info->textFieldHeight_;
         Rect keyboardRect = Rect(rect.posX_, rect.posY_, rect.width_, rect.height_);
-        LOGI("UIContent OccupiedAreaChange rect:%{public}s type: %{public}d", keyboardRect.ToString().c_str(), type);
+        LOGI("UIContent OccupiedAreaChange rect:%{public}s type: %{public}d, positionY:%{public}f, height:%{public}f",
+            keyboardRect.ToString().c_str(), type, positionY, height);
         if (type == OHOS::Rosen::OccupiedAreaType::TYPE_INPUT) {
             auto container = Platform::AceContainer::GetContainer(instanceId_);
             CHECK_NULL_VOID(container);
             auto taskExecutor = container->GetTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);
+            auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_VOID(context);
+            auto uiExtMgr = context->GetUIExtensionManager();
+            if (uiExtMgr && uiExtMgr->NotifyOccupiedAreaChangeInfo(info)) {
+                return;
+            }
+            auto curWindow = context->GetCurrentWindowRect();
+            positionY -= curWindow.Top();
             ContainerScope scope(instanceId_);
             taskExecutor->PostTask(
-                [container, keyboardRect, rsTransaction, positionY, height] {
-                    auto context = container->GetPipelineContext();
+                [context, keyboardRect, rsTransaction, positionY, height] {
                     CHECK_NULL_VOID(context);
                     context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, rsTransaction);
                 },
@@ -224,7 +233,7 @@ public:
 
     void OnAvoidAreaChanged(const OHOS::Rosen::AvoidArea avoidArea, OHOS::Rosen::AvoidAreaType type) override
     {
-        LOGI("UIContent OnAvoidAreaChanged type:%{public}d, topRect: avoidArea:x:%{public}d, y:%{public}d, "
+        LOGD("Avoid area changed, type:%{public}d, topRect: avoidArea:x:%{public}d, y:%{public}d, "
              "width:%{public}d, height%{public}d; bottomRect: avoidArea:x:%{public}d, y:%{public}d, "
              "width:%{public}d, height%{public}d",
             type, avoidArea.topRect_.posX_, avoidArea.topRect_.posY_, (int32_t)avoidArea.topRect_.width_,
@@ -236,27 +245,23 @@ public:
         CHECK_NULL_VOID(pipeline);
         auto taskExecutor = container->GetTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);
-        switch (type) {
-            case Rosen::AvoidAreaType::TYPE_SYSTEM:
-                systemSafeArea_ = ConvertAvoidArea(avoidArea);
-                break;
-            case Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR:
-                navigationBar_ = ConvertAvoidArea(avoidArea);
-                break;
-            default:
-                // cutout doesn't affect layout
-                return;
+        if (type == Rosen::AvoidAreaType::TYPE_SYSTEM) {
+            systemSafeArea_ = ConvertAvoidArea(avoidArea);
+        } else if (type == Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
+            navigationBar_ = ConvertAvoidArea(avoidArea);
         }
         auto safeArea = systemSafeArea_;
         auto navSafeArea = navigationBar_;
         ContainerScope scope(instanceId_);
         taskExecutor->PostTask(
-            [pipeline, safeArea, navSafeArea, type] {
+            [pipeline, safeArea, navSafeArea, type, avoidArea] {
                 if (type == Rosen::AvoidAreaType::TYPE_SYSTEM) {
                     pipeline->UpdateSystemSafeArea(safeArea);
-                } else {
+                } else if (type == Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR) {
                     pipeline->UpdateNavSafeArea(navSafeArea);
                 }
+                // for ui extension component
+                pipeline->UpdateOriginAvoidArea(avoidArea, static_cast<uint32_t>(type));
             },
             TaskExecutor::TaskType::UI);
     }
@@ -321,9 +326,6 @@ public:
                 action = DragEventAction::DRAG_EVENT_START;
                 break;
         }
-#ifndef ENABLE_DRAG_FRAMEWORK
-        aceView->ProcessDragEvent(x, y, action);
-#endif // ENABLE_DRAG_FRAMEWORK
     }
 
 private:
@@ -371,7 +373,7 @@ public:
         taskExecutor->PostTask(
             [instanceId = instanceId_] {
                 SubwindowManager::GetInstance()->ClearMenu();
-                SubwindowManager::GetInstance()->ClearMenuNG(instanceId, false, true);
+                SubwindowManager::GetInstance()->ClearMenuNG(instanceId, true, true);
                 SubwindowManager::GetInstance()->ClearPopupInSubwindow(instanceId);
             },
             TaskExecutor::TaskType::UI);
@@ -385,6 +387,10 @@ UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runti
 {
     CHECK_NULL_VOID(context);
     context_ = context->weak_from_this();
+    bundleName_ = context->GetBundleName();
+    auto hapModuleInfo = context->GetHapModuleInfo();
+    CHECK_NULL_VOID(hapModuleInfo);
+    moduleName_ = hapModuleInfo->name;
 }
 
 UIContentImpl::UIContentImpl(OHOS::AbilityRuntime::Context* context, void* runtime, bool isCard)
@@ -482,14 +488,23 @@ void UIContentImpl::InitializeByName(OHOS::Rosen::Window* window, const std::str
     InitializeInner(window, name, storage, true);
 }
 
-void UIContentImpl::InitializeDynamic(const std::string& hapPath, const std::string& abcPath)
+void UIContentImpl::InitializeDynamic(
+    const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint)
 {
     isDynamicRender_ = true;
     hapPath_ = hapPath;
     auto env = reinterpret_cast<napi_env>(runtime_);
     CHECK_NULL_VOID(env);
     taskWrapper_ = std::make_shared<NG::UVTaskWrapperImpl>(env);
-    InitializeInner(nullptr, abcPath, nullptr, false);
+
+    CommonInitializeForm(nullptr, abcPath, nullptr);
+
+    LOGI("Initialize DynamicComponent startUrl = %{public}s, entryPoint = %{public}s", startUrl_.c_str(),
+        entryPoint.c_str());
+    Platform::AceContainer::RunDynamicPage(instanceId_, startUrl_, "", entryPoint);
+    auto distributedUI = std::make_shared<NG::DistributedUI>();
+    uiManager_ = std::make_unique<DistributedUIManager>(instanceId_, distributedUI);
+    Platform::AceContainer::GetContainer(instanceId_)->SetDistributedUI(distributedUI);
 }
 
 void UIContentImpl::Initialize(
@@ -1371,6 +1386,7 @@ void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& con
         window_->RegisterAvoidAreaChangeListener(avoidAreaChangedListener_);
         pipeline->UpdateSystemSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_SYSTEM));
         pipeline->UpdateCutoutSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_CUTOUT));
+        pipeline->UpdateNavSafeArea(container->GetViewSafeAreaByType(Rosen::AvoidAreaType::TYPE_NAVIGATION_INDICATOR));
     }
 }
 
@@ -1392,7 +1408,7 @@ void UIContentImpl::InitializeDisplayAvailableRect(const RefPtr<Platform::AceCon
 
 void UIContentImpl::Foreground()
 {
-    LOGI("UIContentImpl: window foreground");
+    LOGI("[%{public}s][%{public}s]: window foreground", bundleName_.c_str(), moduleName_.c_str());
     Platform::AceContainer::OnShow(instanceId_);
     // set the flag isForegroundCalled to be true
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -1408,7 +1424,7 @@ void UIContentImpl::Foreground()
 
 void UIContentImpl::Background()
 {
-    LOGI("UIContentImpl: window background");
+    LOGI("[%{public}s][%{public}s]: window background", bundleName_.c_str(), moduleName_.c_str());
     Platform::AceContainer::OnHide(instanceId_);
 
     CHECK_NULL_VOID(window_);
@@ -1428,11 +1444,19 @@ void UIContentImpl::ReloadForm(const std::string& url)
     Platform::AceContainer::RunPage(instanceId_, startUrl_, "");
 }
 
+SerializedGesture UIContentImpl::GetFormSerializedGesture()
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, SerializedGesture{});
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, SerializedGesture{});
+    return pipelineContext->GetSerializedGesture();
+}
+
 void UIContentImpl::Focus()
 {
-    LOGI("UIContentImpl: window focus");
+    LOGI("%{public}s window focus", bundleName_.c_str());
     Platform::AceContainer::OnActive(instanceId_);
-
     CHECK_NULL_VOID(window_);
     std::string windowName = window_->GetWindowName();
     Recorder::EventRecorder::Get().SetFocusContainerInfo(windowName, instanceId_);
@@ -1440,14 +1464,13 @@ void UIContentImpl::Focus()
 
 void UIContentImpl::UnFocus()
 {
-    LOGI("UIContentImpl: window unFocus");
+    LOGI("%{public}s window unfocus", bundleName_.c_str());
     Platform::AceContainer::OnInactive(instanceId_);
 }
 
 void UIContentImpl::Destroy()
 {
-    LOGI("UIContentImpl: window destroy");
-
+    LOGI("%{public}s window destroy", bundleName_.c_str());
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     // stop performance check and output json file
@@ -1532,6 +1555,12 @@ bool UIContentImpl::ProcessBackPressed()
     CHECK_NULL_RETURN(container, false);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(pipeline, false);
+    auto uiExtMgr = pipeline->GetUIExtensionManager();
+    if (uiExtMgr && uiExtMgr->OnBackPressed()) {
+        return true;
+    }
     bool ret = false;
     taskExecutor->PostSyncTask(
         [container, this, &ret]() {
@@ -1564,11 +1593,29 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
             "WindowName = %{public}s, WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
             "ViewPosX = %{public}d, ViewPosY = %{public}d",
             pointerEvent->GetId(), container->GetWindowName().c_str(), container->GetWindowId(),
-            container->GetViewWidth(), container->GetViewHeight(), container->GetViewPosX(),
-            container->GetViewPosY());
+            container->GetViewWidth(), container->GetViewHeight(), container->GetViewPosX(), container->GetViewPosY());
     }
-    auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    auto* aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
     Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent);
+    return true;
+}
+
+bool UIContentImpl::ProcessPointerEventWithCallback(
+    const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, const std::function<void()>& callback)
+{
+    auto container = AceType::DynamicCast<Platform::AceContainer>(AceEngine::Get().GetContainer(instanceId_));
+    CHECK_NULL_RETURN(container, false);
+    container->SetCurPointerEvent(pointerEvent);
+    if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
+        TAG_LOGI(AceLogTag::ACE_INPUTTRACKING,
+            "PointerEvent Process to ui_content, eventInfo: id:%{public}d, "
+            "WindowName = %{public}s, WindowId = %{public}d, ViewWidth = %{public}d, ViewHeight = %{public}d, "
+            "ViewPosX = %{public}d, ViewPosY = %{public}d",
+            pointerEvent->GetId(), container->GetWindowName().c_str(), container->GetWindowId(),
+            container->GetViewWidth(), container->GetViewHeight(), container->GetViewPosX(), container->GetViewPosY());
+    }
+    auto* aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    Platform::AceViewOhos::DispatchTouchEvent(aceView, pointerEvent, nullptr, callback);
     return true;
 }
 
@@ -1581,7 +1628,7 @@ bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& 
         touchEvent->GetId(), touchEvent->GetKeyCode(), touchEvent->GetKeyAction(), touchEvent->GetActionTime());
     auto container = AceEngine::Get().GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
-    auto aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
+    auto* aceView = static_cast<Platform::AceViewOhos*>(container->GetView());
     return Platform::AceViewOhos::DispatchKeyEvent(aceView, touchEvent);
 }
 
@@ -1639,11 +1686,12 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
             if (rsWindow) {
                 pipelineContext->SetIsLayoutFullScreen(
                     rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_FULLSCREEN);
-                auto isNeedAvoidWindowMode = (rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING ||
-                                              rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
-                                              rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
-                                             (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
-                                              SystemProperties::GetDeviceType() == DeviceType::TABLET);
+                auto isNeedAvoidWindowMode =
+                    (rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_FLOATING ||
+                        rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_PRIMARY ||
+                        rsWindow->GetMode() == Rosen::WindowMode::WINDOW_MODE_SPLIT_SECONDARY) &&
+                    (SystemProperties::GetDeviceType() == DeviceType::PHONE ||
+                        SystemProperties::GetDeviceType() == DeviceType::TABLET);
                 pipelineContext->SetIsNeedAvoidWindow(isNeedAvoidWindowMode);
             }
             if (reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
@@ -2211,8 +2259,8 @@ void UIContentImpl::ProcessFormVisibleChange(bool isVisible)
 }
 
 void UIContentImpl::SearchElementInfoByAccessibilityId(
-    int32_t elementId, int32_t mode,
-    int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
+    int64_t elementId, int32_t mode,
+    int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -2220,7 +2268,7 @@ void UIContentImpl::SearchElementInfoByAccessibilityId(
 }
 
 void UIContentImpl::SearchElementInfosByText(
-    int32_t elementId, const std::string& text, int32_t baseParent,
+    int64_t elementId, const std::string& text, int64_t baseParent,
     std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -2229,8 +2277,8 @@ void UIContentImpl::SearchElementInfosByText(
 }
 
 void UIContentImpl::FindFocusedElementInfo(
-    int32_t elementId, int32_t focusType,
-    int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
+    int64_t elementId, int32_t focusType,
+    int64_t baseParent, Accessibility::AccessibilityElementInfo& output)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -2238,8 +2286,8 @@ void UIContentImpl::FindFocusedElementInfo(
 }
 
 void UIContentImpl::FocusMoveSearch(
-    int32_t elementId, int32_t direction,
-    int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
+    int64_t elementId, int32_t direction,
+    int64_t baseParent, Accessibility::AccessibilityElementInfo& output)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -2247,7 +2295,7 @@ void UIContentImpl::FocusMoveSearch(
 }
 
 bool UIContentImpl::NotifyExecuteAction(
-    int32_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int32_t offset)
+    int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
@@ -2283,14 +2331,14 @@ void UIContentImpl::RemoveOldPopInfoIfExsited(bool isShowInSubWindow, int32_t no
         CHECK_NULL_VOID(subwindow);
         overlayManager = subwindow->GetOverlayManager();
     }
- 
+
     CHECK_NULL_VOID(overlayManager);
     if (overlayManager->HasPopupInfo(nodeId)) {
         LOGD("Target node id=%{public}d has old popup info, erase it", nodeId);
         overlayManager->ErasePopupInfo(nodeId);
     }
 }
- 
+
 RefPtr<PopupParam> UIContentImpl::CreateCustomPopupParam(
     bool isShow, const CustomPopupUIExtensionConfig& config)
 {
@@ -2298,15 +2346,15 @@ RefPtr<PopupParam> UIContentImpl::CreateCustomPopupParam(
     popupParam->SetIsShow(isShow);
     popupParam->SetUseCustomComponent(true);
     popupParam->SetShowInSubWindow(config.isShowInSubWindow);
- 
+
     if (config.isAutoCancel.has_value()) {
         popupParam->SetHasAction(!config.isAutoCancel.value());
     }
- 
+
     if (config.isEnableArrow.has_value()) {
         popupParam->SetEnableArrow(config.isEnableArrow.value());
     }
- 
+
     if (config.targetOffset.has_value()) {
         PopupOffset targetOffset = config.targetOffset.value();
         DimensionUnit unit = static_cast<DimensionUnit>(targetOffset.unit);
@@ -2316,59 +2364,56 @@ RefPtr<PopupParam> UIContentImpl::CreateCustomPopupParam(
             popupParam->SetTargetOffset(Offset(dx.ConvertToPx(), dy.ConvertToPx()));
         }
     }
- 
+
     if (config.targetSpace.has_value()) {
         PopupLength targetSpace = config.targetSpace.value();
         DimensionUnit unit = static_cast<DimensionUnit>(targetSpace.unit);
         popupParam->SetTargetSpace(CalcDimension(targetSpace.length, unit));
     }
- 
+
     if (config.arrowOffset.has_value()) {
         PopupLength arrowOffset = config.arrowOffset.value();
         DimensionUnit unit = static_cast<DimensionUnit>(arrowOffset.unit);
         popupParam->SetArrowOffset(CalcDimension(arrowOffset.length, unit));
     }
- 
+
     if (config.placement.has_value()) {
         popupParam->SetPlacement(static_cast<Placement>(config.placement.value()));
     }
- 
+
     if (config.backgroundColor.has_value()) {
         popupParam->SetBackgroundColor(Color(config.backgroundColor.value()));
     }
- 
+
     if (config.maskColor.has_value()) {
         popupParam->SetMaskColor(Color(config.maskColor.value()));
     }
     return popupParam;
 }
- 
+
 void UIContentImpl::OnPopupStateChange(const std::string& event,
     const CustomPopupUIExtensionConfig& config, int32_t nodeId)
 {
     if (config.onStateChange) {
         config.onStateChange(event);
     }
- 
+
     auto visible = JsonUtil::ParseJsonString(event);
     CHECK_NULL_VOID(visible);
     bool isVisible = visible->GetBool("isVisible");
     if (isVisible) {
         return;
     }
- 
+
     LOGD("Created custom popup is invisible");
     ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostDelayedTask(
-        [config, nodeId]() {
-            RemoveOldPopInfoIfExsited(config.isShowInSubWindow, nodeId);
-        },
+    taskExecutor->PostDelayedTask([config, nodeId]() { RemoveOldPopInfoIfExsited(config.isShowInSubWindow, nodeId); },
         TaskExecutor::TaskType::UI, 100); // delay 100ms
     customPopupConfigMap_.erase(nodeId);
 }
- 
+
 int32_t UIContentImpl::CreateCustomPopupUIExtension(const AAFwk::Want& want,
     const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config)
 {
@@ -2387,7 +2432,7 @@ int32_t UIContentImpl::CreateCustomPopupUIExtension(const AAFwk::Want& want,
                 LOGW("Nodeid=%{public}d has unclosed popup, cannot create new", targetNode->GetId());
                 return;
             }
- 
+
             auto popupParam = CreateCustomPopupParam(true, config);
             auto uiExtNode = ModalUIExtension::Create(want, callbacks);
             if (config.targetSize.has_value()) {
@@ -2404,7 +2449,7 @@ int32_t UIContentImpl::CreateCustomPopupUIExtension(const AAFwk::Want& want,
             popupParam->SetOnStateChange([config, nodeId, this](const std::string& event) {
                 this->OnPopupStateChange(event, config, nodeId);
             });
- 
+
             NG::ViewAbstract::BindPopup(popupParam, targetNode, AceType::DynamicCast<NG::UINode>(uiExtNode));
             customPopupConfigMap_[nodeId] = config;
         },
@@ -2412,7 +2457,7 @@ int32_t UIContentImpl::CreateCustomPopupUIExtension(const AAFwk::Want& want,
     LOGI("Create custom popup with UIExtension end, nodeId=%{public}d", nodeId);
     return nodeId;
 }
- 
+
 void UIContentImpl::DestroyCustomPopupUIExtension(int32_t nodeId)
 {
     LOGI("Destroy custom popup start, nodeId=%{public}d", nodeId);
@@ -2429,8 +2474,8 @@ void UIContentImpl::DestroyCustomPopupUIExtension(int32_t nodeId)
     auto config = popupConfig->second;
     taskExecutor->PostTask(
         [container, nodeId, config, this]() {
-            auto targetNode = AceType::DynamicCast<NG::FrameNode>(
-                ElementRegister::GetInstance()->GetUINodeById(nodeId));
+            auto targetNode =
+                AceType::DynamicCast<NG::FrameNode>(ElementRegister::GetInstance()->GetUINodeById(nodeId));
             CHECK_NULL_VOID(targetNode);
             auto popupParam = CreateCustomPopupParam(false, config);
             NG::ViewAbstract::BindPopup(popupParam, targetNode, nullptr);
@@ -2442,6 +2487,7 @@ void UIContentImpl::DestroyCustomPopupUIExtension(int32_t nodeId)
 
 void UIContentImpl::SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow)
 {
+    ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
@@ -2455,6 +2501,7 @@ void UIContentImpl::SetContainerModalTitleVisible(bool customTitleSettedShow, bo
 
 void UIContentImpl::SetContainerModalTitleHeight(int32_t height)
 {
+    ContainerScope scope(instanceId_);
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
@@ -2468,6 +2515,7 @@ void UIContentImpl::SetContainerModalTitleHeight(int32_t height)
 
 int32_t UIContentImpl::GetContainerModalTitleHeight()
 {
+    ContainerScope scope(instanceId_);
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, -1);
     return pipeline->GetContainerModalTitleHeight();
@@ -2477,6 +2525,7 @@ bool UIContentImpl::GetContainerModalButtonsRect(Rosen::Rect& containerModal, Ro
 {
     NG::RectF floatContainerModal;
     NG::RectF floatButtons;
+    ContainerScope scope(instanceId_);
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     if (!pipeline->GetContainerModalButtonsRect(floatContainerModal, floatButtons)) {
@@ -2490,6 +2539,7 @@ bool UIContentImpl::GetContainerModalButtonsRect(Rosen::Rect& containerModal, Ro
 void UIContentImpl::SubscribeContainerModalButtonsRectChange(
     std::function<void(Rosen::Rect& containerModal, Rosen::Rect& buttons)>&& callback)
 {
+    ContainerScope scope(instanceId_);
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
 

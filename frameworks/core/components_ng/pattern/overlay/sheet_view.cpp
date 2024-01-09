@@ -64,6 +64,7 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targe
     auto layoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
     layoutProperty->UpdateScrollContentEndOffset(inset.bottom_.Length());
     scrollNode->MountToParent(sheetNode);
+    layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     CreateCloseIconButtonNode(sheetNode, sheetStyle);
     sheetNode->MarkModifyDone();
     return sheetNode;
@@ -186,10 +187,8 @@ RefPtr<FrameNode> SheetView::CreateScrollNode()
     paintProps->UpdateScrollBarMode(DisplayMode::OFF);
     auto pattern = scroll->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
-    pattern->SetEdgeEffect(EdgeEffect::SPRING, pattern->GetAlwaysEnabled());
-    auto layoutProps = scroll->GetLayoutProperty();
-    CHECK_NULL_RETURN(layoutProps, nullptr);
-    layoutProps->UpdateAlignment(Alignment::TOP_CENTER);
+    pattern->SetEdgeEffect(EdgeEffect::SPRING, false);
+    props->UpdateAlignment(Alignment::TOP_CENTER);
     scroll->MarkModifyDone();
     return scroll;
 }

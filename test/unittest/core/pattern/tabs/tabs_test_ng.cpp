@@ -13,102 +13,134 @@
  * limitations under the License.
  */
 
-#include <cstddef>
-#include <utility>
-
-#include "gtest/gtest.h"
-
-#include "base/geometry/axis.h"
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-
-#define private public
-#define protected public
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-
-#include "core/components/scroll/scrollable.h"
-#include "core/components/tab_bar/tab_theme.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/event/event_hub.h"
-#include "core/components_ng/layout/layout_wrapper_builder.h"
-#include "core/components_ng/pattern/divider/divider_pattern.h"
-#include "core/components_ng/pattern/divider/divider_render_property.h"
-#include "core/components_ng/pattern/image/image_layout_property.h"
-#include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/swiper/swiper_event_hub.h"
-#include "core/components_ng/pattern/swiper/swiper_pattern.h"
-#include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
-#include "core/components_ng/pattern/tabs/tab_content_model_ng.h"
-#include "core/components_ng/pattern/tabs/tab_content_pattern.h"
-#include "core/components_ng/pattern/tabs/tabs_model_ng.h"
-#include "core/components_ng/pattern/tabs/tabs_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/property/layout_constraint.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/components_ng/layout/layout_wrapper_node.h"
-#include "core/components_ng/layout/layout_wrapper.h"
-#include "base/memory/ace_type.h"
-
-using namespace testing;
-using namespace testing::ext;
+#include "tabs_test_ng.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr float FIRST_ITEM_WIDTH = 800.0f;
-constexpr float FIRST_ITEM_HEIGHT = 800.0f;
-const SizeF FIRST_ITEM_SIZE(FIRST_ITEM_WIDTH, FIRST_ITEM_HEIGHT);
-constexpr float INFINITY_NUM = 1000000.0f;
-const SizeF INFINITY_SIZE(INFINITY_NUM, INFINITY_NUM);
-constexpr float NEGTIVE_NUM = -100.0f;
-const SizeF NEGTIVE_SIZE(NEGTIVE_NUM, NEGTIVE_NUM);
-constexpr float TABBAR_WIDTH = 50.0f;
-constexpr float SWIPER_WIDTH = 750.0f;
-const double DEFAULT_OFFSET = -1.0f;
-const int DEFAULT_ITEMCOUNT = 1;
-const int DEFAULT_INDEX = -1;
-const int BEGIN_INDEX = 0;
-const int CURRENT_INDEX = 1;
-const int END_INDEX = 0;
-const OffsetF CURRENT_OFFSET(1.0f, 1.0f);
-constexpr float TEST_MASK_A_RADIUS_RATIO = 0.0f;
-constexpr float TEST_MASK_B_RADIUS_RATIO = 1.414f;
-constexpr float TEST_MASK_MIDDLE_RADIUS_RATIO = (TEST_MASK_A_RADIUS_RATIO + TEST_MASK_B_RADIUS_RATIO) / 2.0f;
-constexpr int32_t TEST_SWIPER_INDEX = 0;
-constexpr int32_t TEST_DIVIDER_INDEX = 1;
-constexpr int32_t TEST_TAB_BAR_INDEX = 2;
-constexpr int32_t TEST_SELECTED_MASK_COUNT = 2;
-constexpr int32_t TEST_UNSELECTED_MASK_COUNT = 1;
-constexpr int32_t LG_COLUMN_NUM = 12;
-constexpr int32_t XS_COLUMN_NUM = 2;
-constexpr int32_t PLATFORM_VERSION_10 = 10;
-constexpr int32_t PLATFORM_VERSION_11 = 11;
-} // namespace
-
-class TabsTestNg : public testing::Test {
-public:
-    static void SetUpTestSuite();
-    static void TearDownTestSuite();
-};
-
 void TabsTestNg::SetUpTestSuite()
 {
-    MockPipelineContext::SetUp();
+    TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
-    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TabTheme>()));
+    auto tabTheme = AceType::MakeRefPtr<TabTheme>();
+    tabTheme->defaultTabBarName_ = "tabBarItemName";
+    tabTheme->tabBarDefaultWidth_ = Dimension(TABBAR_DEFAULT_WIDTH);
+    tabTheme->tabBarDefaultHeight_ = Dimension(TABBAR_DEFAULT_HEIGHT);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(tabTheme));
 }
 
 void TabsTestNg::TearDownTestSuite()
 {
-    MockPipelineContext::TearDown();
+    TestNG::TearDownTestSuite();
+}
+
+void TabsTestNg::SetUp() {}
+
+void TabsTestNg::TearDown()
+{
+    frameNode_ = nullptr;
+    pattern_ = nullptr;
+    layoutProperty_ = nullptr;
+
+    swiperNode_ = nullptr;
+    swiperPattern_ = nullptr;
+    swiperLayoutProperty_ = nullptr;
+    swiperPaintProperty_ = nullptr;
+    swiperController_ = nullptr;
+
+    tabBarNode_ = nullptr;
+    tabBarPattern_ = nullptr;
+    tabBarLayoutProperty_ = nullptr;
+    tabBarPaintProperty_ = nullptr;
+    tabBarAccessibilityProperty_ = nullptr;
+
+    dividerNode_ = nullptr;
+    dividerRenderProperty_ = nullptr;
+}
+
+void TabsTestNg::GetInstance()
+{
+    // tabs
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    frameNode_ = AceType::DynamicCast<TabsNode>(element);
+    pattern_ = frameNode_->GetPattern<TabsPattern>();
+    layoutProperty_ = frameNode_->GetLayoutProperty<TabsLayoutProperty>();
+    // swiper>tabContent
+    swiperNode_= AceType::DynamicCast<FrameNode>(frameNode_->GetTabs());
+    swiperPattern_ = swiperNode_->GetPattern<SwiperPattern>();
+    swiperLayoutProperty_ = swiperNode_->GetLayoutProperty<SwiperLayoutProperty>();
+    swiperPaintProperty_ = swiperNode_->GetPaintProperty<SwiperPaintProperty>();
+    swiperController_ = swiperPattern_->GetSwiperController();
+    // tabBar
+    tabBarNode_ = AceType::DynamicCast<FrameNode>(frameNode_->GetTabBar());
+    tabBarPattern_ = tabBarNode_->GetPattern<TabBarPattern>();
+    tabBarLayoutProperty_ = tabBarNode_->GetLayoutProperty<TabBarLayoutProperty>();
+    tabBarPaintProperty_ = tabBarNode_->GetPaintProperty<TabBarPaintProperty>();
+    tabBarAccessibilityProperty_ = tabBarNode_->GetAccessibilityProperty<TabBarAccessibilityProperty>();
+    // divider
+    dividerNode_ = AceType::DynamicCast<FrameNode>(frameNode_->GetDivider());
+    dividerRenderProperty_ = dividerNode_->GetPaintProperty<DividerRenderProperty>();
+}
+
+void TabsTestNg::Create(const std::function<void(TabsModelNG)>& callback, BarPosition barPosition, int32_t index)
+{
+    TabsModelNG model;
+    model.Create(barPosition, index, nullptr, nullptr);
+    ViewAbstract::SetWidth(CalcLength(TABS_WIDTH));
+    ViewAbstract::SetHeight(CalcLength(TABS_HEIGHT));
+    if (callback) {
+        callback(model);
+    }
+    auto tabNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabNode->GetTabBar());
+    tabBarNode->GetOrCreateFocusHub();
+    model.Pop();
+    GetInstance();
+    FlushLayoutTask(frameNode_);
+}
+
+void TabsTestNg::CreateWithItem(
+    const std::function<void(TabsModelNG)>& callback, BarPosition barPosition, int32_t index)
+{
+    Create(
+        [callback](TabsModelNG model) {
+            if (callback) {
+                callback(model);
+            }
+            CreateItem(TABCONTENT_NUMBER);
+        },
+        barPosition, index);
+}
+
+void TabsTestNg::CreateItem(int32_t itemNumber)
+{
+    auto tabFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto weakTab = AceType::WeakClaim(AceType::RawPtr(tabFrameNode));
+    int32_t nodeId = 0;
+    for (int32_t index = 0; index < itemNumber; index++) {
+        TabContentModelNG model;
+        model.Create();
+        auto tabBarItemFunc = TabBarItemBuilder();
+        model.SetTabBar("", "", std::move(tabBarItemFunc), true);
+        ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+        ViewAbstract::SetHeight(CalcLength(FILL_LENGTH));
+        auto tabContentFrameNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+        auto tabContentNode = AceType::DynamicCast<TabContentNode>(tabContentFrameNode);
+        tabContentNode->UpdateRecycleElmtId(nodeId); // for AddChildToGroup
+        tabContentNode->GetTabBarItemId(); // for AddTabBarItem
+        tabContentNode->SetParent(weakTab); // for AddTabBarItem
+        model.Pop();
+        nodeId++;
+    }
+}
+
+TabBarBuilderFunc TabsTestNg::TabBarItemBuilder()
+{
+    return []() {
+        ColumnModelNG colModel;
+        colModel.Create(Dimension(0), nullptr, "");
+        ViewAbstract::SetWidth(CalcLength(10.f));
+        ViewAbstract::SetHeight(CalcLength(10.f));
+    };
 }
 
 /**
@@ -10059,7 +10091,6 @@ HWTEST_F(TabsTestNg, AdjustFocusPosition005, TestSize.Level1)
     auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
     auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
 
-    BuildTabBar(tabsNode, TabBarStyle::SUBTABBATSTYLE, TabBarStyle::SUBTABBATSTYLE);
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     ASSERT_NE(tabBarLayoutProperty, nullptr);
     tabBarPattern->focusIndicator_ = -10;
@@ -10170,7 +10201,6 @@ HWTEST_F(TabsTestNg, Layout001, TestSize.Level1)
     LayoutWrapperNode layoutWrapper =
         LayoutWrapperNode(tabsFrameNode, geometryNode, tabsFrameNode->GetLayoutProperty());
     LayoutConstraintF layoutConstrain;
-    layoutConstrain.selfIdealSize.SetSize(SizeF(FIRST_ITEM_WIDTH, INFINITY_NUM));
     AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper.GetLayoutProperty())
         ->UpdateLayoutConstraint(layoutConstrain);
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabsLayoutAlgorithm));
@@ -10364,5 +10394,631 @@ HWTEST_F(TabsTestNg, Create003, TestSize.Level1)
 
     auto tabsLayoutProperty = tabsFrameNode->GetLayoutProperty<TabsLayoutProperty>();
     EXPECT_TRUE(testIndex >= 0);
+}
+
+/**
+ * @tc.name: TabsPatternParseJsonString002
+ * @tc.desc: test ParseJsonString
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsPatternOnRestoreInfo002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::END, 0, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsNode, nullptr);
+
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    ASSERT_NE(tabsLayoutProperty, nullptr);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    ASSERT_NE(tabsPattern, nullptr);
+
+    /**
+     * @tc.steps: step1. Function OnRestoreInfo is called.
+     * @tc.expected: Passing invalid & valid JSON format.
+     */
+    tabsPattern->OnRestoreInfo("");
+    auto info = JsonUtil::ParseJsonString("");
+    EXPECT_FALSE(info->IsObject());
+}
+
+/**
+* @tc.name: TabsModelMeasure007
+* @tc.desc: test Measure
+* @tc.type: FUNC
+*/
+HWTEST_F(TabsTestNg, TabsModelMeasure007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize all properties of tabs.
+     */
+    TabsModelNG instance;
+    instance.Create(BarPosition::START, 1, nullptr, nullptr);
+    TabsItemDivider divider;
+    instance.SetDivider(divider);
+
+    /**
+     * @tc.steps: step1. Get tabs pattern to create layoutAlgorithm, and call measure and layout functions.
+     * @tc.expected: step1. related function is called.
+     */
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    auto pattern = tabsFrameNode->GetPattern<TabsPattern>();
+    auto tabsLayoutAlgorithm = pattern->CreateLayoutAlgorithm();
+
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    LayoutWrapperNode layoutWrapper =
+        LayoutWrapperNode(tabsFrameNode, geometryNode, tabsFrameNode->GetLayoutProperty());
+    LayoutConstraintF layoutConstraintVaild;
+
+    float layoutSize = 10000.0f;
+    layoutConstraintVaild.selfIdealSize.SetSize(SizeF(layoutSize, layoutSize));
+    AceType::DynamicCast<TabsLayoutProperty>(layoutWrapper.GetLayoutProperty())
+        ->UpdateLayoutConstraint(layoutConstraintVaild);
+
+    layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabsLayoutAlgorithm));
+    layoutWrapper.GetLayoutProperty()->UpdateContentConstraint();
+
+    auto childLayoutConstraint = layoutWrapper.GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
+
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_SWIPER_INDEX));
+    RefPtr<GeometryNode> geometryNode1 = AceType::MakeRefPtr<GeometryNode>();
+
+    RefPtr<LayoutWrapperNode> swiperLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(swiperNode, geometryNode1, swiperNode->GetLayoutProperty());
+    swiperLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+
+    swiperLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
+
+    layoutWrapper.AppendChild(swiperLayoutWrapper);
+    auto dividerNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_DIVIDER_INDEX));
+    RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
+
+    RefPtr<LayoutWrapperNode> dividerLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(dividerNode, geometryNode2, dividerNode->GetLayoutProperty());
+    dividerLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    dividerLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
+    layoutWrapper.AppendChild(dividerLayoutWrapper);
+
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    RefPtr<GeometryNode> geometryNode3 = AceType::MakeRefPtr<GeometryNode>();
+
+    RefPtr<LayoutWrapperNode> tabBarLayoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(tabBarNode, geometryNode3, tabBarNode->GetLayoutProperty());
+    tabBarLayoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(childLayoutConstraint);
+    tabBarLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
+    layoutWrapper.AppendChild(tabBarLayoutWrapper);
+
+    /**
+     * @tc.steps: step1. Set currentChildCount_ Value is 0
+     * @tc.expected: step1. After calling the Measure interface, layoutWrapper GetTotalChildCount() -2 <=0
+     */
+    layoutWrapper.currentChildCount_ = 0;
+    tabsLayoutAlgorithm->Measure(&layoutWrapper);
+    tabsLayoutAlgorithm->Layout(&layoutWrapper);
+    EXPECT_TRUE(layoutWrapper.GetTotalChildCount() - 2 <= 0);
+}
+
+/**
+* @tc.name: TabBarPatternProvideRestoreInfo003
+* @tc.desc: test Measure
+* @tc.type: FUNC
+*/
+HWTEST_F(TabsTestNg, TabBarPatternProvideRestoreInfo003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize all properties of tabs.
+     */
+    TabsModelNG instance;
+    instance.Create(BarPosition::START, 1, nullptr, nullptr);
+    TabsItemDivider divider;
+    instance.SetDivider(divider);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsNode, nullptr);
+
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+
+    auto accessibilityProperty = tabBarNode->GetAccessibilityProperty<TabBarAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    /**
+     * @tc.steps: step1.1. Constructing TabBarPattern class pointers
+     * @tc.expected:tabBarPattern->ProvideRestoreInfo() not null.
+     */
+    EXPECT_TRUE(tabBarPattern->ProvideRestoreInfo() != "");
+}
+
+/**
+* @tc.name: TabBarPatternBeforeCreateLayoutWrapper003
+* @tc.desc: test Measure
+* @tc.type: FUNC
+*/
+HWTEST_F(TabsTestNg, TabBarPatternBeforeCreateLayoutWrapper003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize all properties of tabs.
+     */
+    TabsModelNG instance;
+    instance.Create(BarPosition::START, 1, nullptr, nullptr);
+    TabsItemDivider divider;
+    instance.SetDivider(divider);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsNode, nullptr);
+
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+
+    auto accessibilityProperty = tabBarNode->GetAccessibilityProperty<TabBarAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    tabBarPattern->BeforeCreateLayoutWrapper();
+    /**
+     * @tc.steps: step1.1. Constructing TabBarPattern class pointers
+     * @tc.expected:tabBarPattern not null.
+     */
+    ASSERT_NE(tabBarPattern, nullptr);
+}
+
+/**
+* @tc.name: TabsPatternSetOnAnimationEnd002
+* @tc.desc: test Measure
+* @tc.type: FUNC
+*/
+HWTEST_F(TabsTestNg, TabsPatternSetOnAnimationEnd002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    ASSERT_NE(swiperNode, nullptr);
+
+    auto eventHub = swiperNode->GetEventHub<SwiperEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto pattern = tabsNode->GetPattern<TabsPattern>();
+    ASSERT_NE(pattern, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+    auto accessibilityProperty = tabBarNode->GetAccessibilityProperty<TabBarAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    /**
+     * @tc.steps: step1. Test SetOnAnimationStart function.
+     * @tc.expected:eventHub->animationStartEvent_ not null.
+     */
+    auto onAnimationStart = [](int32_t index, int32_t targetIndex, const AnimationCallbackInfo& info) {};
+    tabsModel.SetOnAnimationStart(std::move(onAnimationStart));
+
+    /**
+     * @tc.steps: step2.2. Test SetOnAnimationEnd function.
+     * @tc.expected:pattern->animationEndEvent_ not null.
+     */
+    tabBarPattern->InitTurnPageRateEvent();
+    int32_t testswipingIndex = 1;
+    float testturnPageRate = 1.0f;
+    tabBarPattern->swiperController_->turnPageRateCallback_(testswipingIndex, testturnPageRate);
+
+    /**
+     * @tc.steps: step1. Convert lvalue to rvalue reference using std:: move()
+     */
+    auto onAnimationEnd = [](int32_t index, const AnimationCallbackInfo& info) {};
+    tabsModel.SetOnAnimationEnd(std::move(onAnimationEnd));
+    EXPECT_NE(pattern->animationEndEvent_, nullptr);
+
+    pattern->SetAnimationEndEvent(std::move(*tabBarPattern->animationEndEvent_));
+    EXPECT_NE(pattern->animationEndEvent_, nullptr);
+}
+
+/**
+* @tc.name: TabBarPatternSetSpecificSupportAction002
+* @tc.desc: test Measure
+* @tc.type: FUNC
+*/
+HWTEST_F(TabsTestNg, TabBarPatternSetSpecificSupportAction002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize all properties of tabs.
+     */
+    TabsModelNG instance;
+    instance.Create(BarPosition::START, 1, nullptr, nullptr);
+    TabsItemDivider divider;
+    instance.SetDivider(divider);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsNode, nullptr);
+
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+
+    auto accessibilityProperty = tabBarNode->GetAccessibilityProperty<TabBarAccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. invoke SetSpecificSupportAction.
+     * @tc.expected: Related function is called.
+     */
+    TabContentModelNG tabContentModel1;
+    tabContentModel1.Create();
+
+    auto tabContentFrameNode1 =
+        AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(tabContentFrameNode1, nullptr);
+
+    TabContentModelNG tabContentModel2;
+    tabContentModel2.Create();
+
+    auto tabContentFrameNode2 =
+        AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(tabContentFrameNode2, nullptr);
+
+    accessibilityProperty->SetSpecificSupportAction();
+    EXPECT_FALSE(accessibilityProperty->IsScrollable());
+    tabBarLayoutProperty->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_SWIPER_INDEX));
+    ASSERT_NE(swiperNode, nullptr);
+
+    tabContentFrameNode1->MountToParent(swiperNode);
+    tabContentFrameNode2->MountToParent(swiperNode);
+    auto frameNode = accessibilityProperty->host_.Upgrade();
+    ASSERT_NE(frameNode, nullptr);
+
+    accessibilityProperty->SetSpecificSupportAction();
+    EXPECT_FALSE(tabBarPattern->IsAtBottom());
+}
+
+/**
+ * @tc.name: TabsPatternGetAxis003
+ * @tc.desc: test GetAxis
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsPatternGetAxis003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create tabsModel.
+     */
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::END, 0, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsNode, nullptr);
+
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    /**
+     * @tc.steps: steps2. GetScopeFocusAlgorithm
+     * @tc.expected: steps2. Check the result of GetScopeFocusAlgorithm
+     */
+    auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    ASSERT_NE(tabsLayoutProperty, nullptr);
+
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    ASSERT_NE(tabsPattern, nullptr);
+    tabsLayoutProperty->UpdateAxis(Axis::HORIZONTAL);
+    tabsPattern->GetScopeFocusAlgorithm();
+    EXPECT_EQ(tabsLayoutProperty->GetAxis().value(), Axis::HORIZONTAL);
+
+    tabsLayoutProperty->UpdateAxis(Axis::VERTICAL);
+    tabsPattern->GetScopeFocusAlgorithm();
+    EXPECT_EQ(tabsLayoutProperty->GetAxis().value(), Axis::VERTICAL);
+
+    tabsLayoutProperty->UpdateAxis(Axis::FREE);
+    tabsPattern->GetScopeFocusAlgorithm();
+    EXPECT_EQ(tabsLayoutProperty->GetAxis().value(), Axis::FREE);
+
+    tabsLayoutProperty->UpdateAxis(Axis::NONE);
+    tabsPattern->GetScopeFocusAlgorithm();
+    EXPECT_EQ(tabsLayoutProperty->GetAxis().value(), Axis::NONE);
+}
+
+/**
+ * @tc.name: TabsPatternGetScopeFocusAlgorithm004
+ * @tc.desc: test GetScopeFocusAlgorithm
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabsPatternGetScopeFocusAlgorithm004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::END, 0, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    /**
+     * @tc.steps: steps2. GetScopeFocusAlgorithm
+     * @tc.expected: steps2. Check the result of GetScopeFocusAlgorithm
+     */
+    auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    ASSERT_NE(tabsLayoutProperty, nullptr);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    ASSERT_NE(tabsPattern, nullptr);
+
+    tabsLayoutProperty->Reset();
+    tabsPattern->GetScopeFocusAlgorithm();
+    EXPECT_FALSE(tabsLayoutProperty->GetAxis().has_value());
+}
+
+/**
+ * @tc.name: TabBarModifierSetSelectedMode002
+ * @tc.desc: test SetSelectedMode
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarModifierSetSelectedMode002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Select mode as BOARD
+     */
+    SelectedMode selectedMode = SelectedMode::BOARD;
+    auto tabBarModifier = AceType::MakeRefPtr<TabBarModifier>();
+    tabBarModifier->SetSelectedMode(selectedMode);
+    ASSERT_NE(tabBarModifier->hasIndicator_, nullptr);
+    tabBarModifier->hasIndicator_ = nullptr;
+
+    /**
+     * @tc.steps: steps2.Calling the SetSelectedMode interface to pass in SelectedMode:: BOARD
+     * @tc.expected: steps2. TabBarModifier -> has Indicator_ nullptr
+     */
+    tabBarModifier->SetSelectedMode(selectedMode);
+    EXPECT_EQ(tabBarModifier->hasIndicator_, nullptr);
+}
+
+/**
+ * @tc.name: TabBarPatternAdjustFocusPosition003
+ * @tc.desc: test AdjustFocusPosition
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarPatternAdjustFocusPosition004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::END, 0, nullptr, nullptr);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsNode, nullptr);
+
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: steps2. GetScopeFocusAlgorithm
+     * @tc.expected: steps2. Check the result of GetScopeFocusAlgorithm
+     */
+    tabBarPattern->AdjustFocusPosition();
+    tabBarLayoutProperty->UpdateTabBarMode(TabBarMode::SCROLLABLE);
+    tabBarPattern->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
+
+    tabBarPattern->axis_ = Axis::HORIZONTAL;
+    tabBarPattern->tabItemOffsets_.clear();
+    OffsetF c1(-1.0f, -1.0f);
+
+    tabBarPattern->tabItemOffsets_.emplace_back(c1);
+    tabBarPattern->focusIndicator_ = 0;
+    tabBarPattern->AdjustFocusPosition();
+    tabBarPattern->SetTabBarStyle(TabBarStyle::SUBTABBATSTYLE);
+    EXPECT_EQ(tabBarPattern->GetTabBarStyle(), TabBarStyle::SUBTABBATSTYLE);
+
+    /**
+     * @tc.steps: steps3. Set TabBarStyle: NOSTYLE
+     * @tc.expected: Expected value is TabBarStyle: NOSTYLE
+     */
+    tabBarPattern->SetTabBarStyle(TabBarStyle::NOSTYLE);
+    EXPECT_EQ(tabBarPattern->GetTabBarStyle(), TabBarStyle::NOSTYLE);
+
+    tabBarPattern->SetTabBarStyle(TabBarStyle::BOTTOMTABBATSTYLE);
+    EXPECT_EQ(tabBarPattern->GetTabBarStyle(), TabBarStyle::BOTTOMTABBATSTYLE);
+}
+
+/**
+ * @tc.name: TabBarLayoutAlgorithmUpdateChildConstraint002
+ * @tc.desc: test UpdateChildConstraint
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmUpdateChildConstraint003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. build tabBarNode and ideaSize.
+     */
+    LayoutConstraintF childConstraint = LayoutConstraintF();
+    TabsModelNG instance;
+    instance.Create(BarPosition::START, 1, nullptr, nullptr);
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsFrameNode, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+    auto tabBarLayoutAlgorithm = AceType::DynamicCast<TabBarLayoutAlgorithm>(tabBarPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(tabBarLayoutAlgorithm, nullptr);
+    auto tabBarProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarProperty, nullptr);
+    tabBarProperty->UpdateTabBarMode(TabBarMode::FIXED);
+
+    /**
+     * @tc.steps: step2. Set width and height
+     */
+    float width = 1.0;
+    float height = 2.0;
+    auto ideaSize = SizeF(width, height);
+    int32_t childCount = 1;
+    auto axis = Axis::FREE;
+    tabBarLayoutAlgorithm->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
+
+    /**
+     * @tc.steps: step2. call UpdateChildConstraint function.
+     * @tc.expected: The function is run ok.
+     */
+    tabBarProperty->UpdateTabBarMode(TabBarMode::FIXED_START);
+    tabBarLayoutAlgorithm->UpdateChildConstraint(childConstraint, tabBarProperty, ideaSize, childCount, axis);
+    EXPECT_EQ(tabBarProperty->GetTabBarMode().value(), TabBarMode::FIXED_START);
+}
+
+/**
+ * @tc.name: CustomAnimationTest001
+ * @tc.desc: test custom animation disable swipe
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, CustomAnimationTest001, TestSize.Level1)
+{
+    const std::string text_test = "text_test";
+
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, INDEX_ONE, nullptr, nullptr);
+    tabsModel.SetIsCustomAnimation(true);
+    tabsModel.SetOnCustomAnimation([](int32_t from, int32_t to) -> TabContentAnimatedTransition {
+        TabContentAnimatedTransition transitionInfo;
+        transitionInfo.transition = [](const RefPtr<TabContentTransitionProxy>& proxy) {};
+        return transitionInfo;
+    });
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabsNode, nullptr);
+    EXPECT_EQ(tabsNode->GetTag(), V2::TABS_ETS_TAG);
+
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_SWIPER_INDEX));
+    EXPECT_EQ(swiperNode->GetTag(), V2::SWIPER_ETS_TAG);
+
+    TabContentModelNG tabContentModel;
+    SelectedMode selectedMode = SelectedMode::INDICATOR;
+    tabContentModel.Create();
+    tabContentModel.SetSelectedMode(selectedMode);
+    auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabContentFrameNode, nullptr);
+    EXPECT_EQ(tabContentFrameNode->GetTag(), V2::TAB_CONTENT_ITEM_ETS_TAG);
+    auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
+    ASSERT_NE(tabContentPattern, nullptr);
+    EXPECT_EQ(tabContentPattern->GetSelectedMode(), SelectedMode::INDICATOR);
+    tabContentFrameNode->GetTabBarItemId();
+    tabContentFrameNode->MountToParent(swiperNode);
+    tabContentPattern->SetTabBar(text_test, "", nullptr);
+    EXPECT_EQ(tabContentPattern->GetTabBarParam().GetText(), text_test);
+    tabContentModel.AddTabBarItem(tabContentFrameNode, DEFAULT_NODE_SLOT, true);
+
+    TabContentModelNG tabContentModel2;
+    tabContentModel2.Create();
+    tabContentModel2.SetSelectedMode(selectedMode);
+    auto tabContentFrameNode2 = AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(tabContentFrameNode2, nullptr);
+    EXPECT_EQ(tabContentFrameNode2->GetTag(), V2::TAB_CONTENT_ITEM_ETS_TAG);
+    auto tabContentPattern2 = tabContentFrameNode2->GetPattern<TabContentPattern>();
+    ASSERT_NE(tabContentPattern2, nullptr);
+    EXPECT_EQ(tabContentPattern2->GetSelectedMode(), SelectedMode::INDICATOR);
+    tabContentFrameNode2->GetTabBarItemId();
+    tabContentFrameNode2->MountToParent(swiperNode);
+    tabContentPattern2->SetTabBar(text_test, "", nullptr);
+    EXPECT_EQ(tabContentPattern2->GetTabBarParam().GetText(), text_test);
+    tabContentModel2.AddTabBarItem(tabContentFrameNode2, DEFAULT_NODE_SLOT, true);
+
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
+    ASSERT_NE(tabBarLayoutProperty, nullptr);
+    tabBarLayoutProperty->UpdateAxis(Axis::VERTICAL);
+    EXPECT_EQ(tabBarLayoutProperty->GetAxisValue(), Axis::VERTICAL);
+    tabBarPattern->tabBarStyle_ = TabBarStyle::SUBTABBATSTYLE;
+    tabBarPattern->tabItemOffsets_ = { { 0.0f, 0.0f }, { 10.0f, 10.0f } };
+
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+
+    auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    ASSERT_NE(swiperLayoutProperty, nullptr);
+    swiperLayoutProperty->UpdateIndex(INDEX_ONE);
+
+    GestureEvent info;
+    Offset offset(1, 1);
+    info.SetLocalLocation(offset);
+    tabBarLayoutProperty->UpdateAxis(Axis::HORIZONTAL);
+    tabBarPattern->HandleClick(info);
+
+    EXPECT_EQ(swiperPattern->IsDisableSwipe(), true);
+    EXPECT_EQ(swiperPattern->customAnimationToIndex_.has_value(), true);
+
+    swiperPattern->OnCustomAnimationFinish(INDEX_ONE, INDEX_ZERO, false);
+    EXPECT_EQ(swiperPattern->customAnimationToIndex_.has_value(), false);
+
+    swiperPattern->SwipeTo(INDEX_ONE);
+    EXPECT_EQ(swiperPattern->customAnimationToIndex_.has_value(), true);
+}
+
+/**
+ * @tc.name: CustomAnimationTest002
+ * @tc.desc: test custom animation set undefined
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, CustomAnimationTest002, TestSize.Level1)
+{
+    TabsModelNG model;
+    model.Create(BarPosition::START, 0, nullptr, nullptr);
+    model.SetIsCustomAnimation(false);
+
+    for (int32_t index = 0; index < 3; index++) {
+        TabContentModelNG tabContentModel;
+        tabContentModel.Create();
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    auto tabsFrameNode = AceType::DynamicCast<TabsNode>(element);
+
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsFrameNode->GetChildAtIndex(TEST_SWIPER_INDEX));
+    ASSERT_NE(swiperNode, nullptr);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+
+    EXPECT_EQ(swiperPattern->IsDisableSwipe(), false);
 }
 } // namespace OHOS::Ace::NG

@@ -36,9 +36,9 @@ class LineStartPointModifier extends ModifierWithKey<object> {
   static identity: Symbol = Symbol('startPoint');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().line.resetStartPoint(node);
+      getUINativeModule().line.resetStartPoint(node);
     } else {
-      GetUINativeModule().line.setStartPoint(node, this.value);
+      getUINativeModule().line.setStartPoint(node, this.value);
     }
   }
 
@@ -54,9 +54,9 @@ class LineEndPointModifier extends ModifierWithKey<object> {
   static identity: Symbol = Symbol('endPoint');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().line.resetEndPoint(node);
+      getUINativeModule().line.resetEndPoint(node);
     } else {
-      GetUINativeModule().line.setEndPoint(node, this.value);
+      getUINativeModule().line.setEndPoint(node, this.value);
     }
   }
 
@@ -68,10 +68,10 @@ class LineEndPointModifier extends ModifierWithKey<object> {
 // @ts-ignore
 globalThis.Line.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkLineComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

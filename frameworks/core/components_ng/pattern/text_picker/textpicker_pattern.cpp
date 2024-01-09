@@ -58,7 +58,6 @@ void TextPickerPattern::OnAttachToFrameNode()
 
 bool TextPickerPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    CHECK_NULL_RETURN(config.frameSizeChange, false);
     CHECK_NULL_RETURN(dirty, false);
     SetButtonIdeaSize();
     return true;
@@ -117,10 +116,10 @@ void TextPickerPattern::OnModifyDone()
     if (cascadeOptions_.size() > 0) {
         SetChangeCallback([weak = WeakClaim(this)](const RefPtr<FrameNode>& tag,
             bool add, uint32_t index, bool notify) {
-            auto refPtr = weak.Upgrade();
-            CHECK_NULL_VOID(refPtr);
-            refPtr->HandleColumnChange(tag, add, index, notify);
-        });
+                auto refPtr = weak.Upgrade();
+                CHECK_NULL_VOID(refPtr);
+                refPtr->HandleColumnChange(tag, add, index, notify);
+            });
     }
     SetEventCallback([weak = WeakClaim(this)](bool refresh) {
         auto refPtr = weak.Upgrade();
@@ -444,7 +443,7 @@ void TextPickerPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
         if (!GetIsShowInDialog()) {
             piantRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx() - PRESS_INTERVAL.ConvertToPx();
             centerX = focusKeyID_ * (piantRectWidth + FOUCS_WIDTH.ConvertToPx() + PRESS_INTERVAL.ConvertToPx()) +
-                FOUCS_WIDTH.ConvertToPx();
+                      FOUCS_WIDTH.ConvertToPx();
         } else {
             piantRectWidth = columnWidth - FOUCS_WIDTH.ConvertToPx();
             centerX = focusKeyID_ * piantRectWidth + FOUCS_WIDTH.ConvertToPx() / HALF;
@@ -754,7 +753,7 @@ std::string TextPickerPattern::GetSelectedObject(bool isColumnChange, int32_t st
     if (context->GetIsDeclarative()) {
         if (values.size() == 1) {
             return std::string("{\"value\":") + "\"" + values[0] + "\"" + ",\"index\":" + std::to_string(indexs[0]) +
-               ",\"status\":" + std::to_string(status) + "}";
+                   ",\"status\":" + std::to_string(status) + "}";
         } else {
             return GetSelectedObjectMulti(values, indexs, status);
         }
@@ -884,5 +883,34 @@ void TextPickerPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(frameNode);
     FrameNode::ProcessOffscreenNode(frameNode);
     host->MarkModifyDone();
+}
+
+void TextPickerPattern::CheckAndUpdateColumnSize(SizeF& size)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pickerNode = DynamicCast<FrameNode>(host);
+    CHECK_NULL_VOID(pickerNode);
+
+    auto layoutProperty = pickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+
+    auto layoutConstraint = layoutProperty->GetLayoutConstraint();
+    auto layoutSize = layoutConstraint->selfIdealSize;
+    auto layoutMaxSize = layoutConstraint->maxSize;
+
+    PaddingPropertyF padding = layoutProperty->CreatePaddingAndBorder();
+    auto childCount = static_cast<float>(pickerNode->GetChildren().size());
+
+    auto width = layoutSize.Width().has_value() ? layoutSize.Width() : layoutMaxSize.Width();
+    auto height = layoutSize.Height().has_value() ? layoutSize.Height() : layoutMaxSize.Height();
+
+    if (width.has_value()) {
+        size.SetWidth(std::min(size.Width(), (width.value() - padding.Width()) / std::max(childCount, 1.0f)));
+    }
+
+    if (height.has_value()) {
+        size.SetHeight(std::min(size.Height(), height.value() - padding.Height()));
+    }
 }
 } // namespace OHOS::Ace::NG

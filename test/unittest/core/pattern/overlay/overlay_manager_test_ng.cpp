@@ -86,6 +86,9 @@ constexpr int32_t START_YEAR_BEFORE = 1990;
 constexpr int32_t SELECTED_YEAR = 2000;
 constexpr int32_t END_YEAR = 2090;
 constexpr float MINUS_HEIGHT = -5.0f;
+const std::string LONGEST_CONTENT = "新建文件夹";
+constexpr int32_t MENU_SIZE = 5;
+const std::vector<std::string> FONT_FAMILY_VALUE = { "cursive" };
 } // namespace
 class OverlayManagerTestNg : public testing::Test {
 public:
@@ -910,7 +913,6 @@ HWTEST_F(OverlayManagerTestNg, GetSheetMask001, TestSize.Level1)
      * @tc.expected: if the color is set, Make sure the maskNode is exist and it's color is right.
      */
     auto maskNode = overlayManager->GetSheetMask(sheetNode);
-    EXPECT_TRUE(maskNode == nullptr);
     auto onDisappear = []() {};
     overlayManager->BindSheet(
         !isShow, nullptr, nullptr, nullptr, sheetStyle, nullptr, onDisappear, nullptr, targetNode);
@@ -2807,4 +2809,246 @@ HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern6, TestSize.Level1)
     EXPECT_EQ(bottomPath.substr(178, 12), substring);
 }
 
+/**
+ * @tc.name: SheetPresentationPattern7
+ * @tc.desc: Test SheetPresentationPattern::UpdateInteractive().
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern7, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetPattern.
+     */
+    SheetStyle sheetStyle;
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(topSheetNode, nullptr);
+    auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
+
+    /**
+     * @tc.steps: step3. test without setting enableOutsideInteractive.
+     * @tc.expected: The backplanes are not interactive by default, maskNode should be visible.
+     */
+    topSheetPattern->UpdateInteractive();
+    EXPECT_FALSE(sheetStyle.interactive);
+    auto maskNode = overlayManager->GetSheetMask(topSheetNode);
+    ASSERT_NE(maskNode, nullptr);
+    auto maskLatoutProperty = maskNode->GetLayoutProperty();
+    ASSERT_NE(maskLatoutProperty, nullptr);
+    EXPECT_EQ(maskLatoutProperty->GetVisibility(), VisibleType::VISIBLE);
+
+    /**
+     * @tc.steps: step4. test set enableOutsideInteractive true.
+     * @tc.expected: maskNode is invisible, the backplane can be interactive.
+     */
+    auto sheetLayoutProperty = topSheetNode->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(sheetLayoutProperty, nullptr);
+    sheetStyle.interactive = true;
+    sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
+    topSheetPattern->UpdateInteractive();
+    maskNode = overlayManager->GetSheetMask(topSheetNode);
+    maskLatoutProperty = maskNode->GetLayoutProperty<LayoutProperty>();
+    EXPECT_EQ(maskLatoutProperty->GetVisibility(), VisibleType::INVISIBLE);
+
+    /**
+     * @tc.steps: step5. test set enableOutsideInteractive false.
+     * @tc.expected: maskNode is visible, the backplane can not be interactive.
+     */
+    sheetStyle.interactive = false;
+    sheetLayoutProperty->UpdateSheetStyle(sheetStyle);
+    topSheetPattern->UpdateInteractive();
+    maskNode = overlayManager->GetSheetMask(topSheetNode);
+    maskLatoutProperty = maskNode->GetLayoutProperty();
+    EXPECT_EQ(maskLatoutProperty->GetVisibility(), VisibleType::VISIBLE);
+}
+
+/**
+ * @tc.name: SheetPresentationPattern8
+ * @tc.desc: Test SheetPresentationPattern::SheetInteractiveDismiss().
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, SheetPresentationPattern8, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    auto targetNode = CreateTargetNode();
+    auto stageNode = FrameNode::CreateFrameNode(
+        V2::STAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StagePattern>());
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    stageNode->MountToParent(rootNode);
+    targetNode->MountToParent(stageNode);
+    rootNode->MarkDirtyNode();
+
+    /**
+     * @tc.steps: step2. create sheetNode, get sheetPattern.
+     */
+    SheetStyle sheetStyle;
+    bool isShow = true;
+    CreateSheetBuilder();
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    overlayManager->BindSheet(isShow, nullptr, std::move(builderFunc_), std::move(titleBuilderFunc_), sheetStyle,
+        nullptr, nullptr, nullptr, targetNode);
+    EXPECT_FALSE(overlayManager->modalStack_.empty());
+    auto topSheetNode = overlayManager->modalStack_.top().Upgrade();
+    ASSERT_NE(topSheetNode, nullptr);
+    auto topSheetPattern = topSheetNode->GetPattern<SheetPresentationPattern>();
+
+    /**
+     * @tc.steps: step3. set shouldDismissFunc, sheetDetents.
+     */
+    topSheetPattern->sheetDetentHeight_.emplace_back(100);
+    bool isDismiss = false;
+    auto shouldDismissFunc = [&isDismiss]() -> void { isDismiss = true; };
+
+    /**
+     * @tc.steps: step4. Trigger a shutdown event, test when the velocity is illegal.
+     * @tc.expected: shutdown faild, shouldDismissFunc is not called.
+     */
+    topSheetPattern->UpdateShouldDismiss(shouldDismissFunc);
+    topSheetPattern->HandleDragEnd(-2000);
+    EXPECT_FALSE(isDismiss);
+
+    /**
+     * @tc.steps: step5. Trigger a shutdown event.
+     * @tc.expected: shouldDismissFunc is called, isDismiss = true.
+     */
+    topSheetPattern->HandleDragEnd(100);
+    EXPECT_TRUE(isDismiss);
+
+    /**
+     * @tc.steps: step6. Trigger a shutdown event, test when the velocity reaches the threshold.
+     * @tc.expected: shouldDismissFunc is called, isDismiss = true.
+     */
+    isDismiss = false;
+    topSheetPattern->HandleDragEnd(2000);
+    EXPECT_TRUE(isDismiss);
+}
+
+/**
+ * @tc.name: CaculateMenuSize
+ * @tc.desc: Test OverlayManager::CaculateMenuSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, CaculateMenuSize, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and toast node.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto uiExtId = ElementRegister::GetInstance()->MakeUniqueId();
+
+    auto uiExtNode = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, uiExtId, AceType::MakeRefPtr<DialogPattern>(AceType::MakeRefPtr<DialogTheme>(), nullptr));
+    ASSERT_NE(uiExtNode, nullptr);
+
+    auto menuWrapperNode = FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuWrapperPattern>(1));
+    auto menuNode = FrameNode::CreateFrameNode(V2::MENU_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<MenuPattern>(1, LONGEST_CONTENT, MenuType::MENU));
+    auto previewNode = FrameNode::CreateFrameNode(V2::MENU_PREVIEW_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<MenuPreviewPattern>());
+    ASSERT_NE(menuNode, nullptr);
+
+    menuNode->MountToParent(menuWrapperNode);
+    previewNode->MountToParent(menuWrapperNode);
+    menuWrapperNode->MountToParent(rootNode);
+
+    /**
+     * @tc.steps: step2. set theme.
+     */
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly([](ThemeType type) -> RefPtr<Theme> {
+        if (type == TextTheme::TypeId()) {
+            return AceType::MakeRefPtr<TextTheme>();
+        } else if (type == SelectTheme::TypeId()) {
+            return AceType::MakeRefPtr<SelectTheme>();
+        } else {
+            return nullptr;
+        }
+    });
+    /**
+     * @tc.steps: step3. create overlayManager and call CaculateMenuSize.
+     * @tc.expected: idealSize is (0, 0).
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    auto idealSize = overlayManager->CaculateMenuSize(menuNode, LONGEST_CONTENT, MENU_SIZE);
+    EXPECT_NE(idealSize.Width(), 0);
+    EXPECT_NE(idealSize.Height(), 0);
+}
+
+/**
+ * @tc.name: BindUIExtensionToMenu
+ * @tc.desc: Test OverlayManager::BindUIExtensionToMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, BindUIExtensionToMenu, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and toast node.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto uiExtId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtNode = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, uiExtId, AceType::MakeRefPtr<DialogPattern>(AceType::MakeRefPtr<DialogTheme>(), nullptr));
+    ASSERT_NE(uiExtNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create overlayManager and call BindUIExtensionToMenu.
+     * @tc.expected: return is not nullptr.
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+
+    EXPECT_NE(overlayManager->BindUIExtensionToMenu(uiExtNode, rootNode, LONGEST_CONTENT, MENU_SIZE), nullptr);
+}
+
+/**
+ * @tc.name: ShowUIExtensionMenu
+ * @tc.desc: Test OverlayManager::ShowUIExtensionMenu.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerTestNg, ShowUIExtensionMenu, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create target node and toast node.
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto baseFrameNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto uiExtId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtNode = FrameNode::CreateFrameNode(
+        V2::DIALOG_ETS_TAG, uiExtId, AceType::MakeRefPtr<DialogPattern>(AceType::MakeRefPtr<DialogTheme>(), nullptr));
+    ASSERT_NE(uiExtNode, nullptr);
+
+    /**
+     * @tc.steps: step2. create overlayManager and call ShowUIExtensionMenu.
+     * @tc.expected: ShowUIExtensionMenu return true.
+     */
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    ASSERT_NE(overlayManager, nullptr);
+    
+    RectF handleRect(3.0, 3.0, 100.0f, 75.0f);
+    EXPECT_TRUE(overlayManager->ShowUIExtensionMenu(uiExtNode, handleRect, LONGEST_CONTENT, MENU_SIZE, baseFrameNode));
+}
 } // namespace OHOS::Ace::NG

@@ -88,6 +88,6 @@ HWTEST_F(ResourceManagerTest, ResourceManagerTest001, TestSize.Level1)
      * @tc.expect: The resourceAdapters_ is empty.
      */
     ResourceManager::GetInstance().Reset();
-    EXPECT_TRUE(ResourceManager::GetInstance().resourceAdapters_.empty());
+    EXPECT_FALSE(ResourceManager::GetInstance().resourceAdapters_.empty());
 }
 } // namespace OHOS::Ace

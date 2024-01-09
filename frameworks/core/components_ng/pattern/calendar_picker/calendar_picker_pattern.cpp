@@ -256,7 +256,7 @@ void CalendarPickerPattern::ResetTextStateByNode(const RefPtr<FrameNode>& textFr
     RefPtr<CalendarTheme> calendarTheme = pipeline->GetTheme<CalendarTheme>();
     CHECK_NULL_VOID(calendarTheme);
     textLayoutProperty->UpdateTextColor(layoutProperty->GetColor().value_or(calendarTheme->GetEntryFontColor()));
-    textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 CalendarPickerSelectedType CalendarPickerPattern::CheckRegion(const Offset& globalLocation)
@@ -696,7 +696,7 @@ void CalendarPickerPattern::HandleTextFocusEvent(int32_t index)
     auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
     textLayoutProperty->UpdateTextColor(Color::WHITE);
-    textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    textFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void CalendarPickerPattern::HandleTextHoverEvent(bool state, int32_t index)
@@ -1015,7 +1015,7 @@ void CalendarPickerPattern::FlushTextStyle()
         if (layoutProperty->HasWeight()) {
             textLayoutProperty->UpdateFontWeight(layoutProperty->GetWeight().value());
         }
-        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        textNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
 }
 

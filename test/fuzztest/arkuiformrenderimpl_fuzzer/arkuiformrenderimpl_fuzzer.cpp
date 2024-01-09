@@ -42,7 +42,8 @@ bool DispatcherImplAPI(const std::string data, size_t size)
     std::weak_ptr<OHOS::AppExecFwk::EventHandler> handler;
     FormRendererDispatcherImpl dispatcherImpl(uiContent, nullptr, handler);
     std::shared_ptr<OHOS::MMI::PointerEvent> pointEvent;
-    dispatcherImpl.DispatchPointerEvent(pointEvent);
+    SerializedGesture serializedGesture;
+    dispatcherImpl.DispatchPointerEvent(pointEvent, serializedGesture);
     dispatcherImpl.SetAllowUpdate(true);
     dispatcherImpl.IsAllowUpdate();
     return true;

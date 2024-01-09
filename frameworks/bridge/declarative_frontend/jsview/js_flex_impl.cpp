@@ -20,7 +20,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/flex_model_impl.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-#include "frameworks/core/common/container.h"
 #include "frameworks/core/components_ng/pattern/flex/flex_model_ng.h"
 
 namespace OHOS::Ace::Framework {
@@ -88,34 +87,6 @@ void JSFlexImpl::CreateFlexComponent(const JSCallbackInfo& info)
     }
 }
 
-void JSFlexImpl::CalculationWrapDirection(int32_t direction, int32_t wrapVal)
-{
-    if (direction >= 0 && direction <= DIRECTION_MAX_VALUE) {
-        FlexModel::GetInstance()->SetDirection(static_cast<FlexDirection>(direction));
-        // WrapReverse means wrapVal = 2. Wrap means wrapVal = 1.
-        WrapDirection wrapDirection;
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-            if (direction <= 1) {
-                wrapDirection = static_cast<WrapDirection>(direction + 2 * (wrapVal - 1));
-            } else if (direction == 2) {
-                wrapDirection = wrapVal == 2 ? WrapDirection::HORIZONTAL : WrapDirection::HORIZONTAL_REVERSE;
-            } else if (direction == 3) {
-                wrapDirection = wrapVal == 2 ? WrapDirection::VERTICAL : WrapDirection::VERTICAL_REVERSE;
-            } else {
-                wrapDirection = static_cast<WrapDirection>(direction - 2 * (wrapVal - 1));
-            }
-            FlexModel::GetInstance()->SetWrapDirection(static_cast<WrapDirection>(wrapDirection));
-        } else {
-            if (direction <= 1) {
-                direction += 2 * (wrapVal - 1);
-            } else {
-                direction -= 2 * (wrapVal - 1);
-            }
-            FlexModel::GetInstance()->SetWrapDirection(static_cast<WrapDirection>(direction));
-        }
-    }
-}
-
 void JSFlexImpl::CreateWrapComponent(const JSCallbackInfo& info, int32_t wrapVal)
 {
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
@@ -125,8 +96,17 @@ void JSFlexImpl::CreateWrapComponent(const JSCallbackInfo& info, int32_t wrapVal
     JSRef<JSVal> alignContentVal = obj->GetProperty("alignContent");
     FlexModel::GetInstance()->CreateWrap();
     if (directionVal->IsNumber()) {
-        int32_t direction = directionVal->ToNumber<int32_t>();
-        CalculationWrapDirection(direction, wrapVal);
+        auto direction = directionVal->ToNumber<int32_t>();
+        if (direction >= 0 && direction <= DIRECTION_MAX_VALUE) {
+            FlexModel::GetInstance()->SetDirection(static_cast<FlexDirection>(direction));
+            // WrapReverse means wrapVal = 2. Wrap means wrapVal = 1.
+            if (direction <= 1) {
+                direction += 2 * (wrapVal - 1);
+            } else {
+                direction -= 2 * (wrapVal - 1);
+            }
+            FlexModel::GetInstance()->SetWrapDirection(static_cast<WrapDirection>(direction));
+        }
     } else {
         // No direction set case: wrapVal == 2 means FlexWrap.WrapReverse.
         WrapDirection wrapDirection = wrapVal == 2 ? WrapDirection::HORIZONTAL_REVERSE : WrapDirection::HORIZONTAL;

@@ -303,6 +303,8 @@ public:
     {
         isPicker_ = isPicker;
     }
+    
+    void CheckAndUpdateColumnSize(SizeF& size);
 
 private:
     void OnModifyDone() override;

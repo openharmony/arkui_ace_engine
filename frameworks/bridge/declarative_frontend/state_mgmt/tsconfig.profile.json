@@ -32,6 +32,8 @@
     "src/lib/common/state_mgmt_console_trace.ts",
     "src/lib/common/observed_object.ts",
     "src/lib/common/observed_property_abstract.ts",
+    "src/lib/common/custom_dialog_controller_native.d.ts",
+    "src/lib/common/custom_dialog_controller.ts",
 
     // full_update specific
     "src/lib/full_update/fu_view_native.d.ts",

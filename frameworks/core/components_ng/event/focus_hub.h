@@ -33,11 +33,12 @@ constexpr int32_t DEFAULT_TAB_FOCUSED_INDEX = -2;
 constexpr int32_t NONE_TAB_FOCUSED_INDEX = -1;
 constexpr int32_t MASK_FOCUS_STEP_FORWARD = 0x10;
 constexpr int32_t MASK_FOCUS_STEP_TAB = 0x5;
-constexpr int32_t DEEPTH_OF_MENU_WRAPPER = 3;
-constexpr int32_t DEEPTH_OF_MENU = 2;
-constexpr int32_t DEEPTH_OF_DIALOG = 2;
-constexpr int32_t DEEPTH_OF_PAGE = 1;
-constexpr int32_t DEEPTH_OF_POPUP = 2;
+const std::list<int32_t> DEEPTH_OF_MENU_WRAPPER = { 0, 0, 0 };
+const std::list<int32_t> DEEPTH_OF_MENU = { 0, 0 };
+const std::list<int32_t> DEEPTH_OF_DIALOG = { 0, 0 };
+const std::list<int32_t> DEEPTH_OF_PAGE = { 0 };
+const std::list<int32_t> DEEPTH_OF_POPUP = { 0, 0 };
+const std::list<int32_t> DEEPTH_OF_SHEET_PAGE = { 1, 0 };
 
 enum class FocusType : int32_t {
     DISABLE = 0,
@@ -433,6 +434,8 @@ public:
 
     static void PushPageCloseKeyboard();
 
+    static void NavCloseKeyboard();
+
     BlurReason GetBlurReason() const
     {
         return blurReason_;
@@ -492,6 +495,20 @@ public:
     {
         return focusPaintParamsPtr_ ? focusPaintParamsPtr_->HasFocusPadding() : false;
     }
+
+    bool HasBackwardFocusMovement() const
+    {
+        return hasBackwardMovement_;
+    }
+
+    void ClearBackwardFocusMovementFlag()
+    {
+        hasBackwardMovement_ = false;
+    }
+
+    bool HasBackwardFocusMovementInChildren();
+    void ClearBackwardFocusMovementFlagInChildren();
+
     Dimension GetFocusPadding() const
     {
         CHECK_NULL_RETURN(focusPaintParamsPtr_, Dimension());
@@ -529,6 +546,7 @@ public:
     RefPtr<FrameNode> GetFrameNode() const;
     RefPtr<GeometryNode> GetGeometryNode() const;
     RefPtr<FocusHub> GetParentFocusHub() const;
+    RefPtr<FocusHub> GetRootFocusHub();
     std::string GetFrameName() const;
     int32_t GetFrameId() const;
 
@@ -746,6 +764,9 @@ public:
 
     void SetFocusType(FocusType type)
     {
+        if (focusType_ != type && type == FocusType::DISABLE) {
+            RemoveSelf(BlurReason::FOCUS_SWITCH);
+        }
         focusType_ = type;
     }
     FocusType GetFocusType() const
@@ -882,6 +903,18 @@ public:
         return isViewHasFocused_;
     }
 
+    size_t GetFocusableCount()
+    {
+        size_t count = 0;
+        auto children = GetChildren();
+        for (const auto& child : children) {
+            if (child->IsFocusable()) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     static inline bool IsFocusStepVertical(FocusStep step)
     {
         return (static_cast<uint32_t>(step) & 0x1) == 0;
@@ -970,6 +1003,7 @@ private:
     bool isFocusUnit_ { false };
     bool isViewRootScopeFocused_ { true };
     bool isViewHasFocused_ { false };
+    bool hasBackwardMovement_ { false };
 
     FocusType focusType_ = FocusType::DISABLE;
     FocusStyleType focusStyleType_ = FocusStyleType::NONE;

@@ -95,4 +95,9 @@ std::string PixelMapPreview::GetModifyId()
 {
     return "";
 }
+
+void PixelMapPreview::Scale(float xAxis, float yAxis) {}
+
+void PixelMapPreview::Scale(float xAxis, float yAxis, const AceAntiAliasingOption &option) {}
+
 } // namespace OHOS::Ace

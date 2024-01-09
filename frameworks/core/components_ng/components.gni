@@ -106,27 +106,15 @@ template("build_component_ng") {
       if (enable_graphic_text_gine) {
         include_dirs += [ "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export" ]
       }
-      configs += [ "$ace_flutter_engine_root:flutter_config" ]
-      deps += [
-        "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform",
-        "$skia_root_new:skia_$platform",
-      ]
-      if (enable_graphic_text_gine) {
-        deps -=
-            [ "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform" ]
-        deps += [ "$ace_flutter_engine_root:flutter_engine_fml_$platform" ]
-      }
+      deps += [ "$skia_root_new:skia_$platform" ]
       if (!is_arkui_x && defined(config.enable_drag_framework) &&
           config.enable_drag_framework) {
-        external_deps += [
-          "device_status:devicestatus_client",
-          "graphic_2d:librender_service_client",
-        ]
+        external_deps += [ "device_status:devicestatus_client" ]
         include_dirs += [
           "//base/msdp/device_status/interfaces/innerkits/interaction/include",
         ]
       }
-
+      external_deps += [ "graphic_2d:librender_service_client" ]
       if (platform == "ohos" || platform == "ohos_ng") {
         deps += [ "//third_party/openGLES:libGLES" ]
         external_deps += [ "graphic_2d:2d_graphics" ]

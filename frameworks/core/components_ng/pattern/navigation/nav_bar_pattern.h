@@ -113,8 +113,6 @@ public:
         return isHideToolbar_;
     }
 
-    bool IsTitleBarHide();
-    bool IsTitleModeFree();
     void OnAttachToFrameNode() override;
     void OnWindowFocused() override
     {
@@ -136,7 +134,6 @@ protected:
 
 private:
     void WindowFocus(bool isFocus);
-    void RegistOritationListener();
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void OnModifyDone() override;
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -146,8 +143,8 @@ private:
 
     RefPtr<PanEvent> panEvent_;
     WeakPtr<FrameNode> scrollableNode_;
-    bool isOritationListenerRegisted_ = false;
     bool isHideToolbar_ = false;
+    bool isHideTitlebar_ = false;
     std::vector<NG::BarItem> titleBarMenuItems_;
     std::vector<NG::BarItem> toolBarMenuItems_;
     std::optional<int32_t> menuNodeId_;
@@ -155,6 +152,7 @@ private:
     RefPtr<FrictionMotion> motion_;
     RefPtr<Animator> controller_;
     bool isTitleMenuNodeShowing_ = false;
+    NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
 };
 
 } // namespace OHOS::Ace::NG

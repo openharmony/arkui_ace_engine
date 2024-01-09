@@ -93,9 +93,6 @@ bool PluginPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         info.dimension != pluginInfo_.dimension || data_ != data) {
         pluginInfo_ = info;
         data_ = data;
-        TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT,
-            "pluginInfo = info; pluginInfo.width: %{public}lf, pluginInfo.height: %{public}lf",
-            pluginInfo_.width.Value(), pluginInfo_.height.Value());
     } else {
         // for update pluguin component
         if (pluginInfo_.allowUpdate != info.allowUpdate) {
@@ -296,8 +293,7 @@ void PluginPattern::FireOnCompleteEvent() const
 void PluginPattern::FireOnErrorEvent(const std::string& code, const std::string& msg)
 {
     loadFialState_ = true;
-    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "FireOnErrorEvent code: %{public}s, msg: %{public}s",
-        code.c_str(), msg.c_str());
+    TAG_LOGD(AceLogTag::ACE_PLUGIN_COMPONENT, "code: %{public}s, msg: %{public}s", code.c_str(), msg.c_str());
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<PluginEventHub>();
@@ -310,7 +306,7 @@ void PluginPattern::FireOnErrorEvent(const std::string& code, const std::string&
 
 void PluginPattern::OnActionEvent(const std::string& action) const
 {
-    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "plugin send OnAction Event, action: %{public}s", action.c_str());
+    TAG_LOGD(AceLogTag::ACE_PLUGIN_COMPONENT, "action: %{public}s", action.c_str());
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid()) {
         return;

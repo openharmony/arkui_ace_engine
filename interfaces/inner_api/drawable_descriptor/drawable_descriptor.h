@@ -29,6 +29,7 @@
 #include <optional>
 #include <string>
 #include <tuple>
+#include <utility>
 
 #include "foundation/arkui/ace_engine/interfaces/inner_api/form_render/include/form_renderer_hilog.h"
 #include "image_converter.h"
@@ -80,6 +81,8 @@ public:
     void SetMaskPath(std::string& path);
     void SetIconType(uint32_t iconType);
     void SetDensity(uint32_t density);
+    void InitLayeredParam(std::pair<std::unique_ptr<uint8_t[]>, size_t> &foregroundInfo,
+        std::pair<std::unique_ptr<uint8_t[]>, size_t> &backgroundInfo);
 
 private:
     friend class ImageConverter;
@@ -240,6 +243,20 @@ public:
         HILOG_ERROR("unknow resource type: %{public}s", type.c_str());
         state = Global::Resource::INVALID_FORMAT;
         return nullptr;
+    }
+
+    static std::unique_ptr<DrawableDescriptor> Create(std::pair<std::unique_ptr<uint8_t[]>, size_t> &foregroundInfo,
+        std::pair<std::unique_ptr<uint8_t[]>, size_t> &backgroundInfo, std::string &path, DrawableType& drawableType,
+        const std::shared_ptr<ResourceManager>& resourceMgr)
+    {
+        std::unique_ptr<uint8_t[]> jsonBuf;
+        drawableType = DrawableDescriptor::DrawableType::LAYERED;
+        auto layeredDrawableDescriptor = std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), 0,
+            resourceMgr);
+        layeredDrawableDescriptor->SetMaskPath(path);
+        layeredDrawableDescriptor->SetIconType(1);
+        layeredDrawableDescriptor->InitLayeredParam(foregroundInfo, backgroundInfo);
+        return layeredDrawableDescriptor;
     }
 };
 } // namespace OHOS::Ace::Napi

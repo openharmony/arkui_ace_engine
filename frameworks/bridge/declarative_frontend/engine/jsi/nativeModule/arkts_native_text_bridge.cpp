@@ -16,7 +16,7 @@
 
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "core/interfaces/native/node/api.h"
 #include "core/components/common/properties/shadow.h"
 #include "frameworks/base/geometry/calc_dimension.h"
 #include "frameworks/base/geometry/dimension.h"
@@ -584,7 +584,7 @@ ArkUINativeModuleValue TextBridge::SetHeightAdaptivePolicy(ArkUIRuntimeCallInfo*
     if (secondArg->IsNumber()
         && secondArg->Int32Value(vm) >= static_cast<int32_t>(TextHeightAdaptivePolicy::MAX_LINES_FIRST)
         && secondArg->Int32Value(vm) <= static_cast<int32_t>(TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST)) {
-        uint32_t value = secondArg->Int32Value(vm);
+        auto value = secondArg->Int32Value(vm);
         GetArkUIInternalNodeAPI()->GetTextModifier().SetTextHeightAdaptivePolicy(nativeNode, value);
     } else {
         GetArkUIInternalNodeAPI()->GetTextModifier().ResetTextHeightAdaptivePolicy(nativeNode);

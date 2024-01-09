@@ -14,8 +14,6 @@
  */
 
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
-#include "core/components_ng/pattern/swiper/swiper_model.h"
-#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
@@ -24,14 +22,16 @@
 #include "core/common/recorder/node_data_cache.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/tab_bar/tabs_event.h"
+#include "core/components_ng/pattern/divider/divider_layout_property.h"
+#include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
+#include "core/components_ng/pattern/swiper/swiper_model.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/property/property.h"
-#include "core/components_ng/pattern/divider/divider_layout_property.h"
-#include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -47,7 +47,7 @@ void TabsPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
     // expand to navigation bar by default
     host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(
-        { .edges = SAFE_AREA_EDGE_BOTTOM, .type = SAFE_AREA_TYPE_SYSTEM });
+        { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM });
 }
 
 void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& event)
@@ -97,7 +97,7 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
             }
         }
         /* js callback */
-        if (jsEvent) {
+        if (jsEvent && tabsNode->IsOnMainTree()) {
             TabContentChangeEvent eventInfo(index);
             jsEvent(&eventInfo);
 
@@ -109,7 +109,11 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
             CHECK_NULL_VOID(pattern);
             auto tabBarText = pattern->GetTabBarTextByIndex(index);
             Recorder::EventParamsBuilder builder;
-            builder.SetId(inspectorId).SetType(tabsNode->GetTag()).SetIndex(index).SetText(tabBarText);
+            builder.SetId(inspectorId)
+                .SetType(tabsNode->GetTag())
+                .SetIndex(index)
+                .SetText(tabBarText)
+                .SetDescription(tabsNode->GetAutoEventParamValue(""));
             Recorder::EventRecorder::Get().OnChange(std::move(builder));
             if (!inspectorId.empty()) {
                 Recorder::NodeDataCache::Get().PutMultiple(inspectorId, tabBarText, index);
@@ -232,11 +236,44 @@ void TabsPattern::UpdateSwiperDisableSwipe(bool disableSwipe)
     swiperPattern->SetSwiperEventCallback(disableSwipe);
 }
 
+void TabsPattern::SetSwiperPaddingAndBorder()
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
+    auto layoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    swiperPattern->SetTabsPaddingAndBorder(layoutProperty->CreatePaddingAndBorder());
+}
+
 void TabsPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+        CHECK_NULL_VOID(tabsNode);
+        auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+        CHECK_NULL_VOID(tabBarNode);
+        auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+        CHECK_NULL_VOID(tabBarPattern);
+        auto tabBarRenderContext = tabBarNode->GetRenderContext();
+        CHECK_NULL_VOID(tabBarRenderContext);
+        auto tabBarPaintProperty = tabBarPattern->GetPaintProperty<TabBarPaintProperty>();
+        CHECK_NULL_VOID(tabBarPaintProperty);
+        BlurStyleOption styleOption;
+        styleOption.blurStyle = BlurStyle::NO_MATERIAL;
+        if (!tabBarPaintProperty->GetBarBackgroundColor().has_value() ||
+            tabBarPaintProperty->GetBarBackgroundColor().value() == Color::TRANSPARENT) {
+            styleOption.blurStyle = BlurStyle::COMPONENT_THICK;
+        }
+        tabBarRenderContext->UpdateBackBlurStyle(styleOption);
+    }
 
     UpdateSwiperDisableSwipe(isCustomAnimation_ ? true : isDisableSwipe_);
+    SetSwiperPaddingAndBorder();
 
     if (onChangeEvent_) {
         return;

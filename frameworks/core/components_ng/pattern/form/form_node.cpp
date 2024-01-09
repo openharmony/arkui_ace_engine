@@ -100,11 +100,10 @@ HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& paren
 
     // Send TouchEvent Info to FormRenderService when Provider is ArkTS Card.
     if (subContainer->GetUISyntaxType() == FrontendType::ETS_CARD) {
-        DispatchPointerEvent(touchRestrict.touchEvent);
-        auto callback = [weak = WeakClaim(this)](const TouchEvent& touchEvent) {
+        auto callback = [weak = WeakClaim(this)](const TouchEvent& touchEvent, SerializedGesture& serializedGesture) {
             auto formNode = weak.Upgrade();
             CHECK_NULL_VOID(formNode);
-            formNode->DispatchPointerEvent(touchEvent);
+            formNode->DispatchPointerEvent(touchEvent, serializedGesture);
         };
         context->AddEtsCardTouchEventCallback(touchRestrict.touchEvent.id, callback);
         return testResult;
@@ -117,13 +116,14 @@ HitTestResult FormNode::TouchTest(const PointF& globalPoint, const PointF& paren
     return testResult;
 }
 
-void FormNode::DispatchPointerEvent(const TouchEvent& touchEvent) const
+void FormNode::DispatchPointerEvent(const TouchEvent& touchEvent,
+    SerializedGesture& serializedGesture)
 {
     auto pattern = GetPattern<FormPattern>();
     CHECK_NULL_VOID(pattern);
     auto selfGlobalOffset = GetFormOffset();
     auto pointerEvent = ConvertPointerEvent(selfGlobalOffset, touchEvent);
-    pattern->DispatchPointerEvent(pointerEvent);
+    pattern->DispatchPointerEvent(pointerEvent, serializedGesture);
 }
 
 OffsetF FormNode::GetFormOffset() const

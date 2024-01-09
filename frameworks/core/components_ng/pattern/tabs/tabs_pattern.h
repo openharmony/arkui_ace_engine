@@ -115,6 +115,7 @@ private:
     void BeforeCreateLayoutWrapper() override;
     std::string GetTabBarTextByIndex(int32_t index) const;
     void UpdateSwiperDisableSwipe(bool disableSwipe);
+    void SetSwiperPaddingAndBorder();
 
     bool isCustomAnimation_ = false;
     bool isDisableSwipe_ = false;

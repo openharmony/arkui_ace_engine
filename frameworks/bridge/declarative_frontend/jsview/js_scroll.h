@@ -17,11 +17,11 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SCROLL_H
 
 #include "base/utils/noncopyable.h"
-#include "bridge/declarative_frontend/jsview/js_container_base.h"
+#include "bridge/declarative_frontend/jsview/js_scrollable_base.h"
 
 namespace OHOS::Ace::Framework {
 
-class JSScroll : public JSContainerBase {
+class JSScroll : public JSScrollableBase {
 public:
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);

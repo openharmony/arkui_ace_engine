@@ -33,7 +33,7 @@
 
 namespace OHOS::Ace::NG {
 
-thread_local int32_t UINode::currentAccessibilityId_ = 0;
+thread_local int64_t UINode::currentAccessibilityId_ = 0;
 
 UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
     : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot)
@@ -98,6 +98,29 @@ void UINode::AddChild(const RefPtr<UINode>& child, int32_t slot, bool silently)
     it = children_.begin();
     std::advance(it, slot);
     DoAddChild(it, child, silently);
+}
+
+void UINode::AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode)
+{
+    CHECK_NULL_VOID(child);
+    CHECK_NULL_VOID(siblingNode);
+    auto it = std::find(children_.begin(), children_.end(), child);
+    if (it != children_.end()) {
+        LOGW("Child node already exists. Existing child nodeId %{public}d, add %{public}s child nodeId nodeId "
+             "%{public}d",
+            (*it)->GetId(), child->GetTag().c_str(), child->GetId());
+        return;
+    }
+    // remove from disappearing children
+    RemoveDisappearingChild(child);
+    auto siblingNodeIter = std::find(children_.begin(), children_.end(), siblingNode);
+    if (siblingNodeIter != children_.end()) {
+        DoAddChild(++siblingNodeIter, child, false);
+        return;
+    }
+    it = children_.begin();
+    std::advance(it, -1);
+    DoAddChild(it, child, false);
 }
 
 std::list<RefPtr<UINode>>::iterator UINode::RemoveChild(const RefPtr<UINode>& child, bool allowTransition)
@@ -491,6 +514,10 @@ void UINode::DumpTree(int32_t depth)
     for (const auto& [item, index] : disappearingChildren_) {
         item->DumpTree(depth + 1);
     }
+    auto frameNode = AceType::DynamicCast<FrameNode>(this);
+    if (frameNode && frameNode->GetOverlayNode()) {
+        frameNode->GetOverlayNode()->DumpTree(depth + 1);
+    }
 }
 
 bool UINode::DumpTreeById(int32_t depth, const std::string& id)
@@ -675,6 +702,16 @@ RefPtr<LayoutWrapperNode> UINode::CreateLayoutWrapper(bool forceMeasure, bool fo
     return frameChild ? frameChild->CreateLayoutWrapper(forceMeasure, forceLayout) : nullptr;
 }
 
+bool UINode::RenderCustomChild(int64_t deadline)
+{
+    for (const auto& child : GetChildren()) {
+        if (child && !child->RenderCustomChild(deadline)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void UINode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
 {
     for (const auto& child : GetChildren()) {
@@ -694,6 +731,18 @@ void UINode::Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos)
             child->Build(extraInfos);
         }
     }
+}
+
+void UINode::CreateExportTextureInfoIfNeeded()
+{
+    if (!exportTextureInfo_) {
+        exportTextureInfo_ = MakeRefPtr<ExportTextureInfo>();
+    }
+}
+
+bool UINode::IsNeedExportTexture() const
+{
+    return exportTextureInfo_ && exportTextureInfo_->GetCurrentRenderType() == NodeRenderType::RENDER_TYPE_TEXTURE;
 }
 
 void UINode::SetActive(bool active)
@@ -819,7 +868,7 @@ void UINode::AddDisappearingChild(const RefPtr<UINode>& child, uint32_t index)
 bool UINode::RemoveDisappearingChild(const RefPtr<UINode>& child)
 {
     // quick reject
-    if (child->isDisappearing_ == false) {
+    if (!child->isDisappearing_) {
         return false;
     }
     auto it = std::find_if(disappearingChildren_.begin(), disappearingChildren_.end(),
@@ -955,7 +1004,7 @@ std::string UINode::GetCurrentCustomNodeInfo()
     return extraInfo;
 }
 
-int32_t UINode::GenerateAccessibilityId()
+int64_t UINode::GenerateAccessibilityId()
 {
     return currentAccessibilityId_++;
 }

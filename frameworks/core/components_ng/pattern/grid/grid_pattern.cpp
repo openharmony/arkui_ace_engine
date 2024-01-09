@@ -153,8 +153,11 @@ void GridPattern::OnModifyDone()
             return grid->GetMainContentSize();
         });
     }
-    
+
     Register2DragDropManager();
+    if (IsNeedInitClickEventRecorder()) {
+        Pattern::InitClickEventRecorder();
+    }
 }
 
 void GridPattern::MultiSelectWithoutKeyboard(const RectF& selectedZone)
@@ -355,8 +358,8 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
     if (gridLayoutInfo_.reachStart_) {
         if (source == SCROLL_FROM_UPDATE) {
-            auto friction = ScrollablePattern::CalculateFriction(
-                std::abs(gridLayoutInfo_.currentOffset_) / GetMainContentSize());
+            auto friction =
+                ScrollablePattern::CalculateFriction(std::abs(gridLayoutInfo_.currentOffset_) / GetMainContentSize());
             gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
             gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.currentOffset_ + offset * friction;
         } else {
@@ -405,15 +408,10 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
                         (gridLayoutInfo.endIndex_ != gridLayoutInfo_.endIndex_);
     bool offsetEnd = gridLayoutInfo_.offsetEnd_;
     gridLayoutInfo_ = gridLayoutInfo;
+    AnimateToTarget(scrollAlign_, layoutAlgorithmWrapper);
 
-    if (targetIndex_.has_value()) {
-        ScrollToTargrtIndex(targetIndex_.value());
-        targetIndex_.reset();
-        scrollAlign_ = ScrollAlign::AUTO;
-    }
-    if (gridLayoutInfo_.startIndex_ == 0 && NearZero(gridLayoutInfo_.currentOffset_)) {
-        gridLayoutInfo_.reachStart_ = true;
-    }
+    gridLayoutInfo_.reachStart_ = gridLayoutInfo_.startIndex_ == 0 && NearZero(gridLayoutInfo_.currentOffset_);
+
     gridLayoutInfo_.childrenCount_ = dirty->GetTotalChildCount();
     currentHeight_ = EstimateHeight();
     if (!offsetEnd && gridLayoutInfo_.offsetEnd_) {
@@ -433,63 +431,6 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     MarkSelectedItems();
     isInitialized_ = true;
     return false;
-}
-
-void GridPattern::ScrollToTargrtIndex(int32_t index)
-{
-    if (index == LAST_ITEM) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto totalItemCount = host->TotalChildCount();
-        index = totalItemCount - 1;
-    }
-    int32_t targetRow = -1;
-    for (const auto& rowIndex : gridLayoutInfo_.gridMatrix_) {
-        for (const auto& columnIndex : rowIndex.second) {
-            if (columnIndex.second == index) {
-                targetRow = rowIndex.first;
-                break;
-            }
-        }
-    }
-    float mainGap = GetMainGap();
-    float targetPos = 0.0f;
-    if (targetRow == -1) {
-        return;
-    }
-    for (const auto& rowIndex : gridLayoutInfo_.lineHeightMap_) {
-        if (targetRow == rowIndex.first) {
-            AdjustingTargetPos(targetPos, rowIndex.first, rowIndex.second);
-            targetIndex_.reset();
-            return;
-        }
-        targetPos = targetPos + rowIndex.second + mainGap;
-    }
-}
-void GridPattern::AdjustingTargetPos(float targetPos, int32_t rowIndex, float lineHeight)
-{
-    switch (scrollAlign_) {
-        case ScrollAlign::START:;
-        case ScrollAlign::NONE:break;
-        case ScrollAlign::CENTER:
-            // Centered layout requires subtracting half of the window size+ target row height
-            targetPos = targetPos - ((gridLayoutInfo_.lastMainSize_ - lineHeight) * HALF);
-            break;
-        case ScrollAlign::END:
-            targetPos = targetPos - gridLayoutInfo_.lastMainSize_ + lineHeight;
-            break;
-        case ScrollAlign::AUTO:
-            if ((gridLayoutInfo_.startMainLineIndex_ == rowIndex) && (rowIndex == gridLayoutInfo_.endMainLineIndex_)) {
-                return;
-            }
-            if ((gridLayoutInfo_.startMainLineIndex_ < rowIndex) && (rowIndex < gridLayoutInfo_.endMainLineIndex_)) {
-                return;
-            } else if (rowIndex >= gridLayoutInfo_.endMainLineIndex_) {
-                targetPos = targetPos - gridLayoutInfo_.lastMainSize_ + lineHeight;
-            }
-            break;
-    }
-    AnimateTo(targetPos, -1, nullptr, true);
 }
 
 void GridPattern::CheckScrollable()
@@ -573,6 +514,7 @@ void GridPattern::MarkDirtyNodeSelf()
 
 void GridPattern::OnScrollEndCallback()
 {
+    isSmoothScrolling_ = false;
     SetScrollSource(SCROLL_FROM_ANIMATION);
     scrollStop_ = true;
     MarkDirtyNodeSelf();
@@ -1347,19 +1289,30 @@ void GridPattern::ScrollTo(float position)
 
 float GridPattern::EstimateHeight() const
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, 0.0);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, 0.0);
-    const auto& info = gridLayoutInfo_;
-    auto viewScopeSize = geometryNode->GetPaddingSize();
-    auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
-    auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
-    if (!layoutProperty->GetLayoutOptions().has_value()) {
-        return info.GetContentOffset(mainGap);
+    if (!isConfigScrollable_) {
+        return 0.0f;
     }
+    // During the scrolling animation, the exact current position is used. Other times use the estimated location
+    if (isSmoothScrolling_) {
+        auto lineIndex = 0;
+        scrollGridLayoutInfo_.GetLineIndexByIndex(gridLayoutInfo_.startIndex_, lineIndex);
+        return scrollGridLayoutInfo_.GetTotalHeightFromZeroIndex(lineIndex, GetMainGap()) +
+               std::abs(gridLayoutInfo_.currentOffset_);
+    } else {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, 0.0);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, 0.0);
+        const auto& info = gridLayoutInfo_;
+        auto viewScopeSize = geometryNode->GetPaddingSize();
+        auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
+        auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
+        if (!layoutProperty->GetLayoutOptions().has_value()) {
+            return info.GetContentOffset(mainGap);
+        }
 
-    return info.GetContentOffset(layoutProperty->GetLayoutOptions().value(), mainGap);
+        return info.GetContentOffset(layoutProperty->GetLayoutOptions().value(), mainGap);
+    }
 }
 
 float GridPattern::GetAverageHeight() const
@@ -1433,7 +1386,8 @@ void GridPattern::UpdateScrollBarOffset()
             estimatedHeight = gridLayoutInfo_.GetContentHeight(mainGap);
         } else {
             offset = info.GetContentOffset(layoutProperty->GetLayoutOptions().value(), mainGap);
-            estimatedHeight = info.GetContentHeight(layoutProperty->GetLayoutOptions().value(), mainGap);
+            estimatedHeight =
+                info.GetContentHeight(layoutProperty->GetLayoutOptions().value(), info.childrenCount_, mainGap);
         }
     }
     if (info.startMainLineIndex_ != 0 && info.startIndex_ == 0) {
@@ -1785,12 +1739,13 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
     StopAnimate();
-    if ((index >= 0) || (index == LAST_ITEM)) {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    int32_t totalChildCount = host->TotalChildCount();
+    if (((index >= 0) && (index < totalChildCount)) || (index == LAST_ITEM)) {
         if (smooth) {
             targetIndex_ = index;
             scrollAlign_ = align;
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         } else {
             UpdateStartIndex(index, align);
@@ -1798,4 +1753,33 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
     }
     FireAndCleanScrollingListener();
 }
+
+// Turn on the scrolling animation
+void GridPattern::AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper)
+{
+    if (targetIndex_.has_value()) {
+        AnimateToTargetImp(align, layoutAlgorithmWrapper);
+        targetIndex_.reset();
+    }
+}
+
+// scroll to the item where the index is located
+bool GridPattern::AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper)
+{
+    auto gridScrollLayoutAlgorithm =
+        DynamicCast<GridScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+    scrollGridLayoutInfo_ = gridScrollLayoutAlgorithm->GetScrollGridLayoutInfo();
+
+    float targetPos = 0.0f;
+    // Based on the index, align gets the position to scroll to
+
+    auto sucess = scrollGridLayoutInfo_.GetGridItemAnimatePos(
+        gridLayoutInfo_, targetIndex_.value(), align, GetMainGap(), targetPos);
+    CHECK_NULL_RETURN(sucess, false);
+
+    isSmoothScrolling_ = true;
+    AnimateTo(targetPos, -1, nullptr, true);
+    return true;
+}
+
 } // namespace OHOS::Ace::NG

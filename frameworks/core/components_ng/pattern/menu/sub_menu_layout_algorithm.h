@@ -35,11 +35,13 @@ private:
     float VerticalLayoutSubMenuHalfScreen(const SizeF& size, float position, const SizeF& menuItemSize);
     void ModifySubMenuWrapper(LayoutWrapper* layoutWrapper);
     void InitializePadding(LayoutWrapper* layoutWrapper);
+    void InitializePaddingAPI11(LayoutWrapper* layoutWrapper);
     float margin_ = 0.0f;
     float paddingStart_ = 0.0f;
     float paddingEnd_ = 0.0f;
     float paddingTop_ = 0.0f;
     float paddingBottom_ = 0.0f;
+    float optionPadding_ = 0.0f;
 
     ACE_DISALLOW_COPY_AND_MOVE(SubMenuLayoutAlgorithm);
 };

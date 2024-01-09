@@ -22,6 +22,7 @@
 #include "pointer_event.h"
 
 #include "base/utils/macros.h"
+#include "interfaces/inner_api/ace/serialized_gesture.h"
 
 namespace OHOS {
 namespace Ace {
@@ -40,7 +41,8 @@ public:
      * @param pointerEvent The pointer event info.
      */
     virtual void DispatchPointerEvent(
-        const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) = 0;
+        const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent,
+        SerializedGesture& serializedGesture) = 0;
     /**
      * @brief Set AllowUpdate.
      * @param allowUpdate The allowUpdate.

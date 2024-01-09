@@ -33,12 +33,8 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-
-constexpr int32_t CHILD_COUNT = 2;
 constexpr double DEFAULT_INDICATOR_OFFSET = 16.0;
-constexpr int32_t DEFAULT_FRICTION_RATIO = 42;
-constexpr char REFRESH_LAST_UPDATED[] = "refresh.last_updated"; // I18n for last updated
-constexpr Dimension LOADING_PROGRESS_SIZE = 32.0_vp;
+constexpr int32_t DEFAULT_FRICTION_RATIO = 62;
 } // namespace
 
 void RefreshModelNG::Create()
@@ -53,99 +49,11 @@ void RefreshModelNG::Create()
     ACE_UPDATE_LAYOUT_PROPERTY(
         RefreshLayoutProperty, IndicatorOffset, Dimension(DEFAULT_INDICATOR_OFFSET, DimensionUnit::VP));
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, Friction, DEFAULT_FRICTION_RATIO);
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsUseOffset, true);
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsShowLastTime, false);
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, ScrollableOffset, OffsetF(0.0, 0.0));
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, ShowTimeOffset, OffsetF(0.0, 0.0));
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingProcessOffset, OffsetF(0.0, 0.0));
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, TriggerRefreshDistance, Dimension(0.0, DimensionUnit::VP));
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshDistance, Dimension(0.0, DimensionUnit::VP));
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsRefresh, true);
 }
 
-void RefreshModelNG::Pop()
-{
-    auto refreshNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    if (refreshNode && refreshNode->IsAtomicNode()) {
-        ViewStackProcessor::GetInstance()->Pop();
-        refreshNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    }
-    CHECK_NULL_VOID(refreshNode);
-    auto layoutProperty = refreshNode->GetLayoutProperty<RefreshLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto refreshRenderProperty = refreshNode->GetPaintProperty<RefreshRenderProperty>();
-    CHECK_NULL_VOID(refreshRenderProperty);
-    auto pattern = refreshNode->GetPattern<RefreshPattern>();
-    CHECK_NULL_VOID(pattern);
-    if (!pattern->GetIsCustomBuilderExist()) {
-        if (refreshNode->TotalChildCount() >= CHILD_COUNT) {
-            return;
-        }
-        auto textChild = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
-        CHECK_NULL_VOID(textChild);
-        refreshNode->AddChild(textChild);
-        auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
-        CHECK_NULL_VOID(textLayoutProperty);
-        if (layoutProperty->GetIsShowLastTimeValue()) {
-            textLayoutProperty->UpdateContent(refreshRenderProperty->GetTimeTextValue());
-            auto lastTimeText = Localization::GetInstance()->GetEntryLetters(REFRESH_LAST_UPDATED);
-            refreshRenderProperty->UpdateLastTimeText(lastTimeText);
-            auto timeText = StringUtils::FormatString("");
-            refreshRenderProperty->UpdateTimeText(timeText);
-        }
-        auto textStyle = layoutProperty->GetTextStyle();
-        CHECK_NULL_VOID(textStyle);
-        textLayoutProperty->UpdateTextAlign(textStyle->GetTextAlign());
-        textLayoutProperty->UpdateTextBaseline(textStyle->GetTextBaseline());
-        textLayoutProperty->UpdateTextCase(textStyle->GetTextCase());
-        textLayoutProperty->UpdateTextColor(textStyle->GetTextColor());
-        textLayoutProperty->UpdateFontWeight(textStyle->GetFontWeight());
-        textLayoutProperty->UpdateFontFamily(textStyle->GetFontFamilies());
-        textLayoutProperty->UpdateTextDecoration(textStyle->GetTextDecoration());
-        textLayoutProperty->UpdateTextDecorationColor(textStyle->GetTextDecorationColor());
-        textLayoutProperty->UpdateTextDecorationStyle(textStyle->GetTextDecorationStyle());
-        textLayoutProperty->UpdateVisibility(VisibleType::INVISIBLE);
-
-        auto loadingProgressChild = FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG,
-            ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LoadingProgressPattern>());
-        CHECK_NULL_VOID(loadingProgressChild);
-        auto gestureHub = loadingProgressChild->GetEventHub<EventHub>();
-        if (gestureHub) {
-            gestureHub->SetEnabled(false);
-        }
-        auto progressLayoutProperty = loadingProgressChild->GetLayoutProperty<LoadingProgressLayoutProperty>();
-        progressLayoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(LOADING_PROGRESS_SIZE.ConvertToPx()), CalcLength(LOADING_PROGRESS_SIZE.ConvertToPx())));
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto themeManager = pipeline->GetThemeManager();
-        CHECK_NULL_VOID(themeManager);
-        auto theme = themeManager->GetTheme<RefreshTheme>();
-        CHECK_NULL_VOID(theme);
-        auto paintProperty = loadingProgressChild->GetPaintProperty<LoadingProgressPaintProperty>();
-        CHECK_NULL_VOID(paintProperty);
-        paintProperty->UpdateColor(theme->GetProgressColor());
-        auto progressContext = loadingProgressChild->GetRenderContext();
-        CHECK_NULL_VOID(progressContext);
-        progressContext->UpdateOpacity(0.0);
-        refreshNode->AddChild(loadingProgressChild);
-        loadingProgressChild->MarkDirtyNode();
-    }
-    NG::ViewStackProcessor::GetInstance()->PopContainer();
-}
 void RefreshModelNG::SetRefreshing(bool isRefreshing)
 {
-    ACE_UPDATE_PAINT_PROPERTY(RefreshRenderProperty, IsRefreshing, isRefreshing);
-}
-
-void RefreshModelNG::SetRefreshDistance(const Dimension& refreshDistance)
-{
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, RefreshDistance, refreshDistance);
-}
-
-void RefreshModelNG::SetUseOffset(bool isUseOffset)
-{
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsUseOffset, isUseOffset);
+    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsRefreshing, isRefreshing);
 }
 
 void RefreshModelNG::SetIndicatorOffset(const Dimension& indicatorOffset)
@@ -158,54 +66,9 @@ void RefreshModelNG::SetFriction(int32_t friction)
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, Friction, friction);
 }
 
-void RefreshModelNG::IsRefresh(bool isRefresh)
-{
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsRefresh, isRefresh);
-}
-
-void RefreshModelNG::SetLoadingDistance(const Dimension& loadingDistance)
-{
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, LoadingDistance, loadingDistance);
-}
-
-void RefreshModelNG::SetProgressDistance(const Dimension& progressDistance)
-{
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, ProgressDistance, progressDistance);
-}
-
-void RefreshModelNG::SetProgressDiameter(const Dimension& progressDiameter)
-{
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, ProgressDiameter, progressDiameter);
-}
-
-void RefreshModelNG::SetMaxDistance(const Dimension& maxDistance)
-{
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, MaxDistance, maxDistance);
-}
-
-void RefreshModelNG::SetIsShowLastTime(bool isShowlastTime)
-{
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsShowLastTime, isShowlastTime);
-}
-
-void RefreshModelNG::SetShowTimeDistance(const Dimension& showTimeDistance)
-{
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, ShowTimeDistance, showTimeDistance);
-}
-
-void RefreshModelNG::SetTextStyle(const TextStyle& textStyle)
-{
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, TextStyle, textStyle);
-}
-
 void RefreshModelNG::SetProgressColor(const Color& progressColor)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, ProgressColor, progressColor);
-}
-
-void RefreshModelNG::SetProgressBackgroundColor(const Color& backgroundColor)
-{
-    ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, BackgroundColor, backgroundColor);
 }
 
 void RefreshModelNG::SetOnStateChange(StateChangeEvent&& stateChange)
@@ -237,7 +100,6 @@ void RefreshModelNG::SetChangeEvent(ChangeEvent&& changeEvent)
 
 void RefreshModelNG::SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder)
 {
-    CHECK_NULL_VOID(customBuilder);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RefreshPattern>();

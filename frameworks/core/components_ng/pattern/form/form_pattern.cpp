@@ -22,6 +22,7 @@
 #include "base/geometry/dimension.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
+#include "base/utils/time_util.h"
 #include "core/common/form_manager.h"
 #include "core/common/frontend.h"
 #include "core/components/form/resource/form_manager_delegate.h"
@@ -42,9 +43,7 @@
 #include "form_info.h"
 #endif
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/common/udmf/udmf_client.h"
-#endif // ENABLE_DRAG_FRAMEWORK
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -176,10 +175,16 @@ void FormPattern::HandleSnapshot(uint32_t delayTime)
     CHECK_NULL_VOID(pipeline);
     auto executor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(executor);
+    snapshotTimestamp_ = GetCurrentTimestamp();
     executor->PostDelayedTask(
-        [weak = WeakClaim(this)]() mutable {
+        [weak = WeakClaim(this), delayTime]() mutable {
             auto form = weak.Upgrade();
             CHECK_NULL_VOID(form);
+            int64_t currentTime = GetCurrentTimestamp();
+            if (currentTime - form->snapshotTimestamp_ < delayTime) {
+                TAG_LOGD(AceLogTag::ACE_FORM, "another snapshot task has been posted.");
+                return;
+            }
             form->TakeSurfaceCaptureForUI();
         },
         TaskExecutor::TaskType::UI, delayTime);
@@ -300,6 +305,7 @@ void FormPattern::UpdateImageNode()
     CHECK_NULL_VOID(pixelMap_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    DeleteImageNode();
     auto imageNode = CreateImageNode();
     CHECK_NULL_VOID(imageNode);
     auto pixelLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
@@ -728,6 +734,7 @@ void FormPattern::FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSur
     auto layoutProperty = host->GetLayoutProperty<FormLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
+    TAG_LOGI(AceLogTag::ACE_FORM, "VisibleType: %{public}d", static_cast<int32_t>(visible));
     layoutProperty->UpdateVisibility(visible);
 
     isLoaded_ = true;
@@ -992,7 +999,8 @@ const RefPtr<SubContainer>& FormPattern::GetSubContainer() const
     return subContainer_;
 }
 
-void FormPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const
+void FormPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    SerializedGesture& serializedGesture)
 {
     CHECK_NULL_VOID(pointerEvent);
     CHECK_NULL_VOID(formManagerBridge_);
@@ -1003,12 +1011,11 @@ void FormPattern::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>&
             pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_UP ||
             pointerAction == OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW) {
             // still dispatch 'up' event to finish this pointer event
-            formManagerBridge_->DispatchPointerEvent(pointerEvent);
+            formManagerBridge_->DispatchPointerEvent(pointerEvent, serializedGesture);
         }
         return;
     }
-
-    formManagerBridge_->DispatchPointerEvent(pointerEvent);
+    formManagerBridge_->DispatchPointerEvent(pointerEvent, serializedGesture);
 }
 
 void FormPattern::RemoveSubContainer()
@@ -1030,7 +1037,6 @@ void FormPattern::EnableDrag()
                          const std::string& /* extraParams */) -> DragDropInfo {
         DragDropInfo info;
 
-#ifdef ENABLE_DRAG_FRAMEWORK
         auto form = weak.Upgrade();
         CHECK_NULL_RETURN(form, info);
         auto subcontainer = form->GetSubContainer();
@@ -1039,7 +1045,6 @@ void FormPattern::EnableDrag()
         RefPtr<UnifiedData> unifiedData = UdmfClient::GetInstance()->CreateUnifiedData();
         UdmfClient::GetInstance()->AddFormRecord(unifiedData, subcontainer->GetRunningCardId(), form->cardInfo_);
         event->SetData(unifiedData);
-#endif // ENABLE_DRAG_FRAMEWORK
 
         info.extraInfo = "card drag";
         return info;

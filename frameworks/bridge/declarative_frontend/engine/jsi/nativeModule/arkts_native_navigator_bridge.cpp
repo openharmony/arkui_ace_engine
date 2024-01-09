@@ -14,7 +14,7 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigator_bridge.h"
 
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "core/interfaces/native/node/api.h"
 
 namespace OHOS::Ace::NG {
 ArkUINativeModuleValue NavigatorBridge::SetTarget(ArkUIRuntimeCallInfo* runtimeCallInfo)

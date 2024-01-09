@@ -339,6 +339,7 @@ void SharedOverlayManager::GetOffShuttle(const RefPtr<SharedTransitionEffect>& e
         auto exchangeEffect = AceType::DynamicCast<SharedTransitionExchange>(effect);
         auto destVisible = exchangeEffect->GetInitialDestVisible();
         exchangeEffect->SetVisibleToDest(destVisible);
+        exchangeEffect->DestRequestDefaultFocus();
     }
 }
 

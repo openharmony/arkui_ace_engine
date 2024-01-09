@@ -32,7 +32,6 @@ public:
 protected:
     static void CreateFlexComponent(const JSCallbackInfo& info);
     static void CreateWrapComponent(const JSCallbackInfo& info, int32_t wrapVal);
-    static void CalculationWrapDirection(int32_t direction, int32_t wrapVal);
     static void JsFlexWidth(const JSRef<JSVal>& jsValue);
     static void JsFlexHeight(const JSRef<JSVal>& jsValue);
 };

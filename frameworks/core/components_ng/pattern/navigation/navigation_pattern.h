@@ -27,12 +27,15 @@
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
+#include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
 
 using namespace Framework;
+using OnNavigationAnimation = std::function<NavigationTransition(NavContentInfo, NavContentInfo,
+        NavigationOperation)>;
 class NavigationPattern : public Pattern {
     DECLARE_ACE_TYPE(NavigationPattern, Pattern);
 
@@ -184,6 +187,8 @@ public:
 
     void OnVisibleChange(bool isVisible) override;
 
+    void OnColorConfigurationUpdate() override;
+
     Dimension GetMinNavBarWidthValue() const
     {
         return minNavBarWidthValue_;
@@ -252,7 +257,7 @@ public:
     {
         return initNavBarWidthValue_;
     }
-    
+
     void SetIfNeedInit(bool ifNeedInit)
     {
         ifNeedInit_ = ifNeedInit;
@@ -297,17 +302,34 @@ public:
 
     static void FireNavigationStateChange(const RefPtr<UINode>& node, bool show);
 
-    void NotifyDialogChange(bool isShow);
+    void NotifyDialogChange(bool isShow, bool isNavigationChanged);
     void NotifyPageHide(const std::string& pageName);
+    void DumpInfo() override;
+
+    void SetIsCustomAnimation(bool isCustom)
+    {
+        isCustomAnimation_ = isCustom;
+    }
+
+    void SetNavigationTransition(const OnNavigationAnimation navigationAnimation)
+    {
+        onTransition_ = std::move(navigationAnimation);
+    }
 
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath, bool isPopPage);
     void TransitionWithAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
+    bool TriggerCustomAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
+        const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
 
+    void OnCustomAnimationFinish(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
+        const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
     void TransitionWithOutAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool needVisible = false);
+    NavigationTransition ExecuteTransition(const RefPtr<NavDestinationGroupNode>& preTopDestination,
+        const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
     RefPtr<RenderContext> GetTitleBarRenderContext();
     void DoAnimation(NavigationMode usrNavigationMode);
     RefPtr<UINode> GenerateUINodeByIndex(int32_t index);
@@ -321,11 +343,16 @@ private:
     void RangeCalculation(
         const RefPtr<NavigationGroupNode>& hostNode, const RefPtr<NavigationLayoutProperty>& navigationLayoutProperty);
     bool UpdateTitleModeChangeEventHub(const RefPtr<NavigationGroupNode>& hostNode);
+    void NotifyPageShow(const std::string& pageName);
+    int32_t FireNavDestinationStateChange(bool show);
+    void UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNavDestination,
+        const RefPtr<FrameNode> &newTopNavDestination);
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
     RefPtr<NavigationStack> navigationStack_;
     RefPtr<InputEvent> hoverEvent_;
     RefPtr<DragEvent> dragEvent_;
+    RefPtr<NavigationTransitionProxy> currentProxy_;
     RectF dragRect_;
     bool ifNeedInit_ = true;
     float preNavBarWidth_ = 0.0f;
@@ -343,10 +370,10 @@ private:
     Dimension minContentWidthValue_ = 0.0_vp;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
     bool navigationModeChange_ = false;
+    bool isCustomAnimation_ = false; // custom animation
     std::shared_ptr<NavigationController> navigationController_;
     std::map<int32_t, std::function<void(bool)>> onStateChangeMap_;
-    void NotifyPageShow(const std::string& pageName);
-    RefPtr<UINode> FireNavDestinationStateChange(bool show);
+    OnNavigationAnimation onTransition_;
 };
 
 } // namespace OHOS::Ace::NG

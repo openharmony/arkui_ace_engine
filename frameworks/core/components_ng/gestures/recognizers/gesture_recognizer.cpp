@@ -17,6 +17,7 @@
 
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
+#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/components_ng/event/response_ctrl.h"
@@ -35,11 +36,11 @@ RefPtr<EventManager> GetCurrentEventManager()
     return context->GetEventManager();
 }
 
-RefPtr<GestureReferee> GetCurrentGestureReferee()
+RefPtr<GestureReferee> GetCurrentGestureReferee(const RefPtr<NGGestureRecognizer>& recognizer)
 {
     auto eventManager = GetCurrentEventManager();
     CHECK_NULL_RETURN(eventManager, nullptr);
-    return eventManager->GetGestureRefereeNG();
+    return eventManager->GetGestureRefereeNG(recognizer);
 }
 
 } // namespace
@@ -86,7 +87,6 @@ bool NGGestureRecognizer::ShouldResponse()
     }
     auto eventManager = GetCurrentEventManager();
     CHECK_NULL_RETURN(eventManager, true);
-
     auto frameNode = GetAttachedNode();
     auto ctrl = eventManager->GetResponseCtrl();
     CHECK_NULL_RETURN(ctrl, true);
@@ -164,7 +164,7 @@ void NGGestureRecognizer::BatchAdjudicate(const RefPtr<NGGestureRecognizer>& rec
         return;
     }
 
-    auto referee = GetCurrentGestureReferee();
+    auto referee = GetCurrentGestureReferee(recognizer);
     if (!referee) {
         recognizer->OnRejected();
         return;
@@ -198,6 +198,11 @@ void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode
     while (host) {
         auto localMat = getLocalMatrix();
         vTrans.emplace_back(localMat);
+        //when the InjectPointerEvent is invoked, need to enter the lowest windowscene.
+        if (host->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
+            TAG_LOGD(AceLogTag::ACE_GESTURE, "need to break when inject WindowsScene, id:%{public}d", host->GetId());
+            break;
+        }
         host = host->GetAncestorNodeOfFrame();
     }
 
@@ -220,9 +225,12 @@ void NGGestureRecognizer::AboutToAccept()
         OnAccepted();
         return;
     }
+
     auto eventManager = GetCurrentEventManager();
     CHECK_NULL_VOID(eventManager);
-
+    if (fromCardOrUIExtension_) {
+        eventManager->SetInnerFlag(true);
+    }
     auto frameNode = GetAttachedNode();
     auto ctrl = eventManager->GetResponseCtrl();
     CHECK_NULL_VOID(ctrl);

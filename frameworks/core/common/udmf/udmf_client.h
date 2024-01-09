@@ -48,8 +48,7 @@ public:
         const RefPtr<UnifiedData>& unifiedData, int32_t formId, const RequestFormInfo& cardInfo) = 0;
     virtual void AddLinkRecord(
         const RefPtr<UnifiedData>& unifiedData, const std::string& url, const std::string& description) = 0;
-    virtual void GetLinkRecord(
-        const RefPtr<UnifiedData>& unifiedData, std::string& url, std::string& description) = 0;
+    virtual void GetLinkRecord(const RefPtr<UnifiedData>& unifiedData, std::string& url, std::string& description) = 0;
     virtual bool GetFileUriRecord(const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri) = 0;
     virtual bool AddFileUriRecord(const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri) = 0;
     virtual void AddHtmlRecord(

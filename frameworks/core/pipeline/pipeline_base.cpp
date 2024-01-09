@@ -267,10 +267,11 @@ void PipelineBase::SetTextFieldManager(const RefPtr<ManagerInterface>& manager)
     textFieldManager_ = manager;
 }
 
-void PipelineBase::RegisterFont(const std::string& familyName, const std::string& familySrc)
+void PipelineBase::RegisterFont(const std::string& familyName, const std::string& familySrc,
+    const std::string& bundleName, const std::string& moduleName)
 {
     if (fontManager_) {
-        fontManager_->RegisterFont(familyName, familySrc, AceType::Claim(this));
+        fontManager_->RegisterFont(familyName, familySrc, AceType::Claim(this), bundleName, moduleName);
     }
 }
 
@@ -287,6 +288,13 @@ bool PipelineBase::GetSystemFont(const std::string& fontName, FontInfo& fontInfo
         return fontManager_->GetSystemFont(fontName, fontInfo);
     }
     return false;
+}
+
+void PipelineBase::GetUIFontConfig(FontConfigJsonInfo& fontConfigJsonInfo)
+{
+    if (fontManager_) {
+        fontManager_->GetUIFontConfig(fontConfigJsonInfo);
+    }
 }
 
 void PipelineBase::HyperlinkStartAbility(const std::string& address) const
@@ -783,7 +791,8 @@ void PipelineBase::AddEtsCardTouchEventCallback(int32_t pointId, EtsCardTouchEve
     etsCardTouchEventCallback_[pointId] = std::move(callback);
 }
 
-void PipelineBase::HandleEtsCardTouchEvent(const TouchEvent& point)
+void PipelineBase::HandleEtsCardTouchEvent(const TouchEvent& point,
+    SerializedGesture& serializedGesture)
 {
     if (point.id < 0) {
         return;
@@ -793,9 +802,8 @@ void PipelineBase::HandleEtsCardTouchEvent(const TouchEvent& point)
     if (iter == etsCardTouchEventCallback_.end()) {
         return;
     }
-
     if (iter->second) {
-        iter->second(point);
+        iter->second(point, serializedGesture);
     }
 }
 

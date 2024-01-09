@@ -67,6 +67,8 @@ constexpr float CONTAINER_WIDTH = 600.0f;
 constexpr float CONTAINER_HEIGHT = 1000.0f;
 constexpr float BUBBLE_WIDTH = 100.0f;
 constexpr float BUBBLE_HEIGHT = 50.0f;
+constexpr float BUBBLE_WIDTH_CHANGE = 116.0f;
+constexpr float BUBBLE_HEIGHT_CHANGE = 66.0f;
 constexpr float TARGET_WIDTH = 100.0f;
 constexpr float TARGET_HEIGHT = 200.0f;
 constexpr float TARGET_X = 100.0f;
@@ -1508,9 +1510,9 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest003, TestSize.Level1)
      */
     bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     bubbleLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
-    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(BUBBLE_WIDTH, BUBBLE_HEIGHT));
-    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetX(), 16);
-    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetY(), 1);
+    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameSize(), SizeF(BUBBLE_WIDTH_CHANGE, BUBBLE_HEIGHT_CHANGE));
+    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetX(), 0);
+    EXPECT_EQ(textLayoutWrapper->GetGeometryNode()->GetFrameOffset().GetY(), 8);
 }
 
 /**
@@ -1747,8 +1749,8 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest007, TestSize.Level1)
     EXPECT_FALSE(children.empty());
     bubbleLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     bubbleLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
-    EXPECT_FALSE(
-        bubbleLayoutAlgorithm->GetChildPosition(SizeF(ZERO, ZERO), bubbleLayoutProperty) == DISPLAY_WINDOW_OFFSET);
+    EXPECT_FALSE(bubbleLayoutAlgorithm->GetChildPosition(SizeF(ZERO, ZERO), bubbleLayoutProperty, true) ==
+                 DISPLAY_WINDOW_OFFSET);
 }
 
 /**
@@ -1801,7 +1803,7 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest008, TestSize.Level1)
          * @tc.steps: step4. excute GetChildPosition
          * @tc.expected: step4. GetChildPosition returns the result as the bubble position.
          */
-        auto resultOffset = bubbleLayoutAlgorithm->GetChildPosition(childSize, bubbleLayoutProperty);
+        auto resultOffset = bubbleLayoutAlgorithm->GetChildPositionNew(childSize, bubbleLayoutProperty);
         EXPECT_EQ(resultOffset, DISPLAY_WINDOW_OFFSET);
         OffsetF arrowPosition;
         /**
@@ -1922,6 +1924,38 @@ HWTEST_F(BubbleTestNg, BubbleLayoutTest009, TestSize.Level1)
         EXPECT_EQ(targetSize, SizeF(0.0f, 0.0f));
         auto targetOffset = bubbleLayoutAlgorithm->targetOffset_;
         EXPECT_EQ(targetOffset, OffsetF(0.0f, 0.0f));
+    }
+}
+
+/**
+ * @tc.name: BubbleBorderTest001
+ * @tc.desc: Test BubbleBorderOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestNg, BubbleBorderTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create the BubblePaintMethod.
+     */
+    BubblePaintMethod bubblePaintMethod;
+
+    /**
+     * @tc.steps: step2. Set condition.
+     */
+    bubblePaintMethod.SetShowArrow(true);
+    bubblePaintMethod.enableArrow_ = true;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto popupTheme = pipelineContext->GetTheme<PopupTheme>();
+
+    /**
+     * @tc.steps: step3. Excute function for border offset.
+     */
+    if (popupTheme->GetPopupDoubleBorderEnable()) {
+        if (bubblePaintMethod.needPaintOuterBorder_) {
+            EXPECT_EQ(bubblePaintMethod.GetBorderOffset(), -bubblePaintMethod.outerBorderWidth_);
+        } else {
+            EXPECT_EQ(bubblePaintMethod.GetBorderOffset(), bubblePaintMethod.innerBorderWidth_);
+        }
     }
 }
 } // namespace OHOS::Ace::NG

@@ -224,6 +224,8 @@ HWTEST_F(WebModelTestNg, SetOnLoadIntercept005, TestSize.Level1)
     webModelNG.SetAudioStateChangedId(std::move(audioStateChanged));
     auto firstContentfulPaintId = [](const std::shared_ptr<BaseEventInfo>& info) {};
     webModelNG.SetFirstContentfulPaintId(std::move(firstContentfulPaintId));
+    auto safeBrowsingCheckResultId = [](const std::shared_ptr<BaseEventInfo>& info) {};
+    webModelNG.SetSafeBrowsingCheckResultId(std::move(safeBrowsingCheckResultId));
 #endif
 }
 } // namespace OHOS::Ace::NG

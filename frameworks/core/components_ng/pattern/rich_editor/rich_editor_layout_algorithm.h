@@ -49,6 +49,7 @@ protected:
 
 private:
     void GetPlaceholderRects(std::vector<RectF>& rectF) override;
+    RefPtr<SpanItem> GetFirstTextSpanItem() const;
     int32_t GetPreviousLength() const override;
     ParagraphStyle GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const override;
 

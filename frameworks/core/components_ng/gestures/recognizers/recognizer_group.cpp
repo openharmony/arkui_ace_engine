@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/components_ng/gestures/gesture_group.h"
 
 namespace OHOS::Ace::NG {
 
@@ -33,6 +34,22 @@ void RecognizerGroup::OnBeginGestureReferee(int32_t touchId, bool needUpdateChil
             child->BeginReferee(touchId, needUpdateChild);
         }
     }
+}
+
+RefPtr<Gesture> RecognizerGroup::CreateGestureFromRecognizer() const
+{
+    GestureMode mode = GetGestureMode();
+    RefPtr<GestureGroup> gestureGroup = AceType::MakeRefPtr<GestureGroup>(mode);
+    for (const auto& child : recognizers_) {
+        if (!child) {
+            continue;
+        }
+        RefPtr<Gesture> gesture = child->CreateGestureFromRecognizer();
+        if (gesture) {
+            gestureGroup->AddGesture(gesture);
+        }
+    }
+    return gestureGroup;
 }
 
 void RecognizerGroup::OnFinishGestureReferee(int32_t touchId, bool isBlocked)

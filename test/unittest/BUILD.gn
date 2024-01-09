@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -232,6 +232,7 @@ ohos_source_set("ace_components_manager") {
     "$ace_root/frameworks/core/components_ng/manager/drag_drop/drag_drop_proxy.cpp",
     "$ace_root/frameworks/core/components_ng/manager/frame_rate/frame_rate_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/full_screen/full_screen_manager.cpp",
+    "$ace_root/frameworks/core/components_ng/manager/post_event/post_event_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/safe_area/safe_area_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_client.cpp",
     "$ace_root/frameworks/core/components_ng/manager/select_overlay/select_overlay_manager.cpp",
@@ -395,6 +396,7 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/utils.cpp",
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
+    "$ace_root/frameworks/core/gestures/drag_event.cpp",
     "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
     "$ace_root/frameworks/core/pipeline/base/constants.cpp",
     "$ace_root/test/mock/core/common/mock_icon_theme.cpp",
@@ -409,19 +411,7 @@ ohos_source_set("ace_core_extra") {
 
 ohos_source_set("ace_engine_unittest_flutter_deps") {
   testonly = true
-  sources = [ "$ace_root/test/mock/core/common/mock_flutter_window.cpp" ]
-  public_configs = [ "$ace_flutter_engine_root:flutter_config" ]
-  public_deps = [
-    "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_ohos",
-    "$skia_root_new:skia_ohos",
-  ]
-  if (enable_graphic_text_gine) {
-    public_deps -= [ "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_ohos" ]
-    public_deps += [
-      "$ace_flutter_engine_root:flutter_engine_fml_ohos",
-      "$ace_flutter_engine_root/icu:ace_libicu_ohos",
-    ]
-  }
+  public_deps = [ "$skia_root_new:skia_ohos" ]
   cflags_cc = [ "-Wno-thread-safety-attributes" ]
   external_deps = [ "eventhandler:libeventhandler" ]
 }
@@ -440,6 +430,7 @@ source_set("ace_components_mock") {
     "$ace_root/test/mock/base/mock_event_report.cpp",
     "$ace_root/test/mock/base/mock_foldable_window.cpp",
     "$ace_root/test/mock/base/mock_frame_trace_adapter.cpp",
+    "$ace_root/test/mock/base/mock_image_source.cpp",
     "$ace_root/test/mock/base/mock_jank_frame_report.cpp",
     "$ace_root/test/mock/base/mock_localization.cpp",
     "$ace_root/test/mock/base/mock_measure_util.cpp",
@@ -451,17 +442,20 @@ source_set("ace_components_mock") {
     "$ace_root/test/mock/base/mock_system_properties.cpp",
     "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
     "$ace_root/test/mock/core/common/mock_ace_engine.cpp",
+    "$ace_root/test/mock/core/common/mock_ace_engine_ext.cpp",
     "$ace_root/test/mock/core/common/mock_clipboard.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "$ace_root/test/mock/core/common/mock_data_detector_mgr.cpp",
     "$ace_root/test/mock/core/common/mock_font_manager_ng.cpp",
+    "$ace_root/test/mock/core/common/mock_frame_report.cpp",
     "$ace_root/test/mock/core/common/mock_image_analyzer_mgr.cpp",
     "$ace_root/test/mock/core/common/mock_interaction.cpp",
+    "$ace_root/test/mock/core/common/mock_layout_inspector.cpp",
     "$ace_root/test/mock/core/common/mock_motion_path_evaluator.cpp",
-    "$ace_root/test/mock/core/common/mock_scrollable.cpp",
-    "$ace_root/test/mock/core/common/mock_scrollable_ng.cpp",
+    "$ace_root/test/mock/core/common/mock_raw_recognizer.cpp",
     "$ace_root/test/mock/core/common/mock_theme_constants.cpp",
     "$ace_root/test/mock/core/common/mock_theme_utils.cpp",
+    "$ace_root/test/mock/core/common/mock_udmf.cpp",
     "$ace_root/test/mock/core/event/mock_time_event_proxy.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_cache.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_loading_context.cpp",
@@ -470,11 +464,13 @@ source_set("ace_components_mock") {
     "$ace_root/test/mock/core/pipeline/mock_element_register.cpp",
     "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
     "$ace_root/test/mock/core/render/mock_animation_utils.cpp",
+    "$ace_root/test/mock/core/render/mock_canvas_image.cpp",
     "$ace_root/test/mock/core/render/mock_font_collection.cpp",
     "$ace_root/test/mock/core/render/mock_media_player_creator.cpp",
     "$ace_root/test/mock/core/render/mock_modifier_adapter.cpp",
     "$ace_root/test/mock/core/render/mock_paragraph.cpp",
     "$ace_root/test/mock/core/render/mock_path_painter.cpp",
+    "$ace_root/test/mock/core/render/mock_pixmap_image.cpp",
     "$ace_root/test/mock/core/render/mock_render_context_creator.cpp",
     "$ace_root/test/mock/core/render/mock_render_surface_creator.cpp",
     "$ace_root/test/mock/core/rosen/testing_typography_style.cpp",
@@ -484,7 +480,6 @@ source_set("ace_components_mock") {
   ]
   deps = [
     "$ace_root/frameworks/core/components/theme:build_theme_code",
-    "//foundation/arkui/napi:ace_napi",
     "//third_party/googletest:gmock_main",
   ]
   configs += [ ":ace_unittest_config" ]
@@ -775,7 +770,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/refresh/refresh_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/refresh/refresh_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/relative_container/relative_container_layout_algorithm.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/relative_container/relative_container_view.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/relative_container/relative_container_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/paragraph_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_content_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_controller.cpp",
@@ -808,12 +803,16 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/scroll_bar/scroll_bar_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/nestable_scroll_container.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/refresh_coordination.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_controller.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_item.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_item_pool.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_paint_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/scrollable/scrollable_utils.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/search_event_hub.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/search/search_gesture_event_hub.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/search_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/search_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/search/search_node.cpp",
@@ -878,6 +877,8 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/symbol/symbol_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/symbol/symbol_source_info.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/tabs/tab_bar_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/tabs/tab_bar_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/tabs/tab_bar_layout_property.cpp",
@@ -893,6 +894,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/text/image_span_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/span_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/span_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text/symbol_span_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_content_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_controller.cpp",
@@ -987,6 +989,5 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components/theme:build_theme_code",
     "//third_party/bounds_checking_function:libsec_static",
   ]
-  external_deps = [ "napi:ace_napi" ]
   configs = [ ":ace_unittest_config" ]
 }

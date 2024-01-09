@@ -25,6 +25,8 @@ void NodeContainerModelNG::Create()
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         "NodeContainer", nodeId, []() { return AceType::MakeRefPtr<NodeContainerPattern>(); });
     stack->Push(frameNode);
+
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, Alignment::TOP_LEFT);
 }
 
 void NodeContainerModelNG::SetMakeFunction(std::function<RefPtr<UINode>()>&& makeFunc)
@@ -45,6 +47,13 @@ void NodeContainerModelNG::SetOnResize(std::function<void(const SizeF& size)>&& 
     pattern->SetOnResize(std::move(resizeFunc));
 }
 
+void NodeContainerModelNG::SetOnTouchEvent(TouchEventFunc &&touchEventFunc)
+{
+    auto gestureHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetOnTouchEvent(std::move(touchEventFunc));
+}
+
 void NodeContainerModelNG::BindController(std::function<void()>&& resetFunc)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -61,5 +70,14 @@ void NodeContainerModelNG::ResetController()
     auto pattern = AceType::DynamicCast<NodeContainerPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(pattern);
     pattern->ResetController();
+}
+
+void NodeContainerModelNG::FireMakeNode()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = AceType::DynamicCast<NodeContainerPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(pattern);
+    pattern->RemakeNode();
 }
 } // namespace OHOS::Ace::NG

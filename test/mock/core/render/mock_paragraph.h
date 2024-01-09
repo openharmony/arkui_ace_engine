@@ -67,8 +67,8 @@ public:
         return false;
     }
 
-    bool CalcCaretMetricsByPosition(
-        int32_t extent, CaretMetricsF& caretCaretMetric, const OffsetF& lastTouchOffsetF) override
+    bool CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric, const OffsetF& lastTouchOffsetF,
+        TextAffinity& textAffinity) override
     {
         return false;
     }

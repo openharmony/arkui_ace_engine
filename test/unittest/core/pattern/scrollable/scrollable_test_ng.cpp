@@ -951,7 +951,7 @@ HWTEST_F(ScrollableTestNg, OnScrollEnd001, TestSize.Level1)
     EXPECT_TRUE(mockPn);
 
     EXPECT_CALL(*mockPn, OnScrollEndRecursive).Times(1);
-    scrollPn->OnScrollEndRecursive();
+    scrollPn->OnScrollEndRecursive(std::nullopt);
 }
 
 HWTEST_F(ScrollableTestNg, IsInHotZone001, TestSize.Level1)

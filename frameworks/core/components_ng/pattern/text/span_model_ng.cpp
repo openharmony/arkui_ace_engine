@@ -18,8 +18,10 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/text/span_node.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -41,6 +43,15 @@ void SpanModelNG::Create(const std::string& content)
     stack->Push(spanNode);
 
     ACE_UPDATE_SPAN_PROPERTY(Content, content, PropertyInfo::NONE);
+}
+
+RefPtr<SpanNode> SpanModelNG::CreateSpanNode(int32_t nodeId, const std::string& content)
+{
+    auto spanNode = SpanNode::CreateSpanNode(nodeId);
+    CHECK_NULL_RETURN(spanNode, nullptr);
+    spanNode->UpdateContent(content);
+    spanNode->AddPropertyInfo(PropertyInfo::NONE);
+    return spanNode;
 }
 
 void SpanModelNG::SetFont(const Font& value)
@@ -234,4 +245,18 @@ void SpanModelNG::SetFont(FrameNode* frameNode, const Font& value)
     }
 }
 
+void SpanModelNG::CreateContainSpan()
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto spanNode = ContainerSpanNode::GetOrCreateSpanNode(nodeId);
+    stack->Push(spanNode);
+}
+
+void SpanModelNG::SetTextBackgroundStyle(const TextBackgroundStyle& style)
+{
+    auto baseSpan = AceType::DynamicCast<BaseSpan>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    CHECK_NULL_VOID(baseSpan);
+    baseSpan->SetTextBackgroundStyle(style);
+}
 } // namespace OHOS::Ace::NG

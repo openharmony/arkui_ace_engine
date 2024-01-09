@@ -256,6 +256,7 @@ void JSUIExtensionProxy::On(const JSCallbackInfo& info)
         pipelineContext->UpdateCurrentActiveNode(node);
         JSRef<JSObject> contextObj = JSClass<JSUIExtensionProxy>::NewInstance();
         RefPtr<JSUIExtensionProxy> proxy = Referenced::Claim(contextObj->Unwrap<JSUIExtensionProxy>());
+        CHECK_NULL_VOID(proxy);
         proxy->SetInstanceId(instanceId);
         proxy->SetProxy(session);
         auto param = JSRef<JSVal>::Cast(contextObj);
@@ -388,6 +389,7 @@ void JSUIExtension::OnRemoteReady(const JSCallbackInfo& info)
         pipelineContext->UpdateCurrentActiveNode(node);
         JSRef<JSObject> contextObj = JSClass<JSUIExtensionProxy>::NewInstance();
         RefPtr<JSUIExtensionProxy> proxy = Referenced::Claim(contextObj->Unwrap<JSUIExtensionProxy>());
+        CHECK_NULL_VOID(proxy);
         proxy->SetInstanceId(instanceId);
         proxy->SetProxy(session);
         auto returnValue = JSRef<JSVal>::Cast(contextObj);

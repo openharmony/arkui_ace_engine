@@ -886,59 +886,6 @@ HWTEST_F(NavBarTestNg, NavBarPattern006, TestSize.Level1)
 }
 
 /**
- * @tc.name: NavBarPattern007
- * @tc.desc: Test RegistOritationListener function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavBarTestNg, NavBarPattern007, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create NavBar
-     */
-    CreateNavBar();
-
-    /**
-     * @tc.steps: step2. call RegistOritationListener func when isOritationListenerRegisted_ is true
-     * @tc.expected:isOritationListenerRegisted_ is true
-     */
-    navBarpattern_->isOritationListenerRegisted_ = true;
-    navBarpattern_->RegistOritationListener();
-    EXPECT_TRUE(navBarpattern_->isOritationListenerRegisted_);
-
-    /**
-     * @tc.steps: step3. call RegistOritationListener func when isOritationListenerRegisted_ is false
-     * @tc.expected:isOritationListenerRegisted_ is true
-     */
-    navBarpattern_->isOritationListenerRegisted_ = false;
-    navBarpattern_->RegistOritationListener();
-    EXPECT_TRUE(navBarpattern_->isOritationListenerRegisted_);
-}
-
-/**
- * @tc.name: NavBarPattern008
- * @tc.desc: Test OnDetachFromFrameNode function.
- * @tc.type: FUNC
- */
-HWTEST_F(NavBarTestNg, NavBarPattern008, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create NavBar
-     */
-    CreateNavBar();
-
-    /**
-     * @tc.steps: step2. call OnDetachFromFrameNode func when isOritationListenerRegisted_ is true
-     * @tc.expected:isOritationListenerRegisted_ is false
-     */
-    navBarpattern_->isOritationListenerRegisted_ = true;
-    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(FRAME_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<Pattern>());
-    ASSERT_NE(frameNode, nullptr);
-    navBarpattern_->OnDetachFromFrameNode(AceType::RawPtr(frameNode));
-    EXPECT_FALSE(navBarpattern_->isOritationListenerRegisted_);
-}
-
-/**
  * @tc.name: NavBarPattern009
  * @tc.desc: Test BuildMenu function.
  * @tc.type: FUNC

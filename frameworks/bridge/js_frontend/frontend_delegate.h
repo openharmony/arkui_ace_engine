@@ -212,11 +212,14 @@ public:
 
     virtual void OnMediaQueryUpdate(bool isSynchronous = false) = 0;
 
-    virtual void RegisterFont(const std::string& familyName, const std::string& familySrc) = 0;
+    virtual void RegisterFont(const std::string& familyName, const std::string& familySrc,
+        const std::string& bundleName = "", const std::string& moduleName = "") = 0;
 
     virtual void GetSystemFontList(std::vector<std::string>& fontList) = 0;
 
     virtual bool GetSystemFont(const std::string& fontName, FontInfo& fontInfo) = 0;
+
+    virtual void GetUIFontConfig(FontConfigJsonInfo& fontConfigJsonInfo) {}
 
     virtual SingleTaskExecutor GetAnimationJsTask() = 0;
 

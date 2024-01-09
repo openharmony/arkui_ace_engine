@@ -118,9 +118,13 @@ public:
 
     void OnNapiCallback(napi_value resultArg, const DragStatus dragStatus)
     {
+        std::vector<napi_value> cbList(cbList_.size());
         for (auto& cbRef : cbList_) {
             napi_value cb = nullptr;
             napi_get_reference_value(env_, cbRef, &cb);
+            cbList.push_back(cb);
+        }
+        for (auto& cb : cbList) {
             napi_call_function(env_, nullptr, cb, 1, &resultArg, nullptr);
         }
     }
@@ -132,10 +136,6 @@ public:
             [](napi_env env, void* data, void* hint) {
                 DragAction* dragAction = static_cast<DragAction*>(data);
                 if (dragAction != nullptr) {
-                    if (dragAction->asyncCtx_ != nullptr) {
-                        delete dragAction->asyncCtx_->dragAction;
-                        dragAction->asyncCtx_->dragAction = nullptr;
-                    }
                     dragAction->DeleteRef();
                     delete dragAction;
                 }
@@ -335,7 +335,7 @@ private:
         if (parameterType == ParameterType::DRAGITEMINFO_ARRAY) {
             OnMultipleComplete(dragCtx);
         } else if (parameterType == ParameterType::MIX) {
-            int arrayLenth = dragCtx->customBuilderList.size();
+            int32_t arrayLenth = static_cast<int32_t>(dragCtx->customBuilderList.size());
             for (auto customBuilderValue: dragCtx->customBuilderList) {
                 napi_value cb = nullptr;
                 napi_get_reference_value(dragCtx->env, customBuilderValue, &cb);
@@ -528,6 +528,11 @@ void HandleSuccess(DragControllerAsyncCtx* asyncCtx, const DragNotifyMsg& dragNo
         LOGW("container is null. %{public}d", asyncCtx->instanceId);
         return;
     }
+    if (dragStatus == DragStatus::ENDED) {
+        auto pipelineContext = container->GetPipelineContext();
+        CHECK_NULL_VOID(pipelineContext);
+        pipelineContext->ResetDragging();
+    }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostSyncTask(
@@ -648,16 +653,23 @@ void EnvelopedDragData(DragControllerAsyncCtx* asyncCtx, std::optional<Msdp::Dev
     }
     auto pointerId = asyncCtx->pointerId;
     std::string udKey;
+    std::map<std::string, int64_t> summary;
     int32_t dataSize = 1;
     if (asyncCtx->unifiedData) {
         int32_t ret = UdmfClient::GetInstance()->SetData(asyncCtx->unifiedData, udKey);
         if (ret != 0) {
             LOGW("Udmf set data fail, error code is %{public}d", ret);
+        } else {
+            ret = UdmfClient::GetInstance()->GetSummary(udKey, summary);
+            if (ret != 0) {
+                LOGW("GetSummary fail, error code is %{public}d", ret);
+            }
         }
         dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
     }
-    dragData = { shadowInfos, {}, udKey, "", "", asyncCtx->sourceType, dataSize != 0 ? dataSize : shadowInfos.size(),
-        pointerId, asyncCtx->globalX, asyncCtx->globalY, 0, true, false, {} };
+    dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, "", asyncCtx->sourceType,
+        dataSize != 0 ? dataSize : shadowInfos.size(), pointerId, asyncCtx->globalX, asyncCtx->globalY, 0, true, false,
+        summary };
 }
 
 void StartDragService(DragControllerAsyncCtx* asyncCtx)
@@ -697,6 +709,10 @@ void StartDragService(DragControllerAsyncCtx* asyncCtx)
     if (asyncCtx->dragState == DragState::SENDING) {
         asyncCtx->dragState = DragState::SUCCESS;
         Msdp::DeviceStatus::InteractionManager::GetInstance()->SetDragWindowVisible(true);
+        napi_handle_scope scope = nullptr;
+        napi_open_handle_scope(asyncCtx->env, &scope);
+        HandleOnDragStart(asyncCtx);
+        napi_close_handle_scope(asyncCtx->env, scope);
     }
 }
 
@@ -757,10 +773,16 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
             int32_t dataSize = 1;
             auto pointerId = asyncCtx->pointerId;
             std::string udKey;
+            std::map<std::string, int64_t> summary;
             if (asyncCtx->unifiedData) {
                 int32_t ret = UdmfClient::GetInstance()->SetData(asyncCtx->unifiedData, udKey);
                 if (ret != 0) {
                     LOGW("Udmf set data fail, error code is %{public}d", ret);
+                } else {
+                    ret = UdmfClient::GetInstance()->GetSummary(udKey, summary);
+                    if (ret != 0) {
+                        LOGW("GetSummary fail, error code is %{public}d", ret);
+                    }
                 }
                 dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
             }
@@ -775,10 +797,10 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
                 HandleFail(asyncCtx, Framework::ERROR_CODE_PARAM_INVALID, "touchPoint's coordinate out of range");
                 return;
             }
-            Msdp::DeviceStatus::ShadowInfo shadowInfo { asyncCtx->pixelMap, -x, -y  };
-            Msdp::DeviceStatus::DragData dragData { { shadowInfo }, {}, udKey, "", "",
-                asyncCtx->sourceType, dataSize, pointerId, asyncCtx->globalX, asyncCtx->globalY, 0, true, {}
-            };
+            Msdp::DeviceStatus::ShadowInfo shadowInfo { asyncCtx->pixelMap, -x, -y };
+            Msdp::DeviceStatus::DragData dragData { { shadowInfo }, {}, udKey, asyncCtx->extraParams, "",
+                asyncCtx->sourceType, dataSize, pointerId, asyncCtx->globalX, asyncCtx->globalY, 0, true, false,
+                summary };
 
             OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
                 LOGI("DragController start on callback %{pubic}d", dragNotifyMsg.result);
@@ -1335,7 +1357,7 @@ static napi_value JSCreateDragAction(napi_env env, napi_callback_info info)
     }
 
     napi_value result = nullptr;
-    napi_get_cb_info(env, info, nullptr, nullptr, &result, nullptr);
+    napi_create_object(env, &result);
     DragAction* dragAction = new (std::nothrow) DragAction(dragAsyncContext);
     dragAction->NapiSerializer(env, result);
     dragAsyncContext->dragAction = dragAction;
@@ -1348,7 +1370,7 @@ static napi_value JSGetDragPreview(napi_env env, napi_callback_info info)
 {
     DragPreview* dragPreview = new DragPreview();
     napi_value result = nullptr;
-    napi_get_cb_info(env, info, nullptr, nullptr, &result, nullptr);
+    napi_create_object(env, &result);
     dragPreview->NapiSerializer(env, result);
     return result;
 }

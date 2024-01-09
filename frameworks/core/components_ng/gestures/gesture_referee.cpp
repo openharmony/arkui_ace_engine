@@ -18,6 +18,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
 #include "core/components_ng/gestures/recognizers/recognizer_group.h"
 
 namespace OHOS::Ace::NG {
@@ -156,6 +157,13 @@ void GestureScope::Close(bool isBlocked)
     for (const auto& weak : recognizers_) {
         auto recognizer = weak.Upgrade();
         if (recognizer) {
+            auto weakGroup = recognizer->GetGestureGroup();
+            auto group = weakGroup.Upgrade();
+            while (group) {
+                recognizer = group;
+                weakGroup = group->GetGestureGroup();
+                group = weakGroup.Upgrade();
+            }
             recognizer->FinishReferee(static_cast<int32_t>(touchId_), isBlocked);
         }
     }
@@ -360,6 +368,9 @@ void GestureReferee::HandleAcceptDisposal(const RefPtr<NGGestureRecognizer>& rec
     }
     // clean delay task.
     if (prevState == RefereeState::PENDING) {
+        if (AceType::InstanceOf<ParallelRecognizer>(recognizer)) {
+            return;
+        }
         auto iter = gestureScopes_.begin();
         while (iter != gestureScopes_.end()) {
             if (iter->second->IsDelayClosed()) {

@@ -40,7 +40,7 @@ namespace {
 constexpr float PARAGRAPH_SAVE_BOUNDARY = 1.0f;
 constexpr uint32_t INLINE_DEFAULT_VIEW_MAXLINE = 3;
 constexpr uint32_t COUNTER_TEXT_MAXLINE = 1;
-constexpr int32_t INVAILD_VALUE = -1;
+constexpr int32_t DEFAULT_MODE = -1;
 constexpr int32_t SHOW_COUNTER_PERCENT = 100;
 } // namespace
 void TextFieldLayoutAlgorithm::ConstructTextStyles(
@@ -62,6 +62,8 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
         textContent = pattern->GetTextValue();
         if (!pattern->IsTextArea() && isInlineStyle) {
             textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
+        } else {
+            textStyle.SetTextOverflow(TextOverflow::CLIP);
         }
     } else {
         UpdatePlaceholderTextStyle(
@@ -264,18 +266,18 @@ void TextFieldLayoutAlgorithm::UpdateCounterNode(
 
     std::string counterText = "";
     TextStyle countTextStyle = (textLength != maxLength) ? theme->GetCountTextStyle() : theme->GetOverCountTextStyle();
-    auto counterType = textFieldLayoutProperty->GetSetCounterValue(INVAILD_VALUE);
+    auto counterType = textFieldLayoutProperty->GetSetCounterValue(DEFAULT_MODE);
     uint32_t limitsize = maxLength * counterType / SHOW_COUNTER_PERCENT;
-    if ((pattern->GetCounterState() == true) && textLength == maxLength && (counterType != INVAILD_VALUE)) {
+    if ((pattern->GetCounterState() == true) && textLength == maxLength && (counterType != DEFAULT_MODE)) {
         countTextStyle = theme->GetOverCountTextStyle();
         counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
         countTextStyle.SetTextColor(theme->GetOverCounterColor());
         pattern->SetCounterState(false);
-    } else if ((textLength >= limitsize) && (counterType != INVAILD_VALUE)) {
+    } else if ((textLength >= limitsize) && (counterType != DEFAULT_MODE)) {
         countTextStyle = theme->GetCountTextStyle();
         counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
         countTextStyle.SetTextColor(theme->GetDefaultCounterColor());
-    } else if (textFieldLayoutProperty->GetShowCounterValue(false) && counterType == INVAILD_VALUE) {
+    } else if (textFieldLayoutProperty->GetShowCounterValue(false) && counterType == DEFAULT_MODE) {
         counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
     }
     textLayoutProperty->UpdateContent(counterText);
@@ -640,6 +642,7 @@ void TextFieldLayoutAlgorithm::SetPropertyToModifier(
     modifier->SetFontWeight(textStyle.GetFontWeight());
     modifier->SetTextColor(textStyle.GetTextColor());
     modifier->SetFontStyle(textStyle.GetFontStyle());
+    modifier->SetTextOverflow(textStyle.GetTextOverflow());
 }
 
 void TextFieldLayoutAlgorithm::UpdateUnitLayout(LayoutWrapper* layoutWrapper)

@@ -72,6 +72,7 @@
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -106,7 +107,7 @@ const char* GetDeclarativeSharedLibrary()
 void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, const RefPtr<AssetManager>& assetManager,
     const ColorScheme& colorScheme, const ResourceInfo& resourceInfo,
     const std::shared_ptr<OHOS::AbilityRuntime::Context>& context,
-    const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& abilityInfo)
+    const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& abilityInfo, bool clearCache = false)
 {
     auto resourceAdapter = ResourceAdapter::CreateV2();
     resourceAdapter->Init(resourceInfo);
@@ -118,20 +119,24 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     themeManager->LoadCustomTheme(assetManager);
     themeManager->LoadResourceThemes();
 
+    if (clearCache) {
+        ResourceManager::GetInstance().Reset();
+    }
+
     auto defaultBundleName = "";
     auto defaultModuleName = "";
-    ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter);
+    ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter, true);
     if (context) {
         auto bundleName = context->GetBundleName();
         auto moduleName = context->GetHapModuleInfo()->name;
         if (!bundleName.empty() && !moduleName.empty()) {
-            ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
+            ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter, true);
         }
     } else if (abilityInfo) {
         auto bundleName = abilityInfo->bundleName;
         auto moduleName = abilityInfo->moduleName;
         if (!bundleName.empty() && !moduleName.empty()) {
-            ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
+            ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter, true);
         }
     }
 }
@@ -216,6 +221,14 @@ void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper)
     } else {
         taskExecutorImpl->InitJsThread();
     }
+}
+
+bool AceContainer::IsKeyboard()
+{
+    if (uiWindow_ == nullptr) {
+        return false;
+    }
+    return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
 }
 
 void AceContainer::Initialize()
@@ -974,6 +987,18 @@ bool AceContainer::RunPage(
     return true;
 }
 
+bool AceContainer::RunDynamicPage(
+    int32_t instanceId, const std::string& content, const std::string& params, const std::string& entryPoint)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, false);
+    ContainerScope scope(instanceId);
+    auto front = container->GetFrontend();
+    CHECK_NULL_RETURN(front, false);
+    front->RunDynamicPage(content, params, entryPoint);
+    return true;
+}
+
 bool AceContainer::PushPage(int32_t instanceId, const std::string& content, const std::string& params)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
@@ -1726,6 +1751,28 @@ NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaTyp
     return {};
 }
 
+NG::SafeAreaInsets AceContainer::GetKeyboardSafeArea()
+{
+    CHECK_NULL_RETURN(uiWindow_, {});
+    Rosen::AvoidArea avoidArea;
+    Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(Rosen::AvoidAreaType::TYPE_KEYBOARD, avoidArea);
+    if (ret == Rosen::WMError::WM_OK) {
+        return ConvertAvoidArea(avoidArea);
+    }
+    return {};
+}
+
+Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
+{
+    CHECK_NULL_RETURN(uiWindow_, {});
+    Rosen::AvoidArea avoidArea;
+    Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(type, avoidArea);
+    if (ret == Rosen::WMError::WM_OK) {
+        return avoidArea;
+    }
+    return {};
+}
+
 std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextByModule(
     const std::string& bundle, const std::string& module)
 {
@@ -1819,7 +1866,7 @@ float AceContainer::GetSmallWindowScale() const
         if (!window) {
             continue;
         }
-        if (window->wid_ == windowId) {
+        if (window->wid_ == static_cast<int32_t>(windowId)) {
             scale = window->scaleVal_;
             break;
         }
@@ -1880,10 +1927,7 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
         } else if (parsedConfig.direction == "vertical") {
             resDirection = DeviceOrientation::PORTRAIT;
         }
-        if (SystemProperties::GetDeviceOrientation() != resDirection) {
-            configurationChange.directionUpdate = true;
-            SystemProperties::SetDeviceOrientation(resDirection == DeviceOrientation::PORTRAIT ? 0 : 1);
-        }
+        configurationChange.directionUpdate = true;
         resConfig.SetOrientation(resDirection);
     }
     if (!parsedConfig.densitydpi.empty()) {
@@ -2055,7 +2099,8 @@ void AceContainer::UpdateResource()
     if (SystemProperties::GetResourceDecoupling()) {
         auto context = runtimeContext_.lock();
         auto abilityInfo = abilityInfo_.lock();
-        InitResourceAndThemeManager(pipelineContext_, assetManager_, colorScheme_, resourceInfo_, context, abilityInfo);
+        InitResourceAndThemeManager(
+            pipelineContext_, assetManager_, colorScheme_, resourceInfo_, context, abilityInfo, true);
     } else {
         ThemeConstants::InitDeviceType();
         auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
@@ -2257,7 +2302,7 @@ void AceContainer::RegisterStopDragCallback(int32_t pointerId, StopDragCallback&
 }
 
 void AceContainer::SearchElementInfoByAccessibilityIdNG(
-    int32_t elementId, int32_t mode, int32_t baseParent,
+    int64_t elementId, int32_t mode, int64_t baseParent,
     std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     CHECK_NULL_VOID(taskExecutor_);
@@ -2279,7 +2324,7 @@ void AceContainer::SearchElementInfoByAccessibilityIdNG(
 }
 
 void AceContainer::SearchElementInfosByTextNG(
-    int32_t elementId, const std::string& text, int32_t baseParent,
+    int64_t elementId, const std::string& text, int64_t baseParent,
     std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     CHECK_NULL_VOID(taskExecutor_);
@@ -2301,7 +2346,7 @@ void AceContainer::SearchElementInfosByTextNG(
 }
 
 void AceContainer::FindFocusedElementInfoNG(
-    int32_t elementId, int32_t focusType, int32_t baseParent,
+    int64_t elementId, int32_t focusType, int64_t baseParent,
     Accessibility::AccessibilityElementInfo& output)
 {
     CHECK_NULL_VOID(taskExecutor_);
@@ -2323,7 +2368,7 @@ void AceContainer::FindFocusedElementInfoNG(
 }
 
 void AceContainer::FocusMoveSearchNG(
-    int32_t elementId, int32_t direction, int32_t baseParent,
+    int64_t elementId, int32_t direction, int64_t baseParent,
     Accessibility::AccessibilityElementInfo& output)
 {
     CHECK_NULL_VOID(taskExecutor_);
@@ -2344,8 +2389,8 @@ void AceContainer::FocusMoveSearchNG(
 }
 
 bool AceContainer::NotifyExecuteAction(
-    int32_t elementId, const std::map<std::string, std::string>& actionArguments,
-    int32_t action, int32_t offset)
+    int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+    int32_t action, int64_t offset)
 {
     bool IsExecuted = false;
     CHECK_NULL_RETURN(taskExecutor_, IsExecuted);

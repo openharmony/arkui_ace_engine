@@ -701,4 +701,13 @@ uint32_t ResourceAdapterImpl::GetResourceLimitKeys() const
     return manager->GetResourceLimitKeys();
 }
 
+uint32_t ResourceAdapterImpl::GetSymbolById(uint32_t resId) const
+{
+    uint32_t result = 0;
+    auto manager = GetResourceManager();
+    CHECK_NULL_RETURN(manager, -1);
+    manager->GetSymbolById(resId, result);
+    return result;
+}
+
 } // namespace OHOS::Ace

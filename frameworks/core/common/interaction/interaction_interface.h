@@ -35,9 +35,12 @@ public:
 
     virtual int32_t UpdateDragStyle(DragCursorStyleCore style) = 0;
 
-#ifdef ENABLE_DRAG_FRAMEWORK
+    virtual int32_t UpdatePreviewStyle(const PreviewStyle& previewStyle) = 0;
+
+    virtual int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle& previewStyle,
+                     const PreviewAnimation& animation) = 0;
+
     virtual int32_t StopDrag(DragDropRet result) = 0;
-#endif
 
     virtual int32_t GetUdKey(std::string& udKey) = 0;
 

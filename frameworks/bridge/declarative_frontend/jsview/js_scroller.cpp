@@ -125,7 +125,7 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     auto animationValue = obj->GetProperty("animation");
     if (animationValue->IsObject()) {
         auto animationObj = JSRef<JSObject>::Cast(animationValue);
-        if (!ConvertFromJSValue(animationObj->GetProperty("duration"), duration) || NonPositive(duration)) {
+        if (!ConvertFromJSValue(animationObj->GetProperty("duration"), duration) || Negative(duration)) {
             duration = DEFAULT_DURATION;
         }
 

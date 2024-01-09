@@ -20,14 +20,13 @@
 
 #include <memory>
 #include "interfaces/inner_api/ace/ai/image_analyzer_interface.h"
-#include "napi/native_api.h"
 
 namespace OHOS::Ace {
 using ImageAnalyzerInstance = std::unique_ptr<ImageAnalyzerInterface, std::function<void (ImageAnalyzerInterface*)>>;
 
 class ImageAnalyzerLoader : public std::enable_shared_from_this<ImageAnalyzerLoader> {
 public:
-    static std::shared_ptr<ImageAnalyzerLoader> Load(std::string libPath);
+    static std::shared_ptr<ImageAnalyzerLoader> Load();
     ~ImageAnalyzerLoader();
     ImageAnalyzerLoader() = default;
 
@@ -38,7 +37,7 @@ public:
     ImageAnalyzerInstance CreateImageAnalyzer();
 
 private:
-    bool Init(std::string libPath);
+    bool Init();
     void Close();
     
     void *libraryHandle_ = nullptr;

@@ -1550,6 +1550,7 @@ void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialo
         .isModal = dialogAttr.isModal,
         .maskRect = dialogAttr.maskRect,
         .customBuilder = dialogAttr.customBuilder,
+        .isSysBlurStyle = false,
     };
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();
@@ -2759,14 +2760,20 @@ RefPtr<JsAcePage> FrontendDelegateDeclarative::GetPage(int32_t pageId) const
     return itPage->second;
 }
 
-void FrontendDelegateDeclarative::RegisterFont(const std::string& familyName, const std::string& familySrc)
+void FrontendDelegateDeclarative::RegisterFont(const std::string& familyName, const std::string& familySrc,
+    const std::string& bundleName, const std::string& moduleName)
 {
-    pipelineContextHolder_.Get()->RegisterFont(familyName, familySrc);
+    pipelineContextHolder_.Get()->RegisterFont(familyName, familySrc, bundleName, moduleName);
 }
 
 void FrontendDelegateDeclarative::GetSystemFontList(std::vector<std::string>& fontList)
 {
     pipelineContextHolder_.Get()->GetSystemFontList(fontList);
+}
+
+void FrontendDelegateDeclarative::GetUIFontConfig(FontConfigJsonInfo& fontConfigJsonInfo)
+{
+    pipelineContextHolder_.Get()->GetUIFontConfig(fontConfigJsonInfo);
 }
 
 bool FrontendDelegateDeclarative::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)

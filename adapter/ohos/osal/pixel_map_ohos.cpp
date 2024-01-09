@@ -156,6 +156,34 @@ void* PixelMapOhos::GetRawPixelMapPtr() const
     return pixmap_.get();
 }
 
+void PixelMapOhos::Scale(float xAxis, float yAxis)
+{
+    CHECK_NULL_VOID(pixmap_);
+    pixmap_->scale(xAxis, yAxis);
+}
+
+void PixelMapOhos::Scale(float xAxis, float yAxis, const AceAntiAliasingOption &option)
+{
+    CHECK_NULL_VOID(pixmap_);
+    switch (option) {
+        case AceAntiAliasingOption::NONE:
+            pixmap_->scale(xAxis, yAxis, Media::AntiAliasingOption::NONE);
+            break;
+        case AceAntiAliasingOption::LOW:
+            pixmap_->scale(xAxis, yAxis, Media::AntiAliasingOption::LOW);
+            break;
+        case AceAntiAliasingOption::MEDIUM:
+            pixmap_->scale(xAxis, yAxis, Media::AntiAliasingOption::MEDIUM);
+            break;
+        case AceAntiAliasingOption::HIGH:
+            pixmap_->scale(xAxis, yAxis, Media::AntiAliasingOption::HIGH);
+            break;
+        default:
+            pixmap_->scale(xAxis, yAxis, Media::AntiAliasingOption::NONE);
+            break;
+    }
+}
+
 std::string PixelMapOhos::GetId()
 {
     // using pixmap addr

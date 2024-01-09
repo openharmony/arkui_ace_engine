@@ -299,11 +299,14 @@ public:
 
     void ChangeLocale(const std::string& language, const std::string& countryOrRegion) override;
 
-    void RegisterFont(const std::string& familyName, const std::string& familySrc) override;
+    void RegisterFont(const std::string& familyName, const std::string& familySrc, const std::string& bundleName = "",
+        const std::string& moduleName = "") override;
 
     void GetSystemFontList(std::vector<std::string>& fontList) override;
 
     bool GetSystemFont(const std::string& fontName, FontInfo& fontInfo) override;
+
+    void GetUIFontConfig(FontConfigJsonInfo& fontConfigJsonInfo) override;
 
     void HandleImage(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& callback) override;
 

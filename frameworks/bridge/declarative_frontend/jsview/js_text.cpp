@@ -112,17 +112,14 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
     auto paramObject = JSRef<JSObject>::Cast(tmpInfo);
     auto fontSize = paramObject->GetProperty("size");
     CalcDimension size;
-    if (!JSContainerBase::ParseJsDimensionFp(fontSize, size) || fontSize->IsNull()) {
-        font.fontSize = std::nullopt;
-    }
-    if (fontSize->IsUndefined() || size.IsNegative() || size.Unit() == DimensionUnit::PERCENT) {
+    if (ParseJsDimensionFpNG(fontSize, size, false) && size.IsNonNegative()) {
+        font.fontSize = size;
+    } else {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         font.fontSize = theme->GetTextStyle().GetFontSize();
-    } else {
-        font.fontSize = size;
     }
     std::string weight;
     auto fontWeight = paramObject->GetProperty("weight");
@@ -196,9 +193,7 @@ void JSText::SetTextShadow(const JSCallbackInfo& info)
     }
     std::vector<Shadow> shadows;
     ParseTextShadowFromShadowObject(info[0], shadows);
-    if (!shadows.empty()) {
-        TextModel::GetInstance()->SetTextShadow(shadows);
-    }
+    TextModel::GetInstance()->SetTextShadow(shadows);
 }
 
 void JSText::SetTextOverflow(const JSCallbackInfo& info)

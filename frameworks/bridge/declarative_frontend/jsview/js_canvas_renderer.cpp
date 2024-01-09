@@ -20,6 +20,7 @@
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_pattern.h"
+#include "bridge/declarative_frontend/jsview/js_offscreen_canvas.h"
 #include "bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/models/canvas_renderer_model_impl.h"
@@ -423,7 +424,7 @@ void JSCanvasRenderer::JsSetFont(const JSCallbackInfo& info)
         } else if (fontProp.find("px") != std::string::npos || fontProp.find("vp") != std::string::npos) {
             Dimension size;
             if (fontProp.find("vp") != std::string::npos) {
-                size = Dimension(StringToDimension(fontProp).ConvertToPx());
+                size = GetDimensionValue(fontProp);
             } else {
                 std::string fontSize = fontProp.substr(0, fontProp.size() - 2);
                 size = Dimension(StringToDouble(fontProp));
@@ -711,6 +712,34 @@ RefPtr<CanvasPath2D> JSCanvasRenderer::JsMakePath2D(const JSCallbackInfo& info)
     return AceType::MakeRefPtr<CanvasPath2D>();
 }
 
+JSRenderImage* JSCanvasRenderer::UnwrapNapiImage(const JSRef<JSObject> jsObject)
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (engine == nullptr) {
+        return nullptr;
+    }
+    JSRenderImage* jsImage = nullptr;
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    panda::Local<JsiValue> value = jsObject.Get().GetLocalHandle();
+    JSValueWrapper valueWrapper = value;
+    napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    napi_value isImageBitmap = nullptr;
+    if (napi_get_named_property(env, napiValue, "isImageBitmap", &isImageBitmap) == napi_ok) {
+        int32_t value = 0;
+        napi_get_value_int32(env, isImageBitmap, &value);
+        if (!value) {
+            return nullptr;
+        }
+    } else {
+        return nullptr;
+    }
+    void* native = nullptr;
+    napi_unwrap(env, napiValue, &native);
+    jsImage = reinterpret_cast<JSRenderImage*>(native);
+    return jsImage;
+}
+
 void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
 {
     CanvasImage image;
@@ -721,7 +750,7 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         return;
     }
-    JSRenderImage* jsImage = JSRef<JSObject>::Cast(info[0])->Unwrap<JSRenderImage>();
+    JSRenderImage* jsImage = UnwrapNapiImage(info[0]);
     if (jsImage) {
         isImage = true;
         std::string imageValue = jsImage->GetSrc();
@@ -730,6 +759,7 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
         imgHeight = jsImage->GetHeight();
 
         auto closeCallback = [weak = AceType::WeakClaim(this), imageValue]() {
+            LOGI("Image bitmap close called.");
             auto jsCanvasRenderer = weak.Upgrade();
             CHECK_NULL_VOID(jsCanvasRenderer);
             jsCanvasRenderer->JsCloseImageBitmap(imageValue);
@@ -815,7 +845,7 @@ void JSCanvasRenderer::JsCreatePattern(const JSCallbackInfo& info)
         return;
     }
     if (info[0]->IsObject()) {
-        auto* jsImage = JSRef<JSObject>::Cast(info[0])->Unwrap<JSRenderImage>();
+        JSRenderImage* jsImage = UnwrapNapiImage(info[0]);
         if (jsImage == nullptr) {
             return;
         }
@@ -939,7 +969,7 @@ void JSCanvasRenderer::ParseImageData(const JSCallbackInfo& info, ImageData& ima
     if (info[1]->IsString()) {
         std::string imageDataXStr = "";
         JSViewAbstract::ParseJsString(info[1], imageDataXStr);
-        value = Dimension(StringToDimension(imageDataXStr).ConvertToPx());
+        value = GetDimensionValue(imageDataXStr);
         imageData.x = value.Value();
     } else {
         ParseJsInt(info[1], imageData.x);
@@ -948,7 +978,7 @@ void JSCanvasRenderer::ParseImageData(const JSCallbackInfo& info, ImageData& ima
     if (info[2]->IsString()) {
         std::string imageDataYStr = "";
         JSViewAbstract::ParseJsString(info[2], imageDataYStr);
-        value = Dimension(StringToDimension(imageDataYStr).ConvertToPx());
+        value = GetDimensionValue(imageDataYStr);
         imageData.y = value.Value();
     } else {
         ParseJsInt(info[2], imageData.y);
@@ -974,7 +1004,7 @@ void JSCanvasRenderer::ParseImageDataAsStr(const JSCallbackInfo& info, ImageData
     if (info[3]->IsString()) {
         std::string imageDataDirtyXStr = "";
         JSViewAbstract::ParseJsString(info[3], imageDataDirtyXStr);
-        value = Dimension(StringToDimension(imageDataDirtyXStr).ConvertToPx());
+        value = GetDimensionValue(imageDataDirtyXStr);
         imageData.dirtyX = value.Value();
     } else {
         ParseJsInt(info[3], imageData.dirtyX);
@@ -983,7 +1013,7 @@ void JSCanvasRenderer::ParseImageDataAsStr(const JSCallbackInfo& info, ImageData
     if (info[4]->IsString()) {
         std::string imageDataDirtyYStr = "";
         JSViewAbstract::ParseJsString(info[4], imageDataDirtyYStr);
-        value = Dimension(StringToDimension(imageDataDirtyYStr).ConvertToPx());
+        value = GetDimensionValue(imageDataDirtyYStr);
         imageData.dirtyY = value.Value();
     } else {
         ParseJsInt(info[4], imageData.dirtyY);
@@ -992,7 +1022,7 @@ void JSCanvasRenderer::ParseImageDataAsStr(const JSCallbackInfo& info, ImageData
     if (info[5]->IsString()) {
         std::string imageDataDirtWidth = "";
         JSViewAbstract::ParseJsString(info[5], imageDataDirtWidth);
-        value = Dimension(StringToDimension(imageDataDirtWidth).ConvertToPx());
+        value = GetDimensionValue(imageDataDirtWidth);
         imageData.dirtyWidth = value.Value();
     } else {
         ParseJsInt(info[5], imageData.dirtyWidth);
@@ -1001,7 +1031,7 @@ void JSCanvasRenderer::ParseImageDataAsStr(const JSCallbackInfo& info, ImageData
     if (info[6]->IsString()) {
         std::string imageDataDirtyHeight = "";
         JSViewAbstract::ParseJsString(info[6], imageDataDirtyHeight);
-        value = Dimension(StringToDimension(imageDataDirtyHeight).ConvertToPx());
+        value = GetDimensionValue(imageDataDirtyHeight);
         imageData.dirtyHeight = value.Value();
     } else {
         ParseJsInt(info[6], imageData.dirtyHeight);
@@ -1037,18 +1067,18 @@ void JSCanvasRenderer::JsGetImageData(const JSCallbackInfo& info)
     JSViewAbstract::ParseJsDouble(info[2], fWidth);
     JSViewAbstract::ParseJsDouble(info[3], fHeight);
 
+    fLeft = PipelineBase::Vp2PxWithCurrentDensity(fLeft);
+    fTop = PipelineBase::Vp2PxWithCurrentDensity(fTop);
+    fWidth = PipelineBase::Vp2PxWithCurrentDensity(fWidth);
+    fHeight = PipelineBase::Vp2PxWithCurrentDensity(fHeight);
+
     left = fLeft;
     top = fTop;
     width = fWidth;
     height = fHeight;
 
-    left = PipelineBase::Vp2PxWithCurrentDensity(left);
-    top = PipelineBase::Vp2PxWithCurrentDensity(top);
-    width = PipelineBase::Vp2PxWithCurrentDensity(width);
-    height = PipelineBase::Vp2PxWithCurrentDensity(height);
-
-    finalHeight = static_cast<uint32_t>(std::abs(height));
     finalWidth = static_cast<uint32_t>(std::abs(width));
+    finalHeight = static_cast<uint32_t>(std::abs(height));
     int32_t length = finalHeight * finalWidth * 4;
     JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(length);
     auto* buffer = static_cast<uint8_t*>(arrayBuffer->GetBuffer());
@@ -2296,6 +2326,17 @@ void JSCanvasRenderer::JsClearRect(const JSCallbackInfo& info)
         baseInfo.isOffscreen = isOffscreen_;
 
         CanvasRendererModel::GetInstance()->ClearRect(baseInfo, rect);
+    }
+}
+
+Dimension JSCanvasRenderer::GetDimensionValue(const std::string& str)
+{
+    auto context = PipelineBase::GetCurrentContext();
+    Dimension dimension = StringToDimension(str);
+    if (context == nullptr) {
+        return Dimension(JSOffscreenCanvas::ConvertToPxValue(dimension));
+    } else {
+        return Dimension(dimension.ConvertToPx());
     }
 }
 } // namespace OHOS::Ace::Framework

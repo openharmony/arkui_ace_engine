@@ -45,6 +45,8 @@ public:
 
     void StartTransition(const RefPtr<FrameNode>& srcPage, const RefPtr<FrameNode>& destPage, RouteType type);
 
+    void PageChangeCloseKeyboard();
+
     static void FirePageHide(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE);
     static void FirePageShow(const RefPtr<UINode>& node, PageTransitionType transitionType = PageTransitionType::NONE);
 
@@ -61,6 +63,7 @@ private:
     // ace performance check
     void PerformanceCheck(const RefPtr<FrameNode>& pageNode, int64_t vsyncTimeout);
     void StopPageTransition();
+    void FireAutoSave(const RefPtr<FrameNode>& pageNode);
 
     RefPtr<FrameNode> stageNode_;
     RefPtr<StagePattern> stagePattern_;

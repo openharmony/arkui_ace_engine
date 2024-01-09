@@ -29,7 +29,7 @@ namespace OHOS::Ace {
 namespace {
 #ifndef OS_ACCOUNT_EXISTS
 constexpr int32_t DEFAULT_OS_ACCOUNT_ID = 0; // 0 is the default id when there is no os_account part
-#endif  // OS_ACCOUNT_EXISTS
+#endif                                       // OS_ACCOUNT_EXISTS
 
 ErrCode GetActiveAccountIds(std::vector<int32_t>& userIds)
 {
@@ -37,7 +37,7 @@ ErrCode GetActiveAccountIds(std::vector<int32_t>& userIds)
 #ifdef OS_ACCOUNT_EXISTS
     return AccountSA::OsAccountManager::QueryActiveOsAccountIds(userIds);
 #else  // OS_ACCOUNT_EXISTS
-    LOGE("os account part not exists, use default id.");
+    TAG_LOGW(AceLogTag::ACE_PLUGIN_COMPONENT, "os account part not exists, use default id.");
     userIds.push_back(DEFAULT_OS_ACCOUNT_ID);
     return ERR_OK;
 #endif // OS_ACCOUNT_EXISTS
@@ -125,7 +125,6 @@ void PluginElement::HandleOnCompleteEvent() const
         return;
     }
     if (!onCompleteEvent_) {
-        LOGE("could not find available event handle");
         return;
     }
     onCompleteEvent_("");
@@ -135,7 +134,6 @@ void PluginElement::HandleOnErrorEvent(const std::string& code, const std::strin
 {
     loadFailState_ = true;
     if (!onErrorEvent_) {
-        LOGE("could not find available event handle");
         return;
     }
     auto json = JsonUtil::Create(true);
@@ -184,7 +182,6 @@ void PluginElement::Prepare(const WeakPtr<Element>& parent)
 
                 auto render = plugin->GetRenderNode();
                 if (!render) {
-                    LOGE("remove plugin from screen fail, due to could not get plugin render node");
                     return;
                 }
                 auto renderPlugin = AceType::DynamicCast<RenderPlugin>(render);
@@ -200,18 +197,15 @@ void PluginElement::OnActionEvent(const std::string& action) const
 {
     auto eventAction = JsonUtil::ParseJsonString(action);
     if (!eventAction->IsValid()) {
-        LOGE("get event action failed");
         return;
     }
     auto actionType = eventAction->GetValue("action");
     if (!actionType->IsValid()) {
-        LOGE("get event key failed");
         return;
     }
 
     auto type = actionType->GetString();
     if (type != "router" && type != "message") {
-        LOGE("undefined event type");
         return;
     }
 
@@ -219,7 +213,6 @@ void PluginElement::OnActionEvent(const std::string& action) const
 #ifdef OHOS_STANDARD_SYSTEM
         auto context = GetContext().Upgrade();
         if (context) {
-            LOGI("send action evetn to ability to process");
             context->OnActionEvent(action);
         }
 #endif
@@ -328,7 +321,6 @@ std::string PluginElement::GetPackagePathByWant(const WeakPtr<PluginElement>& we
     std::vector<int32_t> userIds;
     ErrCode errCode = GetActiveAccountIds(userIds);
     if (errCode != ERR_OK) {
-        LOGE("Query Active OsAccountIds failed!");
         pluginElement->HandleOnErrorEvent("1", "Query Active OsAccountIds failed!");
         return packagePathStr;
     }
@@ -345,7 +337,6 @@ void PluginElement::GetModuleNameByWant(const WeakPtr<PluginElement>& weak, Requ
     std::vector<std::string> strList;
     pluginElement->SplitString(info.pluginName, '&', strList);
     if (strList.empty()) {
-        LOGE("Template source is empty.");
         pluginElement->HandleOnErrorEvent("1", "Template source is empty.");
         return;
     }
@@ -373,13 +364,12 @@ std::string PluginElement::GetPackagePathByBms(const WeakPtr<PluginElement>& wea
     CHECK_NULL_RETURN(pluginElement, packagePathStr);
     auto bms = PluginComponentManager::GetInstance()->GetBundleManager();
     if (!bms) {
-        LOGE("Bms bundleManager is nullptr.");
         pluginElement->HandleOnErrorEvent("1", "Bms bundleManager is nullptr.");
         return packagePathStr;
     }
 
     if (strList.empty()) {
-        LOGE("App bundleName or abilityName is empty.");
+        TAG_LOGW(AceLogTag::ACE_PLUGIN_COMPONENT, "App bundleName or abilityName is empty.");
         pluginElement->HandleOnErrorEvent("1", "App bundleName is empty.");
         return packagePathStr;
     }
@@ -387,7 +377,6 @@ std::string PluginElement::GetPackagePathByBms(const WeakPtr<PluginElement>& wea
     bool ret = bms->GetBundleInfo(strList[0], AppExecFwk::BundleFlag::GET_BUNDLE_DEFAULT, bundleInfo,
         userIds.size() > 0 ? userIds[0] : AppExecFwk::Constants::UNSPECIFIED_USERID);
     if (!ret) {
-        LOGE("Bms get bundleName failed!");
         pluginElement->HandleOnErrorEvent("1", "Bms get bundleName failed!");
         return packagePathStr;
     }
@@ -397,7 +386,6 @@ std::string PluginElement::GetPackagePathByBms(const WeakPtr<PluginElement>& wea
             if (bundleInfo.moduleResPaths.size() == 1) {
                 info.moduleResPath = bundleInfo.moduleResPaths[0];
             } else {
-                LOGE("Bms moduleResPaths is empty.");
                 pluginElement->HandleOnErrorEvent("1", "Bms moduleResPaths is empty.");
                 return packagePathStr;
             }
@@ -410,7 +398,6 @@ std::string PluginElement::GetPackagePathByBms(const WeakPtr<PluginElement>& wea
             bool ret = bms->QueryAbilityInfo(want, AppExecFwk::AbilityInfoFlag::GET_ABILITY_INFO_DEFAULT,
                 userIds.size() > 0 ? userIds[0] : AppExecFwk::Constants::UNSPECIFIED_USERID, abilityInfo);
             if (!ret) {
-                LOGE("Bms get abilityInfo failed!");
                 pluginElement->HandleOnErrorEvent("1", "Bms get bundleName failed!");
                 return packagePathStr;
             }
@@ -432,7 +419,6 @@ std::string PluginElement::GetPackagePathByBms(const WeakPtr<PluginElement>& wea
         packagePathStr = result->hapPath;
         return packagePathStr;
     }
-    LOGE("Bms get hapInfo failed!");
     pluginElement->HandleOnErrorEvent(
         "1", "Bms get hapPath failed! Cannot find hap according to BundleName and ModuleName!");
     return packagePathStr;
@@ -474,7 +460,6 @@ void PluginElement::RunPluginTask(const WeakPtr<PluginElement>& weak, const RefP
     RequestPluginInfo info = plugin->GetPluginRequestInfo();
     auto packagePathStr = pluginElement->GetPackagePath(weak, info);
     if (packagePathStr.empty()) {
-        LOGE("package path is empty.");
         pluginElement->HandleOnErrorEvent("1", "package path is empty.");
         return;
     }

@@ -29,9 +29,6 @@ namespace OHOS::Ace::Napi {
 constexpr size_t STR_MAX_BUFFER_SIZE = 1024;
 constexpr size_t CALLBACK_OJECT_NUM = 1;
 constexpr size_t ARGC_NUM_SIZE = 2;
-constexpr size_t INDEX_MIN_FPS = 1;
-constexpr size_t INDEX_MAX_FPS = 2;
-constexpr size_t INDEX_EXPECTED_FPS = 3;
 
 napi_value NapiGetUndefined(napi_env env)
 {
@@ -126,7 +123,7 @@ void CreateTimeInfoJsObject(const napi_env env, RefPtr<DisplaySyncData> displayS
     }
 }
 
-napi_value ParseExpectedFrameRateRange(napi_env env, napi_callback_info info, std::vector<int32_t>& FPS)
+napi_value ParseExpectedFrameRateRange(napi_env env, napi_callback_info info, FrameRateRange& frameRateRange)
 {
     size_t argc = 1;
     napi_value argv[1];
@@ -152,23 +149,20 @@ napi_value ParseExpectedFrameRateRange(napi_env env, napi_callback_info info, st
         NapiThrow(env, "ExpectedFrameRateRange Error", Framework::ERROR_CODE_PARAM_INVALID);
         return NapiGetUndefined(env);
     }
-    FPS[INDEX_MIN_FPS] = minFPS;
-    FPS[INDEX_MAX_FPS] = maxFPS;
-    FPS[INDEX_EXPECTED_FPS] = expectedFPS;
+    frameRateRange.Set(minFPS, maxFPS, expectedFPS);
     return NapiGetUndefined(env);
 }
 
 napi_value JSSetExpectedFrameRateRange(napi_env env, napi_callback_info info)
 {
-    std::vector<int32_t> FPS { -1, -1, -1 }; // minFPS, maxFPS, expectedFPS
-    ParseExpectedFrameRateRange(env, info, FPS);
+    FrameRateRange frameRateRange;
+    ParseExpectedFrameRateRange(env, info, frameRateRange);
 
     RefPtr<UIDisplaySync> uiDisplaySync = GetDisplaySync(env, info)->GetUIDisplaySync();
     if (!uiDisplaySync) {
         return NapiGetUndefined(env);
     }
 
-    FrameRateRange frameRateRange(FPS[INDEX_MIN_FPS], FPS[INDEX_MAX_FPS], FPS[INDEX_EXPECTED_FPS]);
     uiDisplaySync->SetExpectedFrameRateRange(std::move(frameRateRange));
     return NapiGetUndefined(env);
 }
@@ -230,15 +224,13 @@ void DisplaySync::NapiSerializer(napi_env& env, napi_value& jsDisplaySync)
         nullptr, nullptr);
 }
 
-void DisplaySync::RegisterOnFrameCallback(
-    napi_value cb, napi_ref& onFrameRef, CallbackType callbackType, napi_env env, napi_handle_scope scope)
+void DisplaySync::RegisterOnFrameCallback(napi_value cb, napi_ref& onFrameRef,
+    CallbackType callbackType, napi_env env)
 {
     if (onFrameRef) {
-        napi_close_handle_scope(env, scope);
         return;
     }
     napi_create_reference(env, cb, 1, &onFrameRef);
-    napi_close_handle_scope(env, scope);
 
     GetUIDisplaySync()->RegisterOnFrameWithData([env, onFrameRef] (RefPtr<DisplaySyncData> displaySyncData) {
         napi_handle_scope innerScope = nullptr;
@@ -287,11 +279,6 @@ void DisplaySync::Destroy(napi_env env)
 
 napi_value JSOnFrame_On(napi_env env, napi_callback_info info)
 {
-    napi_handle_scope scope = nullptr;
-    napi_open_handle_scope(env, &scope);
-    if (scope == nullptr) {
-        return NapiGetUndefined(env);
-    }
     napi_value thisVar = nullptr;
     napi_value cb = nullptr;
     CallbackType callbackType = CallbackType::UNKNOW;
@@ -300,12 +287,11 @@ napi_value JSOnFrame_On(napi_env env, napi_callback_info info)
 
     DisplaySync* displaySync = GetDisplaySync(env, info);
     if (!displaySync) {
-        napi_close_handle_scope(env, scope);
         return NapiGetUndefined(env);
     }
 
     if (callbackType == CallbackType::ONFRAME) {
-        displaySync->RegisterOnFrameCallback(cb, displaySync->onFrameRef_, callbackType, env, scope);
+        displaySync->RegisterOnFrameCallback(cb, displaySync->onFrameRef_, callbackType, env);
     }
     return NapiGetUndefined(env);
 }

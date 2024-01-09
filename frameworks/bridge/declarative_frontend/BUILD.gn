@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -29,6 +29,8 @@ template("declarative_frontend") {
     defines += [ "USE_ARK_ENGINE" ]
     configs = [ "$ace_root:ace_config" ]
 
+    include_dirs =
+        [ "$ace_napi_frameworks/bridge/declarative_frontend/engine/jsi" ]
     if (platform == "ohos_ng" || is_arkui_x) {
       sources = [
         "ng/declarative_frontend_ng.cpp",
@@ -44,6 +46,10 @@ template("declarative_frontend") {
     }
 
     deps = [ "$ace_root/frameworks/core/components/theme:build_theme_code" ]
+    external_deps = [
+      "ets_runtime:libark_jsruntime",
+      "napi:ace_napi",
+    ]
   }
 }
 
@@ -155,6 +161,7 @@ template("declarative_js_engine") {
       "engine/functions/js_hover_function.cpp",
       "engine/functions/js_key_function.cpp",
       "engine/functions/js_mouse_function.cpp",
+      "engine/functions/js_navigation_function.cpp",
       "engine/functions/js_on_area_change_function.cpp",
       "engine/functions/js_on_child_touch_test_function.cpp",
       "engine/functions/js_page_transition_function.cpp",
@@ -190,6 +197,7 @@ template("declarative_js_engine") {
       "jsview/js_column_split.cpp",
       "jsview/js_common_view.cpp",
       "jsview/js_container_base.cpp",
+      "jsview/js_container_span.cpp",
       "jsview/js_counter.cpp",
       "jsview/js_data_panel.cpp",
       "jsview/js_datepicker.cpp",
@@ -266,6 +274,7 @@ template("declarative_js_engine") {
       "jsview/js_scope_util.cpp",
       "jsview/js_scroll.cpp",
       "jsview/js_scrollable.cpp",
+      "jsview/js_scrollable_base.cpp",
       "jsview/js_scroller.cpp",
       "jsview/js_search.cpp",
       "jsview/js_sec_button_base.cpp",
@@ -368,6 +377,7 @@ template("declarative_js_engine") {
       "jsview/models/radio_model_impl.cpp",
       "jsview/models/rect_model_impl.cpp",
       "jsview/models/refresh_model_impl.cpp",
+      "jsview/models/relative_container_model_impl.cpp",
       "jsview/models/rendering_context_model_impl.cpp",
       "jsview/models/richeditor_model_impl.cpp",
       "jsview/models/row_model_impl.cpp",
@@ -438,6 +448,8 @@ template("declarative_js_engine") {
     if (defined(vendor_configs.ace_engine_advanced)) {
       include_dirs += vendor_configs.ace_advance_dirs
       sources += vendor_configs.ace_engine_advanced_jsview
+    } else {
+      sources += [ "jsview/js_cached_image.cpp" ]
     }
 
     if (defined(config.xcomponent_components_support) &&
@@ -644,6 +656,7 @@ template("declarative_js_engine_ng") {
       "engine/functions/js_hover_function.cpp",
       "engine/functions/js_key_function.cpp",
       "engine/functions/js_mouse_function.cpp",
+      "engine/functions/js_navigation_function.cpp",
       "engine/functions/js_on_area_change_function.cpp",
       "engine/functions/js_on_child_touch_test_function.cpp",
       "engine/functions/js_page_transition_function.cpp",
@@ -690,6 +703,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_column_split.cpp",
       "jsview/js_common_view.cpp",
       "jsview/js_container_base.cpp",
+      "jsview/js_container_span.cpp",
       "jsview/js_counter.cpp",
       "jsview/js_data_panel.cpp",
       "jsview/js_datepicker.cpp",
@@ -758,6 +772,7 @@ template("declarative_js_engine_ng") {
       "jsview/js_scope_util.cpp",
       "jsview/js_scroll.cpp",
       "jsview/js_scrollable.cpp",
+      "jsview/js_scrollable_base.cpp",
       "jsview/js_scroller.cpp",
       "jsview/js_search.cpp",
       "jsview/js_sec_button_base.cpp",
@@ -873,6 +888,10 @@ template("declarative_js_engine_ng") {
 
     if (defined(config.remote_window_support) && config.remote_window_support) {
       sources += [ "jsview/js_remote_window.cpp" ]
+    }
+
+    if (!defined(vendor_configs.ace_engine_advanced)) {
+      sources += [ "jsview/js_cached_image.cpp" ]
     }
 
     if (defined(config.xcomponent_components_support) &&

@@ -30,6 +30,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
+#include "core/components_ng/pattern/list/list_height_offset_calculator.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_lanes_layout_algorithm.h"
@@ -89,6 +90,9 @@ void ListPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     Register2DragDropManager();
     SetAccessibilityAction();
+    if (IsNeedInitClickEventRecorder()) {
+        Pattern::InitClickEventRecorder();
+    }
 }
 
 bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -585,6 +589,18 @@ void ListPattern::GetListItemGroupEdge(bool& groupAtStart, bool& groupAtEnd) con
     }
 }
 
+float ListPattern::GetOffsetWithLimit(float offset) const
+{
+    auto currentOffset = GetTotalOffset() + contentStartOffset_;
+    if (Positive(offset)) {
+        return std::min(currentOffset, offset);
+    } else if (Negative(offset)) {
+        auto remainHeight = GetTotalHeight() - currentOffset;
+        return std::max(offset, -remainHeight);
+    }
+    return 0;
+}
+
 OverScrollOffset ListPattern::GetOverScrollOffset(double delta) const
 {
     OverScrollOffset offset = { 0, 0 };
@@ -738,7 +754,7 @@ bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
     bool outOfEnd = (endIndex_ == maxListItemIndex_) && LessNotEqual(endPos, contentEndPos) &&
         LessNotEqual(startPos, contentStartOffset_);
     if (IsScrollSnapAlignCenter()) {
-        auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
+        float itemHeight = itemPosition_[centerIndex_].endPos - itemPosition_[centerIndex_].startPos;
         outOfStart = (startIndex_ == 0) && Positive(startPos + itemHeight / 2.0f - contentMainSize_ / 2.0f);
         outOfEnd =
             (endIndex_ == maxListItemIndex_) && LessNotEqual(endPos - itemHeight / 2.0f, contentMainSize_ / 2.0f);
@@ -1533,6 +1549,15 @@ void ListPattern::UpdateScrollBarOffset()
     float itemsSize = itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
     float currentOffset = itemsSize / itemPosition_.size() * itemPosition_.begin()->first - startMainPos_;
     auto estimatedHeight = itemsSize / itemPosition_.size() * (maxListItemIndex_ + 1) - spaceWidth_;
+    if (lanes_ == 1) {
+        const auto& begin = *itemPosition_.begin();
+        auto calculate = ListHeightOffsetCalculator(
+            begin.first, {begin.second.startPos, begin.second.endPos}, spaceWidth_);
+        if (calculate.GetEstimateHeightAndOffset(GetHost())) {
+            currentOffset = calculate.GetEstimateOffset();
+            estimatedHeight = calculate.GetEstimateHeight();
+        }
+    }
     if (GetAlwaysEnabled()) {
         estimatedHeight = estimatedHeight - spaceWidth_;
     }
@@ -1558,7 +1583,7 @@ float ListPattern::GetTotalHeight() const
 {
     auto currentOffset = GetTotalOffset();
     if (endIndex_ >= maxListItemIndex_) {
-        return currentOffset + endMainPos_;
+        return currentOffset + endMainPos_ + contentEndOffset_;
     }
     if (itemPosition_.empty()) {
         return 0.0f;
@@ -1566,7 +1591,7 @@ float ListPattern::GetTotalHeight() const
     int32_t remainCount = maxListItemIndex_ - endIndex_;
     float itemsSize = itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
     float remainOffset = itemsSize / itemPosition_.size() * remainCount - spaceWidth_;
-    return currentOffset + endMainPos_ + remainOffset;
+    return currentOffset + endMainPos_ + remainOffset + contentEndOffset_;
 }
 
 void ListPattern::SetChainAnimation()
@@ -1619,7 +1644,9 @@ void ListPattern::SetChainAnimation()
         chainAnimation_->SetAnimationCallback([weak = AceType::WeakClaim(this)]() {
             auto list = weak.Upgrade();
             CHECK_NULL_VOID(list);
-            list->MarkDirtyNodeSelf();
+            if (list->IsScrollableAnimationNotRunning()) {
+                list->MarkDirtyNodeSelf();
+            }
         });
     }
 }
@@ -1636,7 +1663,8 @@ void ListPattern::SetChainAnimationOptions(const ChainAnimationOptions& options)
         }
         float maxSpace = options.maxSpace.ConvertToPx();
         float minSpace = options.minSpace.ConvertToPx();
-        if (GreatNotEqual(minSpace, maxSpace)) {
+        if (Negative(minSpace) || Negative(maxSpace) || GreatNotEqual(minSpace, space) ||
+            LessNotEqual(maxSpace, space) || GreatNotEqual(minSpace, maxSpace)) {
             minSpace = space;
             maxSpace = space;
         }

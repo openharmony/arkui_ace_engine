@@ -56,20 +56,13 @@ template("ace_core_pipeline_source_set") {
       "base/factories/render_node_factory.cpp",
     ]
 
-    configs = [
-      "$ace_root:ace_config",
-      "$ace_flutter_engine_root:flutter_config",
-    ]
+    configs = [ "$ace_root:ace_config" ]
 
     deps = [
-      "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform",
       "$ace_root/frameworks/core/components/theme:build_theme_code",
       "$skia_root_new:skia_$platform",
     ]
     external_deps = []
-    if (enable_graphic_text_gine) {
-      deps -= [ "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform" ]
-    }
 
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       sources += [ "base/rosen_render_context.cpp" ]

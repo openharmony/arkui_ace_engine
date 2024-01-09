@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 
 #include <optional>
 #include <sstream>
@@ -279,9 +280,7 @@ void JSSpan::SetTextShadow(const JSCallbackInfo& info)
     }
     std::vector<Shadow> shadows;
     ParseTextShadowFromShadowObject(info[0], shadows);
-    if (!shadows.empty()) {
-        SpanModel::GetInstance()->SetTextShadow(shadows);
-    }
+    SpanModel::GetInstance()->SetTextShadow(shadows);
 }
 
 void JSSpan::JSBind(BindingTarget globalObj)
@@ -306,6 +305,7 @@ void JSSpan::JSBind(BindingTarget globalObj)
     JSClass<JSSpan>::StaticMethod("remoteMessage", &JSSpan::JsRemoteMessage);
     JSClass<JSSpan>::StaticMethod("onClick", &JSSpan::JsOnClick);
     JSClass<JSSpan>::StaticMethod("lineHeight", &JSSpan::SetLineHeight, opt);
+    JSClass<JSSpan>::StaticMethod("textBackgroundStyle", &JSContainerSpan::SetTextBackgroundStyle, opt);
     JSClass<JSSpan>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

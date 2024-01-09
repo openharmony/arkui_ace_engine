@@ -18,8 +18,8 @@
 
 #include "base/memory/ace_type.h"
 #include "base/utils/noncopyable.h"
-#include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 
 namespace OHOS::Ace::NG {
 class NestableScrollContainer : public virtual Pattern {
@@ -30,12 +30,22 @@ public:
 
     virtual Axis GetAxis() const = 0;
 
-    // regular scroll motion
-    // RETURN remaining offset
+    /**
+     * @brief Handle regular scroll motion.
+     *
+     * @param offset delta on the main axis.
+     * @param source scroll source type defined in scrollable_properties.h.
+     * @param state current nested state. Defines how this function is triggered.
+     * @return remaining offset and whether the edge is reached
+     */
     virtual ScrollResult HandleScroll(float offset, int32_t source, NestedState state) = 0;
 
-    // triggered by drag end velocity
-    // RETURN true if velocity is consumed
+    /**
+     * @brief Handle drag end velocity, triggering a scroll animation or a bounce animation on overScroll.
+     *
+     * @param velocity drag end velocity.
+     * @return true if velocity is consumed
+     */
     virtual bool HandleScrollVelocity(float velocity) = 0;
 
     /**
@@ -47,14 +57,16 @@ public:
 
     /**
      * @brief This function is called when the scrolling ends, recursively pass upwards.
-     * 
+     *
+     * @param velocity The velocity of the DragEnd event. Optionally passed to parent when the child won't call
+     * HandleScrollVelocity.
      */
-    virtual void OnScrollEndRecursive() = 0;
+    virtual void OnScrollEndRecursive(const std::optional<float>& velocity) = 0;
 
 protected:
     /**
      * @brief Helper function. Searches for the parent NestableScrollContainer of the current instance.
-     * 
+     *
      * @return RefPtr<NestableScrollContainer> A reference to the parent NestableScrollContainer.
      */
     RefPtr<NestableScrollContainer> SearchParent();

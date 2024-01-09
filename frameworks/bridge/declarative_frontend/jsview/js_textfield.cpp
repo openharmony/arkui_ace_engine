@@ -80,7 +80,7 @@ constexpr uint32_t MAX_LINES = 3;
 constexpr uint32_t MINI_VAILD_VALUE = 1;
 constexpr uint32_t MAX_VAILD_VALUE = 100;
 constexpr uint32_t ILLEGAL_VALUE = 0;
-constexpr uint32_t INVAILD_VALUE = -1;
+constexpr uint32_t DEFAULT_MODE = -1;
 } // namespace
 
 void ParseTextFieldTextObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
@@ -278,7 +278,7 @@ void JSTextField::SetEnterKeyType(const JSCallbackInfo& info)
     if (!info[0]->IsNumber()) {
         return;
     }
-    TextInputAction textInputAction = static_cast<TextInputAction>(info[0]->ToNumber<int32_t>());
+    TextInputAction textInputAction = CastToTextInputAction(info[0]->ToNumber<int32_t>());
     TextFieldModel::GetInstance()->SetEnterKeyType(textInputAction);
 }
 
@@ -1062,7 +1062,7 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
         TextFieldModel::GetInstance()->SetCounterType(inputNumber);
         if (parameter->IsNull() || parameter->IsUndefined()) {
             TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
-            TextFieldModel::GetInstance()->SetCounterType(INVAILD_VALUE);
+            TextFieldModel::GetInstance()->SetCounterType(DEFAULT_MODE);
             return;
         }
         if (inputNumber < MINI_VAILD_VALUE || inputNumber > MAX_VAILD_VALUE) {
@@ -1075,7 +1075,7 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
         return;
     }
     TextFieldModel::GetInstance()->SetShowCounter(info[0]->ToBoolean());
-    TextFieldModel::GetInstance()->SetCounterType(INVAILD_VALUE);
+    TextFieldModel::GetInstance()->SetCounterType(DEFAULT_MODE);
     TextFieldModel::GetInstance()->SetShowCounterBorder(true);
 }
 

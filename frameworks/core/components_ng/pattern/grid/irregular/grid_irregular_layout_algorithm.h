@@ -19,6 +19,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_layout_info.h"
 
 /**
  * @brief GridIrregularLayout class supports irregular grid items that take multiple rows and multiple columns.
@@ -51,11 +52,9 @@ private:
      */
     void Init(const RefPtr<GridLayoutProperty>& props);
 
-    /**
-     * @brief Fills the content with GridItems up to the target length.
-     * @param targetLen The target main-axis length to fill.
-     */
-    void FillWithItems(float targetLen);
+    void MeasureOnOffset(float mainSize);
+
+    void MeasureOnJump(float mainSize);
 
     /**
      * @brief Performs the layout of the children based on the main offset.
@@ -80,6 +79,29 @@ private:
      * @return True if Grid has reached the end, false otherwise.
      */
     inline bool ReachedEnd() const;
+
+    /**
+     * @brief Transforms GridLayoutInfo::scrollAlign_ into other ScrollAlign values.
+     */
+    void TransformAutoScrollAlign();
+
+    /**
+     *
+     * @param jumpIdx The GridItem index to jump to.
+     * @return The line index of the item in GridMatrix.
+     */
+    int32_t FindJumpLineIdx(int32_t jumpIdx);
+
+    /**
+     * @brief Prepares GridLayoutInfo::lineHeightMap_ using GridIrregularFiller.
+     *
+     * If the algorithm identifies that mainSize can't be filled with the current scrollAlign_ and jumpLineIdx, these
+     * params will be adjusted. For instance, jumping to the last line with ScrollAlign::START isn't possible.
+     *
+     * @param mainSize The main-axis length of the grid.
+     * @param jumpLineIdx The line index to jump to, can be adjusted during the function call.
+     */
+    void PrepareLineHeight(float mainSize, int32_t& jumpLineIdx);
 
     LayoutWrapper* wrapper_ = nullptr;
 

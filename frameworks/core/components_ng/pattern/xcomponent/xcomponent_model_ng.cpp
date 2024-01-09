@@ -35,20 +35,84 @@ void XComponentModelNG::Create(const std::string& id, XComponentType type, const
     stack->Push(frameNode);
     ACE_UPDATE_LAYOUT_PROPERTY(XComponentLayoutProperty, XComponentType, type);
 }
+
+RefPtr<AceType> XComponentModelNG::Create(int32_t nodeId, float width, float height, const std::string& id,
+    XComponentType type, const std::string& libraryname,
+    const std::shared_ptr<InnerXComponentController>& xcomponentController)
+{
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::XCOMPONENT_ETS_TAG, nodeId);
+    auto calcWidth = CalcLength(width, DimensionUnit::VP);
+    auto calcHeight = CalcLength(height, DimensionUnit::VP);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        V2::XCOMPONENT_ETS_TAG, nodeId, [id, type, libraryname, xcomponentController, calcWidth, calcHeight]() {
+            return AceType::MakeRefPtr<XComponentPattern>(id, type, libraryname, xcomponentController,
+                calcWidth.GetDimension().ConvertToPx(), calcHeight.GetDimension().ConvertToPx());
+        });
+
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
+    if (layoutProperty) {
+        layoutProperty->UpdateXComponentType(type);
+        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(calcWidth, calcHeight));
+    }
+    return frameNode;
+}
+
+XComponentType XComponentModelNG::GetTypeImpl(const RefPtr<FrameNode>& frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, XComponentType::UNKNOWN);
+    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, XComponentType::UNKNOWN);
+    return layoutProperty->GetXComponentTypeValue();
+}
+
+XComponentType XComponentModelNG::GetType()
+{
+    return GetTypeImpl(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+}
+
 void XComponentModelNG::SetSoPath(const std::string& soPath)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
-    if (!layoutProperty || layoutProperty->GetXComponentTypeValue() == XComponentType::COMPONENT) {
+    auto type = GetTypeImpl(frameNode);
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
         return;
     }
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
     xcPattern->SetSoPath(soPath);
 }
+
 void XComponentModelNG::SetOnLoad(LoadEvent&& onLoad)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto type = GetTypeImpl(frameNode);
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
+        return;
+    }
+    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnLoad(std::move(onLoad));
+}
+
+void XComponentModelNG::SetOnDestroy(DestroyEvent&& onDestroy)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto type = GetTypeImpl(frameNode);
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
+        return;
+    }
+    auto eventHub = frameNode->GetEventHub<XComponentEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnDestroy(std::move(onDestroy));
+}
+
+void XComponentModelNG::RegisterOnCreate(const RefPtr<AceType>& node, LoadEvent&& onLoad)
+{
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
     if (!layoutProperty || layoutProperty->GetXComponentTypeValue() == XComponentType::COMPONENT) {
@@ -58,9 +122,10 @@ void XComponentModelNG::SetOnLoad(LoadEvent&& onLoad)
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnLoad(std::move(onLoad));
 }
-void XComponentModelNG::SetOnDestroy(DestroyEvent&& onDestroy)
+
+void XComponentModelNG::RegisterOnDestroy(const RefPtr<AceType>& node, DestroyEvent&& onDestroy)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
     CHECK_NULL_VOID(frameNode);
     auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
     if (!layoutProperty || layoutProperty->GetXComponentTypeValue() == XComponentType::COMPONENT) {
@@ -75,17 +140,15 @@ bool XComponentModelNG::IsTexture()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_RETURN(frameNode, false);
-    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, false);
-    return layoutProperty->GetXComponentTypeValue() == XComponentType::TEXTURE;
+    return GetTypeImpl(frameNode) == XComponentType::TEXTURE;
 }
 
 void XComponentModelNG::SetDetachCallback(DetachCallback&& onDetach)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
-    if (!layoutProperty || layoutProperty->GetXComponentTypeValue() == XComponentType::COMPONENT) {
+    auto type = GetTypeImpl(frameNode);
+    if (type == XComponentType::COMPONENT || type == XComponentType::NODE) {
         return;
     }
     auto eventHub = frameNode->GetEventHub<XComponentEventHub>();

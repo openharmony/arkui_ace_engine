@@ -23,6 +23,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/response_ctrl.h"
 #include "core/components_ng/gestures/gesture_referee.h"
+#include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
 #include "core/event/axis_event.h"
 #include "core/event/key_event.h"
 #include "core/event/mouse_event.h"
@@ -73,6 +74,9 @@ public:
         const TouchRestrict& touchRestrict, const Offset& offset = Offset(),
         float viewScale = 1.0f, bool needAppend = false);
 
+    bool PostEventTouchTest(const TouchEvent& touchPoint, const RefPtr<NG::UINode>& uiNode,
+        const TouchRestrict& touchRestrict);
+
     void TouchTest(const AxisEvent& event, const RefPtr<RenderNode>& renderNode, const TouchRestrict& touchRestrict);
 
     void TouchTest(const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode, const TouchRestrict& touchRestrict);
@@ -81,6 +85,7 @@ public:
 
     bool DispatchTouchEvent(const TouchEvent& point);
     bool DispatchTouchEvent(const AxisEvent& event);
+    bool PostEventDispatchTouchEvent(const TouchEvent& point);
     void FlushTouchEventsBegin(const std::list<TouchEvent>& touchEvents);
     void FlushTouchEventsEnd(const std::list<TouchEvent>& touchEvents);
 
@@ -146,8 +151,11 @@ public:
         return referee_;
     }
 
-    RefPtr<NG::GestureReferee> GetGestureRefereeNG()
+    RefPtr<NG::GestureReferee> GetGestureRefereeNG(const RefPtr<NG::NGGestureRecognizer>& recognizer)
     {
+        if (recognizer->IsPostEventResult()) {
+            return postEventRefereeNG_;
+        }
         return refereeNG_;
     }
 
@@ -213,8 +221,21 @@ public:
     }
 
     void CheckTouchEvent(TouchEvent touchEvent);
-private:
     std::unordered_map<size_t, TouchTestResult> touchTestResults_;
+    std::unordered_map<size_t, TouchTestResult> postEventTouchTestResults_;
+
+    void SetInnerFlag(bool value)
+    {
+        innerEventWin_ = value;
+    }
+
+    bool GetInnerFlag() const
+    {
+        return innerEventWin_;
+    }
+
+private:
+    bool innerEventWin_ = false;
     std::unordered_map<size_t, MouseTestResult> mouseTestResults_;
     MouseTestResult currMouseTestResults_;
     MouseTestResult pressMouseTestResults_;
@@ -236,6 +257,7 @@ private:
     bool isLastMoveBeforeUp_ = false;
     RefPtr<GestureReferee> referee_;
     RefPtr<NG::GestureReferee> refereeNG_;
+    RefPtr<NG::GestureReferee> postEventRefereeNG_;
     std::list<WeakPtr<NG::FrameNode>> keyboardShortcutNode_;
     std::vector<KeyCode> pressedKeyCodes_;
     NG::EventTreeRecord eventTree_;

@@ -101,12 +101,17 @@ struct UpdateSpanStyle {
         updateTextDecorationColor.reset();
         updateTextShadows.reset();
 
+        updateSymbolColor.reset();
+        updateSymbolRenderingStrategy.reset();
+        updateSymbolEffectStrategy.reset();
+
         updateImageWidth.reset();
         updateImageHeight.reset();
         updateImageVerticalAlign.reset();
         updateImageFit.reset();
         marginProp.reset();
         borderRadius.reset();
+        isSymbolStyle = false;
     }
 
     std::optional<Color> updateTextColor = std::nullopt;
@@ -118,6 +123,10 @@ struct UpdateSpanStyle {
     std::optional<Color> updateTextDecorationColor = std::nullopt;
     std::optional<std::vector<Shadow>> updateTextShadows = std::nullopt;
 
+    std::optional<std::vector<Color>> updateSymbolColor = std::nullopt;
+    std::optional<uint32_t> updateSymbolRenderingStrategy = std::nullopt;
+    std::optional<uint32_t> updateSymbolEffectStrategy = std::nullopt;
+
     std::optional<CalcDimension> updateImageWidth = std::nullopt;
     std::optional<CalcDimension> updateImageHeight = std::nullopt;
     std::optional<VerticalAlign> updateImageVerticalAlign = std::nullopt;
@@ -125,6 +134,8 @@ struct UpdateSpanStyle {
     std::optional<OHOS::Ace::NG::MarginProperty> marginProp = std::nullopt;
     std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
     bool hasResourceFontColor = false;
+    bool hasResourceDecorationColor = false;
+    bool isSymbolStyle = false;
 };
 
 struct UpdateParagraphStyle {
@@ -149,6 +160,7 @@ struct TextSpanOptions : SpanOptionBase {
     std::optional<UpdateParagraphStyle> paraStyle;
     UserGestureOptions userGestureOption;
     bool hasResourceFontColor = false;
+    bool hasResourceDecorationColor = false;
 };
 
 struct SymbolSpanOptions : SpanOptionBase {

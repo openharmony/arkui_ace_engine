@@ -594,19 +594,38 @@ bool ContainerModalPattern::GetContainerModalButtonsRect(RectF& containerModal, 
     CHECK_NULL_RETURN(column, false);
     auto columnRect = column->GetGeometryNode()->GetFrameRect();
     containerModal = columnRect;
+    if (columnRect.Width() == 0) {
+        LOGW("Get rect of buttons failed, the rect is measuring.");
+        return false;
+    }
 
     auto controlButtonsRow = GetControlButtonRow();
     CHECK_NULL_RETURN(controlButtonsRow, false);
     auto children = controlButtonsRow->GetChildren();
-    auto firstButtonRect = AceType::DynamicCast<FrameNode>(children.front())->GetGeometryNode()->GetFrameRect();
-    auto lastButtonRect = AceType::DynamicCast<FrameNode>(children.back())->GetGeometryNode()->GetFrameRect();
+    RectF firstButtonRect;
+    RectF lastButtonRect;
+    for (auto& child : children) {
+        auto node = AceType::DynamicCast<FrameNode>(child);
+        if (node->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+            continue;
+        }
+        auto rect = node->GetGeometryNode()->GetFrameRect();
+        if (firstButtonRect.Width() == 0) {
+            firstButtonRect = rect;
+        }
+        lastButtonRect = rect;
+    }
     buttons = firstButtonRect.CombineRectT(lastButtonRect);
-
-    if (controlButtonsRow->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
-        buttons.SetLeft(containerModal.Width() - TITLE_PADDING_END.ConvertToPx() - buttons.Width());
-        buttons.SetTop((titleHeight_ - TITLE_BUTTON_SIZE).ConvertToPx() / 2.0f);
+    if (buttons.Width() == 0) {
+        LOGW("Get rect of buttons failed, buttons are hidden");
+        return false;
     }
 
+    auto widthByPx = (TITLE_PADDING_START + TITLE_PADDING_END).ConvertToPx() + buttons.Width();
+    buttons.SetLeft(containerModal.Width() - widthByPx);
+    buttons.SetTop(0);
+    buttons.SetWidth(widthByPx);
+    buttons.SetHeight(titleHeight_.ConvertToPx());
     return true;
 }
 
@@ -635,5 +654,82 @@ void ContainerModalPattern::CallButtonsRectChange()
             }
         },
         TaskExecutor::TaskType::JS);
+}
+
+void ContainerModalPattern::InitTitle()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto themeConstants = themeManager->GetThemeConstants();
+    CHECK_NULL_VOID(themeConstants);
+    auto id = pipeline->GetWindowManager()->GetAppIconId();
+    auto pixelMap = themeConstants->GetPixelMap(id);
+    if (pixelMap) {
+        RefPtr<PixelMap> icon = PixelMap::CreatePixelMap(&pixelMap);
+        SetAppIcon(icon);
+    } else {
+        LOGW("Cannot get pixelmap, try media path."); // use themeConstants GetMediaPath
+    }
+    SetAppTitle(themeConstants->GetString(pipeline->GetWindowManager()->GetAppLabelId()));
+}
+
+void ContainerModalPattern::Init()
+{
+    InitContainerEvent();
+    InitTitle();
+    InitLayoutProperty();
+}
+
+void ContainerModalPattern::InitLayoutProperty()
+{
+    auto containerModal = GetHost();
+    containerModal->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+
+    auto column = GetColumnNode();
+    column->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+
+    auto content = GetContentNode();
+    auto contentProperty = content->GetLayoutProperty();
+    contentProperty->UpdateMeasureType(MeasureType::MATCH_CONTENT);
+    contentProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(1.0, DimensionUnit::PERCENT)));
+
+    auto stack = GetStackNode();
+    stack->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+
+    auto buttonsRow = GetControlButtonRow();
+    auto buttonsRowProperty = buttonsRow->GetLayoutProperty<LinearLayoutProperty>();
+    buttonsRowProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    buttonsRowProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));
+    buttonsRowProperty->UpdateMainAxisAlign(FlexAlign::FLEX_END);
+    buttonsRowProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
+
+    InitTitleRowLayoutProperty(GetCustomTitleRow());
+    InitTitleRowLayoutProperty(GetFloatingTitleRow());
+
+    containerModal->MarkModifyDone();
+}
+
+void ContainerModalPattern::InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow)
+{
+    auto titleRowProperty = titleRow->GetLayoutProperty<LinearLayoutProperty>();
+    titleRowProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    titleRowProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));
+    titleRowProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+    titleRowProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    PaddingProperty padding { std::nullopt, GetControlButtonRowWidth(), std::nullopt, std::nullopt };
+    titleRowProperty->UpdatePadding(padding);
+}
+
+CalcLength ContainerModalPattern::GetControlButtonRowWidth()
+{
+    auto row = GetControlButtonRow();
+    int32_t buttonNum = row->GetChildren().size();
+
+    return CalcLength(TITLE_ELEMENT_MARGIN_HORIZONTAL * (buttonNum - 1) + TITLE_BUTTON_SIZE * buttonNum +
+                      TITLE_PADDING_START + TITLE_PADDING_END);
 }
 } // namespace OHOS::Ace::NG

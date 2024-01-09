@@ -204,7 +204,7 @@ public:
         return false;
     }
 
-    virtual bool HasTransition() const
+    virtual bool HasDisappearTransition() const
     {
         return false;
     }
@@ -248,6 +248,20 @@ public:
     virtual void OnTransformCenterUpdate(const DimensionOffset& value) {}
     virtual void OnOffsetUpdate(const OffsetT<Dimension>& value) {}
 
+    // used in arkts_native_render_node_modifier set property directly to rsNode
+    virtual void SetRotation(float rotationX, float rotationY, float rotationZ) {}
+    virtual void SetShadowColor(uint32_t color) {}
+    virtual void SetShadowOffset(float offsetX, float offsetY) {}
+    virtual void SetShadowAlpha(float alpha) {}
+    virtual void SetShadowElevation(float elevation) {}
+    virtual void SetShadowRadius(float radius) {}
+    virtual void SetScale(float scaleX, float scaleY) {}
+    virtual void SetBackgroundColor(uint32_t colorValue) {}
+    virtual void SetRenderPivot(float pivotX, float pivotY) {}
+    virtual void SetFrame(float positionX, float positionY, float width, float height) {}
+    virtual void SetOpacity(float opacity) {}
+    virtual void SetTranslate(float translateX, float translateY, float translateZ) {}
+
     virtual RectF GetPaintRectWithTransform()
     {
         return {};
@@ -267,6 +281,8 @@ public:
 
     virtual void GetPointWithTransform(PointF& point) {}
 
+    virtual void GetPointTransform(PointF& point) {}
+
     virtual RectF GetPaintRectWithoutTransform()
     {
         return {};
@@ -283,6 +299,14 @@ public:
     {
         return OffsetF();
     }
+
+    virtual void CancelTranslateXYAnimation() {}
+
+    virtual OffsetF GetTranslateXYProperty()
+    {
+        return OffsetF();
+    }
+
     // update translateXY in backend.
     virtual void UpdateTranslateInXY(const OffsetF& offset) {}
 
@@ -293,6 +317,8 @@ public:
     virtual void ClearDrawCommands() {}
 
     virtual void DumpInfo() {}
+
+    virtual void DumpAdvanceInfo() {}
 
     void ObscuredToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
@@ -324,6 +350,11 @@ public:
     void SetIsModalRootNode(bool isModalRootNode)
     {
         isModalRootNode_ = isModalRootNode;
+    }
+
+    void SetIsNeedRebuildRSTree(bool isNeedRebuildRSTree)
+    {
+        isNeedRebuildRSTree_ = isNeedRebuildRSTree;
     }
 
     std::optional<BlurStyleOption> GetBackBlurStyle() const
@@ -536,6 +567,17 @@ public:
     {
         return true;
     }
+    virtual void SetRenderFrameOffset(const OffsetF& offset) {}
+
+    virtual bool DoTextureExport(uint64_t /* surfaceId */)
+    {
+        return false;
+    }
+
+    virtual bool StopTextureExport()
+    {
+        return false;
+    }
 
 protected:
     RenderContext() = default;
@@ -543,6 +585,7 @@ protected:
     ShareId shareId_;
     bool isModalRootNode_ = false;
     bool isSynced_ = false;
+    bool isNeedRebuildRSTree_ = true;
 
     virtual void OnBackgroundImageUpdate(const ImageSourceInfo& imageSourceInfo) {}
     virtual void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) {}

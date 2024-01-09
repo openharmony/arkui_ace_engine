@@ -32,7 +32,11 @@ void FrameNodeSnapshot::Dump(std::list<std::pair<int32_t, std::string>>& dumpLis
     }
     oss << "monopolizeEvents: " << monopolizeEvents << ", "
         << "isHit: " << isHit << ", "
-        << "hitTestMode: " << hitTestMode;
+        << "hitTestMode: " << hitTestMode << ", ";
+    oss << "responseRegion: ";
+    for (const auto& rect : responseRegionList) {
+        oss << rect.ToString().c_str();
+    }
     dumpList.emplace_back(std::make_pair(depth, oss.str()));
 }
 

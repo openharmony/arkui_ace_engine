@@ -212,6 +212,7 @@ public:
     void SetSwiperController(const RefPtr<SwiperController>& swiperController)
     {
         swiperController_ = swiperController;
+        InitSwiperController();
     }
 
     int32_t GetCurrentFirstIndex() const
@@ -229,9 +230,15 @@ public:
         return turnPageRate_;
     }
 
-    GestureState GetGestureState() const
+    GestureState GetGestureState()
     {
-        return gestureState_;
+        auto gestureState = gestureState_;
+        if (gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT ||
+            gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT) {
+            gestureState_ = GestureState::GESTURE_STATE_NONE;
+        }
+
+        return gestureState;
     }
 
     TouchBottomTypeLoop GetTouchBottomTypeLoop() const
@@ -542,6 +549,11 @@ public:
         customAnimationToIndex_ = toIndex;
     }
 
+    std::optional<int32_t> GetCustomAnimationToIndex() const
+    {
+        return customAnimationToIndex_;
+    }
+
     void SetCustomContentTransition(std::function<TabContentAnimatedTransition(int32_t, int32_t)>&& event)
     {
         onCustomContentTransition_ =
@@ -555,6 +567,16 @@ public:
 
     void SetSwiperEventCallback(bool disableSwipe);
     void UpdateSwiperPanEvent(bool disableSwipe);
+    bool IsUseCustomAnimation() const;
+    float GetMotionVelocity()
+    {
+        return motionVelocity_;
+    }
+
+    void SetTabsPaddingAndBorder(const PaddingPropertyF& tabsPaddingAndBorder)
+    {
+        tabsPaddingAndBorder_ = tabsPaddingAndBorder;
+    }
 
 private:
     void OnModifyDone() override;
@@ -571,6 +593,8 @@ private:
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitHoverMouseEvent();
     // Init on key event
+    void InitOnFocusInternal(const RefPtr<FocusHub>& focusHub);
+    void HandleFocusInternal();
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     void FlushFocus(const RefPtr<FrameNode>& curShowFrame);
@@ -687,7 +711,16 @@ private:
     void OnAnimationTranslateZero(int32_t nextIndex, bool stopAutoPlay);
     void UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus);
     void TriggerCustomContentTransitionEvent(int32_t fromIndex, int32_t toIndex);
-    bool IsUseCustomAnimation() const;
+    /**
+     * @brief Preprocess drag delta when received from DragUpdate event.
+     *
+     * Drag offset in Swiper can't go beyond a full page. Apply the restriction through this function.
+     *
+     * @param delta
+     * @param mainSize content length along the main axis.
+     * @param deltaSum accumulated delta in the current drag event.
+     */
+    static void ProcessDelta(float& delta, float mainSize, float deltaSum);
 
     /**
      * @brief Stops animations when the scroll starts.
@@ -725,7 +758,7 @@ private:
     bool HandleScrollVelocity(float velocity) override;
 
     void OnScrollStartRecursive(float position) override;
-    void OnScrollEndRecursive() override;
+    void OnScrollEndRecursive(const std::optional<float>& velocity) override;
 
     /**
      * @brief Notifies the parent component that the scroll has started at the specified position.
@@ -740,8 +773,10 @@ private:
 
     inline bool ChildFirst(NestedState state);
     void HandleTouchBottomLoop();
-    void CalculateGestureState(float additionalOffset, float currentTurnPageRate);
+    void CalculateGestureState(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex);
     void StopIndicatorAnimation();
+    RefPtr<FrameNode> GetCurrentFrameNode(int32_t currentIndex) const;
+    bool FadeOverScroll(float offset);
 
     WeakPtr<NestableScrollContainer> parent_;
     /**
@@ -786,12 +821,13 @@ private:
     float currentOffset_ = 0.0f;
     float fadeOffset_ = 0.0f;
     float turnPageRate_ = 0.0f;
-    GestureState gestureState_ = GestureState::GESTURE_STATE_FOLLOW;
+    GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     TouchBottomTypeLoop touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     float touchBottomRate_ = 1.0f;
     float currentIndexOffset_ = 0.0f;
     int32_t gestureSwipeIndex_ = 0;
     int32_t currentFirstIndex_ = 0;
+    int32_t currentFocusIndex_ = 0;
 
     bool moveDirection_ = false;
     bool indicatorDoingAnimation_ = false;
@@ -804,6 +840,7 @@ private:
     bool indicatorIsBoolean_ = true;
     bool isAtHotRegion_ = false;
     bool isDragging_ = false;
+    bool needTurn_ = false;
     /**
      * @brief Indicates whether the child NestableScrollContainer is currently scrolling and affecting Swiper.
      */
@@ -843,6 +880,8 @@ private:
     std::optional<int32_t> pauseTargetIndex_;
     std::optional<int32_t> oldChildrenSize_;
     float currentDelta_ = 0.0f;
+    // cumulated delta in a single drag event
+    float mainDeltaSum_ = 0.0f;
     SwiperLayoutAlgorithm::PositionMap itemPosition_;
     std::optional<float> velocity_;
     float motionVelocity_ = 0.0f;
@@ -861,7 +900,6 @@ private:
     bool fadeAnimationIsRunning_ = false;
     bool autoLinearReachBoundary = false;
 
-    float mainDeltaSum_ = 0.0f;
     std::optional<int32_t> cachedCount_;
 
     std::optional<int32_t> surfaceChangedCallbackId_;
@@ -876,6 +914,7 @@ private:
     std::set<int32_t> needUnmountIndexs_;
     std::optional<int32_t> customAnimationToIndex_;
     RefPtr<TabContentTransitionProxy> currentProxyInAnimation_;
+    PaddingPropertyF tabsPaddingAndBorder_;
 };
 } // namespace OHOS::Ace::NG
 

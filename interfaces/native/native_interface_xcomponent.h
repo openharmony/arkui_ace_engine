@@ -621,6 +621,28 @@ int32_t OH_NativeXComponent_RegisterOnFrameCallback(OH_NativeXComponent* compone
  */
 int32_t OH_NativeXComponent_UnregisterOnFrameCallback(OH_NativeXComponent* component);
 
+/**
+ * @brief Attach the root <b>ArkUI_NodeHandle</b> to xcomponent's <b>OH_NativeXComponent</b>.
+ *
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @param root Indicates the pointer to the root <b>ArkUI_NodeHandle</b>.
+ * @return Returns the status code of the execution.
+ * @since 11
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_AttachNativeRootNode(OH_NativeXComponent* component, void* root);
+
+/**
+ * @brief detach the root <b>ArkUI_NodeHandle</b> to xcomponent's <b>OH_NativeXComponent</b>.
+ *
+ * @param component Indicates the pointer to this <b>OH_NativeXComponent</b> instance.
+ * @param root Indicates the pointer to the root <b>ArkUI_NodeHandle</b>.
+ * @return Returns the status code of the execution.
+ * @since 11
+ * @version 1.0
+ */
+int32_t OH_NativeXComponent_DetachNativeRootNode(OH_NativeXComponent* component, void* root);
+
 #ifdef __cplusplus
 };
 #endif

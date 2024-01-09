@@ -31,10 +31,10 @@ class ArkTabContentComponent extends ArkComponent implements TabContentAttribute
 // @ts-ignore
 globalThis.TabContent.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTabContentComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

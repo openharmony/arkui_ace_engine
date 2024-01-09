@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_IMAGE_ACE_PIXEL_MAP_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_IMAGE_ACE_PIXEL_MAP_H
 
+#include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 
 namespace OHOS {
@@ -47,6 +48,43 @@ enum class AlphaType : int32_t {
     IMAGE_ALPHA_TYPE_UNPREMUL = 3, // image have alpha component, and all pixels stored without premultiply alpha value.
 };
 
+struct ImageResizableSlice {
+    Dimension left;
+    Dimension right;
+    Dimension top;
+    Dimension bottom;
+    std::string ToString() const
+    {
+        std::string result;
+        result.append("ImageResizableSlice: {");
+        result.append("left: ");
+        result.append(left.ToString());
+        result.append(", right: ");
+        result.append(right.ToString());
+        result.append(", top: ");
+        result.append(top.ToString());
+        result.append(", bottom: ");
+        result.append(bottom.ToString());
+        result.append("}");
+        return result;
+    }
+    bool operator==(const ImageResizableSlice& slice) const
+    {
+        return left == slice.left && right == slice.right && top == slice.top && bottom == slice.bottom;
+    }
+    bool Valid() const
+    {
+        return left.IsValid() || right.IsValid() || top.IsValid() || bottom.IsValid();
+    }
+};
+
+enum class AceAntiAliasingOption : int32_t {
+    NONE = 0,
+    LOW = 1,
+    MEDIUM = 2,
+    HIGH = 3,
+};
+
 class ACE_EXPORT PixelMap : public AceType {
     DECLARE_ACE_TYPE(PixelMap, AceType)
 
@@ -73,6 +111,8 @@ public:
     virtual std::string GetModifyId() = 0;
     virtual std::shared_ptr<Media::PixelMap> GetPixelMapSharedPtr() = 0;
     virtual void* GetWritablePixels() const = 0;
+    virtual void Scale(float xAxis, float yAxis) = 0;
+    virtual void Scale(float xAxis, float yAxis, const AceAntiAliasingOption &option) = 0;
 
     static void* GetReleaseContext(const RefPtr<PixelMap>& pixelMap);
     // passed to SkImage to release PixelMap shared_ptr

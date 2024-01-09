@@ -529,6 +529,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         }
         txtStyle.symbol.SetRenderColor(symbolColors);
         txtStyle.symbol.SetRenderMode(textStyle.GetRenderStrategy());
+        txtStyle.symbol.SetSymbolEffect(textStyle.GetEffectStrategy());
     }
     txtStyle.baseline = ConvertTxtTextBaseline(textStyle.GetTextBaseline());
     txtStyle.decoration = ConvertTxtTextDecoration(textStyle.GetTextDecoration());
@@ -577,6 +578,23 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         }
         txtStyle.fontFeatures = features;
     }
+    auto textBackgroundStyle = textStyle.GetTextBackgroundStyle();
+    CHECK_NULL_VOID(textBackgroundStyle.has_value());
+    txtStyle.styleId = textBackgroundStyle->groupId;
+    if (textBackgroundStyle->backgroundColor.has_value()) {
+        txtStyle.backgroundRect.color = textBackgroundStyle->backgroundColor.value().GetValue();
+    }
+    auto radius = textBackgroundStyle->backgroundRadius;
+    CHECK_NULL_VOID(radius.has_value());
+    auto radiusConverter = [context = pipelineContext](const std::optional<Dimension>& radius) -> double {
+        CHECK_NULL_RETURN(radius.has_value(), 0);
+        CHECK_NULL_RETURN(context, radius->Value());
+        return context->NormalizeToPx(radius.value());
+    };
+    txtStyle.backgroundRect.leftTopRadius = radiusConverter(radius->radiusTopLeft);
+    txtStyle.backgroundRect.rightTopRadius = radiusConverter(radius->radiusTopRight);
+    txtStyle.backgroundRect.leftBottomRadius = radiusConverter(radius->radiusBottomLeft);
+    txtStyle.backgroundRect.rightBottomRadius = radiusConverter(radius->radiusBottomRight);
 }
 #endif
 

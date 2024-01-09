@@ -25,6 +25,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/pipeline/base/render_component.h"
 
 namespace OHOS::Ace {
@@ -128,6 +129,18 @@ struct PlaceholderRun {
 
     /// The baseline offset
     float baseline_offset = 0.0f;
+};
+
+struct TextBackgroundStyle {
+    std::optional<Color> backgroundColor;
+    std::optional<NG::BorderRadiusProperty> backgroundRadius;
+    int32_t groupId = 0;
+
+    bool operator==(const TextBackgroundStyle& value) const
+    {
+        return backgroundColor == value.backgroundColor && backgroundRadius == value.backgroundRadius &&
+               groupId == value.groupId;
+    }
 };
 
 class ACE_EXPORT TextStyle final {
@@ -521,12 +534,20 @@ public:
         return renderColors_;
     }
 
-    int32_t GetEffectStrategy()
+    int32_t GetEffectStrategy() const
     {
         return effectStrategy_;
     }
 
+    void SetTextBackgroundStyle(const std::optional<TextBackgroundStyle>& style)
+    {
+        textBackgroundStyle_ = style;
+    }
 
+    const std::optional<TextBackgroundStyle>& GetTextBackgroundStyle() const
+    {
+        return textBackgroundStyle_;
+    }
 private:
     std::vector<std::string> fontFamilies_;
     std::unordered_map<std::string, int32_t> fontFeatures_;
@@ -568,6 +589,8 @@ private:
     std::vector<Color> renderColors_;
     int32_t renderStrategy_ = 0;
     int32_t effectStrategy_ = 0;
+
+    std::optional<TextBackgroundStyle> textBackgroundStyle_;
 };
 
 namespace StringUtils {

@@ -27,8 +27,8 @@ FormFrontendDelegateDeclarative::~FormFrontendDelegateDeclarative()
     LOG_DESTROY();
 }
 
-void FormFrontendDelegateDeclarative::RunCard(const std::string& url,
-    const std::string& params, const std::string& profile, int64_t cardId)
+void FormFrontendDelegateDeclarative::RunCard(const std::string& url, const std::string& params,
+    const std::string& profile, int64_t cardId, const std::string& entryPoint)
 {
     ACE_SCOPED_TRACE("FormFrontendDelegateDeclarative::RunCard");
     auto pageRouterManager = GetPageRouterManager();
@@ -44,13 +44,13 @@ void FormFrontendDelegateDeclarative::RunCard(const std::string& url,
     auto weakCardPipeline = WeakPtr<PipelineBase>(cardPipeline);
     container->SetCardPipeline(weakCardPipeline, cardId);
 #ifndef PREVIEW
-    pageRouterManager->RunCard(url, params, cardId);
+    pageRouterManager->RunCard(url, params, cardId, entryPoint);
 #else
     taskExecutor->PostTask(
-        [weak = WeakClaim<NG::PageRouterManager>(RawPtr(pageRouterManager)), url, params, cardId]() {
+        [weak = WeakClaim<NG::PageRouterManager>(RawPtr(pageRouterManager)), url, params, cardId, entryPoint]() {
             auto pageRouterManager = weak.Upgrade();
             CHECK_NULL_VOID(pageRouterManager);
-            pageRouterManager->RunCard(url, params, cardId);
+            pageRouterManager->RunCard(url, params, cardId, entryPoint);
         },
         TaskExecutor::TaskType::JS);
 #endif

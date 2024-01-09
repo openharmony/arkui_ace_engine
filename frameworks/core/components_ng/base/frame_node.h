@@ -40,6 +40,7 @@
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/event/input_event_hub.h"
+#include "core/components_ng/event/target_component.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/layout_constraint.h"
@@ -638,21 +639,22 @@ public:
     OffsetF GetOffsetInScreen();
     RefPtr<PixelMap> GetPixelMap();
     RefPtr<FrameNode> GetPageNode();
+    RefPtr<FrameNode> GetNodeContainer();
     void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType);
     void NotifyFillRequestFailed(int32_t errCode);
 
     int32_t GetUiExtensionId();
-    int32_t WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId);
-    void SearchExtensionElementInfoByAccessibilityIdNG(int32_t elementId, int32_t mode,
-        int32_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
-    void SearchElementInfosByTextNG(int32_t elementId, const std::string& text,
-        int32_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
-    void FindFocusedExtensionElementInfoNG(int32_t elementId, int32_t focusType,
-        int32_t offset, Accessibility::AccessibilityElementInfo& output);
-    void FocusMoveSearchNG(int32_t elementId, int32_t direction,
-        int32_t offset, Accessibility::AccessibilityElementInfo& output);
-    bool TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int32_t offset);
+    int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId);
+    void SearchExtensionElementInfoByAccessibilityIdNG(int64_t elementId, int32_t mode,
+        int64_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
+    void SearchElementInfosByTextNG(int64_t elementId, const std::string& text,
+        int64_t offset, std::list<Accessibility::AccessibilityElementInfo>& output);
+    void FindFocusedExtensionElementInfoNG(int64_t elementId, int32_t focusType,
+        int64_t offset, Accessibility::AccessibilityElementInfo& output);
+    void FocusMoveSearchNG(int64_t elementId, int32_t direction,
+        int64_t offset, Accessibility::AccessibilityElementInfo& output);
+    bool TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int64_t offset);
     std::vector<RectF> GetResponseRegionListForRecognizer(int32_t sourceType);
     bool InResponseRegionList(const PointF& parentLocalPoint, const std::vector<RectF>& responseRegionList) const;
 
@@ -667,6 +669,8 @@ public:
     {
         cachedGlobalOffset_ = timestampOffset;
     }
+
+    void InitLastArea();
 
 private:
     void MarkNeedRender(bool isRenderBoundary);
@@ -726,7 +730,7 @@ private:
     void UpdatePercentSensitive();
 
     void UpdateParentAbsoluteOffset();
-    void AddFrameNodeSnapshot(bool isHit, int32_t parentId);
+    void AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<RectF> responseRegionList);
 
     int32_t GetNodeExpectedRate();
 
@@ -759,6 +763,7 @@ private:
     RefPtr<GeometryNode> oldGeometryNode_;
     std::optional<bool> skipMeasureContent_;
     std::unique_ptr<FramePorxy> frameProxy_;
+    WeakPtr<TargetComponent> targetComponent_;
 
     bool needSyncRenderTree_ = false;
 
@@ -808,6 +813,7 @@ private:
     friend class Pattern;
 
     ACE_DISALLOW_COPY_AND_MOVE(FrameNode);
+
 };
 } // namespace OHOS::Ace::NG
 

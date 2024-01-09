@@ -51,7 +51,7 @@ public:
             auto host = GetFrameNode();
             if (host) {
                 auto id = host->GetInspectorIdValue("");
-                builder.SetId(id).SetType(host->GetHostTag());
+                builder.SetId(id).SetType(host->GetHostTag()).SetDescription(host->GetAutoEventParamValue(""));
                 if (!id.empty()) {
                     Recorder::NodeDataCache::Get().PutMultiple(id, value_, check);
                 }

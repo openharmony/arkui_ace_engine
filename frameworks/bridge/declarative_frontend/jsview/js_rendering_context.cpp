@@ -15,6 +15,7 @@
 
 #include "js_rendering_context.h"
 
+#include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "frameworks/bridge/declarative_frontend/jsview/models/rendering_context_model_impl.h"
@@ -211,12 +212,21 @@ void JSRenderingContext::JsTransferFromImageBitmap(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         return;
     }
-    uint32_t id = 0;
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
-    JSRef<JSVal> widthId = obj->GetProperty("__id");
-    JSViewAbstract::ParseJsInteger(widthId, id);
-    RefPtr<AceType> offscreenPattern = JSOffscreenRenderingContext::GetOffscreenPattern(id);
-    RenderingContextModel::GetInstance()->SetTransferFromImageBitmap(
-        canvasPattern_, offscreenPattern);
+    auto engine = EngineHelper::GetCurrentEngine();
+    if (engine != nullptr) {
+        NativeEngine* nativeEngine = engine->GetNativeEngine();
+        napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+        panda::Local<JsiValue> value = info[0].Get().GetLocalHandle();
+        JSValueWrapper valueWrapper = value;
+        napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    
+        uint32_t id = 0;
+        napi_value widthId = nullptr;
+        napi_get_named_property(env, napiValue, "__id", &widthId);
+        napi_get_value_uint32(env, widthId, &id);
+        RefPtr<AceType> offscreenPattern = JSOffscreenRenderingContext::GetOffscreenPattern(id);
+        RenderingContextModel::GetInstance()->SetTransferFromImageBitmap(
+            canvasPattern_, offscreenPattern);
+    }
 }
 } // namespace OHOS::Ace::Framework

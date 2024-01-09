@@ -638,6 +638,9 @@ bool NavigationModelNG::CreateNavBarNodeChildsIfNeeded(const RefPtr<NavBarNode>&
         navBarContentRenderContext->UpdateClipEdge(true);
         navBarNode->AddChild(navBarContentNode);
         navBarNode->SetNavBarContentNode(navBarContentNode);
+
+        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
+        navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
 
     // toolBar node
@@ -646,6 +649,10 @@ bool NavigationModelNG::CreateNavBarNodeChildsIfNeeded(const RefPtr<NavBarNode>&
         ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TOOL_BAR_ETS_TAG, toolBarNodeId);
         auto toolBarNode = NavToolbarNode::GetOrCreateToolbarNode(
             V2::TOOL_BAR_ETS_TAG, toolBarNodeId, []() { return AceType::MakeRefPtr<NavToolbarPattern>(); });
+        toolBarNode->MarkModifyDone();
+        auto property = toolBarNode->GetLayoutProperty();
+        CHECK_NULL_RETURN(property, false);
+        property->UpdateVisibility(VisibleType::GONE);
         navBarNode->AddChild(toolBarNode);
         navBarNode->SetToolBarNode(toolBarNode);
         navBarNode->SetPreToolBarNode(toolBarNode);
@@ -674,24 +681,28 @@ bool NavigationModelNG::CreateContentNodeIfNeeded(const RefPtr<NavigationGroupNo
 
 bool NavigationModelNG::CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNode>& navigationGroupNode)
 {
-    if (navigationGroupNode->GetDividerNode()) {
-        return true;
+    if (!navigationGroupNode->GetDividerNode()) {
+        int32_t dividerNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+        ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::DIVIDER_ETS_TAG, dividerNodeId);
+        auto dividerNode = FrameNode::GetOrCreateFrameNode(
+            V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
+        navigationGroupNode->AddChild(dividerNode);
+        navigationGroupNode->SetDividerNode(dividerNode);
+
+        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
+        dividerNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+
+        auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
+        CHECK_NULL_RETURN(dividerLayoutProperty, false);
+        dividerLayoutProperty->UpdateStrokeWidth(DIVIDER_WIDTH);
+        dividerLayoutProperty->UpdateVertical(true);
+        auto theme = NavigationGetTheme();
+        CHECK_NULL_RETURN(theme, false);
+        auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
+        CHECK_NULL_RETURN(dividerRenderProperty, false);
+        dividerRenderProperty->UpdateDividerColor(Color::TRANSPARENT);
+        dividerNode->GetRenderContext()->UpdateBackgroundColor(theme->GetNavigationDividerColor());
     }
-
-    int32_t dividerNodeId = ElementRegister::GetInstance()->MakeUniqueId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::DIVIDER_ETS_TAG, dividerNodeId);
-    auto dividerNode = FrameNode::GetOrCreateFrameNode(
-        V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
-    navigationGroupNode->AddChild(dividerNode);
-    navigationGroupNode->SetDividerNode(dividerNode);
-
-    auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
-    CHECK_NULL_RETURN(dividerLayoutProperty, false);
-    dividerLayoutProperty->UpdateStrokeWidth(DIVIDER_WIDTH);
-    dividerLayoutProperty->UpdateVertical(true);
-    auto dividerRenderProperty = dividerNode->GetPaintProperty<DividerRenderProperty>();
-    CHECK_NULL_RETURN(dividerRenderProperty, false);
-    dividerRenderProperty->UpdateDividerColor(DIVIDER_COLOR);
 
     return true;
 }
@@ -1107,11 +1118,15 @@ void NavigationModelNG::SetCustomToolBar(const RefPtr<AceType>& customNode)
         }
     }
     navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
-    auto toolBarNode = navBarNode->GetToolBarNode();
+    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetToolBarNode());
     CHECK_NULL_VOID(toolBarNode);
     toolBarNode->Clean();
     customToolBar->MountToParent(toolBarNode);
     navBarNode->UpdatePrevToolBarIsCustom(true);
+    toolBarNode->SetHasValidContent(true);
+    auto property = toolBarNode->GetLayoutProperty();
+    CHECK_NULL_VOID(property);
+    property->UpdateVisibility(VisibleType::VISIBLE);
 }
 
 bool NavigationModelNG::NeedSetItems()
@@ -1138,7 +1153,7 @@ void NavigationModelNG::SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems)
         }
         navBarNode->UpdateToolBarNodeOperation(ChildNodeOperation::REPLACE);
     }
-    auto toolBarNode = AceType::DynamicCast<FrameNode>(navBarNode->GetPreToolBarNode());
+    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetPreToolBarNode());
     CHECK_NULL_VOID(toolBarNode);
     auto rowProperty = toolBarNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(rowProperty);
@@ -1150,6 +1165,9 @@ void NavigationModelNG::SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems)
         UpdateBarItemNodeWithItem(barItemNode, toolBarItem);
         toolBarNode->AddChild(barItemNode);
     }
+    bool hasValidContent = !toolBarNode->GetChildren().empty();
+    toolBarNode->SetHasValidContent(hasValidContent);
+    rowProperty->UpdateVisibility(hasValidContent ? VisibleType::VISIBLE : VisibleType::GONE);
     navBarNode->SetToolBarNode(toolBarNode);
     navBarNode->SetPreToolBarNode(toolBarNode);
     navBarNode->UpdatePrevToolBarIsCustom(false);
@@ -1183,7 +1201,8 @@ void NavigationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolB
     CHECK_NULL_VOID(rowProperty);
     rowProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
 
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
+        !SystemProperties::GetNavigationBlurEnabled()) {
         CreateToolBarDividerNode(navBarNode);
     }
 
@@ -1204,6 +1223,10 @@ void NavigationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolB
             containerNode->AddChild(toolBarItemNode);
         }
     }
+
+    bool hasValidContent = !containerNode->GetChildren().empty();
+    toolBarNode->SetHasValidContent(hasValidContent);
+    rowProperty->UpdateVisibility(hasValidContent ? VisibleType::VISIBLE : VisibleType::GONE);
 
     if (needMoreButton) {
         int32_t barItemNodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -1733,5 +1756,23 @@ void NavigationModelNG::PutComponentInsideNavigator(
     }
     navBarNode->SetBackButton(backButtonNode);
     navBarNode->UpdateBackButtonNodeOperation(ChildNodeOperation::ADD);
+}
+
+void NavigationModelNG::SetIsCustomAnimation(bool isCustom)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsCustomAnimation(isCustom);
+}
+
+void NavigationModelNG::SetCustomTransition(NavigationTransitionEvent&& customTransition)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetNavigationTransition(std::move(customTransition));
 }
 } // namespace OHOS::Ace::NG

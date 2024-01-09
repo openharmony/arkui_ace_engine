@@ -16,7 +16,7 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/jsview/js_image.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
@@ -170,7 +170,7 @@ ArkUINativeModuleValue ImageBridge::SetObjectFit(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     if (secondArg->IsNumber()) {
-        int32_t objectFitValue = secondArg->Uint32Value(vm);
+        int32_t objectFitValue = secondArg->Int32Value(vm);
         GetArkUIInternalNodeAPI()->GetImageModifier().SetObjectFit(nativeNode, objectFitValue);
     } else {
         GetArkUIInternalNodeAPI()->GetImageModifier().ResetObjectFit(nativeNode);

@@ -23,11 +23,13 @@ namespace OHOS::Ace::Framework {
 class JSNodeContainer : public JSViewAbstract, public JSInteractableView {
 public:
     static void Create(const JSCallbackInfo& info);
-    static RefPtr<NG::UINode> GetNodeByNodeController(const JSRef<JSObject>& object, JsiExecutionContext execCtx);
+    static void SetNodeController(const JSRef<JSObject>& object, JsiExecutionContext execCtx);
+    static void ResetNodeController();
     static JSRef<JSVal> GetCurrentContext();
     static void SetOnAppearFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx);
     static void SetOnDisappearFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx);
     static void SetOnResizeFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx);
+    static void SetOnTouchEventFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx);
     static void JSBind(BindingTarget globalObj);
 };
 

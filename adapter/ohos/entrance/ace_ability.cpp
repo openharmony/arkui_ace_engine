@@ -21,7 +21,7 @@
 #include "ability_process.h"
 #include "dm/display_manager.h"
 #include "form_utils_impl.h"
-#include "init_data.h"
+#include "ohos/init_data.h"
 #include "ipc_skeleton.h"
 #include "res_config.h"
 #include "resource_manager.h"

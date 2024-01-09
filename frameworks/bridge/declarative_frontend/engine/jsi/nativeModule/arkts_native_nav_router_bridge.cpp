@@ -14,18 +14,32 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_nav_router_bridge.h"
 
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "core/interfaces/native/node/api.h"
 
 namespace OHOS::Ace::NG {
+constexpr int32_t CALL_ARG_0 = 0;
+constexpr int32_t CALL_ARG_1 = 1;
+constexpr int32_t NAV_ROUTE_MODE_RANGE = 2;
+constexpr int32_t NAV_ROUTE_MODE_DEFAULT = 0;
 ArkUINativeModuleValue NavRouterBridge::SetMode(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    int32_t value = secondArg->Int32Value(vm);
-    GetArkUIInternalNodeAPI()->GetNavRouterModifier().SetNavRouteMode(nativeNode, value);
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+
+    if (valueArg->IsNumber()) {
+        int32_t value = valueArg->Int32Value(vm);
+        if (value >= NAV_ROUTE_MODE_DEFAULT && value <= NAV_ROUTE_MODE_RANGE) {
+            GetArkUIInternalNodeAPI()->GetNavRouterModifier().SetNavRouteMode(nativeNode, value);
+        } else {
+            GetArkUIInternalNodeAPI()->GetNavRouterModifier().ResetNavRouteMode(nativeNode);
+        }
+    } else {
+        GetArkUIInternalNodeAPI()->GetNavRouterModifier().ResetNavRouteMode(nativeNode);
+    }
+
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -33,8 +47,8 @@ ArkUINativeModuleValue NavRouterBridge::ResetMode(ArkUIRuntimeCallInfo* runtimeC
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(CALL_ARG_0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetNavRouterModifier().ResetNavRouteMode(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }

@@ -174,7 +174,7 @@ private:
         builder.SetId(inspectorId_);
         auto host = GetFrameNode();
         if (host) {
-            builder.SetType(host->GetHostTag());
+            builder.SetType(host->GetHostTag()).SetDescription(host->GetAutoEventParamValue(""));
         }
         builder.SetEventType(eventType).SetText(param);
         Recorder::EventRecorder::Get().OnEvent(std::move(builder));

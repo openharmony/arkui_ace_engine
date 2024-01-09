@@ -14,6 +14,7 @@
  */
 
 #include "frameworks/bridge/declarative_frontend/jsview/js_image_span.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 
 #if !defined(PREVIEW)
 #include <dlfcn.h>
@@ -34,6 +35,7 @@ void JSImageSpan::Create(const JSCallbackInfo& info)
         return;
     }
     JSImage::Create(info);
+    NG::ImageSpanView::Create();
 }
 
 void JSImageSpan::SetObjectFit(const JSCallbackInfo& info)
@@ -62,6 +64,12 @@ void JSImageSpan::SetVerticalAlign(int32_t verticalAlign)
     NG::ImageSpanView::SetVerticalAlign(align);
 }
 
+void JSImageSpan::SetTextBackgroundStyle(const JSCallbackInfo& info)
+{
+    auto textBackgroundStyle = JSContainerSpan::ParseTextBackgroundStyle(info);
+    NG::ImageSpanView::SetPlaceHolderStyle(textBackgroundStyle);
+}
+
 void JSImageSpan::JSBind(BindingTarget globalObj)
 {
     JSClass<JSImageSpan>::Declare("ImageSpan");
@@ -69,6 +77,7 @@ void JSImageSpan::JSBind(BindingTarget globalObj)
     JSClass<JSImageSpan>::StaticMethod("create", &JSImageSpan::Create, opt);
     JSClass<JSImageSpan>::StaticMethod("objectFit", &JSImageSpan::SetObjectFit);
     JSClass<JSImageSpan>::StaticMethod("verticalAlign", &JSImageSpan::SetVerticalAlign);
+    JSClass<JSImageSpan>::StaticMethod("textBackgroundStyle", &JSImageSpan::SetTextBackgroundStyle);
     JSClass<JSImageSpan>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

@@ -35,6 +35,8 @@
       non-virtual?thunk?to?OHOS::Ace::PluginComponentManager::UIServiceListener::OnReturnRequest*;
 
       OHOS_ACE_*;
+      GetArkUINodeAPI;
+      GetArkUIAnyFullNodeAPI;
 
       OHOS::Ace::AceApplicationInfo::*;
       OHOS::Ace::AceScopedTrace::*;

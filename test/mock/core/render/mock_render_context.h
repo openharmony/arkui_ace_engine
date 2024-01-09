@@ -34,7 +34,6 @@ public:
     MOCK_METHOD1(AnimateHoverEffectScale, void(bool));
     MOCK_METHOD1(SetVisible, void(bool));
     MOCK_METHOD0(GetLocalTransformMatrix, Matrix4());
-    MOCK_METHOD2(CalcExpectedFrameRate, int32_t(const std::string&, float));
 
     void ResetBlendBgColor() override
     {
@@ -54,6 +53,17 @@ public:
     RectF GetPaintRectWithTransform() override
     {
         return rect_;
+    }
+
+    void UpdateBackBlurStyle(const std::optional<BlurStyleOption>& bgBlurStyle)
+    {
+        const auto& groupProperty = GetOrCreateBackground();
+        groupProperty->propBlurStyleOption = bgBlurStyle;
+    }
+
+    int32_t CalcExpectedFrameRate(const std::string& scene, float speed)
+    {
+        return 0;
     }
 
     RectF rect_;

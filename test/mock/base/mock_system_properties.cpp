@@ -35,7 +35,7 @@ DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT }
 bool SystemProperties::isHookModeEnabled_ = false;
 bool SystemProperties::rosenBackendEnabled_ = true;
 bool SystemProperties::windowAnimationEnabled_ = true;
-bool SystemProperties::layoutTraceEnable_ = false;
+bool SystemProperties::buildTraceEnable_ = false;
 double SystemProperties::resolution_ = 0.0;
 constexpr float defaultAnimationScale = 1.0f;
 bool SystemProperties::extSurfaceEnabled_ = false;
@@ -46,9 +46,10 @@ int32_t SystemProperties::deviceWidth_ = 720;
 int32_t SystemProperties::deviceHeight_ = 1280;
 bool SystemProperties::downloadByNetworkEnabled_ = false;
 bool SystemProperties::traceEnabled_ = false;
-bool SystemProperties::changeTitleStyleEnabled_ = false;
 int32_t SystemProperties::devicePhysicalWidth_ = 0;
 int32_t SystemProperties::devicePhysicalHeight_ = 0;
+bool SystemProperties::enableScrollableItemPool_ = false;
+bool SystemProperties::navigationBlurEnabled_ = false;
 
 float SystemProperties::GetFontWeightScale()
 {
@@ -97,8 +98,28 @@ bool SystemProperties::GetImageFrameworkEnabled()
     return true;
 }
 
+bool SystemProperties::GetTitleStyleEnabled()
+{
+    return false;
+}
+
 std::string SystemProperties::GetCustomTitleFilePath()
 {
     return {};
+}
+
+bool SystemProperties::GetDisplaySyncSkipEnabled()
+{
+    return true;
+}
+
+bool SystemProperties::GetNavigationBlurEnabled()
+{
+    return navigationBlurEnabled_;
+}
+
+bool SystemProperties::GetLayoutTraceEnabled()
+{
+    return false;
 }
 } // namespace OHOS::Ace

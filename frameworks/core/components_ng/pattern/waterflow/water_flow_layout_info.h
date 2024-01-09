@@ -22,6 +22,7 @@
 #include <sstream>
 
 #include "base/utils/utils.h"
+#include "core/components/scroll/scroll_controller_base.h"
 
 namespace OHOS::Ace::NG {
 struct FlowItemIndex {
@@ -70,6 +71,8 @@ public:
     bool offsetEnd_ = false;
 
     int32_t jumpIndex_ = EMPTY_JUMP_INDEX;
+
+    ScrollAlign align_;
 
     int32_t startIndex_ = 0;
     int32_t endIndex_ = 0;

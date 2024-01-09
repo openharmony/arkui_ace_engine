@@ -17,7 +17,7 @@
 #include <string>
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/text/text_theme.h"
@@ -129,7 +129,7 @@ ArkUINativeModuleValue SpanBridge::SetFontStyle(ArkUIRuntimeCallInfo *runtimeCal
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
     if (secondArg->IsNumber()) {
-        int32_t value = secondArg->Uint32Value(vm);
+        int32_t value = secondArg->Int32Value(vm);
         if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
             GetArkUIInternalNodeAPI()->GetSpanModifier().SetSpanFontStyle(nativeNode, value);
         } else {

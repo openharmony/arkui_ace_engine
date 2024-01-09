@@ -13,30 +13,34 @@
  * limitations under the License.
  */
 
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class ArkStackComponent extends ArkComponent implements StackAttribute {
   constructor(nativePtr: KNode) {
     super(nativePtr);
   }
   onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
   alignContent(value: Alignment): StackAttribute {
     modifierWithKey(this._modifiersWithKeys, StackAlignContentModifier.identity, StackAlignContentModifier, value);
     return this;
   }
+  align(value: Alignment): this {
+    modifierWithKey(this._modifiersWithKeys, StackAlignContentModifier.identity, StackAlignContentModifier, value);
+    return this;
+  }
 }
 
-class StackAlignContentModifier extends Modifier<number> {
+class StackAlignContentModifier extends ModifierWithKey<number> {
   constructor(nativePtr: number) {
     super(nativePtr);
   }
   static identity: Symbol = Symbol('stackAlignContent');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().stack.resetAlignContent(node);
+      getUINativeModule().stack.resetAlignContent(node);
     } else {
-      GetUINativeModule().stack.setAlignContent(node, this.value!);
+      getUINativeModule().stack.setAlignContent(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -46,10 +50,10 @@ class StackAlignContentModifier extends Modifier<number> {
 // @ts-ignore
 globalThis.Stack.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkStackComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

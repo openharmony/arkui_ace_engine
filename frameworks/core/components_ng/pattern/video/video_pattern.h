@@ -39,7 +39,7 @@ class VideoPattern : public Pattern {
 public:
     using HiddenChangeEvent = std::function<void(bool)>;
 
-    VideoPattern() = default;
+    VideoPattern() = delete;
     explicit VideoPattern(const RefPtr<VideoControllerV2>& videoController);
     ~VideoPattern() override;
 
@@ -238,6 +238,8 @@ protected:
     RefPtr<MediaPlayer> mediaPlayer_ = MediaPlayer::Create();
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
     RefPtr<RenderContext> renderContextForMediaPlayer_ = RenderContext::Create();
+
+    int32_t instanceId_;
 
 #if defined(VIDEO_TEXTURE_SUPPORTED) && defined(ENABLE_ROSEN_BACKEND)
     WeakPtr<RenderSurface> renderSurfaceWeakPtr_;

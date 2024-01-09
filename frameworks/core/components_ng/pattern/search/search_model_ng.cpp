@@ -69,16 +69,16 @@ RefPtr<TextFieldControllerBase> SearchModelNG::Create(const std::optional<std::s
     // Set search background
     auto renderContext = frameNode->GetRenderContext();
     auto textFieldTheme = PipelineBase::GetCurrentContext()->GetTheme<TextFieldTheme>();
-    renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
     auto radius = textFieldTheme->GetBorderRadius();
     BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
     renderContext->UpdateBorderRadius(borderRadius);
 
     ViewStackProcessor::GetInstance()->Push(frameNode);
     auto pattern = frameNode->GetPattern<SearchPattern>();
-    pattern->SetSearchController(AceType::MakeRefPtr<TextFieldController>());
+
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    pattern->SetSearchController(textFieldPattern->GetTextFieldController());
     pattern->UpdateChangeEvent(textFieldPattern->GetTextValue());
     return pattern->GetSearchController();
 }
@@ -662,7 +662,6 @@ void SearchModelNG::CreateTextField(const RefPtr<SearchNode>& parentNode, const 
     auto textFieldTheme = pipeline->GetTheme<TextFieldTheme>();
     CHECK_NULL_VOID(textFieldTheme);
     auto renderContext = frameNode->GetRenderContext();
-    renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
     auto textFieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     textFieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
     textFieldPaintProperty->UpdateCursorWidth(textFieldTheme->GetCursorWidth());

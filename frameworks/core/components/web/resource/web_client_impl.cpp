@@ -130,11 +130,11 @@ void DownloadListenerImpl::OnDownloadStart(const std::string& url, const std::st
     delegate->OnDownloadStart(url, userAgent, contentDisposition, mimetype, contentLength);
 }
 
-void AccessibilityEventListenerImpl::OnAccessibilityEvent(int32_t nodeId, uint32_t eventType)
+void AccessibilityEventListenerImpl::OnAccessibilityEvent(int64_t accessibilityId, uint32_t eventType)
 {
     ContainerScope scope(instanceId_);
     CHECK_NULL_VOID(webDelegate_);
-    webDelegate_->OnAccessibilityEvent(nodeId, static_cast<AccessibilityEventType>(eventType));
+    webDelegate_->OnAccessibilityEvent(accessibilityId, static_cast<AccessibilityEventType>(eventType));
 }
 
 void FindListenerImpl::OnFindResultReceived(
@@ -158,15 +158,16 @@ void WebClientImpl::OnPageLoadEnd(int httpStatusCode, const std::string& url)
     delegate->OnPageFinished(url);
 }
 
-void WebClientImpl::OnFocus()
+bool WebClientImpl::OnFocus()
 {
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
-    if (!delegate) {
-        return;
+    CHECK_NULL_RETURN(delegate, false);
+    bool isFocused = delegate->RequestFocus();
+    if (isFocused) {
+        delegate->OnRequestFocus();
     }
-    delegate->OnRequestFocus();
-    delegate->RequestFocus();
+    return isFocused;
 }
 
 bool WebClientImpl::OnConsoleLog(const OHOS::NWeb::NWebConsoleLog& message)
@@ -783,6 +784,14 @@ void WebClientImpl::OnFirstContentfulPaint(int64_t navigationStartTick, int64_t 
     delegate->OnFirstContentfulPaint(navigationStartTick, firstContentfulPaintMs);
 }
 
+void WebClientImpl::OnSafeBrowsingCheckResult(int threat_type)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnSafeBrowsingCheckResult(threat_type);
+}
+
 void WebClientImpl::OnCompleteSwapWithNewSize()
 {
     ContainerScope scope(instanceId_);
@@ -850,6 +859,20 @@ void WebClientImpl::OnScrollState(bool scrollState)
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_VOID(delegate);
     delegate->OnScrollState(scrollState);
+}
+void WebClientImpl::OnNativeEmbedLifecycleChange(const NWeb::NativeEmbedDataInfo& dataInfo)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnNativeEmbedLifecycleChange(dataInfo);
+}
+void WebClientImpl::OnNativeEmbedGestureEvent(const NWeb::NativeEmbedTouchEvent& event)
+{
+    ContainerScope scope(instanceId_);
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnNativeEmbedGestureEvent(event);
 }
 
 void WebClientImpl::OnRootLayerChanged(int width, int height)

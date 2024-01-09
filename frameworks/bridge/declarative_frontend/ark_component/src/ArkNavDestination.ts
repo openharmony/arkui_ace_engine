@@ -23,7 +23,7 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
     throw new Error('Method not implemented.');
   }
   hideTitleBar(value: boolean): this {
-    modifier(this._modifiers, HideTitleBarModifier, value);
+    modifierWithKey(this._modifiersWithKeys, HideTitleBarModifier.identity, HideTitleBarModifier, value);
     return this;
   }
   onShown(callback: () => void): this {
@@ -37,7 +37,7 @@ class ArkNavDestinationComponent extends ArkComponent implements NavDestinationA
   }
 }
 
-class HideTitleBarModifier extends Modifier<boolean> {
+class HideTitleBarModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
@@ -45,19 +45,19 @@ class HideTitleBarModifier extends Modifier<boolean> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().navDestination.resetHideTitleBar(node);
+      getUINativeModule().navDestination.resetHideTitleBar(node);
     } else {
-      GetUINativeModule().navDestination.setHideTitleBar(node, this.value!);
+      getUINativeModule().navDestination.setHideTitleBar(node, this.value!);
     }
   }
 }
 //@ts-ignore
 globalThis.NavDestination.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkNavDestinationComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

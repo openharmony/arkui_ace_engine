@@ -20,6 +20,7 @@
 #include <cstdint>
 
 #include "base/geometry/dimension.h"
+#include "base/log/dump_log.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -149,10 +150,14 @@ void NavDestinationPattern::OnModifyDone()
     auto renderContext = hostNode->GetRenderContext();
     do {
         if (renderContext->GetBackgroundColor().has_value()) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Background already has color: %{public}s",
+                renderContext->GetBackgroundColor()->ColorToString().c_str());
             break;
         }
         if (hostNode->GetNavDestinationMode() == NavDestinationMode::DIALOG) {
             renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set dialog background color: %{public}s",
+                renderContext->GetBackgroundColor()->ColorToString().c_str());
             break;
         }
         auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -164,6 +169,8 @@ void NavDestinationPattern::OnModifyDone()
             break;
         }
         renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set default background color: %{public}s",
+            renderContext->GetBackgroundColor()->ColorToString().c_str());
     } while (0);
     auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navDestinationLayoutProperty);
@@ -242,7 +249,7 @@ void NavDestinationPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_BOTTOM, .type = SAFE_AREA_TYPE_SYSTEM };
+    SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
     host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
 }
 
@@ -257,5 +264,10 @@ void NavDestinationPattern::OnAttachToMainTree()
     }
     CHECK_NULL_VOID(node);
     navigationNode_ = AceType::WeakClaim(RawPtr(node));
+}
+
+void NavDestinationPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc(std::string("name: ").append(name_));
 }
 } // namespace OHOS::Ace::NG

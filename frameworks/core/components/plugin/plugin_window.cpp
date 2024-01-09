@@ -15,19 +15,15 @@
 
 #include "core/components/plugin/plugin_window.h"
 
-#include "base/log/log.h"
-
 namespace OHOS::Ace {
 void PluginWindow::RequestFrame()
 {
     auto context = outSidePipelineContext_.Upgrade();
     if (!context) {
-        LOGE("plugin could not request frame due to null context");
         return;
     }
     auto window = context->GetWindow();
     if (!window) {
-        LOGE("plugin could not request frame due to null window");
         return;
     }
 
@@ -38,7 +34,6 @@ void PluginWindow::SetVsyncCallback(AceVsyncCallback&& callback)
 {
     auto context = outSidePipelineContext_.Upgrade();
     if (!context) {
-        LOGE("plugin set vsync callback fail due to null context");
         return;
     }
     context->SetSubWindowVsyncCallback(std::move(callback), pluginWindowId_);

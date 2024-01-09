@@ -316,7 +316,7 @@ public:
         return context_;
     }
 
-    void SetNodeId(int32_t nodeId)
+    void SetNodeId(int64_t nodeId)
     {
         nodeId_ = nodeId;
     }
@@ -529,7 +529,7 @@ private:
     bool available_ = true;
     bool needCenterFix_ = false;
     bool isDragUpdateStop_ = false;
-    int32_t nodeId_ = 0;
+    int64_t nodeId_ = 0;
     double slipFactor_ = 0.0;
     static double sFriction_;
     static double sVelocityScale_;

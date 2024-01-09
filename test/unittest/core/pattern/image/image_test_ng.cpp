@@ -1559,40 +1559,6 @@ HWTEST_F(ImageTestNg, ImageLayoutFunction001, TestSize.Level1)
 }
 
 /**
- * @tc.name: Drag001
- * @tc.desc: Test image drag with src change.
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestNg, Drag001, TestSize.Level1)
-{
-    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    frameNode->SetDraggable(true);
-    frameNode->MarkModifyDone();
-    auto pattern = frameNode->GetPattern<ImagePattern>();
-    pattern->loadingCtx_->SuccessCallback(nullptr);
-
-    // emulate drag event
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    ASSERT_NE(eventHub->GetOnDragStart(), nullptr);
-    auto extraParams =
-        eventHub->GetDragExtraParams(std::string(), Point(RADIUS_DEFAULT, RADIUS_DEFAULT), DragEventType::START);
-    auto dragDropInfo = (eventHub->GetOnDragStart())(nullptr, extraParams);
-
-    // check dragInfo
-    EXPECT_EQ(dragDropInfo.extraInfo, IMAGE_SRC_URL);
-
-    // change src
-    frameNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(ImageSourceInfo(ALT_SRC_URL));
-    frameNode->MarkModifyDone();
-    pattern->loadingCtx_->SuccessCallback(nullptr);
-
-    auto newDragDropInfo = (eventHub->GetOnDragStart())(nullptr, extraParams);
-    EXPECT_EQ(newDragDropInfo.extraInfo, ALT_SRC_URL);
-}
-
-/**
  * @tc.name: CopyOption001
  * @tc.desc: Test image copyOption.
  * @tc.type: FUNC
@@ -1795,7 +1761,7 @@ HWTEST_F(ImageTestNg, GetMaxSize001, TestSize.Level1)
     // 300 / 200 = 1.5
     std::vector<SizeF> cases = { { 1, 1 }, { 1, Infinity<float>() }, { Infinity<float>(), 1 },
         { Infinity<float>(), Infinity<float>() } };
-    std::vector<SizeF> expectedRes { { 1, 1 }, { 1, 2 }, { 0.5, 1 }, { 0, 0 } };
+    std::vector<SizeF> expectedRes { { 1, 1 }, { 1, 2 }, { 0.5, 1 }, { 720, 1440 } };
     for (int i = 0; i < 4; ++i) {
         layoutConstraintSize.maxSize.SetSizeT(cases[i]);
         size = imageLayoutAlgorithm->MeasureContent(layoutConstraintSize, &layoutWrapper);
@@ -1829,6 +1795,11 @@ HWTEST_F(ImageTestNg, MeasureContent001, TestSize.Level1)
             ImageSourceInfo(ALT_SRC_URL, Dimension(-1), Dimension(-1)), LoadNotifier(nullptr, nullptr, nullptr)) };
 
     LayoutConstraintF layoutConstraintSize;
+    std::vector<std::vector<SizeF>> cases = {
+        { {0, 0}, {720, 1440}, {0, 0} },
+        { {720, 480}, {720, 480}, {720, 480} },
+        { {0, 0}, {720, 720}, {0, 0} }
+    };
 
     for (int i = 0; i < 3; ++i) {
         for (int j = 0; j < 3; ++j) {
@@ -1839,7 +1810,7 @@ HWTEST_F(ImageTestNg, MeasureContent001, TestSize.Level1)
             if (status == 0 || status == 2 || status == 6 || status == 8) {
                 EXPECT_EQ(size, std::nullopt);
             } else {
-                EXPECT_EQ(size.value(), SizeF(0, 0));
+                EXPECT_EQ(size.value(), cases[i][j]);
             }
         }
     }

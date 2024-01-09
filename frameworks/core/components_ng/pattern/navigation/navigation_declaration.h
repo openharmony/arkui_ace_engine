@@ -77,8 +77,7 @@ constexpr Dimension ICON_PADDING = 10.0_vp;
 constexpr Dimension TEXT_TOP_PADDING = 2.0_vp;
 
 // divider
-constexpr Dimension DIVIDER_WIDTH = 1.0_vp;
-constexpr Color DIVIDER_COLOR = Color(0x08000000);
+constexpr Dimension DIVIDER_WIDTH = 1.0_px;
 constexpr Dimension DEFAULT_DIVIDER_START_MARGIN = 0.0_vp;
 constexpr Dimension DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING = 2.0_vp;
 constexpr int32_t DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_NUM = 2;
@@ -185,5 +184,18 @@ enum class NavRouteMode {
     PUSH,
     REPLACE,
 };
+
+enum class NavigationOperation {
+    PUSH = 1,
+    POP,
+    REPLACE,
+};
+
+struct NavContentInfo {
+    std::string name;
+    int32_t index = 0;
+    NavDestinationMode mode;
+};
+
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_NAVIGATION_NAVIGATION_DECLARATION_H

@@ -156,9 +156,19 @@ inline bool LessOrEqual(double left, double right)
     return (left - right) < epsilon;
 }
 
+inline bool LessOrEqualCustomPrecision(double left, double right, double epsilon = 0.000001f)
+{
+    return (left - right) < epsilon;
+}
+
 inline bool LessNotEqual(double left, double right)
 {
     constexpr double epsilon = -0.001f;
+    return (left - right) < epsilon;
+}
+
+inline bool LessNotEqualCustomPrecision(double left, double right, double epsilon = -0.000001f)
+{
     return (left - right) < epsilon;
 }
 
@@ -168,9 +178,19 @@ inline bool GreatOrEqual(double left, double right)
     return (left - right) > epsilon;
 }
 
+inline bool GreatOrEqualCustomPrecision(double left, double right, double epsilon = -0.000001f)
+{
+    return (left - right) > epsilon;
+}
+
 inline bool GreatNotEqual(double left, double right)
 {
     constexpr double epsilon = 0.001f;
+    return (left - right) > epsilon;
+}
+
+inline bool GreatNotEqualCustomPrecision(double left, double right, double epsilon = 0.000001f)
+{
     return (left - right) > epsilon;
 }
 

@@ -62,6 +62,8 @@ public:
         bubbleMethod->SetClipPath(clipPath_);
         bubbleMethod->SetClipFrameNode(clipFrameNode_);
         bubbleMethod->SetArrowOffsetsFromClip(arrowOffsetsFromClip_);
+        bubbleMethod->SetArrowWidth(arrowWidth_);
+        bubbleMethod->SetArrowHeight(arrowHeight_);
         return bubbleMethod;
     }
 
@@ -168,8 +170,10 @@ private:
     SizeF childSize_;
     RectF touchRegion_;
     std::optional<Placement> arrowPlacement_;
-    // top right bottom left
-    std::vector<float> arrowOffsetsFromClip_ = { 0.0f, 0.0f, 0.0f, 0.0f };
+    std::vector<std::vector<float>> arrowOffsetsFromClip_
+        = { {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f} };
+    float arrowWidth_ = Dimension(16.0_vp).ConvertToPx();
+    float arrowHeight_ = Dimension(8.0_vp).ConvertToPx();
 
     bool showArrow_ = false;
 

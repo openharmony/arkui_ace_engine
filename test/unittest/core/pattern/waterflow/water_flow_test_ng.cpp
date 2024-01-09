@@ -18,6 +18,7 @@
 #include <memory>
 
 #include "gtest/gtest.h"
+#include "core/components/scroll/scroll_controller_base.h"
 
 #define protected public
 #define private public
@@ -35,7 +36,7 @@
 #include "base/utils/utils.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/scroll/scrollable.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
@@ -1284,25 +1285,6 @@ HWTEST_F(WaterFlowTestNg, WaterFlowPattern_OnDirtyLayoutWrapperSwap001, TestSize
 }
 
 /**
- * @tc.name: WaterFlowPattern_EdgeEffect001
- * @tc.desc: Test EdgeEffect.
- * @tc.type: FUNC
- */
-HWTEST_F(WaterFlowTestNg, WaterFlowPattern_EdgeEffect001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Init Waterflow node
-     */
-    CreateWithItem([](WaterFlowModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, true); });
-
-    /**
-     * @tc.steps: step2. test function.
-     * @tc.expected: function CanOverScroll return true with spring edge effect.
-     */
-    EXPECT_TRUE(pattern_->CanOverScroll(SCROLL_FROM_UPDATE));
-}
-
-/**
  * @tc.name: Property010
  * @tc.desc: Test ToJsonValue of WaterFlowLayoutProperty.
  * @tc.type: FUNC
@@ -1537,28 +1519,52 @@ HWTEST_F(WaterFlowTestNg, ScrollToIndex002, TestSize.Level1)
         CreateItem(30);
     });
 
-    pattern_->ScrollToIndex(3);
+    pattern_->ScrollToIndex(3, false, ScrollAlign::AUTO);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 0);
     EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, 0);
     EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, 0);
 
-    pattern_->ScrollToIndex(15);
+    pattern_->ScrollToIndex(15, false, ScrollAlign::START);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 15);
     EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, 0);
     EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -1100);
 
-    pattern_->ScrollToIndex(LAST_ITEM);
+    pattern_->ScrollToIndex(LAST_ITEM, false, ScrollAlign::START);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 19);
     EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, -100);
     EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -1500);
 
-    pattern_->ScrollToIndex(0);
+    pattern_->ScrollToIndex(0, false, ScrollAlign::START);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 0);
     EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, 0);
     EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, 0);
+
+    pattern_->ScrollToIndex(15, false, ScrollAlign::AUTO);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 7);
+    EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -500);
+
+    pattern_->ScrollToIndex(7, false, ScrollAlign::CENTER);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 3);
+    EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, 0);
+    EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -200);
+
+    pattern_->ScrollToIndex(14, false, ScrollAlign::END);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 3);
+    EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, -100);
+    EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -300);
+
+    pattern_->ScrollToIndex(2, false, ScrollAlign::AUTO);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 1);
+    EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, -100);
+    EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -100);
 }
 } // namespace OHOS::Ace::NG

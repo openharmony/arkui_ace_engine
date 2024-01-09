@@ -40,6 +40,10 @@ const Dimension MARGIN_TEXT_LEFT = 24.0_vp;
 const Dimension MARGIN_TEXT_RIGHT = 84.0_vp;
 const Dimension MARGIN_BUTTON = 12.0_vp;
 const Dimension MARGIN_BACK_BUTTON_RIGHT = -20.0_vp;
+const float REVERSED_X = -1.0f;
+const float UNCHANGED_X = 1.0f;
+const float UNCHANGED_Y = 1.0f;
+constexpr int32_t LABLE_ROWSIZE = 2;
 
 bool HasNavigation(const RefPtr<UINode>& node)
 {
@@ -92,6 +96,7 @@ void AppBarView::iniBehavior()
             titleBar->GetLayoutProperty()->UpdateVisibility(VisibleType::GONE);
         }
     });
+    UpdateRowLayout();
 }
 
 RefPtr<FrameNode> AppBarView::BuildBarTitle()
@@ -111,11 +116,28 @@ RefPtr<FrameNode> AppBarView::BuildBarTitle()
     CHECK_NULL_RETURN(renderContext, nullptr);
     renderContext->UpdateBackgroundColor(appBarTheme->GetBgColor());
 
+    auto titleLabel = BuildBarLabel();
+    appBarRow->AddChild(BuildIconButton(
+        InternalResource::ResourceId::APP_BAR_BACK_SVG,
+        [pipeline](GestureEvent& info) {
+            if (pipeline) {
+                pipeline->CallRouterBackToPopPage();
+            }
+        },
+        true));
+    appBarRow->AddChild(titleLabel);
+    return appBarRow;
+}
+
+RefPtr<FrameNode> AppBarView::BuildBarLabel()
+{
     // create title label
-    auto titleLabel = FrameNode::CreateFrameNode(
+    auto appBarLabel = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    auto textLayoutProperty = titleLabel->GetLayoutProperty<TextLayoutProperty>();
+    auto textLayoutProperty = appBarLabel->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_RETURN(textLayoutProperty, nullptr);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_RETURN(themeManager, nullptr);
     auto themeConstants = themeManager->GetThemeConstants();
@@ -131,29 +153,21 @@ RefPtr<FrameNode> AppBarView::BuildBarTitle()
 #else
     textLayoutProperty->UpdateContent(themeConstants->GetString(pipeline->GetAppLabelId()));
 #endif
-    textLayoutProperty->UpdateMaxLines(2);
+    auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
+    textLayoutProperty->UpdateMaxLines(LABLE_ROWSIZE);
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     textLayoutProperty->UpdateFontSize(appBarTheme->GetFontSize());
     textLayoutProperty->UpdateTextColor(appBarTheme->GetTextColor());
     textLayoutProperty->UpdateFontWeight(FontWeight::MEDIUM);
     textLayoutProperty->UpdateAlignment(Alignment::CENTER_LEFT);
     textLayoutProperty->UpdateLayoutWeight(1.0f);
-
+    
     MarginProperty margin;
     margin.left = CalcLength(MARGIN_TEXT_LEFT);
     margin.right = CalcLength(MARGIN_TEXT_RIGHT);
     textLayoutProperty->UpdateMargin(margin);
-
-    appBarRow->AddChild(BuildIconButton(
-        InternalResource::ResourceId::APP_BAR_BACK_SVG,
-        [pipeline](GestureEvent& info) {
-            if (pipeline) {
-                pipeline->CallRouterBackToPopPage();
-            }
-        },
-        true));
-    appBarRow->AddChild(titleLabel);
-    return appBarRow;
+	
+    return appBarLabel;
 }
 
 RefPtr<FrameNode> AppBarView::BuildFaButton()
@@ -379,14 +393,21 @@ void AppBarView::SetRowWidth(const Dimension& width)
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
+    auto butttonRadius = appBarTheme->GetIconCornerRadius();
     Dimension offset = appBarTheme->GetIconSize() * 3;
     Dimension positionX = width - offset;
+    Dimension positionLeftX = appBarTheme->GetIconSize() - butttonRadius;
     Dimension positionY = (appBarTheme->GetAppBarHeight() / 2.0f) - appBarTheme->GetIconSize();
     auto faButton = GetFaButton();
     CHECK_NULL_VOID(faButton);
     auto renderContext = faButton->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    renderContext->UpdatePosition(OffsetT(positionX, positionY));
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (!isRtl) {
+        renderContext->UpdatePosition(OffsetT(positionX, positionY));
+    } else {
+        renderContext->UpdatePosition(OffsetT(positionLeftX, positionY));
+    }
 }
 
 void AppBarView::SetEachIconColor(
@@ -437,5 +458,70 @@ RefPtr<FrameNode> AppBarView::GetFaButton()
     return AceType::DynamicCast<FrameNode>(atom_->GetLastChild());
 #endif
     return nullptr;
+}
+
+RefPtr<FrameNode> AppBarView::GetBackButton()
+{
+    CHECK_NULL_RETURN(atom_, nullptr);
+    auto row = atom_->GetFirstChild();
+    CHECK_NULL_RETURN(row, nullptr);
+    return AceType::DynamicCast<FrameNode>(row->GetFirstChild());
+}
+
+void AppBarView::ReverseBackButton()
+{
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    auto backButton = GetBackButton();
+    CHECK_NULL_VOID(backButton);
+    auto renderContext = backButton->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto buttonLayoutProperty = backButton->GetLayoutProperty();
+    CHECK_NULL_VOID(buttonLayoutProperty);
+
+    MarginProperty buttonmargin;
+    bool isBackButton = true;
+    if (!isRtl) {
+        buttonmargin.left = CalcLength(isBackButton ? MARGIN_BUTTON : -MARGIN_BUTTON);
+        buttonmargin.right = CalcLength(isBackButton ? MARGIN_BACK_BUTTON_RIGHT : MARGIN_BUTTON);
+        renderContext->UpdateTransformScale(VectorF(UNCHANGED_X, UNCHANGED_Y));
+    } else {
+        buttonmargin.right = CalcLength(isBackButton ? MARGIN_BUTTON : -MARGIN_BUTTON);
+        buttonmargin.left = CalcLength(isBackButton ? MARGIN_BACK_BUTTON_RIGHT : MARGIN_BUTTON);
+        renderContext->UpdateTransformScale(VectorF(REVERSED_X, UNCHANGED_Y));
+    }
+    buttonLayoutProperty->UpdateMargin(buttonmargin);
+
+    backButton->MarkModifyDone();
+    backButton->MarkDirtyNode();
+}
+
+void AppBarView::UpdateRowLayout()
+{
+    bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
+    if (isRtlSetted == isRtl) {
+        return;
+    }
+    CHECK_NULL_VOID(atom_);
+    auto row = atom_->GetFirstChild();
+    auto label = AceType::DynamicCast<FrameNode>(row->GetChildAtIndex(1));
+    CHECK_NULL_VOID(label);
+    auto textLayoutProperty = label->GetLayoutProperty<TextLayoutProperty>();
+    MarginProperty textmargin;
+    if (!isRtl) {
+        textLayoutProperty->UpdateTextAlign(TextAlign::LEFT);
+        textmargin.left = CalcLength(MARGIN_TEXT_LEFT);
+        textmargin.right = CalcLength(MARGIN_TEXT_RIGHT);
+        isRtlSetted = false;
+    } else {
+        textLayoutProperty->UpdateTextAlign(TextAlign::RIGHT);
+        textmargin.right = CalcLength(MARGIN_TEXT_LEFT);
+        textmargin.left = CalcLength(MARGIN_TEXT_RIGHT);
+        isRtlSetted = true;
+    }
+    textLayoutProperty->UpdateMargin(textmargin);
+    label->MarkModifyDone();
+    label->MarkDirtyNode();
+
+    ReverseBackButton();
 }
 } // namespace OHOS::Ace::NG

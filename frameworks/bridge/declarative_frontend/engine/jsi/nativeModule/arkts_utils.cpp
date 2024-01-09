@@ -366,7 +366,7 @@ bool ArkTSUtils::ParseStringArray(const EcmaVM* vm, const Local<JSValueRef>& arg
         return false;
     }
     auto handle = panda::CopyableGlobal<panda::ArrayRef>(vm, arg);
-    int32_t length = handle->Length(vm);
+    int32_t length = static_cast<int32_t>(handle->Length(vm));
     if (length != defaultLength) {
         return false;
     }
@@ -389,6 +389,15 @@ bool ArkTSUtils::ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value
 {
     if (value->IsNumber()) {
         result = value->Int32Value(vm);
+        return true;
+    }
+    return false;
+}
+
+bool ArkTSUtils::ParseJsInteger(const EcmaVM *vm, const Local<JSValueRef> &value, uint32_t &result)
+{
+    if (value->IsNumber()) {
+        result = value->Uint32Value(vm);
         return true;
     }
     // resource ignore by design
@@ -431,15 +440,15 @@ bool ArkTSUtils::ParseResourceToDouble(const EcmaVM* vm, const Local<JSValueRef>
         }
         Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
         auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
-        if (resType == static_cast<uint32_t>(ResourceType::STRING)) {
+        if (resType == static_cast<int32_t>(ResourceType::STRING)) {
             auto numberString = resourceWrapper->GetStringByName(param->ToString(vm)->ToString());
             return StringUtils::StringToDouble(numberString, result);
         }
-        if (resType == static_cast<uint32_t>(ResourceType::INTEGER)) {
+        if (resType == static_cast<int32_t>(ResourceType::INTEGER)) {
             result = resourceWrapper->GetIntByName(param->ToString(vm)->ToString());
             return true;
         }
-        if (resType == static_cast<uint32_t>(ResourceType::FLOAT)) {
+        if (resType == static_cast<int32_t>(ResourceType::FLOAT)) {
             result = resourceWrapper->GetDoubleByName(param->ToString(vm)->ToString());
             return true;
         }
@@ -712,13 +721,13 @@ bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM *vm, const Local<JSValueR
             }
             Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
             auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
-            if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::MEDIA)) {
+            if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::MEDIA)) {
                 result = resourceWrapper->GetMediaPathByName(param->ToString(vm)->ToString());
                 return true;
             }
             return false;
         }
-        if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::MEDIA)) {
+        if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::MEDIA)) {
             result = resourceWrapper->GetMediaPath(resId->Uint32Value(vm));
             return true;
         }
@@ -740,11 +749,22 @@ void ArkTSUtils::GetStringFromJS(const EcmaVM *vm, const Local<JSValueRef> &valu
 
 bool ArkTSUtils::ParseJsIntegerArray(const EcmaVM* vm, Local<JSValueRef> values, std::vector<uint32_t>& result)
 {
+    if (!values->IsArray(vm) && !values->IsObject()) {
+        return false;
+    }
+
     Local<panda::ArrayRef> valueArray = static_cast<Local<panda::ArrayRef>>(values);
     for (size_t i = 0; i < valueArray->Length(vm); i++) {
         Local<JSValueRef> value = valueArray->GetValueAt(vm, values, i);
         if (value->IsNumber()) {
             result.emplace_back(value->Uint32Value(vm));
+        } else if (value->IsObject()) {
+            uint32_t singleResInt;
+            if (ParseJsInteger(vm, value, singleResInt)) {
+                result.emplace_back(singleResInt);
+            } else {
+                return false;
+            }
         } else {
             return false;
         }
@@ -768,9 +788,13 @@ bool ArkTSUtils::ParseJsString(const EcmaVM* vm, const Local<JSValueRef>& jsValu
 }
 
 std::string GetReplaceContentStr(
-    const EcmaVM* vm, int pos, const std::string& type, Local<panda::ArrayRef> params, int32_t containCount)
+    const EcmaVM* vm, int32_t pos, const std::string& type, Local<panda::ArrayRef> params, int32_t containCount)
 {
-    auto item = panda::ArrayRef::GetValueAt(vm, params, pos + containCount);
+    int32_t index = pos + containCount;
+    if (index < 0) {
+        return std::string();
+    }
+    auto item = panda::ArrayRef::GetValueAt(vm, params, static_cast<uint32_t>(index));
     if (type == "d") {
         if (item->IsNumber()) {
             return std::to_string(item->ToNumber(vm)->Value());
@@ -806,7 +830,7 @@ void ReplaceHolder(const EcmaVM* vm, std::string& originStr, const Local<panda::
             firstMatch = false;
             shortHolderType = pos.length() == 0;
         } else {
-            if (shortHolderType ^ (pos.length() == 0)) {
+            if (static_cast<uint32_t>(shortHolderType) ^ static_cast<uint32_t>(pos.length() == 0)) {
                 return;
             }
         }

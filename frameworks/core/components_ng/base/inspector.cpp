@@ -20,6 +20,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/stage/page_info.h"
@@ -401,7 +402,11 @@ void Inspector::GetRectangleById(const std::string& key, Rectangle& rectangle)
     auto context = frameNode->GetRenderContext();
     CHECK_NULL_VOID(context);
     rectangle.localOffset = context->GetPaintRectWithTransform().GetOffset();
-    rectangle.windowOffset = frameNode->GetTransformRelativeOffset();
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        rectangle.windowOffset = frameNode->GetTransformRelativeOffset();
+    } else {
+        rectangle.windowOffset = frameNode->GetOffsetRelativeToWindow();
+    }
     auto pipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     rectangle.screenRect = pipeline->GetCurrentWindowRect();
@@ -514,8 +519,6 @@ void FillSimplifiedInspectorAttrs(const RefPtr<NG::UINode>& parent, std::unique_
     jsonObject->Put(INSPECTOR_ZINDEX, tmpJson->GetInt(INSPECTOR_ZINDEX));
     jsonObject->Put(INSPECTOR_VISIBILITY, tmpJson->GetString(INSPECTOR_VISIBILITY).c_str());
     jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
-
-    jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
 }
 
 void GetSimplifiedSpanInspector(

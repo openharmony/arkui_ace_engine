@@ -75,6 +75,14 @@ bool ScrollBar::InBarHoverRegion(const Point& point) const
     return false;
 }
 
+bool ScrollBar::InBarRectRegion(const Point& point) const
+{
+    if (NeedScrollBar() && shapeMode_ == ShapeMode::RECT) {
+        return barRect_.IsInRegion(point);
+    }
+    return false;
+}
+
 void ScrollBar::FlushBarWidth()
 {
     SetBarRegion(paintOffset_, viewPortSize_);
@@ -197,6 +205,7 @@ void ScrollBar::SetRectTrickRegion(
     // Avoid crossing the top or bottom boundary.
     double activeMainOffset = std::min(offsetScale_ * lastMainOffset, barRegionSize_ - activeSize)
                                 + NormalizeToPx(startReservedHeight_);
+    activeMainOffset = !isReverse_ ? activeMainOffset : barRegionSize_ - activeSize - activeMainOffset;
     bool canUseAnimation = !isOutOfBoundary_ && !positionModeUpdate_;
     double inactiveSize = 0.0;
     double inactiveMainOffset = 0.0;
@@ -365,18 +374,23 @@ void ScrollBar::SetMouseEvent()
         auto scrollBar = weak.Upgrade();
         CHECK_NULL_VOID(scrollBar && scrollBar->IsScrollable());
         Point point(info.GetLocalLocation().GetX(), info.GetLocalLocation().GetY());
-        bool inRegion = scrollBar->InBarHoverRegion(point);
-        if (inRegion && !scrollBar->IsHover()) {
+        bool inBarRegion = scrollBar->InBarRectRegion(point);
+        bool inHoverRegion = scrollBar->InBarHoverRegion(point);
+        if (inBarRegion) {
+            scrollBar->PlayScrollBarAppearAnimation();
+        } else if (!scrollBar->IsPressed()) {
+            scrollBar->ScheduleDisappearDelayTask();
+        }
+        if (inHoverRegion && !scrollBar->IsHover()) {
             if (!scrollBar->IsPressed()) {
                 scrollBar->PlayScrollBarGrowAnimation();
             }
             scrollBar->SetHover(true);
         }
-        if (scrollBar->IsHover() && !inRegion) {
+        if (scrollBar->IsHover() && !inHoverRegion) {
             scrollBar->SetHover(false);
             if (!scrollBar->IsPressed()) {
                 scrollBar->PlayScrollBarShrinkAnimation();
-                scrollBar->ScheduleDisappearDelayTask();
             }
         }
     });
@@ -584,7 +598,7 @@ void ScrollBar::ProcessFrictionMotionStop()
 void ScrollBar::OnCollectTouchTarget(
     const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
 {
-    if (panRecognizer_) {
+    if (panRecognizer_ && isScrollable_) {
         panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
         panRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
         result.emplace_front(panRecognizer_);

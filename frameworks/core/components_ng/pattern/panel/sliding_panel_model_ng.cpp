@@ -287,9 +287,10 @@ void SlidingPanelModelNG::ResetPanelHalfHeight(FrameNode* frameNode)
     auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
-
-    auto halfHeight = Dimension(frameSize.Height() / HALF_VALUS);
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HalfHeight, halfHeight, frameNode);
+    if (GreatNotEqual(frameSize.Height(), 0.0)) {
+        auto halfHeight = Dimension((frameSize.Height() - BLANK_MIN_HEIGHT.ConvertToPx()) / HALF_VALUS);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HalfHeight, halfHeight, frameNode);
+    }
 }
 
 void SlidingPanelModelNG::ResetPanelFullHeight(FrameNode* frameNode)
@@ -299,8 +300,9 @@ void SlidingPanelModelNG::ResetPanelFullHeight(FrameNode* frameNode)
     auto geometryNode = frameNode->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
-
-    auto fullHeight = Dimension(frameSize.Height() - BLANK_MIN_HEIGHT.ConvertToPx());
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, FullHeight, fullHeight, frameNode);
+    if (GreatNotEqual(frameSize.Height(), 0.0)) {
+        auto fullHeight = Dimension(frameSize.Height() - BLANK_MIN_HEIGHT.ConvertToPx());
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, FullHeight, fullHeight, frameNode);
+    }
 }
 } // namespace OHOS::Ace::NG

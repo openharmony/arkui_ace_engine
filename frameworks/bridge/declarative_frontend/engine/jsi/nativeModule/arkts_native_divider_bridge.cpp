@@ -15,7 +15,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_divider_bridge.h"
 
 #include "base/geometry/dimension.h"
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/divider/divider_theme.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"

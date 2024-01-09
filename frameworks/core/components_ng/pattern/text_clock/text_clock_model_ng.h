@@ -33,6 +33,7 @@ public:
     void SetFontFamily(const std::vector<std::string>& value) override;
     void SetTextShadow(const std::vector<Shadow>& value) override;
     void SetFontFeature(const FONT_FEATURES_MAP& value) override;
+    void InitFontDefault(const TextStyle& textStyle) override;
 
     static void SetFormat(FrameNode* frameNode, const std::string& format);
     static void SetFontColor(FrameNode* frameNode, const Color& value);

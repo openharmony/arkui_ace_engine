@@ -50,12 +50,9 @@ private:
     static bool ReadFileFromAssetManager(
         const RefPtr<AssetManager>& assetManager, const std::string& fileName, std::string& content);
 
-    static bool GetFormEtsFilePath(
-        const RefPtr<AssetManager>& assetManager, std::unordered_set<std::string>& filePaths);
-
     static bool ParseComponentCollectionJson(
-        const std::string& bundleName, const std::unordered_set<std::string>& formEtsFilePaths,
-        const std::string& content, std::unordered_set<std::string>& formModuleList, bool isReloadCondition);
+        const std::string& bundleName, const std::string& content,
+        std::unordered_set<std::string>& formModuleList, bool isReloadCondition);
 
     static bool IsFormEtsFilePath(const std::unordered_set<std::string>& formEtsFilePaths, std::string path);
 

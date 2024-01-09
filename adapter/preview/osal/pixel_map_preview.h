@@ -39,6 +39,8 @@ public:
     void* GetRawPixelMapPtr() const override;
     std::string GetId() override;
     std::string GetModifyId() override;
+    void Scale(float xAxis, float yAxis) override;
+    void Scale(float xAxis, float yAxis, const AceAntiAliasingOption &option) override;
     std::shared_ptr<Media::PixelMap> GetPixelMapSharedPtr() override
     {
         return pixmap_;

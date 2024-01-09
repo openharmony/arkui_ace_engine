@@ -47,15 +47,29 @@ public:
     {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_BOTTOM, .type = SAFE_AREA_TYPE_SYSTEM };
+        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
 
+        SetBackgroundAndBlur();
+    }
+
+    void OnColorConfigurationUpdate() override
+    {
+        SetBackgroundAndBlur();
+    }
+
+private:
+    void SetBackgroundAndBlur()
+    {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         auto theme = NavigationGetTheme();
         CHECK_NULL_VOID(theme);
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            renderContext->UpdateBackgroundColor(theme->GetToolbarBlurColor());
+        if (SystemProperties::GetNavigationBlurEnabled() &&
+            Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            renderContext->UpdateBackgroundColor(theme->GetBackgroundBlurColor());
 
             BlurStyleOption blur;
             blur.blurStyle = BlurStyle::COMPONENT_THICK;

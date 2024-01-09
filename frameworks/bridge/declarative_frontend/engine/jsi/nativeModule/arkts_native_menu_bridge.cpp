@@ -14,7 +14,7 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_menu_bridge.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "core/interfaces/native/node/api.h"
 
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
@@ -67,9 +67,10 @@ ArkUINativeModuleValue MenuBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo
         return panda::JSValueRef::Undefined(vm);
     }
 
-    CalcDimension fontSize = Dimension(-1.0);
-    ArkTSUtils::ParseJsDimensionFp(vm, sizeArg, fontSize, false);
-
+    CalcDimension fontSize;
+    if (!ArkTSUtils::ParseJsDimensionFp(vm, sizeArg, fontSize, false)) {
+        fontSize = Dimension(0.0);
+    }
     std::string weight = DEFAULT_ERR_CODE;
     if (weightArg->IsNumber()) {
         weight = std::to_string(weightArg->Int32Value(vm));
@@ -84,13 +85,13 @@ ArkUINativeModuleValue MenuBridge::SetFont(ArkUIRuntimeCallInfo* runtimeCallInfo
         style = styleArg->Int32Value(vm);
     }
 
-    std::string family = DEFAULT_ERR_CODE;
-    if (familyArg->IsString()) {
-        family = familyArg->ToString(vm)->ToString();
+    std::string family;
+    if (!ArkTSUtils::ParseJsFontFamiliesToString(vm, familyArg, family) || family.empty()) {
+        family = DEFAULT_ERR_CODE;
     }
-
+    std::string fontSizeStr = fontSize.ToString();
     std::string fontInfo = StringUtils::FormatString(FORMAT_FONT.c_str(),
-        StringUtils::DoubleToString(fontSize.Value()).c_str(), weight.c_str(), family.c_str());
+        fontSizeStr.c_str(), weight.c_str(), family.c_str());
 
     GetArkUIInternalNodeAPI()->GetMenuModifier().SetFont(
         nativeNode, fontInfo.c_str(), style);

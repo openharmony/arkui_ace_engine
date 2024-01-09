@@ -19,13 +19,17 @@
 
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
+namespace {
 constexpr int CALL_ARG_0 = 0;
 constexpr int CALL_ARG_1 = 1;
+constexpr uint32_t VALID_RADIUS_PAIR_FLAG = 1;
+constexpr uint32_t INVALID_RADIUS_PAIR_FLAG = 0;
+} // namespace
 ArkUINativeModuleValue RectBridge::SetRadiusWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -89,12 +93,11 @@ ArkUINativeModuleValue RectBridge::SetRadius(ArkUIRuntimeCallInfo* runtimeCallIn
     Local<JSValueRef> jsValue = runtimeCallInfo->GetCallArgRef(CALL_ARG_1);
     std::vector<double> radiusValues;
     std::vector<int32_t> radiusUnits;
-    int32_t radiusPairsCount = 4;
-    bool radiusValidPairs[] { false, false, false, false };
+    std::vector<uint32_t> radiusValidPairs;
     if (jsValue->IsArray(vm)) {
         RectBridge::SetRadiusWithArray(vm, jsValue, radiusValues, radiusUnits, radiusValidPairs);
         GetArkUIInternalNodeAPI()->GetRectModifier().SetRectRadiusWithArray(
-            nativeNode, radiusValues.data(), radiusUnits.data(), radiusValidPairs, radiusPairsCount);
+            nativeNode, radiusValues.data(), radiusUnits.data(), radiusValidPairs.data(), radiusValidPairs.size());
         return panda::JSValueRef::Undefined(vm);
     }
     if (jsValue->IsNumber() || jsValue->IsString() || jsValue->IsObject()) {
@@ -120,7 +123,7 @@ ArkUINativeModuleValue RectBridge::ResetRadius(ArkUIRuntimeCallInfo* runtimeCall
 }
 
 void RectBridge::SetRadiusWithArray(const EcmaVM* vm, const Local<JSValueRef>& jsValue,
-    std::vector<double>& radiusValues, std::vector<int32_t>& radiusUnits, bool* radiusValidPairs)
+    std::vector<double>& radiusValues, std::vector<int32_t>& radiusUnits, std::vector<uint32_t>& radiusValidPairs)
 {
     if (!jsValue->IsArray(vm)) {
         return;
@@ -160,7 +163,7 @@ void RectBridge::SetRadiusWithArray(const EcmaVM* vm, const Local<JSValueRef>& j
         if (!ArkTSUtils::ParseJsDimensionVpNG(vm, radiusY, radiusYValue, isSupportPercent)) {
             radiusYValue.Reset();
         }
-        radiusValidPairs[i] = true;
+        radiusValidPairs.push_back(VALID_RADIUS_PAIR_FLAG);
         radiusValues.push_back(radiusXValue.Value());
         radiusValues.push_back(radiusYValue.Value());
         radiusUnits.push_back(static_cast<int32_t>(radiusXValue.Unit()));
@@ -168,10 +171,10 @@ void RectBridge::SetRadiusWithArray(const EcmaVM* vm, const Local<JSValueRef>& j
     }
 }
 
-void RectBridge::SetRadiusArraysInvalidValue(
-    std::vector<double>& radiusValues, std::vector<int32_t>& radiusUnits, bool* radiusValidPairs, int index)
+void RectBridge::SetRadiusArraysInvalidValue(std::vector<double>& radiusValues, std::vector<int32_t>& radiusUnits,
+    std::vector<uint32_t>& radiusValidPairs, int index)
 {
-    radiusValidPairs[index] = false;
+    radiusValidPairs.push_back(INVALID_RADIUS_PAIR_FLAG);
     CalcDimension radiusXValue;
     CalcDimension radiusYValue;
     radiusXValue.Reset();

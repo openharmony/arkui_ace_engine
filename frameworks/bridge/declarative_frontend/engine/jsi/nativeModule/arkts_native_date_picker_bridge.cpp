@@ -16,6 +16,8 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_date_picker_bridge.h"
 
 #include "interfaces/napi/kits/utils/napi_utils.h"
+
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
@@ -205,10 +207,14 @@ ArkUINativeModuleValue DatePickerBridge::SetLunar(ArkUIRuntimeCallInfo* runtimeC
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    bool isLunar = secondArg->ToBoolean(vm)->Value();
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> isLunarArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    if (isLunarArg->IsUndefined() || !isLunarArg->IsBoolean()) {
+        GetArkUIInternalNodeAPI()->GetDatePickerModifier().ResetLunar(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    bool isLunar = isLunarArg->ToBoolean(vm)->Value();
     GetArkUIInternalNodeAPI()->GetDatePickerModifier().SetLunar(nativeNode, isLunar);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -220,6 +226,35 @@ ArkUINativeModuleValue DatePickerBridge::ResetLunar(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetDatePickerModifier().ResetLunar(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue DatePickerBridge::SetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    CommonBridge::SetBackgroundColor(runtimeCallInfo);
+
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Color color;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
+        GetArkUIInternalNodeAPI()->GetDatePickerModifier().ResetDatePickerBackgroundColor(nativeNode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetDatePickerModifier().SetDatePickerBackgroundColor(nativeNode, color.GetValue());
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue DatePickerBridge::ResetBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    CommonBridge::ResetBackgroundColor(runtimeCallInfo);
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetDatePickerModifier().ResetDatePickerBackgroundColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

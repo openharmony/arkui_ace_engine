@@ -37,6 +37,9 @@ public:
     ScrollBarPattern() = default;
     ~ScrollBarPattern() override
     {
+        if (scrollBarProxy_) {
+            scrollBarProxy_->UnRegisterScrollBar(AceType::WeakClaim(this));
+        }
         scrollBarProxy_ = nullptr;
         scrollableEvent_ = nullptr;
         disappearAnimation_ = nullptr;

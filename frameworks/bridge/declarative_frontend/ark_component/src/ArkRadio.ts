@@ -23,11 +23,7 @@ class ArkRadioComponent extends ArkComponent implements RadioAttribute {
     throw new Error('Method not implemented.');
   }
   checked(value: boolean): this {
-    if (!!value) {
-      modifier(this._modifiers, RadioCheckedModifier, value);
-    } else {
-      modifier(this._modifiers, RadioCheckedModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, RadioCheckedModifier.identity, RadioCheckedModifier, value);
     return this;
   }
   onChange(callback: (isChecked: boolean) => void): this {
@@ -39,16 +35,16 @@ class ArkRadioComponent extends ArkComponent implements RadioAttribute {
   }
 }
 
-class RadioCheckedModifier extends Modifier<boolean> {
+class RadioCheckedModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {
     super(value);
   }
   static identity: Symbol = Symbol('radioChecked');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().radio.resetRadioChecked(node);
+      getUINativeModule().radio.resetRadioChecked(node);
     } else {
-      GetUINativeModule().radio.setRadioChecked(node, this.value!);
+      getUINativeModule().radio.setRadioChecked(node, this.value!);
     }
   }
 }
@@ -60,9 +56,9 @@ class RadioStyleModifier extends ModifierWithKey<RadioStyle> {
   static identity: Symbol = Symbol('radioStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().radio.resetRadioStyle(node);
+      getUINativeModule().radio.resetRadioStyle(node);
     } else {
-      GetUINativeModule().radio.setRadioStyle(
+      getUINativeModule().radio.setRadioStyle(
         node, this.value.checkedBackgroundColor, this.value.uncheckedBorderColor, this.value.indicatorColor);
     }
   }
@@ -86,10 +82,10 @@ class RadioStyleModifier extends ModifierWithKey<RadioStyle> {
 // @ts-ignore
 globalThis.Radio.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkRadioComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

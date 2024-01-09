@@ -38,7 +38,11 @@ public:
     NavigationGroupNode(const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
         : GroupNode(tag, nodeId, pattern)
     {}
+
     ~NavigationGroupNode() override;
+
+    using AnimationFinishCallback = std::function<void()>;
+
     void AddChildToGroup(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT) override;
 
     // remain child needs to keep to use pop animation
@@ -116,15 +120,13 @@ public:
     static RefPtr<UINode> GetNavDestinationNode(RefPtr<UINode> uiNode);
     void SetBackButtonEvent(const RefPtr<NavDestinationGroupNode>& navDestination,
         const RefPtr<NavRouterPattern>& navRouterPattern = nullptr);
-    void AddBackButtonIconToNavDestination(const RefPtr<UINode>& navDestinationNode);
 
-    void ExitTransitionWithPop(const RefPtr<FrameNode>& node);
-    void ExitTransitionWithPush(const RefPtr<FrameNode>& node, bool isNavBar = false);
-    void EnterTransitionWithPop(const RefPtr<FrameNode>& node, bool isNavBar = false);
-    void EnterTransitionWithPush(const RefPtr<FrameNode>& node, bool isNavBar = false);
+    void TransitionWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
+    void TransitionWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
+
     void BackButtonAnimation(const RefPtr<FrameNode>& backButtonNode, bool isTransitionIn);
     void MaskAnimation(const RefPtr<RenderContext>& transitionOutNodeContext);
-    void TitleOpacityAnimationOut(const RefPtr<RenderContext>& transitionOutNodeContext);
+    void TitleOpacityAnimation(const RefPtr<FrameNode>& node, bool isTransitionOut);
     void TransitionWithReplace(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar);
     void DealNavigationExit(const RefPtr<FrameNode>& preNode, bool isNavBar, bool isAnimated = true);
     void NotifyPageHide();
@@ -132,6 +134,14 @@ public:
     int32_t GetLastStandardIndex() const
     {
         return lastStandardIndex_;
+    }
+    AnimationOption CreateAnimationOption(const RefPtr<Curve>& curve, FillMode mode,
+        int32_t duration, const AnimationFinishCallback& callback);
+    NavigationMode GetNavigationMode();
+
+    void SetIsOnAnimation(bool isOnAnimation)
+    {
+        isOnAnimation_ = isOnAnimation;
     }
 
 private:

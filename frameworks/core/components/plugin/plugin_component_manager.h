@@ -16,19 +16,20 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PLUGIN_COMPONENT_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PLUGIN_COMPONENT_MANAGER_H
 
-#include <mutex>
 #include <map>
+#include <mutex>
 #include <unordered_set>
 
-#include "base/memory/ace_type.h"
 #include "bundlemgr/bundle_mgr_interface.h"
-#include "base/json/json_util.h"
-#include "core/components/common/layout/grid_column_info.h"
-#include "core/components/plugin/plugin_component_template.h"
-#include "core/components/plugin/plugin_component_callback.h"
 #include "ui_service_interface.h"
 #include "ui_service_stub.h"
 #include "want.h"
+
+#include "base/json/json_util.h"
+#include "base/memory/ace_type.h"
+#include "core/components/common/layout/grid_column_info.h"
+#include "core/components/plugin/plugin_component_callback.h"
+#include "core/components/plugin/plugin_component_template.h"
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT PluginComponentManager final {
@@ -43,10 +44,9 @@ public:
 
     ACE_EXPORT static std::shared_ptr<PluginComponentManager> GetInstance();
 
-    int Push(const AAFwk::Want& want, const std::string& name, const std::string& jsonPath,
-        const std::string& data, const std::string& extraData);
-    int Request(
-        const AAFwk::Want& want, const std::string& name, const std::string& jsonPath, const std::string& data);
+    int Push(const AAFwk::Want& want, const std::string& name, const std::string& jsonPath, const std::string& data,
+        const std::string& extraData);
+    int Request(const AAFwk::Want& want, const std::string& name, const std::string& jsonPath, const std::string& data);
     int ReturnRequest(
         const AAFwk::Want& want, const std::string& pluginName, const std::string& data, const std::string& extraData);
     void RegisterCallBack(
@@ -54,13 +54,13 @@ public:
     void UnregisterCallBack(const std::shared_ptr<PluginComponentCallBack>& callback);
     void UnregisterCallBack(const AAFwk::Want& want);
 
-    bool GetTemplatePathFromJsonFile(const std::string& packagePathStr,
-        const std::string& srcPath, const std::string& jsonPath, std::string& jsonStr);
+    bool GetTemplatePathFromJsonFile(const std::string& packagePathStr, const std::string& srcPath,
+        const std::string& jsonPath, std::string& jsonStr);
     std::string GetPackagePath(const AAFwk::Want& want) const;
 
     sptr<AppExecFwk::IBundleMgr> GetBundleManager();
 
-    class UIServiceListener final: public Ace::UIServiceStub {
+    class UIServiceListener final : public Ace::UIServiceStub {
     public:
         UIServiceListener() = default;
         ~UIServiceListener()
@@ -73,11 +73,11 @@ public:
         void UnresgisterListener(const std::shared_ptr<PluginComponentCallBack>& callback);
         void OnPushCallBack(const AAFwk::Want& want, const std::string& name, const std::string& jsonPath,
             const std::string& data, const std::string& extraData) override;
-        void OnRequestCallBack(const AAFwk::Want& want, const std::string& name,  const std::string& data) override;
-        void OnReturnRequest(const AAFwk::Want& want, const std::string& source,  const std::string& data,
+        void OnRequestCallBack(const AAFwk::Want& want, const std::string& name, const std::string& data) override;
+        void OnReturnRequest(const AAFwk::Want& want, const std::string& source, const std::string& data,
             const std::string& extraData) override;
         void RequestByJsonPath(const PluginComponentTemplate& pluginTemplate, const std::string& data);
-    
+
     private:
         std::recursive_mutex mutex_;
         std::map<std::shared_ptr<PluginComponentCallBack>, CallBackType> callbackVec_;

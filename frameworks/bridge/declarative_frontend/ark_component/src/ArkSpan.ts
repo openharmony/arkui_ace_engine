@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class SpanFontSizeModifier extends ModifierWithKey<Length> {
   constructor(value: Length) {
     super(value);
@@ -21,9 +21,9 @@ class SpanFontSizeModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('spanFontSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().span.resetFontSize(node);
+      getUINativeModule().span.resetFontSize(node);
     } else {
-      GetUINativeModule().span.setFontSize(node, this.value!);
+      getUINativeModule().span.setFontSize(node, this.value!);
     }
   }
 
@@ -38,9 +38,9 @@ class SpanFontFamilyModifier extends ModifierWithKey<string | Resource> {
   static identity: Symbol = Symbol('spanFontFamily');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().span.resetFontFamily(node);
+      getUINativeModule().span.resetFontFamily(node);
     } else {
-      GetUINativeModule().span.setFontFamily(node, this.value!);
+      getUINativeModule().span.setFontFamily(node, this.value!);
     }
   }
 
@@ -55,9 +55,9 @@ class SpanLineHeightModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('spanLineHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().span.resetLineHeight(node);
+      getUINativeModule().span.resetLineHeight(node);
     } else {
-      GetUINativeModule().span.setLineHeight(node, this.value!);
+      getUINativeModule().span.setLineHeight(node, this.value!);
     }
   }
 
@@ -72,9 +72,9 @@ class SpanFontStyleModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('spanFontStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().span.resetFontStyle(node);
+      getUINativeModule().span.resetFontStyle(node);
     } else {
-      GetUINativeModule().span.setFontStyle(node, this.value!);
+      getUINativeModule().span.setFontStyle(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -88,9 +88,9 @@ class SpanTextCaseModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('spanTextCase');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().span.resetTextCase(node);
+      getUINativeModule().span.resetTextCase(node);
     } else {
-      GetUINativeModule().span.setTextCase(node, this.value!);
+      getUINativeModule().span.setTextCase(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -104,9 +104,9 @@ class SpanFontColorModifier extends ModifierWithKey<ResourceColor> {
   static identity = Symbol('spanFontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().span.resetFontColor(node);
+      getUINativeModule().span.resetFontColor(node);
     } else {
-      GetUINativeModule().span.setFontColor(node, this.value!);
+      getUINativeModule().span.setFontColor(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
@@ -120,9 +120,9 @@ class SpanLetterSpacingModifier extends ModifierWithKey<string> {
   static identity = Symbol('spanLetterSpacing');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().span.resetLetterSpacing(node);
+      getUINativeModule().span.resetLetterSpacing(node);
     } else {
-      GetUINativeModule().span.setLetterSpacing(node, this.value!);
+      getUINativeModule().span.setLetterSpacing(node, this.value!);
     }
   }
 }
@@ -133,9 +133,9 @@ class SpanFontModifier extends ModifierWithKey<Font> {
   static identity = Symbol('spanFont');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().span.resetFont(node);
+      getUINativeModule().span.resetFont(node);
     } else {
-      GetUINativeModule().span.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      getUINativeModule().span.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
 
@@ -164,9 +164,9 @@ class SpanDecorationModifier extends ModifierWithKey<{ type: TextDecorationType,
   static identity = Symbol('spanDecoration');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().span.resetDecoration(node);
+      getUINativeModule().span.resetDecoration(node);
     } else {
-      GetUINativeModule().span.setDecoration(node, this.value.type, this.value.color);
+      getUINativeModule().span.setDecoration(node, this.value.type, this.value.color);
     }
   }
 
@@ -190,9 +190,9 @@ class SpanFontWeightModifier extends ModifierWithKey<string> {
   static identity = Symbol('spanfontweight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().span.resetFontWeight(node);
+      getUINativeModule().span.resetFontWeight(node);
     } else {
-      GetUINativeModule().span.setFontWeight(node, this.value!);
+      getUINativeModule().span.setFontWeight(node, this.value!);
     }
   }
 }
@@ -217,6 +217,21 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     });
   }
   onGestureJudgeBegin(callback: (gestureInfo: GestureInfo, event: BaseGestureEvent) => GestureJudgeResult): this {
+    throw new Error('Method not implemented.');
+  }
+  outline(value: OutlineOptions): this {
+    throw new Error('Method not implemented.');
+  }
+  outlineColor(value: ResourceColor | EdgeColors): this {
+    throw new Error('Method not implemented.');
+  }
+  outlineRadius(value: Dimension | OutlineRadiuses): this {
+    throw new Error('Method not implemented.');
+  }
+  outlineStyle(value: OutlineStyle | EdgeOutlineStyles): this {
+    throw new Error('Method not implemented.');
+  }
+  outlineWidth(value: Dimension | EdgeOutlineWidths): this {
     throw new Error('Method not implemented.');
   }
   width(value: Length): this {
@@ -779,12 +794,11 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
 // @ts-ignore
 globalThis.Span.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
 
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkSpanComponent(nativeNode);
   });
-  applyUIAttributes(modifier, nativeNode, component);
+  modifier.applyNormalAttribute(component);
   component.applyModifierPatch();
-
-}
+};

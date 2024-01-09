@@ -52,7 +52,7 @@ frameworks/bridge/declarative_frontend/view_stack_processor.h    @yan-shuifeng @
 frameworks/core/components_ng/pattern/ability_component/  @lushi1202
 frameworks/core/components_ng/pattern/action_sheet/  @cheng-feiwang
 frameworks/core/components_ng/pattern/animator/  @hehongyang9
-frameworks/core/components_ng/pattern/app_bar/  @benb365
+frameworks/core/components_ng/pattern/app_bar/  @benb365 @qsluochen
 frameworks/core/components_ng/pattern/badge/  @Hu_ZeQi
 frameworks/core/components_ng/pattern/blank/  @xiexiyun
 frameworks/core/components_ng/pattern/bubble/  @cheng-feiwang
@@ -63,7 +63,7 @@ frameworks/core/components_ng/pattern/canvas_renderer/  @keerecles
 frameworks/core/components_ng/pattern/checkbox/  @fredtt
 frameworks/core/components_ng/pattern/checkboxgroup/  @fredtt
 frameworks/core/components_ng/pattern/common_view/  @yangfan229
-frameworks/core/components_ng/pattern/container_modal/  @benb365
+frameworks/core/components_ng/pattern/container_modal/  @benb365 @qsluochen
 frameworks/core/components_ng/pattern/counter/  @xuqinfeng1996
 frameworks/core/components_ng/pattern/custom/  @yan-shuifeng
 frameworks/core/components_ng/pattern/custom_paint/  @keerecles

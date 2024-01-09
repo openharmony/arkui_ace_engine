@@ -20,12 +20,14 @@
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_navigation_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/models/navigation_model_impl.h"
+#include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
@@ -35,6 +37,7 @@
 namespace OHOS::Ace {
 std::unique_ptr<NavigationModel> NavigationModel::instance_ = nullptr;
 std::mutex NavigationModel::mutex_;
+constexpr int32_t NAVIGATION_ANIMATION_TIMEOUT = 1000; // ms
 
 NavigationModel* NavigationModel::GetInstance()
 {
@@ -60,6 +63,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 constexpr int32_t TITLE_MODE_RANGE = 2;
 constexpr int32_t NAVIGATION_MODE_RANGE = 2;
+constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t NAV_BAR_POSITION_RANGE = 1;
 constexpr int32_t DEFAULT_NAV_BAR_WIDTH = 240;
 constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
@@ -244,6 +248,7 @@ void JSNavigation::Create(const JSCallbackInfo& info)
 
 void JSNavigation::JSBind(BindingTarget globalObj)
 {
+    JsNavigationTransitionProxy::JSBind(globalObj);
     JSClass<JSNavigation>::Declare("Navigation");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSNavigation>::StaticMethod("create", &JSNavigation::Create);
@@ -271,6 +276,8 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSNavigation>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSNavigation>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSNavigation>::StaticMethod("customNavContentTransition", &JSNavigation::SetCustomNavContentTransition);
+    JSClass<JSNavigation>::StaticMethod("expandSafeArea", &JSNavigation::JsExpandSafeArea);
     JSClass<JSNavigation>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -668,5 +675,95 @@ void JSNavigation::SetOnNavigationModeChange(const JSCallbackInfo& info)
     };
     NavigationModel::GetInstance()->SetOnNavigationModeChange(std::move(onModeChange));
     info.ReturnSelf();
+}
+
+void JSNavigation::SetCustomNavContentTransition(const JSCallbackInfo& info)
+{
+    if (info.Length() == 0 || !info[0]->IsFunction()) {
+        NavigationModel::GetInstance()->SetIsCustomAnimation(false);
+        return;
+    }
+    RefPtr<JsNavigationFunction> jsNavigationFunction =
+        AceType::MakeRefPtr<JsNavigationFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto onNavigationAnimation = [execCtx = info.GetExecutionContext(), func = std::move(jsNavigationFunction)](
+                                     NG::NavContentInfo from, NG::NavContentInfo to,
+                                     NG::NavigationOperation operation) -> NG::NavigationTransition {
+        NG::NavigationTransition transition;
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, transition);
+        auto ret = func->Execute(from, to, operation);
+        if (!ret->IsObject()) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "custom transition is invalid, do default animation");
+            transition.isValid = false;
+            return transition;
+        }
+
+        auto transitionObj = JSRef<JSObject>::Cast(ret);
+        JSRef<JSVal> time = transitionObj->GetProperty("timeout");
+        if (time->IsNumber()) {
+            auto timeout = time->ToNumber<int32_t>();
+            transition.timeout = ((timeout >= 0)  && (timeout <= NAVIGATION_ANIMATION_TIMEOUT)) ?
+                timeout : NAVIGATION_ANIMATION_TIMEOUT;
+        } else {
+            transition.timeout = NAVIGATION_ANIMATION_TIMEOUT;
+        }
+        JSRef<JSVal> transitionContext = transitionObj->GetProperty("transition");
+        auto jsOnTransition = AceType::MakeRefPtr<JsNavigationFunction>(JSRef<JSFunc>::Cast(transitionContext));
+        if (transitionContext->IsFunction()) {
+            auto onTransition = [execCtx, func = std::move(jsOnTransition)](
+                                    const RefPtr<NG::NavigationTransitionProxy>& proxy) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("transition");
+                func->Execute(proxy);
+            };
+            transition.transition = std::move(onTransition);
+        }
+        JSRef<JSVal> endCallback = transitionObj->GetProperty("onTransitionEnd");
+        if (endCallback->IsFunction()) {
+            auto onEndedCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(endCallback));
+            auto onEndTransition = [execCtx, func = std::move(onEndedCallback)](bool isSuccess) {
+                JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+                ACE_SCORING_EVENT("onTransitionEnded");
+                JSRef<JSVal> successVal = JSRef<JSVal>::Make(ToJSValue(isSuccess));
+                func->ExecuteJS(1, &successVal);
+            };
+            transition.endCallback = std::move(onEndTransition);
+        }
+        return transition;
+    };
+    NavigationModel::GetInstance()->SetIsCustomAnimation(true);
+    NavigationModel::GetInstance()->SetCustomTransition(onNavigationAnimation);
+}
+
+void JSNavigation::JsExpandSafeArea(const JSCallbackInfo& info)
+{
+    NG::SafeAreaExpandOpts opts { .type = NG::SAFE_AREA_TYPE_ALL, .edges = NG::SAFE_AREA_EDGE_ALL };
+    if (info.Length() >= 1 && info[0]->IsArray()) {
+        auto paramArray = JSRef<JSArray>::Cast(info[0]);
+        uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
+        for (size_t i = 0; i < paramArray->Length(); ++i) {
+            if (!paramArray->GetValueAt(i)->IsNumber() ||
+                paramArray->GetValueAt(i)->ToNumber<uint32_t>() >= NG::SAFE_AREA_EDGE_START) {
+                safeAreaType = NG::SAFE_AREA_TYPE_ALL;
+                break;
+            }
+            safeAreaType |= (1 << paramArray->GetValueAt(i)->ToNumber<uint32_t>());
+        }
+        opts.type = NG::SAFE_AREA_TYPE_SYSTEM;
+    }
+    if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsArray()) {
+        auto paramArray = JSRef<JSArray>::Cast(info[1]);
+        uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
+        for (size_t i = 0; i < paramArray->Length(); ++i) {
+            if (!paramArray->GetValueAt(i)->IsNumber() ||
+                paramArray->GetValueAt(i)->ToNumber<uint32_t>() >= NG::SAFE_AREA_EDGE_START) {
+                safeAreaEdge = NG::SAFE_AREA_EDGE_ALL;
+                break;
+            }
+            safeAreaEdge |= (1 << paramArray->GetValueAt(i)->ToNumber<uint32_t>());
+        }
+        opts.edges =  NG::SAFE_AREA_EDGE_ALL;
+    }
+
+    ViewAbstractModel::GetInstance()->UpdateSafeAreaExpandOpts(opts);
 }
 } // namespace OHOS::Ace::Framework

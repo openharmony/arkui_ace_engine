@@ -15,7 +15,7 @@
 
 /// <reference path='./import.ts' />
 const arkUINativeModule = globalThis.getArkUINativeModule();
-function GetUINativeModule() {
+function getUINativeModule() {
   if (arkUINativeModule) {
     return arkUINativeModule;
   }
@@ -40,8 +40,8 @@ function applyUIAttributes(modifier, nativeNode, component) {
   if (modifier.applySelectedAttribute !== undefined) {
     state |= UI_STATE_SELECTED;
   }
-  GetUINativeModule().setSupportedUIState(nativeNode, state);
-  const currentUIState = GetUINativeModule().getUIState(nativeNode);
+  getUINativeModule().setSupportedUIState(nativeNode, state);
+  const currentUIState = getUINativeModule().getUIState(nativeNode);
   if (modifier.applyNormalAttribute !== undefined) {
     modifier.applyNormalAttribute(component);
   }
@@ -59,8 +59,7 @@ function applyUIAttributes(modifier, nativeNode, component) {
   }
 }
 function isResource(variable) {
-  let _a;
-  return ((_a = variable) === null || _a === void 0 ? void 0 : _a.bundleName) !== undefined;
+  return (variable === null || variable === void 0 ? void 0 : variable.bundleName) !== undefined;
 }
 function isResourceEqual(stageValue, value) {
   return (stageValue.bundleName === value.bundleName) &&
@@ -157,19 +156,14 @@ class BackgroundColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetBackgroundColor(node);
+      getUINativeModule().common.resetBackgroundColor(node);
     }
     else {
-      GetUINativeModule().common.setBackgroundColor(node, this.value);
+      getUINativeModule().common.setBackgroundColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 BackgroundColorModifier.identity = Symbol('backgroundColor');
@@ -179,19 +173,14 @@ class WidthModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetWidth(node);
+      getUINativeModule().common.resetWidth(node);
     }
     else {
-      GetUINativeModule().common.setWidth(node, this.value);
+      getUINativeModule().common.setWidth(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 WidthModifier.identity = Symbol('width');
@@ -201,14 +190,14 @@ class BorderWidthModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetBorderWidth(node);
+      getUINativeModule().common.resetBorderWidth(node);
     }
     else {
       if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
-        GetUINativeModule().common.setBorderWidth(node, this.value, this.value, this.value, this.value);
+        getUINativeModule().common.setBorderWidth(node, this.value, this.value, this.value, this.value);
       }
       else {
-        GetUINativeModule().common.setBorderWidth(node, this.value.left, this.value.right, this.value.top, this.value.bottom);
+        getUINativeModule().common.setBorderWidth(node, this.value.left, this.value.right, this.value.top, this.value.bottom);
       }
     }
   }
@@ -234,19 +223,14 @@ class HeightModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetHeight(node);
+      getUINativeModule().common.resetHeight(node);
     }
     else {
-      GetUINativeModule().common.setHeight(node, this.value);
+      getUINativeModule().common.setHeight(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 HeightModifier.identity = Symbol('height');
@@ -256,14 +240,14 @@ class BorderRadiusModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetBorderRadius(node);
+      getUINativeModule().common.resetBorderRadius(node);
     }
     else {
       if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
-        GetUINativeModule().common.setBorderRadius(node, this.value, this.value, this.value, this.value);
+        getUINativeModule().common.setBorderRadius(node, this.value, this.value, this.value, this.value);
       }
       else {
-        GetUINativeModule().common.setBorderRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
+        getUINativeModule().common.setBorderRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
       }
     }
   }
@@ -289,10 +273,10 @@ class PositionModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetPosition(node);
+      getUINativeModule().common.resetPosition(node);
     }
     else {
-      GetUINativeModule().common.setPosition(node, this.value.x, this.value.y);
+      getUINativeModule().common.setPosition(node, this.value.x, this.value.y);
     }
   }
   checkObjectDiff() {
@@ -307,15 +291,15 @@ class BorderColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetBorderColor(node);
+      getUINativeModule().common.resetBorderColor(node);
     }
     else {
       const valueType = typeof this.value;
       if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
-        GetUINativeModule().common.setBorderColor(node, this.value, this.value, this.value, this.value);
+        getUINativeModule().common.setBorderColor(node, this.value, this.value, this.value, this.value);
       }
       else {
-        GetUINativeModule().common.setBorderColor(node, this.value.left, this.value.right, this.value.top, this.value.bottom);
+        getUINativeModule().common.setBorderColor(node, this.value.left, this.value.right, this.value.top, this.value.bottom);
       }
     }
   }
@@ -335,31 +319,64 @@ class BorderColorModifier extends ModifierWithKey {
   }
 }
 BorderColorModifier.identity = Symbol('borderColor');
-class TransformModifier extends Modifier {
+class TransformModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetTransform(node);
+      getUINativeModule().common.resetTransform(node);
     }
     else {
-      GetUINativeModule().common.setTransform(node, this.value.matrix);
+      getUINativeModule().common.setTransform(node, this.value.matrix4x4);
     }
+  }
+  checkObjectDiff() {
+    return !deepCompareArrays(this.stageValue.matrix4x4, this.value.matrix4x4);
   }
 }
 TransformModifier.identity = Symbol('transform');
-class BorderStyleModifier extends Modifier {
+class BorderStyleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
+    let _a, _b, _c, _d;
     if (reset) {
-      GetUINativeModule().common.resetBorderStyle(node);
+      getUINativeModule().common.resetBorderStyle(node);
     }
     else {
-      GetUINativeModule().common.setBorderStyle(node, this.value.type, this.value.style, this.value.top, this.value.right, this.value.bottom, this.value.left);
+      let type;
+      let style;
+      let top;
+      let right;
+      let bottom;
+      let left;
+      if (isNumber(this.value)) {
+        style = this.value;
+        type = true;
+      }
+      else if (isObject(this.value)) {
+        top = (_a = this.value) === null || _a === void 0 ? void 0 : _a.top;
+        right = (_b = this.value) === null || _b === void 0 ? void 0 : _b.right;
+        bottom = (_c = this.value) === null || _c === void 0 ? void 0 : _c.bottom;
+        left = (_d = this.value) === null || _d === void 0 ? void 0 : _d.left;
+        type = true;
+      }
+      if (type === true) {
+        getUINativeModule().common.setBorderStyle(node, type, style, top, right, bottom, left);
+      }
+      else {
+        getUINativeModule().common.resetBorderStyle(node);
+      }
     }
+  }
+  checkObjectDiff() {
+    let _a, _b, _c, _d, _e, _f, _g, _h;
+    return !(((_a = this.value) === null || _a === void 0 ? void 0 : _a.top) === ((_b = this.stageValue) === null || _b === void 0 ? void 0 : _b.top) &&
+      ((_c = this.value) === null || _c === void 0 ? void 0 : _c.right) === ((_d = this.stageValue) === null || _d === void 0 ? void 0 : _d.right) &&
+      ((_e = this.value) === null || _e === void 0 ? void 0 : _e.bottom) === ((_f = this.stageValue) === null || _f === void 0 ? void 0 : _f.bottom) &&
+      ((_g = this.value) === null || _g === void 0 ? void 0 : _g.left) === ((_h = this.stageValue) === null || _h === void 0 ? void 0 : _h.left));
   }
 }
 BorderStyleModifier.identity = Symbol('borderStyle');
@@ -369,14 +386,16 @@ class ShadowModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetShadow(node);
+      getUINativeModule().common.resetShadow(node);
     }
     else {
       if (isNumber(this.value)) {
-        GetUINativeModule().common.setShadow(node, this.value, undefined, undefined, undefined, undefined, undefined, undefined);
+        getUINativeModule().common.setShadow(node, this.value, undefined, undefined, undefined, undefined, undefined, undefined);
       }
       else {
-        GetUINativeModule().common.setShadow(node, undefined, this.value.radius, this.value.type, this.value.color, this.value.offsetX, this.value.offsetY, this.value.fill);
+        getUINativeModule().common.setShadow(node, undefined, this.value.radius, 
+          this.value.type, this.value.color, 
+          this.value.offsetX, this.value.offsetY, this.value.fill);
       }
     }
   }
@@ -390,30 +409,30 @@ class ShadowModifier extends ModifierWithKey {
   }
 }
 ShadowModifier.identity = Symbol('shadow');
-class HitTestBehaviorModifier extends Modifier {
+class HitTestBehaviorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetHitTestBehavior(node);
+      getUINativeModule().common.resetHitTestBehavior(node);
     }
     else {
-      GetUINativeModule().common.setHitTestBehavior(node, this.value);
+      getUINativeModule().common.setHitTestBehavior(node, this.value);
     }
   }
 }
 HitTestBehaviorModifier.identity = Symbol('hitTestBehavior');
-class ZIndexModifier extends Modifier {
+class ZIndexModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetZIndex(node);
+      getUINativeModule().common.resetZIndex(node);
     }
     else {
-      GetUINativeModule().common.setZIndex(node, this.value);
+      getUINativeModule().common.setZIndex(node, this.value);
     }
   }
 }
@@ -424,102 +443,97 @@ class OpacityModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetOpacity(node);
+      getUINativeModule().common.resetOpacity(node);
     }
     else {
-      GetUINativeModule().common.setOpacity(node, this.value);
+      getUINativeModule().common.setOpacity(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 OpacityModifier.identity = Symbol('opacity');
-class AlignModifier extends Modifier {
+class AlignModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetAlign(node);
+      getUINativeModule().common.resetAlign(node);
     }
     else {
-      GetUINativeModule().common.setAlign(node, this.value);
+      getUINativeModule().common.setAlign(node, this.value);
     }
   }
 }
 AlignModifier.identity = Symbol('align');
-class BackdropBlurModifier extends Modifier {
+class BackdropBlurModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetBackdropBlur(node);
+      getUINativeModule().common.resetBackdropBlur(node);
     }
     else {
-      GetUINativeModule().common.setBackdropBlur(node, this.value);
+      getUINativeModule().common.setBackdropBlur(node, this.value);
     }
   }
 }
 BackdropBlurModifier.identity = Symbol('backdropBlur');
-class HueRotateModifier extends Modifier {
+class HueRotateModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetHueRotate(node);
+      getUINativeModule().common.resetHueRotate(node);
     }
     else {
-      GetUINativeModule().common.setHueRotate(node, this.value);
+      getUINativeModule().common.setHueRotate(node, this.value);
     }
   }
 }
 HueRotateModifier.identity = Symbol('hueRotate');
-class InvertModifier extends Modifier {
+class InvertModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetInvert(node);
+      getUINativeModule().common.resetInvert(node);
     }
     else {
-      GetUINativeModule().common.setInvert(node, this.value);
+      getUINativeModule().common.setInvert(node, this.value);
     }
   }
 }
 InvertModifier.identity = Symbol('invert');
-class SepiaModifier extends Modifier {
+class SepiaModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetSepia(node);
+      getUINativeModule().common.resetSepia(node);
     }
     else {
-      GetUINativeModule().common.setSepia(node, this.value);
+      getUINativeModule().common.setSepia(node, this.value);
     }
   }
 }
 SepiaModifier.identity = Symbol('sepia');
-class SaturateModifier extends Modifier {
+class SaturateModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetSaturate(node);
+      getUINativeModule().common.resetSaturate(node);
     }
     else {
-      GetUINativeModule().common.setSaturate(node, this.value);
+      getUINativeModule().common.setSaturate(node, this.value);
     }
   }
 }
@@ -530,74 +544,69 @@ class ColorBlendModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetColorBlend(node);
+      getUINativeModule().common.resetColorBlend(node);
     }
     else {
-      GetUINativeModule().common.setColorBlend(node, this.value);
+      getUINativeModule().common.setColorBlend(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 ColorBlendModifier.identity = Symbol('colorBlend');
-class GrayscaleModifier extends Modifier {
+class GrayscaleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetGrayscale(node);
+      getUINativeModule().common.resetGrayscale(node);
     }
     else {
-      GetUINativeModule().common.setGrayscale(node, this.value);
+      getUINativeModule().common.setGrayscale(node, this.value);
     }
   }
 }
 GrayscaleModifier.identity = Symbol('grayscale');
-class ContrastModifier extends Modifier {
+class ContrastModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetContrast(node);
+      getUINativeModule().common.resetContrast(node);
     }
     else {
-      GetUINativeModule().common.setContrast(node, this.value);
+      getUINativeModule().common.setContrast(node, this.value);
     }
   }
 }
 ContrastModifier.identity = Symbol('contrast');
-class BrightnessModifier extends Modifier {
+class BrightnessModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetBrightness(node);
+      getUINativeModule().common.resetBrightness(node);
     }
     else {
-      GetUINativeModule().common.setBrightness(node, this.value);
+      getUINativeModule().common.setBrightness(node, this.value);
     }
   }
 }
 BrightnessModifier.identity = Symbol('brightness');
-class BlurModifier extends Modifier {
+class BlurModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetBlur(node);
+      getUINativeModule().common.resetBlur(node);
     }
     else {
-      GetUINativeModule().common.setBlur(node, this.value);
+      getUINativeModule().common.setBlur(node, this.value);
     }
   }
 }
@@ -608,10 +617,10 @@ class LinearGradientModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetLinearGradient(node);
+      getUINativeModule().common.resetLinearGradient(node);
     }
     else {
-      GetUINativeModule().common.setLinearGradient(node, this.value.angle, this.value.direction, this.value.colors, this.value.repeating);
+      getUINativeModule().common.setLinearGradient(node, this.value.angle, this.value.direction, this.value.colors, this.value.repeating);
     }
   }
   checkObjectDiff() {
@@ -628,10 +637,10 @@ class RadialGradientModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetRadialGradient(node);
+      getUINativeModule().common.resetRadialGradient(node);
     }
     else {
-      GetUINativeModule().common.setRadialGradient(node, this.value.center, this.value.radius, this.value.colors, this.value.repeating);
+      getUINativeModule().common.setRadialGradient(node, this.value.center, this.value.radius, this.value.colors, this.value.repeating);
     }
   }
   checkObjectDiff() {
@@ -648,10 +657,11 @@ class SweepGradientModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetSweepGradient(node);
+      getUINativeModule().common.resetSweepGradient(node);
     }
     else {
-      GetUINativeModule().common.setSweepGradient(node, this.value.center, this.value.start, this.value.end, this.value.rotation, this.value.colors, this.value.repeating);
+      getUINativeModule().common.setSweepGradient(node, this.value.center, this.value.start, 
+        this.value.end, this.value.rotation, this.value.colors, this.value.repeating);
     }
   }
   checkObjectDiff() {
@@ -670,10 +680,11 @@ class OverlayModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetOverlay(node);
+      getUINativeModule().common.resetOverlay(node);
     }
     else {
-      GetUINativeModule().common.setOverlay(node, this.value.value, this.value.align, this.value.offsetX, this.value.offsetY, this.value.hasOptions, this.value.hasOffset);
+      getUINativeModule().common.setOverlay(node, this.value.value, this.value.align,
+        this.value.offsetX, this.value.offsetY, this.value.hasOptions, this.value.hasOffset);
     }
   }
   checkObjectDiff() {
@@ -690,28 +701,28 @@ class BorderImageModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetBorderImage(node);
+      getUINativeModule().common.resetBorderImage(node);
     }
     else {
-      let sliceTop = undefined;
-      let sliceRight = undefined;
-      let sliceBottom = undefined;
-      let sliceLeft = undefined;
-      let repeat = undefined;
-      let source = undefined;
-      let sourceAngle = undefined;
-      let sourceDirection = undefined;
-      let sourceColors = undefined;
-      let sourceRepeating = undefined;
-      let widthTop = undefined;
-      let widthRight = undefined;
-      let widthBottom = undefined;
-      let widthLeft = undefined;
-      let outsetTop = undefined;
-      let outsetRight = undefined;
-      let outsetBottom = undefined;
-      let outsetLeft = undefined;
-      let fill = undefined;
+      let sliceTop;
+      let sliceRight;
+      let sliceBottom;
+      let sliceLeft;
+      let repeat;
+      let source;
+      let sourceAngle;
+      let sourceDirection;
+      let sourceColors;
+      let sourceRepeating;
+      let widthTop;
+      let widthRight;
+      let widthBottom;
+      let widthLeft;
+      let outsetTop;
+      let outsetRight;
+      let outsetBottom;
+      let outsetLeft;
+      let fill;
       if (!isUndefined(this.value.slice)) {
         if (isLengthType(this.value.slice) || isResource(this.value.slice)) {
           let tmpSlice = this.value.slice;
@@ -774,7 +785,10 @@ class BorderImageModifier extends ModifierWithKey {
         }
       }
       fill = this.value.fill;
-      GetUINativeModule().common.setBorderImage(node, sliceTop, sliceRight, sliceBottom, sliceLeft, repeat, source, sourceAngle, sourceDirection, sourceColors, sourceRepeating, widthTop, widthRight, widthBottom, widthLeft, outsetTop, outsetRight, outsetBottom, outsetLeft, fill);
+      getUINativeModule().common.setBorderImage(node, sliceTop, sliceRight, sliceBottom,
+        sliceLeft, repeat, source, sourceAngle, sourceDirection, sourceColors, sourceRepeating,
+        widthTop, widthRight, widthBottom, widthLeft, outsetTop, outsetRight, outsetBottom,
+        outsetLeft, fill);
     }
   }
 }
@@ -785,10 +799,17 @@ class BorderModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetBorder(node);
+      getUINativeModule().common.resetBorder(node);
     }
     else {
-      GetUINativeModule().common.setBorder(node, this.value.arkWidth.left, this.value.arkWidth.right, this.value.arkWidth.top, this.value.arkWidth.bottom, this.value.arkColor.leftColor, this.value.arkColor.rightColor, this.value.arkColor.topColor, this.value.arkColor.bottomColor, this.value.arkRadius.topLeft, this.value.arkRadius.topRight, this.value.arkRadius.bottomLeft, this.value.arkRadius.bottomRight, this.value.arkStyle.top, this.value.arkStyle.right, this.value.arkStyle.bottom, this.value.arkStyle.left);
+      getUINativeModule().common.setBorder(node, this.value.arkWidth.left,
+        this.value.arkWidth.right, this.value.arkWidth.top, this.value.arkWidth.bottom,
+        this.value.arkColor.leftColor, this.value.arkColor.rightColor,
+        this.value.arkColor.topColor, this.value.arkColor.bottomColor,
+        this.value.arkRadius.topLeft, this.value.arkRadius.topRight,
+        this.value.arkRadius.bottomLeft, this.value.arkRadius.bottomRight,
+        this.value.arkStyle.top, this.value.arkStyle.right, this.value.arkStyle.bottom,
+        this.value.arkStyle.left);
     }
   }
   checkObjectDiff() {
@@ -796,16 +817,237 @@ class BorderModifier extends ModifierWithKey {
   }
 }
 BorderModifier.identity = Symbol('border');
+class OutlineColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOutlineColor(node);
+    }
+    else {
+      const valueType = typeof this.value;
+      if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
+        getUINativeModule().common.setOutlineColor(node, this.value, this.value, this.value, this.value);
+      }
+      else {
+        getUINativeModule().common.setOutlineColor(node, this.value.left, this.value.right, this.value.top, this.value.bottom);
+      }
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !(this.stageValue.left === this.value.left &&
+        this.stageValue.right === this.value.right &&
+        this.stageValue.top === this.value.top &&
+        this.stageValue.bottom === this.value.bottom);
+    }
+    else {
+      return true;
+    }
+  }
+}
+OutlineColorModifier.identity = Symbol('outlineColor');
+class OutlineRadiusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOutlineRadius(node);
+    }
+    else {
+      const valueType = typeof this.value;
+      if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
+        getUINativeModule().common.setOutlineRadius(node, this.value, this.value, this.value, this.value);
+      }
+      else {
+        getUINativeModule().common.setOutlineRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
+      }
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !(this.stageValue.topLeft === this.value.topLeft &&
+        this.stageValue.topRight === this.value.topRight &&
+        this.stageValue.bottomLeft === this.value.bottomLeft &&
+        this.stageValue.bottomRight === this.value.bottomRight);
+    }
+    else {
+      return true;
+    }
+  }
+}
+OutlineRadiusModifier.identity = Symbol('outlineRadius');
+class OutlineStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOutlineStyle(node);
+    }
+    else {
+      if (isNumber(this.value)) {
+        getUINativeModule().common.setOutlineStyle(node, this.value, this.value, this.value, this.value);
+      }
+      else {
+        getUINativeModule().common.setOutlineStyle(node, this.value.top, this.value.right, this.value.bottom, this.value.left);
+      }
+    }
+  }
+  checkObjectDiff() {
+    return !(this.value.top === this.stageValue.top &&
+      this.value.right === this.stageValue.right &&
+      this.value.bottom === this.stageValue.bottom &&
+      this.value.left === this.stageValue.left);
+  }
+}
+OutlineStyleModifier.identity = Symbol('outlineStyle');
+class OutlineWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOutlineWidth(node);
+    }
+    else {
+      if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
+        getUINativeModule().common.setOutlineWidth(node, this.value, this.value, this.value, this.value);
+      }
+      else {
+        getUINativeModule().common.setOutlineWidth(node, this.value.left, this.value.right, this.value.top, this.value.bottom);
+      }
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !(this.stageValue.left === this.value.left &&
+        this.stageValue.right === this.value.right &&
+        this.stageValue.top === this.value.top &&
+        this.stageValue.bottom === this.value.bottom);
+    }
+    else {
+      return true;
+    }
+  }
+}
+OutlineWidthModifier.identity = Symbol('outlineWidth');
+class OutlineModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOutline(node);
+    }
+    else {
+      let widthLeft;
+      let widthRight;
+      let widthTop;
+      let widthBottom;
+      if (!isUndefined(this.value.width) && this.value.width != null) {
+        if (isNumber(this.value.width) || isString(this.value.width) || isResource(this.value.width)) {
+          widthLeft = this.value.width;
+          widthRight = this.value.width;
+          widthTop = this.value.width;
+          widthBottom = this.value.width;
+        }
+        else {
+          widthLeft = this.value.width.left;
+          widthRight = this.value.width.right;
+          widthTop = this.value.width.top;
+          widthBottom = this.value.width.bottom;
+        }
+      }
+      let leftColor;
+      let rightColor;
+      let topColor;
+      let bottomColor;
+      if (!isUndefined(this.value.color) && this.value.color != null) {
+        if (isNumber(this.value.color) || isString(this.value.color) || isResource(this.value.color)) {
+          leftColor = this.value.color;
+          rightColor = this.value.color;
+          topColor = this.value.color;
+          bottomColor = this.value.color;
+        }
+        else {
+          leftColor = this.value.color.left;
+          rightColor = this.value.color.right;
+          topColor = this.value.color.top;
+          bottomColor = this.value.color.bottom;
+        }
+      }
+      let topLeft;
+      let topRight;
+      let bottomLeft;
+      let bottomRight;
+      if (!isUndefined(this.value.radius) && this.value.radius != null) {
+        if (isNumber(this.value.radius) || isString(this.value.radius) || isResource(this.value.radius)) {
+          topLeft = this.value.radius;
+          topRight = this.value.radius;
+          bottomLeft = this.value.radius;
+          bottomRight = this.value.radius;
+        }
+        else {
+          topLeft = this.value.radius.topLeft;
+          topRight = this.value.radius.topRight;
+          bottomLeft = this.value.radius.bottomLeft;
+          bottomRight = this.value.radius.bottomRight;
+        }
+      }
+      let styleTop;
+      let styleRight;
+      let styleBottom;
+      let styleLeft;
+      if (!isUndefined(this.value.style) && this.value.style != null) {
+        if (isNumber(this.value.style) || isString(this.value.style) || isResource(this.value.style)) {
+          styleTop = this.value.style;
+          styleRight = this.value.style;
+          styleBottom = this.value.style;
+          styleLeft = this.value.style;
+        }
+        else {
+          styleTop = this.value.style.top;
+          styleRight = this.value.style.right;
+          styleBottom = this.value.style.bottom;
+          styleLeft = this.value.style.left;
+        }
+      }
+      getUINativeModule().common.setOutline(node, widthLeft, widthRight, widthTop, widthBottom,
+        leftColor, rightColor, topColor, bottomColor,
+        topLeft, topRight, bottomLeft, bottomRight,
+        styleTop, styleRight, styleBottom, styleLeft);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+      !isBaseOrResourceEqual(this.stageValue.color, this.value.color) ||
+      !isBaseOrResourceEqual(this.stageValue.radius, this.value.radius) ||
+      !isBaseOrResourceEqual(this.stageValue.style, this.value.style);
+  }
+}
+OutlineModifier.identity = Symbol('outline');
 class ForegroundBlurStyleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetForegroundBlurStyle(node);
+      getUINativeModule().common.resetForegroundBlurStyle(node);
     }
     else {
-      GetUINativeModule().common.setForegroundBlurStyle(node, this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale);
+      getUINativeModule().common.setForegroundBlurStyle(node, this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale);
     }
   }
   checkObjectDiff() {
@@ -823,14 +1065,16 @@ class BackgroundImagePositionModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b;
     if (reset) {
-      GetUINativeModule().common.resetBackgroundImagePosition(node);
+      getUINativeModule().common.resetBackgroundImagePosition(node);
     }
     else {
       if (isNumber(this.value)) {
-        GetUINativeModule().common.setBackgroundImagePosition(node, this.value, undefined, undefined);
+        getUINativeModule().common.setBackgroundImagePosition(node, this.value, undefined, undefined);
       }
       else {
-        GetUINativeModule().common.setBackgroundImagePosition(node, undefined, (_a = this.value) === null || _a === void 0 ? void 0 : _a.x, (_b = this.value) === null || _b === void 0 ? void 0 : _b.y);
+        getUINativeModule().common.setBackgroundImagePosition(node, undefined,
+          (_a = this.value) === null || _a === void 0 ? void 0 : _a.x,
+          (_b = this.value) === null || _b === void 0 ? void 0 : _b.y);
       }
     }
   }
@@ -841,17 +1085,20 @@ class BackgroundImagePositionModifier extends ModifierWithKey {
   }
 }
 BackgroundImagePositionModifier.identity = Symbol('backgroundImagePosition');
-class LinearGradientBlurModifier extends Modifier {
+class LinearGradientBlurModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetLinearGradientBlur(node);
+      getUINativeModule().common.resetLinearGradientBlur(node);
     }
     else {
-      GetUINativeModule().common.setLinearGradientBlur(node, this.value.blurRadius, this.value.fractionStops, this.value.direction);
+      getUINativeModule().common.setLinearGradientBlur(node, this.value.blurRadius, this.value.fractionStops, this.value.direction);
     }
+  }
+  checkObjectDiff() {
+    return !this.value.isEqual(this.stageValue);
   }
 }
 LinearGradientBlurModifier.identity = Symbol('linearGradientBlur');
@@ -861,10 +1108,10 @@ class BackgroundImageModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetBackgroundImage(node);
+      getUINativeModule().common.resetBackgroundImage(node);
     }
     else {
-      GetUINativeModule().common.setBackgroundImage(node, this.value.src, this.value.repeat);
+      getUINativeModule().common.setBackgroundImage(node, this.value.src, this.value.repeat);
     }
   }
   checkObjectDiff() {
@@ -879,10 +1126,10 @@ class BackgroundBlurStyleModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetBackgroundBlurStyle(node);
+      getUINativeModule().common.resetBackgroundBlurStyle(node);
     }
     else {
-      GetUINativeModule().common.setBackgroundBlurStyle(node, this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale);
+      getUINativeModule().common.setBackgroundBlurStyle(node, this.value.blurStyle, this.value.colorMode, this.value.adaptiveColor, this.value.scale);
     }
   }
 }
@@ -894,14 +1141,16 @@ class BackgroundImageSizeModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b;
     if (reset) {
-      GetUINativeModule().common.resetBackgroundImageSize(node);
+      getUINativeModule().common.resetBackgroundImageSize(node);
     }
     else {
       if (isNumber(this.value)) {
-        GetUINativeModule().common.setBackgroundImageSize(node, this.value, undefined, undefined);
+        getUINativeModule().common.setBackgroundImageSize(node, this.value, undefined, undefined);
       }
       else {
-        GetUINativeModule().common.setBackgroundImageSize(node, undefined, (_a = this.value) === null || _a === void 0 ? void 0 : _a.width, (_b = this.value) === null || _b === void 0 ? void 0 : _b.height);
+        getUINativeModule().common.setBackgroundImageSize(node, undefined,
+          (_a = this.value) === null || _a === void 0 ? void 0 : _a.width,
+          (_b = this.value) === null || _b === void 0 ? void 0 : _b.height);
       }
     }
   }
@@ -911,58 +1160,82 @@ class BackgroundImageSizeModifier extends ModifierWithKey {
   }
 }
 BackgroundImageSizeModifier.identity = Symbol('backgroundImageSize');
-class TranslateModifier extends Modifier {
+class TranslateModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetTranslate(node);
+      getUINativeModule().common.resetTranslate(node);
     }
     else {
-      GetUINativeModule().common.setTranslate(node, this.value.x, this.value.y, this.value.z);
+      getUINativeModule().common.setTranslate(node, this.value.x, this.value.y, this.value.z);
     }
+  }
+  checkObjectDiff() {
+    return !(this.value.x === this.stageValue.x &&
+      this.value.y === this.stageValue.y &&
+      this.value.z === this.stageValue.z);
   }
 }
 TranslateModifier.identity = Symbol('translate');
-class ScaleModifier extends Modifier {
+class ScaleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetScale(node);
+      getUINativeModule().common.resetScale(node);
     }
     else {
-      GetUINativeModule().common.setScale(node, this.value.x, this.value.y, this.value.z, this.value.centerX, this.value.centerY);
+      getUINativeModule().common.setScale(node, this.value.x, this.value.y, this.value.z, this.value.centerX, this.value.centerY);
     }
+  }
+  checkObjectDiff() {
+    return !(this.value.x === this.stageValue.x &&
+      this.value.y === this.stageValue.y &&
+      this.value.z === this.stageValue.z &&
+      this.value.centerX === this.stageValue.centerX &&
+      this.value.centerY === this.stageValue.centerY);
   }
 }
 ScaleModifier.identity = Symbol('scale');
-class RotateModifier extends Modifier {
+class RotateModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetRotate(node);
+      getUINativeModule().common.resetRotate(node);
     }
     else {
-      GetUINativeModule().common.setRotate(node, this.value.x, this.value.y, this.value.z, this.value.angle, this.value.centerX, this.value.centerY, this.value.centerY, this.value.perspective);
+      getUINativeModule().common.setRotate(node, this.value.x, this.value.y,
+        this.value.z, this.value.angle, this.value.centerX, this.value.centerY,
+        this.value.centerY, this.value.perspective);
     }
+  }
+  checkObjectDiff() {
+    return !(this.value.x === this.stageValue.x &&
+      this.value.y === this.stageValue.y &&
+      this.value.z === this.stageValue.z &&
+      this.value.angle === this.stageValue.angle &&
+      this.value.centerX === this.stageValue.centerX &&
+      this.value.centerY === this.stageValue.centerY &&
+      this.value.centerZ === this.stageValue.centerZ &&
+      this.value.perspective === this.stageValue.perspective);
   }
 }
 RotateModifier.identity = Symbol('rotate');
-class GeometryTransitionModifier extends Modifier {
+class GeometryTransitionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetGeometryTransition(node);
+      getUINativeModule().common.resetGeometryTransition(node);
     }
     else {
-      GetUINativeModule().common.setGeometryTransition(node, this.value);
+      getUINativeModule().common.setGeometryTransition(node, this.value);
     }
   }
 }
@@ -973,10 +1246,10 @@ class ClipModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetClip(node);
+      getUINativeModule().common.resetClip(node);
     }
     else {
-      GetUINativeModule().common.setClip(node, this.value);
+      getUINativeModule().common.setClip(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -990,10 +1263,10 @@ class MaskModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetMask(node);
+      getUINativeModule().common.resetMask(node);
     }
     else {
-      GetUINativeModule().common.setMask(node, this.value);
+      getUINativeModule().common.setMask(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -1007,10 +1280,10 @@ class PixelStretchEffectModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetPixelStretchEffect(node);
+      getUINativeModule().common.resetPixelStretchEffect(node);
     }
     else {
-      GetUINativeModule().common.setPixelStretchEffect(node, this.value.top, this.value.right, this.value.bottom, this.value.left);
+      getUINativeModule().common.setPixelStretchEffect(node, this.value.top, this.value.right, this.value.bottom, this.value.left);
     }
   }
   checkObjectDiff() {
@@ -1027,66 +1300,66 @@ class LightUpEffectModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetLightUpEffect(node);
+      getUINativeModule().common.resetLightUpEffect(node);
     }
     else {
-      GetUINativeModule().common.setLightUpEffect(node, this.value);
+      getUINativeModule().common.setLightUpEffect(node, this.value);
     }
   }
 }
 LightUpEffectModifier.identity = Symbol('lightUpEffect');
-class SphericalEffectModifier extends Modifier {
+class SphericalEffectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetSphericalEffect(node);
+      getUINativeModule().common.resetSphericalEffect(node);
     }
     else {
-      GetUINativeModule().common.setSphericalEffect(node, this.value);
+      getUINativeModule().common.setSphericalEffect(node, this.value);
     }
   }
 }
 SphericalEffectModifier.identity = Symbol('sphericalEffect');
-class RenderGroupModifier extends Modifier {
+class RenderGroupModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetRenderGroup(node);
+      getUINativeModule().common.resetRenderGroup(node);
     }
     else {
-      GetUINativeModule().common.setRenderGroup(node, this.value);
+      getUINativeModule().common.setRenderGroup(node, this.value);
     }
   }
 }
 RenderGroupModifier.identity = Symbol('renderGroup');
-class RenderFitModifier extends Modifier {
+class RenderFitModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetRenderFit(node);
+      getUINativeModule().common.resetRenderFit(node);
     }
     else {
-      GetUINativeModule().common.setRenderFit(node, this.value);
+      getUINativeModule().common.setRenderFit(node, this.value);
     }
   }
 }
 RenderFitModifier.identity = Symbol('renderFit');
-class UseEffectModifier extends Modifier {
+class UseEffectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetUseEffect(node);
+      getUINativeModule().common.resetUseEffect(node);
     }
     else {
-      GetUINativeModule().common.setUseEffect(node, this.value);
+      getUINativeModule().common.setUseEffect(node, this.value);
     }
   }
 }
@@ -1097,60 +1370,75 @@ class ForegroundColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetForegroundColor(node);
+      getUINativeModule().common.resetForegroundColor(node);
     }
     else {
-      GetUINativeModule().common.setForegroundColor(node, this.value);
+      getUINativeModule().common.setForegroundColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 ForegroundColorModifier.identity = Symbol('foregroundColor');
-class MotionPathModifier extends Modifier {
+class MotionPathModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetMotionPath(node);
+      getUINativeModule().common.resetMotionPath(node);
     }
     else {
-      GetUINativeModule().common.setMotionPath(node, this.value.path, this.value.from, this.value.to, this.value.rotatable);
+      let path;
+      let rotatable;
+      let from;
+      let to;
+      if (isString(this.value.path)) {
+        path = this.value.path;
+      }
+      if (isBoolean(this.value.rotatable)) {
+        rotatable = this.value.rotatable;
+      }
+      if (isNumber(this.value.from) && isNumber(this.value.to)) {
+        from = this.value.from;
+        to = this.value.to;
+      }
+      getUINativeModule().common.setMotionPath(node, path, from, to, rotatable);
     }
+  }
+  checkObjectDiff() {
+    return !(this.value.path === this.stageValue.path &&
+      this.value.from === this.stageValue.from &&
+      this.value.to === this.stageValue.to &&
+      this.value.rotatable === this.stageValue.rotatable);
   }
 }
 MotionPathModifier.identity = Symbol('motionPath');
-class GroupDefaultFocusModifier extends Modifier {
+class GroupDefaultFocusModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetGroupDefaultFocus(node);
+      getUINativeModule().common.resetGroupDefaultFocus(node);
     }
     else {
-      GetUINativeModule().common.setGroupDefaultFocus(node, this.value);
+      getUINativeModule().common.setGroupDefaultFocus(node, this.value);
     }
   }
 }
 GroupDefaultFocusModifier.identity = Symbol('groupDefaultFocus');
-class FocusOnTouchModifier extends Modifier {
+class FocusOnTouchModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetFocusOnTouch(node);
+      getUINativeModule().common.resetFocusOnTouch(node);
     }
     else {
-      GetUINativeModule().common.setFocusOnTouch(node, this.value);
+      getUINativeModule().common.setFocusOnTouch(node, this.value);
     }
   }
 }
@@ -1162,10 +1450,11 @@ class OffsetModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b;
     if (reset) {
-      GetUINativeModule().common.resetOffset(node);
+      getUINativeModule().common.resetOffset(node);
     }
     else {
-      GetUINativeModule().common.setOffset(node, (_a = this.value) === null || _a === void 0 ? void 0 : _a.x, (_b = this.value) === null || _b === void 0 ? void 0 : _b.y);
+      getUINativeModule().common.setOffset(node, (_a = this.value) === null ||
+      _a === void 0 ? void 0 : _a.x, (_b = this.value) === null || _b === void 0 ? void 0 : _b.y);
     }
   }
   checkObjectDiff() {
@@ -1181,10 +1470,11 @@ class MarkAnchorModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b;
     if (reset) {
-      GetUINativeModule().common.resetMarkAnchor(node);
+      getUINativeModule().common.resetMarkAnchor(node);
     }
     else {
-      GetUINativeModule().common.setMarkAnchor(node, (_a = this.value) === null || _a === void 0 ? void 0 : _a.x, (_b = this.value) === null || _b === void 0 ? void 0 : _b.y);
+      getUINativeModule().common.setMarkAnchor(node, (_a = this.value) === null ||
+      _a === void 0 ? void 0 : _a.x, (_b = this.value) === null || _b === void 0 ? void 0 : _b.y);
     }
   }
   checkObjectDiff() {
@@ -1193,44 +1483,44 @@ class MarkAnchorModifier extends ModifierWithKey {
   }
 }
 MarkAnchorModifier.identity = Symbol('markAnchor');
-class DefaultFocusModifier extends Modifier {
+class DefaultFocusModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetDefaultFocus(node);
+      getUINativeModule().common.resetDefaultFocus(node);
     }
     else {
-      GetUINativeModule().common.setDefaultFocus(node, this.value);
+      getUINativeModule().common.setDefaultFocus(node, this.value);
     }
   }
 }
 DefaultFocusModifier.identity = Symbol('defaultFocus');
-class FocusableModifier extends Modifier {
+class FocusableModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetFocusable(node);
+      getUINativeModule().common.resetFocusable(node);
     }
     else {
-      GetUINativeModule().common.setFocusable(node, this.value);
+      getUINativeModule().common.setFocusable(node, this.value);
     }
   }
 }
 FocusableModifier.identity = Symbol('focusable');
-class TouchableModifier extends Modifier {
+class TouchableModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetTouchable(node);
+      getUINativeModule().common.resetTouchable(node);
     }
     else {
-      GetUINativeModule().common.setTouchable(node, this.value);
+      getUINativeModule().common.setTouchable(node, this.value);
     }
   }
 }
@@ -1241,10 +1531,10 @@ class MarginModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetMargin(node);
+      getUINativeModule().common.resetMargin(node);
     }
     else {
-      GetUINativeModule().common.setMargin(node, this.value.top, this.value.right, this.value.bottom, this.value.left);
+      getUINativeModule().common.setMargin(node, this.value.top, this.value.right, this.value.bottom, this.value.left);
     }
   }
   checkObjectDiff() {
@@ -1261,10 +1551,10 @@ class PaddingModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetPadding(node);
+      getUINativeModule().common.resetPadding(node);
     }
     else {
-      GetUINativeModule().common.setPadding(node, this.value.top, this.value.right, this.value.bottom, this.value.left);
+      getUINativeModule().common.setPadding(node, this.value.top, this.value.right, this.value.bottom, this.value.left);
     }
   }
   checkObjectDiff() {
@@ -1281,10 +1571,10 @@ class VisibilityModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetVisibility(node);
+      getUINativeModule().common.resetVisibility(node);
     }
     else {
-      GetUINativeModule().common.setVisibility(node, this.value);
+      getUINativeModule().common.setVisibility(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -1292,58 +1582,63 @@ class VisibilityModifier extends ModifierWithKey {
   }
 }
 VisibilityModifier.identity = Symbol('visibility');
-class AccessibilityTextModifier extends Modifier {
+class AccessibilityTextModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetAccessibilityText(node);
+      getUINativeModule().common.resetAccessibilityText(node);
     }
     else {
-      GetUINativeModule().common.setAccessibilityText(node, this.value);
+      getUINativeModule().common.setAccessibilityText(node, this.value);
     }
   }
 }
 AccessibilityTextModifier.identity = Symbol('accessibilityText');
-class AllowDropModifier extends Modifier {
+class AllowDropModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetAllowDrop(node);
+      getUINativeModule().common.resetAllowDrop(node);
     }
     else {
-      GetUINativeModule().common.setAllowDrop(node, this.value.allowDropArray);
+      getUINativeModule().common.setAllowDrop(node, this.value);
     }
+  }
+  checkObjectDiff() {
+    return !(Array.isArray(this.value) && Array.isArray(this.stageValue) &&
+      this.value.length === this.stageValue.length &&
+      this.value.every((value, index) => value === this.stageValue[index]));
   }
 }
 AllowDropModifier.identity = Symbol('allowDrop');
-class AccessibilityLevelModifier extends Modifier {
+class AccessibilityLevelModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetAccessibilityLevel(node);
+      getUINativeModule().common.resetAccessibilityLevel(node);
     }
     else {
-      GetUINativeModule().common.setAccessibilityLevel(node, this.value);
+      getUINativeModule().common.setAccessibilityLevel(node, this.value);
     }
   }
 }
 AccessibilityLevelModifier.identity = Symbol('accessibilityLevel');
-class AccessibilityDescriptionModifier extends Modifier {
+class AccessibilityDescriptionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetAccessibilityDescription(node);
+      getUINativeModule().common.resetAccessibilityDescription(node);
     }
     else {
-      GetUINativeModule().common.setAccessibilityDescription(node, this.value);
+      getUINativeModule().common.setAccessibilityDescription(node, this.value);
     }
   }
 }
@@ -1354,10 +1649,10 @@ class DirectionModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetDirection(node);
+      getUINativeModule().common.resetDirection(node);
     }
     else {
-      GetUINativeModule().common.setDirection(node, this.value);
+      getUINativeModule().common.setDirection(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -1365,58 +1660,71 @@ class DirectionModifier extends ModifierWithKey {
   }
 }
 DirectionModifier.identity = Symbol('direction');
-class AlignRulesModifier extends Modifier {
+class AlignRulesModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetAlignRules(node);
+      getUINativeModule().common.resetAlignRules(node);
     }
     else {
-      GetUINativeModule().common.setAlignRules(node, this.value.left, this.value.middle, this.value.right, this.value.top, this.value.center, this.value.bottom);
+      getUINativeModule().common.setAlignRules(node, this.value.left, this.value.middle,
+        this.value.right, this.value.top, this.value.center, this.value.bottom);
     }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.left, this.value.left) ||
+      !isBaseOrResourceEqual(this.stageValue.middle, this.value.middle) ||
+      !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
+      !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
+      !isBaseOrResourceEqual(this.stageValue.center, this.value.center) ||
+      !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom);
   }
 }
 AlignRulesModifier.identity = Symbol('alignRules');
-class ExpandSafeAreaModifier extends Modifier {
+class ExpandSafeAreaModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetExpandSafeArea(node);
+      getUINativeModule().common.resetExpandSafeArea(node);
     }
     else {
-      GetUINativeModule().common.setExpandSafeArea(node, this.value.type, this.value.edges);
+      getUINativeModule().common.setExpandSafeArea(node, this.value.type, this.value.edges);
     }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.type, this.value.type) ||
+      !isBaseOrResourceEqual(this.stageValue.edges, this.value.edges);
   }
 }
 ExpandSafeAreaModifier.identity = Symbol('expandSafeArea');
-class GridSpanModifier extends Modifier {
+class GridSpanModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetGridSpan(node);
+      getUINativeModule().common.resetGridSpan(node);
     }
     else {
-      GetUINativeModule().common.setGridSpan(node, this.value);
+      getUINativeModule().common.setGridSpan(node, this.value);
     }
   }
 }
 GridSpanModifier.identity = Symbol('gridSpan');
-class GridOffsetModifier extends Modifier {
+class GridOffsetModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetGridOffset(node);
+      getUINativeModule().common.resetGridOffset(node);
     }
     else {
-      GetUINativeModule().common.setGridOffset(node, this.value);
+      getUINativeModule().common.setGridOffset(node, this.value);
     }
   }
 }
@@ -1427,10 +1735,10 @@ class AlignSelfModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetAlignSelf(node);
+      getUINativeModule().common.resetAlignSelf(node);
     }
     else {
-      GetUINativeModule().common.setAlignSelf(node, this.value);
+      getUINativeModule().common.setAlignSelf(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -1444,10 +1752,10 @@ class SizeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetSize(node);
+      getUINativeModule().common.resetSize(node);
     }
     else {
-      GetUINativeModule().common.setSize(node, this.value.width, this.value.height);
+      getUINativeModule().common.setSize(node, this.value.width, this.value.height);
     }
   }
   checkObjectDiff() {
@@ -1462,10 +1770,10 @@ class DisplayPriorityModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetDisplayPriority(node);
+      getUINativeModule().common.resetDisplayPriority(node);
     }
     else {
-      GetUINativeModule().common.setDisplayPriority(node, this.value);
+      getUINativeModule().common.setDisplayPriority(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -1473,73 +1781,78 @@ class DisplayPriorityModifier extends ModifierWithKey {
   }
 }
 DisplayPriorityModifier.identity = Symbol('displayPriority');
-class IDModifier extends Modifier {
+class IdModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetId(node);
+      getUINativeModule().common.resetId(node);
     }
     else {
-      GetUINativeModule().common.setId(node, this.value);
+      getUINativeModule().common.setId(node, this.value);
     }
   }
 }
-IDModifier.identity = Symbol('id');
-class KeyModifier extends Modifier {
+IdModifier.identity = Symbol('id');
+class KeyModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetKey(node);
+      getUINativeModule().common.resetKey(node);
     }
     else {
-      GetUINativeModule().common.setKey(node, this.value);
+      getUINativeModule().common.setKey(node, this.value);
     }
   }
 }
 KeyModifier.identity = Symbol('key');
-class RestoreIdModifier extends Modifier {
+class RestoreIdModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetRestoreId(node);
+      getUINativeModule().common.resetRestoreId(node);
     }
     else {
-      GetUINativeModule().common.setRestoreId(node, this.value);
+      getUINativeModule().common.setRestoreId(node, this.value);
     }
   }
 }
 RestoreIdModifier.identity = Symbol('restoreId');
-class TabIndexModifier extends Modifier {
+class TabIndexModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetTabIndex(node);
+      getUINativeModule().common.resetTabIndex(node);
     }
     else {
-      GetUINativeModule().common.setTabIndex(node, this.value);
+      getUINativeModule().common.setTabIndex(node, this.value);
     }
   }
 }
 TabIndexModifier.identity = Symbol('tabIndex');
-class ObscuredModifier extends Modifier {
+class ObscuredModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
-    if (reset) {
-      GetUINativeModule().common.resetObscured(node);
+    if (reset || (!Array.isArray(this.value))) {
+      getUINativeModule().common.resetObscured(node);
     }
     else {
-      GetUINativeModule().common.setObscured(node, this.value.reasons);
+      getUINativeModule().common.setObscured(node, this.value);
     }
+  }
+  checkObjectDiff() {
+    return !(Array.isArray(this.value) && Array.isArray(this.stageValue) &&
+      this.value.length === this.stageValue.length &&
+      this.value.every((value, index) => value === this.stageValue[index]));
   }
 }
 ObscuredModifier.identity = Symbol('obscured');
@@ -1550,7 +1863,7 @@ class MouseResponseRegionModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b, _c, _d, _e, _f, _g, _h;
     if (reset) {
-      GetUINativeModule().common.resetMouseResponseRegion(node);
+      getUINativeModule().common.resetMouseResponseRegion(node);
     }
     else {
       let responseRegion = [];
@@ -1568,7 +1881,7 @@ class MouseResponseRegionModifier extends ModifierWithKey {
         responseRegion.push((_g = this.value.width) !== null && _g !== void 0 ? _g : 'PLACEHOLDER');
         responseRegion.push((_h = this.value.height) !== null && _h !== void 0 ? _h : 'PLACEHOLDER');
       }
-      GetUINativeModule().common.setMouseResponseRegion(node, responseRegion, responseRegion.length);
+      getUINativeModule().common.setMouseResponseRegion(node, responseRegion, responseRegion.length);
     }
   }
   checkObjectDiff() {
@@ -1607,7 +1920,7 @@ class ResponseRegionModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b, _c, _d, _e, _f, _g, _h;
     if (reset) {
-      GetUINativeModule().common.resetResponseRegion(node);
+      getUINativeModule().common.resetResponseRegion(node);
     }
     else {
       let responseRegion = [];
@@ -1625,7 +1938,7 @@ class ResponseRegionModifier extends ModifierWithKey {
         responseRegion.push((_g = this.value.width) !== null && _g !== void 0 ? _g : 'PLACEHOLDER');
         responseRegion.push((_h = this.value.height) !== null && _h !== void 0 ? _h : 'PLACEHOLDER');
       }
-      GetUINativeModule().common.setResponseRegion(node, responseRegion, responseRegion.length);
+      getUINativeModule().common.setResponseRegion(node, responseRegion, responseRegion.length);
     }
   }
   checkObjectDiff() {
@@ -1663,10 +1976,10 @@ class FlexGrowModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetFlexGrow(node);
+      getUINativeModule().common.resetFlexGrow(node);
     }
     else {
-      GetUINativeModule().common.setFlexGrow(node, this.value);
+      getUINativeModule().common.setFlexGrow(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -1680,10 +1993,10 @@ class FlexShrinkModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetFlexShrink(node);
+      getUINativeModule().common.resetFlexShrink(node);
     }
     else {
-      GetUINativeModule().common.setFlexShrink(node, this.value);
+      getUINativeModule().common.setFlexShrink(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -1697,10 +2010,10 @@ class AspectRatioModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetAspectRatio(node);
+      getUINativeModule().common.resetAspectRatio(node);
     }
     else {
-      GetUINativeModule().common.setAspectRatio(node, this.value);
+      getUINativeModule().common.setAspectRatio(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -1714,10 +2027,10 @@ class ConstraintSizeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetConstraintSize(node);
+      getUINativeModule().common.resetConstraintSize(node);
     }
     else {
-      GetUINativeModule().common.setConstraintSize(node, this.value.minWidth, this.value.maxWidth, this.value.minHeight, this.value.maxHeight);
+      getUINativeModule().common.setConstraintSize(node, this.value.minWidth, this.value.maxWidth, this.value.minHeight, this.value.maxHeight);
     }
   }
   checkObjectDiff() {
@@ -1734,10 +2047,10 @@ class FlexBasisModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetFlexBasis(node);
+      getUINativeModule().common.resetFlexBasis(node);
     }
     else {
-      GetUINativeModule().common.setFlexBasis(node, this.value);
+      getUINativeModule().common.setFlexBasis(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -1745,58 +2058,58 @@ class FlexBasisModifier extends ModifierWithKey {
   }
 }
 FlexBasisModifier.identity = Symbol('flexBasis');
-class LayoutWeightModifier extends Modifier {
+class LayoutWeightModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetLayoutWeight(node);
+      getUINativeModule().common.resetLayoutWeight(node);
     }
     else {
-      GetUINativeModule().common.setLayoutWeight(node, this.value);
+      getUINativeModule().common.setLayoutWeight(node, this.value);
     }
   }
 }
 LayoutWeightModifier.identity = Symbol('layoutWeight');
-class EnabledModifier extends Modifier {
+class EnabledModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetEnabled(node);
+      getUINativeModule().common.resetEnabled(node);
     }
     else {
-      GetUINativeModule().common.setEnabled(node, this.value);
+      getUINativeModule().common.setEnabled(node, this.value);
     }
   }
 }
 EnabledModifier.identity = Symbol('enabled');
-class DraggableModifier extends Modifier {
+class DraggableModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetDraggable(node);
+      getUINativeModule().common.resetDraggable(node);
     }
     else {
-      GetUINativeModule().common.setDraggable(node, this.value);
+      getUINativeModule().common.setDraggable(node, this.value);
     }
   }
 }
 DraggableModifier.identity = Symbol('draggable');
-class AccessibilityGroupModifier extends Modifier {
+class AccessibilityGroupModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetAccessibilityGroup(node);
+      getUINativeModule().common.resetAccessibilityGroup(node);
     }
     else {
-      GetUINativeModule().common.setAccessibilityGroup(node, this.value);
+      getUINativeModule().common.setAccessibilityGroup(node, this.value);
     }
   }
 }
@@ -1807,39 +2120,45 @@ class HoverEffectModifier extends Modifier {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetHoverEffect(node);
+      getUINativeModule().common.resetHoverEffect(node);
     }
     else {
-      GetUINativeModule().common.setHoverEffect(node, this.value);
+      getUINativeModule().common.setHoverEffect(node, this.value);
     }
   }
 }
 HoverEffectModifier.identity = Symbol('hoverEffect');
-class ClickEffectModifier extends Modifier {
+class ClickEffectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset || !this.value) {
-      GetUINativeModule().common.resetClickEffect(node);
+      getUINativeModule().common.resetClickEffect(node);
     }
     else {
-      GetUINativeModule().common.setClickEffect(node, this.value.level, this.value.scale);
+      getUINativeModule().common.setClickEffect(node, this.value.level, this.value.scale);
     }
+  }
+  checkObjectDiff() {
+    return !((this.value.level === this.stageValue.level) && (this.value.scale === this.stageValue.scale));
   }
 }
 ClickEffectModifier.identity = Symbol('clickEffect');
-class KeyBoardShortCutModifier extends Modifier {
+class KeyBoardShortCutModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetKeyBoardShortCut(node);
+      getUINativeModule().common.resetKeyBoardShortCut(node);
     }
     else {
-      GetUINativeModule().common.setKeyBoardShortCut(node, this.value.value, this.value.keys);
+      getUINativeModule().common.setKeyBoardShortCut(node, this.value.value, this.value.keys);
     }
+  }
+  checkObjectDiff() {
+    return !this.value.isEqual(this.stageValue);
   }
 }
 KeyBoardShortCutModifier.identity = Symbol('keyboardShortcut');
@@ -1849,10 +2168,10 @@ class TransitionModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetTransition(node);
+      getUINativeModule().common.resetTransition(node);
     }
     else {
-      GetUINativeModule().common.setTransition(node, this.value);
+      getUINativeModule().common.setTransition(node, this.value);
     }
   }
 }
@@ -1863,10 +2182,10 @@ class SharedTransitionModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().common.resetSharedTransition(node);
+      getUINativeModule().common.resetSharedTransition(node);
     }
     else {
-      GetUINativeModule().common.setSharedTransition(node, this.value.id, this.value.options);
+      getUINativeModule().common.setSharedTransition(node, this.value.id, this.value.options);
     }
   }
 }
@@ -1881,8 +2200,7 @@ const isUndefined = (val) => typeof val === 'undefined';
 const isObject = (val) => typeof val === 'object';
 const isFunction = (val) => typeof val === 'function';
 const isLengthType = (val) => typeof val === 'string' || typeof val === 'number';
-const lessThenFunction = (val1, val2) => (val1 - val2) < 0.001;
-function CheckJSCallbackInfo(value, checklist) {
+function checkJsCallbackInfo(value, checklist) {
   let typeVerified = false;
   checklist.forEach(function (infoType) {
     switch (infoType) {
@@ -1910,7 +2228,7 @@ function CheckJSCallbackInfo(value, checklist) {
         break;
     }
   });
-  return typeVerified || checklist.length == 0;
+  return typeVerified || checklist.length === 0;
 }
 function modifier(modifiers, modifierClass, value) {
   const identity = modifierClass['identity'];
@@ -1960,6 +2278,26 @@ class ArkComponent {
   onGestureJudgeBegin(callback) {
     throw new Error('Method not implemented.');
   }
+  outline(value) {
+    modifierWithKey(this._modifiersWithKeys, OutlineModifier.identity, OutlineModifier, value);
+    return this;
+  }
+  outlineColor(value) {
+    modifierWithKey(this._modifiersWithKeys, OutlineColorModifier.identity, OutlineColorModifier, value);
+    return this;
+  }
+  outlineRadius(value) {
+    modifierWithKey(this._modifiersWithKeys, OutlineRadiusModifier.identity, OutlineRadiusModifier, value);
+    return this;
+  }
+  outlineStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, OutlineStyleModifier.identity, OutlineStyleModifier, value);
+    return this;
+  }
+  outlineWidth(value) {
+    modifierWithKey(this._modifiersWithKeys, OutlineWidthModifier.identity, OutlineWidthModifier, value);
+    return this;
+  }
   width(value) {
     modifierWithKey(this._modifiersWithKeys, WidthModifier.identity, WidthModifier, value);
     return this;
@@ -2003,10 +2341,10 @@ class ArkComponent {
       opts.edges = safeAreaEdge;
     }
     if (opts.type === undefined && opts.edges === undefined) {
-      modifier(this._modifiers, ExpandSafeAreaModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, ExpandSafeAreaModifier.identity, ExpandSafeAreaModifier, undefined);
     }
     else {
-      modifier(this._modifiers, ExpandSafeAreaModifier, opts);
+      modifierWithKey(this._modifiersWithKeys, ExpandSafeAreaModifier.identity, ExpandSafeAreaModifier, opts);
     }
     return this;
   }
@@ -2028,31 +2366,31 @@ class ArkComponent {
   }
   touchable(value) {
     if (typeof value === 'boolean') {
-      modifier(this._modifiers, TouchableModifier, value);
+      modifierWithKey(this._modifiersWithKeys, TouchableModifier.identity, TouchableModifier, value);
     }
     else {
-      modifier(this._modifiers, TouchableModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, TouchableModifier.identity, TouchableModifier, undefined);
     }
     return this;
   }
   hitTestBehavior(value) {
     if (value) {
-      modifier(this._modifiers, HitTestBehaviorModifier, value);
+      modifierWithKey(this._modifiersWithKeys, HitTestBehaviorModifier.identity, HitTestBehaviorModifier, value);
     }
     else {
-      modifier(this._modifiers, HitTestBehaviorModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, HitTestBehaviorModifier.identity, HitTestBehaviorModifier, undefined);
     }
     return this;
   }
   layoutWeight(value) {
     if (isNumber(value)) {
-      modifier(this._modifiers, LayoutWeightModifier, value);
+      modifierWithKey(this._modifiersWithKeys, LayoutWeightModifier.identity, LayoutWeightModifier, value);
     }
     else if (isString(value) && !isNaN(Number(value))) {
-      modifier(this._modifiers, LayoutWeightModifier, parseInt(value.toString()));
+      modifierWithKey(this._modifiersWithKeys, LayoutWeightModifier.identity, LayoutWeightModifier, parseInt(value.toString()));
     }
     else {
-      modifier(this._modifiers, LayoutWeightModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, LayoutWeightModifier.identity, LayoutWeightModifier, undefined);
     }
     return this;
   }
@@ -2225,13 +2563,7 @@ class ArkComponent {
     return this;
   }
   borderStyle(value) {
-    let arkBorderStyle = new ArkBorderStyle();
-    if (arkBorderStyle.parseBorderStyle(value)) {
-      modifier(this._modifiers, BorderStyleModifier, arkBorderStyle);
-    }
-    else {
-      modifier(this._modifiers, BorderStyleModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, BorderStyleModifier.identity, BorderStyleModifier, value);
     return this;
   }
   borderWidth(value) {
@@ -2275,10 +2607,10 @@ class ArkComponent {
   }
   focusable(value) {
     if (typeof value === 'boolean') {
-      modifier(this._modifiers, FocusableModifier, value);
+      modifierWithKey(this._modifiersWithKeys, FocusableModifier.identity, FocusableModifier, value);
     }
     else {
-      modifier(this._modifiers, FocusableModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, FocusableModifier.identity, FocusableModifier, undefined);
     }
     return this;
   }
@@ -2290,37 +2622,37 @@ class ArkComponent {
   }
   tabIndex(index) {
     if (typeof index !== 'number') {
-      modifier(this._modifiers, TabIndexModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, TabIndexModifier.identity, TabIndexModifier, undefined);
     }
     else {
-      modifier(this._modifiers, TabIndexModifier, index);
+      modifierWithKey(this._modifiersWithKeys, TabIndexModifier.identity, TabIndexModifier, index);
     }
     return this;
   }
   defaultFocus(value) {
     if (typeof value === 'boolean') {
-      modifier(this._modifiers, DefaultFocusModifier, value);
+      modifierWithKey(this._modifiersWithKeys, DefaultFocusModifier.identity, DefaultFocusModifier, value);
     }
     else {
-      modifier(this._modifiers, DefaultFocusModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, DefaultFocusModifier.identity, DefaultFocusModifier, undefined);
     }
     return this;
   }
   groupDefaultFocus(value) {
     if (typeof value === 'boolean') {
-      modifier(this._modifiers, GroupDefaultFocusModifier, value);
+      modifierWithKey(this._modifiersWithKeys, GroupDefaultFocusModifier.identity, GroupDefaultFocusModifier, value);
     }
     else {
-      modifier(this._modifiers, GroupDefaultFocusModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, GroupDefaultFocusModifier.identity, GroupDefaultFocusModifier, undefined);
     }
     return this;
   }
   focusOnTouch(value) {
     if (typeof value === 'boolean') {
-      modifier(this._modifiers, FocusOnTouchModifier, value);
+      modifierWithKey(this._modifiersWithKeys, FocusOnTouchModifier.identity, FocusOnTouchModifier, value);
     }
     else {
-      modifier(this._modifiers, FocusOnTouchModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, FocusOnTouchModifier.identity, FocusOnTouchModifier, undefined);
     }
     return this;
   }
@@ -2342,49 +2674,49 @@ class ArkComponent {
   }
   blur(value) {
     if (!isNumber(value)) {
-      modifier(this._modifiers, BlurModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, BlurModifier.identity, BlurModifier, undefined);
     }
     else {
-      modifier(this._modifiers, BlurModifier, value);
+      modifierWithKey(this._modifiersWithKeys, BlurModifier.identity, BlurModifier, value);
     }
     return this;
   }
   linearGradientBlur(value, options) {
-    if (isUndefined(value) || isUndefined(options)) {
-      modifier(this._modifiers, LinearGradientBlurModifier, undefined);
+    if (isUndefined(value) || isNull(value) || isUndefined(options) || isNull(options)) {
+      modifierWithKey(this._modifiersWithKeys, LinearGradientBlurModifier.identity, LinearGradientBlurModifier, undefined);
       return this;
     }
     let arkLinearGradientBlur = new ArkLinearGradientBlur();
     arkLinearGradientBlur.blurRadius = value;
     arkLinearGradientBlur.fractionStops = options.fractionStops;
     arkLinearGradientBlur.direction = options.direction;
-    modifier(this._modifiers, LinearGradientBlurModifier, arkLinearGradientBlur);
+    modifierWithKey(this._modifiersWithKeys, LinearGradientBlurModifier.identity, LinearGradientBlurModifier, arkLinearGradientBlur);
     return this;
   }
   brightness(value) {
     if (!isNumber(value)) {
-      modifier(this._modifiers, BrightnessModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, BrightnessModifier.identity, BrightnessModifier, undefined);
     }
     else {
-      modifier(this._modifiers, BrightnessModifier, value);
+      modifierWithKey(this._modifiersWithKeys, BrightnessModifier.identity, BrightnessModifier, value);
     }
     return this;
   }
   contrast(value) {
     if (!isNumber(value)) {
-      modifier(this._modifiers, ContrastModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, ContrastModifier.identity, ContrastModifier, undefined);
     }
     else {
-      modifier(this._modifiers, ContrastModifier, value);
+      modifierWithKey(this._modifiersWithKeys, ContrastModifier.identity, ContrastModifier, value);
     }
     return this;
   }
   grayscale(value) {
     if (!isNumber(value)) {
-      modifier(this._modifiers, GrayscaleModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, GrayscaleModifier.identity, GrayscaleModifier, undefined);
     }
     else {
-      modifier(this._modifiers, GrayscaleModifier, value);
+      modifierWithKey(this._modifiersWithKeys, GrayscaleModifier.identity, GrayscaleModifier, value);
     }
     return this;
   }
@@ -2394,145 +2726,89 @@ class ArkComponent {
   }
   saturate(value) {
     if (!isNumber(value)) {
-      modifier(this._modifiers, SaturateModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, SaturateModifier.identity, SaturateModifier, undefined);
     }
     else {
-      modifier(this._modifiers, SaturateModifier, value);
+      modifierWithKey(this._modifiersWithKeys, SaturateModifier.identity, SaturateModifier, value);
     }
     return this;
   }
   sepia(value) {
     if (!isNumber(value)) {
-      modifier(this._modifiers, SepiaModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, SepiaModifier.identity, SepiaModifier, undefined);
     }
     else {
-      modifier(this._modifiers, SepiaModifier, value);
+      modifierWithKey(this._modifiersWithKeys, SepiaModifier.identity, SepiaModifier, value);
     }
     return this;
   }
   invert(value) {
     if (!isNumber(value)) {
-      modifier(this._modifiers, InvertModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, InvertModifier.identity, InvertModifier, undefined);
     }
     else {
-      modifier(this._modifiers, InvertModifier, value);
+      modifierWithKey(this._modifiersWithKeys, InvertModifier.identity, InvertModifier, value);
     }
     return this;
   }
   hueRotate(value) {
     if (!isNumber(value) && !isString(value)) {
-      modifier(this._modifiers, HueRotateModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, HueRotateModifier.identity, HueRotateModifier, undefined);
     }
     else {
-      modifier(this._modifiers, HueRotateModifier, value);
+      modifierWithKey(this._modifiersWithKeys, HueRotateModifier.identity, HueRotateModifier, value);
     }
     return this;
   }
   useEffect(value) {
-    modifier(this._modifiers, UseEffectModifier, value);
+    modifierWithKey(this._modifiersWithKeys, UseEffectModifier.identity, UseEffectModifier, value);
     return this;
   }
   backdropBlur(value) {
     if (!isNumber(value)) {
-      modifier(this._modifiers, BackdropBlurModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, BackdropBlurModifier.identity, BackdropBlurModifier, undefined);
     }
     else {
-      modifier(this._modifiers, BackdropBlurModifier, value);
+      modifierWithKey(this._modifiersWithKeys, BackdropBlurModifier.identity, BackdropBlurModifier, value);
     }
     return this;
   }
   renderGroup(value) {
-    modifier(this._modifiers, RenderGroupModifier, value);
+    modifierWithKey(this._modifiersWithKeys, RenderGroupModifier.identity, RenderGroupModifier, value);
     return this;
   }
   translate(value) {
-    let arkTranslate = new ArkTranslate();
-    if (isNumber(value === null || value === void 0 ? void 0 : value.x) || isString(value === null || value === void 0 ? void 0 : value.x)) {
-      arkTranslate.x = value.x;
-    }
-    if (isNumber(value === null || value === void 0 ? void 0 : value.y) || isString(value === null || value === void 0 ? void 0 : value.y)) {
-      arkTranslate.y = value.y;
-    }
-    if (isNumber(value === null || value === void 0 ? void 0 : value.z) || isString(value === null || value === void 0 ? void 0 : value.z)) {
-      arkTranslate.z = value.z;
-    }
-    modifier(this._modifiers, TranslateModifier, arkTranslate);
+    modifierWithKey(this._modifiersWithKeys, TranslateModifier.identity, TranslateModifier, value);
     return this;
   }
   scale(value) {
-    let arkScale = new ArkScale();
-    if (isNumber(value === null || value === void 0 ? void 0 : value.x)) {
-      arkScale.x = value === null || value === void 0 ? void 0 : value.x;
-    }
-    if (isNumber(value === null || value === void 0 ? void 0 : value.y)) {
-      arkScale.y = value === null || value === void 0 ? void 0 : value.y;
-    }
-    if (isNumber(value === null || value === void 0 ? void 0 : value.z)) {
-      arkScale.z = value === null || value === void 0 ? void 0 : value.z;
-    }
-    if (isNumber(value === null || value === void 0 ? void 0 : value.centerX) || isString(value === null || value === void 0 ? void 0 : value.centerX)) {
-      arkScale.centerX = value === null || value === void 0 ? void 0 : value.centerX;
-    }
-    if (isNumber(value === null || value === void 0 ? void 0 : value.centerY) || isString(value === null || value === void 0 ? void 0 : value.centerY)) {
-      arkScale.centerY = value === null || value === void 0 ? void 0 : value.centerY;
-    }
-    modifier(this._modifiers, ScaleModifier, arkScale);
+    modifierWithKey(this._modifiersWithKeys, ScaleModifier.identity, ScaleModifier, value);
     return this;
   }
   gridSpan(value) {
     if (isNumber(value)) {
-      modifier(this._modifiers, GridSpanModifier, value);
+      modifierWithKey(this._modifiersWithKeys, GridSpanModifier.identity, GridSpanModifier, value);
     }
     else {
-      modifier(this._modifiers, GridSpanModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, GridSpanModifier.identity, GridSpanModifier, undefined);
     }
     return this;
   }
   gridOffset(value) {
     if (isNumber(value)) {
-      modifier(this._modifiers, GridOffsetModifier, value);
+      modifierWithKey(this._modifiersWithKeys, GridOffsetModifier.identity, GridOffsetModifier, value);
     }
     else {
-      modifier(this._modifiers, GridOffsetModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, GridOffsetModifier.identity, GridOffsetModifier, undefined);
     }
     return this;
   }
   rotate(value) {
-    let arkRotate = new ArkRotate();
-    if (isNumber(value === null || value === void 0 ? void 0 : value.x)) {
-      arkRotate.x = value === null || value === void 0 ? void 0 : value.x;
-    }
-    if (isNumber(value === null || value === void 0 ? void 0 : value.y)) {
-      arkRotate.y = value === null || value === void 0 ? void 0 : value.y;
-    }
-    if (isNumber(value === null || value === void 0 ? void 0 : value.z)) {
-      arkRotate.z = value === null || value === void 0 ? void 0 : value.z;
-    }
-    if (isNumber(value === null || value === void 0 ? void 0 : value.angle) || isString(value === null || value === void 0 ? void 0 : value.angle)) {
-      arkRotate.angle = value === null || value === void 0 ? void 0 : value.angle;
-    }
-    if (isNumber(value === null || value === void 0 ? void 0 : value.centerX) || isString(value === null || value === void 0 ? void 0 : value.centerX)) {
-      arkRotate.centerX = value === null || value === void 0 ? void 0 : value.centerX;
-    }
-    if (isNumber(value === null || value === void 0 ? void 0 : value.centerY) || isString(value === null || value === void 0 ? void 0 : value.centerY)) {
-      arkRotate.centerY = value === null || value === void 0 ? void 0 : value.centerY;
-    }
-    if (isNumber(value === null || value === void 0 ? void 0 : value.centerZ) || isString(value === null || value === void 0 ? void 0 : value.centerZ)) {
-      arkRotate.centerZ = value === null || value === void 0 ? void 0 : value.centerZ;
-    }
-    if (isNumber(value === null || value === void 0 ? void 0 : value.perspective)) {
-      arkRotate.perspective = value === null || value === void 0 ? void 0 : value.perspective;
-    }
-    modifier(this._modifiers, RotateModifier, arkRotate);
+    modifierWithKey(this._modifiersWithKeys, RotateModifier.identity, RotateModifier, value);
     return this;
   }
   transform(value) {
-    if (isUndefined(value)) {
-      modifier(this._modifiers, TransformModifier, undefined);
-    }
-    else {
-      modifier(this._modifiers, TransformModifier, new ArkTransformMatrix(value['matrix4x4']));
-    }
+    modifierWithKey(this._modifiersWithKeys, TransformModifier.identity, TransformModifier, value);
     return this;
   }
   onAppear(event) {
@@ -2574,7 +2850,7 @@ class ArkComponent {
       if (typeof (value) === 'number') {
         zIndex = value;
       }
-      modifier(this._modifiers, ZIndexModifier, zIndex);
+      modifierWithKey(this._modifiersWithKeys, ZIndexModifier.identity, ZIndexModifier, zIndex);
     }
     return this;
   }
@@ -2595,10 +2871,10 @@ class ArkComponent {
   }
   align(value) {
     if (isNumber(value)) {
-      modifier(this._modifiers, AlignModifier, value);
+      modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, value);
     }
     else {
-      modifier(this._modifiers, AlignModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, AlignModifier.identity, AlignModifier, undefined);
     }
     return this;
   }
@@ -2616,10 +2892,10 @@ class ArkComponent {
   }
   enabled(value) {
     if (typeof value === 'boolean') {
-      modifier(this._modifiers, EnabledModifier, value);
+      modifierWithKey(this._modifiersWithKeys, EnabledModifier.identity, EnabledModifier, value);
     }
     else {
-      modifier(this._modifiers, EnabledModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, EnabledModifier.identity, EnabledModifier, undefined);
     }
     return this;
   }
@@ -2628,7 +2904,7 @@ class ArkComponent {
   }
   alignRules(value) {
     if (!isObject(value) || JSON.stringify(value) === '{}') {
-      modifier(this._modifiers, AlignRulesModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, AlignRulesModifier.identity, AlignRulesModifier, undefined);
       return this;
     }
     let keys = ['left', 'middle', 'right', 'top', 'center', 'bottom'];
@@ -2697,7 +2973,7 @@ class ArkComponent {
           break;
       }
     }
-    modifier(this._modifiers, AlignRulesModifier, arkValue);
+    modifierWithKey(this._modifiersWithKeys, AlignRulesModifier.identity, AlignRulesModifier, arkValue);
     return this;
   }
   aspectRatio(value) {
@@ -2705,15 +2981,7 @@ class ArkComponent {
     return this;
   }
   clickEffect(value) {
-    if (value) {
-      let arkClickEffect = new ArkClickEffect();
-      arkClickEffect.level = value.level;
-      arkClickEffect.scale = value.scale;
-      modifier(this._modifiers, ClickEffectModifier, arkClickEffect);
-    }
-    else {
-      modifier(this._modifiers, ClickEffectModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ClickEffectModifier.identity, ClickEffectModifier, value);
     return this;
   }
   onDragStart(event) {
@@ -2735,17 +3003,15 @@ class ArkComponent {
     throw new Error('Method not implemented.');
   }
   allowDrop(value) {
-    let allowDrop = new ArkAllowDrop();
-    allowDrop.allowDropArray = value;
-    modifier(this._modifiers, AllowDropModifier, allowDrop);
+    modifierWithKey(this._modifiersWithKeys, AllowDropModifier.identity, AllowDropModifier, value);
     return this;
   }
   draggable(value) {
     if (typeof value === 'boolean') {
-      modifier(this._modifiers, DraggableModifier, value);
+      modifierWithKey(this._modifiersWithKeys, DraggableModifier.identity, DraggableModifier, value);
     }
     else {
-      modifier(this._modifiers, DraggableModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, DraggableModifier.identity, DraggableModifier, undefined);
     }
     return this;
   }
@@ -2776,24 +3042,7 @@ class ArkComponent {
     return this;
   }
   motionPath(value) {
-    let arkMotionPath = new ArkMotionPath();
-    arkMotionPath.path = '';
-    arkMotionPath.rotatable = false;
-    arkMotionPath.from = 0.0;
-    arkMotionPath.to = 1.0;
-    if (value) {
-      if (typeof value.path === 'string') {
-        arkMotionPath.path = value.path;
-      }
-      if (typeof value.rotatable === 'boolean') {
-        arkMotionPath.rotatable = value.rotatable;
-      }
-      if (typeof value.from === 'number' && typeof value.to === 'number') {
-        arkMotionPath.from = value.from;
-        arkMotionPath.to = value.to;
-      }
-    }
-    modifier(this._modifiers, MotionPathModifier, arkMotionPath);
+    modifierWithKey(this._modifiersWithKeys, MotionPathModifier.identity, MotionPathModifier, value);
     return this;
   }
   shadow(value) {
@@ -2806,25 +3055,25 @@ class ArkComponent {
   }
   key(value) {
     if (typeof value === 'string') {
-      modifier(this._modifiers, KeyModifier, value);
+      modifierWithKey(this._modifiersWithKeys, KeyModifier.identity, KeyModifier, value);
     }
     else {
-      modifier(this._modifiers, KeyModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, KeyModifier.identity, KeyModifier, undefined);
     }
     return this;
   }
   id(value) {
     if (typeof value === 'string') {
-      modifier(this._modifiers, IDModifier, value);
+      modifierWithKey(this._modifiersWithKeys, IdModifier.identity, IdModifier, value);
     }
     else {
-      modifier(this._modifiers, IDModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, IdModifier.identity, IdModifier, undefined);
     }
     return this;
   }
   geometryTransition(id) {
     if (isString(id)) {
-      modifier(this._modifiers, GeometryTransitionModifier, id);
+      modifierWithKey(this._modifiersWithKeys, GeometryTransitionModifier.identity, GeometryTransitionModifier, id);
     }
     return this;
   }
@@ -2855,10 +3104,10 @@ class ArkComponent {
   }
   restoreId(value) {
     if (typeof value !== 'number') {
-      modifier(this._modifiers, RestoreIdModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, RestoreIdModifier.identity, RestoreIdModifier, undefined);
     }
     else {
-      modifier(this._modifiers, RestoreIdModifier, value);
+      modifierWithKey(this._modifiersWithKeys, RestoreIdModifier.identity, RestoreIdModifier, value);
     }
     return this;
   }
@@ -2866,7 +3115,7 @@ class ArkComponent {
     throw new Error('Method not implemented.');
   }
   sphericalEffect(value) {
-    modifier(this._modifiers, SphericalEffectModifier, value);
+    modifierWithKey(this._modifiersWithKeys, SphericalEffectModifier.identity, SphericalEffectModifier, value);
     return this;
   }
   lightUpEffect(value) {
@@ -2881,60 +3130,54 @@ class ArkComponent {
     let keyboardShortCut = new ArkKeyBoardShortCut();
     keyboardShortCut.value = value;
     keyboardShortCut.keys = keys;
-    modifier(this._modifiers, KeyBoardShortCutModifier, keyboardShortCut);
+    modifierWithKey(this._modifiersWithKeys, KeyBoardShortCutModifier.identity, KeyBoardShortCutModifier, keyboardShortCut);
     return this;
   }
   accessibilityGroup(value) {
     if (typeof value === 'boolean') {
-      modifier(this._modifiers, AccessibilityGroupModifier, value);
+      modifierWithKey(this._modifiersWithKeys, AccessibilityGroupModifier.identity, AccessibilityGroupModifier, value);
     }
     else {
-      modifier(this._modifiers, AccessibilityGroupModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, AccessibilityGroupModifier.identity, AccessibilityGroupModifier, undefined);
     }
     return this;
   }
   accessibilityText(value) {
     if (typeof value === 'string') {
-      modifier(this._modifiers, AccessibilityTextModifier, value);
+      modifierWithKey(this._modifiersWithKeys, AccessibilityTextModifier.identity, AccessibilityTextModifier, value);
     }
     else {
-      modifier(this._modifiers, AccessibilityTextModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, AccessibilityTextModifier.identity, AccessibilityTextModifier, undefined);
     }
     return this;
   }
   accessibilityDescription(value) {
     if (typeof value !== 'string') {
-      modifier(this._modifiers, AccessibilityDescriptionModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, AccessibilityDescriptionModifier.identity, AccessibilityDescriptionModifier, undefined);
     }
     else {
-      modifier(this._modifiers, AccessibilityDescriptionModifier, value);
+      modifierWithKey(this._modifiersWithKeys, AccessibilityDescriptionModifier.identity, AccessibilityDescriptionModifier, value);
     }
     return this;
   }
   accessibilityLevel(value) {
     if (typeof value !== 'string') {
-      modifier(this._modifiers, AccessibilityLevelModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, AccessibilityLevelModifier.identity, AccessibilityLevelModifier, undefined);
     }
     else {
-      modifier(this._modifiers, AccessibilityLevelModifier, value);
+      modifierWithKey(this._modifiersWithKeys, AccessibilityLevelModifier.identity, AccessibilityLevelModifier, value);
     }
     return this;
   }
   obscured(reasons) {
-    let arkObscured = new ArkObscured();
-    if (arkObscured.parseReasonsArray(reasons)) {
-      modifier(this._modifiers, ObscuredModifier, arkObscured);
-    }
-    else {
-      modifier(this._modifiers, ObscuredModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ObscuredModifier.identity, ObscuredModifier, reasons);
     return this;
   }
   reuseId(id) {
     throw new Error('Method not implemented.');
   }
   renderFit(fitMode) {
-    modifier(this._modifiers, RenderFitModifier, fitMode);
+    modifierWithKey(this._modifiersWithKeys, RenderFitModifier.identity, RenderFitModifier, fitMode);
     return this;
   }
   attributeModifier(modifier) {
@@ -2950,6 +3193,7 @@ const isFloat = (val) => Number.isFinite(val) && !Number.isInteger(val);
 const isInteger = (val) => Number.isInteger(val);
 const isNonEmptyMap = (val) => val instanceof Map && val.size > 0;
 const isTruthyString = (val) => typeof val === 'string' && val.trim() !== '';
+
 /// <reference path='./import.ts' />
 class BlankColorModifier extends ModifierWithKey {
   constructor(value) {
@@ -2957,19 +3201,14 @@ class BlankColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().blank.resetColor(node);
+      getUINativeModule().blank.resetColor(node);
     }
     else {
-      GetUINativeModule().blank.setColor(node, this.value);
+      getUINativeModule().blank.setColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 BlankColorModifier.identity = Symbol('blankColor');
@@ -2985,13 +3224,14 @@ class ArkBlankComponent extends ArkComponent {
 // @ts-ignore
 globalThis.Blank.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkBlankComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ColumnAlignItemsModifier extends ModifierWithKey {
   constructor(value) {
@@ -2999,10 +3239,10 @@ class ColumnAlignItemsModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().column.resetAlignItems(node);
+      getUINativeModule().column.resetAlignItems(node);
     }
     else {
-      GetUINativeModule().column.setAlignItems(node, this.value);
+      getUINativeModule().column.setAlignItems(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -3016,10 +3256,10 @@ class ColumnJustifyContentModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().column.resetJustifyContent(node);
+      getUINativeModule().column.resetJustifyContent(node);
     }
     else {
-      GetUINativeModule().column.setJustifyContent(node, this.value);
+      getUINativeModule().column.setJustifyContent(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -3049,13 +3289,14 @@ class ArkColumnComponent extends ArkComponent {
 // @ts-ignore
 globalThis.Column.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkColumnComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ColumnSplitDividerModifier extends ModifierWithKey {
   constructor(value) {
@@ -3063,10 +3304,10 @@ class ColumnSplitDividerModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().columnSplit.resetDivider(node);
+      getUINativeModule().columnSplit.resetDivider(node);
     }
     else {
-      GetUINativeModule().columnSplit.setDivider(node, this.value.startMargin, this.value.endMargin);
+      getUINativeModule().columnSplit.setDivider(node, this.value.startMargin, this.value.endMargin);
     }
   }
   checkObjectDiff() {
@@ -3081,10 +3322,10 @@ class ColumnSplitResizeableModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().columnSplit.resetResizeable(node);
+      getUINativeModule().columnSplit.resetResizeable(node);
     }
     else {
-      GetUINativeModule().columnSplit.setResizeable(node, this.value);
+      getUINativeModule().columnSplit.setResizeable(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -3111,13 +3352,14 @@ class ArkColumnSplitComponent extends ArkComponent {
 // @ts-ignore
 globalThis.ColumnSplit.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkColumnSplitComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class DividerVerticalModifier extends ModifierWithKey {
   constructor(value) {
@@ -3125,10 +3367,10 @@ class DividerVerticalModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().divider.resetVertical(node);
+      getUINativeModule().divider.resetVertical(node);
     }
     else {
-      GetUINativeModule().divider.setVertical(node, this.value);
+      getUINativeModule().divider.setVertical(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -3142,10 +3384,10 @@ class DividerLineCapModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().divider.resetLineCap(node);
+      getUINativeModule().divider.resetLineCap(node);
     }
     else {
-      GetUINativeModule().divider.setLineCap(node, this.value);
+      getUINativeModule().divider.setLineCap(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -3159,10 +3401,10 @@ class DividerColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().divider.resetColor(node);
+      getUINativeModule().divider.resetColor(node);
     }
     else {
-      GetUINativeModule().divider.setColor(node, this.value);
+      getUINativeModule().divider.setColor(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -3176,10 +3418,10 @@ class DividerStrokeWidthModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().divider.resetStrokeWidth(node);
+      getUINativeModule().divider.resetStrokeWidth(node);
     }
     else {
-      GetUINativeModule().divider.setStrokeWidth(node, this.value);
+      getUINativeModule().divider.setStrokeWidth(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -3211,13 +3453,14 @@ class ArkDividerComponent extends ArkComponent {
 // @ts-ignore
 globalThis.Divider.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkDividerComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkFlexComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -3233,13 +3476,14 @@ class ArkFlexComponent extends ArkComponent {
 // @ts-ignore
 globalThis.Flex.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkFlexComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class GridRowAlignItemsModifier extends ModifierWithKey {
   constructor(value) {
@@ -3247,10 +3491,10 @@ class GridRowAlignItemsModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().gridRow.resetAlignItems(node);
+      getUINativeModule().gridRow.resetAlignItems(node);
     }
     else {
-      GetUINativeModule().gridRow.setAlignItems(node, this.value);
+      getUINativeModule().gridRow.setAlignItems(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -3276,13 +3520,14 @@ class ArkGridRowComponent extends ArkComponent {
 // @ts-ignore
 globalThis.GridRow.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkGridRowComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkGridComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -3416,10 +3661,10 @@ class GridColumnsTemplateModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().grid.resetColumnsTemplate(node);
+      getUINativeModule().grid.resetColumnsTemplate(node);
     }
     else {
-      GetUINativeModule().grid.setColumnsTemplate(node, this.value);
+      getUINativeModule().grid.setColumnsTemplate(node, this.value);
     }
   }
 }
@@ -3430,10 +3675,10 @@ class GridRowsTemplateModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().grid.resetRowsTemplate(node);
+      getUINativeModule().grid.resetRowsTemplate(node);
     }
     else {
-      GetUINativeModule().grid.setRowsTemplate(node, this.value);
+      getUINativeModule().grid.setRowsTemplate(node, this.value);
     }
   }
 }
@@ -3444,22 +3689,14 @@ class GridColumnsGapModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().grid.resetColumnsGap(node);
+      getUINativeModule().grid.resetColumnsGap(node);
     }
     else {
-      GetUINativeModule().grid.setColumnsGap(node, this.value);
+      getUINativeModule().grid.setColumnsGap(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else if (!isResource(this.stageValue) && !isResource(this.value)) {
-      return !(this.stageValue === this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 GridColumnsGapModifier.identity = Symbol('gridColumnsGap');
@@ -3469,22 +3706,14 @@ class GridRowsGapModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().grid.resetRowsGap(node);
+      getUINativeModule().grid.resetRowsGap(node);
     }
     else {
-      GetUINativeModule().grid.setRowsGap(node, this.value);
+      getUINativeModule().grid.setRowsGap(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else if (!isResource(this.stageValue) && !isResource(this.value)) {
-      return !(this.stageValue === this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 GridRowsGapModifier.identity = Symbol('gridRowsGap');
@@ -3494,10 +3723,10 @@ class GridScrollBarWidthModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().grid.resetScrollBarWidth(node);
+      getUINativeModule().grid.resetScrollBarWidth(node);
     }
     else {
-      GetUINativeModule().grid.setScrollBarWidth(node, this.value);
+      getUINativeModule().grid.setScrollBarWidth(node, this.value);
     }
   }
 }
@@ -3508,10 +3737,10 @@ class GridScrollBarModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().grid.resetScrollBar(node);
+      getUINativeModule().grid.resetScrollBar(node);
     }
     else {
-      GetUINativeModule().grid.setScrollBar(node, this.value);
+      getUINativeModule().grid.setScrollBar(node, this.value);
     }
   }
 }
@@ -3522,10 +3751,10 @@ class GridScrollBarColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().grid.resetScrollBarColor(node);
+      getUINativeModule().grid.resetScrollBarColor(node);
     }
     else {
-      GetUINativeModule().grid.setScrollBarColor(node, this.value);
+      getUINativeModule().grid.setScrollBarColor(node, this.value);
     }
   }
 }
@@ -3536,10 +3765,10 @@ class GridEditModeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().grid.resetEditMode(node);
+      getUINativeModule().grid.resetEditMode(node);
     }
     else {
-      GetUINativeModule().grid.setEditMode(node, this.value);
+      getUINativeModule().grid.setEditMode(node, this.value);
     }
   }
 }
@@ -3550,10 +3779,10 @@ class GridCachedCountModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().grid.resetCachedCount(node);
+      getUINativeModule().grid.resetCachedCount(node);
     }
     else {
-      GetUINativeModule().grid.setCachedCount(node, this.value);
+      getUINativeModule().grid.setCachedCount(node, this.value);
     }
   }
 }
@@ -3564,10 +3793,10 @@ class GridMultiSelectableModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().grid.resetMultiSelectable(node);
+      getUINativeModule().grid.resetMultiSelectable(node);
     }
     else {
-      GetUINativeModule().grid.setMultiSelectable(node, this.value);
+      getUINativeModule().grid.setMultiSelectable(node, this.value);
     }
   }
 }
@@ -3579,10 +3808,12 @@ class GridEdgeEffectModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b;
     if (reset) {
-      GetUINativeModule().grid.resetEdgeEffect(node);
+      getUINativeModule().grid.resetEdgeEffect(node);
     }
     else {
-      GetUINativeModule().grid.setEdgeEffect(node, (_a = this.value) === null || _a === void 0 ? void 0 : _a.value, (_b = this.value.options) === null || _b === void 0 ? void 0 : _b.alwaysEnabled);
+      getUINativeModule().grid.setEdgeEffect(node, (_a = this.value) === null ||
+      _a === void 0 ? void 0 : _a.value, (_b = this.value.options) === null ||
+      _b === void 0 ? void 0 : _b.alwaysEnabled);
     }
   }
   checkObjectDiff() {
@@ -3598,10 +3829,12 @@ class GridNestedScrollModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b;
     if (reset) {
-      GetUINativeModule().grid.resetNestedScroll(node);
+      getUINativeModule().grid.resetNestedScroll(node);
     }
     else {
-      GetUINativeModule().grid.setNestedScroll(node, (_a = this.value) === null || _a === void 0 ? void 0 : _a.scrollForward, (_b = this.value) === null || _b === void 0 ? void 0 : _b.scrollBackward);
+      getUINativeModule().grid.setNestedScroll(node, (_a = this.value) === null ||
+      _a === void 0 ? void 0 : _a.scrollForward, (_b = this.value) === null ||
+      _b === void 0 ? void 0 : _b.scrollBackward);
     }
   }
   checkObjectDiff() {
@@ -3616,10 +3849,10 @@ class GridEnableScrollModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().grid.resetEnableScroll(node);
+      getUINativeModule().grid.resetEnableScroll(node);
     }
     else {
-      GetUINativeModule().grid.setEnableScroll(node, this.value);
+      getUINativeModule().grid.setEnableScroll(node, this.value);
     }
   }
 }
@@ -3630,10 +3863,10 @@ class GridFrictionModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().grid.resetFriction(node);
+      getUINativeModule().grid.resetFriction(node);
     }
     else {
-      GetUINativeModule().grid.setFriction(node, this.value);
+      getUINativeModule().grid.setFriction(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -3647,10 +3880,10 @@ class GridMaxCountModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().grid.resetMaxCount(node);
+      getUINativeModule().grid.resetMaxCount(node);
     }
     else {
-      GetUINativeModule().grid.setMaxCount(node, this.value);
+      getUINativeModule().grid.setMaxCount(node, this.value);
     }
   }
 }
@@ -3661,10 +3894,10 @@ class GridMinCountModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().grid.resetMinCount(node);
+      getUINativeModule().grid.resetMinCount(node);
     }
     else {
-      GetUINativeModule().grid.setMinCount(node, this.value);
+      getUINativeModule().grid.setMinCount(node, this.value);
     }
   }
 }
@@ -3675,10 +3908,10 @@ class GridCellLengthModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().grid.resetCellLength(node);
+      getUINativeModule().grid.resetCellLength(node);
     }
     else {
-      GetUINativeModule().grid.setCellLength(node, this.value);
+      getUINativeModule().grid.setCellLength(node, this.value);
     }
   }
 }
@@ -3689,10 +3922,10 @@ class GridLayoutDirectionModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().grid.resetLayoutDirection(node);
+      getUINativeModule().grid.resetLayoutDirection(node);
     }
     else {
-      GetUINativeModule().grid.setLayoutDirection(node, this.value);
+      getUINativeModule().grid.setLayoutDirection(node, this.value);
     }
   }
 }
@@ -3703,10 +3936,10 @@ class GridSupportAnimationModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().grid.resetSupportAnimation(node);
+      getUINativeModule().grid.resetSupportAnimation(node);
     }
     else {
-      GetUINativeModule().grid.setSupportAnimation(node, this.value);
+      getUINativeModule().grid.setSupportAnimation(node, this.value);
     }
   }
 }
@@ -3714,13 +3947,14 @@ GridSupportAnimationModifier.identity = Symbol('gridSupportAnimation');
 // @ts-ignore
 globalThis.Grid.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkGridComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class GridColSpanModifier extends ModifierWithKey {
   constructor(value) {
@@ -3728,14 +3962,14 @@ class GridColSpanModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().gridCol.resetSpan(node);
+      getUINativeModule().gridCol.resetSpan(node);
     }
     else {
       if (isNumber(this.value)) {
-        GetUINativeModule().gridCol.setSpan(node, this.value, this.value, this.value, this.value, this.value, this.value);
+        getUINativeModule().gridCol.setSpan(node, this.value, this.value, this.value, this.value, this.value, this.value);
       }
       else {
-        GetUINativeModule().gridCol.setSpan(node, this.value.xs, this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
+        getUINativeModule().gridCol.setSpan(node, this.value.xs, this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
       }
     }
   }
@@ -3763,14 +3997,14 @@ class GridColOffsetModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().gridCol.resetGridColOffset(node);
+      getUINativeModule().gridCol.resetGridColOffset(node);
     }
     else {
       if (isNumber(this.value)) {
-        GetUINativeModule().gridCol.setGridColOffset(node, this.value, this.value, this.value, this.value, this.value, this.value);
+        getUINativeModule().gridCol.setGridColOffset(node, this.value, this.value, this.value, this.value, this.value, this.value);
       }
       else {
-        GetUINativeModule().gridCol.setGridColOffset(node, this.value.xs, this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
+        getUINativeModule().gridCol.setGridColOffset(node, this.value.xs, this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
       }
     }
   }
@@ -3798,14 +4032,14 @@ class GridColOrderModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().gridCol.resetOrder(node);
+      getUINativeModule().gridCol.resetOrder(node);
     }
     else {
       if (isNumber(this.value)) {
-        GetUINativeModule().gridCol.setOrder(node, this.value, this.value, this.value, this.value, this.value, this.value);
+        getUINativeModule().gridCol.setOrder(node, this.value, this.value, this.value, this.value, this.value, this.value);
       }
       else {
-        GetUINativeModule().gridCol.setOrder(node, this.value.xs, this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
+        getUINativeModule().gridCol.setOrder(node, this.value.xs, this.value.sm, this.value.md, this.value.lg, this.value.xl, this.value.xxl);
       }
     }
   }
@@ -3847,13 +4081,14 @@ class ArkGridColComponent extends ArkComponent {
 // @ts-ignore
 globalThis.GridCol.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkGridColComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ImageColorFilterModifier extends ModifierWithKey {
   constructor(value) {
@@ -3861,10 +4096,10 @@ class ImageColorFilterModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().image.resetColorFilter(node);
+      getUINativeModule().image.resetColorFilter(node);
     }
     else {
-      GetUINativeModule().image.setColorFilter(node, this.value);
+      getUINativeModule().image.setColorFilter(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -3878,10 +4113,10 @@ class ImageFillColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().image.resetFillColor(node);
+      getUINativeModule().image.resetFillColor(node);
     }
     else {
-      GetUINativeModule().image.setFillColor(node, this.value);
+      getUINativeModule().image.setFillColor(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -3895,10 +4130,10 @@ class ImageAltModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().image.resetAlt(node);
+      getUINativeModule().image.resetAlt(node);
     }
     else {
-      GetUINativeModule().image.setAlt(node, this.value);
+      getUINativeModule().image.setAlt(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -3912,10 +4147,10 @@ class ImageCopyOptionModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().image.resetCopyOption(node);
+      getUINativeModule().image.resetCopyOption(node);
     }
     else {
-      GetUINativeModule().image.setCopyOption(node, this.value);
+      getUINativeModule().image.setCopyOption(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -3929,10 +4164,10 @@ class ImageAutoResizeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().image.resetAutoResize(node);
+      getUINativeModule().image.resetAutoResize(node);
     }
     else {
-      GetUINativeModule().image.setAutoResize(node, this.value);
+      getUINativeModule().image.setAutoResize(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -3946,10 +4181,10 @@ class ImageFitOriginalSizeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().image.resetFitOriginalSize(node);
+      getUINativeModule().image.resetFitOriginalSize(node);
     }
     else {
-      GetUINativeModule().image.setFitOriginalSize(node, this.value);
+      getUINativeModule().image.setFitOriginalSize(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -3963,10 +4198,10 @@ class ImageDraggableModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().image.resetDraggable(node);
+      getUINativeModule().image.resetDraggable(node);
     }
     else {
-      GetUINativeModule().image.setDraggable(node, this.value);
+      getUINativeModule().image.setDraggable(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -3980,10 +4215,10 @@ class ImageInterpolationModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().image.resetImageInterpolation(node);
+      getUINativeModule().image.resetImageInterpolation(node);
     }
     else {
-      GetUINativeModule().image.setImageInterpolation(node, this.value);
+      getUINativeModule().image.setImageInterpolation(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -3997,10 +4232,10 @@ class ImageSourceSizeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().image.resetSourceSize(node);
+      getUINativeModule().image.resetSourceSize(node);
     }
     else {
-      GetUINativeModule().image.setSourceSize(node, this.value.width, this.value.height);
+      getUINativeModule().image.setSourceSize(node, this.value.width, this.value.height);
     }
   }
   checkObjectDiff() {
@@ -4015,10 +4250,10 @@ class ImageMatchTextDirectionModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().image.resetMatchTextDirection(node);
+      getUINativeModule().image.resetMatchTextDirection(node);
     }
     else {
-      GetUINativeModule().image.setMatchTextDirection(node, this.value);
+      getUINativeModule().image.setMatchTextDirection(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -4032,10 +4267,10 @@ class ImageObjectRepeatModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().image.resetObjectRepeat(node);
+      getUINativeModule().image.resetObjectRepeat(node);
     }
     else {
-      GetUINativeModule().image.setObjectRepeat(node, this.value);
+      getUINativeModule().image.setObjectRepeat(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -4049,10 +4284,10 @@ class ImageRenderModeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().image.resetRenderMode(node);
+      getUINativeModule().image.resetRenderMode(node);
     }
     else {
-      GetUINativeModule().image.setRenderMode(node, this.value);
+      getUINativeModule().image.setRenderMode(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -4066,10 +4301,10 @@ class ImageSyncLoadModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().image.resetSyncLoad(node);
+      getUINativeModule().image.resetSyncLoad(node);
     }
     else {
-      GetUINativeModule().image.setSyncLoad(node, this.value);
+      getUINativeModule().image.setSyncLoad(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -4083,10 +4318,10 @@ class ImageObjectFitModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().image.resetObjectFit(node);
+      getUINativeModule().image.resetObjectFit(node);
     }
     else {
-      GetUINativeModule().image.setObjectFit(node, this.value);
+      getUINativeModule().image.setObjectFit(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -4100,21 +4335,22 @@ class ImageBorderRadiusModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().image.resetBorderRadius(node);
+      getUINativeModule().image.resetBorderRadius(node);
     }
     else {
       if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
-        GetUINativeModule().image.setBorderRadius(node, this.value, this.value, this.value, this.value);
+        getUINativeModule().image.setBorderRadius(node, this.value, this.value, this.value, this.value);
       }
       else {
-        GetUINativeModule().image.setBorderRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
+        getUINativeModule().image.setBorderRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
       }
     }
   }
   checkObjectDiff() {
     if (isResource(this.stageValue) && isResource(this.value)) {
       return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+    }
+    else if (!isResource(this.stageValue) && !isResource(this.value)) {
       return !(this.stageValue.topLeft === this.value.topLeft &&
         this.stageValue.topRight === this.value.topRight &&
         this.stageValue.bottomLeft === this.value.bottomLeft &&
@@ -4206,13 +4442,14 @@ class ArkImageComponent extends ArkComponent {
 // @ts-ignore
 globalThis.Image.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkImageComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ImageAnimatorImagesModifier extends ModifierWithKey {
   constructor(value) {
@@ -4220,15 +4457,17 @@ class ImageAnimatorImagesModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().imageAnimator.resetImages(node);
+      getUINativeModule().imageAnimator.resetImages(node);
     }
     else {
       let arkImageFrame = this.convertImageFrames(this.value);
       if (!arkImageFrame) {
-        GetUINativeModule().imageAnimator.resetImages(node);
+        getUINativeModule().imageAnimator.resetImages(node);
       }
       else {
-        GetUINativeModule().imageAnimator.setImages(node, arkImageFrame.arrSrc, arkImageFrame.arrWidth, arkImageFrame.arrHeight, arkImageFrame.arrTop, arkImageFrame.arrLeft, arkImageFrame.arrDuration, arkImageFrame.arrSrc.length);
+        getUINativeModule().imageAnimator.setImages(node, arkImageFrame.arrSrc,
+          arkImageFrame.arrWidth, arkImageFrame.arrHeight, arkImageFrame.arrTop,
+          arkImageFrame.arrLeft, arkImageFrame.arrDuration, arkImageFrame.arrSrc.length);
       }
     }
   }
@@ -4297,10 +4536,10 @@ class ImageAnimatorDurationModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().imageAnimator.resetDuration(node);
+      getUINativeModule().imageAnimator.resetDuration(node);
     }
     else {
-      GetUINativeModule().imageAnimator.setDuration(node, this.value);
+      getUINativeModule().imageAnimator.setDuration(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -4314,10 +4553,10 @@ class ImageAnimatorReverseModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().imageAnimator.resetReverse(node);
+      getUINativeModule().imageAnimator.resetReverse(node);
     }
     else {
-      GetUINativeModule().imageAnimator.setReverse(node, this.value);
+      getUINativeModule().imageAnimator.setReverse(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -4331,10 +4570,10 @@ class ImageAnimatorStateModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().imageAnimator.resetState(node);
+      getUINativeModule().imageAnimator.resetState(node);
     }
     else {
-      GetUINativeModule().imageAnimator.setState(node, this.value);
+      getUINativeModule().imageAnimator.setState(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -4348,10 +4587,10 @@ class ImageAnimatorFixedSizeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().imageAnimator.resetFixedSize(node);
+      getUINativeModule().imageAnimator.resetFixedSize(node);
     }
     else {
-      GetUINativeModule().imageAnimator.setFixedSize(node, this.value);
+      getUINativeModule().imageAnimator.setFixedSize(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -4365,10 +4604,10 @@ class ImageAnimatorFillModeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().imageAnimator.resetFillMode(node);
+      getUINativeModule().imageAnimator.resetFillMode(node);
     }
     else {
-      GetUINativeModule().imageAnimator.setFillMode(node, this.value);
+      getUINativeModule().imageAnimator.setFillMode(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -4382,10 +4621,10 @@ class ImageAnimatorIterationsModeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().imageAnimator.resetIterations(node);
+      getUINativeModule().imageAnimator.resetIterations(node);
     }
     else {
-      GetUINativeModule().imageAnimator.setIterations(node, this.value);
+      getUINativeModule().imageAnimator.setIterations(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -4450,13 +4689,14 @@ class ArkImageAnimatorComponent extends ArkComponent {
 // @ts-ignore
 globalThis.ImageAnimator.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkImageAnimatorComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ImageSpanObjectFitModifier extends ModifierWithKey {
   constructor(value) {
@@ -4464,10 +4704,10 @@ class ImageSpanObjectFitModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().imageSpan.resetObjectFit(node);
+      getUINativeModule().imageSpan.resetObjectFit(node);
     }
     else {
-      GetUINativeModule().imageSpan.setObjectFit(node, this.value);
+      getUINativeModule().imageSpan.setObjectFit(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -4481,10 +4721,10 @@ class ImageSpanVerticalAlignModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().imageSpan.resetVerticalAlign(node);
+      getUINativeModule().imageSpan.resetVerticalAlign(node);
     }
     else {
-      GetUINativeModule().imageSpan.setVerticalAlign(node, this.value);
+      getUINativeModule().imageSpan.setVerticalAlign(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -4508,13 +4748,14 @@ class ArkImageSpanComponent extends ArkComponent {
 // @ts-ignore
 globalThis.ImageSpan.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkImageSpanComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class PatternLockActiveColorModifier extends ModifierWithKey {
   constructor(value) {
@@ -4522,10 +4763,10 @@ class PatternLockActiveColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().patternLock.resetActiveColor(node);
+      getUINativeModule().patternLock.resetActiveColor(node);
     }
     else {
-      GetUINativeModule().patternLock.setActiveColor(node, this.value);
+      getUINativeModule().patternLock.setActiveColor(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -4539,10 +4780,10 @@ class PatternLockSelectedColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().patternLock.resetSelectedColor(node);
+      getUINativeModule().patternLock.resetSelectedColor(node);
     }
     else {
-      GetUINativeModule().patternLock.setSelectedColor(node, this.value);
+      getUINativeModule().patternLock.setSelectedColor(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -4556,10 +4797,10 @@ class PatternLockPathColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().patternLock.resetPathColor(node);
+      getUINativeModule().patternLock.resetPathColor(node);
     }
     else {
-      GetUINativeModule().patternLock.setPathColor(node, this.value);
+      getUINativeModule().patternLock.setPathColor(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -4573,10 +4814,10 @@ class PatternLockRegularColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().patternLock.resetRegularColor(node);
+      getUINativeModule().patternLock.resetRegularColor(node);
     }
     else {
-      GetUINativeModule().patternLock.setRegularColor(node, this.value);
+      getUINativeModule().patternLock.setRegularColor(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -4590,10 +4831,10 @@ class PatternLockSideLengthModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().patternLock.resetSideLength(node);
+      getUINativeModule().patternLock.resetSideLength(node);
     }
     else {
-      GetUINativeModule().patternLock.setSideLength(node, this.value);
+      getUINativeModule().patternLock.setSideLength(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -4607,10 +4848,10 @@ class PatternLockPathStrokeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().patternLock.resetPathStrokeWidth(node);
+      getUINativeModule().patternLock.resetPathStrokeWidth(node);
     }
     else {
-      GetUINativeModule().patternLock.setPathStrokeWidth(node, this.value);
+      getUINativeModule().patternLock.setPathStrokeWidth(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -4624,10 +4865,10 @@ class PatternLockCircleRadiusModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().patternLock.resetCircleRadius(node);
+      getUINativeModule().patternLock.resetCircleRadius(node);
     }
     else {
-      GetUINativeModule().patternLock.setCircleRadius(node, this.value);
+      getUINativeModule().patternLock.setCircleRadius(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -4641,10 +4882,10 @@ class PatternLockAutoResetModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().patternLock.resetAutoReset(node);
+      getUINativeModule().patternLock.resetAutoReset(node);
     }
     else {
-      GetUINativeModule().patternLock.setAutoReset(node, this.value);
+      getUINativeModule().patternLock.setAutoReset(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -4701,13 +4942,14 @@ class ArkPatternLockComponent extends ArkComponent {
 // @ts-ignore
 globalThis.PatternLock.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkPatternLockComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class RichEditorCopyOptionsModifier extends ModifierWithKey {
   constructor(value) {
@@ -4715,10 +4957,10 @@ class RichEditorCopyOptionsModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().richEditor.resetCopyOptions(node);
+      getUINativeModule().richEditor.resetCopyOptions(node);
     }
     else {
-      GetUINativeModule().richEditor.setCopyOptions(node, this.value);
+      getUINativeModule().richEditor.setCopyOptions(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -4771,13 +5013,14 @@ class ArkRichEditorComponent extends ArkComponent {
 // @ts-ignore
 globalThis.RichEditor.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkRichEditorComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class RowAlignItemsModifier extends ModifierWithKey {
   constructor(value) {
@@ -4785,10 +5028,10 @@ class RowAlignItemsModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().row.resetAlignItems(node);
+      getUINativeModule().row.resetAlignItems(node);
     }
     else {
-      GetUINativeModule().row.setAlignItems(node, this.value);
+      getUINativeModule().row.setAlignItems(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -4802,10 +5045,10 @@ class RowJustifyContentlModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().row.resetJustifyContent(node);
+      getUINativeModule().row.resetJustifyContent(node);
     }
     else {
-      GetUINativeModule().row.setJustifyContent(node, this.value);
+      getUINativeModule().row.setJustifyContent(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -4835,13 +5078,14 @@ class ArkRowComponent extends ArkComponent {
 // @ts-ignore
 globalThis.Row.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkRowComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class RowSplitResizeableModifier extends ModifierWithKey {
   constructor(value) {
@@ -4849,10 +5093,10 @@ class RowSplitResizeableModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().rowSplit.resetResizeable(node);
+      getUINativeModule().rowSplit.resetResizeable(node);
     }
     else {
-      GetUINativeModule().rowSplit.setResizeable(node, this.value);
+      getUINativeModule().rowSplit.setResizeable(node, this.value);
     }
   }
 }
@@ -4872,13 +5116,14 @@ class ArkRowSplitComponent extends ArkComponent {
 // @ts-ignore
 globalThis.RowSplit.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkRowSplitComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class SearchSelectionMenuHiddenModifier extends ModifierWithKey {
   constructor(value) {
@@ -4886,10 +5131,10 @@ class SearchSelectionMenuHiddenModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().search.resetSelectionMenuHidden(node);
+      getUINativeModule().search.resetSelectionMenuHidden(node);
     }
     else {
-      GetUINativeModule().search.setSelectionMenuHidden(node, this.value);
+      getUINativeModule().search.setSelectionMenuHidden(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -4903,10 +5148,10 @@ class SearchCaretStyleModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().search.resetCaretStyle(node);
+      getUINativeModule().search.resetCaretStyle(node);
     }
     else {
-      GetUINativeModule().search.setCaretStyle(node, this.value.width, this.value.color);
+      getUINativeModule().search.setCaretStyle(node, this.value.width, this.value.color);
     }
   }
   checkObjectDiff() {
@@ -4921,10 +5166,10 @@ class SearchEnableKeyboardOnFocusModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().search.resetEnableKeyboardOnFocus(node);
+      getUINativeModule().search.resetEnableKeyboardOnFocus(node);
     }
     else {
-      GetUINativeModule().search.setEnableKeyboardOnFocus(node, this.value);
+      getUINativeModule().search.setEnableKeyboardOnFocus(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -4938,10 +5183,10 @@ class SearchSearchIconModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().search.resetSearchIcon(node);
+      getUINativeModule().search.resetSearchIcon(node);
     }
     else {
-      GetUINativeModule().search.setSearchIcon(node, this.value.size, this.value.color, this.value.src);
+      getUINativeModule().search.setSearchIcon(node, this.value.size, this.value.color, this.value.src);
     }
   }
   checkObjectDiff() {
@@ -4957,10 +5202,10 @@ class SearchPlaceholderFontModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().search.resetPlaceholderFont(node);
+      getUINativeModule().search.resetPlaceholderFont(node);
     }
     else {
-      GetUINativeModule().search.setPlaceholderFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      getUINativeModule().search.setPlaceholderFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
   checkObjectDiff() {
@@ -4977,10 +5222,10 @@ class SearchSearchButtonModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().search.resetSearchButton(node);
+      getUINativeModule().search.resetSearchButton(node);
     }
     else {
-      GetUINativeModule().search.setSearchButton(node, this.value.value, this.value.fontSize, this.value.fontColor);
+      getUINativeModule().search.setSearchButton(node, this.value.value, this.value.fontSize, this.value.fontColor);
     }
   }
   checkObjectDiff() {
@@ -4996,10 +5241,10 @@ class SearchFontColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().search.resetFontColor(node);
+      getUINativeModule().search.resetFontColor(node);
     }
     else {
-      GetUINativeModule().search.setFontColor(node, this.value);
+      getUINativeModule().search.setFontColor(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -5013,10 +5258,10 @@ class SearchCopyOptionModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().search.resetCopyOption(node);
+      getUINativeModule().search.resetCopyOption(node);
     }
     else {
-      GetUINativeModule().search.setCopyOption(node, this.value);
+      getUINativeModule().search.setCopyOption(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -5030,10 +5275,10 @@ class SearchTextFontModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().search.resetTextFont(node);
+      getUINativeModule().search.resetTextFont(node);
     }
     else {
-      GetUINativeModule().search.setTextFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      getUINativeModule().search.setTextFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
   checkObjectDiff() {
@@ -5050,10 +5295,10 @@ class SearchPlaceholderColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().search.resetPlaceholderColor(node);
+      getUINativeModule().search.resetPlaceholderColor(node);
     }
     else {
-      GetUINativeModule().search.setPlaceholderColor(node, this.value);
+      getUINativeModule().search.setPlaceholderColor(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -5068,10 +5313,13 @@ class SearchCancelButtonModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b, _c;
     if (reset) {
-      GetUINativeModule().search.resetCancelButton(node);
+      getUINativeModule().search.resetCancelButton(node);
     }
     else {
-      GetUINativeModule().search.setCancelButton(node, this.value.style, (_a = this.value.icon) === null || _a === void 0 ? void 0 : _a.size, (_b = this.value.icon) === null || _b === void 0 ? void 0 : _b.color, (_c = this.value.icon) === null || _c === void 0 ? void 0 : _c.src);
+      getUINativeModule().search.setCancelButton(node, this.value.style,
+        (_a = this.value.icon) === null || _a === void 0 ? void 0 : _a.size,
+        (_b = this.value.icon) === null || _b === void 0 ? void 0 : _b.color,
+        (_c = this.value.icon) === null || _c === void 0 ? void 0 : _c.src);
     }
   }
   checkObjectDiff() {
@@ -5089,10 +5337,10 @@ class SearchTextAlignModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().search.resetTextAlign(node);
+      getUINativeModule().search.resetTextAlign(node);
     }
     else {
-      GetUINativeModule().search.setTextAlign(node, this.value);
+      getUINativeModule().search.setTextAlign(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -5202,13 +5450,14 @@ class ArkSearchComponent extends ArkComponent {
 // @ts-ignore
 globalThis.Search.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkSearchComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class SpanFontSizeModifier extends ModifierWithKey {
   constructor(value) {
@@ -5216,10 +5465,10 @@ class SpanFontSizeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().span.resetFontSize(node);
+      getUINativeModule().span.resetFontSize(node);
     }
     else {
-      GetUINativeModule().span.setFontSize(node, this.value);
+      getUINativeModule().span.setFontSize(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -5233,10 +5482,10 @@ class SpanFontFamilyModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().span.resetFontFamily(node);
+      getUINativeModule().span.resetFontFamily(node);
     }
     else {
-      GetUINativeModule().span.setFontFamily(node, this.value);
+      getUINativeModule().span.setFontFamily(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -5250,10 +5499,10 @@ class SpanLineHeightModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().span.resetLineHeight(node);
+      getUINativeModule().span.resetLineHeight(node);
     }
     else {
-      GetUINativeModule().span.setLineHeight(node, this.value);
+      getUINativeModule().span.setLineHeight(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -5267,10 +5516,10 @@ class SpanFontStyleModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().span.resetFontStyle(node);
+      getUINativeModule().span.resetFontStyle(node);
     }
     else {
-      GetUINativeModule().span.setFontStyle(node, this.value);
+      getUINativeModule().span.setFontStyle(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -5284,10 +5533,10 @@ class SpanTextCaseModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().span.resetTextCase(node);
+      getUINativeModule().span.resetTextCase(node);
     }
     else {
-      GetUINativeModule().span.setTextCase(node, this.value);
+      getUINativeModule().span.setTextCase(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -5301,10 +5550,10 @@ class SpanFontColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().span.resetFontColor(node);
+      getUINativeModule().span.resetFontColor(node);
     }
     else {
-      GetUINativeModule().span.setFontColor(node, this.value);
+      getUINativeModule().span.setFontColor(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -5318,10 +5567,10 @@ class SpanLetterSpacingModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().span.resetLetterSpacing(node);
+      getUINativeModule().span.resetLetterSpacing(node);
     }
     else {
-      GetUINativeModule().span.setLetterSpacing(node, this.value);
+      getUINativeModule().span.setLetterSpacing(node, this.value);
     }
   }
 }
@@ -5332,10 +5581,10 @@ class SpanFontModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().span.resetFont(node);
+      getUINativeModule().span.resetFont(node);
     }
     else {
-      GetUINativeModule().span.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      getUINativeModule().span.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
   checkObjectDiff() {
@@ -5364,10 +5613,10 @@ class SpanDecorationModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().span.resetDecoration(node);
+      getUINativeModule().span.resetDecoration(node);
     }
     else {
-      GetUINativeModule().span.setDecoration(node, this.value.type, this.value.color);
+      getUINativeModule().span.setDecoration(node, this.value.type, this.value.color);
     }
   }
   checkObjectDiff() {
@@ -5392,10 +5641,10 @@ class SpanFontWeightModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().span.resetFontWeight(node);
+      getUINativeModule().span.resetFontWeight(node);
     }
     else {
-      GetUINativeModule().span.setFontWeight(node, this.value);
+      getUINativeModule().span.setFontWeight(node, this.value);
     }
   }
 }
@@ -5417,6 +5666,21 @@ class ArkSpanComponent {
     });
   }
   onGestureJudgeBegin(callback) {
+    throw new Error('Method not implemented.');
+  }
+  outline(value) {
+    throw new Error('Method not implemented.');
+  }
+  outlineColor(value) {
+    throw new Error('Method not implemented.');
+  }
+  outlineRadius(value) {
+    throw new Error('Method not implemented.');
+  }
+  outlineStyle(value) {
+    throw new Error('Method not implemented.');
+  }
+  outlineWidth(value) {
     throw new Error('Method not implemented.');
   }
   width(value) {
@@ -5838,13 +6102,14 @@ class ArkSpanComponent {
 // @ts-ignore
 globalThis.Span.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkSpanComponent(nativeNode);
   });
-  applyUIAttributes(modifier, nativeNode, component);
+  modifier.applyNormalAttribute(component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class SideBarContainerPositionModifier extends ModifierWithKey {
   constructor(value) {
@@ -5852,10 +6117,10 @@ class SideBarContainerPositionModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().sideBarContainer.resetSideBarPosition(node);
+      getUINativeModule().sideBarContainer.resetSideBarPosition(node);
     }
     else {
-      GetUINativeModule().sideBarContainer.setSideBarPosition(node, this.value);
+      getUINativeModule().sideBarContainer.setSideBarPosition(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -5869,10 +6134,10 @@ class SideBarContainerAutoHideModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().sideBarContainer.resetAutoHide(node);
+      getUINativeModule().sideBarContainer.resetAutoHide(node);
     }
     else {
-      GetUINativeModule().sideBarContainer.setAutoHide(node, this.value);
+      getUINativeModule().sideBarContainer.setAutoHide(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -5886,10 +6151,10 @@ class SideBarContainerShowSideBarModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().sideBarContainer.resetShowSideBar(node);
+      getUINativeModule().sideBarContainer.resetShowSideBar(node);
     }
     else {
-      GetUINativeModule().sideBarContainer.setShowSideBar(node, this.value);
+      getUINativeModule().sideBarContainer.setShowSideBar(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -5903,10 +6168,10 @@ class SideBarContainerMaxSideBarWidthModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().sideBarContainer.resetMaxSideBarWidth(node);
+      getUINativeModule().sideBarContainer.resetMaxSideBarWidth(node);
     }
     else {
-      GetUINativeModule().sideBarContainer.setMaxSideBarWidth(node, this.value);
+      getUINativeModule().sideBarContainer.setMaxSideBarWidth(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -5920,10 +6185,10 @@ class SideBarContainerWidthModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().sideBarContainer.resetSideBarWidth(node);
+      getUINativeModule().sideBarContainer.resetSideBarWidth(node);
     }
     else {
-      GetUINativeModule().sideBarContainer.setSideBarWidth(node, this.value);
+      getUINativeModule().sideBarContainer.setSideBarWidth(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -5937,10 +6202,10 @@ class SideBarContainerMinContentWidthModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().sideBarContainer.resetMinContentWidth(node);
+      getUINativeModule().sideBarContainer.resetMinContentWidth(node);
     }
     else {
-      GetUINativeModule().sideBarContainer.setMinContentWidth(node, this.value);
+      getUINativeModule().sideBarContainer.setMinContentWidth(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -5954,10 +6219,10 @@ class SideBarContainerShowControlButtonModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().sideBarContainer.resetShowControlButton(node);
+      getUINativeModule().sideBarContainer.resetShowControlButton(node);
     }
     else {
-      GetUINativeModule().sideBarContainer.setShowControlButton(node, this.value);
+      getUINativeModule().sideBarContainer.setShowControlButton(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -5971,10 +6236,10 @@ class SideBarContainerMinSideBarWidthModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().sideBarContainer.resetMinSideBarWidth(node);
+      getUINativeModule().sideBarContainer.resetMinSideBarWidth(node);
     }
     else {
-      GetUINativeModule().sideBarContainer.setMinSideBarWidth(node, this.value);
+      getUINativeModule().sideBarContainer.setMinSideBarWidth(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -5989,10 +6254,14 @@ class SideBarContainerControlButtonModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b, _c;
     if (reset) {
-      GetUINativeModule().sideBarContainer.resetControlButton(node);
+      getUINativeModule().sideBarContainer.resetControlButton(node);
     }
     else {
-      GetUINativeModule().sideBarContainer.setControlButton(node, this.value.left, this.value.top, this.value.width, this.value.height, (_a = this.value.icons) === null || _a === void 0 ? void 0 : _a.shown, (_b = this.value.icons) === null || _b === void 0 ? void 0 : _b.hidden, (_c = this.value.icons) === null || _c === void 0 ? void 0 : _c.switching);
+      getUINativeModule().sideBarContainer.setControlButton(node, this.value.left,
+        this.value.top, this.value.width, this.value.height, (_a = this.value.icons) === null ||
+        _a === void 0 ? void 0 : _a.shown, (_b = this.value.icons) === null ||
+        _b === void 0 ? void 0 : _b.hidden, (_c = this.value.icons) === null ||
+        _c === void 0 ? void 0 : _c.switching);
     }
   }
   checkObjectDiff() {
@@ -6004,9 +6273,12 @@ class SideBarContainerControlButtonModifier extends ModifierWithKey {
       return true;
     }
     else {
-      return !isBaseOrResourceEqual((_a = this.stageValue.icons) === null || _a === void 0 ? void 0 : _a.shown, (_b = this.value.icons) === null || _b === void 0 ? void 0 : _b.shown) ||
-        !isBaseOrResourceEqual((_c = this.stageValue.icons) === null || _c === void 0 ? void 0 : _c.hidden, (_d = this.value.icons) === null || _d === void 0 ? void 0 : _d.hidden) ||
-        !isBaseOrResourceEqual((_e = this.stageValue.icons) === null || _e === void 0 ? void 0 : _e.switching, (_f = this.value.icons) === null || _f === void 0 ? void 0 : _f.switching);
+      return !isBaseOrResourceEqual((_a = this.stageValue.icons) === null || _a === void 0 ? void 0 : _a.shown, (_b = this.value.icons) === null ||
+      _b === void 0 ? void 0 : _b.shown) ||
+        !isBaseOrResourceEqual((_c = this.stageValue.icons) === null || _c === void 0 ? void 0 : _c.hidden, (_d = this.value.icons) === null ||
+        _d === void 0 ? void 0 : _d.hidden) ||
+        !isBaseOrResourceEqual((_e = this.stageValue.icons) === null || _e === void 0 ? void 0 : _e.switching, (_f = this.value.icons) === null ||
+        _f === void 0 ? void 0 : _f.switching);
     }
   }
 }
@@ -6017,14 +6289,14 @@ class SideBarContainerDividerModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().sideBarContainer.resetDivider(node);
+      getUINativeModule().sideBarContainer.resetDivider(node);
     }
     else {
       if (!this.value || !isObject(this.value) || !this.value.strokeWidth) {
-        GetUINativeModule().sideBarContainer.resetDivider(node);
+        getUINativeModule().sideBarContainer.resetDivider(node);
       }
       else {
-        GetUINativeModule().sideBarContainer.setDivider(node, this.value.strokeWidth, this.value.color, this.value.startMargin, this.value.endMargin);
+        getUINativeModule().sideBarContainer.setDivider(node, this.value.strokeWidth, this.value.color, this.value.startMargin, this.value.endMargin);
       }
     }
   }
@@ -6087,13 +6359,14 @@ class ArkSideBarContainerComponent extends ArkComponent {
 // @ts-ignore
 globalThis.SideBarContainer.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkSideBarContainerComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkStackComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -6106,17 +6379,21 @@ class ArkStackComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, StackAlignContentModifier.identity, StackAlignContentModifier, value);
     return this;
   }
+  align(value) {
+    modifierWithKey(this._modifiersWithKeys, StackAlignContentModifier.identity, StackAlignContentModifier, value);
+    return this;
+  }
 }
-class StackAlignContentModifier extends Modifier {
+class StackAlignContentModifier extends ModifierWithKey {
   constructor(nativePtr) {
     super(nativePtr);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().stack.resetAlignContent(node);
+      getUINativeModule().stack.resetAlignContent(node);
     }
     else {
-      GetUINativeModule().stack.setAlignContent(node, this.value);
+      getUINativeModule().stack.setAlignContent(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -6127,13 +6404,14 @@ StackAlignContentModifier.identity = Symbol('stackAlignContent');
 // @ts-ignore
 globalThis.Stack.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkStackComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class FontColorModifier extends ModifierWithKey {
   constructor(value) {
@@ -6141,19 +6419,14 @@ class FontColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().text.resetFontColor(node);
+      getUINativeModule().text.resetFontColor(node);
     }
     else {
-      GetUINativeModule().text.setFontColor(node, this.value);
+      getUINativeModule().text.setFontColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 FontColorModifier.identity = Symbol('textFontColor');
@@ -6163,19 +6436,14 @@ class FontSizeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().text.resetFontSize(node);
+      getUINativeModule().text.resetFontSize(node);
     }
     else {
-      GetUINativeModule().text.setFontSize(node, this.value);
+      getUINativeModule().text.setFontSize(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 FontSizeModifier.identity = Symbol('textFontSize');
@@ -6185,10 +6453,10 @@ class FontWeightModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().text.resetFontWeight(node);
+      getUINativeModule().text.resetFontWeight(node);
     }
     else {
-      GetUINativeModule().text.setFontWeight(node, this.value);
+      getUINativeModule().text.setFontWeight(node, this.value);
     }
   }
 }
@@ -6199,10 +6467,10 @@ class FontStyleModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().text.resetFontStyle(node);
+      getUINativeModule().text.resetFontStyle(node);
     }
     else {
-      GetUINativeModule().text.setFontStyle(node, this.value);
+      getUINativeModule().text.setFontStyle(node, this.value);
     }
   }
 }
@@ -6213,10 +6481,10 @@ class TextAlignModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().text.resetTextAlign(node);
+      getUINativeModule().text.resetTextAlign(node);
     }
     else {
-      GetUINativeModule().text.setTextAlign(node, this.value);
+      getUINativeModule().text.setTextAlign(node, this.value);
     }
   }
 }
@@ -6227,10 +6495,10 @@ class TextHeightAdaptivePolicyModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().text.resetHeightAdaptivePolicy(node);
+      getUINativeModule().text.resetHeightAdaptivePolicy(node);
     }
     else {
-      GetUINativeModule().text.setHeightAdaptivePolicy(node, this.value);
+      getUINativeModule().text.setHeightAdaptivePolicy(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -6244,10 +6512,10 @@ class TextDraggableModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().text.resetDraggable(node);
+      getUINativeModule().text.resetDraggable(node);
     }
     else {
-      GetUINativeModule().text.setDraggable(node, this.value);
+      getUINativeModule().text.setDraggable(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -6261,13 +6529,13 @@ class TextMinFontSizeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().text.resetMinFontSize(node);
+      getUINativeModule().text.resetMinFontSize(node);
     }
     else if (!isNumber(this.value) && !isString(this.value) && !isResource(this.value)) {
-      GetUINativeModule().text.resetMinFontSize(node);
+      getUINativeModule().text.resetMinFontSize(node);
     }
     else {
-      GetUINativeModule().text.setMinFontSize(node, this.value);
+      getUINativeModule().text.setMinFontSize(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -6281,13 +6549,13 @@ class TextMaxFontSizeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().text.resetMaxFontSize(node);
+      getUINativeModule().text.resetMaxFontSize(node);
     }
     else if (!isNumber(this.value) && !isString(this.value) && !isResource(this.value)) {
-      GetUINativeModule().text.resetMaxFontSize(node);
+      getUINativeModule().text.resetMaxFontSize(node);
     }
     else {
-      GetUINativeModule().text.setMaxFontSize(node, this.value);
+      getUINativeModule().text.setMaxFontSize(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -6301,13 +6569,13 @@ class TextLineHeightModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().text.resetLineHeight(node);
+      getUINativeModule().text.resetLineHeight(node);
     }
     else if (!isNumber(this.value) && !isString(this.value) && !isResource(this.value)) {
-      GetUINativeModule().text.resetLineHeight(node);
+      getUINativeModule().text.resetLineHeight(node);
     }
     else {
-      GetUINativeModule().text.setLineHeight(node, this.value);
+      getUINativeModule().text.setLineHeight(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -6321,10 +6589,10 @@ class TextCopyOptionModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().text.resetCopyOption(node);
+      getUINativeModule().text.resetCopyOption(node);
     }
     else {
-      GetUINativeModule().text.setCopyOption(node, this.value);
+      getUINativeModule().text.setCopyOption(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -6338,13 +6606,13 @@ class TextFontFamilyModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().text.resetFontFamily(node);
+      getUINativeModule().text.resetFontFamily(node);
     }
     else if (!isString(this.value) && !isResource(this.value)) {
-      GetUINativeModule().text.resetFontFamily(node);
+      getUINativeModule().text.resetFontFamily(node);
     }
     else {
-      GetUINativeModule().text.setFontFamily(node, this.value);
+      getUINativeModule().text.setFontFamily(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -6358,13 +6626,13 @@ class TextMaxLinesModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().text.resetMaxLines(node);
+      getUINativeModule().text.resetMaxLines(node);
     }
     else if (!isNumber(this.value)) {
-      GetUINativeModule().text.resetMaxLines(node);
+      getUINativeModule().text.resetMaxLines(node);
     }
     else {
-      GetUINativeModule().text.setMaxLines(node, this.value);
+      getUINativeModule().text.setMaxLines(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -6378,13 +6646,13 @@ class TextLetterSpacingModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().text.resetLetterSpacing(node);
+      getUINativeModule().text.resetLetterSpacing(node);
     }
     else if (!isNumber(this.value) && !isString(this.value)) {
-      GetUINativeModule().text.resetLetterSpacing(node);
+      getUINativeModule().text.resetLetterSpacing(node);
     }
     else {
-      GetUINativeModule().text.setLetterSpacing(node, this.value);
+      getUINativeModule().text.setLetterSpacing(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -6398,10 +6666,10 @@ class TextTextOverflowModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().text.resetTextOverflow(node);
+      getUINativeModule().text.resetTextOverflow(node);
     }
     else {
-      GetUINativeModule().text.setTextOverflow(node, this.value.overflow);
+      getUINativeModule().text.setTextOverflow(node, this.value.overflow);
     }
   }
   checkObjectDiff() {
@@ -6415,13 +6683,13 @@ class TextBaselineOffsetModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().text.resetBaselineOffset(node);
+      getUINativeModule().text.resetBaselineOffset(node);
     }
     else if (!isNumber(this.value) && !isString(this.value)) {
-      GetUINativeModule().text.resetBaselineOffset(node);
+      getUINativeModule().text.resetBaselineOffset(node);
     }
     else {
-      GetUINativeModule().text.setBaselineOffset(node, this.value);
+      getUINativeModule().text.setBaselineOffset(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -6435,10 +6703,10 @@ class TextTextCaseModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().text.resetTextCase(node);
+      getUINativeModule().text.resetTextCase(node);
     }
     else {
-      GetUINativeModule().text.setTextCase(node, this.value);
+      getUINativeModule().text.setTextCase(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -6452,13 +6720,13 @@ class TextTextIndentModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().text.resetTextIndent(node);
+      getUINativeModule().text.resetTextIndent(node);
     }
     else if (!isNumber(this.value) && !isString(this.value) && !isResource(this.value)) {
-      GetUINativeModule().text.resetTextIndent(node);
+      getUINativeModule().text.resetTextIndent(node);
     }
     else {
-      GetUINativeModule().text.setTextIndent(node, this.value);
+      getUINativeModule().text.setTextIndent(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -6472,15 +6740,16 @@ class TextTextShadowModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().text.resetTextShadow(node);
+      getUINativeModule().text.resetTextShadow(node);
     }
     else {
       let shadow = new ArkShadowInfoToArray();
       if (!shadow.convertShadowOptions(this.value)) {
-        GetUINativeModule().text.resetTextShadow(node);
+        getUINativeModule().text.resetTextShadow(node);
       }
       else {
-        GetUINativeModule().text.setTextShadow(node, shadow.radius, shadow.type, shadow.color, shadow.offsetX, shadow.offsetY, shadow.fill, shadow.radius.length);
+        getUINativeModule().text.setTextShadow(node, shadow.radius, shadow.type, shadow.color,
+          shadow.offsetX, shadow.offsetY, shadow.fill, shadow.radius.length);
       }
     }
   }
@@ -6515,10 +6784,10 @@ class TextDecorationModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().text.resetDecoration(node);
+      getUINativeModule().text.resetDecoration(node);
     }
     else {
-      GetUINativeModule().text.setDecoration(node, this.value.type, this.value.color);
+      getUINativeModule().text.setDecoration(node, this.value.type, this.value.color);
     }
   }
   checkObjectDiff() {
@@ -6543,10 +6812,10 @@ class TextFontModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().text.resetFont(node);
+      getUINativeModule().text.resetFont(node);
     }
     else {
-      GetUINativeModule().text.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      getUINativeModule().text.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
   checkObjectDiff() {
@@ -6609,27 +6878,7 @@ class ArkTextComponent extends ArkComponent {
   fontWeight(value) {
     let fontWeightStr = '400';
     if (isNumber(value)) {
-      if (value === 0) {
-        fontWeightStr = 'Lighter';
-      }
-      else if (value === 1) {
-        fontWeightStr = 'Normal';
-      }
-      else if (value === 2) {
-        fontWeightStr = 'Regular';
-      }
-      else if (value === 3) {
-        fontWeightStr = 'Medium';
-      }
-      else if (value === 4) {
-        fontWeightStr = 'Bold';
-      }
-      else if (value === 5) {
-        fontWeightStr = 'Bolder';
-      }
-      else {
-        fontWeightStr = value.toString();
-      }
+      fontWeightStr = value.toString();
     }
     else if (isString(value)) {
       fontWeightStr = String(value);
@@ -6709,13 +6958,14 @@ class ArkTextComponent extends ArkComponent {
 // @ts-ignore
 globalThis.Text.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTextComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class TextAreaFontStyleModifier extends ModifierWithKey {
   constructor(value) {
@@ -6723,10 +6973,10 @@ class TextAreaFontStyleModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textArea.resetFontStyle(node);
+      getUINativeModule().textArea.resetFontStyle(node);
     }
     else {
-      GetUINativeModule().textArea.setFontStyle(node, this.value);
+      getUINativeModule().textArea.setFontStyle(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -6740,10 +6990,10 @@ class TextAreaCopyOptionModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textArea.resetCopyOption(node);
+      getUINativeModule().textArea.resetCopyOption(node);
     }
     else {
-      GetUINativeModule().textArea.setCopyOption(node, this.value);
+      getUINativeModule().textArea.setCopyOption(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -6757,10 +7007,10 @@ class TextAreaMaxLinesModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textArea.resetMaxLines(node);
+      getUINativeModule().textArea.resetMaxLines(node);
     }
     else {
-      GetUINativeModule().textArea.setMaxLines(node, this.value);
+      getUINativeModule().textArea.setMaxLines(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -6774,10 +7024,10 @@ class TextAreaFontSizeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textArea.resetFontSize(node);
+      getUINativeModule().textArea.resetFontSize(node);
     }
     else {
-      GetUINativeModule().textArea.setFontSize(node, this.value);
+      getUINativeModule().textArea.setFontSize(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -6791,19 +7041,14 @@ class TextAreaPlaceholderColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textArea.resetPlaceholderColor(node);
+      getUINativeModule().textArea.resetPlaceholderColor(node);
     }
     else {
-      GetUINativeModule().textArea.setPlaceholderColor(node, this.value);
+      getUINativeModule().textArea.setPlaceholderColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 TextAreaPlaceholderColorModifier.identity = Symbol('textAreaPlaceholderColor');
@@ -6813,19 +7058,14 @@ class TextAreaFontColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textArea.resetFontColor(node);
+      getUINativeModule().textArea.resetFontColor(node);
     }
     else {
-      GetUINativeModule().textArea.setFontColor(node, this.value);
+      getUINativeModule().textArea.setFontColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 TextAreaFontColorModifier.identity = Symbol('textAreaFontColor');
@@ -6835,10 +7075,10 @@ class TextAreaFontWeightModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textArea.resetFontWeight(node);
+      getUINativeModule().textArea.resetFontWeight(node);
     }
     else {
-      GetUINativeModule().textArea.setFontWeight(node, this.value);
+      getUINativeModule().textArea.setFontWeight(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -6852,10 +7092,10 @@ class TextAreaBarStateModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textArea.resetBarState(node);
+      getUINativeModule().textArea.resetBarState(node);
     }
     else {
-      GetUINativeModule().textArea.setBarState(node, this.value);
+      getUINativeModule().textArea.setBarState(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -6869,10 +7109,10 @@ class TextAreaEnableKeyboardOnFocusModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textArea.resetEnableKeyboardOnFocus(node);
+      getUINativeModule().textArea.resetEnableKeyboardOnFocus(node);
     }
     else {
-      GetUINativeModule().textArea.setEnableKeyboardOnFocus(node, this.value);
+      getUINativeModule().textArea.setEnableKeyboardOnFocus(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -6886,10 +7126,10 @@ class TextAreaFontFamilyModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textArea.resetFontFamily(node);
+      getUINativeModule().textArea.resetFontFamily(node);
     }
     else {
-      GetUINativeModule().textArea.setFontFamily(node, this.value);
+      getUINativeModule().textArea.setFontFamily(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -6903,19 +7143,14 @@ class TextAreaCaretColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textArea.resetCaretColor(node);
+      getUINativeModule().textArea.resetCaretColor(node);
     }
     else {
-      GetUINativeModule().textArea.setCaretColor(node, this.value);
+      getUINativeModule().textArea.setCaretColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 TextAreaCaretColorModifier.identity = Symbol('textAreaCaretColor');
@@ -6925,10 +7160,10 @@ class TextAreaMaxLengthModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textArea.resetMaxLength(node);
+      getUINativeModule().textArea.resetMaxLength(node);
     }
     else {
-      GetUINativeModule().textArea.setMaxLength(node, this.value);
+      getUINativeModule().textArea.setMaxLength(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -6942,10 +7177,10 @@ class TextAreaStyleModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textArea.resetStyle(node);
+      getUINativeModule().textArea.resetStyle(node);
     }
     else {
-      GetUINativeModule().textArea.setStyle(node, this.value);
+      getUINativeModule().textArea.setStyle(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -6959,10 +7194,10 @@ class TextAreaSelectionMenuHiddenModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textArea.resetSelectionMenuHidden(node);
+      getUINativeModule().textArea.resetSelectionMenuHidden(node);
     }
     else {
-      GetUINativeModule().textArea.setSelectionMenuHidden(node, this.value);
+      getUINativeModule().textArea.setSelectionMenuHidden(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -6976,10 +7211,10 @@ class TextAreaPlaceholderFontModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textArea.resetPlaceholderFont(node);
+      getUINativeModule().textArea.resetPlaceholderFont(node);
     }
     else {
-      GetUINativeModule().textArea.setPlaceholderFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      getUINativeModule().textArea.setPlaceholderFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
   checkObjectDiff() {
@@ -6994,16 +7229,16 @@ class TextAreaPlaceholderFontModifier extends ModifierWithKey {
   }
 }
 TextAreaPlaceholderFontModifier.identity = Symbol('textAreaPlaceholderFont');
-class TextAreaTextAlignModifier extends Modifier {
+class TextAreaTextAlignModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textArea.resetTextAlign(node);
+      getUINativeModule().textArea.resetTextAlign(node);
     }
     else {
-      GetUINativeModule().textArea.setTextAlign(node, this.value);
+      getUINativeModule().textArea.setTextAlign(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7017,10 +7252,10 @@ class TextAreaShowCounterModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textArea.resetShowCounter(node);
+      getUINativeModule().textArea.resetShowCounter(node);
     }
     else {
-      GetUINativeModule().textArea.setShowCounter(node, this.value.value, this.value.options);
+      getUINativeModule().textArea.setShowCounter(node, this.value.value, this.value.options);
     }
   }
   checkObjectDiff() {
@@ -7138,13 +7373,14 @@ class ArkTextAreaComponent extends ArkComponent {
 // @ts-ignore
 globalThis.TextArea.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTextAreaComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class TextInputStyleModifier extends ModifierWithKey {
   constructor(value) {
@@ -7152,10 +7388,10 @@ class TextInputStyleModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textInput.resetStyle(node);
+      getUINativeModule().textInput.resetStyle(node);
     }
     else {
-      GetUINativeModule().textInput.setStyle(node, this.value);
+      getUINativeModule().textInput.setStyle(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7169,10 +7405,10 @@ class TextInputMaxLengthModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textInput.resetMaxLength(node);
+      getUINativeModule().textInput.resetMaxLength(node);
     }
     else {
-      GetUINativeModule().textInput.setMaxLength(node, this.value);
+      getUINativeModule().textInput.setMaxLength(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7186,10 +7422,10 @@ class TextInputMaxLinesModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textInput.resetMaxLines(node);
+      getUINativeModule().textInput.resetMaxLines(node);
     }
     else {
-      GetUINativeModule().textInput.setMaxLines(node, this.value);
+      getUINativeModule().textInput.setMaxLines(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7203,10 +7439,10 @@ class TextInputShowPasswordIconModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textInput.resetShowPasswordIcon(node);
+      getUINativeModule().textInput.resetShowPasswordIcon(node);
     }
     else {
-      GetUINativeModule().textInput.setShowPasswordIcon(node, this.value);
+      getUINativeModule().textInput.setShowPasswordIcon(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7220,10 +7456,10 @@ class TextInputTextAlignModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textInput.resetTextAlign(node);
+      getUINativeModule().textInput.resetTextAlign(node);
     }
     else {
-      GetUINativeModule().textInput.setTextAlign(node, this.value);
+      getUINativeModule().textInput.setTextAlign(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7237,10 +7473,10 @@ class TextInputPlaceholderFontModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textInput.resetPlaceholderFont(node);
+      getUINativeModule().textInput.resetPlaceholderFont(node);
     }
     else {
-      GetUINativeModule().textInput.setPlaceholderFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      getUINativeModule().textInput.setPlaceholderFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
   checkObjectDiff() {
@@ -7272,10 +7508,10 @@ class TextInputPlaceholderColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textInput.resetPlaceholderColor(node);
+      getUINativeModule().textInput.resetPlaceholderColor(node);
     }
     else {
-      GetUINativeModule().textInput.setPlaceholderColor(node, this.value);
+      getUINativeModule().textInput.setPlaceholderColor(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7289,10 +7525,10 @@ class TextInputPasswordIconModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textInput.resetPasswordIcon(node);
+      getUINativeModule().textInput.resetPasswordIcon(node);
     }
     else {
-      GetUINativeModule().textInput.setPasswordIcon(node, this.value.onIconSrc, this.value.offIconSrc);
+      getUINativeModule().textInput.setPasswordIcon(node, this.value.onIconSrc, this.value.offIconSrc);
     }
   }
   checkObjectDiff() {
@@ -7307,10 +7543,10 @@ class TextInputSelectedBackgroundColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textInput.resetSelectedBackgroundColor(node);
+      getUINativeModule().textInput.resetSelectedBackgroundColor(node);
     }
     else {
-      GetUINativeModule().textInput.setSelectedBackgroundColor(node, this.value);
+      getUINativeModule().textInput.setSelectedBackgroundColor(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7324,10 +7560,10 @@ class TextInputSelectionMenuHiddenModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textInput.resetSelectionMenuHidden(node);
+      getUINativeModule().textInput.resetSelectionMenuHidden(node);
     }
     else {
-      GetUINativeModule().textInput.setSelectionMenuHidden(node, this.value);
+      getUINativeModule().textInput.setSelectionMenuHidden(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7341,10 +7577,10 @@ class TextInputShowUnderlineModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textInput.resetShowUnderline(node);
+      getUINativeModule().textInput.resetShowUnderline(node);
     }
     else {
-      GetUINativeModule().textInput.setShowUnderline(node, this.value);
+      getUINativeModule().textInput.setShowUnderline(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7358,10 +7594,10 @@ class TextInputShowErrorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textInput.resetShowError(node);
+      getUINativeModule().textInput.resetShowError(node);
     }
     else {
-      GetUINativeModule().textInput.setShowError(node, this.value);
+      getUINativeModule().textInput.setShowError(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7375,10 +7611,10 @@ class TextInputTypeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textInput.resetType(node);
+      getUINativeModule().textInput.resetType(node);
     }
     else {
-      GetUINativeModule().textInput.setType(node, this.value);
+      getUINativeModule().textInput.setType(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7392,10 +7628,10 @@ class TextInputCaretPositionModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textInput.resetCaretPosition(node);
+      getUINativeModule().textInput.resetCaretPosition(node);
     }
     else {
-      GetUINativeModule().textInput.setCaretPosition(node, this.value);
+      getUINativeModule().textInput.setCaretPosition(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7409,10 +7645,10 @@ class TextInputCopyOptionModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textInput.resetCopyOption(node);
+      getUINativeModule().textInput.resetCopyOption(node);
     }
     else {
-      GetUINativeModule().textInput.setCopyOption(node, this.value);
+      getUINativeModule().textInput.setCopyOption(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7426,10 +7662,10 @@ class TextInputEnableKeyboardOnFocusModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textInput.resetEnableKeyboardOnFocus(node);
+      getUINativeModule().textInput.resetEnableKeyboardOnFocus(node);
     }
     else {
-      GetUINativeModule().textInput.setEnableKeyboardOnFocus(node, this.value);
+      getUINativeModule().textInput.setEnableKeyboardOnFocus(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7443,10 +7679,10 @@ class TextInputCaretStyleModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textInput.resetCaretStyle(node);
+      getUINativeModule().textInput.resetCaretStyle(node);
     }
     else {
-      GetUINativeModule().textInput.setCaretStyle(node, this.value.width);
+      getUINativeModule().textInput.setCaretStyle(node, this.value.width);
     }
   }
   checkObjectDiff() {
@@ -7465,10 +7701,10 @@ class TextInputEnterKeyTypeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textInput.resetEnterKeyType(node);
+      getUINativeModule().textInput.resetEnterKeyType(node);
     }
     else {
-      GetUINativeModule().textInput.setEnterKeyType(node, this.value);
+      getUINativeModule().textInput.setEnterKeyType(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7482,10 +7718,10 @@ class TextInputBarStateModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textInput.resetBarState(node);
+      getUINativeModule().textInput.resetBarState(node);
     }
     else {
-      GetUINativeModule().textInput.setBarState(node, this.value);
+      getUINativeModule().textInput.setBarState(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7499,10 +7735,10 @@ class TextInputCaretColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textInput.resetCaretColor(node);
+      getUINativeModule().textInput.resetCaretColor(node);
     }
     else {
-      GetUINativeModule().textInput.setCaretColor(node, this.value);
+      getUINativeModule().textInput.setCaretColor(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7516,10 +7752,10 @@ class TextInputFontColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textInput.resetFontColor(node);
+      getUINativeModule().textInput.resetFontColor(node);
     }
     else {
-      GetUINativeModule().textInput.setFontColor(node, this.value);
+      getUINativeModule().textInput.setFontColor(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7533,10 +7769,10 @@ class TextInputFontSizeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textInput.resetFontSize(node);
+      getUINativeModule().textInput.resetFontSize(node);
     }
     else {
-      GetUINativeModule().textInput.setFontSize(node, this.value);
+      getUINativeModule().textInput.setFontSize(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7550,10 +7786,10 @@ class TextInputFontStyleModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textInput.resetFontStyle(node);
+      getUINativeModule().textInput.resetFontStyle(node);
     }
     else {
-      GetUINativeModule().textInput.setFontStyle(node, this.value);
+      getUINativeModule().textInput.setFontStyle(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7567,10 +7803,10 @@ class TextInputFontWeightModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textInput.resetFontWeight(node);
+      getUINativeModule().textInput.resetFontWeight(node);
     }
     else {
-      GetUINativeModule().textInput.setFontWeight(node, this.value);
+      getUINativeModule().textInput.setFontWeight(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7584,10 +7820,10 @@ class TextInputFontFamilyModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textInput.resetFontFamily(node);
+      getUINativeModule().textInput.resetFontFamily(node);
     }
     else {
-      GetUINativeModule().textInput.setFontFamily(node, this.value);
+      getUINativeModule().textInput.setFontFamily(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7757,13 +7993,14 @@ class ArkTextInputComponent extends ArkComponent {
 // @ts-ignore
 globalThis.TextInput.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTextInputComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class VideoObjectFitModifier extends ModifierWithKey {
   constructor(value) {
@@ -7771,10 +8008,10 @@ class VideoObjectFitModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().video.resetObjectFit(node);
+      getUINativeModule().video.resetObjectFit(node);
     }
     else {
-      GetUINativeModule().video.setObjectFit(node, this.value);
+      getUINativeModule().video.setObjectFit(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7788,10 +8025,10 @@ class VideoAutoPlayModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().video.resetAutoPlay(node);
+      getUINativeModule().video.resetAutoPlay(node);
     }
     else {
-      GetUINativeModule().video.setAutoPlay(node, this.value);
+      getUINativeModule().video.setAutoPlay(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7805,10 +8042,10 @@ class VideoControlsModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().video.resetControls(node);
+      getUINativeModule().video.resetControls(node);
     }
     else {
-      GetUINativeModule().video.setControls(node, this.value);
+      getUINativeModule().video.setControls(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7822,10 +8059,10 @@ class VideoLoopModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().video.resetLoop(node);
+      getUINativeModule().video.resetLoop(node);
     }
     else {
-      GetUINativeModule().video.setLoop(node, this.value);
+      getUINativeModule().video.setLoop(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7839,10 +8076,10 @@ class VideoMutedModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().video.resetMuted(node);
+      getUINativeModule().video.resetMuted(node);
     }
     else {
-      GetUINativeModule().video.setMuted(node, this.value);
+      getUINativeModule().video.setMuted(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -7908,27 +8145,14 @@ class ArkVideoComponent extends ArkComponent {
 // @ts-ignore
 globalThis.Video.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkVideoComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
-/*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the 'License');
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 /// <reference path='./import.ts' />
 class ArkBorderStyle {
   constructor() {
@@ -8018,39 +8242,6 @@ class ArkBorderRadius {
       this.bottomRight === another.bottomRight);
   }
 }
-class ArkTransformMatrix {
-  constructor(matrix) {
-    this.matrix = matrix;
-    this.length = 16;
-  }
-  compareArrays(arr1, arr2) {
-    return (Array.isArray(arr1) &&
-      Array.isArray(arr2) &&
-      arr1.length === arr2.length &&
-      arr1.every((value, index) => value === arr2[index]));
-  }
-  isEqual(another) {
-    return this.compareArrays(this.matrix, another.matrix);
-  }
-}
-class ArkLabelStyle {
-  constructor() {
-    this.overflow = undefined;
-    this.maxLines = undefined;
-    this.minFontSize = undefined;
-    this.maxFontSize = undefined;
-    this.heightAdaptivePolicy = undefined;
-    this.font = new ArkLabelFont();
-  }
-  isEqual(another) {
-    return (this.overflow === another.overflow &&
-      this.maxLines === another.maxLines &&
-      this.minFontSize === another.minFontSize &&
-      this.maxFontSize === another.maxFontSize &&
-      this.heightAdaptivePolicy === another.heightAdaptivePolicy &&
-      this.font.isEqual(another.font));
-  }
-}
 class ArkLabelFont {
   constructor() {
     this.size = undefined;
@@ -8078,45 +8269,6 @@ function deepCompareArrays(arr1, arr2) {
       }
     }));
 }
-function deepSimpleCopy(obj) {
-  if (typeof obj === 'object') {
-    if (Array.isArray(obj)) {
-      let result = [];
-      for (let i = 0; i < obj.length; i++) {
-        result[i] = deepSimpleCopy(obj[i]);
-      }
-      return result;
-    }
-    else {
-      let result = {};
-      for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
-          result[key] = deepSimpleCopy(obj[key]);
-        }
-      }
-      return result;
-    }
-  }
-  return obj;
-}
-function copyColorStop(colorStop) {
-  if (Array.isArray(colorStop)) {
-    let result = [];
-    for (let index = 0; index < colorStop.length; index++) {
-      let value = colorStop[index];
-      if (index === 0) {
-        let arkColor = new ArkColor();
-        if (arkColor.parseColorValue(value)) {
-          result[0] = arkColor.getColor();
-        }
-        continue;
-      }
-      result[index] = deepSimpleCopy(value);
-    }
-    return result;
-  }
-  return deepSimpleCopy(colorStop);
-}
 class ArkLinearGradient {
   constructor(angle, direction, colors, repeating) {
     this.angle = angle;
@@ -8127,20 +8279,6 @@ class ArkLinearGradient {
   isEqual(another) {
     return (this.angle === another.angle &&
       this.direction === another.direction &&
-      deepCompareArrays(this.colors, another.colors) &&
-      this.repeating === another.repeating);
-  }
-}
-class ArkRadialGradient {
-  constructor(center, radius, colors, repeating) {
-    this.center = center;
-    this.radius = radius;
-    this.colors = colors;
-    this.repeating = repeating;
-  }
-  isEqual(another) {
-    return (deepCompareArrays(this.center, another.center) &&
-      this.radius === another.radius &&
       deepCompareArrays(this.colors, another.colors) &&
       this.repeating === another.repeating);
   }
@@ -8257,43 +8395,6 @@ class ArkScrollEdgeEffect {
       (this.options === another.options);
   }
 }
-class ArkFont {
-  constructor() {
-    this.size = undefined;
-    this.weight = undefined;
-  }
-  setSize(size) {
-    this.size = size;
-  }
-  setFamily(family) {
-    this.family = family;
-  }
-  setStyle(style) {
-    this.style = style;
-  }
-  isEqual(another) {
-    return (this.size === another.size &&
-      this.weight === another.weight &&
-      this.family === another.family &&
-      this.style === another.style);
-  }
-  parseFontWeight(value) {
-    const valueWeightMap = {
-      [0]: 'Lighter',
-      [1]: 'Normal',
-      [2]: 'Regular',
-      [3]: 'Medium',
-      [4]: 'Bold',
-      [5]: 'Bolder'
-    };
-    if (value in valueWeightMap) {
-      this.weight = valueWeightMap[value];
-    }
-    else {
-      this.weight = value.toString();
-    }
-  }
-}
 class ArkMenuAlignType {
   constructor(alignType, offset) {
     this.alignType = alignType;
@@ -8313,36 +8414,6 @@ class ArkSliderTips {
   }
   isEqual(another) {
     return this.showTip === another.showTip && this.tipText === another.tipText;
-  }
-}
-class ArkTextStyle {
-  constructor() {
-    this.color = undefined;
-    this.font = new ArkFont();
-  }
-  parseTextStyle(value) {
-    if (isObject(value)) {
-      let color = new ArkColor();
-      let inputFont = value.font;
-      let inputColor = value.color;
-      if (!isUndefined(inputColor) && (isNumber(inputColor) || isString(inputColor))) {
-        color.parseColorValue(inputColor);
-        this.color = color.getColor();
-      }
-      if (!isUndefined(inputFont) && isObject(inputFont)) {
-        if (!isUndefined(inputFont.size)) {
-          this.font.size = inputFont.size;
-        }
-        if (!isUndefined(inputFont.weight)) {
-          this.font.parseFontWeight(inputFont.weight);
-        }
-        this.font.family = inputFont.family;
-        this.font.style = inputFont.style;
-      }
-    }
-  }
-  isEqual(another) {
-    return this.color === another.color && this.font.isEqual(another.font);
   }
 }
 class ArkRadioStyle {
@@ -8397,15 +8468,6 @@ class ArkSelectedIndices {
     return this.compareArrays(this.selectedValues, another.selectedValues);
   }
 }
-class ArkBlockSize {
-  constructor() {
-    this.width = undefined;
-    this.height = undefined;
-  }
-  isEqual(another) {
-    return this.width === another.width && this.height === another.height;
-  }
-}
 class ArkBorder {
   constructor() {
     this.arkWidth = new ArkBorderWidth();
@@ -8421,16 +8483,6 @@ class ArkBorder {
   }
   checkObjectDiff(another) {
     return !this.isEqual(another);
-  }
-}
-class ArkBackgroundImagePosition {
-  constructor() {
-    this.alignment = undefined;
-    this.x = undefined;
-    this.y = undefined;
-  }
-  isEqual(another) {
-    return this.alignment === another.alignment && this.x === another.x && this.y === another.y;
   }
 }
 class ArkBackgroundImageSize {
@@ -8452,68 +8504,6 @@ class ArkBackgroundImage {
     return this.src === another.src && this.repeat === another.repeat;
   }
 }
-class ArkTranslate {
-  constructor() {
-    this.x = undefined;
-    this.y = undefined;
-    this.z = undefined;
-  }
-  isEqual(another) {
-    return this.x === another.x && this.y === another.y && this.z === another.z;
-  }
-}
-class ArkScale {
-  constructor() {
-    this.x = undefined;
-    this.y = undefined;
-    this.z = undefined;
-    this.centerX = undefined;
-    this.centerY = undefined;
-  }
-  isEqual(another) {
-    return (this.x === another.x &&
-      this.y === another.y &&
-      this.z === another.z &&
-      this.centerX === another.centerX &&
-      this.centerY === another.centerY);
-  }
-}
-class ArkRotate {
-  constructor() {
-    this.x = undefined;
-    this.y = undefined;
-    this.z = undefined;
-    this.angle = undefined;
-    this.centerX = undefined;
-    this.centerY = undefined;
-    this.centerZ = undefined;
-    this.perspective = undefined;
-  }
-  isEqual(another) {
-    return (this.x === another.x &&
-      this.y === another.y &&
-      this.z === another.z &&
-      this.angle === another.angle &&
-      this.centerX === another.centerX &&
-      this.centerY === another.centerY &&
-      this.centerZ === another.centerZ &&
-      this.perspective === another.perspective);
-  }
-}
-class ArkMotionPath {
-  constructor() {
-    this.path = undefined;
-    this.from = undefined;
-    this.to = undefined;
-    this.rotatable = undefined;
-  }
-  isEqual(another) {
-    return (this.path === another.path &&
-      this.from === another.from &&
-      this.to === another.to &&
-      this.rotatable === another.rotatable);
-  }
-}
 class ArkGridColColumnOption {
   constructor() {
     this.xs = undefined;
@@ -8532,15 +8522,6 @@ class ArkGridColColumnOption {
       this.xxl === another.xxl);
   }
 }
-class ArkSize {
-  constructor() {
-    this.width = undefined;
-    this.height = undefined;
-  }
-  isEqual(another) {
-    return this.width === another.width && this.height === another.height;
-  }
-}
 class ArkPadding {
   constructor() {
     this.top = undefined;
@@ -8555,14 +8536,6 @@ class ArkPadding {
       this.left === another.left);
   }
 }
-class ArkAllowDrop {
-  constructor() {
-    this.allowDropArray = undefined;
-  }
-  isEqual(another) {
-    return this.allowDropArray === another.allowDropArray;
-  }
-}
 class ArkBarMode {
   isEqual(another) {
     return (this.barMode === another.barMode) && (this.options === another.options);
@@ -8573,11 +8546,6 @@ class ArkDivider {
     return (this.divider === another.divider);
   }
 }
-class ArkBarBackgroundColor {
-  isEqual(another) {
-    return (this.value === another.value);
-  }
-}
 class ArkBarGridAlign {
   isEqual(another) {
     return (this.barGridAlign === another.barGridAlign);
@@ -8586,71 +8554,6 @@ class ArkBarGridAlign {
 class ArkScrollableBarModeOptions {
   isEqual(another) {
     return (this.value === another.value);
-  }
-}
-class ArkObscured {
-  constructor() {
-    this.reasons = [];
-  }
-  parseReasonsArray(reasonObject) {
-    if (Array.isArray(reasonObject)) {
-      for (let i = 0; i < reasonObject.length; i++) {
-        this.reasons.push(reasonObject[i]);
-      }
-      return true;
-    }
-    return false;
-  }
-  isEqual(another) {
-    return this.reasons === another.reasons;
-  }
-}
-class ArkResponseRegion {
-  constructor() {
-    this.responseRegion = [];
-  }
-  isObject(region) {
-    return region !== null && !Array.isArray(region) && typeof region === 'object';
-  }
-  parseRegionValue(value) {
-    if (Array.isArray(value)) {
-      return this.parseArrayList(value);
-    }
-    else if (this.isObject(value)) {
-      return this.parseArray(value);
-    }
-    else if (value === undefined) {
-      this.responseRegion = [];
-      return true;
-    }
-    return false;
-  }
-  parseArray(regionObject) {
-    let _a, _b, _c, _d;
-    if (this.isObject(regionObject)) {
-      let x = (_a = regionObject['x']) !== null && _a !== void 0 ? _a : 'PLACEHOLDER';
-      let y = (_b = regionObject['y']) !== null && _b !== void 0 ? _b : 'PLACEHOLDER';
-      let width = (_c = regionObject['width']) !== null && _c !== void 0 ? _c : 'PLACEHOLDER';
-      let height = (_d = regionObject['height']) !== null && _d !== void 0 ? _d : 'PLACEHOLDER';
-      this.responseRegion.push(x.toString());
-      this.responseRegion.push(y.toString());
-      this.responseRegion.push(width.toString());
-      this.responseRegion.push(height.toString());
-      return true;
-    }
-    return false;
-  }
-  parseArrayList(regionObject) {
-    if (Array.isArray(regionObject)) {
-      for (let i = 0; i < regionObject.length; i++) {
-        this.parseArray(regionObject[i]);
-      }
-      return true;
-    }
-    return false;
-  }
-  isEqual(another) {
-    return this.responseRegion === another.responseRegion;
   }
 }
 class ArkAlignRules {
@@ -8678,18 +8581,6 @@ class ArkSafeAreaExpandOpts {
   }
   isEqual(another) {
     return (this.type === another.type) && (this.edges === another.edges);
-  }
-}
-class ArkSideBarDividerStyle {
-  constructor() {
-    this.startMargin = undefined;
-    this.endMargin = undefined;
-  }
-  isEqual(another) {
-    return this.strokeWidth === another.strokeWidth &&
-      this.color === another.color &&
-      this.startMargin === another.startMargin &&
-      this.endMargin === another.endMargin;
   }
 }
 class ArkButtonStyle {
@@ -8810,16 +8701,6 @@ class ArkShadowInfoToArray {
     return false;
   }
 }
-class ArkPasswordIcon {
-  constructor() {
-    this.onIconSrc = undefined;
-    this.offIconSrc = undefined;
-  }
-  isEqual(another) {
-    return this.onIconSrc === another.onIconSrc &&
-      this.offIconSrc === another.offIconSrc;
-  }
-}
 class ArkSearchButton {
   constructor() {
     this.value = undefined;
@@ -8850,40 +8731,6 @@ class ArkImageFrameInfoToArray {
       (this.arrDuration.toString() === another.arrDuration.toString());
   }
 }
-class ArkPickerTextStyle {
-  constructor() {
-    this.color = undefined;
-    this.size = '16fp';
-    this.weight = 'Regular';
-  }
-  setColor(color) {
-    let arkColor = new ArkColor();
-    arkColor.parseColorValue(color);
-    this.color = arkColor.color;
-  }
-  setSize(size) {
-    this.size = size.toString();
-  }
-  setWeight(value) {
-    const valueWeightMap = {
-      [0]: 'Lighter',
-      [1]: 'Normal',
-      [2]: 'Regular',
-      [3]: 'Medium',
-      [4]: 'Bold',
-      [5]: 'Bolder'
-    };
-    if (value in valueWeightMap) {
-      this.weight = valueWeightMap[value];
-    }
-    else {
-      this.weight = value.toString();
-    }
-  }
-  isEqual(another) {
-    return this.color === another.color && this.size === another.size && this.weight === another.weight;
-  }
-}
 class ArkEdgeAlign {
   constructor() {
     this.alignType = undefined;
@@ -8891,24 +8738,6 @@ class ArkEdgeAlign {
   }
   isEqual(another) {
     return (this.alignType === another.alignType && this.offset === another.offset);
-  }
-}
-class ArkDatePickerTextStyle {
-  constructor() {
-    this.color = undefined;
-    this.font = undefined;
-  }
-  isEqual(another) {
-    return (this.color === another.color && this.font === another.font);
-  }
-}
-class ArkClickEffect {
-  constructor() {
-    this.level = undefined;
-    this.scale = undefined;
-  }
-  isEqual(another) {
-    return (this.level === another.level) && (this.scale === another.scale);
   }
 }
 class ArkKeyBoardShortCut {
@@ -8929,14 +8758,6 @@ class ArkAlignStyle {
   }
   isEqual(another) {
     return (this.indexerAlign === another.indexerAlign && this.offset === another.offset);
-  }
-}
-class ArkResourceColor {
-  constructor() {
-    this.color = undefined;
-  }
-  isEqual(another) {
-    return (this.color === another.color);
   }
 }
 class ArkNestedScrollOptions {
@@ -9112,8 +8933,9 @@ class ArkScrollSnapOptions {
       && (this.enableSnapToEnd === another.enableSnapToEnd));
   }
 }
+
 /// <reference path='./import.ts' />
-/// <reference path='./ArkComponent.ts' />
+/// <reference path="./ArkComponent.ts" />
 const FontWeightMap = {
   0: 'lighter',
   1: 'normal',
@@ -9185,19 +9007,14 @@ class ButtonBackgroundColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().button.resetBackgroundColor(node);
+      getUINativeModule().button.resetBackgroundColor(node);
     }
     else {
-      GetUINativeModule().button.setBackgroundColor(node, this.value);
+      getUINativeModule().button.setBackgroundColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 ButtonBackgroundColorModifier.identity = Symbol('buttonBackgroundColor');
@@ -9207,10 +9024,10 @@ class ButtonStateEffectModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().button.resetStateEffect(node);
+      getUINativeModule().button.resetStateEffect(node);
     }
     else {
-      GetUINativeModule().button.setStateEffect(node, this.value);
+      getUINativeModule().button.setStateEffect(node, this.value);
     }
   }
 }
@@ -9221,10 +9038,10 @@ class ButtonFontStyleModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().button.resetFontStyle(node);
+      getUINativeModule().button.resetFontStyle(node);
     }
     else {
-      GetUINativeModule().button.setFontStyle(node, this.value);
+      getUINativeModule().button.setFontStyle(node, this.value);
     }
   }
 }
@@ -9235,19 +9052,14 @@ class ButtonFontFamilyModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().button.resetFontFamily(node);
+      getUINativeModule().button.resetFontFamily(node);
     }
     else {
-      GetUINativeModule().button.setFontFamily(node, this.value);
+      getUINativeModule().button.setFontFamily(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 ButtonFontFamilyModifier.identity = Symbol('buttonFontFamily');
@@ -9257,7 +9069,7 @@ class ButtonLabelStyleModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().button.resetLabelStyle(node);
+      getUINativeModule().button.resetLabelStyle(node);
     }
     else {
       let textOverflow = this.value.overflow; // number(enum) -> Ace::TextOverflow
@@ -9265,18 +9077,18 @@ class ButtonLabelStyleModifier extends ModifierWithKey {
       let minFontSize = this.value.minFontSize; // number | string | Resource -> Dimension
       let maxFontSize = this.value.maxFontSize; // number | string | Resource -> Dimension
       let heightAdaptivePolicy = this.value.heightAdaptivePolicy; // number(enum) -> Ace::TextHeightAdaptivePolicy
-      let fontSize = undefined; // number | string | Resource -> Dimension
-      let fontWeight = undefined; // number | string | Ace::FontWeight -> string -> Ace::FontWeight
-      let fontStyle = undefined; // number(enum) -> Ace::FontStyle
-      let fontFamily = undefined; // string -> std::vector<std::string>
+      let fontSize; // number | string | Resource -> Dimension
+      let fontWeight; // number | string | Ace::FontWeight -> string -> Ace::FontWeight
+      let fontStyle; // number(enum) -> Ace::FontStyle
+      let fontFamily; // string -> std::vector<std::string>
       if (isObject(this.value.font)) {
         fontSize = this.value.font.size;
         fontStyle = this.value.font.style;
         fontFamily = this.value.font.family;
         fontWeight = this.value.font.weight;
       }
-      GetUINativeModule().button.setLabelStyle(node, textOverflow, maxLines, minFontSize, maxFontSize,
-        heightAdaptivePolicy, fontSize, fontWeight, fontStyle, fontFamily);
+      getUINativeModule().button.setLabelStyle(node, textOverflow, maxLines, minFontSize,
+        maxFontSize, heightAdaptivePolicy, fontSize, fontWeight, fontStyle, fontFamily);
     }
   }
   checkObjectDiff() {
@@ -9303,10 +9115,10 @@ class ButtonTypeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().button.resetType(node);
+      getUINativeModule().button.resetType(node);
     }
     else {
-      GetUINativeModule().button.setType(node, this.value);
+      getUINativeModule().button.setType(node, this.value);
     }
   }
 }
@@ -9317,19 +9129,14 @@ class ButtonFontColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().button.resetFontColor(node);
+      getUINativeModule().button.resetFontColor(node);
     }
     else {
-      GetUINativeModule().button.setFontColor(node, this.value);
+      getUINativeModule().button.setFontColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 ButtonFontColorModifier.identity = Symbol('buttonFontColor');
@@ -9339,19 +9146,14 @@ class ButtonFontSizeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().button.resetFontSize(node);
+      getUINativeModule().button.resetFontSize(node);
     }
     else {
-      GetUINativeModule().button.setFontSize(node, this.value);
+      getUINativeModule().button.setFontSize(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 ButtonFontSizeModifier.identity = Symbol('buttonFontSize');
@@ -9361,10 +9163,10 @@ class ButtonFontWeightModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().button.resetFontWeight(node);
+      getUINativeModule().button.resetFontWeight(node);
     }
     else {
-      GetUINativeModule().button.setFontWeight(node, this.value);
+      getUINativeModule().button.setFontWeight(node, this.value);
     }
   }
 }
@@ -9375,13 +9177,14 @@ class ButtonBorderRadiusModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().button.resetButtonBorderRadius(node);
-    } else {
+      getUINativeModule().button.resetButtonBorderRadius(node);
+    }
+    else {
       if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
-        GetUINativeModule().button.setButtonBorderRadius(node, this.value, this.value, this.value, this.value);
+        getUINativeModule().button.setButtonBorderRadius(node, this.value, this.value, this.value, this.value);
       }
       else {
-        GetUINativeModule().button.setButtonBorderRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
+        getUINativeModule().button.setButtonBorderRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
       }
     }
   }
@@ -9404,13 +9207,14 @@ ButtonBorderRadiusModifier.identity = Symbol('buttonBorderRadius');
 // @ts-ignore
 globalThis.Button.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkButtonComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkLoadingProgressComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -9434,10 +9238,10 @@ class LoadingProgressColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().loadingProgress.resetColor(node);
+      getUINativeModule().loadingProgress.resetColor(node);
     }
     else {
-      GetUINativeModule().loadingProgress.setColor(node, this.value);
+      getUINativeModule().loadingProgress.setColor(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -9451,10 +9255,10 @@ class LoadingProgressEnableLoadingModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().loadingProgress.resetEnableLoading(node);
+      getUINativeModule().loadingProgress.resetEnableLoading(node);
     }
     else {
-      GetUINativeModule().loadingProgress.setEnableLoading(node, this.value);
+      getUINativeModule().loadingProgress.setEnableLoading(node, this.value);
     }
   }
 }
@@ -9462,13 +9266,14 @@ LoadingProgressEnableLoadingModifier.identity = Symbol('loadingProgressEnableLoa
 // @ts-ignore
 globalThis.LoadingProgress.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkLoadingProgressComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkRefreshComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -9487,21 +9292,22 @@ class ArkRefreshComponent extends ArkComponent {
 // @ts-ignore
 globalThis.Refresh.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkRefreshComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ScrollNestedScrollModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().scroll.resetNestedScroll(node);
+      getUINativeModule().scroll.resetNestedScroll(node);
     }
     else {
-      GetUINativeModule().scroll.setNestedScroll(node, this.value.scrollForward, this.value.scrollBackward);
+      getUINativeModule().scroll.setNestedScroll(node, this.value.scrollForward, this.value.scrollBackward);
     }
   }
   checkObjectDiff() {
@@ -9513,10 +9319,10 @@ ScrollNestedScrollModifier.identity = Symbol('nestedScroll');
 class ScrollEnableScrollInteractionModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().scroll.resetEnableScroll(node);
+      getUINativeModule().scroll.resetEnableScroll(node);
     }
     else {
-      GetUINativeModule().scroll.setEnableScroll(node, this.value);
+      getUINativeModule().scroll.setEnableScroll(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -9527,26 +9333,21 @@ ScrollEnableScrollInteractionModifier.identity = Symbol('enableScrollInteraction
 class ScrollFrictionModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().scroll.resetFriction(node);
+      getUINativeModule().scroll.resetFriction(node);
     }
     else {
-      GetUINativeModule().scroll.setFriction(node, this.value);
+      getUINativeModule().scroll.setFriction(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 ScrollFrictionModifier.identity = Symbol('friction');
 class ScrollScrollSnapModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().scroll.resetScrollSnap(node);
+      getUINativeModule().scroll.resetScrollSnap(node);
     }
     else {
       let snapPagination = [];
@@ -9561,10 +9362,12 @@ class ScrollScrollSnapModifier extends ModifierWithKey {
         isArray = false;
       }
       if (isArray) {
-        GetUINativeModule().scroll.setScrollSnap(node, this.value.snapAlign, snapPagination, this.value.enableSnapToStart, this.value.enableSnapToEnd);
+        getUINativeModule().scroll.setScrollSnap(node, this.value.snapAlign, snapPagination,
+          this.value.enableSnapToStart, this.value.enableSnapToEnd);
       }
       else {
-        GetUINativeModule().scroll.setScrollSnap(node, this.value.snapAlign, this.value.snapPagination, this.value.enableSnapToStart, this.value.enableSnapToEnd);
+        getUINativeModule().scroll.setScrollSnap(node, this.value.snapAlign, this.value.snapPagination,
+          this.value.enableSnapToStart, this.value.enableSnapToEnd);
       }
     }
   }
@@ -9579,10 +9382,10 @@ ScrollScrollSnapModifier.identity = Symbol('scrollSnap');
 class ScrollScrollBarModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().scroll.resetScrollBar(node);
+      getUINativeModule().scroll.resetScrollBar(node);
     }
     else {
-      GetUINativeModule().scroll.setScrollBar(node, this.value);
+      getUINativeModule().scroll.setScrollBar(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -9596,10 +9399,10 @@ class ScrollScrollableModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().scroll.resetScrollable(node);
+      getUINativeModule().scroll.resetScrollable(node);
     }
     else {
-      GetUINativeModule().scroll.setScrollable(node, this.value);
+      getUINativeModule().scroll.setScrollable(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -9614,10 +9417,11 @@ class ScrollEdgeEffectModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a;
     if (reset) {
-      GetUINativeModule().scroll.resetEdgeEffect(node);
+      getUINativeModule().scroll.resetEdgeEffect(node);
     }
     else {
-      GetUINativeModule().scroll.setEdgeEffect(node, this.value.value, (_a = this.value.options) === null || _a === void 0 ? void 0 : _a.alwaysEnabled);
+      getUINativeModule().scroll.setEdgeEffect(node, this.value.value, (_a = this.value.options) === null || _a ===
+      void 0 ? void 0 : _a.alwaysEnabled);
     }
   }
   checkObjectDiff() {
@@ -9632,10 +9436,10 @@ class ScrollScrollBarWidthModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().scroll.resetScrollBarWidth(node);
+      getUINativeModule().scroll.resetScrollBarWidth(node);
     }
     else {
-      GetUINativeModule().scroll.setScrollBarWidth(node, this.value);
+      getUINativeModule().scroll.setScrollBarWidth(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -9649,19 +9453,14 @@ class ScrollScrollBarColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().scroll.resetScrollBarColor(node);
+      getUINativeModule().scroll.resetScrollBarColor(node);
     }
     else {
-      GetUINativeModule().scroll.setScrollBarColor(node, this.value);
+      getUINativeModule().scroll.setScrollBarColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 ScrollScrollBarColorModifier.identity = Symbol('scrollBarColor');
@@ -9762,13 +9561,14 @@ class ArkScrollComponent extends ArkComponent {
 // @ts-ignore
 globalThis.Scroll.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkScrollComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkToggleComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -9795,17 +9595,14 @@ class ToggleSelectedColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().toggle.resetSelectedColor(node);
+      getUINativeModule().toggle.resetSelectedColor(node);
     }
     else {
-      GetUINativeModule().toggle.setSelectedColor(node, this.value);
+      getUINativeModule().toggle.setSelectedColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    return true;
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 ToggleSelectedColorModifier.identity = Symbol('toggleSelectedColor');
@@ -9815,30 +9612,28 @@ class ToggleSwitchPointColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().toggle.resetSwitchPointColor(node);
+      getUINativeModule().toggle.resetSwitchPointColor(node);
     }
     else {
-      GetUINativeModule().toggle.setSwitchPointColor(node, this.value);
+      getUINativeModule().toggle.setSwitchPointColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    return true;
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 ToggleSwitchPointColorModifier.identity = Symbol('toggleSwitchPointColor');
 // @ts-ignore
 globalThis.Toggle.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkToggleComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkSelectComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -9916,10 +9711,10 @@ class FontModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().select.resetFont(node);
+      getUINativeModule().select.resetFont(node);
     }
     else {
-      GetUINativeModule().select.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      getUINativeModule().select.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
   checkObjectDiff() {
@@ -9937,10 +9732,10 @@ class OptionFontModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().select.resetOptionFont(node);
+      getUINativeModule().select.resetOptionFont(node);
     }
     else {
-      GetUINativeModule().select.setOptionFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      getUINativeModule().select.setOptionFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
   checkObjectDiff() {
@@ -9958,10 +9753,10 @@ class SelectedOptionFontModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().select.resetSelectedOptionFont(node);
+      getUINativeModule().select.resetSelectedOptionFont(node);
     }
     else {
-      GetUINativeModule().select.setSelectedOptionFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      getUINativeModule().select.setSelectedOptionFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
   checkObjectDiff() {
@@ -9979,10 +9774,10 @@ class MenuAlignModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().select.resetMenuAlign(node);
+      getUINativeModule().select.resetMenuAlign(node);
     }
     else {
-      GetUINativeModule().select.setMenuAlign(node, this.value.alignType, this.value.dx, this.value.dy);
+      getUINativeModule().select.setMenuAlign(node, this.value.alignType, this.value.dx, this.value.dy);
     }
   }
   checkObjectDiff() {
@@ -10008,10 +9803,10 @@ class ArrowPositionModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().select.resetArrowPosition(node);
+      getUINativeModule().select.resetArrowPosition(node);
     }
     else {
-      GetUINativeModule().select.setArrowPosition(node, this.value);
+      getUINativeModule().select.setArrowPosition(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -10025,10 +9820,10 @@ class SpaceModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().select.resetSpace(node);
+      getUINativeModule().select.resetSpace(node);
     }
     else {
-      GetUINativeModule().select.setSpace(node, this.value);
+      getUINativeModule().select.setSpace(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -10042,10 +9837,10 @@ class ValueModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().select.resetValue(node);
+      getUINativeModule().select.resetValue(node);
     }
     else {
-      GetUINativeModule().select.setValue(node, this.value);
+      getUINativeModule().select.setValue(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -10059,10 +9854,10 @@ class SelectedModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().select.resetSelected(node);
+      getUINativeModule().select.resetSelected(node);
     }
     else {
-      GetUINativeModule().select.setSelected(node, this.value);
+      getUINativeModule().select.setSelected(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -10076,10 +9871,10 @@ class SelectFontColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().select.resetFontColor(node);
+      getUINativeModule().select.resetFontColor(node);
     }
     else {
-      GetUINativeModule().select.setFontColor(node, this.value);
+      getUINativeModule().select.setFontColor(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -10093,10 +9888,10 @@ class SelectedOptionBgColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().select.resetSelectedOptionBgColor(node);
+      getUINativeModule().select.resetSelectedOptionBgColor(node);
     }
     else {
-      GetUINativeModule().select.setSelectedOptionBgColor(node, this.value);
+      getUINativeModule().select.setSelectedOptionBgColor(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -10110,10 +9905,10 @@ class OptionBgColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().select.resetOptionBgColor(node);
+      getUINativeModule().select.resetOptionBgColor(node);
     }
     else {
-      GetUINativeModule().select.setOptionBgColor(node, this.value);
+      getUINativeModule().select.setOptionBgColor(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -10127,10 +9922,10 @@ class OptionFontColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().select.resetOptionFontColor(node);
+      getUINativeModule().select.resetOptionFontColor(node);
     }
     else {
-      GetUINativeModule().select.setOptionFontColor(node, this.value);
+      getUINativeModule().select.setOptionFontColor(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -10144,10 +9939,10 @@ class SelectedOptionFontColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().select.resetSelectedOptionFontColor(node);
+      getUINativeModule().select.resetSelectedOptionFontColor(node);
     }
     else {
-      GetUINativeModule().select.setSelectedOptionFontColor(node, this.value);
+      getUINativeModule().select.setSelectedOptionFontColor(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -10158,13 +9953,14 @@ SelectedOptionFontColorModifier.identity = Symbol('selectSelectedOptionFontColor
 // @ts-ignore
 globalThis.Select.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkSelectComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkRadioComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -10174,12 +9970,7 @@ class ArkRadioComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   checked(value) {
-    if (!!value) {
-      modifier(this._modifiers, RadioCheckedModifier, value);
-    }
-    else {
-      modifier(this._modifiers, RadioCheckedModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, RadioCheckedModifier.identity, RadioCheckedModifier, value);
     return this;
   }
   onChange(callback) {
@@ -10190,16 +9981,16 @@ class ArkRadioComponent extends ArkComponent {
     return this;
   }
 }
-class RadioCheckedModifier extends Modifier {
+class RadioCheckedModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().radio.resetRadioChecked(node);
+      getUINativeModule().radio.resetRadioChecked(node);
     }
     else {
-      GetUINativeModule().radio.setRadioChecked(node, this.value);
+      getUINativeModule().radio.setRadioChecked(node, this.value);
     }
   }
 }
@@ -10210,10 +10001,10 @@ class RadioStyleModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().radio.resetRadioStyle(node);
+      getUINativeModule().radio.resetRadioStyle(node);
     }
     else {
-      GetUINativeModule().radio.setRadioStyle(node, this.value.checkedBackgroundColor, this.value.uncheckedBorderColor, this.value.indicatorColor);
+      getUINativeModule().radio.setRadioStyle(node, this.value.checkedBackgroundColor, this.value.uncheckedBorderColor, this.value.indicatorColor);
     }
   }
   checkObjectDiff() {
@@ -10229,13 +10020,14 @@ RadioStyleModifier.identity = Symbol('radioStyle');
 // @ts-ignore
 globalThis.Radio.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkRadioComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkTimePickerComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -10273,22 +10065,38 @@ class TimepickerTextStyleModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
     if (reset) {
-      GetUINativeModule().timepicker.resetTextStyle(node);
+      getUINativeModule().timepicker.resetTextStyle(node);
     }
     else {
-      GetUINativeModule().timepicker.setTextStyle(node, (_b = (_a = this.value) === null || _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined, (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined, (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null || _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined, (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null || _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined, (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null || _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
+      getUINativeModule().timepicker.setTextStyle(node, (_b = (_a = this.value) === null ||
+      _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined,
+      (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null ||
+      _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined,
+      (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null ||
+      _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined,
+      (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null ||
+      _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined,
+      (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null ||
+      _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
     }
   }
   checkObjectDiff() {
     let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
-    if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) === ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
-      ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) === ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style))) {
+    if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) ===
+    ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
+      ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) ===
+      ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style))) {
       return true;
     }
     else {
-      return !isBaseOrResourceEqual((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.color, (_k = this.value) === null || _k === void 0 ? void 0 : _k.color) ||
-        !isBaseOrResourceEqual((_m = (_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.font) === null || _m === void 0 ? void 0 : _m.size, (_p = (_o = this.value) === null || _o === void 0 ? void 0 : _o.font) === null || _p === void 0 ? void 0 : _p.size) ||
-        !isBaseOrResourceEqual((_r = (_q = this.stageValue) === null || _q === void 0 ? void 0 : _q.font) === null || _r === void 0 ? void 0 : _r.family, (_t = (_s = this.value) === null || _s === void 0 ? void 0 : _s.font) === null || _t === void 0 ? void 0 : _t.family);
+      return !isBaseOrResourceEqual((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.color, (_k = this.value) === null ||
+      _k === void 0 ? void 0 : _k.color) ||
+        !isBaseOrResourceEqual((_m = (_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.font) === null ||
+        _m === void 0 ? void 0 : _m.size, (_p = (_o = this.value) === null || _o === void 0 ? void 0 : _o.font) === null ||
+        _p === void 0 ? void 0 : _p.size) ||
+        !isBaseOrResourceEqual((_r = (_q = this.stageValue) === null || _q === void 0 ? void 0 : _q.font) === null ||
+        _r === void 0 ? void 0 : _r.family, (_t = (_s = this.value) === null || _s === void 0 ? void 0 : _s.font) === null ||
+        _t === void 0 ? void 0 : _t.family);
     }
   }
 }
@@ -10300,16 +10108,27 @@ class TimepickerSelectedTextStyleModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
     if (reset) {
-      GetUINativeModule().timepicker.resetSelectedTextStyle(node);
+      getUINativeModule().timepicker.resetSelectedTextStyle(node);
     }
     else {
-      GetUINativeModule().timepicker.setSelectedTextStyle(node, (_b = (_a = this.value) === null || _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined, (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined, (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null || _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined, (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null || _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined, (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null || _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
+      getUINativeModule().timepicker.setSelectedTextStyle(node, (_b = (_a = this.value) === null ||
+      _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined,
+      (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null ||
+      _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined,
+      (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null ||
+      _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined,
+      (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null ||
+      _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined,
+      (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null ||
+      _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
     }
   }
   checkObjectDiff() {
     let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
-    if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) === ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
-      ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) === ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style))) {
+    if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) ===
+    ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
+      ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) ===
+      ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style))) {
       return true;
     }
     else {
@@ -10327,22 +10146,40 @@ class TimepickerDisappearTextStyleModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
     if (reset) {
-      GetUINativeModule().timepicker.resetDisappearTextStyle(node);
+      getUINativeModule().timepicker.resetDisappearTextStyle(node);
     }
     else {
-      GetUINativeModule().timepicker.setDisappearTextStyle(node, (_b = (_a = this.value) === null || _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined, (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined, (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null || _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined, (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null || _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined, (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null || _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
+      getUINativeModule().timepicker.setDisappearTextStyle(node, (_b = (_a = this.value) === null ||
+      _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined, 
+      (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null ||
+      _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined, 
+      (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null ||
+      _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined, 
+      (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null ||
+      _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined,
+      (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null ||
+      _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
     }
   }
   checkObjectDiff() {
     let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
-    if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) === ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
-      ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) === ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style))) {
+    if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ?
+      void 0 : _b.weight) === ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null ||
+      _d === void 0 ? void 0 : _d.weight) &&
+      ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ?
+        void 0 : _f.style) === ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null ||
+        _h === void 0 ? void 0 : _h.style))) {
       return true;
     }
     else {
-      return !isBaseOrResourceEqual((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.color, (_k = this.value) === null || _k === void 0 ? void 0 : _k.color) ||
-        !isBaseOrResourceEqual((_m = (_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.font) === null || _m === void 0 ? void 0 : _m.size, (_p = (_o = this.value) === null || _o === void 0 ? void 0 : _o.font) === null || _p === void 0 ? void 0 : _p.size) ||
-        !isBaseOrResourceEqual((_r = (_q = this.stageValue) === null || _q === void 0 ? void 0 : _q.font) === null || _r === void 0 ? void 0 : _r.family, (_t = (_s = this.value) === null || _s === void 0 ? void 0 : _s.font) === null || _t === void 0 ? void 0 : _t.family);
+      return !isBaseOrResourceEqual((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.color,
+      (_k = this.value) === null || _k === void 0 ? void 0 : _k.color) ||
+        !isBaseOrResourceEqual((_m = (_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.font) === null ||
+        _m === void 0 ? void 0 : _m.size, (_p = (_o = this.value) === null || _o === void 0 ? void 0 : _o.font) === null ||
+        _p === void 0 ? void 0 : _p.size) ||
+        !isBaseOrResourceEqual((_r = (_q = this.stageValue) === null || _q === void 0 ? void 0 : _q.font) === null ||
+        _r === void 0 ? void 0 : _r.family, (_t = (_s = this.value) === null || _s === void 0 ? void 0 : _s.font) === null ||
+        _t === void 0 ? void 0 : _t.family);
     }
   }
 }
@@ -10350,13 +10187,14 @@ TimepickerDisappearTextStyleModifier.identity = Symbol('disappearTextStyle');
 // @ts-ignore
 globalThis.TimePicker.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTimePickerComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkTextPickerComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -10366,21 +10204,11 @@ class ArkTextPickerComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   defaultPickerItemHeight(value) {
-    if (isResource(value)) {
-      modifier(this._modifiers, TextpickerDefaultPickerItemHeightModifier, undefined);
-    }
-    else {
-      modifier(this._modifiers, TextpickerDefaultPickerItemHeightModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextpickerDefaultPickerItemHeightModifier.identity, TextpickerDefaultPickerItemHeightModifier, value);
     return this;
   }
   canLoop(value) {
-    if (isUndefined(value)) {
-      modifier(this._modifiers, TextpickerCanLoopModifier, undefined);
-    }
-    else {
-      modifier(this._modifiers, TextpickerCanLoopModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, TextpickerCanLoopModifier.identity, TextpickerCanLoopModifier, value);
     return this;
   }
   disappearTextStyle(value) {
@@ -10405,45 +10233,45 @@ class ArkTextPickerComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   selectedIndex(value) {
-    let input = new ArkSelectedIndices();
-    if (!Array.isArray(value)) {
-      if (!isNumber(value)) {
-        modifier(this._modifiers, TextpickerSelectedIndexModifier, undefined);
-        return this;
-      }
-      input.selectedValues[0] = value;
-    }
-    else {
-      input.selectedValues = value;
-    }
-    modifier(this._modifiers, TextpickerSelectedIndexModifier, input);
+    modifierWithKey(this._modifiersWithKeys, TextpickerSelectedIndexModifier.identity, TextpickerSelectedIndexModifier, value);
     return this;
   }
 }
-class TextpickerCanLoopModifier extends Modifier {
+class TextpickerCanLoopModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textpicker.resetCanLoop(node);
+      getUINativeModule().textpicker.resetCanLoop(node);
     }
     else {
-      GetUINativeModule().textpicker.setCanLoop(node, this.value);
+      getUINativeModule().textpicker.setCanLoop(node, this.value);
     }
   }
 }
 TextpickerCanLoopModifier.identity = Symbol('textpickerCanLoop');
-class TextpickerSelectedIndexModifier extends Modifier {
+class TextpickerSelectedIndexModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textpicker.resetSelectedIndex(node);
+      getUINativeModule().textpicker.resetSelectedIndex(node);
     }
     else {
-      GetUINativeModule().textpicker.setSelectedIndex(node, this.value.selectedValues);
+      getUINativeModule().textpicker.setSelectedIndex(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    if (Array.isArray(this.stageValue) && Array.isArray(this.value)) {
+      return !deepCompareArrays(this.stageValue, this.value);
+    }
+    else if (Array.isArray(this.stageValue) || Array.isArray(this.value)) {
+      return true;
+    }
+    else {
+      return this.stageValue !== this.value;
     }
   }
 }
@@ -10455,22 +10283,38 @@ class TextpickerTextStyleModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
     if (reset) {
-      GetUINativeModule().textpicker.resetTextStyle(node);
+      getUINativeModule().textpicker.resetTextStyle(node);
     }
     else {
-      GetUINativeModule().textpicker.setTextStyle(node, (_b = (_a = this.value) === null || _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined, (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined, (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null || _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined, (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null || _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined, (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null || _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
+      getUINativeModule().textpicker.setTextStyle(node, (_b = (_a = this.value) === null ||
+      _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined, (_e =
+      (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null ||
+      _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined, (_h =
+      (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null ||
+      _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined,
+      (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null ||
+      _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined, 
+      (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null ||
+      _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
     }
   }
   checkObjectDiff() {
     let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
-    if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) === ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
-      ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) === ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style))) {
+    if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) ===
+    ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
+      ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) ===
+      ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style))) {
       return true;
     }
     else {
-      return !isBaseOrResourceEqual((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.color, (_k = this.value) === null || _k === void 0 ? void 0 : _k.color) ||
-        !isBaseOrResourceEqual((_m = (_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.font) === null || _m === void 0 ? void 0 : _m.size, (_p = (_o = this.value) === null || _o === void 0 ? void 0 : _o.font) === null || _p === void 0 ? void 0 : _p.size) ||
-        !isBaseOrResourceEqual((_r = (_q = this.stageValue) === null || _q === void 0 ? void 0 : _q.font) === null || _r === void 0 ? void 0 : _r.family, (_t = (_s = this.value) === null || _s === void 0 ? void 0 : _s.font) === null || _t === void 0 ? void 0 : _t.family);
+      return !isBaseOrResourceEqual((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.color, (_k = this.value) === null ||
+      _k === void 0 ? void 0 : _k.color) ||
+        !isBaseOrResourceEqual((_m = (_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.font) === null ||
+        _m === void 0 ? void 0 : _m.size, (_p = (_o = this.value) === null || _o === void 0 ? void 0 : _o.font) === null ||
+        _p === void 0 ? void 0 : _p.size) ||
+        !isBaseOrResourceEqual((_r = (_q = this.stageValue) === null || _q === void 0 ? void 0 : _q.font) === null ||
+        _r === void 0 ? void 0 : _r.family, (_t = (_s = this.value) === null || _s === void 0 ? void 0 : _s.font) === null ||
+        _t === void 0 ? void 0 : _t.family);
     }
   }
 }
@@ -10482,22 +10326,39 @@ class TextpickerSelectedTextStyleModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
     if (reset) {
-      GetUINativeModule().textpicker.resetSelectedTextStyle(node);
+      getUINativeModule().textpicker.resetSelectedTextStyle(node);
     }
     else {
-      GetUINativeModule().textpicker.setSelectedTextStyle(node, (_b = (_a = this.value) === null || _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined, (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined, (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null || _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined, (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null || _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined, (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null || _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
+      getUINativeModule().textpicker.setSelectedTextStyle(node, (_b =
+        (_a = this.value) === null || _a === void 0 ? void 0 : _a.color) !== null &&
+        _b !== void 0 ? _b : undefined, (_e = (_d = (_c = this.value) === null ||
+        _c === void 0 ? void 0 : _c.font) === null ||
+        _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined,
+        (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null ||
+        _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined,
+        (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null ||
+        _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined,
+        (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null ||
+        _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
     }
   }
   checkObjectDiff() {
     let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
-    if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) === ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
-      ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) === ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style))) {
+    if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) ===
+    ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
+      ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) ===
+      ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style))) {
       return true;
     }
     else {
-      return !isBaseOrResourceEqual((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.color, (_k = this.value) === null || _k === void 0 ? void 0 : _k.color) ||
-        !isBaseOrResourceEqual((_m = (_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.font) === null || _m === void 0 ? void 0 : _m.size, (_p = (_o = this.value) === null || _o === void 0 ? void 0 : _o.font) === null || _p === void 0 ? void 0 : _p.size) ||
-        !isBaseOrResourceEqual((_r = (_q = this.stageValue) === null || _q === void 0 ? void 0 : _q.font) === null || _r === void 0 ? void 0 : _r.family, (_t = (_s = this.value) === null || _s === void 0 ? void 0 : _s.font) === null || _t === void 0 ? void 0 : _t.family);
+      return !isBaseOrResourceEqual((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.color, (_k = this.value) === null ||
+      _k === void 0 ? void 0 : _k.color) ||
+        !isBaseOrResourceEqual((_m = (_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.font) === null ||
+        _m === void 0 ? void 0 : _m.size, (_p = (_o = this.value) === null || _o === void 0 ? void 0 : _o.font) === null ||
+        _p === void 0 ? void 0 : _p.size) ||
+        !isBaseOrResourceEqual((_r = (_q = this.stageValue) === null || _q === void 0 ? void 0 : _q.font) === null ||
+        _r === void 0 ? void 0 : _r.family, (_t = (_s = this.value) === null || _s === void 0 ? void 0 : _s.font) === null ||
+        _t === void 0 ? void 0 : _t.family);
     }
   }
 }
@@ -10509,10 +10370,20 @@ class TextpickerDisappearTextStyleModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
     if (reset) {
-      GetUINativeModule().textpicker.resetDisappearTextStyle(node);
+      getUINativeModule().textpicker.resetDisappearTextStyle(node);
     }
     else {
-      GetUINativeModule().textpicker.setDisappearTextStyle(node, (_b = (_a = this.value) === null || _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined, (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined, (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null || _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined, (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null || _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined, (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null || _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
+      getUINativeModule().textpicker.setDisappearTextStyle(node, (_b =
+        (_a = this.value) === null || _a === void 0 ? void 0 : _a.color) !== null &&
+        _b !== void 0 ? _b : undefined, (_e = (_d = (_c = this.value) === null ||
+        _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.size) !== null &&
+        _e !== void 0 ? _e : undefined, (_h = (_g = (_f = this.value) === null ||
+        _f === void 0 ? void 0 : _f.font) === null || _g === void 0 ? void 0 : _g.weight) !== null &&
+        _h !== void 0 ? _h : undefined, (_l = (_k = (_j = this.value) === null ||
+        _j === void 0 ? void 0 : _j.font) === null || _k === void 0 ? void 0 : _k.family) !== null &&
+        _l !== void 0 ? _l : undefined, (_p = (_o = (_m = this.value) === null ||
+        _m === void 0 ? void 0 : _m.font) === null || _o === void 0 ? void 0 : _o.style) !== null &&
+        _p !== void 0 ? _p : undefined);
     }
   }
   checkObjectDiff() {
@@ -10529,16 +10400,16 @@ class TextpickerDisappearTextStyleModifier extends ModifierWithKey {
   }
 }
 TextpickerDisappearTextStyleModifier.identity = Symbol('textpickerDisappearTextStyle');
-class TextpickerDefaultPickerItemHeightModifier extends Modifier {
+class TextpickerDefaultPickerItemHeightModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textpicker.resetDefaultPickerItemHeight(node);
+      getUINativeModule().textpicker.resetDefaultPickerItemHeight(node);
     }
     else {
-      GetUINativeModule().textpicker.setDefaultPickerItemHeight(node, this.value);
+      getUINativeModule().textpicker.setDefaultPickerItemHeight(node, this.value);
     }
   }
 }
@@ -10546,13 +10417,14 @@ TextpickerDefaultPickerItemHeightModifier.identity = Symbol('textpickerDefaultPi
 // @ts-ignore
 globalThis.TextPicker.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTextPickerComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkSliderComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -10630,10 +10502,10 @@ class BlockStyleModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().slider.resetBlockStyle(node);
+      getUINativeModule().slider.resetBlockStyle(node);
     }
     else {
-      GetUINativeModule().slider.setBlockStyle(node, this.value);
+      getUINativeModule().slider.setBlockStyle(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -10650,10 +10522,10 @@ class ShowTipsModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a;
     if (reset) {
-      GetUINativeModule().slider.resetShowTips(node);
+      getUINativeModule().slider.resetShowTips(node);
     }
     else {
-      GetUINativeModule().slider.setShowTips(node, this.value.showTip, (_a = this.value) === null || _a === void 0 ? void 0 : _a.tipText);
+      getUINativeModule().slider.setShowTips(node, this.value.showTip, (_a = this.value) === null || _a === void 0 ? void 0 : _a.tipText);
     }
   }
   checkObjectDiff() {
@@ -10669,19 +10541,14 @@ class StepSizeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().slider.resetStepSize(node);
+      getUINativeModule().slider.resetStepSize(node);
     }
     else {
-      GetUINativeModule().slider.setStepSize(node, this.value);
+      getUINativeModule().slider.setStepSize(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 StepSizeModifier.identity = Symbol('sliderStepSize');
@@ -10691,10 +10558,10 @@ class BlockSizeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().slider.resetBlockSize(node);
+      getUINativeModule().slider.resetBlockSize(node);
     }
     else {
-      GetUINativeModule().slider.setBlockSize(node, this.value.width, this.value.height);
+      getUINativeModule().slider.setBlockSize(node, this.value.width, this.value.height);
     }
   }
   checkObjectDiff() {
@@ -10713,19 +10580,14 @@ class TrackBorderRadiusModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().slider.resetTrackBorderRadius(node);
+      getUINativeModule().slider.resetTrackBorderRadius(node);
     }
     else {
-      GetUINativeModule().slider.setTrackBorderRadius(node, this.value);
+      getUINativeModule().slider.setTrackBorderRadius(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 TrackBorderRadiusModifier.identity = Symbol('sliderTrackBorderRadius');
@@ -10735,19 +10597,14 @@ class StepColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().slider.resetStepColor(node);
+      getUINativeModule().slider.resetStepColor(node);
     }
     else {
-      GetUINativeModule().slider.setStepColor(node, this.value);
+      getUINativeModule().slider.setStepColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 StepColorModifier.identity = Symbol('sliderStepColor');
@@ -10757,19 +10614,14 @@ class BlockBorderColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().slider.resetBlockBorderColor(node);
+      getUINativeModule().slider.resetBlockBorderColor(node);
     }
     else {
-      GetUINativeModule().slider.setBlockBorderColor(node, this.value);
+      getUINativeModule().slider.setBlockBorderColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 BlockBorderColorModifier.identity = Symbol('sliderBlockBorderColor');
@@ -10779,19 +10631,14 @@ class BlockBorderWidthModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().slider.resetBlockBorderWidth(node);
+      getUINativeModule().slider.resetBlockBorderWidth(node);
     }
     else {
-      GetUINativeModule().slider.setBlockBorderWidth(node, this.value);
+      getUINativeModule().slider.setBlockBorderWidth(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 BlockBorderWidthModifier.identity = Symbol('sliderBlockBorderWidth');
@@ -10801,19 +10648,14 @@ class BlockColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().slider.resetBlockColor(node);
+      getUINativeModule().slider.resetBlockColor(node);
     }
     else {
-      GetUINativeModule().slider.setBlockColor(node, this.value);
+      getUINativeModule().slider.setBlockColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 BlockColorModifier.identity = Symbol('sliderBlockColor');
@@ -10823,19 +10665,14 @@ class TrackColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().slider.resetTrackBackgroundColor(node);
+      getUINativeModule().slider.resetTrackBackgroundColor(node);
     }
     else {
-      GetUINativeModule().slider.setTrackBackgroundColor(node, this.value);
+      getUINativeModule().slider.setTrackBackgroundColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 TrackColorModifier.identity = Symbol('sliderTrackColor');
@@ -10845,19 +10682,14 @@ class SelectColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().slider.resetSelectColor(node);
+      getUINativeModule().slider.resetSelectColor(node);
     }
     else {
-      GetUINativeModule().slider.setSelectColor(node, this.value);
+      getUINativeModule().slider.setSelectColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 SelectColorModifier.identity = Symbol('sliderSelectColor');
@@ -10867,10 +10699,10 @@ class ShowStepsModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().slider.resetShowSteps(node);
+      getUINativeModule().slider.resetShowSteps(node);
     }
     else {
-      GetUINativeModule().slider.setShowSteps(node, this.value);
+      getUINativeModule().slider.setShowSteps(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -10884,73 +10716,81 @@ class TrackThicknessModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().slider.resetThickness(node);
+      getUINativeModule().slider.resetThickness(node);
     }
     else {
-      GetUINativeModule().slider.setThickness(node, this.value);
+      getUINativeModule().slider.setThickness(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 TrackThicknessModifier.identity = Symbol('sliderTrackThickness');
 // @ts-ignore
 globalThis.Slider.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkSliderComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
-class RatingStarsModifier extends Modifier {
+class RatingStarsModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().rating.resetStars(node);
+      getUINativeModule().rating.resetStars(node);
     }
     else {
-      GetUINativeModule().rating.setStars(node, this.value);
+      getUINativeModule().rating.setStars(node, this.value);
     }
   }
 }
 RatingStarsModifier.identity = Symbol('ratingStars');
-class RatingStepSizeModifier extends Modifier {
+class RatingStepSizeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().rating.resetStepSize(node);
+      getUINativeModule().rating.resetStepSize(node);
     }
     else {
-      GetUINativeModule().rating.setStepSize(node, this.value);
+      getUINativeModule().rating.setStepSize(node, this.value);
     }
   }
 }
 RatingStepSizeModifier.identity = Symbol('ratingStepSize');
-class RatingStarStyleModifier extends Modifier {
+class RatingStarStyleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     let _a, _b, _c;
     if (reset) {
-      GetUINativeModule().rating.resetStarStyle(node);
+      getUINativeModule().rating.resetStarStyle(node);
     }
     else {
-      GetUINativeModule().rating.setStarStyle(node, (_a = this.value) === null || _a === void 0 ? void 0 : _a.backgroundUri, (_b = this.value) === null || _b === void 0 ? void 0 : _b.foregroundUri, (_c = this.value) === null || _c === void 0 ? void 0 : _c.secondaryUri);
+      getUINativeModule().rating.setStarStyle(node, (_a = this.value) === null ||
+      _a === void 0 ? void 0 : _a.backgroundUri, (_b = this.value) === null ||
+      _b === void 0 ? void 0 : _b.foregroundUri, (_c = this.value) === null ||
+      _c === void 0 ? void 0 : _c.secondaryUri);
     }
+  }
+  checkObjectDiff() {
+    let _a, _b, _c, _d, _e, _f;
+    return ((_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.backgroundUri) !==
+      ((_b = this.value) === null || _b === void 0 ? void 0 : _b.backgroundUri) ||
+      ((_c = this.stageValue) === null || _c === void 0 ? void 0 : _c.foregroundUri) !==
+      ((_d = this.value) === null || _d === void 0 ? void 0 : _d.foregroundUri) ||
+      ((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.secondaryUri) !==
+      ((_f = this.value) === null || _f === void 0 ? void 0 : _f.secondaryUri);
   }
 }
 RatingStarStyleModifier.identity = Symbol('ratingStarStyle');
@@ -10962,21 +10802,11 @@ class ArkRatingComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   stars(value) {
-    if (!isUndefined(value)) {
-      modifier(this._modifiers, RatingStarsModifier, value);
-    }
-    else {
-      modifier(this._modifiers, RatingStarsModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, RatingStarsModifier.identity, RatingStarsModifier, value);
     return this;
   }
   stepSize(value) {
-    if (isNumber(value)) {
-      modifier(this._modifiers, RatingStepSizeModifier, value);
-    }
-    else {
-      modifier(this._modifiers, RatingStepSizeModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, RatingStepSizeModifier.identity, RatingStepSizeModifier, value);
     return this;
   }
   starStyle(value) {
@@ -10985,10 +10815,10 @@ class ArkRatingComponent extends ArkComponent {
       starStyle.backgroundUri = value.backgroundUri;
       starStyle.foregroundUri = value.foregroundUri;
       starStyle.secondaryUri = value.secondaryUri;
-      modifier(this._modifiers, RatingStarStyleModifier, starStyle);
+      modifierWithKey(this._modifiersWithKeys, RatingStarStyleModifier.identity, RatingStarStyleModifier, value);
     }
     else {
-      modifier(this._modifiers, RatingStarStyleModifier, undefined);
+      modifierWithKey(this._modifiersWithKeys, RatingStarStyleModifier.identity, RatingStarStyleModifier, undefined);
     }
     return this;
   }
@@ -10999,13 +10829,14 @@ class ArkRatingComponent extends ArkComponent {
 // @ts-ignore
 globalThis.Rating.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkRatingComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkCheckboxComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -11049,10 +10880,13 @@ class CheckboxMarkModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b, _c;
     if (reset) {
-      GetUINativeModule().checkbox.resetMark(node);
+      getUINativeModule().checkbox.resetMark(node);
     }
     else {
-      GetUINativeModule().checkbox.setMark(node, (_a = this.value) === null || _a === void 0 ? void 0 : _a.strokeColor, (_b = this.value) === null || _b === void 0 ? void 0 : _b.size, (_c = this.value) === null || _c === void 0 ? void 0 : _c.strokeWidth);
+      getUINativeModule().checkbox.setMark(node, (_a = this.value) === null ||
+      _a === void 0 ? void 0 : _a.strokeColor, (_b = this.value) === null ||
+      _b === void 0 ? void 0 : _b.size, (_c = this.value) === null ||
+      _c === void 0 ? void 0 : _c.strokeWidth);
     }
   }
   checkObjectDiff() {
@@ -11069,10 +10903,10 @@ class CheckboxSelectModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().checkbox.resetSelect(node);
+      getUINativeModule().checkbox.resetSelect(node);
     }
     else {
-      GetUINativeModule().checkbox.setSelect(node, this.value);
+      getUINativeModule().checkbox.setSelect(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -11086,10 +10920,10 @@ class CheckboxHeightModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().checkbox.resetHeight(node);
+      getUINativeModule().checkbox.resetHeight(node);
     }
     else {
-      GetUINativeModule().checkbox.setHeight(node, this.value);
+      getUINativeModule().checkbox.setHeight(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -11103,10 +10937,10 @@ class CheckboxWidthModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().checkbox.resetWidth(node);
+      getUINativeModule().checkbox.resetWidth(node);
     }
     else {
-      GetUINativeModule().checkbox.setWidth(node, this.value);
+      getUINativeModule().checkbox.setWidth(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -11120,10 +10954,10 @@ class CheckboxSelectedColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().checkbox.resetSelectedColor(node);
+      getUINativeModule().checkbox.resetSelectedColor(node);
     }
     else {
-      GetUINativeModule().checkbox.setSelectedColor(node, this.value);
+      getUINativeModule().checkbox.setSelectedColor(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -11137,10 +10971,10 @@ class CheckboxUnselectedColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().checkbox.resetUnSelectedColor(node);
+      getUINativeModule().checkbox.resetUnSelectedColor(node);
     }
     else {
-      GetUINativeModule().checkbox.setUnSelectedColor(node, this.value);
+      getUINativeModule().checkbox.setUnSelectedColor(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -11151,13 +10985,14 @@ CheckboxUnselectedColorModifier.identity = Symbol('checkboxUnselectedColor');
 // @ts-ignore
 globalThis.Checkbox.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkCheckboxComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkNavDestinationComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -11167,7 +11002,7 @@ class ArkNavDestinationComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   hideTitleBar(value) {
-    modifier(this._modifiers, HideTitleBarModifier, value);
+    modifierWithKey(this._modifiersWithKeys, HideTitleBarModifier.identity, HideTitleBarModifier, value);
     return this;
   }
   onShown(callback) {
@@ -11180,16 +11015,16 @@ class ArkNavDestinationComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
 }
-class HideTitleBarModifier extends Modifier {
+class HideTitleBarModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().navDestination.resetHideTitleBar(node);
+      getUINativeModule().navDestination.resetHideTitleBar(node);
     }
     else {
-      GetUINativeModule().navDestination.setHideTitleBar(node, this.value);
+      getUINativeModule().navDestination.setHideTitleBar(node, this.value);
     }
   }
 }
@@ -11197,13 +11032,14 @@ HideTitleBarModifier.identity = Symbol('hideTitleBar');
 //@ts-ignore
 globalThis.NavDestination.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkNavDestinationComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkCounterComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -11216,48 +11052,38 @@ class ArkCounterComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   enableDec(value) {
-    if (isBoolean(value)) {
-      modifier(this._modifiers, EnableDecModifier, value);
-    }
-    else {
-      modifier(this._modifiers, EnableDecModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, EnableDecModifier.identity, EnableDecModifier, value);
     return this;
   }
   enableInc(value) {
-    if (isBoolean(value)) {
-      modifier(this._modifiers, EnableIncModifier, value);
-    }
-    else {
-      modifier(this._modifiers, EnableIncModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, EnableIncModifier.identity, EnableIncModifier, value);
     return this;
   }
 }
-class EnableIncModifier extends Modifier {
+class EnableIncModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().counter.resetEnableInc(node);
+      getUINativeModule().counter.resetEnableInc(node);
     }
     else {
-      GetUINativeModule().counter.setEnableInc(node, this.value);
+      getUINativeModule().counter.setEnableInc(node, this.value);
     }
   }
 }
 EnableIncModifier.identity = Symbol('enableInc');
-class EnableDecModifier extends Modifier {
+class EnableDecModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().counter.resetEnableDec(node);
+      getUINativeModule().counter.resetEnableDec(node);
     }
     else {
-      GetUINativeModule().counter.setEnableDec(node, this.value);
+      getUINativeModule().counter.setEnableDec(node, this.value);
     }
   }
 }
@@ -11265,24 +11091,25 @@ EnableDecModifier.identity = Symbol('enableDec');
 // @ts-ignore
 globalThis.Counter.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkCounterComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
-class CheckboxGroupSelectAllModifier extends Modifier {
+class CheckboxGroupSelectAllModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().checkboxgroup.resetCheckboxGroupSelectAll(node);
+      getUINativeModule().checkboxgroup.resetCheckboxGroupSelectAll(node);
     }
     else {
-      GetUINativeModule().checkboxgroup.setCheckboxGroupSelectAll(node, this.value);
+      getUINativeModule().checkboxgroup.setCheckboxGroupSelectAll(node, this.value);
     }
   }
 }
@@ -11293,19 +11120,14 @@ class CheckboxGroupSelectedColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().checkboxgroup.resetCheckboxGroupSelectedColor(node);
+      getUINativeModule().checkboxgroup.resetCheckboxGroupSelectedColor(node);
     }
     else {
-      GetUINativeModule().checkboxgroup.setCheckboxGroupSelectedColor(node, this.value);
+      getUINativeModule().checkboxgroup.setCheckboxGroupSelectedColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 CheckboxGroupSelectedColorModifier.identity = Symbol('checkboxgroupSelectedColor');
@@ -11315,19 +11137,14 @@ class CheckboxGroupUnselectedColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().checkboxgroup.resetCheckboxGroupUnSelectedColor(node);
+      getUINativeModule().checkboxgroup.resetCheckboxGroupUnSelectedColor(node);
     }
     else {
-      GetUINativeModule().checkboxgroup.setCheckboxGroupUnSelectedColor(node, this.value);
+      getUINativeModule().checkboxgroup.setCheckboxGroupUnSelectedColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 CheckboxGroupUnselectedColorModifier.identity = Symbol('checkboxgroupUnselectedColor');
@@ -11338,10 +11155,13 @@ class CheckboxGroupMarkModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b, _c;
     if (reset) {
-      GetUINativeModule().checkboxgroup.resetCheckboxGroupMark(node);
+      getUINativeModule().checkboxgroup.resetCheckboxGroupMark(node);
     }
     else {
-      GetUINativeModule().checkboxgroup.setCheckboxGroupMark(node, (_a = this.value) === null || _a === void 0 ? void 0 : _a.strokeColor, (_b = this.value) === null || _b === void 0 ? void 0 : _b.size, (_c = this.value) === null || _c === void 0 ? void 0 : _c.strokeWidth);
+      getUINativeModule().checkboxgroup.setCheckboxGroupMark(node, (_a = this.value) === null ||
+      _a === void 0 ? void 0 : _a.strokeColor, (_b = this.value) === null ||
+      _b === void 0 ? void 0 : _b.size, (_c = this.value) === null ||
+      _c === void 0 ? void 0 : _c.strokeWidth);
     }
   }
   checkObjectDiff() {
@@ -11357,12 +11177,7 @@ class ArkCheckboxGroupComponent extends ArkComponent {
     super(nativePtr);
   }
   selectAll(value) {
-    if (isBoolean(value)) {
-      modifier(this._modifiers, CheckboxGroupSelectAllModifier, value);
-    }
-    else {
-      modifier(this._modifiers, CheckboxGroupSelectAllModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, CheckboxGroupSelectAllModifier.identity, CheckboxGroupSelectAllModifier, value);
     return this;
   }
   selectedColor(value) {
@@ -11384,193 +11199,29 @@ class ArkCheckboxGroupComponent extends ArkComponent {
 // @ts-ignore
 globalThis.CheckboxGroup.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkCheckboxGroupComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
-/// <reference path='./import.ts' />
-const COLOR_WITH_MAGIC = /#[0-9A-Fa-f]{6,8}/;
-const COLOR_WITH_MAGIC_MINI = /#[0-9A-Fa-f]{3,4}/;
-const COLOR_WITH_RGB = /rgb\(([0-9]{1,3})\,([0-9]{1,3})\,([0-9]{1,3})\)/i;
-const COLOR_WITH_RGBA = /rgba\(([0-9]{1,3})\,([0-9]{1,3})\,([0-9]{1,3})\,(\d+\.?\d*)\)/i;
-const COLOR_ALPHA_MASK = 0xff000000;
-const MIN_RGB_VALUE = 0;
-const MAX_RGB_VALUE = 255;
-const COLOR_ALPHA_OFFSET = 24;
-const MIN_RGBA_OPACITY = 0.0;
-const MAX_RGBA_OPACITY = 1.0;
-const MIN_COLOR_STR_LEN = 8;
-const HEX_DECIMAL = 16;
-class ArkColor {
-  constructor() {
-    this.color = undefined;
-  }
-  isEqual(another) {
-    return (this.color === another.color);
-  }
-  parseColorValue(value) {
-    if (isResource(value)) {
-      return false;
-    }
-    if (typeof value === 'number') {
-      return this.parseColorUint(value);
-    }
-    else if (typeof value === 'string') {
-      return this.parseColorString(value);
-    }
-    else if (value === undefined) {
-      this.color = value;
-      return true;
-    }
-    return false;
-  }
-  parseColorString(colorStr) {
-    if (colorStr.length === 0) {
-      return false;
-    }
-    colorStr = colorStr.replace(/\s/g, '');
-    return (this.matchColorWithMagic(colorStr) ||
-      this.matchColorWithMagicMini(colorStr) ||
-      this.matchColorWithRGB(colorStr) ||
-      this.matchColorWithRGBA(colorStr) ||
-      this.matchColorSpecialString(colorStr) ||
-      this.parseUintColorString(colorStr));
-  }
-  matchColorWithMagic(colorStr) {
-    const matches = colorStr.match(COLOR_WITH_MAGIC);
-    if (matches) {
-      colorStr = colorStr.substr(1);
-      let value = parseInt(colorStr, HEX_DECIMAL);
-      if (colorStr.length < MIN_COLOR_STR_LEN) {
-        value |= COLOR_ALPHA_MASK;
-      }
-      this.color = value;
-      return true;
-    }
-    return false;
-  }
-  matchColorWithMagicMini(colorStr) {
-    const matches = colorStr.match(COLOR_WITH_MAGIC_MINI);
-    if (matches) {
-      colorStr = colorStr.substr(1);
-      let newColorStr = colorStr.replace(/./g, (match) => match + match);
-      let value = parseInt(newColorStr, HEX_DECIMAL);
-      if (newColorStr.length < MIN_COLOR_STR_LEN) {
-        value |= COLOR_ALPHA_MASK;
-      }
-      this.color = value;
-      return true;
-    }
-    return false;
-  }
-  matchColorWithRGB(colorStr) {
-    const matches = colorStr.match(COLOR_WITH_RGB);
-    if (matches && matches.length === 4) {
-      const [_, redInt, greenInt, blueInt] = matches;
-      if (this.isRGBValid(parseInt(redInt)) && this.isRGBValid(parseInt(greenInt)) && this.isRGBValid(parseInt(blueInt))) {
-        this.color = this.fromRGB(parseInt(redInt), parseInt(greenInt), parseInt(blueInt));
-        return true;
-      }
-    }
-    return false;
-  }
-  matchColorWithRGBA(colorStr) {
-    const matches = colorStr.match(COLOR_WITH_RGBA);
-    if (matches && matches.length === 5) {
-      const [_, redInt, greenInt, blueInt, opacityDouble] = matches;
-      if (this.isRGBValid(parseInt(redInt)) &&
-        this.isRGBValid(parseInt(greenInt)) &&
-        this.isRGBValid(parseInt(blueInt)) &&
-        this.isOpacityValid(parseFloat(opacityDouble))) {
-        this.color = this.fromRGBO(parseInt(redInt), parseInt(greenInt), parseInt(blueInt), parseFloat(opacityDouble));
-        return true;
-      }
-    }
-    return false;
-  }
-  matchColorSpecialString(colorStr) {
-    const colorTable = {
-      black: 0xff000000,
-      blue: 0xff0000ff,
-      gray: 0xffc0c0c0,
-      green: 0xff00ff00,
-      red: 0xffff0000,
-      white: 0xffffffff,
-    };
-    if (colorStr in colorTable) {
-      this.color = colorTable[colorStr];
-      return true;
-    }
-    return false;
-  }
-  parseUintColorString(colorStr) {
-    const colorInt = Number(colorStr);
-    return this.parseColorUint(colorInt);
-  }
-  parseColorUint(colorInt) {
-    if (colorInt > 0) {
-      this.color = colorInt;
-      if ((colorInt & COLOR_ALPHA_MASK) === 0) {
-        this.color |= COLOR_ALPHA_MASK;
-      }
-      return true;
-    }
-    return false;
-  }
-  isRGBValid(value) {
-    return value >= MIN_RGB_VALUE && value <= MAX_RGB_VALUE;
-  }
-  isOpacityValid(value) {
-    return value >= MIN_RGBA_OPACITY && value <= MAX_RGBA_OPACITY;
-  }
-  fromARGB(alpha, red, green, blue) {
-    const argb = (alpha << 24) | (red << 16) | (green << 8) | blue;
-    return argb >>> 0;
-  }
-  fromRGBO(red, green, blue, opacity) {
-    const alpha = Math.round(opacity * 0xff) & 0xff;
-    return this.fromARGB(alpha, red, green, blue);
-  }
-  fromRGB(red, green, blue) {
-    return this.fromARGB(0xff, red, green, blue);
-  }
-  getColor() {
-    return this.color;
-  }
-}
+
 /// <reference path='./import.ts' />
 class ArkPanelComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
   }
   mode(value) {
-    if (typeof value === 'number') {
-      modifier(this._modifiers, PanelModeModifier, value);
-    }
-    else {
-      modifier(this._modifiers, PanelModeModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, PanelModeModifier.identity, PanelModeModifier, value);
     return this;
   }
   type(value) {
-    if (typeof value === 'number') {
-      modifier(this._modifiers, PanelTypeModifier, value);
-    }
-    else {
-      modifier(this._modifiers, PanelTypeModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, PanelTypeModifier.identity, PanelTypeModifier, value);
     return this;
   }
   dragBar(value) {
-    if (typeof value === 'boolean') {
-      modifier(this._modifiers, DragBarModifier, value);
-    }
-    else {
-      modifier(this._modifiers, DragBarModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, DragBarModifier.identity, DragBarModifier, value);
     return this;
   }
   customHeight(value) {
@@ -11578,39 +11229,19 @@ class ArkPanelComponent extends ArkComponent {
     return this;
   }
   fullHeight(value) {
-    if (typeof value !== 'number' && typeof value !== 'string') {
-      modifier(this._modifiers, PanelFullHeightModifier, undefined);
-    }
-    else {
-      modifier(this._modifiers, PanelFullHeightModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, PanelFullHeightModifier.identity, PanelFullHeightModifier, value);
     return this;
   }
   halfHeight(value) {
-    if (typeof value !== 'number' && typeof value !== 'string') {
-      modifier(this._modifiers, PanelHalfHeightModifier, undefined);
-    }
-    else {
-      modifier(this._modifiers, PanelHalfHeightModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, PanelHalfHeightModifier.identity, PanelHalfHeightModifier, value);
     return this;
   }
   miniHeight(value) {
-    if (typeof value !== 'number' && typeof value !== 'string') {
-      modifier(this._modifiers, PanelMiniHeightModifier, undefined);
-    }
-    else {
-      modifier(this._modifiers, PanelMiniHeightModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, PanelMiniHeightModifier.identity, PanelMiniHeightModifier, value);
     return this;
   }
   show(value) {
-    if (typeof value === 'boolean') {
-      modifier(this._modifiers, ShowModifier, value);
-    }
-    else {
-      modifier(this._modifiers, ShowModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ShowModifier.identity, ShowModifier, value);
     return this;
   }
   backgroundMask(color) {
@@ -11618,12 +11249,7 @@ class ArkPanelComponent extends ArkComponent {
     return this;
   }
   showCloseIcon(value) {
-    if (typeof value === 'boolean') {
-      modifier(this._modifiers, ShowCloseIconModifier, value);
-    }
-    else {
-      modifier(this._modifiers, ShowCloseIconModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, ShowCloseIconModifier.identity, ShowCloseIconModifier, value);
     return this;
   }
   onChange(event) {
@@ -11639,47 +11265,48 @@ class PanelBackgroundMaskModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().panel.resetPanelBackgroundMask(node);
+      getUINativeModule().panel.resetPanelBackgroundMask(node);
     }
     else {
-      GetUINativeModule().panel.setPanelBackgroundMask(node, this.value);
+      getUINativeModule().panel.setPanelBackgroundMask(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 PanelBackgroundMaskModifier.identity = Symbol('panelBackgroundMask');
-class PanelModeModifier extends Modifier {
+class PanelModeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().panel.resetPanelMode(node);
+      getUINativeModule().panel.resetPanelMode(node);
     }
     else {
-      GetUINativeModule().panel.setPanelMode(node, this.value);
+      getUINativeModule().panel.setPanelMode(node, this.value);
     }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 PanelModeModifier.identity = Symbol('panelMode');
-class PanelTypeModifier extends Modifier {
+class PanelTypeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().panel.resetPanelType(node);
+      getUINativeModule().panel.resetPanelType(node);
     }
     else {
-      GetUINativeModule().panel.setPanelType(node, this.value);
+      getUINativeModule().panel.setPanelType(node, this.value);
     }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 PanelTypeModifier.identity = Symbol('panelType');
@@ -11689,116 +11316,130 @@ class PanelCustomHeightModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().panel.resetPanelCustomHeight(node);
+      getUINativeModule().panel.resetPanelCustomHeight(node);
     }
     else {
-      GetUINativeModule().panel.setPanelCustomHeight(node, this.value);
+      getUINativeModule().panel.setPanelCustomHeight(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 PanelCustomHeightModifier.identity = Symbol('panelCustomHeight');
-class PanelFullHeightModifier extends Modifier {
+class PanelFullHeightModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().panel.resetPanelFullHeight(node);
+      getUINativeModule().panel.resetPanelFullHeight(node);
     }
     else {
-      GetUINativeModule().panel.setPanelFullHeight(node, this.value);
+      getUINativeModule().panel.setPanelFullHeight(node, this.value);
     }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 PanelFullHeightModifier.identity = Symbol('panelFullHeight');
-class PanelHalfHeightModifier extends Modifier {
+class PanelHalfHeightModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().panel.resetPanelHalfHeight(node);
+      getUINativeModule().panel.resetPanelHalfHeight(node);
     }
     else {
-      GetUINativeModule().panel.setPanelHalfHeight(node, this.value);
+      getUINativeModule().panel.setPanelHalfHeight(node, this.value);
     }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 PanelHalfHeightModifier.identity = Symbol('panelHalfHeight');
-class PanelMiniHeightModifier extends Modifier {
+class PanelMiniHeightModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().panel.resetPanelMiniHeight(node);
+      getUINativeModule().panel.resetPanelMiniHeight(node);
     }
     else {
-      GetUINativeModule().panel.setPanelMiniHeight(node, this.value);
+      getUINativeModule().panel.setPanelMiniHeight(node, this.value);
     }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 PanelMiniHeightModifier.identity = Symbol('panelMiniHeight');
-class ShowCloseIconModifier extends Modifier {
+class ShowCloseIconModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().panel.resetShowCloseIcon(node);
+      getUINativeModule().panel.resetShowCloseIcon(node);
     }
     else {
-      GetUINativeModule().panel.setShowCloseIcon(node, this.value);
+      getUINativeModule().panel.setShowCloseIcon(node, this.value);
     }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 ShowCloseIconModifier.identity = Symbol('showCloseIcon');
-class DragBarModifier extends Modifier {
+class DragBarModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().panel.resetDragBar(node);
+      getUINativeModule().panel.resetDragBar(node);
     }
     else {
-      GetUINativeModule().panel.setDragBar(node, this.value);
+      getUINativeModule().panel.setDragBar(node, this.value);
     }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 DragBarModifier.identity = Symbol('dragBar');
-class ShowModifier extends Modifier {
+class ShowModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().panel.resetShow(node);
+      getUINativeModule().panel.resetShow(node);
     }
     else {
-      GetUINativeModule().panel.setShow(node, this.value);
+      getUINativeModule().panel.setShow(node, this.value);
     }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 ShowModifier.identity = Symbol('show');
 // @ts-ignore
 globalThis.Panel.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkPanelComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 const TITLE_MODE_RANGE = 2;
 const NAV_BAR_POSITION_RANGE = 1;
@@ -11817,7 +11458,7 @@ class ArkNavigationComponent extends ArkComponent {
     return this;
   }
   navBarPosition(value) {
-    modifier(this._modifiers, NavBarPositionModifier, value);
+    modifierWithKey(this._modifiersWithKeys, NavBarPositionModifier.identity, NavBarPositionModifier, value);
     return this;
   }
   navBarWidthRange(value) {
@@ -11829,7 +11470,7 @@ class ArkNavigationComponent extends ArkComponent {
     return this;
   }
   mode(value) {
-    modifier(this._modifiers, ModeModifier, value);
+    modifierWithKey(this._modifiersWithKeys, ModeModifier.identity, ModeModifier, value);
     return this;
   }
   backButtonIcon(value) {
@@ -11837,26 +11478,26 @@ class ArkNavigationComponent extends ArkComponent {
     return this;
   }
   hideNavBar(value) {
-    modifier(this._modifiers, HideNavBarModifier, isBoolean(value) ? value : false);
+    modifierWithKey(this._modifiersWithKeys, HideNavBarModifier.identity, HideNavBarModifier, value);
     return this;
   }
   title(value) {
     throw new Error('Method not implemented.');
   }
   subTitle(value) {
-    modifier(this._modifiers, SubTitleModifier, value);
+    modifierWithKey(this._modifiersWithKeys, SubTitleModifier.identity, SubTitleModifier, value);
     return this;
   }
   hideTitleBar(value) {
-    modifier(this._modifiers, NavigationHideTitleBarModifier, isBoolean(value) ? value : false);
+    modifierWithKey(this._modifiersWithKeys, NavigationHideTitleBarModifier.identity, NavigationHideTitleBarModifier, value);
     return this;
   }
   hideBackButton(value) {
-    modifier(this._modifiers, HideBackButtonModifier, isBoolean(value) ? value : false);
+    modifierWithKey(this._modifiersWithKeys, HideBackButtonModifier.identity, HideBackButtonModifier, value);
     return this;
   }
   titleMode(value) {
-    modifier(this._modifiers, TitleModeModifier, value);
+    modifierWithKey(this._modifiersWithKeys, TitleModeModifier.identity, TitleModeModifier, value);
     return this;
   }
   menus(value) {
@@ -11869,7 +11510,7 @@ class ArkNavigationComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   hideToolBar(value) {
-    modifier(this._modifiers, HideToolBarModifier, isBoolean(value) ? value : false);
+    modifierWithKey(this._modifiersWithKeys, HideToolBarModifier.identity, HideToolBarModifier, value);
     return this;
   }
   onTitleModeChange(callback) {
@@ -11891,19 +11532,14 @@ class BackButtonIconModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().navigation.resetBackButtonIcon(node);
+      getUINativeModule().navigation.resetBackButtonIcon(node);
     }
     else {
-      GetUINativeModule().navigation.setBackButtonIcon(node, this.value);
+      getUINativeModule().navigation.setBackButtonIcon(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 BackButtonIconModifier.identity = Symbol('backButtonIcon');
@@ -11913,19 +11549,14 @@ class NavBarWidthRangeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().navigation.resetNavBarWidthRange(node);
+      getUINativeModule().navigation.resetNavBarWidthRange(node);
     }
     else {
-      GetUINativeModule().navigation.setNavBarWidthRange(node, this.value);
+      getUINativeModule().navigation.setNavBarWidthRange(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 NavBarWidthRangeModifier.identity = Symbol('navBarWidthRange');
@@ -11935,19 +11566,14 @@ class MinContentWidthModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().navigation.resetMinContentWidth(node);
+      getUINativeModule().navigation.resetMinContentWidth(node);
     }
     else {
-      GetUINativeModule().navigation.setMinContentWidth(node, this.value);
+      getUINativeModule().navigation.setMinContentWidth(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 MinContentWidthModifier.identity = Symbol('minContentWidth');
@@ -11957,130 +11583,125 @@ class NavBarWidthModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().navigation.resetNavBarWidth(node);
+      getUINativeModule().navigation.resetNavBarWidth(node);
     }
     else {
-      GetUINativeModule().navigation.setNavBarWidth(node, this.value);
+      getUINativeModule().navigation.setNavBarWidth(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 NavBarWidthModifier.identity = Symbol('navBarWidth');
-class NavBarPositionModifier extends Modifier {
+class NavBarPositionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().navigation.resetNavBarPosition(node);
+      getUINativeModule().navigation.resetNavBarPosition(node);
     }
     else {
-      GetUINativeModule().navigation.setNavBarPosition(node, this.value);
+      getUINativeModule().navigation.setNavBarPosition(node, this.value);
     }
   }
 }
 NavBarPositionModifier.identity = Symbol('navBarPosition');
-class ModeModifier extends Modifier {
+class ModeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().navigation.resetMode(node);
+      getUINativeModule().navigation.resetMode(node);
     }
     else {
-      GetUINativeModule().navigation.setMode(node, this.value);
+      getUINativeModule().navigation.setMode(node, this.value);
     }
   }
 }
 ModeModifier.identity = Symbol('mode');
-class HideToolBarModifier extends Modifier {
+class HideToolBarModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().navigation.resetHideToolBar(node);
+      getUINativeModule().navigation.resetHideToolBar(node);
     }
     else {
-      GetUINativeModule().navigation.setHideToolBar(node, this.value);
+      getUINativeModule().navigation.setHideToolBar(node, this.value);
     }
   }
 }
 HideToolBarModifier.identity = Symbol('hideToolBar');
-class TitleModeModifier extends Modifier {
+class TitleModeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().navigation.resetTitleMode(node);
+      getUINativeModule().navigation.resetTitleMode(node);
     }
     else {
-      GetUINativeModule().navigation.setTitleMode(node, this.value);
+      getUINativeModule().navigation.setTitleMode(node, this.value);
     }
   }
 }
 TitleModeModifier.identity = Symbol('titleMode');
-class HideBackButtonModifier extends Modifier {
+class HideBackButtonModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().navigation.resetHideBackButton(node);
+      getUINativeModule().navigation.resetHideBackButton(node);
     }
     else {
-      GetUINativeModule().navigation.setHideBackButton(node, this.value);
+      getUINativeModule().navigation.setHideBackButton(node, this.value);
     }
   }
 }
 HideBackButtonModifier.identity = Symbol('hideBackButton');
-class SubTitleModifier extends Modifier {
+class SubTitleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().navigation.resetSubTitle(node);
+      getUINativeModule().navigation.resetSubTitle(node);
     }
     else {
-      GetUINativeModule().navigation.setSubTitle(node, this.value);
+      getUINativeModule().navigation.setSubTitle(node, this.value);
     }
   }
 }
 SubTitleModifier.identity = Symbol('subTitle');
-class NavigationHideTitleBarModifier extends Modifier {
+class NavigationHideTitleBarModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().navigation.resetHideTitleBar(node);
+      getUINativeModule().navigation.resetHideTitleBar(node);
     }
     else {
-      GetUINativeModule().navigation.setHideTitleBar(node, this.value);
+      getUINativeModule().navigation.setHideTitleBar(node, this.value);
     }
   }
 }
 NavigationHideTitleBarModifier.identity = Symbol('hideTitleBar');
-class HideNavBarModifier extends Modifier {
+class HideNavBarModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().navigation.resetHideNavBar(node);
+      getUINativeModule().navigation.resetHideNavBar(node);
     }
     else {
-      GetUINativeModule().navigation.setHideNavBar(node, this.value);
+      getUINativeModule().navigation.setHideNavBar(node, this.value);
     }
   }
 }
@@ -12088,16 +11709,15 @@ HideNavBarModifier.identity = Symbol('hideNavBar');
 // @ts-ignore
 globalThis.Navigation.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkNavigationComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
-const NAV_ROUTE_MODE_RANGE = 2;
-const NAV_ROUTE_MODE_DEFAULT = 0;
 class ArkNavRouterComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
@@ -12106,25 +11726,20 @@ class ArkNavRouterComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   mode(mode) {
-    if (isNumber(mode) && mode >= NAV_ROUTE_MODE_DEFAULT && mode <= NAV_ROUTE_MODE_RANGE) {
-      modifier(this._modifiers, NavRouterModeModifier, mode);
-    }
-    else {
-      modifier(this._modifiers, NavRouterModeModifier, NAV_ROUTE_MODE_DEFAULT);
-    }
+    modifierWithKey(this._modifiersWithKeys, NavRouterModeModifier.identity, NavRouterModeModifier, mode);
     return this;
   }
 }
-class NavRouterModeModifier extends Modifier {
+class NavRouterModeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().navRouter.resetMode(node);
+      getUINativeModule().navRouter.resetMode(node);
     }
     else {
-      GetUINativeModule().navRouter.setMode(node, this.value);
+      getUINativeModule().navRouter.setMode(node, this.value);
     }
   }
 }
@@ -12132,87 +11747,88 @@ NavRouterModeModifier.identity = Symbol('mode');
 // @ts-ignore
 globalThis.NavRouter.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkNavRouterComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkNavigatorComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
   }
   active(value) {
-    modifier(this._modifiers, ActiveModifier, value);
+    modifierWithKey(this._modifiersWithKeys, ActiveModifier.identity, ActiveModifier, value);
     return this;
   }
   type(value) {
-    modifier(this._modifiers, TypeModifier, value);
+    modifierWithKey(this._modifiersWithKeys, TypeModifier.identity, TypeModifier, value);
     return this;
   }
   target(value) {
-    modifier(this._modifiers, TargetModifier, value);
+    modifierWithKey(this._modifiersWithKeys, TargetModifier.identity, TargetModifier, value);
     return this;
   }
   params(value) {
-    modifier(this._modifiers, ParamsModifier, JSON.stringify(value));
+    modifierWithKey(this._modifiersWithKeys, ParamsModifier.identity, ParamsModifier, JSON.stringify(value));
     return this;
   }
 }
-class ParamsModifier extends Modifier {
+class ParamsModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().navigator.resetParams(node);
+      getUINativeModule().navigator.resetParams(node);
     }
     else {
-      GetUINativeModule().navigator.setParams(node, this.value);
+      getUINativeModule().navigator.setParams(node, this.value);
     }
   }
 }
 ParamsModifier.identity = Symbol('params');
-class TypeModifier extends Modifier {
+class TypeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().navigator.resetType(node);
+      getUINativeModule().navigator.resetType(node);
     }
     else {
-      GetUINativeModule().navigator.setType(node, this.value);
+      getUINativeModule().navigator.setType(node, this.value);
     }
   }
 }
 TypeModifier.identity = Symbol('type');
-class ActiveModifier extends Modifier {
+class ActiveModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().navigator.resetActive(node);
+      getUINativeModule().navigator.resetActive(node);
     }
     else {
-      GetUINativeModule().navigator.setActive(node, this.value);
+      getUINativeModule().navigator.setActive(node, this.value);
     }
   }
 }
 ActiveModifier.identity = Symbol('active');
-class TargetModifier extends Modifier {
+class TargetModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().navigator.resetTarget(node);
+      getUINativeModule().navigator.resetTarget(node);
     }
     else {
-      GetUINativeModule().navigator.setTarget(node, this.value);
+      getUINativeModule().navigator.setTarget(node, this.value);
     }
   }
 }
@@ -12220,13 +11836,14 @@ TargetModifier.identity = Symbol('target');
 // @ts-ignore
 globalThis.Navigator.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkNavigatorComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkAlphabetIndexerComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -12268,12 +11885,7 @@ class ArkAlphabetIndexerComponent extends ArkComponent {
     return this;
   }
   usingPopup(value) {
-    if (typeof value === 'boolean') {
-      modifier(this._modifiers, UsingPopupModifier, value);
-    }
-    else {
-      modifier(this._modifiers, UsingPopupModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, UsingPopupModifier.identity, UsingPopupModifier, value);
     return this;
   }
   selectedFont(value) {
@@ -12289,12 +11901,7 @@ class ArkAlphabetIndexerComponent extends ArkComponent {
     return this;
   }
   itemSize(value) {
-    if (typeof value !== 'number' && typeof value !== 'string') {
-      modifier(this._modifiers, ItemSizeModifier, undefined);
-    }
-    else {
-      modifier(this._modifiers, ItemSizeModifier, value);
-    }
+    modifierWithKey(this._modifiersWithKeys, ItemSizeModifier.identity, ItemSizeModifier, value);
     return this;
   }
   font(value) {
@@ -12318,12 +11925,7 @@ class ArkAlphabetIndexerComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   selected(index) {
-    if (typeof index === 'number') {
-      modifier(this._modifiers, AlphabetIndexerSelectedModifier, index);
-    }
-    else {
-      modifier(this._modifiers, AlphabetIndexerSelectedModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, AlphabetIndexerSelectedModifier.identity, AlphabetIndexerSelectedModifier, index);
     return this;
   }
   popupPosition(value) {
@@ -12334,7 +11936,7 @@ class ArkAlphabetIndexerComponent extends ArkComponent {
 // @ts-ignore
 globalThis.AlphabetIndexer.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkAlphabetIndexerComponent(nativeNode);
   });
@@ -12347,10 +11949,10 @@ class PopupItemFontModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().alphabetIndexer.resetPopupItemFont(node);
+      getUINativeModule().alphabetIndexer.resetPopupItemFont(node);
     }
     else {
-      GetUINativeModule().alphabetIndexer.setPopupItemFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      getUINativeModule().alphabetIndexer.setPopupItemFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
   checkObjectDiff() {
@@ -12368,10 +11970,10 @@ class SelectedFontModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().alphabetIndexer.resetSelectedFont(node);
+      getUINativeModule().alphabetIndexer.resetSelectedFont(node);
     }
     else {
-      GetUINativeModule().alphabetIndexer.setSelectedFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      getUINativeModule().alphabetIndexer.setSelectedFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
   checkObjectDiff() {
@@ -12389,10 +11991,10 @@ class PopupFontModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().alphabetIndexer.resetPopupFont(node);
+      getUINativeModule().alphabetIndexer.resetPopupFont(node);
     }
     else {
-      GetUINativeModule().alphabetIndexer.setPopupFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      getUINativeModule().alphabetIndexer.setPopupFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
   checkObjectDiff() {
@@ -12410,10 +12012,10 @@ class AlphabetIndexerFontModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().alphabetIndexer.resetFont(node);
+      getUINativeModule().alphabetIndexer.resetFont(node);
     }
     else {
-      GetUINativeModule().alphabetIndexer.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      getUINativeModule().alphabetIndexer.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
   checkObjectDiff() {
@@ -12431,19 +12033,14 @@ class PopupItemBackgroundColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().alphabetIndexer.resetPopupItemBackgroundColor(node);
+      getUINativeModule().alphabetIndexer.resetPopupItemBackgroundColor(node);
     }
     else {
-      GetUINativeModule().alphabetIndexer.setPopupItemBackgroundColor(node, this.value);
+      getUINativeModule().alphabetIndexer.setPopupItemBackgroundColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 PopupItemBackgroundColorModifier.identity = Symbol('popupItemBackgroundColor');
@@ -12453,19 +12050,14 @@ class ColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().alphabetIndexer.resetColor(node);
+      getUINativeModule().alphabetIndexer.resetColor(node);
     }
     else {
-      GetUINativeModule().alphabetIndexer.setColor(node, this.value);
+      getUINativeModule().alphabetIndexer.setColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 ColorModifier.identity = Symbol('alphabetColor');
@@ -12475,19 +12067,14 @@ class PopupColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().alphabetIndexer.resetPopupColor(node);
+      getUINativeModule().alphabetIndexer.resetPopupColor(node);
     }
     else {
-      GetUINativeModule().alphabetIndexer.setPopupColor(node, this.value);
+      getUINativeModule().alphabetIndexer.setPopupColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 PopupColorModifier.identity = Symbol('popupColor');
@@ -12497,19 +12084,14 @@ class SelectedColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().alphabetIndexer.resetSelectedColor(node);
+      getUINativeModule().alphabetIndexer.resetSelectedColor(node);
     }
     else {
-      GetUINativeModule().alphabetIndexer.setSelectedColor(node, this.value);
+      getUINativeModule().alphabetIndexer.setSelectedColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 SelectedColorModifier.identity = Symbol('selectedColor');
@@ -12519,19 +12101,14 @@ class PopupBackgroundModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().alphabetIndexer.resetPopupBackground(node);
+      getUINativeModule().alphabetIndexer.resetPopupBackground(node);
     }
     else {
-      GetUINativeModule().alphabetIndexer.setPopupBackground(node, this.value);
+      getUINativeModule().alphabetIndexer.setPopupBackground(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 PopupBackgroundModifier.identity = Symbol('popupBackground');
@@ -12541,19 +12118,14 @@ class SelectedBackgroundColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().alphabetIndexer.resetSelectedBackgroundColor(node);
+      getUINativeModule().alphabetIndexer.resetSelectedBackgroundColor(node);
     }
     else {
-      GetUINativeModule().alphabetIndexer.setSelectedBackgroundColor(node, this.value);
+      getUINativeModule().alphabetIndexer.setSelectedBackgroundColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 SelectedBackgroundColorModifier.identity = Symbol('selectedBackgroundColor');
@@ -12563,19 +12135,14 @@ class PopupUnselectedColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().alphabetIndexer.resetPopupUnselectedColor(node);
+      getUINativeModule().alphabetIndexer.resetPopupUnselectedColor(node);
     }
     else {
-      GetUINativeModule().alphabetIndexer.setPopupUnselectedColor(node, this.value);
+      getUINativeModule().alphabetIndexer.setPopupUnselectedColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 PopupUnselectedColorModifier.identity = Symbol('popupUnselectedColor');
@@ -12585,19 +12152,14 @@ class PopupSelectedColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().alphabetIndexer.resetPopupSelectedColor(node);
+      getUINativeModule().alphabetIndexer.resetPopupSelectedColor(node);
     }
     else {
-      GetUINativeModule().alphabetIndexer.setPopupSelectedColor(node, this.value);
+      getUINativeModule().alphabetIndexer.setPopupSelectedColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 PopupSelectedColorModifier.identity = Symbol('popupSelectedColor');
@@ -12607,10 +12169,10 @@ class AlignStyleModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().alphabetIndexer.resetAlignStyle(node);
+      getUINativeModule().alphabetIndexer.resetAlignStyle(node);
     }
     else {
-      GetUINativeModule().alphabetIndexer.setAlignStyle(node, this.value.indexerAlign, this.value.offset);
+      getUINativeModule().alphabetIndexer.setAlignStyle(node, this.value.indexerAlign, this.value.offset);
     }
   }
   checkObjectDiff() {
@@ -12620,44 +12182,44 @@ class AlignStyleModifier extends ModifierWithKey {
   }
 }
 AlignStyleModifier.identity = Symbol('alignStyle');
-class UsingPopupModifier extends Modifier {
+class UsingPopupModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().alphabetIndexer.resetUsingPopup(node);
+      getUINativeModule().alphabetIndexer.resetUsingPopup(node);
     }
     else {
-      GetUINativeModule().alphabetIndexer.setUsingPopup(node, this.value);
+      getUINativeModule().alphabetIndexer.setUsingPopup(node, this.value);
     }
   }
 }
 UsingPopupModifier.identity = Symbol('usingPopup');
-class AlphabetIndexerSelectedModifier extends Modifier {
+class AlphabetIndexerSelectedModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().alphabetIndexer.resetSelected(node);
+      getUINativeModule().alphabetIndexer.resetSelected(node);
     }
     else {
-      GetUINativeModule().alphabetIndexer.setSelected(node, this.value);
+      getUINativeModule().alphabetIndexer.setSelected(node, this.value);
     }
   }
 }
 AlphabetIndexerSelectedModifier.identity = Symbol('alphabetIndexerSelected');
-class ItemSizeModifier extends Modifier {
+class ItemSizeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().alphabetIndexer.resetItemSize(node);
+      getUINativeModule().alphabetIndexer.resetItemSize(node);
     }
     else {
-      GetUINativeModule().alphabetIndexer.setItemSize(node, this.value);
+      getUINativeModule().alphabetIndexer.setItemSize(node, this.value);
     }
   }
 }
@@ -12668,10 +12230,10 @@ class PopupPositionModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().alphabetIndexer.resetPopupPosition(node);
+      getUINativeModule().alphabetIndexer.resetPopupPosition(node);
     }
     else {
-      GetUINativeModule().alphabetIndexer.setPopupPosition(node, this.value.x, this.value.y);
+      getUINativeModule().alphabetIndexer.setPopupPosition(node, this.value.x, this.value.y);
     }
   }
   checkObjectDiff() {
@@ -12681,6 +12243,7 @@ class PopupPositionModifier extends ModifierWithKey {
   }
 }
 PopupPositionModifier.identity = Symbol('popupPosition');
+
 /// <reference path='./import.ts' />
 class TextStyleModifier extends ModifierWithKey {
   constructor(value) {
@@ -12689,20 +12252,29 @@ class TextStyleModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b, _c, _d, _e, _f, _g, _h;
     if (reset) {
-      GetUINativeModule().calendarPicker.resetTextStyle(node);
+      getUINativeModule().calendarPicker.resetTextStyle(node);
     }
     else {
-      GetUINativeModule().calendarPicker.setTextStyle(node, (_b = (_a = this.value) === null || _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined, (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined, (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null || _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined);
+      getUINativeModule().calendarPicker.setTextStyle(node, (_b = (_a = this.value) === null ||
+      _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined,
+      (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null ||
+      _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined, (_h =
+      (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null ||
+      _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined);
     }
   }
   checkObjectDiff() {
     let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
-    if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) === ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight))) {
+    if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) ===
+    ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight))) {
       return true;
     }
     else {
-      return !isBaseOrResourceEqual((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.color, (_f = this.value) === null || _f === void 0 ? void 0 : _f.color) ||
-        !isBaseOrResourceEqual((_h = (_g = this.stageValue) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.size, (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null || _k === void 0 ? void 0 : _k.size);
+      return !isBaseOrResourceEqual((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.color, (_f = this.value) === null ||
+      _f === void 0 ? void 0 : _f.color) ||
+        !isBaseOrResourceEqual((_h = (_g = this.stageValue) === null || _g === void 0 ? void 0 : _g.font) === null ||
+         _h === void 0 ? void 0 : _h.size, (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null ||
+         _k === void 0 ? void 0 : _k.size);
     }
   }
 }
@@ -12714,10 +12286,15 @@ class EdgeAlignModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b, _c, _d, _e, _f, _g, _h;
     if (reset) {
-      GetUINativeModule().calendarPicker.resetEdgeAlign(node);
+      getUINativeModule().calendarPicker.resetEdgeAlign(node);
     }
     else {
-      GetUINativeModule().calendarPicker.setEdgeAlign(node, (_b = (_a = this.value) === null || _a === void 0 ? void 0 : _a.alignType) !== null && _b !== void 0 ? _b : undefined, (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.offset) === null || _d === void 0 ? void 0 : _d.dx) !== null && _e !== void 0 ? _e : undefined, (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.offset) === null || _g === void 0 ? void 0 : _g.dy) !== null && _h !== void 0 ? _h : undefined);
+      getUINativeModule().calendarPicker.setEdgeAlign(node, (_b = (_a = this.value) === null ||
+      _a === void 0 ? void 0 : _a.alignType) !== null && _b !== void 0 ? _b : undefined,
+      (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.offset) === null ||
+      _d === void 0 ? void 0 : _d.dx) !== null && _e !== void 0 ? _e : undefined, (_h = (_g =
+      (_f = this.value) === null || _f === void 0 ? void 0 : _f.offset) === null ||
+      _g === void 0 ? void 0 : _g.dy) !== null && _h !== void 0 ? _h : undefined);
     }
   }
   checkObjectDiff() {
@@ -12757,13 +12334,14 @@ class ArkCalendarPickerComponent extends ArkComponent {
 // @ts-ignore
 globalThis.CalendarPicker.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkCalendarPickerComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkDataPanelComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -12796,57 +12374,42 @@ class ArkDataPanelComponent extends ArkComponent {
 class DataPanelStrokeWidthModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().dataPanel.resetDataPanelStrokeWidth(node);
+      getUINativeModule().dataPanel.resetDataPanelStrokeWidth(node);
     }
     else {
-      GetUINativeModule().dataPanel.setDataPanelStrokeWidth(node, this.value);
+      getUINativeModule().dataPanel.setDataPanelStrokeWidth(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 DataPanelStrokeWidthModifier.identity = Symbol('dataPanelStrokeWidth');
 class DataPanelCloseEffectModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().dataPanel.resetCloseEffect(node);
+      getUINativeModule().dataPanel.resetCloseEffect(node);
     }
     else {
-      GetUINativeModule().dataPanel.setCloseEffect(node, this.value);
+      getUINativeModule().dataPanel.setCloseEffect(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 DataPanelCloseEffectModifier.identity = Symbol('dataPanelCloseEffect');
 class DataPanelTrackBackgroundColorModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().dataPanel.resetDataPanelTrackBackgroundColor(node);
+      getUINativeModule().dataPanel.resetDataPanelTrackBackgroundColor(node);
     }
     else {
-      GetUINativeModule().dataPanel.setDataPanelTrackBackgroundColor(node, this.value);
+      getUINativeModule().dataPanel.setDataPanelTrackBackgroundColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 DataPanelTrackBackgroundColorModifier.identity = Symbol('dataPanelTrackBackgroundColorModifier');
@@ -12854,13 +12417,12 @@ class DataPanelTrackShadowModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
       if (this.value === null) {
-        GetUINativeModule().dataPanel.setDataPanelTrackShadow(node, null);
-        return;
+        getUINativeModule().dataPanel.setDataPanelTrackShadow(node, null);
       }
-      GetUINativeModule().dataPanel.resetDataPanelTrackShadow(node);
+      getUINativeModule().dataPanel.resetDataPanelTrackShadow(node);
     }
     else {
-      GetUINativeModule().dataPanel.setDataPanelTrackShadow(node, this.value);
+      getUINativeModule().dataPanel.setDataPanelTrackShadow(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -12871,10 +12433,11 @@ DataPanelTrackShadowModifier.identity = Symbol('dataPanelTrackShadow');
 class DataPanelValueColorsModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().dataPanel.resetDataPanelValueColors(node);
+      getUINativeModule().dataPanel.resetDataPanelValueColors(node);
+      return;
     }
     else {
-      GetUINativeModule().dataPanel.setDataPanelValueColors(node, this.value);
+      getUINativeModule().dataPanel.setDataPanelValueColors(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -12885,20 +12448,21 @@ DataPanelValueColorsModifier.identity = Symbol('dataPanelValueColors');
 // @ts-ignore
 globalThis.DataPanel.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkDataPanelComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkDatePickerComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
   }
   lunar(value) {
-    modifier(this._modifiers, DatePickerLunarModifier, isBoolean(value) ? value : false);
+    modifierWithKey(this._modifiersWithKeys, DatePickerLunarModifier.identity, DatePickerLunarModifier, value);
     return this;
   }
   disappearTextStyle(value) {
@@ -12919,17 +12483,21 @@ class ArkDatePickerComponent extends ArkComponent {
   onDateChange(callback) {
     throw new Error('Method not implemented.');
   }
+  backgroundColor(value) {
+    modifierWithKey(this._modifiersWithKeys, DatePickerBackgroundColorModifier.identity, DatePickerBackgroundColorModifier, value);
+    return this;
+  }
 }
-class DatePickerLunarModifier extends Modifier {
+class DatePickerLunarModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().datePicker.resetLunar(node);
+      getUINativeModule().datePicker.resetLunar(node);
     }
     else {
-      GetUINativeModule().datePicker.setLunar(node, this.value);
+      getUINativeModule().datePicker.setLunar(node, this.value);
     }
   }
 }
@@ -12941,22 +12509,36 @@ class DatePickerTextStyleModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
     if (reset) {
-      GetUINativeModule().datePicker.resetTextStyle(node);
+      getUINativeModule().datePicker.resetTextStyle(node);
     }
     else {
-      GetUINativeModule().datePicker.setTextStyle(node, (_b = (_a = this.value) === null || _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined, (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined, (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null || _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined, (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null || _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined, (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null || _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
+      getUINativeModule().datePicker.setTextStyle(node, (_b = (_a = this.value) === null ||
+      _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined, (_e = (_d = (_c = this.value) === null ||
+      _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined,
+      (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null ||
+      _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined,
+      (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null ||
+      _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined,
+      (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null ||
+      _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
     }
   }
   checkObjectDiff() {
     let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
-    if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) === ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
-      ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) === ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style))) {
+    if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) ===
+      ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
+      ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) ===
+      ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style))) {
       return true;
     }
     else {
-      return !isBaseOrResourceEqual((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.color, (_k = this.value) === null || _k === void 0 ? void 0 : _k.color) ||
-        !isBaseOrResourceEqual((_m = (_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.font) === null || _m === void 0 ? void 0 : _m.size, (_p = (_o = this.value) === null || _o === void 0 ? void 0 : _o.font) === null || _p === void 0 ? void 0 : _p.size) ||
-        !isBaseOrResourceEqual((_r = (_q = this.stageValue) === null || _q === void 0 ? void 0 : _q.font) === null || _r === void 0 ? void 0 : _r.family, (_t = (_s = this.value) === null || _s === void 0 ? void 0 : _s.font) === null || _t === void 0 ? void 0 : _t.family);
+      return !isBaseOrResourceEqual((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.color, (_k = this.value) === null ||
+      _k === void 0 ? void 0 : _k.color) ||
+        !isBaseOrResourceEqual((_m = (_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.font) === null ||
+        _m === void 0 ? void 0 : _m.size, (_p = (_o = this.value) === null || _o === void 0 ? void 0 : _o.font) === null || _p === void 0 ? void 0 : _p.size) ||
+        !isBaseOrResourceEqual((_r = (_q = this.stageValue) === null || _q === void 0 ? void 0 : _q.font) === null ||
+        _r === void 0 ? void 0 : _r.family, (_t = (_s = this.value) === null || _s === void 0 ? void 0 : _s.font) === null ||
+        _t === void 0 ? void 0 : _t.family);
     }
   }
 }
@@ -12968,22 +12550,38 @@ class DatePickerSelectedTextStyleModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
     if (reset) {
-      GetUINativeModule().datePicker.resetSelectedTextStyle(node);
+      getUINativeModule().datePicker.resetSelectedTextStyle(node);
     }
     else {
-      GetUINativeModule().datePicker.setSelectedTextStyle(node, (_b = (_a = this.value) === null || _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined, (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined, (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null || _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined, (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null || _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined, (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null || _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
+      getUINativeModule().datePicker.setSelectedTextStyle(node, (_b = (_a = this.value) === null ||
+      _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined,
+      (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null ||
+      _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined, (_h = (_g =
+      (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null ||
+      _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined,
+      (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null ||
+      _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined, (_p =
+      (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null ||
+      _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
     }
   }
   checkObjectDiff() {
     let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
-    if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) === ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
-      ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) === ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style))) {
+    if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) ===
+    ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
+      ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) ===
+      ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style))) {
       return true;
     }
     else {
-      return !isBaseOrResourceEqual((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.color, (_k = this.value) === null || _k === void 0 ? void 0 : _k.color) ||
-        !isBaseOrResourceEqual((_m = (_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.font) === null || _m === void 0 ? void 0 : _m.size, (_p = (_o = this.value) === null || _o === void 0 ? void 0 : _o.font) === null || _p === void 0 ? void 0 : _p.size) ||
-        !isBaseOrResourceEqual((_r = (_q = this.stageValue) === null || _q === void 0 ? void 0 : _q.font) === null || _r === void 0 ? void 0 : _r.family, (_t = (_s = this.value) === null || _s === void 0 ? void 0 : _s.font) === null || _t === void 0 ? void 0 : _t.family);
+      return !isBaseOrResourceEqual((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.color, (_k = this.value) === null ||
+      _k === void 0 ? void 0 : _k.color) ||
+        !isBaseOrResourceEqual((_m = (_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.font) === null || _m ===
+        void 0 ? void 0 : _m.size, (_p = (_o = this.value) === null || _o === void 0 ? void 0 : _o.font) === null || _p ===
+        void 0 ? void 0 : _p.size) ||
+        !isBaseOrResourceEqual((_r = (_q = this.stageValue) === null || _q === void 0 ? void 0 : _q.font) === null || _r ===
+        void 0 ? void 0 : _r.family, (_t = (_s = this.value) === null || _s === void 0 ? void 0 : _s.font) === null || _t ===
+        void 0 ? void 0 : _t.family);
     }
   }
 }
@@ -12995,36 +12593,70 @@ class DatePickerDisappearTextStyleModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
     if (reset) {
-      GetUINativeModule().datePicker.resetDisappearTextStyle(node);
+      getUINativeModule().datePicker.resetDisappearTextStyle(node);
     }
     else {
-      GetUINativeModule().datePicker.setDisappearTextStyle(node, (_b = (_a = this.value) === null || _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined, (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined, (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null || _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined, (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null || _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined, (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null || _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
+      getUINativeModule().datePicker.setDisappearTextStyle(node, (_b = (_a = this.value) === null ||
+      _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined,
+      (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null ||
+      _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined,
+      (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null ||
+      _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined,
+      (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null ||
+      _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined,
+      (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null ||
+      _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
     }
   }
   checkObjectDiff() {
     let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
-    if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) === ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
-      ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) === ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style))) {
+    if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) ===
+    ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight) &&
+      ((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.font) === null || _f === void 0 ? void 0 : _f.style) ===
+      ((_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.font) === null || _h === void 0 ? void 0 : _h.style))) {
       return true;
     }
     else {
-      return !isBaseOrResourceEqual((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.color, (_k = this.value) === null || _k === void 0 ? void 0 : _k.color) ||
-        !isBaseOrResourceEqual((_m = (_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.font) === null || _m === void 0 ? void 0 : _m.size, (_p = (_o = this.value) === null || _o === void 0 ? void 0 : _o.font) === null || _p === void 0 ? void 0 : _p.size) ||
-        !isBaseOrResourceEqual((_r = (_q = this.stageValue) === null || _q === void 0 ? void 0 : _q.font) === null || _r === void 0 ? void 0 : _r.family, (_t = (_s = this.value) === null || _s === void 0 ? void 0 : _s.font) === null || _t === void 0 ? void 0 : _t.family);
+      return !isBaseOrResourceEqual((_j = this.stageValue) === null || _j === void 0 ? void 0 : _j.color, (_k = this.value) === null ||
+      _k === void 0 ? void 0 : _k.color) ||
+        !isBaseOrResourceEqual((_m = (_l = this.stageValue) === null || _l === void 0 ? void 0 : _l.font) === null ||
+        _m === void 0 ? void 0 : _m.size, (_p = (_o = this.value) === null || _o === void 0 ? void 0 : _o.font) === null ||
+        _p === void 0 ? void 0 : _p.size) ||
+        !isBaseOrResourceEqual((_r = (_q = this.stageValue) === null || _q === void 0 ? void 0 : _q.font) === null ||
+        _r === void 0 ? void 0 : _r.family, (_t = (_s = this.value) === null ||
+        _s === void 0 ? void 0 : _s.font) === null || _t === void 0 ? void 0 : _t.family);
     }
   }
 }
 DatePickerDisappearTextStyleModifier.identity = Symbol('disappearTextStyle');
+class DatePickerBackgroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().datePicker.resetBackgroundColor(node);
+    }
+    else {
+      getUINativeModule().datePicker.setBackgroundColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+DatePickerBackgroundColorModifier.identity = Symbol('datePickerBackgroundColor');
 //@ts-ignore
 globalThis.DatePicker.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkDatePickerComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkFormComponentComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -13072,10 +12704,10 @@ class FormComponentModuleNameModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().formComponent.resetModuleName(node);
+      getUINativeModule().formComponent.resetModuleName(node);
     }
     else {
-      GetUINativeModule().formComponent.setModuleName(node, this.value);
+      getUINativeModule().formComponent.setModuleName(node, this.value);
     }
   }
 }
@@ -13086,10 +12718,10 @@ class FormComponentDimensionModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().formComponent.resetDimension(node);
+      getUINativeModule().formComponent.resetDimension(node);
     }
     else {
-      GetUINativeModule().formComponent.setDimension(node, this.value);
+      getUINativeModule().formComponent.setDimension(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -13103,10 +12735,10 @@ class FormComponentAllowUpdateModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().formComponent.resetAllowUpdate(node);
+      getUINativeModule().formComponent.resetAllowUpdate(node);
     }
     else {
-      GetUINativeModule().formComponent.setAllowUpdate(node, this.value);
+      getUINativeModule().formComponent.setAllowUpdate(node, this.value);
     }
   }
 }
@@ -13117,10 +12749,10 @@ class FormComponentSizeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().formComponent.resetSize(node);
+      getUINativeModule().formComponent.resetSize(node);
     }
     else {
-      GetUINativeModule().formComponent.setSize(node, this.value.width, this.value.height);
+      getUINativeModule().formComponent.setSize(node, this.value.width, this.value.height);
     }
   }
   checkObjectDiff() {
@@ -13136,10 +12768,10 @@ class FormComponentVisibilityModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().formComponent.resetVisibility(node);
+      getUINativeModule().formComponent.resetVisibility(node);
     }
     else {
-      GetUINativeModule().formComponent.setVisibility(node, this.value);
+      getUINativeModule().formComponent.setVisibility(node, this.value);
     }
   }
 }
@@ -13147,13 +12779,14 @@ FormComponentVisibilityModifier.identity = Symbol('formComponentVisibility');
 // @ts-ignore
 globalThis.FormComponent.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkFormComponentComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkGaugeComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -13197,10 +12830,10 @@ class ArkGaugeComponent extends ArkComponent {
 class GaugeIndicatorModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().gauge.resetGaugeIndicator(node, this.value);
+      getUINativeModule().gauge.resetGaugeIndicator(node, this.value);
     }
     else {
-      GetUINativeModule().gauge.setGaugeIndicator(node, this.value.icon, this.value.space);
+      getUINativeModule().gauge.setGaugeIndicator(node, this.value.icon, this.value.space);
     }
   }
   checkObjectDiff() {
@@ -13212,10 +12845,10 @@ GaugeIndicatorModifier.identity = Symbol('gaugeIndicator');
 class GaugeColorsModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().gauge.resetGaugeColors(node);
+      getUINativeModule().gauge.resetGaugeColors(node);
     }
     else {
-      GetUINativeModule().gauge.setGaugeColors(node, this.value);
+      getUINativeModule().gauge.setGaugeColors(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -13226,108 +12859,84 @@ GaugeColorsModifier.identity = Symbol('gaugeColors');
 class GaugeVauleModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().gauge.resetGaugeVaule(node);
+      getUINativeModule().gauge.resetGaugeVaule(node);
     }
     else {
-      GetUINativeModule().gauge.setGaugeVaule(node, this.value);
+      getUINativeModule().gauge.setGaugeVaule(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 GaugeVauleModifier.identity = Symbol('gaugeVaule');
 class GaugeStartAngleModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().gauge.resetGaugeStartAngle(node);
+      getUINativeModule().gauge.resetGaugeStartAngle(node);
     }
     else {
-      GetUINativeModule().gauge.setGaugeStartAngle(node, this.value);
+      getUINativeModule().gauge.setGaugeStartAngle(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 GaugeStartAngleModifier.identity = Symbol('gaugeStartAngle');
 class GaugeEndAngleModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().gauge.resetGaugeEndAngle(node);
+      getUINativeModule().gauge.resetGaugeEndAngle(node);
     }
     else {
-      GetUINativeModule().gauge.setGaugeEndAngle(node, this.value);
+      getUINativeModule().gauge.setGaugeEndAngle(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 GaugeEndAngleModifier.identity = Symbol('gaugeEndAngle');
 class GaugeStrokeWidthModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().gauge.resetGaugeStrokeWidth(node);
+      getUINativeModule().gauge.resetGaugeStrokeWidth(node);
     }
     else {
-      GetUINativeModule().gauge.setGaugeStrokeWidth(node, this.value);
+      getUINativeModule().gauge.setGaugeStrokeWidth(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 GaugeStrokeWidthModifier.identity = Symbol('gaugeStrokeWidth');
 class GaugeTrackShadowModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().gauge.resetGaugeTrackShadow(node);
+      getUINativeModule().gauge.resetGaugeTrackShadow(node);
     }
     else {
-      GetUINativeModule().gauge.setGaugeTrackShadow(node, this.value, this.value.radius, this.value.offsetX, this.value.offsetY);
+      getUINativeModule().gauge.setGaugeTrackShadow(node, this.value, this.value.radius, this.value.offsetX, this.value.offsetY);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 GaugeTrackShadowModifier.identity = Symbol('gaugeTrackShadow');
 // @ts-ignore
 globalThis.Gauge.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkGaugeComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkMarqueeComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -13372,19 +12981,14 @@ class MarqueeFontColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().marquee.resetFontColor(node);
+      getUINativeModule().marquee.resetFontColor(node);
     }
     else {
-      GetUINativeModule().marquee.setFontColor(node, this.value);
+      getUINativeModule().marquee.setFontColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 MarqueeFontColorModifier.identity = Symbol('fontColor');
@@ -13394,19 +12998,14 @@ class MarqueeFontSizeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().marquee.resetFontSize(node);
+      getUINativeModule().marquee.resetFontSize(node);
     }
     else {
-      GetUINativeModule().marquee.setFontSize(node, this.value);
+      getUINativeModule().marquee.setFontSize(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 MarqueeFontSizeModifier.identity = Symbol('fontSize');
@@ -13416,10 +13015,10 @@ class MarqueeAllowScaleModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().marquee.resetAllowScale(node);
+      getUINativeModule().marquee.resetAllowScale(node);
     }
     else {
-      GetUINativeModule().marquee.setAllowScale(node, this.value);
+      getUINativeModule().marquee.setAllowScale(node, this.value);
     }
   }
 }
@@ -13430,10 +13029,10 @@ class MarqueeFontWeightModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().marquee.resetFontWeight(node);
+      getUINativeModule().marquee.resetFontWeight(node);
     }
     else {
-      GetUINativeModule().marquee.setFontWeight(node, this.value);
+      getUINativeModule().marquee.setFontWeight(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -13447,10 +13046,10 @@ class MarqueeFontFamilyModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().marquee.resetFontFamily(node);
+      getUINativeModule().marquee.resetFontFamily(node);
     }
     else {
-      GetUINativeModule().marquee.setFontFamily(node, this.value);
+      getUINativeModule().marquee.setFontFamily(node, this.value);
     }
   }
 }
@@ -13458,13 +13057,14 @@ MarqueeFontFamilyModifier.identity = Symbol('fontFamily');
 // @ts-ignore
 globalThis.Marquee.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkMarqueeComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class MenuFontColorModifier extends ModifierWithKey {
   constructor(value) {
@@ -13472,19 +13072,14 @@ class MenuFontColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().menu.resetMenuFontColor(node);
+      getUINativeModule().menu.resetMenuFontColor(node);
     }
     else {
-      GetUINativeModule().menu.setMenuFontColor(node, this.value);
+      getUINativeModule().menu.setMenuFontColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 MenuFontColorModifier.identity = Symbol('fontColor');
@@ -13494,10 +13089,10 @@ class MenuFontModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset || !this.value) {
-      GetUINativeModule().menu.resetFont(node);
+      getUINativeModule().menu.resetFont(node);
     }
     else {
-      GetUINativeModule().menu.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      getUINativeModule().menu.setFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
   checkObjectDiff() {
@@ -13515,14 +13110,14 @@ class RadiusModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().menu.resetRadius(node);
+      getUINativeModule().menu.resetRadius(node);
     }
     else {
       if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
-        GetUINativeModule().menu.setRadius(node, this.value, this.value, this.value, this.value);
+        getUINativeModule().menu.setRadius(node, this.value, this.value, this.value, this.value);
       }
       else {
-        GetUINativeModule().menu.setRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
+        getUINativeModule().menu.setRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
       }
     }
   }
@@ -13568,13 +13163,14 @@ class ArkMenuComponent extends ArkComponent {
 // @ts-ignore
 globalThis.Menu.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkMenuComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class MenuItemSelectedModifier extends ModifierWithKey {
   constructor(value) {
@@ -13582,10 +13178,10 @@ class MenuItemSelectedModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().menuitem.resetMenuItemSelected(node);
+      getUINativeModule().menuitem.resetMenuItemSelected(node);
     }
     else {
-      GetUINativeModule().menuitem.setMenuItemSelected(node, this.value);
+      getUINativeModule().menuitem.setMenuItemSelected(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -13599,19 +13195,14 @@ class LabelFontColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().menuitem.resetLabelFontColor(node);
+      getUINativeModule().menuitem.resetLabelFontColor(node);
     }
     else {
-      GetUINativeModule().menuitem.setLabelFontColor(node, this.value);
+      getUINativeModule().menuitem.setLabelFontColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 LabelFontColorModifier.identity = Symbol('labelfontColor');
@@ -13621,19 +13212,14 @@ class ContentFontColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().menuitem.resetContentFontColor(node);
+      getUINativeModule().menuitem.resetContentFontColor(node);
     }
     else {
-      GetUINativeModule().menuitem.setContentFontColor(node, this.value);
+      getUINativeModule().menuitem.setContentFontColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 ContentFontColorModifier.identity = Symbol('contentfontColor');
@@ -13643,10 +13229,10 @@ class LabelFontModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset || !this.value) {
-      GetUINativeModule().menuitem.resetLabelFont(node);
+      getUINativeModule().menuitem.resetLabelFont(node);
     }
     else {
-      GetUINativeModule().menuitem.setLabelFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      getUINativeModule().menuitem.setLabelFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
   checkObjectDiff() {
@@ -13664,10 +13250,10 @@ class ContentFontModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset || !this.value) {
-      GetUINativeModule().menuitem.resetContentFont(node);
+      getUINativeModule().menuitem.resetContentFont(node);
     }
     else {
-      GetUINativeModule().menuitem.setContentFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
+      getUINativeModule().menuitem.setContentFont(node, this.value.size, this.value.weight, this.value.family, this.value.style);
     }
   }
   checkObjectDiff() {
@@ -13713,13 +13299,14 @@ class ArkMenuItemComponent extends ArkComponent {
 // @ts-ignore
 globalThis.MenuItem.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkMenuItemComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkMenuItemGroupComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -13732,15 +13319,16 @@ class ArkMenuItemGroupComponent extends ArkComponent {
 // @ts-ignore
 globalThis.MenuItemGroup.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkMenuItemGroupComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
-class ArkPluginComponentComponent extends ArkComponent {
+class ArkPluginComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
   }
@@ -13753,17 +13341,92 @@ class ArkPluginComponentComponent extends ArkComponent {
   monopolizeEvents(monopolize) {
     throw new Error('Method not implemented.');
   }
+  size(value) {
+    modifierWithKey(this._modifiersWithKeys, PluginSizeModifier.identity, PluginSizeModifier, value);
+    return this;
+  }
+  width(value) {
+    modifierWithKey(this._modifiersWithKeys, PluginWidthModifier.identity, PluginWidthModifier, value);
+    return this;
+  }
+  height(value) {
+    modifierWithKey(this._modifiersWithKeys, PluginHeightModifier.identity, PluginHeightModifier, value);
+    return this;
+  }
 }
+class PluginWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().plugin.resetWidth(node);
+    }
+    else {
+      getUINativeModule().plugin.setWidth(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else {
+      return true;
+    }
+  }
+}
+PluginWidthModifier.identity = Symbol('pluginWidth');
+class PluginHeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().plugin.resetHeight(node);
+    }
+    else {
+      getUINativeModule().plugin.setHeight(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else {
+      return true;
+    }
+  }
+}
+PluginHeightModifier.identity = Symbol('pluginHeight');
+class PluginSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().plugin.resetSize(node);
+    }
+    else {
+      getUINativeModule().plugin.setSize(node, this.value.width, this.value.height);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+      !isBaseOrResourceEqual(this.stageValue.height, this.value.height);
+  }
+}
+PluginSizeModifier.identity = Symbol('size');
 // @ts-ignore
 globalThis.PluginComponent.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
-    return new ArkPluginComponentComponent(nativeNode);
+    return new ArkPluginComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkProgressComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -13792,10 +13455,10 @@ class ArkProgressComponent extends ArkComponent {
 class ProgressValueModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().progress.ResetProgressValue(node);
+      getUINativeModule().progress.ResetProgressValue(node);
     }
     else {
-      GetUINativeModule().progress.SetProgressValue(node, this.value);
+      getUINativeModule().progress.SetProgressValue(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -13806,10 +13469,10 @@ ProgressValueModifier.identity = Symbol('value');
 class ProgressColorModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().progress.resetProgressColor(node);
+      getUINativeModule().progress.resetProgressColor(node);
     }
     else {
-      GetUINativeModule().progress.setProgressColor(node, this.value);
+      getUINativeModule().progress.setProgressColor(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -13820,7 +13483,7 @@ ProgressColorModifier.identity = Symbol('color');
 class ProgressStyleModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().progress.ResetProgressStyle(node);
+      getUINativeModule().progress.ResetProgressStyle(node);
     }
     else {
       let strokeWidth = this.value.strokeWidth;
@@ -13830,10 +13493,10 @@ class ProgressStyleModifier extends ModifierWithKey {
       let borderColor = this.value.borderColor;
       let borderWidth = this.value.borderWidth;
       let content = this.value.content;
-      let fontSize = undefined;
-      let fontWeight = undefined;
-      let fontFamily = undefined;
-      let fontStyle = undefined;
+      let fontSize;
+      let fontWeight;
+      let fontFamily;
+      let fontStyle;
       if (this.value.font) {
         fontSize = this.value.font.size;
         fontWeight = this.value.font.weight;
@@ -13846,8 +13509,10 @@ class ProgressStyleModifier extends ModifierWithKey {
       let shadow = this.value.shadow;
       let status = this.value.status;
       let strokeRadius = this.value.strokeRadius;
-      GetUINativeModule().progress.SetProgressStyle(node, strokeWidth, scaleCount, scaleWidth, enableSmoothEffect, borderColor, borderWidth,
-        content, fontSize, fontWeight, fontFamily, fontStyle, fontColor, enableScanEffect, showDefaultPercentage, shadow, status, strokeRadius);
+      getUINativeModule().progress.SetProgressStyle(node, strokeWidth, scaleCount,
+        scaleWidth, enableSmoothEffect, borderColor, borderWidth, content, fontSize,
+        fontWeight, fontFamily, fontStyle, fontColor, enableScanEffect, showDefaultPercentage,
+        shadow, status, strokeRadius);
     }
   }
   checkObjectDiff() {
@@ -13858,32 +13523,28 @@ ProgressStyleModifier.identity = Symbol('style');
 class ProgressBackgroundColorModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().progress.resetProgressBackgroundColor(node);
+      getUINativeModule().progress.resetProgressBackgroundColor(node);
     }
     else {
-      GetUINativeModule().progress.setProgressBackgroundColor(node, this.value);
+      getUINativeModule().progress.setProgressBackgroundColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 ProgressBackgroundColorModifier.identity = Symbol('progressBackgroundColor');
 // @ts-ignore
 globalThis.Progress.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkProgressComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkQRCodeComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -13911,19 +13572,14 @@ class QRColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().qrcode.resetQRColor(node);
+      getUINativeModule().qrcode.resetQRColor(node);
     }
     else {
-      GetUINativeModule().qrcode.setQRColor(node, this.value);
+      getUINativeModule().qrcode.setQRColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 QRColorModifier.identity = Symbol('color');
@@ -13933,19 +13589,14 @@ class QRBackgroundColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().qrcode.resetQRBackgroundColor(node);
+      getUINativeModule().qrcode.resetQRBackgroundColor(node);
     }
     else {
-      GetUINativeModule().qrcode.setQRBackgroundColor(node, this.value);
+      getUINativeModule().qrcode.setQRBackgroundColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 QRBackgroundColorModifier.identity = Symbol('qrBackgroundColor');
@@ -13955,10 +13606,10 @@ class QRContentOpacityModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().qrcode.resetContentOpacity(node);
+      getUINativeModule().qrcode.resetContentOpacity(node);
     }
     else {
-      GetUINativeModule().qrcode.setContentOpacity(node, this.value);
+      getUINativeModule().qrcode.setContentOpacity(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -13969,13 +13620,14 @@ QRContentOpacityModifier.identity = Symbol('qrContentOpacity');
 // @ts-ignore
 globalThis.QRCode.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkQRCodeComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkRichTextComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -13994,13 +13646,14 @@ class ArkRichTextComponent extends ArkComponent {
 // @ts-ignore
 globalThis.RichText.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkRichTextComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkScrollBarComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -14013,13 +13666,14 @@ class ArkScrollBarComponent extends ArkComponent {
 // @ts-ignore
 globalThis.ScrollBar.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkScrollBarComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkStepperComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -14047,13 +13701,14 @@ class ArkStepperComponent extends ArkComponent {
 // @ts-ignore
 globalThis.Stepper.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkStepperComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkStepperItemComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -14063,7 +13718,7 @@ class ArkStepperItemComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   nextLabel(value) {
-    modifier(this._modifiers, NextLabelModifier, value);
+    modifierWithKey(this._modifiersWithKeys, NextLabelModifier.identity, NextLabelModifier, value);
     return this;
   }
   status(value) {
@@ -14073,16 +13728,16 @@ class ArkStepperItemComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
 }
-class NextLabelModifier extends Modifier {
+class NextLabelModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().stepperItem.resetNextLabel(node);
+      getUINativeModule().stepperItem.resetNextLabel(node);
     }
     else {
-      GetUINativeModule().stepperItem.setNextLabel(node, this.value);
+      getUINativeModule().stepperItem.setNextLabel(node, this.value);
     }
   }
 }
@@ -14090,13 +13745,14 @@ NextLabelModifier.identity = Symbol('NextLabel');
 // @ts-ignore
 globalThis.StepperItem.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkStepperItemComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkTextClockComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -14145,10 +13801,10 @@ class TextClockFormatModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textClock.resetFormat(node);
+      getUINativeModule().textClock.resetFormat(node);
     }
     else {
-      GetUINativeModule().textClock.setFormat(node, this.value);
+      getUINativeModule().textClock.setFormat(node, this.value);
     }
   }
 }
@@ -14159,10 +13815,10 @@ class TextClockFontColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textClock.resetFontColor(node);
+      getUINativeModule().textClock.resetFontColor(node);
     }
     else {
-      GetUINativeModule().textClock.setFontColor(node, this.value);
+      getUINativeModule().textClock.setFontColor(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -14176,10 +13832,10 @@ class TextClockFontSizeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textClock.resetFontSize(node);
+      getUINativeModule().textClock.resetFontSize(node);
     }
     else {
-      GetUINativeModule().textClock.setFontSize(node, this.value);
+      getUINativeModule().textClock.setFontSize(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -14193,10 +13849,10 @@ class TextClockFontStyleModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textClock.resetFontStyle(node);
+      getUINativeModule().textClock.resetFontStyle(node);
     }
     else {
-      GetUINativeModule().textClock.setFontStyle(node, this.value);
+      getUINativeModule().textClock.setFontStyle(node, this.value);
     }
   }
 }
@@ -14207,10 +13863,10 @@ class TextClockFontWeightModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textClock.resetFontWeight(node);
+      getUINativeModule().textClock.resetFontWeight(node);
     }
     else {
-      GetUINativeModule().textClock.setFontWeight(node, this.value);
+      getUINativeModule().textClock.setFontWeight(node, this.value);
     }
   }
 }
@@ -14221,10 +13877,10 @@ class TextClockFontFamilyModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textClock.resetFontFamily(node);
+      getUINativeModule().textClock.resetFontFamily(node);
     }
     else {
-      GetUINativeModule().textClock.setFontFamily(node, this.value);
+      getUINativeModule().textClock.setFontFamily(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -14235,13 +13891,14 @@ TextClockFontFamilyModifier.identity = Symbol('textClockFontFamily');
 // @ts-ignore
 globalThis.TextClock.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTextClockComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkTextTimerComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -14278,10 +13935,10 @@ class ArkTextTimerComponent extends ArkComponent {
 class TextTimerFontColorModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textTimer.resetFontColor(node);
+      getUINativeModule().textTimer.resetFontColor(node);
     }
     else {
-      GetUINativeModule().textTimer.setFontColor(node, this.value);
+      getUINativeModule().textTimer.setFontColor(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -14292,10 +13949,10 @@ TextTimerFontColorModifier.identity = Symbol('fontColor');
 class TextTimerFontSizeModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textTimer.resetFontSize(node);
+      getUINativeModule().textTimer.resetFontSize(node);
     }
     else {
-      GetUINativeModule().textTimer.setFontSize(node, this.value);
+      getUINativeModule().textTimer.setFontSize(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -14306,10 +13963,10 @@ TextTimerFontSizeModifier.identity = Symbol('fontSize');
 class TextTimerFontWeightModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textTimer.resetFontWeight(node);
+      getUINativeModule().textTimer.resetFontWeight(node);
     }
     else {
-      GetUINativeModule().textTimer.setFontWeight(node, this.value);
+      getUINativeModule().textTimer.setFontWeight(node, this.value);
     }
   }
 }
@@ -14317,10 +13974,10 @@ TextTimerFontWeightModifier.identity = Symbol('fontWeight');
 class TextTimerFontStyleModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textTimer.resetFontStyle(node);
+      getUINativeModule().textTimer.resetFontStyle(node);
     }
     else {
-      GetUINativeModule().textTimer.setFontStyle(node, this.value);
+      getUINativeModule().textTimer.setFontStyle(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -14331,10 +13988,10 @@ TextTimerFontStyleModifier.identity = Symbol('fontStyle');
 class TextTimerFontFamilyModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textTimer.resetFontFamily(node);
+      getUINativeModule().textTimer.resetFontFamily(node);
     }
     else {
-      GetUINativeModule().textTimer.setFontFamily(node, this.value);
+      getUINativeModule().textTimer.setFontFamily(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -14345,10 +14002,10 @@ TextTimerFontFamilyModifier.identity = Symbol('fontFamily');
 class TextTimerFormatModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().textTimer.resetFormat(node);
+      getUINativeModule().textTimer.resetFormat(node);
     }
     else {
-      GetUINativeModule().textTimer.setFormat(node, this.value);
+      getUINativeModule().textTimer.setFormat(node, this.value);
     }
   }
 }
@@ -14356,13 +14013,14 @@ TextTimerFormatModifier.identity = Symbol('textTimerFormat');
 // @ts-ignore
 globalThis.TextTimer.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTextTimerComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkWebComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -14642,13 +14300,14 @@ class ArkWebComponent extends ArkComponent {
 // @ts-ignore
 globalThis.Web.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkWebComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkXComponentComponent {
   constructor(nativePtr) {
@@ -14665,6 +14324,21 @@ class ArkXComponentComponent {
     expiringItemsWithKeys.forEach(key => {
       this._modifiersWithKeys.delete(key);
     });
+  }
+  outline(value) {
+    throw new Error('Method not implemented.');
+  }
+  outlineColor(value) {
+    throw new Error('Method not implemented.');
+  }
+  outlineRadius(value) {
+    throw new Error('Method not implemented.');
+  }
+  outlineStyle(value) {
+    throw new Error('Method not implemented.');
+  }
+  outlineWidth(value) {
+    throw new Error('Method not implemented.');
   }
   width(value) {
     throw new Error('Method not implemented.');
@@ -15054,25 +14728,30 @@ class ArkXComponentComponent {
     throw new Error('Method not implemented.');
   }
 }
+// @ts-ignore
+globalThis.XComponent.attributeModifier = function (modifier) {
+  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
+    return new ArkXComponentComponent(nativeNode);
+  });
+  applyUIAttributes(modifier, nativeNode, component);
+  component.applyModifierPatch();
+};
 class XComponentOpacityModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().xComponent.resetOpacity(node);
+      getUINativeModule().xComponent.resetOpacity(node);
     }
     else {
-      GetUINativeModule().xComponent.setOpacity(node, this.value);
+      getUINativeModule().xComponent.setOpacity(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 XComponentOpacityModifier.identity = Symbol('xComponentOpacity');
@@ -15082,32 +14761,18 @@ class XComponentBackgroundColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().xComponent.resetBackgroundColor(node);
+      getUINativeModule().xComponent.resetBackgroundColor(node);
     }
     else {
-      GetUINativeModule().xComponent.setBackgroundColor(node, this.value);
+      getUINativeModule().xComponent.setBackgroundColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 XComponentBackgroundColorModifier.identity = Symbol('xComponentBackgroundColor');
-// @ts-ignore
-globalThis.XComponent.attributeModifier = function (modifier) {
-  const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, () => {
-    return new ArkXComponentComponent(nativeNode);
-  });
-  applyUIAttributes(modifier, nativeNode, component);
-  component.applyModifierPatch();
-};
+
 /// <reference path='./import.ts' />
 class ArkBadgeComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -15120,13 +14785,14 @@ class ArkBadgeComponent extends ArkComponent {
 // @ts-ignore
 globalThis.Badge.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkBadgeComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkFlowItemComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -15139,13 +14805,14 @@ class ArkFlowItemComponent extends ArkComponent {
 // @ts-ignore
 globalThis.FlowItem.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkFlowItemComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkFormLinkComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -15158,21 +14825,22 @@ class ArkFormLinkComponent extends ArkComponent {
 // @ts-ignore
 globalThis.FormLink.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkFormLinkComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class GridItemSelectableModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().gridItem.resetGridItemSelectable(node);
+      getUINativeModule().gridItem.resetGridItemSelectable(node);
     }
     else {
-      GetUINativeModule().gridItem.setGridItemSelectable(node, this.value);
+      getUINativeModule().gridItem.setGridItemSelectable(node, this.value);
     }
   }
 }
@@ -15180,10 +14848,10 @@ GridItemSelectableModifier.identity = Symbol('gridItemSelectable');
 class GridItemSelectedModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().gridItem.resetGridItemSelected(node);
+      getUINativeModule().gridItem.resetGridItemSelected(node);
     }
     else {
-      GetUINativeModule().gridItem.setGridItemSelected(node, this.value);
+      getUINativeModule().gridItem.setGridItemSelected(node, this.value);
     }
   }
 }
@@ -15191,10 +14859,10 @@ GridItemSelectedModifier.identity = Symbol('gridItemSelected');
 class GridItemRowStartModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().gridItem.resetGridItemRowStart(node);
+      getUINativeModule().gridItem.resetGridItemRowStart(node);
     }
     else {
-      GetUINativeModule().gridItem.setGridItemRowStart(node, this.value);
+      getUINativeModule().gridItem.setGridItemRowStart(node, this.value);
     }
   }
 }
@@ -15202,10 +14870,10 @@ GridItemRowStartModifier.identity = Symbol('gridItemRowStart');
 class GridItemRowEndModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().gridItem.resetGridItemRowEnd(node);
+      getUINativeModule().gridItem.resetGridItemRowEnd(node);
     }
     else {
-      GetUINativeModule().gridItem.setGridItemRowEnd(node, this.value);
+      getUINativeModule().gridItem.setGridItemRowEnd(node, this.value);
     }
   }
 }
@@ -15213,10 +14881,10 @@ GridItemRowEndModifier.identity = Symbol('gridItemRowEnd');
 class GridItemColumnStartModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().gridItem.resetGridItemColumnStart(node);
+      getUINativeModule().gridItem.resetGridItemColumnStart(node);
     }
     else {
-      GetUINativeModule().gridItem.setGridItemColumnStart(node, this.value);
+      getUINativeModule().gridItem.setGridItemColumnStart(node, this.value);
     }
   }
 }
@@ -15224,10 +14892,10 @@ GridItemColumnStartModifier.identity = Symbol('gridItemColumnStart');
 class GridItemColumnEndModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().gridItem.resetGridItemColumnEnd(node);
+      getUINativeModule().gridItem.resetGridItemColumnEnd(node);
     }
     else {
-      GetUINativeModule().gridItem.setGridItemColumnEnd(node, this.value);
+      getUINativeModule().gridItem.setGridItemColumnEnd(node, this.value);
     }
   }
 }
@@ -15273,13 +14941,14 @@ class ArkGridItemComponent extends ArkComponent {
 // @ts-ignore
 globalThis.GridItem.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkGridItemComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkHyperlinkComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -15296,32 +14965,28 @@ class HyperlinkColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().hyperlink.resetColor(node);
+      getUINativeModule().hyperlink.resetColor(node);
     }
     else {
-      GetUINativeModule().hyperlink.setColor(node, this.value);
+      getUINativeModule().hyperlink.setColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 HyperlinkColorModifier.identity = Symbol('hyperlinkColor');
 // @ts-ignore
 globalThis.Hyperlink.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkHyperlinkComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ListEditModeModifier extends ModifierWithKey {
   constructor(value) {
@@ -15329,10 +14994,10 @@ class ListEditModeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().list.resetEditMode(node);
+      getUINativeModule().list.resetEditMode(node);
     }
     else {
-      GetUINativeModule().list.setEditMode(node, this.value);
+      getUINativeModule().list.setEditMode(node, this.value);
     }
   }
 }
@@ -15343,10 +15008,10 @@ class ListMultiSelectableModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().list.resetMultiSelectable(node);
+      getUINativeModule().list.resetMultiSelectable(node);
     }
     else {
-      GetUINativeModule().list.setMultiSelectable(node, this.value);
+      getUINativeModule().list.setMultiSelectable(node, this.value);
     }
   }
 }
@@ -15357,10 +15022,10 @@ class ListAlignListItemModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().list.resetAlignListItem(node);
+      getUINativeModule().list.resetAlignListItem(node);
     }
     else {
-      GetUINativeModule().list.setAlignListItem(node, this.value);
+      getUINativeModule().list.setAlignListItem(node, this.value);
     }
   }
 }
@@ -15371,10 +15036,10 @@ class ListScrollSnapAlignModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().list.resetScrollSnapAlign(node);
+      getUINativeModule().list.resetScrollSnapAlign(node);
     }
     else {
-      GetUINativeModule().list.setScrollSnapAlign(node, this.value);
+      getUINativeModule().list.setScrollSnapAlign(node, this.value);
     }
   }
 }
@@ -15386,15 +15051,14 @@ class ListDividerModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b, _c, _d;
     if (reset) {
-      GetUINativeModule().list.resetDivider(node);
-    } else {
-      GetUINativeModule().list.setDivider(
-        node,
-        (_a = this.value) === null || _a === void 0 ? void 0 : _a.strokeWidth,
-        (_b = this.value) === null || _b === void 0 ? void 0 : _b.color,
-        (_c = this.value) === null || _c === void 0 ? void 0 : _c.startMargin,
-        (_d = this.value) === null || _d === void 0 ? void 0 : _d.endMargin
-      );
+      getUINativeModule().list.resetDivider(node);
+    }
+    else {
+      getUINativeModule().list.setDivider(node, (_a = this.value) === null ||
+      _a === void 0 ? void 0 : _a.strokeWidth, (_b = this.value) === null ||
+      _b === void 0 ? void 0 : _b.color, (_c = this.value) === null ||
+      _c === void 0 ? void 0 : _c.startMargin, (_d = this.value) === null ||
+      _d === void 0 ? void 0 : _d.endMargin);
     }
   }
   checkObjectDiff() {
@@ -15413,10 +15077,17 @@ class ChainAnimationOptionsModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b, _c, _d, _e, _f, _g;
     if (reset) {
-      GetUINativeModule().list.resetChainAnimationOptions(node);
+      getUINativeModule().list.resetChainAnimationOptions(node);
     }
     else {
-      GetUINativeModule().list.setChainAnimationOptions(node, (_a = this.value) === null || _a === void 0 ? void 0 : _a.minSpace, (_b = this.value) === null || _b === void 0 ? void 0 : _b.maxSpace, (_c = this.value) === null || _c === void 0 ? void 0 : _c.conductivity, (_d = this.value) === null || _d === void 0 ? void 0 : _d.intensity, (_e = this.value) === null || _e === void 0 ? void 0 : _e.edgeEffect, (_f = this.value) === null || _f === void 0 ? void 0 : _f.stiffness, (_g = this.value) === null || _g === void 0 ? void 0 : _g.damping);
+      getUINativeModule().list.setChainAnimationOptions(node, (_a = this.value) === null ||
+      _a === void 0 ? void 0 : _a.minSpace, (_b = this.value) === null ||
+      _b === void 0 ? void 0 : _b.maxSpace, (_c = this.value) === null ||
+      _c === void 0 ? void 0 : _c.conductivity, (_d = this.value) === null ||
+      _d === void 0 ? void 0 : _d.intensity, (_e = this.value) === null ||
+      _e === void 0 ? void 0 : _e.edgeEffect, (_f = this.value) === null ||
+      _f === void 0 ? void 0 : _f.stiffness, (_g = this.value) === null ||
+      _g === void 0 ? void 0 : _g.damping);
     }
   }
   checkObjectDiff() {
@@ -15433,10 +15104,10 @@ class ListChainAnimationModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().list.resetChainAnimation(node);
+      getUINativeModule().list.resetChainAnimation(node);
     }
     else {
-      GetUINativeModule().list.setChainAnimation(node, this.value);
+      getUINativeModule().list.setChainAnimation(node, this.value);
     }
   }
 }
@@ -15447,10 +15118,10 @@ class ListCachedCountModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().list.resetCachedCount(node);
+      getUINativeModule().list.resetCachedCount(node);
     }
     else {
-      GetUINativeModule().list.setCachedCount(node, this.value);
+      getUINativeModule().list.setCachedCount(node, this.value);
     }
   }
 }
@@ -15461,10 +15132,10 @@ class ListEnableScrollInteractionModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().list.resetEnableScrollInteraction(node);
+      getUINativeModule().list.resetEnableScrollInteraction(node);
     }
     else {
-      GetUINativeModule().list.setEnableScrollInteraction(node, this.value);
+      getUINativeModule().list.setEnableScrollInteraction(node, this.value);
     }
   }
 }
@@ -15475,10 +15146,10 @@ class ListStickyModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().list.resetSticky(node);
+      getUINativeModule().list.resetSticky(node);
     }
     else {
-      GetUINativeModule().list.setSticky(node, this.value);
+      getUINativeModule().list.setSticky(node, this.value);
     }
   }
 }
@@ -15490,10 +15161,11 @@ class ListEdgeEffectModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a;
     if (reset) {
-      GetUINativeModule().list.resetListEdgeEffect(node);
+      getUINativeModule().list.resetListEdgeEffect(node);
     }
     else {
-      GetUINativeModule().list.setListEdgeEffect(node, this.value.value, (_a = this.value.options) === null || _a === void 0 ? void 0 : _a.alwaysEnabled);
+      getUINativeModule().list.setListEdgeEffect(node, this.value.value, (_a = this.value.options) === null ||
+      _a === void 0 ? void 0 : _a.alwaysEnabled);
     }
   }
   checkObjectDiff() {
@@ -15508,10 +15180,10 @@ class ListListDirectionModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().list.resetListDirection(node);
+      getUINativeModule().list.resetListDirection(node);
     }
     else {
-      GetUINativeModule().list.setListDirection(node, this.value);
+      getUINativeModule().list.setListDirection(node, this.value);
     }
   }
 }
@@ -15522,27 +15194,19 @@ class ListFrictionModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().list.resetListFriction(node);
+      getUINativeModule().list.resetListFriction(node);
     }
     else {
       if (!isNumber(this.value) && !isResource(this.value)) {
-        GetUINativeModule().list.resetListFriction(node);
+        getUINativeModule().list.resetListFriction(node);
       }
       else {
-        GetUINativeModule().list.setListFriction(node, this.value);
+        getUINativeModule().list.setListFriction(node, this.value);
       }
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else if (!isResource(this.stageValue) && !isResource(this.value)) {
-      return !(this.stageValue === this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 ListFrictionModifier.identity = Symbol('listFriction');
@@ -15553,11 +15217,12 @@ class ListNestedScrollModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b;
     if (reset) {
-      GetUINativeModule().list.resetListNestedScroll(node);
+      getUINativeModule().list.resetListNestedScroll(node);
     }
     else {
-      GetUINativeModule().list.setListNestedScroll(node, (_a = this.value) === null || _a === void 0 ? void 0 : _a.scrollForward,
-        (_b = this.value) === null || _b === void 0 ? void 0 : _b.scrollBackward);
+      getUINativeModule().list.setListNestedScroll(node, (_a = this.value) === null ||
+      _a === void 0 ? void 0 : _a.scrollForward, (_b = this.value) === null ||
+      _b === void 0 ? void 0 : _b.scrollBackward);
     }
   }
 }
@@ -15568,10 +15233,10 @@ class ListScrollBarModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().list.resetListScrollBar(node);
+      getUINativeModule().list.resetListScrollBar(node);
     }
     else {
-      GetUINativeModule().list.setListScrollBar(node, this.value);
+      getUINativeModule().list.setListScrollBar(node, this.value);
     }
   }
 }
@@ -15582,10 +15247,10 @@ class ListLanesModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().list.resetListLanes(node);
+      getUINativeModule().list.resetListLanes(node);
     }
     else {
-      GetUINativeModule().list.setListLanes(node, this.value.lanesNum, this.value.minLength, this.value.maxLength, this.value.gutter);
+      getUINativeModule().list.setListLanes(node, this.value.lanesNum, this.value.minLength, this.value.maxLength, this.value.gutter);
     }
   }
   checkObjectDiff() {
@@ -15732,21 +15397,22 @@ class ArkListComponent extends ArkComponent {
 // @ts-ignore
 globalThis.List.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkListComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ListItemSelectedModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().listItem.resetListItemSelected(node);
+      getUINativeModule().listItem.resetListItemSelected(node);
     }
     else {
-      GetUINativeModule().listItem.setListItemSelected(node, this.value);
+      getUINativeModule().listItem.setListItemSelected(node, this.value);
     }
   }
 }
@@ -15754,10 +15420,10 @@ ListItemSelectedModifier.identity = Symbol('listItemSelected');
 class ListItemSelectableModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().listItem.resetSelectable(node);
+      getUINativeModule().listItem.resetSelectable(node);
     }
     else {
-      GetUINativeModule().listItem.setSelectable(node, this.value);
+      getUINativeModule().listItem.setSelectable(node, this.value);
     }
   }
 }
@@ -15793,13 +15459,14 @@ class ArkListItemComponent extends ArkComponent {
 // @ts-ignore
 globalThis.ListItem.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkListItemComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ListItemGroupDividerModifier extends ModifierWithKey {
   constructor(value) {
@@ -15808,10 +15475,14 @@ class ListItemGroupDividerModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b, _c, _d;
     if (reset) {
-      GetUINativeModule().listItemGroup.resetDivider(node);
+      getUINativeModule().listItemGroup.resetDivider(node);
     }
     else {
-      GetUINativeModule().listItemGroup.setDivider(node, (_a = this.value) === null || _a === void 0 ? void 0 : _a.strokeWidth, (_b = this.value) === null || _b === void 0 ? void 0 : _b.color, (_c = this.value) === null || _c === void 0 ? void 0 : _c.startMargin, (_d = this.value) === null || _d === void 0 ? void 0 : _d.endMargin);
+      getUINativeModule().listItemGroup.setDivider(node, (_a = this.value) === null ||
+      _a === void 0 ? void 0 : _a.strokeWidth, (_b = this.value) === null ||
+      _b === void 0 ? void 0 : _b.color, (_c = this.value) === null ||
+      _c === void 0 ? void 0 : _c.startMargin, (_d = this.value) === null ||
+      _d === void 0 ? void 0 : _d.endMargin);
     }
   }
   checkObjectDiff() {
@@ -15838,13 +15509,14 @@ class ArkListItemGroupComponent extends ArkComponent {
 // @ts-ignore
 globalThis.ListItemGroup.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkListItemGroupComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkRelativeContainerComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -15857,52 +15529,33 @@ class ArkRelativeContainerComponent extends ArkComponent {
 // @ts-ignore
 globalThis.RelativeContainer.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkRelativeContainerComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkSwiperComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
   }
   index(value) {
-    if (typeof value === 'number') {
-      modifier(this._modifiers, SwiperIndexModifier, value);
-    }
-    else {
-      modifier(this._modifiers, SwiperIndexModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperIndexModifier.identity, SwiperIndexModifier, value);
     return this;
   }
   autoPlay(value) {
-    if (typeof value === 'boolean') {
-      modifier(this._modifiers, SwiperAutoPlayModifier, value);
-    }
-    else {
-      modifier(this._modifiers, SwiperAutoPlayModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperAutoPlayModifier.identity, SwiperAutoPlayModifier, value);
     return this;
   }
   interval(value) {
-    if (typeof value === 'number') {
-      modifier(this._modifiers, SwiperIntervalModifier, value);
-    }
-    else {
-      modifier(this._modifiers, SwiperIntervalModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperIntervalModifier.identity, SwiperIntervalModifier, value);
     return this;
   }
   indicator(value) {
-    if (typeof value === 'boolean' || typeof value === 'object') {
-      modifierWithKey(this._modifiersWithKeys, SwiperIndicatorModifier.identity, SwiperIndicatorModifier, value);
-    }
-    else {
-      modifierWithKey(this._modifiersWithKeys, SwiperIndicatorModifier.identity, SwiperIndicatorModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperIndicatorModifier.identity, SwiperIndicatorModifier, value);
     return this;
   }
   displayArrow(value, isHoverShow) {
@@ -15913,93 +15566,43 @@ class ArkSwiperComponent extends ArkComponent {
     return this;
   }
   loop(value) {
-    if (typeof value === 'boolean') {
-      modifier(this._modifiers, SwiperLoopModifier, value);
-    }
-    else {
-      modifier(this._modifiers, SwiperLoopModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperLoopModifier.identity, SwiperLoopModifier, value);
     return this;
   }
   duration(value) {
-    if (typeof value === 'number') {
-      modifier(this._modifiers, SwiperDurationModifier, value);
-    }
-    else {
-      modifier(this._modifiers, SwiperDurationModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperDurationModifier.identity, SwiperDurationModifier, value);
     return this;
   }
   vertical(value) {
-    if (typeof value === 'boolean') {
-      modifier(this._modifiers, SwiperVerticalModifier, value);
-    }
-    else {
-      modifier(this._modifiers, SwiperVerticalModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperVerticalModifier.identity, SwiperVerticalModifier, value);
     return this;
   }
   itemSpace(value) {
-    if (typeof value === 'number' || typeof value === 'string') {
-      modifier(this._modifiers, SwiperItemSpaceModifier, value);
-    }
-    else {
-      modifier(this._modifiers, SwiperItemSpaceModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperItemSpaceModifier.identity, SwiperItemSpaceModifier, value);
     return this;
   }
   displayMode(value) {
-    if (typeof value === 'number') {
-      modifier(this._modifiers, SwiperDisplayModeModifier, value);
-    }
-    else {
-      modifier(this._modifiers, SwiperDisplayModeModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperDisplayModeModifier.identity, SwiperDisplayModeModifier, value);
     return this;
   }
   cachedCount(value) {
-    if (typeof value === 'number') {
-      modifier(this._modifiers, SwiperCachedCountModifier, value);
-    }
-    else {
-      modifier(this._modifiers, SwiperCachedCountModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperCachedCountModifier.identity, SwiperCachedCountModifier, value);
     return this;
   }
   displayCount(value) {
-    if (typeof value === 'number' || typeof value === 'string' || typeof value === 'object') {
-      modifierWithKey(this._modifiersWithKeys, SwiperDisplayCountModifier.identity, SwiperDisplayCountModifier, value);
-    }
-    else {
-      modifierWithKey(this._modifiersWithKeys, SwiperDisplayCountModifier.identity, SwiperDisplayCountModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperDisplayCountModifier.identity, SwiperDisplayCountModifier, value);
     return this;
   }
   effectMode(value) {
-    if (typeof value === 'number') {
-      modifier(this._modifiers, SwiperEffectModeModifier, value);
-    }
-    else {
-      modifier(this._modifiers, SwiperEffectModeModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperEffectModeModifier.identity, SwiperEffectModeModifier, value);
     return this;
   }
   disableSwipe(value) {
-    if (typeof value === 'boolean') {
-      modifier(this._modifiers, SwiperDisableSwipeModifier, value);
-    }
-    else {
-      modifier(this._modifiers, SwiperDisableSwipeModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperDisableSwipeModifier.identity, SwiperDisableSwipeModifier, value);
     return this;
   }
   curve(value) {
-    if (typeof value === 'number' || typeof value === 'string') {
-      modifier(this._modifiers, SwiperCurveModifier, value);
-    }
-    else {
-      modifier(this._modifiers, SwiperCurveModifier, undefined);
-    }
+    modifierWithKey(this._modifiersWithKeys, SwiperCurveModifier.identity, SwiperCurveModifier, value);
     return this;
   }
   onChange(event) {
@@ -16035,55 +15638,46 @@ class ArkSwiperComponent extends ArkComponent {
 class SwiperNextMarginModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperNextMargin(node);
+      getUINativeModule().swiper.resetSwiperNextMargin(node);
     }
     else {
-      GetUINativeModule().swiper.setSwiperNextMargin(node, this.value);
+      getUINativeModule().swiper.setSwiperNextMargin(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 SwiperNextMarginModifier.identity = Symbol('swiperNextMargin');
 class SwiperPrevMarginModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperPrevMargin(node);
+      getUINativeModule().swiper.resetSwiperPrevMargin(node);
     }
     else {
-      GetUINativeModule().swiper.setSwiperPrevMargin(node, this.value);
+      getUINativeModule().swiper.setSwiperPrevMargin(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 SwiperPrevMarginModifier.identity = Symbol('swiperPrevMargin');
 class SwiperDisplayCountModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperDisplayCount(node);
+      getUINativeModule().swiper.resetSwiperDisplayCount(node);
     }
     else {
-      if (isNull(this.value)) {
-        GetUINativeModule().swiper.resetSwiperDisplayCount(node);
-      } else if (typeof this.value === 'object') {
+      if (isNull(this.value) || isUndefined(this.value)) {
+        getUINativeModule().swiper.resetSwiperDisplayCount(node);
+      }
+      else if (typeof this.value === 'object') {
         let minSize = this.value.minSize.toString();
-        GetUINativeModule().swiper.setSwiperDisplayCount(node, minSize, typeof this.value);
+        getUINativeModule().swiper.setSwiperDisplayCount(node, minSize, typeof this.value);
       }
       else {
-        GetUINativeModule().swiper.setSwiperDisplayCount(node, this.value, typeof this.value);
+        getUINativeModule().swiper.setSwiperDisplayCount(node, this.value, typeof this.value);
       }
     }
   }
@@ -16103,16 +15697,17 @@ SwiperDisplayCountModifier.identity = Symbol('swiperDisplayCount');
 class SwiperDisplayArrowModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperDisplayArrow(node);
-    } else {
-      if (!isNull(this.value.value) && typeof this.value === 'object') {
+      getUINativeModule().swiper.resetSwiperDisplayArrow(node);
+    }
+    else {
+      if (!isNull(this.value.value) && !isUndefined(this.value.value) && typeof this.value === 'object') {
         let displayArrowValue = 3;
-        let showBackground = undefined;
-        let isSidebarMiddle = undefined;
-        let backgroundSize = undefined;
-        let backgroundColor = undefined;
-        let arrowSize = undefined;
-        let arrowColor = undefined;
+        let showBackground;
+        let isSidebarMiddle;
+        let backgroundSize;
+        let backgroundColor;
+        let arrowSize;
+        let arrowColor;
         if (typeof this.value.value === 'boolean') {
           if (this.value.value) {
             displayArrowValue = 1;
@@ -16120,7 +15715,8 @@ class SwiperDisplayArrowModifier extends ModifierWithKey {
           else {
             displayArrowValue = 0;
           }
-        } else if (typeof this.value.value === 'object') {
+        }
+        else if (typeof this.value.value === 'object') {
           displayArrowValue = 2;
           showBackground = this.value.value.showBackground;
           isSidebarMiddle = this.value.value.isSidebarMiddle;
@@ -16129,14 +15725,15 @@ class SwiperDisplayArrowModifier extends ModifierWithKey {
           arrowSize = this.value.value.arrowSize;
           arrowColor = this.value.value.arrowColor;
         }
-        let isHoverShow = undefined;
+        let isHoverShow;
         if (typeof this.value.isHoverShow === 'boolean') {
           isHoverShow = this.value.isHoverShow;
         }
-        GetUINativeModule().swiper.setSwiperDisplayArrow(node, displayArrowValue, showBackground, isSidebarMiddle, backgroundSize, backgroundColor, arrowSize, arrowColor, isHoverShow);
+        getUINativeModule().swiper.setSwiperDisplayArrow(node, displayArrowValue, showBackground,
+          isSidebarMiddle, backgroundSize, backgroundColor, arrowSize, arrowColor, isHoverShow);
       }
       else {
-        GetUINativeModule().swiper.resetSwiperDisplayArrow(node);
+        getUINativeModule().swiper.resetSwiperDisplayArrow(node);
       }
     }
   }
@@ -16167,28 +15764,28 @@ SwiperDisplayArrowModifier.identity = Symbol('swiperDisplayArrow');
 class SwiperIndicatorModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperIndicator(node);
+      getUINativeModule().swiper.resetSwiperIndicator(node);
     }
     else {
-      let left = undefined;
-      let top = undefined;
-      let right = undefined;
-      let bottom = undefined;
-      let itemWidth = undefined;
-      let itemHeight = undefined;
-      let selectedItemWidth = undefined;
-      let selectedItemHeight = undefined;
-      let mask = undefined;
-      let color = undefined;
-      let selectedColor = undefined;
-      let fontColor = undefined;
-      let selectedFontColor = undefined;
-      let digitFontSize = undefined;
-      let digitFontWeight = undefined;
-      let selectedDigitFontSize = undefined;
-      let selectedDigitFontWeight = undefined;
+      let left;
+      let top;
+      let right;
+      let bottom;
+      let itemWidth;
+      let itemHeight;
+      let selectedItemWidth;
+      let selectedItemHeight;
+      let mask;
+      let color;
+      let selectedColor;
+      let fontColor;
+      let selectedFontColor;
+      let digitFontSize;
+      let digitFontWeight;
+      let selectedDigitFontSize;
+      let selectedDigitFontWeight;
       if (typeof this.value === 'boolean') {
-        GetUINativeModule().swiper.setSwiperIndicator(node, 'boolean', this.value);
+        getUINativeModule().swiper.setSwiperIndicator(node, 'boolean', this.value);
       }
       else if (typeof this.value === 'object' && this.value.type === 'DotIndicator') {
         left = this.value.leftValue;
@@ -16202,7 +15799,8 @@ class SwiperIndicatorModifier extends ModifierWithKey {
         mask = this.value.maskValue;
         color = this.value.colorValue;
         selectedColor = this.value.selectedColorValue;
-        GetUINativeModule().swiper.setSwiperIndicator(node, 'ArkDotIndicator', itemWidth, itemHeight, selectedItemWidth, selectedItemHeight, mask, color, selectedColor, left, top, right, bottom);
+        getUINativeModule().swiper.setSwiperIndicator(node, 'ArkDotIndicator', itemWidth, itemHeight, selectedItemWidth,
+          selectedItemHeight, mask, color, selectedColor, left, top, right, bottom);
       }
       else if (typeof this.value === 'object' && this.value.type === 'DigitIndicator') {
         left = this.value.leftValue;
@@ -16220,10 +15818,11 @@ class SwiperIndicatorModifier extends ModifierWithKey {
           selectedDigitFontSize = this.value.selectedDigitFontValue.size;
           selectedDigitFontWeight = arkDigitFont.parseFontWeight(this.value.selectedDigitFontValue.weight);
         }
-        GetUINativeModule().swiper.setSwiperIndicator(node, 'ArkDigitIndicator', fontColor, selectedFontColor, digitFontSize, digitFontWeight, selectedDigitFontSize, selectedDigitFontWeight, left, top, right, bottom);
+        getUINativeModule().swiper.setSwiperIndicator(node, 'ArkDigitIndicator', fontColor, selectedFontColor, digitFontSize,
+          digitFontWeight, selectedDigitFontSize, selectedDigitFontWeight, left, top, right, bottom);
       }
       else {
-        GetUINativeModule().swiper.setSwiperIndicator(node, 'boolean', true);
+        getUINativeModule().swiper.setSwiperIndicator(node, 'boolean', true);
       }
     }
   }
@@ -16235,21 +15834,21 @@ class SwiperIndicatorModifier extends ModifierWithKey {
       return this.stageValue !== this.value;
     }
     if (this.stageValue instanceof ArkDotIndicator && this.value instanceof ArkDotIndicator) {
-      return (!isBaseOrResourceEqual(this.stageValue.itemWidth, this.value.itemWidth) ||
-        !isBaseOrResourceEqual(this.stageValue.itemHeight, this.value.itemHeight) ||
-        !isBaseOrResourceEqual(this.stageValue.selectedItemWidth, this.value.selectedItemWidth) ||
-        !isBaseOrResourceEqual(this.stageValue.selectedItemHeight, this.value.selectedItemHeight) ||
-        !isBaseOrResourceEqual(this.stageValue.mask, this.value.mask) ||
-        !isBaseOrResourceEqual(this.stageValue.color, this.value.color) ||
-        !isBaseOrResourceEqual(this.stageValue.selectedColor, this.value.selectedColor));
+      return (!isBaseOrResourceEqual(this.stageValue.itemWidthValue, this.value.itemWidthValue) ||
+        !isBaseOrResourceEqual(this.stageValue.itemHeightValue, this.value.itemHeightValue) ||
+        !isBaseOrResourceEqual(this.stageValue.selectedItemWidthValue, this.value.selectedItemWidthValue) ||
+        !isBaseOrResourceEqual(this.stageValue.selectedItemHeightValue, this.value.selectedItemHeightValue) ||
+        !isBaseOrResourceEqual(this.stageValue.maskValue, this.value.maskValue) ||
+        !isBaseOrResourceEqual(this.stageValue.colorValue, this.value.colorValue) ||
+        !isBaseOrResourceEqual(this.stageValue.selectedColorValue, this.value.selectedColorValue));
     }
     else if (this.stageValue instanceof ArkDigitIndicator && this.value instanceof ArkDigitIndicator) {
-      return (!isBaseOrResourceEqual(this.stageValue.fontColor, this.value.fontColor) ||
-        !isBaseOrResourceEqual(this.stageValue.selectedFontColor, this.value.selectedFontColor) ||
-        !isBaseOrResourceEqual(this.stageValue.digitFont.size, this.value.digitFont.size) ||
-        !isBaseOrResourceEqual(this.stageValue.digitFont.weight, this.value.digitFont.weight) ||
-        !isBaseOrResourceEqual(this.stageValue.selectedDigitFont.size, this.value.selectedDigitFont.size) ||
-        !isBaseOrResourceEqual(this.stageValue.selectedDigitFont.weight, this.value.selectedDigitFont.weight));
+      return (!isBaseOrResourceEqual(this.stageValue.fontColorValue, this.value.fontColorValue) ||
+        !isBaseOrResourceEqual(this.stageValue.selectedFontColorValue, this.value.selectedFontColorValue) ||
+        !isBaseOrResourceEqual(this.stageValue.digitFontValue.size, this.value.digitFontValue.size) ||
+        !isBaseOrResourceEqual(this.stageValue.digitFontValue.weight, this.value.digitFontValue.weight) ||
+        !isBaseOrResourceEqual(this.stageValue.selectedDigitFontValue.size, this.value.selectedDigitFontValue.size) ||
+        !isBaseOrResourceEqual(this.stageValue.selectedDigitFontValue.weight, this.value.selectedDigitFontValue.weight));
     }
     else {
       return true;
@@ -16257,10 +15856,10 @@ class SwiperIndicatorModifier extends ModifierWithKey {
   }
 }
 SwiperIndicatorModifier.identity = Symbol('swiperIndicator');
-class SwiperCurveModifier extends Modifier {
+class SwiperCurveModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperCurve(node);
+      getUINativeModule().swiper.resetSwiperCurve(node);
     }
     else {
       const curveMap = {
@@ -16286,142 +15885,179 @@ class SwiperCurveModifier extends Modifier {
           this.value = this.value.toString();
         }
       }
-      GetUINativeModule().swiper.setSwiperCurve(node, this.value);
+      getUINativeModule().swiper.setSwiperCurve(node, this.value);
     }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 SwiperCurveModifier.identity = Symbol('swiperCurve');
-class SwiperDisableSwipeModifier extends Modifier {
+class SwiperDisableSwipeModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperDisableSwipe(node);
+      getUINativeModule().swiper.resetSwiperDisableSwipe(node);
     }
     else {
-      GetUINativeModule().swiper.setSwiperDisableSwipe(node, this.value);
+      getUINativeModule().swiper.setSwiperDisableSwipe(node, this.value);
     }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 SwiperDisableSwipeModifier.identity = Symbol('swiperDisableSwipe');
-class SwiperEffectModeModifier extends Modifier {
+class SwiperEffectModeModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperEffectMode(node);
+      getUINativeModule().swiper.resetSwiperEffectMode(node);
     }
     else {
-      GetUINativeModule().swiper.setSwiperEffectMode(node, this.value);
+      getUINativeModule().swiper.setSwiperEffectMode(node, this.value);
     }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 SwiperEffectModeModifier.identity = Symbol('swiperEffectMode');
-class SwiperCachedCountModifier extends Modifier {
+class SwiperCachedCountModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperCachedCount(node);
+      getUINativeModule().swiper.resetSwiperCachedCount(node);
     }
     else {
-      GetUINativeModule().swiper.setSwiperCachedCount(node, this.value);
+      getUINativeModule().swiper.setSwiperCachedCount(node, this.value);
     }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 SwiperCachedCountModifier.identity = Symbol('swiperCachedCount');
-class SwiperDisplayModeModifier extends Modifier {
+class SwiperDisplayModeModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperDisplayMode(node);
+      getUINativeModule().swiper.resetSwiperDisplayMode(node);
     }
     else {
-      GetUINativeModule().swiper.setSwiperDisplayMode(node, this.value);
+      getUINativeModule().swiper.setSwiperDisplayMode(node, this.value);
     }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 SwiperDisplayModeModifier.identity = Symbol('swiperDisplayMode');
-class SwiperItemSpaceModifier extends Modifier {
+class SwiperItemSpaceModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperItemSpace(node);
+      getUINativeModule().swiper.resetSwiperItemSpace(node);
     }
     else {
-      GetUINativeModule().swiper.setSwiperItemSpace(node, this.value);
+      getUINativeModule().swiper.setSwiperItemSpace(node, this.value);
     }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 SwiperItemSpaceModifier.identity = Symbol('swiperItemSpace');
-class SwiperVerticalModifier extends Modifier {
+class SwiperVerticalModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperVertical(node);
+      getUINativeModule().swiper.resetSwiperVertical(node);
     }
     else {
-      GetUINativeModule().swiper.setSwiperVertical(node, this.value);
+      getUINativeModule().swiper.setSwiperVertical(node, this.value);
     }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 SwiperVerticalModifier.identity = Symbol('swiperVertical');
-class SwiperLoopModifier extends Modifier {
+class SwiperLoopModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperLoop(node);
+      getUINativeModule().swiper.resetSwiperLoop(node);
     }
     else {
-      GetUINativeModule().swiper.setSwiperLoop(node, this.value);
+      getUINativeModule().swiper.setSwiperLoop(node, this.value);
     }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 SwiperLoopModifier.identity = Symbol('swiperLoop');
-class SwiperIntervalModifier extends Modifier {
+class SwiperIntervalModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperInterval(node);
+      getUINativeModule().swiper.resetSwiperInterval(node);
     }
     else {
-      GetUINativeModule().swiper.setSwiperInterval(node, this.value);
+      getUINativeModule().swiper.setSwiperInterval(node, this.value);
     }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 SwiperIntervalModifier.identity = Symbol('swiperInterval');
-class SwiperAutoPlayModifier extends Modifier {
+class SwiperAutoPlayModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperAutoPlay(node);
+      getUINativeModule().swiper.resetSwiperAutoPlay(node);
     }
     else {
-      GetUINativeModule().swiper.setSwiperAutoPlay(node, this.value);
+      getUINativeModule().swiper.setSwiperAutoPlay(node, this.value);
     }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 SwiperAutoPlayModifier.identity = Symbol('swiperAutoPlay');
-class SwiperIndexModifier extends Modifier {
+class SwiperIndexModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperIndex(node);
+      getUINativeModule().swiper.resetSwiperIndex(node);
     }
     else {
-      GetUINativeModule().swiper.setSwiperIndex(node, this.value);
+      getUINativeModule().swiper.setSwiperIndex(node, this.value);
     }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 SwiperIndexModifier.identity = Symbol('swiperIndex');
-class SwiperDurationModifier extends Modifier {
+class SwiperDurationModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().swiper.resetSwiperDuration(node);
+      getUINativeModule().swiper.resetSwiperDuration(node);
     }
     else {
-      GetUINativeModule().swiper.setSwiperDuration(node, this.value);
+      getUINativeModule().swiper.setSwiperDuration(node, this.value);
     }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 SwiperDurationModifier.identity = Symbol('swiperDuration');
 // @ts-ignore
 globalThis.Swiper.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkSwiperComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkTabsComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -16437,15 +16073,15 @@ class ArkTabsComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   vertical(value) {
-    modifier(this._modifiers, TabsVerticalModifier, value);
+    modifierWithKey(this._modifiersWithKeys, TabsVerticalModifier.identity, TabsVerticalModifier, value);
     return this;
   }
   barPosition(value) {
-    modifier(this._modifiers, BarPositionModifier, value);
+    modifierWithKey(this._modifiersWithKeys, BarPositionModifier.identity, BarPositionModifier, value);
     return this;
   }
   scrollable(value) {
-    modifier(this._modifiers, ScrollableModifier, value);
+    modifierWithKey(this._modifiersWithKeys, ScrollableModifier.identity, ScrollableModifier, value);
     return this;
   }
   barMode(value, options) {
@@ -16469,7 +16105,7 @@ class ArkTabsComponent extends ArkComponent {
     return this;
   }
   animationDuration(value) {
-    modifier(this._modifiers, AnimationDurationModifier, value);
+    modifierWithKey(this._modifiersWithKeys, AnimationDurationModifier.identity, AnimationDurationModifier, value);
     return this;
   }
   onChange(event) {
@@ -16479,7 +16115,7 @@ class ArkTabsComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   fadingEdge(value) {
-    modifier(this._modifiers, FadingEdgeModifier, value);
+    modifierWithKey(this._modifiersWithKeys, FadingEdgeModifier.identity, FadingEdgeModifier, value);
     return this;
   }
   divider(value) {
@@ -16487,7 +16123,7 @@ class ArkTabsComponent extends ArkComponent {
     return this;
   }
   barOverlap(value) {
-    modifier(this._modifiers, BarOverlapModifier, value);
+    modifierWithKey(this._modifiersWithKeys, BarOverlapModifier.identity, BarOverlapModifier, value);
     return this;
   }
   barBackgroundColor(value) {
@@ -16505,10 +16141,10 @@ class BarGridAlignModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().tabs.resetBarGridAlign(node);
+      getUINativeModule().tabs.resetBarGridAlign(node);
     }
     else {
-      GetUINativeModule().tabs.setBarGridAlign(node, this.value.sm, this.value.md, this.value.lg, this.value.gutter, this.value.margin);
+      getUINativeModule().tabs.setBarGridAlign(node, this.value.sm, this.value.md, this.value.lg, this.value.gutter, this.value.margin);
     }
   }
   checkObjectDiff() {
@@ -16526,10 +16162,10 @@ class DividerModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().tabs.resetDivider(node);
+      getUINativeModule().tabs.resetDivider(node);
     }
     else {
-      GetUINativeModule().tabs.setDivider(node, this.value.strokeWidth, this.value.color, this.value.startMargin, this.value.endMargin);
+      getUINativeModule().tabs.setDivider(node, this.value.strokeWidth, this.value.color, this.value.startMargin, this.value.endMargin);
     }
   }
   checkObjectDiff() {
@@ -16546,19 +16182,14 @@ class BarWidthModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().tabs.resetTabBarWidth(node);
+      getUINativeModule().tabs.resetTabBarWidth(node);
     }
     else {
-      GetUINativeModule().tabs.setTabBarWidth(node, this.value);
+      getUINativeModule().tabs.setTabBarWidth(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 BarWidthModifier.identity = Symbol('barWidth');
@@ -16568,10 +16199,10 @@ class BarAdaptiveHeightModifier extends Modifier {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().tabs.resetBarAdaptiveHeight(node);
+      getUINativeModule().tabs.resetBarAdaptiveHeight(node);
     }
     else {
-      GetUINativeModule().tabs.setBarAdaptiveHeight(node, this.value);
+      getUINativeModule().tabs.setBarAdaptiveHeight(node, this.value);
     }
   }
 }
@@ -16582,74 +16213,69 @@ class BarHeightModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().tabs.resetTabBarHeight(node);
+      getUINativeModule().tabs.resetTabBarHeight(node);
     }
     else {
-      GetUINativeModule().tabs.setTabBarHeight(node, this.value);
+      getUINativeModule().tabs.setTabBarHeight(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 BarHeightModifier.identity = Symbol('barHeight');
-class BarOverlapModifier extends Modifier {
+class BarOverlapModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().tabs.resetBarOverlap(node);
+      getUINativeModule().tabs.resetBarOverlap(node);
     }
     else {
-      GetUINativeModule().tabs.setBarOverlap(node, this.value);
+      getUINativeModule().tabs.setBarOverlap(node, this.value);
     }
   }
 }
 BarOverlapModifier.identity = Symbol('barOverlap');
-class TabsVerticalModifier extends Modifier {
+class TabsVerticalModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().tabs.resetIsVertical(node);
+      getUINativeModule().tabs.resetIsVertical(node);
     }
     else {
-      GetUINativeModule().tabs.setIsVertical(node, this.value);
+      getUINativeModule().tabs.setIsVertical(node, this.value);
     }
   }
 }
 TabsVerticalModifier.identity = Symbol('vertical');
-class AnimationDurationModifier extends Modifier {
+class AnimationDurationModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().tabs.resetAnimationDuration(node);
+      getUINativeModule().tabs.resetAnimationDuration(node);
     }
     else {
-      GetUINativeModule().tabs.setAnimationDuration(node, this.value);
+      getUINativeModule().tabs.setAnimationDuration(node, this.value);
     }
   }
 }
 AnimationDurationModifier.identity = Symbol('animationduration');
-class ScrollableModifier extends Modifier {
+class ScrollableModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().tabs.resetScrollable(node);
+      getUINativeModule().tabs.resetScrollable(node);
     }
     else {
-      GetUINativeModule().tabs.setScrollable(node, this.value);
+      getUINativeModule().tabs.setScrollable(node, this.value);
     }
   }
 }
@@ -16661,10 +16287,12 @@ class TabBarModeModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     let _a, _b;
     if (reset) {
-      GetUINativeModule().tabs.resetTabBarMode(node);
+      getUINativeModule().tabs.resetTabBarMode(node);
     }
     else {
-      GetUINativeModule().tabs.setTabBarMode(node, this.value.barMode, (_a = this.value.options) === null || _a === void 0 ? void 0 : _a.margin, (_b = this.value.options) === null || _b === void 0 ? void 0 : _b.nonScrollableLayoutStyle);
+      getUINativeModule().tabs.setTabBarMode(node, this.value.barMode,
+        (_a = this.value.options) === null || _a === void 0 ? void 0 : _a.margin,
+        (_b = this.value.options) === null || _b === void 0 ? void 0 : _b.nonScrollableLayoutStyle);
     }
   }
   checkObjectDiff() {
@@ -16674,8 +16302,10 @@ class TabBarModeModifier extends ModifierWithKey {
     }
     else if (!isResource(this.stageValue) && !isResource(this.value)) {
       return !(this.value.barMode === this.stageValue.barMode &&
-        ((_a = this.value.options) === null || _a === void 0 ? void 0 : _a.margin) === ((_b = this.stageValue.options) === null || _b === void 0 ? void 0 : _b.margin) &&
-        ((_c = this.value.options) === null || _c === void 0 ? void 0 : _c.nonScrollableLayoutStyle) === ((_d = this.stageValue.options) === null || _d === void 0 ? void 0 : _d.nonScrollableLayoutStyle));
+        ((_a = this.value.options) === null || _a === void 0 ? void 0 : _a.margin) === ((_b = this.stageValue.options) === null ||
+        _b === void 0 ? void 0 : _b.margin) &&
+        ((_c = this.value.options) === null || _c === void 0 ? void 0 : _c.nonScrollableLayoutStyle) === ((_d = this.stageValue.options) === null ||
+        _d === void 0 ? void 0 : _d.nonScrollableLayoutStyle));
     }
     else {
       return true;
@@ -16683,16 +16313,16 @@ class TabBarModeModifier extends ModifierWithKey {
   }
 }
 TabBarModeModifier.identity = Symbol('tabsbarMode');
-class BarPositionModifier extends Modifier {
+class BarPositionModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().tabs.resetTabBarPosition(node);
+      getUINativeModule().tabs.resetTabBarPosition(node);
     }
     else {
-      GetUINativeModule().tabs.setTabBarPosition(node, this.value);
+      getUINativeModule().tabs.setTabBarPosition(node, this.value);
     }
   }
 }
@@ -16703,10 +16333,10 @@ class TabsHideTitleBarModifier extends Modifier {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().tabs.resetHideTitleBar(node);
+      getUINativeModule().tabs.resetHideTitleBar(node);
     }
     else {
-      GetUINativeModule().tabs.setHideTitleBar(node, this.value);
+      getUINativeModule().tabs.setHideTitleBar(node, this.value);
     }
   }
 }
@@ -16717,32 +16347,27 @@ class BarBackgroundColorModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().tabs.resetBarBackgroundColor(node);
+      getUINativeModule().tabs.resetBarBackgroundColor(node);
     }
     else {
-      GetUINativeModule().tabs.setBarBackgroundColor(node, this.value);
+      getUINativeModule().tabs.setBarBackgroundColor(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 BarBackgroundColorModifier.identity = Symbol('barbackgroundcolor');
-class FadingEdgeModifier extends Modifier {
+class FadingEdgeModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().tabs.resetFadingEdge(node);
+      getUINativeModule().tabs.resetFadingEdge(node);
     }
     else {
-      GetUINativeModule().tabs.setFadingEdge(node, this.value);
+      getUINativeModule().tabs.setFadingEdge(node, this.value);
     }
   }
 }
@@ -16750,13 +16375,14 @@ FadingEdgeModifier.identity = Symbol('fadingedge');
 // @ts-ignore
 globalThis.Tabs.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTabsComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkTabContentComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -16772,13 +16398,14 @@ class ArkTabContentComponent extends ArkComponent {
 // @ts-ignore
 globalThis.TabContent.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTabContentComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkUIExtensionComponentComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -16810,6 +16437,7 @@ globalThis.UIExtensionComponent.attributeModifier = function (modifier) {
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ItemConstraintSizeModifier extends ModifierWithKey {
   constructor(value) {
@@ -16817,10 +16445,10 @@ class ItemConstraintSizeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().waterFlow.resetItemConstraintSize(node);
+      getUINativeModule().waterFlow.resetItemConstraintSize(node);
     }
     else {
-      GetUINativeModule().waterFlow.setItemConstraintSize(node, this.value.minWidth, this.value.maxWidth, this.value.minHeight, this.value.maxHeight);
+      getUINativeModule().waterFlow.setItemConstraintSize(node, this.value.minWidth, this.value.maxWidth, this.value.minHeight, this.value.maxHeight);
     }
   }
   checkObjectDiff() {
@@ -16837,10 +16465,10 @@ class ColumnsTemplateModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().waterFlow.resetColumnsTemplate(node);
+      getUINativeModule().waterFlow.resetColumnsTemplate(node);
     }
     else {
-      GetUINativeModule().waterFlow.setColumnsTemplate(node, this.value);
+      getUINativeModule().waterFlow.setColumnsTemplate(node, this.value);
     }
   }
 }
@@ -16851,10 +16479,10 @@ class RowsTemplateModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().waterFlow.resetRowsTemplate(node);
+      getUINativeModule().waterFlow.resetRowsTemplate(node);
     }
     else {
-      GetUINativeModule().waterFlow.setRowsTemplate(node, this.value);
+      getUINativeModule().waterFlow.setRowsTemplate(node, this.value);
     }
   }
 }
@@ -16865,10 +16493,10 @@ class EnableScrollInteractionModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().waterFlow.resetEnableScrollInteraction(node);
+      getUINativeModule().waterFlow.resetEnableScrollInteraction(node);
     }
     else {
-      GetUINativeModule().waterFlow.setEnableScrollInteraction(node, this.value);
+      getUINativeModule().waterFlow.setEnableScrollInteraction(node, this.value);
     }
   }
 }
@@ -16879,19 +16507,14 @@ class RowsGapModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().waterFlow.resetRowsGap(node);
+      getUINativeModule().waterFlow.resetRowsGap(node);
     }
     else {
-      GetUINativeModule().waterFlow.setRowsGap(node, this.value);
+      getUINativeModule().waterFlow.setRowsGap(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 RowsGapModifier.identity = Symbol('rowsGap');
@@ -16901,19 +16524,14 @@ class ColumnsGapModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().waterFlow.resetColumnsGap(node);
+      getUINativeModule().waterFlow.resetColumnsGap(node);
     }
     else {
-      GetUINativeModule().waterFlow.setColumnsGap(node, this.value);
+      getUINativeModule().waterFlow.setColumnsGap(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 ColumnsGapModifier.identity = Symbol('columnsGap');
@@ -16923,10 +16541,10 @@ class LayoutDirectionModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().waterFlow.resetLayoutDirection(node);
+      getUINativeModule().waterFlow.resetLayoutDirection(node);
     }
     else {
-      GetUINativeModule().waterFlow.setLayoutDirection(node, this.value);
+      getUINativeModule().waterFlow.setLayoutDirection(node, this.value);
     }
   }
 }
@@ -16937,10 +16555,10 @@ class NestedScrollModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().waterFlow.resetNestedScroll(node);
+      getUINativeModule().waterFlow.resetNestedScroll(node);
     }
     else {
-      GetUINativeModule().waterFlow.setNestedScroll(node, this.value.scrollForward, this.value.scrollBackward);
+      getUINativeModule().waterFlow.setNestedScroll(node, this.value.scrollForward, this.value.scrollBackward);
     }
   }
 }
@@ -16951,19 +16569,14 @@ class FrictionModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().waterFlow.resetFriction(node);
+      getUINativeModule().waterFlow.resetFriction(node);
     }
     else {
-      GetUINativeModule().waterFlow.setFriction(node, this.value);
+      getUINativeModule().waterFlow.setFriction(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 FrictionModifier.identity = Symbol('friction');
@@ -17044,27 +16657,14 @@ class ArkWaterFlowComponent extends ArkComponent {
 // @ts-ignore
 globalThis.WaterFlow.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkWaterFlowComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
-/*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the 'License');
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 /// <reference path='./import.ts' />
 class ArkCommonShapeComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -17114,7 +16714,7 @@ class ArkCommonShapeComponent extends ArkComponent {
     return this;
   }
   strokeDashArray(value) {
-    modifierWithKey(this._modifiersWithKeys, Symbol('strokeDashArray'), StrokeDashArrayModifier, value);
+    modifierWithKey(this._modifiersWithKeys, StrokeDashArrayModifier.identity, StrokeDashArrayModifier, value);
     return this;
   }
   mesh(value, column, row) {
@@ -17127,19 +16727,14 @@ class StrokeDashArrayModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().commonShape.resetStrokeDashArray(node);
+      getUINativeModule().commonShape.resetStrokeDashArray(node);
     }
     else {
-      GetUINativeModule().commonShape.setStrokeDashArray(node, this.value);
+      getUINativeModule().commonShape.setStrokeDashArray(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 StrokeDashArrayModifier.identity = Symbol('strokeDashArray');
@@ -17149,19 +16744,14 @@ class StrokeModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().commonShape.resetStroke(node);
+      getUINativeModule().commonShape.resetStroke(node);
     }
     else {
-      GetUINativeModule().commonShape.setStroke(node, this.value);
+      getUINativeModule().commonShape.setStroke(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 StrokeModifier.identity = Symbol('stroke');
@@ -17171,19 +16761,14 @@ class FillModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().commonShape.resetFill(node);
+      getUINativeModule().commonShape.resetFill(node);
     }
     else {
-      GetUINativeModule().commonShape.setFill(node, this.value);
+      getUINativeModule().commonShape.setFill(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 FillModifier.identity = Symbol('fill');
@@ -17193,19 +16778,14 @@ class StrokeDashOffsetModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().commonShape.resetStrokeDashOffset(node);
+      getUINativeModule().commonShape.resetStrokeDashOffset(node);
     }
     else {
-      GetUINativeModule().commonShape.setStrokeDashOffset(node, this.value);
+      getUINativeModule().commonShape.setStrokeDashOffset(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 StrokeDashOffsetModifier.identity = Symbol('strokeDashOffset');
@@ -17215,10 +16795,10 @@ class StrokeLineCapModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().commonShape.resetStrokeLineCap(node);
+      getUINativeModule().commonShape.resetStrokeLineCap(node);
     }
     else {
-      GetUINativeModule().commonShape.setStrokeLineCap(node, this.value);
+      getUINativeModule().commonShape.setStrokeLineCap(node, this.value);
     }
   }
 }
@@ -17229,10 +16809,10 @@ class StrokeLineJoinModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().commonShape.resetStrokeLineJoin(node);
+      getUINativeModule().commonShape.resetStrokeLineJoin(node);
     }
     else {
-      GetUINativeModule().commonShape.setStrokeLineJoin(node, this.value);
+      getUINativeModule().commonShape.setStrokeLineJoin(node, this.value);
     }
   }
 }
@@ -17243,10 +16823,10 @@ class StrokeMiterLimitModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().commonShape.resetStrokeMiterLimit(node);
+      getUINativeModule().commonShape.resetStrokeMiterLimit(node);
     }
     else {
-      GetUINativeModule().commonShape.setStrokeMiterLimit(node, this.value);
+      getUINativeModule().commonShape.setStrokeMiterLimit(node, this.value);
     }
   }
 }
@@ -17257,19 +16837,14 @@ class FillOpacityModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().commonShape.resetFillOpacity(node);
+      getUINativeModule().commonShape.resetFillOpacity(node);
     }
     else {
-      GetUINativeModule().commonShape.setFillOpacity(node, this.value);
+      getUINativeModule().commonShape.setFillOpacity(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 FillOpacityModifier.identity = Symbol('FillOpacity');
@@ -17279,19 +16854,14 @@ class StrokeOpacityModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().commonShape.resetStrokeOpacity(node);
+      getUINativeModule().commonShape.resetStrokeOpacity(node);
     }
     else {
-      GetUINativeModule().commonShape.setStrokeOpacity(node, this.value);
+      getUINativeModule().commonShape.setStrokeOpacity(node, this.value);
     }
   }
   checkObjectDiff() {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    }
-    else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 StrokeOpacityModifier.identity = Symbol('StrokeOpacity');
@@ -17301,10 +16871,10 @@ class StrokeWidthModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().commonShape.resetStrokeWidth(node);
+      getUINativeModule().commonShape.resetStrokeWidth(node);
     }
     else {
-      GetUINativeModule().commonShape.setStrokeWidth(node, this.value);
+      getUINativeModule().commonShape.setStrokeWidth(node, this.value);
     }
   }
 }
@@ -17315,14 +16885,15 @@ class AntiAliasModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().commonShape.resetAntiAlias(node);
+      getUINativeModule().commonShape.resetAntiAlias(node);
     }
     else {
-      GetUINativeModule().commonShape.setAntiAlias(node, this.value);
+      getUINativeModule().commonShape.setAntiAlias(node, this.value);
     }
   }
 }
 AntiAliasModifier.identity = Symbol('antiAlias');
+
 /// <reference path='./import.ts' />
 class ArkCircleComponent extends ArkCommonShapeComponent {
   monopolizeEvents(monopolize) {
@@ -17332,13 +16903,14 @@ class ArkCircleComponent extends ArkCommonShapeComponent {
 // @ts-ignore
 globalThis.Circle.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkCircleComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkEllipseComponent extends ArkCommonShapeComponent {
   monopolizeEvents(monopolize) {
@@ -17348,13 +16920,14 @@ class ArkEllipseComponent extends ArkCommonShapeComponent {
 // @ts-ignore
 globalThis.Ellipse.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkEllipseComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 /// <reference path='./ArkCommonShape.ts' />
 class ArkLineComponent extends ArkCommonShapeComponent {
@@ -17376,10 +16949,10 @@ class LineStartPointModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().line.resetStartPoint(node);
+      getUINativeModule().line.resetStartPoint(node);
     }
     else {
-      GetUINativeModule().line.setStartPoint(node, this.value);
+      getUINativeModule().line.setStartPoint(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -17393,10 +16966,10 @@ class LineEndPointModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().line.resetEndPoint(node);
+      getUINativeModule().line.resetEndPoint(node);
     }
     else {
-      GetUINativeModule().line.setEndPoint(node, this.value);
+      getUINativeModule().line.setEndPoint(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -17407,13 +16980,14 @@ LineEndPointModifier.identity = Symbol('endPoint');
 // @ts-ignore
 globalThis.Line.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkLineComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 /// <reference path='./ArkCommonShape.ts' />
 const ARRAY_LENGTH = 2;
@@ -17451,10 +17025,10 @@ class PolylinePointsModifier extends ModifierWithKey {
       reset = true;
     }
     if (reset) {
-      GetUINativeModule().polyline.resetPoints(node);
+      getUINativeModule().polyline.resetPoints(node);
     }
     else {
-      GetUINativeModule().polyline.setPoints(node, xPoint, yPoint);
+      getUINativeModule().polyline.setPoints(node, xPoint, yPoint);
     }
   }
   checkObjectDiff() {
@@ -17465,32 +17039,71 @@ PolylinePointsModifier.identity = Symbol('points');
 // @ts-ignore
 globalThis.Polyline.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkPolylineComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkPolygonComponent extends ArkCommonShapeComponent {
   points(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, PolygonPointsModifier.identity, PolygonPointsModifier, value);
+    return this;
   }
   monopolizeEvents(monopolize) {
     throw new Error('Method not implemented.');
   }
 }
+class PolygonPointsModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    let xPoint = [];
+    let yPoint = [];
+    if (Array.isArray(this.value)) {
+      for (let i = 0; i <= this.value.length; i++) {
+        let item = this.value[i];
+        if (!Array.isArray(item)) {
+          continue;
+        }
+        if (item.length < ARRAY_LENGTH || isUndefined(item[0]) || isUndefined(item[1])) {
+          reset = true;
+          break;
+        }
+        xPoint.push(item[0]);
+        yPoint.push(item[1]);
+      }
+    }
+    else {
+      reset = true;
+    }
+    if (reset) {
+      getUINativeModule().polygon.resetPolygonPoints(node);
+    }
+    else {
+      getUINativeModule().polygon.setPolygonPoints(node, xPoint, yPoint);
+    }
+  }
+  checkObjectDiff() {
+    return this.stageValue !== this.value;
+  }
+}
+PolygonPointsModifier.identity = Symbol('polygonPoints');
 // @ts-ignore
 globalThis.Polygon.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkPolygonComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkPathComponent extends ArkCommonShapeComponent {
   constructor(nativePtr) {
@@ -17507,10 +17120,10 @@ class CommandsModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().path.resetPathCommands(node);
+      getUINativeModule().path.resetPathCommands(node);
     }
     else {
-      GetUINativeModule().path.setPathCommands(node, this.value);
+      getUINativeModule().path.setPathCommands(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -17526,39 +17139,26 @@ CommandsModifier.identity = Symbol('commands');
 // @ts-ignore
 globalThis.Path.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkPathComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
-/*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the 'License');
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 /// <reference path='./import.ts' />
-/// <reference path='./ArkCommonShape.ts' />
+/// <reference path="./ArkCommonShape.ts" />
 class RectRadiusWidthModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().rect.resetRectRadiusWidth(node);
+      getUINativeModule().rect.resetRectRadiusWidth(node);
     }
     else {
-      GetUINativeModule().rect.setRectRadiusWidth(node, this.value);
+      getUINativeModule().rect.setRectRadiusWidth(node, this.value);
     }
   }
 }
@@ -17569,10 +17169,10 @@ class RectRadiusHeightModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().rect.resetRectRadiusHeight(node);
+      getUINativeModule().rect.resetRectRadiusHeight(node);
     }
     else {
-      GetUINativeModule().rect.setRectRadiusHeight(node, this.value);
+      getUINativeModule().rect.setRectRadiusHeight(node, this.value);
     }
   }
 }
@@ -17583,10 +17183,10 @@ class RectRadiusModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().rect.resetRectRadius(node);
+      getUINativeModule().rect.resetRectRadius(node);
     }
     else {
-      GetUINativeModule().rect.setRectRadius(node, this.value);
+      getUINativeModule().rect.setRectRadius(node, this.value);
     }
   }
   checkObjectDiff() {
@@ -17614,39 +17214,26 @@ class ArkRectComponent extends ArkCommonShapeComponent {
 // @ts-ignore
 globalThis.Rect.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkRectComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
-/*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
- * Licensed under the Apache License, Version 2.0 (the 'License');
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an 'AS IS' BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 /// <reference path='./import.ts' />
-/// <reference path='./ArkCommonShape.ts' />
+/// <reference path="./ArkCommonShape.ts" />
 class ShapeViewPortModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().shape.resetShapeViewPort(node);
+      getUINativeModule().shape.resetShapeViewPort(node);
     }
     else {
-      GetUINativeModule().shape.setShapeViewPort(node, this.value.x, this.value.y, this.value.width, this.value.height);
+      getUINativeModule().shape.setShapeViewPort(node, this.value.x, this.value.y, this.value.width, this.value.height);
     }
   }
   checkObjectDiff() {
@@ -17661,10 +17248,10 @@ class ShapeMeshModifier extends ModifierWithKey {
   }
   applyPeer(node, reset) {
     if (reset) {
-      GetUINativeModule().shape.resetShapeMesh(node);
+      getUINativeModule().shape.resetShapeMesh(node);
     }
     else {
-      GetUINativeModule().shape.setShapeMesh(node, this.value.value, this.value.column, this.value.row);
+      getUINativeModule().shape.setShapeMesh(node, this.value.value, this.value.column, this.value.row);
     }
   }
   checkObjectDiff() {
@@ -17697,13 +17284,14 @@ class ArkShapeComponent extends ArkCommonShapeComponent {
 // @ts-ignore
 globalThis.Shape.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkShapeComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkCanvasComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -17719,13 +17307,14 @@ class ArkCanvasComponent extends ArkComponent {
 // @ts-ignore
 globalThis.Canvas.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkCanvasComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkGridContainerComponent extends ArkComponent {
   constructor(nativePtr) {
@@ -17744,17 +17333,18 @@ class ArkGridContainerComponent extends ArkComponent {
 // @ts-ignore
 globalThis.GridContainer.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkGridContainerComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
 };
+
 /// <reference path='./import.ts' />
 class ArkEffectComponentComponent extends ArkComponent {
   monopolizeEvents(monopolize) {
-      throw new Error('Method not implemented.');
+    throw new Error('Method not implemented.');
   }
 }
 // @ts-ignore
@@ -17762,7 +17352,7 @@ if (globalThis.EffectComponent !== undefined) {
   // @ts-ignore
   globalThis.EffectComponent.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
     let component = this.createOrGetNode(elmtId, () => {
       return new ArkEffectComponentComponent(nativeNode);
     });
@@ -17770,6 +17360,7 @@ if (globalThis.EffectComponent !== undefined) {
     component.applyModifierPatch();
   };
 }
+
 /// <reference path='./import.ts' />
 class ArkRemoteWindowComponent extends ArkComponent {
   monopolizeEvents(monopolize) {
@@ -17781,7 +17372,7 @@ if (globalThis.RemoteWindow !== undefined) {
   // @ts-ignore
   globalThis.RemoteWindow.attributeModifier = function (modifier) {
     const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
     let component = this.createOrGetNode(elmtId, () => {
       return new ArkRemoteWindowComponent(nativeNode);
     });

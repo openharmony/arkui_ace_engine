@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -398,6 +398,7 @@ void JsiDeclarativeEngineInstance::InitAceModule()
         PreloadStateManagement(runtime_);
         PreloadJsEnums(runtime_);
         PreloadArkComponent(runtime_);
+        PreloadUIContent(runtime_);
     }
 #if defined(PREVIEW)
     std::string jsMockSystemPluginString(_binary_jsMockSystemPlugin_abc_start,
@@ -451,7 +452,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     }
     
     // preload js views
-    JsRegisterViews(JSNApi::GetGlobalObject(vm));
+    JsRegisterViews(JSNApi::GetGlobalObject(vm), runtime);
 
     // preload aceConsole
     shared_ptr<JsValue> global = arkRuntime->GetGlobal();
@@ -1038,8 +1039,7 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
         };
         bool debugMode = AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint();
         panda::JSNApi::DebugOption debugOption = { libraryPath.c_str(), debugMode };
-        JSNApi::NotifyDebugMode(
-            tid, vm, libraryPath.c_str(), debugOption, tid, workerPostTask, debugVersion, debugMode);
+        JSNApi::NotifyDebugMode(tid, vm, debugOption, tid, workerPostTask, debugVersion);
 #endif
         instance->InitConsoleModule(arkNativeEngine);
 
@@ -1135,23 +1135,6 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, false);
     CardScope cardScope(cardId);
-
-    if (container->IsDynamicRender()) {
-        CHECK_NULL_RETURN(runtime_, false);
-        auto engine = reinterpret_cast<NativeEngine*>(runtime_);
-        CHECK_NULL_RETURN(engine, false);
-        auto vm = engine->GetEcmaVm();
-        CHECK_NULL_RETURN(vm, false);
-        panda::TryCatch trycatch(vm);
-        [[maybe_unused]] napi_value result = engine->RunScript(fileName.c_str());
-        if (!trycatch.HasCaught()) {
-            return true;
-        } else {
-            engine->lastException_ = trycatch.GetException();
-            return false;
-        }
-    }
-
     std::string abcPath;
     std::vector<uint8_t> content;
     if (container->IsFRSCardContainer()) {
@@ -1212,6 +1195,25 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
         return false;
     }
     return true;
+}
+
+bool JsiDeclarativeEngine::ExecuteDynamicAbc(const std::string& fileName, const std::string& entryPoint)
+{
+    CHECK_NULL_RETURN(runtime_, false);
+    auto engine = reinterpret_cast<NativeEngine*>(runtime_);
+    CHECK_NULL_RETURN(engine, false);
+    auto vm = engine->GetEcmaVm();
+    CHECK_NULL_RETURN(vm, false);
+    panda::TryCatch trycatch(vm);
+
+    char* entry = entryPoint.empty() ? nullptr : const_cast<char*>(entryPoint.c_str());
+    [[maybe_unused]] napi_value result = engine->RunScript(fileName.c_str(), entry);
+    if (!trycatch.HasCaught()) {
+        return true;
+    } else {
+        engine->lastException_ = trycatch.GetException();
+        return false;
+    }
 }
 
 bool JsiDeclarativeEngine::UpdateRootComponent()
@@ -1528,10 +1530,12 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, 
     return true;
 }
 
-bool JsiDeclarativeEngine::LoadCard(const std::string& url, int64_t cardId)
+bool JsiDeclarativeEngine::LoadCard(const std::string& url, int64_t cardId, const std::string& entryPoint)
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadCard");
-    return ExecuteCardAbc(url, cardId);
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    return container->IsDynamicRender() ? ExecuteDynamicAbc(url, entryPoint) : ExecuteCardAbc(url, cardId);
 }
 
 #if defined(PREVIEW)
@@ -1667,6 +1671,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
     const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
     CHECK_RUN_ON(JS);
+
     if (Container::IsCurrentUseNewPipeline()) {
         ACE_DCHECK(engineInstance_);
         auto xcFrameNode = NG::FrameNode::GetFrameNode(V2::XCOMPONENT_ETS_TAG, static_cast<int32_t>(nodeId));
@@ -1675,11 +1680,6 @@ void JsiDeclarativeEngine::FireExternalEvent(
         }
         auto xcPattern = DynamicCast<NG::XComponentPattern>(xcFrameNode->GetPattern());
         CHECK_NULL_VOID(xcPattern);
-
-        void* nativeWindow = nullptr;
-
-        nativeWindow = xcPattern->GetNativeWindow();
-
         std::weak_ptr<OH_NativeXComponent> weakNativeXComponent;
         RefPtr<OHOS::Ace::NativeXComponentImpl> nativeXComponentImpl = nullptr;
 
@@ -1688,12 +1688,16 @@ void JsiDeclarativeEngine::FireExternalEvent(
         CHECK_NULL_VOID(nativeXComponent);
         CHECK_NULL_VOID(nativeXComponentImpl);
 
-        if (!nativeWindow) {
-            return;
+        auto type = xcPattern->GetType();
+        if (type == XComponentType::SURFACE || type == XComponentType::TEXTURE) {
+            void* nativeWindow = nullptr;
+            nativeWindow = xcPattern->GetNativeWindow();
+            if (!nativeWindow) {
+                return;
+            }
+            nativeXComponentImpl->SetSurface(nativeWindow);
         }
-        nativeXComponentImpl->SetSurface(nativeWindow);
         nativeXComponentImpl->SetXComponentId(componentId);
-
         auto* arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
         if (arkNativeEngine == nullptr) {
             return;
@@ -1704,6 +1708,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         if (status != napi_ok) {
             return;
         }
+
         std::string arguments;
         auto soPath = xcPattern->GetSoPath().value_or("");
         auto runtime = engineInstance_->GetJsRuntime();
@@ -1714,30 +1719,31 @@ void JsiDeclarativeEngine::FireExternalEvent(
         if (objXComp.IsEmpty() || pandaRuntime->HasPendingException()) {
             return;
         }
-
         auto objContext = JsiObject(objXComp);
         JSRef<JSObject> obj = JSRef<JSObject>::Make(objContext);
         OHOS::Ace::Framework::XComponentClient::GetInstance().AddJsValToJsValMap(componentId, obj);
         napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
 
-        auto task = [weak = WeakClaim(this), weakPattern = AceType::WeakClaim(AceType::RawPtr(xcPattern))]() {
-            auto pattern = weakPattern.Upgrade();
-            if (!pattern) {
+        if (type == XComponentType::SURFACE || type == XComponentType::TEXTURE) {
+            auto task = [weak = WeakClaim(this), weakPattern = AceType::WeakClaim(AceType::RawPtr(xcPattern))]() {
+                auto pattern = weakPattern.Upgrade();
+                if (!pattern) {
+                    return;
+                }
+                auto bridge = weak.Upgrade();
+                if (bridge) {
+#ifdef XCOMPONENT_SUPPORTED
+                    pattern->NativeXComponentInit();
+#endif
+                }
+            };
+
+            auto delegate = engineInstance_->GetDelegate();
+            if (!delegate) {
                 return;
             }
-            auto bridge = weak.Upgrade();
-            if (bridge) {
-#ifdef XCOMPONENT_SUPPORTED
-                pattern->NativeXComponentInit();
-#endif
-            }
-        };
-
-        auto delegate = engineInstance_->GetDelegate();
-        if (!delegate) {
-            return;
+            delegate->PostSyncTaskToPage(task);
         }
-        delegate->PostSyncTaskToPage(task);
         return;
     }
 #ifndef NG_BUILD
@@ -1879,8 +1885,8 @@ void JsiDeclarativeEngine::DestroyApplication(const std::string& packageName)
 
 void JsiDeclarativeEngine::UpdateApplicationState(const std::string& packageName, Frontend::State state)
 {
-    LOGI("Update application state, packageName %{public}s, state: %{public}d", packageName.c_str(),
-        static_cast<int32_t>(state));
+    LOGI("Update application state %{public}s, state: %{public}s", packageName.c_str(),
+        Frontend::stateToString(state).c_str());
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
     if (!runtime) {
         return;
@@ -2004,6 +2010,15 @@ void JsiDeclarativeEngine::GetStackTrace(std::string& trace)
         return;
     }
     panda::DFXJSNApi::BuildJsStackTrace(vm, trace);
+}
+
+std::string JsiDeclarativeEngine::GetPagePath(const std::string& url)
+{
+    auto iter = namedRouterRegisterMap_.find(url);
+    if (iter != namedRouterRegisterMap_.end()) {
+        return iter->second.pagePath;
+    }
+    return "";
 }
 
 void JsiDeclarativeEngine::SetLocalStorage(int32_t instanceId, NativeReference* nativeValue)

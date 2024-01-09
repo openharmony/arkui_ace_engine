@@ -203,7 +203,11 @@ void MenuItemPattern::RecordChangeEvent() const
     CHECK_NULL_VOID(itemProperty);
     auto content = itemProperty->GetContent().value_or("");
     Recorder::EventParamsBuilder builder;
-    builder.SetId(inspectorId).SetType(host->GetTag()).SetChecked(isSelected_).SetText(content);
+    builder.SetId(inspectorId)
+        .SetType(host->GetTag())
+        .SetChecked(isSelected_)
+        .SetText(content)
+        .SetDescription(host->GetAutoEventParamValue(""));
     Recorder::EventRecorder::Get().OnChange(std::move(builder));
     Recorder::NodeDataCache::Get().PutMultiple(inspectorId, content, isSelected_);
 }
@@ -474,6 +478,17 @@ void MenuItemPattern::OnHover(bool isHover)
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void MenuItemPattern::OnVisibleChange(bool isVisible)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto parentNode = host->GetParent();
+    CHECK_NULL_VOID(parentNode);
+    if (parentNode->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
+        parentNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 bool MenuItemPattern::OnKeyEvent(const KeyEvent& event)

@@ -51,6 +51,10 @@ namespace OHOS::Ace::NG {
 enum class Status {DRAGGING, ON_DROP, NONE };
 using CalculateHandleFunc = std::function<void()>;
 using ShowSelectOverlayFunc = std::function<void(const RectF&, const RectF&)>;
+struct SpanNodeInfo {
+    RefPtr<UINode> node;
+    RefPtr<UINode> containerSpanNode;
+};
 // TextPattern is the base class for text render node to perform paint text.
 class TextPattern : public ScrollablePattern, public TextDragBase, public TextBase {
     DECLARE_ACE_TYPE(TextPattern, ScrollablePattern, TextDragBase, TextBase);
@@ -61,7 +65,7 @@ public:
 
     SelectionInfo GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
 
-    int32_t GetTextContentLength();
+    virtual int32_t GetTextContentLength();
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
@@ -92,6 +96,11 @@ public:
 
     bool IsAtomicNode() const override
     {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        if (host->GetTag() == V2::SYMBOL_ETS_TAG) {
+            return true;
+        }
         return false;
     }
 
@@ -295,7 +304,6 @@ public:
     }
     virtual void OnColorConfigurationUpdate() override;
 
-#ifdef ENABLE_DRAG_FRAMEWORK
     NG::DragDropInfo OnDragStart(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
     DragDropInfo OnDragStartNoChild(const RefPtr<Ace::DragEvent>& event, const std::string& extraParams);
     void InitDragEvent();
@@ -306,12 +314,14 @@ public:
     void OnDragEndNoChild();
     void CloseOperate();
     void OnDragMove(const RefPtr<Ace::DragEvent>& event);
-#endif
+
     std::string GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const;
     TextStyleResult GetTextStyleObject(const RefPtr<SpanNode>& node);
+    SymbolSpanStyle GetSymbolSpanStyleObject(const RefPtr<SpanNode>& node);
     RefPtr<UINode> GetChildByIndex(int32_t index) const;
     RefPtr<SpanItem> GetSpanItemByIndex(int32_t index) const;
     ResultObject GetTextResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
+    ResultObject GetSymbolSpanResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
     ResultObject GetImageResultObject(RefPtr<UINode> uinode, int32_t index, int32_t start, int32_t end);
 
     const std::vector<std::string>& GetDragContents() const
@@ -581,7 +591,7 @@ protected:
     std::optional<TextStyle> textStyle_;
     std::list<RefPtr<SpanItem>> spans_;
     float baselineOffset_ = 0.0f;
-    int32_t imageCount_ = 0;
+    int32_t placeholderCount_ = 0;
     SelectMenuInfo selectMenuInfo_;
     std::vector<RectF> dragBoxes_;
 
@@ -617,7 +627,8 @@ private:
     void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
     void ActSetSelection(int32_t start, int32_t end);
     void SetAccessibilityAction();
-    void CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpanHasClick);
+    void CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanHasClick);
+    void UpdateContainerChildren(const RefPtr<UINode>& parent, const RefPtr<UINode>& child);
     RefPtr<RenderContext> GetRenderContext();
     void ProcessBoundRectByTextShadow(RectF& rect);
     void FireOnSelectionChange(int32_t start, int32_t end);
@@ -627,10 +638,14 @@ private:
     void HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset);
     void HandleMouseLeftMoveAction(const MouseInfo& info, const Offset& textOffset);
     void HandleSelectionChange(int32_t start, int32_t end);
-    void InitSpanItem(std::stack<RefPtr<UINode>> nodes);
+    void InitSpanItem(std::stack<SpanNodeInfo> nodes);
     void UpdateSelectionSpanType(int32_t selectStart, int32_t selectEnd);
     int32_t GetSelectionSpanItemIndex(const MouseInfo& info);
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
+    void RedisplaySelectOverlay();
+    void ProcessBoundRectByTextMarquee(RectF& rect);
+    ResultObject GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t index, int32_t start, int32_t end);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     // to check if drag is in progress
 
     bool isMeasureBoundary_ = false;
@@ -658,6 +673,7 @@ private:
     int32_t dragRecordSize_ = -1;
     std::optional<TextResponseType> textResponseType_;
     RefPtr<TextController> textController_;
+    TextSpanType oldSelectedType_ = TextSpanType::NONE;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG

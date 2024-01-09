@@ -16,12 +16,12 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_GRID_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_GRID_H
 
-#include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
+#include "bridge/declarative_frontend/jsview/js_scrollable_base.h"
 #include "frameworks/core/components/grid_layout/grid_layout_component.h"
 
 namespace OHOS::Ace::Framework {
 
-class JSGrid : public JSContainerBase {
+class JSGrid : public JSScrollableBase {
 public:
     static void Create(const JSCallbackInfo& info);
     static void JSBind(BindingTarget globalObj);

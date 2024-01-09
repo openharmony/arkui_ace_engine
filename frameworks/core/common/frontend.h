@@ -73,7 +73,8 @@ public:
     Frontend() = default;
     ~Frontend() override;
 
-    enum class State { ON_CREATE, ON_DESTROY, ON_SHOW, ON_HIDE, ON_ACTIVE, ON_INACTIVE, UNDEFINE };
+    enum State : uint8_t { ON_CREATE = 0, ON_DESTROY, ON_SHOW, ON_HIDE, ON_ACTIVE, ON_INACTIVE, UNDEFINE };
+    static std::string stateToString(int state);
 
     static RefPtr<Frontend> Create();
     static RefPtr<Frontend> CreateDefault();
@@ -113,6 +114,8 @@ public:
 
     virtual void RunPage(const std::string& content, const std::string& params) = 0;
     virtual void RunPage(const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params) {};
+    virtual void RunDynamicPage(
+        const std::string& content, const std::string& params, const std::string& entryPoint) {};
 
     virtual void RunPageByNamedRouter(const std::string& name) {}
 

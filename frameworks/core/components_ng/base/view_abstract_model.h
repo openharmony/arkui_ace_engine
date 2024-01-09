@@ -261,6 +261,7 @@ public:
     virtual void SetDefaultFocus(bool isSet) = 0;
     virtual void SetGroupDefaultFocus(bool isSet) = 0;
     virtual void SetInspectorId(const std::string& inspectorId) = 0;
+    virtual void SetAutoEventParam(const std::string& param) {};
     virtual void SetRestoreId(int32_t restoreId) = 0;
     virtual void SetDebugLine(const std::string& line) = 0;
     virtual void SetHoverEffect(HoverEffectType hoverEffect) = 0;

@@ -30,6 +30,8 @@ public:
     virtual void Create(std::function<void()>&& deepRenderFunc) = 0;
     virtual void SetHideTitleBar(bool hideTitleBar) = 0;
     virtual void SetTitle(const std::string& title, bool hasSubTitle) = 0;
+    virtual void SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
+        const std::string& bundleName, const std::string& moduleName) = 0;
     virtual void SetSubtitle(const std::string& subtitle) = 0;
     virtual void SetCustomTitle(const RefPtr<AceType>& customNode) = 0;
     virtual void SetTitleHeight(int32_t height) = 0;

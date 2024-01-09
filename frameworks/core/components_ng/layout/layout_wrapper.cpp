@@ -76,10 +76,14 @@ void LayoutWrapper::RestoreGeoState()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto manager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(manager);
     auto&& restoreNodes = manager->GetGeoRestoreNodes();
     if (restoreNodes.find(hostNode_) != restoreNodes.end()) {
-        GetGeometryNode()->Restore();
+        if (GetGeometryNode()) {
+            GetGeometryNode()->Restore();
+        }
         manager->RemoveRestoreNode(hostNode_);
+        manager->AddNeedExpandNode(hostNode_);
     }
 }
 
@@ -93,23 +97,20 @@ void LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
         if (!isFocusOnPage && LessNotEqual(manager->GetKeyboardOffset(), 0.0)) {
             return;
         }
-        GetGeometryNode()->SetFrameOffset(
-            GetGeometryNode()->GetFrameOffset() + OffsetF(0, manager->GetKeyboardOffset()));
+        auto safeArea = manager->GetSafeArea();
+        GetGeometryNode()->SetFrameOffset(OffsetF(0, safeArea.top_.Length() + manager->GetKeyboardOffset()));
     }
 }
 
 void LayoutWrapper::SaveGeoState()
 {
-    auto&& expandOpts = GetLayoutProperty()->GetSafeAreaExpandOpts();
-    if ((expandOpts && expandOpts->Expansive()) || GetHostTag() == V2::PAGE_ETS_TAG) {
-        // save geometry state before SafeArea expansion / keyboard avoidance.
-        GetGeometryNode()->Save();
-        // record nodes whose geometry states need to be restored, to speed up RestoreGeoState
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto manager = pipeline->GetSafeAreaManager();
-        manager->AddGeoRestoreNode(GetHostNode());
-    }
+    // save geometry state before SafeArea expansion / keyboard avoidance.
+    GetGeometryNode()->Save();
+    // record nodes whose geometry states need to be restored, to speed up RestoreGeoState
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto manager = pipeline->GetSafeAreaManager();
+    manager->AddGeoRestoreNode(GetHostNode());
 }
 
 void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
@@ -172,10 +173,6 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
     }
     geometryNode->SetFrameOffset(frame.GetOffset());
     geometryNode->SetFrameSize(frame.GetSize());
-    auto hostPattern = host->GetPattern();
-    if (hostPattern) {
-        hostPattern->UpdateNeedRecalculateSafeArea();
-    }
 }
 
 void LayoutWrapper::AdjustChildren(const OffsetF& offset)
@@ -186,6 +183,7 @@ void LayoutWrapper::AdjustChildren(const OffsetF& offset)
             continue;
         }
         auto childGeo = child->GetGeometryNode();
+        child->SaveGeoState();
         childGeo->SetFrameOffset(childGeo->GetFrameOffset() + offset);
         child->ForceSyncGeometryNode();
     }

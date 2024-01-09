@@ -58,13 +58,15 @@ void JSSymbolSpan::SetFontSize(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
-    CalcDimension fontSize;
-    if (!ParseJsDimensionFp(info[0], fontSize)) {
+    auto theme = GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
+    if (!ParseJsDimensionFpNG(info[0], fontSize, false)) {
+        fontSize = theme->GetTextStyle().GetFontSize();
+        SymbolSpanModel::GetInstance()->SetFontSize(fontSize);
         return;
     }
     if (fontSize.IsNegative()) {
-        auto theme = GetTheme<TextTheme>();
-        CHECK_NULL_VOID(theme);
         fontSize = theme->GetTextStyle().GetFontSize();
     }
 
@@ -74,6 +76,29 @@ void JSSymbolSpan::SetFontSize(const JSCallbackInfo& info)
 void JSSymbolSpan::SetFontWeight(const std::string& value)
 {
     SymbolSpanModel::GetInstance()->SetFontWeight(ConvertStrToFontWeight(value));
+}
+
+void JSSymbolSpan::SetFontColor(const JSCallbackInfo& info)
+{
+    std::vector<Color> symbolColor;
+    if (!ParseJsSymbolColor(info[0], symbolColor)) {
+        return;
+    }
+    SymbolSpanModel::GetInstance()->SetFontColor(symbolColor);
+}
+
+void JSSymbolSpan::SetSymbolRenderingStrategy(const JSCallbackInfo& info)
+{
+    uint32_t strategy = 0;
+    ParseJsInteger(info[0], strategy);
+    SymbolSpanModel::GetInstance()->SetSymbolRenderingStrategy(strategy);
+}
+
+void JSSymbolSpan::SetSymbolEffect(const JSCallbackInfo& info)
+{
+    uint32_t strategy = 0;
+    ParseJsInteger(info[0], strategy);
+    SymbolSpanModel::GetInstance()->SetSymbolEffect(strategy);
 }
 
 void JSSymbolSpan::Create(const JSCallbackInfo& info)
@@ -93,6 +118,9 @@ void JSSymbolSpan::JSBind(BindingTarget globalObj)
     JSClass<JSSymbolSpan>::StaticMethod("create", &JSSymbolSpan::Create, opt);
     JSClass<JSSymbolSpan>::StaticMethod("fontSize", &JSSymbolSpan::SetFontSize, opt);
     JSClass<JSSymbolSpan>::StaticMethod("fontWeight", &JSSymbolSpan::SetFontWeight, opt);
+    JSClass<JSSymbolSpan>::StaticMethod("fontColor", &JSSymbolSpan::SetFontColor, opt);
+    JSClass<JSSymbolSpan>::StaticMethod("renderingStrategy", &JSSymbolSpan::SetSymbolRenderingStrategy, opt);
+    JSClass<JSSymbolSpan>::StaticMethod("effectStrategy", &JSSymbolSpan::SetSymbolEffect, opt);
     JSClass<JSSymbolSpan>::InheritAndBind<JSContainerBase>(globalObj);
 }
 } // namespace OHOS::Ace::Framework

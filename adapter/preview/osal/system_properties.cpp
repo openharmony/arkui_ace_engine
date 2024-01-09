@@ -40,7 +40,7 @@ void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 
 bool SystemProperties::traceEnabled_ = false;
 bool SystemProperties::svgTraceEnable_ = false;
-bool SystemProperties::layoutTraceEnable_ = false;
+bool SystemProperties::buildTraceEnable_ = false;
 bool SystemProperties::accessibilityEnabled_ = false;
 bool SystemProperties::isRound_ = false;
 bool SystemProperties::isDeviceAccess_ = false;
@@ -70,7 +70,6 @@ bool SystemProperties::downloadByNetworkEnabled_ = false;
 bool SystemProperties::gpuUploadEnabled_ = false;
 bool SystemProperties::isHookModeEnabled_ = false;
 bool SystemProperties::astcEnabled_ = false;
-bool SystemProperties::changeTitleStyleEnabled_ = false;
 int SystemProperties::astcMax_ = 0;
 int SystemProperties::astcPsnr_ = 0;
 bool SystemProperties::extSurfaceEnabled_ = false;
@@ -81,6 +80,8 @@ bool SystemProperties::rosenBackendEnabled_ = false;
 #else
 bool SystemProperties::rosenBackendEnabled_ = true;
 #endif
+bool SystemProperties::enableScrollableItemPool_ = false;
+bool SystemProperties::navigationBlurEnabled_ = true;
 
 void SystemProperties::InitDeviceType(DeviceType type)
 {
@@ -228,6 +229,11 @@ bool SystemProperties::GetResourceDecoupling()
     return true;
 }
 
+bool SystemProperties::GetTitleStyleEnabled()
+{
+    return false;
+}
+
 int32_t SystemProperties::GetJankFrameThreshold()
 {
     return 0;
@@ -239,6 +245,21 @@ std::string SystemProperties::GetCustomTitleFilePath()
 }
 
 bool SystemProperties::Is24HourClock()
+{
+    return false;
+}
+
+bool SystemProperties::GetDisplaySyncSkipEnabled()
+{
+    return true;
+}
+
+bool SystemProperties::GetNavigationBlurEnabled()
+{
+    return navigationBlurEnabled_;
+}
+
+bool SystemProperties::GetLayoutTraceEnabled()
 {
     return false;
 }

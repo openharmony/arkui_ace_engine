@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-/// <reference path="./import.ts" />
+/// <reference path='./import.ts' />
 class GridRowAlignItemsModifier extends ModifierWithKey<number> {
   constructor(value: number) {
     super(value);
@@ -21,37 +21,37 @@ class GridRowAlignItemsModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('gridRowAlignItems');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().gridRow.resetAlignItems(node);
+      getUINativeModule().gridRow.resetAlignItems(node);
     } else {
-      GetUINativeModule().gridRow.setAlignItems(node, this.value!);
+      getUINativeModule().gridRow.setAlignItems(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
-class ArkGridRowComponent extends ArkComponent implements CommonMethod<GridRowAttribute>{
+class ArkGridRowComponent extends ArkComponent implements CommonMethod<GridRowAttribute> {
   constructor(nativePtr: KNode) {
     super(nativePtr);
   }
   onBreakpointChange(callback: (breakpoints: string) => void): GridRowAttribute {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
   alignItems(value: ItemAlign): GridRowAttribute {
     modifierWithKey(this._modifiersWithKeys, GridRowAlignItemsModifier.identity, GridRowAlignItemsModifier, value);
     return this;
   }
   monopolizeEvents(monopolize: boolean): this {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
 }
 // @ts-ignore
 globalThis.GridRow.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkGridRowComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};
