@@ -490,7 +490,7 @@ bool PerfMonitor::IsExceptResponseTime(int64_t time, const std::string& sceneId)
         sceneId == PerfConstants::PC_SHOW_DESKTOP_GESTURE_OPERATION ||
         sceneId == PerfConstants::PC_ALT_TAB_TO_RECENT ||
         sceneId == PerfConstants::PC_SHORTCUT_TO_RECENT ||
-        sceneId == PerfConstants::PC_ESC_EXIT_RECENT ||
+        sceneId == PerfConstants::PC_EXIT_RECENT ||
         sceneId == PerfConstants::PC_SHORTCUT_TO_APP_CENTER ||
         sceneId == PerfConstants::PC_SHORTCUT_EXIT_APP_CENTER) {
         return true;
