@@ -175,6 +175,7 @@ public:
     {
         PerformAction(TextInputAction::NEW_LINE, false);
     }
+    bool HandleOnEscape() override;
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
     void CursorMove(CaretMoveIntent direction) override;
