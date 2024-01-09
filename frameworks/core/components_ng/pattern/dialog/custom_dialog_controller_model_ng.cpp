@@ -112,10 +112,6 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
         }
         CHECK_NULL_VOID(dialog);
         if (dialogProperties.isShowInSubWindow) {
-            SubwindowManager::GetInstance()->DeleteHotAreas(
-                SubwindowManager::GetInstance()->GetDialogSubWindowId(), dialog->GetId());
-            SubwindowManager::GetInstance()->HideDialogSubWindow(
-                SubwindowManager::GetInstance()->GetDialogSubWindowId());
             SubwindowManager::GetInstance()->CloseDialogNG(dialog);
             dialogs.pop_back();
         } else {
