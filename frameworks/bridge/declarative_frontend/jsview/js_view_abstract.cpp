@@ -5295,13 +5295,20 @@ void JSViewAbstract::JsBlendMode(const JSCallbackInfo& info)
     }
     BlendMode blendMode = BlendMode::NONE;
     BlendApplyType blendApplyType = BlendApplyType::FAST;
+    int srcOverOffscreen = 1000;
     if (info[0]->IsNumber()) {
         auto blendModeNum = info[0]->ToNumber<int32_t>();
         if (blendModeNum >= static_cast<int>(BlendMode::NONE) &&
             blendModeNum <= static_cast<int>(BlendMode::LUMINOSITY)) {
             blendMode = static_cast<BlendMode>(blendModeNum);
         }
-    }
+        if (blendModeNum == 1000) {
+            //new sdk is not allowed to use ts-ignore. To adapt API11 interface
+            //changes, we add this flag. It will be deleted after application switch to newer sdk
+            blendMode = BlendMode::SRC_OVER;
+            blendApplyType = BlendApplyType::OFFSCREEN;
+        }
+    }D:\code\arkui_ace_engine_1\frameworks\bridge\declarative_frontend\jsview\js_view_abstract.cpp
     if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsNumber()) {
         auto blendApplyTypeNum = info[1]->ToNumber<int32_t>();
         if (blendApplyTypeNum >= static_cast<int>(BlendApplyType::FAST) &&
