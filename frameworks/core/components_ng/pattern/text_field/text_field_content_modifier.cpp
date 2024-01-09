@@ -95,10 +95,41 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
         contentRect.Width() + contentRect.GetX() + textFieldPattern->GetInlinePadding(), clipRectHeight);
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     if (paragraph) {
+        canvas.Save();
+        RSRect clipRect;
+        std::vector<RSPoint> clipRadius;
+        GetFrameRectClip(clipRect, clipRadius);
+        canvas.ClipRoundRect(clipRect, clipRadius, true);
         paragraph->Paint(canvas, textFieldPattern->GetTextRect().GetX(),
             textFieldPattern->IsTextArea() ? textFieldPattern->GetTextRect().GetY() : contentOffset.GetY());
+        canvas.Restore();
     }
     canvas.Restore();
+}
+
+void TextFieldContentModifier::GetFrameRectClip(RSRect& clipRect, std::vector<RSPoint>& clipRadius)
+{
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto host = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto textFrameRect = textFieldPattern->GetFrameRect();
+    clipRect = RSRect(0.0f, 0.0f, textFrameRect.Width(), textFrameRect.Height());
+    auto radius = renderContext->GetBorderRadius().value_or(BorderRadiusProperty());
+    auto radiusTopLeft = RSPoint(static_cast<float>(radius.radiusTopLeft.value_or(0.0_vp).ConvertToPx()),
+        static_cast<float>(radius.radiusTopLeft.value_or(0.0_vp).ConvertToPx()));
+    clipRadius.emplace_back(radiusTopLeft);
+    auto radiusTopRight = RSPoint(static_cast<float>(radius.radiusTopRight.value_or(0.0_vp).ConvertToPx()),
+        static_cast<float>(radius.radiusTopRight.value_or(0.0_vp).ConvertToPx()));
+    clipRadius.emplace_back(radiusTopRight);
+    auto radiusBottomRight = RSPoint(static_cast<float>(radius.radiusBottomRight.value_or(0.0_vp).ConvertToPx()),
+        static_cast<float>(radius.radiusBottomRight.value_or(0.0_vp).ConvertToPx()));
+    clipRadius.emplace_back(radiusBottomRight);
+    auto radiusBottomLeft = RSPoint(static_cast<float>(radius.radiusBottomLeft.value_or(0.0_vp).ConvertToPx()),
+        static_cast<float>(radius.radiusBottomLeft.value_or(0.0_vp).ConvertToPx()));
+    clipRadius.emplace_back(radiusBottomLeft);
 }
 
 void TextFieldContentModifier::SetDefaultAnimatablePropertyValue()

@@ -78,6 +78,7 @@ private:
     std::vector<TextPoint> GetTextPoints(float startX, float startY, float endX, float endY, bool haveOffset = false);
     std::shared_ptr<RSPath> GetPathByPoints(std::vector<TextPoint> points);
     void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas);
+    void GetFrameRectClip(RSRect& clipRect, std::vector<RSPoint>& clipRadius);
 
     bool needPaintSelect_ = false;
     WeakPtr<Pattern> pattern_;
