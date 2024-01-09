@@ -212,6 +212,7 @@ public:
     void SetSwiperController(const RefPtr<SwiperController>& swiperController)
     {
         swiperController_ = swiperController;
+        InitSwiperController();
     }
 
     int32_t GetCurrentFirstIndex() const
