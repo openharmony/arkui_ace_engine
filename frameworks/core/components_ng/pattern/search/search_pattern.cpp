@@ -530,6 +530,7 @@ void SearchPattern::OnClickButtonAndImage()
 
 void SearchPattern::OnClickCancelButton()
 {
+    focusChoice_ = FocusChoice::SEARCH;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
@@ -545,6 +546,7 @@ void SearchPattern::OnClickCancelButton()
     textFieldLayoutProperty->UpdateValue("");
     auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
     eventHub->FireOnChange("");
+    textFieldPattern->StartTwinkling();
     host->MarkModifyDone();
     textFieldFrameNode->MarkModifyDone();
 }
@@ -625,7 +627,6 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     // If the focus is on the Delete button, press Enter to delete the content.
     if (event.code == KeyCode::KEY_ENTER && focusChoice_ == FocusChoice::CANCEL_BUTTON) {
         OnClickCancelButton();
-        focusChoice_ = FocusChoice::SEARCH;
         PaintFocusState();
         return true;
     }
