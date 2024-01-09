@@ -138,6 +138,9 @@ void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
     if (!(layoutProperty->GetShowUnderlineValue(false) && textFieldPattern->IsUnspecifiedOrTextType())) {
         return;
     }
+    if (textFieldPattern->IsNormalInlineState() && textFieldPattern->HasFocus()) {
+        return;
+    }
     auto contentRect = textFieldPattern->GetContentRect();
     auto textFrameRect = textFieldPattern->GetFrameRect();
     auto responseArea = textFieldPattern->GetResponseArea();

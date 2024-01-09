@@ -151,6 +151,9 @@ void SearchPattern::OnModifyDone()
         margin.bottom = CalcLength(UP_AND_DOWN_PADDING.ConvertToPx());
         layoutProperty->UpdateMargin(margin);
     }
+
+    HandleBackgroundColor();
+
     auto searchButton = layoutProperty->GetSearchButton();
     searchButton_ = searchButton.has_value() ? searchButton->value() : "";
     InitSearchController();
@@ -188,6 +191,19 @@ void SearchPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     InitFocusEvent(focusHub);
     InitClickEvent();
+}
+
+void SearchPattern::HandleBackgroundColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto textFieldTheme = PipelineBase::GetCurrentContext()->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
+    if (!renderContext->HasBackgroundColor()) {
+        renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
+    }
 }
 
 void SearchPattern::HandleEnabled()
