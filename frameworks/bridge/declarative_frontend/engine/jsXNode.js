@@ -70,7 +70,7 @@ class BuilderNode extends BaseNode {
         const childWeakRef = this.childrenWeakrefMap_.get(id);
         return childWeakRef ? childWeakRef.deref() : undefined;
     }
-    updateStateVarsOfChildByElmtId(elmtId, params, updateParams) {
+    updateStateVarsOfChildByElmtId(elmtId, params) {
         if (elmtId < 0) {
             return;
         }
@@ -78,9 +78,7 @@ class BuilderNode extends BaseNode {
         if (!child) {
             return;
         }
-        if (typeof child.aboutToUpdate === "function") {
-            child.aboutToUpdate(updateParams);
-        }
+        child.updateStateVars(params);
     }
     build(builder, params) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
