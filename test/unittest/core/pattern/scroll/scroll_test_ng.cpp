@@ -1725,7 +1725,7 @@ HWTEST_F(ScrollTestNg, FadeController002, TestSize.Level1)
     fadeController->controller_->NotifyStopListener();
     fadeController->state_ = OverScrollState::PULL;
     fadeController->ProcessPull(1.0, 1.0, 1.0);
-    EXPECT_EQ(fadeController->state_,OverScrollState::PULL);
+    EXPECT_EQ(fadeController->state_, OverScrollState::PULL);
 
     /**
      * @tc.steps: step4. When OverScrollState is PULL, call the ProcessRecede function and callback function in
@@ -1734,8 +1734,8 @@ HWTEST_F(ScrollTestNg, FadeController002, TestSize.Level1)
      */
     fadeController->controller_ = nullptr;
     fadeController->ProcessRecede(10);
-    EXPECT_EQ(fadeController->state_,OverScrollState::PULL);
-    
+    EXPECT_EQ(fadeController->state_, OverScrollState::PULL);
+
     /**
      * @tc.steps: step5. When OverScrollState is 0, call the Initialize function and callback function in
      *                   fadeController.
@@ -1767,7 +1767,7 @@ HWTEST_F(ScrollTestNg, FadeController003, TestSize.Level1)
     };
     fadeController->SetCallback(callback);
 
-   /**
+    /**
      * @tc.steps: step2. When OverScrollState is PULL, call the ProcessAbsorb function and callback function in
      *                   fadeController.
      * @tc.expected: step2. Check whether relevant parameters are correct.
@@ -1776,8 +1776,8 @@ HWTEST_F(ScrollTestNg, FadeController003, TestSize.Level1)
     fadeController->state_ = OverScrollState::PULL;
     fadeController->ProcessAbsorb(10);
     fadeController->ProcessRecede(10);
-    EXPECT_EQ(fadeController->state_,OverScrollState::PULL);
-    fadeController->ProcessPull(1.0,0.0,1.0);
+    EXPECT_EQ(fadeController->state_, OverScrollState::PULL);
+    fadeController->ProcessPull(1.0, 0.0, 1.0);
 
     /**
      * @tc.steps: step3. When OverScrollState is IDLE, call the DecelerateListener function and callback function in
@@ -1788,7 +1788,7 @@ HWTEST_F(ScrollTestNg, FadeController003, TestSize.Level1)
     fadeController->ProcessAbsorb(-10);
     fadeController->callback_ = nullptr;
     fadeController->DecelerateListener(0.0);
-    EXPECT_EQ(fadeController->state_,OverScrollState::IDLE);
+    EXPECT_EQ(fadeController->state_, OverScrollState::IDLE);
 }
 
 /**
