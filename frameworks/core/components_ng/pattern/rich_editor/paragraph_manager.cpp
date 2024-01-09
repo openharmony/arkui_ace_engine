@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 
+#include <iterator>
+
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
@@ -68,6 +70,26 @@ std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end) const
         y += info.paragraph->GetHeight();
     }
     return res;
+}
+
+bool ParagraphManager::IsSelectLineHeadAndUseLeadingMargin(int32_t start) const
+{
+    for (auto iter = paragraphs_.begin(); iter != paragraphs_.end(); iter++) {
+        auto curParagraph = *iter;
+        if (curParagraph.paragraph && curParagraph.paragraph->GetParagraphStyle().leadingMargin &&
+            curParagraph.start == start) {
+            return true;
+        }
+        auto next = std::next(iter);
+        if (next != paragraphs_.end()) {
+            auto nextParagraph = *next;
+            if (nextParagraph.paragraph && nextParagraph.paragraph->GetParagraphStyle().leadingMargin &&
+                nextParagraph.start == start + 1) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 std::vector<RectF> ParagraphManager::GetPlaceholderRects() const
