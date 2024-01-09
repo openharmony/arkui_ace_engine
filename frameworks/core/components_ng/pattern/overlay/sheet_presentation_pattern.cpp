@@ -408,6 +408,7 @@ void SheetPresentationPattern::AvoidSafeArea()
         return;
     }
     keyboardHeight_ = manager->GetKeyboardInset().Length();
+    CHECK_NULL_VOID(host->GetFocusHub()->IsCurrentFocus());
     auto heightUp = GetSheetHeightChange();
     auto offset = pageHeight_ - height_ - heightUp;
     auto renderContext = host->GetRenderContext();
