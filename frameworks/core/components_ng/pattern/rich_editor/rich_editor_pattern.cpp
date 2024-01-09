@@ -3837,8 +3837,6 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
 
-        pattern->UpdateSelectMenuInfo(hasData, selectInfo, isCopyAll);
-
         selectInfo.menuCallback.onCopy = [weak, usingMouse]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -3884,6 +3882,7 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
         }
         selectInfo.callerFrameNode = host;
         pattern->CopySelectionMenuParams(selectInfo, responseType);
+        pattern->UpdateSelectMenuInfo(hasData, selectInfo, isCopyAll);
         pattern->CheckEditorTypeChange();
         pattern->UpdateSelectOverlayOrCreate(selectInfo);
     };
