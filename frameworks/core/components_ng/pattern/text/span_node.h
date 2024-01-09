@@ -283,6 +283,7 @@ class ACE_EXPORT SpanNode : public UINode, public BaseSpan {
 public:
     static RefPtr<SpanNode> GetOrCreateSpanNode(int32_t nodeId);
     static RefPtr<SpanNode> GetOrCreateSpanNode(const std::string& tag, int32_t nodeId);
+    static RefPtr<SpanNode> CreateSpanNode(int32_t nodeId);
 
     explicit SpanNode(int32_t nodeId) : UINode(V2::SPAN_ETS_TAG, nodeId), BaseSpan(nodeId) {}
     explicit SpanNode(const std::string& tag, int32_t nodeId) : UINode(tag, nodeId), BaseSpan(nodeId) {}

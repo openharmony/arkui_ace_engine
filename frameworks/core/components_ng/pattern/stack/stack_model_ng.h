@@ -26,7 +26,7 @@ class FrameNode;
 class ACE_EXPORT StackModelNG : public StackModel {
 public:
     void Create(Alignment align) override;
-    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId); //override;
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     void SetStackFit(StackFit fit) override {}
     void SetOverflow(Overflow overflow) override {}
     void SetAlignment(Alignment align) override;

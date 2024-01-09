@@ -111,6 +111,13 @@ RefPtr<SpanNode> SpanNode::GetOrCreateSpanNode(int32_t nodeId)
     return spanNode;
 }
 
+RefPtr<SpanNode> SpanNode::CreateSpanNode(int32_t nodeId)
+{
+    auto spanNode = MakeRefPtr<SpanNode>(nodeId);
+    ElementRegister::GetInstance()->AddUINode(spanNode);
+    return spanNode;
+}
+
 RefPtr<SpanNode> SpanNode::GetOrCreateSpanNode(const std::string& tag, int32_t nodeId)
 {
     auto spanNode = ElementRegister::GetInstance()->GetSpecificItemById<SpanNode>(nodeId);

@@ -23,6 +23,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/pattern/image/image_model_ng.h"
 
 namespace OHOS::Ace::NG {
 void ImageSpanView::SetObjectFit(ImageFit value)
@@ -55,4 +56,16 @@ void ImageSpanView::Create()
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, HasPlaceHolderStyle, false);
 }
+
+RefPtr<FrameNode> ImageSpanView::CreateFrameNode(int32_t nodeId)
+{
+    RefPtr<PixelMap> pixmap = nullptr;
+    auto imageSpanNode = ImageModelNG::CreateFrameNode(nodeId, "", pixmap, "", "");
+    CHECK_NULL_RETURN(imageSpanNode, nullptr);
+    auto layoutProperty = imageSpanNode->GetLayoutProperty<ImageLayoutProperty>();
+    layoutProperty->UpdateHasPlaceHolderStyle(false);
+    return imageSpanNode;
+}
+
+
 } // namespace OHOS::Ace::NG

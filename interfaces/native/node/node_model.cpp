@@ -21,6 +21,9 @@
 
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/property/property.h"
 #include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NodeModel {
@@ -98,7 +101,6 @@ ArkUIFullNodeAPI* GetAnyFullNodeImpl(int version)
     }
     return impl;
 }
-
 } // namespace
 
 ArkUIFullNodeAPI* GetFullImpl()
@@ -180,8 +182,7 @@ void InsertChildAfter(ArkUI_NodeHandle parentNode, ArkUI_NodeHandle childNode, A
 
 const char* GetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
 {
-    // TODO.
-    return nullptr;
+    return GetNodeAttribute(node, attribute);
 }
 
 void SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const char* value)
@@ -191,7 +192,7 @@ void SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, cons
 
 void ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute)
 {
-    // TODO.
+    ResetNodeAttribute(node, attribute);
 }
 
 void RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t eventId)
@@ -258,7 +259,22 @@ void ApplyModifierFinish(ArkUI_NodeHandle nodePtr)
 
 void MarkDirty(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag)
 {
-    // TODO.
+    // spanNode inherited from UINode
+    auto* uiNode = reinterpret_cast<NG::UINode*>(nodePtr->uiNodeHandle);
+    CHECK_NULL_VOID(uiNode);
+    NG::PropertyChangeFlag flag;
+    switch (dirtyFlag) {
+        case NODE_NEED_LAYOUT: {
+            flag = NG::PROPERTY_UPDATE_LAYOUT;
+        }
+        case NODE_NEED_RENDER: {
+            flag = NG::PROPERTY_UPDATE_RENDER;
+        }
+        default: {
+            flag = NG::PROPERTY_UPDATE_NORMAL;
+        }
+    }
+    uiNode->MarkDirtyNode(flag);
 }
 
 } // namespace OHOS::Ace::NodeModel

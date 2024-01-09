@@ -38,14 +38,21 @@ void ScrollModelNG::Create()
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::SCROLL_ETS_TAG, nodeId);
-    auto frameNode = CreateScroll(nodeId);
-    stack->Push(frameNode);
-}
-
-RefPtr<FrameNode> ScrollModelNG::CreateScroll(int32_t nodeId)
-{
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::SCROLL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ScrollPattern>(); });
+    stack->Push(frameNode);
+    SetEdgeEffect(EdgeEffect::NONE, true);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto positionController = AceType::MakeRefPtr<NG::ScrollableController>();
+    pattern->SetPositionController(positionController);
+    positionController->SetScrollPattern(pattern);
+}
+
+RefPtr<FrameNode> ScrollModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::SCROLL_ETS_TAG, nodeId, AceType::MakeRefPtr<ScrollPattern>());
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     pattern->SetAlwaysEnabled(true);
     auto positionController = AceType::MakeRefPtr<NG::ScrollableController>();

@@ -92,6 +92,39 @@ void TextFieldModelNG::CreateNode(
     }
 }
 
+RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::optional<std::string>& placeholder,
+    const std::optional<std::string>& value, bool isTextArea)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        isTextArea ? V2::TEXTAREA_ETS_TAG : V2::TEXTINPUT_ETS_TAG, nodeId, AceType::MakeRefPtr<TextFieldPattern>());
+    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_RETURN(textFieldLayoutProperty, nullptr);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    pattern->SetModifyDoneStatus(false);
+    auto textValue = pattern->GetTextValue();
+    if (SystemProperties::GetDebugEnabled()) {
+        LOGI("TextFieldModelNG::GetOrCreateNode with text %{public}s, current text %{public}s",
+            value.value_or("NA").c_str(), textValue.c_str());
+    }
+    if (value.has_value() && value.value() != textValue) {
+        pattern->InitEditingValueText(value.value());
+    }
+    textFieldLayoutProperty->UpdatePlaceholder(placeholder.value_or(""));
+    if (!isTextArea) {
+        textFieldLayoutProperty->UpdateMaxLines(1);
+        textFieldLayoutProperty->UpdatePlaceholderMaxLines(1);
+    } else {
+        textFieldLayoutProperty->UpdatePlaceholderMaxLines(Infinity<uint32_t>());
+    }
+    pattern->SetTextFieldController(AceType::MakeRefPtr<TextFieldController>());
+    pattern->GetTextFieldController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
+    pattern->SetTextEditController(AceType::MakeRefPtr<TextEditController>());
+    pattern->InitSurfaceChangedCallback();
+    pattern->InitSurfacePositionChangedCallback();
+    ProcessDefaultStyleAndBehaviors(frameNode);
+    return frameNode;
+}
+
 void TextFieldModelNG::SetDraggable(bool draggable)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -102,6 +135,44 @@ void TextFieldModelNG::SetDraggable(bool draggable)
 void TextFieldModelNG::SetShowUnderline(bool showUnderLine)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextFieldLayoutProperty, ShowUnderline, showUnderLine);
+}
+
+void TextFieldModelNG::ProcessDefaultStyleAndBehaviors(const RefPtr<FrameNode>& frameNode)
+{
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto textfieldPaintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(textfieldPaintProperty);
+    textfieldPaintProperty->UpdatePressBgColor(textFieldTheme->GetPressColor());
+    textfieldPaintProperty->UpdateHoverBgColor(textFieldTheme->GetHoverColor());
+    auto renderContext = frameNode->GetRenderContext();
+    renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
+    auto radius = textFieldTheme->GetBorderRadius();
+    textfieldPaintProperty->UpdateCursorColor(textFieldTheme->GetCursorColor());
+    BorderRadiusProperty borderRadius { radius.GetX(), radius.GetY(), radius.GetY(), radius.GetX() };
+    renderContext->UpdateBorderRadius(borderRadius);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_VOID(dragDropManager);
+    dragDropManager->AddTextFieldDragFrameNode(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    PaddingProperty paddings;
+    auto themePadding = textFieldTheme->GetPadding();
+    paddings.top = NG::CalcLength(themePadding.Top().ConvertToPx());
+    paddings.bottom = NG::CalcLength(themePadding.Bottom().ConvertToPx());
+    paddings.left = NG::CalcLength(themePadding.Left().ConvertToPx());
+    paddings.right = NG::CalcLength(themePadding.Right().ConvertToPx());
+    auto layoutProperty = frameNode->GetLayoutProperty<LayoutProperty>();
+    layoutProperty->UpdatePadding(paddings);
+    if (frameNode->IsFirstBuilding()) {
+        auto draggable = pipeline->GetDraggable<TextFieldTheme>();
+        frameNode->SetDraggable(draggable);
+        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->SetTextDraggable(true);
+    }
 }
 
 void TextFieldModelNG::ProcessDefaultPadding(PaddingProperty& paddings)
