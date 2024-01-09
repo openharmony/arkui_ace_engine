@@ -2555,6 +2555,22 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
             menuParam.placement = PLACEMENT[placement];
         }
     }
+    
+    auto backgroundColorValue = menuOptions->GetProperty("backgroundColor");
+    Color backgroundColor;
+    if (JSViewAbstract::ParseJsColor(backgroundColorValue, backgroundColor)) {
+        menuParam.backgroundColor = backgroundColor;
+    }
+
+    auto backgroundBlurStyle = menuOptions->GetProperty("backgroundBlurStyle");
+    BlurStyleOption styleOption;
+    if (backgroundBlurStyle->IsNumber()) {
+        auto blurStyle = backgroundBlurStyle->ToNumber<int32_t>();
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+            menuParam.backgroundBlurStyle = blurStyle;
+        }
+    }
     WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto onAppearValue = menuOptions->GetProperty("onAppear");
     if (onAppearValue->IsFunction()) {

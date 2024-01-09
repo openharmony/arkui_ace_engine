@@ -83,6 +83,8 @@ struct MenuParam {
     MenuPreviewMode previewMode = MenuPreviewMode::NONE;
     MenuPreviewAnimationOptions previewAnimationOptions;
     std::optional<EffectOption> backgroundEffectOption;
+    std::optional<Color> backgroundColor;
+    std::optional<int32_t> backgroundBlurStyle;
 };
 
 class ACE_FORCE_EXPORT ViewAbstract {
