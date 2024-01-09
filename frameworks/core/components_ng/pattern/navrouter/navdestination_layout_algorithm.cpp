@@ -140,19 +140,25 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(constraint);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     auto size = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
-    // to avoid zero-height of navDestination
-    if (size.Height() == 0) {
+
+    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
+    MinusPaddingToSize(padding, size);
+
+    float titleBarHeight = MeasureTitleBar(layoutWrapper, hostNode, navDestinationLayoutProperty, size);
+    float contentChildHeight= MeasureContentChild(layoutWrapper, hostNode, navDestinationLayoutProperty, size, titleBarHeight);
+
+    size.SetHeight(titleBarHeight + contentChildHeight);
+    if (titleBarHeight + contentChildHeight == 0) {
         auto pipeline = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipeline);
         auto height = pipeline->GetRootHeight();
         size.SetHeight(height);
     }
+    else {
+        size.AddWidth(padding.left.value_or(0.0f) + padding.right.value_or(0.0f));
+        size.AddHeight(padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f));
+    }
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
-    MinusPaddingToSize(padding, size);
-
-    float titleBarHeight = MeasureTitleBar(layoutWrapper, hostNode, navDestinationLayoutProperty, size);
-    MeasureContentChild(layoutWrapper, hostNode, navDestinationLayoutProperty, size, titleBarHeight);
 }
 
 void NavDestinationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
