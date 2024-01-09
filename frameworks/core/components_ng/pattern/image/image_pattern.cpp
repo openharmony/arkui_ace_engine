@@ -898,7 +898,7 @@ void ImagePattern::OnColorConfigurationUpdate()
     LoadImage(src);
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
         auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
-        if (altLoadingCtx_->GetSourceInfo() == altImageSourceInfo) {
+        if (altLoadingCtx_ && altLoadingCtx_->GetSourceInfo() == altImageSourceInfo) {
             altLoadingCtx_.Reset();
         }
         altImageSourceInfo.SetIsSystemColorChange(true);
