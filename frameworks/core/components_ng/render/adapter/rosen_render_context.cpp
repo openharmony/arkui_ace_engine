@@ -4107,23 +4107,7 @@ void RosenRenderContext::DumpAdvanceInfo()
         DumpLog::GetInstance().AddDesc("DynamicLightUpDegree:" + std::to_string(GetDynamicLightUpDegree().value()));
     }
     if (GetBackBlendMode().has_value()) {
-        switch (GetBackBlendMode().value()) {
-            case BlendMode::NONE: {
-                DumpLog::GetInstance().AddDesc("BlendMode:NONE");
-                break;
-            }
-            case BlendMode::DST: {
-                DumpLog::GetInstance().AddDesc("BlendMode:DST");
-                break;
-            }
-            case BlendMode::SRC_IN: {
-                DumpLog::GetInstance().AddDesc("BlendMode:SRC_IN");
-                break;
-            }
-            default: {
-                break;
-            }
-        }
+        DumpLog::GetInstance().AddDesc("BlendMode:" + std::to_string(static_cast<int>(GetBackBlendMode().value())));
     }
     if (GetLinearGradient().has_value()) {
         DumpLog::GetInstance().AddDesc("LinearGradient:" + GetLinearGradient().value().ToString());
