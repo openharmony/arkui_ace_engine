@@ -1579,7 +1579,6 @@ void TextFieldPattern::InitDragDropEvent()
                         Offset(pattern->parentGlobalOffset_.GetX(), pattern->parentGlobalOffset_.GetY()) -
                         Offset(0, theme->GetInsertCursorOffset().ConvertToPx());
         auto position = pattern->ConvertTouchOffsetToCaretPosition(offset);
-        CHECK_NULL_VOID(position);
         pattern->SetCaretPosition(position);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);

@@ -111,6 +111,7 @@ struct UpdateSpanStyle {
         updateImageFit.reset();
         marginProp.reset();
         borderRadius.reset();
+        isSymbolStyle = false;
     }
 
     std::optional<Color> updateTextColor = std::nullopt;
@@ -134,6 +135,7 @@ struct UpdateSpanStyle {
     std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
     bool hasResourceFontColor = false;
     bool hasResourceDecorationColor = false;
+    bool isSymbolStyle = false;
 };
 
 struct UpdateParagraphStyle {
