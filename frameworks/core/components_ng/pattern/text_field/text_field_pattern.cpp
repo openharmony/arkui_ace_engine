@@ -1605,7 +1605,14 @@ void TextFieldPattern::InitDragDropEvent()
             pattern->MarkContentChange();
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
-            pattern->showSelect_ = true;
+            
+            // Except for DRAG_SUCCESS, all of rest need to show
+            if (event != nullptr && event->GetResult() != DragRet::DRAG_SUCCESS) {
+                auto dragTextStart = pattern->dragTextStart_;
+                auto dragTextEnd = pattern->dragTextEnd_;
+                pattern->selectController_->UpdateHandleIndex(dragTextStart, dragTextEnd);
+                pattern->showSelect_ = true;
+            }
             auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
