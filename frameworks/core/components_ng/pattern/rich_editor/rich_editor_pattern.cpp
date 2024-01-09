@@ -602,8 +602,17 @@ void RichEditorPattern::DeleteSpansByRange(
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto childrens = host->GetChildren();
+    if (childrens.empty()) {
+        return;
+    }
+
     auto itStart = childrens.begin();
-    std::advance(itStart, startInfo.spanIndex_);
+    if (startInfo.spanIndex_ >= childrens.size()) {
+        std::advance(itStart, childrens.size() - 1);
+        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "startInfo.spanIndex_ is larger than childrens size");
+    } else {
+        std::advance(itStart, startInfo.spanIndex_);
+    }
     auto saveStartSpan = (start == startInfo.spanStart_) ? 0 : 1;
     if (saveStartSpan) {
         auto spanNodeStart = DynamicCast<SpanNode>(*itStart);
