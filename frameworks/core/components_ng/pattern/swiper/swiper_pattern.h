@@ -709,6 +709,16 @@ private:
     void OnAnimationTranslateZero(int32_t nextIndex, bool stopAutoPlay);
     void UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus);
     void TriggerCustomContentTransitionEvent(int32_t fromIndex, int32_t toIndex);
+    /**
+     * @brief Preprocess drag delta when received from DragUpdate event.
+     * 
+     * Drag offset in Swiper can't go beyond a full page. Apply the restriction through this function.
+     *
+     * @param delta 
+     * @param mainSize content length along the main axis.
+     * @param deltaSum accumulated delta in the current drag event.
+     */
+    static void ProcessDelta(float& delta, float mainSize, float deltaSum);
 
     /**
      * @brief Stops animations when the scroll starts.
@@ -866,6 +876,8 @@ private:
     std::optional<int32_t> pauseTargetIndex_;
     std::optional<int32_t> oldChildrenSize_;
     float currentDelta_ = 0.0f;
+    // cumulated delta in a single drag event
+    float mainDeltaSum_ = 0.0f;
     SwiperLayoutAlgorithm::PositionMap itemPosition_;
     std::optional<float> velocity_;
     float motionVelocity_ = 0.0f;
@@ -884,7 +896,6 @@ private:
     bool fadeAnimationIsRunning_ = false;
     bool autoLinearReachBoundary = false;
 
-    float mainDeltaSum_ = 0.0f;
     std::optional<int32_t> cachedCount_;
 
     std::optional<int32_t> surfaceChangedCallbackId_;
