@@ -153,6 +153,13 @@ void FolderStackLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(controlPartsWrapper);
         controlPartsWrapper->GetLayoutProperty()->UpdatePadding(padding);
         StackLayoutAlgorithm::Measure(layoutWrapper);
+        auto hoverNode = hostNode->GetHoverNode();
+        CHECK_NULL_VOID(hoverNode);
+        auto hoverIndex = hostNode->GetChildIndexById(hoverNode->GetId());
+        auto hoverStackWrapper = layoutWrapper->GetOrCreateChildByIndex(hoverIndex);
+        CHECK_NULL_VOID(hoverStackWrapper);
+        auto geometryNode = hoverStackWrapper->GetGeometryNode();
+        geometryNode->SetFrameSize(controlPartsWrapper->GetGeometryNode()->GetFrameSize());
         return;
     }
     RangeCalculation(hostNode, layoutProperty, size);
