@@ -139,11 +139,12 @@ void TextInputLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     // update child position.
-    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto frameNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
+    auto size = layoutWrapper->GetGeometryNode()->GetFrameSize() -
+                SizeF(pattern->GetHorizontalPaddingAndBorderSum(), pattern->GetVerticalPaddingAndBorderSum());
     const auto& content = layoutWrapper->GetGeometryNode()->GetContent();
     CHECK_NULL_VOID(content);
     auto contentSize = content->GetRect().GetSize();
@@ -159,9 +160,12 @@ void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         hasAlign = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().has_value();
     }
 
+    auto offsetBase = OffsetF(
+        pattern->GetPaddingLeft() + pattern->GetBorderLeft(), pattern->GetPaddingTop() + pattern->GetBorderTop());
+
     // Update content position.
-    OffsetF contentOffset = Alignment::GetAlignPosition(size, contentSize, align);
-    content->SetOffset(OffsetF(pattern->GetPaddingLeft() + pattern->GetBorderLeft(), contentOffset.GetY()));
+    OffsetF contentOffset = offsetBase + Alignment::GetAlignPosition(size, contentSize, align);
+    content->SetOffset(OffsetF(offsetBase.GetX(), contentOffset.GetY()));
     auto paintProperty = pattern->GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
     if (LessOrEqual(textRect_.Width(), contentSize.Width())) {
