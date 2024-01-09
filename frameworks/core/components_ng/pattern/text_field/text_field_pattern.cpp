@@ -1604,7 +1604,7 @@ void TextFieldPattern::InitDragDropEvent()
             pattern->MarkContentChange();
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
-            
+
             // Except for DRAG_SUCCESS, all of rest need to show
             if (event != nullptr && event->GetResult() != DragRet::DRAG_SUCCESS) {
                 auto dragTextStart = pattern->dragTextStart_;
@@ -5567,6 +5567,9 @@ void TextFieldPattern::StopEditing()
     UpdateSelection(selectController_->GetCaretIndex());
     StopTwinkling();
     CloseKeyboard(true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 bool TextFieldPattern::CheckHandleVisible(const RectF& paintRect)
