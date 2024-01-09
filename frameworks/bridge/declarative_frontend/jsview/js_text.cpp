@@ -336,15 +336,43 @@ void JSText::SetFontFamily(const JSCallbackInfo& info)
 
 void JSText::SetMinFontSize(const JSCallbackInfo& info)
 {
-    CalcDimension fontSize;
-    ParseJsDimensionFp(info[0], fontSize);
+    if (info.Length() < 1) {
+        return;
+    }
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
+    if (!ParseJsDimensionFp(info[0], fontSize)) {
+        fontSize = theme->GetTextStyle().GetFontSize();
+        TextModel::GetInstance()->SetFontSize(fontSize);
+        return;
+    }
+    if (fontSize.IsNegative()) {
+        fontSize = theme->GetTextStyle().GetFontSize();
+    }
     TextModel::GetInstance()->SetAdaptMinFontSize(fontSize);
 }
 
 void JSText::SetMaxFontSize(const JSCallbackInfo& info)
 {
-    CalcDimension fontSize;
-    ParseJsDimensionFp(info[0], fontSize);
+    if (info.Length() < 1) {
+        return;
+    }
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
+    if (!ParseJsDimensionFp(info[0], fontSize)) {
+        fontSize = theme->GetTextStyle().GetFontSize();
+        TextModel::GetInstance()->SetFontSize(fontSize);
+        return;
+    }
+    if (fontSize.IsNegative()) {
+        fontSize = theme->GetTextStyle().GetFontSize();
+    }
     TextModel::GetInstance()->SetAdaptMaxFontSize(fontSize);
 }
 
