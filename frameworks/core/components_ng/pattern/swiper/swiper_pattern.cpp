@@ -2183,7 +2183,6 @@ void SwiperPattern::OnSpringAnimationStart(float velocity)
 
 void SwiperPattern::OnSpringAndFadeAnimationFinish()
 {
-    nextIndex_ = GetFirstItemInfoInVisibleArea().first;
     auto itemInfoInVisibleArea = std::make_pair(0, SwiperItemInfo {});
     if (!itemPosition_.empty()) {
         auto item = itemPosition_.find(nextIndex_);

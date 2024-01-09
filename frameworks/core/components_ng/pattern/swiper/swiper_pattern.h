@@ -711,10 +711,10 @@ private:
     void TriggerCustomContentTransitionEvent(int32_t fromIndex, int32_t toIndex);
     /**
      * @brief Preprocess drag delta when received from DragUpdate event.
-     * 
+     *
      * Drag offset in Swiper can't go beyond a full page. Apply the restriction through this function.
      *
-     * @param delta 
+     * @param delta
      * @param mainSize content length along the main axis.
      * @param deltaSum accumulated delta in the current drag event.
      */
