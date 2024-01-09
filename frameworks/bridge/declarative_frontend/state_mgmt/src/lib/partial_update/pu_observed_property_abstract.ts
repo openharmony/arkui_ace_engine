@@ -41,63 +41,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   // install when current value is ObservedObject and the value type is not using compatibility mode
   // note value may change for union type variables when switching an object from one class to another.
   protected shouldInstallTrackedObjectReadCb : boolean = true;
-  private dependentElmtIdsByProperty_ = new class PropertyDependencies {
-
-    // dependencies for property -> elmtId
-    // variable read during render adds elmtId
-    // variable assignment causes elmtId to need re-render.
-    // UINode with elmtId deletion needs elmtId to be removed from all records, see purgeDependenciesForElmtId
-    private propertyDependencies_: Set<number> = new Set<number>();
-
-    public getAllPropertyDependencies(): Set<number> {
-      stateMgmtConsole.debug(`  ... variable value assignment: returning affected elmtIds ${JSON.stringify(Array.from(this.propertyDependencies_))}`);
-      return this.propertyDependencies_;
-    }
-
-    public addPropertyDependency(elmtId: number): void {
-      this.propertyDependencies_.add(elmtId);
-      stateMgmtConsole.debug(`   ... variable value read: add dependent elmtId ${elmtId} - updated list of dependent elmtIds: ${JSON.stringify(Array.from(this.propertyDependencies_))}`);
-    }
-
-    public purgeDependenciesForElmtId(rmElmtId: number): void {
-      stateMgmtConsole.debug(`   ...purge all dependencies for elmtId ${rmElmtId} `);
-      this.propertyDependencies_.delete(rmElmtId);
-      stateMgmtConsole.debug(`      ... updated list of elmtIds dependent on variable assignment: ${JSON.stringify(Array.from(this.propertyDependencies_))}`);
-      this.trackedObjectPropertyDependencies_.forEach((propertyElmtId, propertyName) => {
-        propertyElmtId.delete(rmElmtId);
-        stateMgmtConsole.debug(`      ... updated dependencies on objectProperty '${propertyName}' changes: ${JSON.stringify(Array.from(propertyElmtId))}`);
-      });
-    }
-
-    // dependencies on individual object properties
-    private trackedObjectPropertyDependencies_: Map<string, Set<number>> = new Map<string, Set<number>>();
-
-    public addTrackedObjectPropertyDependency(readProperty: string, elmtId: number): void {
-      let dependentElmtIds = this.trackedObjectPropertyDependencies_.get(readProperty);
-      if (!dependentElmtIds) {
-        dependentElmtIds = new Set<number>();
-        this.trackedObjectPropertyDependencies_.set(readProperty, dependentElmtIds);
-      }
-      dependentElmtIds.add(elmtId);
-      stateMgmtConsole.debug(`   ... object property '${readProperty}' read: add dependent elmtId ${elmtId} - updated list of dependent elmtIds: ${JSON.stringify(Array.from(dependentElmtIds))}`);
-    }
-
-    public getTrackedObjectPropertyDependencies(changedObjectProperty: string, debugInfo: string): Set<number> {
-      const dependentElmtIds = this.trackedObjectPropertyDependencies_.get(changedObjectProperty) || new Set<number>();
-      stateMgmtConsole.debug(`  ... property '@Track ${changedObjectProperty}': returning affected elmtIds ${JSON.stringify(Array.from(dependentElmtIds))}`);
-      return dependentElmtIds;
-    }
-
-    public dumpInfoDependencies(): string {
-      let result = `dependencies: variable assignment (or object prop change in compat mode) affects elmtIds: ${JSON.stringify(Array.from(this.propertyDependencies_))} \n`;
-      this.trackedObjectPropertyDependencies_.forEach((propertyElmtId, propertyName) => {
-        result += `  property '@Track ${propertyName}' change affects elmtIds: ${JSON.stringify(Array.from(propertyElmtId))} \n`;
-      });
-      return result;
-    }
-
-  }; // inner class PropertyDependencies
-
+  private dependentElmtIdsByProperty_ = new PropertyDependencies();
 
   constructor(subscriber: IPropertySubscriber, viewName: PropertyInfo) {
     super(subscriber, viewName);
@@ -495,4 +439,61 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     // unused for PU
     // need to overwrite impl of base class with empty function.
   }
+}
+
+class PropertyDependencies {
+
+  // dependencies for property -> elmtId
+  // variable read during render adds elmtId
+  // variable assignment causes elmtId to need re-render.
+  // UINode with elmtId deletion needs elmtId to be removed from all records, see purgeDependenciesForElmtId
+  private propertyDependencies_: Set<number> = new Set<number>();
+
+  public getAllPropertyDependencies(): Set<number> {
+    stateMgmtConsole.debug(`  ... variable value assignment: returning affected elmtIds ${JSON.stringify(Array.from(this.propertyDependencies_))}`);
+    return this.propertyDependencies_;
+  }
+
+  public addPropertyDependency(elmtId: number): void {
+    this.propertyDependencies_.add(elmtId);
+    stateMgmtConsole.debug(`   ... variable value read: add dependent elmtId ${elmtId} - updated list of dependent elmtIds: ${JSON.stringify(Array.from(this.propertyDependencies_))}`);
+  }
+
+  public purgeDependenciesForElmtId(rmElmtId: number): void {
+    stateMgmtConsole.debug(`   ...purge all dependencies for elmtId ${rmElmtId} `);
+    this.propertyDependencies_.delete(rmElmtId);
+    stateMgmtConsole.debug(`      ... updated list of elmtIds dependent on variable assignment: ${JSON.stringify(Array.from(this.propertyDependencies_))}`);
+    this.trackedObjectPropertyDependencies_.forEach((propertyElmtId, propertyName) => {
+      propertyElmtId.delete(rmElmtId);
+      stateMgmtConsole.debug(`      ... updated dependencies on objectProperty '${propertyName}' changes: ${JSON.stringify(Array.from(propertyElmtId))}`);
+    });
+  }
+
+  // dependencies on individual object properties
+  private trackedObjectPropertyDependencies_: Map<string, Set<number>> = new Map<string, Set<number>>();
+
+  public addTrackedObjectPropertyDependency(readProperty: string, elmtId: number): void {
+    let dependentElmtIds = this.trackedObjectPropertyDependencies_.get(readProperty);
+    if (!dependentElmtIds) {
+      dependentElmtIds = new Set<number>();
+      this.trackedObjectPropertyDependencies_.set(readProperty, dependentElmtIds);
+    }
+    dependentElmtIds.add(elmtId);
+    stateMgmtConsole.debug(`   ... object property '${readProperty}' read: add dependent elmtId ${elmtId} - updated list of dependent elmtIds: ${JSON.stringify(Array.from(dependentElmtIds))}`);
+  }
+
+  public getTrackedObjectPropertyDependencies(changedObjectProperty: string, debugInfo: string): Set<number> {
+    const dependentElmtIds = this.trackedObjectPropertyDependencies_.get(changedObjectProperty) || new Set<number>();
+    stateMgmtConsole.debug(`  ... property '@Track ${changedObjectProperty}': returning affected elmtIds ${JSON.stringify(Array.from(dependentElmtIds))}`);
+    return dependentElmtIds;
+  }
+
+  public dumpInfoDependencies(): string {
+    let result = `dependencies: variable assignment (or object prop change in compat mode) affects elmtIds: ${JSON.stringify(Array.from(this.propertyDependencies_))} \n`;
+    this.trackedObjectPropertyDependencies_.forEach((propertyElmtId, propertyName) => {
+      result += `  property '@Track ${propertyName}' change affects elmtIds: ${JSON.stringify(Array.from(propertyElmtId))} \n`;
+    });
+    return result;
+  }
+
 }
