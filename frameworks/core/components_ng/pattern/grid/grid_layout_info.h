@@ -23,8 +23,15 @@
 #include "base/geometry/ng/rect_t.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/grid/grid_layout_options.h"
+#include "core/components_ng/property/layout_constraint.h"
 
 namespace OHOS::Ace::NG {
+
+struct GridPredictLayoutParam {
+    std::list<int32_t> items;
+    LayoutConstraintF layoutConstraint;
+};
+
 constexpr int32_t EMPTY_JUMP_INDEX = -2;
 constexpr float HALF = 0.5f;
 
