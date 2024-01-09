@@ -81,6 +81,7 @@ float CalculateFriction(float gamma)
 SwiperPattern::SwiperPattern()
 {
     swiperController_ = MakeRefPtr<SwiperController>();
+    InitSwiperController();
 }
 
 void SwiperPattern::OnAttachToFrameNode()
@@ -213,7 +214,6 @@ void SwiperPattern::OnModifyDone()
     InitArrow();
     SetLazyLoadIsLoop();
     RegisterVisibleAreaChange();
-    InitSwiperController();
     InitTouchEvent(gestureHub);
     InitHoverMouseEvent();
     StopAndResetSpringAnimation();
@@ -1027,10 +1027,6 @@ void SwiperPattern::StopFadeAnimation()
 
 void SwiperPattern::InitSwiperController()
 {
-    if (swiperController_->HasInitialized()) {
-        return;
-    }
-
     swiperController_->SetSwipeToImpl([weak = WeakClaim(this)](int32_t index, bool reverse) {
         auto swiper = weak.Upgrade();
         if (swiper) {
