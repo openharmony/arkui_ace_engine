@@ -2689,6 +2689,15 @@ void WebPattern::OnScrollStartRecursive(float position)
     isFirstFlingScrollVelocity_ = true;
 }
 
+void WebPattern::OnAttachToBuilderNode(NodeStatus nodeStatus) 
+{
+    if (nodeStatus != NodeStatus::NORMAL_NODE) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "Web offline mode type");
+        isOfflineMode_ = true;
+        OfflineMode();
+    }
+}
+
 void WebPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollEndRecursive");
