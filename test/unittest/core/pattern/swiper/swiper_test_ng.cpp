@@ -11611,4 +11611,43 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorLayoutAlgorithmLayout008, TestSize.Level1)
     swiperLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
     EXPECT_TRUE(swiperLayoutAlgorithm->prevMargin_ != 0.0f);
 }
+
+/**
+ * @tc.name: SwiperProcessDelta001
+ * @tc.desc: Test for SwiperPattern::ProcessDelta.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperProcessDelta001, TestSize.Level1)
+{
+    float mainSize = 50.0f;
+    float delta = 5.0f;
+    float deltaSum = 46.0f;
+    SwiperPattern::ProcessDelta(delta, mainSize, deltaSum);
+    EXPECT_EQ(delta, 4.0f);
+
+    delta = -10.0f;
+    deltaSum = 50.0f;
+    SwiperPattern::ProcessDelta(delta, mainSize, deltaSum);
+    EXPECT_EQ(delta, -10.0f);
+
+    delta = -10.0f;
+    deltaSum = -40.0f;
+    SwiperPattern::ProcessDelta(delta, mainSize, deltaSum);
+    EXPECT_EQ(delta, -10.0f);
+
+    delta = -10.0f;
+    deltaSum = -50.0f;
+    SwiperPattern::ProcessDelta(delta, mainSize, deltaSum);
+    EXPECT_EQ(delta, 0.0f);
+
+    delta = -50.0f;
+    deltaSum = -50.0f;
+    SwiperPattern::ProcessDelta(delta, mainSize, deltaSum);
+    EXPECT_EQ(delta, 0.0f);
+
+    delta = 1.0f;
+    deltaSum = -50.0f;
+    SwiperPattern::ProcessDelta(delta, mainSize, deltaSum);
+    EXPECT_EQ(delta, 1.0f);
+}
 } // namespace OHOS::Ace::NG
