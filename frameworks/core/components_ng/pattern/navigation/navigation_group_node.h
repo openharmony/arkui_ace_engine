@@ -118,8 +118,7 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     static RefPtr<UINode> GetNavDestinationNode(RefPtr<UINode> uiNode);
-    void SetBackButtonEvent(const RefPtr<NavDestinationGroupNode>& navDestination,
-        const RefPtr<NavRouterPattern>& navRouterPattern = nullptr);
+    void SetBackButtonEvent(const RefPtr<NavDestinationGroupNode>& navDestination);
 
     void TransitionWithPop(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
     void TransitionWithPush(const RefPtr<FrameNode>& preNode, const RefPtr<FrameNode>& curNode, bool isNavBar = false);
