@@ -4037,9 +4037,15 @@ void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight,
         "Textfield handleSurface change, new width %{public}d, new height %{public}d, prev width %{public}d, prev "
         "height %{public}d",
         newWidth, newHeight, prevWidth, prevHeight);
-    auto proxy = GetSelectOverlayProxy();
-    CHECK_NULL_VOID(proxy);
-    proxy->ShowOrHiddenMenu(true);
+    if (SelectOverlayIsOn()) {
+        auto proxy = GetSelectOverlayProxy();
+        proxy->ShowOrHiddenMenu(true);
+        processOverlayDelayTask_ = [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->ProcessOverlay(false);
+        };
+    }
     if (HasFocus() && IsSingleHandle()) {
         StartTwinkling();
     }
