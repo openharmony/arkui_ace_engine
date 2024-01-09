@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,10 +44,10 @@
 namespace OHOS::Ace::NG {
 
 namespace {
-constexpr float PERCENT = 0.01; // Percent
-constexpr float FOLLOW_TO_RECYCLE_DURATION = 600;
-constexpr float CUSTOM_BUILDER_ANIMATION_DURATION = 100;
-constexpr float LOADING_ANIMATION_DURATION = 350;
+constexpr float PERCENT = 0.01f; // Percent
+constexpr float FOLLOW_TO_RECYCLE_DURATION = 600.0f;
+constexpr float CUSTOM_BUILDER_ANIMATION_DURATION = 100.0f;
+constexpr float LOADING_ANIMATION_DURATION = 350.0f;
 constexpr float MAX_OFFSET = 100000.0f;
 constexpr float HALF = 0.5f;
 constexpr float BASE_SCALE = 0.707f; // std::sqrt(2)/2
@@ -290,7 +290,7 @@ void RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
         if (NearZero(scrollOffset_) && NonPositive(delta)) {
             return;
         }
-        scrollOffset_ = std::clamp(scrollOffset_ + delta * DEFAULT_FRICTION * PERCENT, 0.0f, MAX_OFFSET);
+        scrollOffset_ = std::clamp(scrollOffset_ + delta * CalculateFriction(), 0.0f, MAX_OFFSET);
         if (!isSourceFromAnimation_) {
             if (isRefreshing_) {
                 UpdateLoadingProgressStatus(RefreshAnimationState::RECYCLE, GetFollowRatio());
@@ -317,6 +317,16 @@ void RefreshPattern::HandleDragEnd(float speed)
     } else {
         HandleDragEndLowVersion();
     }
+}
+
+float RefreshPattern::CalculateFriction()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, 1.0f);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, 1.0f);
+    auto contentHeight = geometryNode->GetPaddingSize().Height();
+    return NearZero(contentHeight) ? 1.0f : ScrollablePattern::CalculateFriction(scrollOffset_ / contentHeight);
 }
 
 float RefreshPattern::GetFollowRatio()

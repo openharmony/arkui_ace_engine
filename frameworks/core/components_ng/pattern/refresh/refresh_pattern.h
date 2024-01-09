@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,31 +75,11 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
     void OnModifyDone() override;
-    void FireStateChange(int32_t value);
-    void FireRefreshing();
-    void FireChangeEvent(const std::string& value);
-    void OnActive() override {}
     void InitCoordinationEvent(RefPtr<ScrollableCoordinationEvent>& coordinationEvent);
     void AddCustomBuilderNode(const RefPtr<NG::UINode>& builder);
-    void UpdateInternalPlacement();
     FocusPattern GetFocusPattern() const override
     {
         return { FocusType::SCOPE, true };
-    }
-
-    float GetLoadingDistance() const
-    {
-        return triggerLoadingDistance_;
-    }
-
-    float GetCustomBuilderOffset() const
-    {
-        return customBuilderOffset_;
-    }
-
-    bool GetIsCustomBuilderExist() const
-    {
-        return isCustomBuilderExist_;
     }
 
 private:
@@ -107,14 +87,11 @@ private:
     void HandleDragStart(bool isDrag = true, float mainSpeed = 0.0f);
     void HandleDragUpdate(float delta, float mainSpeed = 0.0f);
     void HandleDragEnd(float speed);
+    float CalculateFriction();
     void TriggerStatusChange(RefreshStatus newStatus);
-    void LoadingProgressReset();
     void OnAttachToFrameNode() override;
     float GetFollowRatio();
-    bool ScrollComponentReactInMove();
     void HandleCustomBuilderDragUpdateStage();
-    void ScrollableNodeResetAnimation();
-    void OnAppearAnimationFinish();
     void SetAccessibilityAction();
     void InitOnKeyEvent();
     bool OnKeyEvent(const KeyEvent& event);
@@ -139,6 +116,9 @@ private:
     void RefreshStatusChangeEffect();
     float GetTargetOffset();
     void ResetAnimation();
+    void FireStateChange(int32_t value);
+    void FireRefreshing();
+    void FireChangeEvent(const std::string& value);
     void UpdateDragFRCSceneInfo(const std::string& scene, float speed, SceneStatus sceneStatus);
 
     RefreshStatus refreshStatus_ = RefreshStatus::INACTIVE;
@@ -147,15 +127,12 @@ private:
     bool isSourceFromAnimation_ = false;
     bool isRefreshing_ = false;
     bool isKeyEventRegisted_ = false;
-    float triggerLoadingDistance_ = 0.0f;
     RefPtr<FrameNode> progressChild_;
     RefPtr<FrameNode> customBuilder_;
     RefPtr<FrameNode> scrollableNode_;
     bool isCustomBuilderExist_ = false;
-    float customBuilderOffset_ = 0.0f;
     float builderMeasureBaseHeight_ = 0.0f;
     RefPtr<NodeAnimatablePropertyFloat> offsetProperty_;
-    RefPtr<NodeAnimatablePropertyFloat> lowVersionOffset_;
     std::shared_ptr<AnimationUtils::Animation> animation_;
     // API version 10
     void InitLowVersionOffset();
@@ -173,6 +150,9 @@ private:
     void UpdateLoadingMarginTop(float top);
     float GetScrollOffset(float delta);
 
+    float triggerLoadingDistance_ = 0.0f;
+    float customBuilderOffset_ = 0.0f;
+    RefPtr<NodeAnimatablePropertyFloat> lowVersionOffset_;
     ACE_DISALLOW_COPY_AND_MOVE(RefreshPattern);
 };
 } // namespace OHOS::Ace::NG
