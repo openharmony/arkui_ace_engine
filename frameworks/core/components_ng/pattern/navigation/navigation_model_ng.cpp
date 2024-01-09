@@ -638,6 +638,9 @@ bool NavigationModelNG::CreateNavBarNodeChildsIfNeeded(const RefPtr<NavBarNode>&
         navBarContentRenderContext->UpdateClipEdge(true);
         navBarNode->AddChild(navBarContentNode);
         navBarNode->SetNavBarContentNode(navBarContentNode);
+
+        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
+        navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
 
     // toolBar node
@@ -1198,7 +1201,8 @@ void NavigationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolB
     CHECK_NULL_VOID(rowProperty);
     rowProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
 
-    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
+        !SystemProperties::GetNavigationBlurEnabled()) {
         CreateToolBarDividerNode(navBarNode);
     }
 

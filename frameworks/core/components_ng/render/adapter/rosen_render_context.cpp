@@ -40,6 +40,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/rect_t.h"
 #include "base/log/dump_log.h"
+#include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
@@ -48,6 +49,7 @@
 #include "core/animation/spring_curve.h"
 #include "core/common/container.h"
 #include "core/common/rosen/rosen_convert_helper.h"
+#include "core/components/common/properties/blend_mode.h"
 #include "core/components/common/properties/blur_parameter.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/theme/app_theme.h"
@@ -1926,12 +1928,12 @@ void RosenRenderContext::PaintAccessibilityFocus()
     Dimension focusPaddingVp = Dimension(0.0, DimensionUnit::VP);
     constexpr uint32_t ACCESSIBILITY_FOCUS_COLOR = 0xbf39b500;
     constexpr double ACCESSIBILITY_FOCUS_WIDTH = 4.0;
+    double lineWidth = ACCESSIBILITY_FOCUS_WIDTH * PipelineBase::GetCurrentDensity();
     Color paintColor(ACCESSIBILITY_FOCUS_COLOR);
-    Dimension paintWidth(ACCESSIBILITY_FOCUS_WIDTH, DimensionUnit::PX);
+    Dimension paintWidth(lineWidth, DimensionUnit::PX);
     const auto& bounds = rsNode_->GetStagingProperties().GetBounds();
     RoundRect frameRect;
-    frameRect.SetRect(RectF(ACCESSIBILITY_FOCUS_WIDTH, ACCESSIBILITY_FOCUS_WIDTH,
-        bounds.z_ - (2 * ACCESSIBILITY_FOCUS_WIDTH), bounds.w_ - (2 * ACCESSIBILITY_FOCUS_WIDTH)));
+    frameRect.SetRect(RectF(lineWidth, lineWidth, bounds.z_ - (2 * lineWidth), bounds.w_ - (2 * lineWidth)));
     PaintFocusState(frameRect, focusPaddingVp, paintColor, paintWidth, true);
 }
 
@@ -3932,7 +3934,7 @@ void RosenRenderContext::PaintMouseSelectRect(const RectF& rect, const Color& fi
     rsNode_->AddModifier(mouseSelectModifier_);
 }
 
-void RosenRenderContext::DumpInfo() 
+void RosenRenderContext::DumpInfo()
 {
     if (rsNode_) {
         DumpLog::GetInstance().AddDesc("------------start print rsNode");
@@ -4068,6 +4070,116 @@ void RosenRenderContext::DumpInfo()
     }
 }
 
+void RosenRenderContext::DumpAdvanceInfo()
+{
+    if (GetBackgroundAlign().has_value()) {
+        DumpLog::GetInstance().AddDesc("BackgroundAlign:" + GetBackgroundAlign().value().ToString());
+    }
+    if (GetBackgroundImage().has_value()) {
+        DumpLog::GetInstance().AddDesc("BackgroundImage:" + GetBackgroundImage().value().ToString());
+    }
+    if (GetSphericalEffect().has_value()) {
+        DumpLog::GetInstance().AddDesc("SphericalEffect:" + std::to_string(GetSphericalEffect().value()));
+    }
+    if (GetPixelStretchEffect().has_value()) {
+        DumpLog::GetInstance().AddDesc("PixelStretchEffect:" + GetPixelStretchEffect().value().ToString());
+    }
+    if (GetLightUpEffect().has_value()) {
+        DumpLog::GetInstance().AddDesc("LightUpEffect:" + std::to_string(GetLightUpEffect().value()));
+    }
+    if (GetBorderColor().has_value()) {
+        DumpLog::GetInstance().AddDesc("BorderColor:" + GetBorderColor().value().ToString());
+    }
+    if (GetBorderWidth().has_value()) {
+        DumpLog::GetInstance().AddDesc("BorderWidth:" + GetBorderWidth().value().ToString());
+    }
+    if (GetOuterBorderRadius().has_value()) {
+        DumpLog::GetInstance().AddDesc("OuterBorderRadius:" + GetOuterBorderRadius().value().ToString());
+    }
+    if (GetOuterBorderColor().has_value()) {
+        DumpLog::GetInstance().AddDesc("OuterBorderColor:" + GetOuterBorderColor().value().ToString());
+    }
+    if (GetOuterBorderWidth().has_value()) {
+        DumpLog::GetInstance().AddDesc("OuterBorderWidth:" + GetOuterBorderWidth().value().ToString());
+    }
+    if (GetDynamicLightUpRate().has_value()) {
+        DumpLog::GetInstance().AddDesc("DynamicLightUpRate:" + std::to_string(GetDynamicLightUpRate().value()));
+    }
+    if (GetDynamicLightUpDegree().has_value()) {
+        DumpLog::GetInstance().AddDesc("DynamicLightUpDegree:" + std::to_string(GetDynamicLightUpDegree().value()));
+    }
+    if (GetBackBlendMode().has_value()) {
+        switch (GetBackBlendMode().value()) {
+            case BlendMode::NORMAL: {
+                DumpLog::GetInstance().AddDesc("BlendMode:NORMAL");
+                break;
+            }
+            case BlendMode::DESTINATION_IN: {
+                DumpLog::GetInstance().AddDesc("BlendMode:DESTINATION_IN");
+                break;
+            }
+            case BlendMode::SOURCE_IN: {
+                DumpLog::GetInstance().AddDesc("BlendMode:SOURCE_IN");
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+    }
+    if (GetLinearGradient().has_value()) {
+        DumpLog::GetInstance().AddDesc("LinearGradient:" + GetLinearGradient().value().ToString());
+    }
+    if (GetSweepGradient().has_value()) {
+        DumpLog::GetInstance().AddDesc("SweepGradient:" + GetSweepGradient().value().ToString());
+    }
+    if (GetRadialGradient().has_value()) {
+        DumpLog::GetInstance().AddDesc("RadialGradient:" + GetRadialGradient().value().ToString());
+    }
+    if (GetFrontBrightness().has_value()) {
+        DumpLog::GetInstance().AddDesc("FrontBrightness:" + GetFrontBrightness().value().ToString());
+    }
+    if (GetFrontGrayScale().has_value()) {
+        DumpLog::GetInstance().AddDesc("FrontGrayScale:" + GetFrontGrayScale().value().ToString());
+    }
+    if (GetFrontContrast().has_value()) {
+        DumpLog::GetInstance().AddDesc("FrontContrast:" + GetFrontContrast().value().ToString());
+    }
+    if (GetFrontSaturate().has_value()) {
+        DumpLog::GetInstance().AddDesc("FrontSaturate:" + GetFrontSaturate().value().ToString());
+    }
+    if (GetFrontSepia().has_value()) {
+        DumpLog::GetInstance().AddDesc("FrontSepia:" + GetFrontSepia().value().ToString());
+    }
+    if (GetFrontHueRotate().has_value()) {
+        DumpLog::GetInstance().AddDesc("FrontHueRotate:" + std::to_string(GetFrontHueRotate().value()));
+    }
+    if (GetFrontColorBlend().has_value()) {
+        DumpLog::GetInstance().AddDesc("FrontColorBlend:" + GetFrontColorBlend().value().ColorToString());
+    }
+    if (GetBorderImageSource().has_value()) {
+        DumpLog::GetInstance().AddDesc("BorderImageSource:" + GetBorderImageSource().value().ToString());
+    }
+    if (GetBorderImageGradient().has_value()) {
+        DumpLog::GetInstance().AddDesc("BorderImageGradient:" + GetBorderImageGradient().value().ToString());
+    }
+    if (GetForegroundColor().has_value()) {
+        DumpLog::GetInstance().AddDesc("ForegroundColor:" + GetForegroundColor().value().ColorToString());
+    }
+    if (GetLightIntensity().has_value()) {
+        DumpLog::GetInstance().AddDesc("LightIntensity:" + std::to_string(GetLightIntensity().value()));
+    }
+    if (GetLightIlluminated().has_value()) {
+        DumpLog::GetInstance().AddDesc("LightIlluminated:" + std::to_string(GetLightIlluminated().value()));
+    }
+    if (GetIlluminatedBorderWidth().has_value()) {
+        DumpLog::GetInstance().AddDesc("IlluminatedBorderWidth:" + GetIlluminatedBorderWidth().value().ToString());
+    }
+    if (GetBloom().has_value()) {
+        DumpLog::GetInstance().AddDesc("Bloom:" + std::to_string(GetBloom().value()));
+    }
+}
+
 void RosenRenderContext::MarkContentChanged(bool isChanged)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -4162,7 +4274,7 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
             },
             false);
     } else {
-        if (transitionEffect_->HasDisappearTransition()) {
+        if (!transitionEffect_->HasDisappearTransition()) {
             return;
         }
         // Re-use current implicit animation timing params, only replace the finish callback function.
@@ -4601,5 +4713,41 @@ void RosenRenderContext::SetShadowRadius(float radius)
 void RosenRenderContext::SetRenderFrameOffset(const OffsetF& offset)
 {
     frameOffset_ = offset;
+}
+
+void RosenRenderContext::SetScale(float scaleX, float scaleY)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetScale(scaleX, scaleY);
+}
+
+void RosenRenderContext::SetBackgroundColor(uint32_t colorValue)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetBackgroundColor(colorValue);
+}
+
+void RosenRenderContext::SetRenderPivot(float pivotX, float pivotY)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetPivot(pivotX, pivotY);
+}
+
+void RosenRenderContext::SetFrame(float positionX, float positionY, float width, float height)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetFrame(positionX, positionY, width, height);
+}
+
+void RosenRenderContext::SetOpacity(float opacity)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetAlpha(opacity);
+}
+
+void RosenRenderContext::SetTranslate(float translateX, float translateY, float translateZ)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetTranslate(translateX, translateY, translateZ);
 }
 } // namespace OHOS::Ace::NG

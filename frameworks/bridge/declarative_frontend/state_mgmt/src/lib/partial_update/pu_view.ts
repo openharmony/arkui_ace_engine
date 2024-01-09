@@ -115,10 +115,10 @@ abstract class ViewPU extends NativeViewPartialUpdate
   // flag for initial rendering being done
   private isInitialRenderDone: boolean = false;
 
-  // indicates the currently rendered or rendered UINode's elmtId
+  // indicates the currently rendered or rendered UINode's elmtIds
   // or -1 if none is currently rendering
-  // isRenderInProgress==true always when renderingOfElementIdOnGoing_>=0 
-  private currentlyRenderedElmtId_ : number = -1;
+  // isRenderInProgress == true always when currentlyRenderedElmtIdStack_.length >= 0 
+  private currentlyRenderedElmtIdStack_ : Array<number> = new Array<number> ();
 
   // static flag for paused rendering
   // when paused, getCurrentlyRenderedElmtId() will return -1
@@ -138,7 +138,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   private watchedProps: Map<string, (propName: string) => void>
     = new Map<string, (propName: string) => void>();
 
-  private recycleManager: RecycleManager = undefined;
+  private recycleManager_: RecycleManager = undefined;
   
   private isCompFreezeAllowed: boolean = false;
 
@@ -154,58 +154,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   // registry of update functions
   // the key is the elementId of the Component/Element that's the result of this function
-  private updateFuncByElmtId = new class UpdateFuncsByElmtId {
-
-    private map_ = new Map<number, UpdateFuncRecord>();
-
-    public delete(elmtId: number): boolean {
-      return this.map_.delete(elmtId);
-    }
-
-    public set(elmtId: number, params: UpdateFunc | { updateFunc: UpdateFunc, classObject?: UIClassObject, node?: Object }): void {
-      (typeof params == "object") ? 
-        this.map_.set(elmtId, new UpdateFuncRecord(params))
-        : this.map_.set(elmtId, new UpdateFuncRecord({ updateFunc: params as UpdateFunc }));
-    }
-
-    public get(elmtId: number): UpdateFuncRecord | undefined {
-      return this.map_.get(elmtId);
-    }
-
-    public keys(): IterableIterator<number> {
-      return this.map_.keys();
-    }
-
-    public clear(): void {
-      return this.map_.clear();
-    }
-
-    public get size(): number {
-      return this.map_.size;
-    }
-
-    public forEach(callbackfn: (value: UpdateFuncRecord, key: number, map: Map<number, UpdateFuncRecord>) => void) : void {
-      this.map_.forEach(callbackfn);
-    }
-
-    // dump info about known elmtIds to a string
-    // use function only for debug output and DFX.
-    public debugInfoRegisteredElmtIds(): string {
-      let result: string = "";
-      let sepa: string = "";
-      this.map_.forEach((value: UpdateFuncRecord, elmtId: number) => {
-        result += `${sepa}${value.getComponentName()}[${elmtId}]`;
-        sepa = ", ";
-      });
-      return result;
-    }
-
-    public debugInfoElmtId(elmtId: number): string {
-      const updateFuncEntry = this.map_.get(elmtId);
-      return updateFuncEntry ? `'${updateFuncEntry!.getComponentName()}[${elmtId}]'` : `'unknown component type'[${elmtId}]`;
-    }
-  }
-
+  private updateFuncByElmtId = new UpdateFuncsByElmtId();
 
   // my LocalStorage instance, shared with ancestor Views.
   // create a default instance on demand if none is initialized
@@ -702,7 +651,11 @@ abstract class ViewPU extends NativeViewPartialUpdate
         }
         stateMgmtConsole.debug(`${this.debugInfo()}: viewPropertyHasChanged property: elmtIds that need re-render due to state variable change: ${this.debugInfoElmtIds(Array.from(dependentElmtIds))} .`)
         for (const elmtId of dependentElmtIds) {
-          this.dirtDescendantElementIds_.add(elmtId);
+          if (this.hasRecycleManager()) {
+            this.dirtDescendantElementIds_.add(this.recycleManager_.proxyNodeId(elmtId));
+          } else {
+            this.dirtDescendantElementIds_.add(elmtId);
+          }
         }
         stateMgmtConsole.debug(`   ... updated full list of elmtIds that need re-render [${this.debugInfoElmtIds(Array.from(this.dirtDescendantElementIds_))}].`)
       } else {
@@ -851,7 +804,11 @@ abstract class ViewPU extends NativeViewPartialUpdate
         // ascending order ensures parent nodes will be updated before their children
         // prior cleanup ensure no already deleted Elements have their update func executed
         Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => {
-            this.UpdateElement(elmtId);
+            if (this.hasRecycleManager()) {
+              this.UpdateElement(this.recycleManager_.proxyNodeId(elmtId));
+            } else {
+              this.UpdateElement(elmtId);
+            }
             this.dirtDescendantElementIds_.delete(elmtId);
         });
 
@@ -889,7 +846,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
    * set in observeComponentCreation(2)
    */
   public getCurrentlyRenderedElmtId() {
-    return ViewPU.renderingPaused ? -1 : this.currentlyRenderedElmtId_;
+    return ViewPU.renderingPaused || this.currentlyRenderedElmtIdStack_.length == 0 ? -1 : this.currentlyRenderedElmtIdStack_.slice(-1)[0];
   }
 
   public static pauseRendering() {
@@ -909,9 +866,9 @@ abstract class ViewPU extends NativeViewPartialUpdate
     }
     const updateFunc = (elmtId: number, isFirstRender: boolean) => {
       stateMgmtConsole.debug(`${this.debugInfo()}: ${isFirstRender ? `First render` : `Re-render/update`} start ....`);
-      this.currentlyRenderedElmtId_ = elmtId;
+      this.currentlyRenderedElmtIdStack_.push(elmtId);
       compilerAssignedUpdateFunc(elmtId, isFirstRender);
-      this.currentlyRenderedElmtId_ = -1;
+      this.currentlyRenderedElmtIdStack_.pop();
       stateMgmtConsole.debug(`${this.debugInfo()}: ${isFirstRender ? `First render` : `Re-render/update`} - DONE ....`);
     }
 
@@ -948,12 +905,12 @@ abstract class ViewPU extends NativeViewPartialUpdate
       this.syncInstanceId();
       stateMgmtConsole.debug(`${this.debugInfo()}: ${isFirstRender ? `First render` : `Re-render/update`} start ....`);
       ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-      this.currentlyRenderedElmtId_ = elmtId;
+      this.currentlyRenderedElmtIdStack_.push(elmtId);
       compilerAssignedUpdateFunc(elmtId, isFirstRender);
       if (!isFirstRender) {
         _popFunc();
       }
-      this.currentlyRenderedElmtId_ = -1;
+      this.currentlyRenderedElmtIdStack_.pop();
       ViewStackProcessor.StopGetAccessRecording();
       stateMgmtConsole.debug(`${this.debugInfo()}: ${isFirstRender ? `First render` : `Re-render/update`} - DONE ....`);
       this.restoreInstanceId();
@@ -974,30 +931,30 @@ abstract class ViewPU extends NativeViewPartialUpdate
       stateMgmtConsole.applicationError(`${this.debugInfo()} has error in update func: ${(error as Error).message}`)
       throw error;
     }
-    stateMgmtConsole.debug(`${this.debugInfo()} is initial rendering elmtId ${this.id__()}, tag: ${_componentName}, and updateFuncByElmtId size :${this.updateFuncByElmtId.size}`);
+    stateMgmtConsole.debug(`${this.debugInfo()} is initial rendering elmtId ${elmtId}, tag: ${_componentName}, and updateFuncByElmtId size :${this.updateFuncByElmtId.size}`);
   }
 
   getOrCreateRecycleManager(): RecycleManager {
-    if (!this.recycleManager) {
-      this.recycleManager = new RecycleManager
+    if (!this.recycleManager_) {
+      this.recycleManager_ = new RecycleManager
     }
-    return this.recycleManager;
+    return this.recycleManager_;
   }
 
   getRecycleManager(): RecycleManager {
-    return this.recycleManager;
+    return this.recycleManager_;
   }
 
   hasRecycleManager(): boolean {
-    return !(this.recycleManager === undefined);
+    return !(this.recycleManager_ === undefined);
   }
 
   initRecycleManager(): void {
-    if (this.recycleManager) {
+    if (this.recycleManager_) {
       stateMgmtConsole.error(`${this.debugInfo()}: init recycleManager multiple times. Internal error.`);
       return;
     }
-    this.recycleManager = new RecycleManager;
+    this.recycleManager_ = new RecycleManager;
   }
 
   /**
@@ -1023,25 +980,17 @@ abstract class ViewPU extends NativeViewPartialUpdate
     // if there is a suitable recycle node, run a recycle update function.
     const newElmtId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
     const oldElmtId: number = node.id__();
-    // store the current id and origin id, used for dirty element sort in {compareNumber}
-    recycleUpdateFunc(newElmtId, /* is first render */ true, node);
-    const oldEntry: UpdateFuncRecord | undefined = this.updateFuncByElmtId.get(oldElmtId);
-    this.updateFuncByElmtId.delete(oldElmtId);
-    this.updateFuncByElmtId.set(newElmtId, {
-      updateFunc: compilerAssignedUpdateFunc,
-      classObject: oldEntry && oldEntry.getComponentClass(),
-      node: oldEntry && oldEntry.getNode()
-    });
-    node.updateId(newElmtId);
-    node.updateRecycleElmtId(oldElmtId, newElmtId);
-    SubscriberManager.UpdateRecycleElmtId(oldElmtId, newElmtId);
+    this.recycleManager_.updateNodeId(oldElmtId, newElmtId);
+    recycleUpdateFunc(oldElmtId, /* is first render */ true, node);
   }
 
   aboutToReuseInternal() {
     this.runReuse_ = true;
     stateMgmtTrace.scopedTrace(() => {
       if (this.paramsGenerator_ && typeof this.paramsGenerator_ == "function") {
-        this.aboutToReuse(this.paramsGenerator_());
+        const params = this.paramsGenerator_();
+        this.updateStateVars(params);
+        this.aboutToReuse(params);
       }
     }, "aboutToReuse", this.constructor.name);
     this.updateDirtyElements();
@@ -1470,5 +1419,57 @@ abstract class ViewPU extends NativeViewPartialUpdate
   private debugInfoInactiveComponents(): string {
     return Array.from(ViewPU.inactiveComponents_)
       .map((component) => `- ${component}`).join('\n');
+  }
+}
+
+class UpdateFuncsByElmtId {
+
+  private map_ = new Map<number, UpdateFuncRecord>();
+
+  public delete(elmtId: number): boolean {
+    return this.map_.delete(elmtId);
+  }
+
+  public set(elmtId: number, params: UpdateFunc | { updateFunc: UpdateFunc, classObject?: UIClassObject, node?: Object }): void {
+    (typeof params == "object") ?
+      this.map_.set(elmtId, new UpdateFuncRecord(params))
+      : this.map_.set(elmtId, new UpdateFuncRecord({ updateFunc: params as UpdateFunc }));
+  }
+
+  public get(elmtId: number): UpdateFuncRecord | undefined {
+    return this.map_.get(elmtId);
+  }
+
+  public keys(): IterableIterator<number> {
+    return this.map_.keys();
+  }
+
+  public clear(): void {
+    return this.map_.clear();
+  }
+
+  public get size(): number {
+    return this.map_.size;
+  }
+
+  public forEach(callbackfn: (value: UpdateFuncRecord, key: number, map: Map<number, UpdateFuncRecord>) => void) : void {
+    this.map_.forEach(callbackfn);
+  }
+
+  // dump info about known elmtIds to a string
+  // use function only for debug output and DFX.
+  public debugInfoRegisteredElmtIds(): string {
+    let result: string = "";
+    let sepa: string = "";
+    this.map_.forEach((value: UpdateFuncRecord, elmtId: number) => {
+      result += `${sepa}${value.getComponentName()}[${elmtId}]`;
+      sepa = ", ";
+    });
+    return result;
+  }
+
+  public debugInfoElmtId(elmtId: number): string {
+    const updateFuncEntry = this.map_.get(elmtId);
+    return updateFuncEntry ? `'${updateFuncEntry!.getComponentName()}[${elmtId}]'` : `'unknown component type'[${elmtId}]`;
   }
 }

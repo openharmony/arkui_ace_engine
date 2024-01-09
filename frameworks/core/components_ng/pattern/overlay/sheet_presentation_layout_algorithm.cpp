@@ -161,7 +161,7 @@ float SheetPresentationLayoutAlgorithm::GetHeightByScreenSizeType(const SizeF& m
     float height = maxSize.Height();
     switch (sheetType_) {
         case SheetType::SHEET_BOTTOM:
-        case SheetType::SHEET_BOTTOMPC:
+        case SheetType::SHEET_BOTTOM_FREE_WINDOW:
         case SheetType::SHEET_BOTTOMLANDSPACE:
             height = maxSize.Height();
             break;
@@ -183,7 +183,7 @@ float SheetPresentationLayoutAlgorithm::GetWidthByScreenSizeType(const SizeF& ma
     float width = maxSize.Width();
     switch (sheetType_) {
         case SheetType::SHEET_BOTTOM:
-        case SheetType::SHEET_BOTTOMPC:
+        case SheetType::SHEET_BOTTOM_FREE_WINDOW:
             width = maxSize.Width();
             break;
         case SheetType::SHEET_BOTTOMLANDSPACE:

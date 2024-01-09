@@ -73,7 +73,8 @@ public:
 
     bool FlushAnimation(uint64_t timeStamp) override
     {
-        return rsUIDirector_->FlushAnimation(timeStamp);
+        int64_t vsyncPeriod = GetVSyncPeriod();
+        return rsUIDirector_->FlushAnimation(timeStamp, vsyncPeriod);
     }
 
     void FlushModifier() override

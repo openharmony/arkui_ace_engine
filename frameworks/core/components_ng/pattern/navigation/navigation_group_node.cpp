@@ -125,7 +125,7 @@ void NavigationGroupNode::UpdateNavDestinationNodeWithoutMarkDirty(const RefPtr<
     int32_t slot = 0;
     UpdateLastStandardIndex();
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "last standard page index is %{public}d", lastStandardIndex_);
-    for (int32_t i = 0; i != navDestinationNodes.size(); ++i) {
+    for (uint32_t i = 0; i != navDestinationNodes.size(); ++i) {
         const auto& childNode = navDestinationNodes[i];
         const auto& uiNode = childNode.second;
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(GetNavDestinationNode(uiNode));
@@ -235,6 +235,7 @@ RefPtr<UINode> NavigationGroupNode::GetNavDestinationNode(RefPtr<UINode> uiNode)
             continue;
         }
     }
+    CHECK_NULL_RETURN(uiNode, nullptr);
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "get navDestination node failed: id: %{public}d, %{public}s",
         uiNode->GetId(), uiNode->GetTag().c_str());
     return nullptr;
@@ -381,6 +382,11 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             auto onFinishCallback = [weakPreNode, weakPreTitle, weakNavigation, weakPreBackIcon, preFrameSize]() {
                 TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation end");
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
+                auto navigation = weakNavigation.Upgrade();
+                if (navigation) {
+                    navigation->isOnAnimation_ = false;
+                    navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+                }
                 auto preNavDesNode = weakPreNode.Upgrade();
                 CHECK_NULL_VOID(preNavDesNode);
                 if (preNavDesNode->GetTransitionType() != PageTransitionType::EXIT_POP) {
@@ -400,11 +406,6 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
                 auto context = PipelineContext::GetCurrentContext();
                 CHECK_NULL_VOID(context);
                 context->MarkNeedFlushMouseEvent();
-
-                auto navigation = weakNavigation.Upgrade();
-                CHECK_NULL_VOID(navigation);
-                navigation->isOnAnimation_ = false;
-                navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
             };
             taskExecutor->PostTask(onFinishCallback, TaskExecutor::TaskType::UI);
         };
@@ -779,7 +780,7 @@ void NavigationGroupNode::UpdateLastStandardIndex()
     if (navDestinationNodes.size() == 0) {
         return;
     }
-    for (int32_t index = navDestinationNodes.size() - 1; index >= 0; index--) {
+    for (int32_t index = static_cast<int32_t>(navDestinationNodes.size()) - 1; index >= 0; index--) {
         const auto& curPath = navDestinationNodes[index];
         const auto& uiNode = curPath.second;
         if (!uiNode) {
@@ -798,7 +799,7 @@ bool NavigationGroupNode::UpdateNavDestinationVisibility(const RefPtr<NavDestina
 {
     auto eventHub = navDestination->GetEventHub<NavDestinationEventHub>();
     CHECK_NULL_RETURN(eventHub, false);
-    if (index == destinationSize - 1) {
+    if (index == static_cast<int32_t>(destinationSize) - 1) {
         // process shallow builder
         navDestination->ProcessShallowBuilder();
         navDestination->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE, true);

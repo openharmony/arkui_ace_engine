@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "core/image/image_source_info.h"
 #define NAPI_VERSION 8
 
 #include "core/components_ng/pattern/image/image_pattern.h"
@@ -343,9 +344,8 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src)
     loadingCtx_->LoadImageData();
 }
 
-void ImagePattern::LoadAltImage(const RefPtr<ImageLayoutProperty>& imageLayoutProperty)
+void ImagePattern::LoadAltImage(const ImageSourceInfo& altImageSourceInfo)
 {
-    auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
     LoadNotifier altLoadNotifier(CreateDataReadyCallbackForAlt(), CreateLoadSuccessCallbackForAlt(), nullptr);
     if (!altLoadingCtx_ || altLoadingCtx_->GetSourceInfo() != altImageSourceInfo ||
         (altLoadingCtx_ && altImageSourceInfo.IsSvg())) {
@@ -386,7 +386,8 @@ void ImagePattern::LoadImageDataIfNeed()
         });
     }
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
-        LoadAltImage(imageLayoutProperty);
+        auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
+        LoadAltImage(altImageSourceInfo);
     }
 }
 
@@ -892,10 +893,16 @@ void ImagePattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(imageLayoutProperty);
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
+    src.SetIsSystemColorChange(true);
 
     LoadImage(src);
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
-        LoadAltImage(imageLayoutProperty);
+        auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
+        if (altLoadingCtx_ && altLoadingCtx_->GetSourceInfo() == altImageSourceInfo) {
+            altLoadingCtx_.Reset();
+        }
+        altImageSourceInfo.SetIsSystemColorChange(true);
+        LoadAltImage(altImageSourceInfo);
     }
 }
 
@@ -954,6 +961,15 @@ void ImagePattern::UpdateAnalyzerOverlay()
     if (!IsSupportImageAnalyzerFeature() || !isAnalyzerOverlayBuild_) {
         return;
     }
+
+    auto imageLayoutProperty = GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
+    UpdateInternalResource(src);
+    if (loadingCtx_ && loadingCtx_->GetSourceInfo() == src) {
+        return;
+    }
+
     auto pixelMap = image_->GetPixelMap();
     CHECK_NULL_VOID(pixelMap);
     napi_value pixelmapNapiVal = ConvertPixmapNapi(pixelMap);

@@ -162,8 +162,9 @@ ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
         GreatNotEqual(pManager_->minParagraphFontSize.value(), style.fontSize)) {
         pManager_->minParagraphFontSize = style.fontSize;
     }
-    auto&& spanGroup = GetSpans();
-    auto&& lineStyle = spanGroup.front()->textLineStyle;
+    const auto& spanItem = GetFirstTextSpanItem();
+    CHECK_NULL_RETURN(spanItem, style);
+    auto& lineStyle = spanItem->textLineStyle;
     CHECK_NULL_RETURN(lineStyle, style);
     if (lineStyle->propTextAlign) {
         style.align = *(lineStyle->propTextAlign);
@@ -181,6 +182,19 @@ ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
     }
 
     return style;
+}
+
+RefPtr<SpanItem> RichEditorLayoutAlgorithm::GetFirstTextSpanItem() const
+{
+    auto& spanGroup = GetSpans();
+    auto it = spanGroup.begin();
+    while (it != spanGroup.end()) {
+        if (!DynamicCast<PlaceholderSpanItem>(*it)) {
+            return *it;
+        }
+        ++it;
+    }
+    return *spanGroup.begin();
 }
 
 int32_t RichEditorLayoutAlgorithm::GetPreviousLength() const

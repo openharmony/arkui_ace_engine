@@ -16,6 +16,7 @@
 #include "core/components_ng/render/render_property.h"
 
 #include "core/common/ace_application_info.h"
+#include "core/components/common/properties/blend_mode.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -62,8 +63,7 @@ std::string BasicShapeTypeToString(BasicShapeType type)
     } else {                                                         \
         json##name->Put("x", "0.0px");                               \
         json##name->Put("y", "0.0px");                               \
-    }                                                                \
-
+    }
 
 #define ACE_OFFSET_API_TEN_TO_JSON(name)                             \
     auto json##name = JsonUtil::Create(true);                        \
@@ -73,7 +73,7 @@ std::string BasicShapeTypeToString(BasicShapeType type)
     } else {                                                         \
         json##name->Put("x", "");                                    \
         json##name->Put("y", "");                                    \
-    }                                                                \
+    }
 
 void RenderPositionProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
@@ -106,6 +106,7 @@ void GraphicsProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("sepia", propFrontSepia.has_value() ? propFrontSepia->Value() : 0.0);
     json->Put("hueRotate", propFrontHueRotate.has_value() ? propFrontHueRotate.value() : 0.0);
     json->Put("colorBlend", propFrontColorBlend.has_value() ? propFrontColorBlend->ColorToString().c_str() : "");
+    json->Put("blendMode", propBackBlendMode.has_value() ? static_cast<uint16_t>(propBackBlendMode.value()) : 0);
 
     auto jsonShadow = JsonUtil::Create(true);
     auto shadow = propBackShadow.value_or(Shadow());
@@ -179,7 +180,7 @@ void CustomBackgroundProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) con
     std::string backgroundPixelMap = "NONE";
     if (propBackgroundPixelMap.has_value()) {
         backgroundPixelMap = std::to_string(propBackgroundPixelMap.value()->GetWidth()) + ", " +
-                          std::to_string(propBackgroundPixelMap.value()->GetHeight());
+                             std::to_string(propBackgroundPixelMap.value()->GetHeight());
     }
     json->Put("backgroundPixelMap", backgroundPixelMap.c_str());
     json->Put("backgroundAlign", propBackgroundAlign.value().ToString().c_str());

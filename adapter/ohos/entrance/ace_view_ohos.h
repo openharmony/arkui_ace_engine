@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_ACE_VIEW_OHOS_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_ACE_VIEW_OHOS_H
 
+#include <functional>
 #include <memory>
 
 #include "interfaces/inner_api/ace/viewport_config.h"
@@ -49,7 +50,7 @@ public:
     static void SetViewportMetrics(AceViewOhos* view, const ViewportConfig& config);
 
     static void DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-        const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr);
+        const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr, const std::function<void()>& callback = nullptr);
     static bool DispatchKeyEvent(AceViewOhos* view, const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     static bool DispatchRotationEvent(AceViewOhos* view, float rotationValue);
     static void DispatchEventToPerf(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
@@ -70,7 +71,7 @@ public:
     void Launch() override;
 
     void ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-        const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr);
+        const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr, const std::function<void()>& callback = nullptr);
 
     void ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr);

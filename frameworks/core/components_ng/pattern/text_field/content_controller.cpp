@@ -44,10 +44,15 @@ std::string ContentController::PreprocessString(int32_t startIndex, int32_t endI
     auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
     auto selectValue = GetSelectedValue(startIndex, endIndex);
     if (property->GetTextInputType().has_value() &&
-        property->GetTextInputType().value() == TextInputType::EMAIL_ADDRESS &&
-        content_.find('@') != std::string::npos && value.find('@') != std::string::npos &&
-        GetSelectedValue(startIndex, endIndex).find('@') == std::string::npos) {
-        tmp.erase(std::remove_if(tmp.begin(), tmp.end(), [](char c) { return c == '@'; }), tmp.end());
+        (property->GetTextInputType().value() == TextInputType::NUMBER_DECIMAL ||
+        property->GetTextInputType().value() == TextInputType::EMAIL_ADDRESS)) {
+        char specialChar = property->GetTextInputType().value() == TextInputType::NUMBER_DECIMAL ?
+            '.' : '@';
+        if (content_.find(specialChar) != std::string::npos && value.find(specialChar) != std::string::npos &&
+            GetSelectedValue(startIndex, endIndex).find(specialChar) == std::string::npos) {
+            tmp.erase(
+                std::remove_if(tmp.begin(), tmp.end(), [&specialChar](char c) { return c == specialChar; }), tmp.end());
+        }
     }
     auto wideText = GetWideText();
     auto wideTmp = StringUtils::ToWstring(tmp);
@@ -73,6 +78,11 @@ bool ContentController::ReplaceSelectedValue(int32_t startIndex, int32_t endInde
     content_ = StringUtils::ToString(wideText.substr(0, startIndex)) + tmp +
                StringUtils::ToString(wideText.substr(endIndex, static_cast<int32_t>(wideText.length()) - endIndex));
     FilterValue();
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto textField = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_RETURN(textField, false);
+    textField->ContentFireOnChangeEvent();
     return !tmp.empty();
 }
 
@@ -171,6 +181,7 @@ void ContentController::FilterValue()
     if (GreatNotEqual(textWidth, maxLength)) {
         content_ = StringUtils::ToString(GetWideText().substr(0, maxLength));
     }
+    textField->ContentFireOnChangeEvent();
 }
 
 std::string ContentController::RemoveErrorTextFromValue(const std::string& value, const std::string& errorText)
@@ -294,6 +305,11 @@ void ContentController::erase(int32_t startIndex, int32_t length)
 {
     auto wideText = GetWideText().erase(startIndex, length);
     content_ = StringUtils::ToString(wideText);
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textField = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textField);
+    textField->ContentFireOnChangeEvent();
 }
 
 std::string ContentController::GetValueBeforeIndex(int32_t index)

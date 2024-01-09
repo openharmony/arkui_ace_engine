@@ -74,9 +74,6 @@ bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::func
     CHECK_NULL_RETURN(host, false);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
-    if (type == PageTransitionType::EXIT_POP || type == PageTransitionType::EXIT_PUSH) {
-        ProcessAutoSave();
-    }
     if (pageTransitionFunc_) {
         pageTransitionFunc_();
     }
@@ -125,7 +122,6 @@ void PagePattern::ProcessAutoSave()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     if (!host->NeedRequestAutoSave()) {
-        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "No need to auto save");
         return;
     }
     auto container = Container::Current();

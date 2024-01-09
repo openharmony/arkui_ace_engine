@@ -23,6 +23,7 @@
 namespace OHOS::Ace::NG {
 ListContentModifier::ListContentModifier(const OffsetF& clipOffset, const SizeF& clipSize)
 {
+    color_ = AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor::TRANSPARENT);
     clipOffset_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(clipOffset);
     clipSize_ = AceType::MakeRefPtr<AnimatablePropertySizeF>(clipSize);
     clip_ = AceType::MakeRefPtr<PropertyBool>(true);
@@ -30,6 +31,7 @@ ListContentModifier::ListContentModifier(const OffsetF& clipOffset, const SizeF&
     dividerList_ = AceType::MakeRefPtr<AnimatableArithmeticProperty>(
         AceType::DynamicCast<CustomAnimatableArithmetic>(lda));
 
+    AttachProperty(color_);
     AttachProperty(clipOffset_);
     AttachProperty(clipSize_);
     AttachProperty(clip_);
@@ -53,7 +55,8 @@ void ListContentModifier::onDraw(DrawingContext& context)
     CHECK_NULL_VOID(lda);
     auto dividerMap = lda->GetDividerMap();
     if (!dividerMap.empty()) {
-        DividerPainter dividerPainter(width_, 0, isVertical_, color_, LineCap::SQUARE);
+        DividerPainter dividerPainter(
+            width_, 0, isVertical_, color_->Get().ToColor(), LineCap::SQUARE);
         for (auto child : dividerMap) {
             if (child.second.length > 0) {
                 dividerPainter.SetDividerLength(child.second.length);

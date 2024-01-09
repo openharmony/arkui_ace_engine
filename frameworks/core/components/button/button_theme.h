@@ -80,7 +80,7 @@ public:
             theme->progressColor_ = buttonPattern->GetAttr<Color>("process_button_text_color", Color());
             theme->radius_ = buttonPattern->GetAttr<Dimension>("button_radius", 0.0_vp);
             theme->bgFocusColor_ = buttonPattern->GetAttr<Color>("button_bg_focus_color", Color());
-            theme->bgDisabledAlpha_ = buttonPattern->GetAttr<double>(PATTERN_BG_COLOR_DISABLED_ALPHA, 0.0);
+            theme->bgDisabledAlpha_ = buttonPattern->GetAttr<double>("bg_color_disabled_alpha", 0.0);
             theme->textFocusColor_ = buttonPattern->GetAttr<Color>("button_text_focus_color", Color());
             theme->textStyle_.SetFontSize(buttonPattern->GetAttr<Dimension>("button_font_size", 0.0_fp));
             theme->textStyle_.SetFontWeight(

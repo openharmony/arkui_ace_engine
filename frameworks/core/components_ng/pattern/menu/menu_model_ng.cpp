@@ -28,11 +28,6 @@ void MenuModelNG::Create()
         []() { return AceType::MakeRefPtr<InnerMenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MULTI_MENU); });
     CHECK_NULL_VOID(menuNode);
     ViewStackProcessor::GetInstance()->Push(menuNode);
-
-    auto layoutProps = menuNode->GetLayoutProperty();
-    CHECK_NULL_VOID(layoutProps);
-    // default min width
-    layoutProps->UpdateCalcMinSize(CalcSize(CalcLength(MIN_MENU_WIDTH), std::nullopt));
 }
 
 void MenuModelNG::SetFontSize(const Dimension& fontSize)

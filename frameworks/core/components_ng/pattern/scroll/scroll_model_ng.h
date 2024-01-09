@@ -53,6 +53,9 @@ public:
     void SetScrollSnap(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
         const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide) override;
 
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetScrollController(
+        FrameNode* frameNode, const RefPtr<ScrollControllerBase>& scroller, const RefPtr<ScrollProxy>& proxy);
     static void SetNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
     static void SetScrollEnabled(FrameNode* frameNode, bool scrollEnabled);
     static void SetFriction(FrameNode* frameNode, double friction);
@@ -63,6 +66,7 @@ public:
     static void SetScrollBarColor(FrameNode* frameNode, const Color& color);
     static void SetScrollBarWidth(FrameNode* frameNode, const Dimension& dimension);
     static void SetEdgeEffect(FrameNode* frameNode, const EdgeEffect& edgeEffect, bool alwaysEnabled);
+    static void SetOnScroll(FrameNode* frameNode, NG::ScrollEvent&& event);
     void SetEnablePaging(bool enablePaging) override;
 };
 

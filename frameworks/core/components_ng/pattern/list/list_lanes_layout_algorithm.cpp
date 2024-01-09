@@ -54,16 +54,22 @@ float ListLanesLayoutAlgorithm::MeasureAndGetChildHeight(LayoutWrapper* layoutWr
     auto wrapper = layoutWrapper->GetOrCreateChildByIndex(childIndex);
     CHECK_NULL_RETURN(wrapper, 0.0f);
     bool isGroup = wrapper->GetHostTag() == V2::LIST_ITEM_GROUP_ETS_TAG;
+    float mainLen = 0.0f;
     if (isGroup) {
         auto listLayoutProperty =
             AceType::DynamicCast<ListLayoutProperty>(layoutWrapper->GetLayoutProperty());
         // true: layout forward, true: layout all group items.
         SetListItemGroupParam(wrapper, childIndex, 0.0f, true, listLayoutProperty, true);
         wrapper->Measure(groupLayoutConstraint_);
+        mainLen = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
     } else {
-        wrapper->Measure(childLayoutConstraint_);
+        auto laneCeil = GetLanesCeil(layoutWrapper, childIndex);
+        for (int32_t i = childIndex; i <= laneCeil; i++) {
+            auto wrapper = layoutWrapper->GetOrCreateChildByIndex(i);
+            wrapper->Measure(childLayoutConstraint_);
+            mainLen = std::max(mainLen, GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_));
+        }
     }
-    float mainLen = GetMainAxisSize(wrapper->GetGeometryNode()->GetMarginFrameSize(), axis_);
     return mainLen;
 }
 

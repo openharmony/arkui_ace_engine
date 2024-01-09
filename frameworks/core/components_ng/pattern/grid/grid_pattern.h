@@ -203,6 +203,16 @@ public:
     {
         return true;
     }
+    
+    std::optional<GridPredictLayoutParam> GetPredictLayoutParam() const
+    {
+        return predictLayoutParam_;
+    }
+
+    void SetPredictLayoutParam(std::optional<GridPredictLayoutParam> param)
+    {
+        predictLayoutParam_ = param;
+    }
 
 private:
     float GetEndOffset();
@@ -274,6 +284,7 @@ private:
     bool isSmoothScrolling_ = false;
     GridLayoutInfo scrollGridLayoutInfo_;
     GridLayoutInfo gridLayoutInfo_;
+    std::optional<GridPredictLayoutParam> predictLayoutParam_;
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);
 };
 

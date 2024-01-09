@@ -47,6 +47,10 @@ public:
 
     bool HandleEvent(const TouchEvent& point) override;
     bool HandleEvent(const AxisEvent& event) override;
+    GestureMode GetGestureMode() const override
+    {
+        return GestureMode::Parallel;
+    }
 
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override {};

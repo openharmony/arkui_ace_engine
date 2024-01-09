@@ -55,6 +55,7 @@
 #include "core/image/image_cache.h"
 #include "core/pipeline/container_window_manager.h"
 #include "core/components_ng/manager/display_sync/ui_display_sync_manager.h"
+#include "interfaces/inner_api/ace/serialized_gesture.h"
 
 namespace OHOS::Rosen {
 class RSTransaction;
@@ -84,7 +85,8 @@ class NavigationController;
 enum class FrontendType;
 using SharePanelCallback = std::function<void(const std::string& bundleName, const std::string& abilityName)>;
 using AceVsyncCallback = std::function<void(uint64_t, uint32_t)>;
-using EtsCardTouchEventCallback = std::function<void(const TouchEvent&)>;
+using EtsCardTouchEventCallback = std::function<void(const TouchEvent&,
+    SerializedGesture& serializedGesture)>;
 
 class ACE_FORCE_EXPORT PipelineBase : public AceType {
     DECLARE_ACE_TYPE(PipelineBase, AceType);
@@ -940,7 +942,7 @@ public:
 
     void AddEtsCardTouchEventCallback(int32_t ponitId, EtsCardTouchEventCallback&& callback);
 
-    void HandleEtsCardTouchEvent(const TouchEvent& point);
+    void HandleEtsCardTouchEvent(const TouchEvent& point, SerializedGesture &serializedGesture);
 
     void RemoveEtsCardTouchEventCallback(int32_t ponitId);
 
@@ -1036,6 +1038,16 @@ public:
         return onFocus_;
     }
 
+    uint64_t GetVsyncTime() const
+    {
+        return vsyncTime_;
+    }
+
+    void SetVsyncTime(uint64_t time)
+    {
+        vsyncTime_ = time;
+    }
+
     virtual void UpdateCurrentActiveNode(const WeakPtr<NG::FrameNode>& node) {}
 
     virtual std::string GetCurrentExtraInfo() { return ""; }
@@ -1067,6 +1079,16 @@ public:
     virtual void SetIsDragging(bool isDragging) {}
 
     virtual void ResetDragging() {}
+
+    virtual const SerializedGesture& GetSerializedGesture() const
+    {
+        return serializedGesture_;
+    }
+    
+    virtual bool PrintVsyncInfoIfNeed() const
+    {
+        return false;
+    }
 
 protected:
     virtual bool MaybeRelease() override;
@@ -1201,6 +1223,7 @@ protected:
     std::once_flag displaySyncFlag_;
     RefPtr<UIDisplaySyncManager> uiDisplaySyncManager_;
 
+    SerializedGesture serializedGesture_;
 private:
     void DumpFrontend() const;
     double ModifyKeyboardHeight(double keyboardHeight) const;
@@ -1223,6 +1246,7 @@ private:
     int64_t formAnimationStartTime_ = 0;
     bool isFormAnimation_ = false;
     bool halfLeading_ = false;
+    uint64_t vsyncTime_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

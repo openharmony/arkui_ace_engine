@@ -2005,6 +2005,7 @@ var XComponentType;
   XComponentType[XComponentType["SURFACE"] = 0] = "SURFACE";
   XComponentType[XComponentType["COMPONENT"] = 1] = "COMPONENT";
   XComponentType[XComponentType["TEXTURE"] = 2] = "TEXTURE";
+  XComponentType[XComponentType["NODE"] = 3] = "NODE";
 })(XComponentType || (XComponentType = {}));
 
 var NestedScrollMode;

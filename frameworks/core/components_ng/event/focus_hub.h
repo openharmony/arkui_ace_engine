@@ -434,6 +434,8 @@ public:
 
     static void PushPageCloseKeyboard();
 
+    static void NavCloseKeyboard();
+
     BlurReason GetBlurReason() const
     {
         return blurReason_;
@@ -762,6 +764,9 @@ public:
 
     void SetFocusType(FocusType type)
     {
+        if (focusType_ != type && type == FocusType::DISABLE) {
+            RemoveSelf(BlurReason::FOCUS_SWITCH);
+        }
         focusType_ = type;
     }
     FocusType GetFocusType() const

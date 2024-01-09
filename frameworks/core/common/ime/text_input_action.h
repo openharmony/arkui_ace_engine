@@ -38,6 +38,16 @@ enum class TextInputAction {
     END = NEW_LINE,
 };
 
+enum class KeyBoardType {
+    SOFT_KEYBOARD = 0,
+    STATUS_BAR,
+};
+
+struct KeyBoardInfo {
+    KeyBoardType keyBoardType = KeyBoardType::SOFT_KEYBOARD;
+    bool visible = false;
+};
+
 // For convenience of convert int value from Java
 TextInputAction CastToTextInputAction(int32_t value);
 

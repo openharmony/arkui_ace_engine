@@ -178,6 +178,7 @@ void TitleBarPattern::InitTitleParam()
     tempTitleOffsetY_ = 0.0f;
     fontSize_.reset();
     opacity_.reset();
+    isFreeTitleUpdated_ = false;
 }
 
 bool TitleBarPattern::IsHidden()
@@ -434,6 +435,8 @@ void TitleBarPattern::ProcessTitleDragStart(float offset)
     SetDefaultSubtitleOpacity();
     auto tempOpacity = GetSubtitleOpacity();
     UpdateSubTitleOpacity(tempOpacity);
+
+    isFreeTitleUpdated_ = true;
 }
 
 void TitleBarPattern::ProcessTitleDragUpdate(float offset, float dragOffsetY)
@@ -856,6 +859,9 @@ void TitleBarPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
 
     SetBackgroundAndBlur();
+
+    SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP};
+    host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
 }
 
 void TitleBarPattern::OnCoordScrollStart()
@@ -1068,7 +1074,8 @@ float TitleBarPattern::CalculateHandledOffsetBetweenMinAndMaxTitle(float offset,
 
 void TitleBarPattern::SetBackgroundAndBlur()
 {
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+    if (SystemProperties::GetNavigationBlurEnabled() &&
+        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto renderContext = host->GetRenderContext();

@@ -87,11 +87,6 @@ bool IsSvgTraceEnabled()
     return (system::GetParameter("persist.ace.trace.svg.enabled", "0") == "1");
 }
 
-bool IsLayoutTraceEnabled()
-{
-    return (system::GetParameter("persist.ace.trace.layout.enabled", "false") == "true");
-}
-
 bool IsBuildTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.build.enabled", "false") == "true");
@@ -162,6 +157,11 @@ bool IsAccessibilityEnabled()
 bool IsDebugEnabled()
 {
     return (system::GetParameter("persist.ace.debug.enabled", "0") == "1");
+}
+
+bool IsNavigationBlurEnabled()
+{
+    return (system::GetParameter("persist.ace.navigation.blur.enabled", "0") == "1");
 }
 
 bool IsGpuUploadEnabled()
@@ -239,7 +239,6 @@ bool IsResourceDecoupling()
 
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
-bool SystemProperties::layoutTraceEnable_ = IsLayoutTraceEnabled() && IsDeveloperModeOn();
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && IsDeveloperModeOn();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
@@ -278,6 +277,7 @@ ACE_WEAK_SYM bool SystemProperties::extSurfaceEnabled_ = IsExtSurfaceEnabled();
 ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount();
 bool SystemProperties::enableScrollableItemPool_ = IsEnableScrollableItemPool();
 bool SystemProperties::resourceDecoupling_ = IsResourceDecoupling();
+bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
 
 bool SystemProperties::IsSyscapExist(const char* cap)
 {
@@ -388,7 +388,6 @@ void SystemProperties::InitDeviceInfo(
     debugEnabled_ = IsDebugEnabled();
     traceEnabled_ = IsTraceEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
-    layoutTraceEnable_ = IsLayoutTraceEnabled() && IsDeveloperModeOn();
     buildTraceEnable_ = IsBuildTraceEnabled() && IsDeveloperModeOn();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     rosenBackendEnabled_ = IsRosenBackendEnabled();
@@ -398,6 +397,8 @@ void SystemProperties::InitDeviceInfo(
     animationScale_ = std::atof(system::GetParameter(ANIMATION_SCALE_KEY, "1").c_str());
     WatchParameter(ANIMATION_SCALE_KEY, OnAnimationScaleChanged, nullptr);
     resourceDecoupling_ = IsResourceDecoupling();
+
+    navigationBlurEnabled_ = IsNavigationBlurEnabled();
 
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
@@ -492,6 +493,11 @@ bool SystemProperties::GetDebugPixelMapSaveEnabled()
     return system::GetBoolParameter("persist.ace.save.pixelmap.enabled", false);
 }
 
+bool SystemProperties::GetLayoutTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.layout.enabled", "false") == "true") && IsDeveloperModeOn();
+}
+
 ACE_WEAK_SYM bool SystemProperties::GetIsUseMemoryMonitor()
 {
     static bool isUseMemoryMonitor = IsUseMemoryMonitor();
@@ -537,5 +543,15 @@ std::optional<bool> SystemProperties::GetRtlEnabled()
     } else {
         return (ret == "true") ? true : false;
     }
+}
+
+bool SystemProperties::GetDisplaySyncSkipEnabled()
+{
+    return system::GetBoolParameter("debug.ace.displaySyncSkip.enabled", true);
+}
+
+bool SystemProperties::GetNavigationBlurEnabled()
+{
+    return navigationBlurEnabled_;
 }
 } // namespace OHOS::Ace

@@ -40,7 +40,6 @@ void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
 
 bool SystemProperties::traceEnabled_ = false;
 bool SystemProperties::svgTraceEnable_ = false;
-bool SystemProperties::layoutTraceEnable_ = false;
 bool SystemProperties::buildTraceEnable_ = false;
 bool SystemProperties::accessibilityEnabled_ = false;
 bool SystemProperties::isRound_ = false;
@@ -82,6 +81,7 @@ bool SystemProperties::rosenBackendEnabled_ = false;
 bool SystemProperties::rosenBackendEnabled_ = true;
 #endif
 bool SystemProperties::enableScrollableItemPool_ = false;
+bool SystemProperties::navigationBlurEnabled_ = true;
 
 void SystemProperties::InitDeviceType(DeviceType type)
 {
@@ -245,6 +245,21 @@ std::string SystemProperties::GetCustomTitleFilePath()
 }
 
 bool SystemProperties::Is24HourClock()
+{
+    return false;
+}
+
+bool SystemProperties::GetDisplaySyncSkipEnabled()
+{
+    return true;
+}
+
+bool SystemProperties::GetNavigationBlurEnabled()
+{
+    return navigationBlurEnabled_;
+}
+
+bool SystemProperties::GetLayoutTraceEnabled()
 {
     return false;
 }

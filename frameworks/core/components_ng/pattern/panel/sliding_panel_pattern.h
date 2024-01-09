@@ -146,6 +146,7 @@ private:
     std::optional<bool> invisibleFlag_;
     std::queue<bool> isShowQueue_;
     bool isClosePanel_ = false;
+    bool preAnimateFlag_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(SlidingPanelPattern);
 };

@@ -119,6 +119,8 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
     pipelineContext->CloseImplicitAnimation();
     if (immediately) {
         pipelineContext->FlushMessages();
+    } else {
+        pipelineContext->RequestFrame();
     }
 }
 
@@ -135,6 +137,8 @@ void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOp
     pipelineContext->CloseImplicitAnimation();
     if (immediately) {
         pipelineContext->FlushMessages();
+    } else {
+        pipelineContext->RequestFrame();
     }
 }
 
@@ -530,6 +534,11 @@ void JSViewContext::JSKeyframeAnimateTo(const JSCallbackInfo& info)
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     auto overallAnimationOption = ParseKeyframeOverallParam(info.GetExecutionContext(), obj);
     auto keyframes = ParseKeyframes(info.GetExecutionContext(), keyframeArr);
+    int duration = 0;
+    for (auto& keyframe : keyframes) {
+        duration += keyframe.duration;
+    }
+    overallAnimationOption.SetDuration(duration);
     // actual curve is in keyframe, this curve will not be effective
     overallAnimationOption.SetCurve(Curves::EASE_IN_OUT);
     pipelineContext->FlushBuild();

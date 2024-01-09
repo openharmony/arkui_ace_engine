@@ -12,13 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import curves from '@ohos.curves';
+
 const START_TIME = 250;
 const END_TIME = 200;
 const BORDER_RADIUS = 12;
-const OPACITY_NUM = 0.18;
-const DEFAULT_HEIGHT = 48;
-const FIT_HEIGHT = 58;
-const ZINDEX_NUM = 999;
+const ZINDEX_NUM = 9;
+
 
 export enum MarginType {
   DEFAULT_MARGIN = 0,
@@ -45,43 +45,28 @@ export struct ExceptionPrompt {
     // Click Set Network to open the Set network pop-up interface
   }
 
-  @Builder FirstBuilder() {
-    Column() {
-    }
-    .height('100%')
-    .width('100%')
-    .borderRadius(BORDER_RADIUS)
-    .backgroundColor($r('sys.color.ohos_id_color_background'))
-  }
-
-  @Builder SecondBuilder() {
-    Column() {
-    }
-    .height('100%')
-    .width('100%')
-    .borderRadius(BORDER_RADIUS)
-    .backgroundColor($r('sys.color.ohos_id_color_warning'))
-    .opacity(OPACITY_NUM)
-    .zIndex(ZINDEX_NUM)
-  }
-
-  @Builder TextBuilder() {
-    Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign.Center }) {
-      Flex({ alignItems: ItemAlign.Center }) {
-        Image(this.options.icon??$r('sys.media.ohos_ic_public_fail'))
+  @Builder
+  TextBuilder() {
+    Flex({ justifyContent: FlexAlign.SpaceBetween, alignItems: ItemAlign
+      .Center }) {
+      Row() {
+        Image(this.options.icon ?? $r('sys.media.ohos_ic_public_fail'))
           .width("24vp")
           .height('24vp')
-          .objectFit(ImageFit.Contain)
           .fillColor($r('sys.color.ohos_id_color_warning'))
         Text(this.options.tip)
           .fontSize($r('sys.float.ohos_id_text_size_body1'))
           .fontColor($r('sys.color.ohos_id_color_warning'))
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .maxLines(2)
-          .margin({ left: $r('sys.float.ohos_id_dialog_margin_end'), right: $r('sys.float.ohos_id_dialog_margin_end') })
+          .lineHeight(24)
+          .margin({
+            left: $r('sys.float.ohos_id_dialog_margin_end'),
+            right: $r('sys.float.ohos_id_dialog_margin_end')
+          })
       }
+      .padding({ right: $r('sys.float.ohos_id_default_padding_end') })
       .width('100%')
-      .height('100%')
       .onClick(() => {
         this.onTipClick() //Click the callback of the prompt text
       })
@@ -103,8 +88,8 @@ export struct ExceptionPrompt {
           }
         }
         .backgroundColor(this.touchBackgroundColor)
-        .width(this.options.actionText ? 120 : 0)
-        .height(32)
+        .width(this.options.actionText ? 144 : 0)
+        .height(24)
         .borderRadius($r('sys.float.ohos_id_corner_radius_subtab'))
         .padding({
           right: $r('sys.float.ohos_id_elements_margin_vertical_l'),
@@ -119,42 +104,44 @@ export struct ExceptionPrompt {
             this.touchBackgroundColor = $r('sys.color.ohos_id_color_sub_background_transparent')
           }
         })
-      }
 
+      }
     }
     .padding({
       left: $r('sys.float.ohos_id_notification_margin_start'),
-      right: $r('sys.float.ohos_id_text_paragraph_margin_s')
+      right: $r('sys.float.ohos_id_text_paragraph_margin_s'),
+      top: $r('sys.float.ohos_id_default_padding_start'),
+      bottom: $r('sys.float.ohos_id_default_padding_end')
     })
-    .position({})
-    .zIndex(ZINDEX_NUM)
-    .width('100%')
-    .height('100%')
   }
 
   build() {
-    Column() {
-      Stack() {
-        this.FirstBuilder()
-        this.SecondBuilder()
-        this.TextBuilder()
+    Row() {
+      Column() {
+        Column() {
+          this.TextBuilder()
+        }
+        .width('100%')
+        .borderRadius(BORDER_RADIUS)
+        .backgroundColor('#fdd9d9')
+        .zIndex(ZINDEX_NUM)
       }
       .padding(this.options.marginType === MarginType.DEFAULT_MARGIN ? {
-                                                                          left: $r('sys.float.ohos_id_card_margin_start'),
-                                                                          right: $r('sys.float.ohos_id_card_margin_end')
-                                                                        } : {
-                                                                              left: $r('sys.float.ohos_id_max_padding_start'),
-                                                                              right: $r('sys.float.ohos_id_max_padding_end')
-                                                                            })
+                                                                         left: $r('sys.float.ohos_id_card_margin_start'),
+                                                                         right: $r('sys.float.ohos_id_card_margin_end')
+                                                                       } : {
+                                                                             left: $r('sys.float.ohos_id_max_padding_start'),
+                                                                             right: $r('sys.float.ohos_id_max_padding_end')
+                                                                           })
       .transition(
         TransitionEffect.OPACITY.animation({
+          curve: curves.cubicBezierCurve(0.33, 0, 0.67, 1),
           duration: this.options.isShown ? START_TIME : END_TIME
         })
       )
       .visibility(this.options.isShown ? Visibility.Visible : Visibility.None)
     }
     .width('100%')
-    .height(this.options.actionText ? FIT_HEIGHT : DEFAULT_HEIGHT)
     .position({ y: this.options.marginTop })
     .zIndex(ZINDEX_NUM)
   }

@@ -31,6 +31,9 @@ constexpr int32_t BAR_DISAPPEAR_DURATION = 400; // 400ms
 constexpr int32_t BAR_APPEAR_DURATION = 100;    // 100ms
 constexpr int32_t BAR_GROW_DURATION = 150;      // 150ms, scroll bar width expands from 4dp to 8dp
 constexpr int32_t BAR_SHRINK_DURATION = 250;    // 250ms, scroll bar width shrinks from 8dp to 4dp
+constexpr int32_t BAR_DISAPPEAR_FRAME_RATE = 20;
+constexpr int32_t BAR_DISAPPEAR_MIN_FRAME_RATE = 0;
+constexpr int32_t BAR_DISAPPEAR_MAX_FRAME_RATE = 90;
 } // namespace
 
 ScrollBarOverlayModifier::ScrollBarOverlayModifier(const OffsetF& barOffset, const SizeF& barSize)
@@ -243,6 +246,8 @@ void ScrollBarOverlayModifier::StartOpacityAnimation(OpacityAnimationType opacit
     AnimationOption option;
     option.SetCurve(Curves::SHARP);
     if (opacityAnimationType == OpacityAnimationType::DISAPPEAR) {
+        option.SetFrameRateRange(AceType::MakeRefPtr<FrameRateRange>(
+            BAR_DISAPPEAR_MIN_FRAME_RATE, BAR_DISAPPEAR_MAX_FRAME_RATE, BAR_DISAPPEAR_FRAME_RATE));
         option.SetDuration(BAR_DISAPPEAR_DURATION);
     } else if (opacityAnimationType == OpacityAnimationType::APPEAR) {
         option.SetDuration(BAR_APPEAR_DURATION);

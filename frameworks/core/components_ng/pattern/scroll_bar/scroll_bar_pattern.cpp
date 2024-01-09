@@ -22,6 +22,9 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t BAR_DISAPPEAR_DELAY_DURATION = 2000; // 2000ms
 constexpr int32_t BAR_DISAPPEAR_DURATION = 400;        // 400ms
+constexpr int32_t BAR_DISAPPEAR_FRAME_RATE = 20;
+constexpr int32_t BAR_DISAPPEAR_MIN_FRAME_RATE = 0;
+constexpr int32_t BAR_DISAPPEAR_MAX_FRAME_RATE = 90;
 } // namespace
 
 void ScrollBarPattern::OnAttachToFrameNode()
@@ -205,6 +208,8 @@ void ScrollBarPattern::StartDisappearAnimator()
         AnimationOption option;
         option.SetCurve(Curves::FRICTION);
         option.SetDuration(BAR_DISAPPEAR_DURATION);
+        option.SetFrameRateRange(AceType::MakeRefPtr<FrameRateRange>(
+            BAR_DISAPPEAR_MIN_FRAME_RATE, BAR_DISAPPEAR_MAX_FRAME_RATE, BAR_DISAPPEAR_FRAME_RATE));
         auto disappearAnimation = AnimationUtils::StartAnimation(option, [weak]() {
             auto scrollBar = weak.Upgrade();
             CHECK_NULL_VOID(scrollBar);

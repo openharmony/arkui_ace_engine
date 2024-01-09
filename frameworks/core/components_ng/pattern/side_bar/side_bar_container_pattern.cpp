@@ -842,7 +842,10 @@ void SideBarContainerPattern::FireChangeEvent(bool isShow)
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto inspectorId = host->GetInspectorId().value_or("");
-        builder.SetId(inspectorId).SetType(host->GetTag()).SetChecked(isShow);
+        builder.SetId(inspectorId)
+            .SetType(host->GetTag())
+            .SetChecked(isShow)
+            .SetDescription(host->GetAutoEventParamValue(""));
         Recorder::EventRecorder::Get().OnChange(std::move(builder));
     }
 }

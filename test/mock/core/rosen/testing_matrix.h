@@ -24,6 +24,18 @@
 namespace OHOS::Ace::Testing {
 class TestingMatrix {
 public:
+    enum Index {
+        SCALE_X,
+        SKEW_X,
+        TRANS_X,
+        SKEW_Y,
+        SCALE_Y,
+        TRANS_Y,
+        PERSP_0,
+        PERSP_1,
+        PERSP_2,
+    };
+
     TestingMatrix() = default;
     ~TestingMatrix() = default;
     void Rotate(float degree, float px, float py) {}
@@ -42,6 +54,9 @@ public:
 
     void SetMatrix(
         float scaleX, float skewX, float transX, float skewY, float scaleY, float transY, float p0, float p1, float p2)
+    {}
+
+    void Set(Index index, float value)
     {}
 
     void MapPoints(std::vector<TestingPoint>& dst, const std::vector<TestingPoint>& src, uint32_t count) const {}

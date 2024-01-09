@@ -20,7 +20,7 @@
 #include <string>
 
 #include "core/components_ng/pattern/text/span_model.h"
-
+#include "core/components_ng/pattern/text/span_node.h"
 namespace OHOS::Ace::NG {
 class ACE_EXPORT SpanModelNG : public SpanModel {
 public:
@@ -41,6 +41,8 @@ public:
     // TODO: add extra event for span.
     void SetOnClick(std::function<void(const BaseEventInfo* info)>&& click) override;
     void ClearOnClick() override;
+
+    static RefPtr<SpanNode> CreateSpanNode(int32_t nodeId, const std::string& content);
     static void SetFontWeight(FrameNode* frameNode, FontWeight value);
     static void SetTextCase(FrameNode* frameNode, TextCase value);
     static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);

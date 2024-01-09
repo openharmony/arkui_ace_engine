@@ -25,6 +25,10 @@ class ArkStackComponent extends ArkComponent implements StackAttribute {
     modifierWithKey(this._modifiersWithKeys, StackAlignContentModifier.identity, StackAlignContentModifier, value);
     return this;
   }
+  align(value: Alignment): this {
+    modifierWithKey(this._modifiersWithKeys, StackAlignContentModifier.identity, StackAlignContentModifier, value);
+    return this;
+  }
 }
 
 class StackAlignContentModifier extends ModifierWithKey<number> {

@@ -40,17 +40,17 @@ RefPtr<UINode> WindowSceneHelper::FindWindowScene(RefPtr<FrameNode> targetNode)
 
     auto container = Container::Current();
     if (!container || !container->IsScenceBoardWindow() || !container->IsSceneBoardEnabled()) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Container nullptr Or not ScenceBoardWindow.");
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Container nullptr Or not ScenceBoardWindow.");
         return nullptr;
     }
 
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "FindWindowScene start.");
+    TAG_LOGD(AceLogTag::ACE_KEYBOARD, "FindWindowScene start.");
     auto parent = targetNode->GetParent();
     while (parent && parent->GetTag() != V2::WINDOW_SCENE_ETS_TAG) {
         parent = parent->GetParent();
     }
     CHECK_NULL_RETURN(parent, nullptr);
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "FindWindowScene successfully.");
+    TAG_LOGD(AceLogTag::ACE_KEYBOARD, "FindWindowScene successfully.");
 
     return parent;
 }
@@ -59,25 +59,25 @@ sptr<Rosen::Session> GetCurSession(RefPtr<FrameNode> focusedFrameNode)
 {
     RefPtr<UINode> sceneBoardWindowUINode = WindowSceneHelper::FindWindowScene(focusedFrameNode);
     if (sceneBoardWindowUINode == nullptr) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "FindWindowScene failed.");
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "FindWindowScene failed.");
         return nullptr;
     }
 
     auto windowSceneFrameNode = AceType::DynamicCast<FrameNode>(sceneBoardWindowUINode);
     if (windowSceneFrameNode == nullptr) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "WindowFrameNode to FrameNode failed.");
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "WindowFrameNode to FrameNode failed.");
         return nullptr;
     }
 
     auto windowScenePattern = windowSceneFrameNode->GetPattern<SystemWindowScene>();
     if (windowScenePattern == nullptr) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "windowScenePattern is nullptr.");
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "windowScenePattern is nullptr.");
         return nullptr;
     }
 
     auto window2patternSession = windowScenePattern->GetSession();
     if (window2patternSession == nullptr) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "The session is nullptr between window and pattern.");
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "The session is nullptr between window and pattern.");
         return nullptr;
     }
     sptr<Rosen::Session> session;
@@ -91,7 +91,7 @@ bool WindowSceneHelper::IsWindowScene(RefPtr<FrameNode> focusedFrameNode)
     bool isWindowSceneFlag = false;
     sptr<Rosen::Session> window2patternSession = GetCurSession(focusedFrameNode);
     if (window2patternSession == nullptr) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "The session between window and pattern is nullptr.");
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "The session between window and pattern is nullptr.");
         return isWindowSceneFlag;
     }
     isWindowSceneFlag = window2patternSession->GetSessionInfo().isSystem_;
@@ -105,7 +105,7 @@ uint32_t WindowSceneHelper::GetFocusSystemWindowId(RefPtr<FrameNode> focusedFram
     bool isWindowScene = IsWindowScene(focusedFrameNode);
     sptr<Rosen::Session> window2patternSession = GetCurSession(focusedFrameNode);
     if (window2patternSession == nullptr) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "The session between window and pattern is nullptr.");
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "The session between window and pattern is nullptr.");
         return focusSystemWindowId;
     }
     if (isWindowScene) {
@@ -121,7 +121,7 @@ bool WindowSceneHelper::IsFocusWindowSceneCloseKeyboard(RefPtr<FrameNode> focuse
     bool isWindowSceneSaveKeyboardFlag = false;
     sptr<Rosen::Session> window2patternSession = GetCurSession(focusedFrameNode);
     if (window2patternSession == nullptr) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "The session between window and pattern is nullptr.");
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "The session between window and pattern is nullptr.");
         return isWindowSceneSaveKeyboardFlag;
     }
     isWindowSceneSaveKeyboardFlag = window2patternSession->GetSCBKeepKeyboardFlag();
@@ -141,23 +141,29 @@ bool WindowSceneHelper::GetNeedKeyboardOnFocusFlag(const RefPtr<FrameNode> frame
         auto curPattern = AceType::DynamicCast<SearchPattern>(pattern);
         isNeed = curPattern->GetNeedToRequestKeyboardOnFocus();
     }
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Need to Request Keyboard On Focus Flag:(%{public}d)", isNeed);
+    TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Need to Request Keyboard On Focus Flag:(%{public}d)", isNeed);
     return isNeed;
 }
 
 void WindowSceneHelper::IsWindowSceneCloseKeyboard(RefPtr<FrameNode> frameNode)
 {
 #if defined (ENABLE_STANDARD_INPUT)
+    if (frameNode->GetTag() == V2::UI_EXTENSION_COMPONENT_TAG || frameNode->GetTag() ==
+        V2::UI_EXTENSION_COMPONENT_ETS_TAG) {
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "UIExtension(%{public}s/%{public}d) notNeedSoftKeyboard.",
+            frameNode->GetTag().c_str(), frameNode->GetId());
+        return;
+    }
     // If focus pattern does not need softkeyboard, close it, in windowScene.
     auto curPattern = frameNode->GetPattern<NG::Pattern>();
     CHECK_NULL_VOID(curPattern);
     bool isNeedKeyBoard = curPattern->NeedSoftKeyboard();
     auto isWindowScene = IsWindowScene(frameNode);
     auto saveKeyboard = IsFocusWindowSceneCloseKeyboard(frameNode);
-    TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SCB/Keep/Need(%{public}d/%{public}d/%{public}d)",
+    TAG_LOGD(AceLogTag::ACE_KEYBOARD, "SCB/Keep/Need(%{public}d/%{public}d/%{public}d)",
         isWindowScene, saveKeyboard, isNeedKeyBoard);
     if (isWindowScene && !saveKeyboard && !isNeedKeyBoard) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "scbFrameNode(%{public}s/%{public}d) notNeedSoftKeyboard.",
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "scbFrameNode(%{public}s/%{public}d) notNeedSoftKeyboard.",
             frameNode->GetTag().c_str(), frameNode->GetId());
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
@@ -167,8 +173,9 @@ void WindowSceneHelper::IsWindowSceneCloseKeyboard(RefPtr<FrameNode> frameNode)
             bool curIsShown = false;
             auto infApiRes = inputMethod->IsPanelShown(curKeyboardPanelInfo, curIsShown);
             if (infApiRes || curIsShown) {
-                TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Shown.");
+                TAG_LOGD(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Shown.");
                 inputMethod->RequestHideInput();
+                inputMethod->Close();
                 TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
             }
         }
@@ -183,12 +190,14 @@ void WindowSceneHelper::IsCloseKeyboard(RefPtr<FrameNode> frameNode)
     auto curPattern = frameNode->GetPattern<NG::Pattern>();
     CHECK_NULL_VOID(curPattern);
     bool isNeedKeyBoard = curPattern->NeedSoftKeyboard();
-    if (!isNeedKeyBoard) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "FrameNode(%{public}s/%{public}d) notNeedSoftKeyboard.",
+    auto saveKeyboard = IsFocusWindowSceneCloseKeyboard(frameNode);
+    TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Keep/Need(%{public}d/%{public}d)", !saveKeyboard, !isNeedKeyBoard);
+    if (!saveKeyboard && !isNeedKeyBoard) {
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "FrameNode(%{public}s/%{public}d) notNeedSoftKeyboard.",
             frameNode->GetTag().c_str(), frameNode->GetId());
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
-            inputMethod->RequestHideInput();
+            inputMethod->Close();
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
         }
     }

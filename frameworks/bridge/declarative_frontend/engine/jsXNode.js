@@ -396,7 +396,7 @@ class RenderNode extends __JSBaseNode__ {
             this.pivotValue.x = this.checkUndefinedOrNullWithDefaultValue(pivot.x, 0.5);
             this.pivotValue.y = this.checkUndefinedOrNullWithDefaultValue(pivot.y, 0.5);
         }
-        GetUINativeModule().common.setScale(this.nodePtr, this.scaleValue.x, this.scaleValue.y, 1.0, this.pivotValue.x, this.pivotValue.y);
+        GetUINativeModule().renderNode.setPivot(this.nodePtr, this.pivotValue.x, this.pivotValue.y);
     }
     set position(position) {
         if (position === undefined || position === null) {
@@ -428,7 +428,7 @@ class RenderNode extends __JSBaseNode__ {
             this.scaleValue.x = this.checkUndefinedOrNullWithDefaultValue(scale.x, 1.0);
             this.scaleValue.y = this.checkUndefinedOrNullWithDefaultValue(scale.y, 1.0);
         }
-        GetUINativeModule().common.setScale(this.nodePtr, this.scaleValue.x, this.scaleValue.y, 1.0, this.pivotValue.x, this.pivotValue.y);
+        GetUINativeModule().renderNode.setScale(this.nodePtr, this.scaleValue.x, this.scaleValue.y);
     }
     set shadowColor(color) {
         this.shadowColorValue = this.checkUndefinedOrNullWithDefaultValue(color, 0);
@@ -497,7 +497,7 @@ class RenderNode extends __JSBaseNode__ {
             this.translationValue.x = this.checkUndefinedOrNullWithDefaultValue(translation.x, 0);
             this.translationValue.y = this.checkUndefinedOrNullWithDefaultValue(translation.y, 0);
         }
-        GetUINativeModule().common.setTranslate(this.nodePtr, this.translationValue.x, this.translationValue.y, 0);
+        GetUINativeModule().renderNode.setTranslate(this.nodePtr, this.translationValue.x, this.translationValue.y, 0);
     }
     get backgroundColor() {
         return this.backgroundColorValue;

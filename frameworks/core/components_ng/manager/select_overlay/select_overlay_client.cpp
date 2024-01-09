@@ -73,6 +73,7 @@ void SelectOverlayClient::InitSelectOverlay()
     selectOverlayInfo_.callerFrameNode = GetClientHost();
     selectOverlayInfo_.firstHandle.isShow = false;
     selectOverlayInfo_.secondHandle.isShow = false;
+    selectOverlayInfo_.hitTestMode = HitTestMode::HTMDEFAULT;
 }
 
 void SelectOverlayClient::RequestOpenSelectOverlay(ClientOverlayInfo& showOverlayInfo)
@@ -272,13 +273,14 @@ void SelectOverlayClient::OnParentScrollStartOrEnd(bool isEnd)
     auto proxy = GetSelectOverlayProxy();
     CHECK_NULL_VOID(proxy);
     if (!isEnd) {
+        isMenuShow_ = proxy->IsMenuShow();
         proxy->ShowOrHiddenMenu(true);
         return;
     }
     if (proxy->IsSingleHandle() && !proxy->IsSingleHandleMenuShow()) {
         UpdateSelectMenuInfo([](SelectMenuInfo& menuInfo) { menuInfo.menuIsShow = false; });
     } else {
-        proxy->ShowOrHiddenMenu(false);
+        proxy->ShowOrHiddenMenu(!isMenuShow_);
     }
 }
 

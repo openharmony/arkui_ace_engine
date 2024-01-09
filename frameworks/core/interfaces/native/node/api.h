@@ -404,6 +404,17 @@ struct ArkUICommonModifierAPI {
     void (*ResetAccessibilityGroup)(NodeHandle node);
     void (*SetHoverEffect)(NodeHandle node, int32_t hoverEffectValue);
     void (*ResetHoverEffect)(NodeHandle node);
+    void (*SetOutlineColor)(NodeHandle node, const uint32_t* values, int32_t valuesSize);
+    void (*ResetOutlineColor)(NodeHandle node);
+    void (*SetOutlineRadius)(NodeHandle node, const double* values, int32_t valuesSize);
+    void (*ResetOutlineRadius)(NodeHandle node);
+    void (*SetOutlineWidth)(NodeHandle node, const double* values, int32_t valuesSize);
+    void (*ResetOutlineWidth)(NodeHandle node);
+    void (*SetOutlineStyle)(NodeHandle node, const uint32_t* values, int32_t valuesSize);
+    void (*ResetOutlineStyle)(NodeHandle node);
+    void (*SetOutline)(NodeHandle node, const double* values, int32_t valuesSize, const uint32_t* colorAndStyle,
+        int32_t colorAndStyleSize);
+    void (*ResetOutline)(NodeHandle node);
     void (*SetClickEffect)(NodeHandle node, const int32_t level, float scaleValue);
     void (*ResetClickEffect)(NodeHandle node);
     void (*SetKeyBoardShortCut)(NodeHandle node, const char* value, const int32_t* keysIntArray, int32_t length);
@@ -1217,6 +1228,8 @@ struct ArkUIDatePickerModifierAPI {
     void (*ResetDisappearTextStyle)(NodeHandle node);
     void (*SetLunar)(NodeHandle node, bool isLunar);
     void (*ResetLunar)(NodeHandle node);
+    void (*SetDatePickerBackgroundColor)(NodeHandle node, uint32_t color);
+    void (*ResetDatePickerBackgroundColor)(NodeHandle node);
 };
 
 struct ArkUIAlphabetIndexerModifierAPI {
@@ -1570,6 +1583,12 @@ struct ArkUIRenderNodeModifierAPI {
     void (*SetShadowElevation)(NodeHandle node, float elevation);
     void (*SetShadowRadius)(NodeHandle node, float radius);
     void (*Invalidate)(NodeHandle node);
+    void (*SetScale)(NodeHandle node, float scaleX, float scaleY);
+    void (*SetRenderNodeBackgroundColor)(NodeHandle node, uint32_t colorValue);
+    void (*SetPivot)(NodeHandle node, float pivotX, float pivotY);
+    void (*SetFrame)(NodeHandle node, float positionX, float positionY, float width, float height);
+    void (*SetOpacity)(NodeHandle node, float opacity);
+    void (*SetTranslate)(NodeHandle node, float translateX, float translateY, float translateZ);
 };
 
 struct ArkUINodeAPI {
@@ -1658,5 +1677,5 @@ struct ArkUINodeAPI {
     ArkUIFormComponentModifierAPI (*GetFormComponentModifier)();
 #endif
 };
-ArkUINodeAPI* GetArkUIInternalNodeAPI(void);
+ArkUINodeAPI* GetArkUIInternalNodeAPI();
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_API_H

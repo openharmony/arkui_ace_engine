@@ -25,6 +25,7 @@ constexpr int32_t DEFAULT_INDEX = 3;
 constexpr uint32_t SIZE = 6;
 const Dimension RING_STROKE_WIDTH[] = { 1.12_vp, 1.5_vp, 1.76_vp, 1.9_vp, 2.16_vp, 2.28_vp };
 const Dimension COMET_RADIUS[] = { 1.2_vp, 1.8_vp, 2.4_vp, 3.0_vp, 3.36_vp, 4.18_vp };
+const Dimension DIAMETER[] = { 16.0_vp, 24.0_vp, 32.0_vp, 40.0_vp, 48.0_vp, 76.0_vp};
 const Dimension MODE_16 = 16.0_vp;
 const Dimension MODE_24 = 24.0_vp;
 const Dimension MODE_32 = 32.0_vp;
@@ -52,26 +53,34 @@ public:
 
     static float GetRingStrokeWidth(float diameter)
     {
-        auto base = CalculateBase(diameter);
-        auto index = static_cast<uint32_t>(base);
-        if (index < SIZE - 1) {
-            return RING_STROKE_WIDTH[index].ConvertToPx();
-        }
-        if (index == SIZE - 1) {
+        if (LessOrEqual(diameter, MODE_16.ConvertToPx())) {
+            return diameter / MODE_16.ConvertToPx() * RING_STROKE_WIDTH[0].ConvertToPx();
+        } else if (GreatOrEqual(diameter, MODE_76.ConvertToPx())) {
             return GetMostStrokeWidth(diameter);
+        } else {
+            for (uint32_t index = 1; index < SIZE; index++) {
+                if (LessOrEqual(diameter, DIAMETER[index].ConvertToPx())) {
+                    return CalculateValue(diameter, DIAMETER[index - 1].ConvertToPx(), DIAMETER[index].ConvertToPx(),
+                        RING_STROKE_WIDTH[index - 1].ConvertToPx(), RING_STROKE_WIDTH[index].ConvertToPx());
+                }
+            }
         }
         return RING_STROKE_WIDTH[DEFAULT_INDEX].ConvertToPx();
     }
 
     static float GetCometRadius(float diameter)
     {
-        auto base = CalculateBase(diameter);
-        auto index = static_cast<uint32_t>(base);
-        if (index < SIZE - 1) {
-            return COMET_RADIUS[index].ConvertToPx();
-        }
-        if (index == SIZE - 1) {
+        if (LessOrEqual(diameter, MODE_16.ConvertToPx())) {
+            return diameter / MODE_16.ConvertToPx() * COMET_RADIUS[0].ConvertToPx();
+        } else if (GreatOrEqual(diameter, MODE_76.ConvertToPx())) {
             return GetMostCometRadius(diameter);
+        } else {
+            for (uint32_t index = 1; index < SIZE; index++) {
+                if (LessOrEqual(diameter, DIAMETER[index].ConvertToPx())) {
+                    return CalculateValue(diameter, DIAMETER[index - 1].ConvertToPx(), DIAMETER[index].ConvertToPx(),
+                        COMET_RADIUS[index - 1].ConvertToPx(), COMET_RADIUS[index].ConvertToPx());
+                }
+            }
         }
         return COMET_RADIUS[DEFAULT_INDEX].ConvertToPx();
     }
@@ -92,20 +101,10 @@ public:
     }
 
 private:
-    static LoadingProgressBase CalculateBase(float diameter)
+    static float CalculateValue(float inputValue, float minInput, float maxInput, float minOutPut, float maxOutput)
     {
-        if (LessNotEqual(diameter, MODE_24.ConvertToPx())) {
-            return LoadingProgressBase::BASE16;
-        } else if (LessNotEqual(diameter, MODE_32.ConvertToPx())) {
-            return LoadingProgressBase::BASE24;
-        } else if (LessNotEqual(diameter, MODE_40.ConvertToPx())) {
-            return LoadingProgressBase::BASE32;
-        } else if (LessNotEqual(diameter, MODE_48.ConvertToPx())) {
-            return LoadingProgressBase::BASE40;
-        } else if (LessNotEqual(diameter, MODE_76.ConvertToPx())) {
-            return LoadingProgressBase::BASE48;
-        }
-        return LoadingProgressBase::BASE76;
+        auto inputScale = (inputValue - minInput) / (maxInput - minInput);
+        return (maxOutput - minOutPut) * inputScale + minOutPut;
     }
 };
 } // namespace OHOS::Ace::NG

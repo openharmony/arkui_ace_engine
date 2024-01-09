@@ -153,7 +153,7 @@ void GridPattern::OnModifyDone()
             return grid->GetMainContentSize();
         });
     }
-    
+
     Register2DragDropManager();
     if (IsNeedInitClickEventRecorder()) {
         Pattern::InitClickEventRecorder();
@@ -358,8 +358,8 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     }
     if (gridLayoutInfo_.reachStart_) {
         if (source == SCROLL_FROM_UPDATE) {
-            auto friction = ScrollablePattern::CalculateFriction(
-                std::abs(gridLayoutInfo_.currentOffset_) / GetMainContentSize());
+            auto friction =
+                ScrollablePattern::CalculateFriction(std::abs(gridLayoutInfo_.currentOffset_) / GetMainContentSize());
             gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
             gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.currentOffset_ + offset * friction;
         } else {
@@ -410,9 +410,8 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     gridLayoutInfo_ = gridLayoutInfo;
     AnimateToTarget(scrollAlign_, layoutAlgorithmWrapper);
 
-    if (gridLayoutInfo_.startIndex_ == 0 && NearZero(gridLayoutInfo_.currentOffset_)) {
-        gridLayoutInfo_.reachStart_ = true;
-    }
+    gridLayoutInfo_.reachStart_ = gridLayoutInfo_.startIndex_ == 0 && NearZero(gridLayoutInfo_.currentOffset_);
+
     gridLayoutInfo_.childrenCount_ = dirty->GetTotalChildCount();
     currentHeight_ = EstimateHeight();
     if (!offsetEnd && gridLayoutInfo_.offsetEnd_) {
@@ -1290,9 +1289,14 @@ void GridPattern::ScrollTo(float position)
 
 float GridPattern::EstimateHeight() const
 {
+    if (!isConfigScrollable_) {
+        return 0.0f;
+    }
     // During the scrolling animation, the exact current position is used. Other times use the estimated location
     if (isSmoothScrolling_) {
-        return scrollGridLayoutInfo_.GetTotalHeightFromZeroIndex(gridLayoutInfo_.startMainLineIndex_, GetMainGap()) +
+        auto lineIndex = 0;
+        scrollGridLayoutInfo_.GetLineIndexByIndex(gridLayoutInfo_.startIndex_, lineIndex);
+        return scrollGridLayoutInfo_.GetTotalHeightFromZeroIndex(lineIndex, GetMainGap()) +
                std::abs(gridLayoutInfo_.currentOffset_);
     } else {
         auto host = GetHost();
@@ -1306,6 +1310,7 @@ float GridPattern::EstimateHeight() const
         if (!layoutProperty->GetLayoutOptions().has_value()) {
             return info.GetContentOffset(mainGap);
         }
+
         return info.GetContentOffset(layoutProperty->GetLayoutOptions().value(), mainGap);
     }
 }
@@ -1381,7 +1386,8 @@ void GridPattern::UpdateScrollBarOffset()
             estimatedHeight = gridLayoutInfo_.GetContentHeight(mainGap);
         } else {
             offset = info.GetContentOffset(layoutProperty->GetLayoutOptions().value(), mainGap);
-            estimatedHeight = info.GetContentHeight(layoutProperty->GetLayoutOptions().value(), mainGap);
+            estimatedHeight =
+                info.GetContentHeight(layoutProperty->GetLayoutOptions().value(), info.childrenCount_, mainGap);
         }
     }
     if (info.startMainLineIndex_ != 0 && info.startIndex_ == 0) {
@@ -1775,6 +1781,5 @@ bool GridPattern::AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWr
     AnimateTo(targetPos, -1, nullptr, true);
     return true;
 }
-
 
 } // namespace OHOS::Ace::NG

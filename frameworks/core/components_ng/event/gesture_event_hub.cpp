@@ -18,12 +18,11 @@
 #include <cstdint>
 #include <list>
 
+#include "base/image/image_source.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/time_util.h"
-#include "base/image/image_source.h"
-#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/common/interaction/interaction_interface.h"
@@ -51,8 +50,6 @@
 #include "core/common/udmf/udmf_client.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
 namespace OHOS::Ace::NG {
-RefPtr<PixelMap> g_pixelMap;
-bool g_getPixelMapSucc = false;
 namespace {
 #if defined(PIXEL_MAP_SUPPORTED)
 constexpr int32_t CREATE_PIXELMAP_TIME = 80;
@@ -179,8 +176,8 @@ void GestureEventHub::OnModifyDone()
     }
 }
 
-RefPtr<NGGestureRecognizer> GestureEventHub::PackInnerRecognizer(
-    const Offset& offset, std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, int32_t touchId,
+RefPtr<NGGestureRecognizer> GestureEventHub::PackInnerRecognizer(const Offset& offset,
+    std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, int32_t touchId,
     const RefPtr<TargetComponent>& targetComponent)
 {
     RefPtr<NGGestureRecognizer> current;
@@ -236,6 +233,7 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
                     groupRecognizer->SetCoordinateOffset(offset);
                     groupRecognizer->AttachFrameNode(WeakPtr<FrameNode>(host));
                     groupRecognizer->SetTargetComponent(targetComponent);
+                    groupRecognizer->SetSize(size.Height(), size.Width());
                 }
             }
         }
@@ -696,7 +694,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     auto frameTag = frameNode->GetTag();
     auto hostPattern = frameNode->GetPattern<TextDragBase>();
     if (hostPattern && (frameTag == V2::RICH_EDITOR_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
-                        frameTag == V2::TEXTINPUT_ETS_TAG || frameTag == V2::SEARCH_Field_ETS_TAG)) {
+                           frameTag == V2::TEXTINPUT_ETS_TAG || frameTag == V2::SEARCH_Field_ETS_TAG)) {
         frameNodeOffset_ = hostPattern->GetDragUpperLeftCoordinates();
     } else {
         frameNodeOffset_ = frameNode->GetOffsetRelativeToWindow();
@@ -725,17 +723,13 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         }
     }
 #if defined(PIXEL_MAP_SUPPORTED)
-    g_getPixelMapSucc = false;
-    if (dragDropInfo.customNode) {
+    if (dragDropInfo.pixelMap == nullptr && dragDropInfo.customNode) {
         auto callback = [id = Container::CurrentId(), pipeline, info, gestureEventHubPtr = AceType::Claim(this),
-                            frameNode, dragDropInfo,
-                            event](std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) {
+                            frameNode, dragDropInfo, event](
+                            std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()>) mutable {
             ContainerScope scope(id);
-            if (pixelMap == nullptr) {
-                g_getPixelMapSucc = false;
-            } else {
-                g_pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
-                g_getPixelMapSucc = true;
+            if (pixelMap != nullptr) {
+                dragDropInfo.pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
             }
             auto taskScheduler = pipeline->GetTaskExecutor();
             CHECK_NULL_VOID(taskScheduler);
@@ -798,9 +792,6 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     if (dragDropInfo.pixelMap != nullptr) {
         pixelMap = dragDropInfo.pixelMap;
         SetPixelMap(dragDropInfo.pixelMap);
-    } else if (g_getPixelMapSucc) {
-        pixelMap = g_pixelMap;
-        SetPixelMap(g_pixelMap);
     } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
         dragDropManager->SetIsMouseDrag(true);
         pixelMap = CreatePixelMapFromString(DEFAULT_MOUSE_DRAG_IMAGE);

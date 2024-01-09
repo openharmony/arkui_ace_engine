@@ -252,10 +252,7 @@ public:
         return svgTraceEnable_;
     }
 
-    static bool GetLayoutTraceEnabled()
-    {
-        return layoutTraceEnable_;
-    }
+    static bool GetLayoutTraceEnabled();
 
     static bool GetBuildTraceEnabled()
     {
@@ -402,6 +399,10 @@ public:
         return enableScrollableItemPool_;
     }
 
+    static bool GetDisplaySyncSkipEnabled();
+
+    static bool GetNavigationBlurEnabled();
+
 private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;
@@ -444,6 +445,7 @@ private:
     static uint32_t dumpFrameCount_;
     static bool resourceDecoupling_;
     static bool enableScrollableItemPool_;
+    static bool navigationBlurEnabled_;
 };
 
 } // namespace OHOS::Ace

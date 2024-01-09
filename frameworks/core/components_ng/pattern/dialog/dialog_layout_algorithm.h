@@ -68,6 +68,8 @@ private:
     void MultipleDialog(const RefPtr<DialogLayoutProperty>& dialogProp, const SizeF& childSize, const SizeF& selfSize,
         const RefPtr<OverlayManager> subOverlayManager);
     void ProcessMaskRect(std::optional<DimensionRect> maskRect, const RefPtr<FrameNode>& dialog);
+    void SetSubWindowHotarea(
+        const RefPtr<DialogLayoutProperty>& dialogProp, SizeF childSize, SizeF selfSize, int32_t frameNodeId);
 	
     void UpdateTouchRegion();
 

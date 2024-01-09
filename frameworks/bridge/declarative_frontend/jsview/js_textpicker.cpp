@@ -231,7 +231,12 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
         if (!isSingleRange && optionsMultiContentCheckErr && optionsCascadeContentCheckErr) {
             param.result.clear();
             param.options.clear();
-            return;
+
+            RefPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            bool firstBuild = targetNode && targetNode->IsFirstBuilding();
+            if (!firstBuild) {
+                return;
+            }
         }
         auto theme = GetTheme<PickerTheme>();
         CHECK_NULL_VOID(theme);

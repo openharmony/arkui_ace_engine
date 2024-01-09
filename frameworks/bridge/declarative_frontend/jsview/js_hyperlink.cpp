@@ -23,6 +23,8 @@
 #include "frameworks/core/components_ng/pattern/hyperlink/hyperlink_model.h"
 #include "frameworks/core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
 #include "core/components/hyperlink/hyperlink_theme.h"
+#include "core/components_ng/base/view_stack_model.h"
+
 
 namespace OHOS::Ace {
 
@@ -96,7 +98,7 @@ void JSHyperlink::SetColor(const JSCallbackInfo& info)
 void JSHyperlink::Pop()
 {
     if (Container::IsCurrentUseNewPipeline()) {
-        JSViewAbstract::Pop();
+        ViewStackModel::GetInstance()->PopContainer();
         return;
     }
 

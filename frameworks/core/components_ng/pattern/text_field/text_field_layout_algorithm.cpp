@@ -200,6 +200,7 @@ SizeF TextFieldLayoutAlgorithm::TextAreaMeasureContent(
 
     if (autoWidth_) {
         contentWidth = std::min(contentWidth, paragraph_->GetLongestLine());
+        paragraph_->Layout(std::ceil(contentWidth));
     }
 
     auto counterNodeHeight = CounterNodeMeasure(contentWidth, layoutWrapper);

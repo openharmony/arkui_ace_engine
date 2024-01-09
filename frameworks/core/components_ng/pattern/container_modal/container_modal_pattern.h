@@ -156,6 +156,11 @@ public:
         return false;
     }
 
+    void OnLanguageConfigurationUpdate() override
+    {
+        InitTitle();
+    }
+
 protected:
     virtual RefPtr<UINode> GetTitleItemByIndex(const RefPtr<FrameNode>& controlButtonsNode, int32_t originIndex)
     {
@@ -195,6 +200,7 @@ private:
     void InitTitle();
     void InitContainerEvent();
     void InitLayoutProperty();
+    void InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow);
 
     std::string appLabel_;
     RefPtr<PanEvent> panEvent_ = nullptr;

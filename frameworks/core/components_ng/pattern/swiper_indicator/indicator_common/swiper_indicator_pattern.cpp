@@ -76,6 +76,10 @@ void SwiperIndicatorPattern::OnModifyDone()
         host->Clean();
     }
 
+    if (dotIndicatorModifier_) {
+        dotIndicatorModifier_->StopAnimation();
+    }
+
     auto swiperEventHub = swiperPattern->GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
 
@@ -450,9 +454,9 @@ void SwiperIndicatorPattern::UpdateTextContentSub(const RefPtr<SwiperIndicatorLa
     lastTextLayoutProperty->UpdateFontWeight(fontWeight);
     lastTextLayoutProperty->UpdateContent("/" + std::to_string(swiperPattern->TotalCount()));
     firstTextNode->MarkModifyDone();
-    firstTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    firstTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     lastTextNode->MarkModifyDone();
-    lastTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    lastTextNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void SwiperIndicatorPattern::HandleDragStart(const GestureEvent& info)

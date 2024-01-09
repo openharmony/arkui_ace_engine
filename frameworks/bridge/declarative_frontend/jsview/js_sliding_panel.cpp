@@ -65,6 +65,7 @@ const static bool DEFAULT_HASDRAGBAR = true;
 const static bool DEFAULT_SHOWCLOSEICON = false;
 const static PanelMode DEFAULT_PANELMODE = PanelMode::HALF;
 const static PanelType DEFAULT_PANELTYPE = PanelType::FOLDABLE_BAR;
+const std::string DEFAULT_BACKGROUND_MASK = "#08182431";
 } // namespace
 
 void JSSlidingPanel::Create(const JSCallbackInfo& info)
@@ -115,12 +116,11 @@ void JSSlidingPanel::JSBind(BindingTarget globalObj)
 
 void JSSlidingPanel::SetBackgroundMask(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
-        return;
-    }
     Color color;
-    if (!ParseJsColor(info[0], color)) {
-        return;
+    if (info.Length() < 1) {
+        color = Color::FromString(DEFAULT_BACKGROUND_MASK);
+    } else if (!ParseJsColor(info[0], color)) {
+        color = Color::FromString(DEFAULT_BACKGROUND_MASK);
     }
 
     SlidingPanelModel::GetInstance()->SetBackgroundMask(color);

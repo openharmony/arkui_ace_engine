@@ -42,6 +42,7 @@
 #include "bridge/declarative_frontend/jsview/js_base_node.h"
 #include "bridge/declarative_frontend/jsview/js_blank.h"
 #include "bridge/declarative_frontend/jsview/js_button.h"
+#include "bridge/declarative_frontend/jsview/js_cached_image.h"
 #include "bridge/declarative_frontend/jsview/js_calendar.h"
 #include "bridge/declarative_frontend/jsview/js_calendar_controller.h"
 #include "bridge/declarative_frontend/jsview/js_calendar_picker.h"
@@ -689,7 +690,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "GestureGroup", JSGesture::JSBind },
     { "PanGestureOption", JSPanGestureOption::JSBind },
     { "PanGestureOptions", JSPanGestureOption::JSBind },
-    { "CustomDialogController", JSCustomDialogController::JSBind },
+    { "NativeCustomDialogController", JSCustomDialogController::JSBind },
     { "Scroller", JSScroller::JSBind },
     { "ListScroller", JSListScroller::JSBind },
     { "SwiperController", JSSwiperController::JSBind },

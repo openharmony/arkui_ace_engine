@@ -75,7 +75,7 @@ public:
     void OnExtensionDied() override {}
 
     void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info,
-        int32_t uiExtensionIdLevelVec) override {};
+        int64_t uiExtensionIdLevelVec) override {};
 
 private:
     WeakPtr<WindowPattern> windowPattern_;
@@ -408,16 +408,6 @@ bool WindowPattern::IsFilterMouseEvent(const std::shared_ptr<MMI::PointerEvent>&
 void WindowPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto hub = host->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(hub);
-    auto gestureHub = hub->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    InitTouchEvent(gestureHub);
-    auto inputHub = hub->GetOrCreateInputEventHub();
-    CHECK_NULL_VOID(inputHub);
-    InitMouseEvent(inputHub);
 }
 
 void WindowPattern::TransferFocusState(bool focusState)

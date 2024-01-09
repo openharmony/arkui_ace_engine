@@ -213,9 +213,7 @@ void AceContainer::InitializeFrontend()
 void AceContainer::RunNativeEngineLoop()
 {
     taskExecutor_->PostTask([frontend = frontend_]() { frontend->RunNativeEngineLoop(); }, TaskExecutor::TaskType::JS);
-    // After the JS thread executes frontend ->RunNativeEngineLoop(),
-    // it is thrown back into the Platform thread queue to form a loop.
-    taskExecutor_->PostTask([this]() { RunNativeEngineLoop(); }, TaskExecutor::TaskType::PLATFORM);
+    // After the JS thread executes frontend ->RunNativeEngineLoop()
 }
 
 void AceContainer::InitializeAppConfig(const std::string& assetPath, const std::string& bundleName,

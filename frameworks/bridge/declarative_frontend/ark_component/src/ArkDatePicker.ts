@@ -43,6 +43,10 @@ class ArkDatePickerComponent extends ArkComponent implements DatePickerAttribute
   onDateChange(callback: (value: Date) => void): DatePickerAttribute {
     throw new Error('Method not implemented.');
   }
+  backgroundColor(value: ResourceColor): this {
+    modifierWithKey(this._modifiersWithKeys, DatePickerBackgroundColorModifier.identity, DatePickerBackgroundColorModifier, value);
+    return this;
+  }
 }
 
 class DatePickerLunarModifier extends ModifierWithKey<boolean> {
@@ -143,6 +147,24 @@ class DatePickerDisappearTextStyleModifier extends ModifierWithKey<PickerTextSty
         !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
         !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family);
     }
+  }
+}
+
+class DatePickerBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('datePickerBackgroundColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().datePicker.resetBackgroundColor(node);
+    } else {
+      getUINativeModule().datePicker.setBackgroundColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 

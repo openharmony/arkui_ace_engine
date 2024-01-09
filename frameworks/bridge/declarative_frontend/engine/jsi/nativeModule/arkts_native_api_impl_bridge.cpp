@@ -179,6 +179,26 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetBorderStyle));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBorderStyle"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetBorderStyle));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOutlineColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOutlineColor));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOutlineColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOutlineColor));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOutlineRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOutlineRadius));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOutlineRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOutlineRadius));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOutlineStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOutlineStyle));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOutlineStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOutlineStyle));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOutlineWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOutlineWidth));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOutlineWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOutlineWidth));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOutline"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetOutline));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOutline"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetOutline));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShadow"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetShadow));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShadow"),
@@ -1825,6 +1845,18 @@ void ArkUINativeModule::RegisterRenderNodeAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetShadowRadius));
     renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "invalidate"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::Invalidate));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setScale"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetScale));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetBackgroundColor));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPivot"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetPivot));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFrame"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetFrame));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOpacity"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetOpacity));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTranslate"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetTranslate));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "renderNode"), renderNode);
 }
 
@@ -2109,6 +2141,10 @@ void ArkUINativeModule::RegisterDatePickerAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::SetLunar));
     datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLunar"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::ResetLunar));
+    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::SetBackgroundColor));
+    datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::ResetBackgroundColor));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "datePicker"), datePicker);
 }
 

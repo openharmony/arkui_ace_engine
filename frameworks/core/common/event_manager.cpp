@@ -103,6 +103,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     if (refereeNG_->QueryAllDone(touchPoint.id)) {
         refereeNG_->CleanGestureScope(touchPoint.id);
         if (touchTestResults_.empty() && refereeNG_->QueryAllDone()) {
+            innerEventWin_ = false;
             responseCtrl_->Reset();
             refereeNG_->CleanAll();
         }
@@ -162,6 +163,14 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
             .append(".");
     }
     TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "SceneBoard touch test hitted node info: %{public}s", resultInfo.c_str());
+    if (scenceBoardTouchTestResultInfo.size() == 0) {
+        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "SceneBoard touch test result is empty.");
+        std::list<std::pair<int32_t, std::string>> dumpList;
+        eventTree_.Dump(dumpList, 0);
+        for (auto& item : dumpList) {
+            TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "EventTreeDumpInfo: %{public}s", item.second.c_str());
+        }
+    }
 }
 
 bool EventManager::PostEventTouchTest(
@@ -181,7 +190,7 @@ bool EventManager::PostEventTouchTest(
         }
     }
     // For root node, the parent local point is the same as global point.
-    auto result = uiNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id);
+    uiNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id);
     for (const auto& item : hitTestResult) {
         item->SetIsPostEventResult(true);
         auto group = AceType::DynamicCast<NG::RecognizerGroup>(item);
@@ -189,8 +198,9 @@ bool EventManager::PostEventTouchTest(
             group->SetIsPostEventResultRecursively(true);
         }
     }
+    auto result = !hitTestResult.empty();
     postEventTouchTestResults_[touchPoint.id] = std::move(hitTestResult);
-    return !(static_cast<int32_t>(result) == 0);
+    return result;
 }
 
 void EventManager::TouchTest(
@@ -836,9 +846,7 @@ bool EventManager::DispatchMouseEventNG(const MouseEvent& event)
         handledResults.clear();
         auto container = Container::Current();
         CHECK_NULL_RETURN(container, false);
-        if ((event.button == MouseButton::LEFT_BUTTON && !container->IsScenceBoardWindow()) ||
-            (event.button == MouseButton::LEFT_BUTTON && container->IsScenceBoardWindow() &&
-                event.pullAction != MouseAction::PULL_UP && event.pullAction != MouseAction::PULL_MOVE)) {
+        if (event.button == MouseButton::LEFT_BUTTON) {
             for (const auto& mouseTarget : pressMouseTestResults_) {
                 if (mouseTarget) {
                     handledResults.emplace_back(mouseTarget);

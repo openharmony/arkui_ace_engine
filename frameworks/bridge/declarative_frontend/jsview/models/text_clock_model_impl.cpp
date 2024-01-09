@@ -98,6 +98,14 @@ void TextClockModelImpl::SetFontFamily(const std::vector<std::string>& value)
     component->SetTextStyle(textStyle);
 }
 
+void TextClockModelImpl::InitFontDefault(const TextStyle& textStyle)
+{
+    auto component = GetComponent();
+    CHECK_NULL_VOID(component);
+
+    component->SetTextStyle(textStyle);
+}
+
 RefPtr<TextClockComponent> TextClockModelImpl::GetComponent()
 {
     auto* stack = ViewStackProcessor::GetInstance();

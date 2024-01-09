@@ -51,6 +51,11 @@ PanRecognizer::PanRecognizer(int32_t fingers, const PanDirection& direction, dou
     }
 }
 
+RefPtr<Gesture> PanRecognizer::CreateGestureFromRecognizer() const
+{
+    return AceType::MakeRefPtr<PanGesture>(fingers_, direction_, distance_);
+}
+
 PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) : panGestureOption_(panGestureOption)
 {
     auto context = PipelineContext::GetCurrentContext();

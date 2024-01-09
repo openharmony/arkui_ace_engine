@@ -62,7 +62,12 @@ template("ace_core_interfaces_native_node") {
       "node/nav_router_modifier.cpp",
       "node/navigation_modifier.cpp",
       "node/navigator_modifier.cpp",
+      "node/node_api.cpp",
+      "node/node_common_modifier.cpp",
       "node/node_container_modifier.cpp",
+      "node/node_modifiers.cpp",
+      "node/node_scroll_modifier.cpp",
+      "node/node_text_input_modifier.cpp",
       "node/panel_modifier.cpp",
       "node/path_modifier.cpp",
       "node/pattern_lock_modifier.cpp",
@@ -97,6 +102,7 @@ template("ace_core_interfaces_native_node") {
       "node/timepicker_modifier.cpp",
       "node/toggle_modifier.cpp",
       "node/video_modifier.cpp",
+      "node/view_model.cpp",
       "node/water_flow_modifier.cpp",
     ]
 
