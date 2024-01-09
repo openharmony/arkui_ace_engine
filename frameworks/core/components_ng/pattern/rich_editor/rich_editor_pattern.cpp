@@ -2602,7 +2602,7 @@ bool RichEditorPattern::CursorMoveUp()
     if (static_cast<int32_t>(GetTextContentLength()) > 1) {
         float caretHeight = 0.0f;
         OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
-        auto minDet = paragraphs_.minParagraphFontSize.value() / 2.0;
+        auto minDet = paragraphs_.minParagraphFontSize.value_or(0.0f) / 2.0;
         int32_t caretPosition = paragraphs_.GetIndex(
             Offset(caretOffset.GetX() - GetTextRect().GetX(), caretOffset.GetY() - GetTextRect().GetY() - minDet));
         caretPosition = std::clamp(caretPosition, 0, static_cast<int32_t>(GetTextContentLength()));
