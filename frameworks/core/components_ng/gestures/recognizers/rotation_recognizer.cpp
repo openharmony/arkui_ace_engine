@@ -98,6 +98,7 @@ void RotationRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         static_cast<int32_t>(activeFingers_.size()) == DEFAULT_ROTATION_FINGERS) {
         SendCallbackMsg(onActionEnd_);
     }
+    activeFingers_.remove(event.id);
 }
 
 void RotationRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
