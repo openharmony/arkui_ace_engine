@@ -1630,11 +1630,6 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
 
     if (scalePoint.type == TouchType::MOVE) {
         touchEvents_.emplace_back(point);
-        auto container = Container::Current();
-        if (container && container->IsScenceBoardWindow() && IsWindowSceneConsumed()) {
-            FlushTouchEvents();
-            return;
-        }
         hasIdleTasks_ = true;
         RequestFrame();
         return;
@@ -1930,11 +1925,9 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         SetIsFocusActive(false);
     }
     auto container = Container::Current();
-    if (((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
-             event.action == MouseAction::MOVE) &&
-            (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) ||
-        (container && container->IsScenceBoardWindow() &&
-            (event.pullAction == MouseAction::PULL_MOVE || event.pullAction == MouseAction::PULL_UP))) {
+    if ((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
+            event.action == MouseAction::MOVE) &&
+        (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) {
         auto touchPoint = event.CreateTouchPoint();
         if (event.pullAction == MouseAction::PULL_MOVE) {
             touchPoint.pullType = TouchType::PULL_MOVE;
