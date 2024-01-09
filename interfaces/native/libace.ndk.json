@@ -94,5 +94,13 @@
     {
         "first_introduced": "11",
         "name": "OH_ArkUI_GetBasicNodeAPI"
+    },
+    {
+        "first_introduced": "11",
+        "name": "OH_NativeXComponent_AttachNativeRootNode"
+    },
+    {
+        "first_introduced": "11",
+        "name": "OH_NativeXComponent_DetachNativeRootNode"
     }
 ]

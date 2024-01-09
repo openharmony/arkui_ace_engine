@@ -146,10 +146,36 @@ public:
     static void Create(const JSCallbackInfo& info);
     static void JsOnLoad(const JSCallbackInfo& args);
     static void JsOnDestroy(const JSCallbackInfo& args);
+    static void JsOnAppear(const JSCallbackInfo& args);
+    static void JsOnDisAppear(const JSCallbackInfo& args);
+
+    static void JsOnTouch(const JSCallbackInfo& args);
+    static void JsOnClick(const JSCallbackInfo& args);
+    static void JsOnKeyEvent(const JSCallbackInfo& args);
+    static void JsOnMouse(const JSCallbackInfo& args);
+    static void JsOnHover(const JSCallbackInfo& args);
+    static void JsOnFocus(const JSCallbackInfo& args);
+    static void JsOnBlur(const JSCallbackInfo& args);
+
     static void JsBackgroundColor(const JSCallbackInfo& args);
+    static void JsBackgroundImage(const JSCallbackInfo& args);
+    static void JsBackgroundImageSize(const JSCallbackInfo& args);
+    static void JsBackgroundImagePosition(const JSCallbackInfo& args);
     static void JsOpacity(const JSCallbackInfo& args);
-    static void OmitEvent(const JSCallbackInfo& args);
-    static void OmitAttribute(const JSCallbackInfo& args);
+    static void JsBlur(const JSCallbackInfo& args);
+    static void JsBackdropBlur(const JSCallbackInfo& args);
+    static void JsGrayscale(const JSCallbackInfo& args);
+    static void JsBrightness(const JSCallbackInfo& args);
+    static void JsSaturate(const JSCallbackInfo& args);
+    static void JsContrast(const JSCallbackInfo& args);
+    static void JsInvert(const JSCallbackInfo& args);
+    static void JsSepia(const JSCallbackInfo& args);
+    static void JsHueRotate(const JSCallbackInfo& args);
+    static void JsColorBlend(const JSCallbackInfo& args);
+    static void JsSphericalEffect(const JSCallbackInfo& args);
+    static void JsLightUpEffect(const JSCallbackInfo& args);
+    static void JsPixelStretchEffect(const JSCallbackInfo& args);
+    static void JsLinearGradientBlur(const JSCallbackInfo& args);
 
     // For xcomponent node
     static void* Create(const XComponentParams& params);
