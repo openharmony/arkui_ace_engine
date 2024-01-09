@@ -3119,6 +3119,12 @@ void RichEditorPattern::AddOperationRecord(const OperationRecord& record)
     operationRecords_.emplace_back(record);
 }
 
+bool RichEditorPattern::HandleOnEscape()
+{
+    CloseSelectOverlay();
+    return false;
+}
+
 void RichEditorPattern::HandleOnUndoAction()
 {
     if (operationRecords_.empty()) {
