@@ -49,6 +49,13 @@ void SetDialogProperties(DialogProperties& properties, TextPickerDialog& textPic
     if (textPickerDialog.alignment.has_value()) {
         properties.alignment = textPickerDialog.alignment.value();
     }
+    
+    if (textPickerDialog.backgroundColor.has_value()) {
+        properties.backgroundColor = textPickerDialog.backgroundColor.value();
+    }
+    if (textPickerDialog.backgroundBlurStyle.has_value()) {
+        properties.backgroundBlurStyle = textPickerDialog.backgroundBlurStyle.value();
+    }
     properties.customStyle = false;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));

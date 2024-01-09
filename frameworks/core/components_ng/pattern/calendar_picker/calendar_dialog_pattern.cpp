@@ -67,10 +67,7 @@ void CalendarDialogPattern::UpdateDialogBackgroundColor()
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     auto contentRenderContext = host->GetRenderContext();
     CHECK_NULL_VOID(contentRenderContext);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-        contentRenderContext->IsUniRenderEnabled()) {
-        contentRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-    } else {
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         contentRenderContext->UpdateBackgroundColor(theme->GetDialogBackgroundColor());
     }
 }

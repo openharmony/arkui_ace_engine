@@ -331,6 +331,12 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     if (pickerDialog.alignment.has_value()) {
         properties.alignment = pickerDialog.alignment.value();
     }
+    if (pickerDialog.backgroundColor.has_value()) {
+        properties.backgroundColor = pickerDialog.backgroundColor.value();
+    }
+    if (pickerDialog.backgroundBlurStyle.has_value()) {
+        properties.backgroundBlurStyle = pickerDialog.backgroundBlurStyle.value();
+    }
 
     properties.customStyle = false;
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
