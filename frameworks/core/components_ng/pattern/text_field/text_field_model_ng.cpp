@@ -95,8 +95,8 @@ void TextFieldModelNG::CreateNode(
 RefPtr<FrameNode> TextFieldModelNG::CreateFrameNode(int32_t nodeId, const std::optional<std::string>& placeholder,
     const std::optional<std::string>& value, bool isTextArea)
 {
-    auto frameNode = FrameNode::GetOrCreateFrameNode(isTextArea ? V2::TEXTAREA_ETS_TAG : V2::TEXTINPUT_ETS_TAG, nodeId,
-        []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    auto frameNode = FrameNode::CreateFrameNode(
+        isTextArea ? V2::TEXTAREA_ETS_TAG : V2::TEXTINPUT_ETS_TAG, nodeId, AceType::MakeRefPtr<TextFieldPattern>());
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(textFieldLayoutProperty, nullptr);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
