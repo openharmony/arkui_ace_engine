@@ -87,11 +87,6 @@ bool IsSvgTraceEnabled()
     return (system::GetParameter("persist.ace.trace.svg.enabled", "0") == "1");
 }
 
-bool IsLayoutTraceEnabled()
-{
-    return (system::GetParameter("persist.ace.trace.layout.enabled", "false") == "true");
-}
-
 bool IsBuildTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.build.enabled", "false") == "true");
@@ -244,7 +239,6 @@ bool IsResourceDecoupling()
 
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
-bool SystemProperties::layoutTraceEnable_ = IsLayoutTraceEnabled() && IsDeveloperModeOn();
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && IsDeveloperModeOn();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
@@ -394,7 +388,6 @@ void SystemProperties::InitDeviceInfo(
     debugEnabled_ = IsDebugEnabled();
     traceEnabled_ = IsTraceEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
-    layoutTraceEnable_ = IsLayoutTraceEnabled() && IsDeveloperModeOn();
     buildTraceEnable_ = IsBuildTraceEnabled() && IsDeveloperModeOn();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     rosenBackendEnabled_ = IsRosenBackendEnabled();
@@ -498,6 +491,11 @@ bool SystemProperties::GetImageFrameworkEnabled()
 bool SystemProperties::GetDebugPixelMapSaveEnabled()
 {
     return system::GetBoolParameter("persist.ace.save.pixelmap.enabled", false);
+}
+
+bool SystemProperties::GetLayoutTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.layout.enabled", "false") == "true") && IsDeveloperModeOn();
 }
 
 ACE_WEAK_SYM bool SystemProperties::GetIsUseMemoryMonitor()
