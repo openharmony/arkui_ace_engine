@@ -23,6 +23,7 @@
 #include <unordered_map>
 
 #include "base/geometry/ng/point_t.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/log/ace_performance_check.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -515,6 +516,8 @@ public:
     void CreateExportTextureInfoIfNeeded();
 
     bool IsNeedExportTexture() const;
+
+    virtual bool SetParentLayoutConstraint(const SizeF& size) const;
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()

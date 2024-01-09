@@ -586,6 +586,7 @@ public:
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild) override;
     bool CheckNeedForceMeasureAndLayout() override;
 
+    bool SetParentLayoutConstraint(const SizeF& size) const override;
     void ForceSyncGeometryNode()
     {
         CHECK_NULL_VOID(renderContext_);

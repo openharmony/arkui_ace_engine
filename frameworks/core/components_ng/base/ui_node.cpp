@@ -27,6 +27,7 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/property/layout_constraint.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -1012,5 +1013,12 @@ int64_t UINode::GenerateAccessibilityId()
 NodeStatus UINode::GetNodeStatus() const
 {
     return nodeStatus_;
+}
+
+bool UINode::SetParentLayoutConstraint(const SizeF& size) const
+{
+    auto children = GetChildren();
+    return std::any_of(children.begin(), children.end(),
+        [size](const RefPtr<UINode>& child) { return child->SetParentLayoutConstraint(size); });
 }
 } // namespace OHOS::Ace::NG

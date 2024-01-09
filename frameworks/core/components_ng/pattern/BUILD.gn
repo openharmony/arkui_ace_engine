@@ -253,6 +253,7 @@ build_component_ng("pattern_ng") {
     "navrouter/navrouter_group_node.cpp",
     "navrouter/navrouter_model_ng.cpp",
     "navrouter/navrouter_pattern.cpp",
+    "node_container/node_container_layout_algorithm.cpp",
     "node_container/node_container_model_ng.cpp",
     "node_container/node_container_pattern.cpp",
     "option/option_accessibility_property.cpp",
