@@ -957,6 +957,7 @@ void JsBindFormViews(BindingTarget globalObj, const std::unordered_set<std::stri
         JSDumpRegister::JSBind(globalObj);
         JSLocalStorage::JSBind(globalObj);
         JSStateMgmtProfiler::JSBind(globalObj);
+        JSCustomDialogController::JSBind(globalObj);
 
         JSEnvironment::JSBind(globalObj);
         JSViewContext::JSBind(globalObj);
