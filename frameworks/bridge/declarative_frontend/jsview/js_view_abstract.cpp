@@ -5308,7 +5308,7 @@ void JSViewAbstract::JsBlendMode(const JSCallbackInfo& info)
             blendMode = BlendMode::SRC_OVER;
             blendApplyType = BlendApplyType::OFFSCREEN;
         }
-    }D:\code\arkui_ace_engine_1\frameworks\bridge\declarative_frontend\jsview\js_view_abstract.cpp
+    }
     if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsNumber()) {
         auto blendApplyTypeNum = info[1]->ToNumber<int32_t>();
         if (blendApplyTypeNum >= static_cast<int>(BlendApplyType::FAST) &&
