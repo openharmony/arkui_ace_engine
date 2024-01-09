@@ -929,4 +929,29 @@ void TextFieldModelNG::SetCounterType(FrameNode* frameNode, int32_t value)
     CHECK_NULL_VOID(layoutProperty);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SetCounter, value, frameNode);
 }
+
+void TextFieldModelNG::SetOnChange(FrameNode* frameNode, std::function<void(const std::string&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(func));
+}
+
+void TextFieldModelNG::SetTextInputText(FrameNode* frameNode, const std::string& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    auto textValue = pattern->GetTextValue();
+    if (value != textValue) {
+        pattern->InitEditingValueText(value);
+    }
+}
+
+void TextFieldModelNG::SetTextInputPlaceHolder(FrameNode* frameNode, const std::string& placeholder)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
+    textFieldLayoutProperty->UpdatePlaceholder(placeholder);
+}
 } // namespace OHOS::Ace::NG

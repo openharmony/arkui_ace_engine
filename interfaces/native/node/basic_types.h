@@ -53,6 +53,7 @@ typedef unsigned int ArkUI_Uint32;
 typedef long long ArkUI_Int64;
 typedef float ArkUI_Float32;
 typedef double ArkUI_Float64;
+typedef const char* ArkUI_CharPtr;
 
 union ArkUI_NodeEventCallbackArg {
     ArkUI_Int32 i32;

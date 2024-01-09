@@ -1109,6 +1109,8 @@ struct ArkUITextInputModifier {
     void (*resetTextInputFontStyle)(ArkUINodeHandle node);
     void (*setTextInputFontFamily)(ArkUINodeHandle node, ArkUI_CharPtr* fontFamilies, ArkUI_Uint32 length);
     void (*resetTextInputFontFamily)(ArkUINodeHandle node);
+    void (*setTextInputPlaceholderString)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*setTextInputTextString)(ArkUINodeHandle node, ArkUI_CharPtr value);
 };
 
 struct ArkUITabsModifier {

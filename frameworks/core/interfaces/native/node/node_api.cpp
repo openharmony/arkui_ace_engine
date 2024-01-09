@@ -23,6 +23,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/interfaces/native/node/node_scroll_modifier.h"
+#include "core/interfaces/native/node/node_text_input_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
 
 namespace OHOS::Ace::NG {
@@ -101,6 +102,12 @@ const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnScroll,
 };
 
+const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
+    nullptr,
+    nullptr,
+    NodeModifier::SetOnTextInputChange,
+};
+
 /* clang-format on */
 void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, ArkUI_Int32 eventId)
 {
@@ -124,6 +131,15 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, A
                 return;
             }
             eventHandle = scrollNodeAsyncEventHandlers[subKind];
+            break;
+        }
+        case ARKUI_TEXTINPUT: {
+            // textinput event type.
+            if (subKind >= sizeof(textInputNodeAsyncEventHandlers) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = textInputNodeAsyncEventHandlers[subKind];
             break;
         }
         default: {
