@@ -1646,7 +1646,7 @@ void WebPattern::OnModifyDone()
 
     // offline mode
     if (host->GetNodeStatus() != NodeStatus::NORMAL_NODE) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "Web offline mode type");
+        TAG_LOGI(AceLogTag::ACE_WEB, "Web offline mode type");
         isOfflineMode_ = true;
         OfflineMode();
     }
@@ -2689,10 +2689,10 @@ void WebPattern::OnScrollStartRecursive(float position)
     isFirstFlingScrollVelocity_ = true;
 }
 
-void WebPattern::OnAttachToBuilderNode(NodeStatus nodeStatus) 
+void WebPattern::OnAttachToBuilderNode(NodeStatus nodeStatus)
 {
     if (nodeStatus != NodeStatus::NORMAL_NODE) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "Web offline mode type");
+        TAG_LOGI(AceLogTag::ACE_WEB, "Web offline mode type");
         isOfflineMode_ = true;
         OfflineMode();
     }

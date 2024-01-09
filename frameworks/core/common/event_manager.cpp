@@ -108,6 +108,9 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
             refereeNG_->CleanAll();
         }
     }
+    if (downFingerIds_.empty() && refereeNG_->QueryAllDone()) {
+        refereeNG_->ForceCleanGestureReferee();
+    }
     if (frameNode->HaveSecurityComponent()) {
         std::vector<NG::RectF> rect;
         frameNode->CheckSecurityComponentStatus(rect);
