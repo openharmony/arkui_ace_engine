@@ -1703,18 +1703,10 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
     auto mainDelta = static_cast<float>(info.GetMainDelta());
     if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD) {
         isTouchPad_ = true;
-        auto mainSize = CalculateVisibleSize();
-        if (std::abs(mainDelta) > mainSize) {
-            mainDelta = mainDelta > 0 ? mainSize : -mainSize;
-        }
-
-        if ((std::abs(mainDeltaSum_ + mainDelta)) > mainSize) {
-            mainDelta = GreatNotEqual((mainDeltaSum_ + mainDelta), 0) ? (mainSize - mainDeltaSum_) :
-                (-mainDeltaSum_ - mainSize);
-        }
-
-        mainDeltaSum_ += mainDelta;
     }
+    auto mainSize = CalculateVisibleSize();
+    ProcessDelta(mainDelta, mainSize, mainDeltaSum_);
+    mainDeltaSum_ += mainDelta;
 
     PointF dragPoint(static_cast<float>(info.GetGlobalLocation().GetX()),
         static_cast<float>(info.GetGlobalLocation().GetY()));
@@ -2226,7 +2218,6 @@ void SwiperPattern::OnSpringAnimationStart(float velocity)
 
 void SwiperPattern::OnSpringAndFadeAnimationFinish()
 {
-    nextIndex_ = GetFirstItemInfoInVisibleArea().first;
     auto itemInfoInVisibleArea = std::make_pair(0, SwiperItemInfo {});
     if (!itemPosition_.empty()) {
         auto item = itemPosition_.find(nextIndex_);
@@ -4040,5 +4031,17 @@ RefPtr<FrameNode> SwiperPattern::GetCurrentFrameNode(int32_t currentIndex) const
     auto currentLayoutWrapper = host->GetChildByIndex(GetLoopIndex(currentIndex));
     CHECK_NULL_RETURN(currentLayoutWrapper, nullptr);
     return currentLayoutWrapper->GetHostNode();
+}
+
+void SwiperPattern::ProcessDelta(float& delta, float mainSize, float deltaSum)
+{
+    if (std::abs(delta) > mainSize) {
+        delta = delta > 0 ? mainSize : -mainSize;
+    }
+
+    if ((std::abs(deltaSum + delta)) > mainSize) {
+        delta = GreatNotEqual((deltaSum + delta), 0) ? (mainSize - deltaSum) :
+            (-deltaSum - mainSize);
+    }
 }
 } // namespace OHOS::Ace::NG
