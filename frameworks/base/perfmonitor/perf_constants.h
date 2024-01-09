@@ -57,8 +57,8 @@ public:
     // PC shortcut to recent
     static constexpr char PC_SHORTCUT_TO_RECENT[] = "PC_SHORTCUT_TO_RECENT";
 
-    // PC esc exit recent
-    static constexpr char PC_ESC_EXIT_RECENT[] = "PC_ESC_EXIT_RECENT";
+    // PC exit recent
+    static constexpr char PC_EXIT_RECENT[] = "PC_EXIT_RECENT";
 
     // PC shoutcut to app center
     static constexpr char PC_SHORTCUT_TO_APP_CENTER[] = "PC_SHORTCUT_TO_APP_CENTER";
