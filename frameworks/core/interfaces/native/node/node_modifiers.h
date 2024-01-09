@@ -399,6 +399,9 @@ struct ArkUICommonModifier {
     void (*setKeyBoardShortCut)(
         ArkUINodeHandle node, ArkUI_CharPtr value, const ArkUI_Int32* keysIntArray, ArkUI_Int32 length);
     void (*resetKeyBoardShortCut)(ArkUINodeHandle node);
+    void (*setClip)(ArkUINodeHandle node, ArkUI_Int32 isClip);
+    void (*setClipShape)(ArkUINodeHandle node, ArkUI_CharPtr value, ArkUI_Float64* attribute, ArkUI_Int32 length);
+    void (*setClipPath)(ArkUINodeHandle node, ArkUI_CharPtr value, ArkUI_Float64* attribute, ArkUI_CharPtr commands);    
 };
 
 struct ArkUITextModifier {
