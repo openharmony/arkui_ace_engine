@@ -1164,7 +1164,7 @@ void WebPattern::UpdateLayoutAfterKerboardShow(int32_t width, int32_t height, do
             return;
         }
         drawSize_.SetHeight(newHeight);
-        UpdateWebLayoutSize(width, height);
+        UpdateWebLayoutSize(width, height, true);
     }
 }
 
@@ -1692,7 +1692,7 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
     if (!isFocus_ || !isVisible_) {
         if (isVirtualKeyBoardShow_ == VkState::VK_SHOW) {
             drawSize_.SetSize(drawSizeCache_);
-            UpdateWebLayoutSize(width, height);
+            UpdateWebLayoutSize(width, height, false);
             isVirtualKeyBoardShow_ = VkState::VK_HIDE;
         }
         return false;
@@ -1702,7 +1702,7 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
             return false;
         }
         drawSize_.SetSize(drawSizeCache_);
-        UpdateWebLayoutSize(width, height);
+        UpdateWebLayoutSize(width, height, false);
         isVirtualKeyBoardShow_ = VkState::VK_HIDE;
     } else if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
         drawSizeCache_.SetSize(drawSize_);
@@ -1733,7 +1733,7 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
     return true;
 }
 
-void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height)
+void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard)
 {
     CHECK_NULL_VOID(delegate_);
     if (delegate_->ShouldVirtualKeyboardOverlay()) {
@@ -1745,8 +1745,8 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height)
     auto rect = frameNode->GetGeometryNode()->GetFrameRect();
     auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
 
-    // Scroll focused node into view when keyboard show or hide, so set isKeyboard to true here.
-    delegate_->SetBoundsOrResize(drawSize_, offset, true);
+    // Scroll focused node into view when keyboard show.
+    delegate_->SetBoundsOrResize(drawSize_, offset, isKeyboard);
 
     rect.SetSize(SizeF(drawSize_.Width(), drawSize_.Height()));
     frameNode->GetRenderContext()->SyncGeometryProperties(rect);
