@@ -874,6 +874,11 @@ void RichEditorPattern::CopyTextSpanLineStyle(
         target->UpdateLeadingMargin(source->GetLeadingMarginValue({}));
         target->AddPropertyInfo(PropertyInfo::LEADING_MARGIN);
     }
+
+    if (source->HasTextAlign()) {
+        target->UpdateTextAlign(source->GetTextAlignValue(TextAlign::LEFT));
+        target->AddPropertyInfo(PropertyInfo::TEXT_ALIGN);
+    }
 }
 
 int32_t RichEditorPattern::TextSpanSplit(int32_t position, bool needLeadingMargin)
