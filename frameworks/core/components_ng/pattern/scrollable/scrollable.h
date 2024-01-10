@@ -66,6 +66,8 @@ using NestableScrollCallback = std::function<ScrollResult(float, int32_t, Nested
 using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 using ScrollMotionFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 
+class FrameNode;
+
 class Scrollable : public TouchEventTarget {
     DECLARE_ACE_TYPE(Scrollable, TouchEventTarget);
 
@@ -120,12 +122,8 @@ public:
         }
     }
 
-    void OnCollectTouchTarget(TouchTestResult& result)
-    {
-        if (panRecognizerNG_) {
-            result.emplace_back(panRecognizerNG_);
-        }
-    }
+    void OnCollectTouchTarget(
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent);
 
     void SetDragTouchRestrict(const TouchRestrict& touchRestrict)
     {

@@ -161,8 +161,8 @@ public:
         disappearAnimation_ = disappearAnimation;
     }
 
-    void OnCollectTouchTarget(const OffsetF& coordinateOffset,
-        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result);
+    void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent);
 
     float GetMainOffset(const Offset& offset) const
     {

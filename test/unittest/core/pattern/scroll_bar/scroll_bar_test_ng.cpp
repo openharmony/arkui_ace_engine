@@ -837,7 +837,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest012, TestSize.Level1)
     const int32_t size = result.size();
     EXPECT_EQ(pattern_->scrollableEvent_->InBarRegion(localPoint, source), true);
 
-    pattern_->scrollableEvent_->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::LIST_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    pattern_->scrollableEvent_->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result, frameNode, nullptr);
     EXPECT_FLOAT_EQ(pattern_->panRecognizer_->GetCoordinateOffset().GetX(), coordinateOffset.GetX());
     EXPECT_FLOAT_EQ(pattern_->panRecognizer_->GetCoordinateOffset().GetY(), coordinateOffset.GetY());
     EXPECT_EQ(result.size(), size + 1);
@@ -847,7 +848,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest012, TestSize.Level1)
     EXPECT_EQ(pattern_->scrollableEvent_->InBarRegion(localPoint, source), false);
 
     pattern_->panRecognizer_ = nullptr;
-    pattern_->scrollableEvent_->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result);
+    pattern_->scrollableEvent_->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result, frameNode, nullptr);
     EXPECT_EQ(result.size(), size + 1);
 }
 

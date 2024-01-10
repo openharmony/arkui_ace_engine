@@ -192,8 +192,9 @@ HWTEST_F(ScrollableEventTestNg, ScrollableEventOnCollectTouchTargetTest003, Test
      * @tc.expected: Invoke InitializeScrollable. when scrollableEvents_ is empty return directly.
      */
     TouchTestResult result;
-    scrollableActuator->CollectTouchTarget(
-        COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(), result, LOCAL_POINT);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    scrollableActuator->CollectTouchTarget(COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(),
+        result, LOCAL_POINT, frameNode, nullptr);
     EXPECT_EQ(result.size(), SCROLL_TEST_RESULT_SIZE);
     EXPECT_EQ(scrollableActuator->scrollableEvents_.size(), SCROLLABLE_EVENT_SIZE);
 
@@ -213,8 +214,8 @@ HWTEST_F(ScrollableEventTestNg, ScrollableEventOnCollectTouchTargetTest003, Test
      * @tc.steps: step4. CollectTouchTarget when initialized_ is false and scrollableEvents_ is not empty.
      * @tc.expected: gestureEventHub cannot GetFrameNode, InitializeScrollable fuction will return directly.
      */
-    scrollableActuator->CollectTouchTarget(
-        COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(), result, LOCAL_POINT);
+    scrollableActuator->CollectTouchTarget(COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(),
+        result, LOCAL_POINT, frameNode, nullptr);
     EXPECT_EQ(result.size(), SCROLL_TEST_RESULT_SIZE_1);
     auto coordinateOffset = scrollableEvent->GetScrollable()->panRecognizerNG_->GetCoordinateOffset();
     EXPECT_EQ(coordinateOffset, Offset(WIDTH, HEIGHT)) <<
@@ -225,7 +226,6 @@ HWTEST_F(ScrollableEventTestNg, ScrollableEventOnCollectTouchTargetTest003, Test
      * @tc.steps: step5. Add frameNode to gestureEventHub, and Add ScrollEdgeEffect whose axis is same with the
      * scrollableEvent.
      */
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
     eventHub->AttachHost(frameNode);
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(SCROLLABLE_EVENT_EDGE_EFFECT);
     scrollableActuator->AddScrollEdgeEffect(SCROLLABLE_EVENT_AXIS, scrollEdgeEffect);
@@ -237,8 +237,8 @@ HWTEST_F(ScrollableEventTestNg, ScrollableEventOnCollectTouchTargetTest003, Test
      * @tc.expected: The loop will be continued when scrollableEvent is not enabled.
      */
     scrollableEvent->SetEnabled(SCROLLABLE_EVENT_DISENABLED);
-    scrollableActuator->CollectTouchTarget(
-        COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(), result, LOCAL_POINT);
+    scrollableActuator->CollectTouchTarget(COORDINATE_OFFSET, SCROLL_RESTRICT, eventHub->CreateGetEventTargetImpl(),
+        result, LOCAL_POINT, frameNode, nullptr);
     EXPECT_EQ(result.size(), SCROLL_TEST_RESULT_SIZE_1);
 }
 } // namespace OHOS::Ace::NG
