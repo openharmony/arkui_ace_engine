@@ -951,6 +951,15 @@ void ParsePopupCommonParam(
         JSViewAbstract::GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow);
     }
     popupParam->SetShadow(shadow);
+
+    auto blurStyleValue = popupObj->GetProperty("backgroundBlurStyle");
+    if (blurStyleValue->IsNumber()) {
+        auto blurStyle = blurStyleValue->ToNumber<int32_t>();
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+            popupParam->SetBlurStyle(static_cast<BlurStyle>(blurStyle));
+        }
+    }
 }
 
 void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
@@ -1051,6 +1060,12 @@ void ParseCustomPopupParam(
     if (popupParam) {
         popupParam->SetUseCustomComponent(true);
     }
+
+    auto focusableValue = popupObj->GetProperty("focusable");
+    if (focusableValue->IsBoolean()) {
+        popupParam->SetFocusable(focusableValue->ToBoolean());
+    }
+
     ParsePopupCommonParam(info, popupObj, popupParam);
 }
 #endif

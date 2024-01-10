@@ -22,6 +22,7 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/placement.h"
 #include "core/event/ace_event_handler.h"
@@ -409,6 +410,26 @@ public:
         return setErrorRadius_;
     }
 
+    void SetFocusable(bool focusable)
+    {
+        focusable_ = focusable;
+    }
+
+    bool GetFocusable() const
+    {
+        return focusable_;
+    }
+
+    void SetBlurStyle(const BlurStyle& blurStyle)
+    {
+        blurStyle_ = blurStyle;
+    }
+
+    BlurStyle GetBlurStyle() const
+    {
+        return blurStyle_;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -421,9 +442,11 @@ private:
     bool setErrorArrowWidth_ = false;
     bool setErrorArrowHeight_ = false;
     bool setErrorRadius_ = false;
+    bool focusable_ = true;
     Color maskColor_;
     Color backgroundColor_;
     Placement placement_ = Placement::BOTTOM;
+    BlurStyle blurStyle_ = BlurStyle::COMPONENT_ULTRA_THICK;
     EventMarker onVisibilityChange_;
     Edge padding_;
     Edge margin_;
