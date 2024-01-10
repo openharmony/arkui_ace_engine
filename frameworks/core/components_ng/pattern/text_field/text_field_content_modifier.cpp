@@ -423,9 +423,10 @@ void TextFieldContentModifier::ProcessErrorParagraph(DrawingContext& context, fl
     auto offset = contentOffset_->Get();
     auto textFrameRect = textFieldPattern->GetFrameRect();
     auto errorParagraph = textFieldPattern->GetErrorParagraph();
+    auto errorValue = textFieldPattern->GetErrorTextString();
     auto frameNode = textFieldPattern->GetHost();
     auto& canvas = context.canvas;
-    if (showErrorState_->Get() && errorParagraph && !textFieldPattern->IsDisabled()) {
+    if (showErrorState_->Get() && errorParagraph && !textFieldPattern->IsDisabled() && !errorValue.empty()) {
         auto property = frameNode->GetLayoutProperty();
         float padding = 0.0f;
         if (property && property->GetPaddingProperty()) {
