@@ -198,10 +198,6 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     selectOverlayProxy_.Reset(); // skip show selectoverlay in the TextPattern.
     bool ret = TextPattern::OnDirtyLayoutWrapperSwap(dirty, config);
     selectOverlayProxy_ = restoreSelectOverlayProxy;
-    if (textSelector_.baseOffset != -1 && textSelector_.destinationOffset != -1 && SelectOverlayIsOn()) {
-        CalculateHandleOffsetAndShowOverlay();
-        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
-    }
     UpdateScrollStateAfterLayout(config.frameSizeChange);
     if (!isRichEditorInit_) {
         auto eventHub = GetEventHub<RichEditorEventHub>();
@@ -213,6 +209,10 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     }
     MoveCaretAfterTextChange();
     MoveCaretToContentRect();
+    if (textSelector_.baseOffset != -1 && textSelector_.destinationOffset != -1 && SelectOverlayIsOn()) {
+        CalculateHandleOffsetAndShowOverlay();
+        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+    }
     UpdateCaretInfoToController();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, ret);
@@ -1166,6 +1166,7 @@ void RichEditorPattern::UpdateImageStyle(RefPtr<FrameNode>& imageNode, const Ima
 void RichEditorPattern::UpdateSpanStyle(
     int32_t start, int32_t end, const TextStyle& textStyle, const ImageSpanAttribute& imageStyle)
 {
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "range=[%{public}d, %{public}d]", start, end);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     int32_t spanStart = 0;
@@ -1179,8 +1180,7 @@ void RichEditorPattern::UpdateSpanStyle(
             }
             spanEnd = spanStart + 1;
         } else {
-            auto spanItem = spanNode->GetSpanItem();
-            spanItem->GetIndex(spanStart, spanEnd);
+            spanNode->GetSpanItem()->GetIndex(spanStart, spanEnd);
         }
         if (spanEnd < start) {
             continue;
@@ -1196,25 +1196,20 @@ void RichEditorPattern::UpdateSpanStyle(
             if (spanEnd == end) {
                 break;
             }
-            continue;
-        }
-        if (spanStart < start && start < spanEnd) {
+        } else if (spanStart < start && start < spanEnd) {
             TextSpanSplit(start, true);
             --it;
-            continue;
-        }
-        if (spanStart < end && end < spanEnd) {
+        } else if (spanStart < end && end < spanEnd) {
             TextSpanSplit(end, true);
             --(--it);
-            continue;
-        }
-        if (spanStart >= end) {
+        } else if (spanStart >= end) {
             break;
         }
     }
 
     // Custom menus do not actively close.
-    if (!(SelectOverlayIsOn() && selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.menuBuilder != nullptr)) {
+    if (!SelectOverlayIsOn() || selectOverlayProxy_->GetSelectOverlayMangerInfo().menuInfo.menuBuilder == nullptr) {
+        TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "CloseSelectOverlay");
         CloseSelectOverlay();
     }
 }
