@@ -564,8 +564,6 @@ void NavBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
             std::move(actionEndTask), std::move(actionCancelTask));
     }
 
-    panEvent_ = MakeRefPtr<PanEvent>(
-        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     PanDirection panDirection = { .type = PanDirection::VERTICAL };
     gestureHub->SetPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }

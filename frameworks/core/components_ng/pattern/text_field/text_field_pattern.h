@@ -290,7 +290,9 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true };
+        FocusPattern focusPattern = { FocusType::NODE, true };
+        focusPattern.SetIsFocusActiveWhenFocused(true);
+        return focusPattern;
     }
 
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
@@ -1072,6 +1074,7 @@ public:
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
 
     void ContentFireOnChangeEvent();
+    void GetCaretMetrics(CaretMetricsF& caretCaretMetric) override;
 protected:
     virtual void InitDragEvent();
 

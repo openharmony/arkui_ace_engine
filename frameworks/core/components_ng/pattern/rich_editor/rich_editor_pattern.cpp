@@ -882,6 +882,11 @@ void RichEditorPattern::CopyTextSpanLineStyle(
         target->UpdateLeadingMargin(source->GetLeadingMarginValue({}));
         target->AddPropertyInfo(PropertyInfo::LEADING_MARGIN);
     }
+
+    if (source->HasTextAlign()) {
+        target->UpdateTextAlign(source->GetTextAlignValue(TextAlign::LEFT));
+        target->AddPropertyInfo(PropertyInfo::TEXT_ALIGN);
+    }
 }
 
 int32_t RichEditorPattern::TextSpanSplit(int32_t position, bool needLeadingMargin)
@@ -2796,7 +2801,7 @@ bool RichEditorPattern::CursorMoveUp()
     if (static_cast<int32_t>(GetTextContentLength()) > 1) {
         float caretHeight = 0.0f;
         OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
-        auto minDet = paragraphs_.minParagraphFontSize.value() / 2.0;
+        auto minDet = paragraphs_.minParagraphFontSize.value_or(0.0f) / 2.0;
         int32_t caretPosition = paragraphs_.GetIndex(
             Offset(caretOffset.GetX() - GetTextRect().GetX(), caretOffset.GetY() - GetTextRect().GetY() - minDet));
         caretPosition = std::clamp(caretPosition, 0, static_cast<int32_t>(GetTextContentLength()));
@@ -5230,5 +5235,17 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     auto jsonValue = JsonUtil::Create(true);
     jsonValue->Put("types", "");
     json->Put("dataDetectorConfig", jsonValue->ToString().c_str());
+}
+
+void RichEditorPattern::GetCaretMetrics(CaretMetricsF& caretCaretMetric)
+{
+    float caretHeight = 0.0f;
+    OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto offset = host->GetPaintRectOffset();
+    caretOffset += offset;
+    caretCaretMetric.offset = caretOffset;
+    caretCaretMetric.height = caretHeight;
 }
 } // namespace OHOS::Ace::NG

@@ -154,9 +154,9 @@ void RichEditorLayoutAlgorithm::GetPlaceholderRects(std::vector<RectF>& rects)
 }
 
 ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
-    const TextStyle& textStyle, const std::string& content) const
+    const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const
 {
-    auto style = TextLayoutAlgorithm::GetParagraphStyle(textStyle, content);
+    auto style = TextLayoutAlgorithm::GetParagraphStyle(textStyle, content, layoutWrapper);
     style.fontSize = textStyle.GetFontSize().ConvertToPx();
     if (!pManager_->minParagraphFontSize.has_value() ||
         GreatNotEqual(pManager_->minParagraphFontSize.value(), style.fontSize)) {

@@ -110,7 +110,9 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        focusPattern.SetIsFocusActiveWhenFocused(true);
+        return focusPattern;
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
@@ -384,6 +386,7 @@ public:
     {
         return selectedType_.value_or(TextSpanType::NONE);
     }
+    void GetCaretMetrics(CaretMetricsF& caretCaretMetric) override;
 
 protected:
     bool CanStartAITask() override;

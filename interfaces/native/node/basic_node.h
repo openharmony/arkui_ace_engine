@@ -512,7 +512,7 @@ typedef enum {
      * @note 入参格式为InputType的枚举名称 normal,password,email,number,phoneNumber,
      * UserName,NewPassword,NumberPassword,ScreenLockPassword,NumberDecimal。
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_TYPE, "Normal");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_TYPE, "normal");
      * @endcode
      */
     NODE_TEXT_INPUT_TYPE,
@@ -807,9 +807,9 @@ typedef enum {
     /**
      * @brief 通过<b>setAttribute</b>方法设置一页内元素显示个数.
      * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note 入参格式为数字类型字符串.
+     * @note 入参格式为数字类型字符串或为"auto"字符串.
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_DISPLAY_COUNT, "2 number");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_DISPLAY_COUNT, "2");
      * @endcode
      *
      */
@@ -829,9 +829,9 @@ typedef enum {
     /**
      * @brief 通过<b>setAttribute</b>方法设置导航点箭头样式.
      * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note 入参格式为两个布尔值，第一个参数为是否显示导航点箭头，第二个参数鼠标悬停时是否显示箭头.
+     * @note 入参格式为"true"、"false"与"showOnHover".
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_DISPLAY_ARROW, true false");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_DISPLAY_ARROW, true");
      * @endcode
      *
      */

@@ -163,7 +163,7 @@ void WindowSceneHelper::IsWindowSceneCloseKeyboard(RefPtr<FrameNode> frameNode)
     TAG_LOGD(AceLogTag::ACE_KEYBOARD, "SCB/Keep/Need(%{public}d/%{public}d/%{public}d)",
         isWindowScene, saveKeyboard, isNeedKeyBoard);
     if (isWindowScene && !saveKeyboard && !isNeedKeyBoard) {
-        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "scbFrameNode(%{public}s/%{public}d) notNeedSoftKeyboard.",
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "scbFrameNode(%{public}s/%{public}d) notNeedSoftKeyboard.",
             frameNode->GetTag().c_str(), frameNode->GetId());
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
@@ -173,10 +173,9 @@ void WindowSceneHelper::IsWindowSceneCloseKeyboard(RefPtr<FrameNode> frameNode)
             bool curIsShown = false;
             auto infApiRes = inputMethod->IsPanelShown(curKeyboardPanelInfo, curIsShown);
             if (infApiRes || curIsShown) {
-                TAG_LOGD(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Shown.");
                 inputMethod->RequestHideInput();
                 inputMethod->Close();
-                TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
+                TAG_LOGI(AceLogTag::ACE_KEYBOARD, "scbSoftKeyboard Closes Successfully.");
             }
         }
     }
@@ -193,7 +192,7 @@ void WindowSceneHelper::IsCloseKeyboard(RefPtr<FrameNode> frameNode)
     auto saveKeyboard = IsFocusWindowSceneCloseKeyboard(frameNode);
     TAG_LOGD(AceLogTag::ACE_KEYBOARD, "Keep/Need(%{public}d/%{public}d)", !saveKeyboard, !isNeedKeyBoard);
     if (!saveKeyboard && !isNeedKeyBoard) {
-        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "FrameNode(%{public}s/%{public}d) notNeedSoftKeyboard.",
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "FrameNode(%{public}s/%{public}d) notNeedSoftKeyboard.",
             frameNode->GetTag().c_str(), frameNode->GetId());
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {

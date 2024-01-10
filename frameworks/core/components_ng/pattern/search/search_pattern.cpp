@@ -804,7 +804,9 @@ void SearchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 
 FocusPattern SearchPattern::GetFocusPattern() const
 {
-    return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
+    FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
+    focusPattern.SetIsFocusActiveWhenFocused(true);
+    return focusPattern;
 }
 
 void SearchPattern::RequestKeyboard()

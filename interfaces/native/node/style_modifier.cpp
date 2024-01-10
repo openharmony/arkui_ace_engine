@@ -53,6 +53,9 @@ constexpr int DEFAULT_SIZE_24 = 24;
 constexpr int COLOR_STRATEGY_STYLE = 1;
 constexpr int COLOR_STYLE = 2;
 constexpr int UNIT_VP = 1;
+constexpr int DISPLAY_ARROW_FALSE = 0;
+constexpr int DISPLAY_ARROW_TRUE = 1;
+
 
 typedef std::map<const std::string, ArkUI_Int32> AttrStringToIntMap;
 
@@ -1399,10 +1402,16 @@ void SetSwiperDisplayCount(ArkUI_NodeHandle node, const char* value)
         return;
     }
     std::string displayCountStr(value);
-    std::vector<std::string> displayCountProps;
-    StringUtils::StringSplitter(displayCountStr.c_str(), ' ', displayCountProps);
+    std::string type = "number";
+    if (StringUtils::IsNumber(displayCountStr)) {
+        type = "number";
+    } else if (std::strcmp(displayCountStr.c_str(), "auto") == 0) {
+        type = "string";
+    } else {
+        type = "undefined";
+    }
     fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperDisplayCount(
-        node->uiNodeHandle, displayCountProps[NUM_0].c_str(), displayCountProps[NUM_1].c_str());
+        node->uiNodeHandle, displayCountStr.c_str(), type.c_str());
 }
 
 void SetSwiperDisableSwipe(ArkUI_NodeHandle node, const char* value)
@@ -1429,10 +1438,14 @@ void SetSwiperShowDisplayArrow(ArkUI_NodeHandle node, const char* value)
     double displayArrow[ALLOW_SIZE_8] = { 1, 0, 0, DEFAULT_SIZE_24, defaultBackgroundColor, DEFAULT_SIZE_18,
         defaultArrowColor, 0 };
     std::string displayArrowStr(value);
-    std::vector<std::string> displayArrowProps;
-    StringUtils::StringSplitter(displayArrowStr.c_str(), ' ', displayArrowProps);
-    displayArrow[NUM_0] = StringToBoolInt(displayArrowProps[NUM_0].c_str(), 0);
-    displayArrow[NUM_7] = StringToBoolInt(displayArrowProps[NUM_1].c_str(), 0);
+    if (std::strcmp(displayArrowStr.c_str(), "showOnHover")) {
+        displayArrow[NUM_0] = DISPLAY_ARROW_TRUE;
+        displayArrow[NUM_7] = DISPLAY_ARROW_TRUE;
+    } else {
+        displayArrow[NUM_0] = StringToBoolInt(displayArrowStr.c_str(), 0);
+        displayArrow[NUM_7] = DISPLAY_ARROW_FALSE;
+    }
+
     std::stringstream ss;
     for (const auto& str : displayArrow) {
         ss << str << "|";

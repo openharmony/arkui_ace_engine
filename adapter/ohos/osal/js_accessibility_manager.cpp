@@ -1103,6 +1103,33 @@ static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, Ac
 }
 
 #ifdef WEB_SUPPORTED
+static void UpdateWebAccessibilityElementInfoActions(
+    const NWeb::NWebAccessibilityNodeInfo& node, AccessibilityElementInfo& nodeInfo)
+{
+    if (node.clickable) {
+        AccessibleAction action(ConvertAceAction(AceAction::ACTION_CLICK), "web");
+        nodeInfo.AddAction(action);
+    }
+
+    if (node.focusable) {
+        if (node.focused) {
+            AccessibleAction action(ConvertAceAction(AceAction::ACTION_CLEAR_FOCUS), "web");
+            nodeInfo.AddAction(action);
+        } else {
+            AccessibleAction action(ConvertAceAction(AceAction::ACTION_FOCUS), "web");
+            nodeInfo.AddAction(action);
+        }
+    }
+
+    if (node.accessibilityFocus) {
+        AccessibleAction action(ConvertAceAction(AceAction::ACTION_CLEAR_ACCESSIBILITY_FOCUS), "web");
+        nodeInfo.AddAction(action);
+    } else {
+        AccessibleAction action(ConvertAceAction(AceAction::ACTION_ACCESSIBILITY_FOCUS), "web");
+        nodeInfo.AddAction(action);
+    }
+}
+
 static void UpdateWebAccessibilityElementInfo(
     const NWeb::NWebAccessibilityNodeInfo& node, AccessibilityElementInfo& nodeInfo)
 {
@@ -1143,11 +1170,7 @@ static void UpdateWebAccessibilityElementInfo(
         nodeInfo.SetEditable(node.editable);
         nodeInfo.SetDeletable(node.deletable);
         nodeInfo.SetClickable(node.clickable);
-        auto supportAceActions = node.actions;
-        for (auto it = supportAceActions.begin(); it != supportAceActions.end(); ++it) {
-            AccessibleAction action(ConvertAceAction(static_cast<AceAction>(*it)), "web");
-            nodeInfo.AddAction(action);
-        }
+        UpdateWebAccessibilityElementInfoActions(node, nodeInfo);
     }
 }
 

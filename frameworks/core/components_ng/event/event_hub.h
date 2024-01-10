@@ -103,6 +103,14 @@ public:
         return focusHub_;
     }
 
+    const RefPtr<FocusHub>& GetOrCreateFocusHub(const FocusPattern& focusPattern)
+    {
+        if (!focusHub_) {
+            focusHub_ = MakeRefPtr<FocusHub>(WeakClaim(this), focusPattern);
+        }
+        return focusHub_;
+    }
+
     const RefPtr<FocusHub>& GetFocusHub() const
     {
         return focusHub_;
