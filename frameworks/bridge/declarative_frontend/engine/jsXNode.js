@@ -465,8 +465,7 @@ class RenderNode extends __JSBaseNode__ {
             this.frameValue.width = this.checkUndefinedOrNullWithDefaultValue(size.width, 0);
             this.frameValue.height = this.checkUndefinedOrNullWithDefaultValue(size.height, 0);
         }
-        GetUINativeModule().common.setWidth(this.nodePtr, this.frameValue.width);
-        GetUINativeModule().common.setHeight(this.nodePtr, this.frameValue.height);
+        GetUINativeModule().renderNode.setSize(this.nodePtr, this.frameValue.width, this.frameValue.height);
     }
     set transform(transform) {
         if (transform === undefined || transform === null) {

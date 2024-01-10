@@ -167,6 +167,18 @@ void SetFrame(NodeHandle node, float positionX, float positionY, float width, fl
     renderContext->SetFrame(positionX, positionY, width, height);
 }
 
+void SetSize(NodeHandle node, float width, float height)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    auto* frameNode = AceType::DynamicCast<FrameNode>(currentNode);
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(width, DimensionUnit::VP), CalcLength(height, DimensionUnit::VP)));
+    frameNode->MarkDirtyNode();
+}
+
 void SetOpacity(NodeHandle node, float opacity)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
@@ -187,7 +199,7 @@ ArkUIRenderNodeModifierAPI GetRenderNodeModifier()
 {
     static const ArkUIRenderNodeModifierAPI modifier = { AppendChild, InsertChildAfter, RemoveChild, ClearChildren,
         SetClipToFrame, SetRotation, SetShadowColor, SetShadowOffset, SetShadowAlpha, SetShadowElevation,
-        SetShadowRadius, Invalidate, SetScale, SetRenderNodeBackgroundColor, SetPivot, SetFrame,
+        SetShadowRadius, Invalidate, SetScale, SetRenderNodeBackgroundColor, SetPivot, SetFrame, SetSize,
         SetOpacity, SetTranslate };
 
     return modifier;
