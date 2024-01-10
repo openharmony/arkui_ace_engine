@@ -252,10 +252,7 @@ public:
         return svgTraceEnable_;
     }
 
-    static bool GetLayoutTraceEnabled()
-    {
-        return layoutTraceEnable_;
-    }
+    static bool GetLayoutTraceEnabled();
 
     static bool GetBuildTraceEnabled()
     {

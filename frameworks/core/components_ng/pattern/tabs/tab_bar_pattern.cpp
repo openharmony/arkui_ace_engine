@@ -695,22 +695,31 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
     }
 
     auto index = CalculateSelectedIndex(info.GetLocalLocation());
+    TAG_LOGI(AceLogTag::ACE_TABS, "Clicked tabBarIndex: %{public}d, Clicked tabBarLocation: %{public}s", index,
+        info.GetLocalLocation().ToString().c_str());
     if (index < 0 || index >= totalCount || !swiperController_ ||
         indicator_ >= static_cast<int32_t>(tabBarStyles_.size())) {
         return;
     }
-    LOGE("ZMH, selected index:%{public}d", index);
+
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
     CHECK_NULL_VOID(tabsNode);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
+    CHECK_NULL_VOID(swiperNode);
     auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabsPattern);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(swiperPattern);
     if (tabsPattern->GetInterceptStatus()) {
         auto interceptCallback = tabsPattern->GetOnContentWillChange();
-        if (!interceptCallback(index)) {
-            LOGE("ZMH, interceptCallback return false, index:%{public}d", index);
+        int32_t currentIndex = swiperPattern->GetCurrentIndex();
+        if (!interceptCallback(currentIndex, index)) {
+            LOGE("ZMH, interceptCallback return false, currentIndex:%{public}d, comingIndex:%{public}d",
+                currentIndex, index);
             return;
         }
-        LOGE("ZMH, interceptCallback return true, index:%{public}d", index);
+        LOGE("ZMH, interceptCallback return true, currentIndex:%{public}d, comingIndex:%{public}d",
+            currentIndex, index);
     }
 
     SetSwiperCurve(DurationCubicCurve);

@@ -868,7 +868,7 @@ void TabsModelNG::SetOnCustomAnimation(TabsCustomAnimationEvent&& onCustomAnimat
     swiperPattern->SetCustomContentTransition(std::move(onCustomAnimation));
 }
 
-void TabsModelNG::SetOnContentWillChange(std::function<bool(int32_t)>&& callback)
+void TabsModelNG::SetOnContentWillChange(std::function<bool(int32_t, int32_t)>&& callback)
 {
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(tabsNode);

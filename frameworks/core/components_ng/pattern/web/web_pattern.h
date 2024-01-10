@@ -440,16 +440,16 @@ public:
         return rootLayerHeight_;
     }
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
-    RefPtr<WebAccessibilityNode> GetFocusedAccessibilityNode(int32_t accessibilityId, bool isAccessibilityFocus);
-    RefPtr<WebAccessibilityNode> GetAccessibilityNodeById(int32_t accessibilityId);
-    RefPtr<WebAccessibilityNode> GetAccessibilityNodeByFocusMove(int32_t accessibilityId, int32_t direction);
-    void ExecuteAction(int32_t nodeId, AceAction action) const;
+    RefPtr<WebAccessibilityNode> GetFocusedAccessibilityNode(int64_t accessibilityId, bool isAccessibilityFocus);
+    RefPtr<WebAccessibilityNode> GetAccessibilityNodeById(int64_t accessibilityId);
+    RefPtr<WebAccessibilityNode> GetAccessibilityNodeByFocusMove(int64_t accessibilityId, int32_t direction);
+    void ExecuteAction(int64_t accessibilityId, AceAction action) const;
     void SetAccessibilityState(bool state);
 
 private:
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
-    void UpdateWebLayoutSize(int32_t width, int32_t height);
+    void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard);
     void UpdateLayoutAfterKerboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 

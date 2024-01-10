@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -19,6 +19,11 @@ ace_unittest("list_test_ng") {
     "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
     "$ace_root/frameworks/bridge/common/utils/utils.cpp",
     "$ace_root/frameworks/bridge/js_frontend/engine/common/js_constants.cpp",
+    "list_attr_test_ng.cpp",
+    "list_common_test_ng.cpp",
+    "list_layout_test_ng.cpp",
+    "list_scroller_test_ng.cpp",
+    "list_swipe_test_ng.cpp",
     "list_test_ng.cpp",
   ]
 }

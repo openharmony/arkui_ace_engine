@@ -151,6 +151,9 @@ void SearchPattern::OnModifyDone()
         margin.bottom = CalcLength(UP_AND_DOWN_PADDING.ConvertToPx());
         layoutProperty->UpdateMargin(margin);
     }
+
+    HandleBackgroundColor();
+
     auto searchButton = layoutProperty->GetSearchButton();
     searchButton_ = searchButton.has_value() ? searchButton->value() : "";
     InitSearchController();
@@ -188,6 +191,19 @@ void SearchPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     InitFocusEvent(focusHub);
     InitClickEvent();
+}
+
+void SearchPattern::HandleBackgroundColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto textFieldTheme = PipelineBase::GetCurrentContext()->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
+    if (!renderContext->HasBackgroundColor()) {
+        renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
+    }
 }
 
 void SearchPattern::HandleEnabled()
@@ -514,6 +530,7 @@ void SearchPattern::OnClickButtonAndImage()
 
 void SearchPattern::OnClickCancelButton()
 {
+    focusChoice_ = FocusChoice::SEARCH;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
@@ -529,6 +546,7 @@ void SearchPattern::OnClickCancelButton()
     textFieldLayoutProperty->UpdateValue("");
     auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
     eventHub->FireOnChange("");
+    textFieldPattern->StartTwinkling();
     host->MarkModifyDone();
     textFieldFrameNode->MarkModifyDone();
 }
@@ -609,7 +627,6 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     // If the focus is on the Delete button, press Enter to delete the content.
     if (event.code == KeyCode::KEY_ENTER && focusChoice_ == FocusChoice::CANCEL_BUTTON) {
         OnClickCancelButton();
-        focusChoice_ = FocusChoice::SEARCH;
         PaintFocusState();
         return true;
     }
@@ -735,12 +752,11 @@ void SearchPattern::PaintFocusState()
 
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    context->SetIsFocusActive(true);
     RoundRect focusRect;
     GetInnerFocusPaintRect(focusRect);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->PaintInnerFocusState(focusRect);
+    focusHub->PaintInnerFocusState(focusRect, true);
     host->MarkModifyDone();
 }
 

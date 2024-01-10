@@ -55,16 +55,8 @@ public:
     std::pair<std::string, RefPtr<UINode>> GetChildByIndex(int32_t index, bool needBuild)
     {
         auto iter = cachedItems_.find(index);
-        if (iter != cachedItems_.end()) {
-            if (iter->second.second) {
-                return iter->second;
-            }
-            auto keyIter = expiringItem_.find(iter->second.first);
-            if (keyIter != expiringItem_.end() && keyIter->second.second) {
-                iter->second.second = keyIter->second.second;
-                expiringItem_.erase(keyIter);
-                return iter->second;
-            }
+        if (iter != cachedItems_.end() && iter->second.second) {
+            return iter->second;
         }
 
         if (needBuild) {
@@ -76,6 +68,16 @@ public:
             }
             return itemInfo;
         }
+
+        if (iter != cachedItems_.end()) {
+            auto keyIter = expiringItem_.find(iter->second.first);
+            if (keyIter != expiringItem_.end() && keyIter->second.second) {
+                iter->second.second = keyIter->second.second;
+                expiringItem_.erase(keyIter);
+                return iter->second;
+            }
+        }
+
         return {};
     }
 
@@ -330,6 +332,52 @@ public:
         }
     }
 
+    bool PreBuildByIndex(int32_t index, std::unordered_map<std::string, LazyForEachCacheChild>& cache,
+        int64_t deadline, const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask)
+    {
+        if (GetSysTimestamp() > deadline) {
+            return false;
+        }
+        bool isTimeout = false;
+        preBuildingIndex_ = -1;
+        auto uiNode = CacheItem(index, cache, itemConstraint, deadline, isTimeout);
+        if (isTimeout) {
+            preBuildingIndex_ = index;
+            return false;
+        }
+        if (!canRunLongPredictTask && itemConstraint) {
+            return false;
+        }
+        if (canRunLongPredictTask && uiNode && itemConstraint) {
+            RefPtr<FrameNode> frameNode = DynamicCast<FrameNode>(uiNode);
+            while (!frameNode) {
+                auto tempNode = uiNode;
+                uiNode = tempNode->GetFirstChild();
+                if (!uiNode) {
+                    break;
+                }
+                frameNode = DynamicCast<FrameNode>(uiNode);
+            }
+            if (frameNode) {
+                frameNode->GetGeometryNode()->SetParentLayoutConstraint(itemConstraint.value());
+                FrameNode::ProcessOffscreenNode(frameNode);
+            }
+        }
+        return true;
+    }
+
+    bool ProcessPreBuildingIndex(std::unordered_map<std::string, LazyForEachCacheChild>& cache, int64_t deadline,
+        const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask,
+        std::unordered_set<int32_t>& idleIndexes)
+    {
+        if (idleIndexes.find(preBuildingIndex_) == idleIndexes.end()) {
+            preBuildingIndex_ = -1;
+            return true;
+        }
+        idleIndexes.erase(preBuildingIndex_);
+        return PreBuildByIndex(preBuildingIndex_, cache, deadline, itemConstraint, canRunLongPredictTask);
+    }
+
     bool PreBuild(int64_t deadline, const std::optional<LayoutConstraintF>& itemConstraint, bool canRunLongPredictTask)
     {
         ACE_SCOPED_TRACE("expiringItem_ count:[%zu]", expiringItem_.size());
@@ -346,37 +394,16 @@ public:
         ProcessCachedIndex(cache, idleIndexes);
 
         bool result = true;
+        result = ProcessPreBuildingIndex(cache, deadline, itemConstraint, canRunLongPredictTask, idleIndexes);
+        if (!result) {
+            expiringItem_.swap(cache);
+            return result;
+        }
+
         for (auto index : idleIndexes) {
-            if (GetSysTimestamp() > deadline) {
-                result = false;
+            result = PreBuildByIndex(index, cache, deadline, itemConstraint, canRunLongPredictTask);
+            if (!result) {
                 break;
-            }
-            bool isTimeout = false;
-            preBuildingIndex_ = -1;
-            auto uiNode = CacheItem(index, cache, itemConstraint, deadline, isTimeout);
-            if (isTimeout) {
-                preBuildingIndex_ = index;
-                result = false;
-                break;
-            }
-            if (!canRunLongPredictTask && itemConstraint) {
-                result = false;
-                continue;
-            }
-            if (canRunLongPredictTask && uiNode && itemConstraint) {
-                RefPtr<FrameNode> frameNode = DynamicCast<FrameNode>(uiNode);
-                while (!frameNode) {
-                    auto tempNode = uiNode;
-                    uiNode = tempNode->GetFirstChild();
-                    if (!uiNode) {
-                        break;
-                    }
-                    frameNode = DynamicCast<FrameNode>(uiNode);
-                }
-                if (frameNode) {
-                    frameNode->GetGeometryNode()->SetParentLayoutConstraint(itemConstraint.value());
-                    FrameNode::ProcessOffscreenNode(frameNode);
-                }
             }
         }
         expiringItem_.swap(cache);
@@ -390,9 +417,13 @@ public:
             auto iter = idleIndexes.find(node.first);
             if (iter != idleIndexes.end() && node.second) {
                 ProcessOffscreenNode(node.second, false);
-                cache.try_emplace(key, std::move(node));
-                cachedItems_.try_emplace(node.first, LazyForEachChild(key, nullptr));
-                idleIndexes.erase(iter);
+                if (node.first == preBuildingIndex_) {
+                    cache.try_emplace(key, node);
+                } else {
+                    cache.try_emplace(key, std::move(node));
+                    cachedItems_.try_emplace(node.first, LazyForEachChild(key, nullptr));
+                    idleIndexes.erase(iter);
+                }
             } else {
                 NotifyDataDeleted(node.second);
                 ProcessOffscreenNode(node.second, true);

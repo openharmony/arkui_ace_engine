@@ -267,6 +267,14 @@ void DatePickerModelNG::SetBackgroundColor(const Color& color)
     datePickerPattern->SetBackgroundColor(color);
 }
 
+void DatePickerModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto datePickerPattern = frameNode->GetPattern<DatePickerPattern>();
+    CHECK_NULL_VOID(datePickerPattern);
+    datePickerPattern->SetBackgroundColor(color);
+}
+
 void DatePickerModelNG::SetChangeEvent(DateChangeEvent&& onChange)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -322,6 +330,12 @@ void DatePickerDialogModelNG::SetDatePickerDialogShow(PickerDialogInfo& pickerDi
     }
     if (pickerDialog.alignment.has_value()) {
         properties.alignment = pickerDialog.alignment.value();
+    }
+    if (pickerDialog.backgroundColor.has_value()) {
+        properties.backgroundColor = pickerDialog.backgroundColor.value();
+    }
+    if (pickerDialog.backgroundBlurStyle.has_value()) {
+        properties.backgroundBlurStyle = pickerDialog.backgroundBlurStyle.value();
     }
 
     properties.customStyle = false;

@@ -55,6 +55,14 @@ void ListItemModelNG::Create()
         []() { return AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE); });
     stack->Push(frameNode);
 }
+
+RefPtr<FrameNode> ListItemModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_ETS_TAG, nodeId,
+        AceType::MakeRefPtr<ListItemPattern>(nullptr, V2::ListItemStyle::NONE));
+    return frameNode;
+}
+
 // use SetDeleteArea to update builder function
 void ListItemModelNG::SetSwiperAction(std::function<void()>&& startAction, std::function<void()>&& endAction,
     OnOffsetChangeFunc&& onOffsetChangeFunc, V2::SwipeEdgeEffect edgeEffect)

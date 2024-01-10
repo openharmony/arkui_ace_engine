@@ -83,6 +83,7 @@ float CalculateFriction(float gamma)
 SwiperPattern::SwiperPattern()
 {
     swiperController_ = MakeRefPtr<SwiperController>();
+    InitSwiperController();
 }
 
 void SwiperPattern::OnAttachToFrameNode()
@@ -215,7 +216,6 @@ void SwiperPattern::OnModifyDone()
     InitArrow();
     SetLazyLoadIsLoop();
     RegisterVisibleAreaChange();
-    InitSwiperController();
     InitTouchEvent(gestureHub);
     InitHoverMouseEvent();
     StopAndResetSpringAnimation();
@@ -844,6 +844,7 @@ bool SwiperPattern::IsUseCustomAnimation() const
 
 void SwiperPattern::SwipeTo(int32_t index)
 {
+    LOGE("ZMH, SwiperPattern::SwipeTo enter");
     auto targetIndex = IsLoop() ? index : (index < 0 || index > (TotalCount() - 1)) ? 0 : index;
     targetIndex = IsLoop() ? targetIndex : std::clamp(targetIndex, 0, TotalCount() - GetDisplayCount());
 
@@ -854,11 +855,13 @@ void SwiperPattern::SwipeTo(int32_t index)
     CHECK_NULL_VOID(tabsPattern);
     if (tabsPattern->GetInterceptStatus()) {
         auto interceptCallback = tabsPattern->GetOnContentWillChange();
-        if (!interceptCallback(targetIndex)) {
-            LOGE("ZMH, interceptCallback return false, targetIndex:%{public}d", targetIndex);
+        if (!interceptCallback(currentIndex_, targetIndex)) {
+            LOGE("ZMH, interceptCallback return false, currentIndex:%{public}d, comingIndex:%{public}d",
+                currentIndex_, targetIndex);
             return;
         }
-        LOGE("ZMH, interceptCallback return true, targetIndex:%{public}d", targetIndex);
+        LOGE("ZMH, interceptCallback return true, currentIndex:%{public}d, comingIndex:%{public}d",
+            currentIndex_, targetIndex);
     }
 
     if (IsUseCustomAnimation()) {
@@ -1050,10 +1053,6 @@ void SwiperPattern::StopFadeAnimation()
 
 void SwiperPattern::InitSwiperController()
 {
-    if (swiperController_->HasInitialized()) {
-        return;
-    }
-
     swiperController_->SetSwipeToImpl([weak = WeakClaim(this)](int32_t index, bool reverse) {
         auto swiper = weak.Upgrade();
         if (swiper) {
@@ -1389,18 +1388,7 @@ bool SwiperPattern::CheckOverScroll(float offset)
             }
             break;
         case EdgeEffect::FADE:
-            if (IsOutOfBoundary(offset)) {
-                if (!IsVisibleChildrenSizeLessThanSwiper()) {
-                    currentDelta_ = currentDelta_ - offset;
-                }
-                auto host = GetHost();
-                CHECK_NULL_RETURN(host, false);
-                if (itemPosition_.begin()->first == 0 || itemPosition_.rbegin()->first == TotalCount() - 1) {
-                    auto remainOffset = GetDistanceToEdge();
-                    fadeOffset_ += (offset - remainOffset);
-                }
-                host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-                MarkDirtyNodeSelf();
+            if (FadeOverScroll(offset)) {
                 return true;
             }
             break;
@@ -1441,6 +1429,29 @@ bool SwiperPattern::SpringOverScroll(float offset)
     return true;
 }
 
+bool SwiperPattern::FadeOverScroll(float offset)
+{
+    if (IsOutOfBoundary(fadeOffset_ + offset)) {
+        auto onlyUpdateFadeOffset = (itemPosition_.begin()->first == 0 && offset < 0.0f) ||
+                               (itemPosition_.rbegin()->first == TotalCount() - 1 && offset > 0.0f);
+        if (!IsVisibleChildrenSizeLessThanSwiper() && !onlyUpdateFadeOffset) {
+            currentDelta_ = currentDelta_ - offset;
+        }
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, false);
+        if (itemPosition_.begin()->first == 0 || itemPosition_.rbegin()->first == TotalCount() - 1) {
+            auto remainOffset = GetDistanceToEdge();
+            fadeOffset_ += (offset - remainOffset);
+        }
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        MarkDirtyNodeSelf();
+        return true;
+    }
+
+    fadeOffset_ = 0.0f;
+    return false;
+}
+
 void SwiperPattern::HandleTouchBottomLoop()
 {
     auto currentFirstIndex = GetLoopIndex(currentFirstIndex_);
@@ -1448,11 +1459,19 @@ void SwiperPattern::HandleTouchBottomLoop()
     bool commTouchBottom = (currentFirstIndex == TotalCount() - 1);
     bool followTouchBottom = (commTouchBottom && (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT ||
                                                      gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT));
+    if (followTouchBottom) {
+        if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_LEFT) {
+            touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+        } else if (gestureState_ == GestureState::GESTURE_STATE_FOLLOW_RIGHT) {
+            touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+        }
+        return;
+    }
     bool leftReleaseTouchBottom = (commTouchBottom && (currentIndex == 0 && gestureState_ ==
         GestureState::GESTURE_STATE_RELEASE_LEFT));
     bool rightReleaseTouchBottom = ((currentFirstIndex == 0) && (currentIndex == TotalCount() - 1) &&
                                     gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT);
-    if (followTouchBottom || leftReleaseTouchBottom || rightReleaseTouchBottom) {
+    if (leftReleaseTouchBottom || rightReleaseTouchBottom) {
         if (currentIndex == 0) {
             // left bottom
             touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
@@ -1464,23 +1483,24 @@ void SwiperPattern::HandleTouchBottomLoop()
     return;
 }
 
-void SwiperPattern::CalculateGestureState(float additionalOffset, float currentTurnPageRate)
+void SwiperPattern::CalculateGestureState(float additionalOffset, float currentTurnPageRate, int32_t preFirstIndex)
 {
-    if (gestureState_ == GestureState::GESTURE_STATE_INIT) {
-        return;
+    // Keep follow hand
+    if ((preFirstIndex == 0 && currentFirstIndex_ == TotalCount() - 1) ||
+        (preFirstIndex == TotalCount() - 1 && currentFirstIndex_ == 0)) {
+        needTurn_ = true;
     }
-    gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+
     if (GreatNotEqual(additionalOffset, 0.0f)) {
         gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+        needTurn_ = false;
     } else if (LessNotEqual(additionalOffset, 0.0f)) {
         gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
-    } else if ((GetLoopIndex(currentFirstIndex_) == GetLoopIndex(currentIndex_)) &&
-               GreatNotEqual(std::abs(currentTurnPageRate), std::abs(turnPageRate_))) {
-        gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
-    } else if (currentTurnPageRate == 0 && turnPageRate_ == 0) {
-        gestureState_ = GestureState::GESTURE_STATE_NONE;
-    } else if (GetLoopIndex(currentFirstIndex_) != GetLoopIndex(currentIndex_)) {
-        gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+        needTurn_ = false;
+    } else if (GetLoopIndex(currentFirstIndex_) >= GetLoopIndex(currentIndex_)) {
+        gestureState_ = needTurn_ ? GestureState::GESTURE_STATE_FOLLOW_LEFT : GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    } else if (GetLoopIndex(currentFirstIndex_) < GetLoopIndex(currentIndex_)) {
+        gestureState_ = needTurn_ ? GestureState::GESTURE_STATE_FOLLOW_RIGHT : GestureState::GESTURE_STATE_FOLLOW_LEFT;
     }
     return;
 }
@@ -1499,6 +1519,7 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset)
         return;
     }
 
+    int32_t preFirstIndex = currentFirstIndex_;
     float currentTurnPageRate = FLT_MAX;
     for (const auto& iter : itemPosition_) {
         if (LessNotEqual((iter.second.startPos + additionalOffset), 0) &&
@@ -1520,7 +1541,7 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset)
     }
 
     currentFirstIndex_ = GetLoopIndex(currentFirstIndex_);
-    CalculateGestureState(additionalOffset, currentTurnPageRate);
+    CalculateGestureState(additionalOffset, currentTurnPageRate, preFirstIndex);
     turnPageRate_ = (currentTurnPageRate == FLT_MAX ? turnPageRate_ : currentTurnPageRate);
 
     touchBottomType_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
@@ -1697,18 +1718,10 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
     auto mainDelta = static_cast<float>(info.GetMainDelta());
     if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::TOUCHPAD) {
         isTouchPad_ = true;
-        auto mainSize = CalculateVisibleSize();
-        if (std::abs(mainDelta) > mainSize) {
-            mainDelta = mainDelta > 0 ? mainSize : -mainSize;
-        }
-
-        if ((std::abs(mainDeltaSum_ + mainDelta)) > mainSize) {
-            mainDelta = GreatNotEqual((mainDeltaSum_ + mainDelta), 0) ? (mainSize - mainDeltaSum_) :
-                (-mainDeltaSum_ - mainSize);
-        }
-
-        mainDeltaSum_ += mainDelta;
     }
+    auto mainSize = CalculateVisibleSize();
+    ProcessDelta(mainDelta, mainSize, mainDeltaSum_);
+    mainDeltaSum_ += mainDelta;
 
     PointF dragPoint(static_cast<float>(info.GetGlobalLocation().GetX()),
         static_cast<float>(info.GetGlobalLocation().GetY()));
@@ -1825,15 +1838,21 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDista
         return nextIndex;
     }
 
+    auto firstIndex = firstItemInfoInVisibleArea.first;
+    auto dragDistance = firstItemInfoInVisibleArea.second.endPos;
+    if (firstIndex == currentIndex_ && firstItemInfoInVisibleArea.second.startPos > 0) {
+        firstIndex--;
+        dragDistance = firstItemInfoInVisibleArea.second.startPos;
+    }
     auto direction = GreatNotEqual(velocity, 0.0);
-    auto dragThresholdFlag = direction ? firstItemInfoInVisibleArea.second.endPos > firstItemLength / 2
-                                       : firstItemInfoInVisibleArea.second.endPos < firstItemLength / 2;
+    auto dragThresholdFlag =
+        direction ? dragDistance > firstItemLength / 2 : firstItemInfoInVisibleArea.second.endPos < firstItemLength / 2;
     auto turnVelocity = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? NEW_MIN_TURN_PAGE_VELOCITY
                                                                                            : MIN_TURN_PAGE_VELOCITY;
     if ((!onlyDistance && std::abs(velocity) > turnVelocity) || dragThresholdFlag) {
-        nextIndex = direction ? firstItemInfoInVisibleArea.first : firstItemInfoInVisibleArea.first + 1;
+        nextIndex = direction ? firstIndex : firstItemInfoInVisibleArea.first + 1;
     } else {
-        nextIndex = direction ? firstItemInfoInVisibleArea.first + 1 : firstItemInfoInVisibleArea.first;
+        nextIndex = direction ? firstIndex + 1 : firstItemInfoInVisibleArea.first;
     }
 
     if (!IsAutoLinear() && nextIndex > currentIndex_ + GetDisplayCount()) {
@@ -4027,5 +4046,17 @@ RefPtr<FrameNode> SwiperPattern::GetCurrentFrameNode(int32_t currentIndex) const
     auto currentLayoutWrapper = host->GetChildByIndex(GetLoopIndex(currentIndex));
     CHECK_NULL_RETURN(currentLayoutWrapper, nullptr);
     return currentLayoutWrapper->GetHostNode();
+}
+
+void SwiperPattern::ProcessDelta(float& delta, float mainSize, float deltaSum)
+{
+    if (std::abs(delta) > mainSize) {
+        delta = delta > 0 ? mainSize : -mainSize;
+    }
+
+    if ((std::abs(deltaSum + delta)) > mainSize) {
+        delta = GreatNotEqual((deltaSum + delta), 0) ? (mainSize - deltaSum) :
+            (-deltaSum - mainSize);
+    }
 }
 } // namespace OHOS::Ace::NG

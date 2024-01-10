@@ -239,3 +239,21 @@ int32_t OH_NativeXComponent::UnregisterOnFrameCallback()
     xcomponentImpl_->setUnregisterOnFrameEventCallback_();
     return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
 }
+
+int32_t OH_NativeXComponent::AttachNativeRootNode(void* root)
+{
+    if (root == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    xcomponentImpl_->AttachContainer(root);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}
+
+int32_t OH_NativeXComponent::DetachNativeRootNode(void* root)
+{
+    if (root == nullptr) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    xcomponentImpl_->DetachContainer(root);
+    return OH_NATIVEXCOMPONENT_RESULT_SUCCESS;
+}

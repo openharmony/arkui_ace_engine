@@ -54,6 +54,33 @@ void TextModelNG::Create(const std::string& content)
     textPattern->ClearSelectionMenu();
 }
 
+RefPtr<FrameNode> TextModelNG::CreateFrameNode(int32_t nodeId, const std::string& content)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, nodeId, AceType::MakeRefPtr<TextPattern>());
+
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto layout = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    if (layout) {
+        layout->UpdateContent(content);
+    }
+    // set draggable for framenode
+    if (frameNode->IsFirstBuilding()) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, nullptr);
+        auto draggable = pipeline->GetDraggable<TextTheme>();
+        frameNode->SetDraggable(draggable);
+        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_RETURN(gestureHub, nullptr);
+        gestureHub->SetTextDraggable(true);
+    }
+
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    textPattern->SetTextController(AceType::MakeRefPtr<TextController>());
+    textPattern->GetTextController()->SetPattern(WeakPtr(textPattern));
+    textPattern->ClearSelectionMenu();
+    return frameNode;
+}
+
 void TextModelNG::SetFont(const Font& value)
 {
     if (value.fontSize.has_value()) {

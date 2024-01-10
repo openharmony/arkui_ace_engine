@@ -206,23 +206,23 @@ public:
     bool DumpViewData(const RefPtr<NG::FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap);
 
     void SearchElementInfoByAccessibilityId(
-        int32_t elementId, int32_t mode,
-        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) override;
+        int64_t elementId, int32_t mode,
+        int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) override;
 
     void SearchElementInfosByText(
-        int32_t elementId, const std::string& text, int32_t baseParent,
+        int64_t elementId, const std::string& text, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) override;
 
     void FindFocusedElementInfo(
-        int32_t elementId, int32_t focusType,
-        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) override;
+        int64_t elementId, int32_t focusType,
+        int64_t baseParent, Accessibility::AccessibilityElementInfo& output) override;
 
     void FocusMoveSearch(
-        int32_t elementId, int32_t direction,
-        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) override;
+        int64_t elementId, int32_t direction,
+        int64_t baseParent, Accessibility::AccessibilityElementInfo& output) override;
 
-    bool NotifyExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int32_t offset) override;
+    bool NotifyExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int64_t offset) override;
 
     int32_t GetInstanceId() override
     {

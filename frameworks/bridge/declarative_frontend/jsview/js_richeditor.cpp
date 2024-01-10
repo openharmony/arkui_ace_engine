@@ -174,6 +174,11 @@ JSRef<JSObject> JSRichEditor::CreateJSTextStyleResult(const TextStyleResult& tex
     decorationObj->SetProperty<int32_t>("type", textStyleResult.decorationType);
     decorationObj->SetProperty<std::string>("color", textStyleResult.decorationColor);
     textStyleObj->SetPropertyObject("decoration", decorationObj);
+    textStyleObj->SetProperty<int32_t>("textAlign", textStyleResult.textAlign);
+    JSRef<JSArray> leadingMarginArray = JSRef<JSArray>::New();
+    leadingMarginArray->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(textStyleResult.leadingMarginSize[0])));
+    leadingMarginArray->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(textStyleResult.leadingMarginSize[1])));
+    textStyleObj->SetPropertyObject("leadingMarginSize", leadingMarginArray);
 
     return textStyleObj;
 }
@@ -200,6 +205,8 @@ JSRef<JSObject> JSRichEditor::CreateJSImageStyleResult(const ImageStyleResult& i
     imageSpanStyleObj->SetPropertyObject("size", sizeArray);
     imageSpanStyleObj->SetProperty<int32_t>("verticalAlign", imageStyleResult.verticalAlign);
     imageSpanStyleObj->SetProperty<int32_t>("objectFit", imageStyleResult.objectFit);
+    imageSpanStyleObj->SetProperty<std::string>("borderRadius", imageStyleResult.borderRadius);
+    imageSpanStyleObj->SetProperty<std::string>("margin", imageStyleResult.margin);
 
     return imageSpanStyleObj;
 }
@@ -760,6 +767,7 @@ void JSRichEditorController::ParseJsTextStyle(
 void JSRichEditorController::ParseJsSymbolSpanStyle(
     const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
 {
+    updateSpanStyle.isSymbolStyle = true;
     JSRef<JSVal> fontColor = styleObject->GetProperty("fontColor");
     std::vector<Color> symbolColor;
     if (!fontColor->IsNull() && JSContainerBase::ParseJsSymbolColor(fontColor, symbolColor)) {

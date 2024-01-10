@@ -141,6 +141,7 @@ public:
     void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) override;
     void SetBackShadow(const std::vector<Shadow>& shadows) override;
     void SetBlendMode(BlendMode blendMode) override;
+    void SetBlendApplyType(BlendApplyType blendApplyType) override;
     void SetColorBlend(const Color& value) override;
     void SetWindowBlur(float progress, WindowBlurStyle blurStyle) override;
     void SetBrightness(const Dimension& value) override;

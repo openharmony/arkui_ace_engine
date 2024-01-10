@@ -136,7 +136,7 @@ public:
     virtual void SetBarGridAlign(const BarGridColumnOptions& BarGridColumnOptions) = 0;
     virtual void SetIsCustomAnimation(bool isCustom) {}
     virtual void SetOnCustomAnimation(TabsCustomAnimationEvent&& onCustomAnimation) {}
-    virtual void SetOnContentWillChange(std::function<bool(int32_t)>&& callback) {}
+    virtual void SetOnContentWillChange(std::function<bool(int32_t, int32_t)>&& callback) {}
 
 private:
     static std::unique_ptr<TabsModel> instance_;

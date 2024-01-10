@@ -862,7 +862,7 @@ public:
 
     bool PaintFocusState(bool isNeedStateStyles = true);
     bool PaintAllFocusState();
-    bool PaintInnerFocusState(const RoundRect& paintRect);
+    bool PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate = false);
     void ClearFocusState(bool isNeedStateStyles = true);
     void ClearAllFocusState();
 

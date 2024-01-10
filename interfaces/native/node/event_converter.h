@@ -23,6 +23,7 @@ namespace OHOS::Ace::NodeModel {
 
 // for error info, use int instead of ArkUINodeEventType
 ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type);
+ArkUI_Int32 ConvertToNodeEventType(ArkUIAsyncEventKind type);
 
 bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event);
 

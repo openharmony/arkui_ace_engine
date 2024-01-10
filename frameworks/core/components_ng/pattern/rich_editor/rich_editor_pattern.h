@@ -175,6 +175,7 @@ public:
     {
         PerformAction(TextInputAction::NEW_LINE, false);
     }
+    bool HandleOnEscape() override;
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
     void CursorMove(CaretMoveIntent direction) override;
@@ -401,6 +402,7 @@ private:
     void StartTwinkling();
     void StopTwinkling();
     void UpdateTextStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
+    void UpdateSymbolStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void UpdateImageStyle(RefPtr<FrameNode>& imageNode, const ImageSpanAttribute& imageStyle);
     void InitTouchEvent();
     bool SelectOverlayIsOn();

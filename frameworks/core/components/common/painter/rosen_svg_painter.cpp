@@ -716,7 +716,11 @@ double RosenSvgPainter::UpdateTextPath(
         } else {
             font.SetTypeface(fontTypeNormal_);
         }
+#ifdef WINDOWS_PLATFORM
+        auto width = font.MeasureText(&temp, 4, RSTextEncoding::UTF16);
+#else
         auto width = font.MeasureText(&temp, sizeof(wchar_t), RSTextEncoding::UTF16);
+#endif
         if (length < offset + width + space) {
             break;
         }

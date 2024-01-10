@@ -225,12 +225,6 @@ void JSButton::CompleteParameters(ButtonParameters& buttonParameters)
     if (!buttonParameters.maxLines.has_value()) {
         buttonParameters.maxLines = buttonTheme->GetTextMaxLines();
     }
-    if (!buttonParameters.minFontSize.has_value()) {
-        buttonParameters.minFontSize = buttonTheme->GetMinFontSize();
-    }
-    if (!buttonParameters.maxFontSize.has_value()) {
-        buttonParameters.maxFontSize = buttonTheme->GetMaxFontSize();
-    }
     if (!buttonParameters.fontSize.has_value()) {
         buttonParameters.fontSize = textStyle.GetFontSize();
     }

@@ -16,6 +16,8 @@
 #include "native_interface_xcomponent.h"
 
 #include "frameworks/core/components/xcomponent/native_interface_xcomponent_impl.h"
+#include "node/basic_types.h"
+#include "node/node_model.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -226,6 +228,24 @@ int32_t OH_NativeXComponent_UnregisterOnFrameCallback(OH_NativeXComponent* compo
         return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
     }
     return component->UnregisterOnFrameCallback();
+}
+
+int32_t OH_NativeXComponent_AttachNativeRootNode(
+    OH_NativeXComponent* component, void* root)
+{
+    if ((component == nullptr) || (root == nullptr)) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    return component->AttachNativeRootNode(reinterpret_cast<ArkUI_NodeHandle>(root)->uiNodeHandle);
+}
+
+int32_t OH_NativeXComponent_DetachNativeRootNode(
+    OH_NativeXComponent* component, void* root)
+{
+    if ((component == nullptr) || (root == nullptr)) {
+        return OH_NATIVEXCOMPONENT_RESULT_BAD_PARAMETER;
+    }
+    return component->DetachNativeRootNode(reinterpret_cast<ArkUI_NodeHandle>(root)->uiNodeHandle);
 }
 
 #ifdef __cplusplus

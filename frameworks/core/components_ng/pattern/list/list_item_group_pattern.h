@@ -200,6 +200,8 @@ private:
     float_t headerMainSize_ = 0.0f;
     float_t footerMainSize_ = 0.0f;
 
+    std::optional<LayoutedItemInfo> layoutedItemInfo_;
+
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
     float spaceWidth_ = 0.0f;
     Axis axis_ = Axis::VERTICAL;

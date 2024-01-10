@@ -44,7 +44,6 @@ public:
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->GetRenderContext()->SetClipToBounds(true);
-        host->SetNeedAdjustOffset(false);
         SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }

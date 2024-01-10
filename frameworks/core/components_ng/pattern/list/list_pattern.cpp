@@ -754,7 +754,7 @@ bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
     bool outOfEnd = (endIndex_ == maxListItemIndex_) && LessNotEqual(endPos, contentEndPos) &&
         LessNotEqual(startPos, contentStartOffset_);
     if (IsScrollSnapAlignCenter()) {
-        auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
+        float itemHeight = itemPosition_[centerIndex_].endPos - itemPosition_[centerIndex_].startPos;
         outOfStart = (startIndex_ == 0) && Positive(startPos + itemHeight / 2.0f - contentMainSize_ / 2.0f);
         outOfEnd =
             (endIndex_ == maxListItemIndex_) && LessNotEqual(endPos - itemHeight / 2.0f, contentMainSize_ / 2.0f);
@@ -1551,7 +1551,8 @@ void ListPattern::UpdateScrollBarOffset()
     auto estimatedHeight = itemsSize / itemPosition_.size() * (maxListItemIndex_ + 1) - spaceWidth_;
     if (lanes_ == 1) {
         const auto& begin = *itemPosition_.begin();
-        auto calculate = ListHeightOffsetCalculator(begin.first, {begin.second.startPos, begin.second.endPos});
+        auto calculate = ListHeightOffsetCalculator(
+            begin.first, {begin.second.startPos, begin.second.endPos}, spaceWidth_);
         if (calculate.GetEstimateHeightAndOffset(GetHost())) {
             currentOffset = calculate.GetEstimateOffset();
             estimatedHeight = calculate.GetEstimateHeight();
@@ -1841,11 +1842,11 @@ void ListPattern::ClearMultiSelect()
     ClearSelectedZone();
 }
 
-bool ListPattern::IsItemSelected(const GestureEvent& info)
+bool ListPattern::IsItemSelected()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto node = host->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+    auto node = host->FindChildByPosition(mouseStartOffsetGlobal_.GetX(), mouseStartOffsetGlobal_.GetY());
     CHECK_NULL_RETURN(node, false);
     auto itemPattern = node->GetPattern<ListItemPattern>();
     if (itemPattern) {
@@ -1853,7 +1854,7 @@ bool ListPattern::IsItemSelected(const GestureEvent& info)
     }
     auto itemGroupPattern = node->GetPattern<ListItemGroupPattern>();
     if (itemGroupPattern) {
-        auto itemNode = node->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+        auto itemNode = node->FindChildByPosition(mouseStartOffsetGlobal_.GetX(), mouseStartOffsetGlobal_.GetY());
         CHECK_NULL_RETURN(itemNode, false);
         itemPattern = itemNode->GetPattern<ListItemPattern>();
         CHECK_NULL_RETURN(itemPattern, false);

@@ -30,6 +30,7 @@ public:
     void CreateWithWrap() override {}
     static void SetJustifyContent(FrameNode* frameNode, FlexAlign flexAlign);
     static void SetAlignItems(FrameNode* frameNode, FlexAlign flexAlign);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
 };
 
 } // namespace OHOS::Ace::NG

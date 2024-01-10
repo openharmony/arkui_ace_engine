@@ -53,7 +53,7 @@ public:
             auto host = GetFrameNode();
             if (host) {
                 auto id = host->GetInspectorIdValue("");
-                builder.SetId(id).SetType(host->GetHostTag());
+                builder.SetId(id).SetType(host->GetHostTag()).SetDescription(host->GetAutoEventParamValue(""));
             }
             builder.SetEventType(Recorder::EventType::SEARCH_SUBMIT).SetText(value);
             Recorder::EventRecorder::Get().OnEvent(std::move(builder));

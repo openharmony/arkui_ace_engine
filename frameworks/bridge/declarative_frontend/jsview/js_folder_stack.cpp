@@ -86,7 +86,7 @@ void JSFolderStack::SetAlignContent(const JSCallbackInfo& info)
         return;
     }
     auto value = info[0]->ToNumber<size_t>();
-    if (value < 0 || value >= static_cast<int32_t>(ALIGNMENT_ARR.size())) {
+    if (value < 0 || static_cast<int32_t>(value) >= static_cast<int32_t>(ALIGNMENT_ARR.size())) {
         FolderStackModel::GetInstance()->SetAlignment(Alignment::CENTER);
         return;
     }

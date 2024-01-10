@@ -606,7 +606,7 @@ enum class PositionMode {
     BOTTOM,
 };
 
-enum class XComponentType { SURFACE = 0, COMPONENT, TEXTURE };
+enum class XComponentType { UNKNOWN = -1, SURFACE = 0, COMPONENT, TEXTURE, NODE };
 
 enum class WebType { SURFACE = 0, TEXTURE };
 

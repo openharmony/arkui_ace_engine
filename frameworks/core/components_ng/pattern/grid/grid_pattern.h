@@ -203,6 +203,16 @@ public:
     {
         return true;
     }
+    
+    std::optional<GridPredictLayoutParam> GetPredictLayoutParam() const
+    {
+        return predictLayoutParam_;
+    }
+
+    void SetPredictLayoutParam(std::optional<GridPredictLayoutParam> param)
+    {
+        predictLayoutParam_ = param;
+    }
 
 private:
     float GetEndOffset();
@@ -232,7 +242,7 @@ private:
     bool HandleDirectionKey(KeyCode code);
 
     void ClearMultiSelect() override;
-    bool IsItemSelected(const GestureEvent& info) override;
+    bool IsItemSelected() override;
     void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;
     void UpdateScrollBarOffset() override;
     void UpdateRectOfDraggedInItem(int32_t insertIndex);
@@ -274,6 +284,7 @@ private:
     bool isSmoothScrolling_ = false;
     GridLayoutInfo scrollGridLayoutInfo_;
     GridLayoutInfo gridLayoutInfo_;
+    std::optional<GridPredictLayoutParam> predictLayoutParam_;
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);
 };
 

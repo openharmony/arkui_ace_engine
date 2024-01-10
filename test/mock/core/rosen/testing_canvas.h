@@ -55,6 +55,7 @@ public:
     virtual void DrawArc(const TestingRect& oval, float startAngle, float sweepAngle) {}
     virtual void DrawRect(const TestingRect& rect) {}
     virtual void ClipRoundRect(const TestingRoundRect& roundRect, ClipOp op, bool antiAlias = false) {}
+    virtual void ClipRoundRect(const TestingRect& rect, std::vector<TestingPoint>& pts, bool antiAlias = false) {}
     virtual void Rotate(float deg, float sx, float sy) {}
     virtual void Rotate(float deg) {}
     virtual void Translate(float tx, float ty) {}

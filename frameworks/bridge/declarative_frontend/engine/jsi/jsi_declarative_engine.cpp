@@ -1671,6 +1671,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
     const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
     CHECK_RUN_ON(JS);
+
     if (Container::IsCurrentUseNewPipeline()) {
         ACE_DCHECK(engineInstance_);
         auto xcFrameNode = NG::FrameNode::GetFrameNode(V2::XCOMPONENT_ETS_TAG, static_cast<int32_t>(nodeId));
@@ -1679,11 +1680,6 @@ void JsiDeclarativeEngine::FireExternalEvent(
         }
         auto xcPattern = DynamicCast<NG::XComponentPattern>(xcFrameNode->GetPattern());
         CHECK_NULL_VOID(xcPattern);
-
-        void* nativeWindow = nullptr;
-
-        nativeWindow = xcPattern->GetNativeWindow();
-
         std::weak_ptr<OH_NativeXComponent> weakNativeXComponent;
         RefPtr<OHOS::Ace::NativeXComponentImpl> nativeXComponentImpl = nullptr;
 
@@ -1692,12 +1688,16 @@ void JsiDeclarativeEngine::FireExternalEvent(
         CHECK_NULL_VOID(nativeXComponent);
         CHECK_NULL_VOID(nativeXComponentImpl);
 
-        if (!nativeWindow) {
-            return;
+        auto type = xcPattern->GetType();
+        if (type == XComponentType::SURFACE || type == XComponentType::TEXTURE) {
+            void* nativeWindow = nullptr;
+            nativeWindow = xcPattern->GetNativeWindow();
+            if (!nativeWindow) {
+                return;
+            }
+            nativeXComponentImpl->SetSurface(nativeWindow);
         }
-        nativeXComponentImpl->SetSurface(nativeWindow);
         nativeXComponentImpl->SetXComponentId(componentId);
-
         auto* arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
         if (arkNativeEngine == nullptr) {
             return;
@@ -1708,6 +1708,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         if (status != napi_ok) {
             return;
         }
+
         std::string arguments;
         auto soPath = xcPattern->GetSoPath().value_or("");
         auto runtime = engineInstance_->GetJsRuntime();
@@ -1718,30 +1719,31 @@ void JsiDeclarativeEngine::FireExternalEvent(
         if (objXComp.IsEmpty() || pandaRuntime->HasPendingException()) {
             return;
         }
-
         auto objContext = JsiObject(objXComp);
         JSRef<JSObject> obj = JSRef<JSObject>::Make(objContext);
         OHOS::Ace::Framework::XComponentClient::GetInstance().AddJsValToJsValMap(componentId, obj);
         napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
 
-        auto task = [weak = WeakClaim(this), weakPattern = AceType::WeakClaim(AceType::RawPtr(xcPattern))]() {
-            auto pattern = weakPattern.Upgrade();
-            if (!pattern) {
+        if (type == XComponentType::SURFACE || type == XComponentType::TEXTURE) {
+            auto task = [weak = WeakClaim(this), weakPattern = AceType::WeakClaim(AceType::RawPtr(xcPattern))]() {
+                auto pattern = weakPattern.Upgrade();
+                if (!pattern) {
+                    return;
+                }
+                auto bridge = weak.Upgrade();
+                if (bridge) {
+#ifdef XCOMPONENT_SUPPORTED
+                    pattern->NativeXComponentInit();
+#endif
+                }
+            };
+
+            auto delegate = engineInstance_->GetDelegate();
+            if (!delegate) {
                 return;
             }
-            auto bridge = weak.Upgrade();
-            if (bridge) {
-#ifdef XCOMPONENT_SUPPORTED
-                pattern->NativeXComponentInit();
-#endif
-            }
-        };
-
-        auto delegate = engineInstance_->GetDelegate();
-        if (!delegate) {
-            return;
+            delegate->PostSyncTaskToPage(task);
         }
-        delegate->PostSyncTaskToPage(task);
         return;
     }
 #ifndef NG_BUILD

@@ -16,47 +16,24 @@
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 
 #include <algorithm>
-#include <cmath>
-#include <cstdint>
 
-#include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
-#include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navigation/bar_item_event_hub.h"
-#include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
-#include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
-#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
-#include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
-#include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/option/option_view.h"
-#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/touch_event.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -540,7 +517,6 @@ void NavBarPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    host->SetNeedAdjustOffset(false);
     SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
     host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
@@ -756,27 +732,5 @@ bool NavBarPattern::CanCoordScrollUp(float offset) const
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_RETURN(titlePattern, false);
     return Negative(offset) && titlePattern->IsCurrentMaxTitle();
-}
-
-void NavBarPattern::UpdateNeedRecalculateSafeArea()
-{
-    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
-    CHECK_NULL_VOID(hostNode);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto safeArea = pipeline->GetSafeArea();
-    auto geometryNode = hostNode->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto parentGlobalOffset = hostNode->GetParentGlobalOffsetDuringLayout();
-    auto frame = geometryNode->GetFrameRect() + parentGlobalOffset;
-    if (!safeArea.top_.IsOverlapped(frame.Top())) {
-        auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-        CHECK_NULL_VOID(titleBarNode);
-        auto geometryNode = titleBarNode->GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        auto offset = OffsetF(0.0f, 0.0f);
-        geometryNode->SetFrameOffset(offset);
-        titleBarNode->ForceSyncGeometryNode();
-    }
 }
 } // namespace OHOS::Ace::NG

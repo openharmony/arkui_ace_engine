@@ -107,12 +107,12 @@ public:
         isDisableSwipe_ = isDisableSwipe;
     }
 
-    void SetOnContentWillChange(std::function<bool(int32_t)>&& callback)
+    void SetOnContentWillChange(std::function<bool(int32_t, int32_t)>&& callback)
     {
         callback_ = callback;
     }
 
-    std::function<bool(int32_t)> GetOnContentWillChange() const
+    std::function<bool(int32_t, int32_t)> GetOnContentWillChange() const
     {
         return callback_;
     }
@@ -145,7 +145,7 @@ private:
     ChangeEventPtr onIndexChangeEvent_;
     AnimationStartEventPtr animationStartEvent_;
     AnimationEndEventPtr animationEndEvent_;
-    std::function<bool(int32_t)> callback_;
+    std::function<bool(int32_t, int32_t)> callback_;
     bool interceptStatus_ = false;
 };
 

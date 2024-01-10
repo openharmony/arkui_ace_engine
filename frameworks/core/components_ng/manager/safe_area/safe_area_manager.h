@@ -124,6 +124,16 @@ public:
         geoRestoreNodes_.insert(node);
     }
 
+    void AddNeedExpandNode(const WeakPtr<FrameNode>& node)
+    {
+        needExpandNodes_.insert(node);
+    }
+
+    void ClearNeedExpandNode()
+    {
+        needExpandNodes_.clear();
+    }
+
     void RemoveRestoreNode(const WeakPtr<FrameNode>& node)
     {
         geoRestoreNodes_.erase(node);
@@ -133,6 +143,7 @@ public:
     {
         return safeAreaCurve_;
     }
+    void ExpandSafeArea();
 
     OffsetF GetWindowWrapperOffset();
 
@@ -175,6 +186,24 @@ private:
      */
     std::set<WeakPtr<FrameNode>> geoRestoreNodes_;
 
+    struct DepthCompare {
+        bool operator()(const WeakPtr<FrameNode>& a, const WeakPtr<FrameNode>& b) const
+        {
+            auto ptrA = a.Upgrade();
+            auto ptrB = b.Upgrade();
+            if (!ptrA || !ptrB) {
+                return false;
+            }
+            if (ptrA->GetDepth() < ptrB->GetDepth()) {
+                return true;
+            }
+            if (ptrA->GetDepth() == ptrB->GetDepth()) {
+                return ptrA < ptrB;
+            }
+            return false;
+        }
+    };
+    std::set<WeakPtr<FrameNode>, DepthCompare> needExpandNodes_;
     // amount of offset to apply to Page when keyboard is up
     float keyboardOffset_ = 0.0f;
 

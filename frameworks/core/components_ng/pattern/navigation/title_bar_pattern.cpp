@@ -859,6 +859,9 @@ void TitleBarPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
 
     SetBackgroundAndBlur();
+
+    SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP};
+    host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
 }
 
 void TitleBarPattern::OnCoordScrollStart()

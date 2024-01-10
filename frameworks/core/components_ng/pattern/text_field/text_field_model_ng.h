@@ -65,6 +65,7 @@ public:
     void SetCopyOption(CopyOptions copyOption) override;
     void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems) override;
     void ProcessDefaultPadding(PaddingProperty& paddings);
+    static void ProcessDefaultStyleAndBehaviors(const RefPtr<FrameNode>& frameNode);
     void ResetMaxLength() override;
     void SetForegroundColor(const Color& value) override;
     void SetPasswordIcon(const PasswordIcon& passwordIcon) override;
@@ -92,7 +93,8 @@ public:
     void SetCancelIconColor(const Color& iconColor) override;
     void SetIsShowCancelButton(bool isShowCancelButton) override;
     void SetSelectAllValue(bool isSetSelectAllValue) override;
-
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::optional<std::string>& placeholder,
+        const std::optional<std::string>& value, bool isTextArea);
     static void SetInputStyle(FrameNode* frameNode, InputStyle value);
     static void SetSelectionMenuHidden(FrameNode* frameNode, bool contextMenuHidden);
     static void RequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
@@ -122,6 +124,9 @@ public:
     static void SetShowCounter(FrameNode* frameNode, bool value);
     static void SetShowError(FrameNode* frameNode, const std::string& errorText, bool visible);
     static void SetCounterType(FrameNode* frameNode, int32_t value);
+    static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
+    static void SetTextInputText(FrameNode* frameNode, const std::string& value);
+    static void SetTextInputPlaceHolder(FrameNode* frameNode, const std::string& placeholder);
 private:
     void AddDragFrameNodeToManager() const;
     void SetDraggable(bool draggable);

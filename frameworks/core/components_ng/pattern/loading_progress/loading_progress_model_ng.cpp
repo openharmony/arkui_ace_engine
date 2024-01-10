@@ -31,7 +31,12 @@ void LoadingProgressModelNG::Create()
         V2::LOADING_PROGRESS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LoadingProgressPattern>(); });
     stack->Push(frameNode);
 }
-
+RefPtr<FrameNode> LoadingProgressModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode =
+        FrameNode::CreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG, nodeId, AceType::MakeRefPtr<LoadingProgressPattern>());
+    return frameNode;
+}
 void LoadingProgressModelNG::SetColor(const Color& value)
 {
     ACE_UPDATE_PAINT_PROPERTY(LoadingProgressPaintProperty, Color, value);

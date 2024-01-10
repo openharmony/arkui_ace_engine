@@ -144,6 +144,7 @@ private:
     float baselineOffset_ = 0.0f;
     std::optional<TextStyle> textStyle_;
     RefPtr<PropertyBool> showSelect_;
+    float indent_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

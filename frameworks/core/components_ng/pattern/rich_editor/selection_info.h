@@ -46,6 +46,11 @@ enum SelectSpanType : int32_t {
     TYPESYMBOLSPAN,
 };
 
+enum RichEditorLeadingRange : int32_t {
+    LEADING_START,
+    LEADING_END,
+};
+
 struct SpanPosition {
     int32_t spanIndex = 0;
     int32_t spanRange[2] = { 0, 0 };
@@ -67,12 +72,16 @@ struct TextStyleResult {
     std::string fontFamily;
     int32_t decorationType = 0;
     std::string decorationColor;
+    int32_t textAlign = 0;
+    float leadingMarginSize[2] = { 0.0, 0.0 };
 };
 
 struct ImageStyleResult {
     double size[2] = { 0.0, 0.0 };
     int32_t verticalAlign = 0;
     int32_t objectFit = 0;
+    std::string borderRadius;
+    std::string margin;
 };
 
 struct ResultObject {

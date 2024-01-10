@@ -204,10 +204,17 @@ public:
             CHECK_NULL_VOID(container);
             auto taskExecutor = container->GetTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);
+            auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_VOID(context);
+            auto uiExtMgr = context->GetUIExtensionManager();
+            if (uiExtMgr && uiExtMgr->NotifyOccupiedAreaChangeInfo(info)) {
+                return;
+            }
+            auto curWindow = context->GetCurrentWindowRect();
+            positionY -= curWindow.Top();
             ContainerScope scope(instanceId_);
             taskExecutor->PostTask(
-                [container, keyboardRect, rsTransaction, positionY, height] {
-                    auto context = container->GetPipelineContext();
+                [context, keyboardRect, rsTransaction, positionY, height] {
                     CHECK_NULL_VOID(context);
                     context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, rsTransaction);
                 },
@@ -1548,6 +1555,12 @@ bool UIContentImpl::ProcessBackPressed()
     CHECK_NULL_RETURN(container, false);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(pipeline, false);
+    auto uiExtMgr = pipeline->GetUIExtensionManager();
+    if (uiExtMgr && uiExtMgr->OnBackPressed()) {
+        return true;
+    }
     bool ret = false;
     taskExecutor->PostSyncTask(
         [container, this, &ret]() {
@@ -2246,14 +2259,16 @@ void UIContentImpl::ProcessFormVisibleChange(bool isVisible)
 }
 
 void UIContentImpl::SearchElementInfoByAccessibilityId(
-    int32_t elementId, int32_t mode, int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
+    int64_t elementId, int32_t mode,
+    int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     container->SearchElementInfoByAccessibilityIdNG(elementId, mode, baseParent, output);
 }
 
-void UIContentImpl::SearchElementInfosByText(int32_t elementId, const std::string& text, int32_t baseParent,
+void UIContentImpl::SearchElementInfosByText(
+    int64_t elementId, const std::string& text, int64_t baseParent,
     std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -2262,7 +2277,8 @@ void UIContentImpl::SearchElementInfosByText(int32_t elementId, const std::strin
 }
 
 void UIContentImpl::FindFocusedElementInfo(
-    int32_t elementId, int32_t focusType, int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
+    int64_t elementId, int32_t focusType,
+    int64_t baseParent, Accessibility::AccessibilityElementInfo& output)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -2270,7 +2286,8 @@ void UIContentImpl::FindFocusedElementInfo(
 }
 
 void UIContentImpl::FocusMoveSearch(
-    int32_t elementId, int32_t direction, int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
+    int64_t elementId, int32_t direction,
+    int64_t baseParent, Accessibility::AccessibilityElementInfo& output)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -2278,7 +2295,7 @@ void UIContentImpl::FocusMoveSearch(
 }
 
 bool UIContentImpl::NotifyExecuteAction(
-    int32_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int32_t offset)
+    int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);

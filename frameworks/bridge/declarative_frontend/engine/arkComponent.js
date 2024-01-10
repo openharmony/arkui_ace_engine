@@ -817,6 +817,227 @@ class BorderModifier extends ModifierWithKey {
   }
 }
 BorderModifier.identity = Symbol('border');
+class OutlineColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOutlineColor(node);
+    }
+    else {
+      const valueType = typeof this.value;
+      if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
+        getUINativeModule().common.setOutlineColor(node, this.value, this.value, this.value, this.value);
+      }
+      else {
+        getUINativeModule().common.setOutlineColor(node, this.value.left, this.value.right, this.value.top, this.value.bottom);
+      }
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !(this.stageValue.left === this.value.left &&
+        this.stageValue.right === this.value.right &&
+        this.stageValue.top === this.value.top &&
+        this.stageValue.bottom === this.value.bottom);
+    }
+    else {
+      return true;
+    }
+  }
+}
+OutlineColorModifier.identity = Symbol('outlineColor');
+class OutlineRadiusModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOutlineRadius(node);
+    }
+    else {
+      const valueType = typeof this.value;
+      if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
+        getUINativeModule().common.setOutlineRadius(node, this.value, this.value, this.value, this.value);
+      }
+      else {
+        getUINativeModule().common.setOutlineRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
+      }
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !(this.stageValue.topLeft === this.value.topLeft &&
+        this.stageValue.topRight === this.value.topRight &&
+        this.stageValue.bottomLeft === this.value.bottomLeft &&
+        this.stageValue.bottomRight === this.value.bottomRight);
+    }
+    else {
+      return true;
+    }
+  }
+}
+OutlineRadiusModifier.identity = Symbol('outlineRadius');
+class OutlineStyleModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOutlineStyle(node);
+    }
+    else {
+      if (isNumber(this.value)) {
+        getUINativeModule().common.setOutlineStyle(node, this.value, this.value, this.value, this.value);
+      }
+      else {
+        getUINativeModule().common.setOutlineStyle(node, this.value.top, this.value.right, this.value.bottom, this.value.left);
+      }
+    }
+  }
+  checkObjectDiff() {
+    return !(this.value.top === this.stageValue.top &&
+      this.value.right === this.stageValue.right &&
+      this.value.bottom === this.stageValue.bottom &&
+      this.value.left === this.stageValue.left);
+  }
+}
+OutlineStyleModifier.identity = Symbol('outlineStyle');
+class OutlineWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOutlineWidth(node);
+    }
+    else {
+      if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
+        getUINativeModule().common.setOutlineWidth(node, this.value, this.value, this.value, this.value);
+      }
+      else {
+        getUINativeModule().common.setOutlineWidth(node, this.value.left, this.value.right, this.value.top, this.value.bottom);
+      }
+    }
+  }
+  checkObjectDiff() {
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    }
+    else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !(this.stageValue.left === this.value.left &&
+        this.stageValue.right === this.value.right &&
+        this.stageValue.top === this.value.top &&
+        this.stageValue.bottom === this.value.bottom);
+    }
+    else {
+      return true;
+    }
+  }
+}
+OutlineWidthModifier.identity = Symbol('outlineWidth');
+class OutlineModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetOutline(node);
+    }
+    else {
+      let widthLeft;
+      let widthRight;
+      let widthTop;
+      let widthBottom;
+      if (!isUndefined(this.value.width) && this.value.width != null) {
+        if (isNumber(this.value.width) || isString(this.value.width) || isResource(this.value.width)) {
+          widthLeft = this.value.width;
+          widthRight = this.value.width;
+          widthTop = this.value.width;
+          widthBottom = this.value.width;
+        }
+        else {
+          widthLeft = this.value.width.left;
+          widthRight = this.value.width.right;
+          widthTop = this.value.width.top;
+          widthBottom = this.value.width.bottom;
+        }
+      }
+      let leftColor;
+      let rightColor;
+      let topColor;
+      let bottomColor;
+      if (!isUndefined(this.value.color) && this.value.color != null) {
+        if (isNumber(this.value.color) || isString(this.value.color) || isResource(this.value.color)) {
+          leftColor = this.value.color;
+          rightColor = this.value.color;
+          topColor = this.value.color;
+          bottomColor = this.value.color;
+        }
+        else {
+          leftColor = this.value.color.left;
+          rightColor = this.value.color.right;
+          topColor = this.value.color.top;
+          bottomColor = this.value.color.bottom;
+        }
+      }
+      let topLeft;
+      let topRight;
+      let bottomLeft;
+      let bottomRight;
+      if (!isUndefined(this.value.radius) && this.value.radius != null) {
+        if (isNumber(this.value.radius) || isString(this.value.radius) || isResource(this.value.radius)) {
+          topLeft = this.value.radius;
+          topRight = this.value.radius;
+          bottomLeft = this.value.radius;
+          bottomRight = this.value.radius;
+        }
+        else {
+          topLeft = this.value.radius.topLeft;
+          topRight = this.value.radius.topRight;
+          bottomLeft = this.value.radius.bottomLeft;
+          bottomRight = this.value.radius.bottomRight;
+        }
+      }
+      let styleTop;
+      let styleRight;
+      let styleBottom;
+      let styleLeft;
+      if (!isUndefined(this.value.style) && this.value.style != null) {
+        if (isNumber(this.value.style) || isString(this.value.style) || isResource(this.value.style)) {
+          styleTop = this.value.style;
+          styleRight = this.value.style;
+          styleBottom = this.value.style;
+          styleLeft = this.value.style;
+        }
+        else {
+          styleTop = this.value.style.top;
+          styleRight = this.value.style.right;
+          styleBottom = this.value.style.bottom;
+          styleLeft = this.value.style.left;
+        }
+      }
+      getUINativeModule().common.setOutline(node, widthLeft, widthRight, widthTop, widthBottom,
+        leftColor, rightColor, topColor, bottomColor,
+        topLeft, topRight, bottomLeft, bottomRight,
+        styleTop, styleRight, styleBottom, styleLeft);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+      !isBaseOrResourceEqual(this.stageValue.color, this.value.color) ||
+      !isBaseOrResourceEqual(this.stageValue.radius, this.value.radius) ||
+      !isBaseOrResourceEqual(this.stageValue.style, this.value.style);
+  }
+}
+OutlineModifier.identity = Symbol('outline');
 class ForegroundBlurStyleModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -2056,6 +2277,26 @@ class ArkComponent {
   }
   onGestureJudgeBegin(callback) {
     throw new Error('Method not implemented.');
+  }
+  outline(value) {
+    modifierWithKey(this._modifiersWithKeys, OutlineModifier.identity, OutlineModifier, value);
+    return this;
+  }
+  outlineColor(value) {
+    modifierWithKey(this._modifiersWithKeys, OutlineColorModifier.identity, OutlineColorModifier, value);
+    return this;
+  }
+  outlineRadius(value) {
+    modifierWithKey(this._modifiersWithKeys, OutlineRadiusModifier.identity, OutlineRadiusModifier, value);
+    return this;
+  }
+  outlineStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, OutlineStyleModifier.identity, OutlineStyleModifier, value);
+    return this;
+  }
+  outlineWidth(value) {
+    modifierWithKey(this._modifiersWithKeys, OutlineWidthModifier.identity, OutlineWidthModifier, value);
+    return this;
   }
   width(value) {
     modifierWithKey(this._modifiersWithKeys, WidthModifier.identity, WidthModifier, value);
@@ -5427,6 +5668,21 @@ class ArkSpanComponent {
   onGestureJudgeBegin(callback) {
     throw new Error('Method not implemented.');
   }
+  outline(value) {
+    throw new Error('Method not implemented.');
+  }
+  outlineColor(value) {
+    throw new Error('Method not implemented.');
+  }
+  outlineRadius(value) {
+    throw new Error('Method not implemented.');
+  }
+  outlineStyle(value) {
+    throw new Error('Method not implemented.');
+  }
+  outlineWidth(value) {
+    throw new Error('Method not implemented.');
+  }
   width(value) {
     throw new Error('Method not implemented.');
   }
@@ -6120,6 +6376,10 @@ class ArkStackComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   alignContent(value) {
+    modifierWithKey(this._modifiersWithKeys, StackAlignContentModifier.identity, StackAlignContentModifier, value);
+    return this;
+  }
+  align(value) {
     modifierWithKey(this._modifiersWithKeys, StackAlignContentModifier.identity, StackAlignContentModifier, value);
     return this;
   }
@@ -12223,6 +12483,10 @@ class ArkDatePickerComponent extends ArkComponent {
   onDateChange(callback) {
     throw new Error('Method not implemented.');
   }
+  backgroundColor(value) {
+    modifierWithKey(this._modifiersWithKeys, DatePickerBackgroundColorModifier.identity, DatePickerBackgroundColorModifier, value);
+    return this;
+  }
 }
 class DatePickerLunarModifier extends ModifierWithKey {
   constructor(value) {
@@ -12365,6 +12629,23 @@ class DatePickerDisappearTextStyleModifier extends ModifierWithKey {
   }
 }
 DatePickerDisappearTextStyleModifier.identity = Symbol('disappearTextStyle');
+class DatePickerBackgroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().datePicker.resetBackgroundColor(node);
+    }
+    else {
+      getUINativeModule().datePicker.setBackgroundColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+DatePickerBackgroundColorModifier.identity = Symbol('datePickerBackgroundColor');
 //@ts-ignore
 globalThis.DatePicker.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -14043,6 +14324,21 @@ class ArkXComponentComponent {
     expiringItemsWithKeys.forEach(key => {
       this._modifiersWithKeys.delete(key);
     });
+  }
+  outline(value) {
+    throw new Error('Method not implemented.');
+  }
+  outlineColor(value) {
+    throw new Error('Method not implemented.');
+  }
+  outlineRadius(value) {
+    throw new Error('Method not implemented.');
+  }
+  outlineStyle(value) {
+    throw new Error('Method not implemented.');
+  }
+  outlineWidth(value) {
+    throw new Error('Method not implemented.');
   }
   width(value) {
     throw new Error('Method not implemented.');

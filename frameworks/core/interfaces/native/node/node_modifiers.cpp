@@ -15,6 +15,12 @@
 #include "core/interfaces/native/node/node_modifiers.h"
 
 #include "core/interfaces/native/node/node_common_modifier.h"
+#include "core/interfaces/native/node/node_list_modifier.h"
+#include "core/interfaces/native/node/node_scroll_modifier.h"
+#include "core/interfaces/native/node/node_stack_modifier.h"
+#include "core/interfaces/native/node/node_text_input_modifier.h"
+#include "core/interfaces/native/node/node_text_modifier.h"
+
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -25,6 +31,21 @@ const ArkUINodeModifiers impl = {
     nullptr,
     nullptr,
     nullptr,
+    NodeModifier::GetTextModifier,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    NodeModifier::GetStackModifier,
     nullptr,
     nullptr,
     nullptr,
@@ -49,6 +70,7 @@ const ArkUINodeModifiers impl = {
     nullptr,
     nullptr,
     nullptr,
+    NodeModifier::GetTextInputModifier,
     nullptr,
     nullptr,
     nullptr,
@@ -60,6 +82,7 @@ const ArkUINodeModifiers impl = {
     nullptr,
     nullptr,
     nullptr,
+    NodeModifier::GetScrollModifier,
     nullptr,
     nullptr,
     nullptr,
@@ -67,26 +90,7 @@ const ArkUINodeModifiers impl = {
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
+    NodeModifier::GetListModifier,
     nullptr,
     nullptr,
     nullptr,

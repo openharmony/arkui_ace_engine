@@ -388,8 +388,8 @@ RefPtr<FrameNode> FrameNode::CreateFrameNode(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
 {
     auto frameNode = MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot);
-    frameNode->InitializePatternAndContext();
     ElementRegister::GetInstance()->AddUINode(frameNode);
+    frameNode->InitializePatternAndContext();
     return frameNode;
 }
 
@@ -1315,6 +1315,14 @@ void FrameNode::MarkModifyDone()
 {
     pattern_->OnModifyDone();
     // restore info will overwrite the first setted attribute
+    auto &&opts = GetLayoutProperty()->GetSafeAreaExpandOpts();
+    if (opts && opts->Expansive()) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto safeAreaManager = pipeline->GetSafeAreaManager();
+        CHECK_NULL_VOID(safeAreaManager);
+        safeAreaManager->AddNeedExpandNode(GetHostNode());
+    }
     if (!isRestoreInfoUsed_) {
         isRestoreInfoUsed_ = true;
         auto pipeline = PipelineContext::GetCurrentContext();
@@ -1663,7 +1671,7 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
     {
         ACE_DEBUG_SCOPED_TRACE("FrameNode::IsOutOfTouchTestRegion");
         bool isOutOfRegion = IsOutOfTouchTestRegion(parentRevertPoint, static_cast<int32_t>(touchRestrict.sourceType));
-        AddFrameNodeSnapshot(!isOutOfRegion, parentId);
+        AddFrameNodeSnapshot(!isOutOfRegion, parentId, responseRegionList);
         if ((!isDispatch) && isOutOfRegion) {
             return HitTestResult::OUT_OF_REGION;
         }
@@ -2583,7 +2591,6 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     if (!oldGeometryNode_) {
         oldGeometryNode_ = geometryNode_->Clone();
     }
-    RestoreGeoState();
     pattern_->BeforeCreateLayoutWrapper();
     GetLayoutAlgorithm(true);
 
@@ -2697,9 +2704,7 @@ void FrameNode::Layout()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     bool isFocusOnPage = pipeline->CheckPageFocus();
-    SaveGeoState();
     AvoidKeyboard(isFocusOnPage);
-    ExpandSafeArea(isFocusOnPage);
     SyncGeometryNode();
 
     UpdateParentAbsoluteOffset();
@@ -3010,7 +3015,7 @@ void FrameNode::RecordExposureIfNeed(const std::string& inspectorId)
     pipeline->AddVisibleAreaChangeNode(Claim(this), exposureProcessor_->GetRatio(), callback, false);
 }
 
-void FrameNode::AddFrameNodeSnapshot(bool isHit, int32_t parentId)
+void FrameNode::AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<RectF> responseRegionList)
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
@@ -3024,7 +3029,8 @@ void FrameNode::AddFrameNodeSnapshot(bool isHit, int32_t parentId)
         .comId = propInspectorId_.value_or(""),
         .monopolizeEvents = GetMonopolizeEvents(),
         .isHit = isHit,
-        .hitTestMode = static_cast<int32_t>(GetHitTestMode())
+        .hitTestMode = static_cast<int32_t>(GetHitTestMode()),
+        .responseRegionList = responseRegionList
     };
     eventMgr->GetEventTreeRecord().AddFrameNodeSnapshot(std::move(info));
 }
@@ -3037,7 +3043,7 @@ int32_t FrameNode::GetUiExtensionId()
     return -1;
 }
 
-int32_t FrameNode::WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId)
+int64_t FrameNode::WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId)
 {
     if (pattern_) {
         return pattern_->WrapExtensionAbilityId(extensionOffset, abilityId);
@@ -3045,40 +3051,40 @@ int32_t FrameNode::WrapExtensionAbilityId(int32_t extensionOffset, int32_t abili
     return -1;
 }
 
-void FrameNode::SearchExtensionElementInfoByAccessibilityIdNG(int32_t elementId, int32_t mode,
-    int32_t offset, std::list<Accessibility::AccessibilityElementInfo>& output)
+void FrameNode::SearchExtensionElementInfoByAccessibilityIdNG(int64_t elementId, int32_t mode,
+    int64_t offset, std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     if (pattern_) {
         pattern_->SearchExtensionElementInfoByAccessibilityId(elementId, mode, offset, output);
     }
 }
 
-void FrameNode::SearchElementInfosByTextNG(int32_t elementId, const std::string& text,
-    int32_t offset, std::list<Accessibility::AccessibilityElementInfo>& output)
+void FrameNode::SearchElementInfosByTextNG(int64_t elementId, const std::string& text,
+    int64_t offset, std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     if (pattern_) {
         pattern_->SearchElementInfosByText(elementId, text, offset, output);
     }
 }
 
-void FrameNode::FindFocusedExtensionElementInfoNG(int32_t elementId, int32_t focusType,
-    int32_t offset, Accessibility::AccessibilityElementInfo& output)
+void FrameNode::FindFocusedExtensionElementInfoNG(int64_t elementId, int32_t focusType,
+    int64_t offset, Accessibility::AccessibilityElementInfo& output)
 {
     if (pattern_) {
         pattern_->FindFocusedElementInfo(elementId, focusType, offset, output);
     }
 }
 
-void FrameNode::FocusMoveSearchNG(int32_t elementId, int32_t direction,
-    int32_t offset, Accessibility::AccessibilityElementInfo& output)
+void FrameNode::FocusMoveSearchNG(int64_t elementId, int32_t direction,
+    int64_t offset, Accessibility::AccessibilityElementInfo& output)
 {
     if (pattern_) {
         pattern_->FocusMoveSearch(elementId, direction, offset, output);
     }
 }
 
-bool FrameNode::TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
-    int32_t action, int32_t offset)
+bool FrameNode::TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+    int32_t action, int64_t offset)
 {
     bool isExecuted = false;
     if (pattern_) {
@@ -3222,4 +3228,13 @@ void FrameNode::InitLastArea()
     }
 }
 
+bool FrameNode::SetParentLayoutConstraint(const SizeF& size) const
+{
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.UpdatePercentReference(size);
+    layoutConstraint.UpdateMaxSizeWithCheck(size);
+    layoutConstraint.UpdateIllegalParentIdealSizeWithCheck(OptionalSize(size));
+    layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
+    return true;
+}
 } // namespace OHOS::Ace::NG

@@ -800,6 +800,7 @@ void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     json->Put("draggable", host->IsDraggable() ? "true" : "false");
+    json->Put("enableAnalyzer", isEnableAnalyzer_ ? "true" : "false");
 }
 
 void ImagePattern::UpdateFillColorIfForegroundColor()
@@ -898,7 +899,7 @@ void ImagePattern::OnColorConfigurationUpdate()
     LoadImage(src);
     if (loadingCtx_->NeedAlt() && imageLayoutProperty->GetAlt()) {
         auto altImageSourceInfo = imageLayoutProperty->GetAlt().value_or(ImageSourceInfo(""));
-        if (altLoadingCtx_->GetSourceInfo() == altImageSourceInfo) {
+        if (altLoadingCtx_ && altLoadingCtx_->GetSourceInfo() == altImageSourceInfo) {
             altLoadingCtx_.Reset();
         }
         altImageSourceInfo.SetIsSystemColorChange(true);

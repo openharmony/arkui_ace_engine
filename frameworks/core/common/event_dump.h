@@ -24,6 +24,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/geometry/ng/offset_t.h"
+#include "base/geometry/ng/rect_t.h"
 #include "core/event/touch_event.h"
 
 namespace OHOS::Ace::NG {
@@ -37,6 +38,7 @@ struct FrameNodeSnapshot {
     bool monopolizeEvents = false;
     bool isHit = false;
     int32_t hitTestMode = 0;
+    std::vector<RectF> responseRegionList;
 };
 
 struct TouchPointSnapshot {

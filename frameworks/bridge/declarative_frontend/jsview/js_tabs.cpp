@@ -532,18 +532,20 @@ void JSTabs::SetCustomContentTransition(const JSCallbackInfo& info)
 
 void JSTabs::SetOnContentWillChange(const JSCallbackInfo& info)
 {
-    LOGE("ZMH, SetOnContentWillChange enter");
     if (!info[0]->IsFunction()) {
         return;
     }
 
     auto handler = AceType::MakeRefPtr<JsTabsFunction>(JSRef<JSFunc>::Cast(info[0]));
-    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(handler)](int32_t index) -> bool {
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(handler)]
+        (int32_t currentIndex, int32_t comingIndex) -> bool {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
         ACE_SCORING_EVENT("Tabs.onContentWillChange");
-        auto res = func->Execute(index);
-        LOGE("ZMH, After func->Execute(index), res:%{public}d", res);
-        return res;
+        auto ret = func->Execute(currentIndex, comingIndex);
+        if (!ret->IsBoolean()) {
+            return true;
+        }
+        return ret->ToBoolean();
     };
     TabsModel::GetInstance()->SetOnContentWillChange(std::move(callback));
 }

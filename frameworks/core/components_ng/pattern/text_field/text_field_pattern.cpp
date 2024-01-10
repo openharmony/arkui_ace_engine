@@ -1579,7 +1579,6 @@ void TextFieldPattern::InitDragDropEvent()
                         Offset(pattern->parentGlobalOffset_.GetX(), pattern->parentGlobalOffset_.GetY()) -
                         Offset(0, theme->GetInsertCursorOffset().ConvertToPx());
         auto position = pattern->ConvertTouchOffsetToCaretPosition(offset);
-        CHECK_NULL_VOID(position);
         pattern->SetCaretPosition(position);
         auto host = pattern->GetHost();
         CHECK_NULL_VOID(host);
@@ -1605,7 +1604,14 @@ void TextFieldPattern::InitDragDropEvent()
             pattern->MarkContentChange();
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
-            pattern->showSelect_ = true;
+
+            // Except for DRAG_SUCCESS, all of rest need to show
+            if (event != nullptr && event->GetResult() != DragRet::DRAG_SUCCESS) {
+                auto dragTextStart = pattern->dragTextStart_;
+                auto dragTextEnd = pattern->dragTextEnd_;
+                pattern->selectController_->UpdateHandleIndex(dragTextStart, dragTextEnd);
+                pattern->showSelect_ = true;
+            }
             auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1726,7 +1732,9 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     auto lastCaretIndex = selectController_->GetCaretIndex();
     auto lastCaretRect = selectController_->GetCaretRect();
-    selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation());
+    if (mouseStatus_ != MouseStatus::MOVE) {
+        selectController_->UpdateCaretInfoByOffset(info.GetLocalLocation());
+    }
     StartTwinkling();
     SetIsSingleHandle(true);
     CloseSelectOverlay(true);
@@ -2066,7 +2074,9 @@ void TextFieldPattern::OnModifyDone()
         inlineSelectAllFlag_ = false;
         inlineFocusState_ = false;
         RestorePreInlineStates();
-        UpdateSelection(0);
+        if (!GetTextBoxes().empty()) {
+            UpdateSelection(0);
+        }
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     auto maxlength = GetMaxLength();
@@ -3015,26 +3025,6 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
         positionY += frameRect_.Height();
     }
 
-    auto uiExtMgr = pipeline->GetUIExtensionManager();
-    if (uiExtMgr && uiExtMgr->IsWindowTypeUIExtension(pipeline)) {
-        // find the direct child of the dialog.
-        auto parent = tmpHost->GetParent();
-        RefPtr<UINode> child = tmpHost;
-        while (parent && parent->GetTag() != V2::DIALOG_COMPONENT_TAG) {
-            child = parent;
-            parent = parent->GetParent();
-        }
-        if (AceType::DynamicCast<FrameNode>(parent)) {
-            auto childOfDialog = AceType::DynamicCast<FrameNode>(child);
-            if (childOfDialog) {
-                positionY = (childOfDialog->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset()).GetY() +
-                            windowRect.Top();
-                height = childOfDialog->GetTransformRectRelativeToWindow().Height();
-            }
-        }
-        height = positionY + height > windowRect.Bottom() ? windowRect.Bottom() - positionY : height;
-    }
-
     MiscServices::CursorInfo cursorInfo { .left = selectController_->GetCaretRect().Left() + windowRect.Left() +
                                                   parentGlobalOffset_.GetX(),
         .top = selectController_->GetCaretRect().Top() + windowRect.Top() + parentGlobalOffset_.GetY(),
@@ -3965,7 +3955,10 @@ void TextFieldPattern::RecordSubmitEvent() const
                                           TextInputType::VISIBLE_PASSWORD
                                     : false;
     Recorder::EventParamsBuilder builder;
-    builder.SetId(inspectorId).SetType(host->GetTag()).SetEventType(Recorder::EventType::SEARCH_SUBMIT);
+    builder.SetId(inspectorId)
+        .SetType(host->GetTag())
+        .SetEventType(Recorder::EventType::SEARCH_SUBMIT)
+        .SetDescription(host->GetAutoEventParamValue(""));
     if (!isPwdType) {
         builder.SetText(contentController_->GetTextValue());
     }
@@ -4044,9 +4037,15 @@ void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight,
         "Textfield handleSurface change, new width %{public}d, new height %{public}d, prev width %{public}d, prev "
         "height %{public}d",
         newWidth, newHeight, prevWidth, prevHeight);
-    auto proxy = GetSelectOverlayProxy();
-    CHECK_NULL_VOID(proxy);
-    proxy->ShowOrHiddenMenu(true);
+    if (SelectOverlayIsOn()) {
+        auto proxy = GetSelectOverlayProxy();
+        proxy->ShowOrHiddenMenu(true);
+        processOverlayDelayTask_ = [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->ProcessOverlay(false);
+        };
+    }
     if (HasFocus() && IsSingleHandle()) {
         StartTwinkling();
     }
@@ -4410,6 +4409,9 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Set caret position to %{public}d", position);
     selectController_->MoveCaretToContentRect(position, TextAffinity::DOWNSTREAM);
+    if (HasFocus()) {
+        StartTwinkling();
+    }
     CloseSelectOverlay();
     auto tmpHost = GetHost();
     CHECK_NULL_VOID(tmpHost);
@@ -4933,9 +4935,7 @@ void TextFieldPattern::SetShowError()
         layoutProperty->UpdateTextColor(passwordModeStyle_.textColor);
         preErrorState_ = true;
     }
-    if (!IsNormalInlineState()) {
-        UpdateErrorTextMargin();
-    }
+    UpdateErrorTextMargin();
 }
 
 void TextFieldPattern::CreateErrorParagraph(const std::string& content)
@@ -4945,7 +4945,9 @@ void TextFieldPattern::CreateErrorParagraph(const std::string& content)
     TextStyle errorTextStyle = theme->GetErrorTextStyle();
     std::string errorText = content;
     ParagraphStyle paraStyle { .align = TextAlign::START,
+        .maxLines = 1,
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
+        .textOverflow = TextOverflow::ELLIPSIS,
         .fontSize = errorTextStyle.GetFontSize().ConvertToPx() };
     errorParagraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
     CHECK_NULL_VOID(errorParagraph_);
@@ -4966,8 +4968,9 @@ void TextFieldPattern::UpdateErrorTextMargin()
     auto theme = GetTheme();
     CHECK_NULL_VOID(theme);
     MarginProperty errorMargin;
-    if (layoutProperty->GetShowErrorTextValue(false)) {
-        CreateErrorParagraph(layoutProperty->GetErrorTextValue(""));
+    auto errorText = layoutProperty->GetErrorTextValue("");
+    if (layoutProperty->GetShowErrorTextValue(false) && !IsNormalInlineState() && !errorText.empty()) {
+        CreateErrorParagraph(errorText);
         if (errorParagraph_) {
             errorParagraph_->Layout(std::numeric_limits<double>::infinity());
             auto errorTextMargin = ERROR_TEXT_TOP_MARGIN.ConvertToPx() +
@@ -5570,6 +5573,9 @@ void TextFieldPattern::StopEditing()
     UpdateSelection(selectController_->GetCaretIndex());
     StopTwinkling();
     CloseKeyboard(true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 bool TextFieldPattern::CheckHandleVisible(const RectF& paintRect)

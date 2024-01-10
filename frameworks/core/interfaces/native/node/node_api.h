@@ -23,7 +23,7 @@
 extern "C" {
 #endif
 
-#define ARKUI_NODE_API_VERSION 63
+#define ARKUI_NODE_API_VERSION 64
 
 enum ArkUINodeType {
     ARKUI_TEXT = 1,
@@ -37,6 +37,14 @@ enum ArkUINodeType {
     ARKUI_SCROLL = 9,
     ARKUI_LIST = 10,
     ARKUI_SWIPER = 11,
+    ARKUI_TEXT_AREA = 12,
+    ARKUI_BUTTON = 13,
+    ARKUI_PROGRESS = 14,
+    ARKUI_CHECKBOX = 15,
+    ARKUI_COLUMN = 16,
+    ARKUI_ROW = 17,
+    ARKUI_FLEX = 18,
+    ARKUI_LIST_ITEM = 19
 };
 
 #define ARKUI_MAX_EVENT_NUM 1000
@@ -75,6 +83,9 @@ enum ArkUIAsyncEventKind {
     ON_IMAGE_ERROR,
 
     ON_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_SCROLL,
+    ON_SCROLL_FRAME_BEGIN,
+    ON_SCROLL_START,
+    ON_SCROLL_STOP,
 };
 
 // Current implementation assumes that each argument is 4 bytes,
@@ -89,6 +100,10 @@ union ArkUIEventCallbackArg {
 
 struct ArkUINodeAsyncEvent {
     ArkUIEventCallbackArg data[ARKUI_ASYNC_EVENT_ARGS_COUNT];
+};
+
+struct ArkUIStringAsyncEvent {
+    ArkUI_CharPtr pStr;
 };
 
 struct ArkUIGestureAsyncEvent {
@@ -119,6 +134,7 @@ struct ArkUINodeEvent {
     union {
         ArkUINodeAsyncEvent componentAsyncEvent;
         ArkUIGestureAsyncEvent gestureAsyncEvent;
+        ArkUIStringAsyncEvent stringAsyncEvent;
     };
 };
 

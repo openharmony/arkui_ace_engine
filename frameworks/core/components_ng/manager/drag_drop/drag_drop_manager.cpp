@@ -378,13 +378,17 @@ void DragDropManager::NotifyDragRegisterFrameNode(std::unordered_map<int32_t, We
 {
     for (auto iter = nodes.begin(); iter != nodes.end(); iter++) {
         auto frameNode = iter->second.Upgrade();
-        CHECK_NULL_VOID(frameNode);
+        if (!frameNode) {
+            continue;
+        }
         auto eventHub = frameNode->GetEventHub<EventHub>();
         if (!CheckParentVisible(frameNode) || (eventHub && !eventHub->IsEnabled())) {
             continue;
         }
         auto pattern = frameNode->GetPattern<Pattern>();
-        CHECK_NULL_VOID(pattern);
+        if (!pattern) {
+            continue;
+        }
         pattern->HandleOnDragStatusCallback(dragEventType, notifyEvent);
     }
 }
