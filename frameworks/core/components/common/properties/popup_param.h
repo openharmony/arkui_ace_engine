@@ -442,7 +442,7 @@ private:
     bool setErrorArrowWidth_ = false;
     bool setErrorArrowHeight_ = false;
     bool setErrorRadius_ = false;
-    bool focusable_ = true;
+    bool focusable_ = false;
     Color maskColor_;
     Color backgroundColor_;
     Placement placement_ = Placement::BOTTOM;
