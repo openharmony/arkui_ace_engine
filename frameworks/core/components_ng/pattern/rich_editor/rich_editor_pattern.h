@@ -388,6 +388,10 @@ public:
     }
     void GetCaretMetrics(CaretMetricsF& caretCaretMetric) override;
 
+    void SetShowSelect(bool isShowSelect) {
+        showSelect_ = isShowSelect;
+    }
+
 protected:
     bool CanStartAITask() override;
 
