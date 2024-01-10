@@ -6342,4 +6342,16 @@ void TextFieldPattern::NotifyKeyboardInfo(const KeyBoardInfo& info)
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     textFieldManager->SetImeShow(info.visible);
 }
+
+void TextFieldPattern::GetCaretMetrics(CaretMetricsF& caretCaretMetric)
+{
+    OffsetF offset = selectController_->GetCaretRect().GetOffset();
+    float height = selectController_->GetCaretRect().Height();
+    float width = selectController_->GetCaretRect().Width();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textPaintOffset = host->GetPaintRectOffset();
+    caretCaretMetric.offset = offset + textPaintOffset + OffsetF(width / 2.0f, 0.0f);
+    caretCaretMetric.height = height;
+}
 } // namespace OHOS::Ace::NG

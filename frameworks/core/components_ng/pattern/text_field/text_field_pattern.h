@@ -1074,6 +1074,7 @@ public:
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
 
     void ContentFireOnChangeEvent();
+    void GetCaretMetrics(CaretMetricsF& caretCaretMetric) override;
 protected:
     virtual void InitDragEvent();
 

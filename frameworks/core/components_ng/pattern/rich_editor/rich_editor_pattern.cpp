@@ -5231,4 +5231,16 @@ void RichEditorPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     jsonValue->Put("types", "");
     json->Put("dataDetectorConfig", jsonValue->ToString().c_str());
 }
+
+void RichEditorPattern::GetCaretMetrics(CaretMetricsF& caretCaretMetric)
+{
+    float caretHeight = 0.0f;
+    OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto offset = host->GetPaintRectOffset();
+    caretOffset += offset;
+    caretCaretMetric.offset = caretOffset;
+    caretCaretMetric.height = caretHeight;
+}
 } // namespace OHOS::Ace::NG

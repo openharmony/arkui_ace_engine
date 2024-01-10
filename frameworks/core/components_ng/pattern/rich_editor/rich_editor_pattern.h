@@ -386,6 +386,7 @@ public:
     {
         return selectedType_.value_or(TextSpanType::NONE);
     }
+    void GetCaretMetrics(CaretMetricsF& caretCaretMetric) override;
 
 protected:
     bool CanStartAITask() override;
