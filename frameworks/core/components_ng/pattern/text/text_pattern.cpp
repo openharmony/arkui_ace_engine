@@ -54,7 +54,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t AI_TEXT_MAX_LENGTH = 300;
 constexpr int32_t AI_TEXT_GAP = 100;
-constexpr int32_t AI_DELAY_TIME = 300;
+constexpr int32_t AI_DELAY_TIME = 100;
 constexpr double DIMENSION_VALUE = 16.0;
 constexpr const char COPY_ACTION[] = "copy";
 constexpr const char SELECT_ACTION[] = "select";
