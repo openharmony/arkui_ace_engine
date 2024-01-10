@@ -347,7 +347,10 @@ public:
     void DumpAdvanceInfo() override;
 
     std::optional<int32_t> GetAnimationDuration();
-    
+
+    bool ContentWillChange(int32_t comingIndex);
+    bool ContentWillChange(int32_t currentIndex, int32_t comingIndex);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;

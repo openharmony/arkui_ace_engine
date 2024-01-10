@@ -251,6 +251,7 @@ void TabsPattern::SetSwiperPaddingAndBorder()
 
 void TabsPattern::OnModifyDone()
 {
+    LOGE("ZMH, TabsPattern::OnModifyDone() enter");
     Pattern::OnModifyDone();
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());

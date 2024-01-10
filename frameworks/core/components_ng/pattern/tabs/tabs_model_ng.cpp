@@ -237,6 +237,7 @@ void TabsModelNG::SetIsVertical(bool isVertical)
 
 void TabsModelNG::SetIndex(int32_t index)
 {
+    LOGE("ZMH, TabsModelNG::SetIndex enter, index:%{public}d", index);
     auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(tabsNode);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());

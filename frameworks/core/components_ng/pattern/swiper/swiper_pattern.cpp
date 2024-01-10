@@ -202,6 +202,7 @@ void SwiperPattern::OnLoopChange()
 
 void SwiperPattern::OnModifyDone()
 {
+    LOGE("ZMH, SwiperPattern::OnModifyDone() enter");
     currentOffset_ = 0.0f;
     Pattern::OnModifyDone();
     auto host = GetHost();
@@ -847,22 +848,11 @@ void SwiperPattern::SwipeTo(int32_t index)
     LOGE("ZMH, SwiperPattern::SwipeTo enter");
     auto targetIndex = IsLoop() ? index : (index < 0 || index > (TotalCount() - 1)) ? 0 : index;
     targetIndex = IsLoop() ? targetIndex : std::clamp(targetIndex, 0, TotalCount() - GetDisplayCount());
-
-    auto host = GetHost();
-    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
-    CHECK_NULL_VOID(tabsNode);
-    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
-    CHECK_NULL_VOID(tabsPattern);
-    if (tabsPattern->GetInterceptStatus()) {
-        auto interceptCallback = tabsPattern->GetOnContentWillChange();
-        if (!interceptCallback(currentIndex_, targetIndex)) {
-            LOGE("ZMH, interceptCallback return false, currentIndex:%{public}d, comingIndex:%{public}d",
-                currentIndex_, targetIndex);
-            return;
-        }
-        LOGE("ZMH, interceptCallback return true, currentIndex:%{public}d, comingIndex:%{public}d",
-            currentIndex_, targetIndex);
+    if (!ContentWillChange(targetIndex)) {
+        LOGE("ZMH, interceptCallback return false, comingIndex:%{public}d", targetIndex);
+        return;
     }
+    LOGE("ZMH, interceptCallback return true, comingIndex:%{public}d", targetIndex);
 
     if (IsUseCustomAnimation()) {
         OnCustomContentTransition(targetIndex);
@@ -1179,9 +1169,14 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         return;
     }
     direction_ = GetDirection();
+    indexCanChangeMap_.clear();
 
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
+        pattern->indexCanChangeMap_.clear();
+        LOGE("ZMH, actionStartTask, GetOffsetX:%{public}f, GetOffsetY:%{public}f, GetMainDelta:%{public}f",
+            info.GetOffsetX(), info.GetOffsetY(), info.GetMainDelta());
+        LOGE("ZMH, actionStartTask, indexCanChangeMap_.size():%{public}zu", pattern->indexCanChangeMap_.size());
         if (pattern) {
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
                 return;
@@ -1197,6 +1192,38 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
+        LOGE("ZMH, actionUpdateTask, GetOffsetX:%{public}f, GetOffsetY:%{public}f, GetMainDelta:%{public}f",
+            info.GetOffsetX(), info.GetOffsetY(), info.GetMainDelta());
+        int32_t currentIndex = pattern->GetCurrentIndex();
+        int32_t comingIndex = currentIndex;
+        if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
+            comingIndex = comingIndex - 1 < 0 ? 0 : comingIndex - 1;
+        } else if (LessNotEqual(info.GetMainDelta(), 0.0)) {
+            comingIndex = comingIndex + 1 > pattern->TotalCount() - 1 ? pattern->TotalCount() - 1 : comingIndex + 1;
+        }
+        LOGE("ZMH, actionUpdateTask 1, indexCanChangeMap_.size():%{public}zu", pattern->indexCanChangeMap_.size());
+        auto iter = pattern->indexCanChangeMap_.find(comingIndex);
+        if (iter != pattern->indexCanChangeMap_.end()) {
+            // map中有记录，不需要重复执行回调，直接用map中保存的结果
+            if (!iter->second) {
+                // comingIndex 不可达，return
+                LOGE("ZMH, actionUpdateTask 11 interceptCallback return false, comingIndex:%{public}d", comingIndex);
+                return;
+            }
+        } else {
+            // map中无记录，执行回调，保存结果
+            bool ret = pattern->ContentWillChange(currentIndex, comingIndex);
+            pattern->indexCanChangeMap_.insert({comingIndex, ret});
+            LOGE("ZMH, actionUpdateTask 2, indexCanChangeMap_.size():%{public}zu", pattern->indexCanChangeMap_.size());
+            if (!ret) {
+                // comingIndex 不可达，return
+                LOGE("ZMH, actionUpdateTask 22 interceptCallback return false, comingIndex:%{public}d", comingIndex);
+                return;
+            }
+        }
+        LOGE("ZMH, actionUpdateTask 33 interceptCallback return true, comingIndex:%{public}d", comingIndex);
+        LOGE("ZMH, actionUpdateTask 3, indexCanChangeMap_.size():%{public}zu", pattern->indexCanChangeMap_.size());
+
         if (pattern) {
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
                 if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
@@ -1212,6 +1239,10 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
+        LOGE("ZMH, actionUpdateTask 1, indexCanChangeMap_.size():%{public}zu", pattern->indexCanChangeMap_.size());
+        LOGE("ZMH, actionEndTask, GetOffsetX:%{public}f, GetOffsetY:%{public}f, GetMainDelta:%{public}f",
+            info.GetOffsetX(), info.GetOffsetY(), info.GetMainDelta());
+        pattern->indexCanChangeMap_.clear();
         if (pattern) {
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
                 return;
@@ -4058,5 +4089,28 @@ void SwiperPattern::ProcessDelta(float& delta, float mainSize, float deltaSum)
         delta = GreatNotEqual((deltaSum + delta), 0) ? (mainSize - deltaSum) :
             (-deltaSum - mainSize);
     }
+}
+
+bool SwiperPattern::ContentWillChange(int32_t comingIndex)
+{
+    LOGE("ZMH, SwiperPattern::ContentWillChange(int32_t comingIndex) enter");
+    int32_t currentIndex = GetCurrentIndex();
+    return ContentWillChange(currentIndex, comingIndex);
+}
+
+bool SwiperPattern::ContentWillChange(int32_t currentIndex, int32_t comingIndex)
+{
+    LOGE("ZMH, SwiperPattern::ContentWillChange(int32_t currentIndex, int32_t comingIndex) enter");
+    auto host = GetHost(); // SwiperFrameNode
+    CHECK_NULL_RETURN(host, true);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_RETURN(tabsNode, true);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_RETURN(tabsPattern, true);
+    if (tabsPattern->GetInterceptStatus()) {
+        auto interceptCallback = tabsPattern->GetOnContentWillChange();
+        return interceptCallback(currentIndex, comingIndex);
+    }
+    return true;
 }
 } // namespace OHOS::Ace::NG
