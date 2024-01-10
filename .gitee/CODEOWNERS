@@ -109,7 +109,7 @@ frameworks/core/components_ng/pattern/refresh/  @Hu_ZeQi
 frameworks/core/components_ng/pattern/relative_container/  @xiexiyun
 frameworks/core/components_ng/pattern/remote_window/  @liuchao92
 frameworks/core/components_ng/pattern/rendering_context/  @keerecles
-frameworks/core/components_ng/pattern/rich_editor/  @xiexiyun
+frameworks/core/components_ng/pattern/rich_editor/  @zhuweifeng94 @carnivore233
 frameworks/core/components_ng/pattern/root/  @zhoutianer
 frameworks/core/components_ng/pattern/scroll/  @rongShao-Z
 frameworks/core/components_ng/pattern/scroll_bar/  @rongShao-Z
