@@ -383,11 +383,7 @@ void RichEditorPattern::AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset
     auto it = spans_.begin();
     std::advance(it, offset);
     spans_.insert(it, item);
-    int32_t spanTextLength = 0;
-    for (auto& span : spans_) {
-        span->position = spanTextLength + StringUtils::ToWstring(span->content).length();
-        spanTextLength += StringUtils::ToWstring(span->content).length();
-    }
+    UpdateSpanPosition();
 }
 
 int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, const SpanOptionBase& options)
@@ -625,6 +621,7 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options)
     }
     start = std::max(0, start);
     end = std::min(length, end);
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "index range=[%{public}d, %{public}d]", start, end);
     if (start > length || end < 0 || start == end) {
         return;
     }
@@ -654,13 +651,13 @@ void RichEditorPattern::DeleteSpans(const RangeOptions& options)
         ResetSelection();
     }
     SetCaretOffset(start);
-    ResetSelection();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto childrens = host->GetChildren();
     if (childrens.empty() || GetTextContentLength() == 0) {
         SetCaretPosition(0);
     }
+    UpdateSpanPosition();
 }
 
 void RichEditorPattern::DeleteSpanByRange(int32_t start, int32_t end, SpanPositionInfo info)
@@ -889,20 +886,19 @@ void RichEditorPattern::CopyTextSpanLineStyle(
 
 int32_t RichEditorPattern::TextSpanSplit(int32_t position, bool needLeadingMargin)
 {
-    int32_t spanIndex = 0;
-    int32_t spanStart = 0;
-    int32_t spanOffset = 0;
-
     if (spans_.empty()) {
         return -1;
     }
 
     auto positionInfo = GetSpanPositionInfo(position);
-    spanIndex = positionInfo.spanIndex_;
-    spanStart = positionInfo.spanStart_;
-    spanOffset = positionInfo.spanOffset_;
+    int32_t spanIndex = positionInfo.spanIndex_;
+    int32_t spanStart = positionInfo.spanStart_;
+    int32_t offsetInSpan = positionInfo.spanOffset_;
+    TAG_LOGD(AceLogTag::ACE_RICH_TEXT,
+        "position=%{public}d, spanIndex=%{public}d, spanStart=%{public}d, offsetInSpan=%{public}d",
+        position, spanIndex, spanStart, offsetInSpan);
 
-    if (spanOffset <= 0) {
+    if (offsetInSpan <= 0) {
         return spanIndex;
     }
 
@@ -915,11 +911,11 @@ int32_t RichEditorPattern::TextSpanSplit(int32_t position, bool needLeadingMargi
     CHECK_NULL_RETURN(spanNode, -1);
     auto spanItem = spanNode->GetSpanItem();
     auto spanItemContent = StringUtils::ToWstring(spanItem->content);
-    if (spanOffset > static_cast<int32_t>(spanItemContent.length())) {
-        spanOffset = static_cast<int32_t>(spanItemContent.length());
+    if (offsetInSpan > static_cast<int32_t>(spanItemContent.length())) {
+        offsetInSpan = static_cast<int32_t>(spanItemContent.length());
     }
-    auto newContent = spanItemContent.substr(spanOffset);
-    auto deleteContent = spanItemContent.substr(0, spanOffset);
+    auto newContent = spanItemContent.substr(offsetInSpan);
+    auto deleteContent = spanItemContent.substr(0, offsetInSpan);
 
     auto* stack = ViewStackProcessor::GetInstance();
     CHECK_NULL_RETURN(stack, -1);
@@ -928,7 +924,7 @@ int32_t RichEditorPattern::TextSpanSplit(int32_t position, bool needLeadingMargi
     CHECK_NULL_RETURN(newSpanNode, -1);
 
     auto newSpanItem = newSpanNode->GetSpanItem();
-    newSpanItem->position = spanStart + spanOffset;
+    newSpanItem->position = spanStart + offsetInSpan;
     auto spanIter = spans_.begin();
     std::advance(spanIter, spanIndex);
     spans_.insert(spanIter, newSpanItem);
@@ -2573,11 +2569,7 @@ void RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
     retInfo.SetTextDecoration(spanNode->GetTextDecorationValue(TextDecoration::NONE));
     retInfo.SetColor(spanNode->GetTextDecorationColorValue(Color::BLACK).ColorToString());
     eventHub->FireOnIMEInputComplete(retInfo);
-    int32_t spanTextLength = 0;
-    for (auto& span : spans_) {
-        spanTextLength += StringUtils::ToWstring(span->content).length();
-        span->position = spanTextLength;
-    }
+    UpdateSpanPosition();
     MoveCaretAfterTextChange();
 }
 
@@ -3429,11 +3421,7 @@ void RichEditorPattern::DeleteByDeleteValueInfo(const RichEditorDeleteValue& inf
     if (info.GetRichEditorDeleteDirection() == RichEditorDeleteDirection::BACKWARD) {
         SetCaretPosition(std::clamp(caretPosition_ - caretMoveLength, 0, static_cast<int32_t>(GetTextContentLength())));
     }
-    int32_t spanTextLength = 0;
-    for (auto& span : spans_) {
-        span->position = spanTextLength + StringUtils::ToWstring(span->content).length();
-        spanTextLength += StringUtils::ToWstring(span->content).length();
-    }
+    UpdateSpanPosition();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     OnModifyDone();
 }
