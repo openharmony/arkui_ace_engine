@@ -70,4 +70,50 @@ ArkUINativeModuleValue LoadingProgressBridge::ResetEnableLoading(ArkUIRuntimeCal
     GetArkUIInternalNodeAPI()->GetLoadingProgressModifier().ResetEnableLoading(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+bool ParseJsColorStrategy(const EcmaVM* vm, const Local<JSValueRef>& jsValue, ForegroundColorStrategy& strategy)
+{
+    if (jsValue->IsString()) {
+        std::string colorStr = jsValue->ToString(vm)->ToString();
+        if (colorStr.compare("invert") == 0) {
+            strategy = ForegroundColorStrategy::INVERT;
+            return true;
+        }
+    }
+    return false;
+}
+
+ArkUINativeModuleValue LoadingProgressBridge::SetForegroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    auto colorArg = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodeArg->ToNativePointer(vm)->Value();
+
+    ForegroundColorStrategy strategy;
+    if (ParseJsColorStrategy(vm, colorArg, strategy)) {
+        auto strategyInt = static_cast<uint32_t>(ForegroundColorStrategy::INVERT);
+        GetArkUIInternalNodeAPI()->GetCommonModifier().SetForegroundColor(nativeNode, false, strategyInt);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    Color foregroundColor;
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, foregroundColor)) {
+        GetArkUIInternalNodeAPI()->GetLoadingProgressModifier().ResetForegroundColor(nativeNode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetLoadingProgressModifier().SetForegroundColor(
+            nativeNode, foregroundColor.GetValue());
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue LoadingProgressBridge::ResetForegroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetLoadingProgressModifier().ResetForegroundColor(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

@@ -995,6 +995,8 @@ struct ArkUIVideoModifierAPI {
     void (*ResetVideoLoop)(NodeHandle node);
     void (*SetVideoMuted)(NodeHandle node, uint32_t value);
     void (*ResetVideoMuted)(NodeHandle node);
+    void (*SetVideoOpacity)(NodeHandle node, double opacity);
+    void (*ResetVideoOpacity)(NodeHandle node);
 };
 
 struct ArkUIPatternLockModifierAPI {
@@ -1610,6 +1612,8 @@ struct ArkUILoadingProgressModifierAPI {
     void (*ResetColor)(NodeHandle node);
     void (*SetEnableLoading)(NodeHandle node, bool value);
     void (*ResetEnableLoading)(NodeHandle node);
+    void (*SetForegroundColor)(NodeHandle node, uint32_t color);
+    void (*ResetForegroundColor)(NodeHandle node);
 };
 
 struct ArkUITextClockModifierAPI {
