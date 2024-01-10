@@ -239,11 +239,11 @@ void GridPattern::ClearMultiSelect()
     ClearSelectedZone();
 }
 
-bool GridPattern::IsItemSelected(const GestureEvent& info)
+bool GridPattern::IsItemSelected()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto node = host->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+    auto node = host->FindChildByPosition(mouseStartOffsetGlobal_.GetX(), mouseStartOffsetGlobal_.GetY());
     CHECK_NULL_RETURN(node, false);
     auto itemPattern = node->GetPattern<GridItemPattern>();
     CHECK_NULL_RETURN(itemPattern, false);

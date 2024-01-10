@@ -1842,11 +1842,11 @@ void ListPattern::ClearMultiSelect()
     ClearSelectedZone();
 }
 
-bool ListPattern::IsItemSelected(const GestureEvent& info)
+bool ListPattern::IsItemSelected()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto node = host->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+    auto node = host->FindChildByPosition(mouseStartOffsetGlobal_.GetX(), mouseStartOffsetGlobal_.GetY());
     CHECK_NULL_RETURN(node, false);
     auto itemPattern = node->GetPattern<ListItemPattern>();
     if (itemPattern) {
@@ -1854,7 +1854,7 @@ bool ListPattern::IsItemSelected(const GestureEvent& info)
     }
     auto itemGroupPattern = node->GetPattern<ListItemGroupPattern>();
     if (itemGroupPattern) {
-        auto itemNode = node->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+        auto itemNode = node->FindChildByPosition(mouseStartOffsetGlobal_.GetX(), mouseStartOffsetGlobal_.GetY());
         CHECK_NULL_RETURN(itemNode, false);
         itemPattern = itemNode->GetPattern<ListItemPattern>();
         CHECK_NULL_RETURN(itemPattern, false);
