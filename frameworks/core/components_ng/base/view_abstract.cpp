@@ -1549,6 +1549,14 @@ void ViewAbstract::SetBlendMode(BlendMode blendMode)
     ACE_UPDATE_RENDER_CONTEXT(BackBlendMode, blendMode);
 }
 
+void ViewAbstract::SetBlendApplyType(BlendApplyType blendApplyType)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(BackBlendApplyType, blendApplyType);
+}
+
 void ViewAbstract::SetLinearGradient(const NG::Gradient &gradient)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

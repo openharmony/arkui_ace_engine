@@ -3011,18 +3011,16 @@ void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
 void RosenRenderContext::OnBackBlendModeUpdate(BlendMode blendMode)
 {
     CHECK_NULL_VOID(rsNode_);
-    Rosen::RSColorBlendModeType blendModeType = Rosen::RSColorBlendModeType::NONE;
-    switch (blendMode) {
-        case BlendMode::SOURCE_IN:
-            blendModeType = Rosen::RSColorBlendModeType::SRC_IN;
-            break;
-        case BlendMode::DESTINATION_IN:
-            blendModeType = Rosen::RSColorBlendModeType::DST_IN;
-            break;
-        default:
-            blendModeType = Rosen::RSColorBlendModeType::NONE;
-    }
-    rsNode_->SetColorBlendMode(blendModeType);
+    auto rsBlendMode = static_cast<Rosen::RSColorBlendMode>(blendMode);
+    rsNode_->SetColorBlendMode(rsBlendMode);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnBackBlendApplyTypeUpdate(BlendApplyType blendApplyType)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto rsBlendApplyType = static_cast<Rosen::RSColorBlendApplyType>(blendApplyType);
+    rsNode_->SetColorBlendApplyType(rsBlendApplyType);
     RequestNextFrame();
 }
 
@@ -4109,23 +4107,7 @@ void RosenRenderContext::DumpAdvanceInfo()
         DumpLog::GetInstance().AddDesc("DynamicLightUpDegree:" + std::to_string(GetDynamicLightUpDegree().value()));
     }
     if (GetBackBlendMode().has_value()) {
-        switch (GetBackBlendMode().value()) {
-            case BlendMode::NORMAL: {
-                DumpLog::GetInstance().AddDesc("BlendMode:NORMAL");
-                break;
-            }
-            case BlendMode::DESTINATION_IN: {
-                DumpLog::GetInstance().AddDesc("BlendMode:DESTINATION_IN");
-                break;
-            }
-            case BlendMode::SOURCE_IN: {
-                DumpLog::GetInstance().AddDesc("BlendMode:SOURCE_IN");
-                break;
-            }
-            default: {
-                break;
-            }
-        }
+        DumpLog::GetInstance().AddDesc("BlendMode:" + std::to_string(static_cast<int>(GetBackBlendMode().value())));
     }
     if (GetLinearGradient().has_value()) {
         DumpLog::GetInstance().AddDesc("LinearGradient:" + GetLinearGradient().value().ToString());

@@ -5306,15 +5306,33 @@ void JSViewAbstract::JsShadow(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBlendMode(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
-    if (!CheckJSCallbackInfo("JsBlendMode", info, checkList)) {
-        ViewAbstractModel::GetInstance()->SetBlendMode(BlendMode::NORMAL);
+    if (info.Length() == 0) {
         return;
     }
-    int16_t value = 0;
-    ParseJsInteger<int16_t>(info[0], value);
-    auto blendMode = static_cast<BlendMode>(value);
+    BlendMode blendMode = BlendMode::NONE;
+    BlendApplyType blendApplyType = BlendApplyType::FAST;
+    // for backward compatible, we temporary add a magic number to trigger offscreen, will remove soon
+    constexpr int BACKWARD_COMPAT_MAGIC_NUMBER_OFFSCREEN = 1000;
+    if (info[0]->IsNumber()) {
+        auto blendModeNum = info[0]->ToNumber<int32_t>();
+        if (blendModeNum >= static_cast<int>(BlendMode::NONE) &&
+            blendModeNum <= static_cast<int>(BlendMode::LUMINOSITY)) {
+            blendMode = static_cast<BlendMode>(blendModeNum);
+        } else if (blendModeNum == BACKWARD_COMPAT_MAGIC_NUMBER_OFFSCREEN) {
+            // backward compatibility code, will remove soon
+            blendMode = BlendMode::SRC_OVER;
+            blendApplyType = BlendApplyType::OFFSCREEN;
+        }
+    }
+    if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsNumber()) {
+        auto blendApplyTypeNum = info[1]->ToNumber<int32_t>();
+        if (blendApplyTypeNum >= static_cast<int>(BlendApplyType::FAST) &&
+            blendApplyTypeNum <= static_cast<int>(BlendApplyType::OFFSCREEN)) {
+            blendApplyType = static_cast<BlendApplyType>(blendApplyTypeNum);
+        }
+    }
     ViewAbstractModel::GetInstance()->SetBlendMode(blendMode);
+    ViewAbstractModel::GetInstance()->SetBlendApplyType(blendApplyType);
 }
 
 void JSViewAbstract::JsGrayScale(const JSCallbackInfo& info)
