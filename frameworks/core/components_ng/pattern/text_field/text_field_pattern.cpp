@@ -1318,7 +1318,9 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
     } else if (touchType == TouchType::UP) {
         HandleTouchUp();
     } else if (touchType == TouchType::MOVE) {
-        HandleTouchMove(info);
+        if (!isUsingMouse_) {
+            HandleTouchMove(info);
+        }
     }
 }
 
@@ -2768,10 +2770,14 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     }
     ChangeMouseState(info.GetLocalLocation(), pipeline, frameId);
 
+    isUsingMouse_ = true;
     if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
         HandleRightMouseEvent(info);
     } else if (info.GetButton() == MouseButton::LEFT_BUTTON) {
         HandleLeftMouseEvent(info);
+    }
+    if (info.GetAction() == OHOS::Ace::MouseAction::RELEASE) {
+        isUsingMouse_ = false;
     }
 }
 
@@ -2782,7 +2788,6 @@ void TextFieldPattern::HandleRightMouseEvent(MouseInfo& info)
         return;
     }
     if (info.GetAction() == OHOS::Ace::MouseAction::RELEASE) {
-        isUsingMouse_ = true;
         HandleRightMouseReleaseEvent(info);
     }
 }
