@@ -2226,6 +2226,7 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
         auto spanNode = DynamicCast<SpanNode>(current.node);
         if (spanNode && current.node->GetTag() == V2::SYMBOL_SPAN_ETS_TAG) {
             spanNode->CleanSpanItemChildren();
+            UpdateChildProperty(spanNode);
             spanNode->MountToParagraph();
             textForDisplay_.append(StringUtils::Str16ToStr8(SYMBOL_TRANS));
         } else if (spanNode && current.node->GetTag() != V2::PLACEHOLDER_SPAN_ETS_TAG) {
