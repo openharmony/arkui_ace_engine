@@ -125,7 +125,7 @@ void JSButton::SetType(const JSCallbackInfo& info)
 
 void JSButton::SetButtonStyle(const JSCallbackInfo& info)
 {
-    int32_t value = static_cast<int32_t>(ButtonStyleMode::NORMAL);
+    int32_t value = static_cast<int32_t>(ButtonStyleMode::EMPHASIZE);
     if (info[0]->IsNumber()) {
         auto valueT = info[0]->ToNumber<int32_t>();
         if (valueT >= static_cast<int32_t>(ButtonStyleMode::NORMAL) &&
@@ -650,12 +650,18 @@ CreateWithPara JSButton::ParseCreatePara(const JSCallbackInfo& info, bool hasLab
     if (optionObj->GetProperty(JSButton::STATE_EFFECT)->IsBoolean()) {
         para.stateEffect = optionObj->GetProperty(JSButton::STATE_EFFECT)->ToBoolean();
     }
+    if (optionObj->HasProperty(JSButton::BUTTON_STYLE)) {
+        para.buttonStyleMode = ButtonStyleMode::EMPHASIZE;
+    }
     if (optionObj->GetProperty(JSButton::BUTTON_STYLE)->IsNumber()) {
         auto styleModeIntValue = optionObj->GetProperty(JSButton::BUTTON_STYLE)->ToNumber<int32_t>();
         if (styleModeIntValue >= static_cast<int32_t>(ButtonStyleMode::NORMAL) &&
             styleModeIntValue <= static_cast<int32_t>(ButtonStyleMode::TEXT)) {
             para.buttonStyleMode = static_cast<ButtonStyleMode>(styleModeIntValue);
         }
+    }
+    if (optionObj->HasProperty(JSButton::CONTROL_SIZE)) {
+        para.controlSize = ControlSize::NORMAL;
     }
     if (optionObj->GetProperty(JSButton::CONTROL_SIZE)->IsNumber()) {
         auto controlSizeIntValue = optionObj->GetProperty(JSButton::CONTROL_SIZE)->ToNumber<int32_t>();
