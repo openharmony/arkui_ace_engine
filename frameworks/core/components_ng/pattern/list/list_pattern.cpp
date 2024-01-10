@@ -1433,6 +1433,11 @@ bool ListPattern::AnimateToTarget(int32_t index, std::optional<int32_t> indexInG
         GetListItemAnimatePos(iter->second.startPos, iter->second.endPos, align, targetPos);
     }
     if (!NearZero(targetPos)) {
+        if (Negative(targetPos)) {
+            targetPos -= contentStartOffset_;
+        } else {
+            targetPos += contentEndOffset_;
+        }
         AnimateTo(targetPos + currentOffset_, -1, nullptr, true);
     }
     return true;
