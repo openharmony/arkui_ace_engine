@@ -94,13 +94,18 @@ public:
         return estimateOffset_;
     }
 
+    void SetEstimatedItemHeight(float itemHeight)
+    {
+        estimateItemHeight_ = itemHeight;
+    }
+
 private:
     float GetAverageItemHeight() const
     {
         if (totalItemCount_ > 0) {
             return totalItemHeight_ / totalItemCount_;
         }
-        return DEFAULT_ITEM_HEIGHT;
+        return estimateItemHeight_;
     }
 
     int32_t currentIndex_ = 0;
@@ -113,6 +118,7 @@ private:
     float totalItemHeight_ = 0.0f;
     float totalItemCount_ = 0.0f;
 
+    float estimateItemHeight_ = DEFAULT_ITEM_HEIGHT;
     float groupedItemHeight_ = DEFAULT_ITEM_HEIGHT;
 };
 } // namespace OHOS::Ace::NG
