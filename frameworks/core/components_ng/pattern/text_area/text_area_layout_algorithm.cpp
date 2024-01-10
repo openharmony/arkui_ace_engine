@@ -43,6 +43,8 @@ std::optional<SizeF> TextAreaLayoutAlgorithm::MeasureContent(
 
     auto isInlineStyle = pattern->IsNormalInlineState();
 
+    direction_ = textFieldLayoutProperty->GetLayoutDirection();
+
     // Create paragraph.
     if (pattern->IsDragging() && !showPlaceHolder_) {
         CreateParagraph(textStyle, pattern->GetDragContents(), textContent_, false);
@@ -131,7 +133,7 @@ void TextAreaLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pattern);
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize() -
                 SizeF(pattern->GetHorizontalPaddingAndBorderSum(), pattern->GetVerticalPaddingAndBorderSum());
-    
+
     // Remove counterNode height.
     auto counterNode = pattern->GetCounterNode().Upgrade();
     if (counterNode && !pattern->IsNormalInlineState()) {
