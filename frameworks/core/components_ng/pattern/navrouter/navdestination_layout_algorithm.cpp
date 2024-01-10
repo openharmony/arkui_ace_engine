@@ -153,8 +153,7 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         CHECK_NULL_VOID(pipeline);
         auto height = pipeline->GetRootHeight();
         size.SetHeight(height);
-    }
-    else {
+    } else {
         size.AddWidth(padding.left.value_or(0.0f) + padding.right.value_or(0.0f));
         size.AddHeight(padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f));
     }
