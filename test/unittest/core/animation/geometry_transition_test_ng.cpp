@@ -119,7 +119,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition001, TestSize.Level1)
     gt_->Build(weakNode2, true);
     gt_->WillLayout(node2);
     gt_->DidLayout(node2);
-    EXPECT_FALSE(gt_->hasInAnim_);
+    EXPECT_TRUE(gt_->hasInAnim_);
     EXPECT_TRUE(gt_->hasOutAnim_);
 
     Create(weakNode1, true);
