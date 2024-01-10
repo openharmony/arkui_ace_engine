@@ -976,6 +976,19 @@ void ArkTSUtils::GetJsMediaBundleInfo(
     }
 }
 
+bool ArkTSUtils::ParseJsColorStrategy(
+    const EcmaVM* vm, const Local<JSValueRef>& value, ForegroundColorStrategy& strategy)
+{
+    if (value->IsString()) {
+        std::string colorStr = value->ToString(vm)->ToString();
+        if (colorStr.compare("invert") == 0) {
+            strategy = ForegroundColorStrategy::INVERT;
+            return true;
+        }
+    }
+    return false;
+}
+
 bool ArkTSUtils::GetJsPasswordIcon(const EcmaVM *vm, const Local<JSValueRef> &jsOnIconSrc,
     const Local<JSValueRef> &jsOffIconSrc, PasswordIcon& result)
 {

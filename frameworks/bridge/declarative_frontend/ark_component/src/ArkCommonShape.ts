@@ -74,6 +74,19 @@ class ArkCommonShapeComponent extends ArkComponent implements CommonShapeMethod<
   mesh(value: any[], column: number, row: number): this {
     throw new Error('Method not implemented.');
   }
+  height(value: Length): this {
+    modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity, CommonShapeHeightModifier, value);
+    return this;
+  }
+  width(value: Length): this {
+    modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity, CommonShapeWidthModifier, value);
+    return this;
+  }
+  foregroundColor(value: string | number | Resource | Color): this {
+    modifierWithKey(
+      this._modifiersWithKeys, CommonShapeForegroundColorModifier.identity, CommonShapeForegroundColorModifier, value);
+    return this;
+  }
 }
 
 class StrokeDashArrayModifier extends ModifierWithKey<object> {
@@ -249,5 +262,57 @@ class AntiAliasModifier extends ModifierWithKey<boolean> {
     } else {
       getUINativeModule().commonShape.setAntiAlias(node, this.value);
     }
+  }
+}
+
+class CommonShapeHeightModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('commonShapeHeight');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().commonShape.resetHeight(node);
+    } else {
+      getUINativeModule().commonShape.setHeight(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class CommonShapeWidthModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('commonShapeWidth');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().commonShape.resetWidth(node);
+    } else {
+      getUINativeModule().commonShape.setWidth(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+
+class CommonShapeForegroundColorModifier extends ModifierWithKey<string | number | Resource | Color> {
+  constructor(value: string | number | Resource | Color) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('commonShapeForegroundColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().commonShape.resetForegroundColor(node);
+    } else {
+      getUINativeModule().commonShape.setForegroundColor(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }

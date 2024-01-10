@@ -17577,6 +17577,19 @@ class ArkCommonShapeComponent extends ArkComponent {
   mesh(value, column, row) {
     throw new Error('Method not implemented.');
   }
+  height(value) {
+    modifierWithKey(this._modifiersWithKeys, CommonShapeHeightModifier.identity, CommonShapeHeightModifier, value);
+    return this;
+  }
+  width(value) {
+    modifierWithKey(this._modifiersWithKeys, CommonShapeWidthModifier.identity, CommonShapeWidthModifier, value);
+    return this;
+  }
+  foregroundColor(value) {
+    modifierWithKey(
+      this._modifiersWithKeys, CommonShapeForegroundColorModifier.identity, CommonShapeForegroundColorModifier, value);
+    return this;
+  }
 }
 class StrokeDashArrayModifier extends ModifierWithKey {
   constructor(value) {
@@ -17750,6 +17763,57 @@ class AntiAliasModifier extends ModifierWithKey {
   }
 }
 AntiAliasModifier.identity = Symbol('antiAlias');
+class CommonShapeHeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().commonShape.resetHeight(node);
+    }
+    else {
+      getUINativeModule().commonShape.setHeight(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+CommonShapeHeightModifier.identity = Symbol('commonShapeHeight');
+class CommonShapeWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().commonShape.resetWidth(node);
+    }
+    else {
+      getUINativeModule().commonShape.setWidth(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+CommonShapeWidthModifier.identity = Symbol('commonShapeWidth');
+class CommonShapeForegroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().commonShape.resetForegroundColor(node);
+    }
+    else {
+      getUINativeModule().commonShape.setForegroundColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+CommonShapeForegroundColorModifier.identity = Symbol('commonShapeForegroundColor');
 
 /// <reference path='./import.ts' />
 class ArkCircleComponent extends ArkCommonShapeComponent {
