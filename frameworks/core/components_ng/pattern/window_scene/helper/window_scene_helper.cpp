@@ -167,16 +167,9 @@ void WindowSceneHelper::IsWindowSceneCloseKeyboard(RefPtr<FrameNode> frameNode)
             frameNode->GetTag().c_str(), frameNode->GetId());
         auto inputMethod = MiscServices::InputMethodController::GetInstance();
         if (inputMethod) {
-            MiscServices::PanelInfo curKeyboardPanelInfo;
-            curKeyboardPanelInfo.panelType = MiscServices::PanelType::SOFT_KEYBOARD;
-            curKeyboardPanelInfo.panelFlag = MiscServices::PanelFlag::FLG_FIXED;
-            bool curIsShown = false;
-            auto infApiRes = inputMethod->IsPanelShown(curKeyboardPanelInfo, curIsShown);
-            if (infApiRes || curIsShown) {
-                inputMethod->RequestHideInput();
-                inputMethod->Close();
-                TAG_LOGI(AceLogTag::ACE_KEYBOARD, "scbSoftKeyboard Closes Successfully.");
-            }
+            inputMethod->RequestHideInput();
+            inputMethod->Close();
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "scbSoftKeyboard Closes Successfully.");
         }
     }
 #endif
