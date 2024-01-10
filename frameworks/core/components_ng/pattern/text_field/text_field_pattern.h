@@ -290,7 +290,9 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true };
+        FocusPattern focusPattern = { FocusType::NODE, true };
+        focusPattern.SetIsFocusActiveWhenFocused(true);
+        return focusPattern;
     }
 
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
