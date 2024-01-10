@@ -289,6 +289,7 @@ TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
     contentController_ = MakeRefPtr<ContentController>(WeakClaim(this));
     selectController_ = MakeRefPtr<TextSelectController>(WeakClaim(this));
     selectController_->InitContentController(contentController_);
+    magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
 }
 
 TextFieldPattern::~TextFieldPattern()
@@ -1360,6 +1361,9 @@ void TextFieldPattern::HandleTouchUp()
     if (isMousePressed_) {
         isMousePressed_ = false;
     }
+    if (GetShowMagnifier()) {
+        UpdateShowMagnifier();
+    }
     if (enableTouchAndHoverEffect_ && !HasStateStyle(UI_STATE_PRESSED)) {
         auto tmpHost = GetHost();
         CHECK_NULL_VOID(tmpHost);
@@ -2257,6 +2261,7 @@ void TextFieldPattern::InitLongPressEvent()
 
 void TextFieldPattern::HandleLongPress(GestureEvent& info)
 {
+    isTouchCaret_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     bool shouldProcessOverlayAfterLayout = false;
@@ -2644,9 +2649,6 @@ void TextFieldPattern::OnHandleClosed(bool closedByGlobalEvent)
     }
     if (GetShowMagnifier()) {
         UpdateShowMagnifier();
-        auto tmpHost = GetHost();
-        CHECK_NULL_VOID(tmpHost);
-        tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
 
@@ -4415,7 +4417,7 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Set caret position to %{public}d", position);
     selectController_->MoveCaretToContentRect(position, TextAffinity::DOWNSTREAM);
-    if (HasFocus()) {
+    if (HasFocus() && !GetShowMagnifier()) {
         StartTwinkling();
     }
     CloseSelectOverlay();
@@ -6246,8 +6248,9 @@ void TextFieldPattern::ShowMenu()
     CloseSelectOverlay(true);
     if (IsSingleHandle()) {
         SetIsSingleHandle(true);
+    } else {
+        SetIsSingleHandle(false);
     }
-    SetIsSingleHandle(false);
     ProcessOverlay(true, true, true);
 }
 

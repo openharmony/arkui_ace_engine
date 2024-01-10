@@ -50,6 +50,7 @@
 #include "core/components_ng/pattern/text_area/text_area_layout_algorithm.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/text_field/content_controller.h"
+#include "core/components_ng/pattern/text_field/magnifier_controller.h"
 #include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
@@ -1019,10 +1020,12 @@ public:
 
     void UpdateShowMagnifier(bool isShowMagnifier = false)
     {
-        if (isShowMagnifier_ == isShowMagnifier) {
-            return;
-        }
         isShowMagnifier_ = isShowMagnifier;
+        if (isShowMagnifier_) {
+            magnifierController_->OpenMagnifier();
+        } else {
+            magnifierController_->CloseMagnifier();
+        }
     }
 
     bool GetShowMagnifier() const
@@ -1075,6 +1078,24 @@ public:
 
     void ContentFireOnChangeEvent();
     void GetCaretMetrics(CaretMetricsF& caretCaretMetric) override;
+
+    void SetMagnifierRect(MagnifierRect magnifierRect)
+    {
+        magnifierRect_ = magnifierRect;
+    }
+
+    MagnifierRect GetMagnifierRect()
+    {
+        return magnifierRect_;
+    }
+
+    OffsetF GetTextPaintOffset() const;
+
+    const RefPtr<MagnifierController>& GetMagnifierController()
+    {
+        return magnifierController_;
+    }
+
 protected:
     virtual void InitDragEvent();
 
@@ -1192,7 +1213,6 @@ private:
     void FilterExistText();
     void CreateErrorParagraph(const std::string& content);
     void UpdateErrorTextMargin();
-    OffsetF GetTextPaintOffset() const;
     void UpdateSelectController();
     void UpdateHandlesOffsetOnScroll(float offset);
     void CloseHandleAndSelect() override;
@@ -1389,6 +1409,8 @@ private:
     bool needSelectAll_ = false;
     bool isModifyDone_ = false;
     Offset clickLocation_;
+    MagnifierRect magnifierRect_;
+    RefPtr<MagnifierController> magnifierController_;
 };
 } // namespace OHOS::Ace::NG
 
