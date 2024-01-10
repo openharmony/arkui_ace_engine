@@ -2626,6 +2626,7 @@ void TextFieldPattern::OnHandleMoveDone(const RectF& /* handleRect */, bool isFi
         }
     } else {
         auto handleInfo = GetSelectHandleInfo(selectController_->GetCaretRect().GetOffset());
+        handleInfo.paintRect.SetWidth(selectController_->GetCaretRect().Width());
         proxy->UpdateSecondSelectHandleInfo(handleInfo);
     }
     auto tmpHost = GetHost();
