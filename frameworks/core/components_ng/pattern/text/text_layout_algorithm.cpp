@@ -342,6 +342,13 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, L
     }
 }
 
+void TextLayoutAlgorithm::SetNodeForAnimation(const TextStyle& symbolTextStyle, RefPtr<FrameNode>& frameNode)
+{
+    if (symbolTextStyle.GetEffectStrategy() > 0) {
+        paragraph_->SetParagraphSymbolAnimation(frameNode);
+    }
+}
+
 bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper)
 {
     auto frameNode = layoutWrapper->GetHostNode();
@@ -370,6 +377,7 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
         paragraph_->AddSymbol(symbolSourceInfo->GetUnicode());
         paragraph_->PopStyle();
         paragraph_->Build();
+        SetNodeForAnimation(symbolTextStyle, frameNode);
         return true;
     }
     paragraph_->PushStyle(textStyle);

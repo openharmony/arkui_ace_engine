@@ -21,6 +21,7 @@
 #include "txt/paragraph_builder.h"
 #include "txt/paragraph_txt.h"
 #else
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "core/components_ng/render/drawing.h"
 #endif
 
@@ -38,10 +39,41 @@ public:
     TxtParagraph(const ParagraphStyle& paraStyle, std::shared_ptr<txt::FontCollection> fontCollection)
         : paraStyle_(paraStyle), fontCollection_(std::move(fontCollection))
     {}
+
+    void SetParagraphSymbolAnimation(const RefPtr<FrameNode>& frameNode) override
+    {}
 #else
     TxtParagraph(const ParagraphStyle& paraStyle, std::shared_ptr<RSFontCollection> fontCollection)
         : paraStyle_(paraStyle), fontCollection_(std::move(fontCollection))
     {}
+
+    void SetParagraphSymbolAnimation(const RefPtr<FrameNode>& frameNode) override
+    {
+        auto context = AceType::DynamicCast<NG::RosenRenderContext>(frameNode->GetRenderContext());
+        auto rsNode = context->GetRSNode();
+        rsSymbolAnimation_ = RSSymbolAnimation();
+        rsSymbolAnimation_.SetNode(rsNode);
+
+        std::function<bool(
+            const std::shared_ptr< RSSymbolAnimationConfig>& symbolAnimationConfig)>
+            scaleCallback = std::bind(&RSSymbolAnimation::SetSymbolAnimation,
+            rsSymbolAnimation_,
+            std::placeholders::_1);
+
+        SetAnimation(scaleCallback);
+    }
+
+    void SetAnimation(
+        std::function<bool(
+            const std::shared_ptr<Rosen::TextEngine::SymbolAnimationConfig>&)>& animationFunc)
+    {
+        if (animationFunc == nullptr) {
+            TAG_LOGE(AceLogTag::ACE_TEXT_FIELD, "HmSymbol txt_paragraph::SetAnimation failed ");
+        } else {
+            paragraph_->SetAnimation(animationFunc);
+            TAG_LOGD(AceLogTag::ACE_TEXT_FIELD, "HmSymbol txt_paragraph::SetAnimation success ");
+        }
+    }
 #endif
     ~TxtParagraph() override;
 
@@ -106,6 +138,7 @@ private:
     std::unique_ptr<txt::ParagraphBuilder> builder_;
     std::shared_ptr<txt::FontCollection> fontCollection_;
 #else
+    Rosen::RSSymbolAnimation rsSymbolAnimation_;
     std::unique_ptr<RSParagraph> paragraph_;
     std::unique_ptr<RSParagraphBuilder> builder_;
     std::shared_ptr<RSFontCollection> fontCollection_;
