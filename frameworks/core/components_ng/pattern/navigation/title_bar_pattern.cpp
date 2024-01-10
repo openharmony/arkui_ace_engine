@@ -868,6 +868,7 @@ void TitleBarPattern::OnCoordScrollStart()
 {
     coordScrollOffset_ = 0.0f;
     coordScrollFinalOffset_ = 0.0f;
+    isFreeTitleUpdated_ = true;
 
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(titleBarNode);
@@ -975,7 +976,7 @@ void TitleBarPattern::SetTitleStyleByCoordScrollOffset(float offset)
         SetTempTitleBarHeight(offset);
         titleMoveDistance_ = (tempTitleBarHeight_ - defaultTitleBarHeight_) * moveRatio_;
     }
-    
+
     SetTempTitleOffsetY();
     SetTempSubTitleOffsetY();
     titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
