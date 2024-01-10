@@ -480,12 +480,17 @@ public:
             CHECK_NULL_VOID(host);
             auto inspectorId = host->GetInspectorId().value_or("");
             auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityText(true);
-            if (inspectorId.empty() && text.empty()) {
+            auto desc = host->GetAutoEventParamValue("");
+            if (inspectorId.empty() && text.empty() && desc.empty()) {
                 return;
             }
 
             Recorder::EventParamsBuilder builder;
-            builder.SetId(inspectorId).SetType(host->GetTag()).SetEventType(Recorder::LONG_PRESS).SetText(text);
+            builder.SetId(inspectorId)
+                .SetType(host->GetTag())
+                .SetEventType(Recorder::LONG_PRESS)
+                .SetText(text)
+                .SetDescription(desc);
             Recorder::EventRecorder::Get().OnEvent(std::move(builder));
         };
         return longPressCallback;
@@ -524,12 +529,13 @@ protected:
             CHECK_NULL_VOID(host);
             auto inspectorId = host->GetInspectorId().value_or("");
             auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetAccessibilityText(true);
-            if (inspectorId.empty() && text.empty()) {
+            auto desc = host->GetAutoEventParamValue("");
+            if (inspectorId.empty() && text.empty() && desc.empty()) {
                 return;
             }
 
             Recorder::EventParamsBuilder builder;
-            builder.SetId(inspectorId).SetType(host->GetTag()).SetText(text);
+            builder.SetId(inspectorId).SetType(host->GetTag()).SetText(text).SetDescription(desc);
             Recorder::EventRecorder::Get().OnClick(std::move(builder));
         };
         clickCallback_ = MakeRefPtr<ClickEvent>(std::move(clickCallback));

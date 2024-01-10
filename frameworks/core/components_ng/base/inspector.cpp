@@ -519,8 +519,6 @@ void FillSimplifiedInspectorAttrs(const RefPtr<NG::UINode>& parent, std::unique_
     jsonObject->Put(INSPECTOR_ZINDEX, tmpJson->GetInt(INSPECTOR_ZINDEX));
     jsonObject->Put(INSPECTOR_VISIBILITY, tmpJson->GetString(INSPECTOR_VISIBILITY).c_str());
     jsonNode->Put(INSPECTOR_ATTRS, jsonObject);
-
-    jsonNode->Put(INSPECTOR_TYPE, parent->GetTag().c_str());
 }
 
 void GetSimplifiedSpanInspector(

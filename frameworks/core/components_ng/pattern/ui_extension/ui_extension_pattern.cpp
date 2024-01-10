@@ -418,15 +418,7 @@ void UIExtensionPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
 
 bool UIExtensionPattern::HandleKeyEvent(const KeyEvent& event)
 {
-    if (event.code == KeyCode::KEY_TAB && event.action == KeyAction::DOWN) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, false);
-        DispatchFocusActiveEvent(true);
-        // tab trigger consume the key event
-        return pipeline->IsTabJustTriggerOnKeyEvent();
-    } else {
-        return DispatchKeyEventSync(event.rawKeyEvent);
-    }
+    return DispatchKeyEventSync(event.rawKeyEvent);
 }
 
 void UIExtensionPattern::HandleFocusEvent()

@@ -317,6 +317,8 @@ public:
 
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
 
+    OffsetF GetPaintRectCenter() const;
+
     std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
 
     OffsetF GetPaintRectOffsetToPage() const;
@@ -586,6 +588,7 @@ public:
     RefPtr<UINode> GetFrameChildByIndex(uint32_t index, bool needBuild) override;
     bool CheckNeedForceMeasureAndLayout() override;
 
+    bool SetParentLayoutConstraint(const SizeF& size) const override;
     void ForceSyncGeometryNode()
     {
         CHECK_NULL_VOID(renderContext_);

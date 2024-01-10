@@ -71,7 +71,11 @@ public:
         // Animation is not displayed when created for the first time.
         if (isFirstCreated_) {
             animatableBoardColor_->Set(isSelect_->Get() ? LinearColor(userActiveColor_) : LinearColor(inactiveColor_));
-            pointOffset_->Set(isSelect_->Get() ? actualSize_.Width() - actualSize_.Height() : 0.0f);
+            if (direction_ == TextDirection::RTL) {
+                pointOffset_->Set(isSelect_->Get() ? 0.0f : actualSize_.Width() - actualSize_.Height());
+            } else {
+                pointOffset_->Set(isSelect_->Get() ? actualSize_.Width() - actualSize_.Height() : 0.0f);
+            }
             isFirstCreated_ = false;
         }
         AnimationOption colorOption = AnimationOption();
@@ -86,7 +90,11 @@ public:
         pointOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
         float newPointOffset = 0.0f;
         if (!isDragEvent_) {
-            newPointOffset = isSelect_->Get() ? actualSize_.Width() - actualSize_.Height() : 0.0f;
+            if (direction_ == TextDirection::RTL) {
+                newPointOffset = isSelect_->Get() ? 0.0f : actualSize_.Width() - actualSize_.Height();
+            } else {
+                newPointOffset = isSelect_->Get() ? actualSize_.Width() - actualSize_.Height() : 0.0f;
+            }
         } else {
             newPointOffset = std::clamp(
                 dragOffsetX_->Get() - offset_->Get().GetX(), 0.0f, actualSize_.Width() - actualSize_.Height());
@@ -195,6 +203,14 @@ public:
         showHoverEffect_ = showHoverEffect;
     }
 
+    void SetDirection(TextDirection direction)
+    {
+        if (direction_ != direction) {
+            direction_ = direction;
+            isFirstCreated_ = true;
+        }
+    }
+
 private:
     float actualWidth_ = 0.0f;
     float actualHeight_ = 0.0f;
@@ -219,6 +235,7 @@ private:
     SizeF hotZoneSize_;
     SizeF actualSize_;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
+    TextDirection direction_ = TextDirection::AUTO;
 
     RefPtr<AnimatablePropertyColor> animatableBoardColor_;
     RefPtr<AnimatablePropertyColor> animateTouchHoverColor_;

@@ -1266,6 +1266,7 @@ void ViewAbstract::BindPopup(const RefPtr<PopupParam> &param, const RefPtr<Frame
     auto isShow = param->IsShow();
     auto isUseCustom = param->IsUseCustom();
     auto showInSubWindow = param->IsShowInSubWindow();
+    popupInfo.focusable = param->GetFocusable();
     // subwindow model needs to use subContainer to get popupInfo
     if (showInSubWindow) {
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
@@ -1549,6 +1550,14 @@ void ViewAbstract::SetBlendMode(BlendMode blendMode)
     ACE_UPDATE_RENDER_CONTEXT(BackBlendMode, blendMode);
 }
 
+void ViewAbstract::SetBlendApplyType(BlendApplyType blendApplyType)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(BackBlendApplyType, blendApplyType);
+}
+
 void ViewAbstract::SetLinearGradient(const NG::Gradient &gradient)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -1578,6 +1587,14 @@ void ViewAbstract::SetInspectorId(const std::string &inspectorId)
     auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
     if (uiNode) {
         uiNode->UpdateInspectorId(inspectorId);
+    }
+}
+
+void ViewAbstract::SetAutoEventParam(const std::string& param)
+{
+    auto uiNode = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    if (uiNode) {
+        uiNode->UpdateAutoEventParam(param);
     }
 }
 

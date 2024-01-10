@@ -888,7 +888,7 @@ void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo)
     auto popupPattern = popupNode->GetPattern<BubblePattern>();
     CHECK_NULL_VOID(popupPattern);
     if ((isTypeWithOption && !isShowInSubWindow) ||
-        (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) && isUseCustom)) {
+        (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) && isUseCustom && popupInfo.focusable)) {
         BlurLowerNode(popupNode);
         auto onFinish = [popupNodeWk = WeakPtr<FrameNode>(popupNode), weak = WeakClaim(this)]() {
             auto overlayManager = weak.Upgrade();
@@ -911,6 +911,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
         return;
     }
     popupMap_[targetId].markNeedUpdate = false;
+    auto focusable = popupInfo.focusable;
     auto popupNode = popupInfo.popupNode;
     CHECK_NULL_VOID(popupNode);
     auto layoutProp = popupNode->GetLayoutProperty<BubbleLayoutProperty>();
@@ -941,13 +942,13 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
     }
     popupPattern->SetTransitionStatus(TransitionStatus::EXITING);
     if ((isTypeWithOption && !isShowInSubWindow) ||
-        (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) && isUseCustom)) {
+        (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) && isUseCustom && focusable)) {
         ResetLowerNodeFocusable(popupNode);
     }
     // detach popupNode after exiting animation
     popupMap_[targetId].isCurrentOnShow = false;
     popupPattern->StartExitingAnimation(
-        [isShowInSubWindow, isTypeWithOption, isUseCustom, popupNodeWk = WeakPtr<FrameNode>(popupNode),
+        [isShowInSubWindow, isTypeWithOption, isUseCustom, focusable, popupNodeWk = WeakPtr<FrameNode>(popupNode),
             rootNodeWk = WeakPtr<UINode>(rootNode), weak = WeakClaim(this)]() {
             auto rootNode = rootNodeWk.Upgrade();
             auto popupNode = popupNodeWk.Upgrade();
@@ -961,7 +962,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
             rootNode->RemoveChild(popupNode);
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
             if ((isTypeWithOption && !isShowInSubWindow) ||
-                (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) && isUseCustom)) {
+                (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) && isUseCustom && focusable)) {
                 overlayManager->BlurOverlayNode(popupNode);
             }
             if (isShowInSubWindow) {
@@ -1643,6 +1644,12 @@ void OverlayManager::CloseDialog(const RefPtr<FrameNode>& dialogNode)
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "close dialog enter");
     auto dialogLayoutProp = AceType::DynamicCast<DialogLayoutProperty>(dialogNode->GetLayoutProperty());
     CHECK_NULL_VOID(dialogLayoutProp);
+    if (dialogLayoutProp->GetShowInSubWindowValue(false)) {
+        SubwindowManager::GetInstance()->DeleteHotAreas(
+            SubwindowManager::GetInstance()->GetDialogSubWindowId(), dialogNode->GetId());
+        SubwindowManager::GetInstance()->HideDialogSubWindow(
+            SubwindowManager::GetInstance()->GetDialogSubWindowId());
+    }
     if (dialogLayoutProp->GetShowInSubWindowValue(false) && dialogLayoutProp->GetIsModal().value_or(true)) {
         auto parentPipelineContext = PipelineContext::GetMainPipelineContext();
         CHECK_NULL_VOID(parentPipelineContext);

@@ -401,7 +401,8 @@ struct ArkUICommonModifier {
     void (*resetKeyBoardShortCut)(ArkUINodeHandle node);
     void (*setClip)(ArkUINodeHandle node, ArkUI_Int32 isClip);
     void (*setClipShape)(ArkUINodeHandle node, ArkUI_CharPtr value, ArkUI_Float64* attribute, ArkUI_Int32 length);
-    void (*setClipPath)(ArkUINodeHandle node, ArkUI_CharPtr value, ArkUI_Float64* attribute, ArkUI_CharPtr commands);    
+    void (*setClipPath)(
+        ArkUINodeHandle node, ArkUI_CharPtr value, ArkUI_Float64* attribute, ArkUI_CharPtr);
 };
 
 struct ArkUITextModifier {
@@ -1371,6 +1372,8 @@ struct ArkUIScrollModifier {
     void (*resetScrollScrollBarWidth)(ArkUINodeHandle node);
     void (*setScrollEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, bool alwaysEnabled);
     void (*resetScrollEdgeEffect)(ArkUINodeHandle node);
+    void (*setEnableScrollInteraction)(ArkUINodeHandle node, bool enableScrollInteraction);
+    void (*resetEnableScrollInteraction)(ArkUINodeHandle node);
 };
 
 struct ArkUIListItemModifier {

@@ -951,6 +951,15 @@ void ParsePopupCommonParam(
         JSViewAbstract::GetShadowFromTheme(ShadowStyle::OuterDefaultMD, shadow);
     }
     popupParam->SetShadow(shadow);
+
+    auto blurStyleValue = popupObj->GetProperty("backgroundBlurStyle");
+    if (blurStyleValue->IsNumber()) {
+        auto blurStyle = blurStyleValue->ToNumber<int32_t>();
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+            popupParam->SetBlurStyle(static_cast<BlurStyle>(blurStyle));
+        }
+    }
 }
 
 void ParsePopupParam(const JSCallbackInfo& info, const JSRef<JSObject>& popupObj, const RefPtr<PopupParam>& popupParam)
@@ -1051,6 +1060,12 @@ void ParseCustomPopupParam(
     if (popupParam) {
         popupParam->SetUseCustomComponent(true);
     }
+
+    auto focusableValue = popupObj->GetProperty("focusable");
+    if (focusableValue->IsBoolean()) {
+        popupParam->SetFocusable(focusableValue->ToBoolean());
+    }
+
     ParsePopupCommonParam(info, popupObj, popupParam);
 }
 #endif
@@ -2553,6 +2568,22 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
         auto placement = placementValue->ToNumber<int32_t>();
         if (placement >= 0 && placement < static_cast<int32_t>(PLACEMENT.size())) {
             menuParam.placement = PLACEMENT[placement];
+        }
+    }
+    
+    auto backgroundColorValue = menuOptions->GetProperty("backgroundColor");
+    Color backgroundColor;
+    if (JSViewAbstract::ParseJsColor(backgroundColorValue, backgroundColor)) {
+        menuParam.backgroundColor = backgroundColor;
+    }
+
+    auto backgroundBlurStyle = menuOptions->GetProperty("backgroundBlurStyle");
+    BlurStyleOption styleOption;
+    if (backgroundBlurStyle->IsNumber()) {
+        auto blurStyle = backgroundBlurStyle->ToNumber<int32_t>();
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+            menuParam.backgroundBlurStyle = blurStyle;
         }
     }
     WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -5290,15 +5321,33 @@ void JSViewAbstract::JsShadow(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsBlendMode(const JSCallbackInfo& info)
 {
-    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::NUMBER };
-    if (!CheckJSCallbackInfo("JsBlendMode", info, checkList)) {
-        ViewAbstractModel::GetInstance()->SetBlendMode(BlendMode::NORMAL);
+    if (info.Length() == 0) {
         return;
     }
-    int16_t value = 0;
-    ParseJsInteger<int16_t>(info[0], value);
-    auto blendMode = static_cast<BlendMode>(value);
+    BlendMode blendMode = BlendMode::NONE;
+    BlendApplyType blendApplyType = BlendApplyType::FAST;
+    // for backward compatible, we temporary add a magic number to trigger offscreen, will remove soon
+    constexpr int BACKWARD_COMPAT_MAGIC_NUMBER_OFFSCREEN = 1000;
+    if (info[0]->IsNumber()) {
+        auto blendModeNum = info[0]->ToNumber<int32_t>();
+        if (blendModeNum >= static_cast<int>(BlendMode::NONE) &&
+            blendModeNum <= static_cast<int>(BlendMode::LUMINOSITY)) {
+            blendMode = static_cast<BlendMode>(blendModeNum);
+        } else if (blendModeNum == BACKWARD_COMPAT_MAGIC_NUMBER_OFFSCREEN) {
+            // backward compatibility code, will remove soon
+            blendMode = BlendMode::SRC_OVER;
+            blendApplyType = BlendApplyType::OFFSCREEN;
+        }
+    }
+    if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsNumber()) {
+        auto blendApplyTypeNum = info[1]->ToNumber<int32_t>();
+        if (blendApplyTypeNum >= static_cast<int>(BlendApplyType::FAST) &&
+            blendApplyTypeNum <= static_cast<int>(BlendApplyType::OFFSCREEN)) {
+            blendApplyType = static_cast<BlendApplyType>(blendApplyTypeNum);
+        }
+    }
     ViewAbstractModel::GetInstance()->SetBlendMode(blendMode);
+    ViewAbstractModel::GetInstance()->SetBlendApplyType(blendApplyType);
 }
 
 void JSViewAbstract::JsGrayScale(const JSCallbackInfo& info)
@@ -5711,7 +5760,43 @@ void JSViewAbstract::JsAccessibilityText(const std::string& text)
 
 void JSViewAbstract::JsAccessibilityDescription(const std::string& description)
 {
-    ViewAbstractModel::GetInstance()->SetAccessibilityDescription(description);
+    std::pair<bool, std::string> autoEventPair(false, "");
+    std::pair<bool, std::string> descriptionPair(false, "");
+    ParseAccessibilityDescriptionJson(description, autoEventPair, descriptionPair);
+    if (descriptionPair.first) {
+        ViewAbstractModel::GetInstance()->SetAccessibilityDescription(descriptionPair.second);
+    } else {
+        ViewAbstractModel::GetInstance()->SetAccessibilityDescription(description);
+    }
+    if (autoEventPair.first) {
+        ViewAbstractModel::GetInstance()->SetAutoEventParam(autoEventPair.second);
+    }
+}
+
+void JSViewAbstract::ParseAccessibilityDescriptionJson(const std::string& description,
+    std::pair<bool, std::string>& autoEventPair, std::pair<bool, std::string>& descriptionPair)
+{
+    if (description.empty()) {
+        return;
+    }
+    if (!StartWith(description, "{") || !EndWith(description, "}")) {
+        return;
+    }
+    auto jsonObj = JsonUtil::ParseJsonString(description);
+    if (!jsonObj || !jsonObj->IsValid() || !jsonObj->IsObject()) {
+        return;
+    }
+    if (jsonObj->Contains("$autoEventParam")) {
+        auto param = jsonObj->GetValue("$autoEventParam");
+        if (param) {
+            autoEventPair = std::make_pair(true, param->ToString());
+        }
+    }
+    if (jsonObj->Contains("$accessibilityDescription")) {
+        descriptionPair = std::make_pair(true, jsonObj->GetString("$accessibilityDescription"));
+    } else if (jsonObj->Contains("$autoEventParam")) {
+        descriptionPair = std::make_pair(true, "");
+    }
 }
 
 void JSViewAbstract::JsAccessibilityImportance(const std::string& importance)

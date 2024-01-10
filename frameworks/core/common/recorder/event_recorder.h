@@ -70,6 +70,7 @@ constexpr char KEY_ID[] = "id";
 constexpr char KEY_TYPE[] = "type";
 constexpr char KEY_NAV_DST[] = "navDst";
 constexpr char KEY_PAGE[] = "page";
+constexpr char KEY_DESCRIPTION[] = "description";
 constexpr char KEY_PAGE_PARAM[] = "pageParam";
 constexpr char KEY_DURATION[] = "duration";
 constexpr char KEY_TEXT[] = "text";
@@ -93,6 +94,8 @@ public:
     EventParamsBuilder& SetId(const std::string& id);
 
     EventParamsBuilder& SetType(const std::string& type);
+
+    EventParamsBuilder& SetDescription(const std::string& desc);
 
     EventParamsBuilder& SetNavDst(const std::string& dstName);
 
@@ -125,7 +128,6 @@ std::string MapToString(const std::shared_ptr<std::unordered_map<std::string, st
 
 class EventRecorder final {
 public:
-    ~EventRecorder() = default;
     static EventRecorder& Get();
 
     bool IsPageRecordEnable() const;
@@ -150,6 +152,7 @@ public:
 
 private:
     EventRecorder();
+    ~EventRecorder() = default;
     friend class EventConfig;
 
     EventSwitch eventSwitch_;

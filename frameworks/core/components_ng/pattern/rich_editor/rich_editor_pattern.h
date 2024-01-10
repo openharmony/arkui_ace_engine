@@ -130,6 +130,15 @@ public:
         return timestamp_;
     }
 
+    void UpdateSpanPosition()
+    {
+        uint32_t spanTextLength = 0;
+        for (auto& span : spans_) {
+            spanTextLength += StringUtils::ToWstring(span->content).length();
+            span->position = spanTextLength;
+        }
+    }
+
     void ResetBeforePaste();
     void ResetAfterPaste();
 
@@ -175,6 +184,7 @@ public:
     {
         PerformAction(TextInputAction::NEW_LINE, false);
     }
+    bool HandleOnEscape() override;
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
     void CursorMove(CaretMoveIntent direction) override;

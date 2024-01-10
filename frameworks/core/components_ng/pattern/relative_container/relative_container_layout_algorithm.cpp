@@ -490,8 +490,10 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
         calcConstraint->selfIdealSize.value().Height().has_value()) {
         verticalHasIdealSize = true;
     }
-    horizontalHasIdealSize &= Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN);
-    verticalHasIdealSize &= Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN);
+    horizontalHasIdealSize =
+        horizontalHasIdealSize && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN);
+    verticalHasIdealSize =
+        verticalHasIdealSize && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN);
     const auto& childFlexItemProperty = childLayoutProperty->GetFlexItemProperty();
     std::optional<float> childIdealWidth;
     std::optional<float> childIdealHeight;

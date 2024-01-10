@@ -243,7 +243,7 @@ private:
     void MeasureStart(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex);
     void MeasureEnd(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex);
     void MeasureAuto(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex);
-    void UpdateReferencePos(RefPtr<LayoutProperty> layoutProperty);
+    float UpdateReferencePos(RefPtr<LayoutProperty> layoutProperty, bool forwardLayout, float referencePos);
     bool NeedMeasureItem() const;
     static void SetListItemIndex(const LayoutWrapper* groupLayoutWrapper,
         const RefPtr<LayoutWrapper>& itemLayoutWrapper, int32_t indexInGroup);

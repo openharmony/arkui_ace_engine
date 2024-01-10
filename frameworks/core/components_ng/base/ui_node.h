@@ -23,6 +23,7 @@
 #include <unordered_map>
 
 #include "base/geometry/ng/point_t.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/log/ace_performance_check.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -328,6 +329,9 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(InspectorId, std::string);
     virtual void OnInspectorIdUpdate(const std::string& /*unused*/) {}
 
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AutoEventParam, std::string);
+    virtual void OnAutoEventParamUpdate(const std::string& /*unused*/) {}
+
     template<typename T>
     RefPtr<T> FindChildNodeOfClass()
     {
@@ -512,6 +516,8 @@ public:
     void CreateExportTextureInfoIfNeeded();
 
     bool IsNeedExportTexture() const;
+
+    virtual bool SetParentLayoutConstraint(const SizeF& size) const;
 
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()

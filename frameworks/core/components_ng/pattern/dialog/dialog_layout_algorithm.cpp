@@ -317,8 +317,6 @@ void DialogLayoutAlgorithm::ProcessMaskRect(std::optional<DimensionRect> maskRec
     auto rootHeight = PipelineContext::GetCurrentRootHeight();
     RectF rect = RectF(offset.GetX().ConvertToPxWithSize(rootWidth), offset.GetY().ConvertToPxWithSize(rootHeight),
         width.ConvertToPxWithSize(rootWidth), height.ConvertToPxWithSize(rootHeight));
-    dialogContext->ClipWithRect(rect);
-    dialogContext->UpdateClipEdge(true);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     std::vector<DimensionRect> mouseResponseRegion;
     mouseResponseRegion.emplace_back(width, height, offset);
@@ -362,19 +360,31 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     dialogOffset_ = dialogProp->GetDialogOffset().value_or(DimensionOffset());
     alignment_ = dialogProp->GetDialogAlignment().value_or(DialogAlignment::DEFAULT);
     topLeftPoint_ = ComputeChildPosition(childSize, dialogProp, selfSize);
-    if (!dialogProp->GetIsModal().value_or(true) ||
-        (dialogProp->GetIsModal().value_or(true) && dialogProp->GetShowInSubWindowValue(false))) {
+    if ((!dialogProp->GetIsModal().value_or(true) ||
+            (dialogProp->GetIsModal().value_or(true) && dialogProp->GetShowInSubWindowValue(false))) &&
+        !dialogProp->GetIsScenceBoardDialog().value_or(false)) {
         ProcessMaskRect(
             DimensionRect(Dimension(childSize.Width()), Dimension(childSize.Height()), DimensionOffset(topLeftPoint_)),
             frameNode);
     }
     child->GetGeometryNode()->SetMarginFrameOffset(topLeftPoint_);
     child->Layout();
+    SetSubWindowHotarea(dialogProp, childSize, selfSize, frameNode->GetId());
+}
+
+void DialogLayoutAlgorithm::SetSubWindowHotarea(
+    const RefPtr<DialogLayoutProperty>& dialogProp, SizeF childSize, SizeF selfSize, int32_t frameNodeId)
+{
     if (dialogProp->GetShowInSubWindowValue(false)) {
         std::vector<Rect> rects;
-        auto rect = Rect(topLeftPoint_.GetX(), topLeftPoint_.GetY(), childSize.Width(), childSize.Height());
+        Rect rect;
+        if (!dialogProp->GetIsScenceBoardDialog().value_or(false)) {
+            rect = Rect(topLeftPoint_.GetX(), topLeftPoint_.GetY(), childSize.Width(), childSize.Height());
+        } else {
+            rect = Rect(0.0f, 0.0f, selfSize.Width(), selfSize.Height());
+        }
         rects.emplace_back(rect);
-        SubwindowManager::GetInstance()->SetDialogHotAreas(rects, frameNode->GetId(), subWindowId_);
+        SubwindowManager::GetInstance()->SetDialogHotAreas(rects, frameNodeId, subWindowId_);
     }
 }
 

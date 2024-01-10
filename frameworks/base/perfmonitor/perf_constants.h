@@ -56,6 +56,15 @@ public:
 
     // PC shortcut to recent
     static constexpr char PC_SHORTCUT_TO_RECENT[] = "PC_SHORTCUT_TO_RECENT";
+
+    // PC exit recent
+    static constexpr char PC_EXIT_RECENT[] = "PC_EXIT_RECENT";
+
+    // PC shoutcut to app center
+    static constexpr char PC_SHORTCUT_TO_APP_CENTER[] = "PC_SHORTCUT_TO_APP_CENTER";
+
+    // PC shoutcut exit app center
+    static constexpr char PC_SHORTCUT_EXIT_APP_CENTER[] = "PC_SHORTCUT_EXIT_APP_CENTER";
 };
 } // namespace OHOS::Ace
 #endif // ARKUI_PERF_SCENE_ID_H

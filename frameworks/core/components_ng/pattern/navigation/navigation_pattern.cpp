@@ -17,31 +17,14 @@
 #include <string>
 
 #include "base/log/dump_log.h"
-#include "base/log/log_wrapper.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/perfmonitor/perf_constants.h"
-#include "base/memory/referenced.h"
-#include "base/mousestyle/mouse_style.h"
-#include "base/utils/utils.h"
 #include "core/common/container.h"
-#include "core/common/recorder/event_recorder.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/divider/divider_render_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
-#include "core/components_ng/pattern/navigation/navigation_declaration.h"
-#include "core/components_ng/pattern/navigation/navigation_event_hub.h"
-#include "core/components_ng/pattern/navigation/navigation_group_node.h"
-#include "core/components_ng/pattern/navigation/navigation_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
-#include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
-#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
-#include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
-#include "core/components_ng/property/property.h"
-#include "core/pipeline_ng/pipeline_context.h"
-#include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
 
@@ -542,7 +525,8 @@ void NavigationPattern::TransitionWithOutAnimation(const RefPtr<NavDestinationGr
     }
 
     // navBar push navDestination
-    if (newTopNavDestination && newTopNavDestination->GetNavDestinationMode() == NavDestinationMode::STANDARD) {
+    if (newTopNavDestination && newTopNavDestination->GetNavDestinationMode() == NavDestinationMode::STANDARD &&
+        navigationMode_ == NavigationMode::STACK) {
         auto layoutProperty = navBarNode->GetLayoutProperty();
         CHECK_NULL_VOID(layoutProperty);
         layoutProperty->UpdateVisibility(VisibleType::INVISIBLE, true);
@@ -801,15 +785,13 @@ void NavigationPattern::UpdateContextRect(
 
     if (navigationPattern->GetNavigationMode() == NavigationMode::STACK) {
         curDestination->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);
-        navBarNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
         return;
     }
     auto navigationLayoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(navigationLayoutProperty);
     auto navBarProperty = navBarNode->GetLayoutProperty();
     navBarProperty->UpdateVisibility(navigationLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE));
-    navBarNode->SetActive(navigationLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE ?
-        true : false);
+    navBarNode->SetActive(navigationLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::VISIBLE);
     if (!curDestination->IsOnAnimation()) {
         curDestination->GetRenderContext()->UpdateTranslateInXY(OffsetF { 0.0f, 0.0f });
         curDestination->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);
@@ -969,6 +951,14 @@ void NavigationPattern::OnHover(bool isHover)
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     int32_t currentPointerStyle = 0;
     mouseStyle->GetPointerStyle(windowId, currentPointerStyle);
+    auto defaultValue = Dimension(0.0);
+    auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto userSetMinNavBarWidthValue = layoutProperty->GetMinNavBarWidthValue(defaultValue);
+    auto userSetMaxNavBarWidthValue = layoutProperty->GetMaxNavBarWidthValue(defaultValue);
+    if (userSetMinNavBarWidthValue == userSetMaxNavBarWidthValue && userSetNavBarRangeFlag_) {
+        return;
+    }
     if (currentPointerStyle != static_cast<int32_t>(format)) {
         mouseStyle->SetPointerStyle(windowId, format);
     }

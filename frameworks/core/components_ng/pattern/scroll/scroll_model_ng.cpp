@@ -97,6 +97,30 @@ void ScrollModelNG::SetOnScroll(FrameNode* frameNode, NG::ScrollEvent&& event)
     eventHub->SetOnScroll(std::move(event));
 }
 
+void ScrollModelNG::SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollFrameBegin(std::move(event));
+}
+
+void ScrollModelNG::SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollStart(std::move(event));
+}
+
+void ScrollModelNG::SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollStop(std::move(event));
+}
+
 RefPtr<ScrollProxy> ScrollModelNG::CreateScrollBarProxy()
 {
     return AceType::MakeRefPtr<ScrollBarProxy>();

@@ -178,8 +178,10 @@ struct DialogProperties {
     DialogButtonDirection buttonDirection = DialogButtonDirection::AUTO;
     bool isMask = false;
     bool isModal = true;
+    bool isScenceBoardDialog = false;
     bool isSysBlurStyle = true;           // init use sysBlurStyle
     std::function<void()> customBuilder;
+    std::optional<int32_t> backgroundBlurStyle;
 
 #ifndef NG_BUILD
     std::unordered_map<std::string, EventMarker> callbacks; // <callback type(success, cancel, complete), eventId>

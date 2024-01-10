@@ -83,6 +83,8 @@ struct MenuParam {
     MenuPreviewMode previewMode = MenuPreviewMode::NONE;
     MenuPreviewAnimationOptions previewAnimationOptions;
     std::optional<EffectOption> backgroundEffectOption;
+    std::optional<Color> backgroundColor;
+    std::optional<int32_t> backgroundBlurStyle;
 };
 
 class ACE_FORCE_EXPORT ViewAbstract {
@@ -158,6 +160,7 @@ public:
     static void SetFrontBlur(const Dimension &radius, const BlurOption &blurOption);
     static void SetBackShadow(const Shadow &shadow);
     static void SetBlendMode(BlendMode blendMode);
+    static void SetBlendApplyType(BlendApplyType blendApplyType);
 
     // graphics
     static void SetBrightness(const Dimension &value);
@@ -267,6 +270,8 @@ public:
     static void ShowMenu(int32_t targetId, const NG::OffsetF &offset, bool isContextMenu = false);
     // inspector
     static void SetInspectorId(const std::string &inspectorId);
+    // auto event param
+    static void SetAutoEventParam(const std::string& param);
     // restore
     static void SetRestoreId(int32_t restoreId);
     // inspector debugLine

@@ -21,6 +21,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
@@ -59,13 +60,12 @@ public:
     void OnOffscreenProcess(bool recursive) override;
 
 private:
-    void AddNavDestinationToNavigation(const RefPtr<UINode>& parent);
-    void SetDestinationChangeEvent(const RefPtr<UINode>& parent);
+    void AddNavDestinationToNavigation();
 
     void ProcessDestinationChangeEvent();
 
     RefPtr<UINode> navDestinationNode_;
-    WeakPtr<UINode> weakNavigation_;
+    WeakPtr<NavigationGroupNode> weakNavigation_;
 };
 
 } // namespace OHOS::Ace::NG

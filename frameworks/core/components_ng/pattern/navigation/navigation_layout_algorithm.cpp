@@ -466,12 +466,10 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto size =
         CreateIdealSizeByPercentRef(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT).ConvertToSizeT();
     FitScrollFullWindow(size);
-    if (IsAutoHeight(navigationLayoutProperty)) {
-        SetNavigationHeight(layoutWrapper, size);
-    }
-    layoutWrapper->GetGeometryNode()->SetFrameSize(size);
+    
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
+
     if (ifNeedInit_) {
         RangeCalculation(hostNode, navigationLayoutProperty);
     }
@@ -485,6 +483,13 @@ void NavigationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     MeasureNavBar(layoutWrapper, hostNode, navigationLayoutProperty, navBarSize_);
     MeasureContentChild(layoutWrapper, hostNode, navigationLayoutProperty, contentSize_);
     MeasureDivider(layoutWrapper, hostNode, navigationLayoutProperty, dividerSize_);
+
+    if (IsAutoHeight(navigationLayoutProperty)) {
+        SetNavigationHeight(layoutWrapper, size);
+    }
+    size.AddWidth(padding.left.value_or(0.0f) + padding.right.value_or(0.0f));
+    size.AddHeight(padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f));
+    layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 }
 
 void NavigationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

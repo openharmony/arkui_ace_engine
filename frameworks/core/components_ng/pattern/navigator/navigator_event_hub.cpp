@@ -31,7 +31,7 @@ void NavigatorEventHub::NavigatePage()
         auto host = GetFrameNode();
         if (host) {
             auto id = host->GetInspectorIdValue("");
-            builder.SetId(id).SetType(host->GetHostTag());
+            builder.SetId(id).SetType(host->GetHostTag()).SetDescription(host->GetAutoEventParamValue(""));
         }
         builder.SetEventType(Recorder::EventType::NAVIGATOR)
             .SetExtra(Recorder::KEY_NAV_PAGE, url_)

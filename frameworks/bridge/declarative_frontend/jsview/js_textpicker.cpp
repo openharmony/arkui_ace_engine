@@ -1167,6 +1167,22 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
         textPickerDialog.maskRect = maskRect;
     }
 
+    auto backgroundColorValue = paramObject->GetProperty("backgroundColor");
+    Color backgroundColor;
+    if (JSViewAbstract::ParseJsColor(backgroundColorValue, backgroundColor)) {
+        textPickerDialog.backgroundColor = backgroundColor;
+    }
+
+    auto backgroundBlurStyle = paramObject->GetProperty("backgroundBlurStyle");
+    BlurStyleOption styleOption;
+    if (backgroundBlurStyle->IsNumber()) {
+        auto blurStyle = backgroundBlurStyle->ToNumber<int32_t>();
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+            textPickerDialog.backgroundBlurStyle = blurStyle;
+        }
+    }
+
     TextPickerDialogModel::GetInstance()->SetTextPickerDialogShow(pickerText, settingData, std::move(cancelEvent),
         std::move(acceptEvent), std::move(changeEvent), textPickerDialog);
 }

@@ -108,6 +108,9 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
             refereeNG_->CleanAll();
         }
     }
+    if (downFingerIds_.empty() && refereeNG_->QueryAllDone()) {
+        refereeNG_->ForceCleanGestureReferee();
+    }
     if (frameNode->HaveSecurityComponent()) {
         std::vector<NG::RectF> rect;
         frameNode->CheckSecurityComponentStatus(rect);
@@ -131,10 +134,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     touchTestResults_[touchPoint.id] = std::move(hitTestResult);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
-    if (!container->IsScenceBoardWindow()) {
-        return;
-    }
-    std::map<int32_t, TouchTestResultInfo> scenceBoardTouchTestResultInfo;
+    std::map<int32_t, TouchTestResultInfo> touchTestResultInfo;
     for (const auto& item : touchTestResults_[touchPoint.id]) {
         auto node = item->GetAttachedNode().Upgrade();
         if (!node) {
@@ -144,12 +144,12 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         if (!frameNode) {
             continue;
         }
-        scenceBoardTouchTestResultInfo[frameNode->GetId()] = { frameNode->GetId(), frameNode->GetTag(),
+        touchTestResultInfo[frameNode->GetId()] = { frameNode->GetId(), frameNode->GetTag(),
             frameNode->GetInspectorIdValue(""), frameNode->GetGeometryNode()->GetFrameRect().ToString(),
             frameNode->GetDepth() };
     }
     std::string resultInfo = std::string("fingerId: ").append(std::to_string(touchPoint.id));
-    for (const auto& item : scenceBoardTouchTestResultInfo) {
+    for (const auto& item : touchTestResultInfo) {
         resultInfo.append(" id: ")
             .append(std::to_string(item.first))
             .append(", tag: ")
@@ -162,9 +162,9 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
             .append(std::to_string(item.second.depth))
             .append(".");
     }
-    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "SceneBoard touch test hitted node info: %{public}s", resultInfo.c_str());
-    if (scenceBoardTouchTestResultInfo.size() == 0) {
-        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "SceneBoard touch test result is empty.");
+    TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "Touch test hitted node info: %{public}s", resultInfo.c_str());
+    if (touchTestResultInfo.empty()) {
+        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "Touch test result is empty.");
         std::list<std::pair<int32_t, std::string>> dumpList;
         eventTree_.Dump(dumpList, 0);
         for (auto& item : dumpList) {

@@ -80,6 +80,7 @@ public:
 
     virtual RefPtr<GestureSnapshot> Dump() const override;
     RefPtr<Gesture> CreateGestureFromRecognizer() const override;
+    void ForceCleanRecognizer() override;
 
 private:
     // Recognize whether MOVE/UP event is in response region.

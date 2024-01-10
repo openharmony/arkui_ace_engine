@@ -602,8 +602,6 @@ void MenuPattern::ResetTheme(const RefPtr<FrameNode>& host, bool resetForDesktop
     auto scroll = DynamicCast<FrameNode>(host->GetFirstChild());
     CHECK_NULL_VOID(scroll);
 
-    renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-
     if (resetForDesktopMenu) {
         // DesktopMenu apply shadow on inner Menu node
         renderContext->UpdateBackShadow(ShadowConfig::NoneShadow);

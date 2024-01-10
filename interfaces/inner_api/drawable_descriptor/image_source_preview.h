@@ -112,6 +112,16 @@ public:
     {
         return 0;
     }
+    
+    uint32_t WritePixels(const uint8_t *source, const uint64_t &bufferSize)
+    {
+        return 0;
+    }
+
+    static std::unique_ptr<PixelMap> Create(const InitializationOptions& opts)
+    {
+        return nullptr;
+    }
 
     static std::unique_ptr<PixelMap> Create(
         const uint32_t* colors, uint32_t colorLength, const InitializationOptions& opts)

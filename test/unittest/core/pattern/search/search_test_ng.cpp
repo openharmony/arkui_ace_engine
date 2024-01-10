@@ -432,6 +432,87 @@ HWTEST_F(SearchTestNg, SearchPatternMethodTest004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SearchPatternMethodTest005
+ * @tc.desc: click cancel button when no focus at cancel button
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SearchPatternMethodTest005, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. get frameNode and pattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+    textFieldPattern->UpdateEditingValue("Text", 0);
+
+    /**
+     * @tc.step: step2. click cancel button.
+     * @tc.expected: focusChoice_ = FocusChoice::SEARCH.
+     */
+    auto cancelButtonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_BUTTON_INDEX));
+    ASSERT_NE(cancelButtonFrameNode, nullptr);
+    auto gesture = textFieldFrameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gesture, nullptr);
+    gesture->ActClick();
+
+    EXPECT_EQ(pattern->focusChoice_, SearchPattern::FocusChoice::SEARCH);
+}
+
+/**
+ * @tc.name: SearchPatternMethodTest006
+ * @tc.desc: click cancel button when focus at cancel button
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, SearchPatternMethodTest006, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. get frameNode and pattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    textFieldPattern->UpdateEditingValue("Text", 0);
+    TimeStamp timeStamp;
+    KeyEvent keyEvent(
+        KeyCode::KEY_TAB, KeyAction::DOWN, { KeyCode::KEY_TAB }, 0, timeStamp, 0, 0, SourceType::KEYBOARD, {});
+
+    /**
+     * @tc.step: move focus to cancel button by pressing TAB
+     * @tc.expected: focusChoice_ = FocusChoice::CANCEL_BUTTON.
+     */
+    pattern->focusChoice_ = SearchPattern::FocusChoice::SEARCH;
+    pattern->cancelButtonSize_ = SizeF(100.0, 50.0);
+    pattern->OnKeyEvent(keyEvent);
+    EXPECT_EQ(pattern->focusChoice_, SearchPattern::FocusChoice::CANCEL_BUTTON);
+
+    /**
+     * @tc.step: step3. click cancel button.
+     * @tc.expected: focusChoice_ = FocusChoice::SEARCH.
+     */
+    auto cancelButtonFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(CANCEL_BUTTON_INDEX));
+    ASSERT_NE(cancelButtonFrameNode, nullptr);
+    auto gesture = textFieldFrameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gesture, nullptr);
+    gesture->ActClick();
+
+    EXPECT_EQ(pattern->focusChoice_, SearchPattern::FocusChoice::SEARCH);
+}
+
+/**
  * @tc.name: Pattern001
  * @tc.desc: isHover_ is false
  * @tc.type: FUNC
@@ -2230,6 +2311,49 @@ HWTEST_F(SearchTestNg, Pattern019, TestSize.Level1)
     pattern->focusChoice_ = SearchPattern::FocusChoice::SEARCH_BUTTON;
     pattern->isSearchButtonEnabled_ = true;
     pattern->OnKeyEvent(keyEventShiftTab);
+    EXPECT_EQ(pattern->focusChoice_, SearchPattern::FocusChoice::SEARCH);
+}
+
+/**
+ * @tc.name: Pattern020
+ * @tc.desc: test OnKeyEvent for pressing Enter when the focus is at cancel button
+ * @tc.type: FUNC
+ */
+HWTEST_F(SearchTestNg, Pattern020, TestSize.Level1)
+{
+    /**
+     * @tc.step: step1. get frameNode and pattern.
+     */
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SearchPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(TEXTFIELD_INDEX));
+    ASSERT_NE(textFieldFrameNode, nullptr);
+    auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(textFieldPattern, nullptr);
+
+    textFieldPattern->UpdateEditingValue("Text", 0);
+    TimeStamp timeStamp;
+    KeyEvent keyEvent(
+        KeyCode::KEY_TAB, KeyAction::DOWN, { KeyCode::KEY_TAB }, 0, timeStamp, 0, 0, SourceType::KEYBOARD, {});
+
+    /**
+     * @tc.step: step2. call OnKeyEvent().
+     * @tc.expected: focusChoice_ = FocusChoice::CANCEL_BUTTON.
+     */
+    pattern->focusChoice_ = SearchPattern::FocusChoice::SEARCH;
+    pattern->cancelButtonSize_ = SizeF(100.0, 50.0);
+    pattern->OnKeyEvent(keyEvent);
+    EXPECT_EQ(pattern->focusChoice_, SearchPattern::FocusChoice::CANCEL_BUTTON);
+
+    /**
+     * @tc.step: step3. call OnKeyEvent().
+     * @tc.expected: focusChoice_ = FocusChoice::SEARCH.
+     */
+    keyEvent.code = KeyCode::KEY_ENTER, keyEvent.action = KeyAction::DOWN;
+    pattern->OnKeyEvent(keyEvent);
     EXPECT_EQ(pattern->focusChoice_, SearchPattern::FocusChoice::SEARCH);
 }
 } // namespace OHOS::Ace::NG

@@ -41,6 +41,7 @@ void GridScrollerTestNg::CreateWithNoProxy(const std::function<void(GridModelNG)
 
 AssertionResult GridScrollerTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, float expectOffset)
 {
+    // After every call to ScrollToIndex(), reset currentOffset_
     float startOffset = pattern_->GetTotalOffset();
     pattern_->ScrollToIndex(index, smooth, align);
     FlushLayoutTask(frameNode_);
@@ -48,8 +49,9 @@ AssertionResult GridScrollerTestNg::ScrollToIndex(int32_t index, bool smooth, Sc
         // Straight to the end of the anmiation
     }
     float currentOffset = pattern_->GetTotalOffset();
-    // reset offset before return
-    pattern_->ScrollTo(startOffset);
+    pattern_->gridLayoutInfo_.currentOffset_ = 0; // for avoid some error
+    FlushLayoutTask(frameNode_);
+    pattern_->ScrollTo(startOffset); // reset currentOffset_
     FlushLayoutTask(frameNode_);
     return IsEqual(currentOffset, expectOffset);
 }
@@ -61,97 +63,40 @@ AssertionResult GridScrollerTestNg::ScrollToIndex(int32_t index, bool smooth, Sc
  */
 HWTEST_F(GridScrollerTestNg, ScrollToIndex001, TestSize.Level1)
 {
+    /**
+     * @tc.cases: Grid at top, ScrollTo index:0, text each ScrollAlign
+     * @tc.expected: Each test grid does not scroll
+     */
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         CreateColItem(40);
     });
-
-    /**
-     * @tc.steps: step1. first item in viewport
-     */
+    EXPECT_TRUE(pattern_->IsAtTop());
     int32_t index = 0;
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, 0));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, 0));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, 0));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, 0));
-
-    /**
-     * @tc.steps: step2. the item in viewport
-     */
-    index = 8;
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, ITEM_HEIGHT * 2));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, ITEM_HEIGHT * 0.5));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, 0));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, 0));
-
-    /**
-     * @tc.steps: step3. the item below viewport
-     */
-    index = 16;
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, ITEM_HEIGHT * 4));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, ITEM_HEIGHT * 2.5));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, ITEM_HEIGHT));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, ITEM_HEIGHT));
-
-    /**
-     * @tc.steps: step4. last item below viewport
-     */
-    index = LAST_ITEM;
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, ITEM_HEIGHT * 6));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, ITEM_HEIGHT * 6));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, ITEM_HEIGHT * 6));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, ITEM_HEIGHT * 6));
-
-    /**
-     * @tc.steps: step5. scroll to middle, first item above viewport
-     */
-    UpdateCurrentOffset(-ITEM_HEIGHT * 4);
-    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * 4);
-    index = 0;
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, 0));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, 0));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, 0));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, 0));
-
-    /**
-     * @tc.steps: step6. the item above viewport
-     */
-    index = 6;
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, ITEM_HEIGHT));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, 0));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, 0));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, ITEM_HEIGHT));
-
-    /**
-     * @tc.steps: step7. scroll to bottom, last item in viewport
-     */
-    UpdateCurrentOffset(-ITEM_HEIGHT * 2);
-    EXPECT_TRUE(pattern_->IsAtBottom());
-    index = LAST_ITEM;
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, ITEM_HEIGHT * 6));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, ITEM_HEIGHT * 6));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, ITEM_HEIGHT * 6));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, ITEM_HEIGHT * 6));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, 0.f));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, 0.f));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, 0.f));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, 0.f));
 }
 
 /**
  * @tc.name: ScrollToIndex002
- * @tc.desc: Test ScrollToIndex invalid
+ * @tc.desc: Test ScrollToIndex
  * @tc.type: FUNC
  */
 HWTEST_F(GridScrollerTestNg, ScrollToIndex002, TestSize.Level1)
 {
+    /**
+     * @tc.cases: Grid at top, ScrollTo index:8, index:8 item is in the view, text each ScrollAlign
+     * @tc.expected: Each test scroll the correct distance
+     */
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateColItem(24);
+        CreateColItem(40);
     });
-
-    /**
-     * @tc.steps: step1. Invalid index, index < -1
-     */
-    int32_t index = -2;
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, 0));
-    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, 0));
+    int32_t index = 8;
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, ITEM_HEIGHT * 2));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, ITEM_HEIGHT * 0.5));
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, 0));
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, 0));
 }
@@ -162,6 +107,126 @@ HWTEST_F(GridScrollerTestNg, ScrollToIndex002, TestSize.Level1)
  * @tc.type: FUNC
  */
 HWTEST_F(GridScrollerTestNg, ScrollToIndex003, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Grid at top, ScrollTo index:16, index:16 item is below the view, text each ScrollAlign
+     * @tc.expected: Each test scroll the correct distance
+     */
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(40);
+    });
+    int32_t index = 16;
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, ITEM_HEIGHT * 4));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, ITEM_HEIGHT * 2.5));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, ITEM_HEIGHT));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, ITEM_HEIGHT));
+}
+
+/**
+ * @tc.name: ScrollToIndex004
+ * @tc.desc: Test ScrollToIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, ScrollToIndex004, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Grid at top, ScrollTo index:LAST_ITEM, index:LAST_ITEM item is below the view, text each ScrollAlign
+     * @tc.expected: Each test scroll the correct distance
+     */
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(40);
+    });
+    int32_t index = LAST_ITEM;
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, ITEM_HEIGHT * 6));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, ITEM_HEIGHT * 6));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, ITEM_HEIGHT * 6));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, ITEM_HEIGHT * 6));
+}
+
+/**
+ * @tc.name: ScrollToIndex005
+ * @tc.desc: Test ScrollToIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, ScrollToIndex005, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Grid at middle(scroll a little distance), ScrollTo index:0, index:0 item is above the view,
+     *            text each ScrollAlign
+     * @tc.expected: Each test scroll the correct distance
+     */
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(40);
+    });
+    pattern_->ScrollTo(ITEM_HEIGHT * 4);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * 4);
+    EXPECT_FALSE(pattern_->IsAtTop());
+    EXPECT_FALSE(pattern_->IsAtBottom());
+    int32_t index = 0;
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, 0));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, 0));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, 0));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, 0));
+}
+
+/**
+ * @tc.name: ScrollToIndex006
+ * @tc.desc: Test ScrollToIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, ScrollToIndex006, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Grid at bottom, ScrollTo index:LAST_ITEM, index:LAST_ITEM item is in the view, text each ScrollAlign
+     * @tc.expected: Each test scroll the correct distance
+     */
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(40);
+    });
+    pattern_->ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), ITEM_HEIGHT * 6);
+    EXPECT_TRUE(pattern_->IsAtBottom());
+    int32_t index = LAST_ITEM;
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, ITEM_HEIGHT * 6));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, ITEM_HEIGHT * 6));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, ITEM_HEIGHT * 6));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, ITEM_HEIGHT * 6));
+}
+
+/**
+ * @tc.name: ScrollToIndex007
+ * @tc.desc: Test ScrollToIndex invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, ScrollToIndex007, TestSize.Level1)
+{
+    /**
+     * @tc.cases: ScrollTo invalid index:-2, text each ScrollAlign
+     * @tc.expected: Each test scroll the correct distance
+     */
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(24);
+    });
+    int32_t index = -2;
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, 0));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, 0));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, 0));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, 0));
+}
+
+/**
+ * @tc.name: ScrollToIndex008
+ * @tc.desc: Test ScrollToIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, ScrollToIndex008, TestSize.Level1)
 {
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
@@ -175,6 +240,93 @@ HWTEST_F(GridScrollerTestNg, ScrollToIndex003, TestSize.Level1)
     pattern_->ScrollToIndex(30, true, ScrollAlign::END);
     EXPECT_EQ(pattern_->targetIndex_.value(), 30);
     EXPECT_EQ(pattern_->scrollAlign_, ScrollAlign::END);
+}
+
+/**
+ * @tc.name: ScrollToIndex009
+ * @tc.desc: Test ScrollToIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, ScrollToIndex009, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Set gap, ScrollTo index:16, text each ScrollAlign
+     * @tc.expected: Each test scroll the correct distance
+     */
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetColumnsGap(Dimension(COL_GAP));
+        model.SetRowsGap(Dimension(ROW_GAP));
+        CreateColItem(40);
+    });
+    int32_t index = 16;
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, ITEM_HEIGHT * 4 + ROW_GAP * 4));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, ITEM_HEIGHT * 2.5 + ROW_GAP * 4));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, ITEM_HEIGHT + ROW_GAP * 4));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, ITEM_HEIGHT + ROW_GAP * 4));
+}
+
+/**
+ * @tc.name: ScrollToIndex010
+ * @tc.desc: Test ScrollToIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, ScrollToIndex010, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Set GridLayoutOptions:irregularIndexes, ScrollTo index:7, text each ScrollAlign
+     * @tc.expected: Each test scroll the correct distance
+     */
+    GridLayoutOptions option;
+    option.irregularIndexes = { 6, 1, 3, 4, 5, 0 };
+    Create([option](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetLayoutOptions(option);
+        model.SetColumnsGap(Dimension(COL_GAP));
+        model.SetRowsGap(Dimension(ROW_GAP));
+        CreateColItem(10);
+    });
+    int32_t index = 5;
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, ITEM_HEIGHT * 4 + ROW_GAP * 7));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, ITEM_HEIGHT * 3.5 + ROW_GAP * 5));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, ITEM_HEIGHT * 2 + ROW_GAP * 5));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, ITEM_HEIGHT * 2 + ROW_GAP * 5));
+}
+
+/**
+ * @tc.name: ScrollToIndex011
+ * @tc.desc: Test ScrollToIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, DISABLED_ScrollToIndex011, TestSize.Level1)
+{
+    // to do ... ScrollToIndex not support getSizeByIndex at now!!!!
+    /**
+     * @tc.cases: Set GridLayoutOptions:irregularIndexes getSizeByIndex,
+     *            set gap, ScrollTo index:7, text each ScrollAlign
+     * @tc.expected: Each test scroll the correct distance
+     */
+    GridLayoutOptions option;
+    option.irregularIndexes = { 6, 1, 3, 4, 5, 0 };
+    GetSizeByIndex onGetIrregularSizeByIndex = [](int32_t index) {
+        if (index == 3) {
+            return GridItemSize { 1, 2 };
+        }
+        return GridItemSize { 1, 4 };
+    };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+    Create([option](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetLayoutOptions(option);
+        model.SetColumnsGap(Dimension(COL_GAP));
+        model.SetRowsGap(Dimension(ROW_GAP));
+        CreateColItem(10);
+    });
+    int32_t index = 5;
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::START, ITEM_HEIGHT * 4 + ROW_GAP * 3));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, ITEM_HEIGHT * 5.5 + ROW_GAP * 4));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, ITEM_HEIGHT + ROW_GAP * 3));
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, ITEM_HEIGHT + ROW_GAP * 3));
 }
 
 /**

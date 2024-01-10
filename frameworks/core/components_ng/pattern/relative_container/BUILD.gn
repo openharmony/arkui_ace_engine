@@ -18,7 +18,7 @@ build_component_plugin("relative_container_source") {
   js_source = "arkui_relative_container"
   sources = [
     "relative_container_layout_algorithm.cpp",
+    "relative_container_model_ng.cpp",
     "relative_container_napi.cpp",
-    "relative_container_view.cpp",
   ]
 }

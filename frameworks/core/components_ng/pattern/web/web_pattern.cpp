@@ -1957,9 +1957,12 @@ void WebPattern::RegisterSelectOverlayCallback(SelectOverlayInfo& selectInfo,
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback)
 {
+    CHECK_NULL_VOID(delegate_);
+    auto copyOption = delegate_->GetCopyOptionMode();
     quickMenuCallback_ = callback;
     int32_t flags = params->GetEditStateFlags();
-    if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT) {
+    if ((flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT)
+        && (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::NONE)) {
         selectInfo.menuCallback.onCut = [weak = AceType::WeakClaim(this), callback]() {
             CHECK_NULL_VOID(callback);
             callback->Continue(
@@ -1968,7 +1971,8 @@ void WebPattern::RegisterSelectOverlayCallback(SelectOverlayInfo& selectInfo,
     } else {
         selectInfo.menuInfo.showCut = false;
     }
-    if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY) {
+    if ((flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY)
+        && (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::NONE)) {
         selectInfo.menuCallback.onCopy = [weak = AceType::WeakClaim(this), callback]() {
             CHECK_NULL_VOID(callback);
             callback->Continue(

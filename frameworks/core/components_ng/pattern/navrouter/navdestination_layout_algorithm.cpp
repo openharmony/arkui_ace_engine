@@ -15,16 +15,8 @@
 
 #include "core/components_ng/pattern/navrouter/navdestination_layout_algorithm.h"
 
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_algorithm.h"
-#include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
-#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -140,19 +132,25 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(constraint);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     auto size = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
-    // to avoid zero-height of navDestination
-    if (size.Height() == 0) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto height = pipeline->GetRootHeight();
-        size.SetHeight(height);
-    }
-    layoutWrapper->GetGeometryNode()->SetFrameSize(size);
+
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
 
     float titleBarHeight = MeasureTitleBar(layoutWrapper, hostNode, navDestinationLayoutProperty, size);
-    MeasureContentChild(layoutWrapper, hostNode, navDestinationLayoutProperty, size, titleBarHeight);
+    float contentChildHeight =
+            MeasureContentChild(layoutWrapper, hostNode, navDestinationLayoutProperty, size, titleBarHeight);
+
+    size.SetHeight(titleBarHeight + contentChildHeight);
+    if (titleBarHeight + contentChildHeight == 0) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto height = pipeline->GetRootHeight();
+        size.SetHeight(height);
+    } else {
+        size.AddWidth(padding.left.value_or(0.0f) + padding.right.value_or(0.0f));
+        size.AddHeight(padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f));
+    }
+    layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 }
 
 void NavDestinationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

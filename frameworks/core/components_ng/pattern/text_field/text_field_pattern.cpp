@@ -1604,7 +1604,7 @@ void TextFieldPattern::InitDragDropEvent()
             pattern->MarkContentChange();
             auto host = pattern->GetHost();
             CHECK_NULL_VOID(host);
-            
+
             // Except for DRAG_SUCCESS, all of rest need to show
             if (event != nullptr && event->GetResult() != DragRet::DRAG_SUCCESS) {
                 auto dragTextStart = pattern->dragTextStart_;
@@ -3101,7 +3101,7 @@ bool TextFieldPattern::RequestCustomKeyboard()
     CHECK_NULL_RETURN(customKeyboardBuilder_, false);
     auto frameNode = GetHost();
     CHECK_NULL_RETURN(frameNode, false);
-    auto pipeline = PipelineContext::GetMainPipelineContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, false);
@@ -3955,7 +3955,10 @@ void TextFieldPattern::RecordSubmitEvent() const
                                           TextInputType::VISIBLE_PASSWORD
                                     : false;
     Recorder::EventParamsBuilder builder;
-    builder.SetId(inspectorId).SetType(host->GetTag()).SetEventType(Recorder::EventType::SEARCH_SUBMIT);
+    builder.SetId(inspectorId)
+        .SetType(host->GetTag())
+        .SetEventType(Recorder::EventType::SEARCH_SUBMIT)
+        .SetDescription(host->GetAutoEventParamValue(""));
     if (!isPwdType) {
         builder.SetText(contentController_->GetTextValue());
     }
@@ -4034,9 +4037,15 @@ void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight,
         "Textfield handleSurface change, new width %{public}d, new height %{public}d, prev width %{public}d, prev "
         "height %{public}d",
         newWidth, newHeight, prevWidth, prevHeight);
-    auto proxy = GetSelectOverlayProxy();
-    CHECK_NULL_VOID(proxy);
-    proxy->ShowOrHiddenMenu(true);
+    if (SelectOverlayIsOn()) {
+        auto proxy = GetSelectOverlayProxy();
+        proxy->ShowOrHiddenMenu(true);
+        processOverlayDelayTask_ = [weak = WeakClaim(this)]() {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->ProcessOverlay(false);
+        };
+    }
     if (HasFocus() && IsSingleHandle()) {
         StartTwinkling();
     }
@@ -5564,6 +5573,9 @@ void TextFieldPattern::StopEditing()
     UpdateSelection(selectController_->GetCaretIndex());
     StopTwinkling();
     CloseKeyboard(true);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 bool TextFieldPattern::CheckHandleVisible(const RectF& paintRect)

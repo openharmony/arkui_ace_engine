@@ -56,7 +56,7 @@ void CustomDialogControllerModelNG::SetOpenDialog(DialogProperties& dialogProper
         CHECK_NULL_VOID(overlayManager);
         if (dialogProperties.isShowInSubWindow) {
             dialog = SubwindowManager::GetInstance()->ShowDialogNG(dialogProperties, std::move(func));
-            if (dialogProperties.isModal) {
+            if (dialogProperties.isModal && !dialogProperties.isScenceBoardDialog) {
                 DialogProperties Maskarg;
                 Maskarg.isMask = true;
                 Maskarg.autoCancel = dialogProperties.autoCancel;
@@ -112,10 +112,6 @@ void CustomDialogControllerModelNG::SetCloseDialog(DialogProperties& dialogPrope
         }
         CHECK_NULL_VOID(dialog);
         if (dialogProperties.isShowInSubWindow) {
-            SubwindowManager::GetInstance()->DeleteHotAreas(
-                SubwindowManager::GetInstance()->GetDialogSubWindowId(), dialog->GetId());
-            SubwindowManager::GetInstance()->HideDialogSubWindow(
-                SubwindowManager::GetInstance()->GetDialogSubWindowId());
             SubwindowManager::GetInstance()->CloseDialogNG(dialog);
             dialogs.pop_back();
         } else {

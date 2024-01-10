@@ -130,13 +130,18 @@ void JSView::RenderJSExecution()
 
 void JSView::SyncInstanceId()
 {
-    restoreInstanceId_ = Container::CurrentId();
+    restoreInstanceIdStack_.push(Container::CurrentId());
     ContainerScope::UpdateCurrent(instanceId_);
 }
 
 void JSView::RestoreInstanceId()
 {
-    ContainerScope::UpdateCurrent(restoreInstanceId_);
+    if (restoreInstanceIdStack_.empty()) {
+        ContainerScope::UpdateCurrent(-1);
+        return;
+    }
+    ContainerScope::UpdateCurrent(restoreInstanceIdStack_.top());
+    restoreInstanceIdStack_.pop();
 }
 
 void JSView::GetInstanceId(const JSCallbackInfo& info)

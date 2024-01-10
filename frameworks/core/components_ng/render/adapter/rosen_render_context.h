@@ -183,6 +183,7 @@ public:
     Rosen::SHADOW_COLOR_STRATEGY ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy);
     void OnBackShadowUpdate(const Shadow& shadow) override;
     void OnBackBlendModeUpdate(BlendMode blendMode) override;
+    void OnBackBlendApplyTypeUpdate(BlendApplyType applyType) override;
     void UpdateBorderWidthF(const BorderWidthPropertyF& value) override;
 
     void OnTransformMatrixUpdate(const Matrix4& matrix) override;
@@ -293,7 +294,8 @@ public:
     void MarkDrivenRender(bool flag) override;
     void MarkDrivenRenderItemIndex(int32_t index) override;
     void MarkDrivenRenderFramePaintState(bool flag) override;
-    RefPtr<PixelMap> GetThumbnailPixelMap() override;
+    RefPtr<PixelMap> GetThumbnailPixelMap(bool needScale = false) override;
+    void UpdateThumbnailPixelMapScale(float& scaleX, float& scaleY) override;
     std::vector<double> transInfo_;
     std::vector<double> GetTrans() override;
 #ifndef USE_ROSEN_DRAWING

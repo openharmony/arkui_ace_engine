@@ -241,9 +241,9 @@ class BuilderNode extends BaseNode {
         if (branchId == oldBranchid) {
             return;
         }
-        // branchid identifies uniquely the if .. <1> .. else if .<2>. else .<3>.branch
+        // branchId identifies uniquely the if .. <1> .. else if .<2>. else .<3>.branch
         // ifElseNode stores the most recent branch, so we can compare
-        // removedChildElmtIds will be filled with the elmtIds of all childten and their children will be deleted in response to if .. else chnage
+        // removedChildElmtIds will be filled with the elmtIds of all children and their children will be deleted in response to if .. else change
         var removedChildElmtIds = new Array();
         If.branchId(branchId, removedChildElmtIds);
         this.purgeDeletedElmtIds();

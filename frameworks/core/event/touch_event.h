@@ -93,7 +93,7 @@ struct TouchEvent final {
 
     // all points on the touch screen.
     std::vector<TouchPoint> pointers;
-    std::shared_ptr<MMI::PointerEvent> pointerEvent;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent { nullptr };
     std::vector<uint8_t> enhanceData;
     // historical points
     std::vector<TouchEvent> history;

@@ -2116,6 +2116,28 @@ OffsetF FrameNode::GetPaintRectOffset(bool excludeSelf) const
     return offset;
 }
 
+OffsetF FrameNode::GetPaintRectCenter() const
+{
+    auto context = GetRenderContext();
+    CHECK_NULL_RETURN(context, OffsetF());
+    auto trans = context->GetPaintRectWithTransform();
+    auto offset = trans.GetOffset();
+    auto center = offset + OffsetF(trans.Width() / 2.0f, trans.Height() / 2.0f);
+    auto parent = GetAncestorNodeOfFrame();
+    while (parent) {
+        auto renderContext = parent->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, OffsetF());
+        auto scale = renderContext->GetTransformScale();
+        if (scale) {
+            center.SetX(center.GetX() * scale.value().x);
+            center.SetY(center.GetY() * scale.value().y);
+        }
+        center += renderContext->GetPaintRectWithTransform().GetOffset();
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    return center;
+}
+
 OffsetF FrameNode::GetParentGlobalOffsetDuringLayout() const
 {
     OffsetF offset {};
@@ -3228,4 +3250,13 @@ void FrameNode::InitLastArea()
     }
 }
 
+bool FrameNode::SetParentLayoutConstraint(const SizeF& size) const
+{
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.UpdatePercentReference(size);
+    layoutConstraint.UpdateMaxSizeWithCheck(size);
+    layoutConstraint.UpdateIllegalParentIdealSizeWithCheck(OptionalSize(size));
+    layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
+    return true;
+}
 } // namespace OHOS::Ace::NG

@@ -1265,14 +1265,19 @@ public:
     }
 };
 
-RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap()
+RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap(bool needScale)
 {
     if (rsNode_ == nullptr) {
         return nullptr;
     }
     std::shared_ptr<DrawDragThumbnailCallback> drawDragThumbnailCallback =
         std::make_shared<DrawDragThumbnailCallback>();
-    auto ret = RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, 1, 1);
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+    if (needScale) {
+        UpdateThumbnailPixelMapScale(scaleX, scaleY);
+    }
+    auto ret = RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, scaleX, scaleY);
     if (!ret) {
         return nullptr;
     }
@@ -1281,6 +1286,29 @@ RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap()
         return nullptr;
     }
     return g_pixelMap;
+}
+
+void RosenRenderContext::UpdateThumbnailPixelMapScale(float& scaleX, float& scaleY)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto scale = rsNode_->GetStagingProperties().GetScale();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    auto parent = frameNode->GetAncestorNodeOfFrame();
+    while (parent) {
+        auto parentRenderContext = parent->GetRenderContext();
+        CHECK_NULL_VOID(parentRenderContext);
+        auto parentScale = parentRenderContext->GetTransformScale();
+        if (parentScale) {
+            scale[0] *= parentScale.value().x;
+            scale[1] *= parentScale.value().y;
+        }
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    scaleX = scale[0];
+    scaleY = scale[1];
 }
 
 #ifndef USE_ROSEN_DRAWING
@@ -3011,18 +3039,16 @@ void RosenRenderContext::OnBackShadowUpdate(const Shadow& shadow)
 void RosenRenderContext::OnBackBlendModeUpdate(BlendMode blendMode)
 {
     CHECK_NULL_VOID(rsNode_);
-    Rosen::RSColorBlendModeType blendModeType = Rosen::RSColorBlendModeType::NONE;
-    switch (blendMode) {
-        case BlendMode::SOURCE_IN:
-            blendModeType = Rosen::RSColorBlendModeType::SRC_IN;
-            break;
-        case BlendMode::DESTINATION_IN:
-            blendModeType = Rosen::RSColorBlendModeType::DST_IN;
-            break;
-        default:
-            blendModeType = Rosen::RSColorBlendModeType::NONE;
-    }
-    rsNode_->SetColorBlendMode(blendModeType);
+    auto rsBlendMode = static_cast<Rosen::RSColorBlendMode>(blendMode);
+    rsNode_->SetColorBlendMode(rsBlendMode);
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnBackBlendApplyTypeUpdate(BlendApplyType blendApplyType)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto rsBlendApplyType = static_cast<Rosen::RSColorBlendApplyType>(blendApplyType);
+    rsNode_->SetColorBlendApplyType(rsBlendApplyType);
     RequestNextFrame();
 }
 
@@ -4109,23 +4135,7 @@ void RosenRenderContext::DumpAdvanceInfo()
         DumpLog::GetInstance().AddDesc("DynamicLightUpDegree:" + std::to_string(GetDynamicLightUpDegree().value()));
     }
     if (GetBackBlendMode().has_value()) {
-        switch (GetBackBlendMode().value()) {
-            case BlendMode::NORMAL: {
-                DumpLog::GetInstance().AddDesc("BlendMode:NORMAL");
-                break;
-            }
-            case BlendMode::DESTINATION_IN: {
-                DumpLog::GetInstance().AddDesc("BlendMode:DESTINATION_IN");
-                break;
-            }
-            case BlendMode::SOURCE_IN: {
-                DumpLog::GetInstance().AddDesc("BlendMode:SOURCE_IN");
-                break;
-            }
-            default: {
-                break;
-            }
-        }
+        DumpLog::GetInstance().AddDesc("BlendMode:" + std::to_string(static_cast<int>(GetBackBlendMode().value())));
     }
     if (GetLinearGradient().has_value()) {
         DumpLog::GetInstance().AddDesc("LinearGradient:" + GetLinearGradient().value().ToString());

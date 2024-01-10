@@ -100,7 +100,7 @@ void JSIndexer::Create(const JSCallbackInfo& args)
     if (selectedProperty->IsNumber()) {
         selectedVal = selectedProperty->ToNumber<int32_t>();
         IndexerModel::GetInstance()->Create(indexerArray, selectedVal);
-    } else if (selectedProperty->IsObject()) {
+    } else if (length > 0 && selectedProperty->IsObject()) {
         JSRef<JSObject> selectedObj = JSRef<JSObject>::Cast(selectedProperty);
         auto selectedValueProperty = selectedObj->GetProperty("value");
         if (selectedValueProperty->IsNumber()) {
@@ -116,6 +116,8 @@ void JSIndexer::Create(const JSCallbackInfo& args)
         }
 
         args.ReturnSelf();
+    } else {
+        IndexerModel::GetInstance()->Create(indexerArray, selectedVal);
     }
 }
 
