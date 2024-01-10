@@ -533,6 +533,7 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
     Point point = pointerEvent.GetPoint();
     dragDropState_ = DragDropMgrState::IDLE;
     preTargetFrameNode_ = nullptr;
+    draggedFrameNode_ = nullptr;
     hasNotifiedTransformation_ = false;
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow()) {
