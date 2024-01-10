@@ -800,6 +800,7 @@ void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     json->Put("draggable", host->IsDraggable() ? "true" : "false");
+    json->Put("enableAnalyzer", isEnableAnalyzer_ ? "true" : "false");
 }
 
 void ImagePattern::UpdateFillColorIfForegroundColor()
