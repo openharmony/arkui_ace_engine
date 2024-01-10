@@ -123,6 +123,7 @@ void SwitchPattern::UpdateSwitchLayoutProperty()
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProperty);
+    direction_ = layoutProperty->GetLayoutDirection();
     auto& setMargin = layoutProperty->GetMarginProperty();
     if (setMargin) {
         if (setMargin->left.has_value()) {
@@ -458,8 +459,12 @@ void SwitchPattern::HandleDragEnd()
 {
     auto mainSize = GetSwitchWidth();
     auto contentOffset = GetSwitchContentOffsetX();
-    if ((isOn_.value() && dragOffsetX_ - contentOffset < mainSize / 2) ||
-        (!isOn_.value() && dragOffsetX_ - contentOffset >= mainSize / 2)) {
+    if ((direction_ == TextDirection::RTL &&
+        ((isOn_.value() && dragOffsetX_ - contentOffset > mainSize / 2) ||
+        (!isOn_.value() && dragOffsetX_ - contentOffset <= mainSize / 2))) ||
+        (direction_ != TextDirection::RTL &&
+        ((isOn_.value() && dragOffsetX_ - contentOffset < mainSize / 2) ||
+        (!isOn_.value() && dragOffsetX_ - contentOffset >= mainSize / 2)))) {
         OnClick();
     }
     isDragEvent_ = false;
