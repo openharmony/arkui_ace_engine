@@ -42,6 +42,12 @@ RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>>
             continue;
         }
         span->MarkNeedRemoveNewLine(false);
+        // clear placeholder textstyle,it should be modified by text line
+        auto placeholderSpanItem = AceType::DynamicCast<PlaceholderSpanItem>(span);
+        if (placeholderSpanItem) {
+            TextStyle textStyle;
+            placeholderSpanItem->textStyle = textStyle;
+        }
         ++it;
     }
     if (!spans.empty()) {
