@@ -40,6 +40,7 @@ constexpr int32_t BUBBLE_DISPLAY_SIZE_CHANGE_TIMER = 250;
 constexpr int32_t BUBBLE_DISPLAY_OPACITY_CHANGE_TIMER = 150;
 constexpr int32_t BUBBLE_DISAPPEAR_SIZE_CHANGE_TIMER = 250;
 constexpr int32_t BUBBLE_DISAPPEAR_OPACITY_CHANGE_TIMER = 250;
+constexpr int32_t BUBBLE_DISAPPEAR_DELAY_TIMER = 2000;
 constexpr Dimension BUBBLE_VERTICAL_WIDTH = 62.0_vp;
 constexpr Dimension BUBBLE_VERTICAL_HEIGHT = 32.0_vp;
 constexpr Dimension BUBBLE_HORIZONTAL_WIDTH = 48.0_vp;
@@ -280,10 +281,27 @@ void SliderTipModifier::SetTipFlag(bool flag)
     if (tipFlag_->Get() == flag) {
         return;
     }
+    taskId_++;
     if (flag) {
         SetBubbleDisplayAnimation();
     } else {
-        SetBubbleDisappearAnimation();
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostDelayedTask(
+            [weak = WeakClaim(this), taskId = taskId_]() {
+                auto modifier = weak.Upgrade();
+                CHECK_NULL_VOID(modifier);
+                if (modifier->taskId_ != taskId) {
+                    return;
+                }
+                modifier->SetBubbleDisappearAnimation();
+                auto pipeline = PipelineBase::GetCurrentContext();
+                CHECK_NULL_VOID(pipeline);
+                pipeline->RequestFrame();
+            },
+            TaskExecutor::TaskType::UI, BUBBLE_DISAPPEAR_DELAY_TIMER);
     }
     tipFlag_->Set(flag);
 }
