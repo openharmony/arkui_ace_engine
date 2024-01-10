@@ -13,18 +13,13 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_TEXT_MODIFIER_H
+#define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_TEXT_MODIFIER_H
 
-#include "basic_node.h"
+#include "core/interfaces/native/node/node_modifiers.h"
 
-#include "core/interfaces/native/node/node_api.h"
+namespace OHOS::Ace::NG::NodeModifier {
+const ArkUITextModifier* GetTextModifier();
+}
 
-namespace OHOS::Ace::NodeModel {
-
-// for error info, use int instead of ArkUINodeEventType
-ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type);
-ArkUI_Int32 ConvertToNodeEventType(ArkUIAsyncEventKind type);
-
-bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event);
-
-}; // namespace OHOS::Ace::NodeModel
+#endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_TEXT_MODIFIER_H

@@ -656,6 +656,7 @@ void ResetTransform(ArkUINodeHandle node)
                        matrix[NUM_9], matrix[NUM_13], matrix[NUM_2], matrix[NUM_6], matrix[NUM_10], matrix[NUM_14],
                        matrix[NUM_3], matrix[NUM_7], matrix[NUM_11], matrix[NUM_15]));
 }
+
 void SetBorderColor(ArkUINodeHandle node, const uint32_t& leftColorInt, const uint32_t& rightColorInt,
     const uint32_t& topColorInt, const uint32_t& bottomColorInt)
 {
@@ -1589,6 +1590,7 @@ void ResetBackgroundImage(ArkUINodeHandle node)
     ViewAbstract::SetBackgroundImage(frameNode, OHOS::Ace::ImageSourceInfo { srcStr, bundle, module });
     ViewAbstract::SetBackgroundImageRepeat(frameNode, OHOS::Ace::ImageRepeat::NO_REPEAT);
 }
+
 void SetTranslate(ArkUINodeHandle node, const double* values, const int* units, int32_t length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);

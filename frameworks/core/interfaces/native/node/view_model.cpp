@@ -20,6 +20,10 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
+#include "core/components_ng/pattern/linear_layout/row_model_ng.h"
+#include "core/components_ng/pattern/list/list_model_ng.h"
+#include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
@@ -113,12 +117,36 @@ void* createSwiperNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createColumnNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = ColumnModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createRowNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = RowModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createListItemNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = ListItemModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 {
-    static createArkUIFrameNode* createArkUIFrameNodes[] = { nullptr, createTextNode, createSpanNode,
-        createImageSpanNode, createImageNode, createToggleNode, createLoadingProgress, createTextInputNode,
-        createStackNode, createScrollNode, createListNode, createSwiperNode };
+    static createArkUIFrameNode* createArkUIFrameNodes[] = {
+        nullptr, createTextNode, createSpanNode, createImageSpanNode, createImageNode, createToggleNode,
+        createLoadingProgress, createTextInputNode, createStackNode, createScrollNode, createListNode,
+        createSwiperNode, nullptr, nullptr, nullptr, nullptr, createColumnNode, createRowNode,
+        nullptr, createListItemNode
+    };
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);
         return nullptr;

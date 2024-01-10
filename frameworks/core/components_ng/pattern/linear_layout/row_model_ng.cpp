@@ -39,6 +39,17 @@ void RowModelNG::Create(const std::optional<Dimension>& space, AlignDeclaration*
     }
 }
 
+RefPtr<FrameNode> RowModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::ROW_ETS_TAG, nodeId, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto castLinearLayoutProperty = frameNode->GetLayoutProperty<LinearLayoutProperty>();
+    if (castLinearLayoutProperty) {
+        castLinearLayoutProperty->UpdateFlexDirection(FlexDirection::ROW);
+    }
+    return frameNode;
+}
+
 void RowModelNG::SetAlignItems(FlexAlign flexAlign)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, CrossAxisAlign, flexAlign);

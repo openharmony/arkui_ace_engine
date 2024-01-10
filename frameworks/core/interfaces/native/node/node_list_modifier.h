@@ -15,16 +15,10 @@
 
 #pragma once
 
-#include "basic_node.h"
+#include "core/interfaces/native/node/node_modifiers.h"
 
-#include "core/interfaces/native/node/node_api.h"
+namespace OHOS::Ace::NG::NodeModifier {
 
-namespace OHOS::Ace::NodeModel {
+const ArkUIListModifier* GetListModifier();
 
-// for error info, use int instead of ArkUINodeEventType
-ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type);
-ArkUI_Int32 ConvertToNodeEventType(ArkUIAsyncEventKind type);
-
-bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event);
-
-}; // namespace OHOS::Ace::NodeModel
+} // namespace OHOS::Ace::NG::NodeModifier
