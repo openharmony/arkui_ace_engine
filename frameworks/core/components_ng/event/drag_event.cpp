@@ -425,7 +425,7 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
             } else {
                 auto context = frameNode->GetRenderContext();
                 CHECK_NULL_VOID(context);
-                auto pixelMap = context->GetThumbnailPixelMap();
+                auto pixelMap = context->GetThumbnailPixelMap(true);
                 gestureHub->SetPixelMap(pixelMap);
             }
         };
@@ -513,20 +513,35 @@ void DragEventActuator::SetFilter(const RefPtr<DragEventActuator>& actuator)
     }
 }
 
-OffsetF DragEventActuator::GetFloatImageOffset(const RefPtr<FrameNode>& frameNode)
+OffsetF DragEventActuator::GetFloatImageOffset(const RefPtr<FrameNode>& frameNode, const RefPtr<PixelMap>& pixelMap)
 {
-    auto offsetToWindow = frameNode->GetPaintRectOffset();
-    auto offsetX = offsetToWindow.GetX();
-    auto offsetY = offsetToWindow.GetY();
+    CHECK_NULL_RETURN(frameNode, OffsetF());
+    auto centerPosition = frameNode->GetPaintRectCenter();
+    float width = 0.0f;
+    float height = 0.0f;
+    if (pixelMap) {
+        width = pixelMap->GetWidth();
+        height = pixelMap->GetHeight();
+    }
+    auto offsetX = centerPosition.GetX() - width / 2.0f;
+    auto offsetY = centerPosition.GetY() - height / 2.0f;
 #ifdef WEB_SUPPORTED
     if (frameNode->GetTag() == V2::WEB_ETS_TAG) {
         auto webPattern = frameNode->GetPattern<WebPattern>();
         if (webPattern) {
-            offsetX += webPattern->GetDragOffset().GetX();
-            offsetY += webPattern->GetDragOffset().GetY();
+            auto offsetToWindow = frameNode->GetPaintRectOffset();
+            offsetX = offsetToWindow.GetX() + webPattern->GetDragOffset().GetX();
+            offsetY = offsetToWindow.GetY() + webPattern->GetDragOffset().GetY();
         }
     }
 #endif
+    // Check web tag.
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, OffsetF());
+    if (pipelineContext->HasFloatTitle()) {
+        offsetX -= static_cast<float>((CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx());
+        offsetY -= static_cast<float>((CONTAINER_TITLE_HEIGHT + CONTAINER_BORDER_WIDTH).ConvertToPx());
+    }
     return OffsetF(offsetX, offsetY);
 }
 
@@ -627,13 +642,7 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     CHECK_NULL_VOID(pixelMap);
     auto width = pixelMap->GetWidth();
     auto height = pixelMap->GetHeight();
-    auto offsetX = GetFloatImageOffset(frameNode).GetX();
-    auto offsetY = GetFloatImageOffset(frameNode).GetY();
-    // Check web tag.
-    if (pipelineContext->HasFloatTitle()) {
-        offsetX -= static_cast<float>((CONTAINER_BORDER_WIDTH + CONTENT_PADDING).ConvertToPx());
-        offsetY -= static_cast<float>((CONTAINER_TITLE_HEIGHT + CONTAINER_BORDER_WIDTH).ConvertToPx());
-    }
+    auto offset = GetFloatImageOffset(frameNode, pixelMap);
     // create imageNode
     auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
@@ -647,7 +656,7 @@ void DragEventActuator::SetPixelMap(const RefPtr<DragEventActuator>& actuator)
     props->UpdateUserDefinedIdealSize(targetSize);
     auto imageContext = imageNode->GetRenderContext();
     CHECK_NULL_VOID(imageContext);
-    imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(offsetX), Dimension(offsetY)));
+    imageContext->UpdatePosition(OffsetT<Dimension>(Dimension(offset.GetX()), Dimension(offset.GetY())));
     ClickEffectInfo clickEffectInfo;
     clickEffectInfo.level = ClickEffectLevel::LIGHT;
     clickEffectInfo.scaleNumber = SCALE_NUMBER;
