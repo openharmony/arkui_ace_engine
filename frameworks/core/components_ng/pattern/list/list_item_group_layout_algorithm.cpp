@@ -307,7 +307,14 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
             startPos = itemPosition_.begin()->second.first;
         }
         endPos = itemPosition_.rbegin()->second.second;
-        startIndex = std::min(GetStartIndex(), totalItemCount_ - 1);
+        startIndex = GetStartIndex();
+        if (startIndex >= totalItemCount_) {
+            startIndex = totalItemCount_ - 1;
+            if (itemPosition_.begin()->first > 0) {
+                startPos = ((startPos - headerMainSize_) / GetLanesFloor(itemPosition_.begin()->first)) *
+                               GetLanesFloor(startIndex) + headerMainSize_;
+            }
+        }
         endIndex = std::min(GetEndIndex(), totalItemCount_ - 1);
         itemPosition_.clear();
         layoutWrapper->RemoveAllChildInRenderTree();
