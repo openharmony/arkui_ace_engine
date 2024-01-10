@@ -17,6 +17,7 @@
 
 #include <regex>
 
+#include "base/utils/string_utils.h"
 #include "core/common/container.h"
 
 namespace OHOS::Ace {
@@ -30,9 +31,15 @@ constexpr uint32_t APNG_FILE_SUFFIX_LEN = 5;
 bool ImageSourceInfo::IsSVGSource(const std::string& src, InternalResource::ResourceId resourceId)
 {
     // 4 is the length of ".svg".
-    return (src.size() > FILE_SUFFIX_LEN && src.substr(src.size() - FILE_SUFFIX_LEN) == ".svg") ||
-           (src.empty() && resourceId > InternalResource::ResourceId::SVG_START &&
-               resourceId < InternalResource::ResourceId::SVG_END);
+    if (src.size() > FILE_SUFFIX_LEN) {
+        auto srcSuffix = src.substr(src.size() - FILE_SUFFIX_LEN);
+        StringUtils::TransformStrCase(srcSuffix, StringUtils::TEXT_CASE_LOWERCASE);
+        if (srcSuffix == ".svg") {
+            return true;
+        }
+    }
+    return (src.empty() && resourceId > InternalResource::ResourceId::SVG_START &&
+            resourceId < InternalResource::ResourceId::SVG_END);
 }
 
 bool ImageSourceInfo::IsPngSource(const std::string& src, InternalResource::ResourceId resourceId)
