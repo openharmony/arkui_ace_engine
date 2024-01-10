@@ -88,14 +88,14 @@ frameworks/core/components_ng/pattern/linear_split/  @xiexiyun
 frameworks/core/components_ng/pattern/list/  @yeyinglong_admin
 frameworks/core/components_ng/pattern/loading_progress/  @Zhang-Dong-hui
 frameworks/core/components_ng/pattern/marquee/  @liyujie43
-frameworks/core/components_ng/pattern/menu/  @cheng-feiwang
+frameworks/core/components_ng/pattern/menu/  @Armstrong15
 frameworks/core/components_ng/pattern/model/  @
 frameworks/core/components_ng/pattern/navigation/  @tsj_2020
 frameworks/core/components_ng/pattern/navigator/  @tsj_2020
 frameworks/core/components_ng/pattern/navrouter/  @tsj_2020
 frameworks/core/components_ng/pattern/option/  @cheng-feiwang
 frameworks/core/components_ng/pattern/overlay/  @cheng-feiwang
-frameworks/core/components_ng/pattern/panel/  @zhou-chaobo
+frameworks/core/components_ng/pattern/panel/  @Armstrong15
 frameworks/core/components_ng/pattern/patternlock/  @Zhang-Dong-hui
 frameworks/core/components_ng/pattern/picker/  @luoying_ace_admin
 frameworks/core/components_ng/pattern/plugin/  @wangchensu1 @keerecles @ZhangYu-Home
@@ -189,7 +189,7 @@ frameworks/core/components/image/  @xiexiyun
 frameworks/core/components/indexer/  @Zhang-Dong-hui
 frameworks/core/components/list/  @yeyinglong_admin
 frameworks/core/components/marquee/  @liyujie43
-frameworks/core/components/menu/  @cheng-feiwang
+frameworks/core/components/menu/  @Armstrong15
 frameworks/core/components/mouse_listener/  @catpoison
 frameworks/core/components/multimodal/  @
 frameworks/core/components/navigation_bar/  @tsj_2020
@@ -199,7 +199,7 @@ frameworks/core/components/overlay/  @yangfan229
 frameworks/core/components/padding/  @yangfan229
 frameworks/core/components/page/  @yan-shuifeng
 frameworks/core/components/page_transition/  @hehongyang9
-frameworks/core/components/panel/  @zhou-chaobo
+frameworks/core/components/panel/  @Armstrong15
 frameworks/core/components/picker/  @luoying_ace_admin
 frameworks/core/components/piece/  @cheng-feiwang
 frameworks/core/components/plugin/  @wangchensu1
