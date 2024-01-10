@@ -399,12 +399,14 @@ void SelectOverlayNode::DispatchVisibleState(FrameNodeType type, FrameNodeTrigge
             SetFrameNodeStatus(type, FrameNodeStatus::VISIBLETOGONE);
             AnimationUtils::Animate(
                 option,
-                [weak = WeakClaim(this), type]() {
+                [weak = WeakClaim(this), type, id = Container::CurrentId()]() {
+                    ContainerScope scope(id);
                     auto node = weak.Upgrade();
                     CHECK_NULL_VOID(node);
                     node->SetFrameNodeOpacity(type, 0.0);
                 },
-                [weak = WeakClaim(this), type]() {
+                [weak = WeakClaim(this), type, id = Container::CurrentId()]() {
+                    ContainerScope scope(id);
                     auto node = weak.Upgrade();
                     CHECK_NULL_VOID(node);
                     node->ExecuteOverlayStatus(type, FrameNodeTrigger::HIDDEN);
@@ -430,12 +432,14 @@ void SelectOverlayNode::DispatchVisibleToGoneState(FrameNodeType type, FrameNode
             SetFrameNodeVisibility(type, VisibleType::VISIBLE);
             AnimationUtils::Animate(
                 option,
-                [weak = WeakClaim(this), type]() {
+                [weak = WeakClaim(this), type, id = Container::CurrentId()]() {
+                    ContainerScope scope(id);
                     auto node = weak.Upgrade();
                     CHECK_NULL_VOID(node);
                     node->SetFrameNodeOpacity(type, 1.0);
                 },
-                [weak = WeakClaim(this), type]() {
+                [weak = WeakClaim(this), type, id = Container::CurrentId()]() {
+                    ContainerScope scope(id);
                     auto node = weak.Upgrade();
                     CHECK_NULL_VOID(node);
                     node->ExecuteOverlayStatus(type, FrameNodeTrigger::SHOWN);
@@ -464,12 +468,14 @@ void SelectOverlayNode::DispatchGoneState(FrameNodeType type, FrameNodeTrigger t
             SetFrameNodeVisibility(type, VisibleType::VISIBLE);
             AnimationUtils::Animate(
                 option,
-                [weak = WeakClaim(this), type]() {
+                [weak = WeakClaim(this), type, id = Container::CurrentId()]() {
+                    ContainerScope scope(id);
                     auto node = weak.Upgrade();
                     CHECK_NULL_VOID(node);
                     node->SetFrameNodeOpacity(type, 1.0);
                 },
-                [weak = WeakClaim(this), type]() {
+                [weak = WeakClaim(this), type, id = Container::CurrentId()]() {
+                    ContainerScope scope(id);
                     auto node = weak.Upgrade();
                     CHECK_NULL_VOID(node);
                     node->ExecuteOverlayStatus(type, FrameNodeTrigger::SHOWN);
@@ -497,12 +503,14 @@ void SelectOverlayNode::DispatchGoneToVisibleState(FrameNodeType type, FrameNode
             SetFrameNodeStatus(type, FrameNodeStatus::VISIBLETOGONE);
             AnimationUtils::Animate(
                 option,
-                [weak = WeakClaim(this), type]() {
+                [weak = WeakClaim(this), type, id = Container::CurrentId()]() {
+                    ContainerScope scope(id);
                     auto node = weak.Upgrade();
                     CHECK_NULL_VOID(node);
                     node->SetFrameNodeOpacity(type, 0.0);
                 },
-                [weak = WeakClaim(this), type]() {
+                [weak = WeakClaim(this), type, id = Container::CurrentId()]() {
+                    ContainerScope scope(id);
                     auto node = weak.Upgrade();
                     CHECK_NULL_VOID(node);
                     node->ExecuteOverlayStatus(type, FrameNodeTrigger::HIDDEN);
@@ -629,7 +637,9 @@ void SelectOverlayNode::MoreAnimation()
     auto toolbarHeight = textOverlayTheme->GetMenuToolbarHeight();
     auto frameSize = CalcSize(CalcLength(toolbarHeight.ConvertToPx()), CalcLength(toolbarHeight.ConvertToPx()));
 
-    AnimationUtils::Animate(extensionOption, [extensionContext, selectMenuInnerContext]() {
+    AnimationUtils::Animate(
+        extensionOption, [extensionContext, selectMenuInnerContext, id = Container::CurrentId()]() {
+        ContainerScope scope(id);
         extensionContext->UpdateOpacity(1.0);
         extensionContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
         extensionContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
@@ -709,7 +719,9 @@ void SelectOverlayNode::BackAnimation()
     extensionOption.SetDuration(ANIMATION_DURATION2);
     extensionOption.SetCurve(Curves::FAST_OUT_SLOW_IN);
 
-    AnimationUtils::Animate(extensionOption, [extensionContext, selectMenuInnerContext]() {
+    AnimationUtils::Animate(
+        extensionOption, [extensionContext, selectMenuInnerContext, id = Container::CurrentId()]() {
+        ContainerScope scope(id);
         extensionContext->UpdateOpacity(0.0);
         extensionContext->UpdateTransformTranslate({ 0.0f, MORE_MENU_TRANSLATE.ConvertToPx(), 0.0f });
         selectMenuInnerContext->UpdateOpacity(1.0);
@@ -1247,7 +1259,8 @@ void SelectOverlayNode::ShowSelectOverlay(bool animation)
         option.SetDuration(MENU_SHOW_ANIMATION_DURATION);
         option.SetCurve(Curves::SHARP);
 
-        AnimationUtils::Animate(option, [weak = WeakClaim(this)]() {
+        AnimationUtils::Animate(option, [weak = WeakClaim(this), id = Container::CurrentId()]() {
+            ContainerScope scope(id);
             auto node = weak.Upgrade();
             CHECK_NULL_VOID(node);
             node->SetSelectMenuOpacity(1.0);
@@ -1269,7 +1282,8 @@ void SelectOverlayNode::HideSelectOverlay(const std::function<void()>& callback)
     handleOption.SetDuration(HANDLE_ANIMATION_DURATION);
     handleOption.SetCurve(Curves::SHARP);
 
-    AnimationUtils::Animate(handleOption, [weak = WeakClaim(this)]() {
+    AnimationUtils::Animate(handleOption, [weak = WeakClaim(this), id = Container::CurrentId()]() {
+        ContainerScope scope(id);
         auto node = weak.Upgrade();
         CHECK_NULL_VOID(node);
         auto pattern = node->GetPattern<SelectOverlayPattern>();
@@ -1285,7 +1299,8 @@ void SelectOverlayNode::HideSelectOverlay(const std::function<void()>& callback)
 
     AnimationUtils::Animate(
         overlayOption,
-        [weak = WeakClaim(this)]() {
+        [weak = WeakClaim(this), id = Container::CurrentId()]() {
+            ContainerScope scope(id);
             auto node = weak.Upgrade();
             CHECK_NULL_VOID(node);
             node->SetSelectMenuOpacity(0.0);

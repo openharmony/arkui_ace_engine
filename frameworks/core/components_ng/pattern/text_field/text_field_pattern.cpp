@@ -4040,6 +4040,7 @@ void TextFieldPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight,
     if (SelectOverlayIsOn()) {
         auto proxy = GetSelectOverlayProxy();
         proxy->ShowOrHiddenMenu(true);
+        UpdateOriginIsMenuShow(false);
         processOverlayDelayTask_ = [weak = WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
