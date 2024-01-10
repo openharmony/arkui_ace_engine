@@ -28,6 +28,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/ace_view.h"
 #include "core/common/container.h"
+#include "core/common/udmf/udmf_client.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/declaration/button/button_declaration.h"
@@ -54,7 +55,6 @@
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#include "core/common/udmf/udmf_client.h"
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t SECONDS_PER_HOUR = 3600;
@@ -183,6 +183,7 @@ void VideoPattern::ResetStatus()
 
 void VideoPattern::ResetMediaPlayer()
 {
+    CHECK_NULL_VOID(mediaPlayer_);
     mediaPlayer_->ResetMediaPlayer();
     if (!SetSourceForMediaPlayer()) {
         TAG_LOGW(AceLogTag::ACE_VIDEO, "Video set source for mediaPlayer failed.");
@@ -221,11 +222,11 @@ void VideoPattern::PrepareMediaPlayer()
         return;
     }
     src_ = videoLayoutProperty->GetVideoSource().value();
-    if (!mediaPlayer_->IsMediaPlayerValid()) {
+    if (mediaPlayer_ && !mediaPlayer_->IsMediaPlayerValid()) {
         mediaPlayer_->CreateMediaPlayer();
     }
 
-    if (!mediaPlayer_->IsMediaPlayerValid()) {
+    if (mediaPlayer_ && !mediaPlayer_->IsMediaPlayerValid()) {
         // It need post on ui thread.
         FireError();
         return;
@@ -254,8 +255,8 @@ bool VideoPattern::SetSourceForMediaPlayer()
 
 void VideoPattern::RegisterMediaPlayerEvent()
 {
-    if (src_.empty()) {
-        TAG_LOGW(AceLogTag::ACE_VIDEO, "Video src is empty, register mediaPlayerEvent fail");
+    if (src_.empty() || !mediaPlayer_) {
+        TAG_LOGW(AceLogTag::ACE_VIDEO, "Video src is empty or mediaPlayer is null, register mediaPlayerEvent fail");
         return;
     }
     ContainerScope scope(instanceId_);
@@ -391,7 +392,7 @@ void VideoPattern::OnCurrentTimeChange(uint32_t currentPos)
 
     if (duration_ == 0) {
         int32_t duration = 0;
-        if (mediaPlayer_->GetDuration(duration) == 0) {
+        if (mediaPlayer_ && mediaPlayer_->GetDuration(duration) == 0) {
             duration_ = duration / MILLISECONDS_TO_SECONDS;
             OnUpdateTime(duration_, DURATION_POS);
         }
@@ -503,6 +504,7 @@ void VideoPattern::OnPrepared(double width, double height, uint32_t duration, ui
     CHECK_NULL_VOID(host);
     auto videoLayoutProperty = host->GetLayoutProperty<VideoLayoutProperty>();
     CHECK_NULL_VOID(videoLayoutProperty);
+    CHECK_NULL_VOID(mediaPlayer_);
     videoLayoutProperty->UpdateVideoSize(SizeF(static_cast<float>(width), static_cast<float>(height)));
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 
@@ -602,7 +604,7 @@ void VideoPattern::OnVisibleChange(bool isVisible)
 
 void VideoPattern::UpdateLooping()
 {
-    if (mediaPlayer_->IsMediaPlayerValid()) {
+    if (mediaPlayer_ && mediaPlayer_->IsMediaPlayerValid()) {
         ContainerScope scope(instanceId_);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
@@ -617,7 +619,7 @@ void VideoPattern::UpdateLooping()
 
 void VideoPattern::UpdateSpeed()
 {
-    if (mediaPlayer_->IsMediaPlayerValid()) {
+    if (mediaPlayer_ && mediaPlayer_->IsMediaPlayerValid()) {
         ContainerScope scope(instanceId_);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
@@ -632,7 +634,7 @@ void VideoPattern::UpdateSpeed()
 
 void VideoPattern::UpdateMuted()
 {
-    if (mediaPlayer_->IsMediaPlayerValid()) {
+    if (mediaPlayer_ && mediaPlayer_->IsMediaPlayerValid()) {
         ContainerScope scope(instanceId_);
         float volume = muted_ ? 0.0f : 1.0f;
         auto context = PipelineContext::GetCurrentContext();
@@ -687,7 +689,7 @@ void VideoPattern::OnUpdateTime(uint32_t time, int pos) const
 
 void VideoPattern::PrepareSurface()
 {
-    if (renderSurface_->IsSurfaceValid()) {
+    if (!mediaPlayer_ || renderSurface_->IsSurfaceValid()) {
         return;
     }
     if (!SystemProperties::GetExtSurfaceEnabled()) {
@@ -742,8 +744,8 @@ void VideoPattern::RegisterRenderContextCallBack()
                 y + (videoNodeSize.Height() - videoFrameSize.Height()) / AVERAGE_VALUE, videoFrameSize.Width(),
                 videoFrameSize.Height());
             if (videoPattern->renderSurface_) {
-                if (videoPattern->renderSurface_->SetExtSurfaceBoundsSync(rect.Left(),
-                    rect.Top(), rect.Width(), rect.Height())) {
+                if (videoPattern->renderSurface_->SetExtSurfaceBoundsSync(
+                        rect.Left(), rect.Top(), rect.Width(), rect.Height())) {
                     videoPattern->lastBoundsRect_ = rect;
                 }
             }
@@ -1543,7 +1545,7 @@ void VideoPattern::RecoverState(const RefPtr<VideoPattern>& videoPattern)
 {
     CHECK_NULL_VOID(videoPattern);
     currentPos_ = videoPattern->GetCurrentPos();
-    if (mediaPlayer_->IsMediaPlayerValid() && mediaPlayer_->IsPlaying() != isPlaying_) {
+    if (mediaPlayer_ && mediaPlayer_->IsMediaPlayerValid() && mediaPlayer_->IsPlaying() != isPlaying_) {
         isPlaying_ = mediaPlayer_->IsPlaying();
         ChangePlayButtonTag();
     }
