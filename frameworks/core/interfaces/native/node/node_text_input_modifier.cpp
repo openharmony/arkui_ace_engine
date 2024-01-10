@@ -598,14 +598,15 @@ const ArkUITextInputModifier* GetTextInputModifier()
     return &modifier;
 }
 
-void SetOnTextInputChange(ArkUINodeHandle node, ArkUI_Int32 eventId)
+void SetOnTextInputChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onChange = [node, eventId](const std::string& str) {
+    auto onChange = [node, eventId, extraParam](const std::string& str) {
         ArkUINodeEvent event;
         event.kind = ON_TEXTINPUT_CHANGE;
         event.eventId = eventId;
+        event.extraParam= extraParam;
         event.stringAsyncEvent.pStr = str.c_str();
         SendArkUIAsyncEvent(&event);
     };
