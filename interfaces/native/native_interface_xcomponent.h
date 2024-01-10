@@ -40,6 +40,7 @@
 #include <stdint.h>
 
 #include "native_xcomponent_key_event.h"
+#include "node/common.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -630,7 +631,7 @@ int32_t OH_NativeXComponent_UnregisterOnFrameCallback(OH_NativeXComponent* compo
  * @since 11
  * @version 1.0
  */
-int32_t OH_NativeXComponent_AttachNativeRootNode(OH_NativeXComponent* component, void* root);
+int32_t OH_NativeXComponent_AttachNativeRootNode(OH_NativeXComponent* component, ArkUI_NodeHandle root);
 
 /**
  * @brief detach the root <b>ArkUI_NodeHandle</b> to xcomponent's <b>OH_NativeXComponent</b>.
@@ -641,7 +642,7 @@ int32_t OH_NativeXComponent_AttachNativeRootNode(OH_NativeXComponent* component,
  * @since 11
  * @version 1.0
  */
-int32_t OH_NativeXComponent_DetachNativeRootNode(OH_NativeXComponent* component, void* root);
+int32_t OH_NativeXComponent_DetachNativeRootNode(OH_NativeXComponent* component, ArkUI_NodeHandle root);
 
 #ifdef __cplusplus
 };
