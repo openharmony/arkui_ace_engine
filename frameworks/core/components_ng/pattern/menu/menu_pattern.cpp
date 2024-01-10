@@ -164,7 +164,8 @@ void MenuPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(pipelineContext);
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
     CHECK_NULL_VOID(targetNode);
-    pipelineContext->AddOnAreaChangeNode(targetNode->GetId());
+    auto eventHub = targetNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
     OnAreaChangedFunc onAreaChangedFunc = [menuNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
                                               const OffsetF& /* oldOrigin */, const RectF& /* rect */,
                                               const OffsetF& /* origin */) {
@@ -180,7 +181,7 @@ void MenuPattern::OnAttachToFrameNode()
             menuNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     };
-    targetNode->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
+    eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
 }
 
 void MenuPattern::OnModifyDone()
