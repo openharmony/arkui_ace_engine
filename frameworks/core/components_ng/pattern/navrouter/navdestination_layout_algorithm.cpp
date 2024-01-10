@@ -145,7 +145,8 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, size);
 
     float titleBarHeight = MeasureTitleBar(layoutWrapper, hostNode, navDestinationLayoutProperty, size);
-    float contentChildHeight= MeasureContentChild(layoutWrapper, hostNode, navDestinationLayoutProperty, size, titleBarHeight);
+    float contentChildHeight =
+            MeasureContentChild(layoutWrapper, hostNode, navDestinationLayoutProperty, size, titleBarHeight);
 
     size.SetHeight(titleBarHeight + contentChildHeight);
     if (titleBarHeight + contentChildHeight == 0) {
