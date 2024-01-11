@@ -406,26 +406,6 @@ class ArkSliderTips {
   }
 }
 
-class ArkRadioStyle {
-  checkedBackgroundColor: number | undefined;
-  uncheckedBorderColor: number | undefined;
-  indicatorColor: number | undefined;
-
-  constructor() {
-    this.checkedBackgroundColor = undefined;
-    this.uncheckedBorderColor = undefined;
-    this.indicatorColor = undefined;
-  }
-
-  isEqual(another: ArkRadioStyle): boolean {
-    return (
-      this.checkedBackgroundColor === another.checkedBackgroundColor &&
-      this.uncheckedBorderColor === another.uncheckedBorderColor &&
-      this.indicatorColor === another.indicatorColor
-    );
-  }
-}
-
 class ArkStarStyle {
   backgroundUri: string | undefined;
   foregroundUri: string | undefined;
@@ -466,28 +446,6 @@ class ArkBackgroundBlurStyle {
       this.adaptiveColor === another.adaptiveColor &&
       this.scale === another.scale
     );
-  }
-}
-
-
-class ArkSelectedIndices {
-  selectedValues: number[];
-
-  constructor() {
-    this.selectedValues = [];
-  }
-
-  compareArrays(arr1: number[], arr2: number[]): boolean {
-    return (
-      Array.isArray(arr1) &&
-      Array.isArray(arr2) &&
-      arr1.length === arr2.length &&
-      arr1.every((value, index) => value === arr2[index])
-    );
-  }
-
-  isEqual(another: ArkSelectedIndices): boolean {
-    return this.compareArrays(this.selectedValues, another.selectedValues);
   }
 }
 

@@ -8455,18 +8455,6 @@ class ArkSliderTips {
     return this.showTip === another.showTip && this.tipText === another.tipText;
   }
 }
-class ArkRadioStyle {
-  constructor() {
-    this.checkedBackgroundColor = undefined;
-    this.uncheckedBorderColor = undefined;
-    this.indicatorColor = undefined;
-  }
-  isEqual(another) {
-    return (this.checkedBackgroundColor === another.checkedBackgroundColor &&
-      this.uncheckedBorderColor === another.uncheckedBorderColor &&
-      this.indicatorColor === another.indicatorColor);
-  }
-}
 class ArkStarStyle {
   constructor() {
     this.backgroundUri = undefined;
@@ -8491,20 +8479,6 @@ class ArkBackgroundBlurStyle {
       this.colorMode === another.colorMode &&
       this.adaptiveColor === another.adaptiveColor &&
       this.scale === another.scale);
-  }
-}
-class ArkSelectedIndices {
-  constructor() {
-    this.selectedValues = [];
-  }
-  compareArrays(arr1, arr2) {
-    return (Array.isArray(arr1) &&
-      Array.isArray(arr2) &&
-      arr1.length === arr2.length &&
-      arr1.every((value, index) => value === arr2[index]));
-  }
-  isEqual(another) {
-    return this.compareArrays(this.selectedValues, another.selectedValues);
   }
 }
 class ArkBorder {
@@ -9720,10 +9694,24 @@ class ArkSelectComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   optionWidth(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SelectOptionWidthModifier.identity, SelectOptionWidthModifier, value);
+    return this;
   }
   optionHeight(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, SelectOptionHeightModifier.identity, SelectOptionHeightModifier, value);
+    return this;
+  }
+  width(value) {
+    modifierWithKey(this._modifiersWithKeys, SelectWidthModifier.identity, SelectWidthModifier, value);
+    return this;
+  }
+  height(value) {
+    modifierWithKey(this._modifiersWithKeys, SelectHeightModifier.identity, SelectHeightModifier, value);
+    return this;
+  }
+  size(value) {
+    modifierWithKey(this._modifiersWithKeys, SelectSizeModifier.identity, SelectSizeModifier, value);
+    return this;
   }
   selected(value) {
     modifierWithKey(this._modifiersWithKeys, SelectedModifier.identity, SelectedModifier, value);
@@ -10027,6 +10015,92 @@ class SelectedOptionFontColorModifier extends ModifierWithKey {
   }
 }
 SelectedOptionFontColorModifier.identity = Symbol('selectSelectedOptionFontColor');
+class SelectOptionWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().select.resetOptionWidth(node);
+    } else {
+      getUINativeModule().select.setOptionWidth(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SelectOptionWidthModifier.identity = Symbol('selectOptionWidth');
+class SelectOptionHeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().select.resetOptionHeight(node);
+    } else {
+      getUINativeModule().select.setOptionHeight(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SelectOptionHeightModifier.identity = Symbol('selectOptionHeight');
+class SelectWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().select.resetWidth(node);
+    } else {
+      getUINativeModule().select.setWidth(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SelectWidthModifier.identity = Symbol('selectWidth');
+class SelectHeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().select.resetHeight(node);
+    } else {
+      getUINativeModule().select.setHeight(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+SelectHeightModifier.identity = Symbol('selectHeight');
+class SelectSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().select.resetSize(node);
+    } else {
+      getUINativeModule().select.setSize(node, this.value.width, this.value.height);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+      !isBaseOrResourceEqual(this.stageValue.height, this.value.height);
+  }
+}
+SelectSizeModifier.identity = Symbol('selectSize');
 // @ts-ignore
 globalThis.Select.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();

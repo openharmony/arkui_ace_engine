@@ -105,6 +105,15 @@ public:
         CHECK_NULL_RETURN(themeManager, nullptr);
         return themeManager->GetTheme<T>();
     }
+    static bool IsPercentStr(std::string& percent)
+    {
+        if (percent.find("%") != std::string::npos) {
+            size_t index = percent.find("%");
+            percent = percent.substr(0, index);
+            return true;
+        }
+        return false;
+    }
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H
