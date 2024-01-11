@@ -282,15 +282,13 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarSwiperNode()
     auto swiperNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     CHECK_NULL_RETURN(swiperNode, nullptr);
-    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_RETURN(swiperPaintProperty, nullptr);
-    swiperPaintProperty->UpdateDisableSwipe(false);
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
     swiperLayoutProperty->UpdateIndex(CURRENT_MONTH_INDEX);
     swiperLayoutProperty->UpdateShowIndicator(false);
     swiperLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     swiperLayoutProperty->UpdateLoop(true);
+    swiperLayoutProperty->UpdateDisableSwipe(false);
     return swiperNode;
 }
 

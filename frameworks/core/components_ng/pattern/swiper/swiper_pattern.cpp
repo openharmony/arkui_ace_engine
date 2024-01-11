@@ -237,8 +237,8 @@ void SwiperPattern::OnModifyDone()
             }
         }
     }
-
-    UpdateSwiperPanEvent(IsDisableSwipe());
+    bool disableSwipe = IsDisableSwipe();
+    UpdateSwiperPanEvent(disableSwipe);
 
     auto focusHub = host->GetFocusHub();
     if (focusHub) {
@@ -246,7 +246,7 @@ void SwiperPattern::OnModifyDone()
         InitOnFocusInternal(focusHub);
     }
 
-    SetSwiperEventCallback(IsDisableSwipe());
+    SetSwiperEventCallback(disableSwipe);
 
     auto updateCubicCurveCallback = [weak = WeakClaim(this)]() {
         auto swiperPattern = weak.Upgrade();
@@ -2593,9 +2593,9 @@ EdgeEffect SwiperPattern::GetEdgeEffect() const
 
 bool SwiperPattern::IsDisableSwipe() const
 {
-    auto swiperPaintProperty = GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_RETURN(swiperPaintProperty, false);
-    return swiperPaintProperty->GetDisableSwipe().value_or(false);
+    auto props = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(props, false);
+    return props->GetDisableSwipe().value_or(false);
 }
 
 bool SwiperPattern::IsShowIndicator() const

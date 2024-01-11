@@ -63,6 +63,7 @@ public:
         value->propArrowSize_ = CloneArrowSize();
         value->propArrowColor_ = CloneArrowColor();
         value->propLoop_ = CloneLoop();
+        value->propDisableSwipe_ = CloneDisableSwipe();
         return value;
     }
 
@@ -93,6 +94,7 @@ public:
         ResetArrowSize();
         ResetArrowColor();
         ResetLoop();
+        ResetDisableSwipe();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -120,6 +122,7 @@ public:
         json->Put("arrowBackgroundColor", propBackgroundColor_.value_or(Color::TRANSPARENT).ColorToString().c_str());
         json->Put("arrowColor", propArrowColor_.value_or(Color::TRANSPARENT).ColorToString().c_str());
         json->Put("loop", propLoop_.value_or(true) ? "true" : "false");
+        json->Put("disableSwipe", GetDisableSwipe().value_or(false) ? "true" : "false");
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override
@@ -138,6 +141,7 @@ public:
         auto displayMode = json->GetString("displayMode");
         UpdateDisplayMode(uMap.count(displayMode) ? uMap.at(displayMode) : SwiperDisplayMode::STRETCH);
         UpdateDisplayCount(json->GetInt("displayCount"));
+        UpdateDisableSwipe(json->GetBool("disableSwipe"));
         LayoutProperty::FromJson(json);
     }
 
@@ -187,6 +191,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ArrowColor, Color, PROPERTY_UPDATE_NORMAL);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Loop, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsCustomAnimation, bool, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisableSwipe, bool, PROPERTY_UPDATE_MEASURE);
 };
 } // namespace OHOS::Ace::NG
 
