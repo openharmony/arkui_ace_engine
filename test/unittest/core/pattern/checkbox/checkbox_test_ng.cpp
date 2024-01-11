@@ -26,6 +26,8 @@
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_paint_property.h"
+#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
+#include "core/components_ng/pattern/stage/page_event_hub.h"
 #include "core/components_ng/pattern/stage/stage_manager.h"
 #include "core/components_ng/pattern/stage/stage_pattern.h"
 #include "test/mock/core/rosen/mock_canvas.h"
@@ -656,6 +658,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest017, TestSize.Level1)
     checkBoxGroupMap[GROUP_NAME].push_back(frameNode2);
     checkBoxGroupMap[GROUP_NAME].push_back(frameNode3);
     checkBoxGroupMap[GROUP_NAME].push_back(groupFrameNode);
+    checkBoxGroupMap[GROUP_NAME].push_back(nullptr);
     bool isSelected = true;
     pattern1->UpdateCheckBoxGroupStatus(frameNode1, checkBoxGroupMap, isSelected);
     auto checkBoxPaintProperty1 = frameNode1->GetPaintProperty<CheckBoxPaintProperty>();
@@ -1838,5 +1841,516 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPaintPropertyTest004, TestSize.Level1)
      */
     checkBoxPaintProperty->Reset();
     EXPECT_EQ(checkBoxPaintProperty->HasCheckBoxSelectedStyle(), false);
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest002
+ * @tc.desc: CheckBox test Select and ClearSelection.
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    pattern->lastSelect_ = false;
+    pattern->SetAccessibilityAction();
+
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<CheckBoxAccessibilityProperty>();
+    EXPECT_TRUE(accessibilityProperty->ActActionSelect());
+
+    pattern->lastSelect_ = true;
+    pattern->MarkIsSelected(true);
+    EXPECT_TRUE(pattern->lastSelect_ == true);
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest017
+ * @tc.desc: Test UpdateCheckBoxGroupStatus.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0117, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create checkbox and groupname
+     */
+    auto checkBoxPattern = AceType::MakeRefPtr<CheckBoxPattern>();
+    FrameNode checkBoxFrameNode = FrameNode("test", 0, checkBoxPattern);
+    auto checkBoxEventHub = AceType::MakeRefPtr<CheckBoxEventHub>();
+    checkBoxEventHub->SetGroupName(GROUP_NAME);
+    checkBoxFrameNode.eventHub_ = checkBoxEventHub;
+
+    std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap;
+
+    /**
+     * @tc.steps: step2. Create frameNode1 with V2::CHECKBOXGROUP_ETS_TAG and create some parameters
+     */
+    auto frameNode1 = FrameNode::GetOrCreateFrameNode(
+        V2::CHECKBOXGROUP_ETS_TAG, 1, []() { return AceType::MakeRefPtr<CheckBoxGroupPattern>(); });
+    auto groupPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
+    frameNode1->paintProperty_ = groupPaintProperty;
+
+    /**
+     * @tc.steps: step3. Create CheckBoxPattern and call UpdateCheckBoxGroupStatusWhenDetach
+     */
+    checkBoxGroupMap[GROUP_NAME].push_back(nullptr);
+    checkBoxGroupMap[GROUP_NAME].push_back(frameNode1);
+    checkBoxPattern->UpdateCheckBoxGroupStatusWhenDetach(&checkBoxFrameNode, checkBoxGroupMap);
+    auto pattern = frameNode1->GetPattern<CheckBoxGroupPattern>();
+    EXPECT_EQ(pattern->uiStatus_, UIStatus::ON_TO_OFF);
+    EXPECT_EQ(groupPaintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::NONE);
+
+    /**
+     * @tc.steps: step4. Create frameNode2 with test and create some parameters
+     */
+    auto frameNode2 =
+        FrameNode::GetOrCreateFrameNode("test", 2, []() { return AceType::MakeRefPtr<CheckBoxGroupPattern>(); });
+    auto paintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
+    paintProperty->UpdateCheckBoxSelect(true);
+    frameNode2->paintProperty_ = paintProperty;
+    frameNode2->eventHub_ = AceType::MakeRefPtr<CheckBoxEventHub>();
+    checkBoxGroupMap[GROUP_NAME].push_back(frameNode2);
+    checkBoxPattern->UpdateCheckBoxGroupStatusWhenDetach(&checkBoxFrameNode, checkBoxGroupMap);
+    EXPECT_EQ(pattern->uiStatus_, UIStatus::OFF_TO_ON);
+    EXPECT_EQ(groupPaintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::ALL);
+
+    /**
+     * @tc.steps: step5. Create frameNode3 and frameNode4 with test and create some parameters
+     */
+    auto frameNode3 =
+        FrameNode::GetOrCreateFrameNode("test", 3, []() { return AceType::MakeRefPtr<CheckBoxGroupPattern>(); });
+    auto paintProperty3 = AceType::MakeRefPtr<CheckBoxPaintProperty>();
+    frameNode3->paintProperty_ = paintProperty3;
+    checkBoxGroupMap[GROUP_NAME].push_back(frameNode3);
+    auto frameNode4 =
+        FrameNode::GetOrCreateFrameNode("test", 4, []() { return AceType::MakeRefPtr<CheckBoxGroupPattern>(); });
+    auto paintProperty4 = AceType::MakeRefPtr<CheckBoxPaintProperty>();
+    paintProperty4->UpdateCheckBoxSelect(false);
+    frameNode4->paintProperty_ = paintProperty4;
+    checkBoxGroupMap[GROUP_NAME].push_back(frameNode4);
+    checkBoxPattern->UpdateCheckBoxGroupStatusWhenDetach(&checkBoxFrameNode, checkBoxGroupMap);
+    EXPECT_EQ(pattern->uiStatus_, UIStatus::UNSELECTED);
+    EXPECT_EQ(groupPaintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::PART);
+}
+
+HWTEST_F(CheckBoxTestNG, OnAfterModifyDone003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+
+    /**
+     * @tc.steps: step2. Get CheckBox pattern object
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Set CheckBox pattern variable and call Init methods
+     * @tc.expected: Check the CheckBox pattern value
+     */
+    // InitMouseEvent()
+    pattern->InitMouseEvent();
+    ASSERT_NE(pattern->mouseEvent_, nullptr);
+    pattern->InitMouseEvent();
+    pattern->mouseEvent_->GetOnHoverEventFunc()(true);
+    // InitTouchEvent()
+    pattern->InitTouchEvent();
+    ASSERT_NE(pattern->touchListener_, nullptr);
+    TouchEventInfo info("onTouch");
+    TouchLocationInfo touchInfo1(1);
+    touchInfo1.SetTouchType(TouchType::UP);
+    info.AddTouchLocationInfo(std::move(touchInfo1));
+    pattern->touchListener_->GetTouchEventCallback()(info);
+    pattern->InitTouchEvent();
+    EXPECT_TRUE(touchInfo1.GetTouchType() == TouchType::UP);
+}
+
+HWTEST_F(CheckBoxTestNG, OnAfterModifyDone0024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+
+    /**
+     * @tc.steps: step2. Get CheckBox pattern object
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    EXPECT_NE(pattern, nullptr);
+
+    auto host = pattern->GetHost();
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto stageManager = pipelineContext->GetStageManager();
+    auto pageNode = stageManager->GetPageById(host->GetPageId());
+    EXPECT_FALSE(pattern->lastSelect_);
+}
+
+HWTEST_F(CheckBoxTestNG, OnAfterModifyDone009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create pattern
+     */
+    auto checkBoxPattern = AceType::MakeRefPtr<CheckBoxPattern>();
+    auto frameNode1 = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<CheckBoxPattern>());
+    frameNode1->hostPageId_ = 10;
+    checkBoxPattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode1));
+    checkBoxPattern->prePageId_ = 10;
+
+    /**
+     * @tc.steps: step2. create stageManager and child
+     */
+    RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("stageNode", 1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<FrameNode> child = AceType::MakeRefPtr<FrameNode>("child", 10, AceType::MakeRefPtr<Pattern>());
+    child->hostPageId_ = 10;
+    stageNode->AddChild(child);
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    EXPECT_NE(stageManager, nullptr);
+    stageManager->stageNode_ = stageNode;
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    pipelineContext->stageManager_ = stageManager;
+
+    /**
+     * @tc.steps: step3. Call CheckPageNode
+     */
+    checkBoxPattern->CheckPageNode();
+    EXPECT_EQ(checkBoxPattern->GetPrePageId(), child->GetId());
+
+    /**
+     * @tc.steps: step4. set child nodeId != 10 and Call CheckPageNode
+     */
+    auto checkBoxEvent = AceType::MakeRefPtr<CheckBoxEventHub>();
+    checkBoxEvent->SetGroupName(GROUP_NAME);
+    frameNode1->eventHub_ = checkBoxEvent;
+    child->eventHub_ = AceType::MakeRefPtr<NG::PageEventHub>();
+    child->nodeId_ = 2;
+    checkBoxPattern->CheckPageNode();
+    EXPECT_EQ(checkBoxPattern->prePageId_, child->nodeId_);
+}
+
+HWTEST_F(CheckBoxTestNG, OnAfterModifyDone0027, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+
+    /**
+     * @tc.steps: step2. Get CheckBox pattern object
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    EXPECT_NE(pattern, nullptr);
+
+    pattern->OnAfterModifyDone();
+    auto host = pattern->GetHost();
+    auto inspectorId = host->GetInspectorId().value_or("");
+    EXPECT_TRUE(inspectorId.empty());
+
+    host->UpdateInspectorId("test");
+    pattern->OnAfterModifyDone();
+    EXPECT_FALSE(host->GetInspectorIdValue().empty());
+}
+
+HWTEST_F(CheckBoxTestNG, OnAfterModifyDone0062, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+
+    /**
+     * @tc.steps: step2. Get CheckBox pattern object
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    EXPECT_NE(pattern, nullptr);
+
+    RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<Pattern>());
+    FrameNode& ref = *stageNode;
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    EXPECT_NE(pipelineContext->stageManager_, nullptr);
+    auto child = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    pipelineContext->stageManager_->stageNode_ = frameNode;
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<PageEventHub>();
+    EXPECT_NE(eventHub, nullptr);
+    child->eventHub_ = eventHub;
+    frameNode->AddChild(child);
+    pattern->OnDetachFromFrameNode(&ref);
+    EXPECT_NE(stageManager->stageNode_, nullptr);
+}
+
+HWTEST_F(CheckBoxTestNG, OnAfterModifyDone0032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init CheckBox node
+     */
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
+
+    /**
+     * @tc.steps: step2. Get CheckBox pattern object
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    EXPECT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    EXPECT_NE(pattern, nullptr);
+
+    RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<Pattern>());
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    EXPECT_NE(stageManager, nullptr);
+
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    pipelineContext->stageManager_ = stageManager;
+    EXPECT_NE(pipelineContext->stageManager_, nullptr);
+
+    auto child = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
+    pipelineContext->stageManager_->stageNode_ = frameNode;
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<PageEventHub>();
+    EXPECT_NE(eventHub, nullptr);
+
+    child->eventHub_ = eventHub;
+    frameNode->AddChild(child);
+    pattern->preGroup_ = "";
+    pattern->UpdateState();
+    EXPECT_TRUE(pattern->preGroup_ != "");
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest0118
+ * @tc.desc: Test CheckBoxGroupIsTrue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0118, TestSize.Level1)
+{
+    /*
+     * @tc.steps: step1. create checkBoxFrameNode and some parameters.
+     */
+    auto checkBoxFrameNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<CheckBoxPattern>());
+    auto paintPropertyTemp = AceType::MakeRefPtr<CheckBoxPaintProperty>();
+    paintPropertyTemp->UpdateCheckBoxSelect(true);
+    checkBoxFrameNode->paintProperty_ = paintPropertyTemp;
+    auto checkBoxeventHub = AceType::MakeRefPtr<CheckBoxEventHub>();
+    checkBoxeventHub->SetGroupName(GROUP_NAME);
+    checkBoxFrameNode->eventHub_ = checkBoxeventHub;
+
+    /*
+     * @tc.steps: step2. create checkBoxPattern.
+     */
+    auto checkBoxPattern = AceType::MakeRefPtr<CheckBoxPattern>();
+    checkBoxPattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(checkBoxFrameNode));
+    EXPECT_NE(checkBoxPattern->GetHost(), nullptr);
+
+    /*
+     * @tc.steps: step3. create stageManager.
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<CheckBoxPattern>());
+    auto pageNode = AceType::MakeRefPtr<FrameNode>("STAGE", 0, AceType::MakeRefPtr<CheckBoxPattern>());
+    auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
+    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 2);
+    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 3);
+    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 4);
+    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 5);
+    pageNode->eventHub_ = pageEventHub;
+
+    stageNode->AddChild(pageNode);
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    pipelineContext->stageManager_ = stageManager;
+
+    /*
+     * @tc.steps: step4. create list with Children
+     */
+    auto checkBoxGroupPattern = AceType::MakeRefPtr<CheckBoxGroupPattern>();
+    auto frameNode2 = AceType::MakeRefPtr<FrameNode>(V2::CHECKBOXGROUP_ETS_TAG, 2, checkBoxGroupPattern);
+    auto groupPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
+    groupPaintProperty->isCheckBoxCallbackDealed_ = true;
+    frameNode2->paintProperty_ = groupPaintProperty;
+    auto frameNode3 = AceType::MakeRefPtr<FrameNode>("test3", 3, AceType::MakeRefPtr<Pattern>());
+    auto paintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
+    paintProperty->UpdateCheckBoxSelect(true);
+    frameNode3->paintProperty_ = paintProperty;
+    ElementRegister::GetInstance()->itemMap_[2] = AceType::WeakClaim(AceType::RawPtr(frameNode2));
+    ElementRegister::GetInstance()->itemMap_[3] = AceType::WeakClaim(AceType::RawPtr(frameNode3));
+    ElementRegister::GetInstance()->itemMap_[4] = nullptr;
+    ElementRegister::GetInstance()->itemMap_[5] = AceType::WeakClaim(AceType::RawPtr(checkBoxFrameNode));
+
+    /*
+     * @tc.steps: step5. call CheckBoxGroupIsTrue,
+     * @tc.expected: groupPaintProperty.GetIsCheckBoxCallbackDealed() is true and exit error
+     */
+    checkBoxPattern->CheckBoxGroupIsTrue();
+    EXPECT_TRUE(groupPaintProperty->GetIsCheckBoxCallbackDealed());
+
+    /*
+     * @tc.steps: step6. set isCheckBoxCallbackDealed_ is false and call CheckBoxGroupIsTrue
+     */
+    groupPaintProperty->isCheckBoxCallbackDealed_ = false;
+    checkBoxPattern->CheckBoxGroupIsTrue();
+    EXPECT_EQ(groupPaintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::ALL);
+    EXPECT_TRUE(groupPaintProperty->isCheckBoxCallbackDealed_);
+
+    /*
+     * @tc.steps: step7. set CheckBoxSelect is false and call CheckBoxGroupIsTrue
+     */
+    groupPaintProperty->isCheckBoxCallbackDealed_ = false;
+    paintPropertyTemp->UpdateCheckBoxSelect(false);
+    checkBoxPattern->CheckBoxGroupIsTrue();
+    EXPECT_EQ(groupPaintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::PART);
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest0119
+ * @tc.desc: Test CheckBoxGroupIsTrue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0119, TestSize.Level1)
+{
+    /*
+     * @tc.steps: step1. create checkBoxFrameNode and some parameters.
+     */
+    auto checkBoxFrameNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<CheckBoxPattern>());
+    auto paintPropertyTemp = AceType::MakeRefPtr<CheckBoxPaintProperty>();
+    paintPropertyTemp->UpdateCheckBoxSelect(false);
+    checkBoxFrameNode->paintProperty_ = paintPropertyTemp;
+    auto checkBoxeventHub = AceType::MakeRefPtr<CheckBoxEventHub>();
+    checkBoxeventHub->SetGroupName(GROUP_NAME);
+    checkBoxFrameNode->eventHub_ = checkBoxeventHub;
+
+    /*
+     * @tc.steps: step2. create checkBoxPattern.
+     */
+    auto checkBoxPattern = AceType::MakeRefPtr<CheckBoxPattern>();
+    checkBoxPattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(checkBoxFrameNode));
+    EXPECT_NE(checkBoxPattern->GetHost(), nullptr);
+
+    /*
+     * @tc.steps: step3. create stageManager.
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<CheckBoxPattern>());
+    auto pageNode = AceType::MakeRefPtr<FrameNode>("STAGE", 0, AceType::MakeRefPtr<CheckBoxPattern>());
+    auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
+    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 2);
+    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 3);
+    pageNode->eventHub_ = pageEventHub;
+
+    stageNode->AddChild(pageNode);
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    pipelineContext->stageManager_ = stageManager;
+
+    /*
+     * @tc.steps: step4. create list with Children
+     */
+    auto checkBoxGroupPattern = AceType::MakeRefPtr<CheckBoxGroupPattern>();
+    auto frameNode2 = AceType::MakeRefPtr<FrameNode>(V2::CHECKBOXGROUP_ETS_TAG, 2, checkBoxGroupPattern);
+    auto groupPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
+    groupPaintProperty->isCheckBoxCallbackDealed_ = false;
+    frameNode2->paintProperty_ = groupPaintProperty;
+    auto frameNode3 = AceType::MakeRefPtr<FrameNode>("test3", 3, AceType::MakeRefPtr<Pattern>());
+    auto paintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
+    paintProperty->UpdateCheckBoxSelect(false);
+    frameNode3->paintProperty_ = paintProperty;
+    ElementRegister::GetInstance()->itemMap_[2] = AceType::WeakClaim(AceType::RawPtr(frameNode2));
+    ElementRegister::GetInstance()->itemMap_[3] = AceType::WeakClaim(AceType::RawPtr(frameNode3));
+
+    /*
+     * @tc.steps: step5. call CheckBoxGroupIsTrue
+     */
+    checkBoxPattern->CheckBoxGroupIsTrue();
+    EXPECT_EQ(groupPaintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::NONE);
+    EXPECT_TRUE(groupPaintProperty->isCheckBoxCallbackDealed_);
+}
+
+/**
+ * @tc.name: CheckBoxPatternTest0120
+ * @tc.desc: Test CheckBoxGroupIsTrue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0120, TestSize.Level1)
+{
+    /*
+     * @tc.steps: step1. create checkBoxFrameNode and some parameters.
+     */
+    auto checkBoxFrameNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<CheckBoxPattern>());
+    auto paintPropertyTemp = AceType::MakeRefPtr<CheckBoxPaintProperty>();
+    paintPropertyTemp->UpdateCheckBoxSelect(true);
+    checkBoxFrameNode->paintProperty_ = paintPropertyTemp;
+    auto checkBoxeventHub = AceType::MakeRefPtr<CheckBoxEventHub>();
+    checkBoxeventHub->SetGroupName(GROUP_NAME);
+    checkBoxFrameNode->eventHub_ = checkBoxeventHub;
+
+    /*
+     * @tc.steps: step2. create checkBoxPattern.
+     */
+    auto checkBoxPattern = AceType::MakeRefPtr<CheckBoxPattern>();
+    checkBoxPattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(checkBoxFrameNode));
+    EXPECT_NE(checkBoxPattern->GetHost(), nullptr);
+
+    /*
+     * @tc.steps: step3. create stageManager.
+     */
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    RefPtr<FrameNode> stageNode = AceType::MakeRefPtr<FrameNode>("STAGE", -1, AceType::MakeRefPtr<CheckBoxPattern>());
+    auto pageNode = AceType::MakeRefPtr<FrameNode>("STAGE", 0, AceType::MakeRefPtr<CheckBoxPattern>());
+    auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
+    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 2);
+    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 3);
+    pageEventHub->AddCheckBoxToGroup(GROUP_NAME, 4);
+    pageNode->eventHub_ = pageEventHub;
+    stageNode->AddChild(pageNode);
+    auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
+    pipelineContext->stageManager_ = stageManager;
+
+    /*
+     * @tc.steps: step4. create list with Children
+     */
+    auto checkBoxGroupPattern = AceType::MakeRefPtr<CheckBoxGroupPattern>();
+    auto frameNode2 = AceType::MakeRefPtr<FrameNode>(V2::CHECKBOXGROUP_ETS_TAG, 2, checkBoxGroupPattern);
+    auto groupPaintProperty = AceType::MakeRefPtr<CheckBoxGroupPaintProperty>();
+    groupPaintProperty->isCheckBoxCallbackDealed_ = false;
+    frameNode2->paintProperty_ = groupPaintProperty;
+    auto frameNode3 = AceType::MakeRefPtr<FrameNode>("test3", 3, AceType::MakeRefPtr<CheckBoxPattern>());
+    auto paintProperty = AceType::MakeRefPtr<CheckBoxPaintProperty>();
+    paintProperty->ResetCheckBoxSelect();
+    frameNode3->paintProperty_ = paintProperty;
+    ElementRegister::GetInstance()->itemMap_[2] = AceType::WeakClaim(AceType::RawPtr(frameNode2));
+    ElementRegister::GetInstance()->itemMap_[3] = AceType::WeakClaim(AceType::RawPtr(frameNode3));
+    ElementRegister::GetInstance()->itemMap_[4] = nullptr;
+
+    /*
+     * @tc.steps: step5. call CheckBoxGroupIsTrue,
+     * @tc.expected: groupPaintProperty.GetIsCheckBoxCallbackDealed() is true and exit error
+     */
+    checkBoxPattern->CheckBoxGroupIsTrue();
+    EXPECT_TRUE(groupPaintProperty->GetIsCheckBoxCallbackDealed());
+
+    /*
+     * @tc.steps: step6. set CheckBoxGroupSelect is true
+     */
+    paintProperty->ResetCheckBoxSelect();
+    groupPaintProperty->isCheckBoxCallbackDealed_ = false;
+    groupPaintProperty->UpdateCheckBoxGroupSelect(true);
+    checkBoxPattern->CheckBoxGroupIsTrue();
+    auto checkBoxPattern3 = frameNode3->GetPattern<CheckBoxPattern>();
+    EXPECT_TRUE(checkBoxPattern3->lastSelect_);
 }
 } // namespace OHOS::Ace::NG
