@@ -81,20 +81,7 @@ void TextPickerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     }
 
     auto layoutConstraint = pickerNode->GetLayoutProperty()->GetLayoutConstraint();
-    auto width = layoutConstraint->selfIdealSize.Width();
-    auto height = layoutConstraint->selfIdealSize.Height();
-    float pickerWidth = 0.0f;
-    auto children = pickerNode->GetChildren();
-
-    if (width.has_value()) {
-        pickerWidth = width.value() / static_cast<float>(children.size());
-    } else {
-        pickerWidth = static_cast<float>((pickerTheme->GetDividerSpacing() * DIVIDER_SIZE).ConvertToPx());
-    }
-
-    if (height.has_value()) {
-        pickerHeight = height.value();
-    }
+    float pickerWidth = static_cast<float>((pickerTheme->GetDividerSpacing() * DIVIDER_SIZE).ConvertToPx());
 
     auto textPickerPattern = pickerNode->GetPattern<TextPickerPattern>();
     CHECK_NULL_VOID(textPickerPattern);
