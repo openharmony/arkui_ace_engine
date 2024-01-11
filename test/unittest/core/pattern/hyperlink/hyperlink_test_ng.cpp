@@ -104,7 +104,9 @@ HWTEST_F(HyperlinkTestNg, HyperlinkDrag001, TestSize.Level1)
     ASSERT_NE(eventHub->GetOnDragStart(), nullptr);
     auto extraParams =
         eventHub->GetDragExtraParams(std::string(), Point(RADIUS_DEFAULT, RADIUS_DEFAULT), DragEventType::START);
-    auto dragDropInfo = (eventHub->GetOnDragStart())(nullptr, extraParams);
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+    auto dragDropInfo = (eventHub->GetOnDragStart())(dragEvent, extraParams);
 
     // check dragInfo
     EXPECT_EQ(dragDropInfo.extraInfo, HYPERLINK_EXTRAINFO);
