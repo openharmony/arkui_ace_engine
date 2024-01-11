@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -801,7 +801,9 @@ export class ChipComponent extends ViewPU {
             Text.focusable(!0);
             Text.textAlign(TextAlign.Center);
             Text.visibility(this.getVisibility());
-            Text.draggable(!1)
+            Text.draggable(!1);
+            ViewStackProcessor.visualState("focused");
+            ViewStackProcessor.visualState()
         }), Text);
         Text.pop();
         this.observeComponentCreation2(((e, i) => {
@@ -815,13 +817,6 @@ export class ChipComponent extends ViewPU {
             Image.flexShrink(0);
             Image.visibility(this.getVisibility());
             Image.draggable(!1);
-            ViewStackProcessor.visualState("focused");
-            Image.borderColor(this.theme.chipNode.focusOutlineColor);
-            Image.borderWidth(this.getSuffixIconFocusable() ? this.theme.chipNode.borderWidth : 0);
-            ViewStackProcessor.visualState("normal");
-            Image.borderColor(Color.Transparent);
-            Image.borderWidth(0);
-            ViewStackProcessor.visualState();
             Image.onFocus((() => {
                 this.suffixIconOnFocus = !0
             }));
