@@ -820,6 +820,8 @@ void WebPattern::HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info)
     // use summary to set fake data
     ClearDragData();
     delegate_->HandleDragEvent(localX, localY, DragAction::DRAG_ENTER);
+    // RequestFocus to show the carret frame_caret
+    WebRequestFocus();
 }
 
 void WebPattern::HandleOnDragDropLink(RefPtr<UnifiedData> aceData)
