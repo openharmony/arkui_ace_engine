@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/node_container/node_container_layout_algorithm.h"
+#include <optional>
 
 #include "core/components_ng/layout/layout_wrapper.h"
 
@@ -23,7 +24,7 @@ void NodeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         if (child->GetHostTag() == "RenderNode") {
-            child->Measure(child->GetLayoutProperty()->GetLayoutConstraint());
+            child->Measure(std::nullopt);
         } else {
             child->Measure(layoutConstraint);
         }
