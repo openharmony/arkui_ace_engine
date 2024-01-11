@@ -493,7 +493,6 @@ void ScrollPattern::JumpToPosition(float position, int32_t source)
     // If an animation is playing, stop it.
     auto lastAnimateRunning = AnimateRunning();
     StopAnimate();
-    float cachePosition = currentOffset_;
     DoJump(position, source);
     // AccessibilityEventType::SCROLL_END
     if (lastAnimateRunning) {
