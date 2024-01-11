@@ -1673,6 +1673,7 @@ void SwiperPattern::HandleDragStart(const GestureEvent& info)
 
     gestureSwipeIndex_ = currentIndex_;
     isDragging_ = true;
+    isTouchDown_ = true;
     mainDeltaSum_ = 0.0f;
     // in drag process, close lazy feature.
     SetLazyLoadFeature(false);
@@ -1723,6 +1724,7 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 
 void SwiperPattern::HandleDragEnd(double dragVelocity)
 {
+    isTouchDown_ = false;
     UpdateDragFRCSceneInfo(dragVelocity, SceneStatus::END);
     const auto& addEventCallback = swiperController_->GetAddTabBarEventCallback();
     if (addEventCallback) {
