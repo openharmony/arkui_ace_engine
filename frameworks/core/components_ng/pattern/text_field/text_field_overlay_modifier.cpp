@@ -90,17 +90,21 @@ void TextFieldOverlayModifier::SetSecondHandleOffset(const OffsetF& offset)
 void TextFieldOverlayModifier::onDraw(DrawingContext& context)
 {
     auto& canvas = context.canvas;
-    canvas.Save();
-    RSRect clipRect;
-    std::vector<RSPoint> clipRadius;
-    GetFrameRectClip(clipRect, clipRadius);
-    canvas.ClipRoundRect(clipRect, clipRadius, true);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        canvas.Save();
+        RSRect clipRect;
+        std::vector<RSPoint> clipRadius;
+        GetFrameRectClip(clipRect, clipRadius);
+        canvas.ClipRoundRect(clipRect, clipRadius, true);
+    }
     PaintCursor(context);
     PaintSelection(context);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        canvas.Restore();
+    }
     PaintScrollBar(context);
     PaintEdgeEffect(frameSize_->Get(), context.canvas);
     PaintUnderline(context.canvas);
-    canvas.Restore();
     PaintMagnifier(context);
 }
 
