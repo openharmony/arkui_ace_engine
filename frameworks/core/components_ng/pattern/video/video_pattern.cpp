@@ -1483,19 +1483,14 @@ void VideoPattern::EnableDrag()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto layoutProperty = GetLayoutProperty<VideoLayoutProperty>();
-    std::string videoSrcBefore = src_;
-    std::string imageSrcBefore = "";
-    if (layoutProperty->HasPosterImageInfo()) {
-        imageSrcBefore = layoutProperty->GetPosterImageInfo().value().GetSrc();
-    }
-    auto dragEnd = [wp = WeakClaim(this), videoSrcBefore](
+    auto dragEnd = [wp = WeakClaim(this)](
                        const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto videoPattern = wp.Upgrade();
         CHECK_NULL_VOID(videoPattern);
         auto videoLayoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
         CHECK_NULL_VOID(videoLayoutProperty);
         auto unifiedData = event->GetData();
-        std::string videoSrc = "";
+        std::string videoSrc;
         if (unifiedData != nullptr) {
             int ret = UdmfClient::GetInstance()->GetVideoRecordUri(unifiedData, videoSrc);
             if (ret != 0) {
@@ -1508,7 +1503,7 @@ void VideoPattern::EnableDrag()
             videoSrc = json->GetString(key);
         }
 
-        if (videoSrc == videoSrcBefore) {
+        if (videoSrc == videoPattern->GetSrc()) {
             return;
         }
 
