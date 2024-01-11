@@ -2573,9 +2573,9 @@ void RichEditorPattern::AfterIMEInsertValue(const RefPtr<SpanNode>& spanNode, in
     retInfo.SetFontFamily(fontFamilyValue);
     retInfo.SetTextDecoration(spanNode->GetTextDecorationValue(TextDecoration::NONE));
     retInfo.SetColor(spanNode->GetTextDecorationColorValue(Color::BLACK).ColorToString());
-    eventHub->FireOnIMEInputComplete(retInfo);
     UpdateSpanPosition();
     MoveCaretAfterTextChange();
+    eventHub->FireOnIMEInputComplete(retInfo);
 }
 
 void RichEditorPattern::ResetFirstNodeStyle()
