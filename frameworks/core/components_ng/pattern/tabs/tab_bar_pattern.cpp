@@ -86,6 +86,34 @@ void TabBarPattern::OnAttachToFrameNode()
             scrollable->StopScrollable();
         }
     });
+    InitSurfaceChangedCallback();
+}
+
+void TabBarPattern::InitSurfaceChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (!HasSurfaceChangedCallback()) {
+        auto callbackId = pipeline->RegisterSurfaceChangedCallback(
+            [weak = WeakClaim(this)](int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight,
+                WindowSizeChangeReason type) {
+                if (type == WindowSizeChangeReason::UNDEFINED) {
+                    return;
+                }
+                auto pattern = weak.Upgrade();
+                if (!pattern) {
+                    return;
+                }
+
+                if (type == WindowSizeChangeReason::ROTATION) {
+                    pattern->windowSizeChangeReason_ = type;
+                    pattern->StopTranslateAnimation();
+                }
+            });
+        UpdateSurfaceChangedCallbackId(callbackId);
+    }
 }
 
 void TabBarPattern::InitClick(const RefPtr<GestureEventHub>& gestureHub)
@@ -657,6 +685,13 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         UpdateIndicator(indicator);
     }
     isFirstLayout_ = false;
+
+    if (windowSizeChangeReason_ == WindowSizeChangeReason::ROTATION &&
+        animationTargetIndex_.has_value() && animationTargetIndex_ != indicator) {
+        swiperController_->SwipeToWithoutAnimation(animationTargetIndex_.value());
+        windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
+    }
+    animationTargetIndex_.reset();
     UpdateGradientRegions(!swiperPattern->IsUseCustomAnimation());
     if (!swiperPattern->IsUseCustomAnimation() && isTouchingSwiper_ &&
         layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
@@ -719,6 +754,7 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
     } else {
         if (GetAnimationDuration().has_value()) {
             swiperController_->SwipeTo(index);
+            animationTargetIndex_ = index;
         } else {
             swiperController_->SwipeToWithoutAnimation(index);
         }
@@ -1383,7 +1419,7 @@ void TabBarPattern::TriggerTranslateAnimation(
         PlayTranslateAnimation(originalPaintRect.GetX() + originalPaintRect.Width() / 2,
             targetPaintRect.GetX() + targetPaintRect.Width() / 2, targetOffset);
     }
-
+    animationTargetIndex_ = index;
     UpdateTextColor(index);
 }
 
