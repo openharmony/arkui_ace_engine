@@ -169,6 +169,11 @@ public:
         return 0;
     }
 
+    virtual int32_t GetAnimateExpectedRate() const
+    {
+        return 0;
+    }
+
 protected:
     bool isRequestVsync_ = false;
     bool onShow_ = true;
