@@ -1958,12 +1958,10 @@ HWTEST_F(CheckBoxTestNG, OnAfterModifyDone003, TestSize.Level1)
      * @tc.steps: step3. Set CheckBox pattern variable and call Init methods
      * @tc.expected: Check the CheckBox pattern value
      */
-    // InitMouseEvent()
     pattern->InitMouseEvent();
     ASSERT_NE(pattern->mouseEvent_, nullptr);
     pattern->InitMouseEvent();
     pattern->mouseEvent_->GetOnHoverEventFunc()(true);
-    // InitTouchEvent()
     pattern->InitTouchEvent();
     ASSERT_NE(pattern->touchListener_, nullptr);
     TouchEventInfo info("onTouch");
