@@ -39,6 +39,7 @@ public:
     std::string GetValueAfterIndex(int32_t index);
     void erase(int32_t startIndex, int32_t length);
     void FilterValue();
+    void FilterValueType(std::string& value);
     std::string GetSelectedLimitValue(int32_t& index, int32_t& startIndex);
 
     std::wstring GetWideText()
