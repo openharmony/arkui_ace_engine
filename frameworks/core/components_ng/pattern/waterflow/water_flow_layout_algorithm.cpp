@@ -272,6 +272,7 @@ LayoutConstraintF WaterFlowLayoutAlgorithm::CreateChildConstraint(int32_t crossI
         axis_ == Axis::VERTICAL ? SizeF(itemCrossSize, itemMainSize) : SizeF(itemMainSize, itemCrossSize);
 
     itemConstraint.maxSize = itemIdealSize;
+    itemConstraint.maxSize.SetMainSize(Infinity<float>(), axis_);
     itemConstraint.percentReference = itemIdealSize;
 
     CHECK_NULL_RETURN(layoutProperty->HasItemLayoutConstraint(), itemConstraint);

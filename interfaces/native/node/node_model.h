@@ -16,7 +16,7 @@
 #pragma once
 
 #include "basic_node.h"
-#include "basic_types.h"
+#include "common.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,11 +47,11 @@ const char* GetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribut
 void SetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const char* value);
 void ResetAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute);
 
-void RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, ArkUI_Int32 eventId);
+void RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t eventId);
 void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType);
 void RegisterOnEvent(void (*eventReceiver)(ArkUI_NodeEvent* event));
 void UnregisterOnEvent();
-ArkUI_Int32 CheckEvent(ArkUI_NodeEvent* event);
+int32_t CheckEvent(ArkUI_NodeEvent* event);
 
 void ApplyModifierFinish(ArkUI_NodeHandle nodePtr);
 void MarkDirty(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag);

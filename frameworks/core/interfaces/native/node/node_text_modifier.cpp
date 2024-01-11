@@ -52,6 +52,14 @@ FontWeight ConvertStrToFontWeight(const char* weight, FontWeight defaultFontWeig
 }
 
 namespace {
+void SetTextContext(ArkUINodeHandle node, const char* value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string content(value);
+    TextModelNG::InitText(frameNode, content);
+}
+
 void SetFontWeight(ArkUINodeHandle node, const char* weight)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -457,10 +465,10 @@ void ResetTextFont(ArkUINodeHandle node)
 namespace NodeModifier {
 const ArkUITextModifier* GetTextModifier()
 {
-    static const ArkUITextModifier modifier = { SetFontWeight, ResetFontWeight, SetFontStyle, ResetFontStyle,
-        SetTextAlign, ResetTextAlign, SetFontColor, ResetFontColor, SetFontSize, ResetFontSize, SetTextLineHeight,
-        ResetTextLineHeight, SetTextTextOverflow, ResetTextTextOverflow, SetTextDecoration, ResetTextDecoration,
-        SetTextTextCase, ResetTextTextCase, SetTextMaxLines, ResetTextMaxLines, SetTextMinFontSize,
+    static const ArkUITextModifier modifier = { SetTextContext, SetFontWeight, ResetFontWeight, SetFontStyle,
+        ResetFontStyle, SetTextAlign, ResetTextAlign, SetFontColor, ResetFontColor, SetFontSize, ResetFontSize,
+        SetTextLineHeight, ResetTextLineHeight, SetTextTextOverflow, ResetTextTextOverflow, SetTextDecoration,
+        ResetTextDecoration, SetTextTextCase, ResetTextTextCase, SetTextMaxLines, ResetTextMaxLines, SetTextMinFontSize,
         ReSetTextMinFontSize, SetTextDraggable, ResetTextDraggable, SetTextMaxFontSize, ResetTextMaxFontSize,
         SetTextFontFamily, ResetTextFontFamily, SetTextCopyOption, ResetTextCopyOption, SetTextTextShadow,
         ResetTextTextShadow, SetTextHeightAdaptivePolicy, ResetTextHeightAdaptivePolicy, SetTextTextIndent,
@@ -469,5 +477,5 @@ const ArkUITextModifier* GetTextModifier()
 
     return &modifier;
 }
-}
+} // namespace NodeModifier
 } // namespace OHOS::Ace::NG

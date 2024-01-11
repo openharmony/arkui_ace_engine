@@ -23,7 +23,7 @@
 extern "C" {
 #endif
 
-#define ARKUI_NODE_API_VERSION 64
+#define ARKUI_NODE_API_VERSION 65
 
 enum ArkUINodeType {
     ARKUI_TEXT = 1,

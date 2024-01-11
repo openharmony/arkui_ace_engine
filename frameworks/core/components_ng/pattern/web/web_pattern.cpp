@@ -820,6 +820,8 @@ void WebPattern::HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info)
     // use summary to set fake data
     ClearDragData();
     delegate_->HandleDragEvent(localX, localY, DragAction::DRAG_ENTER);
+    // RequestFocus to show the carret frame_caret
+    WebRequestFocus();
 }
 
 void WebPattern::HandleOnDragDropLink(RefPtr<UnifiedData> aceData)
@@ -1646,7 +1648,7 @@ void WebPattern::OnModifyDone()
 
     // offline mode
     if (host->GetNodeStatus() != NodeStatus::NORMAL_NODE) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "Web offline mode type");
+        TAG_LOGI(AceLogTag::ACE_WEB, "Web offline mode type");
         isOfflineMode_ = true;
         OfflineMode();
     }
@@ -2691,6 +2693,15 @@ void WebPattern::OnScrollStartRecursive(float position)
         parent->OnScrollStartRecursive(position);
     }
     isFirstFlingScrollVelocity_ = true;
+}
+
+void WebPattern::OnAttachToBuilderNode(NodeStatus nodeStatus)
+{
+    if (nodeStatus != NodeStatus::NORMAL_NODE) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "Web offline mode type");
+        isOfflineMode_ = true;
+        OfflineMode();
+    }
 }
 
 void WebPattern::OnScrollEndRecursive(const std::optional<float>& velocity)

@@ -93,7 +93,7 @@
     },
     {
         "first_introduced": "11",
-        "name": "OH_ArkUI_GetBasicNodeAPI"
+        "name": "OH_ArkUI_GetNativeNodeAPI"
     },
     {
         "first_introduced": "11",

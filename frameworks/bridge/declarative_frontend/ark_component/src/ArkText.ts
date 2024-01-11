@@ -126,6 +126,23 @@ class TextDraggableModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class TextWordBreakModifier extends ModifierWithKey<WordBreak> {
+  constructor(value: WordBreak) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textWordBreak');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().text.resetWordBreak(node);
+    } else {
+      getUINativeModule().text.setWordBreak(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class TextMinFontSizeModifier extends ModifierWithKey<number | string | Resource> {
   constructor(value: number | string | Resource) {
     super(value);
@@ -435,6 +452,25 @@ class TextFontModifier extends ModifierWithKey<Font> {
     }
   }
 }
+
+class TextClipModifier extends ModifierWithKey<boolean | object> {
+  constructor(value: boolean | object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textClip');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetClipWithEdge(node);
+    } else {
+      getUINativeModule().common.setClipWithEdge(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return true;
+  }
+}
+
 class ArkTextComponent extends ArkComponent implements TextAttribute {
   constructor(nativePtr: KNode) {
     super(nativePtr);
@@ -539,7 +575,8 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
     return this;
   }
   wordBreak(value: WordBreak): TextAttribute {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TextWordBreakModifier.identity, TextWordBreakModifier, value);
+    return this;
   }
   onCopy(callback: (value: string) => void): TextAttribute {
     throw new Error('Method not implemented.');
@@ -549,6 +586,10 @@ class ArkTextComponent extends ArkComponent implements TextAttribute {
   }
   ellipsisMode(value: EllipsisMode): TextAttribute {
     throw new Error('Method not implemented.');
+  }
+  clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
+    modifierWithKey(this._modifiersWithKeys, TextClipModifier.identity, TextClipModifier, value);
+    return this;
   }
 }
 // @ts-ignore

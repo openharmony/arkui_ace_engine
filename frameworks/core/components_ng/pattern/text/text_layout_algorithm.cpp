@@ -342,12 +342,19 @@ void TextLayoutAlgorithm::UpdateParagraphForAISpan(const TextStyle& textStyle, L
     }
 }
 
+void TextLayoutAlgorithm::SetNodeForAnimation(const TextStyle& symbolTextStyle, RefPtr<FrameNode>& frameNode)
+{
+    if (symbolTextStyle.GetEffectStrategy() > 0) {
+        paragraph_->SetParagraphSymbolAnimation(frameNode);
+    }
+}
+
 bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper)
 {
     auto frameNode = layoutWrapper->GetHostNode();
     auto pipeline = frameNode->GetContext();
     auto pattern = frameNode->GetPattern<TextPattern>();
-    auto paraStyle = GetParagraphStyle(textStyle, content);
+    auto paraStyle = GetParagraphStyle(textStyle, content, layoutWrapper);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && spanItemChildren_.empty()) {
         paraStyle.fontSize = textStyle.GetFontSize().ConvertToPx();
     }
@@ -370,6 +377,7 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
         paragraph_->AddSymbol(symbolSourceInfo->GetUnicode());
         paragraph_->PopStyle();
         paragraph_->Build();
+        SetNodeForAnimation(symbolTextStyle, frameNode);
         return true;
     }
     paragraph_->PushStyle(textStyle);
@@ -377,7 +385,7 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
     if (spanItemChildren_.empty()) {
         if (pattern->IsDragging()) {
             auto dragContents = pattern->GetDragContents();
-            CreateParagraphDrag(textStyle, dragContents, content);
+            CreateParagraphDrag(textStyle, dragContents, content, layoutWrapper);
         } else {
             if (pattern->NeedShowAIDetect()) {
                 UpdateParagraphForAISpan(textStyle, layoutWrapper);
@@ -393,21 +401,21 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
     return true;
 }
 
-void TextLayoutAlgorithm::CreateParagraphDrag(const TextStyle& textStyle,
-    const std::vector<std::string>& contents, const std::string content)
+void TextLayoutAlgorithm::CreateParagraphDrag(const TextStyle& textStyle, const std::vector<std::string>& contents,
+    const std::string content, LayoutWrapper* layoutWrapper)
 {
     TextStyle dragTextStyle = textStyle;
     Color color = textStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_TRANSPARENCY);
     dragTextStyle.SetTextColor(color);
     std::vector<TextStyle> textStyles { textStyle, dragTextStyle, textStyle };
     auto style = textStyles.begin();
-    ParagraphStyle paraStyle { .direction = GetTextDirection(content),
+    ParagraphStyle paraStyle { .direction = GetTextDirection(content, layoutWrapper),
         .maxLines = style->GetMaxLines(),
         .align = style->GetTextAlign(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = style->GetWordBreak(),
         .textOverflow = style->GetTextOverflow(),
-        .fontSize = style->GetFontSize().ConvertToPx()};
+        .fontSize = style->GetFontSize().ConvertToPx() };
 
     paragraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
     CHECK_NULL_VOID(paragraph_);
@@ -567,8 +575,15 @@ bool TextLayoutAlgorithm::DidExceedMaxLines(const SizeF& maxSize)
     return didExceedMaxLines;
 }
 
-TextDirection TextLayoutAlgorithm::GetTextDirection(const std::string& content)
+TextDirection TextLayoutAlgorithm::GetTextDirection(const std::string& content, LayoutWrapper* layoutWrapper)
 {
+    auto textLayoutProperty = DynamicCast<TextLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(textLayoutProperty, TextDirection::LTR);
+    auto direction = textLayoutProperty->GetLayoutDirection();
+    if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
+        return direction;
+    }
+
     TextDirection textDirection = TextDirection::LTR;
     auto showingTextForWString = StringUtils::ToWstring(content);
     for (const auto& charOfShowingText : showingTextForWString) {
@@ -1106,10 +1121,11 @@ void TextLayoutAlgorithm::GetPlaceholderRects(std::vector<RectF>& rects)
     paragraph_->GetRectsForPlaceholders(rects);
 }
 
-ParagraphStyle TextLayoutAlgorithm::GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const
+ParagraphStyle TextLayoutAlgorithm::GetParagraphStyle(
+    const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const
 {
     return {
-        .direction = GetTextDirection(content),
+        .direction = GetTextDirection(content, layoutWrapper),
         .align = textStyle.GetTextAlign(),
         .maxLines = textStyle.GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),

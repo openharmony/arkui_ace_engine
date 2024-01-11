@@ -210,9 +210,9 @@ typedef void* NodeHandle;
 struct ArkUICommonModifierAPI {
     void (*SetBackgroundColor)(NodeHandle node, uint32_t color);
     void (*ResetBackgroundColor)(NodeHandle node);
-    void (*SetWidth)(NodeHandle node, double value, int unit, const char* calcVlaue);
+    void (*SetWidth)(NodeHandle node, double value, int32_t unit, const char* calcVlaue);
     void (*ResetWidth)(NodeHandle node);
-    void (*SetHeight)(NodeHandle node, double value, int unit, const char* calcVlaue);
+    void (*SetHeight)(NodeHandle node, double value, int32_t unit, const char* calcVlaue);
     void (*ResetHeight)(NodeHandle node);
     void (*SetBorderRadius)(NodeHandle node, const double *values, const int *units, int32_t length);
     void (*ResetBorderRadius)(NodeHandle node);
@@ -464,6 +464,8 @@ struct ArkUITextModifierAPI {
     void (*ResetTextLetterSpacing)(NodeHandle node);
     void (*SetTextFont)(NodeHandle node, const struct ArkUIFontStruct *fontInfo);
     void (*ResetTextFont)(NodeHandle node);
+    void (*SetWordBreak)(NodeHandle node, const uint32_t wordBreak);
+    void (*ResetWordBreak)(NodeHandle node);
 };
 
 struct ArkUIButtonModifierAPI {
@@ -565,7 +567,7 @@ struct ArkUISearchModifierAPI {
 };
 
 struct ArkUISelectModifierAPI {
-    void (*SetSpace)(NodeHandle node, float value, int unit);
+    void (*SetSpace)(NodeHandle node, float value, int32_t unit);
     void (*SetValue)(NodeHandle node, const char *value);
     void (*SetSelected)(NodeHandle node, int32_t idx);
     void (*SetSelectFontColor)(NodeHandle node, const uint32_t colorVal);
@@ -574,8 +576,8 @@ struct ArkUISelectModifierAPI {
     void (*SetOptionFontColor)(NodeHandle node, const uint32_t colorVal);
     void (*SetSelectedOptionFontColor)(NodeHandle node, const uint32_t colorVal);
     void (*SetArrowPosition)(NodeHandle node, const int32_t arrowPosition);
-    void (*SetMenuAlign)(NodeHandle node, const int32_t alignType, const float *values, const int *units,
-        const int32_t size);
+    void (*SetMenuAlign)(
+        NodeHandle node, const int32_t alignType, const float* values, const int32_t* units, const int32_t size);
     void (*SetFont)(NodeHandle node, const char *fontInfo, int32_t style);
     void (*SetOptionFont)(NodeHandle node, const char *fontInfo, int32_t style);
     void (*SetSelectedOptionFont)(NodeHandle node, const char *fontInfo, int32_t style);
@@ -592,6 +594,18 @@ struct ArkUISelectModifierAPI {
     void (*ResetFont)(NodeHandle node);
     void (*ResetOptionFont)(NodeHandle node);
     void (*ResetSelectedOptionFont)(NodeHandle node);
+
+    void (*SetSelectWidth)(NodeHandle node, double value, int32_t unit, const char* calcVlaue);
+    void (*ResetSelectWidth)(NodeHandle node);
+    void (*SetSelectHeight)(NodeHandle node, double value, int32_t unit, const char* calcVlaue);
+    void (*ResetSelectHeight)(NodeHandle node);
+    void (*SetSelectSize)(NodeHandle node, const double* number, const int8_t* unit, const char** calc);
+    void (*ResetSelectSize)(NodeHandle node);
+    void (*SetOptionWidthFitTrigger)(NodeHandle node, bool trigger);
+    void (*SetOptionWidth)(NodeHandle node, const char* width);
+    void (*ResetOptionWidth)(NodeHandle node);
+    void (*SetOptionHeight)(NodeHandle node, const char* height);
+    void (*ResetOptionHeight)(NodeHandle node);
 };
 
 struct ArkUICheckboxModifierAPI {
@@ -693,6 +707,21 @@ struct ArkUIRadioModifierAPI {
     void (*SetRadioStyle)(
         NodeHandle node, uint32_t checkedBackgroundColor, uint32_t uncheckedBorderColor, uint32_t indicatorColor);
     void (*ResetRadioStyle)(NodeHandle node);
+    void (*SetRadioWidth)(NodeHandle node, double value, uint32_t unit);
+    void (*ResetRadioWidth)(NodeHandle node);
+    void (*SetRadioHeight)(NodeHandle node, double value, uint32_t unit);
+    void (*ResetRadioHeight)(NodeHandle node);
+    void (*SetRadioSize)(
+        NodeHandle node, double widthValue, int32_t widthUnit, double heightValue, int32_t heightUnit);
+    void (*ResetRadioSize)(NodeHandle node);
+    void (*SetRadioHoverEffect)(NodeHandle node, int32_t hoverEffectValue);
+    void (*ResetRadioHoverEffect)(NodeHandle node);
+    void (*SetRadioPadding)(
+        NodeHandle node, const struct ArkUISizeType *top, const struct ArkUISizeType *right,
+            const struct ArkUISizeType *bottom, const struct ArkUISizeType *left);
+    void (*ResetRadioPadding)(NodeHandle node);
+    void (*SetRadioResponseRegion)(NodeHandle node, const double* values, const int32_t* units, uint32_t length);
+    void (*ResetRadioResponseRegion)(NodeHandle node);
 };
 
 struct ArkUIDividerModifierAPI {
@@ -1057,6 +1086,11 @@ struct ArkUICalendarPickerModifierAPI {
     void (*ResetTextStyle)(NodeHandle node);
     void (*SetEdgeAlign)(NodeHandle node, const double* values, const int* units, int32_t size, int32_t alignType);
     void (*ResetEdgeAlign)(NodeHandle node);
+    void (*SetCalendarPickerPadding)(NodeHandle node, const struct ArkUISizeType* top,
+        const struct ArkUISizeType* right, const struct ArkUISizeType* bottom, const struct ArkUISizeType* left);
+    void (*ResetCalendarPickerPadding)(NodeHandle node);
+    void (*SetCalendarPickerBorder)(NodeHandle node, const uint32_t color);
+    void (*ResetCalendarPickerBorder)(NodeHandle node);
 };
 
 struct ArkUITextInputModifierAPI {
@@ -1142,6 +1176,8 @@ struct ArkUITabsModifierAPI {
     void (*ResetTabBarHeight)(NodeHandle node);
     void (*ResetBarAdaptiveHeight)(NodeHandle node);
     void (*ResetAnimationDuration)(NodeHandle node);
+    void (*SetTabClip)(NodeHandle node, bool clipEdge);
+    void (*ResetTabClip)(NodeHandle node);
 };
 
 struct ArkUIStepperItemModifierAPI {
@@ -1306,6 +1342,8 @@ struct ArkUISwiperModifierAPI {
     void (*ResetSwiperIndicator)(NodeHandle node);
     void (*SetSwiperDuration)(NodeHandle node, int32_t duration);
     void (*ResetSwiperDuration)(NodeHandle node);
+    void (*SetSwiperEnabled)(NodeHandle node, bool enabled);
+    void (*ResetSwiperEnabled)(NodeHandle node);
 };
 
 struct ArkUIDataPanelModifierAPI {
@@ -1587,6 +1625,7 @@ struct ArkUIRenderNodeModifierAPI {
     void (*SetRenderNodeBackgroundColor)(NodeHandle node, uint32_t colorValue);
     void (*SetPivot)(NodeHandle node, float pivotX, float pivotY);
     void (*SetFrame)(NodeHandle node, float positionX, float positionY, float width, float height);
+    void (*SetSize)(NodeHandle node, float width, float height);
     void (*SetOpacity)(NodeHandle node, float opacity);
     void (*SetTranslate)(NodeHandle node, float translateX, float translateY, float translateZ);
 };

@@ -257,6 +257,20 @@ void ResetBarAdaptiveHeight(NodeHandle node)
     TabsModelNG::SetBarAdaptiveHeight(frameNode, false);
 }
 
+void SetTabClip(NodeHandle node, bool clipEdge)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetClipEdge(frameNode, clipEdge);
+}
+
+void ResetTabClip(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TabsModelNG::SetClipEdge(frameNode, false);
+}
+
 ArkUITabsModifierAPI GetTabsModifier()
 {
     static const ArkUITabsModifierAPI modifier = {
@@ -288,6 +302,8 @@ ArkUITabsModifierAPI GetTabsModifier()
         ResetTabBarHeight,
         ResetBarAdaptiveHeight,
         ResetAnimationDuration,
+        SetTabClip,
+        ResetTabClip,
     };
 
     return modifier;

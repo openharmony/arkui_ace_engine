@@ -806,11 +806,13 @@ void RosenRenderContext::OnPixelStretchEffectUpdate(const PixStretchEffectOption
         pixStretchVector.SetValues(static_cast<float>(option.left.Value()), static_cast<float>(option.top.Value()),
             static_cast<float>(option.right.Value()), static_cast<float>(option.bottom.Value()));
         rsNode_->SetPixelStretchPercent(pixStretchVector);
+        rsNode_->SetPixelStretch({ 0, 0, 0, 0 });
     } else {
         pixStretchVector.SetValues(static_cast<float>(option.left.ConvertToPx()),
             static_cast<float>(option.top.ConvertToPx()), static_cast<float>(option.right.ConvertToPx()),
             static_cast<float>(option.bottom.ConvertToPx()));
         rsNode_->SetPixelStretch(pixStretchVector);
+        rsNode_->SetPixelStretchPercent({ 0, 0, 0, 0 });
     }
     RequestNextFrame();
 }
@@ -1265,14 +1267,19 @@ public:
     }
 };
 
-RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap()
+RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap(bool needScale)
 {
     if (rsNode_ == nullptr) {
         return nullptr;
     }
     std::shared_ptr<DrawDragThumbnailCallback> drawDragThumbnailCallback =
         std::make_shared<DrawDragThumbnailCallback>();
-    auto ret = RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, 1, 1);
+    float scaleX = 1.0f;
+    float scaleY = 1.0f;
+    if (needScale) {
+        UpdateThumbnailPixelMapScale(scaleX, scaleY);
+    }
+    auto ret = RSInterfaces::GetInstance().TakeSurfaceCaptureForUI(rsNode_, drawDragThumbnailCallback, scaleX, scaleY);
     if (!ret) {
         return nullptr;
     }
@@ -1281,6 +1288,29 @@ RefPtr<PixelMap> RosenRenderContext::GetThumbnailPixelMap()
         return nullptr;
     }
     return g_pixelMap;
+}
+
+void RosenRenderContext::UpdateThumbnailPixelMapScale(float& scaleX, float& scaleY)
+{
+    CHECK_NULL_VOID(rsNode_);
+    auto scale = rsNode_->GetStagingProperties().GetScale();
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(context);
+    auto parent = frameNode->GetAncestorNodeOfFrame();
+    while (parent) {
+        auto parentRenderContext = parent->GetRenderContext();
+        CHECK_NULL_VOID(parentRenderContext);
+        auto parentScale = parentRenderContext->GetTransformScale();
+        if (parentScale) {
+            scale[0] *= parentScale.value().x;
+            scale[1] *= parentScale.value().y;
+        }
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    scaleX = scale[0];
+    scaleY = scale[1];
 }
 
 #ifndef USE_ROSEN_DRAWING

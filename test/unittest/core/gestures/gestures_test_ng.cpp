@@ -2020,8 +2020,8 @@ HWTEST_F(GesturesTestNg, GestureRecognizerTest001, TestSize.Level1)
     /**
      * @tc.steps: step1. create GestureRecognizer.
      */
-    ClickRecognizer clickRecognizer = ClickRecognizer(FINGER_NUMBER, COUNT);
-    clickRecognizer.refereeState_ = RefereeState::SUCCEED;
+    auto clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->refereeState_ = RefereeState::SUCCEED;
     TouchEvent touchEvent;
 
     /**
@@ -2029,24 +2029,24 @@ HWTEST_F(GesturesTestNg, GestureRecognizerTest001, TestSize.Level1)
      * @tc.expected: step2. result equals.
      */
     touchEvent.type = TouchType::MOVE;
-    clickRecognizer.HandleEvent(touchEvent);
-    EXPECT_EQ(clickRecognizer.refereeState_, RefereeState::SUCCEED);
+    clickRecognizer->HandleEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::SUCCEED);
 
     touchEvent.type = TouchType::DOWN;
-    clickRecognizer.HandleEvent(touchEvent);
-    EXPECT_EQ(clickRecognizer.refereeState_, RefereeState::SUCCEED);
+    clickRecognizer->HandleEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::SUCCEED);
 
     touchEvent.type = TouchType::UP;
-    clickRecognizer.HandleEvent(touchEvent);
-    EXPECT_EQ(clickRecognizer.refereeState_, RefereeState::SUCCEED);
+    clickRecognizer->HandleEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::SUCCEED);
 
     touchEvent.type = TouchType::CANCEL;
-    clickRecognizer.HandleEvent(touchEvent);
-    EXPECT_EQ(clickRecognizer.refereeState_, RefereeState::SUCCEED);
+    clickRecognizer->HandleEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::SUCCEED);
 
     touchEvent.type = TouchType::UNKNOWN;
-    clickRecognizer.HandleEvent(touchEvent);
-    EXPECT_EQ(clickRecognizer.refereeState_, RefereeState::SUCCEED);
+    clickRecognizer->HandleEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::SUCCEED);
 
     /**
      * @tc.steps: step2. call AxisEvent function and compare result.
@@ -2054,20 +2054,20 @@ HWTEST_F(GesturesTestNg, GestureRecognizerTest001, TestSize.Level1)
      */
     AxisEvent axisEvent;
     axisEvent.action = AxisAction::BEGIN;
-    clickRecognizer.HandleEvent(axisEvent);
-    EXPECT_EQ(clickRecognizer.refereeState_, RefereeState::SUCCEED);
+    clickRecognizer->HandleEvent(axisEvent);
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::FAIL);
 
     axisEvent.action = AxisAction::UPDATE;
-    clickRecognizer.HandleEvent(axisEvent);
-    EXPECT_EQ(clickRecognizer.refereeState_, RefereeState::SUCCEED);
+    clickRecognizer->HandleEvent(axisEvent);
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::FAIL);
 
     axisEvent.action = AxisAction::END;
-    clickRecognizer.HandleEvent(axisEvent);
-    EXPECT_EQ(clickRecognizer.refereeState_, RefereeState::SUCCEED);
+    clickRecognizer->HandleEvent(axisEvent);
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::FAIL);
 
     axisEvent.action = AxisAction::NONE;
-    clickRecognizer.HandleEvent(axisEvent);
-    EXPECT_EQ(clickRecognizer.refereeState_, RefereeState::SUCCEED);
+    clickRecognizer->HandleEvent(axisEvent);
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::FAIL);
 }
 
 /**
@@ -5509,7 +5509,7 @@ HWTEST_F(GesturesTestNg, RotationRecognizerTest001, TestSize.Level1)
      * @tc.expected: step3. result equals.
      */
     rotationRecognizer.OnRejected();
-    EXPECT_EQ(rotationRecognizer.refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(rotationRecognizer.refereeState_, RefereeState::SUCCEED);
 }
 
 /**

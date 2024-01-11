@@ -140,4 +140,37 @@ void RadioModelNG::SetIndicatorColor(FrameNode* frameNode, const Color& color)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(RadioPaintProperty, RadioIndicatorColor, color, frameNode);
 }
+
+void RadioModelNG::SetWidth(FrameNode* frameNode, const Dimension& width)
+{
+    NG::ViewAbstract::SetWidth(frameNode, NG::CalcLength(width));
+}
+
+void RadioModelNG::SetHeight(FrameNode* frameNode, const Dimension& height)
+{
+    NG::ViewAbstract::SetHeight(frameNode, NG::CalcLength(height));
+}
+
+void RadioModelNG::SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect)
+{
+    NG::ViewAbstract::SetHoverEffect(frameNode, hoverEffect);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetShowHoverEffect(hoverEffect != HoverEffectType::NONE);
+}
+
+void RadioModelNG::SetPadding(FrameNode* frameNode, const NG::PaddingProperty& newArgs)
+{
+    NG::ViewAbstract::SetPadding(frameNode, newArgs);
+}
+
+void RadioModelNG::SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion)
+{
+    NG::ViewAbstract::SetResponseRegion(frameNode, responseRegion);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsUserSetResponseRegion(true);
+}
 } // namespace OHOS::Ace::NG

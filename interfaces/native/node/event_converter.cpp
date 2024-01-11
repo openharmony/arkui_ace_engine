@@ -15,7 +15,6 @@
 #include "node/event_converter.h"
 
 #include "basic_node.h"
-#include "node/basic_types.h"
 #include "securec.h"
 
 #include "base/log/log_wrapper.h"

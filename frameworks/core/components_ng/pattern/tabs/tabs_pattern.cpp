@@ -78,9 +78,7 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
             tabBarPattern->HandleBottomTabBarChange(index);
         }
         tabBarPattern->SetMaskAnimationByCreate(false);
-        if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::FIXED) {
-            tabBarPattern->SetIndicator(index);
-        }
+        tabBarPattern->SetIndicator(index);
         tabBarPattern->UpdateIndicator(index);
         tabBarPattern->UpdateTextColor(index);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
@@ -229,9 +227,9 @@ void TabsPattern::UpdateSwiperDisableSwipe(bool disableSwipe)
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
-    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_VOID(swiperPaintProperty);
-    swiperPaintProperty->UpdateDisableSwipe(disableSwipe);
+    auto props = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    props->UpdateDisableSwipe(disableSwipe);
     swiperPattern->UpdateSwiperPanEvent(disableSwipe);
     swiperPattern->SetSwiperEventCallback(disableSwipe);
 }
@@ -253,24 +251,26 @@ void TabsPattern::OnModifyDone()
 {
     LOGE("ZMH, TabsPattern::OnModifyDone() enter");
     Pattern::OnModifyDone();
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
-        CHECK_NULL_VOID(tabsNode);
-        auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
-        CHECK_NULL_VOID(tabBarNode);
-        auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-        CHECK_NULL_VOID(tabBarPattern);
-        auto tabBarRenderContext = tabBarNode->GetRenderContext();
-        CHECK_NULL_VOID(tabBarRenderContext);
-        auto tabBarPaintProperty = tabBarPattern->GetPaintProperty<TabBarPaintProperty>();
-        CHECK_NULL_VOID(tabBarPaintProperty);
-        BlurStyleOption styleOption;
-        styleOption.blurStyle = BlurStyle::NO_MATERIAL;
-        if (!tabBarPaintProperty->GetBarBackgroundColor().has_value() ||
-            tabBarPaintProperty->GetBarBackgroundColor().value() == Color::TRANSPARENT) {
-            styleOption.blurStyle = BlurStyle::COMPONENT_THICK;
+    if (isBlurStyle_) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+            CHECK_NULL_VOID(tabsNode);
+            auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+            CHECK_NULL_VOID(tabBarNode);
+            auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+            CHECK_NULL_VOID(tabBarPattern);
+            auto tabBarRenderContext = tabBarNode->GetRenderContext();
+            CHECK_NULL_VOID(tabBarRenderContext);
+            auto tabBarPaintProperty = tabBarPattern->GetPaintProperty<TabBarPaintProperty>();
+            CHECK_NULL_VOID(tabBarPaintProperty);
+            BlurStyleOption styleOption;
+            styleOption.blurStyle = BlurStyle::NO_MATERIAL;
+            if (!tabBarPaintProperty->GetBarBackgroundColor().has_value() ||
+                tabBarPaintProperty->GetBarBackgroundColor().value() == Color::TRANSPARENT) {
+                styleOption.blurStyle = BlurStyle::COMPONENT_THICK;
+            }
+            tabBarRenderContext->UpdateBackBlurStyle(styleOption);
         }
-        tabBarRenderContext->UpdateBackBlurStyle(styleOption);
     }
 
     UpdateSwiperDisableSwipe(isCustomAnimation_ ? true : isDisableSwipe_);

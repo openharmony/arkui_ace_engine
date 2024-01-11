@@ -20,6 +20,7 @@
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/scroll_model_impl.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/components_ng/pattern/scroll/inner/scroll_bar.h"
@@ -96,6 +97,7 @@ void JSScroll::Create(const JSCallbackInfo& info)
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSScroller* jsScroller = JSRef<JSObject>::Cast(info[0])->Unwrap<JSScroller>();
         if (jsScroller) {
+            jsScroller->SetInstanceId(Container::CurrentId());
             auto positionController = ScrollModel::GetInstance()->GetOrCreateController();
             jsScroller->SetController(positionController);
             // Init scroll bar proxy.

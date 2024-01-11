@@ -17,6 +17,6 @@ declare class ForEach {
   static create(): void;
   static pop(): void;
   static setIdArray(elmtId: number, newIdArray: string[], diffIndexArray: number[], duplicateIds: number[]): void;
-  static createNewChildStart(id: string, parentNode: BaseNode): void;
-  static createNewChildFinish(id: string, parentNode: BaseNode): void;
+  static createNewChildStart(id: string, parentNode: JSBuilderNode): void;
+  static createNewChildFinish(id: string, parentNode: JSBuilderNode): void;
 }

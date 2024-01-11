@@ -91,6 +91,10 @@ class ArkTabsComponent extends ArkComponent implements TabsAttribute {
     modifierWithKey(this._modifiersWithKeys, BarGridAlignModifier.identity, BarGridAlignModifier, value);
     return this;
   }
+  clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
+    modifierWithKey(this._modifiersWithKeys, TabClipModifier.identity, TabClipModifier, value);
+    return this;
+  }
 }
 
 class BarGridAlignModifier extends ModifierWithKey<BarGridColumnOptions> {
@@ -343,6 +347,24 @@ class FadingEdgeModifier extends ModifierWithKey<boolean> {
     } else {
       getUINativeModule().tabs.setFadingEdge(node, this.value);
     }
+  }
+}
+
+class TabClipModifier extends ModifierWithKey<boolean | object> {
+  constructor(value: boolean | object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('tabclip');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().tabs.resetTabClip(node);
+    } else {
+      getUINativeModule().tabs.setTabClip(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return true;
   }
 }
 

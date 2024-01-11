@@ -76,6 +76,11 @@ public:
         return gestureEventHub_;
     }
 
+    void SetGestureEventHub(const RefPtr<GestureEventHub>& gestureEventHub)
+    {
+        gestureEventHub_ = gestureEventHub;
+    }
+
     const RefPtr<InputEventHub>& GetOrCreateInputEventHub()
     {
         if (!inputEventHub_) {
@@ -99,6 +104,14 @@ public:
             if (paintParamsPtr) {
                 focusHub_->SetFocusPaintParamsPtr(paintParamsPtr);
             }
+        }
+        return focusHub_;
+    }
+
+    const RefPtr<FocusHub>& GetOrCreateFocusHub(const FocusPattern& focusPattern)
+    {
+        if (!focusHub_) {
+            focusHub_ = MakeRefPtr<FocusHub>(WeakClaim(this), focusPattern);
         }
         return focusHub_;
     }

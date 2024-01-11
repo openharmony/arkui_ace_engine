@@ -110,7 +110,9 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        focusPattern.SetIsFocusActiveWhenFocused(true);
+        return focusPattern;
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
@@ -128,6 +130,15 @@ public:
     long long GetTimestamp() const
     {
         return timestamp_;
+    }
+
+    void UpdateSpanPosition()
+    {
+        uint32_t spanTextLength = 0;
+        for (auto& span : spans_) {
+            spanTextLength += StringUtils::ToWstring(span->content).length();
+            span->position = spanTextLength;
+        }
     }
 
     void ResetBeforePaste();
@@ -374,6 +385,12 @@ public:
     TextSpanType GetEditorType() const
     {
         return selectedType_.value_or(TextSpanType::NONE);
+    }
+    void GetCaretMetrics(CaretMetricsF& caretCaretMetric) override;
+
+    void SetShowSelect(bool isShowSelect)
+    {
+        showSelect_ = isShowSelect;
     }
 
 protected:

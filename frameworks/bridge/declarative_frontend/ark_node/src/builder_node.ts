@@ -15,7 +15,32 @@
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
 /// <reference path="../../state_mgmt/src/lib/partial_update/pu_viewstack_processor.d.ts" />
 
-class BuilderNode extends BaseNode {
+class BuilderNode {
+  private _JSBuilderNode: JSBuilderNode;
+  private nodePtr_: number | null;
+  constructor(uiContext: UIContext, options: RenderOptions) {
+    let jsBuilderNode = new JSBuilderNode(uiContext, options);
+    this._JSBuilderNode = jsBuilderNode;
+    let id = Symbol("BuilderNode");
+    BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.set(id, jsBuilderNode);
+    BuilderNodeFinalizationRegisterProxy.register(this, { name: 'BuilderNode', idOfNode: id })
+  }
+  public update(params: Object) {
+    this._JSBuilderNode.update(params);
+  }
+  public build(builder: WrappedBuilder<Object[]>, params: Object) {
+    this._JSBuilderNode.build(builder, params);
+    this.nodePtr_ = this._JSBuilderNode.getNodePtr();
+  }
+  public reset(): void {
+    this._JSBuilderNode.reset();
+  }
+  public getFrameNode(): FrameNode {
+    return this._JSBuilderNode.getFrameNode();
+  }
+}
+
+class JSBuilderNode extends BaseNode {
   private updateFuncByElmtId?: Map<number, UpdateFunc | UpdateFuncRecord>;
   private params_: Object;
   private uiContext_: UIContext;
@@ -43,7 +68,7 @@ class BuilderNode extends BaseNode {
     const childWeakRef = this.childrenWeakrefMap_.get(id);
     return childWeakRef ? childWeakRef.deref() : undefined;
   }
-  public updateStateVarsOfChildByElmtId(elmtId, params: Object, updateParams: Object): void {
+  public updateStateVarsOfChildByElmtId(elmtId, params: Object): void {
     if (elmtId < 0) {
       return;
     }
@@ -51,9 +76,7 @@ class BuilderNode extends BaseNode {
     if (!child) {
       return;
     }
-    if (typeof child.aboutToUpdate === "function") {
-      child.aboutToUpdate(updateParams);
-    }
+    child.updateStateVars(params);
   }
   public build(builder: WrappedBuilder<Object[]>, params: Object) {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
@@ -243,5 +266,15 @@ class BuilderNode extends BaseNode {
     this.purgeDeletedElmtIds();
 
     branchfunc();
+  }
+  public getNodePtr(): number | null {
+    return this.nodePtr_;
+  }
+  public reset() {
+    this.nodePtr_ = null;
+    super.reset();
+    if (this.frameNode_ !== undefined && this.frameNode_ !== null) {
+      this.frameNode_.setNodePtr(null);
+    }
   }
 }

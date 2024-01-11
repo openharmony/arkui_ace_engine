@@ -95,6 +95,31 @@ void VelocityTracker::UpdateVelocity()
         yVelocity = linearParam * yAxis[0] * yValue + yAxis[1];
     }
 
+    if (currentTrackPoint_.type == TouchType::UP) {
+        static const int32_t minSize = 2;
+        if (yAxis_.GetYVals().size() >= minSize) {
+            auto yAxisDelta = yAxis_.GetYVals()[yAxis_.GetYVals().size() - 1] -
+                yAxis_.GetYVals()[yAxis_.GetYVals().size() - 2];
+            if (yAxisDelta > 0 && yVelocity < 0) {
+                yVelocity = 0;
+            } else if (yAxisDelta < 0 && yVelocity > 0) {
+                yVelocity = 0;
+            } else if (yAxisDelta == 0) {
+                yVelocity = 0;
+            }
+        }
+        if (xAxis_.GetYVals().size() >= minSize) {
+            auto xAxisDelta = xAxis_.GetYVals()[xAxis_.GetYVals().size() - 1] -
+                xAxis_.GetYVals()[xAxis_.GetYVals().size() - 2];
+            if (xAxisDelta > 0 && xVelocity < 0) {
+                xVelocity = 0;
+            } else if (xAxisDelta < 0 && xVelocity > 0) {
+                xVelocity = 0;
+            } else if (xAxisDelta == 0) {
+                xVelocity = 0;
+            }
+        }
+    }
     velocity_.SetOffsetPerSecond({ xVelocity, yVelocity });
     isVelocityDone_ = true;
 }

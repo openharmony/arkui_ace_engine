@@ -124,6 +124,8 @@ void ButtonModelNG::SetControlSize(const std::optional<ControlSize>& controlSize
         PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
             CalcLength(padding.Top()), CalcLength(padding.Bottom()) };
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding);
+        Dimension fontSize = buttonTheme->GetTextSize(controlSize.value());
+        SetFontSize(fontSize);
     }
 }
 

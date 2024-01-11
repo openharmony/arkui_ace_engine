@@ -145,8 +145,16 @@ void TextFieldContentModifier::SetDefaultAnimatablePropertyValue()
     CHECK_NULL_VOID(pipelineContext);
     theme = pipelineContext->GetTheme<TextTheme>();
     textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    TextStyle textStyle = CreateTextStyleUsingTheme(
-        textFieldLayoutProperty->GetFontStyle(), textFieldLayoutProperty->GetTextLineStyle(), theme);
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    TextStyle textStyle;
+    if (!textFieldPattern->GetTextValue().empty()) {
+        textStyle = CreateTextStyleUsingTheme(
+            textFieldLayoutProperty->GetFontStyle(), textFieldLayoutProperty->GetTextLineStyle(), theme);
+    } else {
+        textStyle = CreateTextStyleUsingTheme(textFieldLayoutProperty->GetPlaceholderFontStyle(),
+            textFieldLayoutProperty->GetPlaceholderTextLineStyle(), theme);
+    }
     SetDefaultFontSize(textStyle);
     SetDefaultFontWeight(textStyle);
     SetDefaultTextColor(textStyle);
@@ -423,9 +431,10 @@ void TextFieldContentModifier::ProcessErrorParagraph(DrawingContext& context, fl
     auto offset = contentOffset_->Get();
     auto textFrameRect = textFieldPattern->GetFrameRect();
     auto errorParagraph = textFieldPattern->GetErrorParagraph();
+    auto errorValue = textFieldPattern->GetErrorTextString();
     auto frameNode = textFieldPattern->GetHost();
     auto& canvas = context.canvas;
-    if (showErrorState_->Get() && errorParagraph && !textFieldPattern->IsDisabled()) {
+    if (showErrorState_->Get() && errorParagraph && !textFieldPattern->IsDisabled() && !errorValue.empty()) {
         auto property = frameNode->GetLayoutProperty();
         float padding = 0.0f;
         if (property && property->GetPaddingProperty()) {

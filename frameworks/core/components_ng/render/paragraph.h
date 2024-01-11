@@ -119,14 +119,14 @@ public:
     virtual bool GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) = 0;
     virtual std::u16string GetParagraphText() = 0;
     virtual const ParagraphStyle& GetParagraphStyle() const = 0;
-
+    // interfaces for pass on Symbol Animation interface
+    virtual void SetParagraphSymbolAnimation(const RefPtr<FrameNode>& frameNode) = 0;
     // interfaces for painting
     virtual void Paint(RSCanvas& canvas, float x, float y) = 0;
 #ifndef USE_ROSEN_DRAWING
     virtual void Paint(SkCanvas* skCanvas, float x, float y) = 0;
 #endif
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_PAPAGRAPH_H

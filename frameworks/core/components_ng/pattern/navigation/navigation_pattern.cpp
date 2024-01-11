@@ -951,6 +951,14 @@ void NavigationPattern::OnHover(bool isHover)
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     int32_t currentPointerStyle = 0;
     mouseStyle->GetPointerStyle(windowId, currentPointerStyle);
+    auto defaultValue = Dimension(0.0);
+    auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto userSetMinNavBarWidthValue = layoutProperty->GetMinNavBarWidthValue(defaultValue);
+    auto userSetMaxNavBarWidthValue = layoutProperty->GetMaxNavBarWidthValue(defaultValue);
+    if (userSetMinNavBarWidthValue == userSetMaxNavBarWidthValue && userSetNavBarRangeFlag_) {
+        return;
+    }
     if (currentPointerStyle != static_cast<int32_t>(format)) {
         mouseStyle->SetPointerStyle(windowId, format);
     }
@@ -1117,10 +1125,10 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
     }
     auto transition = navigationTransition.transition;
     proxy->SetFinishTransitionEvent([weakPattern = WeakClaim(this), preTopNavDestination, newTopNavDestination,
-                                        isPopPage, endCallBack = navigationTransition.endCallback](bool isSuccess) {
+                                    proxy, isPopPage, endCallBack = navigationTransition.endCallback](bool isSuccess) {
         auto navigationPattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(navigationPattern);
-        if (navigationPattern->currentProxy_->GetIsFinished()) {
+        if (proxy != nullptr && proxy->GetIsFinished()) {
             TAG_LOGD(AceLogTag::ACE_NAVIGATION, "custom animation has finished");
             return;
         }
@@ -1129,7 +1137,9 @@ bool NavigationPattern::TriggerCustomAnimation(const RefPtr<NavDestinationGroupN
             endCallBack(isSuccess);
         }
         navigationPattern->OnCustomAnimationFinish(preTopNavDestination, newTopNavDestination, isPopPage);
-        navigationPattern->currentProxy_->SetIsFinished(true);
+        if (proxy != nullptr) {
+            proxy->SetIsFinished(true);
+        }
     });
     transition(proxy);
     auto timeout = navigationTransition.timeout;
@@ -1182,7 +1192,13 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
         }
         if ((newTopNavDestination && preTopNavDestination && isPopPage) ||
             (preTopNavDestination && !newTopNavDestination && navigationMode_ == NavigationMode::STACK)) {
+            PageTransitionType preNodeTransitionType = preTopNavDestination->GetTransitionType();
+            if (preNodeTransitionType != PageTransitionType::EXIT_POP) {
+                TAG_LOGI(AceLogTag::ACE_NAVIGATION, "previous destination node is executing another transition");
+                return;
+            }
             auto preDestinationPattern = preTopNavDestination->GetPattern<NavDestinationPattern>();
+            CHECK_NULL_VOID(preDestinationPattern);
             auto shallowBuilder = preDestinationPattern->GetShallowBuilder();
             if (shallowBuilder) {
                 shallowBuilder->MarkIsExecuteDeepRenderDone(false);
@@ -1197,13 +1213,22 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
             (!preTopNavDestination && newTopNavDestination && navigationMode_ == NavigationMode::STACK)) {
             hostNode->SetNeedSetInvisible(true);
             RefPtr<FrameNode> node;
+            PageTransitionType preNodeTransitionType;
             if (preTopNavDestination) {
+                preNodeTransitionType = preTopNavDestination->GetTransitionType();
                 node = preTopNavDestination;
             } else {
                 // pre destination is nullptr, preNode is navBarNode
+                auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
+                CHECK_NULL_VOID(navBarNode);
+                preNodeTransitionType = navBarNode->GetTransitionType();
                 node = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarNode());
+                CHECK_NULL_VOID(node);
             }
-            CHECK_NULL_VOID(node);
+            if (preNodeTransitionType != PageTransitionType::EXIT_PUSH) {
+                TAG_LOGI(AceLogTag::ACE_NAVIGATION, "previous destination node is executing another transition");
+                return;
+            }
             auto property = node->GetLayoutProperty();
             property->UpdateVisibility(VisibleType::INVISIBLE);
             node->SetActive(false);
@@ -1225,7 +1250,9 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
 NavigationTransition NavigationPattern::ExecuteTransition(const RefPtr<NavDestinationGroupNode>& preTopDestination,
     const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage)
 {
+    NavigationTransition navigationTransition;
     auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, navigationTransition);
     NavigationOperation operation;
     NavContentInfo preInfo = currentProxy_->GetPreDestination();
     NavContentInfo topInfo = currentProxy_->GetTopDestination();
@@ -1245,6 +1272,35 @@ NavigationTransition NavigationPattern::ExecuteTransition(const RefPtr<NavDestin
         operation = NavigationOperation::POP;
     } else {
         operation = NavigationOperation::PUSH;
+    }
+
+    /* set transition animation flag fro navBarNode or navDestinationNode */
+    if (operation == NavigationOperation::PUSH) {
+        if (preTopDestination != nullptr) {
+            preTopDestination->SetTransitionType(PageTransitionType::EXIT_PUSH);
+        } else {
+            // preTopDestination is nullptr, previous node is navBar node
+            auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
+            CHECK_NULL_RETURN(navBarNode, navigationTransition);
+            navBarNode->SetTransitionType(PageTransitionType::EXIT_PUSH);
+        }
+
+        if (newTopNavDestination != nullptr) {
+            newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_PUSH);
+        }
+    }
+    if (operation == NavigationOperation::POP) {
+        if (preTopDestination != nullptr) {
+            preTopDestination->SetTransitionType(PageTransitionType::EXIT_POP);
+        }
+        if (newTopNavDestination != nullptr) {
+            newTopNavDestination->SetTransitionType(PageTransitionType::ENTER_POP);
+        } else {
+            // newTopNavDestination is nullptr, current node is navBar node
+            auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
+            CHECK_NULL_RETURN(navBarNode, navigationTransition);
+            navBarNode->SetTransitionType(PageTransitionType::ENTER_POP);
+        }
     }
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "custom animation start: operation: %{public}d", operation);
     return onTransition_(preInfo, topInfo, operation);

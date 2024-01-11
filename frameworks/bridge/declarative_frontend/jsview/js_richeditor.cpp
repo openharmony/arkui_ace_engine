@@ -1319,7 +1319,13 @@ std::pair<int32_t, int32_t> ParseRange(const JSRef<JSObject>& object)
     if (!JSContainerBase::ParseJsInt32(object->GetProperty("end"), end)) {
         end = INT_MAX;
     }
-    if (start > end || start < 0 || end < 0) {
+    if (start < 0) {
+        start = 0;
+    }
+    if (end < 0) {
+        end = INT_MAX;
+    }
+    if (start > end) {
         start = 0;
         end = INT_MAX;
     }

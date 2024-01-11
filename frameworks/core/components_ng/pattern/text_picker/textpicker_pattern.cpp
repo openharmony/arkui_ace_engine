@@ -897,20 +897,25 @@ void TextPickerPattern::CheckAndUpdateColumnSize(SizeF& size)
 
     auto layoutConstraint = layoutProperty->GetLayoutConstraint();
     auto layoutSize = layoutConstraint->selfIdealSize;
-    auto layoutMaxSize = layoutConstraint->maxSize;
 
     PaddingPropertyF padding = layoutProperty->CreatePaddingAndBorder();
     auto childCount = static_cast<float>(pickerNode->GetChildren().size());
+    auto pickerContentSize = SizeF(size.Width() * childCount, size.Height());
+    AddPaddingToSize(padding, pickerContentSize);
 
-    auto width = layoutSize.Width().has_value() ? layoutSize.Width() : layoutMaxSize.Width();
-    auto height = layoutSize.Height().has_value() ? layoutSize.Height() : layoutMaxSize.Height();
-
-    if (width.has_value()) {
-        size.SetWidth(std::min(size.Width(), (width.value() - padding.Width()) / std::max(childCount, 1.0f)));
+    if (layoutSize.Width().has_value()) {
+        pickerContentSize.SetWidth(layoutSize.Width().value());
+    }
+    if (layoutSize.Height().has_value()) {
+        pickerContentSize.SetHeight(layoutSize.Height().value());
     }
 
-    if (height.has_value()) {
-        size.SetHeight(std::min(size.Height(), height.value() - padding.Height()));
-    }
+    auto version10OrLarger =
+        PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9;
+    pickerContentSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize, version10OrLarger);
+    MinusPaddingToSize(padding, pickerContentSize);
+
+    size.SetWidth(pickerContentSize.Width() / std::max(childCount, 1.0f));
+    size.SetHeight(std::min(size.Height(), pickerContentSize.Height()));
 }
 } // namespace OHOS::Ace::NG

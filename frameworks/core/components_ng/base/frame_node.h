@@ -317,6 +317,8 @@ public:
 
     OffsetF GetPaintRectOffset(bool excludeSelf = false) const;
 
+    OffsetF GetPaintRectCenter() const;
+
     std::pair<OffsetF, bool> GetPaintRectGlobalOffsetWithTranslate(bool excludeSelf = false) const;
 
     OffsetF GetPaintRectOffsetToPage() const;
@@ -350,6 +352,7 @@ public:
 
     void OnDetachFromMainTree(bool recursive) override;
     void OnAttachToMainTree(bool recursive) override;
+    void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
 
     void OnVisibleChange(bool isVisible) override;
 

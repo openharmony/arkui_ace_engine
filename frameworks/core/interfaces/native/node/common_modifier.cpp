@@ -510,7 +510,7 @@ void ResetBackgroundColor(NodeHandle node)
     ViewAbstract::SetBackgroundColor(frameNode, Color(Color::TRANSPARENT));
 }
 
-void SetWidth(NodeHandle node, double value, int unit, const char* calcVlaue)
+void SetWidth(NodeHandle node, double value, int32_t unit, const char* calcVlaue)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -529,7 +529,8 @@ void ResetWidth(NodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::ClearWidthOrHeight(frameNode, true);
 }
-void SetHeight(NodeHandle node, double value, int unit, const char* calcVlaue)
+
+void SetHeight(NodeHandle node, double value, int32_t unit, const char* calcVlaue)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -541,6 +542,7 @@ void SetHeight(NodeHandle node, double value, int unit, const char* calcVlaue)
         ViewAbstract::SetHeight(frameNode, CalcLength(value, unitEnum));
     }
 }
+
 void ResetHeight(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);

@@ -1168,6 +1168,9 @@ void FocusHub::OnFocusNode()
         parentFocusHub->SetLastFocusNodeIndex(AceType::Claim(this));
     }
     HandleParentScroll(); // If current focus node has a scroll parent. Handle the scroll event.
+    if (isFocusActiveWhenFocused_) {
+        PaintFocusState(true, true);
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     auto rootNode = pipeline ? pipeline->GetRootElement() : nullptr;
     auto rootFocusHub = rootNode ? rootNode->GetFocusHub() : nullptr;
@@ -1292,7 +1295,7 @@ void FocusHub::OnBlurScope()
     }
 }
 
-bool FocusHub::PaintFocusState(bool isNeedStateStyles)
+bool FocusHub::PaintFocusState(bool isNeedStateStyles, bool forceUpdate)
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
@@ -1300,7 +1303,7 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
     CHECK_NULL_RETURN(frameNode, false);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
-    if (!context->GetIsFocusActive() || !IsNeedPaintFocusState()) {
+    if (!forceUpdate && (!context->GetIsFocusActive() || !IsNeedPaintFocusState())) {
         return false;
     }
 
@@ -1324,7 +1327,7 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
         if (!focusRectInner.GetRect().IsValid()) {
             return false;
         }
-        return PaintInnerFocusState(focusRectInner);
+        return PaintInnerFocusState(focusRectInner, forceUpdate);
     }
 
     auto appTheme = context->GetTheme<AppTheme>();
@@ -1371,7 +1374,7 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
 bool FocusHub::PaintAllFocusState()
 {
     if (PaintFocusState()) {
-        return true;
+        return !isFocusActiveWhenFocused_;
     }
     std::list<RefPtr<FocusHub>> focusNodes;
     FlushChildrenFocusHub(focusNodes);

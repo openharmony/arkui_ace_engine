@@ -51,6 +51,7 @@ public:
     MOCK_METHOD1(GetRectsForPlaceholders, void(std::vector<RectF>& selectedRects));
     MOCK_METHOD1(SetIndents, void(const std::vector<float>& indents));
     MOCK_METHOD1(GetCharacterWidth, float(int32_t index));
+    MOCK_METHOD1(SetParagraphSymbolAnimation, void(const RefPtr<FrameNode>& frameNode));
     MOCK_METHOD3(ComputeOffsetForCaretDownstream, bool(int32_t extent, CaretMetricsF& result,
         bool needLineHighest));
     MOCK_METHOD3(ComputeOffsetForCaretUpstream, bool(int32_t extent, CaretMetricsF& result,
