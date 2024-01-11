@@ -470,9 +470,11 @@ void PipelineContext::IsCloseSCBKeyboard()
             needSoftKeyboard_ = std::nullopt;
         }
     } else {
-        if (windowFocus_.has_value() && windowFocus_.value()) {
+        if ((windowFocus_.has_value() && windowFocus_.value()) ||
+            (windowShow_.has_value() && windowShow_.value())) {
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nomal Window focus first, set focusflag to window.");
             windowFocus_.reset();
+            windowShow_.reset();
             focusOnNodeCallback_();
             return;
         }
@@ -2265,6 +2267,10 @@ void PipelineContext::OnShow()
 {
     CHECK_RUN_ON(UI);
     onShow_ = true;
+    if (focusOnNodeCallback_) {
+        windowShow_ = true;
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "windowShow is OK.");
+    }
     window_->OnShow();
     RequestFrame();
     FlushWindowStateChangedCallback(true);
