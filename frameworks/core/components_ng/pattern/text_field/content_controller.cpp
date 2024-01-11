@@ -17,7 +17,6 @@
 #include <algorithm>
 #include <cstdint>
 #include <string>
-#include <time.h>
 
 #include "base/log/log_wrapper.h"
 #include "base/utils/string_utils.h"
