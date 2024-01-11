@@ -26,6 +26,7 @@
 #include "core/components/root/root_element.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
@@ -371,7 +372,8 @@ void SubwindowOhos::HideWindow()
     CHECK_NULL_VOID(context);
     auto rootNode = context->GetRootElement();
     CHECK_NULL_VOID(rootNode);
-    if (!rootNode->GetChildren().empty()) {
+    if (!rootNode->GetChildren().empty() &&
+        !(rootNode->GetChildren().size() == 1 && rootNode->GetLastChild()->GetTag() == V2::KEYBOARD_ETS_TAG)) {
         auto lastChildId = rootNode->GetLastChild()->GetId();
         if (hotAreasMap_.find(lastChildId) != hotAreasMap_.end()) {
             auto hotAreaRect = hotAreasMap_[lastChildId];
@@ -392,7 +394,8 @@ void SubwindowOhos::HideWindow()
         CHECK_NULL_VOID(context);
         auto rootNode = context->GetRootElement();
         CHECK_NULL_VOID(rootNode);
-        if (!rootNode->GetChildren().empty()) {
+        if (!rootNode->GetChildren().empty() &&
+            !(rootNode->GetChildren().size() == 1 && rootNode->GetLastChild()->GetTag() == V2::KEYBOARD_ETS_TAG)) {
             auto lastChildId = rootNode->GetLastChild()->GetId();
             if (hotAreasMap_.find(lastChildId) != hotAreasMap_.end()) {
                 auto hotAreaRect = hotAreasMap_[lastChildId];
