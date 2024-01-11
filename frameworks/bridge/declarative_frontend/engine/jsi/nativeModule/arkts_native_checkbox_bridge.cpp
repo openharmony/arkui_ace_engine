@@ -201,4 +201,114 @@ ArkUINativeModuleValue CheckboxBridge::ResetCheckboxHeight(ArkUIRuntimeCallInfo*
     GetArkUIInternalNodeAPI()->GetCheckboxModifier().ResetCheckboxHeight(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue CheckboxBridge::SetCheckboxPadding(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> top = runtimeCallInfo->GetCallArgRef(1);    // 1: top data
+    Local<JSValueRef> right = runtimeCallInfo->GetCallArgRef(2);  // 2: right data
+    Local<JSValueRef> bottom = runtimeCallInfo->GetCallArgRef(3); // 3: bottom data
+    Local<JSValueRef> left = runtimeCallInfo->GetCallArgRef(4);   // 4: left data
+    CalcDimension topDimen(0, DimensionUnit::VP);
+    CalcDimension rightDimen(0, DimensionUnit::VP);
+    CalcDimension bottomDimen(0, DimensionUnit::VP);
+    CalcDimension leftDimen(0, DimensionUnit::VP);
+    ArkTSUtils::ParseJsDimensionVp(vm, top, topDimen);
+    ArkTSUtils::ParseJsDimensionVp(vm, right, rightDimen);
+    ArkTSUtils::ParseJsDimensionVp(vm, bottom, bottomDimen);
+    ArkTSUtils::ParseJsDimensionVp(vm, left, leftDimen);
+    const uint32_t arraySize = 4; // 4 : data length
+    double values[arraySize];
+    int units[arraySize];
+    values[0] = topDimen.IsNonNegative() ? topDimen.Value() : 0;
+    units[0] = static_cast<int>(topDimen.Unit());
+    values[1] = rightDimen.IsNonNegative() ? rightDimen.Value() : 0;
+    units[1] = static_cast<int>(rightDimen.Unit());
+    values[2] = bottomDimen.IsNonNegative() ? bottomDimen.Value() : 0; // 2: bottom data
+    units[2] = static_cast<int>(bottomDimen.Unit());                   // 2: bottom Unit
+    values[3] = leftDimen.IsNonNegative() ? leftDimen.Value() : 0;     // 3: left data
+    units[3] = static_cast<int>(leftDimen.Unit());                     // 3: left Unit
+    GetArkUIInternalNodeAPI()->GetCheckboxModifier().SetCheckboxPadding(nativeNode, values, units);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CheckboxBridge::ResetCheckboxPadding(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCheckboxModifier().ResetCheckboxPadding(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CheckboxBridge::SetCheckboxResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
+    Local<JSValueRef> lengthArg = runtimeCallInfo->GetCallArgRef(2); // 2: array length
+    uint32_t length = lengthArg->Int32Value(vm);
+    double regionArray[length];
+    int32_t regionUnits[length];
+    if (!ArkTSUtils::ParseResponseRegion(vm, secondArg, regionArray, regionUnits, length)) {
+        GetArkUIInternalNodeAPI()->GetCheckboxModifier().ResetCheckboxResponseRegion(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    GetArkUIInternalNodeAPI()->GetCheckboxModifier().SetCheckboxResponseRegion(
+        nativeNode, regionArray, regionUnits, length);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CheckboxBridge::ResetCheckboxResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCheckboxModifier().ResetCheckboxResponseRegion(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CheckboxBridge::SetCheckboxSize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> widthArg = runtimeCallInfo->GetCallArgRef(1); // 1: width value
+    Local<JSValueRef> heightAry = runtimeCallInfo->GetCallArgRef(2); // 2: height value
+    CalcDimension width;
+    ArkTSUtils::ParseJsDimensionVp(vm, widthArg, width, false);
+    if (widthArg->IsUndefined() || width.IsNegative()) {
+        GetArkUIInternalNodeAPI()->GetCheckboxModifier().ResetCheckboxWidth(nativeNode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetCheckboxModifier().SetCheckboxWidth(
+            nativeNode, width.Value(), static_cast<int>(width.Unit()));
+    }
+    CalcDimension height;
+    ArkTSUtils::ParseJsDimensionVp(vm, heightAry, height, false);
+    if (heightAry->IsUndefined() || height.IsNegative()) {
+        GetArkUIInternalNodeAPI()->GetCheckboxModifier().ResetCheckboxHeight(nativeNode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetCheckboxModifier().SetCheckboxHeight(
+            nativeNode, height.Value(), static_cast<int>(height.Unit()));
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CheckboxBridge::ResetCheckboxSize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    CHECK_NULL_RETURN(nativeNode, panda::NativePointerRef::New(vm, nullptr));
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

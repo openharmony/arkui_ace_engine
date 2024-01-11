@@ -11062,10 +11062,135 @@ class ArkCheckboxComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, CheckboxMarkModifier.identity, CheckboxMarkModifier, value);
     return this;
   }
+  padding(value) {
+    let arkValue = new ArkPadding();
+    if (value !== null && value !== undefined) {
+      if (isLengthType(value) || isResource(value)) {
+        arkValue.top = value;
+        arkValue.right = value;
+        arkValue.bottom = value;
+        arkValue.left = value;
+      }
+      else {
+        arkValue.top = value.top;
+        arkValue.right = value.right;
+        arkValue.bottom = value.bottom;
+        arkValue.left = value.left;
+      }
+      modifierWithKey(this._modifiersWithKeys, CheckBoxPaddingModifier.identity, CheckBoxPaddingModifier, arkValue);
+    }
+    else {
+      modifierWithKey(this._modifiersWithKeys, CheckBoxPaddingModifier.identity, CheckBoxPaddingModifier, undefined);
+    }
+    return this;
+  }
+  size(value) {
+    modifierWithKey(this._modifiersWithKeys, CheckBoxSizeModifier.identity, CheckBoxSizeModifier, value);
+    return this;
+  }
+  responseRegion(value) {
+    modifierWithKey(this._modifiersWithKeys, CheckBoxResponseRegionModifier.identity, CheckBoxResponseRegionModifier, value);
+    return this;
+  }
   onChange(callback) {
     throw new Error('Method not implemented.');
   }
 }
+class CheckBoxResponseRegionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    let _a, _b, _c, _d, _e, _f, _g, _h;
+    if (reset) {
+      getUINativeModule().checkbox.resetCheckboxResponseRegion(node);
+    }
+    else {
+      let responseRegion = [];
+      if (Array.isArray(this.value)) {
+        for (let i = 0; i < this.value.length; i++) {
+          responseRegion.push((_a = this.value[i].x) !== null && _a !== void 0 ? _a : 'PLACEHOLDER');
+          responseRegion.push((_b = this.value[i].y) !== null && _b !== void 0 ? _b : 'PLACEHOLDER');
+          responseRegion.push((_c = this.value[i].width) !== null && _c !== void 0 ? _c : 'PLACEHOLDER');
+          responseRegion.push((_d = this.value[i].height) !== null && _d !== void 0 ? _d : 'PLACEHOLDER');
+        }
+      }
+      else {
+        responseRegion.push((_e = this.value.x) !== null && _e !== void 0 ? _e : 'PLACEHOLDER');
+        responseRegion.push((_f = this.value.y) !== null && _f !== void 0 ? _f : 'PLACEHOLDER');
+        responseRegion.push((_g = this.value.width) !== null && _g !== void 0 ? _g : 'PLACEHOLDER');
+        responseRegion.push((_h = this.value.height) !== null && _h !== void 0 ? _h : 'PLACEHOLDER');
+      }
+      getUINativeModule().checkbox.setCheckboxResponseRegion(node, responseRegion, responseRegion.length);
+    }
+  }
+  checkObjectDiff() {
+    if (Array.isArray(this.value) && Array.isArray(this.stageValue)) {
+      if (this.value.length !== this.stageValue.length) {
+        return true;
+      }
+      else {
+        for (let i = 0; i < this.value.length; i++) {
+          if (!(isBaseOrResourceEqual(this.stageValue[i].x, this.value[i].x) &&
+            isBaseOrResourceEqual(this.stageValue[i].y, this.value[i].y) &&
+            isBaseOrResourceEqual(this.stageValue[i].width, this.value[i].width) &&
+            isBaseOrResourceEqual(this.stageValue[i].height, this.value[i].height))) {
+            return true;
+          }
+        }
+        return false;
+      }
+    }
+    else if (!Array.isArray(this.value) && !Array.isArray(this.stageValue)) {
+      return (!(isBaseOrResourceEqual(this.stageValue.x, this.value.x) &&
+        isBaseOrResourceEqual(this.stageValue.y, this.value.y) &&
+        isBaseOrResourceEqual(this.stageValue.width, this.value.width) &&
+        isBaseOrResourceEqual(this.stageValue.height, this.value.height)));
+    }
+    else {
+      return true;
+    }
+  }
+}
+CheckBoxResponseRegionModifier.identity = Symbol('responseRegion');
+class CheckBoxSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().checkbox.resetCheckboxSize(node);
+    }
+    else {
+      getUINativeModule().checkbox.setCheckboxSize(node, this.value.width, this.value.height);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+      !isBaseOrResourceEqual(this.stageValue.height, this.value.height);
+  }
+}
+CheckBoxSizeModifier.identity = Symbol('size');
+class CheckBoxPaddingModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().checkbox.resetCheckboxPadding(node);
+    }
+    else {
+      getUINativeModule().checkbox.setCheckboxPadding(node, this.value.top, this.value.right, this.value.bottom, this.value.left);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
+      !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
+      !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
+      !isBaseOrResourceEqual(this.stageValue.left, this.value.left);
+  }
+}
+CheckBoxPaddingModifier.identity = Symbol('padding');
 class CheckboxMarkModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -11252,7 +11377,92 @@ class ArkCounterComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, EnableIncModifier.identity, EnableIncModifier, value);
     return this;
   }
+  backgroundColor(value) {
+    modifierWithKey(this._modifiersWithKeys, CounterBackgroundColorModifier.identity, CounterBackgroundColorModifier, value);
+    return this;
+  }
+  width(value) {
+    modifierWithKey(this._modifiersWithKeys, CounterWidthModifier.identity, CounterWidthModifier, value);
+    return this;
+  }
+  height(value) {
+    modifierWithKey(this._modifiersWithKeys, CounterHeightModifier.identity, CounterHeightModifier, value);
+    return this;
+  }
+  size(value) {
+    modifierWithKey(this._modifiersWithKeys, CounterSizeModifier.identity, CounterSizeModifier, value);
+    return this;
+  }
 }
+class CounterHeightModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().counter.resetCounterHeight(node);
+    }
+    else {
+      getUINativeModule().counter.setCounterHeight(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+CounterHeightModifier.identity = Symbol('CounterHeight');
+class CounterWidthModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().counter.resetCounterWidth(node);
+    }
+    else {
+      getUINativeModule().counter.setCounterWidth(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+CounterWidthModifier.identity = Symbol('CounterWidth');
+class CounterBackgroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().counter.resetCounterBackgroundColor(node);
+    }
+    else {
+      getUINativeModule().counter.setCounterBackgroundColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+CounterBackgroundColorModifier.identity = Symbol('CounterBackgroundColor');
+class CounterSizeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().counter.resetCounterSize(node);
+    }
+    else {
+      getUINativeModule().counter.setCounterSize(node, this.value.width, this.value.height);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+      !isBaseOrResourceEqual(this.stageValue.height, this.value.height);
+  }
+}
+CounterSizeModifier.identity = Symbol('CounterSize');
 class EnableIncModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
