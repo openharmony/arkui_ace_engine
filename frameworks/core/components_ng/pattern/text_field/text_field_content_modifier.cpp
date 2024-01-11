@@ -95,14 +95,19 @@ void TextFieldContentModifier::onDraw(DrawingContext& context)
         contentRect.Width() + contentRect.GetX() + textFieldPattern->GetInlinePadding(), clipRectHeight);
     canvas.ClipRect(clipInnerRect, RSClipOp::INTERSECT);
     if (paragraph) {
-        canvas.Save();
-        RSRect clipRect;
-        std::vector<RSPoint> clipRadius;
-        GetFrameRectClip(clipRect, clipRadius);
-        canvas.ClipRoundRect(clipRect, clipRadius, true);
-        paragraph->Paint(canvas, textFieldPattern->GetTextRect().GetX(),
-            textFieldPattern->IsTextArea() ? textFieldPattern->GetTextRect().GetY() : contentOffset.GetY());
-        canvas.Restore();
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            canvas.Save();
+            RSRect clipRect;
+            std::vector<RSPoint> clipRadius;
+            GetFrameRectClip(clipRect, clipRadius);
+            canvas.ClipRoundRect(clipRect, clipRadius, true);
+            paragraph->Paint(canvas, textFieldPattern->GetTextRect().GetX(),
+                textFieldPattern->IsTextArea() ? textFieldPattern->GetTextRect().GetY() : contentOffset.GetY());
+            canvas.Restore();
+        } else {
+            paragraph->Paint(canvas, textFieldPattern->GetTextRect().GetX(),
+                textFieldPattern->IsTextArea() ? textFieldPattern->GetTextRect().GetY() : contentOffset.GetY());
+        }
     }
     canvas.Restore();
 }
