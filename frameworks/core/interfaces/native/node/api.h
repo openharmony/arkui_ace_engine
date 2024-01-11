@@ -509,6 +509,12 @@ struct ArkUICounterModifierAPI {
     void (*ReSetEnableInc)(NodeHandle node);
     void (*SetEnableDec)(NodeHandle node, bool value);
     void (*ReSetEnableDec)(NodeHandle node);
+    void (*SetCounterHeight)(NodeHandle node, double value, int unit);
+    void (*ResetCounterHeight)(NodeHandle node);
+    void (*SetCounterWidth)(NodeHandle node, double value, int unit);
+    void (*ResetCounterWidth)(NodeHandle node);
+    void (*SetCounterBackgroundColor)(NodeHandle node, uint32_t color);
+    void (*ResetCounterBackgroundColor)(NodeHandle node);
 };
 
 struct ArkUICheckboxGroupModifierAPI {
@@ -615,6 +621,8 @@ struct ArkUICheckboxModifierAPI {
     void (*SetCheckboxWidth)(NodeHandle node, double widthVal, int widthUnit);
     void (*SetCheckboxHeight)(NodeHandle node, double heightVal, int heightUnit);
     void (*SetMark)(NodeHandle node, uint32_t color, double sizeValue, double widthValue);
+    void (*SetCheckboxPadding)(NodeHandle node, const double* values, const int* units);
+    void (*SetCheckboxResponseRegion)(NodeHandle node, const double* values, const int32_t* units, uint32_t length);
 
     void (*ResetSelect)(NodeHandle node);
     void (*ResetSelectedColor)(NodeHandle node);
@@ -622,6 +630,8 @@ struct ArkUICheckboxModifierAPI {
     void (*ResetCheckboxWidth)(NodeHandle node);
     void (*ResetCheckboxHeight)(NodeHandle node);
     void (*ResetMark)(NodeHandle node);
+    void (*ResetCheckboxPadding)(NodeHandle node);
+    void (*ResetCheckboxResponseRegion)(NodeHandle node);
 };
 
 struct ArkUITimepickerModifierAPI {

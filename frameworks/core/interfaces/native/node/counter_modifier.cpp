@@ -45,9 +45,36 @@ void ResetEnableDec(NodeHandle node)
     CHECK_NULL_VOID(frameNode);
     CounterModelNG::SetEnableDec(frameNode, true);
 }
+
+void SetCounterHeight(NodeHandle node, double value, int unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension height = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    CounterModelNG::SetHeight(frameNode, height);
+}
+void ResetCounterHeight(NodeHandle node) {}
+void SetCounterWidth(NodeHandle node, double value, int unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension width = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    CounterModelNG::SetWidth(frameNode, width);
+}
+void ResetCounterWidth(NodeHandle node) {}
+void SetCounterBackgroundColor(NodeHandle node, uint32_t color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CounterModelNG::SetBackgroundColor(frameNode, Color(color));
+}
+void ResetCounterBackgroundColor(NodeHandle node) {}
+
 ArkUICounterModifierAPI GetCounterModifier()
 {
-    static const ArkUICounterModifierAPI modifier = { SetEnableInc, ResetEnableInc, SetEnableDec, ResetEnableDec };
+    static const ArkUICounterModifierAPI modifier = { SetEnableInc, ResetEnableInc, SetEnableDec, ResetEnableDec,
+        SetCounterHeight, ResetCounterHeight, SetCounterWidth, ResetCounterWidth, SetCounterBackgroundColor,
+        ResetCounterBackgroundColor };
 
     return modifier;
 }

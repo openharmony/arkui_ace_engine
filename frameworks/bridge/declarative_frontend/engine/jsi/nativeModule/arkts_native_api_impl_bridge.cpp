@@ -551,6 +551,22 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetEnableDec));
     counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableDec"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetEnableDec));
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCounterHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetCounterHeight));
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCounterHeight"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetCounterHeight));
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCounterWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetCounterWidth));
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCounterWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetCounterWidth));
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCounterBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetCounterBackgroundColor));
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCounterBackgroundColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetCounterBackgroundColor));
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCounterSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetCounterSize));
+    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCounterSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetCounterSize));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "counter"), counter);
 
     auto checkboxgroup = panda::ObjectRef::New(vm);
@@ -1243,6 +1259,19 @@ void ArkUINativeModule::RegisterCheckboxAttributes(Local<panda::ObjectRef> objec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CheckboxBridge::SetCheckboxHeight));
     checkbox->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetHeight"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CheckboxBridge::ResetCheckboxHeight));
+    checkbox->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCheckboxSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CheckboxBridge::SetCheckboxSize));
+    checkbox->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCheckboxSize"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CheckboxBridge::ResetCheckboxSize));
+    checkbox->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCheckboxResponseRegion"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CheckboxBridge::SetCheckboxResponseRegion));
+    checkbox->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCheckboxResponseRegion"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CheckboxBridge::ResetCheckboxResponseRegion));
+    checkbox->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCheckboxPadding"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), CheckboxBridge::SetCheckboxPadding));
+    checkbox->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCheckboxPadding"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), CheckboxBridge::ResetCheckboxPadding));
+
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "checkbox"), checkbox);
 }
 
