@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -770,7 +770,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/refresh/refresh_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/refresh/refresh_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/relative_container/relative_container_layout_algorithm.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/relative_container/relative_container_view.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/relative_container/relative_container_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/paragraph_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_content_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/rich_editor/rich_editor_controller.cpp",
@@ -877,6 +877,8 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/symbol/symbol_model_ng.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/symbol/symbol_source_info.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/tabs/tab_bar_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/tabs/tab_bar_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/tabs/tab_bar_layout_property.cpp",
@@ -892,6 +894,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/text/image_span_view.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/span_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/span_node.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text/symbol_span_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_content_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_controller.cpp",
@@ -912,6 +915,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/text_drag/text_drag_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_drag/text_drag_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/content_controller.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text_field/magnifier_controller.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_content_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_field/text_field_controller.cpp",

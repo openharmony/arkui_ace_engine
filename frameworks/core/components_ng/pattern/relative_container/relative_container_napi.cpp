@@ -17,7 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/common_napi_utils/common_napi_utils.h"
-#include "core/components_ng/pattern/relative_container/relative_container_view.h"
+#include "core/components_ng/pattern/relative_container/relative_container_model_ng.h"
 
 extern const char _binary_arkui_relative_container_js_start[];
 extern const char _binary_arkui_relative_container_abc_start[];
@@ -36,7 +36,7 @@ static constexpr const int ARG_NUM_1 = 1;
 } // namespace
 napi_value Create(napi_env env, napi_callback_info info)
 {
-    NG::RelativeContainerView::Create();
+    NG::RelativeContainerModelNG::Create();
     return CommonNapiUtils::CreateNull(env);
 }
 

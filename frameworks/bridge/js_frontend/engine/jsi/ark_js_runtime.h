@@ -107,7 +107,6 @@ public:
 
     const EcmaVM* GetThreadVm() const
     {
-        LOGI("vm_ is nullptr, use threadVm_");
         return threadVm_;
     }
 

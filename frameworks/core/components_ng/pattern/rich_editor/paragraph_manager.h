@@ -49,6 +49,7 @@ public:
     OffsetF ComputeCursorOffset(int32_t index, float& selectLineHeight, bool downStreamFirst = false,
             bool needLineHighest = true) const;
     OffsetF ComputeCursorInfoByClick(int32_t index, float& selectLineHeight, const OffsetF& lastTouchOffset) const;
+    bool IsSelectLineHeadAndUseLeadingMargin(int32_t start) const;
 
     void AddParagraph(ParagraphInfo&& info)
     {

@@ -35,6 +35,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_badge.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_blank.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_cached_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_picker.h"

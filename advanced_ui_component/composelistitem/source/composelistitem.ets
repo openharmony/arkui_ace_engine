@@ -589,23 +589,23 @@ export struct ComposeListItem {
   @State isActive: boolean = false
 
   aboutToAppear() {
-    if (this.contentItem === null) {
-      if (this.operateItem.image !== null || this.operateItem.icon !== null || this.operateItem.subIcon !== null) {
+    if (this.contentItem === undefined) {
+      if (this.operateItem.image !== undefined || this.operateItem.icon !== undefined || this.operateItem.subIcon !== undefined) {
         this.itemHeight = OPERATEITEM_IMAGE_SIZE + SAFE_LIST_PADDING
       }
       return
     }
 
-    if (this.contentItem.secondaryText === null && this.contentItem.description === null) {
-      if (this.contentItem.icon === null) {
+    if (this.contentItem.secondaryText === undefined && this.contentItem.description === undefined) {
+      if (this.contentItem.icon === undefined) {
         this.itemHeight = ItemHeight.FIRST_HEIGHT
       }
       else {
         this.itemHeight = this.contentItem.iconStyle <= IconType.HEAD_SCULPTURE ? ItemHeight.SECOND_HEIGHT : ItemHeight.THIRD_HEIGHT
       }
     }
-    else if (this.contentItem.description === null) {
-      if (this.contentItem.icon === null || (this.contentItem.icon !== null && this.contentItem.iconStyle <= IconType.SYSTEM_ICON)) {
+    else if (this.contentItem.description === undefined) {
+      if (this.contentItem.icon === undefined || (this.contentItem.icon !== undefined && this.contentItem.iconStyle <= IconType.SYSTEM_ICON)) {
         this.itemHeight = ItemHeight.THIRD_HEIGHT
       }
       else {

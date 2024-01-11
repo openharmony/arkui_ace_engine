@@ -1191,6 +1191,16 @@ public:
         blendMode_ = blendMode;
     }
 
+    BlendApplyType GetBlendApplyType() const
+    {
+        return blendApplyType_;
+    }
+
+    void SetBlendApplyType(BlendApplyType blendApplyType)
+    {
+        blendApplyType_ = blendApplyType;
+    }
+
     const Dimension& GetGrayScale(void) const
     {
         return grayScale_;
@@ -1321,7 +1331,8 @@ private:
     // shadow vector is empty
     std::vector<Shadow> shadows_;
     // blendMode
-    BlendMode blendMode_ = BlendMode::NORMAL;
+    BlendMode blendMode_ = BlendMode::NONE;
+    BlendApplyType blendApplyType_ = BlendApplyType::FAST;
     Dimension grayScale_;
     // Brightness (1.0 as default), range = (0, 2)
     Dimension brightness_ = 1.0_px;

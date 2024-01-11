@@ -113,7 +113,7 @@ public:
         navigationStack_->Add(name, navDestinationNode, mode);
     }
 
-    void AddNavDestinationNode(const std::string& name, RefPtr<UINode> navDestinationNode, NavRouteMode mode,
+    void AddNavDestinationNode(const std::string& name, const RefPtr<UINode>& navDestinationNode, NavRouteMode mode,
         const RefPtr<RouteInfo>& routeInfo)
     {
         navigationStack_->Add(name, navDestinationNode, mode, routeInfo);
@@ -157,9 +157,9 @@ public:
         navigationStack_->RemoveAll();
     }
 
-    void DisableAnimation()
+    void UpdateAnimatedValue(bool animated)
     {
-        navigationStack_->UpdateAnimatedValue(false);
+        navigationStack_->UpdateAnimatedValue(animated);
     }
 
     void SetNavigationStackProvided(bool provided)
@@ -316,8 +316,6 @@ public:
         onTransition_ = std::move(navigationAnimation);
     }
 
-    bool NeedRecalculateSafeArea() override;
-
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath, bool isPopPage);
@@ -347,6 +345,8 @@ private:
     bool UpdateTitleModeChangeEventHub(const RefPtr<NavigationGroupNode>& hostNode);
     void NotifyPageShow(const std::string& pageName);
     int32_t FireNavDestinationStateChange(bool show);
+    void UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNavDestination,
+        const RefPtr<FrameNode> &newTopNavDestination);
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
     RefPtr<NavigationStack> navigationStack_;

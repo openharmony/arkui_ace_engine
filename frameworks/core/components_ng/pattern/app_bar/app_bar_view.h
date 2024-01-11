@@ -57,9 +57,11 @@ public:
     void SetRowWidth(const Dimension& positionX);
     void IniColor();
     void ReverseBackButton();
+    void UpdateRowLayout();
 
 private:
     static RefPtr<FrameNode> BuildBarTitle();
+    static RefPtr<FrameNode> BuildBarLabel();
     static RefPtr<FrameNode> BuildIconButton(
         InternalResource::ResourceId icon, GestureEventFunc&& clickCallback, bool isBackButton);
     static void BindContentCover(const RefPtr<FrameNode>& targetNode);
@@ -73,6 +75,7 @@ private:
     bool isVisibleSetted = false;
     bool isRowColorSetted = false;
     bool isIconColorSetted = false;
+    bool isRtlSetted = false;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_APP_BAR_VIEW_H

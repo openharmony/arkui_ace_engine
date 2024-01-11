@@ -248,9 +248,8 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     CheckScrollable();
 
     isInitialized_ = true;
-    auto property = host->GetLayoutProperty();
-    CHECK_NULL_RETURN(host, false);
-    return property->GetPaddingProperty() != nullptr;
+
+    return NeedRender();
 }
 
 bool WaterFlowPattern::ScrollToTargrtIndex(int32_t index)
@@ -483,5 +482,22 @@ void WaterFlowPattern::OnAnimateStop()
 {
     scrollStop_ = true;
     MarkDirtyNodeSelf();
+}
+
+bool WaterFlowPattern::NeedRender()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto size = geometryNode->GetPaddingSize();
+
+    auto needRender = lastSize_ != size;
+    lastSize_ = size;
+
+    auto property = host->GetLayoutProperty();
+    CHECK_NULL_RETURN(host, false);
+    needRender = property->GetPaddingProperty() != nullptr || needRender;
+    return needRender;
 }
 } // namespace OHOS::Ace::NG

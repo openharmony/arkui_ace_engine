@@ -34,6 +34,11 @@ RefPtr<SelectOverlayProxy> SelectOverlayManager::CreateAndShowSelectOverlay(
             auto proxy = MakeRefPtr<SelectOverlayProxy>(current->GetId());
             return proxy;
         }
+        auto frameNode = GetCallerHost();
+        CHECK_NULL_RETURN(frameNode, nullptr);
+        if (frameNode->GetTag() != V2::RICH_EDITOR_ETS_TAG) {
+            NotifyOverlayClosed(true);
+        }
         DestroySelectOverlay(current->GetId());
     }
     selectOverlayInfo_ = info;

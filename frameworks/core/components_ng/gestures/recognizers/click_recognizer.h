@@ -22,6 +22,7 @@
 #include "base/geometry/ng/point_t.h"
 #include "base/thread/cancelable_callback.h"
 #include "core/accessibility/accessibility_utils.h"
+#include "core/components_ng/gestures/tap_gesture.h"
 #include "core/components_ng/gestures/recognizers/multi_fingers_recognizer.h"
 #include "core/gestures/click_info.h"
 
@@ -78,6 +79,8 @@ public:
     }
 
     virtual RefPtr<GestureSnapshot> Dump() const override;
+    RefPtr<Gesture> CreateGestureFromRecognizer() const override;
+    void ForceCleanRecognizer() override;
 
 private:
     // Recognize whether MOVE/UP event is in response region.

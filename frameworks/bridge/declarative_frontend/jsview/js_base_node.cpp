@@ -48,30 +48,24 @@ const std::unordered_set<std::string> EXPORT_TEXTURE_SUPPORT_TYPES = { V2::JS_VI
 
 void JSBaseNode::BuildNode(const JSCallbackInfo& info)
 {
-    if (info.Length() >= 1 && !info[0]->IsFunction()) {
-        return;
-    }
     auto builder = info[0];
     auto buildFunc = AceType::MakeRefPtr<JsFunction>(info.This(), JSRef<JSFunc>::Cast(builder));
-    CHECK_NULL_VOID(buildFunc);
-    if ((info.Length() >= 2 && !(info[1]->IsObject() || info[1]->IsUndefined() || info[1]->IsNull()))) {
-        return;
+    NG::ScopedViewStackProcessor builderViewStackProcessor;
+    NG::ViewStackProcessor::GetInstance()->SetIsBuilderNode(true);
+    NG::ViewStackProcessor::GetInstance()->SetIsExportTexture(renderType_ == NodeRenderType::RENDER_TYPE_TEXTURE);
+    if (info.Length() >= 2 && info[1]->IsObject()) {
+        JSRef<JSVal> param = info[1];
+        buildFunc->ExecuteJS(1, &param);
+    } else {
+        buildFunc->ExecuteJS();
     }
-    {
-        NG::ScopedViewStackProcessor builderViewStackProcessor;
-        NG::ViewStackProcessor::GetInstance()->SetIsBuilderNode(true);
-        NG::ViewStackProcessor::GetInstance()->SetIsExportTexture(renderType_ == NodeRenderType::RENDER_TYPE_TEXTURE);
-        if (info.Length() >= 2 && info[1]->IsObject()) {
-            JSRef<JSVal> param = info[1];
-            buildFunc->ExecuteJS(1, &param);
-        } else {
-            buildFunc->ExecuteJS();
-        }
-        viewNode_ = NG::ViewStackProcessor::GetInstance()->Finish();
-        if (viewNode_) {
-            viewNode_->Build(nullptr);
-        }
+    auto parent = viewNode_ ? viewNode_->GetParent() : nullptr;
+    auto newNode = NG::ViewStackProcessor::GetInstance()->Finish();
+    if (parent) {
+        parent->ReplaceChild(viewNode_, newNode);
+        newNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
     }
+    viewNode_ = newNode;
     if (viewNode_ && EXPORT_TEXTURE_SUPPORT_TYPES.count(viewNode_->GetTag()) > 0) {
         viewNode_->CreateExportTextureInfoIfNeeded();
         auto exportTextureInfo = viewNode_->GetExportTextureInfo();
@@ -79,6 +73,23 @@ void JSBaseNode::BuildNode(const JSCallbackInfo& info)
         exportTextureInfo->SetSurfaceId(surfaceId_);
         exportTextureInfo->SetCurrentRenderType(renderType_);
     }
+    if (size_.IsValid()) {
+        viewNode_->SetParentLayoutConstraint(size_.ConvertToSizeT());
+    }
+    if (viewNode_) {
+        viewNode_->Build(nullptr);
+    }
+}
+
+void JSBaseNode::Create(const JSCallbackInfo& info)
+{
+    if (info.Length() >= 1 && !info[0]->IsFunction()) {
+        return;
+    }
+    if ((info.Length() >= 2 && !(info[1]->IsObject() || info[1]->IsUndefined() || info[1]->IsNull()))) {
+        return;
+    }
+    BuildNode(info);
     EcmaVM* vm = info.GetVm();
     info.SetReturnValue(JSRef<JSVal>::Make(panda::NativePointerRef::New(vm, AceType::RawPtr(viewNode_))));
 }
@@ -134,8 +145,21 @@ void JSBaseNode::ConstructorCallback(const JSCallbackInfo& info)
 {
     std::string surfaceId;
     NodeRenderType renderType = NodeRenderType::RENDER_TYPE_DISPLAY;
+    NG::OptionalSizeF selfIdealSize;
     if (info.Length() > 0 && info[0]->IsObject()) {
         auto renderOption = JSRef<JSObject>::Cast(info[0]);
+        auto size = renderOption->GetProperty("selfIdealSize");
+        if (size->IsObject()) {
+            auto sizeObj = JSRef<JSObject>::Cast(size);
+            auto width = sizeObj->GetProperty("width");
+            auto widthValue = width->IsNumber() ? width->ToNumber<float>() : 0.0f;
+            widthValue = LessNotEqual(widthValue, 0.0f) ? 0.0f : widthValue;
+            auto height = sizeObj->GetProperty("height");
+            auto heightValue = height->IsNumber() ? height->ToNumber<float>() : 0.0f;
+            heightValue = LessNotEqual(heightValue, 0.0f) ? 0.0f : heightValue;
+            selfIdealSize.SetWidth(PipelineBase::Vp2PxWithCurrentDensity(widthValue));
+            selfIdealSize.SetHeight(PipelineBase::Vp2PxWithCurrentDensity(heightValue));
+        }
         auto type = renderOption->GetProperty("type");
         if (type->IsNumber()) {
             renderType = static_cast<NodeRenderType>(type->ToNumber<uint32_t>());
@@ -145,7 +169,7 @@ void JSBaseNode::ConstructorCallback(const JSCallbackInfo& info)
             surfaceId = id->ToString();
         }
     }
-    auto instance = AceType::MakeRefPtr<JSBaseNode>(renderType, surfaceId);
+    auto instance = AceType::MakeRefPtr<JSBaseNode>(selfIdealSize, renderType, surfaceId);
     instance->IncRefCount();
     info.SetReturnValue(AceType::RawPtr(instance));
 }
@@ -263,7 +287,7 @@ void JSBaseNode::JSBind(BindingTarget globalObj)
 {
     JSClass<JSBaseNode>::Declare("__JSBaseNode__");
 
-    JSClass<JSBaseNode>::CustomMethod("create", &JSBaseNode::BuildNode);
+    JSClass<JSBaseNode>::CustomMethod("create", &JSBaseNode::Create);
     JSClass<JSBaseNode>::CustomMethod("createRenderNode", &JSBaseNode::CreateRenderNode);
     JSClass<JSBaseNode>::CustomMethod("finishUpdateFunc", &JSBaseNode::FinishUpdateFunc);
     JSClass<JSBaseNode>::CustomMethod("postTouchEvent", &JSBaseNode::PostTouchEvent);

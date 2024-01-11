@@ -330,6 +330,9 @@ public:
     static void JsDragPreview(const JSCallbackInfo& info);
     static void JsAccessibilityVirtualNode(const JSCallbackInfo& info);
 
+    static void ParseAccessibilityDescriptionJson(const std::string& description,
+        std::pair<bool, std::string>& autoEventPair, std::pair<bool, std::string>& descriptionPair);
+
     static void JSCreateAnimatableProperty(const JSCallbackInfo& info);
     static void JSUpdateAnimatableProperty(const JSCallbackInfo& info);
     static void JSRenderGroup(const JSCallbackInfo& info);

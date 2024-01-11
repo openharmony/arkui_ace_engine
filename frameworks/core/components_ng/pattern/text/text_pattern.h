@@ -51,6 +51,10 @@ namespace OHOS::Ace::NG {
 enum class Status {DRAGGING, ON_DROP, NONE };
 using CalculateHandleFunc = std::function<void()>;
 using ShowSelectOverlayFunc = std::function<void(const RectF&, const RectF&)>;
+struct SpanNodeInfo {
+    RefPtr<UINode> node;
+    RefPtr<UINode> containerSpanNode;
+};
 // TextPattern is the base class for text render node to perform paint text.
 class TextPattern : public ScrollablePattern, public TextDragBase, public TextBase {
     DECLARE_ACE_TYPE(TextPattern, ScrollablePattern, TextDragBase, TextBase);
@@ -61,7 +65,7 @@ public:
 
     SelectionInfo GetSpansInfo(int32_t start, int32_t end, GetSpansMethod method);
 
-    int32_t GetTextContentLength();
+    virtual int32_t GetTextContentLength();
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
@@ -623,9 +627,8 @@ private:
     void UpdateChildProperty(const RefPtr<SpanNode>& child) const;
     void ActSetSelection(int32_t start, int32_t end);
     void SetAccessibilityAction();
-    void CollectSpanNodes(std::stack<RefPtr<UINode>> nodes, bool& isSpanHasClick);
-    void CollectContainerSpanNodes(const RefPtr<UINode>& node, bool& isSpanHasClick);
-    void UpdateContainerChildren(const RefPtr<ContainerSpanNode>& parent, const RefPtr<UINode>& child);
+    void CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanHasClick);
+    void UpdateContainerChildren(const RefPtr<UINode>& parent, const RefPtr<UINode>& child);
     RefPtr<RenderContext> GetRenderContext();
     void ProcessBoundRectByTextShadow(RectF& rect);
     void FireOnSelectionChange(int32_t start, int32_t end);
@@ -635,13 +638,14 @@ private:
     void HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset);
     void HandleMouseLeftMoveAction(const MouseInfo& info, const Offset& textOffset);
     void HandleSelectionChange(int32_t start, int32_t end);
-    void InitSpanItem(std::stack<RefPtr<UINode>> nodes);
+    void InitSpanItem(std::stack<SpanNodeInfo> nodes);
     void UpdateSelectionSpanType(int32_t selectStart, int32_t selectEnd);
     int32_t GetSelectionSpanItemIndex(const MouseInfo& info);
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     void RedisplaySelectOverlay();
     void ProcessBoundRectByTextMarquee(RectF& rect);
     ResultObject GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t index, int32_t start, int32_t end);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
     // to check if drag is in progress
 
     bool isMeasureBoundary_ = false;

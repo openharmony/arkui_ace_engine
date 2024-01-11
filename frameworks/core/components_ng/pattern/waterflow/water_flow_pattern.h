@@ -141,10 +141,12 @@ private:
     void MarkDirtyNodeSelf();
     void OnScrollEndCallback() override;
     bool ScrollToTargrtIndex(int32_t index);
+    bool NeedRender();
     std::optional<int32_t> targetIndex_;
     WaterFlowLayoutInfo layoutInfo_;
 
     float prevOffset_ = 0.0f;
+    SizeF lastSize_;
 
     // clip padding of WaterFlow
     RefPtr<WaterFlowContentModifier> contentModifier_;

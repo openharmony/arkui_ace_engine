@@ -78,9 +78,7 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
             tabBarPattern->HandleBottomTabBarChange(index);
         }
         tabBarPattern->SetMaskAnimationByCreate(false);
-        if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::FIXED) {
-            tabBarPattern->SetIndicator(index);
-        }
+        tabBarPattern->SetIndicator(index);
         tabBarPattern->UpdateIndicator(index);
         tabBarPattern->UpdateTextColor(index);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
@@ -97,7 +95,7 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
             }
         }
         /* js callback */
-        if (jsEvent) {
+        if (jsEvent && tabsNode->IsOnMainTree()) {
             TabContentChangeEvent eventInfo(index);
             jsEvent(&eventInfo);
 
@@ -109,7 +107,11 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
             CHECK_NULL_VOID(pattern);
             auto tabBarText = pattern->GetTabBarTextByIndex(index);
             Recorder::EventParamsBuilder builder;
-            builder.SetId(inspectorId).SetType(tabsNode->GetTag()).SetIndex(index).SetText(tabBarText);
+            builder.SetId(inspectorId)
+                .SetType(tabsNode->GetTag())
+                .SetIndex(index)
+                .SetText(tabBarText)
+                .SetDescription(tabsNode->GetAutoEventParamValue(""));
             Recorder::EventRecorder::Get().OnChange(std::move(builder));
             if (!inspectorId.empty()) {
                 Recorder::NodeDataCache::Get().PutMultiple(inspectorId, tabBarText, index);
@@ -248,6 +250,27 @@ void TabsPattern::SetSwiperPaddingAndBorder()
 void TabsPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
+    if (isBlurStyle_) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+            CHECK_NULL_VOID(tabsNode);
+            auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+            CHECK_NULL_VOID(tabBarNode);
+            auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+            CHECK_NULL_VOID(tabBarPattern);
+            auto tabBarRenderContext = tabBarNode->GetRenderContext();
+            CHECK_NULL_VOID(tabBarRenderContext);
+            auto tabBarPaintProperty = tabBarPattern->GetPaintProperty<TabBarPaintProperty>();
+            CHECK_NULL_VOID(tabBarPaintProperty);
+            BlurStyleOption styleOption;
+            styleOption.blurStyle = BlurStyle::NO_MATERIAL;
+            if (!tabBarPaintProperty->GetBarBackgroundColor().has_value() ||
+                tabBarPaintProperty->GetBarBackgroundColor().value() == Color::TRANSPARENT) {
+                styleOption.blurStyle = BlurStyle::COMPONENT_THICK;
+            }
+            tabBarRenderContext->UpdateBackBlurStyle(styleOption);
+        }
+    }
 
     UpdateSwiperDisableSwipe(isCustomAnimation_ ? true : isDisableSwipe_);
     SetSwiperPaddingAndBorder();

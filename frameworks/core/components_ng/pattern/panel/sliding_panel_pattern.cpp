@@ -92,13 +92,18 @@ void SlidingPanelPattern::OnModifyDone()
     auto backgroundMask = layoutProperty->GetBackgroundMaskValue(Color::TRANSPARENT);
     renderContext->UpdateBackgroundColor(isShow ? backgroundMask : Color::TRANSPARENT);
     if (isShow_.has_value() && isShow != isShow_.value_or(false)) {
+        if (preAnimateFlag_ && !isShowQueue_.empty()) {
+            isShowQueue_.pop();
+        }
+
+        preAnimateFlag_ = true;
         isShowQueue_.push(isShow);
         if (isShowQueue_.size() == 1 && isShowQueue_.front()) {
             invisibleFlag_ = false;
         }
         return;
     }
-    invisibleFlag_ = !invisibleFlag_.has_value() ? !isShow : false;
+    invisibleFlag_ = !isShow;
 }
 
 void SlidingPanelPattern::OnAttachToFrameNode()
@@ -611,6 +616,7 @@ void SlidingPanelPattern::AnimateTo(float targetLocation, PanelMode mode)
             panelNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
         panel->OnAnimationStop();
+        panel->preAnimateFlag_ = false;
     });
     AppendBlankHeightAnimation(targetLocation, mode);
     auto geometryNode = host->GetGeometryNode();

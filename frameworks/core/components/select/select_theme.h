@@ -86,16 +86,14 @@ public:
             theme->menuTitleFontColor_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->menuTitleFontColor_);
             theme->menuTitleHeight_ = pattern->GetAttr<Dimension>("menu_title_height", theme->menuTitleHeight_);
             theme->fontColor_ =
-                pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->fontColor_)
+                pattern->GetAttr<Color>("text_color", theme->fontColor_)
                     .BlendOpacity(pattern->GetAttr<double>("menu_text_primary_alpha", defaultTextColorAlpha));
             theme->disabledFontColor_ = theme->fontColor_.BlendOpacity(
                 pattern->GetAttr<double>("color_disabled_alpha", defaultDisabledColorAlpha));
             theme->secondaryFontColor_ =
                 pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->fontColor_)
                     .BlendOpacity(pattern->GetAttr<double>("menu_text_secondary_alpha", defaultSecondaryColorAlpha));
-            theme->menuFontColor_ =
-                pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->menuFontColor_)
-                    .BlendOpacity(pattern->GetAttr<double>("menu_text_primary_alpha", defaultTextColorAlpha));
+            theme->menuFontColor_ = pattern->GetAttr<Color>("text_color", theme->menuFontColor_);
             theme->disabledMenuFontColor_ = theme->menuFontColor_.BlendOpacity(
                 pattern->GetAttr<double>("menu_text_tertiary_alpha", defaultTertiaryColorAlpha));
             theme->clickedColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_CLICKED, theme->clickedColor_);
@@ -104,7 +102,7 @@ public:
                     .BlendOpacity(pattern->GetAttr<double>("bg_color_selected_alpha", bgColorSelectedAlpha));
             theme->selectedColorText_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR_SELECTED, theme->selectedColorText_);
             theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, theme->hoverColor_);
-            theme->backgroundColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR, theme->backgroundColor_);
+            theme->backgroundColor_ = pattern->GetAttr<Color>("bg_color", theme->backgroundColor_);
             theme->disabledBackgroundColor_ = theme->disabledBackgroundColor_.BlendOpacity(
                 pattern->GetAttr<double>("color_disabled_alpha", defaultDisabledColorAlpha));
             theme->lineColor_ = pattern->GetAttr<Color>("line_color", theme->lineColor_);

@@ -13,18 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_COLUMN_MODEL_NG_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_COLUMN_MODEL_NG_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STACK_STACK_MODEL_NG_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STACK_STACK_MODEL_NG_H
 
 #include "base/utils/macros.h"
 #include "core/components_ng/pattern/stack/stack_model.h"
-#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
+
+class FrameNode;
 
 class ACE_EXPORT StackModelNG : public StackModel {
 public:
     void Create(Alignment align) override;
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     void SetStackFit(StackFit fit) override {}
     void SetOverflow(Overflow overflow) override {}
     void SetAlignment(Alignment align) override;
@@ -36,4 +38,4 @@ private:
 };
 
 } // namespace OHOS::Ace::NG
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LINEAR_LAYOUT_COLUMN_MODEL_NG_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_STACK_STACK_MODEL_NG_H

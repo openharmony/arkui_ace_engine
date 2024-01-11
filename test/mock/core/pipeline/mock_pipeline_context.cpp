@@ -459,6 +459,17 @@ void PipelineContext::SetIsDragging(bool isDragging) {}
 void PipelineContext::ResetDragging() {}
 
 void PipelineContext::UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
+
+bool PipelineContext::PrintVsyncInfoIfNeed() const
+{
+    return false;
+}
+
+const SerializedGesture& PipelineContext::GetSerializedGesture() const
+{
+    return serializedGesture_;
+}
+
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 

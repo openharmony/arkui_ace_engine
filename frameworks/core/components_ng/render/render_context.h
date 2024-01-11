@@ -255,6 +255,12 @@ public:
     virtual void SetShadowAlpha(float alpha) {}
     virtual void SetShadowElevation(float elevation) {}
     virtual void SetShadowRadius(float radius) {}
+    virtual void SetScale(float scaleX, float scaleY) {}
+    virtual void SetBackgroundColor(uint32_t colorValue) {}
+    virtual void SetRenderPivot(float pivotX, float pivotY) {}
+    virtual void SetFrame(float positionX, float positionY, float width, float height) {}
+    virtual void SetOpacity(float opacity) {}
+    virtual void SetTranslate(float translateX, float translateY, float translateZ) {}
 
     virtual RectF GetPaintRectWithTransform()
     {
@@ -311,6 +317,8 @@ public:
     virtual void ClearDrawCommands() {}
 
     virtual void DumpInfo() {}
+
+    virtual void DumpAdvanceInfo() {}
 
     void ObscuredToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
@@ -402,10 +410,11 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(LightUpEffect, double);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ParticleOptionArray, std::list<ParticleOption>);
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(ClickEffectLevel, ClickEffectInfo);
-    virtual RefPtr<PixelMap> GetThumbnailPixelMap()
+    virtual RefPtr<PixelMap> GetThumbnailPixelMap(bool needScale = false)
     {
         return nullptr;
     }
+    virtual void UpdateThumbnailPixelMapScale(float& scaleX, float& scaleY) {}
 
     virtual void SetActualForegroundColor(const Color& value) {}
     // transform matrix
@@ -466,6 +475,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, DynamicLightUpDegree, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackShadow, Shadow);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackBlendMode, BlendMode);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, BackBlendApplyType, BlendApplyType);
 
     // BorderRadius.
     ACE_DEFINE_PROPERTY_GROUP(Border, BorderProperty);
@@ -642,6 +652,7 @@ protected:
     virtual void OnDynamicLightUpDegreeUpdate(const float degree) {}
     virtual void OnBackShadowUpdate(const Shadow& shadow) {}
     virtual void OnBackBlendModeUpdate(BlendMode blendMode) {}
+    virtual void OnBackBlendApplyTypeUpdate(BlendApplyType blendApplyType) {}
 
     virtual void OnOverlayTextUpdate(const OverlayOptions& overlay) {}
     virtual void OnMotionPathUpdate(const MotionPathOption& motionPath) {}

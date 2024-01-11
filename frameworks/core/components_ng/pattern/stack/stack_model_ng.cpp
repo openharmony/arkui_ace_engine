@@ -32,13 +32,19 @@ void StackModelNG::Create()
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::STACK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StackPattern>(); });
     stack->Push(frameNode);
-    frameNode->SetExclusiveEventForChild(true);
 }
 
 void StackModelNG::Create(Alignment alignment)
 {
     Create();
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
+}
+
+RefPtr<FrameNode> StackModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::STACK_ETS_TAG, nodeId, AceType::MakeRefPtr<StackPattern>());
+    frameNode->SetExclusiveEventForChild(true);
+    return frameNode;
 }
 
 void StackModelNG::SetAlignment(Alignment alignment)

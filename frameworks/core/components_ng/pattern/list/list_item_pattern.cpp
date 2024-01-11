@@ -123,6 +123,7 @@ void ListItemPattern::SetStartNode(const RefPtr<NG::UINode>& startNode)
             }
         } else {
             host->ReplaceChild(host->GetChildAtIndex(startNodeIndex_), startNode);
+            host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
     } else if (HasStartNode()) {
         host->RemoveChildAtIndex(startNodeIndex_);
@@ -152,6 +153,7 @@ void ListItemPattern::SetEndNode(const RefPtr<NG::UINode>& endNode)
             }
         } else {
             host->ReplaceChild(host->GetChildAtIndex(endNodeIndex_), endNode);
+            host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
     } else if (HasEndNode()) {
         host->RemoveChildAtIndex(endNodeIndex_);
@@ -908,6 +910,7 @@ void ListItemPattern::InitDisableEvent()
     } else {
         if (enableOpacity_.has_value()) {
             renderContext->UpdateOpacity(enableOpacity_.value());
+            enableOpacity_.reset();
         } else {
             renderContext->UpdateOpacity(UserDefineOpacity);
         }

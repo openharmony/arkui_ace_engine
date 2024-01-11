@@ -46,6 +46,7 @@ public:
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
     void SetTransform(const TransformParam& param) override;
     TransformParam GetTransform() const override;
+    void UpdateSize(int32_t width, int32_t height);
     int32_t GetWidth()
     {
         return width_;
@@ -63,6 +64,7 @@ public:
         return bitmapSize_;
     }
 private:
+    void InitBitmap(int32_t width, int32_t height);
     void ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj) override;
     void ImageObjFailed() override;
     void PaintText(const std::string& text, double x, double y, std::optional<double> maxWidth, bool isStroke,

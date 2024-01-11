@@ -91,4 +91,28 @@ void DeclarativeModulePreloader::ReloadCard(NativeEngine& runtime, const std::st
     ReloadAceModuleCard(reinterpret_cast<void*>(&runtime), bundleName.c_str());
 }
 // ArkTsCard end
+
+using CreateFuncWorker = void (*)(void*);
+constexpr char PRE_INIT_ACE_MODULE_FUNC_WORKER[] = "OHOS_ACE_PreloadAceModuleWorker";
+
+void InitAceModuleWorker(void* runtime)
+{
+    LIBHANDLE handle = LOADLIB(AceForwardCompatibility::GetAceLibName());
+    if (handle == nullptr) {
+        return;
+    }
+
+    auto entry = reinterpret_cast<CreateFuncWorker>(LOADSYM(handle, PRE_INIT_ACE_MODULE_FUNC_WORKER));
+    if (entry == nullptr) {
+        FREELIB(handle);
+        return;
+    }
+
+    entry(runtime);
+}
+
+void DeclarativeModulePreloader::PreloadWorker(NativeEngine& runtime)
+{
+    InitAceModuleWorker(reinterpret_cast<void*>(&runtime));
+}
 } // namespace OHOS::Ace

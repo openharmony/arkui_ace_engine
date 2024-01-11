@@ -23,6 +23,9 @@
 
 #include "base/log/log.h"
 #include "core/common/container.h"
+#include "core/components_ng/gestures/gesture_group.h"
+#include "core/components_ng/gestures/pan_gesture.h"
+#include "core/gestures/gesture_info.h"
 #include "frameworks/base/json/json_util.h"
 #include "frameworks/core/common/frontend.h"
 
@@ -227,7 +230,8 @@ void FormManagerDelegate::HandleCachedClickEvents()
             std::to_string(pointerEventCache_.size()).c_str());
         recycleStatus_ = RecycleStatus::RECOVERED;
         for (const auto& pointerEvent : pointerEventCache_) {
-            formRendererDispatcher_->DispatchPointerEvent(pointerEvent);
+            SerializedGesture serializedGesture;
+            formRendererDispatcher_->DispatchPointerEvent(pointerEvent, serializedGesture);
         }
         pointerEventCache_.clear();
     }
@@ -590,7 +594,9 @@ void FormManagerDelegate::OnActionEvent(const std::string& action)
 #endif
 }
 
-void FormManagerDelegate::DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
+void FormManagerDelegate::DispatchPointerEvent(const
+    std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+    SerializedGesture& serializedGesture)
 {
     if (!isDynamic_) {
         return;
@@ -616,7 +622,7 @@ void FormManagerDelegate::DispatchPointerEvent(const std::shared_ptr<MMI::Pointe
         }
         return;
     }
-    formRendererDispatcher_->DispatchPointerEvent(pointerEvent);
+    formRendererDispatcher_->DispatchPointerEvent(pointerEvent, serializedGesture);
 }
 
 void FormManagerDelegate::SetAllowUpdate(bool allowUpdate)

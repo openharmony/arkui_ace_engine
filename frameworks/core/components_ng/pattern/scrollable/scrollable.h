@@ -70,7 +70,7 @@ class Scrollable : public TouchEventTarget {
     DECLARE_ACE_TYPE(Scrollable, TouchEventTarget);
 
 public:
-    Scrollable() = default;
+    Scrollable();
     Scrollable(ScrollPositionCallback&& callback, Axis axis);
     Scrollable(const ScrollPositionCallback& callback, Axis axis);
     ~Scrollable() override;
@@ -118,20 +118,12 @@ public:
         if (panRecognizerNG_) {
             panRecognizerNG_->SetCoordinateOffset(offset);
         }
-
-        if (rawRecognizer_) {
-            rawRecognizer_->SetCoordinateOffset(offset);
-        }
     }
 
     void OnCollectTouchTarget(TouchTestResult& result)
     {
         if (panRecognizerNG_) {
             result.emplace_back(panRecognizerNG_);
-        }
-
-        if (rawRecognizer_) {
-            result.emplace_back(rawRecognizer_);
         }
     }
 
@@ -180,7 +172,7 @@ public:
         return canOverScroll_;
     }
 
-    void ProcessScrollMotionStop();
+    void ProcessScrollMotionStop(bool StopFriction);
 
     bool DispatchEvent(const TouchEvent& point) override
     {
@@ -190,9 +182,6 @@ public:
     {
         if (!available_) {
             return true;
-        }
-        if (rawRecognizer_) {
-            return rawRecognizer_->HandleEvent(event);
         }
         return true;
     }
@@ -479,7 +468,6 @@ private:
     // used for ng structure.
     RefPtr<NG::PanRecognizer> panRecognizerNG_;
 
-    RefPtr<RawRecognizer> rawRecognizer_;
     WeakPtr<PipelineBase> context_;
     double currentPos_ = 0.0;
     double currentVelocity_ = 0.0;
@@ -530,7 +518,7 @@ private:
     DragFRCSceneCallback dragFRCSceneCallback_;
     ScrollMotionFRCSceneCallback scrollMotionFRCSceneCallback_;
 
-    std::chrono::high_resolution_clock::time_point lastTime_;
+    uint64_t lastVsyncTime_ = 0;
     RefPtr<NodeAnimatablePropertyFloat> frictionOffsetProperty_;
     float finalPosition_ = 0.0f;
     float lastPosition_ = 0.0f;

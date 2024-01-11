@@ -536,6 +536,22 @@ void JSCalendarPickerDialog::CalendarPickerDialogShow(const JSRef<JSObject>& par
     } else {
         properties.alignment = DialogAlignment::CENTER;
     }
+
+    auto backgroundColorValue = paramObj->GetProperty("backgroundColor");
+    Color backgroundColor;
+    if (JSViewAbstract::ParseJsColor(backgroundColorValue, backgroundColor)) {
+        properties.backgroundColor = backgroundColor;
+    }
+
+    auto backgroundBlurStyle = paramObj->GetProperty("backgroundBlurStyle");
+    BlurStyleOption styleOption;
+    if (backgroundBlurStyle->IsNumber()) {
+        auto blurStyle = backgroundBlurStyle->ToNumber<int32_t>();
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+            properties.backgroundBlurStyle = blurStyle;
+        }
+    }
     properties.customStyle = false;
     properties.offset = DimensionOffset(Offset(0, -theme->GetMarginBottom().ConvertToPx()));
     NG::BorderRadiusProperty dialogRadius;

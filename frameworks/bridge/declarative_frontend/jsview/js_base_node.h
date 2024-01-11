@@ -16,12 +16,9 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_BASE_NODE_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_BASE_NODE_H
 
-#include <functional>
-#include "base/geometry/size.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
-#include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings_defines.h"
 
@@ -30,7 +27,8 @@ class JSBaseNode : public AceType {
     DECLARE_ACE_TYPE(JSBaseNode, AceType)
 public:
     JSBaseNode() = default;
-    JSBaseNode(NodeRenderType renderType, const std::string& surfaceId) : renderType_(renderType), surfaceId_(surfaceId)
+    JSBaseNode(const NG::OptionalSizeF& size, NodeRenderType renderType, std::string surfaceId)
+        : size_(size), renderType_(renderType), surfaceId_(std::move(surfaceId))
     {}
     ~JSBaseNode() override = default;
 
@@ -38,6 +36,7 @@ public:
     static void ConstructorCallback(const JSCallbackInfo& info);
     static void DestructorCallback(JSBaseNode* node);
     void FinishUpdateFunc(const JSCallbackInfo& info);
+    void Create(const JSCallbackInfo& info);
     void BuildNode(const JSCallbackInfo& info);
     void PostTouchEvent(const JSCallbackInfo& info);
     void CreateRenderNode(const JSCallbackInfo& info);
@@ -51,6 +50,7 @@ protected:
     RefPtr<NG::UINode> viewNode_;
 
 private:
+    NG::OptionalSizeF size_;
     NodeRenderType renderType_ = NodeRenderType::RENDER_TYPE_DISPLAY;
     std::string surfaceId_;
 };

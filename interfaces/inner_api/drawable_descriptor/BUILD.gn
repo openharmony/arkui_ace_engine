@@ -24,6 +24,7 @@ config("drawable_config") {
     "${ace_root}/interfaces/frameworks",
     "${ace_root}/interfaces/inner_api/drawable_descriptor",
     "${ace_root}/interfaces/napi/kits/drawabledescriptor",
+    "${graphic_2d_path}/utils/color_manager/export",
     "//foundation/multimedia/image_framework/interfaces/innerkits/include",
   ]
   if (current_os != "ohos") {
@@ -69,6 +70,7 @@ ohos_shared_library("drawable_descriptor") {
   if (current_os == "ohos") {
     external_deps += [
       "graphic_2d:2d_graphics",
+      "graphic_2d:color_manager",
       "image_framework:image",
       "image_framework:image_native",
       "resource_management:global_resmgr",

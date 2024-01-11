@@ -130,13 +130,18 @@ void JSView::RenderJSExecution()
 
 void JSView::SyncInstanceId()
 {
-    restoreInstanceId_ = Container::CurrentId();
+    restoreInstanceIdStack_.push(Container::CurrentId());
     ContainerScope::UpdateCurrent(instanceId_);
 }
 
 void JSView::RestoreInstanceId()
 {
-    ContainerScope::UpdateCurrent(restoreInstanceId_);
+    if (restoreInstanceIdStack_.empty()) {
+        ContainerScope::UpdateCurrent(-1);
+        return;
+    }
+    ContainerScope::UpdateCurrent(restoreInstanceIdStack_.top());
+    restoreInstanceIdStack_.pop();
 }
 
 void JSView::GetInstanceId(const JSCallbackInfo& info)
@@ -856,10 +861,6 @@ void JSViewPartialUpdate::CreateRecycle(const JSCallbackInfo& info)
     if (recycle) {
         auto node = view->GetCachedRecycleNode();
         node->SetRecycleRenderFunc(std::move(recycleUpdateFunc));
-        auto newElmtId = ViewStackModel::GetInstance()->GetElmtIdToAccountFor();
-        auto uiNode = AceType::DynamicCast<NG::UINode>(node);
-        ElementRegister::GetInstance()->UpdateRecycleElmtId(uiNode->GetId(), newElmtId);
-        uiNode->UpdateRecycleElmtId(newElmtId);
         ViewStackModel::GetInstance()->Push(node, true);
     } else {
         ViewStackModel::GetInstance()->Push(view->CreateViewNode(), true);

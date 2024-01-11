@@ -69,6 +69,8 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     clipPath_ = bubbleLayoutAlgorithm->GetClipPath();
     clipFrameNode_ = bubbleLayoutAlgorithm->GetClipFrameNode();
     arrowOffsetsFromClip_ = bubbleLayoutAlgorithm->GetArrowOffsetsFromClip();
+    arrowWidth_ = bubbleLayoutAlgorithm->GetArrowWidth();
+    arrowHeight_ = bubbleLayoutAlgorithm->GetArrowHeight();
     paintProperty->UpdatePlacement(bubbleLayoutAlgorithm->GetArrowPlacement());
     if (delayShow_) {
         delayShow_ = false;
@@ -99,7 +101,8 @@ void BubblePattern::OnAttachToFrameNode()
 
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
-    pipelineContext->AddOnAreaChangeNode(targetNode->GetId());
+    auto eventHub = targetNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
     OnAreaChangedFunc onAreaChangedFunc = [popupNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
                                               const OffsetF& /* oldOrigin */, const RectF& /* rect */,
                                               const OffsetF& /* origin */) {
@@ -107,7 +110,7 @@ void BubblePattern::OnAttachToFrameNode()
         CHECK_NULL_VOID(popupNode);
         popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
-    targetNode->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
+    eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
 }
 
 void BubblePattern::OnDetachFromFrameNode(FrameNode* frameNode)

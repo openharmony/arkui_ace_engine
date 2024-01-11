@@ -18,6 +18,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
+#include "core/components_ng/gestures/recognizers/parallel_recognizer.h"
 #include "core/components_ng/gestures/recognizers/recognizer_group.h"
 
 namespace OHOS::Ace::NG {
@@ -120,7 +121,8 @@ bool DectectAllDone(const RefPtr<NGGestureRecognizer> recognizer)
 {
     RefereeState state = recognizer->GetRefereeState();
     if (!AceType::InstanceOf<RecognizerGroup>(recognizer)) {
-        if (state != RefereeState::SUCCEED && state != RefereeState::SUCCEED_BLOCKED && state != RefereeState::FAIL) {
+        if (state != RefereeState::SUCCEED && state != RefereeState::SUCCEED_BLOCKED &&
+            state != RefereeState::FAIL && state != RefereeState::READY) {
             return false;
         }
     } else {
@@ -367,6 +369,9 @@ void GestureReferee::HandleAcceptDisposal(const RefPtr<NGGestureRecognizer>& rec
     }
     // clean delay task.
     if (prevState == RefereeState::PENDING) {
+        if (AceType::InstanceOf<ParallelRecognizer>(recognizer)) {
+            return;
+        }
         auto iter = gestureScopes_.begin();
         while (iter != gestureScopes_.end()) {
             if (iter->second->IsDelayClosed()) {

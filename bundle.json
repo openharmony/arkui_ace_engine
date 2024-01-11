@@ -52,6 +52,7 @@
                 "os_account",
                 "graphic_2d",
                 "graphic_3d",
+                "graphic_surface",
                 "safwk",
                 "common_event_service",
                 "data_share",
@@ -115,6 +116,7 @@
                             "ui_event.h",
                             "ui_event_observer.h",
                             "viewport_config.h",
+                            "serialized_gesture.h",
                             "serializeable_object.h",
                             "modal_ui_extension_config.h"
                         ]

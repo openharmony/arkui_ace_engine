@@ -169,10 +169,22 @@ struct TextSelector {
     std::string ToString()
     {
         std::string result;
-        result.append("base offset: ");
+        result.append("baseOffset: ");
         result.append(std::to_string(baseOffset));
-        result.append(", destination offset: ");
+        result.append(", selectionBaseOffset: ");
+        result.append(selectionBaseOffset.ToString());
+        result.append(", destinationOffset: ");
         result.append(std::to_string(destinationOffset));
+        result.append(", selectionDestinationOffset: ");
+        result.append(selectionDestinationOffset.ToString());
+        result.append(", firstHandle: ");
+        result.append(firstHandle.ToString());
+        result.append(", secondHandle: ");
+        result.append(secondHandle.ToString());
+        result.append(", firstHandleOffset_: ");
+        result.append(firstHandleOffset_.ToString());
+        result.append(", secondHandleOffset_: ");
+        result.append(secondHandleOffset_.ToString());
         return result;
     }
 

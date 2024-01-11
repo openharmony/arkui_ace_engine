@@ -956,4 +956,10 @@ void Animator::ResetIsReverse()
     isReverse_ = false;
 }
 
+bool Animator::PrintVsyncInfoIfNeed() const
+{
+    CHECK_NULL_RETURN(scheduler_, false);
+    return scheduler_->PrintVsyncInfoIfNeed();
+}
+
 } // namespace OHOS::Ace

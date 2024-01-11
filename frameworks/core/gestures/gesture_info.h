@@ -211,7 +211,7 @@ public:
     {
         onPanDistanceIds_.emplace(onPanDistanceId.GetId(), onPanDistanceId);
     }
-
+    
 private:
     PanDirection direction_;
     double distance_ = DEFAULT_PAN_DISTANCE.ConvertToPx();

@@ -23,6 +23,7 @@
 #include "interfaces/inner_api/form_render/include/form_renderer.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_delegate_impl.h"
 #include "interfaces/inner_api/form_render/include/form_renderer_group.h"
+#include "interfaces/inner_api/ace/serialized_gesture.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 using namespace testing;
@@ -286,7 +287,8 @@ HWTEST_F(FormRenderTest, FormRenderTest002, TestSize.Level1)
     std::shared_ptr<OHOS::MMI::PointerEvent> event;
     EXPECT_CALL(*((MockUIContent*)(formRenderer->uiContent_.get())), ProcessPointerEvent(event))
         .WillOnce(Return(true));
-    formRendererDispatcher->DispatchPointerEvent(event);
+    SerializedGesture serializedGesture;
+    formRendererDispatcher->DispatchPointerEvent(event, serializedGesture);
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 } // namespace OHOS::Ace

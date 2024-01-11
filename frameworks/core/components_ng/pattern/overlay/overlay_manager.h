@@ -59,6 +59,7 @@ struct PopupInfo {
     bool isBlockEvent = true;
     SizeF targetSize;
     OffsetF targetOffset;
+    bool focusable = false;
 };
 
 // StageManager is the base class for root render node to perform page switch.
@@ -343,6 +344,13 @@ public:
 
     void DismissSheet();
 
+    void SetDismissTargetId(int32_t targetId)
+    {
+        dismissTargetId_ = targetId;
+    }
+ 
+    void RemoveSheetNode(const RefPtr<FrameNode>& sheetNode);
+
     void DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t targetId);
 
     RefPtr<FrameNode> GetSheetMask(const RefPtr<FrameNode>& sheetNode);
@@ -460,6 +468,7 @@ private:
     float sheetHeight_ { 0.0 };
     WeakPtr<UINode> rootNodeWeak_;
     int32_t dialogCount_ = 0;
+    int32_t dismissTargetId_ = 0;
     std::unordered_map<int32_t, int32_t> maskNodeIdMap_;
     int32_t subWindowId_;
     bool hasPixelMap_ { false };

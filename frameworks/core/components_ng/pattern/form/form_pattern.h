@@ -63,7 +63,8 @@ public:
 
     const RefPtr<SubContainer>& GetSubContainer() const;
 
-    void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent) const;
+    void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
+        SerializedGesture& serializedGesture);
 
     void OnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap);
 
@@ -145,6 +146,7 @@ private:
     bool isSnapshot_ = false;
     bool isRegistedAreaCallback_ = false;
     RefPtr<PixelMap> pixelMap_ = nullptr;
+    int64_t snapshotTimestamp_ = 0;
     int32_t scopeId_;
     std::string localeTag_ = AceApplicationInfo::GetInstance().GetLocaleTag();
     std::vector<std::string> formLinkInfos_;

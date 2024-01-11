@@ -37,6 +37,9 @@ XComponentType ConvertToXComponentType(const std::string& type)
     if (type == "component") {
         return XComponentType::COMPONENT;
     }
+    if (type == "node") {
+        return XComponentType::NODE;
+    }
     return XComponentType::SURFACE;
 }
 } // namespace
@@ -72,38 +75,38 @@ void JSXComponent::JSBind(BindingTarget globalObj)
     JSClass<JSXComponent>::StaticMethod("create", &JSXComponent::Create);
     JSClass<JSXComponent>::StaticMethod("onLoad", &JSXComponent::JsOnLoad);
     JSClass<JSXComponent>::StaticMethod("onDestroy", &JSXComponent::JsOnDestroy);
+    JSClass<JSXComponent>::StaticMethod("onAppear", &JSXComponent::JsOnAppear);
+    JSClass<JSXComponent>::StaticMethod("onDisAppear", &JSXComponent::JsOnDisAppear);
 
-    JSClass<JSXComponent>::StaticMethod("onAppear", &JSXComponent::OmitEvent);
-    JSClass<JSXComponent>::StaticMethod("onDisAppear", &JSXComponent::OmitEvent);
-    JSClass<JSXComponent>::StaticMethod("onTouch", &JSXComponent::OmitEvent);
-    JSClass<JSXComponent>::StaticMethod("onClick", &JSXComponent::OmitEvent);
-    JSClass<JSXComponent>::StaticMethod("onKeyEvent", &JSXComponent::OmitEvent);
-    JSClass<JSXComponent>::StaticMethod("onMouse", &JSXComponent::OmitEvent);
-    JSClass<JSXComponent>::StaticMethod("onHover", &JSXComponent::OmitEvent);
-    JSClass<JSXComponent>::StaticMethod("onFocus", &JSXComponent::OmitEvent);
-    JSClass<JSXComponent>::StaticMethod("onBlur", &JSXComponent::OmitEvent);
+    JSClass<JSXComponent>::StaticMethod("onTouch", &JSXComponent::JsOnTouch);
+    JSClass<JSXComponent>::StaticMethod("onClick", &JSXComponent::JsOnClick);
+    JSClass<JSXComponent>::StaticMethod("onKeyEvent", &JSXComponent::JsOnKeyEvent);
+    JSClass<JSXComponent>::StaticMethod("onMouse", &JSXComponent::JsOnMouse);
+    JSClass<JSXComponent>::StaticMethod("onHover", &JSXComponent::JsOnHover);
+    JSClass<JSXComponent>::StaticMethod("onFocus", &JSXComponent::JsOnFocus);
+    JSClass<JSXComponent>::StaticMethod("onBlur", &JSXComponent::JsOnBlur);
 
     JSClass<JSXComponent>::StaticMethod("backgroundColor", &JSXComponent::JsBackgroundColor);
-    JSClass<JSXComponent>::StaticMethod("backgroundImage", &JSXComponent::OmitAttribute);
-    JSClass<JSXComponent>::StaticMethod("backgroundImageSize", &JSXComponent::OmitAttribute);
-    JSClass<JSXComponent>::StaticMethod("backgroundImagePosition", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("backgroundImage", &JSXComponent::JsBackgroundImage);
+    JSClass<JSXComponent>::StaticMethod("backgroundImageSize", &JSXComponent::JsBackgroundImageSize);
+    JSClass<JSXComponent>::StaticMethod("backgroundImagePosition", &JSXComponent::JsBackgroundImagePosition);
     JSClass<JSXComponent>::StaticMethod("opacity", &JSXComponent::JsOpacity);
-    JSClass<JSXComponent>::StaticMethod("blur", &JSXComponent::OmitAttribute);
-    JSClass<JSXComponent>::StaticMethod("backdropBlur", &JSXComponent::OmitAttribute);
-    JSClass<JSXComponent>::StaticMethod("grayscale", &JSXComponent::OmitAttribute);
-    JSClass<JSXComponent>::StaticMethod("brightness", &JSXComponent::OmitAttribute);
-    JSClass<JSXComponent>::StaticMethod("saturate", &JSXComponent::OmitAttribute);
-    JSClass<JSXComponent>::StaticMethod("contrast", &JSXComponent::OmitAttribute);
-    JSClass<JSXComponent>::StaticMethod("invert", &JSXComponent::OmitAttribute);
-    JSClass<JSXComponent>::StaticMethod("sepia", &JSXComponent::OmitAttribute);
-    JSClass<JSXComponent>::StaticMethod("hueRotate", &JSXComponent::OmitAttribute);
-    JSClass<JSXComponent>::StaticMethod("colorBlend", &JSXComponent::OmitAttribute);
-    JSClass<JSXComponent>::StaticMethod("sphericalEffect", &JSXComponent::OmitAttribute);
-    JSClass<JSXComponent>::StaticMethod("lightUpEffect", &JSXComponent::OmitAttribute);
-    JSClass<JSXComponent>::StaticMethod("pixelStretchEffect", &JSXComponent::OmitAttribute);
-    JSClass<JSXComponent>::StaticMethod("linearGradientBlur", &JSXComponent::OmitAttribute);
+    JSClass<JSXComponent>::StaticMethod("blur", &JSXComponent::JsBlur);
+    JSClass<JSXComponent>::StaticMethod("backdropBlur", &JSXComponent::JsBackdropBlur);
+    JSClass<JSXComponent>::StaticMethod("grayscale", &JSXComponent::JsGrayscale);
+    JSClass<JSXComponent>::StaticMethod("brightness", &JSXComponent::JsBrightness);
+    JSClass<JSXComponent>::StaticMethod("saturate", &JSXComponent::JsSaturate);
+    JSClass<JSXComponent>::StaticMethod("contrast", &JSXComponent::JsContrast);
+    JSClass<JSXComponent>::StaticMethod("invert", &JSXComponent::JsInvert);
+    JSClass<JSXComponent>::StaticMethod("sepia", &JSXComponent::JsSepia);
+    JSClass<JSXComponent>::StaticMethod("hueRotate", &JSXComponent::JsHueRotate);
+    JSClass<JSXComponent>::StaticMethod("colorBlend", &JSXComponent::JsColorBlend);
+    JSClass<JSXComponent>::StaticMethod("sphericalEffect", &JSXComponent::JsSphericalEffect);
+    JSClass<JSXComponent>::StaticMethod("lightUpEffect", &JSXComponent::JsLightUpEffect);
+    JSClass<JSXComponent>::StaticMethod("pixelStretchEffect", &JSXComponent::JsPixelStretchEffect);
+    JSClass<JSXComponent>::StaticMethod("linearGradientBlur", &JSXComponent::JsLinearGradientBlur);
 
-    JSClass<JSXComponent>::InheritAndBind<JSViewAbstract>(globalObj);
+    JSClass<JSXComponent>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSXComponent::Create(const JSCallbackInfo& info)
@@ -270,23 +273,258 @@ void JSXComponent::JsOnDestroy(const JSCallbackInfo& args)
     XComponentModel::GetInstance()->SetOnDestroy(std::move(onDestroy));
 }
 
+void JSXComponent::JsOnAppear(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::NODE) {
+        return;
+    }
+    JSInteractableView::JsOnAppear(args);
+}
+
+void JSXComponent::JsOnDisAppear(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::NODE) {
+        return;
+    }
+    JSInteractableView::JsOnDisAppear(args);
+}
+
+void JSXComponent::JsOnTouch(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::NODE) {
+        return;
+    }
+    JSInteractableView::JsOnTouch(args);
+}
+
+void JSXComponent::JsOnClick(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::NODE) {
+        return;
+    }
+    JSViewAbstract::JsOnClick(args);
+}
+
+void JSXComponent::JsOnKeyEvent(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::NODE) {
+        return;
+    }
+    JSViewAbstract::JsOnKeyEvent(args);
+}
+
+void JSXComponent::JsOnMouse(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::NODE) {
+        return;
+    }
+    JSViewAbstract::JsOnMouse(args);
+}
+
+void JSXComponent::JsOnHover(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::NODE) {
+        return;
+    }
+    JSViewAbstract::JsOnHover(args);
+}
+
+
+void JSXComponent::JsOnFocus(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::NODE) {
+        return;
+    }
+    JSViewAbstract::JsOnFocus(args);
+}
+
+void JSXComponent::JsOnBlur(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::NODE) {
+        return;
+    }
+    JSViewAbstract::JsOnBlur(args);
+}
+
 void JSXComponent::JsBackgroundColor(const JSCallbackInfo& args)
 {
-    if (!XComponentModel::GetInstance()->IsTexture()) {
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type == XComponentType::SURFACE || type == XComponentType::COMPONENT) {
         return;
     }
     JSViewAbstract::JsBackgroundColor(args);
 }
 
+void JSXComponent::JsBackgroundImage(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::NODE) {
+        return;
+    }
+    JSViewAbstract::JsBackgroundImage(args);
+}
+
+void JSXComponent::JsBackgroundImageSize(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::NODE) {
+        return;
+    }
+    JSViewAbstract::JsHueRotate(args);
+}
+
+void JSXComponent::JsBackgroundImagePosition(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::NODE) {
+        return;
+    }
+    JSViewAbstract::JsBackgroundImagePosition(args);
+}
+
+
 void JSXComponent::JsOpacity(const JSCallbackInfo& args)
 {
-    if (!XComponentModel::GetInstance()->IsTexture()) {
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type == XComponentType::SURFACE || type == XComponentType::COMPONENT) {
         return;
     }
     JSViewAbstract::JsOpacity(args);
 }
 
-void JSXComponent::OmitEvent(const JSCallbackInfo& /* args */) {}
+void JSXComponent::JsBlur(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::NODE) {
+        return;
+    }
+    JSViewAbstract::JsBlur(args);
+}
 
-void JSXComponent::OmitAttribute(const JSCallbackInfo& /* args */) {}
+void JSXComponent::JsBackdropBlur(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::NODE) {
+        return;
+    }
+    JSViewAbstract::JsBackdropBlur(args);
+}
+
+void JSXComponent::JsGrayscale(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::NODE) {
+        return;
+    }
+   // JSViewAbstract::JsGrayscale(args);
+}
+
+void JSXComponent::JsBrightness(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::NODE) {
+        return;
+    }
+    JSViewAbstract::JsBrightness(args);
+}
+
+void JSXComponent::JsSaturate(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::NODE) {
+        return;
+    }
+    JSViewAbstract::JsSaturate(args);
+}
+
+void JSXComponent::JsContrast(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::NODE) {
+        return;
+    }
+    JSViewAbstract::JsContrast(args);
+}
+
+void JSXComponent::JsInvert(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::NODE) {
+        return;
+    }
+    JSViewAbstract::JsInvert(args);
+}
+
+void JSXComponent::JsSepia(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::NODE) {
+        return;
+    }
+    JSViewAbstract::JsSepia(args);
+}
+
+void JSXComponent::JsHueRotate(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::NODE) {
+        return;
+    }
+    JSViewAbstract::JsHueRotate(args);
+}
+
+void JSXComponent::JsColorBlend(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::NODE) {
+        return;
+    }
+    JSViewAbstract::JsColorBlend(args);
+}
+
+void JSXComponent::JsSphericalEffect(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::NODE) {
+        return;
+    }
+    JSViewAbstract::JsSphericalEffect(args);
+}
+
+void JSXComponent::JsLightUpEffect(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::NODE) {
+        return;
+    }
+    JSViewAbstract::JsLightUpEffect(args);
+}
+
+void JSXComponent::JsPixelStretchEffect(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::NODE) {
+        return;
+    }
+    JSViewAbstract::JsPixelStretchEffect(args);
+}
+
+void JSXComponent::JsLinearGradientBlur(const JSCallbackInfo& args)
+{
+    auto type = XComponentModel::GetInstance()->GetType();
+    if (type != XComponentType::NODE) {
+        return;
+    }
+    JSViewAbstract::JsLinearGradientBlur(args);
+}
+
 } // namespace OHOS::Ace::Framework

@@ -23,8 +23,15 @@
 #include "base/geometry/ng/rect_t.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/grid/grid_layout_options.h"
+#include "core/components_ng/property/layout_constraint.h"
 
 namespace OHOS::Ace::NG {
+
+struct GridPredictLayoutParam {
+    std::list<int32_t> items;
+    LayoutConstraintF layoutConstraint;
+};
+
 constexpr int32_t EMPTY_JUMP_INDEX = -2;
 constexpr float HALF = 0.5f;
 
@@ -110,6 +117,20 @@ struct GridLayoutInfo {
      */
     int32_t FindItemInRange(int32_t target) const;
 
+    /**
+     * @brief clears gridMatrix_ and lineHeightMap_ starting from line [idx]
+     *
+     * @param idx starting line index
+     */
+    void ClearMapsToEnd(int32_t idx);
+
+    /**
+     * @brief clears gridMatrix_ and lineHeightMap_ in range [0, idx)
+     *
+     * @param idx ending line index, exclusive.
+     */
+    void ClearMapsFromStart(int32_t idx);
+
     void ResetPositionFlags()
     {
         reachEnd_ = false;
@@ -130,10 +151,26 @@ struct GridLayoutInfo {
     float GetContentOffset(float mainGap) const;
     float GetContentHeight(float mainGap) const;
     float GetContentOffset(const GridLayoutOptions& options, float mainGap) const;
-    float GetContentHeight(const GridLayoutOptions& options, float mainGap) const;
+
+    /**
+     * @brief Get the content height of Grid in range [0, endIdx).
+     *
+     * IF: Irregular items always take up the whole line (no getSizeByIdx callback).
+     * THEN: Assumes that all irregular lines have the same height, and all other regular lines have the same height.
+     * ELSE: Call a more versatile algorithm.
+     * REQUIRES:
+     * 1. all irregular lines must have the same height.
+     * 2. all regular items must have the same height.
+     *
+     * @param options contains irregular item info.
+     * @param endIdx ending item index (exclusive).
+     * @param mainGap gap between lines.
+     * @return total height of the content.
+     */
+    float GetContentHeight(const GridLayoutOptions& options, int32_t endIdx, float mainGap) const;
     float GetCurrentLineHeight() const;
 
-    bool GetLineIndexByIndex(int32_t targetIndex, int32_t& targetLineIndex);
+    bool GetLineIndexByIndex(int32_t targetIndex, int32_t& targetLineIndex) const;
     float GetTotalHeightFromZeroIndex(int32_t targetLineIndex, float mainGap) const;
 
     bool GetGridItemAnimatePos(const GridLayoutInfo& currentGridLayoutInfo, int32_t targetIndex, ScrollAlign align,

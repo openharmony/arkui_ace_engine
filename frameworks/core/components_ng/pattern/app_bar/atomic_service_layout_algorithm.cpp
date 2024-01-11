@@ -27,7 +27,6 @@ void AtomicServiceLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     Dimension rootWidthByPx(PipelineContext::GetCurrentRootWidth(), DimensionUnit::PX);
     Dimension rootWidthByVp(rootWidthByPx.ConvertToVp(), DimensionUnit::VP);
     appBar->SetRowWidth(rootWidthByVp);
-    appBar->ReverseBackButton();
     LinearLayoutAlgorithm::Layout(layoutWrapper);
 }
 } // namespace OHOS::Ace::NG

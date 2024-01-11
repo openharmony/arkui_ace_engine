@@ -377,6 +377,15 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     MenuType type, const MenuParam& menuParam)
 {
     auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag, type);
+    auto menuNodeRenderContext = menuNode->GetRenderContext();
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+        menuNodeRenderContext->IsUniRenderEnabled()) {
+        BlurStyleOption styleOption;
+        styleOption.blurStyle = static_cast<BlurStyle>(
+            menuParam.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
+        menuNodeRenderContext->UpdateBackBlurStyle(styleOption);
+        menuNodeRenderContext->UpdateBackgroundColor(menuParam.backgroundColor.value_or(Color::TRANSPARENT));
+    }
     auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     if (!menuParam.title.empty()) {
@@ -436,6 +445,15 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
 {
     auto type = menuParam.type;
     auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag, type, previewCustomNode);
+    auto menuNodeRenderContext = menuNode->GetRenderContext();
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+        menuNodeRenderContext->IsUniRenderEnabled()) {
+        BlurStyleOption styleOption;
+        styleOption.blurStyle = static_cast<BlurStyle>(
+            menuParam.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
+        menuNodeRenderContext->UpdateBackBlurStyle(styleOption);
+        menuNodeRenderContext->UpdateBackgroundColor(menuParam.backgroundColor.value_or(Color::TRANSPARENT));
+    }
     auto pattern = menuNode->GetPattern<MenuPattern>();
     if (pattern) {
         pattern->SetPreviewMode(menuParam.previewMode);

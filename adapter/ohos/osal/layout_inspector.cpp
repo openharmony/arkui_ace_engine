@@ -25,6 +25,7 @@
 #include "wm/window.h"
 
 #include "adapter/ohos/osal/pixel_map_ohos.h"
+#include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/subwindow/subwindow_ohos.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/thread/background_task_executor.h"
@@ -109,6 +110,10 @@ const OHOS::sptr<OHOS::Rosen::Window> GetWindow(int32_t containerId)
             return subWindowOhos->GetSubWindow();
         }
     } else {
+        auto aceContainer = AceType::DynamicCast<Platform::AceContainer>(container);
+        if (aceContainer != nullptr) {
+            return OHOS::Rosen::Window::Find(aceContainer->GetWindowName());
+        }
         return OHOS::Rosen::Window::GetTopWindowWithId(container->GetWindowId());
     }
     return nullptr;

@@ -152,6 +152,7 @@ public:
     int32_t position = -1;
     int32_t imageNodeId = -1;
     std::string inspectId;
+    std::string description;
     std::string content;
     uint32_t unicode = 0;
     std::unique_ptr<FontStyle> fontStyle = std::make_unique<FontStyle>();
@@ -174,7 +175,7 @@ public:
     void UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder);
     virtual int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
         double width = 0.0f, double height = 0.0f, VerticalAlign verticalAlign = VerticalAlign::BASELINE);
-    virtual void UpdateSymbolSpanColor(TextStyle& symbolSpanStyle);
+    virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
     virtual void UpdateTextStyleForAISpan(
         const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
     virtual void UpdateTextStyle(
@@ -283,6 +284,7 @@ class ACE_EXPORT SpanNode : public UINode, public BaseSpan {
 public:
     static RefPtr<SpanNode> GetOrCreateSpanNode(int32_t nodeId);
     static RefPtr<SpanNode> GetOrCreateSpanNode(const std::string& tag, int32_t nodeId);
+    static RefPtr<SpanNode> CreateSpanNode(int32_t nodeId);
 
     explicit SpanNode(int32_t nodeId) : UINode(V2::SPAN_ETS_TAG, nodeId), BaseSpan(nodeId) {}
     explicit SpanNode(const std::string& tag, int32_t nodeId) : UINode(tag, nodeId), BaseSpan(nodeId) {}
@@ -327,6 +329,11 @@ public:
     void OnInspectorIdUpdate(const std::string& inspectorId) override
     {
         spanItem_->inspectId = inspectorId;
+    }
+
+    void OnAutoEventParamUpdate(const std::string& desc) override
+    {
+        spanItem_->description = desc;
     }
 
     DEFINE_SPAN_FONT_STYLE_ITEM(FontSize, Dimension);

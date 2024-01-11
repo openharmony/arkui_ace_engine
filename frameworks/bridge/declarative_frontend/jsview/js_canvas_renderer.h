@@ -219,6 +219,7 @@ private:
     std::shared_ptr<Pattern> GetPatternPtr(int32_t id);
     bool isInitializeShadow_ = false;
     bool isOffscreenInitializeShadow_ = false;
+    Dimension GetDimensionValue(const std::string& str);
 };
 
 } // namespace OHOS::Ace::Framework

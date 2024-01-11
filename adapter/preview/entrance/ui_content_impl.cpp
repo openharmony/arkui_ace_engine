@@ -383,6 +383,16 @@ bool UIContentImpl::ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::Pointer
     return EventDispatcher::GetInstance().DispatchTouchEvent(pointerEvent);
 }
 
+bool UIContentImpl::ProcessPointerEventWithCallback(
+    const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, const std::function<void()>& callback)
+{
+    auto result = EventDispatcher::GetInstance().DispatchTouchEvent(pointerEvent);
+    if (callback) {
+        callback();
+    }
+    return result;
+}
+
 bool UIContentImpl::ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent)
 {
     return EventDispatcher::GetInstance().DispatchKeyEvent(keyEvent);

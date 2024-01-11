@@ -24,19 +24,25 @@
 #include "base/memory/referenced.h"
 #include "base/want/want_wrap.h"
 #include "core/common/container.h"
+#include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 
-namespace OHOS::Rosen {
+namespace OHOS {
+template<typename T>
+class sptr;
+namespace Rosen {
 class AvoidArea;
 enum class WSError;
+class OccupiedAreaChangeInfo;
 } // namespace OHOS::Rosen
+} // namespace OHOS
 
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t UI_EXTENSION_UNKNOW_ID = 0;
-constexpr int32_t UI_EXTENSION_ID_FIRST_MAX = 21;
+constexpr int32_t UI_EXTENSION_ID_FIRST_MAX = 210;
 constexpr int32_t UI_EXTENSION_ID_OTHER_MAX = 9;
-constexpr int32_t UI_EXTENSION_OFFSET_MAX = 100000000;
-constexpr int32_t UI_EXTENSION_OFFSET_MIN = 1000000;
+constexpr int64_t UI_EXTENSION_OFFSET_MAX = 10000000000000;
+constexpr int64_t UI_EXTENSION_OFFSET_MIN = 100000000000;
 constexpr int32_t UI_EXTENSION_ID_FACTOR = 10;
 constexpr int32_t UI_EXTENSION_LEVEL_MAX = 3;
 constexpr int32_t UI_EXTENSION_ROOT_ID = -1;
@@ -50,14 +56,15 @@ public:
     UIExtensionManager() = default;
     ~UIExtensionManager() override = default;
 
-    void RegisterUIExtensionInFocus(const WeakPtr<UIExtensionPattern>& uiExtensionFocused);
+    void RegisterUIExtensionInFocus(
+        const WeakPtr<UIExtensionPattern>& uiExtensionFocused, const WeakPtr<SessionWrapper>& sessionWrapper);
     bool OnBackPressed();
     const RefPtr<FrameNode> GetFocusUiExtensionNode();
-    bool IsWrapExtensionAbilityId(int32_t elementId);
+    bool IsWrapExtensionAbilityId(int64_t elementId);
     bool IsWindowTypeUIExtension(const RefPtr<PipelineBase>& pipeline);
-    bool SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo, int32_t uiExtensionOffset,
-        const RefPtr<PipelineBase>& pipeline);
-    std::pair<int32_t, int32_t> UnWrapExtensionAbilityId(int32_t extensionOffset, int32_t elementId);
+    bool SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
+        int64_t uiExtensionOffset, const RefPtr<PipelineBase>& pipeline);
+    std::pair<int64_t, int64_t> UnWrapExtensionAbilityId(int64_t extensionOffset, int64_t elementId);
     int32_t ApplyExtensionId();
     void RecycleExtensionId(int32_t id);
 
@@ -83,6 +90,8 @@ public:
      */
     void TransferOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type);
 
+    bool NotifyOccupiedAreaChangeInfo(const sptr<Rosen::OccupiedAreaChangeInfo>& info);
+
 private:
     class UIExtensionIdUtility {
     public:
@@ -100,6 +109,7 @@ private:
     };
 
     WeakPtr<UIExtensionPattern> uiExtensionFocused_;
+    WeakPtr<SessionWrapper> sessionWrapper_;
     std::map<int32_t, OHOS::Ace::WeakPtr<UIExtensionPattern>> aliveUIExtensions_;
     std::unique_ptr<UIExtensionIdUtility> extensionIdUtility_ = std::make_unique<UIExtensionIdUtility>();
 };

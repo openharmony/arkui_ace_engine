@@ -63,6 +63,8 @@ public:
     // UI content event process
     bool ProcessBackPressed() override;
     bool ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override;
+    bool ProcessPointerEventWithCallback(
+        const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, const std::function<void()>& callback) override;
     bool ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent) override;
     bool ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent) override;
     bool ProcessVsyncEvent(uint64_t timeStampNanos) override;
@@ -121,6 +123,11 @@ public:
     sptr<IRemoteObject> GetParentToken() override
     {
         return nullptr;
+    }
+
+    SerializedGesture GetFormSerializedGesture() override
+    {
+        return SerializedGesture();
     }
 
     void UpdateTransform(const OHOS::Rosen::Transform& transform) override {};

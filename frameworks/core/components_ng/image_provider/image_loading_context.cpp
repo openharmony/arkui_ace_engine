@@ -146,9 +146,11 @@ void ImageLoadingContext::OnDataReady()
 
 void ImageLoadingContext::OnDataLoading()
 {
-    if (auto obj = ImageProvider::QueryImageObjectFromCache(src_); obj) {
-        DataReadyCallback(obj);
-        return;
+    if (!src_.GetIsOnSystemColorChange()) {
+        if (auto obj = ImageProvider::QueryImageObjectFromCache(src_); obj) {
+            DataReadyCallback(obj);
+            return;
+        }
     }
     if (src_.GetSrcType() == SrcType::NETWORK && SystemProperties::GetDownloadByNetworkEnabled()) {
         if (syncLoad_) {
@@ -164,6 +166,7 @@ void ImageLoadingContext::OnDataLoading()
         return;
     }
     ImageProvider::CreateImageObject(src_, WeakClaim(this), syncLoad_);
+    src_.SetIsSystemColorChange(false);
 }
 
 bool ImageLoadingContext::NotifyReadyIfCacheHit()

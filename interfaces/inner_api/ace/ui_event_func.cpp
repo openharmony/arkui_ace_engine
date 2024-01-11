@@ -73,34 +73,30 @@ void UIEventFunc::ResetFunc()
 
 void UIEventFunc::RegisterUIEventObserver(const std::string& config, const std::shared_ptr<UIEventObserver>& observer)
 {
-    auto func = UIEventFunc::Get();
-    if (func.IsAvailable()) {
-        func.registerFunc_(config, observer);
+    if (UIEventFunc::Get().IsAvailable()) {
+        UIEventFunc::Get().registerFunc_(config, observer);
     }
 }
 
 void UIEventFunc::UnregisterUIEventObserver(const std::shared_ptr<UIEventObserver>& observer)
 {
-    auto func = UIEventFunc::Get();
-    if (func.IsAvailable()) {
-        func.unregisterFunc_(observer);
+    if (UIEventFunc::Get().IsAvailable()) {
+        UIEventFunc::Get().unregisterFunc_(observer);
     }
 }
 
 void UIEventFunc::GetNodeProperty(
     const std::string& pageUrl, std::unordered_map<std::string, std::string>& nodeProperties)
 {
-    auto func = UIEventFunc::Get();
-    if (func.IsAvailable()) {
-        func.getPropFunc_(pageUrl, nodeProperties);
+    if (UIEventFunc::Get().IsAvailable()) {
+        UIEventFunc::Get().getPropFunc_(pageUrl, nodeProperties);
     }
 }
 
 void UIEventFunc::GetSimplifiedInspectorTree(std::string& tree)
 {
-    auto func = UIEventFunc::Get();
-    if (func.IsAvailable()) {
-        func.getTreeFunc_(tree);
+    if (UIEventFunc::Get().IsAvailable()) {
+        UIEventFunc::Get().getTreeFunc_(tree);
     }
 }
 } // namespace OHOS::Ace

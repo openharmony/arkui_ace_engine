@@ -31,6 +31,7 @@ public:
     std::shared_ptr<RSData> GetRSData() const;
     std::pair<SizeF, int32_t> Parse() const;
     RefPtr<SvgDomBase> MakeSvgDom(const std::optional<Color>& svgFillColor);
+    std::string ToString() const override;
 
 private:
     std::shared_ptr<RSData> rsData_;

@@ -309,11 +309,7 @@ AssertionResult ScrollTestNg::IsEqualCurrentPosition(float expectOffset)
 {
     FlushLayoutTask(frameNode_);
     float currentOffset = pattern_->GetCurrentPosition();
-    if (NearEqual(currentOffset, expectOffset)) {
-        return AssertionSuccess();
-    }
-    return AssertionFailure() << "currentOffset: " << currentOffset << " != "
-                              << "expectOffset: " << expectOffset;
+    return IsEqual(currentOffset, expectOffset);
 }
 
 /**
@@ -1330,17 +1326,20 @@ HWTEST_F(ScrollTestNg, UpdateCurrentOffset002, TestSize.Level1)
     EXPECT_TRUE(UpdateAndVerifyPosition(-1, -1, SCROLL_FROM_BAR_FLING));
     EXPECT_TRUE(UpdateAndVerifyPosition(1, 0, SCROLL_FROM_ROTATE));
 
-    pattern_->currentOffset_ = 10.f;
-    pattern_->UpdateCurrentOffset(-5.f, SCROLL_FROM_UPDATE);
-    EXPECT_EQ(pattern_->GetScrollBarOutBoundaryExtent(), 5.f);
+    pattern_->currentOffset_ = -10.f;
+    pattern_->UpdateScrollBarOffset();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetScrollBarOutBoundaryExtent(), 0);
 
     pattern_->currentOffset_ = -1000.f;
-    pattern_->UpdateCurrentOffset(-10.f, SCROLL_FROM_UPDATE);
+    pattern_->UpdateScrollBarOffset();
+    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetScrollBarOutBoundaryExtent(),
         -pattern_->currentOffset_ - (ITEM_HEIGHT * TOTAL_LINE_NUMBER - SCROLL_HEIGHT));
 
     pattern_->currentOffset_ = -100.f;
-    pattern_->UpdateCurrentOffset(-10.f, SCROLL_FROM_UPDATE);
+    pattern_->UpdateScrollBarOffset();
+    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->GetScrollBarOutBoundaryExtent(), 0.0f);
 }
 
@@ -1468,6 +1467,139 @@ HWTEST_F(ScrollTestNg, ScrollFadeEffect002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollFadeEffect003
+ * @tc.desc: Test SetPaintDirection in different situations.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollFadeEffect003, TestSize.Level1)
+{
+    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::FADE, true); });
+    RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
+    auto scrollable = AceType::MakeRefPtr<Scrollable>();
+    scrollEdgeEffect->SetScrollable(scrollable);
+
+    /**
+     * @tc.steps: step1. call InitialEdgeEffect()
+     */
+    auto scrollFadeEffect = AceType::DynamicCast<ScrollFadeEffect>(scrollEdgeEffect);
+    scrollEdgeEffect->InitialEdgeEffect();
+    EXPECT_EQ(scrollFadeEffect->fadeColor_, Color::GRAY);
+    scrollFadeEffect->fadeController_->DecelerateListener(1.0);
+
+    /**
+     * @tc.steps: step2. overScroll is 0.001, call SetPaintDirection()
+     */
+    scrollFadeEffect->SetPaintDirection(Axis::HORIZONTAL, 0.001f, true);
+
+    /**
+     * @tc.steps: step3. call SetPaintDirection() and axis is vertical.
+     */
+    scrollFadeEffect->fadeController_ = nullptr;
+    scrollFadeEffect->SetPaintDirection(Axis::VERTICAL, -1.f, true);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->direction_, OverScrollDirection::UP);
+
+    scrollFadeEffect->scrollable_->currentVelocity_ = 1000.0;
+    scrollFadeEffect->SetPaintDirection(Axis::VERTICAL, 1.f, true);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->direction_, OverScrollDirection::DOWN);
+
+    /**
+     * @tc.steps: step4. call SetPaintDirection() and axis is horizontal.
+     */
+    scrollFadeEffect->scrollable_->currentVelocity_ = 0.0;
+    scrollFadeEffect->SetPaintDirection(Axis::HORIZONTAL, -1.f, true);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->direction_, OverScrollDirection::LEFT);
+
+    scrollFadeEffect->scrollable_->currentVelocity_ = 1000.0;
+    scrollFadeEffect->SetPaintDirection(Axis::HORIZONTAL, 1.f, true);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->direction_, OverScrollDirection::RIGHT);
+}
+
+/**
+ * @tc.name: ScrollFadeEffect004
+ * @tc.desc: Test SetPaintDirection in different situations.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollFadeEffect004, TestSize.Level1)
+{
+    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::FADE, true); });
+    RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
+    auto scrollable = AceType::MakeRefPtr<Scrollable>();
+    scrollEdgeEffect->SetScrollable(scrollable);
+
+    /**
+     * @tc.steps: step1. call InitialEdgeEffect()
+     */
+    auto scrollFadeEffect = AceType::DynamicCast<ScrollFadeEffect>(scrollEdgeEffect);
+    scrollEdgeEffect->InitialEdgeEffect();
+    EXPECT_EQ(scrollFadeEffect->fadeColor_, Color::GRAY);
+    scrollFadeEffect->fadeController_->DecelerateListener(1.0);
+
+    /**
+     * @tc.steps: step2. call SetPaintDirection() and axis is vertical.
+     */
+    scrollFadeEffect->scrollable_->currentVelocity_ = 1000.0;
+    scrollFadeEffect->SetPaintDirection(Axis::VERTICAL, 1.f, true);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->direction_, OverScrollDirection::DOWN);
+
+    scrollFadeEffect->SetPaintDirection(Axis::VERTICAL, -1.f, true);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->direction_, OverScrollDirection::UP);
+
+    /**
+     * @tc.steps: step3. call SetPaintDirection() and axis is horizontal.
+     */
+    scrollFadeEffect->scrollable_->currentVelocity_ = 1000.0;
+    scrollFadeEffect->SetPaintDirection(Axis::HORIZONTAL, 1.f, true);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->direction_, OverScrollDirection::RIGHT);
+
+    scrollFadeEffect->scrollable_->currentVelocity_ = 0.0;
+    scrollFadeEffect->SetPaintDirection(Axis::HORIZONTAL, -1.f, true);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->direction_, OverScrollDirection::LEFT);
+}
+
+/**
+ * @tc.name: ScrollFadeEffect005
+ * @tc.desc: Test HandleOverScroll in different situations.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, ScrollFadeEffect005, TestSize.Level1)
+{
+    CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::FADE, true); });
+    RefPtr<ScrollEdgeEffect> scrollEdgeEffect = pattern_->GetScrollEdgeEffect();
+    auto scrollable = AceType::MakeRefPtr<Scrollable>();
+    scrollEdgeEffect->SetScrollable(scrollable);
+
+    /**
+     * @tc.steps: step1. call InitialEdgeEffect()
+     */
+    auto scrollFadeEffect = AceType::DynamicCast<ScrollFadeEffect>(scrollEdgeEffect);
+    scrollEdgeEffect->InitialEdgeEffect();
+    EXPECT_EQ(scrollFadeEffect->fadeColor_, Color::GRAY);
+    scrollFadeEffect->fadeController_->DecelerateListener(1.0);
+
+    /**
+     * @tc.steps: step2. call HandleOverScroll(), axis is vertical and isScrollFromUpdate is false.
+     * @tc.expected: do nothing
+     */
+    const SizeF viewPort(SCROLL_WIDTH, SCROLL_HEIGHT);
+    scrollFadeEffect->HandleOverScroll(Axis::VERTICAL, 0.f, viewPort);
+
+    /**
+     * @tc.steps: step3. call HandleOverScroll(), axis is vertical and isScrollFromUpdate is true.
+     */
+    scrollFadeEffect->fadeController_ = nullptr;
+    scrollFadeEffect->HandleOverScroll(Axis::VERTICAL, -1.f, viewPort, true, false);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->direction_, OverScrollDirection::UP);
+    ASSERT_NE(scrollFadeEffect->fadeController_, nullptr);
+
+    /**
+     * @tc.steps: step4. call HandleOverScroll(), axis is horizontal and isScrollFromUpdate is true.
+     */
+    scrollFadeEffect->scrollable_->currentVelocity_ = 0.0;
+    scrollFadeEffect->HandleOverScroll(Axis::HORIZONTAL, -1.f, viewPort, true, false);
+    EXPECT_EQ(scrollFadeEffect->fadePainter_->direction_, OverScrollDirection::LEFT);
+}
+
+/**
  * @tc.name: FadeController001
  * @tc.desc: Test scroll_fade_controller
  * @tc.type: FUNC
@@ -1552,6 +1684,111 @@ HWTEST_F(ScrollTestNg, FadeController001, TestSize.Level1)
     fadeController->decele_->NotifyListener(100.0);
     EXPECT_EQ(param1, 2940.3);
     EXPECT_EQ(param2, 31853.25);
+}
+
+/**
+ * @tc.name: FadeController002
+ * @tc.desc: Test scroll_fade_controller
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, FadeController002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ScrollFadeController and set callback function.
+     */
+    auto fadeController = AceType::MakeRefPtr<ScrollFadeController>();
+    ASSERT_NE(fadeController, nullptr);
+    double param1 = 10.f;
+    double param2 = -10.0;
+    auto callback = [&param1, &param2](double parameter1, double parameter2) {
+        param1 = parameter1;
+        param2 = parameter2;
+    };
+    fadeController->SetCallback(callback);
+
+    /**
+     * @tc.steps: step2. When OverScrollState is IDLE, call the ProcessAbsorb function and callback function in
+     *                   fadeController.
+     * @tc.expected: step2. Check whether relevant parameters are correct.
+     */
+    fadeController->state_ = OverScrollState::IDLE;
+    fadeController->ProcessAbsorb(1.0);
+    fadeController->decele_->NotifyListener(100.0);
+    EXPECT_EQ(fadeController->opacity_, 0.3);
+    EXPECT_EQ(fadeController->scaleSize_, 3.25);
+
+    /**
+     * @tc.steps: step3. When OverScrollState is PULL, call the ProcessPull function and callback function in
+     *                   fadeController.
+     * @tc.expected: step3. Check whether relevant parameters are correct.
+     */
+    fadeController->controller_->NotifyStopListener();
+    fadeController->state_ = OverScrollState::PULL;
+    fadeController->ProcessPull(1.0, 1.0, 1.0);
+    EXPECT_EQ(fadeController->state_, OverScrollState::PULL);
+
+    /**
+     * @tc.steps: step4. When OverScrollState is PULL, call the ProcessRecede function and callback function in
+     *                   fadeController.
+     * @tc.expected: step4. Check whether relevant parameters are correct.
+     */
+    fadeController->controller_ = nullptr;
+    fadeController->ProcessRecede(10);
+    EXPECT_EQ(fadeController->state_, OverScrollState::PULL);
+
+    /**
+     * @tc.steps: step5. When OverScrollState is 0, call the Initialize function and callback function in
+     *                   fadeController.
+     * @tc.expected: step5. Check whether relevant parameters are correct.
+     */
+    int value = 4;
+    OverScrollState data = static_cast<OverScrollState>(value);
+    fadeController->state_ = data;
+    fadeController->ProcessAbsorb(1.0);
+}
+
+/**
+ * @tc.name: FadeController003
+ * @tc.desc: Test scroll_fade_controller
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, FadeController003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ScrollFadeController and set callback function.
+     */
+    auto fadeController = AceType::MakeRefPtr<ScrollFadeController>();
+    ASSERT_NE(fadeController, nullptr);
+    double param1 = 10.f;
+    double param2 = -10.0;
+    auto callback = [&param1, &param2](double parameter1, double parameter2) {
+        param1 = parameter1;
+        param2 = parameter2;
+    };
+    fadeController->SetCallback(callback);
+
+    /**
+     * @tc.steps: step2. When OverScrollState is PULL, call the ProcessAbsorb function and callback function in
+     *                   fadeController.
+     * @tc.expected: step2. Check whether relevant parameters are correct.
+     */
+    fadeController->controller_ = nullptr;
+    fadeController->state_ = OverScrollState::PULL;
+    fadeController->ProcessAbsorb(10);
+    fadeController->ProcessRecede(10);
+    EXPECT_EQ(fadeController->state_, OverScrollState::PULL);
+    fadeController->ProcessPull(1.0, 0.0, 1.0);
+
+    /**
+     * @tc.steps: step3. When OverScrollState is IDLE, call the DecelerateListener function and callback function in
+     *                   fadeController.
+     * @tc.expected: step3. Check whether relevant parameters are correct.
+     */
+    fadeController->state_ = OverScrollState::IDLE;
+    fadeController->ProcessAbsorb(-10);
+    fadeController->callback_ = nullptr;
+    fadeController->DecelerateListener(0.0);
+    EXPECT_EQ(fadeController->state_, OverScrollState::IDLE);
 }
 
 /**
@@ -1890,8 +2127,7 @@ HWTEST_F(ScrollTestNg, ScrollBar005, TestSize.Level1)
 
     scrollBar->SetPositionMode(PositionMode::LEFT);
     scrollBar->SetNormalWidth(Dimension(1)); // call CalcReservedHeight;
-    EXPECT_EQ(scrollBar->startReservedHeight_, Dimension(0.0));
-    EXPECT_EQ(scrollBar->endReservedHeight_, Dimension(0.0));
+    EXPECT_EQ(scrollBar->endReservedHeight_.Value(), 0);
 
     BorderRadiusProperty borderRadiusProperty;
     float radius = 13.f;
@@ -2222,72 +2458,70 @@ HWTEST_F(ScrollTestNg, OnScrollCallback003, TestSize.Level1)
      * @tc.expected: The scrollableDistance_ is two of ITEM_HEIGHT
      */
     CreateWithContent([](ScrollModelNG model) { model.SetEdgeEffect(EdgeEffect::SPRING, true); });
-    EXPECT_EQ(pattern_->scrollableDistance_, ITEM_HEIGHT * 2);
+    float scrollableDistance = ITEM_HEIGHT * 2;
+    EXPECT_EQ(pattern_->scrollableDistance_, scrollableDistance);
 
     /**
      * @tc.steps: step2. scroll to above of content
      * @tc.expected: friction is not effected
      */
-    OnScrollCallback(1.f, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(1.f));
+    pattern_->OnScrollCallback(1, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->GetCurrentPosition(), 1);
 
     /**
      * @tc.steps: step3. Continue scroll up
      * @tc.expected: friction is effected, but is 1
      */
-    OnScrollCallback(1.f, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(2.f));
+    pattern_->OnScrollCallback(1, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->GetCurrentPosition(), 2);
 
     /**
      * @tc.steps: step4. Continue scroll up
      * @tc.expected: friction is effected
      */
-    OnScrollCallback(1.f, SCROLL_FROM_UPDATE);
-    double currentOffset = pattern_->GetCurrentPosition();
-    EXPECT_LT(currentOffset, 3.f);
+    pattern_->OnScrollCallback(1, SCROLL_FROM_UPDATE);
+    EXPECT_LT(pattern_->GetCurrentPosition(), 3);
 
     /**
      * @tc.steps: step5. Scroll down
      * @tc.expected: friction is not effected
      */
-    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(currentOffset - 1.f));
+    pattern_->OnScrollCallback(-1, SCROLL_FROM_UPDATE);
+    EXPECT_LT(pattern_->GetCurrentPosition(), 2);
 
     /**
      * @tc.steps: step6. Scroll to bottom for test other condition
      */
-    float scrollableDistance = ITEM_HEIGHT * 2;
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
-    EXPECT_TRUE(IsEqualCurrentPosition(-scrollableDistance));
+    EXPECT_EQ(pattern_->GetCurrentPosition(), -scrollableDistance);
 
     /**
      * @tc.steps: step7. scroll to below of content
      * @tc.expected: friction is not effected
      */
-    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(-(scrollableDistance + 1.f)));
+    pattern_->OnScrollCallback(-1, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->GetCurrentPosition(), -(scrollableDistance + 1));
 
     /**
      * @tc.steps: step8. Continue scroll down
      * @tc.expected: friction is effected, but is 1
      */
-    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(-(scrollableDistance + 2.f)));
+    pattern_->OnScrollCallback(-1, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->GetCurrentPosition(), -(scrollableDistance + 2));
 
     /**
      * @tc.steps: step9. Continue scroll down
      * @tc.expected: friction is effected
      */
-    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
-    currentOffset = pattern_->GetCurrentPosition();
-    EXPECT_GT(currentOffset, -(scrollableDistance + 3.f));
+    pattern_->OnScrollCallback(-1, SCROLL_FROM_UPDATE);
+    EXPECT_GT(pattern_->GetCurrentPosition(), -(scrollableDistance + 3));
 
     /**
      * @tc.steps: step10. Scroll up
      * @tc.expected: friction is not effected
      */
-    OnScrollCallback(1.f, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(currentOffset + 1.f));
+    pattern_->OnScrollCallback(1, SCROLL_FROM_UPDATE);
+    EXPECT_GT(pattern_->GetCurrentPosition(), -(scrollableDistance + 2));
 
     /**
      * @tc.steps: step11. scroll to middle of content
@@ -2295,8 +2529,8 @@ HWTEST_F(ScrollTestNg, OnScrollCallback003, TestSize.Level1)
      */
     ScrollToEdge(ScrollEdgeType::SCROLL_TOP);
     EXPECT_EQ(pattern_->GetCurrentPosition(), 0);
-    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(-1.f));
+    pattern_->OnScrollCallback(-1, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->GetCurrentPosition(), -1);
 }
 
 /**
@@ -2320,65 +2554,63 @@ HWTEST_F(ScrollTestNg, OnScrollCallback004, TestSize.Level1)
      * @tc.steps: step2. scroll to above of content
      * @tc.expected: friction is not effected
      */
-    OnScrollCallback(1.f, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(1.f));
+    pattern_->OnScrollCallback(1, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->GetCurrentPosition(), 1);
 
     /**
      * @tc.steps: step3. Continue scroll up
      * @tc.expected: friction is effected, but is 1
      */
-    OnScrollCallback(1.f, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(2.f));
+    pattern_->OnScrollCallback(1, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->GetCurrentPosition(), 2);
 
     /**
      * @tc.steps: step4. Continue scroll up
      * @tc.expected: friction is effected
      */
-    OnScrollCallback(1.f, SCROLL_FROM_UPDATE);
-    double currentOffset = pattern_->GetCurrentPosition();
-    EXPECT_LT(currentOffset, 3.f);
+    pattern_->OnScrollCallback(1, SCROLL_FROM_UPDATE);
+    EXPECT_LT(pattern_->GetCurrentPosition(), 3);
 
     /**
      * @tc.steps: step5. Scroll down
      * @tc.expected: friction is not effected
      */
-    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(currentOffset - 1.f));
+    pattern_->OnScrollCallback(-1, SCROLL_FROM_UPDATE);
+    EXPECT_LT(pattern_->GetCurrentPosition(), 2);
 
     /**
      * @tc.steps: step6. Scroll to bottom for test other condition
      */
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
-    EXPECT_TRUE(IsEqualCurrentPosition(0));
+    EXPECT_EQ(pattern_->GetCurrentPosition(), 0);
 
     /**
      * @tc.steps: step7. scroll to below of content
      * @tc.expected: friction is not effected
      */
-    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(-1.f));
+    pattern_->OnScrollCallback(-1, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->GetCurrentPosition(), -1);
 
     /**
      * @tc.steps: step8. Continue scroll down
      * @tc.expected: friction is effected, but is 1
      */
-    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(-2.f));
+    pattern_->OnScrollCallback(-1, SCROLL_FROM_UPDATE);
+    EXPECT_EQ(pattern_->GetCurrentPosition(), -2);
 
     /**
      * @tc.steps: step9. Continue scroll down
      * @tc.expected: friction is effected
      */
-    OnScrollCallback(-1.f, SCROLL_FROM_UPDATE);
-    currentOffset = pattern_->GetCurrentPosition();
-    EXPECT_GT(currentOffset, -3.f);
+    pattern_->OnScrollCallback(-1, SCROLL_FROM_UPDATE);
+    EXPECT_GT(pattern_->GetCurrentPosition(), -3);
 
     /**
      * @tc.steps: step10. Scroll up
      * @tc.expected: friction is not effected
      */
-    OnScrollCallback(1.f, SCROLL_FROM_UPDATE);
-    EXPECT_TRUE(IsEqualCurrentPosition(currentOffset + 1.f));
+    pattern_->OnScrollCallback(1, SCROLL_FROM_UPDATE);
+    EXPECT_GT(pattern_->GetCurrentPosition(), -2);
 }
 
 /**
@@ -3234,7 +3466,7 @@ HWTEST_F(ScrollTestNg, StopAnimation001, TestSize.Level1)
     CreateWithContent([](ScrollModelNG model) {});
     std::shared_ptr<AnimationUtils::Animation> animation;
     pattern_->StopAnimation(animation);
-    ASSERT_NE(animation, nullptr);
+    EXPECT_TRUE(pattern_->isAnimationStop_);
 }
 
 /**

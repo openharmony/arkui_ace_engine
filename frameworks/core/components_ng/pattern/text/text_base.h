@@ -46,6 +46,22 @@ struct HandleMoveStatus {
     }
 };
 
+template<typename T>
+void GetTextCaretMetrics(RefPtr<FrameNode>& targetNode, CaretMetricsF& caretMetrics)
+{
+    CHECK_NULL_VOID(targetNode);
+    if (targetNode->GetTag() == V2::SEARCH_ETS_TAG) {
+        auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(targetNode->GetChildren().front());
+        CHECK_NULL_VOID(textFieldFrameNode);
+        auto textPattern = textFieldFrameNode->GetPattern<T>();
+        CHECK_NULL_VOID(textPattern);
+        textPattern->GetCaretMetrics(caretMetrics);
+    } else {
+        auto textPattern = targetNode->GetPattern<T>();
+        CHECK_NULL_VOID(textPattern);
+        textPattern->GetCaretMetrics(caretMetrics);
+    }
+}
 class TextBase : public SelectOverlayClient {
     DECLARE_ACE_TYPE(TextBase, SelectOverlayClient);
 
@@ -146,6 +162,8 @@ public:
         context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height);
     }
 
+    virtual void GetCaretMetrics(CaretMetricsF& caretCaretMetric) {}
+    
 protected:
     TextSelector textSelector_;
     bool showSelect_ = true;

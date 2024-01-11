@@ -103,6 +103,14 @@ public:
         return focusHub_;
     }
 
+    const RefPtr<FocusHub>& GetOrCreateFocusHub(const FocusPattern& focusPattern)
+    {
+        if (!focusHub_) {
+            focusHub_ = MakeRefPtr<FocusHub>(WeakClaim(this), focusPattern);
+        }
+        return focusHub_;
+    }
+
     const RefPtr<FocusHub>& GetFocusHub() const
     {
         return focusHub_;
@@ -196,9 +204,25 @@ public:
         }
     }
 
+    void FireInnerOnAreaChanged(
+        const RectF& oldRect, const OffsetF& oldOrigin, const RectF& rect, const OffsetF& origin)
+    {
+        for (auto& innerCallbackInfo : onAreaChangedInnerCallbacks_) {
+            if (innerCallbackInfo.second) {
+                auto innerOnAreaCallback = innerCallbackInfo.second;
+                innerOnAreaCallback(oldRect, oldOrigin, rect, origin);
+            }
+        }
+    }
+
     bool HasOnAreaChanged() const
     {
         return static_cast<bool>(onAreaChanged_);
+    }
+
+    bool HasInnerOnAreaChanged() const
+    {
+        return !onAreaChangedInnerCallbacks_.empty();
     }
 
     using OnDragFunc = std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
@@ -479,6 +503,13 @@ public:
 
     void PostEnabledTask();
 
+    void AddInnerOnAreaChangedCallback(int32_t id, OnAreaChangedFunc&& callback);
+
+    void ClearOnAreaChangedInnerCallbacks()
+    {
+        onAreaChangedInnerCallbacks_.clear();
+    }
+
 protected:
     virtual void OnModifyDone() {}
 
@@ -492,6 +523,7 @@ private:
     std::function<void()> onAppear_;
     std::function<void()> onDisappear_;
     OnAreaChangedFunc onAreaChanged_;
+    std::unordered_map<int32_t, OnAreaChangedFunc> onAreaChangedInnerCallbacks_;
 
     OnDragStartFunc onDragStart_;
     OnDragFunc onDragEnter_;

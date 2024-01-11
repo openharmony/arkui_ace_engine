@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +46,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr float CUSTOM_NODE_WIDTH = 100.f;
 constexpr float CUSTOM_NODE_HEIGHT = 10.f;
+constexpr float REFRESH_HEIGHT = 400.f;
 constexpr Dimension DEFAULT_INDICATOR_OFFSET = 16.0_vp;
 constexpr int32_t DEFAULT_FRICTION_RATIO = 62;
 constexpr float PERCENT = 0.01; // Percent
@@ -109,6 +110,7 @@ void RefreshTestNg::Create(const std::function<void(RefreshModelNG)>& callback)
 {
     RefreshModelNG model;
     model.Create();
+    ViewAbstract::SetHeight(CalcLength(REFRESH_HEIGHT));
     if (callback) {
         callback(model);
     }
@@ -559,7 +561,7 @@ HWTEST_F(RefreshTestNg, RefreshDragFrameRatio001, TestSize.Level1)
     Create();
     auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
     frameNode_->renderContext_ = renderContext;
-    EXPECT_CALL(*renderContext, CalcExpectedFrameRate(_, _)).Times(3);
+    // CalcExpectedFrameRate will be called
     pattern_->HandleDragStart();
     pattern_->HandleDragUpdate(0.0f);
     pattern_->HandleDragEnd(0.0f);

@@ -563,46 +563,6 @@ HWTEST_F(AppBarTestNg, SetRowColor002, TestSize.Level1)
 }
 
 /**
- * @tc.name: Test004
- * @tc.desc: Test
- * @tc.type: FUNC
- */
-HWTEST_F(AppBarTestNg, Test004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create appBar when direction is Rtl.
-     * @tc.expected: appBar is not null.
-     */
-    auto test = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
-    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
-    auto atom = AppBarView::Create(test);
-    auto appBar = Referenced::MakeRefPtr<AppBarView>(atom);
-    EXPECT_NE(appBar, nullptr);
-    auto titleBar = AceType::DynamicCast<FrameNode>(atom->GetFirstChild());
-    EXPECT_NE(titleBar, nullptr);
-
-    auto label = AceType::DynamicCast<FrameNode>(titleBar->GetLastChild());
-    auto textLayoutProperty = label->GetLayoutProperty<TextLayoutProperty>();
-    EXPECT_NE(textLayoutProperty, nullptr);
-    auto backButton = AceType::DynamicCast<FrameNode>(titleBar->GetFirstChild());
-    auto buttonLayoutProperty = backButton->GetLayoutProperty();
-    EXPECT_NE(buttonLayoutProperty, nullptr);
-
-    /**
-     * @tc.steps: step2. Testing margins and textAlign
-     */
-    constexpr Dimension MARGIN_TEXT_LEFT = 24.0_vp;
-    constexpr Dimension MARGIN_TEXT_RIGHT = 84.0_vp;
-    constexpr Dimension MARGIN_BUTTON = 12.0_vp;
-    constexpr Dimension MARGIN_BACK_BUTTON_RIGHT = -20.0_vp;
-    EXPECT_EQ(textLayoutProperty->GetTextAlign(), OHOS::Ace::TextAlign::RIGHT);
-    EXPECT_EQ(textLayoutProperty->GetMarginProperty()->left.value(), CalcLength(MARGIN_TEXT_RIGHT));
-    EXPECT_EQ(textLayoutProperty->GetMarginProperty()->right.value(), CalcLength(MARGIN_TEXT_LEFT));
-    EXPECT_EQ(buttonLayoutProperty->GetMarginProperty()->left.value(), CalcLength(MARGIN_BACK_BUTTON_RIGHT));
-    EXPECT_EQ(buttonLayoutProperty->GetMarginProperty()->right.value(), CalcLength(MARGIN_BUTTON));
-}
-
-/**
  * @tc.name: SetRowWidth002
  * @tc.desc: Testing the SetRowWidth interface
  * @tc.type: FUNC
@@ -640,29 +600,54 @@ HWTEST_F(AppBarTestNg, SetRowWidth002, TestSize.Level1)
 }
 
 /**
- * @tc.name: ReverseBackButton001
- * @tc.desc: Testing the ReverseBackButton interface
+ * @tc.name: UpdateRowLayout001
+ * @tc.desc: Testing the UpdateRowLayout interface
  * @tc.type: FUNC
  */
-HWTEST_F(AppBarTestNg, ReverseBackButton001, TestSize.Level1)
+HWTEST_F(AppBarTestNg, UpdateRowLayout001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create appBar.
      * @tc.expected: appBar is not null.
      */
-    auto stage = AceType::MakeRefPtr<FrameNode>("stage", 1, AceType::MakeRefPtr<StagePattern>());
-    auto frameNode = AppBarView::Create(stage);
-    auto appBar = Referenced::MakeRefPtr<AppBarView>(frameNode);
-
+    auto test = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    auto atom = AppBarView::Create(test);
+    auto appBar = Referenced::MakeRefPtr<AppBarView>(atom);
+    EXPECT_NE(appBar, nullptr);
+    
+    auto titleBar = AceType::DynamicCast<FrameNode>(atom->GetFirstChild());
+    EXPECT_NE(titleBar, nullptr);
+    auto label = AceType::DynamicCast<FrameNode>(titleBar->GetLastChild());
+    auto textLayoutProperty = label->GetLayoutProperty<TextLayoutProperty>();
+    auto backButton = AceType::DynamicCast<FrameNode>(titleBar->GetFirstChild());
+    auto buttonLayoutProperty = backButton->GetLayoutProperty();
+    auto renderContext = backButton->GetRenderContext();
+    EXPECT_NE(renderContext, nullptr);
     /**
-     * @tc.Construct the parameters required to call the ReverseBackButton function
-     * @tc.Calling the ReverseBackButton function
+     * @tc.Calling the UpdateRowLayout function when direction is Rtl.
      */
+    constexpr Dimension MARGIN_TEXT_LEFT = 24.0_vp;
+    constexpr Dimension MARGIN_TEXT_RIGHT = 84.0_vp;
+    constexpr Dimension MARGIN_BUTTON = 12.0_vp;
+    constexpr Dimension MARGIN_BACK_BUTTON_RIGHT = -20.0_vp;
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
-    auto titleBar = frameNode->GetChildAtIndex(0);
-    auto backbtn = AceType::DynamicCast<FrameNode>(titleBar->GetFirstChild());
-    auto renderContext = backbtn->GetRenderContext();
-    appBar->ReverseBackButton();
+    appBar->UpdateRowLayout();
+    EXPECT_EQ(textLayoutProperty->GetTextAlign(), OHOS::Ace::TextAlign::RIGHT);
+    EXPECT_EQ(textLayoutProperty->GetMarginProperty()->left.value(), CalcLength(MARGIN_TEXT_RIGHT));
+    EXPECT_EQ(textLayoutProperty->GetMarginProperty()->right.value(), CalcLength(MARGIN_TEXT_LEFT));
+    EXPECT_EQ(buttonLayoutProperty->GetMarginProperty()->left.value(), CalcLength(MARGIN_BACK_BUTTON_RIGHT));
+    EXPECT_EQ(buttonLayoutProperty->GetMarginProperty()->right.value(), CalcLength(MARGIN_BUTTON));
     EXPECT_EQ(renderContext->GetTransformScale(), VectorF(-1.0f, 1.0f));
+    /**
+     * @tc.Calling the UpdateRowLayout function when direction is Ltr.
+     */
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    appBar->UpdateRowLayout();
+    EXPECT_EQ(textLayoutProperty->GetTextAlign(), OHOS::Ace::TextAlign::LEFT);
+    EXPECT_EQ(textLayoutProperty->GetMarginProperty()->right.value(), CalcLength(MARGIN_TEXT_RIGHT));
+    EXPECT_EQ(textLayoutProperty->GetMarginProperty()->left.value(), CalcLength(MARGIN_TEXT_LEFT));
+    EXPECT_EQ(buttonLayoutProperty->GetMarginProperty()->right.value(), CalcLength(MARGIN_BACK_BUTTON_RIGHT));
+    EXPECT_EQ(buttonLayoutProperty->GetMarginProperty()->left.value(), CalcLength(MARGIN_BUTTON));
+    EXPECT_EQ(renderContext->GetTransformScale(), VectorF(1.0f, 1.0f));
 }
 } // namespace OHOS::Ace::NG

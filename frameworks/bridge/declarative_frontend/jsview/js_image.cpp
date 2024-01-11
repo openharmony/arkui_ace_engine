@@ -113,13 +113,23 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
     } else if (!ParseJsMedia(args[0], src)) {
         return;
     }
+    int32_t resId = 0;
+    if (args[0]->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(args[0]);
+        JSRef<JSVal> tmp = jsObj->GetProperty("id");
+        if (!tmp->IsNull() && tmp->IsNumber()) {
+            resId = tmp->ToNumber<int32_t>();
+        }
+    }
     if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK) {
         return;
     }
     std::string bundleName;
     std::string moduleName;
     GetJsMediaBundleInfo(args[0], bundleName, moduleName);
-    ImageModel::GetInstance()->SetAlt(ImageSourceInfo { src, bundleName, moduleName });
+    ImageSourceInfo srcInfo = ImageSourceInfo { src, bundleName, moduleName };
+    srcInfo.SetIsUriPureNumber((resId == -1));
+    ImageModel::GetInstance()->SetAlt(srcInfo);
 }
 
 void JSImage::SetObjectFit(const JSCallbackInfo& args)
@@ -218,6 +228,14 @@ void JSImage::Create(const JSCallbackInfo& info)
     std::string moduleName;
     std::string src;
     bool srcValid = ParseJsMedia(info[0], src);
+    int32_t resId = 0;
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> tmp = jsObj->GetProperty("id");
+        if (!tmp->IsNull() && tmp->IsNumber()) {
+            resId = tmp->ToNumber<int32_t>();
+        }
+    }
     if (isCard && info[0]->IsString()) {
         SrcType srcType = ImageSourceInfo::ResolveURIType(src);
         bool notSupport = (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
@@ -241,7 +259,7 @@ void JSImage::Create(const JSCallbackInfo& info)
 #endif
     }
 
-    ImageModel::GetInstance()->Create(src, pixmap, bundleName, moduleName);
+    ImageModel::GetInstance()->Create(src, pixmap, bundleName, moduleName, (resId == -1));
 }
 
 bool JSImage::IsDrawable(const JSRef<JSVal>& jsValue)
@@ -333,6 +351,9 @@ void JSImage::SetImageFill(const JSCallbackInfo& info)
 
     Color color;
     if (!ParseJsColor(info[0], color)) {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            return;
+        }
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<ImageTheme>();

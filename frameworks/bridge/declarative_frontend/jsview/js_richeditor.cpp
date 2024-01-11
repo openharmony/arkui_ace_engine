@@ -174,6 +174,11 @@ JSRef<JSObject> JSRichEditor::CreateJSTextStyleResult(const TextStyleResult& tex
     decorationObj->SetProperty<int32_t>("type", textStyleResult.decorationType);
     decorationObj->SetProperty<std::string>("color", textStyleResult.decorationColor);
     textStyleObj->SetPropertyObject("decoration", decorationObj);
+    textStyleObj->SetProperty<int32_t>("textAlign", textStyleResult.textAlign);
+    JSRef<JSArray> leadingMarginArray = JSRef<JSArray>::New();
+    leadingMarginArray->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(textStyleResult.leadingMarginSize[0])));
+    leadingMarginArray->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(textStyleResult.leadingMarginSize[1])));
+    textStyleObj->SetPropertyObject("leadingMarginSize", leadingMarginArray);
 
     return textStyleObj;
 }
@@ -200,6 +205,8 @@ JSRef<JSObject> JSRichEditor::CreateJSImageStyleResult(const ImageStyleResult& i
     imageSpanStyleObj->SetPropertyObject("size", sizeArray);
     imageSpanStyleObj->SetProperty<int32_t>("verticalAlign", imageStyleResult.verticalAlign);
     imageSpanStyleObj->SetProperty<int32_t>("objectFit", imageStyleResult.objectFit);
+    imageSpanStyleObj->SetProperty<std::string>("borderRadius", imageStyleResult.borderRadius);
+    imageSpanStyleObj->SetProperty<std::string>("margin", imageStyleResult.margin);
 
     return imageSpanStyleObj;
 }
@@ -760,6 +767,7 @@ void JSRichEditorController::ParseJsTextStyle(
 void JSRichEditorController::ParseJsSymbolSpanStyle(
     const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
 {
+    updateSpanStyle.isSymbolStyle = true;
     JSRef<JSVal> fontColor = styleObject->GetProperty("fontColor");
     std::vector<Color> symbolColor;
     if (!fontColor->IsNull() && JSContainerBase::ParseJsSymbolColor(fontColor, symbolColor)) {
@@ -1305,8 +1313,12 @@ std::pair<int32_t, int32_t> ParseRange(const JSRef<JSObject>& object)
 {
     int32_t start = -1;
     int32_t end = -1;
-    JSContainerBase::ParseJsInt32(object->GetProperty("start"), start);
-    JSContainerBase::ParseJsInt32(object->GetProperty("end"), end);
+    if (!JSContainerBase::ParseJsInt32(object->GetProperty("start"), start)) {
+        start = 0;
+    }
+    if (!JSContainerBase::ParseJsInt32(object->GetProperty("end"), end)) {
+        end = INT_MAX;
+    }
     if (start < 0) {
         start = 0;
     }
@@ -1314,7 +1326,8 @@ std::pair<int32_t, int32_t> ParseRange(const JSRef<JSObject>& object)
         end = INT_MAX;
     }
     if (start > end) {
-        std::swap(start, end);
+        start = 0;
+        end = INT_MAX;
     }
     return std::make_pair(start, end);
 }

@@ -183,6 +183,7 @@ public:
     Rosen::SHADOW_COLOR_STRATEGY ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy);
     void OnBackShadowUpdate(const Shadow& shadow) override;
     void OnBackBlendModeUpdate(BlendMode blendMode) override;
+    void OnBackBlendApplyTypeUpdate(BlendApplyType applyType) override;
     void UpdateBorderWidthF(const BorderWidthPropertyF& value) override;
 
     void OnTransformMatrixUpdate(const Matrix4& matrix) override;
@@ -270,6 +271,7 @@ public:
     void OnPositionUpdate(const OffsetT<Dimension>& value) override;
     void OnZIndexUpdate(int32_t value) override;
     void DumpInfo() override;
+    void DumpAdvanceInfo() override;
     void SetClipBoundsWithCommands(const std::string& commands) override;
     void SetNeedDebugBoundary(bool flag) override
     {
@@ -292,7 +294,8 @@ public:
     void MarkDrivenRender(bool flag) override;
     void MarkDrivenRenderItemIndex(int32_t index) override;
     void MarkDrivenRenderFramePaintState(bool flag) override;
-    RefPtr<PixelMap> GetThumbnailPixelMap() override;
+    RefPtr<PixelMap> GetThumbnailPixelMap(bool needScale = false) override;
+    void UpdateThumbnailPixelMapScale(float& scaleX, float& scaleY) override;
     std::vector<double> transInfo_;
     std::vector<double> GetTrans() override;
 #ifndef USE_ROSEN_DRAWING
@@ -326,6 +329,12 @@ public:
     void SetShadowElevation(float elevation) override;
     void SetShadowRadius(float radius) override;
     void SetRenderFrameOffset(const OffsetF& offset) override;
+    void SetScale(float scaleX, float scaleY) override;
+    void SetBackgroundColor(uint32_t colorValue) override;
+    void SetRenderPivot(float pivotX, float pivotY) override;
+    void SetFrame(float positionX, float positionY, float width, float height) override;
+    void SetOpacity(float opacity) override;
+    void SetTranslate(float translateX, float translateY, float translateZ) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -407,7 +416,7 @@ private:
     }
     bool HasDisappearTransition() const override
     {
-        return transitionEffect_ != nullptr && !transitionEffect_->HasDisappearTransition();
+        return transitionEffect_ != nullptr && transitionEffect_->HasDisappearTransition();
     }
     void OnTransitionInFinish();
     void OnTransitionOutFinish();

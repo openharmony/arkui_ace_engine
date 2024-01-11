@@ -242,13 +242,12 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
             renderContext->UpdateBackgroundColor(
                 popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
         } else {
-            BlurStyleOption styleOption;
-            styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
             auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(Color::TRANSPARENT);
             renderContext->UpdateBackgroundColor(backgroundColor);
+            BlurStyleOption styleOption;
+            styleOption.blurStyle = param->GetBlurStyle();
             renderContext->UpdateBackBlurStyle(styleOption);
         }
-        renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
         if (param->GetShadow().has_value()) {
             renderContext->UpdateBackShadow(param->GetShadow().value());
         }
@@ -316,8 +315,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     float popupMaxWidth = 0.0f;
     float popupMaxHeight = 0.0f;
     GetPopupMaxWidthAndHeight(param, popupMaxWidth, popupMaxHeight);
-    columnLayoutProperty->UpdateCalcMaxSize(
-        CalcSize(NG::CalcLength(Dimension(popupMaxWidth)), NG::CalcLength(Dimension(popupMaxHeight))));
+    columnLayoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, NG::CalcLength(Dimension(popupMaxHeight))));
     if (param->GetChildWidth().has_value()) {
         columnLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(param->GetChildWidth().value()), std::nullopt));
@@ -327,10 +325,10 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
             columnRenderContext->UpdateBackgroundColor(
                 popupPaintProps->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
         } else {
+            auto backgroundColor = popupPaintProps->GetBackgroundColor().value_or(Color::TRANSPARENT);
+            columnRenderContext->UpdateBackgroundColor(backgroundColor);
             BlurStyleOption styleOption;
-            styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
-            columnRenderContext->UpdateBackgroundColor(
-                popupPaintProps->GetBackgroundColor().value_or(Color::TRANSPARENT));
+            styleOption.blurStyle = param->GetBlurStyle();
             columnRenderContext->UpdateBackBlurStyle(styleOption);
         }
         if (param->GetShadow().has_value()) {
@@ -345,7 +343,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
 
 void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode)
 {
-    UpdateCommonParam(popupId, param);
+    UpdateCommonParam(popupId, param, false);
     auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupId);
     CHECK_NULL_VOID(popupNode);
     auto popupProp = AceType::DynamicCast<BubbleLayoutProperty>(popupNode->GetLayoutProperty());
@@ -421,7 +419,7 @@ void BubbleView::GetPopupMaxWidthAndHeight(const RefPtr<PopupParam>& param, floa
     popupMaxWidth = GetMaxWith().Value();
 }
 
-void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& param)
+void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& param, bool custom)
 {
     auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupId);
     CHECK_NULL_VOID(popupNode);
@@ -480,8 +478,12 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     float popupMaxWidth = 0.0f;
     float popupMaxHeight = 0.0f;
     GetPopupMaxWidthAndHeight(param, popupMaxWidth, popupMaxHeight);
-    childLayoutProperty->UpdateCalcMaxSize(
-        CalcSize(NG::CalcLength(Dimension(popupMaxWidth)), NG::CalcLength(Dimension(popupMaxHeight))));
+    if (custom) {
+        childLayoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, NG::CalcLength(Dimension(popupMaxHeight))));
+    } else {
+        childLayoutProperty->UpdateCalcMaxSize(
+            CalcSize(NG::CalcLength(Dimension(popupMaxWidth)), NG::CalcLength(Dimension(popupMaxHeight))));
+    }
     if (param->GetChildWidth().has_value()) {
         childLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(param->GetChildWidth().value()), std::nullopt));
@@ -491,9 +493,10 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
             renderContext->UpdateBackgroundColor(
                 popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
         } else {
+            auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(Color::TRANSPARENT);
+            renderContext->UpdateBackgroundColor(backgroundColor);
             BlurStyleOption styleOption;
-            styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
-            renderContext->UpdateBackgroundColor(popupPaintProp->GetBackgroundColor().value_or(Color::TRANSPARENT));
+            styleOption.blurStyle = param->GetBlurStyle();
             renderContext->UpdateBackBlurStyle(styleOption);
         }
     }

@@ -203,7 +203,11 @@ void MenuItemPattern::RecordChangeEvent() const
     CHECK_NULL_VOID(itemProperty);
     auto content = itemProperty->GetContent().value_or("");
     Recorder::EventParamsBuilder builder;
-    builder.SetId(inspectorId).SetType(host->GetTag()).SetChecked(isSelected_).SetText(content);
+    builder.SetId(inspectorId)
+        .SetType(host->GetTag())
+        .SetChecked(isSelected_)
+        .SetText(content)
+        .SetDescription(host->GetAutoEventParamValue(""));
     Recorder::EventRecorder::Get().OnChange(std::move(builder));
     Recorder::NodeDataCache::Get().PutMultiple(inspectorId, content, isSelected_);
 }

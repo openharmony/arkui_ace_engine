@@ -58,12 +58,15 @@ class ScrollablePattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(ScrollablePattern, NestableScrollContainer);
 
 public:
-    ScrollablePattern() = default;
+    ScrollablePattern();
     ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled);
 
     ~ScrollablePattern()
     {
         UnRegister2DragDropManager();
+        if (scrollBarProxy_) {
+            scrollBarProxy_->UnRegisterScrollableNode(AceType::WeakClaim(this));
+        }
     }
 
     bool IsAtomicNode() const override
@@ -492,6 +495,7 @@ protected:
     bool multiSelectable_ = false;
     bool isMouseEventInit_ = false;
     OffsetF mouseStartOffset_;
+    OffsetF mouseStartOffsetGlobal_;
     float totalOffsetOfMousePressed_ = 0.0f;
     std::unordered_map<int32_t, ItemSelectedStatus> itemToBeSelected_;
 
@@ -530,16 +534,18 @@ private:
 
     void OnAttachToFrameNode() override;
     void AttachAnimatableProperty(RefPtr<Scrollable> scrollable);
+    void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
 
     // select with mouse
     virtual void MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
     virtual void ClearMultiSelect() {};
-    virtual bool IsItemSelected(const GestureEvent& info)
+    virtual bool IsItemSelected()
     {
         return false;
     }
     void ClearInvisibleItemsSelectedStatus();
     void HandleInvisibleItemsSelectedStatus(const RectF& selectedZone);
+    void HandleMouseEventWithoutKeyboard(const MouseInfo& info);
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(const GestureEvent& info);
@@ -603,6 +609,7 @@ private:
 
     Axis axis_;
     RefPtr<ScrollableEvent> scrollableEvent_;
+    RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
     RefPtr<RefreshCoordination> refreshCoordination_;
     int32_t scrollSource_ = SCROLL_FROM_NONE;
@@ -637,6 +644,7 @@ private:
     GestureEvent lastMouseMove_;
     RefPtr<SelectMotion> selectMotion_;
     RefPtr<PanEvent> boxSelectPanEvent_;
+    RefPtr<InputEvent> mouseEvent_;
 
     RefPtr<NavBarPattern> navBarPattern_;
     RefPtr<SheetPresentationPattern> sheetPattern_;
@@ -649,7 +657,7 @@ private:
     RefPtr<NodeAnimatablePropertyFloat> curveOffsetProperty_;
     std::shared_ptr<AnimationUtils::Animation> springAnimation_;
     std::shared_ptr<AnimationUtils::Animation> curveAnimation_;
-    std::chrono::high_resolution_clock::time_point lastTime_;
+    uint64_t lastVsyncTime_ = 0;
     bool isAnimationStop_ = true; // graphic animation flag
     float currentVelocity_ = 0.0f;
     float lastPosition_ = 0.0f;

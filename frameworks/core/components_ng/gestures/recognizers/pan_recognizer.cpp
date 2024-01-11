@@ -37,6 +37,12 @@ constexpr int32_t AXIS_PAN_FINGERS = 1;
 
 } // namespace
 
+void PanRecognizer::ForceCleanRecognizer()
+{
+    MultiFingersRecognizer::ForceCleanRecognizer();
+    OnResetStatus();
+}
+
 PanRecognizer::PanRecognizer(int32_t fingers, const PanDirection& direction, double distance)
     : MultiFingersRecognizer(fingers), direction_(direction), distance_(distance), mouseDistance_(distance),
       newFingers_(fingers_), newDistance_(distance_), newDirection_(direction_)
@@ -49,6 +55,11 @@ PanRecognizer::PanRecognizer(int32_t fingers, const PanDirection& direction, dou
     if (fingers_ > MAX_PAN_FINGERS || fingers_ < DEFAULT_PAN_FINGERS) {
         fingers_ = DEFAULT_PAN_FINGERS;
     }
+}
+
+RefPtr<Gesture> PanRecognizer::CreateGestureFromRecognizer() const
+{
+    return AceType::MakeRefPtr<PanGesture>(fingers_, direction_, distance_);
 }
 
 PanRecognizer::PanRecognizer(const RefPtr<PanGestureOption>& panGestureOption) : panGestureOption_(panGestureOption)

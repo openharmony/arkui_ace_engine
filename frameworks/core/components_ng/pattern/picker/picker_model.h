@@ -38,6 +38,8 @@ struct PickerDialogInfo {
     std::optional<DialogAlignment> alignment;
     std::optional<DimensionOffset> offset;
     std::optional<DimensionRect> maskRect;
+    std::optional<Color> backgroundColor;
+    std::optional<int32_t> backgroundBlurStyle;
 };
 class DatePickerModel {
 public:

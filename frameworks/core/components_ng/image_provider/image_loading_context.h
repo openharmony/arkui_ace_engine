@@ -106,7 +106,7 @@ private:
         return dstSize_.IsPositive() && dstSize != dstSize_;
     }
 
-    const ImageSourceInfo src_;
+    ImageSourceInfo src_;
     RefPtr<ImageStateManager> stateManager_;
     RefPtr<ImageObject> imageObj_;
     RefPtr<CanvasImage> canvasImage_;

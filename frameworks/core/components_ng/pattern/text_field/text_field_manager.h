@@ -70,11 +70,22 @@ public:
 
     void UpdateScrollableParentViewPort(const RefPtr<FrameNode>& node);
 
+    bool GetImeShow() const
+    {
+        return imeShow_;
+    }
+
+    void SetImeShow(bool imeShow)
+    {
+        imeShow_ = imeShow;
+    }
+
 private:
     void ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset);
     RefPtr<FrameNode> FindScrollableOfFocusedTextField(const RefPtr<FrameNode>& textField);
 
     bool hasMove_ = false;
+    bool imeShow_ = false;
     Offset position_;
     float height_ = 0.0f;
     WeakPtr<Pattern> onFocusTextField_;

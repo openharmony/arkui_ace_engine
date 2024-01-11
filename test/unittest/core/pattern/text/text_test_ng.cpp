@@ -3485,7 +3485,7 @@ HWTEST_F(TextTestNg, HandleMouseEvent003, TestSize.Level1)
     pattern->blockPress_ = false;
     pattern->HandleMouseEvent(info);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
-    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 3);
 }
 
 /**

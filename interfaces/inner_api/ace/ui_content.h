@@ -27,6 +27,7 @@
 #include "macros.h"
 #include "modal_ui_extension_config.h"
 #include "popup_ui_extension_config.h"
+#include "serialized_gesture.h"
 #include "serializeable_object.h"
 #include "viewport_config.h"
 
@@ -179,6 +180,7 @@ public:
     virtual void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& errorCallback) {};
     virtual void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& callback) {};
 
+
     // for distribute UI source
     virtual SerializeableObjectArray DumpUITree()
     {
@@ -285,23 +287,23 @@ public:
 
 #ifndef PREVIEW
     virtual void SearchElementInfoByAccessibilityId(
-        int32_t elementId, int32_t mode,
-        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) {};
+        int64_t elementId, int32_t mode,
+        int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) {};
 
     virtual void SearchElementInfosByText(
-        int32_t elementId, const std::string& text, int32_t baseParent,
+        int64_t elementId, const std::string& text, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) {};
 
     virtual void FindFocusedElementInfo(
-        int32_t elementId, int32_t focusType,
-        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) {};
+        int64_t elementId, int32_t focusType,
+        int64_t baseParent, Accessibility::AccessibilityElementInfo& output) {};
 
     virtual void FocusMoveSearch(
-        int32_t elementId, int32_t direction,
-        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) {};
-        
-    virtual bool NotifyExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int32_t offset)
+        int64_t elementId, int32_t direction,
+        int64_t baseParent, Accessibility::AccessibilityElementInfo& output) {};
+
+    virtual bool NotifyExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int64_t offset)
     {
         return false;
     }
@@ -329,12 +331,23 @@ public:
     {
         return 0;
     }
- 
+
     /**
      * @description: Destroy the custom popup.
      * @param config Indicates the ID of the UI node which bind the pupop
      */
     virtual void DestroyCustomPopupUIExtension(int32_t nodeId) {}
+
+    virtual SerializedGesture GetFormSerializedGesture()
+    {
+        return SerializedGesture();
+    }
+
+    virtual bool ProcessPointerEventWithCallback(
+        const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, const std::function<void()>& callback)
+    {
+        return true;
+    };
 
     virtual void UpdateTransform(const OHOS::Rosen::Transform& transform) = 0;
 };

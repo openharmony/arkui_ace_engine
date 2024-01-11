@@ -76,6 +76,7 @@ namespace OHOS::Ace {
 namespace NG {
 namespace {
 constexpr int32_t DEFAULT_INSTANCE_ID = 0;
+constexpr int32_t DEFAULT_INT0 = 0;
 constexpr int32_t DEFAULT_INT1 = 1;
 constexpr int32_t DEFAULT_INT3 = 3;
 constexpr int32_t DEFAULT_INT10 = 10;
@@ -358,7 +359,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg004, TestSize.Level1)
     context_->AddScheduleTask(scheduleTask);
     context_->AddScheduleTask(nullptr);
     context_->FlushAnimation(NANO_TIME_STAMP);
-    EXPECT_EQ(scheduleTask->GetNanoTimestamp(), NANO_TIME_STAMP);
+    EXPECT_EQ(scheduleTask->GetNanoTimestamp(), DEFAULT_INT0);
 }
 
 /**
@@ -1182,7 +1183,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     pageNode->AddChild(childNode);
     context_->stageManager_->stageNode_ = pageNode;
     EXPECT_FALSE(context_->OnKeyEvent(event));
-    EXPECT_TRUE(context_->dragDropManager_->isDragCancel_);
+    EXPECT_FALSE(context_->dragDropManager_->isDragCancel_);
 }
 
 /**
