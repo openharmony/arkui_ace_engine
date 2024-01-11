@@ -236,14 +236,14 @@ void GridItemPattern::InitDisableStyle()
 
     if (!eventHub->IsDeveloperEnabled()) {
         enableOpacity_ = renderContext->GetOpacityValue(1.0);
-        renderContext->UpdateOpacity(theme->GetGridItemDisabledAlpha());
+        lastOpacity_ = enableOpacity_.value() * theme->GetGridItemDisabledAlpha();
+    } else if (enableOpacity_.has_value() && userDefineOpacity == lastOpacity_) {
+        lastOpacity_ = enableOpacity_.value();
+        enableOpacity_.reset();
     } else {
-        if (enableOpacity_.has_value()) {
-            renderContext->UpdateOpacity(enableOpacity_.value());
-        } else {
-            renderContext->UpdateOpacity(userDefineOpacity);
-        }
+        lastOpacity_ = userDefineOpacity;
     }
+    renderContext->UpdateOpacity(lastOpacity_);
 }
 
 void GridItemPattern::InitFocusPaintRect(const RefPtr<FocusHub>& focusHub)

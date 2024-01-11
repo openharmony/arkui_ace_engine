@@ -159,6 +159,7 @@ private:
     bool isPressed_ = false;
     GridItemStyle gridItemStyle_ = GridItemStyle::NONE;
     std::optional<double> enableOpacity_;
+    double lastOpacity_ = 0.0;
     std::optional<GridItemIndexInfo> irregularItemInfo_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridItemPattern);

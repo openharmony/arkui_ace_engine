@@ -906,14 +906,14 @@ void ListItemPattern::InitDisableEvent()
             selectable_ = false;
         }
         enableOpacity_ = renderContext->GetOpacityValue(1.0);
-        renderContext->UpdateOpacity(theme->GetItemDisabledAlpha());
+        lastOpacity_ = enableOpacity_.value() * theme->GetItemDisabledAlpha();
+    } else if (enableOpacity_.has_value() && userDefineOpacity == lastOpacity_) {
+        lastOpacity_ = enableOpacity_.value();
+        enableOpacity_.reset();
     } else {
-        if (enableOpacity_.has_value()) {
-            renderContext->UpdateOpacity(enableOpacity_.value());
-        } else {
-            renderContext->UpdateOpacity(UserDefineOpacity);
-        }
+        lastOpacity_ = userDefineOpacity;
     }
+    renderContext->UpdateOpacity(lastOpacity_);
 }
 
 bool ListItemPattern::GetLayouted() const
