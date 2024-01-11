@@ -107,6 +107,13 @@ public:
     bool DispatchEvent(const TouchEvent& point) override;
     bool HandleEvent(const TouchEvent& point) override;
 
+    void CopyTouchEvent(const RefPtr<TouchEventActuator>& touchEventActuator)
+    {
+        touchEvents_ = touchEventActuator->touchEvents_;
+        userCallback_ = touchEventActuator->userCallback_;
+        onTouchEventCallback_ = touchEventActuator->onTouchEventCallback_;
+    }
+
 private:
     bool TriggerTouchCallBack(const TouchEvent& changedPoint);
     bool ShouldResponse() override;
