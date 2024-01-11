@@ -635,7 +635,7 @@ bool ParseString(const ResourceInfo& info, std::string& result)
         result = originStr;
         return true;
     }
-    return false;
+    return true;
 }
 
 std::string ErrorToMessage(int32_t code)
