@@ -1675,9 +1675,18 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
+    // The density of sub windows related to dialog needs to be consistent with the main window.
+    auto modifyConfig = config;
+    if (instanceId_ >= MIN_SUBCONTAINER_ID) {
+        auto parentContainer = Platform::AceContainer::GetContainer(container->GetParentId());
+        CHECK_NULL_VOID(parentContainer);
+        auto parentPipeline = parentContainer->GetPipelineContext();
+        CHECK_NULL_VOID(parentPipeline);
+        modifyConfig.SetDensity(parentPipeline->GetDensity());
+    }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    auto task = [config, container, reason, rsTransaction, rsWindow = window_]() {
+    auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_]() {
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
         if (pipelineContext) {
