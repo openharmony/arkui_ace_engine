@@ -100,7 +100,6 @@ typedef std::map<const std::string, ArkUI_Int32> AttrStringToIntMap;
 const int ALLOW_SIZE_2(2);
 const int ALLOW_SIZE_5(5);
 const int ALLOW_SIZE_10(10);
-const int ALLOW_SIZE_16(16);
 
 const int ALLOW_INDEX_0(0);
 const int ALLOW_INDEX_1(1);
@@ -1097,34 +1096,6 @@ void SetFontFamily(ArkUI_NodeHandle node, const char* value)
     } else if (node->type == ARKUI_NODE_TEXT) {
         fullImpl->getNodeModifiers()->getTextModifier()->setTextFontFamily(
             node->uiNodeHandle, const_cast<const char**>(families.get()), fontFamilies.size());
-    }
-}
-
-void SetTextCase(ArkUI_NodeHandle node, const char* value)
-{
-    auto fullImpl = GetFullImpl();
-    if (!fullImpl) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
-        return;
-    }
-    if (node->type == ARKUI_NODE_TEXT) {
-        std::vector<std::string> textCase = {"Normal","LowerCase","UpperCase"};
-        fullImpl->getNodeModifiers()->getTextModifier()->setTextTextCase(
-            node->uiNodeHandle, StringToEnumInt(value, textCase, 0));
-    }
-}
-
-void SetTextOverflow(ArkUI_NodeHandle node, const char* value) 
-{
-    auto fullImpl = GetFullImpl();
-    if (!fullImpl) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
-        return;
-    }
-    if (node->type == ARKUI_NODE_TEXT) {
-        std::vector<std::string> textOverflow = {"None","Clip","Ellipsis","MARQUEE"};
-        fullImpl->getNodeModifiers()->getTextModifier()->setTextTextOverflow(
-            node->uiNodeHandle, StringToEnumInt(value, textOverflow, 0));
     }
 }
 

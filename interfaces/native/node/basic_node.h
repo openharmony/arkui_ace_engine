@@ -87,7 +87,7 @@ typedef enum {
     /** 弹性布局容器 */
     ARKUI_NODE_FLEX,
     /** 列表项. */
-    ARKUI_NODE_LIST_ITEM
+    ARKUI_NODE_LIST_ITEM,
     /** 刷新. */
     ARKUI_NODE_REFRESH,
 } ArkUI_NodeType;
@@ -585,8 +585,6 @@ typedef enum {
      *
      * @see ArkUI_BasicNodeAPI::setAttribute
      * @note 入参color: #argb类型，格式字符串，如"#ffffffff"
-    /**
-     * @note 入参格式为#argb类型字符串，如"#FF1122FF"。
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_COLOR, "#FF1122FF");
      * @endcode
