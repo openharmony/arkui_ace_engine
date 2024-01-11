@@ -275,17 +275,19 @@ bool WaterFlowPattern::ScrollToTargrtIndex(int32_t index)
             targetPosition = -(layoutInfo_.lastMainSize_ - (item.first + item.second));
             break;
         case ScrollAlign::AUTO:
-            if (targetPosition + item.first + item.second < 0) {
+            if (layoutInfo_.currentOffset_ + item.first + item.second < 0) {
                 targetPosition = item.first;
-            } else if (targetPosition + item.first > layoutInfo_.lastMainSize_) {
+            } else if (layoutInfo_.currentOffset_ + item.first > layoutInfo_.lastMainSize_) {
                 targetPosition = -(layoutInfo_.lastMainSize_ - (item.first + item.second));
+            } else {
+                targetPosition = -layoutInfo_.currentOffset_;
             }
             break;
         case ScrollAlign::CENTER:
             targetPosition = -(-item.first + (layoutInfo_.lastMainSize_ - item.second) / 2);
             break;
         default:
-            break;
+            return false;
     }
     ScrollablePattern::AnimateTo(targetPosition, -1, nullptr, true);
     return true;
