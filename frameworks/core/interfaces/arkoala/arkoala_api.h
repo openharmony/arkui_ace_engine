@@ -636,8 +636,7 @@ struct ArkUIAPIEventCallback {
 #define ARKUI_ASYNC_EVENT_ARGS_COUNT 12
 
 struct ArkUINodeAsyncEvent {
-    ArkUI_Int32 subKind;
-    ArkUI_Int32 data[ARKUI_ASYNC_EVENT_ARGS_COUNT];
+    ArkUIEventCallbackArg data[ARKUI_ASYNC_EVENT_ARGS_COUNT];
 };
 
 struct ArkUIStringAsyncEvent {
@@ -2027,6 +2026,7 @@ struct ArkUIDatePickerModifier {
 };
 
 struct ArkUISpanModifier {
+    void (*setSpanContent)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*setSpanTextCase)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetSpanTextCase)(ArkUINodeHandle node);
     void (*setSpanFontWeight)(ArkUINodeHandle node, ArkUI_CharPtr value);
