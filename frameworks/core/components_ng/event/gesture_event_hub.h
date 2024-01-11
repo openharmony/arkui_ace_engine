@@ -626,6 +626,7 @@ private:
     RefPtr<PixelMap> dragPreviewPixelMap_;
 
     OffsetF frameNodeOffset_;
+    SizeF frameNodeSize_;
     GestureEvent gestureInfoForWeb_;
     bool isReceivedDragGestureInfo_ = false;
     OnChildTouchTestFunc onChildTouchTestFunc_;
