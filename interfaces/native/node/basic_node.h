@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,28 +14,29 @@
  */
 
 /**
- * @addtogroup OH_ArkUI Native Node
+ * @addtogroup ArkUI_NativeNode
  * @{
  *
- * @brief 提供ArkUI在Native侧的组件接口，包括组件创建销毁、树节点操作，属性设置，事件监听，自定义组件等UI能力。
+ * @brief 提供ArkUI在Native侧的UI组件能力，如组件创建销毁、树节点操作，属性设置，事件监听等。
  *
- * @since 11
- * @version 1.0
+ * @since 12
  */
 
 /**
  * @file basic_node.h
  *
- * @brief 提供Basic API Family集合的UI操作接口。
+ * @brief 提供NativeNode接口的BasicAPIFamily类型定义。
  *
- * @since 11
- * @version 1.0
+ * @library libace_ndk.z.so
+ * @syscap SystemCapability.ArkUI.ArkUI.Full
+ * @since 12
  */
 
 #ifndef _ARKUI_NODE_BASIC_NODE_H_
 #define _ARKUI_NODE_BASIC_NODE_H_
 
-#include "basic_types.h"
+#include "common.h"
+#include "native_event.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -44,11 +45,10 @@ extern "C" {
 /**
  * @brief 提供ArkUI在Native侧可创建组件类型.
  *
- * @since 11
- * @version 1.0
+ * @since 12
  */
 typedef enum {
-    /** 自定义组件. */
+    /** 自定义节点. */
     ARKUI_NODE_CUSTOM = 0,
     /** 文本. */
     ARKUI_NODE_TEXT = 1,
@@ -72,19 +72,19 @@ typedef enum {
     ARKUI_NODE_LIST,
     /** 翻页容器. */
     ARKUI_NODE_SWIPER,
-    /** 多行文本 **/
+    /** 多行文本 */
     ARKUI_NODE_TEXT_AREA,
-    /** 按钮 **/
+    /** 按钮 */
     ARKUI_NODE_BUTTON,
-    /** 进度条 **/
+    /** 进度条 */
     ARKUI_NODE_PROGRESS,
-    /** 复选框 **/
+    /** 复选框 */
     ARKUI_NODE_CHECKBOX,
-    /** 垂直布局容器 **/
+    /** 垂直布局容器 */
     ARKUI_NODE_COLUMN,
-    /** 水平布局容器 **/
+    /** 水平布局容器 */
     ARKUI_NODE_ROW,
-    /** 弹性布局容器 **/
+    /** 弹性布局容器 */
     ARKUI_NODE_FLEX,
     /** 列表项. */
     ARKUI_NODE_LIST_ITEM
@@ -94,13 +94,12 @@ typedef enum {
 /**
  * @brief 定义ArkUI在Native侧可以设置的属性样式集合.
  *
- * @since 11
- * @version 1.0
+ * @since 12
  */
 typedef enum {
     /**
      * @brief 通过<b>setAttribute</b>方法设置宽度属性.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参格式为数字类型字符串，单位为vp.
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, WIDTH, "100");
@@ -111,7 +110,7 @@ typedef enum {
 
     /**
      * @brief 通过<b>setAttribute</b>方法设置高度属性.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参格式为数字类型字符串，单位为vp.
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, HEIGHT, "100");
@@ -122,8 +121,8 @@ typedef enum {
 
     /**
      * @brief 通过<b>setAttribute</b>方法设置背景色属性.
-     * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note 入参color: #argb类型，格式字符串，如"#ffffffff"
+     *
+     * @note 入参格式为#argb类型字符串，如"#FF1122FF".
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, BACKGROUND_COLOR, "#FF1122FF");
      * @endcode
@@ -246,7 +245,8 @@ typedef enum {
     /**
      * @brief 通过<b>setAttribute</b>方法设置组件内容在元素绘制区域内的对齐方式.
      * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note 入参alignContent:String("TopStart","Top","TopEnd","Start","Center","End","BottomStart","Bottom","BottomEnd")
+     * @note
+     * 入参alignContent:String("TopStart","Top","TopEnd","Start","Center","End","BottomStart","Bottom","BottomEnd")
      *       格式字符串，如 "Center"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_ALIGN, "Center");
@@ -402,7 +402,10 @@ typedef enum {
     NODE_SHADOW,
 
     /**
-     * @note 入参格式为#argb类型字符串，如"#FF1122FF"。
+     * @brief 通过<b>setAttribute</b>方法设置组件字体颜色，只针对包含文本元素的组件.
+     *
+     * @see ArkUI_BasicNodeAPI::setAttribute
+     * @note 入参color: #argb类型，格式字符串，如"#ffffffff"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_COLOR, "#FF1122FF");
      * @endcode
@@ -530,20 +533,12 @@ typedef enum {
      * @endcode
      */
     NODE_TEXT_INPUT_SHOW_PASSWORD_ICON,
-    /**
-     * @brief 通过<b>setAttribute</b>方法设置组件字体颜色，只针对包含文本元素的组件.
-     * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note 入参color: #argb类型，格式字符串，如"#ffffffff"
-     * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_FONT_COLOR, "#FF1122FF");
-     * @endcode
-     *
-     */
-    NODE_TEXT_FONT_COLOR = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT,
+
     /**
      * @brief 通过<b>setAttribute</b>方法设置子组件在容器内的对齐方式.
      * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note 入参alignContent:String("TopStart","Top","TopEnd","Start","Center","End","BottomStart","Bottom","BottomEnd")
+     * @note
+     * 入参alignContent:String("TopStart","Top","TopEnd","Start","Center","End","BottomStart","Bottom","BottomEnd")
      *       格式字符串，如 "Center"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_STACK_ALIGN_CONTENT, "Center");
@@ -603,7 +598,8 @@ typedef enum {
      */
     NODE_SCROLL_EDGE_EFFECT,
     /**
-     * @brief 通过<b>setAttribute</b>方法设置是否支持滚动手势，当设置为false时，无法通过手指或者鼠标滚动，但不影响控制器的滚动接口.
+     * @brief
+     * 通过<b>setAttribute</b>方法设置是否支持滚动手势，当设置为false时，无法通过手指或者鼠标滚动，但不影响控制器的滚动接口.
      * @see ArkUI_BasicNodeAPI::setAttribute
      * @note 入参enableScrollInteraction： Boolean，格式为字符串，如"true"
      * @code {.c}
@@ -613,7 +609,8 @@ typedef enum {
      */
     NODE_SCROLL_ENABLE_SCROLL_INTERACTION,
     /**
-     * @brief 通过<b>setAttribute</b>方法设置摩擦系数，手动划动滚动区域时生效，只对惯性滚动过程有影响，对惯性滚动过程中的链式效果有间接影响.
+     * @brief
+     * 通过<b>setAttribute</b>方法设置摩擦系数，手动划动滚动区域时生效，只对惯性滚动过程有影响，对惯性滚动过程中的链式效果有间接影响.
      * @see ArkUI_BasicNodeAPI::setAttribute
      * @note 入参fiction: float, 格式为字符串，如"0.6"
      * @code {.c}
@@ -625,8 +622,8 @@ typedef enum {
     /**
      * @brief 通过<b>setAttribute</b>方法设置Scroll组件的限位滚动模式.
      * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note 入参paginationValue:Array paginationParams:Array, 格式字符串 "pagination1,pagination2,... snapAlign,snapToStart,
-     *       snapToEnd,isArray", 格式字符串，如 "0,500,1000,1500 0,1,1,0"
+     * @note 入参paginationValue:Array paginationParams:Array, 格式字符串 "pagination1,pagination2,...
+     * snapAlign,snapToStart, snapToEnd,isArray", 格式字符串，如 "0,500,1000,1500 0,1,1,0"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_SNAP, "0,500,1000,1500 0,1,1,0");
      * @endcode
@@ -684,7 +681,8 @@ typedef enum {
      */
     NODE_LIST_EDGE_EFFECT,
     /**
-     * @brief 通过<b>setAttribute</b>方法设置是否支持滚动手势，当设置为false时，无法通过手指或者鼠标滚动，但不影响控制器的滚动接口.
+     * @brief
+     * 通过<b>setAttribute</b>方法设置是否支持滚动手势，当设置为false时，无法通过手指或者鼠标滚动，但不影响控制器的滚动接口.
      * @see ArkUI_BasicNodeAPI::setAttribute
      * @note 入参enableScrollInteraction： Boolean，格式为字符串，如"true"
      * @code {.c}
@@ -694,7 +692,8 @@ typedef enum {
      */
     NODE_LIST_ENABLE_SCROLL_INTERACTION,
     /**
-     * @brief 通过<b>setAttribute</b>方法设置摩擦系数，手动划动滚动区域时生效，只对惯性滚动过程有影响，对惯性滚动过程中的链式效果有间接影响.
+     * @brief
+     * 通过<b>setAttribute</b>方法设置摩擦系数，手动划动滚动区域时生效，只对惯性滚动过程有影响，对惯性滚动过程中的链式效果有间接影响.
      * @see ArkUI_BasicNodeAPI::setAttribute
      * @note 入参fiction: float, 格式为字符串，如"0.6"
      * @code {.c}
@@ -838,92 +837,171 @@ typedef enum {
     NODE_SWIPER_SHOW_DISPLAY_ARROW,
 } ArkUI_NodeAttributeType;
 
+/**
+ * @brief 定义组件回调事件的基础参数类型。
+ *
+ * @since 12
+ */
+union ArkUI_NodeEventCallbackArg {
+    /** 带符号的int类型。*/
+    int32_t i32;
+    /** 无符号的int类型。*/
+    uint32_t u32;
+    /** 浮点类型。 */
+    float f32;
+};
+
+#define MAX_COMPONENT_EVENT_ARG_NUM 12
+/**
+ * @brief 定义组件回调事件的参数类型。
+ *
+ * @since 12
+ */
+typedef struct {
+    /** 数据数组对象。*/
+    ArkUI_NodeEventCallbackArg data[MAX_COMPONENT_EVENT_ARG_NUM];
+} ArkUI_NodeComponentEvent;
+
+/**
+ * @brief 定义组件回调事件使用字符串参数的类型。
+ *
+ * @since 12
+ */
+typedef struct {
+    /** 字符串数据。*/
+    const char* pStr;
+} ArkUI_StringAsyncEvent;
+
+/**
+ * @brief 提供NativeNode组件支持的事件类型定义。
+ *
+ * @since 12
+ */
 typedef enum {
+    /**
+     * @brief 手势事件类型。
+     *
+     * 事件回调发生时，事件参数<b>::ArkUI_NodeEvent</b>对象中的联合体类型为<b>::ArkUI_TouchEvent。</b>
+     */
     NODE_TOUCH_EVENT = 0,
+
     NODE_EVENT_ON_APPEAR,
 
     NODE_TEXT_INPUT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_INPUT,
 
+    /**
+     * @brief 定义ARKUI_NODE_SCROLL滚动组件的滚动事件枚举值。
+     *
+     * 事件回调发生时，事件参数<b>::ArkUI_NodeEvent</b>对象中的联合体类型为<b>::ArkUI_NodeComponentEvent</b>。\n
+     * <b>ArkUI_NodeComponent.data[0].f32</b>表示距离上一次事件触发的X轴增量。\n
+     * <b>ArkUI_NodeComponent.data[1].f32</b>表示距离上一次事件触发的Y轴增量。\n
+     */
     NODE_SCROLL_EVENT_ON_SCROLL = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SCROLL,
     NODE_SCROLL_EVENT_ON_SCROLL_FRAME_BEGIN,
     NODE_SCROLL_EVENT_ON_SCROLL_START,
     NODE_SCROLL_EVENT_ON_SCROLL_STOP,
 } ArkUI_NodeEventType;
 
-#define MAX_COMPONENT_EVENT_ARG_NUM 12
+/**
+ * @brief 定义组件事件的通用结构类型。
+ *
+ * @since 12
+ */
 typedef struct {
-    ArkUI_NodeEventCallbackArg data[MAX_COMPONENT_EVENT_ARG_NUM];
-} ArkUI_NodeComponentEvent;
+    /**
+     * @brief 事件类型。
+     *
+     * @see ArkUI_NodeEventType
+     */
+    int32_t kind;
 
-typedef struct {
-    ArkUI_CharPtr pStr;
-} ArkUI_StringAsyncEvent;
-
-typedef struct {
-    ArkUI_Int32 kind; // Actually ArkUI_EventType, but use int for fixed binary layout.
-    ArkUI_Int32 eventId;
+    /**
+     * @brief 事件自定义标识ID。
+     *
+     * 该事件id在调用<b>::registerNodeEvent</b>函数时作为参数传递进来。
+     */
+    int32_t eventId;
     union {
+        /** touch事件类型回调参数。*/
         ArkUI_NodeTouchEvent touchEvent;
+        /** 通用组件事件使用数字类型回调参数。*/
         ArkUI_NodeComponentEvent componentEvent;
+        /** 通用组件事件使用字符串类型回调参数。*/
         ArkUI_StringAsyncEvent stringEvent;
     };
 } ArkUI_NodeEvent;
 
+/**
+ * @brief 自定义组件调用<b>::markDirty</b>是传递的藏区标识类型。
+ *
+ * @since 12
+ */
 typedef enum {
-    NODE_NEED_MEASURE = 0,
+    /** 重新测算大学和布局位置 */
+    NODE_NEED_MEASURE = 1,
+    /** 重新布局位置。*/
     NODE_NEED_LAYOUT,
+    /** 重新进行绘制。*/
     NODE_NEED_RENDER,
 } ArkUI_NodeDirtyFlag;
 
+#define ARKUI_BASIC_API_FAMILY_VERSION 1
 /**
  * @brief ArkUI提供的Native侧Basic API Family接口集合.
  *
- * @since 11
- * @version 1.0
+ * @since 12
  */
 typedef struct {
-    ArkUI_Int32 version;
+    int32_t version;
 
     /**
-     * @brief 基于<b>ArkUI_NodeType</b>生成对应的组件并返回组件对象指针.
-     * @see ::ArkUI_NodeType
-     * @see ::ArkUI_NodeHandle
+     * @brief 基于<b>ArkUI_NodeType</b>生成对应的组件并返回组件对象指针。
+     *
+     * @param type 创建指定类型的UI组件节点。
+     * @return 返回创建完成的组件操作指针，如果创建失败返回nullptr。
      */
     ArkUI_NodeHandle (*createNode)(ArkUI_NodeType type);
 
     /**
-     * @brief 销毁特点指针指向的组件对象.
-     * @see ::ArkUI_NodeHandle
+     * @brief 销毁组件指针指向的组件对象。
+     *
+     * @param node 组件指针对象。
      */
     void (*disposeNode)(ArkUI_NodeHandle node);
 
     /**
      * @brief 将组件挂载到某个父节点之下.
-     * @see ::ArkUI_NodeHandle
+     *
+     * @param parent 父节点指针。
+     * @param child 子节点指针。
      */
     void (*addChild)(ArkUI_NodeHandle parent, ArkUI_NodeHandle child);
 
     /**
      * @brief 将组件从父节点中移除.
-     * @see ::ArkUI_NodeHandle
+     *
+     * @param parent 父节点指针。
+     * @param child 子节点指针。
      */
     void (*removeChild)(ArkUI_NodeHandle parent, ArkUI_NodeHandle child);
 
     /**
      * @brief 将组件挂载到某个父节点之下，挂载位置在<b>sibling</b>节点之后.
-     * @see ::ArkUI_NodeHandle
+     *
+     * @param parent 父节点指针。
+     * @param child 子节点指针。
+     * @param sibling 前一个兄弟节点指针，如果为空则插入位置在最前面。
      */
     void (*insertChildAfter)(ArkUI_NodeHandle parent, ArkUI_NodeHandle child, ArkUI_NodeHandle sibling);
 
-    // 属性通用接口，类似CSS进行通用的字符串类型和字符串数据定义。
     void (*setAttribute)(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const char* value);
     const char* (*getAttribute)(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute);
     void (*resetAttribute)(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute);
 
-    void (*registerNodeEvent)(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, ArkUI_Int32 eventId);
+    void (*registerNodeEvent)(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, int32_t eventId);
     void (*unregisterNodeEvent)(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType);
-    void (*registerOnEvent)(void (*eventReceiver)(ArkUI_NodeEvent* event));
-    void (*unregisterOnEvent)();
+    void (*registerEventReceiver)(void (*eventReceiver)(ArkUI_NodeEvent* event));
+    void (*unregisterEventReceiver)();
 
     // Commit attributes updates for node.
     void (*applyModifierFinish)(ArkUI_NodeHandle nodePtr);
@@ -932,30 +1010,9 @@ typedef struct {
     void (*markDirty)(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag);
 } ArkUI_BasicNodeAPI;
 
-/**
- * @brief 定义任意版本的Basic API Family类型.
- *
- * @since 11
- * @version 1.0
- */
-typedef struct {
-    ArkUI_Int32 version;
-} ArkUI_AnyBasicNodeAPI;
-
-/**
- * @brief 获取指定NDK版本的Basic API Family接口集合.
- *
- * @param version NDK版本信息，
- * @return ArkUI_BasicNodeAPI* 返回指定NDK版本的Basic API Family接口集合.
- * @code {.cpp}
- * auto basicNodeApi = reinterpret_cast<ArkUIBasicNodeAPI*>(OH_ArkUI_GetBasicNodeAPI(11));
- * @endcode
- *
- */
-ArkUI_AnyBasicNodeAPI* OH_ArkUI_GetBasicNodeAPI(ArkUI_Int32 version);
-
 #ifdef __cplusplus
 };
 #endif
 
 #endif // _ARKUI_NODE_BASIC_NODE_H_
+/** @}*/

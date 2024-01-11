@@ -22,12 +22,10 @@
 #include <regex>
 
 #include "basic_node.h"
-#include "node/basic_types.h"
 #include "node_model.h"
 
 #include "base/log/log_wrapper.h"
 #include "base/utils/string_utils.h"
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NodeModel {
@@ -55,7 +53,6 @@ constexpr int COLOR_STYLE = 2;
 constexpr int UNIT_VP = 1;
 constexpr int DISPLAY_ARROW_FALSE = 0;
 constexpr int DISPLAY_ARROW_TRUE = 1;
-
 
 typedef std::map<const std::string, ArkUI_Int32> AttrStringToIntMap;
 
