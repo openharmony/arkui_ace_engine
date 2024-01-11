@@ -1408,6 +1408,7 @@ private:
     bool isTouchCaret_ = false;
     bool needSelectAll_ = false;
     bool isModifyDone_ = false;
+    bool initTextRect_ = false;
     Offset clickLocation_;
     MagnifierRect magnifierRect_;
     RefPtr<MagnifierController> magnifierController_;
