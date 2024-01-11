@@ -88,8 +88,9 @@ public:
             theme->fontColor_ =
                 pattern->GetAttr<Color>("text_color", theme->fontColor_)
                     .BlendOpacity(pattern->GetAttr<double>("menu_text_primary_alpha", defaultTextColorAlpha));
-            theme->disabledFontColor_ = theme->fontColor_.BlendOpacity(
-                pattern->GetAttr<double>("color_disabled_alpha", defaultDisabledColorAlpha));
+            theme->disabledFontColorAlpha_ =
+                pattern->GetAttr<double>("color_disabled_alpha", defaultDisabledColorAlpha);
+            theme->disabledFontColor_ = theme->fontColor_.BlendOpacity(theme->disabledFontColorAlpha_);
             theme->secondaryFontColor_ =
                 pattern->GetAttr<Color>(PATTERN_TEXT_COLOR, theme->fontColor_)
                     .BlendOpacity(pattern->GetAttr<double>("menu_text_secondary_alpha", defaultSecondaryColorAlpha));
@@ -103,12 +104,11 @@ public:
             theme->selectedColorText_ = pattern->GetAttr<Color>(PATTERN_TEXT_COLOR_SELECTED, theme->selectedColorText_);
             theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, theme->hoverColor_);
             theme->backgroundColor_ = pattern->GetAttr<Color>("bg_color", theme->backgroundColor_);
-            theme->disabledBackgroundColor_ = theme->disabledBackgroundColor_.BlendOpacity(
-                pattern->GetAttr<double>("color_disabled_alpha", defaultDisabledColorAlpha));
+            theme->disabledBackgroundColor_ =
+                theme->disabledBackgroundColor_.BlendOpacity(theme->disabledFontColorAlpha_);
             theme->lineColor_ = pattern->GetAttr<Color>("line_color", theme->lineColor_);
             theme->spinnerColor_ = pattern->GetAttr<Color>("select_icon_color", theme->spinnerColor_);
-            theme->disabledSpinnerColor_ = theme->spinnerColor_.BlendOpacity(
-                pattern->GetAttr<double>("color_disabled_alpha", defaultDisabledColorAlpha));
+            theme->disabledSpinnerColor_ = theme->spinnerColor_.BlendOpacity(theme->disabledFontColorAlpha_);
             theme->selectBorderRadius_ = pattern->GetAttr<Dimension>("border_radius", theme->selectBorderRadius_);
             theme->menuBorderRadius_ = pattern->GetAttr<Dimension>("menu_border_radius", theme->menuBorderRadius_);
             theme->innerBorderRadius_ = pattern->GetAttr<Dimension>("inner_border_radius", theme->innerBorderRadius_);
@@ -238,6 +238,7 @@ public:
         theme->fontFamily_ = fontFamily_;
         theme->fontColor_ = fontColor_;
         theme->disabledFontColor_ = disabledFontColor_;
+        theme->disabledFontColorAlpha_ = disabledFontColorAlpha_;
         theme->secondaryFontColor_ = secondaryFontColor_;
         theme->fontWeight_ = fontWeight_;
         theme->textDecoration_ = textDecoration_;
@@ -390,6 +391,11 @@ public:
     const Color& GetDisabledFontColor() const
     {
         return disabledFontColor_;
+    }
+
+    double GetDisabledFontColorAlpha() const
+    {
+        return disabledFontColorAlpha_;
     }
 
     const Color& GetSecondaryFontColor() const
@@ -891,6 +897,7 @@ private:
     Dimension fontSize_;
     Color fontColor_;
     Color disabledFontColor_;
+    double disabledFontColorAlpha_ = 0.0;
     Color secondaryFontColor_;
     std::string fontFamily_;
     FontWeight fontWeight_ { FontWeight::NORMAL };
