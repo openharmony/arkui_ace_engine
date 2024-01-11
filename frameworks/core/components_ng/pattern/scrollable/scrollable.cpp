@@ -474,6 +474,14 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
         return;
     }
     if (NearZero(correctVelocity, FRICTION_VELOCITY_THRESHOLD)) {
+        HandleScrollEnd(correctVelocity);
+        currentVelocity_ = 0.0;
+#ifdef OHOS_PLATFORM
+        ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+        if (FrameReport::GetInstance().GetEnable()) {
+            FrameReport::GetInstance().EndListFling();
+        }
+#endif
         return;
     }
     // change motion param when list item need to be center of screen on watch
