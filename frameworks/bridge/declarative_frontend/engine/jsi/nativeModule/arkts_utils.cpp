@@ -256,8 +256,11 @@ bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueR
         result = Color(ColorAlphaAdapt(value));
         return true;
     }
-    result = resourceWrapper->GetColor(resId->Int32Value(vm));
-    return true;
+    if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::COLOR)) {
+        result = resourceWrapper->GetColor(resId->ToNumber(vm)->Value());
+        return true;
+    }
+    return false;
 }
 
 bool ArkTSUtils::ParseJsDimensionFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj,

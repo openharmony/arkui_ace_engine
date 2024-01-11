@@ -1633,10 +1633,9 @@ void ListPattern::SetChainAnimation()
         if (chainAnimationOptions_.has_value()) {
             float maxSpace = chainAnimationOptions_.value().maxSpace.ConvertToPx();
             float minSpace = chainAnimationOptions_.value().minSpace.ConvertToPx();
-            if (GreatNotEqual(minSpace, maxSpace)) {
-                minSpace = space;
-                maxSpace = space;
-            }
+            minSpace = Negative(minSpace) ? 0.0f : minSpace;
+            minSpace = GreatNotEqual(minSpace, space) ? space : minSpace;
+            maxSpace = LessNotEqual(maxSpace, space) ? space : maxSpace;
             springProperty_->SetStiffness(chainAnimationOptions_.value().stiffness);
             springProperty_->SetDamping(chainAnimationOptions_.value().damping);
             chainAnimation_ = AceType::MakeRefPtr<ChainAnimation>(space, maxSpace, minSpace, springProperty_);
@@ -1679,11 +1678,9 @@ void ListPattern::SetChainAnimationOptions(const ChainAnimationOptions& options)
         }
         float maxSpace = options.maxSpace.ConvertToPx();
         float minSpace = options.minSpace.ConvertToPx();
-        if (Negative(minSpace) || Negative(maxSpace) || GreatNotEqual(minSpace, space) ||
-            LessNotEqual(maxSpace, space) || GreatNotEqual(minSpace, maxSpace)) {
-            minSpace = space;
-            maxSpace = space;
-        }
+        minSpace = Negative(minSpace) ? 0.0f : minSpace;
+        minSpace = GreatNotEqual(minSpace, space) ? space : minSpace;
+        maxSpace = LessNotEqual(maxSpace, space) ? space : maxSpace;
         chainAnimation_->SetSpace(space, maxSpace, minSpace);
         auto conductivity = chainAnimationOptions_.value().conductivity;
         if (LessNotEqual(conductivity, 0) || GreatNotEqual(conductivity, 1)) {
