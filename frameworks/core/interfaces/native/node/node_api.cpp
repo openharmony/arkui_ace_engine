@@ -60,7 +60,7 @@ namespace {
 
 ArkUINodeHandle CreateNode(ArkUINodeType type, int peerId, ArkUI_Int32 /*flags*/)
 {
-    return ViewModel::CreateNode(type, peerId);
+    return reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
 }
 
 void DisposeNode(ArkUINodeHandle node)

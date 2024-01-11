@@ -23,6 +23,8 @@ extern "C" {
 #define ARKUI_FULL_API_VERSION 65
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
+#define ARKUI_NODE_API_VERSION 65
+
 #define ARKUI_BASIC_API_VERSION 4
 #define ARKUI_NODE_GRAPHICS_API_VERSION 4
 #define ARKUI_NODE_MODIFIERS_API_VERSION 4
@@ -910,6 +912,20 @@ struct ArkUICommonModifier {
     void (*setKeyBoardShortCut)(
         ArkUINodeHandle node, ArkUI_CharPtr value, const ArkUI_Int32* keysIntArray, ArkUI_Int32 length);
     void (*resetKeyBoardShortCut)(ArkUINodeHandle node);
+
+    void (*setClip)(ArkUINodeHandle node, ArkUI_Int32 isClip);
+    void (*setClipShape)(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Float64* attribute, ArkUI_Int32 length);
+    void (*setClipPath)(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Float64* attribute, ArkUI_CharPtr commands);
+    void (*setOpacityTransition)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*setRotateTransition)(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_Int32 length, ArkUI_Float32 centerXValue,
+                                ArkUI_Int32 centerXUnit, ArkUI_Float32 centerYValue, ArkUI_Int32 centerYUnit, ArkUI_Float32 centerZValue,
+                                ArkUI_Int32 centerZUnit, ArkUI_Float32 perspective, ArkUI_Float32 angle);
+
+    void (*setScaleTransition)(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_Int32 length, ArkUI_Float32 centerX, 
+                               ArkUI_Int32 centerXUnit, ArkUI_Float32 centerY, ArkUI_Int32 centerYUnit);
+
+    void (*setTranslateTransition)(ArkUINodeHandle node, ArkUI_Float32 centerXValue, ArkUI_Int32 centerXUnit, ArkUI_Float32 centerYValue,
+                                    ArkUI_Int32 centerYUnit, ArkUI_Float32 centerZValue, ArkUI_Int32 centerZUnit);
 };
 
 
@@ -1055,6 +1071,7 @@ struct ArkUIButtonModifier {
 };
 
 struct ArkUIImageModifier {
+    void (*setImageSrc)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*setCopyOption)(ArkUINodeHandle node, ArkUI_Int32 copyOption);
     void (*resetCopyOption)(ArkUINodeHandle node);
     void (*setAutoResize)(ArkUINodeHandle node, bool autoResize);
@@ -2279,12 +2296,6 @@ struct ArkUINavigation {
     void (*setNavDestinationBackPressed)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUI_Int32 indexerId);
 };
 
-struct ArkUIBasicNode {
-    ArkUI_Int32 version;
-    void (*setCallbackMethod)(ArkUIAPICallbackMethod* method);
-    const ArkUIBasicAPI* (*getBasicModifier)();
-};
-
 struct ArkUIGraphicsCanvas {
     void (*finalize)(ArkUICanvasHandle canvas);
 
@@ -2459,6 +2470,12 @@ struct ArkUIBasicAPI {
     // Commit attributes updates for node.
     void (*applyModifierFinish)(ArkUINodeHandle nodePtr);
     void (*markDirty)(ArkUINodeHandle nodePtr, ArkUINodeDirtyFlag dirtyFlag);
+};
+
+struct ArkUIBasicNode {
+    ArkUI_Int32 version;
+    void (*setCallbackMethod)(ArkUIAPICallbackMethod* method);
+    const ArkUIBasicAPI* (*getBasicModifier)();
 };
 
 /**
