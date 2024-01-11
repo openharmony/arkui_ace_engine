@@ -1017,4 +1017,13 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     }
 }
 
+void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
+{
+    JSCanvasGradient::JSBind(globalObj);
+    JSCanvasPattern::JSBind(globalObj);
+    JSMatrix2d::JSBind(globalObj);
+    JSOffscreenCanvas::JSBind(globalObj, nativeEngine);
+    JSOffscreenRenderingContext::JSBind(globalObj);
+}
+
 } // namespace OHOS::Ace::Framework

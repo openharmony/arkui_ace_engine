@@ -44,16 +44,6 @@ napi_value AttachOffscreenCanvas(napi_env env, void* value, void*)
         LOGW("Invalid context.");
         return nullptr;
     }
-    napi_value global = nullptr;
-    napi_status status = napi_get_global(env, &global);
-    if (status != napi_ok) {
-        return nullptr;
-    }
-    BindingTarget bindingTarget = NapiValueToLocalValue(global);
-    JSOffscreenRenderingContext::JSBind(bindingTarget);
-    JSCanvasGradient::JSBind(bindingTarget);
-    JSCanvasPattern::JSBind(bindingTarget);
-    JSMatrix2d::JSBind(bindingTarget);
 
     napi_value offscreenCanvas = nullptr;
     napi_create_object(env, &offscreenCanvas);
@@ -77,8 +67,6 @@ napi_value AttachOffscreenCanvas(napi_env env, void* value, void*)
         nullptr, nullptr);
     return offscreenCanvas;
 }
-
-double JSOffscreenCanvas::dipScale_ = 1.0;
 
 napi_value JSOffscreenCanvas::InitOffscreenCanvas(napi_env env)
 {
@@ -130,7 +118,6 @@ napi_value JSOffscreenCanvas::Constructor(napi_env env, napi_callback_info info)
     auto context = PipelineBase::GetCurrentContext();
     if (context != nullptr) {
         workCanvas->instanceId_ = context->GetInstanceId();
-        workCanvas->dipScale_ = context->GetDipScale();
     }
     if (napi_get_value_double(env, argv[0], &fWidth) == napi_ok) {
         fWidth = PipelineBase::Vp2PxWithCurrentDensity(fWidth);
@@ -388,19 +375,5 @@ napi_value JSOffscreenCanvas::CreateContext2d(napi_env env, double width, double
     offscreenCanvasContext_->SetOffscreenPattern(offscreenCanvasPattern_);
     offscreenCanvasContext_->AddOffscreenCanvasPattern(offscreenCanvasPattern_);
     return thisVal;
-}
-
-double JSOffscreenCanvas::ConvertToPxValue(Dimension dimension)
-{
-    if (dimension.Unit() == DimensionUnit::NONE) {
-        return dimension.Value();
-    }
-    if (dimension.Unit() == DimensionUnit::PX) {
-        return dimension.Value();
-    }
-    if (dimension.Unit() == DimensionUnit::VP) {
-        return dimension.Value() * dipScale_;
-    }
-    return 0.0;
 }
 } // namespace OHOS::Ace::Framework

@@ -437,12 +437,14 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleWorker(void* runtime)
     if (!arkRuntime->InitializeFromExistVM(vm)) {
         return;
     }
+    localRuntime_ = arkRuntime;
     LocalScope scope(vm);
+
+    // preload js views
+    JsRegisterWorkerViews(JSNApi::GetGlobalObject(vm), runtime);
 
     // preload js enums
     PreloadJsEnums(arkRuntime);
-
-    localRuntime_ = arkRuntime;
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModule(void* runtime)

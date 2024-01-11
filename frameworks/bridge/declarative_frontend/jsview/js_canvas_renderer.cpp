@@ -20,7 +20,6 @@
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/jsview/js_canvas_pattern.h"
-#include "bridge/declarative_frontend/jsview/js_offscreen_canvas.h"
 #include "bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/models/canvas_renderer_model_impl.h"
@@ -715,29 +714,41 @@ RefPtr<CanvasPath2D> JSCanvasRenderer::JsMakePath2D(const JSCallbackInfo& info)
 
 JSRenderImage* JSCanvasRenderer::UnwrapNapiImage(const JSRef<JSObject> jsObject)
 {
-    auto engine = EngineHelper::GetCurrentEngine();
-    if (engine == nullptr) {
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+
+    if (runtime == nullptr) {
         return nullptr;
     }
-    JSRenderImage* jsImage = nullptr;
-    NativeEngine* nativeEngine = engine->GetNativeEngine();
-    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    auto vm = runtime->GetEcmaVm();
     panda::Local<JsiValue> value = jsObject.Get().GetLocalHandle();
     JSValueWrapper valueWrapper = value;
-    napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
+    Global<JSValueRef> arkValue = valueWrapper;
+    napi_value napiValue = reinterpret_cast<napi_value>(*arkValue.ToLocal(vm));
+    panda::Local<panda::JSValueRef> nativeValue(reinterpret_cast<uintptr_t>(napiValue));
+    auto nativeObject = nativeValue->ToObject(vm);
+
     napi_value isImageBitmap = nullptr;
-    if (napi_get_named_property(env, napiValue, "isImageBitmap", &isImageBitmap) == napi_ok) {
-        int32_t value = 0;
-        napi_get_value_int32(env, isImageBitmap, &value);
-        if (!value) {
-            return nullptr;
-        }
-    } else {
+    Local<panda::StringRef> keyType = panda::StringRef::NewFromUtf8(vm, "isImageBitmap");
+    Local<panda::JSValueRef> valueType = nativeObject->Get(vm, keyType);
+    isImageBitmap = reinterpret_cast<napi_value>(*valueType);
+    if (isImageBitmap == nullptr) {
         return nullptr;
     }
-    void* native = nullptr;
-    napi_unwrap(env, napiValue, &native);
-    jsImage = reinterpret_cast<JSRenderImage*>(native);
+    int32_t type = 0;
+    panda::Local<panda::JSValueRef> localType(reinterpret_cast<uintptr_t>(isImageBitmap));
+    type = localType->Int32Value(vm);
+    if (!type) {
+        return nullptr;
+    }
+
+    JSRenderImage* jsImage = nullptr;
+    Local<panda::StringRef> keyObj = panda::StringRef::GetNapiWrapperString(vm);
+    Local<panda::JSValueRef> valObj = nativeObject->Get(vm, keyObj);
+    if (valObj->IsObject()) {
+        Local<panda::ObjectRef> ext(valObj);
+        auto ref = reinterpret_cast<NativeReference*>(ext->GetNativePointerField(0));
+        jsImage = ref != nullptr ? reinterpret_cast<JSRenderImage*>(ref->GetData()) : nullptr;
+    }
     return jsImage;
 }
 
@@ -753,28 +764,17 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
     }
     JSRenderImage* jsImage = UnwrapNapiImage(info[0]);
     if (jsImage) {
-        isImage = true;
-        std::string imageValue = jsImage->GetSrc();
-        image.src = imageValue;
-        imgWidth = jsImage->GetWidth();
-        imgHeight = jsImage->GetHeight();
-
-        auto closeCallback = [weak = AceType::WeakClaim(this), imageValue]() {
-            LOGI("Image bitmap close called.");
-            auto jsCanvasRenderer = weak.Upgrade();
-            CHECK_NULL_VOID(jsCanvasRenderer);
-            jsCanvasRenderer->JsCloseImageBitmap(imageValue);
-        };
-        jsImage->SetCloseCallback(closeCallback);
+        pixelMap = jsImage->GetPixelMap();
     } else {
 #if !defined(PREVIEW)
         pixelMap = CreatePixelMapFromNapiValue(info[0]);
 #endif
-        if (!pixelMap) {
-            return;
-        }
+    }
+    if (!pixelMap) {
+        return;
     }
     ExtractInfoToImage(image, info, isImage);
+    image.instanceId = jsImage ? jsImage->GetInstanceId() : 0;
 
     BaseInfo baseInfo;
     baseInfo.canvasPattern = canvasPattern_;
@@ -824,12 +824,10 @@ void JSCanvasRenderer::ExtractInfoToImage(CanvasImage& image, const JSCallbackIn
             JSViewAbstract::ParseJsDouble(info[6], image.dy);
             JSViewAbstract::ParseJsDouble(info[7], image.dWidth);
             JSViewAbstract::ParseJsDouble(info[8], image.dHeight);
-            if (isImage) {
-                image.sx = PipelineBase::Vp2PxWithCurrentDensity(image.sx);
-                image.sy = PipelineBase::Vp2PxWithCurrentDensity(image.sy);
-                image.sWidth = PipelineBase::Vp2PxWithCurrentDensity(image.sWidth);
-                image.sHeight = PipelineBase::Vp2PxWithCurrentDensity(image.sHeight);
-            }
+            image.sx = PipelineBase::Vp2PxWithCurrentDensity(image.sx);
+            image.sy = PipelineBase::Vp2PxWithCurrentDensity(image.sy);
+            image.sWidth = PipelineBase::Vp2PxWithCurrentDensity(image.sWidth);
+            image.sHeight = PipelineBase::Vp2PxWithCurrentDensity(image.sHeight);
             image.dx = PipelineBase::Vp2PxWithCurrentDensity(image.dx);
             image.dy = PipelineBase::Vp2PxWithCurrentDensity(image.dy);
             image.dWidth = PipelineBase::Vp2PxWithCurrentDensity(image.dWidth);
@@ -2332,12 +2330,13 @@ void JSCanvasRenderer::JsClearRect(const JSCallbackInfo& info)
 
 Dimension JSCanvasRenderer::GetDimensionValue(const std::string& str)
 {
-    auto context = PipelineBase::GetCurrentContext();
     Dimension dimension = StringToDimension(str);
-    if (context == nullptr) {
-        return Dimension(JSOffscreenCanvas::ConvertToPxValue(dimension));
-    } else {
-        return Dimension(dimension.ConvertToPx());
+    if ((dimension.Unit() == DimensionUnit::NONE) || (dimension.Unit() == DimensionUnit::PX)) {
+        return Dimension(dimension.Value());
     }
+    if (dimension.Unit() == DimensionUnit::VP) {
+        return Dimension(dimension.Value() * SystemProperties::GetResolution());
+    }
+    return Dimension(0.0);
 }
 } // namespace OHOS::Ace::Framework
