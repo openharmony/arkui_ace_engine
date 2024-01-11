@@ -37,6 +37,18 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type)
             return ON_SCROLL_STOP;
         case NODE_EVENT_ON_APPEAR:
             return ON_APPEAR;
+        case NODE_ON_FOCUS:
+            return ON_FOCUS;
+        case NODE_ON_BLUR:
+            return ON_BLUR;
+        case NODE_TEXT_INPUT_ON_SUBMIT:
+            return ON_TEXTINPUT_SUBMIT;
+        case NODE_REFRESH_STATE_CHANGE:
+            return ON_REFRESH_STATE_CHANGE;
+        case NODE_REFRESH_ON_REFRESH:
+            return ON_REFRESH_REFRESHING;
+        case NODE_SCROLL_EVENT_EDGE:
+            return ON_SCROLL_EDGE;
         default:
             return -1;
     }
@@ -57,6 +69,18 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIAsyncEventKind type)
             return NODE_SCROLL_EVENT_ON_SCROLL_STOP;
         case ON_APPEAR:
             return NODE_EVENT_ON_APPEAR;
+        case ON_FOCUS:
+            return NODE_ON_FOCUS;
+        case ON_BLUR:
+            return NODE_ON_BLUR;
+        case ON_TEXTINPUT_SUBMIT:
+            return NODE_TEXT_INPUT_ON_SUBMIT;
+        case ON_REFRESH_STATE_CHANGE:
+            return NODE_REFRESH_STATE_CHANGE;
+        case ON_REFRESH_REFRESHING:
+            return NODE_REFRESH_ON_REFRESH;
+        case NODE_SCROLL_EVENT_EDGE:
+            return ON_SCROLL_EDGE;
         default:
             return -1;
     }
@@ -77,5 +101,4 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
     event->eventId = origin->eventId;
     return true;
 }
-
 }; // namespace OHOS::Ace::NodeModel

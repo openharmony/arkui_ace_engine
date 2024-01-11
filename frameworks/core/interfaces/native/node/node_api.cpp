@@ -25,6 +25,9 @@
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
+#include "core/interfaces/native/node/node_common_modifier.h"
+#include "core/interfaces/native/node/node_refresh_modifier.h"
+#include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace::NG {
 
@@ -87,8 +90,8 @@ typedef void (*ComponentAsyncEventHandler)(ArkUINodeHandle node, ArkUI_Int32 eve
 /* clang-format off */
 const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     nullptr,
-    nullptr,
-    nullptr,
+    NodeModifier::SetOnFocus,
+    NodeModifier::SetOnBlur,
     nullptr,
     nullptr,
     nullptr,
@@ -102,13 +105,18 @@ const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnScroll,
     NodeModifier::SetOnScrollFrameBegin,
     NodeModifier::SetOnScrollStart,
-    NodeModifier::SetOnScrollStop
+    NodeModifier::SetOnScrollStop,
+    NodeModifier::SetOnScrollEdge,
 };
 
 const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
-    nullptr,
-    nullptr,
+    NodeModifier::SetTextInputOnSubmit,
     NodeModifier::SetOnTextInputChange,
+};
+
+const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
+    NodeModifier::SetRefreshOnStateChange,
+    NodeModifier::SetOnRefreshing,
 };
 
 /* clang-format on */
@@ -145,6 +153,15 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, A
             eventHandle = textInputNodeAsyncEventHandlers[subKind];
             break;
         }
+        case ARKUI_REFRESH: {
+            // textinput event type.
+            if (subKind >= sizeof(refreshNodeAsyncEventHandlers) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = refreshNodeAsyncEventHandlers[subKind];
+            break;
+        }
         default: {
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
         }
@@ -175,6 +192,16 @@ void ApplyModifierFinish(ArkUINodeHandle nodePtr)
     }
 }
 
+bool RequestFocus(ArkUINodeHandle handle, ArkUI_CharPtr value)
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    std::string targetNodeId(value);
+    return pipelineContext->RequestFocus(targetNodeId);
+}
+
 /* clang-format off */
 const struct ArkUIBasicAPI basicImpl = {
     CreateNode,
@@ -194,6 +221,7 @@ const struct ArkUIBasicAPI basicImpl = {
     nullptr,
     ApplyModifierFinish,
     nullptr,
+    RequestFocus,
 };
 /* clang-format on */
 

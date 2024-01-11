@@ -40,6 +40,7 @@ ArkUI_BasicNodeAPI basicImpl_11 = {
     OHOS::Ace::NodeModel::UnregisterOnEvent,
     OHOS::Ace::NodeModel::ApplyModifierFinish,
     OHOS::Ace::NodeModel::MarkDirty,
+    OHOS::Ace::NodeModel::RequestFocus,
 };
 
 } // namespace

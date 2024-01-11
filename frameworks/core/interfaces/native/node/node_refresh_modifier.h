@@ -18,11 +18,6 @@
 #include "core/interfaces/native/node/node_modifiers.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
-const ArkUIScrollModifier* GetScrollModifier();
-
-void SetOnScroll(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
-void SetOnScrollFrameBegin(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
-void SetOnScrollStart(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
-void SetOnScrollStop(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
-void SetOnScrollEdge(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
+    void SetRefreshOnStateChange(ArkUINodeHandle node, ArkUI_Int32 eventId);
+    void SetOnRefreshing(ArkUINodeHandle node, ArkUI_Int32 eventId);
 } // namespace OHOS::Ace::NG::NodeModifier

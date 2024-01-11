@@ -127,6 +127,7 @@ public:
     static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
     static void SetTextInputText(FrameNode* frameNode, const std::string& value);
     static void SetTextInputPlaceHolder(FrameNode* frameNode, const std::string& placeholder);
+    static void SetOnSubmit(FrameNode* frameNode, std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func);
 private:
     void AddDragFrameNodeToManager() const;
     void SetDraggable(bool draggable);

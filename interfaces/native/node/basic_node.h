@@ -88,6 +88,8 @@ typedef enum {
     ARKUI_NODE_FLEX,
     /** 列表项. */
     ARKUI_NODE_LIST_ITEM
+    /** 刷新. */
+    ARKUI_NODE_REFRESH,
 } ArkUI_NodeType;
 
 #define MAX_NODE_SCOPE_NUM 1000
@@ -468,6 +470,108 @@ typedef enum {
      * @endcode
      */
     NODE_TRANSLATE_TRANSITION,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置当前组件是否可以获焦.
+     *
+     * @note 入参格式为内容为true或false的字符串，不区分大小写.
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_FOCUSABLE, "true");
+     * @endcode
+     *
+     */
+    NODE_FOCUSABLE,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置无障碍组.
+     *
+     * @note 入参格式为内容为true或false的字符串，不区分大小写.
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_ACCESSIBILITY_GROUP, "true");
+     * @endcode
+     *
+     */
+    NODE_ACCESSIBILITY_GROUP,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置无障碍文本.
+     *
+     * @note 入参格式为字符串。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_ACCESSIBILITY_TEXT, "test");
+     * @endcode
+     *
+     */
+    NODE_ACCESSIBILITY_TEXT,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置无障碍文本.
+     *
+     * @note 入参格式为字符串。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_ACCESSIBILITY_LEVEL, "test");
+     * @endcode
+     *
+     */
+    NODE_ACCESSIBILITY_LEVEL,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置无障碍文本.
+     *
+     * @note 入参格式为字符串。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_ACCESSIBILITY_DESCRIPTION, "test");
+     * @endcode
+     *
+     */
+    NODE_ACCESSIBILITY_DESCRIPTION,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置当前组件是否为当前页面上的默认焦点.
+     *
+     * @note 入参格式为内容为true或false的字符串，不区分大小写.
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_DEFAULT_FOCUS, "true");
+     * @endcode
+     *
+     */
+    NODE_DEFAULT_FOCUS,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置一个或多个触摸热区.
+     *
+     * @note 4个参数 用空格分隔
+     * 1. 触摸点相对于组件左上角的x轴坐标,单位为vp
+     * 2. 触摸点相对于组件左上角的y轴坐标,单位为vp
+     * 3. 触摸热区的宽度 ，单位为%.
+     * 4. 触摸热区的高度，单位为%.
+     * 设置一个触摸热区 如"0 0 100 100".
+     * 设置多个触摸热区需要用{}，参数用逗号分隔 如"{0 0 100 100},{0 0 100 100}".
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_RESPONSE_REGION, "0 0 100 100");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_RESPONSE_REGION, "{0 0 100 100},{0 0 100 100}");
+     * @endcode
+     *
+     */
+    NODE_RESPONSE_REGION,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置组件的遮罩文本.
+     *
+     * @note 4个参数 用空格分隔 
+     * 1. 遮罩文本内容 .
+     * 2. 设置浮层相对于组件的方位 {"TopStart", "Top", "TopEnd",
+     *       "Start", "Center", "End", "BottomStart", "Bottom", "BottomEnd"}.
+     * 3. 浮层基于自身左上角的偏移量 X ，单位为vp.
+     * 4. 浮层基于自身左上角的偏移量 Y，单位为vp.
+     * 如"test TopStart 2 3".
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_OVERLAY, "test TopStart 2 3");
+     * @endcode
+     *
+     */
+    NODE_OVERLAY,
+
     /**
      * @brief 通过<b>setAttribute</b>为当前text组件设置内容。
      * @note 入参:value: String
@@ -481,6 +585,8 @@ typedef enum {
      *
      * @see ArkUI_BasicNodeAPI::setAttribute
      * @note 入参color: #argb类型，格式字符串，如"#ffffffff"
+    /**
+     * @note 入参格式为#argb类型字符串，如"#FF1122FF"。
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_COLOR, "#FF1122FF");
      * @endcode
@@ -565,6 +671,30 @@ typedef enum {
      * @endcode
      */
     NODE_TEXT_OVER_FLOW,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置字体列表.
+     *
+     * @note 入参格式字体字符串. 
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_FAMILY, "HarmonyOS Sans");
+     * @endcode
+     *
+     */
+    NODE_FONT_FAMILY,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置文本是否可复制粘贴.
+     *
+     * @note CopyOptions9:String("None","InApp","LocalDevice","CROSS_DEVICE")
+     *       格式字符串，如 "Center"
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_COPY_OPTION, "Normal");
+     * @endcode
+     *
+     */
+    NODE_TEXT_COPY_OPTION,
+
     /**
      * @brief 通过<b>setAttribute</b>为当前span组件设置文本内容。
      * @note 入参:value: String
@@ -630,6 +760,7 @@ typedef enum {
      * @endcode
      */
     NODE_IMAGE_COLOR_FILTER,
+
     /**
      * @note 入参格式为字符串。
      * @code {.c}
@@ -819,6 +950,66 @@ typedef enum {
      *
      */
     NODE_SCROLL_SCROLL_SNAP,
+
+     /**
+     * @brief 通过{@link setAttribute}方法设置嵌套滚动选项。设置向前向后两个方向上的嵌套滚动模式，实现与父组件的滚动联动.
+     *
+     * @note NestedScrollMode:String("SELF_ONLY","SELF_FIRST","PARENT_FIRST","PARALLEL")
+     *       格式字符串 可以设置2个参数 用空格隔开。
+     * 1. 可滚动组件往末尾端滚动时的嵌套滚动选项。
+     * 2. 可滚动组件往起始端滚动时的嵌套滚动选项。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_NESTED_SCROLL, "SELF_ONLY PARENT_FIRST");
+     * @endcode
+     *
+     */
+    NODE_SCROLL_NESTED_SCROLL,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置组件的遮罩文本.
+     *
+     * @note 5个参数 用空格分隔 
+     * 1. 水平滑动偏移 ,单位为vp
+     * 2. 垂直滑动偏移 ,单位为vp
+     * 3. 滚动时长设置. 单位毫秒
+     * 4. 滚动曲线设置 {"Linear", "Ease", "EaseIn",
+     *       "EaseOut", "EaseInOut", "FastOutSlowIn", "LinearOutSlowIn", "FastOutLinearIn", 
+     *       "ExtremeDeceleration", "Sharp", "Rhythm", "Smooth", "Friction"}
+     * 5. 使能默认弹簧动效  Boolean格式字符串，如"true"
+     * 如"10 10 1000 Linear true".
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_TO, "10 10 1000 Linear true");
+     * @endcode
+     *
+     */
+    NODE_SCROLL_TO,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置文本是否可复制粘贴.
+     *
+     * @note Edge:String("Top","Center","Bottom","Baseline","Start","Middle","End")
+     *       格式字符串，如 "Top"
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_EDGE, "Top");
+     * @endcode
+     *
+     */
+    NODE_SCROLL_EDGE,
+
+    /**
+     * @brief 通过{@link getAttribute}方法返回当前的滚动偏移量.
+     *
+     * @note 返回值2个参数 用空格分隔 
+     * 1. 水平滑动偏移; 单位为vp
+     * 2. 竖直滑动偏移; 单位为vp
+     * 如 “ 10 20”
+     * @code {.c}
+     * basicNodeApi->getAttribute(nodeHandle, NODE_SCROLL_CURRENT_OFFSET);
+     * @endcode
+     *
+     */
+    NODE_SCROLL_CURRENT_OFFSET,
+
     /**
      * @brief 通过<b>setAttribute</b>方法设置滚动条状态.
      * @see ArkUI_BasicNodeAPI::setAttribute
@@ -1066,8 +1257,11 @@ typedef enum {
     NODE_TOUCH_EVENT = 0,
 
     NODE_EVENT_ON_APPEAR,
+    NODE_ON_FOCUS,
+    NODE_ON_BLUR,
 
     NODE_TEXT_INPUT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_INPUT,
+    NODE_TEXT_INPUT_ON_SUBMIT,
 
     /**
      * @brief 定义ARKUI_NODE_SCROLL滚动组件的滚动事件枚举值。
@@ -1080,6 +1274,10 @@ typedef enum {
     NODE_SCROLL_EVENT_ON_SCROLL_FRAME_BEGIN,
     NODE_SCROLL_EVENT_ON_SCROLL_START,
     NODE_SCROLL_EVENT_ON_SCROLL_STOP,
+    NODE_SCROLL_EVENT_EDGE,
+
+    NODE_REFRESH_STATE_CHANGE = 1000 * ARKUI_NODE_REFRESH + 1,
+    NODE_REFRESH_ON_REFRESH,
 } ArkUI_NodeEventType;
 
 /**
@@ -1193,6 +1391,8 @@ typedef struct {
 
     // 请求节点标记脏区强制进行刷新。
     void (*markDirty)(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag);
+
+    bool (*requestFocus)(ArkUI_NodeHandle handle, const char* value);
 } ArkUI_BasicNodeAPI;
 
 #ifdef __cplusplus

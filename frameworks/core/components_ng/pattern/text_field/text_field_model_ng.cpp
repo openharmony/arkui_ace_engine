@@ -954,4 +954,12 @@ void TextFieldModelNG::SetTextInputPlaceHolder(FrameNode* frameNode, const std::
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     textFieldLayoutProperty->UpdatePlaceholder(placeholder);
 }
+
+void TextFieldModelNG::SetOnSubmit(FrameNode* frameNode, std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSubmit(std::move(func));
+}
 } // namespace OHOS::Ace::NG

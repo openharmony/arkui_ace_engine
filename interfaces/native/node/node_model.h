@@ -55,5 +55,6 @@ int32_t CheckEvent(ArkUI_NodeEvent* event);
 
 void ApplyModifierFinish(ArkUI_NodeHandle nodePtr);
 void MarkDirty(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag);
+bool RequestFocus(ArkUI_NodeHandle node, const char* value);
 
 }; // namespace OHOS::Ace::NodeModel
