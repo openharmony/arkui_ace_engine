@@ -86,6 +86,9 @@ constexpr Dimension DIALOG_SUBTITLE_PADDING_LEFT = 24.0_vp;
 constexpr Dimension DIALOG_SUBTITLE_PADDING_RIGHT = 24.0_vp;
 constexpr Dimension DIALOG_TWO_TITLE_ZERO_SPACE = 0.0_vp;
 constexpr Dimension DIALOG_TWO_TITLE_SPACE = 16.0_vp;
+constexpr Dimension ADAPT_TITLE_MIN_FONT_SIZE = 16.0_fp;
+constexpr Dimension ADAPT_SUBTITLE_MIN_FONT_SIZE = 12.0_fp;
+constexpr uint32_t ADAPT_TITLE_MAX_LINES = 2;
 } // namespace
 
 void DialogPattern::OnModifyDone()
@@ -332,14 +335,18 @@ RefPtr<FrameNode> DialogPattern::BuildMainTitle(const DialogProperties& dialogPr
     CHECK_NULL_RETURN(titleProp, nullptr);
     titleProp->UpdateMaxLines(DIALOG_TITLE_MAXLINES);
     titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    titleProp->UpdateAdaptMaxFontSize(dialogTheme_->GetTitleTextStyle().GetFontSize());
-    titleProp->UpdateAdaptMinFontSize(dialogTheme_->GetTitleTextStyle().GetFontSize());
     std::string titleContent = dialogProperties.title.empty() ? dialogProperties.subtitle : dialogProperties.title;
     titleProp->UpdateContent(titleContent);
     auto titleStyle = dialogTheme_->GetTitleTextStyle();
     titleProp->UpdateFontSize(titleStyle.GetFontSize());
     titleProp->UpdateFontWeight(titleStyle.GetFontWeight());
     titleProp->UpdateTextColor(titleStyle.GetTextColor());
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        titleProp->UpdateAdaptMaxFontSize(dialogTheme_->GetTitleTextStyle().GetFontSize());
+        titleProp->UpdateAdaptMinFontSize(ADAPT_TITLE_MIN_FONT_SIZE);
+        titleProp->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+        titleProp->UpdateMaxLines(ADAPT_TITLE_MAX_LINES);
+    }
     PaddingProperty titlePadding;
     auto paddingInTheme = (dialogProperties.content.empty() && dialogProperties.buttons.empty())
                               ? dialogTheme_->GetTitleDefaultPadding()
@@ -384,11 +391,15 @@ RefPtr<FrameNode> DialogPattern::BuildSubTitle(const DialogProperties& dialogPro
     auto titleStyle = dialogTheme_->GetSubTitleTextStyle();
     titleProp->UpdateMaxLines(DIALOG_TITLE_MAXLINES);
     titleProp->UpdateTextOverflow(TextOverflow::ELLIPSIS);
-    titleProp->UpdateAdaptMaxFontSize(titleStyle.GetFontSize());
-    titleProp->UpdateAdaptMinFontSize(titleStyle.GetFontSize());
     titleProp->UpdateContent(dialogProperties.subtitle);
     titleProp->UpdateFontSize(titleStyle.GetFontSize());
     titleProp->UpdateTextColor(titleStyle.GetTextColor());
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        titleProp->UpdateAdaptMaxFontSize(titleStyle.GetFontSize());
+        titleProp->UpdateAdaptMinFontSize(ADAPT_SUBTITLE_MIN_FONT_SIZE);
+        titleProp->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+        titleProp->UpdateMaxLines(ADAPT_TITLE_MAX_LINES);
+    }
     PaddingProperty titlePadding;
     titlePadding.left = CalcLength(DIALOG_SUBTITLE_PADDING_LEFT);
     titlePadding.right = CalcLength(DIALOG_SUBTITLE_PADDING_RIGHT);
