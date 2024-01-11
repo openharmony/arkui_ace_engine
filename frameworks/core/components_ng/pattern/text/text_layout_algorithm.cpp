@@ -995,7 +995,7 @@ void TextLayoutAlgorithm::SplitSpanContentByLines(const TextStyle& textStyle,
             paragraph_->GetRectsForRange(child->position - StringUtils::ToWstring(textValue).length() - start,
                 child->position - start, selectedRects);
         }
-        RectF currentRect;
+        RectF currentRect = RectF(0, -1, 0, 0);
         auto preLinetLastSpan = spanContentLines.rbegin();
         double preLineFontSize = textStyle.GetFontSize().Value();
         if (preLinetLastSpan != spanContentLines.rend()) {
