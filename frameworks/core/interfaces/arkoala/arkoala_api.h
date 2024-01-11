@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ARKTS_FRONTEND_ARKOALA_API_H
-#define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ARKTS_FRONTEND_ARKOALA_API_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_API_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_API_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define ARKUI_FULL_API_VERSION 65
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
@@ -58,7 +62,7 @@ typedef _ArkUIXComponentController* ArkUIXComponentControllerHandle;
 /**
  * ToolType
  */
-typedef enum {
+enum TouchEventToolType {
     /**
      * UNKNOWN
      */
@@ -74,13 +78,13 @@ typedef enum {
      *
      */
     TOOL_TYPE_PEN = 2,
-} TouchEventToolType;
+};
 
 /**
  * SourceType
  *
  */
-typedef enum {
+enum ArkUISourceType {
     SOURCE_TYPE_UNKNOWN = 0,
     /**
      * Touchscreen
@@ -96,9 +100,9 @@ typedef enum {
      * TouchPad
      */
     SOURCE_TYPE_TOUCH_PAD = 3
-} ArkUISourceType;
+};
 
-typedef struct {
+struct ArkUITouchPoint {
     /**
      * Pointer identifier
      */
@@ -214,11 +218,12 @@ typedef struct {
      *
      */
     TouchEventToolType toolType;
-} ArkUITouchPoint;
+};
+
 /**
  * ToolType
  */
-typedef enum {
+enum TouchEventToolType {
     /**
      * UNKNOWN
      */
@@ -234,13 +239,13 @@ typedef enum {
      *
      */
     TOOL_TYPE_PEN = 2,
-} TouchEventToolType;
+};
 
 /**
  * SourceType
  *
  */
-typedef enum {
+enum ArkUISourceType {
     SOURCE_TYPE_UNKNOWN = 0,
     /**
      * Touchscreen
@@ -256,9 +261,9 @@ typedef enum {
      * TouchPad
      */
     SOURCE_TYPE_TOUCH_PAD = 3
-} ArkUISourceType;
+};
 
-typedef struct {
+struct ArkUITouchPoint {
     /**
      * Pointer identifier
      */
@@ -374,16 +379,16 @@ typedef struct {
      *
      */
     TouchEventToolType toolType;
-} ArkUITouchPoint;
+};
 
-typedef enum {
+enum ArkUITouchEventAction {
     ACTION_DOWN = 0,
     ACTION_UP,
     ACTION_MOVE,
     ACTION_CANCEL,
-} ArkUITouchEventAction;
+};
 
-typedef struct {
+struct ArkUIHistoricalTouchPoint {
     /**
      * Touch action
      */
@@ -393,9 +398,9 @@ typedef struct {
     /** touch point info of the historical event. */
     ArkUITouchPoint actionTouch;
     ArkUISourceType sourceType;
-} ArkUIHistoricalTouchPoint;
+};
 
-typedef struct {
+struct ArkUITouchEvent {
     /**
      * Touch action
      *
@@ -437,16 +442,16 @@ typedef struct {
      *
      */
     ArkUI_Bool preventDefault;
-} ArkUITouchEvent;
+};
 
-typedef enum {
+enum ArkUITouchEventAction {
     ACTION_DOWN = 0,
     ACTION_UP,
     ACTION_MOVE,
     ACTION_CANCEL,
-} ArkUITouchEventAction;
+};
 
-typedef struct {
+struct ArkUIHistoricalTouchPoint {
     /**
      * Touch action
      */
@@ -456,9 +461,9 @@ typedef struct {
     /** touch point info of the historical event. */
     ArkUITouchPoint actionTouch;
     ArkUISourceType sourceType;
-} ArkUIHistoricalTouchPoint;
+};
 
-typedef struct {
+struct ArkUITouchEvent {
     /**
      * Touch action
      *
@@ -474,13 +479,14 @@ typedef struct {
     ArkUITouchPoint actionTouch;
 
     /**
-     * @brief 返回此事件发生时所有屏幕接触点信息.
+     * @brief Returns information about all screen touch points when this event occurs.
      *
      */
     ArkUI_Int32 (*getTouches)(ArkUITouchPoint** points);
 
     /**
-     * @brief 返回此事件中的历史点信息。这些是在此事件和上一个事件之间发生的运动.
+     * @brief Returns the historical point information in this event.
+     * These are the movements that occurred between this event and the previous event.
      *
      */
     ArkUI_Int32 (*getHistoricalPoints)(ArkUIHistoricalTouchPoint** historicalPoints);
@@ -488,17 +494,18 @@ typedef struct {
     ArkUISourceType sourceType;
 
     /**
-     * @brief 阻止事件进一步向父节点冒泡处理.
+     * @brief Prevents events from bubbling further to the parent node for processing.
      *
      */
     ArkUI_Bool stopPropagation;
 
     /**
-     * @brief 阻止当前节点的默认事件处理行为，允许事件进一步向上冒泡.
+     * @brief Blocks the current node's default event handling behavior, allowing events
+     * to bubble up further.
      *
      */
     ArkUI_Bool preventDefault;
-} ArkUITouchEvent;
+};
 
 struct StringAndDouble {
     ArkUI_Float64 value;
@@ -667,55 +674,110 @@ struct ArkUIChainAnimationOptionsType {
     ArkUI_Int32 maxSpaceUnits;
 };
 
-enum ArkUIAPIEventKind {
-    Invalid = 0,
-    SinglePointerInput = 1,
-    MultiPointerInput = 2,
-    Callback = 3,
-    ComponentAsyncEvent = 4,
-    TextInput = 5,
-    GestureAsyncEvent = 6
+enum ArkUINodeType {
+    ARKUI_TEXT = 1,
+    ARKUI_SPAN,
+    ARKUI_IMAGE_SPAN,
+    ARKUI_IMAGE,
+    ARKUI_TOGGLE,
+    ARKUI_LOADINGPROGRESS,
+    ARKUI_TEXTINPUT,
+    ARKUI_STACK,
+    ARKUI_SCROLL,
+    ARKUI_LIST,
+    ARKUI_SWIPER,
+    ARKUI_TEXT_AREA,
+    ARKUI_BUTTON,
+    ARKUI_PROGRESS,
+    ARKUI_CHECKBOX,
+    ARKUI_COLUMN,
+    ARKUI_ROW,
+    ARKUI_FLEX,
+    ARKUI_LIST_ITEM,
+    ARKUI_TABS,
+    ARKUI_NAVIGATOR,
+    ARKUI_WEB,
+    ARKUI_SLIDER,
+    ARKUI_CANVAS,
+    ARKUI_RADIO,
+    ARKUI_GRID,
+    ARKUI_XCOMPONENT,
+    ARKUI_SIDEBAR,
+
+    ARKUI_MISC // Keep this item last
 };
 
-enum ArkUIAPIComponentAsyncEventSubKind {
-    OnAppear = 0,
-    OnDisappear = 1,
-    SwiperChange = 2,
-    TabsChange = 3,
-    VisibleAreaChange = 4,
-    OnClick = 5,
-    OnScrollIndex = 6,
-    OnNavigatorClick = 7,
-    ListScroll = 8,
-    ListScrollIndex = 9,
-    ListScrollStart = 10,
-    ListScrollStop = 11,
-    OnWebLoadIntercept = 12,
-    OnToggleChange = 13,
-    OnTextInputEditChange = 14,
-    OnTextInputSubmit = 15,
-    OnTextInputChange = 16,
-    OnSliderChange = 17,
-    SwiperAnimationStart = 18,
-    SwiperAnimationEnd = 19,
-    SwiperGestureSwipe = 20,
-    OnAreaChange = 21,
-    OnHover = 22,
-    OnBlur = 23,
-    OnKeyEvent = 24,
-    OnMouse = 25,
-    CanvasReady = 26,
-    OnImageComplete = 27,
-    OnImageError = 28,
-    RefreshStateChange = 29,
-    OnRefreshing = 30,
-    OnRadioChange = 31,
-    GridScroll = 32,
-    GridScrollStart = 33,
-    GridScrollStop = 34,
-    OnSideBarChange = 35,
-    OnXComponentLoad = 36,
-    OnXComponentDestroy = 37,
+enum ArkUIEventCategory {
+    Invalid,
+    SinglePointerInput,
+    MultiPointerInput,
+    Callback,
+    ComponentAsyncEvent,
+    TextInput,
+    GestureAsyncEvent,
+    StringEvent
+};
+
+#define ARKUI_MAX_EVENT_NUM 1000
+
+enum ArkUIAsyncEventKind {
+// common events
+    ON_APPEAR = 0,
+    ON_DISAPPEAR = 1,
+    ON_TOUCH = 2,
+    ON_CLICK = 3,
+    ON_HOVER = 4,
+    ON_BLUR = 5,
+    ON_KEYEVENT = 6,
+    ON_MOUSE = 7,
+    ON_AREA_CHANGE = 8,
+    ON_VISIBLEAREA_CHANGE = 9,
+    ON_GESTURE = 10,
+    // components events
+    ON_LIST_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_LIST,
+    ON_LIST_SCROLL_INDEX,
+    ON_LIST_SCROLL_START,
+    ON_LIST_SCROLL_STOP,
+
+    ON_TOGGLE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TOGGLE,
+
+    ON_TEXTINPUT_EDIT_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXTINPUT,
+    ON_TEXTINPUT_SUBMIT,
+    ON_TEXTINPUT_CHANGE,
+
+    ON_SWIPER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_SWIPER,
+    ON_SWIPER_ANIMATION_START,
+    ON_SWIPER_ANIMATION_END,
+    ON_SWIPER_GESTURE_SWIPE,
+
+    ON_IMAGE_COMPLETE = ARKUI_MAX_EVENT_NUM * ARKUI_IMAGE,
+    ON_IMAGE_ERROR,
+
+    ON_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_SCROLL,
+    ON_SCROLL_FRAME_BEGIN,
+    ON_SCROLL_START,
+    ON_SCROLL_STOP,
+    ON_SCROLL_INDEX,
+
+    ON_TABS_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TABS,
+    ON_NAVIGATOR_CLICK = ARKUI_MAX_EVENT_NUM * ARKUI_NAVIGATOR,
+    ON_WEB_INTERCEPT = ARKUI_MAX_EVENT_NUM * ARKUI_WEB,
+    ON_SLIDER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_SLIDER,
+    ON_CANVAS_READY = ARKUI_MAX_EVENT_NUM * ARKUI_CANVAS,
+
+    ON_RADIO_CNANGE = ARKUI_MAX_EVENT_NUM * ARKUI_RADIO,
+    
+    ON_GRID_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_GRID,
+    ON_GRID_START,
+    ON_GRID_STOP,
+
+    ON_SIDEBAR_CNANGE = ARKUI_MAX_EVENT_NUM * ARKUI_SIDEBAR,
+
+    ON_XCOMPONENT_LOAD = ARKUI_MAX_EVENT_NUM * ARKUI_XCOMPONENT,
+    ON_XCOMPONENT_DESTROY,
+
+    ON_REFRESH_STATE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_MISC,
+    ON_REFRESHING,
 };
 
 enum ArkUIAPIGestureAsyncEventSubKind {
@@ -795,9 +857,13 @@ struct ArkUIAPIEventCallback {
 
 #define ARKUI_ASYNC_EVENT_ARGS_COUNT 12
 
-struct ArkUIAPIEventComponentAsyncEvent {
+struct ArkUINodeAsyncEvent {
     ArkUI_Int32 subKind;
     ArkUI_Int32 data[ARKUI_ASYNC_EVENT_ARGS_COUNT];
+};
+
+struct ArkUIStringAsyncEvent {
+    ArkUI_CharPtr pStr;
 };
 
 struct ArkUIAPIEventGestureAsyncEvent {
@@ -821,17 +887,17 @@ struct ArkUIAPIEventGestureAsyncEvent {
     ArkUI_Int32 velocity;
 };
 
-struct ArkUIAPIEvent {
-    ArkUI_Int32 kind; // Actually ArkUINodeAPIEventKind, but use int for fixed
-                        // binary layout.
-    ArkUI_Int32 nodeId;
+struct ArkUINodeEvent {
+    ArkUI_Int32 kind; // Actually ArkUIEventCategory, but use int for fixed binary layout.
+    ArkUI_Int32 eventId;
     union {
         ArkUIAPIEventSinglePointer singlePointer;
         ArkUIAPIEventMultiPointer multiPointer;
         ArkUIAPIEventCallback callback;
-        ArkUIAPIEventComponentAsyncEvent componentAsyncEvent;
+        ArkUINodeAsyncEvent componentAsyncEvent;
         ArkUIAPIEventTextInput textInputEvent;
         ArkUIAPIEventGestureAsyncEvent gestureAsyncEvent;
+        ArkUIStringAsyncEvent stringAsyncEvent;
     };
 };
 
@@ -2667,6 +2733,12 @@ struct ArkUINodeModifiers {
 
 const ArkUINodeModifiers* GetArkUINodeModifiers();
 
+enum ArkUINodeDirtyFlag {
+    NEED_MEASURE = 0,
+    NEED_LAYOUT,
+    NEED_RENDER,
+};
+
 struct ArkUIBasicAPI {
     /// Tree operations.
     ArkUINodeHandle (*createNode)(ArkUINodeType type, ArkUI_Int32 id, ArkUI_Int32 flags);
@@ -2720,4 +2792,8 @@ struct ArkUIAnyNodeAPI {
 const ArkUIFullNodeAPI* GetArkUIFullNodeAPI();
 void SendArkUIAsyncEvent(ArkUINodeEvent* event);
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_ARKTS_FRONTEND_ARKOALA_API_H
+#ifdef __cplusplus
+};
+#endif
+
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_ARKOALA_API_H

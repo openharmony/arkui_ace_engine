@@ -87,7 +87,7 @@ typedef void (*ComponentAsyncEventHandler)(ArkUINodeHandle node, ArkUI_Int32 eve
 
 /**
  * IMPORTANT!!!
- * the order of declaring the handler must be same as the ArkUIAPIComponentAsyncEventSubKind did
+ * the order of declaring the handler must be same as the ArkUIAsyncEventKind did
  */
 /* clang-format off */
 const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
@@ -257,6 +257,8 @@ ArkUIFullNodeAPI impl = {
     ARKUI_NODE_API_VERSION,
     GetBasicAPI,
     GetArkUINodeModifiers,
+    nullptr,
+    nullptr,
     nullptr,
 };
 /* clang-format on */
