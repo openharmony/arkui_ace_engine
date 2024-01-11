@@ -108,6 +108,15 @@ public:
         return clickRecognizer_;
     }
 
+    void CopyClickEvent(const RefPtr<ClickEventActuator>& clickEventActuator)
+    {
+        clickEvents_ = clickEventActuator->clickEvents_;
+        userCallback_ = clickEventActuator->userCallback_;
+        if (clickEventActuator->clickRecognizer_) {
+            clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
+        }
+    }
+    
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     std::list<RefPtr<ClickEvent>> clickEvents_;

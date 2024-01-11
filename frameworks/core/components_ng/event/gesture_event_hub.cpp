@@ -1260,4 +1260,47 @@ void GestureEventHub::ClearUserOnTouch()
         touchEventActuator_->ClearUserCallback();
     }
 }
+
+void GestureEventHub::CopyGestures(const RefPtr<GestureEventHub>& gestureEventHub)
+{
+    gestures_ = gestureEventHub->backupGestures_;
+    recreateGesture_ = true;
+}
+
+void GestureEventHub::CopyEvent(const RefPtr<GestureEventHub>& gestureEventHub)
+{
+    auto originalTouchEventActuator = gestureEventHub->touchEventActuator_;
+    if (originalTouchEventActuator) {
+        touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
+        touchEventActuator_->CopyTouchEvent(originalTouchEventActuator);
+    }
+    
+    auto originalClickEventActuator = gestureEventHub->clickEventActuator_;
+    if (originalClickEventActuator) {
+        clickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
+        clickEventActuator_->CopyClickEvent(originalClickEventActuator);
+    }
+
+    auto originalLongPressEventActuator = gestureEventHub->longPressEventActuator_;
+    if (originalLongPressEventActuator) {
+        longPressEventActuator_ = MakeRefPtr<LongPressEventActuator>(WeakClaim(this));
+        longPressEventActuator_->CopyLongPressEvent(originalLongPressEventActuator);
+    }
+
+    auto originalDragEventActuator = gestureEventHub->dragEventActuator_;
+    if (originalDragEventActuator) {
+        dragEventActuator_ = MakeRefPtr<DragEventActuator>(WeakClaim(this), originalDragEventActuator->GetDirection(),
+            originalDragEventActuator->GetFingers(), originalDragEventActuator->GetDistance());
+        dragEventActuator_->CopyDragEvent(originalDragEventActuator);
+    }
+    auto originalShowMenu = gestureEventHub->showMenu_;
+    if (originalShowMenu) {
+        if (showMenu_) {
+            RemoveClickEvent(showMenu_);
+        }
+        auto originalGetGestureEventFunc = originalShowMenu->GetGestureEventFunc();
+        showMenu_= MakeRefPtr<ClickEvent>(std::move(originalGetGestureEventFunc));
+        AddClickEvent(showMenu_);
+    }
+}
 } // namespace OHOS::Ace::NG

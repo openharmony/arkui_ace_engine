@@ -151,6 +151,7 @@ public:
             gestures_.clear();
         }
         gestures_.emplace_back(gesture);
+        backupGestures_.emplace_back(gesture);
         recreateGesture_ = true;
     }
 
@@ -580,6 +581,10 @@ public:
     bool parallelCombineClick = false;
     RefPtr<ParallelRecognizer> innerParallelRecognizer_;
 
+    void CopyGestures(const RefPtr<GestureEventHub>& gestureEventHub);
+
+    void CopyEvent(const RefPtr<GestureEventHub>& gestureEventHub);
+
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
@@ -612,6 +617,7 @@ private:
 
     // Set by use gesture, priorityGesture and parallelGesture attribute function.
     std::list<RefPtr<NG::Gesture>> gestures_;
+    std::list<RefPtr<NG::Gesture>> backupGestures_;
     std::list<RefPtr<NGGestureRecognizer>> gestureHierarchy_;
 
     // used in bindMenu, need to delete the old callback when bindMenu runs again

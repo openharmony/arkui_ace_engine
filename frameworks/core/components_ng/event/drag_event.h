@@ -130,6 +130,16 @@ public:
         return direction_;
     }
 
+    int32_t GetFingers() const
+    {
+        return fingers_;
+    }
+
+    float GetDistance() const
+    {
+        return distance_;
+    }
+
     void StartDragTaskForWeb(const GestureEvent& info);
     void StartLongPressActionForWeb();
     void CancelDragForWeb();
@@ -159,6 +169,8 @@ public:
         return isDragUserReject_;
     }
 
+    void CopyDragEvent(const RefPtr<DragEventActuator>& dragEventActuator);
+    
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     RefPtr<DragEvent> userCallback_;
