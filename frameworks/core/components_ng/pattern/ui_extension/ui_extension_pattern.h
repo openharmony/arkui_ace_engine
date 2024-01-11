@@ -85,6 +85,7 @@ public:
     void OnConnect();
     void OnDisconnect();
     void OnExtensionDied();
+    bool OnBackPressed();
     void HandleDragEvent(const PointerEvent& info) override;
 
     void SetModalOnDestroy(const std::function<void()>&& callback);
@@ -116,7 +117,6 @@ public:
     int32_t GetUiExtensionId() override;
     int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
     void DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type);
-    bool NotifyOccupiedAreaChangeInfo(const sptr<Rosen::OccupiedAreaChangeInfo>& info);
 
     virtual void SearchExtensionElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) override;

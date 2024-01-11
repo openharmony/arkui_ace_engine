@@ -24,17 +24,11 @@
 #include "base/memory/referenced.h"
 #include "base/want/want_wrap.h"
 #include "core/common/container.h"
-#include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 
-namespace OHOS {
-template<typename T>
-class sptr;
-namespace Rosen {
+namespace OHOS::Rosen {
 class AvoidArea;
 enum class WSError;
-class OccupiedAreaChangeInfo;
 } // namespace OHOS::Rosen
-} // namespace OHOS
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -56,8 +50,7 @@ public:
     UIExtensionManager() = default;
     ~UIExtensionManager() override = default;
 
-    void RegisterUIExtensionInFocus(
-        const WeakPtr<UIExtensionPattern>& uiExtensionFocused, const WeakPtr<SessionWrapper>& sessionWrapper);
+    void RegisterUIExtensionInFocus(const WeakPtr<UIExtensionPattern>& uiExtensionFocused);
     bool OnBackPressed();
     const RefPtr<FrameNode> GetFocusUiExtensionNode();
     bool IsWrapExtensionAbilityId(int64_t elementId);
@@ -90,8 +83,6 @@ public:
      */
     void TransferOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type);
 
-    bool NotifyOccupiedAreaChangeInfo(const sptr<Rosen::OccupiedAreaChangeInfo>& info);
-
 private:
     class UIExtensionIdUtility {
     public:
@@ -109,7 +100,6 @@ private:
     };
 
     WeakPtr<UIExtensionPattern> uiExtensionFocused_;
-    WeakPtr<SessionWrapper> sessionWrapper_;
     std::map<int32_t, OHOS::Ace::WeakPtr<UIExtensionPattern>> aliveUIExtensions_;
     std::unique_ptr<UIExtensionIdUtility> extensionIdUtility_ = std::make_unique<UIExtensionIdUtility>();
 };

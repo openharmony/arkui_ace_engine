@@ -204,17 +204,10 @@ public:
             CHECK_NULL_VOID(container);
             auto taskExecutor = container->GetTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);
-            auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-            CHECK_NULL_VOID(context);
-            auto uiExtMgr = context->GetUIExtensionManager();
-            if (uiExtMgr && uiExtMgr->NotifyOccupiedAreaChangeInfo(info)) {
-                return;
-            }
-            auto curWindow = context->GetCurrentWindowRect();
-            positionY -= curWindow.Top();
             ContainerScope scope(instanceId_);
             taskExecutor->PostTask(
-                [context, keyboardRect, rsTransaction, positionY, height] {
+                [container, keyboardRect, rsTransaction, positionY, height] {
+                    auto context = container->GetPipelineContext();
                     CHECK_NULL_VOID(context);
                     context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, rsTransaction);
                 },
@@ -1555,12 +1548,6 @@ bool UIContentImpl::ProcessBackPressed()
     CHECK_NULL_RETURN(container, false);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
-    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
-    CHECK_NULL_RETURN(pipeline, false);
-    auto uiExtMgr = pipeline->GetUIExtensionManager();
-    if (uiExtMgr && uiExtMgr->OnBackPressed()) {
-        return true;
-    }
     bool ret = false;
     taskExecutor->PostSyncTask(
         [container, this, &ret]() {

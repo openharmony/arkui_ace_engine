@@ -26,9 +26,6 @@
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "base/utils/utils.h"
-#include "core/common/container.h"
-#include "core/common/container_scope.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -239,8 +236,6 @@ void SessionWrapperImpl::InitAllCallback()
 void SessionWrapperImpl::CreateSession(const AAFwk::Want& want)
 {
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Create session: %{private}s", want.ToString().c_str());
-    const std::string occupiedAreaChangeKey("ability.want.params.IsNotifyOccupiedAreaChange");
-    isNotifyOccupiedAreaChange_ = want.GetBoolParam(occupiedAreaChangeKey, false);
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
     CHECK_NULL_VOID(container);
     auto callerToken = container->GetToken();
@@ -436,15 +431,10 @@ std::shared_ptr<Rosen::RSSurfaceNode> SessionWrapperImpl::GetSurfaceNode() const
 void SessionWrapperImpl::RefreshDisplayArea(float left, float top, float width, float height)
 {
     CHECK_NULL_VOID(session_);
-    ContainerScope scope(instanceId_);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto curWindow = pipeline->GetCurrentWindowRect();
-    windowRect_.posX_ = std::round(left + curWindow.Left());
-    windowRect_.posY_ = std::round(top + curWindow.Top());
-    windowRect_.width_ = std::round(width);
-    windowRect_.height_ = std::round(height);
-    session_->UpdateRect(windowRect_, Rosen::SizeChangeReason::UNDEFINED);
+    Rosen::WSRect windowRect {
+        .posX_ = std::round(left), .posY_ = std::round(top), .width_ = std::round(width), .height_ = std::round(height)
+    };
+    session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
 }
 /************************************************ End: The interface to control the display area **********************/
 
@@ -473,25 +463,6 @@ void SessionWrapperImpl::NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "AvoidArea: session = %{public}s", session_ ? "non-null" : "null");
     CHECK_NULL_VOID(session_);
     session_->UpdateAvoidArea(sptr<Rosen::AvoidArea>::MakeSptr(avoidArea), static_cast<Rosen::AvoidAreaType>(type));
-}
-
-bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaChangeInfo> info) const
-{
-    CHECK_NULL_RETURN(session_, false);
-    CHECK_NULL_RETURN(info, false);
-    CHECK_NULL_RETURN(isNotifyOccupiedAreaChange_, false);
-    int32_t keyboardHeight = info->rect_.height_;
-    if (keyboardHeight > 0) {
-        ContainerScope scope(instanceId_);
-        auto pipeline = PipelineBase::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, false);
-        auto curWindow = pipeline->GetCurrentWindowRect();
-        int32_t spaceWindow = std::max(curWindow.Bottom() - windowRect_.posY_ - windowRect_.height_, .0);
-        keyboardHeight = std::max(keyboardHeight - spaceWindow, 0);
-    }
-    info->rect_.height_ = keyboardHeight;
-    session_->NotifyOccupiedAreaChangeInfo(info);
-    return true;
 }
 /************************************************ End: The interface to control the avoid area ************************/
 } // namespace OHOS::Ace::NG

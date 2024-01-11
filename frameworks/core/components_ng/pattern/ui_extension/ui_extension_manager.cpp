@@ -41,17 +41,16 @@ void UIExtensionManager::UIExtensionIdUtility::RecycleExtensionId(int32_t id)
     }
 }
 
-void UIExtensionManager::RegisterUIExtensionInFocus(
-    const WeakPtr<UIExtensionPattern>& uiExtensionFocused, const WeakPtr<SessionWrapper>& sessionWrapper)
+void UIExtensionManager::RegisterUIExtensionInFocus(const WeakPtr<UIExtensionPattern>& uiExtensionFocused)
 {
     uiExtensionFocused_ = uiExtensionFocused;
-    sessionWrapper_ = sessionWrapper;
 }
 
 bool UIExtensionManager::OnBackPressed()
 {
-    auto sessionWrapper = sessionWrapper_.Upgrade();
-    return sessionWrapper && sessionWrapper->NotifyBackPressedSync();
+    auto uiExtensionFocused = uiExtensionFocused_.Upgrade();
+    CHECK_NULL_RETURN(uiExtensionFocused, false);
+    return uiExtensionFocused->OnBackPressed();
 }
 
 bool UIExtensionManager::IsWrapExtensionAbilityId(int64_t elementId)
@@ -128,11 +127,5 @@ void UIExtensionManager::RemoveDestroyedUIExtension(int32_t nodeId)
     if (it != aliveUIExtensions_.end()) {
         aliveUIExtensions_.erase(nodeId);
     }
-}
-
-bool UIExtensionManager::NotifyOccupiedAreaChangeInfo(const sptr<Rosen::OccupiedAreaChangeInfo>& info)
-{
-    auto sessionWrapper = sessionWrapper_.Upgrade();
-    return sessionWrapper && sessionWrapper->NotifyOccupiedAreaChangeInfo(info);
 }
 } // namespace OHOS::Ace::NG

@@ -85,14 +85,11 @@ public:
 
     // The interface to control the avoid area
     void NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const override;
-    bool NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaChangeInfo> info) const override;
 
 private:
     void InitAllCallback();
     sptr<Rosen::ExtensionSession> session_;
     WeakPtr<UIExtensionPattern> hostPattern_;
-    Rosen::WSRect windowRect_;
-    bool isNotifyOccupiedAreaChange_ = false;
     int32_t instanceId_;
     bool isTransferringCaller_;
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;
