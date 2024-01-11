@@ -278,7 +278,6 @@ void DragEventActuator::OnCollectTouchTarget(const OffsetF& coordinateOffset, co
                         renderContext_->UpdateBorderRadius(borderRadius_);
                     },
                     option.GetOnFinishEvent());
-                HideEventColumn();
                 HidePixelMap();
                 HideFilter();
             }
@@ -763,6 +762,9 @@ void DragEventActuator::BindClickEvent(const RefPtr<FrameNode>& columnNode)
     CHECK_NULL_VOID(columnGestureHub);
     auto clickListener = MakeRefPtr<ClickEvent>(std::move(callback));
     columnGestureHub->AddClickEvent(clickListener);
+    if (!GetIsBindOverlayValue(Claim(this))) {
+        columnGestureHub->SetHitTestMode(HitTestMode::HTMBLOCK);
+    }
 }
 
 void DragEventActuator::ShowPixelMapAnimation(const RefPtr<FrameNode>& imageNode, bool hasContextMenu)
