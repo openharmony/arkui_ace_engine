@@ -1950,20 +1950,19 @@ HWTEST_F(CheckBoxTestNG, OnAfterModifyDone003, TestSize.Level1)
      * @tc.steps: step2. Get CheckBox pattern object
      */
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
-    ASSERT_NE(pattern, nullptr);
+    EXPECT_NE(pattern, nullptr);
 
     /**
      * @tc.steps: step3. Set CheckBox pattern variable and call Init methods
-     * @tc.expected: Check the CheckBox pattern value
+     * @tc.expected: GetTouchType is UP
      */
     pattern->InitMouseEvent();
-    ASSERT_NE(pattern->mouseEvent_, nullptr);
+    EXPECT_NE(pattern->mouseEvent_, nullptr);
     pattern->InitMouseEvent();
     pattern->mouseEvent_->GetOnHoverEventFunc()(true);
     pattern->InitTouchEvent();
-    ASSERT_NE(pattern->touchListener_, nullptr);
+    EXPECT_NE(pattern->touchListener_, nullptr);
     TouchEventInfo info("onTouch");
     TouchLocationInfo touchInfo1(1);
     touchInfo1.SetTouchType(TouchType::UP);
@@ -2028,6 +2027,7 @@ HWTEST_F(CheckBoxTestNG, OnAfterModifyDone009, TestSize.Level1)
 
     /**
      * @tc.steps: step4. set child nodeId != 10 and Call CheckPageNode
+     * @tc.expected: prePageId_ is update with nodeId_
      */
     auto checkBoxEvent = AceType::MakeRefPtr<CheckBoxEventHub>();
     checkBoxEvent->SetGroupName(GROUP_NAME);
@@ -2200,6 +2200,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0118, TestSize.Level1)
 
     /*
      * @tc.steps: step6. set isCheckBoxCallbackDealed_ is false and call CheckBoxGroupIsTrue
+     * @tc.expected: selectdStatus is ALL
      */
     groupPaintProperty->isCheckBoxCallbackDealed_ = false;
     checkBoxPattern->CheckBoxGroupIsTrue();
@@ -2208,6 +2209,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0118, TestSize.Level1)
 
     /*
      * @tc.steps: step7. set CheckBoxSelect is false and call CheckBoxGroupIsTrue
+     * @tc.expected: selectdStatus is PART
      */
     groupPaintProperty->isCheckBoxCallbackDealed_ = false;
     paintPropertyTemp->UpdateCheckBoxSelect(false);
@@ -2272,6 +2274,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0119, TestSize.Level1)
 
     /*
      * @tc.steps: step5. call CheckBoxGroupIsTrue
+     * @tc.expected: selectdStatus is NONE
      */
     checkBoxPattern->CheckBoxGroupIsTrue();
     EXPECT_EQ(groupPaintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::NONE);
@@ -2343,6 +2346,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0120, TestSize.Level1)
 
     /*
      * @tc.steps: step6. set CheckBoxGroupSelect is true
+     * @tc.expected: lastSelect_ is NONE
      */
     paintProperty->ResetCheckBoxSelect();
     groupPaintProperty->isCheckBoxCallbackDealed_ = false;
