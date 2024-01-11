@@ -125,12 +125,10 @@ float RichEditorLayoutAlgorithm::GetShadowOffset(const std::list<RefPtr<SpanItem
         float downOffsetY = 0.0f;
         for (const auto& shadow : shadows) {
             auto shadowBlurRadius = shadow.GetBlurRadius() * 2.0f;
-            downOffsetY = std::max(downOffsetY, static_cast<float>(shadowBlurRadius));
-            upOffsetY = std::min(upOffsetY, static_cast<float>(-shadowBlurRadius));
-            if (LessNotEqual(shadow.GetOffset().GetY(), 0.0f) &&
+            if (LessOrEqual(shadow.GetOffset().GetY(), 0.0f) &&
                 LessNotEqual(shadow.GetOffset().GetY(), upOffsetY)) {
                 upOffsetY = shadow.GetOffset().GetY() - shadowBlurRadius;
-            } else if (GreatNotEqual(shadow.GetOffset().GetY(), 0.0f) &&
+            } else if (GreatOrEqual(shadow.GetOffset().GetY(), 0.0f) &&
                 GreatNotEqual(shadow.GetOffset().GetY() + shadowBlurRadius, downOffsetY)) {
                 downOffsetY = shadow.GetOffset().GetY() + shadowBlurRadius;
             }
