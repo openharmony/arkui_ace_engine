@@ -342,7 +342,7 @@ HWTEST_F(TouchEventTestNg, OnFlushTouchEventsEnd001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. call OnFlushTouchEventsEnd.
-     * @tc.expected: Expected isFlushTouchEventsEnd_ The value of is false.
+     * @tc.expected: Expected isFlushTouchEventsEnd_ The value of is true.
      */
     touchEventActuator->OnFlushTouchEventsEnd();
     EXPECT_TRUE(touchEventActuator->isFlushTouchEventsEnd_);
