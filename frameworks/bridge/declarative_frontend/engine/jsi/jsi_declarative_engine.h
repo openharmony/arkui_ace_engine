@@ -79,6 +79,7 @@ public:
     static void TriggerPageUpdate(const shared_ptr<JsRuntime>&);
     static RefPtr<PipelineBase> GetPipelineContext(const shared_ptr<JsRuntime>& runtime);
     static void PreloadAceModule(void* runtime);
+    static void PreloadAceModuleWorker(void* runtime);
 
     WeakPtr<JsMessageDispatcher> GetJsMessageDispatcher() const
     {

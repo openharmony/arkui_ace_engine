@@ -497,7 +497,7 @@ bool WaterFlowPattern::NeedRender()
 
     auto property = host->GetLayoutProperty();
     CHECK_NULL_RETURN(host, false);
-    needRender |= property->GetPaddingProperty() != nullptr;
+    needRender = property->GetPaddingProperty() != nullptr || needRender;
     return needRender;
 }
 } // namespace OHOS::Ace::NG

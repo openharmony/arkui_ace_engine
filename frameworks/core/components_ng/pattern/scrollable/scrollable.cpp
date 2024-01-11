@@ -473,6 +473,9 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
         currentVelocity_ = 0.0;
         return;
     }
+    if (NearZero(correctVelocity, FRICTION_VELOCITY_THRESHOLD)) {
+        return;
+    }
     // change motion param when list item need to be center of screen on watch
     FixScrollMotion(mainPosition, correctVelocity);
 

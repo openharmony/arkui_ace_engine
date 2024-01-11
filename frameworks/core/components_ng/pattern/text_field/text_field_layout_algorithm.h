@@ -70,7 +70,7 @@ public:
         return inlineMeasureItem_;
     }
 
-    static TextDirection GetTextDirection(const std::string& content);
+    static TextDirection GetTextDirection(const std::string& content, TextDirection direction = TextDirection::AUTO);
 
     static void UpdateTextStyle(const RefPtr<FrameNode>& frameNode,
         const RefPtr<TextFieldLayoutProperty>& layoutProperty, const RefPtr<TextFieldTheme>& theme,
@@ -129,6 +129,7 @@ protected:
     std::string textContent_;
     bool showPlaceHolder_ = false;
     float preferredHeight_ = 0.0f;
+    TextDirection direction_ = TextDirection::AUTO;
 
     float unitWidth_ = 0.0f;
     bool autoWidth_ = false;

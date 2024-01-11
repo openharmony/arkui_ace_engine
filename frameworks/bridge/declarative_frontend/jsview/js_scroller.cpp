@@ -140,7 +140,12 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     }
     auto direction = scrollController->GetScrollDirection();
     auto position = direction == Axis::VERTICAL ? yOffset : xOffset;
-    scrollController->AnimateTo(position, static_cast<float>(duration), curve, smooth);
+    if (instanceId_.has_value()) {
+        ContainerScope scope(instanceId_.value());
+        scrollController->AnimateTo(position, static_cast<float>(duration), curve, smooth);
+    } else {
+        scrollController->AnimateTo(position, static_cast<float>(duration), curve, smooth);
+    }
 }
 
 void JSScroller::ParseCurveParams(RefPtr<Curve>& curve, const JSRef<JSVal>& jsValue)

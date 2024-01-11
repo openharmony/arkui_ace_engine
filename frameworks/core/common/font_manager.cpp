@@ -64,6 +64,10 @@ void FontManager::SetFontFamily(const char* familyName, const char* familySrc)
 
 bool FontManager::IsDefaultFontChanged()
 {
+    // For AutoUI Test，render Text with High precision
+    if (SystemProperties::GetDebugAutoUIEnabled()) {
+        isDefaultFontChanged_ = true;
+    }
     return isDefaultFontChanged_;
 }
 

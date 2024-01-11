@@ -15,6 +15,7 @@
 #include "core/interfaces/native/node/node_common_modifier.h"
 
 #include "base/geometry/ng/vector.h"
+#include "base/geometry/shape.h"
 #include "base/utils/system_properties.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
@@ -24,6 +25,7 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/image/image_source_info.h"
+#include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -656,6 +658,7 @@ void ResetTransform(ArkUINodeHandle node)
                        matrix[NUM_9], matrix[NUM_13], matrix[NUM_2], matrix[NUM_6], matrix[NUM_10], matrix[NUM_14],
                        matrix[NUM_3], matrix[NUM_7], matrix[NUM_11], matrix[NUM_15]));
 }
+
 void SetBorderColor(ArkUINodeHandle node, const uint32_t& leftColorInt, const uint32_t& rightColorInt,
     const uint32_t& topColorInt, const uint32_t& bottomColorInt)
 {
@@ -1589,6 +1592,7 @@ void ResetBackgroundImage(ArkUINodeHandle node)
     ViewAbstract::SetBackgroundImage(frameNode, OHOS::Ace::ImageSourceInfo { srcStr, bundle, module });
     ViewAbstract::SetBackgroundImageRepeat(frameNode, OHOS::Ace::ImageRepeat::NO_REPEAT);
 }
+
 void SetTranslate(ArkUINodeHandle node, const double* values, const int* units, int32_t length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2806,6 +2810,61 @@ void ResetKeyBoardShortCut(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ViewAbstractModelNG::SetKeyboardShortcut(frameNode, "", std::vector<OHOS::Ace::ModifierKey>(), nullptr);
 }
+
+void SetClip(ArkUINodeHandle node, int32_t isClip)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetClipEdge(frameNode, static_cast<bool>(isClip));
+}
+
+void SetClipShape(ArkUINodeHandle node, const char* type, double* attribute, int length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (std::strcmp(type, "rect") == 0) {
+        auto shape = AceType::MakeRefPtr<ShapeRect>();
+        auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(1));
+        auto height = Dimension(attribute[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(1));
+        auto radiusWidth = Dimension(attribute[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(1));
+        auto radiusHeight = Dimension(attribute[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(1));
+        shape->SetWidth(width);
+        shape->SetHeight(height);
+        shape->SetRadiusWidth(radiusWidth);
+        shape->SetRadiusHeight(radiusHeight);
+        ViewAbstract::SetClipShape(frameNode, shape);
+    }
+    if (std::strcmp(type, "circle") == 0) {
+        auto shape = AceType::MakeRefPtr<Circle>();
+        auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(1));
+        auto height = Dimension(attribute[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(1));
+        shape->SetWidth(width);
+        shape->SetHeight(height);
+        ViewAbstract::SetClipShape(frameNode, shape);
+    }
+    if (std::strcmp(type, "ellipse") == 0) {
+        auto shape = AceType::MakeRefPtr<Ellipse>();
+        auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(1));
+        auto height = Dimension(attribute[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(1));
+        shape->SetWidth(width);
+        shape->SetHeight(height);
+        ViewAbstract::SetClipShape(frameNode, shape);
+    }
+}
+
+void SetClipPath(ArkUINodeHandle node, const char* type, double* attribute, const char* commands)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto path = AceType::MakeRefPtr<Path>();
+    auto width = Dimension(attribute[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(1));
+    auto height = Dimension(attribute[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(1));
+    std::string pathCommands(commands);
+    path->SetWidth(width);
+    path->SetHeight(height);
+    path->SetValue(StringUtils::TrimStr(pathCommands));
+    ViewAbstract::SetClipShape(frameNode, path);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -2841,7 +2900,7 @@ const ArkUICommonModifier* GetCommonModifier()
         ResetTabIndex, SetObscured, ResetObscured, SetResponseRegion, ResetResponseRegion, SetMouseResponseRegion,
         ResetMouseResponseRegion, SetEnabled, ResetEnabled, SetDraggable, ResetDraggable, SetAccessibilityGroup,
         ResetAccessibilityGroup, SetHoverEffect, ResetHoverEffect, SetClickEffect, ResetClickEffect,
-        SetKeyBoardShortCut, ResetKeyBoardShortCut };
+        SetKeyBoardShortCut, ResetKeyBoardShortCut, SetClip, SetClipShape, SetClipPath };
 
     return &modifier;
 }

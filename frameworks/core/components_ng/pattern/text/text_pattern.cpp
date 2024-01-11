@@ -54,7 +54,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t AI_TEXT_MAX_LENGTH = 300;
 constexpr int32_t AI_TEXT_GAP = 100;
-constexpr int32_t AI_DELAY_TIME = 300;
+constexpr int32_t AI_DELAY_TIME = 100;
 constexpr double DIMENSION_VALUE = 16.0;
 constexpr const char COPY_ACTION[] = "copy";
 constexpr const char SELECT_ACTION[] = "select";
@@ -597,7 +597,11 @@ void TextPattern::CheckHandles(SelectHandleInfo& handleInfo)
 
 void TextPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID(!longPressEvent_);
+    constexpr int32_t longPressDelay = 600;
+    if (longPressEvent_) {
+        gestureHub->SetLongPressEvent(longPressEvent_, false, false, longPressDelay);
+        return;
+    }
     auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -605,7 +609,6 @@ void TextPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
     };
     longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
 
-    constexpr int32_t longPressDelay = 600;
     // Default time is 500, used by drag event. Drag event would trigger if text is selected, but we want
     // it to only trigger on the second long press, after selection. Therefore, long press delay of Selection needs to
     // be slightly longer to ensure that order.
@@ -2030,11 +2033,6 @@ void TextPattern::ActSetSelection(int32_t start, int32_t end)
     start = start > textSize ? textSize : start;
     end = end > textSize ? textSize : end;
     if (start >= end) {
-        SelectOverlayInfo selectInfo;
-        selectInfo.firstHandle.paintRect = textSelector_.firstHandle;
-        selectInfo.secondHandle.paintRect = textSelector_.secondHandle;
-        CheckHandles(selectInfo.firstHandle);
-        CheckHandles(selectInfo.secondHandle);
         FireOnSelectionChange(-1, -1);
         return;
     }

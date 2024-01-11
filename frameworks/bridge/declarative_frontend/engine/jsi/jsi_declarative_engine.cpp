@@ -416,6 +416,35 @@ void JsiDeclarativeEngineInstance::InitAceModule()
 #endif
 }
 
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModuleWorker(void* runtime)
+{
+    JsiDeclarativeEngineInstance::PreloadAceModuleWorker(runtime);
+}
+
+void JsiDeclarativeEngineInstance::PreloadAceModuleWorker(void* runtime)
+{
+    auto sharedRuntime = reinterpret_cast<NativeEngine*>(runtime);
+
+    if (!sharedRuntime) {
+        return;
+    }
+    std::shared_ptr<ArkJSRuntime> arkRuntime = std::make_shared<ArkJSRuntime>();
+    auto nativeArkEngine = static_cast<ArkNativeEngine*>(sharedRuntime);
+    EcmaVM* vm = const_cast<EcmaVM*>(nativeArkEngine->GetEcmaVm());
+    if (vm == nullptr) {
+        return;
+    }
+    if (!arkRuntime->InitializeFromExistVM(vm)) {
+        return;
+    }
+    LocalScope scope(vm);
+
+    // preload js enums
+    PreloadJsEnums(arkRuntime);
+
+    localRuntime_ = arkRuntime;
+}
+
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModule(void* runtime)
 {
     JsiDeclarativeEngineInstance::PreloadAceModule(runtime);

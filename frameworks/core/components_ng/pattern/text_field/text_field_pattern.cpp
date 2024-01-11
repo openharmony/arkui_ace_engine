@@ -289,6 +289,7 @@ TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
     contentController_ = MakeRefPtr<ContentController>(WeakClaim(this));
     selectController_ = MakeRefPtr<TextSelectController>(WeakClaim(this));
     selectController_->InitContentController(contentController_);
+    magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
 }
 
 TextFieldPattern::~TextFieldPattern()
@@ -1318,7 +1319,9 @@ void TextFieldPattern::HandleTouchEvent(const TouchEventInfo& info)
     } else if (touchType == TouchType::UP) {
         HandleTouchUp();
     } else if (touchType == TouchType::MOVE) {
-        HandleTouchMove(info);
+        if (!isUsingMouse_) {
+            HandleTouchMove(info);
+        }
     }
 }
 
@@ -1357,6 +1360,9 @@ void TextFieldPattern::HandleTouchUp()
     }
     if (isMousePressed_) {
         isMousePressed_ = false;
+    }
+    if (GetShowMagnifier()) {
+        UpdateShowMagnifier();
     }
     if (enableTouchAndHoverEffect_ && !HasStateStyle(UI_STATE_PRESSED)) {
         auto tmpHost = GetHost();
@@ -2255,6 +2261,7 @@ void TextFieldPattern::InitLongPressEvent()
 
 void TextFieldPattern::HandleLongPress(GestureEvent& info)
 {
+    isTouchCaret_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     bool shouldProcessOverlayAfterLayout = false;
@@ -2626,6 +2633,7 @@ void TextFieldPattern::OnHandleMoveDone(const RectF& /* handleRect */, bool isFi
         }
     } else {
         auto handleInfo = GetSelectHandleInfo(selectController_->GetCaretRect().GetOffset());
+        handleInfo.paintRect.SetWidth(selectController_->GetCaretRect().Width());
         proxy->UpdateSecondSelectHandleInfo(handleInfo);
     }
     auto tmpHost = GetHost();
@@ -2641,9 +2649,6 @@ void TextFieldPattern::OnHandleClosed(bool closedByGlobalEvent)
     }
     if (GetShowMagnifier()) {
         UpdateShowMagnifier();
-        auto tmpHost = GetHost();
-        CHECK_NULL_VOID(tmpHost);
-        tmpHost->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     }
 }
 
@@ -2767,10 +2772,14 @@ void TextFieldPattern::HandleMouseEvent(MouseInfo& info)
     }
     ChangeMouseState(info.GetLocalLocation(), pipeline, frameId);
 
+    isUsingMouse_ = true;
     if (info.GetButton() == MouseButton::RIGHT_BUTTON) {
         HandleRightMouseEvent(info);
     } else if (info.GetButton() == MouseButton::LEFT_BUTTON) {
         HandleLeftMouseEvent(info);
+    }
+    if (info.GetAction() == OHOS::Ace::MouseAction::RELEASE) {
+        isUsingMouse_ = false;
     }
 }
 
@@ -2781,7 +2790,6 @@ void TextFieldPattern::HandleRightMouseEvent(MouseInfo& info)
         return;
     }
     if (info.GetAction() == OHOS::Ace::MouseAction::RELEASE) {
-        isUsingMouse_ = true;
         HandleRightMouseReleaseEvent(info);
     }
 }
@@ -3101,7 +3109,7 @@ bool TextFieldPattern::RequestCustomKeyboard()
     CHECK_NULL_RETURN(customKeyboardBuilder_, false);
     auto frameNode = GetHost();
     CHECK_NULL_RETURN(frameNode, false);
-    auto pipeline = PipelineContext::GetMainPipelineContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, false);
@@ -4409,7 +4417,7 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Set caret position to %{public}d", position);
     selectController_->MoveCaretToContentRect(position, TextAffinity::DOWNSTREAM);
-    if (HasFocus()) {
+    if (HasFocus() && !GetShowMagnifier()) {
         StartTwinkling();
     }
     CloseSelectOverlay();
@@ -6240,8 +6248,9 @@ void TextFieldPattern::ShowMenu()
     CloseSelectOverlay(true);
     if (IsSingleHandle()) {
         SetIsSingleHandle(true);
+    } else {
+        SetIsSingleHandle(false);
     }
-    SetIsSingleHandle(false);
     ProcessOverlay(true, true, true);
 }
 
@@ -6341,5 +6350,17 @@ void TextFieldPattern::NotifyKeyboardInfo(const KeyBoardInfo& info)
     CHECK_NULL_VOID(pipeline);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
     textFieldManager->SetImeShow(info.visible);
+}
+
+void TextFieldPattern::GetCaretMetrics(CaretMetricsF& caretCaretMetric)
+{
+    OffsetF offset = selectController_->GetCaretRect().GetOffset();
+    float height = selectController_->GetCaretRect().Height();
+    float width = selectController_->GetCaretRect().Width();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textPaintOffset = host->GetPaintRectOffset();
+    caretCaretMetric.offset = offset + textPaintOffset + OffsetF(width / 2.0f, 0.0f);
+    caretCaretMetric.height = height;
 }
 } // namespace OHOS::Ace::NG

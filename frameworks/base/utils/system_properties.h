@@ -237,6 +237,11 @@ public:
         return debugBoundaryEnabled_;
     }
 
+    static bool GetDebugAutoUIEnabled()
+    {
+        return debugAutoUIEnabled_;
+    }
+
     static bool GetDownloadByNetworkEnabled()
     {
         return downloadByNetworkEnabled_;
@@ -435,6 +440,7 @@ private:
     static bool windowAnimationEnabled_;
     static bool debugEnabled_;
     static bool debugBoundaryEnabled_;
+    static bool debugAutoUIEnabled_; // for AutoUI Test
     static bool downloadByNetworkEnabled_;
     static bool gpuUploadEnabled_;
     static bool isHookModeEnabled_;

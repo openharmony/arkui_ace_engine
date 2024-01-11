@@ -752,12 +752,11 @@ void SearchPattern::PaintFocusState()
 
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    context->SetIsFocusActive(true);
     RoundRect focusRect;
     GetInnerFocusPaintRect(focusRect);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->PaintInnerFocusState(focusRect);
+    focusHub->PaintInnerFocusState(focusRect, true);
     host->MarkModifyDone();
 }
 
@@ -805,7 +804,9 @@ void SearchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 
 FocusPattern SearchPattern::GetFocusPattern() const
 {
-    return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
+    FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
+    focusPattern.SetIsFocusActiveWhenFocused(true);
+    return focusPattern;
 }
 
 void SearchPattern::RequestKeyboard()

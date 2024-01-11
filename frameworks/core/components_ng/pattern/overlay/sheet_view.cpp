@@ -58,11 +58,7 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targe
     CHECK_NULL_RETURN(scrollNode, nullptr);
     builder->MountToParent(scrollNode);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto inset = pipeline->GetSafeArea();
     auto layoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
-    layoutProperty->UpdateScrollContentEndOffset(inset.bottom_.Length());
     scrollNode->MountToParent(sheetNode);
     layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     CreateCloseIconButtonNode(sheetNode, sheetStyle);

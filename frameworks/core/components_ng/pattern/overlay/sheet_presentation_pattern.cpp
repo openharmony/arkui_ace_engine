@@ -118,9 +118,29 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
     UpdateDragBarStatus();
     UpdateCloseIconStatus();
     UpdateSheetTitle();
+    AvoidAiBar();
     UpdateInteractive();
     ClipSheetNode();
     return true;
+}
+
+void SheetPresentationPattern::AvoidAiBar()
+{
+    CHECK_NULL_VOID(Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN));
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto scrollNode = DynamicCast<FrameNode>(host->GetChildAtIndex(1));
+    CHECK_NULL_VOID(scrollNode);
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(scrollPattern);
+    if (NonPositive(scrollPattern->GetScrollableDistance())) {
+        return;
+    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto inset = pipeline->GetSafeArea();
+    auto layoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
+    layoutProperty->UpdateScrollContentEndOffset(inset.bottom_.Length());
 }
 
 void SheetPresentationPattern::OnAttachToFrameNode()

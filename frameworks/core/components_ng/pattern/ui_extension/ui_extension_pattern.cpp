@@ -137,6 +137,7 @@ void UIExtensionPattern::OnConnect()
     auto&& opts = host->GetLayoutProperty()->GetSafeAreaExpandOpts();
     if (opts && opts->Expansive()) {
         contentNode_->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+        contentNode_->MarkModifyDone();
     }
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(contentNode_->GetRenderContext());
     CHECK_NULL_VOID(context);

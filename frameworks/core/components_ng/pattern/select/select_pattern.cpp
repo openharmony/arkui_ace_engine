@@ -1067,7 +1067,27 @@ void SelectPattern::OnLanguageConfigurationUpdate()
         [weak = WeakClaim(this)]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->UpdateText(pattern->selected_);
+            auto index = pattern->selected_;
+            pattern->UpdateText(index);
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            auto hub = host->GetEventHub<SelectEventHub>();
+            CHECK_NULL_VOID(hub);
+            if (index >= static_cast<int32_t>(pattern->options_.size()) || index < 0) {
+                return;
+            }
+            auto newSelected = pattern->options_[index]->GetPattern<OptionPattern>();
+            CHECK_NULL_VOID(newSelected);
+            auto value = newSelected->GetText();
+            auto valueChangeEvent = hub->GetValueChangeEvent();
+            if (valueChangeEvent) {
+                valueChangeEvent(value);
+            }
+            auto onSelect = hub->GetSelectEvent();
+            if (onSelect) {
+                onSelect(index, value);
+            }
+            
         },
         TaskExecutor::TaskType::UI);
 }

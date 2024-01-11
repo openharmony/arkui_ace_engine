@@ -44,7 +44,6 @@ napi_value AttachOffscreenCanvas(napi_env env, void* value, void*)
         LOGW("Invalid context.");
         return nullptr;
     }
-    JSOffscreenCanvas::SetLocalThreadVm(env);
     napi_value global = nullptr;
     napi_status status = napi_get_global(env, &global);
     if (status != napi_ok) {
@@ -135,11 +134,11 @@ napi_value JSOffscreenCanvas::Constructor(napi_env env, napi_callback_info info)
     }
     if (napi_get_value_double(env, argv[0], &fWidth) == napi_ok) {
         fWidth = PipelineBase::Vp2PxWithCurrentDensity(fWidth);
-        workCanvas->SetWidth(round(fWidth));
+        workCanvas->SetWidth(fWidth);
     }
     if (napi_get_value_double(env, argv[1], &fHeight) == napi_ok) {
         fHeight = PipelineBase::Vp2PxWithCurrentDensity(fHeight);
-        workCanvas->SetHeight(round(fHeight));
+        workCanvas->SetHeight(fHeight);
     }
 
     napi_coerce_to_native_binding_object(
@@ -341,17 +340,6 @@ napi_value JSOffscreenCanvas::onGetContext(napi_env env, napi_callback_info info
         return contextObj;
     }
     return nullptr;
-}
-
-void JSOffscreenCanvas::SetLocalThreadVm(napi_env env)
-{
-    auto nativeEngine = reinterpret_cast<NativeEngine*>(env);
-    auto runtime = static_cast<ArkNativeEngine*>(nativeEngine);
-    CHECK_NULL_VOID(runtime);
-    EcmaVM* vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
-    CHECK_NULL_VOID(vm);
-    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    arkRuntime->SetThreadVm(vm);
 }
 
 napi_value JSOffscreenCanvas::CreateContext2d(napi_env env, double width, double height)

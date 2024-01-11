@@ -951,6 +951,14 @@ void NavigationPattern::OnHover(bool isHover)
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     int32_t currentPointerStyle = 0;
     mouseStyle->GetPointerStyle(windowId, currentPointerStyle);
+    auto defaultValue = Dimension(0.0);
+    auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    auto userSetMinNavBarWidthValue = layoutProperty->GetMinNavBarWidthValue(defaultValue);
+    auto userSetMaxNavBarWidthValue = layoutProperty->GetMaxNavBarWidthValue(defaultValue);
+    if (userSetMinNavBarWidthValue == userSetMaxNavBarWidthValue && userSetNavBarRangeFlag_) {
+        return;
+    }
     if (currentPointerStyle != static_cast<int32_t>(format)) {
         mouseStyle->SetPointerStyle(windowId, format);
     }

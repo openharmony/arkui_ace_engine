@@ -166,6 +166,10 @@ void SliderContentModifier::DrawStep(DrawingContext& context)
     }
     auto stepsLengthX = (endX - startX) * stepRatio;
     auto stepsLengthY = (endY - startY) * stepRatio;
+    auto trackThickness = trackThickness_->Get();
+    if (GreatNotEqual(stepSize, trackThickness)) {
+        stepSize = trackThickness;
+    }
 
     RSBrush brush;
     brush.SetAntiAlias(true);

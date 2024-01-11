@@ -678,6 +678,7 @@ public:
         int64_t accessibilityId, int32_t direction, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const;
     void SetAccessibilityState(bool state);
     void UpdateAccessibilityState(bool state);
+    OHOS::NWeb::NWebPreference::CopyOptionMode GetCopyOptionMode() const;
 private:
     void InitWebEvent();
     void RegisterWebEvent();
