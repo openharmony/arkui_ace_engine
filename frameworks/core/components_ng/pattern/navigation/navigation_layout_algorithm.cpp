@@ -380,8 +380,6 @@ void NavigationLayoutAlgorithm::CheckSizeInSplit(
     } else if (!userSetNavBarRangeFlag_ && !userSetMinContentFlag_ && userSetNavBarWidthFlag_) {
         realNavBarWidth_ = userSetNavBarWidth;
         realContentWidth_ = frameWidth - realNavBarWidth_ - dividerWidth;
-    } else if (userSetNavBarRangeFlag_) {
-        realContentWidth_ = frameWidth - realNavBarWidth_ - dividerWidth;
     } else {
         float remainingSpace = frameWidth - realNavBarWidth_ - dividerWidth;
         float remainingMaxSpace = frameWidth - minNavBarWidth - dividerWidth;
