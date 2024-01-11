@@ -539,6 +539,12 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // calculate menu main size
     auto childConstraint = CreateChildConstraint(layoutWrapper);
+    if (menuPattern->IsSelectMenu()) {
+        auto selectMenuWidth = menuPattern->GetSelectMenuWidth();
+        childConstraint.maxSize.SetWidth(selectMenuWidth);
+        childConstraint.parentIdealSize.SetWidth(selectMenuWidth);
+        childConstraint.selfIdealSize.SetWidth(selectMenuWidth);
+    }
     float idealHeight = 0.0f;
     float idealWidth = 0.0f;
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
@@ -553,11 +559,6 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    
-    if (menuPattern->IsSelectMenu()) {
-        auto selectMenuWidth = menuPattern->GetSelectMenuWidth();
-        idealSize.SetWidth(selectMenuWidth);
-    }
     geometryNode->SetFrameSize(idealSize);
 }
 
