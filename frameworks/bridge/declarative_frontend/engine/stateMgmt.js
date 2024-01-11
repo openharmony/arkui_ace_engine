@@ -2035,7 +2035,7 @@ class SubscribableHandler {
                 break;
             default:
                 const result = Reflect.get(target, property, receiver);
-                let propertyStr = property.toString();
+                let propertyStr = String(property);
                 if (this.readCbFunc_ && typeof result != "function") {
                     let isTracked = this.isPropertyTracked(target, propertyStr);
                     
@@ -2072,7 +2072,7 @@ class SubscribableHandler {
                     return true;
                 }
                 Reflect.set(target, property, newValue);
-                const propString = property.toString();
+                const propString = String(property);
                 if (TrackedObject.isCompatibilityMode(target)) {
                     
                     this.notifyObjectPropertyHasChanged(propString, newValue);
