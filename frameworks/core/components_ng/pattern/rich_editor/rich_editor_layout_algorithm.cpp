@@ -81,6 +81,8 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
         if (!paragraph) {
             continue;
         }
+        float shadowOffset = GetShadowOffset(group);
+        res.AddHeight(shadowOffset);
         textHeight += paragraph->GetHeight();
         auto firstSpan = *group.begin();
         pManager_->AddParagraph({ .paragraph = paragraph,
@@ -109,6 +111,33 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
         contentHeight = std::min(contentHeight, contentConstraint.maxSize.Height());
     }
     return SizeF(res.Width(), contentHeight);
+}
+
+float RichEditorLayoutAlgorithm::GetShadowOffset(const std::list<RefPtr<SpanItem>>& group)
+{
+    float shadowOffset = 0.0f;
+    for (auto& span: group) {
+        if (!span->fontStyle || !span->fontStyle->HasTextShadow()) {
+            continue;
+        }
+        auto shadows = span->fontStyle->GetTextShadowValue();
+        float upOffsetY = 0.0f;
+        float downOffsetY = 0.0f;
+        for (const auto& shadow : shadows) {
+            auto shadowBlurRadius = shadow.GetBlurRadius() * 2.0f;
+            downOffsetY = std::max(downOffsetY, static_cast<float>(shadowBlurRadius));
+            upOffsetY = std::min(upOffsetY, static_cast<float>(-shadowBlurRadius));
+            if (LessNotEqual(shadow.GetOffset().GetY(), 0.0f) &&
+                LessNotEqual(shadow.GetOffset().GetY(), upOffsetY)) {
+                upOffsetY = shadow.GetOffset().GetY() - shadowBlurRadius;
+            } else if (GreatNotEqual(shadow.GetOffset().GetY(), 0.0f) &&
+                GreatNotEqual(shadow.GetOffset().GetY() + shadowBlurRadius, downOffsetY)) {
+                downOffsetY = shadow.GetOffset().GetY() + shadowBlurRadius;
+            }
+        }
+        shadowOffset = std::max(shadowOffset, downOffsetY - upOffsetY);
+    }
+    return shadowOffset;
 }
 
 void RichEditorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)

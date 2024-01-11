@@ -2607,6 +2607,8 @@ void TextPattern::ProcessBoundRectByTextShadow(RectF& rect)
     float downOffsetY = 0.0f;
     for (const auto& shadow : shadows.value()) {
         auto shadowBlurRadius = shadow.GetBlurRadius() * 2.0f;
+        downOffsetY = std::max(downOffsetY, static_cast<float>(shadowBlurRadius));
+        upOffsetY = std::min(upOffsetY, static_cast<float>(-shadowBlurRadius));
         if (LessNotEqual(shadow.GetOffset().GetX(), 0.0f) && LessNotEqual(shadow.GetOffset().GetX(), leftOffsetX)) {
             leftOffsetX = shadow.GetOffset().GetX() - shadowBlurRadius;
         }
