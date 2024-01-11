@@ -5539,11 +5539,11 @@ void TextFieldPattern::SetAccessibilityScrollAction()
                 pattern->GetTextRect().Height() - (std::abs((pattern->GetTextRect().GetY() - offset)));
             if (offset > scrollDistance) {
                 pattern->OnTextAreaScroll(-scrollDistance);
-                frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+                // AccessibilityEventType::SCROLL_END
                 return;
             }
             pattern->OnTextAreaScroll(-offset);
-            frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+            // AccessibilityEventType::SCROLL_END
         }
     });
 
@@ -5557,11 +5557,11 @@ void TextFieldPattern::SetAccessibilityScrollAction()
             float scrollDistance = std::abs(pattern->GetTextRect().GetY() - pattern->GetTextContentRect().GetY());
             if (offset > scrollDistance) {
                 pattern->OnTextAreaScroll(scrollDistance);
-                frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+                // AccessibilityEventType::SCROLL_END
                 return;
             }
             pattern->OnTextAreaScroll(offset);
-            frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+            // AccessibilityEventType::SCROLL_END
         }
     });
 }

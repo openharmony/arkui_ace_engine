@@ -1173,9 +1173,7 @@ void GridPattern::ScrollBy(float offset)
 {
     StopAnimate();
     UpdateCurrentOffset(-offset, SCROLL_FROM_JUMP);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    // AccessibilityEventType::SCROLL_END
 }
 
 void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
@@ -1232,9 +1230,7 @@ void GridPattern::ScrollPage(bool reverse)
     } else {
         UpdateCurrentOffset(GetMainContentSize(), SCROLL_FROM_JUMP);
     }
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    // AccessibilityEventType::SCROLL_END
 }
 
 bool GridPattern::UpdateStartIndex(int32_t index)
@@ -1246,7 +1242,7 @@ bool GridPattern::UpdateStartIndex(int32_t index)
     CHECK_NULL_RETURN(host, false);
     gridLayoutInfo_.jumpIndex_ = index;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    // AccessibilityEventType::SCROLL_END
     SetScrollSource(SCROLL_FROM_JUMP);
     return true;
 }
@@ -1261,9 +1257,7 @@ void GridPattern::OnAnimateStop()
 {
     scrollStop_ = true;
     MarkDirtyNodeSelf();
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    // AccessibilityEventType::SCROLL_END
 }
 
 void GridPattern::AnimateTo(float position, float duration, const RefPtr<Curve>& curve, bool smooth)
@@ -1282,9 +1276,7 @@ void GridPattern::ScrollTo(float position)
     TAG_LOGI(AceLogTag::ACE_GRID, "ScrollTo:%{public}f", position);
     StopAnimate();
     UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    // AccessibilityEventType::SCROLL_END
 }
 
 float GridPattern::EstimateHeight() const
