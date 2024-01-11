@@ -66,6 +66,7 @@ constexpr int32_t NAVIGATION_MODE_RANGE = 2;
 constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t NAV_BAR_POSITION_RANGE = 1;
 constexpr int32_t DEFAULT_NAV_BAR_WIDTH = 240;
+constexpr Dimension DEFAULT_MIN_NAV_BAR_WIDTH = 240.0_vp;
 constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
 
 JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent& eventInfo)
@@ -597,9 +598,11 @@ void JSNavigation::SetNavBarWidthRange(const JSCallbackInfo& info)
     CalcDimension minNavBarWidth;
 
     CalcDimension maxNavBarWidth;
-    ParseJsDimensionVp(min, minNavBarWidth);
     ParseJsDimensionVp(max, maxNavBarWidth);
 
+    if (!ParseJsDimensionVp(min, minNavBarWidth)) {
+        minNavBarWidth.SetValue(DEFAULT_MIN_NAV_BAR_WIDTH.Value());
+    }
     if (LessNotEqual(minNavBarWidth.Value(), 0.0)) {
         minNavBarWidth.SetValue(0);
     }
