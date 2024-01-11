@@ -4952,6 +4952,7 @@ class ViewPU extends NativeViewPartialUpdate {
             this.localStorage_ = localStorage;
             
         }
+        this.isCompFreezeAllowed = this.isCompFreezeAllowed || (this.parent_ && this.parent_.isCompFreezeAllowed);
         SubscriberManager.Add(this);
         
     }
@@ -5177,7 +5178,7 @@ class ViewPU extends NativeViewPartialUpdate {
     initAllowComponentFreeze(freezeState) {
         // set to true if freeze parameter set for this @Component to true
         // otherwise inherit from parent @Component (if it exists).
-        this.isCompFreezeAllowed = freezeState || (this.parent_ && this.parent_.isCompFreezeAllowed);
+        this.isCompFreezeAllowed = freezeState || this.isCompFreezeAllowed;
         
     }
     /**
