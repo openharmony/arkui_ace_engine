@@ -18,7 +18,6 @@
 #include <cstdint>
 #include <string>
 
-#include "base/log/log_wrapper.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
