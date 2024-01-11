@@ -465,11 +465,14 @@ ArkUINativeModuleValue SwiperBridge::ResetSwiperIndex(ArkUIRuntimeCallInfo* runt
 }
 std::string GetStringByValueRef(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
 {
+    std::string result = "-";
+    if (jsValue->IsUndefined()) {
+        return result;
+    }
     CalcDimension calc;
-    std::string result =
-        ArkTSUtils::ParseJsDimension(vm, jsValue, calc, DimensionUnit::VP, true)
-            ? (calc.Unit() == DimensionUnit::PERCENT ? (std::to_string(calc.Value() * DEFAULT_PERCENT_VALUE) + "%")
-                                                     : (std::to_string(calc.Value()) + "vp")) : "-";
+    result = ArkTSUtils::ParseJsDimension(vm, jsValue, calc, DimensionUnit::VP, true)
+        ? (calc.Unit() == DimensionUnit::PERCENT ? (std::to_string(calc.Value() * DEFAULT_PERCENT_VALUE) + "%")
+                                                 : (std::to_string(calc.Value()) + "vp")) : "0.0_vp";
     return result;
 }
 std::string GetSwiperDotIndicator(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm)
