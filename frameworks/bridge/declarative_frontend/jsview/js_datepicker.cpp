@@ -1111,11 +1111,11 @@ void JSTimePicker::CreateTimePicker(const JSCallbackInfo& info, const JSRef<JSOb
     auto selectedTime = paramObj->GetProperty("selected");
     auto theme = GetTheme<PickerTheme>();
     CHECK_NULL_VOID(theme);
-    auto componentsValue = paramObj->GetProperty("displayedComponent");
+    auto formatValue = paramObj->GetProperty("format");
     bool showSecond = false;
-    if (componentsValue->IsNumber()) {
-        auto displayedComponent = static_cast<TimePickerDisplayedComponents>(componentsValue->ToNumber<int32_t>());
-        if (displayedComponent == TimePickerDisplayedComponents::HOUR_MINUTE_SECOND) {
+    if (formatValue->IsNumber()) {
+        auto displayedFormat = static_cast<TimePickerFormat>(formatValue->ToNumber<int32_t>());
+        if (displayedFormat == TimePickerFormat::HOUR_MINUTE_SECOND) {
             showSecond = true;
         }
     }
