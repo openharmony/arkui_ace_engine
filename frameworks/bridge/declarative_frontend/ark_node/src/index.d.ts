@@ -75,9 +75,19 @@ type RemovedElementInfo = { elmtId: number, tag: string };
 declare class UINodeRegisterProxy {
     public static instance_: UINodeRegisterProxy;
     public removeElementsInfo_: Array<RemovedElementInfo>;
-    public static ElementIdToOwningViewPU_: Map<number, WeakRef<BuilderNode>>;
+    public static ElementIdToOwningViewPU_: Map<number, WeakRef<JSBuilderNode>>;
     public unregisterElmtIdsFromViewPUs(): void;
     private obtainDeletedElmtIds(): void;
     public static unregisterElmtIdsFromViewPUs(): void;
     public static obtainDeletedElmtIds(): void;
+}
+
+declare interface RegisterParams {
+    name: string;
+    idOfNode: Symbol
+}
+
+declare class FinalizationRegistry {
+    constructor(fun: (arg0: RegisterParams) => void);
+    register(target: BuilderNode, heldValue: RegisterParams): undefined;
 }
