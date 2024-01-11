@@ -71,18 +71,12 @@ void SwiperModelNG::SetDisplayCount(int32_t displayCount)
         return;
     }
 
-    ResetDisplayMode();
     ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, DisplayCount, displayCount);
 }
 
 void SwiperModelNG::ResetDisplayCount()
 {
     ACE_RESET_LAYOUT_PROPERTY(SwiperLayoutProperty, DisplayCount);
-}
-
-void SwiperModelNG::ResetDisplayMode()
-{
-    ACE_RESET_LAYOUT_PROPERTY(SwiperLayoutProperty, DisplayMode);
 }
 
 void SwiperModelNG::SetMinSize(const Dimension& minSize)
@@ -391,11 +385,6 @@ void SwiperModelNG::SetDisplayMode(FrameNode* frameNode, SwiperDisplayMode displ
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, DisplayMode, displayMode, frameNode);
 }
 
-void SwiperModelNG::ResetDisplayMode(FrameNode* frameNode)
-{
-    ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, DisplayMode, frameNode);
-}
-
 void SwiperModelNG::SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(SwiperPaintProperty, EdgeEffect, edgeEffect, frameNode);
@@ -412,7 +401,6 @@ void SwiperModelNG::SetDisplayCount(FrameNode* frameNode, int32_t displayCount)
         return;
     }
 
-    ResetDisplayMode(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, DisplayCount, displayCount, frameNode);
 }
 
