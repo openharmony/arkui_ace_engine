@@ -139,6 +139,7 @@ RefPtr<Frontend> PipelineBase::GetFrontend() const
 
 void PipelineBase::ClearImageCache()
 {
+    std::lock_guard<std::shared_mutex> lock(imageMtx_);
     if (imageCache_) {
         imageCache_->Clear();
     }
