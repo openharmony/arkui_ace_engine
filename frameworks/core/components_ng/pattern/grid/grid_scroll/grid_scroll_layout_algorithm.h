@@ -138,8 +138,6 @@ private:
 
     void FillCacheLineAtEnd(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
     float FillNewCacheLineBackward(float crossSize, float mainSize, LayoutWrapper* layoutWrapper);
-    float FillCurrentCacheLine(std::map<int32_t, int32_t> line, int32_t& currentIndex, float crossSize, float mainSize,
-        LayoutWrapper* layoutWrapper);
     int32_t MeasureCachedChild(const SizeF& frameSize, int32_t itemIndex, LayoutWrapper* layoutWrapper,
         const RefPtr<LayoutWrapper>& childLayoutWrapper);
 
