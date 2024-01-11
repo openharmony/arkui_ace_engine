@@ -38,7 +38,7 @@ int32_t ParagraphManager::GetIndex(Offset offset) const
         if (GreatNotEqual(offset.GetY(), info.paragraph->GetHeight())) {
             if (idx == static_cast<int>(paragraphs_.size()) - 1) {
                 // in the last line
-                 return info.paragraph->GetGlyphIndexByCoordinate(offset) + info.start;
+                return info.end;
             }
             // get offset relative to each paragraph
             offset.SetY(offset.GetY() - info.paragraph->GetHeight());
