@@ -179,8 +179,8 @@ bool ImageSourceInfo::operator==(const ImageSourceInfo& info) const
     if (isSvg_ && fillColor_ != info.fillColor_) {
         return false;
     }
-    return ((!pixmap_ && !info.pixmap_) || (pixmap_ && info.pixmap_ && pixmap_ == info.pixmap_)) &&
-           src_ == info.src_ && resourceId_ == info.resourceId_;
+    return ((!pixmap_ && !info.pixmap_) || (pixmap_ && info.pixmap_ && pixmap_->GetRawPixelMapPtr() ==
+        info.pixmap_->GetRawPixelMapPtr())) && src_ == info.src_ && resourceId_ == info.resourceId_;
 }
 
 bool ImageSourceInfo::operator!=(const ImageSourceInfo& info) const
