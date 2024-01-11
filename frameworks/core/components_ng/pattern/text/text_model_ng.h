@@ -93,6 +93,7 @@ public:
     static void SetBaselineOffset(FrameNode* frameNode, const Dimension& value);
     static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
     static void SetFont(FrameNode* frameNode, const Font& value);
+    static void SetWordBreak(FrameNode* frameNode, WordBreak value);
 };
 } // namespace OHOS::Ace::NG
 

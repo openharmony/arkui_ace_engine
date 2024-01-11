@@ -1311,7 +1311,7 @@ class ClipModifier extends ModifierWithKey<boolean | object> {
   }
 
   checkObjectDiff(): boolean {
-    return false;
+    return true;
   }
 }
 
@@ -3233,7 +3233,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
-    modifierWithKey(this._modifiersWithKeys, Symbol('clip'), ClipModifier, value);
+    modifierWithKey(this._modifiersWithKeys, ClipModifier.identity, ClipModifier, value);
     return this;
   }
 

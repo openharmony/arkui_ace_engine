@@ -867,4 +867,20 @@ void TabsModelNG::SetOnCustomAnimation(TabsCustomAnimationEvent&& onCustomAnimat
     CHECK_NULL_VOID(swiperPattern);
     swiperPattern->SetCustomContentTransition(std::move(onCustomAnimation));
 }
+
+void TabsModelNG::SetClipEdge(FrameNode* frameNode, bool clipEdge)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsRenderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(tabsRenderContext);
+    tabsRenderContext->UpdateClipEdge(clipEdge);
+    auto tabsChildren = frameNode->GetChildren();
+    for (const auto& child : tabsChildren) {
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(childFrameNode);
+        auto renderContext = childFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateClipEdge(clipEdge);
+    }
+}
 } // namespace OHOS::Ace::NG

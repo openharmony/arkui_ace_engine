@@ -32,6 +32,7 @@ public:
 
     static void SetTextStyle(FrameNode* frameNode, const PickerTextStyle& textStyle);
     static void SetEdgeAlign(FrameNode* frameNode, const CalendarEdgeAlign& alignType, const DimensionOffset& offset);
+    static void SetPadding(FrameNode* frameNode, const PaddingProperty& padding);
 
 private:
     void LayoutPicker(const RefPtr<CalendarPickerPattern>& pickerPattern, RefPtr<FrameNode>& pickerNode,
