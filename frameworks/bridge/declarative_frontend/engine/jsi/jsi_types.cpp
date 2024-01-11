@@ -362,13 +362,13 @@ JsiObjTemplate::JsiObjTemplate(panda::Local<panda::ObjectRef> val) : JsiObject(v
 
 void JsiObjTemplate::SetInternalFieldCount(int32_t count) const
 {
-    GetHandle()->SetNativePointerFieldCount(count);
+    GetHandle()->SetNativePointerFieldCount(GetEcmaVM(), count);
 }
 
 JsiRef<JsiObject> JsiObjTemplate::NewInstance() const
 {
     auto instance = panda::ObjectRef::New(GetEcmaVM());
-    instance->SetNativePointerFieldCount(1);
+    instance->SetNativePointerFieldCount(GetEcmaVM(), 1);
     return JsiRef<JsiObject>::Make(instance);
 }
 
