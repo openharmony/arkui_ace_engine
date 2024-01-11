@@ -16,7 +16,8 @@
 #include "border_property.h"
 
 namespace OHOS::Ace::NG {
-void BorderStyleProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson) const
+void BorderStyleProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson,
+    bool isOutline) const
 {
     static const char* BORDER_STYLE[] = {
         "BorderStyle.Solid",
@@ -24,18 +25,25 @@ void BorderStyleProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, std::uni
         "BorderStyle.Dotted",
         "BorderStyle.None",
     };
+    static const char* OUTLINE_STYLE[] = {
+        "OutlineStyle.SOLID",
+        "OutlineStyle.DASHED",
+        "OutlineStyle.DOTTED",
+        "OutlineStyle.NONE",
+    };
+    const char** style = isOutline ? OUTLINE_STYLE : BORDER_STYLE;
     if (multiValued) {
         auto res = JsonUtil::Create(true);
-        res->Put("left", BORDER_STYLE[static_cast<int>(styleLeft.value_or(BorderStyle::SOLID))]);
-        res->Put("top", BORDER_STYLE[static_cast<int>(styleTop.value_or(BorderStyle::SOLID))]);
-        res->Put("right", BORDER_STYLE[static_cast<int>(styleRight.value_or(BorderStyle::SOLID))]);
-        res->Put("bottom", BORDER_STYLE[static_cast<int>(styleBottom.value_or(BorderStyle::SOLID))]);
-
-        json->Put("borderStyle", res);
+        res->Put("left", style[static_cast<int>(styleLeft.value_or(BorderStyle::SOLID))]);
+        res->Put("top", style[static_cast<int>(styleTop.value_or(BorderStyle::SOLID))]);
+        res->Put("right", style[static_cast<int>(styleRight.value_or(BorderStyle::SOLID))]);
+        res->Put("bottom", style[static_cast<int>(styleBottom.value_or(BorderStyle::SOLID))]);
+        json->Put("outlineStyle", res);
         borderJson->Put("style", res);
     } else {
-        json->Put("borderStyle", BORDER_STYLE[static_cast<int>(styleLeft.value_or(BorderStyle::SOLID))]);
-        borderJson->Put("style", BORDER_STYLE[static_cast<int>(styleLeft.value_or(BorderStyle::SOLID))]);
+        json->Put("outlineStyle",
+            style[static_cast<int>(styleLeft.value_or(BorderStyle::SOLID))]);
+        borderJson->Put("style", style[static_cast<int>(styleLeft.value_or(BorderStyle::SOLID))]);
     }
 }
 
@@ -50,7 +58,7 @@ std::string BorderWidthPropertyT<Dimension>::ToString() const
 }
 
 void BorderWidthPropertyT<Dimension>::ToJsonValue(
-    std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson) const
+    std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson, bool isOutline) const
 {
     if (multiValued) {
         auto res = JsonUtil::Create(true);
@@ -60,11 +68,11 @@ void BorderWidthPropertyT<Dimension>::ToJsonValue(
         res->Put("bottom", bottomDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
 
         borderJson->Put("width", res);
-        json->Put("borderWidth", res);
+        json->Put(isOutline ? "outlineWidth" : "borderWidth", res);
     } else {
         auto left = leftDimen.value_or(Dimension(0.0, DimensionUnit::VP)).ToString();
         borderJson->Put("width", left.c_str());
-        json->Put("borderWidth", left.c_str());
+        json->Put(isOutline ? "outlineWidth" : "borderWidth", left.c_str());
     }
 }
 
@@ -90,7 +98,8 @@ bool BorderWidthPropertyT<Dimension>::UpdateWithCheck(const BorderWidthPropertyT
     return isModified;
 }
 
-void BorderColorProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson) const
+void BorderColorProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson,
+    bool isOutline) const
 {
     if (multiValued) {
         auto res = JsonUtil::Create(true);
@@ -100,11 +109,11 @@ void BorderColorProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, std::uni
         res->Put("bottom", bottomColor.value_or(Color()).ColorToString().c_str());
 
         borderJson->Put("color", res);
-        json->Put("borderColor", res);
+        json->Put(isOutline ? "outlineColor" : "borderColor", res);
     } else {
         auto left = leftColor.value_or(Color()).ColorToString();
         borderJson->Put("color", left.c_str());
-        json->Put("borderColor", left.c_str());
+        json->Put(isOutline ? "outlineColor" : "borderColor", left.c_str());
     }
 }
 
@@ -119,7 +128,7 @@ std::string BorderColorProperty::ToString() const
 }
 
 void BorderRadiusPropertyT<Dimension>::ToJsonValue(
-    std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson) const
+    std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& borderJson, bool isOutline) const
 {
     if (multiValued) {
         auto res = JsonUtil::Create(true);
@@ -128,11 +137,11 @@ void BorderRadiusPropertyT<Dimension>::ToJsonValue(
         res->Put("bottomLeft", radiusBottomLeft.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
         res->Put("bottomRight", radiusBottomRight.value_or(Dimension(0.0, DimensionUnit::VP)).ToString().c_str());
 
-        json->Put("borderRadius", res);
+        json->Put(isOutline ? "outlineRadius" : "borderRadius", res);
         borderJson->Put("radius", res);
     } else {
         auto left = radiusTopLeft.value_or(Dimension(0.0, DimensionUnit::VP)).ToString();
-        json->Put("borderRadius", left.c_str());
+        json->Put(isOutline ? "outlineRadius" : "borderRadius", left.c_str());
         borderJson->Put("radius", left.c_str());
     }
 }
