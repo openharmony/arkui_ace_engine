@@ -1617,6 +1617,7 @@ void TextFieldPattern::InitDragDropEvent()
                 auto dragTextEnd = pattern->dragTextEnd_;
                 pattern->selectController_->UpdateHandleIndex(dragTextStart, dragTextEnd);
                 pattern->showSelect_ = true;
+                pattern->ProcessOverlay(false, false, false, false);
             }
             auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
