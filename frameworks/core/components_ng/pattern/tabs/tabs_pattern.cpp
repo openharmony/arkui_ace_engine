@@ -225,9 +225,9 @@ void TabsPattern::UpdateSwiperDisableSwipe(bool disableSwipe)
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
-    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_VOID(swiperPaintProperty);
-    swiperPaintProperty->UpdateDisableSwipe(disableSwipe);
+    auto props = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    props->UpdateDisableSwipe(disableSwipe);
     swiperPattern->UpdateSwiperPanEvent(disableSwipe);
     swiperPattern->SetSwiperEventCallback(disableSwipe);
 }

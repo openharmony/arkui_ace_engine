@@ -1281,10 +1281,10 @@ HWTEST_F(SwiperTestNg, SwiperModelNg002, TestSize.Level1)
 
     /**
      * @tc.steps: step3.3. Test SetDisableSwipe function.
-     * @tc.expected: SwiperPaintProperty->GetDisableSwipe() is true.
+     * @tc.expected: layoutProperty->GetDisableSwipe() is true.
      */
     model.SetDisableSwipe(true);
-    EXPECT_TRUE(paintProperty->GetDisableSwipe());
+    EXPECT_TRUE(layoutProperty->GetDisableSwipe());
 
     /**
      * @tc.steps: step3.4. Test SetEdgeEffect function.
@@ -10499,7 +10499,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleScroll001, TestSize.Level1)
     auto res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
     EXPECT_EQ(res.remain, 0.0f);
 
-    pattern_->GetPaintProperty<SwiperPaintProperty>()->UpdateDisableSwipe(true);
+    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDisableSwipe(true);
     res = pattern_->HandleScroll(5.0f, SCROLL_FROM_UPDATE, NestedState::GESTURE);
     EXPECT_EQ(res.remain, 5.0f);
     EXPECT_FALSE(res.reachEdge);
@@ -10657,7 +10657,7 @@ HWTEST_F(SwiperTestNg, SwiperPatternHandleScrollVelocity001, TestSize.Level1)
     auto res = pattern_->HandleScrollVelocity(5.0f);
     EXPECT_TRUE(res);
 
-    pattern_->GetPaintProperty<SwiperPaintProperty>()->UpdateDisableSwipe(true);
+    pattern_->GetLayoutProperty<SwiperLayoutProperty>()->UpdateDisableSwipe(true);
     res = pattern_->HandleScrollVelocity(5.0f);
     EXPECT_FALSE(res);
 }

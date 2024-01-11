@@ -1959,9 +1959,9 @@ bool TabBarPattern::CheckSwiperDisable() const
     CHECK_NULL_RETURN(tabsNode, true);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_RETURN(swiperNode, true);
-    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_RETURN(swiperPaintProperty, true);
-    return swiperPaintProperty->GetDisableSwipe().value_or(false);
+    auto props = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(props, true);
+    return props->GetDisableSwipe().value_or(false);
 }
 
 void TabBarPattern::SetSwiperCurve(const RefPtr<Curve>& curve) const

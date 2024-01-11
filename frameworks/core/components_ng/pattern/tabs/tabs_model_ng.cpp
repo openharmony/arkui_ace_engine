@@ -269,9 +269,9 @@ void TabsModelNG::SetIndex(int32_t index)
 
 void TabsModelNG::SetScrollable(bool scrollable)
 {
-    auto swiperPaintProperty = GetSwiperPaintProperty();
-    CHECK_NULL_VOID(swiperPaintProperty);
-    swiperPaintProperty->UpdateDisableSwipe(!scrollable);
+    auto props = GetSwiperLayoutProperty();
+    CHECK_NULL_VOID(props);
+    props->UpdateDisableSwipe(!scrollable);
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(tabsNode);
     auto tabPattern = tabsNode->GetPattern<TabsPattern>();
@@ -763,9 +763,9 @@ void TabsModelNG::SetTabBarPosition(FrameNode* frameNode, BarPosition tabBarPosi
 void TabsModelNG::SetScrollable(FrameNode* frameNode, bool scrollable)
 {
     CHECK_NULL_VOID(frameNode);
-    auto swiperPaintProperty = GetSwiperPaintProperty(frameNode);
-    CHECK_NULL_VOID(swiperPaintProperty);
-    swiperPaintProperty->UpdateDisableSwipe(!scrollable);
+    auto props = GetSwiperLayoutProperty(frameNode);
+    CHECK_NULL_VOID(props);
+    props->UpdateDisableSwipe(!scrollable);
     auto tabPattern = frameNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabPattern);
     tabPattern->SetIsDisableSwipe(!scrollable);

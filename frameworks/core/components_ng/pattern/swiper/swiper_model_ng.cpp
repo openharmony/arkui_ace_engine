@@ -23,14 +23,8 @@
 #include "core/components/swiper/swiper_component.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
-#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_layout_property.h"
-#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -153,7 +147,7 @@ void SwiperModelNG::SetEnabled(bool enabled)
 
 void SwiperModelNG::SetDisableSwipe(bool disableSwipe)
 {
-    ACE_UPDATE_PAINT_PROPERTY(SwiperPaintProperty, DisableSwipe, disableSwipe);
+    ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, DisableSwipe, disableSwipe);
 }
 
 void SwiperModelNG::SetEdgeEffect(EdgeEffect edgeEffect)
@@ -378,7 +372,7 @@ void SwiperModelNG::SetDirection(FrameNode* frameNode, Axis axis)
 
 void SwiperModelNG::SetDisableSwipe(FrameNode* frameNode, bool disableSwipe)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(SwiperPaintProperty, DisableSwipe, disableSwipe, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, DisableSwipe, disableSwipe, frameNode);
 }
 
 void SwiperModelNG::SetItemSpace(FrameNode* frameNode, const Dimension& itemSpace)
