@@ -61,7 +61,8 @@ void ResetSpanTextCase(ArkUINodeHandle node)
     SpanModelNG::SetTextCase(frameNode, DEFAULT_TEXT_CASE);
 }
 
-void SetSpanFontWeight(ArkUINodeHandle node, const char* value)a
+void SetSpanFontWeight(ArkUINodeHandle node, const char* value)
+{
     CHECK_NULL_VOID(frameNode);
     SpanModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(value));
 }
