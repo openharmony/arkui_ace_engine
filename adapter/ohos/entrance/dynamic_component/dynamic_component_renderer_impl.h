@@ -31,8 +31,8 @@ class DynamicComponentRendererImpl : public DynamicComponentRenderer {
     DECLARE_ACE_TYPE(DynamicComponentRendererImpl, DynamicComponentRenderer);
 
 public:
-    explicit DynamicComponentRendererImpl(const RefPtr<FrameNode>& host, const std::string& hapPath,
-        const std::string& abcPath, const std::string& entryPoint, void* runtime);
+    DynamicComponentRendererImpl(const RefPtr<FrameNode>& host, const std::string& hapPath, const std::string& abcPath,
+        const std::string& entryPoint, void* runtime);
     ~DynamicComponentRendererImpl() override = default;
 
     void CreateContent() override;
