@@ -1525,8 +1525,6 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
             auto current = pattern->selectController_->GetCaretIndex();
             auto dragTextStart = pattern->dragTextStart_;
             auto dragTextEnd = pattern->dragTextEnd_;
-            pattern->selectController_->UpdateHandleIndex(dragTextStart, dragTextEnd);
-            pattern->showSelect_ = true;
             if (current < dragTextStart) {
                 pattern->contentController_->erase(dragTextStart, dragTextEnd - dragTextStart);
                 pattern->InsertValue(str);
@@ -1534,12 +1532,21 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
                 pattern->contentController_->erase(dragTextStart, dragTextEnd - dragTextStart);
                 pattern->selectController_->UpdateCaretIndex(current - (dragTextEnd - dragTextStart));
                 pattern->InsertValue(str);
+            } else {
+                pattern->ShowSelectAfterDragDrop();
             }
             pattern->dragStatus_ = DragStatus::NONE;
             pattern->MarkContentChange();
             host->MarkDirtyNode(pattern->IsTextArea() ? PROPERTY_UPDATE_MEASURE : PROPERTY_UPDATE_MEASURE_SELF);
         }
     };
+}
+
+void TextFieldPattern::ShowSelectAfterDragDrop()
+{
+    selectController_->UpdateHandleIndex(dragTextStart_, dragTextEnd_);
+    showSelect_ = true;
+    ProcessOverlay(false, false, false, false);
 }
 
 void TextFieldPattern::InitDragDropEvent()
