@@ -721,6 +721,11 @@ void FrameNode::OnAttachToMainTree(bool recursive)
     hasPendingRequest_ = false;
 }
 
+void FrameNode::OnAttachToBuilderNode(NodeStatus nodeStatus)
+{
+    pattern_->OnAttachToBuilderNode(nodeStatus);
+}
+
 void FrameNode::OnConfigurationUpdate(const OnConfigurationChange& configurationChange)
 {
     if (configurationChange.languageUpdate) {
