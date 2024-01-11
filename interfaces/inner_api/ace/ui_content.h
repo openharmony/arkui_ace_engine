@@ -54,6 +54,7 @@ enum class WindowMode : uint32_t;
 enum class MaximizeMode : uint32_t;
 class RSSurfaceNode;
 class RSTransaction;
+class Transform;
 } // namespace Rosen
 
 namespace AAFwk {
@@ -347,6 +348,8 @@ public:
     {
         return true;
     };
+
+    virtual void UpdateTransform(const OHOS::Rosen::Transform& transform) = 0;
 };
 
 } // namespace OHOS::Ace

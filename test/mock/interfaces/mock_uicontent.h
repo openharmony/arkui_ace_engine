@@ -118,6 +118,7 @@ public:
     MOCK_METHOD3(CreateCustomPopupUIExtension, int32_t(const AAFwk::Want& want,
         const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config));
     MOCK_METHOD1(DestroyCustomPopupUIExtension, void(int32_t nodeId));
+    MOCK_METHOD1(UpdateTransform, void(const OHOS::Rosen::Transform& transform));
 };
 } // namespace Ace
 } // namespace OHOS

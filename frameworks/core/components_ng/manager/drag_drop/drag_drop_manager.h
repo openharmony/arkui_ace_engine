@@ -93,7 +93,7 @@ public:
     std::string GetExtraInfo();
     void SetExtraInfo(const std::string& extraInfo);
     void ClearExtraInfo();
-    float GetSmallWindowScale() const;
+    float GetWindowScale() const;
     void UpdateDragStyle(const DragCursorStyleCore& dragCursorStyleCore = DragCursorStyleCore::DEFAULT);
     void UpdateDragAllowDrop(const RefPtr<FrameNode>& dragFrameNode, const bool isCopy);
     void RequireSummary();
