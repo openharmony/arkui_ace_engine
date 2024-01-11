@@ -46,7 +46,6 @@ public:
                 bubble->PaintMask(canvas, paintWrapper);
                 bubble->ClipBubble(paintWrapper);
                 bubble->PaintBorder(canvas, paintWrapper);
-                bubble->PaintOuterBorder(canvas, paintWrapper);
             }
         };
     }
@@ -57,6 +56,7 @@ public:
             auto bubble = weak.Upgrade();
             if (bubble) {
                 bubble->PaintInnerBorder(canvas, paintWrapper);
+                bubble->PaintOuterBorder(canvas, paintWrapper);
             }
         };
     }

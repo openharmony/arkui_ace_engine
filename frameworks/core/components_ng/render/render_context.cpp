@@ -64,6 +64,7 @@ RefPtr<FrameNode> RenderContext::GetHost() const
 void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     ACE_PROPERTY_TO_JSON_VALUE(propBorder_, BorderProperty);
+    ACE_PROPERTY_TO_JSON_VALUE(propOuterBorder_, OuterBorderProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propPointLight_, PointLightProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propBdImage_, BorderImageProperty);
     ACE_PROPERTY_TO_JSON_VALUE(propOverlay_, OverlayProperty);
