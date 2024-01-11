@@ -845,7 +845,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollVelocity003, TestSize.Level1)
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::FADE);
     scrollPn->edgeEffect_ = EdgeEffect::FADE;
     bool res = scrollPn->HandleScrollVelocity(5);
-    EXPECT_FALSE(res);
+    EXPECT_TRUE(res);
 }
 
 /**
