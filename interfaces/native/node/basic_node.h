@@ -281,7 +281,8 @@ typedef enum {
     /**
      * @brief 通过<b>setAttribute</b>方法设置元素的边框的圆角.
      * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note 入参格式为数字类型字符或4个数字类型字符串分别对应左上、右上、左下、右下，使用空格隔开, 如"1"或"1 1 2 2"，单位为vp;
+     * @note 入参格式为数字类型字符或4个数字类型字符串分别对应左上、右上、左下、右下，使用空格隔开, 如"1"或"1 1 2
+     * 2"，单位为vp;
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_BORDER_RADIUS, "1");
      * basicNodeApi->setAttribute(nodeHandle, NODE_BORDER_RADIUS, "1 1 2 2");
@@ -306,7 +307,8 @@ typedef enum {
     /**
      * @brief 通过<b>setAttribute</b>方法设置元素的边框线条样式.
      * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note 入参格式"dotted"、"dashed"或"solid"或4个使用"dotted"、"dashed"或"solid"的字符串分别对应上、右、下、左，使用空格隔开,
+     * @note
+     * 入参格式"dotted"、"dashed"或"solid"或4个使用"dotted"、"dashed"或"solid"的字符串分别对应上、右、下、左，使用空格隔开,
      * 如"dotted"或"dotted dashed dashed solid";
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_BORDER_STYLE, "dotted");
@@ -400,7 +402,78 @@ typedef enum {
      *
      */
     NODE_SHADOW,
-
+    /**
+     * @brief 通过<b>setAttribute</b>方法设置组件背景图片的宽高.
+     * @see ArkUI_BasicNodeAPI::setAttribute
+     * @note
+     * 入参width:Length,height:Length,Length类型表示带单位的尺寸大小，可以是数字（默认单位vp），或者单位的数字，支持百分比输入：如"1"、"1px"、"100%"
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_IMAGE_SIZE, "20 40px");
+     * 或者：
+     * basicNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_IMAGE_SIZE, "50% 50%");
+     * @endcode
+     *
+     */
+    NODE_BACKGROUND_IMAGE_SIZE,
+    /**
+     * @brief 通过<b>setAttribute</b>为当前组件提供一种背景和内容之间的模糊能力.
+     * @see ArkUI_BasicNodeAPI::setAttribute
+     * @note 入参blurStyle:String("thin","regular","thick")  字符串输入可不区分大小写
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_BLUR_STYLE, "thin");
+     * @endcode
+     *
+     */
+    NODE_BACKGROUND_BLUR_STYLE,
+    /**
+     * @brief 通过<b>setAttribute</b>为当前组件设置转场时的透明度效果。
+     * @note 入参: value: number,value表示插入时的透明度起点值和删除时的透明度终点值。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_OPACITY_TRANSITION , "0.5");
+     * @endcode
+     */
+    NODE_OPACITY_TRANSITION,
+    /**
+     * @brief 通过<b>setAttribute</b>为当前组件设置转场时的旋转效果。
+     * @note 入参: x: number,y: number,z: number,angle: number,centerX: number,centerY: number
+     * 表示插入时的起点值和删除时的终点值。
+     * 其中x表示横向旋转分量，y表示纵向的旋转分量，z表示竖向的旋转分量。
+     * centerX，centerY表示旋转中心点，中心点(0,0)表示组件左上角。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_ROTATE_TRANSITION , "0 0 1 180 0 0");
+     * @endcode
+     */
+    NODE_ROTATE_TRANSITION,
+    /**
+     * @brief 通过<b>setAttribute</b>为当前组件设置转场时的缩放效果。
+     * @note 入参: x: number,y: number,z: number,centerX: Length,centerY: Length。
+     * Length类型表示带单位的尺寸大小，可以是数字（默认单位vp），或者单位的数字，支持百分比输入。
+     * 其中x表示横向放大倍数，y表示纵向的放大倍数，z表示竖向的放大倍数。
+     * centerX，centerY表示缩放中心点，默认值"50%"
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCALE_TRANSITION , "0 0 0 50% 50%");
+     * @endcode
+     */
+    NODE_SCALE_TRANSITION,
+    /**
+     * @brief 通过<b>setAttribute</b>为当前组件设置转场时的平移效果。
+     * @note 入参: x: Length,y: Length,z: Length
+     * Length类型表示带单位的尺寸大小，可以是数字（默认单位vp），或者单位的数字，支持百分比输入。
+     * 表示插入时的起点值和删除时的终点值。
+     * x表示横向的平移距离，y表示纵向的平移距离，z表示竖向的平移距离。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TRANSLATE_TRANSITION , "12 50px 0");
+     * @endcode
+     */
+    NODE_TRANSLATE_TRANSITION,
+    /**
+     * @brief 通过<b>setAttribute</b>为当前text组件设置内容。
+     * @note 入参:value: String
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_CONTENT , "一段文本。");
+     * @endcode
+     */
+    NODE_TEXT_CONTENT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT,
     /**
      * @brief 通过<b>setAttribute</b>方法设置组件字体颜色，只针对包含文本元素的组件.
      *
@@ -410,7 +483,7 @@ typedef enum {
      * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_COLOR, "#FF1122FF");
      * @endcode
      */
-    NODE_FONT_COLOR = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT,
+    NODE_FONT_COLOR,
     /**
      * @note 入参格式为数字类型字符串，单位为fp。
      * @code {.c}
@@ -419,28 +492,142 @@ typedef enum {
      */
     NODE_FONT_SIZE,
     /**
-     * @note 入参格式为FontWeight的枚举名称 lighter,normal,regular,medium,bold,bolder 或者是100-900之间的100倍数字
+     * @note 入参格式为FontStyle的枚举名称 Normal,Italic。
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_WEIGHT, "normal");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_STYLE, "Normal");
+     * @endcode
+     */
+    NODE_FONT_STYLE,
+    /**
+     * @note 入参格式为FontWeight的枚举名称 Lighter,Normal,Regular,Medium,Bold,Bolder 或者是100-900之间的100倍数字
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_WEIGHT, "Normal");
      * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_WEIGHT, "400");
      * @endcode
      */
     NODE_FONT_WEIGHT,
     /**
-     * @note 入参格式为FontStyle的枚举名称 Normal,Italic。
+     * @brief 通过<b>setAttribute</b>为当前组件提供设置文本行高的能力.
+     * @note 入参格式为value：Length,Length类型表示带单位的尺寸大小，可以是数字（默认单位vp），或者单位的数字
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_STYLE, "normal");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_LINE_HEIGHT, "20");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_LINE_HEIGHT, "20vp");
      * @endcode
      */
-    NODE_FONT_STYLE,
+    NODE_TEXT_LINE_HEIGHT,
     /**
-     * @note 入参格式为TextAlign的枚举名称 start,center,end,justify。
+     * @brief 通过<b>setAttribute</b>为当前组件提供设置文本装饰线样式及其颜色。
+     * @note 入参:type：String("none", "underline", "overline", "line_through",
+     * "inherit"),color：String
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_ALIGN, "start");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_DECORATION, "overline #FF1122FF");
+     * @endcode
+     */
+    NODE_TEXT_DECORATION,
+    /**
+     * @brief 通过<b>setAttribute</b>为当前组件提供设置文本大小写。
+     * @note 入参:value：String("normal", "lowercase", "uppercase")
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_CASE, "lowercase");
+     * @endcode
+     */
+    NODE_TEXT_CASE,
+    /**
+     * @brief 通过<b>setAttribute</b>为当前组件提供设置文本字符间距。
+     * @note 入参:value：number，默认单位fp
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_LETTER_SPACING, "5");
+     * @endcode
+     */
+    NODE_TEXT_LETTER_SPACING,
+    /**
+     * @brief 通过<b>setAttribute</b>为当前组件提供设置文本最大行数。
+     * @note 入参:value：number
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_MAX_LINES, "1");
+     * @endcode
+     */
+    NODE_TEXT_MAX_LINES,
+    /**
+     * @note 入参格式为TextAlign的枚举名称 Start,Center,End,JUSTIFY。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_ALIGN, "Start");
      * @endcode
      */
     NODE_TEXT_ALIGN,
-
+    /**
+     * @brief 通过<b>setAttribute</b>为当前组件提供设置文本超长时的显示方式。
+     * @note 入参:value: String("none", "clip", "ellipsis", "marquee")
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_OVER_FLOW , "ellipsis");
+     * @endcode
+     */
+    NODE_TEXT_OVER_FLOW,
+    /**
+     * @brief 通过<b>setAttribute</b>为当前span组件设置文本内容。
+     * @note 入参:value: String
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SPAN_CONTENT , "一段文本。");
+     * @endcode
+     */
+    NODE_SPAN_CONTENT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SPAN,
+    /**
+     * @brief 通过<b>setAttribute</b>为当前imageSpan组件设置图片地址。
+     * @note 入参:value: String
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_IMAGE_SPAN_SRC , "https://www.example.com/xxx.png");
+     * @endcode
+     */
+    NODE_IMAGE_SPAN_SRC = MAX_NODE_SCOPE_NUM * ARKUI_NODE_IMAGE_SPAN,
+    /**
+     * @brief 通过<b>setAttribute</b>为当前imageSpan组件设置图片基于文本的对齐方式。
+     * @note 入参:value: String("top","center","bottom","baseline","none")
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_IMAGE_SPAN_VERTICAL_ALIGN , "center");
+     * @endcode
+     */
+    NODE_IMAGE_SPAN_VERTICAL_ALIGN,
+    /**
+     * @brief 通过<b>setAttribute</b>为当前image组件设置图片地址。
+     * @note 入参:value: String
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_IMAGE_SRC , "https://www.example.com/xxx.png");
+     * @endcode
+     */
+    NODE_IMAGE_SRC = MAX_NODE_SCOPE_NUM * ARKUI_NODE_IMAGE,
+    /**
+     * @brief 通过<b>setAttribute</b>为当前image组件设置图片填充效果。
+     * @note 入参:value: String("fill", "contain", "cover", "fitwidth", "fitheight", "none",
+     * "scale_down", "top_left" )
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_IMAGE_OBJECT_FIT , "fill");
+     * @endcode
+     */
+    NODE_IMAGE_OBJECT_FIT,
+    /**
+     * @brief 通过<b>setAttribute</b>为当前image组件设置图片插值效果效果,缓解图片缩放时的锯齿问题。
+     * @note 入参:value: String("none", "low", "medium", "high")
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_IMAGE_INTERPOLATION , "low");
+     * @endcode
+     */
+    NODE_IMAGE_INTERPOLATION,
+    /**
+     * @brief 通过<b>setAttribute</b>为当前image组件设置图片重复样式。
+     * @note 入参:value: String("no_repeat", "repeat_x", "repeat_y", "repeat" )
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_IMAGE_OBJECT_REPEAT , "repeat");
+     * @endcode
+     */
+    NODE_IMAGE_OBJECT_REPEAT,
+    /**
+     * @brief 通过<b>setAttribute</b>为当前image组件设置图片滤镜效果。
+     * @note 入参:colorFilter: String(4*5的转换矩阵)
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_IMAGE_COLOR_FILTER , "1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0");
+     * @endcode
+     */
+    NODE_IMAGE_COLOR_FILTER,
     /**
      * @note 入参格式为字符串。
      * @code {.c}

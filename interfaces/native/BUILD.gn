@@ -45,6 +45,7 @@ ohos_shared_library("ace_ndk") {
   ]
 
   sources = [
+    "//foundation/arkui/ace_engine/frameworks/core/components/common/properties/color.cpp",
     "//foundation/arkui/ace_engine/frameworks/core/components/xcomponent/native_interface_xcomponent_impl.cpp",
     "native_interface_xcomponent.cpp",
     "node/common.cpp",

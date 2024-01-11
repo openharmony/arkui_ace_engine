@@ -384,6 +384,11 @@ void TextModelNG::SetOnDrop(NG::OnDragDropFunc&& onDrop)
     ViewAbstract::SetOnDrop(std::move(onDrop));
 }
 
+void TextModelNG::InitText(FrameNode* frameNode, std::string& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, Content, value, frameNode);
+}
+
 void TextModelNG::SetTextCase(FrameNode* frameNode, Ace::TextCase value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextCase, value, frameNode);
