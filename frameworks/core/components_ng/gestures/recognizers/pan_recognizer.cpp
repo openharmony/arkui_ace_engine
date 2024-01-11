@@ -243,6 +243,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             ResSchedReport::GetInstance().ResSchedDataReport("click");
             // last one to fire end.
             SendCallbackMsg(onActionEnd_);
+            averageDistance_.Reset();
         }
     }
 }
