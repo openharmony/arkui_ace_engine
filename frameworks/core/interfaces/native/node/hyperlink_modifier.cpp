@@ -39,9 +39,24 @@ void ResetHyperlinkColor(NodeHandle node)
     HyperlinkModelNG::SetColor(frameNode, Color(hyperlinkTheme->GetTextColor()));
 }
 
+void SetHyperlinkDraggable(NodeHandle node, bool draggable)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    HyperlinkModelNG::SetDraggable(frameNode, draggable);
+}
+
+void ResetHyperlinkDraggable(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    HyperlinkModelNG::SetDraggable(frameNode, false);
+}
+
 ArkUIHyperlinkModifierAPI GetHyperlinkModifier()
 {
-    static const ArkUIHyperlinkModifierAPI modifier = { SetHyperlinkColor, ResetHyperlinkColor };
+    static const ArkUIHyperlinkModifierAPI modifier = { SetHyperlinkColor, ResetHyperlinkColor, SetHyperlinkDraggable,
+        ResetHyperlinkDraggable };
 
     return modifier;
 }

@@ -27,6 +27,7 @@ public:
     void SetColor(const Color& value) override;
     void SetDraggable(bool draggable) override;
     static void SetColor(FrameNode* frameNode, const Color& value);
+    static void SetDraggable(FrameNode* frameNode, bool draggable);
 
 private:
     void SetTextStyle(const RefPtr<FrameNode>& textNode, const std::string& content, const std::string& address);

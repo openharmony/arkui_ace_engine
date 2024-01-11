@@ -3654,6 +3654,11 @@ class ArkGridComponent extends ArkComponent {
   monopolizeEvents(monopolize) {
     throw new Error('Method not implemented.');
   }
+  clip(value) {
+    modifierWithKey(this._modifiersWithKeys, GridClipModifier.identity, GridClipModifier, value);
+    return this;
+  }
+
 }
 class GridColumnsTemplateModifier extends ModifierWithKey {
   constructor(value) {
@@ -3944,6 +3949,23 @@ class GridSupportAnimationModifier extends ModifierWithKey {
   }
 }
 GridSupportAnimationModifier.identity = Symbol('gridSupportAnimation');
+class GridClipModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetClipWithEdge(node);
+    }
+    else {
+      getUINativeModule().common.setClipWithEdge(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return true;
+  }
+}
+GridClipModifier.identity = Symbol('gridClip');
 // @ts-ignore
 globalThis.Grid.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -10233,7 +10255,8 @@ class ArkTimePickerComponent extends ArkComponent {
     throw new Error('Method not implemented.');
   }
   useMilitaryTime(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TimepickerUseMilitaryTimeModifier.identity, TimepickerUseMilitaryTimeModifier, value);
+    return this;
   }
   disappearTextStyle(value) {
     modifierWithKey(this._modifiersWithKeys, TimepickerDisappearTextStyleModifier.identity, TimepickerDisappearTextStyleModifier, value);
@@ -10377,6 +10400,21 @@ class TimepickerDisappearTextStyleModifier extends ModifierWithKey {
   }
 }
 TimepickerDisappearTextStyleModifier.identity = Symbol('disappearTextStyle');
+class TimepickerUseMilitaryTimeModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().timepicker.resetTimepickerUseMilitaryTime(node);
+    }
+    else {
+      getUINativeModule().timepicker.setTimepickerUseMilitaryTime(node, this.value);
+    }
+  }
+}
+TimepickerUseMilitaryTimeModifier.identity = Symbol('timepickerUseMilitaryTime');
+
 // @ts-ignore
 globalThis.TimePicker.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -15151,6 +15189,10 @@ class ArkHyperlinkComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, HyperlinkColorModifier.identity, HyperlinkColorModifier, value);
     return this;
   }
+  draggable(value) {
+    modifierWithKey(this._modifiersWithKeys, HyperlinkDraggableModifier.identity, HyperlinkDraggableModifier, value);
+    return this;
+  }
 }
 class HyperlinkColorModifier extends ModifierWithKey {
   constructor(value) {
@@ -15169,6 +15211,20 @@ class HyperlinkColorModifier extends ModifierWithKey {
   }
 }
 HyperlinkColorModifier.identity = Symbol('hyperlinkColor');
+class HyperlinkDraggableModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().hyperlink.resetDraggable(node);
+    }
+    else {
+      getUINativeModule().hyperlink.setDraggable(node, this.value);
+    }
+  }
+}
+HyperlinkDraggableModifier.identity = Symbol('hyperlinkDraggable')
 // @ts-ignore
 globalThis.Hyperlink.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
