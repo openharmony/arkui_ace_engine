@@ -130,11 +130,11 @@ void DownloadListenerImpl::OnDownloadStart(const std::string& url, const std::st
     delegate->OnDownloadStart(url, userAgent, contentDisposition, mimetype, contentLength);
 }
 
-void AccessibilityEventListenerImpl::OnAccessibilityEvent(int32_t nodeId, uint32_t eventType)
+void AccessibilityEventListenerImpl::OnAccessibilityEvent(int64_t accessibilityId, uint32_t eventType)
 {
     ContainerScope scope(instanceId_);
     CHECK_NULL_VOID(webDelegate_);
-    webDelegate_->OnAccessibilityEvent(nodeId, static_cast<AccessibilityEventType>(eventType));
+    webDelegate_->OnAccessibilityEvent(accessibilityId, static_cast<AccessibilityEventType>(eventType));
 }
 
 void FindListenerImpl::OnFindResultReceived(
@@ -158,15 +158,16 @@ void WebClientImpl::OnPageLoadEnd(int httpStatusCode, const std::string& url)
     delegate->OnPageFinished(url);
 }
 
-void WebClientImpl::OnFocus()
+bool WebClientImpl::OnFocus()
 {
     ContainerScope scope(instanceId_);
     auto delegate = webDelegate_.Upgrade();
-    if (!delegate) {
-        return;
+    CHECK_NULL_RETURN(delegate, false);
+    bool isFocused = delegate->RequestFocus();
+    if (isFocused) {
+        delegate->OnRequestFocus();
     }
-    delegate->OnRequestFocus();
-    delegate->RequestFocus();
+    return isFocused;
 }
 
 bool WebClientImpl::OnConsoleLog(const OHOS::NWeb::NWebConsoleLog& message)

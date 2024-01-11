@@ -237,6 +237,11 @@ public:
         return debugBoundaryEnabled_;
     }
 
+    static bool GetDebugAutoUIEnabled()
+    {
+        return debugAutoUIEnabled_;
+    }
+
     static bool GetDownloadByNetworkEnabled()
     {
         return downloadByNetworkEnabled_;
@@ -252,9 +257,11 @@ public:
         return svgTraceEnable_;
     }
 
-    static bool GetLayoutTraceEnabled()
+    static bool GetLayoutTraceEnabled();
+
+    static bool GetBuildTraceEnabled()
     {
-        return layoutTraceEnable_;
+        return buildTraceEnable_;
     }
 
     static bool GetAccessibilityEnabled()
@@ -397,10 +404,15 @@ public:
         return enableScrollableItemPool_;
     }
 
+    static bool GetDisplaySyncSkipEnabled();
+
+    static bool GetNavigationBlurEnabled();
+
 private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;
     static bool layoutTraceEnable_;
+    static bool buildTraceEnable_;
     static bool accessibilityEnabled_;
     static bool isRound_;
     static bool isDeviceAccess_;
@@ -428,6 +440,7 @@ private:
     static bool windowAnimationEnabled_;
     static bool debugEnabled_;
     static bool debugBoundaryEnabled_;
+    static bool debugAutoUIEnabled_; // for AutoUI Test
     static bool downloadByNetworkEnabled_;
     static bool gpuUploadEnabled_;
     static bool isHookModeEnabled_;
@@ -438,6 +451,7 @@ private:
     static uint32_t dumpFrameCount_;
     static bool resourceDecoupling_;
     static bool enableScrollableItemPool_;
+    static bool navigationBlurEnabled_;
 };
 
 } // namespace OHOS::Ace

@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/jsview/js_base_node.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/node_container/node_container_pattern.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/core/common/container_scope.h"
@@ -66,10 +67,21 @@ void JSNodeContainer::Create(const JSCallbackInfo& info)
     if (info.Length() < 1 || !info[0]->IsObject() || info[0]->IsNull()) {
         frameNode->RemoveChildAtIndex(0);
         frameNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
+        ResetNodeController();
         return;
     }
     auto object = JSRef<JSObject>::Cast(info[0]);
 
+    JSObject firstArg = JSRef<JSObject>::Cast(info[0]).Get();
+    auto nodeContainerId = frameNode->GetId();
+    // check if it's the same object, and if it is, return it;
+    auto insideId = firstArg->GetProperty(NODE_CONTAINER_ID);
+    if (insideId->IsNumber()) {
+        auto id = insideId->ToNumber<int32_t>();
+        if (id == nodeContainerId) {
+            return;
+        }
+    }
     // clear the nodeContainerId_ in pre controller;
     NodeContainerModel::GetInstance()->ResetController();
 
@@ -81,26 +93,19 @@ void JSNodeContainer::Create(const JSCallbackInfo& info)
     };
     NodeContainerModel::GetInstance()->BindController(std::move(resetFunc));
     auto execCtx = info.GetExecutionContext();
-    auto child = GetNodeByNodeController(object, execCtx);
+    SetNodeController(object, execCtx);
     // set the nodeContainerId_ to nodeController
-    JSObject firstArg = JSRef<JSObject>::Cast(info[0]).Get();
-    firstArg->SetProperty(NODE_CONTAINER_ID, frameNode->GetId());
-
-    if (child) {
-        frameNode->RemoveChildAtIndex(0);
-        frameNode->AddChild(child);
-    } else {
-        frameNode->RemoveChildAtIndex(0);
-    }
-    frameNode->MarkNeedFrameFlushDirty(NG::PROPERTY_UPDATE_MEASURE);
+    firstArg->SetProperty(NODE_CONTAINER_ID, nodeContainerId);
+    NodeContainerModel::GetInstance()->FireMakeNode();
 }
 
-RefPtr<NG::UINode> JSNodeContainer::GetNodeByNodeController(const JSRef<JSObject>& object, JsiExecutionContext execCtx)
+void JSNodeContainer::SetNodeController(const JSRef<JSObject>& object, JsiExecutionContext execCtx)
 {
     // get the function to makeNode
     JSRef<JSVal> jsMakeNodeFunc = object->GetProperty("makeNode");
     if (!jsMakeNodeFunc->IsFunction()) {
-        return nullptr;
+        ResetNodeController();
+        return;
     }
 
     auto jsFunc = JSRef<JSFunc>::Cast(jsMakeNodeFunc);
@@ -119,7 +124,7 @@ RefPtr<NG::UINode> JSNodeContainer::GetNodeByNodeController(const JSRef<JSObject
         }
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(result);
         JSRef<JSVal> nodeptr = obj->GetProperty(NODEPTR_OF_UINODE);
-        if (nodeptr.IsEmpty() || !nodeptr->IsObject()) {
+        if (nodeptr.IsEmpty()) {
             return nullptr;
         }
         const auto* vm = nodeptr->GetEcmaVM();
@@ -133,22 +138,16 @@ RefPtr<NG::UINode> JSNodeContainer::GetNodeByNodeController(const JSRef<JSObject
     SetOnDisappearFunc(object, execCtx);
     SetOnResizeFunc(object, execCtx);
     SetOnTouchEventFunc(object, execCtx);
+}
 
-    auto context = GetCurrentContext();
-    JSRef<JSVal> result = jsFunc->Call(object, 1, &context);
-    if (result.IsEmpty() || !result->IsObject()) {
-        return nullptr;
-    }
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(result);
-    JSRef<JSVal> nodeptr = obj->GetProperty(NODEPTR_OF_UINODE);
-    if (nodeptr.IsEmpty()) {
-        return nullptr;
-    }
-    const auto* vm = nodeptr->GetEcmaVM();
-    auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
-    auto* uiNode = reinterpret_cast<NG::UINode*>(node);
-    CHECK_NULL_RETURN(uiNode, nullptr);
-    return AceType::Claim(uiNode);
+void JSNodeContainer::ResetNodeController()
+{
+    NodeContainerModel::GetInstance()->ResetController();
+    NodeContainerModel::GetInstance()->SetMakeFunction(nullptr);
+    NodeContainerModel::GetInstance()->SetOnTouchEvent(nullptr);
+    NodeContainerModel::GetInstance()->SetOnResize(nullptr);
+    ViewAbstractModel::GetInstance()->SetOnAppear(nullptr);
+    ViewAbstractModel::GetInstance()->SetOnDisAppear(nullptr);
 }
 
 void JSNodeContainer::SetOnAppearFunc(const JSRef<JSObject>& object, JsiExecutionContext execCtx)

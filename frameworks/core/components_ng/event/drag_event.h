@@ -105,7 +105,6 @@ public:
 
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) override;
-#ifdef ENABLE_DRAG_FRAMEWORK
     void SetThumbnailCallback(std::function<void(Offset)>&& callback);
     void SetFilter(const RefPtr<DragEventActuator>& actuator);
     static void UpdatePreviewPositionAndScale(const RefPtr<FrameNode>& imageNode, const OffsetF& frameOffset);
@@ -125,11 +124,20 @@ public:
     bool GetIsBindOverlayValue(const RefPtr<DragEventActuator>& actuator);
     bool IsAllowedDrag();
     void SetTextPixelMap(const RefPtr<GestureEventHub>& gestureHub);
-    OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode);
-#endif // ENABLE_DRAG_FRAMEWORK
+    OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode, const RefPtr<PixelMap>& pixelMap);
     PanDirection GetDirection() const
     {
         return direction_;
+    }
+
+    int32_t GetFingers() const
+    {
+        return fingers_;
+    }
+
+    float GetDistance() const
+    {
+        return distance_;
     }
 
     void StartDragTaskForWeb(const GestureEvent& info);
@@ -161,6 +169,8 @@ public:
         return isDragUserReject_;
     }
 
+    void CopyDragEvent(const RefPtr<DragEventActuator>& dragEventActuator);
+    
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     RefPtr<DragEvent> userCallback_;

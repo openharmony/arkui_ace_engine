@@ -25,7 +25,7 @@ class VideoFullScreenPattern : public VideoPattern {
     DECLARE_ACE_TYPE(VideoFullScreenPattern, VideoPattern);
 
 public:
-    VideoFullScreenPattern() = default;
+    VideoFullScreenPattern() = delete;
     explicit VideoFullScreenPattern(const RefPtr<VideoControllerV2>& videoController) : VideoPattern(videoController) {}
     ~VideoFullScreenPattern() override = default;
     void InitFullScreenParam(const RefPtr<VideoPattern>& video, const RefPtr<RenderSurface>& renderSurface,
@@ -55,10 +55,7 @@ public:
         return eventHub_;
     }
 
-    void SetEventHub(const RefPtr<EventHub>& eventHub)
-    {
-        eventHub_ = eventHub;
-    }
+    void SetEventHub(const RefPtr<EventHub>& eventHub);
 
     void UpdateState();
 
@@ -84,6 +81,7 @@ public:
 private:
     WeakPtr<VideoPattern> videoPattern_;
     RefPtr<EventHub> eventHub_;
+    RefPtr<GestureEventHub> originGestureEventHub_;
 };
 } // namespace OHOS::Ace::NG
 #endif

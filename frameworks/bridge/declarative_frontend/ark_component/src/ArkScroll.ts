@@ -182,6 +182,25 @@ class ScrollScrollBarColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
+class ScrollClipModifier extends ModifierWithKey<boolean | object> {
+  constructor(value: boolean | object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('scrollClip');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetClipWithEdge(node);
+    } else {
+      getUINativeModule().common.setClipWithEdge(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return true;
+  }
+}
+
+
 class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
   constructor(nativePtr: KNode) {
     super(nativePtr);
@@ -272,6 +291,10 @@ class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
       }
       modifierWithKey(this._modifiersWithKeys, ScrollScrollSnapModifier.identity, ScrollScrollSnapModifier, options);
     }
+    return this;
+  }
+  clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
+    modifierWithKey(this._modifiersWithKeys, ScrollClipModifier.identity, ScrollClipModifier, value);
     return this;
   }
 }

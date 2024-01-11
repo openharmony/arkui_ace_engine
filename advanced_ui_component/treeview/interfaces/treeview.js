@@ -1493,7 +1493,7 @@ export var TreeView;
                     i[t + 1+a].setNodeIsShow(!1);
                     i[t + 1+a].setListItemHeight(0)
                 }
-                this.notifyDataChange(t);
+                this.notifyDataReload();
                 return
             }
             let d = new Array(i[t].getChildNodeInfo().childNum);
@@ -1510,7 +1510,7 @@ export var TreeView;
                 this.expandAndCollapseInfo.get(e) == NodeStatus.Expand && this.handleExpandAndCollapse(d[a])
             }
             d = null;
-            this.notifyDataChange(t)
+            this.notifyDataReload();
         }
 
         init(e) {

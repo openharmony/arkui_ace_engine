@@ -27,6 +27,7 @@ class JSTextInput : public JSViewAbstract {
 public:
     static void JSBind(BindingTarget globalObj);
     static void Create(const JSCallbackInfo& info);
+    static void SetDirection(const std::string& dir);
 };
 
 class JSTextInputController final : public virtual AceType {

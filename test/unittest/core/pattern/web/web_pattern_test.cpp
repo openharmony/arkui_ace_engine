@@ -196,7 +196,7 @@ HWTEST_F(WebPatternTest, OnModifyDoneTest001, TestSize.Level1)
     g_webPattern->isVirtualKeyBoardShow_ = WebPattern::VkState::VK_HIDE;
     result = g_webPattern->ProcessVirtualKeyBoard(width, height, keyboard);
     EXPECT_TRUE(result);
-    g_webPattern->UpdateWebLayoutSize(width, height);
+    g_webPattern->UpdateWebLayoutSize(width, height, false);
     TouchEventInfo info("test");
     info.changedTouches_.clear();
     g_webPattern->touchEvent_->callback_(info);

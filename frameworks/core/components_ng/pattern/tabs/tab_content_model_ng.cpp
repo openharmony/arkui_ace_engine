@@ -257,7 +257,7 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     CHECK_NULL_VOID(textLayoutProperty);
     if (!swiperPattern->IsUseCustomAnimation() || !swiperPattern->GetCustomAnimationToIndex().has_value()) {
         if (myIndex == indicator) {
-            textLayoutProperty->UpdateTextColor(tabTheme->GetActiveIndicatorColor());
+            textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOnColor());
         } else {
             textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOffColor());
         }

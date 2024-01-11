@@ -16,22 +16,33 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_XCOMPONENT_XCOMPONENT_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_XCOMPONENT_XCOMPONENT_MODEL_NG_H
 
+#include "base/memory/referenced.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model.h"
 #include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
+class FrameNode;
 
 class ACE_EXPORT XComponentModelNG : public OHOS::Ace::XComponentModel {
 public:
     void Create(const std::string& id, XComponentType type, const std::string& libraryname,
         const std::shared_ptr<InnerXComponentController>& xcomponentController) override;
+    RefPtr<AceType> Create(int32_t nodeId, float width, float height,
+        const std::string& id, XComponentType type, const std::string& libraryname,
+        const std::shared_ptr<InnerXComponentController>& xcomponentController) override;
+    XComponentType GetType() override;
     void SetSoPath(const std::string& soPath) override;
     void SetOnLoad(LoadEvent&& onLoad) override;
     void SetOnDestroy(DestroyEvent&& onDestroy) override;
+    void RegisterOnCreate(const RefPtr<AceType>& node, LoadEvent&& onLoad) override;
+    void RegisterOnDestroy(const RefPtr<AceType>& node, DestroyEvent&& onDestroy) override;
     bool IsTexture() override;
     void SetDetachCallback(DetachCallback&& onDetach) override;
 
     static bool IsTexture(FrameNode* frameNode);
+
+private:
+    XComponentType GetTypeImpl(const RefPtr<FrameNode>& frameNode);
 };
 
 } // namespace OHOS::Ace::NG

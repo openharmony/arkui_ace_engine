@@ -126,7 +126,6 @@ ohos_fuzztest("ImageApiFuzzTest") {
       "hilog:libhilog",
       "init:libbegetutil",
     ]
-    deps += [ "$ace_flutter_engine_root/icu:ace_libicu_ohos" ]
   } else {
     external_deps = [
       "hilog:libhilog",

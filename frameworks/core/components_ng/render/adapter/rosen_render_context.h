@@ -26,6 +26,7 @@
 #include "include/core/SkRefCnt.h"
 #include "render_service_client/core/animation/rs_particle_params.h"
 #include "render_service_client/core/ui/rs_node.h"
+#include "render_service_client/core/ui/rs_texture_export.h"
 
 #include "base/geometry/dimension_offset.h"
 #include "base/geometry/ng/offset_t.h"
@@ -182,6 +183,7 @@ public:
     Rosen::SHADOW_COLOR_STRATEGY ToShadowColorStrategy(ShadowColorStrategy shadowColorStrategy);
     void OnBackShadowUpdate(const Shadow& shadow) override;
     void OnBackBlendModeUpdate(BlendMode blendMode) override;
+    void OnBackBlendApplyTypeUpdate(BlendApplyType applyType) override;
     void UpdateBorderWidthF(const BorderWidthPropertyF& value) override;
 
     void OnTransformMatrixUpdate(const Matrix4& matrix) override;
@@ -224,6 +226,8 @@ public:
     void ClearChildren() override;
     void SetBounds(float positionX, float positionY, float width, float height) override;
     void OnTransformTranslateUpdate(const TranslateOptions& value) override;
+    bool DoTextureExport(uint64_t surfaceId) override;
+    bool StopTextureExport() override;
 
     RectF GetPaintRectWithTransform() override;
 
@@ -237,6 +241,10 @@ public:
     // append translate value and return origin value.
     void UpdateTranslateInXY(const OffsetF& offset) override;
     OffsetF GetShowingTranslateProperty() override;
+
+    void CancelTranslateXYAnimation() override;
+
+    OffsetF GetTranslateXYProperty() override;
 
     Matrix4 GetLocalTransformMatrix() override;
 
@@ -263,6 +271,7 @@ public:
     void OnPositionUpdate(const OffsetT<Dimension>& value) override;
     void OnZIndexUpdate(int32_t value) override;
     void DumpInfo() override;
+    void DumpAdvanceInfo() override;
     void SetClipBoundsWithCommands(const std::string& commands) override;
     void SetNeedDebugBoundary(bool flag) override
     {
@@ -285,7 +294,8 @@ public:
     void MarkDrivenRender(bool flag) override;
     void MarkDrivenRenderItemIndex(int32_t index) override;
     void MarkDrivenRenderFramePaintState(bool flag) override;
-    RefPtr<PixelMap> GetThumbnailPixelMap() override;
+    RefPtr<PixelMap> GetThumbnailPixelMap(bool needScale = false) override;
+    void UpdateThumbnailPixelMapScale(float& scaleX, float& scaleY) override;
     std::vector<double> transInfo_;
     std::vector<double> GetTrans() override;
 #ifndef USE_ROSEN_DRAWING
@@ -318,6 +328,13 @@ public:
     void SetShadowAlpha(float alpha) override;
     void SetShadowElevation(float elevation) override;
     void SetShadowRadius(float radius) override;
+    void SetRenderFrameOffset(const OffsetF& offset) override;
+    void SetScale(float scaleX, float scaleY) override;
+    void SetBackgroundColor(uint32_t colorValue) override;
+    void SetRenderPivot(float pivotX, float pivotY) override;
+    void SetFrame(float positionX, float positionY, float width, float height) override;
+    void SetOpacity(float opacity) override;
+    void SetTranslate(float translateX, float translateY, float translateZ) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -397,9 +414,9 @@ private:
     {
         return disappearingTransitionCount_ > 0;
     }
-    bool HasTransition() const override
+    bool HasDisappearTransition() const override
     {
-        return transitionEffect_ != nullptr;
+        return transitionEffect_ != nullptr && transitionEffect_->HasDisappearTransition();
     }
     void OnTransitionInFinish();
     void OnTransitionOutFinish();
@@ -540,6 +557,8 @@ private:
     // translate modifiers for developer
     std::shared_ptr<Rosen::RSTranslateModifier> translateXY_;
 
+    std::optional<OffsetF> frameOffset_;
+
     // graphics modifiers
     struct GraphicModifiers {
         std::shared_ptr<GrayScaleModifier> grayScale;
@@ -560,6 +579,8 @@ private:
     bool isTouchUpFinished_ = true;
 
     bool useContentRectForRSFrame_;
+
+    std::shared_ptr<Rosen::RSTextureExport> rsTextureExport_;
 
     template<typename Modifier, typename PropertyType>
     friend class PropertyTransitionEffectTemplate;

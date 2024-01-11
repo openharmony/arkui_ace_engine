@@ -46,7 +46,7 @@ public:
     virtual void SetOnError(std::function<void(const LoadImageFailEvent &info)> &&callback) = 0;
     virtual void SetSvgAnimatorFinishEvent(std::function<void()> &&callback) = 0;
     virtual void Create(const std::string &src, RefPtr<PixelMap> &pixmap, const std::string &bundleName,
-        const std::string &moduleName) = 0;
+        const std::string &moduleName, bool isUriPureNumber = false) = 0;
     virtual void SetImageSourceSize(const std::pair<Dimension, Dimension> &size) = 0;
     virtual void SetImageFill(const Color &color) = 0;
     virtual void SetImageInterpolation(ImageInterpolation interpolation) = 0;
@@ -54,6 +54,7 @@ public:
     virtual void SetImageRenderMode(ImageRenderMode imageRenderMode) = 0;
     virtual bool IsSrcSvgImage() = 0;
     virtual void SetAutoResize(bool autoResize) = 0;
+    virtual void SetResizableSlice(const ImageResizableSlice& slice) = 0;
     virtual void SetSyncMode(bool syncMode) = 0;
     virtual void SetColorFilterMatrix(const std::vector<float> &matrix) = 0;
     virtual void SetDraggable(bool draggable) = 0;

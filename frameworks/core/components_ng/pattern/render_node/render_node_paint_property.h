@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RENDER_NODE_RENDER_NODE_PAINT_PROPERTY_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_RENDER_NODE_RENDER_NODE_PAINT_PROPERTY_H
 
+#include <cstdint>
 #include "core/components_ng/render/paint_property.h"
 #include "core/components_ng/base/frame_node.h"
 
@@ -39,7 +40,7 @@ public:
         return host_;
     }
 
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RenderNodeState, bool, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(RenderNodeFlag, int32_t, PROPERTY_UPDATE_RENDER);
 };
 }
 

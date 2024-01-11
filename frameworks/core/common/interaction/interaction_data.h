@@ -20,6 +20,7 @@
 #include "core/gestures/drag_event.h"
 
 namespace OHOS::Ace {
+constexpr float PERCISION { 1E-6 };
 enum class DragCursorStyleCore {
     DEFAULT = 0,
     FORBIDDEN,
@@ -28,7 +29,7 @@ enum class DragCursorStyleCore {
 };
 
 struct ShadowInfoCore {
-    std::shared_ptr<OHOS::Media::PixelMap> pixelMap;
+    RefPtr<PixelMap> pixelMap;
     int32_t x = -1;
     int32_t y = -1;
 };
@@ -41,11 +42,11 @@ struct ShadowOffsetData {
 };
 
 struct DragDataCore {
-    ShadowInfoCore shadowInfo;
+    std::vector<ShadowInfoCore> shadowInfos;
     std::vector<uint8_t> buffer;
     std::string udKey;
-    std::string filterInfo;
     std::string extraInfo;
+    std::string filterInfo;
     int32_t sourceType = -1;
     int32_t dragNum = -1;
     int32_t pointerId = -1;
@@ -53,22 +54,19 @@ struct DragDataCore {
     int32_t displayY = -1;
     int32_t displayId = -1;
     bool hasCanceledAnimation = false;
-    std::map<std::string, int64_t> summary;
+    bool hasCoordinateCorrected = false;
+    std::map<std::string, int64_t> summarys;
 };
 
 struct DragNotifyMsg {
     int32_t displayX = -1;
     int32_t displayY = -1;
     int32_t targetPid = -1;
-#ifdef ENABLE_DRAG_FRAMEWORK
     DragRet result { DragRet::DRAG_FAIL };
-#endif
 };
 
 struct DragDropRet {
-#ifdef ENABLE_DRAG_FRAMEWORK
     DragRet result { DragRet::DRAG_FAIL };
-#endif
     bool hasCustomAnimation = false;
     int32_t windowId = -1;
 };
@@ -79,6 +77,38 @@ enum class DragState {
     STOP,
     CANCEL,
     MOTION_DRAGGING
+};
+
+enum class PreviewType {
+    FOREGROUND_COLOR = 0,
+    OPACITY = 1,
+    RADIUS = 2,
+    SCALE = 3
+};
+
+struct PreviewStyle {
+    std::vector<PreviewType> types;
+    uint32_t foregroundColor = 0;
+    int32_t opacity = -1;
+    int32_t radius = -1;
+    float scale = -1;
+
+    bool operator == (const PreviewStyle &other) const
+    {
+        return types == other.types && foregroundColor == other.foregroundColor && opacity == other.opacity &&
+               radius == other.radius && fabsf(scale - other.scale) < PERCISION;
+    }
+
+    bool operator!=(const PreviewStyle &other) const
+    {
+        return !(*this == other);
+    }
+};
+
+struct PreviewAnimation {
+    int32_t duration = -1;
+    std::string curveName;
+    std::vector<float> curve;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_INTERACTION_DATA_H

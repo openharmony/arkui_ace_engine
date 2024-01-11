@@ -77,6 +77,9 @@ public:
         }
     }
 
+    void OnFlushTouchEventsBegin() override;
+    void OnFlushTouchEventsEnd() override;
+
     void AddTouchEvent(const RefPtr<TouchEventImpl>& touchEvent)
     {
         if (touchEvents_.empty()) {
@@ -104,6 +107,13 @@ public:
     bool DispatchEvent(const TouchEvent& point) override;
     bool HandleEvent(const TouchEvent& point) override;
 
+    void CopyTouchEvent(const RefPtr<TouchEventActuator>& touchEventActuator)
+    {
+        touchEvents_ = touchEventActuator->touchEvents_;
+        userCallback_ = touchEventActuator->userCallback_;
+        onTouchEventCallback_ = touchEventActuator->onTouchEventCallback_;
+    }
+
 private:
     bool TriggerTouchCallBack(const TouchEvent& changedPoint);
     bool ShouldResponse() override;
@@ -111,6 +121,9 @@ private:
     std::list<RefPtr<TouchEventImpl>> touchEvents_;
     RefPtr<TouchEventImpl> userCallback_;
     RefPtr<TouchEventImpl> onTouchEventCallback_;
+    // isFlushTouchEventsEnd_ means the last one touch event info during one vsync period, used only for web_pattern
+    // if isFlushTouchEventsEnd_ is true, web_pattern start to send touch event list to chromium
+    bool isFlushTouchEventsEnd_ = false;
 };
 
 } // namespace OHOS::Ace::NG

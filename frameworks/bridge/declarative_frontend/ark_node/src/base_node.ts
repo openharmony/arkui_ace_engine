@@ -13,27 +13,45 @@
  * limitations under the License.
  */
 
+enum NodeRenderType {
+  RENDER_TYPE_DISPLAY = 0,
+  RENDER_TYPE_TEXTURE,
+}
+
+declare interface RenderOptions {
+  selfIdealSize?: Size,
+  type?: NodeRenderType,
+  surfaceId?: string
+}
+
 declare class __JSBaseNode__ {
+  constructor(options?: RenderOptions);
   create(builder: (...args: Object[]) => void, params: Object): number | null;
   createRenderNode(): number | null;
+  finishUpdateFunc(): void;
+  reset(): void;
 }
 
 class BaseNode extends __JSBaseNode__ {
   protected instanceId_?: number;
   protected nodePtr_: number | null;
-  constructor(uiContext: UIContext) {
-    super();
+  constructor(uiContext: UIContext, options?: RenderOptions) {
+    super(options);
     var instanceId: number = -1;
     if (uiContext === undefined) {
-      throw Error("BuilderNode constructor error, param uiContext error");
+      throw Error("Node constructor error, param uiContext error");
     } else {
       if (!(typeof uiContext === "object") || !("instanceId_" in uiContext)) {
         throw Error(
-          "BuilderNode constructor error, param uiContext is invalid"
+          "Node constructor error, param uiContext is invalid"
         );
       }
       instanceId = uiContext.instanceId_;
     }
     this.instanceId_ = instanceId;
+  }
+  public getInstanceId()
+  {
+    return this.instanceId_;
   }
 }

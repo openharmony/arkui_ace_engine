@@ -19,7 +19,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
 #include "frameworks/base/geometry/calc_dimension.h"
 #include "frameworks/base/geometry/dimension.h"
@@ -46,12 +46,7 @@ constexpr int NUM_7 = 7;
 constexpr int NUM_8 = 8;
 constexpr int NUM_9 = 9;
 constexpr int NUM_10 = 10;
-constexpr int NUM_11 = 11;
-constexpr int NUM_12 = 12;
 constexpr int NUM_13 = 13;
-constexpr int NUM_14 = 14;
-constexpr int NUM_15 = 15;
-constexpr int NUM_16 = 16;
 constexpr int SIZE_OF_TWO = 2;
 constexpr int SIZE_OF_THREE = 3;
 constexpr int SIZE_OF_FOUR = 4;
@@ -862,12 +857,13 @@ void PushOuterBordeColorVector(const std::optional<Color>& valueColor, std::vect
         options.push_back(0);
     }
 }
-void ParseOuterBorderColor(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm, std::vector<uint32_t> &values)
+void ParseOuterBorderColor(
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<uint32_t>& values, int32_t argsIndex)
 {
-    Local<JSValueRef> leftArg = runtimeCallInfo->GetCallArgRef(NUM_5);
-    Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(NUM_6);
-    Local<JSValueRef> topArg = runtimeCallInfo->GetCallArgRef(NUM_7);
-    Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(NUM_8);
+    Local<JSValueRef> leftArg = runtimeCallInfo->GetCallArgRef(argsIndex);
+    Local<JSValueRef> rightArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
+    Local<JSValueRef> topArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
+    Local<JSValueRef> bottomArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
     
     std::optional<Color> leftColor;
     std::optional<Color> rightColor;
@@ -897,12 +893,13 @@ void ParseOuterBorderColor(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm, st
     PushOuterBordeColorVector(bottomColor, values);
 }
 
-void ParseOuterBorderRadius(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm, std::vector<double> &values)
+void ParseOuterBorderRadius(
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<double>& values, int32_t argsIndex)
 {
-    Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(NUM_9);
-    Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(NUM_10);
-    Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(NUM_11);
-    Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(NUM_12);
+    Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(argsIndex);
+    Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
+    Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
+    Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
 
     std::optional<CalcDimension> topLeftOptinal;
     std::optional<CalcDimension> topRightOptinal;
@@ -930,17 +927,18 @@ void PushOuterBordeStyleVector(const std::optional<BorderStyle>& value, std::vec
     }
 }
 
-void ParseOuterBorderStyle(ArkUIRuntimeCallInfo *runtimeCallInfo, EcmaVM *vm, std::vector<uint32_t> &values)
+void ParseOuterBorderStyle(
+    ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<uint32_t>& values, int32_t argsIndex)
 {
     std::optional<BorderStyle> styleLeft;
     std::optional<BorderStyle> styleRight;
     std::optional<BorderStyle> styleTop;
     std::optional<BorderStyle> styleBottom;
 
-    auto topArg = runtimeCallInfo->GetCallArgRef(NUM_13);
-    auto rightArg = runtimeCallInfo->GetCallArgRef(NUM_14);
-    auto bottomArg = runtimeCallInfo->GetCallArgRef(NUM_15);
-    auto leftArg = runtimeCallInfo->GetCallArgRef(NUM_16);
+    auto topArg = runtimeCallInfo->GetCallArgRef(argsIndex);
+    auto rightArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_1);
+    auto bottomArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_2);
+    auto leftArg = runtimeCallInfo->GetCallArgRef(argsIndex + NUM_3);
 
     if (!topArg->IsUndefined() && topArg->IsNumber()) {
         styleTop = ConvertBorderStyle(topArg->Int32Value(vm));
@@ -1051,13 +1049,16 @@ void GetJsAngle(const EcmaVM* vm, const Local<JSValueRef>& angleArg, std::option
 
 void ParseCenterDimension(const EcmaVM* vm, const Local<JSValueRef>& centerArg, CalcDimension& centerDimension)
 {
-    if (!ArkTSUtils::ParseJsDimensionVp(vm, centerArg, centerDimension)) {
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, centerArg, centerDimension, false)) {
         centerDimension = Dimension(0.5f, DimensionUnit::PERCENT);
     }
 }
 
-bool ParseRotate(ArkUIRuntimeCallInfo *runtimeCallInfo, double values[], int units[])
+bool ParseRotate(ArkUIRuntimeCallInfo *runtimeCallInfo, double values[], int units[], int valuesLength, int unitsLength)
 {
+    if (valuesLength != SIZE_OF_EIGHT || unitsLength != SIZE_OF_THREE) {
+        return false;
+    }
     EcmaVM *vm = runtimeCallInfo->GetVM();
     Local<JSValueRef> xDirectionArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     Local<JSValueRef> yDirectionArg = runtimeCallInfo->GetCallArgRef(NUM_2);
@@ -1082,8 +1083,6 @@ bool ParseRotate(ArkUIRuntimeCallInfo *runtimeCallInfo, double values[], int uni
     angle = angleOptional.value();
     double perspective = 0.0;
     if (!xDirectionArg->IsNumber() && !yDirectionArg->IsNumber() && !zDirectionArg->IsNumber()) {
-        xDirection = 0.0f;
-        yDirection = 0.0f;
         zDirection = 1.0f;
     }
     ParseDirection(vm, xDirectionArg, xDirection);
@@ -1131,10 +1130,10 @@ bool ParseCalcDimension(const EcmaVM* vm,
     std::string calc = result.CalcValue();
     if (isWidth) {
         GetArkUIInternalNodeAPI()->GetCommonModifier().SetWidth(
-            node, result.Value(), static_cast<int>(result.Unit()), calc.c_str());
+            node, result.Value(), static_cast<int32_t>(result.Unit()), calc.c_str());
     } else {
         GetArkUIInternalNodeAPI()->GetCommonModifier().SetHeight(
-            node, result.Value(), static_cast<int>(result.Unit()), calc.c_str());
+            node, result.Value(), static_cast<int32_t>(result.Unit()), calc.c_str());
     }
     return true;
 }
@@ -1160,14 +1159,13 @@ bool ParseJsAlignRule(const EcmaVM* vm, const Local<JSValueRef> &arg, std::strin
 }
 
 bool ParseResponseRegion(
-    const EcmaVM* vm, const Local<JSValueRef>& jsValue, double regionValues[], int32_t regionUnits[])
+    const EcmaVM* vm, const Local<JSValueRef>& jsValue, double regionValues[], int32_t regionUnits[], int32_t length)
 {
     if (jsValue->IsUndefined() || !jsValue->IsArray(vm)) {
         return false;
     }
 
     Local<panda::ArrayRef> transArray = static_cast<Local<panda::ArrayRef>>(jsValue);
-    int32_t length = transArray->Length(vm);
     for (int32_t i = 0; i < length; i = i + NUM_4) {
         Local<JSValueRef> x = transArray->GetValueAt(vm, jsValue, i + NUM_0);
         Local<JSValueRef> y = transArray->GetValueAt(vm, jsValue, i + NUM_1);
@@ -1364,10 +1362,10 @@ ArkUINativeModuleValue CommonBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCallI
 
         if (width.Unit() == DimensionUnit::CALC) {
             GetArkUIInternalNodeAPI()->GetCommonModifier().SetWidth(
-                nativeNode, 0, static_cast<int>(width.Unit()), width.CalcValue().c_str());
+                nativeNode, 0, static_cast<int32_t>(width.Unit()), width.CalcValue().c_str());
         } else {
             GetArkUIInternalNodeAPI()->GetCommonModifier().SetWidth(
-                nativeNode, width.Value(), static_cast<int>(width.Unit()), calcStr.c_str());
+                nativeNode, width.Value(), static_cast<int32_t>(width.Unit()), calcStr.c_str());
         }
     }
     return panda::JSValueRef::Undefined(vm);
@@ -1400,10 +1398,10 @@ ArkUINativeModuleValue CommonBridge::SetHeight(ArkUIRuntimeCallInfo* runtimeCall
         }
         if (height.Unit() == DimensionUnit::CALC) {
             GetArkUIInternalNodeAPI()->GetCommonModifier().SetHeight(
-                nativeNode, height.Value(), static_cast<int>(height.Unit()), height.CalcValue().c_str());
+                nativeNode, height.Value(), static_cast<int32_t>(height.Unit()), height.CalcValue().c_str());
         } else {
             GetArkUIInternalNodeAPI()->GetCommonModifier().SetHeight(
-                nativeNode, height.Value(), static_cast<int>(height.Unit()), calcStr.c_str());
+                nativeNode, height.Value(), static_cast<int32_t>(height.Unit()), calcStr.c_str());
         }
     }
     return panda::JSValueRef::Undefined(vm);
@@ -1526,6 +1524,127 @@ ArkUINativeModuleValue CommonBridge::ResetBorderColor(ArkUIRuntimeCallInfo *runt
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBorderColor(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetOutlineColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    std::vector<uint32_t> colorOptions;
+    ParseOuterBorderColor(runtimeCallInfo, vm, colorOptions, NUM_1);
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetOutlineColor(
+        nativeNode, colorOptions.data(), colorOptions.size());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetOutlineColor(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetOutlineColor(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetOutlineRadius(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    std::vector<double> radiusOptions;
+    ParseOuterBorderRadius(runtimeCallInfo, vm, radiusOptions, NUM_1);
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetOutlineRadius(
+        nativeNode, radiusOptions.data(), radiusOptions.size());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetOutlineRadius(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetOutlineRadius(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetOutlineWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    std::vector<double> widthOptions;
+    ParseOuterBorderWidth(runtimeCallInfo, vm, widthOptions);
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetOutlineWidth(
+        nativeNode, widthOptions.data(), widthOptions.size());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetOutlineWidth(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetOutlineWidth(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetOutlineStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    std::vector<uint32_t> styleOptions;
+    ParseOuterBorderStyle(runtimeCallInfo, vm, styleOptions, NUM_1);
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetOutlineStyle(
+        nativeNode, styleOptions.data(), styleOptions.size());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetOutlineStyle(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetOutlineStyle(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetOutline(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    std::vector<double> options;
+    ParseOuterBorderWidth(runtimeCallInfo, vm, options);         // Outline Width args start index from 1
+    ParseOuterBorderRadius(runtimeCallInfo, vm, options, NUM_9); // Outline Radius args start index
+
+    std::vector<uint32_t> colorAndStyleOptions;
+    ParseOuterBorderColor(runtimeCallInfo, vm, colorAndStyleOptions, NUM_5);  // Outline Color args start index
+    ParseOuterBorderStyle(runtimeCallInfo, vm, colorAndStyleOptions, NUM_13); // Outline Styel args start index
+
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetOutline(
+        nativeNode, options.data(), options.size(), colorAndStyleOptions.data(), colorAndStyleOptions.size());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetOutline(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetOutline(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -2354,12 +2473,12 @@ ArkUINativeModuleValue CommonBridge::SetBorder(ArkUIRuntimeCallInfo* runtimeCall
     auto nativeNode = firstArg->ToNativePointer(vm)->Value();
 
     std::vector<double> options;
-    ParseOuterBorderWidth(runtimeCallInfo, vm, options);
-    ParseOuterBorderRadius(runtimeCallInfo, vm, options);
+    ParseOuterBorderWidth(runtimeCallInfo, vm, options);         // Border Width args start index from 1
+    ParseOuterBorderRadius(runtimeCallInfo, vm, options, NUM_9); // Border Radius args start index
 
     std::vector<uint32_t> colorAndStyleOptions;
-    ParseOuterBorderColor(runtimeCallInfo, vm, colorAndStyleOptions);
-    ParseOuterBorderStyle(runtimeCallInfo, vm, colorAndStyleOptions);
+    ParseOuterBorderColor(runtimeCallInfo, vm, colorAndStyleOptions, NUM_5);  // Border Color args start index
+    ParseOuterBorderStyle(runtimeCallInfo, vm, colorAndStyleOptions, NUM_13); // Border Styel args start index
     
     GetArkUIInternalNodeAPI()->GetCommonModifier().SetBorder(
         nativeNode, options.data(), options.size(), colorAndStyleOptions.data(), colorAndStyleOptions.size());
@@ -2646,7 +2765,7 @@ ArkUINativeModuleValue CommonBridge::SetRotate(ArkUIRuntimeCallInfo *runtimeCall
     double values[SIZE_OF_EIGHT];
     int units[SIZE_OF_THREE];
 
-    if (ParseRotate(runtimeCallInfo, values, units)) {
+    if (ParseRotate(runtimeCallInfo, values, units, SIZE_OF_EIGHT, SIZE_OF_THREE)) {
         GetArkUIInternalNodeAPI()->GetCommonModifier().SetRotate(
             nativeNode, values, SIZE_OF_EIGHT, units, SIZE_OF_THREE);
     } else {
@@ -3992,10 +4111,10 @@ ArkUINativeModuleValue CommonBridge::SetObscured(ArkUIRuntimeCallInfo* runtimeCa
         return panda::JSValueRef::Undefined(vm);
     }
     Local<panda::ArrayRef> transArray = static_cast<Local<panda::ArrayRef>>(secondArg);
-    int32_t length = transArray->Length(vm);
+    auto length = transArray->Length(vm);
     int32_t reasonArray[length];
 
-    for (int32_t i = 0; i < length; i++) {
+    for (size_t i = 0; i < length; i++) {
         Local<JSValueRef> value = transArray->GetValueAt(vm, secondArg, i);
         reasonArray[i] = value->Int32Value(vm);
     }
@@ -4024,7 +4143,7 @@ ArkUINativeModuleValue CommonBridge::SetResponseRegion(ArkUIRuntimeCallInfo* run
     int32_t length = thirdArg->Int32Value(vm);
     double regionArray[length];
     int32_t regionUnits[length];
-    if (!ParseResponseRegion(vm, secondArg, regionArray, regionUnits)) {
+    if (!ParseResponseRegion(vm, secondArg, regionArray, regionUnits, length)) {
         GetArkUIInternalNodeAPI()->GetCommonModifier().ResetResponseRegion(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -4224,7 +4343,7 @@ ArkUINativeModuleValue CommonBridge::SetMouseResponseRegion(ArkUIRuntimeCallInfo
     int32_t length = thirdArg->Int32Value(vm);
     double regionArray[length];
     int32_t regionUnits[length];
-    if (!ParseResponseRegion(vm, secondArg, regionArray, regionUnits)) {
+    if (!ParseResponseRegion(vm, secondArg, regionArray, regionUnits, length)) {
         GetArkUIInternalNodeAPI()->GetCommonModifier().ResetMouseResponseRegion(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
@@ -4438,6 +4557,43 @@ ArkUINativeModuleValue CommonBridge::ResetKeyBoardShortCut(ArkUIRuntimeCallInfo*
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetCommonModifier().ResetKeyBoardShortCut(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetClipWithEdge(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto *frameNode = reinterpret_cast<FrameNode *>(nativeNode);
+
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (info[NUM_1]->IsUndefined()) {
+        ViewAbstract::SetClipEdge(frameNode, true);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (info[NUM_1]->IsObject()) {
+        Framework::JSShapeAbstract *clipShape =
+            Framework::JSRef<Framework::JSObject>::Cast(info[NUM_1])->Unwrap<Framework::JSShapeAbstract>();
+        if (clipShape == nullptr) {
+            return panda::JSValueRef::Undefined(vm);
+        }
+        ViewAbstract::SetClipShape(frameNode, clipShape->GetBasicShape());
+    } else if (info[NUM_1]->IsBoolean()) {
+        ViewAbstract::SetClipEdge(frameNode, info[NUM_1]->ToBoolean());
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetClipWithEdge(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void *nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto *frameNode = reinterpret_cast<FrameNode *>(nativeNode);
+    ViewAbstract::SetClipEdge(frameNode, true);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

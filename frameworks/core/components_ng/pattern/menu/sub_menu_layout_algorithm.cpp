@@ -81,29 +81,19 @@ OffsetF SubMenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<FrameNode>
 {
     auto pipelineContext = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_RETURN(pipelineContext, NG::OffsetF(0.0f, 0.0f));
-    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
-    float windowsOffsetY = static_cast<float>(windowGlobalRect.GetOffset().GetY());
     auto menuItemSize = parentMenuItem->GetGeometryNode()->GetFrameSize();
     position_ = GetSubMenuPosition(parentMenuItem);
     float x = HorizontalLayoutSubMenu(size, position_.GetX(), menuItemSize);
     x = std::clamp(x, paddingStart_, wrapperSize_.Width() - size.Width() - paddingEnd_);
     float y = 0.0f;
     if (hierarchicalParameters_ || !Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        windowsOffsetY = 0.0f;
         y = VerticalLayoutSubMenu(size, position_.GetY(), menuItemSize);
     } else {
         y = VerticalLayoutSubMenuHalfScreen(size, position_.GetY(), menuItemSize);
     }
-    y = std::clamp(
-        y, windowsOffsetY + paddingTop_, windowsOffsetY + wrapperSize_.Height() - size.Height() - paddingBottom_);
-
-    if (hierarchicalParameters_) {
-        auto displayAvailableRect = pipelineContext->GetDisplayAvailableRect();
-        float availableOffsetY = displayAvailableRect.GetOffset().GetY();
-        float wrapperHeight = displayAvailableRect.Height();
-        y = std::clamp(
-            y, availableOffsetY + paddingTop_, availableOffsetY + wrapperHeight - size.Height() - paddingBottom_);
-    }
+    float yMinAvoid = wrapperRect_.Top() + paddingTop_;
+    float yMaxAvoid = wrapperRect_.Bottom() - paddingBottom_ - size.Height();
+    y = std::clamp(y, yMinAvoid, yMaxAvoid);
     return NG::OffsetF(x, y);
 }
 
@@ -174,18 +164,17 @@ float SubMenuLayoutAlgorithm::VerticalLayoutSubMenuHalfScreen(
 // return submenu vertical offset
 float SubMenuLayoutAlgorithm::VerticalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize)
 {
-    float wrapperHeight = wrapperSize_.Height();
-    float bottomSpace = wrapperHeight - position;
+    float bottomSpace = wrapperRect_.Bottom() - position - paddingBottom_;
     // line up top of subMenu with top of the menuItem
     if (bottomSpace >= size.Height()) {
         return position;
     }
     // line up bottom of menu with bottom of the screen
-    if (size.Height() < wrapperHeight) {
-        return wrapperHeight - size.Height();
+    if (size.Height() < wrapperRect_.Height()) {
+        return wrapperRect_.Bottom() - size.Height() - paddingBottom_;
     }
     // can't fit in screen, line up with top of the screen
-    return 0.0f;
+    return wrapperRect_.Top() + paddingTop_;
 }
 
 // returns submenu horizontal offset

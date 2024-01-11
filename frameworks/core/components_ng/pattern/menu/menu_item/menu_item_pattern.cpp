@@ -203,7 +203,11 @@ void MenuItemPattern::RecordChangeEvent() const
     CHECK_NULL_VOID(itemProperty);
     auto content = itemProperty->GetContent().value_or("");
     Recorder::EventParamsBuilder builder;
-    builder.SetId(inspectorId).SetType(host->GetTag()).SetChecked(isSelected_).SetText(content);
+    builder.SetId(inspectorId)
+        .SetType(host->GetTag())
+        .SetChecked(isSelected_)
+        .SetText(content)
+        .SetDescription(host->GetAutoEventParamValue(""));
     Recorder::EventRecorder::Get().OnChange(std::move(builder));
     Recorder::NodeDataCache::Get().PutMultiple(inspectorId, content, isSelected_);
 }
@@ -760,16 +764,32 @@ bool MenuItemPattern::IsDisabled()
 
 void MenuItemPattern::UpdateDisabledStyle()
 {
-    CHECK_NULL_VOID(content_);
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    content_->GetRenderContext()->UpdateForegroundColor(theme->GetDisabledMenuFontColor());
-    auto textLayoutProperty = content_->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateTextColor(theme->GetDisabledMenuFontColor());
-    content_->MarkModifyDone();
+    if (content_) {
+        content_->GetRenderContext()->UpdateForegroundColor(theme->GetDisabledMenuFontColor());
+        auto textLayoutProperty = content_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateTextColor(theme->GetDisabledMenuFontColor());
+        content_->MarkModifyDone();
+    }
+    if (label_) {
+        label_->GetRenderContext()->UpdateForegroundColor(theme->GetDisabledMenuFontColor());
+        auto labelTextLayoutProperty = label_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(labelTextLayoutProperty);
+        labelTextLayoutProperty->UpdateTextColor(theme->GetDisabledMenuFontColor());
+        label_->MarkModifyDone();
+    }
+    if (startIcon_) {
+        startIcon_->GetRenderContext()->UpdateOpacity(theme->GetDisabledFontColorAlpha());
+        startIcon_->MarkModifyDone();
+    }
+    if (endIcon_) {
+        endIcon_->GetRenderContext()->UpdateOpacity(theme->GetDisabledFontColorAlpha());
+        endIcon_->MarkModifyDone();
+    }
 }
 
 void MenuItemPattern::SetAccessibilityAction()

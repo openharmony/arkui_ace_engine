@@ -110,7 +110,9 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        focusPattern.SetIsFocusActiveWhenFocused(true);
+        return focusPattern;
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
@@ -130,6 +132,15 @@ public:
         return timestamp_;
     }
 
+    void UpdateSpanPosition()
+    {
+        uint32_t spanTextLength = 0;
+        for (auto& span : spans_) {
+            spanTextLength += StringUtils::ToWstring(span->content).length();
+            span->position = spanTextLength;
+        }
+    }
+
     void ResetBeforePaste();
     void ResetAfterPaste();
 
@@ -141,7 +152,13 @@ public:
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
     void InsertValue(const std::string& insertValue) override;
-    std::wstring InsertValueOperation(const std::string& insertValue);
+    void InsertValueOperation(const std::string& insertValue, OperationRecord* const record = nullptr);
+    void InsertValueAfterBeforeSpan(RefPtr<SpanNode>& spanNodeBefore, RefPtr<SpanNode>& spanNode,
+        const TextInsertValueInfo& info, const std::string& insertValue);
+    void InsertDiffStyleValueInSpan(
+        RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue);
+    void InsertValueWithoutSpan(
+        RefPtr<SpanNode>& spanNode, const TextInsertValueInfo& info, const std::string& insertValue);
     void InsertValueByPaste(const std::string& insertValue);
     bool IsLineSeparatorInLast(RefPtr<SpanNode>& spanNode);
     void InsertValueToSpanNode(
@@ -162,12 +179,14 @@ public:
     {
         FocusHub::LostFocusToViewRoot();
     }
+    void ClearOperationRecords();
     void ClearRedoOperationRecords();
     void AddOperationRecord(const OperationRecord& record);
     void HandleOnEnter() override
     {
         PerformAction(TextInputAction::NEW_LINE, false);
     }
+    bool HandleOnEscape() override;
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
     void CursorMove(CaretMoveIntent direction) override;
@@ -188,11 +207,14 @@ public:
     void HandleSelect(CaretMoveIntent direction) override;
     bool SetCaretPosition(int32_t pos);
     int32_t GetCaretPosition();
+    int32_t GetTextContentLength() override;
     bool GetCaretVisible() const;
     OffsetF CalcCursorOffsetByPosition(int32_t position, float& selectLineHeight,
         bool downStreamFirst = false, bool needLineHighest = true);
-    void CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
-    int32_t TextSpanSplit(int32_t position);
+    void CopyTextSpanStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target, bool needLeadingMargin = false);
+    void CopyTextSpanFontStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target);
+    void CopyTextSpanLineStyle(RefPtr<SpanNode>& source, RefPtr<SpanNode>& target, bool needLeadingMargin = false);
+    int32_t TextSpanSplit(int32_t position, bool needLeadingMargin = false);
     SpanPositionInfo GetSpanPositionInfo(int32_t position);
     std::function<ImageSourceInfo()> CreateImageSourceInfo(const ImageSpanOptions& options);
     void DeleteSpans(const RangeOptions& options);
@@ -211,7 +233,8 @@ public:
     void SetTypingStyle(struct UpdateSpanStyle typingStyle, TextStyle textStyle);
     int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpan(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1);
-    int32_t AddTextSpanOperation(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1);
+    int32_t AddTextSpanOperation(
+        const TextSpanOptions& options, bool isPaste = false, int32_t index = -1, bool needLeadingMargin = false);
     int32_t AddSymbolSpan(const SymbolSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddSymbolSpanOperation(const SymbolSpanOptions& options, bool isPaste = false, int32_t index = -1);
     void AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset);
@@ -277,11 +300,9 @@ public:
     void CloseSelectOverlay() override;
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
-#ifdef ENABLE_DRAG_FRAMEWORK
     std::function<void(Offset)> GetThumbnailCallback() override;
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
-#endif
     void ResetSelection();
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
@@ -307,9 +328,8 @@ public:
         }
         customKeyboardBuilder_ = keyboardBuilder;
     }
-    void BindSelectionMenu(TextResponseType type, TextSpanType richEditorType,
-        std::function<void()>& menuBuilder, std::function<void(int32_t, int32_t)>& onAppear,
-        std::function<void()>& onDisappear);
+    void BindSelectionMenu(TextResponseType type, TextSpanType richEditorType, std::function<void()>& menuBuilder,
+        std::function<void(int32_t, int32_t)>& onAppear, std::function<void()>& onDisappear);
     void ClearSelectionMenu()
     {
         selectionMenuMap_.clear();
@@ -366,6 +386,12 @@ public:
     {
         return selectedType_.value_or(TextSpanType::NONE);
     }
+    void GetCaretMetrics(CaretMetricsF& caretCaretMetric) override;
+
+    void SetShowSelect(bool isShowSelect)
+    {
+        showSelect_ = isShowSelect;
+    }
 
 protected:
     bool CanStartAITask() override;
@@ -393,6 +419,7 @@ private:
     void StartTwinkling();
     void StopTwinkling();
     void UpdateTextStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
+    void UpdateSymbolStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void UpdateImageStyle(RefPtr<FrameNode>& imageNode, const ImageSpanAttribute& imageStyle);
     void InitTouchEvent();
     bool SelectOverlayIsOn();
@@ -401,6 +428,10 @@ private:
     std::string GetPositionSpansText(int32_t position, int32_t& startSpan);
     void FireOnSelect(int32_t selectStart, int32_t selectEnd);
     void MouseRightFocus(const MouseInfo& info);
+    bool IsScrollBarPressed(const MouseInfo& info);
+    void HandleMouseLeftButtonMove(const MouseInfo& info);
+    void HandleMouseLeftButtonPress(const MouseInfo& info);
+    void HandleMouseLeftButtonRelease(const MouseInfo& info);
     void HandleMouseLeftButton(const MouseInfo& info);
     void HandleMouseRightButton(const MouseInfo& info);
     void HandleMouseEvent(const MouseInfo& info);
@@ -409,11 +440,11 @@ private:
     void UseHostToUpdateTextFieldManager();
     void UpdateTextFieldManager(const Offset& offset, float height);
     void ScrollToSafeArea() const override;
-#ifdef ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     void onDragDropAndLeave();
     void ClearDragDropEvent();
     void OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event);
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
     {
@@ -436,7 +467,6 @@ private:
     void HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
     void HandleCursorOnDragLeaved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
     void HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& notifyDragEvent);
-#endif // ENABLE_DRAG_FRAMEWORK
 
     int32_t GetParagraphLength(const std::list<RefPtr<UINode>>& spans) const;
     // REQUIRES: 0 <= start < end
@@ -455,7 +485,9 @@ private:
     bool CloseKeyboard(bool forceClose) override;
     void CalcInsertValueObj(TextInsertValueInfo& info);
     void CalcDeleteValueObj(int32_t currentPosition, int32_t length, RichEditorDeleteValue& info);
+    int32_t DeleteValueSetBuilderSpan(const RefPtr<SpanItem>& spanItem, RichEditorAbstractSpanResult& spanResult);
     int32_t DeleteValueSetImageSpan(const RefPtr<SpanItem>& spanItem, RichEditorAbstractSpanResult& spanResult);
+    int32_t DeleteValueSetSymbolSpan(const RefPtr<SpanItem>& spanItem, RichEditorAbstractSpanResult& spanResult);
     int32_t DeleteValueSetTextSpan(const RefPtr<SpanItem>& spanItem, int32_t currentPosition, int32_t length,
         RichEditorAbstractSpanResult& spanResult);
     void DeleteByDeleteValueInfo(const RichEditorDeleteValue& info);
@@ -483,6 +515,7 @@ private:
     float CalcDragSpeed(float hotAreaStart, float hotAreaEnd, float point);
     float MoveTextRect(float offset);
     void MoveCaretToContentRect();
+    void MoveCaretToContentRect(const OffsetF& caretOffset, float caretHeight);
     bool IsTextArea() const override
     {
         return true;
@@ -497,7 +530,6 @@ private:
     {
         return NearEqual(richTextRect_.Bottom(), contentRect_.Bottom());
     }
-    void FlushTextForDisplay();
     // ai analysis fun
     bool NeedAiAnalysis(
         const CaretUpdateType targeType, const int32_t pos, const int32_t& spanStart, const std::string& content);
@@ -553,11 +585,10 @@ private:
     RectF frameRect_;
     std::optional<struct UpdateSpanStyle> typingStyle_;
     std::optional<TextStyle> typingTextStyle_;
-#ifdef ENABLE_DRAG_FRAMEWORK
     std::list<ResultObject> dragResultObjects_;
-#endif // ENABLE_DRAG_FRAMEWORK
 
     std::function<void()> customKeyboardBuilder_;
+    RefPtr<OverlayManager> keyboardOverlay_;
     Offset selectionMenuOffset_;
     // add for scroll
     RectF richTextRect_;

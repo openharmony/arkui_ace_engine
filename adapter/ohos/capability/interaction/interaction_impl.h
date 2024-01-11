@@ -32,6 +32,11 @@ public:
 
     int32_t UpdateDragStyle(DragCursorStyleCore style) override;
 
+    int32_t UpdatePreviewStyle(const PreviewStyle& previewStyle) override;
+
+    int32_t UpdatePreviewStyleWithAnimation(const PreviewStyle& previewStyle,
+                                const PreviewAnimation& animation) override;
+
     int32_t StopDrag(DragDropRet result) override;
 
     int32_t GetUdKey(std::string& udKey) override;

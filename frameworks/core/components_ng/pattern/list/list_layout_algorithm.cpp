@@ -629,6 +629,9 @@ void ListLayoutAlgorithm::CheckJumpToIndex()
         int32_t items = -currentDelta_ / averageHeight;
         targetIndex -= items;
         currentDelta_ += items * averageHeight;
+        if (targetIndex <= 0) {
+            currentDelta_ = 0;
+        }
     }
     jumpIndex_ = std::clamp(targetIndex, 0, totalItemCount_ - 1);
 }
@@ -899,7 +902,7 @@ void ListLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, int32_t st
         endMainPos_ = currentEndPos + contentEndOffset_;
         startMainPos_ = endMainPos_ - contentMainSize_;
         auto firstItemTop = itemPosition_.begin()->second.startPos;
-        if (GreatNotEqual(firstItemTop, startMainPos_) && itemPosition_.begin()->second.isGroup) {
+        if (itemPosition_.begin()->second.isGroup) {
             AdjustPostionForListItemGroup(layoutWrapper, axis_, GetStartIndex(), true);
             firstItemTop = itemPosition_.begin()->second.startPos;
         }
@@ -1355,8 +1358,7 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
 
 ListItemInfo ListLayoutAlgorithm::GetListItemGroupPosition(const RefPtr<LayoutWrapper>& layoutWrapper, int32_t index)
 {
-    auto wrapper = layoutWrapper->GetOrCreateChildByIndex(index);
-    int32_t id = wrapper->GetHostNode()->GetId();
+    int32_t id = layoutWrapper->GetHostNode()->GetId();
     ListItemInfo pos = { id, 0, 0, true };
     auto layoutAlgorithmWrapper = layoutWrapper->GetLayoutAlgorithm(true);
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, pos);
@@ -1569,7 +1571,7 @@ void ListLayoutAlgorithm::PostIdleTask(RefPtr<FrameNode> frameNode, const ListPr
             if (wrapper && wrapper->GetHostNode() && !wrapper->GetHostNode()->RenderCustomChild(deadline)) {
                 break;
             }
-            needMarkDirty |= PredictBuildItem(wrapper, param.layoutConstraint);
+            needMarkDirty = PredictBuildItem(wrapper, param.layoutConstraint) || needMarkDirty;
             param.items.erase(it++);
         }
         if (needMarkDirty) {

@@ -23,14 +23,8 @@
 #include "core/components/swiper/swiper_component.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
-#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_layout_property.h"
-#include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_utils.h"
-#include "core/components_ng/property/calc_length.h"
-#include "core/components_ng/property/measure_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -48,6 +42,12 @@ RefPtr<SwiperController> SwiperModelNG::Create()
     auto pattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     return pattern->GetSwiperController();
+}
+
+RefPtr<FrameNode> SwiperModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto swiperNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, nodeId, AceType::MakeRefPtr<SwiperPattern>());
+    return swiperNode;
 }
 
 void SwiperModelNG::SetDirection(Axis axis)
@@ -153,7 +153,7 @@ void SwiperModelNG::SetEnabled(bool enabled)
 
 void SwiperModelNG::SetDisableSwipe(bool disableSwipe)
 {
-    ACE_UPDATE_PAINT_PROPERTY(SwiperPaintProperty, DisableSwipe, disableSwipe);
+    ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, DisableSwipe, disableSwipe);
 }
 
 void SwiperModelNG::SetEdgeEffect(EdgeEffect edgeEffect)
@@ -378,7 +378,7 @@ void SwiperModelNG::SetDirection(FrameNode* frameNode, Axis axis)
 
 void SwiperModelNG::SetDisableSwipe(FrameNode* frameNode, bool disableSwipe)
 {
-    ACE_UPDATE_NODE_PAINT_PROPERTY(SwiperPaintProperty, DisableSwipe, disableSwipe, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, DisableSwipe, disableSwipe, frameNode);
 }
 
 void SwiperModelNG::SetItemSpace(FrameNode* frameNode, const Dimension& itemSpace)
@@ -505,5 +505,10 @@ void SwiperModelNG::SetDotIndicatorStyle(FrameNode* frameNode, const SwiperParam
     auto pattern = frameNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetSwiperParameters(swiperParameters);
+}
+
+void SwiperModelNG::SetEnabled(FrameNode* frameNode, bool enabled)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(SwiperPaintProperty, Enabled, enabled, frameNode);
 }
 } // namespace OHOS::Ace::NG

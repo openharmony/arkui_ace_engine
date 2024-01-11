@@ -61,12 +61,12 @@ void CalendarModelNG::Create(const CalendarData& calendarData)
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     CHECK_NULL_VOID(swiperPaintProperty);
     swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::SPRING);
-    swiperPaintProperty->UpdateDisableSwipe(true);
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);
     swiperLayoutProperty->UpdateLoop(true);
     swiperLayoutProperty->UpdateIndex(1);
     swiperLayoutProperty->UpdateShowIndicator(false);
+    swiperLayoutProperty->UpdateDisableSwipe(true);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
     auto swiperController = swiperPattern->GetSwiperController();
@@ -178,9 +178,9 @@ void CalendarModelNG::SetNeedSlide(const bool needSlide)
     CHECK_NULL_VOID(swiperNode);
     auto swiperFrameNode = AceType::DynamicCast<FrameNode>(swiperNode);
     CHECK_NULL_VOID(swiperFrameNode);
-    auto swiperPaintProperty = swiperFrameNode->GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_VOID(swiperPaintProperty);
-    swiperPaintProperty->UpdateDisableSwipe(!needSlide);
+    auto swiperLayoutProperty = swiperFrameNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(swiperLayoutProperty);
+    swiperLayoutProperty->UpdateDisableSwipe(!needSlide);
     swiperFrameNode->MarkModifyDone();
 }
 

@@ -51,8 +51,8 @@ private:
     std::vector<WeakPtr<AceType>> dialogs_;
 
     DialogProperties dialogProperties_;
-    RefPtr<JsFunction> jsBuilderFunction_;
-    RefPtr<JsFunction> jsCancelFunction_;
+    RefPtr<JsWeakFunction> jsBuilderFunction_;
+    RefPtr<JsWeakFunction> jsCancelFunction_;
     RefPtr<AceType> customDialog_;
     RefPtr<AceType> dialogComponent_;
     std::list<DialogOperation> dialogOperation_;

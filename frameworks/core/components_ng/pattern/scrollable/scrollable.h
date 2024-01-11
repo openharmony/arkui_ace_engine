@@ -70,9 +70,9 @@ class Scrollable : public TouchEventTarget {
     DECLARE_ACE_TYPE(Scrollable, TouchEventTarget);
 
 public:
-    Scrollable() = default;
-    Scrollable(ScrollPositionCallback&& callback, Axis axis) : callback_(std::move(callback)), axis_(axis) {}
-    Scrollable(const ScrollPositionCallback& callback, Axis axis) : callback_(callback), axis_(axis) {}
+    Scrollable();
+    Scrollable(ScrollPositionCallback&& callback, Axis axis);
+    Scrollable(const ScrollPositionCallback& callback, Axis axis);
     ~Scrollable() override;
 
     static void SetVelocityScale(double sVelocityScale);
@@ -118,20 +118,12 @@ public:
         if (panRecognizerNG_) {
             panRecognizerNG_->SetCoordinateOffset(offset);
         }
-
-        if (rawRecognizer_) {
-            rawRecognizer_->SetCoordinateOffset(offset);
-        }
     }
 
     void OnCollectTouchTarget(TouchTestResult& result)
     {
         if (panRecognizerNG_) {
             result.emplace_back(panRecognizerNG_);
-        }
-
-        if (rawRecognizer_) {
-            result.emplace_back(rawRecognizer_);
         }
     }
 
@@ -163,7 +155,7 @@ public:
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(const GestureEvent& info);
-    void HandleScrollEnd();
+    void HandleScrollEnd(const std::optional<float>& velocity);
     bool HandleOverScroll(double velocity);
     ScrollResult HandleScroll(double offset, int32_t source, NestedState state);
 
@@ -180,7 +172,7 @@ public:
         return canOverScroll_;
     }
 
-    void ProcessScrollMotionStop();
+    void ProcessScrollMotionStop(bool StopFriction);
 
     bool DispatchEvent(const TouchEvent& point) override
     {
@@ -190,9 +182,6 @@ public:
     {
         if (!available_) {
             return true;
-        }
-        if (rawRecognizer_) {
-            return rawRecognizer_->HandleEvent(event);
         }
         return true;
     }
@@ -329,7 +318,7 @@ public:
     {
         onScrollStartRec_ = std::move(func);
     }
-    void SetOnScrollEndRec(std::function<void()>&& func)
+    void SetOnScrollEndRec(std::function<void(const std::optional<float>&)>&& func)
     {
         onScrollEndRec_ = std::move(func);
     }
@@ -453,6 +442,14 @@ private:
     float GetFrictionVelocityByFinalPosition(float final, float position, float signum, float friction,
         float threshold = DEFAULT_MULTIPLIER);
 
+    /**
+     * @brief Checks if the scroll event is caused by a mouse wheel.
+     *
+     * @param info The GestureEvent containing the scroll event information.
+     * @return true if the scroll event is caused by a mouse wheel, false otherwise.
+     */
+    static inline bool IsMouseWheelScroll(const GestureEvent& info);
+
     ScrollPositionCallback callback_;
     ScrollEventCallback scrollEnd_;
     ScrollEventCallback scrollEndCallback_;
@@ -471,7 +468,6 @@ private:
     // used for ng structure.
     RefPtr<NG::PanRecognizer> panRecognizerNG_;
 
-    RefPtr<RawRecognizer> rawRecognizer_;
     WeakPtr<PipelineBase> context_;
     double currentPos_ = 0.0;
     double currentVelocity_ = 0.0;
@@ -486,8 +482,8 @@ private:
     bool isDragUpdateStop_ = false;
     int32_t nodeId_ = 0;
     double slipFactor_ = 0.0;
-    static double sFriction_;
-    static double sVelocityScale_;
+    static std::optional<double> sFriction_;
+    static std::optional<double> sVelocityScale_;
     bool continuousDragStatus_ = false;
     CancelableCallback<void()> task_;
     int32_t dragCount_ = 0;
@@ -496,6 +492,7 @@ private:
     double dragEndPosition_ = 0.0;
     double lastVelocity_ = 0.0;
     double friction_ = -1.0;
+    double velocityScale_ = 0.0;
 #ifdef OHOS_PLATFORM
     int64_t startIncreaseTime_ = 0;
 #endif
@@ -507,7 +504,7 @@ private:
     // ScrollablePattern::onScrollStartRecursive
     std::function<void(float)> onScrollStartRec_;
     // ScrollablePattern::onScrollEndRecursive
-    std::function<void()> onScrollEndRec_;
+    std::function<void(const std::optional<float>&)> onScrollEndRec_;
 
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     bool canOverScroll_ = true;
@@ -521,7 +518,7 @@ private:
     DragFRCSceneCallback dragFRCSceneCallback_;
     ScrollMotionFRCSceneCallback scrollMotionFRCSceneCallback_;
 
-    std::chrono::high_resolution_clock::time_point lastTime_;
+    uint64_t lastVsyncTime_ = 0;
     RefPtr<NodeAnimatablePropertyFloat> frictionOffsetProperty_;
     float finalPosition_ = 0.0f;
     float lastPosition_ = 0.0f;

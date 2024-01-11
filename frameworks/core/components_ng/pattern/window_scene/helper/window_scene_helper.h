@@ -56,6 +56,8 @@ public:
         const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent);
 
     static void InjectKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent);
+
+    static bool GetNeedKeyboardOnFocusFlag(const RefPtr<FrameNode> frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_SCENE_HELPER_H

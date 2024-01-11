@@ -52,26 +52,37 @@ void JSSymbol::JSBind(BindingTarget globalObj)
     JSClass<JSSymbol>::StaticMethod("renderingStrategy", &JSSymbol::SetSymbolRenderingStrategy, opt);
     JSClass<JSSymbol>::StaticMethod("fontColor", &JSSymbol::SetFontColor, opt);
     JSClass<JSSymbol>::StaticMethod("effectStrategy", &JSSymbol::SetSymbolEffect, opt);
+    JSClass<JSSymbol>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
+    JSClass<JSSymbol>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
+    JSClass<JSSymbol>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSSymbol>::InheritAndBind<JSViewAbstract>(globalObj);
 }
 
 void JSSymbol::Create(const JSCallbackInfo& info)
 {
     uint32_t symbolId;
+    if (info[0]->IsUndefined()) {
+        SymbolModel::GetInstance()->Create(0);
+        return;
+    }
     ParseJsSymbolId(info[0], symbolId);
-
     SymbolModel::GetInstance()->Create(symbolId);
 }
 
 void JSSymbol::SetFontSize(const JSCallbackInfo& info)
 {
-    CalcDimension fontSize;
-    if (!ParseJsDimensionFp(info[0], fontSize)) {
+    if (info.Length() < 1) {
+        return;
+    }
+    auto theme = GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
+    if (!ParseJsDimensionFpNG(info[0], fontSize, false)) {
+        fontSize = theme->GetTextStyle().GetFontSize();
+        SymbolModel::GetInstance()->SetFontSize(fontSize);
         return;
     }
     if (fontSize.IsNegative()) {
-        auto theme = GetTheme<TextTheme>();
-        CHECK_NULL_VOID(theme);
         fontSize = theme->GetTextStyle().GetFontSize();
     }
 

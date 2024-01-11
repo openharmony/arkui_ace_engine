@@ -3954,29 +3954,33 @@ JSRef<JSVal> NativeEmbeadTouchToJSValue(const NativeEmbeadTouchInfo& eventInfo)
     JSRef<JSArray> touchArr = JSRef<JSArray>::New();
     JSRef<JSArray> changeTouchArr = JSRef<JSArray>::New();
     eventObj->SetProperty("source", static_cast<int32_t>(info.GetSourceDevice()));
-    eventObj->SetProperty("timestamp", static_cast<double>(info.GetTimeStamp().time_since_epoch().count()));
+    eventObj->SetProperty("timestamp", static_cast<double>(GetSysTimestamp()));
     auto target = CreateEventTargetObject(info);
     eventObj->SetPropertyObject("target", target);
     eventObj->SetProperty("pressure", info.GetForce());
     eventObj->SetProperty("sourceTool", static_cast<int32_t>(info.GetSourceTool()));
     eventObj->SetProperty("targetDisplayId", static_cast<int32_t>(info.GetTargetDisplayId()));
     eventObj->SetProperty("deviceId", static_cast<int64_t>(info.GetDeviceId()));
-    uint32_t idx = 0;
+
+    uint32_t index = 0;
+    TouchLocationInfo changeTouch = info.GetChangedTouches().back();
+    JSRef<JSObject> changeTouchElement = CreateTouchInfo(changeTouch, info);
+    changeTouchArr->SetValueAt(index, changeTouchElement);
+    if (info.GetChangedTouches().size() > 0) {
+        eventObj->SetProperty("type", static_cast<int32_t>(changeTouch.GetTouchType()));
+    }
+
     const std::list<TouchLocationInfo>& touchList = info.GetTouches();
     for (const TouchLocationInfo& location : touchList) {
-        JSRef<JSObject> element = CreateTouchInfo(location, info);
-        touchArr->SetValueAt(idx++, element);
+        if (location.GetFingerId() == changeTouch.GetFingerId()) {
+            JSRef<JSObject> touchElement = CreateTouchInfo(changeTouch, info);
+            touchArr->SetValueAt(index++, touchElement);
+        } else {
+            JSRef<JSObject> touchElement = CreateTouchInfo(location, info);
+            touchArr->SetValueAt(index++, touchElement);
+        }
     }
     eventObj->SetPropertyObject("touches", touchArr);
-    idx = 0;
-    const std::list<TouchLocationInfo>& changeTouch = info.GetChangedTouches();
-    for (const TouchLocationInfo& change : changeTouch) {
-        JSRef<JSObject> element = CreateTouchInfo(change, info);
-        changeTouchArr->SetValueAt(idx++, element);
-    }
-    if (changeTouch.size() > 0) {
-        eventObj->SetProperty("type", static_cast<int32_t>(changeTouch.front().GetTouchType()));
-    }
     eventObj->SetPropertyObject("changedTouches", changeTouchArr);
     obj->SetPropertyObject("touchEvent", eventObj);
     return JSRef<JSVal>::Cast(obj);

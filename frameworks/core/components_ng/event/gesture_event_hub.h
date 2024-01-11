@@ -36,14 +36,12 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_proxy.h"
 #include "core/gestures/gesture_info.h"
 
-#ifdef ENABLE_DRAG_FRAMEWORK
-namespace OHOS::Msdp::DeviceStatus {
-struct DragNotifyMsg;
-}
 namespace OHOS::Ace {
+struct DragNotifyMsg;
 class UnifiedData;
 }
-#endif
+// namespace OHOS::Ace
+
 enum class MenuPreviewMode {
     NONE,
     IMAGE,
@@ -84,11 +82,7 @@ enum class HitTestMode {
     HTMTRANSPARENT_SELF,
 };
 
-enum class TouchTestStrategy {
-    DEFAULT = 0,
-    FORWARD_COMPETITION,
-    FORWARD
-};
+enum class TouchTestStrategy { DEFAULT = 0, FORWARD_COMPETITION, FORWARD };
 
 struct TouchTestInfo {
     PointF windowPoint;
@@ -130,10 +124,7 @@ struct DragDropInfo {
     std::string extraInfo;
 };
 
-#ifdef ENABLE_DRAG_FRAMEWORK
-using DragNotifyMsg = Msdp::DeviceStatus::DragNotifyMsg;
 using DragNotifyMsgCore = OHOS::Ace::DragNotifyMsg;
-using OnDragCallback = std::function<void(const DragNotifyMsg&)>;
 using OnDragCallbackCore = std::function<void(const DragNotifyMsgCore&)>;
 constexpr float PIXELMAP_WIDTH_RATE = -0.5f;
 constexpr float PIXELMAP_HEIGHT_RATE = -0.2f;
@@ -142,7 +133,7 @@ constexpr float PIXELMAP_DRAG_WGR_TEXT_SCALE = 2.0f;
 constexpr float PIXELMAP_DRAG_WGR_SCALE = 3.0f;
 constexpr float DEFALUT_DRAG_PPIXELMAP_SCALE = 1.05f;
 constexpr float PIXELMAP_DRAG_DEFAULT_HEIGHT = -28.0f;
-#endif
+
 class EventHub;
 
 // The gesture event hub is mainly used to handle common gesture events.
@@ -157,6 +148,7 @@ public:
             gestures_.clear();
         }
         gestures_.emplace_back(gesture);
+        backupGestures_.emplace_back(gesture);
         recreateGesture_ = true;
     }
 
@@ -480,14 +472,12 @@ public:
         touchable_ = touchable;
     }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
     void SetThumbnailCallback(std::function<void(Offset)>&& callback)
     {
         if (dragEventActuator_) {
             dragEventActuator_->SetThumbnailCallback(std::move(callback));
         }
     }
-#endif // ENABLE_DRAG_FRAMEWORK
 
     bool GetTextDraggable() const
     {
@@ -551,7 +541,6 @@ public:
         return userParallelClickEventActuator_;
     }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
     int32_t SetDragData(const RefPtr<UnifiedData>& unifiedData, std::string& udKey);
     OnDragCallbackCore GetDragCallback(const RefPtr<PipelineBase>& context, const WeakPtr<EventHub>& hub);
     void GenerateMousePixelMap(const GestureEvent& info);
@@ -559,7 +548,6 @@ public:
         const GestureEvent& info, const SizeF& size, const float scale = 1.0f, const bool needScale = false) const;
     float GetPixelMapScale(const int32_t height, const int32_t width) const;
     bool IsPixelMapNeedScale() const;
-#endif // ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     void HandleOnDragStart(const GestureEvent& info);
     void HandleOnDragUpdate(const GestureEvent& info);
@@ -584,11 +572,15 @@ public:
     bool GetMonopolizeEvents() const;
 
     void SetMonopolizeEvents(bool monopolizeEvents);
-    virtual RefPtr<NGGestureRecognizer> PackInnerRecognizer(
-        const Offset& offset, std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, int32_t touchId,
+    virtual RefPtr<NGGestureRecognizer> PackInnerRecognizer(const Offset& offset,
+        std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, int32_t touchId,
         const RefPtr<TargetComponent>& targetComponent);
     bool parallelCombineClick = false;
     RefPtr<ParallelRecognizer> innerParallelRecognizer_;
+
+    void CopyGestures(const RefPtr<GestureEventHub>& gestureEventHub);
+
+    void CopyEvent(const RefPtr<GestureEventHub>& gestureEventHub);
 
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -622,6 +614,7 @@ private:
 
     // Set by use gesture, priorityGesture and parallelGesture attribute function.
     std::list<RefPtr<NG::Gesture>> gestures_;
+    std::list<RefPtr<NG::Gesture>> backupGestures_;
     std::list<RefPtr<NGGestureRecognizer>> gestureHierarchy_;
 
     // used in bindMenu, need to delete the old callback when bindMenu runs again
@@ -639,6 +632,7 @@ private:
     RefPtr<PixelMap> dragPreviewPixelMap_;
 
     OffsetF frameNodeOffset_;
+    SizeF frameNodeSize_;
     GestureEvent gestureInfoForWeb_;
     bool isReceivedDragGestureInfo_ = false;
     OnChildTouchTestFunc onChildTouchTestFunc_;

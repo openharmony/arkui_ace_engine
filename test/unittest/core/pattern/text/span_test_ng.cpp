@@ -31,12 +31,14 @@
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/span_node.h"
+#include "core/components_ng/pattern/text/symbol_span_model_ng.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #undef private
 #undef protected
 #include "core/components_ng/pattern/image/image_model_ng.h"
 #include "frameworks/core/components_ng/pattern/image/image_layout_property.h"
+#include "frameworks/core/common/ai/data_detector_mgr.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -60,6 +62,22 @@ const std::string FONT_DEFAULT_VALUE = "{\"style\":\"FontStyle.Normal\",\"size\"
                                        "\"FontWeight.Normal\",\"family\":\"HarmonyOS Sans\"}";
 const std::string FONT_EQUALS_VALUE =
     R"({"style":"FontStyle.Italic","size":"20.10px","weight":"FontWeight.Bold","family":"cursive"})";
+const std::string TEXT_FOR_AI = "phone: 12345678900,url: www.baidu.com";
+const std::string SPAN_PHONE = "12345678900";
+const std::string SPAN_URL = "www.baidu.com";
+constexpr int32_t AI_SPAN_START = 7;
+constexpr int32_t AI_SPAN_END = 18;
+constexpr int32_t AI_SPAN_START_II = 24;
+constexpr int32_t AI_SPAN_END_II = 37;
+const uint32_t SYMBOL_ID = 1;
+std::vector<Color> SYMBOL_COLOR = { Color::FromRGB(255, 100, 100) };
+std::vector<Color> SYMBOL_COLOR_LIST = { Color::FromRGB(255, 100, 100), Color::FromRGB(255, 255, 100) };
+const uint32_t RENDER_STRATEGY_SINGLE = 0;
+const uint32_t RENDER_STRATEGY_MULTI_COLOR = 1;
+const uint32_t RENDER_STRATEGY_MULTI_OPACITY = 2;
+const uint32_t EFFECT_STRATEGY_NONE = 0;
+const uint32_t EFFECT_STRATEGY_SCALE = 1;
+const uint32_t EFFECT_STRATEGY_HIERARCHICAL = 2;
 } // namespace
 
 class SpanTestNg : public testing::Test {};
@@ -697,5 +715,259 @@ HWTEST_F(SpanTestNg, SpanDecorationToJsonValue003, TestSize.Level1)
     EXPECT_TRUE(json->Contains("content"));
     EXPECT_TRUE(json->GetValue("content")->GetString() == CREATE_VALUE);
     EXPECT_TRUE(json->Contains("decoration"));
+}
+
+/**
+ * @tc.name: SpanItemUpdateParagraph006
+ * @tc.desc: Test SpanItem UpdateParagraph when with ai span.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SpanItemUpdateParagraph006, TestSize.Level1)
+{
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    pattern->SetTextDetectEnable(true);
+    auto node = FrameNode::CreateFrameNode("Test", 1, pattern);
+    spanNode->SetParent(node);
+    spanNode->MountToParagraph();
+    ASSERT_NE(spanNode->GetParent(), nullptr);
+
+    auto json = std::make_unique<JsonValue>();
+    AISpan aiSpan1;
+    aiSpan1.start = AI_SPAN_START;
+    aiSpan1.end = AI_SPAN_END;
+    aiSpan1.content = SPAN_PHONE;
+    aiSpan1.type = TextDataDetectType::PHONE_NUMBER;
+    AISpan aiSpan2;
+    aiSpan2.start = AI_SPAN_START_II;
+    aiSpan2.end = AI_SPAN_END_II;
+    aiSpan2.content = SPAN_URL;
+    aiSpan2.type = TextDataDetectType::URL;
+    std::map<int32_t, AISpan> aiSpanMap;
+    aiSpanMap[AI_SPAN_START] = aiSpan1;
+    aiSpanMap[AI_SPAN_START_II] = aiSpan2;
+    spanNode->spanItem_->aiSpanMap = aiSpanMap;
+    spanNode->spanItem_->content = TEXT_FOR_AI;
+    spanNode->spanItem_->fontStyle = nullptr;
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanNode->spanItem_->children.push_back(spanItem);
+    TextStyle textStyle;
+    ParagraphStyle paraStyle = { .direction = TextDirection::LTR,
+        .align = textStyle.GetTextAlign(),
+        .maxLines = textStyle.GetMaxLines(),
+        .fontLocale = "zh-CN",
+        .wordBreak = textStyle.GetWordBreak(),
+        .textOverflow = textStyle.GetTextOverflow() };
+    auto paragraph = Paragraph::Create(paraStyle, FontCollection::Current());
+    spanNode->spanItem_->UpdateParagraph(nullptr, paragraph);
+    EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
+}
+
+/**
+ * @tc.name: UpdateTextStyleForAISpan001
+ * @tc.desc: Test SpanItem UpdateTextStyleForAISpan when children is not empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, UpdateTextStyleForAISpan001, TestSize.Level1)
+{
+    SpanModelNG spanModelNG;
+    spanModelNG.Create(CREATE_VALUE);
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    
+    auto pattern = AceType::MakeRefPtr<TextPattern>();
+    pattern->SetTextDetectEnable(true);
+    auto node = FrameNode::CreateFrameNode("Test", 1, pattern);
+    spanNode->SetParent(node);
+    spanNode->MountToParagraph();
+    ASSERT_NE(spanNode->GetParent(), nullptr);
+
+    Ace::AISpan aiSpan1;
+    aiSpan1.start = AI_SPAN_START;
+    aiSpan1.end = AI_SPAN_END;
+    aiSpan1.content = SPAN_PHONE;
+    aiSpan1.type = TextDataDetectType::PHONE_NUMBER;
+    Ace::AISpan aiSpan2;
+    aiSpan2.start = AI_SPAN_START_II;
+    aiSpan2.end = AI_SPAN_END_II;
+    aiSpan2.content = SPAN_URL;
+    aiSpan2.type = TextDataDetectType::URL;
+    std::map<int32_t, Ace::AISpan> aiSpanMap;
+    aiSpanMap[AI_SPAN_START] = aiSpan1;
+    aiSpanMap[AI_SPAN_START_II] = aiSpan2;
+    spanNode->spanItem_->aiSpanMap = aiSpanMap;
+    spanNode->spanItem_->fontStyle = nullptr;
+
+    std::string spanContent = TEXT_FOR_AI;
+    spanNode->spanItem_->position = StringUtils::ToWstring(spanContent).length();
+    TextStyle textStyle;
+    ParagraphStyle paraStyle = { .direction = TextDirection::LTR,
+        .align = textStyle.GetTextAlign(),
+        .maxLines = textStyle.GetMaxLines(),
+        .fontLocale = "zh-CN",
+        .wordBreak = textStyle.GetWordBreak(),
+        .textOverflow = textStyle.GetTextOverflow() };
+    auto paragraph= MockParagraph::GetOrCreateMockParagraph();
+
+    spanNode->spanItem_->UpdateTextStyleForAISpan(spanContent, paragraph, textStyle);
+    EXPECT_EQ(spanNode->spanItem_->fontStyle, nullptr);
+}
+
+/**
+ * @tc.name: SymbolSpanPropertyTest001
+ * @tc.desc: Test fontSize and fonColor property of symbolspan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SymbolSpanPropertyTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol span node
+     */
+    SymbolSpanModelNG symbolSpanModelNG;
+    symbolSpanModelNG.Create(SYMBOL_ID);
+
+    /**
+     * @tc.steps: step2. get span node
+     */
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step3. test fontSize property
+     */
+    symbolSpanModelNG.SetFontSize(FONT_SIZE_VALUE);
+    EXPECT_EQ(spanNode->GetFontSize(), FONT_SIZE_VALUE);
+
+    /**
+     * @tc.steps: step4. test fontColor property
+     */
+    symbolSpanModelNG.SetFontColor(SYMBOL_COLOR);
+    EXPECT_EQ(spanNode->GetSymbolColorList(), SYMBOL_COLOR);
+
+    symbolSpanModelNG.SetFontColor(SYMBOL_COLOR_LIST);
+    EXPECT_EQ(spanNode->GetSymbolColorList(), SYMBOL_COLOR_LIST);
+}
+
+/**
+ * @tc.name: SymbolSpanPropertyTest002
+ * @tc.desc: Test fontWeight property of symbolspan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SymbolSpanPropertyTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol span node
+     */
+    SymbolSpanModelNG symbolSpanModelNG;
+    symbolSpanModelNG.Create(SYMBOL_ID);
+
+    /**
+     * @tc.steps: step2. get span node
+     */
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step3. test fontWeight property
+     */
+    symbolSpanModelNG.SetFontWeight(FontWeight::LIGHTER);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::LIGHTER);
+    symbolSpanModelNG.SetFontWeight(FontWeight::REGULAR);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::REGULAR);
+    symbolSpanModelNG.SetFontWeight(FontWeight::NORMAL);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::NORMAL);
+    symbolSpanModelNG.SetFontWeight(FontWeight::MEDIUM);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::MEDIUM);
+    symbolSpanModelNG.SetFontWeight(FontWeight::BOLD);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::BOLD);
+    symbolSpanModelNG.SetFontWeight(FontWeight::BOLDER);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::BOLDER);
+
+    symbolSpanModelNG.SetFontWeight(FontWeight::W100);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W100);
+    symbolSpanModelNG.SetFontWeight(FontWeight::W200);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W200);
+    symbolSpanModelNG.SetFontWeight(FontWeight::W300);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W300);
+    symbolSpanModelNG.SetFontWeight(FontWeight::W400);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W400);
+    symbolSpanModelNG.SetFontWeight(FontWeight::W500);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W500);
+    symbolSpanModelNG.SetFontWeight(FontWeight::W600);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W600);
+    symbolSpanModelNG.SetFontWeight(FontWeight::W700);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W700);
+    symbolSpanModelNG.SetFontWeight(FontWeight::W800);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W800);
+    symbolSpanModelNG.SetFontWeight(FontWeight::W900);
+    EXPECT_EQ(spanNode->GetFontWeight().value(), FontWeight::W900);
+}
+
+/**
+ * @tc.name: SymbolSpanPropertyTest003
+ * @tc.desc: Test render strategy and effect strategy of symbolspan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SymbolSpanPropertyTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol span node
+     */
+    SymbolSpanModelNG symbolSpanModelNG;
+    symbolSpanModelNG.Create(SYMBOL_ID);
+
+    /**
+     * @tc.steps: step2. get span node
+     */
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step3. test symbol rendering strategy property
+     */
+    symbolSpanModelNG.SetSymbolRenderingStrategy(RENDER_STRATEGY_SINGLE);
+    EXPECT_EQ(spanNode->GetSymbolRenderingStrategy(), RENDER_STRATEGY_SINGLE);
+    symbolSpanModelNG.SetSymbolRenderingStrategy(RENDER_STRATEGY_MULTI_COLOR);
+    EXPECT_EQ(spanNode->GetSymbolRenderingStrategy(), RENDER_STRATEGY_MULTI_COLOR);
+    symbolSpanModelNG.SetSymbolRenderingStrategy(RENDER_STRATEGY_MULTI_OPACITY);
+    EXPECT_EQ(spanNode->GetSymbolRenderingStrategy(), RENDER_STRATEGY_MULTI_OPACITY);
+
+    /**
+     * @tc.steps: step4. test symbol effect strategy property
+     */
+    symbolSpanModelNG.SetSymbolEffect(EFFECT_STRATEGY_NONE);
+    EXPECT_EQ(spanNode->GetSymbolEffectStrategy(), EFFECT_STRATEGY_NONE);
+    symbolSpanModelNG.SetSymbolEffect(EFFECT_STRATEGY_SCALE);
+    EXPECT_EQ(spanNode->GetSymbolEffectStrategy(), EFFECT_STRATEGY_SCALE);
+    symbolSpanModelNG.SetSymbolEffect(EFFECT_STRATEGY_HIERARCHICAL);
+    EXPECT_EQ(spanNode->GetSymbolEffectStrategy(), EFFECT_STRATEGY_HIERARCHICAL);
+}
+
+/**
+ * @tc.name: SymbolSpanCreateTest001
+ * @tc.desc: Test render strategy and effect strategy of symbolspan.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SpanTestNg, SymbolSpanCreateTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create symbol span node
+     */
+    SymbolSpanModelNG symbolSpanModelNG;
+    symbolSpanModelNG.Create(SYMBOL_ID);
+
+    /**
+     * @tc.steps: step2. get span node
+     */
+    auto spanNode = AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(spanNode, nullptr);
+
+    /**
+     * @tc.steps: step3. test symbol id
+     */
+    auto symbolId = spanNode->spanItem_->GetSymbolUnicode();
+    EXPECT_EQ(symbolId, SYMBOL_ID);
 }
 } // namespace OHOS::Ace::NG

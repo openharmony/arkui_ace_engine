@@ -24,8 +24,6 @@
 
 namespace OHOS::Ace {
 
-class Container;
-
 class AcePage : public virtual AceType {
     DECLARE_ACE_TYPE(AcePage, AceType);
 

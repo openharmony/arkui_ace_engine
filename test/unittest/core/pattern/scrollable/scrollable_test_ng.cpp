@@ -845,7 +845,7 @@ HWTEST_F(ScrollableTestNg, HandleScrollVelocity003, TestSize.Level1)
     scrollPn->scrollEffect_ = AceType::MakeRefPtr<ScrollEdgeEffect>(EdgeEffect::FADE);
     scrollPn->edgeEffect_ = EdgeEffect::FADE;
     bool res = scrollPn->HandleScrollVelocity(5);
-    EXPECT_FALSE(res);
+    EXPECT_TRUE(res);
 }
 
 /**
@@ -951,7 +951,7 @@ HWTEST_F(ScrollableTestNg, OnScrollEnd001, TestSize.Level1)
     EXPECT_TRUE(mockPn);
 
     EXPECT_CALL(*mockPn, OnScrollEndRecursive).Times(1);
-    scrollPn->OnScrollEndRecursive();
+    scrollPn->OnScrollEndRecursive(std::nullopt);
 }
 
 HWTEST_F(ScrollableTestNg, IsInHotZone001, TestSize.Level1)

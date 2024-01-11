@@ -143,10 +143,10 @@ public:
 
     void SetSelectedColor(const Color& selectedColor)
     {
-        if (selectedColor_) {
+        if (selectedColor_ && isSelectedColorAnimEnd_) {
             selectedColor_->Set(LinearColor(selectedColor));
         }
-        if (touchBottomPointColor_) {
+        if (touchBottomPointColor_ && isSelectedColorAnimEnd_) {
             touchBottomPointColor_->Set(LinearColor(selectedColor));
         }
     }
@@ -276,6 +276,7 @@ private:
         const LinearVector<float>& vectorBlackPointCenterX);
     void PlayTouchBottomAnimation(const std::vector<std::pair<float, float>>& longPointCenterX,
         TouchBottomTypeLoop touchBottomTypeLoop, const LinearVector<float>& vectorBlackPointCenterX);
+    void PlayOpacityAnimation();
 
     RefPtr<AnimatablePropertyColor> backgroundColor_;
     RefPtr<AnimatablePropertyVectorFloat> vectorBlackPointCenterX_;
@@ -300,8 +301,10 @@ private:
     Axis axis_ = Axis::HORIZONTAL;
     RefPtr<PropertyColor> unselectedColor_;
     RefPtr<AnimatablePropertyColor> selectedColor_;
+    bool isSelectedColorAnimEnd_ = true;
     RefPtr<AnimatablePropertyColor> touchBottomPointColor_;
     bool isTouchBottomLoop_ = false;
+    bool ifNeedFinishCallback_ = false;
     std::optional<int32_t> normalToHoverIndex_ = std::nullopt;
     std::optional<int32_t> hoverToNormalIndex_ = std::nullopt;
     bool longPointIsHover_ = false;

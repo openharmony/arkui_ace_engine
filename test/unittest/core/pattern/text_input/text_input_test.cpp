@@ -702,8 +702,8 @@ HWTEST_F(TextInputCursorTest, OnTextChangedListenerCaretPosition006, TestSize.Le
      * @tc.expected: Check if the new handle positions are correct
      */
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 0);
-    EXPECT_EQ(pattern_->selectController_->GetCaretRect().GetX(), 26);
-    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 26)
+    EXPECT_EQ(pattern_->selectController_->GetCaretRect().GetX(), 0);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 0)
         << "Second index is " + std::to_string(pattern_->selectController_->GetSecondHandleInfo().index);
 
     /**
@@ -908,7 +908,7 @@ HWTEST_F(TextInputCursorTest, OnHandleMove003, TestSize.Level1)
     pattern_->HandleSelectionRightWord();
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 5);
-    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 21);
+    EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 26);
 }
 
 /**
@@ -1008,7 +1008,7 @@ HWTEST_F(TextInputCursorTest, CursonMoveLeftTest001, TestSize.Level1)
     /**
      * @tc.steps: In a situation where text is selected, the movement is successful
      */
-    pattern_->HandleSetSelection(3, 5, false);
+    pattern_->HandleSetSelection(5, 5, false);
     FlushLayoutTask(frameNode_);
     ret = pattern_->CursorMoveLeft();
 
@@ -1207,7 +1207,7 @@ HWTEST_F(TextInputCursorTest, CursorMoveRightTest001, TestSize.Level1)
     /**
      * @tc.steps: step3. Select the text within coordinates 3 to 5 and move cursor right
      */
-    pattern_->HandleSetSelection(3, 5, false);
+    pattern_->HandleSetSelection(5, 5, false);
     FlushLayoutTask(frameNode_);
     ret = pattern_->CursorMoveRight();
 
@@ -1555,6 +1555,61 @@ HWTEST_F(TextFieldControllerTest, ContentController003, TestSize.Level1)
      */
     auto afterSelectedValue = pattern_->contentController_->GetValueAfterIndex(3);
     EXPECT_EQ(afterSelectedValue.compare("defghijklmnopqrstuvwxyz"), 0) << "Text is " + afterSelectedValue;
+}
+
+/**
+ * @tc.name: ContentController004
+ * @tc.desc: Test ContentController in different input filter
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, ContentController004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Initialize text field node
+     */
+    CreateTextField();
+    GetFocus();
+
+    /**
+     * @tc.expected: Set text type is NUMBER_DECIMAL
+     */
+    layoutProperty_->UpdateTextInputType(TextInputType::NUMBER_DECIMAL);
+
+    /**
+     * @tc.expected: when the text point more then one, FilterWithDecimal return true,
+     * @tc.expected: and the value update only one point
+     */
+    std::string text = "3.1.4.";
+    pattern_->contentController_->InsertValue(0, text);
+    EXPECT_TRUE(pattern_->contentController_->FilterWithDecimal(text));
+    EXPECT_EQ(pattern_->GetTextValue(), "3.14");
+}
+
+/**
+ * @tc.name: ContentController005
+ * @tc.desc: Test ContentController in different input filter
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldControllerTest, ContentController005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Initialize text field node
+     */
+    CreateTextField();
+    GetFocus();
+
+    /**
+     * @tc.expected: Set text type is NUMBER_DECIMAL
+     */
+    layoutProperty_->UpdateTextInputType(TextInputType::NUMBER_DECIMAL);
+
+    /**
+     * @tc.expected: when the text have one point, FilterWithDecimal return false
+     */
+    std::string text = "3.14";
+    pattern_->contentController_->InsertValue(0, text);
+    EXPECT_FALSE(pattern_->contentController_->FilterWithDecimal(text));
+    EXPECT_EQ(pattern_->GetTextValue(), "3.14");
 }
 
 /**
@@ -2344,6 +2399,7 @@ HWTEST_F(TextFieldUXTest, RepeatClickCaret, TestSize.Level1)
      */
     Offset clickOffset(0.0f, 0.0f);
     int32_t lastIndex = 0;
+    RectF lastCaretRect = RectF(-1.0f, -1.0f, 2.0f, 2.0f);
 
     /**
      * @tc.steps: step3. Text input request focus
@@ -2355,7 +2411,7 @@ HWTEST_F(TextFieldUXTest, RepeatClickCaret, TestSize.Level1)
     /**
      * @tc.steps: step3. test repeat click caret
      */
-    EXPECT_TRUE(pattern_->RepeatClickCaret(clickOffset, lastIndex));
+    EXPECT_TRUE(pattern_->RepeatClickCaret(clickOffset, lastIndex, lastCaretRect));
 }
 
 /**
@@ -2593,14 +2649,21 @@ HWTEST_F(TextFieldUXTest, onDraw001, TestSize.Level1)
     pattern_->OnHandleMove(handleRect, false);
 
     /**
-     * @tc.steps: step3. Craete TextFieldOverlayModifier
+     * @tc.steps: step3. Test magnifier open or close
+     * @tc.expected: magnifier is open
+     */
+    auto ret = pattern_->GetShowMagnifier();
+    EXPECT_TRUE(ret);
+
+    /**
+     * @tc.steps: step4. Craete TextFieldOverlayModifier
      */
     EdgeEffect edgeEffect;
     auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>(edgeEffect);
     auto textFieldOverlayModifier = AceType::MakeRefPtr<TextFieldOverlayModifier>(pattern_, scrollEdgeEffect);
 
     /**
-     * @tc.steps: step4. Create DrawingContext
+     * @tc.steps: step5. Create DrawingContext
      */
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
@@ -2610,16 +2673,9 @@ HWTEST_F(TextFieldUXTest, onDraw001, TestSize.Level1)
     DrawingContext context { rsCanvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
 
     /**
-     * @tc.steps: step5. Do onDraw(context)
+     * @tc.steps: step6. Do onDraw(context)
      */
     textFieldOverlayModifier->onDraw(context);
-
-    /**
-     * @tc.steps: step6. Test magnifier open or close
-     * @tc.expected: magnifier is open
-     */
-    auto ret = pattern_->GetShowMagnifier();
-    EXPECT_TRUE(ret);
 
     /**
      * @tc.steps: step7. When handle move done

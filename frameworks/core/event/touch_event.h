@@ -90,11 +90,10 @@ struct TouchEvent final {
     SourceType sourceType = SourceType::NONE;
     SourceTool sourceTool = SourceTool::UNKNOWN;
     bool isInterpolated = false;
-    int64_t currentSysTime = 0;
 
     // all points on the touch screen.
     std::vector<TouchPoint> pointers;
-    std::shared_ptr<MMI::PointerEvent> pointerEvent;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent { nullptr };
     std::vector<uint8_t> enhanceData;
     // historical points
     std::vector<TouchEvent> history;
@@ -168,17 +167,11 @@ struct TouchEvent final {
         }
     }
 
-    void SetCurrentTime(int64_t currentTime)
-    {
-        currentSysTime = currentTime;
-    }
-
     TouchEvent CreateScalePoint(float scale) const
     {
         if (NearZero(scale)) {
             return { id, x, y, screenX, screenY, type, pullType, time, size, force, tiltX, tiltY, deviceId,
-                targetDisplayId, sourceType, sourceTool, isInterpolated, currentSysTime, pointers, pointerEvent,
-                enhanceData };
+                targetDisplayId, sourceType, sourceTool, isInterpolated, pointers, pointerEvent, enhanceData };
         }
         auto temp = pointers;
         std::for_each(temp.begin(), temp.end(), [scale](auto&& point) {
@@ -188,8 +181,7 @@ struct TouchEvent final {
             point.screenY = point.screenY / scale;
         });
         return { id, x / scale, y / scale, screenX / scale, screenY / scale, type, pullType, time, size, force, tiltX,
-            tiltY, deviceId, targetDisplayId, sourceType, sourceTool, isInterpolated, currentSysTime, temp,
-            pointerEvent, enhanceData };
+            tiltY, deviceId, targetDisplayId, sourceType, sourceTool, isInterpolated, temp, pointerEvent, enhanceData };
     }
 
     TouchEvent UpdateScalePoint(float scale, float offsetX, float offsetY, int32_t pointId) const
@@ -203,8 +195,8 @@ struct TouchEvent final {
                 point.screenY = point.screenY - offsetY;
             });
             return { pointId, x - offsetX, y - offsetY, screenX - offsetX, screenY - offsetY, type, pullType, time,
-                size, force, tiltX, tiltY, deviceId, targetDisplayId, sourceType, sourceTool, isInterpolated,
-                currentSysTime, temp, pointerEvent, enhanceData };
+                size, force, tiltX, tiltY, deviceId, targetDisplayId, sourceType, sourceTool, isInterpolated, temp,
+                pointerEvent, enhanceData };
         }
 
         std::for_each(temp.begin(), temp.end(), [scale, offsetX, offsetY](auto&& point) {
@@ -215,7 +207,7 @@ struct TouchEvent final {
         });
         return { pointId, (x - offsetX) / scale, (y - offsetY) / scale, (screenX - offsetX) / scale,
             (screenY - offsetY) / scale, type, pullType, time, size, force, tiltX, tiltY, deviceId, targetDisplayId,
-            sourceType, sourceTool, isInterpolated, currentSysTime, temp, pointerEvent, enhanceData };
+            sourceType, sourceTool, isInterpolated, temp, pointerEvent, enhanceData };
     }
 
     TouchEvent UpdatePointers() const
@@ -653,7 +645,9 @@ public:
 
     void SetTargetComponent(const RefPtr<NG::TargetComponent>& targetComponent)
     {
-        targetComponent_ = targetComponent;
+        if (!targetComponent_) {
+            targetComponent_ = targetComponent;
+        }
     }
 
     RefPtr<NG::TargetComponent> GetTargetComponent()
@@ -732,21 +726,21 @@ public:
         return pointerEvent_;
     }
 
-    int64_t GetCurrentSysTime()
+    void SetTouchEventsEnd(bool isTouchEventsEnd)
     {
-        return currentSysTime_;
-    }
-    void SetCurrentSysTime(int64_t currentSysTime)
-    {
-        currentSysTime_ = currentSysTime;
+        isTouchEventsEnd_ = isTouchEventsEnd;
     }
 
+    bool GetTouchEventsEnd() const
+    {
+        return isTouchEventsEnd_;
+    }
 private:
     std::shared_ptr<MMI::PointerEvent> pointerEvent_;
     std::list<TouchLocationInfo> touches_;
     std::list<TouchLocationInfo> changedTouches_;
     std::list<TouchLocationInfo> history_;
-    int64_t currentSysTime_ = 0;
+    bool isTouchEventsEnd_ {false};
 };
 
 class NativeEmbeadTouchInfo : public BaseEventInfo {

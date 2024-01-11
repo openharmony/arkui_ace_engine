@@ -40,6 +40,10 @@ public:
     void OnBlocked() override;
 
     bool HandleEvent(const TouchEvent& point) override;
+    GestureMode GetGestureMode() const override
+    {
+        return GestureMode::Sequence;
+    }
 
 private:
     void HandleTouchDownEvent(const TouchEvent& event) override {};

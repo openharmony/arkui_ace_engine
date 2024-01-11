@@ -49,10 +49,15 @@ sk_sp<SkTypeface> RosenSvgPainter::fontTypeChinese_;
 sk_sp<SkTypeface> RosenSvgPainter::fontTypeNormal_;
 #endif
 #else
+#if !defined(PREVIEW)
 const char FONT_TYPE_HWCHINESE[] = "/system/fonts/HwChinese-Medium.ttf";
 const char FONT_TYPE_DROIDSANS[] = "/system/fonts/DroidSans.ttf";
 std::shared_ptr<RSTypeface> RosenSvgPainter::fontTypeChinese_ = RSTypeface::MakeFromFile(FONT_TYPE_HWCHINESE);
 std::shared_ptr<RSTypeface> RosenSvgPainter::fontTypeNormal_ = RSTypeface::MakeFromFile(FONT_TYPE_DROIDSANS);
+#else
+std::shared_ptr<RSTypeface> RosenSvgPainter::fontTypeChinese_;
+std::shared_ptr<RSTypeface> RosenSvgPainter::fontTypeNormal_;
+#endif
 #endif
 
 #ifndef USE_ROSEN_DRAWING
@@ -586,7 +591,11 @@ Offset RosenSvgPainter::UpdateText(RSCanvas* canvas, const SvgTextInfo& svgTextI
             font.SetTypeface(fontTypeNormal_);
         }
         auto blob = RSTextBlob::MakeFromText(&temp, sizeof(temp), font, RSTextEncoding::UTF16);
+#ifdef WINDOWS_PLATFORM
+        auto width = font.MeasureText(&temp, 4, RSTextEncoding::UTF16);
+#else
         auto width = font.MeasureText(&temp, sizeof(temp), RSTextEncoding::UTF16);
+#endif
 
         canvas->Save();
         canvas->Rotate(textDrawInfo.rotate, x, y);
@@ -707,7 +716,11 @@ double RosenSvgPainter::UpdateTextPath(
         } else {
             font.SetTypeface(fontTypeNormal_);
         }
+#ifdef WINDOWS_PLATFORM
+        auto width = font.MeasureText(&temp, 4, RSTextEncoding::UTF16);
+#else
         auto width = font.MeasureText(&temp, sizeof(wchar_t), RSTextEncoding::UTF16);
+#endif
         if (length < offset + width + space) {
             break;
         }

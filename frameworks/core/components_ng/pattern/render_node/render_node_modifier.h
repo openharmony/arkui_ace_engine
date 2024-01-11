@@ -46,6 +46,11 @@ public:
         }
     }
 
+    void SetRenderNodeFlag(int32_t renderNodeFlag)
+    {
+        renderNodeFlag_->Set(renderNodeFlag);
+    }
+
     void Modify()
     {
         renderNodeFlag_->Set(renderNodeFlag_->Get() + 1);

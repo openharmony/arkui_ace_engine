@@ -12,20 +12,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+var NodeRenderType;
+(function (NodeRenderType) {
+    NodeRenderType[NodeRenderType["RENDER_TYPE_DISPLAY"] = 0] = "RENDER_TYPE_DISPLAY";
+    NodeRenderType[NodeRenderType["RENDER_TYPE_TEXTURE"] = 1] = "RENDER_TYPE_TEXTURE";
+})(NodeRenderType || (NodeRenderType = {}));
 class BaseNode extends __JSBaseNode__ {
-    constructor(uiContext) {
-        super();
+    constructor(uiContext, options) {
+        super(options);
         var instanceId = -1;
         if (uiContext === undefined) {
-            throw Error("BuilderNode constructor error, param uiContext error");
+            throw Error("Node constructor error, param uiContext error");
         }
         else {
             if (!(typeof uiContext === "object") || !("instanceId_" in uiContext)) {
-                throw Error("BuilderNode constructor error, param uiContext is invalid");
+                throw Error("Node constructor error, param uiContext is invalid");
             }
             instanceId = uiContext.instanceId_;
         }
         this.instanceId_ = instanceId;
+    }
+    getInstanceId() {
+        return this.instanceId_;
     }
 }
 /*
@@ -43,9 +51,33 @@ class BaseNode extends __JSBaseNode__ {
  * limitations under the License.
  */
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
-class BuilderNode extends BaseNode {
-    constructor(uiContext) {
-        super(uiContext);
+/// <reference path="../../state_mgmt/src/lib/partial_update/pu_viewstack_processor.d.ts" />
+class BuilderNode {
+    constructor(uiContext, options) {
+        let jsBuilderNode = new JSBuilderNode(uiContext, options);
+        this._JSBuilderNode = jsBuilderNode;
+        let id = Symbol("BuilderNode");
+        BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.set(id, jsBuilderNode);
+        BuilderNodeFinalizationRegisterProxy.register(this, { name: 'BuilderNode', idOfNode: id });
+    }
+    update(params) {
+        this._JSBuilderNode.update(params);
+    }
+    build(builder, params) {
+        this._JSBuilderNode.build(builder, params);
+        this.nodePtr_ = this._JSBuilderNode.getNodePtr();
+    }
+    reset() {
+        this._JSBuilderNode.reset();
+    }
+    getFrameNode() {
+        return this._JSBuilderNode.getFrameNode();
+    }
+}
+class JSBuilderNode extends BaseNode {
+    constructor(uiContext, options) {
+        super(uiContext, options);
+        this.childrenWeakrefMap_ = new Map();
         this.uiContext_ = uiContext;
         this.updateFuncByElmtId = new Map();
     }
@@ -53,7 +85,25 @@ class BuilderNode extends BaseNode {
         return -1;
     }
     addChild(child) {
-        return false;
+        if (this.childrenWeakrefMap_.has(child.id__())) {
+            return false;
+        }
+        this.childrenWeakrefMap_.set(child.id__(), new WeakRef(child));
+        return true;
+    }
+    getChildById(id) {
+        const childWeakRef = this.childrenWeakrefMap_.get(id);
+        return childWeakRef ? childWeakRef.deref() : undefined;
+    }
+    updateStateVarsOfChildByElmtId(elmtId, params) {
+        if (elmtId < 0) {
+            return;
+        }
+        let child = this.getChildById(elmtId);
+        if (!child) {
+            return;
+        }
+        child.updateStateVars(params);
     }
     build(builder, params) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
@@ -66,6 +116,35 @@ class BuilderNode extends BaseNode {
         this.frameNode_.setNodePtr(this.nodePtr_);
         __JSScopeUtil__.restoreInstanceId();
     }
+    update(param) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        this.purgeDeletedElmtIds();
+        this.params_ = param;
+        Array.from(this.updateFuncByElmtId.keys()).sort((a, b) => {
+            return (a < b) ? -1 : (a > b) ? 1 : 0;
+        }).forEach(elmtId => this.UpdateElement(elmtId));
+        __JSScopeUtil__.restoreInstanceId();
+    }
+    UpdateElement(elmtId) {
+        // do not process an Element that has been marked to be deleted
+        const obj = this.updateFuncByElmtId.get(elmtId);
+        const updateFunc = (typeof obj === "object") ? obj.updateFunc : null;
+        if (typeof updateFunc === "function") {
+            updateFunc(elmtId, /* isFirstRender */ false);
+            this.finishUpdateFunc();
+        }
+    }
+    purgeDeletedElmtIds() {
+        UINodeRegisterProxy.obtainDeletedElmtIds();
+        UINodeRegisterProxy.unregisterElmtIdsFromViewPUs();
+    }
+    purgeDeleteElmtId(rmElmtId) {
+        const result = this.updateFuncByElmtId.delete(rmElmtId);
+        if (result) {
+            UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(rmElmtId);
+        }
+        return result;
+    }
     getFrameNode() {
         if (this.frameNode_ !== undefined &&
             this.frameNode_ !== null &&
@@ -76,17 +155,23 @@ class BuilderNode extends BaseNode {
     }
     observeComponentCreation(func) {
         var elmId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
-        func(elmId, true);
+        UINodeRegisterProxy.ElementIdToOwningViewPU_.set(elmId, new WeakRef(this));
+        try {
+            func(elmId, true);
+        }
+        catch (error) {
+            // avoid the incompatible change that move set function before updateFunc.
+            UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(elmId);
+            throw error;
+        }
     }
     observeComponentCreation2(compilerAssignedUpdateFunc, classObject) {
-        const _componentName = classObject && "name" in classObject
-            ? Reflect.get(classObject, "name")
-            : "unspecified UINode";
+        const _componentName = classObject && "name" in classObject ? Reflect.get(classObject, "name") : "unspecified UINode";
         const _popFunc = classObject && "pop" in classObject ? classObject.pop : () => { };
-        const updateFunc = (elmtId, isFirstRender, instanceId = this.instanceId_) => {
-            __JSScopeUtil__.syncInstanceId(instanceId);
+        const updateFunc = (elmtId, isFirstRender) => {
+            __JSScopeUtil__.syncInstanceId(this.instanceId_);
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-            compilerAssignedUpdateFunc(elmtId, isFirstRender);
+            compilerAssignedUpdateFunc(elmtId, isFirstRender, this.params_);
             if (!isFirstRender) {
                 _popFunc();
             }
@@ -100,12 +185,14 @@ class BuilderNode extends BaseNode {
             updateFunc: updateFunc,
             componentName: _componentName,
         });
+        UINodeRegisterProxy.ElementIdToOwningViewPU_.set(elmtId, new WeakRef(this));
         try {
             updateFunc(elmtId, /* is first render */ true);
         }
         catch (error) {
             // avoid the incompatible change that move set function before updateFunc.
             this.updateFuncByElmtId.delete(elmtId);
+            UINodeRegisterProxy.ElementIdToOwningViewPU_.delete(elmtId);
             throw error;
         }
     }
@@ -177,14 +264,55 @@ class BuilderNode extends BaseNode {
         if (branchId == oldBranchid) {
             return;
         }
-        // branchid identifies uniquely the if .. <1> .. else if .<2>. else .<3>.branch
+        // branchId identifies uniquely the if .. <1> .. else if .<2>. else .<3>.branch
         // ifElseNode stores the most recent branch, so we can compare
-        // removedChildElmtIds will be filled with the elmtIds of all childten and their children will be deleted in response to if .. else chnage
+        // removedChildElmtIds will be filled with the elmtIds of all children and their children will be deleted in response to if .. else change
         var removedChildElmtIds = new Array();
         If.branchId(branchId, removedChildElmtIds);
+        this.purgeDeletedElmtIds();
         branchfunc();
     }
+    getNodePtr() {
+        return this.nodePtr_;
+    }
+    reset() {
+        this.nodePtr_ = null;
+        super.reset();
+        if (this.frameNode_ !== undefined && this.frameNode_ !== null) {
+            this.frameNode_.setNodePtr(null);
+        }
+    }
 }
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+class BuilderNodeFinalizationRegisterProxy {
+    constructor() {
+        this.finalizationRegistry_ = new FinalizationRegistry((heldValue) => {
+            if (heldValue.name === "BuilderNode") {
+                const builderNode = BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.get(heldValue.idOfNode);
+                BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_.delete(heldValue.idOfNode);
+                builderNode.reset();
+            }
+        });
+    }
+    static register(target, heldValue) {
+        BuilderNodeFinalizationRegisterProxy.instance_.finalizationRegistry_.register(target, heldValue);
+    }
+}
+BuilderNodeFinalizationRegisterProxy.instance_ = new BuilderNodeFinalizationRegisterProxy();
+BuilderNodeFinalizationRegisterProxy.ElementIdToOwningBuilderNode_ = new Map();
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -234,14 +362,14 @@ class NodeController {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class FrameNode extends BaseNode {
+class FrameNode {
     constructor(uiContext, type) {
-        super(uiContext);
         this.renderNode_ = new RenderNode("FrameNode");
         if (type == "BuilderNode") {
             return;
         }
-        this.nodePtr_ = this.createRenderNode();
+        this.baseNode_ = new BaseNode(uiContext);
+        this.nodePtr_ = this.baseNode_.createRenderNode();
         this.renderNode_.setNodePtr(this.nodePtr_);
     }
     getRenderNode() {
@@ -274,9 +402,8 @@ class FrameNode extends BaseNode {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-class RenderNode extends __JSBaseNode__ {
+class RenderNode {
     constructor(type) {
-        super();
         this.nodePtr = null;
         this.childrenList = [];
         this.parentRenderNode = null;
@@ -300,7 +427,8 @@ class RenderNode extends __JSBaseNode__ {
         if (type === "FrameNode") {
             return;
         }
-        this.nodePtr = this.createRenderNode();
+        this.baseNode_ = new __JSBaseNode__();
+        this.nodePtr = this.baseNode_.createRenderNode();
     }
     set backgroundColor(color) {
         this.backgroundColorValue = this.checkUndefinedOrNullWithDefaultValue(color, 0);
@@ -331,7 +459,7 @@ class RenderNode extends __JSBaseNode__ {
             this.pivotValue.x = this.checkUndefinedOrNullWithDefaultValue(pivot.x, 0.5);
             this.pivotValue.y = this.checkUndefinedOrNullWithDefaultValue(pivot.y, 0.5);
         }
-        GetUINativeModule().common.setScale(this.nodePtr, this.scaleValue.x, this.scaleValue.y, 1.0, this.pivotValue.x, this.pivotValue.y);
+        GetUINativeModule().renderNode.setPivot(this.nodePtr, this.pivotValue.x, this.pivotValue.y);
     }
     set position(position) {
         if (position === undefined || position === null) {
@@ -363,7 +491,7 @@ class RenderNode extends __JSBaseNode__ {
             this.scaleValue.x = this.checkUndefinedOrNullWithDefaultValue(scale.x, 1.0);
             this.scaleValue.y = this.checkUndefinedOrNullWithDefaultValue(scale.y, 1.0);
         }
-        GetUINativeModule().common.setScale(this.nodePtr, this.scaleValue.x, this.scaleValue.y, 1.0, this.pivotValue.x, this.pivotValue.y);
+        GetUINativeModule().renderNode.setScale(this.nodePtr, this.scaleValue.x, this.scaleValue.y);
     }
     set shadowColor(color) {
         this.shadowColorValue = this.checkUndefinedOrNullWithDefaultValue(color, 0);
@@ -400,8 +528,7 @@ class RenderNode extends __JSBaseNode__ {
             this.frameValue.width = this.checkUndefinedOrNullWithDefaultValue(size.width, 0);
             this.frameValue.height = this.checkUndefinedOrNullWithDefaultValue(size.height, 0);
         }
-        GetUINativeModule().common.setWidth(this.nodePtr, this.frameValue.width);
-        GetUINativeModule().common.setHeight(this.nodePtr, this.frameValue.height);
+        GetUINativeModule().renderNode.setSize(this.nodePtr, this.frameValue.width, this.frameValue.height);
     }
     set transform(transform) {
         if (transform === undefined || transform === null) {
@@ -432,7 +559,7 @@ class RenderNode extends __JSBaseNode__ {
             this.translationValue.x = this.checkUndefinedOrNullWithDefaultValue(translation.x, 0);
             this.translationValue.y = this.checkUndefinedOrNullWithDefaultValue(translation.y, 0);
         }
-        GetUINativeModule().common.setTranslate(this.nodePtr, this.translationValue.x, this.translationValue.y, 0);
+        GetUINativeModule().renderNode.setTranslate(this.nodePtr, this.translationValue.x, this.translationValue.y, 0);
     }
     get backgroundColor() {
         return this.backgroundColorValue;
@@ -586,5 +713,47 @@ class RenderNode extends __JSBaseNode__ {
         GetUINativeModule().renderNode.invalidate(this.nodePtr);
     }
 }
+/*
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+class XComponentNode extends FrameNode {
+    constructor(uiContext, options, id, type, libraryname) {
+        super(uiContext, "XComponentNode");
+        const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
+        this.xcomponentNode_ = GetUINativeModule().xcomponentNode;
+        this.renderType_ = options.type;
+        const surfaceId = options.surfaceId;
+        const selfIdealWidth = options.selfIdealSize.width;
+        const selfIdealHeight = options.selfIdealSize.height;
+        this.nativeModule_ = this.xcomponentNode_.create(elmtId, id, type, this.renderType_, surfaceId, selfIdealWidth, selfIdealHeight, libraryname);
+        this.xcomponentNode_.registerOnCreateCallback(this.nativeModule_, this.onCreate);
+        this.xcomponentNode_.registerOnDestroyCallback(this.nativeModule_, this.onDestroy);
+        this.nodePtr_ = this.xcomponentNode_.getFrameNode(this.nativeModule_);
+        this.setNodePtr(this.nodePtr_);
+    }
+    onCreate(event) { }
+    onDestroy() { }
+    changeRenderType(type) {
+        if (this.renderType_ === type) {
+            return true;
+        }
+        if (this.xcomponentNode_.changeRenderType(this.nativeModule_, type)) {
+            this.renderType_ = type;
+            return true;
+        }
+        return false;
+    }
+}
 
-export default { NodeController, BuilderNode, BaseNode, RenderNode, FrameNode };
+export default { NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, NodeRenderType, XComponentNode };

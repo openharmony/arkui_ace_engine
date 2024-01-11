@@ -38,6 +38,7 @@ class ColorSpace;
 class Picture;
 struct BitmapFormat;
 class ImageFilter;
+class PointF;
 } // namespace Drawing
 } // namespace OHOS::Rosen
 namespace OHOS::Ace {
@@ -54,6 +55,7 @@ using RSPixmap = Rosen::Drawing::Pixmap;
 using RSImageInfo = Rosen::Drawing::ImageInfo;
 using RSDrawCmdList = Rosen::Drawing::DrawCmdList;
 using RSRoundRect = Rosen::Drawing::RoundRect;
+using RSPoint = Rosen::Drawing::PointF;
 using RSData = Rosen::Drawing::Data;
 using RSImage = Rosen::Drawing::Image;
 using RSColorSpace = Rosen::Drawing::ColorSpace;

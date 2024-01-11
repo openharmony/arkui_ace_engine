@@ -21,7 +21,7 @@
 #include "ability_process.h"
 #include "dm/display_manager.h"
 #include "form_utils_impl.h"
-#include "init_data.h"
+#include "ohos/init_data.h"
 #include "ipc_skeleton.h"
 #include "res_config.h"
 #include "resource_manager.h"
@@ -223,7 +223,7 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         AceApplicationInfo::GetInstance().SetAppVersionName(abilityContext->GetApplicationInfo()->versionName);
         AceApplicationInfo::GetInstance().SetAppVersionCode(abilityContext->GetApplicationInfo()->versionCode);
         AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
-        AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingPid());
+        AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
         ImageFileCache::GetInstance().SetImageCacheFilePath(cacheDir);
         ImageFileCache::GetInstance().SetCacheFileInfo();
         AceEngine::InitJsDumpHeadSignal();

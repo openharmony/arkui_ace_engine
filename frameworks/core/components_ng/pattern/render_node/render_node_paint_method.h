@@ -16,9 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_NODE_RENDER_NODE_PAINT_METHOD_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_NODE_RENDER_NODE_PAINT_METHOD_H
 
+#include <cstdint>
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "core/components_ng/pattern/render_node/render_node_modifier.h"
+#include "core/components_ng/pattern/render_node/render_node_paint_property.h"
 #include "core/components_ng/render/node_paint_method.h"
 
 namespace OHOS::Ace::NG {
@@ -37,11 +39,15 @@ public:
 
     void UpdateContentModifier(PaintWrapper* paintWrapper) override
     {
-        renderNodeModifier_->Modify();
+        auto paintProperty = DynamicCast<RenderNodePaintProperty>(paintWrapper->GetPaintProperty());
+        CHECK_NULL_VOID(paintProperty);
+        renderNodeFlag_ = paintProperty->GetRenderNodeFlag().value_or(renderNodeFlag_);
+        renderNodeModifier_->SetRenderNodeFlag(renderNodeFlag_);
     }
 
 private:
     RefPtr<RenderNodeModifier> renderNodeModifier_;
+    int32_t renderNodeFlag_ = 0;
 };
 } // namespace OHOS::Ace::NG
 

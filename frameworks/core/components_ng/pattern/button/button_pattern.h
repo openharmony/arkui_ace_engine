@@ -288,7 +288,7 @@ protected:
     void HandleBackgroundColor();
     void HandleEnabled();
     void InitButtonLabel();
-    void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
+    void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, int32_t typeFrom, int32_t typeTo,
         int32_t duration, const RefPtr<Curve>& curve);
     Color clickedColor_;
 
@@ -300,6 +300,8 @@ private:
     bool IsNeedToHandleHoverOpacity();
     Color backgroundColor_;
     Color focusBorderColor_;
+    Color themeBgColor_;
+    Color themeTextColor_;
     bool isSetClickedColor_ = false;
     ComponentButtonType buttonType_ = ComponentButtonType::BUTTON;
 

@@ -87,7 +87,6 @@ bool NGGestureRecognizer::ShouldResponse()
     }
     auto eventManager = GetCurrentEventManager();
     CHECK_NULL_RETURN(eventManager, true);
-
     auto frameNode = GetAttachedNode();
     auto ctrl = eventManager->GetResponseCtrl();
     CHECK_NULL_RETURN(ctrl, true);
@@ -199,6 +198,11 @@ void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode
     while (host) {
         auto localMat = getLocalMatrix();
         vTrans.emplace_back(localMat);
+        //when the InjectPointerEvent is invoked, need to enter the lowest windowscene.
+        if (host->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
+            TAG_LOGD(AceLogTag::ACE_GESTURE, "need to break when inject WindowsScene, id:%{public}d", host->GetId());
+            break;
+        }
         host = host->GetAncestorNodeOfFrame();
     }
 
@@ -221,9 +225,12 @@ void NGGestureRecognizer::AboutToAccept()
         OnAccepted();
         return;
     }
+
     auto eventManager = GetCurrentEventManager();
     CHECK_NULL_VOID(eventManager);
-
+    if (fromCardOrUIExtension_) {
+        eventManager->SetInnerFlag(true);
+    }
     auto frameNode = GetAttachedNode();
     auto ctrl = eventManager->GetResponseCtrl();
     CHECK_NULL_VOID(ctrl);

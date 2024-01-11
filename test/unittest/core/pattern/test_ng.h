@@ -149,6 +149,11 @@ public:
         return GetChildFrameNode(frameNode, index)->GetGeometryNode()->GetFrameRect();
     }
 
+    SizeF GetChildSize(const RefPtr<FrameNode>& frameNode, int32_t index)
+    {
+        return GetChildFrameNode(frameNode, index)->GetGeometryNode()->GetFrameSize();
+    }
+
     OffsetF GetChildOffset(const RefPtr<FrameNode>& frameNode, int32_t index)
     {
         return GetChildFrameNode(frameNode, index)->GetGeometryNode()->GetFrameOffset();

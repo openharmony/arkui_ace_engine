@@ -74,14 +74,6 @@ void TabBarPattern::OnAttachToFrameNode()
     renderContext->SetClipToFrame(true);
     host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(
         SafeAreaExpandOpts { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM });
-
-    BlurStyleOption styleOption;
-    styleOption.blurStyle = BlurStyle::COMPONENT_THICK;
-
-    if (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        renderContext -> UpdateBackBlurStyle(styleOption);
-    }
-
     swiperController_->SetTabBarFinishCallback([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -590,6 +582,44 @@ void TabBarPattern::OnModifyDone()
     swiperController_->SetSurfaceChangeCallback(std::move(surfaceChangeCallback));
 }
 
+void TabBarPattern::UpdatePaintIndicator(int32_t indicator, bool needMarkDirty)
+{
+    auto tabBarNode = GetHost();
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
+    if (indicator_ >= static_cast<int32_t>(tabBarStyles_.size())) {
+        return;
+    }
+
+    auto layoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (tabBarPattern->IsContainsBuilder() || layoutProperty->GetAxis() == Axis::VERTICAL ||
+        tabBarStyles_[indicator] == TabBarStyle::BOTTOMTABBATSTYLE) {
+        paintProperty->UpdateIndicator({});
+
+        if (needMarkDirty) {
+            tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
+
+        return;
+    }
+
+    RectF rect = layoutProperty->GetIndicatorRect(indicator);
+    paintProperty->UpdateIndicator(rect);
+    if (!isTouchingSwiper_ || tabBarStyles_[indicator] != TabBarStyle::SUBTABBATSTYLE) {
+        currentIndicatorOffset_ = rect.GetX() + rect.Width() / 2;
+
+        if (needMarkDirty) {
+            tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+        }
+    }
+    if (tabBarStyles_[indicator] == TabBarStyle::SUBTABBATSTYLE) {
+        UpdateSubTabBoard();
+    }
+}
+
 bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (config.skipMeasure && config.skipLayout) {
@@ -618,9 +648,15 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (indicator > totalCount - 1 || indicator < 0) {
         indicator = 0;
     }
-    if (!swiperPattern->IsUseCustomAnimation() && !isAnimating_ && !IsMaskAnimationExecuted()) {
+
+    if (swiperPattern->IsUseCustomAnimation()) {
+        UpdatePaintIndicator(indicator, false);
+    }
+
+    if ((!swiperPattern->IsUseCustomAnimation() || isFirstLayout_) && !isAnimating_ && !IsMaskAnimationExecuted()) {
         UpdateIndicator(indicator);
     }
+    isFirstLayout_ = false;
     UpdateGradientRegions(!swiperPattern->IsUseCustomAnimation());
     if (!swiperPattern->IsUseCustomAnimation() && isTouchingSwiper_ &&
         layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
@@ -658,6 +694,8 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
     }
 
     auto index = CalculateSelectedIndex(info.GetLocalLocation());
+    TAG_LOGI(AceLogTag::ACE_TABS, "Clicked tabBarIndex: %{public}d, Clicked tabBarLocation: %{public}s", index,
+        info.GetLocalLocation().ToString().c_str());
     if (index < 0 || index >= totalCount || !swiperController_ ||
         indicator_ >= static_cast<int32_t>(tabBarStyles_.size())) {
         return;
@@ -964,44 +1002,18 @@ void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& lay
     CHECK_NULL_VOID(swiperController_);
     swiperController_->FinishAnimation();
     int32_t indicator = swiperPattern->GetCurrentIndex();
-    if (indicator == index) {
+    auto tabsPattern = tabsFrameNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    if (!tabsPattern->GetIsCustomAnimation() && indicator == index) {
         return;
     }
     changeByClick_ = true;
-    auto originalPaintRect = layoutProperty->GetIndicatorRect(indicator);
-    auto targetPaintRect = layoutProperty->GetIndicatorRect(index);
-    auto paintProperty = host->GetPaintProperty<TabBarPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    paintProperty->UpdateIndicator(targetPaintRect);
-    float targetOffset = 0.0f;
-    if (host->GetGeometryNode()->GetPaddingSize().Width() < childrenMainSize_ &&
-        layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
-        auto space = GetSpace(index);
-        float frontChildrenMainSize = CalculateFrontChildrenMainSize(index);
-        float backChildrenMainSize = CalculateBackChildrenMainSize(index);
-        targetOffset = space < 0.0f                    ? -frontChildrenMainSize
-                        : frontChildrenMainSize < space ? 0.0f
-                       : backChildrenMainSize < space
-                           ? host->GetGeometryNode()->GetPaddingSize().Width() - childrenMainSize_
-                           : space - frontChildrenMainSize;
-        if (tabItemOffsets_.empty()) {
-            return;
-        }
-        PlayTranslateAnimation(originalPaintRect.GetX() + originalPaintRect.Width() / 2,
-            targetPaintRect.GetX() + targetPaintRect.Width() / 2 - tabItemOffsets_.front().GetX() + scrollMargin_ +
-                targetOffset + GetLeftPadding(),
-            targetOffset);
-    } else {
-        PlayTranslateAnimation(originalPaintRect.GetX() + originalPaintRect.Width() / 2,
-            targetPaintRect.GetX() + targetPaintRect.Width() / 2, targetOffset);
-    }
-    UpdateTextColor(index);
 
-    auto tabsPattern = tabsFrameNode->GetPattern<TabsPattern>();
-    CHECK_NULL_VOID(tabsPattern);
     if (tabsPattern->GetIsCustomAnimation()) {
         OnCustomContentTransition(indicator, index);
+        TriggerTranslateAnimation(layoutProperty, index, swiperPattern->GetCurrentIndex());
     } else {
+        TriggerTranslateAnimation(layoutProperty, index, indicator);
         swiperController_->SwipeTo(index);
     }
 
@@ -1185,30 +1197,7 @@ void TabBarPattern::UpdateIndicator(int32_t indicator)
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateIndicator(indicator);
 
-    auto tabBarNode = GetHost();
-    CHECK_NULL_VOID(tabBarNode);
-    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-    CHECK_NULL_VOID(tabBarPattern);
-    auto paintProperty = GetPaintProperty<TabBarPaintProperty>();
-    if (indicator_ >= static_cast<int32_t>(tabBarStyles_.size())) {
-        return;
-    }
-    if (tabBarPattern->IsContainsBuilder() || layoutProperty->GetAxis() == Axis::VERTICAL ||
-        tabBarStyles_[indicator] == TabBarStyle::BOTTOMTABBATSTYLE) {
-        paintProperty->UpdateIndicator({});
-        tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-        return;
-    }
-
-    RectF rect = layoutProperty->GetIndicatorRect(indicator);
-    paintProperty->UpdateIndicator(rect);
-    if (!isTouchingSwiper_ || tabBarStyles_[indicator] != TabBarStyle::SUBTABBATSTYLE) {
-        currentIndicatorOffset_ = rect.GetX() + rect.Width() / 2;
-        tabBarNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
-    }
-    if (tabBarStyles_[indicator] == TabBarStyle::SUBTABBATSTYLE) {
-        UpdateSubTabBoard();
-    }
+    UpdatePaintIndicator(indicator, true);
 }
 
 void TabBarPattern::UpdateGradientRegions(bool needMarkDirty)
@@ -1360,6 +1349,42 @@ SelectedMode TabBarPattern::GetSelectedMode() const
 bool TabBarPattern::IsContainsBuilder()
 {
     return std::any_of(tabBarType_.begin(), tabBarType_.end(), [](const auto& isBuilder) { return isBuilder.second; });
+}
+
+void TabBarPattern::TriggerTranslateAnimation(
+    const RefPtr<TabBarLayoutProperty>& layoutProperty, int32_t index, int32_t indicator)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto originalPaintRect = layoutProperty->GetIndicatorRect(indicator);
+    auto targetPaintRect = layoutProperty->GetIndicatorRect(index);
+    auto paintProperty = host->GetPaintProperty<TabBarPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    paintProperty->UpdateIndicator(targetPaintRect);
+    float targetOffset = 0.0f;
+    if (host->GetGeometryNode()->GetPaddingSize().Width() < childrenMainSize_ &&
+        layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
+        auto space = GetSpace(index);
+        float frontChildrenMainSize = CalculateFrontChildrenMainSize(index);
+        float backChildrenMainSize = CalculateBackChildrenMainSize(index);
+        targetOffset = space < 0.0f                    ? -frontChildrenMainSize
+                       : frontChildrenMainSize < space ? 0.0f
+                       : backChildrenMainSize < space
+                           ? host->GetGeometryNode()->GetPaddingSize().Width() - childrenMainSize_
+                           : space - frontChildrenMainSize;
+        if (tabItemOffsets_.empty()) {
+            return;
+        }
+        PlayTranslateAnimation(originalPaintRect.GetX() + originalPaintRect.Width() / 2,
+            targetPaintRect.GetX() + targetPaintRect.Width() / 2 - tabItemOffsets_.front().GetX() + scrollMargin_ +
+                targetOffset + GetLeftPadding(),
+            targetOffset);
+    } else {
+        PlayTranslateAnimation(originalPaintRect.GetX() + originalPaintRect.Width() / 2,
+            targetPaintRect.GetX() + targetPaintRect.Width() / 2, targetOffset);
+    }
+
+    UpdateTextColor(index);
 }
 
 void TabBarPattern::PlayTranslateAnimation(float startPos, float endPos, float targetCurrentOffset)
@@ -1936,9 +1961,9 @@ bool TabBarPattern::CheckSwiperDisable() const
     CHECK_NULL_RETURN(tabsNode, true);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_RETURN(swiperNode, true);
-    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_RETURN(swiperPaintProperty, true);
-    return swiperPaintProperty->GetDisableSwipe().value_or(false);
+    auto props = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(props, true);
+    return props->GetDisableSwipe().value_or(false);
 }
 
 void TabBarPattern::SetSwiperCurve(const RefPtr<Curve>& curve) const

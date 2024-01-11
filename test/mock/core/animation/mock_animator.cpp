@@ -280,4 +280,9 @@ int32_t Animator::GetIteration() const
 {
     return iteration_;
 }
+
+bool Animator::PrintVsyncInfoIfNeed() const
+{
+    return false;
+}
 } // namespace OHOS::Ace

@@ -18,6 +18,7 @@
 
 #include <mutex>
 
+#include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/xcomponent/inner_xcomponent_controller.h"
 
@@ -32,14 +33,26 @@ public:
 
     virtual void Create(const std::string& id, XComponentType type, const std::string& libraryname,
         const std::shared_ptr<InnerXComponentController>& xcomponentController) = 0;
+    virtual RefPtr<AceType> Create(int32_t /* nodeId */, float /* width */, float /* height */,
+        const std::string& /* id */, XComponentType /* type */, const std::string& /* libraryname */,
+        const std::shared_ptr<InnerXComponentController>& /* xcomponentController */)
+    {
+        return nullptr;
+    };
     virtual void SetSoPath(const std::string& soPath) = 0;
     virtual void SetOnLoad(LoadEvent&& onLoad) = 0;
     virtual void SetOnDestroy(DestroyEvent&& onDestroy) = 0;
+    virtual void RegisterOnCreate(const RefPtr<AceType>& node, LoadEvent&& onLoad) {};
+    virtual void RegisterOnDestroy(const RefPtr<AceType>& node, DestroyEvent&& onDestroy) {};
     virtual bool IsTexture()
     {
         return false;
     }
     virtual void SetDetachCallback(DetachCallback&& onDetach) {}
+    virtual XComponentType GetType()
+    {
+        return XComponentType::UNKNOWN;
+    }
 
 private:
     static std::unique_ptr<XComponentModel> instance_;

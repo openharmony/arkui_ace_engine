@@ -20,10 +20,9 @@ declare class UIContext {
 declare interface TouchEvent {
 }
 
-declare type UpdateFunc = (elmtId: number, isFirstRender: boolean) => void;
+declare type UpdateFunc = (elmtId: number, isFirstRender: boolean, param?: Object) => void;
 
 interface UpdateFuncRecord {
-
     updateFunc: UpdateFunc;
     componentName: string;
     node?: object;
@@ -38,12 +37,6 @@ declare class WrappedBuilder<Args extends Object[]> {
     constructor(builder: (...args: Args) => void);
 }
 
-declare class ViewStackProcessor {
-    static AllocateNewElmetIdForNextComponent(): number;
-    static StartGetAccessRecordingFor(elmId: number): void;
-    static StopGetAccessRecording(): void;
-}
-
 declare class __JSScopeUtil__ {
     static syncInstanceId(instanceId: number): void;
     static restoreInstanceId(): void;
@@ -54,4 +47,47 @@ declare interface Size {
     height: number;
 }
 
-declare abstract class ViewPU { }
+declare enum XComponentType {
+    SURFACE = 0,
+    COMPONENT,
+    TEXTURE
+}
+
+declare abstract class ViewPU {
+    id__(): number;
+    aboutToUpdate?: (updateParams: Object) => void;
+}
+
+/**
+ * WeakRef
+ * ref to an Object that does not prevent the Object from getting GC'ed
+ * current version of tsc does not know about WeakRef
+ * but Ark runtime supports it
+ *
+ */
+declare class WeakRef<T extends Object> {
+    constructor(o: T);
+    deref(): T;
+}
+
+type RemovedElementInfo = { elmtId: number, tag: string };
+
+declare class UINodeRegisterProxy {
+    public static instance_: UINodeRegisterProxy;
+    public removeElementsInfo_: Array<RemovedElementInfo>;
+    public static ElementIdToOwningViewPU_: Map<number, WeakRef<JSBuilderNode>>;
+    public unregisterElmtIdsFromViewPUs(): void;
+    private obtainDeletedElmtIds(): void;
+    public static unregisterElmtIdsFromViewPUs(): void;
+    public static obtainDeletedElmtIds(): void;
+}
+
+declare interface RegisterParams {
+    name: string;
+    idOfNode: Symbol
+}
+
+declare class FinalizationRegistry {
+    constructor(fun: (arg0: RegisterParams) => void);
+    register(target: BuilderNode, heldValue: RegisterParams): undefined;
+}

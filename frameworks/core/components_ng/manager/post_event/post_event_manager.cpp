@@ -168,16 +168,4 @@ bool PostEventManager::CheckPointValidity(const TouchEvent& touchEvent)
         return actionItem.touchEvent.id == touchEvent.id && actionItem.touchEvent.time == touchEvent.time;
     });
 }
-
-void PostEventManager::CheckNeedReissueCancelEvent(int64_t currentSysTime)
-{
-    auto lastEventMap = lastEventMap_;
-    for (const auto& item : lastEventMap) {
-        if ((currentSysTime - item.second.touchEvent.currentSysTime) > (800 * 1000 * 1000)) {
-            auto event = item.second.touchEvent;
-            event.type = TouchType::CANCEL;
-            PostUpEvent(item.second.targetNode, event);
-        }
-    }
-}
 } // namespace OHOS::Ace::NG

@@ -51,9 +51,7 @@ namespace OHOS::Ace::NG {
  */
 
 namespace {
-#ifdef ENABLE_DRAG_FRAMEWORK
 constexpr float PAN_MAX_VELOCITY = 2000.0f;
-#endif
 
 // create menuWrapper and menu node, update menu props
 std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> CreateMenu(int32_t targetId, const std::string& targetTag = "",
@@ -173,7 +171,6 @@ bool GetHasIcon(const std::vector<OptionParam>& params)
     return false;
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 OffsetF GetFloatImageOffset(const RefPtr<FrameNode>& frameNode)
 {
     auto offsetToWindow = frameNode->GetPaintRectOffset();
@@ -373,7 +370,6 @@ void SetFilter(const RefPtr<FrameNode>& targetNode)
         ShowFilterAnimation(columnNode);
     }
 }
-#endif
 } // namespace
 
 // create menu with menuItems
@@ -381,6 +377,15 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
     MenuType type, const MenuParam& menuParam)
 {
     auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag, type);
+    auto menuNodeRenderContext = menuNode->GetRenderContext();
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+        menuNodeRenderContext->IsUniRenderEnabled()) {
+        BlurStyleOption styleOption;
+        styleOption.blurStyle = static_cast<BlurStyle>(
+            menuParam.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
+        menuNodeRenderContext->UpdateBackBlurStyle(styleOption);
+        menuNodeRenderContext->UpdateBackgroundColor(menuParam.backgroundColor.value_or(Color::TRANSPARENT));
+    }
     auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     if (!menuParam.title.empty()) {
@@ -440,6 +445,15 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
 {
     auto type = menuParam.type;
     auto [wrapperNode, menuNode] = CreateMenu(targetId, targetTag, type, previewCustomNode);
+    auto menuNodeRenderContext = menuNode->GetRenderContext();
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+        menuNodeRenderContext->IsUniRenderEnabled()) {
+        BlurStyleOption styleOption;
+        styleOption.blurStyle = static_cast<BlurStyle>(
+            menuParam.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
+        menuNodeRenderContext->UpdateBackBlurStyle(styleOption);
+        menuNodeRenderContext->UpdateBackgroundColor(menuParam.backgroundColor.value_or(Color::TRANSPARENT));
+    }
     auto pattern = menuNode->GetPattern<MenuPattern>();
     if (pattern) {
         pattern->SetPreviewMode(menuParam.previewMode);
@@ -490,7 +504,6 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
         wrapperNode.Reset();
         return menuNode;
     }
-#ifdef ENABLE_DRAG_FRAMEWORK
     if (type == MenuType::CONTEXT_MENU && menuParam.previewMode != MenuPreviewMode::NONE) {
         auto targetNode = FrameNode::GetFrameNode(targetTag, targetId);
         SetFilter(targetNode);
@@ -499,7 +512,6 @@ RefPtr<FrameNode> MenuView::Create(const RefPtr<UINode>& customNode, int32_t tar
                 menuParam.previewAnimationOptions.scaleFrom, menuParam.previewAnimationOptions.scaleTo);
         }
     }
-#endif
     return wrapperNode;
 }
 

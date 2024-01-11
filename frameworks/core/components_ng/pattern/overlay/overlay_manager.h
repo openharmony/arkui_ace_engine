@@ -59,6 +59,7 @@ struct PopupInfo {
     bool isBlockEvent = true;
     SizeF targetSize;
     OffsetF targetOffset;
+    bool focusable = false;
 };
 
 // StageManager is the base class for root render node to perform page switch.
@@ -217,7 +218,6 @@ public:
         return false;
     }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
     bool GetHasPixelMap()
     {
         return hasPixelMap_;
@@ -288,7 +288,6 @@ public:
     void RemoveFilter();
     void RemoveFilterAnimation();
     void RemoveEventColumn();
-#endif // ENABLE_DRAG_FRAMEWORK
     void UpdateContextMenuDisappearPosition(const NG::OffsetF& offset);
 
     void ResetContextMenuDragHideFinished()
@@ -344,6 +343,13 @@ public:
     void CloseSheet(int32_t targetId);
 
     void DismissSheet();
+
+    void SetDismissTargetId(int32_t targetId)
+    {
+        dismissTargetId_ = targetId;
+    }
+ 
+    void RemoveSheetNode(const RefPtr<FrameNode>& sheetNode);
 
     void DestroySheet(const RefPtr<FrameNode>& sheetNode, int32_t targetId);
 
@@ -462,9 +468,9 @@ private:
     float sheetHeight_ { 0.0 };
     WeakPtr<UINode> rootNodeWeak_;
     int32_t dialogCount_ = 0;
+    int32_t dismissTargetId_ = 0;
     std::unordered_map<int32_t, int32_t> maskNodeIdMap_;
     int32_t subWindowId_;
-#ifdef ENABLE_DRAG_FRAMEWORK
     bool hasPixelMap_ { false };
     bool hasFilter_ { false };
     bool hasEvent_ { false };
@@ -472,7 +478,6 @@ private:
     WeakPtr<FrameNode> pixmapColumnNodeWeak_;
     WeakPtr<FrameNode> filterColumnNodeWeak_;
     WeakPtr<FrameNode> eventColumnNodeWeak_;
-#endif // ENABLE_DRAG_FRAMEWORK
     bool isContextMenuDragHideFinished_ = false;
     OffsetF dragMoveVector_ = OffsetF(0.0f, 0.0f);
     OffsetF lastDragMoveVector_ = OffsetF(0.0f, 0.0f);

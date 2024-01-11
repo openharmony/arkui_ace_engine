@@ -127,6 +127,7 @@ public:
                     pattern->OnReuse();
                 }
             }
+            recyclePatterns_.clear();
             recycleRenderFunc_ = nullptr;
         }
     }

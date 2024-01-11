@@ -66,6 +66,7 @@ WindowScene::~WindowScene()
     CHECK_NULL_VOID(IsMainWindow());
     CHECK_NULL_VOID(session_);
     session_->SetShowRecent(false);
+    session_->SetNeedSnapshot(false);
     UnregisterLifecycleListener();
 }
 
@@ -200,9 +201,9 @@ void WindowScene::OnBoundsChanged(const Rosen::Vector4f& bounds)
 
 void WindowScene::BufferAvailableCallback()
 {
-    auto uiTask = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
+    auto uiTask = [weakThis = WeakClaim(this)]() {
         auto self = weakThis.Upgrade();
-        CHECK_NULL_VOID(self);
+        CHECK_NULL_VOID(self && self->session_);
 
         const auto& config =
             Rosen::SceneSessionManager::GetInstance().GetWindowSceneConfig().startingWindowAnimationConfig_;
@@ -213,14 +214,17 @@ void WindowScene::BufferAvailableCallback()
             auto rsNode = context->GetRSNode();
             CHECK_NULL_VOID(rsNode);
             rsNode->MarkNodeGroup(true);
+            rsNode->SetAlpha(config.opacityStart_);
             auto effect = Rosen::RSTransitionEffect::Create()->Opacity(config.opacityEnd_);
-            rsNode->SetTransitionEffect(effect);
             Rosen::RSAnimationTimingProtocol protocol;
             protocol.SetDuration(config.duration_);
             auto curve = curveMap.count(config.curve_) ? curveMap.at(config.curve_) :
                 Rosen::RSAnimationTimingCurve::DEFAULT;
             Rosen::RSNode::Animate(protocol, curve, [rsNode, effect] {
+                AceAsyncTraceBegin(0, "StartingWindowExitAnimation");
                 rsNode->NotifyTransition(effect, false);
+            }, []() {
+                AceAsyncTraceEnd(0, "StartingWindowExitAnimation");
             });
         }
 
@@ -229,10 +233,8 @@ void WindowScene::BufferAvailableCallback()
         host->RemoveChild(self->startingNode_);
         self->startingNode_.Reset();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        auto session = weakSession.promote();
-        CHECK_NULL_VOID(session);
-        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "BufferAvailableCallback remove starting window node finished "
-            "id:%{public}d name:%{public}s", session->GetPersistentId(), session->GetSessionInfo().bundleName_.c_str());
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "Remove starting window finished, id:%{public}d, name:%{public}s",
+            self->session_->GetPersistentId(), self->session_->GetSessionInfo().bundleName_.c_str());
     };
 
     ContainerScope scope(instanceId_);
@@ -247,7 +249,20 @@ void WindowScene::OnActivation()
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self && self->session_);
 
-        if (self->session_->GetShowRecent() &&
+        if (self->destroyed_) {
+            self->destroyed_ = false;
+            auto host = self->GetHost();
+            CHECK_NULL_VOID(host);
+            host->RemoveChild(self->startingNode_);
+            host->RemoveChild(self->contentNode_);
+            host->RemoveChild(self->snapshotNode_);
+            self->startingNode_.Reset();
+            self->contentNode_.Reset();
+            self->snapshotNode_.Reset();
+            self->session_->SetNeedSnapshot(true);
+            self->OnAttachToFrameNode();
+            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        } else if (self->session_->GetShowRecent() &&
             self->session_->GetSessionState() == Rosen::SessionState::STATE_DISCONNECT && self->snapshotNode_) {
             auto host = self->GetHost();
             CHECK_NULL_VOID(host);
@@ -340,6 +355,7 @@ void WindowScene::OnDisconnect()
     auto uiTask = [weakThis = WeakClaim(this), snapshot]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
+        self->destroyed_ = true;
 
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);

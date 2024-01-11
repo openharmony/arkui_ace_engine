@@ -174,6 +174,11 @@ JSRef<JSObject> JSRichEditor::CreateJSTextStyleResult(const TextStyleResult& tex
     decorationObj->SetProperty<int32_t>("type", textStyleResult.decorationType);
     decorationObj->SetProperty<std::string>("color", textStyleResult.decorationColor);
     textStyleObj->SetPropertyObject("decoration", decorationObj);
+    textStyleObj->SetProperty<int32_t>("textAlign", textStyleResult.textAlign);
+    JSRef<JSArray> leadingMarginArray = JSRef<JSArray>::New();
+    leadingMarginArray->SetValueAt(0, JSRef<JSVal>::Make(ToJSValue(textStyleResult.leadingMarginSize[0])));
+    leadingMarginArray->SetValueAt(1, JSRef<JSVal>::Make(ToJSValue(textStyleResult.leadingMarginSize[1])));
+    textStyleObj->SetPropertyObject("leadingMarginSize", leadingMarginArray);
 
     return textStyleObj;
 }
@@ -184,7 +189,8 @@ JSRef<JSObject> JSRichEditor::CreateJSSymbolSpanStyleResult(const SymbolSpanStyl
     symbolSpanStyleObj->SetProperty<std::string>("fontColor", symbolSpanStyle.symbolColor);
     symbolSpanStyleObj->SetProperty<double>("fontSize", symbolSpanStyle.fontSize);
     symbolSpanStyleObj->SetProperty<int32_t>("fontWeight", symbolSpanStyle.fontWeight);
-    symbolSpanStyleObj->SetProperty<std::optional<uint32_t>>("renderingStrategy", symbolSpanStyle.renderingStrategy);
+    symbolSpanStyleObj->SetProperty<uint32_t>("renderingStrategy", symbolSpanStyle.renderingStrategy);
+    symbolSpanStyleObj->SetProperty<uint32_t>("effectStrategy", symbolSpanStyle.effectStrategy);
 
     return symbolSpanStyleObj;
 }
@@ -199,6 +205,8 @@ JSRef<JSObject> JSRichEditor::CreateJSImageStyleResult(const ImageStyleResult& i
     imageSpanStyleObj->SetPropertyObject("size", sizeArray);
     imageSpanStyleObj->SetProperty<int32_t>("verticalAlign", imageStyleResult.verticalAlign);
     imageSpanStyleObj->SetProperty<int32_t>("objectFit", imageStyleResult.objectFit);
+    imageSpanStyleObj->SetProperty<std::string>("borderRadius", imageStyleResult.borderRadius);
+    imageSpanStyleObj->SetProperty<std::string>("margin", imageStyleResult.margin);
 
     return imageSpanStyleObj;
 }
@@ -759,6 +767,7 @@ void JSRichEditorController::ParseJsTextStyle(
 void JSRichEditorController::ParseJsSymbolSpanStyle(
     const JSRef<JSObject>& styleObject, TextStyle& style, struct UpdateSpanStyle& updateSpanStyle)
 {
+    updateSpanStyle.isSymbolStyle = true;
     JSRef<JSVal> fontColor = styleObject->GetProperty("fontColor");
     std::vector<Color> symbolColor;
     if (!fontColor->IsNull() && JSContainerBase::ParseJsSymbolColor(fontColor, symbolColor)) {
@@ -768,7 +777,7 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
     }
     JSRef<JSVal> fontSize = styleObject->GetProperty("fontSize");
     CalcDimension size;
-    if (!fontSize->IsNull() && JSContainerBase::ParseJsDimensionFp(fontSize, size) &&
+    if (!fontSize->IsNull() && JSContainerBase::ParseJsDimensionFpNG(fontSize, size, false) &&
         !size.IsNegative() && size.Unit() != DimensionUnit::PERCENT) {
         updateSpanStyle.updateFontSize = size;
         style.SetFontSize(size);
@@ -790,9 +799,15 @@ void JSRichEditorController::ParseJsSymbolSpanStyle(
     }
     JSRef<JSVal> renderingStrategy = styleObject->GetProperty("renderingStrategy");
     uint32_t symbolRenderStrategy;
-    if (!renderingStrategy->IsNull() && renderingStrategy->IsNumber()) {
+    if (!renderingStrategy->IsNull() && JSContainerBase::ParseJsInteger(renderingStrategy, symbolRenderStrategy)) {
         updateSpanStyle.updateSymbolRenderingStrategy = symbolRenderStrategy;
         style.SetRenderStrategy(symbolRenderStrategy);
+    }
+    JSRef<JSVal> effectStrategy = styleObject->GetProperty("effectStrategy");
+    uint32_t symbolEffectStrategy;
+    if (!effectStrategy->IsNull() && JSContainerBase::ParseJsInteger(effectStrategy, symbolEffectStrategy)) {
+        updateSpanStyle.updateSymbolEffectStrategy = symbolEffectStrategy;
+        style.SetEffectStrategy(symbolEffectStrategy);
     }
 }
 
@@ -1080,7 +1095,7 @@ void JSRichEditorController::AddSymbolSpan(const JSCallbackInfo& args)
             CHECK_NULL_VOID(pipelineContext);
             auto theme = pipelineContext->GetTheme<TextTheme>();
             TextStyle style = theme ? theme->GetTextStyle() : TextStyle();
-            ParseJsTextStyle(styleObject, style, updateSpanStyle_);
+            ParseJsSymbolSpanStyle(styleObject, style, updateSpanStyle_);
             options.style = style;
         }
     }
@@ -1298,8 +1313,12 @@ std::pair<int32_t, int32_t> ParseRange(const JSRef<JSObject>& object)
 {
     int32_t start = -1;
     int32_t end = -1;
-    JSContainerBase::ParseJsInt32(object->GetProperty("start"), start);
-    JSContainerBase::ParseJsInt32(object->GetProperty("end"), end);
+    if (!JSContainerBase::ParseJsInt32(object->GetProperty("start"), start)) {
+        start = 0;
+    }
+    if (!JSContainerBase::ParseJsInt32(object->GetProperty("end"), end)) {
+        end = INT_MAX;
+    }
     if (start < 0) {
         start = 0;
     }
@@ -1307,7 +1326,8 @@ std::pair<int32_t, int32_t> ParseRange(const JSRef<JSObject>& object)
         end = INT_MAX;
     }
     if (start > end) {
-        std::swap(start, end);
+        start = 0;
+        end = INT_MAX;
     }
     return std::make_pair(start, end);
 }
@@ -1350,8 +1370,9 @@ bool JSRichEditorController::ParseParagraphStyle(const JSRef<JSObject>& styleObj
         } else if (sizeVal->IsUndefined()) {
             std::string resWidthStr;
             if (JSContainerBase::ParseJsString(lm, resWidthStr)) {
-                Dimension resWidth = Dimension::FromString(resWidthStr);
-                style.leadingMargin->size = NG::SizeF(resWidth.Value(), 0.0);
+                CalcDimension width;
+                JSContainerBase::ParseJsDimensionVp(lm, width);
+                style.leadingMargin->size = NG::SizeF(width.ConvertToPx(), 0.0);
             }
         }
     } else if (!lm->IsNull()) {

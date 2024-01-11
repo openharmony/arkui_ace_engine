@@ -17,6 +17,7 @@
 
 #include "core/components/common/properties/color.h"
 #include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/time_picker/timepicker_layout_property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -39,18 +40,33 @@ CanvasDrawFunction TimePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, nullptr);
     auto frameRect = geometryNode->GetFrameRect();
-    return [weak = WeakClaim(this), dividerLineWidth = DIVIDER_LINE_WIDTH, frameRect, dividerSpacing, dividerColor,
-               enabled = enabled_](RSCanvas& canvas) {
+
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    auto pickerNode = renderContext->GetHost();
+    CHECK_NULL_RETURN(pickerNode, nullptr);
+    auto layoutProperty = pickerNode->GetLayoutProperty<TimePickerLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+
+    return [weak = WeakClaim(this), dividerLineWidth = DIVIDER_LINE_WIDTH, layoutProperty, frameRect, dividerSpacing,
+               dividerColor, enabled = enabled_](RSCanvas& canvas) {
         auto picker = weak.Upgrade();
         CHECK_NULL_VOID(picker);
-        DividerPainter dividerPainter(dividerLineWidth, frameRect.Width(), false, dividerColor, LineCap::SQUARE);
-        double upperLine = (frameRect.Height() - dividerSpacing) / 2.0;
-        double downLine = (frameRect.Height() + dividerSpacing) / 2.0;
 
-        OffsetF offset = OffsetF(0.0f, upperLine);
-        dividerPainter.DrawLine(canvas, offset);
-        OffsetF offsetY = OffsetF(0.0f, downLine);
-        dividerPainter.DrawLine(canvas, offsetY);
+        PaddingPropertyF padding = layoutProperty->CreatePaddingAndBorder();
+        RectF contentRect = { padding.left.value_or(0), padding.top.value_or(0), frameRect.Width() - padding.Width(),
+            frameRect.Height() - padding.Height() };
+        if (contentRect.Height() >= dividerSpacing) {
+            DividerPainter dividerPainter(dividerLineWidth, contentRect.Width(), false, dividerColor, LineCap::SQUARE);
+            double upperLine = (contentRect.Height() - dividerSpacing) / 2.0 + contentRect.GetY();
+            double downLine = (contentRect.Height() + dividerSpacing) / 2.0 + contentRect.GetY();
+
+            OffsetF offset = OffsetF(contentRect.GetX(), upperLine);
+            dividerPainter.DrawLine(canvas, offset);
+            OffsetF offsetY = OffsetF(contentRect.GetX(), downLine);
+            dividerPainter.DrawLine(canvas, offsetY);
+        }
+
         if (!enabled) {
             picker->PaintDisable(canvas, frameRect.Width(), frameRect.Height());
         }

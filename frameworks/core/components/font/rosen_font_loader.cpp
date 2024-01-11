@@ -16,16 +16,17 @@
 #include "core/components/font/rosen_font_loader.h"
 
 #include "base/network/download_manager.h"
+#include "core/common/resource/resource_manager.h"
+#include "core/common/resource/resource_object.h"
+#include "core/common/resource/resource_wrapper.h"
 #include "core/components/font/rosen_font_collection.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
 namespace OHOS::Ace {
 
-#ifdef USE_GRAPHIC_TEXT_GINE
 constexpr size_t FILE_HEAD_LENGTH = 7;           // 7 is the size of "file://"
 constexpr size_t MEMORY_HEAD_LENGTH = 9;         // 9 is the size of "memory://"
 constexpr size_t INTERNAL_FILE_HEAD_LENGTH = 15; // 15 is the size of "internal://app/"
-#endif
 
 const std::regex RAWFILE_APP_RES_PATH_REGEX(R"(^resource://RAWFILE/(.*)$)");
 constexpr uint32_t RAWFILE_RESOURCE_MATCH_SIZE = 2;
@@ -34,9 +35,10 @@ RosenFontLoader::RosenFontLoader(const std::string& familyName, const std::strin
     : FontLoader(familyName, familySrc)
 {}
 
-void RosenFontLoader::AddFont(const RefPtr<PipelineBase>& context)
+void RosenFontLoader::AddFont(
+    const RefPtr<PipelineBase>& context, const std::string& bundleName, const std::string& moduleName)
 {
-    if (familySrc_.empty()) {
+    if (context == nullptr || familySrc_.empty()) {
         return;
     }
 
@@ -45,16 +47,12 @@ void RosenFontLoader::AddFont(const RefPtr<PipelineBase>& context)
         LoadFromNetwork(context);
     } else if (familySrc_.substr(0, strlen(FONT_SRC_RESOURCE)) == FONT_SRC_RESOURCE) {
         // Get font from Resource.
-        LoadFromResource(context);
-#ifndef USE_GRAPHIC_TEXT_GINE
-    } else {
-#else
+        LoadFromResource(context, bundleName, moduleName);
     } else if (familySrc_.find_first_of(':') != std::string::npos) {
         // Get font from file
         // Read file with absolute path to solve the problem that rawfile file registration fails during preview.
         LoadFromFile(context);
     } else {
-#endif
         // Get font from asset.
         LoadFromAsset(context);
     }
@@ -65,7 +63,7 @@ void RosenFontLoader::SetDefaultFontFamily(const char* fontFamily, const char* f
     RosenFontCollection::GetInstance().LoadFontFamily(fontFamily, familySrc);
 }
 
-void RosenFontLoader::LoadFromNetwork(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineBase>& context)
+void RosenFontLoader::LoadFromNetwork(const RefPtr<PipelineBase>& context)
 {
     auto weakContext = AceType::WeakClaim(AceType::RawPtr(context));
     context->GetTaskExecutor()->PostTask(
@@ -80,27 +78,12 @@ void RosenFontLoader::LoadFromNetwork(const OHOS::Ace::RefPtr<OHOS::Ace::Pipelin
             if (!DownloadManager::GetInstance().Download(fontLoader->familySrc_, fontData) || fontData.empty()) {
                 return;
             }
-            context->GetTaskExecutor()->PostTask(
-                [fontData, weak] {
-                    auto fontLoader = weak.Upgrade();
-                    if (!fontLoader) {
-                        return;
-                    }
-                    // Load font.
-                    RosenFontCollection::GetInstance().LoadFontFromList(
-                        fontData.data(), fontData.size(), fontLoader->familyName_);
-                    fontLoader->isLoaded_ = true;
-
-                    // When font is already loaded, notify all which used this font.
-                    fontLoader->NotifyCallbacks();
-                },
-                TaskExecutor::TaskType::UI);
+            fontLoader->PostLoadFontTask(std::move(fontData), context);
         },
         TaskExecutor::TaskType::BACKGROUND);
 }
 
-#ifdef USE_GRAPHIC_TEXT_GINE
-void RosenFontLoader::LoadFromFile(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineBase>& context)
+void RosenFontLoader::LoadFromFile(const RefPtr<PipelineBase>& context)
 {
     auto weakContext = AceType::WeakClaim(AceType::RawPtr(context));
     context->GetTaskExecutor()->PostTask(
@@ -123,21 +106,8 @@ void RosenFontLoader::LoadFromFile(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineBa
                 TAG_LOGW(AceLogTag::ACE_FONT, "No asset data!");
                 return;
             }
-            context->GetTaskExecutor()->PostTask(
-                [assetData, weak] {
-                    auto fontLoader = weak.Upgrade();
-                    if (!fontLoader) {
-                        return;
-                    }
-                    // Load font.
-                    RosenFontCollection::GetInstance().LoadFontFromList(
-                        assetData->GetData(), assetData->GetSize(), fontLoader->familyName_);
-                    fontLoader->isLoaded_ = true;
-
-                    // When font is already loaded, notify all which used this font.
-                    fontLoader->NotifyCallbacks();
-                },
-                TaskExecutor::TaskType::UI);
+            const std::vector<uint8_t> fontData(assetData->GetData(), assetData->GetData() + assetData->GetSize());
+            fontLoader->PostLoadFontTask(std::move(fontData), context);
         },
         TaskExecutor::TaskType::BACKGROUND);
 }
@@ -212,24 +182,31 @@ std::string RosenFontLoader::RemovePathHead(const std::string& uri)
     TAG_LOGW(AceLogTag::ACE_FONT, "Wrong scheme, not a valid File!");
     return std::string();
 }
-#endif
 
-void RosenFontLoader::LoadFromResource(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineBase>& context)
+void RosenFontLoader::LoadFromResource(
+    const RefPtr<PipelineBase>& context, const std::string& bundleName, const std::string& moduleName)
 {
     auto weakContext = AceType::WeakClaim(AceType::RawPtr(context));
     context->GetTaskExecutor()->PostTask(
-        [weak = AceType::WeakClaim(this), weakContext] {
+        [weak = AceType::WeakClaim(this), weakContext, bundleName, moduleName] {
             auto fontLoader = weak.Upgrade();
             auto context = weakContext.Upgrade();
             if (!fontLoader || !context) {
                 return;
             }
-            auto themeManager = context->GetThemeManager();
-            if (!themeManager) {
-                return;
+            auto resourceObject = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName);
+            RefPtr<ResourceAdapter> resourceAdapter = nullptr;
+            RefPtr<ThemeConstants> themeConstants = nullptr;
+            if (SystemProperties::GetResourceDecoupling()) {
+                resourceAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resourceObject);
+                CHECK_NULL_VOID(resourceAdapter);
+            } else {
+                auto themeManager = PipelineBase::CurrentThemeManager();
+                CHECK_NULL_VOID(themeManager);
+                themeConstants = themeManager->GetThemeConstants();
+                CHECK_NULL_VOID(themeConstants);
             }
-            TAG_LOGI(AceLogTag::ACE_FONT, "begin to load font from resource.");
-            auto themeConstants = themeManager->GetThemeConstants();
+            auto resourceWrapper = AceType::MakeRefPtr<ResourceWrapper>(themeConstants, resourceAdapter);
             std::string rawFile;
             std::unique_ptr<uint8_t[]> data;
             size_t dataLen = 0;
@@ -241,36 +218,20 @@ void RosenFontLoader::LoadFromResource(const OHOS::Ace::RefPtr<OHOS::Ace::Pipeli
             if (rawFile.empty()) {
                 return;
             }
-            if (!themeConstants->GetRawFileData(rawFile, dataLen, data) || !data.get()) {
-                TAG_LOGW(AceLogTag::ACE_FONT, "Get raw file data failed!");
+
+            if (!resourceWrapper->GetRawFileData(rawFile, dataLen, data, bundleName, moduleName) || !data.get()) {
+                TAG_LOGW(AceLogTag::ACE_FONT, "Get font data by rawFile failed, src:%{private}s, rawFile:%{public}s",
+                    fontLoader->familySrc_.c_str(), rawFile.c_str());
                 return;
             }
 
-            auto fontDataPtr = data.get();
-            std::vector<uint8_t> fontData;
-            for (size_t i = 0; i < dataLen; i++) {
-                fontData.emplace_back(fontDataPtr[i]);
-            }
-            context->GetTaskExecutor()->PostTask(
-                [fontData, weak] {
-                    auto fontLoader = weak.Upgrade();
-                    if (!fontLoader) {
-                        return;
-                    }
-                    // Load font.
-                    RosenFontCollection::GetInstance().LoadFontFromList(
-                        fontData.data(), fontData.size(), fontLoader->familyName_);
-                    fontLoader->isLoaded_ = true;
-
-                    // When font is already loaded, notify all which used this font.
-                    fontLoader->NotifyCallbacks();
-                },
-                TaskExecutor::TaskType::UI);
+            const std::vector<uint8_t> fontData(data.get(), data.get() + dataLen);
+            fontLoader->PostLoadFontTask(std::move(fontData), context);
         },
         TaskExecutor::TaskType::BACKGROUND);
 }
 
-void RosenFontLoader::LoadFromAsset(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineBase>& context)
+void RosenFontLoader::LoadFromAsset(const RefPtr<PipelineBase>& context)
 {
     auto weakContext = AceType::WeakClaim(AceType::RawPtr(context));
     context->GetTaskExecutor()->PostTask(
@@ -296,24 +257,28 @@ void RosenFontLoader::LoadFromAsset(const OHOS::Ace::RefPtr<OHOS::Ace::PipelineB
                 TAG_LOGW(AceLogTag::ACE_FONT, "No asset data!");
                 return;
             }
-
-            context->GetTaskExecutor()->PostTask(
-                [assetData, weak] {
-                    auto fontLoader = weak.Upgrade();
-                    if (!fontLoader) {
-                        return;
-                    }
-                    // Load font.
-                    RosenFontCollection::GetInstance().LoadFontFromList(
-                        assetData->GetData(), assetData->GetSize(), fontLoader->familyName_);
-                    fontLoader->isLoaded_ = true;
-
-                    // When font is already loaded, notify all which used this font.
-                    fontLoader->NotifyCallbacks();
-                },
-                TaskExecutor::TaskType::UI);
+            const std::vector<uint8_t> fontData(assetData->GetData(), assetData->GetData() + assetData->GetSize());
+            fontLoader->PostLoadFontTask(std::move(fontData), context);
         },
         TaskExecutor::TaskType::BACKGROUND);
+}
+
+void RosenFontLoader::PostLoadFontTask(const std::vector<uint8_t>& fontData, const RefPtr<PipelineBase>& context)
+{
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [fontData, weak = AceType::WeakClaim(this)] {
+            auto fontLoader = weak.Upgrade();
+            CHECK_NULL_VOID(fontLoader);
+            // Load font.
+            RosenFontCollection::GetInstance().LoadFontFromList(
+                fontData.data(), fontData.size(), fontLoader->familyName_);
+            fontLoader->isLoaded_ = true;
+
+            // When font is already loaded, notify all which used this font.
+            fontLoader->NotifyCallbacks();
+        },
+        TaskExecutor::TaskType::UI);
 }
 
 void RosenFontLoader::NotifyCallbacks()

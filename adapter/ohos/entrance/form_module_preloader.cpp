@@ -100,18 +100,13 @@ bool FormModulePreloader::ReadFormModuleList(
             return false;
         }
         // Read component_collection.json
-        std::unordered_set<std::string> formEtsFilePaths;
-        if (!GetFormEtsFilePath(assetManager, formEtsFilePaths)) {
-            LOGE("Read form_config.json failed, hapPath: %{private}s.", hapPath.c_str());
-            return false;
-        }
         std::string content;
         if (!ReadFileFromAssetManager(assetManager, "component_collection.json", content)) {
             LOGE("Read component_collection.json failed, hapPath: %{private}s.", hapPath.c_str());
             return false;
         }
         // Parse component_collection.json
-        if (!ParseComponentCollectionJson(bundleName, formEtsFilePaths, content, formModuleList, isReloadCondition)) {
+        if (!ParseComponentCollectionJson(bundleName, content, formModuleList, isReloadCondition)) {
             LOGE("Parse component_collection.json failed, hapPath: %{private}s.", hapPath.c_str());
             return false;
         }
@@ -120,8 +115,8 @@ bool FormModulePreloader::ReadFormModuleList(
 }
 
 bool FormModulePreloader::ParseComponentCollectionJson(
-    const std::string& bundleName, const std::unordered_set<std::string>& formEtsFilePaths,
-    const std::string& content, std::unordered_set<std::string>& formModuleList, bool isReloadCondition)
+    const std::string& bundleName, const std::string& content,
+    std::unordered_set<std::string>& formModuleList, bool isReloadCondition)
 {
     auto collectionJson = JsonUtil::ParseJsonString(content);
     if (collectionJson == nullptr || collectionJson->IsNull()) {
@@ -130,9 +125,6 @@ bool FormModulePreloader::ParseComponentCollectionJson(
     }
     for (auto child = collectionJson->GetChild(); child && !child->IsNull(); child = child->GetNext()) {
         std::string etsPath = child->GetKey();
-        if (!IsFormEtsFilePath(formEtsFilePaths, etsPath)) {
-            continue;
-        }
         auto item = collectionJson->GetValue(etsPath);
         if (item == nullptr || !item->IsValid() || !item->IsArray()) {
             LOGE("Parse component_collection.json failed, etsPath: %{private}s.", etsPath.c_str());
@@ -202,58 +194,6 @@ bool FormModulePreloader::ReadFileFromAssetManager(
     }
     content.assign(buffer, buffer + bufLen);
     return true;
-}
-
-bool FormModulePreloader::GetFormEtsFilePath(
-    const RefPtr<AssetManager>& assetManager, std::unordered_set<std::string>& filePaths)
-{
-    // Read form_config.json
-    std::string content;
-    if (!ReadFileFromAssetManager(assetManager, "form_config.json", content)) {
-        LOGE("Read form_config failed");
-        return false;
-    }
-    auto collectionJson = JsonUtil::ParseJsonString(content);
-    if (collectionJson == nullptr || collectionJson->IsNull()) {
-        LOGE("ParseJsonString failed.");
-        return false;
-    }
-    auto formJson = collectionJson->GetValue("forms");
-    if (formJson == nullptr || formJson->IsNull() || !formJson->IsArray()) {
-        LOGE("Get form-config from json failed.");
-        return false;
-    }
-    // Read FormEtsFilePath
-    int32_t len = formJson->GetArraySize();
-    for (int32_t index = 0; index < len; ++index) {
-        auto config = formJson->GetArrayItem(index);
-        if (config == nullptr || config->IsNull()) {
-            LOGE("Form-config is invalid.");
-            return false;
-        }
-        auto path = config->GetValue("src");
-        if (path == nullptr || !path->IsString()) {
-            LOGE("Read src from form-config failed.");
-            return false;
-        }
-        filePaths.emplace(path->GetString());
-    }
-    return true;
-}
-
-bool FormModulePreloader::IsFormEtsFilePath(
-    const std::unordered_set<std::string>& formEtsFilePaths, std::string path)
-{
-    std::replace(path.begin(), path.end(), '\\', '/');
-    std::string rootPath = "src/main";
-    auto pos = path.find(rootPath);
-    if (pos == std::string::npos) {
-        return formEtsFilePaths.find(path) != formEtsFilePaths.end();
-    }
-    // Convert to relative path
-    std::string relativePath = path.substr(pos + static_cast<int32_t>(rootPath.length()));
-    relativePath.insert(relativePath.begin(), '.');
-    return formEtsFilePaths.find(relativePath) != formEtsFilePaths.end();
 }
 
 RefPtr<AssetManager> FormModulePreloader::CreateAssetManager(const std::string& hapPath)

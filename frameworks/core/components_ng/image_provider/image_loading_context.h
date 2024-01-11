@@ -38,7 +38,7 @@ public:
 
     // return true if calling MakeCanvasImage is necessary
     bool MakeCanvasImageIfNeed(const SizeF& dstSize, bool autoResize, ImageFit imageFit,
-        const std::optional<SizeF>& sourceSize = std::nullopt);
+        const std::optional<SizeF>& sourceSize = std::nullopt, bool hasValidSlice = false);
 
     /* interfaces to drive image loading */
     void LoadImageData();
@@ -72,6 +72,7 @@ public:
     void SuccessCallback(const RefPtr<CanvasImage>& canvasImage);
     void FailCallback(const std::string& errorMsg);
     const std::string GetCurrentLoadingState();
+    void ResizableCalcDstSize();
 
 private:
 #define DEFINE_SET_NOTIFY_TASK(loadResult)                                            \
@@ -105,7 +106,7 @@ private:
         return dstSize_.IsPositive() && dstSize != dstSize_;
     }
 
-    const ImageSourceInfo src_;
+    ImageSourceInfo src_;
     RefPtr<ImageStateManager> stateManager_;
     RefPtr<ImageObject> imageObj_;
     RefPtr<CanvasImage> canvasImage_;

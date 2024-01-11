@@ -149,6 +149,8 @@ struct TestProperty {
  */
 HWTEST_F(NavigationTestNg, NavigationPatternTest001, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
+
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1214,7 +1216,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_010, TestSize.Level1)
     navigationLayoutAlgorithm->navigationMode_ = NavigationMode::SPLIT;
     layout->propHideNavBar_ = true;
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    ASSERT_FALSE(navBarNode->GetLayoutProperty<NavBarLayoutProperty>()->propVisibility_.has_value());
+    ASSERT_EQ(navBarNode->GetLayoutProperty<NavBarLayoutProperty>()->propVisibility_, VisibleType::INVISIBLE);
 }
 
 /**
@@ -3329,7 +3331,7 @@ HWTEST_F(NavigationTestNg, NavDestinationDialogTest002, TestSize.Level1)
     config.skipMeasure = true;
     config.skipLayout = true;
     navigationPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    navigationPattern->NotifyDialogChange(true);
+    navigationPattern->NotifyDialogChange(true, true);
     auto navDestinationPatternA = AceType::DynamicCast<NavDestinationPattern>(navDestinationA->GetPattern());
     EXPECT_NE(navDestinationPatternA, nullptr);
     auto navDestinationPatternB = AceType::DynamicCast<NavDestinationPattern>(navDestinationB->GetPattern());

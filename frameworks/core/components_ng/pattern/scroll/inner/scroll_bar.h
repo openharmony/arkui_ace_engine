@@ -57,6 +57,7 @@ public:
 
     bool InBarTouchRegion(const Point& point) const;
     bool InBarHoverRegion(const Point& point) const;
+    bool InBarRectRegion(const Point& point) const;
     bool NeedScrollBar() const;
     bool NeedPaint() const;
     void UpdateScrollBarRegion(
@@ -492,6 +493,16 @@ public:
         return dragEndPosition_ - dragStartPosition_;
     }
 
+    void SetReverse(bool reverse)
+    {
+        isReverse_ = reverse;
+    }
+
+    bool IsReverse()
+    {
+        return isReverse_;
+    }
+
 protected:
     void InitTheme();
 
@@ -556,6 +567,7 @@ private:
     bool normalWidthUpdate_ = false;
     bool isUserNormalWidth_ = false;
     bool needAdaptAnimation_ = false;
+    bool isReverse_ = false;
 
     Offset paintOffset_;
     Size viewPortSize_;

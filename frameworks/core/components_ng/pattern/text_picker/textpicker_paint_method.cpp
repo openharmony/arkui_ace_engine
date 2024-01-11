@@ -17,6 +17,7 @@
 
 #include "core/components/common/properties/color.h"
 #include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -31,43 +32,68 @@ const Dimension PICKER_DIALOG_DIVIDER_MARGIN = 24.0_vp;
 
 CanvasDrawFunction TextPickerPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto theme = pipeline->GetTheme<PickerTheme>();
-    auto dividerColor = theme->GetDividerColor();
-    auto dividerLineWidth = theme->GetDividerThickness().ConvertToPx();
-    auto dividerSpacing = pipeline->NormalizeToPx(theme->GetDividerSpacing());
-    auto pressColor = theme->GetPressColor();
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, nullptr);
     auto frameRect = geometryNode->GetFrameRect();
-    return [weak = WeakClaim(this), dividerLineWidth, frameRect, dividerColor, dividerSpacing, pressColor,
-               enabled = enabled_, pattern = pattern_](RSCanvas& canvas) {
-        auto picker = weak.Upgrade();
-        CHECK_NULL_VOID(picker);
-        auto textPickerPattern = DynamicCast<TextPickerPattern>(pattern.Upgrade());
-        CHECK_NULL_VOID(textPickerPattern);
-        auto dividerLength = frameRect.Width();
-        auto dividerMargin = 0.0;
-        if (textPickerPattern->GetIsShowInDialog()) {
-            dividerLength = frameRect.Width() - PICKER_DIALOG_DIVIDER_MARGIN.ConvertToPx() * DOUBLE;
-            dividerMargin = PICKER_DIALOG_DIVIDER_MARGIN.ConvertToPx();
-        }
-        DividerPainter dividerPainter(dividerLineWidth, dividerLength, false, dividerColor, LineCap::SQUARE);
-        auto height = picker->defaultPickerItemHeight_;
-        if (textPickerPattern->GetResizeFlag()) {
-            height = textPickerPattern->GetResizePickerItemHeight();
-        }
-        double upperLine = (frameRect.Height() - height) / 2.0;
-        double downLine = (frameRect.Height() + height) / 2.0;
-        OffsetF offset = OffsetF(dividerMargin, upperLine);
-        dividerPainter.DrawLine(canvas, offset);
-        OffsetF offsetY = OffsetF(dividerMargin, downLine);
-        dividerPainter.DrawLine(canvas, offsetY);
-        if (!enabled) {
-            picker->PaintDisable(canvas, frameRect.Width(), frameRect.Height());
-        }
-    };
+
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    auto pickerNode = renderContext->GetHost();
+    CHECK_NULL_RETURN(pickerNode, nullptr);
+    auto layoutProperty = pickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+
+    return
+        [weak = WeakClaim(this), layoutProperty, frameRect, enabled = enabled_, pattern = pattern_](RSCanvas& canvas) {
+            auto picker = weak.Upgrade();
+            CHECK_NULL_VOID(picker);
+            auto textPickerPattern = DynamicCast<TextPickerPattern>(pattern.Upgrade());
+            CHECK_NULL_VOID(textPickerPattern);
+
+            PaddingPropertyF padding = layoutProperty->CreatePaddingAndBorder();
+            RectF contentRect = { padding.left.value_or(0), padding.top.value_or(0),
+                frameRect.Width() - padding.Width(), frameRect.Height() - padding.Height() };
+
+            double dividerHeight = picker->defaultPickerItemHeight_;
+            if (textPickerPattern->GetResizeFlag()) {
+                dividerHeight = textPickerPattern->GetResizePickerItemHeight();
+            }
+
+            if (contentRect.Height() >= dividerHeight) {
+                picker->PaintDividerLines(canvas, contentRect, dividerHeight);
+            }
+
+            if (!enabled) {
+                picker->PaintDisable(canvas, frameRect.Width(), frameRect.Height());
+            }
+        };
+}
+
+void TextPickerPaintMethod::PaintDividerLines(RSCanvas& canvas, RectF contentRect, double dividerHeight)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<PickerTheme>();
+    auto dividerColor = theme->GetDividerColor();
+    auto dividerLineWidth = theme->GetDividerThickness().ConvertToPx();
+
+    auto dividerLength = contentRect.Width();
+    auto dividerMargin = contentRect.GetX();
+    auto textPickerPattern = DynamicCast<TextPickerPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textPickerPattern);
+    if (textPickerPattern->GetIsShowInDialog()) {
+        dividerLength -= PICKER_DIALOG_DIVIDER_MARGIN.ConvertToPx() * DOUBLE;
+        dividerMargin += PICKER_DIALOG_DIVIDER_MARGIN.ConvertToPx();
+    }
+
+    DividerPainter dividerPainter(dividerLineWidth, dividerLength, false, dividerColor, LineCap::SQUARE);
+    double upperLine = (contentRect.Height() - dividerHeight) / 2.0 + contentRect.GetY();
+    double downLine = (contentRect.Height() + dividerHeight) / 2.0 + contentRect.GetY();
+
+    OffsetF offset = OffsetF(dividerMargin, upperLine);
+    dividerPainter.DrawLine(canvas, offset);
+    OffsetF offsetY = OffsetF(dividerMargin, downLine);
+    dividerPainter.DrawLine(canvas, offsetY);
 }
 
 void TextPickerPaintMethod::PaintDisable(RSCanvas& canvas, double X, double Y)

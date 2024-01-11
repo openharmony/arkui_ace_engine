@@ -15,5 +15,10 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("tabs_test_ng") {
   type = "new"
-  sources = [ "tabs_test_ng.cpp" ]
+  sources = [
+    "tabs_attr_test_ng.cpp",
+    "tabs_common_test_ng.cpp",
+    "tabs_event_test_ng.cpp",
+    "tabs_test_ng.cpp",
+  ]
 }

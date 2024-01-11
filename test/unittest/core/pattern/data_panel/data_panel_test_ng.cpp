@@ -1229,7 +1229,7 @@ HWTEST_F(DataPanelTestNg, DataPanelUpdateDateTest001, TestSize.Level1)
     dataPanelModifier.isEffect_->Set(false);
     dataPanelModifier.date_->Set(0.0f);
     dataPanelModifier.UpdateDate();
-    EXPECT_EQ(0.0f, dataPanelModifier.date_->Get());
+    EXPECT_EQ(1.0f, dataPanelModifier.date_->Get());
 }
 
 /**

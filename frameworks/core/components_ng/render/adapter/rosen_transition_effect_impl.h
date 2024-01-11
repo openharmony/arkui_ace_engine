@@ -31,6 +31,10 @@ public:
 
     // Identity transition effect ignores external animation option.
     void SetAnimationOption(const std::shared_ptr<AnimationOption>& option) override {}
+    bool HasDisappearTransition() const override
+    {
+        return false;
+    }
 
 private:
     DECLARE_ACE_TYPE(RosenIdentityTransitionEffect, RosenTransitionEffect);
@@ -143,6 +147,7 @@ public:
     {
         return transitionOut_;
     }
+    bool HasDisappearTransition() const override;
 
 protected:
     void OnAttach(const RefPtr<RosenRenderContext>& context, bool activeTransition) override;

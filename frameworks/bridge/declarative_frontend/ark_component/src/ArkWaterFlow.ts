@@ -78,6 +78,24 @@ class EnableScrollInteractionModifier extends ModifierWithKey<boolean> {
   }
 }
 
+class WaterFlowClipModifier extends ModifierWithKey<boolean | object> {
+  constructor(value: boolean | object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('waterFlowclip');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetClipWithEdge(node);
+    } else {
+      getUINativeModule().common.setClipWithEdge(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return true;
+  }
+}
+
 class RowsGapModifier extends ModifierWithKey<number | string> {
   constructor(value: number | string) {
     super(value);
@@ -231,6 +249,10 @@ class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAttribute {
   }
   monopolizeEvents(monopolize: boolean): this {
     throw new Error('Method not implemented.');
+  }
+  clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
+    modifierWithKey(this._modifiersWithKeys, WaterFlowClipModifier.identity, WaterFlowClipModifier, value);
+    return this;
   }
 }
 

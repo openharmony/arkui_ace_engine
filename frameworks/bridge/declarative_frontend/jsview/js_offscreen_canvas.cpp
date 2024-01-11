@@ -13,273 +13,394 @@
  * limitations under the License.
  */
 
-#include "base/utils/utils.h"
-#include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/jsview/js_offscreen_canvas.h"
 
-namespace OHOS::Ace::Framework {
-void JSOffscreenCanvas::JSBind(BindingTarget globalObj)
-{
-    JSClass<JSOffscreenCanvas>::Declare("OffscreenCanvas");
-    JSClass<JSOffscreenCanvas>::CustomProperty("width", &JSOffscreenCanvas::JsGetWidth,
-        &JSOffscreenCanvas::JsSetWidth);
-    JSClass<JSOffscreenCanvas>::CustomProperty("height", &JSOffscreenCanvas::JsGetHeight,
-        &JSOffscreenCanvas::JsSetHeight);
-    JSClass<JSOffscreenCanvas>::CustomMethod("transferToImageBitmap",
-        &JSOffscreenCanvas::JsTransferToImageBitmap);
-    JSClass<JSOffscreenCanvas>::CustomMethod("getContext", &JSOffscreenCanvas::JsGetContext);
+#include "base/utils/utils.h"
+#include "bridge/declarative_frontend/engine/bindings.h"
+#include "bridge/declarative_frontend/jsview/js_canvas_gradient.h"
+#include "bridge/declarative_frontend/jsview/js_canvas_pattern.h"
+#include "bridge/declarative_frontend/jsview/js_matrix2d.h"
+#include "bridge/declarative_frontend/jsview/js_render_image.h"
+#include "napi/native_api.h"
+#include "napi/native_node_api.h"
 
-    JSClass<JSOffscreenCanvas>::CustomMethod("createRadialGradient",
-        &JSOffscreenCanvas::JsCreateRadialGradient);
-    JSClass<JSOffscreenCanvas>::CustomMethod("fillRect", &JSOffscreenCanvas::JsFillRect);
-    JSClass<JSOffscreenCanvas>::CustomMethod("strokeRect", &JSOffscreenCanvas::JsStrokeRect);
-    JSClass<JSOffscreenCanvas>::CustomMethod("clearRect", &JSOffscreenCanvas::JsClearRect);
-    JSClass<JSOffscreenCanvas>::CustomMethod("createLinearGradient",
-        &JSOffscreenCanvas::JsCreateLinearGradient);
-    JSClass<JSOffscreenCanvas>::CustomMethod("fillText", &JSOffscreenCanvas::JsFillText);
-    JSClass<JSOffscreenCanvas>::CustomMethod("strokeText", &JSOffscreenCanvas::JsStrokeText);
-    JSClass<JSOffscreenCanvas>::CustomMethod("measureText", &JSOffscreenCanvas::JsMeasureText);
-    JSClass<JSOffscreenCanvas>::CustomMethod("moveTo", &JSOffscreenCanvas::JsMoveTo);
-    JSClass<JSOffscreenCanvas>::CustomMethod("lineTo", &JSOffscreenCanvas::JsLineTo);
-    JSClass<JSOffscreenCanvas>::CustomMethod("bezierCurveTo", &JSOffscreenCanvas::JsBezierCurveTo);
-    JSClass<JSOffscreenCanvas>::CustomMethod("quadraticCurveTo", &JSOffscreenCanvas::JsQuadraticCurveTo);
-    JSClass<JSOffscreenCanvas>::CustomMethod("arcTo", &JSOffscreenCanvas::JsArcTo);
-    JSClass<JSOffscreenCanvas>::CustomMethod("arc", &JSOffscreenCanvas::JsArc);
-    JSClass<JSOffscreenCanvas>::CustomMethod("ellipse", &JSOffscreenCanvas::JsEllipse);
-    JSClass<JSOffscreenCanvas>::CustomMethod("fill", &JSOffscreenCanvas::JsFill);
-    JSClass<JSOffscreenCanvas>::CustomMethod("stroke", &JSOffscreenCanvas::JsStroke);
-    JSClass<JSOffscreenCanvas>::CustomMethod("clip", &JSOffscreenCanvas::JsClip);
-    JSClass<JSOffscreenCanvas>::CustomMethod("rect", &JSOffscreenCanvas::JsRect);
-    JSClass<JSOffscreenCanvas>::CustomMethod("beginPath", &JSOffscreenCanvas::JsBeginPath);
-    JSClass<JSOffscreenCanvas>::CustomMethod("closePath", &JSOffscreenCanvas::JsClosePath);
-    JSClass<JSOffscreenCanvas>::CustomMethod("restore", &JSOffscreenCanvas::JsRestore);
-    JSClass<JSOffscreenCanvas>::CustomMethod("save", &JSOffscreenCanvas::JsSave);
-    JSClass<JSOffscreenCanvas>::CustomMethod("rotate", &JSOffscreenCanvas::JsRotate);
-    JSClass<JSOffscreenCanvas>::CustomMethod("scale", &JSOffscreenCanvas::JsScale);
-    JSClass<JSOffscreenCanvas>::CustomMethod("getTransform", &JSOffscreenCanvas::JsGetTransform);
-    JSClass<JSOffscreenCanvas>::CustomMethod("setTransform", &JSOffscreenCanvas::JsSetTransform);
-    JSClass<JSOffscreenCanvas>::CustomMethod("resetTransform", &JSOffscreenCanvas::JsResetTransform);
-    JSClass<JSOffscreenCanvas>::CustomMethod("transform", &JSOffscreenCanvas::JsTransform);
-    JSClass<JSOffscreenCanvas>::CustomMethod("translate", &JSOffscreenCanvas::JsTranslate);
-    JSClass<JSOffscreenCanvas>::CustomMethod("setLineDash", &JSOffscreenCanvas::JsSetLineDash);
-    JSClass<JSOffscreenCanvas>::CustomMethod("getLineDash", &JSOffscreenCanvas::JsGetLineDash);
-    JSClass<JSOffscreenCanvas>::CustomMethod("drawImage", &JSOffscreenCanvas::JsDrawImage);
-    JSClass<JSOffscreenCanvas>::CustomMethod("createPattern", &JSOffscreenCanvas::JsCreatePattern);
-    JSClass<JSOffscreenCanvas>::CustomMethod("createImageData", &JSOffscreenCanvas::JsCreateImageData);
-    JSClass<JSOffscreenCanvas>::CustomMethod("putImageData", &JSOffscreenCanvas::JsPutImageData);
-    JSClass<JSOffscreenCanvas>::CustomMethod("getImageData", &JSOffscreenCanvas::JsGetImageData);
-    JSClass<JSOffscreenCanvas>::CustomMethod("getJsonData", &JSOffscreenCanvas::JsGetJsonData);
-    JSClass<JSOffscreenCanvas>::CustomMethod("getPixelMap", &JSOffscreenCanvas::JsGetPixelMap);
-    JSClass<JSOffscreenCanvas>::CustomMethod("setPixelMap", &JSOffscreenCanvas::JsSetPixelMap);
-    JSClass<JSOffscreenCanvas>::CustomMethod("createConicGradient", &JSOffscreenCanvas::JsCreateConicGradient);
-    JSClass<JSOffscreenCanvas>::CustomMethod("transferFromImageBitmap", &JSOffscreenCanvas::JSTransferFromImageBitmap);
-    JSClass<JSOffscreenCanvas>::CustomProperty("filter", &JSOffscreenCanvas::JsGetFilter,
-        &JSOffscreenCanvas::JsSetFilter);
-    JSClass<JSOffscreenCanvas>::CustomProperty("direction", &JSOffscreenCanvas::JsGetDirection,
-        &JSOffscreenCanvas::JsSetDirection);
-    JSClass<JSOffscreenCanvas>::CustomProperty("fillStyle", &JSOffscreenCanvas::JsGetFillStyle,
-        &JSOffscreenCanvas::JsSetFillStyle);
-    JSClass<JSOffscreenCanvas>::CustomProperty("strokeStyle", &JSOffscreenCanvas::JsGetStrokeStyle,
-        &JSOffscreenCanvas::JsSetStrokeStyle);
-    JSClass<JSOffscreenCanvas>::CustomProperty("lineCap", &JSOffscreenCanvas::JsGetLineCap,
-        &JSOffscreenCanvas::JsSetLineCap);
-    JSClass<JSOffscreenCanvas>::CustomProperty("lineJoin", &JSOffscreenCanvas::JsGetLineJoin,
-        &JSOffscreenCanvas::JsSetLineJoin);
-    JSClass<JSOffscreenCanvas>::CustomProperty("miterLimit", &JSOffscreenCanvas::JsGetMiterLimit,
-        &JSOffscreenCanvas::JsSetMiterLimit);
-    JSClass<JSOffscreenCanvas>::CustomProperty("lineWidth", &JSOffscreenCanvas::JsGetLineWidth,
-        &JSOffscreenCanvas::JsSetLineWidth);
-    JSClass<JSOffscreenCanvas>::CustomProperty("font", &JSOffscreenCanvas::JsGetFont,
-        &JSOffscreenCanvas::JsSetFont);
-    JSClass<JSOffscreenCanvas>::CustomProperty("textAlign", &JSOffscreenCanvas::JsGetTextAlign,
-        &JSOffscreenCanvas::JsSetTextAlign);
-    JSClass<JSOffscreenCanvas>::CustomProperty("textBaseline", &JSOffscreenCanvas::JsGetTextBaseline,
-        &JSOffscreenCanvas::JsSetTextBaseline);
-    JSClass<JSOffscreenCanvas>::CustomProperty("globalAlpha", &JSOffscreenCanvas::JsGetGlobalAlpha,
-        &JSOffscreenCanvas::JsSetGlobalAlpha);
-    JSClass<JSOffscreenCanvas>::CustomProperty("globalCompositeOperation",
-        &JSOffscreenCanvas::JsGetGlobalCompositeOperation, &JSOffscreenCanvas::JsSetGlobalCompositeOperation);
-    JSClass<JSOffscreenCanvas>::CustomProperty("lineDashOffset", &JSOffscreenCanvas::JsGetLineDashOffset,
-        &JSOffscreenCanvas::JsSetLineDashOffset);
-    JSClass<JSOffscreenCanvas>::CustomProperty("shadowBlur", &JSOffscreenCanvas::JsGetShadowBlur,
-        &JSOffscreenCanvas::JsSetShadowBlur);
-    JSClass<JSOffscreenCanvas>::CustomProperty("shadowColor", &JSOffscreenCanvas::JsGetShadowColor,
-        &JSOffscreenCanvas::JsSetShadowColor);
-    JSClass<JSOffscreenCanvas>::CustomProperty("shadowOffsetX", &JSOffscreenCanvas::JsGetShadowOffsetX,
-        &JSOffscreenCanvas::JsSetShadowOffsetX);
-    JSClass<JSOffscreenCanvas>::CustomProperty("shadowOffsetY", &JSOffscreenCanvas::JsGetShadowOffsetY,
-        &JSOffscreenCanvas::JsSetShadowOffsetY);
-    JSClass<JSOffscreenCanvas>::CustomProperty("imageSmoothingEnabled",
-        &JSOffscreenCanvas::JsGetImageSmoothingEnabled, &JSOffscreenCanvas::JsSetImageSmoothingEnabled);
-    JSClass<JSOffscreenCanvas>::CustomProperty("imageSmoothingQuality",
-        &JSOffscreenCanvas::JsGetImageSmoothingQuality, &JSOffscreenCanvas::JsSetImageSmoothingQuality);
-    JSClass<JSOffscreenCanvas>::Bind(globalObj, JSOffscreenCanvas::Constructor, JSOffscreenCanvas::Destructor);
+namespace OHOS::Ace::Framework {
+constexpr int32_t ARGS_COUNT_ONE = 1;
+constexpr int32_t ARGS_COUNT_TWO = 2;
+
+void* DetachOffscreenCanvas(napi_env env, void* value, void* hint)
+{
+    return value;
 }
 
-void JSOffscreenCanvas::Constructor(const JSCallbackInfo& args)
+napi_value AttachOffscreenCanvas(napi_env env, void* value, void*)
 {
-    if (args.Length() < 2) {
+    if (value == nullptr) {
+        LOGW("Invalid parameter.");
+        return nullptr;
+    }
+    JSOffscreenCanvas* workCanvas = (JSOffscreenCanvas*)value;
+    if (workCanvas == nullptr) {
+        LOGW("Invalid context.");
+        return nullptr;
+    }
+    napi_value global = nullptr;
+    napi_status status = napi_get_global(env, &global);
+    if (status != napi_ok) {
+        return nullptr;
+    }
+    BindingTarget bindingTarget = NapiValueToLocalValue(global);
+    JSOffscreenRenderingContext::JSBind(bindingTarget);
+    JSCanvasGradient::JSBind(bindingTarget);
+    JSCanvasPattern::JSBind(bindingTarget);
+    JSMatrix2d::JSBind(bindingTarget);
+
+    napi_value offscreenCanvas = nullptr;
+    napi_create_object(env, &offscreenCanvas);
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_GETTER_SETTER("width", JSOffscreenCanvas::JsGetWidth, JSOffscreenCanvas::JsSetWidth),
+        DECLARE_NAPI_GETTER_SETTER("height", JSOffscreenCanvas::JsGetHeight, JSOffscreenCanvas::JsSetHeight),
+        DECLARE_NAPI_FUNCTION("transferToImageBitmap", JSOffscreenCanvas::JsTransferToImageBitmap),
+        DECLARE_NAPI_FUNCTION("getContext", JSOffscreenCanvas::JsGetContext),
+    };
+    napi_define_properties(env, offscreenCanvas, sizeof(desc) / sizeof(*desc), desc);
+    napi_coerce_to_native_binding_object(
+        env, offscreenCanvas, DetachOffscreenCanvas, AttachOffscreenCanvas, value, nullptr);
+    napi_wrap(
+        env, offscreenCanvas, value,
+        [](napi_env env, void* data, void* hint) {
+            LOGD("Finalizer for offscreen canvas is called");
+            auto wrapper = reinterpret_cast<JSOffscreenCanvas*>(data);
+            delete wrapper;
+            wrapper = nullptr;
+        },
+        nullptr, nullptr);
+    return offscreenCanvas;
+}
+
+double JSOffscreenCanvas::dipScale_ = 1.0;
+
+napi_value JSOffscreenCanvas::InitOffscreenCanvas(napi_env env)
+{
+    napi_value object = nullptr;
+    napi_create_object(env, &object);
+
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_GETTER_SETTER("width", JsGetWidth, JsSetWidth),
+        DECLARE_NAPI_GETTER_SETTER("height", JsGetHeight, JsSetHeight),
+        DECLARE_NAPI_FUNCTION("transferToImageBitmap", JsTransferToImageBitmap),
+        DECLARE_NAPI_FUNCTION("getContext", JsGetContext),
+    };
+    napi_status status = napi_define_class(
+        env, "OffscreenCanvas", NAPI_AUTO_LENGTH, Constructor, nullptr, sizeof(desc) / sizeof(*desc), desc, &object);
+    if (status != napi_ok) {
+        LOGW("Initialize offscreen canvas failed");
+        return nullptr;
+    }
+    return object;
+}
+
+void JSOffscreenCanvas::JSBind(BindingTarget globalObj, void* nativeEngine)
+{
+    if (!nativeEngine) {
         return;
     }
-    if (Container::IsCurrentUseNewPipeline() && args[0]->IsNumber() && args[1]->IsNumber()) {
-        auto offscreenCanvas = Referenced::MakeRefPtr<JSOffscreenCanvas>();
-        CHECK_NULL_VOID(offscreenCanvas);
-        offscreenCanvas->IncRefCount();
-        double fWidth = 0.0;
-        double fHeight = 0.0;
-        if (JSViewAbstract::ParseJsDouble(args[0], fWidth)) {
-            fWidth = PipelineBase::Vp2PxWithCurrentDensity(fWidth);
-            offscreenCanvas->SetWidth(round(fWidth));
-        }
-        if (JSViewAbstract::ParseJsDouble(args[1], fHeight)) {
-            fHeight = PipelineBase::Vp2PxWithCurrentDensity(fHeight);
-            offscreenCanvas->SetHeight(round(fHeight));
-        }
-        args.SetReturnValue(Referenced::RawPtr(offscreenCanvas));
-    }
+    napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+
+    napi_value jsGlobalObj = nullptr;
+    napi_get_global(env, &jsGlobalObj);
+
+    napi_value result = InitOffscreenCanvas(env);
+    napi_set_named_property(env, jsGlobalObj, "OffscreenCanvas", result);
 }
 
-void JSOffscreenCanvas::Destructor(JSOffscreenCanvas* context)
+napi_value JSOffscreenCanvas::Constructor(napi_env env, napi_callback_info info)
 {
-    if (context != nullptr) {
-        context->DecRefCount();
+    size_t argc = 2;
+    napi_value thisVar = nullptr;
+    napi_value argv[2] = { nullptr };
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &thisVar, nullptr));
+    if (argc < ARGS_COUNT_TWO || argv[0] == nullptr || argv[1] == nullptr) {
+        LOGW("Invalid args.");
+        return nullptr;
     }
+    double fWidth = 0.0;
+    double fHeight = 0.0;
+    auto workCanvas = new (std::nothrow) JSOffscreenCanvas();
+    auto context = PipelineBase::GetCurrentContext();
+    if (context != nullptr) {
+        workCanvas->instanceId_ = context->GetInstanceId();
+        workCanvas->dipScale_ = context->GetDipScale();
+    }
+    if (napi_get_value_double(env, argv[0], &fWidth) == napi_ok) {
+        fWidth = PipelineBase::Vp2PxWithCurrentDensity(fWidth);
+        workCanvas->SetWidth(fWidth);
+    }
+    if (napi_get_value_double(env, argv[1], &fHeight) == napi_ok) {
+        fHeight = PipelineBase::Vp2PxWithCurrentDensity(fHeight);
+        workCanvas->SetHeight(fHeight);
+    }
+
+    napi_coerce_to_native_binding_object(
+        env, thisVar, DetachOffscreenCanvas, AttachOffscreenCanvas, workCanvas, nullptr);
+    napi_wrap(
+        env, thisVar, workCanvas,
+        [](napi_env env, void* data, void* hint) {
+            LOGD("Finalizer for offscreen canvas is called");
+            auto workCanvas = reinterpret_cast<JSOffscreenCanvas*>(data);
+            delete workCanvas;
+            workCanvas = nullptr;
+        },
+        nullptr, nullptr);
+    return thisVar;
 }
 
-void JSOffscreenCanvas::JsGetWidth(const JSCallbackInfo& info)
+napi_value JSOffscreenCanvas::JsGetWidth(napi_env env, napi_callback_info info)
+{
+    JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
+    return (me != nullptr) ? me->OnGetWidth(env) : nullptr;
+}
+
+napi_value JSOffscreenCanvas::JsGetHeight(napi_env env, napi_callback_info info)
+{
+    JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
+    return (me != nullptr) ? me->OnGetHeight(env) : nullptr;
+}
+
+napi_value JSOffscreenCanvas::JsSetWidth(napi_env env, napi_callback_info info)
+{
+    JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
+    return (me != nullptr) ? me->OnSetWidth(env, info) : nullptr;
+}
+
+napi_value JSOffscreenCanvas::JsSetHeight(napi_env env, napi_callback_info info)
+{
+    JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
+    return (me != nullptr) ? me->OnSetHeight(env, info) : nullptr;
+}
+napi_value JSOffscreenCanvas::JsTransferToImageBitmap(napi_env env, napi_callback_info info)
+{
+    JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
+    return (me != nullptr) ? me->onTransferToImageBitmap(env) : nullptr;
+}
+
+napi_value JSOffscreenCanvas::JsGetContext(napi_env env, napi_callback_info info)
+{
+    JSOffscreenCanvas* me = static_cast<JSOffscreenCanvas*>(GetNapiCallbackInfoAndThis(env, info));
+    return (me != nullptr) ? me->onGetContext(env, info) : nullptr;
+}
+
+napi_value JSOffscreenCanvas::OnGetWidth(napi_env env)
 {
     double fWidth = PipelineBase::Px2VpWithCurrentDensity(GetWidth());
-    auto returnValue = JSVal(ToJSValue(fWidth));
-    auto returnPtr = JSRef<JSVal>::Make(returnValue);
-    info.SetReturnValue(returnPtr);
+    napi_value width = nullptr;
+    napi_create_double(env, fWidth, &width);
+    return width;
 }
 
-void JSOffscreenCanvas::JsGetHeight(const JSCallbackInfo& info)
+napi_value JSOffscreenCanvas::OnGetHeight(napi_env env)
 {
     double fHeight = PipelineBase::Px2VpWithCurrentDensity(GetHeight());
-    auto returnValue = JSVal(ToJSValue(fHeight));
-    auto returnPtr = JSRef<JSVal>::Make(returnValue);
-    info.SetReturnValue(returnPtr);
+    napi_value height = nullptr;
+    napi_create_double(env, fHeight, &height);
+    return height;
 }
 
-void JSOffscreenCanvas::JsSetWidth(const JSCallbackInfo& info)
+napi_value JSOffscreenCanvas::OnSetWidth(napi_env env, napi_callback_info info)
 {
-    if (info.Length() != 1) {
-        return;
+    CHECK_NULL_RETURN(offscreenCanvasPattern_, nullptr);
+    size_t argc = 0;
+    napi_value argv = nullptr;
+    napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
+    if (argc != ARGS_COUNT_ONE) {
+        LOGD("Invalid args.");
+        return nullptr;
     }
-    if (info[0]->IsUndefined() || info[0]->IsNull()) {
-        return;
+    napi_get_cb_info(env, info, &argc, &argv, nullptr, nullptr);
+    if (argv == nullptr) {
+        return nullptr;
     }
     double width = 0.0;
-    if (JSViewAbstract::ParseJsDouble(info[0], width)) {
-        width_ = PipelineBase::Vp2PxWithCurrentDensity(width);
+    if (napi_get_value_double(env, argv, &width) == napi_ok) {
+        width = PipelineBase::Vp2PxWithCurrentDensity(width);
     } else {
-        return;
+        return nullptr;
     }
 
-    if (contextType_ == ContextType::CONTEXT_2D) {
-        CreateContext2d(width_, GetHeight());
+    if (width_ != width) {
+        width_ = width;
+        offscreenCanvasPattern_->UpdateSize(width_, height_);
     }
-    return;
+    return nullptr;
 }
 
-void JSOffscreenCanvas::JsSetHeight(const JSCallbackInfo& info)
+napi_value JSOffscreenCanvas::OnSetHeight(napi_env env, napi_callback_info info)
 {
-    if (info.Length() != 1) {
-        return;
+    CHECK_NULL_RETURN(offscreenCanvasPattern_, nullptr);
+    size_t argc = 0;
+    napi_value argv = nullptr;
+    napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
+    if (argc != ARGS_COUNT_ONE) {
+        LOGD("Invalid args.");
+        return nullptr;
     }
-
-    if (info[0]->IsUndefined() || info[0]->IsNull()) {
-        return;
+    napi_get_cb_info(env, info, &argc, &argv, nullptr, nullptr);
+    if (argv == nullptr) {
+        return nullptr;
     }
     double height = 0.0;
-    if (JSViewAbstract::ParseJsDouble(info[0], height)) {
-        height_ = PipelineBase::Vp2PxWithCurrentDensity(height);
+    if (napi_get_value_double(env, argv, &height) == napi_ok) {
+        height = PipelineBase::Vp2PxWithCurrentDensity(height);
     } else {
-        return;
+        return nullptr;
     }
 
-    if (contextType_ == ContextType::CONTEXT_2D) {
-        CreateContext2d(GetWidth(), height_);
+    if (height_ != height) {
+        height_ = height;
+        offscreenCanvasPattern_->UpdateSize(width_, height_);
     }
-    return;
+    return nullptr;
 }
 
-void JSOffscreenCanvas::JsTransferToImageBitmap(const JSCallbackInfo& info)
+napi_value JSOffscreenCanvas::onTransferToImageBitmap(napi_env env)
 {
-    if (Container::IsCurrentUseNewPipeline()) {
-        CHECK_NULL_VOID(offscreenCanvasContext_);
-        CHECK_NULL_VOID(offscreenCanvasPattern_);
-        auto final_height = static_cast<uint32_t>(GetHeight());
-        auto final_width = static_cast<uint32_t>(GetWidth());
-        JSRef<JSObject> renderImage = JSRef<JSObject>::New();
-        renderImage->SetProperty("__type", "ImageBitmap");
-        renderImage->SetProperty("__id", offscreenCanvasContext_->GetId());
-        renderImage->SetProperty("height", final_height);
-        renderImage->SetProperty("width", final_width);
-        info.SetReturnValue(renderImage);
+    std::string type = "ImageBitmap";
+    if (offscreenCanvasContext_ == nullptr) {
+        return nullptr;
     }
+    uint32_t id = offscreenCanvasContext_->GetId();
+    auto final_height = static_cast<uint32_t>(GetHeight());
+    auto final_width = static_cast<uint32_t>(GetWidth());
+    napi_value renderImage = nullptr;
+    napi_value jsType = nullptr;
+    napi_value jsId = nullptr;
+    napi_value jsHeight = nullptr;
+    napi_value jsWidth = nullptr;
+    napi_create_object(env, &renderImage);
+    napi_create_string_utf8(env, type.c_str(), type.length(), &jsType);
+    napi_create_uint32(env, id, &jsId);
+    napi_create_double(env, final_height, &jsHeight);
+    napi_create_double(env, final_width, &jsWidth);
+    napi_set_named_property(env, renderImage, "__type", jsType);
+    napi_set_named_property(env, renderImage, "__id", jsId);
+    napi_set_named_property(env, renderImage, "height", jsHeight);
+    napi_set_named_property(env, renderImage, "width", jsWidth);
+    return renderImage;
 }
 
-void JSOffscreenCanvas::JsGetContext(const JSCallbackInfo& info)
+napi_value JSOffscreenCanvas::onGetContext(napi_env env, napi_callback_info info)
 {
-    if (info.Length() < 1 || info.Length() > 2) {
-        return;
+    size_t argc = 2;
+    napi_value argv[2] = { nullptr };
+    napi_value offscreenCanvas = nullptr;
+    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, &offscreenCanvas, nullptr));
+    if (argc < ARGS_COUNT_ONE || argc > ARGS_COUNT_TWO) {
+        LOGD("Invalid args.");
+        return nullptr;
     }
-    if (info[0]->IsUndefined() || info[0]->IsNull()) {
-        return;
+    if (argv[0] == nullptr) {
+        return nullptr;
     }
     if (!Container::IsCurrentUseNewPipeline()) {
-        return;
+        return nullptr;
     }
 
-    if (info[0]->IsString()) {
-        std::string ruleStr;
-        JSViewAbstract::ParseJsString(info[0], ruleStr);
-        if (ruleStr == "2d") {
-            contextType_ = ContextType::CONTEXT_2D;
-            auto contextObj = CreateContext2d(GetWidth(), GetHeight());
-            if (contextObj->IsEmpty()) {
-                return;
+    size_t textLen = 0;
+    std::string contextType = "";
+    napi_get_value_string_utf8(env, argv[0], nullptr, 0, &textLen);
+    std::unique_ptr<char[]> text = std::make_unique<char[]>(textLen + 1);
+    napi_get_value_string_utf8(env, argv[0], text.get(), textLen + 1, &textLen);
+    contextType = text.get();
+    if (contextType == "2d") {
+        contextType_ = ContextType::CONTEXT_2D;
+        napi_value contextObj = CreateContext2d(env, GetWidth(), GetHeight());
+        if (contextObj == nullptr) {
+            return nullptr;
+        }
+        napi_value isSucceed = nullptr;
+        if (napi_get_named_property(env, contextObj, "__isSucceed", &isSucceed) == napi_ok) {
+            bool value = true;
+            napi_get_value_bool(env, isSucceed, &value);
+            if (!value) {
+                return nullptr;
             }
-            JSRef<JSVal> isSucceed = contextObj->GetProperty("__isSucceed");
-            if (isSucceed->IsBoolean() && !isSucceed->ToBoolean()) {
-                return;
-            }
-            if (info[1]->IsObject()) {
-                offscreenCanvasSettings_ = JSRef<JSObject>::Cast(info[1])->Unwrap<JSRenderingContextSettings>();
-                CHECK_NULL_VOID(offscreenCanvasSettings_);
+        } else {
+            return nullptr;
+        }
+        if (argv[1] != nullptr) {
+            panda::Local<panda::ObjectRef> localValue = NapiValueToLocalValue(argv[1]);
+            JSObject jsObject(localValue);
+            offscreenCanvasSettings_ = jsObject.Unwrap<JSRenderingContextSettings>();
+            if (offscreenCanvasSettings_ != nullptr && offscreenCanvasContext_ != nullptr) {
                 bool anti = offscreenCanvasSettings_->GetAntialias();
                 offscreenCanvasContext_->SetAnti(anti);
                 offscreenCanvasContext_->SetAntiAlias();
             }
-            info.SetReturnValue(contextObj);
         }
+        return contextObj;
     }
+    return nullptr;
 }
 
-JSRef<JSObject> JSOffscreenCanvas::CreateContext2d(double width, double height)
+napi_value JSOffscreenCanvas::CreateContext2d(napi_env env, double width, double height)
 {
-    JSRef<JSObject> contextObj = JSClass<JSOffscreenRenderingContext>::NewInstance();
-    if (contextObj->IsEmpty()) {
-        return contextObj;
+    napi_value global = nullptr;
+    napi_status status = napi_get_global(env, &global);
+    if (status != napi_ok) {
+        return nullptr;
     }
-    contextObj->SetProperty("__type", "OffscreenCanvasRenderingContext2D");
-    offscreenCanvasContext_ = Referenced::Claim(contextObj->Unwrap<JSOffscreenRenderingContext>());
-    offscreenCanvasPattern_ = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(
-        static_cast<int32_t>(width), static_cast<int32_t>(height));
-    CHECK_NULL_RETURN(offscreenCanvasPattern_, contextObj);
+    napi_value constructor = nullptr;
+    status = napi_get_named_property(env, global, "OffscreenCanvasRenderingContext2D", &constructor);
+    if (status != napi_ok) {
+        return nullptr;
+    }
+
+    napi_value thisVal = nullptr;
+    napi_create_object(env, &thisVal);
+    status = napi_new_instance(env, constructor, 0, nullptr, &thisVal);
+    if (status != napi_ok) {
+        return nullptr;
+    }
+    if (instanceId_ != -1) {
+        offscreenCanvasPattern_ = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(
+            GetContext(), static_cast<int32_t>(width), static_cast<int32_t>(height));
+    } else {
+        offscreenCanvasPattern_ = AceType::MakeRefPtr<NG::OffscreenCanvasPattern>(
+            static_cast<int32_t>(width), static_cast<int32_t>(height));
+    }
+    if (offscreenCanvasPattern_ == nullptr) {
+        return thisVal;
+    }
+    bool isSucceed = true;
+    napi_value value = nullptr;
     if (!offscreenCanvasPattern_->IsSucceed()) {
-        contextObj->SetProperty("__isSucceed", false);
-        return contextObj;
+        isSucceed = false;
+        napi_create_int32(env, isSucceed, &value);
+        napi_set_named_property(env, thisVal, "__isSucceed", value);
+        return thisVal;
     }
-    contextObj->SetProperty("__isSucceed", true);
+    napi_create_int32(env, isSucceed, &value);
+    napi_set_named_property(env, thisVal, "__isSucceed", value);
+
+    panda::Local<panda::ObjectRef> localValue = NapiValueToLocalValue(thisVal);
+    JSObject jsObject(localValue);
+    offscreenCanvasContext_ = Referenced::Claim(jsObject.Unwrap<JSOffscreenRenderingContext>());
     offscreenCanvasContext_->SetOffscreenPattern(offscreenCanvasPattern_);
     offscreenCanvasContext_->AddOffscreenCanvasPattern(offscreenCanvasPattern_);
-    CHECK_NULL_RETURN(offscreenCanvasSettings_, contextObj);
-    bool anti = offscreenCanvasSettings_->GetAntialias();
-    offscreenCanvasContext_->SetAnti(anti);
-    offscreenCanvasContext_->SetAntiAlias();
-    return contextObj;
+    return thisVal;
+}
+
+double JSOffscreenCanvas::ConvertToPxValue(Dimension dimension)
+{
+    if (dimension.Unit() == DimensionUnit::NONE) {
+        return dimension.Value();
+    }
+    if (dimension.Unit() == DimensionUnit::PX) {
+        return dimension.Value();
+    }
+    if (dimension.Unit() == DimensionUnit::VP) {
+        return dimension.Value() * dipScale_;
+    }
+    return 0.0;
 }
 } // namespace OHOS::Ace::Framework

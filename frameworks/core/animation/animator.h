@@ -203,6 +203,8 @@ public:
         needFrameJankReport_ = false;
     }
 
+    bool PrintVsyncInfoIfNeed() const;
+
 private:
     // Screen refresh callback. duration is in millisecond.
     void OnFrame(int64_t duration);

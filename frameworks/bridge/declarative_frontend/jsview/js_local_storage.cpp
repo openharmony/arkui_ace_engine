@@ -76,7 +76,6 @@ void JSLocalStorage::GetShared(const JSCallbackInfo& info)
         LOGW("LocalStorage with ID %{public}d not found!", currentInstance);
         return;
     }
-    LOGI("JSLocalStorage::GetShared find ID:%{public}d", currentInstance);
     info.SetReturnValue(it->second);
 }
 

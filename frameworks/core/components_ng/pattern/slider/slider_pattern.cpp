@@ -485,7 +485,7 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
 
     PanDirection panDirection;
-    panDirection.type = PanDirection::ALL;
+    panDirection.type = direction_ == Axis::HORIZONTAL ? PanDirection::HORIZONTAL : PanDirection::VERTICAL;
     gestureHub->AddPanEvent(panEvent_, panDirection, 1, DEFAULT_PAN_DISTANCE);
 }
 
@@ -767,11 +767,7 @@ void SliderPattern::FireChangeEvent(int32_t mode)
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (mode == SliderChangeMode::Begin) {
-        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
-    } else if (mode == SliderChangeMode::End) {
-        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
-    }
+    host->OnAccessibilityEvent(AccessibilityEventType::COMPONENT_CHANGE);
 }
 
 void SliderPattern::UpdateMarkDirtyNode(const PropertyChangeFlag& Flag)

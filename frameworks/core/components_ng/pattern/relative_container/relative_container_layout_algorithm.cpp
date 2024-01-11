@@ -47,21 +47,28 @@ void RelativeContainerLayoutAlgorithm::UpdateVerticalTwoAlignValues(
         return;
     }
     auto result = 0.0f;
+    std::optional<float> marginTop;
+    if (!IsAnchorContainer(alignRule.anchor)) {
+        auto anchorWrapper = idNodeMap_[alignRule.anchor];
+        marginTop = anchorWrapper->GetGeometryNode()->GetMargin()->top;
+    }
     switch (alignRule.vertical) {
         case VerticalAlign::TOP:
-            result = IsAnchorContainer(alignRule.anchor) ? 0.0f : recordOffsetMap_[alignRule.anchor].GetY();
+            result = IsAnchorContainer(alignRule.anchor)
+                         ? 0.0f
+                         : recordOffsetMap_[alignRule.anchor].GetY() + marginTop.value_or(0);
             break;
         case VerticalAlign::CENTER:
             result = IsAnchorContainer(alignRule.anchor)
                          ? containerSizeWithoutPaddingBorder_.Height() / 2.0f
-                         : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetMarginFrameSize().Height() / 2.0f +
-                               recordOffsetMap_[alignRule.anchor].GetY();
+                         : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetFrameSize().Height() / 2.0f +
+                               recordOffsetMap_[alignRule.anchor].GetY() + marginTop.value_or(0);
             break;
         case VerticalAlign::BOTTOM:
             result = IsAnchorContainer(alignRule.anchor)
                          ? containerSizeWithoutPaddingBorder_.Height()
-                         : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetMarginFrameSize().Height() +
-                               recordOffsetMap_[alignRule.anchor].GetY();
+                         : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetFrameSize().Height() +
+                               recordOffsetMap_[alignRule.anchor].GetY() + marginTop.value_or(0);
             break;
         default:
             break;
@@ -82,21 +89,28 @@ void RelativeContainerLayoutAlgorithm::UpdateHorizontalTwoAlignValues(
         return;
     }
     auto result = 0.0f;
+    std::optional<float> marginLeft;
+    if (!IsAnchorContainer(alignRule.anchor)) {
+        auto anchorWrapper = idNodeMap_[alignRule.anchor];
+        marginLeft = anchorWrapper->GetGeometryNode()->GetMargin()->left;
+    }
     switch (alignRule.horizontal) {
         case HorizontalAlign::START:
-            result = IsAnchorContainer(alignRule.anchor) ? 0.0f : recordOffsetMap_[alignRule.anchor].GetX();
+            result = IsAnchorContainer(alignRule.anchor)
+                         ? 0.0f
+                         : recordOffsetMap_[alignRule.anchor].GetX() + marginLeft.value_or(0);
             break;
         case HorizontalAlign::CENTER:
             result = IsAnchorContainer(alignRule.anchor)
                          ? containerSizeWithoutPaddingBorder_.Width() / 2.0f
-                         : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetMarginFrameSize().Width() / 2.0f +
-                               recordOffsetMap_[alignRule.anchor].GetX();
+                         : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetFrameSize().Width() / 2.0f +
+                               recordOffsetMap_[alignRule.anchor].GetX() + marginLeft.value_or(0);
             break;
         case HorizontalAlign::END:
             result = IsAnchorContainer(alignRule.anchor)
                          ? containerSizeWithoutPaddingBorder_.Width()
-                         : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetMarginFrameSize().Width() +
-                               recordOffsetMap_[alignRule.anchor].GetX();
+                         : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetFrameSize().Width() +
+                               recordOffsetMap_[alignRule.anchor].GetX() + marginLeft.value_or(0);
             break;
         default:
             break;
@@ -143,14 +157,42 @@ void RelativeContainerLayoutAlgorithm::DetermineTopologicalOrder(LayoutWrapper* 
     TopologicalSort(renderList_);
 }
 
+void RelativeContainerLayoutAlgorithm::UpdateSizeWhenChildrenEmpty(LayoutWrapper* layoutWrapper)
+{
+    CHECK_NULL_VOID(layoutWrapper);
+    auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
+    CHECK_NULL_VOID(relativeContainerLayoutProperty);
+    const auto& calcLayoutConstraint = relativeContainerLayoutProperty->GetCalcLayoutConstraint();
+    if (!calcLayoutConstraint) {
+        const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+        CHECK_NULL_VOID(layoutConstraint.has_value());
+        auto idealSize = CreateIdealSizeByPercentRef(layoutConstraint.value(), Axis::FREE,
+                                                     MeasureType::MATCH_PARENT).ConvertToSizeT();
+        layoutWrapper->GetGeometryNode()->SetFrameSize(idealSize.IsPositive() ? idealSize : SizeF(0.0f, 0.0f));
+        return;
+    }
+    auto selfIdealSize = calcLayoutConstraint->selfIdealSize;
+    padding_ = relativeContainerLayoutProperty->CreatePaddingAndBorder();
+    if (selfIdealSize->Width()->GetDimension().Unit() == DimensionUnit::AUTO) {
+        layoutWrapper->GetGeometryNode()->SetFrameSize(
+            SizeF(padding_.Width(), layoutWrapper->GetGeometryNode()->GetFrameSize().Height()));
+    }
+    if (selfIdealSize->Height()->GetDimension().Unit() == DimensionUnit::AUTO) {
+        layoutWrapper->GetGeometryNode()->SetFrameSize(
+            SizeF(layoutWrapper->GetGeometryNode()->GetFrameSize().Width(), padding_.Height()));
+    }
+}
+
 void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    if (layoutWrapper->GetAllChildrenWithBuild().empty()) {
-        return;
-    }
     auto relativeContainerLayoutProperty = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(relativeContainerLayoutProperty);
+    if (layoutWrapper->GetAllChildrenWithBuild().empty()) {
+        UpdateSizeWhenChildrenEmpty(layoutWrapper);
+        return;
+    }
+
     DetermineTopologicalOrder(layoutWrapper);
     if (SystemProperties::GetDebugEnabled()) {
         std::string result = "[";
@@ -193,12 +235,14 @@ void RelativeContainerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         CalcSizeParam(layoutWrapper, nodeName);
         CalcOffsetParam(layoutWrapper, nodeName);
     }
-
-    auto& calcLayoutConstraint = relativeContainerLayoutProperty->GetCalcLayoutConstraint();
+    const auto& calcLayoutConstraint = relativeContainerLayoutProperty->GetCalcLayoutConstraint();
     CHECK_NULL_VOID(calcLayoutConstraint);
     auto selfIdealSize = calcLayoutConstraint->selfIdealSize;
-    if (selfIdealSize->Width()->GetDimension().Unit() == DimensionUnit::AUTO ||
-        selfIdealSize->Height()->GetDimension().Unit() == DimensionUnit::AUTO) {
+    CHECK_NULL_VOID(selfIdealSize.has_value());
+    if ((selfIdealSize.value().Width().has_value() &&
+            selfIdealSize.value().Width().value().GetDimension().Unit() == DimensionUnit::AUTO) ||
+        (selfIdealSize.value().Height().has_value() &&
+            selfIdealSize.value().Height().value().GetDimension().Unit() == DimensionUnit::AUTO)) {
         MeasureSelf(layoutWrapper);
     }
 }
@@ -227,8 +271,8 @@ void RelativeContainerLayoutAlgorithm::MeasureSelf(LayoutWrapper* layoutWrapper)
         relativeContainerRect = relativeContainerRect.CombineRectT(tempRect);
     }
 
-    relativeContainerRect = relativeContainerRect.IntersectRectT(RectF(0.0f, 0.0f, Infinity<float>(),
-                                                                 Infinity<float>()));
+    relativeContainerRect =
+        relativeContainerRect.IntersectRectT(RectF(0.0f, 0.0f, Infinity<float>(), Infinity<float>()));
     if (selfIdealSize->Width()->GetDimension().Unit() == DimensionUnit::AUTO && !isHorizontalRelyOnContainer_) {
         layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(relativeContainerRect.Width() + padding_.Width(),
             layoutWrapper->GetGeometryNode()->GetFrameSize().Height()));
@@ -311,11 +355,11 @@ void RelativeContainerLayoutAlgorithm::GetDependencyRelationship()
         for (const auto& alignRule : flexItem->GetAlignRulesValue()) {
             if (IsAnchorContainer(alignRule.second.anchor) ||
                 idNodeMap_.find(alignRule.second.anchor) == idNodeMap_.end()) {
-                    if (static_cast<uint32_t>(alignRule.first) < HORIZONTAL_DIRECTION_RANGE) {
-                        isHorizontalRelyOnContainer_ = true;
-                    } else if (static_cast<uint32_t>(alignRule.first) < VERTICAL_DIRECTION_RANGE) {
-                        isVerticalRelyOnContainer_ = true;
-                    }
+                if (static_cast<uint32_t>(alignRule.first) < HORIZONTAL_DIRECTION_RANGE) {
+                    isHorizontalRelyOnContainer_ = true;
+                } else if (static_cast<uint32_t>(alignRule.first) < VERTICAL_DIRECTION_RANGE) {
+                    isVerticalRelyOnContainer_ = true;
+                }
                 continue;
             }
             auto anchorChildWrapper = idNodeMap_[alignRule.second.anchor];
@@ -446,8 +490,10 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
         calcConstraint->selfIdealSize.value().Height().has_value()) {
         verticalHasIdealSize = true;
     }
-    horizontalHasIdealSize &= Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN);
-    verticalHasIdealSize &= Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN);
+    horizontalHasIdealSize =
+        horizontalHasIdealSize && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN);
+    verticalHasIdealSize =
+        verticalHasIdealSize && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN);
     const auto& childFlexItemProperty = childLayoutProperty->GetFlexItemProperty();
     std::optional<float> childIdealWidth;
     std::optional<float> childIdealHeight;
@@ -522,10 +568,10 @@ void RelativeContainerLayoutAlgorithm::CalcSizeParam(LayoutWrapper* layoutWrappe
         return;
     }
 
-    if (childIdealWidth.has_value()) {
+    if (childIdealWidth.has_value() && !horizontalHasIdealSize) {
         childConstraint.selfIdealSize.SetWidth(childIdealWidth.value());
     }
-    if (childIdealHeight.has_value()) {
+    if (childIdealHeight.has_value() && !verticalHasIdealSize) {
         childConstraint.selfIdealSize.SetHeight(childIdealHeight.value());
     }
     childWrapper->Measure(childConstraint);
@@ -600,8 +646,7 @@ OffsetF RelativeContainerLayoutAlgorithm::CalcBias(const RefPtr<LayoutWrapper>& 
     auto verticalOffset = 0.0f;
     auto horizontalValues = alignedValuesOnTwoDirections.first;
     auto verticalValues = alignedValuesOnTwoDirections.second;
-    if (horizontalValues.first.has_value() && horizontalValues.second.has_value() &&
-        childIdealSize.first.has_value()) {
+    if (horizontalValues.first.has_value() && horizontalValues.second.has_value() && childIdealSize.first.has_value()) {
         auto alignDiff = std::abs(horizontalValues.first.value() - horizontalValues.second.value());
         horizontalOffset = (alignDiff - childIdealSize.first.value()) * (IsValidBias(biasX) ? biasX : DEFAULT_BIAS);
     }
@@ -719,7 +764,12 @@ float RelativeContainerLayoutAlgorithm::CalcHorizontalOffset(
     float flexItemWidth = childWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
     float anchorWidth = IsAnchorContainer(alignRule.anchor)
                             ? containerWidth
-                            : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetMarginFrameSize().Width();
+                            : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetFrameSize().Width();
+    std::optional<float> marginLeft;
+    if (!IsAnchorContainer(alignRule.anchor)) {
+        auto anchorWrapper = idNodeMap_[alignRule.anchor];
+        marginLeft = anchorWrapper->GetGeometryNode()->GetMargin()->left;
+    }
     switch (alignDirection) {
         case AlignDirection::LEFT:
             switch (alignRule.horizontal) {
@@ -769,7 +819,8 @@ float RelativeContainerLayoutAlgorithm::CalcHorizontalOffset(
         default:
             break;
     }
-    offsetX += IsAnchorContainer(alignRule.anchor) ? 0.0f : recordOffsetMap_[alignRule.anchor].GetX();
+    offsetX +=
+        IsAnchorContainer(alignRule.anchor) ? 0.0f : recordOffsetMap_[alignRule.anchor].GetX() + marginLeft.value_or(0);
     return offsetX;
 }
 
@@ -782,7 +833,12 @@ float RelativeContainerLayoutAlgorithm::CalcVerticalOffset(
     float flexItemHeight = childWrapper->GetGeometryNode()->GetMarginFrameSize().Height();
     float anchorHeight = IsAnchorContainer(alignRule.anchor)
                              ? containerHeight
-                             : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetMarginFrameSize().Height();
+                             : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetFrameSize().Height();
+    std::optional<float> marginTop;
+    if (!IsAnchorContainer(alignRule.anchor)) {
+        auto anchorWrapper = idNodeMap_[alignRule.anchor];
+        marginTop = anchorWrapper->GetGeometryNode()->GetMargin()->top;
+    }
     switch (alignDirection) {
         case AlignDirection::TOP:
             switch (alignRule.vertical) {
@@ -832,7 +888,8 @@ float RelativeContainerLayoutAlgorithm::CalcVerticalOffset(
         default:
             break;
     }
-    offsetY += IsAnchorContainer(alignRule.anchor) ? 0.0f : recordOffsetMap_[alignRule.anchor].GetY();
+    offsetY +=
+        IsAnchorContainer(alignRule.anchor) ? 0.0f : recordOffsetMap_[alignRule.anchor].GetY() + marginTop.value_or(0);
     return offsetY;
 }
 

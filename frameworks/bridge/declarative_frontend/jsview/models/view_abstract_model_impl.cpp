@@ -961,6 +961,12 @@ void ViewAbstractModelImpl::SetBlendMode(BlendMode blendMode)
     backDecoration->SetBlendMode(blendMode);
 }
 
+void ViewAbstractModelImpl::SetBlendApplyType(BlendApplyType blendApplyType)
+{
+    auto backDecoration = GetBackDecoration();
+    backDecoration->SetBlendApplyType(blendApplyType);
+}
+
 void ViewAbstractModelImpl::SetColorBlend(const Color& value)
 {
     auto decoration = GetFrontDecoration();

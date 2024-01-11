@@ -135,13 +135,6 @@ void JSMenu::SetWidth(const JSCallbackInfo& info)
     if (!ParseJsDimensionVp(info[0], width)) {
         return;
     }
-
-    auto menuWidthToPx = width.ConvertToPx();
-    auto minMenuWidthToPx = MIN_MENU_WIDTH.ConvertToPx();
-    if (menuWidthToPx < minMenuWidthToPx) {
-        return;
-    }
-
     MenuModel::GetInstance()->SetWidth(width);
 }
 

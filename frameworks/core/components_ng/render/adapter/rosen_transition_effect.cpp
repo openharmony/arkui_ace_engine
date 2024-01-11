@@ -417,6 +417,11 @@ void RosenAsymmetricTransitionEffect::OnUpdateTransitionContext(
     }
 }
 
+bool RosenAsymmetricTransitionEffect::HasDisappearTransition() const
+{
+    return transitionOut_ && transitionOut_->HasDisappearTransition();
+}
+
 void RosenTranslateTransitionEffect::OnUpdateTransitionContext(
     const RefPtr<RosenRenderContext>& context, const RectF& selfRect, const SizeF& viewSize)
 {

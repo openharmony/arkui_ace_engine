@@ -36,4 +36,14 @@ sptr<OHOS::Rosen::Window> AceContainer::GetUIWindow(int32_t instanceId)
 {
     return nullptr;
 }
+
+Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
+{
+    return {};
+}
+
+RefPtr<AceContainer> AceContainer::GetContainer(int32_t instanceId)
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace::Platform

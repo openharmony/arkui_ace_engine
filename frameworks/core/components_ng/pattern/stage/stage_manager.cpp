@@ -145,10 +145,16 @@ void StageManager::PageChangeCloseKeyboard()
 {
     // close keyboard
 #if defined (ENABLE_STANDARD_INPUT)
-    // If pushpage, close it
     if (Container::CurrentId() == CONTAINER_ID_DIVIDE_SIZE) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "StageManager FrameNode notNeedSoftKeyboard.");
-        FocusHub::PushPageCloseKeyboard();
+        auto container = Container::Current();
+        if (!container) {
+            return;
+        }
+        if (!container->IsScenceBoardWindow()) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Container not ScenceBoardWindow.");
+            FocusHub::PushPageCloseKeyboard();
+        }
     }
 #endif
 }
@@ -199,6 +205,7 @@ bool StageManager::PushPage(const RefPtr<FrameNode>& node, bool needHideLast, bo
     // close keyboard
     PageChangeCloseKeyboard();
 
+    FireAutoSave(outPageNode);
     if (needTransition) {
         pipeline->AddAfterLayoutTask([weakStage = WeakClaim(this), weakIn = WeakPtr<FrameNode>(node),
                                          weakOut = WeakPtr<FrameNode>(outPageNode)]() {
@@ -259,6 +266,7 @@ bool StageManager::PopPage(bool needShowNext, bool needTransition)
     PageChangeCloseKeyboard();
 
     auto outPageNode = AceType::DynamicCast<FrameNode>(pageNode);
+    FireAutoSave(outPageNode);
     if (needTransition) {
         StartTransition(outPageNode, inPageNode, RouteType::POP);
         inPageNode->OnAccessibilityEvent(AccessibilityEventType::CHANGE);
@@ -310,6 +318,7 @@ bool StageManager::PopPageToIndex(int32_t index, bool needShowNext, bool needTra
         inPageNode = AceType::DynamicCast<FrameNode>(newPageNode);
     }
 
+    FireAutoSave(outPageNode);
     if (needTransition) {
         // from the penultimate node, (popSize - 1) nodes are deleted.
         // the last node will be deleted after pageTransition
@@ -379,8 +388,9 @@ bool StageManager::MovePageToFront(const RefPtr<FrameNode>& node, bool needHideL
     FirePageShow(node, needTransition ? PageTransitionType::ENTER_PUSH : PageTransitionType::NONE);
 
     stageNode_->RebuildRenderContextTree();
+    auto outPageNode = AceType::DynamicCast<FrameNode>(lastPage);
+    FireAutoSave(outPageNode);
     if (needTransition) {
-        auto outPageNode = AceType::DynamicCast<FrameNode>(lastPage);
         StartTransition(outPageNode, node, RouteType::PUSH);
     }
     pipeline->RequestFrame();
@@ -438,6 +448,14 @@ void StageManager::FirePageShow(const RefPtr<UINode>& node, PageTransitionType t
         distributedUI->OnPageChanged(node->GetPageId());
     } while (false);
 #endif
+}
+
+void StageManager::FireAutoSave(const RefPtr<FrameNode>& pageNode)
+{
+    CHECK_NULL_VOID(pageNode);
+    auto pagePattern = pageNode->GetPattern<PagePattern>();
+    CHECK_NULL_VOID(pagePattern);
+    pagePattern->ProcessAutoSave();
 }
 
 RefPtr<FrameNode> StageManager::GetLastPage()

@@ -27,7 +27,6 @@
 #include "core/components_ng/pattern/loading_progress/loading_progress_utill.h"
 #include "core/components_ng/pattern/refresh/refresh_animation_state.h"
 #include "core/components_ng/render/animation_utils.h"
-#include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
@@ -39,6 +38,8 @@ constexpr float ROTATEZ = 22.0f;
 constexpr float COUNT = 50.0f;
 constexpr float HALF = 0.5f;
 constexpr float DOUBLE = 2.0f;
+constexpr int32_t SKEWY = 3;
+constexpr int32_t SCALEY = 4;
 constexpr int32_t RING_ALPHA = 200;
 constexpr int32_t TOTAL_POINTS_COUNT = 20;
 constexpr int32_t TAIL_ANIAMTION_DURATION = 400;
@@ -66,7 +67,7 @@ constexpr float SIZE_SCALE3 = 0.93f;
 constexpr float MOVE_STEP = 0.06f;
 constexpr float TRANS_OPACITY_SPAN = 0.3f;
 constexpr float FULL_OPACITY = 255.0f;
-constexpr float FAKE_DELTA = 0.01f; 
+constexpr float FAKE_DELTA = 0.01f;
 constexpr float BASE_SCALE = 0.707f; // std::sqrt(2)/2
 } // namespace
 LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingProgressOwner)
@@ -160,13 +161,8 @@ void LoadingProgressModifier::DrawOrbit(
     float height = contentSize_->Get().Height();
     double angle = TOTAL_ANGLE * date / FULL_COUNT;
     RSCamera3D camera;
-    camera.Save();
-    camera.RotateYDegrees(ROTATEY);
-    camera.RotateXDegrees(ROTATEX);
-    camera.RotateZDegrees(ROTATEZ);
     RSMatrix matrix;
-    camera.ApplyToMatrix(matrix);
-    camera.Restore();
+    AdjustMatrix(camera, matrix);
     auto center = RSPoint(offset_->Get().GetX() + width / 2, offset_->Get().GetY() + height / 2);
     RSBrush brush;
     brush.SetAntiAlias(true);
@@ -205,6 +201,19 @@ void LoadingProgressModifier::DrawOrbit(
     canvas.Restore();
 }
 
+void LoadingProgressModifier::AdjustMatrix(RSCamera3D& camera, RSMatrix& matrix)
+{
+    camera.Save();
+    camera.RotateYDegrees(ROTATEY);
+    camera.RotateXDegrees(ROTATEX);
+    camera.RotateZDegrees(ROTATEZ);
+    camera.ApplyToMatrix(matrix);
+    camera.Restore();
+    auto temp = matrix.Get(SKEWY);
+    matrix.Set(RSMatrix::SKEW_Y, matrix.Get(SCALEY));
+    matrix.Set(RSMatrix::SCALE_Y, temp);
+}
+
 void LoadingProgressModifier::StartRecycleRingAnimation()
 {
     auto context = PipelineBase::GetCurrentContext();
@@ -217,6 +226,15 @@ void LoadingProgressModifier::StartRecycleRingAnimation()
         option.SetIteration(1);
     } else {
         option.SetIteration(-1);
+    }
+    // if isVisible_ is false, start an animation to stop the key-frame animation
+    if (!isVisible_) {
+        AnimationUtils::Animate(option, [centerDeviation = centerDeviation_]() {
+            CHECK_NULL_VOID(centerDeviation);
+            centerDeviation->Set(FAKE_DELTA);
+            centerDeviation->Set(0.0f);
+        });
+        return;
     }
     AnimationUtils::OpenImplicitAnimation(option, previousStageCurve, nullptr);
     auto middleStageCurve = AceType::MakeRefPtr<CubicCurve>(0.33f, 0.0f, 0.67f, 1.0f);
@@ -255,7 +273,20 @@ void LoadingProgressModifier::StartRecycleCometAnimation()
     } else {
         option.SetIteration(-1);
     }
-
+    // if isVisible_ is false, start an animation to stop the key-frame animation
+    if (!isVisible_) {
+        AnimationUtils::Animate(option, [cometOpacity = cometOpacity_, cometSizeScale = cometSizeScale_]() {
+            if (cometOpacity) {
+                cometOpacity->Set(OPACITY1); // set a value different from the current value to start an animation
+                cometOpacity->Set(OPACITY2); // Set back the original value
+            }
+            if (cometSizeScale) {
+                cometSizeScale->Set(SIZE_SCALE1); // set a value different from the current value to start an animation
+                cometSizeScale->Set(SIZE_SCALE2); // Set back the original value
+            }
+        });
+        return;
+    }
     cometOpacity_->Set(OPACITY2);
     cometTailLen_->Set(TOTAL_TAIL_LENGTH);
     AnimationUtils::OpenImplicitAnimation(option, curve, nullptr);

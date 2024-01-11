@@ -43,20 +43,26 @@ constexpr int32_t DEFAULT_LONGPRESS_DURATION = 800000000;
 
 } // namespace
 
+void ClickRecognizer::ForceCleanRecognizer()
+{
+    MultiFingersRecognizer::ForceCleanRecognizer();
+    OnResetStatus();
+}
+
 bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
 {
     PointF localPoint(event.x, event.y);
     auto frameNode = GetAttachedNode();
     if (!frameNode.Invalid()) {
-        if (!IsPostEventResult()) {
-            NGGestureRecognizer::Transform(localPoint, frameNode);
-        }
         auto host = frameNode.Upgrade();
         CHECK_NULL_RETURN(host, false);
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_RETURN(renderContext, false);
-        auto paintRect = renderContext->GetPaintRectWithoutTransform();
-        localPoint = localPoint + paintRect.GetOffset();
+        if (!IsPostEventResult()) {
+            NGGestureRecognizer::Transform(localPoint, frameNode);
+            auto renderContext = host->GetRenderContext();
+            CHECK_NULL_RETURN(renderContext, false);
+            auto paintRect = renderContext->GetPaintRectWithoutTransform();
+            localPoint = localPoint + paintRect.GetOffset();
+        }
         if (!host->InResponseRegionList(localPoint, responseRegionBuffer_)) {
             TAG_LOGI(AceLogTag::ACE_GESTURE, "This MOVE/UP event is out of region, try to reject click gesture");
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -318,10 +324,15 @@ void ClickRecognizer::DeadlineTimer(CancelableCallback<void()>& deadlineTimer, i
 Offset ClickRecognizer::ComputeFocusPoint()
 {
     Offset sumOfPoints;
+    int32_t count = 0;
     for (auto& element : touchPoints_) {
+        if (count >= fingers_) {
+            break;
+        }
         sumOfPoints = sumOfPoints + element.second.GetOffset();
+        count++;
     }
-    Offset focusPoint = sumOfPoints / touchPoints_.size();
+    Offset focusPoint = sumOfPoints / count;
     return focusPoint;
 }
 
@@ -344,8 +355,12 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
         info.SetTimeStamp(time_);
         info.SetFingerList(fingerList_);
         TouchEvent touchPoint = {};
-        if (!touchPoints_.empty()) {
-            touchPoint = touchPoints_.begin()->second;
+        for (const auto& pointKeyVal : touchPoints_) {
+            auto pointVal = pointKeyVal.second;
+            if (pointVal.sourceType != SourceType::NONE) {
+                touchPoint = pointVal;
+                break;
+            }
         }
         PointF localPoint(touchPoint.GetOffset().GetX(), touchPoint.GetOffset().GetY());
         NGGestureRecognizer::Transform(localPoint, GetAttachedNode());
@@ -432,4 +447,8 @@ RefPtr<GestureSnapshot> ClickRecognizer::Dump() const
     return info;
 }
 
+RefPtr<Gesture> ClickRecognizer::CreateGestureFromRecognizer() const
+{
+    return AceType::MakeRefPtr<TapGesture>(count_, fingers_);
+}
 } // namespace OHOS::Ace::NG

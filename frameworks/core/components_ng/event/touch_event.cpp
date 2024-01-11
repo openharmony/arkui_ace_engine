@@ -26,6 +26,16 @@ bool TouchEventActuator::DispatchEvent(const TouchEvent& point)
     return true;
 }
 
+void TouchEventActuator::OnFlushTouchEventsBegin()
+{
+    isFlushTouchEventsEnd_ = false;
+}
+
+void TouchEventActuator::OnFlushTouchEventsEnd()
+{
+    isFlushTouchEventsEnd_ = true;
+}
+
 bool TouchEventActuator::HandleEvent(const TouchEvent& point)
 {
     auto attachedNode = GetAttachedNode();
@@ -52,7 +62,6 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
     }
     TouchEventInfo event("touchEvent");
     event.SetTimeStamp(lastPoint.time);
-    event.SetCurrentSysTime(lastPoint.currentSysTime);
     event.SetPointerEvent(lastPoint.pointerEvent);
     TouchLocationInfo changedInfo("onTouch", lastPoint.id);
     PointF lastLocalPoint(lastPoint.x, lastPoint.y);
@@ -133,6 +142,11 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
         event.SetTiltY(lastPoint.tiltY.value());
     }
     event.SetSourceTool(lastPoint.sourceTool);
+    if (isFlushTouchEventsEnd_) {
+        // trigger callback of the last touch event during one vsync period
+        event.SetTouchEventsEnd(true);
+        isFlushTouchEventsEnd_ = false;
+    }
     for (auto& impl : touchEvents_) {
         if (impl) {
             (*impl)(event);

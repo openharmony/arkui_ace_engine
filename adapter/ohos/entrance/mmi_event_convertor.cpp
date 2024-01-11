@@ -115,7 +115,6 @@ TouchEvent ConvertTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEv
 #ifdef SECURITY_COMPONENT_ENABLE
     event.enhanceData = pointerEvent->GetEnhanceData();
 #endif
-    event.currentSysTime = GetSysTimestamp();
     int32_t orgDevice = pointerEvent->GetSourceType();
     GetEventDevice(orgDevice, event);
     int32_t orgAction = pointerEvent->GetPointerAction();
@@ -178,7 +177,6 @@ void GetMouseEventAction(int32_t action, MouseEvent& events, bool isScenceBoardW
         case OHOS::MMI::PointerEvent::POINTER_ACTION_MOVE:
             events.action = MouseAction::MOVE;
             break;
-#ifdef ENABLE_DRAG_FRAMEWORK
         case OHOS::MMI::PointerEvent::POINTER_ACTION_PULL_DOWN:
             events.action = MouseAction::PRESS;
             if (isScenceBoardWindow) {
@@ -195,7 +193,6 @@ void GetMouseEventAction(int32_t action, MouseEvent& events, bool isScenceBoardW
                 events.pullAction = MouseAction::PULL_UP;
             }
             break;
-#endif // ENABLE_DRAG_FRAMEWORK
         default:
             events.action = MouseAction::NONE;
             break;

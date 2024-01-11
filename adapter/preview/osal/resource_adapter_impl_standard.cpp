@@ -97,7 +97,8 @@ const char* PATTERN_MAP[] = {
     THEME_PATTERN_GAUGE,
     THEME_PATTERN_SHEET,
     THEME_BLUR_STYLE_COMMON,
-    THEME_PATTERN_SHADOW
+    THEME_PATTERN_SHADOW,
+    THEME_PATTERN_RICH_EDITOR
 };
 } // namespace
 
@@ -506,5 +507,12 @@ std::string ResourceAdapterImpl::GetActualResourceName(const std::string& resNam
         return {};
     }
     return resName.substr(index + 1, resName.length() - index - 1);
+}
+
+uint32_t ResourceAdapterImpl::GetSymbolById(uint32_t resId) const
+{
+    uint32_t result = 0;
+    resourceManager_->GetSymbolById(resId, result);
+    return result;
 }
 } // namespace OHOS::Ace

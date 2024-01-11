@@ -230,7 +230,7 @@ void SvgNode::OnClipPath(RSCanvas& canvas, const Size& viewPort)
         LOGW("OnClipPath abandon, clipPath is empty");
         return;
     }
-    rsCanvas_->ClipPath(clipPath, RSClipOp::INTERSECT);
+    rsCanvas_->ClipPath(clipPath, RSClipOp::INTERSECT, true);
 #endif
 }
 

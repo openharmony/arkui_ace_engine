@@ -151,6 +151,9 @@ void SearchPattern::OnModifyDone()
         margin.bottom = CalcLength(UP_AND_DOWN_PADDING.ConvertToPx());
         layoutProperty->UpdateMargin(margin);
     }
+
+    HandleBackgroundColor();
+
     auto searchButton = layoutProperty->GetSearchButton();
     searchButton_ = searchButton.has_value() ? searchButton->value() : "";
     InitSearchController();
@@ -175,20 +178,53 @@ void SearchPattern::OnModifyDone()
     cancelButtonLayoutProperty->UpdateLabel("");
     cancelButtonFrameNode->MarkModifyDone();
 
+    HandleEnabled();
+
     InitButtonAndImageClickEvent();
     InitCancelButtonClickEvent();
     InitTextFieldValueChangeEvent();
     InitTextFieldDragEvent();
     InitTextFieldClickEvent();
-    InitButtonMouseEvent(searchButtonMouseEvent_, BUTTON_INDEX);
-    InitButtonMouseEvent(cancelButtonMouseEvent_, CANCEL_BUTTON_INDEX);
-    InitButtonTouchEvent(searchButtonTouchListener_, BUTTON_INDEX);
-    InitButtonTouchEvent(cancelButtonTouchListener_, CANCEL_BUTTON_INDEX);
+    InitButtonMouseAndTouchEvent();
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
     InitFocusEvent(focusHub);
     InitClickEvent();
+}
+
+void SearchPattern::HandleBackgroundColor()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto textFieldTheme = PipelineBase::GetCurrentContext()->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
+    if (!renderContext->HasBackgroundColor()) {
+        renderContext->UpdateBackgroundColor(textFieldTheme->GetBgColor());
+    }
+}
+
+void SearchPattern::HandleEnabled()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto searchEventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(searchEventHub);
+    auto textFieldFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(TEXTFIELD_INDEX));
+    CHECK_NULL_VOID(textFieldFrameNode);
+    auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
+    eventHub->SetEnabled(searchEventHub->IsEnabled()? true : false);
+    textFieldFrameNode->MarkModifyDone();
+}
+
+void SearchPattern::InitButtonMouseAndTouchEvent()
+{
+    InitButtonMouseEvent(searchButtonMouseEvent_, BUTTON_INDEX);
+    InitButtonMouseEvent(cancelButtonMouseEvent_, CANCEL_BUTTON_INDEX);
+    InitButtonTouchEvent(searchButtonTouchListener_, BUTTON_INDEX);
+    InitButtonTouchEvent(cancelButtonTouchListener_, CANCEL_BUTTON_INDEX);
 }
 
 void SearchPattern::InitTextFieldValueChangeEvent()
@@ -494,6 +530,7 @@ void SearchPattern::OnClickButtonAndImage()
 
 void SearchPattern::OnClickCancelButton()
 {
+    focusChoice_ = FocusChoice::SEARCH;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
@@ -509,6 +546,7 @@ void SearchPattern::OnClickCancelButton()
     textFieldLayoutProperty->UpdateValue("");
     auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
     eventHub->FireOnChange("");
+    textFieldPattern->StartTwinkling();
     host->MarkModifyDone();
     textFieldFrameNode->MarkModifyDone();
 }
@@ -589,7 +627,6 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     // If the focus is on the Delete button, press Enter to delete the content.
     if (event.code == KeyCode::KEY_ENTER && focusChoice_ == FocusChoice::CANCEL_BUTTON) {
         OnClickCancelButton();
-        focusChoice_ = FocusChoice::SEARCH;
         PaintFocusState();
         return true;
     }
@@ -619,6 +656,7 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
             return true;
         }
         if (focusChoice_ == FocusChoice::SEARCH && event.IsShiftWith(KeyCode::KEY_TAB)) {
+            textFieldPattern->CloseKeyboard(true);
             return false;
         }
         if (focusChoice_ == FocusChoice::SEARCH && !isAllTextSelected && !isTextEmpty) {
@@ -631,8 +669,12 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     }
     if (event.code == KeyCode::KEY_DPAD_RIGHT || (event.pressedCodes.size() == 1 && event.code == KeyCode::KEY_TAB)) {
         if (focusChoice_ == FocusChoice::SEARCH && (isAllTextSelected || isTextEmpty || isOnlyTabPressed)) {
-            if (NearZero(cancelButtonSize_.Height()) && !isSearchButtonEnabled_) {
-                return event.code == KeyCode::KEY_DPAD_RIGHT; // go outside of search only if tab pressed
+            if (NearZero(cancelButtonSize_.Height()) && !isSearchButtonEnabled_ &&
+                event.code == KeyCode::KEY_DPAD_RIGHT) {
+                return true;
+            } else if (NearZero(cancelButtonSize_.Height()) && !isSearchButtonEnabled_) {
+                textFieldPattern->CloseKeyboard(true);
+                return false;
             }
             if (NearZero(cancelButtonSize_.Height())) {
                 focusChoice_ = FocusChoice::SEARCH_BUTTON;
@@ -646,6 +688,10 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
             return true;
         }
         if (focusChoice_ == FocusChoice::CANCEL_BUTTON) {
+            if (!NearZero(cancelButtonSize_.Height()) && (!isSearchButtonEnabled_) &&
+                (event.code == KeyCode::KEY_DPAD_RIGHT)) {
+                return false; // Go out of Search
+            }
             if (isOnlyOneFocusableComponent && isOnlyTabPressed && !isSearchButtonEnabled_) {
                 focusChoice_ = FocusChoice::SEARCH;
                 PaintFocusState();
@@ -665,10 +711,12 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
         }
         if (focusChoice_ == FocusChoice::SEARCH_BUTTON &&
             (event.pressedCodes.size() == 1 && event.code == KeyCode::KEY_TAB)) {
+            textFieldPattern->CloseKeyboard(true);
             return false;
         }
-        if (focusChoice_ == FocusChoice::SEARCH_BUTTON && event.code == KeyCode::KEY_DPAD_RIGHT) {
-            return true;
+        if (focusChoice_ == FocusChoice::SEARCH_BUTTON && isSearchButtonEnabled_ &&
+            (event.code == KeyCode::KEY_DPAD_RIGHT)) {
+            return false; // Go out of Search
         }
     }
 
@@ -695,18 +743,20 @@ void SearchPattern::PaintFocusState()
         } else {
             textFieldPattern->HandleFocusEvent(); // Show caret
         }
-    } else if (textFieldPattern->IsSelected() || textFieldPattern->GetCursorVisible()) {
-        textFieldPattern->HandleSetSelection(0, 0, false); // Clear text selection & caret if focus has gone
+    } else {
+        if (textFieldPattern->IsSelected() || textFieldPattern->GetCursorVisible()) {
+            textFieldPattern->HandleSetSelection(0, 0, false); // Clear text selection & caret if focus has gone
+        }
+        textFieldPattern->CloseKeyboard(true);
     }
 
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    context->SetIsFocusActive(true);
     RoundRect focusRect;
     GetInnerFocusPaintRect(focusRect);
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
-    focusHub->PaintInnerFocusState(focusRect);
+    focusHub->PaintInnerFocusState(focusRect, true);
     host->MarkModifyDone();
 }
 
@@ -754,7 +804,9 @@ void SearchPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
 
 FocusPattern SearchPattern::GetFocusPattern() const
 {
-    return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
+    FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
+    focusPattern.SetIsFocusActiveWhenFocused(true);
+    return focusPattern;
 }
 
 void SearchPattern::RequestKeyboard()

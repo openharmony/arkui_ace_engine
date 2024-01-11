@@ -125,6 +125,7 @@ void PinchRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if (refereeState_ == RefereeState::SUCCEED && static_cast<int32_t>(activeFingers_.size()) == fingers_) {
         SendCallbackMsg(onActionEnd_);
     }
+    activeFingers_.remove(event.id);
 }
 
 void PinchRecognizer::HandleTouchUpEvent(const AxisEvent& event)

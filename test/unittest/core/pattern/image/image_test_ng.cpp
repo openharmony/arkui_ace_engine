@@ -1559,40 +1559,6 @@ HWTEST_F(ImageTestNg, ImageLayoutFunction001, TestSize.Level1)
 }
 
 /**
- * @tc.name: Drag001
- * @tc.desc: Test image drag with src change.
- * @tc.type: FUNC
- */
-HWTEST_F(ImageTestNg, Drag001, TestSize.Level1)
-{
-    auto frameNode = ImageTestNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
-    ASSERT_NE(frameNode, nullptr);
-    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
-    frameNode->SetDraggable(true);
-    frameNode->MarkModifyDone();
-    auto pattern = frameNode->GetPattern<ImagePattern>();
-    pattern->loadingCtx_->SuccessCallback(nullptr);
-
-    // emulate drag event
-    auto eventHub = frameNode->GetEventHub<EventHub>();
-    ASSERT_NE(eventHub->GetOnDragStart(), nullptr);
-    auto extraParams =
-        eventHub->GetDragExtraParams(std::string(), Point(RADIUS_DEFAULT, RADIUS_DEFAULT), DragEventType::START);
-    auto dragDropInfo = (eventHub->GetOnDragStart())(nullptr, extraParams);
-
-    // check dragInfo
-    EXPECT_EQ(dragDropInfo.extraInfo, IMAGE_SRC_URL);
-
-    // change src
-    frameNode->GetLayoutProperty<ImageLayoutProperty>()->UpdateImageSourceInfo(ImageSourceInfo(ALT_SRC_URL));
-    frameNode->MarkModifyDone();
-    pattern->loadingCtx_->SuccessCallback(nullptr);
-
-    auto newDragDropInfo = (eventHub->GetOnDragStart())(nullptr, extraParams);
-    EXPECT_EQ(newDragDropInfo.extraInfo, ALT_SRC_URL);
-}
-
-/**
  * @tc.name: CopyOption001
  * @tc.desc: Test image copyOption.
  * @tc.type: FUNC

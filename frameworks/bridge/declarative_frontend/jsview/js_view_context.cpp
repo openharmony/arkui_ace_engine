@@ -119,6 +119,8 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
     pipelineContext->CloseImplicitAnimation();
     if (immediately) {
         pipelineContext->FlushMessages();
+    } else {
+        pipelineContext->RequestFrame();
     }
 }
 
@@ -135,6 +137,8 @@ void AnimateToForFaMode(const RefPtr<PipelineBase>& pipelineContext, AnimationOp
     pipelineContext->CloseImplicitAnimation();
     if (immediately) {
         pipelineContext->FlushMessages();
+    } else {
+        pipelineContext->RequestFrame();
     }
 }
 
@@ -176,7 +180,6 @@ std::function<float(float)> ParseCallBackFunction(const JSRef<JSObject>& curveOb
 
 struct KeyframeParam {
     int32_t duration = 0;
-    float fraction = 0.0f;
     RefPtr<Curve> curve;
     std::function<void()> animationClosure;
 };
@@ -531,18 +534,13 @@ void JSViewContext::JSKeyframeAnimateTo(const JSCallbackInfo& info)
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     auto overallAnimationOption = ParseKeyframeOverallParam(info.GetExecutionContext(), obj);
     auto keyframes = ParseKeyframes(info.GetExecutionContext(), keyframeArr);
-    int32_t totalDuration = 0;
-    for (const auto& keyframe : keyframes) {
-        totalDuration += keyframe.duration;
+    int duration = 0;
+    for (auto& keyframe : keyframes) {
+        duration += keyframe.duration;
     }
-    overallAnimationOption.SetDuration(totalDuration);
+    overallAnimationOption.SetDuration(duration);
     // actual curve is in keyframe, this curve will not be effective
     overallAnimationOption.SetCurve(Curves::EASE_IN_OUT);
-    int32_t currentDuration = 0;
-    for (auto& keyframe : keyframes) {
-        currentDuration += keyframe.duration;
-        keyframe.fraction = totalDuration > 0 ? static_cast<float>(currentDuration) / totalDuration : 1.0f;
-    }
     pipelineContext->FlushBuild();
     pipelineContext->OpenImplicitAnimation(
         overallAnimationOption, overallAnimationOption.GetCurve(), overallAnimationOption.GetOnFinishEvent());
@@ -550,8 +548,8 @@ void JSViewContext::JSKeyframeAnimateTo(const JSCallbackInfo& info)
         if (!keyframe.animationClosure) {
             continue;
         }
-        AceTraceBeginWithArgs("keyframe %f", keyframe.fraction);
-        AnimationUtils::AddKeyFrame(keyframe.fraction, keyframe.curve, [&keyframe, &pipelineContext]() {
+        AceTraceBeginWithArgs("keyframe duration%d", keyframe.duration);
+        AnimationUtils::AddDurationKeyFrame(keyframe.duration, keyframe.curve, [&keyframe, &pipelineContext]() {
             keyframe.animationClosure();
             pipelineContext->FlushBuild();
             if (!pipelineContext->IsLayouting()) {

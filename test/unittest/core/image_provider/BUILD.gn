@@ -48,6 +48,7 @@ ohos_unittest("image_provider_test_ng") {
     "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
     "$ace_root/test/mock/core/render/mock_animated_image.cpp",
     "$ace_root/test/mock/core/render/mock_animation_utils.cpp",
+    "$ace_root/test/mock/core/render/mock_canvas_image.cpp",
     "$ace_root/test/mock/core/render/mock_modifier_adapter.cpp",
     "$ace_root/test/mock/core/render/mock_pixmap_image.cpp",
     "$ace_root/test/mock/core/render/mock_render_context_creator.cpp",

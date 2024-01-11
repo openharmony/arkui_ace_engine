@@ -140,6 +140,8 @@ public:
     // Mark current page node visible in render tree.
     void ProcessShowState();
 
+    void ProcessAutoSave();
+
     void StopPageTransition();
 
     void MarkRenderDone()
@@ -172,7 +174,6 @@ private:
     void BeforeCreateLayoutWrapper() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
     void FirePageTransitionFinish();
-    void ProcessAutoSave();
 
     bool AvoidKeyboard() const override;
     bool AvoidTop() const override

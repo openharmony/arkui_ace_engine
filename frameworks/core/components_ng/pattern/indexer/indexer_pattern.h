@@ -187,7 +187,6 @@ private:
     uint32_t lastPopupSize_ = 0;
     int32_t currentPopupIndex_ = -1;
     float itemSizeRender_ = 0.0f;
-    int32_t lastSelectProp_ = -1;
     uint32_t popupClickedIndex_ = -1;
     int32_t lastFireSelectIndex_ = -1;
     float lastItemSize_ = -1.0f;

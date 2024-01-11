@@ -205,28 +205,39 @@ void PageUrlCheckerOhos::LoadPageUrl(const std::string& url, const std::function
     auto appInfo = context_->GetApplicationInfo();
     if (appInfo) {
         std::vector<OHOS::AppExecFwk::ModuleInfo> moduleList = appInfo->moduleInfos;
-        bool isInstalled = false;
         auto res = std::any_of(moduleList.begin(), moduleList.end(), [moduleName](const auto &module) {
             return module.moduleName == moduleName;
         });
         if (res) {
-            isInstalled = true;
+            callback();
+            return;
         }
 
-        if (!isInstalled) {
-            auto bms = GetBundleManager();
-            CHECK_NULL_VOID(bms);
-            AAFwk::Want want;
-            want.SetBundle(bundleName);
-            want.SetModuleName(moduleName);
-            sptr<AtomicServiceStatusCallback> routerCallback = new AtomicServiceStatusCallback();
-            routerCallback->SetActionEventHandler(callback);
-            routerCallback->SetErrorEventHandler(silentInstallErrorCallBack);
-            if (bms->SilentInstall(want, appInfo->uid / AppExecFwk::Constants::BASE_USER_RANGE, routerCallback)) {
-                LOGI("Begin to silent install");
-            }
-        } else {
+        auto bms = GetBundleManager();
+        CHECK_NULL_VOID(bms);
+        std::vector<AppExecFwk::BaseSharedBundleInfo> baseSharedBundleInfo;
+        if (bms->GetBaseSharedBundleInfos(bundleName, baseSharedBundleInfo) != 0 &&
+            baseSharedBundleInfo.size() != 0) {
             callback();
+            return;
+        }
+
+        AppExecFwk::BundleInfo bundleInfo;
+        int32_t ret = bms->GetDependentBundleInfo(bundleName, bundleInfo,
+            AppExecFwk::GetDependentBundleInfoFlag::GET_APP_SERVICE_HSP_BUNDLE_INFO);
+        if (ret == ERR_OK && bundleInfo.hapModuleInfos.size() != 0) {
+            callback();
+            return;
+        }
+
+        AAFwk::Want want;
+        want.SetBundle(bundleName);
+        want.SetModuleName(moduleName);
+        sptr<AtomicServiceStatusCallback> routerCallback = new AtomicServiceStatusCallback();
+        routerCallback->SetActionEventHandler(callback);
+        routerCallback->SetErrorEventHandler(silentInstallErrorCallBack);
+        if (bms->SilentInstall(want, appInfo->uid / AppExecFwk::Constants::BASE_USER_RANGE, routerCallback)) {
+            LOGI("Begin to silent install");
         }
     }
 }

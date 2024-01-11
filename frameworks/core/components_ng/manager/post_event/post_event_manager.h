@@ -36,7 +36,6 @@ public:
     ~PostEventManager() override = default;
 
     bool PostEvent(const RefPtr<NG::UINode>& uiNode, const TouchEvent& touchEvent);
-    void CheckNeedReissueCancelEvent(int64_t currentSysTime);
 
 private:
     bool CheckPointValidity(const TouchEvent& touchEvent);

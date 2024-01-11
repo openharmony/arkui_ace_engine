@@ -103,6 +103,7 @@ struct UpdateSpanStyle {
 
         updateSymbolColor.reset();
         updateSymbolRenderingStrategy.reset();
+        updateSymbolEffectStrategy.reset();
 
         updateImageWidth.reset();
         updateImageHeight.reset();
@@ -110,6 +111,7 @@ struct UpdateSpanStyle {
         updateImageFit.reset();
         marginProp.reset();
         borderRadius.reset();
+        isSymbolStyle = false;
     }
 
     std::optional<Color> updateTextColor = std::nullopt;
@@ -123,6 +125,7 @@ struct UpdateSpanStyle {
 
     std::optional<std::vector<Color>> updateSymbolColor = std::nullopt;
     std::optional<uint32_t> updateSymbolRenderingStrategy = std::nullopt;
+    std::optional<uint32_t> updateSymbolEffectStrategy = std::nullopt;
 
     std::optional<CalcDimension> updateImageWidth = std::nullopt;
     std::optional<CalcDimension> updateImageHeight = std::nullopt;
@@ -132,6 +135,7 @@ struct UpdateSpanStyle {
     std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
     bool hasResourceFontColor = false;
     bool hasResourceDecorationColor = false;
+    bool isSymbolStyle = false;
 };
 
 struct UpdateParagraphStyle {

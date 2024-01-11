@@ -25,27 +25,19 @@ template("ace_base_i18n") {
     cflags_cc += invoker.cflags_cc
     deps = [ "$ace_root/frameworks/base/resource:ace_resource" ]
 
-    if (defined(config.use_external_icu)) {
-      if (config.use_external_icu == "shared") {
-        deps += [ "//third_party/icu/icu4c:shared_icui18n" ]
-      } else if (config.use_external_icu == "static") {
-        deps += [ "//third_party/icu/icu4c:static_icui18n" ]
-      }
-      configs += [ "$ace_flutter_engine_root/icu:icu_config_$platform" ]
+    if (defined(config.use_external_icu) &&
+        config.use_external_icu == "static") {
+      deps += [
+        "//third_party/icu/icu4c:static_icui18n",
+        "//third_party/icu/icu4c:static_icuuc",
+      ]
     } else {
-      if (ace_use_rosen_drawing) {
-        if (platform == "ohos") {
-          deps += [ "$ace_flutter_engine_root/icu:ace_libicu_$platform" ]
-        } else {
-          include_dirs = [
-            "$skia_root_new/third_party/externals/icu/source/common",
-            "$skia_root_new/third_party/externals/icu/source/i18n/",
-          ]
-        }
-      } else {
-        deps += [ "$ace_flutter_engine_root/icu:ace_libicu_$platform" ]
-      }
+      deps += [
+        "//third_party/icu/icu4c:shared_icui18n",
+        "//third_party/icu/icu4c:shared_icuuc",
+      ]
     }
+    configs += [ "//third_party/icu/icu4c:icu_config" ]
 
     configs += [
       ":ace_base_i18n_config",
@@ -59,7 +51,6 @@ template("ace_base_i18n") {
 
 foreach(item, ace_platforms) {
   ace_base_i18n("ace_base_i18n_" + item.name) {
-    platform = item.name
     defines = []
     cflags_cc = []
     config = {

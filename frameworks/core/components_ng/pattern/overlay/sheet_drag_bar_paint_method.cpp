@@ -70,7 +70,7 @@ void SheetDragBarPaintMethod::Paint(RSCanvas& canvas, PaintWrapper* paintWrapper
     auto alpha = std::floor(UINT8_MAX * defaultOpacity);
     pen.SetAlpha(alpha * opacity);
     pen.SetColor(ToRSColor(dragBarTheme->GetDragBarColor()));
-    pen.SetWidth(BAR_WIDTH.ConvertToPx());
+    pen.SetWidth(paintProperty->GetBarWidth().value_or(BAR_WIDTH).ConvertToPx());
     pen.SetCapStyle(RSPen::CapStyle::ROUND_CAP);
     canvas.AttachPen(pen);
 

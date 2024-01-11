@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/image/image_paint_method.h"
 
+#include "core/common/container.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/render/adapter/svg_canvas_image.h"
 #include "core/components_ng/render/image_painter.h"
@@ -91,9 +92,23 @@ void ImagePaintMethod::UpdatePaintConfig(const RefPtr<ImageRenderProperty>& rend
 {
     auto&& config = canvasImage_->GetPaintConfig();
     config.renderMode_ = renderProps->GetImageRenderMode().value_or(ImageRenderMode::ORIGINAL);
-    config.imageInterpolation_ = renderProps->GetImageInterpolation().value_or(ImageInterpolation::NONE);
+    ImageInterpolation intepolation = renderProps->GetImageInterpolation().value_or(ImageInterpolation::NONE);
+    // add API version protection
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        intepolation = renderProps->GetImageInterpolation().value_or(ImageInterpolation::LOW);
+    }
+    auto container = Container::Current();
+    // If the default value is set to ImageInterpolation::LOW, the ScenceBoard memory increases.
+    // Therefore the default value is different in the ScenceBoard.
+    if (container && container->IsScenceBoardWindow()) {
+        intepolation = renderProps->GetImageInterpolation().value_or(ImageInterpolation::NONE);
+    }
+    config.imageInterpolation_ = intepolation;
     config.imageRepeat_ = renderProps->GetImageRepeat().value_or(ImageRepeat::NO_REPEAT);
     config.smoothEdge_ = renderProps->GetSmoothEdge().value_or(0.0f);
+    if (renderProps) {
+        config.resizableSlice_ = renderProps->GetImageResizableSliceValue({});
+    }
     auto pipelineCtx = PipelineBase::GetCurrentContext();
     bool isRightToLeft = pipelineCtx && pipelineCtx->IsRightToLeft();
     config.flipHorizontally_ = isRightToLeft && renderProps->GetMatchTextDirection().value_or(false);

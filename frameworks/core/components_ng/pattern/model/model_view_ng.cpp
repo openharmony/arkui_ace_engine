@@ -37,8 +37,8 @@ ModelViewNG::ModelViewNG()
     }
 }
 
-void ModelViewNG::Create(const std::string& src, const std::string& bundleName,
-    const std::string& moduleName, Render3D::SurfaceType surfaceType)
+void ModelViewNG::Create(const std::string& bundleName, const std::string& moduleName,
+    Render3D::SurfaceType surfaceType)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
@@ -52,16 +52,6 @@ void ModelViewNG::Create(const std::string& src, const std::string& bundleName,
         });
 
     stack->Push(frameNode);
-    if (frameNode_.Invalid()) {
-        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelSource, src);
-        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelLights, {});
-        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelAnimations, {});
-        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelGeometries, {});
-        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelCustomRender, {});
-        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelImageTexturePaths, {});
-        ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelShaderInputBuffer,
-            std::make_shared<Render3D::ShaderInputBuffer>());
-    }
     frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
 }
 
@@ -73,6 +63,12 @@ void ModelViewNG::SetBackground(const std::string& value)
 void ModelViewNG::SetHandleCameraMove(bool value)
 {
     ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelCameraMove, value);
+}
+
+void ModelViewNG::SetModelSource(const std::string& value)
+{
+    LOGD("MODEL_NG: Model source: %s", value.c_str());
+    ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelSource, value);
 }
 
 void ModelViewNG::SetTransparent(bool value)
@@ -168,7 +164,7 @@ void ModelViewNG::AddCustomRender(const std::shared_ptr<Render3D::CustomRenderDe
         return;
     }
 
-    const auto& curCustomRender = paintProperty->GetModelCustomRenderValue({ });
+    const auto curCustomRender = paintProperty->GetModelCustomRenderValue({ });
     if (!curCustomRender || (curCustomRender->GetUri() != customRender->GetUri())) {
         ACE_UPDATE_PAINT_PROPERTY(ModelPaintProperty, ModelCustomRender, customRender);
     }

@@ -125,6 +125,7 @@ public:
 
     void InitialLayoutProps();
 
+    void AvoidAiBar();
     void AvoidSafeArea();
     float GetSheetHeightChange();
     void ScrollTo(float height);

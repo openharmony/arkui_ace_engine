@@ -112,17 +112,14 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
     auto paramObject = JSRef<JSObject>::Cast(tmpInfo);
     auto fontSize = paramObject->GetProperty("size");
     CalcDimension size;
-    if (!JSContainerBase::ParseJsDimensionFp(fontSize, size) || fontSize->IsNull()) {
-        font.fontSize = std::nullopt;
-    }
-    if (fontSize->IsUndefined() || size.IsNegative() || size.Unit() == DimensionUnit::PERCENT) {
+    if (ParseJsDimensionFpNG(fontSize, size, false) && size.IsNonNegative()) {
+        font.fontSize = size;
+    } else {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         font.fontSize = theme->GetTextStyle().GetFontSize();
-    } else {
-        font.fontSize = size;
     }
     std::string weight;
     auto fontWeight = paramObject->GetProperty("weight");
@@ -339,15 +336,43 @@ void JSText::SetFontFamily(const JSCallbackInfo& info)
 
 void JSText::SetMinFontSize(const JSCallbackInfo& info)
 {
-    CalcDimension fontSize;
-    ParseJsDimensionFp(info[0], fontSize);
+    if (info.Length() < 1) {
+        return;
+    }
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
+    if (!ParseJsDimensionFp(info[0], fontSize)) {
+        fontSize = theme->GetTextStyle().GetFontSize();
+        TextModel::GetInstance()->SetFontSize(fontSize);
+        return;
+    }
+    if (fontSize.IsNegative()) {
+        fontSize = theme->GetTextStyle().GetFontSize();
+    }
     TextModel::GetInstance()->SetAdaptMinFontSize(fontSize);
 }
 
 void JSText::SetMaxFontSize(const JSCallbackInfo& info)
 {
-    CalcDimension fontSize;
-    ParseJsDimensionFp(info[0], fontSize);
+    if (info.Length() < 1) {
+        return;
+    }
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
+    if (!ParseJsDimensionFp(info[0], fontSize)) {
+        fontSize = theme->GetTextStyle().GetFontSize();
+        TextModel::GetInstance()->SetFontSize(fontSize);
+        return;
+    }
+    if (fontSize.IsNegative()) {
+        fontSize = theme->GetTextStyle().GetFontSize();
+    }
     TextModel::GetInstance()->SetAdaptMaxFontSize(fontSize);
 }
 

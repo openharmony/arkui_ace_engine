@@ -30,6 +30,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
+#include "core/components_ng/pattern/list/list_height_offset_calculator.h"
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_lanes_layout_algorithm.h"
@@ -89,6 +90,9 @@ void ListPattern::OnModifyDone()
     InitOnKeyEvent(focusHub);
     Register2DragDropManager();
     SetAccessibilityAction();
+    if (IsNeedInitClickEventRecorder()) {
+        Pattern::InitClickEventRecorder();
+    }
 }
 
 bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -750,7 +754,7 @@ bool ListPattern::IsOutOfBoundary(bool useCurrentDelta)
     bool outOfEnd = (endIndex_ == maxListItemIndex_) && LessNotEqual(endPos, contentEndPos) &&
         LessNotEqual(startPos, contentStartOffset_);
     if (IsScrollSnapAlignCenter()) {
-        auto itemHeight = itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
+        float itemHeight = itemPosition_[centerIndex_].endPos - itemPosition_[centerIndex_].startPos;
         outOfStart = (startIndex_ == 0) && Positive(startPos + itemHeight / 2.0f - contentMainSize_ / 2.0f);
         outOfEnd =
             (endIndex_ == maxListItemIndex_) && LessNotEqual(endPos - itemHeight / 2.0f, contentMainSize_ / 2.0f);
@@ -1279,6 +1283,11 @@ bool ListPattern::GetListItemAnimatePos(float startPos, float endPos, ScrollAlig
             break;
         case ScrollAlign::AUTO:
             targetPos = CalculateTargetPos(startPos, endPos);
+            if (Negative(targetPos)) {
+                targetPos -= contentStartOffset_;
+            } else {
+                targetPos += contentEndOffset_;
+            }
             break;
     }
     return true;
@@ -1328,6 +1337,11 @@ bool ListPattern::GetListItemGroupAnimatePosWithoutIndexInGroup(int32_t index, f
         case ScrollAlign::AUTO:
             if (targetIndex_.has_value()) {
                 targetPos = CalculateTargetPos(startPos, endPos);
+                if (Negative(targetPos)) {
+                    targetPos -= contentStartOffset_;
+                } else {
+                    targetPos += contentEndOffset_;
+                }
                 return true;
             }
             return false;
@@ -1398,6 +1412,11 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int3
                 itemEndPos += groupPattern->GetFooterMainSize();
             }
             targetPos = CalculateTargetPos(itemStartPos, itemEndPos);
+            if (Negative(targetPos)) {
+                targetPos -= contentStartOffset_;
+            } else {
+                targetPos += contentEndOffset_;
+            }
             break;
     }
     return true;
@@ -1545,6 +1564,16 @@ void ListPattern::UpdateScrollBarOffset()
     float itemsSize = itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
     float currentOffset = itemsSize / itemPosition_.size() * itemPosition_.begin()->first - startMainPos_;
     auto estimatedHeight = itemsSize / itemPosition_.size() * (maxListItemIndex_ + 1) - spaceWidth_;
+    if (lanes_ == 1) {
+        const auto& begin = *itemPosition_.begin();
+        auto calculate = ListHeightOffsetCalculator(
+            begin.first, {begin.second.startPos, begin.second.endPos}, spaceWidth_);
+        calculate.SetEstimatedItemHeight(itemsSize / itemPosition_.size() - spaceWidth_);
+        if (calculate.GetEstimateHeightAndOffset(GetHost())) {
+            currentOffset = calculate.GetEstimateOffset();
+            estimatedHeight = calculate.GetEstimateHeight();
+        }
+    }
     if (GetAlwaysEnabled()) {
         estimatedHeight = estimatedHeight - spaceWidth_;
     }
@@ -1604,10 +1633,9 @@ void ListPattern::SetChainAnimation()
         if (chainAnimationOptions_.has_value()) {
             float maxSpace = chainAnimationOptions_.value().maxSpace.ConvertToPx();
             float minSpace = chainAnimationOptions_.value().minSpace.ConvertToPx();
-            if (GreatNotEqual(minSpace, maxSpace)) {
-                minSpace = space;
-                maxSpace = space;
-            }
+            minSpace = Negative(minSpace) ? 0.0f : minSpace;
+            minSpace = GreatNotEqual(minSpace, space) ? space : minSpace;
+            maxSpace = LessNotEqual(maxSpace, space) ? space : maxSpace;
             springProperty_->SetStiffness(chainAnimationOptions_.value().stiffness);
             springProperty_->SetDamping(chainAnimationOptions_.value().damping);
             chainAnimation_ = AceType::MakeRefPtr<ChainAnimation>(space, maxSpace, minSpace, springProperty_);
@@ -1650,11 +1678,9 @@ void ListPattern::SetChainAnimationOptions(const ChainAnimationOptions& options)
         }
         float maxSpace = options.maxSpace.ConvertToPx();
         float minSpace = options.minSpace.ConvertToPx();
-        if (Negative(minSpace) || Negative(maxSpace) || GreatNotEqual(minSpace, space) ||
-            LessNotEqual(maxSpace, space) || GreatNotEqual(minSpace, maxSpace)) {
-            minSpace = space;
-            maxSpace = space;
-        }
+        minSpace = Negative(minSpace) ? 0.0f : minSpace;
+        minSpace = GreatNotEqual(minSpace, space) ? space : minSpace;
+        maxSpace = LessNotEqual(maxSpace, space) ? space : maxSpace;
         chainAnimation_->SetSpace(space, maxSpace, minSpace);
         auto conductivity = chainAnimationOptions_.value().conductivity;
         if (LessNotEqual(conductivity, 0) || GreatNotEqual(conductivity, 1)) {
@@ -1829,11 +1855,11 @@ void ListPattern::ClearMultiSelect()
     ClearSelectedZone();
 }
 
-bool ListPattern::IsItemSelected(const GestureEvent& info)
+bool ListPattern::IsItemSelected()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto node = host->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+    auto node = host->FindChildByPosition(mouseStartOffsetGlobal_.GetX(), mouseStartOffsetGlobal_.GetY());
     CHECK_NULL_RETURN(node, false);
     auto itemPattern = node->GetPattern<ListItemPattern>();
     if (itemPattern) {
@@ -1841,7 +1867,7 @@ bool ListPattern::IsItemSelected(const GestureEvent& info)
     }
     auto itemGroupPattern = node->GetPattern<ListItemGroupPattern>();
     if (itemGroupPattern) {
-        auto itemNode = node->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+        auto itemNode = node->FindChildByPosition(mouseStartOffsetGlobal_.GetX(), mouseStartOffsetGlobal_.GetY());
         CHECK_NULL_RETURN(itemNode, false);
         itemPattern = itemNode->GetPattern<ListItemPattern>();
         CHECK_NULL_RETURN(itemPattern, false);

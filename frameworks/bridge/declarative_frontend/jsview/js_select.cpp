@@ -810,6 +810,9 @@ void JSSelect::SetOptionHeight(const JSCallbackInfo& info)
             if (value.IsNegative()) {
                 LOGE("OptionHeight is negative");
                 return;
+            } else if (NEAR_ZERO(value.Value())) {
+                LOGE("OptionHeight is zero");
+                return;
             }
             SelectModel::GetInstance()->SetOptionHeight(value);
         }
@@ -817,6 +820,9 @@ void JSSelect::SetOptionHeight(const JSCallbackInfo& info)
         ParseJsDimensionVpNG(info[0], value);
         if (value.IsNegative()) {
             LOGE("OptionHeight is negative");
+            return;
+        } else if (NEAR_ZERO(value.Value())) {
+            LOGE("OptionHeight is zero");
             return;
         }
         SelectModel::GetInstance()->SetOptionHeight(value);

@@ -20,7 +20,7 @@
 #include <sys/stat.h>
 
 #include "contrib/minizip/unzip.h"
-#include "init_data.h"
+#include "ohos/init_data.h"
 #include "unicode/locid.h"
 
 #include "base/i18n/localization.h"

@@ -62,6 +62,8 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
         textContent = pattern->GetTextValue();
         if (!pattern->IsTextArea() && isInlineStyle) {
             textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
+        } else {
+            textStyle.SetTextOverflow(TextOverflow::CLIP);
         }
     } else {
         UpdatePlaceholderTextStyle(
@@ -198,6 +200,7 @@ SizeF TextFieldLayoutAlgorithm::TextAreaMeasureContent(
 
     if (autoWidth_) {
         contentWidth = std::min(contentWidth, paragraph_->GetLongestLine());
+        paragraph_->Layout(std::ceil(contentWidth));
     }
 
     auto counterNodeHeight = CounterNodeMeasure(contentWidth, layoutWrapper);
@@ -520,7 +523,7 @@ void TextFieldLayoutAlgorithm::FontRegisterCallback(
 
 ParagraphStyle TextFieldLayoutAlgorithm::GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const
 {
-    return { .direction = GetTextDirection(content),
+    return { .direction = GetTextDirection(content, direction_),
         .maxLines = textStyle.GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = textStyle.GetWordBreak(),
@@ -553,7 +556,7 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
     std::vector<TextStyle> textStyles { textStyle, dragTextStyle, textStyle };
 
     auto style = textStyles.begin();
-    ParagraphStyle paraStyle { .direction = GetTextDirection(content),
+    ParagraphStyle paraStyle { .direction = GetTextDirection(content, direction_),
         .maxLines = style->GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = style->GetWordBreak(),
@@ -600,8 +603,12 @@ void TextFieldLayoutAlgorithm::CreateInlineParagraph(const TextStyle& textStyle,
     inlineParagraph_->Build();
 }
 
-TextDirection TextFieldLayoutAlgorithm::GetTextDirection(const std::string& content)
+TextDirection TextFieldLayoutAlgorithm::GetTextDirection(const std::string& content, TextDirection direction)
 {
+    if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
+        return direction;
+    }
+
     TextDirection textDirection = TextDirection::LTR;
     auto showingTextForWString = StringUtils::ToWstring(content);
     for (const auto& charOfShowingText : showingTextForWString) {
@@ -640,6 +647,7 @@ void TextFieldLayoutAlgorithm::SetPropertyToModifier(
     modifier->SetFontWeight(textStyle.GetFontWeight());
     modifier->SetTextColor(textStyle.GetTextColor());
     modifier->SetFontStyle(textStyle.GetFontStyle());
+    modifier->SetTextOverflow(textStyle.GetTextOverflow());
 }
 
 void TextFieldLayoutAlgorithm::UpdateUnitLayout(LayoutWrapper* layoutWrapper)

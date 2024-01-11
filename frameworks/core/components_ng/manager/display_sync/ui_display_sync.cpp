@@ -73,7 +73,10 @@ void UIDisplaySync::OnFrame()
         data_->onFrameWithTimestamp_(data_->timestamp_);
     }
 
-    RequestFrame();
+    bool isNeedRequest = data_->onFrame_ || data_->onFrameWithData_ || data_->onFrameWithTimestamp_;
+    if (isNeedRequest) {
+        RequestFrame();
+    }
 }
 
 void UIDisplaySync::AddToPipeline(WeakPtr<PipelineBase>& pipelineContext)
@@ -200,12 +203,12 @@ int32_t UIDisplaySync::GetRefreshRateMode() const
     return refreshRateMode_;
 }
 
-bool UIDisplaySync::IsEnabled() const
+bool UIDisplaySync::IsAutoRefreshRateMode() const
 {
     return refreshRateMode_ == static_cast<int32_t>(RefreshRateMode::REFRESHRATE_MODE_AUTO);
 }
 
-bool UIDisplaySync::IsDisabled() const
+bool UIDisplaySync::IsNonAutoRefreshRateMode() const
 {
     return refreshRateMode_ != static_cast<int32_t>(RefreshRateMode::REFRESHRATE_MODE_AUTO);
 }

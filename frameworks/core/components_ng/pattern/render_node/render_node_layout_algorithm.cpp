@@ -15,34 +15,43 @@
 #include "core/components_ng/pattern/render_node/render_node_layout_algorithm.h"
 
 #include "core/components/common/properties/alignment.h"
-#include "core/components_ng/pattern/render_node/render_node_layout_property.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 
 namespace OHOS::Ace::NG {
 void RenderNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
-        child->Measure(childLayoutConstraint);
+        if (child->GetHostTag() == "RenderNode" || child->GetLayoutProperty()->GetLayoutConstraint().has_value()) {
+            child->Measure(child->GetLayoutProperty()->GetLayoutConstraint());
+        } else {
+            LayoutConstraintF layoutConstraint;
+            layoutConstraint.UpdateParentIdealSizeWithCheck({ 0, 0 });
+            layoutConstraint.UpdateSelfMarginSizeWithCheck({ 0, 0 });
+            child->Measure(layoutConstraint);
+        }
     }
-
     const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
-    const auto& minSize = layoutConstraint->minSize;
-    const auto& maxSize = layoutConstraint->maxSize;
-
     OptionalSizeF frameSize;
     frameSize.UpdateSizeWithCheck(layoutConstraint->selfIdealSize);
-    if (!frameSize.IsValid()) {
-        if (layoutConstraint->selfIdealSize.Width()) {
-            frameSize.ConstrainFloat(minSize, maxSize, false, true);
-        } else if (layoutConstraint->selfIdealSize.Height()) {
-            frameSize.ConstrainFloat(minSize, maxSize, true, true);
-        } else {
-            frameSize.Constrain(minSize, maxSize, true);
-        }
-        frameSize.UpdateIllegalSizeWithCheck(SizeF { 0.0f, 0.0f });
-    }
+    frameSize.UpdateIllegalSizeWithCheck(SizeF { 0.0f, 0.0f });
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
+}
+
+std::optional<SizeF> RenderNodeLayoutAlgorithm::MeasureContent(
+    const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper)
+{
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, std::nullopt);
+    OptionalSizeF contentSize;
+    // Use idea size first if it is valid.
+    contentSize.UpdateSizeWithCheck(contentConstraint.selfIdealSize);
+    if (contentSize.IsValid()) {
+        return contentSize.ConvertToSizeT();
+    }
+    // wrap content case use min size default.
+    contentSize.UpdateIllegalSizeWithCheck(contentConstraint.minSize);
+    return contentSize.ConvertToSizeT();
 }
 
 void RenderNodeLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

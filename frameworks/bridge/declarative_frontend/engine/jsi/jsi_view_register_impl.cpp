@@ -42,6 +42,7 @@
 #include "bridge/declarative_frontend/jsview/js_base_node.h"
 #include "bridge/declarative_frontend/jsview/js_blank.h"
 #include "bridge/declarative_frontend/jsview/js_button.h"
+#include "bridge/declarative_frontend/jsview/js_cached_image.h"
 #include "bridge/declarative_frontend/jsview/js_calendar.h"
 #include "bridge/declarative_frontend/jsview/js_calendar_controller.h"
 #include "bridge/declarative_frontend/jsview/js_calendar_picker.h"
@@ -57,6 +58,7 @@
 #include "bridge/declarative_frontend/jsview/js_column_split.h"
 #include "bridge/declarative_frontend/jsview/js_common_view.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
+#include "bridge/declarative_frontend/jsview/js_container_span.h"
 #include "bridge/declarative_frontend/jsview/js_counter.h"
 #include "bridge/declarative_frontend/jsview/js_data_panel.h"
 #include "bridge/declarative_frontend/jsview/js_datepicker.h"
@@ -485,7 +487,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Span", JSSpan::JSBind },
     { "Button", JSButton::JSBind },
     { "Canvas", JSCanvas::JSBind },
-    { "OffscreenCanvas", JSOffscreenCanvas::JSBind },
     { "Matrix2D", JSMatrix2d::JSBind },
     { "CanvasPattern", JSCanvasPattern::JSBind },
     { "List", JSList::JSBind },
@@ -531,7 +532,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "CanvasRenderingContext2D", JSRenderingContext::JSBind },
     { "OffscreenCanvasRenderingContext2D", JSOffscreenRenderingContext::JSBind },
     { "CanvasGradient", JSCanvasGradient::JSBind },
-    { "ImageBitmap", JSRenderImage::JSBind },
     { "ImageData", JSCanvasImageData::JSBind },
     { "ImageAnimator", JSImageAnimator::JSBind },
     { "Path2D", JSPath2D::JSBind },
@@ -560,7 +560,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Span", JSSpan::JSBind },
     { "Button", JSButton::JSBind },
     { "Canvas", JSCanvas::JSBind },
-    { "OffscreenCanvas", JSOffscreenCanvas::JSBind },
     { "LazyForEach", JSLazyForEach::JSBind },
     { "List", JSList::JSBind },
     { "ListItem", JSListItem::JSBind },
@@ -691,7 +690,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "GestureGroup", JSGesture::JSBind },
     { "PanGestureOption", JSPanGestureOption::JSBind },
     { "PanGestureOptions", JSPanGestureOption::JSBind },
-    { "CustomDialogController", JSCustomDialogController::JSBind },
+    { "NativeCustomDialogController", JSCustomDialogController::JSBind },
     { "Scroller", JSScroller::JSBind },
     { "ListScroller", JSListScroller::JSBind },
     { "SwiperController", JSSwiperController::JSBind },
@@ -703,7 +702,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "CanvasRenderingContext2D", JSRenderingContext::JSBind },
     { "OffscreenCanvasRenderingContext2D", JSOffscreenRenderingContext::JSBind },
     { "CanvasGradient", JSCanvasGradient::JSBind },
-    { "ImageBitmap", JSRenderImage::JSBind },
     { "ImageData", JSCanvasImageData::JSBind },
     { "Path2D", JSPath2D::JSBind },
     { "RenderingContextSettings", JSRenderingContextSettings::JSBind },
@@ -769,9 +767,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "__JSBaseNode__", JSBaseNode::JSBind },
     { "SymbolGlyph", JSSymbol::JSBind },
     { "SymbolSpan", JSSymbolSpan::JSBind },
+    { "ContainerSpan",  JSContainerSpan::JSBind},
 };
 
-void RegisterAllModule(BindingTarget globalObj)
+void RegisterAllModule(BindingTarget globalObj, void* nativeEngine)
 {
     JSColumn::JSBind(globalObj);
     JSCommonView::JSBind(globalObj);
@@ -783,10 +782,11 @@ void RegisterAllModule(BindingTarget globalObj)
     JSRenderingContext::JSBind(globalObj);
     JSOffscreenRenderingContext::JSBind(globalObj);
     JSCanvasGradient::JSBind(globalObj);
-    JSRenderImage::JSBind(globalObj);
+    JSRenderImage::JSBind(globalObj, nativeEngine);
     JSCanvasImageData::JSBind(globalObj);
     JSPath2D::JSBind(globalObj);
     JSRenderingContextSettings::JSBind(globalObj);
+    JSOffscreenCanvas::JSBind(globalObj, nativeEngine);
 #ifdef ABILITY_COMPONENT_SUPPORTED
     JSAbilityComponentController::JSBind(globalObj);
 #endif
@@ -957,6 +957,7 @@ void JsBindFormViews(BindingTarget globalObj, const std::unordered_set<std::stri
         JSDumpRegister::JSBind(globalObj);
         JSLocalStorage::JSBind(globalObj);
         JSStateMgmtProfiler::JSBind(globalObj);
+        JSCustomDialogController::JSBind(globalObj);
 
         JSEnvironment::JSBind(globalObj);
         JSViewContext::JSBind(globalObj);
@@ -979,7 +980,7 @@ void JsBindFormViews(BindingTarget globalObj, const std::unordered_set<std::stri
     }
 }
 
-void JsBindViews(BindingTarget globalObj)
+void JsBindViews(BindingTarget globalObj, void* nativeEngine)
 {
     JSViewAbstract::JSBind(globalObj);
     JSContainerBase::JSBind(globalObj);
@@ -1013,7 +1014,7 @@ void JsBindViews(BindingTarget globalObj)
     if (delegate && delegate->GetAssetContent("component_collection.txt", jsModules)) {
         JsRegisterModules(globalObj, jsModules);
     } else {
-        RegisterAllModule(globalObj);
+        RegisterAllModule(globalObj, nativeEngine);
     }
 }
 

@@ -19,7 +19,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_register.h"
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 #include "js_native_api_types.h"
 #include "napi/native_api.h"
 #include "native_engine/native_engine.h"
@@ -29,11 +28,9 @@
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine.h"
-#endif
 
 namespace OHOS::Ace::Framework {
 namespace {
-#ifdef ENABLE_DRAG_FRAMEWORK
 void NapiThrow(const RefPtr<Framework::JsEngine>& engine, int32_t errCode, const std::string& message)
 {
     NativeEngine* nativeEngine = engine->GetNativeEngine();
@@ -47,7 +44,7 @@ void NapiThrow(const RefPtr<Framework::JsEngine>& engine, int32_t errCode, const
     napi_create_error(env, code, msg, &error);
     napi_throw(env, error);
 }
-#endif
+
 } // namespace
 
 class JsPasteData : public Referenced {
@@ -114,7 +111,6 @@ void JsDragEvent::JSBind(BindingTarget globalObj)
     JSClass<JsDragEvent>::CustomMethod("getY", &JsDragEvent::GetY);
     JSClass<JsDragEvent>::CustomMethod("getDescription", &JsDragEvent::GetDescription);
     JSClass<JsDragEvent>::CustomMethod("setDescription", &JsDragEvent::SetDescription);
-#ifdef ENABLE_DRAG_FRAMEWORK
     JSClass<JsDragEvent>::CustomMethod("setData", &JsDragEvent::SetData);
     JSClass<JsDragEvent>::CustomMethod("getData", &JsDragEvent::GetData);
     JSClass<JsDragEvent>::CustomMethod("getSummary", &JsDragEvent::GetSummary);
@@ -126,7 +122,6 @@ void JsDragEvent::JSBind(BindingTarget globalObj)
     JSClass<JsDragEvent>::CustomMethod("setDragInfo", &JsDragEvent::SetDragInfo);
     JSClass<JsDragEvent>::CustomMethod("getDragInfo", &JsDragEvent::GetDragInfo);
     JSClass<JsDragEvent>::CustomProperty("dragBehavior", &JsDragEvent::GetDragBehavior, &JsDragEvent::SetDragBehavior);
-#endif
     JSClass<JsDragEvent>::CustomMethod("getVelocityX", &JsDragEvent::GetVelocityX);
     JSClass<JsDragEvent>::CustomMethod("getVelocityY", &JsDragEvent::GetVelocityY);
     JSClass<JsDragEvent>::CustomMethod("getVelocity", &JsDragEvent::GetVelocity);
@@ -184,7 +179,7 @@ void JsDragEvent::SetDescription(const JSCallbackInfo& args)
         dragEvent_->SetDescription(args[0]->ToString());
     }
 }
-#ifdef ENABLE_DRAG_FRAMEWORK
+
 void JsDragEvent::SetData(const JSCallbackInfo& args)
 {
     if (!args[0]->IsObject()) {
@@ -323,7 +318,6 @@ void JsDragEvent::GetDragBehavior(const JSCallbackInfo& args)
     auto dragBehaviorRef = JSRef<JSVal>::Make(dragBehavior);
     args.SetReturnValue(dragBehaviorRef);
 }
-#endif
 
 void JsDragEvent::GetVelocityX(const JSCallbackInfo& args)
 {
@@ -360,7 +354,7 @@ void JsDragEvent::Destructor(JsDragEvent* dragEvent)
         dragEvent->DecRefCount();
     }
 }
-#ifdef ENABLE_DRAG_FRAMEWORK
+
 JSRef<JSObject> JsDragEvent::CreateRectangle(const Rect& info)
 {
     JSRef<JSObject> rectObj = JSRef<JSObject>::New();
@@ -370,7 +364,6 @@ JSRef<JSObject> JsDragEvent::CreateRectangle(const Rect& info)
     rectObj->SetProperty<double>("height", PipelineBase::Px2VpWithCurrentDensity(info.Height()));
     return rectObj;
 }
-#endif
 
 void JsDragFunction::JSBind(BindingTarget globalObj)
 {

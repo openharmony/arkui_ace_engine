@@ -48,7 +48,7 @@ if (enable_camera_framework && enable_player_framework) {
       external_deps = [
         "c_utils:utils",
         "camera_framework:camera_framework",
-        "graphic_2d:surface",
+        "graphic_surface:surface",
         "ipc:ipc_core",
         "player_framework:media_client",
       ]

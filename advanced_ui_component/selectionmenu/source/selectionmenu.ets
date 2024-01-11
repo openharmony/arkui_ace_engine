@@ -157,6 +157,7 @@ struct SelectionMenuComponent {
         this.customMenuSize = this.customMenuHeight
       })
     }
+    .useShadowBatching(true)
     .flexShrink(1)
     .height(this.customMenuSize)
   }

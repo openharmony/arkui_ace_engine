@@ -721,7 +721,7 @@ bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM *vm, const Local<JSValueR
             }
             Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(args);
             auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
-            if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::MEDIA)) {
+            if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::MEDIA)) {
                 result = resourceWrapper->GetMediaPathByName(param->ToString(vm)->ToString());
                 return true;
             }
@@ -788,9 +788,13 @@ bool ArkTSUtils::ParseJsString(const EcmaVM* vm, const Local<JSValueRef>& jsValu
 }
 
 std::string GetReplaceContentStr(
-    const EcmaVM* vm, int pos, const std::string& type, Local<panda::ArrayRef> params, int32_t containCount)
+    const EcmaVM* vm, int32_t pos, const std::string& type, Local<panda::ArrayRef> params, int32_t containCount)
 {
-    auto item = panda::ArrayRef::GetValueAt(vm, params, pos + containCount);
+    int32_t index = pos + containCount;
+    if (index < 0) {
+        return std::string();
+    }
+    auto item = panda::ArrayRef::GetValueAt(vm, params, static_cast<uint32_t>(index));
     if (type == "d") {
         if (item->IsNumber()) {
             return std::to_string(item->ToNumber(vm)->Value());
@@ -826,7 +830,7 @@ void ReplaceHolder(const EcmaVM* vm, std::string& originStr, const Local<panda::
             firstMatch = false;
             shortHolderType = pos.length() == 0;
         } else {
-            if (shortHolderType ^ (pos.length() == 0)) {
+            if (static_cast<uint32_t>(shortHolderType) ^ static_cast<uint32_t>(pos.length() == 0)) {
                 return;
             }
         }
@@ -1016,6 +1020,72 @@ bool ArkTSUtils::GetJsPasswordIcon(const EcmaVM *vm, const Local<JSValueRef> &js
             result.hideModuleName = module->ToString(vm)->ToString();
         }
         ParseJsMedia(vm, jsOffIconSrc, result.hideResult);
+    }
+    return true;
+}
+
+void ArkTSUtils::ParsePadding(
+    const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result)
+{
+    if (ArkTSUtils::ParseJsDimensionVp(vm, value, dimen)) {
+        if (LessOrEqual(dimen.Value(), 0.0)) {
+            dimen.SetValue(0.0);
+            dimen.SetUnit(DimensionUnit::VP);
+        }
+        result.unit = static_cast<int8_t>(dimen.Unit());
+        if (dimen.CalcValue() != "") {
+            result.string = dimen.CalcValue().c_str();
+        } else {
+            result.value = dimen.Value();
+        }
+    }
+}
+
+bool ArkTSUtils::ParseResponseRegion(
+    const EcmaVM* vm, const Local<JSValueRef>& jsValue, double* regionValues, int32_t* regionUnits, uint32_t length)
+{
+    if (jsValue->IsUndefined() || !jsValue->IsArray(vm)) {
+        return false;
+    }
+
+    Local<panda::ArrayRef> transArray = static_cast<Local<panda::ArrayRef>>(jsValue);
+    for (uint32_t i = 0; i < length; i = i + 4) { // 4: dimension length
+        Local<JSValueRef> x = transArray->GetValueAt(vm, jsValue, i);
+        Local<JSValueRef> y = transArray->GetValueAt(vm, jsValue, i + 1);
+        Local<JSValueRef> width = transArray->GetValueAt(vm, jsValue, i + 2); // 2: width value
+        Local<JSValueRef> height = transArray->GetValueAt(vm, jsValue, i + 3); // 3: height value
+        CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+        CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+        CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+        CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+        auto s1 = width->ToString(vm)->ToString();
+        auto s2 = height->ToString(vm)->ToString();
+        if (s1.find('-') != std::string::npos) {
+            width = OHOS::Ace::Framework::ToJSValue("100%");
+        }
+        if (s2.find('-') != std::string::npos) {
+            height = OHOS::Ace::Framework::ToJSValue("100%");
+        }
+        if (!ArkTSUtils::ParseJsDimensionNG(vm, x, xDimen, DimensionUnit::VP)) {
+            xDimen = CalcDimension(0.0, DimensionUnit::VP);
+        }
+        if (!ArkTSUtils::ParseJsDimensionNG(vm, y, yDimen, DimensionUnit::VP)) {
+            yDimen = CalcDimension(0.0, DimensionUnit::VP);
+        }
+        if (!ArkTSUtils::ParseJsDimensionNG(vm, width, widthDimen, DimensionUnit::VP)) {
+            widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+        }
+        if (!ArkTSUtils::ParseJsDimensionNG(vm, height, heightDimen, DimensionUnit::VP)) {
+            heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+        }
+        regionValues[i] = xDimen.Value();
+        regionUnits[i] = static_cast<int32_t>(xDimen.Unit());
+        regionValues[i + 1] = yDimen.Value();
+        regionUnits[i + 1] = static_cast<int32_t>(yDimen.Unit());
+        regionValues[i + 2] = widthDimen.Value(); // 2: width value
+        regionUnits[i + 2] = static_cast<int32_t>(widthDimen.Unit()); // 2: width Unit
+        regionValues[i + 3] = heightDimen.Value(); // 3: height value
+        regionUnits[i + 3] = static_cast<int32_t>(heightDimen.Unit()); // 3: height Unit
     }
     return true;
 }

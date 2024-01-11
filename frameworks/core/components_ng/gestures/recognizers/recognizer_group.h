@@ -62,6 +62,15 @@ public:
         remainChildOnResetStatus_ = true;
     }
 
+    virtual void SetInnerFlag(bool value) override {
+        NGGestureRecognizer::SetInnerFlag(value);
+        for (auto& recognizer : recognizers_) {
+            if (recognizer) {
+                recognizer->SetInnerFlag(value);
+            }
+        }
+    }
+
     void AssignNodeId(int id) override
     {
         if (nodeId_ != -1) {
@@ -159,6 +168,9 @@ public:
         }
     }
 
+    RefPtr<Gesture> CreateGestureFromRecognizer() const override;
+    virtual GestureMode GetGestureMode() const = 0;
+    
 protected:
     void OnBeginGestureReferee(int32_t touchId, bool needUpdateChild = false) override;
     void OnFinishGestureReferee(int32_t touchId, bool isBlocked = false) override;

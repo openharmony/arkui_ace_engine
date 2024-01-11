@@ -2581,6 +2581,28 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
     }
 }
 /*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+class CustomDialogController extends NativeCustomDialogController {
+    constructor(arg, view) {
+        super(arg, view);
+        this.builder_ = arg.builder;
+        this.cancel_ = arg.cancel;
+        this.view_ = view;
+    }
+}
+/*
  * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -3475,55 +3497,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         // install when current value is ObservedObject and the value type is not using compatibility mode
         // note value may change for union type variables when switching an object from one class to another.
         this.shouldInstallTrackedObjectReadCb = true;
-        this.dependentElmtIdsByProperty_ = new class PropertyDependencies {
-            constructor() {
-                // dependencies for property -> elmtId
-                // variable read during render adds elmtId
-                // variable assignment causes elmtId to need re-render.
-                // UINode with elmtId deletion needs elmtId to be removed from all records, see purgeDependenciesForElmtId
-                this.propertyDependencies_ = new Set();
-                // dependencies on individual object properties
-                this.trackedObjectPropertyDependencies_ = new Map();
-            }
-            getAllPropertyDependencies() {
-                
-                return this.propertyDependencies_;
-            }
-            addPropertyDependency(elmtId) {
-                this.propertyDependencies_.add(elmtId);
-                
-            }
-            purgeDependenciesForElmtId(rmElmtId) {
-                
-                this.propertyDependencies_.delete(rmElmtId);
-                
-                this.trackedObjectPropertyDependencies_.forEach((propertyElmtId, propertyName) => {
-                    propertyElmtId.delete(rmElmtId);
-                    
-                });
-            }
-            addTrackedObjectPropertyDependency(readProperty, elmtId) {
-                let dependentElmtIds = this.trackedObjectPropertyDependencies_.get(readProperty);
-                if (!dependentElmtIds) {
-                    dependentElmtIds = new Set();
-                    this.trackedObjectPropertyDependencies_.set(readProperty, dependentElmtIds);
-                }
-                dependentElmtIds.add(elmtId);
-                
-            }
-            getTrackedObjectPropertyDependencies(changedObjectProperty, debugInfo) {
-                const dependentElmtIds = this.trackedObjectPropertyDependencies_.get(changedObjectProperty) || new Set();
-                
-                return dependentElmtIds;
-            }
-            dumpInfoDependencies() {
-                let result = `dependencies: variable assignment (or object prop change in compat mode) affects elmtIds: ${JSON.stringify(Array.from(this.propertyDependencies_))} \n`;
-                this.trackedObjectPropertyDependencies_.forEach((propertyElmtId, propertyName) => {
-                    result += `  property '@Track ${propertyName}' change affects elmtIds: ${JSON.stringify(Array.from(propertyElmtId))} \n`;
-                });
-                return result;
-            }
-        }; // inner class PropertyDependencies
+        this.dependentElmtIdsByProperty_ = new PropertyDependencies();
         Object.defineProperty(this, 'owningView_', { writable: true, enumerable: false });
         Object.defineProperty(this, 'subscriberRefs_', { writable: true, enumerable: false, value: new Set() });
         if (subscriber) {
@@ -3779,7 +3753,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
      * and add this component to the list of components who are dependent on this property
      */
     recordPropertyDependentUpdate() {
-        const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
+        const elmtId = this.getRenderingElmtId();
         if (elmtId < 0) {
             // not access recording 
             return;
@@ -3858,6 +3832,55 @@ ObservedPropertyAbstractPU.DelayedNotifyChangesEnum = (_a = class {
     _a.delay_none_pending = 1,
     _a.delay_notification_pending = 2,
     _a);
+class PropertyDependencies {
+    constructor() {
+        // dependencies for property -> elmtId
+        // variable read during render adds elmtId
+        // variable assignment causes elmtId to need re-render.
+        // UINode with elmtId deletion needs elmtId to be removed from all records, see purgeDependenciesForElmtId
+        this.propertyDependencies_ = new Set();
+        // dependencies on individual object properties
+        this.trackedObjectPropertyDependencies_ = new Map();
+    }
+    getAllPropertyDependencies() {
+        
+        return this.propertyDependencies_;
+    }
+    addPropertyDependency(elmtId) {
+        this.propertyDependencies_.add(elmtId);
+        
+    }
+    purgeDependenciesForElmtId(rmElmtId) {
+        
+        this.propertyDependencies_.delete(rmElmtId);
+        
+        this.trackedObjectPropertyDependencies_.forEach((propertyElmtId, propertyName) => {
+            propertyElmtId.delete(rmElmtId);
+            
+        });
+    }
+    addTrackedObjectPropertyDependency(readProperty, elmtId) {
+        let dependentElmtIds = this.trackedObjectPropertyDependencies_.get(readProperty);
+        if (!dependentElmtIds) {
+            dependentElmtIds = new Set();
+            this.trackedObjectPropertyDependencies_.set(readProperty, dependentElmtIds);
+        }
+        dependentElmtIds.add(elmtId);
+        
+    }
+    getTrackedObjectPropertyDependencies(changedObjectProperty, debugInfo) {
+        const dependentElmtIds = this.trackedObjectPropertyDependencies_.get(changedObjectProperty) || new Set();
+        
+        return dependentElmtIds;
+    }
+    dumpInfoDependencies() {
+        let result = `dependencies: variable assignment (or object prop change in compat mode) affects elmtIds: ${JSON.stringify(Array.from(this.propertyDependencies_))} \n`;
+        this.trackedObjectPropertyDependencies_.forEach((propertyElmtId, propertyName) => {
+            result += `  property '@Track ${propertyName}' change affects elmtIds: ${JSON.stringify(Array.from(propertyElmtId))} \n`;
+        });
+        return result;
+    }
+}
 /*
  * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -4885,10 +4908,10 @@ class ViewPU extends NativeViewPartialUpdate {
         this.isRenderInProgress = false;
         // flag for initial rendering being done
         this.isInitialRenderDone = false;
-        // indicates the currently rendered or rendered UINode's elmtId
+        // indicates the currently rendered or rendered UINode's elmtIds
         // or -1 if none is currently rendering
-        // isRenderInProgress==true always when renderingOfElementIdOnGoing_>=0 
-        this.currentlyRenderedElmtId_ = -1;
+        // isRenderInProgress == true always when currentlyRenderedElmtIdStack_.length >= 0 
+        this.currentlyRenderedElmtIdStack_ = new Array();
         // flag if active of inActive
         // inActive means updates are delayed
         this.isActive_ = true;
@@ -4896,7 +4919,7 @@ class ViewPU extends NativeViewPartialUpdate {
         // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU has not been GC.
         this.isDeleting_ = false;
         this.watchedProps = new Map();
-        this.recycleManager = undefined;
+        this.recycleManager_ = undefined;
         this.isCompFreezeAllowed = false;
         this.extraInfo_ = undefined;
         // @Provide'd variables by this class and its ancestors
@@ -4906,49 +4929,7 @@ class ViewPU extends NativeViewPartialUpdate {
         this.dirtDescendantElementIds_ = new Set();
         // registry of update functions
         // the key is the elementId of the Component/Element that's the result of this function
-        this.updateFuncByElmtId = new class UpdateFuncsByElmtId {
-            constructor() {
-                this.map_ = new Map();
-            }
-            delete(elmtId) {
-                return this.map_.delete(elmtId);
-            }
-            set(elmtId, params) {
-                (typeof params == "object") ?
-                    this.map_.set(elmtId, new UpdateFuncRecord(params))
-                    : this.map_.set(elmtId, new UpdateFuncRecord({ updateFunc: params }));
-            }
-            get(elmtId) {
-                return this.map_.get(elmtId);
-            }
-            keys() {
-                return this.map_.keys();
-            }
-            clear() {
-                return this.map_.clear();
-            }
-            get size() {
-                return this.map_.size;
-            }
-            forEach(callbackfn) {
-                this.map_.forEach(callbackfn);
-            }
-            // dump info about known elmtIds to a string
-            // use function only for debug output and DFX.
-            debugInfoRegisteredElmtIds() {
-                let result = "";
-                let sepa = "";
-                this.map_.forEach((value, elmtId) => {
-                    result += `${sepa}${value.getComponentName()}[${elmtId}]`;
-                    sepa = ", ";
-                });
-                return result;
-            }
-            debugInfoElmtId(elmtId) {
-                const updateFuncEntry = this.map_.get(elmtId);
-                return updateFuncEntry ? `'${updateFuncEntry.getComponentName()}[${elmtId}]'` : `'unknown component type'[${elmtId}]`;
-            }
-        };
+        this.updateFuncByElmtId = new UpdateFuncsByElmtId();
         // my LocalStorage instance, shared with ancestor Views.
         // create a default instance on demand if none is initialized
         this.localStoragebackStore_ = undefined;
@@ -5028,10 +5009,28 @@ class ViewPU extends NativeViewPartialUpdate {
     }
     aboutToReuse(params) { }
     aboutToRecycle() { }
+    setDeleteStatusRecursively() {
+        if (!this.childrenWeakrefMap_.size) {
+            return;
+        }
+        this.childrenWeakrefMap_.forEach((value) => {
+            let child = value.deref();
+            if (child) {
+                child.isDeleting_ = true;
+                child.setDeleteStatusRecursively();
+            }
+        });
+    }
     // super class will call this function from
     // its aboutToBeDeleted implementation
     aboutToBeDeletedInternal() {
         
+        // if this.isDeleting_ is true already, it may be set delete status recursively by its parent, so it is not necessary
+        // to set and resursively set its children any more
+        if (!this.isDeleting_) {
+            this.isDeleting_ = true;
+            this.setDeleteStatusRecursively();
+        }
         // tell UINodeRegisterProxy that all elmtIds under
         // this ViewPU should be treated as already unregistered
         
@@ -5059,7 +5058,6 @@ class ViewPU extends NativeViewPartialUpdate {
             this.parent_.removeChild(this);
         }
         this.localStoragebackStore_ = undefined;
-        this.isDeleting_ = true;
     }
     purgeDeleteElmtId(rmElmtId) {
         
@@ -5346,7 +5344,12 @@ class ViewPU extends NativeViewPartialUpdate {
                 }
                 
                 for (const elmtId of dependentElmtIds) {
-                    this.dirtDescendantElementIds_.add(elmtId);
+                    if (this.hasRecycleManager()) {
+                        this.dirtDescendantElementIds_.add(this.recycleManager_.proxyNodeId(elmtId));
+                    }
+                    else {
+                        this.dirtDescendantElementIds_.add(elmtId);
+                    }
                 }
                 
             }
@@ -5476,7 +5479,12 @@ class ViewPU extends NativeViewPartialUpdate {
             // ascending order ensures parent nodes will be updated before their children
             // prior cleanup ensure no already deleted Elements have their update func executed
             Array.from(this.dirtDescendantElementIds_).sort(ViewPU.compareNumber).forEach(elmtId => {
-                this.UpdateElement(elmtId);
+                if (this.hasRecycleManager()) {
+                    this.UpdateElement(this.recycleManager_.proxyNodeId(elmtId));
+                }
+                else {
+                    this.UpdateElement(elmtId);
+                }
                 this.dirtDescendantElementIds_.delete(elmtId);
             });
             if (this.dirtDescendantElementIds_.size) {
@@ -5509,7 +5517,7 @@ class ViewPU extends NativeViewPartialUpdate {
      * set in observeComponentCreation(2)
      */
     getCurrentlyRenderedElmtId() {
-        return ViewPU.renderingPaused ? -1 : this.currentlyRenderedElmtId_;
+        return ViewPU.renderingPaused || this.currentlyRenderedElmtIdStack_.length == 0 ? -1 : this.currentlyRenderedElmtIdStack_.slice(-1)[0];
     }
     static pauseRendering() {
         ViewPU.renderingPaused = true;
@@ -5526,9 +5534,9 @@ class ViewPU extends NativeViewPartialUpdate {
         }
         const updateFunc = (elmtId, isFirstRender) => {
             
-            this.currentlyRenderedElmtId_ = elmtId;
+            this.currentlyRenderedElmtIdStack_.push(elmtId);
             compilerAssignedUpdateFunc(elmtId, isFirstRender);
-            this.currentlyRenderedElmtId_ = -1;
+            this.currentlyRenderedElmtIdStack_.pop();
             
         };
         const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
@@ -5564,12 +5572,12 @@ class ViewPU extends NativeViewPartialUpdate {
             this.syncInstanceId();
             
             ViewStackProcessor.StartGetAccessRecordingFor(elmtId);
-            this.currentlyRenderedElmtId_ = elmtId;
+            this.currentlyRenderedElmtIdStack_.push(elmtId);
             compilerAssignedUpdateFunc(elmtId, isFirstRender);
             if (!isFirstRender) {
                 _popFunc();
             }
-            this.currentlyRenderedElmtId_ = -1;
+            this.currentlyRenderedElmtIdStack_.pop();
             ViewStackProcessor.StopGetAccessRecording();
             
             this.restoreInstanceId();
@@ -5593,23 +5601,23 @@ class ViewPU extends NativeViewPartialUpdate {
         
     }
     getOrCreateRecycleManager() {
-        if (!this.recycleManager) {
-            this.recycleManager = new RecycleManager;
+        if (!this.recycleManager_) {
+            this.recycleManager_ = new RecycleManager;
         }
-        return this.recycleManager;
+        return this.recycleManager_;
     }
     getRecycleManager() {
-        return this.recycleManager;
+        return this.recycleManager_;
     }
     hasRecycleManager() {
-        return !(this.recycleManager === undefined);
+        return !(this.recycleManager_ === undefined);
     }
     initRecycleManager() {
-        if (this.recycleManager) {
+        if (this.recycleManager_) {
             stateMgmtConsole.error(`${this.debugInfo()}: init recycleManager multiple times. Internal error.`);
             return;
         }
-        this.recycleManager = new RecycleManager;
+        this.recycleManager_ = new RecycleManager;
     }
     /**
      * @function observeRecycleComponentCreation
@@ -5633,24 +5641,16 @@ class ViewPU extends NativeViewPartialUpdate {
         // if there is a suitable recycle node, run a recycle update function.
         const newElmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
         const oldElmtId = node.id__();
-        // store the current id and origin id, used for dirty element sort in {compareNumber}
-        recycleUpdateFunc(newElmtId, /* is first render */ true, node);
-        const oldEntry = this.updateFuncByElmtId.get(oldElmtId);
-        this.updateFuncByElmtId.delete(oldElmtId);
-        this.updateFuncByElmtId.set(newElmtId, {
-            updateFunc: compilerAssignedUpdateFunc,
-            classObject: oldEntry && oldEntry.getComponentClass(),
-            node: oldEntry && oldEntry.getNode()
-        });
-        node.updateId(newElmtId);
-        node.updateRecycleElmtId(oldElmtId, newElmtId);
-        SubscriberManager.UpdateRecycleElmtId(oldElmtId, newElmtId);
+        this.recycleManager_.updateNodeId(oldElmtId, newElmtId);
+        recycleUpdateFunc(oldElmtId, /* is first render */ true, node);
     }
     aboutToReuseInternal() {
         this.runReuse_ = true;
         stateMgmtTrace.scopedTrace(() => {
             if (this.paramsGenerator_ && typeof this.paramsGenerator_ == "function") {
-                this.aboutToReuse(this.paramsGenerator_());
+                const params = this.paramsGenerator_();
+                this.updateStateVars(params);
+                this.aboutToReuse(params);
             }
         }, "aboutToReuse", this.constructor.name);
         this.updateDirtyElements();
@@ -5785,6 +5785,24 @@ class ViewPU extends NativeViewPartialUpdate {
         
         
         
+    }
+    UpdateLazyForEachElements(elmtIds) {
+        if (!Array.isArray(elmtIds)) {
+            return;
+        }
+        Array.from(elmtIds).sort(ViewPU.compareNumber).forEach((elmtId) => {
+            const entry = this.updateFuncByElmtId.get(elmtId);
+            const updateFunc = entry ? entry.getUpdateFunc() : undefined;
+            if (typeof updateFunc !== "function") {
+                
+            }
+            else {
+                this.isRenderInProgress = true;
+                updateFunc(elmtId, false);
+                this.finishUpdateFunc(elmtId);
+                this.isRenderInProgress = false;
+            }
+        });
     }
     /**
        * CreateStorageLink and CreateStorageLinkPU are used by the implementation of @StorageLink and
@@ -6023,6 +6041,49 @@ ViewPU.inactiveComponents_ = new Set();
 // static flag for paused rendering
 // when paused, getCurrentlyRenderedElmtId() will return -1
 ViewPU.renderingPaused = false;
+class UpdateFuncsByElmtId {
+    constructor() {
+        this.map_ = new Map();
+    }
+    delete(elmtId) {
+        return this.map_.delete(elmtId);
+    }
+    set(elmtId, params) {
+        (typeof params == "object") ?
+            this.map_.set(elmtId, new UpdateFuncRecord(params))
+            : this.map_.set(elmtId, new UpdateFuncRecord({ updateFunc: params }));
+    }
+    get(elmtId) {
+        return this.map_.get(elmtId);
+    }
+    keys() {
+        return this.map_.keys();
+    }
+    clear() {
+        return this.map_.clear();
+    }
+    get size() {
+        return this.map_.size;
+    }
+    forEach(callbackfn) {
+        this.map_.forEach(callbackfn);
+    }
+    // dump info about known elmtIds to a string
+    // use function only for debug output and DFX.
+    debugInfoRegisteredElmtIds() {
+        let result = "";
+        let sepa = "";
+        this.map_.forEach((value, elmtId) => {
+            result += `${sepa}${value.getComponentName()}[${elmtId}]`;
+            sepa = ", ";
+        });
+        return result;
+    }
+    debugInfoElmtId(elmtId) {
+        const updateFuncEntry = this.map_.get(elmtId);
+        return updateFuncEntry ? `'${updateFuncEntry.getComponentName()}[${elmtId}]'` : `'unknown component type'[${elmtId}]`;
+    }
+}
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -6049,28 +6110,64 @@ class RecycleManager {
     constructor() {
         // key: recycle node name
         // value: recycle node JS object
-        this.cachedRecycleNodes = undefined;
-        this.cachedRecycleNodes = new Map();
+        this.cachedRecycleNodes_ = undefined;
+        this.biMap_ = undefined;
+        this.cachedRecycleNodes_ = new Map();
+        this.biMap_ = new BidirectionalMap();
+    }
+    updateNodeId(oldElmtId, newElmtId) {
+        this.biMap_.delete(oldElmtId);
+        this.biMap_.add([oldElmtId, newElmtId]);
+    }
+    proxyNodeId(oldElmtId) {
+        const proxy = this.biMap_.get(oldElmtId);
+        if (!proxy) {
+            return oldElmtId;
+        }
+        return proxy;
     }
     pushRecycleNode(name, node) {
         var _a;
-        if (!this.cachedRecycleNodes.get(name)) {
-            this.cachedRecycleNodes.set(name, new Array());
+        if (!this.cachedRecycleNodes_.get(name)) {
+            this.cachedRecycleNodes_.set(name, new Array());
         }
-        (_a = this.cachedRecycleNodes.get(name)) === null || _a === void 0 ? void 0 : _a.push(node);
+        (_a = this.cachedRecycleNodes_.get(name)) === null || _a === void 0 ? void 0 : _a.push(node);
     }
     popRecycleNode(name) {
         var _a;
-        return (_a = this.cachedRecycleNodes.get(name)) === null || _a === void 0 ? void 0 : _a.pop();
+        return (_a = this.cachedRecycleNodes_.get(name)) === null || _a === void 0 ? void 0 : _a.pop();
     }
     // When parent JS View is deleted, release all cached nodes
     purgeAllCachedRecycleNode() {
-        this.cachedRecycleNodes.forEach((nodes, _) => {
+        this.cachedRecycleNodes_.forEach((nodes, _) => {
             nodes.forEach((node) => {
                 node.resetRecycleCustomNode();
             });
         });
-        this.cachedRecycleNodes.clear();
+        this.cachedRecycleNodes_.clear();
+    }
+}
+class BidirectionalMap {
+    constructor() {
+        this.fwdMap_ = undefined;
+        this.revMap_ = undefined;
+        this.fwdMap_ = new Map();
+        this.revMap_ = new Map();
+    }
+    delete(key) {
+        if (!this.fwdMap_[key]) {
+            return;
+        }
+        const rev = this.fwdMap_[key];
+        this.fwdMap_.delete(key);
+        this.revMap_.delete(rev);
+    }
+    get(key) {
+        return this.fwdMap_[key] || this.revMap_[key];
+    }
+    add(pair) {
+        this.fwdMap_[pair[0]] = pair[1];
+        this.revMap_[pair[1]] = pair[0];
     }
 }
 /*
