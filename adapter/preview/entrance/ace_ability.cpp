@@ -251,6 +251,8 @@ void AceAbility::InitEnv()
     if (pipelineContext) {
         LOGI("Set MinPlatformVersion to %{public}d", compatibleVersion_);
         pipelineContext->SetMinPlatformVersion(compatibleVersion_);
+        pipelineContext->SetDisplayWindowRectInfo(
+            Rect(Offset(0.0f, 0.0f), Size(runArgs_.deviceWidth, runArgs_.deviceHeight)));
     }
     container->InitializeAppConfig(runArgs_.assetPath, bundleName_, moduleName_, compileMode_);
     AceContainer::AddRouterChangeCallback(ACE_INSTANCE_ID, runArgs_.onRouterChange);
