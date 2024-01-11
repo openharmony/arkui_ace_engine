@@ -15,9 +15,9 @@
 
 #pragma once
 
-#include "core/interfaces/native/node/node_graphics.h"
-#include "core/interfaces/native/node/node_modifiers.h"
-#include "core/interfaces/native/node/node_types.h"
+// #include "core/interfaces/native/node/node_modifiers.h"
+
+#include "core/interfaces/arkoala/arkoala_api.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -102,11 +102,6 @@ enum ArkUIAsyncEventKind {
 
 // Current implementation assumes that each argument is 4 bytes,
 // fix decodeEvent() in TS if it will change.
-union ArkUIEventCallbackArg {
-    ArkUI_Int32 i32;
-    ArkUI_Uint32 u32;
-    ArkUI_Float32 f32;
-};
 
 #define ARKUI_ASYNC_EVENT_ARGS_COUNT 12
 
@@ -116,27 +111,6 @@ struct ArkUINodeAsyncEvent {
 
 struct ArkUIStringAsyncEvent {
     ArkUI_CharPtr pStr;
-};
-
-struct ArkUIGestureAsyncEvent {
-    ArkUI_Int32 subKind;
-    ArkUI_Int32 repeat;
-    ArkUI_Int32 x;
-    ArkUI_Int32 y;
-    ArkUI_Int32 angle;
-    ArkUI_Int32 scale;
-    ArkUI_Int32 pinchCenterX;
-    ArkUI_Int32 pinchCenterY;
-    ArkUI_Int32 speed;
-    ArkUI_Int32 timestamp;
-    ArkUI_Int32 source;
-    ArkUI_Int32 pressure;
-    ArkUI_Int32 tiltX;
-    ArkUI_Int32 tiltY;
-    ArkUI_Int32 sourceTool;
-    ArkUI_Int32 velocityX;
-    ArkUI_Int32 velocityY;
-    ArkUI_Int32 velocity;
 };
 
 struct ArkUINodeEvent {
@@ -157,57 +131,6 @@ enum ArkUINodeDirtyFlag {
     NEED_RENDER,
 };
 
-struct ArkUIBasicAPI {
-    /// Tree operations.
-    ArkUINodeHandle (*createNode)(ArkUINodeType type, ArkUI_Int32 id, ArkUI_Int32 flags);
-    void (*disposeNode)(ArkUINodeHandle node);
-    // Returned pointer is valid only till node is alive.
-    ArkUI_CharPtr (*getName)(ArkUINodeHandle node);
-    void (*dump)(ArkUINodeHandle node);
-
-    void (*addChild)(ArkUINodeHandle parent, ArkUINodeHandle child);
-    void (*removeChild)(ArkUINodeHandle parent, ArkUINodeHandle child);
-    void (*insertChildAfter)(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHandle sibling);
-
-    // Returned pointer is valid only till node is alive.
-    ArkUI_CharPtr (*getAttribute)(ArkUINodeHandle node, ArkUI_CharPtr attribute);
-    void (*setAttribute)(ArkUINodeHandle node, ArkUI_CharPtr attribute, ArkUI_CharPtr value);
-    void (*resetAttribute)(ArkUINodeHandle node, ArkUI_CharPtr attribute);
-
-    /**
-     * notify the node to send node event back
-     */
-    void (*registerNodeAsyncEvent)(ArkUINodeHandle nodePtr, ArkUIAsyncEventKind kind, ArkUI_Int32 eventId,
-        void* extraParam);
-    void (*unRegisterNodeAsyncEvent)(ArkUINodeHandle nodePtr, ArkUIAsyncEventKind kind);
-    void (*registerNodeAsyncEventReceiver)(void (*eventReceiver)(ArkUINodeEvent* event));
-    void (*unRegisterNodeAsyncEventReceiver)();
-    ArkUI_Int32 (*checkAsyncEvent)(ArkUINodeEvent* event);
-
-    // Commit attributes updates for node.
-    void (*applyModifierFinish)(ArkUINodeHandle nodePtr);
-    void (*markDirty)(ArkUINodeHandle nodePtr, ArkUINodeDirtyFlag dirtyFlag);
-};
-
-/**
- * An API to control an implementation. When making changes modifying binary
- * layout, i.e. adding new events - increase ARKUI_NODE_API_VERSION above for binary
- * layout checks.
- */
-struct ArkUIFullNodeAPI {
-    ArkUI_Int32 version;
-    const ArkUIBasicAPI* (*getBasicAPI)();
-    const ArkUINodeModifiers* (*getNodeModifiers)();
-    const ArkUIGraphicsAPI* (*getGraphicsAPI)();
-};
-
-struct ArkUIAnyNodeAPI {
-    ArkUI_Int32 version;
-};
-
-// use internal, not for export.
-const ArkUIFullNodeAPI* GetArkUIFullNodeAPI();
-void SendArkUIAsyncEvent(ArkUINodeEvent* event);
 
 #ifdef __cplusplus
 };

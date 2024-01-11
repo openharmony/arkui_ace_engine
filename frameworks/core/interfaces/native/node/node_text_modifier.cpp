@@ -241,7 +241,7 @@ void SetTextMinFontSize(ArkUINodeHandle node, const ArkUI_Float64 number, const 
     TextModelNG::SetAdaptMinFontSize(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
 }
 
-void ReSetTextMinFontSize(ArkUINodeHandle node)
+void ResetTextMinFontSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
