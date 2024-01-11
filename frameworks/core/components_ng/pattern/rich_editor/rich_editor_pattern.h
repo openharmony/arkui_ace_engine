@@ -388,7 +388,8 @@ public:
     }
     void GetCaretMetrics(CaretMetricsF& caretCaretMetric) override;
 
-    void SetShowSelect(bool isShowSelect) {
+    void SetShowSelect(bool isShowSelect)
+    {
         showSelect_ = isShowSelect;
     }
 
