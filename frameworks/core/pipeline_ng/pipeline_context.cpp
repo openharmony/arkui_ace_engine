@@ -167,6 +167,17 @@ void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirtyNode);
+    auto customNode = DynamicCast<CustomNode>(dirtyNode);
+    if (customNode && !dirtyNode->GetInspectorIdValue("").empty()) {
+        ACE_LAYOUT_SCOPED_TRACE("AddDirtyCustomNode[%s][self:%d][parent:%d][key:%s]",
+            customNode->GetJSViewName().c_str(),
+            dirtyNode->GetId(), dirtyNode->GetParent() ? dirtyNode->GetParent()->GetId() : 0,
+            dirtyNode->GetInspectorIdValue("").c_str());
+    } else if (customNode) {
+        ACE_LAYOUT_SCOPED_TRACE("AddDirtyCustomNode[%s][self:%d][parent:%d]",
+            customNode->GetJSViewName().c_str(),
+            dirtyNode->GetId(), dirtyNode->GetParent() ? dirtyNode->GetParent()->GetId() : 0);
+    }
     dirtyNodes_.emplace(dirtyNode);
     hasIdleTasks_ = true;
     RequestFrame();
@@ -176,6 +187,15 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
+    if (!dirty->GetInspectorIdValue("").empty()) {
+        ACE_LAYOUT_SCOPED_TRACE("AddDirtyLayoutNode[%s][self:%d][parent:%d][key:%s]",
+            dirty->GetTag().c_str(),
+            dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0,
+            dirty->GetInspectorIdValue("").c_str());
+    } else {
+        ACE_LAYOUT_SCOPED_TRACE("AddDirtyLayoutNode[%s][self:%d][parent:%d]", dirty->GetTag().c_str(),
+            dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0);
+    }
     taskScheduler_->AddDirtyLayoutNode(dirty);
     ForceLayoutForImplicitAnimation();
 #ifdef UICAST_COMPONENT_SUPPORTED
@@ -195,6 +215,14 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
+    if (!dirty->GetInspectorIdValue("").empty()) {
+        ACE_LAYOUT_SCOPED_TRACE("AddDirtyRenderNode[%s][self:%d][parent:%d][key:%s]", dirty->GetTag().c_str(),
+            dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0,
+            dirty->GetInspectorIdValue("").c_str());
+    } else {
+        ACE_LAYOUT_SCOPED_TRACE("AddDirtyRenderNode[%s][self:%d][parent:%d]", dirty->GetTag().c_str(),
+            dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0);
+    }
     taskScheduler_->AddDirtyRenderNode(dirty);
     ForceRenderForImplicitAnimation();
 #ifdef UICAST_COMPONENT_SUPPORTED
