@@ -34,6 +34,18 @@ void VideoFullScreenPattern::InitFullScreenParam(const RefPtr<VideoPattern>& vid
     SetEventHub(video->GetEventHub<EventHub>());
 }
 
+void VideoFullScreenPattern::SetEventHub(const RefPtr<EventHub>& eventHub)
+{
+    eventHub_ = eventHub;
+    originGestureEventHub_ = eventHub->GetGestureEventHub();
+    // create a new gestureEventHub and copy original event
+    auto gestureEventHub = MakeRefPtr<GestureEventHub>(eventHub);
+    gestureEventHub->CopyEvent(originGestureEventHub_);
+    gestureEventHub->CopyGestures(originGestureEventHub_);
+    eventHub_->SetGestureEventHub(gestureEventHub);
+    eventHub_->AttachHost(GetHost());
+}
+
 void VideoFullScreenPattern::RequestFullScreen(const RefPtr<VideoNode>& videoNode)
 {
     ContainerScope scope(instanceId_);
@@ -88,6 +100,9 @@ bool VideoFullScreenPattern::ExitFullScreen()
     videoPattern->RecoverState(AceType::Claim(this));
     // change full screen button
     videoPattern->OnFullScreenChange(false);
+    // recover gestureEventHub
+    eventHub_->SetGestureEventHub(originGestureEventHub_);
+    eventHub_->AttachHost(videoPattern->GetHost());
     videoNode->MarkModifyDone();
     return true;
 }
