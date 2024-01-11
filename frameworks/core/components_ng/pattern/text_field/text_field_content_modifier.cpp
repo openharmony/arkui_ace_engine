@@ -145,8 +145,16 @@ void TextFieldContentModifier::SetDefaultAnimatablePropertyValue()
     CHECK_NULL_VOID(pipelineContext);
     theme = pipelineContext->GetTheme<TextTheme>();
     textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
-    TextStyle textStyle = CreateTextStyleUsingTheme(
-        textFieldLayoutProperty->GetFontStyle(), textFieldLayoutProperty->GetTextLineStyle(), theme);
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    TextStyle textStyle;
+    if (!textFieldPattern->GetTextValue().empty()) {
+        textStyle = CreateTextStyleUsingTheme(
+            textFieldLayoutProperty->GetFontStyle(), textFieldLayoutProperty->GetTextLineStyle(), theme);
+    } else {
+        textStyle = CreateTextStyleUsingTheme(textFieldLayoutProperty->GetPlaceholderFontStyle(),
+            textFieldLayoutProperty->GetPlaceholderTextLineStyle(), theme);
+    }
     SetDefaultFontSize(textStyle);
     SetDefaultFontWeight(textStyle);
     SetDefaultTextColor(textStyle);
