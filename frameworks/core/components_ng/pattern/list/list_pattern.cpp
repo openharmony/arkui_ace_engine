@@ -1283,6 +1283,11 @@ bool ListPattern::GetListItemAnimatePos(float startPos, float endPos, ScrollAlig
             break;
         case ScrollAlign::AUTO:
             targetPos = CalculateTargetPos(startPos, endPos);
+            if (Negative(targetPos)) {
+                targetPos -= contentStartOffset_;
+            } else {
+                targetPos += contentEndOffset_;
+            }
             break;
     }
     return true;
@@ -1332,6 +1337,11 @@ bool ListPattern::GetListItemGroupAnimatePosWithoutIndexInGroup(int32_t index, f
         case ScrollAlign::AUTO:
             if (targetIndex_.has_value()) {
                 targetPos = CalculateTargetPos(startPos, endPos);
+                if (Negative(targetPos)) {
+                    targetPos -= contentStartOffset_;
+                } else {
+                    targetPos += contentEndOffset_;
+                }
                 return true;
             }
             return false;
@@ -1402,6 +1412,11 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int3
                 itemEndPos += groupPattern->GetFooterMainSize();
             }
             targetPos = CalculateTargetPos(itemStartPos, itemEndPos);
+            if (Negative(targetPos)) {
+                targetPos -= contentStartOffset_;
+            } else {
+                targetPos += contentEndOffset_;
+            }
             break;
     }
     return true;
