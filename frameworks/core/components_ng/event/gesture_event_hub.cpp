@@ -1245,12 +1245,14 @@ void GestureEventHub::ClearUserOnTouch()
 
 void GestureEventHub::CopyGestures(const RefPtr<GestureEventHub>& gestureEventHub)
 {
+    CHECK_NULL_VOID(gestureEventHub);
     gestures_ = gestureEventHub->backupGestures_;
     recreateGesture_ = true;
 }
 
 void GestureEventHub::CopyEvent(const RefPtr<GestureEventHub>& gestureEventHub)
 {
+    CHECK_NULL_VOID(gestureEventHub);
     auto originalTouchEventActuator = gestureEventHub->touchEventActuator_;
     if (originalTouchEventActuator) {
         touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
