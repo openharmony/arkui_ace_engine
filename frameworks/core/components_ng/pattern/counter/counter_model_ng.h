@@ -36,6 +36,9 @@ public:
     void SetEnableInc(bool enableInc) override;
     static void SetEnableDec(FrameNode* frameNode, bool enableDec);
     static void SetEnableInc(FrameNode* frameNode, bool enableInc);
+    static void SetHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetBackgroundColor(FrameNode* frameNode, const Color& value);
 
 private:
     RefPtr<FrameNode> CreateButtonChild(

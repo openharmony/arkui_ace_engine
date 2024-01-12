@@ -1277,6 +1277,13 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest0182, TestSize.Level1)
     GestureEvent gestureEvent;
     gestureEvent.SetSourceDevice(SourceType::MOUSE);
     gestureEvent.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    auto dragEvent = AceType::MakeRefPtr<DragEvent>([](GestureEvent& info) {}, [](GestureEvent& info) {},
+        [](GestureEvent& info) {}, []() {});
+    PanDirection panDirection;
+    Dimension dimension;
+    gestureEventHub->dragEventActuator_ = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), panDirection, FINGERS, dimension.ConvertToPx());
+    ASSERT_NE(gestureEventHub->dragEventActuator_, nullptr);
     gestureEventHub->HandleOnDragStart(gestureEvent);
     EXPECT_FALSE(eventManager->IsLastMoveBeforeUp());
 }
@@ -1640,6 +1647,13 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest023, TestSize.Level1)
      */
     GestureEvent info;
     auto pipline = PipelineContext::GetCurrentContext();
+    auto dragEvent = AceType::MakeRefPtr<DragEvent>([](GestureEvent& info) {}, [](GestureEvent& info) {},
+        [](GestureEvent& info) {}, []() {});
+    PanDirection panDirection;
+    Dimension dimension;
+    gestureEventHub->dragEventActuator_ = AceType::MakeRefPtr<DragEventActuator>(
+        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), panDirection, FINGERS, dimension.ConvertToPx());
+    ASSERT_NE(gestureEventHub->dragEventActuator_, nullptr);
     gestureEventHub->OnDragStart(info, pipline, frameNode, dragDropInfo, event);
     EXPECT_TRUE(gestureEventHub->dragDropProxy_);
 
@@ -1650,7 +1664,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest023, TestSize.Level1)
     dragDropInfo.customNode = nullptr;
     dragDropInfo.pixelMap = nullptr;
     gestureEventHub->OnDragStart(info, pipline, frameNode, dragDropInfo, event);
-    EXPECT_FALSE(gestureEventHub->dragDropProxy_);
+    EXPECT_TRUE(gestureEventHub->dragDropProxy_);
 }
 
 /**

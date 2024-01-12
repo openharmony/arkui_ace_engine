@@ -567,4 +567,42 @@ ArkUINativeModuleValue SearchBridge::ResetCopyOption(ArkUIRuntimeCallInfo* runti
     GetArkUIInternalNodeAPI()->GetSearchModifier().ResetSearchCopyOption(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue SearchBridge::SetSearchHeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
+    CalcDimension height;
+    std::string calcStr;
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, valueArg, height)) {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetHeight(nativeNode);
+    } else {
+        if (LessNotEqual(height.Value(), 0.0)) {
+            height.SetValue(0.0);
+        }
+        if (height.Unit() == DimensionUnit::CALC) {
+            GetArkUIInternalNodeAPI()->GetCommonModifier().SetHeight(
+                nativeNode, height.Value(), static_cast<int>(height.Unit()), height.CalcValue().c_str());
+        } else {
+            GetArkUIInternalNodeAPI()->GetCommonModifier().SetHeight(
+                nativeNode, height.Value(), static_cast<int>(height.Unit()), calcStr.c_str());
+        }
+        GetArkUIInternalNodeAPI()->GetSearchModifier().SetSearchHeight(
+            nativeNode, height.Value(), static_cast<int>(height.Unit()));
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SearchBridge::ResetSearchHeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetSearchModifier().ResetSearchHeight(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

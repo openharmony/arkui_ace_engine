@@ -81,7 +81,7 @@ void ListItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     UpdateListItemConstraint(contentIdealSize, itemLayoutConstraint);
     auto headerFooterLayoutConstraint = layoutProperty->CreateChildConstraint();
     headerFooterLayoutConstraint.maxSize.SetMainSize(Infinity<float>(), axis_);
-    UpdateReferencePos(layoutProperty);
+    referencePos_ = UpdateReferencePos(layoutProperty, forwardLayout_, referencePos_);
     totalItemCount_ = layoutWrapper->GetTotalChildCount() - itemStartIndex_;
     totalMainSize_ = layoutWrapper->GetGeometryNode()->GetPaddingSize().MainSize(axis_);
     if (headerIndex_ >= 0) {
@@ -196,35 +196,32 @@ float ListItemGroupLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWr
     return maxCrossSize;
 }
 
-void ListItemGroupLayoutAlgorithm::UpdateReferencePos(RefPtr<LayoutProperty> layoutProperty)
+float ListItemGroupLayoutAlgorithm::UpdateReferencePos(
+    RefPtr<LayoutProperty> layoutProperty, bool forwardLayout, float referencePos)
 {
     const auto& padding = layoutProperty->CreatePaddingAndBorder();
     const auto& margin = layoutProperty->CreateMargin();
-    auto offsetBeforeContent_ = axis_ == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
-    auto offsetAfterContent_ = axis_ == Axis::HORIZONTAL ? padding.right.value_or(0) : padding.bottom.value_or(0);
-    offsetBeforeContent_ += axis_ == Axis::HORIZONTAL ? margin.left.value_or(0) : margin.top.value_or(0);
-    offsetAfterContent_ += axis_ == Axis::HORIZONTAL ? margin.right.value_or(0) : margin.bottom.value_or(0);
-    forwardLayout_ ? referencePos_ += offsetBeforeContent_ : referencePos_ -= offsetAfterContent_;
+    auto offsetBeforeContent = axis_ == Axis::HORIZONTAL ? padding.left.value_or(0) : padding.top.value_or(0);
+    auto offsetAfterContent = axis_ == Axis::HORIZONTAL ? padding.right.value_or(0) : padding.bottom.value_or(0);
+    offsetBeforeContent += axis_ == Axis::HORIZONTAL ? margin.left.value_or(0) : margin.top.value_or(0);
+    offsetAfterContent += axis_ == Axis::HORIZONTAL ? margin.right.value_or(0) : margin.bottom.value_or(0);
+    forwardLayout ? referencePos += offsetBeforeContent : referencePos -= offsetAfterContent;
+    return referencePos;
 }
 
 bool ListItemGroupLayoutAlgorithm::NeedMeasureItem() const
 {
-    if (forwardLayout_ && headerIndex_ >= 0) {
+    if (forwardLayout_) {
         if (GreatNotEqual(headerMainSize_, endPos_ - referencePos_)) {
             return false;
         }
-    }
-    if (forwardLayout_ && footerIndex_ >= 0) {
         if (LessNotEqual(totalMainSize_ - footerMainSize_, startPos_ - referencePos_)) {
             return false;
         }
-    }
-    if (!forwardLayout_ && headerIndex_ >= 0) {
+    } else {
         if (GreatNotEqual(headerMainSize_, endPos_ - (referencePos_ - totalMainSize_))) {
             return false;
         }
-    }
-    if (!forwardLayout_ && footerIndex_ >= 0) {
         if (LessNotEqual(totalMainSize_ - footerMainSize_, startPos_ - (referencePos_ - totalMainSize_))) {
             return false;
         }
@@ -310,7 +307,14 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
             startPos = itemPosition_.begin()->second.first;
         }
         endPos = itemPosition_.rbegin()->second.second;
-        startIndex = std::min(GetStartIndex(), totalItemCount_ - 1);
+        startIndex = GetStartIndex();
+        if (startIndex >= totalItemCount_) {
+            startIndex = totalItemCount_ - 1;
+            if (itemPosition_.begin()->first > 0) {
+                startPos = ((startPos - headerMainSize_) / GetLanesFloor(itemPosition_.begin()->first)) *
+                               GetLanesFloor(startIndex) + headerMainSize_;
+            }
+        }
         endIndex = std::min(GetEndIndex(), totalItemCount_ - 1);
         itemPosition_.clear();
         layoutWrapper->RemoveAllChildInRenderTree();
@@ -708,11 +712,27 @@ void ListItemGroupLayoutAlgorithm::AdjustItemPosition()
     } else {
         totalMainSize_ = std::max(totalMainSize_, GetEndPosition() + footerMainSize_);
     }
+    const auto& start = *itemPosition_.begin();
+    const auto& end = *itemPosition_.rbegin();
+    if (layoutedItemInfo_.has_value()) {
+        auto& itemInfo = layoutedItemInfo_.value();
+        if (start.first <= itemInfo.startIndex || LessNotEqual(start.second.first, itemInfo.startPos)) {
+            itemInfo.startIndex = start.first;
+            itemInfo.startPos = start.second.first;
+        }
+        if (end.first >= itemInfo.endIndex || LessNotEqual(end.second.second, itemInfo.endPos)) {
+            itemInfo.endIndex = end.first;
+            itemInfo.endPos = end.second.second;
+        }
+    } else {
+        layoutedItemInfo_ = { start.first, start.second.first, end.first, end.second.second };
+    }
 }
 
 void ListItemGroupLayoutAlgorithm::CheckRecycle(
     const RefPtr<LayoutWrapper>& layoutWrapper, float startPos, float endPos, float referencePos, bool forwardLayout)
 {
+    referencePos = UpdateReferencePos(layoutWrapper->GetLayoutProperty(), forwardLayout, referencePos);
     // Mark inactive in wrapper.
     if (forwardLayout) {
         for (auto pos = itemPosition_.begin(); pos != itemPosition_.end();) {

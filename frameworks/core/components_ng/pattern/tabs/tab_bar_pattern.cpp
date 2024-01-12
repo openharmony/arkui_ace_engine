@@ -86,6 +86,34 @@ void TabBarPattern::OnAttachToFrameNode()
             scrollable->StopScrollable();
         }
     });
+    InitSurfaceChangedCallback();
+}
+
+void TabBarPattern::InitSurfaceChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (!HasSurfaceChangedCallback()) {
+        auto callbackId = pipeline->RegisterSurfaceChangedCallback(
+            [weak = WeakClaim(this)](int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight,
+                WindowSizeChangeReason type) {
+                if (type == WindowSizeChangeReason::UNDEFINED) {
+                    return;
+                }
+                auto pattern = weak.Upgrade();
+                if (!pattern) {
+                    return;
+                }
+
+                if (type == WindowSizeChangeReason::ROTATION) {
+                    pattern->windowSizeChangeReason_ = type;
+                    pattern->StopTranslateAnimation();
+                }
+            });
+        UpdateSurfaceChangedCallbackId(callbackId);
+    }
 }
 
 void TabBarPattern::InitClick(const RefPtr<GestureEventHub>& gestureHub)
@@ -657,6 +685,13 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         UpdateIndicator(indicator);
     }
     isFirstLayout_ = false;
+
+    if (windowSizeChangeReason_ == WindowSizeChangeReason::ROTATION &&
+        animationTargetIndex_.has_value() && animationTargetIndex_ != indicator) {
+        swiperController_->SwipeToWithoutAnimation(animationTargetIndex_.value());
+        windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
+    }
+    animationTargetIndex_.reset();
     UpdateGradientRegions(!swiperPattern->IsUseCustomAnimation());
     if (!swiperPattern->IsUseCustomAnimation() && isTouchingSwiper_ &&
         layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
@@ -694,6 +729,8 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
     }
 
     auto index = CalculateSelectedIndex(info.GetLocalLocation());
+    TAG_LOGI(AceLogTag::ACE_TABS, "Clicked tabBarIndex: %{public}d, Clicked tabBarLocation: %{public}s", index,
+        info.GetLocalLocation().ToString().c_str());
     if (index < 0 || index >= totalCount || !swiperController_ ||
         indicator_ >= static_cast<int32_t>(tabBarStyles_.size())) {
         return;
@@ -717,6 +754,7 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
     } else {
         if (GetAnimationDuration().has_value()) {
             swiperController_->SwipeTo(index);
+            animationTargetIndex_ = index;
         } else {
             swiperController_->SwipeToWithoutAnimation(index);
         }
@@ -1381,7 +1419,7 @@ void TabBarPattern::TriggerTranslateAnimation(
         PlayTranslateAnimation(originalPaintRect.GetX() + originalPaintRect.Width() / 2,
             targetPaintRect.GetX() + targetPaintRect.Width() / 2, targetOffset);
     }
-
+    animationTargetIndex_ = index;
     UpdateTextColor(index);
 }
 
@@ -1421,7 +1459,7 @@ void TabBarPattern::PlayTranslateAnimation(float startPos, float endPos, float t
             CHECK_NULL_VOID(tabBarPattern);
             tabBarPattern->indicatorAnimationIsRunning_ = false;
         });
-    
+
     auto startCurrentOffset = currentOffset_;
     host->CreateAnimatablePropertyFloat("tabbar", 0, [weak](float value) {
         auto tabBarPattern = weak.Upgrade();
@@ -1451,7 +1489,7 @@ void TabBarPattern::StopTranslateAnimation()
 
     if (tabbarIndicatorAnimation_)
         AnimationUtils::StopAnimation(tabbarIndicatorAnimation_);
-    
+
     if (indicatorAnimationIsRunning_)
         indicatorAnimationIsRunning_ = false;
 
@@ -1764,7 +1802,7 @@ void TabBarPattern::SetAccessibilityAction()
             frameNode->TotalChildCount() - MASK_COUNT > 1) {
             auto index = pattern->GetIndicator() + 1;
             pattern->FocusIndexChange(index);
-            frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+            // AccessibilityEventType::SCROLL_END
         }
     });
 
@@ -1779,7 +1817,7 @@ void TabBarPattern::SetAccessibilityAction()
            frameNode->TotalChildCount() - MASK_COUNT > 1) {
             auto index = pattern->GetIndicator() - 1;
             pattern->FocusIndexChange(index);
-            frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+            // AccessibilityEventType::SCROLL_END
         }
     });
 }
@@ -1959,9 +1997,9 @@ bool TabBarPattern::CheckSwiperDisable() const
     CHECK_NULL_RETURN(tabsNode, true);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_RETURN(swiperNode, true);
-    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_RETURN(swiperPaintProperty, true);
-    return swiperPaintProperty->GetDisableSwipe().value_or(false);
+    auto props = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(props, true);
+    return props->GetDisableSwipe().value_or(false);
 }
 
 void TabBarPattern::SetSwiperCurve(const RefPtr<Curve>& curve) const
@@ -2092,7 +2130,8 @@ void TabBarPattern::InitTurnPageRateEvent()
 void TabBarPattern::HandleBottomTabBarAnimation(int32_t index)
 {
     auto preIndex = GetImageColorOnIndex().value_or(indicator_);
-    if (preIndex < 0 || preIndex >= tabBarStyles_.size() || index < 0 || index >= tabBarStyles_.size()) {
+    if (preIndex < 0 || preIndex >= static_cast<int32_t>(tabBarStyles_.size())
+        || index < 0 || index >= static_cast<int32_t>(tabBarStyles_.size())) {
         return;
     }
     if (tabBarStyles_[preIndex] != TabBarStyle::BOTTOMTABBATSTYLE &&

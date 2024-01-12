@@ -154,58 +154,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
   // registry of update functions
   // the key is the elementId of the Component/Element that's the result of this function
-  private updateFuncByElmtId = new class UpdateFuncsByElmtId {
-
-    private map_ = new Map<number, UpdateFuncRecord>();
-
-    public delete(elmtId: number): boolean {
-      return this.map_.delete(elmtId);
-    }
-
-    public set(elmtId: number, params: UpdateFunc | { updateFunc: UpdateFunc, classObject?: UIClassObject, node?: Object }): void {
-      (typeof params == "object") ? 
-        this.map_.set(elmtId, new UpdateFuncRecord(params))
-        : this.map_.set(elmtId, new UpdateFuncRecord({ updateFunc: params as UpdateFunc }));
-    }
-
-    public get(elmtId: number): UpdateFuncRecord | undefined {
-      return this.map_.get(elmtId);
-    }
-
-    public keys(): IterableIterator<number> {
-      return this.map_.keys();
-    }
-
-    public clear(): void {
-      return this.map_.clear();
-    }
-
-    public get size(): number {
-      return this.map_.size;
-    }
-
-    public forEach(callbackfn: (value: UpdateFuncRecord, key: number, map: Map<number, UpdateFuncRecord>) => void) : void {
-      this.map_.forEach(callbackfn);
-    }
-
-    // dump info about known elmtIds to a string
-    // use function only for debug output and DFX.
-    public debugInfoRegisteredElmtIds(): string {
-      let result: string = "";
-      let sepa: string = "";
-      this.map_.forEach((value: UpdateFuncRecord, elmtId: number) => {
-        result += `${sepa}${value.getComponentName()}[${elmtId}]`;
-        sepa = ", ";
-      });
-      return result;
-    }
-
-    public debugInfoElmtId(elmtId: number): string {
-      const updateFuncEntry = this.map_.get(elmtId);
-      return updateFuncEntry ? `'${updateFuncEntry!.getComponentName()}[${elmtId}]'` : `'unknown component type'[${elmtId}]`;
-    }
-  }
-
+  private updateFuncByElmtId = new UpdateFuncsByElmtId();
 
   // my LocalStorage instance, shared with ancestor Views.
   // create a default instance on demand if none is initialized
@@ -298,6 +247,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       this.localStorage_ = localStorage;
       stateMgmtConsole.debug(`${this.debugInfo()}: constructor: Using LocalStorage instance provided via @Entry.`);
     }
+    this.isCompFreezeAllowed = this.isCompFreezeAllowed || (this.parent_ && this.parent_.isCompFreezeAllowed);
 
     SubscriberManager.Add(this);
     stateMgmtConsole.debug(`${this.debugInfo()}: constructor: done`);
@@ -513,7 +463,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   protected initAllowComponentFreeze(freezeState: boolean | undefined) : void {
   // set to true if freeze parameter set for this @Component to true
     // otherwise inherit from parent @Component (if it exists).
-    this.isCompFreezeAllowed = freezeState || (this.parent_ && this.parent_.isCompFreezeAllowed);
+    this.isCompFreezeAllowed = freezeState || this.isCompFreezeAllowed;
     stateMgmtConsole.debug(`${this.debugInfo()}: @Component freezeWhenInactive state is set to ${this.isCompFreezeAllowed}`);
   }
 
@@ -1470,5 +1420,57 @@ abstract class ViewPU extends NativeViewPartialUpdate
   private debugInfoInactiveComponents(): string {
     return Array.from(ViewPU.inactiveComponents_)
       .map((component) => `- ${component}`).join('\n');
+  }
+}
+
+class UpdateFuncsByElmtId {
+
+  private map_ = new Map<number, UpdateFuncRecord>();
+
+  public delete(elmtId: number): boolean {
+    return this.map_.delete(elmtId);
+  }
+
+  public set(elmtId: number, params: UpdateFunc | { updateFunc: UpdateFunc, classObject?: UIClassObject, node?: Object }): void {
+    (typeof params == "object") ?
+      this.map_.set(elmtId, new UpdateFuncRecord(params))
+      : this.map_.set(elmtId, new UpdateFuncRecord({ updateFunc: params as UpdateFunc }));
+  }
+
+  public get(elmtId: number): UpdateFuncRecord | undefined {
+    return this.map_.get(elmtId);
+  }
+
+  public keys(): IterableIterator<number> {
+    return this.map_.keys();
+  }
+
+  public clear(): void {
+    return this.map_.clear();
+  }
+
+  public get size(): number {
+    return this.map_.size;
+  }
+
+  public forEach(callbackfn: (value: UpdateFuncRecord, key: number, map: Map<number, UpdateFuncRecord>) => void) : void {
+    this.map_.forEach(callbackfn);
+  }
+
+  // dump info about known elmtIds to a string
+  // use function only for debug output and DFX.
+  public debugInfoRegisteredElmtIds(): string {
+    let result: string = "";
+    let sepa: string = "";
+    this.map_.forEach((value: UpdateFuncRecord, elmtId: number) => {
+      result += `${sepa}${value.getComponentName()}[${elmtId}]`;
+      sepa = ", ";
+    });
+    return result;
+  }
+
+  public debugInfoElmtId(elmtId: number): string {
+    const updateFuncEntry = this.map_.get(elmtId);
+    return updateFuncEntry ? `'${updateFuncEntry!.getComponentName()}[${elmtId}]'` : `'unknown component type'[${elmtId}]`;
   }
 }

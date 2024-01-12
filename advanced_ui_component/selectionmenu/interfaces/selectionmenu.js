@@ -260,6 +260,7 @@ class SelectionMenuComponent extends ViewPU {
     initialRender() {
         this.observeComponentCreation2(((e, t) => {
             Column.create();
+            Column.useShadowBatching(true);
             Column.flexShrink(1);
             Column.height(this.customMenuSize)
         }), Column);

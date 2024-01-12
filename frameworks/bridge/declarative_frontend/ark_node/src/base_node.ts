@@ -23,11 +23,13 @@ declare interface RenderOptions {
   type?: NodeRenderType,
   surfaceId?: string
 }
+
 declare class __JSBaseNode__ {
   constructor(options?: RenderOptions);
   create(builder: (...args: Object[]) => void, params: Object): number | null;
   createRenderNode(): number | null;
   finishUpdateFunc(): void;
+  reset(): void;
 }
 
 class BaseNode extends __JSBaseNode__ {
@@ -47,5 +49,9 @@ class BaseNode extends __JSBaseNode__ {
       instanceId = uiContext.instanceId_;
     }
     this.instanceId_ = instanceId;
+  }
+  public getInstanceId()
+  {
+    return this.instanceId_;
   }
 }

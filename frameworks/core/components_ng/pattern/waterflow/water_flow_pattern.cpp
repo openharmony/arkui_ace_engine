@@ -266,19 +266,28 @@ bool WaterFlowPattern::ScrollToTargrtIndex(int32_t index)
     }
     auto item = layoutInfo_.waterFlowItems_[crossIndex][index];
     float targetPosition = 0.0;
-    // first line
-    if ((layoutInfo_.currentOffset_ + item.first < 0) && (layoutInfo_.currentOffset_ + item.first + item.second > 0)) {
-        targetPosition = item.first;
-    } else if ((layoutInfo_.currentOffset_ + item.first < layoutInfo_.lastMainSize_) &&
-               (layoutInfo_.currentOffset_ + item.first + item.second > layoutInfo_.lastMainSize_)) {
-        // last line
-        targetPosition = -(layoutInfo_.lastMainSize_ - (item.first + item.second));
-    } else if ((layoutInfo_.currentOffset_ + item.first + item.second < 0) ||
-               (layoutInfo_.currentOffset_ + item.first > layoutInfo_.lastMainSize_)) {
-        // out of viewport
-        targetPosition = item.first;
-    } else {
-        return true;
+    ScrollAlign align = layoutInfo_.align_;
+    switch (align) {
+        case ScrollAlign::START:
+            targetPosition = item.first;
+            break;
+        case ScrollAlign::END:
+            targetPosition = -(layoutInfo_.lastMainSize_ - (item.first + item.second));
+            break;
+        case ScrollAlign::AUTO:
+            if (layoutInfo_.currentOffset_ + item.first + item.second < 0) {
+                targetPosition = item.first;
+            } else if (layoutInfo_.currentOffset_ + item.first > layoutInfo_.lastMainSize_) {
+                targetPosition = -(layoutInfo_.lastMainSize_ - (item.first + item.second));
+            } else {
+                targetPosition = -layoutInfo_.currentOffset_;
+            }
+            break;
+        case ScrollAlign::CENTER:
+            targetPosition = -(-item.first + (layoutInfo_.lastMainSize_ - item.second) / 2);
+            break;
+        default:
+            return false;
     }
     ScrollablePattern::AnimateTo(targetPosition, -1, nullptr, true);
     return true;
@@ -367,7 +376,7 @@ void WaterFlowPattern::ScrollPage(bool reverse)
 
     UpdateCurrentOffset(reverse ? mainContentSize : -mainContentSize, SCROLL_FROM_JUMP);
 
-    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    // AccessibilityEventType::SCROLL_END
 }
 
 std::string WaterFlowPattern::ProvideRestoreInfo()
@@ -497,7 +506,7 @@ bool WaterFlowPattern::NeedRender()
 
     auto property = host->GetLayoutProperty();
     CHECK_NULL_RETURN(host, false);
-    needRender |= property->GetPaddingProperty() != nullptr;
+    needRender = property->GetPaddingProperty() != nullptr || needRender;
     return needRender;
 }
 } // namespace OHOS::Ace::NG

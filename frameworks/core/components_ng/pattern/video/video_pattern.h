@@ -178,6 +178,11 @@ public:
         dragEndAutoPlay_ = isDragEndAutoPlay;
     }
 
+    const std::string& GetSrc() const
+    {
+        return src_;
+    }
+
     void UpdateMediaParam(const RefPtr<MediaPlayer>& mediaPlayer, const RefPtr<RenderSurface>& renderSurface,
         const RefPtr<RenderContext>& renderContext)
     {
@@ -229,11 +234,6 @@ public:
 protected:
     void OnUpdateTime(uint32_t time, int pos) const;
     void RegisterMediaPlayerEvent();
-
-    // Video src.
-    std::string src_;
-    bool isInitialState_ = true; // Initial state is true. Play or seek will set it to false.
-    bool isPlaying_ = false;
 
     RefPtr<MediaPlayer> mediaPlayer_ = MediaPlayer::Create();
     RefPtr<RenderSurface> renderSurface_ = RenderSurface::Create();
@@ -318,6 +318,11 @@ private:
     GestureEventFunc playBtnCallBack_;
     GestureEventFunc pauseBtnCallBack_;
     HiddenChangeEvent hiddenChangeEvent_;
+
+    // Video src.
+    std::string src_;
+    bool isInitialState_ = true; // Initial state is true. Play or seek will set it to false.
+    bool isPlaying_ = false;
 
     bool isStop_ = false;
     bool isDrag_ = false;

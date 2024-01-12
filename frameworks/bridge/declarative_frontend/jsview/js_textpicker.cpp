@@ -231,6 +231,12 @@ void JSTextPicker::Create(const JSCallbackInfo& info)
         if (!isSingleRange && optionsMultiContentCheckErr && optionsCascadeContentCheckErr) {
             param.result.clear();
             param.options.clear();
+
+            RefPtr<NG::FrameNode> targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+            bool firstBuild = targetNode && targetNode->IsFirstBuilding();
+            if (!firstBuild) {
+                return;
+            }
         }
         auto theme = GetTheme<PickerTheme>();
         CHECK_NULL_VOID(theme);
@@ -1159,6 +1165,22 @@ void JSTextPickerDialog::Show(const JSCallbackInfo& info)
     DimensionRect maskRect;
     if (JSViewAbstract::ParseJsDimensionRect(maskRectValue, maskRect)) {
         textPickerDialog.maskRect = maskRect;
+    }
+
+    auto backgroundColorValue = paramObject->GetProperty("backgroundColor");
+    Color backgroundColor;
+    if (JSViewAbstract::ParseJsColor(backgroundColorValue, backgroundColor)) {
+        textPickerDialog.backgroundColor = backgroundColor;
+    }
+
+    auto backgroundBlurStyle = paramObject->GetProperty("backgroundBlurStyle");
+    BlurStyleOption styleOption;
+    if (backgroundBlurStyle->IsNumber()) {
+        auto blurStyle = backgroundBlurStyle->ToNumber<int32_t>();
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+            textPickerDialog.backgroundBlurStyle = blurStyle;
+        }
     }
 
     TextPickerDialogModel::GetInstance()->SetTextPickerDialogShow(pickerText, settingData, std::move(cancelEvent),

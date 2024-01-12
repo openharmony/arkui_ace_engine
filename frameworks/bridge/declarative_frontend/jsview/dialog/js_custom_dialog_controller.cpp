@@ -80,7 +80,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         JSRef<JSVal> builderCallback = constructorArg->GetProperty("builder");
         if (!builderCallback->IsUndefined() && builderCallback->IsFunction()) {
             instance->jsBuilderFunction_ =
-                AceType::MakeRefPtr<JsFunction>(ownerObj, JSRef<JSFunc>::Cast(builderCallback));
+                AceType::MakeRefPtr<JsWeakFunction>(ownerObj, JSRef<JSFunc>::Cast(builderCallback));
         } else {
             instance->jsBuilderFunction_ = nullptr;
             info.SetReturnValue(instance);
@@ -92,7 +92,7 @@ void JSCustomDialogController::ConstructorCallback(const JSCallbackInfo& info)
         JSRef<JSVal> cancelCallback = constructorArg->GetProperty("cancel");
         if (!cancelCallback->IsUndefined() && cancelCallback->IsFunction()) {
             WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-            auto jsCancelFunction = AceType::MakeRefPtr<JsFunction>(ownerObj, JSRef<JSFunc>::Cast(cancelCallback));
+            auto jsCancelFunction = AceType::MakeRefPtr<JsWeakFunction>(ownerObj, JSRef<JSFunc>::Cast(cancelCallback));
             instance->jsCancelFunction_ = jsCancelFunction;
 
             auto onCancel = [execCtx = info.GetExecutionContext(), func = std::move(jsCancelFunction),
@@ -300,6 +300,7 @@ void JSCustomDialogController::JsOpenDialog(const JSCallbackInfo& info)
 
     auto container = Container::Current();
     if (container && container->IsScenceBoardWindow() && !dialogProperties_.windowScene.Upgrade()) {
+        dialogProperties_.isScenceBoardDialog = true;
         auto viewNode = this->ownerView_->GetViewNode();
         CHECK_NULL_VOID(viewNode);
         auto parentCustom = AceType::DynamicCast<NG::CustomNode>(viewNode);
@@ -411,7 +412,7 @@ bool JSCustomDialogController::ParseAnimation(
 
 void JSCustomDialogController::JSBind(BindingTarget object)
 {
-    JSClass<JSCustomDialogController>::Declare("CustomDialogController");
+    JSClass<JSCustomDialogController>::Declare("NativeCustomDialogController");
     JSClass<JSCustomDialogController>::CustomMethod("open", &JSCustomDialogController::JsOpenDialog);
     JSClass<JSCustomDialogController>::CustomMethod("close", &JSCustomDialogController::JsCloseDialog);
     JSClass<JSCustomDialogController>::Bind(

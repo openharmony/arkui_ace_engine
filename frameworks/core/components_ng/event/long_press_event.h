@@ -82,6 +82,18 @@ public:
 
     GestureEventFunc GetGestureEventFunc();
 
+    void CopyLongPressEvent(const RefPtr<LongPressEventActuator>& longPressEventActuator)
+    {
+        isForDrag_ = longPressEventActuator->isForDrag_;
+        isDisableMouseLeft_ = longPressEventActuator->isDisableMouseLeft_;
+        auto originalLongPressRecognizer = longPressEventActuator->longPressRecognizer_;
+        if (originalLongPressRecognizer) {
+            if (!longPressRecognizer_) {
+                longPressRecognizer_ = MakeRefPtr<LongPressRecognizer>(isForDrag_, isDisableMouseLeft_);
+            }
+            longPressRecognizer_->SetDuration(originalLongPressRecognizer->GetDuration());
+        }
+    }
 private:
     bool isForDrag_ = false;
     bool isDisableMouseLeft_ = false;

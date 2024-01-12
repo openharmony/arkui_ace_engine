@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,11 +26,12 @@ namespace OHOS::Ace::NG {
 class UVTaskWrapperImpl : public TaskWrapper {
 public:
     explicit UVTaskWrapperImpl(napi_env env);
-
+    bool WillRunOnCurrentThread() override;
     void Call(const TaskExecutor::Task& task) override;
 
 private:
     uv_loop_t* loop_;
+    pthread_t threadId_;
 };
 
 class UVWorkWrapper {

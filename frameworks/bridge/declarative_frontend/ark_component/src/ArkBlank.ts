@@ -31,12 +31,33 @@ class BlankColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
+class BlankHeightModifier extends ModifierWithKey<Length> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('blankHeight');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().blank.resetBlankHeight(node);
+    } else {
+      getUINativeModule().blank.setBlankHeight(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkBlankComponent extends ArkComponent implements CommonMethod<BlankAttribute> {
   constructor(nativePtr: KNode) {
     super(nativePtr);
   }
   color(value: ResourceColor): BlankAttribute {
     modifierWithKey(this._modifiersWithKeys, BlankColorModifier.identity, BlankColorModifier, value);
+    return this;
+  }
+  height(value: Length): this {
+    modifierWithKey(this._modifiersWithKeys, BlankHeightModifier.identity, BlankHeightModifier, value);
     return this;
   }
 }

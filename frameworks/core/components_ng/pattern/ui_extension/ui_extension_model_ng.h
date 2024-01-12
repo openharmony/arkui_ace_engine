@@ -39,6 +39,7 @@ public:
     void Create() override;
     void InitializeDynamicComponent(const RefPtr<FrameNode>& frameNode, const std::string& hapPath,
         const std::string& abcPath, const std::string& entryPoint, void* runtime) override;
+    void SetOnSizeChanged(std::function<void(int32_t, int32_t)>&& onSizeChanged) override;
 
     void SetOnRemoteReady(std::function<void(const RefPtr<UIExtensionProxy>&)>&& onRemoteReady) override;
     void SetOnRelease(std::function<void(int32_t)>&& onRelease) override;

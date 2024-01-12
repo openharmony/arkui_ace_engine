@@ -57,6 +57,7 @@ constexpr float DEFAULT_THRESHOLD = 0.75f;
 constexpr float DEFAULT_SPRING_RESPONSE = 0.416f;
 constexpr float DEFAULT_SPRING_DAMP = 0.99f;
 constexpr uint32_t MAX_VSYNC_DIFF_TIME = 100 * 1000 * 1000; // max 100 ms
+constexpr float FRICTION_VELOCITY_THRESHOLD = 42.0f;
 #ifdef OHOS_PLATFORM
 constexpr int64_t INCREASE_CPU_TIME_ONCE = 4000000000; // 4s(unit: ns)
 #endif
@@ -125,14 +126,6 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
     auto actionStart = [weakScroll = AceType::WeakClaim(this)](const GestureEvent& info) {
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
-            // Send event to accessibility when scroll start.
-            auto context = scroll->GetContext().Upgrade();
-            if (context) {
-                AccessibilityEvent scrollEvent;
-                scrollEvent.nodeId = scroll->nodeId_;
-                scrollEvent.eventType = "scrollstart";
-                context->SendEventToAccessibility(scrollEvent);
-            }
             scroll->isDragging_ = true;
             scroll->HandleDragStart(info);
         }
@@ -149,13 +142,6 @@ void Scrollable::Initialize(const WeakPtr<PipelineBase>& context)
         auto scroll = weakScroll.Upgrade();
         if (scroll) {
             scroll->HandleDragEnd(info);
-            auto context = scroll->GetContext().Upgrade();
-            if (context && scroll->IsStopped()) {
-                AccessibilityEvent scrollEvent;
-                scrollEvent.nodeId = scroll->nodeId_;
-                scrollEvent.eventType = "scrollend";
-                context->SendEventToAccessibility(scrollEvent);
-            }
             if (scroll->actionEnd_) {
                 auto gestureEvent = info;
                 scroll->actionEnd_(gestureEvent);
@@ -472,6 +458,17 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
         currentVelocity_ = 0.0;
         return;
     }
+    if (NearZero(correctVelocity, FRICTION_VELOCITY_THRESHOLD)) {
+        HandleScrollEnd(correctVelocity);
+        currentVelocity_ = 0.0;
+#ifdef OHOS_PLATFORM
+        ResSchedReport::GetInstance().ResSchedDataReport("slide_off");
+        if (FrameReport::GetInstance().GetEnable()) {
+            FrameReport::GetInstance().EndListFling();
+        }
+#endif
+        return;
+    }
     // change motion param when list item need to be center of screen on watch
     FixScrollMotion(mainPosition, correctVelocity);
 
@@ -495,13 +492,6 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
             CHECK_NULL_VOID(scroll);
             scroll->isFrictionAnimationStop_ = true;
             scroll->ProcessScrollMotionStop(true);
-            auto context = scroll->GetContext().Upgrade();
-            if (context && scroll->Idle()) {
-                AccessibilityEvent scrollEvent;
-                scrollEvent.nodeId = scroll->nodeId_;
-                scrollEvent.eventType = "scrollend";
-                context->SendEventToAccessibility(scrollEvent);
-            }
     });
     isFrictionAnimationStop_ = false;
     if (scrollMotionFRCSceneCallback_) {
@@ -664,12 +654,6 @@ void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scro
             CHECK_NULL_VOID(scroll);
             scroll->isSnapAnimationStop_ = true;
             scroll->ProcessScrollMotionStop(false);
-            auto context = scroll->GetContext().Upgrade();
-            CHECK_NULL_VOID(context && scroll->Idle());
-            AccessibilityEvent scrollEvent;
-            scrollEvent.nodeId = scroll->nodeId_;
-            scrollEvent.eventType = "scrollend";
-            context->SendEventToAccessibility(scrollEvent);
     });
     isSnapAnimationStop_ = false;
     if (scrollMotionFRCSceneCallback_) {
@@ -746,13 +730,6 @@ void Scrollable::OnAnimateStop()
 #endif
     if (scrollEnd_) {
         scrollEnd_();
-    }
-    auto context = GetContext().Upgrade();
-    if (context) {
-        AccessibilityEvent scrollEvent;
-        scrollEvent.nodeId = nodeId_;
-        scrollEvent.eventType = "scrollend";
-        context->SendEventToAccessibility(scrollEvent);
     }
 #if !defined(PREVIEW)
     LayoutInspector::SupportInspector();
@@ -1015,8 +992,7 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetFrictionProperty()
         if (scroll->isFrictionAnimationStop_ || scroll->isTouching_) {
             return;
         }
-        float offset = std::fabs(position - scroll->lastPosition_);
-        if (LessOrEqual(offset, 0.1f)) {
+        if (NearEqual(scroll->finalPosition_, position, 1.0)) {
             scroll->StopFrictionAnimation();
         }
         auto context = OHOS::Ace::PipelineContext::GetCurrentContext();
@@ -1027,6 +1003,9 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetFrictionProperty()
             scroll->frictionVelocity_ = (position - scroll->lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
             if (scroll->scrollMotionFRCSceneCallback_) {
                 scroll->scrollMotionFRCSceneCallback_(scroll->frictionVelocity_, NG::SceneStatus::RUNNING);
+            }
+            if (NearZero(scroll->frictionVelocity_, FRICTION_VELOCITY_THRESHOLD)) {
+                scroll->StopFrictionAnimation();
             }
         }
         scroll->lastVsyncTime_ = currentVsync;

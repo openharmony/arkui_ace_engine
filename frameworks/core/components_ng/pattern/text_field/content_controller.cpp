@@ -54,6 +54,7 @@ std::string ContentController::PreprocessString(int32_t startIndex, int32_t endI
                 std::remove_if(tmp.begin(), tmp.end(), [&specialChar](char c) { return c == specialChar; }), tmp.end());
         }
     }
+    FilterValueType(tmp);
     auto wideText = GetWideText();
     auto wideTmp = StringUtils::ToWstring(tmp);
     auto maxLength = static_cast<uint32_t>(textField->GetMaxLength());
@@ -182,6 +183,31 @@ void ContentController::FilterValue()
         content_ = StringUtils::ToString(GetWideText().substr(0, maxLength));
     }
     textField->ContentFireOnChangeEvent();
+}
+
+void ContentController::FilterValueType(std::string& value)
+{
+    bool textChanged = false;
+    auto result = value;
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textField = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textField);
+    auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
+
+    bool hasInputFilter =
+        property->GetInputFilter().has_value() && !property->GetInputFilter().value().empty() && !content_.empty();
+    if (!hasInputFilter) {
+        FilterTextInputStyle(textChanged, result);
+    } else {
+        textChanged |= FilterWithEvent(property->GetInputFilter().value(), result);
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            FilterTextInputStyle(textChanged, result);
+        }
+    }
+    if (textChanged) {
+        value = result;
+    }
 }
 
 std::string ContentController::RemoveErrorTextFromValue(const std::string& value, const std::string& errorText)

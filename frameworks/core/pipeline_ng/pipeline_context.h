@@ -727,8 +727,9 @@ private:
     RefPtr<FrameNode> focusNode_;
     std::function<void()> focusOnNodeCallback_;
 
-    std::optional<bool> needSoftKeyboard_ ;
-    std::optional<bool> windowFocus_ ;
+    std::optional<bool> needSoftKeyboard_;
+    std::optional<bool> windowFocus_;
+    std::optional<bool> windowShow_;
 
     std::unique_ptr<MouseEvent> lastMouseEvent_;
 

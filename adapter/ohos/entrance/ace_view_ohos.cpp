@@ -120,16 +120,7 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
     } else {
         // touch event
         view->ProcessDragEvent(pointerEvent);
-        int32_t instanceId = view->GetInstanceId();
-        auto container = Platform::AceContainer::GetContainer(instanceId);
-        CHECK_NULL_VOID(container);
-        if (container->IsScenceBoardWindow() &&
-            (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE ||
-            pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP)) {
-            view->ProcessMouseEvent(pointerEvent, node);
-        } else {
-            view->ProcessTouchEvent(pointerEvent, node, callback);
-        }
+        view->ProcessTouchEvent(pointerEvent, node, callback);
     }
 }
 

@@ -352,7 +352,15 @@ public:
         parentId_ = parentId;
     }
 
-    float GetSmallWindowScale() const override;
+    void SetWindowScale(float windowScale) override
+    {
+        windowScale_ = windowScale;
+    }
+
+    float GetWindowScale() const override
+    {
+        return 1.0f;
+    }
 
     int32_t GetParentId() const
     {
@@ -515,20 +523,25 @@ public:
     bool RequestAutoSave(const RefPtr<NG::FrameNode>& node) override;
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;
 
-    void SearchElementInfoByAccessibilityIdNG(int32_t elementId, int32_t mode, int32_t baseParent,
+    void SearchElementInfoByAccessibilityIdNG(
+        int64_t elementId, int32_t mode, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output);
 
-    void SearchElementInfosByTextNG(int32_t elementId, const std::string& text, int32_t baseParent,
+    void SearchElementInfosByTextNG(
+        int64_t elementId, const std::string& text, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output);
 
     void FindFocusedElementInfoNG(
-        int32_t elementId, int32_t focusType, int32_t baseParent, Accessibility::AccessibilityElementInfo& output);
+        int64_t elementId, int32_t focusType, int64_t baseParent,
+        Accessibility::AccessibilityElementInfo& output);
 
     void FocusMoveSearchNG(
-        int32_t elementId, int32_t direction, int32_t baseParent, Accessibility::AccessibilityElementInfo& output);
+        int64_t elementId, int32_t direction, int64_t baseParent,
+        Accessibility::AccessibilityElementInfo& output);
 
     bool NotifyExecuteAction(
-        int32_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int32_t offset);
+        int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int64_t offset);
 
 private:
     virtual bool MaybeRelease() override;
@@ -574,6 +587,7 @@ private:
     sptr<OHOS::Rosen::Window> uiWindow_ = nullptr;
     std::string windowName_;
     uint32_t windowId_ = OHOS::Rosen::INVALID_WINDOW_ID;
+    float windowScale_ = 1.0f;
     sptr<IRemoteObject> token_;
     sptr<IRemoteObject> parentToken_;
 

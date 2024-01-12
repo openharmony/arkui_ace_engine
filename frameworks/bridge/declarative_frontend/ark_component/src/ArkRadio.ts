@@ -33,6 +33,31 @@ class ArkRadioComponent extends ArkComponent implements RadioAttribute {
     modifierWithKey(this._modifiersWithKeys, RadioStyleModifier.identity, RadioStyleModifier, value);
     return this;
   }
+  width(value: Length): this {
+    modifierWithKey(this._modifiersWithKeys, RadioWidthModifier.identity, RadioWidthModifier, value);
+    return this;
+  }
+  height(value: Length): this {
+    modifierWithKey(this._modifiersWithKeys, RadioHeightModifier.identity, RadioHeightModifier, value);
+    return this;
+  }
+  size(value: { width: Length; height: Length }): this {
+    modifierWithKey(this._modifiersWithKeys, RadioSizeModifier.identity, RadioSizeModifier, value);
+    return this;
+  }
+  hoverEffect(value: HoverEffect): this {
+    modifierWithKey(this._modifiersWithKeys, RadioHoverEffectModifier.identity, RadioHoverEffectModifier, value);
+    return this;
+  }
+  padding(value: Padding | Length): this {
+    modifierWithKey(this._modifiersWithKeys, RadioPaddingModifier.identity, RadioPaddingModifier, value);
+    return this;
+  }
+  responseRegion(value: Array<Rectangle> | Rectangle): this {
+    modifierWithKey(this._modifiersWithKeys, RadioResponseRegionModifier.identity,
+      RadioResponseRegionModifier, value);
+    return this;
+  }
 }
 
 class RadioCheckedModifier extends ModifierWithKey<boolean> {
@@ -79,6 +104,175 @@ class RadioStyleModifier extends ModifierWithKey<RadioStyle> {
   }
 }
 
+class RadioWidthModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('radioWidth');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().radio.resetRadioWidth(node);
+    } else {
+      getUINativeModule().radio.setRadioWidth(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class RadioHeightModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('radioHeight');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().radio.resetRadioHeight(node);
+    } else {
+      getUINativeModule().radio.setRadioHeight(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class RadioSizeModifier extends ModifierWithKey<{ width: Length; height: Length }> {
+  constructor(value: { width: Length; height: Length }) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('radioSize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().radio.resetRadioSize(node);
+    } else {
+      getUINativeModule().radio.setRadioSize(node, this.value.width, this.value.height);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+      !isBaseOrResourceEqual(this.stageValue.height, this.value.height);
+  }
+}
+
+class RadioHoverEffectModifier extends ModifierWithKey<HoverEffect> {
+  constructor(value: HoverEffect) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('radioHoverEffect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().radio.resetRadioHoverEffect(node);
+    } else {
+      getUINativeModule().radio.setRadioHoverEffect(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class RadioPaddingModifier extends ModifierWithKey<Padding | Length> {
+  constructor(value: Padding | Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('radioPadding');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().radio.resetRadioPadding(node);
+    } else {
+      let paddingTop: Length;
+      let paddingRight: Length;
+      let paddingBottom: Length;
+      let paddingLeft: Length;
+      if (this.value !== null && this.value !== undefined) {
+        if (isLengthType(this.value) || isResource(this.value)) {
+          paddingTop = <Length> this.value;
+          paddingRight = <Length> this.value;
+          paddingBottom = <Length> this.value;
+          paddingLeft = <Length> this.value;
+        } else {
+          paddingTop = (<Padding> this.value).top;
+          paddingRight = (<Padding> this.value).right;
+          paddingBottom = (<Padding> this.value).bottom;
+          paddingLeft = (<Padding> this.value).left;
+        }
+      }
+      getUINativeModule().radio.setRadioPadding(node, paddingTop, paddingRight, paddingBottom, paddingLeft);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (isLengthType(this.value) || isResource(this.value)) {
+      return !isBaseOrResourceEqual(this.stageValue, this.value);
+    } else {
+      return !isBaseOrResourceEqual((<Padding> this.stageValue).top, (<Padding> this.value).top) ||
+      !isBaseOrResourceEqual((<Padding> this.stageValue).right, (<Padding> this.value).right) ||
+      !isBaseOrResourceEqual((<Padding> this.stageValue).bottom, (<Padding> this.value).bottom) ||
+      !isBaseOrResourceEqual((<Padding> this.stageValue).left, (<Padding> this.value).left);
+    }
+  }
+}
+
+class RadioResponseRegionModifier extends ModifierWithKey<Array<Rectangle> | Rectangle> {
+  constructor(value: Array<Rectangle> | Rectangle) {
+    super(value);
+  }
+  static identity = Symbol('radioResponseRegion');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().radio.resetRadioResponseRegion(node);
+    } else {
+      let responseRegion: (number | string | Resource)[] = [];
+      if (Array.isArray(this.value)) {
+        for (let i = 0; i < this.value.length; i++) {
+          responseRegion.push(this.value[i].x ?? 'PLACEHOLDER');
+          responseRegion.push(this.value[i].y ?? 'PLACEHOLDER');
+          responseRegion.push(this.value[i].width ?? 'PLACEHOLDER');
+          responseRegion.push(this.value[i].height ?? 'PLACEHOLDER');
+        }
+      } else {
+        responseRegion.push(this.value.x ?? 'PLACEHOLDER');
+        responseRegion.push(this.value.y ?? 'PLACEHOLDER');
+        responseRegion.push(this.value.width ?? 'PLACEHOLDER');
+        responseRegion.push(this.value.height ?? 'PLACEHOLDER');
+      }
+      getUINativeModule().radio.setRadioResponseRegion(node, responseRegion, responseRegion.length);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (Array.isArray(this.value) && Array.isArray(this.stageValue)) {
+      if (this.value.length !== this.stageValue.length) {
+        return true;
+      } else {
+        for (let i = 0; i < this.value.length; i++) {
+          if (!(isBaseOrResourceEqual(this.stageValue[i].x, this.value[i].x) &&
+            isBaseOrResourceEqual(this.stageValue[i].y, this.value[i].y) &&
+            isBaseOrResourceEqual(this.stageValue[i].width, this.value[i].width) &&
+            isBaseOrResourceEqual(this.stageValue[i].height, this.value[i].height)
+          )) {
+            return true;
+          }
+        }
+        return false;
+      }
+    } else if (!Array.isArray(this.value) && !Array.isArray(this.stageValue)) {
+      return (!(isBaseOrResourceEqual(this.stageValue.x, this.value.x) &&
+        isBaseOrResourceEqual(this.stageValue.y, this.value.y) &&
+        isBaseOrResourceEqual(this.stageValue.width, this.value.width) &&
+        isBaseOrResourceEqual(this.stageValue.height, this.value.height)
+      ));
+    } else {
+      return true;
+    }
+  }
+}
 // @ts-ignore
 globalThis.Radio.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();

@@ -42,4 +42,43 @@ ArkUINativeModuleValue BlankBridge::ResetColor(ArkUIRuntimeCallInfo* runtimeCall
     GetArkUIInternalNodeAPI()->GetBlankModifier().ResetColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+ArkUINativeModuleValue BlankBridge::SetBlankHeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> valueArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    CalcDimension height;
+    std::string calcStr;
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, valueArg, height)) {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetHeight(nativeNode);
+    } else {
+        if (LessNotEqual(height.Value(), 0.0)) {
+            height.SetValue(0.0);
+        }
+        if (height.Unit() == DimensionUnit::CALC) {
+            GetArkUIInternalNodeAPI()->GetCommonModifier().SetHeight(
+                nativeNode, height.Value(), static_cast<int32_t>(height.Unit()), height.CalcValue().c_str());
+        } else {
+            GetArkUIInternalNodeAPI()->GetCommonModifier().SetHeight(
+                nativeNode, height.Value(), static_cast<int32_t>(height.Unit()), calcStr.c_str());
+        }
+    }
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, valueArg, height)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    GetArkUIInternalNodeAPI()->GetBlankModifier().SetBlankHeight(
+        nativeNode, height.Value(), static_cast<int32_t>(height.Unit()));
+    return panda::JSValueRef::Undefined(vm);
+}
+ArkUINativeModuleValue BlankBridge::ResetBlankHeight(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetBlankModifier().ResetBlankHeight(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 }

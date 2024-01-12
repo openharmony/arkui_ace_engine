@@ -21,11 +21,17 @@ void GridTestNg::SetUpTestSuite()
     TestNG::SetUpTestSuite();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+
     auto buttonTheme = AceType::MakeRefPtr<ButtonTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
 
     auto gridItemTheme = AceType::MakeRefPtr<GridItemTheme>();
     EXPECT_CALL(*themeManager, GetTheme(GridItemTheme::TypeId())).WillRepeatedly(Return(gridItemTheme));
+
+    RefPtr<DragWindow> dragWindow = DragWindow::CreateDragWindow("", 0, 0, 0, 0);
+    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragWindow)), DrawFrameNode(_)).Times(AnyNumber());
+    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragWindow)), MoveTo(_, _)).Times(AnyNumber());
+    EXPECT_CALL(*(AceType::DynamicCast<MockDragWindow>(dragWindow)), Destroy()).Times(AnyNumber());
 }
 
 void GridTestNg::TearDownTestSuite()
@@ -70,18 +76,18 @@ void GridTestNg::Create(const std::function<void(GridModelNG)>& callback)
 }
 
 void GridTestNg::CreateItem(
-    int32_t count, float width, float height, bool focusable, GridItemStyle gridItemStyle)
+    int32_t itemNumber, float width, float height, GridItemStyle gridItemStyle)
 {
-    for (int32_t i = 0; i < count; i++) {
+    for (int32_t i = 0; i < itemNumber; i++) {
         GridItemModelNG itemModel;
         itemModel.Create(gridItemStyle);
         if (width != NULL_VALUE) {
-            ViewAbstract::SetWidth(CalcLength(Dimension(width)));
+            ViewAbstract::SetWidth(CalcLength(width));
         }
         if (height != NULL_VALUE) {
-            ViewAbstract::SetHeight(CalcLength(Dimension(height)));
+            ViewAbstract::SetHeight(CalcLength(height));
         }
-        if (focusable) {
+        {
             ButtonModelNG buttonModelNG;
             buttonModelNG.CreateWithLabel("label");
             ViewStackProcessor::GetInstance()->Pop();
@@ -91,15 +97,21 @@ void GridTestNg::CreateItem(
 }
 
 void GridTestNg::CreateColItem(
-    int32_t count, bool focusable, GridItemStyle gridItemStyle)
+    int32_t itemNumber, GridItemStyle gridItemStyle)
 {
-    CreateItem(count, NULL_VALUE, ITEM_HEIGHT, focusable, gridItemStyle);
+    CreateItem(itemNumber, NULL_VALUE, ITEM_HEIGHT, gridItemStyle);
 }
 
 void GridTestNg::CreateRowItem(
-    int32_t count, bool focusable, GridItemStyle gridItemStyle)
+    int32_t itemNumber, GridItemStyle gridItemStyle)
 {
-    CreateItem(count, ITEM_WIDTH, NULL_VALUE, focusable, gridItemStyle);
+    CreateItem(itemNumber, ITEM_WIDTH, NULL_VALUE, gridItemStyle);
+}
+
+void GridTestNg::CreateFixedItem(
+    int32_t itemNumber, GridItemStyle gridItemStyle)
+{
+    CreateItem(itemNumber, ITEM_WIDTH, ITEM_HEIGHT, gridItemStyle);
 }
 
 void GridTestNg::CreateBigItem(
@@ -120,10 +132,10 @@ void GridTestNg::CreateBigItem(
             itemModel.SetColumnEnd(colEnd);
         }
         if (width != NULL_VALUE) {
-            ViewAbstract::SetWidth(CalcLength(Dimension(width)));
+            ViewAbstract::SetWidth(CalcLength(width));
         }
         if (height != NULL_VALUE) {
-            ViewAbstract::SetHeight(CalcLength(Dimension(height)));
+            ViewAbstract::SetHeight(CalcLength(height));
         }
         ViewStackProcessor::GetInstance()->Pop();
 }
@@ -138,15 +150,15 @@ void GridTestNg::CreateBigRowItem(int32_t rowStart, int32_t rowEnd)
     CreateBigItem(rowStart, rowEnd, NULL_VALUE, NULL_VALUE, ITEM_WIDTH, NULL_VALUE);
 }
 
+void GridTestNg::ScrollTo(float position)
+{
+    pattern_->ScrollTo(position);
+    FlushLayoutTask(frameNode_);
+}
+
 void GridTestNg::UpdateCurrentOffset(float offset, int32_t source)
 {
     pattern_->UpdateCurrentOffset(offset, source);
     FlushLayoutTask(frameNode_);
-}
-
-AssertionResult GridTestNg::IsEqualCurrentOffset(float expectOffset)
-{
-    float currentOffset = pattern_->GetGridLayoutInfo().currentOffset_;
-    return IsEqual(currentOffset, expectOffset);
 }
 } // namespace OHOS::Ace::NG

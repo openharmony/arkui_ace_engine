@@ -23,6 +23,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/interfaces/native/node/node_scroll_modifier.h"
+#include "core/interfaces/native/node/node_text_input_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
 
 namespace OHOS::Ace::NG {
@@ -77,7 +78,7 @@ void InsertChildAfter(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHa
     ViewModel::InsertChildAfter(parent, child, sibling);
 }
 
-typedef void (*ComponentAsyncEventHandler)(ArkUINodeHandle node, ArkUI_Int32 eventId);
+typedef void (*ComponentAsyncEventHandler)(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
 
 /**
  * IMPORTANT!!!
@@ -99,10 +100,19 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnScroll,
+    NodeModifier::SetOnScrollFrameBegin,
+    NodeModifier::SetOnScrollStart,
+    NodeModifier::SetOnScrollStop
+};
+
+const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
+    nullptr,
+    nullptr,
+    NodeModifier::SetOnTextInputChange,
 };
 
 /* clang-format on */
-void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, ArkUI_Int32 eventId)
+void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, ArkUI_Int32 eventId, void* extraParam)
 {
     unsigned int subClassType = kind / ARKUI_MAX_EVENT_NUM;
     unsigned int subKind = kind % ARKUI_MAX_EVENT_NUM;
@@ -126,12 +136,21 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, A
             eventHandle = scrollNodeAsyncEventHandlers[subKind];
             break;
         }
+        case ARKUI_TEXTINPUT: {
+            // textinput event type.
+            if (subKind >= sizeof(textInputNodeAsyncEventHandlers) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = textInputNodeAsyncEventHandlers[subKind];
+            break;
+        }
         default: {
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
         }
     }
     if (eventHandle) {
-        eventHandle(node, eventId);
+        eventHandle(node, eventId, extraParam);
     } else {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d EMPTY IMPLEMENT", kind);
     }

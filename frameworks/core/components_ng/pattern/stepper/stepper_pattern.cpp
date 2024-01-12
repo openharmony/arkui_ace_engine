@@ -550,8 +550,8 @@ void StepperPattern::ButtonTouchUpAnimation(RefPtr<FrameNode> buttonNode)
         BUTTON_ON_PRESS_BEZIER_CURVE_X1, BUTTON_ON_PRESS_BEZIER_CURVE_Y1));
     auto stepperTheme = GetTheme();
     CHECK_NULL_VOID(stepperTheme);
-    Color buttonBackgroundColor =
-        rightIsHover_ ? stepperTheme->GetMouseHoverColor() : stepperTheme->GetMouseHoverColor().ChangeOpacity(0);
+    Color buttonBackgroundColor = (leftIsHover_ || rightIsHover_) ?
+        stepperTheme->GetMouseHoverColor() : stepperTheme->GetMouseHoverColor().ChangeOpacity(0);
     AnimationUtils::Animate(option,
         [renderContext, buttonBackgroundColor]() { renderContext->UpdateBackgroundColor(buttonBackgroundColor); });
 }

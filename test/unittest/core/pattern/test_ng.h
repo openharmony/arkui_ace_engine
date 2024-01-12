@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_TEST_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_TEST_PATTERN_TEST_NG_H
 
+#include <type_traits>
 #include "gtest/gtest.h"
 
 #define private public
@@ -38,6 +39,7 @@ constexpr int32_t PLATFORM_VERSION_TEN = 10;
 constexpr int32_t PLATFORM_VERSION_ELEVEN = 11;
 constexpr Dimension FILL_LENGTH = Dimension(1.0, DimensionUnit::PERCENT);
 constexpr double DEFAULT_FRICTION = 0.6;
+constexpr double NEW_DEFAULT_FRICTION = 0.7;
 constexpr int32_t NULL_VALUE = -1;
 } // namespace
 
@@ -147,6 +149,11 @@ public:
     const RectF& GetChildRect(const RefPtr<FrameNode>& frameNode, int32_t index)
     {
         return GetChildFrameNode(frameNode, index)->GetGeometryNode()->GetFrameRect();
+    }
+
+    SizeF GetChildSize(const RefPtr<FrameNode>& frameNode, int32_t index)
+    {
+        return GetChildFrameNode(frameNode, index)->GetGeometryNode()->GetFrameSize();
     }
 
     OffsetF GetChildOffset(const RefPtr<FrameNode>& frameNode, int32_t index)

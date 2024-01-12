@@ -23,21 +23,22 @@
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/rect.h"
+#include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/macros.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/animatable_color.h"
+#include "core/components/common/properties/blend_mode.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/border_image.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/edge.h"
-#include "core/components/common/properties/shadow.h"
-#include "core/components/common/properties/blend_mode.h"
 #include "core/components/common/properties/invert.h"
 #include "core/components/common/properties/outline_style.h"
-#include "core/pipeline/pipeline_context.h"
+#include "core/components/common/properties/shadow.h"
 #include "core/components/theme/theme_utils.h"
+#include "core/pipeline/pipeline_context.h"
 
 namespace OHOS::Ace {
 
@@ -125,7 +126,7 @@ struct BlurStyleOption {
     AdaptiveColor adaptiveColor = AdaptiveColor::DEFAULT;
     double scale = 1.0;
     BlurOption blurOption;
-    bool operator == (const BlurStyleOption& other) const
+    bool operator==(const BlurStyleOption& other) const
     {
         return blurStyle == other.blurStyle && colorMode == other.colorMode && adaptiveColor == other.adaptiveColor &&
                NearEqual(scale, other.scale);
@@ -161,10 +162,30 @@ struct EffectOption {
     Color color { Color::TRANSPARENT };
     AdaptiveColor adaptiveColor = AdaptiveColor::DEFAULT;
     BlurOption blurOption;
-    bool operator == (const EffectOption& other) const
+    bool operator==(const EffectOption& other) const
     {
         return radius == other.radius && NearEqual(saturation, other.saturation) &&
-            NearEqual(brightness, other.brightness) && color == other.color && adaptiveColor == other.adaptiveColor;
+               NearEqual(brightness, other.brightness) && color == other.color && adaptiveColor == other.adaptiveColor;
+    }
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const
+    {
+        static const char* ADAPTIVE_COLOR[] = { "AdaptiveColor.Default", "AdaptiveColor.Average" };
+        auto jsonEffect = JsonUtil::Create(true);
+        auto jsonBrightnessOption = JsonUtil::Create(true);
+        jsonBrightnessOption->Put("radius", radius.Value());
+        jsonBrightnessOption->Put("saturation", saturation);
+        jsonBrightnessOption->Put("brightness", brightness);
+        jsonBrightnessOption->Put("color", color.ColorToString().c_str());
+        jsonBrightnessOption->Put("adaptiveColor", ADAPTIVE_COLOR[static_cast<int32_t>(adaptiveColor)]);
+        auto grayscale = "[0,0]";
+        if (blurOption.grayscale.size() > 1) {
+            grayscale =
+                ("[" + std::to_string(blurOption.grayscale[0]) + "," + std::to_string(blurOption.grayscale[1]) + "]")
+                    .c_str();
+        }
+        jsonBrightnessOption->Put("blurOption", grayscale);
+        jsonEffect->Put("options", jsonBrightnessOption);
+        json->Put("backgroundEffect", jsonEffect);
     }
 };
 
@@ -364,8 +385,7 @@ public:
     bool IsSweepGradientValid() const
     {
         if (sweepGradient_.startAngle.has_value() && sweepGradient_.endAngle.has_value()) {
-            return LessOrEqual(sweepGradient_.startAngle.value().Value(),
-                sweepGradient_.endAngle.value().Value());
+            return LessOrEqual(sweepGradient_.startAngle.value().Value(), sweepGradient_.endAngle.value().Value());
         }
         if (sweepGradient_.startAngle.has_value() && !sweepGradient_.endAngle.has_value()) {
             return LessOrEqual(sweepGradient_.startAngle.value().Value(), 0.0);
@@ -774,9 +794,7 @@ private:
     bool isAlign_ = false;
 };
 
-class ImageObjectPosition final : public BackgroundImagePosition {
-
-};
+class ImageObjectPosition final : public BackgroundImagePosition {};
 
 class BackgroundImage final : public AceType {
     DECLARE_ACE_TYPE(BackgroundImage, AceType);
@@ -925,8 +943,7 @@ public:
     Decoration() = default;
     ~Decoration() override = default;
 
-    void SetContextAndCallback(
-        const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback);
+    void SetContextAndCallback(const WeakPtr<PipelineContext>& context, const RenderNodeAnimationCallback& callback);
 
     void AddShadow(const Shadow& shadow);
 
@@ -947,8 +964,7 @@ public:
         animationColor_ = animationColor;
     }
 
-    void SetGradient(
-        const Gradient& gradient, const WeakPtr<PipelineContext>& context = nullptr,
+    void SetGradient(const Gradient& gradient, const WeakPtr<PipelineContext>& context = nullptr,
         const RenderNodeAnimationCallback& callback = nullptr)
     {
         gradient_ = gradient;
@@ -961,8 +977,7 @@ public:
                     break;
                 case GradientType::SWEEP:
                     if (gradient_.GetSweepGradient().centerX) {
-                        gradient_.GetSweepGradient().centerX->SetContextAndCallbackAfterFirstAssign(
-                            context, callback);
+                        gradient_.GetSweepGradient().centerX->SetContextAndCallbackAfterFirstAssign(context, callback);
                     }
                     if (gradient_.GetSweepGradient().centerY) {
                         gradient_.GetSweepGradient().centerY->SetContextAndCallbackAfterFirstAssign(context, callback);
@@ -1191,6 +1206,16 @@ public:
         blendMode_ = blendMode;
     }
 
+    BlendApplyType GetBlendApplyType() const
+    {
+        return blendApplyType_;
+    }
+
+    void SetBlendApplyType(BlendApplyType blendApplyType)
+    {
+        blendApplyType_ = blendApplyType;
+    }
+
     const Dimension& GetGrayScale(void) const
     {
         return grayScale_;
@@ -1321,7 +1346,8 @@ private:
     // shadow vector is empty
     std::vector<Shadow> shadows_;
     // blendMode
-    BlendMode blendMode_ = BlendMode::NORMAL;
+    BlendMode blendMode_ = BlendMode::NONE;
+    BlendApplyType blendApplyType_ = BlendApplyType::FAST;
     Dimension grayScale_;
     // Brightness (1.0 as default), range = (0, 2)
     Dimension brightness_ = 1.0_px;

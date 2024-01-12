@@ -73,6 +73,7 @@ void SelectOverlayClient::InitSelectOverlay()
     selectOverlayInfo_.callerFrameNode = GetClientHost();
     selectOverlayInfo_.firstHandle.isShow = false;
     selectOverlayInfo_.secondHandle.isShow = false;
+    selectOverlayInfo_.hitTestMode = HitTestMode::HTMDEFAULT;
 }
 
 void SelectOverlayClient::RequestOpenSelectOverlay(ClientOverlayInfo& showOverlayInfo)
@@ -92,6 +93,7 @@ void SelectOverlayClient::CreateSelectOverlay(const ClientOverlayInfo& clientOve
     CHECK_NULL_VOID(pipeline);
     auto overlayInfo = GetSelectOverlayInfo(clientOverlayInfo);
     CHECK_NULL_VOID(overlayInfo);
+    originIsMenuShow_ = overlayInfo->menuInfo.menuIsShow;
     LOGI("first handle %{public}d, second handle %{public}d, select rect %{public}d", overlayInfo->firstHandle.isShow,
         overlayInfo->secondHandle.isShow, overlayInfo->isSelectRegionVisible);
     selectOverlayProxy_ = pipeline->GetSelectOverlayManager()->CreateAndShowSelectOverlay(
@@ -272,14 +274,13 @@ void SelectOverlayClient::OnParentScrollStartOrEnd(bool isEnd)
     auto proxy = GetSelectOverlayProxy();
     CHECK_NULL_VOID(proxy);
     if (!isEnd) {
-        isMenuShow_ = proxy->IsMenuShow();
         proxy->ShowOrHiddenMenu(true);
         return;
     }
     if (proxy->IsSingleHandle() && !proxy->IsSingleHandleMenuShow()) {
         UpdateSelectMenuInfo([](SelectMenuInfo& menuInfo) { menuInfo.menuIsShow = false; });
     } else {
-        proxy->ShowOrHiddenMenu(!isMenuShow_);
+        proxy->ShowOrHiddenMenu(!originIsMenuShow_);
     }
 }
 

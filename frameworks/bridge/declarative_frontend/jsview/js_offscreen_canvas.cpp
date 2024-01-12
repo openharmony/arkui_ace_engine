@@ -44,7 +44,6 @@ napi_value AttachOffscreenCanvas(napi_env env, void* value, void*)
         LOGW("Invalid context.");
         return nullptr;
     }
-    JSOffscreenCanvas::SetLocalThreadVm(env);
     napi_value global = nullptr;
     napi_status status = napi_get_global(env, &global);
     if (status != napi_ok) {
@@ -58,14 +57,13 @@ napi_value AttachOffscreenCanvas(napi_env env, void* value, void*)
 
     napi_value offscreenCanvas = nullptr;
     napi_create_object(env, &offscreenCanvas);
-    napi_value width = workCanvas->OnGetWidth(env);
-    napi_value height = workCanvas->OnGetHeight(env);
-
-    napi_set_named_property(env, offscreenCanvas, "width", width);
-    napi_set_named_property(env, offscreenCanvas, "height", height);
-    BindNativeFunction(env, offscreenCanvas, "transferToImageBitmap", JSOffscreenCanvas::JsTransferToImageBitmap);
-    BindNativeFunction(env, offscreenCanvas, "getContext", JSOffscreenCanvas::JsGetContext);
-
+    napi_property_descriptor desc[] = {
+        DECLARE_NAPI_GETTER_SETTER("width", JSOffscreenCanvas::JsGetWidth, JSOffscreenCanvas::JsSetWidth),
+        DECLARE_NAPI_GETTER_SETTER("height", JSOffscreenCanvas::JsGetHeight, JSOffscreenCanvas::JsSetHeight),
+        DECLARE_NAPI_FUNCTION("transferToImageBitmap", JSOffscreenCanvas::JsTransferToImageBitmap),
+        DECLARE_NAPI_FUNCTION("getContext", JSOffscreenCanvas::JsGetContext),
+    };
+    napi_define_properties(env, offscreenCanvas, sizeof(desc) / sizeof(*desc), desc);
     napi_coerce_to_native_binding_object(
         env, offscreenCanvas, DetachOffscreenCanvas, AttachOffscreenCanvas, value, nullptr);
     napi_wrap(
@@ -136,11 +134,11 @@ napi_value JSOffscreenCanvas::Constructor(napi_env env, napi_callback_info info)
     }
     if (napi_get_value_double(env, argv[0], &fWidth) == napi_ok) {
         fWidth = PipelineBase::Vp2PxWithCurrentDensity(fWidth);
-        workCanvas->SetWidth(round(fWidth));
+        workCanvas->SetWidth(fWidth);
     }
     if (napi_get_value_double(env, argv[1], &fHeight) == napi_ok) {
         fHeight = PipelineBase::Vp2PxWithCurrentDensity(fHeight);
-        workCanvas->SetHeight(round(fHeight));
+        workCanvas->SetHeight(fHeight);
     }
 
     napi_coerce_to_native_binding_object(
@@ -210,40 +208,56 @@ napi_value JSOffscreenCanvas::OnGetHeight(napi_env env)
 
 napi_value JSOffscreenCanvas::OnSetWidth(napi_env env, napi_callback_info info)
 {
+    CHECK_NULL_RETURN(offscreenCanvasPattern_, nullptr);
     size_t argc = 0;
     napi_value argv = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, &argv, nullptr, nullptr));
-    if (argc != ARGS_COUNT_ONE || argv == nullptr) {
+    napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
+    if (argc != ARGS_COUNT_ONE) {
         LOGD("Invalid args.");
+        return nullptr;
+    }
+    napi_get_cb_info(env, info, &argc, &argv, nullptr, nullptr);
+    if (argv == nullptr) {
         return nullptr;
     }
     double width = 0.0;
     if (napi_get_value_double(env, argv, &width) == napi_ok) {
-        width_ = PipelineBase::Vp2PxWithCurrentDensity(width);
+        width = PipelineBase::Vp2PxWithCurrentDensity(width);
     } else {
         return nullptr;
     }
 
-    if (contextType_ == ContextType::CONTEXT_2D) {
-        CreateContext2d(env, width_, GetHeight());
+    if (width_ != width) {
+        width_ = width;
+        offscreenCanvasPattern_->UpdateSize(width_, height_);
     }
     return nullptr;
 }
 
 napi_value JSOffscreenCanvas::OnSetHeight(napi_env env, napi_callback_info info)
 {
+    CHECK_NULL_RETURN(offscreenCanvasPattern_, nullptr);
     size_t argc = 0;
     napi_value argv = nullptr;
-    NAPI_CALL(env, napi_get_cb_info(env, info, &argc, &argv, nullptr, nullptr));
-    if (argc != ARGS_COUNT_ONE || argv == nullptr) {
+    napi_get_cb_info(env, info, &argc, nullptr, nullptr, nullptr);
+    if (argc != ARGS_COUNT_ONE) {
         LOGD("Invalid args.");
+        return nullptr;
+    }
+    napi_get_cb_info(env, info, &argc, &argv, nullptr, nullptr);
+    if (argv == nullptr) {
         return nullptr;
     }
     double height = 0.0;
     if (napi_get_value_double(env, argv, &height) == napi_ok) {
-        height_ = PipelineBase::Vp2PxWithCurrentDensity(height);
+        height = PipelineBase::Vp2PxWithCurrentDensity(height);
     } else {
         return nullptr;
+    }
+
+    if (height_ != height) {
+        height_ = height;
+        offscreenCanvasPattern_->UpdateSize(width_, height_);
     }
     return nullptr;
 }
@@ -326,17 +340,6 @@ napi_value JSOffscreenCanvas::onGetContext(napi_env env, napi_callback_info info
         return contextObj;
     }
     return nullptr;
-}
-
-void JSOffscreenCanvas::SetLocalThreadVm(napi_env env)
-{
-    auto nativeEngine = reinterpret_cast<NativeEngine*>(env);
-    auto runtime = static_cast<ArkNativeEngine*>(nativeEngine);
-    CHECK_NULL_VOID(runtime);
-    EcmaVM* vm = const_cast<EcmaVM*>(runtime->GetEcmaVm());
-    CHECK_NULL_VOID(vm);
-    auto arkRuntime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
-    arkRuntime->SetThreadVm(vm);
 }
 
 napi_value JSOffscreenCanvas::CreateContext2d(napi_env env, double width, double height)

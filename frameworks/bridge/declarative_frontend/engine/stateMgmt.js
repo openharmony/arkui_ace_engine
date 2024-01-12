@@ -2035,7 +2035,7 @@ class SubscribableHandler {
                 break;
             default:
                 const result = Reflect.get(target, property, receiver);
-                let propertyStr = property.toString();
+                let propertyStr = String(property);
                 if (this.readCbFunc_ && typeof result != "function") {
                     let isTracked = this.isPropertyTracked(target, propertyStr);
                     
@@ -2072,7 +2072,7 @@ class SubscribableHandler {
                     return true;
                 }
                 Reflect.set(target, property, newValue);
-                const propString = property.toString();
+                const propString = String(property);
                 if (TrackedObject.isCompatibilityMode(target)) {
                     
                     this.notifyObjectPropertyHasChanged(propString, newValue);
@@ -2578,6 +2578,28 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
         return (typeof value === "object") ?
             new ObservedPropertyObject(value, owningView, thisPropertyName)
             : new ObservedPropertySimple(value, owningView, thisPropertyName);
+    }
+}
+/*
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+class CustomDialogController extends NativeCustomDialogController {
+    constructor(arg, view) {
+        super(arg, view);
+        this.builder_ = arg.builder;
+        this.cancel_ = arg.cancel;
+        this.view_ = view;
     }
 }
 /*
@@ -3475,55 +3497,7 @@ class ObservedPropertyAbstractPU extends ObservedPropertyAbstract {
         // install when current value is ObservedObject and the value type is not using compatibility mode
         // note value may change for union type variables when switching an object from one class to another.
         this.shouldInstallTrackedObjectReadCb = true;
-        this.dependentElmtIdsByProperty_ = new class PropertyDependencies {
-            constructor() {
-                // dependencies for property -> elmtId
-                // variable read during render adds elmtId
-                // variable assignment causes elmtId to need re-render.
-                // UINode with elmtId deletion needs elmtId to be removed from all records, see purgeDependenciesForElmtId
-                this.propertyDependencies_ = new Set();
-                // dependencies on individual object properties
-                this.trackedObjectPropertyDependencies_ = new Map();
-            }
-            getAllPropertyDependencies() {
-                
-                return this.propertyDependencies_;
-            }
-            addPropertyDependency(elmtId) {
-                this.propertyDependencies_.add(elmtId);
-                
-            }
-            purgeDependenciesForElmtId(rmElmtId) {
-                
-                this.propertyDependencies_.delete(rmElmtId);
-                
-                this.trackedObjectPropertyDependencies_.forEach((propertyElmtId, propertyName) => {
-                    propertyElmtId.delete(rmElmtId);
-                    
-                });
-            }
-            addTrackedObjectPropertyDependency(readProperty, elmtId) {
-                let dependentElmtIds = this.trackedObjectPropertyDependencies_.get(readProperty);
-                if (!dependentElmtIds) {
-                    dependentElmtIds = new Set();
-                    this.trackedObjectPropertyDependencies_.set(readProperty, dependentElmtIds);
-                }
-                dependentElmtIds.add(elmtId);
-                
-            }
-            getTrackedObjectPropertyDependencies(changedObjectProperty, debugInfo) {
-                const dependentElmtIds = this.trackedObjectPropertyDependencies_.get(changedObjectProperty) || new Set();
-                
-                return dependentElmtIds;
-            }
-            dumpInfoDependencies() {
-                let result = `dependencies: variable assignment (or object prop change in compat mode) affects elmtIds: ${JSON.stringify(Array.from(this.propertyDependencies_))} \n`;
-                this.trackedObjectPropertyDependencies_.forEach((propertyElmtId, propertyName) => {
-                    result += `  property '@Track ${propertyName}' change affects elmtIds: ${JSON.stringify(Array.from(propertyElmtId))} \n`;
-                });
-                return result;
-            }
-        }; // inner class PropertyDependencies
+        this.dependentElmtIdsByProperty_ = new PropertyDependencies();
         Object.defineProperty(this, 'owningView_', { writable: true, enumerable: false });
         Object.defineProperty(this, 'subscriberRefs_', { writable: true, enumerable: false, value: new Set() });
         if (subscriber) {
@@ -3858,6 +3832,55 @@ ObservedPropertyAbstractPU.DelayedNotifyChangesEnum = (_a = class {
     _a.delay_none_pending = 1,
     _a.delay_notification_pending = 2,
     _a);
+class PropertyDependencies {
+    constructor() {
+        // dependencies for property -> elmtId
+        // variable read during render adds elmtId
+        // variable assignment causes elmtId to need re-render.
+        // UINode with elmtId deletion needs elmtId to be removed from all records, see purgeDependenciesForElmtId
+        this.propertyDependencies_ = new Set();
+        // dependencies on individual object properties
+        this.trackedObjectPropertyDependencies_ = new Map();
+    }
+    getAllPropertyDependencies() {
+        
+        return this.propertyDependencies_;
+    }
+    addPropertyDependency(elmtId) {
+        this.propertyDependencies_.add(elmtId);
+        
+    }
+    purgeDependenciesForElmtId(rmElmtId) {
+        
+        this.propertyDependencies_.delete(rmElmtId);
+        
+        this.trackedObjectPropertyDependencies_.forEach((propertyElmtId, propertyName) => {
+            propertyElmtId.delete(rmElmtId);
+            
+        });
+    }
+    addTrackedObjectPropertyDependency(readProperty, elmtId) {
+        let dependentElmtIds = this.trackedObjectPropertyDependencies_.get(readProperty);
+        if (!dependentElmtIds) {
+            dependentElmtIds = new Set();
+            this.trackedObjectPropertyDependencies_.set(readProperty, dependentElmtIds);
+        }
+        dependentElmtIds.add(elmtId);
+        
+    }
+    getTrackedObjectPropertyDependencies(changedObjectProperty, debugInfo) {
+        const dependentElmtIds = this.trackedObjectPropertyDependencies_.get(changedObjectProperty) || new Set();
+        
+        return dependentElmtIds;
+    }
+    dumpInfoDependencies() {
+        let result = `dependencies: variable assignment (or object prop change in compat mode) affects elmtIds: ${JSON.stringify(Array.from(this.propertyDependencies_))} \n`;
+        this.trackedObjectPropertyDependencies_.forEach((propertyElmtId, propertyName) => {
+            result += `  property '@Track ${propertyName}' change affects elmtIds: ${JSON.stringify(Array.from(propertyElmtId))} \n`;
+        });
+        return result;
+    }
+}
 /*
  * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -4906,49 +4929,7 @@ class ViewPU extends NativeViewPartialUpdate {
         this.dirtDescendantElementIds_ = new Set();
         // registry of update functions
         // the key is the elementId of the Component/Element that's the result of this function
-        this.updateFuncByElmtId = new class UpdateFuncsByElmtId {
-            constructor() {
-                this.map_ = new Map();
-            }
-            delete(elmtId) {
-                return this.map_.delete(elmtId);
-            }
-            set(elmtId, params) {
-                (typeof params == "object") ?
-                    this.map_.set(elmtId, new UpdateFuncRecord(params))
-                    : this.map_.set(elmtId, new UpdateFuncRecord({ updateFunc: params }));
-            }
-            get(elmtId) {
-                return this.map_.get(elmtId);
-            }
-            keys() {
-                return this.map_.keys();
-            }
-            clear() {
-                return this.map_.clear();
-            }
-            get size() {
-                return this.map_.size;
-            }
-            forEach(callbackfn) {
-                this.map_.forEach(callbackfn);
-            }
-            // dump info about known elmtIds to a string
-            // use function only for debug output and DFX.
-            debugInfoRegisteredElmtIds() {
-                let result = "";
-                let sepa = "";
-                this.map_.forEach((value, elmtId) => {
-                    result += `${sepa}${value.getComponentName()}[${elmtId}]`;
-                    sepa = ", ";
-                });
-                return result;
-            }
-            debugInfoElmtId(elmtId) {
-                const updateFuncEntry = this.map_.get(elmtId);
-                return updateFuncEntry ? `'${updateFuncEntry.getComponentName()}[${elmtId}]'` : `'unknown component type'[${elmtId}]`;
-            }
-        };
+        this.updateFuncByElmtId = new UpdateFuncsByElmtId();
         // my LocalStorage instance, shared with ancestor Views.
         // create a default instance on demand if none is initialized
         this.localStoragebackStore_ = undefined;
@@ -4971,6 +4952,7 @@ class ViewPU extends NativeViewPartialUpdate {
             this.localStorage_ = localStorage;
             
         }
+        this.isCompFreezeAllowed = this.isCompFreezeAllowed || (this.parent_ && this.parent_.isCompFreezeAllowed);
         SubscriberManager.Add(this);
         
     }
@@ -5196,7 +5178,7 @@ class ViewPU extends NativeViewPartialUpdate {
     initAllowComponentFreeze(freezeState) {
         // set to true if freeze parameter set for this @Component to true
         // otherwise inherit from parent @Component (if it exists).
-        this.isCompFreezeAllowed = freezeState || (this.parent_ && this.parent_.isCompFreezeAllowed);
+        this.isCompFreezeAllowed = freezeState || this.isCompFreezeAllowed;
         
     }
     /**
@@ -6060,6 +6042,49 @@ ViewPU.inactiveComponents_ = new Set();
 // static flag for paused rendering
 // when paused, getCurrentlyRenderedElmtId() will return -1
 ViewPU.renderingPaused = false;
+class UpdateFuncsByElmtId {
+    constructor() {
+        this.map_ = new Map();
+    }
+    delete(elmtId) {
+        return this.map_.delete(elmtId);
+    }
+    set(elmtId, params) {
+        (typeof params == "object") ?
+            this.map_.set(elmtId, new UpdateFuncRecord(params))
+            : this.map_.set(elmtId, new UpdateFuncRecord({ updateFunc: params }));
+    }
+    get(elmtId) {
+        return this.map_.get(elmtId);
+    }
+    keys() {
+        return this.map_.keys();
+    }
+    clear() {
+        return this.map_.clear();
+    }
+    get size() {
+        return this.map_.size;
+    }
+    forEach(callbackfn) {
+        this.map_.forEach(callbackfn);
+    }
+    // dump info about known elmtIds to a string
+    // use function only for debug output and DFX.
+    debugInfoRegisteredElmtIds() {
+        let result = "";
+        let sepa = "";
+        this.map_.forEach((value, elmtId) => {
+            result += `${sepa}${value.getComponentName()}[${elmtId}]`;
+            sepa = ", ";
+        });
+        return result;
+    }
+    debugInfoElmtId(elmtId) {
+        const updateFuncEntry = this.map_.get(elmtId);
+        return updateFuncEntry ? `'${updateFuncEntry.getComponentName()}[${elmtId}]'` : `'unknown component type'[${elmtId}]`;
+    }
+}
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");

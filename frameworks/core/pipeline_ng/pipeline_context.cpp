@@ -167,6 +167,17 @@ void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirtyNode);
+    auto customNode = DynamicCast<CustomNode>(dirtyNode);
+    if (customNode && !dirtyNode->GetInspectorIdValue("").empty()) {
+        ACE_LAYOUT_SCOPED_TRACE("AddDirtyCustomNode[%s][self:%d][parent:%d][key:%s]",
+            customNode->GetJSViewName().c_str(),
+            dirtyNode->GetId(), dirtyNode->GetParent() ? dirtyNode->GetParent()->GetId() : 0,
+            dirtyNode->GetInspectorIdValue("").c_str());
+    } else if (customNode) {
+        ACE_LAYOUT_SCOPED_TRACE("AddDirtyCustomNode[%s][self:%d][parent:%d]",
+            customNode->GetJSViewName().c_str(),
+            dirtyNode->GetId(), dirtyNode->GetParent() ? dirtyNode->GetParent()->GetId() : 0);
+    }
     dirtyNodes_.emplace(dirtyNode);
     hasIdleTasks_ = true;
     RequestFrame();
@@ -176,6 +187,15 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
+    if (!dirty->GetInspectorIdValue("").empty()) {
+        ACE_LAYOUT_SCOPED_TRACE("AddDirtyLayoutNode[%s][self:%d][parent:%d][key:%s]",
+            dirty->GetTag().c_str(),
+            dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0,
+            dirty->GetInspectorIdValue("").c_str());
+    } else {
+        ACE_LAYOUT_SCOPED_TRACE("AddDirtyLayoutNode[%s][self:%d][parent:%d]", dirty->GetTag().c_str(),
+            dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0);
+    }
     taskScheduler_->AddDirtyLayoutNode(dirty);
     ForceLayoutForImplicitAnimation();
 #ifdef UICAST_COMPONENT_SUPPORTED
@@ -195,6 +215,14 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
+    if (!dirty->GetInspectorIdValue("").empty()) {
+        ACE_LAYOUT_SCOPED_TRACE("AddDirtyRenderNode[%s][self:%d][parent:%d][key:%s]", dirty->GetTag().c_str(),
+            dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0,
+            dirty->GetInspectorIdValue("").c_str());
+    } else {
+        ACE_LAYOUT_SCOPED_TRACE("AddDirtyRenderNode[%s][self:%d][parent:%d]", dirty->GetTag().c_str(),
+            dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0);
+    }
     taskScheduler_->AddDirtyRenderNode(dirty);
     ForceRenderForImplicitAnimation();
 #ifdef UICAST_COMPONENT_SUPPORTED
@@ -457,7 +485,7 @@ void PipelineContext::IsCloseSCBKeyboard()
         // Frame other window to SCB window Or inSCB window changes,hide keyboard.
         if ((windowFocus_.has_value() && windowFocus_.value()) ||
             curFocusNode_ != curFrameNode) {
-            TAG_LOGD(AceLogTag::ACE_KEYBOARD, "In  windowscene change, windowscene focus.");
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SCB Windowfocus first, ready to hide keyboard.");
             windowFocus_.reset();
             curFocusNode_ = curFrameNode;
             WindowSceneHelper::IsWindowSceneCloseKeyboard(curFrameNode);
@@ -465,20 +493,22 @@ void PipelineContext::IsCloseSCBKeyboard()
         }
         // In windowscene, focus change, need close keyboard.
         if (needSoftKeyboard_.has_value() && !needSoftKeyboard_.value()) {
-            TAG_LOGD(AceLogTag::ACE_KEYBOARD, "In windowscene, close keyboard.");
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SCB WindowscenePage ready to close keyboard.");
             WindowSceneHelper::IsCloseKeyboard(curFrameNode);
             needSoftKeyboard_ = std::nullopt;
         }
     } else {
-        if (windowFocus_.has_value() && windowFocus_.value()) {
-            TAG_LOGD(AceLogTag::ACE_KEYBOARD, "In page, focusOnNodeCallback_.");
+        if ((windowFocus_.has_value() && windowFocus_.value()) ||
+            (windowShow_.has_value() && windowShow_.value())) {
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nomal Window focus first, set focusflag to window.");
             windowFocus_.reset();
+            windowShow_.reset();
             focusOnNodeCallback_();
+            return;
         }
 
-        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "In page, be ready to close keyboard.");
         if (needSoftKeyboard_.has_value() && !needSoftKeyboard_.value()) {
-            TAG_LOGD(AceLogTag::ACE_KEYBOARD, "In page, close keyboard.");
+            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nomal WindowPage ready to close keyboard.");
             FocusHub::IsCloseKeyboard(curFrameNode);
             needSoftKeyboard_ = std::nullopt;
         }
@@ -944,6 +974,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACE();
     if (NearEqual(rootWidth_, width) && NearEqual(rootHeight_, height) &&
         type == WindowSizeChangeReason::CUSTOM_ANIMATION && !isDensityChanged_) {
         TryCallNextFrameLayoutCallback();
@@ -1395,12 +1426,6 @@ bool PipelineContext::OnBackPressed()
         return true;
     }
 
-#ifdef WINDOW_SCENE_SUPPORTED
-    if (uiExtensionManager_->OnBackPressed()) {
-        return true;
-    }
-#endif
-
     // if has popup, back press would hide popup and not trigger page back
     auto hasOverlay = false;
     taskExecutor_->PostSyncTask(
@@ -1636,11 +1661,6 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
 
     if (scalePoint.type == TouchType::MOVE) {
         touchEvents_.emplace_back(point);
-        auto container = Container::Current();
-        if (container && container->IsScenceBoardWindow() && IsWindowSceneConsumed()) {
-            FlushTouchEvents();
-            return;
-        }
         hasIdleTasks_ = true;
         RequestFrame();
         return;
@@ -1936,11 +1956,9 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         SetIsFocusActive(false);
     }
     auto container = Container::Current();
-    if (((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
-             event.action == MouseAction::MOVE) &&
-            (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) ||
-        (container && container->IsScenceBoardWindow() &&
-            (event.pullAction == MouseAction::PULL_MOVE || event.pullAction == MouseAction::PULL_UP))) {
+    if ((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
+            event.action == MouseAction::MOVE) &&
+        (event.button == MouseButton::LEFT_BUTTON || event.pressedButtons == MOUSE_PRESS_LEFT)) {
         auto touchPoint = event.CreateTouchPoint();
         if (event.pullAction == MouseAction::PULL_MOVE) {
             touchPoint.pullType = TouchType::PULL_MOVE;
@@ -2278,6 +2296,10 @@ void PipelineContext::OnShow()
 {
     CHECK_RUN_ON(UI);
     onShow_ = true;
+    if (focusOnNodeCallback_) {
+        windowShow_ = true;
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "windowShow is OK.");
+    }
     window_->OnShow();
     RequestFrame();
     FlushWindowStateChangedCallback(true);

@@ -377,6 +377,7 @@ template("declarative_js_engine") {
       "jsview/models/radio_model_impl.cpp",
       "jsview/models/rect_model_impl.cpp",
       "jsview/models/refresh_model_impl.cpp",
+      "jsview/models/relative_container_model_impl.cpp",
       "jsview/models/rendering_context_model_impl.cpp",
       "jsview/models/richeditor_model_impl.cpp",
       "jsview/models/row_model_impl.cpp",

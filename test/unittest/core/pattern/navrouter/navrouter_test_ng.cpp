@@ -39,6 +39,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/navigation_content_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
@@ -140,7 +141,6 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg002, TestSize.Level1)
     auto navRouterGroupNode = AceType::DynamicCast<NavRouterGroupNode>(frameNode);
     ASSERT_NE(navRouterGroupNode, nullptr);
     auto navRouterPattern = AceType::DynamicCast<NavRouterPattern>(navRouterGroupNode->pattern_);
-    navRouterPattern->name_ = "navDestinationNode";
     /**
      * @tc.steps: step2. create navigationPattern and construct navigationStack_ property.
      */
@@ -183,7 +183,6 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg003, TestSize.Level1)
     auto navRouterGroupNode = AceType::DynamicCast<NavRouterGroupNode>(frameNode);
     ASSERT_NE(navRouterGroupNode, nullptr);
     auto navRouterPattern = AceType::DynamicCast<NavRouterPattern>(navRouterGroupNode->pattern_);
-    navRouterPattern->name_ = "navDestinationNode";
     /**
      * @tc.steps: step2. create navigationPattern and construct navigationStack_ property.
      */
@@ -733,7 +732,6 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0015, TestSize.Level1)
 
     parentNode->isOnAnimation_ = false;
 
-    navRouterGroupNode->GetPattern<NavRouterPattern>()->name_ = "navDestination";
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(
         "navDestinationNode", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     std::pair<std::string, RefPtr<UINode>> p("navDestination", navDestinationNode);
@@ -855,7 +853,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0016, TestSize.Level1)
     ASSERT_NE(parent->GetPattern<NavigationPattern>()->GetNavDestinationNode(), nullptr);
     navRouterGroupNode->navDestinationNode_ = NavDestinationGroupNode::GetOrCreateGroupNode(
         "navDestinationNode", 20, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    ASSERT_EQ(
+    ASSERT_NE(
         navRouterGroupNode->navDestinationNode_, parent->GetPattern<NavigationPattern>()->GetNavDestinationNode());
 
     AceType::DynamicCast<NavDestinationGroupNode>(navRouterGroupNode->navDestinationNode_)->titleBarNode_ =
@@ -868,38 +866,6 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0016, TestSize.Level1)
     navRouterGroupNode->OnAttachToMainTree(false);
     navRouterGroupNode->GetEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
     ASSERT_NE(navRouterGroupNode->navDestinationNode_, nullptr);
-
-    parent->isOnAnimation_ = false;
-    ASSERT_NE(parent->GetPattern<NavigationPattern>()->GetNavDestinationNode(), nullptr);
-    navRouterGroupNode->navDestinationNode_ = NavDestinationGroupNode::GetOrCreateGroupNode(
-        "navDestinationNode", 20, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    ASSERT_EQ(
-        navRouterGroupNode->navDestinationNode_, parent->GetPattern<NavigationPattern>()->GetNavDestinationNode());
-
-    cur = nullptr;
-    navBar = nullptr;
-    AceType::DynamicCast<NavDestinationGroupNode>(navRouterGroupNode->navDestinationNode_)->titleBarNode_ =
-        TitleBarNode::GetOrCreateTitleBarNode(
-            "titleBarNode34", 34, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
-
-    navRouterGroupNode->OnAttachToMainTree(false);
-    navRouterGroupNode->GetEventHub<NavRouterEventHub>()->FireDestinationChangeEvent();
-    ASSERT_NE(navRouterGroupNode->navDestinationNode_, nullptr);
-
-    parent->isOnAnimation_ = false;
-    ASSERT_NE(parent->GetPattern<NavigationPattern>()->GetNavDestinationNode(), nullptr);
-    navRouterGroupNode->navDestinationNode_ = NavDestinationGroupNode::GetOrCreateGroupNode(
-        "navDestinationNode", 20, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
-    ASSERT_EQ(
-        navRouterGroupNode->navDestinationNode_, parent->GetPattern<NavigationPattern>()->GetNavDestinationNode());
-
-    stack->navPathList_.clear();
-    layoutProperty->propNavigationMode_ = NavigationMode::SPLIT;
-    cur = nullptr;
-    navBar = nullptr;
-    AceType::DynamicCast<NavDestinationGroupNode>(navRouterGroupNode->navDestinationNode_)->titleBarNode_ =
-        TitleBarNode::GetOrCreateTitleBarNode(
-            "titleBarNode34", 34, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
 }
 
 /**
@@ -939,7 +905,6 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0017, TestSize.Level1)
     auto layoutProperty = AceType::MakeRefPtr<NavigationLayoutProperty>();
     parent->layoutProperty_ = layoutProperty;
 
-    navRouterGroupNode->GetPattern<NavRouterPattern>()->name_ = "test";
     auto stack = AceType::MakeRefPtr<NavigationStack>();
     auto preNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, 55, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
@@ -1162,9 +1127,11 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0025, TestSize.Level1)
     /**
      * @tc.steps: step1. create navigation.
      */
-    auto navRouterPattern = AceType::MakeRefPtr<NavRouterPattern>();
     auto navigation = NavigationGroupNode::GetOrCreateGroupNode(
         "parentNode", 11, []() { return AceType::MakeRefPtr<NavigationPattern>(); });
+    auto navigationContentNode = FrameNode::GetOrCreateFrameNode(V2::NAVIGATION_CONTENT_ETS_TAG, 12,
+        []() { return AceType::MakeRefPtr<NavigationContentPattern>(); });
+    navigation->SetContentNode(navigationContentNode);
     auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
         "NavDestination", 22, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     auto contentNode = NavDestinationGroupNode::GetOrCreateGroupNode(
@@ -1193,9 +1160,7 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0025, TestSize.Level1)
     backButton->eventHub_ = eventHub;
     navDestination->eventHub_ = AceType::MakeRefPtr<NavDestinationEventHub>();
     navDestination->contentNode_ = nullptr;
-
-    navigation->SetBackButtonEvent(navDestination, nullptr);
-
+    navigation->SetBackButtonEvent(navDestination);
     pattern->navigationMode_ = NavigationMode::STACK;
     auto stack = AceType::MakeRefPtr<NavigationStack>();
     std::pair<std::string, RefPtr<UINode>> p("test0", preNavDestination);
@@ -1203,11 +1168,9 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0025, TestSize.Level1)
     stack->navPathList_.push_back(p);
     stack->navPathList_.push_back(p2);
     pattern->navigationStack_ = stack;
-    navDestination->GetPattern<NavDestinationPattern>()->name_ = "test";
     ASSERT_EQ(pattern->navigationStack_->navPathList_.size(), 2);
     ASSERT_NE(AceType::DynamicCast<NavDestinationGroupNode>(pattern->GetPreNavDestination("test", preNavDestination)),
         nullptr);
-
     navDestination->GetPattern<NavDestinationPattern>()->navDestinationNode_ = preNavDestination;
     GestureEvent event;
     navDestination->backButtonEvent_(event);
@@ -1217,9 +1180,8 @@ HWTEST_F(NavrouterTestNg, NavrouterTestNg0025, TestSize.Level1)
     eventHub->gestureEventHub_ = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
     navDestination->GetPattern<NavDestinationPattern>()->shallowBuilder_ = AceType::MakeRefPtr<ShallowBuilder>(
         []() { return FrameNode::CreateFrameNode("BackButton", 123, AceType::MakeRefPtr<ButtonPattern>()); });
-
     navDestination->GetPattern<NavDestinationPattern>()->navDestinationNode_ = preNavDestination;
-    navigation->SetBackButtonEvent(navDestination, navRouterPattern);
+    navigation->SetBackButtonEvent(navDestination);
     navDestination->backButtonEvent_(event);
     EXPECT_TRUE(navDestination->GetEventHub<NavDestinationEventHub>()->onBackPressedEvent_());
 }

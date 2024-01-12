@@ -151,8 +151,13 @@ protected:
         scrollableParentInfo_.parentIds.clear();
     }
 
+    void UpdateOriginIsMenuShow(bool isShow)
+    {
+        originIsMenuShow_ = isShow;
+    }
+
 private:
-    bool isMenuShow_ = true;
+    bool originIsMenuShow_ = true;
     void RegisterParentScrollCallback(int32_t parentId, int32_t callbackId);
     std::optional<SelectOverlayInfo> GetSelectOverlayInfo(const ClientOverlayInfo& clientInfo);
     void CreateSelectOverlay(const ClientOverlayInfo& showOverlayInfo);

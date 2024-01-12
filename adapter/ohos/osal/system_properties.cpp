@@ -43,6 +43,7 @@ constexpr char PROPERTY_DEVICE_TYPE_TABLET[] = "tablet";
 constexpr char PROPERTY_DEVICE_TYPE_TWOINONE[] = "2in1";
 constexpr char PROPERTY_DEVICE_TYPE_WATCH[] = "watch";
 constexpr char PROPERTY_DEVICE_TYPE_CAR[] = "car";
+constexpr char ENABLE_DEBUG_AUTOUI_KEY[] = "persist.ace.debug.autoui.enabled";
 constexpr char ENABLE_DEBUG_BOUNDARY_KEY[] = "persist.ace.debug.boundary.enabled";
 constexpr char ENABLE_DOWNLOAD_BY_NETSTACK_KEY[] = "persist.ace.download.netstack.enabled";
 constexpr char ANIMATION_SCALE_KEY[] = "persist.sys.arkui.animationscale";
@@ -67,6 +68,11 @@ void Swap(int32_t& deviceWidth, int32_t& deviceHeight)
     deviceHeight = temp;
 }
 
+bool IsDebugAutoUIEnabled()
+{
+    return (system::GetParameter(ENABLE_DEBUG_AUTOUI_KEY, "false") == "true");
+}
+
 bool IsDebugBoundaryEnabled()
 {
     return system::GetParameter(ENABLE_DEBUG_BOUNDARY_KEY, "false") == "true";
@@ -85,11 +91,6 @@ bool IsTraceEnabled()
 bool IsSvgTraceEnabled()
 {
     return (system::GetParameter("persist.ace.trace.svg.enabled", "0") == "1");
-}
-
-bool IsLayoutTraceEnabled()
-{
-    return (system::GetParameter("persist.ace.trace.layout.enabled", "false") == "true");
 }
 
 bool IsBuildTraceEnabled()
@@ -169,6 +170,11 @@ bool IsNavigationBlurEnabled()
     return (system::GetParameter("persist.ace.navigation.blur.enabled", "0") == "1");
 }
 
+bool IsGridCacheEnabled()
+{
+    return (system::GetParameter("persist.ace.grid.cache.enabled", "0") == "1");
+}
+
 bool IsGpuUploadEnabled()
 {
     return (system::GetParameter("persist.ace.gpuupload.enabled", "0") == "1" ||
@@ -244,7 +250,6 @@ bool IsResourceDecoupling()
 
 bool SystemProperties::traceEnabled_ = IsTraceEnabled();
 bool SystemProperties::svgTraceEnable_ = IsSvgTraceEnabled();
-bool SystemProperties::layoutTraceEnable_ = IsLayoutTraceEnabled() && IsDeveloperModeOn();
 bool SystemProperties::buildTraceEnable_ = IsBuildTraceEnabled() && IsDeveloperModeOn();
 bool SystemProperties::accessibilityEnabled_ = IsAccessibilityEnabled();
 bool SystemProperties::isRound_ = false;
@@ -272,6 +277,7 @@ bool SystemProperties::unZipHap_ = true;
 ACE_WEAK_SYM bool SystemProperties::rosenBackendEnabled_ = IsRosenBackendEnabled();
 ACE_WEAK_SYM bool SystemProperties::isHookModeEnabled_ = IsHookModeEnabled();
 bool SystemProperties::debugBoundaryEnabled_ = IsDebugBoundaryEnabled();
+bool SystemProperties::debugAutoUIEnabled_ = IsDebugAutoUIEnabled();
 bool SystemProperties::downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled();
 ACE_WEAK_SYM bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
 ACE_WEAK_SYM bool SystemProperties::debugEnabled_ = IsDebugEnabled();
@@ -284,6 +290,7 @@ ACE_WEAK_SYM uint32_t SystemProperties::dumpFrameCount_ = GetSysDumpFrameCount()
 bool SystemProperties::enableScrollableItemPool_ = IsEnableScrollableItemPool();
 bool SystemProperties::resourceDecoupling_ = IsResourceDecoupling();
 bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
+bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
 
 bool SystemProperties::IsSyscapExist(const char* cap)
 {
@@ -394,18 +401,20 @@ void SystemProperties::InitDeviceInfo(
     debugEnabled_ = IsDebugEnabled();
     traceEnabled_ = IsTraceEnabled();
     svgTraceEnable_ = IsSvgTraceEnabled();
-    layoutTraceEnable_ = IsLayoutTraceEnabled() && IsDeveloperModeOn();
     buildTraceEnable_ = IsBuildTraceEnabled() && IsDeveloperModeOn();
     accessibilityEnabled_ = IsAccessibilityEnabled();
     rosenBackendEnabled_ = IsRosenBackendEnabled();
     isHookModeEnabled_ = IsHookModeEnabled();
     debugBoundaryEnabled_ = system::GetParameter(ENABLE_DEBUG_BOUNDARY_KEY, "false") == "true";
+    debugAutoUIEnabled_ = system::GetParameter(ENABLE_DEBUG_AUTOUI_KEY, "false") == "true";
+
     downloadByNetworkEnabled_ = system::GetParameter(ENABLE_DOWNLOAD_BY_NETSTACK_KEY, "true") == "true";
     animationScale_ = std::atof(system::GetParameter(ANIMATION_SCALE_KEY, "1").c_str());
     WatchParameter(ANIMATION_SCALE_KEY, OnAnimationScaleChanged, nullptr);
     resourceDecoupling_ = IsResourceDecoupling();
 
     navigationBlurEnabled_ = IsNavigationBlurEnabled();
+    gridCacheEnabled_ = IsGridCacheEnabled();
 
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
@@ -419,8 +428,9 @@ void SystemProperties::InitDeviceInfo(
 ACE_WEAK_SYM void SystemProperties::SetDeviceOrientation(int32_t orientation)
 {
     int32_t newOrientation = ((orientation == static_cast<int32_t>(RsOrientation::LANDSCAPE)) ||
-        (orientation == static_cast<int32_t>(RsOrientation::LANDSCAPE_INVERTED))) ?
-        ORIENTATION_LANDSCAPE : ORIENTATION_PORTRAIT;
+                                 (orientation == static_cast<int32_t>(RsOrientation::LANDSCAPE_INVERTED)))
+                                 ? ORIENTATION_LANDSCAPE
+                                 : ORIENTATION_PORTRAIT;
     if (newOrientation == ORIENTATION_PORTRAIT && orientation_ != DeviceOrientation::PORTRAIT) {
         Swap(deviceWidth_, deviceHeight_);
         orientation_ = DeviceOrientation::PORTRAIT;
@@ -500,6 +510,11 @@ bool SystemProperties::GetDebugPixelMapSaveEnabled()
     return system::GetBoolParameter("persist.ace.save.pixelmap.enabled", false);
 }
 
+bool SystemProperties::GetLayoutTraceEnabled()
+{
+    return (system::GetParameter("persist.ace.trace.layout.enabled", "false") == "true") && IsDeveloperModeOn();
+}
+
 ACE_WEAK_SYM bool SystemProperties::GetIsUseMemoryMonitor()
 {
     static bool isUseMemoryMonitor = IsUseMemoryMonitor();
@@ -555,5 +570,10 @@ bool SystemProperties::GetDisplaySyncSkipEnabled()
 bool SystemProperties::GetNavigationBlurEnabled()
 {
     return navigationBlurEnabled_;
+}
+
+bool SystemProperties::GetGridCacheEnabled()
+{
+    return gridCacheEnabled_;
 }
 } // namespace OHOS::Ace

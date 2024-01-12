@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,9 +24,11 @@
 #include "adapter/ohos/entrance/ui_content_impl.h"
 #include "base/thread/task_executor.h"
 #include "base/utils/utils.h"
-#include "core/common/ace_engine.h"
+#include "bridge/card_frontend/form_frontend_declarative.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
+#include "core/components_ng/pattern/stage/page_pattern.h"
+#include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -38,52 +40,97 @@ DynamicComponentRendererImpl::DynamicComponentRendererImpl(const RefPtr<FrameNod
     runtime_ = reinterpret_cast<NativeEngine*>(runtime);
 }
 
-std::shared_ptr<DynamicComponentRenderer> DynamicComponentRenderer::Create(const RefPtr<FrameNode>& host,
+RefPtr<DynamicComponentRenderer> DynamicComponentRenderer::Create(const RefPtr<FrameNode>& host,
     const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint, void* runtime)
 {
-    return std::make_shared<DynamicComponentRendererImpl>(host, hapPath, abcPath, entryPoint, runtime);
+    return AceType::MakeRefPtr<DynamicComponentRendererImpl>(host, hapPath, abcPath, entryPoint, runtime);
 }
 
 void DynamicComponentRendererImpl::CreateContent()
 {
+    hostInstanceId_ = Container::CurrentId();
+
     CHECK_NULL_VOID(runtime_);
     if (!runtime_->IsRestrictedWorkerThread()) {
-        LOGW("DynamicComponent should run in restricted worker thread");
+        TAG_LOGW(AceLogTag::ACE_DYNAMIC_COMPONENT, "DynamicComponent should run in restricted worker thread");
         return;
     }
 
     auto napiEnv = reinterpret_cast<napi_env>(runtime_);
     auto uvTaskWrapper = std::make_shared<UVTaskWrapperImpl>(napiEnv);
-
-    uvTaskWrapper->Call([weak = this->weak_from_this(), hostInstanceId = Container::CurrentId()]() {
-        auto renderer = weak.lock();
+    uvTaskWrapper->Call([weak = WeakClaim(this)]() {
+        auto renderer = weak.Upgrade();
         CHECK_NULL_VOID(renderer);
 
         // create UI Content
-        LOGI("create dynamic UI Content");
+        TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "create dynamic UI Content");
         renderer->uiContent_ = UIContent::Create(nullptr, renderer->runtime_, true);
         CHECK_NULL_VOID(renderer->uiContent_);
 
         renderer->uiContent_->InitializeDynamic(renderer->hapPath_, renderer->abcPath_, renderer->entryPoint_);
-        renderer->AttachRenderContext(hostInstanceId);
-        LOGD("foreground dynamic UI content");
+        ContainerScope scope(renderer->uiContent_->GetInstanceId());
+        renderer->RegisterSizeChangedCallback();
+        renderer->AttachRenderContext();
+        TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "foreground dynamic UI content");
         renderer->uiContent_->Foreground();
     });
 }
 
-void DynamicComponentRendererImpl::AttachRenderContext(int32_t hostInstanceId)
+void DynamicComponentRendererImpl::RegisterSizeChangedCallback()
 {
-    ContainerScope scope(hostInstanceId);
-    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(uiContent_);
+    auto container = Container::GetContainer(uiContent_->GetInstanceId());
+    CHECK_NULL_VOID(container);
+    auto frontend = AceType::DynamicCast<OHOS::Ace::FormFrontendDeclarative>(container->GetFrontend());
+    CHECK_NULL_VOID(frontend);
+    auto delegate = frontend->GetDelegate();
+    CHECK_NULL_VOID(delegate);
+    auto pageRouterManager = delegate->GetPageRouterManager();
+    CHECK_NULL_VOID(pageRouterManager);
+    auto pageNode = pageRouterManager->GetCurrentPageNode();
+    CHECK_NULL_VOID(pageNode);
+    auto pagePattern = AceType::DynamicCast<PagePattern>(pageNode->GetPattern());
+    CHECK_NULL_VOID(pagePattern);
+
+    auto dynamicPageSizeCallback = [weak = WeakClaim(this)](SizeF size) {
+        auto renderer = weak.Upgrade();
+        CHECK_NULL_VOID(renderer);
+        auto width = size.Width();
+        auto height = size.Height();
+        if (!NearEqual(renderer->contentSize_.Width(), width) || !NearEqual(renderer->contentSize_.Height(), height)) {
+            renderer->contentSize_.SetSizeT(size);
+            TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "dynamic card size: width=%{public}f, height=%{public}f", width,
+                height);
+            auto hostTaskExecutor = renderer->GetHostTaskExecutor();
+            CHECK_NULL_VOID(hostTaskExecutor);
+            hostTaskExecutor->PostTask(
+                [hostWeak = renderer->host_, hostInstanceId = renderer->hostInstanceId_, width, height]() {
+                    ContainerScope scope(hostInstanceId);
+                    auto host = hostWeak.Upgrade();
+                    CHECK_NULL_VOID(host);
+                    auto pattern = AceType::DynamicCast<UIExtensionPattern>(host->GetPattern());
+                    CHECK_NULL_VOID(pattern);
+                    pattern->OnSizeChanged(width, height);
+                },
+                TaskExecutor::TaskType::UI);
+        }
+    };
+    pagePattern->SetDynamicPageSizeCallback(std::move(dynamicPageSizeCallback));
+}
+
+void DynamicComponentRendererImpl::AttachRenderContext()
+{
+    auto taskExecutor = GetHostTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostSyncTask(
-        [weak = host_, instanceId = uiContent_->GetInstanceId()]() {
+        [weak = host_, hostInstanceId = hostInstanceId_, instanceId = uiContent_->GetInstanceId()]() {
+            ContainerScope scope(hostInstanceId);
             auto host = weak.Upgrade();
             CHECK_NULL_VOID(host);
-            auto renderContext = host->GetRenderContext();
-            CHECK_NULL_VOID(renderContext);
+            auto hostRenderContext = host->GetRenderContext();
+            CHECK_NULL_VOID(hostRenderContext);
 
-            auto container = AceEngine::Get().GetContainer(instanceId);
+            auto container = Container::GetContainer(instanceId);
             CHECK_NULL_VOID(container);
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
@@ -91,22 +138,23 @@ void DynamicComponentRendererImpl::AttachRenderContext(int32_t hostInstanceId)
             CHECK_NULL_VOID(pipelineContext);
             auto rootElement = pipelineContext->GetRootElement();
             CHECK_NULL_VOID(rootElement);
-            auto exRenderContext = rootElement->GetRenderContext();
-            CHECK_NULL_VOID(exRenderContext);
+            auto renderContext = rootElement->GetRenderContext();
+            CHECK_NULL_VOID(renderContext);
 
-            exRenderContext->SetClipToFrame(true);
-            exRenderContext->SetClipToBounds(true);
+            renderContext->SetClipToFrame(true);
+            renderContext->SetClipToBounds(true);
 
-            LOGD("add render context of dynamic component");
-            renderContext->ClearChildren();
-            renderContext->AddChild(exRenderContext, -1);
+            TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "add render context of dynamic component for '%{public}d'",
+                instanceId);
+            hostRenderContext->ClearChildren();
+            hostRenderContext->AddChild(renderContext, -1);
 
             host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
             auto parent = host->GetParent();
             CHECK_NULL_VOID(parent);
             parent->MarkNeedSyncRenderTree();
             parent->RebuildRenderContextTree();
-            renderContext->RequestNextFrame();
+            hostRenderContext->RequestNextFrame();
         },
         TaskExecutor::TaskType::UI);
 }
@@ -135,21 +183,46 @@ void DynamicComponentRendererImpl::TransferKeyEvent(const std::shared_ptr<MMI::K
         TaskExecutor::TaskType::UI);
 }
 
-void DynamicComponentRendererImpl::UpdateViewportConfig(const Ace::ViewportConfig& config,
+void DynamicComponentRendererImpl::UpdateViewportConfig(const ViewportConfig& config,
     Rosen::WindowSizeChangeReason reason, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
-    LOGD("update dynamic component viewport");
+    CHECK_NULL_VOID(uiContent_);
+
+    ViewportConfig vpConfig;
+    vpConfig.SetDensity(config.Density());
+    vpConfig.SetPosition(config.Left(), config.Top());
+    vpConfig.SetOrientation(config.Orientation());
+
+    if (NearZero(config.Width()) && NearZero(config.Height()) && !adaptive_) {
+        TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "set adaptive size for dynamic component '%{public}d'",
+            uiContent_->GetInstanceId());
+        adaptive_ = true;
+        int32_t deviceWidth = 0;
+        int32_t deviceHeight = 0;
+        auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplay();
+        if (defaultDisplay) {
+            deviceWidth = defaultDisplay->GetWidth();
+            deviceHeight = defaultDisplay->GetHeight();
+        }
+        vpConfig.SetSize(deviceWidth, deviceHeight);
+    } else {
+        vpConfig.SetSize(config.Width(), config.Height());
+    }
+
     auto taskExecutor = GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [uiContent = uiContent_, config, reason, rsTransaction]() {
-            ContainerScope scope(uiContent->GetInstanceId());
-            auto width = config.Width();
-            auto height = config.Height();
-            uiContent->SetFormWidth(width);
-            uiContent->SetFormHeight(height);
-            uiContent->OnFormSurfaceChange(width, height);
-            uiContent->UpdateViewportConfig(config, reason, rsTransaction);
+        [weak = WeakClaim(this), vpConfig, reason, rsTransaction]() {
+            auto renderer = weak.Upgrade();
+            CHECK_NULL_VOID(renderer);
+            CHECK_NULL_VOID(renderer->uiContent_);
+            ContainerScope scope(renderer->uiContent_->GetInstanceId());
+            auto width = vpConfig.Width();
+            auto height = vpConfig.Height();
+            renderer->uiContent_->SetFormWidth(width);
+            renderer->uiContent_->SetFormHeight(height);
+            renderer->uiContent_->OnFormSurfaceChange(width, height);
+            renderer->uiContent_->UpdateViewportConfig(vpConfig, reason, rsTransaction);
         },
         TaskExecutor::TaskType::UI);
 }
@@ -161,20 +234,24 @@ void DynamicComponentRendererImpl::DestroyContent()
     taskExecutor->PostTask(
         [uiContent = uiContent_]() {
             ContainerScope scope(uiContent->GetInstanceId());
+            TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "destroy dynamic UI content");
             uiContent->Destroy();
         },
         TaskExecutor::TaskType::UI);
-
-    uiContent_ = nullptr;
 }
 
 RefPtr<TaskExecutor> DynamicComponentRendererImpl::GetTaskExecutor()
 {
     CHECK_NULL_RETURN(uiContent_, nullptr);
-    auto instanceId = uiContent_->GetInstanceId();
-    auto container = AceEngine::Get().GetContainer(instanceId);
+    auto container = Container::GetContainer(uiContent_->GetInstanceId());
     CHECK_NULL_RETURN(container, nullptr);
-    auto taskExecutor = container->GetTaskExecutor();
-    return taskExecutor;
+    return container->GetTaskExecutor();
+}
+
+RefPtr<TaskExecutor> DynamicComponentRendererImpl::GetHostTaskExecutor()
+{
+    auto container = Container::GetContainer(hostInstanceId_);
+    CHECK_NULL_RETURN(container, nullptr);
+    return container->GetTaskExecutor();
 }
 } // namespace OHOS::Ace::NG

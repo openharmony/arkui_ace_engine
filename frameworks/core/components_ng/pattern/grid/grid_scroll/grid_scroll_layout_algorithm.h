@@ -136,6 +136,20 @@ private:
     void SkipRegularLines(bool forward);
     void SupplyAllData2ZeroIndex(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
 
+    void FillCacheLineAtEnd(float mainSize, float crossSize, LayoutWrapper* layoutWrapper);
+    float FillNewCacheLineBackward(float crossSize, float mainSize, LayoutWrapper* layoutWrapper);
+    int32_t MeasureCachedChild(const SizeF& frameSize, int32_t itemIndex, LayoutWrapper* layoutWrapper,
+        const RefPtr<LayoutWrapper>& childLayoutWrapper);
+
+    void LayoutCachedItem(LayoutWrapper* layoutWrapper, int32_t cacheCount);
+    void LayoutBackwardCachedLine(LayoutWrapper* layoutWrapper, int32_t cacheCount);
+    void LayoutForwardCachedLine(LayoutWrapper* layoutWrapper, int32_t cacheCount);
+    void CreateCachedChildConstraint(LayoutWrapper* layoutWrapper, float mainSize, float crossSize);
+
+    static void PostIdleTask(RefPtr<FrameNode> frameNode, const GridPredictLayoutParam& param);
+    static bool PredictBuildItem(RefPtr<LayoutWrapper> wrapper, const LayoutConstraintF& constraint);
+    static void SyncGeometry(RefPtr<LayoutWrapper>& wrapper);
+    void CompeleteItemCrossPosition(LayoutWrapper* layoutWrapper, std::map<int32_t, int32_t> items);
     /**
      * @brief Updates the main line during ReloadToStartIndex based on the new crossCount_.
      *
@@ -171,6 +185,9 @@ private:
     std::map<int32_t, float> itemsCrossPosition_;
     bool canOverScroll_ = false;
     int32_t scrollSource_ = SCROLL_FROM_NONE;
+    OffsetF childFrameOffset_;
+    std::list<int32_t> predictBuildList_;
+    LayoutConstraintF cachedChildConstraint_;
 
     ACE_DISALLOW_COPY_AND_MOVE(GridScrollLayoutAlgorithm);
 };

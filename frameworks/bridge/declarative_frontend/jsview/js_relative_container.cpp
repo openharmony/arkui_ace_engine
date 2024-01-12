@@ -16,11 +16,37 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_relative_container.h"
 
 #include "base/log/ace_trace.h"
-#include "core/components_ng/pattern/relative_container/relative_container_view.h"
+#include "bridge/declarative_frontend/jsview/models/relative_container_model_impl.h"
+#include "core/components_ng/pattern/relative_container/relative_container_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-#include "frameworks/core/components/relative_container/relative_container_component.h"
+
+namespace OHOS::Ace {
+
+std::unique_ptr<RelativeContainerModel> RelativeContainerModel::instance_ = nullptr;
+std::mutex RelativeContainerModel::mutex_;
+
+RelativeContainerModel* RelativeContainerModel::GetInstance()
+{
+    if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
+#ifdef NG_BUILD
+            instance_.reset(new NG::RelativeContainerModelNG());
+#else
+            if (Container::IsCurrentUseNewPipeline()) {
+                instance_.reset(new NG::RelativeContainerModelNG());
+            } else {
+                instance_.reset(new Framework::RelativeContainerModelImpl());
+            }
+#endif
+        }
+    }
+    return instance_.get();
+}
+
+} // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
 
@@ -42,18 +68,7 @@ void JSRelativeContainer::JSBind(BindingTarget globalObj)
 
 void JSRelativeContainer::Create(const JSCallbackInfo& info)
 {
-#ifdef NG_BUILD
-    NG::RelativeContainerView::Create();
-#else
-    if (Container::IsCurrentUseNewPipeline()) {
-        NG::RelativeContainerView::Create();
-        return;
-    }
-    std::list<RefPtr<Component>> children;
-    RefPtr<OHOS::Ace::RelativeContainerComponent> component = AceType::MakeRefPtr<RelativeContainerComponent>(children);
-    ViewStackProcessor::GetInstance()->Push(component);
-    JSInteractableView::SetFocusNode(true);
-#endif
+    RelativeContainerModel::GetInstance()->Create();
 }
 
 } // namespace OHOS::Ace::Framework

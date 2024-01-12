@@ -47,7 +47,6 @@ public:
         paintProperty->UpdatePaintProperty(this);
         paintProperty->propSwiperAnimationStyle_ = CloneSwiperAnimationStyle();
         paintProperty->propEnabled_ = CloneEnabled();
-        paintProperty->propDisableSwipe_ = CloneDisableSwipe();
         paintProperty->propEdgeEffect_ = CloneEdgeEffect();
         paintProperty->propFadeColor_ = CloneFadeColor();
         return paintProperty;
@@ -58,7 +57,6 @@ public:
         PaintProperty::Reset();
         ResetSwiperAnimationStyle();
         ResetEnabled();
-        ResetDisableSwipe();
         ResetEdgeEffect();
         ResetFadeColor();
     }
@@ -74,7 +72,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SwiperAnimationStyle, Curve, RefPtr<Curve>, PROPERTY_UPDATE_RENDER);
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Enabled, bool, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisableSwipe, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(EdgeEffect, EdgeEffect, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FadeColor, Color, PROPERTY_UPDATE_RENDER);
 };

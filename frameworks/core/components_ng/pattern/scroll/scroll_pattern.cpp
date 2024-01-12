@@ -453,7 +453,7 @@ void ScrollPattern::OnAnimateStop()
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    // AccessibilityEventType::SCROLL_END
     scrollStop_ = true;
 }
 
@@ -493,13 +493,8 @@ void ScrollPattern::JumpToPosition(float position, int32_t source)
     // If an animation is playing, stop it.
     auto lastAnimateRunning = AnimateRunning();
     StopAnimate();
-    float cachePosition = currentOffset_;
     DoJump(position, source);
-    if (cachePosition != currentOffset_) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
-    }
+    // AccessibilityEventType::SCROLL_END
     if (lastAnimateRunning) {
         SetScrollAbort(false);
     }
@@ -867,7 +862,7 @@ float ScrollPattern::GetSelectScrollWidth()
     auto scrollNode = GetHost();
     CHECK_NULL_RETURN(scrollNode, SELECT_SCROLL_MIN_WIDTH.ConvertToPx());
     float finalWidth = SELECT_SCROLL_MIN_WIDTH.ConvertToPx();
-    
+
     if (IsWidthModifiedBySelect()) {
         auto scrollLayoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
         CHECK_NULL_RETURN(scrollLayoutProperty, SELECT_SCROLL_MIN_WIDTH.ConvertToPx());
@@ -876,7 +871,7 @@ float ScrollPattern::GetSelectScrollWidth()
     } else {
         finalWidth = defaultWidth;
     }
-    
+
     if (finalWidth < SELECT_SCROLL_MIN_WIDTH.ConvertToPx()) {
         finalWidth = defaultWidth;
     }

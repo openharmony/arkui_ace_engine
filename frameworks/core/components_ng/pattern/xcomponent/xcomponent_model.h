@@ -49,6 +49,10 @@ public:
         return false;
     }
     virtual void SetDetachCallback(DetachCallback&& onDetach) {}
+    virtual XComponentType GetType()
+    {
+        return XComponentType::UNKNOWN;
+    }
 
 private:
     static std::unique_ptr<XComponentModel> instance_;

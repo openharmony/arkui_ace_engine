@@ -110,8 +110,8 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         if (sessionWrapper_->GetWant()->IsEquals(want)) {
             return;
         }
-        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "The old want is %{private}s",
-            sessionWrapper_->GetWant()->ToString().c_str());
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "The old want is %{private}s, id = %{public}d",
+            sessionWrapper_->GetWant()->ToString().c_str(), uiExtensionId_);
         auto host = GetHost();
         CHECK_NULL_VOID(host);
         host->RemoveChild(contentNode_);
@@ -137,6 +137,7 @@ void UIExtensionPattern::OnConnect()
     auto&& opts = host->GetLayoutProperty()->GetSafeAreaExpandOpts();
     if (opts && opts->Expansive()) {
         contentNode_->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+        contentNode_->MarkModifyDone();
     }
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(contentNode_->GetRenderContext());
     CHECK_NULL_VOID(context);
@@ -161,15 +162,17 @@ void UIExtensionPattern::OnConnect()
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
     uiExtensionManager->AddAliveUIExtension(host->GetId(), WeakClaim(this));
     if (isFocused || isModal_) {
-        uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this));
+        uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this), sessionWrapper_);
     }
-    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "The UIExtensionComponent is connected.");
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "The UIExtensionComponent is connected, id = %{public}d.", uiExtensionId_);
 }
 
 void UIExtensionPattern::OnAccessibilityEvent(
-    const Accessibility::AccessibilityEventInfo& info, int32_t uiExtensionOffset)
+    const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset)
 {
-    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "The accessibility event is reported.");
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "The accessibility event is reported, id = %{public}d.", uiExtensionId_);
     ContainerScope scope(instanceId_);
     auto ngPipeline = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(ngPipeline);
@@ -184,7 +187,8 @@ void UIExtensionPattern::OnAccessibilityEvent(
 void UIExtensionPattern::OnDisconnect()
 {
     CHECK_RUN_ON(UI);
-    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "The session is disconnected and state = %{public}d.", state_);
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "The session is disconnected and state = %{public}d, id = %{public}d.", state_, uiExtensionId_);
     state_ = AbilityState::DESTRUCTION;
     if (onReleaseCallback_) {
         onReleaseCallback_(static_cast<int32_t>(ReleaseCode::DESTROY_NORMAL));
@@ -194,7 +198,8 @@ void UIExtensionPattern::OnDisconnect()
 void UIExtensionPattern::OnExtensionDied()
 {
     CHECK_RUN_ON(UI);
-    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "The session is died and state = %{public}d.", state_);
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "The session is died and state = %{public}d, id = %{public}d.",
+        state_, uiExtensionId_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->RemoveChild(contentNode_);
@@ -203,11 +208,6 @@ void UIExtensionPattern::OnExtensionDied()
     if (onReleaseCallback_) {
         onReleaseCallback_(static_cast<int32_t>(ReleaseCode::CONNECT_BROKEN));
     }
-}
-
-bool UIExtensionPattern::OnBackPressed()
-{
-    return sessionWrapper_ && sessionWrapper_->NotifyBackPressedSync();
 }
 
 bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
@@ -224,11 +224,8 @@ bool UIExtensionPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto geometryNode = dirty->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     auto frameRect = geometryNode->GetFrameRect();
-    ContainerScope scope(instanceId_);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    auto curWindow = pipeline->GetCurrentWindowRect();
-    sessionWrapper_->RefreshDisplayArea(std::round(globalOffsetWithTranslate.GetX() + curWindow.Left()),
-        std::round(globalOffsetWithTranslate.GetY() + curWindow.Top()), frameRect.Width(), frameRect.Height());
+    sessionWrapper_->RefreshDisplayArea(
+        globalOffsetWithTranslate.GetX(), globalOffsetWithTranslate.GetY(), frameRect.Width(), frameRect.Height());
     return false;
 }
 
@@ -260,6 +257,9 @@ bool UIExtensionPattern::OnDirtyLayoutWrapperSwapForDynamicComponent(
 
 void UIExtensionPattern::OnWindowShow()
 {
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "Show window, state = %{public}d, visible = %{public}d, id = %{public}d.",
+        state_, isVisible_, uiExtensionId_);
     if (isVisible_) {
         NotifyForeground();
     }
@@ -267,6 +267,9 @@ void UIExtensionPattern::OnWindowShow()
 
 void UIExtensionPattern::OnWindowHide()
 {
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "Hide window, state = %{public}d, visible = %{public}d, id = %{public}d.",
+        state_, isVisible_, uiExtensionId_);
     if (isVisible_) {
         NotifyBackground();
     }
@@ -426,15 +429,7 @@ void UIExtensionPattern::InitHoverEvent(const RefPtr<InputEventHub>& inputHub)
 
 bool UIExtensionPattern::HandleKeyEvent(const KeyEvent& event)
 {
-    if (event.code == KeyCode::KEY_TAB && event.action == KeyAction::DOWN) {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_RETURN(pipeline, false);
-        DispatchFocusActiveEvent(true);
-        // tab trigger consume the key event
-        return pipeline->IsTabJustTriggerOnKeyEvent();
-    } else {
-        return DispatchKeyEventSync(event.rawKeyEvent);
-    }
+    return DispatchKeyEventSync(event.rawKeyEvent);
 }
 
 void UIExtensionPattern::HandleFocusEvent()
@@ -445,7 +440,7 @@ void UIExtensionPattern::HandleFocusEvent()
     }
     DispatchFocusState(true);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
-    uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this));
+    uiExtensionManager->RegisterUIExtensionInFocus(WeakClaim(this), sessionWrapper_);
 }
 
 void UIExtensionPattern::HandleBlurEvent()
@@ -455,7 +450,7 @@ void UIExtensionPattern::HandleBlurEvent()
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto uiExtensionManager = pipeline->GetUIExtensionManager();
-    uiExtensionManager->RegisterUIExtensionInFocus(nullptr);
+    uiExtensionManager->RegisterUIExtensionInFocus(nullptr, nullptr);
 }
 
 void UIExtensionPattern::HandleTouchEvent(const TouchEventInfo& info)
@@ -591,7 +586,8 @@ void UIExtensionPattern::SetModalOnRemoteReadyCallback(
 
 void UIExtensionPattern::FireOnRemoteReadyCallback()
 {
-    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "The onRemoteReady is called and state = %{public}d.", state_);
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "The onRemoteReady is called and state = %{public}d, id = %{public}d.", state_, uiExtensionId_);
     ContainerScope scope(instanceId_);
     // These two callbacks will be unified in the future.
     if (onRemoteReadyCallback_) {
@@ -611,7 +607,8 @@ void UIExtensionPattern::FireModalOnDestroy()
 {
     // Native modal page destroy callback
     if (onModalDestroy_) {
-        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "The onModalDestroy is called and state = %{public}d.", state_);
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "The onModalDestroy is called and state = %{public}d, id = %{public}d.", state_, uiExtensionId_);
         ContainerScope scope(instanceId_);
         onModalDestroy_();
     }
@@ -626,7 +623,8 @@ void UIExtensionPattern::FireOnReleaseCallback(int32_t releaseCode)
 {
     state_ = AbilityState::DESTRUCTION;
     if (onReleaseCallback_) {
-        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "The onRelease is called and state = %{public}d.", state_);
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "The onRelease is called and state = %{public}d, id = %{public}d.", state_, uiExtensionId_);
         onReleaseCallback_(static_cast<int32_t>(ReleaseCode::DESTROY_NORMAL));
     }
 }
@@ -645,8 +643,9 @@ void UIExtensionPattern::SetOnErrorCallback(
 void UIExtensionPattern::FireOnErrorCallback(int32_t code, const std::string& name, const std::string& message)
 {
     // 1. As long as the error occurs, the host believes that UIExtensionAbility has been killed.
-    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Error: state = %{public}d, code=%{public}d, name=%{public}s", state_,
-        code, name.c_str());
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "Error: Id = %{public}d, state = %{public}d, code=%{public}d, name=%{public}s",
+        uiExtensionId_, state_, code, name.c_str());
     state_ = AbilityState::NONE;
     if (onErrorCallback_) {
         ContainerScope scope(instanceId_);
@@ -664,7 +663,8 @@ void UIExtensionPattern::SetOnResultCallback(const std::function<void(int32_t, c
 void UIExtensionPattern::FireOnResultCallback(int32_t code, const AAFwk::Want& want)
 {
     if (onResultCallback_ && (state_ != AbilityState::DESTRUCTION)) {
-        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "The onResult is called and state = %{public}d.", state_);
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "The onResult is called and state = %{public}d, id = %{public}d.", state_, uiExtensionId_);
         ContainerScope scope(instanceId_);
         onResultCallback_(code, want);
     }
@@ -679,7 +679,8 @@ void UIExtensionPattern::SetOnReceiveCallback(const std::function<void(const AAF
 void UIExtensionPattern::FireOnReceiveCallback(const AAFwk::WantParams& params)
 {
     if (onReceiveCallback_) {
-        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "The onReceive is called and state = %{public}d.", state_);
+        TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+            "The onReceive is called and state = %{public}d, id = %{public}d.", state_, uiExtensionId_);
         ContainerScope scope(instanceId_);
         onReceiveCallback_(params);
     }
@@ -693,8 +694,9 @@ void UIExtensionPattern::SetSyncCallbacks(
 
 void UIExtensionPattern::FireSyncCallbacks()
 {
-    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "The size of sync callbacks = %{public}zu and state = %{public}d.",
-        onSyncOnCallbackList_.size(), state_);
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "The size of sync callbacks = %{public}zu and state = %{public}d, id = %{public}d.",
+        onSyncOnCallbackList_.size(), state_, uiExtensionId_);
     ContainerScope scope(instanceId_);
     for (const auto& callback : onSyncOnCallbackList_) {
         if (callback) {
@@ -711,8 +713,9 @@ void UIExtensionPattern::SetAsyncCallbacks(
 
 void UIExtensionPattern::FireAsyncCallbacks()
 {
-    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "The size of async callbacks = %{public}zu and state = %{public}d.",
-        onSyncOnCallbackList_.size(), state_);
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "The size of async callbacks = %{public}zu and state = %{public}d, id = %{public}d.",
+        onSyncOnCallbackList_.size(), state_, uiExtensionId_);
     ContainerScope scope(instanceId_);
     for (const auto& callback : onAsyncOnCallbackList_) {
         if (callback) {
@@ -723,6 +726,9 @@ void UIExtensionPattern::FireAsyncCallbacks()
 
 void UIExtensionPattern::OnVisibleChange(bool visible)
 {
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT,
+        "The visual state of the window changes, state = %{public}d, visible = %{public}d, id = %{public}d.",
+        state_, isVisible_, uiExtensionId_);
     isVisible_ = visible;
     if (visible) {
         NotifyForeground();
@@ -793,19 +799,24 @@ void UIExtensionPattern::DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidAr
     sessionWrapper_->NotifyOriginAvoidArea(avoidArea, type);
 }
 
-int32_t UIExtensionPattern::WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId)
+bool UIExtensionPattern::NotifyOccupiedAreaChangeInfo(const sptr<Rosen::OccupiedAreaChangeInfo>& info)
+{
+    return sessionWrapper_ && sessionWrapper_->NotifyOccupiedAreaChangeInfo(info);
+}
+
+int64_t UIExtensionPattern::WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId)
 {
     return uiExtensionId_ * extensionOffset + abilityId;
 }
 
 void UIExtensionPattern::SearchExtensionElementInfoByAccessibilityId(
-    int32_t elementId, int32_t mode, int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
+    int64_t elementId, int32_t mode, int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     CHECK_NULL_VOID(sessionWrapper_);
     sessionWrapper_->SearchExtensionElementInfoByAccessibilityId(elementId, mode, baseParent, output);
 }
 
-void UIExtensionPattern::SearchElementInfosByText(int32_t elementId, const std::string& text, int32_t baseParent,
+void UIExtensionPattern::SearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
     std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     CHECK_NULL_VOID(sessionWrapper_);
@@ -813,21 +824,21 @@ void UIExtensionPattern::SearchElementInfosByText(int32_t elementId, const std::
 }
 
 void UIExtensionPattern::FindFocusedElementInfo(
-    int32_t elementId, int32_t focusType, int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
+    int64_t elementId, int32_t focusType, int64_t baseParent, Accessibility::AccessibilityElementInfo& output)
 {
     CHECK_NULL_VOID(sessionWrapper_);
     sessionWrapper_->FindFocusedElementInfo(elementId, focusType, baseParent, output);
 }
 
 void UIExtensionPattern::FocusMoveSearch(
-    int32_t elementId, int32_t direction, int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
+    int64_t elementId, int32_t direction, int64_t baseParent, Accessibility::AccessibilityElementInfo& output)
 {
     CHECK_NULL_VOID(sessionWrapper_);
     sessionWrapper_->FocusMoveSearch(elementId, direction, baseParent, output);
 }
 
 bool UIExtensionPattern::TransferExecuteAction(
-    int32_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int32_t offset)
+    int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset)
 {
     return sessionWrapper_ && sessionWrapper_->TransferExecuteAction(elementId, actionArguments, action, offset);
 }

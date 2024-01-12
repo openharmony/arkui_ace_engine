@@ -81,6 +81,8 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
         if (!paragraph) {
             continue;
         }
+        float shadowOffset = GetShadowOffset(group);
+        res.AddHeight(shadowOffset);
         textHeight += paragraph->GetHeight();
         auto firstSpan = *group.begin();
         pManager_->AddParagraph({ .paragraph = paragraph,
@@ -109,6 +111,32 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
         contentHeight = std::min(contentHeight, contentConstraint.maxSize.Height());
     }
     return SizeF(res.Width(), contentHeight);
+}
+
+float RichEditorLayoutAlgorithm::GetShadowOffset(const std::list<RefPtr<SpanItem>>& group)
+{
+    float shadowOffset = 0.0f;
+    for (auto& span: group) {
+        if (!span->fontStyle || !span->fontStyle->HasTextShadow()) {
+            continue;
+        }
+        auto shadows = span->fontStyle->GetTextShadowValue();
+        float upOffsetY = 0.0f;
+        float downOffsetY = 0.0f;
+        for (const auto& shadow : shadows) {
+            auto shadowBlurRadius = shadow.GetBlurRadius() * 2.0f;
+            auto shadowOffsetY = shadow.GetOffset().GetY();
+            if (LessOrEqual(shadowOffsetY, 0.0f) &&
+                LessNotEqual(shadowOffsetY, upOffsetY)) {
+                upOffsetY = shadowOffsetY - shadowBlurRadius;
+            } else if (GreatOrEqual(shadowOffsetY, 0.0f) &&
+                GreatNotEqual(shadowOffsetY + shadowBlurRadius, downOffsetY)) {
+                downOffsetY = shadowOffsetY + shadowBlurRadius;
+            }
+        }
+        shadowOffset = std::max(shadowOffset, downOffsetY - upOffsetY);
+    }
+    return shadowOffset;
 }
 
 void RichEditorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -154,16 +182,17 @@ void RichEditorLayoutAlgorithm::GetPlaceholderRects(std::vector<RectF>& rects)
 }
 
 ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
-    const TextStyle& textStyle, const std::string& content) const
+    const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const
 {
-    auto style = TextLayoutAlgorithm::GetParagraphStyle(textStyle, content);
+    auto style = TextLayoutAlgorithm::GetParagraphStyle(textStyle, content, layoutWrapper);
     style.fontSize = textStyle.GetFontSize().ConvertToPx();
     if (!pManager_->minParagraphFontSize.has_value() ||
         GreatNotEqual(pManager_->minParagraphFontSize.value(), style.fontSize)) {
         pManager_->minParagraphFontSize = style.fontSize;
     }
-    auto&& spanGroup = GetSpans();
-    auto&& lineStyle = spanGroup.front()->textLineStyle;
+    const auto& spanItem = GetFirstTextSpanItem();
+    CHECK_NULL_RETURN(spanItem, style);
+    auto& lineStyle = spanItem->textLineStyle;
     CHECK_NULL_RETURN(lineStyle, style);
     if (lineStyle->propTextAlign) {
         style.align = *(lineStyle->propTextAlign);
@@ -181,6 +210,19 @@ ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
     }
 
     return style;
+}
+
+RefPtr<SpanItem> RichEditorLayoutAlgorithm::GetFirstTextSpanItem() const
+{
+    auto& spanGroup = GetSpans();
+    auto it = spanGroup.begin();
+    while (it != spanGroup.end()) {
+        if (!DynamicCast<PlaceholderSpanItem>(*it)) {
+            return *it;
+        }
+        ++it;
+    }
+    return *spanGroup.begin();
 }
 
 int32_t RichEditorLayoutAlgorithm::GetPreviousLength() const

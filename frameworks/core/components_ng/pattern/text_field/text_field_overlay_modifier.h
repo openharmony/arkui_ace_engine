@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/scroll/inner/scroll_bar_overlay_modifier.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
 #include "core/components_ng/pattern/text_drag/text_drag_pattern.h"
+#include "core/components_ng/pattern/text_field/magnifier_controller.h"
 #include "core/components_ng/pattern/text_field/text_field_paint_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
@@ -78,6 +79,7 @@ private:
     std::vector<TextPoint> GetTextPoints(float startX, float startY, float endX, float endY, bool haveOffset = false);
     std::shared_ptr<RSPath> GetPathByPoints(std::vector<TextPoint> points);
     void PaintShadow(const RSPath& path, const Shadow& shadow, RSCanvas& canvas);
+    void GetFrameRectClip(RSRect& clipRect, std::vector<RSPoint>& clipRadius);
 
     bool needPaintSelect_ = false;
     WeakPtr<Pattern> pattern_;
@@ -100,6 +102,7 @@ private:
     RefPtr<PropertySizeF> frameSize_;
     RefPtr<PropertyBool> changeSelectedRects_;
     RectF textRect_;
+    MagnifierRect magnifierRect_;
     ACE_DISALLOW_COPY_AND_MOVE(TextFieldOverlayModifier);
 };
 } // namespace OHOS::Ace::NG

@@ -80,6 +80,14 @@ class ArkButtonComponent extends ArkComponent implements ButtonAttribute {
     modifierWithKey(this._modifiersWithKeys, ButtonBorderRadiusModifier.identity, ButtonBorderRadiusModifier, value);
     return this;
   }
+  border(value: BorderOptions): this {
+    modifierWithKey(this._modifiersWithKeys, ButtonBorderModifier.identity, ButtonBorderModifier, value);
+    return this;
+  }
+  size(value: SizeOptions): this {
+    modifierWithKey(this._modifiersWithKeys, ButtonSizeModifier.identity, ButtonSizeModifier, value);
+    return this;
+  }
 }
 class ButtonBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
   constructor(value: ResourceColor) {
@@ -278,6 +286,137 @@ class ButtonBorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses
     }
   }
 }
+
+class ButtonBorderModifier extends ModifierWithKey<BorderOptions> {
+  constructor(value: BorderOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('buttonBorder');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().button.resetButtonBorder(node);
+    } else {
+      let widthLeft;
+      let widthRight;
+      let widthTop;
+      let widthBottom;
+      if (!isUndefined(this.value.width) && this.value.width != null) {
+        if (isNumber(this.value.width) || isString(this.value.width) || isResource(this.value.width)) {
+          widthLeft = this.value.width;
+          widthRight = this.value.width;
+          widthTop = this.value.width;
+          widthBottom = this.value.width;
+        } else {
+          widthLeft = (this.value.width as EdgeWidths).left;
+          widthRight = (this.value.width as EdgeWidths).right;
+          widthTop = (this.value.width as EdgeWidths).top;
+          widthBottom = (this.value.width as EdgeWidths).bottom;
+        }
+      }
+      let leftColor;
+      let rightColor;
+      let topColor;
+      let bottomColor;
+      if (!isUndefined(this.value.color) && this.value.color != null) {
+        if (isNumber(this.value.color) || isString(this.value.color) || isResource(this.value.color)) {
+          leftColor = this.value.color;
+          rightColor = this.value.color;
+          topColor = this.value.color;
+          bottomColor = this.value.color;
+        } else {
+          leftColor = (this.value.color as EdgeColors).left;
+          rightColor = (this.value.color as EdgeColors).right;
+          topColor = (this.value.color as EdgeColors).top;
+          bottomColor = (this.value.color as EdgeColors).bottom;
+        }
+      }
+      let topLeft;
+      let topRight;
+      let bottomLeft;
+      let bottomRight;
+      if (!isUndefined(this.value.radius) && this.value.radius != null) {
+        if (isNumber(this.value.radius) || isString(this.value.radius) || isResource(this.value.radius)) {
+          topLeft = this.value.radius;
+          topRight = this.value.radius;
+          bottomLeft = this.value.radius;
+          bottomRight = this.value.radius;
+        } else {
+          topLeft = (this.value.radius as BorderRadiuses).topLeft;
+          topRight = (this.value.radius as BorderRadiuses).topRight;
+          bottomLeft = (this.value.radius as BorderRadiuses).bottomLeft;
+          bottomRight = (this.value.radius as BorderRadiuses).bottomRight;
+        }
+      }
+      let styleTop;
+      let styleRight;
+      let styleBottom;
+      let styleLeft;
+      if (!isUndefined(this.value.style) && this.value.style != null) {
+        if (isNumber(this.value.style) || isString(this.value.style) || isResource(this.value.style)) {
+          styleTop = this.value.style;
+          styleRight = this.value.style;
+          styleBottom = this.value.style;
+          styleLeft = this.value.style;
+        } else {
+          styleTop = (this.value.style as EdgeStyles).top;
+          styleRight = (this.value.style as EdgeStyles).right;
+          styleBottom = (this.value.style as EdgeStyles).bottom;
+          styleLeft = (this.value.style as EdgeStyles).left;
+        }
+      }
+      getUINativeModule().button.setButtonBorder(
+        node,
+        widthLeft,
+        widthRight,
+        widthTop,
+        widthBottom,
+        leftColor,
+        rightColor,
+        topColor,
+        bottomColor,
+        topLeft,
+        topRight,
+        bottomLeft,
+        bottomRight,
+        styleTop,
+        styleRight,
+        styleBottom,
+        styleLeft
+      );
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return (
+      !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+      !isBaseOrResourceEqual(this.stageValue.color, this.value.color) ||
+      !isBaseOrResourceEqual(this.stageValue.radius, this.value.radius) ||
+      !isBaseOrResourceEqual(this.stageValue.style, this.value.style)
+    );
+  }
+}
+
+class ButtonSizeModifier extends ModifierWithKey<SizeOptions> {
+  constructor(value: SizeOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('buttonSize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().button.resetButtonSize(node);
+    } else {
+      getUINativeModule().button.setButtonSize(node, this.value.width, this.value.height);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return (
+      !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+      !isBaseOrResourceEqual(this.stageValue.height, this.value.height)
+    );
+  }
+}
+
 // @ts-ignore
 globalThis.Button.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();

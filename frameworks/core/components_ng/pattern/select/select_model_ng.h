@@ -83,6 +83,9 @@ public:
     static void SetSelectedOptionFontWeight(FrameNode* frameNode, const FontWeight& value);
     static void SetSelectedOptionFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
     static void SetSelectedOptionItalicFontStyle(FrameNode* frameNode, const Ace::FontStyle& value);
+    static void SetOptionWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetOptionHeight(FrameNode* frameNode, const Dimension& value);
+    static void SetOptionWidthFitTrigger(FrameNode* frameNode, bool isFitTrigger);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_SELECT_SELECT_MODEL_NG_H

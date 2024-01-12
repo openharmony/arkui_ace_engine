@@ -67,7 +67,7 @@ constexpr float SIZE_SCALE3 = 0.93f;
 constexpr float MOVE_STEP = 0.06f;
 constexpr float TRANS_OPACITY_SPAN = 0.3f;
 constexpr float FULL_OPACITY = 255.0f;
-constexpr float FAKE_DELTA = 0.01f; 
+constexpr float FAKE_DELTA = 0.01f;
 constexpr float BASE_SCALE = 0.707f; // std::sqrt(2)/2
 } // namespace
 LoadingProgressModifier::LoadingProgressModifier(LoadingProgressOwner loadingProgressOwner)
@@ -227,6 +227,15 @@ void LoadingProgressModifier::StartRecycleRingAnimation()
     } else {
         option.SetIteration(-1);
     }
+    // if isVisible_ is false, start an animation to stop the key-frame animation
+    if (!isVisible_) {
+        AnimationUtils::Animate(option, [centerDeviation = centerDeviation_]() {
+            CHECK_NULL_VOID(centerDeviation);
+            centerDeviation->Set(FAKE_DELTA);
+            centerDeviation->Set(0.0f);
+        });
+        return;
+    }
     AnimationUtils::OpenImplicitAnimation(option, previousStageCurve, nullptr);
     auto middleStageCurve = AceType::MakeRefPtr<CubicCurve>(0.33f, 0.0f, 0.67f, 1.0f);
     AnimationUtils::AddKeyFrame(
@@ -264,7 +273,20 @@ void LoadingProgressModifier::StartRecycleCometAnimation()
     } else {
         option.SetIteration(-1);
     }
-
+    // if isVisible_ is false, start an animation to stop the key-frame animation
+    if (!isVisible_) {
+        AnimationUtils::Animate(option, [cometOpacity = cometOpacity_, cometSizeScale = cometSizeScale_]() {
+            if (cometOpacity) {
+                cometOpacity->Set(OPACITY1); // set a value different from the current value to start an animation
+                cometOpacity->Set(OPACITY2); // Set back the original value
+            }
+            if (cometSizeScale) {
+                cometSizeScale->Set(SIZE_SCALE1); // set a value different from the current value to start an animation
+                cometSizeScale->Set(SIZE_SCALE2); // Set back the original value
+            }
+        });
+        return;
+    }
     cometOpacity_->Set(OPACITY2);
     cometTailLen_->Set(TOTAL_TAIL_LENGTH);
     AnimationUtils::OpenImplicitAnimation(option, curve, nullptr);

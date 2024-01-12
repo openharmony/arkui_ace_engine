@@ -55,6 +55,8 @@ public:
     static void SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radiusTopLeft,
         const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
         const std::optional<Dimension>& radiusBottomRight);
+    static void SetSize(
+        FrameNode* frameNode, const std::optional<Dimension>& width, const std::optional<Dimension>& height);
 
 private:
     static void CreateWithLabel(const std::string& label);

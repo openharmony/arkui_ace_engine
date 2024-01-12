@@ -22,10 +22,29 @@ class ArkSelectComponent extends ArkComponent implements SelectAttribute {
     throw new Error('Method not implemented.');
   }
   optionWidth(value: Dimension | OptionWidthMode): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(
+      this._modifiersWithKeys, SelectOptionWidthModifier.identity, SelectOptionWidthModifier, value);
+    return this;
   }
   optionHeight(value: Dimension): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(
+      this._modifiersWithKeys, SelectOptionHeightModifier.identity, SelectOptionHeightModifier, value);
+    return this;
+  }
+  width(value: Length): this {
+    modifierWithKey(
+      this._modifiersWithKeys, SelectWidthModifier.identity, SelectWidthModifier, value);
+    return this;
+  }
+  height(value: Length): this {
+    modifierWithKey(
+      this._modifiersWithKeys, SelectHeightModifier.identity, SelectHeightModifier, value);
+    return this;
+  }
+  size(value: SizeOptions): this {
+    modifierWithKey(
+      this._modifiersWithKeys, SelectSizeModifier.identity, SelectSizeModifier, value);
+    return this;
   }
   selected(value: number | Resource): this {
     modifierWithKey(
@@ -349,6 +368,102 @@ class SelectedOptionFontColorModifier extends ModifierWithKey<ResourceColor> {
   }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class SelectOptionWidthModifier extends ModifierWithKey<Dimension | OptionWidthMode> {
+  constructor(value: Dimension | OptionWidthMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('selectOptionWidth');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().select.resetOptionWidth(node);
+    } else {
+      getUINativeModule().select.setOptionWidth(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class SelectOptionHeightModifier extends ModifierWithKey<Dimension> {
+  constructor(value: Dimension) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('selectOptionHeight');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().select.resetOptionHeight(node);
+    } else {
+      getUINativeModule().select.setOptionHeight(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class SelectWidthModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('selectWidth');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().select.resetWidth(node);
+    } else {
+      getUINativeModule().select.setWidth(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class SelectHeightModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('selectHeight');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().select.resetHeight(node);
+    } else {
+      getUINativeModule().select.setHeight(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class SelectSizeModifier extends ModifierWithKey<SizeOptions> {
+  constructor(value: SizeOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('selectSize');
+
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().select.resetSize(node);
+    } else {
+      getUINativeModule().select.setSize(node, this.value.width, this.value.height);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+      !isBaseOrResourceEqual(this.stageValue.height, this.value.height);
   }
 }
 

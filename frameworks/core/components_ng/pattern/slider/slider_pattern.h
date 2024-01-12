@@ -179,7 +179,7 @@ private:
     void StartAnimation();
     void StopAnimation();
 
-    void OpenTranslateAnimation();
+    void OpenTranslateAnimation(SliderStatus status);
     void CloseTranslateAnimation();
     SliderContentModifier::Parameters UpdateContentParameters();
     void GetSelectPosition(SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset);

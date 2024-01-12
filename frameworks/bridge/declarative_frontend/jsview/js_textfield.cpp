@@ -278,7 +278,7 @@ void JSTextField::SetEnterKeyType(const JSCallbackInfo& info)
     if (!info[0]->IsNumber()) {
         return;
     }
-    TextInputAction textInputAction = static_cast<TextInputAction>(info[0]->ToNumber<int32_t>());
+    TextInputAction textInputAction = CastToTextInputAction(info[0]->ToNumber<int32_t>());
     TextFieldModel::GetInstance()->SetEnterKeyType(textInputAction);
 }
 

@@ -31,7 +31,7 @@ RefPtr<AppTheme> AppTheme::Builder::Build(const RefPtr<ThemeConstants>& themeCon
     }
 
     theme->backgroundColor_ = themeStyle->GetAttr<Color>(THEME_ATTR_BG_COLOR, Color::WHITE);
-    auto color = themeStyle->GetAttr<Color>("focus_color", Color());
+    auto color = themeStyle->GetAttr<Color>("focus_color", Color(0xff0a59f7));
     if (color != Color(0xff000000)) {
         theme->focusColor_ = color;
     }

@@ -89,12 +89,48 @@ void TextFieldOverlayModifier::SetSecondHandleOffset(const OffsetF& offset)
 
 void TextFieldOverlayModifier::onDraw(DrawingContext& context)
 {
+    auto& canvas = context.canvas;
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        canvas.Save();
+        RSRect clipRect;
+        std::vector<RSPoint> clipRadius;
+        GetFrameRectClip(clipRect, clipRadius);
+        canvas.ClipRoundRect(clipRect, clipRadius, true);
+    }
     PaintCursor(context);
     PaintSelection(context);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        canvas.Restore();
+    }
     PaintScrollBar(context);
     PaintEdgeEffect(frameSize_->Get(), context.canvas);
     PaintUnderline(context.canvas);
     PaintMagnifier(context);
+}
+
+void TextFieldOverlayModifier::GetFrameRectClip(RSRect& clipRect, std::vector<RSPoint>& clipRadius)
+{
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    CHECK_NULL_VOID(textFieldPattern);
+    auto host = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto textFrameRect = textFieldPattern->GetFrameRect();
+    clipRect = RSRect(0.0f, 0.0f, textFrameRect.Width(), textFrameRect.Height());
+    auto radius = renderContext->GetBorderRadius().value_or(BorderRadiusProperty());
+    auto radiusTopLeft = RSPoint(static_cast<float>(radius.radiusTopLeft.value_or(0.0_vp).ConvertToPx()),
+        static_cast<float>(radius.radiusTopLeft.value_or(0.0_vp).ConvertToPx()));
+    clipRadius.emplace_back(radiusTopLeft);
+    auto radiusTopRight = RSPoint(static_cast<float>(radius.radiusTopRight.value_or(0.0_vp).ConvertToPx()),
+        static_cast<float>(radius.radiusTopRight.value_or(0.0_vp).ConvertToPx()));
+    clipRadius.emplace_back(radiusTopRight);
+    auto radiusBottomRight = RSPoint(static_cast<float>(radius.radiusBottomRight.value_or(0.0_vp).ConvertToPx()),
+        static_cast<float>(radius.radiusBottomRight.value_or(0.0_vp).ConvertToPx()));
+    clipRadius.emplace_back(radiusBottomRight);
+    auto radiusBottomLeft = RSPoint(static_cast<float>(radius.radiusBottomLeft.value_or(0.0_vp).ConvertToPx()),
+        static_cast<float>(radius.radiusBottomLeft.value_or(0.0_vp).ConvertToPx()));
+    clipRadius.emplace_back(radiusBottomLeft);
 }
 
 void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
@@ -104,6 +140,9 @@ void TextFieldOverlayModifier::PaintUnderline(RSCanvas& canvas) const
     auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     if (!(layoutProperty->GetShowUnderlineValue(false) && textFieldPattern->IsUnspecifiedOrTextType())) {
+        return;
+    }
+    if (textFieldPattern->IsNormalInlineState() && textFieldPattern->HasFocus()) {
         return;
     }
     auto contentRect = textFieldPattern->GetContentRect();
@@ -234,20 +273,19 @@ void TextFieldOverlayModifier::PaintMagnifier(DrawingContext& context)
 {
     auto pattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(pattern);
-    auto pixelMap = pattern->GetPixelMap();
-    CHECK_NULL_VOID(pixelMap);
-    if (!pattern->GetShowMagnifier()) {
+    magnifierRect_ = pattern->GetMagnifierRect();
+    if (!magnifierRect_.isChildNode) {
         return;
     }
+    auto pixelMap = magnifierRect_.pixelMap;
+    CHECK_NULL_VOID(pixelMap);
     auto& canvas = context.canvas;
     canvas.Save();
-    float startX = 0.0f;
-    float startY = 0.0f;
-    float endX = 0.0f;
-    float endY = 0.0f;
-    float localOffsetX = 0.0f;
-    auto cursorOffsetY = cursorOffset_->Get().GetY();
-    if (!GetMagnifierRect(startX, startY, endX, endY, localOffsetX, cursorOffsetY)) {
+
+    auto cursorOffsetY = magnifierRect_.cursorOffset.GetY();
+    auto localOffsetX = magnifierRect_.localOffset.GetX();
+    if (!GetMagnifierRect(magnifierRect_.startX, magnifierRect_.startY, magnifierRect_.endX, magnifierRect_.endY,
+        localOffsetX, cursorOffsetY)) {
         return;
     }
 
@@ -256,11 +294,16 @@ void TextFieldOverlayModifier::PaintMagnifier(DrawingContext& context)
     brush.SetAntiAlias(true);
     canvas.AttachBrush(brush);
 
-    std::vector<TextPoint> drawPathPoints = GetTextPoints(startX, startY, endX, endY, false);
+    std::vector<TextPoint> drawPathPoints =
+        GetTextPoints(magnifierRect_.startX, magnifierRect_.startY, magnifierRect_.endX, magnifierRect_.endY, false);
     auto drawPath = GetPathByPoints(drawPathPoints);
-    canvas.DrawPath(*drawPath);
     PaintShadow(*drawPath, ShadowConfig::DefaultShadowM, canvas);
-    std::vector<TextPoint> clipPathPoints = GetTextPoints(startX, startY, endX, endY, false);
+    canvas.DrawPath(*drawPath);
+    brush.SetColor(magnifierRect_.bgColor);
+    canvas.AttachBrush(brush);
+    canvas.DrawPath(*drawPath);
+    std::vector<TextPoint> clipPathPoints =
+        GetTextPoints(magnifierRect_.startX, magnifierRect_.startY, magnifierRect_.endX, magnifierRect_.endY, false);
     auto clipPath = GetPathByPoints(clipPathPoints);
     canvas.ClipPath(*clipPath, RSClipOp::INTERSECT, true);
 
@@ -275,8 +318,8 @@ void TextFieldOverlayModifier::PaintMagnifier(DrawingContext& context)
 
     RectF dstRect;
     dstRect.SetRect(localOffsetX - localOffsetX * magnifierGain,
-        startY - cursorOffsetY * magnifierGain + pixelMapImageOffset, pixelMap->GetWidth() * magnifierGain,
-        pixelMap->GetHeight() * magnifierGain);
+        magnifierRect_.startY - cursorOffsetY * magnifierGain + pixelMapImageOffset,
+        pixelMap->GetWidth() * magnifierGain, pixelMap->GetHeight() * magnifierGain);
     pixelMapImage.DrawRect(canvas, ToRSRect(dstRect));
 
     canvas.DetachBrush();
@@ -286,17 +329,16 @@ void TextFieldOverlayModifier::PaintMagnifier(DrawingContext& context)
 bool TextFieldOverlayModifier::GetMagnifierRect(
     float& startX, float& startY, float& endX, float& endY, float& localOffsetX, float& cursorOffsetY)
 {
-    auto pattern = DynamicCast<TextFieldPattern>(pattern_.Upgrade());
+    auto pattern = DynamicCast<TextFieldPattern>(magnifierRect_.parent.Upgrade());
     CHECK_NULL_RETURN(pattern, false);
-    auto cursorOffsetX = cursorOffset_->Get().GetX();
+    auto cursorOffsetX = magnifierRect_.cursorOffset.GetX();
     auto magnifierWidth = MAGNIFIER_WIDTH.ConvertToPx();
     auto magnifierHeight = MAGNIFIER_HEIGHT.ConvertToPx();
     auto magnifierOffsetY = MAGNIFIER_OFFSET_Y.ConvertToPx();
     auto closeMagnifierMaxOffsetX = CLOSE_MAGNIFIER_MAX_OFFSET_X.ConvertToPx();
-    localOffsetX = pattern->GetLocalOffset().GetX();
-    auto localOffsetY = pattern->GetLocalOffset().GetY();
-    localOffsetX = std::max(localOffsetX, contentOffset_->Get().GetX());
-    localOffsetX = std::min(localOffsetX, contentSize_->Get().Width() + contentOffset_->Get().GetX());
+    auto localOffsetY = magnifierRect_.localOffset.GetY();
+    localOffsetX = std::max(localOffsetX, magnifierRect_.contentOffset.GetX());
+    localOffsetX = std::min(localOffsetX, magnifierRect_.contentSize.Width() + magnifierRect_.contentOffset.GetX());
     auto textBoxesLeft = 0.0f;
     if (!pattern->GetTextBoxes().empty()) {
         textBoxesLeft = pattern->GetTextBoxes()[0].Left();
@@ -328,8 +370,8 @@ bool TextFieldOverlayModifier::GetMagnifierRect(
     startX = std::max(startX, 0.0f);
     endX = startX + magnifierWidth;
     endY = startY;
-    if (endX > contentSize_->Get().Width() + contentOffset_->Get().GetX() * 2.0f) {
-        endX = contentSize_->Get().Width() + contentOffset_->Get().GetX() * 2.0f;
+    if (endX > magnifierRect_.contentSize.Width() + magnifierRect_.contentOffset.GetX() * 2.0f) {
+        endX = magnifierRect_.contentSize.Width() + magnifierRect_.contentOffset.GetX() * 2.0f;
         startX = endX - magnifierWidth;
     }
     return true;

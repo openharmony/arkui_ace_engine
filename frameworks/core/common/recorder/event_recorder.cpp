@@ -50,6 +50,14 @@ EventParamsBuilder& EventParamsBuilder::SetType(const std::string& type)
     return *this;
 }
 
+EventParamsBuilder& EventParamsBuilder::SetDescription(const std::string& desc)
+{
+    if (!desc.empty()) {
+        params_->emplace(KEY_DESCRIPTION, desc);
+    }
+    return *this;
+}
+
 EventParamsBuilder& EventParamsBuilder::SetNavDst(const std::string& dstName)
 {
     if (!dstName.empty()) {

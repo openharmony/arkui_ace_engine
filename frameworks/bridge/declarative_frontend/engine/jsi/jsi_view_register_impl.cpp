@@ -690,7 +690,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "GestureGroup", JSGesture::JSBind },
     { "PanGestureOption", JSPanGestureOption::JSBind },
     { "PanGestureOptions", JSPanGestureOption::JSBind },
-    { "CustomDialogController", JSCustomDialogController::JSBind },
+    { "NativeCustomDialogController", JSCustomDialogController::JSBind },
     { "Scroller", JSScroller::JSBind },
     { "ListScroller", JSListScroller::JSBind },
     { "SwiperController", JSSwiperController::JSBind },
@@ -957,6 +957,7 @@ void JsBindFormViews(BindingTarget globalObj, const std::unordered_set<std::stri
         JSDumpRegister::JSBind(globalObj);
         JSLocalStorage::JSBind(globalObj);
         JSStateMgmtProfiler::JSBind(globalObj);
+        JSCustomDialogController::JSBind(globalObj);
 
         JSEnvironment::JSBind(globalObj);
         JSViewContext::JSBind(globalObj);

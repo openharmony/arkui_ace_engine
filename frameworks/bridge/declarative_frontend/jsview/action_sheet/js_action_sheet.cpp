@@ -291,6 +291,22 @@ void JSActionSheet::Show(const JSCallbackInfo& args)
         LOGI("Parse isModalValue");
         properties.isModal = isModalValue->ToBoolean();
     }
+
+    auto backgroundColorValue = obj->GetProperty("backgroundColor");
+    Color backgroundColor;
+    if (JSViewAbstract::ParseJsColor(backgroundColorValue, backgroundColor)) {
+        properties.backgroundColor = backgroundColor;
+    }
+
+    auto backgroundBlurStyle = obj->GetProperty("backgroundBlurStyle");
+    BlurStyleOption styleOption;
+    if (backgroundBlurStyle->IsNumber()) {
+        auto blurStyle = backgroundBlurStyle->ToNumber<int32_t>();
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+            properties.backgroundBlurStyle = blurStyle;
+        }
+    }
     ActionSheetModel::GetInstance()->ShowActionSheet(properties);
     args.SetReturnValue(args.This());
 }

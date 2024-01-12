@@ -67,6 +67,29 @@ void ImageModelNG::Create(const std::string &src, RefPtr<PixelMap> &pixMap, cons
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo);
 }
 
+RefPtr<FrameNode> ImageModelNG::CreateFrameNode(int32_t nodeId, const std::string& src, RefPtr<PixelMap>& pixMap,
+    const std::string& bundleName, const std::string& moduleName, bool isUriPureNumber)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    // set draggable for framenode
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, nullptr);
+    auto draggable = pipeline->GetDraggable<ImageTheme>();
+    if (draggable && !frameNode->IsDraggable()) {
+        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_RETURN(gestureHub, nullptr);
+        gestureHub->InitDragDropEvent();
+    }
+    frameNode->SetDraggable(draggable);
+    auto srcInfo = CreateSourceInfo(src, pixMap, bundleName, moduleName);
+    srcInfo.SetIsUriPureNumber(isUriPureNumber);
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    layoutProperty->UpdateImageSourceInfo(srcInfo);
+    return frameNode;
+}
+
 void ImageModelNG::SetAlt(const ImageSourceInfo &src)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, Alt, src);
@@ -235,6 +258,16 @@ bool ImageModelNG::UpdateDragItemInfo(DragItemInfo &itemInfo)
     return false;
 }
 
+void ImageModelNG::InitImage(FrameNode *frameNode, std::string& src)
+{
+    std::string bundleName;
+    std::string moduleName;
+    RefPtr<OHOS::Ace::PixelMap> pixMapPtr;
+    auto srcInfo = CreateSourceInfo(src, pixMapPtr, bundleName, moduleName);
+    srcInfo.SetIsUriPureNumber(false);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
+}
+
 void ImageModelNG::SetCopyOption(FrameNode *frameNode, CopyOptions copyOption)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>(frameNode);
@@ -342,6 +375,11 @@ void ImageModelNG::SetImageAnalyzerConfig(const ImageAnalyzerConfig& config)
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetImageAnalyzerConfig(config);
+}
+
+bool ImageModelNG::IsSrcSvgImage(FrameNode* frameNode)
+{
+    return false;
 }
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

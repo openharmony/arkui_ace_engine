@@ -22,6 +22,29 @@
 #include "drawing/engine_adapter/skia_adapter/skia_canvas.h"
 #include "drawing/engine_adapter/skia_adapter/skia_path.h"
 #include "image/image.h"
+#include "rosen_text/symbol_animation_config.h"
+#include "render_service_client/core/animation/rs_symbol_animation.h"
+
+// win API conflict handle
+#ifdef DIFFERENCE
+#undef DIFFERENCE
+#endif
+#ifdef DrawText
+#undef DrawText
+#endif
+#ifdef GetMessage
+#undef GetMessage
+#endif
+#ifdef LoadImage
+#undef LoadImage
+#endif
+#ifdef GetCurrentTime
+#undef GetCurrentTime
+#endif
+#ifdef DOUBLE_CLICK
+#undef DOUBLE_CLICK
+#endif
+
 #ifdef USE_ROSEN_DRAWING
 #include "recording/recording_canvas.h"
 #include "recording/recording_color_filter.h"
@@ -165,6 +188,8 @@ using RSTextRectHeightStyle = Rosen::TextRectHeightStyle;
 using RSTextRectWidthStyle = Rosen::TextRectWidthStyle;
 using RSTextRect = Rosen::TextRect;
 using RSEllipsisMode = Rosen::EllipsisModal;
+using RSSymbolAnimation = Rosen::RSSymbolAnimation;
+using RSSymbolAnimationConfig = Rosen::TextEngine::SymbolAnimationConfig;
 #endif
 } // namespace OHOS::Ace
 #else

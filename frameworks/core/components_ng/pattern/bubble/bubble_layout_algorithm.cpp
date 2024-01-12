@@ -34,9 +34,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/bubble/bubble_layout_property.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_pattern.h"
-#include "core/components_ng/pattern/search/search_text_field.h"
-#include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/pipeline/pipeline_base.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -371,19 +369,33 @@ void BubbleLayoutAlgorithm::BubbleAvoidanceRule(RefPtr<LayoutWrapper> child, Ref
     auto childShowWidth = childSize_.Width() - BUBBLE_ARROW_HEIGHT.ConvertToPx() * 2;
     auto childShowHeight = childSize_.Height() - BUBBLE_ARROW_HEIGHT.ConvertToPx() * 2;
     childSize_ = SizeF(childShowWidth, childShowHeight);
+    auto littleSide = childSize_.Height() > childSize_.Width() ? childSize_.Width() : childSize_.Height();
+    auto littleSideHalf = littleSide / HALF;
+    if (borderRadius_.Unit() == DimensionUnit::PERCENT) {
+        auto value = borderRadius_.Value() * littleSideHalf;
+        borderRadius_.SetValue(value);
+        borderRadius_.SetUnit(DimensionUnit::PX);
+        border_.SetBorderRadius(Radius(borderRadius_));
+    }
+    auto borderRadius = ModifyBorderRadius(border_.BottomLeftRadius().GetY().ConvertToPx(), childSize_.Height() / 2);
+    auto borderRadius2 = ModifyBorderRadius(border_.BottomLeftRadius().GetY().ConvertToPx(), childSize_.Width() / 2);
+    float radiusPx = borderRadius < borderRadius2 ? borderRadius : borderRadius2;
+    borderRadius_.SetValue(radiusPx);
+    borderRadius_.SetUnit(DimensionUnit::PX);
+    border_.SetBorderRadius(Radius(borderRadius_));
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TWELVE)) {
         childOffset_ = GetChildPosition(childSize_, bubbleProp, UseArrowOffset); // bubble's offset
         placement_ = arrowPlacement_;
         UpdateChildPosition(childOffset_);
         if (arrowPlacement_ == Placement::TOP) {
             if (bCaretMode_) {
-                arrowPosition_ =
-                    OffsetF(targetOffset_.GetX(), targetOffset_.GetY() + childSize_.Height() + scaledBubbleSpacing_);
+                arrowPosition_ = OffsetF(targetOffset_.GetX(), targetOffset_.GetY() - scaledBubbleSpacing_);
             }
         }
         if (arrowPlacement_ == Placement::BOTTOM) {
             if (bCaretMode_) {
-                arrowPosition_ = OffsetF(targetOffset_.GetX(), targetOffset_.GetY() - scaledBubbleSpacing_);
+                arrowPosition_ =
+                    OffsetF(targetOffset_.GetX(), targetOffset_.GetY() + targetSize_.Height() + scaledBubbleSpacing_);
             }
         }
     } else {
@@ -1074,43 +1086,16 @@ void BubbleLayoutAlgorithm::InitCaretTargetSizeAndPosition()
     CHECK_NULL_VOID(targetNode);
     auto it = std::find(TEXT_STATES.begin(), TEXT_STATES.end(), targetTag_);
     bCaretMode_ = false;
-    float caretHeight = 0.0f;
-    OffsetF caretOffset;
+    CaretMetricsF caretMetrics;
     if (it != TEXT_STATES.end()) {
         bCaretMode_ = true;
         positionOffset_ = OffsetF(0.0f, 0.0f);
         if ((placement_ != Placement::BOTTOM) && (placement_ != Placement::TOP)) {
             placement_ = Placement::BOTTOM;
         }
-        if (targetTag_ == V2::RICH_EDITOR_ETS_TAG) {
-            auto richEditorPattern = targetNode->GetPattern<RichEditorPattern>();
-            CHECK_NULL_VOID(richEditorPattern);
-            caretOffset =
-                richEditorPattern->CalcCursorOffsetByPosition(richEditorPattern->GetCaretPosition(), caretHeight);
-            targetOffset_ += caretOffset;
-        } else if (targetTag_ == V2::SEARCH_ETS_TAG) {
-            auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(targetNode->GetChildren().front());
-            CHECK_NULL_VOID(textFieldFrameNode);
-            auto textPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
-            CHECK_NULL_VOID(textPattern);
-            caretOffset = textFieldFrameNode->GetPaintRectOffset();
-            CaretMetricsF caretMetrics;
-            textPattern->CalcCaretMetricsByPosition(
-                textPattern->GetTextSelectController()->GetStartIndex(), caretMetrics);
-            caretHeight = caretMetrics.height;
-            caretOffset += caretMetrics.offset;
-            targetOffset_ = caretOffset;
-        } else {
-            auto textPattern = targetNode->GetPattern<TextFieldPattern>();
-            CHECK_NULL_VOID(textPattern);
-            CaretMetricsF caretMetrics;
-            textPattern->CalcCaretMetricsByPosition(
-                textPattern->GetTextSelectController()->GetStartIndex(), caretMetrics);
-            caretHeight = caretMetrics.height;
-            caretOffset = caretMetrics.offset;
-            targetOffset_ += caretOffset;
-        }
-        targetSize_.SetHeight(caretHeight);
+        GetTextCaretMetrics<TextBase>(targetNode, caretMetrics);
+        targetOffset_ = caretMetrics.offset;
+        targetSize_.SetHeight(caretMetrics.height);
         targetSize_.SetWidth(0.0f);
     }
 }
@@ -1234,7 +1219,7 @@ OffsetF BubbleLayoutAlgorithm::GetPositionWithPlacementTop(
     float radius = borderRadius_.ConvertToPx();
     arrowPosition = topPosition + OffsetF(radius + arrowHalfWidth, childSize.Height() + bubbleSpacing);
     if (bCaretMode_) {
-        arrowPosition = OffsetF(targetOffset_.GetX(), targetOffset_.GetY() + childSize.Height() + bubbleSpacing);
+        arrowPosition = OffsetF(targetOffset_.GetX(), targetOffset_.GetY() - bubbleSpacing);
     }
     return topPosition;
 }
@@ -1277,7 +1262,7 @@ OffsetF BubbleLayoutAlgorithm::GetPositionWithPlacementBottom(
     float radius = borderRadius_.ConvertToPx();
     arrowPosition = bottomPosition + OffsetF(radius + arrowHalfWidth, -bubbleSpacing);
     if (bCaretMode_) {
-        arrowPosition = OffsetF(targetOffset_.GetX(), targetOffset_.GetY() - bubbleSpacing);
+        arrowPosition = OffsetF(targetOffset_.GetX(), targetOffset_.GetY() + targetSize_.Height() + bubbleSpacing);
     }
     return bottomPosition;
 }
@@ -1449,20 +1434,7 @@ std::string BubbleLayoutAlgorithm::ClipBubbleWithPath()
     if (!bCaretMode_) {
         arrowOffset = GetArrowOffset(arrowPlacement_);
     }
-    auto littleSide = childSize_.Height() > childSize_.Width() ? childSize_.Width() : childSize_.Height();
-    auto littleSideHalf = littleSide / HALF;
-    if (borderRadius_.Unit() == DimensionUnit::PERCENT) {
-        auto value = borderRadius_.Value() * littleSideHalf;
-        borderRadius_.SetValue(value);
-        borderRadius_.SetUnit(DimensionUnit::PX);
-        border_.SetBorderRadius(Radius(borderRadius_));
-    }
-    auto borderRadius = ModifyBorderRadius(border_.BottomLeftRadius().GetY().ConvertToPx(), childSize_.Height() / 2);
-    auto borderRadius2 = ModifyBorderRadius(border_.BottomLeftRadius().GetY().ConvertToPx(), childSize_.Width() / 2);
-    float radiusPx = borderRadius < borderRadius2 ? borderRadius : borderRadius2;
-    borderRadius_.SetValue(radiusPx);
-    borderRadius_.SetUnit(DimensionUnit::PX);
-    border_.SetBorderRadius(Radius(borderRadius_));
+    float radiusPx = borderRadius_.ConvertToPx();
     Placement arrowBuildplacement = Placement::NONE;
     if (enableArrow_ && showArrow_) {
         GetArrowBuildPlacement(arrowBuildplacement);
@@ -2276,39 +2248,39 @@ void BubbleLayoutAlgorithm::GetPositionWithPlacement(
             arrowPosition = childPosition + OffsetF(radius + arrowHalfWidth, -bubbleSpacing);
             break;
         case Placement::LEFT:
-            childPosition =
-                OffsetF(targetOffset_.GetX() - targetSpace - bubbleSpacing - childSize.Width() - marginRight - arrowHeight_,
-                    targetOffset_.GetY() + targetSize_.Height() / HALF - childSize.Height() / HALF);
+            childPosition = OffsetF(
+                targetOffset_.GetX() - targetSpace - bubbleSpacing - childSize.Width() - marginRight - arrowHeight_,
+                targetOffset_.GetY() + targetSize_.Height() / HALF - childSize.Height() / HALF);
             arrowPosition = childPosition + OffsetF(childSize_.Width() + bubbleSpacing, radius + arrowHalfWidth);
             break;
         case Placement::LEFT_TOP:
-            childPosition =
-                OffsetF(targetOffset_.GetX() - targetSpace - bubbleSpacing - childSize.Width() - marginRight - arrowHeight_,
-                    targetOffset_.GetY() - marginBottom);
+            childPosition = OffsetF(
+                targetOffset_.GetX() - targetSpace - bubbleSpacing - childSize.Width() - marginRight - arrowHeight_,
+                targetOffset_.GetY() - marginBottom);
             arrowPosition = childPosition + OffsetF(childSize_.Width() + bubbleSpacing, radius + arrowHalfWidth);
             break;
         case Placement::LEFT_BOTTOM:
-            childPosition =
-                OffsetF(targetOffset_.GetX() - targetSpace - bubbleSpacing - childSize.Width() - marginRight - arrowHeight_,
-                    targetOffset_.GetY() + targetSize_.Height() - childSize.Height() - marginTop);
+            childPosition = OffsetF(
+                targetOffset_.GetX() - targetSpace - bubbleSpacing - childSize.Width() - marginRight - arrowHeight_,
+                targetOffset_.GetY() + targetSize_.Height() - childSize.Height() - marginTop);
             arrowPosition = childPosition + OffsetF(childSize_.Width() + bubbleSpacing, radius + arrowHalfWidth);
             break;
         case Placement::RIGHT:
-            childPosition =
-                OffsetF(targetOffset_.GetX() + targetSize_.Width() + targetSpace + bubbleSpacing + marginLeft + arrowHeight_,
-                    targetOffset_.GetY() + targetSize_.Height() / HALF - childSize.Height() / HALF);
+            childPosition = OffsetF(
+                targetOffset_.GetX() + targetSize_.Width() + targetSpace + bubbleSpacing + marginLeft + arrowHeight_,
+                targetOffset_.GetY() + targetSize_.Height() / HALF - childSize.Height() / HALF);
             arrowPosition = childPosition + OffsetF(-bubbleSpacing, radius + arrowHalfWidth);
             break;
         case Placement::RIGHT_TOP:
-            childPosition =
-                OffsetF(targetOffset_.GetX() + targetSize_.Width() + targetSpace + bubbleSpacing + marginLeft + arrowHeight_,
-                    targetOffset_.GetY() - marginBottom);
+            childPosition = OffsetF(
+                targetOffset_.GetX() + targetSize_.Width() + targetSpace + bubbleSpacing + marginLeft + arrowHeight_,
+                targetOffset_.GetY() - marginBottom);
             arrowPosition = childPosition + OffsetF(-bubbleSpacing, radius + arrowHalfWidth);
             break;
         case Placement::RIGHT_BOTTOM:
-            childPosition =
-                OffsetF(targetOffset_.GetX() + targetSize_.Width() + targetSpace + bubbleSpacing + marginLeft + arrowHeight_,
-                    targetOffset_.GetY() + targetSize_.Height() - childSize.Height() - marginTop);
+            childPosition = OffsetF(
+                targetOffset_.GetX() + targetSize_.Width() + targetSpace + bubbleSpacing + marginLeft + arrowHeight_,
+                targetOffset_.GetY() + targetSize_.Height() - childSize.Height() - marginTop);
             arrowPosition = childPosition + OffsetF(-bubbleSpacing, radius + arrowHalfWidth);
             break;
         default:

@@ -16,7 +16,6 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RENDER_RENDER_NODE_LAYOUT_ALGORITHM_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RENDER_RENDER_NODE_LAYOUT_ALGORITHM_H
 
-#include "core/components/common/properties/alignment.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 
 namespace OHOS::Ace::NG {
@@ -32,10 +31,7 @@ public:
     void Layout(LayoutWrapper* layoutWrapper) override;
 
     std::optional<SizeF> MeasureContent(
-        const LayoutConstraintF& contentConstraint, LayoutWrapper* /* layoutWrapper */) override
-    {
-        return contentConstraint.selfIdealSize.ConvertToSizeT();
-    }
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper) override;
 
 private:
     ACE_DISALLOW_COPY_AND_MOVE(RenderNodeLayoutAlgorithm);

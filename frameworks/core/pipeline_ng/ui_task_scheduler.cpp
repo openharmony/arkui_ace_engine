@@ -16,12 +16,15 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 #include "base/log/frame_report.h"
+#include "base/longframe/long_frame_report.h"
 #include "base/memory/referenced.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
 #include "core/common/thread_checker.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
+#include "core/components_v2/inspector/inspector_constants.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 uint64_t UITaskScheduler::frameId_ = 0;
@@ -48,6 +51,32 @@ void UITaskScheduler::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
     }
 }
 
+void UITaskScheduler::RestoreGeoState()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    if (safeAreaManager) {
+        std::set<WeakPtr<FrameNode>> geoRestoreNodes = safeAreaManager->GetGeoRestoreNodes();
+        for (auto& node : geoRestoreNodes) {
+            auto frameNode = node.Upgrade();
+            if (frameNode && frameNode->GetTag() != V2::PAGE_ETS_TAG) {
+                frameNode->RestoreGeoState();
+            }
+        }
+    }
+}
+
+void UITaskScheduler::ExpandSafeArea()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto safeAreaManager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(safeAreaManager);
+    safeAreaManager->ExpandSafeArea();
+}
+
 void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
 {
     CHECK_RUN_ON(UI);
@@ -55,10 +84,16 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     if (dirtyLayoutNodes_.empty()) {
         return;
     }
+    RestoreGeoState();
     if (isLayouting_) {
         LOGF("you are already in flushing layout!");
         abort();
     }
+
+    // Pause GC during long frame
+    std::unique_ptr<ILongFrame> longFrame = std::make_unique<ILongFrame>();
+    longFrame->ReportStartEvent();
+
     isLayouting_ = true;
     auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
     PageDirtySet dirtyLayoutNodesSet(dirtyLayoutNodes.begin(), dirtyLayoutNodes.end());
@@ -77,6 +112,10 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
             frameInfo_->AddTaskInfo(node->GetTag(), node->GetId(), time, FrameInfo::TaskType::LAYOUT);
         }
     }
+    ExpandSafeArea();
+
+    longFrame->ReportEndEvent();
+
     isLayouting_ = false;
 }
 

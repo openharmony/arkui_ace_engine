@@ -136,9 +136,6 @@ public:
             theme->hoverColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_HOVERED, theme->hoverColor_);
             theme->pressColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_PRESSED, theme->pressColor_);
             theme->paddingHorizontal_ = pattern->GetAttr<Dimension>("padding_horizontal", 24.0_vp);
-            if (SystemProperties::GetDeviceType() != DeviceType::PHONE) {
-                return; // light, dart color only for phone
-            }
             theme->popupDecoration_->SetBackgroundColor(
                 pattern->GetAttr<Color>("popup_bg_color", theme->popupDecoration_->GetBackgroundColor()));
             theme->focusColor_ = pattern->GetAttr<Color>(PATTERN_BG_COLOR_FOCUSED, theme->focusColor_);
@@ -494,7 +491,7 @@ public:
     {
         return hoverColor_;
     }
-    
+
     const Dimension& GetPaddingHorizontal() const
     {
         return paddingHorizontal_;

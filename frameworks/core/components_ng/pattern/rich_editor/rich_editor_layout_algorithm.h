@@ -49,12 +49,16 @@ protected:
 
 private:
     void GetPlaceholderRects(std::vector<RectF>& rectF) override;
+    RefPtr<SpanItem> GetFirstTextSpanItem() const;
     int32_t GetPreviousLength() const override;
-    ParagraphStyle GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const override;
+    ParagraphStyle GetParagraphStyle(
+        const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const override;
 
     void ApplyIndent(const TextStyle& textStyle, double width) override
     { // do nothing
     }
+
+    float GetShadowOffset(const std::list<RefPtr<SpanItem>>& group);
 
     std::vector<std::list<RefPtr<SpanItem>>> spans_;
     ParagraphManager* pManager_;

@@ -23,7 +23,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/scroll_bar.h"
 #include "core/components/declaration/swiper/swiper_declaration.h"
-#include "core/components_ng/pattern/swiper/swiper_event_hub.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 
 namespace OHOS::Ace::NG {
@@ -43,7 +43,6 @@ public:
     void SetDisplayMode(SwiperDisplayMode displayMode) override;
     void SetDisplayCount(int32_t displayCount) override;
     void ResetDisplayCount() override;
-    void ResetDisplayMode() override;
     void SetMinSize(const Dimension& minSize) override;
     void SetShowIndicator(bool showIndicator) override;
     void SetIndicatorType(SwiperIndicatorType indicatorType) override;
@@ -71,6 +70,7 @@ public:
     void SetDisplayArrow(bool displayArrow) override;
     void SetHoverShow(bool hoverShow) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin);
     static void SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin);
     static void SetIndex(FrameNode* frameNode, uint32_t index);
@@ -83,7 +83,6 @@ public:
     static void SetDisableSwipe(FrameNode* frameNode, bool disableSwipe);
     static void SetItemSpace(FrameNode* frameNode, const Dimension& itemSpace);
     static void SetDisplayMode(FrameNode* frameNode, SwiperDisplayMode displayMode);
-    static void ResetDisplayMode(FrameNode* frameNode);
     static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect EdgeEffect);
     static void SetMinSize(FrameNode* frameNode, const Dimension& minSize);
     static void SetDisplayCount(FrameNode* frameNode, int32_t displayCount);
@@ -98,6 +97,7 @@ public:
     static void SetDotIndicatorStyle(FrameNode* frameNode, const SwiperParameters& swiperParameters);
     static void SetIndicatorType(FrameNode* frameNode, SwiperIndicatorType indicatorType);
     static void SetIsIndicatorCustomSize(FrameNode* frameNode, bool isCustomSize);
+    static void SetEnabled(FrameNode* frameNode, bool enabled);
 };
 
 } // namespace OHOS::Ace::NG

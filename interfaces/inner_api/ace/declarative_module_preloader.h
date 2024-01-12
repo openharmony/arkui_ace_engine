@@ -33,6 +33,8 @@ public:
     static void PreloadCard(NativeEngine& runtime, const std::string &bundleName);
     static void ReloadCard(NativeEngine& runtime, const std::string &bundleName); // For card upgrade condition
     // ArkTsCard end
+
+    static void PreloadWorker(NativeEngine& runtime);
 };
 
 } // namespace OHOS::Ace

@@ -23,6 +23,7 @@
 #include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components/tab_bar/tab_controller.h"
 #include "core/components/tab_bar/tab_theme.h"
@@ -114,6 +115,7 @@ public:
     virtual void Pop() = 0;
     virtual void SetIndex(int32_t index) = 0;
     virtual void SetTabBarPosition(BarPosition tabBarPosition) = 0;
+    virtual void SetBarBackgroundBlurStyle(BlurStyle tabBarBlurStyle) {}
     virtual void SetTabBarMode(TabBarMode tabBarMode) = 0;
     virtual void SetTabBarWidth(const Dimension& tabBarWidth) = 0;
     virtual void SetTabBarHeight(const Dimension& tabBarHeight) = 0;

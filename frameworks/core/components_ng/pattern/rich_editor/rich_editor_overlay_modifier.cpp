@@ -153,6 +153,9 @@ void RichEditorOverlayModifier::onDraw(DrawingContext& drawingContext)
     if (!showSelect_->Get()) {
         PaintScrollBar(drawingContext);
         PaintEdgeEffect(frameSize_->Get(), drawingContext.canvas);
+        auto pattern = AceType::DynamicCast<RichEditorPattern>(pattern_.Upgrade());
+        CHECK_NULL_VOID(pattern);
+        pattern->SetShowSelect(true);
         return;
     }
     drawingContext.canvas.Save();

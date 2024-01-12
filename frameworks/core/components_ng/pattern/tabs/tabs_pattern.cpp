@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_paint_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_layout_property.h"
 #include "core/components_ng/pattern/tabs/tabs_node.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -78,9 +79,7 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
             tabBarPattern->HandleBottomTabBarChange(index);
         }
         tabBarPattern->SetMaskAnimationByCreate(false);
-        if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::FIXED) {
-            tabBarPattern->SetIndicator(index);
-        }
+        tabBarPattern->SetIndicator(index);
         tabBarPattern->UpdateIndicator(index);
         tabBarPattern->UpdateTextColor(index);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
@@ -109,7 +108,11 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
             CHECK_NULL_VOID(pattern);
             auto tabBarText = pattern->GetTabBarTextByIndex(index);
             Recorder::EventParamsBuilder builder;
-            builder.SetId(inspectorId).SetType(tabsNode->GetTag()).SetIndex(index).SetText(tabBarText);
+            builder.SetId(inspectorId)
+                .SetType(tabsNode->GetTag())
+                .SetIndex(index)
+                .SetText(tabBarText)
+                .SetDescription(tabsNode->GetAutoEventParamValue(""));
             Recorder::EventRecorder::Get().OnChange(std::move(builder));
             if (!inspectorId.empty()) {
                 Recorder::NodeDataCache::Get().PutMultiple(inspectorId, tabBarText, index);
@@ -225,9 +228,9 @@ void TabsPattern::UpdateSwiperDisableSwipe(bool disableSwipe)
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
-    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_VOID(swiperPaintProperty);
-    swiperPaintProperty->UpdateDisableSwipe(disableSwipe);
+    auto props = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_VOID(props);
+    props->UpdateDisableSwipe(disableSwipe);
     swiperPattern->UpdateSwiperPanEvent(disableSwipe);
     swiperPattern->SetSwiperEventCallback(disableSwipe);
 }
@@ -248,23 +251,19 @@ void TabsPattern::SetSwiperPaddingAndBorder()
 void TabsPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
-        CHECK_NULL_VOID(tabsNode);
-        auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
-        CHECK_NULL_VOID(tabBarNode);
-        auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
-        CHECK_NULL_VOID(tabBarPattern);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(GetHost());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    CHECK_NULL_VOID(tabBarPattern);
+    auto tabBarPaintProperty = tabBarPattern->GetPaintProperty<TabBarPaintProperty>();
+    if (tabBarPaintProperty->GetTabBarBlurStyle().has_value() &&
+        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         auto tabBarRenderContext = tabBarNode->GetRenderContext();
         CHECK_NULL_VOID(tabBarRenderContext);
-        auto tabBarPaintProperty = tabBarPattern->GetPaintProperty<TabBarPaintProperty>();
-        CHECK_NULL_VOID(tabBarPaintProperty);
         BlurStyleOption styleOption;
-        styleOption.blurStyle = BlurStyle::NO_MATERIAL;
-        if (!tabBarPaintProperty->GetBarBackgroundColor().has_value() ||
-            tabBarPaintProperty->GetBarBackgroundColor().value() == Color::TRANSPARENT) {
-            styleOption.blurStyle = BlurStyle::COMPONENT_THICK;
-        }
+        styleOption.blurStyle = tabBarPaintProperty->GetTabBarBlurStyle().value();
         tabBarRenderContext->UpdateBackBlurStyle(styleOption);
     }
 

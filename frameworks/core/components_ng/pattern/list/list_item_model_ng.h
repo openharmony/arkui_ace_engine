@@ -45,6 +45,7 @@ public:
 
     static void SetSelected(FrameNode* frameNode, bool selected);
     static void SetSelectable(FrameNode* frameNode, bool selectable);
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
 private:
     void InstallSwiperCallBack(RefPtr<ListItemEventHub> eventHub,
                                OnDeleteEvent&& onDelete,

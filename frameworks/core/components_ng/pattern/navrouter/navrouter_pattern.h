@@ -41,15 +41,6 @@ public:
     }
 
     void OnModifyDone() override;
-    void SetNavDestination(const std::string& name)
-    {
-        name_ = name;
-    }
-
-    const std::string& GetNavDestination() const
-    {
-        return name_;
-    }
 
     void SetRouteInfo(const RefPtr<RouteInfo>& routeInfo)
     {
@@ -73,7 +64,6 @@ public:
 
 private:
     RefPtr<ClickEvent> clickListener_;
-    std::string name_;
     RefPtr<RouteInfo> routeInfo_;
     NavRouteMode mode_ = NavRouteMode::PUSH_WITH_RECREATE;
 };

@@ -543,4 +543,35 @@ ArkUINativeModuleValue TabsBridge::ResetBarPosition(ArkUIRuntimeCallInfo* runtim
     GetArkUIInternalNodeAPI()->GetTabsModifier().ResetTabBarPosition(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue TabsBridge::SetTabClip(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (info[TABS_ARG_INDEX_1]->IsUndefined()) {
+        ViewAbstract::SetClipEdge(frameNode, false);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (info[TABS_ARG_INDEX_1]->IsObject()) {
+        CommonBridge::SetClip(runtimeCallInfo);
+    } else if (info[TABS_ARG_INDEX_1]->IsBoolean()) {
+        GetArkUIInternalNodeAPI()->GetTabsModifier().SetTabClip(nativeNode, info[TABS_ARG_INDEX_1]->ToBoolean());
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TabsBridge::ResetTabClip(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetTabsModifier().ResetTabClip(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

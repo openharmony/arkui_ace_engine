@@ -83,6 +83,8 @@ struct MenuParam {
     MenuPreviewMode previewMode = MenuPreviewMode::NONE;
     MenuPreviewAnimationOptions previewAnimationOptions;
     std::optional<EffectOption> backgroundEffectOption;
+    std::optional<Color> backgroundColor;
+    std::optional<int32_t> backgroundBlurStyle;
 };
 
 class ACE_FORCE_EXPORT ViewAbstract {
@@ -158,6 +160,7 @@ public:
     static void SetFrontBlur(const Dimension &radius, const BlurOption &blurOption);
     static void SetBackShadow(const Shadow &shadow);
     static void SetBlendMode(BlendMode blendMode);
+    static void SetBlendApplyType(BlendApplyType blendApplyType);
 
     // graphics
     static void SetBrightness(const Dimension &value);
@@ -267,6 +270,8 @@ public:
     static void ShowMenu(int32_t targetId, const NG::OffsetF &offset, bool isContextMenu = false);
     // inspector
     static void SetInspectorId(const std::string &inspectorId);
+    // auto event param
+    static void SetAutoEventParam(const std::string& param);
     // restore
     static void SetRestoreId(int32_t restoreId);
     // inspector debugLine
@@ -345,6 +350,14 @@ public:
     static void SetBorderWidth(FrameNode* frameNode, const Dimension& value);
     static void SetBorderColor(FrameNode* frameNode, const BorderColorProperty& value);
     static void SetBorderColor(FrameNode* frameNode, const Color& value);
+    static void SetOuterBorderColor(FrameNode* frameNode, const Color& value);
+    static void SetOuterBorderColor(FrameNode* frameNode, const BorderColorProperty& value);
+    static void SetOuterBorderRadius(FrameNode* frameNode, const Dimension& value);
+    static void SetOuterBorderRadius(FrameNode* frameNode, const BorderRadiusProperty& value);
+    static void SetOuterBorderWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetOuterBorderWidth(FrameNode* frameNode, const BorderWidthProperty& value);
+    static void SetOuterBorderStyle(FrameNode* frameNode, const BorderStyleProperty& value);
+    static void SetOuterBorderStyle(FrameNode* frameNode, const BorderStyle& value);
     static void SetBorderStyle(FrameNode* frameNode, const BorderStyle& value);
     static void SetBorderStyle(FrameNode* frameNode, const BorderStyleProperty& value);
     static void SetBackShadow(FrameNode* frameNode, const Shadow& shadow);

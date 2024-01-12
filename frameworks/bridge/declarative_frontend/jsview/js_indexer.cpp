@@ -99,25 +99,26 @@ void JSIndexer::Create(const JSCallbackInfo& args)
     JSRef<JSVal> selectedProperty = paramObj->GetProperty("selected");
     if (selectedProperty->IsNumber()) {
         selectedVal = selectedProperty->ToNumber<int32_t>();
-    }
-    IndexerModel::GetInstance()->Create(indexerArray, selectedVal);
-    if (length <= 0 || !selectedProperty->IsObject()) {
-        return;
-    }
-    JSRef<JSObject> selectedObj = JSRef<JSObject>::Cast(selectedProperty);
-    auto selectedValueProperty = selectedObj->GetProperty("value");
-    if (selectedValueProperty->IsNumber()) {
-        selectedVal = selectedValueProperty->ToNumber<int32_t>();
-    }
-    JSRef<JSVal> changeEventVal = selectedObj->GetProperty("changeEvent");
-    if (!changeEventVal.IsEmpty()) {
-        if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
-            ParseIndexerSelectedObject(args, changeEventVal);
+        IndexerModel::GetInstance()->Create(indexerArray, selectedVal);
+    } else if (length > 0 && selectedProperty->IsObject()) {
+        JSRef<JSObject> selectedObj = JSRef<JSObject>::Cast(selectedProperty);
+        auto selectedValueProperty = selectedObj->GetProperty("value");
+        if (selectedValueProperty->IsNumber()) {
+            selectedVal = selectedValueProperty->ToNumber<int32_t>();
         }
-        return;
-    }
+        IndexerModel::GetInstance()->Create(indexerArray, selectedVal);
+        JSRef<JSVal> changeEventVal = selectedObj->GetProperty("changeEvent");
+        if (!changeEventVal.IsEmpty()) {
+            if (!changeEventVal->IsUndefined() && changeEventVal->IsFunction()) {
+                ParseIndexerSelectedObject(args, changeEventVal);
+            }
+            return;
+        }
 
-    args.ReturnSelf();
+        args.ReturnSelf();
+    } else {
+        IndexerModel::GetInstance()->Create(indexerArray, selectedVal);
+    }
 }
 
 void JSIndexer::SetSelectedColor(const JSCallbackInfo& args)
