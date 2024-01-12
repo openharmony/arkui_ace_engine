@@ -1239,10 +1239,38 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        LOGE("ZMH, actionUpdateTask 1, indexCanChangeMap_.size():%{public}zu", pattern->indexCanChangeMap_.size());
         LOGE("ZMH, actionEndTask, GetOffsetX:%{public}f, GetOffsetY:%{public}f, GetMainDelta:%{public}f",
             info.GetOffsetX(), info.GetOffsetY(), info.GetMainDelta());
-        pattern->indexCanChangeMap_.clear();
+        int32_t currentIndex = pattern->GetCurrentIndex();
+        int32_t comingIndex = currentIndex;
+        if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
+            comingIndex = comingIndex - 1 < 0 ? 0 : comingIndex - 1;
+        } else if (LessNotEqual(info.GetMainDelta(), 0.0)) {
+            comingIndex = comingIndex + 1 > pattern->TotalCount() - 1 ? pattern->TotalCount() - 1 : comingIndex + 1;
+        }
+        LOGE("ZMH, actionEndTask 3, indexCanChangeMap_.size():%{public}zu", pattern->indexCanChangeMap_.size());
+        auto iter = pattern->indexCanChangeMap_.find(comingIndex);
+        if (iter != pattern->indexCanChangeMap_.end()) {
+            // map中有记录，不需要重复执行回调，直接用map中保存的结果
+            if (!iter->second) {
+                // comingIndex 不可达，return
+                LOGE("ZMH, actionEndTask 44 interceptCallback return false, comingIndex:%{public}d", comingIndex);
+                return;
+            }
+        } else {
+            // map中无记录，执行回调，保存结果
+            bool ret = pattern->ContentWillChange(currentIndex, comingIndex);
+            pattern->indexCanChangeMap_.insert({comingIndex, ret});
+            LOGE("ZMH, actionEndTask 55, indexCanChangeMap_.size():%{public}zu", pattern->indexCanChangeMap_.size());
+            if (!ret) {
+                // comingIndex 不可达，return
+                LOGE("ZMH, actionEndTask 66 interceptCallback return false, comingIndex:%{public}d", comingIndex);
+                return;
+            }
+        }
+        LOGE("ZMH, actionEndTask 77 interceptCallback return true, comingIndex:%{public}d", comingIndex);
+        LOGE("ZMH, actionEndTask 88, indexCanChangeMap_.size():%{public}zu", pattern->indexCanChangeMap_.size());
+
         if (pattern) {
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
                 return;
