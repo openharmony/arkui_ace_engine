@@ -20,7 +20,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
 
 namespace OHOS::Ace::NG {
-constexpr int32_t MAX_SIZE = 10;
+constexpr size_t MAX_SIZE = 10;
 
 ScrollableItemPool& ScrollableItemPool::GetInstance()
 {
