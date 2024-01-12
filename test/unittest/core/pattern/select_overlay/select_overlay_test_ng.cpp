@@ -3008,9 +3008,12 @@ HWTEST_F(SelectOverlayTestNg, StartHiddenHandleTask002, TestSize.Level1)
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
     auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
-    ASSERT_NE(pattern, nullptr);
     bool isDelay = false;
+    RectF area;
+    area = RectF(1, 1, 1, 1);
+    pattern->UpdateShowArea(area);
     pattern->StartHiddenHandleTask(isDelay);
+    EXPECT_NE(pattern->GetSelectOverlayInfo(), nullptr);
 }
 
 /**
