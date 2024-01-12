@@ -1912,6 +1912,7 @@ void ScrollablePattern::FireOnScrollStart()
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(hub);
+    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
     auto onScrollStart = hub->GetOnScrollStart();
     CHECK_NULL_VOID(onScrollStart);
     onScrollStart();
@@ -1941,6 +1942,10 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
 {
     if (scrollStop_) {
         if (!GetScrollAbort()) {
+            auto host = GetHost();
+            if (host != nullptr) {
+                host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+            }
             if (onScrollStop) {
                 SetScrollSource(SCROLL_FROM_NONE);
                 onScrollStop();

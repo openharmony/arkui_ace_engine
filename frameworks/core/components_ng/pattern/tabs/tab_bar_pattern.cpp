@@ -1459,7 +1459,7 @@ void TabBarPattern::PlayTranslateAnimation(float startPos, float endPos, float t
             CHECK_NULL_VOID(tabBarPattern);
             tabBarPattern->indicatorAnimationIsRunning_ = false;
         });
-    
+
     auto startCurrentOffset = currentOffset_;
     host->CreateAnimatablePropertyFloat("tabbar", 0, [weak](float value) {
         auto tabBarPattern = weak.Upgrade();
@@ -1489,7 +1489,7 @@ void TabBarPattern::StopTranslateAnimation()
 
     if (tabbarIndicatorAnimation_)
         AnimationUtils::StopAnimation(tabbarIndicatorAnimation_);
-    
+
     if (indicatorAnimationIsRunning_)
         indicatorAnimationIsRunning_ = false;
 
@@ -1802,7 +1802,7 @@ void TabBarPattern::SetAccessibilityAction()
             frameNode->TotalChildCount() - MASK_COUNT > 1) {
             auto index = pattern->GetIndicator() + 1;
             pattern->FocusIndexChange(index);
-            frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+            // AccessibilityEventType::SCROLL_END
         }
     });
 
@@ -1817,7 +1817,7 @@ void TabBarPattern::SetAccessibilityAction()
            frameNode->TotalChildCount() - MASK_COUNT > 1) {
             auto index = pattern->GetIndicator() - 1;
             pattern->FocusIndexChange(index);
-            frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+            // AccessibilityEventType::SCROLL_END
         }
     });
 }

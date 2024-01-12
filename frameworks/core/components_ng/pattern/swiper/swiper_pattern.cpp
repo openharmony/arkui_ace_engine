@@ -779,6 +779,9 @@ void SwiperPattern::FireAnimationStartEvent(
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     swiperEventHub->FireAnimationStartEvent(currentIndex, nextIndex, info);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
 }
 
 void SwiperPattern::FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const

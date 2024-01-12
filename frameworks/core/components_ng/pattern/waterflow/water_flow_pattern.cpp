@@ -367,7 +367,7 @@ void WaterFlowPattern::ScrollPage(bool reverse)
 
     UpdateCurrentOffset(reverse ? mainContentSize : -mainContentSize, SCROLL_FROM_JUMP);
 
-    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    // AccessibilityEventType::SCROLL_END
 }
 
 std::string WaterFlowPattern::ProvideRestoreInfo()
