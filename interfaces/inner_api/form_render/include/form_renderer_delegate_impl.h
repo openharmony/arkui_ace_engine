@@ -53,6 +53,11 @@ public:
      * @param height
      */
     int32_t OnSurfaceChange(float width, float height) override;
+    /**
+     * @brief OnSurfaceDetach.
+     * @param surfaceId The surfaceNode ID.
+     */
+    int32_t OnSurfaceDetach(uint64_t surfaceId) override;
 
     int32_t OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos) override;
 
@@ -61,6 +66,7 @@ public:
     void SetActionEventHandler(std::function<void(const std::string&)>&& listener);
     void SetErrorEventHandler(std::function<void(const std::string&, const std::string&)>&& listener);
     void SetSurfaceChangeEventHandler(std::function<void(float width, float height)>&& listener);
+    void SetSurfaceDetachEventHandler(std::function<void()>&& listener);
     void SetFormLinkInfoUpdateHandler(std::function<void(const std::vector<std::string>&)>&& listener);
 
 private:
@@ -70,6 +76,7 @@ private:
     std::function<void(const std::string&)> actionEventHandler_;
     std::function<void(const std::string&, const std::string&)> errorEventHandler_;
     std::function<void(float width, float height)> surfaceChangeEventHandler_;
+    std::function<void()> surfaceDetachEventHandler_;
     std::function<void(const std::vector<std::string>&)> formLinkInfoUpdateHandler_;
 };
 } // namespace Ace

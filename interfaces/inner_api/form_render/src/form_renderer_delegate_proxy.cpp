@@ -102,6 +102,33 @@ int32_t FormRendererDelegateProxy::OnSurfaceReuse(
     return reply.ReadInt32();
 }
 
+int32_t FormRendererDelegateProxy::OnSurfaceDetach(uint64_t surfaceId)
+{
+    MessageParcel data;
+    if (!WriteInterfaceToken(data)) {
+        HILOG_ERROR("%{public}s, failed to write interface token", __func__);
+        return ERR_INVALID_VALUE;
+    }
+    data.WriteUint64(surfaceId);
+    HILOG_INFO("Proxy detach surfaceNode:%{public}s", std::to_string(surfaceId).c_str());
+
+    MessageParcel reply;
+    MessageOption option;
+    auto remoteProxy = Remote();
+    if (!remoteProxy) {
+        HILOG_ERROR("Send surfaceNode failed, ipc remoteObj is null");
+        return IPC_PROXY_ERR;
+    }
+    int32_t error = remoteProxy->SendRequest(
+        static_cast<uint32_t>(IFormRendererDelegate::Message::ON_FORMSURFACE_DETACH), data, reply, option);
+    if (error != NO_ERROR) {
+        HILOG_ERROR("%{public}s, failed to SendRequest: %{public}d", __func__, error);
+        return error;
+    }
+
+    return reply.ReadInt32();
+}
+
 int32_t FormRendererDelegateProxy::OnSurfaceRelease(uint64_t surfaceId)
 {
     MessageParcel data;

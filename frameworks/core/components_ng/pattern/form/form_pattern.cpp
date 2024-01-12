@@ -210,6 +210,11 @@ void FormPattern::HandleStaticFormEvent(const PointF& touchPoint)
 
 void FormPattern::TakeSurfaceCaptureForUI()
 {
+    if (isFrsNodeDetached_) {
+        TAG_LOGI(AceLogTag::ACE_FORM, "Frs node is detached, cancel snapshot.");
+        return;
+    }
+    
     if (isDynamic_) {
         formLinkInfos_.clear();
     }
@@ -664,6 +669,13 @@ void FormPattern::InitFormManagerDelegate()
         });
     });
 
+    formManagerBridge_->AddFormSurfaceDetachCallback([weak = WeakClaim(this), instanceID]() {
+            ContainerScope scope(instanceID);
+            auto formPattern = weak.Upgrade();
+            CHECK_NULL_VOID(formPattern);
+            formPattern->FireFormSurfaceDetachCallback();
+        });
+
     formManagerBridge_->AddActionEventHandle([weak = WeakClaim(this), instanceID](const std::string& action) {
         ContainerScope scope(instanceID);
         TAG_LOGI(AceLogTag::ACE_FORM, "Card receive action event, action: %{public}s", action.c_str());
@@ -739,6 +751,7 @@ void FormPattern::FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSur
 
     isLoaded_ = true;
     isUnTrust_ = false;
+    isFrsNodeDetached_ = false;
     isDynamic_ = isDynamic;
     DeleteImageNode();
     host->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
@@ -766,6 +779,12 @@ void FormPattern::FireFormSurfaceChangeCallback(float width, float height)
     parent->MarkNeedSyncRenderTree();
     parent->RebuildRenderContextTree();
     renderContext->RequestNextFrame();
+}
+
+void FormPattern::FireFormSurfaceDetachCallback()
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "FireFormSurfaceDetachCallback isFrsNodeDetached:%{public}d", isFrsNodeDetached_);
+    isFrsNodeDetached_ = true;
 }
 
 void FormPattern::CreateCardContainer()
@@ -1067,6 +1086,10 @@ void FormPattern::UpdateConfiguration()
 
 void FormPattern::OnVisibleAreaChange(bool visible)
 {
+    if (isFrsNodeDetached_) {
+        return;
+    }
+    
     CHECK_NULL_VOID(formManagerBridge_);
     formManagerBridge_->SetVisibleChange(visible);
 }
