@@ -313,10 +313,8 @@ HWTEST_F(TouchEventTestNg, OnFlushTouchEventsBegin001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create TouchEventActuator.
-     * @tc.expected: touchEventActuator is not nullptr.
      */
     auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
-    EXPECT_NE(touchEventActuator, nullptr);
 
     /**
      * @tc.steps: step2. call OnFlushTouchEventsBegin.
@@ -335,10 +333,8 @@ HWTEST_F(TouchEventTestNg, OnFlushTouchEventsEnd001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create TouchEventActuator.
-     * @tc.expected: touchEventActuator is not nullptr.
      */
     auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
-    EXPECT_NE(touchEventActuator, nullptr);
 
     /**
      * @tc.steps: step2. call OnFlushTouchEventsEnd.
@@ -357,10 +353,8 @@ HWTEST_F(TouchEventTestNg, ShouldResponse001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create TouchEventActuator.
-     * @tc.expected: touchEventActuator is not nullptr.
      */
     auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
-    EXPECT_NE(touchEventActuator, nullptr);
 
     /**
      * @tc.steps: step2. call ShouldResponse.
@@ -377,11 +371,9 @@ HWTEST_F(TouchEventTestNg, ShouldResponse001, TestSize.Level1)
 HWTEST_F(TouchEventTestNg, TriggerTouchCallBack001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create TouchEventActuator.
-     * @tc.expected: touchEventActuator is not nullptr.
+     * @tc.steps: step1. Create TouchEventActuator..
      */
     auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
-    EXPECT_NE(touchEventActuator, nullptr);
 
     /**
      * @tc.steps: step2. create TouchEvent object and call TriggerTouchCallBack.
