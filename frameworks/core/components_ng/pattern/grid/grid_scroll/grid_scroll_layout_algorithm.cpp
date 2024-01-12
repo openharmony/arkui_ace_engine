@@ -437,7 +437,9 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
         SupplyAllData2ZeroIndex(mainSize, crossSize, layoutWrapper);
         gridLayoutInfo_.targetIndex_.reset();
     }
-    SkipLargeOffset(mainSize, layoutWrapper);
+    if (enableSkipping_) {
+        SkipLargeOffset(mainSize, layoutWrapper);
+    }
 
     if (!gridLayoutInfo_.lastCrossCount_) {
         gridLayoutInfo_.lastCrossCount_ = crossCount_;
