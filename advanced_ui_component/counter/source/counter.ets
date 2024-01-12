@@ -208,10 +208,10 @@ export struct CounterComponent {
   @State hasFocusText3: boolean = false
   @State subBtnFocusWidh: string = '0vp'
   @State addBtnFocusWidh: string = '0vp'
-  @State value: number = undefined;
-  @State year: number = undefined;
-  @State month: number = undefined;
-  @State day: number = undefined;
+  @State value: number | undefined = undefined;
+  @State year: number = 0;
+  @State month: number = 0;
+  @State day: number = 0;
   @State hour: number = 0;
   @State minute: number = 0;
   @State second: number = 0;
@@ -412,7 +412,7 @@ export struct CounterComponent {
     if (this.dateStyleOptions.year !== undefined &&
         this.dateStyleOptions.year >= this.minYear &&
         this.dateStyleOptions.year <= this.maxYear) {
-      if (this.year === undefined) {
+      if (this.year === 0) {
         this.year = this.dateStyleOptions.year;
         let date = new DateData(this.year, this.month, this.day);
         this.onDateChange?.(date);
@@ -425,7 +425,7 @@ export struct CounterComponent {
     if (this.dateStyleOptions.month !== undefined &&
         this.dateStyleOptions.month <= CounterConstant.COUNTER_MAX_MONTH &&
         this.dateStyleOptions.month >= CounterConstant.COUNTER_MIN_MONTH) {
-      if (this.month === undefined) {
+      if (this.month === 0) {
         this.month = this.dateStyleOptions.month;
         let date = new DateData(this.year, this.month, this.day);
         this.onDateChange?.(date);
@@ -438,7 +438,7 @@ export struct CounterComponent {
     if (this.dateStyleOptions.day !== undefined &&
         this.dateStyleOptions.day <= this.getDayNumber() &&
         this.dateStyleOptions.day >= CounterConstant.COUNTER_MIN_DAY) {
-      if (this.day === undefined) {
+      if (this.day === 0) {
         this.day = this.dateStyleOptions.day;
         let date = new DateData(this.year, this.month, this.day);
         this.onDateChange?.(date);
