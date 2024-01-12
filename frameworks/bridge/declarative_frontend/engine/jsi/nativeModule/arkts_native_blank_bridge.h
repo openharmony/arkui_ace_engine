@@ -23,6 +23,8 @@ class BlankBridge {
 public:
     static ArkUINativeModuleValue SetColor(ArkUIRuntimeCallInfo *runtimeCallInfo);
     static ArkUINativeModuleValue ResetColor(ArkUIRuntimeCallInfo *runtimeCallInfo);
+    static ArkUINativeModuleValue SetBlankHeight(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetBlankHeight(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 }
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_BLANK_BRIDGE_H
