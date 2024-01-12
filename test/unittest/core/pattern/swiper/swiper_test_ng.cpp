@@ -11284,11 +11284,11 @@ HWTEST_F(SwiperTestNg, StopAnimation001, TestSize.Level1)
 
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     /**
-     * @tc.steps: step1. Calling the StopAnimation interface
+     * @tc.steps: step2. Calling the StopAnimation interface
      * @tc.expected: LongPointLeftAnimEnd_ And longPointRightAnimEnd_ To be true
      */
     modifier->StopAnimation();
-    EXPECT_TRUE(modifier->longPointLeftAnimEnd_ == true && modifier->longPointRightAnimEnd_ == true);
+    EXPECT_TRUE(modifier->longPointLeftAnimEnd_ && modifier->longPointRightAnimEnd_);
 }
 
 /**
@@ -11314,11 +11314,11 @@ HWTEST_F(SwiperTestNg, PlayIndicatorAnimation001, TestSize.Level1)
     TouchBottomTypeLoop touchBottomTypeLoop;
     touchBottomTypeLoop = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
     /**
-     * @tc.steps: step1. Construct parameters to call PlayIndicator Animation
+     * @tc.steps: step2. Construct parameters to call PlayIndicator Animation
      * @tc.expected: IsTouchBottomLoop_ Equal to false
      */
     modifier->PlayIndicatorAnimation(vectorBlackPointCenterX, longPointCenterX, gestureState, touchBottomTypeLoop);
-    EXPECT_TRUE(modifier->isTouchBottomLoop_ == false);
+    EXPECT_FALSE(modifier->isTouchBottomLoop_);
 }
 
 /**
@@ -11337,12 +11337,12 @@ HWTEST_F(SwiperTestNg, UpdateLongPointDilateRatio001, TestSize.Level1)
 
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     /**
-     * @tc.steps: step1. Call the UpdateLongPointDilateRatio interface to convert longPointIsHover_ Set to false
+     * @tc.steps: step2. Call the UpdateLongPointDilateRatio interface to convert longPointIsHover_ Set to false
      * @tc.expected: LongPointIsHover_ Equal to true
      */
     modifier->longPointIsHover_ = true;
     modifier->UpdateLongPointDilateRatio();
-    EXPECT_TRUE(modifier->longPointIsHover_ == true);
+    EXPECT_TRUE(modifier->longPointIsHover_);
 }
 
 /**
@@ -11361,7 +11361,7 @@ HWTEST_F(SwiperTestNg, UpdateDilatePaintProperty001, TestSize.Level1)
 
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     /**
-     * @tc.steps: step1. Calling the UpdateDilatePaintProperty interface
+     * @tc.steps: step2. Calling the UpdateDilatePaintProperty interface
      * @tc.expected: modifier->longPointLeftAnimEnd_ && modifier->longPointRightAnimEnd_ Condition is true
      */
     LinearVector<float> vectorBlackPointCenterX;
@@ -11411,7 +11411,7 @@ HWTEST_F(SwiperTestNg, UpdateShrinkPaintProperty002, TestSize.Level1)
 
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     /**
-     * @tc.steps: step1. Calling the UpdateShrinkPaintProperty interface
+     * @tc.steps: step2. Calling the UpdateShrinkPaintProperty interface
      * @tc.expected: Modifier ->longPointLeftAnimEnd_&& Modifier ->longPointRightAnimEnd_ Condition is false
      */
     LinearVector<float> vectorBlackPointCenterX;
@@ -11462,7 +11462,7 @@ HWTEST_F(SwiperTestNg, PaintUnselectedIndicator001, TestSize.Level1)
 
     RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
     /**
-     * @tc.steps: step1. Calling the PaintUnselectedIndicator interface
+     * @tc.steps: step2. Calling the PaintUnselectedIndicator interface
      * @tc.expected: modifier->isCustomSize_ is false
      */
     LinearVector<float> itemHalfSizes;
@@ -11566,7 +11566,7 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorPaintHoverIndicator003, TestSize.Level1)
     paintMethod->dotIndicatorModifier_->SetIsPressed(true);
 
     /**
-     * @tc.steps: step3. call PaintHoverIndicator.
+     * @tc.steps: step2. call PaintHoverIndicator.
      * @tc.expected: dotIndicatorModifier_->GetIsPressed is false.
      */
     paintMethod->mouseClickIndex_ = 100;
@@ -11609,7 +11609,7 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorCalculatePointCenterX002, TestSize.Level1)
     ASSERT_NE(paintMethod->dotIndicatorModifier_, nullptr);
     paintMethod->IsCustomSizeValue_ = true;
     /**
-     * @tc.steps: step1. call CalculatePointCenterX.
+     * @tc.steps: step2. call CalculatePointCenterX.
      * @tc.expected: run success
      */
     vectorBlackPointCenterX.push_back(20.0f);
@@ -11655,7 +11655,7 @@ HWTEST_F(SwiperTestNg, GetMoveRate001, TestSize.Level1)
     RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
 
     /**
-     * @tc.steps: step1. Calling the GetMoveRate interface
+     * @tc.steps: step2. Calling the GetMoveRate interface
      * @tc.expected: GestureState_ 5. After accepting, read the value of std:: get<2>(gestureState_5),
      * which is equal to std:: abs (paintMethod ->turnPageRate2)
      */
