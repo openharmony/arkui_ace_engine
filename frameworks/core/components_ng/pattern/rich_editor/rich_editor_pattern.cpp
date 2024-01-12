@@ -81,6 +81,7 @@ namespace {
 // should be moved to theme
 constexpr float CARET_WIDTH = 1.5f;
 constexpr float DEFAULT_CARET_HEIGHT = 18.5f;
+constexpr Dimension KEYBOARD_AVOID_OFFSET = 24.0_vp;
 #endif
 constexpr int32_t IMAGE_SPAN_LENGTH = 1;
 constexpr int32_t SYMBOL_SPAN_LENGTH = 2;
@@ -1441,9 +1442,9 @@ void RichEditorPattern::HandleSingleClickEvent(OHOS::Ace::GestureEvent& info)
 
     auto focusHub = GetHost()->GetOrCreateFocusHub();
     if (focusHub) {
+        SetCaretPosition(position);
         if (!isClickOnAISpan_ && focusHub->RequestFocusImmediately()) {
             float caretHeight = 0.0f;
-            SetCaretPosition(position);
             OffsetF caretOffset = CalcCursorOffsetByPosition(GetCaretPosition(), caretHeight, false, false);
             CHECK_NULL_VOID(overlayMod_);
             DynamicCast<RichEditorOverlayModifier>(overlayMod_)->SetCaretOffsetAndHeight(caretOffset, caretHeight);
@@ -2104,8 +2105,12 @@ std::optional<MiscServices::TextConfig> RichEditorPattern::GetMiscTextConfig()
         auto overlayModifier = DynamicCast<RichEditorOverlayModifier>(overlayMod_);
         caretHeight = overlayModifier ? overlayModifier->GetCaretHeight() : DEFAULT_CARET_HEIGHT;
     }
+    auto offset = KEYBOARD_AVOID_OFFSET.ConvertToPx();
+    auto caretTop = caretOffset.GetY() + windowRect.Top() + parentGlobalOffset_.GetY();
+    height = caretTop + caretHeight + offset - positionY;
+
     MiscServices::CursorInfo cursorInfo { .left = caretOffset.GetX() + windowRect.Left() + parentGlobalOffset_.GetX(),
-        .top = caretOffset.GetY() + windowRect.Top() + parentGlobalOffset_.GetY(),
+        .top = caretTop,
         .width = CARET_WIDTH,
         .height = caretHeight };
     MiscServices::InputAttribute inputAttribute = { .inputPattern = (int32_t)TextInputType::UNSPECIFIED,
