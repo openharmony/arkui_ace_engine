@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,14 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_REFRESH_MODIFIER_H
+#define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_REFRESH_MODIFIER_H
 
 #include "core/interfaces/native/node/node_modifiers.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
-const ArkUIScrollModifier* GetScrollModifier();
-
-void SetOnScroll(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
-void SetOnScrollFrameBegin(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
-void SetOnScrollStart(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
-void SetOnScrollStop(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
-void SetOnScrollEdge(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
+    void SetRefreshOnStateChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
+    void SetOnRefreshing(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
 } // namespace OHOS::Ace::NG::NodeModifier
+
+#endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_REFRESH_MODIFIER_H

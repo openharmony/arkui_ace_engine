@@ -69,6 +69,7 @@ template("ace_core_interfaces_native_node") {
       "node/node_image_span_modifier.cpp",
       "node/node_list_modifier.cpp",
       "node/node_modifiers.cpp",
+      "node/node_refresh_modifier.cpp",
       "node/node_scroll_modifier.cpp",
       "node/node_span_modifier.cpp",
       "node/node_stack_modifier.cpp",

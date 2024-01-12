@@ -44,7 +44,8 @@ enum ArkUINodeType {
     ARKUI_COLUMN = 16,
     ARKUI_ROW = 17,
     ARKUI_FLEX = 18,
-    ARKUI_LIST_ITEM = 19
+    ARKUI_LIST_ITEM = 19,
+    ARKUI_REFRESH = 20,
 };
 
 #define ARKUI_MAX_EVENT_NUM 1000
@@ -62,6 +63,8 @@ enum ArkUIAsyncEventKind {
     ON_AREA_CHANGE = 8,
     ON_VISIBLEAREA_CHANGE = 9,
     ON_GESTURE = 10,
+    ON_FOCUS = 11,
+    
     // components events
     ON_LIST_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_LIST,
     ON_LIST_SCROLL_INDEX,
@@ -86,6 +89,10 @@ enum ArkUIAsyncEventKind {
     ON_SCROLL_FRAME_BEGIN,
     ON_SCROLL_START,
     ON_SCROLL_STOP,
+    ON_SCROLL_EDGE,
+
+    ON_REFRESH_STATE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_REFRESH,
+    ON_REFRESH_REFRESHING,
 };
 
 // Current implementation assumes that each argument is 4 bytes,

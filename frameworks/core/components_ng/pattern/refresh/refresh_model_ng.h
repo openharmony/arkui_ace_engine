@@ -50,6 +50,10 @@ public:
     void SetShowTimeDistance(const Dimension& showTimeDistance) override {}
     void SetTextStyle(const TextStyle& textStyle) override {}
     void SetProgressBackgroundColor(const Color& backgroundColor) override {}
+
+    static void SetOnStateChange(FrameNode* frameNode, StateChangeEvent&& stateChange);
+    static void SetOnRefreshing(FrameNode* frameNode, RefreshingEvent&& refreshing);
+
 };
 } // namespace OHOS::Ace::NG
 
