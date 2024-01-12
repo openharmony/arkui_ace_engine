@@ -3567,7 +3567,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest053, TestSize.Level1)
 
     frameNode->GetTransformRelativeOffset();
     auto renderContext = frameNode->GetRenderContext();
-    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(renderContext, nullptr);
 
     /**
      * @tc.steps: step3. call CalcDragPreviewDistanceWithPoint.
