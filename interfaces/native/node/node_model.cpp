@@ -211,7 +211,7 @@ void RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, 
         return;
     }
     impl->getBasicAPI()->registerNodeAsyncEvent(
-        nodePtr->uiNodeHandle, static_cast<ArkUIAsyncEventKind>(originEventType), eventId);
+        nodePtr->uiNodeHandle, static_cast<ArkUIAsyncEventKind>(originEventType), eventId, nodePtr);
 }
 
 void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType)
@@ -232,6 +232,7 @@ void RegisterOnEvent(void (*eventReceiver)(ArkUI_NodeEvent* event))
         auto innerReceiver = [](ArkUINodeEvent* origin) {
             if (g_eventReceiver) {
                 auto event = reinterpret_cast<ArkUI_NodeEvent*>(origin);
+                event->node = reinterpret_cast<ArkUI_NodeHandle>(origin->extraParam);
                 event->kind = ConvertToNodeEventType(static_cast<ArkUIAsyncEventKind>(origin->kind));
                 g_eventReceiver(event);
             }

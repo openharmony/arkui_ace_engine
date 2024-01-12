@@ -32,6 +32,9 @@ namespace OHOS::Ace::NodeModel {
 namespace {
 const std::regex COLOR_WITH_MAGIC("#[0-9A-Fa-f]{8}");
 const std::regex BRACKETS("\\(.*?\\)");
+constexpr int DEFAULT_ANGLE = 180;
+constexpr ArkUI_Float64 DEFAULT_Z_SCALE = 1.0;
+constexpr int UNIT_VP = 1;
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
@@ -50,7 +53,6 @@ constexpr int DEFAULT_SIZE_18 = 18;
 constexpr int DEFAULT_SIZE_24 = 24;
 constexpr int COLOR_STRATEGY_STYLE = 1;
 constexpr int COLOR_STYLE = 2;
-constexpr int UNIT_VP = 1;
 constexpr int DISPLAY_ARROW_FALSE = 0;
 constexpr int DISPLAY_ARROW_TRUE = 1;
 constexpr int32_t X_INDEX = 0;
@@ -142,22 +144,6 @@ int StringToBoolInt(const char* value, int defaultValue = 1)
     } else {
         return defaultValue;
     }
-}
-
-std::vector<std::string> StringSplit(const std::string& str, const std::string& delimiter)
-{
-    std::vector<std::string> result;
-
-    size_t start = 0;
-    size_t end = str.find(delimiter);
-    while (end != std::string::npos) {
-        result.push_back(str.substr(start, end - start));
-        start = end + delimiter.length();
-        end = str.find(delimiter, start);
-    }
-    result.push_back(str.substr(start, end - start));
-
-    return result;
 }
 
 int StringToEnumInt(const char* value, const std::vector<std::string>& vec, int defaultValue)
@@ -292,7 +278,8 @@ void SetMargin(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
         return;
     }
-    std::vector<std::string> params = StringSplit(value, " ");
+    std::vector<std::string> params;
+    StringUtils::StringSplitter(value, ' ', params);
     if (params.size() != NUM_4) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "params are invalid");
         return;
@@ -316,7 +303,8 @@ void SetTranslate(ArkUI_NodeHandle node, const char* value)
         return;
     }
 
-    std::vector<std::string> valuesSrc = StringSplit(value, ",");
+    std::vector<std::string> valuesSrc;
+    StringUtils::StringSplitter(value, ',', valuesSrc);
     auto size = valuesSrc.size();
     if (size <= 0) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "valuesSrc is empty");
@@ -339,21 +327,28 @@ void SetScale(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
         return;
     }
-
-    std::vector<std::string> valuesSrc = StringSplit(value, ",");
-    auto size = valuesSrc.size();
-    if (size <= 0) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "valuesSrc is empty");
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
         return;
     }
-    ArkUI_Float64 values[size];
+
+    std::vector<std::string> valuesSrc;
+    StringUtils::StringSplitter(value, ',', valuesSrc);
+    auto size = valuesSrc.size();
+    if (size != NUM_4) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "valuesSrc is invalid");
+        return;
+    }
+    ArkUI_Float64 values[size + NUM_1];
     for (int i = 0; i < size; ++i) {
         values[i] = StringUtils::StringToDouble(valuesSrc[i].c_str());
     }
+    values[size] = DEFAULT_Z_SCALE;
 
     ArkUI_Int32 units[NUM_2] = { UNIT_VP, UNIT_VP };
 
-    fullImpl->getNodeModifiers()->getCommonModifier()->setScale(node->uiNodeHandle, values, size, units, NUM_2);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setScale(node->uiNodeHandle, values,
+        size + NUM_1, units, NUM_2);
 }
 
 void SetRotate(ArkUI_NodeHandle node, const char* value)
@@ -363,7 +358,8 @@ void SetRotate(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
         return;
     }
-    std::vector<std::string> valuesSrc = StringSplit(value, ",");
+    std::vector<std::string> valuesSrc;
+    StringUtils::StringSplitter(value, ',', valuesSrc);
     auto size = valuesSrc.size();
     if (size <= 0) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "valuesSrc is empty");
@@ -385,6 +381,10 @@ void SetBrightness(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
         return;
     }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
     ArkUI_Float64 brightness = StringUtils::StringToDouble(value);
     fullImpl->getNodeModifiers()->getCommonModifier()->setBrightness(node->uiNodeHandle, brightness);
 }
@@ -394,6 +394,10 @@ void SetSaturate(ArkUI_NodeHandle node, const char* value)
     auto fullImpl = GetFullImpl();
     if (!fullImpl) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
         return;
     }
     ArkUI_Float64 saturate = StringUtils::StringToDouble(value);
@@ -407,6 +411,10 @@ void SetBlur(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
         return;
     }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
     ArkUI_Float64 blur = StringUtils::StringToDouble(value);
     fullImpl->getNodeModifiers()->getCommonModifier()->setBlur(node->uiNodeHandle, blur);
 }
@@ -418,48 +426,49 @@ void SetLinearGradient(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
         return;
     }
-    std::vector<std::string> params = StringSplit(value, " ");
-    if (params.size() != NUM_2) {
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
+    std::vector<std::string> params;
+    StringUtils::StringSplitter(value, ' ', params);
+    if (params.size() < NUM_1) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "params are invalid");
         return;
     }
 
-    std::vector<std::string> valuesSrc = StringSplit(params[NUM_0], ",");
-    auto size = valuesSrc.size();
-    if (size != NUM_4) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "valuesSrc is invalid");
+    std::vector<std::string> colorsSrc;
+    StringUtils::StringSplitter(params[NUM_0], ',', colorsSrc);
+    if (colorsSrc.size() % NUM_2) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "colorsSrc is invalid");
         return;
     }
-    ArkUI_Float64 values[size];
-    values[NUM_0] = StringToBoolInt(valuesSrc[NUM_0].c_str());
-    values[NUM_1] = StringUtils::StringToDouble(valuesSrc[NUM_1].c_str());
-
-    AttrStringToIntMap paramsMap = {
-        { "Left", 0 },
-        { "Top", 1 },
-        { "Right", 2 },
-        { "Bottom", 3 },
-        { "LeftTop", 4 },
-        { "LeftBottom", 5 },
-        { "RightTop", 6 },
-        { "RightBottom", 7 },
-        { "None", 8 },
-    };
-
-    auto attrVal = paramsMap.find(value) != paramsMap.end() ? paramsMap[value] : 0;
-    values[NUM_2] = attrVal;
-    values[NUM_3] = StringToBoolInt(valuesSrc[NUM_3].c_str());
-
-    std::vector<std::string> colorsSrc = StringSplit(params[NUM_1], ",");
-    ArkUI_Float64 colors[colorsSrc.size()];
-    for (int i = 0; i < colorsSrc.size(); i += NUM_3) {
-        colors[i + NUM_0] = StringToColorInt(colorsSrc[i + NUM_0].c_str());
-        colors[i + NUM_1] = StringToBoolInt(colorsSrc[i + NUM_1].c_str());
-        colors[i + NUM_2] = StringUtils::StringToDouble(colorsSrc[i + NUM_2].c_str());
+    auto size = colorsSrc.size() / NUM_2 * NUM_3;
+    ArkUI_Float64 colors[size];
+    for (int i = 0, j = 0; i < colorsSrc.size() && j < size; i += NUM_2, j += NUM_3) {
+        colors[j + NUM_0] = StringToColorInt(colorsSrc[i + NUM_0].c_str());
+        colors[j + NUM_1] = true;
+        colors[j + NUM_2] = StringUtils::StringToDouble(colorsSrc[i + NUM_1].c_str());
     }
 
-    fullImpl->getNodeModifiers()->getCommonModifier()->setLinearGradient(
-        node->uiNodeHandle, values, size, colors, colorsSrc.size());
+    ArkUI_Float64 values[NUM_4] = { false, DEFAULT_ANGLE, NUM_3, false };
+    if (params.size() > NUM_1) {
+        values[NUM_0] = true;
+        values[NUM_1] = StringUtils::StringToDouble(params[NUM_1].c_str());
+    }
+
+    AttrStringToIntMap paramsMap = {
+        { "left", 0}, { "top", 1}, { "right", 2}, { "bottom", 3}, { "left-top", 4},
+        { "left-bottom", 5}, { "right-top", 6}, { "right-bottom", 7}, { "none", 8},
+    };
+
+    if (params.size() > NUM_2) {
+        values[NUM_2] = paramsMap.find(params[NUM_2]) != paramsMap.end() ? paramsMap[params[NUM_2]] : NUM_3;
+    }
+    values[NUM_3] = (params.size() > NUM_3) ? StringToBoolInt(params[NUM_3].c_str()) : false;
+
+    fullImpl->getNodeModifiers()->getCommonModifier()->setLinearGradient(node->uiNodeHandle,
+        values, NUM_4, colors, size);
 }
 
 void SetAlign(ArkUI_NodeHandle node, const char* value)
@@ -474,8 +483,17 @@ void SetAlign(ArkUI_NodeHandle node, const char* value)
         return;
     }
 
-    AttrStringToIntMap paramsMap = { { "TopStart", 0 }, { "Top", 1 }, { "TopEnd", 2 }, { "Start", 3 }, { "Center", 4 },
-        { "End", 5 }, { "BottomStart", 6 }, { "Bottom", 7 }, { "BottomEnd", 8 } };
+    AttrStringToIntMap paramsMap = {
+        { "top-start", 0},
+        { "top", 1},
+        { "top-end", 2},
+        { "start", 3},
+        { "center", 4},
+        { "end", 5},
+        { "bottom-start", 6},
+        { "bottom", 7},
+        { "bottom-end", 8}
+    };
 
     auto attrVal = paramsMap.find(value) != paramsMap.end() ? paramsMap[value] : 0;
     fullImpl->getNodeModifiers()->getCommonModifier()->setAlign(node->uiNodeHandle, attrVal);
@@ -1074,9 +1092,22 @@ void SetAlignContent(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
         return;
     }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
 
-    AttrStringToIntMap paramsMap = { { "TopStart", 0 }, { "Top", 1 }, { "TopEnd", 2 }, { "Start", 3 }, { "Center", 4 },
-        { "End", 5 }, { "BottomStart", 6 }, { "Bottom", 7 }, { "BottomEnd", 8 } };
+    AttrStringToIntMap paramsMap = {
+        { "top-start", 0},
+        { "top", 1},
+        { "top-end", 2},
+        { "start", 3},
+        { "center", 4},
+        { "end", 5},
+        { "bottom-start", 6},
+        { "bottom", 7},
+        { "bottom-end", 8}
+    };
 
     auto attrVal = paramsMap.find(value) != paramsMap.end() ? paramsMap[value] : 0;
     fullImpl->getNodeModifiers()->getStackModifier()->setAlignContent(node->uiNodeHandle, attrVal);
@@ -1101,38 +1132,33 @@ void SetScrollScrollSnap(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
         return;
     }
-    std::vector<std::string> params = StringSplit(value, " ");
-    if (params.size() == 0) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is null");
+    std::vector<std::string> params;
+    StringUtils::StringSplitter(value, ' ', params);
+    if (params.size() != NUM_4) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "params are invalid");
         return;
     }
-    std::vector<std::string> paginationValueSrc = StringSplit(params[NUM_0], ",");
-    auto size = paginationValueSrc.size();
-    if (paginationValueSrc.empty()) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "paginationValueSrc.len is 0");
+    std::vector<std::string> paginationsSrc;
+    StringUtils::StringSplitter(value, ',', paginationsSrc);
+    auto size = paginationsSrc.size();
+    if (paginationsSrc.empty()) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "paginationsSrc is empty");
         return;
     }
-    ArkUI_Float64 paginationValue[size];
+    ArkUI_Float64 paginations[size];
+    ArkUI_Int32 paginationParams[NUM_4 + size];
     for (int i = 0; i < size; ++i) {
-        paginationValue[i] = StringToFloat(paginationValueSrc[i].c_str());
+        paginations[i] = StringUtils::StringToDouble(paginationsSrc[i].c_str());
+        paginationParams[i] = UNIT_VP;
     }
 
-    std::vector<std::string> paginationParamsSrc = StringSplit(params[NUM_1], ",");
-    if (paginationParamsSrc.empty()) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "paginationParamsSrc.len is 0");
-        return;
-    }
-    ArkUI_Int32 paginationParams[paginationParamsSrc.size() + size];
-    for (int i = 0; i < paginationParamsSrc.size() + size; ++i) {
-        if (i < size) {
-            paginationParams[i] = UNIT_VP;
-            continue;
-        }
-        paginationParams[i] = StringToFloat(paginationParamsSrc[i].c_str());
-    }
+    paginationParams[size + NUM_0] = StringToBoolInt(params[NUM_0].c_str());
+    paginationParams[size + NUM_1] = StringToBoolInt(params[NUM_2].c_str());
+    paginationParams[size + NUM_2] = StringToBoolInt(params[NUM_3].c_str());
+    paginationParams[size + NUM_3] = (size > 1) ? true : false;
 
-    fullImpl->getNodeModifiers()->getScrollModifier()->setScrollScrollSnap(
-        node->uiNodeHandle, paginationValue, size, paginationParams, paginationParamsSrc.size());
+    fullImpl->getNodeModifiers()->getScrollModifier()->setScrollScrollSnap(node->uiNodeHandle, paginations,
+        size, paginationParams, NUM_4 + size);
 }
 
 void SetScrollScrollBar(ArkUI_NodeHandle node, const char* value)
@@ -1148,9 +1174,9 @@ void SetScrollScrollBar(ArkUI_NodeHandle node, const char* value)
     }
 
     AttrStringToIntMap paramsMap = {
-        { "Off", 0 },
-        { "Auto", 1 },
-        { "On", 2 },
+        { "off", 0},
+        { "auto", 1},
+        { "on", 2},
     };
 
     auto attrVal = paramsMap.find(value) != paramsMap.end() ? paramsMap[value] : 0;
@@ -1196,13 +1222,13 @@ void SetScrollScrollable(ArkUI_NodeHandle node, const char* value)
     }
 
     AttrStringToIntMap paramsMap = {
-        { "Vertical", 0 },
-        { "Horizontal", 1 },
-        { "Free", 2 },
-        { "None", 3 },
+        { "vertical", 0},
+        { "horizontal", 1},
+        { "free", 2},
+        { "none", 3},
     };
 
-    auto attrVal = paramsMap.find(value) != paramsMap.end() ? paramsMap[value] : 0;
+    auto attrVal = paramsMap.find(value) != paramsMap.end() ? paramsMap[value] : NUM_0;
     fullImpl->getNodeModifiers()->getScrollModifier()->setScrollScrollable(node->uiNodeHandle, attrVal);
 }
 
@@ -1217,22 +1243,24 @@ void SetScrollEdgeEffect(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
         return;
     }
-    bool enabled = false;
-    std::vector<std::string> params = StringSplit(value, " ");
-    if (params.size() != NUM_2) {
+    bool alwaysEnabled = true;
+    std::vector<std::string> params;
+    StringUtils::StringSplitter(value, ' ', params);
+    auto size = params.size();
+    if (size <= 0) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "params are invalid");
         return;
     }
 
     AttrStringToIntMap paramsMap = {
-        { "Spring", 0 },
-        { "Fade", 1 },
-        { "None", 2 },
+        { "spring", 0},
+        { "fade", 1},
+        { "none", 2},
     };
 
-    auto attrVal = paramsMap.find(value) != paramsMap.end() ? paramsMap[value] : 0;
-    enabled = StringToBoolInt(params[NUM_1].c_str());
-    fullImpl->getNodeModifiers()->getScrollModifier()->setScrollEdgeEffect(node->uiNodeHandle, attrVal, enabled);
+    auto attrVal = paramsMap.find(params[NUM_0]) != paramsMap.end() ? paramsMap[params[NUM_0]] : NUM_0;
+    alwaysEnabled = (size > NUM_1) ? StringToBoolInt(params[NUM_1].c_str()) : true;
+    fullImpl->getNodeModifiers()->getScrollModifier()->setScrollEdgeEffect(node->uiNodeHandle, attrVal, alwaysEnabled);
 }
 
 void SetScrollEnableScrollInteraction(ArkUI_NodeHandle node, const char* value)
@@ -1242,22 +1270,16 @@ void SetScrollEnableScrollInteraction(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
         return;
     }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
     bool enableScrollInteraction = StringToBoolInt(value);
     fullImpl->getNodeModifiers()->getScrollModifier()->setEnableScrollInteraction(
         node->uiNodeHandle, enableScrollInteraction);
 }
 
 // List Attributes functions
-void SetListCachedCount(ArkUI_NodeHandle node, const char* value)
-{
-    auto fullImpl = GetFullImpl();
-    if (!fullImpl) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
-        return;
-    }
-    fullImpl->getNodeModifiers()->getListModifier()->setCachedCount(node->uiNodeHandle, StringToInt(value));
-}
-
 void SetListScrollBar(ArkUI_NodeHandle node, const char* value)
 {
     auto fullImpl = GetFullImpl();
@@ -1271,10 +1293,9 @@ void SetListScrollBar(ArkUI_NodeHandle node, const char* value)
     }
 
     AttrStringToIntMap paramsMap = {
-        { "Vertical", 0 },
-        { "Horizontal", 1 },
-        { "Free", 2 },
-        { "None", 3 },
+        { "off", 0},
+        { "auto", 1},
+        { "on", 2},
     };
 
     auto attrVal = paramsMap.find(value) != paramsMap.end() ? paramsMap[value] : 0;
@@ -1294,10 +1315,10 @@ void SetListListDirection(ArkUI_NodeHandle node, const char* value)
     }
 
     AttrStringToIntMap paramsMap = {
-        { "Vertical", 0 },
-        { "Horizontal", 1 },
-        { "Free", 2 },
-        { "None", 3 },
+        { "vertical", 0},
+        { "horizontal", 1},
+        { "free", 2},
+        { "none", 3},
     };
 
     auto attrVal = paramsMap.find(value) != paramsMap.end() ? paramsMap[value] : 0;
@@ -1317,7 +1338,12 @@ void SetListListSticky(ArkUI_NodeHandle node, const char* value)
         return;
     }
 
-    AttrStringToIntMap paramsMap = { { "None", 0 }, { "Header", 1 }, { "Footer", 2 }, { "Both", 3 } };
+    AttrStringToIntMap paramsMap = {
+        { "none", 0},
+        { "header", 1},
+        { "footer", 2},
+        { "both", 3}
+    };
 
     auto attrVal = paramsMap.find(value) != paramsMap.end() ? paramsMap[value] : 0;
 
@@ -1329,6 +1355,10 @@ void SetListEnableScrollInteraction(ArkUI_NodeHandle node, const char* value)
     auto fullImpl = GetFullImpl();
     if (!fullImpl) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
         return;
     }
     bool enableScrollInteraction = StringToBoolInt(value);
@@ -1347,22 +1377,23 @@ void SetListEdgeEffect(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
         return;
     }
-    ArkUI_Bool alwaysEnabled = false;
-    std::vector<std::string> params = StringSplit(value, " ");
-    if (params.size() != NUM_2) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "params is invalid");
+    ArkUI_Bool alwaysEnabled = true;
+    std::vector<std::string> params;
+    StringUtils::StringSplitter(value, ' ', params);
+    auto size = params.size();
+    if (size <= 0) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "params are invalid");
         return;
     }
 
     AttrStringToIntMap paramsMap = {
-        { "Spring", 0 },
-        { "Fade", 1 },
-        { "None", 2 },
+        { "spring", 0},
+        { "fade", 1},
+        { "none", 2},
     };
 
-    auto attrVal = paramsMap.find(value) != paramsMap.end() ? paramsMap[value] : 0;
-
-    alwaysEnabled = StringToBoolInt(params[NUM_1].c_str());
+    auto attrVal = paramsMap.find(params[NUM_0]) != paramsMap.end() ? paramsMap[params[NUM_0]] : NUM_0;
+    alwaysEnabled = (size > NUM_1) ? StringToBoolInt(params[NUM_1].c_str()) : true;
     fullImpl->getNodeModifiers()->getListModifier()->setListEdgeEffect(node->uiNodeHandle, attrVal, alwaysEnabled);
 }
 
@@ -2035,8 +2066,10 @@ void SetScrollAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const char* va
 
 void SetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const char* value)
 {
-    static Setter* setters[] = { SetListCachedCount, SetListScrollBar, SetListListDirection, SetListListSticky,
-        SetListEdgeEffect, SetListEnableScrollInteraction };
+    static Setter* setters[] = {
+        SetListScrollBar, SetListListDirection, SetListListSticky, SetListEdgeEffect,
+        SetListEnableScrollInteraction
+    };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

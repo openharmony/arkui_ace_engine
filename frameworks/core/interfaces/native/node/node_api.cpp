@@ -78,7 +78,7 @@ void InsertChildAfter(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHa
     ViewModel::InsertChildAfter(parent, child, sibling);
 }
 
-typedef void (*ComponentAsyncEventHandler)(ArkUINodeHandle node, ArkUI_Int32 eventId);
+typedef void (*ComponentAsyncEventHandler)(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
 
 /**
  * IMPORTANT!!!
@@ -112,7 +112,7 @@ const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
 };
 
 /* clang-format on */
-void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, ArkUI_Int32 eventId)
+void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, ArkUI_Int32 eventId, void* extraParam)
 {
     unsigned int subClassType = kind / ARKUI_MAX_EVENT_NUM;
     unsigned int subKind = kind % ARKUI_MAX_EVENT_NUM;
@@ -150,7 +150,7 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, A
         }
     }
     if (eventHandle) {
-        eventHandle(node, eventId);
+        eventHandle(node, eventId, extraParam);
     } else {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d EMPTY IMPLEMENT", kind);
     }

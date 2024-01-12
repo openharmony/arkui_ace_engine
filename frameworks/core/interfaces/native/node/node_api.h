@@ -131,6 +131,7 @@ struct ArkUINodeEvent {
     ArkUI_Int32 kind;    // Actually ArkUINodeAPIEventKind, but use int for fixed
                          // binary layout.
     ArkUI_Int32 eventId; // use to identify the event.
+    void* extraParam;
     union {
         ArkUINodeAsyncEvent componentAsyncEvent;
         ArkUIGestureAsyncEvent gestureAsyncEvent;
@@ -164,7 +165,8 @@ struct ArkUIBasicAPI {
     /**
      * notify the node to send node event back
      */
-    void (*registerNodeAsyncEvent)(ArkUINodeHandle nodePtr, ArkUIAsyncEventKind kind, ArkUI_Int32 eventId);
+    void (*registerNodeAsyncEvent)(ArkUINodeHandle nodePtr, ArkUIAsyncEventKind kind, ArkUI_Int32 eventId,
+        void* extraParam);
     void (*unRegisterNodeAsyncEvent)(ArkUINodeHandle nodePtr, ArkUIAsyncEventKind kind);
     void (*registerNodeAsyncEventReceiver)(void (*eventReceiver)(ArkUINodeEvent* event));
     void (*unRegisterNodeAsyncEventReceiver)();

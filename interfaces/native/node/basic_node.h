@@ -180,7 +180,7 @@ typedef enum {
     /**
      * @brief 通过<b>setAttribute</b>方法设置组件缩放.
      * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note 入参 centerX:double(单位vp),centerY:double(单位vp),x:double,y:double，格式字符串，如"0.5,0.5,1.0,0.5".
+     * @note 入参 centerX:double(单位vp),centerY:double(单位vp),x:double,y:double，格式字符串，如 "0.5,0.5,1.0,0.5".
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SCALE, "0.5,0.5,1.0,0.5");
      * @endcode
@@ -193,7 +193,7 @@ typedef enum {
      * @note 入参 centerX:double(单位vp),centerY:double(单位vp),centerZ:double(单位vp),x:double,y:double,
      *       z:double,angle:double,perspective:double，格式字符串，如 "0.5,0.5,0.0,0,0,1,300,0".
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCALE, "0.5,0.5,0.0,0,0,1,300,0");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_ROTATE, "0.5,0.5,0.0,0,0,1,300,0");
      * @endcode
      *
      */
@@ -231,13 +231,16 @@ typedef enum {
     /**
      * @brief 通过<b>setAttribute</b>方法设置组件颜色渐变效果.
      * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note 入参hasAngle:Boolean,angle:double,direction:String("Left","Top","Right","Bottom","LeftTop","LeftBottom",
-     *       "RightTop","RightBottom","None"),repeating:Boolean color:#argb类型,hasDimension:Boolean,
-     *       dimension:double([0,1])...，... 代表可重复，格式字符串，
-     *       如"false,90,Left,false #ffff0000,true,0.0,#ff0000ff,true,0.3,#ffffff00,true,0.5"
+     * @note 入参
+     *      colors:#argb,dimension:double(范围[0,1] 单位PERCENT)...
+     *      angle?:number(线性渐变的起始角度。0点方向顺时针旋转为正向角度。默认值：180)
+     *      direction?:String("left","top","right","bottom","left-top","left-bottom","right-top",
+     *                        "right-bottom","none", 默认值 "bottom")
+     *      repeating?:Boolean(默认值 false)
+     *      格式字符串，如 "#ffff0000,0.0,#ff0000ff,0.3,#ffffff00,0.5 90 left true"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_LINEAR_GRADIENT,
-     *     "false,90,Left,false #ffff0000,true,0.0,#ff0000ff,true,0.3,#ffffff00,true,0.5");
+     *      "#ffff0000,0.0,#ff0000ff,0.3,#ffffff00,0.5 90 left true");
      * @endcode
      *
      */
@@ -245,11 +248,10 @@ typedef enum {
     /**
      * @brief 通过<b>setAttribute</b>方法设置组件内容在元素绘制区域内的对齐方式.
      * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note
-     * 入参alignContent:String("TopStart","Top","TopEnd","Start","Center","End","BottomStart","Bottom","BottomEnd")
-     *       格式字符串，如 "Center"
+     * @note 入参 align:String("top-start","top","top-end","start","center","end","bottom-start","bottom",
+     *       "bottom-end")，格式字符串，如 "center"
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_ALIGN, "Center");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_ALIGN, "center");
      * @endcode
      *
      */
@@ -724,11 +726,10 @@ typedef enum {
     /**
      * @brief 通过<b>setAttribute</b>方法设置子组件在容器内的对齐方式.
      * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note
-     * 入参alignContent:String("TopStart","Top","TopEnd","Start","Center","End","BottomStart","Bottom","BottomEnd")
-     *       格式字符串，如 "Center"
+     * @note 入参 alignContent:String("top-start","top","top-end","start","center","end","bottom-start","bottom",
+     *       "bottom-end")，格式字符串，如 "center"
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_STACK_ALIGN_CONTENT, "Center");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_STACK_ALIGN_CONTENT, "center");
      * @endcode
      *
      */
@@ -737,9 +738,9 @@ typedef enum {
     /**
      * @brief 通过<b>setAttribute</b>方法设置滚动条状态.
      * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note 入参 displayMode:String("Off","Auto","On") ，格式字符串，如 "On"
+     * @note 入参 displayMode:String("off","auto","on") ，格式字符串，如 "on"
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_BAR, "On");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_BAR, "on");
      * @endcode
      *
      */
@@ -747,7 +748,7 @@ typedef enum {
     /**
      * @brief 通过<b>setAttribute</b>方法设置滚动条的宽度.
      * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note 入参 srcollBarWidth:double , 格式字符串，如 "2"
+     * @note 入参 srcollBarWidth:double(单位vp) , 格式字符串，如 "2"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_BAR_WIDTH, "2");
      * @endcode
@@ -755,7 +756,7 @@ typedef enum {
      */
     NODE_SCROLL_SCROLL_BAR_WIDTH,
     /**
-     * @brief 通过<b>setAttribute</b>方法设置滚动条的宽度.
+     * @brief 通过<b>setAttribute</b>方法设置滚动条的颜色.
      * @see ArkUI_BasicNodeAPI::setAttribute
      * @note 入参color: #argb类型，格式字符串，如"#ffffffff"
      * @code {.c}
@@ -767,9 +768,9 @@ typedef enum {
     /**
      * @brief 通过<b>setAttribute</b>方法设置滚动方向.
      * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note 入参 axis:String("Vertical","Horizontal","Free","None")，格式字符串，如 "Vertical"
+     * @note 入参 axis:String("vertical","horizontal","free","none")，格式字符串，如 "vertical"
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLLABLE, "Vertical");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLLABLE, "vertical");
      * @endcode
      *
      */
@@ -777,9 +778,10 @@ typedef enum {
     /**
      * @brief 通过<b>setAttribute</b>方法设置边缘滑动效果.
      * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note 入参 edgeEffect:String("Spring","Fade","None") alwaysEnabled:Boolean ，格式字符串，如 "Spring true"
+     * @note 入参 edgeEffect:String("spring","fade","none") alwaysEnabled?:Boolean(默认值为true) ，格式字符串，
+     *       如 "spring" 或者 "spring false"
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_EDGE_EFFECT, "Spring true");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_EDGE_EFFECT, "spring");
      * @endcode
      *
      */
@@ -788,7 +790,7 @@ typedef enum {
      * @brief
      * 通过<b>setAttribute</b>方法设置是否支持滚动手势，当设置为false时，无法通过手指或者鼠标滚动，但不影响控制器的滚动接口.
      * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note 入参enableScrollInteraction： Boolean，格式为字符串，如"true"
+     * @note 入参 enableScrollInteraction:Boolean，格式为字符串，如"true"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_ENABLE_SCROLL_INTERACTION, "true");
      * @endcode
@@ -799,7 +801,7 @@ typedef enum {
      * @brief
      * 通过<b>setAttribute</b>方法设置摩擦系数，手动划动滚动区域时生效，只对惯性滚动过程有影响，对惯性滚动过程中的链式效果有间接影响.
      * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note 入参fiction: float, 格式为字符串，如"0.6"
+     * @note 入参 fiction:float, 格式为字符串，如 "0.6"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_FRICTION, "0.6");
      * @endcode
@@ -809,40 +811,30 @@ typedef enum {
     /**
      * @brief 通过<b>setAttribute</b>方法设置Scroll组件的限位滚动模式.
      * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note 入参paginationValue:Array paginationParams:Array, 格式字符串 "pagination1,pagination2,...
-     * snapAlign,snapToStart, snapToEnd,isArray", 格式字符串，如 "0,500,1000,1500 0,1,1,0"
+     * @note 入参 snapAlign:String("none","start","center","end") pagination1:double(单位vp),pagination2:double(单位vp),...
+     *            enableSnapToStart:Boolean enableSnapToEnd:Boolean", 格式字符串，如 "start 0,500,1000,1500 true true"
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_SNAP, "0,500,1000,1500 0,1,1,0");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_SNAP, "none 0,500,1000,1500 true true");
      * @endcode
      *
      */
     NODE_SCROLL_SCROLL_SNAP,
     /**
-     * @brief 通过<b>setAttribute</b>方法设置列表中ListItem/ListItemGroup的预加载数量，只在LazyForEach中生效.
-     * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note 入参cachedCount: int, 格式字符串，如"5"
-     * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_CACHED_COUNT, "5");
-     * @endcode
-     *
-     */
-    NODE_LIST_CACHED_COUNT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LIST,
-    /**
      * @brief 通过<b>setAttribute</b>方法设置滚动条状态.
      * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note 入参 displayMode:String("Off","Auto","On") ，格式字符串，如 "On"
+     * @note 入参 displayMode:String("off","auto","on") ，格式字符串，如 "on"
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_BAR, "2");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_BAR, "on");
      * @endcode
      *
      */
-    NODE_LIST_SCROLL_BAR,
+    NODE_LIST_SCROLL_BAR = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LIST,
     /**
      * @brief 通过<b>setAttribute</b>方法设置List组件排列方向.
      * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note 入参 axis:String("Vertical","Horizontal","Free","None")，格式字符串，如 "Vertical"
+     * @note 入参 axis:String("vertical","horizontal","free","none")，格式字符串，如 "vertical"
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_LIST_DIRECTION, "Vertical");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_LIST_DIRECTION, "vertical");
      * @endcode
      *
      */
@@ -850,9 +842,9 @@ typedef enum {
     /**
      * @brief 通过<b>setAttribute</b>方法配合ListItemGroup组件使用，设置ListItemGroup中header和footer是否要吸顶或吸底.
      * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note 入参 stickyStyle:String("None","Header","Footer","Both")，格式字符串，如"Header"
+     * @note 入参 stickyStyle:String("none","header","footer","both")，格式字符串，如 "header"
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_STICKY, "Header");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_STICKY, "header");
      * @endcode
      *
      */
@@ -860,9 +852,10 @@ typedef enum {
     /**
      * @brief 通过<b>setAttribute</b>方法设置边缘滑动效果.
      * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note 入参 edgeEffect:String("Spring","Fade","None") alwaysEnabled:Boolean ，格式字符串，如 "Spring true"
+     * @note 入参 edgeEffect:String("spring","fade","none") alwaysEnabled?:Boolean(默认值 true) ，格式字符串，
+     *       如 "spring" 或 "spring false"
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_EDGE_EFFECT, "Spring true");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_EDGE_EFFECT, "spring");
      * @endcode
      *
      */
@@ -871,7 +864,7 @@ typedef enum {
      * @brief
      * 通过<b>setAttribute</b>方法设置是否支持滚动手势，当设置为false时，无法通过手指或者鼠标滚动，但不影响控制器的滚动接口.
      * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note 入参enableScrollInteraction： Boolean，格式为字符串，如"true"
+     * @note 入参 enableScrollInteraction:Boolean，格式为字符串，如"true"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_ENABLE_SCROLL_INTERACTION, "true");
      * @endcode
@@ -1108,6 +1101,11 @@ typedef struct {
      * 该事件id在调用<b>::registerNodeEvent</b>函数时作为参数传递进来。
      */
     int32_t eventId;
+    /**
+     * @brief 事件所属组件。
+     */
+    ArkUI_NodeHandle node;
+
     union {
         /** touch事件类型回调参数。*/
         ArkUI_NodeTouchEvent touchEvent;
