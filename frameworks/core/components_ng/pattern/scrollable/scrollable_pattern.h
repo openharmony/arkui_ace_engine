@@ -495,6 +495,7 @@ protected:
     bool multiSelectable_ = false;
     bool isMouseEventInit_ = false;
     OffsetF mouseStartOffset_;
+    OffsetF mouseStartOffsetGlobal_;
     float totalOffsetOfMousePressed_ = 0.0f;
     std::unordered_map<int32_t, ItemSelectedStatus> itemToBeSelected_;
 
@@ -538,12 +539,13 @@ private:
     // select with mouse
     virtual void MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
     virtual void ClearMultiSelect() {};
-    virtual bool IsItemSelected(const GestureEvent& info)
+    virtual bool IsItemSelected()
     {
         return false;
     }
     void ClearInvisibleItemsSelectedStatus();
     void HandleInvisibleItemsSelectedStatus(const RectF& selectedZone);
+    void HandleMouseEventWithoutKeyboard(const MouseInfo& info);
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(const GestureEvent& info);
@@ -642,6 +644,7 @@ private:
     GestureEvent lastMouseMove_;
     RefPtr<SelectMotion> selectMotion_;
     RefPtr<PanEvent> boxSelectPanEvent_;
+    RefPtr<InputEvent> mouseEvent_;
 
     RefPtr<NavBarPattern> navBarPattern_;
     RefPtr<SheetPresentationPattern> sheetPattern_;

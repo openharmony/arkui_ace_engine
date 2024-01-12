@@ -59,6 +59,7 @@ struct PopupInfo {
     bool isBlockEvent = true;
     SizeF targetSize;
     OffsetF targetOffset;
+    bool focusable = false;
 };
 
 // StageManager is the base class for root render node to perform page switch.

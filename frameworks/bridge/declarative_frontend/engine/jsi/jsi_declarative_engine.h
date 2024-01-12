@@ -79,6 +79,7 @@ public:
     static void TriggerPageUpdate(const shared_ptr<JsRuntime>&);
     static RefPtr<PipelineBase> GetPipelineContext(const shared_ptr<JsRuntime>& runtime);
     static void PreloadAceModule(void* runtime);
+    static void PreloadAceModuleWorker(void* runtime);
 
     WeakPtr<JsMessageDispatcher> GetJsMessageDispatcher() const
     {
@@ -449,7 +450,7 @@ private:
     std::string pluginModuleName_;
     static thread_local std::unordered_map<std::string, NamedRouterProperty> namedRouterRegisterMap_;
     bool isFirstCallShow_ = true;
-    static panda::Global<panda::ObjectRef> obj_;
+    static thread_local panda::Global<panda::ObjectRef> obj_;
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngine);
 };
 

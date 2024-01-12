@@ -76,9 +76,14 @@ bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     }
 
     if (!isCanvasInit_) {
-        customPaintEventHub->FireReadyEvent();
+        auto context = PipelineContext::GetCurrentContext();
+        if (context) {
+            context->AddAfterLayoutTask([customPaintEventHub]() {
+                    customPaintEventHub->FireReadyEvent();
+                });
+        }
         isCanvasInit_ = true;
-        return true;
+        return context != nullptr;
     }
     return false;
 }

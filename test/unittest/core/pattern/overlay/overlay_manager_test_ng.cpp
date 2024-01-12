@@ -2380,10 +2380,18 @@ HWTEST_F(OverlayManagerTestNg, TestSheetAvoidaiBar, TestSize.Level1)
     NG::SheetStyle style;
     auto sheetNode = SheetView::CreateSheetPage(0, "", operationColumn, operationColumn, std::move(callback), style);
     ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
     auto scrollNode = AceType::DynamicCast<FrameNode>(sheetNode->GetChildAtIndex(1));
     ASSERT_NE(scrollNode, nullptr);
+    auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
+    ASSERT_NE(scrollPattern, nullptr);
     auto scrollLayoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
     ASSERT_NE(scrollLayoutProperty, nullptr);
+    sheetPattern->AvoidAiBar();
+    EXPECT_EQ(scrollLayoutProperty->GetScrollContentEndOffsetValue(.0f), .0f);
+    scrollPattern->scrollableDistance_ = 10.0f;
+    sheetPattern->AvoidAiBar();
     EXPECT_EQ(scrollLayoutProperty->GetScrollContentEndOffsetValue(.0f),
         PipelineContext::GetCurrentContext()->GetSafeArea().bottom_.Length());
 }

@@ -33,7 +33,6 @@
 namespace OHOS::Ace {
 std::unique_ptr<UIExtensionModel> UIExtensionModel::instance_ = nullptr;
 std::mutex UIExtensionModel::mutex_;
-constexpr int32_t PLATFORM_VERSION_ELEVEN = 11;
 
 UIExtensionModel* UIExtensionModel::GetInstance()
 {
@@ -356,12 +355,8 @@ void JSUIExtension::Create(const JSCallbackInfo& info)
     auto wantObj = JSRef<JSObject>::Cast(info[0]);
     RefPtr<OHOS::Ace::WantWrap> want = CreateWantWrapFromNapiValue(wantObj);
 
-    auto pipeline = PipelineBase::GetCurrentContext();
     bool transferringCaller = false;
-    CHECK_NULL_VOID(pipeline);
-    if (pipeline->GetMinPlatformVersion() >= PLATFORM_VERSION_ELEVEN &&
-        info.Length() > 1 &&
-        info[1]->IsObject()) {
+    if (info.Length() > 1 && info[1]->IsObject()) {
         auto obj = JSRef<JSObject>::Cast(info[1]);
         JSRef<JSVal> transferringCallerValue = obj->GetProperty("isTransferringCaller");
         if (transferringCallerValue->IsBoolean()) {

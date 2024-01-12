@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -206,6 +207,17 @@ void EventHub::HandleInternalOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, co
     if (IsFireOnDrop(info)) {
         FireOnDrop(info, extraParams);
     }
+}
+
+void EventHub::AddInnerOnAreaChangedCallback(int32_t id, OnAreaChangedFunc&& callback)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    pipeline->AddOnAreaChangeNode(frameNode->GetId());
+    frameNode->InitLastArea();
+    onAreaChangedInnerCallbacks_[id] = std::move(callback);
 }
 
 } // namespace OHOS::Ace::NG

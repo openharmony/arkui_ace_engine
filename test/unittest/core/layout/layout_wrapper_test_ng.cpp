@@ -1854,7 +1854,7 @@ HWTEST_F(LayoutWrapperTestNg, LayoutWrapperTest047, TestSize.Level1)
     layoutWrapper->layoutProperty_->UpdateSafeAreaExpandOpts({ SAFE_AREA_TYPE_NONE, SAFE_AREA_EDGE_NONE });
     layoutWrapper->hostNode_.Upgrade()->tag_ = V2::STAGE_ETS_TAG;
     layoutWrapper->SaveGeoState();
-    EXPECT_FALSE(layoutWrapper->GetGeometryNode()->previousState_);
+    EXPECT_TRUE(layoutWrapper->GetGeometryNode()->previousState_);
 }
 
 /**

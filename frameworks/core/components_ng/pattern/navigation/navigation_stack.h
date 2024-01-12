@@ -130,9 +130,12 @@ public:
     }
     virtual bool GetAnimatedValue() const
     {
-        return true;
+        return animated_;
     }
-    virtual void UpdateAnimatedValue(bool animated) {}
+    virtual void UpdateAnimatedValue(bool animated)
+    {
+        animated_ = animated;
+    }
     int32_t FindIndex(const std::string& name, const RefPtr<UINode>& navDestinationNode, bool isNavPathList);
     virtual std::string GetRouteParam() const
     {
@@ -150,6 +153,7 @@ private:
     // prev backup NavPathList
     NavPathList preNavPathList_;
     NavPathList cacheNodes_;
+    bool animated_ = true;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_STACK_H

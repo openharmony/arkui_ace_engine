@@ -86,6 +86,34 @@ void TabBarPattern::OnAttachToFrameNode()
             scrollable->StopScrollable();
         }
     });
+    InitSurfaceChangedCallback();
+}
+
+void TabBarPattern::InitSurfaceChangedCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    if (!HasSurfaceChangedCallback()) {
+        auto callbackId = pipeline->RegisterSurfaceChangedCallback(
+            [weak = WeakClaim(this)](int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight,
+                WindowSizeChangeReason type) {
+                if (type == WindowSizeChangeReason::UNDEFINED) {
+                    return;
+                }
+                auto pattern = weak.Upgrade();
+                if (!pattern) {
+                    return;
+                }
+
+                if (type == WindowSizeChangeReason::ROTATION) {
+                    pattern->windowSizeChangeReason_ = type;
+                    pattern->StopTranslateAnimation();
+                }
+            });
+        UpdateSurfaceChangedCallbackId(callbackId);
+    }
 }
 
 void TabBarPattern::InitClick(const RefPtr<GestureEventHub>& gestureHub)
@@ -657,6 +685,13 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         UpdateIndicator(indicator);
     }
     isFirstLayout_ = false;
+
+    if (windowSizeChangeReason_ == WindowSizeChangeReason::ROTATION &&
+        animationTargetIndex_.has_value() && animationTargetIndex_ != indicator) {
+        swiperController_->SwipeToWithoutAnimation(animationTargetIndex_.value());
+        windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
+    }
+    animationTargetIndex_.reset();
     UpdateGradientRegions(!swiperPattern->IsUseCustomAnimation());
     if (!swiperPattern->IsUseCustomAnimation() && isTouchingSwiper_ &&
         layoutProperty->GetTabBarModeValue(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
@@ -694,6 +729,8 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
     }
 
     auto index = CalculateSelectedIndex(info.GetLocalLocation());
+    TAG_LOGI(AceLogTag::ACE_TABS, "Clicked tabBarIndex: %{public}d, Clicked tabBarLocation: %{public}s", index,
+        info.GetLocalLocation().ToString().c_str());
     if (index < 0 || index >= totalCount || !swiperController_ ||
         indicator_ >= static_cast<int32_t>(tabBarStyles_.size())) {
         return;
@@ -717,6 +754,7 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
     } else {
         if (GetAnimationDuration().has_value()) {
             swiperController_->SwipeTo(index);
+            animationTargetIndex_ = index;
         } else {
             swiperController_->SwipeToWithoutAnimation(index);
         }
@@ -1381,7 +1419,7 @@ void TabBarPattern::TriggerTranslateAnimation(
         PlayTranslateAnimation(originalPaintRect.GetX() + originalPaintRect.Width() / 2,
             targetPaintRect.GetX() + targetPaintRect.Width() / 2, targetOffset);
     }
-
+    animationTargetIndex_ = index;
     UpdateTextColor(index);
 }
 
@@ -1959,9 +1997,9 @@ bool TabBarPattern::CheckSwiperDisable() const
     CHECK_NULL_RETURN(tabsNode, true);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());
     CHECK_NULL_RETURN(swiperNode, true);
-    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_RETURN(swiperPaintProperty, true);
-    return swiperPaintProperty->GetDisableSwipe().value_or(false);
+    auto props = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(props, true);
+    return props->GetDisableSwipe().value_or(false);
 }
 
 void TabBarPattern::SetSwiperCurve(const RefPtr<Curve>& curve) const

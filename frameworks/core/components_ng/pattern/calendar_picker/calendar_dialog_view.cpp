@@ -73,11 +73,12 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
         BorderRadiusProperty radius;
         radius.SetRadius(theme->GetDialogBorderRadius());
         renderContext->UpdateBorderRadius(radius);
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-            renderContext->IsUniRenderEnabled()) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
             BlurStyleOption styleOption;
-            styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
+            styleOption.blurStyle = static_cast<BlurStyle>(
+                dialogProperties.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
             renderContext->UpdateBackBlurStyle(styleOption);
+            renderContext->UpdateBackgroundColor(dialogProperties.backgroundColor.value_or(Color::TRANSPARENT));
         }
     }
     renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowS);
@@ -281,15 +282,13 @@ RefPtr<FrameNode> CalendarDialogView::CreateCalendarSwiperNode()
     auto swiperNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     CHECK_NULL_RETURN(swiperNode, nullptr);
-    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_RETURN(swiperPaintProperty, nullptr);
-    swiperPaintProperty->UpdateDisableSwipe(false);
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
     swiperLayoutProperty->UpdateIndex(CURRENT_MONTH_INDEX);
     swiperLayoutProperty->UpdateShowIndicator(false);
     swiperLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     swiperLayoutProperty->UpdateLoop(true);
+    swiperLayoutProperty->UpdateDisableSwipe(false);
     return swiperNode;
 }
 

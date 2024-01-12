@@ -73,6 +73,7 @@ void SelectOverlayClient::InitSelectOverlay()
     selectOverlayInfo_.callerFrameNode = GetClientHost();
     selectOverlayInfo_.firstHandle.isShow = false;
     selectOverlayInfo_.secondHandle.isShow = false;
+    selectOverlayInfo_.hitTestMode = HitTestMode::HTMDEFAULT;
 }
 
 void SelectOverlayClient::RequestOpenSelectOverlay(ClientOverlayInfo& showOverlayInfo)

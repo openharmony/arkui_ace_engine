@@ -132,7 +132,7 @@ XComponentPattern::XComponentPattern(const std::string& id, XComponentType type,
     initSize_.SetHeight(initHeight);
 }
 
-void XComponentPattern::CreateSurface(int32_t instanceId)
+void XComponentPattern::Initialize(int32_t instanceId)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -167,10 +167,17 @@ void XComponentPattern::CreateSurface(int32_t instanceId)
             renderSurface_->SetRenderContext(renderContext);
             renderSurface_->SetIsTexture(true);
         }
+
         renderSurface_->InitSurface();
         renderSurface_->UpdateXComponentConfig();
         InitEvent();
         SetMethodCall();
+    } else if (type_ == XComponentType::NODE) {
+        auto context = PipelineContext::GetCurrentContext();
+        if (context) {
+            FireExternalEvent(context, id_, host->GetId(), false);
+            InitNativeNodeCallbacks();
+        }
     }
     renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
 }
@@ -178,7 +185,7 @@ void XComponentPattern::CreateSurface(int32_t instanceId)
 void XComponentPattern::OnAttachToFrameNode()
 {
     instanceId_ = Container::CurrentId();
-    CreateSurface(instanceId_);
+    Initialize(instanceId_);
 }
 
 void XComponentPattern::OnAreaChangedInner()
@@ -253,7 +260,8 @@ void XComponentPattern::ConfigSurface(uint32_t surfaceWidth, uint32_t surfaceHei
 
 bool XComponentPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    if (type_ == XComponentType::COMPONENT || config.skipMeasure || dirty->SkipMeasureContent()) {
+    if (type_ == XComponentType::COMPONENT || type_ == XComponentType::NODE
+        || config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
     auto geometryNode = dirty->GetGeometryNode();
@@ -413,6 +421,36 @@ void XComponentPattern::XComponentSizeChange(float textureWidth, float textureHe
     renderSurface_->AdjustNativeWindowSize(
         static_cast<uint32_t>(textureWidth * viewScale), static_cast<uint32_t>(textureHeight * viewScale));
     NativeXComponentChange(textureWidth, textureHeight);
+}
+
+void XComponentPattern::InitNativeNodeCallbacks()
+{
+    CHECK_NULL_VOID(nativeXComponent_);
+    CHECK_NULL_VOID(nativeXComponentImpl_);
+
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    nativeXComponentImpl_->registerContaner(AceType::RawPtr(host));
+
+    auto OnAttachRootNativeNode = [](void* container, void* root) {
+        auto node = AceType::Claim(reinterpret_cast<NG::FrameNode*>(root));
+        CHECK_NULL_VOID(node);
+        auto host = AceType::Claim(reinterpret_cast<NG::FrameNode*>(container));
+        CHECK_NULL_VOID(host);
+        host->AddChild(node);
+        host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    };
+
+    auto OnDetachRootNativeNode = [](void* container, void* root) {
+        auto node = AceType::Claim(reinterpret_cast<NG::FrameNode*>(root));
+        CHECK_NULL_VOID(node);
+        auto host = AceType::Claim(reinterpret_cast<NG::FrameNode*>(container));
+        CHECK_NULL_VOID(host);
+        host->RemoveChild(node);
+    };
+
+    nativeXComponentImpl_->registerNativeNodeCallbacks(std::move(OnAttachRootNativeNode),
+        std::move(OnDetachRootNativeNode));
 }
 
 void XComponentPattern::InitEvent()
@@ -714,6 +752,21 @@ std::vector<OH_NativeXComponent_HistoricalPoint> XComponentPattern::SetHistoryPo
     return historicalPoints;
 }
 
+
+void XComponentPattern::FireExternalEvent(RefPtr<NG::PipelineContext> context,
+    const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
+{
+    CHECK_NULL_VOID(context);
+#ifdef NG_BUILD
+    auto frontEnd = AceType::DynamicCast<DeclarativeFrontendNG>(context->GetFrontend());
+#else
+    auto frontEnd = AceType::DynamicCast<DeclarativeFrontend>(context->GetFrontend());
+#endif
+    CHECK_NULL_VOID(frontEnd);
+    auto jsEngine = frontEnd->GetJsEngine();
+    jsEngine->FireExternalEvent(componentId, nodeId, isDestroy);
+}
+
 ExternalEvent XComponentPattern::CreateExternalEvent()
 {
     return [weak = AceType::WeakClaim(this), instanceId = instanceId_](
@@ -721,14 +774,9 @@ ExternalEvent XComponentPattern::CreateExternalEvent()
         ContainerScope scope(instanceId);
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
-#ifdef NG_BUILD
-        auto frontEnd = AceType::DynamicCast<DeclarativeFrontendNG>(context->GetFrontend());
-#else
-        auto frontEnd = AceType::DynamicCast<DeclarativeFrontend>(context->GetFrontend());
-#endif
-        CHECK_NULL_VOID(frontEnd);
-        auto jsEngine = frontEnd->GetJsEngine();
-        jsEngine->FireExternalEvent(componentId, nodeId, isDestroy);
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->FireExternalEvent(context, componentId, nodeId, isDestroy);
     };
 }
 

@@ -153,11 +153,70 @@ void ResetMark(NodeHandle node)
     CheckBoxModelNG::SetCheckMarkWidth(frameNode, checkBoxTheme->GetCheckStroke());
 }
 
+void SetCheckboxPadding(NodeHandle node, const double* values, const int* units)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcLength topDimen;
+    CalcLength rightDimen;
+    CalcLength bottomDimen;
+    CalcLength leftDimen;
+    topDimen = CalcLength(values[0], static_cast<DimensionUnit>(units[0])); // 0: top Dimension
+    rightDimen = CalcLength(values[1], static_cast<DimensionUnit>(units[1])); // 1: right Dimension
+    bottomDimen = CalcLength(values[2], static_cast<DimensionUnit>(units[2])); // 2: bottom Dimension
+    leftDimen = CalcLength(values[3], static_cast<DimensionUnit>(units[3])); // 3: left Dimension
+    NG::PaddingProperty padding;
+    padding.top = std::optional<CalcLength>(topDimen);
+    padding.bottom = std::optional<CalcLength>(bottomDimen);
+    padding.left = std::optional<CalcLength>(leftDimen);
+    padding.right = std::optional<CalcLength>(rightDimen);
+
+    CheckBoxModelNG::SetPadding(frameNode, padding);
+}
+
+void SetCheckboxResponseRegion(NodeHandle node, const double* values, const int32_t* units, uint32_t length)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<DimensionRect> region;
+    int32_t AYYAY_LENGTH = 4; // 4: dimension length
+    for (uint32_t i = 0; i < length / 4; i++) {
+        CalcDimension xDimen =
+            CalcDimension(values[i * AYYAY_LENGTH], static_cast<DimensionUnit>(units[i * AYYAY_LENGTH]));
+        CalcDimension yDimen =
+            CalcDimension(values[i * AYYAY_LENGTH + 1], static_cast<DimensionUnit>(units[i * AYYAY_LENGTH + 1]));
+        CalcDimension widthDimen = CalcDimension(
+            values[i * AYYAY_LENGTH + 2], static_cast<DimensionUnit>(units[i * AYYAY_LENGTH + 2])); // 2: width value
+        CalcDimension heightDimen = CalcDimension(
+            values[i * AYYAY_LENGTH + 3], static_cast<DimensionUnit>(units[i * AYYAY_LENGTH + 3])); // 3: height value
+        DimensionOffset offsetDimen(xDimen, yDimen);
+        DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
+        region.emplace_back(dimenRect);
+    }
+    CheckBoxModelNG::SetResponseRegion(frameNode, region);
+}
+
+void ResetCheckboxPadding(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::PaddingProperty padding;
+    padding.top = std::optional<CalcLength>(CalcLength(0.0, DimensionUnit::VP));
+    padding.bottom = std::optional<CalcLength>(CalcLength(0.0, DimensionUnit::VP));
+    padding.left = std::optional<CalcLength>(CalcLength(0.0, DimensionUnit::VP));
+    padding.right = std::optional<CalcLength>(CalcLength(0.0, DimensionUnit::VP));
+
+    CheckBoxModelNG::SetPadding(frameNode, padding);
+}
+
+void ResetCheckboxResponseRegion(NodeHandle node) {}
+
 ArkUICheckboxModifierAPI GetCheckboxModifier()
 {
     static const ArkUICheckboxModifierAPI modifier = { SetSelect, SetSelectedColor, SetUnSelectedColor,
-        SetCheckboxWidth, SetCheckboxHeight, SetMark, ResetSelect, ResetSelectedColor, ResetUnSelectedColor,
-        ResetCheckboxWidth, ResetCheckboxHeight, ResetMark };
+        SetCheckboxWidth, SetCheckboxHeight, SetMark, SetCheckboxPadding, SetCheckboxResponseRegion, ResetSelect,
+        ResetSelectedColor, ResetUnSelectedColor, ResetCheckboxWidth, ResetCheckboxHeight, ResetMark,
+        ResetCheckboxPadding, ResetCheckboxResponseRegion };
 
     return modifier;
 }

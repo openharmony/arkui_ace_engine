@@ -820,6 +820,8 @@ void WebPattern::HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info)
     // use summary to set fake data
     ClearDragData();
     delegate_->HandleDragEvent(localX, localY, DragAction::DRAG_ENTER);
+    // RequestFocus to show the carret frame_caret
+    WebRequestFocus();
 }
 
 void WebPattern::HandleOnDragDropLink(RefPtr<UnifiedData> aceData)
@@ -1164,7 +1166,7 @@ void WebPattern::UpdateLayoutAfterKerboardShow(int32_t width, int32_t height, do
             return;
         }
         drawSize_.SetHeight(newHeight);
-        UpdateWebLayoutSize(width, height);
+        UpdateWebLayoutSize(width, height, true);
     }
 }
 
@@ -1646,7 +1648,7 @@ void WebPattern::OnModifyDone()
 
     // offline mode
     if (host->GetNodeStatus() != NodeStatus::NORMAL_NODE) {
-        TAG_LOGE(AceLogTag::ACE_WEB, "Web offline mode type");
+        TAG_LOGI(AceLogTag::ACE_WEB, "Web offline mode type");
         isOfflineMode_ = true;
         OfflineMode();
     }
@@ -1692,7 +1694,7 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
     if (!isFocus_ || !isVisible_) {
         if (isVirtualKeyBoardShow_ == VkState::VK_SHOW) {
             drawSize_.SetSize(drawSizeCache_);
-            UpdateWebLayoutSize(width, height);
+            UpdateWebLayoutSize(width, height, false);
             isVirtualKeyBoardShow_ = VkState::VK_HIDE;
         }
         return false;
@@ -1702,7 +1704,7 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
             return false;
         }
         drawSize_.SetSize(drawSizeCache_);
-        UpdateWebLayoutSize(width, height);
+        UpdateWebLayoutSize(width, height, false);
         isVirtualKeyBoardShow_ = VkState::VK_HIDE;
     } else if (isVirtualKeyBoardShow_ != VkState::VK_SHOW) {
         drawSizeCache_.SetSize(drawSize_);
@@ -1733,7 +1735,7 @@ bool WebPattern::ProcessVirtualKeyBoard(int32_t width, int32_t height, double ke
     return true;
 }
 
-void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height)
+void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard)
 {
     CHECK_NULL_VOID(delegate_);
     if (delegate_->ShouldVirtualKeyboardOverlay()) {
@@ -1745,8 +1747,8 @@ void WebPattern::UpdateWebLayoutSize(int32_t width, int32_t height)
     auto rect = frameNode->GetGeometryNode()->GetFrameRect();
     auto offset = Offset(GetCoordinatePoint()->GetX(), GetCoordinatePoint()->GetY());
 
-    // Scroll focused node into view when keyboard show or hide, so set isKeyboard to true here.
-    delegate_->SetBoundsOrResize(drawSize_, offset, true);
+    // Scroll focused node into view when keyboard show.
+    delegate_->SetBoundsOrResize(drawSize_, offset, isKeyboard);
 
     rect.SetSize(SizeF(drawSize_.Width(), drawSize_.Height()));
     frameNode->GetRenderContext()->SyncGeometryProperties(rect);
@@ -1957,9 +1959,12 @@ void WebPattern::RegisterSelectOverlayCallback(SelectOverlayInfo& selectInfo,
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params,
     std::shared_ptr<OHOS::NWeb::NWebQuickMenuCallback> callback)
 {
+    CHECK_NULL_VOID(delegate_);
+    auto copyOption = delegate_->GetCopyOptionMode();
     quickMenuCallback_ = callback;
     int32_t flags = params->GetEditStateFlags();
-    if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT) {
+    if ((flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_CUT)
+        && (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::NONE)) {
         selectInfo.menuCallback.onCut = [weak = AceType::WeakClaim(this), callback]() {
             CHECK_NULL_VOID(callback);
             callback->Continue(
@@ -1968,7 +1973,8 @@ void WebPattern::RegisterSelectOverlayCallback(SelectOverlayInfo& selectInfo,
     } else {
         selectInfo.menuInfo.showCut = false;
     }
-    if (flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY) {
+    if ((flags & OHOS::NWeb::NWebQuickMenuParams::QM_EF_CAN_COPY)
+        && (copyOption != OHOS::NWeb::NWebPreference::CopyOptionMode::NONE)) {
         selectInfo.menuCallback.onCopy = [weak = AceType::WeakClaim(this), callback]() {
             CHECK_NULL_VOID(callback);
             callback->Continue(
@@ -2689,6 +2695,15 @@ void WebPattern::OnScrollStartRecursive(float position)
     isFirstFlingScrollVelocity_ = true;
 }
 
+void WebPattern::OnAttachToBuilderNode(NodeStatus nodeStatus)
+{
+    if (nodeStatus != NodeStatus::NORMAL_NODE) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "Web offline mode type");
+        isOfflineMode_ = true;
+        OfflineMode();
+    }
+}
+
 void WebPattern::OnScrollEndRecursive(const std::optional<float>& velocity)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::OnScrollEndRecursive");
@@ -2931,7 +2946,7 @@ void WebPattern::UpdateJavaScriptOnDocumentEnd()
     }
 }
 
-RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeById(int32_t accessibilityId)
+RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeById(int64_t accessibilityId)
 {
     CHECK_NULL_RETURN(delegate_, nullptr);
     CHECK_NULL_RETURN(webAccessibilityNode_, nullptr);
@@ -2943,7 +2958,7 @@ RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeById(int32_t access
     return webAccessibilityNode_;
 }
 
-RefPtr<WebAccessibilityNode> WebPattern::GetFocusedAccessibilityNode(int32_t accessibilityId, bool isAccessibilityFocus)
+RefPtr<WebAccessibilityNode> WebPattern::GetFocusedAccessibilityNode(int64_t accessibilityId, bool isAccessibilityFocus)
 {
     CHECK_NULL_RETURN(delegate_, nullptr);
     CHECK_NULL_RETURN(webAccessibilityNode_, nullptr);
@@ -2955,7 +2970,7 @@ RefPtr<WebAccessibilityNode> WebPattern::GetFocusedAccessibilityNode(int32_t acc
     return webAccessibilityNode_;
 }
 
-RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeByFocusMove(int32_t accessibilityId, int32_t direction)
+RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeByFocusMove(int64_t accessibilityId, int32_t direction)
 {
     CHECK_NULL_RETURN(delegate_, nullptr);
     CHECK_NULL_RETURN(webAccessibilityNode_, nullptr);
@@ -2968,10 +2983,10 @@ RefPtr<WebAccessibilityNode> WebPattern::GetAccessibilityNodeByFocusMove(int32_t
 }
 
 
-void WebPattern::ExecuteAction(int32_t nodeId, AceAction action) const
+void WebPattern::ExecuteAction(int64_t accessibilityId, AceAction action) const
 {
     CHECK_NULL_VOID(delegate_);
-    delegate_->ExecuteAction(nodeId, action);
+    delegate_->ExecuteAction(accessibilityId, action);
 }
 
 void WebPattern::SetAccessibilityState(bool state)

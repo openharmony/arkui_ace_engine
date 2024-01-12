@@ -43,8 +43,6 @@ struct MergedConfig {
 
 class NodeDataCache final {
 public:
-    ~NodeDataCache() = default;
-
     static NodeDataCache& Get();
 
     void OnPageReady();
@@ -77,6 +75,7 @@ public:
 
 private:
     NodeDataCache();
+    ~NodeDataCache() = default;
 
     void Reset();
 

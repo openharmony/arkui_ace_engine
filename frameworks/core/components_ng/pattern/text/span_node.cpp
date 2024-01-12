@@ -111,6 +111,13 @@ RefPtr<SpanNode> SpanNode::GetOrCreateSpanNode(int32_t nodeId)
     return spanNode;
 }
 
+RefPtr<SpanNode> SpanNode::CreateSpanNode(int32_t nodeId)
+{
+    auto spanNode = MakeRefPtr<SpanNode>(nodeId);
+    ElementRegister::GetInstance()->AddUINode(spanNode);
+    return spanNode;
+}
+
 RefPtr<SpanNode> SpanNode::GetOrCreateSpanNode(const std::string& tag, int32_t nodeId)
 {
     auto spanNode = ElementRegister::GetInstance()->GetSpecificItemById<SpanNode>(nodeId);
@@ -466,6 +473,7 @@ int32_t ImageSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNode */,
 {
     CHECK_NULL_RETURN(builder, -1);
     PlaceholderRun run;
+    textStyle = TextStyle();
     run.width = width;
     run.height = height;
     switch (verticalAlign) {
@@ -513,6 +521,7 @@ int32_t PlaceholderSpanItem::UpdateParagraph(const RefPtr<FrameNode>& /* frameNo
     double width, double height, VerticalAlign /* verticalAlign */)
 {
     CHECK_NULL_RETURN(builder, -1);
+    textStyle = TextStyle();
     PlaceholderRun run;
     run.width = width;
     run.height = height;

@@ -155,20 +155,15 @@ std::string GetInfoFromVectorByIndex(const std::vector<std::string>& dotIndicato
                ? "" : (dotIndicatorInfo[index] == "-" ? "" : dotIndicatorInfo[index]);
 }
 
-void SetIndicatorInfo(SwiperParameters& swiperParameters, const std::vector<std::string>& dotIndicatorInfo)
+std::optional<Dimension> ParseIndicatorDimension(const std::string& value)
 {
-    auto leftValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_LEFT);
-    auto topValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_TOP);
-    auto rightValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_RIGHT);
-    auto bottomValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_BOTTOM);
-    CalcDimension dimPosition = StringUtils::StringToCalcDimension(leftValue, false, DimensionUnit::VP);
-    swiperParameters.dimLeft = LessNotEqual(dimPosition.ConvertToPx(), 0.0f) ? 0.0_vp : dimPosition;
-    dimPosition = StringUtils::StringToCalcDimension(topValue, false, DimensionUnit::VP);
-    swiperParameters.dimTop = LessNotEqual(dimPosition.ConvertToPx(), 0.0f) ? 0.0_vp : dimPosition;
-    dimPosition = StringUtils::StringToCalcDimension(rightValue, false, DimensionUnit::VP);
-    swiperParameters.dimRight = LessNotEqual(dimPosition.ConvertToPx(), 0.0f) ? 0.0_vp : dimPosition;
-    dimPosition = StringUtils::StringToCalcDimension(bottomValue, false, DimensionUnit::VP);
-    swiperParameters.dimBottom = LessNotEqual(dimPosition.ConvertToPx(), 0.0f) ? 0.0_vp : dimPosition;
+    std::optional<Dimension> indicatorDimension;
+    if (value.empty()) {
+        return indicatorDimension;
+    }
+    CalcDimension dimPosition = StringUtils::StringToCalcDimension(value, false, DimensionUnit::VP);
+    indicatorDimension = LessNotEqual(dimPosition.ConvertToPx(), 0.0f) ? 0.0_vp : dimPosition;
+    return indicatorDimension;
 }
 
 SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std::string>& dotIndicatorInfo)
@@ -186,7 +181,14 @@ SwiperParameters GetDotIndicatorInfo(FrameNode* frameNode, const std::vector<std
     CHECK_NULL_RETURN(swiperIndicatorTheme, SwiperParameters());
     bool parseOk = false;
     SwiperParameters swiperParameters;
-    SetIndicatorInfo(swiperParameters, dotIndicatorInfo);
+    auto leftValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_LEFT);
+    auto topValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_TOP);
+    auto rightValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_RIGHT);
+    auto bottomValue = GetInfoFromVectorByIndex(dotIndicatorInfo, DOT_INDICATOR_BOTTOM);
+    swiperParameters.dimLeft = ParseIndicatorDimension(leftValue);
+    swiperParameters.dimTop = ParseIndicatorDimension(topValue);
+    swiperParameters.dimRight = ParseIndicatorDimension(rightValue);
+    swiperParameters.dimBottom = ParseIndicatorDimension(bottomValue);
     CalcDimension dimPosition = StringUtils::StringToCalcDimension(itemWidthValue, false, DimensionUnit::VP);
     auto defaultSize = swiperIndicatorTheme->GetSize();
     bool parseItemWOk = !itemWidthValue.empty() && dimPosition.Unit() != DimensionUnit::PERCENT;
@@ -273,14 +275,10 @@ SwiperDigitalParameters GetDigitIndicatorInfo(const std::vector<std::string>& di
     CHECK_NULL_RETURN(swiperIndicatorTheme, SwiperDigitalParameters());
     bool parseOk = false;
     SwiperDigitalParameters digitalParameters;
-    CalcDimension dimPosition = StringUtils::StringToCalcDimension(dotLeftValue, false, DimensionUnit::VP);
-    digitalParameters.dimLeft = LessNotEqual(dimPosition.ConvertToPx(), 0.0f) ? 0.0_vp : dimPosition;
-    dimPosition = StringUtils::StringToCalcDimension(dotTopValue, false, DimensionUnit::VP);
-    digitalParameters.dimTop = LessNotEqual(dimPosition.ConvertToPx(), 0.0f) ? 0.0_vp : dimPosition;
-    dimPosition = StringUtils::StringToCalcDimension(dotRightValue, false, DimensionUnit::VP);
-    digitalParameters.dimRight = LessNotEqual(dimPosition.ConvertToPx(), 0.0f) ? 0.0_vp : dimPosition;
-    dimPosition = StringUtils::StringToCalcDimension(dotBottomValue, false, DimensionUnit::VP);
-    digitalParameters.dimBottom = LessNotEqual(dimPosition.ConvertToPx(), 0.0f) ? 0.0_vp : dimPosition;
+    digitalParameters.dimLeft = ParseIndicatorDimension(dotLeftValue);
+    digitalParameters.dimTop = ParseIndicatorDimension(dotTopValue);
+    digitalParameters.dimRight = ParseIndicatorDimension(dotRightValue);
+    digitalParameters.dimBottom = ParseIndicatorDimension(dotBottomValue);
     Color fontColor;
     parseOk = Color::ParseColorString(fontColorValue, fontColor);
     digitalParameters.fontColor =
@@ -640,6 +638,20 @@ void ResetSwiperDuration(NodeHandle node)
     SwiperModelNG::SetDuration(frameNode, value);
 }
 
+void SetSwiperEnabled(NodeHandle node, bool enabled)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetEnabled(frameNode, enabled);
+}
+
+void ResetSwiperEnabled(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::SetEnabled(frameNode, false);
+}
+
 ArkUISwiperModifierAPI GetSwiperModifier()
 {
     static const ArkUISwiperModifierAPI modifier = { SetSwiperNextMargin, ResetSwiperNextMargin, SetSwiperPrevMargin,
@@ -649,7 +661,7 @@ ArkUISwiperModifierAPI GetSwiperModifier()
         ResetSwiperDisplayMode, SetSwiperItemSpace, ResetSwiperItemSpace, SetSwiperVertical, ResetSwiperVertical,
         SetSwiperLoop, ResetSwiperLoop, SetSwiperInterval, ResetSwiperInterval, SetSwiperAutoPlay, ResetSwiperAutoPlay,
         SetSwiperIndex, ResetSwiperIndex, SetSwiperIndicator, ResetSwiperIndicator, SetSwiperDuration,
-        ResetSwiperDuration };
+        ResetSwiperDuration, SetSwiperEnabled, ResetSwiperEnabled };
     return modifier;
 }
 } // namespace OHOS::Ace::NG

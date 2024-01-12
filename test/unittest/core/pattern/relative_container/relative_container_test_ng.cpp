@@ -28,7 +28,7 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/relative_container/relative_container_layout_property.h"
 #include "core/components_ng/pattern/relative_container/relative_container_pattern.h"
-#include "core/components_ng/pattern/relative_container/relative_container_view.h"
+#include "core/components_ng/pattern/relative_container/relative_container_model_ng.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 using namespace testing;
@@ -90,7 +90,8 @@ public:
  */
 HWTEST_F(RelativeContainerTestNg, RelativeContainerPatternTest001, TestSize.Level1)
 {
-    RelativeContainerView::Create();
+    RelativeContainerModelNG relativeContainerNg;
+    relativeContainerNg.Create();
     auto relativeContainerFrameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     EXPECT_FALSE(relativeContainerFrameNode == nullptr);
     auto relativeContainerLayoutProperty = relativeContainerFrameNode->GetLayoutProperty();

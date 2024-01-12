@@ -107,7 +107,7 @@ HWTEST_F(GridLayoutTestNg, ScrollLayout001, TestSize.Level1)
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         model.SetMaxCount(2);
-        CreateColItem(18, true);
+        CreateColItem(18);
     });
     const float smallerHeight = GRID_HEIGHT - ITEM_HEIGHT;
     RectF gridRect(0.f, 0.f, GRID_WIDTH, smallerHeight);
@@ -143,7 +143,7 @@ HWTEST_F(GridLayoutTestNg, ScrollLayout002, TestSize.Level1)
     Create([](GridModelNG model) {
         model.SetRowsTemplate("1fr 1fr 1fr 1fr");
         model.SetMaxCount(2);
-        CreateColItem(18, true);
+        CreateColItem(18);
     });
 
     /**
@@ -391,7 +391,7 @@ HWTEST_F(GridLayoutTestNg, GetAverageHeight001, TestSize.Level1)
  */
 HWTEST_F(GridLayoutTestNg, GridItemDisableEventTest001, TestSize.Level1)
 {
-    Create([](GridModelNG model) { CreateColItem(10, false, GridItemStyle::PLAIN); });
+    Create([](GridModelNG model) { CreateColItem(10, GridItemStyle::PLAIN); });
 
     /**
      * @tc.steps: step2. Get girdItem frameNode and pattern, set callback function.
@@ -824,7 +824,7 @@ HWTEST_F(GridLayoutTestNg, SearchIrregularFocusableChildInScroll002, TestSize.Le
     Create([option](GridModelNG gridModelNG) {
         gridModelNG.SetRowsTemplate("1fr 1fr 1fr 1fr");
         gridModelNG.SetLayoutOptions(option);
-        CreateRowItem(10, true);
+        CreateRowItem(10);
     });
 
     /**
@@ -913,7 +913,7 @@ HWTEST_F(GridLayoutTestNg, SearchIrregularFocusableChildInNormalGrid001, TestSiz
         model.SetRowsTemplate("1fr 1fr 1fr 1fr");
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         CreateBigItem(1, 2, 1, 2);
-        CreateRowItem(10, true);
+        CreateRowItem(10);
     });
 
     /**
@@ -1062,7 +1062,7 @@ HWTEST_F(GridLayoutTestNg, ChangeItemNumber001, TestSize.Level1)
  * @tc.desc: Test UpdateGridMatrix
  * @tc.type: FUNC
  */
-HWTEST_F(GridTestNg, UpdateGridMatrix001, TestSize.Level1)
+HWTEST_F(GridLayoutTestNg, UpdateGridMatrix001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create 100 items

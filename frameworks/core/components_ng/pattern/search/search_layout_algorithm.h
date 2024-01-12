@@ -45,6 +45,7 @@ private:
     double CalcSearchAdaptHeight(LayoutWrapper* layoutWrapper);
     void CalcChildrenHotZone(LayoutWrapper* layoutWrapper);
     double CalcSearchWidth(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
+    double CalcSearchHeight(const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
 
     // children frame size
     SizeF searchIconSizeMeasure_;

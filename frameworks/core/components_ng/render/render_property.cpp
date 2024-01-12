@@ -295,6 +295,16 @@ void BorderProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("border", jsonBorder->ToString().c_str());
 }
 
+void OuterBorderProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    auto jsonOutline = JsonUtil::Create(true);
+    propOuterBorderStyle.value_or(BorderStyleProperty()).ToJsonValue(json, jsonOutline, true);
+    propOuterBorderColor.value_or(BorderColorProperty()).ToJsonValue(json, jsonOutline, true);
+    propOuterBorderWidth.value_or(BorderWidthProperty()).ToJsonValue(json, jsonOutline, true);
+    propOuterBorderRadius.value_or(BorderRadiusProperty()).ToJsonValue(json, jsonOutline, true);
+    json->Put("outline", jsonOutline->ToString().c_str());
+}
+
 void PointLightProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     auto jsonLightIntensity = JsonUtil::Create(true);

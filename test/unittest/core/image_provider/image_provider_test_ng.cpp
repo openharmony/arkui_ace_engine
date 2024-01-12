@@ -603,4 +603,52 @@ HWTEST_F(ImageProviderTestNg, TargetSize001, TestSize.Level1)
     ctx->OnMakeCanvasImage();
     EXPECT_EQ(ctx->dstRect_.GetSize(), SizeF(50, 50));
 }
+
+/**
+ * @tc.name: NotifiersTest002
+ * @tc.desc: Test NotifiersTest.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, NotifiersTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Construction parameters
+     * @tc.expected: ImageSourceInfo.
+     */
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx, nullptr);
+
+    callbackFlag = 0;
+    auto callback1 = [](const ImageSourceInfo& src) {
+        callbackFlag = 1;
+        return;
+    };
+    auto callback2 = [](const ImageSourceInfo& src) {
+        callbackFlag = 2;
+        return;
+    };
+    auto callback3 = [](const ImageSourceInfo& src, const std::string& errorMsg) {
+        callbackFlag = 3;
+        return;
+    };
+    /**
+     * @tc.steps: step2. Manage notification tasks for loading data
+     * @tc.expected: LoadNotifier.
+     */
+    ctx->notifiers_ = LoadNotifier(std::move(callback1), std::move(callback2), std::move(callback3));
+    std::function<void()> func = []() {};
+    ctx->pendingMakeCanvasImageTask_ = func;
+    /**
+     * @tc.steps: step3. Cleaning or resetting with image loading.
+     * @tc.expected: OnUnloaded.
+     */
+    ctx->OnUnloaded();
+    ctx->OnLoadFail();
+    EXPECT_EQ(callbackFlag, 3);
+    ctx->OnDataReady();
+    EXPECT_EQ(callbackFlag, 1);
+    ctx->OnLoadSuccess();
+    EXPECT_EQ(callbackFlag, 2);
+}
 } // namespace OHOS::Ace::NG

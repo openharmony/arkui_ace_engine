@@ -68,6 +68,7 @@ public:
             switchModifier_ = AceType::MakeRefPtr<SwitchModifier>(isSelect, boardColor, dragOffsetX_);
         }
         auto paintMethod = MakeRefPtr<SwitchPaintMethod>(switchModifier_);
+        paintMethod->SetDirection(direction_);
         paintMethod->SetIsSelect(isOn_.value_or(false));
         auto eventHub = host->GetEventHub<EventHub>();
         CHECK_NULL_RETURN(eventHub, nullptr);
@@ -183,6 +184,7 @@ private:
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
+    TextDirection direction_ = TextDirection::AUTO;
     bool isDragEvent_ = false;
     RefPtr<SwitchModifier> switchModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(SwitchPattern);

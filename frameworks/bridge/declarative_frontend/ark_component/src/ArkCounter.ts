@@ -32,6 +32,93 @@ class ArkCounterComponent extends ArkComponent implements CounterAttribute {
     modifierWithKey(this._modifiersWithKeys, EnableIncModifier.identity, EnableIncModifier, value);
     return this;
   }
+  backgroundColor(value: ResourceColor): this {
+    modifierWithKey(this._modifiersWithKeys, CounterBackgroundColorModifier.identity, CounterBackgroundColorModifier, value);
+    return this;
+  }
+  width(value: Length): this {
+    modifierWithKey(
+      this._modifiersWithKeys, CounterWidthModifier.identity, CounterWidthModifier, value);
+    return this;
+  }
+  height(value: Length): this {
+    modifierWithKey(
+      this._modifiersWithKeys, CounterHeightModifier.identity, CounterHeightModifier, value);
+    return this;
+  }
+  size(value: SizeOptions): this {
+    modifierWithKey(this._modifiersWithKeys, CounterSizeModifier.identity, CounterSizeModifier, value);
+    return this;
+  }
+}
+class CounterHeightModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('CounterHeight');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().counter.resetCounterHeight(node);
+    } else {
+      getUINativeModule().counter.setCounterHeight(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class CounterWidthModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('CounterWidth');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().counter.resetCounterWidth(node);
+    } else {
+      getUINativeModule().counter.setCounterWidth(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class CounterBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('CounterBackgroundColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().counter.resetCounterBackgroundColor(node);
+    } else {
+      getUINativeModule().counter.setCounterBackgroundColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class CounterSizeModifier extends ModifierWithKey<SizeOptions> {
+  constructor(value: SizeOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('CounterSize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().counter.resetCounterSize(node);
+    } else {
+      getUINativeModule().counter.setCounterSize(node, this.value.width, this.value.height);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+      !isBaseOrResourceEqual(this.stageValue.height, this.value.height);
+  }
 }
 class EnableIncModifier extends ModifierWithKey<boolean> {
   constructor(value: boolean) {

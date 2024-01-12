@@ -51,7 +51,6 @@ namespace {
 constexpr double DIALOG_HEIGHT_RATIO = 0.8;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_LANDSCAPE = 0.9;
 constexpr double DIALOG_HEIGHT_RATIO_FOR_CAR = 0.95;
-constexpr Dimension listPaddingHeight = 48.0_vp;
 constexpr Dimension FULLSCREEN = 100.0_pct;
 constexpr Dimension MULTIPLE_DIALOG_OFFSET_X = 48.0_vp;
 constexpr Dimension MULTIPLE_DIALOG_OFFSET_Y = 48.0_vp;
@@ -134,8 +133,7 @@ void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper)
         Distribute(scrollHeight, listHeight, restHeight);
         auto childConstraint = CreateDialogChildConstraint(layoutWrapper, scrollHeight, restWidth);
         scroll->Measure(childConstraint);
-        childConstraint =
-            CreateDialogChildConstraint(layoutWrapper, listHeight + listPaddingHeight.ConvertToPx(), restWidth);
+        childConstraint = CreateDialogChildConstraint(layoutWrapper, listHeight, restWidth);
         list->Measure(childConstraint);
     } else {
         if (scroll != nullptr) {
@@ -144,8 +142,8 @@ void DialogLayoutAlgorithm::AnalysisHeightOfChild(LayoutWrapper* layoutWrapper)
             scroll->Measure(childConstraint);
         }
         if (list != nullptr) {
-            auto childConstraint = CreateDialogChildConstraint(
-                layoutWrapper, std::min(restHeight, listHeight + (float)listPaddingHeight.ConvertToPx()), restWidth);
+            auto childConstraint =
+                CreateDialogChildConstraint(layoutWrapper, std::min(restHeight, listHeight), restWidth);
             list->Measure(childConstraint);
         }
     }
@@ -319,8 +317,6 @@ void DialogLayoutAlgorithm::ProcessMaskRect(std::optional<DimensionRect> maskRec
     auto rootHeight = PipelineContext::GetCurrentRootHeight();
     RectF rect = RectF(offset.GetX().ConvertToPxWithSize(rootWidth), offset.GetY().ConvertToPxWithSize(rootHeight),
         width.ConvertToPxWithSize(rootWidth), height.ConvertToPxWithSize(rootHeight));
-    dialogContext->ClipWithRect(rect);
-    dialogContext->UpdateClipEdge(true);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     std::vector<DimensionRect> mouseResponseRegion;
     mouseResponseRegion.emplace_back(width, height, offset);
@@ -364,19 +360,31 @@ void DialogLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     dialogOffset_ = dialogProp->GetDialogOffset().value_or(DimensionOffset());
     alignment_ = dialogProp->GetDialogAlignment().value_or(DialogAlignment::DEFAULT);
     topLeftPoint_ = ComputeChildPosition(childSize, dialogProp, selfSize);
-    if (!dialogProp->GetIsModal().value_or(true) ||
-        (dialogProp->GetIsModal().value_or(true) && dialogProp->GetShowInSubWindowValue(false))) {
+    if ((!dialogProp->GetIsModal().value_or(true) ||
+            (dialogProp->GetIsModal().value_or(true) && dialogProp->GetShowInSubWindowValue(false))) &&
+        !dialogProp->GetIsScenceBoardDialog().value_or(false)) {
         ProcessMaskRect(
             DimensionRect(Dimension(childSize.Width()), Dimension(childSize.Height()), DimensionOffset(topLeftPoint_)),
             frameNode);
     }
     child->GetGeometryNode()->SetMarginFrameOffset(topLeftPoint_);
     child->Layout();
+    SetSubWindowHotarea(dialogProp, childSize, selfSize, frameNode->GetId());
+}
+
+void DialogLayoutAlgorithm::SetSubWindowHotarea(
+    const RefPtr<DialogLayoutProperty>& dialogProp, SizeF childSize, SizeF selfSize, int32_t frameNodeId)
+{
     if (dialogProp->GetShowInSubWindowValue(false)) {
         std::vector<Rect> rects;
-        auto rect = Rect(topLeftPoint_.GetX(), topLeftPoint_.GetY(), childSize.Width(), childSize.Height());
+        Rect rect;
+        if (!dialogProp->GetIsScenceBoardDialog().value_or(false)) {
+            rect = Rect(topLeftPoint_.GetX(), topLeftPoint_.GetY(), childSize.Width(), childSize.Height());
+        } else {
+            rect = Rect(0.0f, 0.0f, selfSize.Width(), selfSize.Height());
+        }
         rects.emplace_back(rect);
-        SubwindowManager::GetInstance()->SetDialogHotAreas(rects, frameNode->GetId(), subWindowId_);
+        SubwindowManager::GetInstance()->SetDialogHotAreas(rects, frameNodeId, subWindowId_);
     }
 }
 
@@ -503,7 +511,8 @@ bool DialogLayoutAlgorithm::SetAlignmentSwitch(const SizeF& maxSize, const SizeF
     auto displayInfo = container->GetDisplayInfo();
     CHECK_NULL_RETURN(displayInfo, false);
     auto foldStatus = displayInfo->GetFoldStatus();
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && foldStatus == FoldStatus::EXPAND) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && displayInfo->GetIsFoldable()
+        && foldStatus == FoldStatus::EXPAND) {
         topLeftPoint = OffsetF(maxSize.Width() - childSize.Width(), maxSize.Height() - childSize.Height()) / 2.0;
         return true;
     }

@@ -497,7 +497,7 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
             currentEndPos += spaceWidth_;
         }
         // reach the valid target index
-        if (targetIndex_ && GreatOrEqual(currentIndex, targetIndex_.value())) {
+        if (targetIndex_ && currentIndex >= targetIndex_.value()) {
             endMainPos = targetIsSameWithStartFlag_ ? endMainPos_ : currentStartPos + contentMainSize_;
             currentTargetIndex_ = targetIndex_.value();
             targetIndex_.reset();
@@ -505,7 +505,8 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
         if (static_cast<int32_t>(itemPosition_.size()) >= totalItemCount_) {
             break;
         }
-    } while (LessNotEqual(currentEndPos, nextMargin_ != 0.0f ? endMainPos + nextMargin_ + spaceWidth_ : endMainPos));
+    } while (LessNotEqual(currentEndPos, nextMargin_ != 0.0f ? endMainPos + nextMargin_ + spaceWidth_ : endMainPos) ||
+             (targetIndex_ && currentIndex < targetIndex_.value()));
 
     if (overScrollFeature_ && canOverScroll_) {
         return;

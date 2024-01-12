@@ -899,7 +899,7 @@ void ListItemPattern::InitDisableEvent()
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ListItemTheme>();
     CHECK_NULL_VOID(theme);
-    auto UserDefineOpacity = renderContext->GetOpacityValue(1.0);
+    auto userDefineOpacity = renderContext->GetOpacityValue(1.0);
 
     if (!eventHub->IsDeveloperEnabled()) {
         if (selectable_) {

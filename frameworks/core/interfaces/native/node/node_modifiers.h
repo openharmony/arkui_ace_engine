@@ -399,9 +399,22 @@ struct ArkUICommonModifier {
     void (*setKeyBoardShortCut)(
         ArkUINodeHandle node, ArkUI_CharPtr value, const ArkUI_Int32* keysIntArray, ArkUI_Int32 length);
     void (*resetKeyBoardShortCut)(ArkUINodeHandle node);
+    void (*setClip)(ArkUINodeHandle node, ArkUI_Int32 isClip);
+    void (*setClipShape)(ArkUINodeHandle node, ArkUI_CharPtr value, ArkUI_Float64* attribute, ArkUI_Int32 length);
+    void (*setClipPath)(
+        ArkUINodeHandle node, ArkUI_CharPtr value, ArkUI_Float64* attribute, ArkUI_CharPtr);
+    void (*setOpacityTransition)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*setRotateTransition)(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_Int32 length,
+        ArkUI_Float32 centerX, ArkUI_Int32 centerXUnit, ArkUI_Float32 centerY, ArkUI_Int32 centerYUnit,
+        ArkUI_Float32 centerZValue, ArkUI_Int32 centerZUnit, ArkUI_Float32 perspective, ArkUI_Float32 angle);
+    void (*setScaleTransition)(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_Int32 length,
+        ArkUI_Float32 centerX, ArkUI_Int32 centerXUnit, ArkUI_Float32 centerY, ArkUI_Int32 centerYUnit);
+    void (*setTranslateTransition)(ArkUINodeHandle node, ArkUI_Float32 centerX, ArkUI_Int32 centerXUnit,
+        ArkUI_Float32 centerY, ArkUI_Int32 centerYUnit, ArkUI_Float32 centerZValue, ArkUI_Int32 centerZUnit);
 };
 
 struct ArkUITextModifier {
+    void (*setContent)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*setFontWeight)(ArkUINodeHandle node, ArkUI_CharPtr weight);
     void (*resetFontWeight)(ArkUINodeHandle node);
     void (*setFontStyle)(ArkUINodeHandle node, ArkUI_Uint32 fontStyle);
@@ -880,6 +893,7 @@ struct ArkUIRichEditorModifier {
 };
 
 struct ArkUIImageModifier {
+    void (*setSrc)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*setCopyOption)(ArkUINodeHandle node, ArkUI_Int32 copyOption);
     void (*resetCopyOption)(ArkUINodeHandle node);
     void (*setAutoResize)(ArkUINodeHandle node, bool autoResize);
@@ -986,6 +1000,7 @@ struct ArkUIPolylineModifier {
 };
 
 struct ArkUISpanModifier {
+    void (*setContent)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*setSpanTextCase)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetSpanTextCase)(ArkUINodeHandle node);
     void (*setSpanFontWeight)(ArkUINodeHandle node, ArkUI_CharPtr value);
@@ -1109,6 +1124,8 @@ struct ArkUITextInputModifier {
     void (*resetTextInputFontStyle)(ArkUINodeHandle node);
     void (*setTextInputFontFamily)(ArkUINodeHandle node, ArkUI_CharPtr* fontFamilies, ArkUI_Uint32 length);
     void (*resetTextInputFontFamily)(ArkUINodeHandle node);
+    void (*setTextInputPlaceholderString)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*setTextInputTextString)(ArkUINodeHandle node, ArkUI_CharPtr value);
 };
 
 struct ArkUITabsModifier {
@@ -1366,6 +1383,8 @@ struct ArkUIScrollModifier {
     void (*resetScrollScrollBarWidth)(ArkUINodeHandle node);
     void (*setScrollEdgeEffect)(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, bool alwaysEnabled);
     void (*resetScrollEdgeEffect)(ArkUINodeHandle node);
+    void (*setEnableScrollInteraction)(ArkUINodeHandle node, bool enableScrollInteraction);
+    void (*resetEnableScrollInteraction)(ArkUINodeHandle node);
 };
 
 struct ArkUIListItemModifier {

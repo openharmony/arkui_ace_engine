@@ -154,16 +154,17 @@ void RichEditorLayoutAlgorithm::GetPlaceholderRects(std::vector<RectF>& rects)
 }
 
 ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
-    const TextStyle& textStyle, const std::string& content) const
+    const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const
 {
-    auto style = TextLayoutAlgorithm::GetParagraphStyle(textStyle, content);
+    auto style = TextLayoutAlgorithm::GetParagraphStyle(textStyle, content, layoutWrapper);
     style.fontSize = textStyle.GetFontSize().ConvertToPx();
     if (!pManager_->minParagraphFontSize.has_value() ||
         GreatNotEqual(pManager_->minParagraphFontSize.value(), style.fontSize)) {
         pManager_->minParagraphFontSize = style.fontSize;
     }
-    auto&& spanGroup = GetSpans();
-    auto&& lineStyle = spanGroup.front()->textLineStyle;
+    const auto& spanItem = GetFirstTextSpanItem();
+    CHECK_NULL_RETURN(spanItem, style);
+    auto& lineStyle = spanItem->textLineStyle;
     CHECK_NULL_RETURN(lineStyle, style);
     if (lineStyle->propTextAlign) {
         style.align = *(lineStyle->propTextAlign);
@@ -181,6 +182,19 @@ ParagraphStyle RichEditorLayoutAlgorithm::GetParagraphStyle(
     }
 
     return style;
+}
+
+RefPtr<SpanItem> RichEditorLayoutAlgorithm::GetFirstTextSpanItem() const
+{
+    auto& spanGroup = GetSpans();
+    auto it = spanGroup.begin();
+    while (it != spanGroup.end()) {
+        if (!DynamicCast<PlaceholderSpanItem>(*it)) {
+            return *it;
+        }
+        ++it;
+    }
+    return *spanGroup.begin();
 }
 
 int32_t RichEditorLayoutAlgorithm::GetPreviousLength() const

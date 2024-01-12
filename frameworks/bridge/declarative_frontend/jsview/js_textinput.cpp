@@ -39,6 +39,7 @@ void JSTextInput::JSBind(BindingTarget globalObj)
     JSClass<JSTextInput>::Declare("TextInput");
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSTextInput>::StaticMethod("create", &JSTextInput::Create, opt);
+    JSClass<JSTextInput>::StaticMethod("direction", &JSTextInput::SetDirection);
     JSClass<JSTextInput>::StaticMethod("type", &JSTextField::SetType);
     JSClass<JSTextInput>::StaticMethod("placeholderColor", &JSTextField::SetPlaceholderColor);
     JSClass<JSTextInput>::StaticMethod("placeholderFont", &JSTextField::SetPlaceholderFont);
@@ -109,6 +110,17 @@ void JSTextInput::JSBind(BindingTarget globalObj)
 void JSTextInput::Create(const JSCallbackInfo& info)
 {
     JSTextField::CreateTextInput(info);
+}
+
+void JSTextInput::SetDirection(const std::string& dir)
+{
+    JSViewAbstract::SetDirection(dir);
+
+    TextAlign textAlign = TextAlign::START;
+    if (dir == "Rtl") {
+        textAlign = TextAlign::END;
+    }
+    TextFieldModel::GetInstance()->SetTextAlign(textAlign);
 }
 
 void JSTextInputController::JSBind(BindingTarget globalObj)

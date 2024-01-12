@@ -55,6 +55,7 @@ public:
         switchModifier_->SetOffset(offset);
         switchModifier_->SetEnabled(enabled_);
         switchModifier_->SetIsSelect(isSelect_);
+        switchModifier_->SetDirection(direction_);
         switchModifier_->SetTouchHoverAnimationType(touchHoverType_);
         switchModifier_->SetDragOffsetX(dragOffsetX_);
         switchModifier_->SetIsDragEvent(isDragEvent_);
@@ -123,6 +124,11 @@ public:
         showHoverEffect_ = showHoverEffect;
     }
 
+    void SetDirection(TextDirection direction)
+    {
+        direction_ = direction;
+    }
+
 private:
     float dragOffsetX_ = 0.0f;
     float hoverPercent_ = 0.0f;
@@ -138,6 +144,7 @@ private:
     OffsetF hotZoneOffset_;
     SizeF hotZoneSize_;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
+    TextDirection direction_ = TextDirection::AUTO;
     bool isDragEvent_ = false;
 
     RefPtr<SwitchModifier> switchModifier_;

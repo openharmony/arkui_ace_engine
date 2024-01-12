@@ -58,30 +58,6 @@ public:
         SetBackgroundAndBlur();
     }
 
-    void UpdateNeedRecalculateSafeArea() override
-    {
-        auto pipeline = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(pipeline);
-        auto safeArea = pipeline->GetSafeArea();
-        auto safeAreaHeight = safeArea.top_.Length();
-        auto hostNode = GetHost();
-        CHECK_NULL_VOID(hostNode);
-        auto parent = hostNode->GetAncestorNodeOfFrame();
-        CHECK_NULL_VOID(parent);
-        auto parentGlobalOffset = parent->GetParentGlobalOffsetDuringLayout();
-        auto parentGeometryNode = parent->GetGeometryNode();
-        CHECK_NULL_VOID(parentGeometryNode);
-        auto frame = parentGeometryNode->GetFrameRect() + parentGlobalOffset;
-        if (!safeArea.top_.IsOverlapped(frame.Top())) {
-            safeAreaHeight = 0.0f;
-        }
-        auto geometryNode = hostNode->GetGeometryNode();
-        CHECK_NULL_VOID(geometryNode);
-        OffsetF offset(geometryNode->GetFrameOffset().GetX(), geometryNode->GetFrameOffset().GetY() + safeAreaHeight);
-        geometryNode->SetFrameOffset(offset);
-        hostNode->ForceSyncGeometryNode();
-    }
-
 private:
     void SetBackgroundAndBlur()
     {

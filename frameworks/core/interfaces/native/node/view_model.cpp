@@ -20,30 +20,139 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
+#include "core/components_ng/pattern/linear_layout/row_model_ng.h"
+#include "core/components_ng/pattern/list/list_model_ng.h"
+#include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
+#include "core/components_ng/pattern/text_field/text_field_model_ng.h"
+#include "core/components_ng/pattern/text/image_span_view.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
+#include "core/components_ng/pattern/text/span_model_ng.h"
+#include "core/components_ng/pattern/toggle/toggle_model_ng.h"
+#include "core/components_ng/pattern/image/image_model_ng.h"
+#include "core/components_ng/pattern/list/list_model_ng.h"
+#include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
+#include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
+#include "core/interfaces/native/node/node_types.h"
+
 
 namespace OHOS::Ace::NG::ViewModel {
+void* createTextNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = TextModelNG::CreateFrameNode(nodeId, "");
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
 
+void* createSpanNode(ArkUI_Int32 nodeId)
+{
+    auto spanNode = SpanModelNG::CreateSpanNode(nodeId, "");
+    spanNode->IncRefCount();
+    return AceType::RawPtr(spanNode);
+}
+
+void* createImageSpanNode(ArkUI_Int32 nodeId)
+{
+    auto imageSpanNode = ImageSpanView::CreateFrameNode(nodeId);
+    imageSpanNode->IncRefCount();
+    return AceType::RawPtr(imageSpanNode);
+}
+void* createImageNode(ArkUI_Int32 nodeId)
+{
+    RefPtr<PixelMap> pixmap = nullptr;
+    auto frameNode = ImageModelNG::CreateFrameNode(nodeId, "", pixmap, "", "", false);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createToggleNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = ToggleModelNG::CreateFrameNode(nodeId, NG::ToggleType::SWITCH, false);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createLoadingProgress(ArkUI_Int32 nodeId)
+{
+    auto frameNode = LoadingProgressModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createTextInputNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = TextFieldModelNG::CreateFrameNode(nodeId, "", "", false);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createStackNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = StackModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createScrollNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = ScrollModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createListNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = ListModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createSwiperNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = SwiperModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createColumnNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = ColumnModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createRowNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = RowModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createListItemNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = ListItemModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 {
-    switch (tag) {
-        case ARKUI_STACK: {
-            auto frameNode = StackModelNG::CreateFrameNode(nodeId);
-            frameNode->IncRefCount();
-            return AceType::RawPtr(frameNode);
-        }
-        case ARKUI_SCROLL: {
-            auto frameNode = ScrollModelNG::CreateScroll(nodeId);
-            frameNode->IncRefCount();
-            return AceType::RawPtr(frameNode);
-        }
-        default: {
-            TAG_LOGE(Ace::AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);
-        }
+    static createArkUIFrameNode* createArkUIFrameNodes[] = {
+        nullptr, createTextNode, createSpanNode, createImageSpanNode, createImageNode, createToggleNode,
+        createLoadingProgress, createTextInputNode, createStackNode, createScrollNode, createListNode,
+        createSwiperNode, nullptr, nullptr, nullptr, nullptr, createColumnNode, createRowNode,
+        nullptr, createListItemNode
+    };
+    if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);
+        return nullptr;
     }
-    return nullptr;
+    CHECK_NULL_RETURN(createArkUIFrameNodes[tag], nullptr);
+    return createArkUIFrameNodes[tag](nodeId);
 }
 
 void DisposeNode(void* nativePtr)

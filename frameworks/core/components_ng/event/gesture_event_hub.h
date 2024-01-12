@@ -40,6 +40,7 @@ namespace OHOS::Ace {
 struct DragNotifyMsg;
 class UnifiedData;
 }
+// namespace OHOS::Ace
 
 enum class MenuPreviewMode {
     NONE,
@@ -81,11 +82,7 @@ enum class HitTestMode {
     HTMTRANSPARENT_SELF,
 };
 
-enum class TouchTestStrategy {
-    DEFAULT = 0,
-    FORWARD_COMPETITION,
-    FORWARD
-};
+enum class TouchTestStrategy { DEFAULT = 0, FORWARD_COMPETITION, FORWARD };
 
 struct TouchTestInfo {
     PointF windowPoint;
@@ -151,6 +148,7 @@ public:
             gestures_.clear();
         }
         gestures_.emplace_back(gesture);
+        backupGestures_.emplace_back(gesture);
         recreateGesture_ = true;
     }
 
@@ -574,11 +572,15 @@ public:
     bool GetMonopolizeEvents() const;
 
     void SetMonopolizeEvents(bool monopolizeEvents);
-    virtual RefPtr<NGGestureRecognizer> PackInnerRecognizer(
-        const Offset& offset, std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, int32_t touchId,
+    virtual RefPtr<NGGestureRecognizer> PackInnerRecognizer(const Offset& offset,
+        std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, int32_t touchId,
         const RefPtr<TargetComponent>& targetComponent);
     bool parallelCombineClick = false;
     RefPtr<ParallelRecognizer> innerParallelRecognizer_;
+
+    void CopyGestures(const RefPtr<GestureEventHub>& gestureEventHub);
+
+    void CopyEvent(const RefPtr<GestureEventHub>& gestureEventHub);
 
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
@@ -612,6 +614,7 @@ private:
 
     // Set by use gesture, priorityGesture and parallelGesture attribute function.
     std::list<RefPtr<NG::Gesture>> gestures_;
+    std::list<RefPtr<NG::Gesture>> backupGestures_;
     std::list<RefPtr<NGGestureRecognizer>> gestureHierarchy_;
 
     // used in bindMenu, need to delete the old callback when bindMenu runs again
@@ -629,6 +632,7 @@ private:
     RefPtr<PixelMap> dragPreviewPixelMap_;
 
     OffsetF frameNodeOffset_;
+    SizeF frameNodeSize_;
     GestureEvent gestureInfoForWeb_;
     bool isReceivedDragGestureInfo_ = false;
     OnChildTouchTestFunc onChildTouchTestFunc_;

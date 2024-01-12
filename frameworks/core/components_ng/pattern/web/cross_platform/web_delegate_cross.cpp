@@ -940,7 +940,11 @@ void WebDelegateCross::RecordWebEvent(Recorder::EventType eventType, const std::
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
     Recorder::EventParamsBuilder builder;
-    builder.SetId(host->GetInspectorIdValue("")).SetType(host->GetHostTag()).SetEventType(eventType).SetText(param);
+    builder.SetId(host->GetInspectorIdValue(""))
+        .SetType(host->GetHostTag())
+        .SetEventType(eventType)
+        .SetText(param)
+        .SetDescription(host->GetAutoEventParamValue(""));
     Recorder::EventRecorder::Get().OnEvent(std::move(builder));
 }
 

@@ -21,4 +21,8 @@ namespace OHOS::Ace::NodeModel {
 
 void SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, const char* value);
 
+const char* GetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type);
+
+void ResetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type);
+
 }; // namespace OHOS::Ace::NodeModel

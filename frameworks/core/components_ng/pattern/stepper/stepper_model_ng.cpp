@@ -99,9 +99,9 @@ RefPtr<FrameNode> StepperModelNG::CreateSwiperChild(int32_t id, uint32_t index)
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     CHECK_NULL_RETURN(swiperPaintProperty, nullptr);
     swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::NONE);
-    swiperPaintProperty->UpdateDisableSwipe(true);
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
+    swiperLayoutProperty->UpdateDisableSwipe(true);
     swiperLayoutProperty->UpdateLoop(false);
     swiperLayoutProperty->UpdateCachedCount(0);
     swiperLayoutProperty->UpdateIndex(static_cast<int32_t>(index));

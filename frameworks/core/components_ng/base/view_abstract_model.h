@@ -193,6 +193,7 @@ public:
     virtual void SetFrontBlur(const Dimension& radius, const BlurOption& blurOption) = 0;
     virtual void SetBackShadow(const std::vector<Shadow>& shadows) = 0;
     virtual void SetBlendMode(BlendMode blendMode) = 0;
+    virtual void SetBlendApplyType(BlendApplyType blendApplyType) = 0;
     virtual void SetColorBlend(const Color& value) = 0;
     virtual void SetWindowBlur(float progress, WindowBlurStyle blurStyle) = 0;
     virtual void SetBrightness(const Dimension& value) = 0;
@@ -261,6 +262,7 @@ public:
     virtual void SetDefaultFocus(bool isSet) = 0;
     virtual void SetGroupDefaultFocus(bool isSet) = 0;
     virtual void SetInspectorId(const std::string& inspectorId) = 0;
+    virtual void SetAutoEventParam(const std::string& param) {};
     virtual void SetRestoreId(int32_t restoreId) = 0;
     virtual void SetDebugLine(const std::string& line) = 0;
     virtual void SetHoverEffect(HoverEffectType hoverEffect) = 0;

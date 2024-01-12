@@ -223,7 +223,7 @@ void AceAbility::OnStart(const Want& want, sptr<AAFwk::SessionInfo> sessionInfo)
         AceApplicationInfo::GetInstance().SetAppVersionName(abilityContext->GetApplicationInfo()->versionName);
         AceApplicationInfo::GetInstance().SetAppVersionCode(abilityContext->GetApplicationInfo()->versionCode);
         AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
-        AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingPid());
+        AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
         ImageFileCache::GetInstance().SetImageCacheFilePath(cacheDir);
         ImageFileCache::GetInstance().SetCacheFileInfo();
         AceEngine::InitJsDumpHeadSignal();

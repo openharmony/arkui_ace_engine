@@ -54,6 +54,11 @@ public:
         resetFunc_();
     }
 
+    bool IsMeasureBoundary() const override
+    {
+        return true;
+    }
+
     void SetMakeFunction(std::function<RefPtr<UINode>()>&& makeFunc)
     {
         makeFunc_ = std::move(makeFunc);

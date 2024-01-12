@@ -110,7 +110,9 @@ public:
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        FocusPattern focusPattern = { FocusType::NODE, true, FocusStyleType::INNER_BORDER };
+        focusPattern.SetIsFocusActiveWhenFocused(true);
+        return focusPattern;
     }
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
@@ -128,6 +130,15 @@ public:
     long long GetTimestamp() const
     {
         return timestamp_;
+    }
+
+    void UpdateSpanPosition()
+    {
+        uint32_t spanTextLength = 0;
+        for (auto& span : spans_) {
+            spanTextLength += StringUtils::ToWstring(span->content).length();
+            span->position = spanTextLength;
+        }
     }
 
     void ResetBeforePaste();
@@ -175,6 +186,7 @@ public:
     {
         PerformAction(TextInputAction::NEW_LINE, false);
     }
+    bool HandleOnEscape() override;
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
     void CursorMove(CaretMoveIntent direction) override;
@@ -374,6 +386,12 @@ public:
     {
         return selectedType_.value_or(TextSpanType::NONE);
     }
+    void GetCaretMetrics(CaretMetricsF& caretCaretMetric) override;
+
+    void SetShowSelect(bool isShowSelect)
+    {
+        showSelect_ = isShowSelect;
+    }
 
 protected:
     bool CanStartAITask() override;
@@ -401,6 +419,7 @@ private:
     void StartTwinkling();
     void StopTwinkling();
     void UpdateTextStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
+    void UpdateSymbolStyle(RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle);
     void UpdateImageStyle(RefPtr<FrameNode>& imageNode, const ImageSpanAttribute& imageStyle);
     void InitTouchEvent();
     bool SelectOverlayIsOn();

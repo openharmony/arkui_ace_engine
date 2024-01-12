@@ -71,8 +71,8 @@ namespace OHOS::Ace::NG {
  */
 namespace {
 const Dimension MENU_CONTAINER_WIDTH = 240.0_vp;
-const Dimension MENU_CONTAINER_HEIGHT = 209.0_vp;
-const Dimension MENU_CONTAINER_HEIGHT_HIDE = 100.0_vp;
+const Dimension MENU_CONTAINER_HEIGHT = 201.0_vp;
+const Dimension MENU_CONTAINER_HEIGHT_HIDE = 96.0_vp;
 const Dimension MENU_CONTAINER_DIVIDER_HEIGHT = 9.0_vp;
 const Dimension MENU_CONTAINER_DIVIDER_STROKE_HEIGHT = 1.0_vp;
 const Dimension MENU_ITEM_RADIUS = 8.0_vp;

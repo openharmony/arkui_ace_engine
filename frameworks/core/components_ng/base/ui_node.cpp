@@ -27,13 +27,14 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "core/common/container.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/property/layout_constraint.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
-thread_local int32_t UINode::currentAccessibilityId_ = 0;
+thread_local int64_t UINode::currentAccessibilityId_ = 0;
 
 UINode::UINode(const std::string& tag, int32_t nodeId, bool isRoot)
     : tag_(tag), nodeId_(nodeId), accessibilityId_(currentAccessibilityId_++), isRoot_(isRoot)
@@ -280,6 +281,10 @@ void UINode::DoAddChild(
 
     child->SetParent(Claim(this));
     child->SetDepth(GetDepth() + 1);
+    if (nodeStatus_ != NodeStatus::NORMAL_NODE) {
+        child->UpdateNodeStatus(nodeStatus_);
+    }
+
     if (!silently && onMainTree_) {
         child->AttachToMainTree(!allowTransition);
     }
@@ -1004,7 +1009,7 @@ std::string UINode::GetCurrentCustomNodeInfo()
     return extraInfo;
 }
 
-int32_t UINode::GenerateAccessibilityId()
+int64_t UINode::GenerateAccessibilityId()
 {
     return currentAccessibilityId_++;
 }
@@ -1012,5 +1017,24 @@ int32_t UINode::GenerateAccessibilityId()
 NodeStatus UINode::GetNodeStatus() const
 {
     return nodeStatus_;
+}
+
+bool UINode::SetParentLayoutConstraint(const SizeF& size) const
+{
+    auto children = GetChildren();
+    return std::any_of(children.begin(), children.end(),
+        [size](const RefPtr<UINode>& child) { return child->SetParentLayoutConstraint(size); });
+}
+
+void UINode::UpdateNodeStatus(NodeStatus nodeStatus)
+{
+    nodeStatus_ = nodeStatus;
+    for (const auto& child : children_) {
+        if (child->GetNodeStatus() == nodeStatus_) {
+            continue;
+        }
+        child->OnAttachToBuilderNode(nodeStatus_);
+        child->UpdateNodeStatus(nodeStatus_);
+    }
 }
 } // namespace OHOS::Ace::NG

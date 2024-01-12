@@ -81,12 +81,18 @@ OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(
 {
     antiAlias_ = true;
     context_ = context;
+    matrix_.reset();
+    InitBitmap(width, height);
+    imageShadow_ = std::make_unique<Shadow>();
+    InitImageCallbacks();
+}
+
+void OffscreenCanvasPaintMethod::InitBitmap(int32_t width, int32_t height)
+{
     width_ = width;
     height_ = height;
     lastLayoutSize_.SetWidth(static_cast<float>(width));
     lastLayoutSize_.SetHeight(static_cast<float>(height));
-    matrix_.reset();
-
 #ifndef USE_ROSEN_DRAWING
     auto imageInfo =
         SkImageInfo::Make(width, height, SkColorType::kRGBA_8888_SkColorType, SkAlphaType::kUnpremul_SkAlphaType);
@@ -104,9 +110,11 @@ OffscreenCanvasPaintMethod::OffscreenCanvasPaintMethod(
     rsCanvas_ = std::make_unique<RSCanvas>();
     rsCanvas_->Bind(bitmap_);
 #endif
+}
 
-    imageShadow_ = std::make_unique<Shadow>();
-    InitImageCallbacks();
+void OffscreenCanvasPaintMethod::UpdateSize(int32_t width, int32_t height)
+{
+    InitBitmap(width, height);
 }
 
 void OffscreenCanvasPaintMethod::ImageObjReady(const RefPtr<Ace::ImageObject>& imageObj)

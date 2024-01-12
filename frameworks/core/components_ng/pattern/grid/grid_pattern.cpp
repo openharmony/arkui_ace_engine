@@ -239,11 +239,11 @@ void GridPattern::ClearMultiSelect()
     ClearSelectedZone();
 }
 
-bool GridPattern::IsItemSelected(const GestureEvent& info)
+bool GridPattern::IsItemSelected()
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto node = host->FindChildByPosition(info.GetGlobalLocation().GetX(), info.GetGlobalLocation().GetY());
+    auto node = host->FindChildByPosition(mouseStartOffsetGlobal_.GetX(), mouseStartOffsetGlobal_.GetY());
     CHECK_NULL_RETURN(node, false);
     auto itemPattern = node->GetPattern<GridItemPattern>();
     CHECK_NULL_RETURN(itemPattern, false);
@@ -410,9 +410,8 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     gridLayoutInfo_ = gridLayoutInfo;
     AnimateToTarget(scrollAlign_, layoutAlgorithmWrapper);
 
-    if (gridLayoutInfo_.startIndex_ == 0 && NearZero(gridLayoutInfo_.currentOffset_)) {
-        gridLayoutInfo_.reachStart_ = true;
-    }
+    gridLayoutInfo_.reachStart_ = gridLayoutInfo_.startIndex_ == 0 && NearZero(gridLayoutInfo_.currentOffset_);
+
     gridLayoutInfo_.childrenCount_ = dirty->GetTotalChildCount();
     currentHeight_ = EstimateHeight();
     if (!offsetEnd && gridLayoutInfo_.offsetEnd_) {
@@ -1290,6 +1289,9 @@ void GridPattern::ScrollTo(float position)
 
 float GridPattern::EstimateHeight() const
 {
+    if (!isConfigScrollable_) {
+        return 0.0f;
+    }
     // During the scrolling animation, the exact current position is used. Other times use the estimated location
     if (isSmoothScrolling_) {
         auto lineIndex = 0;

@@ -47,6 +47,8 @@ constexpr float TOUCH_BOTTOM_BACKGROUND_WIDTH_MULTIPLE = 1.225f;
 constexpr float TOUCH_BOTTOM_BACKGROUND_HEIGHT_MULTIPLE = 0.8f;
 constexpr float TOUCH_BOTTOM_DOT_WIDTH_MULTIPLE = 0.0125f;
 constexpr int32_t TOUCH_BOTTOM_ANIMATION_DURATION = 200;
+constexpr int32_t OPACITY_ANIMATION_DURATION = 100;
+constexpr uint8_t TARGET_ALPHA = 255;
 } // namespace
 
 void DotIndicatorModifier::onDraw(DrawingContext& context)
@@ -290,8 +292,8 @@ void DotIndicatorModifier::UpdateShrinkPaintProperty(
     indicatorMargin_->Set(margin);
     indicatorPadding_->Set(static_cast<float>(INDICATOR_PADDING_DEFAULT.ConvertToPx()));
 
-    vectorBlackPointCenterX_->Set(vectorBlackPointCenterX);
     if (longPointLeftAnimEnd_ && longPointRightAnimEnd_) {
+        vectorBlackPointCenterX_->Set(vectorBlackPointCenterX);
         longPointLeftCenterX_->Set(longPointCenterX.first);
         longPointRightCenterX_->Set(longPointCenterX.second);
     }
@@ -368,6 +370,8 @@ void DotIndicatorModifier::UpdateNormalToHoverPaintProperty(
     AnimationOption option;
     option.SetDuration(COMPONENT_DILATE_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
+    longPointLeftAnimEnd_ = true;
+    longPointRightAnimEnd_ = true;
     AnimationUtils::Animate(option, [weak = WeakClaim(this), hoverItemHalfSizes, vectorBlackPointCenterX,
         longPointCenterX]() {
         auto modifier = weak.Upgrade();
@@ -383,6 +387,8 @@ void DotIndicatorModifier::UpdateHoverToNormalPaintProperty(
     AnimationOption option;
     option.SetDuration(COMPONENT_SHRINK_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
+    longPointLeftAnimEnd_ = true;
+    longPointRightAnimEnd_ = true;
     AnimationUtils::Animate(option, [weak = WeakClaim(this), margin, normalItemHalfSizes, vectorBlackPointCenterX,
         longPointCenterX]() {
         auto modifier = weak.Upgrade();
@@ -398,6 +404,8 @@ void DotIndicatorModifier::UpdateNormalToPressPaintProperty(
     AnimationOption option;
     option.SetDuration(COMPONENT_DILATE_ANIMATION_DURATION);
     option.SetCurve(Curves::SHARP);
+    longPointLeftAnimEnd_ = true;
+    longPointRightAnimEnd_ = true;
     AnimationUtils::Animate(option, [weak = WeakClaim(this), hoverItemHalfSizes, vectorBlackPointCenterX,
         longPointCenterX]() {
         auto modifier = weak.Upgrade();
@@ -500,14 +508,26 @@ void DotIndicatorModifier::UpdateAllPointCenterXAnimation(GestureState gestureSt
     if (longPointLeftAnimEnd_ && longPointRightAnimEnd_) {
         longPointLeftAnimEnd_ = false;
         longPointRightAnimEnd_ = false;
+        auto weak = WeakClaim(this);
+        longPointLeftAnimation_ = AnimationUtils::StartAnimation(optionLeft, [weak, longPointCenterX]() {
+                auto modifier = weak.Upgrade();
+                CHECK_NULL_VOID(modifier);
+                modifier->longPointLeftCenterX_->Set(longPointCenterX.first);
+            }, [weak]() {
+                auto modifier = weak.Upgrade();
+                CHECK_NULL_VOID(modifier);
+                modifier->longPointLeftAnimEnd_ = true;
+            });
 
-        longPointLeftAnimation_ = AnimationUtils::StartAnimation(
-            optionLeft, [&]() { longPointLeftCenterX_->Set(longPointCenterX.first); },
-            [&]() { longPointLeftAnimEnd_ = true; });
-
-        longPointRightAnimation_ = AnimationUtils::StartAnimation(
-            optionRight, [&]() { longPointRightCenterX_->Set(longPointCenterX.second); },
-            [&]() { longPointRightAnimEnd_ = true; });
+        longPointRightAnimation_ = AnimationUtils::StartAnimation(optionRight, [weak, longPointCenterX]() {
+                auto modifier = weak.Upgrade();
+                CHECK_NULL_VOID(modifier);
+                modifier->longPointRightCenterX_->Set(longPointCenterX.second);
+            }, [weak]() {
+                auto modifier = weak.Upgrade();
+                CHECK_NULL_VOID(modifier);
+                modifier->longPointRightAnimEnd_ = true;
+            });
     }
 }
 
@@ -558,6 +578,33 @@ void DotIndicatorModifier::PlayBlackPointsAnimation(const LinearVector<float>& v
         AnimationUtils::StartAnimation(option, [&]() { vectorBlackPointCenterX_->Set(vectorBlackPointCenterX); });
 }
 
+void DotIndicatorModifier::PlayOpacityAnimation()
+{
+    AnimationOption optionOpacity;
+    // x0:0.33, y0:0, x1:0.67, y1:1
+    optionOpacity.SetCurve(AceType::MakeRefPtr<CubicCurve>(0.33, 0, 0.67, 1));
+    optionOpacity.SetDuration(OPACITY_ANIMATION_DURATION);
+    isSelectedColorAnimEnd_ = false;
+    isTouchBottomLoop_ = true;
+    selectedColor_->Set(LinearColor(selectedColor_->Get().BlendOpacity(0.0f)));
+    auto weak = WeakClaim(this);
+    AnimationUtils::StartAnimation(optionOpacity, [weak]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            auto color = modifier->selectedColor_->Get();
+            auto targetColor =
+                LinearColor(Color::FromARGB(TARGET_ALPHA, color.GetRed(), color.GetGreen(), color.GetBlue()));
+            modifier->selectedColor_->Set(targetColor);
+            modifier->touchBottomPointColor_->Set(LinearColor(modifier->touchBottomPointColor_->Get().BlendOpacity(0)));
+        }, [weak]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            modifier->touchBottomPointColor_->Set(LinearColor(modifier->unselectedColor_->Get()));
+            modifier->isTouchBottomLoop_ = false;
+            modifier->isSelectedColorAnimEnd_ = true;
+        });
+}
+
 void DotIndicatorModifier::PlayTouchBottomAnimation(const std::vector<std::pair<float, float>>& longPointCenterX,
     TouchBottomTypeLoop touchBottomTypeLoop, const LinearVector<float>& vectorBlackPointCenterX)
 {
@@ -570,40 +617,33 @@ void DotIndicatorModifier::PlayTouchBottomAnimation(const std::vector<std::pair<
     optionBottom.SetCurve(AceType::MakeRefPtr<CubicCurve>(0.33, 0, 0.67, 1));
     optionBottom.SetDuration(TOUCH_BOTTOM_ANIMATION_DURATION);
 
-    FinishCallback bottomFinishCallback = [&, optionBottom, longPointCenterX, vectorBlackPointCenterX,
+    auto weak = WeakClaim(this);
+    FinishCallback bottomFinishCallback = [weak, optionBottom, longPointCenterX, vectorBlackPointCenterX,
                                               touchBottomTypeLoop]() {
-        if (!ifNeedFinishCallback_) {
+        auto modifier = weak.Upgrade();
+        CHECK_NULL_VOID(modifier);
+        if (!(modifier->ifNeedFinishCallback_)) {
             return;
         }
+        modifier->PlayOpacityAnimation();
         if (touchBottomTypeLoop == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT) {
-            longPointLeftCenterX_->Set(vectorBlackPointCenterX[vectorBlackPointCenterX.size() - 1]);
-            longPointRightCenterX_->Set(vectorBlackPointCenterX[vectorBlackPointCenterX.size() - 1]);
+            modifier->longPointLeftCenterX_->Set(vectorBlackPointCenterX[vectorBlackPointCenterX.size() - 1]);
+            modifier->longPointRightCenterX_->Set(vectorBlackPointCenterX[vectorBlackPointCenterX.size() - 1]);
         } else if (touchBottomTypeLoop == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT) {
-            longPointLeftCenterX_->Set(vectorBlackPointCenterX[0]);
-            longPointRightCenterX_->Set(vectorBlackPointCenterX[0]);
+            modifier->longPointLeftCenterX_->Set(vectorBlackPointCenterX[0]);
+            modifier->longPointRightCenterX_->Set(vectorBlackPointCenterX[0]);
         }
 
-        AnimationOption optionOpacity;
-        // x0:0.33, y0:0, x1:0.67, y1:1
-        optionOpacity.SetCurve(AceType::MakeRefPtr<CubicCurve>(0.33, 0, 0.67, 1));
-        optionOpacity.SetDuration(100);
-        isSelectedColorAnimEnd_ = false;
-        isTouchBottomLoop_ = true;
-        AnimationUtils::StartAnimation(optionOpacity, [&]() {
-            selectedColor_->Set(LinearColor(selectedColor_->Get().BlendOpacity(1.0)));
-            touchBottomPointColor_->Set(LinearColor(touchBottomPointColor_->Get().BlendOpacity(0)));
-        }, [&]() {
-            touchBottomPointColor_->Set(LinearColor(unselectedColor_->Get()));
-            isTouchBottomLoop_ = false;
-            isSelectedColorAnimEnd_ = true;
-        });
-
-        AnimationUtils::StartAnimation(optionBottom, [&, longPointCenterX]() {
-            longPointLeftCenterX_->Set(longPointCenterX[1].first);
-            longPointRightCenterX_->Set(longPointCenterX[1].second);
-        }, [&]() {
-            longPointLeftAnimEnd_ = true;
-            longPointRightAnimEnd_ = true;
+        AnimationUtils::StartAnimation(optionBottom, [weak, longPointCenterX]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            modifier->longPointLeftCenterX_->Set(longPointCenterX[1].first);
+            modifier->longPointRightCenterX_->Set(longPointCenterX[1].second);
+        }, [weak]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            modifier->longPointLeftAnimEnd_ = true;
+            modifier->longPointRightAnimEnd_ = true;
         });
     };
     if (longPointLeftAnimEnd_ && longPointRightAnimEnd_) {
@@ -611,9 +651,11 @@ void DotIndicatorModifier::PlayTouchBottomAnimation(const std::vector<std::pair<
         longPointRightAnimEnd_ = false;
         ifNeedFinishCallback_ = true;
         touchBottomPointColor_->Set(LinearColor(selectedColor_->Get()));
-        AnimationUtils::StartAnimation(optionBottom, [&, longPointCenterX]() {
-            longPointLeftCenterX_->Set(longPointCenterX[0].first);
-            longPointRightCenterX_->Set(longPointCenterX[0].second);
+        AnimationUtils::StartAnimation(optionBottom, [weak, longPointCenterX]() {
+            auto modifier = weak.Upgrade();
+            CHECK_NULL_VOID(modifier);
+            modifier->longPointLeftCenterX_->Set(longPointCenterX[0].first);
+            modifier->longPointRightCenterX_->Set(longPointCenterX[0].second);
         }, bottomFinishCallback);
     }
 }
@@ -655,13 +697,26 @@ void DotIndicatorModifier::PlayLongPointAnimation(const std::vector<std::pair<fl
     if (longPointLeftAnimEnd_ && longPointRightAnimEnd_) {
         longPointLeftAnimEnd_ = false;
         longPointRightAnimEnd_ = false;
-        longPointLeftAnimation_ = AnimationUtils::StartAnimation(optionLeft, [&, longPointCenterX]() {
-                longPointLeftCenterX_->Set(longPointCenterX[0].first);
-            }, [&]() { longPointLeftAnimEnd_ = true; });
+        auto weak = WeakClaim(this);
+        longPointLeftAnimation_ = AnimationUtils::StartAnimation(optionLeft, [weak, longPointCenterX]() {
+                auto modifier = weak.Upgrade();
+                CHECK_NULL_VOID(modifier);
+                modifier->longPointLeftCenterX_->Set(longPointCenterX[0].first);
+            }, [weak]() {
+                auto modifier = weak.Upgrade();
+                CHECK_NULL_VOID(modifier);
+                modifier->longPointLeftAnimEnd_ = true;
+            });
 
-        longPointRightAnimation_ = AnimationUtils::StartAnimation(optionRight, [&, longPointCenterX]() {
-                longPointRightCenterX_->Set(longPointCenterX[0].second);
-            }, [&]() { longPointRightAnimEnd_ = true; });
+        longPointRightAnimation_ = AnimationUtils::StartAnimation(optionRight, [weak, longPointCenterX]() {
+                auto modifier = weak.Upgrade();
+                CHECK_NULL_VOID(modifier);
+                modifier->longPointRightCenterX_->Set(longPointCenterX[0].second);
+            }, [weak]() {
+                auto modifier = weak.Upgrade();
+                CHECK_NULL_VOID(modifier);
+                modifier->longPointRightAnimEnd_ = true;
+            });
     }
 }
 
@@ -669,6 +724,7 @@ void DotIndicatorModifier::PlayIndicatorAnimation(const LinearVector<float>& vec
     const std::vector<std::pair<float, float>>& longPointCenterX, GestureState gestureState,
     TouchBottomTypeLoop touchBottomTypeLoop)
 {
+    StopAnimation();
     isTouchBottomLoop_ = false;
     PlayBlackPointsAnimation(vectorBlackPointCenterX);
     PlayLongPointAnimation(longPointCenterX, gestureState, touchBottomTypeLoop, vectorBlackPointCenterX);

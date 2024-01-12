@@ -179,6 +179,8 @@ private:
     }
 
     bool IsOutOfPressedRegion(int32_t sourceType, const Offset& location) const;
+    bool IsOutOfPressedRegionWithoutClip(RefPtr<FrameNode> node, int32_t sourceType,
+        const Offset& location) const;
     void Transform(PointF& localPointF, const WeakPtr<FrameNode>& node) const;
 
     WeakPtr<FrameNode> host_;

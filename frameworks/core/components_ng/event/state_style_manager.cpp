@@ -254,6 +254,30 @@ bool StateStyleManager::IsOutOfPressedRegion(int32_t sourceType, const Offset& l
 {
     auto node = host_.Upgrade();
     CHECK_NULL_RETURN(node, false);
+    if (IsOutOfPressedRegionWithoutClip(node, sourceType, location)) {
+        return true;
+    }
+    auto parent = node->GetAncestorNodeOfFrame();
+    while (parent) {
+        auto renderContext = parent->GetRenderContext();
+        if (!renderContext) {
+            parent = parent->GetAncestorNodeOfFrame();
+            continue;
+        }
+        // If the parent node has a "clip" attribute, the press region should be re-evaluated.
+        auto clip = renderContext->GetClipEdge().value_or(false);
+        if (clip && IsOutOfPressedRegionWithoutClip(parent, sourceType, location)) {
+            return true;
+        }
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    return false;
+}
+
+bool StateStyleManager::IsOutOfPressedRegionWithoutClip(RefPtr<FrameNode> node, int32_t sourceType,
+    const Offset& location) const
+{
+    CHECK_NULL_RETURN(node, false);
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
 

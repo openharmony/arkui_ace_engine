@@ -774,7 +774,7 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
         RSRecordingPath path;
 #endif
         path.AddRoundRect(
-            { offset.GetX(), offset.GetY(), dateLength + offset.GetX() + strokeWidth_->Get(),
+            { offset.GetX(), offset.GetY(), dateLength + offset.GetX() + radius * INT32_TWO,
               strokeWidth_->Get() + offset.GetY() },
             radius, radius);
         canvas.DrawPath(path);
@@ -802,7 +802,7 @@ void ProgressModifier::PaintLinear(RSCanvas& canvas, const OffsetF& offset, cons
 #endif
         path.AddRoundRect(
             { offset.GetX(), offset.GetY(), strokeWidth_->Get() + offset.GetX(),
-              dateLength + offset.GetY() + strokeWidth_->Get() },
+              dateLength + offset.GetY() + radius * INT32_TWO },
             radius, radius);
         canvas.DrawPath(path);
         canvas.DetachBrush();
@@ -1349,7 +1349,7 @@ void ProgressModifier::PaintTrailing(RSCanvas& canvas, const RingProgressData& r
 
     for (size_t i = 0; i < gradientColors.size(); i++) {
         double dimension = gradientColors[i].GetDimension().Value();
-        Color color = gradientColors[0].GetLinearColor().BlendOpacity(dimension);
+        Color color = gradientColors[i].GetLinearColor().BlendOpacity(dimension);
         colors.emplace_back(color.GetValue());
         pos.emplace_back(gradientColors[i].GetDimension().Value());
     }

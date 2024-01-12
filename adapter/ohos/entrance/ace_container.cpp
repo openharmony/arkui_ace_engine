@@ -1856,24 +1856,6 @@ std::string AceContainer::GetFontFamilyName(std::string path)
     return fontFamilyName;
 }
 
-float AceContainer::GetSmallWindowScale() const
-{
-    float scale = 1.0f;
-    auto windowId = GetWindowId();
-    std::vector<sptr<OHOS::Rosen::AccessibilityWindowInfo>> windowInfos;
-    OHOS::Rosen::WindowManager::GetInstance().GetAccessibilityWindowInfo(windowInfos);
-    for (auto& window : windowInfos) {
-        if (!window) {
-            continue;
-        }
-        if (window->wid_ == static_cast<int32_t>(windowId)) {
-            scale = window->scaleVal_;
-            break;
-        }
-    }
-    return scale;
-}
-
 bool AceContainer::endsWith(std::string str, std::string suffix)
 {
     if (str.length() < suffix.length()) {
@@ -2302,7 +2284,7 @@ void AceContainer::RegisterStopDragCallback(int32_t pointerId, StopDragCallback&
 }
 
 void AceContainer::SearchElementInfoByAccessibilityIdNG(
-    int32_t elementId, int32_t mode, int32_t baseParent,
+    int64_t elementId, int32_t mode, int64_t baseParent,
     std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     CHECK_NULL_VOID(taskExecutor_);
@@ -2324,7 +2306,7 @@ void AceContainer::SearchElementInfoByAccessibilityIdNG(
 }
 
 void AceContainer::SearchElementInfosByTextNG(
-    int32_t elementId, const std::string& text, int32_t baseParent,
+    int64_t elementId, const std::string& text, int64_t baseParent,
     std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     CHECK_NULL_VOID(taskExecutor_);
@@ -2346,7 +2328,7 @@ void AceContainer::SearchElementInfosByTextNG(
 }
 
 void AceContainer::FindFocusedElementInfoNG(
-    int32_t elementId, int32_t focusType, int32_t baseParent,
+    int64_t elementId, int32_t focusType, int64_t baseParent,
     Accessibility::AccessibilityElementInfo& output)
 {
     CHECK_NULL_VOID(taskExecutor_);
@@ -2368,7 +2350,7 @@ void AceContainer::FindFocusedElementInfoNG(
 }
 
 void AceContainer::FocusMoveSearchNG(
-    int32_t elementId, int32_t direction, int32_t baseParent,
+    int64_t elementId, int32_t direction, int64_t baseParent,
     Accessibility::AccessibilityElementInfo& output)
 {
     CHECK_NULL_VOID(taskExecutor_);
@@ -2389,8 +2371,8 @@ void AceContainer::FocusMoveSearchNG(
 }
 
 bool AceContainer::NotifyExecuteAction(
-    int32_t elementId, const std::map<std::string, std::string>& actionArguments,
-    int32_t action, int32_t offset)
+    int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+    int32_t action, int64_t offset)
 {
     bool IsExecuted = false;
     CHECK_NULL_RETURN(taskExecutor_, IsExecuted);

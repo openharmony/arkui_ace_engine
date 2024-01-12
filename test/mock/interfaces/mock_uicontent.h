@@ -102,22 +102,23 @@ public:
 
 #ifndef PREVIEW
     MOCK_METHOD4(
-        SearchElementInfoByAccessibilityId, void(int32_t elementId,
-        int32_t mode, int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output));
+        SearchElementInfoByAccessibilityId, void(int64_t elementId,
+        int32_t mode, int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output));
     MOCK_METHOD4(
-        SearchElementInfosByText, void(int32_t elementId,
-        const std::string& text, int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output));
+        SearchElementInfosByText, void(int64_t elementId,
+        const std::string& text, int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output));
     MOCK_METHOD4(
-        FindFocusedElementInfo, void(int32_t elementId,
-        int32_t focusType, int32_t baseParent, Accessibility::AccessibilityElementInfo& output));
+        FindFocusedElementInfo, void(int64_t elementId,
+        int32_t focusType, int64_t baseParent, Accessibility::AccessibilityElementInfo& output));
     MOCK_METHOD4(
-        FocusMoveSearch, void(int32_t elementId, int32_t direction,
-        int32_t baseParent, Accessibility::AccessibilityElementInfo& output));
+        FocusMoveSearch, void(int64_t elementId, int32_t direction,
+        int64_t baseParent, Accessibility::AccessibilityElementInfo& output));
 #endif
     MOCK_METHOD1(GetAppPaintSize, void(OHOS::Rosen::Rect&));
     MOCK_METHOD3(CreateCustomPopupUIExtension, int32_t(const AAFwk::Want& want,
         const ModalUIExtensionCallbacks& callbacks, const CustomPopupUIExtensionConfig& config));
     MOCK_METHOD1(DestroyCustomPopupUIExtension, void(int32_t nodeId));
+    MOCK_METHOD1(UpdateTransform, void(const OHOS::Rosen::Transform& transform));
 };
 } // namespace Ace
 } // namespace OHOS

@@ -54,7 +54,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t AI_TEXT_MAX_LENGTH = 300;
 constexpr int32_t AI_TEXT_GAP = 100;
-constexpr int32_t AI_DELAY_TIME = 300;
+constexpr int32_t AI_DELAY_TIME = 100;
 constexpr double DIMENSION_VALUE = 16.0;
 constexpr const char COPY_ACTION[] = "copy";
 constexpr const char SELECT_ACTION[] = "select";
@@ -597,7 +597,11 @@ void TextPattern::CheckHandles(SelectHandleInfo& handleInfo)
 
 void TextPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID(!longPressEvent_);
+    constexpr int32_t longPressDelay = 600;
+    if (longPressEvent_) {
+        gestureHub->SetLongPressEvent(longPressEvent_, false, false, longPressDelay);
+        return;
+    }
     auto longPressCallback = [weak = WeakClaim(this)](GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -605,7 +609,6 @@ void TextPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
     };
     longPressEvent_ = MakeRefPtr<LongPressEvent>(std::move(longPressCallback));
 
-    constexpr int32_t longPressDelay = 600;
     // Default time is 500, used by drag event. Drag event would trigger if text is selected, but we want
     // it to only trigger on the second long press, after selection. Therefore, long press delay of Selection needs to
     // be slightly longer to ensure that order.
@@ -686,14 +689,13 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
     if (onClick_) {
         auto onClick = onClick_;
         onClick(info);
-
         if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
             auto host = GetHost();
             CHECK_NULL_VOID(host);
-            auto inspectorId = host->GetInspectorIdValue("");
             auto text = host->GetAccessibilityProperty<NG::AccessibilityProperty>()->GetText();
             Recorder::EventParamsBuilder builder;
-            builder.SetId(inspectorId).SetType(host->GetTag()).SetText(text);
+            builder.SetId(host->GetInspectorIdValue("")).SetType(host->GetTag()).SetText(text)
+                .SetDescription(host->GetAutoEventParamValue(""));
             Recorder::EventRecorder::Get().OnClick(std::move(builder));
         }
     }
@@ -738,7 +740,7 @@ void TextPattern::HandleSpanSingleClickEvent(
                     item->onClick(spanClickinfo);
                     if (Recorder::EventRecorder::Get().IsComponentRecordEnable()) {
                         Recorder::EventParamsBuilder builder;
-                        builder.SetId(item->inspectId).SetText(item->content);
+                        builder.SetId(item->inspectId).SetText(item->content).SetDescription(item->description);
                         Recorder::EventRecorder::Get().OnClick(std::move(builder));
                     }
                     isClickOnSpan = true;
@@ -1428,7 +1430,9 @@ void TextPattern::InitDragEvent()
             return pattern->OnDragStart(event, extraParams);
         }
     };
-    eventHub->SetOnDragStart(std::move(onDragStart));
+    if (!eventHub->HasOnDragStart()) {
+        eventHub->SetOnDragStart(std::move(onDragStart));
+    }
     auto onDragMove = [weakPtr = WeakClaim(this)](
                           const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
@@ -1504,6 +1508,10 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
     textStyle.fontFamily = !fontFamilyValue.empty() ? fontFamilyValue : defaultFontFamily.front();
     textStyle.decorationType = static_cast<int32_t>(node->GetTextDecorationValue(TextDecoration::NONE));
     textStyle.decorationColor = node->GetTextDecorationColorValue(Color::BLACK).ColorToString();
+    textStyle.textAlign = static_cast<int32_t>(node->GetTextAlignValue(TextAlign::START));
+    auto lm = node->GetLeadingMarginValue({});
+    textStyle.leadingMarginSize[RichEditorLeadingRange::LEADING_START] = Dimension(lm.size.Width()).ConvertToVp();
+    textStyle.leadingMarginSize[RichEditorLeadingRange::LEADING_END] = Dimension(lm.size.Height()).ConvertToVp();
     return textStyle;
 }
 
@@ -1661,6 +1669,17 @@ ResultObject TextPattern::GetImageResultObject(RefPtr<UINode> uinode, int32_t in
         }
         if (imageLayoutProperty->HasVerticalAlign()) {
             resultObject.imageStyle.objectFit = static_cast<int32_t>(imageLayoutProperty->GetVerticalAlignValue());
+        }
+        if (geometryNode->GetMargin()) {
+            resultObject.imageStyle.margin = geometryNode->GetMargin()->ToJsonString();
+        }
+        auto imageRenderCtx = imageNode->GetRenderContext();
+        if (imageRenderCtx->GetBorderRadius()) {
+            BorderRadiusProperty brp;
+            auto jsonObject = JsonUtil::Create(true);
+            auto jsonBorder = JsonUtil::Create(true);
+            imageRenderCtx->GetBorderRadiusValue(brp).ToJsonValue(jsonObject, jsonBorder);
+            resultObject.imageStyle.borderRadius = jsonObject->ToString();
         }
     }
     return resultObject;
@@ -2014,11 +2033,6 @@ void TextPattern::ActSetSelection(int32_t start, int32_t end)
     start = start > textSize ? textSize : start;
     end = end > textSize ? textSize : end;
     if (start >= end) {
-        SelectOverlayInfo selectInfo;
-        selectInfo.firstHandle.paintRect = textSelector_.firstHandle;
-        selectInfo.secondHandle.paintRect = textSelector_.secondHandle;
-        CheckHandles(selectInfo.firstHandle);
-        CheckHandles(selectInfo.secondHandle);
         FireOnSelectionChange(-1, -1);
         return;
     }
@@ -2053,6 +2067,7 @@ void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool
         CHECK_NULL_VOID(host);
         pipeline->AddOnAreaChangeNode(host->GetId());
         selectInfo.callerFrameNode = GetHost();
+        selectInfo.hitTestMode = HitTestMode::HTMDEFAULT;
         if (!selectInfo.isUsingMouse) {
             CheckHandles(selectInfo.firstHandle);
             CheckHandles(selectInfo.secondHandle);
@@ -2211,6 +2226,7 @@ void TextPattern::CollectSpanNodes(std::stack<SpanNodeInfo> nodes, bool& isSpanH
         auto spanNode = DynamicCast<SpanNode>(current.node);
         if (spanNode && current.node->GetTag() == V2::SYMBOL_SPAN_ETS_TAG) {
             spanNode->CleanSpanItemChildren();
+            UpdateChildProperty(spanNode);
             spanNode->MountToParagraph();
             textForDisplay_.append(StringUtils::Str16ToStr8(SYMBOL_TRANS));
         } else if (spanNode && current.node->GetTag() != V2::PLACEHOLDER_SPAN_ETS_TAG) {

@@ -204,10 +204,17 @@ public:
             CHECK_NULL_VOID(container);
             auto taskExecutor = container->GetTaskExecutor();
             CHECK_NULL_VOID(taskExecutor);
+            auto context = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+            CHECK_NULL_VOID(context);
+            auto uiExtMgr = context->GetUIExtensionManager();
+            if (uiExtMgr && uiExtMgr->NotifyOccupiedAreaChangeInfo(info)) {
+                return;
+            }
+            auto curWindow = context->GetCurrentWindowRect();
+            positionY -= curWindow.Top();
             ContainerScope scope(instanceId_);
             taskExecutor->PostTask(
-                [container, keyboardRect, rsTransaction, positionY, height] {
-                    auto context = container->GetPipelineContext();
+                [context, keyboardRect, rsTransaction, positionY, height] {
                     CHECK_NULL_VOID(context);
                     context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height, rsTransaction);
                 },
@@ -585,7 +592,7 @@ void UIContentImpl::CommonInitializeForm(
             AceApplicationInfo::GetInstance().SetPackageName(context->GetBundleName());
             AceApplicationInfo::GetInstance().SetDataFileDirPath(context->GetFilesDir());
             AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
-            AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingPid());
+            AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
             CapabilityRegistry::Register();
             ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
             ImageFileCache::GetInstance().SetCacheFileInfo();
@@ -992,7 +999,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
         AceApplicationInfo::GetInstance().SetAppVersionName(context->GetApplicationInfo()->versionName);
         AceApplicationInfo::GetInstance().SetAppVersionCode(context->GetApplicationInfo()->versionCode);
         AceApplicationInfo::GetInstance().SetUid(IPCSkeleton::GetCallingUid());
-        AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingPid());
+        AceApplicationInfo::GetInstance().SetPid(IPCSkeleton::GetCallingRealPid());
         CapabilityRegistry::Register();
         ImageFileCache::GetInstance().SetImageCacheFilePath(context->GetCacheDir());
         ImageFileCache::GetInstance().SetCacheFileInfo();
@@ -1548,6 +1555,12 @@ bool UIContentImpl::ProcessBackPressed()
     CHECK_NULL_RETURN(container, false);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_RETURN(taskExecutor, false);
+    auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());
+    CHECK_NULL_RETURN(pipeline, false);
+    auto uiExtMgr = pipeline->GetUIExtensionManager();
+    if (uiExtMgr && uiExtMgr->OnBackPressed()) {
+        return true;
+    }
     bool ret = false;
     taskExecutor->PostSyncTask(
         [container, this, &ret]() {
@@ -1662,9 +1675,18 @@ void UIContentImpl::UpdateViewportConfig(const ViewportConfig& config, OHOS::Ros
     ContainerScope scope(instanceId_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
+    // The density of sub windows related to dialog needs to be consistent with the main window.
+    auto modifyConfig = config;
+    if (instanceId_ >= MIN_SUBCONTAINER_ID) {
+        auto parentContainer = Platform::AceContainer::GetContainer(container->GetParentId());
+        CHECK_NULL_VOID(parentContainer);
+        auto parentPipeline = parentContainer->GetPipelineContext();
+        CHECK_NULL_VOID(parentPipeline);
+        modifyConfig.SetDensity(parentPipeline->GetDensity());
+    }
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    auto task = [config, container, reason, rsTransaction, rsWindow = window_]() {
+    auto task = [config = modifyConfig, container, reason, rsTransaction, rsWindow = window_]() {
         container->SetWindowPos(config.Left(), config.Top());
         auto pipelineContext = container->GetPipelineContext();
         if (pipelineContext) {
@@ -2246,14 +2268,16 @@ void UIContentImpl::ProcessFormVisibleChange(bool isVisible)
 }
 
 void UIContentImpl::SearchElementInfoByAccessibilityId(
-    int32_t elementId, int32_t mode, int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
+    int64_t elementId, int32_t mode,
+    int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
     container->SearchElementInfoByAccessibilityIdNG(elementId, mode, baseParent, output);
 }
 
-void UIContentImpl::SearchElementInfosByText(int32_t elementId, const std::string& text, int32_t baseParent,
+void UIContentImpl::SearchElementInfosByText(
+    int64_t elementId, const std::string& text, int64_t baseParent,
     std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
@@ -2262,7 +2286,8 @@ void UIContentImpl::SearchElementInfosByText(int32_t elementId, const std::strin
 }
 
 void UIContentImpl::FindFocusedElementInfo(
-    int32_t elementId, int32_t focusType, int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
+    int64_t elementId, int32_t focusType,
+    int64_t baseParent, Accessibility::AccessibilityElementInfo& output)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -2270,7 +2295,8 @@ void UIContentImpl::FindFocusedElementInfo(
 }
 
 void UIContentImpl::FocusMoveSearch(
-    int32_t elementId, int32_t direction, int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
+    int64_t elementId, int32_t direction,
+    int64_t baseParent, Accessibility::AccessibilityElementInfo& output)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_VOID(container);
@@ -2278,7 +2304,7 @@ void UIContentImpl::FocusMoveSearch(
 }
 
 bool UIContentImpl::NotifyExecuteAction(
-    int32_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int32_t offset)
+    int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset)
 {
     auto container = Platform::AceContainer::GetContainer(instanceId_);
     CHECK_NULL_RETURN(container, false);
@@ -2537,5 +2563,21 @@ void UIContentImpl::SubscribeContainerModalButtonsRectChange(
         cb(containerModal, buttons);
     };
     pipeline->SubscribeContainerModalButtonsRectChange(std::move(wrapFunc));
+}
+
+void UIContentImpl::UpdateTransform(const OHOS::Rosen::Transform& transform)
+{
+    LOGI("UIContentImpl: UpdateTransform, window scale is %{public}f", transform.scaleX_);
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_VOID(container);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = Container::CurrentTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    auto windowScale = transform.scaleX_;
+    taskExecutor->PostTask(
+        [container, windowScale]() {
+            container->SetWindowScale(windowScale);
+        },
+        TaskExecutor::TaskType::UI);
 }
 } // namespace OHOS::Ace

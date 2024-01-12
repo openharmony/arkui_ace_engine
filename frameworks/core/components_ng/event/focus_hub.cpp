@@ -752,6 +752,10 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
                 ret = RequestNextFocus(FocusStep::TAB, GetRect());
                 auto focusParent = GetParentFocusHub();
                 if (!focusParent || !focusParent->IsCurrentFocus()) {
+                    if (context->IsFocusWindowIdSetted()) {
+                        FocusToHeadOrTailChild(true);
+                        return false;
+                    }
                     ret = FocusToHeadOrTailChild(true);
                 }
                 context->SetIsFocusingByTab(false);
@@ -760,6 +764,10 @@ bool FocusHub::OnKeyEventScope(const KeyEvent& keyEvent)
                 ret = RequestNextFocus(FocusStep::SHIFT_TAB, GetRect());
                 auto focusParent = GetParentFocusHub();
                 if (!focusParent || !focusParent->IsCurrentFocus()) {
+                    if (context->IsFocusWindowIdSetted()) {
+                        FocusToHeadOrTailChild(false);
+                        return false;
+                    }
                     ret = FocusToHeadOrTailChild(false);
                 }
                 context->SetIsFocusingByTab(false);
@@ -1160,6 +1168,9 @@ void FocusHub::OnFocusNode()
         parentFocusHub->SetLastFocusNodeIndex(AceType::Claim(this));
     }
     HandleParentScroll(); // If current focus node has a scroll parent. Handle the scroll event.
+    if (isFocusActiveWhenFocused_) {
+        PaintFocusState(true, true);
+    }
     auto pipeline = PipelineContext::GetCurrentContext();
     auto rootNode = pipeline ? pipeline->GetRootElement() : nullptr;
     auto rootFocusHub = rootNode ? rootNode->GetFocusHub() : nullptr;
@@ -1284,7 +1295,7 @@ void FocusHub::OnBlurScope()
     }
 }
 
-bool FocusHub::PaintFocusState(bool isNeedStateStyles)
+bool FocusHub::PaintFocusState(bool isNeedStateStyles, bool forceUpdate)
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
@@ -1292,13 +1303,15 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
     CHECK_NULL_RETURN(frameNode, false);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
-    if (!context->GetIsFocusActive() || !IsNeedPaintFocusState()) {
+    if (!forceUpdate && (!context->GetIsFocusActive() || !IsNeedPaintFocusState())) {
         return false;
     }
 
-    if (isNeedStateStyles && HasFocusStateStyle()) {
-        // do focus state style.
-        CheckFocusStateStyle(true);
+    if (HasFocusStateStyle()) {
+        if (isNeedStateStyles) {
+            // do focus state style.
+            CheckFocusStateStyle(true);
+        }
         return true;
     }
 
@@ -1314,7 +1327,7 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
         if (!focusRectInner.GetRect().IsValid()) {
             return false;
         }
-        return PaintInnerFocusState(focusRectInner);
+        return PaintInnerFocusState(focusRectInner, forceUpdate);
     }
 
     auto appTheme = context->GetTheme<AppTheme>();
@@ -1361,7 +1374,7 @@ bool FocusHub::PaintFocusState(bool isNeedStateStyles)
 bool FocusHub::PaintAllFocusState()
 {
     if (PaintFocusState()) {
-        return true;
+        return !isFocusActiveWhenFocused_;
     }
     std::list<RefPtr<FocusHub>> focusNodes;
     FlushChildrenFocusHub(focusNodes);
@@ -1375,7 +1388,7 @@ bool FocusHub::PaintAllFocusState()
     return false;
 }
 
-bool FocusHub::PaintInnerFocusState(const RoundRect& paintRect)
+bool FocusHub::PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate)
 {
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(context, false);
@@ -1383,7 +1396,7 @@ bool FocusHub::PaintInnerFocusState(const RoundRect& paintRect)
     CHECK_NULL_RETURN(frameNode, false);
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);
-    if (!context->GetIsFocusActive() || !IsNeedPaintFocusState()) {
+    if (!forceUpdate && (!context->GetIsFocusActive() || !IsNeedPaintFocusState())) {
         return false;
     }
     auto appTheme = context->GetTheme<AppTheme>();

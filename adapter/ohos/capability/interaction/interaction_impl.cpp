@@ -64,7 +64,7 @@ int32_t InteractionImpl::StartDrag(const DragDataCore& dragData,
         }
     };
     Msdp::DeviceStatus::DragData msdpDragData { {},
-        dragData.buffer, dragData.udKey, dragData.filterInfo, dragData.extraInfo,
+        dragData.buffer, dragData.udKey, dragData.extraInfo, dragData.filterInfo,
         dragData.sourceType, dragData.dragNum, dragData.pointerId, dragData.displayX, dragData.displayY,
         dragData.displayId, dragData.hasCanceledAnimation, dragData.hasCoordinateCorrected, dragData.summarys };
     for (auto& shadowInfo: dragData.shadowInfos) {

@@ -17,6 +17,7 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -40,6 +41,17 @@ void ColumnModelNG::Create(const std::optional<Dimension>& space, AlignDeclarati
     if (GreatOrEqual(space->Value(), 0.0)) {
         ACE_UPDATE_LAYOUT_PROPERTY(LinearLayoutProperty, Space, space.value());
     }
+}
+
+RefPtr<FrameNode> ColumnModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::COLUMN_ETS_TAG, nodeId, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    auto castLinearLayoutProperty = frameNode->GetLayoutProperty<LinearLayoutProperty>();
+    if (castLinearLayoutProperty) {
+        castLinearLayoutProperty->UpdateFlexDirection(FlexDirection::COLUMN);
+    }
+    return frameNode;
 }
 
 void ColumnModelNG::SetAlignItems(FlexAlign flexAlign)

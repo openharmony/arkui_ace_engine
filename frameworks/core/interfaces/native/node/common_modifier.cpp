@@ -510,7 +510,7 @@ void ResetBackgroundColor(NodeHandle node)
     ViewAbstract::SetBackgroundColor(frameNode, Color(Color::TRANSPARENT));
 }
 
-void SetWidth(NodeHandle node, double value, int unit, const char* calcVlaue)
+void SetWidth(NodeHandle node, double value, int32_t unit, const char* calcVlaue)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -529,7 +529,8 @@ void ResetWidth(NodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::ClearWidthOrHeight(frameNode, true);
 }
-void SetHeight(NodeHandle node, double value, int unit, const char* calcVlaue)
+
+void SetHeight(NodeHandle node, double value, int32_t unit, const char* calcVlaue)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -541,6 +542,7 @@ void SetHeight(NodeHandle node, double value, int unit, const char* calcVlaue)
         ViewAbstract::SetHeight(frameNode, CalcLength(value, unitEnum));
     }
 }
+
 void ResetHeight(NodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -2776,6 +2778,176 @@ void ResetHoverEffect(NodeHandle node)
     ViewAbstract::SetHoverEffect(frameNode, OHOS::Ace::HoverEffectType::AUTO);
 }
 
+void SetOutlineColor(NodeHandle node, const uint32_t* values, int32_t valuesSize)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t colorOffset = NUM_0;
+    NG::BorderColorProperty borderColors;
+    SetOptionalBorderColor(borderColors.leftColor, values, valuesSize, colorOffset);
+    SetOptionalBorderColor(borderColors.rightColor, values, valuesSize, colorOffset);
+    SetOptionalBorderColor(borderColors.topColor, values, valuesSize, colorOffset);
+    SetOptionalBorderColor(borderColors.bottomColor, values, valuesSize, colorOffset);
+    borderColors.multiValued = true;
+    ViewAbstract::SetOuterBorderColor(frameNode, borderColors);
+}
+
+void ResetOutlineColor(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetOuterBorderColor(frameNode, Color::BLACK);
+}
+
+void SetOutlineRadius(NodeHandle node, const double* values, int32_t valuesSize)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t radiusOffset = NUM_0;
+
+    NG::BorderRadiusProperty borderRadius;
+    SetOptionalBorder(borderRadius.radiusTopLeft, values, valuesSize, radiusOffset);
+    SetOptionalBorder(borderRadius.radiusTopRight, values, valuesSize, radiusOffset);
+    SetOptionalBorder(borderRadius.radiusBottomLeft, values, valuesSize, radiusOffset);
+    SetOptionalBorder(borderRadius.radiusBottomRight, values, valuesSize, radiusOffset);
+    borderRadius.multiValued = true;
+    ViewAbstract::SetOuterBorderRadius(frameNode, borderRadius);
+}
+
+void ResetOutlineRadius(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension value;
+    ViewAbstract::SetOuterBorderRadius(frameNode, value);
+}
+
+void SetOutlineWidth(NodeHandle node, const double* values, int32_t valuesSize)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t offset = NUM_0;
+    NG::BorderWidthProperty borderWidth;
+
+    SetOptionalBorder(borderWidth.leftDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderWidth.rightDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderWidth.topDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderWidth.bottomDimen, values, valuesSize, offset);
+    borderWidth.multiValued = true;
+    ViewAbstract::SetOuterBorderWidth(frameNode, borderWidth);
+}
+
+void ResetOutlineWidth(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension value;
+    ViewAbstract::SetOuterBorderWidth(frameNode, value);
+}
+
+void SetOutlineStyle(NodeHandle node, const uint32_t* values, int32_t valuesSize)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t styleOffset = NUM_0;
+    NG::BorderStyleProperty borderStyles;
+    SetOptionalBorderStyle(borderStyles.styleLeft, values, valuesSize, styleOffset);
+    SetOptionalBorderStyle(borderStyles.styleRight, values, valuesSize, styleOffset);
+    SetOptionalBorderStyle(borderStyles.styleTop, values, valuesSize, styleOffset);
+    SetOptionalBorderStyle(borderStyles.styleBottom, values, valuesSize, styleOffset);
+    borderStyles.multiValued = true;
+    ViewAbstract::SetOuterBorderStyle(frameNode, borderStyles);
+}
+
+void ResetOutlineStyle(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetOuterBorderStyle(frameNode, BorderStyle::SOLID);
+}
+/**
+ * @param src source OutlineWidth and and OutlineRadius value
+ * @param options option value
+ * values[offset + 0], option[offset + 1], option[offset + 2]: OutlineWidth left(hasValue, value, unit)
+ * values[offset + 3], option[offset + 4], option[offset + 5]: OutlineWidth right(hasValue, value, unit)
+ * values[offset + 6], option[offset + 7], option[offset + 8]: OutlineWidth top(hasValue, value, unit)
+ * values[offset + 9], option[offset + 10], option[offset + 11]: OutlineWidth bottom(hasValue, value, unit)
+ * values[offset + 12], option[offset + 13], option[offset + 14] : OutlineRadius TopLeft(hasValue, value, unit)
+ * values[offset + 15], option[offset + 16], option[offset + 17] : OutlineRadius TopRight(hasValue, value, unit)
+ * values[offset + 18], option[offset + 19], option[offset + 20] : OutlineRadius BottomLeft(hasValue, value, unit)
+ * values[offset + 21], option[offset + 22], option[offset + 23] : OutlineRadius BottomRight(hasValue, value, unit)
+ * @param optionsLength options valuesSize
+ * @param src source color and Style value
+ * colorAndStyle[offset + 0], option[offset + 1]: OultlineColors leftColor(hasValue, value)
+ * colorAndStyle[offset + 2], option[offset + 3]: OultlineColors rightColor(hasValue, value)
+ * colorAndStyle[offset + 4], option[offset + 5]: OultlineColors topColor(hasValue, value)
+ * colorAndStyle[offset + 6], option[offset + 7]: OultlineColors bottomColor(hasValue, value)
+ * colorAndStyle[offset + 8], option[offset + 9]: OutlineStyles styleLeft(hasValue, value)
+ * colorAndStyle[offset + 10], option[offset + 11]: OutlineStyles styleRight(hasValue, value)
+ * colorAndStyle[offset + 12], option[offset + 12]: OutlineStyles styleTop(hasValue, value)
+ * colorAndStyle[offset + 14], option[offset + 15]: OutlineStyles styleBottom(hasValue, value)
+ * @param optionsLength options colorAndStyleSize
+ */
+void SetOutline(
+    NodeHandle node, const double* values, int32_t valuesSize, const uint32_t* colorAndStyle, int32_t colorAndStyleSize)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if ((values == nullptr) || (valuesSize != NUM_24) || (colorAndStyle == nullptr) || colorAndStyleSize != NUM_16) {
+        return;
+    }
+
+    int32_t offset = NUM_0; // offset for outline width and outline radius
+    NG::BorderWidthProperty borderWidth;
+    SetOptionalBorder(borderWidth.leftDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderWidth.rightDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderWidth.topDimen, values, valuesSize, offset);
+    SetOptionalBorder(borderWidth.bottomDimen, values, valuesSize, offset);
+    borderWidth.multiValued = true;
+    if (borderWidth.leftDimen.has_value() || borderWidth.rightDimen.has_value() || borderWidth.topDimen.has_value() ||
+        borderWidth.bottomDimen.has_value()) {
+        ViewAbstract::SetOuterBorderWidth(frameNode, borderWidth);
+    }
+
+    NG::BorderRadiusProperty borderRadius;
+    SetOptionalBorder(borderRadius.radiusTopLeft, values, valuesSize, offset);
+    SetOptionalBorder(borderRadius.radiusTopRight, values, valuesSize, offset);
+    SetOptionalBorder(borderRadius.radiusBottomLeft, values, valuesSize, offset);
+    SetOptionalBorder(borderRadius.radiusBottomRight, values, valuesSize, offset);
+    borderRadius.multiValued = true;
+    if (borderRadius.radiusTopLeft.has_value() || borderRadius.radiusTopRight.has_value() ||
+        borderRadius.radiusBottomLeft.has_value() || borderRadius.radiusBottomRight.has_value()) {
+        ViewAbstract::SetOuterBorderRadius(frameNode, borderRadius);
+    }
+
+    int32_t colorAndStyleOffset = NUM_0; // offset for outline color and outline style
+    NG::BorderColorProperty borderColors;
+    SetOptionalBorderColor(borderColors.leftColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    SetOptionalBorderColor(borderColors.rightColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    SetOptionalBorderColor(borderColors.topColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    SetOptionalBorderColor(borderColors.bottomColor, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    borderColors.multiValued = true;
+    ViewAbstract::SetOuterBorderColor(frameNode, borderColors);
+
+    NG::BorderStyleProperty borderStyles;
+    SetOptionalBorderStyle(borderStyles.styleLeft, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    SetOptionalBorderStyle(borderStyles.styleRight, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    SetOptionalBorderStyle(borderStyles.styleTop, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    SetOptionalBorderStyle(borderStyles.styleBottom, colorAndStyle, colorAndStyleSize, colorAndStyleOffset);
+    borderStyles.multiValued = true;
+    ViewAbstract::SetOuterBorderStyle(frameNode, borderStyles);
+}
+
+void ResetOutline(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension borderWidth;
+    ViewAbstract::SetOuterBorderWidth(frameNode, borderWidth);
+    ViewAbstract::SetOuterBorderColor(frameNode, Color::BLACK);
+    ViewAbstract::SetOuterBorderRadius(frameNode, borderWidth);
+    ViewAbstract::SetOuterBorderStyle(frameNode, BorderStyle::SOLID);
+}
 void SetClickEffect(NodeHandle node, const int32_t levelValue, float scaleValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2852,6 +3024,8 @@ ArkUICommonModifierAPI GetCommonModifier()
         ResetRestoreId, SetTabIndex, ResetTabIndex, SetObscured, ResetObscured, SetResponseRegion, ResetResponseRegion,
         SetMouseResponseRegion, ResetMouseResponseRegion, SetEnabled, ResetEnabled,
         SetDraggable, ResetDraggable, SetAccessibilityGroup, ResetAccessibilityGroup, SetHoverEffect, ResetHoverEffect,
+        SetOutlineColor, ResetOutlineColor, SetOutlineRadius, ResetOutlineRadius,
+        SetOutlineWidth, ResetOutlineWidth, SetOutlineStyle, ResetOutlineStyle, SetOutline, ResetOutline,
         SetClickEffect, ResetClickEffect, SetKeyBoardShortCut, ResetKeyBoardShortCut};
 
     return modifier;

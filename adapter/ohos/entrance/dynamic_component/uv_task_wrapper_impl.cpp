@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,19 +20,27 @@ namespace OHOS::Ace::NG {
 UVTaskWrapperImpl::UVTaskWrapperImpl(napi_env env)
 {
     if (env == nullptr) {
-        LOGE("env is nullptr");
+        LOGE("env is null");
         return;
     }
-    napi_get_uv_event_loop(env, &loop_);
-    if (loop_ == nullptr) {
-        LOGE("get uv loop failed");
+    auto engine = reinterpret_cast<NativeEngine*>(env);
+    if (engine == nullptr) {
+        LOGE("native engine is null");
+        return;
     }
+    loop_ = engine->GetUVLoop();
+    threadId_ = engine->GetTid();
+}
+
+bool UVTaskWrapperImpl::WillRunOnCurrentThread()
+{
+    return pthread_self() == threadId_;
 }
 
 void UVTaskWrapperImpl::Call(const TaskExecutor::Task& task)
 {
     if (loop_ == nullptr) {
-        LOGW("loop is nullptr");
+        LOGW("loop is null");
         return;
     }
     UVWorkWrapper* workWrapper = new UVWorkWrapper(task);

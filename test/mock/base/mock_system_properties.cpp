@@ -35,7 +35,6 @@ DeviceOrientation SystemProperties::orientation_ { DeviceOrientation::PORTRAIT }
 bool SystemProperties::isHookModeEnabled_ = false;
 bool SystemProperties::rosenBackendEnabled_ = true;
 bool SystemProperties::windowAnimationEnabled_ = true;
-bool SystemProperties::layoutTraceEnable_ = false;
 bool SystemProperties::buildTraceEnable_ = false;
 double SystemProperties::resolution_ = 0.0;
 constexpr float defaultAnimationScale = 1.0f;
@@ -51,6 +50,7 @@ int32_t SystemProperties::devicePhysicalWidth_ = 0;
 int32_t SystemProperties::devicePhysicalHeight_ = 0;
 bool SystemProperties::enableScrollableItemPool_ = false;
 bool SystemProperties::navigationBlurEnabled_ = false;
+bool SystemProperties::gridCacheEnabled_ = false;
 
 float SystemProperties::GetFontWeightScale()
 {
@@ -117,5 +117,15 @@ bool SystemProperties::GetDisplaySyncSkipEnabled()
 bool SystemProperties::GetNavigationBlurEnabled()
 {
     return navigationBlurEnabled_;
+}
+
+bool SystemProperties::GetLayoutTraceEnabled()
+{
+    return false;
+}
+
+bool SystemProperties::GetGridCacheEnabled()
+{
+    return gridCacheEnabled_;
 }
 } // namespace OHOS::Ace

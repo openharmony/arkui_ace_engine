@@ -134,8 +134,9 @@ std::shared_ptr<Media::PixelMap> ImageConverter::BitmapToPixelMap(
     auto data = bitMap->GetPixels();
     opts.size.width = static_cast<int32_t>(bitMap->GetWidth());
     opts.size.height = static_cast<int32_t>(bitMap->GetHeight());
-    auto pixelMap = Media::PixelMap::Create(reinterpret_cast<uint32_t*>(data),
-        opts.size.width * opts.size.height, opts);
+    opts.editable = true;
+    auto pixelMap = Media::PixelMap::Create(opts);
+    pixelMap->WritePixels(reinterpret_cast<uint8_t*>(data), opts.size.width * opts.size.height * sizeof(uint32_t));
     return pixelMap;
 }
 #endif
