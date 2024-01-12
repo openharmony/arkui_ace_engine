@@ -144,6 +144,11 @@ public:
         keyGenFunc_ = std::move(keyGenFunc);
     }
 
+    void SetUpdateChangedNodeFlag(const bool updateChangedNodeFlag)
+    {
+        updateChangedNodeFlag_ = updateChangedNodeFlag;
+    }
+
     void ReleaseChildGroupByComposedId(const std::string& composedId)
     {
         if (parentView_ != nullptr) {
@@ -171,6 +176,7 @@ protected:
     JSRef<JSFunc> unregisterListenerFunc_;
     JSRef<JSFunc> itemGenFunc_;
     ItemKeyGenerator keyGenFunc_;
+    bool updateChangedNodeFlag_ = false;
 
     JSWeak<JSObject> listenerProxyObj_;
     WeakPtr<JSDataChangeListener> listenerProxy_;

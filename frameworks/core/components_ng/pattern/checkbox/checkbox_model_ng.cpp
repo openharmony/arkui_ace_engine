@@ -165,4 +165,18 @@ void CheckBoxModelNG::SetWidth(FrameNode* frameNode, const Dimension& width)
 {
     NG::ViewAbstract::SetWidth(frameNode, NG::CalcLength(width));
 }
+
+void CheckBoxModelNG::SetPadding(FrameNode* frameNode, const NG::PaddingProperty& padding)
+{
+    NG::ViewAbstract::SetPadding(padding);
+}
+
+void CheckBoxModelNG::SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion)
+{
+    NG::ViewAbstract::SetResponseRegion(responseRegion);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsUserSetResponseRegion(true);
+}
 } // namespace OHOS::Ace::NG

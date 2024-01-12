@@ -84,6 +84,11 @@ public:
         duration_ = duration;
     }
 
+    int32_t GetDuration() const
+    {
+        return duration_;
+    }
+
     void SetGestureHub(WeakPtr<GestureEventHub> gestureHub)
     {
         gestureHub_ = gestureHub;

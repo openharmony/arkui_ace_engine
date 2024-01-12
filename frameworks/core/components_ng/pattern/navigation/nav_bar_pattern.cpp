@@ -16,46 +16,24 @@
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 
 #include <algorithm>
-#include <cmath>
-#include <cstdint>
 
-#include "base/geometry/dimension.h"
 #include "base/i18n/localization.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
-#include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/base/view_abstract.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
-#include "core/components_ng/pattern/bubble/bubble_view.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
-#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navigation/bar_item_event_hub.h"
-#include "core/components_ng/pattern/navigation/bar_item_node.h"
 #include "core/components_ng/pattern/navigation/bar_item_pattern.h"
-#include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
-#include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
-#include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
-#include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
+#include "core/components_ng/pattern/navigation/tool_bar_node.h"
 #include "core/components_ng/pattern/option/option_view.h"
-#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
-#include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/touch_event.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -515,7 +493,7 @@ void MountToolBar(const RefPtr<NavBarNode>& hostNode)
     CHECK_NULL_VOID(hostNode->GetToolBarNode());
     auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
-    auto toolBarNode = AceType::DynamicCast<FrameNode>(hostNode->GetToolBarNode());
+    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(hostNode->GetToolBarNode());
     CHECK_NULL_VOID(toolBarNode);
     auto toolBarLayoutProperty = toolBarNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_VOID(toolBarLayoutProperty);
@@ -525,12 +503,10 @@ void MountToolBar(const RefPtr<NavBarNode>& hostNode)
         hostNode->AddChild(hostNode->GetToolBarNode());
     }
 
-    if (navBarLayoutProperty->GetHideToolBar().value_or(false)) {
+    if (navBarLayoutProperty->GetHideToolBar().value_or(false) || !toolBarNode->HasValidContent()) {
         toolBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
-        toolBarNode->SetActive(false);
     } else {
         toolBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
-        toolBarNode->SetActive(true);
     }
 }
 } // namespace
@@ -541,18 +517,23 @@ void NavBarPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
+    SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
+    host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+    pipelineContext->AddWindowSizeChangeCallback(host->GetId());
+
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
     if (theme && theme->GetNavBarUnfocusEffectEnable()) {
         pipelineContext->AddWindowFocusChangedCallback(host->GetId());
     }
-    SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_BOTTOM, .type = SAFE_AREA_TYPE_SYSTEM };
-    host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
 }
 
 void NavBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
-    CHECK_NULL_VOID(!panEvent_);
+    if (isHideTitlebar_ || titleMode_ != NavigationTitleMode::FREE) {
+        gestureHub->RemovePanEvent(panEvent_);
+        return;
+    }
 
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
@@ -560,7 +541,7 @@ void NavBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         pattern->HandleOnDragStart(info.GetOffsetY());
     };
 
-    auto actionUpdateTask = [weak = WeakClaim(this), this](const GestureEvent& info) {
+    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandleOnDragUpdate(info.GetOffsetY());
@@ -578,12 +559,11 @@ void NavBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         pattern->HandleOnDragEnd();
     };
 
-    if (panEvent_) {
-        gestureHub->RemovePanEvent(panEvent_);
+    if (!panEvent_) {
+        panEvent_ = MakeRefPtr<PanEvent>(std::move(actionStartTask), std::move(actionUpdateTask),
+            std::move(actionEndTask), std::move(actionCancelTask));
     }
 
-    panEvent_ = MakeRefPtr<PanEvent>(
-        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
     PanDirection panDirection = { .type = PanDirection::VERTICAL };
     gestureHub->SetPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
 }
@@ -623,87 +603,45 @@ void NavBarPattern::HandleOnDragEnd()
     titlePattern->ProcessTitleDragEnd();
 }
 
-bool NavBarPattern::GetCurrentNavBarStatus() const
-{
-    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
-    CHECK_NULL_RETURN(hostNode, false);
-    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_RETURN(titleNode, false);
-    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_RETURN(titlePattern, false);
-    return titlePattern->GetCurrentNavBarStatus();
-}
-
 void NavBarPattern::OnCoordScrollStart()
 {
-    offset_ = 0.0f;
+    if (isHideTitlebar_ || titleMode_ != NavigationTitleMode::FREE) {
+        return;
+    }
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
     CHECK_NULL_VOID(titleNode);
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titlePattern);
-    titlePattern->SetCanOverDrag(true);
-    titlePattern->SetTitleScaleChange(false);
-    titlePattern->ProcessTitleDragStart(offset_);
+    titlePattern->OnCoordScrollStart();
 }
 
-void NavBarPattern::OnCoordScrollUpdate(float offset, float dragOffsetY)
+float NavBarPattern::OnCoordScrollUpdate(float offset)
 {
-    offset_ += offset;
+    if (isHideTitlebar_ || titleMode_ != NavigationTitleMode::FREE) {
+        return 0.0f;
+    }
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
-    CHECK_NULL_VOID(hostNode);
+    CHECK_NULL_RETURN(hostNode, 0.0f);
     auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_VOID(titleNode);
+    CHECK_NULL_RETURN(titleNode, 0.0f);
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_VOID(titlePattern);
-    titlePattern->ProcessTitleDragUpdate(offset_, dragOffsetY);
+    CHECK_NULL_RETURN(titlePattern, 0.0f);
+    return titlePattern->OnCoordScrollUpdate(offset);
 }
 
 void NavBarPattern::OnCoordScrollEnd()
 {
+    if (isHideTitlebar_ || titleMode_ != NavigationTitleMode::FREE) {
+        return;
+    }
     auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
     auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
     CHECK_NULL_VOID(titleNode);
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
-    titlePattern->ProcessTitleDragEnd();
-    offset_ = 0.0f;
-}
-
-bool NavBarPattern::GetFullStatus()
-{
-    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
-    CHECK_NULL_RETURN(hostNode, false);
-    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_RETURN(titleNode, false);
-    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_RETURN(titlePattern, false);
-    auto isFullStatus = titlePattern->IsTitleFullStatus();
-    return isFullStatus;
-}
-
-bool NavBarPattern::GetDraggedDown()
-{
-    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
-    CHECK_NULL_RETURN(hostNode, false);
-    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_RETURN(titleNode, false);
-    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_RETURN(titlePattern, false);
-    auto isDraggedDown = titlePattern->IsTitleDraggedDown();
-    return isDraggedDown;
-}
-
-bool NavBarPattern::GetIsMinTitle() const
-{
-    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
-    CHECK_NULL_RETURN(hostNode, false);
-    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_RETURN(titleNode, false);
-    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_RETURN(titlePattern, false);
-    return titlePattern->IsMinTitle();
+    titlePattern->OnCoordScrollEnd();
 }
 
 void NavBarPattern::OnModifyDone()
@@ -715,12 +653,11 @@ void NavBarPattern::OnModifyDone()
     MountToolBar(hostNode);
     auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
-    isHideToolbar_ = navBarLayoutProperty->GetHideToolBar().value_or(false);
-    RegistOritationListener();
-    // if current mode is not free, doesn't have animation
-    if (navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
-        return;
-    }
+    isHideToolbar_ = navBarLayoutProperty->GetHideToolBarValue(false);
+    isHideTitlebar_ = navBarLayoutProperty->GetHideTitleBarValue(false);
+    titleMode_ = navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+
+    // drag navbar to update title bar height.
     auto gesture = hostNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     InitPanEvent(gesture);
@@ -753,66 +690,12 @@ void NavBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSiz
     }
 }
 
-void NavBarPattern::RegistOritationListener()
-{
-    if (isOritationListenerRegisted_) {
-        return;
-    }
-    isOritationListenerRegisted_ = true;
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    pipeline->AddWindowSizeChangeCallback(host->GetId());
-}
-
 void NavBarPattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
-    isOritationListenerRegisted_ = false;
-}
-
-void NavBarPattern::ResetAssociatedScroll()
-{
-    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
-    CHECK_NULL_VOID(hostNode);
-    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_VOID(titleNode);
-    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_VOID(titlePattern);
-    titlePattern->ResetAssociatedScroll();
-}
-
-bool NavBarPattern::UpdateAssociatedScrollOffset(float offset)
-{
-    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
-    CHECK_NULL_RETURN(hostNode, true);
-    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
-    CHECK_NULL_RETURN(titleNode, true);
-    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
-    CHECK_NULL_RETURN(titlePattern, true);
-    return titlePattern->UpdateAssociatedScrollOffset(offset);
-}
-
-bool NavBarPattern::IsTitleModeFree()
-{
-    auto frameNode = GetHost();
-    CHECK_NULL_RETURN(frameNode, false);
-    auto navBarLayoutProperty = frameNode->GetLayoutProperty<NavBarLayoutProperty>();
-    CHECK_NULL_RETURN(navBarLayoutProperty, false);
-    return navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FREE;
-}
-
-bool NavBarPattern::IsTitleBarHide()
-{
-    auto frameNode = GetHost();
-    CHECK_NULL_RETURN(frameNode, false);
-    auto navBarLayoutProperty = frameNode->GetLayoutProperty<NavBarLayoutProperty>();
-    CHECK_NULL_RETURN(navBarLayoutProperty, false);
-    return navBarLayoutProperty->GetHideTitleBar().value_or(false);
 }
 
 void NavBarPattern::WindowFocus(bool isFocus)
@@ -836,5 +719,16 @@ void NavBarPattern::WindowFocus(bool isFocus)
         maskProperty->SetColor(isFocus?Color::TRANSPARENT:maskColor);
         renderContext->UpdateProgressMask(maskProperty);
     }
+}
+
+bool NavBarPattern::CanCoordScrollUp(float offset) const
+{
+    auto hostNode = AceType::DynamicCast<NavBarNode>(GetHost());
+    CHECK_NULL_RETURN(hostNode, false);
+    auto titleNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
+    CHECK_NULL_RETURN(titleNode, false);
+    auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_RETURN(titlePattern, false);
+    return Negative(offset) && titlePattern->IsCurrentMaxTitle();
 }
 } // namespace OHOS::Ace::NG

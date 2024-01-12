@@ -24,6 +24,8 @@
 #include "base/memory/referenced.h"
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/color.h"
+#include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/text_styles.h"
@@ -150,9 +152,13 @@ public:
     int32_t position = -1;
     int32_t imageNodeId = -1;
     std::string inspectId;
+    std::string description;
     std::string content;
+    uint32_t unicode = 0;
     std::unique_ptr<FontStyle> fontStyle = std::make_unique<FontStyle>();
     std::unique_ptr<TextLineStyle> textLineStyle = std::make_unique<TextLineStyle>();
+    // for text background style
+    std::optional<TextBackgroundStyle> backgroundStyle;
     GestureEventFunc onClick;
     GestureEventFunc onLongPress;
     [[deprecated]] std::list<RefPtr<SpanItem>> children;
@@ -162,13 +168,14 @@ public:
     // to have normal spacing between paragraphs, remove \n from every paragraph except the last one.
     bool needRemoveNewLine = false;
     bool hasResourceFontColor = false;
+    bool hasResourceDecorationColor = false;
     std::optional<LeadingMargin> leadingMargin;
-#ifdef ENABLE_DRAG_FRAMEWORK
     int32_t selectedStart = -1;
     int32_t selectedEnd = -1;
-#endif // ENABLE_DRAG_FRAMEWORK
+    void UpdateSymbolSpanParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder);
     virtual int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder,
         double width = 0.0f, double height = 0.0f, VerticalAlign verticalAlign = VerticalAlign::BASELINE);
+    virtual void UpdateSymbolSpanColor(const RefPtr<FrameNode>& frameNode, TextStyle& symbolSpanStyle);
     virtual void UpdateTextStyleForAISpan(
         const std::string& content, const RefPtr<Paragraph>& builder, const std::optional<TextStyle>& textStyle);
     virtual void UpdateTextStyle(
@@ -178,11 +185,9 @@ public:
     virtual void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
     std::string GetFont() const;
-#ifdef ENABLE_DRAG_FRAMEWORK
     virtual void StartDrag(int32_t start, int32_t end);
     virtual void EndDrag();
     virtual bool IsDragging();
-#endif // ENABLE_DRAG_FRAMEWORK
     std::optional<TextStyle> GetTextStyle() const
     {
         return textStyle_;
@@ -203,12 +208,21 @@ public:
     {
         onLongPress = std::move(onLongPress_);
     }
+    void SetIsParentText(bool isText)
+    {
+        isParentText = isText;
+    }
+    bool GetIsParentText()
+    {
+        return isParentText;
+    }
     std::string GetSpanContent(const std::string& rawContent);
-    
     std::string GetSpanContent();
+    uint32_t GetSymbolUnicode();
 
 private:
     std::optional<TextStyle> textStyle_;
+    bool isParentText = false;
 };
 
 
@@ -226,16 +240,58 @@ enum class PropertyInfo {
     LEADING_MARGIN,
     NONE,
     TEXTSHADOW,
+    SYMBOL_COLOR,
+    SYMBOL_RENDERING_STRATEGY,
+    SYMBOL_EFFECT_STRATEGY,
 };
 
-class ACE_EXPORT SpanNode : public UINode {
-    DECLARE_ACE_TYPE(SpanNode, UINode);
+class ACE_EXPORT BaseSpan : public virtual AceType {
+    DECLARE_ACE_TYPE(BaseSpan, AceType);
+
+public:
+    explicit BaseSpan(int32_t id) : groupId_(id) {}
+    virtual void MarkTextDirty() = 0;
+    virtual void SetTextBackgroundStyle(const TextBackgroundStyle& style);
+    virtual void UpdateTextBackgroundFromParent(const std::optional<TextBackgroundStyle>& style)
+    {
+        textBackgroundStyle_ = style;
+    }
+
+    const std::optional<TextBackgroundStyle> GetTextBackgroundStyle()
+    {
+        return textBackgroundStyle_;
+    }
+
+    void SetHasTextBackgroundStyle(bool hasStyle)
+    {
+        hasTextBackgroundStyle_ = hasStyle;
+    }
+
+    bool HasTextBackgroundStyle()
+    {
+        return hasTextBackgroundStyle_;
+    }
+
+private:
+    std::optional<TextBackgroundStyle> textBackgroundStyle_;
+    int32_t groupId_ = 0;
+    bool hasTextBackgroundStyle_ = false;
+};
+
+class ACE_EXPORT SpanNode : public UINode, public BaseSpan {
+    DECLARE_ACE_TYPE(SpanNode, UINode, BaseSpan);
 
 public:
     static RefPtr<SpanNode> GetOrCreateSpanNode(int32_t nodeId);
+    static RefPtr<SpanNode> GetOrCreateSpanNode(const std::string& tag, int32_t nodeId);
+    static RefPtr<SpanNode> CreateSpanNode(int32_t nodeId);
 
-    explicit SpanNode(int32_t nodeId) : UINode(V2::SPAN_ETS_TAG, nodeId) {}
+    explicit SpanNode(int32_t nodeId) : UINode(V2::SPAN_ETS_TAG, nodeId), BaseSpan(nodeId) {}
+    explicit SpanNode(const std::string& tag, int32_t nodeId) : UINode(tag, nodeId), BaseSpan(nodeId) {}
     ~SpanNode() override = default;
+
+    void SetTextBackgroundStyle(const TextBackgroundStyle& style) override;
+    void UpdateTextBackgroundFromParent(const std::optional<TextBackgroundStyle>& style) override;
 
     bool IsAtomicNode() const override
     {
@@ -245,6 +301,15 @@ public:
     const RefPtr<SpanItem>& GetSpanItem() const
     {
         return spanItem_;
+    }
+
+    void UpdateContent(const uint32_t& unicode)
+    {
+        if (spanItem_->unicode == unicode) {
+            return;
+        }
+        spanItem_->unicode = unicode;
+        RequestTextFlushDirty();
     }
 
     void UpdateContent(const std::string& content)
@@ -266,6 +331,11 @@ public:
         spanItem_->inspectId = inspectorId;
     }
 
+    void OnAutoEventParamUpdate(const std::string& desc) override
+    {
+        spanItem_->description = desc;
+    }
+
     DEFINE_SPAN_FONT_STYLE_ITEM(FontSize, Dimension);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextColor, Color);
     DEFINE_SPAN_FONT_STYLE_ITEM(ItalicFontStyle, Ace::FontStyle);
@@ -277,6 +347,9 @@ public:
     DEFINE_SPAN_FONT_STYLE_ITEM(TextCase, TextCase);
     DEFINE_SPAN_FONT_STYLE_ITEM(TextShadow, std::vector<Shadow>);
     DEFINE_SPAN_FONT_STYLE_ITEM(LetterSpacing, Dimension);
+    DEFINE_SPAN_FONT_STYLE_ITEM(SymbolColorList, std::vector<Color>);
+    DEFINE_SPAN_FONT_STYLE_ITEM(SymbolRenderingStrategy, uint32_t);
+    DEFINE_SPAN_FONT_STYLE_ITEM(SymbolEffectStrategy, uint32_t);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LineHeight, Dimension);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(TextAlign, TextAlign);
     DEFINE_SPAN_TEXT_LINE_STYLE_ITEM(LeadingMargin, LeadingMargin);
@@ -300,6 +373,7 @@ public:
     }
 
     void RequestTextFlushDirty();
+    static void RequestTextFlushDirty(const RefPtr<UINode>& node);
     // The function is only used for fast preview.
     void FastPreviewUpdateChildDone() override
     {
@@ -316,13 +390,19 @@ public:
         propertyInfo_.clear();
     }
 
+    void MarkTextDirty() override
+    {
+        RequestTextFlushDirty();
+    }
+
     std::set<PropertyInfo> CalculateInheritPropertyInfo()
     {
         std::set<PropertyInfo> inheritPropertyInfo;
         const std::set<PropertyInfo> propertyInfoContainer = { PropertyInfo::FONTSIZE, PropertyInfo::FONTCOLOR,
             PropertyInfo::FONTSTYLE, PropertyInfo::FONTWEIGHT, PropertyInfo::FONTFAMILY, PropertyInfo::TEXTDECORATION,
             PropertyInfo::TEXTCASE, PropertyInfo::LETTERSPACE, PropertyInfo::LINEHEIGHT, PropertyInfo::TEXT_ALIGN,
-            PropertyInfo::LEADING_MARGIN, PropertyInfo::TEXTSHADOW };
+            PropertyInfo::LEADING_MARGIN, PropertyInfo::TEXTSHADOW, PropertyInfo::SYMBOL_COLOR,
+            PropertyInfo::SYMBOL_RENDERING_STRATEGY, PropertyInfo::SYMBOL_EFFECT_STRATEGY };
         set_difference(propertyInfoContainer.begin(), propertyInfoContainer.end(), propertyInfo_.begin(),
             propertyInfo_.end(), inserter(inheritPropertyInfo, inheritPropertyInfo.begin()));
         return inheritPropertyInfo;
@@ -412,6 +492,7 @@ public:
     int32_t UpdateParagraph(const RefPtr<FrameNode>& frameNode, const RefPtr<Paragraph>& builder, double width,
         double height, VerticalAlign verticalAlign) override;
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override {};
+    void UpdatePlaceholderBackgroundStyle(const RefPtr<FrameNode>& imageNode);
     ACE_DISALLOW_COPY_AND_MOVE(ImageSpanItem);
 };
 
@@ -449,6 +530,38 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(ImageSpanNode);
 };
 
+class ACE_EXPORT ContainerSpanNode : public UINode, public BaseSpan {
+    DECLARE_ACE_TYPE(ContainerSpanNode, UINode, BaseSpan);
+
+public:
+    static RefPtr<ContainerSpanNode> GetOrCreateSpanNode(int32_t nodeId)
+    {
+        auto spanNode = ElementRegister::GetInstance()->GetSpecificItemById<ContainerSpanNode>(nodeId);
+        if (spanNode) {
+            spanNode->SetHasTextBackgroundStyle(false);
+            return spanNode;
+        }
+        spanNode = MakeRefPtr<ContainerSpanNode>(nodeId);
+        ElementRegister::GetInstance()->AddUINode(spanNode);
+        return spanNode;
+    }
+
+    explicit ContainerSpanNode(int32_t nodeId) : UINode(V2::CONTAINER_SPAN_ETS_TAG, nodeId), BaseSpan(nodeId) {}
+    ~ContainerSpanNode() override = default;
+
+    bool IsAtomicNode() const override
+    {
+        return false;
+    }
+
+    void MarkTextDirty() override
+    {
+        SpanNode::RequestTextFlushDirty(Claim(this));
+    }
+
+private:
+    ACE_DISALLOW_COPY_AND_MOVE(ContainerSpanNode);
+};
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_SYNTAX_FOR_EACH_NODE_H

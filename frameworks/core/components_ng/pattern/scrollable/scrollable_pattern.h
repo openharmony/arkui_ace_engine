@@ -43,8 +43,11 @@
 namespace OHOS::Ace::NG {
 #ifndef WEARABLE_PRODUCT
 constexpr double FRICTION = 0.6;
+constexpr double NEW_FRICTION = 0.7;
+constexpr double MAX_VELOCITY = 800000.0;
 #else
 constexpr double FRICTION = 0.9;
+constexpr double MAX_VELOCITY = 5000.0;
 #endif
 enum class ModalSheetCoordinationMode : char {
     UNKNOWN = 0,
@@ -55,14 +58,15 @@ class ScrollablePattern : public NestableScrollContainer {
     DECLARE_ACE_TYPE(ScrollablePattern, NestableScrollContainer);
 
 public:
-    ScrollablePattern() = default;
-    ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled)
-        : edgeEffect_(edgeEffect), edgeEffectAlwaysEnabled_(alwaysEnabled)
-    {}
+    ScrollablePattern();
+    ScrollablePattern(EdgeEffect edgeEffect, bool alwaysEnabled);
 
     ~ScrollablePattern()
     {
         UnRegister2DragDropManager();
+        if (scrollBarProxy_) {
+            scrollBarProxy_->UnRegisterScrollableNode(AceType::WeakClaim(this));
+        }
     }
 
     bool IsAtomicNode() const override
@@ -260,6 +264,8 @@ public:
         return friction_;
     }
 
+    void SetMaxFlingVelocity(double max);
+
     void StopAnimate();
     bool AnimateRunning() const
     {
@@ -342,14 +348,9 @@ public:
         return scrollSource_;
     }
 
-    int32_t GetCurrentVelocity() const
+    float GetCurrentVelocity() const
     {
         return currentVelocity_;
-    }
-
-    int32_t IsAnimationStop() const
-    {
-        return isAnimationStop_;
     }
 
     ScrollState GetScrollState() const;
@@ -409,12 +410,38 @@ public:
         edgeEffectAlwaysEnabled_ = alwaysEnabled;
     }
 
+    bool IsScrollableAnimationNotRunning()
+    {
+        if (scrollableEvent_) {
+            auto scrollable = scrollableEvent_->GetScrollable();
+            if (scrollable) {
+                return scrollable->IsAnimationNotRunning();
+            }
+            return false;
+        }
+        return false;
+    }
+
     float GetFinalPosition() const
     {
         return finalPosition_;
     }
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
+
+    bool IsScrollableSpringMotionRunning()
+    {
+        CHECK_NULL_RETURN(scrollableEvent_, false);
+        auto scrollable = scrollableEvent_->GetScrollable();
+        CHECK_NULL_RETURN(scrollable, false);
+        return scrollable->IsSpringMotionRunning();
+    }
+
+    virtual bool IsScrollSnap()
+    {
+        // When setting snap or enablePaging in scroll, the PARENT_FIRST in nestedScroll_ is invalid
+        return false;
+    }
 
 protected:
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const
@@ -468,6 +495,7 @@ protected:
     bool multiSelectable_ = false;
     bool isMouseEventInit_ = false;
     OffsetF mouseStartOffset_;
+    OffsetF mouseStartOffsetGlobal_;
     float totalOffsetOfMousePressed_ = 0.0f;
     std::unordered_map<int32_t, ItemSelectedStatus> itemToBeSelected_;
 
@@ -493,12 +521,11 @@ protected:
 private:
     virtual void OnScrollEndCallback() {};
 
-    void DraggedDownScrollEndProcess();
     void RegisterScrollBarEventTask();
-    bool OnScrollPosition(double offset, int32_t source);
+    bool OnScrollPosition(double& offset, int32_t source);
     void SetParentScrollable();
     void ProcessNavBarReactOnStart();
-    bool ProcessNavBarReactOnUpdate(float offset);
+    float ProcessNavBarReactOnUpdate(float offset);
     void ProcessNavBarReactOnEnd();
     void InitSpringOffsetProperty();
     void InitCurveOffsetProperty(float position);
@@ -507,27 +534,27 @@ private:
 
     void OnAttachToFrameNode() override;
     void AttachAnimatableProperty(RefPtr<Scrollable> scrollable);
+    void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
 
     // select with mouse
     virtual void MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
     virtual void ClearMultiSelect() {};
-    virtual bool IsItemSelected(const GestureEvent& info)
+    virtual bool IsItemSelected()
     {
         return false;
     }
     void ClearInvisibleItemsSelectedStatus();
     void HandleInvisibleItemsSelectedStatus(const RectF& selectedZone);
+    void HandleMouseEventWithoutKeyboard(const MouseInfo& info);
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(const GestureEvent& info);
     void SelectWithScroll();
     RectF ComputeSelectedZone(const OffsetF& startOffset, const OffsetF& endOffset);
     float GetOutOfScrollableOffset() const;
-    float GetOffsetWithLimit(float offset) const;
+    virtual float GetOffsetWithLimit(float offset) const;
     void LimitMouseEndOffset();
     void UpdateBorderRadius();
-
-    bool ProcessAssociatedScroll(double offset, int32_t source);
 
     /******************************************************************************
      * NestableScrollContainer implementations
@@ -535,7 +562,7 @@ private:
     ScrollResult HandleScroll(float offset, int32_t source, NestedState state = NestedState::GESTURE) override;
     bool HandleScrollVelocity(float velocity) override;
 
-    void OnScrollEndRecursive() override;
+    void OnScrollEndRecursive(const std::optional<float>& velocity) override;
     void OnScrollStartRecursive(float position) override;
 
     ScrollResult HandleScrollParentFirst(float& offset, int32_t source, NestedState state);
@@ -575,12 +602,14 @@ private:
     float GetVelocity() const;
     bool NeedSplitScroll(OverScrollOffset& overOffsets, int32_t source);
     RefreshCoordinationMode CoordinateWithRefresh(double& offset, int32_t source, bool isAtTop);
-    bool CoordinateWithNavigation(bool isAtTop, bool isDraggedDown, double& offset, int32_t source);
+    bool CoordinateWithNavigation(double& offset, int32_t source, bool isAtTop);
     void NotifyFRCSceneInfo(const std::string& scene, double velocity, SceneStatus sceneStatus);
     ModalSheetCoordinationMode CoordinateWithSheet(double& offset, int32_t source, bool isAtTop);
+    bool NeedCoordinateScrollWithNavigation(double offset, int32_t source, const OverScrollOffset& overOffsets);
 
     Axis axis_;
     RefPtr<ScrollableEvent> scrollableEvent_;
+    RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
     RefPtr<RefreshCoordination> refreshCoordination_;
     int32_t scrollSource_ = SCROLL_FROM_NONE;
@@ -595,7 +624,8 @@ private:
     bool isSheetInReactive_ = false;
     bool isCoordEventNeedSpring_ = true;
     double scrollBarOutBoundaryExtent_ = 0.0;
-    double friction_ = FRICTION;
+    double friction_ = 0.0;
+    double maxFlingVelocity_ = MAX_VELOCITY;
     // scroller
     RefPtr<Animator> animator_;
     bool scrollAbort_ = false;
@@ -614,6 +644,7 @@ private:
     GestureEvent lastMouseMove_;
     RefPtr<SelectMotion> selectMotion_;
     RefPtr<PanEvent> boxSelectPanEvent_;
+    RefPtr<InputEvent> mouseEvent_;
 
     RefPtr<NavBarPattern> navBarPattern_;
     RefPtr<SheetPresentationPattern> sheetPattern_;
@@ -626,11 +657,13 @@ private:
     RefPtr<NodeAnimatablePropertyFloat> curveOffsetProperty_;
     std::shared_ptr<AnimationUtils::Animation> springAnimation_;
     std::shared_ptr<AnimationUtils::Animation> curveAnimation_;
-    std::chrono::high_resolution_clock::time_point lastTime_;
-    bool isAnimationStop_ = true;
+    uint64_t lastVsyncTime_ = 0;
+    bool isAnimationStop_ = true; // graphic animation flag
     float currentVelocity_ = 0.0f;
     float lastPosition_ = 0.0f;
     float finalPosition_ = 0.0f;
+    uint32_t runningAnimationCount_ = 0;
+
     RefPtr<Animator> hotzoneAnimator_;
     float lastHonezoneOffsetPct_ = 0.0f;
     RefPtr<BezierVariableVelocityMotion> velocityMotion_;
@@ -642,6 +675,7 @@ private:
     void HandleMoveEventInComp(const PointF& point);
     void HandleLeaveHotzoneEvent();
     bool isVertical() const;
+    void AddHotZoneSenceInterface(SceneStatus scene);
 };
 } // namespace OHOS::Ace::NG
 

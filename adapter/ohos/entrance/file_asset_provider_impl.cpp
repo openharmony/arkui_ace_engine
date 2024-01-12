@@ -22,6 +22,7 @@
 #include <sys/types.h>
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
+#include "base/utils/utils.h"
 
 namespace OHOS::Ace {
 constexpr int64_t FOO_MAX_LEN = 20 * 1024 * 1024;
@@ -55,7 +56,11 @@ std::unique_ptr<AssetMapping> FileAssetProviderImpl::GetAsMapping(const std::str
 
     for (const auto& basePath : assetBasePaths_) {
         std::string fileName = packagePath_ + basePath + assetName;
-        std::FILE* fp = std::fopen(fileName.c_str(), "r");
+        char realPath[PATH_MAX] = { 0x00 };
+        if (!RealPath(fileName, realPath)) {
+            continue;
+        }
+        std::FILE* fp = std::fopen(realPath, "r");
         if (fp == nullptr) {
             continue;
         }
@@ -101,7 +106,11 @@ std::string FileAssetProviderImpl::GetAssetPath(const std::string& assetName, bo
     for (const auto& basePath : assetBasePaths_) {
         std::string assetBasePath = packagePath_ + basePath;
         std::string fileName = assetBasePath + assetName;
-        std::FILE* fp = std::fopen(fileName.c_str(), "r");
+        char realPath[PATH_MAX] = { 0x00 };
+        if (!RealPath(fileName, realPath)) {
+            continue;
+        }
+        std::FILE* fp = std::fopen(realPath, "r");
         if (fp == nullptr) {
             continue;
         }

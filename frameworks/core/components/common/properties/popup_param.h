@@ -22,6 +22,7 @@
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/common/properties/placement.h"
 #include "core/event/ace_event_handler.h"
@@ -379,6 +380,56 @@ public:
         return shadow_;
     }
 
+    void SetErrorArrowWidth(bool setErrorArrowWidth)
+    {
+        setErrorArrowWidth_ = setErrorArrowWidth;
+    }
+
+    bool GetErrorArrowWidth() const
+    {
+        return setErrorArrowWidth_;
+    }
+
+    void SetErrorArrowHeight(bool setErrorArrowHeight)
+    {
+        setErrorArrowHeight_ = setErrorArrowHeight;
+    }
+
+    bool GetErrorArrowHeight() const
+    {
+        return setErrorArrowHeight_;
+    }
+
+    void SetErrorRadius(bool setErrorRadius)
+    {
+        setErrorRadius_ = setErrorRadius;
+    }
+
+    bool GetErrorRadius() const
+    {
+        return setErrorRadius_;
+    }
+
+    void SetFocusable(bool focusable)
+    {
+        focusable_ = focusable;
+    }
+
+    bool GetFocusable() const
+    {
+        return focusable_;
+    }
+
+    void SetBlurStyle(const BlurStyle& blurStyle)
+    {
+        blurStyle_ = blurStyle;
+    }
+
+    BlurStyle GetBlurStyle() const
+    {
+        return blurStyle_;
+    }
+
 private:
     bool isShow_ = true;
     bool hasAction_ = false;
@@ -388,9 +439,14 @@ private:
     bool useCustom_ = false;
     bool isShowInSubWindow_ = false;
     bool blockEvent_ = true;
+    bool setErrorArrowWidth_ = false;
+    bool setErrorArrowHeight_ = false;
+    bool setErrorRadius_ = false;
+    bool focusable_ = false;
     Color maskColor_;
     Color backgroundColor_;
     Placement placement_ = Placement::BOTTOM;
+    BlurStyle blurStyle_ = BlurStyle::COMPONENT_ULTRA_THICK;
     EventMarker onVisibilityChange_;
     Edge padding_;
     Edge margin_;

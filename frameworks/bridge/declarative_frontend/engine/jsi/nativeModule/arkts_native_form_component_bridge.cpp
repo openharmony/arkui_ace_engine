@@ -14,7 +14,9 @@
  */
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_form_component_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+
+#include "core/interfaces/native/node/api.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -122,6 +124,7 @@ ArkUINativeModuleValue FormComponentBridge::SetSize(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> widthValue = runtimeCallInfo->GetCallArgRef(1);
     Local<JSValueRef> heightValue = runtimeCallInfo->GetCallArgRef(2);
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    CommonBridge::SetSize(runtimeCallInfo);
     CalcDimension width = 0.0_vp;
     CalcDimension height = 0.0_vp;
     bool hasWidth = (!widthValue->IsNull() && !widthValue->IsUndefined() &&
@@ -143,6 +146,7 @@ ArkUINativeModuleValue FormComponentBridge::ResetSize(ArkUIRuntimeCallInfo* runt
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    CommonBridge::ResetSize(runtimeCallInfo);
     GetArkUIInternalNodeAPI()->GetFormComponentModifier().ResetFormSize(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }

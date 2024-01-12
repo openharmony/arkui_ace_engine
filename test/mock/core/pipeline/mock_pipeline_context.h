@@ -109,6 +109,7 @@ public:
     MOCK_METHOD0(GetStoredNodeInfo, std::unique_ptr<JsonValue>());
     MOCK_METHOD1(UpdateSystemSafeArea, void(const SafeAreaInsets& systemSafeArea));
     MOCK_METHOD1(UpdateCutoutSafeArea, void(const SafeAreaInsets& cutoutSafeArea));
+    MOCK_METHOD1(UpdateNavSafeArea, void(const SafeAreaInsets& navSafeArea));
     MOCK_CONST_METHOD0(GetSafeArea, SafeAreaInsets());
     MOCK_METHOD0(NotifyConfigurationChange, void());
     MOCK_METHOD0(NeedSoftKeyboard, bool());
@@ -120,6 +121,9 @@ public:
     MOCK_METHOD0(GetOverlayManager, const RefPtr<NG::OverlayManager>());
     MOCK_CONST_METHOD0(IsDragging, bool());
     MOCK_METHOD1(SetIsDragging, void(bool isDragging));
+    MOCK_METHOD0(ResetDragging, void());
+    MOCK_CONST_METHOD0(HasFloatTitle, bool());
+    MOCK_METHOD2(UpdateOriginAvoidArea, void(const Rosen::AvoidArea& avoidArea, uint32_t type));
 
     static RefPtr<MockPipelineContext> pipeline_;
 

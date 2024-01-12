@@ -117,6 +117,11 @@ public:
         layoutInfo_.restoreOffset_ = restoreOffset;
     }
 
+    void SetScrollAlign(ScrollAlign align)
+    {
+        layoutInfo_.align_ = align;
+    }
+
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
     Rect GetItemRect(int32_t index) const override;
@@ -136,10 +141,12 @@ private:
     void MarkDirtyNodeSelf();
     void OnScrollEndCallback() override;
     bool ScrollToTargrtIndex(int32_t index);
+    bool NeedRender();
     std::optional<int32_t> targetIndex_;
     WaterFlowLayoutInfo layoutInfo_;
 
     float prevOffset_ = 0.0f;
+    SizeF lastSize_;
 
     // clip padding of WaterFlow
     RefPtr<WaterFlowContentModifier> contentModifier_;

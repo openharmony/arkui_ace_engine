@@ -15,9 +15,7 @@
 
 #include "core/components_ng/pattern/navigation/navigation_content_layout_algorithm.h"
 
-#include "core/components_ng/layout/box_layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
-#include "core/components_ng/pattern/navrouter/navdestination_layout_algorithm.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -29,7 +27,7 @@ void NavigationContentLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     std::list<RefPtr<LayoutWrapper>> children;
     for (auto index = 0; index < childSize; index++) {
         auto child = layoutWrapper->GetOrCreateChildByIndex(index, false);
-        if (child->IsActive()) {
+        if (child->GetHostNode() && child->GetHostNode()->IsVisible()) {
             child->Measure(layoutConstraint);
             children.emplace_back(child);
         }
@@ -52,7 +50,8 @@ void NavigationContentLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     // Update child position.
     for (const auto& child : layoutWrapper->GetAllChildrenWithBuild(false)) {
-        if (child->IsActive()) {
+        auto childNode = child->GetHostNode();
+        if (childNode && childNode->IsVisible()) {
             SizeF childSize = child->GetGeometryNode()->GetMarginFrameSize();
             auto translate = Alignment::GetAlignPosition(size, childSize, align) + paddingOffset;
             child->GetGeometryNode()->SetMarginFrameOffset(translate);

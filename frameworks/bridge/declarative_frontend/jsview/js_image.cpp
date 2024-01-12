@@ -113,13 +113,23 @@ void JSImage::SetAlt(const JSCallbackInfo& args)
     } else if (!ParseJsMedia(args[0], src)) {
         return;
     }
+    int32_t resId = 0;
+    if (args[0]->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(args[0]);
+        JSRef<JSVal> tmp = jsObj->GetProperty("id");
+        if (!tmp->IsNull() && tmp->IsNumber()) {
+            resId = tmp->ToNumber<int32_t>();
+        }
+    }
     if (ImageSourceInfo::ResolveURIType(src) == SrcType::NETWORK) {
         return;
     }
     std::string bundleName;
     std::string moduleName;
     GetJsMediaBundleInfo(args[0], bundleName, moduleName);
-    ImageModel::GetInstance()->SetAlt(ImageSourceInfo { src, bundleName, moduleName });
+    ImageSourceInfo srcInfo = ImageSourceInfo { src, bundleName, moduleName };
+    srcInfo.SetIsUriPureNumber((resId == -1));
+    ImageModel::GetInstance()->SetAlt(srcInfo);
 }
 
 void JSImage::SetObjectFit(const JSCallbackInfo& args)
@@ -207,15 +217,25 @@ void JSImage::Create(const JSCallbackInfo& info)
         return;
     }
 
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    bool isCard = context->IsFormRender();
+    bool isCard = context->IsFormRender() && !container->IsDynamicRender();
 
     // Interim programme
     std::string bundleName;
     std::string moduleName;
     std::string src;
     bool srcValid = ParseJsMedia(info[0], src);
+    int32_t resId = 0;
+    if (info[0]->IsObject()) {
+        JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(info[0]);
+        JSRef<JSVal> tmp = jsObj->GetProperty("id");
+        if (!tmp->IsNull() && tmp->IsNumber()) {
+            resId = tmp->ToNumber<int32_t>();
+        }
+    }
     if (isCard && info[0]->IsString()) {
         SrcType srcType = ImageSourceInfo::ResolveURIType(src);
         bool notSupport = (srcType == SrcType::NETWORK || srcType == SrcType::FILE || srcType == SrcType::DATA_ABILITY);
@@ -239,7 +259,7 @@ void JSImage::Create(const JSCallbackInfo& info)
 #endif
     }
 
-    ImageModel::GetInstance()->Create(src, pixmap, bundleName, moduleName);
+    ImageModel::GetInstance()->Create(src, pixmap, bundleName, moduleName, (resId == -1));
 }
 
 bool JSImage::IsDrawable(const JSRef<JSVal>& jsValue)
@@ -263,6 +283,55 @@ void JSImage::JsBorder(const JSCallbackInfo& info)
     ImageModel::GetInstance()->SetBackBorder();
 }
 
+void JSImage::JsImageResizable(const JSCallbackInfo& info)
+{
+    auto infoObj = info[0];
+    ImageResizableSlice sliceResult;
+    if (!infoObj->IsObject()) {
+        ImageModel::GetInstance()->SetResizableSlice(sliceResult);
+        return;
+    }
+    JSRef<JSObject> resizableObject = JSRef<JSObject>::Cast(infoObj);
+    if (resizableObject->IsEmpty()) {
+        ImageModel::GetInstance()->SetResizableSlice(sliceResult);
+        return;
+    }
+    auto sliceValue = resizableObject->GetProperty("slice");
+    JSRef<JSObject> sliceObj = JSRef<JSObject>::Cast(sliceValue);
+    if (sliceObj->IsEmpty()) {
+        ImageModel::GetInstance()->SetResizableSlice(sliceResult);
+        return;
+    }
+    static std::array<std::string, 4> keys = { "left", "right", "top", "bottom" };
+    for (uint32_t i = 0; i < keys.size(); i++) {
+        auto sliceSize = sliceObj->GetProperty(keys.at(i).c_str());
+        CalcDimension sliceDimension;
+        if (!ParseJsDimensionVp(sliceSize, sliceDimension)) {
+            continue;
+        }
+        if (!sliceDimension.IsValid()) {
+            continue;
+        }
+        switch (static_cast<BorderImageDirection>(i)) {
+            case BorderImageDirection::LEFT:
+                sliceResult.left = sliceDimension;
+                break;
+            case BorderImageDirection::RIGHT:
+                sliceResult.right = sliceDimension;
+                break;
+            case BorderImageDirection::TOP:
+                sliceResult.top = sliceDimension;
+                break;
+            case BorderImageDirection::BOTTOM:
+                sliceResult.bottom = sliceDimension;
+                break;
+            default:
+                break;
+        }
+    }
+    ImageModel::GetInstance()->SetResizableSlice(sliceResult);
+}
+
 void JSImage::JsBorderRadius(const JSCallbackInfo& info)
 {
     JSViewAbstract::JsBorderRadius(info);
@@ -282,6 +351,9 @@ void JSImage::SetImageFill(const JSCallbackInfo& info)
 
     Color color;
     if (!ParseJsColor(info[0], color)) {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            return;
+        }
         auto pipelineContext = PipelineBase::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<ImageTheme>();
@@ -490,6 +562,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSImage>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSImage>::StaticMethod("autoResize", &JSImage::SetAutoResize);
+    JSClass<JSImage>::StaticMethod("resizable", &JSImage::JsImageResizable);
 
     JSClass<JSImage>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSImage>::StaticMethod("onHover", &JSInteractableView::JsOnHover);
@@ -511,6 +584,7 @@ void JSImage::JSBind(BindingTarget globalObj)
     JSClass<JSImage>::StaticMethod("opacity", &JSImage::JsOpacity);
     JSClass<JSImage>::StaticMethod("blur", &JSImage::JsBlur);
     JSClass<JSImage>::StaticMethod("transition", &JSImage::JsTransition);
+    JSClass<JSImage>::StaticMethod("pointLight", &JSViewAbstract::JsPointLight, opt);
     JSClass<JSImage>::InheritAndBind<JSViewAbstract>(globalObj);
 
     JSClass<JSColorFilter>::Declare("ColorFilter");
@@ -582,7 +656,7 @@ void JSImage::AnalyzerConfig(const JSCallbackInfo &info)
     
     auto paramObject = JSRef<JSObject>::Cast(configParams);
     JSRef<JSVal> typeVal = paramObject->GetProperty("types");
-    JSRef<JSVal> showButtonVal = paramObject->GetProperty("showAIbutton");
+    JSRef<JSVal> showButtonVal = paramObject->GetProperty("showAIButton");
     JSRef<JSVal> marginVal = paramObject->GetProperty("aiButtonOffset");
     JSRef<JSVal> textOpVal = paramObject->GetProperty("textOptions");
     JSRef<JSVal> subjectOpVal = paramObject->GetProperty("subjectOptions");

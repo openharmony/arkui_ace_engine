@@ -147,7 +147,27 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
         AddNewChild(parentFrame, nodeId, index);
     }
 }
-
+RefPtr<FrameNode> ToggleModelNG::CreateFrameNode(int32_t nodeId, ToggleType toggleType, bool isOn)
+{
+    RefPtr<FrameNode> frameNode = nullptr;
+    switch (toggleType) {
+        case ToggleType::CHECKBOX: {
+            frameNode = CreateCheckboxFrameNode(nodeId, isOn);
+            break;
+        }
+        case ToggleType::SWITCH: {
+            frameNode = CreateSwitchFrameNode(nodeId, isOn);
+            break;
+        }
+        case ToggleType::BUTTON: {
+            frameNode = CreateButtonFrameNode(nodeId, isOn);
+            break;
+        }
+        default:
+            break;
+    }
+    return frameNode;
+}
 void ToggleModelNG::SetSwitchSelected(RefPtr<FrameNode>& childFrameNode, bool isOn)
 {
     if (!childFrameNode) {
@@ -254,7 +274,35 @@ void ToggleModelNG::SetPadding(const NG::PaddingPropertyF& /*args*/, const NG::P
 {
     NG::ViewAbstract::SetPadding(newArgs);
 }
+RefPtr<FrameNode> ToggleModelNG::CreateCheckboxFrameNode(int32_t nodeId, bool isOn)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::CHECKBOX_ETS_TAG, nodeId, AceType::MakeRefPtr<CheckBoxPattern>());
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.SetSelect(isOn);
+    return frameNode;
+}
 
+RefPtr<FrameNode> ToggleModelNG::CreateSwitchFrameNode(int32_t nodeId, bool isOn)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, nodeId, AceType::MakeRefPtr<SwitchPattern>());
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
+    CHECK_NULL_RETURN(eventHub, nullptr);
+    eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
+    auto paintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    CHECK_NULL_RETURN(paintProperty, nullptr);
+    paintProperty->UpdateIsOn(isOn);
+    return frameNode;
+}
+
+RefPtr<FrameNode> ToggleModelNG::CreateButtonFrameNode(int32_t nodeId, bool isOn)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TOGGLE_ETS_TAG, nodeId, AceType::MakeRefPtr<ToggleButtonPattern>());
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    ToggleButtonModelNG::SetIsOn(isOn);
+    return frameNode;
+}
 void ToggleModelNG::CreateCheckbox(int32_t nodeId)
 {
     auto* stack = ViewStackProcessor::GetInstance();

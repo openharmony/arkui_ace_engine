@@ -11,25 +11,45 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
+
+ace_unittest("common_test") {
+  type = "new"
+  module_output = "common"
+  sources = [
+    "$ace_root/adapter/ohos/entrance/file_asset_provider_impl.cpp",
+    "$ace_root/frameworks/core/common/asset_manager_impl.cpp",
+    "$ace_root/frameworks/core/common/environment/environment_proxy.cpp",
+    "$ace_root/frameworks/core/common/resource/resource_manager.cpp",
+    "$ace_root/frameworks/core/common/rosen/rosen_asset_manager.cpp",
+    "$ace_root/frameworks/core/common/rosen/rosen_convert_helper.cpp",
+    "$ace_root/frameworks/core/common/rosen/rosen_window.cpp",
+    "$ace_root/frameworks/core/common/sharedata/share_data.cpp",
+    "$ace_root/frameworks/core/common/storage/storage_proxy.cpp",
+    "$ace_root/frameworks/core/common/thread_checker.cpp",
+    "$ace_root/frameworks/core/common/vibrator/vibrator_proxy.cpp",
+    "$ace_root/test/mock/core/common/mock_resource_adapter_v2.cpp",
+    "asset/asset_test.cpp",
+    "clipboard/clipboard_test.cpp",
+    "environment/environment_test.cpp",
+    "ime/ime_test.cpp",
+    "others/thread_checker_test.cpp",
+    "recorder/event_recorder_test.cpp",
+    "resource/resource_manager_test.cpp",
+    "rosen/rosen_test.cpp",
+    "sharedata/sharedata_test.cpp",
+    "storage/storage_test.cpp",
+    "vibrator/vibrator_test.cpp",
+  ]
+}
+
 group("core_common_unittest") {
   testonly = true
   deps = [
-    "asset:asset_test",
-    "clipboard:clip_board_test",
+    ":common_test",
     "connect_server:ace_connect_server_manager_test",
-    "environment:environment_test",
-    "flutter:flutter_test",
     "form:form_manager_test",
-    "ime:ime_test",
-    "others:thread_checker_test",
     "plugin:plugin_manager_test",
-    "recorder:event_recorder_test",
-    "register:register_test",
-    "resource:resource_manager_test",
-    "rosen:rosen_test",
-    "sharedata:share_data_test",
-    "storage:storage_test",
     "task:thread_test",
-    "vibrator:vibrator_test",
   ]
 }

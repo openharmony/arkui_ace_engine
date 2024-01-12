@@ -45,9 +45,7 @@
 #include "core/common/text_field_manager.h"
 #include "core/components/bubble/bubble_component.h"
 #include "core/components/popup/popup_component.h"
-#ifdef ENABLE_DRAG_FRAMEWORK
 #include "core/components_ng/render/adapter/rosen_render_context.h"
-#endif // ENABLE_DRAG_FRAMEWORK
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
@@ -273,6 +271,7 @@ void SubwindowOhos::ShowPopupNG(int32_t targetId, const NG::PopupInfo& popupInfo
     ResizeWindow();
     ContainerScope scope(childContainerId_);
     overlayManager->ShowPopup(targetId, popupInfo);
+    window_->SetFocusable(true);
 }
 
 void SubwindowOhos::HidePopupNG(int32_t targetId)
@@ -289,11 +288,9 @@ void SubwindowOhos::HidePopupNG(int32_t targetId)
     ContainerScope scope(childContainerId_);
     overlayManager->HidePopup(targetId == -1 ? popupTargetId_ : targetId, popupInfo);
     context->FlushPipelineImmediately();
-#ifdef ENABLE_DRAG_FRAMEWORK
     HideEventColumn();
     HidePixelMap();
     HideFilter();
-#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void SubwindowOhos::GetPopupInfoNG(int32_t targetId, NG::PopupInfo& popupInfo)
@@ -513,12 +510,10 @@ void SubwindowOhos::ShowPreviewNG()
 
 void SubwindowOhos::HidePreviewNG()
 {
-#ifdef ENABLE_DRAG_FRAMEWORK
     auto overlayManager = GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->RemovePixelMap();
     overlayManager->RemoveEventColumn();
-#endif
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
     CHECK_NULL_VOID(aceContainer);
     auto pipeline = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
@@ -558,11 +553,9 @@ void SubwindowOhos::HideMenuNG(bool showPreviewAnimation, bool startDrag)
     CHECK_NULL_VOID(overlay);
     ContainerScope scope(childContainerId_);
     overlay->HideMenuInSubWindow(showPreviewAnimation, startDrag);
-#ifdef ENABLE_DRAG_FRAMEWORK
     HideEventColumn();
     HidePixelMap(false, 0, 0, false);
     HideFilter();
-#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId)
@@ -582,21 +575,18 @@ void SubwindowOhos::HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t target
     auto overlay = context->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     overlay->HideMenuInSubWindow(menu, targetId_);
-#ifdef ENABLE_DRAG_FRAMEWORK
     HideEventColumn();
     HidePixelMap(false, 0, 0, false);
     HideFilter();
-#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 
 void SubwindowOhos::UpdateHideMenuOffsetNG(const NG::OffsetF& offset)
 {
-    auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
-    CHECK_NULL_VOID(aceContainer);
-    auto context = DynamicCast<NG::PipelineContext>(aceContainer->GetPipelineContext());
-    CHECK_NULL_VOID(context);
-    auto overlay = context->GetOverlayManager();
+    ContainerScope scope(childContainerId_);
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto overlay = pipelineContext->GetOverlayManager();
     CHECK_NULL_VOID(overlay);
     if (overlay->IsContextMenuDragHideFinished()) {
         return;
@@ -620,13 +610,11 @@ void SubwindowOhos::ClearMenuNG(bool inWindow, bool showAnimation)
     }
     HideWindow();
     context->FlushPipelineImmediately();
-#ifdef ENABLE_DRAG_FRAMEWORK
     if (inWindow) {
         HideEventColumn();
     }
     HidePixelMap(false, 0, 0, false);
     HideFilter();
-#endif // ENABLE_DRAG_FRAMEWORK
 }
 
 void SubwindowOhos::ClearPopupNG()
@@ -1341,7 +1329,6 @@ void SubwindowOhos::RequestFocus()
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "subwindow id:%{public}u request focus successfully.", window_->GetWindowId());
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 void SubwindowOhos::HideFilter()
 {
     auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
@@ -1381,5 +1368,4 @@ void SubwindowOhos::HideEventColumn()
     ContainerScope scope(parentContainerId_);
     manager->RemoveEventColumn();
 }
-#endif // ENABLE_DRAG_FRAMEWORK
 } // namespace OHOS::Ace

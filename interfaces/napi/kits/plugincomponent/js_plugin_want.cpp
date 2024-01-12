@@ -63,14 +63,10 @@ napi_value AceWrapElementName(napi_env env, const ElementName& elementName)
     NAPI_CALL(env, napi_set_named_property(env, jsObject, "deviceId", jsValue));
 
     jsValue = nullptr;
-    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "%{public}s called. bundleName=%{public}s", __func__,
-        elementName.GetBundleName().c_str());
     NAPI_CALL(env, napi_create_string_utf8(env, elementName.GetBundleName().c_str(), NAPI_AUTO_LENGTH, &jsValue));
     NAPI_CALL(env, napi_set_named_property(env, jsObject, "bundleName", jsValue));
 
     jsValue = nullptr;
-    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "%{public}s called. abilityName=%{public}s", __func__,
-        elementName.GetAbilityName().c_str());
     NAPI_CALL(env, napi_create_string_utf8(env, elementName.GetAbilityName().c_str(), NAPI_AUTO_LENGTH, &jsValue));
     NAPI_CALL(env, napi_set_named_property(env, jsObject, "abilityName", jsValue));
 
@@ -102,8 +98,6 @@ bool AceInnerWrapWantParamsChar(
     AAFwk::IChar* ao = AAFwk::IChar::Query(value);
     if (ao != nullptr) {
         std::string natValue(static_cast<Char*>(ao)->ToString());
-        TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "%{public}s called. key=%{public}s, natValue=%{public}s", __func__,
-            key.c_str(), natValue.c_str());
         napi_value jsValue = AceWrapStringToJS(env, natValue);
         if (jsValue != nullptr) {
             NAPI_CALL_BASE(env, napi_set_named_property(env, jsObject, key.c_str(), jsValue), false);
@@ -120,8 +114,6 @@ bool AceInnerWrapWantParamsString(
     AAFwk::IString* ao = AAFwk::IString::Query(value);
     if (ao != nullptr) {
         std::string natValue = AAFwk::String::Unbox(ao);
-        TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "%{public}s called. key=%{public}s, natValue=%{public}s", __func__,
-            key.c_str(), natValue.c_str());
         napi_value jsValue = AceWrapStringToJS(env, natValue);
         if (jsValue != nullptr) {
             NAPI_CALL_BASE(env, napi_set_named_property(env, jsObject, key.c_str(), jsValue), false);
@@ -186,8 +178,6 @@ bool AceInnerWrapWantParamsInt32(
     AAFwk::IInteger* ao = AAFwk::IInteger::Query(value);
     if (ao != nullptr) {
         int natValue = AAFwk::Integer::Unbox(ao);
-        TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "%{public}s called. key=%{public}s, natValue=%{public}d", __func__,
-            key.c_str(), natValue);
         napi_value jsValue = AceWrapInt32ToJS(env, natValue);
         if (jsValue != nullptr) {
             NAPI_CALL_BASE(env, napi_set_named_property(env, jsObject, key.c_str(), jsValue), false);
@@ -248,7 +238,6 @@ bool AceInnerWrapWantParamsDouble(
 bool AceInnerWrapWantParamsWantParams(
     napi_env env, napi_value jsObject, const std::string& key, const AAFwk::WantParams& wantParams)
 {
-    TAG_LOGI(AceLogTag::ACE_PLUGIN_COMPONENT, "%{public}s called. key=%{public}s", __func__, key.c_str());
     auto value = wantParams.GetParam(key);
     AAFwk::IWantParams* o = AAFwk::IWantParams::Query(value);
     if (o != nullptr) {

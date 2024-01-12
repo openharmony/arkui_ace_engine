@@ -41,20 +41,13 @@ template("ace_core_pipeline_ng_source_set") {
       "ui_task_scheduler.cpp",
     ]
 
-    configs = [
-      "$ace_root:ace_config",
-      "$ace_flutter_engine_root:flutter_config",
-    ]
+    configs = [ "$ace_root:ace_config" ]
 
     deps = [
-      "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform",
       "$ace_root/frameworks/core/components/theme:build_theme_code",
       "$skia_root_new:skia_$platform",
     ]
     external_deps = []
-    if (enable_graphic_text_gine) {
-      deps -= [ "$ace_flutter_engine_root/libtxt:thirdparty_lib_txt_$platform" ]
-    }
 
     if (defined(config.enable_rosen_backend) && config.enable_rosen_backend) {
       if (is_arkui_x) {
@@ -76,7 +69,6 @@ template("ace_core_pipeline_ng_source_set") {
     if (platform == "ohos" && defined(config.enable_native_view) &&
         config.enable_native_view) {
       sources += [ "layers/ace_scene_builder.cpp" ]
-      deps += [ "$ace_flutter_engine_root/ohos_layers:flutter_ohos_layers" ]
     }
 
     cflags_cc = []

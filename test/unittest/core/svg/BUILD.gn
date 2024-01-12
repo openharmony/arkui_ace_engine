@@ -19,7 +19,14 @@ config("config_svg_parse_test") {
   visibility = [ ":*" ]
   include_dirs = [
     "//commonlibrary/c_utils/base/include",
+    "//foundation/graphic/graphic_2d/rosen/modules",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_client/core",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include",
+    "//foundation/graphic/graphic_2d/rosen/modules/platform/image_native",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
+    "//foundation/graphic/graphic_2d/rosen/modules/2d_engine/rosen_text/export/rosen_text",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
@@ -41,8 +48,11 @@ ohos_unittest("parse_test_ng") {
   sources = [ "parse_test_ng.cpp" ]
 
   if (ace_use_rosen_drawing) {
-    defines = [ "ACE_ENABLE_GPU" ]
-    include_dirs = [ "//third_party/flutter/skia" ]
+    defines = [
+      "ACE_ENABLE_GPU",
+      "NEW_SKIA",
+    ]
+    include_dirs = [ "//third_party/skia" ]
   }
 
   deps = [

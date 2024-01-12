@@ -29,9 +29,14 @@ public:
 
 void GridCommonTestNg::MouseSelect(Offset start, Offset end)
 {
+    MouseInfo infoMouse;
+    infoMouse.SetButton(MouseButton::LEFT_BUTTON);
+    infoMouse.SetAction(MouseAction::PRESS);
     GestureEvent info;
     info.SetInputEventType(InputEventType::MOUSE_BUTTON);
-    info.SetLocalLocation(start);
+    infoMouse.SetLocalLocation(start);
+    infoMouse.SetGlobalLocation(start);
+    pattern_->HandleMouseEventWithoutKeyboard(infoMouse);
     pattern_->HandleDragStart(info);
     if (start != end) {
         info.SetLocalLocation(end);
@@ -87,7 +92,7 @@ HWTEST_F(GridCommonTestNg, KeyEvent001, TestSize.Level1)
     });
     KeyEvent event;
     pattern_->OnKeyEvent(event);
-    EXPECT_TRUE(IsEqualCurrentOffset(0));
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
 
     /**
      * @tc.steps: step2. KeyCode::KEY_PAGE_DOWN.
@@ -96,7 +101,7 @@ HWTEST_F(GridCommonTestNg, KeyEvent001, TestSize.Level1)
     event.action = KeyAction::DOWN;
     event.code = KeyCode::KEY_PAGE_DOWN;
     pattern_->OnKeyEvent(event);
-    EXPECT_TRUE(IsEqualCurrentOffset(-GRID_HEIGHT));
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -GRID_HEIGHT);
 
     /**
      * @tc.steps: step3. KeyCode::KEY_PAGE_UP.
@@ -104,7 +109,7 @@ HWTEST_F(GridCommonTestNg, KeyEvent001, TestSize.Level1)
      */
     event.code = KeyCode::KEY_PAGE_UP;
     pattern_->OnKeyEvent(event);
-    EXPECT_TRUE(IsEqualCurrentOffset(0));
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
 
     /**
      * @tc.steps: step4. Test HandleDirectionKey().
@@ -461,7 +466,7 @@ HWTEST_F(GridCommonTestNg, Drag003, TestSize.Level1)
         model.SetMinCount(2);
         model.SetMaxCount(4);
         model.SetSupportAnimation(true);
-        CreateColItem(itemCount);
+        CreateFixedItem(itemCount);
     });
     auto onItemDragStart = [](const ItemDragInfo&, int32_t) {
         auto dragItem = AceType::MakeRefPtr<FrameNode>("test", 0, AceType::MakeRefPtr<Pattern>());
@@ -539,7 +544,7 @@ HWTEST_F(GridCommonTestNg, FocusStep001, TestSize.Level1)
 {
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateColItem(10, true);
+        CreateColItem(10);
     });
 
     /**
@@ -637,7 +642,7 @@ HWTEST_F(GridCommonTestNg, FocusStep002, TestSize.Level1)
 {
     Create([](GridModelNG model) {
         model.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        CreateRowItem(10, true);
+        CreateRowItem(10);
     });
 
     /**
@@ -736,7 +741,7 @@ HWTEST_F(GridCommonTestNg, FocusStep003, TestSize.Level1)
     Create([](GridModelNG model) {
         model.SetRowsTemplate("1fr 1fr 1fr 1fr");
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateItem(10, NULL_VALUE, NULL_VALUE, true);
+        CreateItem(10, NULL_VALUE, NULL_VALUE);
     });
 
     /**
@@ -837,7 +842,7 @@ HWTEST_F(GridCommonTestNg, FocusStep004, TestSize.Level1)
         CreateBigColItem(2, 3);
         CreateBigColItem(0, 2);
         CreateBigColItem(2, 1);
-        CreateColItem(7, true);
+        CreateColItem(7);
     });
 
     /**
@@ -938,7 +943,7 @@ HWTEST_F(GridCommonTestNg, FocusStep005, TestSize.Level1)
         CreateBigRowItem(1, 2);
         CreateBigRowItem(0, 2);
         CreateBigRowItem(2, 3);
-        CreateRowItem(7, true);
+        CreateRowItem(7);
     });
 
     /**
@@ -1040,7 +1045,7 @@ HWTEST_F(GridCommonTestNg, FocusStep006, TestSize.Level1)
         CreateBigItem(1, 2, 1, 2);
         CreateBigItem(NULL_VALUE, NULL_VALUE, 1, 3);
         CreateBigItem(1, 3, NULL_VALUE, NULL_VALUE);
-        CreateItem(7, NULL_VALUE, NULL_VALUE, true);
+        CreateItem(7, NULL_VALUE, NULL_VALUE);
     });
 
     /**
@@ -1138,7 +1143,7 @@ HWTEST_F(GridCommonTestNg, FocusStep007, TestSize.Level1)
 {
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateColItem(10, true);
+        CreateColItem(10);
     });
 
     /**
@@ -1159,7 +1164,7 @@ HWTEST_F(GridCommonTestNg, FocusStep008, TestSize.Level1)
 {
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateColItem(24, true);
+        CreateColItem(24);
     });
 
     /**
@@ -1185,7 +1190,7 @@ HWTEST_F(GridCommonTestNg, FocusStep009, TestSize.Level1)
 {
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateColItem(24, true);
+        CreateColItem(24);
     });
 
     /**
@@ -1211,7 +1216,7 @@ HWTEST_F(GridCommonTestNg, Focus001, TestSize.Level1)
 {
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateColItem(18, true);
+        CreateColItem(18);
     });
 
     /**
@@ -1278,7 +1283,7 @@ HWTEST_F(GridCommonTestNg, GridAccessibilityTest001, TestSize.Level1)
 HWTEST_F(GridCommonTestNg, GridAccessibilityTest002, TestSize.Level1)
 {
     Create([](GridModelNG model) {
-        CreateColItem(8);
+        CreateItem(8, ITEM_WIDTH, ITEM_HEIGHT, GridItemStyle::NONE);
     });
 
     /**
@@ -1286,8 +1291,8 @@ HWTEST_F(GridCommonTestNg, GridAccessibilityTest002, TestSize.Level1)
      * @tc.expected: Verify return value.
      */
     AceCollectionInfo info = accessibilityProperty_->GetCollectionInfo();
-    EXPECT_EQ(info.rows, 1);
-    EXPECT_EQ(info.columns, 8);
+    EXPECT_EQ(info.rows, 2);
+    EXPECT_EQ(info.columns, 4);
     EXPECT_EQ(info.selectMode, 0);
 }
 
@@ -1498,9 +1503,9 @@ HWTEST_F(GridCommonTestNg, PerformActionTest002, TestSize.Level1)
         CreateColItem(10);
     });
     accessibilityProperty_->ActActionScrollForward();
-    EXPECT_TRUE(IsEqualCurrentOffset(0.f));
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.f);
     accessibilityProperty_->ActActionScrollBackward();
-    EXPECT_TRUE(IsEqualCurrentOffset(0.f));
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.f);
 
     /**
      * @tc.steps: step2. When grid is Scrollable
@@ -1511,9 +1516,9 @@ HWTEST_F(GridCommonTestNg, PerformActionTest002, TestSize.Level1)
         CreateColItem(20);
     });
     accessibilityProperty_->ActActionScrollForward();
-    EXPECT_TRUE(IsEqualCurrentOffset(-GRID_HEIGHT));
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -GRID_HEIGHT);
     accessibilityProperty_->ActActionScrollBackward();
-    EXPECT_TRUE(IsEqualCurrentOffset(0.f));
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.f);
 }
 
 /**
@@ -1526,7 +1531,9 @@ HWTEST_F(GridCommonTestNg, GridDistributed001, TestSize.Level1)
     /**
      * @tc.steps: step1. Init Grid node
      */
-    Create();
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+    });
 
     /**
      * @tc.steps: step2. get pattern .

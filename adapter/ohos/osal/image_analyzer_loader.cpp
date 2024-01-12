@@ -20,10 +20,18 @@
 #include "core/common/ai/image_analyzer_loader.h"
 
 namespace OHOS::Ace {
-std::shared_ptr<ImageAnalyzerLoader> ImageAnalyzerLoader::Load(std::string libPath)
+namespace {
+#ifdef __aarch64__
+constexpr char IMAGE_ANALYZER_SO_PATH[] = "system/lib64/libai_image_analyzer_innerapi.z.so";
+#else
+constexpr char IMAGE_ANALYZER_SO_PATH[] = "system/lib/libai_image_analyzer_innerapi.z.so";
+#endif
+} // namespace
+
+std::shared_ptr<ImageAnalyzerLoader> ImageAnalyzerLoader::Load()
 {
     auto engLib(std::make_shared<ImageAnalyzerLoader>());
-    return engLib->Init(std::move(libPath)) ? engLib : nullptr;
+    return engLib->Init() ? engLib : nullptr;
 }
 
 ImageAnalyzerLoader::~ImageAnalyzerLoader()
@@ -31,18 +39,18 @@ ImageAnalyzerLoader::~ImageAnalyzerLoader()
     Close();
 }
 
-bool ImageAnalyzerLoader::Init(std::string libPath)
+bool ImageAnalyzerLoader::Init()
 {
-    libraryHandle_ = dlopen(libPath.c_str(), 0);
+    libraryHandle_ = dlopen(IMAGE_ANALYZER_SO_PATH, RTLD_LAZY);
     if (libraryHandle_ == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_IMAGE, " Could not dlopen %s: %s", libPath.c_str(), dlerror());
+        TAG_LOGE(AceLogTag::ACE_IMAGE, " Could not dlopen %s: %s", IMAGE_ANALYZER_SO_PATH, dlerror());
     }
     createImageAnalyzerInstance_ =
         (ImageAnalyzerInterface* (*)(napi_env)) dlsym(libraryHandle_, "createImageAnalyzerInstance");
     destroyImageAnalyzerInstance_ =
         (void (*)(ImageAnalyzerInterface *)) dlsym(libraryHandle_, "destroyImageAnalyzerInstance");
     if (createImageAnalyzerInstance_ == nullptr || destroyImageAnalyzerInstance_ == nullptr) {
-        TAG_LOGE(AceLogTag::ACE_IMAGE, " Could not find engine interface functions in %s", libPath.c_str());
+        TAG_LOGE(AceLogTag::ACE_IMAGE, " Could not find engine interface functions in %s", IMAGE_ANALYZER_SO_PATH);
         Close();
         return false;
     }

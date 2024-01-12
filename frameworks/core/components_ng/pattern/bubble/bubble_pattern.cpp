@@ -69,31 +69,13 @@ bool BubblePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     clipPath_ = bubbleLayoutAlgorithm->GetClipPath();
     clipFrameNode_ = bubbleLayoutAlgorithm->GetClipFrameNode();
     arrowOffsetsFromClip_ = bubbleLayoutAlgorithm->GetArrowOffsetsFromClip();
+    arrowWidth_ = bubbleLayoutAlgorithm->GetArrowWidth();
+    arrowHeight_ = bubbleLayoutAlgorithm->GetArrowHeight();
     paintProperty->UpdatePlacement(bubbleLayoutAlgorithm->GetArrowPlacement());
     if (delayShow_) {
         delayShow_ = false;
         if (transitionStatus_ == TransitionStatus::INVISIABLE) {
             StartEnteringAnimation(nullptr);
-        }
-    }
-    auto useCustom = paintProperty->GetUseCustom().value_or(false);
-    if (useCustom) {
-        RefPtr<RenderContext> customRenderContext;
-        auto columnNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
-        CHECK_NULL_RETURN(columnNode, false);
-        auto customNode = AceType::DynamicCast<FrameNode>(columnNode->GetFirstChild());
-        auto columnRenderContext = columnNode->GetRenderContext();
-        if (columnRenderContext) {
-            if (customNode) {
-                customRenderContext = customNode->GetRenderContext();
-            }
-        }
-        if (customRenderContext) {
-            if (customRenderContext->HasBackgroundColor() &&
-                customRenderContext->GetBackgroundColorValue() != Color::TRANSPARENT) {
-                columnRenderContext->UpdateBackgroundColor(customRenderContext->GetBackgroundColorValue());
-                customRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-            }
         }
     }
     return true;
@@ -119,7 +101,8 @@ void BubblePattern::OnAttachToFrameNode()
 
     auto targetNode = FrameNode::GetFrameNode(targetTag_, targetNodeId_);
     CHECK_NULL_VOID(targetNode);
-    pipelineContext->AddOnAreaChangeNode(targetNode->GetId());
+    auto eventHub = targetNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
     OnAreaChangedFunc onAreaChangedFunc = [popupNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
                                               const OffsetF& /* oldOrigin */, const RectF& /* rect */,
                                               const OffsetF& /* origin */) {
@@ -127,7 +110,7 @@ void BubblePattern::OnAttachToFrameNode()
         CHECK_NULL_VOID(popupNode);
         popupNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
-    targetNode->SetOnAreaChangeCallback(std::move(onAreaChangedFunc));
+    eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
 }
 
 void BubblePattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -145,13 +128,6 @@ void BubblePattern::InitTouchEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto bubbleRenderProp = host->GetPaintProperty<BubbleRenderProperty>();
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        CHECK_NULL_VOID(bubbleRenderProp);
-        if (!bubbleRenderProp->GetAutoCancel().value_or(true)) {
-            return;
-        }
-    }
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto gestureHub = hub->GetOrCreateGestureEventHub();
@@ -177,11 +153,7 @@ void BubblePattern::HandleTouchEvent(const TouchEventInfo& info)
     auto touchType = info.GetTouches().front().GetTouchType();
     auto clickPos = info.GetTouches().front().GetLocalLocation();
     if (touchType == TouchType::DOWN) {
-        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            HandleTouchDown(clickPos);
-        } else {
-            PopBubble();
-        }
+        HandleTouchDown(clickPos);
     }
 }
 
@@ -331,10 +303,18 @@ RefPtr<FrameNode> BubblePattern::GetButtonRowNode()
     CHECK_NULL_RETURN(host, nullptr);
     auto columnNode = AceType::DynamicCast<FrameNode>(host->GetLastChild());
     CHECK_NULL_RETURN(columnNode, nullptr);
-    auto buttonRowNode = AceType::DynamicCast<FrameNode>(columnNode->GetLastChild());
+    auto lastColumnNode = AceType::DynamicCast<FrameNode>(columnNode->GetLastChild());
+    CHECK_NULL_RETURN(lastColumnNode, nullptr);
+    auto buttonRowNode = AceType::DynamicCast<FrameNode>(lastColumnNode->GetLastChild());
     CHECK_NULL_RETURN(buttonRowNode, nullptr);
-    if (buttonRowNode->GetTag() != V2::FLEX_ETS_TAG) {
-        return nullptr;
+    if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
+        if (buttonRowNode->GetTag() != V2::ROW_ETS_TAG) {
+            return nullptr;
+        }
+    } else {
+        if (buttonRowNode->GetTag() != V2::FLEX_ETS_TAG) {
+            return nullptr;
+        }
     }
     if (buttonRowNode->GetChildren().empty()) {
         return nullptr;

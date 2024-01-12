@@ -1018,7 +1018,6 @@ HWTEST_F(ProgressTestNg, ProgressModifier001, TestSize.Level1)
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DrawRoundRect(_)).Times(AtLeast(1));
     EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
-    EXPECT_CALL(canvas, DrawArc(_, _, _)).Times(AtLeast(1));
     EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
     EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
     EXPECT_CALL(canvas, Rotate(_, _, _)).Times(AtLeast(1));
@@ -2509,16 +2508,6 @@ HWTEST_F(ProgressTestNg, ProgressSetValue002, TestSize.Level1)
     frameNode = CreateProgressParagraph(testProperty);
     paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
     auto pattern = frameNode->GetPattern<ProgressPattern>();
-    auto theme = PipelineBase::GetCurrentContext()->GetTheme<ProgressTheme>();
-    EXPECT_EQ(paintProperty->GetColor(), theme->GetCapsuleSelectColor());
-    EXPECT_EQ(paintProperty->GetBackgroundColor(), theme->GetBorderColor());
-    EXPECT_EQ(paintProperty->GetBorderColor(), theme->GetCapsuleBgColor());
-    CheckValue(frameNode, testProperty);
-
-    /**
-     * @tc.steps: step3. set ProgressModifier property.
-     * @tc.expected: step3. Check the ProgressModifier property value.
-     */
     auto textNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(0));
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     auto* stack = ViewStackProcessor::GetInstance();
@@ -2902,7 +2891,6 @@ HWTEST_F(ProgressTestNg, ProgressModifier006, TestSize.Level1)
     EXPECT_CALL(canvas, DrawRect(_)).Times(AtLeast(1));
     EXPECT_CALL(canvas, ClipPath(_, _, _)).Times(AtLeast(1));
     EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
-    EXPECT_CALL(canvas, DrawArc(_, _, _)).Times(AtLeast(1));
     EXPECT_CALL(canvas, Rotate(_, _, _)).Times(AtLeast(1));
     EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
     EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));

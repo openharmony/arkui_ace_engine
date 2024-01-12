@@ -66,6 +66,11 @@ void AtomicServicePattern::OnLanguageConfigurationUpdate()
     auto themeConstants = themeManager->GetThemeConstants();
     CHECK_NULL_VOID(themeConstants);
     textLayoutProperty->UpdateContent(themeConstants->GetString(pipelineContext->GetAppLabelId()));
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto appBar = container->GetAppBar();
+    CHECK_NULL_VOID(appBar);
+    appBar->UpdateRowLayout();
 }
 
 void AtomicServicePattern::OnColorConfigurationUpdate()

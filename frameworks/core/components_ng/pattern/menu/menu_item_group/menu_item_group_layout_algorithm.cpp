@@ -107,8 +107,10 @@ void MenuItemGroupLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float footerPadding = needFooterPadding_ ? groupDividerPadding_ : 0.0f;
     totalHeight += footerPadding;
     menuItemGroupSize.SetHeight(totalHeight);
-
-    layoutWrapper->GetGeometryNode()->SetFrameSize(menuItemGroupSize);
+    if (menuItemGroupSize != layoutWrapper->GetGeometryNode()->GetFrameSize()) {
+        layoutWrapper->GetGeometryNode()->SetFrameSize(menuItemGroupSize);
+        host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+    }
 }
 
 void MenuItemGroupLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)

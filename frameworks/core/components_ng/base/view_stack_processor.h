@@ -66,7 +66,7 @@
 #define ACE_UPDATE_NODE_RENDER_CONTEXT(name, value, frameNode)                  \
     do {                                                                        \
         CHECK_NULL_VOID(frameNode);                                             \
-        auto target = frameNode->GetRenderContext();                            \
+        const auto& target = frameNode->GetRenderContext();                     \
         if (target) {                                                           \
             target->Update##name(value);                                        \
         }                                                                       \
@@ -406,6 +406,16 @@ public:
         return isBuilderNode_;
     }
 
+    void SetIsExportTexture(bool isExportTexture)
+    {
+        isExportTexture_ = isExportTexture;
+    }
+
+    bool IsExportTexture() const
+    {
+        return isExportTexture_;
+    }
+
 private:
     ViewStackProcessor();
 
@@ -432,6 +442,7 @@ private:
 
     std::optional<UIState> visualState_ = std::nullopt;
     bool isBuilderNode_ = false;
+    bool isExportTexture_ = false;
 
     // elmtId reserved for next component creation
     ElementIdType reservedNodeId_ = ElementRegister::UndefinedElementId;

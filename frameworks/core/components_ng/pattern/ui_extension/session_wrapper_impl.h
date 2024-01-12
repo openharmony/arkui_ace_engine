@@ -64,15 +64,15 @@ public:
     void NotifyConfigurationUpdate() override;
 
     // The interface about the accessibility
-    bool TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int32_t offset) override;
-    void SearchExtensionElementInfoByAccessibilityId(int32_t elementId, int32_t mode, int32_t baseParent,
+    bool TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int64_t offset) override;
+    void SearchExtensionElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) override;
-    void SearchElementInfosByText(int32_t elementId, const std::string& text, int32_t baseParent,
+    void SearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) override;
-    void FindFocusedElementInfo(int32_t elementId, int32_t focusType, int32_t baseParent,
+    void FindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
         Accessibility::AccessibilityElementInfo& output) override;
-    void FocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
+    void FocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
         Accessibility::AccessibilityElementInfo& output) override;
 
     // The interface to control the display area
@@ -83,10 +83,16 @@ public:
     void SendDataAsync(const AAFwk::WantParams& params) const override;
     int32_t SendDataSync(const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) const override;
 
+    // The interface to control the avoid area
+    void NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const override;
+    bool NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaChangeInfo> info) const override;
+
 private:
     void InitAllCallback();
     sptr<Rosen::ExtensionSession> session_;
     WeakPtr<UIExtensionPattern> hostPattern_;
+    Rosen::WSRect windowRect_;
+    bool isNotifyOccupiedAreaChange_ = false;
     int32_t instanceId_;
     bool isTransferringCaller_;
     std::shared_ptr<Rosen::ILifecycleListener> lifecycleListener_;

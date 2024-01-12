@@ -87,7 +87,8 @@ protected:
 
     virtual void GetPlaceholderRects(std::vector<RectF>& rects);
 
-    virtual ParagraphStyle GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const;
+    virtual ParagraphStyle GetParagraphStyle(
+        const TextStyle& textStyle, const std::string& content, LayoutWrapper* layoutWrapper) const;
 
     virtual void UpdateParagraphForAISpan(const TextStyle& textStyle, LayoutWrapper* layoutWrapper);
 
@@ -98,7 +99,7 @@ private:
     void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     bool CreateParagraph(const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper);
     void CreateParagraphDrag(const TextStyle& textStyle, const std::vector<std::string>& contents,
-        const std::string content);
+        const std::string content, LayoutWrapper* layoutWrapper);
     bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper);
     bool AdaptMinTextSize(TextStyle& textStyle, const std::string& content, const LayoutConstraintF& contentConstraint,
@@ -107,7 +108,7 @@ private:
     bool AddPropertiesAndAnimations(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& textLayoutProperty,
         const LayoutConstraintF& contentConstraint, const RefPtr<PipelineContext>& pipeline,
         LayoutWrapper* layoutWrapper);
-    static TextDirection GetTextDirection(const std::string& content);
+    static TextDirection GetTextDirection(const std::string& content, LayoutWrapper* layoutWrapper);
     float GetTextWidth() const;
     SizeF GetMaxMeasureSize(const LayoutConstraintF& contentConstraint) const;
     bool BuildParagraph(TextStyle& textStyle, const RefPtr<TextLayoutProperty>& layoutProperty,
@@ -138,12 +139,14 @@ private:
     void SetImageSpanTextStyleByLines(const TextStyle& textStyle,
         std::map<int32_t, std::pair<RectF, RefPtr<PlaceholderSpanItem>>>& placeholderSpanList,
         std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>>& spanContentLines);
+    void SetNodeForAnimation(const TextStyle& symbolTextStyle, RefPtr<FrameNode>& frameNode);
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;
     RefPtr<Paragraph> paragraph_;
     float baselineOffset_ = 0.0f;
     std::optional<TextStyle> textStyle_;
     RefPtr<PropertyBool> showSelect_;
+    float indent_ = 0.0f;
     ACE_DISALLOW_COPY_AND_MOVE(TextLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

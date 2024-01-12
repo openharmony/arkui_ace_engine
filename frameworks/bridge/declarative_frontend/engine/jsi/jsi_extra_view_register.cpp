@@ -14,6 +14,7 @@
  */
 
 #include "bridge/declarative_frontend/engine/jsi/jsi_extra_view_register.h"
+#include "bridge/declarative_frontend/jsview/js_cached_image.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -22,6 +23,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
      * Binding function map sample:
       { "XXX", JSXXX::JSBind },
      */
+    { "CachedImage", JSCachedImage::JSBind },
 };
 
 void RegisterExtraViews(BindingTarget globalObj)

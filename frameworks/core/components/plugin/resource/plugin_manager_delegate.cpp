@@ -34,9 +34,7 @@ constexpr char PLUGIN_ADAPTOR_RESOURCE_NAME[] = "pluginAdaptor";
 constexpr char NTC_PARAM_RICH_TEXT[] = "pluginAdaptor";
 } // namespace
 
-PluginManagerDelegate::~PluginManagerDelegate()
-{
-}
+PluginManagerDelegate::~PluginManagerDelegate() {}
 
 void PluginManagerDelegate::UnregisterEvent()
 {
@@ -73,15 +71,14 @@ void PluginManagerDelegate::RegisterEvent()
         });
     resRegister->RegisterEvent(
         MakeEventHash(PLUGIN_EVENT_ON_ERROR), [weak = WeakClaim(this)](const std::string& param) {
-        auto delegate = weak.Upgrade();
-        if (delegate) {
-            delegate->OnPluginError(param);
-        }
-    });
+            auto delegate = weak.Upgrade();
+            if (delegate) {
+                delegate->OnPluginError(param);
+            }
+        });
 }
 
-void PluginManagerDelegate::CreatePlatformResource(
-    const WeakPtr<PipelineBase>& context, const RequestPluginInfo& info)
+void PluginManagerDelegate::CreatePlatformResource(const WeakPtr<PipelineBase>& context, const RequestPluginInfo& info)
 {
     context_ = context;
     state_ = State::CREATING;
@@ -113,10 +110,10 @@ void PluginManagerDelegate::CreatePlatformResource(
         paramStream << NTC_PARAM_RICH_TEXT << PLUGIN_MANAGER_PARAM_EQUALS << delegate->id_ << PLUGIN_MANAGER_PARAM_AND
                     << "bundle" << PLUGIN_MANAGER_PARAM_EQUALS << info.bundleName << PLUGIN_MANAGER_PARAM_AND
                     << "ability" << PLUGIN_MANAGER_PARAM_EQUALS << info.abilityName << PLUGIN_MANAGER_PARAM_AND
-                    << "module" << PLUGIN_MANAGER_PARAM_EQUALS << info.moduleName << PLUGIN_MANAGER_PARAM_AND
-                    << "name" << PLUGIN_MANAGER_PARAM_EQUALS << info.pluginName << PLUGIN_MANAGER_PARAM_AND
-                    << "dimension" << PLUGIN_MANAGER_PARAM_EQUALS << info.dimension << PLUGIN_MANAGER_PARAM_AND
-                    << "id" << PLUGIN_MANAGER_PARAM_EQUALS << info.id << PLUGIN_MANAGER_PARAM_AND;
+                    << "module" << PLUGIN_MANAGER_PARAM_EQUALS << info.moduleName << PLUGIN_MANAGER_PARAM_AND << "name"
+                    << PLUGIN_MANAGER_PARAM_EQUALS << info.pluginName << PLUGIN_MANAGER_PARAM_AND << "dimension"
+                    << PLUGIN_MANAGER_PARAM_EQUALS << info.dimension << PLUGIN_MANAGER_PARAM_AND << "id"
+                    << PLUGIN_MANAGER_PARAM_EQUALS << info.id << PLUGIN_MANAGER_PARAM_AND;
 
         std::string param = paramStream.str();
         delegate->id_ = resRegister->CreateResource(PLUGIN_ADAPTOR_RESOURCE_NAME, param);

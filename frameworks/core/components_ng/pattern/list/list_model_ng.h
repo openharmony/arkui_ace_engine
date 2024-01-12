@@ -15,7 +15,7 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_MODEL_NG_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_LIST_LIST_MODEL_NG_H
-
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_model.h"
 
 namespace OHOS::Ace::NG {
@@ -70,7 +70,7 @@ public:
     void SetOnItemDrop(OnItemDropFunc&& onItemDrop) override;
 
     DisplayMode GetDisplayMode() const override;
-
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetEditMode(FrameNode* frameNode, bool editMode);
     static void SetMultiSelectable(FrameNode* frameNode, bool selectable);
     static void SetChainAnimation(FrameNode* frameNode, bool chainAnimation);

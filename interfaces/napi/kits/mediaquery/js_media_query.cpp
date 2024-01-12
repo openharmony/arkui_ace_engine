@@ -120,7 +120,6 @@ public:
 
     static napi_value On(napi_env env, napi_callback_info info)
     {
-        LOGI("NAPI MediaQuery On called");
         auto jsEngine = EngineHelper::GetCurrentEngine();
         if (!jsEngine) {
             return nullptr;

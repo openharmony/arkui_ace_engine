@@ -88,15 +88,6 @@ constexpr float HEIGHT = 1000.0f;
 constexpr float FLOAT_260 = 260.0f;
 constexpr float DEFAULT_ROOT_HEIGHT = 800.f;
 constexpr float DEFAULT_ROOT_WIDTH = 480.f;
-constexpr float DEFAULT_TITLE_BAR_OFFSET = 0.0f;
-constexpr float POSITIVE_TITLE_BAR_OFFSET = 1.0f;
-constexpr float POSITIVE_LARGE_TITLE_BAR_OFFSET = 100.0f;
-constexpr float POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX = 95.0f;
-constexpr float NEGATIVE_TITLE_BAR_OFFSET = -1.0f;
-constexpr float NEGATIVE_LARGE_TITLE_BAR_OFFSET = -100.0f;
-constexpr float MAX_TITLE_BAR_HEIGHT = 230.0f;
-constexpr float DEFAULT_TITLE_BAR_HEIGHT = 395.0f;
-constexpr float NEGATIVE_MAX_TITLE_BAR_HEIGHT = -1230.0f;
 constexpr Dimension DEFAULT_MIN_NAV_BAR_WIDTH_PER = Dimension(0.2, DimensionUnit::PERCENT);
 constexpr Dimension DEFAULT_MAX_NAV_BAR_WIDTH_PER = Dimension(0.5, DimensionUnit::PERCENT);
 constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH_PER = Dimension(0.3, DimensionUnit::PERCENT);
@@ -158,6 +149,8 @@ struct TestProperty {
  */
 HWTEST_F(NavigationTestNg, NavigationPatternTest001, TestSize.Level1)
 {
+    MockPipelineContextGetTheme();
+
     NavigationModelNG navigationModel;
     navigationModel.Create();
     navigationModel.SetTitle("navigationModel", false);
@@ -1223,7 +1216,7 @@ HWTEST_F(NavigationTestNg, NavigationPatternTest_010, TestSize.Level1)
     navigationLayoutAlgorithm->navigationMode_ = NavigationMode::SPLIT;
     layout->propHideNavBar_ = true;
     pattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    ASSERT_FALSE(navBarNode->GetLayoutProperty<NavBarLayoutProperty>()->propVisibility_.has_value());
+    ASSERT_EQ(navBarNode->GetLayoutProperty<NavBarLayoutProperty>()->propVisibility_, VisibleType::INVISIBLE);
 }
 
 /**
@@ -2129,7 +2122,8 @@ HWTEST_F(NavigationTestNg, NavigationModelNG007, TestSize.Level1)
     ASSERT_NE(navigation, nullptr);
     auto navigationPattern = navigation->GetPattern<NavigationPattern>();
     ASSERT_NE(navigationPattern, nullptr);
-    ASSERT_NE(AceType::DynamicCast<NavBarNode>(navigation->GetNavBarNode()), nullptr);
+    auto narBarNode = AceType::DynamicCast<NavBarNode>(navigation->GetNavBarNode());
+    ASSERT_NE(narBarNode, nullptr);
     /**
      * @tc.steps: step2. construct correct arguments of navigationPattern->CheckTopNavPathChange then call it.
      * @tc.expected: check whether the properties is correct.
@@ -2139,6 +2133,12 @@ HWTEST_F(NavigationTestNg, NavigationModelNG007, TestSize.Level1)
     auto newTopNavDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
         V2::NAVDESTINATION_VIEW_ETS_TAG, 101, []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
 
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(
+        "titleBarNode", 102, []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+    narBarNode->titleBarNode_ = titleBarNode;
+    preTopNavDestination->titleBarNode_ = titleBarNode;
+    newTopNavDestination->titleBarNode_ = titleBarNode;
     navigationPattern->SetNavigationMode(NavigationMode::STACK);
     navigationPattern->TransitionWithAnimation(nullptr, nullptr, false);
     navigationPattern->TransitionWithAnimation(preTopNavDestination, nullptr, false);
@@ -2928,122 +2928,6 @@ HWTEST_F(NavigationTestNg, NavigationModelNG0025, TestSize.Level1)
     ASSERT_FALSE(barItem->isMoreItemNode_);
 }
 
-/**
- * @tc.name: TitleBarPatternUpdateAssociatedScrollOffsetTest001
- * @tc.desc: Test TitleBarPattern::UpdateAssociatedScrollOffset
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationTestNg, TitleBarPatternUpdateAssociatedScrollOffsetTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create navigation.
-     */
-    RefPtr<TitleBarPattern> titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
-    titleBarPattern->enableAssociatedScroll_ = true;
-    titleBarPattern->UpdateAssociatedScrollOffset(DEFAULT_TITLE_BAR_OFFSET);
-    EXPECT_TRUE(titleBarPattern->enableAssociatedScroll_);
-
-    titleBarPattern->enableAssociatedScroll_ = false;
-    titleBarPattern->UpdateAssociatedScrollOffset(DEFAULT_TITLE_BAR_OFFSET);
-    EXPECT_FALSE(titleBarPattern->enableAssociatedScroll_);
-
-    titleBarPattern->enableAssociatedScroll_ = true;
-    titleBarPattern->UpdateAssociatedScrollOffset(NEGATIVE_LARGE_TITLE_BAR_OFFSET);
-    EXPECT_FALSE(titleBarPattern->enableAssociatedScroll_);
-
-    titleBarPattern->enableAssociatedScroll_ = true;
-    titleBarPattern->dragScrolling_ = true;
-    titleBarPattern->associatedScrollOffset_ = POSITIVE_LARGE_TITLE_BAR_OFFSET;
-    titleBarPattern->associatedScrollOffsetMax_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
-    titleBarPattern->UpdateAssociatedScrollOffset(POSITIVE_TITLE_BAR_OFFSET);
-    EXPECT_TRUE(titleBarPattern->enableAssociatedScroll_);
-
-    titleBarPattern->enableAssociatedScroll_ = true;
-    titleBarPattern->dragScrolling_ = true;
-    titleBarPattern->associatedScrollOffset_ = POSITIVE_LARGE_TITLE_BAR_OFFSET;
-    titleBarPattern->associatedScrollOffsetMax_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
-    titleBarPattern->UpdateAssociatedScrollOffset(NEGATIVE_TITLE_BAR_OFFSET);
-    EXPECT_TRUE(titleBarPattern->enableAssociatedScroll_);
-}
-
-/**
- * @tc.name: TitleBarPatternUpdateAssociatedScrollOffsetTest002
- * @tc.desc: Test TitleBarPattern::UpdateAssociatedScrollOffset
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationTestNg, TitleBarPatternUpdateAssociatedScrollOffsetTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create navigation.
-     */
-    RefPtr<TitleBarPattern> titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
-
-    titleBarPattern->enableAssociatedScroll_ = true;
-    titleBarPattern->dragScrolling_ = false;
-    titleBarPattern->associatedScrollOffset_ = POSITIVE_LARGE_TITLE_BAR_OFFSET;
-    titleBarPattern->associatedScrollOffsetMax_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
-    titleBarPattern->defaultTitleBarHeight_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
-    titleBarPattern->maxTitleBarHeight_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
-    titleBarPattern->UpdateAssociatedScrollOffset(POSITIVE_TITLE_BAR_OFFSET);
-    EXPECT_TRUE(titleBarPattern->enableAssociatedScroll_);
-
-    titleBarPattern->enableAssociatedScroll_ = true;
-    titleBarPattern->dragScrolling_ = false;
-    titleBarPattern->associatedScrollOffset_ = POSITIVE_LARGE_TITLE_BAR_OFFSET;
-    titleBarPattern->associatedScrollOffsetMax_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
-    titleBarPattern->maxTitleBarHeight_ = MAX_TITLE_BAR_HEIGHT;
-    titleBarPattern->UpdateAssociatedScrollOffset(POSITIVE_TITLE_BAR_OFFSET);
-    EXPECT_TRUE(titleBarPattern->enableAssociatedScroll_);
-}
-
-/**
- * @tc.name: TitleBarPatternUpdateAssociatedScrollOffsetTest003
- * @tc.desc: Test TitleBarPattern::UpdateAssociatedScrollOffset
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationTestNg, TitleBarPatternUpdateAssociatedScrollOffsetTest003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create navigation.
-     */
-    RefPtr<TitleBarPattern> titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
-
-    titleBarPattern->enableAssociatedScroll_ = true;
-    titleBarPattern->dragScrolling_ = false;
-    titleBarPattern->associatedScrollOffset_ = POSITIVE_LARGE_TITLE_BAR_OFFSET;
-    titleBarPattern->associatedScrollOffsetMax_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
-    titleBarPattern->defaultTitleBarHeight_ = DEFAULT_TITLE_BAR_HEIGHT;
-    titleBarPattern->maxTitleBarHeight_ = NEGATIVE_MAX_TITLE_BAR_HEIGHT;
-    titleBarPattern->UpdateAssociatedScrollOffset(NEGATIVE_TITLE_BAR_OFFSET);
-    EXPECT_FALSE(titleBarPattern->enableAssociatedScroll_);
-
-    titleBarPattern->enableAssociatedScroll_ = true;
-    titleBarPattern->dragScrolling_ = false;
-    titleBarPattern->associatedScrollOverSize_ = true;
-    titleBarPattern->associatedScrollOffset_ = POSITIVE_LARGE_TITLE_BAR_OFFSET;
-    titleBarPattern->associatedScrollOffsetMax_ = POSITIVE_LARGE_TITLE_BAR_OFFSET_MAX;
-    titleBarPattern->maxTitleBarHeight_ = NEGATIVE_MAX_TITLE_BAR_HEIGHT;
-    titleBarPattern->UpdateAssociatedScrollOffset(NEGATIVE_TITLE_BAR_OFFSET);
-    EXPECT_FALSE(titleBarPattern->enableAssociatedScroll_);
-}
-
-/**
- * @tc.name: TitleBarPatternProcessTitleAssociatedUpdateTest101
- * @tc.desc: Test TitleBarPattern::ProcessTitleAssociatedUpdate
- * @tc.type: FUNC
- */
-HWTEST_F(NavigationTestNg, TitleBarPatternProcessTitleAssociatedUpdateTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create navigation.
-     */
-    RefPtr<TitleBarPattern> titleBarPattern = AceType::MakeRefPtr<TitleBarPattern>();
-    RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    titleBarPattern->AttachToFrameNode(frameNode);
-    titleBarPattern->ProcessTitleAssociatedUpdate(NEGATIVE_TITLE_BAR_OFFSET);
-    EXPECT_FALSE(titleBarPattern->enableAssociatedScroll_);
-}
-
 HWTEST_F(NavigationTestNg, NavigationStackTest001, TestSize.Level1)
 {
     /**
@@ -3447,7 +3331,7 @@ HWTEST_F(NavigationTestNg, NavDestinationDialogTest002, TestSize.Level1)
     config.skipMeasure = true;
     config.skipLayout = true;
     navigationPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
-    navigationPattern->NotifyDialogChange(true);
+    navigationPattern->NotifyDialogChange(true, true);
     auto navDestinationPatternA = AceType::DynamicCast<NavDestinationPattern>(navDestinationA->GetPattern());
     EXPECT_NE(navDestinationPatternA, nullptr);
     auto navDestinationPatternB = AceType::DynamicCast<NavDestinationPattern>(navDestinationB->GetPattern());

@@ -169,6 +169,8 @@ public:
         return startIcon_ != nullptr;
     }
 
+    void OnVisibleChange(bool isVisible) override;
+
 protected:
     void RegisterOnKeyEvent();
     void RegisterOnTouch();

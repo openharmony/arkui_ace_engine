@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_ACE_VIEW_OHOS_H
 #define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_ACE_VIEW_OHOS_H
 
+#include <functional>
 #include <memory>
 
 #include "interfaces/inner_api/ace/viewport_config.h"
@@ -26,7 +27,6 @@
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/noncopyable.h"
 #include "core/common/ace_view.h"
-#include "core/common/flutter/flutter_thread_model.h"
 #include "core/common/platform_res_register.h"
 #include "core/common/thread_model_impl.h"
 #include "core/components_ng/base/frame_node.h"
@@ -38,7 +38,6 @@ using ReleaseCallback = std::function<void()>;
 
 class ACE_FORCE_EXPORT AceViewOhos : public AceView, public Referenced {
 public:
-    explicit AceViewOhos(int32_t id, std::unique_ptr<FlutterThreadModel> threadModel);
     explicit AceViewOhos(int32_t id, std::unique_ptr<ThreadModelImpl> threadModelImpl);
     ~AceViewOhos() override = default;
     static AceViewOhos* CreateView(
@@ -51,7 +50,7 @@ public:
     static void SetViewportMetrics(AceViewOhos* view, const ViewportConfig& config);
 
     static void DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-        const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr);
+        const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr, const std::function<void()>& callback = nullptr);
     static bool DispatchKeyEvent(AceViewOhos* view, const std::shared_ptr<MMI::KeyEvent>& keyEvent);
     static bool DispatchRotationEvent(AceViewOhos* view, float rotationValue);
     static void DispatchEventToPerf(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
@@ -72,7 +71,7 @@ public:
     void Launch() override;
 
     void ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-        const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr);
+        const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr, const std::function<void()>& callback = nullptr);
 
     void ProcessMouseEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         const RefPtr<OHOS::Ace::NG::FrameNode>& node = nullptr);
@@ -83,9 +82,9 @@ public:
     bool ProcessKeyEvent(const std::shared_ptr<MMI::KeyEvent>& keyEvent);
 
     bool ProcessRotationEvent(float rotationValue);
-#ifdef ENABLE_DRAG_FRAMEWORK
+
     void ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent);
-#endif // ENABLE_DRAG_FRAMEWORK
+
     void ProcessDragEvent(int32_t x, int32_t y, const DragEventAction& action);
 
     int32_t GetInstanceId() const override
@@ -147,11 +146,6 @@ public:
 
     bool Dump(const std::vector<std::string>& params) override;
     const void* GetNativeWindowById(uint64_t textureId) override;
-
-    FlutterThreadModel* GetThreadModel() const
-    {
-        return threadModel_.get();
-    }
 
     ThreadModelImpl* GetThreadModelImpl() const
     {
@@ -229,8 +223,6 @@ private:
     };
     std::unordered_map<int32_t, TouchPointInfo> touchPointInfoMap_;
 
-    // TODO: still using flutter threads
-    std::unique_ptr<FlutterThreadModel> threadModel_;
     std::unique_ptr<ThreadModelImpl> threadModelImpl_;
 
     ACE_DISALLOW_COPY_AND_MOVE(AceViewOhos);

@@ -16,7 +16,7 @@
 
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -150,7 +150,7 @@ ArkUINativeModuleValue SideBarContainerBridge::SetControlButton(ArkUIRuntimeCall
     if (ArkTSUtils::ParseJsMedia(vm, iconsSwitchingArg, iconsSwitching)) {
         iconsStruct.SwitchingIconInfo = iconsSwitching.c_str();
     }
-    GetArkUIInternalNodeAPI()->GetSideBarContainerModifier().SetControlButton(nativeNode, values, &iconsStruct);
+    GetArkUIInternalNodeAPI()->GetSideBarContainerModifier().SetControlButton(nativeNode, values, NUM_4, &iconsStruct);
     return panda::JSValueRef::Undefined(vm);
 }
 

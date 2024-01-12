@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -37,6 +37,7 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline/base/element_register.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 
 namespace OHOS::Ace::NG {
 
@@ -149,7 +150,8 @@ void PageRouterManager::RunPageByNamedRouter(const std::string& name, const std:
     LoadPage(GenerateNextPageId(), info);
 }
 
-void PageRouterManager::RunCard(const std::string& url, const std::string& params, int64_t cardId)
+void PageRouterManager::RunCard(
+    const std::string& url, const std::string& params, int64_t cardId, const std::string& entryPoint)
 {
     CHECK_RUN_ON(JS);
     RouterPageInfo info { url };
@@ -161,7 +163,7 @@ void PageRouterManager::RunCard(const std::string& url, const std::string& param
         info.url = manifestParser_->GetRouter()->GetEntry("");
     }
 #endif
-    LoadCard(0, info, params, cardId);
+    LoadCard(0, info, params, cardId, false, true, entryPoint);
 }
 
 void PageRouterManager::Push(const RouterPageInfo& target)
@@ -209,6 +211,10 @@ void PageRouterManager::PushNamedRoute(const RouterPageInfo& target)
     CleanPageOverlay();
     if (target.routerMode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(target.url);
+        auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(target.url);
+        if (!pagePath.empty()) {
+            pageInfo = FindPageInStack(pagePath);
+        }
         if (pageInfo.second) {
             // find page in stack, move postion and update params.
             MovePageToFront(pageInfo.first, pageInfo.second, target, true);
@@ -459,6 +465,10 @@ void PageRouterManager::GetState(int32_t& index, std::string& name, std::string&
     auto pageInfo = pagePattern->GetPageInfo();
     CHECK_NULL_VOID(pageInfo);
     auto url = pageInfo->GetPageUrl();
+    auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(url);
+    if (!pagePath.empty()) {
+        url = pagePath;
+    }
     auto pos = url.rfind(".js");
     if (pos == url.length() - 3) {
         url = url.substr(0, pos);
@@ -467,6 +477,12 @@ void PageRouterManager::GetState(int32_t& index, std::string& name, std::string&
     if (pos != std::string::npos) {
         name = url.substr(pos + 1);
         path = url.substr(0, pos + 1);
+    }
+    if (name.size() == 0) {
+        name = "index";
+    }
+    if (path.size() == 0) {
+        path = "/" + url;
     }
 }
 
@@ -946,7 +962,7 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
 }
 
 void PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, const std::string& params,
-    int64_t cardId, bool /*isRestore*/, bool needHideLast)
+    int64_t cardId, bool /* isRestore */, bool needHideLast, const std::string& entryPoint)
 {
     CHECK_RUN_ON(JS);
     auto entryPageInfo = AceType::MakeRefPtr<EntryPageInfo>(pageId, target.url, target.path, params);
@@ -959,7 +975,7 @@ void PageRouterManager::LoadCard(int32_t pageId, const RouterPageInfo& target, c
     if (!loadCard_) {
         return;
     }
-    auto result = loadCard_(target.url, cardId);
+    auto result = loadCard_(target.url, cardId, entryPoint);
     if (!result) {
         pageRouterStack_.pop_back();
         return;

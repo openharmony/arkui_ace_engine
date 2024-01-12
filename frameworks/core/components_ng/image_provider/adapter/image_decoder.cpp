@@ -23,6 +23,7 @@
 #include "include/core/SkGraphics.h"
 #ifdef USE_ROSEN_DRAWING
 #include "drawing/engine_adapter/skia_adapter/skia_data.h"
+#include "drawing/engine_adapter/skia_adapter/skia_image_info.h"
 #endif
 
 #include "base/image/image_source.h"
@@ -84,12 +85,10 @@ RefPtr<CanvasImage> ImageDecoder::MakeDrawingImage()
 
 #ifndef USE_ROSEN_DRAWING
     auto image = ResizeSkImage();
-    CHECK_NULL_RETURN(image, nullptr);
 #else
-    auto skImage = ResizeSkImage();
-    CHECK_NULL_RETURN(skImage, nullptr);
-    auto image = std::make_shared<RSImage>(&skImage);
+    auto image = ResizeDrawingImage();
 #endif
+    CHECK_NULL_RETURN(image, nullptr);
     auto canvasImage = CanvasImage::Create(&image);
 
     if (ImageCompressor::GetInstance()->CanCompress()) {
@@ -124,13 +123,15 @@ RefPtr<CanvasImage> ImageDecoder::MakePixmapImage()
     auto image = PixelMapImage::Create(pixmap);
     if (SystemProperties::GetDebugEnabled()) {
         TAG_LOGI(AceLogTag::ACE_IMAGE,
-            "decode to pixmap, desiredSize = %{public}s, pixmap size = %{public}d x %{public}d",
-            desiredSize_.ToString().c_str(), image->GetWidth(), image->GetHeight());
+            "decode to pixmap, src=%{public}s, desiredSize = %{public}s, pixmap size = %{public}d x %{public}d",
+            obj_->GetSourceInfo().ToString().c_str(), desiredSize_.ToString().c_str(), image->GetWidth(),
+            image->GetHeight());
     }
 
     return image;
 }
 
+#ifndef USE_ROSEN_DRAWING
 sk_sp<SkImage> ImageDecoder::ForceResizeImage(const sk_sp<SkImage>& image, const SkImageInfo& info)
 {
     ACE_FUNCTION_TRACE();
@@ -145,15 +146,39 @@ sk_sp<SkImage> ImageDecoder::ForceResizeImage(const sk_sp<SkImage>& image, const
     bitmap.setImmutable();
     return SkImage::MakeFromBitmap(bitmap);
 }
+#else
+std::shared_ptr<RSImage> ImageDecoder::ForceResizeImage(const std::shared_ptr<RSImage>& image, const RSImageInfo& info)
+{
+    ACE_FUNCTION_TRACE();
+    RSBitmap bitmap;
+    bitmap.Build(info);
 
+    auto res = image->ScalePixels(bitmap, RSSamplingOptions(RSFilterMode::LINEAR, RSMipmapMode::NONE), false);
+
+    CHECK_NULL_RETURN(res, image);
+
+    bitmap.SetImmutable();
+    auto drImage = std::make_shared<RSImage>();
+    drImage->BuildFromBitmap(bitmap);
+    return drImage;
+}
+#endif
+
+#ifndef USE_ROSEN_DRAWING
 sk_sp<SkImage> ImageDecoder::ResizeSkImage()
+#else
+std::shared_ptr<RSImage> ImageDecoder::ResizeDrawingImage()
+#endif
 {
 #ifndef USE_ROSEN_DRAWING
     auto encodedImage = SkImage::MakeFromEncoded(data_);
 #else
     CHECK_NULL_RETURN(data_, nullptr);
-    auto skData = SkData::MakeWithoutCopy(data_->GetData(), data_->GetSize());
-    auto encodedImage = SkImage::MakeFromEncoded(skData);
+    auto skData = data_->GetImpl<Rosen::Drawing::SkiaData>()->GetSkData();
+    auto encodedImage = std::make_shared<RSImage>();
+    if (!encodedImage->MakeFromEncoded(data_)) {
+        return nullptr;
+    }
 #endif
     CHECK_NULL_RETURN(desiredSize_.IsPositive(), encodedImage);
 
@@ -176,7 +201,12 @@ sk_sp<SkImage> ImageDecoder::ResizeSkImage()
     // this method would succeed even if the codec doesn't support that size.
     if (forceResize_) {
         info = info.makeWH(width, height);
+#ifndef USE_ROSEN_DRAWING
         return ForceResizeImage(encodedImage, info);
+#else
+        auto imageInfo = Rosen::Drawing::SkiaImageInfo::ConvertToRSImageInfo(info);
+        return ForceResizeImage(encodedImage, imageInfo);
+#endif
     }
 
     if ((info.width() > width && info.height() > height)) {
@@ -190,11 +220,22 @@ sk_sp<SkImage> ImageDecoder::ResizeSkImage()
         }
 
         info = info.makeWH(idealSize.width(), idealSize.height());
+#ifndef USE_ROSEN_DRAWING
         SkBitmap bitmap;
         bitmap.allocPixels(info);
         auto res = codec->getPixels(info, bitmap.getPixels(), bitmap.rowBytes());
         CHECK_NULL_RETURN(res == SkCodec::kSuccess, encodedImage);
         return SkImage::MakeFromBitmap(bitmap);
+#else
+        auto imageInfo = Rosen::Drawing::SkiaImageInfo::ConvertToRSImageInfo(info);
+        RSBitmap bitmap;
+        bitmap.Build(imageInfo);
+        auto res = codec->getPixels(info, bitmap.GetPixels(), bitmap.GetRowBytes());
+        CHECK_NULL_RETURN(res == SkCodec::kSuccess, encodedImage);
+        auto image = std::make_shared<RSImage>();
+        image->BuildFromBitmap(bitmap);
+        return image;
+#endif
     }
     return encodedImage;
 }
@@ -222,11 +263,9 @@ RefPtr<CanvasImage> ImageDecoder::QueryCompressedCache()
 
     // create encoded SkImage to use its uniqueId
     CHECK_NULL_RETURN(data_, {});
-    auto skData = SkData::MakeWithoutCopy(data_->GetData(), data_->GetSize());
-    auto skImage = SkImage::MakeFromEncoded(skData);
-    std::shared_ptr<RSImage> image = nullptr;
-    if (skImage) {
-        image = std::make_shared<RSImage>(&skImage);
+    auto image = std::make_shared<RSImage>();
+    if (!image->MakeFromEncoded(data_)) {
+        return nullptr;
     }
     auto canvasImage = AceType::DynamicCast<DrawingImage>(CanvasImage::Create(&image));
 #endif

@@ -23,6 +23,7 @@
 #include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/pattern/custom/custom_node_base.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/pattern/overlay/popup_base_pattern.h"
 #include "core/event/touch_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -30,6 +31,7 @@ namespace OHOS::Ace::NG {
 
 namespace {
 constexpr uint32_t PRESS_STYLE_DELAY = 300;
+constexpr uint32_t PRESS_CANCEL_STYLE_DELAY = 64;
 }
 
 StateStyleManager::StateStyleManager(WeakPtr<FrameNode> frameNode) : host_(std::move(frameNode)) {}
@@ -54,22 +56,17 @@ const RefPtr<TouchEventImpl>& StateStyleManager::GetPressedListener()
         auto lastPoint = changeTouches.back();
         const auto& type = lastPoint.GetTouchType();
         if (type == TouchType::DOWN) {
-            if (!stateStyleMgr->HandleScrollingParent()) {
-                stateStyleMgr->UpdateCurrentUIState(UI_STATE_PRESSED);
-            } else {
-                stateStyleMgr->PostPressStyleTask(PRESS_STYLE_DELAY);
-                stateStyleMgr->PendingPressedState();
-            }
+            stateStyleMgr->HandleTouchDown();
             stateStyleMgr->pointerId_.insert(lastPoint.GetFingerId());
         }
         if ((type == TouchType::UP) || (type == TouchType::CANCEL)) {
             stateStyleMgr->pointerId_.erase(lastPoint.GetFingerId());
             if (stateStyleMgr->pointerId_.size() == 0) {
-                stateStyleMgr->ResetPressedState();
+                stateStyleMgr->HandleTouchUp();
             }
         }
         if ((type == TouchType::MOVE) &&
-                (stateStyleMgr->IsCurrentStateOn(UI_STATE_PRESSED) || stateStyleMgr->IsPressedStatePending())) {
+            (stateStyleMgr->IsCurrentStateOn(UI_STATE_PRESSED) || stateStyleMgr->IsPressedStatePending())) {
             int32_t sourceType = static_cast<int32_t>(touches.front().GetSourceDevice());
             if (stateStyleMgr->IsOutOfPressedRegion(sourceType, lastPoint.GetGlobalLocation())) {
                 stateStyleMgr->pointerId_.erase(lastPoint.GetFingerId());
@@ -81,6 +78,32 @@ const RefPtr<TouchEventImpl>& StateStyleManager::GetPressedListener()
     };
     pressedFunc_ = MakeRefPtr<TouchEventImpl>(std::move(pressedCallback));
     return pressedFunc_;
+}
+
+void StateStyleManager::HandleTouchDown()
+{
+    if (!HandleScrollingParent()) {
+        UpdateCurrentUIState(UI_STATE_PRESSED);
+    } else {
+        if (IsPressedCancelStatePending()) {
+            ResetPressedCancelState();
+        }
+        PostPressStyleTask(PRESS_STYLE_DELAY);
+        PendingPressedState();
+    }
+}
+
+void StateStyleManager::HandleTouchUp()
+{
+    if (IsPressedStatePending()) {
+        DeletePressStyleTask();
+        ResetPressedPendingState();
+        UpdateCurrentUIState(UI_STATE_PRESSED);
+        PostPressCancelStyleTask(PRESS_CANCEL_STYLE_DELAY);
+        PendingCancelPressedState();
+    } else if (!IsPressedCancelStatePending()) {
+        ResetPressedState();
+    }
 }
 
 void StateStyleManager::FireStateFunc()
@@ -100,6 +123,14 @@ void StateStyleManager::FireStateFunc()
                 CHECK_NULL_VOID(navDestinationGroupNode);
                 customNode = navDestinationGroupNode->GetNavDestinationCustomNode();
             }
+
+            auto parentFrameNode = DynamicCast<FrameNode>(parent);
+            auto parentPattern = parentFrameNode ? parentFrameNode->GetPattern<PopupBasePattern>() : nullptr;
+            if (parentFrameNode && InstanceOf<PopupBasePattern>(parentPattern)) {
+                parent = ElementRegister::GetInstance()->GetUINodeById(parentPattern->GetTargetId());
+                continue;
+            }
+
             if (customNode) {
                 break;
             }
@@ -140,6 +171,28 @@ void StateStyleManager::PostPressStyleTask(uint32_t delayTime)
     taskExecutor->PostDelayedTask(pressStyleTask_, TaskExecutor::TaskType::UI, delayTime);
 }
 
+void StateStyleManager::PostPressCancelStyleTask(uint32_t delayTime)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+
+    if (IsPressedStatePending() || IsPressedCancelStatePending()) {
+        return;
+    }
+
+    auto weak = AceType::WeakClaim(this);
+    pressCancelStyleTask_.Reset([weak = WeakClaim(this)] {
+        auto stateStyleMgr = weak.Upgrade();
+        CHECK_NULL_VOID(stateStyleMgr);
+        stateStyleMgr->ResetPressedCancelPendingState();
+        stateStyleMgr->ResetCurrentUIState(UI_STATE_PRESSED);
+    });
+
+    taskExecutor->PostDelayedTask(pressCancelStyleTask_, TaskExecutor::TaskType::UI, delayTime);
+}
+
 bool StateStyleManager::HandleScrollingParent()
 {
     auto node = host_.Upgrade();
@@ -152,7 +205,7 @@ bool StateStyleManager::HandleScrollingParent()
         stateStyleMgr->pointerId_.clear();
         stateStyleMgr->ResetPressedPendingState();
         if (stateStyleMgr->pressStyleTask_) {
-            stateStyleMgr->CancelPressStyleTask();
+            stateStyleMgr->DeletePressStyleTask();
         }
     };
 
@@ -200,6 +253,30 @@ void StateStyleManager::Transform(PointF& localPointF, const WeakPtr<FrameNode>&
 bool StateStyleManager::IsOutOfPressedRegion(int32_t sourceType, const Offset& location) const
 {
     auto node = host_.Upgrade();
+    CHECK_NULL_RETURN(node, false);
+    if (IsOutOfPressedRegionWithoutClip(node, sourceType, location)) {
+        return true;
+    }
+    auto parent = node->GetAncestorNodeOfFrame();
+    while (parent) {
+        auto renderContext = parent->GetRenderContext();
+        if (!renderContext) {
+            parent = parent->GetAncestorNodeOfFrame();
+            continue;
+        }
+        // If the parent node has a "clip" attribute, the press region should be re-evaluated.
+        auto clip = renderContext->GetClipEdge().value_or(false);
+        if (clip && IsOutOfPressedRegionWithoutClip(parent, sourceType, location)) {
+            return true;
+        }
+        parent = parent->GetAncestorNodeOfFrame();
+    }
+    return false;
+}
+
+bool StateStyleManager::IsOutOfPressedRegionWithoutClip(RefPtr<FrameNode> node, int32_t sourceType,
+    const Offset& location) const
+{
     CHECK_NULL_RETURN(node, false);
     auto renderContext = node->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, false);

@@ -18,7 +18,6 @@
 
 #include <string>
 
-#include "flutter/fml/memory/ref_counted.h"
 #include "include/codec/SkCodec.h"
 #ifdef USE_ROSEN_DRAWING
 #include "draw/color.h"
@@ -60,7 +59,6 @@ struct LoadCallback {
     FailedCallback failedCallback;
 };
 
-class FlutterRenderImage;
 class ImageProvider {
 public:
     static void TryLoadImageInfo(const RefPtr<PipelineBase>& context, const std::string& src,

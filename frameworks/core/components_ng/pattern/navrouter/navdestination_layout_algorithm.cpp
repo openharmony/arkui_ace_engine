@@ -15,16 +15,8 @@
 
 #include "core/components_ng/pattern/navrouter/navdestination_layout_algorithm.h"
 
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
 #include "core/components_ng/pattern/navigation/navigation_layout_algorithm.h"
-#include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
-#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -92,6 +84,9 @@ float LayoutTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGr
     CHECK_NULL_RETURN(titleBarWrapper, 0.0f);
     auto geometryNode = titleBarWrapper->GetGeometryNode();
     auto titleBarOffset = OffsetT<float>(0.0f, 0.0f);
+    const auto& padding = navDestinationLayoutProperty->CreatePaddingAndBorder();
+    titleBarOffset.AddX(padding.left.value_or(0));
+    titleBarOffset.AddY(padding.top.value_or(0));
     geometryNode->SetMarginFrameOffset(titleBarOffset);
     titleBarWrapper->Layout();
     return geometryNode->GetFrameSize().Height();
@@ -108,12 +103,18 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavDestinationGrou
     auto geometryNode = contentWrapper->GetGeometryNode();
     if (navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) {
         auto contentOffset = OffsetT<float>(0.0f, 0.0f);
+        const auto& padding = navDestinationLayoutProperty->CreatePaddingAndBorder();
+        contentOffset.AddX(padding.left.value_or(0));
+        contentOffset.AddY(padding.top.value_or(0));
         geometryNode->SetMarginFrameOffset(contentOffset);
         contentWrapper->Layout();
         return;
     }
 
-    auto contentOffset = OffsetT<float>(geometryNode->GetFrameOffset().GetX(), titlebarHeight);
+    auto contentOffset = OffsetT<float>(0, titlebarHeight);
+    const auto& padding = navDestinationLayoutProperty->CreatePaddingAndBorder();
+    contentOffset.AddX(padding.left.value_or(0));
+    contentOffset.AddY(padding.top.value_or(0));
     geometryNode->SetMarginFrameOffset(contentOffset);
     contentWrapper->Layout();
 }
@@ -131,13 +132,24 @@ void NavDestinationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(constraint);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     auto size = CreateIdealSize(constraint.value(), Axis::HORIZONTAL, MeasureType::MATCH_PARENT, true);
+
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     MinusPaddingToSize(padding, size);
 
     float titleBarHeight = MeasureTitleBar(layoutWrapper, hostNode, navDestinationLayoutProperty, size);
     float contentChildHeight =
-        MeasureContentChild(layoutWrapper, hostNode, navDestinationLayoutProperty, size, titleBarHeight);
+            MeasureContentChild(layoutWrapper, hostNode, navDestinationLayoutProperty, size, titleBarHeight);
+
     size.SetHeight(titleBarHeight + contentChildHeight);
+    if (titleBarHeight + contentChildHeight == 0) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipeline);
+        auto height = pipeline->GetRootHeight();
+        size.SetHeight(height);
+    } else {
+        size.AddWidth(padding.left.value_or(0.0f) + padding.right.value_or(0.0f));
+        size.AddHeight(padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f));
+    }
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 }
 

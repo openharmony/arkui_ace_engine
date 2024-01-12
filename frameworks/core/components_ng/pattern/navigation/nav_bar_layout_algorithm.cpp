@@ -15,30 +15,20 @@
 
 #include "core/components_ng/pattern/navigation/nav_bar_layout_algorithm.h"
 
-#include "base/geometry/ng/offset_t.h"
-#include "base/geometry/ng/size_t.h"
-#include "base/log/ace_trace.h"
-#include "base/memory/ace_type.h"
-#include "base/utils/utils.h"
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
-#include "core/components_ng/pattern/navigation/navigation_layout_algorithm.h"
-#include "core/components_ng/property/layout_constraint.h"
-#include "core/components_ng/property/measure_property.h"
-#include "core/components_ng/property/measure_utils.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
 float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& hostNode,
     const RefPtr<NavBarLayoutProperty>& navBarLayoutProperty, const SizeF& navigationSize)
 {
+    CHECK_NULL_RETURN(hostNode, 0.0f);
     auto titleBarNode = hostNode->GetTitleBarNode();
     CHECK_NULL_RETURN(titleBarNode, 0.0f);
     auto index = hostNode->GetChildIndexById(titleBarNode->GetId());
@@ -88,16 +78,11 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
     }
 
     // FREE 和 FULL 模式，有subtitle
-    auto titleBar = AceType::DynamicCast<TitleBarNode>(titleBarNode);
-    auto titlePattern = titleBar->GetPattern<TitleBarPattern>();
-    auto overDragOffset = titlePattern->GetOverDragOffset();
-    auto isTitleCustom = hostNode->GetPrevTitleIsCustomValue(false);
     if (hostNode->GetSubtitle()) {
         if (NearZero(titleBarHeight)) {
             titleBarHeight = static_cast<float>(FULL_DOUBLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
         }
-        auto doubleTitleBarHeight = isTitleCustom ? titleBarHeight : overDragOffset / 6.0f + titleBarHeight;
-        constraint.selfIdealSize = OptionalSizeF(navigationSize.Width(), doubleTitleBarHeight);
+        constraint.selfIdealSize = OptionalSizeF(navigationSize.Width(), titleBarHeight);
         titleBarWrapper->Measure(constraint);
         return titleBarHeight;
     }
@@ -106,23 +91,20 @@ float MeasureTitleBar(LayoutWrapper* layoutWrapper, const RefPtr<NavBarNode>& ho
     if (NearZero(titleBarHeight)) {
         titleBarHeight = static_cast<float>(FULL_SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
     }
-    auto singleTitleBarHeight = isTitleCustom ? titleBarHeight : overDragOffset / 6.0f + titleBarHeight;
-    constraint.selfIdealSize = OptionalSizeF(navigationSize.Width(), singleTitleBarHeight);
+    constraint.selfIdealSize = OptionalSizeF(navigationSize.Width(), titleBarHeight);
     titleBarWrapper->Measure(constraint);
     return titleBarHeight;
 }
 
 bool CheckWhetherNeedToHideToolbar(const RefPtr<NavBarNode>& hostNode, const SizeF& navigationSize)
 {
-    if (!hostNode->IsNavbarUseToolbarConfiguration() || hostNode->GetPrevMenuIsCustomValue(false)) {
+    if (hostNode->GetPrevMenuIsCustomValue(false)) {
         return false;
     }
 
     auto toolbarNode = AceType::DynamicCast<NavToolbarNode>(hostNode->GetToolBarNode());
     CHECK_NULL_RETURN(toolbarNode, false);
-    auto containerNode = toolbarNode->GetToolbarContainerNode();
-    CHECK_NULL_RETURN(containerNode, false);
-    if (containerNode->GetChildren().empty()) {
+    if (!toolbarNode->HasValidContent()) {
         return true;
     }
 
@@ -379,5 +361,4 @@ void NavBarLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     float toolbarHeight = LayoutToolBar(layoutWrapper, hostNode, navBarLayoutProperty);
     LayoutToolBarDivider(layoutWrapper, hostNode, navBarLayoutProperty, toolbarHeight);
 }
-
 } // namespace OHOS::Ace::NG

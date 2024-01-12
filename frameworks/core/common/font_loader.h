@@ -28,7 +28,8 @@ public:
     FontLoader(const std::string& familyName, const std::string& familySrc);
     ~FontLoader() override = default;
 
-    virtual void AddFont(const RefPtr<PipelineBase>& context) = 0;
+    virtual void AddFont(const RefPtr<PipelineBase>& context, const std::string& bundleName = "",
+        const std::string& moduleName = "") = 0;
 
     virtual void SetDefaultFontFamily(const char* fontFamily, const char* familySrc)
     {

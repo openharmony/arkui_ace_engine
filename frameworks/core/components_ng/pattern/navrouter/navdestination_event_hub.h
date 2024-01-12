@@ -66,7 +66,10 @@ public:
             CHECK_NULL_VOID(host);
             auto id = host->GetInspectorIdValue("");
             Recorder::EventParamsBuilder builder;
-            builder.SetId(id).SetText(name).SetExtra(Recorder::KEY_PAGE_PARAM, param);
+            builder.SetId(id)
+                .SetText(name)
+                .SetExtra(Recorder::KEY_PAGE_PARAM, param)
+                .SetDescription(host->GetAutoEventParamValue(""));
             Recorder::EventRecorder::Get().OnNavDstShow(std::move(builder));
         }
     }
@@ -88,7 +91,7 @@ public:
             CHECK_NULL_VOID(host);
             auto id = host->GetInspectorIdValue("");
             Recorder::EventParamsBuilder builder;
-            builder.SetId(id).SetText(name);
+            builder.SetId(id).SetText(name).SetDescription(host->GetAutoEventParamValue(""));
             Recorder::EventRecorder::Get().OnNavDstHide(std::move(builder));
         }
     }

@@ -20,7 +20,7 @@
 #include <sys/stat.h>
 
 #include "contrib/minizip/unzip.h"
-#include "init_data.h"
+#include "ohos/init_data.h"
 #include "unicode/locid.h"
 
 #include "base/i18n/localization.h"
@@ -89,7 +89,7 @@ void AceApplicationInfoImpl::SetLocale(const std::string& language, const std::s
     }
 
     icu::Locale locale(language_.c_str(), countryOrRegion.c_str());
-    isRightToLeft_ = locale.isRightToLeft();
+    isRightToLeft_ = SystemProperties::GetRtlEnabled().value_or(locale.isRightToLeft());
 
     auto languageList = Localization::GetLanguageList(language_);
     if (languageList.size() == 1) {

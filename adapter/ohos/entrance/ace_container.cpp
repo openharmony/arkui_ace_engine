@@ -32,9 +32,7 @@
 #include "adapter/ohos/entrance/ace_application_info.h"
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 #include "adapter/ohos/entrance/data_ability_helper_standard.h"
-#include "adapter/ohos/entrance/file_asset_provider.h"
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
-#include "adapter/ohos/entrance/hap_asset_provider.h"
 #include "adapter/ohos/entrance/hap_asset_provider_impl.h"
 #include "adapter/ohos/entrance/ui_content_impl.h"
 #include "adapter/ohos/entrance/utils.h"
@@ -63,8 +61,6 @@
 #include "core/common/asset_manager_impl.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
-#include "core/common/flutter/flutter_asset_manager.h"
-#include "core/common/flutter/flutter_task_executor.h"
 #include "core/common/platform_window.h"
 #include "core/common/plugin_manager.h"
 #include "core/common/resource/resource_manager.h"
@@ -76,6 +72,7 @@
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 #include "core/components_ng/render/adapter/form_render_window.h"
 #include "core/components_ng/render/adapter/rosen_window.h"
+#include "core/pipeline/pipeline_base.h"
 #include "core/pipeline/pipeline_context.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -110,7 +107,7 @@ const char* GetDeclarativeSharedLibrary()
 void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, const RefPtr<AssetManager>& assetManager,
     const ColorScheme& colorScheme, const ResourceInfo& resourceInfo,
     const std::shared_ptr<OHOS::AbilityRuntime::Context>& context,
-    const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& abilityInfo)
+    const std::shared_ptr<OHOS::AppExecFwk::AbilityInfo>& abilityInfo, bool clearCache = false)
 {
     auto resourceAdapter = ResourceAdapter::CreateV2();
     resourceAdapter->Init(resourceInfo);
@@ -122,20 +119,24 @@ void InitResourceAndThemeManager(const RefPtr<PipelineBase>& pipelineContext, co
     themeManager->LoadCustomTheme(assetManager);
     themeManager->LoadResourceThemes();
 
+    if (clearCache) {
+        ResourceManager::GetInstance().Reset();
+    }
+
     auto defaultBundleName = "";
     auto defaultModuleName = "";
-    ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter);
+    ResourceManager::GetInstance().AddResourceAdapter(defaultBundleName, defaultModuleName, resourceAdapter, true);
     if (context) {
         auto bundleName = context->GetBundleName();
         auto moduleName = context->GetHapModuleInfo()->name;
         if (!bundleName.empty() && !moduleName.empty()) {
-            ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
+            ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter, true);
         }
     } else if (abilityInfo) {
         auto bundleName = abilityInfo->bundleName;
         auto moduleName = abilityInfo->moduleName;
         if (!bundleName.empty() && !moduleName.empty()) {
-            ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter);
+            ResourceManager::GetInstance().AddResourceAdapter(bundleName, moduleName, resourceAdapter, true);
         }
     }
 }
@@ -177,35 +178,57 @@ AceContainer::AceContainer(int32_t instanceId, FrontendType type,
     useStageModel_ = true;
 }
 
+// for DynamicComponent
+AceContainer::AceContainer(int32_t instanceId, FrontendType type,
+    std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
+    std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
+    std::shared_ptr<TaskWrapper> taskWrapper,
+    bool useCurrentEventRunner, bool isSubAceContainer, bool useNewPipeline)
+    : instanceId_(instanceId), type_(type), runtimeContext_(std::move(runtimeContext)),
+      abilityInfo_(std::move(abilityInfo)), useCurrentEventRunner_(useCurrentEventRunner),
+      isSubContainer_(isSubAceContainer)
+{
+    ACE_DCHECK(callback);
+    if (useNewPipeline) {
+        SetUseNewPipeline();
+    }
+    if (!isSubContainer_) {
+        InitializeTask(taskWrapper);
+    }
+    platformEventCallback_ = std::move(callback);
+    useStageModel_ = true;
+}
+
 AceContainer::~AceContainer()
 {
     std::lock_guard lock(destructMutex_);
     LOG_DESTROY();
 }
 
-void AceContainer::InitializeTask()
+void AceContainer::InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper)
 {
-    if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        auto taskExecutorImpl = Referenced::MakeRefPtr<TaskExecutorImpl>();
-        taskExecutorImpl->InitPlatformThread(useCurrentEventRunner_);
-        taskExecutor_ = taskExecutorImpl;
-        // No need to create JS Thread for DECLARATIVE_JS
-        if (type_ == FrontendType::DECLARATIVE_JS) {
-            GetSettings().useUIAsJSThread = true;
-        } else {
-            taskExecutorImpl->InitJsThread();
-        }
+    RefPtr<TaskExecutorImpl> taskExecutorImpl;
+    if (taskWrapper != nullptr) {
+        taskExecutorImpl = Referenced::MakeRefPtr<TaskExecutorImpl>(taskWrapper);
     } else {
-        auto flutterTaskExecutor = Referenced::MakeRefPtr<FlutterTaskExecutor>();
-        flutterTaskExecutor->InitPlatformThread(useCurrentEventRunner_);
-        taskExecutor_ = flutterTaskExecutor;
-        // No need to create JS Thread for DECLARATIVE_JS
-        if (type_ == FrontendType::DECLARATIVE_JS) {
-            GetSettings().useUIAsJSThread = true;
-        } else {
-            flutterTaskExecutor->InitJsThread();
-        }
+        taskExecutorImpl = Referenced::MakeRefPtr<TaskExecutorImpl>();
     }
+    taskExecutorImpl->InitPlatformThread(useCurrentEventRunner_);
+    taskExecutor_ = taskExecutorImpl;
+    // No need to create JS Thread for DECLARATIVE_JS
+    if (type_ == FrontendType::DECLARATIVE_JS) {
+        GetSettings().useUIAsJSThread = true;
+    } else {
+        taskExecutorImpl->InitJsThread();
+    }
+}
+
+bool AceContainer::IsKeyboard()
+{
+    if (uiWindow_ == nullptr) {
+        return false;
+    }
+    return uiWindow_->GetType() == Rosen::WindowType::WINDOW_TYPE_INPUT_METHOD_FLOAT;
 }
 
 void AceContainer::Initialize()
@@ -964,6 +987,18 @@ bool AceContainer::RunPage(
     return true;
 }
 
+bool AceContainer::RunDynamicPage(
+    int32_t instanceId, const std::string& content, const std::string& params, const std::string& entryPoint)
+{
+    auto container = AceEngine::Get().GetContainer(instanceId);
+    CHECK_NULL_RETURN(container, false);
+    ContainerScope scope(instanceId);
+    auto front = container->GetFrontend();
+    CHECK_NULL_RETURN(front, false);
+    front->RunDynamicPage(content, params, entryPoint);
+    return true;
+}
+
 bool AceContainer::PushPage(int32_t instanceId, const std::string& content, const std::string& params)
 {
     auto container = AceEngine::Get().GetContainer(instanceId);
@@ -1286,57 +1321,29 @@ void AceContainer::AddAssetPath(int32_t instanceId, const std::string& packagePa
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_VOID(container);
-    if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        RefPtr<AssetManagerImpl> assetManagerImpl;
-        if (container->assetManager_) {
-            assetManagerImpl = AceType::DynamicCast<AssetManagerImpl>(container->assetManager_);
-        } else {
-            assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
-            container->assetManager_ = assetManagerImpl;
-            if (container->type_ != FrontendType::DECLARATIVE_JS) {
-                container->frontend_->SetAssetManager(assetManagerImpl);
-            }
-        }
-        CHECK_NULL_VOID(assetManagerImpl);
-        if (!hapPath.empty()) {
-            auto assetProvider = AceType::MakeRefPtr<HapAssetProviderImpl>();
-            if (assetProvider->Initialize(hapPath, paths)) {
-                LOGI("Push AssetProvider to queue.");
-                assetManagerImpl->PushBack(std::move(assetProvider));
-            }
-        }
-        if (!packagePath.empty()) {
-            auto assetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
-            if (assetProvider->Initialize(packagePath, paths)) {
-                LOGI("Push AssetProvider to queue.");
-                assetManagerImpl->PushBack(std::move(assetProvider));
-            }
-        }
+    RefPtr<AssetManagerImpl> assetManagerImpl;
+    if (container->assetManager_) {
+        assetManagerImpl = AceType::DynamicCast<AssetManagerImpl>(container->assetManager_);
     } else {
-        RefPtr<FlutterAssetManager> flutterAssetManager;
-        if (container->assetManager_) {
-            flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->assetManager_);
-        } else {
-            flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
-            container->assetManager_ = flutterAssetManager;
-            if (container->type_ != FrontendType::DECLARATIVE_JS) {
-                container->frontend_->SetAssetManager(flutterAssetManager);
-            }
+        assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
+        container->assetManager_ = assetManagerImpl;
+        if (container->type_ != FrontendType::DECLARATIVE_JS) {
+            container->frontend_->SetAssetManager(assetManagerImpl);
         }
-        CHECK_NULL_VOID(flutterAssetManager);
-        if (!hapPath.empty()) {
-            auto assetProvider = AceType::MakeRefPtr<HapAssetProvider>();
-            if (assetProvider->Initialize(hapPath, paths)) {
-                LOGI("Push AssetProvider to queue.");
-                flutterAssetManager->PushBack(std::move(assetProvider));
-            }
+    }
+    CHECK_NULL_VOID(assetManagerImpl);
+    if (!hapPath.empty()) {
+        auto assetProvider = AceType::MakeRefPtr<HapAssetProviderImpl>();
+        if (assetProvider->Initialize(hapPath, paths)) {
+            LOGI("Push AssetProvider to queue.");
+            assetManagerImpl->PushBack(std::move(assetProvider));
         }
-        if (!packagePath.empty()) {
-            auto assetProvider = AceType::MakeRefPtr<FileAssetProvider>();
-            if (assetProvider->Initialize(packagePath, paths)) {
-                LOGI("Push AssetProvider to queue.");
-                flutterAssetManager->PushBack(std::move(assetProvider));
-            }
+    }
+    if (!packagePath.empty()) {
+        auto assetProvider = AceType::MakeRefPtr<FileAssetProviderImpl>();
+        if (assetProvider->Initialize(packagePath, paths)) {
+            LOGI("Push AssetProvider to queue.");
+            assetManagerImpl->PushBack(std::move(assetProvider));
         }
     }
 }
@@ -1345,33 +1352,18 @@ void AceContainer::AddLibPath(int32_t instanceId, const std::vector<std::string>
 {
     auto container = AceType::DynamicCast<AceContainer>(AceEngine::Get().GetContainer(instanceId));
     CHECK_NULL_VOID(container);
-    if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        RefPtr<AssetManager> assetManagerImpl;
-        if (container->assetManager_) {
-            assetManagerImpl = AceType::DynamicCast<AssetManagerImpl>(container->assetManager_);
-        } else {
-            assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
-            container->assetManager_ = assetManagerImpl;
-            if (container->type_ != FrontendType::DECLARATIVE_JS) {
-                container->frontend_->SetAssetManager(assetManagerImpl);
-            }
-        }
-        CHECK_NULL_VOID(assetManagerImpl);
-        assetManagerImpl->SetLibPath("default", libPath);
+    RefPtr<AssetManager> assetManagerImpl;
+    if (container->assetManager_) {
+        assetManagerImpl = AceType::DynamicCast<AssetManagerImpl>(container->assetManager_);
     } else {
-        RefPtr<FlutterAssetManager> flutterAssetManager;
-        if (container->assetManager_) {
-            flutterAssetManager = AceType::DynamicCast<FlutterAssetManager>(container->assetManager_);
-        } else {
-            flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
-            container->assetManager_ = flutterAssetManager;
-            if (container->type_ != FrontendType::DECLARATIVE_JS) {
-                container->frontend_->SetAssetManager(flutterAssetManager);
-            }
+        assetManagerImpl = Referenced::MakeRefPtr<AssetManagerImpl>();
+        container->assetManager_ = assetManagerImpl;
+        if (container->type_ != FrontendType::DECLARATIVE_JS) {
+            container->frontend_->SetAssetManager(assetManagerImpl);
         }
-        CHECK_NULL_VOID(flutterAssetManager);
-        flutterAssetManager->SetLibPath("default", libPath);
     }
+    CHECK_NULL_VOID(assetManagerImpl);
+    assetManagerImpl->SetLibPath("default", libPath);
 }
 
 void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, double density, int32_t width,
@@ -1379,48 +1371,25 @@ void AceContainer::AttachView(std::shared_ptr<Window> window, AceView* view, dou
 {
     aceView_ = view;
     auto instanceId = aceView_->GetInstanceId();
-    if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        auto taskExecutorImpl = AceType::DynamicCast<TaskExecutorImpl>(taskExecutor_);
-        if (!isSubContainer_) {
-            auto* aceView = static_cast<AceViewOhos*>(aceView_);
-            ACE_DCHECK(aceView != nullptr);
-            taskExecutorImpl->InitOtherThreads(aceView->GetThreadModelImpl());
+    auto taskExecutorImpl = AceType::DynamicCast<TaskExecutorImpl>(taskExecutor_);
+    if (!isSubContainer_) {
+        auto* aceView = static_cast<AceViewOhos*>(aceView_);
+        ACE_DCHECK(aceView != nullptr);
+        taskExecutorImpl->InitOtherThreads(aceView->GetThreadModelImpl());
+    }
+    ContainerScope scope(instanceId);
+    if (type_ == FrontendType::DECLARATIVE_JS) {
+        // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
+        taskExecutorImpl->InitJsThread(false);
+        InitializeFrontend();
+        auto front = GetFrontend();
+        if (front) {
+            front->UpdateState(Frontend::State::ON_CREATE);
+            front->SetJsMessageDispatcher(AceType::Claim(this));
+            front->SetAssetManager(assetManager_);
         }
-        ContainerScope scope(instanceId);
-        if (type_ == FrontendType::DECLARATIVE_JS) {
-            // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
-            taskExecutorImpl->InitJsThread(false);
-            InitializeFrontend();
-            auto front = GetFrontend();
-            if (front) {
-                front->UpdateState(Frontend::State::ON_CREATE);
-                front->SetJsMessageDispatcher(AceType::Claim(this));
-                front->SetAssetManager(assetManager_);
-            }
-        } else if (type_ != FrontendType::JS_CARD) {
-            aceView_->SetCreateTime(createTime_);
-        }
-    } else {
-        auto flutterTaskExecutor = AceType::DynamicCast<FlutterTaskExecutor>(taskExecutor_);
-        if (!isSubContainer_) {
-            auto* aceView = static_cast<AceViewOhos*>(aceView_);
-            ACE_DCHECK(aceView != nullptr);
-            flutterTaskExecutor->InitOtherThreads(aceView->GetThreadModel());
-        }
-        ContainerScope scope(instanceId);
-        if (type_ == FrontendType::DECLARATIVE_JS) {
-            // For DECLARATIVE_JS frontend display UI in JS thread temporarily.
-            flutterTaskExecutor->InitJsThread(false);
-            InitializeFrontend();
-            auto front = GetFrontend();
-            if (front) {
-                front->UpdateState(Frontend::State::ON_CREATE);
-                front->SetJsMessageDispatcher(AceType::Claim(this));
-                front->SetAssetManager(assetManager_);
-            }
-        } else if (type_ != FrontendType::JS_CARD) {
-            aceView_->SetCreateTime(createTime_);
-        }
+    } else if (type_ != FrontendType::JS_CARD) {
+        aceView_->SetCreateTime(createTime_);
     }
     resRegister_ = aceView_->GetPlatformResRegister();
 #ifndef NG_BUILD
@@ -1721,11 +1690,7 @@ void AceContainer::InitializeSubContainer(int32_t parentContainerId)
     auto parentContainer = AceEngine::Get().GetContainer(parentContainerId);
     CHECK_NULL_VOID(parentContainer);
     auto taskExec = parentContainer->GetTaskExecutor();
-    if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        taskExecutor_ = AceType::DynamicCast<TaskExecutorImpl>(std::move(taskExec));
-    } else {
-        taskExecutor_ = AceType::DynamicCast<FlutterTaskExecutor>(std::move(taskExec));
-    }
+    taskExecutor_ = AceType::DynamicCast<TaskExecutorImpl>(std::move(taskExec));
     auto parentSettings = parentContainer->GetSettings();
     GetSettings().useUIAsJSThread = parentSettings.useUIAsJSThread;
     GetSettings().usePlatformAsUIThread = parentSettings.usePlatformAsUIThread;
@@ -1782,6 +1747,28 @@ NG::SafeAreaInsets AceContainer::GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaTyp
     Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(type, avoidArea);
     if (ret == Rosen::WMError::WM_OK) {
         return ConvertAvoidArea(avoidArea);
+    }
+    return {};
+}
+
+NG::SafeAreaInsets AceContainer::GetKeyboardSafeArea()
+{
+    CHECK_NULL_RETURN(uiWindow_, {});
+    Rosen::AvoidArea avoidArea;
+    Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(Rosen::AvoidAreaType::TYPE_KEYBOARD, avoidArea);
+    if (ret == Rosen::WMError::WM_OK) {
+        return ConvertAvoidArea(avoidArea);
+    }
+    return {};
+}
+
+Rosen::AvoidArea AceContainer::GetAvoidAreaByType(Rosen::AvoidAreaType type)
+{
+    CHECK_NULL_RETURN(uiWindow_, {});
+    Rosen::AvoidArea avoidArea;
+    Rosen::WMError ret = uiWindow_->GetAvoidAreaByType(type, avoidArea);
+    if (ret == Rosen::WMError::WM_OK) {
+        return avoidArea;
     }
     return {};
 }
@@ -1869,24 +1856,6 @@ std::string AceContainer::GetFontFamilyName(std::string path)
     return fontFamilyName;
 }
 
-float AceContainer::GetSmallWindowScale() const
-{
-    float scale = 1.0f;
-    auto windowId = GetWindowId();
-    std::vector<sptr<OHOS::Rosen::AccessibilityWindowInfo>> windowInfos;
-    OHOS::Rosen::WindowManager::GetInstance().GetAccessibilityWindowInfo(windowInfos);
-    for (auto& window : windowInfos) {
-        if (!window) {
-            continue;
-        }
-        if (window->wid_ == windowId) {
-            scale = window->scaleVal_;
-            break;
-        }
-    }
-    return scale;
-}
-
 bool AceContainer::endsWith(std::string str, std::string suffix)
 {
     if (str.length() < suffix.length()) {
@@ -1940,10 +1909,7 @@ void AceContainer::UpdateConfiguration(const ParsedConfig& parsedConfig, const s
         } else if (parsedConfig.direction == "vertical") {
             resDirection = DeviceOrientation::PORTRAIT;
         }
-        if (SystemProperties::GetDeviceOrientation() != resDirection) {
-            configurationChange.directionUpdate = true;
-            SystemProperties::SetDeviceOrientation(resDirection == DeviceOrientation::PORTRAIT ? 0 : 1);
-        }
+        configurationChange.directionUpdate = true;
         resConfig.SetOrientation(resDirection);
     }
     if (!parsedConfig.densitydpi.empty()) {
@@ -2115,7 +2081,8 @@ void AceContainer::UpdateResource()
     if (SystemProperties::GetResourceDecoupling()) {
         auto context = runtimeContext_.lock();
         auto abilityInfo = abilityInfo_.lock();
-        InitResourceAndThemeManager(pipelineContext_, assetManager_, colorScheme_, resourceInfo_, context, abilityInfo);
+        InitResourceAndThemeManager(
+            pipelineContext_, assetManager_, colorScheme_, resourceInfo_, context, abilityInfo, true);
     } else {
         ThemeConstants::InitDeviceType();
         auto themeManager = AceType::MakeRefPtr<ThemeManagerImpl>();
@@ -2317,7 +2284,7 @@ void AceContainer::RegisterStopDragCallback(int32_t pointerId, StopDragCallback&
 }
 
 void AceContainer::SearchElementInfoByAccessibilityIdNG(
-    int32_t elementId, int32_t mode, int32_t baseParent,
+    int64_t elementId, int32_t mode, int64_t baseParent,
     std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     CHECK_NULL_VOID(taskExecutor_);
@@ -2339,7 +2306,7 @@ void AceContainer::SearchElementInfoByAccessibilityIdNG(
 }
 
 void AceContainer::SearchElementInfosByTextNG(
-    int32_t elementId, const std::string& text, int32_t baseParent,
+    int64_t elementId, const std::string& text, int64_t baseParent,
     std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     CHECK_NULL_VOID(taskExecutor_);
@@ -2361,7 +2328,7 @@ void AceContainer::SearchElementInfosByTextNG(
 }
 
 void AceContainer::FindFocusedElementInfoNG(
-    int32_t elementId, int32_t focusType, int32_t baseParent,
+    int64_t elementId, int32_t focusType, int64_t baseParent,
     Accessibility::AccessibilityElementInfo& output)
 {
     CHECK_NULL_VOID(taskExecutor_);
@@ -2383,7 +2350,7 @@ void AceContainer::FindFocusedElementInfoNG(
 }
 
 void AceContainer::FocusMoveSearchNG(
-    int32_t elementId, int32_t direction, int32_t baseParent,
+    int64_t elementId, int32_t direction, int64_t baseParent,
     Accessibility::AccessibilityElementInfo& output)
 {
     CHECK_NULL_VOID(taskExecutor_);
@@ -2404,8 +2371,8 @@ void AceContainer::FocusMoveSearchNG(
 }
 
 bool AceContainer::NotifyExecuteAction(
-    int32_t elementId, const std::map<std::string, std::string>& actionArguments,
-    int32_t action, int32_t offset)
+    int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+    int32_t action, int64_t offset)
 {
     bool IsExecuted = false;
     CHECK_NULL_RETURN(taskExecutor_, IsExecuted);

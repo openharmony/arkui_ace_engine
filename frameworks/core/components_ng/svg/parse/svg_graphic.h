@@ -65,7 +65,7 @@ protected:
         if (skCanvas_) {
             auto smoothEdge = GetSmoothEdge();
             if (GreatNotEqual(smoothEdge, 0.0f)) {
-                auto filter = SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, smoothEdge);
+                auto filter = SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, smoothEdge, false);
                 auto tmpFillPaint = fillPaint_;
                 tmpFillPaint.setMaskFilter(filter);
                 skCanvas_->drawPath(path_, tmpFillPaint);
@@ -80,13 +80,18 @@ protected:
             if (GreatNotEqual(smoothEdge, 0.0f)) {
                 RSFilter filter;
                 filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
-                    RSBlurType::NORMAL, static_cast<double>(smoothEdge)
+                    RSBlurType::NORMAL, static_cast<double>(smoothEdge), false
                 ));
-                strokePen_.SetFilter(filter);
+                auto tmpFillBrush = fillBrush_;
+                tmpFillBrush.SetFilter(filter);
+                rsCanvas_->AttachBrush(tmpFillBrush);
+                rsCanvas_->DrawPath(path_);
+                rsCanvas_->DetachBrush();
+            } else {
+                rsCanvas_->AttachBrush(fillBrush_);
+                rsCanvas_->DrawPath(path_);
+                rsCanvas_->DetachBrush();
             }
-            rsCanvas_->AttachBrush(fillBrush_);
-            rsCanvas_->DrawPath(path_);
-            rsCanvas_->DetachBrush();
         }
 #endif
     }
@@ -97,7 +102,7 @@ protected:
         if (skCanvas_) {
             auto smoothEdge = GetSmoothEdge();
             if (GreatNotEqual(smoothEdge, 0.0f)) {
-                auto filter = SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, smoothEdge);
+                auto filter = SkMaskFilter::MakeBlur(SkBlurStyle::kNormal_SkBlurStyle, smoothEdge, false);
                 auto tmpStrokePaint = strokePaint_;
                 tmpStrokePaint.setMaskFilter(filter);
                 skCanvas_->drawPath(path_, tmpStrokePaint);
@@ -112,13 +117,18 @@ protected:
             if (GreatNotEqual(smoothEdge, 0.0f)) {
                 RSFilter filter;
                 filter.SetMaskFilter(RSMaskFilter::CreateBlurMaskFilter(
-                    RSBlurType::NORMAL, static_cast<double>(smoothEdge)
+                    RSBlurType::NORMAL, static_cast<double>(smoothEdge), false
                 ));
-                strokePen_.SetFilter(filter);
+                auto tmpStrokePen = strokePen_;
+                tmpStrokePen.SetFilter(filter);
+                rsCanvas_->AttachPen(tmpStrokePen);
+                rsCanvas_->DrawPath(path_);
+                rsCanvas_->DetachPen();
+            } else {
+                rsCanvas_->AttachPen(strokePen_);
+                rsCanvas_->DrawPath(path_);
+                rsCanvas_->DetachPen();
             }
-            rsCanvas_->AttachPen(strokePen_);
-            rsCanvas_->DrawPath(path_);
-            rsCanvas_->DetachPen();
         }
 #endif
     }

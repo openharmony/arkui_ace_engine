@@ -464,6 +464,12 @@ ACE_FORCE_EXPORT RefPtr<Curve> CreateCurve(const std::function<float(float)>& js
 
 ACE_FORCE_EXPORT RefPtr<Curve> CreateCurve(const std::string& aniTimFunc, bool useDefault = true);
 
+ACE_FORCE_EXPORT bool ParseCurveParam(
+    const std::string& aniTimFunc, std::string& curveName, std::vector<std::string>& paramsVector);
+
+ACE_FORCE_EXPORT RefPtr<Curve> CreateCurveExceptSpring(
+    const std::string& aniTimFunc, const std::function<float(float)>& jsFunc = nullptr);
+
 ACE_EXPORT TransitionType ParseTransitionType(const std::string& transitionType);
 
 ACE_EXPORT RefPtr<ClipPath> CreateClipPath(const std::string& value);

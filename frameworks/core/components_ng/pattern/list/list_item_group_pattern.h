@@ -173,6 +173,9 @@ public:
         return footerMainSize_;
     }
 
+    float GetEstimateOffset(float height, const std::pair<float, float>& targetPos) const;
+    float GetEstimateHeight(float& averageHeight) const;
+
 private:
     bool IsNeedInitClickEventRecorder() const override
     {
@@ -196,6 +199,8 @@ private:
     int32_t itemDisplayStartIndex_ = -1;
     float_t headerMainSize_ = 0.0f;
     float_t footerMainSize_ = 0.0f;
+
+    std::optional<LayoutedItemInfo> layoutedItemInfo_;
 
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
     float spaceWidth_ = 0.0f;

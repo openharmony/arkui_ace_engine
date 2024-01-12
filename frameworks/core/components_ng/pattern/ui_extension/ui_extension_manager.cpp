@@ -41,19 +41,20 @@ void UIExtensionManager::UIExtensionIdUtility::RecycleExtensionId(int32_t id)
     }
 }
 
-void UIExtensionManager::RegisterUIExtensionInFocus(const WeakPtr<UIExtensionPattern>& uiExtensionFocused)
+void UIExtensionManager::RegisterUIExtensionInFocus(
+    const WeakPtr<UIExtensionPattern>& uiExtensionFocused, const WeakPtr<SessionWrapper>& sessionWrapper)
 {
     uiExtensionFocused_ = uiExtensionFocused;
+    sessionWrapper_ = sessionWrapper;
 }
 
 bool UIExtensionManager::OnBackPressed()
 {
-    auto uiExtensionFocused = uiExtensionFocused_.Upgrade();
-    CHECK_NULL_RETURN(uiExtensionFocused, false);
-    return uiExtensionFocused->OnBackPressed();
+    auto sessionWrapper = sessionWrapper_.Upgrade();
+    return sessionWrapper && sessionWrapper->NotifyBackPressedSync();
 }
 
-bool UIExtensionManager::IsWrapExtensionAbilityId(int32_t elementId)
+bool UIExtensionManager::IsWrapExtensionAbilityId(int64_t elementId)
 {
     return elementId > UI_EXTENSION_OFFSET_MIN;
 }
@@ -67,7 +68,7 @@ bool UIExtensionManager::IsWindowTypeUIExtension(const RefPtr<PipelineBase>& pip
 }
 
 bool UIExtensionManager::SendAccessibilityEventInfo(const Accessibility::AccessibilityEventInfo& eventInfo,
-    int32_t uiExtensionOffset, const RefPtr<PipelineBase>& pipeline)
+    int64_t uiExtensionOffset, const RefPtr<PipelineBase>& pipeline)
 {
     CHECK_NULL_RETURN(pipeline, false);
     auto instanceId = pipeline->GetInstanceId();
@@ -77,14 +78,14 @@ bool UIExtensionManager::SendAccessibilityEventInfo(const Accessibility::Accessi
     return ret == OHOS::Rosen::WMError::WM_OK;
 }
 
-std::pair<int32_t, int32_t> UIExtensionManager::UnWrapExtensionAbilityId(int32_t extensionOffset, int32_t elementId)
+std::pair<int64_t, int64_t> UIExtensionManager::UnWrapExtensionAbilityId(int64_t extensionOffset, int64_t elementId)
 {
     if (extensionOffset == 0) {
-        return std::pair<int32_t, int32_t>(0, 0);
+        return std::pair<int64_t, int64_t>(0, 0);
     }
-    int32_t index = elementId / extensionOffset;
-    int32_t abilityId = elementId % extensionOffset;
-    return std::pair<int32_t, int32_t>(index, abilityId);
+    int64_t index = elementId / extensionOffset;
+    int64_t abilityId = elementId % extensionOffset;
+    return std::pair<int64_t, int64_t>(index, abilityId);
 }
 
 const RefPtr<FrameNode> UIExtensionManager::GetFocusUiExtensionNode()
@@ -104,5 +105,34 @@ void UIExtensionManager::RecycleExtensionId(int32_t id)
 {
     CHECK_NULL_VOID(extensionIdUtility_);
     extensionIdUtility_->RecycleExtensionId(id);
+}
+
+void UIExtensionManager::AddAliveUIExtension(int32_t nodeId, const WeakPtr<UIExtensionPattern>& uiExtension)
+{
+    aliveUIExtensions_.try_emplace(nodeId, uiExtension);
+}
+
+void UIExtensionManager::TransferOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type)
+{
+    for (const auto& it : aliveUIExtensions_) {
+        auto uiExtension = it.second.Upgrade();
+        if (uiExtension) {
+            uiExtension->DispatchOriginAvoidArea(avoidArea, type);
+        }
+    }
+}
+
+void UIExtensionManager::RemoveDestroyedUIExtension(int32_t nodeId)
+{
+    auto it = aliveUIExtensions_.find(nodeId);
+    if (it != aliveUIExtensions_.end()) {
+        aliveUIExtensions_.erase(nodeId);
+    }
+}
+
+bool UIExtensionManager::NotifyOccupiedAreaChangeInfo(const sptr<Rosen::OccupiedAreaChangeInfo>& info)
+{
+    auto sessionWrapper = sessionWrapper_.Upgrade();
+    return sessionWrapper && sessionWrapper->NotifyOccupiedAreaChangeInfo(info);
 }
 } // namespace OHOS::Ace::NG

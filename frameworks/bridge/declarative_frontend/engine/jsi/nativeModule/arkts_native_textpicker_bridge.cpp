@@ -14,7 +14,7 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_textpicker_bridge.h"
 
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -71,30 +71,31 @@ ArkUINativeModuleValue TextpickerBridge::SetSelectedIndex(ArkUIRuntimeCallInfo* 
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> indexArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    uint32_t selectedValue = 0;
+    std::vector<uint32_t> selectedValues;
 
     if (indexArg->IsArray(vm)) {
-        std::vector<uint32_t> selectedValues;
         if (!ArkTSUtils::ParseJsIntegerArray(vm, indexArg, selectedValues)) {
             selectedValues.clear();
-            GetArkUIInternalNodeAPI()->GetTextpickerModifier().SetTextpickerSelectedIndex(
-                nativeNode, selectedValues.data(), DEFAULT_NEGATIVE_NUM);
+            GetArkUIInternalNodeAPI()->GetTextpickerModifier().ResetTextpickerSelected(nativeNode);
             return panda::JSValueRef::Undefined(vm);
         }
         if (selectedValues.size() > 0) {
             GetArkUIInternalNodeAPI()->GetTextpickerModifier().SetTextpickerSelectedIndex(
                 nativeNode, selectedValues.data(), selectedValues.size());
-            return panda::JSValueRef::Undefined(vm);
         } else {
-            selectedValues.emplace_back(0);
+            GetArkUIInternalNodeAPI()->GetTextpickerModifier().ResetTextpickerSelected(nativeNode);
         }
-        GetArkUIInternalNodeAPI()->GetTextpickerModifier().SetTextpickerSelected(nativeNode, selectedValues[0]);
     } else {
+        uint32_t selectedValue = 0;
         if (indexArg->IsNumber()) {
             selectedValue = indexArg->Uint32Value(vm);
+            selectedValues.emplace_back(selectedValue);
+            GetArkUIInternalNodeAPI()->GetTextpickerModifier().SetTextpickerSelectedIndex(
+                nativeNode, selectedValues.data(), DEFAULT_NEGATIVE_NUM); // represent this is a number.
+        } else {
+            selectedValues.clear();
+            GetArkUIInternalNodeAPI()->GetTextpickerModifier().ResetTextpickerSelected(nativeNode);
         }
-        GetArkUIInternalNodeAPI()->GetTextpickerModifier().SetTextpickerSelected(nativeNode, selectedValue);
     }
     return panda::JSValueRef::Undefined(vm);
 }
@@ -256,7 +257,8 @@ ArkUINativeModuleValue TextpickerBridge::SetDefaultPickerItemHeight(ArkUIRuntime
 
     CalcDimension height;
     if (itemHeightValue->IsNumber() || itemHeightValue->IsString()) {
-        if (!ArkTSUtils::ParseJsDimensionNG(vm, itemHeightValue, height, DimensionUnit::FP, false)) {
+        if (!ArkTSUtils::ParseJsDimensionFp(vm, itemHeightValue, height)) {
+            GetArkUIInternalNodeAPI()->GetTextpickerModifier().ResetTextpickerDefaultPickerItemHeight(nativeNode);
             return panda::JSValueRef::Undefined(vm);
         }
     }

@@ -157,6 +157,7 @@ void RosenFontCollection::LoadThemeFont(const char* fontFamily, std::unique_ptr<
         LOGE("Drawing is not supported");
 #endif
 #else
+        fontCollection_->LoadThemeFont("", nullptr, 0);
         fontCollection_->LoadThemeFont(familyName, data, size);
 #endif
     }

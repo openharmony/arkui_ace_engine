@@ -18,6 +18,7 @@
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
@@ -57,12 +58,9 @@ RefPtr<FrameNode> SheetView::CreateSheetPage(int32_t targetId, std::string targe
     CHECK_NULL_RETURN(scrollNode, nullptr);
     builder->MountToParent(scrollNode);
 
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
-    auto inset = pipeline->GetSafeArea();
     auto layoutProperty = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
-    layoutProperty->UpdateScrollContentEndOffset(inset.bottom_.Length());
     scrollNode->MountToParent(sheetNode);
+    layoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     CreateCloseIconButtonNode(sheetNode, sheetStyle);
     sheetNode->MarkModifyDone();
     return sheetNode;
@@ -95,7 +93,6 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
         }
     }
 
-    bool isShow = sheetStyle.showDragBar.value_or(true);
     auto dragBarNode = FrameNode::GetOrCreateFrameNode("SheetDragBar", ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<SheetDragBarPattern>(); });
     auto dragBarLayoutProperty = dragBarNode->GetLayoutProperty();
@@ -103,11 +100,7 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
     dragBarLayoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(SHEET_DRAG_BAR_WIDTH), CalcLength(SHEET_DRAG_BAR_HEIGHT)));
     dragBarLayoutProperty->UpdateAlignment(Alignment::CENTER);
-    if (sheetStyle.isTitleBuilder.has_value()) {
-        dragBarLayoutProperty->UpdateVisibility(isShow ? VisibleType::VISIBLE : VisibleType::INVISIBLE);
-    } else {
-        dragBarLayoutProperty->UpdateVisibility(isShow ? VisibleType::VISIBLE : VisibleType::GONE);
-    }
+    dragBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
 
     dragBarNode->MountToParent(operationColumn);
     dragBarNode->MarkModifyDone();
@@ -129,6 +122,9 @@ RefPtr<FrameNode> SheetView::CreateOperationColumnNode(
 
 void SheetView::CreateCloseIconButtonNode(RefPtr<FrameNode> sheetNode, NG::SheetStyle& sheetStyle)
 {
+    if (!Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        return;
+    }
     auto buttonNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     CHECK_NULL_VOID(buttonNode);
@@ -187,10 +183,8 @@ RefPtr<FrameNode> SheetView::CreateScrollNode()
     paintProps->UpdateScrollBarMode(DisplayMode::OFF);
     auto pattern = scroll->GetPattern<ScrollablePattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
-    pattern->SetEdgeEffect(EdgeEffect::SPRING, pattern->GetAlwaysEnabled());
-    auto layoutProps = scroll->GetLayoutProperty();
-    CHECK_NULL_RETURN(layoutProps, nullptr);
-    layoutProps->UpdateAlignment(Alignment::TOP_CENTER);
+    pattern->SetEdgeEffect(EdgeEffect::SPRING, false);
+    props->UpdateAlignment(Alignment::TOP_CENTER);
     scroll->MarkModifyDone();
     return scroll;
 }

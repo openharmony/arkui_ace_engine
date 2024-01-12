@@ -229,7 +229,7 @@ struct PromptAsyncContext {
     std::string messageString;
     std::vector<ButtonInfo> buttons;
     bool autoCancelBool = true;
-    bool showInSubWindowBool = true;
+    bool showInSubWindowBool = false;
     bool isModalBool = true;
     std::set<std::string> callbacks;
     std::string callbackSuccessString;
@@ -993,6 +993,7 @@ napi_value JSPromptOpenCustomDialog(napi_env env, napi_callback_info info)
 #else
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (delegate) {
+        promptDialogAttr.showInSubWindow = false;
         delegate->OpenCustomDialog(promptDialogAttr, std::move(callBack));
     } else {
         // throw internal error

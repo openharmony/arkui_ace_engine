@@ -123,7 +123,7 @@ void RichEditorModelNG::SetCopyOption(CopyOptions& copyOptions)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, CopyOption, copyOptions);
 }
 
-void RichEditorModelNG::BindSelectionMenu(RichEditorType& editorType, RichEditorResponseType& type,
+void RichEditorModelNG::BindSelectionMenu(TextSpanType& editorType, TextResponseType& type,
     std::function<void()>& buildFunc, SelectMenuParam& menuParam)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

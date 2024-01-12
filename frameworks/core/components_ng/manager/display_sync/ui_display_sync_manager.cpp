@@ -19,12 +19,14 @@ const std::vector<int32_t> UIDisplaySyncManager::REFRESH_RATE_LIST = { 30, 60, 7
 
 void UIDisplaySyncManager::DispatchFunc(uint64_t nanoTimestamp)
 {
+    CheckSkipEnableProperty();
+    displaySyncRange_->Reset();
+
     if (uiDisplaySyncMap_.empty()) {
         return;
     }
 
     IdToDisplaySyncMap backupedMap(uiDisplaySyncMap_);
-    displaySyncRange_->Reset();
 
     int32_t VSyncPeriod = GetVsyncPeriod();
     for (const auto& [Id, weakDisplaySync] : backupedMap) {
@@ -37,8 +39,13 @@ void UIDisplaySyncManager::DispatchFunc(uint64_t nanoTimestamp)
 
             displaySync->CheckRate(sourceVsyncRate_, refreshRateMode_);
             displaySync->UpdateData(nanoTimestamp, VSyncPeriod);
-            displaySync->JudgeWhetherSkip();
+            if (IsAutoRefreshRateMode() ||
+                (IsNonAutoRefreshRateMode() && IsSupportSkip())) {
+                displaySync->JudgeWhetherSkip();
+            }
             displaySync->OnFrame();
+        } else {
+            uiDisplaySyncMap_.erase(Id);
         }
     }
 
@@ -73,6 +80,10 @@ bool UIDisplaySyncManager::RemoveDisplaySync(const RefPtr<UIDisplaySync>& displa
 
 bool UIDisplaySyncManager::SetVsyncRate(int32_t vsyncRate)
 {
+    if (vsyncRate < 0) {
+        return false;
+    }
+
     if (sourceVsyncRate_ == vsyncRate) {
         return false;
     }
@@ -87,6 +98,10 @@ int32_t UIDisplaySyncManager::GetVsyncRate() const
 
 bool UIDisplaySyncManager::SetVsyncPeriod(int64_t vsyncPeriod)
 {
+    if (vsyncPeriod < 0) {
+        return false;
+    }
+
     if (vsyncPeriod_ == vsyncPeriod) {
         return false;
     }
@@ -108,9 +123,18 @@ int64_t UIDisplaySyncManager::GetVsyncPeriod() const
     return vsyncPeriod_;
 }
 
-void UIDisplaySyncManager::SetRefreshRateMode(int32_t refreshRateMode)
+bool UIDisplaySyncManager::SetRefreshRateMode(int32_t refreshRateMode)
 {
+    if (refreshRateMode < -1) {
+        return false;
+    }
+
+    if (refreshRateMode_ == refreshRateMode) {
+        return false;
+    }
+
     refreshRateMode_ = refreshRateMode;
+    return true;
 }
 
 int32_t UIDisplaySyncManager::GetRefreshRateMode() const
@@ -129,16 +153,32 @@ IdToDisplaySyncMap UIDisplaySyncManager::GetUIDisplaySyncMap() const
     return uiDisplaySyncMap_;
 }
 
+void UIDisplaySyncManager::CheckSkipEnableProperty()
+{
+    std::call_once(isEnablePropertyFlag_, [this] () {
+        supportSkipEnabled_ = SystemProperties::GetDisplaySyncSkipEnabled();
+    });
+}
+
+bool UIDisplaySyncManager::IsSupportSkip() const
+{
+    return supportSkipEnabled_;
+}
+
+bool UIDisplaySyncManager::IsAutoRefreshRateMode() const
+{
+    return refreshRateMode_ == static_cast<int32_t>(RefreshRateMode::REFRESHRATE_MODE_AUTO);
+}
+
+bool UIDisplaySyncManager::IsNonAutoRefreshRateMode() const
+{
+    return refreshRateMode_ != static_cast<int32_t>(RefreshRateMode::REFRESHRATE_MODE_AUTO);
+}
+
 UIDisplaySyncManager::UIDisplaySyncManager() {}
 
 UIDisplaySyncManager::~UIDisplaySyncManager() noexcept
 {
-    for (const auto& [Id, weakDisplaySync] : uiDisplaySyncMap_) {
-        auto displaySync = weakDisplaySync.Upgrade();
-        if (displaySync) {
-            RemoveDisplaySync(displaySync);
-        }
-    }
     uiDisplaySyncMap_.clear();
 }
 } // namespace OHOS::Ace

@@ -75,7 +75,10 @@ void TextPickerColumnPattern::OnAttachToFrameNode()
 bool TextPickerColumnPattern::OnDirtyLayoutWrapperSwap(
     const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
-    CHECK_NULL_RETURN(config.frameSizeChange, false);
+    bool isChange =
+        config.frameSizeChange || config.frameOffsetChange || config.contentSizeChange || config.contentOffsetChange;
+
+    CHECK_NULL_RETURN(isChange, false);
     CHECK_NULL_RETURN(dirty, false);
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
@@ -385,9 +388,6 @@ void TextPickerColumnPattern::FlushCurrentOptions(
         FlushCurrentImageOptions();
     } else if (columnkind_ == MIXTURE) {
         FlushCurrentMixtureOptions(textPickerLayoutProperty, isUpateTextContentOnly);
-    }
-    if (isIndexChanged_) {
-        HandleEventCallback(true);
     }
     if (isUpateTextContentOnly && isUpdateAnimationProperties) {
         FlushAnimationTextProperties(isDown);
@@ -754,24 +754,17 @@ void TextPickerColumnPattern::UpdatePickerTextProperties(const RefPtr<TextLayout
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>();
     CHECK_NULL_VOID(pickerTheme);
-    if (currentIndex < middleIndex) {
-        if (currentIndex == 0) {
-            UpdateDisappearTextProperties(pickerTheme, textLayoutProperty, textPickerLayoutProperty);
-        } else {
-            UpdateCandidateTextProperties(pickerTheme, textLayoutProperty, textPickerLayoutProperty);
-        }
-        textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
-    }
     if (currentIndex == middleIndex) {
         UpdateSelectedTextProperties(pickerTheme, textLayoutProperty, textPickerLayoutProperty);
         textLayoutProperty->UpdateAlignment(Alignment::CENTER);
+    } else if ((currentIndex == middleIndex + 1) || (currentIndex == middleIndex - 1)) {
+        UpdateCandidateTextProperties(pickerTheme, textLayoutProperty, textPickerLayoutProperty);
+    } else {
+        UpdateDisappearTextProperties(pickerTheme, textLayoutProperty, textPickerLayoutProperty);
     }
-    if (currentIndex > middleIndex) {
-        if (currentIndex == showCount - 1) {
-            UpdateDisappearTextProperties(pickerTheme, textLayoutProperty, textPickerLayoutProperty);
-        } else {
-            UpdateCandidateTextProperties(pickerTheme, textLayoutProperty, textPickerLayoutProperty);
-        }
+    if (currentIndex < middleIndex) {
+        textLayoutProperty->UpdateAlignment(Alignment::TOP_CENTER);
+    } else if (currentIndex > middleIndex) {
         textLayoutProperty->UpdateAlignment(Alignment::BOTTOM_CENTER);
     }
     textLayoutProperty->UpdateMaxLines(1);
@@ -927,9 +920,7 @@ void TextPickerColumnPattern::HandleDragStart(const GestureEvent& event)
     toss->SetStart(offsetY);
     yLast_ = offsetY;
     pressed_ = true;
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
+    // AccessibilityEventType::SCROLL_START
 }
 
 void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
@@ -963,7 +954,7 @@ void TextPickerColumnPattern::HandleDragEnd()
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     if (!NotLoopOptions() && toss->Play()) {
-        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        // AccessibilityEventType::SCROLL_END
         return;
     }
     yOffset_ = 0.0;
@@ -982,7 +973,7 @@ void TextPickerColumnPattern::HandleDragEnd()
         scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (dir == ScrollDirection::UP ? -1 : 1);
     }
     CreateAnimation(scrollDelta_, 0.0);
-    frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    // AccessibilityEventType::SCROLL_END
 }
 
 void TextPickerColumnPattern::CreateAnimation()
@@ -1370,9 +1361,7 @@ void TextPickerColumnPattern::SetAccessibilityAction()
         }
         pattern->InnerHandleScroll(true);
         pattern->CreateAnimation(0.0 - pattern->jumpInterval_, 0.0);
-        auto frameNode = pattern->GetHost();
-        CHECK_NULL_VOID(frameNode);
-        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        // AccessibilityEventType::SCROLL_END
     });
 
     accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
@@ -1384,9 +1373,7 @@ void TextPickerColumnPattern::SetAccessibilityAction()
         }
         pattern->InnerHandleScroll(false);
         pattern->CreateAnimation(pattern->jumpInterval_, 0.0);
-        auto frameNode = pattern->GetHost();
-        CHECK_NULL_VOID(frameNode);
-        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        // AccessibilityEventType::SCROLL_END
     });
 }
 

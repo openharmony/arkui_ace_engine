@@ -43,23 +43,19 @@ void SearchTextFieldPattern::PerformAction(TextInputAction action, bool forceClo
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateSubmitEvent(GetTextValue());
     CloseKeyboard(forceCloseKeyboard);
+    FocusHub::LostFocusToViewRoot();
 }
 
-TextInputAction SearchTextFieldPattern::GetDefaultTextInputAction()
+TextInputAction SearchTextFieldPattern::GetDefaultTextInputAction() const
 {
     return TextInputAction::SEARCH;
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 void SearchTextFieldPattern::InitDragEvent()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     host->SetDraggable(true);
     TextFieldPattern::InitDragEvent();
-    auto gestureHub = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gestureHub);
-    gestureHub->SetTextDraggable(true);
 }
-#endif
 } // namespace OHOS::Ace::NG

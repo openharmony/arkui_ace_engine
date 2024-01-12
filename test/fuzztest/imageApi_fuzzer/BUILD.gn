@@ -126,7 +126,6 @@ ohos_fuzztest("ImageApiFuzzTest") {
       "hilog:libhilog",
       "init:libbegetutil",
     ]
-    deps += [ "$ace_flutter_engine_root/icu:ace_libicu_ohos" ]
   } else {
     external_deps = [
       "hilog:libhilog",
@@ -136,7 +135,7 @@ ohos_fuzztest("ImageApiFuzzTest") {
   external_deps += [ "c_utils:utils" ]
   sources += [
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
-    "$ace_root/frameworks/core/components/test/mock/mock_resource_adapter.cpp",
+    "$ace_root/test/mock/core/common/mock_resource_adapter.cpp",
   ]
   part_name = ace_engine_part
 

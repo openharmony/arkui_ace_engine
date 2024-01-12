@@ -40,8 +40,13 @@ public:
     RefPtr<CanvasImage> MakePixmapImage();
 
 private:
+#ifndef USE_ROSEN_DRAWING
     static sk_sp<SkImage> ForceResizeImage(const sk_sp<SkImage>& image, const SkImageInfo& info);
     sk_sp<SkImage> ResizeSkImage();
+#else
+    static std::shared_ptr<RSImage> ForceResizeImage(const std::shared_ptr<RSImage>& image, const RSImageInfo& info);
+    std::shared_ptr<RSImage> ResizeDrawingImage();
+#endif
 
     RefPtr<CanvasImage> QueryCompressedCache();
 #ifndef USE_ROSEN_DRAWING

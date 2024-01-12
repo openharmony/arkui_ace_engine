@@ -25,7 +25,9 @@ public:
     void SetMakeFunction(std::function<RefPtr<UINode>()>&& makeFunc) override;
     void SetOnResize(std::function<void(const SizeF& size)>&& resizeFunc) override;
     void BindController(std::function<void()>&& resetFunc) override;
+    void SetOnTouchEvent(TouchEventFunc &&touchEventFunc) override;
     void ResetController() override;
+    void FireMakeNode() override;
 };
 
 } // namespace OHOS::Ace::NG

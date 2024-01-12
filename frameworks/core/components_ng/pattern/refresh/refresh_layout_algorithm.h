@@ -34,11 +34,6 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    bool HasCustomBuilderIndex() const
-    {
-        return customBuilderIndex_.has_value();
-    }
-
     void SetCustomBuilderIndex(int32_t index)
     {
         customBuilderIndex_ = index;
@@ -54,10 +49,21 @@ public:
         scrollOffset_ = offset;
     }
 
+    void SetBuilderMeasureBaseHeight(float builderBaseHeight)
+    {
+        builderBaseHeight_ = builderBaseHeight;
+    }
+
 private:
+    bool HasCustomBuilderIndex() const
+    {
+        return customBuilderIndex_.has_value();
+    }
     OptionalSizeF CalculateBuilderSize(
         RefPtr<LayoutWrapper> childLayoutWrapper, LayoutConstraintF& constraint, float customBaseHeight);
     void PerformLayout(LayoutWrapper* layoutWrapper);
+
+    float builderBaseHeight_ = 0.0f;
     float customBuilderOffset_ = 0.0f;
     float scrollOffset_ = 0.0f;
     std::optional<int32_t> customBuilderIndex_;

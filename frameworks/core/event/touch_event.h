@@ -93,7 +93,7 @@ struct TouchEvent final {
 
     // all points on the touch screen.
     std::vector<TouchPoint> pointers;
-    std::shared_ptr<MMI::PointerEvent> pointerEvent;
+    std::shared_ptr<MMI::PointerEvent> pointerEvent { nullptr };
     std::vector<uint8_t> enhanceData;
     // historical points
     std::vector<TouchEvent> history;
@@ -195,8 +195,8 @@ struct TouchEvent final {
                 point.screenY = point.screenY - offsetY;
             });
             return { pointId, x - offsetX, y - offsetY, screenX - offsetX, screenY - offsetY, type, pullType, time,
-                size, force, tiltX, tiltY, deviceId, targetDisplayId, sourceType, sourceTool, isInterpolated,
-                temp, pointerEvent, enhanceData };
+                size, force, tiltX, tiltY, deviceId, targetDisplayId, sourceType, sourceTool, isInterpolated, temp,
+                pointerEvent, enhanceData };
         }
 
         std::for_each(temp.begin(), temp.end(), [scale, offsetX, offsetY](auto&& point) {
@@ -645,13 +645,26 @@ public:
 
     void SetTargetComponent(const RefPtr<NG::TargetComponent>& targetComponent)
     {
-        targetComponent_ = targetComponent;
+        if (!targetComponent_) {
+            targetComponent_ = targetComponent;
+        }
     }
 
     RefPtr<NG::TargetComponent> GetTargetComponent()
     {
         return targetComponent_;
     }
+
+    void SetIsPostEventResult(bool isPostEventResult)
+    {
+        isPostEventResult_ = isPostEventResult;
+    }
+
+    bool IsPostEventResult() const
+    {
+        return isPostEventResult_;
+    }
+
 private:
     virtual bool ShouldResponse() { return true; };
 
@@ -666,6 +679,7 @@ protected:
     WeakPtr<NG::FrameNode> node_ = nullptr;
     Axis direction_ = Axis::NONE;
     RefPtr<NG::TargetComponent> targetComponent_;
+    bool isPostEventResult_ = false;
 };
 
 using TouchTestResult = std::list<RefPtr<TouchEventTarget>>;
@@ -712,11 +726,44 @@ public:
         return pointerEvent_;
     }
 
+    void SetTouchEventsEnd(bool isTouchEventsEnd)
+    {
+        isTouchEventsEnd_ = isTouchEventsEnd;
+    }
+
+    bool GetTouchEventsEnd() const
+    {
+        return isTouchEventsEnd_;
+    }
 private:
     std::shared_ptr<MMI::PointerEvent> pointerEvent_;
     std::list<TouchLocationInfo> touches_;
     std::list<TouchLocationInfo> changedTouches_;
     std::list<TouchLocationInfo> history_;
+    bool isTouchEventsEnd_ {false};
+};
+
+class NativeEmbeadTouchInfo : public BaseEventInfo {
+    DECLARE_RELATIONSHIP_OF_CLASSES(NativeEmbeadTouchInfo, BaseEventInfo);
+
+public:
+    NativeEmbeadTouchInfo(const std::string& embedId, const TouchEventInfo & touchEventInfo)
+        : BaseEventInfo("NativeEmbeadTouchInfo"), embedId_(embedId), touchEvent_(touchEventInfo) {}
+    ~NativeEmbeadTouchInfo() override = default;
+
+    const std::string& GetEmbedId() const
+    {
+        return embedId_;
+    }
+
+    const TouchEventInfo& GetTouchEventInfo() const
+    {
+        return touchEvent_;
+    }
+
+private:
+    std::string embedId_;
+    TouchEventInfo touchEvent_;
 };
 
 using TouchEventFunc = std::function<void(TouchEventInfo&)>;

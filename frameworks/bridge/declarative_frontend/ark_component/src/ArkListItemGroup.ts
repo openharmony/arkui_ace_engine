@@ -21,9 +21,9 @@ class ListItemGroupDividerModifier extends ModifierWithKey<DividerStyle> {
   static identity: Symbol = Symbol('listItemGroupDivider');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().listItemGroup.resetDivider(node);
+      getUINativeModule().listItemGroup.resetDivider(node);
     } else {
-      GetUINativeModule().listItemGroup.setDivider(node, this.value?.strokeWidth!, this.value?.color, this.value?.startMargin, this.value?.endMargin);
+      getUINativeModule().listItemGroup.setDivider(node, this.value?.strokeWidth!, this.value?.color, this.value?.startMargin, this.value?.endMargin);
     }
   }
 
@@ -51,10 +51,10 @@ class ArkListItemGroupComponent extends ArkComponent implements ListItemGroupAtt
 // @ts-ignore
 globalThis.ListItemGroup.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkListItemGroupComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

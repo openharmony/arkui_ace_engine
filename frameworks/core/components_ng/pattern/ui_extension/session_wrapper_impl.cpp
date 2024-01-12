@@ -18,12 +18,17 @@
 #include <memory>
 
 #include "accessibility_event_info.h"
+#include "refbase.h"
 #include "session_manager/include/extension_session_manager.h"
 #include "ui/rs_surface_node.h"
+#include "wm/wm_common.h"
 
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/want_wrap_ohos.h"
 #include "base/utils/utils.h"
+#include "core/common/container.h"
+#include "core/common/container_scope.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -87,7 +92,7 @@ public:
     }
 
     void OnAccessibilityEvent(
-        const Accessibility::AccessibilityEventInfo& info, int32_t uiExtensionOffset) override
+        const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset) override
     {
         ContainerScope scope(instanceId_);
         auto pipeline = PipelineBase::GetCurrentContext();
@@ -212,6 +217,21 @@ void SessionWrapperImpl::InitAllCallback()
             },
             TaskExecutor::TaskType::UI);
     };
+    sessionCallbacks->notifyGetAvoidAreaByTypeFunc_ = [weak = hostPattern_, taskExecutor](
+                                                          Rosen::AvoidAreaType type) -> Rosen::AvoidArea {
+        Rosen::AvoidArea avoidArea;
+        taskExecutor->PostSyncTask(
+            [weak, &avoidArea, type]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                auto instanceId = pattern->GetInstanceId();
+                auto container = Platform::AceContainer::GetContainer(instanceId);
+                CHECK_NULL_VOID(container);
+                avoidArea = container->GetAvoidAreaByType(type);
+            },
+            TaskExecutor::TaskType::UI);
+        return avoidArea;
+    };
 }
 /************************************************ End: Initialization *************************************************/
 
@@ -219,6 +239,8 @@ void SessionWrapperImpl::InitAllCallback()
 void SessionWrapperImpl::CreateSession(const AAFwk::Want& want)
 {
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Create session: %{private}s", want.ToString().c_str());
+    const std::string occupiedAreaChangeKey("ability.want.params.IsNotifyOccupiedAreaChange");
+    isNotifyOccupiedAreaChange_ = want.GetBoolParam(occupiedAreaChangeKey, false);
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
     CHECK_NULL_VOID(container);
     auto callerToken = container->GetToken();
@@ -370,20 +392,20 @@ void SessionWrapperImpl::NotifyConfigurationUpdate() {}
 
 /************************************************ Begin: The interface about the accessibility ************************/
 bool SessionWrapperImpl::TransferExecuteAction(
-    int32_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int32_t offset)
+    int64_t elementId, const std::map<std::string, std::string>& actionArguments, int32_t action, int64_t offset)
 {
     CHECK_NULL_RETURN(session_, false);
     return OHOS::Rosen::WSError::WS_OK == session_->TransferExecuteAction(elementId, actionArguments, action, offset);
 }
 
 void SessionWrapperImpl::SearchExtensionElementInfoByAccessibilityId(
-    int32_t elementId, int32_t mode, int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
+    int64_t elementId, int32_t mode, int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     CHECK_NULL_VOID(session_);
     session_->TransferSearchElementInfo(elementId, mode, baseParent, output);
 }
 
-void SessionWrapperImpl::SearchElementInfosByText(int32_t elementId, const std::string& text, int32_t baseParent,
+void SessionWrapperImpl::SearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
     std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     CHECK_NULL_VOID(session_);
@@ -391,14 +413,14 @@ void SessionWrapperImpl::SearchElementInfosByText(int32_t elementId, const std::
 }
 
 void SessionWrapperImpl::FindFocusedElementInfo(
-    int32_t elementId, int32_t focusType, int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
+    int64_t elementId, int32_t focusType, int64_t baseParent, Accessibility::AccessibilityElementInfo& output)
 {
     CHECK_NULL_VOID(session_);
     session_->TransferFindFocusedElementInfo(elementId, focusType, baseParent, output);
 }
 
 void SessionWrapperImpl::FocusMoveSearch(
-    int32_t elementId, int32_t direction, int32_t baseParent, Accessibility::AccessibilityElementInfo& output)
+    int64_t elementId, int32_t direction, int64_t baseParent, Accessibility::AccessibilityElementInfo& output)
 {
     CHECK_NULL_VOID(session_);
     session_->TransferFocusMoveSearch(elementId, direction, baseParent, output);
@@ -414,10 +436,15 @@ std::shared_ptr<Rosen::RSSurfaceNode> SessionWrapperImpl::GetSurfaceNode() const
 void SessionWrapperImpl::RefreshDisplayArea(float left, float top, float width, float height)
 {
     CHECK_NULL_VOID(session_);
-    Rosen::WSRect windowRect {
-        .posX_ = std::round(left), .posY_ = std::round(top), .width_ = std::round(width), .height_ = std::round(height)
-    };
-    session_->UpdateRect(windowRect, Rosen::SizeChangeReason::UNDEFINED);
+    ContainerScope scope(instanceId_);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto curWindow = pipeline->GetCurrentWindowRect();
+    windowRect_.posX_ = std::round(left + curWindow.Left());
+    windowRect_.posY_ = std::round(top + curWindow.Top());
+    windowRect_.width_ = std::round(width);
+    windowRect_.height_ = std::round(height);
+    session_->UpdateRect(windowRect_, Rosen::SizeChangeReason::UNDEFINED);
 }
 /************************************************ End: The interface to control the display area **********************/
 
@@ -440,4 +467,31 @@ int32_t SessionWrapperImpl::SendDataSync(const AAFwk::WantParams& wantParams, AA
 }
 /************************************************ End: The interface to send the data for ArkTS ***********************/
 
+/************************************************ Begin: The interface to control the avoid area **********************/
+void SessionWrapperImpl::NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const
+{
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "AvoidArea: session = %{public}s", session_ ? "non-null" : "null");
+    CHECK_NULL_VOID(session_);
+    session_->UpdateAvoidArea(sptr<Rosen::AvoidArea>::MakeSptr(avoidArea), static_cast<Rosen::AvoidAreaType>(type));
+}
+
+bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaChangeInfo> info) const
+{
+    CHECK_NULL_RETURN(session_, false);
+    CHECK_NULL_RETURN(info, false);
+    CHECK_NULL_RETURN(isNotifyOccupiedAreaChange_, false);
+    int32_t keyboardHeight = info->rect_.height_;
+    if (keyboardHeight > 0) {
+        ContainerScope scope(instanceId_);
+        auto pipeline = PipelineBase::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, false);
+        auto curWindow = pipeline->GetCurrentWindowRect();
+        int32_t spaceWindow = std::max(curWindow.Bottom() - windowRect_.posY_ - windowRect_.height_, .0);
+        keyboardHeight = std::max(keyboardHeight - spaceWindow, 0);
+    }
+    info->rect_.height_ = keyboardHeight;
+    session_->NotifyOccupiedAreaChangeInfo(info);
+    return true;
+}
+/************************************************ End: The interface to control the avoid area ************************/
 } // namespace OHOS::Ace::NG

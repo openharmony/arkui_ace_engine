@@ -22,6 +22,7 @@
 
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/js_frontend/engine/common/js_engine.h"
+#include "core/common/font_manager.h"
 
 namespace OHOS::Ace::Napi {
 namespace {
@@ -39,58 +40,8 @@ constexpr int32_t FONT_INFO_INDEX_SYMBOLIC = 9;
 constexpr int32_t FONT_INFO_INDEX_MAX = 10;
 }
 
-#ifndef USE_GRAPHIC_TEXT_GINE
-static bool ParseFamilyName(napi_env env, napi_value familyNameNApi, std::string& familyName, napi_valuetype valueType)
-{
-    napi_typeof(env, familyNameNApi, &valueType);
-    if (valueType == napi_string) {
-        size_t nameLen = 0;
-        napi_get_value_string_utf8(env, familyNameNApi, nullptr, 0, &nameLen);
-        std::unique_ptr<char[]> name = std::make_unique<char[]>(nameLen + 1);
-        napi_get_value_string_utf8(env, familyNameNApi, name.get(), nameLen + 1, &nameLen);
-        familyName = name.get();
-    } else if (valueType == napi_object) {
-        ResourceInfo recv;
-        if (!ParseResourceParam(env, familyNameNApi, recv)) {
-            return false;
-        }
-        if (!ParseString(recv, familyName)) {
-            return false;
-        }
-    } else {
-        return false;
-    }
-    return true;
-}
-
-static bool ParseFamilySrc(napi_env env, napi_value familySrcNApi, std::string& familySrc, napi_valuetype& valueType)
-{
-    napi_typeof(env, familySrcNApi, &valueType);
-    if (valueType == napi_string) {
-        size_t srcLen = 0;
-        napi_get_value_string_utf8(env, familySrcNApi, nullptr, 0, &srcLen);
-        std::unique_ptr<char[]> src = std::make_unique<char[]>(srcLen + 1);
-        napi_get_value_string_utf8(env, familySrcNApi, src.get(), srcLen + 1, &srcLen);
-        familySrc = src.get();
-    } else if (valueType == napi_object) {
-        ResourceInfo recv;
-        if (!ParseResourceParam(env, familySrcNApi, recv)) {
-            NapiThrow(env, "Can not parse resource info from input params.", Framework::ERROR_CODE_INTERNAL_ERROR);
-            return false;
-        }
-
-        if (!ParseString(recv, familySrc)) {
-            NapiThrow(env, "Can not get familySrc from resource manager.", Framework::ERROR_CODE_INTERNAL_ERROR);
-            return false;
-        }
-    } else {
-        return false;
-    }
-    return true;
-}
-#else
-static bool ParseFamilyNameOrSrc(
-    napi_env env, napi_value familyNameOrSrcNApi, std::string& familyNameOrSrc, napi_valuetype valueType)
+static bool ParseFamilyNameOrSrc(napi_env env, napi_value familyNameOrSrcNApi, std::string& familyNameOrSrc,
+    napi_valuetype valueType, ResourceInfo& info)
 {
     napi_typeof(env, familyNameOrSrcNApi, &valueType);
     if (valueType == napi_string) {
@@ -100,11 +51,10 @@ static bool ParseFamilyNameOrSrc(
         napi_get_value_string_utf8(env, familyNameOrSrcNApi, name.get(), nameLen + 1, &nameLen);
         familyNameOrSrc = name.get();
     } else if (valueType == napi_object) {
-        ResourceInfo recv;
-        if (!ParseResourceParam(env, familyNameOrSrcNApi, recv)) {
+        if (!ParseResourceParam(env, familyNameOrSrcNApi, info)) {
             return false;
         }
-        if (!ParseString(recv, familyNameOrSrc)) {
+        if (!ParseString(info, familyNameOrSrc)) {
             return false;
         }
     } else {
@@ -112,7 +62,6 @@ static bool ParseFamilyNameOrSrc(
     }
     return true;
 }
-#endif
 
 static napi_value JSRegisterFont(napi_env env, napi_callback_info info)
 {
@@ -135,28 +84,24 @@ static napi_value JSRegisterFont(napi_env env, napi_callback_info info)
     } else {
         return nullptr;
     }
-#ifndef USE_GRAPHIC_TEXT_GINE
-    if (!ParseFamilyName(env, familyNameNApi, familyName, valueType)) {
-#else
-    if (!ParseFamilyNameOrSrc(env, familyNameNApi, familyName, valueType)) {
-#endif
+
+    ResourceInfo resourceInfo;
+    if (!ParseFamilyNameOrSrc(env, familyNameNApi, familyName, valueType, resourceInfo)) {
         return nullptr;
     }
-#ifndef USE_GRAPHIC_TEXT_GINE
-    if (!ParseFamilySrc(env, familySrcNApi, familySrc, valueType)) {
-#else
-    if (!ParseFamilyNameOrSrc(env, familySrcNApi, familySrc, valueType)) {
-#endif
+    if (!ParseFamilyNameOrSrc(env, familySrcNApi, familySrc, valueType, resourceInfo)) {
         return nullptr;
     }
 
+    std::string bundleName = resourceInfo.bundleName.has_value() ? resourceInfo.bundleName.value() : "";
+    std::string moduleName = resourceInfo.moduleName.has_value() ? resourceInfo.moduleName.value() : "";
     auto delegate = EngineHelper::GetCurrentDelegate();
     if (!delegate) {
         TAG_LOGW(AceLogTag::ACE_FONT, "can not get delegate.");
         return nullptr;
     }
     TAG_LOGI(AceLogTag::ACE_FONT, "begin to register font.");
-    delegate->RegisterFont(familyName, familySrc);
+    delegate->RegisterFont(familyName, familySrc, bundleName, moduleName);
     return nullptr;
 }
 
@@ -241,12 +186,119 @@ static napi_value JSgetFontByName(napi_env env, napi_callback_info info)
     return result;
 }
 
+static napi_value GetUIFontGenericInfo(napi_env env, const FontConfigJsonInfo& fontConfigJsonInfo)
+{
+    napi_value genericSetResult = nullptr;
+    napi_create_array(env, &genericSetResult);
+    int32_t index = 0;
+    for (const FontGenericInfo& generic: fontConfigJsonInfo.genericSet) {
+        napi_value genericResult = nullptr;
+        napi_create_object(env, &genericResult);
+        napi_value familyResult = nullptr;
+        napi_create_string_utf8(env, generic.familyName.c_str(), generic.familyName.length(), &familyResult);
+        napi_value aliasSetResult = nullptr;
+        napi_create_array(env, &aliasSetResult);
+        int32_t index2 = 0;
+        for (const AliasInfo& alias: generic.aliasSet) {
+            napi_value aliasResult = nullptr;
+            napi_create_object(env, &aliasResult);
+            napi_value familyNameResult = nullptr;
+            napi_create_string_utf8(env, alias.familyName.c_str(), alias.familyName.length(), &familyNameResult);
+            napi_value weightResult = nullptr;
+            napi_create_int32(env, alias.weight, &weightResult);
+            napi_set_named_property(env, aliasResult, "name", familyNameResult);
+            napi_set_named_property(env, aliasResult, "weight", weightResult);
+            napi_set_element(env, aliasSetResult, index2++, aliasResult);
+        }
+        index2 = 0;
+        napi_value adjustSetResult = nullptr;
+        napi_create_array(env, &adjustSetResult);
+        for (const AdjustInfo& adjust: generic.adjustSet) {
+            napi_value adjustResult = nullptr;
+            napi_create_object(env, &adjustResult);
+            napi_value weightResult = nullptr;
+            napi_create_int32(env, adjust.origValue, &weightResult);
+            napi_value toResult = nullptr;
+            napi_create_int32(env, adjust.newValue, &toResult);
+            napi_set_named_property(env, adjustResult, "weight", weightResult);
+            napi_set_named_property(env, adjustResult, "to", toResult);
+            napi_set_element(env, adjustSetResult, index2++, adjustResult);
+        }
+        napi_set_named_property(env, genericResult, "family", familyResult);
+        napi_set_named_property(env, genericResult, "alias", aliasSetResult);
+        napi_set_named_property(env, genericResult, "adjust", adjustSetResult);
+        napi_set_element(env, genericSetResult, index++, genericResult);
+    }
+    return genericSetResult;
+}
+
+static napi_value GetUIFontFallbackInfo(napi_env env, const FontConfigJsonInfo& fontConfigJsonInfo)
+{
+    napi_value fallbackGroupSetResult = nullptr;
+    napi_create_array(env, &fallbackGroupSetResult);
+    int32_t index = 0;
+    for (const FallbackGroup& fallbackGroup: fontConfigJsonInfo.fallbackGroupSet) {
+        napi_value fallbackGroupResult = nullptr;
+        napi_create_object(env, &fallbackGroupResult);
+        napi_value fontSetNameResult = nullptr;
+        napi_create_string_utf8(env, fallbackGroup.groupName.c_str(),
+            fallbackGroup.groupName.length(), &fontSetNameResult);
+        napi_value fallbackListResult = nullptr;
+        napi_create_array(env, &fallbackListResult);
+        int32_t index2 = 0;
+        for (const FallbackInfo& fallback: fallbackGroup.fallbackInfoSet) {
+            napi_value fallbackResult = nullptr;
+            napi_create_object(env, &fallbackResult);
+            napi_value familyResult = nullptr;
+            napi_create_string_utf8(env, fallback.familyName.c_str(), fallback.familyName.length(), &familyResult);
+            napi_value languageResult = nullptr;
+            napi_create_string_utf8(env, fallback.font.c_str(), fallback.font.length(), &languageResult);
+
+            napi_set_named_property(env, fallbackResult, "language", languageResult);
+            napi_set_named_property(env, fallbackResult, "family", familyResult);
+            napi_set_element(env, fallbackListResult, index2++, fallbackResult);
+        }
+        napi_set_named_property(env, fallbackGroupResult, "fontSetName", fontSetNameResult);
+        napi_set_named_property(env, fallbackGroupResult, "fallback", fallbackListResult);
+        napi_set_element(env, fallbackGroupSetResult, index++, fallbackGroupResult);
+    }
+    return fallbackGroupSetResult;
+}
+
+static napi_value JsGetUIFontConfig(napi_env env, napi_callback_info info)
+{
+    FontConfigJsonInfo fontConfigJsonInfo;
+    auto delegate = EngineHelper::GetCurrentDelegate();
+    if (!delegate) {
+        return nullptr;
+    }
+    delegate->GetUIFontConfig(fontConfigJsonInfo);
+    napi_value result = nullptr;
+    napi_create_object(env, &result);
+    napi_value fontDirSetResult = nullptr;
+    napi_create_array(env, &fontDirSetResult);
+    int32_t index = 0;
+    for (const std::string& fontDir : fontConfigJsonInfo.fontDirSet) {
+        napi_value fontDirResult = nullptr;
+        napi_create_string_utf8(env, fontDir.c_str(), fontDir.length(), &fontDirResult);
+        napi_set_element(env, fontDirSetResult, index++, fontDirResult);
+    }
+    napi_value genericSetResult = GetUIFontGenericInfo(env, fontConfigJsonInfo);
+    napi_value fallbackGroupSetResult = GetUIFontFallbackInfo(env, fontConfigJsonInfo);
+
+    napi_set_named_property(env, result, "fontDir", fontDirSetResult);
+    napi_set_named_property(env, result, "generic", genericSetResult);
+    napi_set_named_property(env, result, "fallbackGroups", fallbackGroupSetResult);
+    return result;
+}
+
 static napi_value FontExport(napi_env env, napi_value exports)
 {
     napi_property_descriptor fontDesc[] = {
         DECLARE_NAPI_FUNCTION("registerFont", JSRegisterFont),
         DECLARE_NAPI_FUNCTION("getSystemFontList", JSgetSystemFontList),
-        DECLARE_NAPI_FUNCTION("getFontByName", JSgetFontByName)
+        DECLARE_NAPI_FUNCTION("getFontByName", JSgetFontByName),
+        DECLARE_NAPI_FUNCTION("getUIFontConfig", JsGetUIFontConfig)
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(fontDesc) / sizeof(fontDesc[0]), fontDesc));
     return exports;

@@ -40,6 +40,12 @@ void ListModelNG::Create()
     stack->Push(frameNode);
 }
 
+RefPtr<FrameNode> ListModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, nodeId, AceType::MakeRefPtr<ListPattern>());
+    return frameNode;
+}
+
 void ListModelNG::SetSpace(const Dimension& space)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListLayoutProperty, Space, space);
@@ -453,7 +459,6 @@ void ListModelNG::SetListScrollBar(FrameNode* frameNode, int32_t barState)
         displayNumber = barState;
     }
     ScrollableModelNG::SetScrollBarMode(frameNode, displayNumber);
-    
 }
 
 void ListModelNG::SetLanes(FrameNode* frameNode, int32_t lanes)

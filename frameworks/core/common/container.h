@@ -72,6 +72,11 @@ public:
 
     virtual void Destroy() = 0;
 
+    virtual bool IsKeyboard()
+    {
+        return false;
+    }
+
     virtual void DestroyView() {}
 
     // Get the instance id of this container
@@ -158,6 +163,11 @@ public:
     }
 
     virtual RefPtr<DisplayInfo> GetDisplayInfo()
+    {
+        return {};
+    }
+
+    virtual NG::SafeAreaInsets GetKeyboardSafeArea()
     {
         return {};
     }
@@ -323,6 +333,16 @@ public:
         isFRSCardContainer_ = isFRSCardContainer;
     }
 
+    bool IsDynamicRender() const
+    {
+        return isDynamicRender_;
+    }
+
+    void SetIsDynamicRender(bool isDynamicRender)
+    {
+        isDynamicRender_ = isDynamicRender;
+    }
+
     void SetPageUrlChecker(const RefPtr<PageUrlChecker>& pageUrlChecker)
     {
         pageUrlChecker_ = pageUrlChecker;
@@ -338,7 +358,9 @@ public:
         return false;
     }
 
-    virtual float GetSmallWindowScale() const
+    virtual void SetWindowScale(float windowScale) {}
+
+    virtual float GetWindowScale() const
     {
         return 1.0f;
     }
@@ -438,6 +460,7 @@ protected:
     std::mutex stateMutex_;
     Frontend::State state_ = Frontend::State::UNDEFINE;
     bool isFRSCardContainer_ = false;
+    bool isDynamicRender_ = false;
 
 private:
     std::string moduleName_;

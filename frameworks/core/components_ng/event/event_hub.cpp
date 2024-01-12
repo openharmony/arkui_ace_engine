@@ -17,6 +17,7 @@
 
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -82,6 +83,20 @@ GetEventTargetImpl EventHub::CreateGetEventTargetImpl() const
     return impl;
 }
 
+void EventHub::PostEnabledTask()
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto eventHub = weak.Upgrade();
+            CHECK_NULL_VOID(eventHub);
+            eventHub->UpdateCurrentUIState(UI_STATE_DISABLED);
+        }, TaskExecutor::TaskType::UI);
+}
+
 void EventHub::MarkModifyDone()
 {
     if (stateStyleMgr_) {
@@ -93,7 +108,7 @@ void EventHub::MarkModifyDone()
             if (enabled_) {
                 stateStyleMgr_->ResetCurrentUIState(UI_STATE_DISABLED);
             } else {
-                stateStyleMgr_->UpdateCurrentUIState(UI_STATE_DISABLED);
+                PostEnabledTask();
             }
         }
     }
@@ -180,12 +195,10 @@ void EventHub::FireCustomerOnDragFunc(DragFuncType dragFuncType, const RefPtr<OH
 
 bool EventHub::IsFireOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info)
 {
-#ifdef ENABLE_DRAG_FRAMEWORK
     return !HasCustomerOnDrop()
         || info->GetResult() == DragRet::DRAG_DEFAULT
         || info->GetResult() == DragRet::ENABLE_DROP
         || info->GetResult() == DragRet::DISABLE_DROP;
-#endif
     return true;
 }
 
@@ -194,6 +207,17 @@ void EventHub::HandleInternalOnDrop(const RefPtr<OHOS::Ace::DragEvent>& info, co
     if (IsFireOnDrop(info)) {
         FireOnDrop(info, extraParams);
     }
+}
+
+void EventHub::AddInnerOnAreaChangedCallback(int32_t id, OnAreaChangedFunc&& callback)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto frameNode = GetFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    pipeline->AddOnAreaChangeNode(frameNode->GetId());
+    frameNode->InitLastArea();
+    onAreaChangedInnerCallbacks_[id] = std::move(callback);
 }
 
 } // namespace OHOS::Ace::NG

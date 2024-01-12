@@ -115,32 +115,22 @@ void UpdateChildLayoutConstrainByFlexBasis(
     if (flexBasis->Unit() == DimensionUnit::AUTO || !flexBasis->IsValid()) {
         return;
     }
-    auto tempBasis = flexBasis->ConvertToPx();
     if (child->GetLayoutProperty()->GetCalcLayoutConstraint()) {
         auto selfIdealSize = child->GetLayoutProperty()->GetCalcLayoutConstraint()->selfIdealSize;
         if (child->GetHostTag() == V2::BLANK_ETS_TAG && selfIdealSize.has_value()) {
             if (IsHorizontal(direction) && selfIdealSize->Width().has_value() &&
-                selfIdealSize->Width()->GetDimension().ConvertToPx() > tempBasis) {
+                selfIdealSize->Width()->GetDimension().ConvertToPx() > flexBasis->ConvertToPx()) {
                 return;
             } else if (!IsHorizontal(direction) && selfIdealSize->Height().has_value() &&
-                selfIdealSize->Height()->GetDimension().ConvertToPx() > tempBasis) {
+                       selfIdealSize->Height()->GetDimension().ConvertToPx() > flexBasis->ConvertToPx()) {
                 return;
-            }
-        }
-    }
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        if (flexBasis->Unit() == DimensionUnit::PERCENT || !flexBasis->IsValid()) {
-            if (direction == FlexDirection::ROW || direction == FlexDirection::ROW_REVERSE) {
-                tempBasis = flexBasis->ConvertToPxWithSize(layoutConstraint.percentReference.Width());
-            } else {
-                tempBasis = flexBasis->ConvertToPxWithSize(layoutConstraint.percentReference.Height());
             }
         }
     }
     if (direction == FlexDirection::ROW || direction == FlexDirection::ROW_REVERSE) {
-        layoutConstraint.selfIdealSize.SetWidth(tempBasis);
+        layoutConstraint.selfIdealSize.SetWidth(flexBasis->ConvertToPx());
     } else {
-        layoutConstraint.selfIdealSize.SetHeight(tempBasis);
+        layoutConstraint.selfIdealSize.SetHeight(flexBasis->ConvertToPx());
     }
 }
 
@@ -653,11 +643,8 @@ void FlexLayoutAlgorithm::SecondaryMeasureByProperty(
                 continue;
             }
             if (GetSelfAlign(childLayoutWrapper) == FlexAlign::STRETCH) {
-                if (!UserDefinedCrossAxisSize(childLayoutWrapper) &&
-                    Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-                    UpdateLayoutConstraintOnCrossAxis(child.layoutConstraint, crossAxisSize);
-                    child.needSecondMeasure = true;
-                }
+                UpdateLayoutConstraintOnCrossAxis(child.layoutConstraint, crossAxisSize);
+                child.needSecondMeasure = true;
             }
             if (LessOrEqual(totalFlexWeight_, 0.0f) &&
                 (!isInfiniteLayout_ || GreatNotEqual(MainAxisMinValue(layoutWrapper), 0.0f) ||
@@ -869,8 +856,10 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         } else {
             mainAxisSize_ =
                 direction_ == FlexDirection::ROW || direction_ == FlexDirection::ROW_REVERSE
-                    ? (mainAxisInf ? layoutConstraint->percentReference.Width() : layoutConstraint->maxSize.Width())
-                    : (mainAxisInf ? layoutConstraint->percentReference.Height() : layoutConstraint->maxSize.Height());
+                    ? (mainAxisInf ? layoutConstraint->percentReference.Width()
+                                   : std::max(layoutConstraint->minSize.Width(), layoutConstraint->maxSize.Width()))
+                    : (mainAxisInf ? layoutConstraint->percentReference.Height()
+                                   : std::max(layoutConstraint->minSize.Height(), layoutConstraint->maxSize.Height()));
         }
         isInfiniteLayout_ = isLinearLayoutFeature_;
     }
@@ -931,10 +920,15 @@ void FlexLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto mainAxisSizeMax = GetMainAxisSizeHelper(layoutConstraint->maxSize, direction_);
     auto crossAxisSizeMin = GetCrossAxisSizeHelper(layoutConstraint->minSize, direction_);
     auto crossAxisSizeMax = GetCrossAxisSizeHelper(layoutConstraint->maxSize, direction_);
-    finalMainAxisSize = std::clamp(
-        finalMainAxisSize, std::min(mainAxisSizeMin, mainAxisSizeMax), std::max(mainAxisSizeMin, mainAxisSizeMax));
-    finalCrossAxisSize = std::clamp(
-        finalCrossAxisSize, std::min(crossAxisSizeMin, crossAxisSizeMax), std::max(crossAxisSizeMin, crossAxisSizeMax));
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        finalMainAxisSize = std::max(mainAxisSizeMin, std::min(finalMainAxisSize, mainAxisSizeMax));
+        finalCrossAxisSize = std::max(crossAxisSizeMin, std::min(finalCrossAxisSize, crossAxisSizeMax));
+    } else {
+        finalMainAxisSize = std::clamp(
+            finalMainAxisSize, std::min(mainAxisSizeMin, mainAxisSizeMax), std::max(mainAxisSizeMin, mainAxisSizeMax));
+        finalCrossAxisSize = std::clamp(finalCrossAxisSize, std::min(crossAxisSizeMin, crossAxisSizeMax),
+            std::max(crossAxisSizeMin, crossAxisSizeMax));
+    }
 
     realSize.UpdateIllegalSizeWithCheck(
         GetCalcSizeHelper(finalMainAxisSize, finalCrossAxisSize, direction_).ConvertToSizeT());
@@ -1120,19 +1114,6 @@ FlexAlign FlexLayoutAlgorithm::GetSelfAlign(const RefPtr<LayoutWrapper>& layoutW
         return crossAxisAlign;
     }
     return flexItemProperty->GetAlignSelf().value_or(crossAxisAlign);
-}
-
-bool FlexLayoutAlgorithm::UserDefinedCrossAxisSize(const RefPtr<LayoutWrapper>& layoutWrapper) const
-{
-    CHECK_NULL_RETURN(layoutWrapper, false);
-    if (layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint()) {
-        auto userDefinedIdealSize = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint()->selfIdealSize;
-        if (userDefinedIdealSize.has_value()) {
-            return IsHorizontal(direction_) ? userDefinedIdealSize->Height().has_value()
-                                            : userDefinedIdealSize->Width().has_value();
-        }
-    }
-    return false;
 }
 
 } // namespace OHOS::Ace::NG

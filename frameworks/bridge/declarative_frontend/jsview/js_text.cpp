@@ -112,17 +112,14 @@ void JSText::GetFontInfo(const JSCallbackInfo& info, Font& font)
     auto paramObject = JSRef<JSObject>::Cast(tmpInfo);
     auto fontSize = paramObject->GetProperty("size");
     CalcDimension size;
-    if (!JSContainerBase::ParseJsDimensionFp(fontSize, size) || fontSize->IsNull()) {
-        font.fontSize = std::nullopt;
-    }
-    if (fontSize->IsUndefined() || size.IsNegative() || size.Unit() == DimensionUnit::PERCENT) {
+    if (ParseJsDimensionFpNG(fontSize, size, false) && size.IsNonNegative()) {
+        font.fontSize = size;
+    } else {
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
         auto theme = pipelineContext->GetTheme<TextTheme>();
         CHECK_NULL_VOID(theme);
         font.fontSize = theme->GetTextStyle().GetFontSize();
-    } else {
-        font.fontSize = size;
     }
     std::string weight;
     auto fontWeight = paramObject->GetProperty("weight");
@@ -157,8 +154,12 @@ void JSText::SetFontSize(const JSCallbackInfo& info)
     auto theme = pipelineContext->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
     CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
-    ParseJsDimensionFp(info[0], fontSize);
-    if (fontSize.IsNonPositive() || fontSize.Unit() == DimensionUnit::PERCENT) {
+    if (!ParseJsDimensionFpNG(info[0], fontSize, false)) {
+        fontSize = theme->GetTextStyle().GetFontSize();
+        TextModel::GetInstance()->SetFontSize(fontSize);
+        return;
+    }
+    if (fontSize.IsNegative()) {
         fontSize = theme->GetTextStyle().GetFontSize();
     }
     TextModel::GetInstance()->SetFontSize(fontSize);
@@ -192,9 +193,7 @@ void JSText::SetTextShadow(const JSCallbackInfo& info)
     }
     std::vector<Shadow> shadows;
     ParseTextShadowFromShadowObject(info[0], shadows);
-    if (!shadows.empty()) {
-        TextModel::GetInstance()->SetTextShadow(shadows);
-    }
+    TextModel::GetInstance()->SetTextShadow(shadows);
 }
 
 void JSText::SetTextOverflow(const JSCallbackInfo& info)
@@ -279,7 +278,8 @@ void JSText::SetMaxLines(const JSCallbackInfo& info)
 void JSText::SetTextIndent(const JSCallbackInfo& info)
 {
     CalcDimension value;
-    if (!ParseJsDimensionFp(info[0], value)) {
+    if (!ParseJsDimensionFpNG(info[0], value)) {
+        value.Reset();
         TextModel::GetInstance()->SetTextIndent(value);
         return;
     }
@@ -314,7 +314,11 @@ void JSText::SetAlign(const JSCallbackInfo& info)
 void JSText::SetLineHeight(const JSCallbackInfo& info)
 {
     CalcDimension value;
-    ParseJsDimensionFp(info[0], value);
+    if (!ParseJsDimensionFpNG(info[0], value)) {
+        value.Reset();
+        TextModel::GetInstance()->SetLineHeight(value);
+        return;
+    }
     if (value.IsNegative()) {
         value.Reset();
     }
@@ -332,15 +336,43 @@ void JSText::SetFontFamily(const JSCallbackInfo& info)
 
 void JSText::SetMinFontSize(const JSCallbackInfo& info)
 {
-    CalcDimension fontSize;
-    ParseJsDimensionFp(info[0], fontSize);
+    if (info.Length() < 1) {
+        return;
+    }
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
+    if (!ParseJsDimensionFp(info[0], fontSize)) {
+        fontSize = theme->GetTextStyle().GetFontSize();
+        TextModel::GetInstance()->SetFontSize(fontSize);
+        return;
+    }
+    if (fontSize.IsNegative()) {
+        fontSize = theme->GetTextStyle().GetFontSize();
+    }
     TextModel::GetInstance()->SetAdaptMinFontSize(fontSize);
 }
 
 void JSText::SetMaxFontSize(const JSCallbackInfo& info)
 {
-    CalcDimension fontSize;
-    ParseJsDimensionFp(info[0], fontSize);
+    if (info.Length() < 1) {
+        return;
+    }
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto theme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_VOID(theme);
+    CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
+    if (!ParseJsDimensionFp(info[0], fontSize)) {
+        fontSize = theme->GetTextStyle().GetFontSize();
+        TextModel::GetInstance()->SetFontSize(fontSize);
+        return;
+    }
+    if (fontSize.IsNegative()) {
+        fontSize = theme->GetTextStyle().GetFontSize();
+    }
     TextModel::GetInstance()->SetAdaptMaxFontSize(fontSize);
 }
 
@@ -348,6 +380,8 @@ void JSText::SetLetterSpacing(const JSCallbackInfo& info)
 {
     CalcDimension value;
     if (!ParseJsDimensionFpNG(info[0], value, false)) {
+        value.Reset();
+        TextModel::GetInstance()->SetLetterSpacing(value);
         return;
     }
     TextModel::GetInstance()->SetLetterSpacing(value);
@@ -364,7 +398,9 @@ void JSText::SetTextCase(int32_t value)
 void JSText::SetBaselineOffset(const JSCallbackInfo& info)
 {
     CalcDimension value;
-    if (!ParseJsDimensionFp(info[0], value)) {
+    if (!ParseJsDimensionFpNG(info[0], value, false)) {
+        value.Reset();
+        TextModel::GetInstance()->SetBaselineOffset(value);
         return;
     }
     TextModel::GetInstance()->SetBaselineOffset(value);
@@ -478,6 +514,21 @@ void JSText::Create(const JSCallbackInfo& info)
     }
 
     TextModel::GetInstance()->Create(data);
+    if (info.Length() <= 1 || !info[1]->IsObject()) {
+        return;
+    }
+
+    JSTextController* jsController = nullptr;
+    auto paramObject = JSRef<JSObject>::Cast(info[1]);
+    auto controllerObj = paramObject->GetProperty("controller");
+    if (!controllerObj->IsUndefined() && !controllerObj->IsNull()) {
+        jsController = JSRef<JSObject>::Cast(controllerObj)->Unwrap<JSTextController>();
+    }
+
+    RefPtr<TextControllerBase> controller = TextModel::GetInstance()->GetTextController();
+    if (jsController) {
+        jsController->SetController(controller);
+    }
 }
 
 void JSText::SetCopyOption(const JSCallbackInfo& info)
@@ -656,6 +707,60 @@ void JSText::JsDataDetectorConfig(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetTextDetectConfig(textTypes, std::move(onResult));
 }
 
+void JSText::BindSelectionMenu(const JSCallbackInfo& info)
+{
+    // TextSpanType
+    NG::TextSpanType testSpanType = NG::TextSpanType::TEXT;
+    if (info[0]->IsNumber()) {
+        auto spanType = info[0]->ToNumber<int32_t>();
+        testSpanType = static_cast<NG::TextSpanType>(spanType);
+    }
+
+    // Builder
+    if (!info[1]->IsObject()) {
+        return;
+    }
+    JSRef<JSObject> menuObj = JSRef<JSObject>::Cast(info[1]);
+    auto builder = menuObj->GetProperty("builder");
+    if (!builder->IsFunction()) {
+        return;
+    }
+    auto builderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(builder));
+    CHECK_NULL_VOID(builderFunc);
+
+    // TextResponseType
+    int32_t resquiredParameterCount = 3;
+    NG::TextResponseType responseType = NG::TextResponseType::LONG_PRESS;
+    if (info[resquiredParameterCount - 1]->IsNumber()) {
+        auto response = info[resquiredParameterCount - 1]->ToNumber<int32_t>();
+        responseType = static_cast<NG::TextResponseType>(response);
+    }
+
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    std::function<void()> buildFunc = [execCtx = info.GetExecutionContext(), func = std::move(builderFunc),
+                                          node = frameNode]() {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("BindSelectionMenu");
+        PipelineContext::SetCallBackNode(node);
+        func->Execute();
+    };
+
+    // SelectionMenuOptions
+    NG::SelectMenuParam menuParam;
+    if (info.Length() > resquiredParameterCount && info[resquiredParameterCount]->IsObject()) {
+        ParseMenuParam(info, info[resquiredParameterCount], menuParam);
+    }
+
+    TextModel::GetInstance()->BindSelectionMenu(testSpanType, responseType, buildFunc, menuParam);
+}
+
+void JSText::SetOnTextSelectionChange(const JSCallbackInfo& info)
+{
+    CHECK_NULL_VOID(info[0]->IsFunction());
+    JsEventCallback<void(int32_t, int32_t)> callback(info.GetExecutionContext(), JSRef<JSFunc>::Cast(info[0]));
+    TextModel::GetInstance()->SetOnTextSelectionChange(std::move(callback));
+}
+
 void JSText::JSBind(BindingTarget globalObj)
 {
     JSClass<JSText>::Declare("Text");
@@ -706,7 +811,59 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("textMenuOptions", &JSText::JsMenuOptionsExtension);
     JSClass<JSText>::StaticMethod("enableDataDetector", &JSText::JsEnableDataDetector);
     JSClass<JSText>::StaticMethod("dataDetectorConfig", &JSText::JsDataDetectorConfig);
+    JSClass<JSText>::StaticMethod("bindSelectionMenu", &JSText::BindSelectionMenu);
+    JSClass<JSText>::StaticMethod("onTextSelectionChange", &JSText::SetOnTextSelectionChange);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
+void JSTextController::CloseSelectionMenu()
+{
+    auto controller = controllerWeak_.Upgrade();
+    CHECK_NULL_VOID(controller);
+    controller->CloseSelectionMenu();
+}
+
+void JSTextController::JSBind(BindingTarget globalObj)
+{
+    JSClass<JSTextController>::Declare("TextController");
+    JSClass<JSTextController>::Method("closeSelectionMenu", &JSTextController::CloseSelectionMenu);
+    JSClass<JSTextController>::Bind(globalObj, JSTextController::Constructor, JSTextController::Destructor);
+}
+
+void JSText::ParseMenuParam(
+    const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::SelectMenuParam& menuParam)
+{
+    WeakPtr<NG::FrameNode> frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto onAppearValue = menuOptions->GetProperty("onAppear");
+    if (onAppearValue->IsFunction()) {
+        RefPtr<JsFunction> jsOnAppearFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onAppearValue));
+        auto onAppear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnAppearFunc), node = frameNode](
+                            int32_t start, int32_t end) {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onAppear");
+
+            JSRef<JSVal> params[2];
+            params[0] = JSRef<JSVal>::Make(ToJSValue(start));
+            params[1] = JSRef<JSVal>::Make(ToJSValue(end));
+            PipelineContext::SetCallBackNode(node);
+            func->ExecuteJS(2, params);
+        };
+        menuParam.onAppear = std::move(onAppear);
+    }
+
+    auto onDisappearValue = menuOptions->GetProperty("onDisappear");
+    if (onDisappearValue->IsFunction()) {
+        RefPtr<JsFunction> jsOnDisAppearFunc =
+            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onDisappearValue));
+        auto onDisappear = [execCtx = info.GetExecutionContext(), func = std::move(jsOnDisAppearFunc),
+                               node = frameNode]() {
+            JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+            ACE_SCORING_EVENT("onDisappear");
+            PipelineContext::SetCallBackNode(node);
+            func->Execute();
+        };
+        menuParam.onDisappear = std::move(onDisappear);
+    }
+}
 } // namespace OHOS::Ace::Framework

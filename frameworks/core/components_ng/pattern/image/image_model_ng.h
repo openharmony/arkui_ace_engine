@@ -27,7 +27,7 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ImageModelNG : public OHOS::Ace::ImageModel {
 public:
     void Create(const std::string &src, RefPtr<PixelMap> &pixMap, const std::string &bundleName,
-        const std::string &moduleName) override;
+        const std::string &moduleName, bool isUriPureNumber = false) override;
     void SetAlt(const ImageSourceInfo &src) override;
     void SetBorder(const Border &border) override;
     void SetBackBorder() override;
@@ -58,6 +58,10 @@ public:
     bool UpdateDragItemInfo(DragItemInfo &itemInfo) override;
     void EnableAnalyzer(bool isEnableAnalyzer) override;
     void SetImageAnalyzerConfig(const ImageAnalyzerConfig& config) override;
+    void SetResizableSlice(const ImageResizableSlice& slice) override;
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& src, RefPtr<PixelMap>& pixMap,
+        const std::string& bundleName, const std::string& moduleName, bool isUriPureNumber = false);
+    static void InitImage(FrameNode *frameNode, std::string& src);
     static void SetSmoothEdge(FrameNode *frameNode, float value);
     static void SetCopyOption(FrameNode *frameNode, CopyOptions copyOption);
     static void SetAutoResize(FrameNode *frameNode, bool autoResize);

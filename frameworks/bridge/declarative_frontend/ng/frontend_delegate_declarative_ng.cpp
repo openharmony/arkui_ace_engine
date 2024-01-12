@@ -542,9 +542,10 @@ void FrontendDelegateDeclarativeNG::ChangeLocale(const std::string& language, co
         TaskExecutor::TaskType::PLATFORM);
 }
 
-void FrontendDelegateDeclarativeNG::RegisterFont(const std::string& familyName, const std::string& familySrc)
+void FrontendDelegateDeclarativeNG::RegisterFont(const std::string& familyName, const std::string& familySrc,
+    const std::string& bundleName, const std::string& moduleName)
 {
-    pipelineContextHolder_.Get()->RegisterFont(familyName, familySrc);
+    pipelineContextHolder_.Get()->RegisterFont(familyName, familySrc, bundleName, moduleName);
 }
 
 void FrontendDelegateDeclarativeNG::GetSystemFontList(std::vector<std::string>& fontList)
@@ -555,6 +556,11 @@ void FrontendDelegateDeclarativeNG::GetSystemFontList(std::vector<std::string>& 
 bool FrontendDelegateDeclarativeNG::GetSystemFont(const std::string& fontName, FontInfo& fontInfo)
 {
     return pipelineContextHolder_.Get()->GetSystemFont(fontName, fontInfo);
+}
+
+void FrontendDelegateDeclarativeNG::GetUIFontConfig(FontConfigJsonInfo& fontConfigJsonInfo)
+{
+    pipelineContextHolder_.Get()->GetUIFontConfig(fontConfigJsonInfo);
 }
 
 double FrontendDelegateDeclarativeNG::MeasureText(const MeasureContext& context)

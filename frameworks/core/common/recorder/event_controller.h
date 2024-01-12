@@ -22,6 +22,7 @@
 #include <vector>
 
 #include "interfaces/inner_api/ace/ui_event_observer.h"
+#include "base/utils/noncopyable.h"
 #include "core/common/recorder/event_config.h"
 
 namespace OHOS::Ace::Recorder {
@@ -32,8 +33,6 @@ struct UIEventClient {
 
 class EventController final {
 public:
-    ~EventController() = default;
-
     static EventController& Get();
 
     void Register(const std::string& config, const std::shared_ptr<UIEventObserver>& observer);
@@ -47,10 +46,13 @@ public:
 
 private:
     EventController() = default;
+    ~EventController() = default;
     void NotifyConfigChange();
 
     std::mutex cacheLock_;
     std::vector<UIEventClient> clientList_;
+
+    ACE_DISALLOW_COPY_AND_MOVE(EventController);
 };
 } // namespace OHOS::Ace::Recorder
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_RECORDER_EVENT_CONTROLLER_H

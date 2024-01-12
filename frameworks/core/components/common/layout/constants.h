@@ -606,7 +606,7 @@ enum class PositionMode {
     BOTTOM,
 };
 
-enum class XComponentType { SURFACE = 0, COMPONENT, TEXTURE };
+enum class XComponentType { UNKNOWN = -1, SURFACE = 0, COMPONENT, TEXTURE, NODE };
 
 enum class WebType { SURFACE = 0, TEXTURE };
 
@@ -631,6 +631,7 @@ enum class GestureJudgeResult {
 };
 
 enum class GestureTypeName {
+    UNKNOWN = -1,
     TAP_GESTURE = 0,
     LONG_PRESS_GESTURE = 1,
     PAN_GESTURE = 2,
@@ -723,6 +724,10 @@ enum class Orientation : uint32_t {
     END = LOCKED,
 };
 
+enum class NodeRenderType : uint32_t {
+    RENDER_TYPE_DISPLAY = 0,
+    RENDER_TYPE_TEXTURE,
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_BASE_LAYOUT_CONSTANTS_H

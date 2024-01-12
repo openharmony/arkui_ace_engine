@@ -52,8 +52,133 @@ class ArkCheckboxComponent extends ArkComponent implements CheckboxAttribute {
       this._modifiersWithKeys, CheckboxMarkModifier.identity, CheckboxMarkModifier, value);
     return this;
   }
+  padding(value: Padding | Length): this {
+    let arkValue = new ArkPadding();
+    if (value !== null && value !== undefined) {
+      if (isLengthType(value) || isResource(value)) {
+        arkValue.top = <Length>value;
+        arkValue.right = <Length>value;
+        arkValue.bottom = <Length>value;
+        arkValue.left = <Length>value;
+      } else {
+        arkValue.top = (<Padding>value).top;
+        arkValue.right = (<Padding>value).right;
+        arkValue.bottom = (<Padding>value).bottom;
+        arkValue.left = (<Padding>value).left;
+      }
+      modifierWithKey(this._modifiersWithKeys, CheckBoxPaddingModifier.identity, CheckBoxPaddingModifier, arkValue);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, CheckBoxPaddingModifier.identity, CheckBoxPaddingModifier, undefined);
+    }
+    return this;
+  }
+  size(value: SizeOptions): this {
+    modifierWithKey(this._modifiersWithKeys, CheckBoxSizeModifier.identity, CheckBoxSizeModifier, value);
+    return this;
+  }
+  responseRegion(value: Array<Rectangle> | Rectangle): this {
+    modifierWithKey(
+      this._modifiersWithKeys, CheckBoxResponseRegionModifier.identity, CheckBoxResponseRegionModifier, value);
+    return this;
+  }
   onChange(callback: (value: boolean) => void): this {
     throw new Error('Method not implemented.');
+  }
+}
+
+class CheckBoxResponseRegionModifier extends ModifierWithKey<Array<Rectangle> | Rectangle> {
+  constructor(value: Array<Rectangle> | Rectangle) {
+    super(value);
+  }
+  static identity = Symbol('responseRegion');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().checkbox.resetCheckboxResponseRegion(node);
+    } else {
+      let responseRegion: (number | string | Resource)[] = [];
+      if (Array.isArray(this.value)) {
+        for (let i = 0; i < this.value.length; i++) {
+          responseRegion.push(this.value[i].x ?? 'PLACEHOLDER');
+          responseRegion.push(this.value[i].y ?? 'PLACEHOLDER');
+          responseRegion.push(this.value[i].width ?? 'PLACEHOLDER');
+          responseRegion.push(this.value[i].height ?? 'PLACEHOLDER');
+        }
+      } else {
+        responseRegion.push(this.value.x ?? 'PLACEHOLDER');
+        responseRegion.push(this.value.y ?? 'PLACEHOLDER');
+        responseRegion.push(this.value.width ?? 'PLACEHOLDER');
+        responseRegion.push(this.value.height ?? 'PLACEHOLDER');
+      }
+      getUINativeModule().checkbox.setCheckboxResponseRegion(node, responseRegion, responseRegion.length);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    if (Array.isArray(this.value) && Array.isArray(this.stageValue)) {
+      if (this.value.length !== this.stageValue.length) {
+        return true;
+      } else {
+        for (let i = 0; i < this.value.length; i++) {
+          if (!(isBaseOrResourceEqual(this.stageValue[i].x, this.value[i].x) &&
+            isBaseOrResourceEqual(this.stageValue[i].y, this.value[i].y) &&
+            isBaseOrResourceEqual(this.stageValue[i].width, this.value[i].width) &&
+            isBaseOrResourceEqual(this.stageValue[i].height, this.value[i].height)
+          )) {
+            return true;
+          }
+        }
+        return false;
+      }
+    } else if (!Array.isArray(this.value) && !Array.isArray(this.stageValue)) {
+      return (!(isBaseOrResourceEqual(this.stageValue.x, this.value.x) &&
+        isBaseOrResourceEqual(this.stageValue.y, this.value.y) &&
+        isBaseOrResourceEqual(this.stageValue.width, this.value.width) &&
+        isBaseOrResourceEqual(this.stageValue.height, this.value.height)
+      ));
+    } else {
+      return true;
+    }
+  }
+}
+
+class CheckBoxSizeModifier extends ModifierWithKey<SizeOptions> {
+  constructor(value: SizeOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('size');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().checkbox.resetCheckboxSize(node);
+    } else {
+      getUINativeModule().checkbox.setCheckboxSize(node, this.value.width, this.value.height);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+      !isBaseOrResourceEqual(this.stageValue.height, this.value.height);
+  }
+}
+
+class CheckBoxPaddingModifier extends ModifierWithKey<ArkPadding> {
+  constructor(value: ArkPadding) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('padding');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().checkbox.resetCheckboxPadding(node);
+    } else {
+      getUINativeModule().checkbox.setCheckboxPadding(node, this.value.top,
+        this.value.right, this.value.bottom, this.value.left);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
+      !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
+      !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
+      !isBaseOrResourceEqual(this.stageValue.left, this.value.left);
   }
 }
 
@@ -64,10 +189,9 @@ class CheckboxMarkModifier extends ModifierWithKey<MarkStyle> {
   static identity: Symbol = Symbol('checkboxMark');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().checkbox.resetMark(node);
-    }
-    else {
-      GetUINativeModule().checkbox.setMark(node, this.value?.strokeColor, this.value?.size, this.value?.strokeWidth);
+      getUINativeModule().checkbox.resetMark(node);
+    } else {
+      getUINativeModule().checkbox.setMark(node, this.value?.strokeColor, this.value?.size, this.value?.strokeWidth);
     }
   }
 
@@ -86,10 +210,9 @@ class CheckboxSelectModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('checkboxSelect');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().checkbox.resetSelect(node);
-    }
-    else {
-      GetUINativeModule().checkbox.setSelect(node, this.value);
+      getUINativeModule().checkbox.resetSelect(node);
+    } else {
+      getUINativeModule().checkbox.setSelect(node, this.value);
     }
   }
 
@@ -105,10 +228,9 @@ class CheckboxHeightModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('checkboxHeight');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().checkbox.resetHeight(node);
-    }
-    else {
-      GetUINativeModule().checkbox.setHeight(node, this.value);
+      getUINativeModule().checkbox.resetHeight(node);
+    } else {
+      getUINativeModule().checkbox.setHeight(node, this.value);
     }
   }
 
@@ -124,10 +246,9 @@ class CheckboxWidthModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('checkboxWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().checkbox.resetWidth(node);
-    }
-    else {
-      GetUINativeModule().checkbox.setWidth(node, this.value);
+      getUINativeModule().checkbox.resetWidth(node);
+    } else {
+      getUINativeModule().checkbox.setWidth(node, this.value);
     }
   }
 
@@ -143,10 +264,9 @@ class CheckboxSelectedColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('checkboxSelectedColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().checkbox.resetSelectedColor(node);
-    }
-    else {
-      GetUINativeModule().checkbox.setSelectedColor(node, this.value);
+      getUINativeModule().checkbox.resetSelectedColor(node);
+    } else {
+      getUINativeModule().checkbox.setSelectedColor(node, this.value);
     }
   }
 
@@ -162,10 +282,9 @@ class CheckboxUnselectedColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('checkboxUnselectedColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().checkbox.resetUnSelectedColor(node);
-    }
-    else {
-      GetUINativeModule().checkbox.setUnSelectedColor(node, this.value);
+      getUINativeModule().checkbox.resetUnSelectedColor(node);
+    } else {
+      getUINativeModule().checkbox.setUnSelectedColor(node, this.value);
     }
   }
 
@@ -177,7 +296,7 @@ class CheckboxUnselectedColorModifier extends ModifierWithKey<ResourceColor> {
 // @ts-ignore
 globalThis.Checkbox.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkCheckboxComponent(nativeNode);
   });

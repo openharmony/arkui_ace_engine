@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -164,6 +164,83 @@ shared_ptr<JsValue> RequireNativeModule(const shared_ptr<JsRuntime>& runtime, co
 
     return runtime->NewNull();
 }
+
+inline bool PreloadJsEnums(const shared_ptr<JsRuntime>& runtime)
+{
+    return runtime->EvaluateJsCode(
+        (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
+}
+
+inline bool PreloadStateManagement(const shared_ptr<JsRuntime>& runtime)
+{
+    uint8_t* codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
+    int32_t codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
+    return runtime->EvaluateJsCode(codeStart, codeLength);
+}
+
+inline bool PreloadUIContent(const shared_ptr<JsRuntime>& runtime)
+{
+    uint8_t* codeStart = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(_binary_jsUIContext_abc_start));
+    int32_t codeLength = _binary_jsUIContext_abc_end - _binary_jsUIContext_abc_start;
+    return runtime->EvaluateJsCode(codeStart, codeLength);
+}
+
+inline bool PreloadArkComponent(const shared_ptr<JsRuntime>& runtime)
+{
+    return runtime->EvaluateJsCode(
+        (uint8_t*)_binary_arkComponent_abc_start, _binary_arkComponent_abc_end - _binary_arkComponent_abc_start);
+}
+
+bool PreloadConsole(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& global)
+{
+    shared_ptr<JsValue> consoleObj = runtime->NewObject();
+    consoleObj->SetProperty(runtime, "log", runtime->NewFunction(JsiBaseUtils::AppInfoLogPrint));
+    consoleObj->SetProperty(runtime, "debug", runtime->NewFunction(JsiBaseUtils::AppDebugLogPrint));
+    consoleObj->SetProperty(runtime, "info", runtime->NewFunction(JsiBaseUtils::AppInfoLogPrint));
+    consoleObj->SetProperty(runtime, "warn", runtime->NewFunction(JsiBaseUtils::AppWarnLogPrint));
+    consoleObj->SetProperty(runtime, "error", runtime->NewFunction(JsiBaseUtils::AppErrorLogPrint));
+    return global->SetProperty(runtime, "console", consoleObj);
+}
+
+bool PreloadAceConsole(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& global)
+{
+    shared_ptr<JsValue> aceConsoleObj = runtime->NewObject();
+    aceConsoleObj->SetProperty(runtime, "log", runtime->NewFunction(JsiBaseUtils::JsInfoLogPrint));
+    aceConsoleObj->SetProperty(runtime, "debug", runtime->NewFunction(JsiBaseUtils::JsDebugLogPrint));
+    aceConsoleObj->SetProperty(runtime, "info", runtime->NewFunction(JsiBaseUtils::JsInfoLogPrint));
+    aceConsoleObj->SetProperty(runtime, "warn", runtime->NewFunction(JsiBaseUtils::JsWarnLogPrint));
+    aceConsoleObj->SetProperty(runtime, "error", runtime->NewFunction(JsiBaseUtils::JsErrorLogPrint));
+    return global->SetProperty(runtime, "aceConsole", aceConsoleObj);
+}
+
+bool PreloadAceTrace(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& global)
+{
+    shared_ptr<JsValue> aceTraceObj = runtime->NewObject();
+    aceTraceObj->SetProperty(runtime, "begin", runtime->NewFunction(JsiBaseUtils::JsTraceBegin));
+    aceTraceObj->SetProperty(runtime, "end", runtime->NewFunction(JsiBaseUtils::JsTraceEnd));
+    return global->SetProperty(runtime, "aceTrace", aceTraceObj);
+}
+
+bool PreloadPerfutil(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& global)
+{
+    shared_ptr<JsValue> perfObj = runtime->NewObject();
+    perfObj->SetProperty(runtime, "printlog", runtime->NewFunction(JsPerfPrint));
+    perfObj->SetProperty(runtime, "sleep", runtime->NewFunction(JsPerfSleep));
+    perfObj->SetProperty(runtime, "begin", runtime->NewFunction(JsPerfBegin));
+    perfObj->SetProperty(runtime, "end", runtime->NewFunction(JsPerfEnd));
+    return global->SetProperty(runtime, "perfutil", perfObj);
+}
+
+inline bool PreloadExports(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& global)
+{
+    shared_ptr<JsValue> exportsUtilObj = runtime->NewObject();
+    return global->SetProperty(runtime, "exports", exportsUtilObj);
+}
+
+inline bool PreloadRequireNative(const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& global)
+{
+    return global->SetProperty(runtime, "requireNativeModule", runtime->NewFunction(RequireNativeModule));
+}
 } // namespace
 
 // -----------------------
@@ -270,6 +347,32 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
             InitPerfUtilModule();
             InitJsContextModuleObject();
         }
+    } else {
+        auto container = Container::Current();
+        if (container && container->IsDynamicRender()) {
+            LOGD("init ace module for dynamic component");
+            auto vm = std::static_pointer_cast<ArkJSRuntime>(runtime_)->GetEcmaVm();
+            LocalScope scope(vm);
+            // preload js views
+            JsRegisterViews(JSNApi::GetGlobalObject(vm));
+
+            shared_ptr<JsValue> global = runtime_->GetGlobal();
+
+            PreloadConsole(runtime_, global);
+            PreloadAceConsole(runtime_, global);
+            PreloadAceTrace(runtime_, global);
+
+            // preload getContext
+            JsiContextModule::GetInstance()->InitContextModule(runtime_, global);
+
+            PreloadPerfutil(runtime_, global);
+            PreloadExports(runtime_, global);
+            PreloadRequireNative(runtime_, global);
+            PreloadJsEnums(runtime_);
+            PreloadStateManagement(runtime_);
+            PreloadUIContent(runtime_);
+            PreloadArkComponent(runtime_);
+        }
     }
 
     if (usingSharedRuntime_) {
@@ -292,15 +395,10 @@ bool JsiDeclarativeEngineInstance::FireJsEvent(const std::string& eventStr)
 void JsiDeclarativeEngineInstance::InitAceModule()
 {
     if (isUnique_ == false) {
-        uint8_t* codeStart;
-        int32_t codeLength;
-        codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
-        codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
-        runtime_->EvaluateJsCode(codeStart, codeLength);
-        runtime_->EvaluateJsCode(
-            (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
-        runtime_->EvaluateJsCode(
-            (uint8_t*)_binary_arkComponent_abc_start, _binary_arkComponent_abc_end - _binary_arkComponent_abc_start);
+        PreloadStateManagement(runtime_);
+        PreloadJsEnums(runtime_);
+        PreloadArkComponent(runtime_);
+        PreloadUIContent(runtime_);
     }
 #if defined(PREVIEW)
     std::string jsMockSystemPluginString(_binary_jsMockSystemPlugin_abc_start,
@@ -316,6 +414,35 @@ void JsiDeclarativeEngineInstance::InitAceModule()
         LOGW("EvaluateJsCode jsMockHmos failed");
     }
 #endif
+}
+
+extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModuleWorker(void* runtime)
+{
+    JsiDeclarativeEngineInstance::PreloadAceModuleWorker(runtime);
+}
+
+void JsiDeclarativeEngineInstance::PreloadAceModuleWorker(void* runtime)
+{
+    auto sharedRuntime = reinterpret_cast<NativeEngine*>(runtime);
+
+    if (!sharedRuntime) {
+        return;
+    }
+    std::shared_ptr<ArkJSRuntime> arkRuntime = std::make_shared<ArkJSRuntime>();
+    auto nativeArkEngine = static_cast<ArkNativeEngine*>(sharedRuntime);
+    EcmaVM* vm = const_cast<EcmaVM*>(nativeArkEngine->GetEcmaVm());
+    if (vm == nullptr) {
+        return;
+    }
+    if (!arkRuntime->InitializeFromExistVM(vm)) {
+        return;
+    }
+    LocalScope scope(vm);
+
+    // preload js enums
+    PreloadJsEnums(arkRuntime);
+
+    localRuntime_ = arkRuntime;
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModule(void* runtime)
@@ -354,64 +481,39 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     }
     
     // preload js views
-    JsRegisterViews(JSNApi::GetGlobalObject(vm));
+    JsRegisterViews(JSNApi::GetGlobalObject(vm), runtime);
 
     // preload aceConsole
     shared_ptr<JsValue> global = arkRuntime->GetGlobal();
-    shared_ptr<JsValue> aceConsoleObj = arkRuntime->NewObject();
-    aceConsoleObj->SetProperty(arkRuntime, "log", arkRuntime->NewFunction(JsiBaseUtils::JsInfoLogPrint));
-    aceConsoleObj->SetProperty(arkRuntime, "debug", arkRuntime->NewFunction(JsiBaseUtils::JsDebugLogPrint));
-    aceConsoleObj->SetProperty(arkRuntime, "info", arkRuntime->NewFunction(JsiBaseUtils::JsInfoLogPrint));
-    aceConsoleObj->SetProperty(arkRuntime, "warn", arkRuntime->NewFunction(JsiBaseUtils::JsWarnLogPrint));
-    aceConsoleObj->SetProperty(arkRuntime, "error", arkRuntime->NewFunction(JsiBaseUtils::JsErrorLogPrint));
-    global->SetProperty(arkRuntime, "aceConsole", aceConsoleObj);
+    PreloadAceConsole(arkRuntime, global);
 
     // preload aceTrace
-    shared_ptr<JsValue> aceTraceObj = arkRuntime->NewObject();
-    aceTraceObj->SetProperty(arkRuntime, "begin", arkRuntime->NewFunction(JsiBaseUtils::JsTraceBegin));
-    aceTraceObj->SetProperty(arkRuntime, "end", arkRuntime->NewFunction(JsiBaseUtils::JsTraceEnd));
-    global->SetProperty(arkRuntime, "aceTrace", aceTraceObj);
+    PreloadAceTrace(arkRuntime, global);
 
     // preload getContext
     JsiContextModule::GetInstance()->InitContextModule(arkRuntime, global);
 
     // preload perfutil
-    shared_ptr<JsValue> perfObj = arkRuntime->NewObject();
-    perfObj->SetProperty(arkRuntime, "printlog", arkRuntime->NewFunction(JsPerfPrint));
-    perfObj->SetProperty(arkRuntime, "sleep", arkRuntime->NewFunction(JsPerfSleep));
-    perfObj->SetProperty(arkRuntime, "begin", arkRuntime->NewFunction(JsPerfBegin));
-    perfObj->SetProperty(arkRuntime, "end", arkRuntime->NewFunction(JsPerfEnd));
-    global->SetProperty(arkRuntime, "perfutil", perfObj);
+    PreloadPerfutil(arkRuntime, global);
 
     // preload exports and requireNative
-    shared_ptr<JsValue> exportsUtilObj = arkRuntime->NewObject();
-    global->SetProperty(arkRuntime, "exports", exportsUtilObj);
-    global->SetProperty(arkRuntime, "requireNativeModule", arkRuntime->NewFunction(RequireNativeModule));
+    PreloadExports(arkRuntime, global);
+    PreloadRequireNative(arkRuntime, global);
 
     // preload js enums
-    bool jsEnumStyleResult = arkRuntime->EvaluateJsCode(
-        (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
+    bool jsEnumStyleResult = PreloadJsEnums(arkRuntime);
     if (!jsEnumStyleResult) {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
         globalRuntime_ = nullptr;
         return;
     }
 
-    // preload state management
-    uint8_t* codeStart;
-    int32_t codeLength;
-    codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
-    codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
-    bool evalResult = arkRuntime->EvaluateJsCode(codeStart, codeLength);
+    bool evalResult = PreloadStateManagement(arkRuntime);
 
-    // preload uiContext
-    uint8_t* tsCodeStart = const_cast<uint8_t*>(reinterpret_cast<const uint8_t*>(_binary_jsUIContext_abc_start));
-    int32_t tsCodeLength = _binary_jsUIContext_abc_end - _binary_jsUIContext_abc_start;
-    arkRuntime->EvaluateJsCode(tsCodeStart, tsCodeLength);
+    PreloadUIContent(arkRuntime);
 
     // preload ark component
-    bool arkComponentResult = arkRuntime->EvaluateJsCode(
-        (uint8_t*)_binary_arkComponent_abc_start, _binary_arkComponent_abc_end - _binary_arkComponent_abc_start);
+    bool arkComponentResult = PreloadArkComponent(arkRuntime);
     if (!arkComponentResult) {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
         globalRuntime_ = nullptr;
@@ -434,13 +536,7 @@ void JsiDeclarativeEngineInstance::InitConsoleModule()
 
     // app log method
     if (!usingSharedRuntime_) {
-        shared_ptr<JsValue> consoleObj = runtime_->NewObject();
-        consoleObj->SetProperty(runtime_, "log", runtime_->NewFunction(JsiBaseUtils::AppInfoLogPrint));
-        consoleObj->SetProperty(runtime_, "debug", runtime_->NewFunction(JsiBaseUtils::AppDebugLogPrint));
-        consoleObj->SetProperty(runtime_, "info", runtime_->NewFunction(JsiBaseUtils::AppInfoLogPrint));
-        consoleObj->SetProperty(runtime_, "warn", runtime_->NewFunction(JsiBaseUtils::AppWarnLogPrint));
-        consoleObj->SetProperty(runtime_, "error", runtime_->NewFunction(JsiBaseUtils::AppErrorLogPrint));
-        global->SetProperty(runtime_, "console", consoleObj);
+        PreloadConsole(runtime_, global);
     }
 
     if (isModulePreloaded_ && usingSharedRuntime_ && !IsPlugin() && !isUnique_) { // ArkTsCard
@@ -448,19 +544,10 @@ void JsiDeclarativeEngineInstance::InitConsoleModule()
     }
 
     // js framework log method
-    shared_ptr<JsValue> aceConsoleObj = runtime_->NewObject();
-    aceConsoleObj->SetProperty(runtime_, "log", runtime_->NewFunction(JsiBaseUtils::JsInfoLogPrint));
-    aceConsoleObj->SetProperty(runtime_, "debug", runtime_->NewFunction(JsiBaseUtils::JsDebugLogPrint));
-    aceConsoleObj->SetProperty(runtime_, "info", runtime_->NewFunction(JsiBaseUtils::JsInfoLogPrint));
-    aceConsoleObj->SetProperty(runtime_, "warn", runtime_->NewFunction(JsiBaseUtils::JsWarnLogPrint));
-    aceConsoleObj->SetProperty(runtime_, "error", runtime_->NewFunction(JsiBaseUtils::JsErrorLogPrint));
-    global->SetProperty(runtime_, "aceConsole", aceConsoleObj);
+    PreloadAceConsole(runtime_, global);
 
     // js framework trace method
-    shared_ptr<JsValue> aceTraceObj = runtime_->NewObject();
-    aceTraceObj->SetProperty(runtime_, "begin", runtime_->NewFunction(JsiBaseUtils::JsTraceBegin));
-    aceTraceObj->SetProperty(runtime_, "end", runtime_->NewFunction(JsiBaseUtils::JsTraceEnd));
-    global->SetProperty(runtime_, "aceTrace", aceTraceObj);
+    PreloadAceTrace(runtime_, global);
 }
 
 void JsiDeclarativeEngineInstance::InitConsoleModule(ArkNativeEngine* engine)
@@ -498,27 +585,20 @@ void JsiDeclarativeEngineInstance::InitConsoleModule(ArkNativeEngine* engine)
 void JsiDeclarativeEngineInstance::InitPerfUtilModule()
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngineInstance::InitPerfUtilModule");
-    shared_ptr<JsValue> perfObj = runtime_->NewObject();
-    perfObj->SetProperty(runtime_, "printlog", runtime_->NewFunction(JsPerfPrint));
-    perfObj->SetProperty(runtime_, "sleep", runtime_->NewFunction(JsPerfSleep));
-    perfObj->SetProperty(runtime_, "begin", runtime_->NewFunction(JsPerfBegin));
-    perfObj->SetProperty(runtime_, "end", runtime_->NewFunction(JsPerfEnd));
-
     shared_ptr<JsValue> global = runtime_->GetGlobal();
-    global->SetProperty(runtime_, "perfutil", perfObj);
+    PreloadPerfutil(runtime_, global);
 }
 
 void JsiDeclarativeEngineInstance::InitJsExportsUtilObject()
 {
-    shared_ptr<JsValue> exportsUtilObj = runtime_->NewObject();
     shared_ptr<JsValue> global = runtime_->GetGlobal();
-    global->SetProperty(runtime_, "exports", exportsUtilObj);
+    PreloadExports(runtime_, global);
 }
 
 void JsiDeclarativeEngineInstance::InitJsNativeModuleObject()
 {
     shared_ptr<JsValue> global = runtime_->GetGlobal();
-    global->SetProperty(runtime_, "requireNativeModule", runtime_->NewFunction(RequireNativeModule));
+    PreloadRequireNative(runtime_, global);
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     if (!usingSharedRuntime_) {
@@ -845,7 +925,7 @@ napi_value JsiDeclarativeEngineInstance::GetContextValue()
 }
 
 thread_local std::unordered_map<std::string, NamedRouterProperty> JsiDeclarativeEngine::namedRouterRegisterMap_;
-panda::Global<panda::ObjectRef> JsiDeclarativeEngine::obj_;
+thread_local panda::Global<panda::ObjectRef> JsiDeclarativeEngine::obj_;
 
 // -----------------------
 // Start JsiDeclarativeEngine
@@ -988,8 +1068,7 @@ void JsiDeclarativeEngine::RegisterInitWorkerFunc()
         };
         bool debugMode = AceApplicationInfo::GetInstance().IsNeedDebugBreakPoint();
         panda::JSNApi::DebugOption debugOption = { libraryPath.c_str(), debugMode };
-        JSNApi::NotifyDebugMode(
-            tid, vm, libraryPath.c_str(), debugOption, tid, workerPostTask, debugVersion, debugMode);
+        JSNApi::NotifyDebugMode(tid, vm, debugOption, tid, workerPostTask, debugVersion);
 #endif
         instance->InitConsoleModule(arkNativeEngine);
 
@@ -1145,6 +1224,25 @@ bool JsiDeclarativeEngine::ExecuteCardAbc(const std::string& fileName, int64_t c
         return false;
     }
     return true;
+}
+
+bool JsiDeclarativeEngine::ExecuteDynamicAbc(const std::string& fileName, const std::string& entryPoint)
+{
+    CHECK_NULL_RETURN(runtime_, false);
+    auto engine = reinterpret_cast<NativeEngine*>(runtime_);
+    CHECK_NULL_RETURN(engine, false);
+    auto vm = engine->GetEcmaVm();
+    CHECK_NULL_RETURN(vm, false);
+    panda::TryCatch trycatch(vm);
+
+    char* entry = entryPoint.empty() ? nullptr : const_cast<char*>(entryPoint.c_str());
+    [[maybe_unused]] napi_value result = engine->RunScript(fileName.c_str(), entry);
+    if (!trycatch.HasCaught()) {
+        return true;
+    } else {
+        engine->lastException_ = trycatch.GetException();
+        return false;
+    }
 }
 
 bool JsiDeclarativeEngine::UpdateRootComponent()
@@ -1461,10 +1559,12 @@ bool JsiDeclarativeEngine::LoadNamedRouterSource(const std::string& namedRoute, 
     return true;
 }
 
-bool JsiDeclarativeEngine::LoadCard(const std::string& url, int64_t cardId)
+bool JsiDeclarativeEngine::LoadCard(const std::string& url, int64_t cardId, const std::string& entryPoint)
 {
     ACE_SCOPED_TRACE("JsiDeclarativeEngine::LoadCard");
-    return ExecuteCardAbc(url, cardId);
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    return container->IsDynamicRender() ? ExecuteDynamicAbc(url, entryPoint) : ExecuteCardAbc(url, cardId);
 }
 
 #if defined(PREVIEW)
@@ -1600,6 +1700,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
     const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
     CHECK_RUN_ON(JS);
+
     if (Container::IsCurrentUseNewPipeline()) {
         ACE_DCHECK(engineInstance_);
         auto xcFrameNode = NG::FrameNode::GetFrameNode(V2::XCOMPONENT_ETS_TAG, static_cast<int32_t>(nodeId));
@@ -1608,11 +1709,6 @@ void JsiDeclarativeEngine::FireExternalEvent(
         }
         auto xcPattern = DynamicCast<NG::XComponentPattern>(xcFrameNode->GetPattern());
         CHECK_NULL_VOID(xcPattern);
-
-        void* nativeWindow = nullptr;
-
-        nativeWindow = xcPattern->GetNativeWindow();
-
         std::weak_ptr<OH_NativeXComponent> weakNativeXComponent;
         RefPtr<OHOS::Ace::NativeXComponentImpl> nativeXComponentImpl = nullptr;
 
@@ -1621,12 +1717,16 @@ void JsiDeclarativeEngine::FireExternalEvent(
         CHECK_NULL_VOID(nativeXComponent);
         CHECK_NULL_VOID(nativeXComponentImpl);
 
-        if (!nativeWindow) {
-            return;
+        auto type = xcPattern->GetType();
+        if (type == XComponentType::SURFACE || type == XComponentType::TEXTURE) {
+            void* nativeWindow = nullptr;
+            nativeWindow = xcPattern->GetNativeWindow();
+            if (!nativeWindow) {
+                return;
+            }
+            nativeXComponentImpl->SetSurface(nativeWindow);
         }
-        nativeXComponentImpl->SetSurface(nativeWindow);
         nativeXComponentImpl->SetXComponentId(componentId);
-
         auto* arkNativeEngine = static_cast<ArkNativeEngine*>(nativeEngine_);
         if (arkNativeEngine == nullptr) {
             return;
@@ -1637,6 +1737,7 @@ void JsiDeclarativeEngine::FireExternalEvent(
         if (status != napi_ok) {
             return;
         }
+
         std::string arguments;
         auto soPath = xcPattern->GetSoPath().value_or("");
         auto runtime = engineInstance_->GetJsRuntime();
@@ -1647,30 +1748,31 @@ void JsiDeclarativeEngine::FireExternalEvent(
         if (objXComp.IsEmpty() || pandaRuntime->HasPendingException()) {
             return;
         }
-
         auto objContext = JsiObject(objXComp);
         JSRef<JSObject> obj = JSRef<JSObject>::Make(objContext);
         OHOS::Ace::Framework::XComponentClient::GetInstance().AddJsValToJsValMap(componentId, obj);
         napi_close_handle_scope(reinterpret_cast<napi_env>(nativeEngine_), handleScope);
 
-        auto task = [weak = WeakClaim(this), weakPattern = AceType::WeakClaim(AceType::RawPtr(xcPattern))]() {
-            auto pattern = weakPattern.Upgrade();
-            if (!pattern) {
+        if (type == XComponentType::SURFACE || type == XComponentType::TEXTURE) {
+            auto task = [weak = WeakClaim(this), weakPattern = AceType::WeakClaim(AceType::RawPtr(xcPattern))]() {
+                auto pattern = weakPattern.Upgrade();
+                if (!pattern) {
+                    return;
+                }
+                auto bridge = weak.Upgrade();
+                if (bridge) {
+#ifdef XCOMPONENT_SUPPORTED
+                    pattern->NativeXComponentInit();
+#endif
+                }
+            };
+
+            auto delegate = engineInstance_->GetDelegate();
+            if (!delegate) {
                 return;
             }
-            auto bridge = weak.Upgrade();
-            if (bridge) {
-#ifdef XCOMPONENT_SUPPORTED
-                pattern->NativeXComponentInit();
-#endif
-            }
-        };
-
-        auto delegate = engineInstance_->GetDelegate();
-        if (!delegate) {
-            return;
+            delegate->PostSyncTaskToPage(task);
         }
-        delegate->PostSyncTaskToPage(task);
         return;
     }
 #ifndef NG_BUILD
@@ -1812,8 +1914,8 @@ void JsiDeclarativeEngine::DestroyApplication(const std::string& packageName)
 
 void JsiDeclarativeEngine::UpdateApplicationState(const std::string& packageName, Frontend::State state)
 {
-    LOGI("Update application state, packageName %{public}s, state: %{public}d", packageName.c_str(),
-        static_cast<int32_t>(state));
+    LOGI("Update application state %{public}s, state: %{public}s", packageName.c_str(),
+        Frontend::stateToString(state).c_str());
     shared_ptr<JsRuntime> runtime = engineInstance_->GetJsRuntime();
     if (!runtime) {
         return;
@@ -1937,6 +2039,15 @@ void JsiDeclarativeEngine::GetStackTrace(std::string& trace)
         return;
     }
     panda::DFXJSNApi::BuildJsStackTrace(vm, trace);
+}
+
+std::string JsiDeclarativeEngine::GetPagePath(const std::string& url)
+{
+    auto iter = namedRouterRegisterMap_.find(url);
+    if (iter != namedRouterRegisterMap_.end()) {
+        return iter->second.pagePath;
+    }
+    return "";
 }
 
 void JsiDeclarativeEngine::SetLocalStorage(int32_t instanceId, NativeReference* nativeValue)
@@ -2117,27 +2228,16 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
     JsRegisterFormViews(JSNApi::GetGlobalObject(vm), formModuleList);
     // preload aceConsole
     shared_ptr<JsValue> global = arkRuntime->GetGlobal();
-    shared_ptr<JsValue> aceConsoleObj = arkRuntime->NewObject();
-    aceConsoleObj->SetProperty(arkRuntime, "log", arkRuntime->NewFunction(JsiBaseUtils::JsInfoLogPrint));
-    aceConsoleObj->SetProperty(arkRuntime, "debug", arkRuntime->NewFunction(JsiBaseUtils::JsDebugLogPrint));
-    aceConsoleObj->SetProperty(arkRuntime, "info", arkRuntime->NewFunction(JsiBaseUtils::JsInfoLogPrint));
-    aceConsoleObj->SetProperty(arkRuntime, "warn", arkRuntime->NewFunction(JsiBaseUtils::JsWarnLogPrint));
-    aceConsoleObj->SetProperty(arkRuntime, "error", arkRuntime->NewFunction(JsiBaseUtils::JsErrorLogPrint));
-    global->SetProperty(arkRuntime, "aceConsole", aceConsoleObj);
+    PreloadAceConsole(arkRuntime, global);
     // preload aceTrace
-    shared_ptr<JsValue> aceTraceObj = arkRuntime->NewObject();
-    aceTraceObj->SetProperty(arkRuntime, "begin", arkRuntime->NewFunction(JsiBaseUtils::JsTraceBegin));
-    aceTraceObj->SetProperty(arkRuntime, "end", arkRuntime->NewFunction(JsiBaseUtils::JsTraceEnd));
-    global->SetProperty(arkRuntime, "aceTrace", aceTraceObj);
+    PreloadAceTrace(arkRuntime, global);
     // preload getContext
     JsiContextModule::GetInstance()->InitContextModule(arkRuntime, global);
-    // preload exports and requireNative
-    shared_ptr<JsValue> exportsUtilObj = arkRuntime->NewObject();
-    global->SetProperty(arkRuntime, "exports", exportsUtilObj);
+    // preload exports
+    PreloadExports(arkRuntime, global);
 
     // preload js enums
-    bool jsEnumStyleResult = arkRuntime->EvaluateJsCode(
-        (uint8_t*)_binary_jsEnumStyle_abc_start, _binary_jsEnumStyle_abc_end - _binary_jsEnumStyle_abc_start);
+    bool jsEnumStyleResult = PreloadJsEnums(arkRuntime);
     if (!jsEnumStyleResult) {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
         globalRuntime_ = nullptr;
@@ -2145,8 +2245,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
     }
 
     // preload ark component
-    bool arkComponentResult = arkRuntime->EvaluateJsCode(
-        (uint8_t*)_binary_arkComponent_abc_start, _binary_arkComponent_abc_end - _binary_arkComponent_abc_start);
+    bool arkComponentResult = PreloadArkComponent(arkRuntime);
     if (!arkComponentResult) {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);
         globalRuntime_ = nullptr;
@@ -2154,11 +2253,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleCard(
     }
 
     // preload state management
-    uint8_t* codeStart;
-    int32_t codeLength;
-    codeStart = (uint8_t*)_binary_stateMgmt_abc_start;
-    codeLength = _binary_stateMgmt_abc_end - _binary_stateMgmt_abc_start;
-    isModulePreloaded_ = arkRuntime->EvaluateJsCode(codeStart, codeLength);
+    isModulePreloaded_ = PreloadStateManagement(arkRuntime);
 
     {
         std::unique_lock<std::shared_mutex> lock(globalRuntimeMutex_);

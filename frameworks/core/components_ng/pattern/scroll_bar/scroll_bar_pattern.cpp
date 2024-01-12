@@ -22,6 +22,9 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t BAR_DISAPPEAR_DELAY_DURATION = 2000; // 2000ms
 constexpr int32_t BAR_DISAPPEAR_DURATION = 400;        // 400ms
+constexpr int32_t BAR_DISAPPEAR_FRAME_RATE = 20;
+constexpr int32_t BAR_DISAPPEAR_MIN_FRAME_RATE = 0;
+constexpr int32_t BAR_DISAPPEAR_MAX_FRAME_RATE = 90;
 } // namespace
 
 void ScrollBarPattern::OnAttachToFrameNode()
@@ -68,7 +71,7 @@ void ScrollBarPattern::OnModifyDone()
         CHECK_NULL_RETURN(pattern, false);
         if (source == SCROLL_FROM_START) {
             pattern->StopDisappearAnimator();
-            pattern->SendAccessibilityEvent(AccessibilityEventType::SCROLL_START);
+            // AccessibilityEventType::SCROLL_START
             return true;
         }
         return pattern->UpdateCurrentOffset(offset, source);
@@ -79,7 +82,7 @@ void ScrollBarPattern::OnModifyDone()
         if (pattern->GetDisplayMode() == DisplayMode::AUTO) {
             pattern->StartDisappearAnimator();
         }
-        pattern->SendAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        // AccessibilityEventType::SCROLL_END
     };
 
     auto hub = host->GetEventHub<EventHub>();
@@ -205,6 +208,8 @@ void ScrollBarPattern::StartDisappearAnimator()
         AnimationOption option;
         option.SetCurve(Curves::FRICTION);
         option.SetDuration(BAR_DISAPPEAR_DURATION);
+        option.SetFrameRateRange(AceType::MakeRefPtr<FrameRateRange>(
+            BAR_DISAPPEAR_MIN_FRAME_RATE, BAR_DISAPPEAR_MAX_FRAME_RATE, BAR_DISAPPEAR_FRAME_RATE));
         auto disappearAnimation = AnimationUtils::StartAnimation(option, [weak]() {
             auto scrollBar = weak.Upgrade();
             CHECK_NULL_VOID(scrollBar);
@@ -254,9 +259,7 @@ void ScrollBarPattern::SetAccessibilityAction()
         }
         auto source = pattern->GetCurrentPosition();
         pattern->UpdateCurrentOffset(pattern->GetChildOffset(), source);
-        auto frameNode = pattern->GetHost();
-        CHECK_NULL_VOID(frameNode);
-        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        // AccessibilityEventType::SCROLL_END
     });
 
     accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
@@ -267,9 +270,7 @@ void ScrollBarPattern::SetAccessibilityAction()
         }
         auto source = pattern->GetCurrentPosition();
         pattern->UpdateCurrentOffset(-pattern->GetChildOffset(), source);
-        auto frameNode = pattern->GetHost();
-        CHECK_NULL_VOID(frameNode);
-        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        // AccessibilityEventType::SCROLL_END
     });
 }
 

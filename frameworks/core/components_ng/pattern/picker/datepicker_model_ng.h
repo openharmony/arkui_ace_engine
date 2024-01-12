@@ -47,6 +47,7 @@ public:
     static void SetDisappearTextStyle(
         FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
     static void SetShowLunar(FrameNode* frameNode, bool lunar);
+    static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
 
 private:
     static RefPtr<FrameNode> CreateStackNode();

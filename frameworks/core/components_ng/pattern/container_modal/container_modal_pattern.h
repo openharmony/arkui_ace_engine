@@ -60,7 +60,7 @@ public:
 
     virtual void OnWindowForceUnfocused();
 
-    void InitContainerEvent();
+    void Init();
 
     void ShowTitle(bool isShow, bool hasDeco = true, bool needUpdate = false);
 
@@ -129,6 +129,13 @@ public:
         return AceType::DynamicCast<FrameNode>(columnNode->GetChildren().back());
     }
 
+    RefPtr<FrameNode> GetContentNode()
+    {
+        auto stack = GetStackNode();
+        CHECK_NULL_RETURN(stack, nullptr);
+        return AceType::DynamicCast<FrameNode>(stack->GetChildren().front());
+    }
+
     RefPtr<CustomTitleNode> GetFloatingTitleNode()
     {
         auto row = GetFloatingTitleRow();
@@ -147,6 +154,11 @@ public:
     {
         CallButtonsRectChange();
         return false;
+    }
+
+    void OnLanguageConfigurationUpdate() override
+    {
+        InitTitle();
     }
 
 protected:
@@ -182,9 +194,13 @@ protected:
 
 private:
     void WindowFocus(bool isFocus);
-
     void SetTitleButtonHide(
         const RefPtr<FrameNode>& controlButtonsNode, bool hideSplit, bool hideMaximize, bool hideMinimize);
+    CalcLength GetControlButtonRowWidth();
+    void InitTitle();
+    void InitContainerEvent();
+    void InitLayoutProperty();
+    void InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow);
 
     std::string appLabel_;
     RefPtr<PanEvent> panEvent_ = nullptr;

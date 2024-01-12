@@ -50,6 +50,8 @@ public:
 private:
     float pickerItemHeight_ = 0.0f;
     std::vector<int32_t> currentOffset_;
+    void InitGradient(const float& gradientPercent, const RefPtr<FrameNode> stackNode,
+        const RefPtr<FrameNode> columnNode);
     ACE_DISALLOW_COPY_AND_MOVE(DatePickerColumnLayoutAlgorithm);
 };
 } // namespace OHOS::Ace::NG

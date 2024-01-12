@@ -16,10 +16,6 @@
 #include "adapter/ohos/entrance/ace_view_ohos.h"
 
 #include <memory>
-
-#include "flutter/fml/message_loop.h"
-#include "flutter/shell/platform/ohos/platform_task_runner_adapter.h"
-
 #include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/entrance/mmi_event_convertor.h"
 #include "base/log/ace_trace.h"
@@ -55,31 +51,17 @@ bool IsMMIMouseScrollBegin(const AxisEvent& event)
 
 AceViewOhos* AceViewOhos::CreateView(int32_t instanceId, bool useCurrentEventRunner, bool usePlatformThread)
 {
-    if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        auto* aceView =
-            new AceViewOhos(instanceId, ThreadModelImpl::CreateThreadModel(useCurrentEventRunner, !usePlatformThread,
-                !SystemProperties::GetRosenBackendEnabled()));
-        if (aceView != nullptr) {
-            aceView->IncRefCount();
-        }
-        return aceView;
-    } else {
-        auto* aceView =
-            new AceViewOhos(instanceId, FlutterThreadModel::CreateThreadModel(useCurrentEventRunner, !usePlatformThread,
-                !SystemProperties::GetRosenBackendEnabled()));
-        if (aceView != nullptr) {
-            aceView->IncRefCount();
-        }
-        return aceView;
+    auto* aceView =
+        new AceViewOhos(instanceId, ThreadModelImpl::CreateThreadModel(useCurrentEventRunner, !usePlatformThread,
+            !SystemProperties::GetRosenBackendEnabled()));
+    if (aceView != nullptr) {
+        aceView->IncRefCount();
     }
+    return aceView;
 }
 
 AceViewOhos::AceViewOhos(int32_t id, std::unique_ptr<ThreadModelImpl> threadModelImpl)
     : instanceId_(id), threadModelImpl_(std::move(threadModelImpl))
-{}
-
-AceViewOhos::AceViewOhos(int32_t id, std::unique_ptr<FlutterThreadModel> threadModel)
-    : instanceId_(id), threadModel_(std::move(threadModel))
 {}
 
 void AceViewOhos::SurfaceCreated(AceViewOhos* view, OHOS::sptr<OHOS::Rosen::Window> window)
@@ -117,11 +99,12 @@ void AceViewOhos::SetViewportMetrics(AceViewOhos* view, const ViewportConfig& co
 }
 
 void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    const RefPtr<OHOS::Ace::NG::FrameNode>& node)
+    const RefPtr<OHOS::Ace::NG::FrameNode>& node, const std::function<void()>& callback)
 {
     CHECK_NULL_VOID(view);
     CHECK_NULL_VOID(pointerEvent);
-    LogPointInfo(pointerEvent);
+    auto instanceId = view->GetInstanceId();
+    LogPointInfo(pointerEvent, instanceId);
     DispatchEventToPerf(pointerEvent);
     int32_t pointerAction = pointerEvent->GetPointerAction();
 
@@ -131,26 +114,13 @@ void AceViewOhos::DispatchTouchEvent(AceViewOhos* view, const std::shared_ptr<MM
             pointerAction <= MMI::PointerEvent::POINTER_ACTION_AXIS_END) {
             view->ProcessAxisEvent(pointerEvent, node);
         } else {
-#ifdef ENABLE_DRAG_FRAMEWORK
             view->ProcessDragEvent(pointerEvent);
-#endif // ENABLE_DRAG_FRAMEWORK
             view->ProcessMouseEvent(pointerEvent, node);
         }
     } else {
         // touch event
-#ifdef ENABLE_DRAG_FRAMEWORK
         view->ProcessDragEvent(pointerEvent);
-#endif // ENABLE_DRAG_FRAMEWORK
-        int32_t instanceId = view->GetInstanceId();
-        auto container = Platform::AceContainer::GetContainer(instanceId);
-        CHECK_NULL_VOID(container);
-        if (container->IsScenceBoardWindow() &&
-            (pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_MOVE ||
-            pointerAction == MMI::PointerEvent::POINTER_ACTION_PULL_UP)) {
-            view->ProcessMouseEvent(pointerEvent, node);
-        } else {
-            view->ProcessTouchEvent(pointerEvent, node);
-        }
+        view->ProcessTouchEvent(pointerEvent, node, callback);
     }
 }
 
@@ -280,7 +250,7 @@ void AceViewOhos::Launch()
 }
 
 void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
-    const RefPtr<OHOS::Ace::NG::FrameNode>& node)
+    const RefPtr<OHOS::Ace::NG::FrameNode>& node, const std::function<void()>& callback)
 {
     CHECK_NULL_VOID(pointerEvent);
     TouchEvent touchPoint = ConvertTouchEvent(pointerEvent);
@@ -288,13 +258,16 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
         ACE_SCOPED_TRACE("ProcessTouchEvent pointX=%f pointY=%f type=%d timeStamp=%lld id=%d", touchPoint.x,
             touchPoint.y, (int)touchPoint.type, touchPoint.time.time_since_epoch().count(), touchPoint.id);
     }
-    auto markProcess = [pointerEvent]() {
+    auto markProcess = [pointerEvent, finallyCallback = callback]() {
         CHECK_NULL_VOID(pointerEvent);
         if (pointerEvent->GetPointerAction() != MMI::PointerEvent::POINTER_ACTION_MOVE) {
             TAG_LOGI(AceLogTag::ACE_INPUTTRACKING, "touchEvent markProcessed in ace_view, eventInfo: id:%{public}d",
                 pointerEvent->GetId());
         }
         pointerEvent->MarkProcessed();
+        if (finallyCallback) {
+            finallyCallback();
+        }
     };
     if (touchPoint.type != TouchType::UNKNOWN) {
         if (touchEventCallback_) {
@@ -303,7 +276,6 @@ void AceViewOhos::ProcessTouchEvent(const std::shared_ptr<MMI::PointerEvent>& po
     }
 }
 
-#ifdef ENABLE_DRAG_FRAMEWORK
 void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)
 {
     DragEventAction action;
@@ -344,7 +316,6 @@ void AceViewOhos::ProcessDragEvent(const std::shared_ptr<MMI::PointerEvent>& poi
             break;
     }
 }
-#endif // ENABLE_DRAG_FRAMEWORK
 
 void AceViewOhos::ProcessDragEvent(int32_t x, int32_t y, const DragEventAction& action)
 {
@@ -384,7 +355,7 @@ void AceViewOhos::ProcessAxisEvent(const std::shared_ptr<MMI::PointerEvent>& poi
         pointerEvent->MarkProcessed();
     };
     ConvertAxisEvent(pointerEvent, event);
-    
+
     /* The first step of axis event of mouse is equivalent to touch event START + UPDATE.
      * Create a fake UPDATE event here to adapt to axis event of mouse.
      * e.g {START, END} turns into {START, UPDATE, END}.

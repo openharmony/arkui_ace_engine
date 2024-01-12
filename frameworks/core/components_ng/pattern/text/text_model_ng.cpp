@@ -23,6 +23,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/text/text_event_hub.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -46,6 +47,38 @@ void TextModelNG::Create(const std::string& content)
         CHECK_NULL_VOID(gestureHub);
         gestureHub->SetTextDraggable(true);
     }
+
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    textPattern->SetTextController(AceType::MakeRefPtr<TextController>());
+    textPattern->GetTextController()->SetPattern(WeakPtr(textPattern));
+    textPattern->ClearSelectionMenu();
+}
+
+RefPtr<FrameNode> TextModelNG::CreateFrameNode(int32_t nodeId, const std::string& content)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, nodeId, AceType::MakeRefPtr<TextPattern>());
+
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto layout = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    if (layout) {
+        layout->UpdateContent(content);
+    }
+    // set draggable for framenode
+    if (frameNode->IsFirstBuilding()) {
+        auto pipeline = PipelineContext::GetCurrentContext();
+        CHECK_NULL_RETURN(pipeline, nullptr);
+        auto draggable = pipeline->GetDraggable<TextTheme>();
+        frameNode->SetDraggable(draggable);
+        auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_RETURN(gestureHub, nullptr);
+        gestureHub->SetTextDraggable(true);
+    }
+
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    textPattern->SetTextController(AceType::MakeRefPtr<TextController>());
+    textPattern->GetTextController()->SetPattern(WeakPtr(textPattern));
+    textPattern->ClearSelectionMenu();
+    return frameNode;
 }
 
 void TextModelNG::SetFont(const Font& value)
@@ -351,6 +384,11 @@ void TextModelNG::SetOnDrop(NG::OnDragDropFunc&& onDrop)
     ViewAbstract::SetOnDrop(std::move(onDrop));
 }
 
+void TextModelNG::InitText(FrameNode* frameNode, std::string& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, Content, value, frameNode);
+}
+
 void TextModelNG::SetTextCase(FrameNode* frameNode, Ace::TextCase value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextCase, value, frameNode);
@@ -426,5 +464,35 @@ void TextModelNG::SetFont(FrameNode* frameNode, const Font& value)
 void TextModelNG::SetLetterSpacing(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LetterSpacing, value, frameNode);
+}
+
+void TextModelNG::SetWordBreak(FrameNode* frameNode, Ace::WordBreak value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, WordBreak, value, frameNode);
+}
+
+void TextModelNG::BindSelectionMenu(TextSpanType& spanType, TextResponseType& responseType,
+    std::function<void()>& buildFunc, SelectMenuParam& menuParam)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    if (pattern) {
+        pattern->BindSelectionMenu(spanType, responseType, buildFunc, menuParam.onAppear, menuParam.onDisappear);
+    }
+}
+
+void TextModelNG::SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<TextEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelectionChange(std::move(func));
+}
+
+RefPtr<TextControllerBase> TextModelNG::GetTextController()
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    return pattern->GetTextController();
 }
 } // namespace OHOS::Ace::NG

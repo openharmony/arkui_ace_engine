@@ -30,31 +30,17 @@
 namespace OHOS::Ace::Platform {
 AceViewPreview* AceViewPreview::CreateView(int32_t instanceId, bool useCurrentEventRunner, bool usePlatformThread)
 {
-    if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        auto* aceView =
-            new AceViewPreview(instanceId, ThreadModelImpl::CreateThreadModel(useCurrentEventRunner, !usePlatformThread,
-                !SystemProperties::GetRosenBackendEnabled()));
-        if (aceView != nullptr) {
-            aceView->IncRefCount();
-        }
-        return aceView;
-    } else {
-        auto* aceView =
-            new AceViewPreview(instanceId, FlutterThreadModel::CreateThreadModel(useCurrentEventRunner,
-                !usePlatformThread, !SystemProperties::GetRosenBackendEnabled()));
-        if (aceView != nullptr) {
-            aceView->IncRefCount();
-        }
-        return aceView;
+    auto* aceView =
+        new AceViewPreview(instanceId, ThreadModelImpl::CreateThreadModel(useCurrentEventRunner, !usePlatformThread,
+            !SystemProperties::GetRosenBackendEnabled()));
+    if (aceView != nullptr) {
+        aceView->IncRefCount();
     }
+    return aceView;
 }
 
 AceViewPreview::AceViewPreview(int32_t instanceId, std::unique_ptr<ThreadModelImpl> threadModelImpl)
     : instanceId_(instanceId), threadModelImpl_(std::move(threadModelImpl))
-{}
-
-AceViewPreview::AceViewPreview(int32_t instanceId, std::unique_ptr<FlutterThreadModel> threadModel)
-    : instanceId_(instanceId), threadModel_(std::move(threadModel))
 {}
 
 void AceViewPreview::NotifySurfaceChanged(int32_t width, int32_t height,

@@ -187,6 +187,7 @@ struct GraphicsProperty {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(DynamicLightUpDegree, float);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackShadow, Shadow);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(BackBlendMode, BlendMode);
+    ACE_DEFINE_PROPERTY_GROUP_ITEM(BackBlendApplyType, BlendApplyType);
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 };
 

@@ -81,6 +81,29 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, boo
     dragDropManager->AddDragFrameNode(nodeId, AceType::WeakClaim(AceType::RawPtr(frameNode)));
 }
 
+// for DynamicComponent
+void UIExtensionModelNG::Create()
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::DYNAMIC_COMPONENT_ETS_TAG, nodeId,
+        []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
+    stack->Push(frameNode);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->AddWindowStateChangedCallback(nodeId);
+}
+
+void UIExtensionModelNG::InitializeDynamicComponent(const RefPtr<FrameNode>& frameNode, const std::string& hapPath,
+    const std::string& abcPath, const std::string& entryPoint, void* runtime)
+{
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->InitializeDynamicComponent(hapPath, abcPath, entryPoint, runtime);
+}
+
 void UIExtensionModelNG::SetOnRemoteReady(std::function<void(const RefPtr<UIExtensionProxy>&)>&& onRemoteReady)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();

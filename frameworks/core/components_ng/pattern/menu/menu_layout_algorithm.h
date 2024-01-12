@@ -60,6 +60,8 @@ protected:
     OffsetF position_;
     OffsetF positionOffset_;
     SizeF wrapperSize_;
+    // rect is relative to menuWrapper
+    Rect wrapperRect_;
 
 private:
     enum class ErrorPositionType {
@@ -81,6 +83,9 @@ private:
 
     void Initialize(LayoutWrapper* layoutWrapper);
     void InitializePadding(LayoutWrapper* layoutWrapper);
+    void InitializePaddingAPI11(LayoutWrapper* layoutWrapper);
+    void InitWrapperRect(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
+    void InitSpace(const RefPtr<MenuLayoutProperty>& props, const RefPtr<MenuPattern>& menuPattern);
     void ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, OffsetF& position);
     LayoutConstraintF CreateChildConstraint(LayoutWrapper* layoutWrapper);
     void UpdateConstraintWidth(LayoutWrapper* layoutWrapper, LayoutConstraintF& constraint);

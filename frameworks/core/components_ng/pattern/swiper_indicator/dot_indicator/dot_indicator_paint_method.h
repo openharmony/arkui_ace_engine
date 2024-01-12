@@ -133,6 +133,11 @@ public:
         pointAnimationStage_ = pointAnimationStage;
     }
 
+    void SetCurrentIndexActual(int32_t currentIndexActual)
+    {
+        currentIndexActual_ = currentIndexActual;
+    }
+
 private:
     struct StarAndEndPointCenter {
         float startLongPointLeftCenterX = 0.0f;
@@ -162,7 +167,9 @@ private:
         const PaintWrapper* paintWrapper, std::vector<std::pair<float, float>>& pointCenterX);
     std::tuple<float, float, float> GetMoveRate();
     void AdjustPointCenterXForTouchBottom(StarAndEndPointCenter& pointCenter,
-        LinearVector<float>& endVectorBlackPointCenterX, int32_t startCurrentIndex, int32_t endCurrentIndex);
+        LinearVector<float>& endVectorBlackPointCenterX, int32_t startCurrentIndex, int32_t endCurrentIndex,
+        float selectedItemWidth, int32_t index);
+    std::pair<int32_t, int32_t> GetIndex(int32_t index);
 
     RefPtr<DotIndicatorModifier> dotIndicatorModifier_;
     PointF hoverPoint_;
@@ -170,10 +177,11 @@ private:
     std::optional<int32_t> mouseClickIndex_ = std::nullopt;
     Axis axis_ = Axis::HORIZONTAL;
     int32_t currentIndex_ = 0;
+    int32_t currentIndexActual_ = 0;
     int32_t itemCount_ = 0;
     int32_t displayCount_ = 1;
     float turnPageRate_ = 0.0f;
-    GestureState gestureState_ = GestureState::GESTURE_STATE_FOLLOW;
+    GestureState gestureState_ = GestureState::GESTURE_STATE_INIT;
     TouchBottomTypeLoop touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
     PointAnimationStage pointAnimationStage_ = PointAnimationStage::STATE_SHRINKT_TO_BLACK_POINT;
     float touchBottomRate_ = 0.0f;

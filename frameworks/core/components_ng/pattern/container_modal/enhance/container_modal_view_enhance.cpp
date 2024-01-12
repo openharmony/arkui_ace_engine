@@ -71,8 +71,8 @@ namespace OHOS::Ace::NG {
  */
 namespace {
 const Dimension MENU_CONTAINER_WIDTH = 240.0_vp;
-const Dimension MENU_CONTAINER_HEIGHT = 209.0_vp;
-const Dimension MENU_CONTAINER_HEIGHT_HIDE = 100.0_vp;
+const Dimension MENU_CONTAINER_HEIGHT = 201.0_vp;
+const Dimension MENU_CONTAINER_HEIGHT_HIDE = 96.0_vp;
 const Dimension MENU_CONTAINER_DIVIDER_HEIGHT = 9.0_vp;
 const Dimension MENU_CONTAINER_DIVIDER_STROKE_HEIGHT = 1.0_vp;
 const Dimension MENU_ITEM_RADIUS = 8.0_vp;
@@ -114,7 +114,6 @@ RefPtr<FrameNode> ContainerModalViewEnhance::Create(RefPtr<FrameNode>& content)
 {
     auto containerModalNode = FrameNode::CreateFrameNode("ContainerModal",
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ContainerModalPatternEnhance>());
-    containerModalNode->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     auto stack = FrameNode::CreateFrameNode(
         V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
     auto column = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
@@ -125,24 +124,13 @@ RefPtr<FrameNode> ContainerModalViewEnhance::Create(RefPtr<FrameNode>& content)
     column->AddChild(BuildTitle(containerModalNode));
     stack->AddChild(content);
     column->AddChild(stack);
-    content->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_CONTENT);
-    content->GetLayoutProperty()->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(1.0, DimensionUnit::PERCENT)));
     containerModalNode->AddChild(column);
     containerModalNode->AddChild(BuildTitle(containerModalNode, true));
     containerModalNode->AddChild(AddControlButtons(containerModalNode, controlButtonsRow));
 
-    CHECK_NULL_RETURN(stack->GetLayoutProperty(), nullptr);
-    stack->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    CHECK_NULL_RETURN(column->GetLayoutProperty(), nullptr);
-    column->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-    CHECK_NULL_RETURN(controlButtonsRow->GetLayoutProperty(), nullptr);
-    controlButtonsRow->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-
     auto containerPattern = containerModalNode->GetPattern<ContainerModalPatternEnhance>();
     CHECK_NULL_RETURN(containerPattern, nullptr);
-    containerModalNode->MarkModifyDone();
-    containerPattern->InitContainerEvent();
+    containerPattern->Init();
     return containerModalNode;
 }
 
@@ -151,20 +139,21 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildTitle(RefPtr<FrameNode>& conta
     LOGI("ContainerModalViewEnhance BuildTitle called");
     auto titleRow = BuildTitleContainer(containerNode, isFloatingTitle);
     CHECK_NULL_RETURN(titleRow, nullptr);
-    return SetTapGestureEvent(containerNode, titleRow);
+    SetTapGestureEvent(containerNode, titleRow);
+    return titleRow;
 }
 
-RefPtr<FrameNode> ContainerModalViewEnhance::SetTapGestureEvent(
+void ContainerModalViewEnhance::SetTapGestureEvent(
     RefPtr<FrameNode>& containerNode, RefPtr<FrameNode>& containerTitleRow)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, nullptr);
+    CHECK_NULL_VOID(pipeline);
     auto windowManager = pipeline->GetWindowManager();
-    CHECK_NULL_RETURN(windowManager, nullptr);
+    CHECK_NULL_VOID(windowManager);
     auto eventHub = containerTitleRow->GetOrCreateGestureEventHub();
-    CHECK_NULL_RETURN(eventHub, nullptr);
+    CHECK_NULL_VOID(eventHub);
     auto tapGesture = AceType::MakeRefPtr<NG::TapGesture>(2, 1);
-    CHECK_NULL_RETURN(tapGesture, nullptr);
+    CHECK_NULL_VOID(tapGesture);
     tapGesture->SetOnActionId([weakContainerNode = AceType::WeakClaim(AceType::RawPtr(containerNode)),
                                   weakWindowManager = AceType::WeakClaim(AceType::RawPtr(windowManager))](
                                   GestureEvent& info) {
@@ -186,7 +175,6 @@ RefPtr<FrameNode> ContainerModalViewEnhance::SetTapGestureEvent(
     });
     eventHub->AddGesture(tapGesture);
     eventHub->OnModifyDone();
-    return containerTitleRow;
 }
 
 RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
@@ -196,14 +184,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
     CHECK_NULL_RETURN(pipeline, nullptr);
     auto windowManager = pipeline->GetWindowManager();
     CHECK_NULL_RETURN(windowManager, nullptr);
-    auto controlButtonsRow = SetTapGestureEvent(containerNode, containerTitleRow);
-    CHECK_NULL_RETURN(controlButtonsRow, nullptr);
-    auto layoutProperty = controlButtonsRow->GetLayoutProperty<LinearLayoutProperty>();
-    CHECK_NULL_RETURN(layoutProperty, nullptr);
-    layoutProperty->UpdateUserDefinedIdealSize(
-        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));
-    layoutProperty->UpdateMainAxisAlign(FlexAlign::FLEX_END);
-    layoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    SetTapGestureEvent(containerNode, containerTitleRow);
 
     RefPtr<FrameNode> maximizeBtn = BuildControlButton(InternalResource::ResourceId::IC_WINDOW_MAX,
         [weak = AceType::WeakClaim(AceType::RawPtr(containerNode)),
@@ -225,7 +206,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
     maximizeBtn->UpdateInspectorId("EnhanceMaximizeBtn");
     BondingMaxBtnGestureEvent(maximizeBtn, containerNode);
     BondingMaxBtnInputEvent(maximizeBtn, containerNode);
-    controlButtonsRow->AddChild(maximizeBtn);
+    containerTitleRow->AddChild(maximizeBtn);
 
     RefPtr<FrameNode> minimizeBtn = BuildControlButton(InternalResource::ResourceId::IC_WINDOW_MIN,
         [weak = AceType::WeakClaim(AceType::RawPtr(windowManager))](GestureEvent& info) {
@@ -239,7 +220,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
         });
     // minimizeBtn add empty panEvent to over fater container event
     minimizeBtn->UpdateInspectorId("EnhanceMinimizeBtn");
-    controlButtonsRow->AddChild(minimizeBtn);
+    containerTitleRow->AddChild(minimizeBtn);
 
     RefPtr<FrameNode> closeBtn = BuildControlButton(
         InternalResource::ResourceId::IC_WINDOW_CLOSE,
@@ -255,9 +236,9 @@ RefPtr<FrameNode> ContainerModalViewEnhance::AddControlButtons(
         true);
     // closeBtn add empty panEvent to over fater container event
     closeBtn->UpdateInspectorId("EnhanceCloseBtn");
-    controlButtonsRow->AddChild(closeBtn);
+    containerTitleRow->AddChild(closeBtn);
 
-    return controlButtonsRow;
+    return containerTitleRow;
 }
 
 void ContainerModalViewEnhance::BondingMaxBtnGestureEvent(

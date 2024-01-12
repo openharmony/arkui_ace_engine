@@ -340,6 +340,7 @@ static napi_value JSPlay(napi_env env, napi_callback_info info)
     } else {
         animator->Play();
     }
+    animator->PrintVsyncInfoIfNeed();
     napi_value result = nullptr;
     napi_get_null(env, &result);
     return result;

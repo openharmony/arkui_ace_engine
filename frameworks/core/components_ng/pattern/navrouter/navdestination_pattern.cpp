@@ -15,31 +15,12 @@
 
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 
-#include <algorithm>
-#include <cmath>
-#include <cstdint>
-
-#include "base/geometry/dimension.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
-#include "core/components/common/layout/constants.h"
+#include "base/log/dump_log.h"
 #include "core/components/theme/app_theme.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
-#include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
-#include "core/components_ng/pattern/navigation/navigation_group_node.h"
-#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
-#include "core/components_ng/pattern/navrouter/navdestination_layout_algorithm.h"
-#include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
-#include "core/components_ng/property/property.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/event/touch_event.h"
-#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -149,10 +130,14 @@ void NavDestinationPattern::OnModifyDone()
     auto renderContext = hostNode->GetRenderContext();
     do {
         if (renderContext->GetBackgroundColor().has_value()) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Background already has color: %{public}s",
+                renderContext->GetBackgroundColor()->ColorToString().c_str());
             break;
         }
         if (hostNode->GetNavDestinationMode() == NavDestinationMode::DIALOG) {
             renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set dialog background color: %{public}s",
+                renderContext->GetBackgroundColor()->ColorToString().c_str());
             break;
         }
         auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -164,7 +149,9 @@ void NavDestinationPattern::OnModifyDone()
             break;
         }
         renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
-    } while (0);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set default background color: %{public}s",
+            renderContext->GetBackgroundColor()->ColorToString().c_str());
+    } while (false);
     auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navDestinationLayoutProperty);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
@@ -242,7 +229,7 @@ void NavDestinationPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    SafeAreaExpandOpts opts = {.edges = SAFE_AREA_EDGE_BOTTOM, .type = SAFE_AREA_TYPE_SYSTEM };
+    SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
     host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
 }
 
@@ -257,5 +244,10 @@ void NavDestinationPattern::OnAttachToMainTree()
     }
     CHECK_NULL_VOID(node);
     navigationNode_ = AceType::WeakClaim(RawPtr(node));
+}
+
+void NavDestinationPattern::DumpInfo()
+{
+    DumpLog::GetInstance().AddDesc(std::string("name: ").append(name_));
 }
 } // namespace OHOS::Ace::NG

@@ -58,6 +58,7 @@ RefPtr<NG::ProgressMaskProperty> CreateProgressMaskProperty()
 void MakeProperty(NG::RenderContext& renderContext)
 {
     renderContext.propBorder_ = std::make_unique<NG::BorderProperty>();
+    renderContext.propOuterBorder_ = std::make_unique<NG::OuterBorderProperty>();
     renderContext.propBdImage_ = std::make_unique<NG::BorderImageProperty>();
     renderContext.propOverlay_ = std::make_unique<NG::OverlayProperty>();
     renderContext.propPositionProperty_ = std::make_unique<NG::RenderPositionProperty>();

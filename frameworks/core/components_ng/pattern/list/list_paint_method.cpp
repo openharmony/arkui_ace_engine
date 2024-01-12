@@ -53,7 +53,8 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     if (!divider_.strokeWidth.IsValid() || totalItemCount_ <= 0 ||
         divider_.strokeWidth.Unit() == DimensionUnit::PERCENT ||
         GreatOrEqual(divider_.strokeWidth.ConvertToPx(), contentSize)) {
-        listContentModifier_->ResetDividerInfo();
+        ListDividerArithmetic::DividerMap dividerMap;
+        listContentModifier_->SetDividerMap(std::move(dividerMap));
         return;
     }
     Axis axis = vertical_ ? Axis::HORIZONTAL : Axis::VERTICAL;
@@ -77,8 +78,73 @@ void ListPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         dividerInfo.startMargin = 0.0f;
         dividerInfo.endMargin = 0.0f;
     }
-    listContentModifier_->SetDividerInfo(std::move(dividerInfo));
-    listContentModifier_->FlushDivider();
+    UpdateDividerList(dividerInfo);
+}
+
+void ListPaintMethod::UpdateDividerList(const DividerInfo& dividerInfo)
+{
+    float fSpacingTotal = (dividerInfo.lanes - 1) * dividerInfo.laneGutter;
+    float laneLen =
+        (dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes - dividerInfo.startMargin - dividerInfo.endMargin;
+    float crossLen = dividerInfo.crossSize - dividerInfo.startMargin - dividerInfo.endMargin;
+    listContentModifier_->SetDividerPainter(
+        dividerInfo.constrainStrokeWidth, dividerInfo.isVertical, dividerInfo.color);
+
+    int32_t lanes = dividerInfo.lanes;
+    int32_t laneIdx = 0;
+    bool lastIsItemGroup = false;
+    bool isFirstItem = (itemPosition_.begin()->first == 0);
+    std::map<int32_t, int32_t> lastLineIndex;
+    ListDividerArithmetic::DividerMap dividerMap;
+    ListDivider divider;
+
+    for (const auto& child : itemPosition_) {
+        if (!isFirstItem) {
+            float divOffset = (dividerInfo.space + dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
+            float mainPos = child.second.startPos - divOffset + dividerInfo.mainPadding;
+            float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
+            if (lanes > 1 && !lastIsItemGroup && !child.second.isGroup) {
+                crossPos +=
+                    laneIdx * ((dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes + dividerInfo.laneGutter);
+                divider.length = laneLen;
+            } else {
+                divider.length = crossLen;
+            }
+            OffsetF offset = dividerInfo.isVertical ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
+            divider.offset = offset;
+            dividerMap[child.second.id] = divider;
+        }
+        if (laneIdx == 0 || child.second.isGroup) {
+            lastLineIndex.clear();
+        }
+        lastLineIndex[child.first] = child.second.id;
+        lastIsItemGroup = child.second.isGroup;
+        laneIdx = (lanes <= 1 || (laneIdx + 1) >= lanes || child.second.isGroup) ? 0 : laneIdx + 1;
+        isFirstItem = isFirstItem ? laneIdx > 0 : false;
+    }
+    if (!lastLineIndex.empty() && lastLineIndex.rbegin()->first < dividerInfo.totalItemCount - 1) {
+        int32_t laneIdx = 0;
+        for (auto index : lastLineIndex) {
+            if (index.first + lanes >= dividerInfo.totalItemCount) {
+                break;
+            }
+            float divOffset = (dividerInfo.space - dividerInfo.constrainStrokeWidth) / 2; /* 2 half */
+            float mainPos = itemPosition_.at(index.first).endPos + divOffset + dividerInfo.mainPadding;
+            float crossPos = dividerInfo.startMargin + dividerInfo.crossPadding;
+            if (lanes > 1 && !itemPosition_.at(index.first).isGroup) {
+                crossPos +=
+                    laneIdx * ((dividerInfo.crossSize - fSpacingTotal) / dividerInfo.lanes + dividerInfo.laneGutter);
+                divider.length = laneLen;
+            } else {
+                divider.length = crossLen;
+            }
+            OffsetF offset = dividerInfo.isVertical ? OffsetF(mainPos, crossPos) : OffsetF(crossPos, mainPos);
+            divider.offset = offset;
+            dividerMap[-index.second] = divider;
+            laneIdx++;
+        }
+    }
+    listContentModifier_->SetDividerMap(std::move(dividerMap));
 }
 
 void ListPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)

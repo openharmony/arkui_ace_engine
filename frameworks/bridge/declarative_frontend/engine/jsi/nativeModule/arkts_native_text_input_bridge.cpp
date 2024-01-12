@@ -15,7 +15,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_input_bridge.h"
 
 #include "base/utils/utils.h"
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "core/interfaces/native/node/api.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
@@ -87,7 +87,7 @@ ArkUINativeModuleValue TextInputBridge::SetMaxLines(ArkUIRuntimeCallInfo *runtim
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     void *nativeNode = firstArg->ToNativePointer(vm)->Value();
     if (secondArg->IsNumber()) {
-        uint32_t value = secondArg->Int32Value(vm);
+        uint32_t value = secondArg->Uint32Value(vm);
         GetArkUIInternalNodeAPI()->GetTextInputModifier().SetTextInputMaxLines(nativeNode, value);
     } else {
         GetArkUIInternalNodeAPI()->GetTextInputModifier().ResetTextInputMaxLines(nativeNode);

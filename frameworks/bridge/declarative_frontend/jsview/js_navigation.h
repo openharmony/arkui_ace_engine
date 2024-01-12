@@ -48,6 +48,7 @@ public:
     static void SetBackButtonIcon(const JSCallbackInfo& info);
     static void SetOnNavBarStateChange(const JSCallbackInfo& info);
     static void SetNavDestination(const JSCallbackInfo& info);
+    static void JsExpandSafeArea(const JSCallbackInfo& info);
 
     static void ParseToolBarItems(const JSRef<JSArray>& jsArray, std::list<RefPtr<AceType>>& items);
     static void ParseBarItems(
@@ -55,6 +56,8 @@ public:
     static bool ParseCommonTitle(const JSRef<JSVal>& jsValue);
     static void ParseToolbarItemsConfiguration(
         const JSCallbackInfo& info, const JSRef<JSArray>& jsArray, std::vector<NG::BarItem>& items);
+
+    static void SetCustomNavContentTransition(const JSCallbackInfo& info);
 };
 } // namespace OHOS::Ace::Framework
 

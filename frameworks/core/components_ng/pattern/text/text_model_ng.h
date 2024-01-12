@@ -65,7 +65,12 @@ public:
     void SetOnDrop(NG::OnDragDropFunc&& onDrop) override;
     void SetDraggable(bool draggable) override;
     void SetMenuOptionItems(std::vector<MenuOptionsParam>&& menuOptionsItems) override;
-
+    void BindSelectionMenu(TextSpanType& spanType, TextResponseType& responseType, std::function<void()>& buildFunc,
+        SelectMenuParam& menuParam) override;
+    void SetOnTextSelectionChange(std::function<void(int32_t, int32_t)>&& func) override;
+    RefPtr<TextControllerBase> GetTextController() override;
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& content);
+    static void InitText(FrameNode* frameNode, std::string& value);
     static void SetFontWeight(FrameNode* frameNode, Ace::FontWeight value);
     static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);
     static void SetTextAlign(FrameNode* frameNode, Ace::TextAlign value);
@@ -89,6 +94,7 @@ public:
     static void SetBaselineOffset(FrameNode* frameNode, const Dimension& value);
     static void SetLetterSpacing(FrameNode* frameNode, const Dimension& value);
     static void SetFont(FrameNode* frameNode, const Font& value);
+    static void SetWordBreak(FrameNode* frameNode, WordBreak value);
 };
 } // namespace OHOS::Ace::NG
 

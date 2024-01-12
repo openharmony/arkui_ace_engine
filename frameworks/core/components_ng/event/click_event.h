@@ -64,6 +64,9 @@ public:
             userCallback_.Reset();
         }
         userCallback_ = MakeRefPtr<ClickEvent>(std::move(callback));
+        if (!clickRecognizer_) {
+            clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
+        }
     }
 
     void ClearUserCallback()
@@ -100,6 +103,20 @@ public:
 
     GestureEventFunc GetClickEvent();
 
+    const RefPtr<ClickRecognizer>& GetClickRecognizer()
+    {
+        return clickRecognizer_;
+    }
+
+    void CopyClickEvent(const RefPtr<ClickEventActuator>& clickEventActuator)
+    {
+        clickEvents_ = clickEventActuator->clickEvents_;
+        userCallback_ = clickEventActuator->userCallback_;
+        if (clickEventActuator->clickRecognizer_) {
+            clickRecognizer_ = MakeRefPtr<ClickRecognizer>();
+        }
+    }
+    
 private:
     WeakPtr<GestureEventHub> gestureEventHub_;
     std::list<RefPtr<ClickEvent>> clickEvents_;

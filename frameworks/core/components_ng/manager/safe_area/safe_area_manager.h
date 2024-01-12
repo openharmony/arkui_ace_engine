@@ -40,6 +40,14 @@ public:
     bool UpdateSystemSafeArea(const SafeAreaInsets& safeArea);
 
     /**
+     * @brief Updates the navigation indictor safe area.
+     *
+     * @param safeArea The new navigation indictor safe area.
+     * @return True if the system safe area was modified, false otherwise.
+     */
+    bool UpdateNavArea(const SafeAreaInsets& safeArea);
+
+    /**
      * @brief Retrieves the system safe area insets.
      *
      * This function returns the safe area insets of the system, which represents the portion of the screen that is
@@ -116,6 +124,16 @@ public:
         geoRestoreNodes_.insert(node);
     }
 
+    void AddNeedExpandNode(const WeakPtr<FrameNode>& node)
+    {
+        needExpandNodes_.insert(node);
+    }
+
+    void ClearNeedExpandNode()
+    {
+        needExpandNodes_.clear();
+    }
+
     void RemoveRestoreNode(const WeakPtr<FrameNode>& node)
     {
         geoRestoreNodes_.erase(node);
@@ -125,6 +143,7 @@ public:
     {
         return safeAreaCurve_;
     }
+    void ExpandSafeArea();
 
     OffsetF GetWindowWrapperOffset();
 
@@ -157,6 +176,7 @@ private:
 
     SafeAreaInsets systemSafeArea_;
     SafeAreaInsets cutoutSafeArea_;
+    SafeAreaInsets navSafeArea_;
     // keyboard is bottom direction only
     SafeAreaInsets::Inset keyboardInset_;
 
@@ -166,6 +186,24 @@ private:
      */
     std::set<WeakPtr<FrameNode>> geoRestoreNodes_;
 
+    struct DepthCompare {
+        bool operator()(const WeakPtr<FrameNode>& a, const WeakPtr<FrameNode>& b) const
+        {
+            auto ptrA = a.Upgrade();
+            auto ptrB = b.Upgrade();
+            if (!ptrA || !ptrB) {
+                return false;
+            }
+            if (ptrA->GetDepth() < ptrB->GetDepth()) {
+                return true;
+            }
+            if (ptrA->GetDepth() == ptrB->GetDepth()) {
+                return ptrA < ptrB;
+            }
+            return false;
+        }
+    };
+    std::set<WeakPtr<FrameNode>, DepthCompare> needExpandNodes_;
     // amount of offset to apply to Page when keyboard is up
     float keyboardOffset_ = 0.0f;
 

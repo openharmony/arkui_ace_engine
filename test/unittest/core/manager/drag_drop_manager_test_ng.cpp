@@ -1625,6 +1625,343 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerTest036, TestSize.Level1)
     EXPECT_FALSE(frameNode->GetEventHub<EventHub>());
 }
 
+/**
+ * @tc.name: DragDropManagerTest037
+ * @tc.desc: Test GetItemIndex out of eventHub->CheckPostionInGrid is a true branch.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerTest037, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. construct a GeometryNode,updates MarginFrameOffset and FrameSize.
+     * @tc.expected: geometryNode is not null.
+     */
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetMarginFrameOffset(FRAME_OFFSET);
+    geometryNode->SetFrameSize(FRAME_SIZE);
+
+    /**
+     * @tc.steps: step3. construct a FrameNode with GeometryNode.
+     * @tc.expected: gridNode is not null.
+     */
+    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto gridNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<GridPattern>());
+    ASSERT_NE(dragDropManager, nullptr);
+    gridNode->SetGeometryNode(geometryNode);
+
+    /**
+     * @tc.steps: step4. construct a GridEventHub and updates OnItemDrop and AttachHost.
+     */
+    ItemDragInfo itemDragInfo;
+    auto gridEvent = gridNode->GetEventHub<GridEventHub>();
+    std::string onItemDropInfo;
+    ItemDropFunc onItemDrop = [&onItemDropInfo](const ItemDragInfo& /* dragInfo */, int32_t /* itemIndex */,
+                                  int32_t /* insertIndex */, bool /* isSuccess */) { onItemDropInfo = EXTRA_INFO; };
+    gridEvent->SetOnItemDrop(std::move(onItemDrop));
+    gridEvent->AttachHost(WeakPtr<NG::FrameNode>(gridNode));
+
+    /**
+     * @tc.steps: step5. call GetItemIndex with DragEventType::GRID and gridNode.
+     * @tc.expected: retFlag is true.
+     */
+    dragDropManager->draggedGridFrameNode_ = gridNode;
+    dragDropManager->GetItemIndex(gridNode, DragType::GRID, 0, 0);
+    bool retFlag = gridEvent->CheckPostionInGrid(0, 0);
+    EXPECT_TRUE(retFlag);
+}
+
+/**
+ * @tc.name: DragDropManagerTest038
+ * @tc.desc: Test GetItemIndex out of itemFrameNode is a true branch.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerTest038, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. construct a GeometryNode,updates MarginFrameOffset and FrameSize.
+     * @tc.expected: geometryNode is not null.
+     */
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetMarginFrameOffset(FRAME_OFFSET);
+    geometryNode->SetFrameSize(FRAME_SIZE);
+
+    /**
+     * @tc.steps: step3. construct a FrameNode with GeometryNode.
+     * @tc.expected: gridNode is not null.
+     */
+    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto gridNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<GridPattern>());
+    ASSERT_NE(gridNode, nullptr);
+    gridNode->SetGeometryNode(geometryNode);
+
+    /**
+     * @tc.steps: step4. construct a FrameNode.
+     */
+    auto childId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, childId, AceType::MakeRefPtr<Pattern>());
+    childNode->SetGeometryNode(geometryNode);
+
+    /**
+     * @tc.steps: step5. gridNode AddChild with childNode.
+     */
+    gridNode->AddChild(childNode);
+
+    /**
+     * @tc.steps: step6. call GetItemIndex with DragEventType::GRID and gridNode.
+     * @tc.expected: retFlag is true.
+     */
+    dragDropManager->draggedGridFrameNode_ = gridNode;
+    dragDropManager->GetItemIndex(gridNode, DragType::GRID, 0, 0);
+    bool retFlag = gridNode->FindChildByPosition(0, 0);
+    EXPECT_TRUE(retFlag);
+}
+
+/**
+ * @tc.name: DragDropManagerTest039
+ * @tc.desc: Test CheckParentVisible out of parent is a true branch.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerTest039, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. construct a frameNode and update attributes.
+     * IsVisible is false branch
+     */
+    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    frameNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE, true);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    eventHub->SetEnabled(true);
+
+    /**
+     * @tc.steps: step3. update nodesForDragNotify_.
+     * @tc.expected: nodesForDragNotify_ is not empty.
+     */
+    dragDropManager->RegisterDragStatusListener(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    EXPECT_FALSE(dragDropManager->nodesForDragNotify_.empty());
+
+    /**
+     * @tc.steps: step4. update NotifyDragEvent.
+     * @tc.expected: notifyEvent attributes to be the set value.
+     */
+    RefPtr<NotifyDragEvent> notifyEvent = AceType::MakeRefPtr<NotifyDragEvent>();
+    dragDropManager->UpdateNotifyDragEvent(notifyEvent, Point(1.0f, 1.0f), DragEventType::START);
+    EXPECT_DOUBLE_EQ(notifyEvent->GetX(), 1.0);
+    EXPECT_DOUBLE_EQ(notifyEvent->GetY(), 1.0);
+
+    /**
+     * @tc.steps: step5. call NotifyDragRegisterFrameNode branches of CheckParentVisible out of isVisible.
+     * @tc.expected: isVisible is false.
+     */
+    dragDropManager->NotifyDragRegisterFrameNode(
+        dragDropManager->nodesForDragNotify_, DragEventType::START, notifyEvent);
+    bool isVisible = frameNode->IsVisible();
+    EXPECT_FALSE(isVisible);
+
+    /**
+     * @tc.steps: step6. update nodesForDragNotify_.
+     * @tc.expected: nodesForDragNotify_ is not empty.
+     */
+    dragDropManager->UnRegisterDragStatusListener(frameNode->GetId());
+    EXPECT_TRUE(dragDropManager->nodesForDragNotify_.empty());
+    dragDropManager->RegisterDragStatusListener(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    EXPECT_FALSE(dragDropManager->nodesForDragNotify_.empty());
+
+    /**
+     * @tc.steps: step7. update frameNode attribute.
+     * @tc.expected: parent is not null.
+     */
+    auto customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    frameNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE, true);
+    frameNode->SetParent(WeakPtr<NG::UINode>(customNode));
+    auto parent = frameNode->GetParent();
+    EXPECT_TRUE(parent);
+    parent->SetDepth(32);
+    dragDropManager->UpdateNotifyDragEvent(notifyEvent, Point(1.0f, 1.0f), DragEventType::START);
+
+    /**
+     * @tc.steps: step8. call NotifyDragRegisterFrameNode branches of CheckParentVisible out of parentFrameNode.
+     * @tc.expected: parent->GetDepth() returns a value that is not equal to 1.
+     */
+    dragDropManager->NotifyDragRegisterFrameNode(
+        dragDropManager->nodesForDragNotify_, DragEventType::START, notifyEvent);
+    EXPECT_NE(parent->GetDepth(), 1);
+}
+
+/**
+ * @tc.name: DragDropManagerTest0391
+ * @tc.desc: Test CheckParentVisible out of parentFrameNode  is a true branch.
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerTest0391, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. construct a frameNode and update attributes.
+     * IsVisible is false branch
+     */
+    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    auto customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    customNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE, true);
+    frameNode->SetParent(WeakPtr<NG::UINode>(customNode));
+    auto parent = frameNode->GetParent();
+    EXPECT_TRUE(parent);
+    parent->SetDepth(32);
+    EXPECT_NE(parent->GetDepth(), 1);
+
+    /**
+     * @tc.steps: step4. update nodesForDragNotify_ and NotifyDragEvent.
+     * @tc.expected: nodesForDragNotify_ is not empty.
+     */
+    RefPtr<NotifyDragEvent> notifyEvent = AceType::MakeRefPtr<NotifyDragEvent>();
+    dragDropManager->RegisterDragStatusListener(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    EXPECT_FALSE(dragDropManager->nodesForDragNotify_.empty());
+    dragDropManager->UpdateNotifyDragEvent(notifyEvent, Point(1.0f, 1.0f), DragEventType::START);
+
+    /**
+     * @tc.steps: step5. call NotifyDragRegisterFrameNode branches of CheckParentVisible out of parentFrameNode(is
+     * false).
+     * @tc.expected: customNode->IsVisible() returns a value that is not equal to false.
+     */
+    dragDropManager->NotifyDragRegisterFrameNode(
+        dragDropManager->nodesForDragNotify_, DragEventType::START, notifyEvent);
+    EXPECT_FALSE(customNode->IsVisible());
+}
+
+/**
+ * @tc.name: DragDropManagerTest040
+ * @tc.desc: Test FindHitFrameNodes in frameNode branchs
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerTest040, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. construct a frameNode and update attributes.
+     * @tc.expected: geometryNode is null.
+     */
+    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    frameNode->SetActive(true);
+    frameNode->geometryNode_ = nullptr;
+    auto geometryNode = frameNode->GetGeometryNode();
+    EXPECT_FALSE(geometryNode);
+
+    /**
+     * @tc.steps: step3. update nodesForDragNotify_.
+     * @tc.expected: nodesForDragNotify_ is not empty.
+     */
+    dragDropManager->RegisterDragStatusListener(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    EXPECT_FALSE(dragDropManager->nodesForDragNotify_.empty());
+
+    /**
+     * @tc.steps: step4. call FindHitFrameNodes out of geometryNode are false branches.
+     * @tc.expected: frameNodeList is empty.
+     */
+    auto frameNodeList = dragDropManager->FindHitFrameNodes(Point(1.0f, 1.0f));
+    EXPECT_TRUE(frameNodeList.empty());
+
+    /**
+     * @tc.steps: step5. clear nodesForDragNotify_.
+     */
+    dragDropManager->UnRegisterDragStatusListener(frameNode->GetId());
+    EXPECT_TRUE(dragDropManager->nodesForDragNotify_.empty());
+
+    /**
+     * @tc.steps: step6. updates frameNode and nodesForDragNotify_.
+     */
+    frameNode->SetActive(false);
+    frameNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE, true);
+    dragDropManager->RegisterDragStatusListener(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
+
+    /**
+     * @tc.steps: step7. call FindHitFrameNodes out of IsVisible are false branches.
+     * @tc.expected: frameNodeList is empty.
+     */
+    frameNodeList = dragDropManager->FindHitFrameNodes(Point(1.0f, 1.0f));
+    EXPECT_TRUE(frameNodeList.empty());
+}
+
+/**
+ * @tc.name: DragDropManagerTest041
+ * @tc.desc: Test FindHitFrameNodes in frameNode branchs(IsActive is false)
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNg, DragDropManagerTest041, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. construct a frameNode and update attributes.
+     * @tc.expected: geometryNode is null.
+     */
+    auto frameNodeNullId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, frameNodeNullId, AceType::MakeRefPtr<Pattern>());
+    frameNode->SetActive(false);
+    frameNode->geometryNode_ = nullptr;
+
+    /**
+     * @tc.steps: step3. update nodesForDragNotify_.
+     * @tc.expected: nodesForDragNotify_ is not empty.
+     */
+    dragDropManager->RegisterDragStatusListener(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
+    EXPECT_FALSE(dragDropManager->nodesForDragNotify_.empty());
+
+    /**
+     * @tc.steps: step4. call FindHitFrameNodes out of geometryNode are false branches.
+     * @tc.expected: frameNodeList is empty.
+     */
+    auto frameNodeList = dragDropManager->FindHitFrameNodes(Point(1.0f, 1.0f));
+    EXPECT_TRUE(frameNodeList.empty());
+}
+
  /**
  * @tc.name: DragDropManagerFindDragFrameNodeByPositionTest001
  * @tc.desc: Test FindDragFrameNodeByPosition
@@ -2507,15 +2844,9 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerFireOnEditableTextComponent, Test
      */
     {
         auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXTINPUT_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
-#ifdef ENABLE_DRAG_FRAMEWORK
         EXPECT_CALL(*(AceType::DynamicCast<MockInteractionInterface>(
             MockInteractionInterface::GetInstance())), EnterTextEditorArea(_))
             .Times(1).WillOnce(::testing::Return(0));
-#else
-        EXPECT_CALL(*(AceType::DynamicCast<MockInteractionInterface>(
-            MockInteractionInterface::GetInstance())), EnterTextEditorArea(_))
-            .Times(0);
-#endif // ENABLE_DRAG_FRAMEWORK
         dragDropManager->FireOnEditableTextComponent(frameNode, DragEventType::ENTER);
         dragDropManager->FireOnEditableTextComponent(frameNode, DragEventType::ENTER);
         dragDropManager->FireOnEditableTextComponent(frameNode, DragEventType::MOVE);

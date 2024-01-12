@@ -264,14 +264,18 @@ void JSList::SetSticky(int32_t sticky)
     ListModel::GetInstance()->SetSticky(static_cast<V2::StickyStyle>(sticky));
 }
 
-void JSList::SetContentStartOffset(float startOffset)
+void JSList::SetContentStartOffset(const JSCallbackInfo& info)
 {
-    ListModel::GetInstance()->SetContentStartOffset(startOffset);
+    double value = 0.0;
+    ParseJsDouble(info[0], value);
+    ListModel::GetInstance()->SetContentStartOffset(value);
 }
 
-void JSList::SetContentEndOffset(float endOffset)
+void JSList::SetContentEndOffset(const JSCallbackInfo& info)
 {
-    ListModel::GetInstance()->SetContentEndOffset(endOffset);
+    double value = 0.0;
+    ParseJsDouble(info[0], value);
+    ListModel::GetInstance()->SetContentEndOffset(value);
 }
 
 void JSList::SetScrollSnapAlign(int32_t scrollSnapAlign)
@@ -287,40 +291,35 @@ void JSList::SetScrollSnapAlign(int32_t scrollSnapAlign)
 
 void JSList::SetDivider(const JSCallbackInfo& args)
 {
-    if (args.Length() < 1 || !args[0]->IsObject()) {
-        return;
-    }
-
-    JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
     V2::ItemDivider divider;
+    if (args.Length() >= 1 && args[0]->IsObject()) {
+        JSRef<JSObject> obj = JSRef<JSObject>::Cast(args[0]);
+        bool needReset = obj->GetProperty("strokeWidth")->IsString() &&
+            !std::regex_match(obj->GetProperty("strokeWidth")->ToString(), DIMENSION_REGEX);
+        if (needReset || !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth)) {
+            divider.strokeWidth = 0.0_vp;
+        }
+        if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
+            // Failed to get color from param, using default color defined in theme
+            RefPtr<ListTheme> listTheme = GetTheme<ListTheme>();
+            if (listTheme) {
+                divider.color = listTheme->GetDividerColor();
+            }
+        }
 
-    bool needReset = obj->GetProperty("strokeWidth")->IsString() &&
-        !std::regex_match(obj->GetProperty("strokeWidth")->ToString(), DIMENSION_REGEX);
-    if (needReset || !ConvertFromJSValue(obj->GetProperty("strokeWidth"), divider.strokeWidth)) {
-        divider.strokeWidth = 0.0_vp;
-    }
-    if (!ConvertFromJSValue(obj->GetProperty("color"), divider.color)) {
-        // Failed to get color from param, using default color defined in theme
-        RefPtr<ListTheme> listTheme = GetTheme<ListTheme>();
-        if (listTheme) {
-            divider.color = listTheme->GetDividerColor();
+        needReset = obj->GetProperty("startMargin")->IsString() &&
+            !std::regex_match(obj->GetProperty("startMargin")->ToString(), DIMENSION_REGEX);
+        if (needReset || !ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin)) {
+            divider.startMargin = 0.0_vp;
+        }
+
+        needReset = obj->GetProperty("endMargin")->IsString() &&
+            !std::regex_match(obj->GetProperty("endMargin")->ToString(), DIMENSION_REGEX);
+        if (needReset || !ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin)) {
+            divider.endMargin = 0.0_vp;
         }
     }
-
-    needReset = obj->GetProperty("startMargin")->IsString() &&
-        !std::regex_match(obj->GetProperty("startMargin")->ToString(), DIMENSION_REGEX);
-    if (needReset || !ConvertFromJSValue(obj->GetProperty("startMargin"), divider.startMargin)) {
-        divider.startMargin = 0.0_vp;
-    }
-
-    needReset = obj->GetProperty("endMargin")->IsString() &&
-        !std::regex_match(obj->GetProperty("endMargin")->ToString(), DIMENSION_REGEX);
-    if (needReset || !ConvertFromJSValue(obj->GetProperty("endMargin"), divider.endMargin)) {
-        divider.endMargin = 0.0_vp;
-    }
-
     ListModel::GetInstance()->SetDivider(divider);
-
     args.ReturnSelf();
 }
 
@@ -698,7 +697,7 @@ void JSList::JSBind(BindingTarget globalObj)
     JSClass<JSList>::StaticMethod("onItemDrop", &JSList::ItemDropCallback);
     JSClass<JSList>::StaticMethod("remoteMessage", &JSInteractableView::JsCommonRemoteMessage);
 
-    JSClass<JSList>::InheritAndBind<JSContainerBase>(globalObj);
+    JSClass<JSList>::InheritAndBind<JSScrollableBase>(globalObj);
 }
 
 void JSListScroller::JSBind(BindingTarget globalObj)

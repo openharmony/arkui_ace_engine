@@ -35,6 +35,7 @@ public:
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetHoverEffect(HoverEffectType hoverEffect) override;
     void Pop() override;
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, ToggleType toggleType, bool isOn);
     static void SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& selectedColor);
     static void SetSwitchPointColor(FrameNode* frameNode, const Color& switchPointColor);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
@@ -43,6 +44,9 @@ private:
     static void CreateCheckbox(int32_t nodeId);
     static void CreateSwitch(int32_t nodeId);
     static void CreateButton(int32_t nodeId);
+    static RefPtr<FrameNode> CreateCheckboxFrameNode(int32_t nodeId, bool isOn);
+    static RefPtr<FrameNode> CreateSwitchFrameNode(int32_t nodeId, bool isOn);
+    static RefPtr<FrameNode> CreateButtonFrameNode(int32_t nodeId, bool isOn);
     static void AddNewChild(const RefPtr<UINode>& parentFrame, int32_t nodeId, int32_t index);
     static int32_t RemoveNode(const RefPtr<FrameNode>& childFrameNode, int32_t nodeId);
     static void SetSwitchSelected(RefPtr<FrameNode>& childFrameNode, bool isOn);

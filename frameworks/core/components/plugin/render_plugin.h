@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace {
 class RenderPlugin : public RenderSubContainer {
-DECLARE_ACE_TYPE(RenderPlugin, RenderSubContainer);
+    DECLARE_ACE_TYPE(RenderPlugin, RenderSubContainer);
 
 public:
     static RefPtr<RenderNode> Create();
@@ -52,8 +52,9 @@ public:
         return nullptr;
     }
 
-    bool TouchTest(const Point& globalPoint,
-        const Point& parentLocalPoint, const TouchRestrict& touchRestrict, TouchTestResult& result) override;
+    bool TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
+        TouchTestResult& result) override;
+
 private:
     Dimension rootWidth_ = 0.0_vp;
     Dimension rootHeight_ = 0.0_vp;

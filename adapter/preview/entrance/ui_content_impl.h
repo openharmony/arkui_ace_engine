@@ -44,6 +44,8 @@ public:
     void Initialize(OHOS::Rosen::Window* window,
         const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) override {}
     void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override {}
+    void InitializeDynamic(
+        const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint) override {}
     void Initialize(
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override {}
     void Foreground() override {}
@@ -61,6 +63,8 @@ public:
     // UI content event process
     bool ProcessBackPressed() override;
     bool ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override;
+    bool ProcessPointerEventWithCallback(
+        const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, const std::function<void()>& callback) override;
     bool ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent) override;
     bool ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent) override;
     bool ProcessVsyncEvent(uint64_t timeStampNanos) override;
@@ -120,6 +124,13 @@ public:
     {
         return nullptr;
     }
+
+    SerializedGesture GetFormSerializedGesture() override
+    {
+        return SerializedGesture();
+    }
+
+    void UpdateTransform(const OHOS::Rosen::Transform& transform) override {};
 
 private:
     void CommonInitialize(OHOS::Rosen::Window* window, const std::string& contentInfo, napi_value storage);

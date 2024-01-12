@@ -14,7 +14,7 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rating_bridge.h"
 
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -58,7 +58,7 @@ ArkUINativeModuleValue RatingBridge::SetRatingStepSize(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    
+
     if (secondArg->IsNull() || !secondArg->IsNumber()) {
         GetArkUIInternalNodeAPI()->GetRatingModifier().ResetRatingStepSize(nativeNode);
         return panda::JSValueRef::Undefined(vm);
@@ -85,21 +85,33 @@ ArkUINativeModuleValue RatingBridge::SetStarStyle(ArkUIRuntimeCallInfo* runtimeC
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    Local<JSValueRef> forthArg = runtimeCallInfo->GetCallArgRef(NUM_3);
-    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> backgroundUriArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    Local<JSValueRef> foregroundUriArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    Local<JSValueRef> secondaryUriArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
 
     std::string backgroundUri;
-    ArkTSUtils::ParseJsMedia(vm, secondArg, backgroundUri);
-    std::string foregroundUri;
-    ArkTSUtils::ParseJsMedia(vm, thirdArg, foregroundUri);
-    std::string secondaryUri;
-    ArkTSUtils::ParseJsMedia(vm, forthArg, secondaryUri);
+    if (backgroundUriArg->IsString()) {
+        backgroundUri = backgroundUriArg->ToString(vm)->ToString();
+    }
 
-    GetArkUIInternalNodeAPI()->GetRatingModifier().SetStarStyle(nativeNode,
-        backgroundUri.c_str(), foregroundUri.c_str(), secondaryUri.c_str());
+    std::string foregroundUri;
+    if (foregroundUriArg->IsString()) {
+        foregroundUri = foregroundUriArg->ToString(vm)->ToString();
+    }
+
+    std::string secondaryUri;
+    if (secondaryUriArg->IsString()) {
+        secondaryUri = secondaryUriArg->ToString(vm)->ToString();
+    }
+
+    if (secondaryUri.empty() && !backgroundUri.empty()) {
+        secondaryUri = backgroundUri;
+    }
+
+    GetArkUIInternalNodeAPI()->GetRatingModifier().SetStarStyle(
+        nativeNode, backgroundUri.c_str(), foregroundUri.c_str(), secondaryUri.c_str());
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -47,4 +47,14 @@ void ImageObject::ClearData()
 {
     data_ = nullptr;
 }
+
+int32_t ImageObject::GetFrameCount() const
+{
+    return frameCount_;
+}
+
+void ImageObject::SetFrameCount(int32_t frameCount)
+{
+    frameCount_ = frameCount;
+}
 } // namespace OHOS::Ace::NG

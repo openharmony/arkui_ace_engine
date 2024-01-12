@@ -16,13 +16,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_model_ng.h"
 
 #include "base/log/ace_scoring_log.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#include "base/utils/utils.h"
 #include "core/common/container.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/ui_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -30,12 +24,9 @@
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
-#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "core/image/image_source_info.h"
 
 namespace OHOS::Ace::NG {
 void NavDestinationModelNG::Create()
@@ -54,7 +45,7 @@ void NavDestinationModelNG::Create()
         }
     }
     // content node
-    if (!navDestinationNode->GetTitleBarNode()) {
+    if (!navDestinationNode->GetContentNode()) {
         int32_t contentNodeId = ElementRegister::GetInstance()->MakeUniqueId();
         ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId);
         auto contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, contentNodeId,
@@ -137,15 +128,6 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
     auto backButtonImageLayoutProperty = backButtonImageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(backButtonImageLayoutProperty);
 
-    auto navDestinationEventHub = navDestinationNode->GetEventHub<EventHub>();
-    CHECK_NULL_VOID(navDestinationEventHub);
-    auto paintProperty = backButtonImageNode->GetPaintProperty<ImageRenderProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    if (!navDestinationEventHub->IsEnabled()) {
-        paintProperty->UpdateSvgFillColor(theme->GetBackButtonIconColor().BlendOpacity(theme->GetAlphaDisabled()));
-    } else {
-        paintProperty->UpdateSvgFillColor(theme->GetBackButtonIconColor());
-    }
     backButtonImageLayoutProperty->UpdateImageSourceInfo(imageSourceInfo);
     backButtonImageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     backButtonNode->AddChild(backButtonImageNode);
@@ -196,6 +178,9 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc)
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         navDestinationNode->AddChild(contentNode);
         navDestinationNode->SetContentNode(contentNode);
+
+        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
+        contentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
     stack->Push(navDestinationNode);
 }
@@ -266,6 +251,24 @@ void NavDestinationModelNG::SetTitle(const std::string& title, bool hasSubTitle)
     textLayoutProperty->UpdateTextOverflow(TextOverflow::ELLIPSIS);
     navDestinationNode->SetTitle(titleNode);
     navDestinationNode->UpdatePrevTitleIsCustom(false);
+}
+
+void NavDestinationModelNG::SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
+    const std::string& bundleName, const std::string& moduleName)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navDestinationNode);
+
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+    CHECK_NULL_VOID(titleBarLayoutProperty);
+    ImageSourceInfo imageSourceInfo(src, bundleName, moduleName);
+    titleBarLayoutProperty->UpdateImageSource(imageSourceInfo);
+    titleBarLayoutProperty->UpdateNoPixMap(noPixMap);
+    titleBarLayoutProperty->UpdatePixelMap(pixMap);
+    titleBarNode->MarkModifyDone();
 }
 
 void NavDestinationModelNG::SetSubtitle(const std::string& subtitle)

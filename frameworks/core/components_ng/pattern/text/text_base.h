@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_TEXT_TEXT_BASE_H
 
 #include "base/memory/ace_type.h"
+#include "core/common/container.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_client.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text_field/text_selector.h"
@@ -45,6 +46,22 @@ struct HandleMoveStatus {
     }
 };
 
+template<typename T>
+void GetTextCaretMetrics(RefPtr<FrameNode>& targetNode, CaretMetricsF& caretMetrics)
+{
+    CHECK_NULL_VOID(targetNode);
+    if (targetNode->GetTag() == V2::SEARCH_ETS_TAG) {
+        auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(targetNode->GetChildren().front());
+        CHECK_NULL_VOID(textFieldFrameNode);
+        auto textPattern = textFieldFrameNode->GetPattern<T>();
+        CHECK_NULL_VOID(textPattern);
+        textPattern->GetCaretMetrics(caretMetrics);
+    } else {
+        auto textPattern = targetNode->GetPattern<T>();
+        CHECK_NULL_VOID(textPattern);
+        textPattern->GetCaretMetrics(caretMetrics);
+    }
+}
 class TextBase : public SelectOverlayClient {
     DECLARE_ACE_TYPE(TextBase, SelectOverlayClient);
 
@@ -132,6 +149,21 @@ public:
 
     virtual void ScrollToSafeArea() const {}
 
+    static void UpdateKeyboardOffset(double positionY, double height)
+    {
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+        auto keyboardArea = container->GetKeyboardSafeArea();
+        auto keyboardLength = keyboardArea.bottom_.Length();
+        Rect keyboardRect;
+        keyboardRect.SetRect(0, keyboardArea.bottom_.start, 0, keyboardLength);
+        context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height);
+    }
+
+    virtual void GetCaretMetrics(CaretMetricsF& caretCaretMetric) {}
+    
 protected:
     TextSelector textSelector_;
     bool showSelect_ = true;

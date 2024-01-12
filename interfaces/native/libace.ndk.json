@@ -90,5 +90,17 @@
     {
         "first_introduced": "11",
         "name": "OH_NativeXComponent_UnregisterOnFrameCallback"
+    },
+    {
+        "first_introduced": "11",
+        "name": "OH_ArkUI_GetNativeNodeAPI"
+    },
+    {
+        "first_introduced": "11",
+        "name": "OH_NativeXComponent_AttachNativeRootNode"
+    },
+    {
+        "first_introduced": "11",
+        "name": "OH_NativeXComponent_DetachNativeRootNode"
     }
 ]

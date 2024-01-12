@@ -15,6 +15,8 @@
 
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
 
+#include <iterator>
+
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace::NG {
@@ -70,6 +72,26 @@ std::vector<RectF> ParagraphManager::GetRects(int32_t start, int32_t end) const
     return res;
 }
 
+bool ParagraphManager::IsSelectLineHeadAndUseLeadingMargin(int32_t start) const
+{
+    for (auto iter = paragraphs_.begin(); iter != paragraphs_.end(); iter++) {
+        auto curParagraph = *iter;
+        if (curParagraph.paragraph && curParagraph.paragraph->GetParagraphStyle().leadingMargin &&
+            curParagraph.start == start) {
+            return true;
+        }
+        auto next = std::next(iter);
+        if (next != paragraphs_.end()) {
+            auto nextParagraph = *next;
+            if (nextParagraph.paragraph && nextParagraph.paragraph->GetParagraphStyle().leadingMargin &&
+                nextParagraph.start == start + 1) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 std::vector<RectF> ParagraphManager::GetPlaceholderRects() const
 {
     std::vector<RectF> res;
@@ -120,9 +142,6 @@ OffsetF ParagraphManager::ComputeCursorOffset(
                           paragraph->ComputeOffsetForCaretDownstream(relativeIndex, metrics, needLineHighest);
     }
     CHECK_NULL_RETURN(computeSuccess, OffsetF(0.0f, y));
-    if (NearZero(paragraph->GetTextWidth()) && paragraph->GetParagraphStyle().leadingMargin) {
-        metrics.offset.AddX(paragraph->GetParagraphStyle().leadingMargin->size.Width());
-    }
     selectLineHeight = metrics.height;
     return { static_cast<float>(metrics.offset.GetX()), static_cast<float>(metrics.offset.GetY() + y) };
 }
@@ -152,9 +171,10 @@ OffsetF ParagraphManager::ComputeCursorInfoByClick(
     auto&& paragraph = it->paragraph;
 
     CaretMetricsF caretCaretMetric;
-    auto touchOffsetInCurrent = OffsetF(static_cast<float>(lastTouchOffset.GetX()),
+    auto touchOffsetInCurrentParagraph = OffsetF(static_cast<float>(lastTouchOffset.GetX()),
         static_cast<float>(lastTouchOffset.GetY() - y));
-    paragraph->CalcCaretMetricsByPosition(relativeIndex, caretCaretMetric, touchOffsetInCurrent);
+    TextAffinity textAffinity;
+    paragraph->CalcCaretMetricsByPosition(relativeIndex, caretCaretMetric, touchOffsetInCurrentParagraph, textAffinity);
     selectLineHeight = caretCaretMetric.height;
     return { static_cast<float>(caretCaretMetric.offset.GetX()),
             static_cast<float>(caretCaretMetric.offset.GetY() + y) };

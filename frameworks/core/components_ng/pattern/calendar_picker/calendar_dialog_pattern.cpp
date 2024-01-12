@@ -65,7 +65,11 @@ void CalendarDialogPattern::UpdateDialogBackgroundColor()
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
-    host->GetRenderContext()->UpdateBackgroundColor(theme->GetDialogBackgroundColor());
+    auto contentRenderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(contentRenderContext);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        contentRenderContext->UpdateBackgroundColor(theme->GetDialogBackgroundColor());
+    }
 }
 
 void CalendarDialogPattern::UpdateTitleArrowsColor()

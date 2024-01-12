@@ -84,7 +84,7 @@ void ContainerModalPattern::ShowTitle(bool isShow, bool hasDeco, bool needUpdate
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
     PaddingProperty padding;
-    if (isShow) {
+    if (isShow && customTitleSettedShow_) {
         padding = { CalcLength(CONTENT_PADDING), CalcLength(CONTENT_PADDING), std::nullopt,
             CalcLength(CONTENT_PADDING) };
     }
@@ -530,16 +530,13 @@ void ContainerModalPattern::SetCloseButtonStatus(bool isEnabled)
 
 void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSettedShow, bool floatingTitleSettedShow)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto column = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0));
-    CHECK_NULL_VOID(column);
-
     customTitleSettedShow_ = customTitleSettedShow;
-    auto customTitleRow = AceType::DynamicCast<FrameNode>(column->GetChildAtIndex(0));
+    auto customTitleRow = GetCustomTitleRow();
     CHECK_NULL_VOID(customTitleRow);
-    auto customTitleLayoutProperty = customTitleRow->GetLayoutProperty<LinearLayoutProperty>();
+    auto customTitleLayoutProperty = customTitleRow->GetLayoutProperty();
     CHECK_NULL_VOID(customTitleLayoutProperty);
+    auto containerModalLayoutProperty = GetHost()->GetLayoutProperty();
+    PaddingProperty padding;
     if (customTitleLayoutProperty->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE &&
         !customTitleSettedShow) {
         customTitleLayoutProperty->UpdateVisibility(VisibleType::GONE);
@@ -547,17 +544,24 @@ void ContainerModalPattern::SetContainerModalTitleVisible(bool customTitleSetted
                windowMode_ != WindowMode::WINDOW_MODE_SPLIT_PRIMARY &&
                windowMode_ != WindowMode::WINDOW_MODE_SPLIT_SECONDARY && customTitleSettedShow) {
         customTitleLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+        padding = { CalcLength(CONTENT_PADDING), CalcLength(CONTENT_PADDING), std::nullopt,
+            CalcLength(CONTENT_PADDING) };
     }
+    containerModalLayoutProperty->UpdatePadding(padding);
 
     floatingTitleSettedShow_ = floatingTitleSettedShow;
-    auto floatingTitleRow = AceType::DynamicCast<FrameNode>(column->GetChildAtIndex(1));
+    auto floatingTitleRow = GetFloatingTitleRow();
     CHECK_NULL_VOID(floatingTitleRow);
-    auto floatingTitleLayoutProperty = floatingTitleRow->GetLayoutProperty<LinearLayoutProperty>();
+    auto floatingTitleLayoutProperty = floatingTitleRow->GetLayoutProperty();
     CHECK_NULL_VOID(floatingTitleLayoutProperty);
     if (floatingTitleLayoutProperty->GetVisibilityValue(VisibleType::GONE) == VisibleType::VISIBLE &&
         !floatingTitleSettedShow) {
         floatingTitleLayoutProperty->UpdateVisibility(VisibleType::GONE);
     }
+
+    auto buttonsRow = GetControlButtonRow();
+    CHECK_NULL_VOID(buttonsRow);
+    buttonsRow->SetHitTestMode(HitTestMode::HTMTRANSPARENT_SELF);
 }
 
 void ContainerModalPattern::SetContainerModalTitleHeight(int32_t height)
@@ -586,16 +590,42 @@ int32_t ContainerModalPattern::GetContainerModalTitleHeight()
 
 bool ContainerModalPattern::GetContainerModalButtonsRect(RectF& containerModal, RectF& buttons)
 {
-    auto host = GetHost();
-    CHECK_NULL_RETURN(host, false);
-    auto containerModalRect = host->GetGeometryNode()->GetFrameRect();
-    containerModal = containerModalRect;
-    auto controlButtonsRow = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(2));
+    auto column = GetColumnNode();
+    CHECK_NULL_RETURN(column, false);
+    auto columnRect = column->GetGeometryNode()->GetFrameRect();
+    containerModal = columnRect;
+    if (columnRect.Width() == 0) {
+        LOGW("Get rect of buttons failed, the rect is measuring.");
+        return false;
+    }
+
+    auto controlButtonsRow = GetControlButtonRow();
     CHECK_NULL_RETURN(controlButtonsRow, false);
     auto children = controlButtonsRow->GetChildren();
-    auto firstButtonRect = AceType::DynamicCast<FrameNode>(children.front())->GetGeometryNode()->GetFrameRect();
-    auto lastButtonRect = AceType::DynamicCast<FrameNode>(children.back())->GetGeometryNode()->GetFrameRect();
+    RectF firstButtonRect;
+    RectF lastButtonRect;
+    for (auto& child : children) {
+        auto node = AceType::DynamicCast<FrameNode>(child);
+        if (node->GetLayoutProperty()->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+            continue;
+        }
+        auto rect = node->GetGeometryNode()->GetFrameRect();
+        if (firstButtonRect.Width() == 0) {
+            firstButtonRect = rect;
+        }
+        lastButtonRect = rect;
+    }
     buttons = firstButtonRect.CombineRectT(lastButtonRect);
+    if (buttons.Width() == 0) {
+        LOGW("Get rect of buttons failed, buttons are hidden");
+        return false;
+    }
+
+    auto widthByPx = (TITLE_PADDING_START + TITLE_PADDING_END).ConvertToPx() + buttons.Width();
+    buttons.SetLeft(containerModal.Width() - widthByPx);
+    buttons.SetTop(0);
+    buttons.SetWidth(widthByPx);
+    buttons.SetHeight(titleHeight_.ConvertToPx());
     return true;
 }
 
@@ -624,5 +654,82 @@ void ContainerModalPattern::CallButtonsRectChange()
             }
         },
         TaskExecutor::TaskType::JS);
+}
+
+void ContainerModalPattern::InitTitle()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto themeConstants = themeManager->GetThemeConstants();
+    CHECK_NULL_VOID(themeConstants);
+    auto id = pipeline->GetWindowManager()->GetAppIconId();
+    auto pixelMap = themeConstants->GetPixelMap(id);
+    if (pixelMap) {
+        RefPtr<PixelMap> icon = PixelMap::CreatePixelMap(&pixelMap);
+        SetAppIcon(icon);
+    } else {
+        LOGW("Cannot get pixelmap, try media path."); // use themeConstants GetMediaPath
+    }
+    SetAppTitle(themeConstants->GetString(pipeline->GetWindowManager()->GetAppLabelId()));
+}
+
+void ContainerModalPattern::Init()
+{
+    InitContainerEvent();
+    InitTitle();
+    InitLayoutProperty();
+}
+
+void ContainerModalPattern::InitLayoutProperty()
+{
+    auto containerModal = GetHost();
+    containerModal->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+
+    auto column = GetColumnNode();
+    column->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+
+    auto content = GetContentNode();
+    auto contentProperty = content->GetLayoutProperty();
+    contentProperty->UpdateMeasureType(MeasureType::MATCH_CONTENT);
+    contentProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(1.0, DimensionUnit::PERCENT)));
+
+    auto stack = GetStackNode();
+    stack->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+
+    auto buttonsRow = GetControlButtonRow();
+    auto buttonsRowProperty = buttonsRow->GetLayoutProperty<LinearLayoutProperty>();
+    buttonsRowProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    buttonsRowProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));
+    buttonsRowProperty->UpdateMainAxisAlign(FlexAlign::FLEX_END);
+    buttonsRowProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
+
+    InitTitleRowLayoutProperty(GetCustomTitleRow());
+    InitTitleRowLayoutProperty(GetFloatingTitleRow());
+
+    containerModal->MarkModifyDone();
+}
+
+void ContainerModalPattern::InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow)
+{
+    auto titleRowProperty = titleRow->GetLayoutProperty<LinearLayoutProperty>();
+    titleRowProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    titleRowProperty->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));
+    titleRowProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+    titleRowProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
+    PaddingProperty padding { std::nullopt, GetControlButtonRowWidth(), std::nullopt, std::nullopt };
+    titleRowProperty->UpdatePadding(padding);
+}
+
+CalcLength ContainerModalPattern::GetControlButtonRowWidth()
+{
+    auto row = GetControlButtonRow();
+    int32_t buttonNum = row->GetChildren().size();
+
+    return CalcLength(TITLE_ELEMENT_MARGIN_HORIZONTAL * (buttonNum - 1) + TITLE_BUTTON_SIZE * buttonNum +
+                      TITLE_PADDING_START + TITLE_PADDING_END);
 }
 } // namespace OHOS::Ace::NG

@@ -1206,18 +1206,15 @@ void WebDelegate::SetPortMessageCallback(std::string& port, std::function<void(c
     }
 }
 
-void WebDelegate::RequestFocus()
+bool WebDelegate::RequestFocus()
 {
     auto context = context_.Upgrade();
-    if (!context) {
-        return;
-    }
-    context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this)]() {
+    CHECK_NULL_RETURN(context, false);
+    bool result = false;
+    context->GetTaskExecutor()->PostSyncTask(
+        [weak = WeakClaim(this), &result]() {
             auto delegate = weak.Upgrade();
-            if (!delegate) {
-                return;
-            }
+            CHECK_NULL_VOID(delegate);
 
             if (Container::IsCurrentUseNewPipeline()) {
                 auto webPattern = delegate->webPattern_.Upgrade();
@@ -1227,14 +1224,16 @@ void WebDelegate::RequestFocus()
                 auto focusHub = eventHub->GetOrCreateFocusHub();
                 CHECK_NULL_VOID(focusHub);
 
-                focusHub->RequestFocusImmediately(true);
+                result = focusHub->RequestFocusImmediately(true);
+                return;
             }
 
             auto webCom = delegate->webComponent_.Upgrade();
             CHECK_NULL_VOID(webCom);
-            webCom->RequestFocus();
+            result = webCom->RequestFocus();
         },
         TaskExecutor::TaskType::PLATFORM);
+    return result;
 }
 
 void WebDelegate::SearchAllAsync(const std::string& searchStr)
@@ -1682,11 +1681,18 @@ bool WebDelegate::PrepareInitOHOSWeb(const WeakPtr<PipelineBase>& context)
         onTouchIconUrlV2_ = useNewPipe ? eventHub->GetOnTouchIconUrlEvent() : nullptr;
         onAudioStateChangedV2_ = GetAudioStateChangedCallback(useNewPipe, eventHub);
         onFirstContentfulPaintV2_ = useNewPipe ? eventHub->GetOnFirstContentfulPaintEvent() : nullptr;
+        onSafeBrowsingCheckResultV2_ = useNewPipe ? eventHub->GetOnSafeBrowsingCheckResultEvent() : nullptr;
         onOverScrollV2_ = useNewPipe ? eventHub->GetOnOverScrollEvent()
                                      : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
                                            webCom->GetOverScrollId(), oldContext);
         onScreenCaptureRequestV2_ = useNewPipe ? eventHub->GetOnScreenCaptureRequestEvent() : nullptr;
         onNavigationEntryCommittedV2_ = useNewPipe ? eventHub->GetOnNavigationEntryCommittedEvent() : nullptr;
+        OnNativeEmbedLifecycleChangeV2_ = useNewPipe ? eventHub->GetOnNativeEmbedLifecycleChangeEvent()
+                                            : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                                webCom->GetNativeEmbedLifecycleChangeId(), oldContext);
+        OnNativeEmbedGestureEventV2_ = useNewPipe ? eventHub->GetOnNativeEmbedGestureEvent()
+                                            : AceAsyncEvent<void(const std::shared_ptr<BaseEventInfo>&)>::Create(
+                                                webCom->GetNativeEmbedGestureEventId(), oldContext);
     }
     return true;
 }
@@ -2296,13 +2302,6 @@ void WebDelegate::SetWebCallBack()
             }
             return std::string();
         });
-        webController->SetIsIncognitoModeImpl([weak = WeakClaim(this)]() {
-            auto delegate = weak.Upgrade();
-            if (delegate) {
-                return delegate->IsIncognitoMode();
-            }
-            return false;
-        });
     } else {
         TAG_LOGW(AceLogTag::ACE_WEB, "web controller is nullptr");
     }
@@ -2332,7 +2331,7 @@ void WebDelegate::InitWebViewWithWindow()
             delegate->nweb_ =
                 OHOS::NWeb::NWebAdapterHelper::Instance().CreateNWeb(
                     delegate->window_.GetRefPtr(), initArgs,
-                    delegate->IsIncognitoMode());
+                    delegate->incognitoMode_);
             if (delegate->nweb_ == nullptr) {
                 delegate->window_ = nullptr;
                 return;
@@ -3486,6 +3485,26 @@ void WebDelegate::UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEn
         TaskExecutor::TaskType::PLATFORM);
 }
 
+void WebDelegate::UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled)
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    isEmbedModeEnabled_ = isEmbedModeEnabled;
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), isEmbedModeEnabled]() {
+            auto delegate = weak.Upgrade();
+            if (delegate && delegate->nweb_) {
+                std::shared_ptr<OHOS::NWeb::NWebPreference> setting = delegate->nweb_->GetPreference();
+                if (setting) {
+                    setting->SetNativeEmbedMode(isEmbedModeEnabled);
+                }
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM);
+}
+
 void WebDelegate::UpdateScrollBarColor(const std::string& colorValue)
 {
     auto context = context_.Upgrade();
@@ -3897,7 +3916,11 @@ void WebDelegate::RecordWebEvent(Recorder::EventType eventType, const std::strin
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
     Recorder::EventParamsBuilder builder;
-    builder.SetId(host->GetInspectorIdValue("")).SetType(host->GetHostTag()).SetEventType(eventType).SetText(param);
+    builder.SetId(host->GetInspectorIdValue(""))
+        .SetType(host->GetHostTag())
+        .SetEventType(eventType)
+        .SetText(param)
+        .SetDescription(host->GetAutoEventParamValue(""));
     Recorder::EventRecorder::Get().OnEvent(std::move(builder));
 }
 
@@ -4354,7 +4377,7 @@ void WebDelegate::OnDownloadStart(const std::string& url, const std::string& use
         TaskExecutor::TaskType::JS);
 }
 
-void WebDelegate::OnAccessibilityEvent(int32_t accessibilityId, AccessibilityEventType eventType)
+void WebDelegate::OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEventType eventType)
 {
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
@@ -4899,6 +4922,14 @@ void WebDelegate::OnFirstContentfulPaint(int64_t navigationStartTick, int64_t fi
     }
 }
 
+void WebDelegate::OnSafeBrowsingCheckResult(int threat_type)
+{
+    if (onSafeBrowsingCheckResultV2_) {
+        onSafeBrowsingCheckResultV2_(
+            std::make_shared<SafeBrowsingCheckResultEvent>(threat_type));
+    }
+}
+
 void WebDelegate::OnDataResubmitted(std::shared_ptr<OHOS::NWeb::NWebDataResubmissionCallback> handler)
 {
     auto param = std::make_shared<DataResubmittedEvent>(AceType::MakeRefPtr<DataResubmittedOhos>(handler));
@@ -4995,6 +5026,14 @@ void WebDelegate::HandleTouchMove(const int32_t& id, const double& x, const doub
     ACE_DCHECK(nweb_ != nullptr);
     if (nweb_) {
         nweb_->OnTouchMove(id, x, y, from_overlay);
+    }
+}
+
+void WebDelegate::HandleTouchMove(const std::list<OHOS::NWeb::TouchPointInfo>& touchPointInfoList, bool from_overlay)
+{
+    ACE_DCHECK(nweb_ != nullptr);
+    if (nweb_) {
+        nweb_->OnTouchMove(touchPointInfoList, from_overlay);
     }
 }
 
@@ -5192,14 +5231,6 @@ void WebDelegate::SetDrawRect(int32_t x, int32_t y, int32_t width, int32_t heigh
     if (nweb_) {
         nweb_->SetDrawRect(x, y, width, height);
     }
-}
-
-bool WebDelegate::IsIncognitoMode() const
-{
-    if (nweb_) {
-        return nweb_->IsIncognitoMode();
-    }
-    return false;
 }
 #endif
 
@@ -5561,6 +5592,61 @@ void WebDelegate::OnOverScroll(float xOffset, float yOffset)
         TaskExecutor::TaskType::JS);
 }
 
+void WebDelegate::SetTouchEventInfo(const OHOS::NWeb::NativeEmbedTouchEvent& touchEvent, TouchEventInfo& touchEventInfo)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    TouchEvent event{touchEvent.id, touchEvent.x, touchEvent.y, touchEvent.screenX, touchEvent.screenY,
+        static_cast<OHOS::Ace::TouchType>(touchEvent.type)};
+    webPattern->SetTouchEventInfo(event, touchEventInfo);
+}
+
+void WebDelegate::OnNativeEmbedLifecycleChange(const OHOS::NWeb::NativeEmbedDataInfo& dataInfo)
+{
+    if (!isEmbedModeEnabled_) {
+        return;
+    }
+    auto embedInfo = dataInfo.info;
+    auto status = static_cast<OHOS::Ace::NativeEmbedStatus>(dataInfo.status);
+    auto surfaceId = dataInfo.surfaceId;
+    auto embedId = dataInfo.embedId;
+    EmbedInfo info = {embedInfo.id, embedInfo.type,
+                      embedInfo.src, embedInfo.url, embedInfo.width, embedInfo.height};
+    auto context = context_.Upgrade();
+    CHECK_NULL_VOID(context);
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), status, surfaceId, embedId, info]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto OnNativeEmbedLifecycleChangeV2_ = delegate->OnNativeEmbedLifecycleChangeV2_;
+            if (OnNativeEmbedLifecycleChangeV2_) {
+                OnNativeEmbedLifecycleChangeV2_(
+                    std::make_shared<NativeEmbedDataInfo>(status, surfaceId, embedId, info));
+            }
+        },
+        TaskExecutor::TaskType::JS);
+}
+void WebDelegate::OnNativeEmbedGestureEvent(const OHOS::NWeb::NativeEmbedTouchEvent& event)
+{
+    auto context = context_.Upgrade();
+    TouchEventInfo touchEventInfo("touchEvent");
+    auto embedId = event.embedId;
+    SetTouchEventInfo(event, touchEventInfo);
+    CHECK_NULL_VOID(context);
+    TAG_LOGD(AceLogTag::ACE_WEB, "hit Emebed gusture event notify");
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this), embedId, touchEventInfo]() {
+            auto delegate = weak.Upgrade();
+            CHECK_NULL_VOID(delegate);
+            auto OnNativeEmbedGestureEventV2_ = delegate->OnNativeEmbedGestureEventV2_;
+            if (OnNativeEmbedGestureEventV2_) {
+                OnNativeEmbedGestureEventV2_(
+                    std::make_shared<NativeEmbeadTouchInfo>(embedId, touchEventInfo));
+            }
+        },
+        TaskExecutor::TaskType::JS);
+}
+
 void WebDelegate::SetToken()
 {
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
@@ -5647,17 +5733,17 @@ void WebDelegate::JavaScriptOnDocumentEnd()
     }
 }
 
-void WebDelegate::ExecuteAction(int32_t nodeId, AceAction action)
+void WebDelegate::ExecuteAction(int64_t accessibilityId, AceAction action)
 {
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
     uint32_t nwebAction = static_cast<uint32_t>(action);
     context->GetTaskExecutor()->PostTask(
-        [weak = WeakClaim(this), nodeId, nwebAction]() {
+        [weak = WeakClaim(this), accessibilityId, nwebAction]() {
             auto delegate = weak.Upgrade();
             CHECK_NULL_VOID(delegate);
             CHECK_NULL_VOID(delegate->nweb_);
-            delegate->nweb_->ExecuteAction(nodeId, nwebAction);
+            delegate->nweb_->ExecuteAction(accessibilityId, nwebAction);
         },
         TaskExecutor::TaskType::PLATFORM);
 }
@@ -5691,23 +5777,32 @@ void WebDelegate::SetAccessibilityState(bool state)
 }
 
 bool WebDelegate::GetFocusedAccessibilityNodeInfo(
-    int32_t accessibilityId, bool isAccessibilityFocus, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const
+    int64_t accessibilityId, bool isAccessibilityFocus, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const
 {
     CHECK_NULL_RETURN(nweb_, false);
     return nweb_->GetFocusedAccessibilityNodeInfo(accessibilityId, isAccessibilityFocus, nodeInfo);
 }
 
 bool WebDelegate::GetAccessibilityNodeInfoById(
-    int32_t accessibilityId, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const
+    int64_t accessibilityId, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const
 {
     CHECK_NULL_RETURN(nweb_, false);
     return nweb_->GetAccessibilityNodeInfoById(accessibilityId, nodeInfo);
 }
 
 bool WebDelegate::GetAccessibilityNodeInfoByFocusMove(
-    int32_t accessibilityId, int32_t direction, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const
+    int64_t accessibilityId, int32_t direction, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const
 {
     CHECK_NULL_RETURN(nweb_, false);
     return nweb_->GetAccessibilityNodeInfoByFocusMove(accessibilityId, direction, nodeInfo);
+}
+
+OHOS::NWeb::NWebPreference::CopyOptionMode WebDelegate::GetCopyOptionMode() const
+{
+    CHECK_NULL_RETURN(nweb_, OHOS::NWeb::NWebPreference::CopyOptionMode::CROSS_DEVICE);
+    std::shared_ptr<OHOS::NWeb::NWebPreference> setting = nweb_->GetPreference();
+    CHECK_NULL_RETURN(setting, OHOS::NWeb::NWebPreference::CopyOptionMode::CROSS_DEVICE);
+    auto copyOption = setting->GetCopyOptionMode();
+    return copyOption;
 }
 } // namespace OHOS::Ace

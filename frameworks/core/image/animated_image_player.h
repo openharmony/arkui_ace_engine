@@ -18,7 +18,6 @@
 
 #include <unordered_map>
 
-#include "flutter/fml/memory/ref_counted.h"
 #include "include/codec/SkCodec.h"
 
 #include "base/memory/ace_type.h"

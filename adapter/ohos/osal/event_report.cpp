@@ -346,7 +346,8 @@ void EventReport::ReportEventComplete(DataBase& data)
         EVENT_KEY_ANIMATION_END_LATENCY, static_cast<uint64_t>(animationEndLantency),
         EVENT_KEY_E2E_LATENCY, static_cast<uint64_t>(e2eLatency),
         EVENT_KEY_NOTE, note);
-    ACE_SCOPED_TRACE("INTERACTION_COMPLETED_LATENCY: inputTime=%lld(ms), e2eLatency=%lld(ms)",
+    ACE_SCOPED_TRACE("INTERACTION_COMPLETED_LATENCY: sceneId =%s, inputTime=%lld(ms),"
+        "e2eLatency=%lld(ms)", sceneId.c_str(),
         static_cast<long long>(inputTime), static_cast<long long>(e2eLatency));
 }
 
@@ -388,7 +389,8 @@ void EventReport::ReportEventJankFrame(DataBase& data)
         EVENT_KEY_MAX_SEQ_MISSED_FRAMES, maxSeqMissedFrames,
         EVENT_KEY_NOTE, note,
         EVENT_KEY_DISPLAY_ANIMATOR, isDisplayAnimator);
-    ACE_SCOPED_TRACE("INTERACTION_APP_JANK: inputTime=%lld(ms), maxFrameTime=%lld(ms)",
+    ACE_SCOPED_TRACE("INTERACTION_APP_JANK: sceneId =%s, startTime=%lld(ms),"
+        "maxFrameTime=%lld(ms)", sceneId.c_str(),
         static_cast<long long>(startTime), static_cast<long long>(maxFrameTime));
 }
 

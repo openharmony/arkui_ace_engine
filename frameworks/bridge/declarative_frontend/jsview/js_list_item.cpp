@@ -137,8 +137,15 @@ void JSListItem::SetEditable(const JSCallbackInfo& args)
     }
 }
 
-void JSListItem::SetSelectable(bool selectable)
+void JSListItem::SetSelectable(const JSCallbackInfo& info)
 {
+    if (info.Length() < 1) {
+        return;
+    }
+    bool selectable = true;
+    if (info[0]->IsBoolean()) {
+        selectable = info[0]->ToBoolean();
+    }
     ListItemModel::GetInstance()->SetSelectable(selectable);
 }
 

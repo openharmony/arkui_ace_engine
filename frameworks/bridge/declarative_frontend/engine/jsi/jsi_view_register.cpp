@@ -114,7 +114,7 @@ void RegisterCardUpdateCallback(int64_t cardId, const panda::Local<panda::Object
     };
 
     auto container = Container::Current();
-    if (container->IsFRSCardContainer()) {
+    if (container->IsFRSCardContainer() || container->IsDynamicRender()) {
         auto frontEnd = AceType::DynamicCast<FormFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
         CHECK_NULL_VOID(frontEnd);
         auto delegate = frontEnd->GetDelegate();
@@ -203,7 +203,7 @@ void UpdateCardRootComponent(const panda::Local<panda::ObjectRef>& obj)
 
         RefPtr<NG::PageRouterManager> pageRouterManager;
 
-        if (container->IsFRSCardContainer()) {
+        if (container->IsFRSCardContainer() || container->IsDynamicRender()) {
             auto frontEnd = AceType::DynamicCast<FormFrontendDeclarative>(container->GetCardFrontend(cardId).Upgrade());
             CHECK_NULL_VOID(frontEnd);
             auto delegate = frontEnd->GetDelegate();
@@ -238,6 +238,14 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtim
     }
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (!firstArg->IsObject()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    auto container = Container::Current();
+    if (container && container->IsDynamicRender()) {
+        LOGD("load dynamic component card");
+        panda::Local<panda::ObjectRef> obj = firstArg->ToObject(vm);
+        UpdateCardRootComponent(obj);
         return panda::JSValueRef::Undefined(vm);
     }
 
@@ -283,6 +291,17 @@ panda::Local<panda::JSValueRef> JsRegisterNamedRoute(panda::JsiRuntimeCallInfo* 
     if (!firstArg->IsFunction()) {
         return panda::JSValueRef::Undefined(vm);
     }
+#ifdef DYNAMIC_COMPONENT_SUPPORT
+    auto container = Container::Current();
+    if (container && container->IsDynamicRender()) {
+        LOGD("load dynamic component card through named route");
+        panda::Local<panda::FunctionRef> objSupplier = firstArg;
+        std::vector<Local<JSValueRef>> argv;
+        auto obj = objSupplier->Call(vm, JSNApi::GetGlobalObject(vm), argv.data(), 0);
+        UpdateCardRootComponent(obj->ToObject(vm));
+        return panda::JSValueRef::Undefined(vm);
+    }
+#endif
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     if (!secondArg->IsString()) {
         return panda::JSValueRef::Undefined(vm);
@@ -1231,7 +1250,7 @@ void JsRegisterFormViews(BindingTarget globalObj, const std::unordered_set<std::
 }
 #endif
 
-void JsRegisterViews(BindingTarget globalObj)
+void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
 {
     auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
     if (!runtime) {
@@ -1308,7 +1327,7 @@ void JsRegisterViews(BindingTarget globalObj)
     cursorControlObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "restoreDefault"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RestoreDefault));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "cursorControl"), cursorControlObj);
-    JsBindViews(globalObj);
+    JsBindViews(globalObj, nativeEngine);
 
     JSObjectTemplate toggleType;
     toggleType.Constant("Checkbox", 0);

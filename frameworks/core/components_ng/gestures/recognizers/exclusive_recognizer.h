@@ -46,6 +46,10 @@ public:
 
     bool HandleEvent(const TouchEvent& point) override;
     bool HandleEvent(const AxisEvent& event) override;
+    GestureMode GetGestureMode() const override
+    {
+        return GestureMode::Exclusive;
+    }
 
 private:
     bool CheckNeedBlocked(const RefPtr<NGGestureRecognizer>& recognizer);

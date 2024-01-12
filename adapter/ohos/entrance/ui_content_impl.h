@@ -29,9 +29,9 @@
 #include "dm/display_manager.h"
 
 #include "adapter/ohos/entrance/distributed_ui_manager.h"
+#include "base/thread/task_executor.h"
 #include "base/view_data/view_data_wrap.h"
 #include "core/common/asset_manager_impl.h"
-#include "core/common/flutter/flutter_asset_manager.h"
 #include "core/components/common/properties/popup_param.h"
 
 namespace OHOS::Accessibility {
@@ -55,6 +55,8 @@ public:
     void Initialize(OHOS::Rosen::Window* window,
         const std::shared_ptr<std::vector<uint8_t>>& content, napi_value storage) override;
     void InitializeByName(OHOS::Rosen::Window* window, const std::string& name, napi_value storage) override;
+    void InitializeDynamic(
+        const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint) override;
     void Initialize(
         OHOS::Rosen::Window* window, const std::string& url, napi_value storage, uint32_t focusWindowId) override;
     void Foreground() override;
@@ -72,6 +74,8 @@ public:
     // UI content event process
     bool ProcessBackPressed() override;
     bool ProcessPointerEvent(const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent) override;
+    bool ProcessPointerEventWithCallback(
+        const std::shared_ptr<OHOS::MMI::PointerEvent>& pointerEvent, const std::function<void()>& callback) override;
     bool ProcessKeyEvent(const std::shared_ptr<OHOS::MMI::KeyEvent>& keyEvent) override;
     bool ProcessAxisEvent(const std::shared_ptr<OHOS::MMI::AxisEvent>& axisEvent) override;
     bool ProcessVsyncEvent(uint64_t timeStampNanos) override;
@@ -141,11 +145,6 @@ public:
 
     void SetFormBackgroundColor(const std::string& color) override;
 
-    int32_t GetInstanceId()
-    {
-        return instanceId_;
-    }
-
     SerializeableObjectArray DumpUITree() override
     {
         CHECK_NULL_RETURN(uiManager_, SerializeableObjectArray());
@@ -207,26 +206,31 @@ public:
     bool DumpViewData(const RefPtr<NG::FrameNode>& node, RefPtr<ViewDataWrap> viewDataWrap);
 
     void SearchElementInfoByAccessibilityId(
-        int32_t elementId, int32_t mode,
-        int32_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) override;
+        int64_t elementId, int32_t mode,
+        int64_t baseParent, std::list<Accessibility::AccessibilityElementInfo>& output) override;
 
     void SearchElementInfosByText(
-        int32_t elementId, const std::string& text, int32_t baseParent,
+        int64_t elementId, const std::string& text, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) override;
 
     void FindFocusedElementInfo(
-        int32_t elementId, int32_t focusType,
-        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) override;
+        int64_t elementId, int32_t focusType,
+        int64_t baseParent, Accessibility::AccessibilityElementInfo& output) override;
 
     void FocusMoveSearch(
-        int32_t elementId, int32_t direction,
-        int32_t baseParent, Accessibility::AccessibilityElementInfo& output) override;
+        int64_t elementId, int32_t direction,
+        int64_t baseParent, Accessibility::AccessibilityElementInfo& output) override;
 
-    bool NotifyExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int32_t offset) override;
+    bool NotifyExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int64_t offset) override;
+
+    int32_t GetInstanceId() override
+    {
+        return instanceId_;
+    }
 
     std::string RecycleForm() override;
-    
+
     void RecoverForm(const std::string& statusData) override;
 
     int32_t CreateCustomPopupUIExtension(const AAFwk::Want& want,
@@ -239,6 +243,9 @@ public:
     bool GetContainerModalButtonsRect(Rosen::Rect& containerModal, Rosen::Rect& buttons) override;
     void SubscribeContainerModalButtonsRectChange(
         std::function<void(Rosen::Rect& containerModal, Rosen::Rect& buttons)>&& callback) override;
+    void UpdateTransform(const OHOS::Rosen::Transform& transform) override;
+
+    SerializedGesture GetFormSerializedGesture() override;
 
 private:
     void InitializeInner(
@@ -284,6 +291,9 @@ private:
     std::map<std::string, sptr<OHOS::AppExecFwk::FormAshmem>> formImageDataMap_;
     std::unordered_map<int32_t, CustomPopupUIExtensionConfig> customPopupConfigMap_;
     std::unique_ptr<DistributedUIManager> uiManager_;
+
+    bool isDynamicRender_ = false;
+    std::shared_ptr<TaskWrapper> taskWrapper_;
 
     sptr<IRemoteObject> parentToken_ = nullptr;
 };

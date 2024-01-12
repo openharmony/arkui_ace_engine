@@ -50,6 +50,7 @@
 #include "core/components_ng/pattern/text_area/text_area_layout_algorithm.h"
 #include "core/components_ng/pattern/text_drag/text_drag_base.h"
 #include "core/components_ng/pattern/text_field/content_controller.h"
+#include "core/components_ng/pattern/text_field/magnifier_controller.h"
 #include "core/components_ng/pattern/text_field/text_editing_value_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_accessibility_property.h"
 #include "core/components_ng/pattern/text_field/text_field_controller.h"
@@ -157,6 +158,13 @@ public:
         return true;
     }
 
+    bool GetNeedToRequestKeyboardOnFocus() const
+    {
+        return needToRequestKeyboardOnFocus_;
+    }
+
+    bool CheckBlurReason();
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -199,11 +207,12 @@ public:
 
     void InsertValue(const std::string& insertValue) override;
     void InsertValueOperation(const std::string& insertValue);
-    void UpdateCounterTextColor();
+    void UpdateOverCounterColor();
     void UpdateCounterMargin();
     void CleanCounterNode();
     void UltralimitShake();
-    void UpdateCounterBorderStyle(uint32_t& textLength, uint32_t& maxLength);
+    void HandleInputCounterBorder(int32_t& textLength, uint32_t& maxLength);
+    void UpdateCounterBorderStyle(int32_t& textLength, uint32_t& maxLength);
     void UpdateAreaBorderStyle(BorderWidthProperty& currentBorderWidth, BorderWidthProperty& overCountBorderWidth,
         BorderColorProperty& overCountBorderColor, BorderColorProperty& currentBorderColor);
     void DeleteBackward(int32_t length) override;
@@ -276,13 +285,15 @@ public:
     void UpdateCaretPositionByTouch(const Offset& offset);
     bool IsReachedBoundary(float offset);
 
-    virtual TextInputAction GetDefaultTextInputAction();
+    virtual TextInputAction GetDefaultTextInputAction() const;
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
     bool CloseKeyboard(bool forceClose) override;
 
     FocusPattern GetFocusPattern() const override
     {
-        return { FocusType::NODE, true };
+        FocusPattern focusPattern = { FocusType::NODE, true };
+        focusPattern.SetIsFocusActiveWhenFocused(true);
+        return focusPattern;
     }
 
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
@@ -506,6 +517,7 @@ public:
 
     void CloseSelectOverlay() override;
     void CloseSelectOverlay(bool animation);
+    void NotifyKeyboardInfo(const KeyBoardInfo &info) override;
     void SetInputMethodStatus(bool keyboardShown) override
     {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
@@ -763,6 +775,7 @@ public:
     bool OnBackPressed() override;
     void CheckScrollable();
     void HandleClickEvent(GestureEvent& info);
+    bool CheckClickLocation(GestureEvent& info);
     void HandleDoubleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
 
@@ -911,6 +924,7 @@ public:
         customKeyboardBuilder_ = keyboardBuilder;
     }
 
+    void DumpInfo() override;
     void DumpAdvanceInfo() override;
     void DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap) override;
     void NotifyFillRequestSuccess(RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType) override;
@@ -1006,10 +1020,12 @@ public:
 
     void UpdateShowMagnifier(bool isShowMagnifier = false)
     {
-        if (isShowMagnifier_ == isShowMagnifier) {
-            return;
-        }
         isShowMagnifier_ = isShowMagnifier;
+        if (isShowMagnifier_) {
+            magnifierController_->OpenMagnifier();
+        } else {
+            magnifierController_->CloseMagnifier();
+        }
     }
 
     bool GetShowMagnifier() const
@@ -1041,18 +1057,47 @@ public:
     }
     bool HasFocus() const;
     void StopTwinkling();
+    void StartTwinkling();
+
+    bool IsModifyDone()
+    {
+        return isModifyDone_;
+    }
+    void SetModifyDoneStatus(bool value)
+    {
+        isModifyDone_ = value;
+    }
 
     const TimeStamp& GetLastClickTime()
     {
         return lastClickTimeStamp_;
     }
-#ifdef ENABLE_DRAG_FRAMEWORK
+
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
 
+    void ContentFireOnChangeEvent();
+    void GetCaretMetrics(CaretMetricsF& caretCaretMetric) override;
+
+    void SetMagnifierRect(MagnifierRect magnifierRect)
+    {
+        magnifierRect_ = magnifierRect;
+    }
+
+    MagnifierRect GetMagnifierRect()
+    {
+        return magnifierRect_;
+    }
+
+    OffsetF GetTextPaintOffset() const;
+
+    const RefPtr<MagnifierController>& GetMagnifierController()
+    {
+        return magnifierController_;
+    }
+
 protected:
     virtual void InitDragEvent();
-#endif
 
 private:
     void GetTextSelectRectsInRangeAndWillChange();
@@ -1067,7 +1112,6 @@ private:
     void InitTouchEvent();
     void InitLongPressEvent();
     void InitClickEvent();
-#ifdef ENABLE_DRAG_FRAMEWORK
     void InitDragDropEvent();
     std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragStart();
     std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragDrop();
@@ -1076,7 +1120,6 @@ private:
     void HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
     void HandleCursorOnDragLeaved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
     void HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& notifyDragEvent);
-#endif
     int32_t UpdateCaretPositionOnHandleMove(const OffsetF& localOffset);
     bool HasStateStyle(UIState state) const;
 
@@ -1100,7 +1143,6 @@ private:
     void HandleLongPress(GestureEvent& info);
     void UpdateCaretPositionWithClamp(const int32_t& pos);
     void ShowSelectOverlay(const ShowSelectOverlayParams& params);
-    void ShowSelectOverlayAfterDrag();
     void CursorMoveOnClick(const Offset& offset);
 
     void ProcessOverlay(
@@ -1118,7 +1160,6 @@ private:
     void AfterSelection();
 
     void FireEventHubOnChange(const std::string& text);
-    void FireOnChangeIfNeeded();
     // The return value represents whether the editor content has change.
     bool FireOnTextChangeEvent();
 
@@ -1135,7 +1176,6 @@ private:
 
     void ScheduleCursorTwinkling();
     void OnCursorTwinkling();
-    void StartTwinkling();
     void CheckIfNeedToResetKeyboard();
 
     float PreferredTextHeight(bool isPlaceholder, bool isAlgorithmMeasure = false);
@@ -1173,11 +1213,10 @@ private:
     void FilterExistText();
     void CreateErrorParagraph(const std::string& content);
     void UpdateErrorTextMargin();
-    OffsetF GetTextPaintOffset() const;
     void UpdateSelectController();
     void UpdateHandlesOffsetOnScroll(float offset);
     void CloseHandleAndSelect() override;
-    bool RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex);
+    bool RepeatClickCaret(const Offset& offset, int32_t lastCaretIndex, const RectF& lastCaretRect);
     void PaintTextRect();
     void GetIconPaintRect(const RefPtr<TextInputResponseArea>& responseArea, RoundRect& paintRect);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
@@ -1212,6 +1251,7 @@ private:
     void ScrollToSafeArea() const override;
     void RecordSubmitEvent() const;
     void UpdateCancelNode();
+    void RequestKeyboardAfterLongPress();
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1262,7 +1302,6 @@ private:
     bool contChange_ = false;
     bool counterChange_ = false;
     WeakPtr<LayoutWrapper> counterTextNode_;
-    bool hasCounterMargin_ = false;
     bool isCursorAlwaysDisplayed_ = false;
     std::optional<int32_t> surfaceChangedCallbackId_;
     std::optional<int32_t> surfacePositionChangedCallbackId_;
@@ -1282,7 +1321,7 @@ private:
     uint32_t twinklingInterval_ = 0;
     int32_t obscureTickCountDown_ = 0;
     int32_t nakedCharPosition_ = -1;
-    bool updateSelectionAfterObscure_ = false;
+    bool obscuredChange_ = false;
     float currentOffset_ = 0.0f;
     float countHeight_ = 0.0f;
     Dimension underlineWidth_ = 1.0_px;
@@ -1309,6 +1348,7 @@ private:
     int32_t dragTextEnd_ = 0;
     RefPtr<FrameNode> dragNode_;
     DragStatus dragStatus_ = DragStatus::NONE; // The status of the dragged initiator
+    DragStatus dragRecipientStatus_ = DragStatus::NONE; // Drag the recipient's state
     RefPtr<Clipboard> clipboard_;
     std::vector<TextEditingValueNG> operationRecords_;
     std::vector<TextEditingValueNG> redoOperationRecords_;
@@ -1339,6 +1379,7 @@ private:
     bool isFocusedBeforeClick_ = false;
     bool isCustomKeyboardAttached_ = false;
     std::function<void()> customKeyboardBuilder_;
+    RefPtr<OverlayManager> keyboardOverlay_;
     bool isCustomFont_ = false;
     bool hasClicked_ = false;
     bool isDoubleClick_ = false;
@@ -1365,6 +1406,11 @@ private:
     bool isShowMagnifier_ = false;
     OffsetF localOffset_;
     bool isTouchCaret_ = false;
+    bool needSelectAll_ = false;
+    bool isModifyDone_ = false;
+    Offset clickLocation_;
+    MagnifierRect magnifierRect_;
+    RefPtr<MagnifierController> magnifierController_;
 };
 } // namespace OHOS::Ace::NG
 

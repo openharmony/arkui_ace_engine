@@ -20,6 +20,7 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/search/search_gesture_event_hub.h"
 #include "core/common/recorder/event_recorder.h"
 
 namespace OHOS::Ace::NG {
@@ -52,7 +53,7 @@ public:
             auto host = GetFrameNode();
             if (host) {
                 auto id = host->GetInspectorIdValue("");
-                builder.SetId(id).SetType(host->GetHostTag());
+                builder.SetId(id).SetType(host->GetHostTag()).SetDescription(host->GetAutoEventParamValue(""));
             }
             builder.SetEventType(Recorder::EventType::SEARCH_SUBMIT).SetText(value);
             Recorder::EventRecorder::Get().OnEvent(std::move(builder));
@@ -112,6 +113,11 @@ public:
     void SetOnChangeEvent(ChangeAndSubmitEvent&& onChangeEvent)
     {
         onValueChangeEvent_ = std::move(onChangeEvent);
+    }
+
+    RefPtr<GestureEventHub> CreateGestureEventHub() override
+    {
+        return MakeRefPtr<SearchGestureEventHub>(WeakClaim(this));
     }
 
 private:

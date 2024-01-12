@@ -148,10 +148,9 @@ class GridColumnsTemplateModifier extends ModifierWithKey<string> {
   static identity: Symbol = Symbol('gridColumnsTemplate');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().grid.resetColumnsTemplate(node);
-    }
-    else {
-      GetUINativeModule().grid.setColumnsTemplate(node, this.value);
+      getUINativeModule().grid.resetColumnsTemplate(node);
+    } else {
+      getUINativeModule().grid.setColumnsTemplate(node, this.value);
     }
   }
 }
@@ -163,10 +162,9 @@ class GridRowsTemplateModifier extends ModifierWithKey<string> {
   static identity: Symbol = Symbol('gridRowsTemplate');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().grid.resetRowsTemplate(node);
-    }
-    else {
-      GetUINativeModule().grid.setRowsTemplate(node, this.value);
+      getUINativeModule().grid.resetRowsTemplate(node);
+    } else {
+      getUINativeModule().grid.setRowsTemplate(node, this.value);
     }
   }
 }
@@ -178,19 +176,13 @@ class GridColumnsGapModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('gridColumnsGap');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().grid.resetColumnsGap(node);
+      getUINativeModule().grid.resetColumnsGap(node);
     } else {
-      GetUINativeModule().grid.setColumnsGap(node, this.value!);
+      getUINativeModule().grid.setColumnsGap(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
-      return !(this.stageValue === this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -201,19 +193,13 @@ class GridRowsGapModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('gridRowsGap');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().grid.resetRowsGap(node);
+      getUINativeModule().grid.resetRowsGap(node);
     } else {
-      GetUINativeModule().grid.setRowsGap(node, this.value!);
+      getUINativeModule().grid.setRowsGap(node, this.value!);
     }
   }
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
-      return !(this.stageValue === this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -224,10 +210,9 @@ class GridScrollBarWidthModifier extends ModifierWithKey<string | number> {
   static identity: Symbol = Symbol('gridScrollBarWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().grid.resetScrollBarWidth(node);
-    }
-    else {
-      GetUINativeModule().grid.setScrollBarWidth(node, this.value);
+      getUINativeModule().grid.resetScrollBarWidth(node);
+    } else {
+      getUINativeModule().grid.setScrollBarWidth(node, this.value);
     }
   }
 }
@@ -239,10 +224,9 @@ class GridScrollBarModifier extends ModifierWithKey<BarState> {
   static identity: Symbol = Symbol('gridScrollBar');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().grid.resetScrollBar(node);
-    }
-    else {
-      GetUINativeModule().grid.setScrollBar(node, this.value);
+      getUINativeModule().grid.resetScrollBar(node);
+    } else {
+      getUINativeModule().grid.setScrollBar(node, this.value);
     }
   }
 }
@@ -254,10 +238,9 @@ class GridScrollBarColorModifier extends ModifierWithKey<string | number | Color
   static identity: Symbol = Symbol('gridScrollBarColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().grid.resetScrollBarColor(node);
-    }
-    else {
-      GetUINativeModule().grid.setScrollBarColor(node, this.value);
+      getUINativeModule().grid.resetScrollBarColor(node);
+    } else {
+      getUINativeModule().grid.setScrollBarColor(node, this.value);
     }
   }
 }
@@ -269,10 +252,9 @@ class GridEditModeModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('gridEditMode');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().grid.resetEditMode(node);
-    }
-    else {
-      GetUINativeModule().grid.setEditMode(node, this.value);
+      getUINativeModule().grid.resetEditMode(node);
+    } else {
+      getUINativeModule().grid.setEditMode(node, this.value);
     }
   }
 }
@@ -284,10 +266,9 @@ class GridCachedCountModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('gridCachedCount');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().grid.resetCachedCount(node);
-    }
-    else {
-      GetUINativeModule().grid.setCachedCount(node, this.value);
+      getUINativeModule().grid.resetCachedCount(node);
+    } else {
+      getUINativeModule().grid.setCachedCount(node, this.value);
     }
   }
 }
@@ -299,10 +280,9 @@ class GridMultiSelectableModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('gridMultiSelectable');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().grid.resetMultiSelectable(node);
-    }
-    else {
-      GetUINativeModule().grid.setMultiSelectable(node, this.value);
+      getUINativeModule().grid.resetMultiSelectable(node);
+    } else {
+      getUINativeModule().grid.setMultiSelectable(node, this.value);
     }
   }
 }
@@ -314,9 +294,9 @@ class GridEdgeEffectModifier extends ModifierWithKey<ArkGridEdgeEffect> {
   static identity: Symbol = Symbol('gridEdgeEffect');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().grid.resetEdgeEffect(node);
+      getUINativeModule().grid.resetEdgeEffect(node);
     } else {
-      GetUINativeModule().grid.setEdgeEffect(node, this.value?.value, this.value.options?.alwaysEnabled);
+      getUINativeModule().grid.setEdgeEffect(node, this.value?.value, this.value.options?.alwaysEnabled);
     }
   }
 
@@ -333,9 +313,9 @@ class GridNestedScrollModifier extends ModifierWithKey<NestedScrollOptions> {
   static identity: Symbol = Symbol('gridNestedScroll');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().grid.resetNestedScroll(node);
+      getUINativeModule().grid.resetNestedScroll(node);
     } else {
-      GetUINativeModule().grid.setNestedScroll(node, this.value?.scrollForward, this.value?.scrollBackward);
+      getUINativeModule().grid.setNestedScroll(node, this.value?.scrollForward, this.value?.scrollBackward);
     }
   }
 
@@ -352,9 +332,9 @@ class GridEnableScrollModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('gridEnableScroll');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().grid.resetEnableScroll(node);
+      getUINativeModule().grid.resetEnableScroll(node);
     } else {
-      GetUINativeModule().grid.setEnableScroll(node, this.value);
+      getUINativeModule().grid.setEnableScroll(node, this.value);
     }
   }
 }
@@ -366,9 +346,9 @@ class GridFrictionModifier extends ModifierWithKey<number | Resource> {
   static identity: Symbol = Symbol('gridFriction');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().grid.resetFriction(node);
+      getUINativeModule().grid.resetFriction(node);
     } else {
-      GetUINativeModule().grid.setFriction(node, this.value);
+      getUINativeModule().grid.setFriction(node, this.value);
     }
   }
 
@@ -384,10 +364,9 @@ class GridMaxCountModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('gridMaxCount');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().grid.resetMaxCount(node);
-    }
-    else {
-      GetUINativeModule().grid.setMaxCount(node, this.value);
+      getUINativeModule().grid.resetMaxCount(node);
+    } else {
+      getUINativeModule().grid.setMaxCount(node, this.value);
     }
   }
 }
@@ -399,10 +378,9 @@ class GridMinCountModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('gridMinCount');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().grid.resetMinCount(node);
-    }
-    else {
-      GetUINativeModule().grid.setMinCount(node, this.value);
+      getUINativeModule().grid.resetMinCount(node);
+    } else {
+      getUINativeModule().grid.setMinCount(node, this.value);
     }
   }
 }
@@ -414,10 +392,9 @@ class GridCellLengthModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('gridCellLength');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().grid.resetCellLength(node);
-    }
-    else {
-      GetUINativeModule().grid.setCellLength(node, this.value);
+      getUINativeModule().grid.resetCellLength(node);
+    } else {
+      getUINativeModule().grid.setCellLength(node, this.value);
     }
   }
 }
@@ -429,10 +406,9 @@ class GridLayoutDirectionModifier extends ModifierWithKey<GridDirection> {
   static identity: Symbol = Symbol('gridLayoutDirection');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().grid.resetLayoutDirection(node);
-    }
-    else {
-      GetUINativeModule().grid.setLayoutDirection(node, this.value);
+      getUINativeModule().grid.resetLayoutDirection(node);
+    } else {
+      getUINativeModule().grid.setLayoutDirection(node, this.value);
     }
   }
 }
@@ -444,10 +420,9 @@ class GridSupportAnimationModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('gridSupportAnimation');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().grid.resetSupportAnimation(node);
-    }
-    else {
-      GetUINativeModule().grid.setSupportAnimation(node, this.value);
+      getUINativeModule().grid.resetSupportAnimation(node);
+    } else {
+      getUINativeModule().grid.setSupportAnimation(node, this.value);
     }
   }
 }
@@ -455,10 +430,10 @@ class GridSupportAnimationModifier extends ModifierWithKey<boolean> {
 // @ts-ignore
 globalThis.Grid.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkGridComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

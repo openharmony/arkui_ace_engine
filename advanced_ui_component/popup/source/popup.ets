@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+import display from '@ohos.display';
 import mediaquery from '@ohos.mediaquery'
 
 interface IconTheme {
@@ -32,6 +33,7 @@ interface TitleTheme {
 
 interface ButtonTheme {
   margin: Margin;
+  padding: Padding;
   fontSize: Resource;
   fontColor: ResourceColor;
   textMargin: Margin;
@@ -89,6 +91,7 @@ export const defaultTheme: PopupTheme = {
   },
   button: {
     margin: { top: 16, bottom: 16, left: 16, right: 16 },
+    padding: { top: 4, bottom: 4, left: 4, right: 4 },
     fontSize: $r('sys.float.ohos_id_text_size_button2'),
     fontColor: $r('sys.color.ohos_id_color_text_primary_activated'),
     textMargin: { top: 8, bottom: 8, left: 8, right: 8 },
@@ -287,10 +290,7 @@ export struct PopupComponent {
     if (this.message.fontColor) {
       fontColor = this.message.fontColor
     } else {
-      if ((this.icon.image !== '' && this.icon.image !== void (0)) ||
-        (this.title.text !== '' && this.title.text !== void (0)) ||
-        (this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) ||
-        (this.buttons?.[1]?.text !== '' && this.buttons?.[1]?.text !== void (0))) {
+      if (this.title.text !== '' && this.title.text !== void (0)) {
         fontColor = this.theme.message.fontColor
       } else {
         fontColor = this.theme.message.plainFontColor
@@ -327,15 +327,19 @@ export struct PopupComponent {
   }
 
   private getButtonMargin(): Margin {
-    return { top: this.theme.button.textMargin.top as number / 2,
-      bottom: this.theme.button.textMargin.bottom as number / 2,
-      left: this.theme.button.margin.left as number / 2,
-      right: this.theme.button.margin.right as number / 2
+    return { top: this.theme.button.textMargin.top as number / 2 - 4,
+      bottom: this.theme.button.textMargin.bottom as number / 2 - 4,
+      left: this.theme.button.margin.left as number / 2 - 4,
+      right: this.theme.button.margin.right as number / 2 - 4
     }
   }
 
   private getButtonTextMargin(): Margin {
     return { top: this.theme.button.textMargin.bottom as number / 2 }
+  }
+
+  private getButtonTextPadding(): Padding {
+    return this.theme.button.padding
   }
 
   private getButtonHoverColor(): ResourceColor {
@@ -431,6 +435,25 @@ export struct PopupComponent {
     return layoutWeight
   }
 
+  private getApplyMaxSize(): ConstraintSizeOptions {
+    let applyMaxWidth: number = undefined
+    let applyMaxHeight: number = undefined
+    let applyMaxSize: ConstraintSizeOptions = undefined
+    let defaultDisplaySync: display.Display = display.getDefaultDisplaySync()
+    if (defaultDisplaySync.width > 400) {
+      applyMaxWidth = 400
+    } else {
+      applyMaxWidth = defaultDisplaySync.width - 40 - 40
+    }
+    if (defaultDisplaySync.height > 480) {
+      applyMaxHeight = 480
+    } else {
+      applyMaxHeight = defaultDisplaySync.height - 40 - 40
+    }
+    applyMaxSize = { maxWidth: applyMaxWidth, maxHeight: applyMaxHeight }
+    return applyMaxSize
+  }
+
   build() {
     Row() {
       if (this.icon.image !== '' && this.icon.image !== void (0)) {
@@ -454,6 +477,7 @@ export struct PopupComponent {
               .fontWeight(this.getTitleFontWeight())
               .fontSize(this.getTitleFontSize())
               .fontColor(this.getTitleFontColor())
+              .constraintSize({ minHeight: this.getCloseButtonHeight() })
             if (this.showClose || this.showClose === void (0)) {
               Button() {
                 Image(this.getCloseButtonImage())
@@ -520,6 +544,7 @@ export struct PopupComponent {
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
               }
               .margin(this.getButtonMargin())
+              .padding(this.getButtonTextPadding())
               .backgroundColor(this.firstButtonBackgroundColor)
               .onHover((isHover: boolean) => {
                 if (isHover) {
@@ -547,6 +572,7 @@ export struct PopupComponent {
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
               }
               .margin(this.getButtonMargin())
+              .padding(this.getButtonTextPadding())
               .backgroundColor(this.secondButtonBackgroundColor)
               .onHover((isHover: boolean) => {
                 if (isHover) {
@@ -637,6 +663,7 @@ export struct PopupComponent {
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
               }
               .margin(this.getButtonMargin())
+              .padding(this.getButtonTextPadding())
               .backgroundColor(this.firstButtonBackgroundColor)
               .onHover((isHover: boolean) => {
                 if (isHover) {
@@ -664,6 +691,7 @@ export struct PopupComponent {
                   .textOverflow({ overflow: TextOverflow.Ellipsis })
               }
               .margin(this.getButtonMargin())
+              .padding(this.getButtonTextPadding())
               .backgroundColor(this.secondButtonBackgroundColor)
               .onHover((isHover: boolean) => {
                 if (isHover) {
@@ -691,6 +719,7 @@ export struct PopupComponent {
     }
     .alignItems(VerticalAlign.Top)
     .padding(this.getWindowsPadding())
+    .constraintSize(this.getApplyMaxSize())
     .onAreaChange((_, rect) => {
       this.applyHeight = rect.height as number
     })

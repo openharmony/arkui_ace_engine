@@ -26,6 +26,7 @@
 #include "base/memory/referenced.h"
 #include "base/want/want_wrap.h"
 #include "core/common/container.h"
+#include "core/common/dynamic_component_renderer.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
@@ -46,6 +47,10 @@ namespace OHOS::Ace {
 class ModalUIExtensionProxy;
 } // namespace OHOS::Ace
 
+namespace OHOS::Rosen {
+class AvoidArea;
+} // namespace OHOS::Rosen
+
 namespace OHOS::Ace::NG {
 class UIExtensionProxy;
 class UIExtensionPattern : public Pattern {
@@ -65,10 +70,21 @@ public:
     void OnWindowHide() override;
     void OnVisibleChange(bool visible) override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+
+    // for DynamicComponent
+    void InitializeDynamicComponent(
+        const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint, void* runtime);
+    bool OnDirtyLayoutWrapperSwapForDynamicComponent(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config);
+
+    // The uiextension needs inputmethod by default, and is processed by its internal actual focus node.
+    bool NeedSoftKeyboard() const override
+    {
+        return true;
+    }
+
     void OnConnect();
     void OnDisconnect();
     void OnExtensionDied();
-    bool OnBackPressed();
     void HandleDragEvent(const PointerEvent& info) override;
 
     void SetModalOnDestroy(const std::function<void()>&& callback);
@@ -94,22 +110,26 @@ public:
     void NotifyForeground();
     void NotifyBackground();
     void NotifyDestroy();
+    int32_t GetInstanceId();
     int32_t GetSessionId();
+    int32_t GetNodeId();
     int32_t GetUiExtensionId() override;
-    int32_t WrapExtensionAbilityId(int32_t extensionOffset, int32_t abilityId) override;
+    int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId) override;
+    void DispatchOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type);
+    bool NotifyOccupiedAreaChangeInfo(const sptr<Rosen::OccupiedAreaChangeInfo>& info);
 
-    virtual void SearchExtensionElementInfoByAccessibilityId(int32_t elementId, int32_t mode, int32_t baseParent,
+    virtual void SearchExtensionElementInfoByAccessibilityId(int64_t elementId, int32_t mode, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) override;
-    virtual void SearchElementInfosByText(int32_t elementId, const std::string& text, int32_t baseParent,
+    virtual void SearchElementInfosByText(int64_t elementId, const std::string& text, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output) override;
-    virtual void FindFocusedElementInfo(int32_t elementId, int32_t focusType, int32_t baseParent,
+    virtual void FindFocusedElementInfo(int64_t elementId, int32_t focusType, int64_t baseParent,
         Accessibility::AccessibilityElementInfo& output) override;
-    virtual void FocusMoveSearch(int32_t elementId, int32_t direction, int32_t baseParent,
+    virtual void FocusMoveSearch(int64_t elementId, int32_t direction, int64_t baseParent,
         Accessibility::AccessibilityElementInfo& output) override;
-    virtual bool TransferExecuteAction(int32_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int32_t offset) override;
+    virtual bool TransferExecuteAction(int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int64_t offset) override;
     void OnAccessibilityEvent(
-        const Accessibility::AccessibilityEventInfo& info, int32_t uiExtensionOffset);
+        const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset);
 
 private:
     enum class ReleaseCode {
@@ -128,6 +148,11 @@ private:
         int32_t code = 0;
         std::string name;
         std::string message;
+    };
+
+    enum class ComponentType {
+        DYNAMIC,
+        UI_EXTENSION
     };
 
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
@@ -179,6 +204,11 @@ private:
     bool isVisible_ = true;
     bool isModal_ = false;
     int32_t uiExtensionId_ = 0;
+
+    // for DynamicComponent
+    ComponentType componentType_ = ComponentType::UI_EXTENSION;
+    std::shared_ptr<DynamicComponentRenderer> dynamicComponentRenderer_;
+
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };
 } // namespace OHOS::Ace::NG

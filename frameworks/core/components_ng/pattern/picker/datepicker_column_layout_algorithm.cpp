@@ -30,6 +30,14 @@ const int32_t OPTION_COUNT_PHONE_LANDSCAPE = 3;
 const float ITEM_HEIGHT_HALF = 2.0f;
 const int32_t BUFFER_NODE_NUMBER = 2;
 const int32_t HIDENODE = 3;
+constexpr double PERCENT_100 = 100.0;
+
+GradientColor CreatePercentGradientColor(float percent, Color color)
+{
+    NG::GradientColor gredient = GradientColor(color);
+    gredient.SetDimension(CalcDimension(percent * PERCENT_100, DimensionUnit::PERCENT));
+    return gredient;
+}
 } // namespace
 void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
@@ -94,6 +102,29 @@ void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         child->Measure(layoutChildConstraint);
     }
     MeasureText(layoutWrapper, frameSize);
+    auto gradientPercent = static_cast<float>(pickerTheme->GetGradientHeight().ConvertToPx()) / frameSize.Height();
+    InitGradient(gradientPercent, stackNode, columnNode);
+}
+
+void DatePickerColumnLayoutAlgorithm::InitGradient(const float& gradientPercent, const RefPtr<FrameNode> stackNode,
+    const RefPtr<FrameNode> columnNode)
+{
+    auto stackRenderContext = stackNode->GetRenderContext();
+    auto columnRenderContext = columnNode->GetRenderContext();
+    CHECK_NULL_VOID(stackRenderContext);
+    CHECK_NULL_VOID(columnRenderContext);
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::LINEAR);
+    gradient.AddColor(CreatePercentGradientColor(0, Color::TRANSPARENT));
+    gradient.AddColor(CreatePercentGradientColor(gradientPercent, Color::WHITE));
+    gradient.AddColor(CreatePercentGradientColor(1 - gradientPercent, Color::WHITE));
+    gradient.AddColor(CreatePercentGradientColor(1, Color::TRANSPARENT));
+
+    columnRenderContext->UpdateBackBlendMode(BlendMode::SRC_IN);
+    columnRenderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
+    stackRenderContext->UpdateLinearGradient(gradient);
+    stackRenderContext->UpdateBackBlendMode(BlendMode::SRC_OVER);
+    stackRenderContext->UpdateBackBlendApplyType(BlendApplyType::OFFSCREEN);
 }
 
 void DatePickerColumnLayoutAlgorithm::MeasureText(LayoutWrapper* layoutWrapper, const SizeF& size)

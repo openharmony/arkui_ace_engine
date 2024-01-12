@@ -53,6 +53,9 @@ template("ace_capability_ohos_source_set") {
         sources += [ "interaction/interaction_impl.cpp" ]
       }
       external_deps += [ "kv_store:distributeddata_inner" ]
+    } else {
+      sources += [ "//foundation/arkui/ace_engine/adapter/preview/entrance/msdp/interaction_impl.cpp" ]
+      sources += [ "//foundation/arkui/ace_engine/adapter/preview/entrance/udmf/udmf_impl.cpp" ]
     }
     if (defined(config.enable_ability_component) &&
         config.enable_ability_component) {

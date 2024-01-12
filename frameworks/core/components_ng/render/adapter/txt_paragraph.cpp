@@ -26,6 +26,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 const std::u16string ELLIPSIS = u"\u2026";
+const std::u16string SYMBOL_TRANS = u"\uF0001";
 constexpr char16_t NEWLINE_CODE = u'\n';
 constexpr float TEXT_SPLIT_RATIO = 0.6f;
 } // namespace
@@ -125,6 +126,7 @@ void TxtParagraph::AddSymbol(const std::uint32_t& symbolId)
     if (!builder_) {
         CreateBuilder();
     }
+    text_ += SYMBOL_TRANS;
     builder_->AppendSymbol(symbolId);
 }
 
@@ -144,7 +146,7 @@ int32_t TxtParagraph::AddPlaceholder(const PlaceholderRun& span)
 #else
     builder_->AppendPlaceholder(txtSpan);
 #endif
-    auto position = placeholderIndex_ + text_.length() + 1;
+    auto position = static_cast<size_t>(placeholderIndex_) + text_.length() + 1;
     placeholderPosition_.emplace_back(position);
     return ++placeholderIndex_;
 }
@@ -327,9 +329,9 @@ int32_t TxtParagraph::GetGlyphIndexByCoordinate(const Offset& offset)
 bool TxtParagraph::CalCulateAndCheckPreIsPlaceholder(int32_t index, int32_t& extent)
 {
     for (auto placeholderIndex : placeholderPosition_) {
-        if (placeholderIndex == index) {
+        if (placeholderIndex == static_cast<size_t>(index)) {
             return true;
-        } else if (placeholderIndex < extent) {
+        } else if (placeholderIndex < static_cast<size_t>(extent)) {
             extent--;
         }
     }
@@ -565,7 +567,7 @@ bool TxtParagraph::CalcCaretMetricsByPosition(
 }
 
 bool TxtParagraph::CalcCaretMetricsByPosition(
-    int32_t extent, CaretMetricsF& caretCaretMetric, const OffsetF& lastTouchOffset)
+    int32_t extent, CaretMetricsF& caretCaretMetric, const OffsetF& lastTouchOffset, TextAffinity& textAffinity)
 {
     CaretMetricsF metricsUpstream;
     CaretMetricsF metricsDownstream;
@@ -574,13 +576,17 @@ bool TxtParagraph::CalcCaretMetricsByPosition(
     if (downStreamSuccess || upStreamSuccess) {
         if ((metricsDownstream.offset.GetY() < lastTouchOffset.GetY()) && downStreamSuccess) {
             caretCaretMetric = metricsDownstream;
+            textAffinity = TextAffinity::DOWNSTREAM;
         } else if (upStreamSuccess) {
             caretCaretMetric = metricsUpstream;
+            textAffinity = TextAffinity::UPSTREAM;
         } else {
             caretCaretMetric = metricsDownstream;
+            textAffinity = TextAffinity::DOWNSTREAM;
         }
         return true;
     }
+    textAffinity = TextAffinity::DOWNSTREAM;
     return false;
 }
 

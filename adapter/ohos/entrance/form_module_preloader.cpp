@@ -94,24 +94,19 @@ bool FormModulePreloader::ReadFormModuleList(
     LOGI("hapPaths size of bundle %{public}s is %{public}zu", bundleName.c_str(), hapPaths.size());
     for (const std::string& hapPath : hapPaths) {
         // Create HapAssetProvider
-        RefPtr<AssetManager> flutterAssetManager = CreateAssetManager(hapPath);
-        if (flutterAssetManager == nullptr) {
+        RefPtr<AssetManager> assetManager = CreateAssetManager(hapPath);
+        if (assetManager == nullptr) {
             LOGE("CreateAssetManager failed, hapPath: %{private}s.", hapPath.c_str());
             return false;
         }
         // Read component_collection.json
-        std::unordered_set<std::string> formEtsFilePaths;
-        if (!GetFormEtsFilePath(flutterAssetManager, formEtsFilePaths)) {
-            LOGE("Read form_config.json failed, hapPath: %{private}s.", hapPath.c_str());
-            return false;
-        }
         std::string content;
-        if (!ReadFileFromAssetManager(flutterAssetManager, "component_collection.json", content)) {
+        if (!ReadFileFromAssetManager(assetManager, "component_collection.json", content)) {
             LOGE("Read component_collection.json failed, hapPath: %{private}s.", hapPath.c_str());
             return false;
         }
         // Parse component_collection.json
-        if (!ParseComponentCollectionJson(bundleName, formEtsFilePaths, content, formModuleList, isReloadCondition)) {
+        if (!ParseComponentCollectionJson(bundleName, content, formModuleList, isReloadCondition)) {
             LOGE("Parse component_collection.json failed, hapPath: %{private}s.", hapPath.c_str());
             return false;
         }
@@ -120,8 +115,8 @@ bool FormModulePreloader::ReadFormModuleList(
 }
 
 bool FormModulePreloader::ParseComponentCollectionJson(
-    const std::string& bundleName, const std::unordered_set<std::string>& formEtsFilePaths,
-    const std::string& content, std::unordered_set<std::string>& formModuleList, bool isReloadCondition)
+    const std::string& bundleName, const std::string& content,
+    std::unordered_set<std::string>& formModuleList, bool isReloadCondition)
 {
     auto collectionJson = JsonUtil::ParseJsonString(content);
     if (collectionJson == nullptr || collectionJson->IsNull()) {
@@ -130,9 +125,6 @@ bool FormModulePreloader::ParseComponentCollectionJson(
     }
     for (auto child = collectionJson->GetChild(); child && !child->IsNull(); child = child->GetNext()) {
         std::string etsPath = child->GetKey();
-        if (!IsFormEtsFilePath(formEtsFilePaths, etsPath)) {
-            continue;
-        }
         auto item = collectionJson->GetValue(etsPath);
         if (item == nullptr || !item->IsValid() || !item->IsArray()) {
             LOGE("Parse component_collection.json failed, etsPath: %{private}s.", etsPath.c_str());
@@ -166,21 +158,12 @@ void FormModulePreloader::GetHapPathsByBundleName(const std::string& bundleName,
     std::string packagePath = "/data/bundles/" + bundleName + "/";
     std::vector<std::string> basePaths;
     basePaths.push_back("/");
-    if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        auto assetProvider = CreateAssetProviderImpl(packagePath, basePaths, false);
-        if (assetProvider == nullptr) {
-            LOGE("CreateAssetProvider failed, basePath: %{private}s.", packagePath.c_str());
-            return;
-        }
-        assetProvider->GetAssetList("", hapPaths);
-    } else {
-        auto assetProvider = CreateAssetProvider(packagePath, basePaths, false);
-        if (assetProvider == nullptr) {
-            LOGE("CreateAssetProvider failed, basePath: %{private}s.", packagePath.c_str());
-            return;
-        }
-        assetProvider->GetAssetList("", hapPaths);
+    auto assetProvider = CreateAssetProviderImpl(packagePath, basePaths, false);
+    if (assetProvider == nullptr) {
+        LOGE("CreateAssetProvider failed, basePath: %{private}s.", packagePath.c_str());
+        return;
     }
+    assetProvider->GetAssetList("", hapPaths);
     for (auto iter = hapPaths.begin(); iter != hapPaths.end();) {
         if (!std::regex_match(*iter, std::regex(".*\\.hap"))) {
             iter = hapPaths.erase(iter);
@@ -213,58 +196,6 @@ bool FormModulePreloader::ReadFileFromAssetManager(
     return true;
 }
 
-bool FormModulePreloader::GetFormEtsFilePath(
-    const RefPtr<AssetManager>& assetManager, std::unordered_set<std::string>& filePaths)
-{
-    // Read form_config.json
-    std::string content;
-    if (!ReadFileFromAssetManager(assetManager, "form_config.json", content)) {
-        LOGE("Read form_config failed");
-        return false;
-    }
-    auto collectionJson = JsonUtil::ParseJsonString(content);
-    if (collectionJson == nullptr || collectionJson->IsNull()) {
-        LOGE("ParseJsonString failed.");
-        return false;
-    }
-    auto formJson = collectionJson->GetValue("forms");
-    if (formJson == nullptr || formJson->IsNull() || !formJson->IsArray()) {
-        LOGE("Get form-config from json failed.");
-        return false;
-    }
-    // Read FormEtsFilePath
-    int32_t len = formJson->GetArraySize();
-    for (int32_t index = 0; index < len; ++index) {
-        auto config = formJson->GetArrayItem(index);
-        if (config == nullptr || config->IsNull()) {
-            LOGE("Form-config is invalid.");
-            return false;
-        }
-        auto path = config->GetValue("src");
-        if (path == nullptr || !path->IsString()) {
-            LOGE("Read src from form-config failed.");
-            return false;
-        }
-        filePaths.emplace(path->GetString());
-    }
-    return true;
-}
-
-bool FormModulePreloader::IsFormEtsFilePath(
-    const std::unordered_set<std::string>& formEtsFilePaths, std::string path)
-{
-    std::replace(path.begin(), path.end(), '\\', '/');
-    std::string rootPath = "src/main";
-    auto pos = path.find(rootPath);
-    if (pos == std::string::npos) {
-        return formEtsFilePaths.find(path) != formEtsFilePaths.end();
-    }
-    // Convert to relative path
-    std::string relativePath = path.substr(pos + static_cast<int32_t>(rootPath.length()));
-    relativePath.insert(relativePath.begin(), '.');
-    return formEtsFilePaths.find(relativePath) != formEtsFilePaths.end();
-}
-
 RefPtr<AssetManager> FormModulePreloader::CreateAssetManager(const std::string& hapPath)
 {
     std::vector<std::string> basePaths;
@@ -272,32 +203,17 @@ RefPtr<AssetManager> FormModulePreloader::CreateAssetManager(const std::string& 
     basePaths.emplace_back("ets/");
     basePaths.emplace_back("ets/widget/");
     basePaths.emplace_back("resources/base/profile/");
-    if (SystemProperties::GetFlutterDecouplingEnabled()) {
-        RefPtr<AssetManager> assetManager = Referenced::MakeRefPtr<AssetManagerImpl>();
-        if (assetManager == nullptr) {
-            LOGE("Create AssetManagerImpl failed.");
-            return nullptr;
-        }
-        auto assetProvider = CreateAssetProviderImpl(hapPath, basePaths, false);
-        if (assetProvider == nullptr) {
-            LOGE("CreateAssetProvider failed.");
-            return nullptr;
-        }
-        assetManager->PushBack(std::move(assetProvider));
-        return assetManager;
-    } else {
-        RefPtr<FlutterAssetManager> flutterAssetManager = Referenced::MakeRefPtr<FlutterAssetManager>();
-        if (flutterAssetManager == nullptr) {
-            LOGE("Create flutterAssetManager failed.");
-            return nullptr;
-        }
-        auto assetProvider = CreateAssetProvider(hapPath, basePaths, false);
-        if (assetProvider == nullptr) {
-            LOGE("CreateAssetProvider failed.");
-            return nullptr;
-        }
-        flutterAssetManager->PushBack(std::move(assetProvider));
-        return flutterAssetManager;
+    RefPtr<AssetManager> assetManager = Referenced::MakeRefPtr<AssetManagerImpl>();
+    if (assetManager == nullptr) {
+        LOGE("Create AssetManagerImpl failed.");
+        return nullptr;
     }
+    auto assetProvider = CreateAssetProviderImpl(hapPath, basePaths, false);
+    if (assetProvider == nullptr) {
+        LOGE("CreateAssetProvider failed.");
+        return nullptr;
+    }
+    assetManager->PushBack(std::move(assetProvider));
+    return assetManager;
 }
 } // namespace OHOS::Ace

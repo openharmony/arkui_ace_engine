@@ -29,10 +29,22 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr float HOVER_OPACITY = 0.05f;
-constexpr float TOUCH_OPACITY = 0.1f;
 constexpr int32_t HOVER_TO_TOUCH_DURATION = 100;
 constexpr int32_t TOUCH_DURATION = 250;
+constexpr int32_t TYPE_TOUCH = 0;
+constexpr int32_t TYPE_HOVER = 1;
+constexpr int32_t TYPE_CANCEL = 2;
+
+Color GetColorFromType(const RefPtr<ButtonTheme>& theme, const int32_t& type)
+{
+    if (type == TYPE_TOUCH) {
+        return theme->GetClickedColor();
+    } else if (type == TYPE_HOVER) {
+        return theme->GetHoverColor();
+    } else {
+        return Color::TRANSPARENT;
+    }
+}
 } // namespace
 
 void ButtonPattern::OnAttachToFrameNode()
@@ -231,7 +243,7 @@ void ButtonPattern::OnTouchDown()
         }
         // for system default
         auto isNeedToHandleHoverOpacity = IsNeedToHandleHoverOpacity();
-        AnimateTouchAndHover(renderContext, isNeedToHandleHoverOpacity ? HOVER_OPACITY : 0.0f, TOUCH_OPACITY,
+        AnimateTouchAndHover(renderContext, isNeedToHandleHoverOpacity ? TYPE_HOVER : TYPE_CANCEL, TYPE_TOUCH,
             isNeedToHandleHoverOpacity ? HOVER_TO_TOUCH_DURATION : TOUCH_DURATION,
             isNeedToHandleHoverOpacity ? Curves::SHARP : Curves::FRICTION);
     }
@@ -255,11 +267,11 @@ void ButtonPattern::OnTouchUp()
         }
         if (buttonEventHub->IsEnabled()) {
             auto isNeedToHandleHoverOpacity = IsNeedToHandleHoverOpacity();
-            AnimateTouchAndHover(renderContext, TOUCH_OPACITY, isNeedToHandleHoverOpacity ? HOVER_OPACITY : 0.0,
+            AnimateTouchAndHover(renderContext, TYPE_TOUCH, isNeedToHandleHoverOpacity ? TYPE_HOVER : TYPE_CANCEL,
                 isNeedToHandleHoverOpacity ? HOVER_TO_TOUCH_DURATION : TOUCH_DURATION,
                 isNeedToHandleHoverOpacity ? Curves::SHARP : Curves::FRICTION);
         } else {
-            AnimateTouchAndHover(renderContext, TOUCH_OPACITY, 0.0, TOUCH_DURATION, Curves::FRICTION);
+            AnimateTouchAndHover(renderContext, TYPE_TOUCH, TYPE_CANCEL, TOUCH_DURATION, Curves::FRICTION);
         }
     }
 }
@@ -277,7 +289,7 @@ void ButtonPattern::HandleHoverEvent(bool isHover)
     if (enabled && hoverEffect != HoverEffectType::NONE && hoverEffect != HoverEffectType::SCALE) {
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        AnimateTouchAndHover(renderContext, isHover ? 0.0f : HOVER_OPACITY, isHover ? HOVER_OPACITY : 0.0f,
+        AnimateTouchAndHover(renderContext, isHover ? TYPE_CANCEL : TYPE_HOVER, isHover ? TYPE_HOVER : TYPE_CANCEL,
             TOUCH_DURATION, Curves::FRICTION);
     }
 }
@@ -298,6 +310,8 @@ void ButtonPattern::HandleBackgroundColor()
     if (!renderContext->HasBackgroundColor()) {
         renderContext->UpdateBackgroundColor(buttonTheme->GetBgColor(buttonStyle));
     }
+    themeBgColor_ = buttonTheme->GetBgColor(buttonStyle);
+    themeTextColor_ = buttonTheme->GetTextColor(buttonStyle);
 }
 
 void ButtonPattern::HandleEnabled()
@@ -318,16 +332,20 @@ void ButtonPattern::HandleEnabled()
     renderContext->OnOpacityUpdate(enabled ? originalOpacity : alpha * originalOpacity);
 }
 
-void ButtonPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
+void ButtonPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, int32_t typeFrom, int32_t typeTo,
     int32_t duration, const RefPtr<Curve>& curve)
 {
-    Color touchColorFrom = Color::FromRGBO(0, 0, 0, startOpacity);
-    Color touchColorTo = Color::FromRGBO(0, 0, 0, endOpacity);
-    renderContext->BlendBgColor(touchColorFrom);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ButtonTheme>();
+    CHECK_NULL_VOID(theme);
+    Color blendColorFrom = GetColorFromType(theme, typeFrom);
+    Color blendColorTo = GetColorFromType(theme, typeTo);
+    renderContext->BlendBgColor(blendColorFrom);
     AnimationOption option = AnimationOption();
     option.SetDuration(duration);
     option.SetCurve(curve);
-    AnimationUtils::Animate(option, [renderContext, touchColorTo]() { renderContext->BlendBgColor(touchColorTo); });
+    AnimationUtils::Animate(option, [renderContext, blendColorTo]() { renderContext->BlendBgColor(blendColorTo); });
 }
 
 void ButtonPattern::OnColorConfigurationUpdate()
@@ -344,14 +362,18 @@ void ButtonPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(renderContext);
     auto buttonLayoutProperty = node->GetLayoutProperty<ButtonLayoutProperty>();
     CHECK_NULL_VOID(buttonLayoutProperty);
-    ButtonStyleMode defaultButtonStyle = ButtonStyleMode::EMPHASIZE;
-    auto color = buttonTheme->GetBgColor(defaultButtonStyle);
-    renderContext->UpdateBackgroundColor(color);
+    ButtonStyleMode buttonStyle = buttonLayoutProperty->GetButtonStyle().value_or(ButtonStyleMode::EMPHASIZE);
+    if (renderContext->GetBackgroundColor().value_or(themeBgColor_) == themeBgColor_) {
+        auto color = buttonTheme->GetBgColor(buttonStyle);
+        renderContext->UpdateBackgroundColor(color);
+    }
     auto textNode = DynamicCast<FrameNode>(node->GetFirstChild());
     CHECK_NULL_VOID(textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateTextColor(buttonTheme->GetTextColor(defaultButtonStyle));
-    textNode->MarkDirtyNode();
+    if (textLayoutProperty->GetTextColor().value_or(themeTextColor_) == themeTextColor_) {
+        textLayoutProperty->UpdateTextColor(buttonTheme->GetTextColor(buttonStyle));
+        textNode->MarkDirtyNode();
+    }
 }
 } // namespace OHOS::Ace::NG

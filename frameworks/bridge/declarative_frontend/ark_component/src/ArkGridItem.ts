@@ -18,9 +18,9 @@ class GridItemSelectableModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('gridItemSelectable');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().gridItem.resetGridItemSelectable(node);
+      getUINativeModule().gridItem.resetGridItemSelectable(node);
     } else {
-      GetUINativeModule().gridItem.setGridItemSelectable(node, this.value!);
+      getUINativeModule().gridItem.setGridItemSelectable(node, this.value!);
     }
   }
 }
@@ -29,9 +29,9 @@ class GridItemSelectedModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('gridItemSelected');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().gridItem.resetGridItemSelected(node);
+      getUINativeModule().gridItem.resetGridItemSelected(node);
     } else {
-      GetUINativeModule().gridItem.setGridItemSelected(node, this.value!);
+      getUINativeModule().gridItem.setGridItemSelected(node, this.value!);
     }
   }
 }
@@ -40,9 +40,9 @@ class GridItemRowStartModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('gridItemRowStart');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().gridItem.resetGridItemRowStart(node);
+      getUINativeModule().gridItem.resetGridItemRowStart(node);
     } else {
-      GetUINativeModule().gridItem.setGridItemRowStart(node, this.value!);
+      getUINativeModule().gridItem.setGridItemRowStart(node, this.value!);
     }
   }
 }
@@ -51,9 +51,9 @@ class GridItemRowEndModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('gridItemRowEnd');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().gridItem.resetGridItemRowEnd(node);
+      getUINativeModule().gridItem.resetGridItemRowEnd(node);
     } else {
-      GetUINativeModule().gridItem.setGridItemRowEnd(node, this.value!);
+      getUINativeModule().gridItem.setGridItemRowEnd(node, this.value!);
     }
   }
 }
@@ -62,9 +62,9 @@ class GridItemColumnStartModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('gridItemColumnStart');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().gridItem.resetGridItemColumnStart(node);
+      getUINativeModule().gridItem.resetGridItemColumnStart(node);
     } else {
-      GetUINativeModule().gridItem.setGridItemColumnStart(node, this.value!);
+      getUINativeModule().gridItem.setGridItemColumnStart(node, this.value!);
     }
   }
 }
@@ -73,9 +73,9 @@ class GridItemColumnEndModifier extends ModifierWithKey<number> {
   static identity: Symbol = Symbol('gridItemColumnEnd');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().gridItem.resetGridItemColumnEnd(node);
+      getUINativeModule().gridItem.resetGridItemColumnEnd(node);
     } else {
-      GetUINativeModule().gridItem.setGridItemColumnEnd(node, this.value!);
+      getUINativeModule().gridItem.setGridItemColumnEnd(node, this.value!);
     }
   }
 }
@@ -122,10 +122,10 @@ class ArkGridItemComponent extends ArkComponent implements GridItemAttribute {
 // @ts-ignore
 globalThis.GridItem.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkGridItemComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

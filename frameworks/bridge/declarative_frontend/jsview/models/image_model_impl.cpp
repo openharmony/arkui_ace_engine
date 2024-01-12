@@ -119,7 +119,7 @@ void ImageModelImpl::SetSvgAnimatorFinishEvent(std::function<void()>&& callback)
 }
 
 void ImageModelImpl::Create(const std::string& src, RefPtr<PixelMap>& pixmap,
-    const std::string& bundleName, const std::string& moduleName)
+    const std::string& bundleName, const std::string& moduleName, bool /*isUriPureNumber*/)
 {
     RefPtr<ImageComponent> image = AceType::MakeRefPtr<OHOS::Ace::ImageComponent>(src);
     image->SetBundleInfo(bundleName, moduleName);

@@ -34,6 +34,21 @@ class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
       this._modifiersWithKeys.delete(key);
     });
   }
+  outline(value: OutlineOptions): this {
+    throw new Error('Method not implemented.');
+  }
+  outlineColor(value: ResourceColor | EdgeColors): this {
+    throw new Error('Method not implemented.');
+  }
+  outlineRadius(value: Dimension | OutlineRadiuses): this {
+    throw new Error('Method not implemented.');
+  }
+  outlineStyle(value: OutlineStyle | EdgeOutlineStyles): this {
+    throw new Error('Method not implemented.');
+  }
+  outlineWidth(value: Dimension | EdgeOutlineWidths): this {
+    throw new Error('Method not implemented.');
+  }
   width(value: Length): this {
     throw new Error('Method not implemented.');
   }
@@ -74,7 +89,8 @@ class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
     throw new Error('Method not implemented.');
   }
   backgroundColor(value: ResourceColor): this {
-    modifierWithKey(this._modifiersWithKeys, BackgroundColorModifier.identity, BackgroundColorModifier, value);
+    modifierWithKey(this._modifiersWithKeys, XComponentBackgroundColorModifier.identity,
+      XComponentBackgroundColorModifier, value);
     return this;
   }
   backgroundImage(src: ResourceStr, repeat?: ImageRepeat): this {
@@ -93,7 +109,7 @@ class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
     throw new Error('Method not implemented.');
   }
   opacity(value: number | Resource): this {
-    modifierWithKey(this._modifiersWithKeys, OpacityModifier.identity, OpacityModifier, value);
+    modifierWithKey(this._modifiersWithKeys, XComponentOpacityModifier.identity, XComponentOpacityModifier, value);
     return this;
   }
   border(value: BorderOptions): this {
@@ -445,10 +461,46 @@ class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
 // @ts-ignore
 globalThis.XComponent.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkXComponentComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
+};
+
+class XComponentOpacityModifier extends ModifierWithKey<number | Resource> {
+  constructor(value: number | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentOpacity');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetOpacity(node);
+    } else {
+      getUINativeModule().xComponent.setOpacity(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class XComponentBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentBackgroundColor');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetBackgroundColor(node);
+    } else {
+      getUINativeModule().xComponent.setBackgroundColor(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
 }

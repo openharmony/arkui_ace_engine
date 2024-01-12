@@ -19,15 +19,15 @@ class ScrollNestedScrollModifier extends ModifierWithKey<ArkNestedScrollOptions>
   static identity: symbol = Symbol('nestedScroll');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().scroll.resetNestedScroll(node);
+      getUINativeModule().scroll.resetNestedScroll(node);
     } else {
-      GetUINativeModule().scroll.setNestedScroll(node, this.value.scrollForward, this.value.scrollBackward);
+      getUINativeModule().scroll.setNestedScroll(node, this.value.scrollForward, this.value.scrollBackward);
     }
   }
 
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue.scrollForward, this.value.scrollForward) ||
-    !isBaseOrResourceEqual(this.stageValue.scrollBackward, this.value.scrollBackward);
+      !isBaseOrResourceEqual(this.stageValue.scrollBackward, this.value.scrollBackward);
   }
 }
 
@@ -35,9 +35,9 @@ class ScrollEnableScrollInteractionModifier extends ModifierWithKey<boolean> {
   static identity: symbol = Symbol('enableScrollInteraction');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().scroll.resetEnableScroll(node);
+      getUINativeModule().scroll.resetEnableScroll(node);
     } else {
-      GetUINativeModule().scroll.setEnableScroll(node, this.value);
+      getUINativeModule().scroll.setEnableScroll(node, this.value);
     }
   }
 
@@ -50,18 +50,14 @@ class ScrollFrictionModifier extends ModifierWithKey<number | Resource> {
   static identity: symbol = Symbol('friction');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().scroll.resetFriction(node);
+      getUINativeModule().scroll.resetFriction(node);
     } else {
-      GetUINativeModule().scroll.setFriction(node, this.value);
+      getUINativeModule().scroll.setFriction(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -69,7 +65,7 @@ class ScrollScrollSnapModifier extends ModifierWithKey<ArkScrollSnapOptions> {
   static identity: symbol = Symbol('scrollSnap');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().scroll.resetScrollSnap(node);
+      getUINativeModule().scroll.resetScrollSnap(node);
     } else {
       let snapPagination = [];
       let isArray = true;
@@ -83,9 +79,10 @@ class ScrollScrollSnapModifier extends ModifierWithKey<ArkScrollSnapOptions> {
       }
 
       if (isArray) {
-        GetUINativeModule().scroll.setScrollSnap(node, this.value.snapAlign, snapPagination, this.value.enableSnapToStart, this.value.enableSnapToEnd);
+        getUINativeModule().scroll.setScrollSnap(node, this.value.snapAlign, snapPagination, this.value.enableSnapToStart, this.value.enableSnapToEnd);
       } else {
-        GetUINativeModule().scroll.setScrollSnap(node, this.value.snapAlign, this.value.snapPagination, this.value.enableSnapToStart, this.value.enableSnapToEnd);
+        getUINativeModule().scroll.setScrollSnap(node, this.value.snapAlign,
+          this.value.snapPagination, this.value.enableSnapToStart, this.value.enableSnapToEnd);
       }
     }
   }
@@ -102,9 +99,9 @@ class ScrollScrollBarModifier extends ModifierWithKey<number> {
   static identity: symbol = Symbol('scrollBar');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().scroll.resetScrollBar(node);
+      getUINativeModule().scroll.resetScrollBar(node);
     } else {
-      GetUINativeModule().scroll.setScrollBar(node, this.value);
+      getUINativeModule().scroll.setScrollBar(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -119,9 +116,9 @@ class ScrollScrollableModifier extends ModifierWithKey<ScrollDirection> {
   static identity: Symbol = Symbol('scrollable');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().scroll.resetScrollable(node);
+      getUINativeModule().scroll.resetScrollable(node);
     } else {
-      GetUINativeModule().scroll.setScrollable(node, this.value);
+      getUINativeModule().scroll.setScrollable(node, this.value);
     }
   }
 
@@ -134,12 +131,12 @@ class ScrollEdgeEffectModifier extends ModifierWithKey<ArkScrollEdgeEffect> {
   constructor(value: ArkScrollEdgeEffect) {
     super(value);
   }
-  static identity: Symbol = Symbol("edgeEffect");
+  static identity: Symbol = Symbol('edgeEffect');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().scroll.resetEdgeEffect(node);
+      getUINativeModule().scroll.resetEdgeEffect(node);
     } else {
-      GetUINativeModule().scroll.setEdgeEffect(node, this.value.value, this.value.options?.alwaysEnabled);
+      getUINativeModule().scroll.setEdgeEffect(node, this.value.value, this.value.options?.alwaysEnabled);
     }
   }
 
@@ -156,9 +153,9 @@ class ScrollScrollBarWidthModifier extends ModifierWithKey<string | number> {
   static identity: Symbol = Symbol('scrollBarWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().scroll.resetScrollBarWidth(node);
+      getUINativeModule().scroll.resetScrollBarWidth(node);
     } else {
-      GetUINativeModule().scroll.setScrollBarWidth(node, this.value);
+      getUINativeModule().scroll.setScrollBarWidth(node, this.value);
     }
   }
 
@@ -174,20 +171,35 @@ class ScrollScrollBarColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('scrollBarColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().scroll.resetScrollBarColor(node);
+      getUINativeModule().scroll.resetScrollBarColor(node);
     } else {
-      GetUINativeModule().scroll.setScrollBarColor(node, this.value);
+      getUINativeModule().scroll.setScrollBarColor(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
+
+class ScrollClipModifier extends ModifierWithKey<boolean | object> {
+  constructor(value: boolean | object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('scrollClip');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetClipWithEdge(node);
+    } else {
+      getUINativeModule().common.setClipWithEdge(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return true;
+  }
+}
+
 
 class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
   constructor(nativePtr: KNode) {
@@ -281,14 +293,18 @@ class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
     }
     return this;
   }
+  clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
+    modifierWithKey(this._modifiersWithKeys, ScrollClipModifier.identity, ScrollClipModifier, value);
+    return this;
+  }
 }
 // @ts-ignore
 globalThis.Scroll.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkScrollComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

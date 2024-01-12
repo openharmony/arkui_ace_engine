@@ -92,17 +92,16 @@ class BlockStyleModifier extends ModifierWithKey<SliderBlockStyle> {
   static identity: Symbol = Symbol('sliderBlockStyle');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().slider.resetBlockStyle(node);
-    }
-    else {
-      GetUINativeModule().slider.setBlockStyle(node, this.value);
+      getUINativeModule().slider.resetBlockStyle(node);
+    } else {
+      getUINativeModule().slider.setBlockStyle(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
     return !((this.stageValue as SliderBlockStyle).type === (this.value as SliderBlockStyle).type &&
       (this.stageValue as SliderBlockStyle).image === (this.value as SliderBlockStyle).image &&
-      (this.stageValue as SliderBlockStyle).shape === (this.value as SliderBlockStyle).shape)
+      (this.stageValue as SliderBlockStyle).shape === (this.value as SliderBlockStyle).shape);
 
   }
 }
@@ -114,10 +113,9 @@ class ShowTipsModifier extends ModifierWithKey<ArkSliderTips> {
   static identity: Symbol = Symbol('sliderShowTips');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
-      GetUINativeModule().slider.resetShowTips(node);
-    }
-    else {
-      GetUINativeModule().slider.setShowTips(node, this.value.showTip, this.value?.tipText);
+      getUINativeModule().slider.resetShowTips(node);
+    } else {
+      getUINativeModule().slider.setShowTips(node, this.value.showTip, this.value?.tipText);
     }
   }
 
@@ -136,18 +134,14 @@ class StepSizeModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('sliderStepSize');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().slider.resetStepSize(node);
+      getUINativeModule().slider.resetStepSize(node);
     } else {
-      GetUINativeModule().slider.setStepSize(node, this.value);
+      getUINativeModule().slider.setStepSize(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -158,10 +152,9 @@ class BlockSizeModifier extends ModifierWithKey<SizeOptions> {
   static identity: Symbol = Symbol('sliderBlockSize');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
-      GetUINativeModule().slider.resetBlockSize(node);
-    }
-    else {
-      GetUINativeModule().slider.setBlockSize(node, this.value!.width, this.value!.height);
+      getUINativeModule().slider.resetBlockSize(node);
+    } else {
+      getUINativeModule().slider.setBlockSize(node, this.value!.width, this.value!.height);
     }
   }
 
@@ -181,18 +174,14 @@ class TrackBorderRadiusModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('sliderTrackBorderRadius');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().slider.resetTrackBorderRadius(node);
+      getUINativeModule().slider.resetTrackBorderRadius(node);
     } else {
-      GetUINativeModule().slider.setTrackBorderRadius(node, this.value);
+      getUINativeModule().slider.setTrackBorderRadius(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -203,18 +192,14 @@ class StepColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('sliderStepColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().slider.resetStepColor(node);
+      getUINativeModule().slider.resetStepColor(node);
     } else {
-      GetUINativeModule().slider.setStepColor(node, this.value);
+      getUINativeModule().slider.setStepColor(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -225,18 +210,14 @@ class BlockBorderColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('sliderBlockBorderColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().slider.resetBlockBorderColor(node);
+      getUINativeModule().slider.resetBlockBorderColor(node);
     } else {
-      GetUINativeModule().slider.setBlockBorderColor(node, this.value);
+      getUINativeModule().slider.setBlockBorderColor(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -247,18 +228,14 @@ class BlockBorderWidthModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('sliderBlockBorderWidth');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().slider.resetBlockBorderWidth(node);
+      getUINativeModule().slider.resetBlockBorderWidth(node);
     } else {
-      GetUINativeModule().slider.setBlockBorderWidth(node, this.value);
+      getUINativeModule().slider.setBlockBorderWidth(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -269,18 +246,14 @@ class BlockColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('sliderBlockColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().slider.resetBlockColor(node);
+      getUINativeModule().slider.resetBlockColor(node);
     } else {
-      GetUINativeModule().slider.setBlockColor(node, this.value);
+      getUINativeModule().slider.setBlockColor(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -291,18 +264,14 @@ class TrackColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('sliderTrackColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().slider.resetTrackBackgroundColor(node);
+      getUINativeModule().slider.resetTrackBackgroundColor(node);
     } else {
-      GetUINativeModule().slider.setTrackBackgroundColor(node, this.value);
+      getUINativeModule().slider.setTrackBackgroundColor(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -313,18 +282,14 @@ class SelectColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('sliderSelectColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().slider.resetSelectColor(node);
+      getUINativeModule().slider.resetSelectColor(node);
     } else {
-      GetUINativeModule().slider.setSelectColor(node, this.value);
+      getUINativeModule().slider.setSelectColor(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -335,10 +300,9 @@ class ShowStepsModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('sliderShowSteps');
   applyPeer(node: KNode, reset: boolean) {
     if (reset) {
-      GetUINativeModule().slider.resetShowSteps(node);
-    }
-    else {
-      GetUINativeModule().slider.setShowSteps(node, this.value);
+      getUINativeModule().slider.resetShowSteps(node);
+    } else {
+      getUINativeModule().slider.setShowSteps(node, this.value);
     }
   }
   checkObjectDiff(): boolean {
@@ -353,28 +317,24 @@ class TrackThicknessModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('sliderTrackThickness');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().slider.resetThickness(node);
+      getUINativeModule().slider.resetThickness(node);
     } else {
-      GetUINativeModule().slider.setThickness(node, this.value);
+      getUINativeModule().slider.setThickness(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
 // @ts-ignore
 globalThis.Slider.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkSliderComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

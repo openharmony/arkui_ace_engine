@@ -197,6 +197,7 @@ protected:
     void ParseFillPattern(const JSCallbackInfo& info);
     void ParseStorkeGradient(const JSCallbackInfo& info);
     void ParseStrokePattern(const JSCallbackInfo& info);
+    JSRenderImage* UnwrapNapiImage(const JSRef<JSObject> jsObject);
 
 protected:
     bool anti_ = false;
@@ -218,6 +219,7 @@ private:
     std::shared_ptr<Pattern> GetPatternPtr(int32_t id);
     bool isInitializeShadow_ = false;
     bool isOffscreenInitializeShadow_ = false;
+    Dimension GetDimensionValue(const std::string& str);
 };
 
 } // namespace OHOS::Ace::Framework

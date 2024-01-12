@@ -198,11 +198,14 @@ private:
 
     void OnColorConfigurationUpdate() override;
     void LoadImage(const ImageSourceInfo& src);
-    void LoadAltImage(const RefPtr<ImageLayoutProperty>& imageLayoutProperty);
+    void LoadAltImage(const ImageSourceInfo& altImageSourceInfo);
 
-    void UpdateAnalyzerUIConfig(const RefPtr<LayoutWrapper>& dirty);
+    void UpdateAnalyzerUIConfig(const RefPtr<GeometryNode>& geometryNode);
     void CreateAnalyzerOverlay();
+    void UpdateAnalyzerOverlay();
+    void DeleteAnalyzerOverlay();
     bool IsSupportImageAnalyzerFeature();
+    void UpdateAnalyzerOverlayLayout();
 
     CopyOptions copyOption_ = CopyOptions::None;
     ImageInterpolation interpolation_ = ImageInterpolation::NONE;

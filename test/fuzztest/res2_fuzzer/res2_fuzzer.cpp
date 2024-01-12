@@ -21,7 +21,7 @@
 #include "adapter/ohos/entrance/file_asset_provider_impl.h"
 #include "core/common/asset_manager_impl.h"
 #include "frameworks/core/components/theme/theme_constants.h"
-#include "core/components/test/unittest/theme/theme_mock.h"
+#include "test/mock/core/common/theme_mock.h"
 
 const uint32_t u16m = 65535;
 

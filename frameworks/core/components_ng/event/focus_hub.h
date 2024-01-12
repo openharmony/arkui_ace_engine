@@ -33,11 +33,12 @@ constexpr int32_t DEFAULT_TAB_FOCUSED_INDEX = -2;
 constexpr int32_t NONE_TAB_FOCUSED_INDEX = -1;
 constexpr int32_t MASK_FOCUS_STEP_FORWARD = 0x10;
 constexpr int32_t MASK_FOCUS_STEP_TAB = 0x5;
-constexpr int32_t DEEPTH_OF_MENU_WRAPPER = 3;
-constexpr int32_t DEEPTH_OF_MENU = 2;
-constexpr int32_t DEEPTH_OF_DIALOG = 2;
-constexpr int32_t DEEPTH_OF_PAGE = 1;
-constexpr int32_t DEEPTH_OF_POPUP = 2;
+const std::list<int32_t> DEEPTH_OF_MENU_WRAPPER = { 0, 0, 0 };
+const std::list<int32_t> DEEPTH_OF_MENU = { 0, 0 };
+const std::list<int32_t> DEEPTH_OF_DIALOG = { 0, 0 };
+const std::list<int32_t> DEEPTH_OF_PAGE = { 0 };
+const std::list<int32_t> DEEPTH_OF_POPUP = { 0, 0 };
+const std::list<int32_t> DEEPTH_OF_SHEET_PAGE = { 1, 0 };
 
 enum class FocusType : int32_t {
     DISABLE = 0,
@@ -182,6 +183,16 @@ public:
             paintParams_->SetFocusPadding(paintParams.GetFocusPadding());
         }
     }
+    FocusPattern(const FocusPattern& focusPattern)
+    {
+        focusType_ = focusPattern.GetFocusType();
+        focusable_ = focusPattern.GetFocusable();
+        styleType_ = focusPattern.GetStyleType();
+        if (focusPattern.GetFocusPaintParams()) {
+            SetFocusPaintParams(*focusPattern.GetFocusPaintParams());
+        }
+        isFocusActiveWhenFocused_ = focusPattern.GetIsFocusActiveWhenFocused();
+    }
     ~FocusPattern() override = default;
 
     FocusType GetFocusType() const
@@ -234,11 +245,21 @@ public:
         }
     }
 
+    bool GetIsFocusActiveWhenFocused() const
+    {
+        return isFocusActiveWhenFocused_;
+    }
+    void SetIsFocusActiveWhenFocused(bool value)
+    {
+        isFocusActiveWhenFocused_ = value;
+    }
+
 private:
     FocusType focusType_ = FocusType::DISABLE;
     bool focusable_ = false;
     FocusStyleType styleType_ = FocusStyleType::OUTER_BORDER;
     std::unique_ptr<FocusPaintParam> paintParams_ = nullptr;
+    bool isFocusActiveWhenFocused_ = false;
 };
 
 struct ScopeFocusAlgorithm final {
@@ -418,6 +439,17 @@ public:
     explicit FocusHub(const WeakPtr<EventHub>& eventHub, FocusType type = FocusType::DISABLE, bool focusable = false)
         : eventHub_(eventHub), focusable_(focusable), focusType_(type)
     {}
+    explicit FocusHub(const WeakPtr<EventHub>& eventHub, const FocusPattern& focusPattern)
+    {
+        eventHub_ = eventHub;
+        focusable_ = focusPattern.GetFocusable();
+        focusType_ = focusPattern.GetFocusType();
+        focusStyleType_ = focusPattern.GetStyleType();
+        if (focusPattern.GetFocusPaintParams()) {
+            SetFocusPaintParamsPtr(focusPattern.GetFocusPaintParams());
+        }
+        isFocusActiveWhenFocused_ = focusPattern.GetIsFocusActiveWhenFocused();
+    }
     ~FocusHub() override = default;
 
     void SetFocusStyleType(FocusStyleType type)
@@ -430,6 +462,15 @@ public:
     }
 
     static void IsCloseKeyboard(RefPtr<FrameNode> frameNode);
+
+    static void PushPageCloseKeyboard();
+
+    static void NavCloseKeyboard();
+
+    BlurReason GetBlurReason() const
+    {
+        return blurReason_;
+    }
 
     void SetFocusPaintParamsPtr(const std::unique_ptr<FocusPaintParam>& paramsPtr)
     {
@@ -485,6 +526,20 @@ public:
     {
         return focusPaintParamsPtr_ ? focusPaintParamsPtr_->HasFocusPadding() : false;
     }
+
+    bool HasBackwardFocusMovement() const
+    {
+        return hasBackwardMovement_;
+    }
+
+    void ClearBackwardFocusMovementFlag()
+    {
+        hasBackwardMovement_ = false;
+    }
+
+    bool HasBackwardFocusMovementInChildren();
+    void ClearBackwardFocusMovementFlagInChildren();
+
     Dimension GetFocusPadding() const
     {
         CHECK_NULL_RETURN(focusPaintParamsPtr_, Dimension());
@@ -522,6 +577,7 @@ public:
     RefPtr<FrameNode> GetFrameNode() const;
     RefPtr<GeometryNode> GetGeometryNode() const;
     RefPtr<FocusHub> GetParentFocusHub() const;
+    RefPtr<FocusHub> GetRootFocusHub();
     std::string GetFrameName() const;
     int32_t GetFrameId() const;
 
@@ -572,17 +628,11 @@ public:
     }
     void SetParentFocusable(bool parentFocusable);
 
-    void RefreshParentFocusable(bool focusable);
-
     void RefreshFocus();
 
     void SetFocusable(bool focusable, bool isExplicit = true);
     void SetShow(bool show);
-    void SetShowNode(bool show);
-    void SetShowScope(bool show);
     void SetEnabled(bool enabled);
-    void SetEnabledNode(bool enabled);
-    void SetEnabledScope(bool enabled);
 
     bool IsShow() const;
 
@@ -745,6 +795,9 @@ public:
 
     void SetFocusType(FocusType type)
     {
+        if (focusType_ != type && type == FocusType::DISABLE) {
+            RemoveSelf(BlurReason::FOCUS_SWITCH);
+        }
         focusType_ = type;
     }
     FocusType GetFocusType() const
@@ -838,9 +891,9 @@ public:
 
     std::optional<std::string> GetInspectorKey() const;
 
-    bool PaintFocusState(bool isNeedStateStyles = true);
+    bool PaintFocusState(bool isNeedStateStyles = true, bool forceUpdate = false);
     bool PaintAllFocusState();
-    bool PaintInnerFocusState(const RoundRect& paintRect);
+    bool PaintInnerFocusState(const RoundRect& paintRect, bool forceUpdate = false);
     void ClearFocusState(bool isNeedStateStyles = true);
     void ClearAllFocusState();
 
@@ -879,6 +932,27 @@ public:
     bool GetIsViewHasFocused() const
     {
         return isViewHasFocused_;
+    }
+
+    size_t GetFocusableCount()
+    {
+        size_t count = 0;
+        auto children = GetChildren();
+        for (const auto& child : children) {
+            if (child->IsFocusable()) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    void SetIsFocusActiveWhenFocused(bool value)
+    {
+        isFocusActiveWhenFocused_ = value;
+    }
+    bool GetIsFocusActiveWhenFocused() const
+    {
+        return isFocusActiveWhenFocused_;
     }
 
     static inline bool IsFocusStepVertical(FocusStep step)
@@ -969,6 +1043,8 @@ private:
     bool isFocusUnit_ { false };
     bool isViewRootScopeFocused_ { true };
     bool isViewHasFocused_ { false };
+    bool hasBackwardMovement_ { false };
+    bool isFocusActiveWhenFocused_ { false };
 
     FocusType focusType_ = FocusType::DISABLE;
     FocusStyleType focusStyleType_ = FocusStyleType::NONE;

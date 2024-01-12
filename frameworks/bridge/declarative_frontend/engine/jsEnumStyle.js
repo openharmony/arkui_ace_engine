@@ -270,9 +270,45 @@ var Alignment;
 var BlendMode;
 (function (BlendMode) {
   BlendMode[BlendMode["NORMAL"] = 0] = "NORMAL";
-  BlendMode[BlendMode["DESTINATION_IN"] = 1] = "DESTINATION_IN";
-  BlendMode[BlendMode["SOURCE_IN"] = 2] = "SOURCE_IN";
+  BlendMode[BlendMode["DESTINATION_IN"] = 7] = "DESTINATION_IN";
+  BlendMode[BlendMode["SOURCE_IN"] = 6] = "SOURCE_IN";
+  BlendMode[BlendMode["NONE"] = 0] = "NONE";
+  BlendMode[BlendMode["CLEAR"] = 1] = "CLEAR";
+  BlendMode[BlendMode["SRC"] = 2] = "SRC";
+  BlendMode[BlendMode["DST"] = 3] = "DST";
+  BlendMode[BlendMode["SRC_OVER"] = 4] = "SRC_OVER";
+  BlendMode[BlendMode["DST_OVER"] = 5] = "DST_OVER";
+  BlendMode[BlendMode["SRC_IN"] = 6] = "SRC_IN";
+  BlendMode[BlendMode["DST_IN"] = 7] = "DST_IN";
+  BlendMode[BlendMode["SRC_OUT"] = 8] = "SRC_OUT";
+  BlendMode[BlendMode["DST_OUT"] = 9] = "DST_OUT";
+  BlendMode[BlendMode["SRC_ATOP"] = 10] = "SRC_ATOP";
+  BlendMode[BlendMode["DST_ATOP"] = 11] = "DST_ATOP";
+  BlendMode[BlendMode["XOR"] = 12] = "XOR";
+  BlendMode[BlendMode["PLUS"] = 13] = "PLUS";
+  BlendMode[BlendMode["MODULATE"] = 14] = "MODULATE";
+  BlendMode[BlendMode["SCREEN"] = 15] = "SCREEN";
+  BlendMode[BlendMode["OVERLAY"] = 16] = "OVERLAY";
+  BlendMode[BlendMode["DARKEN"] = 17] = "DARKEN";
+  BlendMode[BlendMode["LIGHTEN"] = 18] = "LIGHTEN";
+  BlendMode[BlendMode["COLOR_DODGE"] = 19] = "COLOR_DODGE";
+  BlendMode[BlendMode["COLOR_BURN"] = 20] = "COLOR_BURN";
+  BlendMode[BlendMode["HARD_LIGHT"] = 21] = "HARD_LIGHT";
+  BlendMode[BlendMode["SOFT_LIGHT"] = 22] = "SOFT_LIGHT";
+  BlendMode[BlendMode["DIFFERENCE"] = 23] = "DIFFERENCE";
+  BlendMode[BlendMode["EXCLUSION"] = 24] = "EXCLUSION";
+  BlendMode[BlendMode["MULTIPLY"] = 25] = "MULTIPLY";
+  BlendMode[BlendMode["HUE"] = 26] = "HUE";
+  BlendMode[BlendMode["SATURATION"] = 27] = "SATURATION";
+  BlendMode[BlendMode["COLOR"] = 28] = "COLOR";
+  BlendMode[BlendMode["LUMINOSITY"] = 29] = "LUMINOSITY";
 })(BlendMode || (BlendMode = {}));
+
+var BlendApplyType;
+(function (BlendApplyType) {
+  BlendApplyType[BlendApplyType["FAST"] = 0] = "FAST";
+  BlendApplyType[BlendApplyType["OFFSCREEN"] = 1] = "OFFSCREEN";
+})(BlendApplyType || (BlendApplyType = {}));
 
 var TextOverflow;
 (function (TextOverflow) {
@@ -802,6 +838,7 @@ var InputType;
   InputType[InputType["SCREEN_LOCK_PASSWORD"] = 9] = "SCREEN_LOCK_PASSWORD";
   InputType[InputType["USER_NAME"] = 10] = "USER_NAME";
   InputType[InputType["NEW_PASSWORD"] = 11] = "NEW_PASSWORD";
+  InputType[InputType["NUMBER_DECIMAL"] = 12] = "NUMBER_DECIMAL";
 })(InputType || (InputType = {}));
 
 var SearchType;
@@ -827,6 +864,8 @@ var EnterKeyType;
   EnterKeyType[EnterKeyType["Send"] = 4] = "Send";
   EnterKeyType[EnterKeyType["Next"] = 5] = "Next";
   EnterKeyType[EnterKeyType["Done"] = 6] = "Done";
+  EnterKeyType[EnterKeyType["PREVIOUS"] = 7] = "PREVIOUS";
+  EnterKeyType[EnterKeyType["NEW_LINE"] = 8] = "NEW_LINE";
 })(EnterKeyType || (EnterKeyType = {}));
 
 var ItemState
@@ -875,6 +914,13 @@ var NavDestinationMode;
   NavDestinationMode[NavDestinationMode["STANDARD"] = 0] = "STANDARD";
   NavDestinationMode[NavDestinationMode["DIALOG"] = 1] = "DIALOG";
 }(NavDestinationMode || (NavDestinationMode = {})));
+
+let NavigationOperation;
+(function(NavigationOperation) {
+  NavigationOperation[NavigationOperation.PUSH = 1] = "PUSH";
+  NavigationOperation[NavigationOperation.POP = 2] = "POP";
+  NavigationOperation[NavigationOperation.REPLACE = 3] = "REPLACE";
+}(NavigationOperation || (NavigationOperation = {})));
 
 var ResponseType;
 (function (ResponseType) {
@@ -1086,6 +1132,20 @@ var CopyOptions;
   CopyOptions[CopyOptions["LocalDevice"] = 2] = "LocalDevice";
   CopyOptions[CopyOptions["CROSS_DEVICE"] = 3] = "CrossDevice";
 })(CopyOptions || (CopyOptions = {}));
+
+var SymbolRenderingStrategy;
+(function (SymbolRenderingStrategy) {
+  SymbolRenderingStrategy[SymbolRenderingStrategy["SINGLE"] = 0] = "SINGLE";
+  SymbolRenderingStrategy[SymbolRenderingStrategy["MULTIPLE_COLOR"] = 1] = "MULTIPLE_COLOR";
+  SymbolRenderingStrategy[SymbolRenderingStrategy["MULTIPLE_OPACITY"] = 2] = "MULTIPLE_OPACITY";
+})(SymbolRenderingStrategy || (SymbolRenderingStrategy = {}));
+
+var SymbolEffectStrategy;
+(function (SymbolEffectStrategy) {
+  SymbolEffectStrategy[SymbolEffectStrategy["NONE"] = 0] = "NONE";
+  SymbolEffectStrategy[SymbolEffectStrategy["SCALE"] = 1] = "SCALE";
+  SymbolEffectStrategy[SymbolEffectStrategy["HIERARCHICAL"] = 2] = "HIERARCHICAL";
+})(SymbolEffectStrategy || (SymbolEffectStrategy = {}));
 
 var RichEditorSpanType;
 (function (RichEditorSpanType) {
@@ -1638,15 +1698,15 @@ class NavPathStack {
     this.isReplace = 0;
   }
   push(info, animated) {
-    this.pushPath(info, animated)
+    this.pushPath(info, animated);
   }
   pushPathByName(name, param, animated) {
     this.pathArray.push(new NavPathInfo(name, param));
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
-      this.animated = true
-      return
+      this.animated = true;
+      return;
     }
     this.animated = animated
   }
@@ -1655,8 +1715,8 @@ class NavPathStack {
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
-      this.animated = true
-      return
+      this.animated = true;
+      return;
     }
     this.animated = animated
   }
@@ -1668,8 +1728,8 @@ class NavPathStack {
     this.isReplace = 1;
     this.changeFlag = this.changeFlag + 1;
     if (animated === undefined) {
-      this.animated = true
-      return
+      this.animated = true;
+      return;
     }
     this.animated = animated
   }
@@ -1681,10 +1741,10 @@ class NavPathStack {
     this.pathArray.push(new NavPathInfo(name, param));
     this.changeFlag = this.changeFlag + 1;
     if (animated === undefined) {
-      this.animated = true
-      return
+      this.animated = true;
+      return;
     }
-    this.animated = animated
+    this.animated = animated;
   }
   setIsReplace(value) {
     this.isReplace = value;
@@ -1700,14 +1760,14 @@ class NavPathStack {
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
-      this.animated = true
-      return pathInfo
+      this.animated = true;
+      return pathInfo;
     }
     this.animated = animated
     return pathInfo;
   }
   popTo(name, animated) {
-    popToName(name, animated)
+    popToName(name, animated);
   }
   popToName(name, animated) {
     let index = this.pathArray.findIndex(element => element.name === name);
@@ -1718,8 +1778,8 @@ class NavPathStack {
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
-      this.animated = true
-      return index
+      this.animated = true;
+      return index;
     }
     this.animated = animated
     return index;
@@ -1732,10 +1792,10 @@ class NavPathStack {
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
-      this.animated = true
-      return
+      this.animated = true;
+      return;
     }
-    this.animated = animated
+    this.animated = animated;
   }
   moveToTop(name, animated) {
     let index = this.pathArray.findIndex(element => element.name === name);
@@ -1747,10 +1807,10 @@ class NavPathStack {
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
-      this.animated = true
-      return index
+      this.animated = true;
+      return index;
     }
-    this.animated = animated
+    this.animated = animated;
     return index;
   }
   moveIndexToTop(index, animated) {
@@ -1762,20 +1822,20 @@ class NavPathStack {
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
-      this.animated = true
-      return
+      this.animated = true;
+      return;
     }
-    this.animated = animated
+    this.animated = animated;
   }
   clear(animated) {
     this.pathArray.splice(0);
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     if (animated === undefined) {
-      this.animated = true
-      return
+      this.animated = true;
+      return;
     }
-    this.animated = animated
+    this.animated = animated;
   }
   removeName(name) {
     let removed = false;
@@ -1838,7 +1898,7 @@ class NavPathStack {
     return this.pathArray.length;
   }
   disableAnimation(disableAnimation) {
-    this.disableAllAnimation = disableAnimation
+    this.disableAllAnimation = disableAnimation;
   }
 }
 
@@ -1981,6 +2041,7 @@ var XComponentType;
   XComponentType[XComponentType["SURFACE"] = 0] = "SURFACE";
   XComponentType[XComponentType["COMPONENT"] = 1] = "COMPONENT";
   XComponentType[XComponentType["TEXTURE"] = 2] = "TEXTURE";
+  XComponentType[XComponentType["NODE"] = 3] = "NODE";
 })(XComponentType || (XComponentType = {}));
 
 var NestedScrollMode;
@@ -2213,3 +2274,24 @@ class WrappedBuilder {
         this.builder = builder;
     }
 }
+
+let TextSpanType;
+(function (TextSpanType) {
+  TextSpanType[TextSpanType['TEXT'] = 0] = 'TEXT';
+  TextSpanType[TextSpanType['IMAGE'] = 1] = 'IMAGE';
+  TextSpanType[TextSpanType['MIXED'] = 2] = 'MIXED';
+})(TextSpanType || (TextSpanType = {}));
+
+let TextResponseType;
+(function (TextResponseType) {
+  TextResponseType[TextResponseType['RIGHT_CLICK'] = 0] = 'RIGHT_CLICK';
+  TextResponseType[TextResponseType['LONG_PRESS'] = 1] = 'LONG_PRESS';
+  TextResponseType[TextResponseType['SELECT'] = 2] = 'SELECT';
+})(TextResponseType || (TextResponseType = {}));
+
+let NativeEmbedStatus;
+(function (NativeEmbedStatus) {
+  NativeEmbedStatus['CREATE'] = 0;
+  NativeEmbedStatus['UPDATE'] = 1;
+  NativeEmbedStatus['DESTROY'] = 2;
+})(NativeEmbedStatus || (NativeEmbedStatus = {}));

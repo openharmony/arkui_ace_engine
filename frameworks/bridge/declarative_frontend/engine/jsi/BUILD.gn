@@ -144,76 +144,6 @@ template("declarative_js_engine_ark") {
     configs = [ "$ace_root:ace_config" ]
 
     sources = [
-      "components/arkts_native_alphabet_indexer_modifier.cpp",
-      "components/arkts_native_api_impl.cpp",
-      "components/arkts_native_blank_modifier.cpp",
-      "components/arkts_native_button_modifier.cpp",
-      "components/arkts_native_calendar_picker_modifier.cpp",
-      "components/arkts_native_checkbox_modifier.cpp",
-      "components/arkts_native_checkboxgroup_modifier.cpp",
-      "components/arkts_native_column_modifier.cpp",
-      "components/arkts_native_column_split_modifier.cpp",
-      "components/arkts_native_common_modifier.cpp",
-      "components/arkts_native_common_shape_modifier.cpp",
-      "components/arkts_native_counter_modifier.cpp",
-      "components/arkts_native_data_panel_modifier.cpp",
-      "components/arkts_native_date_picker_modifier.cpp",
-      "components/arkts_native_divider_modifier.cpp",
-      "components/arkts_native_gauge_modifier.cpp",
-      "components/arkts_native_grid_col_modifier.cpp",
-      "components/arkts_native_grid_item_modifier.cpp",
-      "components/arkts_native_grid_modifier.cpp",
-      "components/arkts_native_grid_row_modifier.cpp",
-      "components/arkts_native_hyperlink_modifier.cpp",
-      "components/arkts_native_image_animator_modifier.cpp",
-      "components/arkts_native_image_modifier.cpp",
-      "components/arkts_native_image_span_modifier.cpp",
-      "components/arkts_native_line_modifier.cpp",
-      "components/arkts_native_list_item_group_modifier.cpp",
-      "components/arkts_native_list_item_modifier.cpp",
-      "components/arkts_native_list_modifier.cpp",
-      "components/arkts_native_loading_progress_modifier.cpp",
-      "components/arkts_native_marquee_modifier.cpp",
-      "components/arkts_native_menu_item_modifier.cpp",
-      "components/arkts_native_menu_modifier.cpp",
-      "components/arkts_native_nav_destination_modifier.cpp",
-      "components/arkts_native_nav_router_modifier.cpp",
-      "components/arkts_native_navigation_modifier.cpp",
-      "components/arkts_native_navigator_modifier.cpp",
-      "components/arkts_native_node_container_modifier.cpp",
-      "components/arkts_native_panel_modifier.cpp",
-      "components/arkts_native_path_modifier.cpp",
-      "components/arkts_native_pattern_lock_modifier.cpp",
-      "components/arkts_native_polyline_modifier.cpp",
-      "components/arkts_native_progress_modifier.cpp",
-      "components/arkts_native_qrcode_modifier.cpp",
-      "components/arkts_native_radio_modifier.cpp",
-      "components/arkts_native_rating_modifier.cpp",
-      "components/arkts_native_rect_modifier.cpp",
-      "components/arkts_native_rich_editor_modifier.cpp",
-      "components/arkts_native_row_modifier.cpp",
-      "components/arkts_native_row_split_modifier.cpp",
-      "components/arkts_native_scroll_modifier.cpp",
-      "components/arkts_native_search_modifier.cpp",
-      "components/arkts_native_select_modifier.cpp",
-      "components/arkts_native_shape_modifier.cpp",
-      "components/arkts_native_side_bar_container_modifier.cpp",
-      "components/arkts_native_slider_modifier.cpp",
-      "components/arkts_native_span_modifier.cpp",
-      "components/arkts_native_stack_modifier.cpp",
-      "components/arkts_native_stepper_item_modifier.cpp",
-      "components/arkts_native_swiper_modifier.cpp",
-      "components/arkts_native_tabs_modifier.cpp",
-      "components/arkts_native_text_area_modifier.cpp",
-      "components/arkts_native_text_clock_modifier.cpp",
-      "components/arkts_native_text_input_modifier.cpp",
-      "components/arkts_native_text_modifier.cpp",
-      "components/arkts_native_text_timer_modifier.cpp",
-      "components/arkts_native_textpicker_modifier.cpp",
-      "components/arkts_native_timepicker_modifier.cpp",
-      "components/arkts_native_toggle_modifier.cpp",
-      "components/arkts_native_video_modifier.cpp",
-      "components/arkts_native_water_flow_modifier.cpp",
       "js_converter.cpp",
       "jsi_declarative_engine.cpp",
       "jsi_declarative_group_js_bridge.cpp",
@@ -268,12 +198,14 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_panel_bridge.cpp",
       "nativeModule/arkts_native_path_bridge.cpp",
       "nativeModule/arkts_native_pattern_lock_bridge.cpp",
+      "nativeModule/arkts_native_polygon_bridge.cpp",
       "nativeModule/arkts_native_polyline_bridge.cpp",
       "nativeModule/arkts_native_progress_bridge.cpp",
       "nativeModule/arkts_native_qrcode_bridge.cpp",
       "nativeModule/arkts_native_radio_bridge.cpp",
       "nativeModule/arkts_native_rating_bridge.cpp",
       "nativeModule/arkts_native_rect_bridge.cpp",
+      "nativeModule/arkts_native_render_node_bridge.cpp",
       "nativeModule/arkts_native_rich_editor_bridge.cpp",
       "nativeModule/arkts_native_row_bridge.cpp",
       "nativeModule/arkts_native_row_split_bridge.cpp",
@@ -287,6 +219,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_stack_bridge.cpp",
       "nativeModule/arkts_native_stepper_item_bridge.cpp",
       "nativeModule/arkts_native_swiper_bridge.cpp",
+      "nativeModule/arkts_native_tabcontent_bridge.cpp",
       "nativeModule/arkts_native_tabs_bridge.cpp",
       "nativeModule/arkts_native_text_area_bridge.cpp",
       "nativeModule/arkts_native_text_bridge.cpp",
@@ -301,15 +234,29 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_utils.cpp",
     ]
 
-    deps = []
+    deps = [ "${ace_root}/frameworks/core/interfaces/native:ace_core_interfaces_native_node_$platform" ]
     external_deps = []
+
+    if (defined(config.xcomponent_components_support) &&
+        config.xcomponent_components_support) {
+      sources += [
+        "nativeModule/arkts_native_xcomponent_bridge.cpp",
+        "nativeModule/arkts_native_xcomponent_node_bridge.cpp",
+      ]
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/xcomponent:ace_core_components_xcomponent_pattern_ng_$platform" ]
+      if (is_ohos_standard_system) {
+        deps += [ "$ace_root/interfaces/inner_api/xcomponent_controller:ace_xcomponent_controller" ]
+        external_deps = [
+          "c_utils:utils",
+          "graphic_2d:librender_service_client",
+          "hilog:libhilog",
+        ]
+      }
+    }
 
     if (defined(config.form_components_support) &&
         config.form_components_support) {
-      sources += [
-        "components/arkts_native_form_component_modifier.cpp",
-        "nativeModule/arkts_native_form_component_bridge.cpp",
-      ]
+      sources += [ "nativeModule/arkts_native_form_component_bridge.cpp" ]
       deps += [ "${ace_root}/frameworks/core/components_ng/pattern/form:ace_core_components_form_pattern_ng_$platform" ]
 
       if (is_ohos_standard_system) {
@@ -323,6 +270,26 @@ template("declarative_js_engine_ark") {
           "input:libmmi-client",
           "ipc:ipc_core",
         ]
+      }
+    }
+
+    if (defined(config.plugin_components_support) &&
+        config.plugin_components_support) {
+      sources += [ "nativeModule/arkts_native_plugin_bridge.cpp" ]
+      deps += [
+        "${ace_root}/frameworks/core/components_ng/pattern/plugin:ace_core_components_plugin_pattern_ng_$platform",
+        "${ace_root}/interfaces/inner_api/ui_service_manager:ui_service_mgr",
+      ]
+      external_deps += [
+        "ability_base:want",
+        "ability_runtime:app_manager",
+        "bundle_framework:appexecfwk_core",
+        "c_utils:utils",
+        "graphic_2d:librender_service_client",
+        "ipc:ipc_core",
+      ]
+      if (os_account_exists) {
+        external_deps += [ "os_account:os_account_innerkits" ]
       }
     }
 

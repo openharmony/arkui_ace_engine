@@ -17,9 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_FONT_ROSEN_FONT_LOADER_H
 
 #include "core/common/font_loader.h"
-#ifdef USE_GRAPHIC_TEXT_GINE
 #include "core/common/rosen/rosen_asset_manager.h"
-#endif
 
 namespace OHOS::Ace {
 
@@ -33,18 +31,19 @@ public:
     RosenFontLoader(const std::string& familyName, const std::string& familySrc);
     ~RosenFontLoader() override = default;
 
-    void AddFont(const RefPtr<PipelineBase>& context) override;
+    void AddFont(const RefPtr<PipelineBase>& context, const std::string& bundleName = "",
+        const std::string& moduleName = "") override;
     void SetDefaultFontFamily(const char* fontFamily, const char* familySrc) override;
 
 private:
     void LoadFromNetwork(const RefPtr<PipelineBase>& context);
-    void LoadFromResource(const RefPtr<PipelineBase>& context);
+    void LoadFromResource(
+        const RefPtr<PipelineBase>& context, const std::string& bundleName = "", const std::string& moduleName = "");
     void LoadFromAsset(const RefPtr<PipelineBase>& context);
-#ifdef USE_GRAPHIC_TEXT_GINE
     void LoadFromFile(const RefPtr<PipelineBase>& context);
     RefPtr<Asset> GetAssetFromFile(const std::string& fileName) const;
     std::string RemovePathHead(const std::string& uri);
-#endif
+    void PostLoadFontTask(const std::vector<uint8_t>& fontData, const RefPtr<PipelineBase>& context);
     void NotifyCallbacks();
 };
 

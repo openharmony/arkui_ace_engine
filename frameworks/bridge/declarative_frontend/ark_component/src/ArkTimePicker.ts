@@ -55,10 +55,9 @@ class TimepickerTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().timepicker.resetTextStyle(node);
-    }
-    else {
-      GetUINativeModule().timepicker.setTextStyle(node, this.value?.color ?? undefined,
+      getUINativeModule().timepicker.resetTextStyle(node);
+    } else {
+      getUINativeModule().timepicker.setTextStyle(node, this.value?.color ?? undefined,
         this.value?.font?.size ?? undefined,
         this.value?.font?.weight ?? undefined,
         this.value?.font?.family ?? undefined,
@@ -86,10 +85,9 @@ class TimepickerSelectedTextStyleModifier extends ModifierWithKey<PickerTextStyl
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().timepicker.resetSelectedTextStyle(node);
-    }
-    else {
-      GetUINativeModule().timepicker.setSelectedTextStyle(node, this.value?.color ?? undefined,
+      getUINativeModule().timepicker.resetSelectedTextStyle(node);
+    } else {
+      getUINativeModule().timepicker.setSelectedTextStyle(node, this.value?.color ?? undefined,
         this.value?.font?.size ?? undefined,
         this.value?.font?.weight ?? undefined,
         this.value?.font?.family ?? undefined,
@@ -117,10 +115,9 @@ class TimepickerDisappearTextStyleModifier extends ModifierWithKey<PickerTextSty
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().timepicker.resetDisappearTextStyle(node);
-    }
-    else {
-      GetUINativeModule().timepicker.setDisappearTextStyle(node, this.value?.color ?? undefined,
+      getUINativeModule().timepicker.resetDisappearTextStyle(node);
+    } else {
+      getUINativeModule().timepicker.setDisappearTextStyle(node, this.value?.color ?? undefined,
         this.value?.font?.size ?? undefined,
         this.value?.font?.weight ?? undefined,
         this.value?.font?.family ?? undefined,
@@ -143,7 +140,7 @@ class TimepickerDisappearTextStyleModifier extends ModifierWithKey<PickerTextSty
 // @ts-ignore
 globalThis.TimePicker.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
   let component = this.createOrGetNode(elmtId, () => {
     return new ArkTimePickerComponent(nativeNode);
   });

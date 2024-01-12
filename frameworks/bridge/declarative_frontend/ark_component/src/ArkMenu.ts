@@ -21,18 +21,14 @@ class MenuFontColorModifier extends ModifierWithKey<ResourceColor> {
   static identity: Symbol = Symbol('fontColor');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().menu.resetMenuFontColor(node);
+      getUINativeModule().menu.resetMenuFontColor(node);
     } else {
-      GetUINativeModule().menu.setMenuFontColor(node, this.value);
+      getUINativeModule().menu.setMenuFontColor(node, this.value);
     }
   }
 
   checkObjectDiff(): boolean {
-    if (isResource(this.stageValue) && isResource(this.value)) {
-      return !isResourceEqual(this.stageValue, this.value);
-    } else {
-      return true;
-    }
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
 
@@ -43,10 +39,9 @@ class MenuFontModifier extends ModifierWithKey<Font> {
   static identity: Symbol = Symbol('font');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset || !this.value) {
-      GetUINativeModule().menu.resetFont(node);
-    }
-    else {
-      GetUINativeModule().menu.setFont(node,
+      getUINativeModule().menu.resetFont(node);
+    } else {
+      getUINativeModule().menu.setFont(node,
         this.value.size,
         this.value.weight,
         this.value.family,
@@ -70,13 +65,12 @@ class RadiusModifier extends ModifierWithKey<Dimension | BorderRadiuses> {
   static identity: Symbol = Symbol('radius');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      GetUINativeModule().menu.resetRadius(node);
-    }
-    else {
+      getUINativeModule().menu.resetRadius(node);
+    } else {
       if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
-        GetUINativeModule().menu.setRadius(node, this.value, this.value, this.value, this.value);
+        getUINativeModule().menu.setRadius(node, this.value, this.value, this.value, this.value);
       } else {
-        GetUINativeModule().menu.setRadius(node,
+        getUINativeModule().menu.setRadius(node,
           (this.value as BorderRadiuses).topLeft,
           (this.value as BorderRadiuses).topRight,
           (this.value as BorderRadiuses).bottomLeft,
@@ -126,10 +120,10 @@ class ArkMenuComponent extends ArkComponent implements MenuAttribute {
 // @ts-ignore
 globalThis.Menu.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-  let nativeNode = GetUINativeModule().getFrameNodeById(elmtId);
-  let component = this.createOrGetNode(elmtId, ()=> {
+  let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
+  let component = this.createOrGetNode(elmtId, () => {
     return new ArkMenuComponent(nativeNode);
   });
   applyUIAttributes(modifier, nativeNode, component);
   component.applyModifierPatch();
-}
+};

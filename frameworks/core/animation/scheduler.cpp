@@ -16,6 +16,7 @@
 #include "core/animation/scheduler.h"
 
 #include "base/log/log.h"
+#include "base/thread/task_executor.h"
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
@@ -148,6 +149,27 @@ void Scheduler::AddKeyFrame(float fraction, const std::function<void()>& propert
     }
 
     return context->AddKeyFrame(fraction, propertyCallback);
+}
+
+bool Scheduler::PrintVsyncInfoIfNeed() const
+{
+    auto pipeline = context_.Upgrade();
+    CHECK_NULL_RETURN(pipeline, false);
+    if (pipeline->PrintVsyncInfoIfNeed()) {
+        return true;
+    }
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, false);
+    const uint32_t delay = 3000; // unit: ms
+    // check vsync info after delay time.
+    taskExecutor->PostDelayedTask(
+        [weakContext = context_]() {
+            auto pipeline = weakContext.Upgrade();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->PrintVsyncInfoIfNeed();
+        },
+        TaskExecutor::TaskType::UI, delay);
+    return false;
 }
 
 } // namespace OHOS::Ace

@@ -169,10 +169,22 @@ struct TextSelector {
     std::string ToString()
     {
         std::string result;
-        result.append("base offset: ");
+        result.append("baseOffset: ");
         result.append(std::to_string(baseOffset));
-        result.append(", destination offset: ");
+        result.append(", selectionBaseOffset: ");
+        result.append(selectionBaseOffset.ToString());
+        result.append(", destinationOffset: ");
         result.append(std::to_string(destinationOffset));
+        result.append(", selectionDestinationOffset: ");
+        result.append(selectionDestinationOffset.ToString());
+        result.append(", firstHandle: ");
+        result.append(firstHandle.ToString());
+        result.append(", secondHandle: ");
+        result.append(secondHandle.ToString());
+        result.append(", firstHandleOffset_: ");
+        result.append(firstHandleOffset_.ToString());
+        result.append(", secondHandleOffset_: ");
+        result.append(secondHandleOffset_.ToString());
         return result;
     }
 
@@ -190,6 +202,40 @@ struct TextSelector {
     OffsetF firstHandleOffset_;
     OffsetF secondHandleOffset_;
     OnAccessibilityCallback onAccessibilityCallback_;
+};
+
+enum class TextSpanType : int32_t {
+    TEXT = 0,
+    IMAGE,
+    MIXED,
+    NONE,
+};
+
+enum class TextResponseType : int32_t {
+    RIGHT_CLICK = 0,
+    LONG_PRESS,
+    SELECTED_BY_MOUSE,
+    NONE,
+};
+
+struct SelectMenuParam {
+    std::function<void(int32_t, int32_t)> onAppear;
+    std::function<void()> onDisappear;
+};
+
+struct SelectionMenuParams {
+    TextSpanType type;
+    std::function<void()> buildFunc;
+    std::function<void(int32_t, int32_t)> onAppear;
+    std::function<void()> onDisappear;
+    TextResponseType responseType;
+
+    SelectionMenuParams(TextSpanType _type, std::function<void()> _buildFunc,
+        std::function<void(int32_t, int32_t)> _onAppear, std::function<void()> _onDisappear,
+        TextResponseType _responseType)
+        : type(_type), buildFunc(_buildFunc), onAppear(_onAppear), onDisappear(_onDisappear),
+          responseType(_responseType)
+    {}
 };
 
 } // namespace OHOS::Ace::NG

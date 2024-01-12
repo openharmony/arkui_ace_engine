@@ -271,14 +271,17 @@ void TextContentModifier::DrawObscuration(DrawingContext& drawingContext)
             }
         }
     }
+    auto baselineOffset = baselineOffsetFloat_->Get();
     int32_t obscuredLineCount = std::min(maxLineCount, static_cast<int32_t>(textLineWidth.size()));
-    float offsetY = (contentSize_->Get().Height() - (obscuredLineCount * fontSize)) / (obscuredLineCount + 1);
+    float offsetY = (contentSize_->Get().Height() - std::fabs(baselineOffset) - (obscuredLineCount * fontSize)) /
+                    (obscuredLineCount + 1);
     for (auto i = 0; i < obscuredLineCount; i++) {
         RSRoundRect rSRoundRect(
             RSRect(contentOffset_->Get().GetX(),
-                contentOffset_->Get().GetY() + std::max(offsetY + ((offsetY + fontSize) * i), 0.0f),
+                contentOffset_->Get().GetY() - std::min(baselineOffset, 0.0f) +
+                    std::max(offsetY + ((offsetY + fontSize) * i), 0.0f),
                 contentOffset_->Get().GetX() + std::min(textLineWidth[i], contentSize_->Get().Width()),
-                contentOffset_->Get().GetY() +
+                contentOffset_->Get().GetY() - std::min(baselineOffset, 0.0f) +
                     std::min(offsetY + ((offsetY + fontSize) * i) + fontSize, contentSize_->Get().Height())),
             radiusXY);
         canvas.DrawRoundRect(rSRoundRect);

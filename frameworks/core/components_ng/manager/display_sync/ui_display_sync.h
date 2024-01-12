@@ -138,7 +138,7 @@ public:
 
     int32_t rate_ = 1;
     bool noSkip_ = true;
-    uint32_t count_ = 0;
+    int32_t count_ = 0;
     RefPtr<FrameRateRange> rateRange_ = AceType::MakeRefPtr<FrameRateRange>();
 };
 
@@ -177,8 +177,8 @@ public:
 
     void SetRefreshRateMode(int32_t refreshRateMode);
     int32_t GetRefreshRateMode() const;
-    bool IsEnabled() const;
-    bool IsDisabled() const;
+    bool IsAutoRefreshRateMode() const;
+    bool IsNonAutoRefreshRateMode() const;
 
     UIDisplaySync();
     ~UIDisplaySync() noexcept override;

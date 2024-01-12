@@ -65,11 +65,9 @@ void SearchLayoutAlgorithm::CancelImageMeasure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
-    auto themeHeight = searchTheme->GetHeight().ConvertToPx();
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto imageConstraint = imageLayoutProperty->GetLayoutConstraint();
-    auto searchHeight =
-        (constraint->selfIdealSize.Height().has_value()) ? constraint->selfIdealSize.Height().value() : themeHeight;
+    auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
     auto defaultImageHeight =
         imageConstraint->selfIdealSize.Height().value_or(searchTheme->GetIconSize().ConvertToPx());
     auto iconStretchSize = (NearZero(defaultImageHeight) || !imageConstraint->maxSize.IsPositive()) &&
@@ -163,8 +161,7 @@ void SearchLayoutAlgorithm::TextFieldMeasure(LayoutWrapper* layoutWrapper)
         textFieldWidth = textFieldWidth - cancelButtonWidth;
     }
     auto themeHeight = searchTheme->GetHeight().ConvertToPx();
-    auto searchHeight =
-        (constraint->selfIdealSize.Height().has_value()) ? constraint->selfIdealSize.Height().value() : themeHeight;
+    auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
     auto textFieldHeight = std::min(themeHeight, searchHeight - 0.0f);
     auto childLayoutConstraint = layoutProperty->CreateChildConstraint();
     childLayoutConstraint.selfIdealSize.SetWidth(textFieldWidth);
@@ -187,11 +184,9 @@ void SearchLayoutAlgorithm::ImageMeasure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(pipeline);
     auto searchTheme = pipeline->GetTheme<SearchTheme>();
     CHECK_NULL_VOID(searchTheme);
-    auto themeHeight = searchTheme->GetHeight().ConvertToPx();
     auto constraint = layoutProperty->GetLayoutConstraint();
     auto imageConstraint = imageLayoutProperty->GetLayoutConstraint();
-    auto searchHeight =
-        (constraint->selfIdealSize.Height().has_value()) ? constraint->selfIdealSize.Height().value() : themeHeight;
+    auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
     auto defaultImageHeight =
         imageConstraint->selfIdealSize.Height().value_or(searchTheme->GetIconSize().ConvertToPx());
     auto iconStretchSize = (NearZero(defaultImageHeight) || !imageConstraint->maxSize.IsPositive()) &&
@@ -235,10 +230,8 @@ void SearchLayoutAlgorithm::SearchButtonMeasure(LayoutWrapper* layoutWrapper)
         searchTheme->GetHeight().ConvertToPx() - 2 * searchTheme->GetSearchButtonSpace().ConvertToPx();
     auto searchButtonHeight = std::max(defaultButtonHeight,
         layoutProperty->GetSearchButtonFontSizeValue(searchTheme->GetFontSize()).ConvertToPx() + spaceHeight);
-    auto themeHeight = searchTheme->GetHeight().ConvertToPx();
     auto constraint = layoutProperty->GetLayoutConstraint();
-    auto searchHeight =
-        (constraint->selfIdealSize.Height().has_value()) ? constraint->selfIdealSize.Height().value() : themeHeight;
+    auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
     searchButtonHeight = std::min(searchButtonHeight, searchHeight - 0.0f);
     CalcSize searchButtonCalcSize;
     searchButtonCalcSize.SetHeight(CalcLength(searchButtonHeight));
@@ -313,36 +306,11 @@ void SearchLayoutAlgorithm::SelfMeasure(LayoutWrapper* layoutWrapper)
     auto layoutProperty = AceType::DynamicCast<SearchLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto constraint = layoutProperty->GetLayoutConstraint();
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    auto searchTheme = pipeline->GetTheme<SearchTheme>();
-    CHECK_NULL_VOID(searchTheme);
-
-    // theme height
-    auto themeHeight = searchTheme->GetHeight().ConvertToPx();
-
-    // self height
-    auto searchHeight =
-        (constraint->selfIdealSize.Height().has_value()) ? constraint->selfIdealSize.Height().value() : themeHeight;
-    auto padding = layoutProperty->CreatePaddingAndBorder();
-    auto verticalPadding = padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f);
-    searchHeight = std::max(verticalPadding, static_cast<float>(searchHeight));
-    auto searchHeightAdapt = searchHeight;
-    if (!IsFixedHeightMode(layoutWrapper)) {
-        searchHeightAdapt = CalcSearchAdaptHeight(layoutWrapper);
-        renderContext->SetClipToBounds(false);
-    } else {
-        renderContext->SetClipToBounds(true);
-    }
-
+    auto searchHeight = CalcSearchHeight(constraint.value(), layoutWrapper);
     // update search height
-    constraint->selfIdealSize.SetHeight(searchHeightAdapt);
+    constraint->selfIdealSize.SetHeight(searchHeight);
     auto searchWidth = CalcSearchWidth(constraint.value(), layoutWrapper);
-    SizeF idealSize(searchWidth, searchHeightAdapt);
+    SizeF idealSize(searchWidth, searchHeight);
     if (GreaterOrEqualToInfinity(idealSize.Width()) || GreaterOrEqualToInfinity(idealSize.Height())) {
         geometryNode->SetFrameSize(SizeF());
         return;
@@ -370,9 +338,73 @@ double SearchLayoutAlgorithm::CalcSearchWidth(
         maxIdealSize.UpdateSizeWhenSmaller(finalSize.ConvertToSizeT());
     }
     searchConstraint.maxSize = maxIdealSize;
-    return (searchConstraint.selfIdealSize.Width().has_value())
+    auto searchWidth = (searchConstraint.selfIdealSize.Width().has_value())
                 ? std::min(searchConstraint.selfIdealSize.Width().value(), searchConstraint.maxSize.Width())
                 : std::min(searchConstraint.percentReference.Width(), searchConstraint.maxSize.Width());
+
+    const auto& calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
+    CHECK_NULL_RETURN(calcLayoutConstraint, searchWidth);
+    auto hasMinSize = calcLayoutConstraint->minSize->Width().has_value();
+    auto hasMaxSize = calcLayoutConstraint->maxSize->Width().has_value();
+    auto hasWidth = calcLayoutConstraint->selfIdealSize->Width().has_value();
+    if (hasMinSize && ((hasMaxSize && searchConstraint.minSize.Width() >= searchConstraint.maxSize.Width())
+        || (!hasMaxSize && !hasWidth))) {
+        return searchConstraint.minSize.Width();
+    }
+    if (hasMinSize) {
+        searchWidth = std::max(searchConstraint.minSize.Width(), static_cast<float>(searchWidth));
+    }
+    if (hasMaxSize) {
+        searchWidth = std::min(searchConstraint.maxSize.Width(), static_cast<float>(searchWidth));
+    }
+    return searchWidth;
+}
+
+double SearchLayoutAlgorithm::CalcSearchHeight(
+    const LayoutConstraintF& constraint, LayoutWrapper* layoutWrapper)
+{
+    auto layoutProperty = AceType::DynamicCast<SearchLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, 0.0);
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_RETURN(host, 0.0);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, 0.0);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, 0.0);
+    auto searchTheme = pipeline->GetTheme<SearchTheme>();
+    CHECK_NULL_RETURN(searchTheme, 0.0);
+    auto themeHeight = searchTheme->GetHeight().ConvertToPx();
+    auto searchHeight =
+        (constraint.selfIdealSize.Height().has_value()) ? constraint.selfIdealSize.Height().value() : themeHeight;
+    auto padding = layoutProperty->CreatePaddingAndBorder();
+    auto verticalPadding = padding.top.value_or(0.0f) + padding.bottom.value_or(0.0f);
+    searchHeight = std::max(verticalPadding, static_cast<float>(searchHeight));
+    auto searchHeightAdapt = searchHeight;
+    if (!IsFixedHeightMode(layoutWrapper)) {
+        searchHeightAdapt = std::max(searchHeightAdapt, CalcSearchAdaptHeight(layoutWrapper));
+        renderContext->SetClipToBounds(false);
+    } else {
+        renderContext->SetClipToBounds(true);
+    }
+
+    const auto& calcLayoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
+    CHECK_NULL_RETURN(calcLayoutConstraint, searchHeightAdapt);
+    auto hasMinSize = calcLayoutConstraint->minSize->Height().has_value();
+    auto hasMaxSize = calcLayoutConstraint->maxSize->Height().has_value();
+    auto hasHeight = calcLayoutConstraint->selfIdealSize->Height().has_value();
+    if (hasMinSize && ((hasMaxSize && constraint.minSize.Height() >= constraint.maxSize.Height())
+        || (!hasMaxSize && !hasHeight))) {
+        return constraint.minSize.Height();
+    }
+    if (hasMinSize) {
+        searchHeightAdapt = std::max(constraint.minSize.Height(),
+            static_cast<float>(searchHeightAdapt));
+    }
+    if (hasMaxSize) {
+        searchHeightAdapt = std::min(constraint.maxSize.Height(),
+            static_cast<float>(searchHeightAdapt));
+    }
+    return searchHeightAdapt;
 }
 
 void SearchLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
@@ -484,8 +516,6 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto searchSize = geometryNode->GetFrameSize();
     auto searchFrameWidth = searchSize.Width();
     auto searchFrameHeight = searchSize.Height();
-    auto layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
-    auto searchUserHeight = layoutConstraint->selfIdealSize.Height().value_or(searchTheme->GetHeight().ConvertToPx());
 
     // search icon size
     auto imageWrapper = layoutWrapper->GetOrCreateChildByIndex(IMAGE_INDEX);
@@ -510,7 +540,7 @@ void SearchLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         searchIconConstraint->selfIdealSize.Height().value_or(searchTheme->GetIconHeight().ConvertToPx());
     float imageVerticalOffset = topPadding;
     if (NearEqual(iconUserHeight, iconFrameHeight)) {
-        auto iconInterval = (searchUserHeight - iconUserHeight) / 2;
+        auto iconInterval = (searchFrameHeight - iconUserHeight) / 2;
         if (topPadding <= iconInterval && bottomPadding <= iconInterval) {
             imageVerticalOffset = iconInterval;
         } else if (topPadding <= iconInterval && bottomPadding > iconInterval) {

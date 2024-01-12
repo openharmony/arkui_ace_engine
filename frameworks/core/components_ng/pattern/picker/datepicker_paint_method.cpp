@@ -20,7 +20,9 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/picker/picker_theme.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
+#include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
+
 
 namespace OHOS::Ace::NG {
 
@@ -42,61 +44,36 @@ CanvasDrawFunction DatePickerPaintMethod::GetForegroundDrawFunction(PaintWrapper
     const auto& geometryNode = paintWrapper->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, nullptr);
     auto frameRect = geometryNode->GetFrameRect();
-    return [weak = WeakClaim(this), dividerLineWidth = DIVIDER_LINE_WIDTH, frameRect, dividerSpacing, dividerColor,
-               enabled = enabled_, pattern = pattern_](RSCanvas& canvas) {
-        DividerPainter dividerPainter(dividerLineWidth, frameRect.Width(), false, dividerColor, LineCap::SQUARE);
-        auto height = dividerSpacing;
-        double upperLine = (frameRect.Height() - height) / 2.0;
-        double downLine = (frameRect.Height() + height) / 2.0;
 
-        OffsetF offset = OffsetF(0.0f, upperLine);
-        dividerPainter.DrawLine(canvas, offset);
-        OffsetF offsetY = OffsetF(0.0f, downLine);
-        dividerPainter.DrawLine(canvas, offsetY);
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    auto pickerNode = renderContext->GetHost();
+    CHECK_NULL_RETURN(pickerNode, nullptr);
+    auto layoutProperty = pickerNode->GetLayoutProperty<DataPickerRowLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+
+    return [weak = WeakClaim(this), dividerLineWidth = DIVIDER_LINE_WIDTH, layoutProperty, frameRect, dividerSpacing,
+               dividerColor, enabled = enabled_, pattern = pattern_](RSCanvas& canvas) {
+        PaddingPropertyF padding = layoutProperty->CreatePaddingAndBorder();
+        RectF contentRect = { padding.left.value_or(0), padding.top.value_or(0),
+            frameRect.Width() - padding.Width(), frameRect.Height() - padding.Height() };
+        if (contentRect.Height() >= dividerSpacing) {
+            DividerPainter dividerPainter(dividerLineWidth, contentRect.Width(), false, dividerColor, LineCap::SQUARE);
+            double upperLine = (contentRect.Height() - dividerSpacing) / 2.0 + contentRect.GetY();
+            double downLine = (contentRect.Height() + dividerSpacing) / 2.0 + contentRect.GetY();
+
+            OffsetF offset = OffsetF(contentRect.GetX(), upperLine);
+            dividerPainter.DrawLine(canvas, offset);
+            OffsetF offsetY = OffsetF(contentRect.GetX(), downLine);
+            dividerPainter.DrawLine(canvas, offsetY);
+        }
+
         auto picker = weak.Upgrade();
         CHECK_NULL_VOID(picker);
-        if (enabled) {
-            picker->PaintGradient(canvas, frameRect);
-        } else {
+        if (!enabled) {
             picker->PaintDisable(canvas, frameRect.Width(), frameRect.Height());
         }
     };
-}
-
-void DatePickerPaintMethod::PaintGradient(RSCanvas& canvas, const RectF& frameRect)
-{
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto theme = pipeline->GetTheme<PickerTheme>();
-    auto gradientHeight = static_cast<float>(pipeline->NormalizeToPx(theme->GetGradientHeight()));
-    if (NearZero(gradientHeight)) {
-        return;
-    }
-
-    // Paint gradient rect over the picker content.
-    RSBrush topBrush;
-    RSRect rect(0.0f, 0.0f, frameRect.Right() - frameRect.Left(), frameRect.Bottom() - frameRect.Top());
-    RSPoint topStartPoint;
-    topStartPoint.SetX(0.0f);
-    topStartPoint.SetY(0.0f);
-    RSPoint topEndPoint;
-    topEndPoint.SetX(0.0f);
-    topEndPoint.SetY(frameRect.Height());
-    Color endColor = backgroundColor_;
-    Color middleColor = endColor.ChangeAlpha(0);
-    if (NearZero(frameRect.Bottom())) {
-        return;
-    }
-    std::vector<float> topPos { 0.0f, gradientHeight / frameRect.Bottom(),
-        (frameRect.Bottom() - gradientHeight) / frameRect.Bottom(), 1.0f };
-    std::vector<RSColorQuad> topColors { endColor.GetValue(), middleColor.GetValue(), middleColor.GetValue(),
-        endColor.GetValue() };
-    topBrush.SetShaderEffect(
-        RSShaderEffect::CreateLinearGradient(topStartPoint, topEndPoint, topColors, topPos, RSTileMode::CLAMP));
-    canvas.DetachPen().AttachBrush(topBrush);
-    canvas.DrawRect(rect);
-    canvas.DetachBrush();
-    canvas.Restore();
 }
 
 void DatePickerPaintMethod::PaintDisable(RSCanvas& canvas, double X, double Y)

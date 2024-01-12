@@ -34,13 +34,28 @@ void VideoFullScreenPattern::InitFullScreenParam(const RefPtr<VideoPattern>& vid
     SetEventHub(video->GetEventHub<EventHub>());
 }
 
+void VideoFullScreenPattern::SetEventHub(const RefPtr<EventHub>& eventHub)
+{
+    eventHub_ = eventHub;
+    originGestureEventHub_ = eventHub->GetGestureEventHub();
+    // create a new gestureEventHub and copy original event
+    auto gestureEventHub = MakeRefPtr<GestureEventHub>(eventHub);
+    gestureEventHub->CopyEvent(originGestureEventHub_);
+    gestureEventHub->CopyGestures(originGestureEventHub_);
+    eventHub_->SetGestureEventHub(gestureEventHub);
+    eventHub_->AttachHost(GetHost());
+}
+
 void VideoFullScreenPattern::RequestFullScreen(const RefPtr<VideoNode>& videoNode)
 {
+    ContainerScope scope(instanceId_);
     auto fullScreenNode = AceType::DynamicCast<VideoFullScreenNode>(GetHost());
     CHECK_NULL_VOID(fullScreenNode);
     fullScreenNode->InitVideoFullScreenNode(videoNode);
     // add node to root
-    auto rootNode = PipelineContext::GetCurrentContext()->GetRootElement();
+    auto pipelienContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelienContext);
+    auto rootNode = pipelienContext->GetRootElement();
     if (!rootNode) {
         auto videoPattern = AceType::DynamicCast<VideoPattern>(videoNode->GetPattern());
         videoPattern->UpdateMediaParam(mediaPlayer_, renderSurface_, renderContextForMediaPlayer_);
@@ -85,6 +100,9 @@ bool VideoFullScreenPattern::ExitFullScreen()
     videoPattern->RecoverState(AceType::Claim(this));
     // change full screen button
     videoPattern->OnFullScreenChange(false);
+    // recover gestureEventHub
+    eventHub_->SetGestureEventHub(originGestureEventHub_);
+    eventHub_->AttachHost(videoPattern->GetHost());
     videoNode->MarkModifyDone();
     return true;
 }

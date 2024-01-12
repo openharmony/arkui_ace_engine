@@ -110,18 +110,28 @@ public:
     }
 
     const RefPtr<TouchEventImpl>& GetPressedListener();
+    void HandleTouchDown();
+    void HandleTouchUp();
 
 private:
     void FireStateFunc();
 
     void PostPressStyleTask(uint32_t delayTime);
+    void PostPressCancelStyleTask(uint32_t delayTime);
 
     bool HandleScrollingParent();
 
-    void CancelPressStyleTask()
+    void DeletePressStyleTask()
     {
         if (pressStyleTask_) {
             pressStyleTask_.Cancel();
+        }
+    }
+
+    void DeletePressCancelStyleTask()
+    {
+        if (pressCancelStyleTask_) {
+            pressCancelStyleTask_.Cancel();
         }
     }
 
@@ -130,9 +140,19 @@ private:
         return pressedPendingState_;
     }
 
+    bool IsPressedCancelStatePending()
+    {
+        return pressedCancelPendingState_;
+    }
+
     void ResetPressedPendingState()
     {
         pressedPendingState_ = false;
+    }
+
+    void ResetPressedCancelPendingState()
+    {
+        pressedCancelPendingState_ = false;
     }
 
     void PendingPressedState()
@@ -140,14 +160,27 @@ private:
         pressedPendingState_ = true;
     }
 
+    void PendingCancelPressedState()
+    {
+        pressedCancelPendingState_ = true;
+    }
+
     void ResetPressedState()
     {
         ResetCurrentUIState(UI_STATE_PRESSED);
-        CancelPressStyleTask();
+        DeletePressStyleTask();
         ResetPressedPendingState();
     }
 
+    void ResetPressedCancelState()
+    {
+        DeletePressCancelStyleTask();
+        ResetPressedCancelPendingState();
+    }
+
     bool IsOutOfPressedRegion(int32_t sourceType, const Offset& location) const;
+    bool IsOutOfPressedRegionWithoutClip(RefPtr<FrameNode> node, int32_t sourceType,
+        const Offset& location) const;
     void Transform(PointF& localPointF, const WeakPtr<FrameNode>& node) const;
 
     WeakPtr<FrameNode> host_;
@@ -158,7 +191,9 @@ private:
 
     std::set<int32_t> pointerId_;
     CancelableCallback<void()> pressStyleTask_;
+    CancelableCallback<void()> pressCancelStyleTask_;
     bool pressedPendingState_ = false;
+    bool pressedCancelPendingState_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(StateStyleManager);
 };

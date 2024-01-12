@@ -107,9 +107,9 @@ class DragController {
         }
     }
 
-    createDragAction() {
+    createDragAction(customs, dragInfo) {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
-        let dragAction = this.ohos_dragController.createDragAction();
+        let dragAction = this.ohos_dragController.createDragAction(customs, dragInfo);
         __JSScopeUtil__.restoreInstanceId();
         return dragAction;
     }
@@ -266,6 +266,12 @@ class UIContext {
     getUIObserver() {
         this.observer_ = new UIObserver();
         return this.observer_;
+    }
+
+    keyframeAnimateTo(param, keyframes) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.keyframeAnimateTo(param, keyframes);
+        __JSScopeUtil__.restoreInstanceId();
     }
 }
 class ComponentUtils {

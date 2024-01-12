@@ -46,8 +46,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr double DOUBLENESS = 2.0;
-constexpr Dimension BUBBLE_MAX_HEIGHT = 480.0_vp;
-constexpr Dimension BUBBLE_MAX_WIDTH = 400.0_vp;
 constexpr Dimension OUT_RANGE_SPACE = 40.0_vp;
 OffsetF GetDisplayWindowRectOffset()
 {
@@ -67,6 +65,17 @@ RefPtr<PopupTheme> GetPopupTheme()
     auto popupTheme = pipeline->GetTheme<PopupTheme>();
     CHECK_NULL_RETURN(popupTheme, nullptr);
     return popupTheme;
+}
+
+Dimension GetMaxWith()
+{
+    auto gridColumnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::BUBBLE_TYPE);
+    auto parent = gridColumnInfo->GetParent();
+    if (parent) {
+        parent->BuildColumnWidth();
+    }
+    auto maxWidth = Dimension(gridColumnInfo->GetMaxWidth());
+    return maxWidth;
 }
 
 void UpdateTextProperties(const RefPtr<PopupParam>& param, const RefPtr<TextLayoutProperty>& textLayoutProps)
@@ -165,12 +174,25 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     // Create child
     RefPtr<FrameNode> child;
     if (primaryButton.showButton || secondaryButton.showButton) {
-        child = CreateCombinedChild(param, popupId, targetId, popupNode);
+        auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+            AceType::MakeRefPtr<LinearLayoutPattern>(true));
+        auto columnLayoutProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
+        columnLayoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER); // mainAxisAlign
+        columnLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
+        auto combinedChild = CreateCombinedChild(param, popupId, targetId, popupNode);
         popupPaintProp->UpdatePrimaryButtonShow(primaryButton.showButton);
         popupPaintProp->UpdateSecondaryButtonShow(secondaryButton.showButton);
+        if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
+            popupPaintProp->UpdateAutoCancel(false);
+        }
+        combinedChild->MountToParent(columnNode);
+        child = columnNode;
     } else {
         auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(true));
+        auto columnLayoutProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
+        columnLayoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER); // mainAxisAlign
+        columnLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
         auto textNode = CreateMessage(message, useCustom);
         bobblePattern->SetMessageNode(textNode);
         auto popupTheme = GetPopupTheme();
@@ -187,15 +209,19 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
         auto buttonMiniMumHeight = popupTheme->GetBubbleMiniMumHeight().ConvertToPx();
         layoutProps->UpdateCalcMinSize(CalcSize(std::nullopt, CalcLength(buttonMiniMumHeight)));
         textNode->MarkModifyDone();
-        auto scrollNode = FrameNode::CreateFrameNode(
-            V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
-        CHECK_NULL_RETURN(scrollNode, nullptr);
-        auto scrollProps = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
-        scrollProps->UpdateAxis(Axis::VERTICAL);
-        scrollProps->UpdateAlignment(Alignment::CENTER_LEFT);
-        scrollNode->MarkModifyDone();
-        textNode->MountToParent(scrollNode);
-        scrollNode->MountToParent(columnNode);
+        if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
+            textNode->MountToParent(columnNode);
+        } else {
+            auto scrollNode = FrameNode::CreateFrameNode(V2::SCROLL_ETS_TAG,
+                ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+            CHECK_NULL_RETURN(scrollNode, nullptr);
+            auto scrollProps = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
+            scrollProps->UpdateAxis(Axis::VERTICAL);
+            scrollProps->UpdateAlignment(Alignment::CENTER_LEFT);
+            scrollNode->MarkModifyDone();
+            textNode->MountToParent(scrollNode);
+            scrollNode->MountToParent(columnNode);
+        }
         child = columnNode;
     }
     // TODO: GridSystemManager is not completed, need to check later.
@@ -212,12 +238,16 @@ RefPtr<FrameNode> BubbleView::CreateBubbleNode(
     }
     auto renderContext = child->GetRenderContext();
     if (renderContext) {
-        BlurStyleOption styleOption;
-        styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
-        renderContext->UpdateBackBlurStyle(styleOption);
-        auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor());
-        renderContext->UpdateBackgroundColor(backgroundColor);
-        renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
+        if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
+            renderContext->UpdateBackgroundColor(
+                popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
+        } else {
+            auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(Color::TRANSPARENT);
+            renderContext->UpdateBackgroundColor(backgroundColor);
+            BlurStyleOption styleOption;
+            styleOption.blurStyle = param->GetBlurStyle();
+            renderContext->UpdateBackBlurStyle(styleOption);
+        }
         if (param->GetShadow().has_value()) {
             renderContext->UpdateBackShadow(param->GetShadow().value());
         }
@@ -276,41 +306,33 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     customNode->MountToParent(columnNode);
-    BlurStyleOption styleOption;
-    styleOption.blurStyle = BlurStyle::COMPONENT_ULTRA_THICK;
     auto columnRenderContext = columnNode->GetRenderContext();
-    auto columnLayoutProperty = columnNode->GetLayoutProperty();
+    auto columnLayoutProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(columnLayoutProperty, nullptr);
+    columnLayoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER); // mainAxisAlign
+    columnLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
     auto customFrameNode = AceType::DynamicCast<FrameNode>(customNode);
     float popupMaxWidth = 0.0f;
     float popupMaxHeight = 0.0f;
     GetPopupMaxWidthAndHeight(param, popupMaxWidth, popupMaxHeight);
-    columnLayoutProperty->UpdateCalcMaxSize(
-        CalcSize(NG::CalcLength(Dimension(popupMaxWidth)), NG::CalcLength(Dimension(popupMaxHeight))));
+    columnLayoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, NG::CalcLength(Dimension(popupMaxHeight))));
     if (param->GetChildWidth().has_value()) {
         columnLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(param->GetChildWidth().value()), std::nullopt));
     }
-    auto backgroundColor = popupPaintProps->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor());
-    RefPtr<RenderContext> customRenderContext;
     if (columnRenderContext) {
-        if (customFrameNode) {
-            customRenderContext = customFrameNode->GetRenderContext();
+        if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
+            columnRenderContext->UpdateBackgroundColor(
+                popupPaintProps->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
         } else {
+            auto backgroundColor = popupPaintProps->GetBackgroundColor().value_or(Color::TRANSPARENT);
             columnRenderContext->UpdateBackgroundColor(backgroundColor);
+            BlurStyleOption styleOption;
+            styleOption.blurStyle = param->GetBlurStyle();
+            columnRenderContext->UpdateBackBlurStyle(styleOption);
         }
-        columnRenderContext->UpdateBackBlurStyle(styleOption);
-        columnRenderContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
         if (param->GetShadow().has_value()) {
             columnRenderContext->UpdateBackShadow(param->GetShadow().value());
-        }
-    }
-    if (customRenderContext) {
-        if (customRenderContext->HasBackgroundColor()) {
-            columnRenderContext->UpdateBackgroundColor(customRenderContext->GetBackgroundColorValue());
-            customRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-        } else {
-            columnRenderContext->UpdateBackgroundColor(backgroundColor);
         }
     }
     popupPaintProps->UpdateAutoCancel(!param->HasAction());
@@ -321,7 +343,7 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
 
 void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode)
 {
-    UpdateCommonParam(popupId, param);
+    UpdateCommonParam(popupId, param, false);
     auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupId);
     CHECK_NULL_VOID(popupNode);
     auto popupProp = AceType::DynamicCast<BubbleLayoutProperty>(popupNode->GetLayoutProperty());
@@ -329,24 +351,26 @@ void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& par
     auto message = param->GetMessage();
     auto primaryButton = param->GetPrimaryButtonProperties();
     auto secondaryButton = param->GetSecondaryButtonProperties();
-    if (primaryButton.showButton || secondaryButton.showButton) {
-        auto pipelineContext = PipelineBase::GetCurrentContext();
-        CHECK_NULL_VOID(pipelineContext);
-        float popupMaxWidth = 0.0f;
-        float popupMaxHeight = 0.0f;
-        GetPopupMaxWidthAndHeight(param, popupMaxWidth, popupMaxHeight);
-        auto buttonTheme = pipelineContext->GetTheme<ButtonTheme>();
-        CHECK_NULL_VOID(buttonTheme);
-        auto childNode = AceType::DynamicCast<FrameNode>(popupNode->GetFirstChild());
-        CHECK_NULL_VOID(childNode);
-        const auto& children = childNode->GetChildren();
-        for (const auto& uinode : children) {
-            if (uinode->GetTag() == V2::SCROLL_ETS_TAG) {
-                auto scrollNode = AceType::DynamicCast<FrameNode>(uinode);
-                CHECK_NULL_VOID(scrollNode);
-                auto scrollProps = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
-                scrollProps->UpdateCalcMaxSize(CalcSize(
-                    std::nullopt, CalcLength(Dimension(popupMaxHeight) - buttonTheme->GetHeight() * DOUBLENESS)));
+    if (!(Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
+        if (primaryButton.showButton || secondaryButton.showButton) {
+            auto pipelineContext = PipelineBase::GetCurrentContext();
+            CHECK_NULL_VOID(pipelineContext);
+            float popupMaxWidth = 0.0f;
+            float popupMaxHeight = 0.0f;
+            GetPopupMaxWidthAndHeight(param, popupMaxWidth, popupMaxHeight);
+            auto buttonTheme = pipelineContext->GetTheme<ButtonTheme>();
+            CHECK_NULL_VOID(buttonTheme);
+            auto childNode = AceType::DynamicCast<FrameNode>(popupNode->GetFirstChild());
+            CHECK_NULL_VOID(childNode);
+            const auto& children = childNode->GetChildren();
+            for (const auto& uinode : children) {
+                if (uinode->GetTag() == V2::SCROLL_ETS_TAG) {
+                    auto scrollNode = AceType::DynamicCast<FrameNode>(uinode);
+                    CHECK_NULL_VOID(scrollNode);
+                    auto scrollProps = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
+                    scrollProps->UpdateCalcMaxSize(CalcSize(
+                        std::nullopt, CalcLength(Dimension(popupMaxHeight) - buttonTheme->GetHeight() * DOUBLENESS)));
+                }
             }
         }
     }
@@ -360,16 +384,6 @@ void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& par
     popupPaintProp->UpdatePlacement(param->GetPlacement());
     popupPaintProp->UpdateUseCustom(param->IsUseCustom());
     popupPaintProp->UpdateEnableArrow(param->EnableArrow());
-    if (param->IsBackgroundColorSetted()) {
-        popupPaintProp->UpdateBackgroundColor(param->GetBackgroundColor());
-    }
-    auto childNode = AceType::DynamicCast<FrameNode>(popupNode->GetFirstChild());
-    CHECK_NULL_VOID(childNode);
-    auto renderContext = childNode->GetRenderContext();
-    if (renderContext) {
-        auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor());
-        renderContext->UpdateBackgroundColor(backgroundColor);
-    }
 }
 
 void BubbleView::UpdateCustomPopupParam(int32_t popupId, const RefPtr<PopupParam>& param)
@@ -386,24 +400,6 @@ void BubbleView::UpdateCustomPopupParam(int32_t popupId, const RefPtr<PopupParam
     popupLayoutProp->UpdateEnableArrow(param->EnableArrow());
     popupPaintProp->UpdateAutoCancel(!param->HasAction());
     popupPaintProp->UpdateEnableArrow(param->EnableArrow());
-    auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor());
-    auto childNode = AceType::DynamicCast<FrameNode>(popupNode->GetFirstChild());
-    CHECK_NULL_VOID(childNode);
-    auto customFrameNode = AceType::DynamicCast<FrameNode>(childNode->GetFirstChild());
-    auto columnRenderContext = childNode->GetRenderContext();
-    RefPtr<RenderContext> customRenderContext;
-    if (columnRenderContext) {
-        if (customFrameNode) {
-            customRenderContext = customFrameNode->GetRenderContext();
-        } else {
-            columnRenderContext->UpdateBackgroundColor(backgroundColor);
-        }
-    }
-    if (customRenderContext) {
-        if (!customRenderContext->HasBackgroundColor()) {
-            columnRenderContext->UpdateBackgroundColor(backgroundColor);
-        }
-    }
 }
 
 void BubbleView::GetPopupMaxWidthAndHeight(const RefPtr<PopupParam>& param, float& popupMaxWidth, float& popupMaxHeight)
@@ -416,24 +412,14 @@ void BubbleView::GetPopupMaxWidthAndHeight(const RefPtr<PopupParam>& param, floa
     auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
     auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
     auto maxHeight = windowGlobalRect.Height();
-    auto maxWidth = windowGlobalRect.Width();
     if (param->IsShowInSubWindow()) {
         maxHeight = SystemProperties::GetDeviceHeight();
-        maxWidth = SystemProperties::GetDeviceWidth();
     }
-    if (maxHeight > BUBBLE_MAX_HEIGHT.ConvertToPx()) {
-        popupMaxHeight = BUBBLE_MAX_HEIGHT.ConvertToPx();
-    } else {
-        popupMaxHeight = maxHeight - OUT_RANGE_SPACE.ConvertToPx() - OUT_RANGE_SPACE.ConvertToPx() - bottom - top;
-    }
-    if (maxWidth > BUBBLE_MAX_WIDTH.ConvertToPx()) {
-        popupMaxWidth = BUBBLE_MAX_WIDTH.ConvertToPx();
-    } else {
-        popupMaxWidth = maxWidth - OUT_RANGE_SPACE.ConvertToPx() - OUT_RANGE_SPACE.ConvertToPx();
-    }
+    popupMaxHeight = maxHeight - OUT_RANGE_SPACE.ConvertToPx() - OUT_RANGE_SPACE.ConvertToPx() - bottom - top;
+    popupMaxWidth = GetMaxWith().Value();
 }
 
-void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& param)
+void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& param, bool custom)
 {
     auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupId);
     CHECK_NULL_VOID(popupNode);
@@ -450,6 +436,15 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     }
     popupLayoutProp->UpdateShowInSubWindow(param->IsShowInSubWindow());
     popupLayoutProp->UpdateBlockEvent(param->IsBlockEvent());
+    if (param->GetErrorArrowHeight()) {
+        popupLayoutProp->ResetArrowHeight();
+    }
+    if (param->GetErrorArrowWidth()) {
+        popupLayoutProp->ResetArrowWidth();
+    }
+    if (param->GetErrorRadius()) {
+        popupLayoutProp->ResetRadius();
+    }
     if (param->GetArrowHeight().has_value()) {
         popupLayoutProp->UpdateArrowHeight(param->GetArrowHeight().value());
     }
@@ -483,11 +478,27 @@ void BubbleView::UpdateCommonParam(int32_t popupId, const RefPtr<PopupParam>& pa
     float popupMaxWidth = 0.0f;
     float popupMaxHeight = 0.0f;
     GetPopupMaxWidthAndHeight(param, popupMaxWidth, popupMaxHeight);
-    childLayoutProperty->UpdateCalcMaxSize(
-        CalcSize(NG::CalcLength(Dimension(popupMaxWidth)), NG::CalcLength(Dimension(popupMaxHeight))));
+    if (custom) {
+        childLayoutProperty->UpdateCalcMaxSize(CalcSize(std::nullopt, NG::CalcLength(Dimension(popupMaxHeight))));
+    } else {
+        childLayoutProperty->UpdateCalcMaxSize(
+            CalcSize(NG::CalcLength(Dimension(popupMaxWidth)), NG::CalcLength(Dimension(popupMaxHeight))));
+    }
     if (param->GetChildWidth().has_value()) {
         childLayoutProperty->UpdateUserDefinedIdealSize(
             CalcSize(CalcLength(param->GetChildWidth().value()), std::nullopt));
+    }
+    if (renderContext) {
+        if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
+            renderContext->UpdateBackgroundColor(
+                popupPaintProp->GetBackgroundColor().value_or(GetPopupTheme()->GetBackgroundColor()));
+        } else {
+            auto backgroundColor = popupPaintProp->GetBackgroundColor().value_or(Color::TRANSPARENT);
+            renderContext->UpdateBackgroundColor(backgroundColor);
+            BlurStyleOption styleOption;
+            styleOption.blurStyle = param->GetBlurStyle();
+            renderContext->UpdateBackBlurStyle(styleOption);
+        }
     }
 }
 
@@ -504,7 +515,11 @@ RefPtr<FrameNode> BubbleView::CreateMessage(const std::string& message, bool IsU
     if (IsUseCustom) {
         layoutProperty->UpdateTextColor(Color::BLACK);
     } else {
-        layoutProperty->UpdateTextColor(popupTheme->GetFontColor());
+        if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
+            layoutProperty->UpdateTextColor(popupTheme->GetFontColor());
+        } else {
+            layoutProperty->UpdateTextColor(popupTheme->GetFontPrimaryColor());
+        }
     }
     textNode->MarkModifyDone();
     return textNode;
@@ -531,36 +546,49 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
     textPadding.top = CalcLength(padding.Top());
     textLayoutProps->UpdatePadding(textPadding);
     textLayoutProps->UpdateAlignSelf(FlexAlign::FLEX_START);
-    textLayoutProps->UpdateTextColor(popupTheme->GetFontSecondaryColor());
     UpdateTextProperties(param, textLayoutProps);
     message->MarkModifyDone();
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, nullptr);
     float popupMaxWidth = 0.0f;
     float popupMaxHeight = 0.0f;
-    GetPopupMaxWidthAndHeight(param, popupMaxWidth, popupMaxHeight);
-    auto buttonTheme = pipelineContext->GetTheme<ButtonTheme>();
-    CHECK_NULL_RETURN(buttonTheme, nullptr);
-    auto scrollNode = FrameNode::CreateFrameNode(
-        V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
-    CHECK_NULL_RETURN(scrollNode, nullptr);
-    auto scrollProps = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
-    scrollProps->UpdateAxis(Axis::VERTICAL);
-    scrollProps->UpdateAlignment(Alignment::CENTER_LEFT);
-    scrollProps->UpdateCalcMaxSize(
-        CalcSize(std::nullopt, CalcLength(Dimension(popupMaxHeight) - buttonTheme->GetHeight() * DOUBLENESS)));
-    scrollNode->MarkModifyDone();
-    message->MountToParent(scrollNode);
-    scrollNode->MountToParent(columnNode);
-    auto buttonFlex = BubbleView::CreateButtons(param, popupId, targetId);
-    auto buttonFlexLayoutProperty = buttonFlex->GetLayoutProperty<FlexLayoutProperty>();
-    buttonFlexLayoutProperty->UpdateAlignSelf(FlexAlign::FLEX_END);
-    buttonFlex->MarkModifyDone();
+    if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
+        message->MountToParent(columnNode);
+    } else {
+        GetPopupMaxWidthAndHeight(param, popupMaxWidth, popupMaxHeight);
+        auto buttonTheme = pipelineContext->GetTheme<ButtonTheme>();
+        CHECK_NULL_RETURN(buttonTheme, nullptr);
+        auto scrollNode = FrameNode::CreateFrameNode(
+            V2::SCROLL_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ScrollPattern>());
+        CHECK_NULL_RETURN(scrollNode, nullptr);
+        auto scrollProps = scrollNode->GetLayoutProperty<ScrollLayoutProperty>();
+        scrollProps->UpdateAxis(Axis::VERTICAL);
+        scrollProps->UpdateAlignment(Alignment::CENTER_LEFT);
+        scrollProps->UpdateCalcMaxSize(
+            CalcSize(std::nullopt, CalcLength(Dimension(popupMaxHeight) - buttonTheme->GetHeight() * DOUBLENESS)));
+        scrollNode->MarkModifyDone();
+        message->MountToParent(scrollNode);
+        scrollNode->MountToParent(columnNode);
+    }
+    auto buttonLayout = BubbleView::CreateButtons(param, popupId, targetId);
+    if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
+        auto buttonRowLayoutProperty = buttonLayout->GetLayoutProperty<LinearLayoutProperty>();
+        buttonRowLayoutProperty->UpdateAlignSelf(FlexAlign::FLEX_END);
+    } else {
+        auto buttonFlexLayoutProperty = buttonLayout->GetLayoutProperty<FlexLayoutProperty>();
+        buttonFlexLayoutProperty->UpdateAlignSelf(FlexAlign::FLEX_END);
+    }
+    buttonLayout->MarkModifyDone();
     auto childLayoutProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(childLayoutProperty, nullptr);
-    childLayoutProperty->UpdateCalcMaxSize(
-        CalcSize(NG::CalcLength(Dimension(popupMaxWidth)), NG::CalcLength(Dimension(popupMaxHeight))));
-    buttonFlex->MountToParent(columnNode);
+    if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
+        popupMaxWidth = GetMaxWith().Value();
+        childLayoutProperty->UpdateCalcMaxSize(CalcSize(NG::CalcLength(popupMaxWidth), std::nullopt));
+    } else {
+        childLayoutProperty->UpdateCalcMaxSize(
+            CalcSize(NG::CalcLength(Dimension(popupMaxWidth)), NG::CalcLength(Dimension(popupMaxHeight))));
+    }
+    buttonLayout->MountToParent(columnNode);
     columnNode->MarkModifyDone();
     return columnNode;
 }
@@ -568,28 +596,40 @@ RefPtr<FrameNode> BubbleView::CreateCombinedChild(
 RefPtr<FrameNode> BubbleView::CreateButtons(const RefPtr<PopupParam>& param, int32_t popupId, int32_t targetId)
 {
     auto rowId = ElementRegister::GetInstance()->MakeUniqueId();
-    auto flexNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, rowId, AceType::MakeRefPtr<FlexLayoutPattern>(false));
-    flexNode->GetPattern<FlexLayoutPattern>()->SetIsWrap(true);
-    auto layoutProps = flexNode->GetLayoutProperty<FlexLayoutProperty>();
+    RefPtr<FrameNode> layoutNode;
+    if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
+        layoutNode =
+            FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, rowId, AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    } else {
+        layoutNode = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, rowId, AceType::MakeRefPtr<FlexLayoutPattern>(false));
+        layoutNode->GetPattern<FlexLayoutPattern>()->SetIsWrap(true);
+    }
+
     auto primaryButtonProp = param->GetPrimaryButtonProperties();
     auto primaryButton = BubbleView::CreateButton(primaryButtonProp, popupId, targetId, param);
     if (primaryButton) {
-        primaryButton->MountToParent(flexNode);
+        primaryButton->MountToParent(layoutNode);
     }
     auto secondaryButtonProp = param->GetSecondaryButtonProperties();
     auto secondaryButton = BubbleView::CreateButton(secondaryButtonProp, popupId, targetId, param);
     if (secondaryButton) {
-        secondaryButton->MountToParent(flexNode);
+        secondaryButton->MountToParent(layoutNode);
     }
     auto popupTheme = GetPopupTheme();
     auto littlePadding = popupTheme->GetLittlePadding();
     PaddingProperty rowPadding;
     rowPadding.right = CalcLength(littlePadding);
     rowPadding.bottom = CalcLength(littlePadding);
-    layoutProps->UpdatePadding(rowPadding);
-
-    flexNode->MarkModifyDone();
-    return flexNode;
+    if ((Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
+        auto layoutProps = layoutNode->GetLayoutProperty<LinearLayoutProperty>();
+        layoutProps->UpdateSpace(GetPopupTheme()->GetButtonSpacing());
+        layoutProps->UpdatePadding(rowPadding);
+    } else {
+        auto layoutProps = layoutNode->GetLayoutProperty<FlexLayoutProperty>();
+        layoutProps->UpdatePadding(rowPadding);
+    }
+    layoutNode->MarkModifyDone();
+    return layoutNode;
 }
 
 RefPtr<FrameNode> BubbleView::CreateButton(
@@ -619,7 +659,9 @@ RefPtr<FrameNode> BubbleView::CreateButton(
     auto buttonTextNode = BubbleView::CreateMessage(buttonParam.value, isUseCustom);
     auto textLayoutProperty = buttonTextNode->GetLayoutProperty<TextLayoutProperty>();
     textLayoutProperty->UpdateFontSize(popupTheme->GetButtonFontSize());
-    textLayoutProperty->UpdateTextColor(popupTheme->GetButtonFontColor());
+    if (!(Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
+        textLayoutProperty->UpdateTextColor(popupTheme->GetButtonFontColor());
+    }
     auto buttonTextInsideMargin = popupTheme->GetButtonTextInsideMargin();
     buttonTextNode->MountToParent(buttonNode);
 

@@ -23,6 +23,7 @@
 #include <unordered_map>
 
 #include "base/geometry/ng/point_t.h"
+#include "base/geometry/ng/size_t.h"
 #include "base/log/ace_performance_check.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
@@ -30,6 +31,7 @@
 #include "base/view_data/view_data_wrap.h"
 #include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/export_texture_info/export_texture_info.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/event/touch_event.h"
@@ -68,6 +70,8 @@ public:
 
     // Tree operation start.
     void AddChild(const RefPtr<UINode>& child, int32_t slot = DEFAULT_NODE_SLOT, bool silently = false);
+    void AddChildAfter(const RefPtr<UINode>& child, const RefPtr<UINode>& siblingNode);
+
     std::list<RefPtr<UINode>>::iterator RemoveChild(const RefPtr<UINode>& child, bool allowTransition = false);
     int32_t RemoveChildAndReturnIndex(const RefPtr<UINode>& child);
     void ReplaceChild(const RefPtr<UINode>& oldNode, const RefPtr<UINode>& newNode);
@@ -163,7 +167,7 @@ public:
         return nodeId_;
     }
 
-    int32_t GetAccessibilityId() const
+    int64_t GetAccessibilityId() const
     {
         return accessibilityId_;
     }
@@ -290,6 +294,8 @@ public:
     virtual void OnWindowHide() {}
     virtual void Build(std::shared_ptr<std::list<ExtraInfo>> extraInfos);
 
+    virtual bool RenderCustomChild(int64_t deadline);
+
     virtual void OnWindowFocused() {}
 
     virtual void OnWindowUnfocused() {}
@@ -322,6 +328,9 @@ public:
 
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(InspectorId, std::string);
     virtual void OnInspectorIdUpdate(const std::string& /*unused*/) {}
+
+    ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(AutoEventParam, std::string);
+    virtual void OnAutoEventParamUpdate(const std::string& /*unused*/) {}
 
     template<typename T>
     RefPtr<T> FindChildNodeOfClass()
@@ -496,9 +505,22 @@ public:
     }
 
     std::string GetCurrentCustomNodeInfo();
-    static int32_t GenerateAccessibilityId();
+    static int64_t GenerateAccessibilityId();
 
     NodeStatus GetNodeStatus() const;
+    void UpdateNodeStatus(NodeStatus nodeStatus);
+
+    const RefPtr<ExportTextureInfo>& GetExportTextureInfo() const
+    {
+        return exportTextureInfo_;
+    }
+
+    void CreateExportTextureInfoIfNeeded();
+
+    bool IsNeedExportTexture() const;
+
+    virtual bool SetParentLayoutConstraint(const SizeF& size) const;
+
 protected:
     std::list<RefPtr<UINode>>& ModifyChildren()
     {
@@ -533,7 +555,7 @@ protected:
     // Mount to the main tree to display.
     virtual void OnAttachToMainTree(bool recursive = false);
     virtual void OnDetachFromMainTree(bool recursive = false);
-
+    virtual void OnAttachToBuilderNode(NodeStatus nodeStatus) {}
     // run offscreen process.
     virtual void OnOffscreenProcess(bool recursive) {}
 
@@ -561,7 +583,7 @@ private:
     int32_t hostRootId_ = 0;
     int32_t hostPageId_ = 0;
     int32_t nodeId_ = 0;
-    int32_t accessibilityId_ = -1;
+    int64_t accessibilityId_ = -1;
     int32_t layoutPriority_ = 0;
     bool isRoot_ = false;
     bool onMainTree_ = false;
@@ -570,9 +592,10 @@ private:
     bool isDisappearing_ = false;
     bool isBuildByJS_ = false;
     NodeStatus nodeStatus_ = NodeStatus::NORMAL_NODE;
+    RefPtr<ExportTextureInfo> exportTextureInfo_;
 
     int32_t childrenUpdatedFrom_ = -1;
-    static thread_local int32_t currentAccessibilityId_;
+    static thread_local int64_t currentAccessibilityId_;
     int32_t restoreId_ = -1;
 
     bool useOffscreenProcess_ = false;

@@ -60,7 +60,6 @@ private:
     std::shared_ptr<txt::FontCollection> collection_;
     sk_sp<txt::DynamicFontManager> dynamicFontManager_;
 #else
-    static RefPtr<TxtFontCollection> instance;
     std::shared_ptr<RSFontCollection> collection_;
 #endif
 };

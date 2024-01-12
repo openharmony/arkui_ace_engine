@@ -104,22 +104,15 @@ public:
     }
 
     void OnCoordScrollStart();
-    void OnCoordScrollUpdate(float offset, float dragOffsetY);
+    float OnCoordScrollUpdate(float offset);
     void OnCoordScrollEnd();
-    bool GetDraggedDown();
-    bool GetFullStatus();
-    bool GetIsMinTitle() const;
-    bool GetCurrentNavBarStatus() const;
+    bool CanCoordScrollUp(float offset) const;
 
     bool GetToolbarHideStatus()
     {
         return isHideToolbar_;
     }
 
-    bool IsTitleBarHide();
-    void ResetAssociatedScroll();
-    bool UpdateAssociatedScrollOffset(float offset);
-    bool IsTitleModeFree();
     void OnAttachToFrameNode() override;
     void OnWindowFocused() override
     {
@@ -131,23 +124,27 @@ public:
         WindowFocus(false);
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
 private:
     void WindowFocus(bool isFocus);
-    void RegistOritationListener();
     void OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type) override;
     void OnModifyDone() override;
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleOnDragStart(float offset);
     void HandleOnDragUpdate(float offset);
     void HandleOnDragEnd();
-    float offset_ = 0.0f;
+
     RefPtr<PanEvent> panEvent_;
     WeakPtr<FrameNode> scrollableNode_;
-    bool isOritationListenerRegisted_ = false;
     bool isHideToolbar_ = false;
+    bool isHideTitlebar_ = false;
     std::vector<NG::BarItem> titleBarMenuItems_;
     std::vector<NG::BarItem> toolBarMenuItems_;
     std::optional<int32_t> menuNodeId_;
@@ -155,6 +152,7 @@ private:
     RefPtr<FrictionMotion> motion_;
     RefPtr<Animator> controller_;
     bool isTitleMenuNodeShowing_ = false;
+    NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
 };
 
 } // namespace OHOS::Ace::NG

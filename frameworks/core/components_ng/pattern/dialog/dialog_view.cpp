@@ -27,39 +27,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-void ProcessMaskRect(const DialogProperties& param, const RefPtr<FrameNode>& dialog)
-{
-    auto dialogContext = dialog->GetRenderContext();
-    auto hub = dialog->GetEventHub<DialogEventHub>();
-    if (param.maskRect.has_value()) {
-        auto width = param.maskRect->GetWidth();
-        auto height = param.maskRect->GetHeight();
-        auto offset = param.maskRect->GetOffset();
-        if (width.IsNegative()) {
-            width = 100.0_pct;
-        }
-        if (height.IsNegative()) {
-            height = 100.0_pct;
-        }
-        auto rootWidth = PipelineContext::GetCurrentRootWidth();
-        auto rootHeight = PipelineContext::GetCurrentRootHeight();
-
-        RectF rect = RectF(offset.GetX().ConvertToPxWithSize(rootWidth),
-                           offset.GetY().ConvertToPxWithSize(rootHeight),
-                           width.ConvertToPxWithSize(rootWidth),
-                           height.ConvertToPxWithSize(rootHeight));
-        dialogContext->ClipWithRect(rect);
-        dialogContext->UpdateClipEdge(true);
-        auto gestureHub = hub->GetOrCreateGestureEventHub();
-        std::vector<DimensionRect> mouseResponseRegion;
-        mouseResponseRegion.emplace_back(width, height, offset);
-        gestureHub->SetMouseResponseRegion(mouseResponseRegion);
-        gestureHub->SetResponseRegion(mouseResponseRegion);
-    }
-}
-}
-
 RefPtr<FrameNode> DialogView::CreateDialogNode(
     const DialogProperties& param, const RefPtr<UINode>& customNode = nullptr)
 {
@@ -102,6 +69,7 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     dialogLayoutProp->UpdateShowInSubWindow(param.isShowInSubWindow);
     dialogLayoutProp->UpdateDialogButtonDirection(param.buttonDirection);
     dialogLayoutProp->UpdateIsModal(param.isModal);
+    dialogLayoutProp->UpdateIsScenceBoardDialog(param.isScenceBoardDialog);
     // create gray background
     auto dialogContext = dialog->GetRenderContext();
     CHECK_NULL_RETURN(dialogContext, dialog);
@@ -111,14 +79,14 @@ RefPtr<FrameNode> DialogView::CreateDialogNode(
     } else {
         dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
     }
-
+    if (dialogLayoutProp->GetIsScenceBoardDialog().value_or(false)) {
+        dialogContext->UpdateBackgroundColor(param.maskColor.value_or(dialogTheme->GetMaskColorEnd()));
+    }
     // set onCancel callback
     auto hub = dialog->GetEventHub<DialogEventHub>();
     CHECK_NULL_RETURN(hub, nullptr);
     hub->SetOnCancel(param.onCancel);
     hub->SetOnSuccess(param.onSuccess);
-
-    ProcessMaskRect(param, dialog);
 
     auto pattern = dialog->GetPattern<DialogPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);

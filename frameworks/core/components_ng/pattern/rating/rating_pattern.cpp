@@ -46,8 +46,7 @@ void RatingPattern::CheckImageInfoHasChangedOrNot(
             currentSourceInfo = ratingLayoutProperty->GetForegroundImageSourceInfo().value_or(ImageSourceInfo(""));
             CHECK_NULL_VOID(currentSourceInfo == sourceInfo);
             if (lifeCycleTag == "ImageDataFailed") {
-                TAG_LOGW(AceLogTag::ACE_RATING,
-                    "Rating load foreground image failed, the sourceInfo is %{public}s",
+                TAG_LOGW(AceLogTag::ACE_RATING, "Rating load foreground image failed, the sourceInfo is %{public}s",
                     sourceInfo.ToString().c_str());
             }
             break;
@@ -55,8 +54,7 @@ void RatingPattern::CheckImageInfoHasChangedOrNot(
             currentSourceInfo = ratingLayoutProperty->GetSecondaryImageSourceInfo().value_or(ImageSourceInfo(""));
             CHECK_NULL_VOID(currentSourceInfo == sourceInfo);
             if (lifeCycleTag == "ImageDataFailed") {
-                TAG_LOGW(AceLogTag::ACE_RATING,
-                    "Rating load secondary image failed, the sourceInfo is %{public}s",
+                TAG_LOGW(AceLogTag::ACE_RATING, "Rating load secondary image failed, the sourceInfo is %{public}s",
                     sourceInfo.ToString().c_str());
             }
             break;
@@ -64,8 +62,7 @@ void RatingPattern::CheckImageInfoHasChangedOrNot(
             currentSourceInfo = ratingLayoutProperty->GetBackgroundImageSourceInfo().value_or(ImageSourceInfo(""));
             CHECK_NULL_VOID(currentSourceInfo == sourceInfo);
             if (lifeCycleTag == "ImageDataFailed") {
-                TAG_LOGW(AceLogTag::ACE_RATING,
-                    "Rating load background image failed, the sourceInfo is %{public}s",
+                TAG_LOGW(AceLogTag::ACE_RATING, "Rating load background image failed, the sourceInfo is %{public}s",
                     sourceInfo.ToString().c_str());
             }
             break;
@@ -364,7 +361,10 @@ void RatingPattern::FireChangeEvent() const
     auto inspectorId = host->GetInspectorId().value_or("");
     Recorder::EventParamsBuilder builder;
     auto score = ss.str();
-    builder.SetId(inspectorId).SetType(host->GetTag()).SetText(score);
+    builder.SetId(inspectorId)
+        .SetType(host->GetTag())
+        .SetText(score)
+        .SetDescription(host->GetAutoEventParamValue(""));
     Recorder::EventRecorder::Get().OnChange(std::move(builder));
     if (inspectorId.empty()) {
         return;
@@ -519,15 +519,21 @@ void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     auto singleStarHeight = content->GetRect().Height();
     auto property = GetLayoutProperty<RatingLayoutProperty>();
     CHECK_NULL_VOID(property);
-    auto paddingLeft = 0.0f;
-    auto paddingTop = 0.0f;
+    auto offsetLeft = 0.0f;
+    auto offsetTop = 0.0f;
     const auto& padding = property->GetPaddingProperty();
     if (padding) {
-        paddingLeft = padding->left.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
-        paddingTop = padding->top.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+        offsetLeft += padding->left.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+        offsetTop += padding->top.value_or(CalcLength(0.0_vp)).GetDimension().ConvertToPx();
+    }
+    const auto& border = property->GetBorderWidthProperty();
+    if (border) {
+        offsetLeft += border->leftDimen.value_or(Dimension(0.0)).ConvertToPx();
+        offsetTop += border->topDimen.value_or(Dimension(0.0)).ConvertToPx();
     }
     auto ratingScore = focusRatingScore_;
-    auto wholeStarNum = fmax(ceil(ratingScore) - 1, 0.0);
+    auto wholeStarNum =
+        fmax((NearEqual(ratingScore, std::round(ratingScore)) ? ratingScore : ceil(ratingScore)) - 1, 0.0);
 
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -535,7 +541,7 @@ void RatingPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
     CHECK_NULL_VOID(ratingTheme);
     auto radius = ratingTheme->GetFocusBorderRadius();
 
-    paintRect.SetRect(RectF(static_cast<float>(wholeStarNum) * singleStarWidth_ + paddingLeft, paddingTop,
+    paintRect.SetRect(RectF(static_cast<float>(wholeStarNum) * singleStarWidth_ + offsetLeft, offsetTop,
         singleStarWidth_, singleStarHeight));
     paintRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, static_cast<RSScalar>(radius.ConvertToPx()),
         static_cast<RSScalar>(radius.ConvertToPx()));

@@ -97,7 +97,10 @@ void ContentModifierAdapter::Draw(RSDrawingContext& context) const
         auto rsProp = std::make_shared<RSAnimatableProperty<propType>>(castProp->Get()); \
         castProp->SetUpCallbacks([rsProp]() -> propType { return rsProp->Get(); },       \
             [rsProp](const propType& value) { rsProp->Set(value); },                     \
-            [rsProp]() -> propType { return rsProp->GetStagingValue(); });               \
+            [rsProp]() -> propType { return rsProp->GetStagingValue(); },                \
+            [rsProp](ThresholdType type) { if (type == ThresholdType::LAYOUT) {          \
+                auto rsBaseProp = std::static_pointer_cast<RSPropertyBase>(rsProp);      \
+                rsBaseProp->SetThresholdType(Rosen::ThresholdType::LAYOUT); }});         \
         rsProp->SetUpdateCallback(castProp->GetUpdateCallback());                        \
         return rsProp;                                                                   \
     }
@@ -134,8 +137,12 @@ inline std::shared_ptr<RSPropertyBase> ConvertToRSProperty(const RefPtr<Property
             rsProp->Set(AnimatableArithmeticProxy(value));
         };
         castProp->SetUpCallbacks(getter, setter);
-        rsProp->SetUpdateCallback(
-            [cb = castProp->GetUpdateCallback()](const AnimatableArithmeticProxy& value) { cb(value.GetObject()); });
+        if (castProp->GetUpdateCallback()) {
+            rsProp->SetUpdateCallback(
+                [cb = castProp->GetUpdateCallback()](const AnimatableArithmeticProxy& value) {
+                    cb(value.GetObject());
+                });
+        }
         return rsProp;
     }
 

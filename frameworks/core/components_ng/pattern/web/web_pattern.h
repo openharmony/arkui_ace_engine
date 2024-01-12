@@ -117,7 +117,7 @@ public:
     }
 
     bool NeedSoftKeyboard() const override;
-    
+
     void UpdateScrollOffset(SizeF frameSize) override;
 
     RefPtr<EventHub> CreateEventHub() override
@@ -312,7 +312,8 @@ public:
     ScrollResult HandleScroll(float offset, int32_t source, NestedState state) override;
     bool HandleScrollVelocity(float velocity) override;
     void OnScrollStartRecursive(float position) override;
-    void OnScrollEndRecursive() override;
+    void OnScrollEndRecursive(const std::optional<float>& velocity) override;
+    void OnAttachToBuilderNode(NodeStatus nodeStatus) override;
     Axis GetParentAxis();
     RefPtr<NestableScrollContainer> WebSearchParent();
     void SetNestedScroll(const NestedScrollOptions& nestedOpt);
@@ -362,6 +363,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, ScrollBarColor, std::string);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, OverScrollMode, int32_t);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, CopyOptionMode, int32_t);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(WebProperty, NativeEmbedModeEnabled, bool);
 
     void RequestFullScreen();
     void ExitFullScreen();
@@ -416,9 +418,8 @@ public:
     void UpdateJavaScriptOnDocumentEnd();
     void JavaScriptOnDocumentStart(const ScriptItems& scriptItems);
     void JavaScriptOnDocumentEnd(const ScriptItems& scriptItems);
-#ifdef ENABLE_DRAG_FRAMEWORK
+    void SetTouchEventInfo(const TouchEvent& touchEvent, TouchEventInfo& touchEventInfo);
     DragRet GetDragAcceptableStatus();
-#endif
     Offset GetDragOffset() const;
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
     void OnScrollState(bool scrollState);
@@ -440,16 +441,17 @@ public:
         return rootLayerHeight_;
     }
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
-    RefPtr<WebAccessibilityNode> GetFocusedAccessibilityNode(int32_t accessibilityId, bool isAccessibilityFocus);
-    RefPtr<WebAccessibilityNode> GetAccessibilityNodeById(int32_t accessibilityId);
-    RefPtr<WebAccessibilityNode> GetAccessibilityNodeByFocusMove(int32_t accessibilityId, int32_t direction);
-    void ExecuteAction(int32_t nodeId, AceAction action) const;
+    RefPtr<WebAccessibilityNode> GetFocusedAccessibilityNode(int64_t accessibilityId, bool isAccessibilityFocus);
+    RefPtr<WebAccessibilityNode> GetAccessibilityNodeById(int64_t accessibilityId);
+    RefPtr<WebAccessibilityNode> GetAccessibilityNodeByFocusMove(int64_t accessibilityId, int32_t direction);
+    void ExecuteAction(int64_t accessibilityId, AceAction action) const;
     void SetAccessibilityState(bool state);
 
 private:
     void RegistVirtualKeyBoardListener();
     bool ProcessVirtualKeyBoard(int32_t width, int32_t height, double keyboard);
-    void UpdateWebLayoutSize(int32_t width, int32_t height);
+    void UpdateWebLayoutSize(int32_t width, int32_t height, bool isKeyboard);
+    void UpdateLayoutAfterKerboardShow(int32_t width, int32_t height, double keyboard, double oldWebHeight);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void OnAttachToFrameNode() override;
@@ -506,6 +508,7 @@ private:
     void OnScrollBarColorUpdate(const std::string& value);
     void OnOverScrollModeUpdate(const int32_t value);
     void OnCopyOptionModeUpdate(const int32_t value);
+    void OnNativeEmbedModeEnabledUpdate(bool value);
     int GetWebId();
 
     void InitEvent();
@@ -684,6 +687,8 @@ private:
     ACE_DISALLOW_COPY_AND_MOVE(WebPattern);
     bool accessibilityState_ = false;
     RefPtr<WebAccessibilityNode> webAccessibilityNode_;
+    TouchEventInfo touchEventInfo_{"touchEvent"};
+    std::vector<TouchEventInfo> touchEventInfoList_ {};
 };
 } // namespace OHOS::Ace::NG
 

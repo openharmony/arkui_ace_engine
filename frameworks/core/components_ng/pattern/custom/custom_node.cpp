@@ -62,6 +62,12 @@ void CustomNode::Render()
                 GetParent() ? GetParent()->GetId() : 0);
             // first create child node and wrapper.
             ScopedViewStackProcessor scopedViewStackProcessor;
+            auto parent = GetParent();
+            bool parentNeedExportTexture = false;
+            if (parent && parent->GetTag() == V2::COMMON_VIEW_ETS_TAG) {
+                parentNeedExportTexture = parent->IsNeedExportTexture();
+            }
+            ViewStackProcessor::GetInstance()->SetIsExportTexture(parentNeedExportTexture || IsNeedExportTexture());
             auto child = renderFunction();
             if (child) {
                 child->MountToParent(Claim(this));
@@ -81,6 +87,15 @@ void CustomNode::FlushReload()
     Clean();
     renderFunction_ = completeReloadFunc_;
     Render();
+}
+
+bool CustomNode::RenderCustomChild(int64_t deadline)
+{
+    if (GetSysTimestamp() > deadline) {
+        return false;
+    }
+    Render();
+    return UINode::RenderCustomChild(deadline);
 }
 
 void CustomNode::SetJSViewActive(bool active)

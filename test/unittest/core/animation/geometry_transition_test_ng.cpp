@@ -119,7 +119,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition001, TestSize.Level1)
     gt_->Build(weakNode2, true);
     gt_->WillLayout(node2);
     gt_->DidLayout(node2);
-    EXPECT_FALSE(gt_->hasInAnim_);
+    EXPECT_TRUE(gt_->hasInAnim_);
     EXPECT_TRUE(gt_->hasOutAnim_);
 
     Create(weakNode1, true);
@@ -359,7 +359,7 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition004, TestSize.Level1)
     gt_->OnReSync(trigger);
     gt_->OnReSync();
     gt_->ToString();
-    EXPECT_TRUE(gt_->hasOutAnim_);
+    EXPECT_FALSE(gt_->hasOutAnim_);
 
     // posChanged  is true
     gt_->hasOutAnim_ = false;
@@ -375,12 +375,12 @@ HWTEST_F(GeometryTransitionTestNg, GeometryTransition004, TestSize.Level1)
     // sizeChanged  is true
     gt_->outNodeTargetAbsRect_ = RectF(1.0f, 1.0f, 10.0f, 1.0f);
     gt_->OnReSync();
-    EXPECT_TRUE(gt_->hasOutAnim_);
+    EXPECT_FALSE(gt_->hasOutAnim_);
 
     // sizeChanged  is true
     gt_->outNodeTargetAbsRect_ = RectF(1.0f, 1.0f, 1.0f, 10.0f);
     gt_->OnReSync();
-    EXPECT_TRUE(gt_->hasOutAnim_);
+    EXPECT_FALSE(gt_->hasOutAnim_);
 }
 
 /**

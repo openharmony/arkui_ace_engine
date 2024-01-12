@@ -24,7 +24,6 @@
 
 #include "native_engine/native_value.h"
 
-#include "base/i18n/localization.h"
 #include "base/log/log.h"
 #include "bridge/common/utils/utils.h"
 #include "core/common/container.h"
@@ -41,12 +40,36 @@ struct ResourceInfo {
     std::optional<std::string> moduleName = std::nullopt;
 };
 
+enum class ResourceType : uint32_t {
+    COLOR = 10001,
+    FLOAT,
+    STRING,
+    PLURAL,
+    BOOLEAN,
+    INTARRAY,
+    INTEGER,
+    PATTERN,
+    STRARRAY,
+    MEDIA = 20000,
+    RAWFILE = 30000
+};
+
 size_t GetParamLen(napi_env env, napi_value param);
 bool GetNapiString(napi_env env, napi_value value, std::string& retStr, napi_valuetype& valueType);
 
 void NapiThrow(napi_env env, const std::string& message, int32_t errCode);
 
 napi_value ParseCurve(napi_env env, napi_value value, std::string& curveTypeString, std::vector<float>& curveValue);
+
+napi_value CreateNapiString(napi_env env, std::string rawStr);
+
+void CompleteResourceParam(napi_env env, napi_value value);
+
+void ModifyResourceParam(napi_env env, napi_value value, const ResourceType& resType, const std::string& resName);
+
+bool ConvertResourceType(const std::string& typeName, ResourceType& resType);
+
+bool ParseDollarResource(napi_env env, napi_value value, ResourceType& resType, std::string& resName);
 
 void ParseCurveInfo(const std::string& curveString, std::string& curveTypeString, std::vector<float>& curveValue);
 

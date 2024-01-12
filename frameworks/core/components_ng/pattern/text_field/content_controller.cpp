@@ -25,6 +25,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 const std::string DIGIT_WHITE_LIST = "[0-9]";
+const std::string DIGIT_DECIMAL_WHITE_LIST = "[0-9.]";
 const std::string PHONE_WHITE_LIST = R"([\d\-\+\*\#]+)";
 const std::string EMAIL_WHITE_LIST = "[\\w.\\@]";
 const std::string URL_WHITE_LIST = "[a-zA-z]+://[^\\s]*";
@@ -43,11 +44,17 @@ std::string ContentController::PreprocessString(int32_t startIndex, int32_t endI
     auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
     auto selectValue = GetSelectedValue(startIndex, endIndex);
     if (property->GetTextInputType().has_value() &&
-        property->GetTextInputType().value() == TextInputType::EMAIL_ADDRESS &&
-        content_.find('@') != std::string::npos && value.find('@') != std::string::npos &&
-        GetSelectedValue(startIndex, endIndex).find('@') == std::string::npos) {
-        tmp.erase(std::remove_if(tmp.begin(), tmp.end(), [](char c) { return c == '@'; }), tmp.end());
+        (property->GetTextInputType().value() == TextInputType::NUMBER_DECIMAL ||
+        property->GetTextInputType().value() == TextInputType::EMAIL_ADDRESS)) {
+        char specialChar = property->GetTextInputType().value() == TextInputType::NUMBER_DECIMAL ?
+            '.' : '@';
+        if (content_.find(specialChar) != std::string::npos && value.find(specialChar) != std::string::npos &&
+            GetSelectedValue(startIndex, endIndex).find(specialChar) == std::string::npos) {
+            tmp.erase(
+                std::remove_if(tmp.begin(), tmp.end(), [&specialChar](char c) { return c == specialChar; }), tmp.end());
+        }
     }
+    FilterValueType(tmp);
     auto wideText = GetWideText();
     auto wideTmp = StringUtils::ToWstring(tmp);
     auto maxLength = static_cast<uint32_t>(textField->GetMaxLength());
@@ -59,12 +66,12 @@ std::string ContentController::PreprocessString(int32_t startIndex, int32_t endI
     return tmp;
 }
 
-void ContentController::InsertValue(int32_t index, const std::string& value)
+bool ContentController::InsertValue(int32_t index, const std::string& value)
 {
-    ReplaceSelectedValue(index, index, value);
+    return ReplaceSelectedValue(index, index, value);
 }
 
-void ContentController::ReplaceSelectedValue(int32_t startIndex, int32_t endIndex, const std::string& value)
+bool ContentController::ReplaceSelectedValue(int32_t startIndex, int32_t endIndex, const std::string& value)
 {
     FormatIndex(startIndex, endIndex);
     auto tmp = PreprocessString(startIndex, endIndex, value);
@@ -72,6 +79,12 @@ void ContentController::ReplaceSelectedValue(int32_t startIndex, int32_t endInde
     content_ = StringUtils::ToString(wideText.substr(0, startIndex)) + tmp +
                StringUtils::ToString(wideText.substr(endIndex, static_cast<int32_t>(wideText.length()) - endIndex));
     FilterValue();
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_RETURN(pattern, false);
+    auto textField = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_RETURN(textField, false);
+    textField->ContentFireOnChangeEvent();
+    return !tmp.empty();
 }
 
 std::string ContentController::GetSelectedValue(int32_t startIndex, int32_t endIndex)
@@ -131,6 +144,9 @@ void ContentController::FilterTextInputStyle(bool& textChanged, std::string& res
             textChanged |= FilterWithAscii(result);
             break;
         }
+        case TextInputType::NUMBER_DECIMAL:
+            textChanged |= FilterWithEvent(DIGIT_DECIMAL_WHITE_LIST, result);
+            textChanged |= FilterWithDecimal(result);
         default: {
             break;
         }
@@ -147,7 +163,8 @@ void ContentController::FilterValue()
     CHECK_NULL_VOID(textField);
     auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
 
-    bool hasInputFilter = property->GetInputFilter().has_value() && !content_.empty();
+    bool hasInputFilter = property->GetInputFilter().has_value() &&
+        !property->GetInputFilter().value().empty() && !content_.empty();
     if (!hasInputFilter) {
         FilterTextInputStyle(textChanged, result);
     } else {
@@ -164,6 +181,32 @@ void ContentController::FilterValue()
     auto textWidth = static_cast<int32_t>(GetWideText().length());
     if (GreatNotEqual(textWidth, maxLength)) {
         content_ = StringUtils::ToString(GetWideText().substr(0, maxLength));
+    }
+    textField->ContentFireOnChangeEvent();
+}
+
+void ContentController::FilterValueType(std::string& value)
+{
+    bool textChanged = false;
+    auto result = value;
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textField = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textField);
+    auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
+
+    bool hasInputFilter =
+        property->GetInputFilter().has_value() && !property->GetInputFilter().value().empty() && !content_.empty();
+    if (!hasInputFilter) {
+        FilterTextInputStyle(textChanged, result);
+    } else {
+        textChanged |= FilterWithEvent(property->GetInputFilter().value(), result);
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            FilterTextInputStyle(textChanged, result);
+        }
+    }
+    if (textChanged) {
+        value = result;
     }
 }
 
@@ -245,6 +288,26 @@ bool ContentController::FilterWithAscii(std::string& result)
     return textChange;
 }
 
+bool ContentController::FilterWithDecimal(std::string& result)
+{
+    auto valueToUpdate = result;
+    bool first = true;
+    std::replace_if(
+        result.begin(), result.end(),
+        [&first](const char c) {
+            if (c == '.' && !first) {
+                return true;
+            }
+            if (c == '.') {
+                first = false;
+            }
+            return false;
+        },
+        ' ');
+    result.erase(std::remove(result.begin(), result.end(), ' '), result.end());
+    return result != valueToUpdate;
+}
+
 bool ContentController::FilterWithEvent(const std::string& filter, std::string& result)
 {
     auto errorValue = FilterWithRegex(filter, result);
@@ -268,6 +331,11 @@ void ContentController::erase(int32_t startIndex, int32_t length)
 {
     auto wideText = GetWideText().erase(startIndex, length);
     content_ = StringUtils::ToString(wideText);
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textField = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textField);
+    textField->ContentFireOnChangeEvent();
 }
 
 std::string ContentController::GetValueBeforeIndex(int32_t index)

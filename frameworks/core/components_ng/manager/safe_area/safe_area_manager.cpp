@@ -35,6 +35,15 @@ bool SafeAreaManager::UpdateSystemSafeArea(const SafeAreaInsets& safeArea)
     return true;
 }
 
+bool SafeAreaManager::UpdateNavArea(const SafeAreaInsets& safeArea)
+{
+    if (navSafeArea_ == safeArea) {
+        return false;
+    }
+    navSafeArea_ = safeArea;
+    return true;
+}
+
 bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight)
 {
     uint32_t bottom;
@@ -54,14 +63,14 @@ bool SafeAreaManager::UpdateKeyboardSafeArea(float keyboardHeight)
 SafeAreaInsets SafeAreaManager::GetCombinedSafeArea(const SafeAreaExpandOpts& opts) const
 {
     SafeAreaInsets res;
-    if (ignoreSafeArea_ || !isFullScreen_) {
+    if (ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_)) {
         return res;
     }
     if (opts.type & SAFE_AREA_TYPE_CUTOUT) {
         res = res.Combine(cutoutSafeArea_);
     }
     if (opts.type & SAFE_AREA_TYPE_SYSTEM) {
-        res = res.Combine(systemSafeArea_);
+        res = res.Combine(systemSafeArea_).Combine(navSafeArea_);
     }
     if (keyboardSafeAreaEnabled_ && (opts.type & SAFE_AREA_TYPE_KEYBOARD)) {
         res.bottom_ = res.bottom_.Combine(keyboardInset_);
@@ -123,7 +132,7 @@ SafeAreaInsets SafeAreaManager::GetSafeArea() const
     if (ignoreSafeArea_ || (!isFullScreen_ && !isNeedAvoidWindow_)) {
         return {};
     }
-    return systemSafeArea_.Combine(cutoutSafeArea_);
+    return systemSafeArea_.Combine(cutoutSafeArea_).Combine(navSafeArea_);
 }
 
 float SafeAreaManager::GetKeyboardOffset() const
@@ -147,5 +156,23 @@ OffsetF SafeAreaManager::GetWindowWrapperOffset()
         return wrapperOffset;
     }
     return OffsetF();
+}
+
+void SafeAreaManager::ExpandSafeArea()
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    bool isFocusOnPage = pipeline->CheckPageFocus();
+    auto iter = needExpandNodes_.begin();
+    while (iter != needExpandNodes_.end()) {
+        auto frameNode = (*iter).Upgrade();
+        if (frameNode) {
+            frameNode->SaveGeoState();
+            frameNode->ExpandSafeArea(isFocusOnPage);
+            frameNode->SyncGeometryNode();
+        }
+        ++iter;
+    }
+    ClearNeedExpandNode();
 }
 } // namespace OHOS::Ace::NG

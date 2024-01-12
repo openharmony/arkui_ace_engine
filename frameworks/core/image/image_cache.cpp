@@ -197,7 +197,11 @@ void ImageCache::Clear()
 void ImageCache::DumpCacheInfo()
 {
     auto cacheSize = dataCacheList_.size();
+    auto capacity = static_cast<int32_t>(capacity_);
+    auto dataSizeLimit = static_cast<int32_t>(dataSizeLimit_);
     DumpLog::GetInstance().Print("------------ImageCacheInfo------------");
+    DumpLog::GetInstance().Print("User set ImageRawDataCacheSize : " + std::to_string(dataSizeLimit) + "(B)" +
+                                 ", ImageCacheCount :" + std::to_string(capacity) + "(number)");
     DumpLog::GetInstance().Print("Cache count: " + std::to_string(cacheSize));
     if (cacheSize == 0) {
         return;
@@ -205,8 +209,16 @@ void ImageCache::DumpCacheInfo()
     auto totalCount = 0;
     for (const auto& item : dataCacheList_) {
         auto imageObj = item.cacheObj;
+        auto key = item.cacheKey;
+        std::string srcStr = "NA";
+        for (const auto& cacheImageObj : cacheImgObjListNG_) {
+            if (cacheImageObj.cacheKey == key) {
+                srcStr = cacheImageObj.cacheObj->GetSourceInfo().ToString();
+                break;
+            }
+        }
         totalCount += imageObj->GetSize();
-        DumpLog::GetInstance().Print("Cache Obj: " + imageObj->ToString());
+        DumpLog::GetInstance().Print("Cache Obj of key: " + key + ", src:" + srcStr + "," + imageObj->ToString());
     }
     DumpLog::GetInstance().Print("Cache total size: " + std::to_string(totalCount));
 }

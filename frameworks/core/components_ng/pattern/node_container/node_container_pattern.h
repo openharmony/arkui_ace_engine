@@ -17,9 +17,11 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NODE_CONTAINER_NODE_CONTAINER_PATTERN_H
 
 #include "base/utils/noncopyable.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_property.h"
-#include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
+#include "base/utils/utils.h"
+#include "core/components_ng/pattern/node_container/node_container_layout_algorithm.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/stack/stack_layout_algorithm.h"
+#include "core/components_ng/pattern/stack/stack_layout_property.h"
 
 namespace OHOS::Ace::NG {
 class NodeContainerPattern : virtual public Pattern {
@@ -31,12 +33,12 @@ public:
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
-        return MakeRefPtr<LinearLayoutProperty>(true);
+        return MakeRefPtr<StackLayoutProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
-        return MakeRefPtr<LinearLayoutAlgorithm>();
+        return MakeRefPtr<NodeContainerLayoutAlgorithm>();
     }
 
     void RemakeNode();
@@ -50,6 +52,11 @@ public:
     {
         CHECK_NULL_VOID(resetFunc_);
         resetFunc_();
+    }
+
+    bool IsMeasureBoundary() const override
+    {
+        return true;
     }
 
     void SetMakeFunction(std::function<RefPtr<UINode>()>&& makeFunc)
@@ -74,11 +81,40 @@ public:
         resizeFunc_(size);
     }
 
+    FocusPattern GetFocusPattern() const override
+    {
+        return { FocusType::SCOPE, true };
+    }
+
+    bool IsAtomicNode() const override
+    {
+        return true;
+    }
+
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
+
+    void OnAddBaseNode();
+
+    RefPtr<UINode> GetExportTextureNode() const
+    {
+        return exportTextureNode_.Upgrade();
+    }
+
+    uint64_t GetSurfaceId() const
+    {
+        return surfaceId_;
+    }
+
+    void ResetExportTextureInfo();
+
 private:
+    void OnMountToParentDone() override;
+    void SetExportTextureInfoIfNeeded();
     std::function<void()> resetFunc_;
     std::function<RefPtr<UINode>()> makeFunc_;
     std::function<void(const SizeF& size)> resizeFunc_;
+    WeakPtr<UINode> exportTextureNode_;
+    uint64_t surfaceId_ = 0U;
 
     ACE_DISALLOW_COPY_AND_MOVE(NodeContainerPattern);
 };

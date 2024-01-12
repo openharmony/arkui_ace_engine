@@ -26,18 +26,22 @@
 #include "core/components_ng/image_provider/image_data.h"
 
 namespace OHOS::Ace {
+const std::string ASTC_SUFFIX = ".astc";
+const std::string SLASH = "/";
+const std::string BACKSLASH = "\\";
 struct FileInfo {
-    FileInfo(std::string path, size_t size, time_t time) : filePath(std::move(path)), fileSize(size), accessTime(time)
-    {}
+    FileInfo(std::string name, size_t size, time_t time, size_t cnt)
+        : fileName(std::move(name)), fileSize(size), accessTime(time), accessCount(cnt) {}
 
     // file information will be sort by access time.
     bool operator<(const FileInfo& otherFile) const
     {
-        return accessTime < otherFile.accessTime;
+        return accessTime > otherFile.accessTime;
     }
-    std::string filePath;
+    std::string fileName;
     size_t fileSize;
     time_t accessTime;
+    size_t accessCount;
 };
 
 class ImageFileCache : public Singleton<ImageFileCache> {
@@ -47,20 +51,25 @@ public:
     void SetImageCacheFilePath(const std::string& cacheFilePath);
     std::string GetImageCacheFilePath();
     std::string GetImageCacheFilePath(const std::string& url);
+    std::string GetImageCacheKey(const std::string& fileName);
 
     void SetCacheFileLimit(size_t cacheFileLimit);
     void SetClearCacheFileRatio(float clearRatio);
 
-    bool GetFromCacheFile(const std::string& filePath);
+    std::string GetCacheFilePath(const std::string& url);
 
-    RefPtr<NG::ImageData> GetDataFromCacheFile(const std::string& filePath);
+    RefPtr<NG::ImageData> GetDataFromCacheFile(const std::string& url, const std::string& suffix);
 
     void SetCacheFileInfo();
     void WriteCacheFile(
         const std::string& url, const void* data, size_t size, const std::string& suffix = std::string());
     void ClearCacheFile(const std::vector<std::string>& removeFiles);
+    void DumpCacheInfo();
 private:
-    bool GetFromCacheFileInner(const std::string& filePath);
+    void SaveCacheInner(const std::string& cacheKey, const std::string& suffix, size_t cacheSize,
+        std::vector<std::string>& removeVector);
+    std::string GetCacheFilePathInner(const std::string& url, const std::string& suffix);
+    std::string ConstructCacheFilePath(const std::string& fileName);
 
     std::shared_mutex cacheFilePathMutex_;
     std::string cacheFilePath_;
@@ -73,7 +82,11 @@ private:
     int64_t cacheFileSize_ = 0;
 
     std::mutex cacheFileInfoMutex_;
+    // lru
     std::list<FileInfo> cacheFileInfo_;
+    std::unordered_map<std::string, std::list<FileInfo>::iterator> fileNameToFileInfoPos_;
+    const size_t convertAstcThreshold_ = 5;
+
     bool hasSetCacheFileInfo_ = false;
 };
 } // namespace OHOS::Ace

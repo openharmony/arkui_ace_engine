@@ -101,6 +101,7 @@ public:
     bool IsAtBottom() const override;
     bool OutBoundaryCallback() override;
     OverScrollOffset GetOverScrollOffset(double delta) const override;
+    float GetOffsetWithLimit(float offset) const override;
     void HandleScrollBarOutBoundary();
 
     FocusPattern GetFocusPattern() const override
@@ -269,7 +270,7 @@ private:
 
     // multiSelectable
     void ClearMultiSelect() override;
-    bool IsItemSelected(const GestureEvent& info) override;
+    bool IsItemSelected() override;
     void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;
     void HandleCardModeSelectedEvent(
         const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, float itemGroupTop);
@@ -287,8 +288,8 @@ private:
     int32_t startIndex_ = -1;
     int32_t endIndex_ = -1;
     int32_t centerIndex_ = -1;
-    float startMainPos_;
-    float endMainPos_;
+    float startMainPos_ = 0.0f;
+    float endMainPos_ = 0.0f;
     float currentOffset_ = 0.0f;
     float spaceWidth_ = 0.0f;
     float contentMainSize_ = 0.0f;

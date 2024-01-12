@@ -1973,6 +1973,52 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CalendarDialogViewTest008
+ * @tc.desc: Show Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. mock PlatformVersion VERSION_ELEVEN.
+     * @tc.expected: mock successfully.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    /**
+     * @tc.steps: step2. create dialogNodeProps.
+     * @tc.expected: the dialogNodeProps created successfully.
+     */
+    CalendarSettingData settingData;
+    DialogProperties properties;
+    properties.alignment = DialogAlignment::BOTTOM;
+    properties.customStyle = true;
+    properties.offset = DimensionOffset(Offset(0, -1.0f));
+    auto selectedDate = PickerDate(2000, 1, 1);
+    settingData.selectedDate = selectedDate;
+    settingData.dayRadius = TEST_SETTING_RADIUS;
+    std::map<std::string, NG::DialogEvent> dialogEvent;
+    std::map<std::string, NG::DialogGestureEvent> dialogCancelEvent;
+    /**
+     * @tc.steps: step3. execute CalendarDialogView::Show.
+     * @tc.expected: show successfully.
+     */
+    auto dialogNode = CalendarDialogView::Show(properties, settingData, dialogEvent, dialogCancelEvent);
+    /**
+     * @tc.steps: step4. get dialogNode's grandsonNode.
+     * @tc.expected: getNode successfully.
+     */
+    auto contentNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
+    ASSERT_NE(contentNode, nullptr);
+    auto contentNodeChild = AceType::DynamicCast<FrameNode>(contentNode->GetFirstChild());
+    ASSERT_NE(contentNodeChild, nullptr);
+    /**
+     * @tc.steps: step5. test dialogNode's RenderContext's BackBlurStyle value.
+     * @tc.expected: equal COMPONENT_ULTRA_THICK.
+     */
+    EXPECT_EQ(contentNodeChild->GetRenderContext()->GetBackBlurStyle()->blurStyle, BlurStyle::COMPONENT_ULTRA_THICK);
+}
+
+/**
  * @tc.name: CalendarPickerEventHubTest001
  * @tc.desc: SetChangeEvent Function Test
  * @tc.type: FUNC
@@ -3062,6 +3108,63 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest027, TestSize.Level1)
     ASSERT_NE(dialogPattern->hoverListener_, nullptr);
     ASSERT_NE(dialogPattern->hoverListener_->onHoverCallback_, nullptr);
     dialogPattern->hoverListener_->onHoverCallback_(true);
+}
+
+/**
+ * @tc.name: CalendarDialogPatternTest028
+ * @tc.desc: UpdateDialogBackgroundColor Function Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest028, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. CreateCalendarPicker.
+     * @tc.expected: create successfully.
+     */
+    CreateCalendarPicker();
+
+    /**
+     * @tc.steps: step2. create dialogPattern.
+     * @tc.expected: create successfully.
+     */
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
+    auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
+    EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
+    auto contentWrapper = dialogNode->GetChildAtIndex(0);
+    ASSERT_NE(contentWrapper, nullptr);
+    auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
+    ASSERT_NE(calendarDialogNode, nullptr);
+    auto dialogPattern = calendarDialogNode->GetPattern<CalendarDialogPattern>();
+    /**
+     * @tc.steps: step3. mock PlatformVersion VERSION_ELEVEN and CalendarTheme.
+     * @tc.expected: mock successfully.
+     */
+    RefPtr<CalendarTheme> theme = MockPipelineContext::GetCurrent()->GetTheme<CalendarTheme>();
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
+    /**
+     * @tc.steps: step4. execute UpdateDialogBackgroundColor.
+     * @tc.expected: execute successfully.
+     */
+    dialogPattern->UpdateDialogBackgroundColor();
+    /**
+     * @tc.steps: step5. test calendarDialogNode's RenderContext's BackgroundColorValue value.
+     * @tc.expected: equal TRANSPARENT.
+     */
+    EXPECT_EQ(calendarDialogNode->GetRenderContext()->GetBackgroundColorValue().ColorToString(),
+        Color::TRANSPARENT.ColorToString());
+    /**
+     * @tc.steps: step6. mock PlatformVersion VERSION_TEN.
+     * @tc.expected: mock successfully.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
+    /**
+     * @tc.steps: step7. test calendarDialogNode's RenderContext's BackgroundColorValue value.
+     * @tc.expected: equal themeColor.
+     */
+    dialogPattern->UpdateDialogBackgroundColor();
+    EXPECT_EQ(calendarDialogNode->GetRenderContext()->GetBackgroundColorValue().ColorToString(),
+        theme->GetDialogBackgroundColor().ColorToString());
 }
 
 /**

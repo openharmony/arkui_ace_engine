@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/waterflow/water_flow_pattern.h"
 
 #include "base/utils/utils.h"
+#include "core/components/scroll/scroll_controller_base.h"
 #include "core/components_ng/pattern/waterflow/water_flow_layout_algorithm.h"
 #include "core/components_ng/pattern/waterflow/water_flow_paint_method.h"
 
@@ -247,9 +248,8 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     CheckScrollable();
 
     isInitialized_ = true;
-    auto property = host->GetLayoutProperty();
-    CHECK_NULL_RETURN(host, false);
-    return property->GetPaddingProperty() != nullptr;
+
+    return NeedRender();
 }
 
 bool WaterFlowPattern::ScrollToTargrtIndex(int32_t index)
@@ -367,7 +367,7 @@ void WaterFlowPattern::ScrollPage(bool reverse)
 
     UpdateCurrentOffset(reverse ? mainContentSize : -mainContentSize, SCROLL_FROM_JUMP);
 
-    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    // AccessibilityEventType::SCROLL_END
 }
 
 std::string WaterFlowPattern::ProvideRestoreInfo()
@@ -388,6 +388,7 @@ void WaterFlowPattern::OnRestoreInfo(const std::string& restoreInfo)
     UpdateStartIndex(info->GetInt("beginIndex"));
     Dimension dimension(info->GetDouble("offset"), DimensionUnit::VP);
     SetRestoreOffset(dimension.ConvertToPx());
+    SetScrollAlign(ScrollAlign::START);
 }
 
 Rect WaterFlowPattern::GetItemRect(int32_t index) const
@@ -406,9 +407,10 @@ Rect WaterFlowPattern::GetItemRect(int32_t index) const
         itemGeometry->GetFrameRect().Width(), itemGeometry->GetFrameRect().Height());
 }
 
-void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign /* align */)
+void WaterFlowPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align)
 {
     SetScrollSource(SCROLL_FROM_JUMP);
+    SetScrollAlign(align);
     StopAnimate();
     if ((index >= 0) || (index == LAST_ITEM)) {
         if (smooth) {
@@ -480,5 +482,22 @@ void WaterFlowPattern::OnAnimateStop()
 {
     scrollStop_ = true;
     MarkDirtyNodeSelf();
+}
+
+bool WaterFlowPattern::NeedRender()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    auto size = geometryNode->GetPaddingSize();
+
+    auto needRender = lastSize_ != size;
+    lastSize_ = size;
+
+    auto property = host->GetLayoutProperty();
+    CHECK_NULL_RETURN(host, false);
+    needRender = property->GetPaddingProperty() != nullptr || needRender;
+    return needRender;
 }
 } // namespace OHOS::Ace::NG

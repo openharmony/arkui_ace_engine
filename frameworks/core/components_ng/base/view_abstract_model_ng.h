@@ -672,6 +672,11 @@ public:
         ViewAbstract::SetBlendMode(blendMode);
     }
 
+    void SetBlendApplyType(BlendApplyType blendApplyType) override
+    {
+        ViewAbstract::SetBlendApplyType(blendApplyType);
+    }
+
     void SetColorBlend(const Color& value) override
     {
         ViewAbstract::SetColorBlend(value);
@@ -919,6 +924,11 @@ public:
     void SetInspectorId(const std::string& inspectorId) override
     {
         ViewAbstract::SetInspectorId(inspectorId);
+    }
+
+    void SetAutoEventParam(const std::string& param) override
+    {
+        ViewAbstract::SetAutoEventParam(param);
     }
 
     void SetRestoreId(int32_t restoreId) override

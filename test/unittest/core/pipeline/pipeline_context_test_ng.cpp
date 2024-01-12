@@ -891,7 +891,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg017, TestSize.Level1)
     context_->SetupRootElement();
     auto manager = context_->GetDragDropManager();
     ASSERT_NE(manager, nullptr);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNodeId_017 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_017, nullptr);
     ASSERT_NE(frameNode, nullptr);
     manager->AddDragFrameNode(frameNode->GetId(), frameNode);
 
@@ -929,7 +930,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg017, TestSize.Level1)
     manager->isDragged_ = false;
     manager->currentId_ = DEFAULT_INT1;
     context_->OnDragEvent({ DEFAULT_INT10, DEFAULT_INT10 }, DragEventAction::DRAG_EVENT_MOVE);
-    EXPECT_EQ(manager->currentId_, DEFAULT_INT10);
+    EXPECT_EQ(manager->currentId_, DEFAULT_INT1);
 }
 
 /**
@@ -1111,7 +1112,8 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     context_->SetupRootElement();
     auto eventManager = context_->GetDragDropManager();
     ASSERT_NE(eventManager, nullptr);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNodeId_022 = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::GetOrCreateFrameNode(TEST_TAG, frameNodeId_022, nullptr);
     ASSERT_NE(frameNode, nullptr);
     eventManager->AddDragFrameNode(frameNode->GetId(), frameNode);
     KeyEvent event;
@@ -1181,7 +1183,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg022, TestSize.Level1)
     pageNode->AddChild(childNode);
     context_->stageManager_->stageNode_ = pageNode;
     EXPECT_FALSE(context_->OnKeyEvent(event));
-    EXPECT_TRUE(context_->dragDropManager_->isDragCancel_);
+    EXPECT_FALSE(context_->dragDropManager_->isDragCancel_);
 }
 
 /**

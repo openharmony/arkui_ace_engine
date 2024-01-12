@@ -493,6 +493,7 @@ public:
     void UpdateVerticalScrollBarAccess(bool isVerticalScrollBarAccessEnabled);
     void UpdateScrollBarColor(const std::string& colorValue);
     void UpdateOverScrollMode(const int32_t overscrollModeValue);
+    void UpdateNativeEmbedModeEnabled(bool isEmbedModeEnabled);
     void UpdateCopyOptionMode(const int32_t copyOptionModeValue);
     void LoadUrl();
     void CreateWebMessagePorts(std::vector<RefPtr<WebMessagePort>>& ports);
@@ -503,6 +504,7 @@ public:
     void HandleTouchDown(const int32_t& id, const double& x, const double& y, bool from_overlay = false);
     void HandleTouchUp(const int32_t& id, const double& x, const double& y, bool from_overlay = false);
     void HandleTouchMove(const int32_t& id, const double& x, const double& y, bool from_overlay = false);
+    void HandleTouchMove(const std::list<OHOS::NWeb::TouchPointInfo>& touchPointInfoList, bool fromOverlay = false);
     void HandleTouchCancel();
     void HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY);
     bool OnKeyEvent(int32_t keyCode, int32_t keyAction);
@@ -573,7 +575,7 @@ public:
     bool OnSslSelectCertRequest(const std::shared_ptr<BaseEventInfo>& info);
     void OnDownloadStart(const std::string& url, const std::string& userAgent, const std::string& contentDisposition,
         const std::string& mimetype, long contentLength);
-    void OnAccessibilityEvent(int32_t accessibilityId, AccessibilityEventType eventType);
+    void OnAccessibilityEvent(int64_t accessibilityId, AccessibilityEventType eventType);
     void OnPageError(const std::string& param);
     void OnMessage(const std::string& param);
     void OnFullScreenEnter(std::shared_ptr<OHOS::NWeb::NWebFullScreenExitHandler> handler);
@@ -617,15 +619,17 @@ public:
     void OnTouchIconUrl(const std::string& iconUrl, bool precomposed);
     void OnAudioStateChanged(bool audible);
     void OnFirstContentfulPaint(int64_t navigationStartTick, int64_t firstContentfulPaintMs);
+    void OnSafeBrowsingCheckResult(int threat_type);
     void OnGetTouchHandleHotZone(OHOS::NWeb::TouchHandleHotZone& hotZone);
     void OnOverScroll(float xOffset, float yOffset);
     void OnOverScrollFlingVelocity(float xVelocity, float yVelocity, bool isFling);
     void OnScrollState(bool scrollState);
     void OnRootLayerChanged(int width, int height);
     bool FilterScrollEvent(const float x, const float y, const float xVelocity, const float yVelocity);
-
+    void OnNativeEmbedLifecycleChange(const NWeb::NativeEmbedDataInfo& dataInfo);
+    void OnNativeEmbedGestureEvent(const NWeb::NativeEmbedTouchEvent& event);
     void SetNGWebPattern(const RefPtr<NG::WebPattern>& webPattern);
-    void RequestFocus();
+    bool RequestFocus();
     void SetDrawSize(const Size& drawSize);
     void SetEnhanceSurfaceFlag(const bool& isEnhanceSurface);
     EGLConfig GLGetConfig(int version, EGLDisplay eglDisplay);
@@ -638,6 +642,7 @@ public:
     void JavaScriptOnDocumentStart();
     void JavaScriptOnDocumentEnd();
     void SetJavaScriptItems(const ScriptItems& scriptItems, const ScriptItemType& type);
+    void SetTouchEventInfo(const OHOS::NWeb::NativeEmbedTouchEvent& touchEvent, TouchEventInfo& touchEventInfo);
 #if defined(ENABLE_ROSEN_BACKEND)
     void SetSurface(const sptr<Surface>& surface);
     sptr<Surface> surface_ = nullptr;
@@ -665,14 +670,15 @@ public:
     void SetVirtualKeyBoardArg(int32_t width, int32_t height, double keyboard);
     bool ShouldVirtualKeyboardOverlay();
     void ScrollBy(float deltaX, float deltaY);
-    void ExecuteAction(int32_t accessibilityId, AceAction action);
+    void ExecuteAction(int64_t accessibilityId, AceAction action);
     bool GetFocusedAccessibilityNodeInfo(
-        int32_t accessibilityId, bool isAccessibilityFocus, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const;
-    bool GetAccessibilityNodeInfoById(int32_t accessibilityId, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const;
+        int64_t accessibilityId, bool isAccessibilityFocus, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const;
+    bool GetAccessibilityNodeInfoById(int64_t accessibilityId, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const;
     bool GetAccessibilityNodeInfoByFocusMove(
-        int32_t accessibilityId, int32_t direction, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const;
+        int64_t accessibilityId, int32_t direction, OHOS::NWeb::NWebAccessibilityNodeInfo& nodeInfo) const;
     void SetAccessibilityState(bool state);
     void UpdateAccessibilityState(bool state);
+    OHOS::NWeb::NWebPreference::CopyOptionMode GetCopyOptionMode() const;
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -720,7 +726,6 @@ private:
     void RunJsProxyCallback();
     void RegisterConfigObserver();
     void UnRegisterConfigObserver();
-    bool IsIncognitoMode() const;
 
     // Backward and forward
     void Backward();
@@ -804,6 +809,9 @@ private:
     EventCallbackV2 onOverScrollV2_;
     EventCallbackV2 onScreenCaptureRequestV2_;
     EventCallbackV2 onNavigationEntryCommittedV2_;
+    EventCallbackV2 onSafeBrowsingCheckResultV2_;
+    EventCallbackV2 OnNativeEmbedLifecycleChangeV2_;
+    EventCallbackV2 OnNativeEmbedGestureEventV2_;
 
     int32_t webType_;
     std::string bundlePath_;
@@ -842,6 +850,7 @@ private:
     bool accessibilityState_ = false;
     std::optional<std::string> richtextData_;
     bool incognitoMode_ = false;
+    bool isEmbedModeEnabled_ = false;
 #endif
 };
 

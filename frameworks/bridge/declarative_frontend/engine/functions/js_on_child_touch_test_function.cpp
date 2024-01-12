@@ -24,7 +24,7 @@ void JsOnChildTouchTestFunction::Execute()
 JSRef<JSVal> JsOnChildTouchTestFunction::Execute(const std::vector<NG::TouchTestInfo>& touchInfo)
 {
     JSRef<JSArray> infoArray = JSRef<JSArray>::New();
-    for (auto i = 0; i < touchInfo.size(); i++) {
+    for (size_t i = 0; i < touchInfo.size(); i++) {
         JSRef<JSVal> info = JSRef<JSObject>::Cast(CreateTouchTestInfo(touchInfo[i]));
         infoArray->SetValueAt(i, info);
     }

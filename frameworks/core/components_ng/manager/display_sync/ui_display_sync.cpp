@@ -35,7 +35,7 @@ void UIDisplaySync::CheckRate(int32_t vsyncRate, int32_t refreshRateMode)
 void UIDisplaySync::UpdateData(uint64_t nanoTimestamp, int32_t vsyncPeriod)
 {
     SetTimestampData(nanoTimestamp);
-    uint64_t targetTimestamp = nanoTimestamp + vsyncPeriod * data_->rate_;
+    uint64_t targetTimestamp = nanoTimestamp + static_cast<uint64_t>(vsyncPeriod * data_->rate_);
     SetTargetTimestampData(targetTimestamp);
 }
 
@@ -61,11 +61,11 @@ void UIDisplaySync::OnFrame()
                      "Preferred[%d] VSyncRate[%d] Rate[%d] noSkip[%d]",
                      GetId(), data_->timestamp_, data_->targetTimestamp_,
                      data_->rateRange_->preferred_, sourceVsyncRate_, data_->rate_, data_->noSkip_);
-    if (IsEnabled() && data_->noSkip_ && data_->onFrame_) {
+    if (data_->noSkip_ && data_->onFrame_) {
         data_->onFrame_();
     }
 
-    if (IsEnabled() && data_->noSkip_ && data_->onFrameWithData_) {
+    if (data_->noSkip_ && data_->onFrameWithData_) {
         data_->onFrameWithData_(data_);
     }
 
@@ -73,7 +73,8 @@ void UIDisplaySync::OnFrame()
         data_->onFrameWithTimestamp_(data_->timestamp_);
     }
 
-    if (!data_->noSkip_) {
+    bool isNeedRequest = data_->onFrame_ || data_->onFrameWithData_ || data_->onFrameWithTimestamp_;
+    if (isNeedRequest) {
         RequestFrame();
     }
 }
@@ -202,12 +203,12 @@ int32_t UIDisplaySync::GetRefreshRateMode() const
     return refreshRateMode_;
 }
 
-bool UIDisplaySync::IsEnabled() const
+bool UIDisplaySync::IsAutoRefreshRateMode() const
 {
     return refreshRateMode_ == static_cast<int32_t>(RefreshRateMode::REFRESHRATE_MODE_AUTO);
 }
 
-bool UIDisplaySync::IsDisabled() const
+bool UIDisplaySync::IsNonAutoRefreshRateMode() const
 {
     return refreshRateMode_ != static_cast<int32_t>(RefreshRateMode::REFRESHRATE_MODE_AUTO);
 }

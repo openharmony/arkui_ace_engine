@@ -91,10 +91,7 @@ template("ace_osal_ohos_source_set") {
         "resource_convertor.cpp",
         "resource_theme_style.cpp",
       ]
-      deps = [
-        "$ace_flutter_engine_root/icu:ace_libicu_ohos",
-        "$skia_root_new:skia_ohos",
-      ]
+      deps = [ "$skia_root_new:skia_ohos" ]
 
       if (defined(global_parts_info) &&
           defined(global_parts_info.resourceschedule_soc_perf)) {
@@ -148,7 +145,6 @@ template("ace_osal_ohos_source_set") {
       "app_file_service:fileuri_native",
       "bundle_framework:appexecfwk_core",
       "graphic_2d:librender_service_client",
-      "hichecker:libhichecker",
       "hicollie:libhicollie",
       "hisysevent:libhisysevent",
       "hitrace:libhitracechain",
@@ -158,6 +154,10 @@ template("ace_osal_ohos_source_set") {
       "window_manager:libdm",
       "window_manager:scene_session",
     ]
+
+    if (defined(config.hichecker_exists) && config.hichecker_exists) {
+      external_deps += [ "hichecker:libhichecker" ]
+    }
     deps += [
       "$ace_root/interfaces/inner_api/drawable_descriptor:drawable_descriptor",
     ]

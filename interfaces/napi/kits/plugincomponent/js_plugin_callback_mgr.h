@@ -39,11 +39,12 @@ public:
         const std::shared_ptr<AceJSPluginRequestParam>& param);
     void UnRegisterEvent(size_t key);
     void UnregisterCallBack(napi_env env, const AAFwk::Want& want);
+
 private:
     std::mutex mutex_;
-    ACEAsyncJSCallbackInfo *asyncJSCallbackInfo_ = nullptr;
+    ACEAsyncJSCallbackInfo* asyncJSCallbackInfo_ = nullptr;
     std::map<size_t, std::shared_ptr<JSPluginCallback>> eventList_;
     ACE_DISALLOW_COPY_AND_MOVE(JSPluginCallbackMgr);
 };
-}  // namespace OHOS::Ace::Napi
-#endif  // OHOS_NAPI_ACE_PLUGIN_CALLBACK_MGR_H
+} // namespace OHOS::Ace::Napi
+#endif // OHOS_NAPI_ACE_PLUGIN_CALLBACK_MGR_H

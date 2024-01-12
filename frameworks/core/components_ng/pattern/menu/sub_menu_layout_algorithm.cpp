@@ -40,36 +40,19 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     InitHierarchicalParameters();
     auto pipelineContext = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
-    auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
-    float windowsOffsetY = static_cast<float>(windowGlobalRect.GetOffset().GetY());
-    if (hierarchicalParameters_ || !Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        windowsOffsetY = 0.0f;
-    }
     InitializePadding(layoutWrapper);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         ModifySubMenuWrapper(layoutWrapper);
     }
-    auto menuItemSize = parentMenuItem->GetGeometryNode()->GetFrameSize();
-    position_ = GetSubMenuPosition(parentMenuItem);
-    float x = HorizontalLayoutSubMenu(size, position_.GetX(), menuItemSize);
-    x = std::clamp(x, paddingStart_, wrapperSize_.Width() - menuItemSize.Width() - paddingEnd_);
-    float y = 0.0f;
-    if (hierarchicalParameters_ || !Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        y = VerticalLayoutSubMenu(size, position_.GetY(), menuItemSize);
-    } else {
-        y = VerticalLayoutSubMenuHalfScreen(size, position_.GetY(), menuItemSize);
-    }
-    y = std::clamp(
-        y, windowsOffsetY + paddingTop_, windowsOffsetY + wrapperSize_.Height() - size.Height() - paddingBottom_);
     const auto& geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
-    geometryNode->SetMarginFrameOffset(NG::OffsetF(x, y));
-
+    OffsetF position = MenuLayoutAvoidAlgorithm(parentMenuItem, size);
+    geometryNode->SetMarginFrameOffset(position);
     if (parentMenuItem) {
         auto parentPattern = parentMenuItem->GetPattern<MenuItemPattern>();
         CHECK_NULL_VOID(parentPattern);
-        auto topLeftPoint = OffsetF(x, y);
-        auto bottomRightPoint = OffsetF(x + size.Width(), y + size.Height());
+        auto topLeftPoint = position;
+        auto bottomRightPoint = position + OffsetF(size.Width(), size.Height());
 
         auto pipelineContext = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(pipelineContext);
@@ -92,6 +75,26 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto child = layoutWrapper->GetOrCreateChildByIndex(0);
     CHECK_NULL_VOID(child);
     child->Layout();
+}
+
+OffsetF SubMenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<FrameNode>& parentMenuItem, const SizeF& size)
+{
+    auto pipelineContext = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, NG::OffsetF(0.0f, 0.0f));
+    auto menuItemSize = parentMenuItem->GetGeometryNode()->GetFrameSize();
+    position_ = GetSubMenuPosition(parentMenuItem);
+    float x = HorizontalLayoutSubMenu(size, position_.GetX(), menuItemSize);
+    x = std::clamp(x, paddingStart_, wrapperSize_.Width() - size.Width() - paddingEnd_);
+    float y = 0.0f;
+    if (hierarchicalParameters_ || !Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        y = VerticalLayoutSubMenu(size, position_.GetY(), menuItemSize);
+    } else {
+        y = VerticalLayoutSubMenuHalfScreen(size, position_.GetY(), menuItemSize);
+    }
+    float yMinAvoid = wrapperRect_.Top() + paddingTop_;
+    float yMaxAvoid = wrapperRect_.Bottom() - paddingBottom_ - size.Height();
+    y = std::clamp(y, yMinAvoid, yMaxAvoid);
+    return NG::OffsetF(x, y);
 }
 
 OffsetF SubMenuLayoutAlgorithm::GetSubMenuPosition(const RefPtr<FrameNode>& parentMenuItem)
@@ -161,18 +164,17 @@ float SubMenuLayoutAlgorithm::VerticalLayoutSubMenuHalfScreen(
 // return submenu vertical offset
 float SubMenuLayoutAlgorithm::VerticalLayoutSubMenu(const SizeF& size, float position, const SizeF& menuItemSize)
 {
-    float wrapperHeight = wrapperSize_.Height();
-    float bottomSpace = wrapperHeight - position;
+    float bottomSpace = wrapperRect_.Bottom() - position - paddingBottom_;
     // line up top of subMenu with top of the menuItem
     if (bottomSpace >= size.Height()) {
         return position;
     }
     // line up bottom of menu with bottom of the screen
-    if (size.Height() < wrapperHeight) {
-        return wrapperHeight - size.Height();
+    if (size.Height() < wrapperRect_.Height()) {
+        return wrapperRect_.Bottom() - size.Height() - paddingBottom_;
     }
     // can't fit in screen, line up with top of the screen
-    return 0.0f;
+    return wrapperRect_.Top() + paddingTop_;
 }
 
 // returns submenu horizontal offset
@@ -228,6 +230,26 @@ void SubMenuLayoutAlgorithm::ModifySubMenuWrapper(LayoutWrapper* layoutWrapper)
 }
 
 void SubMenuLayoutAlgorithm::InitializePadding(LayoutWrapper* layoutWrapper)
+{
+    auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    if (!menuPattern->IsSelectOverlayExtensionMenu()) {
+        margin_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+        optionPadding_ = margin_;
+        paddingStart_ = static_cast<float>(theme->GetDefaultPaddingStart().ConvertToPx());
+        paddingEnd_ = static_cast<float>(theme->GetDefaultPaddingEnd().ConvertToPx());
+        paddingTop_ = static_cast<float>(theme->GetDefaultPaddingTop().ConvertToPx());
+        paddingBottom_ = static_cast<float>(theme->GetDefaultPaddingBottomFixed().ConvertToPx());
+    } else {
+        optionPadding_ = static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    }
+}
+
+void SubMenuLayoutAlgorithm::InitializePaddingAPI11(LayoutWrapper* layoutWrapper)
 {
     auto menuNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(menuNode);

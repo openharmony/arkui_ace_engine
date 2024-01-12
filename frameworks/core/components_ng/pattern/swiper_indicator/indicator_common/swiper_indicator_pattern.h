@@ -68,6 +68,33 @@ public:
         }
     }
 
+    RefPtr<DotIndicatorPaintMethod> CreateDotIndicatorPaintMethod(RefPtr<SwiperPattern> swiperPattern)
+    {
+        auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
+        CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
+        auto paintMethod = MakeRefPtr<DotIndicatorPaintMethod>(dotIndicatorModifier_);
+        paintMethod->SetAxis(swiperPattern->GetDirection());
+        paintMethod->SetCurrentIndex(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex()));
+        paintMethod->SetCurrentIndexActual(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentIndex()));
+        paintMethod->SetItemCount(swiperPattern->TotalCount());
+        paintMethod->SetDisplayCount(swiperLayoutProperty->GetDisplayCount().value_or(1));
+        paintMethod->SetGestureState(swiperPattern->GetGestureState());
+        paintMethod->SetTurnPageRate(swiperPattern->GetTurnPageRate());
+        paintMethod->SetIsLoop(swiperPattern->IsLoop());
+        paintMethod->SetTouchBottomTypeLoop(swiperPattern->GetTouchBottomTypeLoop());
+        paintMethod->SetIsHover(isHover_);
+        paintMethod->SetIsPressed(isPressed_);
+        paintMethod->SetHoverPoint(hoverPoint_);
+        if (mouseClickIndex_) {
+            mouseClickIndex_ = swiperPattern->GetLoopIndex(mouseClickIndex_.value());
+        }
+        paintMethod->SetMouseClickIndex(mouseClickIndex_);
+        paintMethod->SetIsTouchBottom(touchBottomType_);
+        paintMethod->SetTouchBottomRate(swiperPattern->GetTouchBottomRate());
+        mouseClickIndex_ = std::nullopt;
+        return paintMethod;
+    }
+
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override
     {
         auto swiperNode = GetSwiperNode();
@@ -78,30 +105,11 @@ public:
             if (!dotIndicatorModifier_) {
                 dotIndicatorModifier_ = AceType::MakeRefPtr<DotIndicatorModifier>();
             }
-            auto swiperLayoutProperty = swiperPattern->GetLayoutProperty<SwiperLayoutProperty>();
-            CHECK_NULL_RETURN(swiperLayoutProperty, nullptr);
             dotIndicatorModifier_->SetAnimationDuration(swiperPattern->GetDuration());
-            dotIndicatorModifier_->SetLongPointHeadCurve(swiperPattern->GetCurveIncludeMotion());
-            auto paintMethod = MakeRefPtr<DotIndicatorPaintMethod>(dotIndicatorModifier_);
-            paintMethod->SetAxis(swiperPattern->GetDirection());
-            paintMethod->SetCurrentIndex(swiperPattern->GetLoopIndex(swiperPattern->GetCurrentFirstIndex()));
-            paintMethod->SetItemCount(swiperPattern->TotalCount());
-            paintMethod->SetDisplayCount(swiperLayoutProperty->GetDisplayCount().value_or(1));
-            paintMethod->SetGestureState(swiperPattern->GetGestureState());
-            paintMethod->SetTurnPageRate(swiperPattern->GetTurnPageRate());
-            paintMethod->SetIsLoop(swiperPattern->IsLoop());
-            paintMethod->SetTouchBottomTypeLoop(swiperPattern->GetTouchBottomTypeLoop());
-            paintMethod->SetIsHover(isHover_);
-            paintMethod->SetIsPressed(isPressed_);
-            paintMethod->SetHoverPoint(hoverPoint_);
-            if (mouseClickIndex_) {
-                mouseClickIndex_ = swiperPattern->GetLoopIndex(mouseClickIndex_.value());
-            }
-            paintMethod->SetMouseClickIndex(mouseClickIndex_);
-            paintMethod->SetIsTouchBottom(touchBottomType_);
-            paintMethod->SetTouchBottomRate(swiperPattern->GetTouchBottomRate());
-            mouseClickIndex_ = std::nullopt;
+            dotIndicatorModifier_->SetLongPointHeadCurve(
+                swiperPattern->GetCurveIncludeMotion(), swiperPattern->GetMotionVelocity());
 
+            auto paintMethod = CreateDotIndicatorPaintMethod(swiperPattern);
             auto geometryNode = swiperNode->GetGeometryNode();
             CHECK_NULL_RETURN(geometryNode, nullptr);
             auto host = GetHost();

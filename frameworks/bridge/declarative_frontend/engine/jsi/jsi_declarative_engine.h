@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -79,6 +79,7 @@ public:
     static void TriggerPageUpdate(const shared_ptr<JsRuntime>&);
     static RefPtr<PipelineBase> GetPipelineContext(const shared_ptr<JsRuntime>& runtime);
     static void PreloadAceModule(void* runtime);
+    static void PreloadAceModuleWorker(void* runtime);
 
     WeakPtr<JsMessageDispatcher> GetJsMessageDispatcher() const
     {
@@ -266,7 +267,7 @@ public:
     bool LoadPageSource(const std::shared_ptr<std::vector<uint8_t>>& content,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
 
-    bool LoadCard(const std::string& url, int64_t cardId) override;
+    bool LoadCard(const std::string& url, int64_t cardId, const std::string& entryPoint) override;
 
     // Update running page
     void UpdateRunningPage(const RefPtr<JsAcePage>& page) override;
@@ -331,6 +332,8 @@ public:
     std::string GetStacktraceMessage() override;
 
     void GetStackTrace(std::string& trace) override;
+
+    static std::string GetPagePath(const std::string& url);
 
     void SetLocalStorage(int32_t instanceId, NativeReference* storage) override;
 
@@ -427,6 +430,7 @@ private:
     void RegisterAssetFunc();
     bool ExecuteAbc(const std::string& fileName);
     bool ExecuteCardAbc(const std::string& fileName, int64_t cardId);
+    bool ExecuteDynamicAbc(const std::string& fileName, const std::string& entryPoint);
 
     RefPtr<JsiDeclarativeEngineInstance> engineInstance_;
 
@@ -446,7 +450,7 @@ private:
     std::string pluginModuleName_;
     static thread_local std::unordered_map<std::string, NamedRouterProperty> namedRouterRegisterMap_;
     bool isFirstCallShow_ = true;
-    static panda::Global<panda::ObjectRef> obj_;
+    static thread_local panda::Global<panda::ObjectRef> obj_;
     ACE_DISALLOW_COPY_AND_MOVE(JsiDeclarativeEngine);
 };
 

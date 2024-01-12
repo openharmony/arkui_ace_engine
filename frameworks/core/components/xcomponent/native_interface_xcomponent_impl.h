@@ -24,6 +24,7 @@
 #include "interfaces/native/native_interface_xcomponent.h"
 
 #include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
 
 struct XComponentTouchPoint {
     float tiltX = 0.0f;
@@ -49,6 +50,7 @@ class NativeXComponentImpl : public virtual AceType {
     using SetOnFrameEvent_Callback = std::function<void()>;
     using SetUnregisterOnFrameEvent_Callback = std::function<void()>;
     using OnFrame_Callback = void (*)(OH_NativeXComponent*, uint64_t, uint64_t);
+    using NativeNode_Callback = void (*)(void*, void*);
 
 public:
     NativeXComponentImpl() {}
@@ -290,6 +292,29 @@ public:
 
     SetUnregisterOnFrameEvent_Callback setUnregisterOnFrameEventCallback_;
 
+    void registerNativeNodeCallbacks(NativeNode_Callback attach, NativeNode_Callback detach)
+    {
+        attachNativeNodeCallback_ = attach;
+        detachNativeNodeCallback_ = detach;
+    }
+
+    void registerContaner(void* container)
+    {
+        container_ = container;
+    }
+
+    void AttachContainer(void* root)
+    {
+        CHECK_NULL_VOID(attachNativeNodeCallback_);
+        attachNativeNodeCallback_(container_, root);
+    }
+
+    void DetachContainer(void* root)
+    {
+        CHECK_NULL_VOID(detachNativeNodeCallback_);
+        detachNativeNodeCallback_(container_, root);
+    }
+
 private:
     std::string xcomponentId_;
     void* window_ = nullptr;
@@ -309,6 +334,9 @@ private:
     std::vector<OH_NativeXComponent_HistoricalPoint> historicalPoints_;
     OnFrame_Callback onFrameCallback_ = nullptr;
     OH_NativeXComponent_ExpectedRateRange* rateRange_ = nullptr;
+    NativeNode_Callback attachNativeNodeCallback_ = nullptr;
+    NativeNode_Callback detachNativeNodeCallback_ = nullptr;
+    void* container_;
 };
 } // namespace OHOS::Ace
 
@@ -335,6 +363,8 @@ struct OH_NativeXComponent {
     int32_t RegisterOnFrameCallback(
         void (*callback)(OH_NativeXComponent* component, uint64_t timestamp, uint64_t targetTimestamp));
     int32_t UnregisterOnFrameCallback();
+    int32_t AttachNativeRootNode(void* root);
+    int32_t DetachNativeRootNode(void* root);
 
 private:
     OHOS::Ace::NativeXComponentImpl* xcomponentImpl_ = nullptr;

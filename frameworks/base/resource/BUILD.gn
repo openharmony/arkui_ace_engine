@@ -75,7 +75,7 @@ action_foreach("objcopy_resource") {
   outputs = [ "$ace_resource_dir/{{source_name_part}}.o" ]
 
   objcopy_tool = objcopy_default
-  script = "$flutter_root/engine/flutter/sky/tools/objcopy.py"
+  script = "$ace_root/build/tools/run_objcopy.py"
   if (target_cpu == "x86_64") {
     objcopy_tool = objcopy_x86_64
   }

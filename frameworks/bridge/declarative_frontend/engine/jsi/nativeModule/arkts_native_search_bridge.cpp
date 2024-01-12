@@ -16,7 +16,7 @@
 
 #include "base/geometry/dimension.h"
 #include "base/utils/utils.h"
-#include "bridge/declarative_frontend/engine/jsi/components/arkts_native_api.h"
+#include "core/interfaces/native/node/api.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
@@ -423,7 +423,7 @@ ArkUINativeModuleValue SearchBridge::SetSearchIcon(ArkUIRuntimeCallInfo* runtime
 
     Color color;
     if (ArkTSUtils::ParseJsColorAlpha(vm, threeArg, color)) {
-        value.color = color.GetValue();
+        value.color = static_cast<int32_t>(color.GetValue());
     } else {
         value.color = INVALID_COLOR_VALUE;
     }
@@ -486,9 +486,9 @@ ArkUINativeModuleValue SearchBridge::SetSearchButton(ArkUIRuntimeCallInfo* runti
 
     Color fontColor;
     if (ArkTSUtils::ParseJsColorAlpha(vm, fourArg, fontColor)) {
-        value.fontColor = fontColor.GetValue();
+        value.fontColor = static_cast<int32_t>(fontColor.GetValue());
     } else {
-        value.fontColor = theme->GetSearchButtonTextColor().GetValue();
+        value.fontColor = static_cast<int32_t>(theme->GetSearchButtonTextColor().GetValue());
     }
     GetArkUIInternalNodeAPI()->GetSearchModifier().SetSearchSearchButton(nativeNode, &value);
     return panda::JSValueRef::Undefined(vm);

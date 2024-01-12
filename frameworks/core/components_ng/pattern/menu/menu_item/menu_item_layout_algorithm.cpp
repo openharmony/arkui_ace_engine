@@ -31,6 +31,7 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(theme);
     horInterval_ = static_cast<float>(theme->GetMenuIconPadding().ConvertToPx()) -
                    static_cast<float>(theme->GetOutPadding().ConvertToPx());
+    auto middleSpace = static_cast<float>(theme->GetIconContentPadding().ConvertToPx());
     auto props = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(props);
     auto layoutConstraint = props->GetLayoutConstraint();
@@ -63,8 +64,16 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     // set item min height
     auto minItemHeight = static_cast<float>(theme->GetOptionMinHeight().ConvertToPx());
     childConstraint.minSize.SetHeight(minItemHeight);
+    auto leftRow = layoutWrapper->GetOrCreateChildByIndex(0);
+    CHECK_NULL_VOID(leftRow);
     // measure right row
-    childConstraint.maxSize.SetWidth(maxRowWidth);
+    if (leftRow->GetGeometryNode()->GetFrameSize().Width()) {
+        // Cannot cover left icon
+        auto iconWidth = static_cast<float>(theme->GetIconSideLength().ConvertToPx());
+        childConstraint.maxSize.SetWidth(maxRowWidth - middleSpace - iconWidth);
+    } else {
+        childConstraint.maxSize.SetWidth(maxRowWidth);
+    }
     float rightRowWidth = 0.0f;
     float rightRowHeight = 0.0f;
     auto rightRow = layoutWrapper->GetOrCreateChildByIndex(1);
@@ -74,17 +83,15 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         rightRowHeight = rightRow->GetGeometryNode()->GetMarginFrameSize().Height();
     }
     // measure left row
-    auto middleSpace = static_cast<float>(theme->GetIconContentPadding().ConvertToPx());
     maxRowWidth -= rightRowWidth + middleSpace;
     childConstraint.maxSize.SetWidth(maxRowWidth);
-    auto leftRow = layoutWrapper->GetOrCreateChildByIndex(0);
-    CHECK_NULL_VOID(leftRow);
     MeasureRow(leftRow, childConstraint);
     float leftRowWidth = leftRow->GetGeometryNode()->GetMarginFrameSize().Width();
     float leftRowHeight = leftRow->GetGeometryNode()->GetMarginFrameSize().Height();
     float contentWidth = leftRowWidth + rightRowWidth + padding.Width() + middleSpace;
+    auto itemHeight = std::max(leftRowHeight, rightRowHeight);
     layoutWrapper->GetGeometryNode()->SetContentSize(
-        SizeF(std::max(minRowWidth, contentWidth), std::max(leftRowHeight, rightRowHeight)));
+        SizeF(std::max(minRowWidth, contentWidth), std::max(itemHeight, minItemHeight)));
     BoxLayoutAlgorithm::PerformMeasureSelf(layoutWrapper);
 
     if (layoutConstraint->selfIdealSize.Width().has_value()) {

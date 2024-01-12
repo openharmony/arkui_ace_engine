@@ -40,7 +40,7 @@ namespace {
 constexpr float PARAGRAPH_SAVE_BOUNDARY = 1.0f;
 constexpr uint32_t INLINE_DEFAULT_VIEW_MAXLINE = 3;
 constexpr uint32_t COUNTER_TEXT_MAXLINE = 1;
-constexpr int32_t INVAILD_VALUE = -1;
+constexpr int32_t DEFAULT_MODE = -1;
 constexpr int32_t SHOW_COUNTER_PERCENT = 100;
 } // namespace
 void TextFieldLayoutAlgorithm::ConstructTextStyles(
@@ -62,6 +62,8 @@ void TextFieldLayoutAlgorithm::ConstructTextStyles(
         textContent = pattern->GetTextValue();
         if (!pattern->IsTextArea() && isInlineStyle) {
             textStyle.SetTextOverflow(TextOverflow::ELLIPSIS);
+        } else {
+            textStyle.SetTextOverflow(TextOverflow::CLIP);
         }
     } else {
         UpdatePlaceholderTextStyle(
@@ -198,6 +200,7 @@ SizeF TextFieldLayoutAlgorithm::TextAreaMeasureContent(
 
     if (autoWidth_) {
         contentWidth = std::min(contentWidth, paragraph_->GetLongestLine());
+        paragraph_->Layout(std::ceil(contentWidth));
     }
 
     auto counterNodeHeight = CounterNodeMeasure(contentWidth, layoutWrapper);
@@ -264,18 +267,18 @@ void TextFieldLayoutAlgorithm::UpdateCounterNode(
 
     std::string counterText = "";
     TextStyle countTextStyle = (textLength != maxLength) ? theme->GetCountTextStyle() : theme->GetOverCountTextStyle();
-    auto counterType = textFieldLayoutProperty->GetSetCounterValue(INVAILD_VALUE);
+    auto counterType = textFieldLayoutProperty->GetSetCounterValue(DEFAULT_MODE);
     uint32_t limitsize = maxLength * counterType / SHOW_COUNTER_PERCENT;
-    if ((pattern->GetCounterState() == true) && textLength == maxLength && (counterType != INVAILD_VALUE)) {
+    if ((pattern->GetCounterState() == true) && textLength == maxLength && (counterType != DEFAULT_MODE)) {
         countTextStyle = theme->GetOverCountTextStyle();
         counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
         countTextStyle.SetTextColor(theme->GetOverCounterColor());
         pattern->SetCounterState(false);
-    } else if ((textLength >= limitsize) && (counterType != INVAILD_VALUE)) {
+    } else if ((textLength >= limitsize) && (counterType != DEFAULT_MODE)) {
         countTextStyle = theme->GetCountTextStyle();
         counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
         countTextStyle.SetTextColor(theme->GetDefaultCounterColor());
-    } else if (textFieldLayoutProperty->GetShowCounterValue(false) && counterType == INVAILD_VALUE) {
+    } else if (textFieldLayoutProperty->GetShowCounterValue(false) && counterType == DEFAULT_MODE) {
         counterText = std::to_string(textLength) + "/" + std::to_string(maxLength);
     }
     textLayoutProperty->UpdateContent(counterText);
@@ -520,7 +523,7 @@ void TextFieldLayoutAlgorithm::FontRegisterCallback(
 
 ParagraphStyle TextFieldLayoutAlgorithm::GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const
 {
-    return { .direction = GetTextDirection(content),
+    return { .direction = GetTextDirection(content, direction_),
         .maxLines = textStyle.GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = textStyle.GetWordBreak(),
@@ -553,7 +556,7 @@ void TextFieldLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, const
     std::vector<TextStyle> textStyles { textStyle, dragTextStyle, textStyle };
 
     auto style = textStyles.begin();
-    ParagraphStyle paraStyle { .direction = GetTextDirection(content),
+    ParagraphStyle paraStyle { .direction = GetTextDirection(content, direction_),
         .maxLines = style->GetMaxLines(),
         .fontLocale = Localization::GetInstance()->GetFontLocale(),
         .wordBreak = style->GetWordBreak(),
@@ -600,8 +603,12 @@ void TextFieldLayoutAlgorithm::CreateInlineParagraph(const TextStyle& textStyle,
     inlineParagraph_->Build();
 }
 
-TextDirection TextFieldLayoutAlgorithm::GetTextDirection(const std::string& content)
+TextDirection TextFieldLayoutAlgorithm::GetTextDirection(const std::string& content, TextDirection direction)
 {
+    if (direction == TextDirection::LTR || direction == TextDirection::RTL) {
+        return direction;
+    }
+
     TextDirection textDirection = TextDirection::LTR;
     auto showingTextForWString = StringUtils::ToWstring(content);
     for (const auto& charOfShowingText : showingTextForWString) {
@@ -640,6 +647,7 @@ void TextFieldLayoutAlgorithm::SetPropertyToModifier(
     modifier->SetFontWeight(textStyle.GetFontWeight());
     modifier->SetTextColor(textStyle.GetTextColor());
     modifier->SetFontStyle(textStyle.GetFontStyle());
+    modifier->SetTextOverflow(textStyle.GetTextOverflow());
 }
 
 void TextFieldLayoutAlgorithm::UpdateUnitLayout(LayoutWrapper* layoutWrapper)

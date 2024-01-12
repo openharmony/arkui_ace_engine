@@ -18,7 +18,6 @@
 
 #include "base/geometry/ng/size_t.h"
 #include "base/image/pixel_map.h"
-
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
@@ -114,20 +113,20 @@ public:
     virtual bool ComputeOffsetForCaretUpstream(int32_t extent, CaretMetricsF& result, bool needLineHighest = true) = 0;
     virtual bool CalcCaretMetricsByPosition(
         int32_t extent, CaretMetricsF& caretCaretMetric, TextAffinity textAffinity) = 0;
-    virtual bool CalcCaretMetricsByPosition(
-        int32_t extent, CaretMetricsF& caretCaretMetric, const OffsetF& lastTouchOffset) = 0;
+    virtual bool CalcCaretMetricsByPosition(int32_t extent, CaretMetricsF& caretCaretMetric,
+        const OffsetF& lastTouchOffset, TextAffinity& textAffinity) = 0;
     virtual void SetIndents(const std::vector<float>& indents) = 0;
     virtual bool GetWordBoundary(int32_t offset, int32_t& start, int32_t& end) = 0;
     virtual std::u16string GetParagraphText() = 0;
     virtual const ParagraphStyle& GetParagraphStyle() const = 0;
-
+    // interfaces for pass on Symbol Animation interface
+    virtual void SetParagraphSymbolAnimation(const RefPtr<FrameNode>& frameNode) = 0;
     // interfaces for painting
     virtual void Paint(RSCanvas& canvas, float x, float y) = 0;
 #ifndef USE_ROSEN_DRAWING
     virtual void Paint(SkCanvas* skCanvas, float x, float y) = 0;
 #endif
 };
-
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_PAPAGRAPH_H

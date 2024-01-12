@@ -35,8 +35,6 @@ struct GridItemIndexInfo {
     int32_t crossEnd = -1;
 };
 
-constexpr float HALF = 0.5f;
-
 class ACE_EXPORT GridPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(GridPattern, ScrollablePattern);
 
@@ -185,6 +183,8 @@ public:
     }
 
     void ScrollToIndex(int32_t index, bool smooth = false, ScrollAlign align = ScrollAlign::AUTO) override;
+    void AnimateToTarget(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
+    bool AnimateToTargetImp(ScrollAlign align, RefPtr<LayoutAlgorithmWrapper>& layoutAlgorithmWrapper);
     int32_t GetOriginalIndex() const;
     int32_t GetCrossCount() const;
     int32_t GetChildrenCount() const;
@@ -202,6 +202,16 @@ public:
     bool IsNeedInitClickEventRecorder() const override
     {
         return true;
+    }
+    
+    std::optional<GridPredictLayoutParam> GetPredictLayoutParam() const
+    {
+        return predictLayoutParam_;
+    }
+
+    void SetPredictLayoutParam(std::optional<GridPredictLayoutParam> param)
+    {
+        predictLayoutParam_ = param;
     }
 
 private:
@@ -232,13 +242,12 @@ private:
     bool HandleDirectionKey(KeyCode code);
 
     void ClearMultiSelect() override;
-    bool IsItemSelected(const GestureEvent& info) override;
+    bool IsItemSelected() override;
     void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;
     void UpdateScrollBarOffset() override;
     void UpdateRectOfDraggedInItem(int32_t insertIndex);
     void SetAccessibilityAction();
 
-    GridLayoutInfo gridLayoutInfo_;
     void ProcessEvent(bool indexChanged, float finalOffset);
     void MarkDirtyNodeSelf();
     void OnScrollEndCallback() override;
@@ -250,8 +259,6 @@ private:
     double GetNearestDistanceFromChildToCurFocusItemInMainAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     double GetNearestDistanceFromChildToCurFocusItemInCrossAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     void ResetAllDirectionsStep();
-    void ScrollToTargrtIndex(int32_t index);
-    void AdjustingTargetPos(float targetPos, int32_t rowIndex, float lineHeight);
 
     float animatorOffset_ = 0.0f;
     float prevHeight_ = 0;
@@ -274,7 +281,10 @@ private:
     std::optional<int32_t> targetIndex_;
     std::pair<std::optional<float>, std::optional<float>> scrollbarInfo_;
     GridItemIndexInfo curFocusIndexInfo_;
-
+    bool isSmoothScrolling_ = false;
+    GridLayoutInfo scrollGridLayoutInfo_;
+    GridLayoutInfo gridLayoutInfo_;
+    std::optional<GridPredictLayoutParam> predictLayoutParam_;
     ACE_DISALLOW_COPY_AND_MOVE(GridPattern);
 };
 

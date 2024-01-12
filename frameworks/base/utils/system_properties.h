@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_SYSTEM_PROPERTIES_H
 
 #include <memory>
+#include <optional>
 #include <string>
 
 #include "base/utils/device_config.h"
@@ -236,6 +237,11 @@ public:
         return debugBoundaryEnabled_;
     }
 
+    static bool GetDebugAutoUIEnabled()
+    {
+        return debugAutoUIEnabled_;
+    }
+
     static bool GetDownloadByNetworkEnabled()
     {
         return downloadByNetworkEnabled_;
@@ -251,9 +257,11 @@ public:
         return svgTraceEnable_;
     }
 
-    static bool GetLayoutTraceEnabled()
+    static bool GetLayoutTraceEnabled();
+
+    static bool GetBuildTraceEnabled()
     {
-        return layoutTraceEnable_;
+        return buildTraceEnable_;
     }
 
     static bool GetAccessibilityEnabled()
@@ -383,23 +391,30 @@ public:
 
     static int32_t GetJankFrameThreshold();
 
-    static bool GetTitleStyleEnabled() {
-        return changeTitleStyleEnabled_;
-    }
+    static bool GetTitleStyleEnabled();
 
     static std::string GetCustomTitleFilePath();
 
-    static bool GetFlutterDecouplingEnabled()
+    static bool Is24HourClock();
+
+    static std::optional<bool> GetRtlEnabled();
+
+    static bool GetEnableScrollableItemPool()
     {
-        return flutterDecouplingEnabled_;
+        return enableScrollableItemPool_;
     }
 
-    static bool Is24HourClock();
+    static bool GetDisplaySyncSkipEnabled();
+
+    static bool GetNavigationBlurEnabled();
+
+    static bool GetGridCacheEnabled();
 
 private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;
     static bool layoutTraceEnable_;
+    static bool buildTraceEnable_;
     static bool accessibilityEnabled_;
     static bool isRound_;
     static bool isDeviceAccess_;
@@ -427,6 +442,7 @@ private:
     static bool windowAnimationEnabled_;
     static bool debugEnabled_;
     static bool debugBoundaryEnabled_;
+    static bool debugAutoUIEnabled_; // for AutoUI Test
     static bool downloadByNetworkEnabled_;
     static bool gpuUploadEnabled_;
     static bool isHookModeEnabled_;
@@ -436,8 +452,9 @@ private:
     static bool extSurfaceEnabled_;
     static uint32_t dumpFrameCount_;
     static bool resourceDecoupling_;
-    static bool changeTitleStyleEnabled_;
-    static bool flutterDecouplingEnabled_;
+    static bool enableScrollableItemPool_;
+    static bool navigationBlurEnabled_;
+    static bool gridCacheEnabled_;
 };
 
 } // namespace OHOS::Ace

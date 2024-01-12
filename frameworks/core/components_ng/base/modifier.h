@@ -30,6 +30,16 @@
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/modifier_adapter.h"
 
+enum class ThresholdType {
+    LAYOUT,  // 0.5f for properties like position, as the difference in properties by 0.5 appears visually unchanged
+    COARSE,  // 1.0f / 256.0f
+    MEDIUM,  // 1.0f / 1000.0f
+    FINE,    // 1.0f / 3072.0f
+    COLOR,   // 0.0f
+    DEFAULT, // 1.0f / 256.0f
+    ZERO,    // 0.0f for noanimatable property
+};
+
 namespace OHOS::Ace::NG {
 class ACE_FORCE_EXPORT Modifier : public virtual AceType {
     DECLARE_ACE_TYPE(Modifier, AceType);
@@ -77,11 +87,13 @@ public:
     ~NormalProperty() override = default;
 
     void SetUpCallbacks(std::function<T()>&& getFunc, std::function<void(const T&)>&& setFunc,
-        std::function<T()>&& getStageFunc = nullptr)
+        std::function<T()>&& getStageFunc = nullptr,
+        std::function<void(ThresholdType)>&& setThresholdTypeFunc = nullptr)
     {
         getFunc_ = std::move(getFunc);
         setFunc_ =  std::move(setFunc);
         getStageFunc_ =  std::move(getStageFunc);
+        setThresholdTypeFunc_ = std::move(setThresholdTypeFunc);
     }
 
     T Get()
@@ -90,6 +102,13 @@ public:
             return getFunc_();
         } else {
             return value_;
+        }
+    }
+
+    void SetThresholdType(ThresholdType type)
+    {
+        if (setThresholdTypeFunc_) {
+            setThresholdTypeFunc_(type);
         }
     }
 
@@ -127,6 +146,7 @@ private:
     std::function<void(const T&)> setFunc_;
     std::function<T()> getStageFunc_;
     std::function<void(const T&)> updateCallback_;
+    std::function<void(ThresholdType)> setThresholdTypeFunc_;
     ACE_DISALLOW_COPY_AND_MOVE(NormalProperty);
 };
 
@@ -304,6 +324,14 @@ public:
         auto property = AceType::DynamicCast<S>(GetProperty());
         if (property) {
             property->Set(value);
+        }
+    }
+
+    void SetThresholdType(ThresholdType type)
+    {
+        auto property = AceType::DynamicCast<S>(GetProperty());
+        if (property) {
+            property->SetThresholdType(type);
         }
     }
 

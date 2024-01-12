@@ -64,6 +64,7 @@ RefPtr<LayoutAlgorithm> ListItemGroupPattern::CreateLayoutAlgorithm()
 {
     auto layoutAlgorithm = MakeRefPtr<ListItemGroupLayoutAlgorithm>(headerIndex_, footerIndex_, itemStartIndex_);
     layoutAlgorithm->SetItemsPosition(itemPosition_);
+    layoutAlgorithm->SetLayoutedItemInfo(layoutedItemInfo_);
     return layoutAlgorithm;
 }
 
@@ -96,6 +97,7 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     itemTotalCount_ = layoutAlgorithm->GetTotalItemCount();
     headerMainSize_ = layoutAlgorithm->GetHeaderMainSize();
     footerMainSize_ = layoutAlgorithm->GetFooterMainSize();
+    layoutedItemInfo_ = layoutAlgorithm->GetLayoutedItemInfo();
     CheckListDirectionInCardStyle();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
@@ -105,6 +107,24 @@ bool ListItemGroupPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>&
     }
     auto listLayoutProperty = host->GetLayoutProperty<ListItemGroupLayoutProperty>();
     return listLayoutProperty && listLayoutProperty->GetDivider().has_value() && !itemPosition_.empty();
+}
+
+float ListItemGroupPattern::GetEstimateOffset(float height, const std::pair<float, float>& targetPos) const
+{
+    return height - targetPos.first;
+}
+
+float ListItemGroupPattern::GetEstimateHeight(float& averageHeight) const
+{
+    if (layoutedItemInfo_.has_value()) {
+        auto totalHeight = (layoutedItemInfo_.value().endPos - layoutedItemInfo_.value().startPos + spaceWidth_);
+        auto itemCount = layoutedItemInfo_.value().endIndex - layoutedItemInfo_.value().startIndex + 1;
+        averageHeight = totalHeight / itemCount;
+        return averageHeight * itemTotalCount_ + headerMainSize_ + footerMainSize_;
+    }
+    auto host = GetHost();
+    auto totalItem = host->GetTotalChildCount();
+    return averageHeight * totalItem;
 }
 
 void ListItemGroupPattern::CheckListDirectionInCardStyle()

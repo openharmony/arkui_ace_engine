@@ -19,31 +19,17 @@
 #include "base/memory/ace_type.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/pattern/list/list_divider_arithmetic.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace::NG {
-struct DividerInfo {
-    float constrainStrokeWidth;
-    float crossSize;
-    float startMargin;
-    float endMargin;
-    float space;
-    float mainPadding;
-    float crossPadding;
-    bool isVertical;
-    int32_t lanes;
-    int32_t totalItemCount;
-    Color color;
-    float laneGutter = 0.0f;
-};
-
 class ListContentModifier : public ContentModifier {
     DECLARE_ACE_TYPE(ListContentModifier, ContentModifier);
 public:
-    using PositionMap = ListLayoutAlgorithm::PositionMap;
+    using DividerMap = ListDividerArithmetic::DividerMap;
     ListContentModifier(const OffsetF& clipOffset, const SizeF& clipSize);
     ~ListContentModifier() override = default;
     void onDraw(DrawingContext& context) override;
@@ -63,39 +49,29 @@ public:
         clip_->Set(clip);
     }
 
-    void SetDividerInfo(DividerInfo&& dividerInfo)
+    void SetDividerPainter(float width, bool isVertical, Color color)
     {
-        dividerInfo_ = dividerInfo;
+        width_ = width;
+        isVertical_ = isVertical;
+        color_->Set(LinearColor(color));
     }
 
-    void ResetDividerInfo()
+    void SetDividerMap(const DividerMap& dividerMap)
     {
-        if (dividerInfo_.has_value()) {
-            dividerInfo_.reset();
-            FlushDivider();
-        }
-    }
-
-    void SetItemsPosition(const PositionMap& positionMap)
-    {
-        itemPosition_ = positionMap;
-    }
-
-    static void PaintDivider(const DividerInfo& dividerInfo, const PositionMap& itemPosition, RSCanvas& canvas);
-
-    void FlushDivider()
-    {
-        flushDivider_->Set(!flushDivider_->Get());
+        RefPtr<ListDividerArithmetic> lda = AceType::MakeRefPtr<ListDividerArithmetic>(dividerMap);
+        CHECK_NULL_VOID(dividerList_);
+        dividerList_->Set(AceType::DynamicCast<CustomAnimatableArithmetic>(lda));
     }
 
 private:
+    RefPtr<AnimatableArithmeticProperty> dividerList_;
     RefPtr<AnimatablePropertyOffsetF> clipOffset_;
     RefPtr<AnimatablePropertySizeF> clipSize_;
+    RefPtr<AnimatablePropertyColor> color_;
     RefPtr<PropertyBool> clip_;
 
-    std::optional<DividerInfo> dividerInfo_;
-    PositionMap itemPosition_;
-    RefPtr<PropertyBool> flushDivider_;
+    float width_ = 0.0f;
+    bool isVertical_ = true;
 
     ACE_DISALLOW_COPY_AND_MOVE(ListContentModifier);
 };

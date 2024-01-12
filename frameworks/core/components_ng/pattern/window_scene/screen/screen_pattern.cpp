@@ -103,7 +103,7 @@ void ScreenPattern::UpdateDisplayInfo()
 void ScreenPattern::UpdateToInputManager(float rotation)
 {
     CHECK_NULL_VOID(screenSession_);
-    auto pid = getprocpid();
+    auto pid = IPCSkeleton::GetCallingRealPid();
     auto uid = IPCSkeleton::GetCallingUid();
     auto screenId = screenSession_->GetScreenId();
     auto screenProperty = screenSession_->GetScreenProperty();
@@ -168,7 +168,6 @@ void ScreenPattern::InputManagerUpdateDisplayInfo(RectF paintRect,
         .windowsInfo = { windowInfo },
         .displaysInfo = g_displayInfoVector
     };
-    MMI::InputManager::GetInstance()->UpdateDisplayInfo(displayGroupInfo);
 }
 
 void ScreenPattern::DeduplicateDisplayInfo()

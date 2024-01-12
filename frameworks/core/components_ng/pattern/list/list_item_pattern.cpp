@@ -94,6 +94,7 @@ bool ListItemPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
+    isLayouted_ = true;
     if (!HasStartNode() && !HasEndNode()) {
         return false;
     }
@@ -122,6 +123,7 @@ void ListItemPattern::SetStartNode(const RefPtr<NG::UINode>& startNode)
             }
         } else {
             host->ReplaceChild(host->GetChildAtIndex(startNodeIndex_), startNode);
+            host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
     } else if (HasStartNode()) {
         host->RemoveChildAtIndex(startNodeIndex_);
@@ -151,6 +153,7 @@ void ListItemPattern::SetEndNode(const RefPtr<NG::UINode>& endNode)
             }
         } else {
             host->ReplaceChild(host->GetChildAtIndex(endNodeIndex_), endNode);
+            host->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
         }
     } else if (HasEndNode()) {
         host->RemoveChildAtIndex(endNodeIndex_);
@@ -907,10 +910,28 @@ void ListItemPattern::InitDisableEvent()
     } else {
         if (enableOpacity_.has_value()) {
             renderContext->UpdateOpacity(enableOpacity_.value());
+            enableOpacity_.reset();
         } else {
             renderContext->UpdateOpacity(UserDefineOpacity);
         }
     }
+}
+
+bool ListItemPattern::GetLayouted() const
+{
+    return isLayouted_;
+}
+
+float ListItemPattern::GetEstimateHeight(float estimateHeight) const
+{
+    if (!isLayouted_) {
+        return estimateHeight;
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, estimateHeight);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, estimateHeight);
+    return GetMainAxisSize(geometryNode->GetMarginFrameSize(), axis_);
 }
 } // namespace OHOS::Ace::NG
 

@@ -76,9 +76,14 @@ bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     }
 
     if (!isCanvasInit_) {
-        customPaintEventHub->FireReadyEvent();
+        auto context = PipelineContext::GetCurrentContext();
+        if (context) {
+            context->AddAfterLayoutTask([customPaintEventHub]() {
+                    customPaintEventHub->FireReadyEvent();
+                });
+        }
         isCanvasInit_ = true;
-        return true;
+        return context != nullptr;
     }
     return false;
 }
@@ -373,7 +378,7 @@ std::unique_ptr<Ace::ImageData> CustomPaintPattern::GetImageData(double left, do
     }
     // Rely on the single-threaded model. Should guarantee the timing between Render Task of pipeline and GetImageData
     if (paintMethod_->HasTask()) {
-        paintMethod_->FlushPipelineImmediately();
+        paintMethod_->FlushUITasks();
     }
     auto host = GetHost();
     if (!host) {
@@ -387,7 +392,7 @@ void CustomPaintPattern::GetImageData(const std::shared_ptr<Ace::ImageData>& ima
 {
     CHECK_NULL_VOID(paintMethod_);
     if (paintMethod_->HasTask()) {
-        paintMethod_->FlushPipelineImmediately();
+        paintMethod_->FlushUITasks();
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);

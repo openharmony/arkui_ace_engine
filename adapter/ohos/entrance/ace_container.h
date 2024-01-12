@@ -72,18 +72,25 @@ class ACE_FORCE_EXPORT AceContainer : public Container, public JsMessageDispatch
     DECLARE_ACE_TYPE(AceContainer, Container, JsMessageDispatcher);
 
 public:
-    AceContainer(int32_t instanceId, FrontendType type,
-        std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility, std::unique_ptr<PlatformEventCallback> callback,
-        bool useCurrentEventRunner = false, bool useNewPipeline = false);
-    AceContainer(int32_t instanceId, FrontendType type,
-        std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
+    AceContainer(int32_t instanceId, FrontendType type, std::shared_ptr<OHOS::AppExecFwk::Ability> aceAbility,
+        std::unique_ptr<PlatformEventCallback> callback, bool useCurrentEventRunner = false,
+        bool useNewPipeline = false);
+    AceContainer(int32_t instanceId, FrontendType type, std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
         std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
         bool useCurrentEventRunner = false, bool isSubContainer = false, bool useNewPipeline = false);
+
+    AceContainer(int32_t instanceId, FrontendType type, std::weak_ptr<OHOS::AbilityRuntime::Context> runtimeContext,
+        std::weak_ptr<OHOS::AppExecFwk::AbilityInfo> abilityInfo, std::unique_ptr<PlatformEventCallback> callback,
+        std::shared_ptr<TaskWrapper> taskWrapper, bool useCurrentEventRunner = false, bool isSubContainer = false,
+        bool useNewPipeline = false);
+
     ~AceContainer() override;
 
     void Initialize() override;
 
     void Destroy() override;
+
+    bool IsKeyboard() override;
 
     void DestroyView() override;
 
@@ -345,7 +352,15 @@ public:
         parentId_ = parentId;
     }
 
-    float GetSmallWindowScale() const override;
+    void SetWindowScale(float windowScale) override
+    {
+        windowScale_ = windowScale;
+    }
+
+    float GetWindowScale() const override
+    {
+        return 1.0f;
+    }
 
     int32_t GetParentId() const
     {
@@ -371,6 +386,8 @@ public:
     static bool RunPage(
         int32_t instanceId, const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params);
     static bool PushPage(int32_t instanceId, const std::string& content, const std::string& params);
+    static bool RunDynamicPage(
+        int32_t instanceId, const std::string& content, const std::string& params, const std::string& entryPoint);
     static bool OnBackPressed(int32_t instanceId);
     static void OnShow(int32_t instanceId);
     static void OnHide(int32_t instanceId);
@@ -448,13 +465,13 @@ public:
     void InitializeSubContainer(int32_t parentContainerId);
     static void SetDialogCallback(int32_t instanceId, FrontendDialogCallback callback);
 
-    std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityContextByModule(const std::string& bundle,
-        const std::string& module);
+    std::shared_ptr<OHOS::AbilityRuntime::Context> GetAbilityContextByModule(
+        const std::string& bundle, const std::string& module);
 
     void UpdateConfiguration(const ParsedConfig& parsedConfig, const std::string& configuration);
 
     void NotifyConfigurationChange(
-        bool needReloadTransition, const OnConfigurationChange& configurationChange = {false, false}) override;
+        bool needReloadTransition, const OnConfigurationChange& configurationChange = { false, false }) override;
     void HotReload() override;
 
     bool IsUseStageModel() const override
@@ -478,6 +495,10 @@ public:
     }
 
     NG::SafeAreaInsets GetViewSafeAreaByType(OHOS::Rosen::AvoidAreaType type);
+
+    NG::SafeAreaInsets GetKeyboardSafeArea() override;
+
+    Rosen::AvoidArea GetAvoidAreaByType(Rosen::AvoidAreaType type);
 
     // ArkTSCard
     void UpdateFormData(const std::string& data);
@@ -503,30 +524,30 @@ public:
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& navigationId) override;
 
     void SearchElementInfoByAccessibilityIdNG(
-        int32_t elementId, int32_t mode, int32_t baseParent,
+        int64_t elementId, int32_t mode, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output);
 
     void SearchElementInfosByTextNG(
-        int32_t elementId, const std::string& text, int32_t baseParent,
+        int64_t elementId, const std::string& text, int64_t baseParent,
         std::list<Accessibility::AccessibilityElementInfo>& output);
 
     void FindFocusedElementInfoNG(
-        int32_t elementId, int32_t focusType, int32_t baseParent,
+        int64_t elementId, int32_t focusType, int64_t baseParent,
         Accessibility::AccessibilityElementInfo& output);
 
     void FocusMoveSearchNG(
-        int32_t elementId, int32_t direction, int32_t baseParent,
+        int64_t elementId, int32_t direction, int64_t baseParent,
         Accessibility::AccessibilityElementInfo& output);
 
     bool NotifyExecuteAction(
-        int32_t elementId, const std::map<std::string, std::string>& actionArguments,
-        int32_t action, int32_t offset);
+        int64_t elementId, const std::map<std::string, std::string>& actionArguments,
+        int32_t action, int64_t offset);
 
 private:
     virtual bool MaybeRelease() override;
     void InitializeFrontend();
     void InitializeCallback();
-    void InitializeTask();
+    void InitializeTask(std::shared_ptr<TaskWrapper> taskWrapper = nullptr);
     void InitWindowCallback();
     bool IsFontFileExistInPath(std::string path);
     std::string GetFontFamilyName(std::string path);
@@ -566,6 +587,7 @@ private:
     sptr<OHOS::Rosen::Window> uiWindow_ = nullptr;
     std::string windowName_;
     uint32_t windowId_ = OHOS::Rosen::INVALID_WINDOW_ID;
+    float windowScale_ = 1.0f;
     sptr<IRemoteObject> token_;
     sptr<IRemoteObject> parentToken_;
 
@@ -573,6 +595,8 @@ private:
     bool isFormRender_ = false;
     int32_t parentId_ = 0;
     bool useStageModel_ = false;
+
+    DeviceOrientation orientation_ = DeviceOrientation::ORIENTATION_UNDEFINED;
 
     mutable std::mutex frontendMutex_;
     mutable std::mutex pipelineMutex_;

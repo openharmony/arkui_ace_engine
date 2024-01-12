@@ -36,6 +36,7 @@ uint64_t UITaskScheduler::frameId_ = 0;
 void MockPipelineContext::SetUp()
 {
     pipeline_ = AceType::MakeRefPtr<MockPipelineContext>();
+    pipeline_->eventManager_ = AceType::MakeRefPtr<EventManager>();
     pipeline_->rootWidth_ = DISPLAY_WIDTH;
     pipeline_->rootHeight_ = DISPLAY_HEIGHT;
     pipeline_->SetupRootElement();
@@ -374,8 +375,14 @@ void PipelineContext::AddWindowSizeChangeCallback(int32_t nodeId) {}
 
 void PipelineContext::RemoveWindowSizeChangeCallback(int32_t nodeId) {}
 
+void PipelineContext::AddNavigationStateCallback(
+    int32_t pageId, int32_t nodeId, const std::function<void()>& callback, bool isOnShow) {}
+
+void PipelineContext::RemoveNavigationStateCallback(int32_t pageId, int32_t nodeId) {}
+void PipelineContext::FirePageChanged(int32_t pageId, bool isOnShow) {}
 void PipelineContext::UpdateSystemSafeArea(const SafeAreaInsets& systemSafeArea) {};
 void PipelineContext::UpdateCutoutSafeArea(const SafeAreaInsets& cutoutSafeArea) {};
+void PipelineContext::UpdateNavSafeArea(const SafeAreaInsets& navSafeArea) {};
 void PipelineContext::SetEnableKeyBoardAvoidMode(bool value) {};
 bool PipelineContext::IsEnableKeyBoardAvoidMode()
 {
@@ -448,6 +455,21 @@ bool PipelineContext::IsDragging() const
 }
 
 void PipelineContext::SetIsDragging(bool isDragging) {}
+
+void PipelineContext::ResetDragging() {}
+
+void PipelineContext::UpdateOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) {}
+
+bool PipelineContext::PrintVsyncInfoIfNeed() const
+{
+    return false;
+}
+
+const SerializedGesture& PipelineContext::GetSerializedGesture() const
+{
+    return serializedGesture_;
+}
+
 } // namespace OHOS::Ace::NG
 // pipeline_context ============================================================
 
@@ -575,6 +597,11 @@ Rect PipelineBase::GetCurrentWindowRect() const
 void PipelineBase::SetTextFieldManager(const RefPtr<ManagerInterface>& manager)
 {
     textFieldManager_ = manager;
+}
+
+bool PipelineBase::HasFloatTitle() const
+{
+    return true;
 }
 } // namespace OHOS::Ace
 // pipeline_base ===============================================================

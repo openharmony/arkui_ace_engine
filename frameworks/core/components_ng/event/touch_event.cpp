@@ -26,6 +26,16 @@ bool TouchEventActuator::DispatchEvent(const TouchEvent& point)
     return true;
 }
 
+void TouchEventActuator::OnFlushTouchEventsBegin()
+{
+    isFlushTouchEventsEnd_ = false;
+}
+
+void TouchEventActuator::OnFlushTouchEventsEnd()
+{
+    isFlushTouchEventsEnd_ = true;
+}
+
 bool TouchEventActuator::HandleEvent(const TouchEvent& point)
 {
     auto attachedNode = GetAttachedNode();
@@ -41,7 +51,7 @@ bool TouchEventActuator::HandleEvent(const TouchEvent& point)
 
 bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
 {
-    if (touchEvents_.empty() && !userCallback_) {
+    if (touchEvents_.empty() && !userCallback_ && !onTouchEventCallback_) {
         return true;
     }
     TouchEvent lastPoint;
@@ -132,6 +142,11 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
         event.SetTiltY(lastPoint.tiltY.value());
     }
     event.SetSourceTool(lastPoint.sourceTool);
+    if (isFlushTouchEventsEnd_) {
+        // trigger callback of the last touch event during one vsync period
+        event.SetTouchEventsEnd(true);
+        isFlushTouchEventsEnd_ = false;
+    }
     for (auto& impl : touchEvents_) {
         if (impl) {
             (*impl)(event);
@@ -141,11 +156,13 @@ bool TouchEventActuator::TriggerTouchCallBack(const TouchEvent& point)
         // actuator->userCallback_ may be overwritten in its invoke so we copy it first
         auto userCallback = userCallback_;
         (*userCallback)(event);
-        if (event.IsStopPropagation()) {
-            return false;
-        }
     }
-    return true;
+    if (onTouchEventCallback_) {
+        // actuator->onTouchEventCallback_ may be overwritten in its invoke so we copy it first
+        auto onTouchEventCallback = onTouchEventCallback_;
+        (*onTouchEventCallback)(event);
+    }
+    return !event.IsStopPropagation();
 }
 
 bool TouchEventActuator::ShouldResponse()

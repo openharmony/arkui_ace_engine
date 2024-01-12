@@ -51,6 +51,7 @@ public:
         ResetContent();
         ResetForegroundColor();
         ResetSymbolSourceInfo();
+        ResetAdaptFontSizeStep();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
@@ -88,8 +89,13 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(CopyOption, CopyOptions, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ForegroundColor, Color, PROPERTY_UPDATE_MEASURE_SELF);
 
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(AdaptFontSizeStep, Dimension, PROPERTY_UPDATE_MEASURE_SELF);
+
     // symbol
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SymbolSourceInfo, SymbolSourceInfo, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, SymbolColorList, std::vector<Color>, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, SymbolRenderingStrategy, uint32_t, PROPERTY_UPDATE_MEASURE_SELF);
+    ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FontStyle, SymbolEffectStrategy, uint32_t, PROPERTY_UPDATE_MEASURE_SELF);
 
     // for XTS inspector
     std::string InspectorGetTextFont() const
@@ -121,6 +127,7 @@ protected:
         value->propTextLineStyle_ = CloneTextLineStyle();
         value->propContent_ = CloneContent();
         value->propForegroundColor_ = CloneForegroundColor();
+        value->propAdaptFontSizeStep_ = CloneAdaptFontSizeStep();
     }
 
 private:

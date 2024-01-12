@@ -31,7 +31,7 @@ public:
 
 protected:
     static RefPtr<FrameNode> BuildTitle(RefPtr<FrameNode>& containerNode, bool isFloatingTitle = false);
-    static RefPtr<FrameNode> SetTapGestureEvent(RefPtr<FrameNode>& containerNode, RefPtr<FrameNode>& containerTitleRow);
+    static void SetTapGestureEvent(RefPtr<FrameNode>& containerNode, RefPtr<FrameNode>& containerTitleRow);
     static RefPtr<FrameNode> AddControlButtons(RefPtr<FrameNode>& containerNode, RefPtr<FrameNode>& containerTitleRow);
     static void BondingMaxBtnGestureEvent(RefPtr<FrameNode>& maximizeBtn, RefPtr<FrameNode>& containerNode);
     static void BondingMaxBtnInputEvent(RefPtr<FrameNode>& maximizeBtn, RefPtr<FrameNode>& containerNode);

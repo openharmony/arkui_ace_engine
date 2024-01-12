@@ -72,7 +72,7 @@ protected:
     static void SetRowStart(int32_t rowStart);
     static void SetRowEnd(int32_t rowEnd);
     static void ForceRebuild(bool forceRebuild);
-    static void SetSelectable(bool selectable);
+    static void SetSelectable(const JSCallbackInfo& info);
     static void SetSelected(const JSCallbackInfo& info);
     static void SelectCallback(const JSCallbackInfo& args);
     static void CreateForPartialUpdate(const JSCallbackInfo& args);

@@ -26,6 +26,56 @@
 
 namespace OHOS::Ace {
 
+struct FontInfo {
+    std::string path;
+    std::string postScriptName;
+    std::string fullName;
+    std::string family;
+    std::string subfamily;
+    uint32_t weight = 0;
+    uint32_t width = 0;
+    bool italic = false;
+    bool monoSpace = false;
+    bool symbolic = false;
+};
+
+typedef struct AdjustInfo {
+    int origValue = 0;
+    int newValue = 0;
+} AdjustInfo;
+using AdjustSet = std::vector<AdjustInfo>;
+
+typedef struct AliasInfo {
+    std::string familyName;
+    int weight = 0;
+} AliasInfo;
+using AliasSet = std::vector<AliasInfo>;
+
+typedef struct FallbackInfo {
+    std::string familyName;
+    std::string font;
+} FallbackInfo;
+using FallbackInfoSet = std::vector<FallbackInfo>;
+
+typedef struct FallbackGroup {
+    std::string groupName;
+    FallbackInfoSet fallbackInfoSet;
+} FallbackGroup;
+using FallbackGroupSet = std::vector<FallbackGroup>;
+
+typedef struct FontGenericInfo {
+    std::string familyName;
+    AliasSet aliasSet;
+    AdjustSet adjustSet;
+} FontGenericInfo;
+using GenericSet = std::vector<FontGenericInfo>;
+
+typedef struct FontConfigJsonInfo {
+    std::vector<std::string> fontDirSet;
+    GenericSet genericSet;
+    FallbackGroupSet fallbackGroupSet;
+} FontConfigJsonInfo;
+
 class FontManager : public virtual AceType {
     DECLARE_ACE_TYPE(FontManager, AceType);
 
@@ -39,8 +89,8 @@ public:
 
     static RefPtr<FontManager> Create();
 
-    void RegisterFont(
-        const std::string& familyName, const std::string& familySrc, const RefPtr<PipelineBase>& context);
+    void RegisterFont(const std::string& familyName, const std::string& familySrc, const RefPtr<PipelineBase>& context,
+        const std::string& bundleName = "", const std::string& moduleName = "");
     void GetSystemFontList(std::vector<std::string>& fontList);
     bool GetSystemFont(const std::string& fontName, FontInfo& fontInfo);
     bool RegisterCallback(
@@ -55,6 +105,7 @@ public:
     void AddVariationNode(const WeakPtr<RenderNode>& node);
     void RemoveVariationNode(const WeakPtr<RenderNode>& node);
     void NotifyVariationNodes();
+    void GetUIFontConfig(FontConfigJsonInfo& info);
 
     bool RegisterCallbackNG(
         const WeakPtr<NG::UINode>& node, const std::string& familyName, const std::function<void()>& callback);

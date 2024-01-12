@@ -347,7 +347,12 @@ export struct AlertDialog{
           .fontSize($r('sys.float.ohos_id_text_size_body1'))
           .fontWeight(FontWeight.Medium)
           .fontColor($r('sys.color.ohos_id_color_text_primary'))
-      }.padding({ left: 24, right: 24, top: 24 })
+      }.padding({
+        left: 24,
+        right: 24,
+        top: 24,
+        bottom: this.secondaryButton.value && this.primaryButton.value ? 0 : 24
+      })
       Row() {
         if (this.primaryButton.value) {
           Button(this.primaryButton.value)

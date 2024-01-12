@@ -359,9 +359,9 @@ void SwiperLayoutAlgorithm::MeasureSwiper(
             }
         }
     } else {
-        bool overScrollTop = startIndex == 0 && GreatNotEqual(startPos, startMainPos_);
+        bool overScrollTop = startIndexInVisibleWindow == 0 && GreatNotEqual(startPos, startMainPos_);
         if ((!overScrollFeature_ && NonNegative(currentOffset_)) || (overScrollFeature_ && overScrollTop)) {
-            LayoutForward(layoutWrapper, layoutConstraint, axis, startIndex, startPos);
+            LayoutForward(layoutWrapper, layoutConstraint, axis, startIndexInVisibleWindow, startPos);
             if (GetStartIndex() > 0 && GreatNotEqual(GetStartPosition(), startMainPos_)) {
                 LayoutBackward(layoutWrapper, layoutConstraint, axis, GetStartIndex() - 1, GetStartPosition());
             }
@@ -483,16 +483,11 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
         if (!result) {
             break;
         }
-        bool hasMinSize = swiperLayoutProperty->GetMinSize().has_value() &&
-                          !LessOrEqual(swiperLayoutProperty->GetMinSizeValue().Value(), 0);
-        bool hasPrevMargin = swiperLayoutProperty->GetPrevMargin().has_value() &&
-                        !LessOrEqual(swiperLayoutProperty->GetPrevMarginValue().ConvertToPx(), 0);
-        bool hasNextMargin = swiperLayoutProperty->GetNextMargin().has_value() &&
-                        !LessOrEqual(swiperLayoutProperty->GetNextMarginValue().ConvertToPx(), 0);
-        auto isSingleCase =
-            !hasMinSize && (!hasPrevMargin && !hasNextMargin) &&
-            ((swiperLayoutProperty->GetDisplayCount().has_value() &&
-                 swiperLayoutProperty->GetDisplayCountValue() == 1) ||
+        bool hasMinSize = !LessOrEqual(swiperLayoutProperty->GetMinSizeValue(Dimension(0)).Value(), 0);
+        bool hasPrevMargin = !LessOrEqual(swiperLayoutProperty->GetPrevMarginValue(Dimension(0)).ConvertToPx(), 0);
+        bool hasNextMargin = !LessOrEqual(swiperLayoutProperty->GetNextMarginValue(Dimension(0)).ConvertToPx(), 0);
+        auto isSingleCase = !hasMinSize && !hasPrevMargin && !hasNextMargin &&
+            (swiperLayoutProperty->GetDisplayCountValue(0) == 1 ||
                 (!swiperLayoutProperty->GetDisplayCount().has_value() && SwiperUtils::IsStretch(swiperLayoutProperty)));
         if (isSingleCase && !mainSizeIsDefined_) {
             endMainPos = startPos + itemPosition_.begin()->second.endPos - itemPosition_.begin()->second.startPos;
@@ -502,21 +497,16 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
             currentEndPos += spaceWidth_;
         }
         // reach the valid target index
-        if (targetIndex_ && GreatOrEqual(currentIndex, targetIndex_.value())) {
-            if (!targetIsSameWithStartFlag_) {
-                endMainPos = currentStartPos + contentMainSize_;
-                currentTargetIndex_ = targetIndex_.value();
-                targetIndex_.reset();
-            } else {
-                endMainPos = endMainPos_;
-                currentTargetIndex_ = targetIndex_.value();
-                targetIndex_.reset();
-            }
+        if (targetIndex_ && currentIndex >= targetIndex_.value()) {
+            endMainPos = targetIsSameWithStartFlag_ ? endMainPos_ : currentStartPos + contentMainSize_;
+            currentTargetIndex_ = targetIndex_.value();
+            targetIndex_.reset();
         }
         if (static_cast<int32_t>(itemPosition_.size()) >= totalItemCount_) {
             break;
         }
-    } while (LessNotEqual(currentEndPos, nextMargin_ != 0.0f ? endMainPos + nextMargin_ + spaceWidth_ : endMainPos));
+    } while (LessNotEqual(currentEndPos, nextMargin_ != 0.0f ? endMainPos + nextMargin_ + spaceWidth_ : endMainPos) ||
+             (targetIndex_ && currentIndex < targetIndex_.value()));
 
     if (overScrollFeature_ && canOverScroll_) {
         return;
@@ -526,7 +516,7 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
     if (LessNotEqual(currentEndPos, endMainPos_) && !itemPosition_.empty()) {
         auto firstItemTop = itemPosition_.begin()->second.startPos;
         auto itemTotalSize = currentEndPos - firstItemTop;
-        if (LessOrEqual(itemTotalSize, contentMainSize_) && (itemPosition_.begin()->first == 0)) {
+        if (!canOverScroll_ && LessOrEqual(itemTotalSize, contentMainSize_) && (itemPosition_.begin()->first == 0)) {
             // all items size is less than swiper.
             currentOffset_ = firstItemTop;
             startMainPos_ = currentOffset_;

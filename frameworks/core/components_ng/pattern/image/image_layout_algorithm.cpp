@@ -18,8 +18,10 @@
 #ifdef FLUTTER_2_5
 #include "ace_shell/shell/common/window_manager.h"
 #endif
+#include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
@@ -117,15 +119,31 @@ void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(props);
     const auto& dstSize = layoutWrapper->GetGeometryNode()->GetContentSize();
     bool autoResize = props->GetAutoResize().value_or(true);
+    // add API version protection
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        autoResize = props->GetAutoResize().value_or(false);
+    }
+    auto container = Container::Current();
+    // If the default value is set to false, the ScenceBoard memory increases.
+    // Therefore the default value is different in the ScenceBoard.
+    if (container && container->IsScenceBoardWindow()) {
+        autoResize = props->GetAutoResize().value_or(true);
+    }
+
     ImageFit imageFit = props->GetImageFit().value_or(ImageFit::COVER);
     const std::optional<SizeF>& sourceSize = props->GetSourceSize();
+    bool hasValidSlice = false;
+    if (layoutWrapper->GetHostNode()) {
+        auto renderProp = layoutWrapper->GetHostNode()->GetPaintProperty<ImageRenderProperty>();
+        hasValidSlice = renderProp && renderProp->HasImageResizableSlice();
+    }
     auto loadingCtx = loadingCtx_.Upgrade();
     if (loadingCtx) {
-        loadingCtx->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize);
+        loadingCtx->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
     }
     auto altLoadingCtx = altLoadingCtx_.Upgrade();
     if (altLoadingCtx) {
-        altLoadingCtx->MakeCanvasImageIfNeed(dstSize, true, imageFit, sourceSize);
+        altLoadingCtx->MakeCanvasImageIfNeed(dstSize, true, imageFit, sourceSize, hasValidSlice);
     }
 }
 

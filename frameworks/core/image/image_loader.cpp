@@ -166,8 +166,8 @@ std::shared_ptr<RSData> ImageLoader::LoadDataFromCachedFile(const std::string& u
             AceLogTag::ACE_IMAGE, "cache file path is too long, cacheFilePath: %{private}s", cacheFilePath.c_str());
         return nullptr;
     }
-    bool cacheFileFound = ImageFileCache::GetInstance().GetFromCacheFile(cacheFilePath);
-    if (!cacheFileFound) {
+    cacheFilePath = ImageFileCache::GetInstance().GetCacheFilePath(uri);
+    if (cacheFilePath == "") {
         return nullptr;
     }
     char realPath[PATH_MAX] = { 0x00 };
@@ -225,23 +225,24 @@ void ImageLoader::CacheImageData(const std::string& key, const RefPtr<NG::ImageD
 RefPtr<NG::ImageData> ImageLoader::LoadImageDataFromFileCache(const std::string& key, const std::string& suffix)
 {
     ACE_FUNCTION_TRACE();
-    auto* fileCache = &ImageFileCache::GetInstance();
-    std::string filePath = fileCache->GetImageCacheFilePath(key) + suffix;
-    auto data = fileCache->GetDataFromCacheFile(filePath);
-    return data;
+    return ImageFileCache::GetInstance().GetDataFromCacheFile(key, suffix);
 }
 
 // NG ImageLoader entrance
-RefPtr<NG::ImageData> ImageLoader::GetImageData(const ImageSourceInfo& src, const WeakPtr<PipelineBase>& context)
+RefPtr<NG::ImageData> ImageLoader::GetImageData(
+    const ImageSourceInfo& src, const WeakPtr<PipelineBase>& context)
 {
     ACE_FUNCTION_TRACE();
+    bool queryCache = !src.GetIsOnSystemColorChange();
     if (src.IsPixmap()) {
         return LoadDecodedImageData(src, context);
     }
 #ifndef USE_ROSEN_DRAWING
-    auto cachedData = ImageLoader::QueryImageDataFromImageCache(src);
-    if (cachedData) {
-        return NG::ImageData::MakeFromDataWrapper(&cachedData);
+    if (queryCache) {
+        auto cachedData = ImageLoader::QueryImageDataFromImageCache(src);
+        if (cachedData) {
+            return NG::ImageData::MakeFromDataWrapper(&cachedData);
+        }
     }
     auto skData = LoadImageData(src, context);
     CHECK_NULL_RETURN(skData, nullptr);
@@ -251,9 +252,11 @@ RefPtr<NG::ImageData> ImageLoader::GetImageData(const ImageSourceInfo& src, cons
 #else
     std::shared_ptr<RSData> rsData = nullptr;
     do {
-        rsData = ImageLoader::QueryImageDataFromImageCache(src);
-        if (rsData) {
-            break;
+        if (queryCache) {
+            rsData = ImageLoader::QueryImageDataFromImageCache(src);
+            if (rsData) {
+                break;
+            }
         }
         rsData = LoadImageData(src, context);
         CHECK_NULL_RETURN(rsData, nullptr);
@@ -633,7 +636,7 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
     std::unique_ptr<uint8_t[]> data;
     size_t dataLen = 0;
     std::string rawFile;
-    if (GetResourceId(uri, rawFile)) {
+    if (!imageSourceInfo.GetIsUriPureNumber() && GetResourceId(uri, rawFile)) {
         // must fit raw file firstly, as file name may contains number
         if (!resourceWrapper->GetRawFileData(rawFile, dataLen, data, bundleName, moudleName)) {
             TAG_LOGW(AceLogTag::ACE_IMAGE, "get image data by name failed, uri:%{private}s, rawFile:%{public}s",
@@ -649,7 +652,7 @@ std::shared_ptr<RSData> ResourceImageLoader::LoadImageData(
 #endif
     }
     uint32_t resId = 0;
-    if (GetResourceId(uri, resId)) {
+    if (!imageSourceInfo.GetIsUriPureNumber() && GetResourceId(uri, resId)) {
         if (!resourceWrapper->GetMediaData(resId, dataLen, data, bundleName, moudleName)) {
             TAG_LOGW(AceLogTag::ACE_IMAGE, "get image data by id failed, uri:%{private}s, id:%{public}u", uri.c_str(),
                 resId);

@@ -391,12 +391,10 @@ Color OptionPattern::GetBgColor()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, Color());
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        return Color::TRANSPARENT;
-    }
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, Color());
-    auto bgColor = theme->GetBackgroundColor();
+    auto bgColor = Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) ? Color::TRANSPARENT
+                                                                                      : theme->GetBackgroundColor();
     return bgColor_.value_or(bgColor);
 }
 

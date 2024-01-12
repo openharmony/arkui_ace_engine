@@ -46,14 +46,17 @@ public:
         return bundleName + "." + moduleName;
     }
 
-    void AddResourceAdapter(
-        const std::string& bundleName, const std::string& moduleName, RefPtr<ResourceAdapter>& resourceAdapter)
+    void AddResourceAdapter(const std::string& bundleName, const std::string& moduleName,
+        RefPtr<ResourceAdapter>& resourceAdapter, bool replace = false)
     {
         std::unique_lock<std::shared_mutex> lock(mutex_);
         if (bundleName.empty() && moduleName.empty()) {
             resourceAdapters_[std::make_pair(bundleName, moduleName)] = resourceAdapter;
         } else {
             auto key = MakeCacheKey(bundleName, moduleName);
+            if (replace) {
+                CountLimitLRU::RemoveCacheObjFromCountLimitLRU<RefPtr<ResourceAdapter>>(key, cacheList_, cache_);
+            }
             CountLimitLRU::CacheWithCountLimitLRU<RefPtr<ResourceAdapter>>(
                 key, resourceAdapter, cacheList_, cache_, capacity_);
         }
@@ -106,7 +109,8 @@ public:
     void Reset()
     {
         std::unique_lock<std::shared_mutex> lock(mutex_);
-        resourceAdapters_.clear();
+        cacheList_.clear();
+        cache_.clear();
     }
 
 private:

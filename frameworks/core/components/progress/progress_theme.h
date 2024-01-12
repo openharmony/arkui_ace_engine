@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PROGRESS_PROGRESS_THEME_H
 
 #include "base/geometry/dimension.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/theme/theme.h"
 #include "core/components/theme/theme_constants.h"
@@ -36,6 +37,17 @@ public:
     public:
         Builder() = default;
         ~Builder() = default;
+
+        static constexpr uint32_t DEFAULT_CAPSULE_BG_COLOR_API9 = 0x19182431;
+        static constexpr uint32_t DEFAULT_CAPSULE_SELECTED_COLOR_API9 = 0xff007dff;
+        static constexpr uint32_t DEFAULT_RING_BEGIN_SIDE_COLOR_API9 = 0xff007dff;
+        static constexpr uint32_t DEFAULT_RING_END_SIDE_COLOR_API9 = 0xff007dff;
+        static constexpr uint32_t DEFAULT_RING_BG_COLOR_API9 = 0x19182431;
+
+        static constexpr uint32_t DEFAULT_CAPSULE_SELECTED_COLOR_API10 = 0x33006cde;
+        static constexpr uint32_t DEFAULT_RING_BG_COLOR_API10 = 0x08182431;
+        static constexpr uint32_t DEFAULT_BORDER_COLOR_API10 = 0x33006cde;
+        static constexpr uint32_t DEFAULT_LOADING_COLOR_API10 = 0x99666666;
 
         RefPtr<ProgressTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
@@ -107,6 +119,19 @@ public:
                 pattern->GetAttr<Color>("ring_progress_fg_color_begin", theme->trackSelectedColor_);
             theme->ringProgressBackgroundColor_ =
                 pattern->GetAttr<Color>("ring_progress_bg_color", Color::GRAY);
+            
+            if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
+                theme->capsuleBgColor_ = Color(DEFAULT_CAPSULE_BG_COLOR_API9);
+                theme->capsuleSelectColor_ = Color(DEFAULT_CAPSULE_SELECTED_COLOR_API9);
+                theme->ringProgressBackgroundColor_ = Color(DEFAULT_RING_BG_COLOR_API9);
+                theme->ringProgressBeginSideColor_ = Color(DEFAULT_RING_BEGIN_SIDE_COLOR_API9);
+                theme->ringProgressEndSideColor_ = Color(DEFAULT_RING_END_SIDE_COLOR_API9);
+            } else if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+                theme->borderColor_ = Color(DEFAULT_BORDER_COLOR_API10);
+                theme->capsuleSelectColor_ = Color(DEFAULT_CAPSULE_SELECTED_COLOR_API10);
+                theme->ringProgressBackgroundColor_ = Color(DEFAULT_RING_BG_COLOR_API10);
+                theme->loadingColor_ = Color(DEFAULT_LOADING_COLOR_API10);
+            }
         }
     };
 

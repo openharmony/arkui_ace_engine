@@ -59,6 +59,7 @@
 #include "core/event/mouse_event.h"
 #include "frameworks/base/window/drag_window.h"
 #include "frameworks/core/components_ng/pattern/root/root_pattern.h"
+
 #undef private
 #undef protected
 
@@ -145,6 +146,27 @@ const std::string TEXT_DEFAULT_VALUE = "{\"style\":\"FontStyle.Normal\",\"size\"
 const std::string TEXT_EQUALS_VALUE =
     R"({"style":"FontStyle.Italic","size":"20.10px","weight":"FontWeight.Bold","family":"cursive"})";
 const Ace::WordBreak TEXT_WORD_BREAK = Ace::WordBreak::BREAK_ALL;
+const std::string TEXT_FOR_AI_SINGLE = "phone: 18888888888";
+const std::string TEXT_FOR_AI = "phone: 12345678900,url: www.baidu.com";
+const std::string SPAN_PHONE = "12345678900";
+const std::string SPAN_URL = "www.baidu.com";
+constexpr int32_t AI_SPAN_START = 7;
+constexpr int32_t AI_SPAN_END = 18;
+constexpr int32_t AI_SPAN_START_II = 24;
+constexpr int32_t AI_SPAN_END_II = 37;
+const struct TextDataDetectResult TEXT_DATA_DETECT_RESULT = {
+    0,
+    "{\"phoneNum\":[{\"charOffset\":7,\"number\":\"18888888888\",\"oriText\":\"18888888888\",\"type\":1}]}",
+    "0",
+    "{\"phoneNum\":[{\"option\":\"呼叫\"},{\"option\":\"发送信息\"},\
+        {\"option\":\"新建联系人\"},{\"option\":\"复制\"},{\"option\":\"选择文本\"}],\
+        \"url\":[{\"option\":\"打开\"},{\"option\":\"复制\"},{\"option\":\"选择文本\"}],\
+        \"email\":[{\"option\":\"新建邮箱\"},{\"option\":\"发送信息\"},\
+        {\"option\":\"新建联系人\"},{\"option\":\"复制\"},{\"option\":\"选择文本\"}],\
+        \"location\":[{\"option\":\"导航至该位置\"},{\"option\":\"在地图中打开\"},\
+        {\"option\":\"复制\"},{\"option\":\"选择文本\"}]}",
+    "{\"bundlename\":\"com.XXXXXX.hmsapp.hiai\",\"abilityname\":\"EntityMenuUIExtensionAbility\"}"
+};
 
 using OnClickCallback = std::function<void(const BaseEventInfo* info)>;
 using DragDropBaseCallback = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
@@ -3371,7 +3393,7 @@ HWTEST_F(TextTestNg, HandleMouseEvent002, TestSize.Level1)
     info.action_ = MouseAction::PRESS;
     pattern->HandleMouseEvent(info);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
-    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 1);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 3);
 }
 
 /**
@@ -3463,7 +3485,7 @@ HWTEST_F(TextTestNg, HandleMouseEvent003, TestSize.Level1)
     pattern->blockPress_ = false;
     pattern->HandleMouseEvent(info);
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
-    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 3);
 }
 
 /**
@@ -4858,4 +4880,447 @@ HWTEST_F(TextTestNg, TextFrameNodeCreator004, TestSize.Level1)
     eventHub->SetOnCopy(std::move(Event));
     EXPECT_TRUE(eventHub->onCopy_);
 }
+
+/**
+ * @tc.name: BindSelectionMenu001
+ * @tc.desc: Test BindSelectionMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, BindSelectionMenu001, TestSize.Level1)
+{
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TOAST_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto pattern = textFrameNode->GetPattern<TextPattern>();
+    int32_t callBack1 = 0;
+    int32_t callBack2 = 0;
+    int32_t callBack3 = 0;
+    std::function<void()> buildFunc = [&callBack1]() {
+        callBack1 = 1;
+        return;
+    };
+    std::function<void(int32_t, int32_t)> onAppear = [&callBack2](int32_t a, int32_t b) {
+        callBack2 = 2;
+        return;
+    };
+    std::function<void()> onDisappear = [&callBack3]() {
+        callBack3 = 3;
+        return;
+    };
+
+    auto key = std::make_pair(TextSpanType::MIXED, TextResponseType::RIGHT_CLICK);
+    std::shared_ptr<SelectionMenuParams> params1 = std::make_shared<SelectionMenuParams>(
+        TextSpanType::MIXED, buildFunc, onAppear, onDisappear, TextResponseType::RIGHT_CLICK);
+    pattern->selectionMenuMap_[key] = params1;
+
+    std::function<void()> nullFunc = nullptr;
+
+    pattern->BindSelectionMenu(TextSpanType::MIXED, TextResponseType::RIGHT_CLICK, nullFunc, onAppear, onDisappear);
+    EXPECT_TRUE(pattern->selectionMenuMap_.empty());
+
+    pattern->selectionMenuMap_[key] = params1;
+    pattern->BindSelectionMenu(TextSpanType::MIXED, TextResponseType::RIGHT_CLICK, buildFunc, onAppear, onDisappear);
+    EXPECT_FALSE(pattern->selectionMenuMap_.empty());
+
+    pattern->BindSelectionMenu(TextSpanType::IMAGE, TextResponseType::RIGHT_CLICK, buildFunc, onAppear, onDisappear);
+    EXPECT_FALSE(pattern->selectionMenuMap_.empty());
+}
+
+/**
+ * @tc.name: CloseSelectionMenu001
+ * @tc.desc: Test CloseSelectionMenu
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, CloseSelectionMenu001, TestSize.Level1)
+{
+    auto textFrameNode =
+        FrameNode::GetOrCreateFrameNode(V2::TOAST_ETS_TAG, 1, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, CREATE_VALUE);
+    auto pattern = textFrameNode->GetPattern<TextPattern>();
+    pattern->SetTextController(AceType::MakeRefPtr<TextController>());
+    pattern->GetTextController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
+    auto textController = pattern->GetTextController();
+    textController->CloseSelectionMenu();
+    int32_t callBack1 = 0;
+    int32_t callBack2 = 0;
+    int32_t callBack3 = 0;
+    std::function<void()> buildFunc = [&callBack1]() {
+        callBack1 = 1;
+        return;
+    };
+
+    std::function<void(int32_t, int32_t)> onAppear = [&callBack2](int32_t a, int32_t b) {
+        callBack2 = 2;
+        return;
+    };
+    std::function<void()> onDisappear = [&callBack3]() {
+        callBack3 = 3;
+        return;
+    };
+    pattern->BindSelectionMenu(TextSpanType::MIXED, TextResponseType::LONG_PRESS, buildFunc, onAppear, onDisappear);
+    GestureEvent info;
+    info.localLocation_ = Offset(1, 1);
+    // copyOption = None
+    pattern->HandleLongPress(info);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
+    pattern->copyOption_ = CopyOptions::Distributed;
+    pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
+    pattern->textForDisplay_ = CREATE_VALUE;
+    pattern->textSelector_.Update(0, 20);
+
+    pattern->ShowSelectOverlay(pattern->textSelector_.firstHandle, pattern->textSelector_.secondHandle);
+
+    auto isClosed = pattern->selectOverlayProxy_->IsClosed();
+    EXPECT_FALSE(isClosed);
+    textController = pattern->GetTextController();
+    textController->CloseSelectionMenu();
+    isClosed = pattern->selectOverlayProxy_->IsClosed();
+    EXPECT_TRUE(isClosed);
+}
+
+/**
+ * @tc.name: OnTextSelectionChange001
+ * @tc.desc: Test onTextSelectionChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnTextSelectionChange001, TestSize.Level1)
+{
+    auto textFrameNode =
+        FrameNode::GetOrCreateFrameNode(V2::TOAST_ETS_TAG, 2, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, Content, CREATE_VALUE);
+    auto pattern = textFrameNode->GetPattern<TextPattern>();
+    pattern->SetTextController(AceType::MakeRefPtr<TextController>());
+    pattern->GetTextController()->SetPattern(AceType::WeakClaim(AceType::RawPtr(pattern)));
+    pattern->textForDisplay_ = CREATE_VALUE;
+    pattern->selectOverlayProxy_ = nullptr;
+    ParagraphStyle paragraphStyle;
+    RefPtr<Paragraph> paragraph = Paragraph::Create(paragraphStyle, FontCollection::Current());
+    pattern->paragraph_ = paragraph;
+    pattern->HandleOnSelectAll();
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), pattern->textForDisplay_.length());
+
+    pattern->ResetSelection();
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
+}
+
+/**
+ * @tc.name: TextLayoutAlgorithmTest009
+ * @tc.desc: test text_layout_algorithm.cpp: new method UpdateParagraphForAISpan001
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextLayoutAlgorithmTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    ASSERT_NE(geometryNode, nullptr);
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    textPattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    TextStyle textStyle;
+    textStyle.SetMaxLines(MAX_LINES);
+    textStyle.SetTextCase(TextCase::NORMAL);
+    LayoutConstraintF contentConstraint;
+    ParagraphStyle paraStyle = { .direction = TextDirection::LTR,
+        .align = textStyle.GetTextAlign(),
+        .maxLines = textStyle.GetMaxLines(),
+        .fontLocale = "zh-CN",
+        .wordBreak = textStyle.GetWordBreak(),
+        .textOverflow = textStyle.GetTextOverflow() };
+    auto paragraph= MockParagraph::GetOrCreateMockParagraph();
+
+    AISpan aiSpan1;
+    aiSpan1.start = AI_SPAN_START;
+    aiSpan1.end = AI_SPAN_END;
+    aiSpan1.content = SPAN_PHONE;
+    aiSpan1.type = TextDataDetectType::PHONE_NUMBER;
+    AISpan aiSpan2;
+    aiSpan2.start = AI_SPAN_START_II;
+    aiSpan2.end = AI_SPAN_END_II;
+    aiSpan2.content = SPAN_URL;
+    aiSpan2.type = TextDataDetectType::URL;
+    std::map<int32_t, AISpan> aiSpanMap;
+    aiSpanMap[AI_SPAN_START] = aiSpan1;
+    aiSpanMap[AI_SPAN_START_II] = aiSpan2;
+    textPattern->aiSpanMap_ = aiSpanMap;
+    textPattern->textForAI_ = TEXT_FOR_AI;
+
+    /**
+     * @tc.steps: step2. Create textLayoutAlgorithm and call UpdateParagraphForAISpan function.
+     * @tc.expected: textLayoutAlgorithm->paragraph_.rawPtr_ is nullptr.
+     */
+    auto textLayoutAlgorithm = AceType::DynamicCast<TextLayoutAlgorithm>(textPattern->CreateLayoutAlgorithm());
+    textLayoutAlgorithm->SetParagraph(paragraph);
+    textLayoutAlgorithm->UpdateParagraphForAISpan(textStyle, AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_NE(textLayoutAlgorithm->paragraph_.rawPtr_, nullptr);
+}
+
+/**
+ * @tc.name: ParseAIJson001
+ * @tc.desc: Test TextPattern: new method ParseAIJson for TextDataDetectResult
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, ParseAIJson001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. Parse to JsonObject.
+     * @tc.expected: parseSuccess phoneNum is not Empty.
+     */
+
+    auto detectResultJson = JsonUtil::ParseJsonString(TEXT_DATA_DETECT_RESULT.entity);
+    ASSERT_NE(detectResultJson, nullptr);
+    EXPECT_TRUE(detectResultJson->Contains("phoneNum"));
+    auto phoneNum = detectResultJson->GetValue("phoneNum");
+    EXPECT_TRUE(phoneNum->IsArray());
+
+    /**
+     * @tc.steps: step3. call ParseAIJson
+     * @tc.expected:aiSpanMap_ not empty
+     */
+    textPattern->textForAI_ = TEXT_FOR_AI_SINGLE;
+    textPattern->aiSpanMap_.clear();
+    textPattern->ParseAIJson(phoneNum, TextDataDetectType::PHONE_NUMBER, 0, false);
+    EXPECT_FALSE(textPattern->aiSpanMap_.empty());
+}
+
+    /**
+ * @tc.name: ParseAIJson002
+ * @tc.desc: Test TextPattern: new method ParseAIJson for methodOption
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, ParseAIJson002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. call ParseAIResult function.
+     * @tc.expected: parseSuccess any element is not Empty.
+     */
+
+    auto menuOptionJson = JsonUtil::ParseJsonString(TEXT_DATA_DETECT_RESULT.menuOption);
+    ASSERT_NE(menuOptionJson, nullptr);
+
+    EXPECT_TRUE(menuOptionJson->Contains("phoneNum"));
+    auto phoneNumOpt = menuOptionJson->GetValue("phoneNum");
+    EXPECT_TRUE(phoneNumOpt->IsArray());
+    auto item = phoneNumOpt->GetArrayItem(0);
+    EXPECT_TRUE(item->Contains("option"));
+    std::string optValue = item->GetString("option");
+    EXPECT_EQ(optValue, "呼叫");
+
+    /**
+     * @tc.steps: step3. call ParseAIJson to generate aiMenuOptionsMap_
+     * @tc.expected:aiMenuOptionsMap_ not empty
+     */
+    textPattern->aiMenuOptionsMap_.clear();
+    textPattern->ParseAIJson(phoneNumOpt, TextDataDetectType::PHONE_NUMBER, 0, true);
+    EXPECT_FALSE(textPattern->aiMenuOptionsMap_.empty());
+}
+
+/**
+ * @tc.name: ParseAIResult001
+ * @tc.desc: Test TextPattern: new method ParseAIResult when methodoption is empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, ParseAIResult001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. call ParseAIResult function.
+     * @tc.expected: parseSuccess aiSpanMap_ is not Empty.
+     */
+    auto detectResultJson = JsonUtil::ParseJsonString(TEXT_DATA_DETECT_RESULT.entity);
+    ASSERT_NE(detectResultJson, nullptr);
+    EXPECT_TRUE(detectResultJson->Contains("phoneNum"));
+    auto phoneNum = detectResultJson->GetValue("phoneNum");
+    EXPECT_TRUE(phoneNum->IsArray());
+
+    textPattern->textForAI_ = TEXT_FOR_AI_SINGLE;
+    textPattern->aiMenuOptionsMap_.clear();
+    textPattern->aiSpanMap_.clear();
+    textPattern->ParseAIResult(TEXT_DATA_DETECT_RESULT, 0);
+    EXPECT_FALSE(textPattern->aiSpanMap_.empty());
+}
+
+/**
+ * @tc.name: ParseAIResult002
+ * @tc.desc: Test TextPattern: new method ParseAIResult when methodoption is not empty
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, ParseAIResult002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    
+    /**
+     * @tc.steps: step2. call ParseAIResult function.
+     * @tc.expected: parseSuccess aiSpanMap_ is not Empty.
+     */
+    std::unordered_map<std::string, std::vector<std::string>> menuOptionsMap;
+    std::vector<std::string> menuOptionsPhone = { "呼叫", "发送信息", "新建联系人", "复制", "选择文本" };
+    std::vector<std::string> menuOptionsEmail = { "新建邮箱", "发送信息", "新建联系人", "复制", "选择文本" };
+    std::vector<std::string> menuOptionsUrl = { "打开", "复制", "选择文本" };
+    std::vector<std::string> menuOptionsLocation = { "导航至该位置", "在地图中打开", "复制", "选择文本" };
+
+    menuOptionsMap["phoneNum"] = menuOptionsPhone;
+    menuOptionsMap["url"] = menuOptionsUrl;
+    menuOptionsMap["email"] = menuOptionsEmail;
+    menuOptionsMap["location"] = menuOptionsLocation;
+
+    textPattern->textForAI_ = TEXT_FOR_AI_SINGLE;
+    textPattern->aiMenuOptionsMap_ = menuOptionsMap;
+    textPattern->aiSpanMap_.clear();
+    textPattern->ParseAIResult(TEXT_DATA_DETECT_RESULT, 0);
+    EXPECT_FALSE(textPattern->aiSpanMap_.empty());
+}
+
+    /**
+ * @tc.name: HandleSpanSingleClickEvent
+ * @tc.desc: test test_pattern.h HandleSpanSingleClickEvent function with valid textSelector
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, HandleSpanSingleClickEvent, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+    pattern->textSelector_.Update(0, 20);
+
+    /**
+     * @tc.steps: step2. construct spanItemChildren
+     */
+    auto spanItemChild = AceType::MakeRefPtr<SpanItem>();
+    spanItemChild->content = TEXT_FOR_AI;
+    spanItemChild->position = StringUtils::ToWstring(spanItemChild->content).length();
+    pattern->spans_.emplace_back(spanItemChild);
+
+    auto paragraph= MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> rects { RectF(0, 0, 20, 20) };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+    pattern->paragraph_ = paragraph;
+
+    pattern->SetTextDetectEnable(true);
+    RectF textContentRect = CONTENT_RECT;
+    pattern->copyOption_ = CopyOptions::Distributed;
+
+    Ace::AISpan aiSpan1;
+    aiSpan1.start = AI_SPAN_START;
+    aiSpan1.end = AI_SPAN_END;
+    aiSpan1.content = SPAN_PHONE;
+    aiSpan1.type = TextDataDetectType::PHONE_NUMBER;
+    Ace::AISpan aiSpan2;
+    aiSpan2.start = AI_SPAN_START_II;
+    aiSpan2.end = AI_SPAN_END_II;
+    aiSpan2.content = SPAN_URL;
+    aiSpan2.type = TextDataDetectType::URL;
+    std::map<int32_t, Ace::AISpan> aiSpanMap;
+    aiSpanMap[AI_SPAN_START] = aiSpan1;
+    aiSpanMap[AI_SPAN_START_II] = aiSpan2;
+    pattern->aiSpanMap_ = aiSpanMap;
+
+    std::unordered_map<std::string, std::vector<std::string>> menuOptionsMap;
+    std::vector<std::string> menuOptionsPhone = { "呼叫", "发送信息", "新建联系人", "复制", "选择文本" };
+    std::vector<std::string> menuOptionsEmail = { "新建邮箱", "发送信息", "新建联系人", "复制", "选择文本" };
+    std::vector<std::string> menuOptionsUrl = { "打开", "复制", "选择文本" };
+    std::vector<std::string> menuOptionsLocation = { "导航至该位置", "在地图中打开", "复制", "选择文本" };
+    menuOptionsMap["phoneNum"] = menuOptionsPhone;
+    menuOptionsMap["url"] = menuOptionsUrl;
+    menuOptionsMap["email"] = menuOptionsEmail;
+    menuOptionsMap["location"] = menuOptionsLocation;
+    pattern->aiMenuOptionsMap_ = menuOptionsMap;
+
+    /**
+     * @tc.steps: step3. create GestureEvent and call HandleSpanSingleClickEvent function.
+     * @tc.expected: isClickOnAISpan is been setted true.
+     */
+    GestureEvent info;
+    info.localLocation_ = Offset(3.0f, 3.0f);
+
+    PointF textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
+    info.GetLocalLocation().GetY() - textContentRect.GetY() };
+
+    bool isClickOnSpan = false;
+    bool isClickOnAISpan = false;
+    pattern->HandleSpanSingleClickEvent(info, textContentRect, textOffset, isClickOnSpan, isClickOnAISpan);
+    EXPECT_TRUE(isClickOnAISpan);
+}
+
+/**
+ * @tc.name: ShowUIExtensionMenu
+ * @tc.desc: test test_pattern.h ShowUIExtensionMenu function with valid textSelector
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, ShowUIExtensionMenu, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    auto [frameNode, pattern] = Init();
+    pattern->textSelector_.Update(0, 20);
+    auto textSpanNode = CreateSpanNodeWithSetDefaultProperty(TEXT_FOR_AI);
+    ASSERT_NE(textSpanNode, nullptr);
+    pattern->AddChildSpanItem(textSpanNode);
+    pattern->SetTextDetectEnable(true);
+
+    Ace::AISpan aiSpan;
+    aiSpan.start = AI_SPAN_START;
+    aiSpan.end = AI_SPAN_END;
+    aiSpan.content = SPAN_PHONE;
+    aiSpan.type = TextDataDetectType::PHONE_NUMBER;
+
+    // /**
+    //  * @tc.steps: step2. set pattern->aiMenuOptionsMap_ and call ShowUIExtensionMenu function
+    //  * @tc.expected: ShowUIExtensionMenu result is true.
+    //  */
+    std::unordered_map<std::string, std::vector<std::string>> menuOptionsMap;
+    std::vector<std::string> menuOptionsPhone = { "呼叫", "发送信息", "新建联系人", "复制", "选择文本" };
+    std::vector<std::string> menuOptionsEmail = { "新建邮箱", "发送信息", "新建联系人", "复制", "选择文本" };
+    std::vector<std::string> menuOptionsUrl = { "打开", "复制", "选择文本" };
+    std::vector<std::string> menuOptionsLocation = { "导航至该位置", "在地图中打开", "复制", "选择文本" };
+
+    menuOptionsMap["phoneNum"] = menuOptionsPhone;
+    menuOptionsMap["url"] = menuOptionsUrl;
+    menuOptionsMap["email"] = menuOptionsEmail;
+    menuOptionsMap["location"] = menuOptionsLocation;
+    pattern->aiMenuOptionsMap_ = menuOptionsMap;
+
+
+    EXPECT_TRUE(pattern->ShowUIExtensionMenu(aiSpan, nullptr, nullptr));
+}
+
 } // namespace OHOS::Ace::NG

@@ -24,6 +24,12 @@
 #include "core/components_v2/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
+struct LayoutedItemInfo {
+    int32_t startIndex = 0;
+    float startPos = 0.0f;
+    int32_t endIndex = 0;
+    float endPos = 0.0f;
+};
 
 // TextLayoutAlgorithm acts as the underlying text layout.
 class ACE_EXPORT ListItemGroupLayoutAlgorithm : public LayoutAlgorithm {
@@ -182,6 +188,21 @@ public:
 
     float GetItemHeight(int32_t index);
 
+    int32_t GetItemStartIndex()
+    {
+        return itemStartIndex_;
+    }
+
+    void SetLayoutedItemInfo(const std::optional<LayoutedItemInfo>& itemInfo)
+    {
+        layoutedItemInfo_ = itemInfo;
+    }
+
+    std::optional<LayoutedItemInfo> GetLayoutedItemInfo() const
+    {
+        return layoutedItemInfo_;
+    }
+
 private:
     float CalculateLaneCrossOffset(float crossSize, float childCrossSize);
     void UpdateListItemConstraint(const OptionalSizeF& selfIdealSize, LayoutConstraintF& contentConstraint);
@@ -222,7 +243,7 @@ private:
     void MeasureStart(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex);
     void MeasureEnd(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex);
     void MeasureAuto(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, int32_t startIndex);
-    void UpdateReferencePos(RefPtr<LayoutProperty> layoutProperty);
+    float UpdateReferencePos(RefPtr<LayoutProperty> layoutProperty, bool forwardLayout, float referencePos);
     bool NeedMeasureItem() const;
     static void SetListItemIndex(const LayoutWrapper* groupLayoutWrapper,
         const RefPtr<LayoutWrapper>& itemLayoutWrapper, int32_t indexInGroup);
@@ -263,6 +284,8 @@ private:
     float contentEndOffset_ = 0.0f;
     bool forwardLayout_ = true;
     bool needAllLayout_ = false;
+
+    std::optional<LayoutedItemInfo> layoutedItemInfo_;
 };
 } // namespace OHOS::Ace::NG
 

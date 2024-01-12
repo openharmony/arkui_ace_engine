@@ -26,17 +26,12 @@
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_event_hub.h"
-#include "core/components_ng/pattern/rich_editor/rich_editor_selection.h"
+#include "core/components_ng/pattern/rich_editor/selection_info.h"
+#include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/render/paragraph.h"
 
 namespace OHOS::Ace {
-enum class RichEditorResponseType : int32_t {
-    RIGHT_CLICK = 0,
-    LONG_PRESS,
-    SELECTED_BY_MOUSE,
-};
-
 struct UserGestureOptions {
     GestureEventFunc onClick;
     GestureEventFunc onLongPress;
@@ -106,12 +101,17 @@ struct UpdateSpanStyle {
         updateTextDecorationColor.reset();
         updateTextShadows.reset();
 
+        updateSymbolColor.reset();
+        updateSymbolRenderingStrategy.reset();
+        updateSymbolEffectStrategy.reset();
+
         updateImageWidth.reset();
         updateImageHeight.reset();
         updateImageVerticalAlign.reset();
         updateImageFit.reset();
         marginProp.reset();
         borderRadius.reset();
+        isSymbolStyle = false;
     }
 
     std::optional<Color> updateTextColor = std::nullopt;
@@ -123,6 +123,10 @@ struct UpdateSpanStyle {
     std::optional<Color> updateTextDecorationColor = std::nullopt;
     std::optional<std::vector<Shadow>> updateTextShadows = std::nullopt;
 
+    std::optional<std::vector<Color>> updateSymbolColor = std::nullopt;
+    std::optional<uint32_t> updateSymbolRenderingStrategy = std::nullopt;
+    std::optional<uint32_t> updateSymbolEffectStrategy = std::nullopt;
+
     std::optional<CalcDimension> updateImageWidth = std::nullopt;
     std::optional<CalcDimension> updateImageHeight = std::nullopt;
     std::optional<VerticalAlign> updateImageVerticalAlign = std::nullopt;
@@ -130,6 +134,8 @@ struct UpdateSpanStyle {
     std::optional<OHOS::Ace::NG::MarginProperty> marginProp = std::nullopt;
     std::optional<OHOS::Ace::NG::BorderRadiusProperty> borderRadius = std::nullopt;
     bool hasResourceFontColor = false;
+    bool hasResourceDecorationColor = false;
+    bool isSymbolStyle = false;
 };
 
 struct UpdateParagraphStyle {
@@ -147,11 +153,6 @@ struct RangeOptions {
     std::optional<int32_t> end;
 };
 
-struct SelectMenuParam {
-    std::function<void(int32_t, int32_t)> onAppear;
-    std::function<void()> onDisappear;
-};
-
 struct TextSpanOptions : SpanOptionBase {
     std::optional<int32_t> offset;
     std::string value;
@@ -159,6 +160,13 @@ struct TextSpanOptions : SpanOptionBase {
     std::optional<UpdateParagraphStyle> paraStyle;
     UserGestureOptions userGestureOption;
     bool hasResourceFontColor = false;
+    bool hasResourceDecorationColor = false;
+};
+
+struct SymbolSpanOptions : SpanOptionBase {
+    std::optional<int32_t> offset;
+    uint32_t symbolId;
+    std::optional<TextStyle> style;
 };
 
 class ACE_EXPORT RichEditorControllerBase : public AceType {
@@ -167,6 +175,7 @@ class ACE_EXPORT RichEditorControllerBase : public AceType {
 public:
     virtual int32_t AddImageSpan(const ImageSpanOptions& options) = 0;
     virtual int32_t AddTextSpan(const TextSpanOptions& options) = 0;
+    virtual int32_t AddSymbolSpan(const SymbolSpanOptions& options) = 0;
     virtual int32_t AddPlaceholderSpan(const RefPtr<NG::UINode>& customNode, const SpanOptionBase& options) = 0;
     virtual int32_t GetCaretOffset() = 0;
     virtual bool SetCaretOffset(int32_t caretPosition) = 0;
@@ -174,11 +183,11 @@ public:
     virtual void UpdateSpanStyle(int32_t start, int32_t end, TextStyle textStyle, ImageSpanAttribute imageStyle) = 0;
     virtual void SetTypingStyle(struct UpdateSpanStyle& typingStyle, TextStyle textStyle) = 0;
     virtual void SetUpdateSpanStyle(struct UpdateSpanStyle updateSpanStyle) = 0;
-    virtual RichEditorSelection GetSpansInfo(int32_t start, int32_t end) = 0;
+    virtual SelectionInfo GetSpansInfo(int32_t start, int32_t end) = 0;
     virtual std::vector<ParagraphInfo> GetParagraphsInfo(int32_t start, int32_t end) = 0;
     virtual void DeleteSpans(const RangeOptions& options) = 0;
     virtual void CloseSelectionMenu() = 0;
-    virtual RichEditorSelection GetSelectionSpansInfo() = 0;
+    virtual SelectionInfo GetSelectionSpansInfo() = 0;
     virtual void SetSelection(int32_t selectionStart, int32_t selectionEnd) = 0;
 };
 
@@ -196,8 +205,8 @@ public:
     virtual void SetOnDeleteComplete(std::function<void()>&& func) = 0;
     virtual void SetCustomKeyboard(std::function<void()>&& func) = 0;
     virtual void SetCopyOption(CopyOptions& copyOptions) = 0;
-    virtual void BindSelectionMenu(RichEditorType& editorType, RichEditorResponseType& responseType,
-        std::function<void()>& buildFunc, SelectMenuParam& menuParam) = 0;
+    virtual void BindSelectionMenu(NG::TextSpanType& editorType, NG::TextResponseType& responseType,
+        std::function<void()>& buildFunc, NG::SelectMenuParam& menuParam) = 0;
     virtual void SetOnPaste(std::function<void(NG::TextCommonEvent&)>&& func) = 0;
     virtual void SetTextDetectEnable(bool value) = 0;
     virtual void SetTextDetectConfig(const std::string& value, std::function<void(const std::string&)>&& onResult) = 0;
