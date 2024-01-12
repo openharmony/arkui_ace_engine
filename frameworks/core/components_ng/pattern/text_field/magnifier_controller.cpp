@@ -14,7 +14,9 @@
  */
 #include "core/components_ng/pattern/text_field/magnifier_controller.h"
 
+#include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
+#include "core/components_ng/render/drawing_prop_convertor.h"
 
 namespace OHOS::Ace::NG {
 
@@ -54,18 +56,7 @@ void MagnifierController::OpenMagnifier()
     childContext->SetContentRectToFrame(RectF(
         textFieldpattern->GetTextPaintOffset().GetX(), textFieldpattern->GetTextPaintOffset().GetY(), 0.0f, 0.0f));
 
-    magnifierRect.localOffset = textFieldpattern->GetLocalOffset();
-    magnifierRect.pixelMap = textFieldpattern->GetPixelMap();
-    magnifierRect.cursorOffset = textFieldpattern->GetCaretOffset();
-    magnifierRect.contentSize =
-        SizeF(textFieldpattern->GetContentRect().Width(), textFieldpattern->GetContentRect().Height());
-    magnifierRect.contentOffset =
-        OffsetF(textFieldpattern->GetContentRect().GetX(), textFieldpattern->GetContentRect().GetY());
-    magnifierRect.isChildNode = true;
-    childPattern->SetMagnifierRect(magnifierRect);
-    magnifierRect.isChildNode = false;
-    textFieldpattern->SetMagnifierRect(magnifierRect);
-
+    SetMagnifierRect(childPattern);
     childNode->ForceSyncGeometryNode();
     childNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
     return;
@@ -134,6 +125,31 @@ void MagnifierController::CreateMagnifierChildNode()
     auto magnifierRect = textFieldpattern->GetMagnifierRect();
     magnifierRect.parent = pattern_;
     magnifierRect.childNodeId = childNode->GetId();
+
+    magnifierRect.isChildNode = true;
+    childPattern->SetMagnifierRect(magnifierRect);
+    magnifierRect.isChildNode = false;
+    textFieldpattern->SetMagnifierRect(magnifierRect);
+}
+
+void MagnifierController::SetMagnifierRect(const RefPtr<Pattern>& childTextFieldPattern)
+{
+    CHECK_NULL_VOID(childTextFieldPattern);
+    auto childPattern = DynamicCast<TextFieldPattern>(childTextFieldPattern);
+    CHECK_NULL_VOID(childPattern);
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textFieldpattern = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textFieldpattern);
+    auto magnifierRect = textFieldpattern->GetMagnifierRect();
+    auto host = textFieldpattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto textFieldTheme = textFieldpattern->GetTheme();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto bgColor = renderContext->GetBackgroundColor().value_or(textFieldTheme->GetBgColor());
+    magnifierRect.bgColor = ToRSColor(bgColor);
     magnifierRect.localOffset = textFieldpattern->GetLocalOffset();
     magnifierRect.pixelMap = textFieldpattern->GetPixelMap();
     magnifierRect.cursorOffset = textFieldpattern->GetCaretOffset();
@@ -141,7 +157,6 @@ void MagnifierController::CreateMagnifierChildNode()
         SizeF(textFieldpattern->GetContentRect().Width(), textFieldpattern->GetContentRect().Height());
     magnifierRect.contentOffset =
         OffsetF(textFieldpattern->GetContentRect().GetX(), textFieldpattern->GetContentRect().GetY());
-
     magnifierRect.isChildNode = true;
     childPattern->SetMagnifierRect(magnifierRect);
     magnifierRect.isChildNode = false;
