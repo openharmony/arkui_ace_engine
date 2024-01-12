@@ -24,7 +24,7 @@ extern "C" {
 
 struct ArkUI_Node {
     ArkUI_NodeType type;
-    void* uiNodeHandle = nullptr;
+    ArkUINodeHandle uiNodeHandle = nullptr;
 };
 
 #ifdef __cplusplus
