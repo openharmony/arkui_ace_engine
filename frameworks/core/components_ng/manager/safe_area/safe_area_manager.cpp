@@ -114,6 +114,20 @@ bool SafeAreaManager::SetKeyBoardAvoidMode(bool value)
     return true;
 }
 
+bool SafeAreaManager::SetIsAtomicService(bool value)
+{
+    if (isAtomicService_ == value) {
+        return false;
+    }
+    isAtomicService_ = value;
+    return true;
+}
+
+bool SafeAreaManager::IsAtomicService() const
+{
+    return isAtomicService_;
+}
+
 SafeAreaInsets SafeAreaManager::GetSystemSafeArea() const
 {
     return systemSafeArea_;

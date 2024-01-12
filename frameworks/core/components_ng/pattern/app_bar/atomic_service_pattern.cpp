@@ -30,6 +30,9 @@ void AtomicServicePattern::BeforeCreateLayoutWrapper()
     auto safeArea = pipeline->GetSafeArea();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto manager = pipeline->GetSafeAreaManager();
+    CHECK_NULL_VOID(manager);
+    manager->SetIsAtomicService(true);
     PaddingProperty padding {
         .left = CalcLength(safeArea.left_.Length()),
         .right = CalcLength(safeArea.right_.Length()),
