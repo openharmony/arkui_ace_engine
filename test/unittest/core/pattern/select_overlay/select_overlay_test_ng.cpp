@@ -2923,7 +2923,6 @@ HWTEST_F(SelectOverlayTestNg, Measure001, TestSize.Level1)
     firstLayoutWrapper->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(FIRST_ITEM_WIDTH), CalcLength(FIRST_ITEM_HEIGHT)));
     layoutWrapper->AppendChild(firstLayoutWrapper);
-    //@tc.steps: step4. Call Measure function.
     selectOverlayLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(layoutWrapper->GetChildByIndex(1), nullptr);
 }
