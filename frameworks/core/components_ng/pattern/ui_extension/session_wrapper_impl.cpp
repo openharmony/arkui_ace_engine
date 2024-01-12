@@ -217,19 +217,12 @@ void SessionWrapperImpl::InitAllCallback()
             },
             TaskExecutor::TaskType::UI);
     };
-    sessionCallbacks->notifyGetAvoidAreaByTypeFunc_ = [weak = hostPattern_, taskExecutor](
+    sessionCallbacks->notifyGetAvoidAreaByTypeFunc_ = [instanceId = instanceId_](
                                                           Rosen::AvoidAreaType type) -> Rosen::AvoidArea {
         Rosen::AvoidArea avoidArea;
-        taskExecutor->PostSyncTask(
-            [weak, &avoidArea, type]() {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                auto instanceId = pattern->GetInstanceId();
-                auto container = Platform::AceContainer::GetContainer(instanceId);
-                CHECK_NULL_VOID(container);
-                avoidArea = container->GetAvoidAreaByType(type);
-            },
-            TaskExecutor::TaskType::UI);
+        auto container = Platform::AceContainer::GetContainer(instanceId);
+        CHECK_NULL_RETURN(container, avoidArea);
+        avoidArea = container->GetAvoidAreaByType(type);
         return avoidArea;
     };
 }
