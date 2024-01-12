@@ -249,7 +249,6 @@ void TabsPattern::SetSwiperPaddingAndBorder()
 
 void TabsPattern::OnModifyDone()
 {
-    LOGE("ZMH, TabsPattern::OnModifyDone() enter");
     Pattern::OnModifyDone();
     if (isBlurStyle_) {
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {

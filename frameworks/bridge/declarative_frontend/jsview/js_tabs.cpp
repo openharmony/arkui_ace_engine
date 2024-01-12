@@ -545,7 +545,6 @@ void JSTabs::SetOnContentWillChange(const JSCallbackInfo& info)
         if (!ret->IsBoolean()) {
             return true;
         }
-        LOGE("ZMH, onContentWillChange callback return:%{public}d", ret->ToBoolean());
         return ret->ToBoolean();
     };
     TabsModel::GetInstance()->SetOnContentWillChange(std::move(callback));

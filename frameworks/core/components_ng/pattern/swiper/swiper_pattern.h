@@ -580,7 +580,6 @@ public:
 
     bool ContentWillChange(int32_t comingIndex);
     bool ContentWillChange(int32_t currentIndex, int32_t comingIndex);
-
     std::map<int32_t, bool> indexCanChangeMap_;
 
 private:

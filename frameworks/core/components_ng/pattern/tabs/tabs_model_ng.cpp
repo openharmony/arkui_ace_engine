@@ -145,6 +145,14 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     }
     auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
     auto preIndex = tabsLayoutProperty->GetIndexValue(0);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    if (tabsPattern->GetInterceptStatus()) {
+        auto interceptCallback = tabsPattern->GetOnContentWillChange();
+        if (!interceptCallback(preIndex, index)) {
+            return;
+        }
+    }
     if ((index != preIndex) && (index >= 0)) {
         SetIndex(index);
         auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
@@ -237,7 +245,6 @@ void TabsModelNG::SetIsVertical(bool isVertical)
 
 void TabsModelNG::SetIndex(int32_t index)
 {
-    LOGE("ZMH, TabsModelNG::SetIndex enter, index:%{public}d", index);
     auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CHECK_NULL_VOID(tabsNode);
     auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabs());

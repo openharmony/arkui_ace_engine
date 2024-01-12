@@ -348,7 +348,6 @@ void TabBarPattern::InitOnKeyEvent(const RefPtr<FocusHub>& focusHub)
 
 bool TabBarPattern::OnKeyEvent(const KeyEvent& event)
 {
-    LOGE("ZMH, TabBarPattern::OnKeyEvent enter");
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipeline, false);
     if (!pipeline->GetIsFocusActive()) {
@@ -403,7 +402,6 @@ bool TabBarPattern::OnKeyEvent(const KeyEvent& event)
 
 bool TabBarPattern::OnKeyEventWithoutClick(const KeyEvent& event)
 {
-    LOGE("ZMH, TabBarPattern::OnKeyEventWithoutClick enter");
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
@@ -415,11 +413,9 @@ bool TabBarPattern::OnKeyEventWithoutClick(const KeyEvent& event)
         if (focusIndicator_ <= 0) {
             return false;
         }
-        if(!ContentWillChange(focusIndicator_ - 1)) {
-            LOGE("ZMH, interceptCallback return false, comingIndex:%{public}d", focusIndicator_ - 1);
+        if (!ContentWillChange(focusIndicator_ - 1)) {
             return true;
         }
-        LOGE("ZMH, interceptCallback return true, comingIndex:%{public}d", focusIndicator_ - 1);
         focusIndicator_ -= 1;
         PaintFocusState();
         return true;
@@ -431,32 +427,25 @@ bool TabBarPattern::OnKeyEventWithoutClick(const KeyEvent& event)
         if (focusIndicator_ >= host->TotalChildCount() - MASK_COUNT - 1) {
             return false;
         }
-        if(!ContentWillChange(focusIndicator_ + 1)) {
-            LOGE("ZMH, interceptCallback return false, comingIndex:%{public}d", focusIndicator_ + 1);
+        if (!ContentWillChange(focusIndicator_ + 1)) {
             return true;
         }
-        LOGE("ZMH, interceptCallback return true, comingIndex:%{public}d", focusIndicator_ + 1);
         focusIndicator_ += 1;
         PaintFocusState();
         return true;
     }
     if (event.code == KeyCode::KEY_MOVE_HOME) {
-        if(!ContentWillChange(0)) {
-            LOGE("ZMH, interceptCallback return false, comingIndex:%{public}d", 0);
+        if (!ContentWillChange(0)) {
             return true;
         }
-        LOGE("ZMH, interceptCallback return true, comingIndex:%{public}d", 0);
         focusIndicator_ = 0;
         PaintFocusState();
         return true;
     }
     if (event.code == KeyCode::KEY_MOVE_END) {
-        if(!ContentWillChange(host->TotalChildCount() - MASK_COUNT - 1)) {
-            LOGE("ZMH, interceptCallback return false, comingIndex:%{public}d",
-                host->TotalChildCount() - MASK_COUNT - 1);
+        if (!ContentWillChange(host->TotalChildCount() - MASK_COUNT - 1)) {
             return true;
         }
-        LOGE("ZMH, interceptCallback return true, comingIndex:%{public}d", host->TotalChildCount() - MASK_COUNT - 1);
         focusIndicator_ = host->TotalChildCount() - MASK_COUNT - 1;
         PaintFocusState();
         return true;
@@ -471,7 +460,6 @@ bool TabBarPattern::OnKeyEventWithoutClick(const KeyEvent& event)
 
 void TabBarPattern::FocusIndexChange(int32_t index)
 {
-    LOGE("ZMH, TabBarPattern::FocusIndexChange enter");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
@@ -481,10 +469,8 @@ void TabBarPattern::FocusIndexChange(int32_t index)
     auto tabBarLayoutProperty = GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(tabBarLayoutProperty);
     if (!ContentWillChange(indicator_, index)) {
-        LOGE("ZMH, interceptCallback return false, comingIndex:%{public}d", index);
         return;
     }
-    LOGE("ZMH, interceptCallback return true, comingIndex:%{public}d", index);
     if (tabsPattern->GetIsCustomAnimation()) {
         OnCustomContentTransition(indicator_, index);
         tabBarLayoutProperty->UpdateIndicator(index);
@@ -563,7 +549,6 @@ void TabBarPattern::PaintFocusState(bool needMarkDirty)
 
 void TabBarPattern::OnModifyDone()
 {
-    LOGE("ZMH, TabBarPattern::OnModifyDone() enter");
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -732,7 +717,6 @@ bool TabBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
 
 void TabBarPattern::HandleClick(const GestureEvent& info)
 {
-    LOGE("ZMH, TabBarPattern::HandleClick enter");
     if (info.GetSourceDevice() == SourceType::KEYBOARD) {
         return;
     }
@@ -767,11 +751,8 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
         return;
     }
     if (!ContentWillChange(index)) {
-        LOGE("ZMH, interceptCallback return false, comingIndex:%{public}d", index);
         return;
     }
-    LOGE("ZMH, interceptCallback return true, comingIndex:%{public}d", index);
-
     SetSwiperCurve(DurationCubicCurve);
 
     TabBarClickEvent(index);
@@ -2289,8 +2270,7 @@ void TabBarPattern::DumpAdvanceInfo()
 
 bool TabBarPattern::ContentWillChange(int32_t comingIndex)
 {
-    LOGE("ZMH, TabBarPattern::ContentWillChange(int32_t comingIndex) enter");
-    auto host = GetHost(); // TabBarFrameNode
+    auto host = GetHost();
     CHECK_NULL_RETURN(host, true);
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
     CHECK_NULL_RETURN(tabsNode, true);
@@ -2304,8 +2284,7 @@ bool TabBarPattern::ContentWillChange(int32_t comingIndex)
 
 bool TabBarPattern::ContentWillChange(int32_t currentIndex, int32_t comingIndex)
 {
-    LOGE("ZMH, TabBarPattern::ContentWillChange(int32_t currentIndex, int32_t comingIndex) enter");
-    auto host = GetHost(); // TabBarFrameNode
+    auto host = GetHost();
     CHECK_NULL_RETURN(host, true);
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
     CHECK_NULL_RETURN(tabsNode, true);
