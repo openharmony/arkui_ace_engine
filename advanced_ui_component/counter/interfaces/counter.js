@@ -252,9 +252,9 @@ export class CounterComponent extends ViewPU {
         this.__focusEnable = new ObservedPropertySimplePU(!0, this, "focusEnable");
         this.__step = new ObservedPropertySimplePU(CounterConstant.COUNTER_INITIAL_STEP, this, "step");
         this.__inputValue = new ObservedPropertySimplePU("0", this, "inputValue");
-        this.__inputYear = new ObservedPropertySimplePU(void 0, this, "inputYear");
-        this.__inputMoon = new ObservedPropertySimplePU(void 0, this, "inputMoon");
-        this.__inputDay = new ObservedPropertySimplePU(void 0, this, "inputDay");
+        this.__inputYear = new ObservedPropertySimplePU(CounterConstant.COUNTER_MIN_YEAR, this, "inputYear");
+        this.__inputMoon = new ObservedPropertySimplePU(0, this, "inputMoon");
+        this.__inputDay = new ObservedPropertySimplePU(0, this, "inputDay");
         this.__inputHour = new ObservedPropertySimplePU(0, this, "inputHour");
         this.__inputMinute = new ObservedPropertySimplePU(0, this, "inputMinute");
         this.__inputSecond = new ObservedPropertySimplePU(0, this, "inputSecond");
@@ -271,9 +271,9 @@ export class CounterComponent extends ViewPU {
         this.__subBtnFocusWidh = new ObservedPropertySimplePU("0vp", this, "subBtnFocusWidh");
         this.__addBtnFocusWidh = new ObservedPropertySimplePU("0vp", this, "addBtnFocusWidh");
         this.__value = new ObservedPropertySimplePU(void 0, this, "value");
-        this.__year = new ObservedPropertySimplePU(CounterConstant.COUNTER_MIN_YEAR, this, "year");
-        this.__month = new ObservedPropertySimplePU(CounterConstant.COUNTER_INITIAL_MONTH, this, "month");
-        this.__day = new ObservedPropertySimplePU(CounterConstant.COUNTER_INITIAL_DAY, this, "day");
+        this.__year = new ObservedPropertySimplePU(0, this, "year");
+        this.__month = new ObservedPropertySimplePU(0, this, "month");
+        this.__day = new ObservedPropertySimplePU(0, this, "day");
         this.__hour = new ObservedPropertySimplePU(0, this, "hour");
         this.__minute = new ObservedPropertySimplePU(0, this, "minute");
         this.__second = new ObservedPropertySimplePU(0, this, "second");
@@ -863,7 +863,7 @@ export class CounterComponent extends ViewPU {
             (this.onHoverDecrease = this.dateStyleOptions.onHoverDecrease);
         if (void 0 !== this.dateStyleOptions.year && this.dateStyleOptions.year >= this.minYear &&
             this.dateStyleOptions.year <= this.maxYear) {
-            if (void 0 === this.year) {
+            if (this.year === 0) {
                 this.year = this.dateStyleOptions.year;
                 let e = new DateData(this.year, this.month, this.day);
                 null === (t = this.onDateChange) || void 0 === t || t.call(this, e)
@@ -876,7 +876,7 @@ export class CounterComponent extends ViewPU {
         if (void 0 !== this.dateStyleOptions.month &&
             this.dateStyleOptions.month <= CounterConstant.COUNTER_MAX_MONTH &&
             this.dateStyleOptions.month >= CounterConstant.COUNTER_MIN_MONTH) {
-            if (void 0 === this.month) {
+            if (this.month === 0) {
                 this.month = this.dateStyleOptions.month;
                 let t = new DateData(this.year, this.month, this.day);
                 null === (e = this.onDateChange) || void 0 === e || e.call(this, t)
@@ -888,7 +888,7 @@ export class CounterComponent extends ViewPU {
         }
         if (void 0 !== this.dateStyleOptions.day && this.dateStyleOptions.day <= this.getDayNumber() &&
             this.dateStyleOptions.day >= CounterConstant.COUNTER_MIN_DAY) {
-            if (void 0 === this.month) {
+            if (this.day === 0) {
                 this.day = this.dateStyleOptions.day;
                 let t = new DateData(this.year, this.month, this.day);
                 null === (o = this.onDateChange) || void 0 === o || o.call(this, t)
