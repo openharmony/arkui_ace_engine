@@ -74,7 +74,13 @@ public:
     {
         std::unique_lock<std::shared_mutex> lock(mutex_);
         if (bundleName.empty() && moduleName.empty()) {
-            return resourceAdapters_.at(std::make_pair(bundleName, moduleName));
+            auto it = resourceAdapters_.find(std::make_pair(bundleName, moduleName));
+            if (it == resourceAdapters_.end()) {
+                TAG_LOGW(AceLogTag::ACE_RESOURCE,
+                    "Get default resourceAdapter failed, don't get resource while UIContent not initialized yet");
+                return ResourceAdapter::Create();
+            }
+            return it->second;
         }
         auto key = MakeCacheKey(bundleName, moduleName);
         return CountLimitLRU::GetCacheObjWithCountLimitLRU<RefPtr<ResourceAdapter>>(key, cacheList_, cache_);
