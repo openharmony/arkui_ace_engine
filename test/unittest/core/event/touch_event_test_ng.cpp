@@ -303,4 +303,131 @@ HWTEST_F(TouchEventTestNg, TouchEventDisable001, TestSize.Level1)
     EXPECT_EQ(touchEventActuator->userCallback_, nullptr);
     EXPECT_TRUE(touchEventActuator->HandleEvent(touchEvent));
 }
+
+/**
+ * @tc.name: OnFlushTouchEventsBegin001
+ * @tc.desc: test functions OnFlushTouchEventsBegin.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, OnFlushTouchEventsBegin001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TouchEventActuator.
+     */
+    auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
+
+    /**
+     * @tc.steps: step2. call OnFlushTouchEventsBegin.
+     * @tc.expected: Expected isFlushTouchEventsEnd_ The value of is false.
+     */
+    touchEventActuator->OnFlushTouchEventsBegin();
+    EXPECT_FALSE(touchEventActuator->isFlushTouchEventsEnd_);
+}
+
+/**
+ * @tc.name: OnFlushTouchEventsEnd001
+ * @tc.desc: test functions OnFlushTouchEventsEnd.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, OnFlushTouchEventsEnd001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TouchEventActuator.
+     */
+    auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
+
+    /**
+     * @tc.steps: step2. call OnFlushTouchEventsEnd.
+     * @tc.expected: Expected isFlushTouchEventsEnd_ The value of is true.
+     */
+    touchEventActuator->OnFlushTouchEventsEnd();
+    EXPECT_TRUE(touchEventActuator->isFlushTouchEventsEnd_);
+}
+
+/**
+ * @tc.name: ShouldResponse001
+ * @tc.desc: test functions ShouldResponse.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, ShouldResponse001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TouchEventActuator.
+     */
+    auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
+
+    /**
+     * @tc.steps: step2. call ShouldResponse.
+     * @tc.expected: Execute function return value is false.
+     */
+    EXPECT_FALSE(touchEventActuator->ShouldResponse());
+}
+
+/**
+ * @tc.name: TriggerTouchCallBack001
+ * @tc.desc: test functions TriggerTouchCallBack.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, TriggerTouchCallBack001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TouchEventActuator..
+     */
+    auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
+
+    /**
+     * @tc.steps: step2. create TouchEvent object and call TriggerTouchCallBack.
+     * @tc.expected: Execute function return value is true.
+     */
+    TouchEvent touchEvent { .tiltX = TILT_X_VALUE, .tiltY = TILT_Y_VALUE, .pointers = POINTERS };
+    EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent));
+
+    /**
+     * @tc.steps: step3. create TouchEventFunc object and Convert to Right Reference.
+     */
+    std::string unknownType;
+    TouchEventFunc callback = [&unknownType](TouchEventInfo& info) { unknownType = info.GetType(); };
+    TouchEventFunc&& callback_1 = std::forward<TouchEventFunc>(callback);
+
+    /**
+     * @tc.steps: step4. onTouchEventCallback_ assignment and call TriggerTouchCallBack.
+     * @tc.expected: Execute function return value is true.
+     */
+    touchEventActuator->onTouchEventCallback_ = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback_1));
+    EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent));
+
+    /**
+     * @tc.steps: step5. userCallback_ assignment and call TriggerTouchCallBack.
+     * @tc.expected: Execute function return value is true.
+     */
+    touchEventActuator->userCallback_ = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback_1));
+    EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent));
+
+    /**
+     * @tc.steps: step6. isInterpolated assignment and call TriggerTouchCallBack.
+     * @tc.expected: Execute function return value is true.
+     */
+    auto touchEventImp = AceType::MakeRefPtr<TouchEventImpl>(std::move(callback));
+    touchEventActuator->AddTouchEvent(touchEventImp);
+    touchEvent.isInterpolated = true;
+    EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent));
+
+    /**
+     * @tc.steps: step7. create TouchEvent object and call TriggerTouchCallBack.
+     * @tc.expected: Execute function return value is true.
+     */
+    TouchEvent touchEvent_2 { .tiltX = TILT_X_VALUE, .tiltY = TILT_Y_VALUE, .pointers = POINTERS_2 };
+    TouchEvent touchEvent_3;
+    touchEvent_2.history.push_back(touchEvent_3);
+    EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent_3));
+
+    /**
+     * @tc.steps: step8. create TouchEvent object and call isFlushTouchEventsEnd_ assignment.
+     * @tc.expected: Execute function return value is true.
+     */
+    TouchEvent touchEvent_4 { .tiltX = TILT_X_VALUE, .tiltY = TILT_Y_VALUE, .pointers = POINTERS_2 };
+    touchEvent_2.history.push_back(touchEvent_4);
+    touchEventActuator->isFlushTouchEventsEnd_ = true;
+    EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent_2));
+}
 } // namespace OHOS::Ace::NG
