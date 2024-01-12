@@ -3772,12 +3772,17 @@ bool TextFieldPattern::CursorMoveUpOperation()
 {
     CHECK_NULL_RETURN(IsTextArea(), false);
     auto originCaretPosition = selectController_->GetCaretIndex();
-    auto offsetX = selectController_->GetCaretRect().GetX() - contentRect_.GetX();
-    auto offsetY = selectController_->GetCaretRect().GetY() - textRect_.GetY();
-    // multiply by 0.5f to convert to the grapheme center point of the previous line.
-    float verticalOffset = offsetY - PreferredLineHeight() * 0.5f;
-    selectController_->UpdateCaretIndex(
-        static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(Offset(offsetX, verticalOffset))));
+    if (IsSelected()) {
+        selectController_->UpdateCaretIndex(selectController_->GetStartIndex());
+        StartTwinkling();
+    } else {
+        auto offsetX = selectController_->GetCaretRect().GetX() - contentRect_.GetX();
+        auto offsetY = selectController_->GetCaretRect().GetY() - textRect_.GetY();
+        // multiply by 0.5f to convert to the grapheme center point of the previous line.
+        float verticalOffset = offsetY - PreferredLineHeight() * 0.5f;
+        selectController_->UpdateCaretIndex(
+            static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(Offset(offsetX, verticalOffset))));
+    }
     OnCursorMoveDone();
     return originCaretPosition != selectController_->GetCaretIndex();
 }
@@ -3796,12 +3801,17 @@ bool TextFieldPattern::CursorMoveDownOperation()
 {
     CHECK_NULL_RETURN(IsTextArea(), false);
     auto originCaretPosition = selectController_->GetCaretIndex();
-    auto offsetX = selectController_->GetCaretRect().GetX() - contentRect_.GetX();
-    auto offsetY = selectController_->GetCaretRect().GetY() - textRect_.GetY();
-    // multiply by 1.5f to convert to the grapheme center point of the next line.
-    float verticalOffset = offsetY + PreferredLineHeight() * 1.5f;
-    selectController_->UpdateCaretIndex(
-        static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(Offset(offsetX, verticalOffset))));
+    if (IsSelected()) {
+        selectController_->UpdateCaretIndex(selectController_->GetEndIndex());
+        StartTwinkling();
+    } else {
+        auto offsetX = selectController_->GetCaretRect().GetX() - contentRect_.GetX();
+        auto offsetY = selectController_->GetCaretRect().GetY() - textRect_.GetY();
+        // multiply by 1.5f to convert to the grapheme center point of the next line.
+        float verticalOffset = offsetY + PreferredLineHeight() * 1.5f;
+        selectController_->UpdateCaretIndex(
+            static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(Offset(offsetX, verticalOffset))));
+    }
     OnCursorMoveDone();
     return originCaretPosition != selectController_->GetCaretIndex();
 }
