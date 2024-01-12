@@ -115,6 +115,16 @@ std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> BadgeTestNg::CreateChild
     return { textNode, textLayoutWrapper };
 }
 
+std::pair<RefPtr<FrameNode>, BadgeModelNG> CreateFrameNodeAndBadgeModelNG(const Dimension badgeCircleSize)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeCircleSize = badgeCircleSize;
+    badge.Create(badgeParameters);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    return { frameNode, badge };
+}
+
 /**
  * @tc.name: BadgeFrameNodeCreator001
  * @tc.desc: Test empty property of Badge.
@@ -473,11 +483,9 @@ HWTEST_F(BadgeTestNg, BadgePatternTest006, TestSize.Level1)
     /**
      * @tc.steps: step1. create badge and get frameNode.
      */
-    BadgeModelNG badge;
-    BadgeParameters badgeParameters;
-    badge.Create(badgeParameters);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
+    auto obj = CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+    RefPtr<FrameNode> frameNode = obj.first;
+    BadgeModelNG badge = obj.second;
 
     /**
      * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
@@ -487,8 +495,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest006, TestSize.Level1)
     RefPtr<LayoutWrapperNode> layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     auto badgePattern = AceType::DynamicCast<BadgePattern>(frameNode->GetPattern());
-    ASSERT_NE(badgePattern, nullptr);
-    auto badgeLayoutProperty = AceType::DynamicCast<BadgeLayoutProperty>(frameNode->GetLayoutProperty());
+    auto badgeLayoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
     ASSERT_NE(badgeLayoutProperty, nullptr);
     auto badgeLayoutAlgorithm = badgePattern->CreateLayoutAlgorithm();
     ASSERT_NE(badgeLayoutAlgorithm, nullptr);
@@ -550,12 +557,9 @@ HWTEST_F(BadgeTestNg, BadgePatternTest007, TestSize.Level1)
     /**
      * @tc.steps: step1. create badge and get frameNode.
      */
-    BadgeModelNG badge;
-    BadgeParameters badgeParameters;
-    badgeParameters.badgeCircleSize = BADGE_CIRCLE_SIZE;
-    badge.Create(badgeParameters);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
+    auto obj = CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+    RefPtr<FrameNode> frameNode = obj.first;
+    BadgeModelNG badge = obj.second;
 
     /**
      * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
@@ -615,7 +619,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest007, TestSize.Level1)
 
 /**
  * @tc.name: BadgePatternTest008
- * @tc.desc: test layout different branch.
+ * @tc.desc: test layout different branch
  * @tc.type: FUNC
  */
 HWTEST_F(BadgeTestNg, BadgePatternTest008, TestSize.Level1)
@@ -623,12 +627,9 @@ HWTEST_F(BadgeTestNg, BadgePatternTest008, TestSize.Level1)
     /**
      * @tc.steps: step1. create badge and get frameNode.
      */
-    BadgeModelNG badge;
-    BadgeParameters badgeParameters;
-    badgeParameters.badgeCircleSize = BADGE_CIRCLE_SIZE;
-    badge.Create(badgeParameters);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
+    auto obj = CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+    RefPtr<FrameNode> frameNode = obj.first;
+    BadgeModelNG badge = obj.second;
 
     /**
      * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
@@ -685,7 +686,7 @@ HWTEST_F(BadgeTestNg, BadgePatternTest008, TestSize.Level1)
 
 /**
  * @tc.name: BadgePatternTest009
- * @tc.desc: test UpdateSizeWithCheck.
+ * @tc.desc: test UpdateSizeWithCheck
  * @tc.type: FUNC
  */
 HWTEST_F(BadgeTestNg, BadgePatternTest009, TestSize.Level1)
@@ -693,11 +694,9 @@ HWTEST_F(BadgeTestNg, BadgePatternTest009, TestSize.Level1)
     /**
      * @tc.steps: step1. create badge and get frameNode.
      */
-    BadgeModelNG badge;
-    BadgeParameters badgeParameters;
-    badge.Create(badgeParameters);
-    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
+    auto obj = CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+    RefPtr<FrameNode> frameNode = obj.first;
+    BadgeModelNG badge = obj.second;
 
     /**
      * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
@@ -786,4 +785,5 @@ HWTEST_F(BadgeTestNg, BadgeAccessibilityPropertyTestNg003, TestSize.Level1)
     auto badgeAccessibilityProperty = frameNode->GetAccessibilityProperty<BadgeAccessibilityProperty>();
     EXPECT_EQ(badgeAccessibilityProperty->GetText(), "");
 }
+
 } // namespace OHOS::Ace::NG
