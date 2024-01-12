@@ -666,7 +666,7 @@ HWTEST_F(AppBarTestNg, IniColor001, TestSize.Level1)
     auto atom = AppBarView::Create(test);
     auto appBar = Referenced::MakeRefPtr<AppBarView>(atom);
     auto titleBar = AceType::DynamicCast<FrameNode>(atom->GetFirstChild());
-	  EXPECT_NE(titleBar, nullptr); 
+    EXPECT_NE(titleBar, nullptr); 
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
@@ -681,7 +681,6 @@ HWTEST_F(AppBarTestNg, IniColor001, TestSize.Level1)
     EXPECT_NE(backIcon, nullptr);
     auto backBtnproperty = backIcon->GetLayoutProperty<ImageLayoutProperty>();
     ASSERT_NE(backBtnproperty, nullptr);
-
     auto FaButton = appBar->atom_->GetLastChild();
     auto faIcon = AceType::DynamicCast<FrameNode>(FaButton->GetFirstChild());
     auto faButtonproperty = faIcon->GetLayoutProperty<ImageLayoutProperty>();
