@@ -78,6 +78,7 @@ const Color TEXT_COLOR_VALUE = Color::FromRGB(255, 100, 100);
 const Color BG_COLOR_VALUE = Color::FromRGB(100, 255, 100);
 const std::vector<SelectParam> CREATE_VALUE = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
     { OPTION_TEXT_3, INTERNAL_SOURCE } };
+constexpr int32_t PLATFORM_VERSION_ELEVEN = 11;
 } // namespace
 struct TestProperty {
     std::optional<Dimension> FontSize = std::nullopt;
@@ -1263,7 +1264,7 @@ HWTEST_F(SelectTestNg, GetFontSizeTest001, TestSize.Level1)
 HWTEST_F(SelectTestNg, SelectPadding001, TestSize.Level1)
 {
     SelectModelNG selectModelInstance;
-
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
     std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
     ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(100);
     selectModelInstance.Create(params);
