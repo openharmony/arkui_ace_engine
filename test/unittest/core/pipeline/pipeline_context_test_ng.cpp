@@ -40,6 +40,7 @@
 #include "base/json/json_util.h"
 #include "base/log/dump_log.h"
 #include "base/log/frame_report.h"
+#include "base/longframe/long_frame_report.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/system_properties.h"
