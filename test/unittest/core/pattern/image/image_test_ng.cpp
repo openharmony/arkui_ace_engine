@@ -2236,6 +2236,8 @@ HWTEST_F(ImageTestNg, ImageSetDraggable0001, TestSize.Level1)
     RefPtr<PixelMap> pixMap = nullptr;
     image.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
     image.SetDraggable(true);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_TRUE(frameNode->draggable_);
 }
 
 HWTEST_F(ImageTestNg, ImageSetDraggable0002, TestSize.Level1)
@@ -2244,6 +2246,8 @@ HWTEST_F(ImageTestNg, ImageSetDraggable0002, TestSize.Level1)
     RefPtr<PixelMap> pixMap = nullptr;
     image.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
     image.SetDraggable(false);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_FALSE(frameNode->draggable_);
 }
 
 /**
