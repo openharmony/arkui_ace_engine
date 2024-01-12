@@ -974,6 +974,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACE();
     if (NearEqual(rootWidth_, width) && NearEqual(rootHeight_, height) &&
         type == WindowSizeChangeReason::CUSTOM_ANIMATION && !isDensityChanged_) {
         TryCallNextFrameLayoutCallback();

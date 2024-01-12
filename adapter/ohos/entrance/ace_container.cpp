@@ -777,6 +777,14 @@ void AceContainer::InitializeCallback()
                                     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
+
+        if (type != WindowSizeChangeReason::ROTATION) {
+            context->SetSurfaceChangeMsg(width, height, type, rsTransaction);
+            context->RequestFrame();
+            return;
+        }
+        context->ResetSurfaceChangeMsg();
+
         auto callback = [context, width, height, type, rsTransaction, id]() {
             context->OnSurfaceChanged(width, height, type, rsTransaction);
             if (type == WindowSizeChangeReason::ROTATION) {
