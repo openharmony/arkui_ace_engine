@@ -99,6 +99,9 @@ constexpr Dimension UNDERLINE_NORMAL_HEIGHT = 48.0_vp;
 constexpr uint32_t INLINE_DEFAULT_VIEW_MAXLINE = 3;
 constexpr Dimension UNDERLINE_NORMAL_PADDING = 12.0_vp;
 constexpr Dimension SCROLL_BAR_MIN_HEIGHT = 4.0_vp;
+#if defined(ENABLE_STANDARD_INPUT)
+constexpr Dimension AVOID_OFFSET = 24.0_vp;
+#endif
 constexpr Dimension DEFAULT_FONT = Dimension(16, DimensionUnit::FP);
 constexpr Dimension COUNTER_BOTTOM = 22.0_vp;
 constexpr double BOTTOM_MARGIN = 22.0;
@@ -3025,12 +3028,14 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     auto windowRect = pipeline->GetCurrentWindowRect();
     double positionY = (tmpHost->GetPaintRectOffset() - pipeline->GetRootRect().GetOffset()).GetY() + windowRect.Top();
     double height = frameRect_.Height();
+    auto offset = AVOID_OFFSET.ConvertToPx();
+    height = selectController_->GetCaretRect().Bottom() + windowRect.Top() + parentGlobalOffset_.GetY() + offset
+        - positionY;
 
     if (IsNormalInlineState()) {
-        auto manager = pipeline->GetSafeAreaManager();
-        const double HEIGHT_OFFSET = theme->GetInlineBorderWidth().ConvertToPx() * 2 + 1;
-        height = std::max(static_cast<double>(inlineMeasureItem_.inlineSizeHeight) + HEIGHT_OFFSET, height);
-        positionY += frameRect_.Height();
+        auto safeBoundary = theme->GetInlineBorderWidth().ConvertToPx() * 2;
+        positionY += static_cast<double>(inlineMeasureItem_.inlineSizeHeight) + safeBoundary;
+        height = offset;
     }
 
     MiscServices::CursorInfo cursorInfo { .left = selectController_->GetCaretRect().Left() + windowRect.Left() +
@@ -4895,6 +4900,7 @@ void TextFieldPattern::ClearCounterNode()
 
 void TextFieldPattern::SetShowError()
 {
+    CHECK_NULL_VOID(!IsNormalInlineState());
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto passWordMode = IsInPasswordMode();
@@ -4934,6 +4940,10 @@ void TextFieldPattern::SetShowError()
         renderContext->UpdateBorderColor(passwordModeStyle_.borderColor);
         renderContext->UpdateBackgroundColor(passwordModeStyle_.bgColor);
         layoutProperty->UpdateTextColor(passwordModeStyle_.textColor);
+        preErrorState_ = false;
+    }
+    if (!visible && !passWordMode) {
+        renderContext->UpdateBorderColor(passwordModeStyle_.borderColor);
         preErrorState_ = false;
     }
     if (visible && (!passWordMode || errorText.empty())) {
