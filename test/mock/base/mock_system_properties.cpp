@@ -65,7 +65,7 @@ DeviceType SystemProperties::GetDeviceType()
 
 bool SystemProperties::GetDebugEnabled()
 {
-    return false;
+    return debugEnabled_;
 }
 
 float SystemProperties::GetAnimationScale()
