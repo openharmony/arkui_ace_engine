@@ -650,4 +650,107 @@ HWTEST_F(AppBarTestNg, UpdateRowLayout001, TestSize.Level1)
     EXPECT_EQ(buttonLayoutProperty->GetMarginProperty()->left.value(), CalcLength(MARGIN_BUTTON));
     EXPECT_EQ(renderContext->GetTransformScale(), VectorF(1.0f, 1.0f));
 }
+
+/**
+ * @tc.name: IniColor001
+ * @tc.desc: Test use of IniColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, IniColor001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create appBar.
+     * @tc.expected: appBar is not null.
+     */
+    auto test = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    auto atom = AppBarView::Create(test);
+    auto appBar = Referenced::MakeRefPtr<AppBarView>(atom);
+    auto titleBar = AceType::DynamicCast<FrameNode>(atom->GetFirstChild());
+	  EXPECT_NE(titleBar, nullptr); 
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
+    ASSERT_NE(appBarTheme, nullptr);
+
+    auto textColor = appBarTheme->GetTextColor();
+    auto renderContext = titleBar->GetRenderContext();
+    auto originColor = renderContext->GetBackgroundColorValue();
+
+    auto backButton = titleBar->GetFirstChild();
+    auto backIcon = AceType::DynamicCast<FrameNode>(backButton->GetFirstChild());
+    EXPECT_NE(backIcon, nullptr);
+    auto backBtnproperty = backIcon->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(backBtnproperty, nullptr);
+
+    auto FaButton = appBar->atom_->GetLastChild();
+    auto faIcon = AceType::DynamicCast<FrameNode>(FaButton->GetFirstChild());
+    auto faButtonproperty = faIcon->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(faButtonproperty, nullptr);
+
+    /**
+     * @tc.Calling the IniColor function When both isRowColorSet and isIconColorSet are false.
+     */	
+    appBar->IniColor();
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), originColor);
+    EXPECT_EQ(backBtnproperty->GetImageSourceInfo()->GetFillColor(), Color::BLACK);
+    EXPECT_EQ(faButtonproperty->GetImageSourceInfo()->GetFillColor(), Color::BLACK);
+    /**
+     * @tc.Calling the IniColor function When isRowColorSet or isIconColorSet is true.
+     */
+    appBar->SetRowColor(Color::RED);
+    EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::RED);
+    appBar->IniColor();
+    EXPECT_NE(renderContext->GetBackgroundColorValue(), appBarTheme->GetBgColor());
+
+    appBar->SetIconColor(Color::BLUE);
+    EXPECT_EQ(faButtonproperty->GetImageSourceInfo()->GetFillColor(), Color::BLUE);
+    appBar->IniColor();
+    EXPECT_NE(faButtonproperty->GetImageSourceInfo()->GetFillColor(), textColor);
+}
+
+/**
+ * @tc.name: AppBarWithNavigation011
+ * @tc.desc: Test when exist navigation hide appbar
+ * @tc.type: FUNC
+ */
+HWTEST_F(AppBarTestNg, AppBarWithNavigation011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create appBar.
+     * @tc.expected: appBar is not null.
+     */
+    auto stage = AceType::MakeRefPtr<FrameNode>("stage", 1, AceType::MakeRefPtr<StagePattern>());
+    auto atom = AppBarView::Create(stage);
+    auto appBar = Referenced::MakeRefPtr<AppBarView>(atom);
+    EXPECT_NE(appBar, nullptr);
+    
+    /**
+     * @tc.Calling the iniBehavior function.
+     * @tc.Create multiple navigation.
+     */      
+    appBar->iniBehavior();
+    stage->GetPattern<StagePattern>()->OnRebuildFrame();
+    auto titleBar = AceType::DynamicCast<FrameNode>(atom->GetFirstChild());
+    auto backbtn = AceType::DynamicCast<FrameNode>(titleBar->GetFirstChild());
+    EXPECT_EQ(backbtn->GetLayoutProperty()->GetVisibility(), VisibleType::GONE);
+
+    auto test2 = AceType::MakeRefPtr<FrameNode>("test", 2, AceType::MakeRefPtr<Pattern>());
+    auto test3 = AceType::MakeRefPtr<FrameNode>("test", 3, AceType::MakeRefPtr<Pattern>());
+    stage->AddChild(test2);
+    stage->AddChild(test3);
+    atom = AppBarView::Create(stage);
+    appBar = Referenced::MakeRefPtr<AppBarView>(atom);	
+    appBar->iniBehavior();
+    stage->GetPattern<StagePattern>()->OnRebuildFrame();
+    titleBar = AceType::DynamicCast<FrameNode>(atom->GetFirstChild());
+    EXPECT_EQ(titleBar->GetLayoutProperty()->GetVisibility(), VisibleType::VISIBLE);
+	
+    appBar->SetVisible(false);
+    appBar->iniBehavior();
+    stage->GetPattern<StagePattern>()->OnRebuildFrame();
+    titleBar = AceType::DynamicCast<FrameNode>(atom->GetFirstChild());
+    backbtn = AceType::DynamicCast<FrameNode>(titleBar->GetFirstChild());
+    EXPECT_EQ(backbtn->GetLayoutProperty()->GetVisibility(), VisibleType::VISIBLE);
+    EXPECT_EQ(titleBar->GetLayoutProperty()->GetVisibility(), VisibleType::GONE);
+}
 } // namespace OHOS::Ace::NG
