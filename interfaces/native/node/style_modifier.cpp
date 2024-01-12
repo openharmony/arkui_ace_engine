@@ -96,7 +96,14 @@ const std::vector<std::string> IMAGE_INTERPOLATION_ARRAY = { "none", "low", "med
 const std::vector<std::string> IMAGE_REPEAT_ARRAY = { "no_repeat", "repeat_x", "repeat_y", "repeat" };
 const std::vector<std::string> TEXT_CASE_ARRAY = { "normal", "lowercase", "uppercase" };
 const std::vector<std::string> IMAGE_SPAN_VERTICAL_ALIGN = { "top", "center", "bottom", "baseline", "none" };
-typedef std::map<const std::string, ArkUI_Int32> AttrStringToIntMap;
+const std::vector<std::string> COMMON_GRADIENT_DIRECTION = { "left", "top", "right", "bottom", "left-top",
+    "left-bottom", "right-top", "right-bottom", "none" };
+const std::vector<std::string> COMMON_ALIGNMENT = { "top-start", "top", "top-end", "start", "center",
+    "end", "bottom-start", "bottom", "bottom-end" };
+const std::vector<std::string> SCROLL_DISPLAY_MODE = { "off",  "auto",  "on" };
+const std::vector<std::string> SCROLL_AXIS = { "vertical",  "horizontal",  "free",  "none" };
+const std::vector<std::string> SCROLL_EDGE_EFFECT = { "spring",  "fade",  "none" };
+const std::vector<std::string> LIST_STICKY_STYLE = { "none",  "header",  "footer",  "both" };
 
 uint32_t StringToColorInt(const char* string, uint32_t defaultValue = 0)
 {
@@ -457,13 +464,8 @@ void SetLinearGradient(ArkUI_NodeHandle node, const char* value)
         values[NUM_1] = StringUtils::StringToDouble(params[NUM_1].c_str());
     }
 
-    AttrStringToIntMap paramsMap = {
-        { "left", 0}, { "top", 1}, { "right", 2}, { "bottom", 3}, { "left-top", 4},
-        { "left-bottom", 5}, { "right-top", 6}, { "right-bottom", 7}, { "none", 8},
-    };
-
     if (params.size() > NUM_2) {
-        values[NUM_2] = paramsMap.find(params[NUM_2]) != paramsMap.end() ? paramsMap[params[NUM_2]] : NUM_3;
+        values[NUM_2] = StringToEnumInt(params[NUM_2].c_str(), COMMON_GRADIENT_DIRECTION, NUM_3);
     }
     values[NUM_3] = (params.size() > NUM_3) ? StringToBoolInt(params[NUM_3].c_str()) : false;
 
@@ -483,19 +485,7 @@ void SetAlign(ArkUI_NodeHandle node, const char* value)
         return;
     }
 
-    AttrStringToIntMap paramsMap = {
-        { "top-start", 0},
-        { "top", 1},
-        { "top-end", 2},
-        { "start", 3},
-        { "center", 4},
-        { "end", 5},
-        { "bottom-start", 6},
-        { "bottom", 7},
-        { "bottom-end", 8}
-    };
-
-    auto attrVal = paramsMap.find(value) != paramsMap.end() ? paramsMap[value] : 0;
+    auto attrVal = StringToEnumInt(value, COMMON_ALIGNMENT, NUM_0);
     fullImpl->getNodeModifiers()->getCommonModifier()->setAlign(node->uiNodeHandle, attrVal);
 }
 
@@ -1097,19 +1087,7 @@ void SetAlignContent(ArkUI_NodeHandle node, const char* value)
         return;
     }
 
-    AttrStringToIntMap paramsMap = {
-        { "top-start", 0},
-        { "top", 1},
-        { "top-end", 2},
-        { "start", 3},
-        { "center", 4},
-        { "end", 5},
-        { "bottom-start", 6},
-        { "bottom", 7},
-        { "bottom-end", 8}
-    };
-
-    auto attrVal = paramsMap.find(value) != paramsMap.end() ? paramsMap[value] : 0;
+    auto attrVal = StringToEnumInt(value, COMMON_ALIGNMENT, NUM_0);
     fullImpl->getNodeModifiers()->getStackModifier()->setAlignContent(node->uiNodeHandle, attrVal);
 }
 
@@ -1173,13 +1151,7 @@ void SetScrollScrollBar(ArkUI_NodeHandle node, const char* value)
         return;
     }
 
-    AttrStringToIntMap paramsMap = {
-        { "off", 0},
-        { "auto", 1},
-        { "on", 2},
-    };
-
-    auto attrVal = paramsMap.find(value) != paramsMap.end() ? paramsMap[value] : 0;
+    auto attrVal = StringToEnumInt(value, SCROLL_DISPLAY_MODE, NUM_1);
     fullImpl->getNodeModifiers()->getScrollModifier()->setScrollScrollBar(node->uiNodeHandle, attrVal);
 }
 
@@ -1221,14 +1193,7 @@ void SetScrollScrollable(ArkUI_NodeHandle node, const char* value)
         return;
     }
 
-    AttrStringToIntMap paramsMap = {
-        { "vertical", 0},
-        { "horizontal", 1},
-        { "free", 2},
-        { "none", 3},
-    };
-
-    auto attrVal = paramsMap.find(value) != paramsMap.end() ? paramsMap[value] : NUM_0;
+    auto attrVal = StringToEnumInt(value, SCROLL_AXIS, NUM_0);
     fullImpl->getNodeModifiers()->getScrollModifier()->setScrollScrollable(node->uiNodeHandle, attrVal);
 }
 
@@ -1252,13 +1217,7 @@ void SetScrollEdgeEffect(ArkUI_NodeHandle node, const char* value)
         return;
     }
 
-    AttrStringToIntMap paramsMap = {
-        { "spring", 0},
-        { "fade", 1},
-        { "none", 2},
-    };
-
-    auto attrVal = paramsMap.find(params[NUM_0]) != paramsMap.end() ? paramsMap[params[NUM_0]] : NUM_0;
+    auto attrVal = StringToEnumInt(value, SCROLL_EDGE_EFFECT, NUM_2);
     alwaysEnabled = (size > NUM_1) ? StringToBoolInt(params[NUM_1].c_str()) : true;
     fullImpl->getNodeModifiers()->getScrollModifier()->setScrollEdgeEffect(node->uiNodeHandle, attrVal, alwaysEnabled);
 }
@@ -1292,13 +1251,7 @@ void SetListScrollBar(ArkUI_NodeHandle node, const char* value)
         return;
     }
 
-    AttrStringToIntMap paramsMap = {
-        { "off", 0},
-        { "auto", 1},
-        { "on", 2},
-    };
-
-    auto attrVal = paramsMap.find(value) != paramsMap.end() ? paramsMap[value] : 0;
+    auto attrVal = StringToEnumInt(value, SCROLL_DISPLAY_MODE, NUM_1);
     fullImpl->getNodeModifiers()->getListModifier()->setListScrollBar(node->uiNodeHandle, attrVal);
 }
 
@@ -1314,14 +1267,7 @@ void SetListListDirection(ArkUI_NodeHandle node, const char* value)
         return;
     }
 
-    AttrStringToIntMap paramsMap = {
-        { "vertical", 0},
-        { "horizontal", 1},
-        { "free", 2},
-        { "none", 3},
-    };
-
-    auto attrVal = paramsMap.find(value) != paramsMap.end() ? paramsMap[value] : 0;
+    auto attrVal = StringToEnumInt(value, SCROLL_AXIS, NUM_0);
     fullImpl->getNodeModifiers()->getListModifier()->setListDirection(node->uiNodeHandle, attrVal);
 }
 
@@ -1338,14 +1284,7 @@ void SetListListSticky(ArkUI_NodeHandle node, const char* value)
         return;
     }
 
-    AttrStringToIntMap paramsMap = {
-        { "none", 0},
-        { "header", 1},
-        { "footer", 2},
-        { "both", 3}
-    };
-
-    auto attrVal = paramsMap.find(value) != paramsMap.end() ? paramsMap[value] : 0;
+    auto attrVal = StringToEnumInt(value, LIST_STICKY_STYLE, NUM_0);
 
     fullImpl->getNodeModifiers()->getListModifier()->setSticky(node->uiNodeHandle, attrVal);
 }
@@ -1386,13 +1325,7 @@ void SetListEdgeEffect(ArkUI_NodeHandle node, const char* value)
         return;
     }
 
-    AttrStringToIntMap paramsMap = {
-        { "spring", 0},
-        { "fade", 1},
-        { "none", 2},
-    };
-
-    auto attrVal = paramsMap.find(params[NUM_0]) != paramsMap.end() ? paramsMap[params[NUM_0]] : NUM_0;
+    auto attrVal = StringToEnumInt(value, SCROLL_EDGE_EFFECT, NUM_2);
     alwaysEnabled = (size > NUM_1) ? StringToBoolInt(params[NUM_1].c_str()) : true;
     fullImpl->getNodeModifiers()->getListModifier()->setListEdgeEffect(node->uiNodeHandle, attrVal, alwaysEnabled);
 }
