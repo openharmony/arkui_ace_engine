@@ -1128,6 +1128,7 @@ void SelectPattern::SetSelectDefaultTheme()
 
 void SelectPattern::SetOptionWidth(const Dimension& value)
 {
+    isFitTrigger_ = false;
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
     auto menuPattern = menu->GetPattern<MenuPattern>();
