@@ -821,11 +821,11 @@ var DatePickerType;
   DatePickerType[DatePickerType["Date"] = 1] = "Date";
 })(DatePickerType || (DatePickerType = {}));
 
-var DisplayedComponentType;
-(function (DisplayedComponentType) {
-  DisplayedComponentType[DisplayedComponentType["HOUR_MINUTE"] = 0] = "HOUR_MINUTE";
-  DisplayedComponentType[DisplayedComponentType["HOUR_MINUTE_SECOND"] = 1] = "HOUR_MINUTE_SECOND";
-})(DisplayedComponentType || (DisplayedComponentType = {}));
+var TimePickerFormat;
+(function (TimePickerFormat) {
+  TimePickerFormat[TimePickerFormat["HOUR_MINUTE"] = 0] = "HOUR_MINUTE";
+  TimePickerFormat[TimePickerFormat["HOUR_MINUTE_SECOND"] = 1] = "HOUR_MINUTE_SECOND";
+})(TimePickerFormat || (TimePickerFormat = {}));
 
 var InputType;
 (function (InputType) {
