@@ -2608,20 +2608,20 @@ void TextPattern::ProcessBoundRectByTextShadow(RectF& rect)
     float downOffsetY = 0.0f;
     for (const auto& shadow : shadows.value()) {
         auto shadowBlurRadius = shadow.GetBlurRadius() * 2.0f;
-        if (LessNotEqual(shadow.GetOffset().GetX(), 0.0f) && LessNotEqual(shadow.GetOffset().GetX(), leftOffsetX)) {
+        if (LessOrEqual(shadow.GetOffset().GetX(), 0.0f) && LessNotEqual(shadow.GetOffset().GetX(), leftOffsetX)) {
             leftOffsetX = shadow.GetOffset().GetX() - shadowBlurRadius;
         }
 
-        if (GreatNotEqual(shadow.GetOffset().GetX(), 0.0f) &&
+        if (GreatOrEqual(shadow.GetOffset().GetX(), 0.0f) &&
             GreatNotEqual(shadow.GetOffset().GetX() + shadowBlurRadius, rightOffsetX)) {
             rightOffsetX = shadow.GetOffset().GetX() + shadowBlurRadius;
         }
 
-        if (LessNotEqual(shadow.GetOffset().GetY(), 0.0f) && LessNotEqual(shadow.GetOffset().GetY(), upOffsetY)) {
+        if (LessOrEqual(shadow.GetOffset().GetY(), 0.0f) && LessNotEqual(shadow.GetOffset().GetY(), upOffsetY)) {
             upOffsetY = shadow.GetOffset().GetY() - shadowBlurRadius;
         }
 
-        if (GreatNotEqual(shadow.GetOffset().GetY(), 0.0f) &&
+        if (GreatOrEqual(shadow.GetOffset().GetY(), 0.0f) &&
             GreatNotEqual(shadow.GetOffset().GetY() + shadowBlurRadius, downOffsetY)) {
             downOffsetY = shadow.GetOffset().GetY() + shadowBlurRadius;
         }
