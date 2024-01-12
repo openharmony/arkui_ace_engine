@@ -150,6 +150,7 @@ public:
     void SetSaturate(const Dimension& value) override;
     void SetSepia(const Dimension& value) override;
     void SetInvert(const InvertVariant& invert) override;
+    void SetSystemBarEffect(bool) override {};
     void SetHueRotate(float value) override;
     void SetUseEffect(bool) override {}
     void SetUseShadowBatching(bool) override {}

@@ -1815,6 +1815,14 @@ void ViewAbstract::SetInvert(FrameNode *frameNode, const InvertVariant &invert)
     ACE_UPDATE_NODE_RENDER_CONTEXT(FrontInvert, invert, frameNode);
 }
 
+void ViewAbstract::SetSystemBarEffect(bool systemBarEffect)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(SystemBarEffect, systemBarEffect);
+}
+
 void ViewAbstract::SetHueRotate(float hueRotate)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {

@@ -385,6 +385,7 @@ private:
     void OnFrontSaturateUpdate(const Dimension& saturate) override;
     void OnFrontSepiaUpdate(const Dimension& sepia) override;
     void OnFrontInvertUpdate(const InvertVariant& invert) override;
+    void OnSystemBarEffectUpdate(bool systemBarEffect) override;
     void OnFrontHueRotateUpdate(float hueRotate) override;
     void OnFrontColorBlendUpdate(const Color& colorBlend) override;
     void OnLinearGradientBlurUpdate(const NG::LinearGradientBlurPara& blurPara) override;

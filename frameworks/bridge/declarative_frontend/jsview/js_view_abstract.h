@@ -297,6 +297,7 @@ public:
     static void JsSaturate(const JSCallbackInfo& info);
     static void JsSepia(const JSCallbackInfo& info);
     static void JsInvert(const JSCallbackInfo& info);
+    static void JsSystemBarEffect(const JSCallbackInfo& info);
     static void JsHueRotate(const JSCallbackInfo& info);
 
     static void JsClip(const JSCallbackInfo& info);
