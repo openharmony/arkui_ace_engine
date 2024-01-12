@@ -969,6 +969,11 @@ void JsBindFormViews(BindingTarget globalObj, const std::unordered_set<std::stri
 
         JSProfiler::JSBind(globalObj);
         JSCommonView::JSBind(globalObj);
+        JSLinearGradient::JSBind(globalObj);
+        JSPath2D::JSBind(globalObj);
+        JSOffscreenRenderingContext::JSBind(globalObj);
+        JSRenderingContextSettings::JSBind(globalObj);
+        JSRenderingContext::JSBind(globalObj);
     }
 
     if (!formModuleList.empty()) {
