@@ -43,6 +43,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/log/frame_report.h"
+#include "base/log/jank_frame_report.h"
 #include "base/log/log.h"
 #include "base/log/log_wrapper.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -606,6 +607,9 @@ void AceContainer::OnInactive(int32_t instanceId)
                 return;
             }
             pipelineContext->WindowFocus(false);
+            if (Container::Current()->IsScenceBoardWindow()) {
+                JankFrameReport::GetInstance().FlushRecord();
+            }
         },
         TaskExecutor::TaskType::UI);
 }
