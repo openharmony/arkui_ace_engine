@@ -16,6 +16,7 @@
 #include <cstdlib>
 
 #include "arkoala_api.h"
+#include "frameworks/base/utils/macros.h"
 
 extern "C" ACE_FORCE_EXPORT ArkUIAnyAPI* GetArkUINodeAPI(ArkUIAPIVariantKind kind, int version)
 {
@@ -28,7 +29,7 @@ extern "C" ACE_FORCE_EXPORT ArkUIAnyAPI* GetArkUINodeAPI(ArkUIAPIVariantKind kin
         }
         case ArkUIAPIVariantKind::Graphics: {
             return nullptr;
-        }        
+        }
         default: {
             ARKOALA_LOG("API kind %d is not supported\n", static_cast<int>(kind));
             return nullptr;

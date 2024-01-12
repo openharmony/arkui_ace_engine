@@ -26,7 +26,7 @@ ArkUINativeModuleValue CounterBridge::SetEnableInc(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> flagArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     if (flagArg->IsUndefined() || !flagArg->IsBoolean()) {
-        GetArkUIInternalNodeAPI()->GetCounterModifier().ReSetEnableInc(nativeNode);
+        GetArkUIInternalNodeAPI()->GetCounterModifier().resetEnableInc(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     bool flag = flagArg->ToBoolean(vm)->Value();
@@ -40,7 +40,7 @@ ArkUINativeModuleValue CounterBridge::ResetEnableInc(ArkUIRuntimeCallInfo* runti
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCounterModifier().ReSetEnableInc(nativeNode);
+    GetArkUIInternalNodeAPI()->GetCounterModifier().resetEnableInc(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -52,7 +52,7 @@ ArkUINativeModuleValue CounterBridge::SetEnableDec(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> flagArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     if (flagArg->IsUndefined() || !flagArg->IsBoolean()) {
-        GetArkUIInternalNodeAPI()->GetCounterModifier().ReSetEnableDec(nativeNode);
+        GetArkUIInternalNodeAPI()->GetCounterModifier().resetEnableDec(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
     bool flag = flagArg->ToBoolean(vm)->Value();
@@ -66,7 +66,7 @@ ArkUINativeModuleValue CounterBridge::ResetEnableDec(ArkUIRuntimeCallInfo* runti
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetCounterModifier().ReSetEnableDec(nativeNode);
+    GetArkUIInternalNodeAPI()->GetCounterModifier().resetEnableDec(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

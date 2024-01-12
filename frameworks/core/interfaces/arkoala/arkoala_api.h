@@ -263,7 +263,7 @@ struct ArkUITouchEvent {
     ArkUI_Int32 (*getTouches)(ArkUITouchPoint** points);
 
     /**
-     * @brief Returns the historical point information in this event. 
+     * @brief Returns the historical point information in this event.
      * These are the movements that occurred between this event and the previous event.
      *
      */
@@ -278,7 +278,7 @@ struct ArkUITouchEvent {
     ArkUI_Bool stopPropagation;
 
     /**
-     * @brief Blocks the current node's default event handling behavior, allowing events 
+     * @brief Blocks the current node's default event handling behavior, allowing events
      * to bubble up further.
      *
      */
@@ -862,7 +862,7 @@ struct ArkUICommonModifier {
     void (*resetMaxHeight)(ArkUINodeHandle node);
     void (*setSize)(ArkUINodeHandle node, const ArkUI_Float64* number, const ArkUI_Int32* unit, ArkUI_CharPtr* calc);
     void (*resetSize)(ArkUINodeHandle node);
-    void (*ClearWidthOrHeight)(ArkUINodeHandle node, bool isWidth);
+    void (*clearWidthOrHeight)(ArkUINodeHandle node, bool isWidth);
     void (*setAlignSelf)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetAlignSelf)(ArkUINodeHandle node);
     void (*setAspectRatio)(ArkUINodeHandle node, ArkUI_Float64 value);
@@ -917,15 +917,18 @@ struct ArkUICommonModifier {
     void (*setClipShape)(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Float64* attribute, ArkUI_Int32 length);
     void (*setClipPath)(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Float64* attribute, ArkUI_CharPtr commands);
     void (*setOpacityTransition)(ArkUINodeHandle node, ArkUI_Float32 value);
-    void (*setRotateTransition)(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_Int32 length, ArkUI_Float32 centerXValue,
-                                ArkUI_Int32 centerXUnit, ArkUI_Float32 centerYValue, ArkUI_Int32 centerYUnit, ArkUI_Float32 centerZValue,
-                                ArkUI_Int32 centerZUnit, ArkUI_Float32 perspective, ArkUI_Float32 angle);
+    void (*setRotateTransition)(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_Int32 length,
+                                ArkUI_Float32 centerXValue, ArkUI_Int32 centerXUnit, ArkUI_Float32 centerYValue,
+                                ArkUI_Int32 centerYUnit, ArkUI_Float32 centerZValue, ArkUI_Int32 centerZUnit,
+                                ArkUI_Float32 perspective, ArkUI_Float32 angle);
 
-    void (*setScaleTransition)(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_Int32 length, ArkUI_Float32 centerX, 
-                               ArkUI_Int32 centerXUnit, ArkUI_Float32 centerY, ArkUI_Int32 centerYUnit);
+    void (*setScaleTransition)(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_Int32 length,
+                               ArkUI_Float32 centerX, ArkUI_Int32 centerXUnit,
+                               ArkUI_Float32 centerY, ArkUI_Int32 centerYUnit);
 
-    void (*setTranslateTransition)(ArkUINodeHandle node, ArkUI_Float32 centerXValue, ArkUI_Int32 centerXUnit, ArkUI_Float32 centerYValue,
-                                    ArkUI_Int32 centerYUnit, ArkUI_Float32 centerZValue, ArkUI_Int32 centerZUnit);
+    void (*setTranslateTransition)(ArkUINodeHandle node, ArkUI_Float32 centerXValue, ArkUI_Int32 centerXUnit,
+                                   ArkUI_Float32 centerYValue, ArkUI_Int32 centerYUnit,
+                                   ArkUI_Float32 centerZValue, ArkUI_Int32 centerZUnit);
 };
 
 
@@ -1072,6 +1075,7 @@ struct ArkUIButtonModifier {
 
 struct ArkUIImageModifier {
     void (*setImageSrc)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*setSrc)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*setCopyOption)(ArkUINodeHandle node, ArkUI_Int32 copyOption);
     void (*resetCopyOption)(ArkUINodeHandle node);
     void (*setAutoResize)(ArkUINodeHandle node, bool autoResize);
@@ -1317,7 +1321,7 @@ struct ArkUIGridModifier {
     void (*resetEdgeEffect)(ArkUINodeHandle node);
     void (*setNestedScroll)(ArkUINodeHandle node, ArkUI_Int32 forward, ArkUI_Int32 backward);
     void (*resetNestedScroll)(ArkUINodeHandle node);
-    void (*setEnableScroll)(ArkUINodeHandle node, bool ScrollEnabled);
+    void (*setEnableScroll)(ArkUINodeHandle node, bool scrollEnabled);
     void (*resetEnableScroll)(ArkUINodeHandle node);
     void (*setFriction)(ArkUINodeHandle node, ArkUI_Float64 friction);
     void (*resetFriction)(ArkUINodeHandle node);
@@ -1612,9 +1616,9 @@ struct ArkUIBlankModifier {
 
 struct ArkUICounterModifier {
     void (*setEnableInc)(ArkUINodeHandle node, bool value);
-    void (*ReSetEnableInc)(ArkUINodeHandle node);
+    void (*resetEnableInc)(ArkUINodeHandle node);
     void (*setEnableDec)(ArkUINodeHandle node, bool value);
-    void (*ReSetEnableDec)(ArkUINodeHandle node);
+    void (*resetEnableDec)(ArkUINodeHandle node);
 };
 
 struct ArkUICheckboxModifier {
@@ -2027,7 +2031,7 @@ struct ArkUIDatePickerModifier {
 };
 
 struct ArkUISpanModifier {
-    void (*setSpanContent)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*setContent)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*setSpanTextCase)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetSpanTextCase)(ArkUINodeHandle node);
     void (*setSpanFontWeight)(ArkUINodeHandle node, ArkUI_CharPtr value);
@@ -2261,7 +2265,6 @@ struct ArkUIXComponentModifier {
     void (*resetXComponentBackgroundColor)(ArkUINodeHandle node);
     void (*setXComponentOpacity)(ArkUINodeHandle node, ArkUI_Float64 opacity);
     void (*resetXComponentOpacity)(ArkUINodeHandle node);
-
 };
 
 struct ArkUIStateModifier {

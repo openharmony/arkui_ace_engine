@@ -1977,7 +1977,7 @@ void SetSpanContent(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
         return;
     }
-    fullImpl->getNodeModifiers()->getSpanModifier()->setSpanContent(node->uiNodeHandle, value);
+    fullImpl->getNodeModifiers()->getSpanModifier()->setContent(node->uiNodeHandle, value);
 }
 
 void SetBackgroundImageSize(ArkUI_NodeHandle node, const char* value)
@@ -2314,7 +2314,7 @@ void SetImageSpanSrc(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
         return;
     }
-    fullImpl->getNodeModifiers()->getImageModifier()->setImageSrc(node->uiNodeHandle, value);
+    fullImpl->getNodeModifiers()->getImageModifier()->setSrc(node->uiNodeHandle, value);
 }
 
 void SetVerticalAlign(ArkUI_NodeHandle node, const char* value)
@@ -2336,7 +2336,7 @@ void SetImageSrc(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
         return;
     }
-    fullImpl->getNodeModifiers()->getImageModifier()->setImageSrc(node->uiNodeHandle, value);
+    fullImpl->getNodeModifiers()->getImageModifier()->setSrc(node->uiNodeHandle, value);
 }
 
 void SetObjectFit(ArkUI_NodeHandle node, const char* value)
