@@ -738,7 +738,6 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     // create a paragraph with all text in 1 line
     textStyle.SetTextOverflow(TextOverflow::CLIP);
     textStyle.SetMaxLines(1);
-    textStyle.SetTextAlign(TextAlign::START);
     if (!CreateParagraph(textStyle, layoutProperty->GetContent().value_or(""), layoutWrapper)) {
         return std::nullopt;
     }
@@ -748,8 +747,13 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
 
     // layout the paragraph to the width of text
     paragraph_->Layout(std::numeric_limits<float>::max());
-    float paragraphWidth = paragraph_->GetMaxWidth();
-    paragraph_->Layout(paragraphWidth);
+    float paragraphWidth = GetTextWidth();
+    if (contentConstraint.selfIdealSize.Width().has_value()) {
+        paragraphWidth = std::max(contentConstraint.selfIdealSize.Width().value(), paragraphWidth);
+    } else {
+        paragraphWidth = std::max(contentConstraint.maxSize.Width(), paragraphWidth);
+    }
+    paragraph_->Layout(std::ceil(paragraphWidth));
 
     textStyle_ = textStyle;
 
