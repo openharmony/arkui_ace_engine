@@ -1307,4 +1307,486 @@ HWTEST_F(SelectTestNg, SelectOptionHeight001, TestSize.Level1)
     EXPECT_EQ(menuLayoutProperty->GetSelectModifiedHeight().value(),
     OPTION_HEIGHT.ConvertToPx());
 }
+
+/**
+ * @tc.name: SetSelectedOptionFontColor001
+ * @tc.desc: Test SelectModelNG SetSelectedOptionFontColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetSelectedOptionFontColor001, TestSize.Level1)
+{
+    RefPtr<SelectPattern> pattern = AceType::MakeRefPtr<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    FrameNode frameNode = FrameNode(V2::SELECT_ETS_TAG, 1, pattern);
+    frameNode_ = FrameNode::GetOrCreateFrameNode(V2::SELECT_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(frameNode_, nullptr);
+    pattern->text_ = frameNode_;
+    pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
+    SelectModelNG::SetSelectedOptionFontColor(&frameNode, Color::BLACK);
+    EXPECT_EQ(pattern->GetSelected(), -1);
+}
+
+/**
+ * @tc.name: SetSelectedOptionFontColor002
+ * @tc.desc: Test SelectPattern SetSelectedOptionFontColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetSelectedOptionFontColor002, TestSize.Level1)
+{
+    RefPtr<SelectPattern> pattern = AceType::MakeRefPtr<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    FrameNode frameNode = FrameNode(V2::SELECT_ETS_TAG, 1, pattern);
+    frameNode_ = FrameNode::GetOrCreateFrameNode(V2::SELECT_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(frameNode_, nullptr);
+    pattern->text_ = frameNode_;
+    pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
+    pattern->selected_ = 0;
+    pattern->SetSelectedOptionFontColor(Color::BLACK);
+    EXPECT_EQ(pattern->GetSelected(), 0);
+}
+
+/**
+ * @tc.name: SetSelectedOptionFontSize001
+ * @tc.desc: Test SelectModelNG SetSelectedOptionFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetSelectedOptionFontSize001, TestSize.Level1)
+{
+    RefPtr<SelectPattern> pattern = AceType::MakeRefPtr<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    FrameNode frameNode = FrameNode(V2::SELECT_ETS_TAG, 1, pattern);
+    frameNode_ = FrameNode::GetOrCreateFrameNode(V2::SELECT_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(frameNode_, nullptr);
+    pattern->text_ = frameNode_;
+    pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
+    SelectModelNG::SetSelectedOptionFontSize(&frameNode, Dimension(20.00, DimensionUnit::VP));
+    EXPECT_EQ(pattern->GetSelected(), -1);
+}
+
+/**
+ * @tc.name: SetSelectedOptionFontSize002
+ * @tc.desc: Test SelectModelNG SetSelectedOptionFontSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetSelectedOptionFontSize002, TestSize.Level1)
+{
+    RefPtr<SelectPattern> pattern = AceType::MakeRefPtr<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    FrameNode frameNode = FrameNode(V2::SELECT_ETS_TAG, 1, pattern);
+    frameNode_ = FrameNode::GetOrCreateFrameNode(V2::SELECT_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(frameNode_, nullptr);
+    pattern->text_ = frameNode_;
+    pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
+    pattern->selected_ = 1;
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+    ASSERT_NE(option, nullptr);
+    pattern->options_.push_back(option);
+    pattern->options_.push_back(option);
+    pattern->SetSelectedOptionFontSize(Dimension(20.00, DimensionUnit::VP));
+    EXPECT_NE(pattern->options_[pattern->selected_]->GetPattern<OptionPattern>(), nullptr);
+}
+
+/**
+ * @tc.name: SetSelectedOptionFontWeight001
+ * @tc.desc: Test SelectModelNG SetSelectedOptionFontWeight001
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetSelectedOptionFontWeight001, TestSize.Level1)
+{
+    RefPtr<SelectPattern> pattern = AceType::MakeRefPtr<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    FrameNode frameNode = FrameNode(V2::SELECT_ETS_TAG, 1, pattern);
+    frameNode_ = FrameNode::GetOrCreateFrameNode(V2::SELECT_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(frameNode_, nullptr);
+    pattern->text_ = frameNode_;
+    pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
+    SelectModelNG::SetSelectedOptionFontWeight(&frameNode, FontWeight::NORMAL);
+    EXPECT_EQ(pattern->GetSelected(), -1);
+}
+
+/**
+ * @tc.name: SetSelectedOptionFontWeight002
+ * @tc.desc: Test SelectPattern SetSelectedOptionFontWeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetSelectedOptionFontWeight002, TestSize.Level1)
+{
+    RefPtr<SelectPattern> pattern = AceType::MakeRefPtr<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    FrameNode frameNode = FrameNode(V2::SELECT_ETS_TAG, 1, pattern);
+    frameNode_ = FrameNode::GetOrCreateFrameNode(V2::SELECT_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(frameNode_, nullptr);
+    pattern->text_ = frameNode_;
+    pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
+    pattern->selected_ = 0;
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+    ASSERT_NE(option, nullptr);
+    pattern->options_.push_back(option);
+    pattern->SetSelectedOptionFontWeight(FontWeight::NORMAL);
+    EXPECT_NE(pattern->options_[pattern->selected_]->GetPattern<OptionPattern>(), nullptr);
+}
+
+/**
+ * @tc.name: SetSelectedOptionFontFamily002
+ * @tc.desc: Test SelectPattern SetSelectedOptionFontFamily
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetSelectedOptionFontFamily002, TestSize.Level1)
+{
+    RefPtr<SelectPattern> pattern = AceType::MakeRefPtr<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    FrameNode frameNode = FrameNode(V2::SELECT_ETS_TAG, 1, pattern);
+    frameNode_ = FrameNode::GetOrCreateFrameNode(V2::SELECT_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(frameNode_, nullptr);
+    pattern->text_ = frameNode_;
+    pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
+    std::vector<std::string> value = { "select", "font", "family" };
+    pattern->SetSelectedOptionFontFamily(value);
+    EXPECT_EQ(pattern->GetSelected(), -1);
+}
+
+/**
+ * @tc.name: SetSelectedOptionFontFamily003
+ * @tc.desc: Test SelectPattern SetSelectedOptionFontFamily
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetSelectedOptionFontFamily003, TestSize.Level1)
+{
+    RefPtr<SelectPattern> pattern = AceType::MakeRefPtr<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    FrameNode frameNode = FrameNode(V2::SELECT_ETS_TAG, 1, pattern);
+    frameNode_ = FrameNode::GetOrCreateFrameNode(V2::SELECT_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(frameNode_, nullptr);
+    pattern->text_ = frameNode_;
+    pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
+    std::vector<std::string> value = { "select", "font", "family" };
+    pattern->selected_ = 0;
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+    ASSERT_NE(option, nullptr);
+    pattern->options_.push_back(option);
+    pattern->SetSelectedOptionFontFamily(value);
+    EXPECT_NE(pattern->options_[pattern->selected_]->GetPattern<OptionPattern>(), nullptr);
+}
+
+/**
+ * @tc.name: SetSelectedOptionItalicFontStyle001
+ * @tc.desc: Test SelectModelNG SetSelectedOptionItalicFontStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetSelectedOptionItalicFontStyle001, TestSize.Level1)
+{
+    RefPtr<SelectPattern> pattern = AceType::MakeRefPtr<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    FrameNode frameNode = FrameNode(V2::SELECT_ETS_TAG, 1, pattern);
+    frameNode_ = FrameNode::GetOrCreateFrameNode(V2::SELECT_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(frameNode_, nullptr);
+    pattern->text_ = frameNode_;
+    pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
+    SelectModelNG::SetSelectedOptionItalicFontStyle(&frameNode, Ace::FontStyle::NORMAL);
+    EXPECT_EQ(pattern->GetSelected(), -1);
+}
+
+/**
+ * @tc.name: SetSelectedOptionItalicFontStyle002
+ * @tc.desc: Test SelectPattern SetSelectedOptionItalicFontStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetSelectedOptionItalicFontStyle002, TestSize.Level1)
+{
+    RefPtr<SelectPattern> pattern = AceType::MakeRefPtr<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    FrameNode frameNode = FrameNode(V2::SELECT_ETS_TAG, 1, pattern);
+    frameNode_ = FrameNode::GetOrCreateFrameNode(V2::SELECT_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(frameNode_, nullptr);
+    pattern->text_ = frameNode_;
+    pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
+    pattern->selected_ = 0;
+    pattern->SetSelectedOptionItalicFontStyle(Ace::FontStyle::NORMAL);
+    EXPECT_EQ(pattern->GetSelected(), 0);
+}
+
+/**
+ * @tc.name: SetSelectedOptionItalicFontStyle003
+ * @tc.desc: Test SelectPattern SetSelectedOptionItalicFontStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetSelectedOptionItalicFontStyle003, TestSize.Level1)
+{
+    RefPtr<SelectPattern> pattern = AceType::MakeRefPtr<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    FrameNode frameNode = FrameNode(V2::SELECT_ETS_TAG, 1, pattern);
+    frameNode_ = FrameNode::GetOrCreateFrameNode(V2::SELECT_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    pattern->text_ = frameNode_;
+    pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
+    pattern->selected_ = 0;
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+    ASSERT_NE(option, nullptr);
+    pattern->options_.push_back(option);
+    pattern->SetSelectedOptionItalicFontStyle(Ace::FontStyle::NORMAL);
+    EXPECT_NE(pattern->options_[pattern->selected_]->GetPattern<OptionPattern>(), nullptr);
+}
+
+/**
+ * @tc.name: SetOptionFontColor001
+ * @tc.desc: Test SelectModelNG SetOptionFontColor
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetOptionFontColor001, TestSize.Level1)
+{
+    RefPtr<SelectPattern> pattern = AceType::MakeRefPtr<SelectPattern>();
+    ASSERT_NE(pattern, nullptr);
+    FrameNode frameNode = FrameNode(V2::SELECT_ETS_TAG, 1, pattern);
+    frameNode_ = FrameNode::GetOrCreateFrameNode(V2::SELECT_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_NE(frameNode_, nullptr);
+    pattern->text_ = frameNode_;
+    pattern->text_->SetLayoutProperty(AceType::MakeRefPtr<TextLayoutProperty>());
+    SelectModelNG::SetOptionFontColor(&frameNode, Color::BLACK);
+    EXPECT_EQ(pattern->GetSelected(), -1);
+}
+
+/**
+ * @tc.name: OnAfterModifyDone001
+ * @tc.desc: Test SelectModelNG OnAfterModifyDone
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, OnAfterModifyDone001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    /**
+     * @tc.steps: step1. Create select.
+     */
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT_2, INTERNAL_SOURCE },
+        { OPTION_TEXT_3, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    /**
+     * @tc.steps: step2. Get frameNode and pattern.
+     */
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(select, nullptr);
+    auto selectPattern = select->GetPattern<SelectPattern>();
+    ASSERT_NE(selectPattern, nullptr);
+    /**
+     * @tc.steps: step3. Call OnAfterModifyDone.
+     * @tc.expected: the function runs normally
+     */
+    selectPattern->OnAfterModifyDone();
+    auto host = selectPattern->GetHost();
+    EXPECT_NE(host->GetEventHub<SelectEventHub>(), nullptr);
+}
+
+/**
+ * @tc.name: ShowSelectMenuTest003
+ * @tc.desc: Test SelectModelNG ShowSelectMenuTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, ShowSelectMenuTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get frameNode and pattern.
+     */
+    TestProperty testProperty;
+    testProperty.FontSize = std::make_optional(FONT_SIZE_VALUE);
+    auto frameNode = CreateSelect(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    pattern->isFitTrigger_ = true;
+    EXPECT_TRUE(pattern);
+    /**
+     * @tc.steps: step2. call ShowSelectMenu function.
+     * @tc.expected: the function exits normally
+     */
+    pattern->ShowSelectMenu();
+    auto offset = pattern->GetHost()->GetPaintRectOffset();
+    EXPECT_EQ(offset.GetY(), pattern->selectSize_.Height());
+}
+
+/**
+ * @tc.name: SetDisabledStyle001
+ * @tc.desc: Test SelectModelNG SetDisabledStyle
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, SetDisabledStyle001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get frameNode and pattern.
+     */
+    TestProperty testProperty;
+    testProperty.FontSize = std::make_optional(FONT_SIZE_VALUE);
+    auto frameNode = CreateSelect(CREATE_VALUE, testProperty);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<SelectPattern>();
+    EXPECT_TRUE(pattern);
+    /**
+     * @tc.steps: step2. call ShowSelectMenu function.
+     * @tc.expected: the function exits normally
+     */
+    pattern->SetDisabledStyle();
+    auto offset = pattern->GetHost()->GetPaintRectOffset();
+    EXPECT_EQ(offset.GetY(), pattern->selectSize_.Height());
+}
+
+/**
+ * @tc.name: UpdateLastSelectedProps001
+ * @tc.desc: Test SelectPattern UpdateLastSelectedProps
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, UpdateLastSelectedProps001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
+        { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = AceType::MakeRefPtr<FrameNode>(V2::SELECT_ETS_TAG, 1, AceType::MakeRefPtr<SelectPattern>());
+    EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
+    auto pattern = select->GetPattern<SelectPattern>();
+    pattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(select));
+    EXPECT_TRUE(pattern);
+    pattern->selected_ = 1;
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+    ASSERT_NE(option, nullptr);
+    pattern->options_.push_back(option);
+    pattern->UpdateLastSelectedProps(0);
+    EXPECT_NE(pattern->options_[0]->GetPattern<OptionPattern>(), nullptr);
+}
+
+/**
+ * @tc.name: UpdateLastSelectedProps002
+ * @tc.desc: Test SelectPattern UpdateLastSelectedProps
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, UpdateLastSelectedProps002, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
+        { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
+    auto pattern = select->GetPattern<SelectPattern>();
+    EXPECT_TRUE(pattern);
+    pattern->selected_ = 1;
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+    ASSERT_NE(option, nullptr);
+    pattern->options_.push_back(option);
+    EXPECT_NE(pattern->options_.size(), 0);
+    pattern->UpdateLastSelectedProps(3);
+    EXPECT_EQ(pattern->options_[pattern->selected_]->GetPattern<OptionPattern>(), 1);
+}
+
+/**
+ * @tc.name: UpdateText001
+ * @tc.desc: Test SelectPattern UpdateText
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, UpdateText001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
+        { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
+    auto pattern = select->GetPattern<SelectPattern>();
+    EXPECT_TRUE(pattern);
+    const int32_t index = -1;
+    pattern->UpdateText(index);
+    EXPECT_EQ(pattern->selectValue_, "");
+}
+
+/**
+ * @tc.name: UpdateText002
+ * @tc.desc: Test SelectPattern UpdateText
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, UpdateText002, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
+        { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = AceType::MakeRefPtr<FrameNode>(V2::SELECT_ETS_TAG, 1, AceType::MakeRefPtr<SelectPattern>());
+    EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
+    auto pattern = select->GetPattern<SelectPattern>();
+    pattern->text_ = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    EXPECT_TRUE(pattern);
+    const int32_t index = 1;
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+    ASSERT_NE(option, nullptr);
+    pattern->options_.push_back(option);
+    EXPECT_EQ(pattern->options_.size(), 1);
+    pattern->UpdateText(index);
+    EXPECT_EQ(pattern->selectValue_, "");
+}
+
+/**
+ * @tc.name: ToJsonValue001
+ * @tc.desc: Test SelectPattern ToJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, ToJsonValue001, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
+        { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = AceType::MakeRefPtr<FrameNode>(V2::SELECT_ETS_TAG, 1, AceType::MakeRefPtr<SelectPattern>());
+    EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
+    auto pattern = select->GetPattern<SelectPattern>();
+    pattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(select));
+    pattern->text_ = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    std::unique_ptr<JsonValue> jsonValue = std::make_unique<JsonValue>();
+    ASSERT_NE(jsonValue, nullptr);
+    pattern->ToJsonValue(jsonValue);
+    EXPECT_TRUE(pattern->options_.empty());
+}
+
+/**
+ * @tc.name: ToJsonValue002
+ * @tc.desc: Test SelectPattern ToJsonValue002
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectTestNg, ToJsonValue002, TestSize.Level1)
+{
+    SelectModelNG selectModelInstance;
+    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE }, { OPTION_TEXT, INTERNAL_SOURCE },
+        { OPTION_TEXT_2, INTERNAL_SOURCE } };
+    selectModelInstance.Create(params);
+    auto select = AceType::MakeRefPtr<FrameNode>(V2::SELECT_ETS_TAG, 1, AceType::MakeRefPtr<SelectPattern>());
+    EXPECT_TRUE(select && select->GetTag() == V2::SELECT_ETS_TAG);
+    auto pattern = select->GetPattern<SelectPattern>();
+    pattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(select));
+    pattern->text_ = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    std::unique_ptr<JsonValue> jsonValue = std::make_unique<JsonValue>();
+    ASSERT_NE(jsonValue, nullptr);
+    auto option = FrameNode::GetOrCreateFrameNode(V2::OPTION_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<OptionPattern>(0); });
+    ASSERT_NE(option, nullptr);
+    pattern->options_.push_back(option);
+    pattern->menuWrapper_ = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+    pattern->ToJsonValue(jsonValue);
+    EXPECT_FALSE(pattern->options_.empty());
+}
 } // namespace OHOS::Ace::NG
