@@ -716,7 +716,7 @@ HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent08, TestSize.Level1)
      * @tc.steps: step2. Change the properties of the TouchEvent and call HandleGlobalEvent
      */
     TouchEvent touchPoint;
-    touchPoint.type = TouchType::DOWN; 
+    touchPoint.type = TouchType::DOWN;
     touchPoint.sourceType = SourceType::TOUCH;
     selectOverlayManager_->touchDownPoints_.clear();
     touchPoint.x = 1.1f;
