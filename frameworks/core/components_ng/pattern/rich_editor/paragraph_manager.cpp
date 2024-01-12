@@ -35,16 +35,12 @@ int32_t ParagraphManager::GetIndex(Offset offset) const
     int idx = 0;
     for (auto it = paragraphs_.begin(); it != paragraphs_.end(); ++it, ++idx) {
         auto&& info = *it;
-        if (GreatNotEqual(offset.GetY(), info.paragraph->GetHeight())) {
-            if (idx == static_cast<int>(paragraphs_.size()) - 1) {
-                // in the last line
-                return info.end;
-            }
-            // get offset relative to each paragraph
-            offset.SetY(offset.GetY() - info.paragraph->GetHeight());
-        } else {
+        if (LessOrEqual(offset.GetY(), info.paragraph->GetHeight()) ||
+            (idx == static_cast<int>(paragraphs_.size()) - 1)) {
             return info.paragraph->GetGlyphIndexByCoordinate(offset) + info.start;
         }
+        // get offset relative to each paragraph
+        offset.SetY(offset.GetY() - info.paragraph->GetHeight());
     }
     return paragraphs_.back().paragraph->GetGlyphIndexByCoordinate(offset) + paragraphs_.back().start;
 }
