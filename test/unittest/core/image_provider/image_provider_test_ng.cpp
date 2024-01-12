@@ -701,7 +701,7 @@ HWTEST_F(ImageProviderTestNg, CreateImageObjHelper001, TestSize.Level1)
 
 /**
  * @tc.name: MakeCanvasImage
- * @tc.desc: Test CreateImageObjHelper
+ * @tc.desc: Test MakeCanvasImage
  * @tc.type: FUNC
  */
 HWTEST_F(ImageProviderTestNg, MakeCanvasImage, TestSize.Level1)
@@ -732,7 +732,6 @@ HWTEST_F(ImageProviderTestNg, CreatePixmap, TestSize.Level1)
     auto data = AceType::MakeRefPtr<PixmapData>(pixmap);
     EXPECT_NE(PixelMapImageObject::Create(src, data), nullptr);
 
-    pixmap = nullptr;
     auto data1 = AceType::MakeRefPtr<SkiaImageData>(nullptr, 0);
     EXPECT_EQ(PixelMapImageObject::Create(src, data1), nullptr);
 }
