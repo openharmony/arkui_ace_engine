@@ -785,5 +785,4 @@ HWTEST_F(BadgeTestNg, BadgeAccessibilityPropertyTestNg003, TestSize.Level1)
     auto badgeAccessibilityProperty = frameNode->GetAccessibilityProperty<BadgeAccessibilityProperty>();
     EXPECT_EQ(badgeAccessibilityProperty->GetText(), "");
 }
-
 } // namespace OHOS::Ace::NG
