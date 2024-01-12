@@ -2033,6 +2033,8 @@ void TextFieldPattern::OnModifyDone()
         needToRefreshSelectOverlay_ = true;
         UpdateSelection(std::clamp(selectController_->GetStartIndex(), 0, textWidth),
             std::clamp(selectController_->GetEndIndex(), 0, textWidth));
+    } else {
+        needToRefreshSelectOverlay_ = false;
     }
     if (layoutProperty->GetTypeChangedValue(false)) {
         layoutProperty->ResetTypeChanged();
