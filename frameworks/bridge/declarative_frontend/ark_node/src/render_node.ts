@@ -91,7 +91,7 @@ class RenderNode {
       0, 0, 1, 0,
       0, 0, 0, 1];
     this.translationValue = { x: 0, y: 0 };
-    if (type === "FrameNode") {
+    if (type === 'FrameNode') {
       return;
     }
     this.baseNode_ = new __JSBaseNode__();
@@ -110,8 +110,8 @@ class RenderNode {
     if (frame === undefined || frame === null) {
       this.frameValue = { x: 0, y: 0, width: 0, height: 0 };
     } else {
-      this.size = { width: frame.width, height: frame.height }
-      this.position = { x: frame.x, y: frame.y }
+      this.size = { width: frame.width, height: frame.height };
+      this.position = { x: frame.x, y: frame.y };
     }
   }
   set opacity(value: number) {
@@ -198,7 +198,7 @@ class RenderNode {
         0, 0, 1, 0,
         0, 0, 0, 1];
     } else {
-      let i: number = 0
+      let i: number = 0;
       while (i < transform.length && i < 16) {
         if (i % 5 === 0) {
           this.transformValue[i] = this.checkUndefinedOrNullWithDefaultValue<number>(transform[i], 1);
@@ -259,7 +259,7 @@ class RenderNode {
     return this.shadowRadiusValue;
   }
   get size(): Size {
-    return { width: this.frameValue.width, height: this.frameValue.height }
+    return { width: this.frameValue.width, height: this.frameValue.height };
   }
   get transform(): Transform {
     return this.transformValue;
@@ -276,7 +276,7 @@ class RenderNode {
   }
   appendChild(node: RenderNode) {
     if (node === undefined || node === null) {
-      return
+      return;
     }
     if (this.childrenList.findIndex(element => element === node) !== -1) {
       return;
