@@ -25,7 +25,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
 
   private source_: ObservedPropertyObjectAbstract<C>;
   private changeNotificationIsOngoing_: boolean = false;
-        
+
   constructor(source: ObservedPropertyObjectAbstract<C>,
     owningChildView: IPropertySubscriber,
     thisPropertyName: PropertyInfo) {
@@ -48,18 +48,18 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     if (this.source_) {
       this.source_.removeSubscriber(this);
 
-        // unregister from the ObservedObject
-        ObservedObject.removeOwningProperty(this.source_.getUnmonitored(), this);
+      // unregister from the ObservedObject
+      ObservedObject.removeOwningProperty(this.source_.getUnmonitored(), this);
     }
     super.aboutToBeDeleted();
   }
 
-  public debugInfoDecorator() : string {
+  public debugInfoDecorator(): string {
     return `@Link/@Consume (class SynchedPropertyTwoWayPU)`;
   }
 
-  private isStorageLinkProp() : boolean {
-    return  (this.source_ && this.source_ instanceof ObservedPropertyAbstract && (!(this.source_ instanceof ObservedPropertyAbstractPU)));
+  private isStorageLinkProp(): boolean {
+    return (this.source_ && this.source_ instanceof ObservedPropertyAbstract && (!(this.source_ instanceof ObservedPropertyAbstractPU)));
   }
 
   private setObject(newValue: C): void {
@@ -88,7 +88,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
    * that peer can be in either ancestor or descendant component if 'this' is used for a @Consume
    * @param eventSource 
    */
-  public syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>) : void {
+  public syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>): void {
     stateMgmtProfiler.begin("SynchedPropertyTwoWayPU.syncPeerHasChanged");
     if (!this.changeNotificationIsOngoing_) {
       stateMgmtConsole.debug(`${this.debugInfo()}: syncPeerHasChanged: from peer '${eventSource && eventSource.debugInfo && eventSource.debugInfo()}' .`)
@@ -97,7 +97,7 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     stateMgmtProfiler.end();
   }
 
-  public syncPeerTrackedPropertyHasChanged(eventSource: ObservedPropertyAbstractPU<C>, changedTrackedObjectPropertyName: string): void { 
+  public syncPeerTrackedPropertyHasChanged(eventSource: ObservedPropertyAbstractPU<C>, changedTrackedObjectPropertyName: string): void {
     stateMgmtProfiler.begin("SynchedPropertyTwoWayPU.syncPeerTrackedPropertyHasChanged");
     if (!this.changeNotificationIsOngoing_) {
       stateMgmtConsole.debug(`${this.debugInfo()}: syncPeerTrackedPropertyHasChanged: from peer '${eventSource && eventSource.debugInfo && eventSource.debugInfo()}', changed property '${changedTrackedObjectPropertyName}'.`);
@@ -138,14 +138,14 @@ class SynchedPropertyTwoWayPU<C> extends ObservedPropertyAbstractPU<C>
     }
 
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: set: value about to change.`);
-    
+
     // avoid circular notifications @Link -> source @State -> other but also back to same @Link
     this.changeNotificationIsOngoing_ = true;
     let oldValue = this.getUnmonitored();
     this.setObject(newValue);
-    TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ newValue, 
-        this.notifyPropertyHasChangedPU.bind(this),
-        this.notifyTrackedObjectPropertyHasChanged.bind(this));
+    TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ newValue,
+      this.notifyPropertyHasChangedPU.bind(this),
+      this.notifyTrackedObjectPropertyHasChanged.bind(this));
     this.changeNotificationIsOngoing_ = false;
     stateMgmtProfiler.end();
   }
@@ -175,6 +175,6 @@ class SynchedPropertyObjectTwoWayPU<C> extends SynchedPropertyTwoWayPU<C> {
 }
 
 class SynchedPropertySimpleTwoWayPU<T> extends SynchedPropertyTwoWayPU<T> {
-  
+
 }
 
