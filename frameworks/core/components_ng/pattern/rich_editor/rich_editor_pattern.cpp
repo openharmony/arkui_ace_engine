@@ -1891,7 +1891,7 @@ void RichEditorPattern::InitDragDropEvent()
         pattern->showSelect_ = true;
         pattern->StopAutoScroll();
         pattern->ClearRedoOperationRecords();
-        pattern->OnDragEnd();
+        pattern->OnDragEnd(event);
     };
     eventHub->SetOnDragEnd(std::move(onDragEnd));
     onDragDropAndLeave();

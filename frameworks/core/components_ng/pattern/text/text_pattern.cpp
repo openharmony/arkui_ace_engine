@@ -1359,16 +1359,18 @@ void TextPattern::UpdateSpanItemDragStatus(const std::list<ResultObject>& result
     }
 }
 
-void TextPattern::OnDragEnd()
+void TextPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
 {
     ResetDragRecordSize(-1);
     auto wk = WeakClaim(this);
     auto pattern = wk.Upgrade();
     CHECK_NULL_VOID(pattern);
-    pattern->showSelect_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    HandleSelectionChange(recoverStart_, recoverEnd_);
+    if (event && event->GetResult() != DragRet::DRAG_SUCCESS) {
+        HandleSelectionChange(recoverStart_, recoverEnd_);
+        pattern->showSelect_ = true;
+    }
     if (dragResultObjects_.empty()) {
         return;
     }
@@ -1378,19 +1380,21 @@ void TextPattern::OnDragEnd()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void TextPattern::OnDragEndNoChild()
+void TextPattern::OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event)
 {
     auto wk = WeakClaim(this);
     auto pattern = wk.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
-    HandleSelectionChange(recoverStart_, recoverEnd_);
     if (pattern->status_ == Status::DRAGGING) {
         pattern->status_ = Status::NONE;
         pattern->MarkContentChange();
         pattern->contentMod_->ChangeDragStatus();
-        pattern->showSelect_ = true;
+        if (event && event->GetResult() != DragRet::DRAG_SUCCESS) {
+            HandleSelectionChange(recoverStart_, recoverEnd_);
+            pattern->showSelect_ = true;
+        }
         auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
@@ -1446,9 +1450,9 @@ void TextPattern::InitDragEvent()
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (pattern->spans_.empty()) {
-            pattern->OnDragEndNoChild();
+            pattern->OnDragEndNoChild(event);
         } else {
-            pattern->OnDragEnd();
+            pattern->OnDragEnd(event);
         }
     };
     eventHub->SetOnDragEnd(std::move(onDragEnd));
