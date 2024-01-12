@@ -17,6 +17,7 @@
 
 #include "basic_node.h"
 #include "common.h"
+#include "frameworks/core/interfaces/native/node/node_api.h"
 
 #ifdef __cplusplus
 extern "C" {
