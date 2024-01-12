@@ -259,7 +259,7 @@ void TabsPattern::OnModifyDone()
     CHECK_NULL_VOID(tabBarPattern);
     auto tabBarPaintProperty = tabBarPattern->GetPaintProperty<TabBarPaintProperty>();
     if (tabBarPaintProperty->GetTabBarBlurStyle().has_value() &&
-        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_NINE)) {
+        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         auto tabBarRenderContext = tabBarNode->GetRenderContext();
         CHECK_NULL_VOID(tabBarRenderContext);
         BlurStyleOption styleOption;
