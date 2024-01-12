@@ -486,11 +486,16 @@ void TextFieldPattern::UpdateCaretRect(bool isEditorValueChanged)
 
 void TextFieldPattern::AdjustTextInReasonableArea()
 {
+    // Adjust y.
     auto contentBottomBoundary = contentRect_.GetY() + contentRect_.GetSize().Height();
     if (textRect_.Height() > contentRect_.Height()) {
         if (textRect_.GetY() + textRect_.Height() < contentBottomBoundary) {
             auto dy = contentBottomBoundary - textRect_.GetY() - textRect_.Height();
             textRect_.SetOffset(OffsetF(textRect_.GetX(), textRect_.GetY() + dy));
+        }
+        if (GreatNotEqual(textRect_.GetY(), contentRect_.GetY())) {
+            auto dy = textRect_.GetY() - contentRect_.GetY();
+            textRect_.SetOffset(OffsetF(textRect_.GetX(), textRect_.GetY() - dy));
         }
     } else {
         if (textRect_.GetY() != contentRect_.GetY()) {
@@ -499,11 +504,16 @@ void TextFieldPattern::AdjustTextInReasonableArea()
         }
     }
 
+    // Adjust x.
     auto contentRightBoundary = contentRect_.GetX() + contentRect_.GetSize().Width();
     if (textRect_.Width() > contentRect_.Width()) {
         if (textRect_.GetX() + textRect_.Width() < contentRightBoundary) {
             auto dx = contentRightBoundary - textRect_.GetX() - textRect_.Width();
             textRect_.SetLeft(textRect_.GetX() + dx);
+        }
+        if (GreatNotEqual(textRect_.GetX(), contentRect_.GetX())) {
+            auto dx = textRect_.GetX() - contentRect_.GetX();
+            textRect_.SetOffset(OffsetF(textRect_.GetX() - dx, textRect_.GetY()));
         }
     }
 }
@@ -2029,9 +2039,11 @@ void TextFieldPattern::OnModifyDone()
     }
     ProcessInnerPadding();
     // The textRect position can't be changed by only redraw.
-    if (CheckNeedMeasure(layoutProperty->GetPropertyChangeFlag()) && !HasInputOperation()) {
+    if (CheckNeedMeasure(layoutProperty->GetPropertyChangeFlag()) && !HasInputOperation() &&
+        (!HasFocus() || !initTextRect_)) {
         textRect_.SetLeft(GetPaddingLeft() + GetBorderLeft());
         textRect_.SetTop(GetPaddingTop() + GetBorderTop());
+        initTextRect_ = true;
     }
     CalculateDefaultCursor();
 
