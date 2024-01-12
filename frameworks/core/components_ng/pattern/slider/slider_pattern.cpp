@@ -255,7 +255,7 @@ void SliderPattern::HandleTouchEvent(const TouchEventInfo& info)
         }
         mousePressedFlag_ = true;
         FireChangeEvent(SliderChangeMode::Begin);
-        OpenTranslateAnimation();
+        OpenTranslateAnimation(SliderStatus::CLICK);
     } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
         if (fingerId_ != touchInfo.GetFingerId()) {
             return;
@@ -452,14 +452,14 @@ void SliderPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         if (info.GetInputEventType() == InputEventType::AXIS) {
             pattern->FireChangeEvent(SliderChangeMode::Begin);
         }
-        pattern->OpenTranslateAnimation();
+        pattern->OpenTranslateAnimation(SliderStatus::MOVE);
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandlingGestureEvent(info);
         pattern->FireChangeEvent(SliderChangeMode::Moving);
-        pattern->OpenTranslateAnimation();
+        pattern->OpenTranslateAnimation(SliderStatus::MOVE);
     };
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
@@ -969,16 +969,16 @@ void SliderPattern::UpdateImagePositionY(float centerY)
     renderContext->SyncGeometryProperties(nullptr);
 }
 
-void SliderPattern::OpenTranslateAnimation()
+void SliderPattern::OpenTranslateAnimation(SliderStatus status)
 {
     CHECK_NULL_VOID(sliderContentModifier_);
-    sliderContentModifier_->SetAnimated();
+    sliderContentModifier_->SetAnimatorStatus(status);
 }
 
 void SliderPattern::CloseTranslateAnimation()
 {
     CHECK_NULL_VOID(sliderContentModifier_);
-    sliderContentModifier_->SetNotAnimated();
+    sliderContentModifier_->SetAnimatorStatus(SliderStatus::DEFAULT);
 }
 
 std::pair<OffsetF, float> SliderPattern::GetBubbleVertexPosition(
