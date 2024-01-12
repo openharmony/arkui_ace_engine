@@ -2945,29 +2945,29 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args)
     } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         CalcDimension left;
-        if (ParseJsDimensionVp(object->GetProperty("left"), left) && left.IsNonNegative()) {
-            if (left.Unit() == DimensionUnit::PERCENT) {
+        if (ParseJsDimensionVp(object->GetProperty("left"), left)) {
+            if (left.Unit() == DimensionUnit::PERCENT || left.IsNegative()) {
                 left.Reset();
             }
             leftDimen = left;
         }
         CalcDimension right;
-        if (ParseJsDimensionVp(object->GetProperty("right"), right) && right.IsNonNegative()) {
-            if (right.Unit() == DimensionUnit::PERCENT) {
+        if (ParseJsDimensionVp(object->GetProperty("right"), right)) {
+            if (right.Unit() == DimensionUnit::PERCENT || right.IsNegative()) {
                 right.Reset();
             }
             rightDimen = right;
         }
         CalcDimension top;
-        if (ParseJsDimensionVp(object->GetProperty("top"), top) && top.IsNonNegative()) {
-            if (top.Unit() == DimensionUnit::PERCENT) {
+        if (ParseJsDimensionVp(object->GetProperty("top"), top)) {
+            if (top.Unit() == DimensionUnit::PERCENT || top.IsNegative()) {
                 top.Reset();
             }
             topDimen = top;
         }
         CalcDimension bottom;
-        if (ParseJsDimensionVp(object->GetProperty("bottom"), bottom) && bottom.IsNonNegative()) {
-            if (bottom.Unit() == DimensionUnit::PERCENT) {
+        if (ParseJsDimensionVp(object->GetProperty("bottom"), bottom)) {
+            if (bottom.Unit() == DimensionUnit::PERCENT || bottom.IsNegative()) {
                 bottom.Reset();
             }
             bottomDimen = bottom;
