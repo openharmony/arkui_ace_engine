@@ -90,15 +90,17 @@ typedef void (*ComponentAsyncEventHandler)(ArkUINodeHandle node, ArkUI_Int32 eve
 /* clang-format off */
 const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     nullptr,
-    NodeModifier::SetOnFocus,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
     NodeModifier::SetOnBlur,
     nullptr,
     nullptr,
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
-    nullptr,
+    NodeModifier::SetOnFocus,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -192,16 +194,6 @@ void ApplyModifierFinish(ArkUINodeHandle nodePtr)
     }
 }
 
-bool RequestFocus(ArkUINodeHandle handle, ArkUI_CharPtr value)
-{
-    auto container = Container::Current();
-    CHECK_NULL_RETURN(container, false);
-    auto pipelineContext = container->GetPipelineContext();
-    CHECK_NULL_RETURN(pipelineContext, false);
-    std::string targetNodeId(value);
-    return pipelineContext->RequestFocus(targetNodeId);
-}
-
 /* clang-format off */
 const struct ArkUIBasicAPI basicImpl = {
     CreateNode,
@@ -221,7 +213,6 @@ const struct ArkUIBasicAPI basicImpl = {
     nullptr,
     ApplyModifierFinish,
     nullptr,
-    RequestFocus,
 };
 /* clang-format on */
 

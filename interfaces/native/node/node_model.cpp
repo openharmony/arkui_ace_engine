@@ -282,14 +282,4 @@ void MarkDirty(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag)
     uiNode->MarkDirtyNode(flag);
 }
 
-bool RequestFocus(ArkUI_NodeHandle nodePtr, const char* value)
-{
-    auto impl = GetFullImpl();
-    if (!impl) {
-        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get node impl");
-        return false;
-    }
-    return impl->getBasicAPI()->requestFocus(nodePtr->uiNodeHandle, value);
-}
-
 } // namespace OHOS::Ace::NodeModel

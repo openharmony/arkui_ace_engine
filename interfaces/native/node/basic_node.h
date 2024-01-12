@@ -505,18 +505,19 @@ typedef enum {
     NODE_ACCESSIBILITY_TEXT,
 
     /**
-     * @brief 通过{@link setAttribute}方法设置无障碍文本.
+     * @brief 通过{@link setAttribute}方法设置无障碍重要性.
      *
-     * @note 入参格式为字符串。
+     * @note Level:String("auto","yes","no","no-hide-descendants")
+     *       格式字符串，如 "auto"
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_ACCESSIBILITY_LEVEL, "test");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_ACCESSIBILITY_LEVEL, "auto");
      * @endcode
      *
      */
     NODE_ACCESSIBILITY_LEVEL,
 
     /**
-     * @brief 通过{@link setAttribute}方法设置无障碍文本.
+     * @brief 通过{@link setAttribute}方法设置无障碍说明.
      *
      * @note 入参格式为字符串。
      * @code {.c}
@@ -560,13 +561,13 @@ typedef enum {
      *
      * @note 4个参数 用空格分隔
      * 1. 遮罩文本内容 .
-     * 2. 设置浮层相对于组件的方位 {"TopStart", "Top", "TopEnd",
-     * "Start", "Center", "End", "BottomStart", "Bottom", "BottomEnd"}.
+     * 2. 设置浮层相对于组件的方位 {"top-start", "top", "top-end",
+     *       "start", "center", "end", "bottom-start", "bottom", "bottom-end"}.
      * 3. 浮层基于自身左上角的偏移量 X ，单位为vp.
      * 4. 浮层基于自身左上角的偏移量 Y，单位为vp.
      * 如"test TopStart 2 3".
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_OVERLAY, "test TopStart 2 3");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_OVERLAY, "test top-start 2 3");
      * @endcode
      *
      */
@@ -684,10 +685,10 @@ typedef enum {
     /**
      * @brief 通过{@link setAttribute}方法设置文本是否可复制粘贴.
      *
-     * @note CopyOptions9:String("None","InApp","LocalDevice","CROSS_DEVICE")
-     *       格式字符串，如 "Center"
+     * @note CopyOptions:String("none","in-app","local-device","cross-device")
+     *       格式字符串，如 "none"
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_COPY_OPTION, "Normal");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_COPY_OPTION, "none");
      * @endcode
      *
      */
@@ -952,62 +953,65 @@ typedef enum {
      /**
      * @brief 通过{@link setAttribute}方法设置嵌套滚动选项。设置向前向后两个方向上的嵌套滚动模式，实现与父组件的滚动联动.
      *
-     * @note NestedScrollMode:String("SELF_ONLY","SELF_FIRST","PARENT_FIRST","PARALLEL")
+     * @note NestedScrollMode:String("self-only","self-first","parent-first","parallel")
      *       格式字符串 可以设置2个参数 用空格隔开。
      * 1. 可滚动组件往末尾端滚动时的嵌套滚动选项。
      * 2. 可滚动组件往起始端滚动时的嵌套滚动选项。
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_NESTED_SCROLL, "SELF_ONLY PARENT_FIRST");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_NESTED_SCROLL, "self-only self-first");
      * @endcode
      *
      */
     NODE_SCROLL_NESTED_SCROLL,
 
     /**
-     * @brief 通过{@link setAttribute}方法设置组件的遮罩文本.
+     * @brief 通过{@link setAttribute}方法设置滑动到指定位置.
+     * 通过{@link getAttribute}方法返回当前的滚动偏移量.
      *
-     * @note 5个参数 用空格分隔 
+     * @note 设置时:5个参数 用空格分隔
      * 1. 水平滑动偏移 ,单位为vp
      * 2. 垂直滑动偏移 ,单位为vp
      * 3. 滚动时长设置. 单位毫秒
-     * 4. 滚动曲线设置 {"Linear", "Ease", "EaseIn",
-     *       "EaseOut", "EaseInOut", "FastOutSlowIn", "LinearOutSlowIn", "FastOutLinearIn",
-     *       "ExtremeDeceleration", "Sharp", "Rhythm", "Smooth", "Friction"}
+     * 4. 滚动曲线设置 {"linear", "ease", "easeIn",
+     *       "easeOut", "ease-in-out", "fast-out-slow-in", "linear-out-slow-in", "fast-out-linear-in",
+     *       "extreme-deceleration", "sharp", "rhythm", "smooth", "friction"}
      * 5. 使能默认弹簧动效  Boolean格式字符串，如"true"
-     * 如"10 10 1000 Linear true".
+     * 如"10 10 1000 linear true".
+     * 获取时：返回值2个参数 用空格分隔
+     * 1. 水平滑动偏移; 单位为vp
+     * 2. 竖直滑动偏移; 单位为vp
+     * 如 “ 10 20”
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_TO, "10 10 1000 Linear true");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_TO, "10 10 1000 linear true");
+     * basicNodeApi->getAttribute(nodeHandle, NODE_SCROLL_OFFSET);
      * @endcode
      *
      */
-    NODE_SCROLL_TO,
+    NODE_SCROLL_OFFSET,
 
     /**
-     * @brief 通过{@link setAttribute}方法设置文本是否可复制粘贴.
+     * @brief 通过{@link setAttribute}方法设置滚动到容器边缘,
+     * 不区分滚动轴方向，Edge.Top和Edge.Start表现相同，Edge.Bottom和Edge.End表现相同.
      *
-     * @note Edge:String("Top","Center","Bottom","Baseline","Start","Middle","End")
+     * @note Edge:String("top","center","bottom","baseline","start","middle","end")
      *       格式字符串，如 "Top"
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_EDGE, "Top");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_EDGE, "top");
      * @endcode
      *
      */
     NODE_SCROLL_EDGE,
 
     /**
-     * @brief 通过{@link getAttribute}方法返回当前的滚动偏移量.
-     *
-     * @note 返回值2个参数 用空格分隔
-     * 1. 水平滑动偏移; 单位为vp
-     * 2. 竖直滑动偏移; 单位为vp
-     * 如 “ 10 20”
+     * @brief 通过<b>setAttribute</b>方法设置列表中ListItem/ListItemGroup的预加载数量，只在LazyForEach中生效.
+     * @see ArkUI_BasicNodeAPI::setAttribute
+     * @note 入参cachedCount: int, 格式字符串，如"5"
      * @code {.c}
-     * basicNodeApi->getAttribute(nodeHandle, NODE_SCROLL_CURRENT_OFFSET);
+     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_CACHED_COUNT, "5");
      * @endcode
      *
      */
-    NODE_SCROLL_CURRENT_OFFSET,
-
+    NODE_LIST_CACHED_COUNT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LIST,
     /**
      * @brief 通过<b>setAttribute</b>方法设置滚动条状态.
      * @see ArkUI_BasicNodeAPI::setAttribute
@@ -1390,7 +1394,6 @@ typedef struct {
     // 请求节点标记脏区强制进行刷新。
     void (*markDirty)(ArkUI_NodeHandle nodePtr, ArkUI_NodeDirtyFlag dirtyFlag);
 
-    bool (*requestFocus)(ArkUI_NodeHandle handle, const char* value);
 } ArkUI_BasicNodeAPI;
 
 #ifdef __cplusplus

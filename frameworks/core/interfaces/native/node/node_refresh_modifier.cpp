@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,28 +28,30 @@ namespace OHOS::Ace::NG {
 
 namespace NodeModifier {
 
-void SetRefreshOnStateChange(ArkUINodeHandle node, ArkUI_Int32 eventId)
+void SetRefreshOnStateChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, eventId](const int32_t value) {
+    auto onEvent = [node, eventId, extraParam](const int32_t value) {
         ArkUINodeEvent event;
         event.kind = ON_REFRESH_STATE_CHANGE;
         event.eventId = eventId;
+        event.extraParam = extraParam;
         event.componentAsyncEvent.data[0].i32 = value;
         SendArkUIAsyncEvent(&event);
     };
     RefreshModelNG::SetOnStateChange(frameNode, std::move(onEvent));
 }
 
-void SetOnRefreshing(ArkUINodeHandle node, ArkUI_Int32 eventId)
+void SetOnRefreshing(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onEvent = [node, eventId]() {
+    auto onEvent = [node, eventId, extraParam]() {
         ArkUINodeEvent event;
         event.kind = ON_REFRESH_REFRESHING;
         event.eventId = eventId;
+        event.extraParam = extraParam;
         SendArkUIAsyncEvent(&event);
     };
     RefreshModelNG::SetOnRefreshing(frameNode, std::move(onEvent));

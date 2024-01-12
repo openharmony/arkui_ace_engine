@@ -182,8 +182,6 @@ struct ArkUIBasicAPI {
     // Commit attributes updates for node.
     void (*applyModifierFinish)(ArkUINodeHandle nodePtr);
     void (*markDirty)(ArkUINodeHandle nodePtr, ArkUINodeDirtyFlag dirtyFlag);
-
-    bool (*requestFocus)(ArkUINodeHandle handle, ArkUI_CharPtr value);
 };
 
 /**

@@ -273,16 +273,6 @@ void SetScrollEdge(ArkUINodeHandle node, int32_t value)
     scrollControllerBase->ScrollToEdge(static_cast<ScrollEdgeType>(value), true);
 }
 
-const char* GetCurrentOffset(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    RefPtr<ScrollControllerBase> scrollControllerBase = ScrollModelNG::GetOrCreateController(frameNode);
-    Offset offset = scrollControllerBase->GetCurrentOffset();
-    auto resultString = std::make_shared<std::string>(std::to_string(offset.GetX())
-    + " " + std::to_string(offset.GetY()));
-    return resultString->c_str();
-}
-
 } // namespace
 
 namespace NodeModifier {
@@ -312,7 +302,6 @@ const ArkUIScrollModifier* GetScrollModifier()
         ResetEnableScrollInteraction,
         SetScrollTo,
         SetScrollEdge,
-        GetCurrentOffset,
     };
     /* clang-format on */
     return &modifier;
