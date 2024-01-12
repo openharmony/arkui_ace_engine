@@ -2986,7 +2986,7 @@ HWTEST_F(ScrollTestNg, ScrollSetFrictionTest001, TestSize.Level1)
     scrollModelNG_1.SetFriction(friction);
     GetInstance();
     FlushLayoutTask(frameNode_);
-    EXPECT_DOUBLE_EQ(pattern_->GetFriction(), DEFAULT_FRICTION);
+    EXPECT_DOUBLE_EQ(pattern_->GetFriction(), NEW_DEFAULT_FRICTION);
 
     /**
      * @tc.steps: step1. set friction more than 0
