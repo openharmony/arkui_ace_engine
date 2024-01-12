@@ -56,6 +56,8 @@ public:
         return false;
     }
 
+    bool IsMeasureBoundary() const override;
+
     bool ShouldDelayChildPressedState() const override
     {
         return true;
