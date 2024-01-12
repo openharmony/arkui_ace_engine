@@ -2225,4 +2225,86 @@ HWTEST_F(ImageTestNg, TestObjectFit001, TestSize.Level1)
     EXPECT_EQ(imageRenderProperty->GetImageFit(), ImageFit::TOP_LEFT);
     EXPECT_EQ(layoutProperty->GetImageFit(), ImageFit::TOP_LEFT);
 }
+/**
+ * @tc.name: ImageSetDraggable0001
+ * @tc.desc: Set the draggable attribute of ImageModelNG object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageSetDraggable0001, TestSize.Level1)
+{
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    image.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
+    image.SetDraggable(true);
+}
+
+HWTEST_F(ImageTestNg, ImageSetDraggable0002, TestSize.Level1)
+{
+    ImageModelNG image;
+    RefPtr<PixelMap> pixMap = nullptr;
+    image.Create(IMAGE_SRC_URL, pixMap, BUNDLE_NAME, MODULE_NAME);
+    image.SetDraggable(false);
+}
+
+/**
+ * @tc.name: ImageDumpInfo0001
+ * @tc.desc: Output the relevant information of ImageModelNG object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageDumpInfo0001, TestSize.Level1)
+{
+    auto frameNode = ImageTestNg::CreateImageNode(RESOURCE_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    frameNode->MarkModifyDone();
+    pattern->DumpInfo();
+    EXPECT_TRUE(pattern->loadingCtx_);
+}
+
+/**
+ * @tc.name: ImageDumpAdvanceInfo0001
+ * @tc.desc: Output more information of ImageModelNG object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageDumpAdvanceInfo0001, TestSize.Level1)
+{
+    auto frameNode = ImageTestNg::CreateImageNode(RESOURCE_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    frameNode->MarkModifyDone();
+    pattern->DumpAdvanceInfo();
+    EXPECT_TRUE(pattern->loadingCtx_);
+}
+
+/**
+ * @tc.name: ImageOnColorConfigurationUpdate0001
+ * @tc.desc: Output more information of ImageModelNG object when the color configuration is updated.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageOnColorConfigurationUpdate0001, TestSize.Level1)
+{
+    auto frameNode = ImageTestNg::CreateImageNode(RESOURCE_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    frameNode->MarkModifyDone();
+    pattern->OnColorConfigurationUpdate();
+    EXPECT_TRUE(pattern->loadingCtx_);
+    frameNode->MarkModifyDone();
+    EXPECT_TRUE(pattern->loadingCtx_);
+}
+
+/**
+ * @tc.name: ImageSetImageAnalyzerConfig0001
+ * @tc.desc: Set the configuration of the image analyzer.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestNg, ImageSetImageAnalyzerConfig0001, TestSize.Level1)
+{
+    auto frameNode = ImageTestNg::CreateImageNode(RESOURCE_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ImagePattern>();
+    frameNode->MarkModifyDone();
+    pattern->SetImageAnalyzerConfig(ImageAnalyzerConfig());
+    EXPECT_TRUE(pattern->loadingCtx_);
+}
 } // namespace OHOS::Ace::NG
