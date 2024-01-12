@@ -232,25 +232,29 @@ void SliderContentModifier::DrawDefaultBlock(DrawingContext& context)
 {
     auto& canvas = context.canvas;
     auto borderWidth = blockBorderWidth_->Get();
-
-    RSPen pen;
-    pen.SetAntiAlias(true);
-    pen.SetWidth(borderWidth);
-    pen.SetColor(ToRSColor(blockBorderColor_->Get()));
-    if (!NearEqual(borderWidth, .0f)) {
-        canvas.AttachPen(pen);
-    }
-    RSBrush brush;
-    brush.SetAntiAlias(true);
-    brush.SetColor(ToRSColor(blockColor_->Get()));
-    canvas.AttachBrush(brush);
-
     auto blockSize = blockSize_->Get();
     auto blockCenter = GetBlockCenter();
-    float radius = std::min(blockSize.Width(), blockSize.Height()) * HALF - borderWidth * HALF;
+    float blockRadius = std::min(blockSize.Width(), blockSize.Height()) * HALF;
+    float radius = blockRadius;
+    RSBrush brush;
+    brush.SetAntiAlias(true);
+    if (GreatOrEqual(borderWidth * HALF, radius)) {
+        brush.SetColor(ToRSColor(blockBorderColor_->Get()));
+    } else {
+        radius = std::min(blockSize.Width(), blockSize.Height()) * HALF - borderWidth * HALF;
+        brush.SetColor(ToRSColor(blockColor_->Get()));
+    }
+    canvas.AttachBrush(brush);
+    RSPen pen;
+    if (!NearEqual(borderWidth, .0f) && LessNotEqual(borderWidth * HALF, blockRadius)) {
+        pen.SetAntiAlias(true);
+        pen.SetWidth(borderWidth);
+        pen.SetColor(ToRSColor(blockBorderColor_->Get()));
+        canvas.AttachPen(pen);
+    }
     canvas.DrawCircle(ToRSPoint(PointF(blockCenter.GetX(), blockCenter.GetY())), radius);
     canvas.DetachBrush();
-    if (!NearEqual(borderWidth, .0f)) {
+    if (!NearEqual(borderWidth, .0f) && LessNotEqual(borderWidth * HALF, blockRadius)) {
         canvas.DetachPen();
     }
 }
