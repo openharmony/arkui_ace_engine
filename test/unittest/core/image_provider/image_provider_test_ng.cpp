@@ -776,7 +776,7 @@ HWTEST_F(ImageProviderTestNg, TargetSize002, TestSize.Level1)
     EXPECT_EQ(testSize.GetY(), 0);
     auto imageSize = ctx->GetImageSize();
     EXPECT_EQ(imageSize, SizeF(-1.0, -1.0));
-    bool autoResize_ = true;
+    bool autoResize = true;
     bool isPixelMapResource = (SrcType::DATA_ABILITY_DECODED == ctx->GetSourceInfo().GetSrcType());
     ctx->ResizableCalcDstSize();
 
@@ -790,7 +790,7 @@ HWTEST_F(ImageProviderTestNg, TargetSize002, TestSize.Level1)
     EXPECT_EQ(testSize1.GetY(), 0);
     ctx->ResizableCalcDstSize();
     EXPECT_EQ(imageSize, SizeF(-1.0, -1.0));
-    EXPECT_TRUE(autoResize_);
+    EXPECT_TRUE(autoResize);
     EXPECT_FALSE(isPixelMapResource);
 }
 
@@ -865,7 +865,7 @@ HWTEST_F(ImageProviderTestNg, TargetSize003, TestSize.Level1)
     EXPECT_EQ(testSize.GetY(), 0);
     auto imageSize = ctx->GetImageSize();
     EXPECT_EQ(imageSize, SizeF(-1.0, -1.0));
-    bool autoResize_ = true;
+    bool autoResize = true;
     bool isPixelMapResource = (SrcType::DATA_ABILITY_DECODED == ctx->GetSourceInfo().GetSrcType());
     ctx->ResizableCalcDstSize();
 
@@ -879,7 +879,7 @@ HWTEST_F(ImageProviderTestNg, TargetSize003, TestSize.Level1)
     EXPECT_EQ(testSize1.GetY(), 0);
     ctx->ResizableCalcDstSize();
     EXPECT_EQ(imageSize, SizeF(-1.0, -1.0));
-    EXPECT_TRUE(autoResize_);
+    EXPECT_TRUE(autoResize);
     EXPECT_FALSE(isPixelMapResource);
 }
 
@@ -924,5 +924,137 @@ HWTEST_F(ImageProviderTestNg, ImageProviderTestNg009, TestSize.Level1)
     ctx->DownloadImage();
     ctx->NotifyReadyIfCacheHit();
     EXPECT_EQ(ctx->stateManager_->GetCurrentState(), ImageLoadingState::LOAD_FAIL);
+}
+/**
+ * @tc.name: HandleCommand002
+ * @tc.desc: Test HandleCommand.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, HandleCommand002, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx, nullptr);
+    ctx->syncLoad_ = false;
+    auto stateManager = AceType::MakeRefPtr<ImageStateManager>(ctx);
+    stateManager->HandleCommandByUnloadedState(ImageLoadingCommand::LOAD_DATA);
+    EXPECT_EQ(stateManager->state_, ImageLoadingState::DATA_LOADING);
+
+    stateManager->HandleCommandByUnloadedState(ImageLoadingCommand::RESET_STATE);
+    EXPECT_EQ(stateManager->state_, ImageLoadingState::UNLOADED);
+
+    stateManager->HandleCommandByUnloadedState(ImageLoadingCommand::LOAD_DATA_SUCCESS);
+    EXPECT_EQ(stateManager->state_, ImageLoadingState::UNLOADED);
+}
+
+/**
+ * @tc.name: HandleCommand003
+ * @tc.desc: Test HandleCommand.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, HandleCommand003, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx, nullptr);
+    ctx->syncLoad_ = false;
+    auto stateManager = AceType::MakeRefPtr<ImageStateManager>(ctx);
+    stateManager->HandleCommandByDataLoadingState(ImageLoadingCommand::LOAD_DATA_SUCCESS);
+    EXPECT_EQ(stateManager->state_, ImageLoadingState::DATA_READY);
+
+    stateManager->HandleCommandByDataLoadingState(ImageLoadingCommand::LOAD_FAIL);
+    EXPECT_EQ(stateManager->state_, ImageLoadingState::LOAD_FAIL);
+
+    stateManager->HandleCommandByDataLoadingState(ImageLoadingCommand::RESET_STATE);
+    EXPECT_EQ(stateManager->state_, ImageLoadingState::UNLOADED);
+
+    stateManager->HandleCommandByDataLoadingState(ImageLoadingCommand::RETRY_LOADING);
+    EXPECT_EQ(stateManager->state_, ImageLoadingState::UNLOADED);
+}
+
+/**
+ * @tc.name: HandleCommand004
+ * @tc.desc: Test HandleCommand.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, HandleCommand004, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx, nullptr);
+    ctx->syncLoad_ = false;
+    auto stateManager = AceType::MakeRefPtr<ImageStateManager>(ctx);
+    stateManager->HandleCommandByDataReadyState(ImageLoadingCommand::MAKE_CANVAS_IMAGE);
+    EXPECT_EQ(stateManager->state_, ImageLoadingState::MAKE_CANVAS_IMAGE);
+
+    stateManager->HandleCommandByDataReadyState(ImageLoadingCommand::RESET_STATE);
+    EXPECT_EQ(stateManager->state_, ImageLoadingState::UNLOADED);
+
+    stateManager->HandleCommandByDataReadyState(ImageLoadingCommand::LOAD_DATA_SUCCESS);
+    EXPECT_EQ(stateManager->state_, ImageLoadingState::UNLOADED);
+}
+
+/**
+ * @tc.name: HandleCommand005
+ * @tc.desc: Test HandleCommand.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, HandleCommand005, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx, nullptr);
+    ctx->syncLoad_ = false;
+    auto stateManager = AceType::MakeRefPtr<ImageStateManager>(ctx);
+    stateManager->HandleCommandByMakeCanvasImageState(ImageLoadingCommand::LOAD_FAIL);
+    EXPECT_EQ(stateManager->state_, ImageLoadingState::LOAD_FAIL);
+
+    stateManager->HandleCommandByMakeCanvasImageState(ImageLoadingCommand::RESET_STATE);
+    EXPECT_EQ(stateManager->state_, ImageLoadingState::UNLOADED);
+
+    stateManager->HandleCommandByMakeCanvasImageState(ImageLoadingCommand::LOAD_DATA_SUCCESS);
+    EXPECT_EQ(stateManager->state_, ImageLoadingState::UNLOADED);
+}
+
+/**
+ * @tc.name: HandleCommand006
+ * @tc.desc: Test HandleCommand.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, HandleCommand006, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx, nullptr);
+    ctx->syncLoad_ = false;
+    auto stateManager = AceType::MakeRefPtr<ImageStateManager>(ctx);
+    stateManager->HandleCommandByLoadSuccessState(ImageLoadingCommand::MAKE_CANVAS_IMAGE);
+    EXPECT_EQ(stateManager->state_, ImageLoadingState::MAKE_CANVAS_IMAGE);
+
+    stateManager->HandleCommandByLoadSuccessState(ImageLoadingCommand::RESET_STATE);
+    EXPECT_EQ(stateManager->state_, ImageLoadingState::UNLOADED);
+
+    stateManager->HandleCommandByLoadSuccessState(ImageLoadingCommand::LOAD_DATA_SUCCESS);
+    EXPECT_EQ(stateManager->state_, ImageLoadingState::UNLOADED);
+}
+
+/**
+ * @tc.name: HandleCommand006
+ * @tc.desc: Test HandleCommand.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageProviderTestNg, HandleCommand007, TestSize.Level1)
+{
+    auto src = ImageSourceInfo(SRC_JPG);
+    auto ctx = AceType::MakeRefPtr<ImageLoadingContext>(src, LoadNotifier(nullptr, nullptr, nullptr), true);
+    EXPECT_NE(ctx, nullptr);
+    ctx->syncLoad_ = false;
+    auto stateManager = AceType::MakeRefPtr<ImageStateManager>(ctx);
+
+    stateManager->HandleCommandByLoadFailState(ImageLoadingCommand::RESET_STATE);
+    EXPECT_EQ(stateManager->state_, ImageLoadingState::UNLOADED);
+
+    stateManager->HandleCommandByLoadFailState(ImageLoadingCommand::LOAD_DATA_SUCCESS);
+    EXPECT_EQ(stateManager->state_, ImageLoadingState::UNLOADED);
 }
 } // namespace OHOS::Ace::NG
