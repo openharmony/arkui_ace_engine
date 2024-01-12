@@ -1876,13 +1876,16 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest002, TestSize.Level1)
 HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0117, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create checkbox and groupname
+     * @tc.steps: step1. Init CheckBox node
      */
-    auto checkBoxPattern = AceType::MakeRefPtr<CheckBoxPattern>();
-    FrameNode checkBoxFrameNode = FrameNode("test", 0, checkBoxPattern);
-    auto checkBoxEventHub = AceType::MakeRefPtr<CheckBoxEventHub>();
+    CheckBoxModelNG checkBoxModelNG;
+    checkBoxModelNG.Create("test", GROUP_NAME, "testTemp");
+    RefPtr<FrameNode> frame = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    FrameNode* checkBoxFrameNode = AceType::RawPtr(frame);
+    auto checkBoxPattern = checkBoxFrameNode->GetPattern<CheckBoxPattern>();
+    auto checkBoxEventHub = checkBoxFrameNode->GetEventHub<NG::CheckBoxEventHub>();
     checkBoxEventHub->SetGroupName(GROUP_NAME);
-    checkBoxFrameNode.eventHub_ = checkBoxEventHub;
+    checkBoxFrameNode->eventHub_ = checkBoxEventHub;
 
     std::unordered_map<std::string, std::list<WeakPtr<FrameNode>>> checkBoxGroupMap;
 
@@ -1899,7 +1902,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0117, TestSize.Level1)
      */
     checkBoxGroupMap[GROUP_NAME].push_back(nullptr);
     checkBoxGroupMap[GROUP_NAME].push_back(frameNode1);
-    checkBoxPattern->UpdateCheckBoxGroupStatusWhenDetach(&checkBoxFrameNode, checkBoxGroupMap);
+    checkBoxPattern->UpdateCheckBoxGroupStatusWhenDetach(checkBoxFrameNode, checkBoxGroupMap);
     auto pattern = frameNode1->GetPattern<CheckBoxGroupPattern>();
     EXPECT_EQ(pattern->uiStatus_, UIStatus::ON_TO_OFF);
     EXPECT_EQ(groupPaintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::NONE);
@@ -1914,12 +1917,13 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0117, TestSize.Level1)
     frameNode2->paintProperty_ = paintProperty;
     frameNode2->eventHub_ = AceType::MakeRefPtr<CheckBoxEventHub>();
     checkBoxGroupMap[GROUP_NAME].push_back(frameNode2);
-    checkBoxPattern->UpdateCheckBoxGroupStatusWhenDetach(&checkBoxFrameNode, checkBoxGroupMap);
+    checkBoxPattern->UpdateCheckBoxGroupStatusWhenDetach(checkBoxFrameNode, checkBoxGroupMap);
     EXPECT_EQ(pattern->uiStatus_, UIStatus::OFF_TO_ON);
     EXPECT_EQ(groupPaintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::ALL);
 
     /**
      * @tc.steps: step5. Create frameNode3 and frameNode4 with test and create some parameters
+     * @tc.expected: uiStatus_ is unselected and selectStatus is PART
      */
     auto frameNode3 =
         FrameNode::GetOrCreateFrameNode("test", 3, []() { return AceType::MakeRefPtr<CheckBoxGroupPattern>(); });
@@ -1932,7 +1936,7 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest0117, TestSize.Level1)
     paintProperty4->UpdateCheckBoxSelect(false);
     frameNode4->paintProperty_ = paintProperty4;
     checkBoxGroupMap[GROUP_NAME].push_back(frameNode4);
-    checkBoxPattern->UpdateCheckBoxGroupStatusWhenDetach(&checkBoxFrameNode, checkBoxGroupMap);
+    checkBoxPattern->UpdateCheckBoxGroupStatusWhenDetach(checkBoxFrameNode, checkBoxGroupMap);
     EXPECT_EQ(pattern->uiStatus_, UIStatus::UNSELECTED);
     EXPECT_EQ(groupPaintProperty->GetSelectStatus(), CheckBoxGroupPaintProperty::SelectStatus::PART);
 }
