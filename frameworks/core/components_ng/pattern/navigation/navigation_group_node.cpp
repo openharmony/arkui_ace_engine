@@ -293,18 +293,17 @@ bool NavigationGroupNode::CheckCanHandleBack()
 {
     auto navigation = AceType::WeakClaim(this).Upgrade();
     CHECK_NULL_RETURN(navigation, false);
-    if (navigation->isOnAnimation_) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation is onAnimation, back press is not support");
-        return true;
-    }
     auto navigationPattern = GetPattern<NavigationPattern>();
     CHECK_NULL_RETURN(navigationPattern, false);
-    const auto& children = contentNode_->GetChildren();
-    if (children.empty()) {
+
+    auto navigationStack = navigationPattern->GetNavigationStack();
+    CHECK_NULL_RETURN(navigationStack, false);
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        NavigationGroupNode::GetNavDestinationNode(navigationStack->Get()));
+    if (!navDestination) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't find destination node to process back press");
         return false;
     }
-    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(children.back());
-    CHECK_NULL_RETURN(navDestination, false);
     auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(navDestination->GetPattern());
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navDestination consume back button event: %{public}s",
         navDestinationPattern->GetName().c_str());
