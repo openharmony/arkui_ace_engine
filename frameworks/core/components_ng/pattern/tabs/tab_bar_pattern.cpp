@@ -2130,7 +2130,8 @@ void TabBarPattern::InitTurnPageRateEvent()
 void TabBarPattern::HandleBottomTabBarAnimation(int32_t index)
 {
     auto preIndex = GetImageColorOnIndex().value_or(indicator_);
-    if (preIndex < 0 || preIndex >= tabBarStyles_.size() || index < 0 || index >= tabBarStyles_.size()) {
+    if (preIndex < 0 || preIndex >= static_cast<int32_t>(tabBarStyles_.size())
+        || index < 0 || index >= static_cast<int32_t>(tabBarStyles_.size())) {
         return;
     }
     if (tabBarStyles_[preIndex] != TabBarStyle::BOTTOMTABBATSTYLE &&
