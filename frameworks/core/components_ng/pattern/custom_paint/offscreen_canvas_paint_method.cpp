@@ -142,9 +142,11 @@ void OffscreenCanvasPaintMethod::DrawImage(
     }
 
 #ifndef USE_ROSEN_DRAWING
+    ContainerScope scope(canvasImage.instanceId);
+    auto context = PipelineBase::GetCurrentContext()
     auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)
-                     ? Ace::ImageProvider::GetSkImage(canvasImage.src, context_, Size(width, height))
-                     : Ace::ImageProvider::GetSkImage(canvasImage.src, context_);
+                     ? Ace::ImageProvider::GetSkImage(canvasImage.src, context, Size(width, height))
+                     : Ace::ImageProvider::GetSkImage(canvasImage.src, context);
     CHECK_NULL_VOID(image);
 
     const auto skCanvas = skCanvas_.get();
@@ -195,9 +197,11 @@ void OffscreenCanvasPaintMethod::DrawImage(
         skCanvas_->restore();
     }
 #else
+    ContainerScope scope(canvasImage.instanceId);
+    auto context = PipelineBase::GetCurrentContext();
     auto image = GreatOrEqual(width, 0) && GreatOrEqual(height, 0)
-                     ? Ace::ImageProvider::GetDrawingImage(canvasImage.src, context_, Size(width, height))
-                     : Ace::ImageProvider::GetDrawingImage(canvasImage.src, context_);
+                     ? Ace::ImageProvider::GetDrawingImage(canvasImage.src, context, Size(width, height))
+                     : Ace::ImageProvider::GetDrawingImage(canvasImage.src, context);
     CHECK_NULL_VOID(image);
 
     const auto rsCanvas = rsCanvas_.get();
@@ -381,9 +385,6 @@ std::unique_ptr<Ace::ImageData> OffscreenCanvasPaintMethod::GetImageData(
     double left, double top, double width, double height)
 {
     double viewScale = 1.0;
-    auto context = context_.Upgrade();
-    CHECK_NULL_RETURN(context, std::unique_ptr<Ace::ImageData>());
-    viewScale = context->GetViewScale();
     double dirtyWidth = std::abs(width);
     double dirtyHeight = std::abs(height);
     double scaledLeft = left * viewScale;
@@ -444,9 +445,6 @@ std::unique_ptr<Ace::ImageData> OffscreenCanvasPaintMethod::GetImageData(
 void OffscreenCanvasPaintMethod::GetImageData(const std::shared_ptr<Ace::ImageData>& imageData)
 {
     double viewScale = 1.0;
-    auto context = context_.Upgrade();
-    CHECK_NULL_VOID(context);
-    viewScale = context->GetViewScale();
     int32_t dirtyWidth = std::abs(imageData->dirtyWidth);
     int32_t dirtyHeight = std::abs(imageData->dirtyHeight);
     double scaledLeft = imageData->dirtyX * viewScale;
@@ -544,7 +542,7 @@ double OffscreenCanvasPaintMethod::MeasureText(const std::string& text, const Pa
     std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
     Rosen::TextStyle txtStyle;
 #endif
-    ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
+    ConvertTxtStyle(state.GetTextStyle(), txtStyle);
 #ifndef USE_GRAPHIC_TEXT_GINE
     txtStyle.font_size = state.GetTextStyle().GetFontSize().Value();
 #else
@@ -583,7 +581,7 @@ double OffscreenCanvasPaintMethod::MeasureTextHeight(const std::string& text, co
     std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
     Rosen::TextStyle txtStyle;
 #endif
-    ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
+    ConvertTxtStyle(state.GetTextStyle(), txtStyle);
 #ifndef USE_GRAPHIC_TEXT_GINE
     txtStyle.font_size = state.GetTextStyle().GetFontSize().Value();
 #else
@@ -623,7 +621,7 @@ TextMetrics OffscreenCanvasPaintMethod::MeasureTextMetrics(const std::string& te
     std::unique_ptr<Rosen::TypographyCreate> builder = Rosen::TypographyCreate::Create(style, fontCollection);
     Rosen::TextStyle txtStyle;
 #endif
-    ConvertTxtStyle(state.GetTextStyle(), context_, txtStyle);
+    ConvertTxtStyle(state.GetTextStyle(), txtStyle);
 #ifndef USE_GRAPHIC_TEXT_GINE
     txtStyle.font_size = state.GetTextStyle().GetFontSize().Value();
 #else
@@ -857,7 +855,7 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, Rosen:
 #else
         txtStyle.fontSize = fillState_.GetTextStyle().GetFontSize().Value();
 #endif
-        ConvertTxtStyle(fillState_.GetTextStyle(), context_, txtStyle);
+        ConvertTxtStyle(fillState_.GetTextStyle(), txtStyle);
         if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
             SkPaint paint;
 
@@ -899,7 +897,7 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, Rosen:
 
         SkSamplingOptions options;
         GetStrokePaint(paint, options);
-        ConvertTxtStyle(strokeState_.GetTextStyle(), context_, txtStyle);
+        ConvertTxtStyle(strokeState_.GetTextStyle(), txtStyle);
 #ifndef USE_GRAPHIC_TEXT_GINE
         txtStyle.font_size = strokeState_.GetTextStyle().GetFontSize().Value();
         if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
@@ -941,7 +939,7 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, Rosen:
 #else
         txtStyle.fontSize = fillState_.GetTextStyle().GetFontSize().Value();
 #endif
-        ConvertTxtStyle(fillState_.GetTextStyle(), context_, txtStyle);
+        ConvertTxtStyle(fillState_.GetTextStyle(), txtStyle);
         if (fillState_.GetGradient().IsValid() && fillState_.GetPaintStyle() == PaintStyle::Gradient) {
             RSBrush brush;
             RSSamplingOptions options;
@@ -989,7 +987,7 @@ void OffscreenCanvasPaintMethod::UpdateTextStyleForeground(bool isStroke, Rosen:
         RSPen pen;
         RSSamplingOptions options;
         GetStrokePaint(pen, options);
-        ConvertTxtStyle(strokeState_.GetTextStyle(), context_, txtStyle);
+        ConvertTxtStyle(strokeState_.GetTextStyle(), txtStyle);
 #ifndef USE_GRAPHIC_TEXT_GINE
         txtStyle.font_size = strokeState_.GetTextStyle().GetFontSize().Value();
         if (strokeState_.GetGradient().IsValid() && strokeState_.GetPaintStyle() == PaintStyle::Gradient) {
@@ -1045,9 +1043,7 @@ void OffscreenCanvasPaintMethod::Path2DRect(const OffsetF& offset, const PathArg
 
 void OffscreenCanvasPaintMethod::SetTransform(const TransformParam& param)
 {
-    auto context = context_.Upgrade();
-    CHECK_NULL_VOID(context);
-    double viewScale = context->GetViewScale();
+    double viewScale = 1.0;
 #ifndef USE_ROSEN_DRAWING
     SkMatrix skMatrix;
     skMatrix.setAll(param.scaleX * viewScale, param.skewX * viewScale, param.translateX, param.skewY * viewScale,
@@ -1063,8 +1059,7 @@ void OffscreenCanvasPaintMethod::SetTransform(const TransformParam& param)
 
 std::string OffscreenCanvasPaintMethod::ToDataURL(const std::string& type, const double quality)
 {
-    auto context = context_.Upgrade();
-    CHECK_NULL_RETURN(context, UNSUPPORTED);
+    double viewScale = 1.0;
     std::string mimeType = GetMimeType(type);
     double qua = GetQuality(type, quality);
     auto imageInfo = SkImageInfo::Make(width_, height_, SkColorType::kBGRA_8888_SkColorType,
@@ -1073,7 +1068,6 @@ std::string OffscreenCanvasPaintMethod::ToDataURL(const std::string& type, const
     SkBitmap tempCache;
     tempCache.allocPixels(imageInfo);
     SkCanvas tempCanvas(tempCache);
-    double viewScale = context->GetViewScale();
     tempCanvas.clear(SK_ColorTRANSPARENT);
     tempCanvas.scale(1.0 / viewScale, 1.0 / viewScale);
     // The return value of the dual framework interface has no alpha
@@ -1087,7 +1081,6 @@ std::string OffscreenCanvasPaintMethod::ToDataURL(const std::string& type, const
             (mimeType == IMAGE_JPEG) ? RSAlphaType::ALPHATYPE_OPAQUE : RSAlphaType::ALPHATYPE_UNPREMUL });
     RSCanvas tempCanvas;
     tempCanvas.Bind(tempCache);
-    double viewScale = context->GetViewScale();
     tempCanvas.Clear(RSColor::COLOR_TRANSPARENT);
     tempCanvas.Scale(1.0 / viewScale, 1.0 / viewScale);
     tempCanvas.DrawBitmap(bitmap_, 0.0f, 0.0f);

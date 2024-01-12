@@ -1100,7 +1100,7 @@ public:
     {
         return serializedGesture_;
     }
-    
+
     virtual bool PrintVsyncInfoIfNeed() const
     {
         return false;

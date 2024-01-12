@@ -315,10 +315,6 @@ SkMatrix CustomPaintPaintMethod::GetMatrixFromPattern(const Ace::Pattern& patter
 {
     SkMatrix matrix;
     double viewScale = 1.0;
-    auto context = context_.Upgrade();
-    if (context) {
-        viewScale = context->GetViewScale();
-    }
     matrix.setAll(pattern.GetScaleX() * viewScale, pattern.GetSkewX() * viewScale, pattern.GetTranslateX() * viewScale,
         pattern.GetSkewY() * viewScale, pattern.GetScaleY() * viewScale, pattern.GetTranslateY() * viewScale, 0.0f,
         0.0f, 1.0f);
@@ -329,10 +325,6 @@ RSMatrix CustomPaintPaintMethod::GetMatrixFromPattern(const Ace::Pattern& patter
 {
     RSMatrix matrix;
     double viewScale = 1.0;
-    auto context = context_.Upgrade();
-    if (context) {
-        viewScale = context->GetViewScale();
-    }
     matrix.SetMatrix(pattern.GetScaleX() * viewScale, pattern.GetSkewX() * viewScale,
         pattern.GetTranslateX() * viewScale, pattern.GetSkewY() * viewScale, pattern.GetScaleY() * viewScale,
         pattern.GetTranslateY() * viewScale, 0.0f, 0.0f, 1.0f);
@@ -2604,9 +2596,7 @@ void CustomPaintPaintMethod::ScaleMatrix(double sx, double sy)
 
 void CustomPaintPaintMethod::SetTransformMatrix(const TransformParam& param)
 {
-    auto context = context_.Upgrade();
-    CHECK_NULL_VOID(context);
-    double viewScale = context->GetViewScale();
+    double viewScale = 1.0;
     matrix_.setAll(param.scaleX * viewScale, param.skewX * viewScale, param.translateX * viewScale,
         param.skewY * viewScale, param.scaleY * viewScale, param.translateY * viewScale, 0, 0, 1);
 }

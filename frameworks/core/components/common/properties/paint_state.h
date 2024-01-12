@@ -93,6 +93,7 @@ struct CanvasImage {
     double dWidth = 0.0;
     double dHeight = 0.0;
     std::string src;
+    int32_t instanceId = 0;
 };
 
 struct ImageData {
