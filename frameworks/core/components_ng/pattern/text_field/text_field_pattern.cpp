@@ -1511,6 +1511,16 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
         CHECK_NULL_VOID(data);
         auto records = UdmfClient::GetInstance()->GetPlainTextRecords(data);
         std::string str;
+        if (records.empty()) {
+            std::string linkUrl;
+            std::string linkTitle;
+            UdmfClient::GetInstance()->GetLinkRecord(data, linkUrl, linkTitle);
+            if (!linkTitle.empty()) {
+                str += linkTitle;
+            } else if (!linkUrl.empty()) {
+                str += linkUrl;
+            }
+        }
         for (const auto& record : records) {
             str += record;
         }
