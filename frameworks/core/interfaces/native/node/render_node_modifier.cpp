@@ -176,7 +176,7 @@ void SetSize(NodeHandle node, float width, float height)
     CHECK_NULL_VOID(layoutProperty);
     layoutProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(width, DimensionUnit::VP), CalcLength(height, DimensionUnit::VP)));
-    frameNode->MarkDirtyNode();
+    frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_MEASURE);
 }
 
 void SetOpacity(NodeHandle node, float opacity)
