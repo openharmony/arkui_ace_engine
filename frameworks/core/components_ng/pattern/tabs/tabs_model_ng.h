@@ -21,6 +21,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
@@ -38,6 +39,7 @@ public:
     void Pop() override;
     void SetIndex(int32_t index) override;
     void SetTabBarPosition(BarPosition tabBarPosition) override;
+    void SetBarBackgroundBlurStyle(BlurStyle tabBarBlurStyle) override;
     void SetTabBarMode(TabBarMode tabBarMode) override;
     void SetTabBarWidth(const Dimension& tabBarWidth) override;
     void SetTabBarHeight(const Dimension& tabBarHeight) override;

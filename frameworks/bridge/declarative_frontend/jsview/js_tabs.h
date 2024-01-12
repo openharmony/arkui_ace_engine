@@ -45,6 +45,7 @@ protected:
     static void SetDivider(const JSCallbackInfo& info);
     static void SetBarOverlap(const JSCallbackInfo& info);
     static void SetBarBackgroundColor(const JSCallbackInfo& info);
+    static void SetBarBackgroundBlurStyle(const JSCallbackInfo& info);
     static void SetClip(const JSCallbackInfo& info);
     static void SetBarGridAlign(const JSCallbackInfo& info);
     static void SetScrollableBarModeOptions(const JSRef<JSVal>& info);
