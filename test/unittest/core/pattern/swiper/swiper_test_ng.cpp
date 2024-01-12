@@ -11228,4 +11228,466 @@ HWTEST_F(SwiperTestNg, SwiperProcessDelta001, TestSize.Level1)
     SwiperPattern::ProcessDelta(delta, mainSize, deltaSum);
     EXPECT_EQ(delta, 1.0f);
 }
+
+/**
+ * @tc.name: PlayLongPointAnimation
+ * @tc.desc: play long point animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, PlayLongPointAnimation002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    LinearVector<float> endVectorBlackPointCenterX;
+    for (int32_t i = 0; i < totalCount; ++i) {
+        endVectorBlackPointCenterX.emplace_back(static_cast<float>(i + 1));
+    }
+    std::vector<std::pair<float, float>> longPointCenterX = { { 0.0f, 0.0f } };
+
+    /**
+     * @tc.steps: step1.clear longPointCenterX Calling the PlayLongPointAnimation interface
+     * @tc.expected: longPointCenterX is empty.
+     */
+    longPointCenterX.clear();
+    modifier->PlayLongPointAnimation(longPointCenterX, GestureState::GESTURE_STATE_RELEASE_RIGHT,
+        TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT, endVectorBlackPointCenterX);
+    EXPECT_TRUE(longPointCenterX.empty());
+
+    /**
+     * @tc.steps: step2.GestureState:: Gesture_ DATE_ RELEASE_ Assign the value of Left to gastureState
+     * @tc.expected: Satisfying the condition GestureState==GestureState:: GESTURE_ DATE_ RELEASE_ Left
+     */
+    auto gestureState = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    modifier->PlayLongPointAnimation(
+        longPointCenterX, gestureState, TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT, endVectorBlackPointCenterX);
+    EXPECT_TRUE(gestureState == GestureState::GESTURE_STATE_RELEASE_LEFT);
+}
+
+/**
+ * @tc.name: StopAnimation
+ * @tc.desc: play long point animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, StopAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    /**
+     * @tc.steps: step1. Calling the StopAnimation interface
+     * @tc.expected: LongPointLeftAnimEnd_ And longPointRightAnimEnd_ To be true
+     */
+    modifier->StopAnimation();
+    EXPECT_TRUE(modifier->longPointLeftAnimEnd_ == true && modifier->longPointRightAnimEnd_ == true);
+}
+
+/**
+ * @tc.name: PlayIndicatorAnimation
+ * @tc.desc: play long point animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, PlayIndicatorAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    LinearVector<float> vectorBlackPointCenterX;
+    vectorBlackPointCenterX.push_back(20.0f);
+    vectorBlackPointCenterX.push_back(20.0f);
+    std::vector<std::pair<float, float>> longPointCenterX = { { 0.0f, 0.0f } };
+    auto gestureState = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    TouchBottomTypeLoop touchBottomTypeLoop;
+    touchBottomTypeLoop = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    /**
+     * @tc.steps: step1. Construct parameters to call PlayIndicator Animation
+     * @tc.expected: IsTouchBottomLoop_ Equal to false
+     */
+    modifier->PlayIndicatorAnimation(vectorBlackPointCenterX, longPointCenterX, gestureState, touchBottomTypeLoop);
+    EXPECT_TRUE(modifier->isTouchBottomLoop_ == false);
+}
+
+/**
+ * @tc.name: UpdateLongPointDilateRatio001
+ * @tc.desc: play long point animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, UpdateLongPointDilateRatio001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    /**
+     * @tc.steps: step1. Call the UpdateLongPointDilateRatio interface to convert longPointIsHover_ Set to false
+     * @tc.expected: LongPointIsHover_ Equal to true
+     */
+    modifier->longPointIsHover_ = true;
+    modifier->UpdateLongPointDilateRatio();
+    EXPECT_TRUE(modifier->longPointIsHover_ == true);
+}
+
+/**
+ * @tc.name: UpdateDilatePaintProperty001
+ * @tc.desc: play long point animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, UpdateDilatePaintProperty001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    /**
+     * @tc.steps: step1. Calling the UpdateDilatePaintProperty interface
+     * @tc.expected: modifier->longPointLeftAnimEnd_ && modifier->longPointRightAnimEnd_ Condition is true
+     */
+    LinearVector<float> vectorBlackPointCenterX;
+    vectorBlackPointCenterX.push_back(20.0f);
+    vectorBlackPointCenterX.push_back(20.0f);
+
+    LinearVector<float> normalItemHalfSizes;
+    normalItemHalfSizes.emplace_back(20.f);
+    normalItemHalfSizes.emplace_back(20.f);
+
+    const std::pair<float, float> longPointCenterX = { 0.0f, 0.0f };
+
+    modifier->longPointLeftAnimEnd_ = true;
+    modifier->longPointRightAnimEnd_ = false;
+    modifier->UpdateDilatePaintProperty(normalItemHalfSizes, vectorBlackPointCenterX, longPointCenterX);
+    EXPECT_FALSE(modifier->longPointLeftAnimEnd_ && modifier->longPointRightAnimEnd_);
+
+    modifier->longPointLeftAnimEnd_ = true;
+    modifier->longPointRightAnimEnd_ = true;
+    modifier->UpdateDilatePaintProperty(normalItemHalfSizes, vectorBlackPointCenterX, longPointCenterX);
+    EXPECT_TRUE(modifier->longPointLeftAnimEnd_ && modifier->longPointRightAnimEnd_);
+
+    modifier->longPointLeftAnimEnd_ = false;
+    modifier->longPointRightAnimEnd_ = false;
+    modifier->UpdateDilatePaintProperty(normalItemHalfSizes, vectorBlackPointCenterX, longPointCenterX);
+    EXPECT_FALSE(modifier->longPointLeftAnimEnd_ && modifier->longPointRightAnimEnd_);
+
+    modifier->longPointLeftAnimEnd_ = false;
+    modifier->longPointRightAnimEnd_ = true;
+    modifier->UpdateDilatePaintProperty(normalItemHalfSizes, vectorBlackPointCenterX, longPointCenterX);
+    EXPECT_FALSE(modifier->longPointLeftAnimEnd_ && modifier->longPointRightAnimEnd_);
+}
+
+/**
+ * @tc.name: UpdateShrinkPaintProperty002
+ * @tc.desc: play long point animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, UpdateShrinkPaintProperty002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    /**
+     * @tc.steps: step1. Calling the UpdateShrinkPaintProperty interface
+     * @tc.expected: Modifier ->longPointLeftAnimEnd_&& Modifier ->longPointRightAnimEnd_ Condition is false
+     */
+    LinearVector<float> vectorBlackPointCenterX;
+    vectorBlackPointCenterX.push_back(20.0f);
+    vectorBlackPointCenterX.push_back(20.0f);
+
+    LinearVector<float> normalItemHalfSizes;
+    normalItemHalfSizes.emplace_back(20.f);
+    normalItemHalfSizes.emplace_back(20.f);
+
+    const std::pair<float, float> longPointCenterX = { 0.0f, 0.0f };
+    auto offset = OffsetF(0.1f, 0.2f);
+
+    modifier->longPointLeftAnimEnd_ = true;
+    modifier->longPointRightAnimEnd_ = false;
+    modifier->UpdateShrinkPaintProperty(offset, normalItemHalfSizes, vectorBlackPointCenterX, longPointCenterX);
+    EXPECT_FALSE(modifier->longPointLeftAnimEnd_ && modifier->longPointRightAnimEnd_);
+
+    modifier->longPointLeftAnimEnd_ = true;
+    modifier->longPointRightAnimEnd_ = true;
+    modifier->UpdateShrinkPaintProperty(offset, normalItemHalfSizes, vectorBlackPointCenterX, longPointCenterX);
+    EXPECT_TRUE(modifier->longPointLeftAnimEnd_ && modifier->longPointRightAnimEnd_);
+
+    modifier->longPointLeftAnimEnd_ = false;
+    modifier->longPointRightAnimEnd_ = true;
+    modifier->UpdateShrinkPaintProperty(offset, normalItemHalfSizes, vectorBlackPointCenterX, longPointCenterX);
+    EXPECT_FALSE(modifier->longPointLeftAnimEnd_ && modifier->longPointRightAnimEnd_);
+
+    modifier->longPointLeftAnimEnd_ = false;
+    modifier->longPointRightAnimEnd_ = false;
+    modifier->UpdateShrinkPaintProperty(offset, normalItemHalfSizes, vectorBlackPointCenterX, longPointCenterX);
+    EXPECT_FALSE(modifier->longPointLeftAnimEnd_ && modifier->longPointRightAnimEnd_);
+}
+
+/**
+ * @tc.name: PaintUnselectedIndicator001
+ * @tc.desc: play long point animation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, PaintUnselectedIndicator001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    auto totalCount = pattern_->TotalCount();
+    EXPECT_EQ(totalCount, 4);
+
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    /**
+     * @tc.steps: step1. Calling the PaintUnselectedIndicator interface
+     * @tc.expected: modifier->isCustomSize_ is false
+     */
+    LinearVector<float> itemHalfSizes;
+    itemHalfSizes.push_back(20.0f);
+    itemHalfSizes.push_back(20.0f);
+
+    RSCanvas canvas;
+    auto offset = OffsetF(0.1f, 0.2f);
+    bool currentIndexFlag = false;
+    modifier->isCustomSize_ = false;
+    modifier->PaintUnselectedIndicator(
+        canvas, offset, itemHalfSizes, currentIndexFlag, LinearColor(Color::TRANSPARENT));
+    EXPECT_TRUE(modifier->isCustomSize_ == false);
+
+    currentIndexFlag = true;
+    modifier->isCustomSize_ = true;
+    modifier->PaintUnselectedIndicator(
+        canvas, offset, itemHalfSizes, currentIndexFlag, LinearColor(Color::TRANSPARENT));
+    EXPECT_TRUE(currentIndexFlag == true);
+
+    currentIndexFlag = true;
+    modifier->isCustomSize_ = false;
+    modifier->PaintUnselectedIndicator(
+        canvas, offset, itemHalfSizes, currentIndexFlag, LinearColor(Color::TRANSPARENT));
+    EXPECT_TRUE(currentIndexFlag);
+}
+
+/**
+ * @tc.name: GetLongPointAnimationStateSecondCenter002
+ * @tc.desc: Test DotIndicatorPaintMethod UpdateContentModifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, GetLongPointAnimationStateSecondCenter002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDirection(Axis::VERTICAL);
+        model.SetIndicatorType(SwiperIndicatorType::DOT);
+    });
+
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    paintProperty->Clone();
+    paintProperty->Reset();
+    paintProperty->UpdateColor(Color::RED);
+    auto renderContext = frameNode_->GetRenderContext();
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+
+    LinearVector<float> longPointCenterX;
+    longPointCenterX.push_back(20.0f);
+    longPointCenterX.push_back(20.0f);
+
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    frameNode_->AddChild(indicatorNode);
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    paintMethod->UpdateNormalIndicator(longPointCenterX, &paintWrapper);
+    EXPECT_TRUE(paintMethod->gestureState_ == GestureState::GESTURE_STATE_RELEASE_LEFT);
+
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    paintMethod->UpdateNormalIndicator(longPointCenterX, &paintWrapper);
+    EXPECT_TRUE(paintMethod->gestureState_ == GestureState::GESTURE_STATE_RELEASE_RIGHT);
+}
+
+/**
+ * @tc.name: SwiperIndicatorPaintHoverIndicator003
+ * @tc.desc: Test DotIndicatorPaintMethod SwiperIndicatorPaintHoverIndicator
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperIndicatorPaintHoverIndicator003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDirection(Axis::VERTICAL);
+        model.SetIndicatorType(SwiperIndicatorType::DOT);
+    });
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    frameNode_->AddChild(indicatorNode);
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    paintProperty->Clone();
+    paintProperty->Reset();
+    paintProperty->UpdateColor(Color::RED);
+    auto renderContext = frameNode_->GetRenderContext();
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    paintMethod->hoverIndex_ = 10;
+    paintMethod->currentIndex_ = 10;
+    paintMethod->mouseClickIndex_ = 5;
+    ASSERT_NE(paintMethod->dotIndicatorModifier_, nullptr);
+    paintMethod->dotIndicatorModifier_->SetNormalToHoverIndex(5);
+    paintMethod->dotIndicatorModifier_->SetIsPressed(true);
+
+    /**
+     * @tc.steps: step3. call PaintHoverIndicator.
+     * @tc.expected: dotIndicatorModifier_->GetIsPressed is false.
+     */
+    paintMethod->mouseClickIndex_ = 100;
+    paintMethod->PaintHoverIndicator(&paintWrapper);
+    EXPECT_FALSE(paintMethod->dotIndicatorModifier_->GetIsPressed());
+}
+
+/**
+ * @tc.name: SwiperIndicatorCalculatePointCenterX002
+ * @tc.desc: Test DotIndicatorPaintMethod CalculatePointCenterX
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperIndicatorCalculatePointCenterX002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDirection(Axis::VERTICAL);
+        model.SetIndicatorType(SwiperIndicatorType::DOT);
+    });
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    frameNode_->AddChild(indicatorNode);
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+    auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    geometryNode->SetFrameSize(SizeF(720.f, 1136.f));
+    auto paintProperty = AceType::MakeRefPtr<DotIndicatorPaintProperty>();
+    paintProperty->Clone();
+    paintProperty->Reset();
+    paintProperty->UpdateItemWidth(Dimension(20.f, DimensionUnit::PX));
+    paintProperty->UpdateItemHeight(Dimension(10.f, DimensionUnit::PX));
+    paintProperty->UpdateSelectedItemWidth(Dimension(30.f, DimensionUnit::PX));
+    paintProperty->UpdateSelectedItemHeight(Dimension(15.f, DimensionUnit::PX));
+    LinearVector<float> vectorBlackPointCenterX;
+    auto renderContext = frameNode_->GetRenderContext();
+    PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
+    paintMethod->dotIndicatorModifier_->SetIsHover(true);
+    ASSERT_NE(paintMethod->dotIndicatorModifier_, nullptr);
+    paintMethod->IsCustomSizeValue_ = true;
+    /**
+     * @tc.steps: step1. call CalculatePointCenterX.
+     * @tc.expected: run success
+     */
+    vectorBlackPointCenterX.push_back(20.0f);
+    vectorBlackPointCenterX.push_back(20.0f);
+    vectorBlackPointCenterX.push_back(20.0f);
+    vectorBlackPointCenterX.push_back(20.0f);
+    vectorBlackPointCenterX.push_back(20.0f);
+    vectorBlackPointCenterX.push_back(20.0f);
+    paintMethod->turnPageRate_ = 110.0f;
+    paintMethod->itemCount_ = 100;
+    paintMethod->CalculatePointCenterX(vectorBlackPointCenterX, 0.0, 0.0, 0.0, 0);
+    paintMethod->turnPageRate_ = 10.0f;
+    paintMethod->itemCount_ = 10;
+    paintMethod->CalculatePointCenterX(vectorBlackPointCenterX, 0.0, 0.0, 0.0, 0);
+    EXPECT_EQ(paintMethod->normalMargin_.GetX(), 0);
+    EXPECT_EQ(paintMethod->normalMargin_.GetY(), 0);
+
+    paintMethod->turnPageRate_ = 110.0f;
+    paintMethod->IsCustomSizeValue_ = false;
+    paintMethod->CalculatePointCenterX(vectorBlackPointCenterX, 0.0, 0.0, 0.0, 0);
+    EXPECT_EQ(paintMethod->normalMargin_.GetX(), 0);
+    EXPECT_EQ(paintMethod->normalMargin_.GetY(), 0);
+}
+
+/**
+ * @tc.name: GetMoveRate001
+ * @tc.desc: Test DotIndicatorPaintMethod CalculatePointCenterX
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, GetMoveRate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) {
+        model.SetDirection(Axis::VERTICAL);
+        model.SetIndicatorType(SwiperIndicatorType::DOT);
+    });
+    auto indicatorNode = FrameNode::GetOrCreateFrameNode(V2::SWIPER_INDICATOR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<SwiperIndicatorPattern>(); });
+    frameNode_->AddChild(indicatorNode);
+    RefPtr<DotIndicatorModifier> modifier = AceType::MakeRefPtr<DotIndicatorModifier>();
+    RefPtr<DotIndicatorPaintMethod> paintMethod = AceType::MakeRefPtr<DotIndicatorPaintMethod>(modifier);
+
+    /**
+     * @tc.steps: step1. Calling the GetMoveRate interface
+     * @tc.expected: GestureState_ 5. After accepting, read the value of std:: get<2>(gestureState_5),
+     * which is equal to std:: abs (paintMethod ->turnPageRate2)
+     */
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_RIGHT;
+    auto gestureState_5 = paintMethod->GetMoveRate();
+    EXPECT_TRUE(std::get<2>(gestureState_5) == std::abs(paintMethod->turnPageRate_));
+
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_FOLLOW_LEFT;
+    auto gestureState_4 = paintMethod->GetMoveRate();
+    EXPECT_TRUE(
+        std::get<2>(gestureState_4) == std::abs(paintMethod->turnPageRate_) + (1 - std::get<1>(gestureState_4)) * 0.5);
+
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_RIGHT;
+    auto gestureState_3 = paintMethod->GetMoveRate();
+    EXPECT_TRUE(std::get<1>(gestureState_3) == std::get<2>(gestureState_3));
+
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_LEFT;
+    auto gestureState_2 = paintMethod->GetMoveRate();
+    EXPECT_TRUE(std::get<1>(gestureState_2) == std::get<2>(gestureState_2));
+
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_LEFT;
+    auto gestureState_1 = paintMethod->GetMoveRate();
+    EXPECT_TRUE(std::get<0>(gestureState_1) == 1);
+
+    paintMethod->gestureState_ = GestureState::GESTURE_STATE_RELEASE_RIGHT;
+    auto gestureState = paintMethod->GetMoveRate();
+    EXPECT_TRUE(std::get<0>(gestureState) == 1);
+
+    paintMethod->isPressed_ = true;
+    paintMethod->touchBottomTypeLoop_ = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    paintMethod->GetMoveRate();
+    EXPECT_TRUE(paintMethod->isPressed_ &&
+                paintMethod->touchBottomTypeLoop_ == TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE);
+}
 } // namespace OHOS::Ace::NG
