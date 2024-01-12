@@ -664,7 +664,7 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
         if (isClickOnAISpan && selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
             selectOverlayProxy_->DisableMenu(true);
         }
-        if (isClickOnSpan && textSelector_.IsValid() && !isMousePressed_) {
+        if (isClickOnSpan && textSelector_.IsValid() && mouseStatus_ != MouseStatus::MOVE) {
             ResetSelection();
         }
         return;
@@ -682,7 +682,7 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
             }
         }
     }
-    if (textSelector_.IsValid() && !isMousePressed_) {
+    if (textSelector_.IsValid() && mouseStatus_ != MouseStatus::MOVE) {
         CloseSelectOverlay(true);
         ResetSelection();
     }
