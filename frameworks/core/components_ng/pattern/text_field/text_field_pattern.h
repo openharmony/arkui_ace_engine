@@ -1073,6 +1073,8 @@ public:
         return lastClickTimeStamp_;
     }
 
+    void CheckTextAlignByDirection(TextAlign& textAlign, TextDirection direction);
+
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
 

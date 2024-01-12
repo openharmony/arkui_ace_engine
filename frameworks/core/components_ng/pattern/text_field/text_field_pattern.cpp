@@ -6331,6 +6331,17 @@ void TextFieldPattern::HandleOnDragStatusCallback(
     }
 }
 
+void TextFieldPattern::CheckTextAlignByDirection(TextAlign& textAlign, TextDirection direction)
+{
+    if (direction == TextDirection::RTL) {
+        if (textAlign == TextAlign::START) {
+            textAlign = TextAlign::END;
+        } else if (textAlign == TextAlign::END) {
+            textAlign = TextAlign::START;
+        }
+    }
+}
+
 void TextFieldPattern::RequestKeyboardAfterLongPress()
 {
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
