@@ -714,6 +714,11 @@ public:
         ViewAbstract::SetInvert(value);
     }
 
+    void SetSystemBarEffect(bool systemBarEffect) override
+    {
+        ViewAbstract::SetSystemBarEffect(systemBarEffect);
+    }
+
     void SetHueRotate(float value) override
     {
         ViewAbstract::SetHueRotate(value);

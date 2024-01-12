@@ -5475,6 +5475,11 @@ void JSViewAbstract::JsInvert(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetInvert(invert);
 }
 
+void JSViewAbstract::JsSystemBarEffect(const JSCallbackInfo& info)
+{
+    ViewAbstractModel::GetInstance()->SetSystemBarEffect(true);
+}
+
 void JSViewAbstract::JsHueRotate(const JSCallbackInfo& info)
 {
     std::optional<float> degree;
@@ -6579,6 +6584,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("saturate", &JSViewAbstract::JsSaturate);
     JSClass<JSViewAbstract>::StaticMethod("sepia", &JSViewAbstract::JsSepia);
     JSClass<JSViewAbstract>::StaticMethod("invert", &JSViewAbstract::JsInvert);
+    JSClass<JSViewAbstract>::StaticMethod("systemBarEffect", &JSViewAbstract::JsSystemBarEffect);
     JSClass<JSViewAbstract>::StaticMethod("hueRotate", &JSViewAbstract::JsHueRotate);
     JSClass<JSViewAbstract>::StaticMethod("clip", &JSViewAbstract::JsClip);
     JSClass<JSViewAbstract>::StaticMethod("mask", &JSViewAbstract::JsMask);
