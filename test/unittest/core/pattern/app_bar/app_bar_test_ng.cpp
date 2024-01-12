@@ -685,7 +685,6 @@ HWTEST_F(AppBarTestNg, IniColor001, TestSize.Level1)
     auto faIcon = AceType::DynamicCast<FrameNode>(FaButton->GetFirstChild());
     auto faButtonproperty = faIcon->GetLayoutProperty<ImageLayoutProperty>();
     ASSERT_NE(faButtonproperty, nullptr);
-
     /**
      * @tc.Calling the IniColor function When both isRowColorSet and isIconColorSet are false.
      */	
@@ -700,7 +699,6 @@ HWTEST_F(AppBarTestNg, IniColor001, TestSize.Level1)
     EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::RED);
     appBar->IniColor();
     EXPECT_NE(renderContext->GetBackgroundColorValue(), appBarTheme->GetBgColor());
-
     appBar->SetIconColor(Color::BLUE);
     EXPECT_EQ(faButtonproperty->GetImageSourceInfo()->GetFillColor(), Color::BLUE);
     appBar->IniColor();
