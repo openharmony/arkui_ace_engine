@@ -127,10 +127,11 @@ enum class AceLogTag : uint8_t {
     ACE_RESOURCE,             // C03937
     ACE_SIDEBAR,              // C03938
     ACE_GEOMETRY_TRANSITION,  // C03939
-    ACE_DOWNLOAD_MANAGER,     // C03940
-    ACE_WINDOW_SCENE,         // C03941
-    ACE_NODE_CONTAINER,       // C03942
-    ACE_NATIVE_NODE,          // C03943
+    ACE_DOWNLOAD_MANAGER,     // C0393A
+    ACE_WINDOW_SCENE,         // C0393B
+    ACE_NODE_CONTAINER,       // C0393C
+    ACE_NATIVE_NODE,          // C0393D
+    ACE_DYNAMIC_COMPONENT,    // C0393E
 
     FORM_RENDER = 255, // C039FF FormRenderer
     END = 256,         // Last one, do not use
