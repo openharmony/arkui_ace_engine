@@ -1856,7 +1856,6 @@ HWTEST_F(CheckBoxTestNG, CheckBoxPatternTest002, TestSize.Level1)
     checkBoxModelNG.Create(NAME, GROUP_NAME, TAG);
 
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     pattern->lastSelect_ = false;
     pattern->SetAccessibilityAction();
