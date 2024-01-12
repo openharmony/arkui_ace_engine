@@ -257,7 +257,7 @@ public:
         textBackgroundStyle_ = style;
     }
 
-    const std::optional<TextBackgroundStyle> GetTextBackgroundStyle()
+    const std::optional<TextBackgroundStyle> GetTextBackgroundStyle() const
     {
         return textBackgroundStyle_;
     }
@@ -548,6 +548,8 @@ public:
 
     explicit ContainerSpanNode(int32_t nodeId) : UINode(V2::CONTAINER_SPAN_ETS_TAG, nodeId), BaseSpan(nodeId) {}
     ~ContainerSpanNode() override = default;
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     bool IsAtomicNode() const override
     {

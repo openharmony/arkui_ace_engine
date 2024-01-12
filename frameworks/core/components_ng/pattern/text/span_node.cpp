@@ -98,6 +98,7 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     if (textLineStyle) {
         json->Put("lineHeight", textLineStyle->GetLineHeight().value_or(Dimension()).ToString().c_str());
     }
+    TextBackgroundStyle::ToJsonValue(json, backgroundStyle);
 }
 
 RefPtr<SpanNode> SpanNode::GetOrCreateSpanNode(int32_t nodeId)
@@ -538,5 +539,10 @@ void BaseSpan::SetTextBackgroundStyle(const TextBackgroundStyle& style)
     textBackgroundStyle_->groupId = groupId_;
     SetHasTextBackgroundStyle(style.backgroundColor.has_value() || style.backgroundRadius.has_value());
     MarkTextDirty();
+}
+
+void ContainerSpanNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    TextBackgroundStyle::ToJsonValue(json, GetTextBackgroundStyle());
 }
 } // namespace OHOS::Ace::NG

@@ -73,7 +73,7 @@ public:
         static const char* OBJECTFITVALUE[] = { "ImageFit.Fill", "ImageFit.Contain", "ImageFit.Cover",
             "ImageFit.Auto", "ImageFit.FitHeight", "ImageFit.None", "ImageFit.ScaleDown" };
         static const char* VERTICALALIGNVALUE[] = { "VerticalAlign.NONE", "VerticalAlign.TOP", "VerticalAlign.CENTER",
-            "VerticalAlign.BOTTOM", "CopyOptions.BASELINE", "VerticalAlign.NONE" };
+            "VerticalAlign.BOTTOM", "VerticalAlign.BASELINE", "VerticalAlign.NONE" };
         json->Put("alt", propAlt_.value_or(ImageSourceInfo("")).GetSrc().c_str());
         json->Put("objectFit", OBJECTFITVALUE[static_cast<int32_t>(propImageFit_.value_or(ImageFit::COVER))]);
         json->Put("verticalAlign",
@@ -93,6 +93,9 @@ public:
         json->Put("rawSrc", propImageSourceInfo_->GetSrc().c_str());
         json->Put("moduleName", propImageSourceInfo_->GetModuleName().c_str());
         ACE_PROPERTY_TO_JSON_VALUE(propImageSizeStyle_, ImageSizeStyle);
+        if (GetHasPlaceHolderStyle().has_value()) {
+            TextBackgroundStyle::ToJsonValue(json, GetPlaceHolderStyle());
+        }
     }
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override
