@@ -167,6 +167,17 @@ void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirtyNode);
+    auto customNode = DynamicCast<CustomNode>(dirtyNode);
+    if (customNode && !dirtyNode->GetInspectorIdValue("").empty()) {
+        ACE_LAYOUT_SCOPED_TRACE("AddDirtyCustomNode[%s][self:%d][parent:%d][key:%s]",
+            customNode->GetJSViewName().c_str(),
+            dirtyNode->GetId(), dirtyNode->GetParent() ? dirtyNode->GetParent()->GetId() : 0,
+            dirtyNode->GetInspectorIdValue("").c_str());
+    } else if (customNode) {
+        ACE_LAYOUT_SCOPED_TRACE("AddDirtyCustomNode[%s][self:%d][parent:%d]",
+            customNode->GetJSViewName().c_str(),
+            dirtyNode->GetId(), dirtyNode->GetParent() ? dirtyNode->GetParent()->GetId() : 0);
+    }
     dirtyNodes_.emplace(dirtyNode);
     hasIdleTasks_ = true;
     RequestFrame();
@@ -176,6 +187,15 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
+    if (!dirty->GetInspectorIdValue("").empty()) {
+        ACE_LAYOUT_SCOPED_TRACE("AddDirtyLayoutNode[%s][self:%d][parent:%d][key:%s]",
+            dirty->GetTag().c_str(),
+            dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0,
+            dirty->GetInspectorIdValue("").c_str());
+    } else {
+        ACE_LAYOUT_SCOPED_TRACE("AddDirtyLayoutNode[%s][self:%d][parent:%d]", dirty->GetTag().c_str(),
+            dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0);
+    }
     taskScheduler_->AddDirtyLayoutNode(dirty);
     ForceLayoutForImplicitAnimation();
 #ifdef UICAST_COMPONENT_SUPPORTED
@@ -195,6 +215,14 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
 {
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
+    if (!dirty->GetInspectorIdValue("").empty()) {
+        ACE_LAYOUT_SCOPED_TRACE("AddDirtyRenderNode[%s][self:%d][parent:%d][key:%s]", dirty->GetTag().c_str(),
+            dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0,
+            dirty->GetInspectorIdValue("").c_str());
+    } else {
+        ACE_LAYOUT_SCOPED_TRACE("AddDirtyRenderNode[%s][self:%d][parent:%d]", dirty->GetTag().c_str(),
+            dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0);
+    }
     taskScheduler_->AddDirtyRenderNode(dirty);
     ForceRenderForImplicitAnimation();
 #ifdef UICAST_COMPONENT_SUPPORTED
@@ -470,9 +498,11 @@ void PipelineContext::IsCloseSCBKeyboard()
             needSoftKeyboard_ = std::nullopt;
         }
     } else {
-        if (windowFocus_.has_value() && windowFocus_.value()) {
+        if ((windowFocus_.has_value() && windowFocus_.value()) ||
+            (windowShow_.has_value() && windowShow_.value())) {
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nomal Window focus first, set focusflag to window.");
             windowFocus_.reset();
+            windowShow_.reset();
             focusOnNodeCallback_();
             return;
         }
@@ -2265,6 +2295,10 @@ void PipelineContext::OnShow()
 {
     CHECK_RUN_ON(UI);
     onShow_ = true;
+    if (focusOnNodeCallback_) {
+        windowShow_ = true;
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "windowShow is OK.");
+    }
     window_->OnShow();
     RequestFrame();
     FlushWindowStateChangedCallback(true);

@@ -20,6 +20,8 @@
 #include "include/core/SkGraphics.h"
 
 #include "base/image/pixel_map.h"
+#include "core/components_ng/property/calc_length.h"
+#include "core/components_ng/property/measure_utils.h"
 #include "frameworks/core/components_ng/render/adapter/image_painter_utils.h"
 #include "frameworks/core/image/sk_image_cache.h"
 #ifdef ENABLE_ROSEN_BACKEND
@@ -27,6 +29,72 @@
 #endif
 
 namespace OHOS::Ace::NG {
+namespace {
+// The [GRAY_COLOR_MATRIX] is of dimension [4 x 5], which transforms a RGB source color (R, G, B, A) to the
+// destination color (R', G', B', A').
+//
+// A classic color image to grayscale conversion formula is [Gray = R * 0.3 + G * 0.59 + B * 0.11].
+// Hence we get the following conversion:
+//
+// | M11 M12 M13 M14 M15 |   | R |   | R' |
+// | M21 M22 M23 M24 M25 |   | G |   | G' |
+// | M31 M32 M33 M34 M35 | x | B | = | B' |
+// | M41 M42 M43 M44 M45 |   | A |   | A' |
+//                           | 1 |
+const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0, 0, // red
+    0.30f, 0.59f, 0.11f, 0, 0,                                   // green
+    0.30f, 0.59f, 0.11f, 0, 0,                                   // blue
+    0, 0, 0, 1.0f, 0 };                                          // alpha transparency
+
+bool ConvertSlice(const ImagePaintConfig& config, RectF& result, float rawImageWidth, float rawImageHeight)
+{
+    const auto& slice = config.resizableSlice_;
+    CHECK_NULL_RETURN(slice.Valid(), false);
+    result.SetLeft(ConvertToPx(slice.left, ScaleProperty::CreateScaleProperty(), rawImageWidth).value_or(0.0f));
+    result.SetTop(ConvertToPx(slice.top, ScaleProperty::CreateScaleProperty(), rawImageHeight).value_or(0.0f));
+    auto rightSliceValue = ConvertToPx(slice.right, ScaleProperty::CreateScaleProperty(), rawImageWidth).value_or(0.0f);
+    auto bottomSliceValue =
+        ConvertToPx(slice.bottom, ScaleProperty::CreateScaleProperty(), rawImageHeight).value_or(0.0f);
+    // illegal case if left position if larger than right, then rect has negative width
+    if (GreatNotEqual(rawImageWidth - rightSliceValue - result.GetX(), 0.0f)) {
+        result.SetWidth(rawImageWidth - rightSliceValue - result.GetX());
+    } else {
+        return false;
+    }
+    // same illegal case for height
+    if (GreatNotEqual(rawImageHeight - bottomSliceValue - result.GetY(), 0.0f)) {
+        result.SetHeight(rawImageHeight - bottomSliceValue - result.GetY());
+    } else {
+        return false;
+    }
+    return true;
+}
+
+#ifndef USE_ROSEN_DRAWING
+void UpdateSKFilter(const ImagePaintConfig& config, SKPaint& paint)
+{
+    if (config.colorFilter_) {
+        paint.setColorFilter(SkColorFilters::Matrix(config.colorFilter_->data()));
+    } else if (ImageRenderMode::TEMPLATE == config.renderMode_) {
+        paint.setColorFilter(SkColorFilters::Matrix(GRAY_COLOR_MATRIX));
+    }
+}
+#else
+void UpdateRSFilter(const ImagePaintConfig& config, RSFilter& filter)
+{
+    if (config.colorFilter_) {
+        RSColorMatrix colorMatrix;
+        colorMatrix.SetArray(config.colorFilter_->data());
+        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix));
+    } else if (ImageRenderMode::TEMPLATE == config.renderMode_) {
+        RSColorMatrix colorMatrix;
+        colorMatrix.SetArray(GRAY_COLOR_MATRIX);
+        filter.SetColorFilter(RSRecordingColorFilter::CreateMatrixColorFilter(colorMatrix));
+    }
+}
+#endif
+} // namespace
+
 RefPtr<CanvasImage> CanvasImage::Create(void* rawImage)
 {
     auto* rsImagePtr = reinterpret_cast<std::shared_ptr<RSImage>*>(rawImage);
@@ -169,8 +237,62 @@ void DrawingImage::DrawToRSCanvas(
         ImagePainterUtils::ClipRRect(canvas, dstRect, radiusXY);
         canvas.DrawImageRect(*image, srcRect, dstRect, options);
     } else {
+        const auto& config = GetPaintConfig();
+        if (config.resizableSlice_.Valid() && DrawImageNine(canvas, srcRect, dstRect, radiusXY)) {
+            return;
+        }
         DrawWithRecordingCanvas(canvas, radiusXY);
     }
+}
+
+bool DrawingImage::DrawImageNine(
+    RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY)
+{
+    const auto& config = GetPaintConfig();
+    const auto& slice = GetPaintConfig().resizableSlice_;
+    CHECK_NULL_RETURN(slice.Valid(), false);
+    RectF centerRect;
+    CHECK_NULL_RETURN(ConvertSlice(config, centerRect, GetWidth(), GetHeight()), false);
+#ifdef ENABLE_ROSEN_BACKEND
+#ifndef USE_ROSEN_DRAWING
+    return false;
+#endif
+    RSBrush brush;
+    auto filterMode = RSFilterMode::NEAREST;
+    switch (config.imageInterpolation_) {
+        case ImageInterpolation::LOW:
+        case ImageInterpolation::MEDIUM:
+            filterMode = RSFilterMode::LINEAR;
+            break;
+        case ImageInterpolation::HIGH:
+        default:
+            break;
+    }
+
+    auto filter = brush.GetFilter();
+    UpdateRSFilter(config, filter);
+    brush.SetFilter(filter);
+    auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
+    std::vector<RSPoint> radius;
+    for (int ii = 0; ii < 4; ii++) {
+        RSPoint point(radiusXY[ii].GetX(), radiusXY[ii].GetY());
+        radius.emplace_back(point);
+    }
+    recordingCanvas.ClipAdaptiveRoundRect(radius);
+    recordingCanvas.Scale(config.scaleX_, config.scaleY_);
+
+    RSPoint pointRadius[4] = {};
+    for (int i = 0; i < 4; i++) {
+        pointRadius[i] = radius[i];
+    }
+    RSRectI rsCenterRect(centerRect.GetX(), centerRect.GetY(), centerRect.GetX() + centerRect.Width(),
+        centerRect.GetY() + centerRect.Height());
+    recordingCanvas.AttachBrush(brush);
+    recordingCanvas.DrawImageNine(image_.get(), rsCenterRect, dstRect, filterMode, &brush);
+    recordingCanvas.DetachBrush();
+    return true;
+#endif
+    return false;
 }
 
 bool DrawingImage::DrawWithRecordingCanvas(RSCanvas& canvas, const BorderRadiusArray& radiusXY)

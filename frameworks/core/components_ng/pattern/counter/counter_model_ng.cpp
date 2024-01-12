@@ -283,4 +283,51 @@ void CounterModelNG::SetEnableInc(FrameNode* frameNode, bool enableInc)
         addNode->GetRenderContext()->UpdateOpacity(1.0);
     }
 }
+void CounterModelNG::SetHeight(FrameNode* frameNode, const Dimension& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(value)));
+
+    int32_t subId = frameNode->GetPattern<CounterPattern>()->GetSubId();
+    auto subNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(subId)));
+    CHECK_NULL_VOID(subNode);
+    auto subLayoutProperty = subNode->GetLayoutProperty();
+    subLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(value)));
+    auto subTextNode = AceType::DynamicCast<FrameNode>(subNode->GetFirstChild());
+    CHECK_NULL_VOID(subTextNode);
+    auto subTextLayoutProperty = subTextNode->GetLayoutProperty();
+    subTextLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(value)));
+
+    int32_t contentId = frameNode->GetPattern<CounterPattern>()->GetContentId();
+    auto contentNode =
+        AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(contentId)));
+    CHECK_NULL_VOID(contentNode);
+    auto contentLayoutProperty = contentNode->GetLayoutProperty();
+    contentLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(value)));
+
+    int32_t addId = frameNode->GetPattern<CounterPattern>()->GetAddId();
+    auto addNode = AceType::DynamicCast<FrameNode>(frameNode->GetChildAtIndex(frameNode->GetChildIndexById(addId)));
+    CHECK_NULL_VOID(addNode);
+    auto addLayoutProperty = addNode->GetLayoutProperty();
+    addLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(value)));
+    auto addTextNode = AceType::DynamicCast<FrameNode>(addNode->GetFirstChild());
+    CHECK_NULL_VOID(addTextNode);
+    auto addTextLayoutProperty = addTextNode->GetLayoutProperty();
+    addTextLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(value)));
+}
+
+void CounterModelNG::SetWidth(FrameNode* frameNode, const Dimension& value)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(value), std::nullopt));
+}
+
+void CounterModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& value)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, value, frameNode);
+}
 } // namespace OHOS::Ace::NG

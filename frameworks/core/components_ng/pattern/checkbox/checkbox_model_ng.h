@@ -46,6 +46,8 @@ public:
     static void SetCheckMarkColor(FrameNode* frameNode, const Color& color);
     static void SetCheckMarkSize(FrameNode* frameNode, const Dimension& size);
     static void SetCheckMarkWidth(FrameNode* frameNode, const Dimension& width);
+    static void SetPadding(FrameNode* frameNode, const NG::PaddingProperty& padding);
+    static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_MODEL_NG_H

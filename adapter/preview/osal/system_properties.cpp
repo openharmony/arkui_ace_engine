@@ -83,6 +83,7 @@ bool SystemProperties::rosenBackendEnabled_ = true;
 #endif
 bool SystemProperties::enableScrollableItemPool_ = false;
 bool SystemProperties::navigationBlurEnabled_ = true;
+bool SystemProperties::gridCacheEnabled_ = false;
 
 void SystemProperties::InitDeviceType(DeviceType type)
 {
@@ -258,6 +259,11 @@ bool SystemProperties::GetDisplaySyncSkipEnabled()
 bool SystemProperties::GetNavigationBlurEnabled()
 {
     return navigationBlurEnabled_;
+}
+
+bool SystemProperties::GetGridCacheEnabled()
+{
+    return gridCacheEnabled_;
 }
 
 bool SystemProperties::GetLayoutTraceEnabled()

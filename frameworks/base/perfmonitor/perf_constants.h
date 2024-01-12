@@ -63,6 +63,9 @@ public:
     // PC shoutcut to app center
     static constexpr char PC_SHORTCUT_TO_APP_CENTER[] = "PC_SHORTCUT_TO_APP_CENTER";
 
+    // PC shoutcut to app center on recent
+    static constexpr char PC_SHORTCUT_TO_APP_CENTER_ON_RECENT[] = "PC_SHORTCUT_TO_APP_CENTER_ON_RECENT";
+
     // PC shoutcut exit app center
     static constexpr char PC_SHORTCUT_EXIT_APP_CENTER[] = "PC_SHORTCUT_EXIT_APP_CENTER";
 };

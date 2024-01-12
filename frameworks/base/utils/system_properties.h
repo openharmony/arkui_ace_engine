@@ -408,6 +408,8 @@ public:
 
     static bool GetNavigationBlurEnabled();
 
+    static bool GetGridCacheEnabled();
+
 private:
     static bool traceEnabled_;
     static bool svgTraceEnable_;
@@ -452,6 +454,7 @@ private:
     static bool resourceDecoupling_;
     static bool enableScrollableItemPool_;
     static bool navigationBlurEnabled_;
+    static bool gridCacheEnabled_;
 };
 
 } // namespace OHOS::Ace

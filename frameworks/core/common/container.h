@@ -358,7 +358,9 @@ public:
         return false;
     }
 
-    virtual float GetSmallWindowScale() const
+    virtual void SetWindowScale(float windowScale) {}
+
+    virtual float GetWindowScale() const
     {
         return 1.0f;
     }
