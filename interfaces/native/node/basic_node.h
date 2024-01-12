@@ -405,22 +405,20 @@ typedef enum {
      */
     NODE_SHADOW,
     /**
-     * @brief 通过<b>setAttribute</b>方法设置组件背景图片的宽高.
+     * @brief 通过<b>setAttribute</b>方法设置组件背景图片的宽高。
      * @see ArkUI_BasicNodeAPI::setAttribute
      * @note
-     * 入参width:Length,height:Length,Length类型表示带单位的尺寸大小，可以是数字（默认单位vp），或者单位的数字，支持百分比输入：如"1"、"1px"、"100%"
+     * 入参width:number,height:number 默认单位vp
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_IMAGE_SIZE, "20 40px");
-     * 或者：
-     * basicNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_IMAGE_SIZE, "50% 50%");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_IMAGE_SIZE, "20 40");
      * @endcode
      *
      */
     NODE_BACKGROUND_IMAGE_SIZE,
     /**
-     * @brief 通过<b>setAttribute</b>为当前组件提供一种背景和内容之间的模糊能力.
+     * @brief 通过<b>setAttribute</b>为当前组件提供一种背景和内容之间的模糊能力。
      * @see ArkUI_BasicNodeAPI::setAttribute
-     * @note 入参blurStyle:String("thin","regular","thick")  字符串输入可不区分大小写
+     * @note 入参blurStyle:String("thin","regular","thick")
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_BLUR_STYLE, "thin");
      * @endcode
@@ -437,34 +435,32 @@ typedef enum {
     NODE_OPACITY_TRANSITION,
     /**
      * @brief 通过<b>setAttribute</b>为当前组件设置转场时的旋转效果。
-     * @note 入参: x: number,y: number,z: number,angle: number,centerX: number,centerY: number
-     * 表示插入时的起点值和删除时的终点值。
+     * @note 入参: x: number,y: number,z: number,angle: number,centerX: number,centerY: number,centerZ:
+     * number,perspective: number,angle: number ,表示插入时的起点值和删除时的终点值。
      * 其中x表示横向旋转分量，y表示纵向的旋转分量，z表示竖向的旋转分量。
-     * centerX，centerY表示旋转中心点，中心点(0,0)表示组件左上角。
+     * centerX，centerY，centerZ表示旋转中心点，中心点(0,0,0)表示组件左上角。
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_ROTATE_TRANSITION , "0 0 1 180 0 0");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_ROTATE_TRANSITION , "0 0 1 180 0 0 0 0 0");
      * @endcode
      */
     NODE_ROTATE_TRANSITION,
     /**
      * @brief 通过<b>setAttribute</b>为当前组件设置转场时的缩放效果。
-     * @note 入参: x: number,y: number,z: number,centerX: Length,centerY: Length。
-     * Length类型表示带单位的尺寸大小，可以是数字（默认单位vp），或者单位的数字，支持百分比输入。
+     * @note 入参: x: number,y: number,z: number,centerX: number,centerY: number
      * 其中x表示横向放大倍数，y表示纵向的放大倍数，z表示竖向的放大倍数。
-     * centerX，centerY表示缩放中心点，默认值"50%"
+     * centerX，centerY表示缩放中心点。
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCALE_TRANSITION , "0 0 0 50% 50%");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCALE_TRANSITION , "0 0 0 20 20");
      * @endcode
      */
     NODE_SCALE_TRANSITION,
     /**
      * @brief 通过<b>setAttribute</b>为当前组件设置转场时的平移效果。
-     * @note 入参: x: Length,y: Length,z: Length
-     * Length类型表示带单位的尺寸大小，可以是数字（默认单位vp），或者单位的数字，支持百分比输入。
+     * @note 入参: x: number,y: number,z: number （默认单位vp）
      * 表示插入时的起点值和删除时的终点值。
      * x表示横向的平移距离，y表示纵向的平移距离，z表示竖向的平移距离。
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TRANSLATE_TRANSITION , "12 50px 0");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TRANSLATE_TRANSITION , "12 50 0");
      * @endcode
      */
     NODE_TRANSLATE_TRANSITION,
@@ -494,26 +490,25 @@ typedef enum {
      */
     NODE_FONT_SIZE,
     /**
-     * @note 入参格式为FontStyle的枚举名称 Normal,Italic。
+     * @note 入参格式为FontStyle的枚举名称 normal,italic。
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_STYLE, "Normal");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_STYLE, "normal");
      * @endcode
      */
     NODE_FONT_STYLE,
     /**
-     * @note 入参格式为FontWeight的枚举名称 Lighter,Normal,Regular,Medium,Bold,Bolder 或者是100-900之间的100倍数字
+     * @note 入参格式为FontWeight的枚举名称 lighter,normal,regular,medium,bold,bolder 或者是100-900之间的100倍数字
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_WEIGHT, "Normal");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_WEIGHT, "normal");
      * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_WEIGHT, "400");
      * @endcode
      */
     NODE_FONT_WEIGHT,
     /**
      * @brief 通过<b>setAttribute</b>为当前组件提供设置文本行高的能力.
-     * @note 入参格式为value：Length,Length类型表示带单位的尺寸大小，可以是数字（默认单位vp），或者单位的数字
+     * @note 入参格式为value：number,默认单位vp
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_LINE_HEIGHT, "20");
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_LINE_HEIGHT, "20vp");
      * @endcode
      */
     NODE_TEXT_LINE_HEIGHT,
@@ -551,9 +546,9 @@ typedef enum {
      */
     NODE_TEXT_MAX_LINES,
     /**
-     * @note 入参格式为TextAlign的枚举名称 Start,Center,End,JUSTIFY。
+     * @note 入参格式为TextAlign的枚举名称 start,center,end,justify。
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_ALIGN, "Start");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_ALIGN, "start");
      * @endcode
      */
     NODE_TEXT_ALIGN,
