@@ -666,7 +666,7 @@ HWTEST_F(AppBarTestNg, IniColor001, TestSize.Level1)
     auto atom = AppBarView::Create(test);
     auto appBar = Referenced::MakeRefPtr<AppBarView>(atom);
     auto titleBar = AceType::DynamicCast<FrameNode>(atom->GetFirstChild());
-    EXPECT_NE(titleBar, nullptr); 
+    EXPECT_NE(titleBar, nullptr);
     auto pipeline = PipelineContext::GetCurrentContext();
     ASSERT_NE(pipeline, nullptr);
     auto appBarTheme = pipeline->GetTheme<AppBarTheme>();
@@ -688,7 +688,7 @@ HWTEST_F(AppBarTestNg, IniColor001, TestSize.Level1)
     /**
      * @tc.steps: step2:Calling the IniColor function.
      * @tc.expected: Check for changes in Rowcolor and Iconcolor.
-     */	
+    */
     appBar->IniColor();
     EXPECT_EQ(renderContext->GetBackgroundColorValue(), originColor);
     EXPECT_EQ(backBtnproperty->GetImageSourceInfo()->GetFillColor(), Color::BLACK);
@@ -717,7 +717,7 @@ HWTEST_F(AppBarTestNg, AppBarWithNavigation011, TestSize.Level1)
     auto stage = AceType::MakeRefPtr<FrameNode>("stage", 1, AceType::MakeRefPtr<StagePattern>());
     auto atom = AppBarView::Create(stage);
     auto appBar = Referenced::MakeRefPtr<AppBarView>(atom);
-    EXPECT_NE(appBar, nullptr);   
+    EXPECT_NE(appBar, nullptr);
     appBar->iniBehavior();
     stage->GetPattern<StagePattern>()->OnRebuildFrame();
     auto titleBar = AceType::DynamicCast<FrameNode>(atom->GetFirstChild());
@@ -733,7 +733,7 @@ HWTEST_F(AppBarTestNg, AppBarWithNavigation011, TestSize.Level1)
     stage->AddChild(test2);
     stage->AddChild(test3);
     atom = AppBarView::Create(stage);
-    appBar = Referenced::MakeRefPtr<AppBarView>(atom);	
+    appBar = Referenced::MakeRefPtr<AppBarView>(atom);
     appBar->iniBehavior();
     stage->GetPattern<StagePattern>()->OnRebuildFrame();
     titleBar = AceType::DynamicCast<FrameNode>(atom->GetFirstChild());
