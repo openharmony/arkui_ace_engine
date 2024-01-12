@@ -302,6 +302,9 @@ TextFieldPattern::~TextFieldPattern()
         textEditingController_->RemoveObserver(WeakClaim(this));
     }
     CloseSelectOverlay();
+    if (isCustomKeyboardAttached_) {
+        CloseCustomKeyboard();
+    }
 }
 
 void TextFieldPattern::BeforeCreateLayoutWrapper()
