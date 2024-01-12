@@ -558,10 +558,10 @@ typedef enum {
     /**
      * @brief 通过{@link setAttribute}方法设置组件的遮罩文本.
      *
-     * @note 4个参数 用空格分隔 
+     * @note 4个参数 用空格分隔
      * 1. 遮罩文本内容 .
      * 2. 设置浮层相对于组件的方位 {"TopStart", "Top", "TopEnd",
-     *       "Start", "Center", "End", "BottomStart", "Bottom", "BottomEnd"}.
+     * "Start", "Center", "End", "BottomStart", "Bottom", "BottomEnd"}.
      * 3. 浮层基于自身左上角的偏移量 X ，单位为vp.
      * 4. 浮层基于自身左上角的偏移量 Y，单位为vp.
      * 如"test TopStart 2 3".
@@ -673,7 +673,7 @@ typedef enum {
     /**
      * @brief 通过{@link setAttribute}方法设置字体列表.
      *
-     * @note 入参格式字体字符串. 
+     * @note 入参格式字体字符串.
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_FAMILY, "HarmonyOS Sans");
      * @endcode
@@ -971,7 +971,7 @@ typedef enum {
      * 2. 垂直滑动偏移 ,单位为vp
      * 3. 滚动时长设置. 单位毫秒
      * 4. 滚动曲线设置 {"Linear", "Ease", "EaseIn",
-     *       "EaseOut", "EaseInOut", "FastOutSlowIn", "LinearOutSlowIn", "FastOutLinearIn", 
+     *       "EaseOut", "EaseInOut", "FastOutSlowIn", "LinearOutSlowIn", "FastOutLinearIn",
      *       "ExtremeDeceleration", "Sharp", "Rhythm", "Smooth", "Friction"}
      * 5. 使能默认弹簧动效  Boolean格式字符串，如"true"
      * 如"10 10 1000 Linear true".
@@ -997,7 +997,7 @@ typedef enum {
     /**
      * @brief 通过{@link getAttribute}方法返回当前的滚动偏移量.
      *
-     * @note 返回值2个参数 用空格分隔 
+     * @note 返回值2个参数 用空格分隔
      * 1. 水平滑动偏移; 单位为vp
      * 2. 竖直滑动偏移; 单位为vp
      * 如 “ 10 20”

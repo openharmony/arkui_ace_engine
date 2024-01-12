@@ -278,7 +278,7 @@ const char* GetCurrentOffset(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     RefPtr<ScrollControllerBase> scrollControllerBase = ScrollModelNG::GetOrCreateController(frameNode);
     Offset offset = scrollControllerBase->GetCurrentOffset();
-    auto resultString = std::make_shared<std::string>(std::to_string(offset.GetX()) 
+    auto resultString = std::make_shared<std::string>(std::to_string(offset.GetX())
     + " " + std::to_string(offset.GetY()));
     return resultString->c_str();
 }

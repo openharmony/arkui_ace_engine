@@ -28,7 +28,7 @@ namespace OHOS::Ace::NG {
 
 namespace NodeModifier {
 
-void SetRefreshOnStateChange(ArkUINodeHandle node, ArkUI_Int32 eventId) 
+void SetRefreshOnStateChange(ArkUINodeHandle node, ArkUI_Int32 eventId)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

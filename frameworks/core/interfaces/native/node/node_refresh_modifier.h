@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 
-#pragma once
+#ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_REFRESH_MODIFIER_H
+#define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_REFRESH_MODIFIER_H
 
 #include "core/interfaces/native/node/node_modifiers.h"
 
@@ -21,3 +22,5 @@ namespace OHOS::Ace::NG::NodeModifier {
     void SetRefreshOnStateChange(ArkUINodeHandle node, ArkUI_Int32 eventId);
     void SetOnRefreshing(ArkUINodeHandle node, ArkUI_Int32 eventId);
 } // namespace OHOS::Ace::NG::NodeModifier
+
+#endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_REFRESH_MODIFIER_H
