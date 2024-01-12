@@ -5983,12 +5983,9 @@ bool TextFieldPattern::IsShowPasswordIcon() const
 
 bool TextFieldPattern::IsShowCancelButtonMode() const
 {
-    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
-    CHECK_NULL_RETURN(paintProperty, false);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    return paintProperty->GetInputStyleValue(InputStyle::DEFAULT) != InputStyle::INLINE && !IsTextArea() &&
-           layoutProperty->GetIsShowCancelButton().value_or(false);
+    return !IsNormalInlineState() && !IsTextArea() && layoutProperty->GetIsShowCancelButton().value_or(false);
 }
 
 void TextFieldPattern::ProcessResponseArea()
