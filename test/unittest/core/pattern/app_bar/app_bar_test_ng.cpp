@@ -693,7 +693,6 @@ HWTEST_F(AppBarTestNg, IniColor001, TestSize.Level1)
     EXPECT_EQ(renderContext->GetBackgroundColorValue(), originColor);
     EXPECT_EQ(backBtnproperty->GetImageSourceInfo()->GetFillColor(), Color::BLACK);
     EXPECT_EQ(faButtonproperty->GetImageSourceInfo()->GetFillColor(), Color::BLACK);
-
     appBar->SetRowColor(Color::RED);
     EXPECT_EQ(renderContext->GetBackgroundColorValue(), Color::RED);
     appBar->IniColor();
