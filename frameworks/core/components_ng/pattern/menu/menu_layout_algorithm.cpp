@@ -1490,7 +1490,7 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<MenuLayoutPro
         y = childOffset.GetY();
     } else {
         x = HorizontalLayout(size, position_.GetX(), menuPattern->IsSelectMenu()) + positionOffset_.GetX();
-        y = VerticalLayout(size, position_.GetY()) + positionOffset_.GetY();
+        y = VerticalLayout(size, position_.GetY(), menuPattern->IsContextMenu()) + positionOffset_.GetY();
         x = std::clamp(x, paddingStart_, wrapperSize_.Width() - size.Width() - paddingEnd_);
         float yMinAvoid = wrapperRect_.Top() + paddingTop_;
         float yMaxAvoid = wrapperRect_.Bottom() - paddingBottom_ - size.Height();
@@ -1632,19 +1632,34 @@ void MenuLayoutAlgorithm::UpdateOptionConstraint(std::list<RefPtr<LayoutWrapper>
 }
 
 // return vertical offset
-float MenuLayoutAlgorithm::VerticalLayout(const SizeF& size, float position)
+float MenuLayoutAlgorithm::VerticalLayout(const SizeF &size, float position, bool isContextMenu)
 {
     placement_ = Placement::BOTTOM;
     // can put menu below click point
-    if (bottomSpace_ >= size.Height()) {
+    if (GreatOrEqual(bottomSpace_, size.Height())) {
         return position + margin_;
     }
-
-    if (bottomSpace_ < size.Height() && size.Height() < wrapperRect_.Height()) {
-        return wrapperRect_.Bottom() - size.Height() - paddingBottom_;
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && isContextMenu) {
+        if (LessNotEqual(bottomSpace_, size.Height()) && LessNotEqual(size.Height(), wrapperRect_.Height())) {
+            return wrapperRect_.Bottom() - size.Height() - paddingBottom_;
+        }
+        // can't fit in screen, line up with top of the screen
+        return wrapperRect_.Top() + paddingTop_;
+    } else {
+        float wrapperHeight = wrapperSize_.Height();
+        // put menu above click point
+        if (GreatOrEqual(topSpace_, size.Height())) {
+            // menu show on top
+            placement_ = Placement::TOP;
+            return topSpace_ - size.Height() + margin_;
+        }
+        // line up bottom of menu with bottom of the screen
+        if (LessNotEqual(size.Height(), wrapperHeight)) {
+            return wrapperHeight - size.Height();
+        }
+        // can't fit in screen, line up with top of the screen
+        return 0.0f;
     }
-    // can't fit in screen, line up with top of the screen
-    return wrapperRect_.Top() + paddingTop_;
 }
 
 // returns horizontal offset
