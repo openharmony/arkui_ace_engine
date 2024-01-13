@@ -528,6 +528,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                     preTitle->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
                 }
                 preNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+                preNode->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);
                 bool needSetInvisible = false;
                 if (isNavBar) {
                     needSetInvisible = AceType::DynamicCast<NavBarNode>(preNode)->GetTransitionType() ==
@@ -633,22 +634,6 @@ void NavigationGroupNode::MaskAnimation(const RefPtr<RenderContext>& transitionO
     maskOption.SetCurve(Curves::FRICTION);
     maskOption.SetDuration(MASK_DURATION);
     maskOption.SetFillMode(FillMode::FORWARDS);
-    maskOption.SetOnFinishEvent(
-        [transitionOutNodeContextWK = WeakPtr<RenderContext>(transitionOutNodeContext), id = Container::CurrentId()] {
-            ContainerScope scope(id);
-            auto context = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(context);
-            auto taskExecutor = context->GetTaskExecutor();
-            CHECK_NULL_VOID(taskExecutor);
-            taskExecutor->PostTask(
-                [transitionOutNodeContextWK]() {
-                    auto transitionOutNodeContext = transitionOutNodeContextWK.Upgrade();
-                    if (transitionOutNodeContext) {
-                        transitionOutNodeContext->SetActualForegroundColor(DEFAULT_MASK_COLOR);
-                    }
-                },
-                TaskExecutor::TaskType::UI);
-        });
     transitionOutNodeContext->SetActualForegroundColor(DEFAULT_MASK_COLOR);
     AnimationUtils::Animate(
         maskOption, [transitionOutNodeContext]() { transitionOutNodeContext->SetActualForegroundColor(MASK_COLOR); },
