@@ -34,6 +34,7 @@ std::mutex ShapeModel::mutex_;
 ShapeModel* ShapeModel::GetInstance()
 {
     if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
         if (!instance_) {
 #ifdef NG_BUILD
             instance_.reset(new NG::ShapeModelNG());
