@@ -80,11 +80,26 @@ constexpr Dimension MIN_DIAMETER = 1.5_vp;
 constexpr Dimension MIN_ARROWHEAD_DIAMETER = 2.0_vp;
 constexpr Dimension ANIMATION_TEXT_OFFSET = 12.0_vp;
 
+float MeasureTextWidth(const TextStyle& textStyle, const std::string& text)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    MeasureContext content;
+    content.textContent = text;
+    content.fontSize = textStyle.GetFontSize();
+    auto fontweight = StringUtils::FontWeightToString(textStyle.GetFontWeight());
+    content.fontWeight = fontweight;
+    return static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(content).Width());
+#else
+    return 0.0f;
+#endif
+}
+
 RefPtr<FrameNode> BuildPasteButton(const std::function<void()>& callback, int32_t overlayId,
     float& buttonWidth, bool isSelectAll = false)
 {
+    auto descriptionId = static_cast<int32_t>(PasteButtonPasteDescription::PASTE);
     auto pasteButton = PasteButtonModelNG::GetInstance()->CreateNode(
-        static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
+        descriptionId,
         static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL),
         static_cast<int32_t>(ButtonType::CAPSULE));
     CHECK_NULL_RETURN(pasteButton, nullptr);
@@ -109,8 +124,12 @@ RefPtr<FrameNode> BuildPasteButton(const std::function<void()>& callback, int32_
     const auto& padding = textOverlayTheme->GetMenuButtonPadding();
     buttonLayoutProperty->UpdateBackgroundLeftPadding(padding.Left());
     buttonLayoutProperty->UpdateBackgroundRightPadding(padding.Right());
+    std::string buttonContent;
+    PasteButtonModelNG::GetInstance()->GetTextResource(descriptionId, buttonContent);
+    buttonWidth = MeasureTextWidth(textStyle, buttonContent);
+    buttonWidth = buttonWidth + padding.Left().ConvertToPx() + padding.Right().ConvertToPx();
     buttonLayoutProperty->UpdateUserDefinedIdealSize(
-        { std::nullopt, std::optional<CalcLength>(textOverlayTheme->GetMenuButtonHeight()) });
+        { CalcLength(buttonWidth), std::optional<CalcLength>(textOverlayTheme->GetMenuButtonHeight()) });
     buttonPaintProperty->UpdateBackgroundColor(Color::TRANSPARENT);
     if (callback) {
         pasteButton->GetOrCreateGestureEventHub()->SetUserOnClick([callback](GestureEvent& /* info */) {
@@ -162,16 +181,7 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
     auto top = CalcLength(padding.Top().ConvertToPx());
     auto bottom = CalcLength(padding.Bottom().ConvertToPx());
     buttonLayoutProperty->UpdatePadding({ left, right, top, bottom });
-#ifdef ENABLE_ROSEN_BACKEND
-    MeasureContext content;
-    content.textContent = data;
-    content.fontSize = textStyle.GetFontSize();
-    auto fontweight = StringUtils::FontWeightToString(textStyle.GetFontWeight());
-    content.fontWeight = fontweight;
-    buttonWidth = static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(content).Width());
-#else
-    buttonWidth = 0.0f;
-#endif
+    buttonWidth = MeasureTextWidth(textStyle, data);
     // Calculate the width of default option include button padding.
     buttonWidth = buttonWidth + padding.Left().ConvertToPx() + padding.Right().ConvertToPx();
     buttonLayoutProperty->UpdateUserDefinedIdealSize(
@@ -231,18 +241,8 @@ RefPtr<FrameNode> BuildButton(
     textLayoutProperty->UpdateTextColor(textStyle.GetTextColor());
     textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
     text->MarkModifyDone();
-
-#ifdef ENABLE_ROSEN_BACKEND
     // Calculate the width of entension option include button padding.
-    MeasureContext content;
-    content.textContent = data;
-    content.fontSize = textStyle.GetFontSize();
-    auto fontweight = StringUtils::FontWeightToString(textStyle.GetFontWeight());
-    content.fontWeight = fontweight;
-    contentWidth = static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(content).Width());
-#else
-    contentWidth = 0.0f;
-#endif
+    contentWidth = MeasureTextWidth(textStyle, data);
     const auto& padding = textOverlayTheme->GetMenuButtonPadding();
     auto left = CalcLength(padding.Left().ConvertToPx());
     auto right = CalcLength(padding.Right().ConvertToPx());
