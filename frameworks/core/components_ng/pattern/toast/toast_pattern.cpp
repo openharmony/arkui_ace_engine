@@ -187,4 +187,24 @@ void ToastPattern::OnColorConfigurationUpdate()
     textLayoutProperty->UpdateTextColor(textColor);
     host->SetNeedCallChildrenUpdate(false);
 }
+
+void ToastPattern::OnAttachToFrameNode()
+{
+    auto pipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    auto callbackId = pipeline->RegisterFoldStatusChangedCallback([](FoldStatus folderStatus) {
+        TAG_LOGI(AceLogTag::ACE_OVERLAY, "Window status changes, status is %{public}d", folderStatus);
+        SubwindowManager::GetInstance()->ResizeWindow();
+    });
+    UpdateFoldStatusChangedCallbackId(callbackId);
+}
+
+void ToastPattern::OnDetachFromFrameNode(FrameNode* node)
+{
+    auto pipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    if (HasFoldStatusChangedCallbackId()) {
+        pipeline->UnRegisterFoldStatusChangedCallback(foldStatusChangedCallbackId_.value_or(-1));
+    }
+}
 } // namespace OHOS::Ace::NG
