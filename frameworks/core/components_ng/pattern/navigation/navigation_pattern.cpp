@@ -963,7 +963,7 @@ void NavigationPattern::OnHover(bool isHover)
     CHECK_NULL_VOID(layoutProperty);
     auto userSetMinNavBarWidthValue = layoutProperty->GetMinNavBarWidthValue(defaultValue);
     auto userSetMaxNavBarWidthValue = layoutProperty->GetMaxNavBarWidthValue(defaultValue);
-    if (userSetMinNavBarWidthValue == userSetMaxNavBarWidthValue && userSetNavBarRangeFlag_) {
+    if (userSetNavBarRangeFlag_ && userSetMinNavBarWidthValue == userSetMaxNavBarWidthValue) {
         return;
     }
     if (currentPointerStyle != static_cast<int32_t>(format)) {
