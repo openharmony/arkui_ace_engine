@@ -70,8 +70,13 @@ public:
                 return pattern->GetBubbleVertexPosition(blockCenter, trackThickness, blockSize);
             });
         }
-        return MakeRefPtr<SliderPaintMethod>(
-            sliderContentModifier_, paintParameters, sliderLength_, borderBlank_, sliderTipModifier_, tipParameters);
+        auto textDirection = TextDirection::AUTO;
+        auto layoutProperty = GetLayoutProperty<SliderLayoutProperty>();
+        if (layoutProperty) {
+            textDirection = layoutProperty->GetLayoutDirection();
+        }
+        return MakeRefPtr<SliderPaintMethod>(sliderContentModifier_, paintParameters, sliderLength_, borderBlank_,
+            sliderTipModifier_, tipParameters, textDirection);
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override

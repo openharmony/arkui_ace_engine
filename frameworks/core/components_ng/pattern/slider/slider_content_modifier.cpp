@@ -335,9 +335,8 @@ void SliderContentModifier::UpdateData(const Parameters& parameters)
     hotCircleShadowWidth_ = parameters.hotCircleShadowWidth;
 }
 
-void SliderContentModifier::JudgeNeedAnimate(const RefPtr<SliderPaintProperty>& property)
+void SliderContentModifier::JudgeNeedAnimate(bool reverse)
 {
-    auto reverse = property->GetReverseValue(false);
     // when reverse is changed, slider block position changes do not animated.
     if (reverse_ != reverse) {
         SetAnimatorStatus(SliderStatus::DEFAULT);
