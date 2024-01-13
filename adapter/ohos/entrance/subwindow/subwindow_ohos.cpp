@@ -420,16 +420,7 @@ void SubwindowOhos::HideWindow()
     }
 #endif
 
-    if (window_->IsFocused()) {
-        auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-        CHECK_NULL_VOID(parentContainer);
-        if (!parentContainer->IsScenceBoardWindow()) {
-            auto parentWindowName = parentContainer->GetWindowName();
-            sptr<OHOS::Rosen::Window> parentWindow = OHOS::Rosen::Window::Find(parentWindowName);
-            CHECK_NULL_VOID(parentWindow);
-            parentWindow->RequestFocus();
-        }
-    } else {
+    if (!window_->IsFocused()) {
         ContainerModalUnFocus();
     }
 
