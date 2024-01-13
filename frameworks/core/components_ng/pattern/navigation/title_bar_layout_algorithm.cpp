@@ -543,6 +543,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
         initialTitleOffsetY_ = menuHeight_ + offsetY;
         isInitialTitle_ = false;
         auto titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()), initialTitleOffsetY_);
+        currentTitleOffsetY_ = initialTitleOffsetY_;
         geometryNode->SetMarginFrameOffset(titleOffset);
         titleWrapper->Layout();
         return;
@@ -560,6 +561,7 @@ void TitleBarLayoutAlgorithm::LayoutTitle(LayoutWrapper* layoutWrapper, const Re
     auto overDragOffset = titlePattern->GetOverDragOffset();
     auto titleOffset = OffsetF(static_cast<float>(maxPaddingStart_.ConvertToPx()),
         titlePattern->GetTempTitleOffsetY() + overDragOffset / 6.0f);
+    currentTitleOffsetY_ = titleOffset.GetY();
     geometryNode->SetMarginFrameOffset(titleOffset);
     titleWrapper->Layout();
 }
@@ -744,12 +746,13 @@ void TitleBarLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(navDestinationNode->GetPattern());
         CHECK_NULL_BREAK(navDestinationPattern);
         showBackButton_ = navDestinationPattern->GetBackButtonState();
-    } while (0);
+    } while (false);
     MeasureBackButton(layoutWrapper, titleBarNode, layoutProperty);
     MeasureMenu(layoutWrapper, titleBarNode, layoutProperty);
     auto titleMaxWidth = GetTitleWidth(titleBarNode, layoutProperty, size);
     MeasureSubtitle(layoutWrapper, titleBarNode, layoutProperty, size, titleMaxWidth);
     MeasureTitle(layoutWrapper, titleBarNode, layoutProperty, size, titleMaxWidth);
+    currentTitleBarHeight_ = size.Height();
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 }
 

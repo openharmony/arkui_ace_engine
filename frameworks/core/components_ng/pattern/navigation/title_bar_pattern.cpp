@@ -23,7 +23,6 @@
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/title_bar_node.h"
-#include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
@@ -265,130 +264,6 @@ void TitleBarPattern::OnModifyDone()
     MountSubTitle(hostNode);
 }
 
-void TitleBarPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
-{
-    CHECK_NULL_VOID(!panEvent_);
-
-    auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        if (info.GetInputEventType() == InputEventType::AXIS) {
-            return;
-        }
-        pattern->HandleDragStart(info);
-    };
-
-    auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        if (info.GetInputEventType() == InputEventType::AXIS) {
-            return;
-        }
-        pattern->HandleDragUpdate(info);
-    };
-
-    auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        if (info.GetInputEventType() == InputEventType::AXIS) {
-            return;
-        }
-        pattern->HandleDragEnd(info.GetMainVelocity());
-    };
-
-    auto actionCancelTask = [weak = WeakClaim(this)]() {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->HandleDragEnd(0.0);
-    };
-
-    if (panEvent_) {
-        gestureHub->RemovePanEvent(panEvent_);
-    }
-
-    panEvent_ = MakeRefPtr<PanEvent>(
-        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
-    PanDirection panDirection = { .type = PanDirection::VERTICAL };
-    gestureHub->AddPanEvent(panEvent_, panDirection, DEFAULT_PAN_FINGER, DEFAULT_PAN_DISTANCE);
-}
-
-void TitleBarPattern::HandleDragStart(const GestureEvent& info)
-{
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
-    CHECK_NULL_VOID(titleBarNode);
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarLayoutProperty);
-    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
-        return;
-    }
-    defaultTitleBarHeight_ = titleBarNode->GetGeometryNode()->GetFrameSize().Height();
-    SetMaxTitleBarHeight();
-    SetTempTitleBarHeight(static_cast<float>(info.GetOffsetY()));
-    minTitleOffsetY_ = (static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) - minTitleHeight_) / 2;
-    maxTitleOffsetY_ = initialTitleOffsetY_;
-    moveRatio_ = (maxTitleOffsetY_ - minTitleOffsetY_) /
-                 (maxTitleBarHeight_ - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
-    titleMoveDistance_ = (tempTitleBarHeight_ - defaultTitleBarHeight_) * moveRatio_;
-    defaultTitleOffsetY_ = GetTitleOffsetY();
-    SetTempTitleOffsetY();
-    defaultSubtitleOffsetY_ = GetSubTitleOffsetY();
-    SetTempSubTitleOffsetY();
-    titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
-
-    // title font size
-    SetDefaultTitleFontSize();
-    auto titleBarHeightDiff = maxTitleBarHeight_ - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx());
-    auto titleFontSizeDiff = MAX_TITLE_FONT_SIZE - MIN_TITLE_FONT_SIZE;
-    fontSizeRatio_ = titleFontSizeDiff.Value() / titleBarHeightDiff;
-    auto tempFontSize = static_cast<float>(
-        (tempTitleBarHeight_ - defaultTitleBarHeight_) * fontSizeRatio_ + defaultTitleFontSize_.Value());
-    UpdateTitleFontSize(Dimension(tempFontSize, DimensionUnit::VP));
-
-    // subTitle Opacity
-    SetDefaultSubtitleOpacity();
-    opacityRatio_ = 1.0f / titleBarHeightDiff;
-    auto tempOpacity =
-        static_cast<float>((tempTitleBarHeight_ - defaultTitleBarHeight_) * opacityRatio_ + defaultSubtitleOpacity_);
-    UpdateSubTitleOpacity(tempOpacity);
-}
-
-void TitleBarPattern::HandleDragUpdate(const GestureEvent& info)
-{
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
-    CHECK_NULL_VOID(titleBarNode);
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarLayoutProperty);
-    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
-        return;
-    }
-    SetTempTitleBarHeight(static_cast<float>(info.GetOffsetY()));
-    titleMoveDistance_ = (tempTitleBarHeight_ - defaultTitleBarHeight_) * moveRatio_;
-    SetTempTitleOffsetY();
-    SetTempSubTitleOffsetY();
-    titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
-
-    // title font size
-    auto tempFontSize = static_cast<float>(
-        (tempTitleBarHeight_ - defaultTitleBarHeight_) * fontSizeRatio_ + defaultTitleFontSize_.Value());
-    UpdateTitleFontSize(Dimension(tempFontSize, DimensionUnit::VP));
-
-    // subTitle Opacity
-    auto tempOpacity =
-        static_cast<float>((tempTitleBarHeight_ - defaultTitleBarHeight_) * opacityRatio_ + defaultSubtitleOpacity_);
-    UpdateSubTitleOpacity(tempOpacity);
-}
-
-void TitleBarPattern::HandleDragEnd(double dragVelocity)
-{
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
-    CHECK_NULL_VOID(titleBarNode);
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarLayoutProperty);
-    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE) {
-        return;
-    }
-}
-
 void TitleBarPattern::ProcessTitleDragStart(float offset)
 {
     if (Positive(overDragOffset_)) {
@@ -411,7 +286,7 @@ void TitleBarPattern::ProcessTitleDragStart(float offset)
         animator_->Stop();
     }
 
-    defaultTitleBarHeight_ = titleBarNode->GetGeometryNode()->GetFrameSize().Height();
+    defaultTitleBarHeight_ = currentTitleBarHeight_;
     SetMaxTitleBarHeight();
     SetTempTitleBarHeight(offset);
     minTitleOffsetY_ = (static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) - minTitleHeight_) / 2.0f;
@@ -419,7 +294,7 @@ void TitleBarPattern::ProcessTitleDragStart(float offset)
     moveRatio_ = (maxTitleOffsetY_ - minTitleOffsetY_) /
                  (maxTitleBarHeight_ - static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
     titleMoveDistance_ = (tempTitleBarHeight_ - defaultTitleBarHeight_) * moveRatio_;
-    defaultTitleOffsetY_ = GetTitleOffsetY();
+    defaultTitleOffsetY_ = currentTitleOffsetY_;
     SetTempTitleOffsetY();
     defaultSubtitleOffsetY_ = GetSubTitleOffsetY();
     SetTempSubTitleOffsetY();
@@ -439,32 +314,7 @@ void TitleBarPattern::ProcessTitleDragStart(float offset)
     isFreeTitleUpdated_ = true;
 }
 
-void TitleBarPattern::ProcessTitleDragUpdate(float offset, float dragOffsetY)
-{
-    if (Positive(overDragOffset_)) {
-        return;
-    }
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
-    CHECK_NULL_VOID(titleBarNode);
-    auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
-    CHECK_NULL_VOID(titleBarLayoutProperty);
-    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) != NavigationTitleMode::FREE ||
-        IsHidden()) {
-        return;
-    }
-    SetTitleStyleByOffset(offset);
-    if (CanOverDrag_) {
-        overDragOffset_ = dragOffsetY + defaultTitleBarHeight_ - maxTitleBarHeight_;
-    } else {
-        overDragOffset_ = 0.0f;
-    }
-    if (Positive(overDragOffset_)) {
-        UpdateScaleByDragOverDragOffset(overDragOffset_);
-    } else {
-        overDragOffset_ = 0.0f;
-    }
-}
-void TitleBarPattern::SetTitleStyleByOffset(float offset)
+void TitleBarPattern::ProcessTitleDragUpdate(float offset)
 {
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(titleBarNode);
@@ -656,7 +506,7 @@ void TitleBarPattern::AnimateTo(float offset)
     animation->AddListener([weakScroll = AceType::WeakClaim(this)](float value) {
         auto titlebar = weakScroll.Upgrade();
         CHECK_NULL_VOID(titlebar);
-        titlebar->SetTitleStyleByOffset(value);
+        titlebar->ProcessTitleDragUpdate(value);
         auto host = titlebar->GetHost();
         CHECK_NULL_VOID(host);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -756,28 +606,6 @@ float TitleBarPattern::GetTitleHeight()
     return geometryNode->GetFrameSize().Height();
 }
 
-float TitleBarPattern::GetTitleOffsetY()
-{
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
-    CHECK_NULL_RETURN(titleBarNode, 0.0f);
-    auto titleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetTitle());
-    CHECK_NULL_RETURN(titleNode, 0.0f);
-    auto geometryNode = titleNode->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, 0.0f);
-    return geometryNode->GetMarginFrameOffset().GetY();
-}
-
-float TitleBarPattern::GetSubTitleHeight()
-{
-    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
-    CHECK_NULL_RETURN(titleBarNode, 0.0f);
-    auto subTitleNode = AceType::DynamicCast<FrameNode>(titleBarNode->GetSubtitle());
-    CHECK_NULL_RETURN(subTitleNode, 0.0f);
-    auto geometryNode = subTitleNode->GetGeometryNode();
-    CHECK_NULL_RETURN(geometryNode, 0.0f);
-    return geometryNode->GetFrameSize().Height();
-}
-
 float TitleBarPattern::GetSubTitleOffsetY()
 {
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
@@ -824,6 +652,8 @@ bool TitleBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     CHECK_NULL_RETURN(titleBarLayoutAlgorithm, false);
     UpdateTitleModeChange();
 
+    currentTitleOffsetY_ = titleBarLayoutAlgorithm->GetCurrentTitleOffsetY();
+    currentTitleBarHeight_ = titleBarLayoutAlgorithm->GetCurrentTitleBarHeight();
     initialTitleOffsetY_ = titleBarLayoutAlgorithm->GetInitialTitleOffsetY();
     isInitialTitle_ = titleBarLayoutAlgorithm->IsInitialTitle();
     initialSubtitleOffsetY_ = titleBarLayoutAlgorithm->GetInitialSubtitleOffsetY();
@@ -886,8 +716,8 @@ void TitleBarPattern::OnCoordScrollStart()
         animator_->Stop();
     }
 
-    defaultTitleBarHeight_ = titleBarNode->GetGeometryNode()->GetFrameSize().Height();
-    defaultTitleOffsetY_ = GetTitleOffsetY();
+    defaultTitleBarHeight_ = currentTitleBarHeight_;
+    defaultTitleOffsetY_ = currentTitleOffsetY_;
     SetMaxTitleBarHeight();
     SetTempTitleBarHeight(0);
     minTitleOffsetY_ = (static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()) - minTitleHeight_) / 2.0f;
