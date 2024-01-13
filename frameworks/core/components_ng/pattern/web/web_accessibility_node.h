@@ -24,14 +24,16 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT WebAccessibilityNode : public FrameNode {
     DECLARE_ACE_TYPE(WebAccessibilityNode, FrameNode)
 public:
-    WebAccessibilityNode(WeakPtr<FrameNode> webNode)
-        : FrameNode(V2::WEB_CORE_TAG, 0, MakeRefPtr<Pattern>()), webNode_(webNode)
+    WebAccessibilityNode(const RefPtr<FrameNode>& webNode)
+        : FrameNode(V2::WEB_CORE_TAG, 0, MakeRefPtr<Pattern>())
     {
-        auto node = webNode_.Upgrade();
-        CHECK_NULL_VOID(node);
-        accessibilityNodeInfo_.pageId = node->GetPageId();
+        webNode_ = WeakPtr(webNode);
+        accessibilityNodeInfo_.pageId = webNode->GetPageId();
     }
-    ~WebAccessibilityNode() override = default;
+    ~WebAccessibilityNode()
+    {
+        webNode_.Reset();
+    }
     NWeb::NWebAccessibilityNodeInfo& GetAccessibilityNodeInfo()
     {
         return accessibilityNodeInfo_;
