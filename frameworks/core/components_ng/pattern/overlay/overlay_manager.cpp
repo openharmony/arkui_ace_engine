@@ -2698,7 +2698,12 @@ void OverlayManager::PlaySheetTransition(
 
     if (isTransitionIn) {
         sheetPattern->SetCurrentHeight(sheetHeight_);
-        auto offset = sheetMaxHeight - sheetHeight_;
+        float offset = 0.0f;
+        if (sheetPattern->GetSheetType() == SheetType::SHEET_POPUP) {
+            offset = sheetPattern->GetSheetOffset();
+        } else {
+            offset = sheetMaxHeight - sheetHeight_;
+        }
         if (isFirstTransition) {
             context->OnTransformTranslateUpdate({ 0.0f, sheetMaxHeight, 0.0f });
         }
