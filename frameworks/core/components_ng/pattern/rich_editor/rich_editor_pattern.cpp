@@ -407,7 +407,7 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
     if (optionalPosition >= 0) {
         offset = TextSpanSplit(options.offset.value());
         if (offset == -1) {
-            spanIndex = host->GetChildren().size();
+            spanIndex = static_cast<int32_t>(host->GetChildren().size());
         } else {
             spanIndex = offset;
         }
@@ -445,11 +445,11 @@ int32_t RichEditorPattern::AddTextSpan(const TextSpanOptions& options, bool isPa
     record.afterCaretPosition =
         record.beforeCaretPosition + static_cast<int32_t>(StringUtils::ToWstring(options.value).length());
     AddOperationRecord(record);
-    return AddTextSpanOperation(options, isPaste, index);
+    return AddTextSpanOperation(options, isPaste, index, false, false);
 }
 
 int32_t RichEditorPattern::AddTextSpanOperation(
-    const TextSpanOptions& options, bool isPaste, int32_t index, bool needLeadingMargin)
+    const TextSpanOptions& options, bool isPaste, int32_t index, bool needLeadingMargin, bool updateCaretOPosition)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, -1);
@@ -463,7 +463,7 @@ int32_t RichEditorPattern::AddTextSpanOperation(
     if (options.offset.has_value()) {
         offset = TextSpanSplit(options.offset.value(), needLeadingMargin);
         if (offset == -1) {
-            spanIndex = host->GetChildren().size();
+            spanIndex = static_cast<int32_t>(host->GetChildren().size());
         } else {
             spanIndex = offset;
         }
@@ -515,10 +515,12 @@ int32_t RichEditorPattern::AddTextSpanOperation(
         auto tmpLongPressFunc = options.userGestureOption.onLongPress;
         spanItem->SetLongPressEvent(std::move(tmpLongPressFunc));
     }
-    if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
-        SetCaretPosition(options.offset.value() + 1 + moveLength_);
-    } else {
-        SetCaretPosition(GetTextContentLength());
+    if (updateCaretOPosition) {
+        if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
+            SetCaretPosition(options.offset.value() + 1 + moveLength_);
+        } else {
+            SetCaretPosition(GetTextContentLength());
+        }
     }
     if (!isPaste && textSelector_.IsValid()) {
         CloseSelectOverlay();
@@ -553,7 +555,7 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
     if (options.offset.has_value()) {
         offset = TextSpanSplit(options.offset.value());
         if (offset == -1) {
-            spanIndex = host->GetChildren().size();
+            spanIndex = static_cast<int32_t>(host->GetChildren().size());
         } else {
             spanIndex = offset;
         }
@@ -1667,7 +1669,7 @@ void RichEditorPattern::HandleFocusEvent()
     CancelAITask();
     UseHostToUpdateTextFieldManager();
     StartTwinkling();
-    if (!usingMouseRightButton_ && !isLongPress_) {
+    if (!usingMouseRightButton_ && !isLongPress_ && !isDragging_) {
         RequestKeyboard(false, true, true);
     }
 }
@@ -5159,7 +5161,11 @@ void RichEditorPattern::HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& n
     }
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
         "In OnDragEnded, the released location is in the current richEditor, id:%{public}d", host->GetId());
-    focusHub->RequestFocusImmediately();
+    if (HasFocus()) {
+        RequestKeyboard(false, true, true);
+    } else {
+        focusHub->RequestFocusImmediately();
+    }
     isCursorAlwaysDisplayed_ = false;
     StartTwinkling();
 };
@@ -5170,12 +5176,14 @@ void RichEditorPattern::HandleOnDragStatusCallback(
     ScrollablePattern::HandleOnDragStatusCallback(dragEventType, notifyDragEvent);
     switch (dragEventType) {
         case DragEventType::MOVE:
+            isDragging_ = true;
             HandleCursorOnDragMoved(notifyDragEvent);
             break;
         case DragEventType::LEAVE:
             HandleCursorOnDragLeaved(notifyDragEvent);
             break;
         case DragEventType::DROP:
+            isDragging_ = false;
             HandleCursorOnDragEnded(notifyDragEvent);
             break;
         default:

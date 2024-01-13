@@ -107,4 +107,20 @@ void RefreshModelNG::SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder)
     pattern->AddCustomBuilderNode(customBuilder);
 }
 
+void RefreshModelNG::SetOnStateChange(FrameNode* frameNode, StateChangeEvent&& stateChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnStateChange(std::move(stateChange));
+}
+
+void RefreshModelNG::SetOnRefreshing(FrameNode* frameNode, RefreshingEvent&& refreshing)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RefreshEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnRefreshing(std::move(refreshing));
+}
+
 } // namespace OHOS::Ace::NG

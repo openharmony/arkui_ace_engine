@@ -538,7 +538,7 @@ void RefreshPattern::UpdateBuilderHeight(float builderHeight)
     auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     builderMeasureBaseHeight_ = builderHeight;
-    host->MarkForceMeasure();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void RefreshPattern::UpdateLoadingProgressTranslate(float scrollOffset)

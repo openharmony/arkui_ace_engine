@@ -38,17 +38,6 @@ public:
         Builder() = default;
         ~Builder() = default;
 
-        static constexpr uint32_t DEFAULT_CAPSULE_BG_COLOR_API9 = 0x19182431;
-        static constexpr uint32_t DEFAULT_CAPSULE_SELECTED_COLOR_API9 = 0xff007dff;
-        static constexpr uint32_t DEFAULT_RING_BEGIN_SIDE_COLOR_API9 = 0xff007dff;
-        static constexpr uint32_t DEFAULT_RING_END_SIDE_COLOR_API9 = 0xff007dff;
-        static constexpr uint32_t DEFAULT_RING_BG_COLOR_API9 = 0x19182431;
-
-        static constexpr uint32_t DEFAULT_CAPSULE_SELECTED_COLOR_API10 = 0x33006cde;
-        static constexpr uint32_t DEFAULT_RING_BG_COLOR_API10 = 0x08182431;
-        static constexpr uint32_t DEFAULT_BORDER_COLOR_API10 = 0x33006cde;
-        static constexpr uint32_t DEFAULT_LOADING_COLOR_API10 = 0x99666666;
-
         RefPtr<ProgressTheme> Build(const RefPtr<ThemeConstants>& themeConstants) const
         {
             RefPtr<ProgressTheme> theme = AceType::Claim(new ProgressTheme());
@@ -70,6 +59,8 @@ public:
                 return;
             }
             const double defaultCachedAlpha = 0.4;
+            const double defaultLoadBGAlpha = 0.6;
+            const double defaultRingBackgroundOpacity = 0.03;
             Color defaultColor = Color::FromRGBO(18, 24, 31, 1.0);
             theme->trackThickness_ = pattern->GetAttr<Dimension>("progress_thickness", 0.0_vp);
             theme->trackWidth_ = pattern->GetAttr<Dimension>("progress_default_width", 0.0_vp);
@@ -121,16 +112,18 @@ public:
                 pattern->GetAttr<Color>("ring_progress_bg_color", Color::GRAY);
             
             if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
-                theme->capsuleBgColor_ = Color(DEFAULT_CAPSULE_BG_COLOR_API9);
-                theme->capsuleSelectColor_ = Color(DEFAULT_CAPSULE_SELECTED_COLOR_API9);
-                theme->ringProgressBackgroundColor_ = Color(DEFAULT_RING_BG_COLOR_API9);
-                theme->ringProgressBeginSideColor_ = Color(DEFAULT_RING_BEGIN_SIDE_COLOR_API9);
-                theme->ringProgressEndSideColor_ = Color(DEFAULT_RING_END_SIDE_COLOR_API9);
+                theme->capsuleBgColor_ = theme->trackBgColor_;
+                theme->capsuleSelectColor_ = theme->trackSelectedColor_;
+                theme->ringProgressBackgroundColor_ = theme->trackBgColor_;
+                theme->ringProgressBeginSideColor_ = theme->trackSelectedColor_;
+                theme->ringProgressEndSideColor_ = theme->trackSelectedColor_;
             } else if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-                theme->borderColor_ = Color(DEFAULT_BORDER_COLOR_API10);
-                theme->capsuleSelectColor_ = Color(DEFAULT_CAPSULE_SELECTED_COLOR_API10);
-                theme->ringProgressBackgroundColor_ = Color(DEFAULT_RING_BG_COLOR_API10);
-                theme->loadingColor_ = Color(DEFAULT_LOADING_COLOR_API10);
+                theme->capsuleSelectColor_ =
+                    pattern->GetAttr<Color>("progress_select_color", Color::RED).BlendOpacity(theme->selectColorAlpha_);
+                theme->borderColor_ = theme->capsuleSelectColor_;
+                theme->ringProgressBackgroundColor_ = theme->trackBgColor_.ChangeOpacity(defaultRingBackgroundOpacity);
+                theme->loadingColor_ = theme->loadingColor_.BlendOpacity(
+                    pattern->GetAttr<double>("loading_progress_bg_color_alpha", defaultLoadBGAlpha));
             }
         }
     };

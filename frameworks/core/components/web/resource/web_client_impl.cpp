@@ -164,9 +164,7 @@ bool WebClientImpl::OnFocus()
     auto delegate = webDelegate_.Upgrade();
     CHECK_NULL_RETURN(delegate, false);
     bool isFocused = delegate->RequestFocus();
-    if (isFocused) {
-        delegate->OnRequestFocus();
-    }
+    delegate->OnRequestFocus();
     return isFocused;
 }
 

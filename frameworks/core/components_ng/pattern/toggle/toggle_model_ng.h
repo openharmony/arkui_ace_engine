@@ -39,6 +39,7 @@ public:
     static void SetSelectedColor(FrameNode* frameNode, const std::optional<Color>& selectedColor);
     static void SetSwitchPointColor(FrameNode* frameNode, const Color& switchPointColor);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
+    static void OnChange(FrameNode* frameNode, ChangeEvent&& onChange);
 
 private:
     static void CreateCheckbox(int32_t nodeId);

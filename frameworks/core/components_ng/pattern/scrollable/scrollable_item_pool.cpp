@@ -20,7 +20,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_item.h"
 
 namespace OHOS::Ace::NG {
-constexpr int32_t MAX_SIZE = 10;
+constexpr size_t MAX_SIZE = 10;
 
 ScrollableItemPool& ScrollableItemPool::GetInstance()
 {
@@ -55,7 +55,7 @@ void ScrollableItemPool::Deallocate(ScrollableItem* obj)
         obj->Clean(true);
         return;
     }
-    if (pool_[tag].size() < size_) {
+    if (pool_[tag].size() < static_cast<uint32_t>(size_)) {
         pool_[tag].emplace_back(obj);
         obj->Clean(true);
         return;

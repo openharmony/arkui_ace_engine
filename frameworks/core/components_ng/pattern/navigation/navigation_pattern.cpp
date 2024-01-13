@@ -223,6 +223,14 @@ void NavigationPattern::OnModifyDone()
     auto size = navigationStack_->Size();
     CheckTopNavPathChange(preTopNavPath, newTopNavPath, preSize > size);
 
+    /* if first navDestination is removed, the new one will be refreshed */
+    if (!navPathList.empty()) {
+        auto firstNavDesNode = AceType::DynamicCast<NavDestinationGroupNode>(
+            NavigationGroupNode::GetNavDestinationNode(navPathList.front().second));
+        CHECK_NULL_VOID(firstNavDesNode);
+        firstNavDesNode->MarkModifyDone();
+    }
+
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto currentPlatformVersion = pipeline->GetMinPlatformVersion();
@@ -955,7 +963,7 @@ void NavigationPattern::OnHover(bool isHover)
     CHECK_NULL_VOID(layoutProperty);
     auto userSetMinNavBarWidthValue = layoutProperty->GetMinNavBarWidthValue(defaultValue);
     auto userSetMaxNavBarWidthValue = layoutProperty->GetMaxNavBarWidthValue(defaultValue);
-    if (userSetMinNavBarWidthValue == userSetMaxNavBarWidthValue && userSetNavBarRangeFlag_) {
+    if (userSetNavBarRangeFlag_ && userSetMinNavBarWidthValue == userSetMaxNavBarWidthValue) {
         return;
     }
     if (currentPointerStyle != static_cast<int32_t>(format)) {

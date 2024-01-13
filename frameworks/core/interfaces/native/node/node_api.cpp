@@ -24,7 +24,11 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
+#include "core/interfaces/native/node/node_toggle_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
+#include "core/interfaces/native/node/node_common_modifier.h"
+#include "core/interfaces/native/node/node_refresh_modifier.h"
+#include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace::NG {
 
@@ -91,24 +95,35 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     nullptr,
     nullptr,
     nullptr,
+    NodeModifier::SetOnBlur,
     nullptr,
     nullptr,
     nullptr,
     nullptr,
     nullptr,
+    NodeModifier::SetOnFocus,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnScroll,
     NodeModifier::SetOnScrollFrameBegin,
     NodeModifier::SetOnScrollStart,
-    NodeModifier::SetOnScrollStop
+    NodeModifier::SetOnScrollStop,
+    NodeModifier::SetOnScrollEdge,
 };
 
 const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
-    nullptr,
-    nullptr,
+    NodeModifier::SetTextInputOnSubmit,
     NodeModifier::SetOnTextInputChange,
+};
+
+const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
+    NodeModifier::SetRefreshOnStateChange,
+    NodeModifier::SetOnRefreshing,
+};
+
+const ComponentAsyncEventHandler TOGGLE_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetOnToggleChange,
 };
 
 /* clang-format on */
@@ -143,6 +158,24 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, A
                 return;
             }
             eventHandle = textInputNodeAsyncEventHandlers[subKind];
+            break;
+        }
+        case ARKUI_REFRESH: {
+            // textinput event type.
+            if (subKind >= sizeof(refreshNodeAsyncEventHandlers) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = refreshNodeAsyncEventHandlers[subKind];
+            break;
+        }
+        case ARKUI_TOGGLE: {
+            // toggle event type.
+            if (subKind >= sizeof(TOGGLE_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = TOGGLE_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         default: {

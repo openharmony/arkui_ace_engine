@@ -202,6 +202,7 @@ public:
     virtual void SetSaturate(const Dimension& value) = 0;
     virtual void SetSepia(const Dimension& value) = 0;
     virtual void SetInvert(const InvertVariant& value) = 0;
+    virtual void SetSystemBarEffect(bool systemBarEffect) = 0;
     virtual void SetHueRotate(float value) = 0;
     virtual void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) = 0;
     virtual void SetUseEffect(bool useEffect) = 0;

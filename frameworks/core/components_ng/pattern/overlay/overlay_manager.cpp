@@ -3482,13 +3482,10 @@ void OverlayManager::RemoveEventColumn()
 }
 
 int32_t OverlayManager::CreateModalUIExtension(
-    const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, bool isProhibitBack)
+    const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, bool isProhibitBack, bool isAsyncModalBinding)
 {
     isProhibitBack_ = isProhibitBack;
-    ModalStyle modalStyle;
-    modalStyle.modalTransition = NG::ModalTransition::NONE;
-    modalStyle.isUIExtension = true;
-    auto uiExtNode = ModalUIExtension::Create(want, callbacks);
+    auto uiExtNode = ModalUIExtension::Create(want, callbacks, isAsyncModalBinding);
     auto layoutProperty = uiExtNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, 0);
     auto full = CalcLength(Dimension(1.0, DimensionUnit::PERCENT));
@@ -3498,13 +3495,38 @@ int32_t OverlayManager::CreateModalUIExtension(
         return uiExtNode;
     };
     auto sessionId = ModalUIExtension::GetSessionId(uiExtNode);
-    // Convert the sessionId into a negative number to distinguish it from the targetId of other modal pages
-    BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, nullptr, -(sessionId));
+    if (!isAsyncModalBinding) {
+        ModalStyle modalStyle;
+        modalStyle.modalTransition = NG::ModalTransition::NONE;
+        modalStyle.isUIExtension = true;
+        // Convert the sessionId into a negative number to distinguish it from the targetId of other modal pages
+        BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, nullptr, -(sessionId));
+    } else {
+        auto bindModalCallback = [weak = WeakClaim(this), buildNodeFunc, sessionId, id = Container::CurrentId()]() {
+            ContainerScope scope(id);
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            ModalStyle modalStyle;
+            modalStyle.modalTransition = NG::ModalTransition::NONE;
+            modalStyle.isUIExtension = true;
+            overlayManager->BindContentCover(
+                true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, nullptr, -(sessionId));
+        };
+        ModalUIExtension::SetBindModalCallback(uiExtNode, std::move(bindModalCallback));
+        uiExtNodes_[sessionId] = WeakClaim(RawPtr(uiExtNode));
+    }
     return sessionId;
 }
 
 void OverlayManager::CloseModalUIExtension(int32_t sessionId)
 {
+    if (uiExtNodes_.find(sessionId) != uiExtNodes_.end()) {
+        auto uiExtNode = uiExtNodes_[sessionId].Upgrade();
+        if (uiExtNode) {
+            ModalUIExtension::SetBindModalCallback(uiExtNode, nullptr);
+        }
+        uiExtNodes_.erase(sessionId);
+    }
     ModalStyle modalStyle;
     modalStyle.modalTransition = NG::ModalTransition::NONE;
     BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, nullptr, -(sessionId));

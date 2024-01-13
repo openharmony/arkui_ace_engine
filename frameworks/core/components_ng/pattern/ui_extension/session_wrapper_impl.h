@@ -34,7 +34,7 @@ public:
     ~SessionWrapperImpl() override;
 
     // About session
-    void CreateSession(const AAFwk::Want& want) override;
+    void CreateSession(const AAFwk::Want& want, bool isAsyncModalBinding = false) override;
     void DestroySession() override;
     bool IsSessionValid() override;
     int32_t GetSessionId() override;

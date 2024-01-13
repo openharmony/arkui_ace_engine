@@ -73,6 +73,10 @@ class BuilderNode {
     getFrameNode() {
         return this._JSBuilderNode.getFrameNode();
     }
+    postTouchEvent(touchEvent)
+    {
+        this._JSBuilderNode.postTouchEvent(touchEvent);
+    }
 }
 class JSBuilderNode extends BaseNode {
     constructor(uiContext, options) {

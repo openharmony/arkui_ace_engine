@@ -57,7 +57,11 @@ RectF TextSelectController::CalculateEmptyValueCaretRect() const
     rect.SetTop(contentRect_.Top());
     rect.SetHeight(textFiled->PreferredLineHeight());
     rect.SetWidth(caretInfo_.rect.Width());
-    switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
+    auto textAlign = layoutProperty->GetTextAlignValue(TextAlign::START);
+    auto direction = layoutProperty->GetLayoutDirection();
+    textFiled->CheckTextAlignByDirection(textAlign, direction);
+
+    switch (textAlign) {
         case TextAlign::START:
             rect.SetLeft(contentRect_.GetX());
             break;

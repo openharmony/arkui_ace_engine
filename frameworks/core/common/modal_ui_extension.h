@@ -31,9 +31,13 @@ struct ModalUIExtensionCallbacks;
 namespace OHOS::Ace {
 class ModalUIExtension final {
 public:
-    static RefPtr<NG::FrameNode> Create(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks);
+    static RefPtr<NG::FrameNode> Create(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
+        bool isAsyncModalBinding = false);
 
     static int32_t GetSessionId(const RefPtr<NG::FrameNode>& uiExtNode);
+
+    static void SetBindModalCallback(const RefPtr<NG::FrameNode>& uiExtNode,
+        std::function<void()>&& bindModalCallback);
 };
 
 } // namespace OHOS::Ace

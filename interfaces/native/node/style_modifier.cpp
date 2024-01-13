@@ -32,6 +32,8 @@ namespace OHOS::Ace::NodeModel {
 namespace {
 const std::regex COLOR_WITH_MAGIC("#[0-9A-Fa-f]{8}");
 const std::regex BRACKETS("\\(.*?\\)");
+const std::regex FLOAT_MAGIC("^[0-9]+(\\.[0-9]+)?$");
+const std::regex SIZE_TYPE_MAGIC("([0-9]+)([a-z]+)");
 constexpr int DEFAULT_ANGLE = 180;
 constexpr ArkUI_Float64 DEFAULT_Z_SCALE = 1.0;
 constexpr int UNIT_VP = 1;
@@ -49,6 +51,10 @@ const int ALLOW_SIZE_4(4);
 const int ALLOW_SIZE_7(7);
 const int ALLOW_SIZE_8(8);
 const int ALLOW_SIZE_16(16);
+const int ALLOW_SIZE_2(2);
+const int ALLOW_SIZE_5(5);
+const int ALLOW_SIZE_10(10);
+
 constexpr int DEFAULT_SIZE_18 = 18;
 constexpr int DEFAULT_SIZE_24 = 24;
 constexpr int COLOR_STRATEGY_STYLE = 1;
@@ -84,10 +90,12 @@ const std::vector<std::string> BLUR_STY_ARRAY = { "no_material", "thin", "regula
 const std::vector<std::string> COLOR_MODE_ARRAY = { "system", "light", "dark" };
 const std::vector<std::string> ADAPTIVE_COLOR_ARRAY = { "default", "average" };
 const std::vector<std::string> TEXT_ALIGN_ARRAY = { "left", "right", "center", "justify", "start", "end" };
+const std::vector<std::string> TEXT_COPY_OPTION_ARRAY = { "none", "in-app", "local", "distributed" };
 const std::vector<std::string> TEXT_DECORATION_TYPE_ARRAY = { "none", "underline", "overline", "line_through",
     "inherit" };
 const std::vector<std::string> TEXT_DECORATION_STYLE_ARRAY = { "solid", "double", "dotted", "dashed", "wavy", "initial",
     "inherit" };
+const std::vector<std::string> TEXT_TEXT_SHADOW_ARRAY = { "color", "blur" };
 const std::vector<std::string> FONT_STYLE_ARRAY = { "normal", "italic" };
 const std::vector<std::string> FONT_OVERFLOW_ARRAY = { "none", "clip", "ellipsis", "marquee" };
 const std::vector<std::string> IMAGE_FIT_ARRAY = { "fill", "contain", "cover", "fitwidth", "fitheight", "none",
@@ -96,7 +104,14 @@ const std::vector<std::string> IMAGE_INTERPOLATION_ARRAY = { "none", "low", "med
 const std::vector<std::string> IMAGE_REPEAT_ARRAY = { "no_repeat", "repeat_x", "repeat_y", "repeat" };
 const std::vector<std::string> TEXT_CASE_ARRAY = { "normal", "lowercase", "uppercase" };
 const std::vector<std::string> IMAGE_SPAN_VERTICAL_ALIGN = { "top", "center", "bottom", "baseline", "none" };
-typedef std::map<const std::string, ArkUI_Int32> AttrStringToIntMap;
+const std::vector<std::string> COMMON_GRADIENT_DIRECTION = { "left", "top", "right", "bottom", "left-top",
+    "left-bottom", "right-top", "right-bottom", "none" };
+const std::vector<std::string> COMMON_ALIGNMENT = { "top-start", "top", "top-end", "start", "center",
+    "end", "bottom-start", "bottom", "bottom-end" };
+const std::vector<std::string> SCROLL_DISPLAY_MODE = { "off",  "auto",  "on" };
+const std::vector<std::string> SCROLL_AXIS = { "vertical",  "horizontal",  "free",  "none" };
+const std::vector<std::string> SCROLL_EDGE_EFFECT = { "spring",  "fade",  "none" };
+const std::vector<std::string> LIST_STICKY_STYLE = { "none",  "header",  "footer",  "both" };
 
 uint32_t StringToColorInt(const char* string, uint32_t defaultValue = 0)
 {
@@ -115,6 +130,16 @@ float StringToFloat(const char* string, float defaultValue = 0.0f)
 {
     char* end = nullptr;
     auto value = strtof(string, &end);
+    if (end == string || errno == ERANGE) {
+        return defaultValue;
+    }
+    return value;
+}
+
+double StringToDouble(const char* string, double defaultValue = 0.0)
+{
+    char* end = nullptr;
+    auto value = strtod(string, &end);
     if (end == string || errno == ERANGE) {
         return defaultValue;
     }
@@ -175,6 +200,7 @@ bool IsMultipleWords(const std::string& str)
     return std::find(str.begin(), str.end(), ' ') != str.end();
 }
 
+// Common Arttributes functions
 void SetWidth(ArkUI_NodeHandle node, const char* value)
 {
     auto* fullImpl = GetFullImpl();
@@ -457,13 +483,8 @@ void SetLinearGradient(ArkUI_NodeHandle node, const char* value)
         values[NUM_1] = StringUtils::StringToDouble(params[NUM_1].c_str());
     }
 
-    AttrStringToIntMap paramsMap = {
-        { "left", 0}, { "top", 1}, { "right", 2}, { "bottom", 3}, { "left-top", 4},
-        { "left-bottom", 5}, { "right-top", 6}, { "right-bottom", 7}, { "none", 8},
-    };
-
     if (params.size() > NUM_2) {
-        values[NUM_2] = paramsMap.find(params[NUM_2]) != paramsMap.end() ? paramsMap[params[NUM_2]] : NUM_3;
+        values[NUM_2] = StringToEnumInt(params[NUM_2].c_str(), COMMON_GRADIENT_DIRECTION, NUM_3);
     }
     values[NUM_3] = (params.size() > NUM_3) ? StringToBoolInt(params[NUM_3].c_str()) : false;
 
@@ -483,19 +504,7 @@ void SetAlign(ArkUI_NodeHandle node, const char* value)
         return;
     }
 
-    AttrStringToIntMap paramsMap = {
-        { "top-start", 0},
-        { "top", 1},
-        { "top-end", 2},
-        { "start", 3},
-        { "center", 4},
-        { "end", 5},
-        { "bottom-start", 6},
-        { "bottom", 7},
-        { "bottom-end", 8}
-    };
-
-    auto attrVal = paramsMap.find(value) != paramsMap.end() ? paramsMap[value] : 0;
+    auto attrVal = StringToEnumInt(value, COMMON_ALIGNMENT, NUM_0);
     fullImpl->getNodeModifiers()->getCommonModifier()->setAlign(node->uiNodeHandle, attrVal);
 }
 
@@ -506,7 +515,7 @@ void SetOpacity(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
         return;
     }
-    fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundColor(
+    fullImpl->getNodeModifiers()->getCommonModifier()->setOpacity(
         node->uiNodeHandle, StringToFloat(value, 0.0f));
 }
 
@@ -795,6 +804,154 @@ void SetShadow(ArkUI_NodeHandle node, const char* value)
         shadows[NUM_0] = StringToEnumInt(value, shadowStyle, 0);
         fullImpl->getNodeModifiers()->getCommonModifier()->setBackShadow(node->uiNodeHandle, shadows, ALLOW_SIZE_1);
     }
+}
+
+void SetFocusable(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    fullImpl->getNodeModifiers()->getCommonModifier()->setFocusable(
+        node->uiNodeHandle, static_cast<bool>(StringToBoolInt(value, 1)));
+}
+
+void SetAccessibilityGroup(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    fullImpl->getNodeModifiers()->getCommonModifier()->setAccessibilityGroup(
+        node->uiNodeHandle, static_cast<bool>(StringToBoolInt(value, 0)));
+}
+
+void SetAccessibilityText(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    fullImpl->getNodeModifiers()->getCommonModifier()->setAccessibilityText(
+        node->uiNodeHandle, value);
+}
+
+void SetAccessibilityLevel(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    fullImpl->getNodeModifiers()->getCommonModifier()->setAccessibilityLevel(
+        node->uiNodeHandle, value);
+}
+
+void SetAccessibilityDescription(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    fullImpl->getNodeModifiers()->getCommonModifier()->setAccessibilityDescription(
+        node->uiNodeHandle, value);
+}
+
+void SetDefaultFocus(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    fullImpl->getNodeModifiers()->getCommonModifier()->setDefaultFocus(
+        node->uiNodeHandle, static_cast<bool>(StringToBoolInt(value, 0)));
+}
+
+// "{1 2 3 4},{1 2 3 4}"
+void SetResponseRegion(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+
+    std::vector<std::string> regionArray;
+    StringUtils::StringSplitter(value, ',', regionArray);
+    std::vector<double> valuesArray;
+    std::vector<int> unitsArray;
+    if (regionArray.size() == 1) {
+        std::vector<std::string> regionVal;
+        //取第一个值进行分解
+        StringUtils::StringSplitter(regionArray[0], ' ', regionVal);
+        for (int i = 0; i < regionVal.size(); i++) {
+            valuesArray.push_back(StringToDouble(regionVal[i].c_str(), 0.0f));
+                    //unit 1
+            unitsArray.push_back(1);
+        }
+    } else if (regionArray.size() > 1) {
+        for (const std::string& region : regionArray) {
+            //判断第一个字符是否符合要求
+            if (!region.empty() && region.size() > ALLOW_SIZE_2 &&
+             region[0] == '{' && region.back() == '}') {
+                std::string regionString = region.substr(1, region.length() - ALLOW_SIZE_2);
+                std::vector<std::string> regionVal;
+                StringUtils::StringSplitter(regionString, ' ', regionVal);
+                for (int i = 0; i < ALLOW_SIZE_4; i++) {
+                    valuesArray.push_back(StringToDouble(regionVal[i].c_str(), 0.0f));
+                    //unit 1
+                    unitsArray.push_back(1);
+                }
+            }
+        }
+    }
+    double* firstValue = valuesArray.data();
+    int* firstUnit = unitsArray.data();
+    fullImpl->getNodeModifiers()->getCommonModifier()->setResponseRegion(
+        node->uiNodeHandle, firstValue, firstUnit, valuesArray.size());
+}
+
+void SetOverlay(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+
+    std::vector<std::string> valueVal;
+    StringUtils::StringSplitter(value, ' ', valueVal);
+
+    if (valueVal.size() < ALLOW_SIZE_4) {
+        return;
+    }
+
+    double values[ALLOW_SIZE_10] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1, 1};
+    std::vector<std::string> alignment = { "top-start", "top", "top-end",
+         "start", "center", "end", "bottom-start", "bottom", "bottom-end" };
+    //调用函数参数要求
+    values[0] = 1;
+    values[1] = StringToEnumInt(valueVal[1].c_str(), alignment, 0);
+    //组装对应的参数
+    if (StringToInt(valueVal[2].c_str(), 0) > 0) {
+        values[2] = 1;
+        values[3] = StringToDouble(valueVal[2].c_str(), 0.0);
+        values[4] = 1;
+    }
+    //组装对应的参数
+    if (StringToInt(valueVal[3].c_str(), 0) > 0) {
+        values[5] = 1;
+        values[6] = StringToDouble(valueVal[3].c_str(), 0.0);
+        values[7] = 1;
+    }
+
+    fullImpl->getNodeModifiers()->getCommonModifier()->setOverlay(
+        node->uiNodeHandle, valueVal[0].c_str(), values, ALLOW_SIZE_10);
 }
 
 // TextInput Arttributes functions
@@ -1097,19 +1254,7 @@ void SetAlignContent(ArkUI_NodeHandle node, const char* value)
         return;
     }
 
-    AttrStringToIntMap paramsMap = {
-        { "top-start", 0},
-        { "top", 1},
-        { "top-end", 2},
-        { "start", 3},
-        { "center", 4},
-        { "end", 5},
-        { "bottom-start", 6},
-        { "bottom", 7},
-        { "bottom-end", 8}
-    };
-
-    auto attrVal = paramsMap.find(value) != paramsMap.end() ? paramsMap[value] : 0;
+    auto attrVal = StringToEnumInt(value, COMMON_ALIGNMENT, NUM_0);
     fullImpl->getNodeModifiers()->getStackModifier()->setAlignContent(node->uiNodeHandle, attrVal);
 }
 
@@ -1173,13 +1318,7 @@ void SetScrollScrollBar(ArkUI_NodeHandle node, const char* value)
         return;
     }
 
-    AttrStringToIntMap paramsMap = {
-        { "off", 0},
-        { "auto", 1},
-        { "on", 2},
-    };
-
-    auto attrVal = paramsMap.find(value) != paramsMap.end() ? paramsMap[value] : 0;
+    auto attrVal = StringToEnumInt(value, SCROLL_DISPLAY_MODE, NUM_1);
     fullImpl->getNodeModifiers()->getScrollModifier()->setScrollScrollBar(node->uiNodeHandle, attrVal);
 }
 
@@ -1221,14 +1360,7 @@ void SetScrollScrollable(ArkUI_NodeHandle node, const char* value)
         return;
     }
 
-    AttrStringToIntMap paramsMap = {
-        { "vertical", 0},
-        { "horizontal", 1},
-        { "free", 2},
-        { "none", 3},
-    };
-
-    auto attrVal = paramsMap.find(value) != paramsMap.end() ? paramsMap[value] : NUM_0;
+    auto attrVal = StringToEnumInt(value, SCROLL_AXIS, NUM_0);
     fullImpl->getNodeModifiers()->getScrollModifier()->setScrollScrollable(node->uiNodeHandle, attrVal);
 }
 
@@ -1252,13 +1384,7 @@ void SetScrollEdgeEffect(ArkUI_NodeHandle node, const char* value)
         return;
     }
 
-    AttrStringToIntMap paramsMap = {
-        { "spring", 0},
-        { "fade", 1},
-        { "none", 2},
-    };
-
-    auto attrVal = paramsMap.find(params[NUM_0]) != paramsMap.end() ? paramsMap[params[NUM_0]] : NUM_0;
+    auto attrVal = StringToEnumInt(value, SCROLL_EDGE_EFFECT, NUM_2);
     alwaysEnabled = (size > NUM_1) ? StringToBoolInt(params[NUM_1].c_str()) : true;
     fullImpl->getNodeModifiers()->getScrollModifier()->setScrollEdgeEffect(node->uiNodeHandle, attrVal, alwaysEnabled);
 }
@@ -1279,6 +1405,67 @@ void SetScrollEnableScrollInteraction(ArkUI_NodeHandle node, const char* value)
         node->uiNodeHandle, enableScrollInteraction);
 }
 
+
+void SetScrollNestedScroll(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    std::vector<std::string> valueVal;
+    StringUtils::StringSplitter(value, ' ', valueVal);
+
+    std::vector<std::string> nestedScrollOptions = { "self-only", "self-first",
+     "parent-first", "parallel" };
+    //组装对应的参数
+    fullImpl->getNodeModifiers()->getScrollModifier()->setScrollNestedScroll(
+        node->uiNodeHandle, StringToEnumInt(valueVal[0].c_str(), nestedScrollOptions, 0),
+        StringToEnumInt(valueVal[1].c_str(), nestedScrollOptions, 0));
+}
+
+void SetScrollTo(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    std::vector<std::string> valueVal;
+    StringUtils::StringSplitter(value, ' ', valueVal);
+    if (valueVal.size() < ALLOW_SIZE_5) {
+        return;
+    }
+
+    std::vector<std::string> curve = { "linear", "ease", "easeIn",
+     "easeOut", "ease-in-out", "fast-out-slow-in", "linear-out-slow-in", "fast-out-linear-in",
+     "extreme-deceleration", "sharp", "rhythm", "smooth", "friction" };
+    //组装对应的参数
+    double values[ALLOW_SIZE_7] = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
+    values[0] = StringToDouble(valueVal[0].c_str(), 0.0);
+    values[1] = 1;
+    values[2] = StringToDouble(valueVal[1].c_str(), 0.0);
+    values[3] = 1;
+    values[4] = StringToDouble(valueVal[2].c_str(), 0.0);
+    values[5] = StringToEnumInt(valueVal[3].c_str(), curve, 0);
+    values[6] = StringToBoolInt(valueVal[4].c_str(), 0.0);
+    fullImpl->getNodeModifiers()->getScrollModifier()->setScrollTo(
+        node->uiNodeHandle, values);
+}
+
+void SetScrollEdge(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    std::vector<std::string> edge = { "top", "center", "bottom",
+     "baseline", "start", "middle", "end" };
+    fullImpl->getNodeModifiers()->getScrollModifier()->setScrollEdge(
+        node->uiNodeHandle, StringToEnumInt(value, edge, 0));
+}
+
 // List Attributes functions
 void SetListScrollBar(ArkUI_NodeHandle node, const char* value)
 {
@@ -1292,13 +1479,7 @@ void SetListScrollBar(ArkUI_NodeHandle node, const char* value)
         return;
     }
 
-    AttrStringToIntMap paramsMap = {
-        { "off", 0},
-        { "auto", 1},
-        { "on", 2},
-    };
-
-    auto attrVal = paramsMap.find(value) != paramsMap.end() ? paramsMap[value] : 0;
+    auto attrVal = StringToEnumInt(value, SCROLL_DISPLAY_MODE, NUM_1);
     fullImpl->getNodeModifiers()->getListModifier()->setListScrollBar(node->uiNodeHandle, attrVal);
 }
 
@@ -1314,14 +1495,7 @@ void SetListListDirection(ArkUI_NodeHandle node, const char* value)
         return;
     }
 
-    AttrStringToIntMap paramsMap = {
-        { "vertical", 0},
-        { "horizontal", 1},
-        { "free", 2},
-        { "none", 3},
-    };
-
-    auto attrVal = paramsMap.find(value) != paramsMap.end() ? paramsMap[value] : 0;
+    auto attrVal = StringToEnumInt(value, SCROLL_AXIS, NUM_0);
     fullImpl->getNodeModifiers()->getListModifier()->setListDirection(node->uiNodeHandle, attrVal);
 }
 
@@ -1338,14 +1512,7 @@ void SetListListSticky(ArkUI_NodeHandle node, const char* value)
         return;
     }
 
-    AttrStringToIntMap paramsMap = {
-        { "none", 0},
-        { "header", 1},
-        { "footer", 2},
-        { "both", 3}
-    };
-
-    auto attrVal = paramsMap.find(value) != paramsMap.end() ? paramsMap[value] : 0;
+    auto attrVal = StringToEnumInt(value, LIST_STICKY_STYLE, NUM_0);
 
     fullImpl->getNodeModifiers()->getListModifier()->setSticky(node->uiNodeHandle, attrVal);
 }
@@ -1386,15 +1553,115 @@ void SetListEdgeEffect(ArkUI_NodeHandle node, const char* value)
         return;
     }
 
-    AttrStringToIntMap paramsMap = {
-        { "spring", 0},
-        { "fade", 1},
-        { "none", 2},
-    };
-
-    auto attrVal = paramsMap.find(params[NUM_0]) != paramsMap.end() ? paramsMap[params[NUM_0]] : NUM_0;
+    auto attrVal = StringToEnumInt(value, SCROLL_EDGE_EFFECT, NUM_2);
     alwaysEnabled = (size > NUM_1) ? StringToBoolInt(params[NUM_1].c_str()) : true;
     fullImpl->getNodeModifiers()->getListModifier()->setListEdgeEffect(node->uiNodeHandle, attrVal, alwaysEnabled);
+}
+
+// Text Attributes functions
+void SetTextBaselineOffset(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    struct StringAndDouble offset = { 0.0, nullptr };
+
+    std::string valueString = std::string(value);
+    if (std::regex_match(valueString, FLOAT_MAGIC)) {
+        offset.value = StringToFloat(value);
+    } else if (std::regex_match(valueString, SIZE_TYPE_MAGIC)) {
+        offset.valueStr = value;
+    }
+
+    fullImpl->getNodeModifiers()->getTextModifier()->setTextBaselineOffset(node->uiNodeHandle, &offset);
+}
+
+void SetTextTextShadow(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+
+    std::vector<struct TextShadowStruct> shadows;
+    std::vector<std::string> values;
+    StringUtils::StringSplitter(value, ',', values);
+    for (auto& items : values) {
+        struct TextShadowStruct shadow;
+        std::vector<std::string> item;
+        StringUtils::StringSplitter(items.c_str(), ' ', item);
+        size_t length = item.size();
+        if (length > 0) {
+            shadow.radius = StringToFloat(item[NUM_0].c_str());
+        }
+        if (length > NUM_1) {
+            shadow.type = StringToEnumInt(item[NUM_1].c_str(), TEXT_TEXT_SHADOW_ARRAY, 0);
+        }
+        if (length > NUM_2) {
+            shadow.color = StringToColorInt(item[NUM_2].c_str());
+        }
+        if (length > NUM_3) {
+            shadow.offsetX = StringToFloat(item[NUM_3].c_str());
+        }
+        if (length > NUM_4) {
+            shadow.offsetY = StringToFloat(item[NUM_4].c_str());
+        }
+        shadows.emplace_back(shadow);
+    }
+
+    fullImpl->getNodeModifiers()->getTextModifier()->setTextTextShadow(node->uiNodeHandle, &shadows[0], shadows.size());
+}
+
+// Toggle Attributes functions
+void SetToggleSelectedColor(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+
+    fullImpl->getNodeModifiers()->getToggleModifier()->setToggleSelectedColor(
+        node->uiNodeHandle, StringToColorInt(value, 0));
+}
+
+void SetToggleSwitchPointColor(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    
+    fullImpl->getNodeModifiers()->getToggleModifier()->setToggleSwitchPointColor(
+        node->uiNodeHandle, StringToColorInt(value, 0));
+}
+
+// LoadingProgress Attributes functions
+void SetLoadingProgressColor(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    
+    fullImpl->getNodeModifiers()->getLoadingProgressModifier()->setColor(node->uiNodeHandle, StringToColorInt(value));
+}
+
+void SetLoadingProgressEnableLoading(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+
+    fullImpl->getNodeModifiers()->getLoadingProgressModifier()->setEnableLoading(
+        node->uiNodeHandle, std::strcmp(value, "false"));
 }
 
 void SetSwiperLoop(ArkUI_NodeHandle node, const char* value)
@@ -1508,7 +1775,7 @@ void SetSwiperIndex(ArkUI_NodeHandle node, const char* value)
         return;
     }
     std::string indexStr(value);
-    fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperInterval(
+    fullImpl->getNodeModifiers()->getSwiperModifier()->setSwiperIndex(
         node->uiNodeHandle, StringUtils::StringToInt(indexStr));
 }
 
@@ -1811,6 +2078,44 @@ void SetTextOverflow(ArkUI_NodeHandle node, const char* value)
         node->uiNodeHandle, StringToEnumInt(value, FONT_OVERFLOW_ARRAY, 0));
 }
 
+void SetFontFamily(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+
+    std::vector<std::string> fontFamilies;
+    StringUtils::StringSplitter(value, ',', fontFamilies);
+
+    auto families = std::make_unique<char* []>(fontFamilies.size());
+    for (uint32_t i = 0; i < fontFamilies.size(); i++) {
+        families[i] = const_cast<char*>(fontFamilies.at(i).c_str());
+    }
+
+    if (node->type == ARKUI_NODE_TEXT_INPUT) {
+        fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputFontFamily(
+            node->uiNodeHandle, const_cast<const char**>(families.get()), fontFamilies.size());
+    } else if (node->type == ARKUI_NODE_TEXT) {
+        fullImpl->getNodeModifiers()->getTextModifier()->setTextFontFamily(
+            node->uiNodeHandle, const_cast<const char**>(families.get()), fontFamilies.size());
+    }
+}
+
+void SetCopyOption(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (node->type == ARKUI_NODE_TEXT) {
+        fullImpl->getNodeModifiers()->getTextModifier()->setTextCopyOption(
+            node->uiNodeHandle, StringToEnumInt(value, TEXT_COPY_OPTION_ARRAY, 0));
+    }
+}
+
 void SetDecoration(ArkUI_NodeHandle node, const char* value)
 {
     auto fullImpl = GetFullImpl();
@@ -1835,6 +2140,9 @@ void SetDecoration(ArkUI_NodeHandle node, const char* value)
             fullImpl->getNodeModifiers()->getSpanModifier()->setSpanDecoration(
                 node->uiNodeHandle, decoration, decorationColor.GetValue(), style);
             break;
+        case ARKUI_NODE_TEXT:
+            fullImpl->getNodeModifiers()->getTextModifier()->setTextDecoration(
+                node->uiNodeHandle, decoration, decorationColor.GetValue(), style);
         default:
             break;
     }
@@ -1853,6 +2161,9 @@ void SetLetterSpacing(ArkUI_NodeHandle node, const char* value)
             fullImpl->getNodeModifiers()->getSpanModifier()->setSpanLetterSpacing(
                 node->uiNodeHandle, &letterSpacingValue);
             break;
+        case ARKUI_NODE_TEXT:
+            fullImpl->getNodeModifiers()->getTextModifier()->setTextLetterSpacing(
+                node->uiNodeHandle, &letterSpacingValue);
         default:
             break;
     }
@@ -1870,6 +2181,9 @@ void SetTextCase(ArkUI_NodeHandle node, const char* value)
             fullImpl->getNodeModifiers()->getSpanModifier()->setSpanTextCase(
                 node->uiNodeHandle, StringToEnumInt(value, TEXT_CASE_ARRAY, 0));
             break;
+        case ARKUI_NODE_TEXT:
+            fullImpl->getNodeModifiers()->getTextModifier()->setTextTextCase(
+                node->uiNodeHandle, StringToEnumInt(value, TEXT_CASE_ARRAY, 0));
         default:
             break;
     }
@@ -1981,7 +2295,10 @@ void SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const char* va
         SetLinearGradient, SetAlign, SetOpacity, SetBorderWidth, SetBorderRadius, SetBorderColor, SetBorderStyle,
         SetZIndex, SetVisibility, SetClip, SetTransform, SetHitTestBehavior, SetPosition, SetShadow,
         SetBackgroundImageSize, SetBackgroundBlurStyle, SetOpacityTransition, SetRotateTransition, SetScaleTransition,
-        SetTranslateTransition };
+        SetTranslateTransition,
+        SetFocusable, SetAccessibilityGroup, SetAccessibilityText,
+        SetAccessibilityLevel, SetAccessibilityDescription, SetDefaultFocus,
+        SetResponseRegion, SetOverlay };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -1992,7 +2309,8 @@ void SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const char* va
 void SetTextAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const char* value)
 {
     static Setter* setters[] = { SetTextContent, SetFontColor, SetFontSize, SetFontStyle, SetFontWeight, SetLineHeight,
-        SetDecoration, SetTextCase, SetLetterSpacing, SetMaxLines, SetTextAlign, SetTextOverflow };
+        SetDecoration, SetTextCase, SetLetterSpacing, SetMaxLines, SetTextAlign, SetTextOverflow,  SetFontFamily,
+        SetCopyOption, SetTextBaselineOffset, SetTextTextShadow };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "text node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -2052,11 +2370,21 @@ void SetStackAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const char* val
     setters[subTypeId](node, value);
 }
 
+void SetToggleAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const char* value)
+{
+    static Setter* setters[] = { SetToggleSelectedColor, SetToggleSwitchPointColor };
+    if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "toggle node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        return;
+    }
+    setters[subTypeId](node, value);
+}
+
 void SetScrollAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const char* value)
 {
     static Setter* setters[] = { SetScrollScrollBar, SetScrollScrollBarWidth, SetScrollScrollBarColor,
         SetScrollScrollable, SetScrollEdgeEffect, SetScrollEnableScrollInteraction, SetScrollFriction,
-        SetScrollScrollSnap };
+        SetScrollScrollSnap, SetScrollNestedScroll, SetScrollTo, SetScrollEdge };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "scroll node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -2089,14 +2417,23 @@ void SetSwiperAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const char* va
     setters[subTypeId](node, value);
 }
 
+void SetLoadingProgressAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const char* value)
+{
+    static Setter* setters[] = { SetLoadingProgressColor, SetLoadingProgressEnableLoading };
+    if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "loadingprogress node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        return;
+    }
+    setters[subTypeId](node, value);
+}
 } // namespace
 
 void SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, const char* value)
 {
     using AttributeSetterClass = void(ArkUI_NodeHandle node, int32_t subTypeId, const char* value);
     static AttributeSetterClass* setterClasses[] = { SetCommonAttribute, SetTextAttribute, SetSpanAttribute,
-        SetImageSpanAttribute, SetImageAttribute, nullptr, nullptr, SetTextInputAttribute, SetStackAttribute,
-        SetScrollAttribute, SetListAttribute, SetSwiperAttribute };
+        SetImageSpanAttribute, SetImageAttribute, SetToggleAttribute, SetLoadingProgressAttribute,
+        SetTextInputAttribute, SetStackAttribute, SetScrollAttribute, SetListAttribute, SetSwiperAttribute };
     int32_t subTypeClass = type / MAX_NODE_SCOPE_NUM;
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
     if (subTypeClass > sizeof(setterClasses) / sizeof(AttributeSetterClass*)) {

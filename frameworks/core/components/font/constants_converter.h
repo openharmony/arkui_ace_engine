@@ -87,6 +87,8 @@ txt::TextDecorationStyle ConvertTxtTextDecorationStyle(TextDecorationStyle textD
 
 void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& context, txt::TextStyle& txtStyle);
 
+void ConvertTxtStyle(const TextStyle& textStyle, txt::TextStyle& txtStyle);
+
 Rect ConvertSkRect(SkRect skRect);
 
 txt::PlaceholderAlignment ConvertPlaceholderAlignment(PlaceholderAlignment textDecoration);
@@ -110,6 +112,7 @@ OHOS::Rosen::TextDecorationStyle ConvertTxtTextDecorationStyle(TextDecorationSty
 
 void ConvertTxtStyle(const TextStyle &textStyle,
     const WeakPtr<PipelineBase> &context, OHOS::Rosen::TextStyle &txtStyle);
+void ConvertTxtStyle(const TextStyle& textStyle, OHOS::Rosen::TextStyle& txtStyle);
 
 Rect ConvertSkRect(const Rosen::Drawing::RectF &skRect);
 

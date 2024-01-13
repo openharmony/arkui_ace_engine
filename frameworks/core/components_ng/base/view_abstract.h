@@ -171,6 +171,7 @@ public:
     static void SetInvert(const InvertVariant &value);
     static void SetHueRotate(float value);
     static void SetColorBlend(const Color &value);
+    static void SetSystemBarEffect(bool systemBarEffect);
 
     // gradient
     static void SetLinearGradient(const NG::Gradient &gradient);
@@ -463,6 +464,8 @@ public:
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction);
 
+    static void SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback);
+    static void SetOnBlur(FrameNode* frameNode, OnBlurFunc &&onBlurCallback);
 private:
     static void AddDragFrameNodeToManager();
 };

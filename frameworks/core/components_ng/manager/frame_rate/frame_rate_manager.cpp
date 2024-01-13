@@ -49,6 +49,14 @@ void FrameRateManager::UpdateNodeRate(int32_t nodeId, int32_t rate)
     }
 }
 
+void FrameRateManager::SetAnimateRate(int32_t rate)
+{
+    if (animateRate_ != rate) {
+        animateRate_ = rate;
+        isRateChanged_ = true;
+    }
+}
+
 void FrameRateManager::SetDisplaySyncRate(int32_t displaySyncRate)
 {
     if (displaySyncRate_ != displaySyncRate) {
@@ -71,6 +79,7 @@ int32_t FrameRateManager::GetExpectedRate()
         expectedRate = maxIter->second;
     }
     expectedRate = std::max(expectedRate, displaySyncRate_);
+    expectedRate = std::max(expectedRate, animateRate_);
     return expectedRate;
 }
 } // namespace OHOS::Ace::NG

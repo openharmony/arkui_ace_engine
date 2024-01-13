@@ -607,7 +607,7 @@ void AceContainer::OnInactive(int32_t instanceId)
                 return;
             }
             pipelineContext->WindowFocus(false);
-            if (Container::Current()->IsScenceBoardWindow()) {
+            if (container->IsScenceBoardWindow()) {
                 JankFrameReport::GetInstance().FlushRecord();
             }
         },
@@ -2300,7 +2300,7 @@ void AceContainer::SearchElementInfoByAccessibilityIdNG(
     std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     CHECK_NULL_VOID(taskExecutor_);
-    taskExecutor_->PostSyncTask(
+    taskExecutor_->PostSyncTaskTimeout(
         [weak = WeakClaim(this), elementId, mode, baseParent, &output]() {
             auto container = weak.Upgrade();
             CHECK_NULL_VOID(container);
@@ -2314,7 +2314,7 @@ void AceContainer::SearchElementInfoByAccessibilityIdNG(
             accessibilityManager->SearchElementInfoByAccessibilityIdNG(
                 elementId, mode, output, ngPipeline, baseParent);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, 1500);
 }
 
 void AceContainer::SearchElementInfosByTextNG(
@@ -2322,7 +2322,7 @@ void AceContainer::SearchElementInfosByTextNG(
     std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     CHECK_NULL_VOID(taskExecutor_);
-    taskExecutor_->PostSyncTask(
+    taskExecutor_->PostSyncTaskTimeout(
         [weak = WeakClaim(this), elementId, &text, baseParent, &output]() {
             auto container = weak.Upgrade();
             CHECK_NULL_VOID(container);
@@ -2336,7 +2336,7 @@ void AceContainer::SearchElementInfosByTextNG(
             accessibilityManager->SearchElementInfosByTextNG(
                 elementId, text, output, ngPipeline, baseParent);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, 1500);
 }
 
 void AceContainer::FindFocusedElementInfoNG(
@@ -2344,7 +2344,7 @@ void AceContainer::FindFocusedElementInfoNG(
     Accessibility::AccessibilityElementInfo& output)
 {
     CHECK_NULL_VOID(taskExecutor_);
-    taskExecutor_->PostSyncTask(
+    taskExecutor_->PostSyncTaskTimeout(
         [weak = WeakClaim(this), elementId, focusType, baseParent, &output]() {
             auto container = weak.Upgrade();
             CHECK_NULL_VOID(container);
@@ -2358,7 +2358,7 @@ void AceContainer::FindFocusedElementInfoNG(
             accessibilityManager->FindFocusedElementInfoNG(
                 elementId, focusType, output, ngPipeline, baseParent);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, 1500);
 }
 
 void AceContainer::FocusMoveSearchNG(
@@ -2366,7 +2366,7 @@ void AceContainer::FocusMoveSearchNG(
     Accessibility::AccessibilityElementInfo& output)
 {
     CHECK_NULL_VOID(taskExecutor_);
-    taskExecutor_->PostSyncTask(
+    taskExecutor_->PostSyncTaskTimeout(
         [weak = WeakClaim(this), elementId, direction, baseParent, &output]() {
             auto container = weak.Upgrade();
             CHECK_NULL_VOID(container);
@@ -2379,7 +2379,7 @@ void AceContainer::FocusMoveSearchNG(
             CHECK_NULL_VOID(accessibilityManager);
             accessibilityManager->FocusMoveSearchNG(elementId, direction, output, ngPipeline, baseParent);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, 1500);
 }
 
 bool AceContainer::NotifyExecuteAction(
@@ -2388,7 +2388,7 @@ bool AceContainer::NotifyExecuteAction(
 {
     bool IsExecuted = false;
     CHECK_NULL_RETURN(taskExecutor_, IsExecuted);
-    taskExecutor_->PostSyncTask(
+    taskExecutor_->PostSyncTaskTimeout(
         [weak = WeakClaim(this), elementId, &actionArguments, action, offset, &IsExecuted]() {
             auto container = weak.Upgrade();
             CHECK_NULL_VOID(container);
@@ -2402,7 +2402,7 @@ bool AceContainer::NotifyExecuteAction(
             IsExecuted = accessibilityManager->ExecuteExtensionActionNG(
                 elementId, actionArguments, action, ngPipeline, offset);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, 1500);
     return IsExecuted;
 }
 

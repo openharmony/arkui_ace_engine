@@ -15,15 +15,17 @@
 #include "core/interfaces/native/node/node_modifiers.h"
 
 #include "core/interfaces/native/node/node_common_modifier.h"
+#include "core/interfaces/native/node/node_image_span_modifier.h"
+#include "core/interfaces/native/node/node_image_modifier.h"
 #include "core/interfaces/native/node/node_list_modifier.h"
+#include "core/interfaces/native/node/node_loading_progress_modifier.h"
 #include "core/interfaces/native/node/node_scroll_modifier.h"
+#include "core/interfaces/native/node/node_span_modifier.h"
 #include "core/interfaces/native/node/node_stack_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
 #include "core/interfaces/native/node/node_text_modifier.h"
-#include "core/interfaces/native/node/node_image_span_modifier.h"
-#include "core/interfaces/native/node/node_image_modifier.h"
-#include "core/interfaces/native/node/node_span_modifier.h"
 #include "core/interfaces/native/node/node_text_modifier.h"
+#include "core/interfaces/native/node/node_toggle_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -36,7 +38,7 @@ const ArkUINodeModifiers impl = {
     nullptr,
     NodeModifier::GetTextModifier,
     nullptr,
-    nullptr,
+    NodeModifier::GetToggleModifier,
     NodeModifier::GetImageSpanModifier,
     nullptr,
     nullptr,
@@ -96,7 +98,7 @@ const ArkUINodeModifiers impl = {
     NodeModifier::GetListModifier,
     nullptr,
     nullptr,
-    nullptr,
+    NodeModifier::GetLoadingProgressModifier,
     nullptr,
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     nullptr,

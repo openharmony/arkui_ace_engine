@@ -109,6 +109,7 @@ private:
     void FireOnUninstallEvent(int64_t id) const;
     void FireFormSurfaceNodeCallback(const std::shared_ptr<Rosen::RSSurfaceNode>& node, bool isDynamic);
     void FireFormSurfaceChangeCallback(float width, float height);
+    void FireFormSurfaceDetachCallback();
     void UpdateBackgroundColorWhenUnTrustForm();
 
     bool ISAllowUpdate() const;
@@ -142,6 +143,7 @@ private:
     bool isBeenLayout_ = false;
     bool isUnTrust_ = false;
     bool isDynamic_ = true;
+    bool isFrsNodeDetached_ = false;
     bool needSnapshotAgain_ = false;
     bool isSnapshot_ = false;
     bool isRegistedAreaCallback_ = false;

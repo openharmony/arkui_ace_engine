@@ -30,7 +30,8 @@ class WantParams;
 
 namespace OHOS::Ace {
 struct ModalUIExtensionConfig {
-bool isProhibitBack = false;
+    bool isProhibitBack = false;
+    bool isAsyncModalBinding = false;
 };
 
 struct ModalUIExtensionCallbacks {

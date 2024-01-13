@@ -100,7 +100,9 @@ void ContentModifierAdapter::Draw(RSDrawingContext& context) const
             [rsProp]() -> propType { return rsProp->GetStagingValue(); },                \
             [rsProp](ThresholdType type) { if (type == ThresholdType::LAYOUT) {          \
                 auto rsBaseProp = std::static_pointer_cast<RSPropertyBase>(rsProp);      \
-                rsBaseProp->SetThresholdType(Rosen::ThresholdType::LAYOUT); }});         \
+                rsBaseProp->SetThresholdType(Rosen::ThresholdType::LAYOUT); }},          \
+            [rsProp](PropertyUnit unit) { if (unit == PropertyUnit::PIXEL_POSITION) {    \
+                rsProp->SetPropertyUnit(Rosen::RSPropertyUnit::PIXEL_POSITION); }});     \
         rsProp->SetUpdateCallback(castProp->GetUpdateCallback());                        \
         return rsProp;                                                                   \
     }

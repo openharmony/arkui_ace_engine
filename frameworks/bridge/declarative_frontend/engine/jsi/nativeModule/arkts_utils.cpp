@@ -700,7 +700,7 @@ bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM *vm, const Local<JSValueR
             return false;
         }
 
-        if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::RAWFILE)) {
+        if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::RAWFILE)) {
             auto args = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
             if (!args->IsArray(vm)) {
                 return false;

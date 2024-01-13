@@ -1032,12 +1032,14 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
     }
 
     CHECK_NULL_VOID(paragraph_);
-    auto end = -1;
-    if (IsSelected() || textSelector_.baseOffset != -1) {
-        end = paragraph_->GetGlyphIndexByCoordinate(textOffset);
+    auto start = textSelector_.baseOffset;
+    auto end = textSelector_.destinationOffset;
+    if (!IsSelected()) {
+        start = -1;
+        end = -1;
     }
     if (isMousePressed_ || oldMouseStatus == MouseStatus::MOVE) {
-        HandleSelectionChange(textSelector_.baseOffset, end);
+        HandleSelectionChange(start, end);
     }
 
     if (IsSelected() && oldMouseStatus == MouseStatus::MOVE && IsSelectedBindSelectionMenu()) {
@@ -1551,7 +1553,7 @@ ResultObject TextPattern::GetTextResultObject(RefPtr<UINode> uinode, int32_t ind
         return resultObject;
     }
     auto spanItem = DynamicCast<SpanNode>(uinode)->GetSpanItem();
-    int32_t itemLength = StringUtils::ToWstring(spanItem->content).length();
+    int32_t itemLength = static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length());
     int32_t endPosition = std::min(GetTextContentLength(), spanItem->position);
     int32_t startPosition = endPosition - itemLength;
 
@@ -1592,7 +1594,7 @@ ResultObject TextPattern::GetSymbolSpanResultObject(RefPtr<UINode> uinode, int32
         return resultObject;
     }
     auto spanItem = DynamicCast<SpanNode>(uinode)->GetSpanItem();
-    int32_t itemLength = StringUtils::ToWstring(spanItem->content).length();
+    int32_t itemLength = static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length());
     int32_t endPosition = std::min(GetTextContentLength(), spanItem->position);
     int32_t startPosition = endPosition - itemLength;
 
@@ -2612,21 +2614,19 @@ void TextPattern::ProcessBoundRectByTextShadow(RectF& rect)
     float downOffsetY = 0.0f;
     for (const auto& shadow : shadows.value()) {
         auto shadowBlurRadius = shadow.GetBlurRadius() * 2.0f;
-        if (LessOrEqual(shadow.GetOffset().GetX(), 0.0f) && LessNotEqual(shadow.GetOffset().GetX(), leftOffsetX)) {
+        if (LessNotEqual(shadow.GetOffset().GetX() - shadowBlurRadius, leftOffsetX)) {
             leftOffsetX = shadow.GetOffset().GetX() - shadowBlurRadius;
         }
 
-        if (GreatOrEqual(shadow.GetOffset().GetX(), 0.0f) &&
-            GreatNotEqual(shadow.GetOffset().GetX() + shadowBlurRadius, rightOffsetX)) {
+        if (GreatNotEqual(shadow.GetOffset().GetX() + shadowBlurRadius, rightOffsetX)) {
             rightOffsetX = shadow.GetOffset().GetX() + shadowBlurRadius;
         }
 
-        if (LessOrEqual(shadow.GetOffset().GetY(), 0.0f) && LessNotEqual(shadow.GetOffset().GetY(), upOffsetY)) {
+        if (LessNotEqual(shadow.GetOffset().GetY() - shadowBlurRadius, upOffsetY)) {
             upOffsetY = shadow.GetOffset().GetY() - shadowBlurRadius;
         }
 
-        if (GreatOrEqual(shadow.GetOffset().GetY(), 0.0f) &&
-            GreatNotEqual(shadow.GetOffset().GetY() + shadowBlurRadius, downOffsetY)) {
+        if (GreatNotEqual(shadow.GetOffset().GetY() + shadowBlurRadius, downOffsetY)) {
             downOffsetY = shadow.GetOffset().GetY() + shadowBlurRadius;
         }
     }

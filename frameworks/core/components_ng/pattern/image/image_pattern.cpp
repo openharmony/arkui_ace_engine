@@ -1046,13 +1046,20 @@ void ImagePattern::UpdateAnalyzerUIConfig(const RefPtr<GeometryNode>& geometryNo
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 
-    auto centerPos = renderContext->GetTransformCenterValue(DimensionOffset(0.5_pct, 0.5_pct));
-    auto scale = renderContext->GetTransformScaleValue(VectorF(1.0f, 1.0f));
-    Matrix4 localMat = Matrix4::CreateTranslate(centerPos.GetX().Value(), centerPos.GetY().Value(), 0) *
-                       Matrix4::CreateScale(scale.x, scale.y, 1.0f) *
-                       Matrix4::CreateTranslate(-centerPos.GetX().Value(), -centerPos.GetY().Value(), 0);
-    if (!(analyzerUIConfig_.transformMat == localMat)) {
-        analyzerUIConfig_.transformMat = localMat;
+    auto localCenter = renderContext->GetTransformCenterValue(DimensionOffset(0.5_pct, 0.5_pct));
+    auto localScale = renderContext->GetTransformScaleValue(VectorF(1.0f, 1.0f));
+    Matrix4 localScaleMat = Matrix4::CreateTranslate(localCenter.GetX().Value(), localCenter.GetY().Value(), 0) *
+                            Matrix4::CreateScale(localScale.x, localScale.y, 1.0f) *
+                            Matrix4::CreateTranslate(-localCenter.GetX().Value(), -localCenter.GetY().Value(), 0);
+
+    auto transformMat = renderContext->GetTransformMatrixValue(Matrix4::CreateIdentity());
+    VectorF transCenter(transformMat.Get(0, 3), transformMat.Get(1, 3));
+    Matrix4 transScaleMat = Matrix4::CreateTranslate(transCenter.x, transCenter.y, 0) *
+                            Matrix4::CreateScale(transformMat.GetScaleX(), transformMat.GetScaleY(), 1.0f) *
+                            Matrix4::CreateTranslate(-transCenter.x, -transCenter.y, 0);
+    Matrix4 scaleMat = localScaleMat * transScaleMat;
+    if (!(analyzerUIConfig_.transformMat == scaleMat)) {
+        analyzerUIConfig_.transformMat = scaleMat;
         isUIConfigUpdate = true;
     }
 

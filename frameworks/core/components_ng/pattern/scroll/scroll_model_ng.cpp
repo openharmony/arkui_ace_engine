@@ -360,4 +360,25 @@ void ScrollModelNG::SetEnablePaging(bool enablePaging)
     }
     pattern->SetScrollSnapUpdate(true);
 }
+
+RefPtr<ScrollControllerBase> ScrollModelNG::GetOrCreateController(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    if (!pattern->GetScrollPositionController()) {
+        auto controller = AceType::MakeRefPtr<NG::ScrollableController>();
+        pattern->SetPositionController(controller);
+    }
+    return pattern->GetScrollPositionController();
+}
+
+void ScrollModelNG::SetOnScrollEdge(FrameNode* frameNode, NG::ScrollEdgeEvent&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollEdge(std::move(event));
+}
+
 } // namespace OHOS::Ace::NG

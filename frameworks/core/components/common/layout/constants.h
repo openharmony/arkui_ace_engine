@@ -318,7 +318,7 @@ enum class BorderImageDirection {
     BOTTOM,
 };
 
-enum class TimePickerDisplayedComponents {
+enum class TimePickerFormat {
     HOUR_MINUTE,
     HOUR_MINUTE_SECOND
 };

@@ -59,7 +59,7 @@ void SvgMask::OnDrawTraversedBefore(RSCanvas& canvas, const Size& viewPort, cons
     RSSaveLayerOps slo(&maskBounds_, nullptr);
     rsCanvas_->SaveLayer(slo);
     // ready to render mask content
-    canvasLayerCount_ = rsCanvas_->GetSaveCount();
+    canvasLayerCount_ = static_cast<int32_t>(rsCanvas_->GetSaveCount());
     RosenSvgPainter::SetMask(rsCanvas_);
 #endif
 }

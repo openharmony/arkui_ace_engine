@@ -31,6 +31,8 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
     "$cjson_root:cjson",
+    "//third_party/googletest:gmock",
+    "//third_party/googletest:gmock_main",
   ]
   sources = [
     "$ace_root/frameworks/core/common/container_scope.cpp",
@@ -62,6 +64,7 @@ ohos_fuzztest("ImageLoaderFuzzTest") {
       "$ace_root/test/mock/core/common/mock_resource_adapter_v2.cpp",
       "$ace_root/test/mock/core/common/mock_theme_constants.cpp",
       "$ace_root/test/mock/core/common/mock_watch_dog.cpp",
+      "$ace_root/test/mock/core/render/mock_canvas_image.cpp",
       "$ace_root/test/mock/core/render/mock_skia_image.cpp",
       "$ace_root/test/mock/interfaces/mock_ace_forward_compatibility.cpp",
       "$ace_root/test/unittest/core/pipeline/mock_event_manager.cpp",

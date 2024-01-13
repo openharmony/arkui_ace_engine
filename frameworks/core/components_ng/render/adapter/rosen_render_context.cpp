@@ -3201,6 +3201,13 @@ void RosenRenderContext::OnFrontInvertUpdate(const InvertVariant& invert)
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnSystemBarEffectUpdate(bool systemBarEffect)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetSystemBarEffect();
+    RequestNextFrame();
+}
+
 void RosenRenderContext::OnFrontHueRotateUpdate(float hueRotate)
 {
     CHECK_NULL_VOID(rsNode_);

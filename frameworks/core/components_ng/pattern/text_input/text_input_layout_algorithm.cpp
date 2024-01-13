@@ -181,7 +181,9 @@ void TextInputLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         auto isEmptyTextEditValue = pattern->GetTextValue().empty();
         auto isInlineStyle = pattern->IsNormalInlineState();
         if (!isEmptyTextEditValue && !isInlineStyle) {
-            switch (layoutProperty->GetTextAlignValue(TextAlign::START)) {
+            auto textAlign = layoutProperty->GetTextAlignValue(TextAlign::START);
+            pattern->CheckTextAlignByDirection(textAlign, direction_);
+            switch (textAlign) {
                 case TextAlign::START:
                     break;
                 case TextAlign::CENTER:

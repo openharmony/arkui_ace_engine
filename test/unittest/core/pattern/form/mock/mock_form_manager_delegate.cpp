@@ -76,6 +76,8 @@ void FormManagerDelegate::NotifySurfaceChange(float width, float height) {}
 
 void FormManagerDelegate::AddFormSurfaceChangeCallback(OnFormSurfaceChangeCallback&& callback) {}
 
+void FormManagerDelegate::AddFormSurfaceDetachCallback(OnFormSurfaceDetachCallback&& callback) {}
+
 void FormManagerDelegate::AddFormLinkInfoUpdateCallback(OnFormLinkInfoUpdateCallback&& callback) {}
 
 void FormManagerDelegate::AddSnapshotCallback(SnapshotCallback&& callback) {}

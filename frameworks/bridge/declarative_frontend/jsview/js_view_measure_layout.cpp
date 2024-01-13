@@ -81,7 +81,9 @@ panda::Local<panda::JSValueRef> ViewMeasureLayout::JSMeasure(panda::JsiRuntimeCa
             ->UpdateCalcMaxSize(NG::CalcSize(std::nullopt, NG::CalcLength(maxHeight)));
     }
     (*iterMeasureChildren_)->Measure(measureDefaultConstraint_);
-
+    if (!(*iterMeasureChildren_)) {
+        return ObjectRef::New(vm);
+    }
     Dimension measureWidth((*iterMeasureChildren_)->GetGeometryNode()->GetFrameRect().Width(), DimensionUnit::PX);
     Dimension measureHeight((*iterMeasureChildren_)->GetGeometryNode()->GetFrameRect().Height(), DimensionUnit::PX);
     Local<ObjectRef> measureResultObject = ObjectRef::New(vm);

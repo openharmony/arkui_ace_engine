@@ -264,7 +264,7 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtim
 panda::Local<panda::JSValueRef> JsLoadCustomTitleBar(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    int32_t argc = static_cast<int32_t>(runtimeCallInfo->GetArgsNumber());
     if (argc != 1) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -1035,7 +1035,7 @@ panda::Local<panda::JSValueRef> RequestFocus(panda::JsiRuntimeCallInfo* runtimeC
 panda::Local<panda::JSValueRef> SetCursor(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    int32_t argc = static_cast<int32_t>(runtimeCallInfo->GetArgsNumber());
     if (vm == nullptr) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -1438,6 +1438,28 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine)
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "IconPosition"), *iconPosition);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "PickerStyle"), *pickerStyle);
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "BadgePosition"), *badgePosition);
+}
+
+void JsRegisterWorkerViews(BindingTarget globalObj, void* nativeEngine)
+{
+    auto runtime = std::static_pointer_cast<ArkJSRuntime>(JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    if (!runtime) {
+        return;
+    }
+    auto vm = runtime->GetEcmaVm();
+    globalObj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "vp2px"), panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Vp2Px));
+    globalObj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "px2vp"), panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Vp));
+    globalObj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "fp2px"), panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Fp2Px));
+    globalObj->Set(
+        vm, panda::StringRef::NewFromUtf8(vm, "px2fp"), panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Fp));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "lpx2px"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Lpx2Px));
+    globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "px2lpx"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), Px2Lpx));
+    JsBindWorkerViews(globalObj, nativeEngine);
 }
 
 } // namespace OHOS::Ace::Framework

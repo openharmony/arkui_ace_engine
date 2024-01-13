@@ -76,6 +76,7 @@ void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     } else {
         json->Put("edgeEffect", "EdgeEffect.None");
     }
+    json->Put("flingSpeedLimit", Dimension(maxFlingVelocity_, DimensionUnit::PX).ToString().c_str());
     auto JsonEdgeEffectOptions = JsonUtil::Create(true);
     JsonEdgeEffectOptions->Put("alwaysEnabled", GetAlwaysEnabled());
     json->Put("edgeEffectOptions", JsonEdgeEffectOptions);

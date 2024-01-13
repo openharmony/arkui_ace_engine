@@ -261,7 +261,7 @@ void RosenRenderFocusAnimation::PaintTVFocus(RSCanvas* canvas)
         width_ + MULTIPLE_FACTOR * padding - padding, height_ + MULTIPLE_FACTOR * padding - padding));
     canvas->Translate(offset_.GetX() - offsetValue / MULTIPLE_FACTOR, offset_.GetY() - offsetValue / MULTIPLE_FACTOR);
 
-    int32_t depthOfSavedStack = canvas->GetSaveCount();
+    int32_t depthOfSavedStack = static_cast<int32_t>(canvas->GetSaveCount());
     RSBrush layerBrush;
     layerBrush.SetAlpha(MAX_ALPHA);
     RSSaveLayerOps slo(rect.get(), &layerBrush);
