@@ -3151,14 +3151,17 @@ void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bo
     }
 }
 
-void OverlayManager::BindKeyboard(const std::function<void()>& keybordBuilder, int32_t targetId)
+void OverlayManager::BindKeyboard(const std::function<void()>& keyboardBuilder, int32_t targetId)
 {
     if (customKeyboardMap_.find(targetId) != customKeyboardMap_.end()) {
         return;
     }
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-    auto customKeyboard = KeyboardView::CreateKeyboard(targetId, keybordBuilder);
+    auto customKeyboard = KeyboardView::CreateKeyboard(targetId, keyboardBuilder);
+    if (!customKeyboard) {
+        return;
+    }
     customKeyboard->MountToParent(rootNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     customKeyboardMap_[targetId] = customKeyboard;
