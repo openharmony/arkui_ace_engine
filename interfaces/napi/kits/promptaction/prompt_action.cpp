@@ -55,6 +55,10 @@ bool ContainerIsService()
 bool ContainerIsScenceBoard()
 {
     auto container = Container::Current();
+    if (!container) {
+        container = Container::GetActive();
+    }
+
     return container && container->IsScenceBoardWindow();
 }
 #endif
