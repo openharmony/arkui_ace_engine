@@ -387,6 +387,14 @@ void FormManagerDelegate::AddFormSurfaceChangeCallback(OnFormSurfaceChangeCallba
     onFormSurfaceChangeCallback_ = std::move(callback);
 }
 
+void FormManagerDelegate::AddFormSurfaceDetachCallback(OnFormSurfaceDetachCallback&& callback)
+{
+    if (!callback || state_ == State::RELEASED) {
+        return;
+    }
+    onFormSurfaceDetachCallback_ = std::move(callback);
+}
+
 void FormManagerDelegate::AddFormLinkInfoUpdateCallback(OnFormLinkInfoUpdateCallback&& callback)
 {
     if (!callback || state_ == State::RELEASED) {
@@ -510,6 +518,13 @@ void FormManagerDelegate::RegisterRenderDelegateEvent()
         formManagerDelegate->OnFormSurfaceChange(width, height);
     };
     renderDelegate_->SetSurfaceChangeEventHandler(std::move(onSurfaceChangeHandler));
+
+    auto&& onSurfaceDetachHandler = [weak = WeakClaim(this)]() {
+        auto formManagerDelegate = weak.Upgrade();
+        CHECK_NULL_VOID(formManagerDelegate);
+        formManagerDelegate->OnFormSurfaceDetach();
+    };
+    renderDelegate_->SetSurfaceDetachEventHandler(std::move(onSurfaceDetachHandler));
 
     auto&& onFormLinkInfoUpdateHandler = [weak = WeakClaim(this)](const std::vector<std::string>& formLinkInfos) {
         auto formManagerDelegate = weak.Upgrade();
@@ -646,6 +661,13 @@ void FormManagerDelegate::OnFormSurfaceChange(float width, float height)
 {
     if (onFormSurfaceChangeCallback_) {
         onFormSurfaceChangeCallback_(width, height);
+    }
+}
+
+void FormManagerDelegate::OnFormSurfaceDetach()
+{
+    if (onFormSurfaceDetachCallback_) {
+        onFormSurfaceDetachCallback_();
     }
 }
 

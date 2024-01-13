@@ -254,6 +254,21 @@ void FormRenderer::OnSurfaceReuse(const OHOS::AppExecFwk::FormJsInfo& formJsInfo
     formRendererDelegate_->OnFormLinkInfoUpdate(cachedInfos_);
 }
 
+void FormRenderer::OnSurfaceDetach()
+{
+    if (!formRendererDelegate_) {
+        HILOG_ERROR("form renderer delegate is null!");
+        return;
+    }
+    auto rsSurfaceNode = uiContent_->GetFormRootNode();
+    if (rsSurfaceNode == nullptr) {
+        HILOG_ERROR("form renderer rsSurfaceNode is null!");
+        return;
+    }
+    HILOG_INFO("Form OnSurfaceDetach.");
+    formRendererDelegate_->OnSurfaceDetach(rsSurfaceNode->GetId());
+}
+
 void FormRenderer::OnActionEvent(const std::string& action)
 {
     if (!formRendererDelegate_) {
@@ -357,6 +372,7 @@ void FormRenderer::AttachForm(const OHOS::AAFwk::Want& want, const OHOS::AppExec
         return;
     }
     ParseWant(want);
+    OnSurfaceDetach();
     AttachUIContent(want, formJsInfo);
     SetRenderDelegate(proxy_);
     OnSurfaceReuse(formJsInfo);
