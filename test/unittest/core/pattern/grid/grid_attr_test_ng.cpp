@@ -1034,4 +1034,59 @@ HWTEST_F(GridAttrTestNg, LayoutOptions002, TestSize.Level1)
     EXPECT_TRUE(VerifyBigItemRect(4, RectF(0.f, ITEM_HEIGHT * 3, GRID_WIDTH, ITEM_HEIGHT)));
     EXPECT_TRUE(VerifyBigItemRect(5, RectF())); // out of view
 }
+
+/**
+ * @tc.name: GridItemDumpAdvanceInfoTest001
+ * @tc.desc: GirdItem dumpadvanceinfo test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestNg, GridItemDumpAdvanceInfoTest001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        model.SetRowsTemplate("1fr 1fr 1fr");
+        model.SetColumnsGap(Dimension(COL_GAP));
+        model.SetRowsGap(Dimension(ROW_GAP));
+        CreateColItem(10);
+    });
+
+    /**
+     * @tc.steps: step1. Get gridItemPattern and call dumpAdvanceInfo.
+     * @tc.expected: Related function is called.
+     */
+    auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
+    gridItemPattern->DumpAdvanceInfo();
+    EXPECT_EQ(gridItemPattern->gridItemStyle_, GridItemStyle::NONE);
+
+    gridItemPattern->gridItemStyle_ = GridItemStyle::PLAIN;
+    gridItemPattern->DumpAdvanceInfo();
+    EXPECT_EQ(gridItemPattern->gridItemStyle_, GridItemStyle::PLAIN);
+}
+
+/**
+ * @tc.name: GridItemSetSelectableTest001
+ * @tc.desc: GirdItem setselectable test.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridAttrTestNg, GridItemSetSelectableTest001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateColItem(20);
+    });
+
+    /**
+     * @tc.steps: step1. Get gridItemPattern.
+     */
+    auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
+
+    /**
+     * @tc.steps: step2. When gridItem is unSelectable isSelected_ and selectable_ is true.
+     * @tc.expected: gridItemPattern->selectable_ is false.
+     */
+    gridItemPattern->isSelected_ = true;
+    gridItemPattern->selectable_ = true;
+    gridItemPattern->SetSelectable(false);
+    EXPECT_FALSE(gridItemPattern->selectable_);
+}
 } // namespace OHOS::Ace::NG
