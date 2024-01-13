@@ -127,7 +127,7 @@ void JSNavigationStack::RemoveName(const std::string& name)
     if (dataSourceObj_->IsEmpty()) {
         return;
     }
-    auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("removeName"));
+    auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("removeByName"));
     JSRef<JSVal> params[1];
     params[0] = JSRef<JSVal>::Make(ToJSValue(name));
     func->Call(dataSourceObj_, 1, params);

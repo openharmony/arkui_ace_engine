@@ -166,6 +166,12 @@ void NavDestinationPattern::OnModifyDone()
         titleBarNode->SetActive(true);
         MountTitleBar(hostNode);
     }
+
+    auto navDesIndex = hostNode->GetIndex();
+    if (navDesIndex == 0) {
+        navDestinationLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+        titleBarLayoutProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
+    }
 }
 
 bool NavDestinationPattern::GetBackButtonState()
