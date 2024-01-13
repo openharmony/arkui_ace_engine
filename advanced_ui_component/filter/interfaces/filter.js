@@ -1396,8 +1396,8 @@ export class Filter extends ViewPU {
       this.twoLineModeItemNumRecord = [];
       this.downArrowShowState = [];
       for (let t = 0;t < this.multiFilters.length; t++) {
-        this.twoLineModeItemNum.push(new ObservedNumber(0));
-        this.twoLineModeItemNumRecord.push(new ObservedNumber(0));
+        this.twoLineModeItemNum.push(new ObservedNumber(this.multiFilters[t].options.length));
+        this.twoLineModeItemNumRecord.push(new ObservedNumber(this.multiFilters[t].options.length));
         this.downArrowShowState.push(new ObservedBoolean(!1))
       }
     }

@@ -699,8 +699,8 @@ export struct Filter {
       this.twoLineModeItemNumRecord = []
       this.downArrowShowState = []
       for (let i = 0; i < this.multiFilters.length; i++) {
-        this.twoLineModeItemNum.push(new ObservedNumber(0))
-        this.twoLineModeItemNumRecord.push(new ObservedNumber(0))
+        this.twoLineModeItemNum.push(new ObservedNumber(this.multiFilters[i].options.length))
+        this.twoLineModeItemNumRecord.push(new ObservedNumber(this.multiFilters[i].options.length))
         this.downArrowShowState.push(new ObservedBoolean(false))
       }
     }
