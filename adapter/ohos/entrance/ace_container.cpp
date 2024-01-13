@@ -607,7 +607,7 @@ void AceContainer::OnInactive(int32_t instanceId)
                 return;
             }
             pipelineContext->WindowFocus(false);
-            if (Container::Current()->IsScenceBoardWindow()) {
+            if (container->IsScenceBoardWindow()) {
                 JankFrameReport::GetInstance().FlushRecord();
             }
         },
