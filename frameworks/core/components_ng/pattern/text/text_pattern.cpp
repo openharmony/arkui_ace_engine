@@ -1032,12 +1032,14 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
     }
 
     CHECK_NULL_VOID(paragraph_);
-    auto end = -1;
-    if (IsSelected() || textSelector_.baseOffset != -1) {
-        end = paragraph_->GetGlyphIndexByCoordinate(textOffset);
+    auto start = textSelector_.baseOffset;
+    auto end = textSelector_.destinationOffset;
+    if (!IsSelected()) {
+        start = -1;
+        end = -1;
     }
     if (isMousePressed_ || oldMouseStatus == MouseStatus::MOVE) {
-        HandleSelectionChange(textSelector_.baseOffset, end);
+        HandleSelectionChange(start, end);
     }
 
     if (IsSelected() && oldMouseStatus == MouseStatus::MOVE && IsSelectedBindSelectionMenu()) {
