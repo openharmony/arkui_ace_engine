@@ -144,9 +144,11 @@ void ContentController::FilterTextInputStyle(bool& textChanged, std::string& res
             textChanged |= FilterWithAscii(result);
             break;
         }
-        case TextInputType::NUMBER_DECIMAL:
+        case TextInputType::NUMBER_DECIMAL: {
             textChanged |= FilterWithEvent(DIGIT_DECIMAL_WHITE_LIST, result);
             textChanged |= FilterWithDecimal(result);
+            break;
+        }
         default: {
             break;
         }
