@@ -3467,7 +3467,6 @@ export struct TreeViewInner {
         .onHover((isHover: boolean) => {
           if (isHover&& (!this.item.getIsSelected())) {
             this.item.setNodeColor($r('sys.color.ohos_id_color_hover'))
-            this.item.isSelected
           } else if （!this.item.getIsSelected()）{
             this.item.setNodeColor($r('sys.color.ohos_id_color_background_transparent'))
           }
