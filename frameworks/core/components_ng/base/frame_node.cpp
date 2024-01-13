@@ -849,7 +849,9 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         auto builderNode = builderFunc_();
         auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(true));
-        builderNode->MountToParent(columnNode);
+        if (builderNode) {
+            builderNode->MountToParent(columnNode);
+        }
         SetBackgroundLayoutConstraint(columnNode);
         renderContext_->CreateBackgroundPixelMap(columnNode);
         builderFunc_ = nullptr;
@@ -2823,7 +2825,9 @@ void FrameNode::SyncGeometryNode()
         auto builderNode = builderFunc_();
         auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(true));
-        builderNode->MountToParent(columnNode);
+        if (builderNode) {
+            builderNode->MountToParent(columnNode);
+        }
         SetBackgroundLayoutConstraint(columnNode);
         renderContext_->CreateBackgroundPixelMap(columnNode);
         builderFunc_ = nullptr;

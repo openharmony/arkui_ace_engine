@@ -357,7 +357,7 @@ public:
 
     void DeleteModal(int32_t targetId);
 
-    void BindKeyboard(const std::function<void()>& keybordBuilder, int32_t targetId);
+    void BindKeyboard(const std::function<void()>& keyboardBuilder, int32_t targetId);
     void CloseKeyboard(int32_t targetId);
     void DestroyKeyboard();
 
