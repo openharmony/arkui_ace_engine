@@ -1837,18 +1837,29 @@ class NavPathStack {
     }
     this.animated = animated;
   }
-  removeName(name) {
-    let removed = false;
-    for (let i = 0; i < this.pathArray.length; i++) {
-      if (this.pathArray[i].name === name) {
-        this.pathArray.splice(i, 1);
-        removed = true;
-      }
+  removeByIndexes(indexes) {
+    if (!Array.isArray(indexes) || indexes.length === 0) {
+      return 0;
     }
-    if (removed) {
+    let originLength = this.pathArray.length;
+    this.pathArray = this.pathArray.filter((item, index) => {
+      return item && !indexes.includes(index) });
+    let cnt = originLength - this.pathArray.length;
+    if (cnt > 0) {
       this.changeFlag = this.changeFlag + 1;
       this.isReplace = 0;
     }
+    return cnt;
+  }
+  removeByName(name) {
+    let originLength = this.pathArray.length;
+    this.pathArray = this.pathArray.filter(item => { return name != item.name });
+    let cnt = originLength - this.pathArray.length;
+    if (cnt > 0) {
+      this.changeFlag = this.changeFlag + 1;
+      this.isReplace = 0;
+    }
+    return cnt;
   }
   removeIndex(index) {
     if (index >= this.pathArray.length) {
