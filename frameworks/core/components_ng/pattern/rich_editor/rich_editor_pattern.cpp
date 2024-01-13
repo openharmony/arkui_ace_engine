@@ -445,11 +445,11 @@ int32_t RichEditorPattern::AddTextSpan(const TextSpanOptions& options, bool isPa
     record.afterCaretPosition =
         record.beforeCaretPosition + static_cast<int32_t>(StringUtils::ToWstring(options.value).length());
     AddOperationRecord(record);
-    return AddTextSpanOperation(options, isPaste, index);
+    return AddTextSpanOperation(options, isPaste, index, false, false);
 }
 
 int32_t RichEditorPattern::AddTextSpanOperation(
-    const TextSpanOptions& options, bool isPaste, int32_t index, bool needLeadingMargin)
+    const TextSpanOptions& options, bool isPaste, int32_t index, bool needLeadingMargin, bool updateCaretOPosition)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, -1);
@@ -515,10 +515,12 @@ int32_t RichEditorPattern::AddTextSpanOperation(
         auto tmpLongPressFunc = options.userGestureOption.onLongPress;
         spanItem->SetLongPressEvent(std::move(tmpLongPressFunc));
     }
-    if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
-        SetCaretPosition(options.offset.value() + 1 + moveLength_);
-    } else {
-        SetCaretPosition(GetTextContentLength());
+    if (updateCaretOPosition) {
+        if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
+            SetCaretPosition(options.offset.value() + 1 + moveLength_);
+        } else {
+            SetCaretPosition(GetTextContentLength());
+        }
     }
     if (!isPaste && textSelector_.IsValid()) {
         CloseSelectOverlay();
