@@ -32,7 +32,6 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
-#include "core/components_ng/pattern/option/option_view.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -589,7 +588,7 @@ void NavBarPattern::HandleOnDragUpdate(float offset)
     CHECK_NULL_VOID(titleNode);
     auto titlePattern = titleNode->GetPattern<TitleBarPattern>();
     CHECK_NULL_VOID(titlePattern);
-    titlePattern->SetTitleStyleByOffset(offset);
+    titlePattern->ProcessTitleDragUpdate(offset);
 }
 
 void NavBarPattern::HandleOnDragEnd()
