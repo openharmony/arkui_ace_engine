@@ -535,7 +535,7 @@ HWTEST_F(CalendarTestNg, CalendarTest005, TestSize.Level1)
     calendarModelNG.SetCalendarDay(calendarDay);
 
     auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay);
-    RSCanvas rsCanvas;
+    Testing::MockCanvas rsCanvas;
     paintMethod->DrawWeekAndDates(rsCanvas, Offset(0, 0));
     EXPECT_EQ(paintMethod->rowCount_, WEEKS_COUNT_SIX);
 }
@@ -606,7 +606,7 @@ HWTEST_F(CalendarTestNg, CalendarTest006, TestSize.Level1)
     calendarModelNG.SetCalendarDay(calendarDay);
 
     auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay);
-    RSCanvas rsCanvas;
+    Testing::MockCanvas rsCanvas;
     paintMethod->DrawWeekAndDates(rsCanvas, Offset(0, 0));
     EXPECT_EQ(paintMethod->rowCount_, WEEKS_COUNT_FIVE);
 }
@@ -699,7 +699,7 @@ HWTEST_F(CalendarTestNg, CalendarTest007, TestSize.Level1)
     calendarModelNG.SetCalendarDay(calendarDay);
 
     auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay);
-    RSCanvas rsCanvas;
+    Testing::MockCanvas rsCanvas;
     paintMethod->SetCalendarTheme(calendarPaintProperty);
     RSTextStyle dateTextStyle;
     RSTextStyle lunarTextStyle;
@@ -1329,7 +1329,7 @@ HWTEST_F(CalendarTestNg, CalendarPaintMethodTest002, TestSize.Level1)
     ObtainedMonth obtainedMonth;
     CalendarDay calendarDay;
     CalendarPaintMethod calendarPaintMethod(obtainedMonth, calendarDay);
-    RSCanvas rsCanvas;
+    Testing::MockCanvas rsCanvas;
     calendarPaintMethod.PaintContent(rsCanvas, calendarPaintProperty);
     EXPECT_TRUE(calendarPaintMethod.obtainedMonth_.days.empty());
     EXPECT_TRUE(calendarPaintMethod.calendarDays_.empty());
@@ -1349,7 +1349,7 @@ HWTEST_F(CalendarTestNg, CalendarPaintMethodTest003, TestSize.Level1)
     CalendarPaintMethod calendarPaintMethod(obtainedMonth, calendarDay);
     calendarPaintMethod.currentMonth_ = calendarMonth;
 
-    RSCanvas rsCanvas;
+    Testing::MockCanvas rsCanvas;
     calendarDay.focused = true;
     calendarPaintMethod.DrawCalendar(
         rsCanvas, Offset(OFFSET_X, OFFSET_Y), Offset(VALID_LENGTH, VALID_LENGTH), calendarDay);
@@ -1400,7 +1400,7 @@ HWTEST_F(CalendarTestNg, CalendarPaintMethodTest004, TestSize.Level1)
     CalendarPaintMethod calendarPaintMethod(obtainedMonth, calendarDay);
     calendarPaintMethod.currentMonth_ = calendarMonth;
 
-    RSCanvas rsCanvas;
+    Testing::MockCanvas rsCanvas;
     RSTextStyle rsTextStyle;
     calendarDay.dayMark.clear();
     calendarPaintMethod.showHoliday_ = false;
@@ -1525,7 +1525,7 @@ HWTEST_F(CalendarTestNg, CalendarPaintMethodTest005, TestSize.Level1)
     calendarModelNG.SetCalendarDay(calendarDay);
 
     auto paintMethod = AceType::MakeRefPtr<CalendarPaintMethod>(obtainedMonth, calendarDay);
-    RSCanvas rsCanvas;
+    Testing::MockCanvas rsCanvas;
     paintMethod->SetCalendarTheme(calendarPaintProperty);
 
     RSTextStyle workOffTextStyle;

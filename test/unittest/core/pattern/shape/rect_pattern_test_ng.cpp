@@ -19,6 +19,7 @@
 #define protected public
 
 #include "base_shape_pattern_test_ng.h"
+#include "test/mock/core/rosen/mock_canvas.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/radius.h"
@@ -79,7 +80,7 @@ public:
         auto contentDraw = paintMethod->GetContentDrawFunction(AceType::RawPtr(paintWrapper));
         EXPECT_EQ(contentDraw == nullptr, false);
         std::shared_ptr<SkCanvas> canvas = std::make_shared<SkCanvas>();
-        RSCanvas rsCavas(&canvas);
+        Testing::MockCanvas rsCavas(&canvas);
         contentDraw(rsCavas);
     }
 

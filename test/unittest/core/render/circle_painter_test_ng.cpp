@@ -12,14 +12,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 #include "base/utils/utils.h"
 #define protected public
 #define private public
-#include "core/components_ng/render/circle_painter.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
+#include "core/components_ng/render/circle_painter.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/shape_painter.h"
@@ -32,20 +34,19 @@ using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace {
-Dimension test {0, DimensionUnit::PX};
+Dimension test { 0, DimensionUnit::PX };
 
 float radius = 1;
 
-Testing::TestingCanvas testingCanvas;
+Testing::MockCanvas testingCanvas;
 Testing::TestingPen pen;
 
-const NG::OffsetF& DRAWOFFSET {1, 1};
+const NG::OffsetF& DRAWOFFSET { 1, 1 };
 
 NG::ShapePaintProperty shapePaintProperty;
-}
+} // namespace
 
-class CirclePainterTestNg : public testing::Test {
-};
+class CirclePainterTestNg : public testing::Test {};
 
 /**
  * @tc.name: CirclePainterTestNg001

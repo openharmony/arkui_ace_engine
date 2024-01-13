@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,6 +31,8 @@ enum class TileMode {
 };
 class TestingShaderEffect {
 public:
+    typedef uint32_t ColorQuad;
+    typedef float scalar;
     TestingShaderEffect() = default;
     ~TestingShaderEffect() = default;
 
@@ -44,6 +46,18 @@ public:
     static std::shared_ptr<TestingShaderEffect> CreateLinearGradient(const TestingPoint& /* startPt */,
         const TestingPoint& /* endPt */, const std::vector<uint32_t>& /* colors */, const std::vector<float>& /* pos */,
         TileMode /* mode */)
+    {
+        return std::make_shared<TestingShaderEffect>();
+    }
+
+    static std::shared_ptr<TestingShaderEffect> CreateRadialGradient(const TestingPoint& centerPt, scalar radius,
+        const std::vector<ColorQuad>& colors, const std::vector<scalar>& pos, TileMode mode)
+    {
+        return std::make_shared<TestingShaderEffect>();
+    }
+    static std::shared_ptr<TestingShaderEffect> CreateTwoPointConical(const TestingPoint& startPt, scalar startRadius,
+        const TestingPoint& endPt, scalar endRadius, const std::vector<ColorQuad>& colors,
+        const std::vector<scalar>& pos, TileMode mode, const TestingMatrix* matrix)
     {
         return std::make_shared<TestingShaderEffect>();
     }

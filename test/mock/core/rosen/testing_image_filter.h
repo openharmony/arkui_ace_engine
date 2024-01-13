@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 
 #include <memory>
 
+#include "test/mock/core/rosen/testing_color_filter.h"
 #include "testing_shader_effect.h"
 
 namespace OHOS::Ace::Testing {
@@ -32,11 +33,31 @@ enum class FilterType {
 
 class TestingImageFilter {
 public:
+    typedef float scalar;
     TestingImageFilter() = default;
     ~TestingImageFilter() = default;
 
     static std::shared_ptr<TestingImageFilter> CreateBlurImageFilter(
         float sigmaX, float sigmaY, TileMode mode, std::shared_ptr<TestingImageFilter> input)
+    {
+        return std::make_shared<TestingImageFilter>();
+    }
+
+    static std::shared_ptr<TestingImageFilter> CreateColorFilterImageFilter(
+        const TestingColorFilter& cf, std::shared_ptr<TestingImageFilter> input)
+    {
+        return std::make_shared<TestingImageFilter>();
+    }
+
+    static std::shared_ptr<TestingImageFilter> CreateArithmeticImageFilter(const std::vector<scalar>& coefficients,
+        bool enforcePMColor, std::shared_ptr<TestingImageFilter> background,
+        std::shared_ptr<TestingImageFilter> foreground)
+    {
+        return std::make_shared<TestingImageFilter>();
+    }
+
+    static std::shared_ptr<TestingImageFilter> CreateOffsetImageFilter(
+        scalar dx, scalar dy, std::shared_ptr<TestingImageFilter> input)
     {
         return std::make_shared<TestingImageFilter>();
     }
