@@ -3465,9 +3465,10 @@ export struct TreeViewInner {
         }
         .opacity(this.listNodeDataSource.getListItemOpacity(this.item))
         .onHover((isHover: boolean) => {
-          if (isHover) {
+          if (isHover&& (!this.item.getIsSelected())) {
             this.item.setNodeColor($r('sys.color.ohos_id_color_hover'))
-          } else {
+            this.item.isSelected
+          } else if （!this.item.getIsSelected()）{
             this.item.setNodeColor($r('sys.color.ohos_id_color_background_transparent'))
           }
         })
