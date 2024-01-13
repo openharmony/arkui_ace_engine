@@ -180,7 +180,7 @@ public:
         checkBoxShape_->Set(static_cast<int32_t>(checkBoxStyle));
     }
 
-    void SetHoverEffectType(const HoverEffectType hoverEffectType)
+    void SetHoverEffectType(HoverEffectType hoverEffectType)
     {
         hoverEffectType_ = hoverEffectType;
     }
