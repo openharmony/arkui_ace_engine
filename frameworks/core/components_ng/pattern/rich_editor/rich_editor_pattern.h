@@ -283,7 +283,8 @@ public:
 
     void ResetLastClickOffset()
     {
-        lastClickOffset_.Reset();
+        lastClickOffset_.SetX(-1);
+        lastClickOffset_.SetY(-1);
     }
 
     int32_t GetCaretSpanIndex()
