@@ -89,6 +89,8 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         json->Put("fontStyle", GetFontStyleInJson(fontStyle->GetItalicFontStyle()).c_str());
         json->Put("fontWeight", GetFontWeightInJson(fontStyle->GetFontWeight()).c_str());
         json->Put("fontFamily", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str());
+        json->Put("renderingStrategy", GetSymbolRenderingStrategyInJson(fontStyle->GetSymbolRenderStrategy()).c_str());
+        json->Put("effectStrategy", GetSymbolEffectStrategyInJson(fontStyle->GetSymbolEffectStrategy()).c_str());
 
         auto shadow = fontStyle->GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
         // Determines if there are multiple textShadows
