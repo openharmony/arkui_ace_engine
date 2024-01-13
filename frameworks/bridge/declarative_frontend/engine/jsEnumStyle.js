@@ -1853,7 +1853,7 @@ class NavPathStack {
   }
   removeByName(name) {
     let originLength = this.pathArray.length;
-    this.pathArray = this.pathArray.filter(item => { return name != item.name });
+    this.pathArray = this.pathArray.filter(item => { return name !== item.name });
     let cnt = originLength - this.pathArray.length;
     if (cnt > 0) {
       this.changeFlag = this.changeFlag + 1;
