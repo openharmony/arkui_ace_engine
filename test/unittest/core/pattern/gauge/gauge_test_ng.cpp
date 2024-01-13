@@ -1086,19 +1086,20 @@ HWTEST_F(GaugeTestNg, NewPaint001, TestSize.Level1)
     GaugeModelNG gauge;
     gauge.Create(VALUE, MIN, MAX);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
     auto gaugePattern = frameNode->GetPattern<GaugePattern>();
+    ASSERT_NE(gaugePattern, nullptr);
     auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
+    ASSERT_NE(gaugePaintProperty, nullptr);
     auto nodePaintMethod = gaugePattern->CreateNodePaintMethod();
+    ASSERT_NE(nodePaintMethod, nullptr);
     auto gaugePaint = AceType::DynamicCast<GaugePaintMethod>(nodePaintMethod);
+    ASSERT_NE(gaugePaint, nullptr);
     RefPtr<RenderContext> rendercontext;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
     auto* paintwrapper = new PaintWrapper(rendercontext, geometryNode, gaugePaintProperty);
     EXPECT_NE(paintwrapper, nullptr);
-    gaugePaint->UpdateContentModifier(paintwrapper);
-    std::vector<RSColorQuad> colors;
-    std::vector<float> pos;
-    gaugePaint->CreateDefaultColor(colors, pos);
     Testing::MockCanvas rsCanvas;
     EXPECT_CALL(rsCanvas, AttachPen(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
@@ -1307,13 +1308,6 @@ HWTEST_F(GaugeTestNg, Measure001, TestSize.Level1)
     RefPtr<ImageLoadingContext> indicatorIconLoadingCtx;
     auto gaugeLayoutAlgorithm = AceType::MakeRefPtr<GaugeLayoutAlgorithm>(indicatorIconLoadingCtx);
     ASSERT_NE(gaugeLayoutAlgorithm, nullptr);
-
-    PaddingPropertyF padding;
-    padding.left = 20.0f;
-    padding.top = 20.0f;
-    geometryNode->UpdatePaddingWithBorder(padding);
-    geometryNode->SetContentOffset(OffsetF(50, 50));
-    
     auto layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(gaugeLayoutAlgorithm));
@@ -1391,7 +1385,6 @@ HWTEST_F(GaugeTestNg, SetLimitFontSize001, TestSize.Level1)
     gauge.Create(VALUE, MIN, MAX);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     auto gaugePattern = frameNode->GetPattern<GaugePattern>();
-    ASSERT_NE(gaugePattern, nullptr);
 
     /**
      * @tc.steps: step2. Create LayoutWrapperNode.
@@ -1400,8 +1393,6 @@ HWTEST_F(GaugeTestNg, SetLimitFontSize001, TestSize.Level1)
     EXPECT_NE(geometryNode, nullptr);
     RefPtr<ImageLoadingContext> indicatorIconLoadingCtx;
     auto gaugeLayoutAlgorithm = AceType::MakeRefPtr<GaugeLayoutAlgorithm>(indicatorIconLoadingCtx);
-    ASSERT_NE(gaugeLayoutAlgorithm, nullptr);
-
     auto layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(gaugeLayoutAlgorithm));
@@ -1441,7 +1432,6 @@ HWTEST_F(GaugeTestNg, SetLimitFontSize001, TestSize.Level1)
      * @tc.steps: step3. Set version restrictions.
      */
     auto pipeline = PipelineBase::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
     pipeline->SetMinPlatformVersion(VERSION);
 
     /**
@@ -1546,7 +1536,6 @@ HWTEST_F(GaugeTestNg, Layout002, TestSize.Level1)
      * @tc.steps: step1. Set version restrictions.
      */
     auto pipeline = PipelineBase::GetCurrentContext();
-    ASSERT_NE(pipeline, nullptr);
     pipeline->SetMinPlatformVersion(VERSION_TEST);
 
     /**
@@ -1555,12 +1544,8 @@ HWTEST_F(GaugeTestNg, Layout002, TestSize.Level1)
     GaugeModelNG gauge;
     gauge.Create(VALUE, MIN, MAX);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
     auto gaugePattern = frameNode->GetPattern<GaugePattern>();
-    ASSERT_NE(gaugePattern, nullptr);
-
     auto layoutProperty = frameNode->GetLayoutProperty<GaugeLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
 
     /**
      * @tc.steps: step3. Create LayoutWrapperNode.
@@ -2005,8 +1990,6 @@ HWTEST_F(GaugeTestNg, GaugeModelNGTest003, TestSize.Level1)
     gauge.Create(VALUE, MIN, MAX);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-
     GaugeShadowOptions shadowOptions;
     gauge.SetShadowOptions(Referenced::RawPtr(frameNode), shadowOptions);
 
@@ -2037,7 +2020,6 @@ HWTEST_F(GaugeTestNg, GaugeModelNGTest003, TestSize.Level1)
      * @tc.expected: step2. check whether the properties is correct.
      */
     auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
-    ASSERT_NE(gaugePaintProperty, nullptr);
     EXPECT_EQ(gaugePaintProperty->GetShadowOptionsValue(), shadowOptions);
     EXPECT_EQ(gaugePaintProperty->GetGradientColorsValue(), colors);
     EXPECT_EQ(gaugePaintProperty->GetValuesValue(), values);
@@ -2064,6 +2046,7 @@ HWTEST_F(GaugeTestNg, GaugeModelNGTest003, TestSize.Level1)
     EXPECT_FALSE(gaugePaintProperty->HasIndicatorIconSourceInfo());
     EXPECT_FALSE(gaugePaintProperty->HasShadowOptions());
 }
+
 /**
  * @tc.name: GaugeModelNGTest004
  * @tc.desc: Test GaugeModelNG  SetIsShowIndicator SetDescription SetIsShowLimitValue SetIsShowDescription
@@ -2078,8 +2061,6 @@ HWTEST_F(GaugeTestNg, GaugeModelNGTest004, TestSize.Level1)
     gauge.Create(VALUE, MIN, MAX);
 
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-
     auto nodePtr = Referenced::RawPtr(frameNode);
     gauge.SetValue(nodePtr, NEW_VALUE);
     gauge.SetStartAngle(nodePtr, START_ANGLE);
