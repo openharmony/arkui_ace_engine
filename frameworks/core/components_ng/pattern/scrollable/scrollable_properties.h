@@ -20,6 +20,7 @@
 #include <optional>
 
 #include "base/geometry/dimension.h"
+#include "core/components_ng/base/frame_scene_status.h"
 
 namespace OHOS::Ace {
 constexpr float DEFAULT_SCROLL_TO_MASS = 1.0f;
@@ -130,6 +131,7 @@ using ScrollEndCallback = std::function<void()>;
 using CalePredictSnapOffsetCallback =
                 std::function<std::optional<float>(float delta, float dragDistance, float velocity)>;
 using StartScrollSnapMotionCallback = std::function<void(float scrollSnapDelta, float scrollSnapVelocity)>;
+using ScrollBarFRCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 } // namespace OHOS::Ace
 
 #endif

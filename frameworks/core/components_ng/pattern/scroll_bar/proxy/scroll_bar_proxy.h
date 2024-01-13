@@ -32,6 +32,7 @@ struct ScrollableNodeInfo {
     std::function<void()> scrollEndCallback;
     CalePredictSnapOffsetCallback calePredictSnapOffsetCallback;
     StartScrollSnapMotionCallback startScrollSnapMotionCallback;
+    ScrollBarFRCallback scrollbarFRcallback;
 
     bool operator==(const ScrollableNodeInfo& info) const
     {
