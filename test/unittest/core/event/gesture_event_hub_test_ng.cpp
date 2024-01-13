@@ -1224,71 +1224,6 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest0181, TestSize.Level1)
 }
 
 /**
- * @tc.name: GestureEventHubTest0182
- * @tc.desc: Test HandleOnDragStart
- * @tc.type: FUNC
- */
-HWTEST_F(GestureEventHubTestNg, GestureEventHubTest0182, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create GestureEventHub.
-     * @tc.expected: gestureEventHub is not null.
-     */
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    EXPECT_TRUE(eventHub);
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::RICH_EDITOR_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
-
-    /**
-     * @tc.steps: step2. update the input parameter attributes.
-     */
-    void* voidPtr = static_cast<void*>(new char[0]);
-    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
-    DragDropInfo dragDropInfo;
-    dragDropInfo.pixelMap = pixelMap;
-    frameNode->SetDragPreview(dragDropInfo);
-
-    auto hostPattern = frameNode->GetPattern<TextDragBase>();
-    EXPECT_TRUE(hostPattern);
-
-    eventHub->AttachHost(frameNode);
-    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-    EXPECT_TRUE(gestureEventHub);
-
-    RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto onDragStart = [&customNode](
-                           const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */, const std::string& /* param */) {
-        DragDropInfo dragDropInfo;
-        dragDropInfo.customNode = customNode;
-        return dragDropInfo;
-    };
-    eventHub->SetOnDragStart(std::move(onDragStart));
-
-    auto eventManager = AceType::MakeRefPtr<EventManager>();
-    EXPECT_TRUE(eventManager);
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    pipeline->SetEventManager(eventManager);
-    eventManager->SetLastMoveBeforeUp(false);
-
-    /**
-     * @tc.steps: step3. call HandleOnDragStart with SourceType::MOUSE and InputEventType::TOUCH_SCREEN.
-     * @tc.expected: eventManager->IsLastMoveBeforeUp() the return value is false.
-     */
-    GestureEvent gestureEvent;
-    gestureEvent.SetSourceDevice(SourceType::MOUSE);
-    gestureEvent.SetInputEventType(InputEventType::TOUCH_SCREEN);
-    auto dragEvent = AceType::MakeRefPtr<DragEvent>([](GestureEvent& info) {}, [](GestureEvent& info) {},
-        [](GestureEvent& info) {}, []() {});
-    PanDirection panDirection;
-    Dimension dimension;
-    gestureEventHub->dragEventActuator_ = AceType::MakeRefPtr<DragEventActuator>(
-        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), panDirection, FINGERS, dimension.ConvertToPx());
-    ASSERT_NE(gestureEventHub->dragEventActuator_, nullptr);
-    gestureEventHub->HandleOnDragStart(gestureEvent);
-    EXPECT_FALSE(eventManager->IsLastMoveBeforeUp());
-}
-
-/**
  * @tc.name: GestureEventHubTest0183
  * @tc.desc: Test HandleOnDragStart
  * @tc.type: FUNC
@@ -1603,68 +1538,6 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest022, TestSize.Level1)
     dragDropManager->SetIsDragged(false);
     gestureEventHub->HandleOnDragUpdate(info);
     EXPECT_FALSE(dragDropManager->IsDragged());
-}
-
-/**
- * @tc.name: GestureEventHubTest023
- * @tc.desc: Test OnDragStart
- * @tc.type: FUNC
- */
-HWTEST_F(GestureEventHubTestNg, GestureEventHubTest023, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create GestureEventHub.
-     * @tc.expected: gestureEventHub is not null.
-     */
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    EXPECT_TRUE(eventHub);
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    eventHub->AttachHost(frameNode);
-    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-    EXPECT_TRUE(gestureEventHub);
-
-    /**
-     * @tc.steps: step2. Update the input parameter attributes.
-     */
-    auto EventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
-    EXPECT_TRUE(EventHub);
-    auto frameNodeOfEvent = EventHub->GetFrameNode();
-    EXPECT_TRUE(frameNodeOfEvent);
-    RefPtr<OHOS::Ace::DragEvent> event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
-
-    void* voidPtr = static_cast<void*>(new char[0]);
-    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
-    DragDropInfo dragDropInfo;
-    dragDropInfo.pixelMap = pixelMap;
-
-    constexpr int64_t PROXY_ID_NOT_FIT = 101;
-    auto dragDropProxy = AceType::MakeRefPtr<DragDropProxy>(PROXY_ID_NOT_FIT);
-    gestureEventHub->dragDropProxy_ = dragDropProxy;
-
-    /**
-     * @tc.steps: step3. call OnDragStart.
-     * @tc.expected: gestureEventHub->dragDropProxy_ is true.
-     */
-    GestureEvent info;
-    auto pipline = PipelineContext::GetCurrentContext();
-    auto dragEvent = AceType::MakeRefPtr<DragEvent>([](GestureEvent& info) {}, [](GestureEvent& info) {},
-        [](GestureEvent& info) {}, []() {});
-    PanDirection panDirection;
-    Dimension dimension;
-    gestureEventHub->dragEventActuator_ = AceType::MakeRefPtr<DragEventActuator>(
-        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), panDirection, FINGERS, dimension.ConvertToPx());
-    ASSERT_NE(gestureEventHub->dragEventActuator_, nullptr);
-    gestureEventHub->OnDragStart(info, pipline, frameNode, dragDropInfo, event);
-    EXPECT_TRUE(gestureEventHub->dragDropProxy_);
-
-    /**
-     * @tc.steps: step4. call OnDragStart with dragDropInfo the propertys is nullptr.
-     * @tc.expected: gestureEventHub->dragDropProxy_ is false.
-     */
-    dragDropInfo.customNode = nullptr;
-    dragDropInfo.pixelMap = nullptr;
-    gestureEventHub->OnDragStart(info, pipline, frameNode, dragDropInfo, event);
-    EXPECT_TRUE(gestureEventHub->dragDropProxy_);
 }
 
 /**
@@ -2072,5 +1945,277 @@ HWTEST_F(GestureEventHubTestNg, GetHitTestModeStr001, TestSize.Level1)
      * @tc.expected: EventHub ->GetHitTestModeStr() is not equal to nullptr
      */
     EXPECT_TRUE(testModeStr != EventHub->GetHitTestModeStr());
+}
+
+/**
+ * @tc.name: HandleOnDragUpdate001
+ * @tc.desc: Test Functions related with drag
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, HandleOnDragUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create guestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("MyButton", 102, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    auto eventHub = guestureEventHub->eventHub_.Upgrade();
+    eventHub->AttachHost(frameNode);
+    ASSERT_NE(eventHub, nullptr);
+
+    auto pipline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipline, nullptr);
+
+    /**
+     * @tc.steps: step2. call HandleOnDragStart
+     *            case: eventHub->HasOnDragStart() is null
+     * @tc.expected: dragDropProxy_ is null.
+     */
+    GestureEvent info;
+    info.SetSourceDevice(SourceType::MOUSE);
+    guestureEventHub->HandleOnDragStart(info);
+    EXPECT_EQ(guestureEventHub->dragDropProxy_, nullptr);
+    /**
+     * @tc.steps: step3. set OnDragStart for eventHub
+     *            after that eventHub->HasOnDragStart() is not null
+     *            case: dragDropInfo.customNode is not null
+     */
+    RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto onDragStart = [&customNode](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) {
+        DragDropInfo dragDropInfo;
+        dragDropInfo.customNode = customNode;
+        return dragDropInfo;
+    };
+    eventHub->SetOnDragStart(std::move(onDragStart));
+
+    /**
+     * @tc.steps: step4. call HandleOnDragStart
+     *            case: dragDropInfo.customNode is not null
+     * @tc.expected: dragDropProxy_ is null.
+     */
+    guestureEventHub->HandleOnDragStart(info);
+    EXPECT_EQ(guestureEventHub->dragDropProxy_, nullptr);
+
+    /**
+     * @tc.steps: step5. call HandleOnDragEnd
+     *            case: eventHub->HasOnDrop() is true
+     * @tc.expected: dragDropProxy_ is null
+     *               onDrop has been called, msg1 = CHECK_TAG_1
+     */
+    std::string msg1;
+    auto onDrop = [&msg1](const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */, const std::string& /* param */) {
+        msg1 = CHECK_TAG_1;
+    };
+    eventHub->SetOnDrop(std::move(onDrop));
+    guestureEventHub->HandleOnDragStart(info);
+    guestureEventHub->HandleOnDragEnd(info);
+    EXPECT_EQ(guestureEventHub->dragDropProxy_, nullptr);
+    EXPECT_EQ(msg1, "HELLO");
+}
+
+/**
+ * @tc.name: HandleOnDragUpdate002
+ * @tc.desc: Test Functions related with drag
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, HandleOnDragUpdate002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::RICH_EDITOR_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+
+    /**
+     * @tc.steps: step2. update the input parameter attributes.
+     */
+    RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    DragDropInfo dragDropInfo;
+    dragDropInfo.customNode = customNode;
+    frameNode->SetDragPreview(dragDropInfo);
+
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    ASSERT_NE(gestureEventHub, nullptr);
+
+    auto onDragStart = [&customNode](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) {
+        DragDropInfo dragDropInfo;
+        dragDropInfo.customNode = customNode;
+        return dragDropInfo;
+    };
+    eventHub->SetOnDragStart(std::move(onDragStart));
+
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    pipeline->SetEventManager(eventManager);
+    eventManager->SetLastMoveBeforeUp(false);
+
+    /**
+     * @tc.steps: step3. call HandleOnDragStart with SourceType::MOUSE and InputEventType::TOUCH_SCREEN.
+     * @tc.expected: eventManager->IsLastMoveBeforeUp() the return value is false.
+     */
+    GestureEvent gestureEvent;
+    gestureEvent.SetSourceDevice(SourceType::MOUSE);
+    gestureEvent.SetInputEventType(InputEventType::MOUSE_BUTTON);
+    gestureEventHub->HandleOnDragStart(gestureEvent);
+    EXPECT_FALSE(eventManager->IsLastMoveBeforeUp());
+}
+
+/**
+ * @tc.name: HandleOnDragUpdate003
+ * @tc.desc: Test Functions related with drag
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, HandleOnDragUpdate003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::WEB_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    auto eventHub = guestureEventHub->eventHub_.Upgrade();
+    eventHub->AttachHost(frameNode);
+    ASSERT_NE(eventHub, nullptr);
+
+    auto pipline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipline, nullptr);
+
+    pipline->SetupRootElement();
+    pipline->onVisibleAreaChangeNodeIds_.clear();
+    pipline->AddOnAreaChangeNode(frameNode->GetId());
+
+    RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    auto onDragStart = [&customNode](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) {
+        void* voidPtr = static_cast<void*>(new char[0]);
+        RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
+        DragDropInfo dragDropInfo;
+        dragDropInfo.customNode = customNode;
+        return dragDropInfo;
+    };
+    eventHub->SetOnDragStart(std::move(onDragStart));
+
+    GestureEvent info;
+    info.SetSourceDevice(SourceType::MOUSE);
+    info.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    guestureEventHub->HandleOnDragStart(info);
+    EXPECT_EQ(guestureEventHub->dragDropProxy_, nullptr);
+}
+
+/**
+ * @tc.name: GestureEventHubTest032
+ * @tc.desc: Test ProcessTouchTestHierarchy
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GestureEventHubTest032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    EXPECT_TRUE(eventHub);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+    EXPECT_TRUE(gestureEventHub);
+
+    /**
+     * @tc.steps: step2. call ProcessTouchTestHierarchy
+     *            case: innerRecognizers & gestureHierarchy_ is empty, current is null
+     * @tc.expected: finalResult is empty
+     */
+    TouchRestrict touchRestrict;
+    std::list<RefPtr<NGGestureRecognizer>> innerTargets;
+    TouchTestResult finalResult;
+
+    /**
+     * @tc.steps: step3. call externalExclusiveRecognizer_
+     *            case: innerRecognizers & gestureHierarchy_ is empty, current is null
+     * @tc.expected: finalResult is empty
+     */
+    gestureEventHub->externalExclusiveRecognizer_.push_back(nullptr);
+    gestureEventHub->externalParallelRecognizer_.push_back(nullptr);
+    EXPECT_EQ(static_cast<int32_t>(gestureEventHub->externalExclusiveRecognizer_.size()), 1);
+    EXPECT_EQ(static_cast<int32_t>(gestureEventHub->externalParallelRecognizer_.size()), 1);
+
+    /**
+     * @tc.steps: step4. call ProcessTouchTestHierarchy
+     *            case: innerRecognizers & gestureHierarchy_ is empty, current is null
+     * @tc.expected: finalResult is empty
+     */
+    gestureEventHub->ProcessTouchTestHierarchy(
+        COORDINATE_OFFSET, touchRestrict, innerTargets, finalResult, TOUCH_ID, nullptr);
+    EXPECT_TRUE(finalResult.empty());
+}
+
+/**
+ * @tc.name: GetPixelMapScale001
+ * @tc.desc: Test GetPixelMapScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, GetPixelMapScale001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
+
+    /**
+     * @tc.steps: step2. construct a dragDropProxy and update gestureEventHub attributes.
+     */
+    constexpr int64_t PROXY_ID_NOT_FIT = 101;
+    auto dragDropProxy = AceType::MakeRefPtr<DragDropProxy>(PROXY_ID_NOT_FIT);
+    gestureEventHub->dragDropProxy_ = dragDropProxy;
+
+    /**
+     * @tc.steps: step3. call HandleOnDragUpdate with GestureEvent.
+     * @tc.expected: gestureEventHub->dragDropProxy_ is true.
+     */
+    GestureEvent info;
+    gestureEventHub->HandleOnDragUpdate(info);
+
+    /**
+     * @tc.steps: step4. call GetPixelMapScale.
+     * @tc.expected: scale is true.
+     */
+    const int32_t height = 600.0f;
+    const int32_t width = 500.0f;
+    float scale = gestureEventHub->GetPixelMapScale(height, width);
+    EXPECT_TRUE(scale);
+}
+
+/**
+ * @tc.name: IsPixelMapNeedScale001
+ * @tc.desc: Test IsPixelMapNeedScale
+ * @tc.type: FUNC
+ */
+HWTEST_F(GestureEventHubTestNg, IsPixelMapNeedScale001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create guestureEventHub.
+     * @tc.expected: gestureEventHub is not null.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("mybutton", -1, AceType::MakeRefPtr<Pattern>());
+    auto guestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(guestureEventHub, nullptr);
+    auto eventHub = guestureEventHub->eventHub_.Upgrade();
+    eventHub->AttachHost(frameNode);
+    ASSERT_NE(eventHub, nullptr);
+
+    auto pipline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipline, nullptr);
+
+    void* voidPtr2 = static_cast<void*>(new char[0]);
+    RefPtr<PixelMap> pixelMap2 = PixelMap::CreatePixelMap(voidPtr2);
+    guestureEventHub->SetPixelMap(pixelMap2);
+
+    bool result = guestureEventHub->IsPixelMapNeedScale();
+    EXPECT_FALSE(result);
 }
 } // namespace OHOS::Ace::NG
