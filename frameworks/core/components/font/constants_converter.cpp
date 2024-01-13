@@ -521,7 +521,7 @@ void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
         txtStyle.isSymbolGlyph = true;
         const std::vector<Color>& symbolColor = textStyle.GetSymbolColorList();
         std::vector<Rosen::Drawing::Color> symbolColors;
-        for (int i = 0; i < symbolColor.size(); i++) {
+        for (size_t i = 0; i < symbolColor.size(); i++) {
             symbolColors.emplace_back(ConvertSkColor(symbolColor[i]));
         }
         txtStyle.symbol.SetRenderColor(symbolColors);
