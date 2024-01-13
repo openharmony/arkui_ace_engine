@@ -227,7 +227,7 @@ void RosenRenderSurface::DrawBuffer()
             Rosen::DrawingSurfaceBufferInfo info {surfaceNode->buffer_, surfaceNode->orgin_.GetX(),
                 surfaceNode->orgin_.GetY(), surfaceNode->buffer_->GetSurfaceBufferWidth(),
                 surfaceNode->buffer_->GetSurfaceBufferHeight()};
-            auto* recordingCanvas = static_cast<Rosen::Drawing::RecordingCanvas*>(canvas.get());
+            auto* recordingCanvas = static_cast<RSRecordingCanvas*>(canvas.get());
             CHECK_NULL_VOID(recordingCanvas);
             recordingCanvas->DrawSurfaceBuffer(info);
 #endif
@@ -370,7 +370,7 @@ void RosenRenderSurface::DrawBufferForXComponent(RSCanvas& canvas, float width, 
         static_cast<int32_t>(height) };
     recordingCanvas->DrawSurfaceBuffer(info);
 #else
-    auto& recordingCanvas = static_cast<Rosen::Drawing::RecordingCanvas&>(canvas);
+    auto& recordingCanvas = static_cast<RSRecordingCanvas&>(canvas);
     Rosen::DrawingSurfaceBufferInfo info {surfaceNode->buffer_, 0, 0, static_cast<int32_t>(width),
         static_cast<int32_t>(height)};
     recordingCanvas.DrawSurfaceBuffer(info);
