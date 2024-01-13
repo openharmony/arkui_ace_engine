@@ -2712,4 +2712,79 @@ HWTEST_F(GridLayoutTestNg, PaintEdgeEffect001, TestSize.Level1)
     paintMethod->PaintEdgeEffect(&paintWrapper, rsCanvas);
     EXPECT_NE(paintMethod->edgeEffect_.Upgrade(), nullptr);
 }
+
+/**
+ * @tc.name: GridScrollTest006
+ * @tc.desc: Test SetOnScrollBarUpdate Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GridScrollTest006, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        ScrollBarUpdateFunc scrollFunc = [](int32_t index, Dimension offset) {
+            std::optional<float> horizontalOffset = offset.ConvertToPx();
+            std::optional<float> verticalOffset = offset.ConvertToPx();
+            return std::make_pair(horizontalOffset, verticalOffset);
+        };
+        model.SetRowsTemplate("1fr 1fr");
+        CreateColItem(2);
+        model.SetGridHeight(Dimension(5));
+        model.SetScrollBarMode(DisplayMode::AUTO);
+        model.SetScrollBarColor("#FF0000");
+        model.SetScrollBarWidth("10vp");
+        model.SetIsRTL(TextDirection::LTR);
+
+        NestedScrollOptions nestedOpt;
+        model.SetNestedScroll(std::move(nestedOpt));
+        ScrollToIndexFunc value;
+        model.SetOnScrollToIndex(std::move(value));
+    });
+    auto paintProperty = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
+    EXPECT_EQ(paintProperty->GetBarStateString(), "BarState.Auto");
+
+    auto pattern = frameNode_->GetPattern<GridPattern>();
+    EXPECT_TRUE(pattern->isConfigScrollable_);
+    auto eventHub = frameNode_->GetEventHub<GridEventHub>();
+    EXPECT_FALSE(eventHub->onScrollToIndex_);
+}
+
+/**
+ * @tc.name: GridSCroll001
+ * @tc.desc: Test SetSelected Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GridSCroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GridItemModelNG object
+     */
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr");
+        GridItemModelNG itemModel;
+        itemModel.Create(GridItemStyle::NONE);
+        itemModel.SetRowStart(NULL_VALUE);
+        itemModel.SetRowEnd(NULL_VALUE);
+        itemModel.SetColumnStart(NULL_VALUE);
+        itemModel.SetColumnEnd(NULL_VALUE);
+        ViewStackProcessor::GetInstance()->Pop();
+
+        /**
+         * @tc.steps: step2. Test Create function
+         */
+        std::function<void(int32_t)> deepRenderFunc = [](int32_t innerNodeId) {};
+        bool isLazy = true;
+        itemModel.Create(std::move(deepRenderFunc), isLazy, GridItemStyle::PLAIN);
+
+        /**
+         * @tc.steps: step3. invoke SetSelected function
+         */
+        itemModel.SetSelected(true);
+    });
+
+    /**
+     * @tc.expected: gridItemPattern->isSelected_ is true
+     */
+    auto gridItemPattern = frameNode_->GetPattern<GridItemPattern>();
+    EXPECT_TRUE(gridItemPattern->isSelected_);
+}
 } // namespace OHOS::Ace::NG
