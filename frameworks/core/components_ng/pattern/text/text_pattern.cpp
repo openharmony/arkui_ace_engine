@@ -1616,6 +1616,7 @@ ResultObject TextPattern::GetSymbolSpanResultObject(RefPtr<UINode> uinode, int32
         resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = end - startPosition;
     }
     if (selectFlag) {
+        resultObject.valueResource = spanItem->GetResourceObject();
         resultObject.spanPosition.spanIndex = index;
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
