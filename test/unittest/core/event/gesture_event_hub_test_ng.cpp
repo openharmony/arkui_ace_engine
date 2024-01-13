@@ -1976,15 +1976,14 @@ HWTEST_F(GestureEventHubTestNg, HandleOnDragUpdate001, TestSize.Level1)
     GestureEvent info;
     info.SetSourceDevice(SourceType::MOUSE);
     guestureEventHub->HandleOnDragStart(info);
-    EXPECT_EQ(gestureEventHub->dragDropProxy_, nullptr);
+    EXPECT_EQ(guestureEventHub->dragDropProxy_, nullptr);
     /**
      * @tc.steps: step3. set OnDragStart for eventHub
      *            after that eventHub->HasOnDragStart() is not null
      *            case: dragDropInfo.customNode is not null
      */
     RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto onDragStart = [&customNode](
-                           const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */, const std::string& /* param */) {
+    auto onDragStart = [&customNode](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) {
         DragDropInfo dragDropInfo;
         dragDropInfo.customNode = customNode;
         return dragDropInfo;
@@ -1997,7 +1996,7 @@ HWTEST_F(GestureEventHubTestNg, HandleOnDragUpdate001, TestSize.Level1)
      * @tc.expected: dragDropProxy_ is null.
      */
     guestureEventHub->HandleOnDragStart(info);
-    EXPECT_EQ(gestureEventHub->dragDropProxy_, nullptr);
+    EXPECT_EQ(guestureEventHub->dragDropProxy_, nullptr);
 
     /**
      * @tc.steps: step5. call HandleOnDragEnd
@@ -2090,31 +2089,18 @@ HWTEST_F(GestureEventHubTestNg, HandleOnDragUpdate003, TestSize.Level1)
     pipline->AddOnAreaChangeNode(frameNode->GetId());
 
     RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto onDragStart = [&customNode](RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */, const std::string& /* param */) {
+    auto onDragStart = [&customNode](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) {
         void* voidPtr = static_cast<void*>(new char[0]);
         RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
         DragDropInfo dragDropInfo;
         dragDropInfo.customNode = customNode;
-        dragDropInfo.pixelMap = pixelMap;
         return dragDropInfo;
     };
     eventHub->SetOnDragStart(std::move(onDragStart));
 
-    RefPtr<UINode> customNode2 = AceType::MakeRefPtr<FrameNode>("node2", 1004, AceType::MakeRefPtr<Pattern>());
-    NG::DragDropInfo dragPreviewInfo;
-    void* voidPtr = static_cast<void*>(new char[0]);
-    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
-    dragPreviewInfo.pixelMap = pixelMap;
-    frameNode->SetDragPreview(dragPreviewInfo);
-
-    void* voidPtr2 = static_cast<void*>(new char[0]);
-    RefPtr<PixelMap> pixelMap2 = PixelMap::CreatePixelMap(voidPtr2);
-    guestureEventHub->SetPixelMap(pixelMap2);
-
     GestureEvent info;
     info.SetSourceDevice(SourceType::MOUSE);
-    info.SetInputEventType(InputEventType::MOUSE_BUTTON);
-
+    info.SetInputEventType(InputEventType::TOUCH_SCREEN);
     guestureEventHub->HandleOnDragStart(info);
     EXPECT_EQ(guestureEventHub->dragDropProxy_, nullptr);
 }
