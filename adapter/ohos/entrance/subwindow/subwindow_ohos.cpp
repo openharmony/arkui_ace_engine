@@ -893,7 +893,7 @@ void SubwindowOhos::ClearToast()
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear toast enter");
     if (!IsToastWindow()) {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "clear toast failed.");
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "default toast needs not to be clear");
         return;
     }
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);

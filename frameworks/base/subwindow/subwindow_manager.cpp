@@ -733,4 +733,15 @@ bool SubwindowManager::GetShown()
     }
     return subwindow->GetShown();
 }
+
+void SubwindowManager::ResizeWindow()
+{
+    auto containerId = Container::CurrentId();
+    auto subwindow = GetSubwindow(containerId);
+    if (!subwindow) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Get Subwindow error, containerId = %{public}d.", containerId);
+        return;
+    }
+    subwindow->ResizeWindow();
+}
 } // namespace OHOS::Ace
