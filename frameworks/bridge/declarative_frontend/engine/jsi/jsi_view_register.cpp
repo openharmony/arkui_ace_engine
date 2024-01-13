@@ -955,11 +955,17 @@ panda::Local<panda::JSValueRef> Lpx2Px(panda::JsiRuntimeCallInfo* runtimeCallInf
     }
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
+    auto window = container->GetWindow();
+    CHECK_NULL_RETURN(window, panda::JSValueRef::Undefined(vm));
+    auto width = window->GetCurrentWindowRect().Width();
+
     auto frontend = container->GetFrontend();
     CHECK_NULL_RETURN(frontend, panda::JSValueRef::Undefined(vm));
     auto windowConfig = frontend->GetWindowConfig();
+    windowConfig.UpdateDesignWidthScale(width);
+
     double lpxValue = firstArg->ToNumber(vm)->Value();
-    double pxValue = lpxValue * windowConfig.GetDesignWidthScale(SystemProperties::GetDeviceWidth());
+    double pxValue = lpxValue * windowConfig.designWidthScale;
     return panda::NumberRef::New(vm, pxValue);
 }
 
@@ -976,11 +982,17 @@ panda::Local<panda::JSValueRef> Px2Lpx(panda::JsiRuntimeCallInfo* runtimeCallInf
     }
     auto container = Container::Current();
     CHECK_NULL_RETURN(container, panda::JSValueRef::Undefined(vm));
+    auto window = container->GetWindow();
+    CHECK_NULL_RETURN(window, panda::JSValueRef::Undefined(vm));
+    auto width = window->GetCurrentWindowRect().Width();
+
     auto frontend = container->GetFrontend();
     CHECK_NULL_RETURN(frontend, panda::JSValueRef::Undefined(vm));
     auto windowConfig = frontend->GetWindowConfig();
+    windowConfig.UpdateDesignWidthScale(width);
+    
     double pxValue = firstArg->ToNumber(vm)->Value();
-    double lpxValue = pxValue / windowConfig.GetDesignWidthScale(SystemProperties::GetDeviceWidth());
+    double lpxValue = pxValue / windowConfig.designWidthScale;
     return panda::NumberRef::New(vm, lpxValue);
 }
 
