@@ -39,7 +39,7 @@ public:
     virtual NG::RectF GetRect() = 0;
     virtual void ShowMenu(const RefPtr<Component>& newComponent) = 0;
     virtual void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset) = 0;
-    virtual void ShowPreviewNG() = 0;
+    virtual bool ShowPreviewNG() = 0;
     virtual void HidePreviewNG() = 0;
     virtual void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) = 0;
     virtual void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false) = 0;

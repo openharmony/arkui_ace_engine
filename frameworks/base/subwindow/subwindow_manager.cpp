@@ -189,7 +189,9 @@ RefPtr<Subwindow> SubwindowManager::ShowPreviewNG()
         subwindow->InitContainer();
         AddSubwindow(containerId, subwindow);
     }
-    subwindow->ShowPreviewNG();
+    if (!subwindow->ShowPreviewNG()) {
+        return nullptr;
+    }
     return subwindow;
 }
 

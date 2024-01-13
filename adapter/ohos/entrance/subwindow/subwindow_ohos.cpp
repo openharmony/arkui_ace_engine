@@ -501,11 +501,13 @@ void SubwindowOhos::ClearMenu()
 #endif
 }
 
-void SubwindowOhos::ShowPreviewNG()
+bool SubwindowOhos::ShowPreviewNG()
 {
+    CHECK_NULL_RETURN(window_, false);
     ShowWindow();
     ResizeWindow();
     window_->SetTouchable(false);
+    return true;
 }
 
 void SubwindowOhos::HidePreviewNG()
