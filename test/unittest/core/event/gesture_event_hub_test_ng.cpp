@@ -1976,7 +1976,7 @@ HWTEST_F(GestureEventHubTestNg, HandleOnDragUpdate001, TestSize.Level1)
     GestureEvent info;
     info.SetSourceDevice(SourceType::MOUSE);
     guestureEventHub->HandleOnDragStart(info);
-
+    EXPECT_EQ(gestureEventHub->dragDropProxy_, nullptr);
     /**
      * @tc.steps: step3. set OnDragStart for eventHub
      *            after that eventHub->HasOnDragStart() is not null
@@ -1994,12 +1994,13 @@ HWTEST_F(GestureEventHubTestNg, HandleOnDragUpdate001, TestSize.Level1)
     /**
      * @tc.steps: step4. call HandleOnDragStart
      *            case: dragDropInfo.customNode is not null
-     * @tc.expected: dragDropProxy_ is not null.
+     * @tc.expected: dragDropProxy_ is null.
      */
     guestureEventHub->HandleOnDragStart(info);
+    EXPECT_EQ(gestureEventHub->dragDropProxy_, nullptr);
 
     /**
-     * @tc.steps: step10. call HandleOnDragEnd
+     * @tc.steps: step5. call HandleOnDragEnd
      *            case: eventHub->HasOnDrop() is true
      * @tc.expected: dragDropProxy_ is null
      *               onDrop has been called, msg1 = CHECK_TAG_1
@@ -2042,8 +2043,7 @@ HWTEST_F(GestureEventHubTestNg, HandleOnDragUpdate002, TestSize.Level1)
     auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(eventHub);
     ASSERT_NE(gestureEventHub, nullptr);
 
-    auto onDragStart = [&customNode](
-                           const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */, const std::string& /* param */) {
+    auto onDragStart = [&customNode](const RefPtr<OHOS::Ace::DragEvent>&, const std::string&) {
         DragDropInfo dragDropInfo;
         dragDropInfo.customNode = customNode;
         return dragDropInfo;
@@ -2090,8 +2090,7 @@ HWTEST_F(GestureEventHubTestNg, HandleOnDragUpdate003, TestSize.Level1)
     pipline->AddOnAreaChangeNode(frameNode->GetId());
 
     RefPtr<UINode> customNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    auto onDragStart = [&customNode](
-                           const RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */, const std::string& /* param */) {
+    auto onDragStart = [&customNode](RefPtr<OHOS::Ace::DragEvent>& /* dragEvent */, const std::string& /* param */) {
         void* voidPtr = static_cast<void*>(new char[0]);
         RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
         DragDropInfo dragDropInfo;
@@ -2111,7 +2110,7 @@ HWTEST_F(GestureEventHubTestNg, HandleOnDragUpdate003, TestSize.Level1)
     void* voidPtr2 = static_cast<void*>(new char[0]);
     RefPtr<PixelMap> pixelMap2 = PixelMap::CreatePixelMap(voidPtr2);
     guestureEventHub->SetPixelMap(pixelMap2);
-    
+
     GestureEvent info;
     info.SetSourceDevice(SourceType::MOUSE);
     info.SetInputEventType(InputEventType::MOUSE_BUTTON);
@@ -2154,7 +2153,7 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubTest032, TestSize.Level1)
     gestureEventHub->externalParallelRecognizer_.push_back(nullptr);
     EXPECT_EQ(static_cast<int32_t>(gestureEventHub->externalExclusiveRecognizer_.size()), 1);
     EXPECT_EQ(static_cast<int32_t>(gestureEventHub->externalParallelRecognizer_.size()), 1);
-    
+
     /**
      * @tc.steps: step4. call ProcessTouchTestHierarchy
      *            case: innerRecognizers & gestureHierarchy_ is empty, current is null
@@ -2195,7 +2194,7 @@ HWTEST_F(GestureEventHubTestNg, GetPixelMapScale001, TestSize.Level1)
     GestureEvent info;
     gestureEventHub->HandleOnDragUpdate(info);
 
-	/**
+    /**
      * @tc.steps: step4. call GetPixelMapScale.
      * @tc.expected: scale is true.
      */
@@ -2205,7 +2204,7 @@ HWTEST_F(GestureEventHubTestNg, GetPixelMapScale001, TestSize.Level1)
     EXPECT_TRUE(scale);
 }
 
- /**
+/**
  * @tc.name: IsPixelMapNeedScale001
  * @tc.desc: Test IsPixelMapNeedScale
  * @tc.type: FUNC
