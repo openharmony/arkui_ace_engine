@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_TEXT_MODIFIER_H
-#define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_TEXT_MODIFIER_H
+#ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_TOGGLE_MODIFIER_H
+#define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_TOGGLE_MODIFIER_H
 
 #include "core/interfaces/native/node/node_modifiers.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
-const ArkUITextModifier* GetTextModifier();
-}
+    const ArkUIToggleModifier* GetToggleModifier();
+    void SetOnToggleChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
+} // namespace OHOS::Ace::NG::NodeModifier
 
-#endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_TEXT_MODIFIER_H
+#endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_TOGGLE_MODIFIER_H
