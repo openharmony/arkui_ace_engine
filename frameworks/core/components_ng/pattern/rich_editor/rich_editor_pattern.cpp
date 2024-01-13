@@ -407,7 +407,7 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
     if (optionalPosition >= 0) {
         offset = TextSpanSplit(options.offset.value());
         if (offset == -1) {
-            spanIndex = host->GetChildren().size();
+            spanIndex = static_cast<int32_t>(host->GetChildren().size());
         } else {
             spanIndex = offset;
         }
@@ -463,7 +463,7 @@ int32_t RichEditorPattern::AddTextSpanOperation(
     if (options.offset.has_value()) {
         offset = TextSpanSplit(options.offset.value(), needLeadingMargin);
         if (offset == -1) {
-            spanIndex = host->GetChildren().size();
+            spanIndex = static_cast<int32_t>(host->GetChildren().size());
         } else {
             spanIndex = offset;
         }
@@ -553,7 +553,7 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
     if (options.offset.has_value()) {
         offset = TextSpanSplit(options.offset.value());
         if (offset == -1) {
-            spanIndex = host->GetChildren().size();
+            spanIndex = static_cast<int32_t>(host->GetChildren().size());
         } else {
             spanIndex = offset;
         }

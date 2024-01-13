@@ -354,7 +354,7 @@ void TextPickerColumnPattern::ResetOptionPropertyHeight()
             CHECK_NULL_VOID(pattern);
             pickerItemHeight =
                 pattern->GetResizeFlag() ? pattern->GetResizePickerItemHeight() : pattern->GetDefaultPickerItemHeight();
-            int32_t itemCounts = GetShowOptionCount();
+            int32_t itemCounts = static_cast<int32_t>(GetShowOptionCount());
             for (int32_t i = 0; i < itemCounts; i++) {
                 TextPickerOptionProperty& prop = optionProperties_[i];
                 prop.height = pickerItemHeight;
@@ -1408,7 +1408,7 @@ void TextPickerColumnPattern::OnAroundButtonClick(RefPtr<EventParam> param)
 void TextPickerColumnPattern::PlayResetAnimation()
 {
     ScrollDirection dir = scrollDelta_ > 0.0 ? ScrollDirection::DOWN : ScrollDirection::UP;
-    int32_t middleIndex = GetShowOptionCount() / HALF_NUMBER;
+    int32_t middleIndex = static_cast<int32_t>(GetShowOptionCount()) / HALF_NUMBER;
     double shiftDistance = (dir == ScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
                                                         : optionProperties_[middleIndex].nextDistance;
     double shiftThreshold = shiftDistance / HALF_NUMBER;

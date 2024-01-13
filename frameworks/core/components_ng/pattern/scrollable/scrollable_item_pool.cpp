@@ -55,7 +55,7 @@ void ScrollableItemPool::Deallocate(ScrollableItem* obj)
         obj->Clean(true);
         return;
     }
-    if (pool_[tag].size() < size_) {
+    if (pool_[tag].size() < static_cast<uint32_t>(size_)) {
         pool_[tag].emplace_back(obj);
         obj->Clean(true);
         return;

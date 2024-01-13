@@ -1551,7 +1551,7 @@ ResultObject TextPattern::GetTextResultObject(RefPtr<UINode> uinode, int32_t ind
         return resultObject;
     }
     auto spanItem = DynamicCast<SpanNode>(uinode)->GetSpanItem();
-    int32_t itemLength = StringUtils::ToWstring(spanItem->content).length();
+    int32_t itemLength = static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length());
     int32_t endPosition = std::min(GetTextContentLength(), spanItem->position);
     int32_t startPosition = endPosition - itemLength;
 
@@ -1592,7 +1592,7 @@ ResultObject TextPattern::GetSymbolSpanResultObject(RefPtr<UINode> uinode, int32
         return resultObject;
     }
     auto spanItem = DynamicCast<SpanNode>(uinode)->GetSpanItem();
-    int32_t itemLength = StringUtils::ToWstring(spanItem->content).length();
+    int32_t itemLength = static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length());
     int32_t endPosition = std::min(GetTextContentLength(), spanItem->position);
     int32_t startPosition = endPosition - itemLength;
 
