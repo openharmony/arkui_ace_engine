@@ -115,6 +115,16 @@ std::pair<RefPtr<FrameNode>, RefPtr<LayoutWrapperNode>> BadgeTestNg::CreateChild
     return { textNode, textLayoutWrapper };
 }
 
+std::pair<RefPtr<FrameNode>, BadgeModelNG> CreateFrameNodeAndBadgeModelNG(const Dimension badgeCircleSize)
+{
+    BadgeModelNG badge;
+    BadgeParameters badgeParameters;
+    badgeParameters.badgeCircleSize = badgeCircleSize;
+    badge.Create(badgeParameters);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    return { frameNode, badge };
+}
+
 /**
  * @tc.name: BadgeFrameNodeCreator001
  * @tc.desc: Test empty property of Badge.
@@ -461,6 +471,262 @@ HWTEST_F(BadgeTestNg, BadgePatternTest005, TestSize.Level1)
         badgePattern->OnModifyDone();
         EXPECT_EQ(layoutProperty->GetBadgeBorderColor().value(), color);
     }
+}
+
+/**
+ * @tc.name: BadgePatternTest006
+ * @tc.desc: test badge measure and layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgePatternTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create badge and get frameNode.
+     */
+    auto obj = CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+    RefPtr<FrameNode> frameNode = obj.first;
+    BadgeModelNG badge = obj.second;
+
+    /**
+     * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
+     * @tc.expected: related function is called.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto badgePattern = AceType::DynamicCast<BadgePattern>(frameNode->GetPattern());
+    auto badgeLayoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
+    ASSERT_NE(badgeLayoutProperty, nullptr);
+    auto badgeLayoutAlgorithm = badgePattern->CreateLayoutAlgorithm();
+    ASSERT_NE(badgeLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(badgeLayoutAlgorithm));
+    badgeLayoutProperty->UpdateBadgeFontSize(BADGE_FONT_SIZE);
+
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
+    auto firstChild = CreateChild(childLayoutConstraint);
+    auto firstChildFrameNode = firstChild.first;
+    auto firstChildLayoutWrapper = firstChild.second;
+    firstChildFrameNode->MountToParent(frameNode);
+    layoutWrapper->AppendChild(firstChildLayoutWrapper);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(firstChildFrameNode->GetLayoutProperty());
+    ASSERT_NE(textLayoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. update layoutWrapper and go to different branch.
+     */
+    LayoutConstraintF LayoutConstraintVaildWidth;
+    LayoutConstraintVaildWidth.selfIdealSize.SetSize(SizeF(1000000, FULL_SCREEN_HEIGHT));
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(LayoutConstraintVaildWidth);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    /**
+     * @tc.steps: step4. call measure and layout with no child.
+     */
+    RefPtr<BadgeLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<BadgeLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_TRUE(layoutAlgorithm->hasFontSize_);
+
+    /**
+     * @tc.steps: step5. call Measure with layoutWrapper.
+     * @tc.expected: layoutAlgorithm->hasFontSize_ is true.
+     */
+    textLayoutProperty->UpdateContent("1");
+    badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_TRUE(layoutAlgorithm->hasFontSize_);
+
+    /**
+     * @tc.steps: step6. call Layout with layoutWrapper and BadgePosition::default.
+     * @tc.expected: layoutAlgorithm->hasFontSize_ is true.
+     */
+    layoutAlgorithm->hasFontSize_ = true;
+    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
+    layoutProperty->UpdateBadgePosition(BadgePosition(6));
+    badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_TRUE(layoutAlgorithm->hasFontSize_);
+}
+
+/**
+ * @tc.name: BadgePatternTest007
+ * @tc.desc: test badge measure and layout.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgePatternTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create badge and get frameNode.
+     */
+    auto obj = CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+    RefPtr<FrameNode> frameNode = obj.first;
+    BadgeModelNG badge = obj.second;
+
+    /**
+     * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
+     * @tc.expected: step2. related function is called.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto badgePattern = AceType::DynamicCast<BadgePattern>(frameNode->GetPattern());
+    ASSERT_NE(badgePattern, nullptr);
+    auto badgeLayoutProperty = AceType::DynamicCast<BadgeLayoutProperty>(frameNode->GetLayoutProperty());
+    ASSERT_NE(badgeLayoutProperty, nullptr);
+    auto badgeLayoutAlgorithm = badgePattern->CreateLayoutAlgorithm();
+    ASSERT_NE(badgeLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(badgeLayoutAlgorithm));
+
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
+    auto firstChild = CreateChild(childLayoutConstraint);
+    auto firstChildFrameNode = firstChild.first;
+    auto firstChildLayoutWrapper = firstChild.second;
+    firstChildFrameNode->MountToParent(frameNode);
+    layoutWrapper->AppendChild(firstChildLayoutWrapper);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(firstChildFrameNode->GetLayoutProperty());
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent(VALUE);
+
+    /**
+     * @tc.steps: step3. update layoutWrapper and go to different branch.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
+    LayoutConstraintF LayoutConstraintVaildWidth;
+    LayoutConstraintVaildWidth.selfIdealSize.SetSize(SizeF(1000000, FULL_SCREEN_HEIGHT));
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(LayoutConstraintVaildWidth);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    /**
+     * @tc.steps: step4. call Measure with layoutWrapper.
+     * @tc.expected: layoutAlgorithm->hasFontSize_ is true.
+     */
+    RefPtr<BadgeLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<BadgeLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    badgeLayoutAlgorithm->Measure(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_TRUE(layoutAlgorithm->hasFontSize_);
+
+    /**
+     * @tc.steps: step5. call Layout with layoutWrapper.
+     * @tc.expected: layoutAlgorithm->hasFontSize_ is true.
+     */
+    layoutAlgorithm->hasFontSize_ = true;
+    layoutProperty->UpdateBadgePosition(BadgePosition(6));
+    layoutProperty->UpdateIsPositionXy(true);
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_TEN);
+    badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_TRUE(layoutAlgorithm->hasFontSize_);
+}
+
+/**
+ * @tc.name: BadgePatternTest008
+ * @tc.desc: test layout different branch
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgePatternTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create badge and get frameNode.
+     */
+    auto obj = CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+    RefPtr<FrameNode> frameNode = obj.first;
+    BadgeModelNG badge = obj.second;
+
+    /**
+     * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
+     * @tc.expected: related function is called.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto badgePattern = AceType::DynamicCast<BadgePattern>(frameNode->GetPattern());
+    ASSERT_NE(badgePattern, nullptr);
+    auto badgeLayoutProperty = AceType::DynamicCast<BadgeLayoutProperty>(frameNode->GetLayoutProperty());
+    ASSERT_NE(badgeLayoutProperty, nullptr);
+    auto badgeLayoutAlgorithm = badgePattern->CreateLayoutAlgorithm();
+    ASSERT_NE(badgeLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(badgeLayoutAlgorithm));
+
+    auto childLayoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
+    childLayoutConstraint.selfIdealSize = OptionalSizeF(FIRST_ITEM_SIZE);
+    auto firstChild = CreateChild(childLayoutConstraint);
+    auto firstChildFrameNode = firstChild.first;
+    auto firstChildLayoutWrapper = firstChild.second;
+    firstChildFrameNode->MountToParent(frameNode);
+    layoutWrapper->AppendChild(firstChildLayoutWrapper);
+    auto textLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(firstChildFrameNode->GetLayoutProperty());
+    ASSERT_NE(textLayoutProperty, nullptr);
+    textLayoutProperty->UpdateContent("badge value");
+
+    /**
+     * @tc.steps: step3. update layoutWrapper and go to different branch.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<BadgeLayoutProperty>();
+    LayoutConstraintF LayoutConstraintVaildWidth;
+    LayoutConstraintVaildWidth.selfIdealSize.SetSize(SizeF(1000000, FULL_SCREEN_HEIGHT));
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(LayoutConstraintVaildWidth);
+    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
+
+    /**
+     * @tc.steps: step4. updated layoutProperty attributes and version information.
+     */
+    RefPtr<BadgeLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<BadgeLayoutAlgorithm>();
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutAlgorithm->hasFontSize_ = true;
+    layoutProperty->UpdateBadgePosition(BadgePosition(6));
+    layoutProperty->UpdateIsPositionXy(true);
+    PipelineBase::GetCurrentContext()->SetMinPlatformVersion((int32_t)PlatformVersion::VERSION_FIVE);
+
+    /**
+     * @tc.steps: step5. call Layout with layoutWrapper.
+     * @tc.expected: layoutAlgorithm->hasFontSize_ is true.
+     */
+    badgeLayoutAlgorithm->Layout(AccessibilityManager::RawPtr(layoutWrapper));
+    EXPECT_TRUE(layoutAlgorithm->hasFontSize_);
+}
+
+/**
+ * @tc.name: BadgePatternTest009
+ * @tc.desc: test UpdateSizeWithCheck
+ * @tc.type: FUNC
+ */
+HWTEST_F(BadgeTestNg, BadgePatternTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create badge and get frameNode.
+     */
+    auto obj = CreateFrameNodeAndBadgeModelNG(BADGE_CIRCLE_SIZE);
+    RefPtr<FrameNode> frameNode = obj.first;
+    BadgeModelNG badge = obj.second;
+
+    /**
+     * @tc.steps: step2. get layout property, layoutAlgorithm and create layoutWrapper.
+     * @tc.expected: related function is called.
+     */
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    RefPtr<LayoutWrapperNode> layoutWrapper =
+        AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
+    auto badgePattern = AceType::DynamicCast<BadgePattern>(frameNode->GetPattern());
+    ASSERT_NE(badgePattern, nullptr);
+    auto badgeLayoutProperty = AceType::DynamicCast<BadgeLayoutProperty>(frameNode->GetLayoutProperty());
+    ASSERT_NE(badgeLayoutProperty, nullptr);
+    auto badgeLayoutAlgorithm = badgePattern->CreateLayoutAlgorithm();
+    ASSERT_NE(badgeLayoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(badgeLayoutAlgorithm));
+    layoutWrapper->GetLayoutProperty()->layoutConstraint_->selfIdealSize =
+        OptionalSize<float>(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
+
+    /**
+     * @tc.steps: step3. call PerformMeasureSelf with layoutWrapper.
+     * @tc.expected: retFlag is true.
+     */
+    RefPtr<BadgeLayoutAlgorithm> layoutAlgorithm = AceType::MakeRefPtr<BadgeLayoutAlgorithm>();
+    ASSERT_NE(badgeLayoutAlgorithm, nullptr);
+    layoutAlgorithm->PerformMeasureSelf(AccessibilityManager::RawPtr(layoutWrapper));
+
+    OptionalSizeF frameSize;
+    frameSize.UpdateSizeWithCheck(OptionalSize<float>(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT));
+    auto retFlag = frameSize.IsValid();
+    EXPECT_TRUE(retFlag);
 }
 
 /**
