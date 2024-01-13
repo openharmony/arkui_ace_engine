@@ -359,7 +359,7 @@ public:
 
     float GetWindowScale() const override
     {
-        return 1.0f;
+        return windowScale_;
     }
 
     int32_t GetParentId() const

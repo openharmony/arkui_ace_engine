@@ -89,6 +89,7 @@ struct DragControllerAsyncCtx {
     int32_t globalX = -1;
     int32_t globalY = -1;
     int32_t sourceType = 0;
+    float windowScale = 1.0f;
     int parseBuilderCount = 0;
     std::mutex dragStateMutex;
     DragState dragState = DragState::PENDING;
@@ -599,6 +600,7 @@ void GetShadowInfoArray(DragControllerAsyncCtx* asyncCtx,
     std::vector<Msdp::DeviceStatus::ShadowInfo>& shadowInfos)
 {
     for (const auto& pixelMap: asyncCtx->pixelMapList) {
+        pixelMap->scale(asyncCtx->windowScale, asyncCtx->windowScale, Media::AntiAliasingOption::HIGH);
         int32_t width = pixelMap->GetWidth();
         int32_t height = pixelMap->GetHeight();
         double x = ConvertToPx(asyncCtx, asyncCtx->touchPoint.GetX(), width);
@@ -722,6 +724,8 @@ void OnMultipleComplete(DragControllerAsyncCtx* asyncCtx)
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    auto windowScale = container->GetWindowScale();
+    asyncCtx->windowScale = windowScale;
     taskExecutor->PostTask(
         [asyncCtx]() {
             CHECK_NULL_VOID(asyncCtx);
@@ -751,6 +755,8 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    auto windowScale = container->GetWindowScale();
+    asyncCtx->windowScale = windowScale;
     taskExecutor->PostTask(
         [asyncCtx]() {
             CHECK_NULL_VOID(asyncCtx);
@@ -786,6 +792,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
                 }
                 dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
             }
+            asyncCtx->pixelMap->scale(asyncCtx->windowScale, asyncCtx->windowScale, Media::AntiAliasingOption::HIGH);
             int32_t width = asyncCtx->pixelMap->GetWidth();
             int32_t height = asyncCtx->pixelMap->GetHeight();
             double x = ConvertToPx(asyncCtx, asyncCtx->touchPoint.GetX(), width);
