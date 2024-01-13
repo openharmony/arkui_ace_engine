@@ -2155,12 +2155,10 @@ HWTEST_F(ProgressTestNg, RingProgressModifier003, TestSize.Level1)
      */
     Testing::MockCanvas canvas;
     DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
-    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
-    EXPECT_CALL(canvas, Translate(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
     EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
     EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
 
