@@ -112,12 +112,17 @@ std::list<RefPtr<FocusHub>>::iterator FocusHub::FlushChildrenFocusHub(std::list<
 
 bool FocusHub::HandleKeyEvent(const KeyEvent& keyEvent)
 {
-    bool shiftTabPressed = keyEvent.IsShiftWith(KeyCode::KEY_TAB);
-    bool leftArrowPressed = keyEvent.code == KeyCode::KEY_DPAD_LEFT;
-    hasBackwardMovement_ = keyEvent.action == KeyAction::DOWN && (shiftTabPressed || leftArrowPressed);
     if (!IsCurrentFocus()) {
         return false;
     }
+    bool shiftTabPressed = keyEvent.IsShiftWith(KeyCode::KEY_TAB);
+    bool leftArrowPressed = keyEvent.code == KeyCode::KEY_DPAD_LEFT;
+    hasBackwardMovement_ = keyEvent.action == KeyAction::DOWN && (shiftTabPressed || leftArrowPressed);
+
+    bool tabOnlyPressed = (keyEvent.code == KeyCode::KEY_TAB) && (!shiftTabPressed);
+    bool rightArrowPressed = keyEvent.code == KeyCode::KEY_DPAD_RIGHT;
+    hasForwardMovement_ = keyEvent.action == KeyAction::DOWN && (tabOnlyPressed || rightArrowPressed);
+
     return OnKeyEvent(keyEvent);
 }
 
@@ -1895,7 +1900,7 @@ bool FocusHub::HasBackwardFocusMovementInChildren()
 {
     std::list<RefPtr<FocusHub>> children;
     FlushChildrenFocusHub(children);
-    for (auto child : children) {
+    for (const auto& child : children) {
         if (child->HasBackwardFocusMovement()) {
             return true;
         }
@@ -1903,13 +1908,25 @@ bool FocusHub::HasBackwardFocusMovementInChildren()
     return false;
 }
 
-void FocusHub::ClearBackwardFocusMovementFlagInChildren()
+bool FocusHub::HasForwardFocusMovementInChildren()
+{
+    std::list<RefPtr<FocusHub>> children;
+    FlushChildrenFocusHub(children);
+    for (const auto& child : children) {
+        if (child->HasForwardFocusMovement()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void FocusHub::ClearFocusMovementFlagsInChildren()
 {
     std::list<RefPtr<FocusHub>> children;
     FlushChildrenFocusHub(children);
     for (auto child : children) {
-        child->ClearBackwardFocusMovementFlag();
-        child->ClearBackwardFocusMovementFlagInChildren();
+        child->ClearFocusMovementFlags();
+        child->ClearFocusMovementFlagsInChildren();
     }
 }
 

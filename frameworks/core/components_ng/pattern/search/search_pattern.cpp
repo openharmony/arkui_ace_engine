@@ -727,7 +727,7 @@ bool SearchPattern::OnKeyEvent(const KeyEvent& event)
     }
 }
 
-void SearchPattern::PaintFocusState()
+void SearchPattern::PaintFocusState(bool recoverFlag)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -737,11 +737,17 @@ void SearchPattern::PaintFocusState()
     CHECK_NULL_VOID(textFieldPattern);
 
     if (focusChoice_ == SearchPattern::FocusChoice::SEARCH) {
-        if (!textFieldPattern->GetTextValue().empty()) {
-            textFieldPattern->HandleOnSelectAll(true); // Select all text
-            textFieldPattern->StopTwinkling(); // Hide caret
-        } else {
+        if (recoverFlag) {
+            // recover to last state when no factical focus movement in initialization
             textFieldPattern->HandleFocusEvent(); // Show caret
+            textFieldPattern->GetTextSelectController()->UpdateCaretIndex(lastCaretIndex_);
+        } else {
+            if (!textFieldPattern->GetTextValue().empty()) {
+                textFieldPattern->HandleOnSelectAll(true); // Select all text
+                textFieldPattern->StopTwinkling();         // Hide caret
+            } else {
+                textFieldPattern->HandleFocusEvent(); // Show caret
+            }
         }
     } else {
         if (textFieldPattern->IsSelected() || textFieldPattern->GetCursorVisible()) {
@@ -979,16 +985,21 @@ void SearchPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
 {
     auto focusTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        if (pattern) {
-            bool backwardFocusMovement = false;
-            auto host = pattern->GetHost();
-            if (host) {
-                auto rootHub = host->GetOrCreateFocusHub()->GetRootFocusHub();
-                backwardFocusMovement = rootHub && rootHub->HasBackwardFocusMovementInChildren();
-                rootHub->ClearBackwardFocusMovementFlagInChildren();
-            }
-            pattern->HandleFocusEvent(backwardFocusMovement);
+        if (!pattern) {
+            return;
         }
+        bool backwardFocusMovement = false;
+        bool forwardFocusMovement = false;
+        auto host = pattern->GetHost();
+        if (host) {
+            auto rootHub = host->GetOrCreateFocusHub()->GetRootFocusHub();
+            backwardFocusMovement = rootHub && rootHub->HasBackwardFocusMovementInChildren();
+            forwardFocusMovement = rootHub && rootHub->HasForwardFocusMovementInChildren();
+            if (rootHub) {
+                rootHub->ClearFocusMovementFlagsInChildren();
+            }
+        }
+        pattern->HandleFocusEvent(forwardFocusMovement, backwardFocusMovement);
     };
     focusHub->SetOnFocusInternal(focusTask);
     auto blurTask = [weak = WeakClaim(this)]() {
@@ -999,7 +1010,7 @@ void SearchPattern::InitFocusEvent(const RefPtr<FocusHub>& focusHub)
     focusHub->SetOnBlurInternal(blurTask);
 }
 
-void SearchPattern::HandleFocusEvent(bool backwardFocusMovement)
+void SearchPattern::HandleFocusEvent(bool forwardFocusMovement, bool backwardFocusMovement)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -1008,12 +1019,14 @@ void SearchPattern::HandleFocusEvent(bool backwardFocusMovement)
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
 
-    focusChoice_ = backwardFocusMovement ? FocusChoice::SEARCH_BUTTON : FocusChoice::SEARCH;
-    if (focusChoice_ == FocusChoice::SEARCH_BUTTON && !isSearchButtonEnabled_) {
-        bool isCancelHidden = NearZero(cancelButtonSize_.Height());
-        focusChoice_ = isCancelHidden ? FocusChoice::SEARCH : FocusChoice::CANCEL_BUTTON;
+    if (forwardFocusMovement || backwardFocusMovement) { // Don't update focus if no factical focus movement
+        focusChoice_ = backwardFocusMovement ? FocusChoice::SEARCH_BUTTON : FocusChoice::SEARCH;
+        if (focusChoice_ == FocusChoice::SEARCH_BUTTON && !isSearchButtonEnabled_) {
+            bool isCancelHidden = NearZero(cancelButtonSize_.Height());
+            focusChoice_ = isCancelHidden ? FocusChoice::SEARCH : FocusChoice::CANCEL_BUTTON;
+        }
     }
-    PaintFocusState();
+    PaintFocusState(!(forwardFocusMovement || backwardFocusMovement));
 }
 
 void SearchPattern::HandleBlurEvent()
@@ -1024,6 +1037,7 @@ void SearchPattern::HandleBlurEvent()
     CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
+    lastCaretIndex_ = textFieldPattern->GetCaretIndex();
     textFieldPattern->HandleBlurEvent();
 }
 
