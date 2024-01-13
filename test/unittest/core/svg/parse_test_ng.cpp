@@ -130,6 +130,9 @@ const std::string RECT_SVG_LABEL = "<svg width=\"400\" height=\"400\" version=\"
 const std::string RECT_SVG_LABEL2 = "<svg version=\"1.1\" fill=\"red\" "
                                     "xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"100\" height=\"100\" x=\"150\" "
                                     "y=\"20\" stroke-width=\"4\" stroke=\"#000000\" rx=\"10\" ry=\"10\"></rect></svg>";
+const std::string RECT_SVG_LABEL3 = "<svg version=\"1.1\" fill=\"red\" "
+                                    "xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"100\" height=\"100\" x=\"150\" "
+                                    "y=\"20\" stroke-width=\"4\" stroke=\"#000000\" rx=\"1\" ry=\"-1\"></rect></svg>";
 constexpr float X = 150.0f;
 constexpr float Y = 20.0f;
 constexpr float RX = 10.0f;
@@ -1666,5 +1669,133 @@ HWTEST_F(ParseTestNg, ParseEllipseTest006, TestSize.Level1)
     auto svgEllipse = AceType::DynamicCast<SvgEllipse>(svg->children_.at(0));
     svgEllipse->AsPath(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_NE(svgEllipse, nullptr);
+}
+
+/**
+ * @tc.name: ParsePolygonTest003
+ * @tc.desc: parse polygon and polyline label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParsePolygonTest003, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. call CreateSvgDom
+     * @tc.expected: Execute svgDom root node is 2
+     */
+    auto svgStream = SkMemoryStream::MakeCopy(POLYGON_SVG_LABEL1.c_str(), POLYGON_SVG_LABEL1.length());
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_EQ(static_cast<int32_t>(svg->children_.size()), CHILD_NUMBER);
+
+    /* *
+     * @tc.steps: step2. call UpdateGradient
+     * @tc.expected: Execute SvgPolygon GradientType not is LINEAR
+     */
+    auto svgPolygon = AceType::DynamicCast<SvgPolygon>(svg->children_.at(0));
+    Gradient temp;
+    temp.SetType(GradientType::CONIC);
+    svgPolygon->declaration_->SetGradient(temp);
+    svgPolygon->UpdateGradient(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
+    EXPECT_NE(svgPolygon->fillState_.GetGradient()->GetType(), GradientType::LINEAR);
+}
+
+/**
+ * @tc.name: ParsePolygonTest004
+ * @tc.desc: parse polygon and polyline label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParsePolygonTest004, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. call CreateSvgDom
+     * @tc.expected: Execute svgDom root node is 2
+     */
+    auto svgStream = SkMemoryStream::MakeCopy(POLYGON_SVG_LABEL1.c_str(), POLYGON_SVG_LABEL1.length());
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_EQ(static_cast<int32_t>(svg->children_.size()), CHILD_NUMBER);
+
+    /* *
+     * @tc.steps: step2. call AsPath
+     * @tc.expected: Execute SvgPolygon Points is empty
+     */
+    auto svgPolygon = AceType::DynamicCast<SvgPolygon>(svg->children_.at(0));
+    auto declaration = AceType::DynamicCast<SvgPolygonDeclaration>(svgPolygon->declaration_);
+    declaration->SetPoints("");
+    svgPolygon->AsPath(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
+    EXPECT_TRUE(declaration->GetPoints().empty());
+
+    /* *
+     * @tc.steps: step3. call AsPath
+     * @tc.expected: Execute SvgPolygon Points parse error
+     */
+    declaration->SetPoints("ccc");
+    svgPolygon->AsPath(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
+    EXPECT_FALSE(declaration->GetPoints().empty());
+}
+
+/**
+ * @tc.name: ParseStyleTest002
+ * @tc.desc: parse use label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseStyleTest002, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. call ParseCssStyle
+     * @tc.expected: Execute function return value false
+     */
+    SvgStyle::ParseCssStyle("", nullptr);
+    std::string str;
+    PushAttr callback = [&str](const std::string& key, const std::pair<std::string, std::string>& value) { str = key; };
+    SvgStyle::ParseCssStyle("body {font-style: oblique;}.normal {font-style: normal;}", callback);
+    EXPECT_FALSE(str.empty());
+
+    SvgStyle::ParseCssStyle("body font-style: oblique;}. {font-style: normal;}", callback);
+    EXPECT_FALSE(str.empty());
+}
+
+/**
+ * @tc.name: ParseRectTest004
+ * @tc.desc: parse rect label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseRectTest004, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(RECT_SVG_LABEL3.c_str(), RECT_SVG_LABEL3.length());
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_GT(static_cast<int32_t>(svg->children_.size()), 0);
+
+    /* *
+     * @tc.steps: step1. call AsPath
+     * @tc.expected: Execute function return value not is 0
+     */
+    auto svgRect = AceType::DynamicCast<SvgRect>(svg->children_.at(0));
+    svgRect->AsPath(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
+    auto rectDeclaration = AceType::DynamicCast<SvgRectDeclaration>(svgRect->declaration_);
+    EXPECT_NE(rectDeclaration->GetRx().Value(), 0);
+}
+
+/**
+ * @tc.name: ParseUseTest002
+ * @tc.desc: parse use label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseUseTest002, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(USE_SVG_LABEL.c_str(), USE_SVG_LABEL.length());
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::GREEN);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_GT(static_cast<int32_t>(svg->children_.size()), 0);
+
+    /* *
+     * @tc.steps: step1. call AsPath
+     * @tc.expected: Execute function return value is true
+     */
+    auto svgUse = AceType::DynamicCast<SvgUse>(svg->children_.at(INDEX_ONE));
+    svgUse->declaration_->SetHref("");
+    svgUse->AsPath(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
+    EXPECT_TRUE(svgUse->declaration_->GetHref().empty());
 }
 } // namespace OHOS::Ace::NG
