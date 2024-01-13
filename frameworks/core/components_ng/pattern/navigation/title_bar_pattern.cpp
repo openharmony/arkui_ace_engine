@@ -17,6 +17,7 @@
 
 #include "core/animation/spring_curve.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_layout_property.h"
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
@@ -736,4 +737,23 @@ void TitleBarPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
 }
 
+void TitleBarPattern::OnColorConfigurationUpdate()
+{
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
+    CHECK_NULL_VOID(titleBarNode);
+    auto backButton = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
+    CHECK_NULL_VOID(backButton);
+    if (backButton->GetTag() == "Navigator") {
+        backButton = AceType::DynamicCast<FrameNode>(backButton->GetChildren().front());
+        CHECK_NULL_VOID(backButton);
+    }
+    auto backButtonImgNode = AceType::DynamicCast<FrameNode>(backButton->GetChildren().front());
+    CHECK_NULL_VOID(backButtonImgNode);
+    auto backButtonImgRender = backButtonImgNode->GetPaintProperty<ImageRenderProperty>();
+    CHECK_NULL_VOID(backButtonImgRender);
+    auto theme = NavigationGetTheme();
+    CHECK_NULL_VOID(theme);
+    backButtonImgRender->UpdateSvgFillColor(theme->GetBackButtonIconColor());
+    backButtonImgNode->MarkModifyDone();
+}
 } // namespace OHOS::Ace::NG
