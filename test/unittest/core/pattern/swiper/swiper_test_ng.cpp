@@ -993,6 +993,142 @@ HWTEST_F(SwiperTestNg, SwiperModelNg003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SwiperModelNg004
+ * @tc.desc: Swiper Model NG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperModelNg004, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {
+        NestedScrollOptions nestedOpt;
+        model.SetNestedScroll(std::move(nestedOpt));
+    });
+    EXPECT_FALSE(pattern_->enableNestedScroll_);
+}
+
+/**
+ * @tc.name: SwiperPaintProperty001
+ * @tc.desc: Swiper Paint Property.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPaintProperty001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+
+    /**
+     * @tc.steps: step1. Test ToJsonValue function.
+     * @tc.expected: Check the swiper property value
+     */
+    auto json = JsonUtil::Create(true);
+    paintProperty_->ToJsonValue(json);
+    EXPECT_EQ(json->GetString("autoPlay"), "false");
+
+    /**
+     * @tc.steps: step2. call UpdateCalcLayoutProperty, push constraint is null.
+     * @tc.expected: Return expected results.
+     */
+    MeasureProperty constraint;
+    layoutProperty_->UpdateCalcLayoutProperty(std::move(constraint));
+    EXPECT_EQ(layoutProperty_->propertyChangeFlag_, 1);
+
+    /**
+     * @tc.steps: step3. Test FromJson function.
+     * @tc.expected: Check the swiper property value
+     */
+    auto jsonFrom = JsonUtil::Create(true);
+    paintProperty_->FromJson(jsonFrom);
+    EXPECT_TRUE(jsonFrom);
+}
+
+/**
+ * @tc.name: SwiperPattern001
+ * @tc.desc: Swiper Paint Property.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPattern001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+
+    /**
+     * @tc.steps: step1. Test DumpAdvanceInfo function.
+     * @tc.expected: SwiperIndicatorType::DOT.
+     */
+    pattern_->lastSwiperIndicatorType_ = SwiperIndicatorType::DOT;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(pattern_->lastSwiperIndicatorType_, SwiperIndicatorType::DOT);
+
+    /**
+     * @tc.steps: step2. Test DumpAdvanceInfo function.
+     * @tc.expected: SwiperIndicatorType::DIGIT.
+     */
+    pattern_->lastSwiperIndicatorType_ = SwiperIndicatorType::DIGIT;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(pattern_->lastSwiperIndicatorType_, SwiperIndicatorType::DIGIT);
+
+    /**
+     * @tc.steps: step3. Test DumpAdvanceInfo function.
+     * @tc.expected: PanDirection::NONE.
+     */
+    pattern_->panDirection_.type = PanDirection::NONE;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(pattern_->panDirection_.type, PanDirection::NONE);
+
+    pattern_->panDirection_.type = PanDirection::LEFT;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(pattern_->panDirection_.type, PanDirection::LEFT);
+
+    pattern_->panDirection_.type = PanDirection::RIGHT;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(pattern_->panDirection_.type, PanDirection::RIGHT);
+
+    pattern_->panDirection_.type = PanDirection::HORIZONTAL;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(pattern_->panDirection_.type, PanDirection::HORIZONTAL);
+
+    pattern_->panDirection_.type = PanDirection::UP;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(pattern_->panDirection_.type, PanDirection::UP);
+
+    pattern_->panDirection_.type = PanDirection::DOWN;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(pattern_->panDirection_.type, PanDirection::DOWN);
+
+    pattern_->panDirection_.type = PanDirection::VERTICAL;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(pattern_->panDirection_.type, PanDirection::VERTICAL);
+
+    pattern_->panDirection_.type = PanDirection::ALL;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(pattern_->panDirection_.type, PanDirection::ALL);
+}
+
+/**
+ * @tc.name: SwiperPattern002
+ * @tc.desc: Swiper Paint Property.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPattern002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+
+    pattern_->direction_ = Axis::NONE;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(pattern_->direction_, Axis::NONE);
+
+    pattern_->direction_ = Axis::HORIZONTAL;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(pattern_->direction_, Axis::HORIZONTAL);
+
+    pattern_->direction_ = Axis::FREE;
+    pattern_->DumpAdvanceInfo();
+    EXPECT_EQ(pattern_->direction_, Axis::FREE);
+
+    pattern_->direction_ = Axis::VERTICAL;
+    pattern_->DumpAdvanceInfo();
+    ASSERT_EQ(pattern_->direction_, Axis::VERTICAL);
+}
+
+/**
  * @tc.name: SwiperFlushFocus001
  * @tc.desc: Swiper FlushFocus.
  * @tc.type: FUNC
@@ -1620,6 +1756,153 @@ HWTEST_F(SwiperTestNg, SwiperIndicatorLayoutAlgorithmLayout006, TestSize.Level1)
     layoutWrapper.GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
     algorithm->Layout(&layoutWrapper);
     EXPECT_EQ(layoutWrapper.GetGeometryNode()->GetMarginFrameOffset(), OffsetF(720.00, 568.00));
+}
+
+/**
+ * @tc.name: SwiperPattern0010
+ * @tc.desc: Test pattern SetIsIndicatorCustomSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPattern0010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    bool isCustomSize = true;
+    pattern_->SetIsIndicatorCustomSize(isCustomSize);
+    EXPECT_TRUE(pattern_->IsCustomSize_);
+}
+
+/**
+ * @tc.name: SwiperPattern0009
+ * @tc.desc: Test pattern StopAndResetSpringAnimation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPattern0009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Default value
+     */
+    CreateWithItem([](SwiperModelNG model) {});
+    pattern_->springAnimationIsRunning_ = true;
+    pattern_->StopAndResetSpringAnimation();
+    EXPECT_FALSE(pattern_->springAnimationIsRunning_);
+}
+
+/**
+ * @tc.name: SwiperPatternOnVisibleChange003
+ * @tc.desc: OnVisibleChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternOnVisibleChange003, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    pattern_->isWindowShow_ = false;
+
+    /**
+     * @tc.cases: call OnVisibleChange.
+     * @tc.expected: Related function runs ok.
+     */
+    pattern_->isInit_ = true;
+    pattern_->OnVisibleChange(true);
+    EXPECT_TRUE(pattern_->isInit_);
+}
+
+/**
+ * @tc.name: SwiperPatternHandleTouchEvent002
+ * @tc.desc: HandleTouchDown
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternHandleTouchEvent002, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    TouchLocationInfo touchLocationInfo("down", 0);
+    touchLocationInfo.SetTouchType(TouchType::DOWN);
+    std::list<TouchLocationInfo> infoSwiper;
+    infoSwiper.emplace_back(touchLocationInfo);
+    TouchEventInfo touchEventInfo("down");
+    touchEventInfo.touches_ = infoSwiper;
+    pattern_->HandleTouchEvent(touchEventInfo);
+    EXPECT_FALSE(pattern_->indicatorDoingAnimation_);
+    const char* name = "HandleTouchDown";
+    pattern_->controller_ = CREATE_ANIMATOR(name);
+    pattern_->controller_->status_ = Animator::Status::RUNNING;
+    pattern_->HandleTouchEvent(touchEventInfo);
+    touchEventInfo.touches_.clear();
+    EXPECT_TRUE(touchEventInfo.touches_.empty());
+}
+
+/**
+ * @tc.name: SwiperPatternHandleTouchUp003
+ * @tc.desc: HandleTouchUp
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternHandleTouchUp003, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    pattern_->controller_ = AceType::MakeRefPtr<Animator>();
+    pattern_->controller_->status_ = Animator::Status::PAUSED;
+
+    /**
+     * @tc.steps: step1. call HandleTouchUp.
+     * @tc.expected: Related function runs ok.
+     */
+    pattern_->springAnimationIsRunning_ = false;
+    pattern_->isTouchDownSpringAnimation_ = true;
+    pattern_->HandleTouchUp();
+    EXPECT_FALSE(pattern_->isTouchDownSpringAnimation_);
+    EXPECT_TRUE(pattern_->springAnimationIsRunning_);
+}
+
+/**
+ * @tc.name: SwiperPatternStopAnimationOnScrollStart001
+ * @tc.desc: HandleTouchUp
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternStopAnimationOnScrollStart001, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    /**
+     * @tc.steps: step1. Set usePropertyAnimation_ To be true
+     * @tc.expected: Pattern_->UsePropertyAnimation_ Condition is true
+     */
+    pattern_->usePropertyAnimation_ = true;
+    pattern_->StopAnimationOnScrollStart(true);
+    EXPECT_FALSE(pattern_->usePropertyAnimation_);
+}
+
+/**
+ * @tc.name: SwiperPatternHandleDragEnd006
+ * @tc.desc: HandleDragEnd
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperTestNg, SwiperPatternHandleDragEnd006, TestSize.Level1)
+{
+    CreateWithItem([](SwiperModelNG model) {});
+    EXPECT_NE(frameNode_->GetLayoutProperty<SwiperLayoutProperty>(), nullptr);
+    layoutProperty_->UpdateLoop(false);
+    layoutProperty_->ResetDisplayCount();
+    layoutProperty_->ResetMinSize();
+    layoutProperty_->UpdateDisplayMode(SwiperDisplayMode::AUTO_LINEAR);
+    pattern_->leftButtonId_.reset();
+    pattern_->rightButtonId_.reset();
+    layoutProperty_->UpdateShowIndicator(false);
+    pattern_->itemPosition_.emplace(std::make_pair(1, SwiperItemInfo { 1.0f, 2.0f }));
+    pattern_->itemPosition_.emplace(std::make_pair(0, SwiperItemInfo { 1.0f, 2.0f }));
+    double dragVelocity = 0.1;
+    pattern_->fadeOffset_ = 1.0f;
+    frameNode_->GetPaintProperty<SwiperPaintProperty>()->UpdateEdgeEffect(EdgeEffect::NONE);
+    pattern_->currentIndex_ = 2;
+
+    /**
+     * @tc.steps: step1. call HandleDragEnd.
+     * @tc.expected: Related function runs ok.
+     */
+    pattern_->swiperController_->SetAddTabBarEventCallback([] { return; });
+    pattern_->itemPosition_.clear();
+    pattern_->HandleDragEnd(dragVelocity);
+    EXPECT_TRUE(pattern_->itemPosition_.empty());
 }
 
 /**
