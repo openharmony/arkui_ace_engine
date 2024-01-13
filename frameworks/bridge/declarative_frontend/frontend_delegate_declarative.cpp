@@ -1504,9 +1504,9 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .title = dialogAttr.title,
         .content = dialogAttr.message,
         .autoCancel = dialogAttr.autoCancel,
+        .buttons = buttons,
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
-        .buttons = buttons,
         .maskRect = dialogAttr.maskRect,
     };
     if (dialogAttr.alignment.has_value()) {
@@ -1527,9 +1527,9 @@ void FrontendDelegateDeclarative::ShowDialog(const PromptDialogAttr& dialogAttr,
         .title = dialogAttr.title,
         .content = dialogAttr.message,
         .autoCancel = dialogAttr.autoCancel,
+        .buttons = buttons,
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
-        .buttons = buttons,
         .onStatusChanged = std::move(onStatusChanged),
         .maskRect = dialogAttr.maskRect,
     };
@@ -1548,9 +1548,9 @@ void FrontendDelegateDeclarative::OpenCustomDialog(const PromptDialogAttr &dialo
     DialogProperties dialogProperties = {
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
-        .maskRect = dialogAttr.maskRect,
-        .customBuilder = dialogAttr.customBuilder,
         .isSysBlurStyle = false,
+        .customBuilder = dialogAttr.customBuilder,
+        .maskRect = dialogAttr.maskRect,
     };
     if (dialogAttr.alignment.has_value()) {
         dialogProperties.alignment = dialogAttr.alignment.value();
