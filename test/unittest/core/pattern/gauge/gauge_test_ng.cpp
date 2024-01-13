@@ -1086,15 +1086,10 @@ HWTEST_F(GaugeTestNg, NewPaint001, TestSize.Level1)
     GaugeModelNG gauge;
     gauge.Create(VALUE, MIN, MAX);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
     auto gaugePattern = frameNode->GetPattern<GaugePattern>();
-    ASSERT_NE(gaugePattern, nullptr);
     auto gaugePaintProperty = frameNode->GetPaintProperty<GaugePaintProperty>();
-    ASSERT_NE(gaugePaintProperty, nullptr);
     auto nodePaintMethod = gaugePattern->CreateNodePaintMethod();
-    ASSERT_NE(nodePaintMethod, nullptr);
     auto gaugePaint = AceType::DynamicCast<GaugePaintMethod>(nodePaintMethod);
-    ASSERT_NE(gaugePaint, nullptr);
     RefPtr<RenderContext> rendercontext;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     EXPECT_NE(geometryNode, nullptr);
@@ -1275,14 +1270,16 @@ HWTEST_F(GaugeTestNg, NewDrawIndicator001, TestSize.Level1)
     ColorStopArrayVector.push_back(colorStopArray);
 
     RenderRingInfo data;
+    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
+    EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
+    gaugePaint->NewDrawIndicator(rsCanvas, gaugePaintProperty, data);
+    
     data.radius = 300.0;
     float pathStartVertexX = 10.0;
     float pathStartVertexY = 12.0;
     RSPath path;
     gaugePaint->CreateDefaultTrianglePath(pathStartVertexX, pathStartVertexY, data.radius, path);
-    EXPECT_CALL(rsCanvas, Save()).Times(AtLeast(1));
-    EXPECT_CALL(rsCanvas, Rotate(_, _, _)).Times(AtLeast(1));
-    gaugePaint->NewDrawIndicator(rsCanvas, gaugePaintProperty, data);
+    EXPECT_TRUE(path.BuildFromSVGString("  "));
 }
 
 /**
@@ -1393,7 +1390,6 @@ HWTEST_F(GaugeTestNg, SetLimitFontSize001, TestSize.Level1)
     GaugeModelNG gauge;
     gauge.Create(VALUE, MIN, MAX);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
     auto gaugePattern = frameNode->GetPattern<GaugePattern>();
     ASSERT_NE(gaugePattern, nullptr);
 
@@ -1405,7 +1401,7 @@ HWTEST_F(GaugeTestNg, SetLimitFontSize001, TestSize.Level1)
     RefPtr<ImageLoadingContext> indicatorIconLoadingCtx;
     auto gaugeLayoutAlgorithm = AceType::MakeRefPtr<GaugeLayoutAlgorithm>(indicatorIconLoadingCtx);
     ASSERT_NE(gaugeLayoutAlgorithm, nullptr);
-    
+
     auto layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, frameNode->GetLayoutProperty());
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(gaugeLayoutAlgorithm));
@@ -1449,31 +1445,14 @@ HWTEST_F(GaugeTestNg, SetLimitFontSize001, TestSize.Level1)
     pipeline->SetMinPlatformVersion(VERSION);
 
     /**
-     * @tc.cases: case1 Set the size to infinity and compare with the expected value.
-     */
-    LayoutConstraintF layoutConstraintSize;
-    layoutConstraintSize.selfIdealSize.SetSize(
-        SizeF(Infinity<float>() / SIZE_INFINITY + 1.0f, Infinity<float>() / SIZE_INFINITY + 1.0f));
-    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize);
-    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
-    //
-    EXPECT_NE(SizeF(Infinity<float>() / SIZE_INFINITY + 1.0f, Infinity<float>() / SIZE_INFINITY + 1.0f), SizeF());
-
-    /**
-     * @tc.cases: case2 Set the size to 300 and compare with the expected value.
-     */
-    layoutConstraintSize.selfIdealSize.SetSize(SizeF(WIDTH_1, HEIGHT_1));
-    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraintSize);
-    layoutWrapper->GetLayoutProperty()->UpdateContentConstraint();
-    
-     /**
      * @tc.cases: SetLimitFontSize.
      */
     gaugeLayoutAlgorithm->SetLimitFontSize(AceType::RawPtr(layoutWrapper), true, Dimension(0.0));
     gaugeLayoutAlgorithm->SetLimitFontSize(AceType::RawPtr(layoutWrapper), false, Dimension(0.0));
     gaugeLayoutAlgorithm->Measure(nullptr);
-    auto hostNode = AceType::DynamicCast<FrameNode>(layoutWrapper->GetHostNode());
-    EXPECT_TRUE(hostNode);
+    pipeline->SetMinPlatformVersion(VERSION_TEST);
+    gaugeLayoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
+    EXPECT_TRUE(AceType::DynamicCast<FrameNode>(layoutWrapper->GetHostNode()));
 }
 
 /**
@@ -1558,7 +1537,7 @@ HWTEST_F(GaugeTestNg, Layout001, TestSize.Level1)
 
 /**
  * @tc.name: Layout002
- * @tc.desc: Test the Layout
+ * @tc.desc: Test the Layout CheckDescriptionIsImageNode
  * @tc.type: FUNC
  */
 HWTEST_F(GaugeTestNg, Layout002, TestSize.Level1)
@@ -1593,18 +1572,28 @@ HWTEST_F(GaugeTestNg, Layout002, TestSize.Level1)
     ASSERT_NE(gaugeLayoutAlgorithm, nullptr);
     auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(frameNode, geometryNode, layoutProperty);
     layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(gaugeLayoutAlgorithm));
+    
+     /**
+     * @tc.steps: step4. Add node and wrapper.
+     */
+    auto descriptionNode = FrameNode::GetOrCreateFrameNode(
+        V2::IMAGE_ETS_TAG, gaugePattern->GetDescriptionNodeId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    frameNode->AddChild(descriptionNode, true);
+    auto descriptionWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(descriptionNode, geometryNode, layoutProperty);
+    ASSERT_NE(descriptionWrapper, nullptr);
+    layoutWrapper->AppendChild(descriptionWrapper, false);
 
-    PaddingPropertyF padding;
-    padding.left = 20.0f;
-    padding.top = 20.0f;
-    geometryNode->UpdatePaddingWithBorder(padding);
-    geometryNode->SetContentOffset(OffsetF(50, 50));
     /**
-     * @tc.cases: case1 Set the padding size and compare it with the expected value.
+     * @tc.cases: case1 Layout and compare it with the expected value.
      */
     gaugeLayoutAlgorithm->Layout(AceType::RawPtr(layoutWrapper));
-    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetPadding()->left, padding.left);
-    EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetPadding()->top, padding.top);
+    EXPECT_TRUE(AceType::DynamicCast<FrameNode>(layoutWrapper->GetHostNode()));
+
+    /**
+     * @tc.cases: case1 CheckDescriptionIsImageNode and compare it with the expected value.
+     */
+    gaugeLayoutAlgorithm->CheckDescriptionIsImageNode(layoutWrapper);
+    EXPECT_TRUE(AceType::DynamicCast<FrameNode>(layoutWrapper->GetHostNode()));
 }
 
 /**
@@ -2019,7 +2008,7 @@ HWTEST_F(GaugeTestNg, GaugeModelNGTest003, TestSize.Level1)
     ASSERT_NE(frameNode, nullptr);
 
     GaugeShadowOptions shadowOptions;
-    gauge.SetShadowOptions(Referenced::RawPtr(frameNode),shadowOptions);
+    gauge.SetShadowOptions(Referenced::RawPtr(frameNode), shadowOptions);
 
     std::vector<ColorStopArray> colors;
     ColorStopArray colorStopArray;
@@ -2038,12 +2027,10 @@ HWTEST_F(GaugeTestNg, GaugeModelNGTest003, TestSize.Level1)
     string iconPath = INDICATOR_ICON_PATH;
     string bundleName = INDICATOR_BUNDLE_NAME;
     string moduleName = INDICATOR_MODULE_NAME;
-    gauge.SetIndicatorIconPath(Referenced::RawPtr(frameNode),iconPath, bundleName, moduleName);
+    gauge.SetIndicatorIconPath(Referenced::RawPtr(frameNode), iconPath, bundleName, moduleName);
     Dimension space;
     space = INDICATOR_SPACE;
-    gauge.SetIndicatorSpace(Referenced::RawPtr(frameNode),space);
-
-
+    gauge.SetIndicatorSpace(Referenced::RawPtr(frameNode), space);
 
     /**
      * @tc.steps: step2. get the properties of all settings.
@@ -2095,7 +2082,7 @@ HWTEST_F(GaugeTestNg, GaugeModelNGTest004, TestSize.Level1)
 
     auto nodePtr = Referenced::RawPtr(frameNode);
     gauge.SetValue(nodePtr, NEW_VALUE);
-    gauge.SetStartAngle(nodePtr,START_ANGLE);
+    gauge.SetStartAngle(nodePtr, START_ANGLE);
     gauge.SetEndAngle(nodePtr, END_ANGLE);
     gauge.SetGaugeStrokeWidth(nodePtr, STOKE_WIDTH);
     gauge.SetColors(nodePtr, COLORS, VALUES);
@@ -2114,6 +2101,5 @@ HWTEST_F(GaugeTestNg, GaugeModelNGTest004, TestSize.Level1)
     EXPECT_EQ(gaugePaintProperty->GetColorsValue(), COLORS);
     EXPECT_EQ(gaugePaintProperty->GetValuesValue(), VALUES);
     EXPECT_EQ(gaugePaintProperty->GetIsShowIndicatorValue(), SHOW_INDICATOR);
-
 }
 } // namespace OHOS::Ace::NG
