@@ -716,6 +716,16 @@ struct ArkUIBorderOptions {
     ArkUI_Int32* styles;
 };
 
+
+struct ArkUIAnimationOptionType {
+    ArkUI_Int32 duration;
+    ArkUI_CharPtr curve;
+    ArkUI_Int32 delay;
+    ArkUI_Int32 iteration;
+    ArkUI_Int32 palyMode;
+    ArkUI_Float32 tempo;
+};
+
 struct ArkUICommonModifier {
     void (*setBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetBackgroundColor)(ArkUINodeHandle node);
@@ -931,19 +941,16 @@ struct ArkUICommonModifier {
     void (*setClip)(ArkUINodeHandle node, ArkUI_Int32 isClip);
     void (*setClipShape)(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Float64* attribute, ArkUI_Int32 length);
     void (*setClipPath)(ArkUINodeHandle node, ArkUI_CharPtr type, ArkUI_Float64* attribute, ArkUI_CharPtr commands);
-    void (*setOpacityTransition)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*setTransitionCenter)(ArkUINodeHandle node, ArkUI_Float32 centerX, ArkUI_Int32 centerXUnit,
+        ArkUI_Float32 centerY, ArkUI_Int32 centerYUnit, ArkUI_Float32 centerZValue, ArkUI_Int32 centerZUnit);
+    void (*setOpacityTransition)(
+        ArkUINodeHandle node, ArkUI_Float32 value, const ArkUIAnimationOptionType* opacityOption);
     void (*setRotateTransition)(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_Int32 length,
-                                ArkUI_Float32 centerXValue, ArkUI_Int32 centerXUnit, ArkUI_Float32 centerYValue,
-                                ArkUI_Int32 centerYUnit, ArkUI_Float32 centerZValue, ArkUI_Int32 centerZUnit,
-                                ArkUI_Float32 perspective, ArkUI_Float32 angle);
-
+        ArkUI_Float32 perspective, ArkUI_Float32 angle, const ArkUIAnimationOptionType* opacityOption);
     void (*setScaleTransition)(ArkUINodeHandle node, ArkUI_Float32* arrayValue, ArkUI_Int32 length,
-                               ArkUI_Float32 centerX, ArkUI_Int32 centerXUnit,
-                               ArkUI_Float32 centerY, ArkUI_Int32 centerYUnit);
-
-    void (*setTranslateTransition)(ArkUINodeHandle node, ArkUI_Float32 centerXValue, ArkUI_Int32 centerXUnit,
-                                   ArkUI_Float32 centerYValue, ArkUI_Int32 centerYUnit,
-                                   ArkUI_Float32 centerZValue, ArkUI_Int32 centerZUnit);
+        const ArkUIAnimationOptionType* opacityOption);
+    void (*setTranslateTransition)(ArkUINodeHandle node, ArkUI_Float32 xValue, ArkUI_Int32 xUnit, ArkUI_Float32 yValue,
+        ArkUI_Int32 yUnit, ArkUI_Float32 zValue, ArkUI_Int32 zUnit, const ArkUIAnimationOptionType* opacityOption);
 };
 
 

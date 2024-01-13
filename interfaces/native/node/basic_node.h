@@ -427,41 +427,85 @@ typedef enum {
      */
     NODE_BACKGROUND_BLUR_STYLE,
     /**
-     * @brief 通过<b>setAttribute</b>为当前组件设置转场时的透明度效果。
-     * @note 入参: value: number,value表示插入时的透明度起点值和删除时的透明度终点值。
+     * @brief 通过<b>setAttribute</b>为当前组件设置转场缩放或者旋转的中心点。
+     *
+     * @note 入参: centerX: number，centerY: number，centerZ: number表示旋转中心点。
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_OPACITY_TRANSITION , "0.5");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TRANSITION_CENTER , "20 20 0");
+     * @endcode
+     */
+    NODE_TRANSITION_CENTER,
+    /**
+     * @brief 通过<b>setAttribute</b>为当前组件设置转场时的透明度效果。
+     *
+     * @note 入参: opacity: number, duration: number,
+     * curve: String("linear","ease","easein","easeout","easeinout","fastoutslowin","linearoutslowin",
+     * "fastoutlinearin", "extremedeceleration", "sharp", "rhythm", "smooth", "friction"), delay: number, iterations:
+     * number, playmode: String("normal", "alternate", "reverse", "alternate_reverse"), tempo: number
+     * opacity表示插入时的透明度起点值和删除时的透明度终点值。
+     * duration表示动画播放时长，单位毫秒。curve表示动画曲线。
+     * delay表示动画延迟播放时间，单位毫秒。
+     * iterations表示动画播放次数，默认1次。
+     * playmode表示动画播放模式，默认播放完从头开始播放。
+     * tempo表示动画播放速度，值越大播放越快，默认值1，0表示无动画。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_OPACITY_TRANSITION , "0.5 3000 ease");
      * @endcode
      */
     NODE_OPACITY_TRANSITION,
     /**
      * @brief 通过<b>setAttribute</b>为当前组件设置转场时的旋转效果。
-     * @note 入参: x: number,y: number,z: number,angle: number,centerX: number,centerY: number,centerZ:
-     * number,perspective: number,angle: number ,表示插入时的起点值和删除时的终点值。
+     *
+     * @note 入参: x: number, y: number, z: number, angle: number, perspective: number, duration: number,
+     * curve: String("linear", "ease", "easein", "easeout", "easeinout", "fastoutslowin", "linearoutslowin",
+     * "fastoutlinearin", "extremedeceleration", "sharp", "rhythm", "smooth", "friction"), delay: number, iterations:
+     * number, playmode: String("normal", "alternate", "reverse", "alternate_reverse"), tempo: number
+     * 表示插入时的起点值和删除时的终点值。
      * 其中x表示横向旋转分量，y表示纵向的旋转分量，z表示竖向的旋转分量。
-     * centerX，centerY，centerZ表示旋转中心点，中心点(0,0,0)表示组件左上角。
+     * duration表示动画播放时长，单位毫秒。curve表示动画曲线。
+     * delay表示动画延迟播放时间，单位毫秒。
+     * iterations表示动画播放次数，默认1次。
+     * playmode表示动画播放模式，默认播放完从头开始播放。
+     * tempo表示动画播放速度，值越大播放越快，默认值1，0表示无动画。
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_ROTATE_TRANSITION , "0 0 1 180 0 0 0 0 0");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TRANSITION_CENTER , "20 20 0"); //设置旋转中心
+     * basicNodeApi->setAttribute(nodeHandle, NODE_ROTATE_TRANSITION , "0 0 1 180 0 3000 ease");
      * @endcode
      */
     NODE_ROTATE_TRANSITION,
     /**
      * @brief 通过<b>setAttribute</b>为当前组件设置转场时的缩放效果。
-     * @note 入参: x: number,y: number,z: number,centerX: number,centerY: number
+     *
+     * @note 入参: x: number,y: number,z: number, duration: number,
+     * curve: String("linear","ease","easein","easeout","easeinout","fastoutslowin","linearoutslowin",
+     * "fastoutlinearin", "extremedeceleration", "sharp", "rhythm", "smooth", "friction"), delay: number, iterations:
+     * number, playmode: String("normal", "alternate", "reverse", "alternate_reverse"), tempo: number
      * 其中x表示横向放大倍数，y表示纵向的放大倍数，z表示竖向的放大倍数。
-     * centerX，centerY表示缩放中心点。
+     * duration表示动画播放时长，单位毫秒。curve表示动画曲线。
+     * delay表示动画延迟播放时间，单位毫秒。
+     * iterations表示动画播放次数，默认1次。
+     * playmode表示动画播放模式，默认播放完从头开始播放。
+     * tempo表示动画播放速度，值越大播放越快，默认值1，0表示无动画。
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SCALE_TRANSITION , "0 0 0 20 20");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SCALE_TRANSITION , "0 0 0 3000 ease");
      * @endcode
      */
     NODE_SCALE_TRANSITION,
     /**
      * @brief 通过<b>setAttribute</b>为当前组件设置转场时的平移效果。
-     * @note 入参: x: number,y: number,z: number （默认单位vp）
-     * 表示插入时的起点值和删除时的终点值。
+     *
+     * @note 入参: x: number, y: number, z: number, duration: number,
+     * curve: String("linear", "ease", "easein", "easeout", "easeinout", "fastoutslowin", "linearoutslowin",
+     * "fastoutlinearin", "extremedeceleration", "sharp", "rhythm", "smooth", "friction"), delay: number, iterations:
+     * number, playmode: String("normal", "alternate", "reverse", "alternate_reverse"), tempo: number
      * x表示横向的平移距离，y表示纵向的平移距离，z表示竖向的平移距离。
+     * duration表示动画播放时长，单位毫秒。curve表示动画曲线。
+     * delay表示动画延迟播放时间，单位毫秒。
+     * iterations表示动画播放次数，默认1次。
+     * playmode表示动画播放模式，默认播放完从头开始播放。
+     * tempo表示动画播放速度，值越大播放越快，默认值1，0表示无动画。
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TRANSLATE_TRANSITION , "12 50 0");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TRANSLATE_TRANSITION , "12 50 0 3000 ease");
      * @endcode
      */
     NODE_TRANSLATE_TRANSITION,

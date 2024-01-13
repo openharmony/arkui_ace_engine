@@ -67,13 +67,11 @@ constexpr int DISPLAY_ARROW_TRUE = 1;
 constexpr int32_t X_INDEX = 0;
 constexpr int32_t Y_INDEX = 1;
 constexpr int32_t Z_INDEX = 2;
-constexpr int32_t SCALE_CENTER_X_INDEX = 3;
-constexpr int32_t SCALE_CENTER_Y_INDEX = 4;
-constexpr int32_t ROTATE_CENTER_X_INDEX = 3;
-constexpr int32_t ROTATE_CENTER_Y_INDEX = 4;
-constexpr int32_t ROTATE_CENTER_Z_INDEX = 5;
-constexpr int32_t ROTATE_PERSPECTIVE_INDEX = 6;
-constexpr int32_t ROTATE_ANGLE_INDEX = 7;
+constexpr int32_t CENTER_X_INDEX = 0;
+constexpr int32_t CENTER_Y_INDEX = 1;
+constexpr int32_t CENTER_Z_INDEX = 2;
+constexpr int32_t ROTATE_PERSPECTIVE_INDEX = 4;
+constexpr int32_t ROTATE_ANGLE_INDEX = 3;
 constexpr uint32_t ARRAY_SIZE = 3;
 constexpr int32_t BACKGROUND_IMAGE_WIDTH_INDEX = 0;
 constexpr int32_t BACKGROUND_IMAGE_HEIGHT_INDEX = 1;
@@ -130,6 +128,22 @@ const std::vector<std::string> SCROLL_DISPLAY_MODE = { "off", "auto", "on" };
 const std::vector<std::string> SCROLL_AXIS = { "vertical", "horizontal", "free", "none" };
 const std::vector<std::string> SCROLL_EDGE_EFFECT = { "spring", "fade", "none" };
 const std::vector<std::string> LIST_STICKY_STYLE = { "none", "header", "footer", "both" };
+const std::vector<std::string> CURVE_ARRAY = { "linear", "ease", "easein", "easeout", "easeinout", "fastoutslowin",
+    "linearoutslowin", "fastoutlinearin", "extremedeceleration", "sharp", "rhythm", "smooth", "friction" };
+const std::vector<std::string> PLAY_MODE_ARRAY = { "normal", "alternate", "reverse", "alternate_reverse" };
+const std::string DEFAULT_CURVE = "linear";
+constexpr int32_t ANIMATION_DURATION_INDEX = 0;
+constexpr int32_t ANIMATION_CURVE_INDEX = 1;
+constexpr int32_t ANIMATION_DELAY_INDEX = 2;
+constexpr int32_t ANIMATION_INTERATION_INDEX = 3;
+constexpr int32_t ANIMATION_PLAY_MODE_INDEX = 4;
+constexpr int32_t ANIMATION_TEMPO_INDEX = 5;
+constexpr int32_t OPACITY_ANIMATION_BASE = 1;
+constexpr int32_t ROTATE_ANIMATION_BASE = 5;
+constexpr int32_t SCALE_ANIMATION_BASE = 3;
+constexpr int32_t TRANSLATE_ANIMATION_BASE = 3;
+constexpr int32_t DEFAULT_DURATION = 1000;
+typedef std::map<const std::string, ArkUI_Int32> AttrStringToIntMap;
 
 uint32_t StringToColorInt(const char* string, uint32_t defaultValue = 0)
 {
@@ -2009,6 +2023,73 @@ void SetBackgroundImageSize(ArkUI_NodeHandle node, const char* value)
         height.Value(), static_cast<int32_t>(width.Unit()), static_cast<int32_t>(height.Unit()));
 }
 
+void SetTransitionCenter(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    std::vector<std::string> transitionCenterVector;
+    StringUtils::StringSplitter(std::string(value), ' ', transitionCenterVector);
+    CalcDimension centerX(0);
+    if (CENTER_X_INDEX < transitionCenterVector.size()) {
+        StringUtils::StringToCalcDimensionNG(transitionCenterVector[CENTER_X_INDEX], centerX, false, DimensionUnit::VP);
+    }
+    CalcDimension centerY(0);
+    if (CENTER_Y_INDEX < transitionCenterVector.size()) {
+        StringUtils::StringToCalcDimensionNG(transitionCenterVector[CENTER_Y_INDEX], centerY, false, DimensionUnit::VP);
+    }
+    CalcDimension centerZ(0);
+    if (CENTER_Z_INDEX < transitionCenterVector.size()) {
+        StringUtils::StringToCalcDimensionNG(transitionCenterVector[CENTER_Z_INDEX], centerZ, false, DimensionUnit::VP);
+    }
+    fullImpl->getNodeModifiers()->getCommonModifier()->setTransitionCenter(node->uiNodeHandle, centerX.Value(),
+        static_cast<int32_t>(centerX.Unit()), centerY.Value(), static_cast<int32_t>(centerY.Unit()), centerZ.Value(),
+        static_cast<int32_t>(centerZ.Unit()));
+}
+
+void ParseAnimation(
+    std::vector<std::string>& sourceVector, ArkUIAnimationOptionType& animationOption, const int animationIndexBase)
+{
+    const int32_t animationDurationIndex = animationIndexBase + ANIMATION_DURATION_INDEX;
+    int32_t duration = DEFAULT_DURATION;
+    if (animationDurationIndex < sourceVector.size()) {
+        duration = StringToInt(sourceVector[animationDurationIndex].c_str(), DEFAULT_DURATION);
+    }
+    const int32_t animationCurveIndex = animationIndexBase + ANIMATION_CURVE_INDEX;
+    std::string curve = DEFAULT_CURVE;
+    if (animationCurveIndex < sourceVector.size()) {
+        curve = sourceVector[animationCurveIndex];
+    }
+    const int32_t animationDelayIndex = animationIndexBase + ANIMATION_DELAY_INDEX;
+    int32_t delay = 0;
+    if (animationDelayIndex < sourceVector.size()) {
+        delay = StringToInt(sourceVector[animationDelayIndex].c_str(), 0);
+    }
+    const int32_t animationIterationsIndex = animationIndexBase + ANIMATION_INTERATION_INDEX;
+    int32_t iterations = 1;
+    if (animationIterationsIndex < sourceVector.size()) {
+        iterations = StringToInt(sourceVector[animationIterationsIndex].c_str(), 1);
+    }
+    const int32_t animationPlayModeIndex = animationIndexBase + ANIMATION_PLAY_MODE_INDEX;
+    int32_t direction = 0;
+    if (animationPlayModeIndex < sourceVector.size()) {
+        direction = StringToEnumInt(sourceVector[animationPlayModeIndex].c_str(), PLAY_MODE_ARRAY, 0);
+    }
+    const int32_t animationTempoIndex = animationIndexBase + ANIMATION_TEMPO_INDEX;
+    float tempo = 1.0f;
+    if (animationTempoIndex < sourceVector.size()) {
+        tempo = StringToFloat(sourceVector[animationTempoIndex].c_str(), 1.0f);
+    }
+    animationOption.duration = duration;
+    animationOption.curve = curve.c_str();
+    animationOption.delay = delay;
+    animationOption.iteration = iterations;
+    animationOption.palyMode = direction;
+    animationOption.tempo = tempo;
+}
+
 void SetOpacityTransition(ArkUI_NodeHandle node, const char* value)
 {
     auto fullImpl = GetFullImpl();
@@ -2016,8 +2097,16 @@ void SetOpacityTransition(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
         return;
     }
+    std::vector<std::string> opacityVector;
+    StringUtils::StringSplitter(std::string(value), ' ', opacityVector);
+    float opacity = DEFAULT_OPACITY;
+    if (opacityVector.size() > 0) {
+        opacity = std::clamp(StringUtils::StringToFloat(opacityVector[0]), 0.0f, 1.0f);
+    }
+    ArkUIAnimationOptionType animationOption;
+    ParseAnimation(opacityVector, animationOption, OPACITY_ANIMATION_BASE);
     fullImpl->getNodeModifiers()->getCommonModifier()->setOpacityTransition(
-        node->uiNodeHandle, StringToFloat(value, DEFAULT_OPACITY));
+        node->uiNodeHandle, opacity, &animationOption);
 }
 
 void SetRotateTransition(ArkUI_NodeHandle node, const char* value)
@@ -2033,30 +2122,18 @@ void SetRotateTransition(ArkUI_NodeHandle node, const char* value)
     for (size_t i = 0; i < rotateVector.size() && i < rotateArray.size(); i++) {
         rotateArray[i] = StringUtils::StringToFloat(rotateVector[i]);
     }
-    CalcDimension centerX(0);
-    if (ROTATE_CENTER_X_INDEX < rotateVector.size()) {
-        StringUtils::StringToCalcDimensionNG(rotateVector[ROTATE_CENTER_X_INDEX], centerX, false, DimensionUnit::VP);
-    }
-    CalcDimension centerY(0);
-    if (ROTATE_CENTER_Y_INDEX < rotateVector.size()) {
-        StringUtils::StringToCalcDimensionNG(rotateVector[ROTATE_CENTER_Y_INDEX], centerY, false, DimensionUnit::VP);
-    }
-    CalcDimension centerZ(0);
-    if (ROTATE_CENTER_Z_INDEX < rotateVector.size()) {
-        StringUtils::StringToCalcDimensionNG(rotateVector[ROTATE_CENTER_Z_INDEX], centerZ, false, DimensionUnit::VP);
+    float angle = 0.0f;
+    if (ROTATE_ANGLE_INDEX < rotateVector.size()) {
+        angle = StringUtils::StringToFloat(rotateVector[ROTATE_ANGLE_INDEX]);
     }
     float perspective = 0.0f;
     if (ROTATE_PERSPECTIVE_INDEX < rotateVector.size()) {
         perspective = StringUtils::StringToFloat(rotateVector[ROTATE_PERSPECTIVE_INDEX]);
     }
-    float angle = 0.0f;
-    if (ROTATE_ANGLE_INDEX < rotateVector.size()) {
-        angle = StringUtils::StringToFloat(rotateVector[ROTATE_ANGLE_INDEX]);
-    }
-    fullImpl->getNodeModifiers()->getCommonModifier()->setRotateTransition(node->uiNodeHandle, &rotateArray[0],
-        ARRAY_SIZE, centerX.Value(), static_cast<int32_t>(centerX.Unit()), centerY.Value(),
-        static_cast<int32_t>(centerY.Unit()), centerZ.Value(), static_cast<int32_t>(centerZ.Unit()), perspective,
-        angle);
+    ArkUIAnimationOptionType animationOption;
+    ParseAnimation(rotateVector, animationOption, ROTATE_ANIMATION_BASE);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setRotateTransition(
+        node->uiNodeHandle, &rotateArray[0], ARRAY_SIZE, perspective, angle, &animationOption);
 }
 
 void SetScaleTransition(ArkUI_NodeHandle node, const char* value)
@@ -2072,18 +2149,10 @@ void SetScaleTransition(ArkUI_NodeHandle node, const char* value)
     for (size_t i = 0; i < scaleVector.size() && i < scaleFloatArray.size(); i++) {
         scaleFloatArray[i] = StringUtils::StringToFloat(scaleVector[i]);
     }
-
-    CalcDimension centerX(0);
-    if (SCALE_CENTER_X_INDEX < scaleVector.size()) {
-        StringUtils::StringToCalcDimensionNG(scaleVector[SCALE_CENTER_X_INDEX], centerX, false, DimensionUnit::VP);
-    }
-    CalcDimension centerY(0);
-    if (SCALE_CENTER_Y_INDEX < scaleVector.size()) {
-        StringUtils::StringToCalcDimensionNG(scaleVector[SCALE_CENTER_Y_INDEX], centerY, false, DimensionUnit::VP);
-    }
-    fullImpl->getNodeModifiers()->getCommonModifier()->setScaleTransition(node->uiNodeHandle, &scaleFloatArray[0],
-        scaleFloatArray.size(), centerX.Value(), static_cast<int32_t>(centerX.Unit()), centerY.Value(),
-        static_cast<int32_t>(centerY.Unit()));
+    ArkUIAnimationOptionType animationOption;
+    ParseAnimation(scaleVector, animationOption, SCALE_ANIMATION_BASE);
+    fullImpl->getNodeModifiers()->getCommonModifier()->setScaleTransition(
+        node->uiNodeHandle, &scaleFloatArray[0], scaleFloatArray.size(), &animationOption);
 }
 
 void SetTranslateTransition(ArkUI_NodeHandle node, const char* value)
@@ -2107,9 +2176,11 @@ void SetTranslateTransition(ArkUI_NodeHandle node, const char* value)
     if (Z_INDEX < translateVector.size()) {
         StringUtils::StringToCalcDimensionNG(translateVector[Z_INDEX], zDimension, false, DimensionUnit::VP);
     }
+    ArkUIAnimationOptionType animationOption;
+    ParseAnimation(translateVector, animationOption, TRANSLATE_ANIMATION_BASE);
     fullImpl->getNodeModifiers()->getCommonModifier()->setTranslateTransition(node->uiNodeHandle, xDimension.Value(),
         static_cast<int32_t>(xDimension.Unit()), yDimension.Value(), static_cast<int32_t>(yDimension.Unit()),
-        zDimension.Value(), static_cast<int32_t>(zDimension.Unit()));
+        zDimension.Value(), static_cast<int32_t>(zDimension.Unit()), &animationOption);
 }
 
 void SetBackgroundBlurStyle(ArkUI_NodeHandle node, const char* value)
@@ -2417,9 +2488,9 @@ void SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const char* va
         SetEnabled, SetMargin, SetTranslate, SetScale, SetRotate, SetBrightness, SetSaturate, SetBlur,
         SetLinearGradient, SetAlign, SetOpacity, SetBorderWidth, SetBorderRadius, SetBorderColor, SetBorderStyle,
         SetZIndex, SetVisibility, SetClip, SetTransform, SetHitTestBehavior, SetPosition, SetShadow,
-        SetBackgroundImageSize, SetBackgroundBlurStyle, SetOpacityTransition, SetRotateTransition, SetScaleTransition,
-        SetTranslateTransition, SetFocusable, SetAccessibilityGroup, SetAccessibilityText, SetAccessibilityLevel,
-        SetAccessibilityDescription, SetDefaultFocus, SetResponseRegion, SetOverlay };
+        SetBackgroundImageSize, SetBackgroundBlurStyle, SetTransitionCenter, SetOpacityTransition, SetRotateTransition,
+        SetScaleTransition, SetTranslateTransition, SetFocusable, SetAccessibilityGroup, SetAccessibilityText,
+        SetAccessibilityLevel, SetAccessibilityDescription, SetDefaultFocus, SetResponseRegion, SetOverlay };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
