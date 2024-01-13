@@ -51,6 +51,7 @@ int32_t SystemProperties::devicePhysicalHeight_ = 0;
 bool SystemProperties::enableScrollableItemPool_ = false;
 bool SystemProperties::navigationBlurEnabled_ = false;
 bool SystemProperties::gridCacheEnabled_ = false;
+bool SystemProperties::sideBarContainerBlurEnable_ = false;
 
 float SystemProperties::GetFontWeightScale()
 {
@@ -127,5 +128,10 @@ bool SystemProperties::GetLayoutTraceEnabled()
 bool SystemProperties::GetGridCacheEnabled()
 {
     return gridCacheEnabled_;
+}
+
+bool SystemProperties::GetSideBarContainerBlurEnable()
+{
+    return sideBarContainerBlurEnable_;
 }
 } // namespace OHOS::Ace

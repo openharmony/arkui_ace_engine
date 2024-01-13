@@ -20,7 +20,10 @@
 #include "base/log/log_wrapper.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/resource/internal_resource.h"
+#include "core/common/ace_application_info.h"
+#include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -402,6 +405,13 @@ void SideBarContainerPattern::CreateAndMountNodes()
             CHECK_NULL_VOID(sideBarTheme);
             Color bgColor = sideBarTheme->GetSideBarBackgroundColor();
             renderContext->UpdateBackgroundColor(bgColor);
+        }
+        if (SystemProperties::GetSideBarContainerBlurEnable() &&
+            Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+            !renderContext->GetBackBlurStyle().has_value()) {
+            BlurStyleOption blurStyleOption;
+            blurStyleOption.blurStyle = BlurStyle::COMPONENT_THICK;
+            renderContext->UpdateBackBlurStyle(blurStyleOption);
         }
     }
     host->RebuildRenderContextTree();
