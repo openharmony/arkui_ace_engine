@@ -32,7 +32,8 @@ public:
     static RefPtr<FrameNode> Create(const std::string& bundleName, const std::string& abilityName,
         const std::map<std::string, std::string>& params, std::function<void(int32_t)>&& onRelease,
         std::function<void(int32_t, const std::string&, const std::string&)>&& onError);
-    static RefPtr<FrameNode> Create(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks);
+    static RefPtr<FrameNode> Create(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
+        bool isAsyncModalBinding = false);
 
     void Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, bool transferringCaller = false) override;
     // for dynamic component

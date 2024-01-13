@@ -44,8 +44,9 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-UIExtensionPattern::UIExtensionPattern(bool isTransferringCaller, bool isModal)
-    : isTransferringCaller_(isTransferringCaller), isModal_(isModal)
+UIExtensionPattern::UIExtensionPattern(bool isTransferringCaller, bool isModal, bool isAsyncModalBinding)
+    : isTransferringCaller_(isTransferringCaller), isModal_(isModal),
+      isAsyncModalBinding_(isAsyncModalBinding)
 {
     sessionWrapper_ = SessionWrapperFactory::CreateSessionWrapper(
         SessionTye::UI_EXTENSION_ABILITY, AceType::WeakClaim(this), instanceId_, isTransferringCaller_);
@@ -119,7 +120,7 @@ void UIExtensionPattern::UpdateWant(const AAFwk::Want& want)
         NotifyDestroy();
         sessionWrapper_->DestroySession();
     }
-    sessionWrapper_->CreateSession(want);
+    sessionWrapper_->CreateSession(want, isAsyncModalBinding_);
     NotifyForeground();
 }
 
@@ -721,6 +722,18 @@ void UIExtensionPattern::FireAsyncCallbacks()
         if (callback) {
             callback(MakeRefPtr<UIExtensionProxy>(sessionWrapper_, Claim(this)));
         }
+    }
+}
+
+void UIExtensionPattern::SetBindModalCallback(const std::function<void()>&& callback)
+{
+    bindModalCallback_ = std::move(callback);
+}
+
+void UIExtensionPattern::FireBindModalCallback()
+{
+    if (bindModalCallback_) {
+        bindModalCallback_();
     }
 }
 
