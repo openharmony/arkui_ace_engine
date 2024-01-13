@@ -264,7 +264,7 @@ panda::Local<panda::JSValueRef> JsLoadDocument(panda::JsiRuntimeCallInfo* runtim
 panda::Local<panda::JSValueRef> JsLoadCustomTitleBar(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    int32_t argc = static_cast<int32_t>(runtimeCallInfo->GetArgsNumber());
     if (argc != 1) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -1035,7 +1035,7 @@ panda::Local<panda::JSValueRef> RequestFocus(panda::JsiRuntimeCallInfo* runtimeC
 panda::Local<panda::JSValueRef> SetCursor(panda::JsiRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
-    int32_t argc = runtimeCallInfo->GetArgsNumber();
+    int32_t argc = static_cast<int32_t>(runtimeCallInfo->GetArgsNumber());
     if (vm == nullptr) {
         return panda::JSValueRef::Undefined(vm);
     }

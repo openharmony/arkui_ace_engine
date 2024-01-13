@@ -109,7 +109,7 @@ uint32_t WindowSceneHelper::GetFocusSystemWindowId(RefPtr<FrameNode> focusedFram
         return focusSystemWindowId;
     }
     if (isWindowScene) {
-        focusSystemWindowId = window2patternSession->GetPersistentId();
+        focusSystemWindowId = static_cast<uint32_t>(window2patternSession->GetPersistentId());
         LOGI("Get systemWindowScene id( %{public}u ) successfully.", focusSystemWindowId);
     }
 

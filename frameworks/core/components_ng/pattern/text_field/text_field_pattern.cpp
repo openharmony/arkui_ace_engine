@@ -3249,8 +3249,8 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
         UpdateCounterBorderStyle(originLength, maxlength);
     }
     bool noDeleteOperation = deleteBackwardOperations_.empty() && deleteForwardOperations_.empty();
-    if (!IsShowPasswordIcon() && originLength == maxlength && noDeleteOperation && !IsSelected() &&
-        textFieldLayoutProperty->GetShowCounterValue(false) && inputValue != DEFAULT_MODE &&
+    if (!IsShowPasswordIcon() && originLength == static_cast<int32_t>(maxlength) && noDeleteOperation &&
+        !IsSelected() && textFieldLayoutProperty->GetShowCounterValue(false) && inputValue != DEFAULT_MODE &&
         inputValue != ILLEGAL_VALUE && !IsNormalInlineState()) {
         counterChange_ = true;
         UpdateOverCounterColor();
@@ -3274,7 +3274,7 @@ void TextFieldPattern::HandleInputCounterBorder(int32_t& textLength, uint32_t& m
         return;
     }
     auto inputValue = textFieldLayoutProperty->GetSetCounterValue(DEFAULT_MODE);
-    if (textLength >= maxLength && inputValue == DEFAULT_MODE) {
+    if (textLength >= static_cast<int32_t>(maxLength) && inputValue == DEFAULT_MODE) {
         UpdateCounterBorderStyle(textLength, maxLength);
     }
 }
@@ -3325,7 +3325,7 @@ void TextFieldPattern::UpdateCounterBorderStyle(int32_t& textLength, uint32_t& m
     CHECK_NULL_VOID(textFieldLayoutProperty);
     counterChange_ = true;
     auto showBorder = textFieldLayoutProperty->GetShowHighlightBorderValue(true);
-    if (textLength >= (maxLength - ONE_CHARACTER) && !IsTextArea() && showBorder == true) {
+    if (static_cast<uint32_t>(textLength) >= (maxLength - ONE_CHARACTER) && !IsTextArea() && showBorder == true) {
         SetUnderlineColor(theme->GetErrorUnderlineColor());
     } else if (textLength >= maxLength && IsTextArea() && showBorder == true) {
         HandleCounterBorder();
