@@ -1667,7 +1667,7 @@ void RichEditorPattern::HandleFocusEvent()
     CancelAITask();
     UseHostToUpdateTextFieldManager();
     StartTwinkling();
-    if (!usingMouseRightButton_ && !isLongPress_) {
+    if (!usingMouseRightButton_ && !isLongPress_ && !isDragging_) {
         RequestKeyboard(false, true, true);
     }
 }
@@ -5159,7 +5159,11 @@ void RichEditorPattern::HandleCursorOnDragEnded(const RefPtr<NotifyDragEvent>& n
     }
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT,
         "In OnDragEnded, the released location is in the current richEditor, id:%{public}d", host->GetId());
-    focusHub->RequestFocusImmediately();
+    if (HasFocus()) {
+        RequestKeyboard(false, true, true);
+    } else {
+        focusHub->RequestFocusImmediately();
+    }
     isCursorAlwaysDisplayed_ = false;
     StartTwinkling();
 };
@@ -5170,12 +5174,14 @@ void RichEditorPattern::HandleOnDragStatusCallback(
     ScrollablePattern::HandleOnDragStatusCallback(dragEventType, notifyDragEvent);
     switch (dragEventType) {
         case DragEventType::MOVE:
+            isDragging_ = true;
             HandleCursorOnDragMoved(notifyDragEvent);
             break;
         case DragEventType::LEAVE:
             HandleCursorOnDragLeaved(notifyDragEvent);
             break;
         case DragEventType::DROP:
+            isDragging_ = false;
             HandleCursorOnDragEnded(notifyDragEvent);
             break;
         default:
