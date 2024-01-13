@@ -97,4 +97,36 @@ std::string GetFontFamilyInJson(const std::optional<std::vector<std::string>>& v
     }
     return fontFamily;
 }
+std::string GetRenderingStrategyInJson(const std::optional<int32_t>& value)
+{
+    string text;
+    switch(value.value_or("RenderingStrategy.SINGLE"))
+    {
+        case 0:
+            text = "RenderingStrategy.SINGLE";
+            break;
+        case 1:
+            text = "RenderingStrategy.MULTIPLE_COLOR";
+            break;
+        default:
+            text = "RenderingStrategy.MULTIPLE_OPACITY";
+    }
+    return text;
+}
+std::string GetEffectStrategyInJson(const std::optional<int32_t>& value)
+{
+    string text;
+    switch(value.value_or("EffectStrategy.NONE"))
+    {
+        case 0:
+            text = "EffectStrategy.NONE";
+            break;
+        case 1:
+            text = "EffectStrategy.SCALE";
+            break;
+        default:
+            text = "EffectStrategy.HIERARCHICAL";
+    }
+    return text;
+}
 } // namespace OHOS::Ace::NG
