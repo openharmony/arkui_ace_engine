@@ -208,10 +208,10 @@ export struct CounterComponent {
   @State hasFocusText3: boolean = false
   @State subBtnFocusWidh: string = '0vp'
   @State addBtnFocusWidh: string = '0vp'
-  @State value: number = 0;
-  @State year: number = CounterConstant.COUNTER_MIN_YEAR;
-  @State month: number = CounterConstant.COUNTER_INITIAL_MONTH;
-  @State day: number = CounterConstant.COUNTER_INITIAL_DAY;
+  @State value: number | undefined = undefined;
+  @State year: number = 0;
+  @State month: number = 0;
+  @State day: number = 0;
   @State hour: number = 0;
   @State minute: number = 0;
   @State second: number = 0;
@@ -267,7 +267,7 @@ export struct CounterComponent {
     if (this.numberStyleOptions.label === undefined) {
       this.numberStyleOptions.label = '';
     }
-    if (this.numberStyleOptions.value !== undefined ) {
+    if (this.numberStyleOptions.value !== undefined && this.value === undefined) {
       this.value = this.numberStyleOptions.value;
       this.onChange?.(this.value);
       this.inputValue = this.value.toString();
@@ -337,7 +337,7 @@ export struct CounterComponent {
   }
 
   private updateInlineStyleOptions() {
-    if (this.inlineStyleOptions.value !== undefined) {
+    if (this.inlineStyleOptions.value !== undefined && this.value === undefined) {
       this.value = this.inlineStyleOptions.value;
       this.onChange?.(this.value);
       this.inputValue = this.value.toString();
@@ -412,21 +412,39 @@ export struct CounterComponent {
     if (this.dateStyleOptions.year !== undefined &&
         this.dateStyleOptions.year >= this.minYear &&
         this.dateStyleOptions.year <= this.maxYear) {
-      this.year = this.dateStyleOptions.year;
+      if (this.year === 0) {
+        this.year = this.dateStyleOptions.year;
+        let date = new DateData(this.year, this.month, this.day);
+        this.onDateChange?.(date);
+      }
+    } else {
+      this.year = CounterConstant.COUNTER_MIN_YEAR;
       let date = new DateData(this.year, this.month, this.day);
       this.onDateChange?.(date);
     }
     if (this.dateStyleOptions.month !== undefined &&
         this.dateStyleOptions.month <= CounterConstant.COUNTER_MAX_MONTH &&
         this.dateStyleOptions.month >= CounterConstant.COUNTER_MIN_MONTH) {
-      this.month = this.dateStyleOptions.month;
+      if (this.month === 0) {
+        this.month = this.dateStyleOptions.month;
+        let date = new DateData(this.year, this.month, this.day);
+        this.onDateChange?.(date);
+      }
+    } else {
+      this.month = CounterConstant.COUNTER_INITIAL_MONTH;
       let date = new DateData(this.year, this.month, this.day);
       this.onDateChange?.(date);
     }
     if (this.dateStyleOptions.day !== undefined &&
         this.dateStyleOptions.day <= this.getDayNumber() &&
         this.dateStyleOptions.day >= CounterConstant.COUNTER_MIN_DAY) {
-      this.day = this.dateStyleOptions.day;
+      if (this.day === 0) {
+        this.day = this.dateStyleOptions.day;
+        let date = new DateData(this.year, this.month, this.day);
+        this.onDateChange?.(date);
+      }
+    } else {
+      this.day = CounterConstant.COUNTER_INITIAL_DAY;
       let date = new DateData(this.year, this.month, this.day);
       this.onDateChange?.(date);
     }
