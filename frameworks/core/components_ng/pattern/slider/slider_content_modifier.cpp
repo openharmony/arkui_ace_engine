@@ -141,6 +141,8 @@ void SliderContentModifier::DrawBackground(DrawingContext& context)
     RSRoundRect roundRect(GetTrackRect(), trackBorderRadius, trackBorderRadius);
     canvas.DrawRoundRect(roundRect);
     canvas.DetachBrush();
+    canvas.Save();
+    canvas.ClipRoundRect(roundRect, RSClipOp::INTERSECT, true);
 }
 
 void SliderContentModifier::DrawStep(DrawingContext& context)
@@ -206,19 +208,19 @@ void SliderContentModifier::DrawSelect(DrawingContext& context)
         auto rect = GetTrackRect();
         auto insetOffset = .0f;
         if (sliderMode == SliderModelNG::SliderMode::INSET) {
-            insetOffset = trackThickness * HALF;
+            insetOffset = std::max(trackBorderRadius, trackThickness * HALF);
         }
         if (!reverse_) {
             if (direction == Axis::HORIZONTAL) {
-                rect.SetRight(blockCenter.GetX() + std::max(trackBorderRadius, insetOffset));
+                rect.SetRight(blockCenter.GetX() + insetOffset);
             } else {
-                rect.SetBottom(blockCenter.GetY() + std::max(trackBorderRadius, insetOffset));
+                rect.SetBottom(blockCenter.GetY() + insetOffset);
             }
         } else {
             if (direction == Axis::HORIZONTAL) {
-                rect.SetLeft(blockCenter.GetX() - std::max(trackBorderRadius, insetOffset));
+                rect.SetLeft(blockCenter.GetX() - insetOffset);
             } else {
-                rect.SetTop(blockCenter.GetY() - std::max(trackBorderRadius, insetOffset));
+                rect.SetTop(blockCenter.GetY() - insetOffset);
             }
         }
 
@@ -230,6 +232,7 @@ void SliderContentModifier::DrawSelect(DrawingContext& context)
         canvas.DrawRoundRect(RSRoundRect(rect, trackBorderRadius, trackBorderRadius));
         canvas.DetachBrush();
     }
+    canvas.Restore();
 }
 
 void SliderContentModifier::DrawDefaultBlock(DrawingContext& context)
@@ -434,13 +437,29 @@ RSRect SliderContentModifier::GetTrackRect()
     auto backStart = backStart_->Get();
     auto backEnd = backEnd_->Get();
     auto trackThickness = trackThickness_->Get();
-
+    auto direction = static_cast<Axis>(directionAxis_->Get());
     RSRect rect;
-    rect.SetLeft(backStart.GetX() - trackThickness * HALF);
-    rect.SetRight(backEnd.GetX() + trackThickness * HALF);
-    rect.SetTop(backStart.GetY() - trackThickness * HALF);
-    rect.SetBottom(backEnd.GetY() + trackThickness * HALF);
-
+    if (direction == Axis::HORIZONTAL) {
+        if (sliderMode_->Get() == static_cast<int32_t>(SliderModel::SliderMode::OUTSET)) {
+            rect.SetLeft(backStart.GetX());
+            rect.SetRight(backEnd.GetX());
+        } else {
+            rect.SetLeft(backStart.GetX() - trackThickness * HALF);
+            rect.SetRight(backEnd.GetX() + trackThickness * HALF);
+        }
+        rect.SetTop(backStart.GetY() - trackThickness * HALF);
+        rect.SetBottom(backEnd.GetY() + trackThickness * HALF);
+    } else {
+        rect.SetLeft(backStart.GetX() - trackThickness * HALF);
+        rect.SetRight(backEnd.GetX() + trackThickness * HALF);
+        if (sliderMode_->Get() == static_cast<int32_t>(SliderModel::SliderMode::OUTSET)) {
+            rect.SetTop(backStart.GetY());
+            rect.SetBottom(backEnd.GetY());
+        } else {
+            rect.SetTop(backStart.GetY() - trackThickness * HALF);
+            rect.SetBottom(backEnd.GetY() + trackThickness * HALF);
+        }
+    }
     return rect;
 }
 
