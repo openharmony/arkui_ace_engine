@@ -99,9 +99,9 @@ bool WindowSceneHelper::IsWindowScene(RefPtr<FrameNode> focusedFrameNode)
     return isWindowSceneFlag;
 }
 
-uint32_t WindowSceneHelper::GetFocusSystemWindowId(RefPtr<FrameNode> focusedFrameNode)
+int32_t WindowSceneHelper::GetFocusSystemWindowId(RefPtr<FrameNode> focusedFrameNode)
 {
-    uint32_t focusSystemWindowId = 0;
+    int32_t focusSystemWindowId = 0;
     bool isWindowScene = IsWindowScene(focusedFrameNode);
     sptr<Rosen::Session> window2patternSession = GetCurSession(focusedFrameNode);
     if (window2patternSession == nullptr) {
@@ -109,8 +109,8 @@ uint32_t WindowSceneHelper::GetFocusSystemWindowId(RefPtr<FrameNode> focusedFram
         return focusSystemWindowId;
     }
     if (isWindowScene) {
-        focusSystemWindowId = static_cast<uint32_t>(window2patternSession->GetPersistentId());
-        LOGI("Get systemWindowScene id( %{public}u ) successfully.", focusSystemWindowId);
+        focusSystemWindowId = window2patternSession->GetPersistentId();
+        LOGI("Get systemWindowScene id( %{public}d ) successfully.", focusSystemWindowId);
     }
 
     return focusSystemWindowId;

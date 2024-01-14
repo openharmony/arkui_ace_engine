@@ -80,6 +80,8 @@ public:
     // handle close keyboard
     RefPtr<FrameNode> HandleFocusNode();
     void IsCloseSCBKeyboard();
+    void IsSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode);
+    void IsNotSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode);
     void SetNeedSoftKeyboard(std::optional<bool> flag)
     {
         needSoftKeyboard_ = flag;
@@ -750,6 +752,8 @@ private:
     RefPtr<PostEventManager> postEventManager_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
+
+    int32_t preNodeId_ = -1;
 };
 } // namespace OHOS::Ace::NG
 
