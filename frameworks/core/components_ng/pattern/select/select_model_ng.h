@@ -60,6 +60,7 @@ public:
     void SetOptionWidth(const Dimension& value) override;
     void SetOptionHeight(const Dimension& value) override;
     void SetOptionWidthFitTrigger(bool isFitTrigger) override;
+    void SetHasOptionWidth(bool hasOptionWidth) override;
 
     static void SetArrowPosition(FrameNode* frameNode, const ArrowPosition value);
     static void SetSpace(FrameNode* frameNode, const Dimension& value);

@@ -201,6 +201,16 @@ public:
         return isSelectMenu_;
     }
 
+    void SetHasOptionWidth(bool hasOptionWidth)
+    {
+        hasOptionWidth_ = hasOptionWidth;
+    }
+
+    bool GetHasOptionWidth()
+    {
+        return hasOptionWidth_;
+    }
+
     void AddOptionNode(const RefPtr<FrameNode>& option)
     {
         CHECK_NULL_VOID(option);
@@ -380,6 +390,7 @@ private:
     bool isWidthModifiedBySelect_ = false;
     bool isHeightModifiedBySelect_ = false;
     bool hasLaid_ = false;
+    bool hasOptionWidth_ = false;
     SizeF targetSize_;
 
     ACE_DISALLOW_COPY_AND_MOVE(MenuPattern);

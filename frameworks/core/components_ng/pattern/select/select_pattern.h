@@ -187,6 +187,7 @@ public:
     void SetOptionWidth(const Dimension& value);
     void SetOptionHeight(const Dimension& value);
     void SetOptionWidthFitTrigger(bool isFitTrigger);
+    void SetHasOptionWidth(bool hasOptionWidth);
 
 private:
     void OnAttachToFrameNode() override;
