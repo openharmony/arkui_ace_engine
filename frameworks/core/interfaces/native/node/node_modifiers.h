@@ -831,6 +831,9 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaFontSize)(ArkUINodeHandle node, const struct ArkUIResourceLength* size);
     void (*resetTextAreaFontSize)(ArkUINodeHandle node);
     void (*setCounterType)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*setTextAreaPlaceholderString)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*setTextAreaTextString)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*stopTextAreaTextEditing)(ArkUINodeHandle node);
 };
 
 struct ArkUINavigationModifier {
@@ -1587,6 +1590,9 @@ struct ArkUIXComponentModifier {
     void (*resetXComponentBackgroundColor)(ArkUINodeHandle node);
     void (*setXComponentOpacity)(ArkUINodeHandle node, ArkUI_Float64 opacity);
     void (*resetXComponentOpacity)(ArkUINodeHandle node);
+    void (*setXComponentId)(ArkUINodeHandle node, ArkUI_CharPtr id);
+    void (*setXComponentType)(ArkUINodeHandle node, ArkUI_Uint32 type);
+    void (*setXComponentSurfaceSize)(ArkUINodeHandle node, ArkUI_Uint32 width, ArkUI_Uint32 height);
 };
 
 struct ArkUIRenderNodeModifier {

@@ -48,6 +48,7 @@ public:
     void SetStrokeRadius(const Dimension& value) override;
     void ResetStrokeRadius() override;
 
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, double value, double max, NG::ProgressType type);
     static void SetValue(FrameNode* frameNode, double value);
     static void SetColor(FrameNode* frameNode, const Color& value);
     static void SetGradientColor(FrameNode* frameNode, const Gradient& value);

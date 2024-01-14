@@ -37,6 +37,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type)
             return ON_SCROLL_STOP;
         case NODE_EVENT_ON_APPEAR:
             return ON_APPEAR;
+        case NODE_TEXT_AREA_ON_CHANGE:
+            return ON_TEXTAREA_CHANGE;
         case NODE_ON_FOCUS:
             return ON_FOCUS;
         case NODE_ON_BLUR:
@@ -71,6 +73,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIAsyncEventKind type)
             return NODE_SCROLL_EVENT_ON_SCROLL_STOP;
         case ON_APPEAR:
             return NODE_EVENT_ON_APPEAR;
+        case ON_TEXTAREA_CHANGE:
+            return NODE_TEXT_AREA_ON_CHANGE;
         case ON_FOCUS:
             return NODE_ON_FOCUS;
         case ON_BLUR:
@@ -93,7 +97,7 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIAsyncEventKind type)
 bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
 {
     if (memcpy_sp(event->componentEvent.data, MAX_COMPONENT_EVENT_ARG_NUM, origin->componentAsyncEvent.data,
-            MAX_COMPONENT_EVENT_ARG_NUM) != 0) {
+        MAX_COMPONENT_EVENT_ARG_NUM) != 0) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to convert origin event data");
         return false;
     }

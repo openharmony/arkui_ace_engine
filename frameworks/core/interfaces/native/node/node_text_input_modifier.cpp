@@ -527,7 +527,7 @@ void SetTextInputPlaceholderString(ArkUINodeHandle node, const char* value)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::string placeholderStr(value);
-    TextFieldModelNG::SetTextInputPlaceHolder(frameNode, placeholderStr);
+    TextFieldModelNG::SetTextFieldPlaceHolder(frameNode, placeholderStr);
 }
 
 void SetTextInputTextString(ArkUINodeHandle node, const char* value)
@@ -535,7 +535,7 @@ void SetTextInputTextString(ArkUINodeHandle node, const char* value)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::string textStr(value);
-    TextFieldModelNG::SetTextInputText(frameNode, textStr);
+    TextFieldModelNG::SetTextFieldText(frameNode, textStr);
 }
 } // namespace
 

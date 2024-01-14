@@ -22,7 +22,7 @@
 namespace OHOS::Ace::NG {
 
 using StateChangeEvent = std::function<void(const int32_t)>;
-using ChangeEvent = std::function<void(const std::string)>;
+using RefreshChangeEvent = std::function<void(const std::string)>;
 using RefreshingEvent = std::function<void()>;
 
 class RefreshEventHub : public EventHub {
@@ -55,7 +55,7 @@ public:
         }
     }
 
-    void SetChangeEvent(ChangeEvent&& changeEvent)
+    void SetChangeEvent(RefreshChangeEvent&& changeEvent)
     {
         changeEvent_ = std::move(changeEvent);
     }
@@ -70,7 +70,7 @@ public:
 private:
     StateChangeEvent stateChange_;
     RefreshingEvent refreshing_;
-    ChangeEvent changeEvent_;
+    RefreshChangeEvent changeEvent_;
     ACE_DISALLOW_COPY_AND_MOVE(RefreshEventHub);
 };
 } // namespace OHOS::Ace::NG

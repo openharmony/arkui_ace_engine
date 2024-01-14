@@ -23,6 +23,8 @@
 #include "core/interfaces/native/node/node_span_modifier.h"
 #include "core/interfaces/native/node/node_stack_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
+#include "core/interfaces/native/node/node_text_area_modifier.h"
+#include "core/interfaces/native/node/node_xcomponent_modifier.h"
 #include "core/interfaces/native/node/node_text_modifier.h"
 #include "core/interfaces/native/node/node_text_modifier.h"
 #include "core/interfaces/native/node/node_toggle_modifier.h"
@@ -56,7 +58,7 @@ const ArkUINodeModifiers impl = {
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
+    NodeModifier::GetTextAreaModifier,
     nullptr,
     nullptr,
     nullptr,
@@ -100,13 +102,15 @@ const ArkUINodeModifiers impl = {
     nullptr,
     NodeModifier::GetLoadingProgressModifier,
     nullptr,
+    nullptr,
+    nullptr,
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     nullptr,
 #else
     nullptr,
 #endif
 #ifdef XCOMPONENT_SUPPORTED
-    nullptr,
+    NodeModifier::GetXComponentModifier,
 #else
     nullptr,
 #endif

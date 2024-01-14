@@ -194,6 +194,24 @@ void ButtonModelNG::Create(const std::string& tagName)
     stack->Push(frameNode);
 }
 
+RefPtr<FrameNode> ButtonModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, nodeId, AceType::MakeRefPtr<ButtonPattern>());
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    if (layoutProperty->GetPaddingProperty()) {
+        return frameNode;
+    }
+    auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+    CHECK_NULL_RETURN(buttonTheme, nullptr);
+    auto padding = buttonTheme->GetPadding();
+    PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
+        CalcLength(padding.Top()), CalcLength(padding.Bottom()) };
+    layoutProperty->UpdatePadding(defaultPadding);
+    return frameNode;
+}
+
 void ButtonModelNG::Padding(const PaddingProperty& paddingNew, const Edge& paddingOld)
 {
     NG::ViewAbstract::SetPadding(paddingNew);

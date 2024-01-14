@@ -24,6 +24,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
+#include "core/interfaces/native/node/node_text_area_modifier.h"
 #include "core/interfaces/native/node/node_toggle_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/node_common_modifier.h"
@@ -113,8 +114,15 @@ const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
 };
 
 const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
+    nullptr,
     NodeModifier::SetTextInputOnSubmit,
     NodeModifier::SetOnTextInputChange,
+};
+
+const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
+    nullptr,
+    nullptr,
+    NodeModifier::SetOnTextAreaChange,
 };
 
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
@@ -160,8 +168,17 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, A
             eventHandle = textInputNodeAsyncEventHandlers[subKind];
             break;
         }
+        case ARKUI_TEXTAREA: {
+            // textarea event type.
+            if (subKind >= sizeof(textAreaNodeAsyncEventHandlers) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = textAreaNodeAsyncEventHandlers[subKind];
+            break;
+        }
         case ARKUI_REFRESH: {
-            // textinput event type.
+            // refresh event type.
             if (subKind >= sizeof(refreshNodeAsyncEventHandlers) / sizeof(ComponentAsyncEventHandler)) {
                 TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
                 return;
