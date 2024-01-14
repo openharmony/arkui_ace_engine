@@ -155,13 +155,15 @@ void ScrollablePattern::ProcessNavBarReactOnEnd()
 
 bool ScrollablePattern::OnScrollPosition(double& offset, int32_t source)
 {
-    auto isAtTop = (IsAtTop() && Positive(offset));
-    auto refreshCoordinateMode = CoordinateWithRefresh(offset, source, isAtTop);
-    auto navigationInCoordination = CoordinateWithNavigation(offset, source, isAtTop);
-    auto modalSheetCoordinationMode = CoordinateWithSheet(offset, source, isAtTop);
-    if ((refreshCoordinateMode == RefreshCoordinationMode::REFRESH_SCROLL) || navigationInCoordination ||
-        (modalSheetCoordinationMode == ModalSheetCoordinationMode::SHEET_SCROLL)) {
-        return false;
+    if (needLinked_) {
+        auto isAtTop = (IsAtTop() && Positive(offset));
+        auto refreshCoordinateMode = CoordinateWithRefresh(offset, source, isAtTop);
+        auto navigationInCoordination = CoordinateWithNavigation(offset, source, isAtTop);
+        auto modalSheetCoordinationMode = CoordinateWithSheet(offset, source, isAtTop);
+        if ((refreshCoordinateMode == RefreshCoordinationMode::REFRESH_SCROLL) || navigationInCoordination ||
+            (modalSheetCoordinationMode == ModalSheetCoordinationMode::SHEET_SCROLL)) {
+            return false;
+        }
     }
 
     if (source == SCROLL_FROM_START) {

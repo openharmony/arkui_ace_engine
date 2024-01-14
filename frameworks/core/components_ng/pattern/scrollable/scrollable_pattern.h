@@ -443,6 +443,11 @@ public:
         return false;
     }
 
+    void SetNeedLinked(bool needLinked)
+    {
+        needLinked_ = needLinked;
+    }
+
 protected:
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const
     {
@@ -655,6 +660,7 @@ private:
 
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     bool edgeEffectAlwaysEnabled_ = false;
+    bool needLinked_ = true;
 
     RefPtr<NodeAnimatablePropertyFloat> springOffsetProperty_;
     RefPtr<NodeAnimatablePropertyFloat> curveOffsetProperty_;

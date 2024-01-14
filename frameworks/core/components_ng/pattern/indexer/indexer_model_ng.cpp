@@ -155,9 +155,9 @@ void IndexerModelNG::SetPopupHorizontalSpace(const Dimension& popupHorizontalSpa
 {
     auto spaceValue = popupHorizontalSpace.Value();
     if (spaceValue >= 0) {
-        ACE_UPDATE_PAINT_PROPERTY(IndexerPaintProperty, PopupHorizontalSpace, popupHorizontalSpace);
+        ACE_UPDATE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupHorizontalSpace, popupHorizontalSpace);
     } else {
-        ACE_RESET_PAINT_PROPERTY(IndexerPaintProperty, PopupHorizontalSpace);
+        ACE_RESET_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupHorizontalSpace);
     }
 }
 
@@ -426,9 +426,9 @@ void IndexerModelNG::SetPopupHorizontalSpace(FrameNode* frameNode, const Dimensi
 {
     auto spaceValue = popupHorizontalSpace.Value();
     if (spaceValue >= 0) {
-        ACE_UPDATE_NODE_PAINT_PROPERTY(IndexerPaintProperty, PopupHorizontalSpace, popupHorizontalSpace, frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupHorizontalSpace, popupHorizontalSpace, frameNode);
     } else {
-        ACE_RESET_NODE_PAINT_PROPERTY(IndexerPaintProperty, PopupHorizontalSpace, frameNode);
+        ACE_RESET_NODE_LAYOUT_PROPERTY(IndexerLayoutProperty, PopupHorizontalSpace, frameNode);
     }
 }
 
