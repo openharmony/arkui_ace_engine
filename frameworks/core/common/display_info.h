@@ -86,11 +86,22 @@ public:
         currentFoldCreaseRegion_ = currentFoldCreaseRegion;
     }
 
+    uint64_t GetDisplayId()
+    {
+        return displayId_;
+    }
+
+    void SetDisplayId(uint64_t displayId)
+    {
+        displayId_ = displayId;
+    }
+
 private:
     FoldStatus foldStatus_ = FoldStatus::UNKNOWN;
     bool isFoldable_ = false;
     Rotation rotation_ = Rotation::ROTATION_0;
     std::vector<Rect> currentFoldCreaseRegion_;
+    uint64_t displayId_ = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_DISPLAY_INFO_H
