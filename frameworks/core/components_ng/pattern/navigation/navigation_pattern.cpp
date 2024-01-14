@@ -355,6 +355,12 @@ void NavigationPattern::CheckTopNavPathChange(
             auto lastStandardIndex = hostNode->GetLastStandardIndex();
             isShow = (lastPreIndex != -1) && (lastPreIndex >= lastStandardIndex);
             hostNode->SetNeedSetInvisible(lastStandardIndex >= 0);
+            if (lastStandardIndex < 0) {
+                auto navBarNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarNode());
+                auto layoutProperty = navBarNode->GetLayoutProperty();
+                layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
+                navBarNode->SetActive(true);
+            }
         }
         auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(preTopNavDestination->GetPattern());
         CHECK_NULL_VOID(navDestinationPattern);
