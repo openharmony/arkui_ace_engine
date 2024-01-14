@@ -2147,6 +2147,7 @@ RefPtr<DisplayInfo> AceContainer::GetDisplayInfo()
             }
         }
     }
+    displayInfo_->SetDisplayId(displayManager->GetId());
     displayInfo_->SetIsFoldable(isFoldable);
     displayInfo_->SetFoldStatus(static_cast<FoldStatus>(static_cast<uint32_t>(dmFoldStatus)));
     displayInfo_->SetRotation(static_cast<Rotation>(static_cast<uint32_t>(dmRotation)));

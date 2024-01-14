@@ -88,6 +88,7 @@ struct DragControllerAsyncCtx {
     bool hasHandle = false;
     int32_t globalX = -1;
     int32_t globalY = -1;
+    uint64_t displayId = 0;
     int32_t sourceType = 0;
     int parseBuilderCount = 0;
     std::mutex dragStateMutex;
@@ -668,8 +669,8 @@ void EnvelopedDragData(DragControllerAsyncCtx* asyncCtx, std::optional<Msdp::Dev
         dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
     }
     dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, "", asyncCtx->sourceType,
-        dataSize != 0 ? dataSize : shadowInfos.size(), pointerId, asyncCtx->globalX, asyncCtx->globalY, 0, true, false,
-        summary };
+        dataSize != 0 ? dataSize : shadowInfos.size(), pointerId, asyncCtx->globalX, asyncCtx->globalY,
+        asyncCtx->displayId, true, false, summary };
 }
 
 void StartDragService(DragControllerAsyncCtx* asyncCtx)
@@ -751,6 +752,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    asyncCtx->displayId = container->GetDisplayInfo()->GetDisplayId();
     taskExecutor->PostTask(
         [asyncCtx]() {
             CHECK_NULL_VOID(asyncCtx);
@@ -799,8 +801,8 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
             }
             Msdp::DeviceStatus::ShadowInfo shadowInfo { asyncCtx->pixelMap, -x, -y };
             Msdp::DeviceStatus::DragData dragData { { shadowInfo }, {}, udKey, asyncCtx->extraParams, "",
-                asyncCtx->sourceType, dataSize, pointerId, asyncCtx->globalX, asyncCtx->globalY, 0, true, false,
-                summary };
+                asyncCtx->sourceType, dataSize, pointerId, asyncCtx->globalX, asyncCtx->globalY, asyncCtx->displayId,
+                true, false, summary };
 
             OnDragCallback callback = [asyncCtx](const DragNotifyMsg& dragNotifyMsg) {
                 LOGI("DragController start on callback %{pubic}d", dragNotifyMsg.result);
