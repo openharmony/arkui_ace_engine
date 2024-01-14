@@ -958,4 +958,10 @@ void XComponentPattern::SetExportTextureSurfaceId(const std::string& surfaceId)
 {
     exportTextureSurfaceId_ = StringUtils::StringToLongUint(surfaceId);
 }
+
+void XComponentPattern::SetSurfaceSize(uint32_t surfaceWidth, uint32_t surfaceHeight)
+{
+    CHECK_NULL_VOID(xcomponentController_);
+    xcomponentController_->ConfigSurface(surfaceWidth, surfaceHeight);
+}
 } // namespace OHOS::Ace::NG

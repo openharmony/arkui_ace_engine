@@ -88,8 +88,10 @@ typedef enum {
     ARKUI_NODE_FLEX,
     /** 列表项. */
     ARKUI_NODE_LIST_ITEM,
-    /** 刷新. */
+    /** 刷新组件 */
     ARKUI_NODE_REFRESH,
+    /** XComponent */
+    ARKUI_NODE_XCOMPONENT,
 } ArkUI_NodeType;
 
 #define MAX_NODE_SCOPE_NUM 1000
@@ -130,20 +132,29 @@ typedef enum {
      */
     NODE_BACKGROUND_COLOR,
     /**
-     * @note 入参格式为"图片地址url repeat参数"，repeat参数可不填写。
+     * @brief 通过<b>setAttribute</b>方法设置组件背景图片.
+     *
+     * @note 入参:value: String("no-repeat", "x", "y", "xy" )。
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_IMAGE, "www.test.png norepeat");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_IMAGE, "/pages/common/icon.png no-repeat");
      * @endcode
      */
     NODE_BACKGROUND_IMAGE,
     /**
+     * @brief 通过<b>setAttribute</b>方法设置组件内间距.
+     *
      * @note 入参为按照上右下左指定的内间距，单位为vp，如"2 3 4 5" 表示上右下左的兼具分别为2vp, 3vp, 4vp, 5vp
+     * 只设置一位时表示上右下左的内间距均为指定值，如设置2位或3位则按照顺序赋值，未指定的采用默认值0vp
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_PADDING, "2 3 4 5");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_PADDING, "4");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_PADDING, "2 3 4");
      * @endcode
      */
     NODE_PADDING,
     /**
+     * @brief 通过<b>setAttribute</b>方法设置组件id.
+     *
      * @note 入参格式为字符串。
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_ID, "test");
@@ -151,6 +162,8 @@ typedef enum {
      */
     NODE_ID,
     /**
+     * @brief 通过<b>setAttribute</b>方法设置组件是否可交互，设置为false后不响应点击等操作.
+     *
      * @note 入参格式为内容为true或false的字符串，不区分大小写。
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_ENABLED, "true");
@@ -159,7 +172,7 @@ typedef enum {
     NODE_ENABLED,
     /**
      * @brief 通过<b>setAttribute</b>方法设置外边距属性.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参top:double right:double bottom:double left:double, 单位为vp，格式字符串，如"10 10 10 10".
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_MARGIN, "10 10 10 10");
@@ -168,7 +181,7 @@ typedef enum {
     NODE_MARGIN,
     /**
      * @brief 通过<b>setAttribute</b>方法设置组件平移.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参 x:double,y:double,z:double，单位vp，格式字符串，如"100.0,20,0".
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_TRANSLATE, "100.0,20,0");
@@ -178,7 +191,7 @@ typedef enum {
     NODE_TRANSLATE,
     /**
      * @brief 通过<b>setAttribute</b>方法设置组件缩放.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参 centerX:double(单位vp),centerY:double(单位vp),x:double,y:double，格式字符串，如 "0.5,0.5,1.0,0.5".
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SCALE, "0.5,0.5,1.0,0.5");
@@ -188,7 +201,7 @@ typedef enum {
     NODE_SCALE,
     /**
      * @brief 通过<b>setAttribute</b>方法设置组件旋转.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参 centerX:double(单位vp),centerY:double(单位vp),centerZ:double(单位vp),x:double,y:double,
      *       z:double,angle:double,perspective:double，格式字符串，如 "0.5,0.5,0.0,0,0,1,300,0".
      * @code {.c}
@@ -199,7 +212,7 @@ typedef enum {
     NODE_ROTATE,
     /**
      * @brief 通过<b>setAttribute</b>方法设置组件高光效果.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参brightness:double, 格式字符串，如"1.2"，推荐取值范围[0,2].
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_BRIGHTNESS, "1.2");
@@ -209,7 +222,7 @@ typedef enum {
     NODE_BRIGHTNESS,
     /**
      * @brief 通过<b>setAttribute</b>方法设置组件饱和度效果.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参blur:double,格式字符串，如"1.0"，推荐取值范围[0,∞].
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SATURATE, "1.0");
@@ -219,7 +232,7 @@ typedef enum {
     NODE_SATURATE,
     /**
      * @brief 通过<b>setAttribute</b>方法设置组件内容模糊效果.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参格式模糊度字符串，如"1.0"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_BLUR, "1.0");
@@ -229,7 +242,7 @@ typedef enum {
     NODE_BLUR,
     /**
      * @brief 通过<b>setAttribute</b>方法设置组件颜色渐变效果.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参
      *      colors:#argb,dimension:double(范围[0,1] 单位PERCENT)...
      *      angle?:number(线性渐变的起始角度。0点方向顺时针旋转为正向角度。默认值：180)
@@ -246,7 +259,7 @@ typedef enum {
     NODE_LINEAR_GRADIENT,
     /**
      * @brief 通过<b>setAttribute</b>方法设置组件内容在元素绘制区域内的对齐方式.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参 align:String("top-start","top","top-end","start","center","end","bottom-start","bottom",
      *       "bottom-end")，格式字符串，如 "center"
      * @code {.c}
@@ -257,7 +270,7 @@ typedef enum {
     NODE_ALIGN,
     /**
      * @brief 通过<b>setAttribute</b>方法设置透明度.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参格式为数字类型字符串,取值范围为0到1.
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_OPACITY, "1");
@@ -267,7 +280,7 @@ typedef enum {
     NODE_OPACITY,
     /**
      * @brief 通过<b>setAttribute</b>方法设置元素的边框的宽度.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参格式入参格式为数字类型字符串或4个数字类型字符串分别对应上、右、下、左，使用空格隔开,
      * 如"1"或"1 1 2 2"，单位为vp;
      * @code {.c}
@@ -279,7 +292,7 @@ typedef enum {
     NODE_BORDER_WIDTH,
     /**
      * @brief 通过<b>setAttribute</b>方法设置元素的边框的圆角.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参格式为数字类型字符或4个数字类型字符串分别对应左上、右上、左下、右下，使用空格隔开, 如"1"或"1 1 2
      * 2"，单位为vp;
      * @code {.c}
@@ -291,7 +304,7 @@ typedef enum {
     NODE_BORDER_RADIUS,
     /**
      * @brief 通过<b>setAttribute</b>方法设置元素的边框的颜色.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参格式#argb类型字符或4个#argb类型字符串分别对应上、右、下、左，使用空格隔开, 如"#FF1122FF"或"#FF1122FF
      * #FF1122FF #FFFFFFF #FFFFFFF";
      * @code {.c}
@@ -303,7 +316,7 @@ typedef enum {
     NODE_BORDER_COLOR,
     /**
      * @brief 通过<b>setAttribute</b>方法设置元素的边框线条样式.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note
      * 入参格式"dotted"、"dashed"或"solid"或4个使用"dotted"、"dashed"或"solid"的字符串分别对应上、右、下、左，使用空格隔开,
      * 如"dotted"或"dotted dashed dashed solid";
@@ -316,7 +329,7 @@ typedef enum {
     NODE_BORDER_STYLE,
     /**
      * @brief 通过<b>setAttribute</b>方法设置组件的堆叠顺序.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参格式为数字类型字符串.
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_ZINDEX, "1");
@@ -326,7 +339,7 @@ typedef enum {
     NODE_ZINDEX,
     /**
      * @brief 通过<b>setAttribute</b>方法设置组件是否可见.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参格式为"visible"、"hidden"与"none".
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_VISIBILITY, "visible");
@@ -336,7 +349,7 @@ typedef enum {
     NODE_VISIBILITY,
     /**
      * @brief 通过<b>setAttribute</b>方法设置组件进行裁剪、遮罩处理.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参格式为"true"、"false"，或为特定格式的字符串
      * 如"rect(10,10,10,10)"括号内分别为width、height、radiusWidth与radiusHeight";"circle(10,10)"括号内分别为width、height;
      * "ellipse(10,10)"括号内分别为width、height; "path(10,10,M0 0 L600 0)"括号内分别为width、height、commands;
@@ -349,7 +362,7 @@ typedef enum {
     NODE_CLIP,
     /**
      * @brief 通过<b>setAttribute</b>方法设置矩阵变换功能，可对图形进行平移、旋转和缩放等.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参格式为16个数字类型字符串,用空格隔开，如""1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1".
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_TRANSFORM, "1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1");
@@ -359,7 +372,7 @@ typedef enum {
     NODE_TRANSFORM,
     /**
      * @brief 通过<b>setAttribute</b>方法设置组件的触摸测试类型.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参格式为"default"、"block"、"transparent"与"none".
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_HIT_TEST_BEHAVIOR, "default");
@@ -369,7 +382,7 @@ typedef enum {
     NODE_HIT_TEST_BEHAVIOR,
     /**
      * @brief 通过<b>setAttribute</b>方法设置元素左上角相对于父容器左上角偏移位置.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参格式为数字类型字符串,需传入x与y两个偏移量，用空格隔开，如"50 100",单位为vp.
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_POSITION, "50 100");
@@ -379,7 +392,7 @@ typedef enum {
     NODE_POSITION,
     /**
      * @brief 通过<b>setAttribute</b>方法设置组件添加阴影效果.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note
      * 入参格式为"outer-default-xs"、"outer-default-sm"、"outer-default-md"、"outer-default-lg"、"outer-floating-sm"、
      * "outer-floating-md"与"none"字符串,或为6个字符串分别对应radius、offsetX、offsetY、type、color与IsFilled
@@ -394,7 +407,7 @@ typedef enum {
     NODE_SHADOW,
     /**
      * @brief 通过<b>setAttribute</b>方法设置组件背景图片的宽高。
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note
      * 入参width:number,height:number 默认单位vp
      * @code {.c}
@@ -405,7 +418,7 @@ typedef enum {
     NODE_BACKGROUND_IMAGE_SIZE,
     /**
      * @brief 通过<b>setAttribute</b>为当前组件提供一种背景和内容之间的模糊能力。
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参blurStyle:String("thin","regular","thick")
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_BLUR_STYLE, "thin");
@@ -562,18 +575,21 @@ typedef enum {
      * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_CONTENT , "一段文本。");
      * @endcode
      */
+    
     NODE_TEXT_CONTENT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT,
     /**
      * @brief 通过<b>setAttribute</b>方法设置组件字体颜色，只针对包含文本元素的组件.
      *
-     * @see ArkUI_BasicNodeAPI::setAttribute
      * @note 入参color: #argb类型，格式字符串，如"#ffffffff"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_COLOR, "#FF1122FF");
      * @endcode
+     *
      */
     NODE_FONT_COLOR,
     /**
+     * @brief 通过<b>setAttribute</b>方法设置字体大小.
+     *
      * @note 入参格式为数字类型字符串，单位为fp。
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_FONT_SIZE, "10");
@@ -605,7 +621,7 @@ typedef enum {
     NODE_TEXT_LINE_HEIGHT,
     /**
      * @brief 通过<b>setAttribute</b>为当前组件提供设置文本装饰线样式及其颜色。
-     * @note 入参:type：String("none", "underline", "overline", "line_through",
+     * @note 入参:type：String("none", "underline", "overline", "line-through",
      * "inherit"),color：String
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_DECORATION, "overline #FF1122FF");
@@ -748,9 +764,9 @@ typedef enum {
     NODE_IMAGE_INTERPOLATION,
     /**
      * @brief 通过<b>setAttribute</b>为当前image组件设置图片重复样式。
-     * @note 入参:value: String("no_repeat", "repeat_x", "repeat_y", "repeat" )
+     * @note 入参:value: String("no-repeat", "x", "y", "xy" )
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_IMAGE_OBJECT_REPEAT , "repeat");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_IMAGE_OBJECT_REPEAT , "xy");
      * @endcode
      */
     NODE_IMAGE_OBJECT_REPEAT,
@@ -802,6 +818,8 @@ typedef enum {
     NODE_LOADING_PROGRESS_ENABLE_LOADING,
 
     /**
+     * @brief 通过<b>setAttribute</b>方法设置输入框无输入时的提示文本.
+     *
      * @note 入参格式为字符串。
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_PLACEHOLDER, "Input");
@@ -809,6 +827,8 @@ typedef enum {
      */
     NODE_TEXT_INPUT_PLACEHOLDER = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_INPUT,
     /**
+     * @brief 通过<b>setAttribute</b>方法设置输入框当前的文本
+     *
      * @note 入参格式为字符串。
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_TEXT, "Init");
@@ -816,6 +836,8 @@ typedef enum {
      */
     NODE_TEXT_INPUT_TEXT,
     /**
+     * @brief 通过<b>setAttribute</b>方法设置光标颜色
+     *
      * @note 入参格式为#argb类型字符串，如"#FF1122FF"。
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_CARET_COLOR, "#FF1122FF");
@@ -823,6 +845,8 @@ typedef enum {
      */
     NODE_TEXT_INPUT_CARET_COLOR,
     /**
+     * @brief 通过<b>setAttribute</b>方法设置光标样式
+     *
      * @note 入参格式为数字类型字符串，单位为vp。
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_CARET_STYLE, "2");
@@ -830,6 +854,8 @@ typedef enum {
      */
     NODE_TEXT_INPUT_CARET_STYLE,
     /**
+     * @brief 通过<b>setAttribute</b>方法设置true可显示为下环线模式的输入框
+     *
      * @note 入参格式为内容为true或false的字符串，不区分大小写。
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_SHOW_UNDERLINE, "true");
@@ -837,6 +863,8 @@ typedef enum {
      */
     NODE_TEXT_INPUT_SHOW_UNDERLINE,
     /**
+     * @brief 通过<b>setAttribute</b>方法设置输入框支持的最大文本数
+     *
      * @note 入参格式为数字类型字符串。
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_MAX_LENGTH, "50");
@@ -844,13 +872,17 @@ typedef enum {
      */
     NODE_TEXT_INPUT_MAX_LENGTH,
     /**
-     * @note 入参格式为EnterKeyType的枚举名称 go,search,send,next,done,previous,newLine。
+     * @brief 通过<b>setAttribute</b>方法设置回车键类型
+     *
+     * @note 入参格式为EnterKeyType的枚举名称 go,search,send,next,done,previous,new-line。
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_ENTER_KEY_TYPE, "done");
      * @endcode
      */
     NODE_TEXT_INPUT_ENTER_KEY_TYPE,
     /**
+     * @brief 通过<b>setAttribute</b>方法设置无输入时默认提示文本的颜色
+     *
      * @note 入参格式为#argb类型字符串，如"#FF1122FF"。
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_PLACEHOLDER_COLOR, "#FF1122FF");
@@ -858,13 +890,17 @@ typedef enum {
      */
     NODE_TEXT_INPUT_PLACEHOLDER_COLOR,
     /**
+     * @brief 通过<b>setAttribute</b>方法设置无输入时默认提示文本的字体配置（包括大小、字重、样式、字体列表）
+     *
      * @note 入参格式为空格分隔的字体字符串，顺序为size weight style families，其中families为逗号分隔的字符串。
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_PLACEHOLDER_FONT, "1 Bold Normal family1,family2");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_PLACEHOLDER_FONT, "1 bold normal family1,family2");
      * @endcode
      */
     NODE_TEXT_INPUT_PLACEHOLDER_FONT,
     /**
+     * @brief 通过<b>setAttribute</b>方法设置当通过点击以外的方式聚焦时是否绑定输入法
+     *
      * @note 入参格式为内容为true或false的字符串，不区分大小写。
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_ENABLE_KEYBOARD_ON_FOCUS, "true");
@@ -872,14 +908,18 @@ typedef enum {
      */
     NODE_TEXT_INPUT_ENABLE_KEYBOARD_ON_FOCUS,
     /**
-     * @note 入参格式为InputType的枚举名称 normal,password,email,number,phoneNumber,
-     * UserName,NewPassword,NumberPassword,ScreenLockPassword,NumberDecimal。
+     * @brief 通过<b>setAttribute</b>方法设置输入框的类型
+     *
+     * @note 入参格式为InputType的枚举名称 normal,password,email,number,phone-number,
+     * user-name,new-password,number-password,screen-lock-password,number-decimal。
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_TYPE, "normal");
      * @endcode
      */
     NODE_TEXT_INPUT_TYPE,
     /**
+     * @brief 通过<b>setAttribute</b>方法设置文本选中时的背景色
+     *
      * @note 入参格式为#argb类型字符串，如"#FF1122FF"。
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_SELECTED_BACKGROUND_COLOR, "#FF1122FF");
@@ -887,6 +927,8 @@ typedef enum {
      */
     NODE_TEXT_INPUT_SELECTED_BACKGROUND_COLOR,
     /**
+     * @brief 通过<b>setAttribute</b>方法设置密码输入模式时是否显示末尾图标
+     *
      * @note 入参格式为内容为true或false的字符串，不区分大小写.
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_INPUT_SHOW_PASSWORD_ICON, "true");
@@ -896,19 +938,18 @@ typedef enum {
 
     /**
      * @brief 通过<b>setAttribute</b>方法设置子组件在容器内的对齐方式.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参 alignContent:String("top-start","top","top-end","start","center","end","bottom-start","bottom",
      *       "bottom-end")，格式字符串，如 "center"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_STACK_ALIGN_CONTENT, "center");
      * @endcode
-     *
      */
     NODE_STACK_ALIGN_CONTENT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_STACK,
 
     /**
      * @brief 通过<b>setAttribute</b>方法设置滚动条状态.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参 displayMode:String("off","auto","on") ，格式字符串，如 "on"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_BAR, "on");
@@ -918,7 +959,7 @@ typedef enum {
     NODE_SCROLL_SCROLL_BAR = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SCROLL,
     /**
      * @brief 通过<b>setAttribute</b>方法设置滚动条的宽度.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参 srcollBarWidth:double(单位vp) , 格式字符串，如 "2"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_BAR_WIDTH, "2");
@@ -928,7 +969,7 @@ typedef enum {
     NODE_SCROLL_SCROLL_BAR_WIDTH,
     /**
      * @brief 通过<b>setAttribute</b>方法设置滚动条的颜色.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参color: #argb类型，格式字符串，如"#ffffffff"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_BAR_COLOR, "#ffffffff");
@@ -938,7 +979,7 @@ typedef enum {
     NODE_SCROLL_SCROLL_BAR_COLOR,
     /**
      * @brief 通过<b>setAttribute</b>方法设置滚动方向.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参 axis:String("vertical","horizontal","free","none")，格式字符串，如 "vertical"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLLABLE, "vertical");
@@ -948,7 +989,7 @@ typedef enum {
     NODE_SCROLL_SCROLLABLE,
     /**
      * @brief 通过<b>setAttribute</b>方法设置边缘滑动效果.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参 edgeEffect:String("spring","fade","none") alwaysEnabled?:Boolean(默认值为true) ，格式字符串，
      *       如 "spring" 或者 "spring false"
      * @code {.c}
@@ -960,7 +1001,7 @@ typedef enum {
     /**
      * @brief
      * 通过<b>setAttribute</b>方法设置是否支持滚动手势，当设置为false时，无法通过手指或者鼠标滚动，但不影响控制器的滚动接口.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参 enableScrollInteraction:Boolean，格式为字符串，如"true"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_ENABLE_SCROLL_INTERACTION, "true");
@@ -971,7 +1012,7 @@ typedef enum {
     /**
      * @brief
      * 通过<b>setAttribute</b>方法设置摩擦系数，手动划动滚动区域时生效，只对惯性滚动过程有影响，对惯性滚动过程中的链式效果有间接影响.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参 fiction:float, 格式为字符串，如 "0.6"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_FRICTION, "0.6");
@@ -981,7 +1022,7 @@ typedef enum {
     NODE_SCROLL_FRICTION,
     /**
      * @brief 通过<b>setAttribute</b>方法设置Scroll组件的限位滚动模式.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参 snapAlign:String("none","start","center","end") pagination1:double(单位vp),pagination2:double(单位vp),...
      *            enableSnapToStart:Boolean enableSnapToEnd:Boolean", 格式字符串，如 "start 0,500,1000,1500 true true"
      * @code {.c}
@@ -1045,7 +1086,7 @@ typedef enum {
 
     /**
      * @brief 通过<b>setAttribute</b>方法设置列表中ListItem/ListItemGroup的预加载数量，只在LazyForEach中生效.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参cachedCount: int, 格式字符串，如"5"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_CACHED_COUNT, "5");
@@ -1055,7 +1096,7 @@ typedef enum {
     NODE_LIST_CACHED_COUNT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LIST,
     /**
      * @brief 通过<b>setAttribute</b>方法设置滚动条状态.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参 displayMode:String("off","auto","on") ，格式字符串，如 "on"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_BAR, "on");
@@ -1065,7 +1106,7 @@ typedef enum {
     NODE_LIST_SCROLL_BAR = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LIST,
     /**
      * @brief 通过<b>setAttribute</b>方法设置List组件排列方向.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参 axis:String("vertical","horizontal","free","none")，格式字符串，如 "vertical"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_LIST_DIRECTION, "vertical");
@@ -1075,7 +1116,7 @@ typedef enum {
     NODE_LIST_LIST_DIRECTION,
     /**
      * @brief 通过<b>setAttribute</b>方法配合ListItemGroup组件使用，设置ListItemGroup中header和footer是否要吸顶或吸底.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参 stickyStyle:String("none","header","footer","both")，格式字符串，如 "header"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_STICKY, "header");
@@ -1085,7 +1126,7 @@ typedef enum {
     NODE_LIST_STICKY,
     /**
      * @brief 通过<b>setAttribute</b>方法设置边缘滑动效果.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参 edgeEffect:String("spring","fade","none") alwaysEnabled?:Boolean(默认值 true) ，格式字符串，
      *       如 "spring" 或 "spring false"
      * @code {.c}
@@ -1097,7 +1138,7 @@ typedef enum {
     /**
      * @brief
      * 通过<b>setAttribute</b>方法设置是否支持滚动手势，当设置为false时，无法通过手指或者鼠标滚动，但不影响控制器的滚动接口.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参 enableScrollInteraction:Boolean，格式为字符串，如"true"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_ENABLE_SCROLL_INTERACTION, "true");
@@ -1108,7 +1149,7 @@ typedef enum {
     /**
      * @brief
      * 通过<b>setAttribute</b>方法设置摩擦系数，手动划动滚动区域时生效，只对惯性滚动过程有影响，对惯性滚动过程中的链式效果有间接影响.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参fiction: float, 格式为字符串，如"0.6"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_FRICTION, "0.6");
@@ -1119,7 +1160,7 @@ typedef enum {
 
     /**
      * @brief 通过<b>setAttribute</b>方法设置是否开启循环.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参isLoop: Boolean, 格式字符串，如"true"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_LOOP, "true");
@@ -1130,7 +1171,7 @@ typedef enum {
 
     /**
      * @brief 通过<b>setAttribute</b>方法设置子组件是否自动播放.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参格式为内容为true或false的字符串，不区分大小写.
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_AUTO_PLAY, "false");
@@ -1141,7 +1182,7 @@ typedef enum {
 
     /**
      * @brief 通过<b>setAttribute</b>方法设置Swiper是否显示导航点指示器.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参格式为内容为true或false的字符串，不区分大小写.
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_SHOW_INDICATOR, true);
@@ -1152,7 +1193,7 @@ typedef enum {
 
     /**
      * @brief 通过<b>setAttribute</b>方法设置自动播放时播放的时间间隔.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参格式为数字类型字符串，单位为毫秒.
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_INTERVAL, "3000");
@@ -1163,7 +1204,7 @@ typedef enum {
 
     /**
      * @brief 通过<b>setAttribute</b>方法设置是否为纵向滑动.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参格式为内容为true或false的字符串，不区分大小写.
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_VERTICAL, "false");
@@ -1174,7 +1215,7 @@ typedef enum {
 
     /**
      * @brief 通过<b>setAttribute</b>方法设置子组件切换的动画时长.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参格式为数字类型字符串，单位为毫秒.
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_DURATION, "400");
@@ -1185,7 +1226,7 @@ typedef enum {
 
     /**
      * @brief 通过<b>setAttribute</b>方法设置Swiper的动画曲线.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参格式为"linear"、"ease"、"easeIn"、"easeOut"、"easeInOut"、
      * "fastOutSlowIn"、"linearOutSlowIn"、"fastOutLinearIn"、"extremeDeceleration"、"sharp"、"rhythm"、"smooth"与"friction".
      * @code {.c}
@@ -1197,7 +1238,7 @@ typedef enum {
 
     /**
      * @brief 通过<b>setAttribute</b>方法设置子组件与子组件之间间隙.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参格式为数字类型字符串，单位为vp.
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_ITEM_SPACE, "50");
@@ -1208,7 +1249,7 @@ typedef enum {
 
     /**
      * @brief 通过<b>setAttribute</b>方法设置当前在容器中显示的子组件的索引值.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参格式为数字类型字符串.
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_INDEX, "2");
@@ -1219,7 +1260,7 @@ typedef enum {
 
     /**
      * @brief 通过<b>setAttribute</b>方法设置一页内元素显示个数.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参格式为数字类型字符串或为"auto"字符串.
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_DISPLAY_COUNT, "2");
@@ -1230,7 +1271,7 @@ typedef enum {
 
     /**
      * @brief 通过<b>setAttribute</b>方法设置禁用组件滑动切换功能.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参格式为内容为true或false的字符串，不区分大小写.
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_DISABLE_SWIPE, "false");
@@ -1241,7 +1282,7 @@ typedef enum {
 
     /**
      * @brief 通过<b>setAttribute</b>方法设置是否显示导航点箭头.
-     * @see ArkUI_BasicNodeAPI::setAttribute
+     *
      * @note 入参格式为"true"、"false"与"showOnHover".
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_SHOW_DISPLAY_ARROW, true");
@@ -1250,6 +1291,97 @@ typedef enum {
      */
     NODE_SWIPER_SHOW_DISPLAY_ARROW,
 
+    /**
+     * @brief 通过{@link setAttribute}方法设置多行文本输入框无输入时的默认提示文本
+     *
+     * @note 入参格式为字符串
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_AREA_PLACEHOLDER, "input");
+     * @endcode
+     */
+    NODE_TEXT_AREA_PLACEHOLDER = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_AREA,
+    /**
+     * @brief 通过{@link setAttribute}方法设置多行文本输入框当前的文本
+     *
+     * @note 入参格式为字符串.
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_AREA_TEXT, "test");
+     * @endcode
+     */
+    NODE_TEXT_AREA_TEXT,
+    /**
+     * @brief 通过{@link setAttribute}方法设置多行文本输入框支持的最大字符数
+     *
+     * @note 入参格式是内容为数字的字符串.
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_AREA_MAX_LENGTH, "50");
+     * @endcode
+     */
+    NODE_TEXT_AREA_MAX_LENGTH,
+    /**
+     * @brief 通过{@link setAttribute}方法设置多行文本输入框默认提示文本的颜色
+     *
+     * @note 入参格式为#argb类型字符串，如"#FF1122FF"。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_AREA_PLACEHOLDER_COLOR, "#FF1122FF");
+     * @endcode
+     */
+    NODE_TEXT_AREA_PLACEHOLDER_COLOR,
+    /**
+     * @brief 通过{@link setAttribute}方法设置多行文本输入框默认提示文本的字体
+     *
+     * @note 入参格式为空格分隔的字体字符串，顺序为size weight style families，其中families为逗号分隔的字符串。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_AREA_PLACEHOLDER_FONT, "1 bold normal family1,family2");
+     * @endcode
+     */
+    NODE_TEXT_AREA_PLACEHOLDER_FONT,
+    /**
+     * @brief 通过{@link setAttribute}方法设置多行文本输入框光标的颜色
+     *
+     * @note 入参格式为#argb类型字符串，如"#FF1122FF"。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_AREA_CARET_COLOR, "#FF1122FF");
+     * @endcode
+     */
+    NODE_TEXT_AREA_CARET_COLOR,
+    /**
+     * @brief 通过{@link setAttribute}方法设置多行文本输入框退出编辑态
+     *
+     * @note 入参格式为true或者false的字符串,设置为false退出编辑态
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_AREA_EDITING, "false");
+     * @endcode
+     */
+    NODE_TEXT_AREA_EDITING,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置XComponent的id
+     *
+     * @note 入参格式为字符串。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_XCOMPONENT_ID, "xcomponentid");
+     * @endcode
+     */
+    NODE_XCOMPONENT_ID = MAX_NODE_SCOPE_NUM * ARKUI_NODE_XCOMPONENT,
+    /**
+     * @brief 通过{@link setAttribute}方法设置XComponent的类型
+     *
+     * @note 入参格式为字符串，可填写surface或者texture。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_XCOMPONENT_TYPE, "surface");
+     * @endcode
+     */
+    NODE_XCOMPONENT_TYPE,
+    /**
+     * @brief 通过{@link setAttribute}方法设置XComponent的宽高
+     *
+     * @note 入参格式为空格分隔的字符串，格式为"width height", 单位为vp。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_XCOMPONENT_SURFACE_SIZE, "300 50");
+     * @endcode
+     */
+    NODE_XCOMPONENT_SURFACE_SIZE,
 } ArkUI_NodeAttributeType;
 
 /**
@@ -1321,6 +1453,8 @@ typedef enum {
     NODE_SCROLL_EVENT_ON_SCROLL_START,
     NODE_SCROLL_EVENT_ON_SCROLL_STOP,
     NODE_SCROLL_EVENT_EDGE,
+
+    NODE_TEXT_AREA_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_AREA,
 
     NODE_REFRESH_STATE_CHANGE = 1000 * ARKUI_NODE_REFRESH + 1,
     NODE_REFRESH_ON_REFRESH,

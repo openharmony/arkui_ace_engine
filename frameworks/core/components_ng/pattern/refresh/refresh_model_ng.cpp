@@ -51,6 +51,16 @@ void RefreshModelNG::Create()
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, Friction, DEFAULT_FRICTION_RATIO);
 }
 
+RefPtr<FrameNode> RefreshModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::REFRESH_ETS_TAG, nodeId, AceType::MakeRefPtr<RefreshPattern>());
+    auto layoutProperty = frameNode->GetLayoutProperty<RefreshLayoutProperty>();
+    layoutProperty->UpdateIndicatorOffset(Dimension(DEFAULT_INDICATOR_OFFSET, DimensionUnit::VP));
+    layoutProperty->UpdateFriction(DEFAULT_FRICTION_RATIO);
+    return frameNode;
+}
+
 void RefreshModelNG::SetRefreshing(bool isRefreshing)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(RefreshLayoutProperty, IsRefreshing, isRefreshing);
@@ -89,7 +99,7 @@ void RefreshModelNG::SetOnRefreshing(RefreshingEvent&& refreshing)
     eventHub->SetOnRefreshing(std::move(refreshing));
 }
 
-void RefreshModelNG::SetChangeEvent(ChangeEvent&& changeEvent)
+void RefreshModelNG::SetChangeEvent(RefreshChangeEvent&& changeEvent)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);

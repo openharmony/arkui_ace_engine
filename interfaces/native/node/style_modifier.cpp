@@ -26,6 +26,8 @@
 
 #include "base/log/log_wrapper.h"
 #include "base/utils/string_utils.h"
+#include "core/components_ng/base/frame_node.h"
+#include "bridge/common/utils/utils.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/components/common/properties/color.h"
 namespace OHOS::Ace::NodeModel {
@@ -37,6 +39,7 @@ const std::regex SIZE_TYPE_MAGIC("([0-9]+)([a-z]+)");
 constexpr int DEFAULT_ANGLE = 180;
 constexpr ArkUI_Float64 DEFAULT_Z_SCALE = 1.0;
 constexpr int UNIT_VP = 1;
+constexpr int UNIT_FP = 2;
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
@@ -84,6 +87,9 @@ constexpr int32_t DECORATION_TYPE_INDEX = 0;
 constexpr int32_t DECORATION_COLOR_INDEX = 1;
 constexpr int32_t DECORATION_STYLE_INDEX = 2;
 constexpr int32_t DEFAULT_OBJECT_FIT = 2;
+
+constexpr int32_t XCOMPONENT_TYPE_SURFACE = 0;
+constexpr int32_t XCOMPONENT_TYPE_TEXTURE = 2;
 const std::vector<std::string> BLUR_STY_ARRAY = { "no_material", "thin", "regular", "thick", "background_thin",
     "background_regular", "background_thick", "background_ultra_thick", "component_ultra_thin", "component_thin",
     "component_regular", "component_thick", "component_ultra_thick" };
@@ -91,7 +97,7 @@ const std::vector<std::string> COLOR_MODE_ARRAY = { "system", "light", "dark" };
 const std::vector<std::string> ADAPTIVE_COLOR_ARRAY = { "default", "average" };
 const std::vector<std::string> TEXT_ALIGN_ARRAY = { "left", "right", "center", "justify", "start", "end" };
 const std::vector<std::string> TEXT_COPY_OPTION_ARRAY = { "none", "in-app", "local", "distributed" };
-const std::vector<std::string> TEXT_DECORATION_TYPE_ARRAY = { "none", "underline", "overline", "line_through",
+const std::vector<std::string> TEXT_DECORATION_TYPE_ARRAY = { "none", "underline", "overline", "line-through",
     "inherit" };
 const std::vector<std::string> TEXT_DECORATION_STYLE_ARRAY = { "solid", "double", "dotted", "dashed", "wavy", "initial",
     "inherit" };
@@ -101,9 +107,14 @@ const std::vector<std::string> FONT_OVERFLOW_ARRAY = { "none", "clip", "ellipsis
 const std::vector<std::string> IMAGE_FIT_ARRAY = { "fill", "contain", "cover", "fitwidth", "fitheight", "none",
     "scale_down", "top_left" };
 const std::vector<std::string> IMAGE_INTERPOLATION_ARRAY = { "none", "low", "medium", "high" };
-const std::vector<std::string> IMAGE_REPEAT_ARRAY = { "no_repeat", "repeat_x", "repeat_y", "repeat" };
+const std::vector<std::string> IMAGE_REPEAT_ARRAY = { "no-repeat", "x", "y", "xy" };
 const std::vector<std::string> TEXT_CASE_ARRAY = { "normal", "lowercase", "uppercase" };
 const std::vector<std::string> IMAGE_SPAN_VERTICAL_ALIGN = { "top", "center", "bottom", "baseline", "none" };
+const std::vector<std::string> TEXT_INPUT_ENTER_KEY_TYPE = { "begin", "none", "go", "search", "send", "next", "done",
+    "previous", "new-line" };
+const std::vector<std::string> TEXT_INPUT_TYPE = { "normal", "multiline", "number", "phone-number", "date-time",
+    "email", "url", "password", "number-password", "screen-lock-password", "user-name", "new-password",
+    "number-decimal" };
 const std::vector<std::string> COMMON_GRADIENT_DIRECTION = { "left", "top", "right", "bottom", "left-top",
     "left-bottom", "right-top", "right-bottom", "none" };
 const std::vector<std::string> COMMON_ALIGNMENT = { "top-start", "top", "top-end", "start", "center",
@@ -210,7 +221,7 @@ void SetWidth(ArkUI_NodeHandle node, const char* value)
     }
     // 1 for vp. check in DimensionUnit.
     fullImpl->getNodeModifiers()->getCommonModifier()->setWidth(
-        node->uiNodeHandle, StringToFloat(value, 0.0f), 1, nullptr);
+        node->uiNodeHandle, StringToFloat(value, 0.0f), UNIT_VP, nullptr);
 }
 
 void SetHeight(ArkUI_NodeHandle node, const char* value)
@@ -221,7 +232,7 @@ void SetHeight(ArkUI_NodeHandle node, const char* value)
         return;
     }
     fullImpl->getNodeModifiers()->getCommonModifier()->setHeight(
-        node->uiNodeHandle, StringToFloat(value, 0.0f), 1, nullptr);
+        node->uiNodeHandle, StringToFloat(value, 0.0f), UNIT_VP, nullptr);
 }
 
 void SetBackgroundColor(ArkUI_NodeHandle node, const char* value)
@@ -244,10 +255,12 @@ void SetBackgroundImage(ArkUI_NodeHandle node, const char* value)
     }
     std::vector<std::string> bgImageVector;
     StringUtils::StringSplitter(value, ' ', bgImageVector);
-    std::vector<std::string> repeatVec = { "norepeat", "x", "y", "xy" };
     std::string repeat = bgImageVector.size() > 1 ? bgImageVector[1] : "";
-    fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundImage(
-        node->uiNodeHandle, bgImageVector[0].c_str(), nullptr, nullptr, StringToEnumInt(repeat.c_str(), repeatVec, 0));
+    std::string bundle;
+    std::string module;
+    fullImpl->getNodeModifiers()->getCommonModifier()->setBackgroundImage(node->uiNodeHandle,
+        bgImageVector[NUM_0].c_str(), bundle.c_str(), module.c_str(),
+        StringToEnumInt(repeat.c_str(), IMAGE_REPEAT_ARRAY, 0));
 }
 
 void SetPadding(ArkUI_NodeHandle node, const char* value)
@@ -264,15 +277,15 @@ void SetPadding(ArkUI_NodeHandle node, const char* value)
     int paddingSize = paddingVal.size();
     for (int i = 0; i < ALLOW_SIZE_4; i++) {
         if (paddingSize == 1) {
-            padding[i] = StringToFloat(paddingVal[0].c_str(), 0.0f);
+            padding[i] = StringToFloat(paddingVal[NUM_0].c_str(), 0.0f);
         } else if (i < paddingSize) {
             padding[i] = StringToFloat(paddingVal[i].c_str(), 0.0f);
         }
     }
-    struct ArkUISizeType top = { padding[0], units[0] };
-    struct ArkUISizeType right = { padding[1], units[1] };
-    struct ArkUISizeType bottom = { padding[2], units[2] };
-    struct ArkUISizeType left = { padding[3], units[3] };
+    struct ArkUISizeType top = { padding[NUM_0], units[NUM_0] };
+    struct ArkUISizeType right = { padding[NUM_1], units[NUM_1] };
+    struct ArkUISizeType bottom = { padding[NUM_2], units[NUM_2] };
+    struct ArkUISizeType left = { padding[NUM_3], units[NUM_3] };
     fullImpl->getNodeModifiers()->getCommonModifier()->setPadding(node->uiNodeHandle, &top, &right, &bottom, &left);
 }
 
@@ -1010,7 +1023,7 @@ void SetFontSize(ArkUI_NodeHandle node, const char* value)
         return;
     }
     if (node->type == ARKUI_NODE_TEXT_INPUT) {
-        struct ArkUILengthType fontSize = { nullptr, StringToFloat(value, 0.0f), 2 };
+        struct ArkUILengthType fontSize = { nullptr, StringToFloat(value, 0.0f), UNIT_FP };
         fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputFontSize(node->uiNodeHandle, &fontSize);
     } else if (node->type == ARKUI_NODE_TEXT) {
         CalcDimension textFontSize;
@@ -1098,8 +1111,13 @@ void SetCaretColor(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
         return;
     }
-    fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputCaretColor(
-        node->uiNodeHandle, StringToColorInt(value, 0));
+    if (node->type == ARKUI_NODE_TEXT_INPUT) {
+        fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputCaretColor(
+            node->uiNodeHandle, StringToColorInt(value, 0));
+    } else if (node->type == ARKUI_NODE_TEXT_AREA) {
+        fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaCaretColor(
+            node->uiNodeHandle, StringToColorInt(value, 0));
+    }
 }
 
 void SetCaretStyle(ArkUI_NodeHandle node, const char* value)
@@ -1131,8 +1149,13 @@ void SetMaxLength(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
         return;
     }
-    fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputMaxLength(
-        node->uiNodeHandle, StringToInt(value, 0));
+    if (node->type == ARKUI_NODE_TEXT_INPUT) {
+        fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputMaxLength(
+            node->uiNodeHandle, StringToInt(value, 0));
+    } else if (node->type == ARKUI_NODE_TEXT_AREA) {
+        fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaMaxLength(
+            node->uiNodeHandle, StringToInt(value, 0));
+    }
 }
 
 void SetEnterKeyType(ArkUI_NodeHandle node, const char* value)
@@ -1142,11 +1165,8 @@ void SetEnterKeyType(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
         return;
     }
-    std::vector<std::string> enterKeyType = { "begin", "none", "go", "search", "send", "next", "done", "previous",
-        "newLine" };
-    int defaultValue = 6;
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputEnterKeyType(
-        node->uiNodeHandle, StringToEnumInt(value, enterKeyType, defaultValue));
+        node->uiNodeHandle, StringToEnumInt(value, TEXT_INPUT_ENTER_KEY_TYPE, NUM_6));
 }
 
 void SetPlaceholderColor(ArkUI_NodeHandle node, const char* value)
@@ -1156,8 +1176,13 @@ void SetPlaceholderColor(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
         return;
     }
-    fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputPlaceholderColor(
-        node->uiNodeHandle, StringToColorInt(value, 0));
+    if (node->type == ARKUI_NODE_TEXT_INPUT) {
+        fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputPlaceholderColor(
+            node->uiNodeHandle, StringToColorInt(value, 0));
+    } else if (node->type == ARKUI_NODE_TEXT_AREA) {
+        fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaPlaceholderColor(
+            node->uiNodeHandle, StringToColorInt(value, 0));
+    }
 }
 
 void SetTextInputPlaceholderFont(ArkUI_NodeHandle node, const char* value)
@@ -1172,17 +1197,14 @@ void SetTextInputPlaceholderFont(ArkUI_NodeHandle node, const char* value)
     for (int i = font.size(); i < ALLOW_SIZE_4; i++) {
         font.emplace_back("");
     }
-    std::vector<std::string> style = { "normal", "italic" };
-    struct ArkUILengthType size = { nullptr, StringToFloat(font[0].c_str(), 0.0f), 2 };
-    std::string familyStr = font[3];
+    struct ArkUILengthType size = { nullptr, StringToFloat(font[NUM_0].c_str(), 0.0f), UNIT_FP };
+    std::string familyStr = font[NUM_3];
     int fontFamilyLength = familyStr.length();
-    struct ArkUIPlaceholderFontType palceHolderFont = { &size, font[1].c_str(), nullptr, 0,
-        StringToEnumInt(font[2].c_str(), style, 0) };
+    struct ArkUIPlaceholderFontType palceHolderFont = { &size, font[NUM_1].c_str(), nullptr, 0,
+        StringToEnumInt(font[NUM_2].c_str(), FONT_STYLE_ARRAY, 0) };
     if (fontFamilyLength) {
-        std::vector<std::string> fontFamilies;
-
-        StringUtils::StringSplitter(familyStr.c_str(), ',', fontFamilies);
-        auto families = std::make_unique<char*[]>(fontFamilies.size());
+        std::vector<std::string> fontFamilies = Framework::ConvertStrToFontFamilies(familyStr);
+        auto families = std::make_unique<char* []>(fontFamilies.size());
         for (uint32_t i = 0; i < fontFamilies.size(); i++) {
             families[i] = const_cast<char*>(fontFamilies.at(i).c_str());
         }
@@ -1212,11 +1234,8 @@ void SetTextInputType(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
         return;
     }
-
-    std::vector<std::string> inputType = { "normal", "multiline", "number", "phone-number", "date-time", "email", "url",
-        "password", "number-password", "screen-lock-password", "user-name", "new-password", "number-decimal" };
     fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputType(
-        node->uiNodeHandle, StringToEnumInt(value, inputType, 0));
+        node->uiNodeHandle, StringToEnumInt(value, TEXT_INPUT_TYPE, 0));
 }
 
 void SetSelectedBackgroundColor(ArkUI_NodeHandle node, const char* value)
@@ -1556,6 +1575,95 @@ void SetListEdgeEffect(ArkUI_NodeHandle node, const char* value)
     auto attrVal = StringToEnumInt(value, SCROLL_EDGE_EFFECT, NUM_2);
     alwaysEnabled = (size > NUM_1) ? StringToBoolInt(params[NUM_1].c_str()) : true;
     fullImpl->getNodeModifiers()->getListModifier()->setListEdgeEffect(node->uiNodeHandle, attrVal, alwaysEnabled);
+}
+
+void SetTextAreaPlaceholderFont(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    std::vector<std::string> font;
+    StringUtils::StringSplitter(value, ' ', font);
+    for (int i = font.size(); i < ALLOW_SIZE_4; i++) {
+        font.emplace_back("");
+    }
+    struct ArkUIResourceLength size = { StringToFloat(font[NUM_0].c_str(), 0.0f), UNIT_FP };
+    std::string weight = font[NUM_1];
+    int fontStyle = StringToEnumInt(font[NUM_2].c_str(), FONT_STYLE_ARRAY, 0);
+    std::string family = font[NUM_3];
+    fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaPlaceholderFont(
+        node->uiNodeHandle, &size, weight.c_str(), family.c_str(), fontStyle);
+}
+
+void SetTextAreaPlaceholder(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaPlaceholderString(node->uiNodeHandle, value);
+}
+
+void SetTextAreaText(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaTextString(node->uiNodeHandle, value);
+}
+
+void StopTextAreaEditing(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!StringToBoolInt(value, 0)) {
+        fullImpl->getNodeModifiers()->getTextAreaModifier()->stopTextAreaTextEditing(node->uiNodeHandle);
+    }
+}
+
+void SetXComponentId(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    fullImpl->getNodeModifiers()->getXComponentModifier()->setXComponentId(node->uiNodeHandle, value);
+}
+
+void SetXComponentType(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    std::string input(value);
+    ArkUI_Uint32 type = input == "texture" ? XCOMPONENT_TYPE_TEXTURE : XCOMPONENT_TYPE_SURFACE;
+    fullImpl->getNodeModifiers()->getXComponentModifier()->setXComponentType(node->uiNodeHandle, type);
+}
+
+void SetXComponentSurfaceSize(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    std::vector<std::string> size;
+    StringUtils::StringSplitter(value, ' ', size);
+    std::string width = size[NUM_0];
+    std::string height = size[NUM_1];
+    fullImpl->getNodeModifiers()->getXComponentModifier()->setXComponentSurfaceSize(
+        node->uiNodeHandle, StringToInt(width.c_str(), 0), StringToInt(height.c_str(), 0));
 }
 
 // Text Attributes functions
@@ -2405,6 +2513,27 @@ void SetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const char* valu
     setters[subTypeId](node, value);
 }
 
+void SetTextAreaAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const char* value)
+{
+    static Setter* setters[] = { SetTextAreaPlaceholder, SetTextAreaText, SetMaxLength,
+        SetPlaceholderColor, SetTextAreaPlaceholderFont, SetCaretColor, StopTextAreaEditing };
+    if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textarea node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        return;
+    }
+    setters[subTypeId](node, value);
+}
+
+void SetXComponentAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const char* value)
+{
+    static Setter* setters[] = { SetXComponentId, SetXComponentType, SetXComponentSurfaceSize, };
+    if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "xcomponent node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        return;
+    }
+    setters[subTypeId](node, value);
+}
+
 void SetSwiperAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const char* value)
 {
     static Setter* setters[] = { SetSwiperLoop, SetSwiperAutoPlay, SetSwiperShowIndicator, SetSwiperInterval,
@@ -2431,9 +2560,11 @@ void SetLoadingProgressAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const
 void SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, const char* value)
 {
     using AttributeSetterClass = void(ArkUI_NodeHandle node, int32_t subTypeId, const char* value);
-    static AttributeSetterClass* setterClasses[] = { SetCommonAttribute, SetTextAttribute, SetSpanAttribute,
-        SetImageSpanAttribute, SetImageAttribute, SetToggleAttribute, SetLoadingProgressAttribute,
-        SetTextInputAttribute, SetStackAttribute, SetScrollAttribute, SetListAttribute, SetSwiperAttribute };
+    static AttributeSetterClass* setterClasses[] = { SetCommonAttribute, SetTextAttribute,
+        SetSpanAttribute, SetImageSpanAttribute, SetImageAttribute, SetToggleAttribute,
+        SetLoadingProgressAttribute, SetTextInputAttribute, SetStackAttribute, SetScrollAttribute,
+        SetListAttribute, SetSwiperAttribute, SetTextAreaAttribute, nullptr, nullptr,
+        nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, SetXComponentAttribute, };
     int32_t subTypeClass = type / MAX_NODE_SCOPE_NUM;
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
     if (subTypeClass > sizeof(setterClasses) / sizeof(AttributeSetterClass*)) {

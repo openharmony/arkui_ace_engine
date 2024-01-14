@@ -40,6 +40,11 @@ public:
     void SetDetachCallback(DetachCallback&& onDetach) override;
 
     static bool IsTexture(FrameNode* frameNode);
+    static RefPtr<FrameNode> CreateFrameNode(
+        int32_t nodeId, const std::string& id, XComponentType type, const std::string& libraryname);
+    static void SetXComponentId(FrameNode* frameNode, const std::string& id);
+    static void SetXComponentType(FrameNode* frameNode, XComponentType type);
+    static void SetXComponentSurfaceSize(FrameNode* frameNode, uint32_t width, uint32_t height);
 
 private:
     XComponentType GetTypeImpl(const RefPtr<FrameNode>& frameNode);

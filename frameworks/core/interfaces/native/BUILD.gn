@@ -75,6 +75,7 @@ template("ace_core_interfaces_native_node") {
       "node/node_span_modifier.cpp",
       "node/node_stack_modifier.cpp",
       "node/node_swiper_modifier.cpp",
+      "node/node_text_area_modifier.cpp",
       "node/node_text_input_modifier.cpp",
       "node/node_text_modifier.cpp",
       "node/node_toggle_modifier.cpp",
@@ -120,7 +121,10 @@ template("ace_core_interfaces_native_node") {
 
     if (defined(config.xcomponent_components_support) &&
         config.xcomponent_components_support) {
-      sources += [ "node/xcomponent_modifier.cpp" ]
+      sources += [
+        "node/node_xcomponent_modifier.cpp",
+        "node/xcomponent_modifier.cpp",
+      ]
     }
 
     if (defined(config.form_components_support) &&
