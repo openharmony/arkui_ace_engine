@@ -3514,12 +3514,21 @@ void RichEditorPattern::InitTouchEvent()
 
 void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
 {
-    auto touchType = info.GetTouches().front().GetTouchType();
+    auto touchPoint = info.GetTouches().front();
+    auto touchType = touchPoint.GetTouchType();
+    if (touchType == TouchType::DOWN) {
+        touchDownOffset_ = touchPoint.GetScreenLocation();
+    }
     if (SelectOverlayIsOn()) {
         if (touchType == TouchType::MOVE) {
+            auto touchOffset = touchPoint.GetScreenLocation();
+            if (touchOffset == touchDownOffset_) {
+                return;
+            }
             selectMenuInfo_.menuIsShow = false;
             selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
         } else if (touchType == TouchType::UP) {
+            touchDownOffset_.Reset();
             selectMenuInfo_.menuIsShow = true;
             selectOverlayProxy_->UpdateSelectMenuInfo(selectMenuInfo_);
         }
@@ -3527,6 +3536,7 @@ void RichEditorPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
     if (touchType == TouchType::DOWN) {
     } else if (touchType == TouchType::UP) {
+        touchDownOffset_.Reset();
         isMousePressed_ = false;
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
         if (isLongPress_) {
