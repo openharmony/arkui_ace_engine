@@ -502,11 +502,6 @@ public:
     void AddOrReplaceNavigationNode(const std::string& id, const WeakPtr<FrameNode>& node);
     void DeleteNavigationNode(const std::string& id);
 
-    void SetDragCleanTask(std::function<void()>&& task)
-    {
-        dragCleanTask_ = std::move(task);
-    }
-
     void AddGestureTask(const DelayedTask& task)
     {
         delayedTasks_.emplace_back(task);
@@ -742,7 +737,6 @@ private:
 
     std::list<FrameInfo> dumpFrameInfos_;
     std::list<std::function<void()>> animationClosuresList_;
-    std::function<void()> dragCleanTask_;
 
     std::map<int32_t, std::function<void(bool)>> isFocusActiveUpdateEvents_;
     std::map<int32_t, std::function<void(bool)>> onFormVisibleChangeEvents_;
