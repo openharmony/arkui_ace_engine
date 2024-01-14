@@ -90,7 +90,7 @@ void MenuItemLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     float leftRowHeight = leftRow->GetGeometryNode()->GetMarginFrameSize().Height();
     float contentWidth = leftRowWidth + rightRowWidth + padding.Width() + middleSpace;
     auto itemHeight = std::max(leftRowHeight, rightRowHeight);
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         layoutWrapper->GetGeometryNode()->SetContentSize(
             SizeF(std::max(minRowWidth, contentWidth), std::max(itemHeight, minItemHeight)));
     } else {
