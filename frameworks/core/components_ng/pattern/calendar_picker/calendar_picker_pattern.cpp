@@ -19,6 +19,7 @@
 
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
+#include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
@@ -856,19 +857,32 @@ OffsetF CalendarPickerPattern::CalculateDialogOffset()
     CHECK_NULL_RETURN(layoutProperty, OffsetF());
     float x = 0.0f;
     float y = 0.0f;
-    auto hostRect = host->GetTransformRectRelativeToWindow();
-    auto hostTop = hostRect.Top();
-    auto hostBottom = hostRect.Bottom();
+    auto hostOffset = host->GetOffsetRelativeToWindow();
+    auto hostSize = host->GetGeometryNode()->GetFrameSize();
 
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, OffsetF());
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
     CHECK_NULL_RETURN(theme, OffsetF());
 
-    if (!IsContainerModal() && hostTop + (DIALOG_HEIGHT).ConvertToPx() > pipelineContext->GetRootHeight()) {
-        y = std::max(static_cast<float>(hostTop - (DIALOG_HEIGHT).ConvertToPx()), 0.0f);
+    float dialogHeight = pipelineContext->GetRootHeight();
+    if (IsContainerModal()) {
+        auto rootNode = pipelineContext->GetRootElement();
+        CHECK_NULL_RETURN(rootNode, OffsetF());
+        auto containerNode = AceType::DynamicCast<FrameNode>(rootNode->GetChildren().front());
+        CHECK_NULL_RETURN(containerNode, OffsetF());
+        auto containerPattern = containerNode->GetPattern<ContainerModalPattern>();
+        CHECK_NULL_RETURN(containerPattern, OffsetF());
+        auto titleHeight = containerPattern->GetContainerModalTitleHeight();
+        dialogHeight -= titleHeight;
+        hostOffset -= OffsetF(0, titleHeight);
+    }
+
+    auto hostRect = RectF(hostOffset, hostSize);
+    if (hostRect.Bottom() + (DIALOG_HEIGHT).ConvertToPx() > dialogHeight) {
+        y = std::max(static_cast<float>(hostRect.Top() - (DIALOG_HEIGHT).ConvertToPx()), 0.0f);
     } else {
-        y = hostBottom + (theme->GetDialogMargin()).ConvertToPx();
+        y = hostRect.Bottom() + (theme->GetDialogMargin()).ConvertToPx();
     }
 
     CalendarEdgeAlign align = layoutProperty->GetDialogAlignType().value_or(CalendarEdgeAlign::EDGE_ALIGN_END);
