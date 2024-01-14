@@ -43,6 +43,7 @@ public:
 
     void PaintBoard(DrawingContext& context);
     void PaintStar(DrawingContext& context);
+    void PaintReverseStar(DrawingContext& context);
 
     void onDraw(DrawingContext& context) override;
 
@@ -187,6 +188,13 @@ public:
         }
     }
 
+    void SetReverse(bool reverse)
+    {
+        if (reverse_) {
+            reverse_->Set(reverse);
+        }
+    }
+
 private:
     // others
     RatingAnimationType state_ = RatingAnimationType::NONE;
@@ -206,6 +214,7 @@ private:
     RefPtr<PropertySizeF> contentSize_;
     // animatable property
     RefPtr<AnimatablePropertyColor> boardColor_;
+    RefPtr<PropertyBool> reverse_;
     ACE_DISALLOW_COPY_AND_MOVE(RatingModifier);
 };
 } // namespace OHOS::Ace::NG

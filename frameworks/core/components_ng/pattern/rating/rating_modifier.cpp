@@ -22,14 +22,13 @@
 
 namespace OHOS::Ace::NG {
 RatingModifier::RatingModifier()
-    : needDraw_(AceType::MakeRefPtr<PropertyBool>(false)),
-      starNum_(AceType::MakeRefPtr<PropertyInt>(0)),
-      touchStar_(AceType::MakeRefPtr<PropertyInt>(0)),
-      drawScore_(AceType::MakeRefPtr<PropertyFloat>(.0f)),
+    : needDraw_(AceType::MakeRefPtr<PropertyBool>(false)), starNum_(AceType::MakeRefPtr<PropertyInt>(0)),
+      touchStar_(AceType::MakeRefPtr<PropertyInt>(0)), drawScore_(AceType::MakeRefPtr<PropertyFloat>(.0f)),
       stepSize_(AceType::MakeRefPtr<PropertyFloat>(.0f)),
       contentOffset_(AceType::MakeRefPtr<PropertyOffsetF>(OffsetF())),
       contentSize_(AceType::MakeRefPtr<PropertySizeF>(SizeF())),
-      boardColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT)))
+      boardColor_(AceType::MakeRefPtr<AnimatablePropertyColor>(LinearColor(Color::TRANSPARENT))),
+      reverse_(AceType::MakeRefPtr<PropertyBool>(false))
 {
     AttachProperty(needDraw_);
     AttachProperty(starNum_);
@@ -39,6 +38,7 @@ RatingModifier::RatingModifier()
     AttachProperty(contentOffset_);
     AttachProperty(contentSize_);
     AttachProperty(boardColor_);
+    AttachProperty(reverse_);
 }
 
 void RatingModifier::onDraw(DrawingContext& context)
@@ -48,7 +48,11 @@ void RatingModifier::onDraw(DrawingContext& context)
     CHECK_NULL_VOID(backgroundImageCanvas_);
     // step1: check if touch down any stars.
     PaintBoard(context);
-    PaintStar(context);
+    if (reverse_ && reverse_->Get()) {
+        PaintReverseStar(context);
+    } else {
+        PaintStar(context);
+    }
     SetNeedDraw(false);
 }
 
@@ -135,5 +139,49 @@ void RatingModifier::PaintStar(DrawingContext& context)
             offsetTemp.SetX(offsetTemp.GetX() + singleStarWidth);
         }
     }
+}
+
+void RatingModifier::PaintReverseStar(DrawingContext& context)
+{
+    const ImagePainter foregroundImagePainter(foregroundImageCanvas_);
+    const ImagePainter secondaryImagePainter(secondaryImageCanvas_);
+    const ImagePainter backgroundPainter(backgroundImageCanvas_);
+
+    auto& canvas = context.canvas;
+    auto offset = contentOffset_->Get();
+    auto starNum = starNum_->Get();
+    auto drawScore = drawScore_->Get();
+    auto config = foregroundImageCanvas_->GetPaintConfig();
+    const float singleStarWidth = contentSize_->Get().Width() / static_cast<float>(starNum_->Get());
+    const float singleStarHeight = contentSize_->Get().Height();
+    const int32_t foregroundImageRepeatNum = ceil(drawScore);
+    const float secondaryImageRepeatNum = foregroundImageRepeatNum - drawScore;
+    const int32_t backgroundImageRepeatNum = starNum - foregroundImageRepeatNum;
+    canvas.Save();
+    auto offsetTemp = offset;
+    auto contentSize = SizeF(singleStarWidth, singleStarHeight);
+    for (int32_t i = 0; i < backgroundImageRepeatNum; i++) {
+        backgroundPainter.DrawImage(canvas, offsetTemp, contentSize);
+        offsetTemp.SetX(offsetTemp.GetX() + singleStarWidth);
+    }
+    if (secondaryImageRepeatNum != 0) {
+        canvas.Save();
+        auto clipRect2 =
+            RSRect(static_cast<float>(offset.GetX() + singleStarWidth * backgroundImageRepeatNum), offsetTemp.GetY(),
+                static_cast<float>(offset.GetX() + singleStarWidth * (static_cast<float>(starNum) - drawScore)),
+                offset.GetY() + singleStarHeight);
+        canvas.ClipRect(clipRect2, RSClipOp::INTERSECT);
+        secondaryImagePainter.DrawImage(canvas, offsetTemp, contentSize);
+        canvas.Restore();
+    }
+    auto clipRect1 =
+        RSRect(static_cast<float>(offset.GetX() + singleStarWidth * (static_cast<float>(starNum) - drawScore)),
+            offsetTemp.GetY(), offset.GetX() + singleStarWidth * starNum, offset.GetY() + singleStarHeight);
+    canvas.ClipRect(clipRect1, RSClipOp::INTERSECT);
+    for (int32_t i = 0; i < foregroundImageRepeatNum; i++) {
+        foregroundImagePainter.DrawImage(canvas, offsetTemp, contentSize);
+        offsetTemp.SetX(static_cast<float>(offsetTemp.GetX() + singleStarWidth));
+    }
+    canvas.Restore();
 }
 } // namespace OHOS::Ace::NG
