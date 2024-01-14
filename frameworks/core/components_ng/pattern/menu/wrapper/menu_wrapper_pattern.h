@@ -244,7 +244,7 @@ private:
     bool isFirstShow_ = true;
     bool isHided_ = false;
     bool isShow_ = false;
-
+    bool isShowInSubWindow_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(MenuWrapperPattern);
 };
 } // namespace OHOS::Ace::NG

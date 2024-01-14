@@ -1236,8 +1236,10 @@ void NavigationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolB
         CHECK_NULL_VOID(barItemLayoutProperty);
         barItemLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
         BuildToolbarMoreItemNode(barItemNode);
-        auto barMenuNode =
-            MenuView::Create(std::move(params), barItemNodeId, V2::BAR_ITEM_ETS_TAG, MenuType::NAVIGATION_MENU);
+        MenuParam menuParam;
+        menuParam.isShowInSubWindow = false;
+        auto barMenuNode = MenuView::Create(
+            std::move(params), barItemNodeId, V2::BAR_ITEM_ETS_TAG, MenuType::NAVIGATION_MENU, menuParam);
         auto toolBarItemNode = CreateToolbarMoreMenuNode(barItemNode);
         CHECK_NULL_VOID(toolBarItemNode);
         BuildToolbarMoreMenuNodeAction(barItemNode, barMenuNode, toolBarItemNode);

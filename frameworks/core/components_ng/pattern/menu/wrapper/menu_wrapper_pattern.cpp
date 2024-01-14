@@ -201,7 +201,17 @@ bool MenuWrapperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_RETURN(theme, false);
     auto expandDisplay = theme->GetExpandDisplay();
-    if ((IsContextMenu() && !IsHided()) || (expandDisplay && !IsHided())) {
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto menuNode = DynamicCast<FrameNode>(host->GetChildAtIndex(0));
+    CHECK_NULL_RETURN(menuNode, false);
+    auto menuPattern = AceType::DynamicCast<MenuPattern>(menuNode->GetPattern());
+    CHECK_NULL_RETURN(menuPattern, false);
+    // copy menu pattern properties to rootMenu
+    auto layoutProperty = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(layoutProperty, false);
+    isShowInSubWindow_ = layoutProperty->GetShowInSubWindowValue(true);
+    if ((IsContextMenu() && !IsHided()) || ((expandDisplay && isShowInSubWindow_) && !IsHided())) {
         SetHotAreas(dirty);
     }
     CheckAndShowAnimation();
@@ -215,7 +225,8 @@ void MenuWrapperPattern::SetHotAreas(const RefPtr<LayoutWrapper>& layoutWrapper)
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
-    if ((layoutWrapper->GetAllChildrenWithBuild().empty() || !IsContextMenu()) && !expandDisplay) {
+    if ((layoutWrapper->GetAllChildrenWithBuild().empty() || !IsContextMenu()) &&
+        !(expandDisplay && isShowInSubWindow_)) {
         return;
     }
     auto layoutProps = layoutWrapper->GetLayoutProperty();

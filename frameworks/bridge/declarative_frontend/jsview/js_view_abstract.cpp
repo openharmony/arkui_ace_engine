@@ -2546,6 +2546,16 @@ void ParseMenuArrowParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menu
     }
 }
 
+void GetMenuShowInSubwindow(NG::MenuParam& menuParam)
+{
+    menuParam.isShowInSubWindow = false;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    menuParam.isShowInSubWindow = theme->GetExpandDisplay();
+}
+
 void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
     auto offsetVal = menuOptions->GetProperty("offset");
@@ -2640,6 +2650,14 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
         };
         menuParam.aboutToDisappear = std::move(aboutToDisappear);
     }
+
+    JSRef<JSVal> showInSubWindowValue = menuOptions->GetProperty("showInSubWindow");
+    GetMenuShowInSubwindow(menuParam);
+    if (menuParam.isShowInSubWindow) {
+        if (showInSubWindowValue->IsBoolean()) {
+            menuParam.isShowInSubWindow = showInSubWindowValue->ToBoolean();
+        }
+    }
     ParseMenuArrowParam(menuOptions, menuParam);
 }
 
@@ -2721,6 +2739,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
         menuParam.placement = Placement::BOTTOM_LEFT;
     }
     size_t builderIndex = 0;
+    GetMenuShowInSubwindow(menuParam);
     if (info.Length() > PARAMETER_LENGTH_FIRST) {
         if (info[0]->IsBoolean()) {
             menuParam.isShow = info[0]->ToBoolean();
@@ -2753,7 +2772,6 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
             }
         }
     }
-
     if (info[builderIndex]->IsArray()) {
         std::vector<NG::OptionParam> optionsParam = ParseBindOptionParam(info, builderIndex);
         ViewAbstractModel::GetInstance()->BindMenu(std::move(optionsParam), nullptr, menuParam);

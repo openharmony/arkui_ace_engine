@@ -319,8 +319,10 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
         CHECK_NULL_RETURN(barItemLayoutProperty, nullptr);
         barItemLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
         BuildMoreIemNode(barItemNode, isButtonEnabled);
-        auto barMenuNode =
-            MenuView::Create(std::move(params), barItemNodeId, V2::BAR_ITEM_ETS_TAG, MenuType::NAVIGATION_MENU);
+        MenuParam menuParam;
+        menuParam.isShowInSubWindow = false;
+        auto barMenuNode = MenuView::Create(
+            std::move(params), barItemNodeId, V2::BAR_ITEM_ETS_TAG, MenuType::NAVIGATION_MENU, menuParam);
         auto buttonPattern = AceType::MakeRefPtr<NG::ButtonPattern>();
         CHECK_NULL_RETURN(buttonPattern, nullptr);
         buttonPattern->setComponentButtonType(ComponentButtonType::NAVIGATION);

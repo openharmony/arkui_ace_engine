@@ -520,14 +520,15 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    InitHierarchicalParameters();
+    auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(menuLayoutProperty);
+    auto isShowInSubWindow = menuLayoutProperty->GetShowInSubWindowValue(true);
+    InitHierarchicalParameters(isShowInSubWindow);
     if (!targetTag_.empty()) {
         InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu(), menuPattern);
     }
     Initialize(layoutWrapper);
 
-    auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(menuLayoutProperty);
     const auto& constraint = menuLayoutProperty->GetLayoutConstraint();
     if (!constraint) {
         return;
@@ -2176,13 +2177,17 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementRightBottom(
     return childPosition;
 }
 
-void MenuLayoutAlgorithm::InitHierarchicalParameters()
+void MenuLayoutAlgorithm::InitHierarchicalParameters(bool isShowInSubWindow)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
+    if (expandDisplay && !isShowInSubWindow) {
+        hierarchicalParameters_ = false;
+        return;
+    }
     hierarchicalParameters_ = expandDisplay;
 }
 
