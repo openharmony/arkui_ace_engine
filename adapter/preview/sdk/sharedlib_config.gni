@@ -202,6 +202,14 @@ if (defined(use_rosen_drawing) && use_rosen_drawing) {
     },
   ]
 
+  common_bin += [
+    {
+      label = "//foundation/graphic/graphic_2d/interfaces/kits/napi/graphic/drawing:drawing_napi_impl"
+      subsystem_name = "graphic"
+      part_name = "graphic_2d"
+    },
+  ]
+
   common_bin -= [
     {
       label = "//foundation/graphic/graphic_2d/rosen/modules/texgine/texgine_drawing:libtexgine_drawing"
