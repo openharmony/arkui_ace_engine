@@ -235,14 +235,14 @@ float ListPattern::CalculateTargetPos(float startPos, float endPos)
 {
     float topOffset = startPos - contentStartOffset_;
     float bottomOffset = endPos - contentMainSize_ + contentEndOffset_;
-    if (GreatOrEqual(startPos, contentStartOffset_) && LessOrEqual(endPos, contentMainSize_ - contentEndOffset_)) {
+    if (GreatOrEqual(topOffset, 0.0f) && LessOrEqual(bottomOffset, 0.0f)) {
         return 0.0f;
     }
-    if ((NearEqual(startPos, contentStartOffset_) && GreatNotEqual(endPos, contentMainSize_ - contentEndOffset_)) ||
-        (LessNotEqual(startPos, contentStartOffset_) && NearEqual(endPos, contentMainSize_ - contentEndOffset_))) {
+    if ((NearEqual(topOffset, 0.0f) && GreatNotEqual(bottomOffset, 0.0f)) ||
+        (LessNotEqual(topOffset, 0.0f) && NearEqual(bottomOffset, 0.0f))) {
         return 0.0f;
     }
-    if (LessNotEqual(startPos, contentStartOffset_) && GreatNotEqual(endPos, contentMainSize_ - contentEndOffset_)) {
+    if (LessNotEqual(topOffset, 0.0f) && GreatNotEqual(bottomOffset, 0.0f)) {
         if (GreatOrEqual(std::abs(topOffset), std::abs(bottomOffset))) {
             return bottomOffset;
         } else {
@@ -254,7 +254,7 @@ float ListPattern::CalculateTargetPos(float startPos, float endPos)
     } else if (LessNotEqual(std::abs(topOffset), std::abs(bottomOffset))) {
         return topOffset;
     } else {
-        if (LessNotEqual(startPos, contentStartOffset_)) {
+        if (LessNotEqual(topOffset, 0.0f)) {
             return topOffset;
         } else {
             return bottomOffset;
