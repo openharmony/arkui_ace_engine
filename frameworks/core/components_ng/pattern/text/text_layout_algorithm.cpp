@@ -408,17 +408,7 @@ void TextLayoutAlgorithm::CreateParagraphDrag(const TextStyle& textStyle, const 
     Color color = textStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_TRANSPARENCY);
     dragTextStyle.SetTextColor(color);
     std::vector<TextStyle> textStyles { textStyle, dragTextStyle, textStyle };
-    auto style = textStyles.begin();
-    ParagraphStyle paraStyle { .direction = GetTextDirection(content, layoutWrapper),
-        .maxLines = style->GetMaxLines(),
-        .align = style->GetTextAlign(),
-        .fontLocale = Localization::GetInstance()->GetFontLocale(),
-        .wordBreak = style->GetWordBreak(),
-        .textOverflow = style->GetTextOverflow(),
-        .fontSize = style->GetFontSize().ConvertToPx() };
 
-    paragraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
-    CHECK_NULL_VOID(paragraph_);
     for (size_t i = 0; i < contents.size(); i++) {
         std::string splitStr = contents[i];
         auto& style = textStyles[i];
