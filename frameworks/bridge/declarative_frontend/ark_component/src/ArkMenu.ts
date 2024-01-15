@@ -93,14 +93,36 @@ class RadiusModifier extends ModifierWithKey<Dimension | BorderRadiuses> {
   }
 }
 
+class MenuWidthModifier extends ModifierWithKey<Length> {
+  constructor(value: Length) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('menuWidth');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().menu.resetWidth(node);
+    } else {
+      getUINativeModule().menu.setWidth(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkMenuComponent extends ArkComponent implements MenuAttribute {
   constructor(nativePtr: KNode) {
     super(nativePtr);
   }
+  width(value: Length): this {
+    modifierWithKey(this._modifiersWithKeys, MenuWidthModifier.identity, MenuWidthModifier, value);
+    return this;
+  }
   fontSize(value: any): this {
     throw new Error('Method not implemented.');
   }
-  font(value: Font): MenuAttribute {
+  font(value: Font): this {
     modifierWithKey(this._modifiersWithKeys, MenuFontModifier.identity, MenuFontModifier, value);
     return this;
   }

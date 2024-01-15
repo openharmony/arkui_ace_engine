@@ -9877,23 +9877,16 @@ class ScrollEnableScrollInteractionModifier extends ModifierWithKey {
   }
 }
 ScrollEnableScrollInteractionModifier.identity = Symbol('enableScrollInteraction');
-class WaterFlowClipModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
+class ScrollEnablePagingModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
-      getUINativeModule().common.resetClipWithEdge(node);
+      getUINativeModule().scroll.resetEnablePaging(node);
+    } else {
+      getUINativeModule().scroll.setEnablePaging(node, this.value);
     }
-    else {
-      getUINativeModule().common.setClipWithEdge(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return true;
   }
 }
-WaterFlowClipModifier.identity = Symbol('waterFlowclip');
+ScrollEnablePagingModifier.identity = Symbol('scrollEnablePaging');
 class ScrollFrictionModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
@@ -10113,6 +10106,10 @@ class ArkScrollComponent extends ArkComponent {
   }
   enableScrollInteraction(value) {
     modifierWithKey(this._modifiersWithKeys, ScrollEnableScrollInteractionModifier.identity, ScrollEnableScrollInteractionModifier, value);
+    return this;
+  }
+  enablePaging(value) {
+    modifierWithKey(this._modifiersWithKeys, ScrollEnablePagingModifier.identity, ScrollEnablePagingModifier, value);
     return this;
   }
   friction(value) {
@@ -13482,12 +13479,12 @@ class CalendarPickerPaddingModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-      if (reset) {
-        getUINativeModule().calendarPicker.resetCalendarPickerPadding(node);
-      }
-      else {
-        getUINativeModule().calendarPicker.setCalendarPickerPadding(node, this.value.top, this.value.right, this.value.bottom, this.value.left);
-      }
+    if (reset) {
+      getUINativeModule().calendarPicker.resetCalendarPickerPadding(node);
+    }
+    else {
+      getUINativeModule().calendarPicker.setCalendarPickerPadding(node, this.value.top, this.value.right, this.value.bottom, this.value.left);
+    }
   }
   checkObjectDiff() {
     return !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
@@ -14374,6 +14371,20 @@ class MenuFontColorModifier extends ModifierWithKey {
   }
 }
 MenuFontColorModifier.identity = Symbol('fontColor');
+class MenuWidthModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().menu.resetWidth(node);
+    } else {
+      getUINativeModule().menu.setWidth(node, this.value);
+    }
+  }
+
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+MenuWidthModifier.identity = Symbol('menuWidth');
 class MenuFontModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -14431,6 +14442,10 @@ RadiusModifier.identity = Symbol('radius');
 class ArkMenuComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
+  }
+  width(value) {
+    modifierWithKey(this._modifiersWithKeys, MenuWidthModifier.identity, MenuWidthModifier, value);
+    return this;
   }
   fontSize(value) {
     throw new Error('Method not implemented.');
@@ -14553,6 +14568,19 @@ class ContentFontModifier extends ModifierWithKey {
   }
 }
 ContentFontModifier.identity = Symbol('contentFont');
+class MenuItemSelectIconModifier extends ModifierWithKey {
+  applyPeer(node, reset) {
+    if (reset || !this.value) {
+      getUINativeModule().menuitem.resetSelectIcon(node);
+    } else {
+      getUINativeModule().menuitem.setSelectIcon(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+MenuItemSelectIconModifier.identity = Symbol('selectIcon');
 class ArkMenuItemComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
@@ -14562,7 +14590,8 @@ class ArkMenuItemComponent extends ArkComponent {
     return this;
   }
   selectIcon(value) {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, MenuItemSelectIconModifier.identity, MenuItemSelectIconModifier, value);
+    return this;
   }
   onChange(callback) {
     throw new Error('Method not implemented.');
@@ -18222,6 +18251,23 @@ class RowsGapModifier extends ModifierWithKey {
   }
 }
 RowsGapModifier.identity = Symbol('rowsGap');
+class WaterFlowClipModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetClipWithEdge(node);
+    }
+    else {
+      getUINativeModule().common.setClipWithEdge(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return true;
+  }
+}
+WaterFlowClipModifier.identity = Symbol('waterFlowclip');
 class ColumnsGapModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

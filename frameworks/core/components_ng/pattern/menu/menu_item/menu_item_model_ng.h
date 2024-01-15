@@ -41,15 +41,17 @@ public:
 
     static void SetSelected(FrameNode* frameNode, bool isSelected = false);
     static void SetLabelFontColor(FrameNode* frameNode, const std::optional<Color>& color);
-    static void SetFontColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetLabelFontSize(FrameNode* frameNode, const Dimension& fontSize);
     static void SetLabelFontWeight(FrameNode* frameNode, FontWeight weight);
     static void SetLabelFontFamily(FrameNode* frameNode, const std::vector<std::string>& families);
     static void SetLabelFontStyle(FrameNode* frameNode, Ace::FontStyle style);
+    static void SetFontColor(FrameNode* frameNode, const std::optional<Color>& color);
     static void SetFontSize(FrameNode* frameNode, const Dimension& fontSize);
     static void SetFontWeight(FrameNode* frameNode, FontWeight weight);
     static void SetFontFamily(FrameNode* frameNode, const std::vector<std::string>& families);
     static void SetFontStyle(FrameNode* frameNode, Ace::FontStyle style);
+    static void SetSelectIcon(FrameNode* frameNode, bool isShow = false);
+    static void SetSelectIconSrc(FrameNode* frameNode, const std::string& src);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_MENU_MENU_ITEM_MODEL_NG_H

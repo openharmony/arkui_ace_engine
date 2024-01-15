@@ -1240,6 +1240,10 @@ struct ArkUIMenuItemModifierAPI {
     void (*ResetLabelFont)(NodeHandle node);
     void (*SetContentFont)(NodeHandle node, const char* fontInfo, int32_t styleVal);
     void (*ResetContentFont)(NodeHandle node);
+    void (*SetSelectIcon)(NodeHandle node, bool showIcon);
+    void (*ResetSelectIcon)(NodeHandle node);
+    void (*SetSelectIconSrc)(NodeHandle node, const char* iconSrc);
+    void (*ResetSelectIconSrc)(NodeHandle node);
 };
 
 struct ArkUIMenuModifierAPI {
@@ -1247,8 +1251,10 @@ struct ArkUIMenuModifierAPI {
     void (*ResetMenuFontColor)(NodeHandle node);
     void (*SetFont)(NodeHandle node, const char* fontInfo, int32_t styleVal);
     void (*ResetFont)(NodeHandle node);
-    void (*SetRadius)(NodeHandle node, const double* values, const int* units);
+    void (*SetRadius)(NodeHandle node, const double* values, const int32_t* units);
     void (*ResetRadius)(NodeHandle node);
+    void (*SetMenuWidth)(NodeHandle node, const char* widthStr);
+    void (*ResetMenuWidth)(NodeHandle node);
 };
 
 struct ArkUIWaterFlowModifierAPI {
@@ -1443,6 +1449,8 @@ struct ArkUIScrollModifierAPI {
     void (*ResetScrollScrollBarWidth)(NodeHandle node);
     void (*SetScrollEdgeEffect)(NodeHandle node, int32_t edgeEffect, bool alwaysEnabled);
     void (*ResetScrollEdgeEffect)(NodeHandle node);
+    void (*SetEnablePaging)(NodeHandle node, bool enablePaging);
+    void (*ResetEnablePaging)(NodeHandle node);
 };
 
 struct ArkUIListItemModifierAPI {
