@@ -102,7 +102,7 @@ private:
     float GetSpace(LayoutWrapper* layoutWrapper, int32_t indicator, const SizeF& frameSize, Axis axis);
     float CalculateFrontChildrenMainSize(LayoutWrapper* layoutWrapper, int32_t indicator, Axis axis);
     void LayoutChildren(LayoutWrapper* layoutWrapper, const SizeF& frameSize, Axis axis, OffsetF& childOffset);
-    void LayoutMask(LayoutWrapper* layoutWrapper);
+    void LayoutMask(LayoutWrapper* layoutWrapper, const std::vector<OffsetF>& childOffsetDelta);
     float CalculateBackChildrenMainSize(LayoutWrapper* layoutWrapper, int32_t indicator, Axis axis);
     void HandleFixedMode(LayoutWrapper* layoutWrapper, const SizeF& frameSize, int32_t childCount);
     void HandleSpaceBetweenOrCenterLayoutStyle(

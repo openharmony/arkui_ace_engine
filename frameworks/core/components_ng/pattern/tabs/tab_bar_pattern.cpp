@@ -808,24 +808,21 @@ void TabBarPattern::HandleBottomTabBarClick(int32_t selectedIndex, int32_t unsel
     OffsetF originalSelectedMaskOffset, originalUnselectedMaskOffset;
     float selectedImageSize = 0.0f, unselectedImageSize = 0.0f;
     for (int32_t maskIndex = 0; maskIndex < MASK_COUNT; maskIndex++) {
-        if (selectedIndexes[maskIndex] < 0) {
-            continue;
-        }
         if (maskIndex == 0) {
             layoutProperty->UpdateSelectedMask(selectedIndex);
         } else {
             layoutProperty->UpdateUnselectedMask(unselectedIndex);
         }
+        if (selectedIndexes[maskIndex] < 0) {
+            continue;
+        }
         GetBottomTabBarImageSizeAndOffset(selectedIndexes, maskIndex, selectedImageSize, unselectedImageSize,
             originalSelectedMaskOffset, originalUnselectedMaskOffset);
     }
-    if (selectedIndex >= 0) {
-        ChangeMask(host, selectedImageSize, originalSelectedMaskOffset, NO_OPACITY, HALF_MASK_RADIUS_RATIO, true);
-    }
-    if (unselectedIndex >= 0) {
-        ChangeMask(host, unselectedImageSize, originalUnselectedMaskOffset, FULL_OPACITY, FULL_MASK_RADIUS_RATIO,
-            false);
-    }
+    ChangeMask(selectedIndex, selectedImageSize, originalSelectedMaskOffset, NO_OPACITY, HALF_MASK_RADIUS_RATIO, true);
+    ChangeMask(unselectedIndex, unselectedImageSize, originalUnselectedMaskOffset, FULL_OPACITY,
+        FULL_MASK_RADIUS_RATIO, false);
+
     host->MarkDirtyNode();
     PlayMaskAnimation(selectedImageSize, originalSelectedMaskOffset, selectedIndex, unselectedImageSize,
         originalUnselectedMaskOffset, unselectedIndex);
@@ -899,7 +896,7 @@ void TabBarPattern::PlayMaskAnimation(float selectedImageSize,
     option.SetCurve(curve);
 
     AnimationUtils::OpenImplicitAnimation(option, option.GetCurve(), [weak = AceType::WeakClaim(this),
-        selectedIndex = selectedIndex, unselectedIndex = unselectedIndex]() {
+        selectedIndex, unselectedIndex]() {
         auto tabBar = weak.Upgrade();
         if (tabBar) {
             auto host = tabBar->GetHost();
@@ -910,29 +907,25 @@ void TabBarPattern::PlayMaskAnimation(float selectedImageSize,
         }
     });
 
-    AnimationUtils::AddKeyFrame(HALF_PROGRESS, [weak = AceType::WeakClaim(this),
-        selectedImageSize = selectedImageSize, originalSelectedMaskOffset = originalSelectedMaskOffset,
-        unselectedImageSize = unselectedImageSize, originalUnselectedMaskOffset = originalUnselectedMaskOffset]() {
+    AnimationUtils::AddKeyFrame(HALF_PROGRESS, [weak = AceType::WeakClaim(this), selectedIndex, unselectedIndex,
+        selectedImageSize, originalSelectedMaskOffset, unselectedImageSize, originalUnselectedMaskOffset]() {
         auto tabBar = weak.Upgrade();
         if (tabBar) {
-            auto host = tabBar->GetHost();
-            CHECK_NULL_VOID(host);
-            ChangeMask(host, selectedImageSize, originalSelectedMaskOffset, FULL_OPACITY, INVALID_RATIO, true);
-            ChangeMask(host, unselectedImageSize, originalUnselectedMaskOffset, NEAR_FULL_OPACITY, INVALID_RATIO,
-                false);
+            tabBar->ChangeMask(selectedIndex, selectedImageSize, originalSelectedMaskOffset, FULL_OPACITY,
+                INVALID_RATIO, true);
+            tabBar->ChangeMask(unselectedIndex, unselectedImageSize, originalUnselectedMaskOffset, NEAR_FULL_OPACITY,
+                INVALID_RATIO, false);
         }
     });
 
-    AnimationUtils::AddKeyFrame(FULL_PROGRESS, [weak = AceType::WeakClaim(this),
-        selectedImageSize = selectedImageSize, originalSelectedMaskOffset = originalSelectedMaskOffset,
-        unselectedImageSize = unselectedImageSize, originalUnselectedMaskOffset = originalUnselectedMaskOffset]() {
+    AnimationUtils::AddKeyFrame(FULL_PROGRESS, [weak = AceType::WeakClaim(this), selectedIndex, unselectedIndex,
+        selectedImageSize, originalSelectedMaskOffset, unselectedImageSize, originalUnselectedMaskOffset]() {
         auto tabBar = weak.Upgrade();
         if (tabBar) {
-            auto host = tabBar->GetHost();
-            CHECK_NULL_VOID(host);
-            ChangeMask(host, selectedImageSize, originalSelectedMaskOffset, FULL_OPACITY, FULL_MASK_RADIUS_RATIO, true);
-            ChangeMask(host, unselectedImageSize, originalUnselectedMaskOffset, NO_OPACITY, HALF_MASK_RADIUS_RATIO,
-                false);
+            tabBar->ChangeMask(selectedIndex, selectedImageSize, originalSelectedMaskOffset, FULL_OPACITY,
+                FULL_MASK_RADIUS_RATIO, true);
+            tabBar->ChangeMask(unselectedIndex, unselectedImageSize, originalUnselectedMaskOffset, NO_OPACITY,
+                HALF_MASK_RADIUS_RATIO, false);
         }
     });
 
@@ -976,53 +969,56 @@ void TabBarPattern::MaskAnimationFinish(const RefPtr<FrameNode>& host, int32_t s
     imageNode->MarkDirtyNode();
 }
 
-void TabBarPattern::ChangeMask(const RefPtr<FrameNode>& host, float imageSize,
-    const OffsetF& originalSelectedMaskOffset, float opacity, float radiusRatio, bool isSelected)
+void TabBarPattern::ChangeMask(int32_t index, float imageSize, const OffsetF& originalMaskOffset, float opacity,
+    float radiusRatio, bool isSelected)
 {
-    if (NearZero(imageSize)) {
-        return;
-    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
     auto maskPosition = host->GetChildren().size() - MASK_COUNT;
-    if (maskPosition < 0) {
+    if (index < 0 || NearZero(imageSize) || maskPosition < 0) {
         return;
     }
-    auto selectedMaskNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(maskPosition + !isSelected));
-    CHECK_NULL_VOID(selectedMaskNode);
 
-    auto selectedImageNode = AceType::DynamicCast<FrameNode>(selectedMaskNode->GetChildren().front());
-    CHECK_NULL_VOID(selectedImageNode);
-    auto selectedImageRenderContext = selectedImageNode->GetRenderContext();
-    CHECK_NULL_VOID(selectedImageRenderContext);
+    auto maskNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(maskPosition + !isSelected));
+    CHECK_NULL_VOID(maskNode);
+    auto maskImageNode = AceType::DynamicCast<FrameNode>(maskNode->GetChildren().front());
+    CHECK_NULL_VOID(maskImageNode);
+    auto maskImageRenderContext = maskImageNode->GetRenderContext();
+    CHECK_NULL_VOID(maskImageRenderContext);
 
     if (NonNegative(radiusRatio)) {
-        auto selectedMaskRenderContext = selectedMaskNode->GetRenderContext();
-        CHECK_NULL_VOID(selectedMaskRenderContext);
+        auto maskRenderContext = maskNode->GetRenderContext();
+        CHECK_NULL_VOID(maskRenderContext);
+        auto maskGeometryNode = maskNode->GetGeometryNode();
+        CHECK_NULL_VOID(maskGeometryNode);
+        auto tabBarNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(index));
+        CHECK_NULL_VOID(tabBarNode);
+        auto tabBarGeometryNode = tabBarNode->GetGeometryNode();
+        CHECK_NULL_VOID(tabBarGeometryNode);
 
-        auto selectedMaskGeometryNode = selectedMaskNode->GetGeometryNode();
-        CHECK_NULL_VOID(selectedMaskGeometryNode);
-        OffsetF selectedMaskOffset = originalSelectedMaskOffset;
-        selectedMaskOffset.AddX(-imageSize * radiusRatio);
-        selectedMaskOffset.AddY(imageSize * (1.0f - radiusRatio));
-        selectedMaskGeometryNode->SetMarginFrameOffset(selectedMaskOffset);
-        selectedMaskGeometryNode->SetFrameSize(SizeF(imageSize * radiusRatio * 2.0f, imageSize * radiusRatio * 2.0f));
-        selectedMaskRenderContext->SyncGeometryProperties(nullptr);
-
+        OffsetF maskOffset = originalMaskOffset;
+        maskOffset.AddX(-imageSize * radiusRatio);
+        maskOffset.AddY(imageSize * (1.0f - radiusRatio));
+        auto tabBarOffset = tabBarGeometryNode->GetMarginFrameOffset();
+        maskGeometryNode->SetMarginFrameOffset(maskOffset + tabBarOffset);
+        maskGeometryNode->SetFrameSize(SizeF(imageSize * radiusRatio * 2.0f, imageSize * radiusRatio * 2.0f));
+        maskRenderContext->SyncGeometryProperties(nullptr);
         BorderRadiusProperty borderRadiusProperty;
         borderRadiusProperty.SetRadius(Dimension(imageSize * radiusRatio));
-        selectedMaskRenderContext->UpdateBorderRadius(borderRadiusProperty);
-
-        selectedImageRenderContext->UpdateOffset(OffsetT<Dimension>(Dimension(imageSize * radiusRatio),
+        maskRenderContext->UpdateBorderRadius(borderRadiusProperty);
+        maskImageRenderContext->UpdateOffset(OffsetT<Dimension>(Dimension(imageSize * radiusRatio),
             Dimension(imageSize * (radiusRatio - 1.0f))));
-        auto selectedImageGeometryNode = selectedImageNode->GetGeometryNode();
-        CHECK_NULL_VOID(selectedImageGeometryNode);
-        selectedImageGeometryNode->SetFrameSize(SizeF(imageSize, imageSize));
-        auto selectedImageProperty = selectedImageNode->GetLayoutProperty<ImageLayoutProperty>();
-        selectedImageProperty->UpdateUserDefinedIdealSize(
+        auto maskImageGeometryNode = maskImageNode->GetGeometryNode();
+        CHECK_NULL_VOID(maskImageGeometryNode);
+        maskImageGeometryNode->SetFrameSize(SizeF(imageSize, imageSize));
+        auto maskImageProperty = maskImageNode->GetLayoutProperty<ImageLayoutProperty>();
+        CHECK_NULL_VOID(maskImageProperty);
+        maskImageProperty->UpdateUserDefinedIdealSize(
             CalcSize(NG::CalcLength(Dimension(imageSize)), NG::CalcLength(Dimension(imageSize))));
-        selectedImageRenderContext->SetVisible(false);
-        selectedImageRenderContext->SyncGeometryProperties(nullptr);
+        maskImageRenderContext->SetVisible(false);
+        maskImageRenderContext->SyncGeometryProperties(nullptr);
     }
-    selectedImageRenderContext->UpdateOpacity(opacity);
+    maskImageRenderContext->UpdateOpacity(opacity);
 }
 
 void TabBarPattern::HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& layoutProperty, int32_t index)
