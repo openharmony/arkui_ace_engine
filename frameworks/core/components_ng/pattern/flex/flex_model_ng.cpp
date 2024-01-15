@@ -84,6 +84,18 @@ void FlexModelNG::CreateWrap()
     layoutProperty->ResetFlexLayoutAttribute();
 }
 
+RefPtr<FrameNode> FlexModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::FLEX_ETS_TAG, nodeId, AceType::MakeRefPtr<FlexLayoutPattern>());
+    auto pattern = frameNode->GetPattern<FlexLayoutPattern>();
+    auto layoutProperty = frameNode->GetLayoutProperty<FlexLayoutProperty>();
+    layoutProperty->UpdateFlexDirection(FlexDirection::ROW);
+    layoutProperty->UpdateMainAxisAlign(FlexAlign::FLEX_START);
+    layoutProperty->UpdateCrossAxisAlign(FlexAlign::FLEX_START);
+    return frameNode;
+}
+
 void FlexModelNG::SetDirection(FlexDirection direction)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(FlexLayoutProperty, FlexDirection, direction);

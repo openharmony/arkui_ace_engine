@@ -26,6 +26,7 @@
 #include "core/components/root/root_element.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
@@ -372,7 +373,8 @@ void SubwindowOhos::HideWindow()
     CHECK_NULL_VOID(context);
     auto rootNode = context->GetRootElement();
     CHECK_NULL_VOID(rootNode);
-    if (!rootNode->GetChildren().empty()) {
+    if (!rootNode->GetChildren().empty() &&
+        !(rootNode->GetChildren().size() == 1 && rootNode->GetLastChild()->GetTag() == V2::KEYBOARD_ETS_TAG)) {
         auto lastChildId = rootNode->GetLastChild()->GetId();
         if (hotAreasMap_.find(lastChildId) != hotAreasMap_.end()) {
             auto hotAreaRect = hotAreasMap_[lastChildId];
@@ -393,7 +395,8 @@ void SubwindowOhos::HideWindow()
         CHECK_NULL_VOID(context);
         auto rootNode = context->GetRootElement();
         CHECK_NULL_VOID(rootNode);
-        if (!rootNode->GetChildren().empty()) {
+        if (!rootNode->GetChildren().empty() &&
+            !(rootNode->GetChildren().size() == 1 && rootNode->GetLastChild()->GetTag() == V2::KEYBOARD_ETS_TAG)) {
             auto lastChildId = rootNode->GetLastChild()->GetId();
             if (hotAreasMap_.find(lastChildId) != hotAreasMap_.end()) {
                 auto hotAreaRect = hotAreasMap_[lastChildId];
@@ -417,16 +420,7 @@ void SubwindowOhos::HideWindow()
     }
 #endif
 
-    if (window_->IsFocused()) {
-        auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-        CHECK_NULL_VOID(parentContainer);
-        if (!parentContainer->IsScenceBoardWindow()) {
-            auto parentWindowName = parentContainer->GetWindowName();
-            sptr<OHOS::Rosen::Window> parentWindow = OHOS::Rosen::Window::Find(parentWindowName);
-            CHECK_NULL_VOID(parentWindow);
-            parentWindow->RequestFocus();
-        }
-    } else {
+    if (!window_->IsFocused()) {
         ContainerModalUnFocus();
     }
 
@@ -899,7 +893,7 @@ void SubwindowOhos::ClearToast()
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear toast enter");
     if (!IsToastWindow()) {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "clear toast failed.");
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "default toast needs not to be clear");
         return;
     }
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);

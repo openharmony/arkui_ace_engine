@@ -310,8 +310,8 @@ public:
     void UpdateSpanItemDragStatus(const std::list<ResultObject>& resultObjects, bool IsDragging);
     virtual std::function<void(Offset)> GetThumbnailCallback();
     std::list<ResultObject> dragResultObjects_;
-    void OnDragEnd();
-    void OnDragEndNoChild();
+    void OnDragEnd(const RefPtr<Ace::DragEvent>& event);
+    void OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event);
     void CloseOperate();
     void OnDragMove(const RefPtr<Ace::DragEvent>& event);
 

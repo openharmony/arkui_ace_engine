@@ -61,6 +61,7 @@ public:
     void SetResizableSlice(const ImageResizableSlice& slice) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId, const std::string& src, RefPtr<PixelMap>& pixMap,
         const std::string& bundleName, const std::string& moduleName, bool isUriPureNumber = false);
+    static void InitImage(FrameNode *frameNode, std::string& src);
     static void SetSmoothEdge(FrameNode *frameNode, float value);
     static void SetCopyOption(FrameNode *frameNode, CopyOptions copyOption);
     static void SetAutoResize(FrameNode *frameNode, bool autoResize);
@@ -77,6 +78,7 @@ public:
     static void SetColorFilterMatrix(FrameNode *frameNode, const std::vector<float> &matrix);
     static void SetDraggable(FrameNode *frameNode, bool draggable);
     static void SetBackBorder(FrameNode *frameNode);
+    static bool IsSrcSvgImage(FrameNode* frameNode);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_H

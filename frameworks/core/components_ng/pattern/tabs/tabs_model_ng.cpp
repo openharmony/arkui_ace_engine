@@ -22,6 +22,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/animation_pub.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -158,6 +159,17 @@ void TabsModelNG::SetTabBarPosition(BarPosition tabBarPosition)
     ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, TabBarPosition, tabBarPosition);
 }
 
+void TabsModelNG::SetBarBackgroundBlurStyle(BlurStyle tabBarBlurStyle)
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
+    CHECK_NULL_VOID(tabBarPaintProperty);
+    tabBarPaintProperty->UpdateTabBarBlurStyle(tabBarBlurStyle);
+}
+
 void TabsModelNG::SetTabBarMode(TabBarMode tabBarMode)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, TabBarMode, tabBarMode);
@@ -269,9 +281,9 @@ void TabsModelNG::SetIndex(int32_t index)
 
 void TabsModelNG::SetScrollable(bool scrollable)
 {
-    auto swiperPaintProperty = GetSwiperPaintProperty();
-    CHECK_NULL_VOID(swiperPaintProperty);
-    swiperPaintProperty->UpdateDisableSwipe(!scrollable);
+    auto props = GetSwiperLayoutProperty();
+    CHECK_NULL_VOID(props);
+    props->UpdateDisableSwipe(!scrollable);
     auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(tabsNode);
     auto tabPattern = tabsNode->GetPattern<TabsPattern>();
@@ -763,9 +775,9 @@ void TabsModelNG::SetTabBarPosition(FrameNode* frameNode, BarPosition tabBarPosi
 void TabsModelNG::SetScrollable(FrameNode* frameNode, bool scrollable)
 {
     CHECK_NULL_VOID(frameNode);
-    auto swiperPaintProperty = GetSwiperPaintProperty(frameNode);
-    CHECK_NULL_VOID(swiperPaintProperty);
-    swiperPaintProperty->UpdateDisableSwipe(!scrollable);
+    auto props = GetSwiperLayoutProperty(frameNode);
+    CHECK_NULL_VOID(props);
+    props->UpdateDisableSwipe(!scrollable);
     auto tabPattern = frameNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabPattern);
     tabPattern->SetIsDisableSwipe(!scrollable);
@@ -866,5 +878,21 @@ void TabsModelNG::SetOnCustomAnimation(TabsCustomAnimationEvent&& onCustomAnimat
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
     swiperPattern->SetCustomContentTransition(std::move(onCustomAnimation));
+}
+
+void TabsModelNG::SetClipEdge(FrameNode* frameNode, bool clipEdge)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto tabsRenderContext = frameNode->GetRenderContext();
+    CHECK_NULL_VOID(tabsRenderContext);
+    tabsRenderContext->UpdateClipEdge(clipEdge);
+    auto tabsChildren = frameNode->GetChildren();
+    for (const auto& child : tabsChildren) {
+        auto childFrameNode = AceType::DynamicCast<FrameNode>(child);
+        CHECK_NULL_VOID(childFrameNode);
+        auto renderContext = childFrameNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateClipEdge(clipEdge);
+    }
 }
 } // namespace OHOS::Ace::NG

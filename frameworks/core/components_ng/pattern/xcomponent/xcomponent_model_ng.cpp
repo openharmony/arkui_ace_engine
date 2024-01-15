@@ -162,4 +162,38 @@ bool XComponentModelNG::IsTexture(FrameNode *frameNode)
     CHECK_NULL_RETURN(layoutProperty, false);
     return layoutProperty->GetXComponentTypeValue() == XComponentType::TEXTURE;
 }
+
+RefPtr<FrameNode> XComponentModelNG::CreateFrameNode(int32_t nodeId, const std::string& id, XComponentType type,
+    const std::string& libraryname)
+{
+    std::shared_ptr<InnerXComponentController> controller = nullptr;
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::XCOMPONENT_ETS_TAG, nodeId, AceType::MakeRefPtr<XComponentPattern>(id, type, libraryname, controller));
+    auto layoutProperty = frameNode->GetLayoutProperty<XComponentLayoutProperty>();
+    if (layoutProperty) {
+        layoutProperty->UpdateXComponentType(type);
+    }
+    return frameNode;
+}
+
+void XComponentModelNG::SetXComponentId(FrameNode* frameNode, const std::string& id)
+{
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->SetId(id);
+}
+
+void XComponentModelNG::SetXComponentType(FrameNode* frameNode, XComponentType type)
+{
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->SetType(type);
+}
+
+void XComponentModelNG::SetXComponentSurfaceSize(FrameNode* frameNode, uint32_t width, uint32_t height)
+{
+    auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(xcPattern);
+    xcPattern->SetSurfaceSize(width, height);
+}
 } // namespace OHOS::Ace::NG

@@ -40,6 +40,8 @@ public:
 
     void UpdateNodeRate(int32_t nodeId, int32_t rate);
 
+    void SetAnimateRate(int32_t rate);
+
     void SetDisplaySyncRate(int32_t displaySyncRate);
 
     int32_t GetDisplaySyncRate() const;
@@ -50,6 +52,7 @@ private:
     std::unordered_map<int32_t, int32_t> nodeRateMap_;
     bool isRateChanged_ = false;
     int32_t displaySyncRate_ = 0;
+    int32_t animateRate_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(FrameRateManager);
 };

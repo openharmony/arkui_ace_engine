@@ -1302,7 +1302,12 @@ export class AlertDialog extends ViewPU {
     this.observeComponentCreation(((e, o) => {
       ViewStackProcessor.StartGetAccessRecordingFor(e);
       Row.create();
-      Row.padding({ left: 24, right: 24, top: 24 });
+      Row.padding({
+        left: 24,
+        right: 24,
+        top: 24,
+        bottom: this.secondaryButton.value || this.primaryButton.value ? 0 : 24
+      });
       o || Row.pop();
       ViewStackProcessor.StopGetAccessRecording();
     }));

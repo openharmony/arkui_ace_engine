@@ -58,6 +58,8 @@ private:
     { // do nothing
     }
 
+    float GetShadowOffset(const std::list<RefPtr<SpanItem>>& group);
+
     std::vector<std::list<RefPtr<SpanItem>>> spans_;
     ParagraphManager* pManager_;
     OffsetF parentGlobalOffset_;

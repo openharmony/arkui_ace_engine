@@ -60,9 +60,16 @@ void SlidingPanelModelNG::Create(bool isShow)
     contentNode->MountToParent(columnNode);
 
     ViewStackProcessor::GetInstance()->Push(panelNode);
-    ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelType, PanelType::FOLDABLE_BAR); // default value
-    ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HasDragBar, true);                   // default value
-    ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelMode, PanelMode::HALF);         // default value
+    auto slidingPanelPattern = panelNode->GetPattern<SlidingPanelPattern>();
+    CHECK_NULL_VOID(slidingPanelPattern);
+    auto layoutProperty = slidingPanelPattern->GetLayoutProperty<SlidingPanelLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelType,
+        layoutProperty->GetPanelTypeValue(PanelType::FOLDABLE_BAR));    // default value
+    ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, HasDragBar,
+        layoutProperty->GetHasDragBarValue(true));                      // default value
+    ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, PanelMode,
+        layoutProperty->GetPanelModeValue(PanelMode::HALF));            // default value
     ACE_UPDATE_LAYOUT_PROPERTY(SlidingPanelLayoutProperty, IsShow, isShow);
 
     auto renderContext = columnNode->GetRenderContext();

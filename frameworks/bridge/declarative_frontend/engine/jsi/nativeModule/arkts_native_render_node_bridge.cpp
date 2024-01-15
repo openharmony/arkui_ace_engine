@@ -286,6 +286,29 @@ ArkUINativeModuleValue RenderNodeBridge::SetFrame(ArkUIRuntimeCallInfo* runtimeC
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue RenderNodeBridge::SetSize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+
+    Local<JSValueRef> width = runtimeCallInfo->GetCallArgRef(1);
+    float widthValue = 0;
+    if (width->IsNumber()) {
+        widthValue = width->ToNumber(vm)->Value();
+    }
+
+    Local<JSValueRef> height = runtimeCallInfo->GetCallArgRef(2);
+    float heightValue = 0;
+    if (height->IsNumber()) {
+        heightValue = height->ToNumber(vm)->Value();
+    }
+
+    GetArkUIInternalNodeAPI()->GetRenderNodeModifier().SetSize(nativeNode, widthValue, heightValue);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue RenderNodeBridge::SetOpacity(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

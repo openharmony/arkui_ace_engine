@@ -24,11 +24,13 @@
 #include "core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 #include "core/components_ng/pattern/custom_paint/rendering_context2d_modifier.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "render_service_client/core/ui/rs_canvas_drawing_node.h"
 #include "base/log/dump_log.h"
 
 namespace {} // namespace
 
 namespace OHOS::Ace::NG {
+#define NONESIZEF SizeF({ 0, 0 })
 class RosenRenderContext;
 void CustomPaintPattern::OnAttachToFrameNode()
 {
@@ -55,27 +57,48 @@ RefPtr<NodePaintMethod> CustomPaintPattern::CreateNodePaintMethod()
 
 bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
+    bool pixelGridRoundSizeChange = false;
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_RETURN(geometryNode, false);
+    SizeF currentPixelGridRoundSize = geometryNode->GetPixelGridRoundSize();
+
+    if (isVisible_ == Visible) {
+        pixelGridRoundSizeChange = currentPixelGridRoundSize != dirtyPixelGridRoundSize_;
+        dirtyPixelGridRoundSize_ = currentPixelGridRoundSize;
+        visiblePixelGridRoundSize_ = currentPixelGridRoundSize;
+        lastDirtyPixelGridRoundSize_ = dirtyPixelGridRoundSize_;
+    } else {
+        return false;
+    }
+
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
     }
     auto customPaintEventHub = GetEventHub<CustomPaintEventHub>();
     CHECK_NULL_RETURN(customPaintEventHub, false);
 
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, false);
-        auto geometryNode = host->GetGeometryNode();
-        CHECK_NULL_RETURN(geometryNode, false);
-        isCanvasInit_ = geometryNode->GetPixelGridRoundSize() == oldPixelGridRoundSize_;
-        lastOldPixelGridRoundSize_ = oldPixelGridRoundSize_;
-        oldPixelGridRoundSize_ = geometryNode->GetPixelGridRoundSize();
-    } else if (config.contentSizeChange || config.frameSizeChange || config.frameOffsetChange ||
-               config.contentOffsetChange) {
-        isCanvasInit_ = false;
-        recordConfig_ = config;
+    if ((isCanvasInit_ == true) && (config.frameSizeChange || config.contentSizeChange)) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+            isCanvasInit_ = !pixelGridRoundSizeChange;
+        } else {
+            isCanvasInit_ = false;
+        }
+    } else if ((isCanvasInit_ == true) && (config.frameOffsetChange || config.contentOffsetChange)) {
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
+            isCanvasInit_ = true;
+        } else {
+            isCanvasInit_ = false;
+        }
     }
 
     if (!isCanvasInit_) {
+        auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(host->GetRenderContext());
+        std::shared_ptr<Rosen::RSNode> rsNode = rosenRenderContext->GetRSNode();
+        auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode);
+        rsCanvasDrawingNode->ResetSurface();
+
         auto context = PipelineContext::GetCurrentContext();
         if (context) {
             context->AddAfterLayoutTask([customPaintEventHub]() {
@@ -909,14 +932,81 @@ void CustomPaintPattern::OnPixelRoundFinish(const SizeF& pixelGridRoundSize)
     paintMethod_->UpdateRecordingCanvas(pixelGridRoundSize.Width(), pixelGridRoundSize.Height());
 }
 
+void CustomPaintPattern::OnVisibleChange(bool isVisible)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    SizeF currentPixelGridRoundSize = geometryNode->GetPixelGridRoundSize();
+
+    switch (isVisible_) {
+        case Unset:
+            isVisible == true ? isVisible_ = Visible : isVisible_ = Invisible;
+            return;
+        case Visible:
+            if (isVisible == false) {
+                isVisible_ = Invisible;
+            }
+            visiblePixelGridRoundSize_ = currentPixelGridRoundSize;
+            dirtyPixelGridRoundSize_ = currentPixelGridRoundSize;
+            return;
+        case Invisible:
+            if (isVisible == false) {
+                return;
+            } else if (isCanvasInit_ == false) {
+                isVisible_ = Visible;
+                if (currentPixelGridRoundSize == NONESIZEF) {
+                    return;
+                } else {
+                    isCanvasInit_ = false;
+                    visiblePixelGridRoundSize_ = currentPixelGridRoundSize;
+                    dirtyPixelGridRoundSize_ = currentPixelGridRoundSize;
+                }
+            } else if (isCanvasInit_ == true) {
+                isVisible_ = Visible;
+                if (currentPixelGridRoundSize == NONESIZEF) {
+                    return;
+                } else if (currentPixelGridRoundSize != visiblePixelGridRoundSize_) {
+                    isCanvasInit_ = false;
+                    visiblePixelGridRoundSize_ = currentPixelGridRoundSize;
+                    dirtyPixelGridRoundSize_ = currentPixelGridRoundSize;
+                } else {
+                    return;
+                }
+            }
+            break;
+        default:
+            break;
+    }
+
+    auto customPaintEventHub = GetEventHub<CustomPaintEventHub>();
+    CHECK_NULL_VOID(customPaintEventHub);
+
+    if (!isCanvasInit_) {
+        auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(host->GetRenderContext());
+        std::shared_ptr<Rosen::RSNode> rsNode = rosenRenderContext->GetRSNode();
+        auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode);
+        rsCanvasDrawingNode->ResetSurface();
+
+        auto context = PipelineContext::GetCurrentContext();
+        if (context) {
+            context->AddAfterLayoutTask([customPaintEventHub]() {
+                    customPaintEventHub->FireReadyEvent();
+                });
+        }
+        isCanvasInit_ = true;
+    }
+}
+
 void CustomPaintPattern::DumpAdvanceInfo()
 {
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         DumpLog::GetInstance().AddDesc(
             std::string("PixelGridRoundSize: ")
-                .append(oldPixelGridRoundSize_.ToString())
+                .append(dirtyPixelGridRoundSize_.ToString())
                 .append(", lase PixelGridRoundSize: ")
-                .append(lastOldPixelGridRoundSize_.ToString()));
+                .append(lastDirtyPixelGridRoundSize_.ToString()));
     } else {
         DumpLog::GetInstance().AddDesc(
             std::string("contentSizeChange: ").append(recordConfig_.contentSizeChange ? "true" : "false"));

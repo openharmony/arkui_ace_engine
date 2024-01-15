@@ -20,6 +20,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
+#include "test/mock/base/mock_subwindow.h"
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "base/log/log_wrapper.h"
@@ -30,6 +31,8 @@
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_view.h"
+#include "core/components_ng/pattern/container_modal/enhance/container_modal_pattern_enhance.h"
+#include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
@@ -51,9 +54,11 @@ protected:
     void SetUp() override;
     void TearDown() override;
     void GetInstance();
+    void GetInstanceEnhance();
     RefPtr<FrameNode> CreateContent();
     void SetMockWindow(WindowMode windowMode);
     void CreateContainerModal();
+    void CreateContainerModalEnhance();
     void Touch(TouchLocationInfo locationInfo);
     void Touch(Offset downOffset, Offset moveOffset, Offset upOffset);
     void Mouse(MouseInfo mouseInfo);
@@ -64,6 +69,7 @@ protected:
 
     RefPtr<FrameNode> frameNode_;
     RefPtr<ContainerModalPattern> pattern_;
+    RefPtr<ContainerModalPatternEnhance> patternEnhance_;
     RefPtr<LayoutProperty> layoutProperty_;
     RefPtr<ContainerModalAccessibilityProperty> accessibilityProperty_;
 };
@@ -92,6 +98,7 @@ void ContainerModelTestNg::TearDown()
 {
     frameNode_ = nullptr;
     pattern_ = nullptr;
+    patternEnhance_ = nullptr;
     layoutProperty_ = nullptr;
     accessibilityProperty_ = nullptr;
 }
@@ -101,6 +108,15 @@ void ContainerModelTestNg::GetInstance()
     RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
     frameNode_ = AceType::DynamicCast<FrameNode>(element);
     pattern_ = frameNode_->GetPattern<ContainerModalPattern>();
+    layoutProperty_ = frameNode_->GetLayoutProperty();
+    accessibilityProperty_ = frameNode_->GetAccessibilityProperty<ContainerModalAccessibilityProperty>();
+}
+
+void ContainerModelTestNg::GetInstanceEnhance()
+{
+    RefPtr<UINode> element = ViewStackProcessor::GetInstance()->Finish();
+    frameNode_ = AceType::DynamicCast<FrameNode>(element);
+    patternEnhance_ = frameNode_->GetPattern<ContainerModalPatternEnhance>();
     layoutProperty_ = frameNode_->GetLayoutProperty();
     accessibilityProperty_ = frameNode_->GetAccessibilityProperty<ContainerModalAccessibilityProperty>();
 }
@@ -126,6 +142,16 @@ void ContainerModelTestNg::CreateContainerModal()
     auto frameNode = view.Create(content);
     ViewStackProcessor::GetInstance()->Push(frameNode);
     GetInstance();
+    FlushLayoutTask(frameNode_);
+}
+
+void ContainerModelTestNg::CreateContainerModalEnhance()
+{
+    ContainerModalViewEnhance view;
+    RefPtr<FrameNode> content = CreateContent();
+    auto frameNode = view.Create(content);
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+    GetInstanceEnhance();
     FlushLayoutTask(frameNode_);
 }
 
@@ -593,5 +619,183 @@ HWTEST_F(ContainerModelTestNg, ButtonsRectTest011, TestSize.Level1)
     pattern_->SubscribeContainerModalButtonsRectChange(std::move(callback));
     pattern_->CallButtonsRectChange();
     EXPECT_TRUE(callbackTriggered);
+}
+
+/**
+ * @tc.name: ContainerModalPatternEnhance001
+ * @tc.desc: Test function about OnWindowFocused.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, ContainerModalPatternEnhance001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create patternEnhance_.
+     */
+    CreateContainerModalEnhance();
+
+    /**
+     * @tc.steps: step2. call OnWindowFocused.
+     * @tc.expected: isFocus_ is true.
+     */
+    patternEnhance_->OnWindowFocused();
+    EXPECT_TRUE(patternEnhance_->isFocus_);
+}
+
+/**
+ * @tc.name: ContainerModalPatternEnhance002
+ * @tc.desc: Test function about GetTitleItemByIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, ContainerModalPatternEnhance002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create patternEnhance_.
+     */
+    CreateContainerModalEnhance();
+    auto frameNode = CreateContent();
+    frameNode->AddChild(frameNode_);
+
+    /**
+     * @tc.steps: step2. call GetTitleItemByIndex.
+     * @tc.expected: get item successfull.
+     */
+    auto child = patternEnhance_->GetTitleItemByIndex(frameNode, 0);
+    EXPECT_EQ(child, frameNode_);
+}
+
+/**
+ * @tc.name: ContainerModalPatternEnhance003
+ * @tc.desc: Test function about OnWindowUnfocused.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, ContainerModalPatternEnhance003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create patternEnhance_.
+     */
+    CreateContainerModalEnhance();
+
+    /**
+     * @tc.steps: step2. call OnWindowUnfocused without subwindow.
+     * @tc.expected: isFocus_ is false.
+     */
+    patternEnhance_->OnWindowUnfocused();
+    EXPECT_FALSE(patternEnhance_->isFocus_);
+
+    /**
+     * @tc.steps: step3. call OnWindowUnfocused with subwindow and GetShown is false.
+     * @tc.expected: isFocus_ is false.
+     */
+    RefPtr<MockSubwindow> subWindow = AceType::MakeRefPtr<MockSubwindow>();
+    SubwindowManager::GetInstance()->SetCurrentSubwindow(subWindow);
+    EXPECT_CALL(*subWindow, GetShown()).WillRepeatedly(Return(false));
+    patternEnhance_->OnWindowUnfocused();
+    EXPECT_FALSE(patternEnhance_->isFocus_);
+
+    /**
+     * @tc.steps: step4. call OnWindowUnfocused with subwindow and GetShown is true.
+     * @tc.expected: isFocus_ is false.
+     */
+    EXPECT_CALL(*subWindow, GetShown()).WillRepeatedly(Return(true));
+    patternEnhance_->OnWindowUnfocused();
+    SubwindowManager::instance_ = nullptr;
+    EXPECT_FALSE(patternEnhance_->isFocus_);
+}
+
+/**
+ * @tc.name: ContainerModalPatternEnhance004
+ * @tc.desc: Test function about OnWindowForceUnfocused.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, ContainerModalPatternEnhance004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create patternEnhance_.
+     */
+    CreateContainerModalEnhance();
+
+    /**
+     * @tc.steps: step2. call OnWindowForceUnfocused.
+     * @tc.expected: !GetIsFocus is true.
+     */
+    patternEnhance_->SetIsFocus(false);
+    patternEnhance_->OnWindowForceUnfocused();
+    EXPECT_TRUE(!patternEnhance_->GetIsFocus());
+
+    patternEnhance_->SetIsFocus(true);
+    patternEnhance_->OnWindowForceUnfocused();
+    EXPECT_TRUE(!patternEnhance_->GetIsFocus());
+}
+
+/**
+ * @tc.name: ContainerModalPatternEnhance005
+ * @tc.desc: Test function about SetContainerButtonHide.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, ContainerModalPatternEnhance005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create patternEnhance_.
+     */
+    CreateContainerModalEnhance();
+
+    /**
+     * @tc.steps: step2. call SetContainerButtonHide.
+     * @tc.expected: hideMaximize and hideMinimize is true.
+     */
+    patternEnhance_->SetContainerButtonHide(true, true, true);
+    EXPECT_TRUE(patternEnhance_->isFocus_);
+    
+    /**
+     * @tc.expected: hideMaximize and hideMinimize is false.
+     */
+    patternEnhance_->SetContainerButtonHide(true, false, false);
+    EXPECT_TRUE(patternEnhance_->isFocus_);
+}
+
+/**
+ * @tc.name: ContainerModalPatternEnhance006
+ * @tc.desc: Test function about CanHideFloatingTitle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, ContainerModalPatternEnhance006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create patternEnhance_.
+     */
+    CreateContainerModalEnhance();
+
+    /**
+     * @tc.steps: step2. call CanHideFloatingTitle.
+     */
+    patternEnhance_->CanHideFloatingTitle();
+    EXPECT_TRUE(patternEnhance_->isFocus_);
+}
+
+/**
+ * @tc.name: ContainerModalPatternEnhance007
+ * @tc.desc: Test function about UpdateTitleInTargetPos.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContainerModelTestNg, ContainerModalPatternEnhance007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create patternEnhance_.
+     */
+    CreateContainerModalEnhance();
+
+    /**
+     * @tc.steps: step2. call UpdateTitleInTargetPos.
+     * @tc.expected: isFocus_ is true.
+     */
+    int32_t height = 50;
+    patternEnhance_->UpdateTitleInTargetPos(false, height);
+    EXPECT_TRUE(patternEnhance_->isFocus_);
+    
+    /**
+     * @tc.expected: isFocus_ is true.
+     */
+    patternEnhance_->UpdateTitleInTargetPos(true, height);
+    EXPECT_TRUE(patternEnhance_->isFocus_);
 }
 } // namespace OHOS::Ace::NG

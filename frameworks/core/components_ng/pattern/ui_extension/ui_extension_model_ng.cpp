@@ -43,11 +43,12 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(const std::string& bundleName, cons
     return frameNode;
 }
 
-RefPtr<FrameNode> UIExtensionModelNG::Create(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks)
+RefPtr<FrameNode> UIExtensionModelNG::Create(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
+    bool isAsyncModalBinding)
 {
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
-        []() { return AceType::MakeRefPtr<UIExtensionPattern>(false, true); });
+        [isAsyncModalBinding]() { return AceType::MakeRefPtr<UIExtensionPattern>(false, true, isAsyncModalBinding); });
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_RETURN(pattern, frameNode);
     pattern->UpdateWant(want);
@@ -102,6 +103,14 @@ void UIExtensionModelNG::InitializeDynamicComponent(const RefPtr<FrameNode>& fra
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->InitializeDynamicComponent(hapPath, abcPath, entryPoint, runtime);
+}
+
+void UIExtensionModelNG::SetOnSizeChanged(std::function<void(int32_t, int32_t)>&& onSizeChanged)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = frameNode->GetPattern<UIExtensionPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnSizeChangedCallback(std::move(onSizeChanged));
 }
 
 void UIExtensionModelNG::SetOnRemoteReady(std::function<void(const RefPtr<UIExtensionProxy>&)>&& onRemoteReady)

@@ -156,6 +156,7 @@ private:
     Color textColor_ = Color::TRANSPARENT;
     Dimension textFontSize_;
     std::function<std::pair<OffsetF, float>()> getBubbleVertexFunc_;
+    int32_t taskId_ = 0;
 
     ACE_DISALLOW_COPY_AND_MOVE(SliderTipModifier);
 };

@@ -19,4 +19,8 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUICommonModifier* GetCommonModifier();
+
+void SetOnFocus(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
+void SetOnBlur(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
+
 } // namespace OHOS::Ace::NG::NodeModifier

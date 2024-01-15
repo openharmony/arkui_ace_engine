@@ -564,8 +564,11 @@ OffsetF GestureEventHub::GetPixelMapOffset(
                                ? frameNodeOffset_.GetX() - SystemProperties::GetDevicePhysicalWidth()
                                : frameNodeOffset_.GetX();
         auto coordinateY = frameNodeOffset_.GetY();
-        result.SetX(scale * (coordinateX - info.GetGlobalLocation().GetX()));
-        result.SetY(scale * (coordinateY - info.GetGlobalLocation().GetY()));
+        auto differentScale = (NearZero(frameNodeSize_.Width()) || NearZero(size.Width()))
+                                  ? 1.0f
+                                  : frameNodeSize_.Width() * DEFALUT_DRAG_PPIXELMAP_SCALE / size.Width();
+        result.SetX(scale * (coordinateX - info.GetGlobalLocation().GetX()) / differentScale);
+        result.SetY(scale * (coordinateY - info.GetGlobalLocation().GetY()) / differentScale);
     }
     if (result.GetX() >= 0.0f) {
         result.SetX(-1.0f);
@@ -592,9 +595,14 @@ float GestureEventHub::GetPixelMapScale(const int32_t height, const int32_t widt
     }
     auto frameNode = GetFrameNode();
     CHECK_NULL_RETURN(frameNode, scale);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, scale);
+    auto dragDropManager = pipeline->GetDragDropManager();
+    CHECK_NULL_RETURN(dragDropManager, scale);
+    auto windowScale = dragDropManager->GetWindowScale();
     if (frameNode->GetDragPreviewOption().mode == DragPreviewMode::DISABLE_SCALE ||
         !(frameNode->GetTag() == V2::WEB_ETS_TAG)) {
-        return scale;
+        return scale * windowScale;
     }
     int32_t deviceHeight = SystemProperties::GetDevicePhysicalHeight();
     int32_t deviceWidth = SystemProperties::GetDevicePhysicalWidth();
@@ -615,11 +623,6 @@ float GestureEventHub::GetPixelMapScale(const int32_t height, const int32_t widt
                 static_cast<float>(minDeviceLength / PIXELMAP_DRAG_WGR_SCALE) / width);
         }
     }
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_RETURN(pipeline, scale);
-    auto dragDropManager = pipeline->GetDragDropManager();
-    CHECK_NULL_RETURN(dragDropManager, scale);
-    auto windowScale = dragDropManager->GetSmallWindowScale();
     return scale * windowScale;
 }
 
@@ -696,8 +699,15 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     if (hostPattern && (frameTag == V2::RICH_EDITOR_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
                            frameTag == V2::TEXTINPUT_ETS_TAG || frameTag == V2::SEARCH_Field_ETS_TAG)) {
         frameNodeOffset_ = hostPattern->GetDragUpperLeftCoordinates();
+        frameNodeSize_ = SizeF(0.0f, 0.0f);
     } else {
         frameNodeOffset_ = frameNode->GetOffsetRelativeToWindow();
+        auto geometryNode = frameNode->GetGeometryNode();
+        if (geometryNode) {
+            frameNodeSize_ = geometryNode->GetFrameSize();
+        } else {
+            frameNodeSize_ = SizeF(0.0f, 0.0f);
+        }
     }
     /*
      * Users may remove frameNode in the js callback function "onDragStart "triggered below,
@@ -1230,6 +1240,51 @@ void GestureEventHub::ClearUserOnTouch()
 {
     if (touchEventActuator_) {
         touchEventActuator_->ClearUserCallback();
+    }
+}
+
+void GestureEventHub::CopyGestures(const RefPtr<GestureEventHub>& gestureEventHub)
+{
+    CHECK_NULL_VOID(gestureEventHub);
+    gestures_ = gestureEventHub->backupGestures_;
+    recreateGesture_ = true;
+}
+
+void GestureEventHub::CopyEvent(const RefPtr<GestureEventHub>& gestureEventHub)
+{
+    CHECK_NULL_VOID(gestureEventHub);
+    auto originalTouchEventActuator = gestureEventHub->touchEventActuator_;
+    if (originalTouchEventActuator) {
+        touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
+        touchEventActuator_->CopyTouchEvent(originalTouchEventActuator);
+    }
+    
+    auto originalClickEventActuator = gestureEventHub->clickEventActuator_;
+    if (originalClickEventActuator) {
+        clickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
+        clickEventActuator_->CopyClickEvent(originalClickEventActuator);
+    }
+
+    auto originalLongPressEventActuator = gestureEventHub->longPressEventActuator_;
+    if (originalLongPressEventActuator) {
+        longPressEventActuator_ = MakeRefPtr<LongPressEventActuator>(WeakClaim(this));
+        longPressEventActuator_->CopyLongPressEvent(originalLongPressEventActuator);
+    }
+
+    auto originalDragEventActuator = gestureEventHub->dragEventActuator_;
+    if (originalDragEventActuator) {
+        dragEventActuator_ = MakeRefPtr<DragEventActuator>(WeakClaim(this), originalDragEventActuator->GetDirection(),
+            originalDragEventActuator->GetFingers(), originalDragEventActuator->GetDistance());
+        dragEventActuator_->CopyDragEvent(originalDragEventActuator);
+    }
+    auto originalShowMenu = gestureEventHub->showMenu_;
+    if (originalShowMenu) {
+        if (showMenu_) {
+            RemoveClickEvent(showMenu_);
+        }
+        auto originalGetGestureEventFunc = originalShowMenu->GetGestureEventFunc();
+        showMenu_= MakeRefPtr<ClickEvent>(std::move(originalGetGestureEventFunc));
+        AddClickEvent(showMenu_);
     }
 }
 } // namespace OHOS::Ace::NG

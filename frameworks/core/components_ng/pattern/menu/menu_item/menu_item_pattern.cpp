@@ -84,13 +84,10 @@ void UpdateFontColor(const RefPtr<FrameNode>& textNode, RefPtr<MenuLayoutPropert
     CHECK_NULL_VOID(renderContext);
     if (fontColor.has_value()) {
         textProperty->UpdateTextColor(fontColor.value());
-        renderContext->UpdateForegroundColor(fontColor.value());
     } else if (menuProperty && menuProperty->GetFontColor().has_value()) {
         textProperty->UpdateTextColor(menuProperty->GetFontColor().value());
-        renderContext->UpdateForegroundColor(menuProperty->GetFontColor().value());
     } else {
         textProperty->UpdateTextColor(defaultFontColor);
-        renderContext->UpdateForegroundColor(defaultFontColor);
     }
 }
 
@@ -723,8 +720,18 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     auto fontStyle = isLabel ? itemProperty->GetLabelItalicFontStyle() : itemProperty->GetItalicFontStyle();
     UpdateFontStyle(textProperty, menuProperty, fontStyle);
     auto fontColor = isLabel ? itemProperty->GetLabelFontColor() : itemProperty->GetFontColor();
+    auto menuItemNode = GetHost();
     UpdateFontColor(
         node, menuProperty, fontColor, isLabel ? theme->GetSecondaryFontColor() : theme->GetMenuFontColor());
+    if (!isLabel) {
+        auto menuItemRenderContext = menuItemNode->GetRenderContext();
+        CHECK_NULL_VOID(menuItemRenderContext);
+        auto renderContext = node->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        if (menuItemRenderContext->HasForegroundColor()) {
+            renderContext->UpdateForegroundColor(menuItemRenderContext->GetForegroundColorValue());
+        }
+    }
     auto fontFamily = isLabel ? itemProperty->GetLabelFontFamily() : itemProperty->GetFontFamily();
     UpdateFontFamily(textProperty, menuProperty, fontFamily);
     textProperty->UpdateContent(content);
@@ -764,16 +771,32 @@ bool MenuItemPattern::IsDisabled()
 
 void MenuItemPattern::UpdateDisabledStyle()
 {
-    CHECK_NULL_VOID(content_);
     auto context = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    content_->GetRenderContext()->UpdateForegroundColor(theme->GetDisabledMenuFontColor());
-    auto textLayoutProperty = content_->GetLayoutProperty<TextLayoutProperty>();
-    CHECK_NULL_VOID(textLayoutProperty);
-    textLayoutProperty->UpdateTextColor(theme->GetDisabledMenuFontColor());
-    content_->MarkModifyDone();
+    if (content_) {
+        content_->GetRenderContext()->UpdateForegroundColor(theme->GetDisabledMenuFontColor());
+        auto textLayoutProperty = content_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(textLayoutProperty);
+        textLayoutProperty->UpdateTextColor(theme->GetDisabledMenuFontColor());
+        content_->MarkModifyDone();
+    }
+    if (label_) {
+        label_->GetRenderContext()->UpdateForegroundColor(theme->GetDisabledMenuFontColor());
+        auto labelTextLayoutProperty = label_->GetLayoutProperty<TextLayoutProperty>();
+        CHECK_NULL_VOID(labelTextLayoutProperty);
+        labelTextLayoutProperty->UpdateTextColor(theme->GetDisabledMenuFontColor());
+        label_->MarkModifyDone();
+    }
+    if (startIcon_) {
+        startIcon_->GetRenderContext()->UpdateOpacity(theme->GetDisabledFontColorAlpha());
+        startIcon_->MarkModifyDone();
+    }
+    if (endIcon_) {
+        endIcon_->GetRenderContext()->UpdateOpacity(theme->GetDisabledFontColorAlpha());
+        endIcon_->MarkModifyDone();
+    }
 }
 
 void MenuItemPattern::SetAccessibilityAction()

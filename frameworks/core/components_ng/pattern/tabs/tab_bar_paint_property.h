@@ -19,6 +19,7 @@
 #include "base/geometry/ng/rect_t.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components_ng/render/paint_property.h"
 
 namespace OHOS::Ace::NG {
@@ -37,7 +38,7 @@ public:
         paintProperty->propIndicator_ = CloneIndicator();
         paintProperty->propFadingEdge_ = CloneFadingEdge();
         paintProperty->propBarBackgroundColor_ = CloneBarBackgroundColor();
-
+        paintProperty->propTabBarBlurStyle_ = CloneTabBarBlurStyle();
         return paintProperty;
     }
 
@@ -64,6 +65,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Indicator, RectF, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(FadingEdge, bool, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(BarBackgroundColor, Color, PROPERTY_UPDATE_RENDER);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(TabBarBlurStyle, BlurStyle, PROPERTY_UPDATE_RENDER);
 };
 
 } // namespace OHOS::Ace::NG

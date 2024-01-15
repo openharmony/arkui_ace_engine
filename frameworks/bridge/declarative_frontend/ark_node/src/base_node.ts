@@ -23,11 +23,13 @@ declare interface RenderOptions {
   type?: NodeRenderType,
   surfaceId?: string
 }
+
 declare class __JSBaseNode__ {
   constructor(options?: RenderOptions);
   create(builder: (...args: Object[]) => void, params: Object): number | null;
   createRenderNode(): number | null;
   finishUpdateFunc(): void;
+  reset(): void;
 }
 
 class BaseNode extends __JSBaseNode__ {
@@ -35,17 +37,21 @@ class BaseNode extends __JSBaseNode__ {
   protected nodePtr_: number | null;
   constructor(uiContext: UIContext, options?: RenderOptions) {
     super(options);
-    var instanceId: number = -1;
+    let instanceId: number = -1;
     if (uiContext === undefined) {
-      throw Error("Node constructor error, param uiContext error");
+      throw Error('Node constructor error, param uiContext error');
     } else {
       if (!(typeof uiContext === "object") || !("instanceId_" in uiContext)) {
         throw Error(
-          "Node constructor error, param uiContext is invalid"
+          'Node constructor error, param uiContext is invalid'
         );
       }
       instanceId = uiContext.instanceId_;
     }
     this.instanceId_ = instanceId;
+  }
+  public getInstanceId()
+  {
+    return this.instanceId_;
   }
 }

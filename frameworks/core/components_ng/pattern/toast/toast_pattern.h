@@ -52,6 +52,10 @@ public:
         return AceType::MakeRefPtr<ToastLayoutAlgorithm>();
     }
 
+    void OnAttachToFrameNode() override;
+
+    void OnDetachFromFrameNode(FrameNode* node) override;
+
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& changeConfig) override;
 
     void OnColorConfigurationUpdate() override;
@@ -74,6 +78,15 @@ public:
         return IsDefaultToast();
     }
 
+    void UpdateFoldStatusChangedCallbackId(std::optional<int32_t> id)
+    {
+        foldStatusChangedCallbackId_ = id;
+    }
+
+    bool HasFoldStatusChangedCallbackId()
+    {
+        return foldStatusChangedCallbackId_.has_value();
+    }
 private:
     void BeforeCreateLayoutWrapper() override;
     void UpdateToastSize(const RefPtr<FrameNode>& toast);
@@ -82,6 +95,7 @@ private:
     double GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper);
 
     RefPtr<FrameNode> textNode_;
+    std::optional<int32_t> foldStatusChangedCallbackId_;
     ACE_DISALLOW_COPY_AND_MOVE(ToastPattern);
 };
 } // namespace OHOS::Ace::NG

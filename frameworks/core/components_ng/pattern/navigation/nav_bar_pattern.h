@@ -129,6 +129,16 @@ public:
         return { FocusType::SCOPE, true };
     }
 
+    int32_t GetMaxMenuNum() const
+    {
+        return maxMenuNums_;
+    }
+
+    void SetMaxMenuNum(int32_t maxMenu)
+    {
+        maxMenuNums_ = maxMenu;
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* frameNode) override;
 
@@ -153,6 +163,7 @@ private:
     RefPtr<Animator> controller_;
     bool isTitleMenuNodeShowing_ = false;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
+    int32_t maxMenuNums_ = -1;
 };
 
 } // namespace OHOS::Ace::NG

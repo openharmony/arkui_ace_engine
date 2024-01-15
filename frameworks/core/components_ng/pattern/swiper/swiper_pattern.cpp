@@ -237,8 +237,8 @@ void SwiperPattern::OnModifyDone()
             }
         }
     }
-
-    UpdateSwiperPanEvent(IsDisableSwipe());
+    bool disableSwipe = IsDisableSwipe();
+    UpdateSwiperPanEvent(disableSwipe);
 
     auto focusHub = host->GetFocusHub();
     if (focusHub) {
@@ -246,7 +246,7 @@ void SwiperPattern::OnModifyDone()
         InitOnFocusInternal(focusHub);
     }
 
-    SetSwiperEventCallback(IsDisableSwipe());
+    SetSwiperEventCallback(disableSwipe);
 
     auto updateCubicCurveCallback = [weak = WeakClaim(this)]() {
         auto swiperPattern = weak.Upgrade();
@@ -779,6 +779,9 @@ void SwiperPattern::FireAnimationStartEvent(
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     swiperEventHub->FireAnimationStartEvent(currentIndex, nextIndex, info);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
 }
 
 void SwiperPattern::FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const
@@ -1673,6 +1676,7 @@ void SwiperPattern::HandleDragStart(const GestureEvent& info)
 
     gestureSwipeIndex_ = currentIndex_;
     isDragging_ = true;
+    isTouchDown_ = true;
     mainDeltaSum_ = 0.0f;
     // in drag process, close lazy feature.
     SetLazyLoadFeature(false);
@@ -1723,6 +1727,7 @@ void SwiperPattern::HandleDragUpdate(const GestureEvent& info)
 
 void SwiperPattern::HandleDragEnd(double dragVelocity)
 {
+    isTouchDown_ = false;
     UpdateDragFRCSceneInfo(dragVelocity, SceneStatus::END);
     const auto& addEventCallback = swiperController_->GetAddTabBarEventCallback();
     if (addEventCallback) {
@@ -2591,9 +2596,9 @@ EdgeEffect SwiperPattern::GetEdgeEffect() const
 
 bool SwiperPattern::IsDisableSwipe() const
 {
-    auto swiperPaintProperty = GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_RETURN(swiperPaintProperty, false);
-    return swiperPaintProperty->GetDisableSwipe().value_or(false);
+    auto props = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(props, false);
+    return props->GetDisableSwipe().value_or(false);
 }
 
 bool SwiperPattern::IsShowIndicator() const

@@ -233,8 +233,8 @@ public:
     void SetTypingStyle(struct UpdateSpanStyle typingStyle, TextStyle textStyle);
     int32_t AddImageSpan(const ImageSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddTextSpan(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1);
-    int32_t AddTextSpanOperation(
-        const TextSpanOptions& options, bool isPaste = false, int32_t index = -1, bool needLeadingMargin = false);
+    int32_t AddTextSpanOperation(const TextSpanOptions& options, bool isPaste = false, int32_t index = -1,
+        bool needLeadingMargin = false, bool updateCaretOPosition = true);
     int32_t AddSymbolSpan(const SymbolSpanOptions& options, bool isPaste = false, int32_t index = -1);
     int32_t AddSymbolSpanOperation(const SymbolSpanOptions& options, bool isPaste = false, int32_t index = -1);
     void AddSpanItem(const RefPtr<SpanItem>& item, int32_t offset);
@@ -283,7 +283,8 @@ public:
 
     void ResetLastClickOffset()
     {
-        lastClickOffset_.Reset();
+        lastClickOffset_.SetX(-1);
+        lastClickOffset_.SetY(-1);
     }
 
     int32_t GetCaretSpanIndex()
@@ -387,6 +388,11 @@ public:
         return selectedType_.value_or(TextSpanType::NONE);
     }
     void GetCaretMetrics(CaretMetricsF& caretCaretMetric) override;
+
+    void SetShowSelect(bool isShowSelect)
+    {
+        showSelect_ = isShowSelect;
+    }
 
 protected:
     bool CanStartAITask() override;
@@ -542,6 +548,7 @@ private:
     bool isFirstMouseSelect_ = true;
     bool leftMousePress_ = false;
     bool isLongPress_ = false;
+    bool isDragging_ = false;
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
     bool imeAttached_ = false;
     bool imeShown_ = false;

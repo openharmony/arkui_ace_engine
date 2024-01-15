@@ -151,8 +151,12 @@ public:
     bool SetIsNeedAvoidWindow(bool value);
     bool SetIgnoreSafeArea(bool value);
     bool SetKeyBoardAvoidMode(bool value);
+    bool SetIsAtomicService(bool value);
+    bool IsAtomicService() const;
 
 private:
+    bool isAtomicService_ = false;
+
     // app window is full screen
     // todo: remove and only use isNeedAvoidWindow_
     bool isFullScreen_ = false;

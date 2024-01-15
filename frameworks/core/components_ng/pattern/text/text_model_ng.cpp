@@ -384,6 +384,11 @@ void TextModelNG::SetOnDrop(NG::OnDragDropFunc&& onDrop)
     ViewAbstract::SetOnDrop(std::move(onDrop));
 }
 
+void TextModelNG::InitText(FrameNode* frameNode, std::string& value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, Content, value, frameNode);
+}
+
 void TextModelNG::SetTextCase(FrameNode* frameNode, Ace::TextCase value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, TextCase, value, frameNode);
@@ -459,6 +464,11 @@ void TextModelNG::SetFont(FrameNode* frameNode, const Font& value)
 void TextModelNG::SetLetterSpacing(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, LetterSpacing, value, frameNode);
+}
+
+void TextModelNG::SetWordBreak(FrameNode* frameNode, Ace::WordBreak value)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, WordBreak, value, frameNode);
 }
 
 void TextModelNG::BindSelectionMenu(TextSpanType& spanType, TextResponseType& responseType,

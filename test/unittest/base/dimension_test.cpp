@@ -44,7 +44,18 @@ const std::string DIMENSION_PCT_STR = StringUtils::DoubleToString(DEFAULT_DOUBLE
 const std::string DIMENSION_AUTO_STR = StringUtils::DoubleToString(DEFAULT_DOUBLE).append("auto");
 } // namespace
 
-class DimensionTest : public testing::Test {};
+
+class DimensionTest : public testing::Test {
+public:
+    static void SetUpTestSuite()
+    {
+        NG::MockPipelineContext::SetUp();
+    }
+    static void TearDownTestSuite()
+    {
+        NG::MockPipelineContext::TearDown();
+    }
+};
 
 /**
  * @tc.name: DimensionTest001
@@ -54,12 +65,7 @@ class DimensionTest : public testing::Test {};
 HWTEST_F(DimensionTest, DimensionTest001, TestSize.Level1)
 {
     /**
-     * @tc.steps1: initialize parameters.
-     */
-    NG::MockPipelineContext::SetUp();
-
-    /**
-     * @tc.steps2: Test the function ConvertToVp of the class Dimension.
+     * @tc.steps1: Test the function ConvertToVp of the class Dimension.
      * @tc.expected: The return values are equal to DEFAULT_DOUBLE or ZERO_DOUBLE
      */
     EXPECT_DOUBLE_EQ(DIMENSION_PX.ConvertToVp(), DEFAULT_DOUBLE);
@@ -79,12 +85,7 @@ HWTEST_F(DimensionTest, DimensionTest001, TestSize.Level1)
 HWTEST_F(DimensionTest, DimensionTest002, TestSize.Level1)
 {
     /**
-     * @tc.steps1: initialize parameters.
-     */
-    NG::MockPipelineContext::SetUp();
-
-    /**
-     * @tc.steps2: Test the function ConvertToPx of the class Dimension.
+     * @tc.steps1: Test the function ConvertToPx of the class Dimension.
      * @tc.expected: The return values are equal to DEFAULT_DOUBLE or ZERO_DOUBLE.
      */
     EXPECT_DOUBLE_EQ(DIMENSION_PX.ConvertToPx(), DEFAULT_DOUBLE);

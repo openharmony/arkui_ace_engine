@@ -15,12 +15,19 @@
 #include "core/interfaces/native/node/node_modifiers.h"
 
 #include "core/interfaces/native/node/node_common_modifier.h"
+#include "core/interfaces/native/node/node_image_span_modifier.h"
+#include "core/interfaces/native/node/node_image_modifier.h"
 #include "core/interfaces/native/node/node_list_modifier.h"
+#include "core/interfaces/native/node/node_loading_progress_modifier.h"
 #include "core/interfaces/native/node/node_scroll_modifier.h"
+#include "core/interfaces/native/node/node_span_modifier.h"
 #include "core/interfaces/native/node/node_stack_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
+#include "core/interfaces/native/node/node_text_area_modifier.h"
+#include "core/interfaces/native/node/node_xcomponent_modifier.h"
 #include "core/interfaces/native/node/node_text_modifier.h"
-
+#include "core/interfaces/native/node/node_text_modifier.h"
+#include "core/interfaces/native/node/node_toggle_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -33,8 +40,8 @@ const ArkUINodeModifiers impl = {
     nullptr,
     NodeModifier::GetTextModifier,
     nullptr,
-    nullptr,
-    nullptr,
+    NodeModifier::GetToggleModifier,
+    NodeModifier::GetImageSpanModifier,
     nullptr,
     nullptr,
     nullptr,
@@ -51,6 +58,11 @@ const ArkUINodeModifiers impl = {
     nullptr,
     nullptr,
     nullptr,
+    NodeModifier::GetTextAreaModifier,
+    nullptr,
+    nullptr,
+    nullptr,
+    NodeModifier::GetImageModifier,
     nullptr,
     nullptr,
     nullptr,
@@ -61,12 +73,7 @@ const ArkUINodeModifiers impl = {
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
-    nullptr,
+    NodeModifier::GetSpanModifier,
     nullptr,
     nullptr,
     nullptr,
@@ -93,6 +100,8 @@ const ArkUINodeModifiers impl = {
     NodeModifier::GetListModifier,
     nullptr,
     nullptr,
+    NodeModifier::GetLoadingProgressModifier,
+    nullptr,
     nullptr,
     nullptr,
 #ifdef PLUGIN_COMPONENT_SUPPORTED
@@ -101,7 +110,7 @@ const ArkUINodeModifiers impl = {
     nullptr,
 #endif
 #ifdef XCOMPONENT_SUPPORTED
-    nullptr,
+    NodeModifier::GetXComponentModifier,
 #else
     nullptr,
 #endif

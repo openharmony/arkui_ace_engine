@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FLEX_FLEX_MODEL_NG_H
 
 #include "core/components_ng/pattern/flex/flex_model.h"
+#include "core/components_ng/base/frame_node.h"
 
 namespace OHOS::Ace::NG {
 
@@ -46,6 +47,8 @@ public:
     void SetJustifyContent(int32_t value) override;
 
     void SetAlignContent(int32_t value) override;
+
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
 };
 
 } // namespace OHOS::Ace::NG

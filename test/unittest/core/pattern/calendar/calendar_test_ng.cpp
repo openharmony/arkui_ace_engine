@@ -374,7 +374,7 @@ HWTEST_F(CalendarTestNg, CalendarModelNGTest003, TestSize.Level1)
 
     EXPECT_FALSE(calendarPaintProperty->GetShowLunarValue());
     EXPECT_FALSE(calendarPaintProperty->GetShowHolidayValue());
-    EXPECT_FALSE(swiperPaintProperty->GetDisableSwipeValue());
+    EXPECT_FALSE(swiperLayoutProperty->GetDisableSwipeValue());
     EXPECT_EQ(calendarPaintProperty->GetStartOfWeekValue(), Week::Sun);
     EXPECT_EQ(calendarPaintProperty->GetOffDaysValue(), OFF_DAYS_VALUE);
     EXPECT_EQ(swiperLayoutProperty->GetDirectionValue(), Axis::HORIZONTAL);
@@ -1054,13 +1054,13 @@ HWTEST_F(CalendarTestNg, CalendarPatternTest005, TestSize.Level1)
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     ASSERT_NE(swiperPaintProperty, nullptr);
 
-    swiperPaintProperty->UpdateDisableSwipe(true);
+    swiperLayoutProperty->UpdateDisableSwipe(true);
     swiperLayoutProperty->UpdateDirection(Axis::VERTICAL);
     calendarPattern->ToJsonValue(json);
     EXPECT_EQ(json->GetString("needSlide"), "false");
     EXPECT_EQ(json->GetString("direction"), "0");
 
-    swiperPaintProperty->UpdateDisableSwipe(false);
+    swiperLayoutProperty->UpdateDisableSwipe(false);
     swiperLayoutProperty->UpdateDirection(Axis::HORIZONTAL);
     json = JsonUtil::Create(true);
     calendarPattern->ToJsonValue(json);
@@ -1069,7 +1069,7 @@ HWTEST_F(CalendarTestNg, CalendarPatternTest005, TestSize.Level1)
 
     std::optional<bool> disableSwipe;
     std::optional<Axis> direction;
-    swiperPaintProperty->propDisableSwipe_ = disableSwipe;
+    swiperLayoutProperty->propDisableSwipe_ = disableSwipe;
     swiperLayoutProperty->propDirection_ = direction;
     json = JsonUtil::Create(true);
     calendarPattern->ToJsonValue(json);

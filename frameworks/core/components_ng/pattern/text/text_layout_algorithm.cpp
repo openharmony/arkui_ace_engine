@@ -738,7 +738,6 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     // create a paragraph with all text in 1 line
     textStyle.SetTextOverflow(TextOverflow::CLIP);
     textStyle.SetMaxLines(1);
-    textStyle.SetTextAlign(TextAlign::START);
     if (!CreateParagraph(textStyle, layoutProperty->GetContent().value_or(""), layoutWrapper)) {
         return std::nullopt;
     }
@@ -748,8 +747,13 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
 
     // layout the paragraph to the width of text
     paragraph_->Layout(std::numeric_limits<float>::max());
-    float paragraphWidth = paragraph_->GetMaxWidth();
-    paragraph_->Layout(paragraphWidth);
+    float paragraphWidth = GetTextWidth();
+    if (contentConstraint.selfIdealSize.Width().has_value()) {
+        paragraphWidth = std::max(contentConstraint.selfIdealSize.Width().value(), paragraphWidth);
+    } else {
+        paragraphWidth = std::max(contentConstraint.maxSize.Width(), paragraphWidth);
+    }
+    paragraph_->Layout(std::ceil(paragraphWidth));
 
     textStyle_ = textStyle;
 
@@ -984,7 +988,7 @@ void TextLayoutAlgorithm::SplitSpanContentByLines(const TextStyle& textStyle,
     std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>>& spanContentLines)
 {
     int32_t currentLine = 0;
-    size_t currentLength = 0;
+    int32_t start = GetFirstSpanStartPositon();
     for (const auto& child : spanList) {
         if (!child) {
             continue;
@@ -992,10 +996,10 @@ void TextLayoutAlgorithm::SplitSpanContentByLines(const TextStyle& textStyle,
         std::string textValue = child->content;
         std::vector<RectF> selectedRects;
         if (!textValue.empty()) {
-            paragraph_->GetRectsForRange(currentLength, currentLength + textValue.size(), selectedRects);
+            paragraph_->GetRectsForRange(child->position - StringUtils::ToWstring(textValue).length() - start,
+                child->position - start, selectedRects);
         }
-        currentLength += textValue.size();
-        RectF currentRect;
+        RectF currentRect = RectF(0, -1, 0, 0);
         auto preLinetLastSpan = spanContentLines.rbegin();
         double preLineFontSize = textStyle.GetFontSize().Value();
         if (preLinetLastSpan != spanContentLines.rend()) {
@@ -1032,6 +1036,18 @@ void TextLayoutAlgorithm::SplitSpanContentByLines(const TextStyle& textStyle,
     }
 }
 
+int32_t TextLayoutAlgorithm::GetFirstSpanStartPositon()
+{
+    int32_t start = 0;
+    if (!spanItemChildren_.empty()) {
+        auto firstSpan = spanItemChildren_.front();
+        if (firstSpan) {
+            start = firstSpan->position - StringUtils::ToWstring(firstSpan->content).length();
+        }
+    }
+    return start;
+}
+
 void TextLayoutAlgorithm::SetImageSpanTextStyleByLines(const TextStyle& textStyle,
     std::map<int32_t, std::pair<RectF, RefPtr<PlaceholderSpanItem>>>& placeholderSpanList,
     std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>>& spanContentLines)
@@ -1046,14 +1062,17 @@ void TextLayoutAlgorithm::SetImageSpanTextStyleByLines(const TextStyle& textStyl
             if (!placeholder) {
                 continue;
             }
-            placeholder->textStyle = textStyle;
-
             auto offset = placeholderItem->second.first.GetOffset();
+            auto spanItemRect = spanItem->second.first;
+            if (GreatOrEqual(offset.GetY(), spanItemRect.Bottom())) {
+                break;
+            }
             auto placeholderItemRect = placeholderItem->second.first;
-            placeholderItemRect.SetOffset(OffsetF(spanItem->second.first.GetOffset().GetX(), offset.GetY()));
+            placeholderItemRect.SetOffset(OffsetF(spanItemRect.GetOffset().GetX(), offset.GetY()));
             bool isIntersectWith = spanItem->second.first.IsIntersectWith(placeholderItemRect);
             if (!isIntersectWith) {
-                break;
+                placeholderItem++;
+                continue;
             }
             Dimension maxFontSize;
             TextStyle spanTextStyle = textStyle;

@@ -14,13 +14,17 @@
  */
 #include "bridge/declarative_frontend/jsview/js_base_node.h"
 
+#include <memory>
 #include <string>
+
+#include "canvas_napi/js_canvas.h"
 
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
+#include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
@@ -31,15 +35,13 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/modifier.h"
 #include "core/components_ng/base/view_stack_processor.h"
-#include "core/event/touch_event.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/drawing_forward.h"
+#include "core/event/touch_event.h"
 #include "core/pipeline/pipeline_base.h"
-#include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
-#include "frameworks/core/components_ng/pattern/render_node/render_node_pattern.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -121,21 +123,32 @@ void JSBaseNode::CreateRenderNode(const JSCallbackInfo& info)
                 sizeObj->SetProperty<float>("height", PipelineBase::Px2VpWithCurrentDensity(context.height));
                 sizeObj->SetProperty<float>("width", PipelineBase::Px2VpWithCurrentDensity(context.width));
                 contextObj->SetPropertyObject("size", sizeObj);
-                auto jsVal = JSRef<JSVal>::Cast(contextObj);
 
                 auto engine = EngineHelper::GetCurrentEngine();
                 CHECK_NULL_VOID(engine);
                 NativeEngine* nativeEngine = engine->GetNativeEngine();
-                ScopeRAII scope(reinterpret_cast<napi_env>(nativeEngine));
+                napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+                ScopeRAII scope(env);
+
+                auto jsCanvas =
+                    OHOS::Rosen::Drawing::JsCanvas::CreateJsCanvas(env, &context.canvas, context.width, context.height);
+                JsiRef<JsiValue> jsCanvasVal = JsConverter::ConvertNapiValueToJsVal(jsCanvas);
+                contextObj->SetPropertyObject("canvas", jsCanvasVal);
+
+                auto jsVal = JSRef<JSVal>::Cast(contextObj);
                 panda::Local<JsiValue> value = jsVal.Get().GetLocalHandle();
                 JSValueWrapper valueWrapper = value;
                 napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
 
-                napi_env env = reinterpret_cast<napi_env>(nativeEngine);
                 napi_wrap(
                     env, nativeValue, &context.canvas, [](napi_env, void*, void*) {}, nullptr, nullptr);
 
                 JSRef<JSVal> result = func->ExecuteJS(1, &jsVal);
+                OHOS::Rosen::Drawing::JsCanvas* unwrapCanvas = nullptr;
+                napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
+                if (unwrapCanvas) {
+                    unwrapCanvas->ResetCanvas();
+                }
             });
     }
     info.SetReturnValue(JSRef<JSVal>::Make(panda::NativePointerRef::New(vm, ptr)));
@@ -291,6 +304,7 @@ void JSBaseNode::JSBind(BindingTarget globalObj)
     JSClass<JSBaseNode>::CustomMethod("createRenderNode", &JSBaseNode::CreateRenderNode);
     JSClass<JSBaseNode>::CustomMethod("finishUpdateFunc", &JSBaseNode::FinishUpdateFunc);
     JSClass<JSBaseNode>::CustomMethod("postTouchEvent", &JSBaseNode::PostTouchEvent);
+    JSClass<JSBaseNode>::CustomMethod("reset", &JSBaseNode::Reset);
 
     JSClass<JSBaseNode>::Bind(globalObj, JSBaseNode::ConstructorCallback, JSBaseNode::DestructorCallback);
 }

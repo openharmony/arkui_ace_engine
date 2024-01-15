@@ -90,6 +90,8 @@ public:
 
     void DrawToRSCanvas(
         RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY) override;
+    bool DrawImageNine(
+        RSCanvas& canvas, const RSRect& srcRect, const RSRect& dstRect, const BorderRadiusArray& radiusXY);
 
     static RefPtr<CanvasImage> QueryFromCache(const std::string& key);
 

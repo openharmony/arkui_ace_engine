@@ -38,6 +38,7 @@ public:
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetCheckboxStyle(CheckBoxStyle checkboxStyle) override;
     
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetSelect(FrameNode* frameNode, bool isSelected);
     static void SetSelectedColor(FrameNode* frameNode, const Color& color);
     static void SetUnSelectedColor(FrameNode* frameNode, const Color& color);
@@ -46,6 +47,8 @@ public:
     static void SetCheckMarkColor(FrameNode* frameNode, const Color& color);
     static void SetCheckMarkSize(FrameNode* frameNode, const Dimension& size);
     static void SetCheckMarkWidth(FrameNode* frameNode, const Dimension& width);
+    static void SetPadding(FrameNode* frameNode, const NG::PaddingProperty& padding);
+    static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CHECKBOX_CHECKBOX_MODEL_NG_H

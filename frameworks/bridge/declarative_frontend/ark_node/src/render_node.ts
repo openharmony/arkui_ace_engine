@@ -50,7 +50,7 @@ type Transform = [
   number
 ];
 
-class RenderNode extends __JSBaseNode__ {
+class RenderNode {
   private childrenList: Array<RenderNode>;
   private nodePtr: number | null;
   private parentRenderNode: RenderNode | null;
@@ -68,9 +68,9 @@ class RenderNode extends __JSBaseNode__ {
   private shadowRadiusValue: number;
   private transformValue: Transform;
   private translationValue: Vector2;
+  private baseNode_ : __JSBaseNode__;
 
   constructor(type: string) {
-    super();
     this.nodePtr = null;
     this.childrenList = [];
     this.parentRenderNode = null;
@@ -91,10 +91,11 @@ class RenderNode extends __JSBaseNode__ {
       0, 0, 1, 0,
       0, 0, 0, 1];
     this.translationValue = { x: 0, y: 0 };
-    if (type === "FrameNode") {
+    if (type === 'FrameNode') {
       return;
     }
-    this.nodePtr = this.createRenderNode();
+    this.baseNode_ = new __JSBaseNode__();
+    this.nodePtr = this.baseNode_.createRenderNode();
   }
 
   set backgroundColor(color: number) {
@@ -109,8 +110,8 @@ class RenderNode extends __JSBaseNode__ {
     if (frame === undefined || frame === null) {
       this.frameValue = { x: 0, y: 0, width: 0, height: 0 };
     } else {
-      this.size = { width: frame.width, height: frame.height }
-      this.position = { x: frame.x, y: frame.y }
+      this.size = { width: frame.width, height: frame.height };
+      this.position = { x: frame.x, y: frame.y };
     }
   }
   set opacity(value: number) {
@@ -188,8 +189,7 @@ class RenderNode extends __JSBaseNode__ {
       this.frameValue.width = this.checkUndefinedOrNullWithDefaultValue<number>(size.width, 0);
       this.frameValue.height = this.checkUndefinedOrNullWithDefaultValue<number>(size.height, 0);
     }
-    GetUINativeModule().common.setWidth(this.nodePtr, this.frameValue.width);
-    GetUINativeModule().common.setHeight(this.nodePtr, this.frameValue.height);
+    GetUINativeModule().renderNode.setSize(this.nodePtr, this.frameValue.width, this.frameValue.height);
   }
   set transform(transform: Transform) {
     if (transform === undefined || transform === null) {
@@ -198,7 +198,7 @@ class RenderNode extends __JSBaseNode__ {
         0, 0, 1, 0,
         0, 0, 0, 1];
     } else {
-      let i: number = 0
+      let i: number = 0;
       while (i < transform.length && i < 16) {
         if (i % 5 === 0) {
           this.transformValue[i] = this.checkUndefinedOrNullWithDefaultValue<number>(transform[i], 1);
@@ -259,7 +259,7 @@ class RenderNode extends __JSBaseNode__ {
     return this.shadowRadiusValue;
   }
   get size(): Size {
-    return { width: this.frameValue.width, height: this.frameValue.height }
+    return { width: this.frameValue.width, height: this.frameValue.height };
   }
   get transform(): Transform {
     return this.transformValue;
@@ -276,7 +276,7 @@ class RenderNode extends __JSBaseNode__ {
   }
   appendChild(node: RenderNode) {
     if (node === undefined || node === null) {
-      return
+      return;
     }
     if (this.childrenList.findIndex(element => element === node) !== -1) {
       return;

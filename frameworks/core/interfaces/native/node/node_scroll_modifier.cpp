@@ -19,6 +19,8 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
+#include "frameworks/bridge/common/utils/utils.h"
+#include "core/components/scroll/scroll_position_controller.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -29,6 +31,15 @@ constexpr double FRICTION_DEFAULT = 0.6;
 constexpr double DEFAULT_DIMENSION_VALUE = 0.0;
 constexpr double DEFAULT_SCROLLBARWIDTH_VALUE = 4.0;
 constexpr int32_t PARAM_SIZE = 4;
+constexpr int32_t SCROLL_TO_INDEX_0 = 0;
+constexpr int32_t SCROLL_TO_INDEX_1 = 1;
+constexpr int32_t SCROLL_TO_INDEX_2 = 2;
+constexpr int32_t SCROLL_TO_INDEX_3 = 3;
+constexpr int32_t SCROLL_TO_INDEX_4 = 4;
+constexpr int32_t SCROLL_TO_INDEX_5 = 5;
+constexpr int32_t SCROLL_TO_INDEX_6 = 6;
+const std::vector<std::string> ControllerCurves = {"ease", "ease-in", "ease-in-out", "ease-out", "friction", "linear"};
+
 bool CheckSnapPagination(const std::vector<Dimension>& snapPagination)
 {
     CHECK_NULL_RETURN(!snapPagination.empty(), false);
@@ -239,6 +250,29 @@ void SetEnableScrollInteraction(ArkUINodeHandle node, bool enableScrollInteracti
 }
 
 void ResetEnableScrollInteraction(ArkUINodeHandle node) {}
+void SetScrollTo(ArkUINodeHandle node, ArkUI_Float64* values)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    RefPtr<ScrollControllerBase> scrollControllerBase =  ScrollModelNG::GetOrCreateController(frameNode);
+
+    Dimension xOffset(values[SCROLL_TO_INDEX_0], static_cast<OHOS::Ace::DimensionUnit>(values[SCROLL_TO_INDEX_1]));
+    Dimension yOffset(values[SCROLL_TO_INDEX_2], static_cast<OHOS::Ace::DimensionUnit>(values[SCROLL_TO_INDEX_3]));
+    float duration = values[SCROLL_TO_INDEX_4];
+    RefPtr<Curve> curve = Framework::CreateCurve(ControllerCurves[static_cast<int>(values[SCROLL_TO_INDEX_5])], false);
+    auto smooth = static_cast<bool>(values[SCROLL_TO_INDEX_6]);
+    auto direction = scrollControllerBase->GetScrollDirection();
+    auto position = direction == Axis::VERTICAL ? yOffset : xOffset;
+    scrollControllerBase->AnimateTo(position, duration, curve, smooth);
+}
+
+void SetScrollEdge(ArkUINodeHandle node, int32_t value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    RefPtr<ScrollControllerBase> scrollControllerBase =  ScrollModelNG::GetOrCreateController(frameNode);
+
+    scrollControllerBase->ScrollToEdge(static_cast<ScrollEdgeType>(value), true);
+}
+
 } // namespace
 
 namespace NodeModifier {
@@ -266,19 +300,22 @@ const ArkUIScrollModifier* GetScrollModifier()
         ResetScrollEdgeEffect,
         SetEnableScrollInteraction,
         ResetEnableScrollInteraction,
+        SetScrollTo,
+        SetScrollEdge,
     };
     /* clang-format on */
     return &modifier;
 }
 
-void SetOnScroll(ArkUINodeHandle node, ArkUI_Int32 eventId)
+void SetOnScroll(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onScroll = [node, eventId](Dimension scrollX, Dimension scrollY) {
+    auto onScroll = [node, eventId, extraParam](Dimension scrollX, Dimension scrollY) {
         ArkUINodeEvent event;
         event.kind = ON_SCROLL;
         event.eventId = eventId;
+        event.extraParam= extraParam;
         event.componentAsyncEvent.data[0].f32 = static_cast<float>(scrollX.Value());
         event.componentAsyncEvent.data[1].f32 = static_cast<float>(scrollY.Value());
         SendArkUIAsyncEvent(&event);
@@ -286,17 +323,18 @@ void SetOnScroll(ArkUINodeHandle node, ArkUI_Int32 eventId)
     ScrollModelNG::SetOnScroll(frameNode, std::move(onScroll));
 }
 
-void SetOnScrollFrameBegin(ArkUINodeHandle node, ArkUI_Int32 eventId)
+void SetOnScrollFrameBegin(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onScrollFrameBegin = [nodeId, node, eventId](const Dimension& offset, const ScrollState& state) ->
+    auto onScrollFrameBegin = [nodeId, node, eventId, extraParam](const Dimension& offset, const ScrollState& state) ->
             ScrollFrameResult {
         ScrollFrameResult scrollRes { .offset = offset };
         ArkUINodeEvent event;
         event.kind = ON_SCROLL_FRAME_BEGIN;
         event.eventId = eventId;
+        event.extraParam= extraParam;
         event.componentAsyncEvent.data[0].f32 = static_cast<float>(offset.Value());
         event.componentAsyncEvent.data[1].i32 = static_cast<int>(state);
         SendArkUIAsyncEvent(&event);
@@ -306,33 +344,49 @@ void SetOnScrollFrameBegin(ArkUINodeHandle node, ArkUI_Int32 eventId)
     ScrollModelNG::SetOnScrollFrameBegin(frameNode, std::move(onScrollFrameBegin));
 }
 
-void SetOnScrollStart(ArkUINodeHandle node, ArkUI_Int32 eventId)
+void SetOnScrollStart(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onScrollStart = [nodeId, node, eventId]() -> void {
+    auto onScrollStart = [nodeId, node, eventId, extraParam]() -> void {
         ArkUINodeEvent event;
         event.kind = ON_SCROLL_START;
         event.eventId = eventId;
+        event.extraParam= extraParam;
         SendArkUIAsyncEvent(&event);
     };
     ScrollModelNG::SetOnScrollStart(frameNode, std::move(onScrollStart));
 }
 
-void SetOnScrollStop(ArkUINodeHandle node, ArkUI_Int32 eventId)
+void SetOnScrollStop(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     int32_t nodeId = frameNode->GetId();
-    auto onScrollStop = [nodeId, node, eventId]() -> void {
+    auto onScrollStop = [nodeId, node, eventId, extraParam]() -> void {
         ArkUINodeEvent event;
         event.kind = ON_SCROLL_STOP;
         event.eventId = eventId;
+        event.extraParam = extraParam;
         SendArkUIAsyncEvent(&event);
     };
     ScrollModelNG::SetOnScrollStop(frameNode, std::move(onScrollStop));
 }
 
+void SetOnScrollEdge(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onScroll = [node, eventId, extraParam](ScrollEdge edge) {
+        ArkUINodeEvent event;
+        event.kind = ON_SCROLL_EDGE;
+        event.eventId = eventId;
+        event.extraParam= extraParam;
+        event.componentAsyncEvent.data[0].i32 = static_cast<int>(edge);
+        SendArkUIAsyncEvent(&event);
+    };
+    ScrollModelNG::SetOnScrollEdge(frameNode, std::move(onScroll));
+}
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

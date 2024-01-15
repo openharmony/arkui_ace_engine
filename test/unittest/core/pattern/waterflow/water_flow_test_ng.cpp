@@ -1531,7 +1531,7 @@ HWTEST_F(WaterFlowTestNg, ScrollToIndex002, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, 0);
     EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -1100);
 
-    pattern_->ScrollToIndex(LAST_ITEM, false, ScrollAlign::START);
+    pattern_->ScrollToIndex(LAST_ITEM);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 19);
     EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, -100);

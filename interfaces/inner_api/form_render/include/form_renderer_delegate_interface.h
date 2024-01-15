@@ -82,6 +82,11 @@ public:
      */
     virtual int32_t OnSurfaceChange(float width, float height) = 0;
     /**
+     * @brief OnSurfaceDetach.
+     * @param surfaceId The surfaceNode ID.
+     */
+    virtual int32_t OnSurfaceDetach(uint64_t surfaceId) = 0;
+    /**
      * @brief OnFormLinkInfoUpdate.
      * @param formLinkInfos
      */
@@ -95,6 +100,7 @@ public:
         ON_ERROR,
         ON_SURFACE_CHANGE,
         ON_FORM_LINK_INFO_UPDATE,
+        ON_FORMSURFACE_DETACH,
     };
 };
 } // namespace Ace

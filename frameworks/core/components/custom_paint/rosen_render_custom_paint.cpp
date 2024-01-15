@@ -2819,7 +2819,7 @@ void RosenRenderCustomPaint::WebGLInit(CanvasRenderContextBase* context)
         webGLContext_->SetBitMapPtr(
             reinterpret_cast<char*>(webglBitmap_.getPixels()), webglBitmap_.width(), webglBitmap_.height());
 #else
-        if (webglBitmap_.GetPixels() != nullptr) {
+        if (!webglBitmap_.GetPixels()) {
             RSBitmapFormat format { RSColorType::COLORTYPE_RGBA_8888, RSAlphaType::ALPHATYPE_OPAQUE };
             webglBitmap_.Build(GetLayoutSize().Width() * viewScale, GetLayoutSize().Height() * viewScale, format);
         }

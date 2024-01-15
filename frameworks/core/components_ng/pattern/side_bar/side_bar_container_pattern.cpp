@@ -20,7 +20,10 @@
 #include "base/log/log_wrapper.h"
 #include "base/mousestyle/mouse_style.h"
 #include "base/resource/internal_resource.h"
+#include "core/common/ace_application_info.h"
+#include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -402,6 +405,13 @@ void SideBarContainerPattern::CreateAndMountNodes()
             CHECK_NULL_VOID(sideBarTheme);
             Color bgColor = sideBarTheme->GetSideBarBackgroundColor();
             renderContext->UpdateBackgroundColor(bgColor);
+        }
+        if (SystemProperties::GetSideBarContainerBlurEnable() &&
+            Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+            !renderContext->GetBackBlurStyle().has_value()) {
+            BlurStyleOption blurStyleOption;
+            blurStyleOption.blurStyle = BlurStyle::COMPONENT_THICK;
+            renderContext->UpdateBackBlurStyle(blurStyleOption);
         }
     }
     host->RebuildRenderContextTree();
@@ -919,7 +929,7 @@ bool SideBarContainerPattern::OnDirtyLayoutWrapperSwap(
 void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContainerLayoutAlgorithm>& layoutAlgorithm)
 {
     CHECK_NULL_VOID(layoutAlgorithm);
-    if (realDividerWidth_ <= 0.0f) {
+    if (realDividerWidth_ < 0.0f) {
         return;
     }
 
@@ -931,7 +941,9 @@ void SideBarContainerPattern::AddDividerHotZoneRect(const RefPtr<SideBarContaine
     hotZoneOffset.SetX(-DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
     hotZoneOffset.SetY(-dividerStartMagin.ConvertToPx());
     SizeF hotZoneSize;
-    hotZoneSize.SetWidth(realDividerWidth_ + DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_NUM *
+    auto baseWidth = NearZero(realDividerWidth_, 0.0f) ?
+        DEFAULT_DIVIDER_STROKE_WIDTH.ConvertToPx() : realDividerWidth_;
+    hotZoneSize.SetWidth(baseWidth + DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_NUM *
                                                  DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
     hotZoneSize.SetHeight(realSideBarHeight_);
 
@@ -1062,7 +1074,7 @@ void SideBarContainerPattern::OnHover(bool isHover)
     auto layoutProperty = GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto dividerStrokeWidth = layoutProperty->GetDividerStrokeWidth().value_or(DEFAULT_DIVIDER_STROKE_WIDTH);
-    if (dividerStrokeWidth.Value() <= 0.0f) {
+    if (dividerStrokeWidth.Value() < 0.0f) {
         return;
     }
 

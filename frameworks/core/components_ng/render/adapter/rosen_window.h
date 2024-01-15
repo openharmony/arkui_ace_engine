@@ -103,6 +103,11 @@ public:
         return rsUIDirector_->GetCurrentRefreshRateMode();
     }
 
+    int32_t GetAnimateExpectedRate() const override
+    {
+        return rsUIDirector_->GetAnimateExpectedRate();
+    }
+
 private:
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;
     WeakPtr<TaskExecutor> taskExecutor_;

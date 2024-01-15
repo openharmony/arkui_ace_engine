@@ -105,7 +105,7 @@ class SubscribableHandler {
   static readonly SET_ONREAD_CB = Symbol("_____set_onread_cb__");
 
   private owningProperties_: Set<number>;
-  private readCbFunc_? : PropertyReadCbFunc;
+  private readCbFunc_?: PropertyReadCbFunc;
 
   constructor(owningProperty: IPropertySubscriber) {
     this.owningProperties_ = new Set<number>();
@@ -117,9 +117,9 @@ class SubscribableHandler {
   }
 
   private isPropertyTracked(obj: Object, property: string): boolean {
-    return Reflect.has(obj, `___TRACKED_${property}`) || 
-        property == TrackedObject.___TRACKED_OPTI_ASSIGNMENT_FAKE_PROP_PROPERTY ||
-        property == TrackedObject.___TRACKED_OPTI_ASSIGNMENT_FAKE_OBJLINK_PROPERTY;
+    return Reflect.has(obj, `___TRACKED_${property}`) ||
+      property === TrackedObject.___TRACKED_OPTI_ASSIGNMENT_FAKE_PROP_PROPERTY ||
+      property === TrackedObject.___TRACKED_OPTI_ASSIGNMENT_FAKE_OBJLINK_PROPERTY;
   }
 
   addOwningProperty(subscriber: IPropertySubscriber): void {
@@ -167,7 +167,7 @@ class SubscribableHandler {
     });
   }
 
-  protected notifyTrackedObjectPropertyHasChanged(propName: string) : void {
+  protected notifyTrackedObjectPropertyHasChanged(propName: string): void {
     stateMgmtConsole.debug(`SubscribableHandler: notifyTrackedObjectPropertyHasChanged '@Track ${propName}'.`)
     this.owningProperties_.forEach((subscribedId) => {
       var owningProperty: IPropertySubscriber = SubscriberManager.Find(subscribedId)
@@ -181,7 +181,7 @@ class SubscribableHandler {
     // no need to support FU code path when app uses @Track
   }
 
-  public has(target: Object, property: PropertyKey) : boolean {
+  public has(target: Object, property: PropertyKey): boolean {
     stateMgmtConsole.debug(`SubscribableHandler: has '${property.toString()}'.`);
     return (property === ObservedObject.__IS_OBSERVED_OBJECT) ? true : Reflect.has(target, property);
   }
@@ -196,7 +196,7 @@ class SubscribableHandler {
         break;
       default:
         const result = Reflect.get(target, property, receiver);
-        let propertyStr : string = property.toString();
+        let propertyStr : string = String(property);
         if (this.readCbFunc_ && typeof result != "function") {
           let isTracked = this.isPropertyTracked(target, propertyStr);
           stateMgmtConsole.debug(`SubscribableHandler: get ObservedObject property '${isTracked ? "@Track " : ""}${propertyStr}' notifying read.`);
@@ -233,7 +233,7 @@ class SubscribableHandler {
           return true;
         }
         Reflect.set(target, property, newValue);
-        const propString = property.toString();
+        const propString = String(property)
         if (TrackedObject.isCompatibilityMode(target)) {
           stateMgmtConsole.debug(`SubscribableHandler: set ObservedObject property '${propString}' (object property tracking compatibility mode).`);
           this.notifyObjectPropertyHasChanged(propString, newValue);
@@ -256,7 +256,7 @@ class SubscribableHandler {
 
 class SubscribableMapSetHandler extends SubscribableHandler {
   constructor(owningProperty: IPropertySubscriber) {
-      super(owningProperty);
+    super(owningProperty);
   }
 
   // In-place Map/Set modification functions
@@ -283,33 +283,33 @@ class SubscribableMapSetHandler extends SubscribableHandler {
    * @returns
    */
   get(target, property, receiver) {
-      if (property === ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT) {
-        return target;
-      }
+    if (property === ObservedObject.__OBSERVED_OBJECT_RAW_OBJECT) {
+      return target;
+    }
 
-      //receiver will fail for internal slot methods of Set and Map
-      //So assign the target as receiver in this case.
-      if (property === Symbol.iterator || property === 'size') {
-        receiver = target;
-      }
+    //receiver will fail for internal slot methods of Set and Map
+    //So assign the target as receiver in this case.
+    if (property === Symbol.iterator || property === 'size') {
+      receiver = target;
+    }
 
-      let ret = super.get(target, property, receiver);
-      if (ret && typeof ret === 'function') {
-        const self = this;
-        return function () {
-          // execute original function with given arguments
-          const result = ret.apply(target, arguments);
-          if (self.mutatingFunctions.has(property)) {
-            self.notifyObjectPropertyHasChanged(property, target);
-          }
-          // Only calls to inserting items can be chained, so returning the 'proxiedObject'
-          // ensures that when chain calls also 2nd function call operates on the proxied object.
-          // Otherwise return the original result of the function.
-          return self.proxiedFunctions.has(property) ? receiver: result;
-        }.bind(receiver);
-      }
+    let ret = super.get(target, property, receiver);
+    if (ret && typeof ret === 'function') {
+      const self = this;
+      return function () {
+        // execute original function with given arguments
+        const result = ret.apply(target, arguments);
+        if (self.mutatingFunctions.has(property)) {
+          self.notifyObjectPropertyHasChanged(property, target);
+        }
+        // Only calls to inserting items can be chained, so returning the 'proxiedObject'
+        // ensures that when chain calls also 2nd function call operates on the proxied object.
+        // Otherwise return the original result of the function.
+        return self.proxiedFunctions.has(property) ? receiver : result;
+      }.bind(receiver);
+    }
 
-      return ret;
+    return ret;
   }
 }
 
@@ -320,8 +320,8 @@ class SubscribableDateHandler extends SubscribableHandler {
   }
 
   dateSetFunctions = new Set(["setFullYear", "setMonth", "setDate", "setHours", "setMinutes", "setSeconds",
-      "setMilliseconds", "setTime", "setUTCFullYear", "setUTCMonth", "setUTCDate", "setUTCHours", "setUTCMinutes",
-      "setUTCSeconds", "setUTCMilliseconds"]);
+    "setMilliseconds", "setTime", "setUTCFullYear", "setUTCMonth", "setUTCDate", "setUTCHours", "setUTCMinutes",
+    "setUTCSeconds", "setUTCMilliseconds"]);
 
   /**
    * Get trap for Date type proxy
@@ -335,7 +335,7 @@ class SubscribableDateHandler extends SubscribableHandler {
     let ret = super.get(target, property);
 
     if (typeof ret === "function") {
-      if(this.dateSetFunctions.has(property)) {
+      if (this.dateSetFunctions.has(property)) {
         const self = this;
         return function () {
           // execute original function with given arguments
@@ -386,10 +386,10 @@ class SubscribableArrayHandler extends SubscribableHandler {
           // prop is the function name here
           // and result is the function return value
           // function modifies none or more properties
-          self.notifyObjectPropertyHasChanged(prop, self.specialFunctions.has(prop)? target: result);
+          self.notifyObjectPropertyHasChanged(prop, self.specialFunctions.has(prop) ? target : result);
           // returning the 'receiver(proxied object)' ensures that when chain calls also 2nd function call
           // operates on the proxied object.
-          return self.specialFunctions.has(prop)? result: receiver;
+          return self.specialFunctions.has(prop) ? result : receiver;
         }.bind(receiver);
       }
       // binding the proxiedObject ensures that modifying functions like push() operate on the
@@ -438,7 +438,7 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
   public static createNewInternal<T extends Object>(rawObject: T,
     owningProperty: IPropertySubscriber): T {
     let proxiedObject;
-    if(rawObject instanceof Map || rawObject instanceof Set) {
+    if (rawObject instanceof Map || rawObject instanceof Set) {
       proxiedObject = new ObservedObject<T>(rawObject, new SubscribableMapSetHandler(owningProperty), owningProperty);
     }
     else if (rawObject instanceof Date) {
@@ -482,7 +482,7 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
    * @returns false if given object is not an ObservedObject 
    */
   public static addOwningProperty(obj: Object, subscriber: IPropertySubscriber): boolean {
-    if (!ObservedObject.IsObservedObject(obj) || subscriber==undefined) {
+    if (!ObservedObject.IsObservedObject(obj) || subscriber == undefined) {
       return false;
     }
 
@@ -514,15 +514,14 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
    * @returns return number of subscribers to the given ObservedObject
    * or false if given object is not an ObservedObject
    */
-  public static countSubscribers(obj: Object) : number | false 
-  {
+  public static countSubscribers(obj: Object): number | false {
     return ObservedObject.IsObservedObject(obj) ? obj[SubscribableHandler.COUNT_SUBSCRIBERS] : false;
   }
 
   /*
     set or unset callback function to be called when a property has been called
   */
-  public static registerPropertyReadCb(obj: Object, readPropCb : PropertyReadCbFunc): boolean {
+  public static registerPropertyReadCb(obj: Object, readPropCb: PropertyReadCbFunc): boolean {
     if (!ObservedObject.IsObservedObject(obj)) {
       return false;
     }
@@ -577,7 +576,7 @@ class ObservedObject<T extends Object> extends ExtendableProxy {
     return result;
   }
 
-  
+
   /**
    * @Observed  decorator extends the decorated class. This function returns the prototype of the decorated class
    * @param proto 

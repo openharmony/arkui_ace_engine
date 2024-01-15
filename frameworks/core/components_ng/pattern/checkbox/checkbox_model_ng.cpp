@@ -42,6 +42,13 @@ void CheckBoxModelNG::Create(
     }
 }
 
+RefPtr<FrameNode> CheckBoxModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::CHECK_BOX_ETS_TAG, nodeId, AceType::MakeRefPtr<CheckBoxPattern>());
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode;
+}
+
 void CheckBoxModelNG::SetSelect(bool isSelected)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
@@ -164,5 +171,19 @@ void CheckBoxModelNG::SetHeight(FrameNode* frameNode, const Dimension& height)
 void CheckBoxModelNG::SetWidth(FrameNode* frameNode, const Dimension& width)
 {
     NG::ViewAbstract::SetWidth(frameNode, NG::CalcLength(width));
+}
+
+void CheckBoxModelNG::SetPadding(FrameNode* frameNode, const NG::PaddingProperty& padding)
+{
+    NG::ViewAbstract::SetPadding(padding);
+}
+
+void CheckBoxModelNG::SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion)
+{
+    NG::ViewAbstract::SetResponseRegion(responseRegion);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsUserSetResponseRegion(true);
 }
 } // namespace OHOS::Ace::NG

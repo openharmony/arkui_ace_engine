@@ -125,7 +125,7 @@ Accessibility::EventType ConvertStrToEventType(const std::string& type)
         { MOUSE_HOVER_EXIT, Accessibility::EventType::TYPE_VIEW_HOVER_EXIT_EVENT },
         { PAGE_CHANGE_EVENT, Accessibility::EventType::TYPE_PAGE_STATE_UPDATE },
         { SCROLL_END_EVENT, Accessibility::EventType::TYPE_VIEW_SCROLLED_EVENT },
-        { SCROLL_START_EVENT, Accessibility::EventType::TYPE_VIEW_SCROLLED_EVENT },
+        { SCROLL_START_EVENT, Accessibility::EventType::TYPE_VIEW_SCROLLED_START },
         { DOM_SELECTED, Accessibility::EventType::TYPE_VIEW_SELECTED_EVENT },
         { TEXT_CHANGE_EVENT, Accessibility::EventType::TYPE_VIEW_TEXT_UPDATE_EVENT },
         { DOM_TOUCH_END, Accessibility::EventType::TYPE_TOUCH_END },
@@ -160,6 +160,7 @@ Accessibility::EventType ConvertAceEventType(AccessibilityEventType type)
         { AccessibilityEventType::ACCESSIBILITY_FOCUS_CLEARED,
             Accessibility::EventType::TYPE_VIEW_ACCESSIBILITY_FOCUS_CLEARED_EVENT },
         { AccessibilityEventType::TEXT_MOVE_UNIT, Accessibility::EventType::TYPE_VIEW_TEXT_MOVE_UNIT_EVENT },
+        { AccessibilityEventType::SCROLL_START, Accessibility::EventType::TYPE_VIEW_SCROLLED_START },
     };
     Accessibility::EventType eventType = Accessibility::EventType::TYPE_VIEW_INVALID;
     int64_t idx = BinarySearchFindIndex(eventTypeMap, ArraySize(eventTypeMap), type);
@@ -1103,33 +1104,6 @@ static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, Ac
 }
 
 #ifdef WEB_SUPPORTED
-static void UpdateWebAccessibilityElementInfoActions(
-    const NWeb::NWebAccessibilityNodeInfo& node, AccessibilityElementInfo& nodeInfo)
-{
-    if (node.clickable) {
-        AccessibleAction action(ConvertAceAction(AceAction::ACTION_CLICK), "web");
-        nodeInfo.AddAction(action);
-    }
-
-    if (node.focusable) {
-        if (node.focused) {
-            AccessibleAction action(ConvertAceAction(AceAction::ACTION_CLEAR_FOCUS), "web");
-            nodeInfo.AddAction(action);
-        } else {
-            AccessibleAction action(ConvertAceAction(AceAction::ACTION_FOCUS), "web");
-            nodeInfo.AddAction(action);
-        }
-    }
-
-    if (node.accessibilityFocus) {
-        AccessibleAction action(ConvertAceAction(AceAction::ACTION_CLEAR_ACCESSIBILITY_FOCUS), "web");
-        nodeInfo.AddAction(action);
-    } else {
-        AccessibleAction action(ConvertAceAction(AceAction::ACTION_ACCESSIBILITY_FOCUS), "web");
-        nodeInfo.AddAction(action);
-    }
-}
-
 static void UpdateWebAccessibilityElementInfo(
     const NWeb::NWebAccessibilityNodeInfo& node, AccessibilityElementInfo& nodeInfo)
 {
@@ -1170,7 +1144,11 @@ static void UpdateWebAccessibilityElementInfo(
         nodeInfo.SetEditable(node.editable);
         nodeInfo.SetDeletable(node.deletable);
         nodeInfo.SetClickable(node.clickable);
-        UpdateWebAccessibilityElementInfoActions(node, nodeInfo);
+        auto supportAceActions = node.actions;
+        for (auto it = supportAceActions.begin(); it != supportAceActions.end(); ++it) {
+            AccessibleAction action(ConvertAceAction(static_cast<AceAction>(*it)), "web");
+            nodeInfo.AddAction(action);
+        }
     }
 }
 

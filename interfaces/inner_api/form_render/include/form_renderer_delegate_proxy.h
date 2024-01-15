@@ -38,6 +38,8 @@ public:
     int32_t OnSurfaceReuse(
         uint64_t surfaceId, const OHOS::AppExecFwk::FormJsInfo& formJsInfo, const AAFwk::Want& want) override;
 
+    int32_t OnSurfaceDetach(uint64_t surfaceId) override;
+
     int32_t OnSurfaceRelease(uint64_t surfaceId) override;
 
     int32_t OnActionEvent(const std::string& action) override;

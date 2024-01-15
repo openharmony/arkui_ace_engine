@@ -16,6 +16,7 @@
 #include "grid_test_ng.h"
 
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
+#include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_filler.h"
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_range_solver.h"
@@ -71,6 +72,8 @@ HWTEST_F(GridLayoutTestNg, GridPaintMethodTest001, TestSize.Level1)
     EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
     EXPECT_CALL(rsCanvas, DrawRect(_)).WillRepeatedly(Return());
+    drawFunction(rsCanvas);
+    paintMethod = nullptr;
     drawFunction(rsCanvas);
 
     /**
@@ -2327,5 +2330,461 @@ HWTEST_F(GridLayoutTestNg, PrepareLineHeights001, TestSize.Level1)
 
     EXPECT_EQ(cmp, info.gridMatrix_);
     EXPECT_EQ(cmpH, info.lineHeightMap_);
+}
+
+/**
+ * @tc.name: GridLayout001
+ * @tc.desc: Test GridLayoutAlgorithm for coverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GridLayout001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        CreateRowItem(16);
+    });
+
+    /**
+     * @tc.steps: step1. call InitGridCeils
+     * @tc.expected: The GetLayoutProperty is !nullptr
+     */
+    auto pattern = frameNode_->GetPattern<GridPattern>();
+    auto algorithm = AceType::MakeRefPtr<GridLayoutAlgorithm>(GridLayoutInfo {}, 4, 4);
+    algorithm->InitGridCeils(AceType::RawPtr(frameNode_), { 0.0f, 0.0f });
+    algorithm->crossCount_ = 5;
+    algorithm->mainCount_ = 5;
+    algorithm->InitGridCeils(AceType::RawPtr(frameNode_), { 0.0f, 0.0f });
+    EXPECT_NE(pattern->GetLayoutProperty<GridLayoutProperty>(), nullptr);
+}
+
+/**
+ * @tc.name: GridLayout002
+ * @tc.desc: Test GridLayoutAlgorithm for coverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GridLayout002, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("");
+        model.SetRowsTemplate("");
+        CreateRowItem(16);
+    });
+
+    /**
+     * @tc.steps: step1. Change to smaller mainSize
+     * @tc.expected: The GetLayoutProperty is correct
+     */
+    auto pattern = frameNode_->GetPattern<GridPattern>();
+    auto algorithm = AceType::MakeRefPtr<GridLayoutAlgorithm>(GridLayoutInfo {}, 4, 4);
+    algorithm->InitGridCeils(AceType::RawPtr(frameNode_), { 0.0f, 0.0f });
+    algorithm->crossCount_ = 5;
+    algorithm->mainCount_ = 5;
+    algorithm->InitGridCeils(AceType::RawPtr(frameNode_), { 0.0f, 0.0f });
+    EXPECT_NE(pattern->GetLayoutProperty<GridLayoutProperty>(), nullptr);
+}
+
+/**
+ * @tc.name: GridLayout003
+ * @tc.desc: Test GridLayoutAlgorithm for coverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GridLayout003, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        std::string emptyString;
+        model.SetColumnsTemplate(emptyString);
+        model.SetRowsTemplate(emptyString);
+        CreateRowItem(16);
+    });
+
+    /**
+     * @tc.steps: step1. Change to smaller mainSize
+     * @tc.expected: The GetLayoutProperty is correct
+     */
+    auto pattern = frameNode_->GetPattern<GridPattern>();
+    auto algorithm = AceType::MakeRefPtr<GridLayoutAlgorithm>(GridLayoutInfo {}, 4, 4);
+    algorithm->gridLayoutInfo_.currentOffset_ = 0.0f;
+    auto layoutProperty = pattern->CreateLayoutProperty();
+    algorithm->InitGridCeils(AceType::RawPtr(frameNode_), { 0.0f, 0.0f });
+    algorithm->crossCount_ = 5;
+    algorithm->mainCount_ = 5;
+    algorithm->InitGridCeils(AceType::RawPtr(frameNode_), { 0.0f, 0.0f });
+    EXPECT_NE(layoutProperty, nullptr);
+}
+
+/**
+ * @tc.name: GridLayout004
+ * @tc.desc: Test GridLayoutAlgorithm for coverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GridLayout004, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateColItem(10);
+    });
+
+    /**
+     * @tc.steps: step1. isVertical_ is true
+     * @tc.expected: The curRow and curCol is correct
+     */
+    int32_t curRow = 0;
+    int32_t curCol = 0;
+    auto pattern = frameNode_->GetPattern<GridPattern>();
+    auto algorithm = AceType::MakeRefPtr<GridLayoutAlgorithm>(GridLayoutInfo {}, 2, 5);
+    EXPECT_EQ(algorithm->crossCount_, 2);
+    EXPECT_EQ(algorithm->mainCount_, 5);
+    algorithm->GetNextGrid(curRow, curCol);
+    EXPECT_EQ(curRow, 0);
+    EXPECT_EQ(curCol, 1);
+    EXPECT_TRUE(algorithm->isVertical_);
+    algorithm->GetNextGrid(curRow, curCol);
+    EXPECT_EQ(curRow, 1);
+    EXPECT_EQ(curCol, 0);
+    curRow = 1;
+    curCol = 1;
+
+    /**
+     * @tc.steps: step2. isVertical_ is false
+     * @tc.expected: The curRow and curCol is correct
+     */
+    algorithm->isVertical_ = false;
+    algorithm->GetNextGrid(curRow, curCol);
+    EXPECT_EQ(curRow, 2);
+    EXPECT_EQ(curCol, 1);
+    algorithm->GetNextGrid(curRow, curCol);
+    EXPECT_EQ(curRow, 3);
+    EXPECT_EQ(curCol, 1);
+    curRow = 5;
+    algorithm->GetNextGrid(curRow, curCol);
+    EXPECT_EQ(curRow, 0);
+    EXPECT_EQ(curCol, 2);
+}
+
+/**
+ * @tc.name: GridLayout005
+ * @tc.desc: Test GridLayoutAlgorithm for coverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GridLayout005, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 6, 1, 2, 3, 4, 5 };
+    Create([option](GridModelNG model) {
+        model.SetColumnsTemplate("1fr");
+        model.SetLayoutOptions(option);
+        CreateRowItem(10);
+    });
+
+    /**
+     * @tc.steps: step2.call GetItemRect
+     * @tc.expected: The GetItemRect is crrect
+     */
+    GridItemRect retItemRect;
+    auto pattern = frameNode_->GetPattern<GridPattern>();
+    auto algorithm = AceType::MakeRefPtr<GridLayoutAlgorithm>(GridLayoutInfo {}, 2, 5);
+    auto childLayoutProperty = GetChildLayoutProperty<GridItemLayoutProperty>(frameNode_, 0);
+    ASSERT_NE(layoutProperty_, nullptr);
+    ASSERT_NE(childLayoutProperty, nullptr);
+    algorithm->GetItemRect(layoutProperty_, childLayoutProperty, 0);
+    EXPECT_EQ(retItemRect.rowStart, -1);
+    EXPECT_EQ(retItemRect.rowSpan, 1);
+    EXPECT_EQ(retItemRect.columnStart, -1);
+    EXPECT_EQ(retItemRect.columnSpan, 1);
+}
+
+/**
+ * @tc.name: GridLayout006
+ * @tc.desc: Test GridLayoutAlgorithm for coverage
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GridLayout006, TestSize.Level1)
+{
+    GridLayoutOptions option;
+    option.regularSize.rows = 1;
+    option.regularSize.columns = 1;
+    option.irregularIndexes = { 6, 1, 2, 3, 4, 5 };
+    option.getRectByIndex = [](int32_t index) {
+        GridItemRect tmpItemRect;
+        tmpItemRect.rowStart = 1;
+        tmpItemRect.rowSpan = 20;
+        tmpItemRect.columnStart = 1;
+        tmpItemRect.columnSpan = 20;
+        return tmpItemRect;
+    };
+    Create([option](GridModelNG model) {
+        model.SetColumnsTemplate("1fr");
+        model.SetLayoutOptions(option);
+        CreateRowItem(10);
+    });
+    pattern_->UpdateStartIndex(3);
+    FlushLayoutTask(frameNode_);
+    layoutProperty_->UpdateColumnsTemplate("1fr 1fr 1fr 1fr 1fr");
+
+    /**
+     * @tc.steps: step2.call GetItemRect
+     * @tc.expected: The GetItemRect is crrect
+     */
+    GridItemRect retItemRect;
+    auto pattern = frameNode_->GetPattern<GridPattern>();
+    auto algorithm = AceType::MakeRefPtr<GridLayoutAlgorithm>(GridLayoutInfo {}, 2, 5);
+    auto childLayoutProperty = GetChildLayoutProperty<GridItemLayoutProperty>(frameNode_, 0);
+    ASSERT_NE(layoutProperty_, nullptr);
+    ASSERT_NE(childLayoutProperty, nullptr);
+    retItemRect = algorithm->GetItemRect(layoutProperty_, childLayoutProperty, 0);
+    EXPECT_EQ(retItemRect.rowStart, 1);
+    EXPECT_EQ(retItemRect.rowSpan, 20);
+    EXPECT_EQ(retItemRect.columnStart, 1);
+    EXPECT_EQ(retItemRect.columnSpan, 20);
+}
+
+/**
+ * @tc.name: UpdateOverlayModifier001
+ * @tc.desc: Test grid paint method UpdateOverlayModifier function
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, UpdateOverlayModifier001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr");
+        CreateColItem(10);
+    });
+
+    /**
+     * @tc.steps: step1. create paintMethod
+     */
+    auto paintMethod = AceType::DynamicCast<GridPaintMethod>(pattern_->CreateNodePaintMethod());
+    auto paintProperty = pattern_->CreatePaintProperty();
+    PaintWrapper paintWrapper(frameNode_->GetRenderContext(), frameNode_->GetGeometryNode(), paintProperty);
+    paintMethod->UpdateOverlayModifier(nullptr);
+
+    /**
+     * @tc.steps: step2. call UpdateOverlayModifier
+     * @tc.expected: scrollBar is nullptr
+     */
+    paintMethod->UpdateOverlayModifier(&paintWrapper);
+    auto scrollBar = paintMethod->scrollBar_.Upgrade();
+    EXPECT_EQ(scrollBar, nullptr);
+}
+
+/**
+ * @tc.name: UpdateOverlayModifier002
+ * @tc.desc: Test grid paint method UpdateOverlayModifier function
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, UpdateOverlayModifier002, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr");
+        CreateColItem(10);
+    });
+
+    /**
+     * @tc.steps: step1. create scrollBar and paintMethod
+     * @tc.expected: scrollBar is !nullptr
+     */
+    pattern_->scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
+    auto paintMethod = AceType::DynamicCast<GridPaintMethod>(pattern_->CreateNodePaintMethod());
+    auto paintProperty = pattern_->CreatePaintProperty();
+    PaintWrapper paintWrapper(frameNode_->GetRenderContext(), frameNode_->GetGeometryNode(), paintProperty);
+    paintMethod->UpdateOverlayModifier(nullptr);
+    auto scrollBar = paintMethod->scrollBar_.Upgrade();
+    EXPECT_NE(scrollBar, nullptr);
+
+    /**
+     * @tc.steps: step2. call UpdateOverlayModifier
+     * @tc.expected: AnimationTyp is correct
+     */
+    paintMethod->UpdateOverlayModifier(&paintWrapper);
+    EXPECT_EQ(scrollBar->GetOpacityAnimationType(), OpacityAnimationType::NONE);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
+
+    /**
+     * @tc.steps: step3. call UpdateOverlayModifier when scrollBarOverlayModifier is seted
+     * @tc.expected: AnimationTyp is correct
+     */
+    pattern_->CreateScrollBarOverlayModifier();
+    EXPECT_EQ(pattern_->scrollBarOverlayModifier_, nullptr);
+    paintMethod->SetScrollBarOverlayModifier(pattern_->GetScrollBarOverlayModifier());
+    auto scrollBarOverlayModifier = paintMethod->scrollBarOverlayModifier_.Upgrade();
+    EXPECT_EQ(scrollBarOverlayModifier, nullptr);
+    paintMethod->UpdateOverlayModifier(&paintWrapper);
+    EXPECT_EQ(scrollBar->GetOpacityAnimationType(), OpacityAnimationType::NONE);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
+    scrollBar = nullptr;
+}
+
+/**
+ * @tc.name: UpdateOverlayModifier003
+ * @tc.desc: Test grid paint method UpdateOverlayModifier function
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, UpdateOverlayModifier003, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr");
+        CreateColItem(10);
+    });
+
+    /**
+     * @tc.steps: step1. create scrollBar and paintMethod and ScrollBarOverlayModifier
+     * @tc.expected: scrollBar is !nullptr
+     */
+    pattern_->scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
+    pattern_->scrollBar_->SetScrollable(true);
+    auto paintMethod = AceType::DynamicCast<GridPaintMethod>(pattern_->CreateNodePaintMethod());
+    auto paintProperty = pattern_->CreatePaintProperty();
+    PaintWrapper paintWrapper(frameNode_->GetRenderContext(), frameNode_->GetGeometryNode(), paintProperty);
+    EXPECT_TRUE(pattern_->scrollBar_->NeedPaint());
+    pattern_->CreateScrollBarOverlayModifier();
+    EXPECT_NE(pattern_->scrollBarOverlayModifier_, nullptr);
+    paintMethod->SetScrollBarOverlayModifier(pattern_->GetScrollBarOverlayModifier());
+    auto scrollBarOverlayModifier = paintMethod->scrollBarOverlayModifier_.Upgrade();
+    EXPECT_NE(scrollBarOverlayModifier, nullptr);
+    auto scrollBar = paintMethod->scrollBar_.Upgrade();
+    EXPECT_NE(scrollBar, nullptr);
+
+    /**
+     * @tc.steps: step2. call UpdateOverlayModifier
+     * @tc.expected: AnimationTyp is correct
+     */
+    paintMethod->UpdateOverlayModifier(&paintWrapper);
+    EXPECT_EQ(scrollBar->GetOpacityAnimationType(), OpacityAnimationType::NONE);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
+
+    /**
+     * @tc.steps: step3. change PositionMode and call UpdateOverlayModifier
+     * @tc.expected: AnimationTyp is correct
+     */
+    scrollBar->SetPositionMode(PositionMode::BOTTOM);
+    paintMethod->UpdateOverlayModifier(&paintWrapper);
+    scrollBar = paintMethod->scrollBar_.Upgrade();
+    EXPECT_EQ(scrollBar->GetOpacityAnimationType(), OpacityAnimationType::NONE);
+    EXPECT_EQ(scrollBar->GetHoverAnimationType(), HoverAnimationType::NONE);
+    scrollBar = nullptr;
+}
+
+/**
+ * @tc.name: PaintEdgeEffect001
+ * @tc.desc: Test grid paint method PaintEdgeEffect function
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, PaintEdgeEffect001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr");
+        CreateColItem(10);
+    });
+
+    /**
+     * @tc.steps: step1. init scrollBar
+     * @tc.expected: scrollBar is !nullptr
+     */
+    pattern_->scrollBar_ = AceType::MakeRefPtr<ScrollBar>(DisplayMode::AUTO);
+    pattern_->scrollBar_->SetScrollable(true);
+    auto paintMethod = AceType::DynamicCast<GridPaintMethod>(pattern_->CreateNodePaintMethod());
+    auto paintProperty = pattern_->CreatePaintProperty();
+    PaintWrapper paintWrapper(frameNode_->GetRenderContext(), frameNode_->GetGeometryNode(), paintProperty);
+    EXPECT_TRUE(pattern_->scrollBar_->NeedPaint());
+    pattern_->CreateScrollBarOverlayModifier();
+    EXPECT_NE(pattern_->scrollBarOverlayModifier_, nullptr);
+    paintMethod->SetScrollBarOverlayModifier(pattern_->GetScrollBarOverlayModifier());
+    auto scrollBarOverlayModifier = paintMethod->scrollBarOverlayModifier_.Upgrade();
+    EXPECT_NE(scrollBarOverlayModifier, nullptr);
+    auto scrollBar = paintMethod->scrollBar_.Upgrade();
+    EXPECT_NE(scrollBar, nullptr);
+
+    /**
+     * @tc.steps: step2. call PaintEdgeEffect
+     * @tc.expected: edgeEffect_ is !nullptr
+     */
+    auto scrollEdgeEffect = AceType::MakeRefPtr<ScrollEdgeEffect>();
+    paintMethod->SetEdgeEffect(scrollEdgeEffect);
+    Testing::MockCanvas rsCanvas;
+    EXPECT_CALL(rsCanvas, DetachPen()).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, AttachBrush(_)).WillRepeatedly(ReturnRef(rsCanvas));
+    EXPECT_CALL(rsCanvas, DrawRect(_)).WillRepeatedly(Return());
+    EXPECT_CALL(rsCanvas, DetachBrush()).WillRepeatedly(ReturnRef(rsCanvas));
+    paintMethod->PaintEdgeEffect(nullptr, rsCanvas);
+    paintMethod->PaintEdgeEffect(&paintWrapper, rsCanvas);
+    EXPECT_NE(paintMethod->edgeEffect_.Upgrade(), nullptr);
+}
+
+/**
+ * @tc.name: GridScrollTest006
+ * @tc.desc: Test SetOnScrollBarUpdate Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GridScrollTest006, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        ScrollBarUpdateFunc scrollFunc = [](int32_t index, Dimension offset) {
+            std::optional<float> horizontalOffset = offset.ConvertToPx();
+            std::optional<float> verticalOffset = offset.ConvertToPx();
+            return std::make_pair(horizontalOffset, verticalOffset);
+        };
+        model.SetRowsTemplate("1fr 1fr");
+        CreateColItem(2);
+        model.SetGridHeight(Dimension(5));
+        model.SetScrollBarMode(DisplayMode::AUTO);
+        model.SetScrollBarColor("#FF0000");
+        model.SetScrollBarWidth("10vp");
+        model.SetIsRTL(TextDirection::LTR);
+
+        NestedScrollOptions nestedOpt;
+        model.SetNestedScroll(std::move(nestedOpt));
+        ScrollToIndexFunc value;
+        model.SetOnScrollToIndex(std::move(value));
+    });
+    auto paintProperty = frameNode_->GetPaintProperty<ScrollablePaintProperty>();
+    EXPECT_EQ(paintProperty->GetBarStateString(), "BarState.Auto");
+
+    auto pattern = frameNode_->GetPattern<GridPattern>();
+    EXPECT_TRUE(pattern->isConfigScrollable_);
+    auto eventHub = frameNode_->GetEventHub<GridEventHub>();
+    EXPECT_FALSE(eventHub->onScrollToIndex_);
+}
+
+/**
+ * @tc.name: GridSCroll001
+ * @tc.desc: Test SetSelected Function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, GridSCroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create GridItemModelNG object
+     */
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr");
+        GridItemModelNG itemModel;
+        itemModel.Create(GridItemStyle::NONE);
+        itemModel.SetRowStart(NULL_VALUE);
+        itemModel.SetRowEnd(NULL_VALUE);
+        itemModel.SetColumnStart(NULL_VALUE);
+        itemModel.SetColumnEnd(NULL_VALUE);
+        ViewStackProcessor::GetInstance()->Pop();
+
+        /**
+         * @tc.steps: step2. Test Create function
+         */
+        std::function<void(int32_t)> deepRenderFunc = [](int32_t innerNodeId) {};
+        bool isLazy = true;
+        itemModel.Create(std::move(deepRenderFunc), isLazy, GridItemStyle::PLAIN);
+
+        /**
+         * @tc.steps: step3. invoke SetSelected function
+         */
+        itemModel.SetSelected(true);
+    });
+
+    /**
+     * @tc.expected: gridItemPattern->isSelected_ is true
+     */
+    auto gridItemPattern = frameNode_->GetPattern<GridItemPattern>();
+    EXPECT_TRUE(gridItemPattern->isSelected_);
 }
 } // namespace OHOS::Ace::NG

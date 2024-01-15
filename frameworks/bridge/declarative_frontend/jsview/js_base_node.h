@@ -18,6 +18,8 @@
 
 #include "base/geometry/ng/size_t.h"
 #include "base/memory/ace_type.h"
+#include "base/utils/utils.h"
+#include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "core/components_ng/base/ui_node.h"
 #include "frameworks/bridge/declarative_frontend/engine/bindings_defines.h"
@@ -40,6 +42,10 @@ public:
     void BuildNode(const JSCallbackInfo& info);
     void PostTouchEvent(const JSCallbackInfo& info);
     void CreateRenderNode(const JSCallbackInfo& info);
+    void Reset(const JSCallbackInfo& info)
+    {
+        viewNode_.Reset();
+    }
 
     RefPtr<NG::UINode> GetViewNode() const
     {

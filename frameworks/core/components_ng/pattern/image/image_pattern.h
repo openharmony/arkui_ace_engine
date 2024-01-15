@@ -138,6 +138,16 @@ public:
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
 
+    WeakPtr<ImageLoadingContext> GetImageLoadingContext()
+    {
+        return WeakClaim(AceType::RawPtr(loadingCtx_));
+    }
+
+    WeakPtr<ImageLoadingContext> GetAltImageLoadingContext()
+    {
+        return WeakClaim(AceType::RawPtr(altLoadingCtx_));
+    }
+
 private:
     class ObscuredImage : public CanvasImage {
         void DrawToRSCanvas(

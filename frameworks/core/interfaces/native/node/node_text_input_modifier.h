@@ -19,5 +19,6 @@
 
 namespace OHOS::Ace::NG::NodeModifier {
     const ArkUITextInputModifier* GetTextInputModifier();
-    void SetOnTextInputChange(ArkUINodeHandle node, ArkUI_Int32 eventId);
+    void SetOnTextInputChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
+    void SetTextInputOnSubmit(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
 } // namespace OHOS::Ace::NG::NodeModifier

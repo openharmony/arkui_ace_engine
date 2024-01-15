@@ -89,9 +89,9 @@ bool TabsNode::Scrollable() const
     }
     auto swiperNode = GetFrameNode(V2::SWIPER_ETS_TAG, swiperId_.value());
     CHECK_NULL_RETURN(swiperNode, true);
-    auto paintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
-    CHECK_NULL_RETURN(paintProperty, true);
-    return !paintProperty->GetDisableSwipe().value_or(false);
+    auto props = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(props, true);
+    return !props->GetDisableSwipe().value_or(false);
 }
 
 int32_t TabsNode::GetAnimationDuration() const

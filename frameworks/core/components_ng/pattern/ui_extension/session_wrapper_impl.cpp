@@ -217,26 +217,28 @@ void SessionWrapperImpl::InitAllCallback()
             },
             TaskExecutor::TaskType::UI);
     };
-    sessionCallbacks->notifyGetAvoidAreaByTypeFunc_ = [weak = hostPattern_, taskExecutor](
-                                                          Rosen::AvoidAreaType type) -> Rosen::AvoidArea {
-        Rosen::AvoidArea avoidArea;
+    sessionCallbacks->notifyBindModalFunc_ = [weak = hostPattern_, taskExecutor]() {
         taskExecutor->PostSyncTask(
-            [weak, &avoidArea, type]() {
+            [weak]() {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
-                auto instanceId = pattern->GetInstanceId();
-                auto container = Platform::AceContainer::GetContainer(instanceId);
-                CHECK_NULL_VOID(container);
-                avoidArea = container->GetAvoidAreaByType(type);
+                pattern->FireBindModalCallback();
             },
             TaskExecutor::TaskType::UI);
+    };
+    sessionCallbacks->notifyGetAvoidAreaByTypeFunc_ = [instanceId = instanceId_](
+                                                          Rosen::AvoidAreaType type) -> Rosen::AvoidArea {
+        Rosen::AvoidArea avoidArea;
+        auto container = Platform::AceContainer::GetContainer(instanceId);
+        CHECK_NULL_RETURN(container, avoidArea);
+        avoidArea = container->GetAvoidAreaByType(type);
         return avoidArea;
     };
 }
 /************************************************ End: Initialization *************************************************/
 
 /************************************************ Begin: About session ************************************************/
-void SessionWrapperImpl::CreateSession(const AAFwk::Want& want)
+void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, bool isAsyncModalBinding)
 {
     TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Create session: %{private}s", want.ToString().c_str());
     const std::string occupiedAreaChangeKey("ability.want.params.IsNotifyOccupiedAreaChange");
@@ -251,6 +253,7 @@ void SessionWrapperImpl::CreateSession(const AAFwk::Want& want)
         .callerToken_ = callerToken,
         .rootToken_ = (isTransferringCaller_ && parentToken) ? parentToken : callerToken,
         .want = std::make_shared<Want>(want),
+        .isAsyncModalBinding_ = isAsyncModalBinding,
     };
     session_ = Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSession(extensionSessionInfo);
     CHECK_NULL_VOID(session_);

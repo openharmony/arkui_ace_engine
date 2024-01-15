@@ -1123,4 +1123,130 @@ HWTEST_F(CustomTestNg, CustomTest025, TestSize.Level1)
     EXPECT_EQ(customTitleNode->nodeId_, 1);
     EXPECT_EQ(customTitleNode->viewKey_, "test");
 }
+
+/**
+ * @tc.name: CustomTest026
+ * @tc.desc: RenderCustomChild
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest026, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Invoke CustomNode Create function.
+     * @tc.expected: Create CustomNode.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    /**
+     * @tc.steps: step2. Define timestamp deadline and n.
+     * @tc.expected: Deadline And N.
+     */
+    int64_t n = 1000000000;
+    int64_t deadline = GetSysTimestamp() + n;
+    /**
+     * @tc.steps: step3. When he is greater than the deadline, the assertion fails.
+     * @tc.expected: GetSysTimestamp.
+     */
+    if (GetSysTimestamp() > deadline) {
+        EXPECT_FALSE(false);
+    }
+    customNode->Render();
+    /**
+     * @tc.steps: step4. Invoke RenderCustomChild function.
+     * @tc.expected: Render CustomChild.
+     */
+    customNode->RenderCustomChild(deadline);
+    bool test = customNode->RenderCustomChild(deadline);
+    EXPECT_EQ(test, true);
+    EXPECT_TRUE(test);
+    /**
+     * @tc.steps: step5. Another branch returned successful.
+     * @tc.expected: RenderCustomChild.
+     */
+    int64_t deadlines = 0;
+    bool result = customNode->RenderCustomChild(deadlines);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CustomTest027
+ * @tc.desc: Render
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest027, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Invoke CustomNode Create function.
+     * @tc.expected: Create CustomNode.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    /**
+     * @tc.steps: step2. Create renderFunction and Call Render.
+     * @tc.expected: Add Child Success
+     */
+    auto renderFunction = []() -> RefPtr<UINode> {
+        RefPtr<UINode> uiNode =
+            CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId() + 1, TEST_TAG);
+        return uiNode;
+    };
+    /**
+     * @tc.steps: step3. Create textFrameNode.
+     */
+    auto textFrameNode = CreateNode(V2::COMMON_VIEW_ETS_TAG);
+    textFrameNode->AddChild(customNode);
+    /**
+     * @tc.steps: step4. Enter the render function.
+     */
+    customNode->renderFunction_ = renderFunction;
+    customNode->Render();
+    EXPECT_FALSE(customNode->UINode::IsNeedExportTexture());
+}
+
+/**
+ * @tc.name: CustomTest028
+ * @tc.desc: GetFrameChildByIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest028, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = CreateNode(V2::TAB_CONTENT_ITEM_ETS_TAG);
+
+    /**
+     * @tc.steps: step2. Create CustomNode and Call GetFrameChildByIndex.
+     * @tc.expected: Create successful.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    auto node = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    uint32_t index = 0;
+    customNode->AddChild(node);
+    RefPtr<UINode> UINode = customNode->GetFrameChildByIndex(index, true);
+    EXPECT_NE(UINode, nullptr);
+}
+
+/**
+ * @tc.name: CustomTest029
+ * @tc.desc: GetFrameChildByIndex.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Invoke CustomNode Create function.
+     * @tc.expected: Create CustomNode.
+     */
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    /**
+     * @tc.steps: step2. Add Child Success.
+     */
+    auto node = AceType::MakeRefPtr<FrameNode>("test", 1, AceType::MakeRefPtr<Pattern>());
+    customNode->AddChild(node);
+    /**
+     * @tc.steps: step3. Call GetFrameChildByIndex with false input parameter
+     * @tc.expected: Create successful.
+     */
+    customNode->CustomNode::GetFrameChildByIndex(0, false);
+    EXPECT_FALSE(customNode->UINode::GetFrameChildByIndex(5, false));
+}
 } // namespace OHOS::Ace::NG

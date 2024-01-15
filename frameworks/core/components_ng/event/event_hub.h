@@ -76,6 +76,11 @@ public:
         return gestureEventHub_;
     }
 
+    void SetGestureEventHub(const RefPtr<GestureEventHub>& gestureEventHub)
+    {
+        gestureEventHub_ = gestureEventHub;
+    }
+
     const RefPtr<InputEventHub>& GetOrCreateInputEventHub()
     {
         if (!inputEventHub_) {

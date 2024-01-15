@@ -43,6 +43,7 @@ public:
     void ClearOnClick() override;
 
     static RefPtr<SpanNode> CreateSpanNode(int32_t nodeId, const std::string& content);
+    static void InitSpan(FrameNode* frameNode, const std::string& content);
     static void SetFontWeight(FrameNode* frameNode, FontWeight value);
     static void SetTextCase(FrameNode* frameNode, TextCase value);
     static void SetItalicFontStyle(FrameNode* frameNode, Ace::FontStyle value);

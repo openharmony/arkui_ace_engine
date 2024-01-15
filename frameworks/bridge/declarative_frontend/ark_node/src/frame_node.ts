@@ -13,15 +13,17 @@
  * limitations under the License.
  */
 
-class FrameNode extends BaseNode {
+class FrameNode {
   private renderNode_: RenderNode;
+  private baseNode_ : BaseNode;
+  protected nodePtr_ : number | null;
   constructor(uiContext: UIContext, type: string) {
-    super(uiContext);
-    this.renderNode_ = new RenderNode("FrameNode");
-    if (type == "BuilderNode") {
+    this.renderNode_ = new RenderNode('FrameNode');
+    if (type === 'BuilderNode') {
       return;
     }
-    this.nodePtr_ = this.createRenderNode();
+    this.baseNode_ = new BaseNode(uiContext);
+    this.nodePtr_ =  this.baseNode_.createRenderNode();
     this.renderNode_.setNodePtr(this.nodePtr_);
   }
   getRenderNode(): RenderNode | null {

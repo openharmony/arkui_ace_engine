@@ -43,7 +43,6 @@ public:
     void SetDisplayMode(SwiperDisplayMode displayMode) override;
     void SetDisplayCount(int32_t displayCount) override;
     void ResetDisplayCount() override;
-    void ResetDisplayMode() override;
     void SetMinSize(const Dimension& minSize) override;
     void SetShowIndicator(bool showIndicator) override;
     void SetIndicatorType(SwiperIndicatorType indicatorType) override;
@@ -84,7 +83,6 @@ public:
     static void SetDisableSwipe(FrameNode* frameNode, bool disableSwipe);
     static void SetItemSpace(FrameNode* frameNode, const Dimension& itemSpace);
     static void SetDisplayMode(FrameNode* frameNode, SwiperDisplayMode displayMode);
-    static void ResetDisplayMode(FrameNode* frameNode);
     static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect EdgeEffect);
     static void SetMinSize(FrameNode* frameNode, const Dimension& minSize);
     static void SetDisplayCount(FrameNode* frameNode, int32_t displayCount);
@@ -99,6 +97,7 @@ public:
     static void SetDotIndicatorStyle(FrameNode* frameNode, const SwiperParameters& swiperParameters);
     static void SetIndicatorType(FrameNode* frameNode, SwiperIndicatorType indicatorType);
     static void SetIsIndicatorCustomSize(FrameNode* frameNode, bool isCustomSize);
+    static void SetEnabled(FrameNode* frameNode, bool enabled);
 };
 
 } // namespace OHOS::Ace::NG

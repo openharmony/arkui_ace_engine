@@ -71,6 +71,9 @@ public:
     static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& event);
     static void SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& event);
     void SetEnablePaging(bool enablePaging) override;
+
+    static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
+    static void SetOnScrollEdge(FrameNode* frameNode, NG::ScrollEdgeEvent&& event);
 };
 
 } // namespace OHOS::Ace::NG

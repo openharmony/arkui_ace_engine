@@ -35,16 +35,12 @@ int32_t ParagraphManager::GetIndex(Offset offset) const
     int idx = 0;
     for (auto it = paragraphs_.begin(); it != paragraphs_.end(); ++it, ++idx) {
         auto&& info = *it;
-        if (GreatNotEqual(offset.GetY(), info.paragraph->GetHeight())) {
-            if (idx == static_cast<int>(paragraphs_.size()) - 1) {
-                // in the last line
-                return info.end;
-            }
-            // get offset relative to each paragraph
-            offset.SetY(offset.GetY() - info.paragraph->GetHeight());
-        } else {
+        if (LessOrEqual(offset.GetY(), info.paragraph->GetHeight()) ||
+            (idx == static_cast<int>(paragraphs_.size()) - 1)) {
             return info.paragraph->GetGlyphIndexByCoordinate(offset) + info.start;
         }
+        // get offset relative to each paragraph
+        offset.SetY(offset.GetY() - info.paragraph->GetHeight());
     }
     return paragraphs_.back().paragraph->GetGlyphIndexByCoordinate(offset) + paragraphs_.back().start;
 }
@@ -174,7 +170,7 @@ OffsetF ParagraphManager::ComputeCursorInfoByClick(
     auto touchOffsetInCurrentParagraph = OffsetF(static_cast<float>(lastTouchOffset.GetX()),
         static_cast<float>(lastTouchOffset.GetY() - y));
     TextAffinity textAffinity;
-    paragraph->CalcCaretMetricsByPosition(relativeIndex, caretCaretMetric, lastTouchOffset, textAffinity);
+    paragraph->CalcCaretMetricsByPosition(relativeIndex, caretCaretMetric, touchOffsetInCurrentParagraph, textAffinity);
     selectLineHeight = caretCaretMetric.height;
     return { static_cast<float>(caretCaretMetric.offset.GetX()),
             static_cast<float>(caretCaretMetric.offset.GetY() + y) };

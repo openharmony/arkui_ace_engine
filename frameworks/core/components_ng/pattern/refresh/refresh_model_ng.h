@@ -35,7 +35,7 @@ public:
     void SetProgressColor(const Color& progressColor) override;
     void SetOnStateChange(StateChangeEvent&& stateChange) override;
     void SetOnRefreshing(RefreshingEvent&& refreshing) override;
-    void SetChangeEvent(ChangeEvent&& changeEvent) override;
+    void SetChangeEvent(RefreshChangeEvent&& changeEvent) override;
     void SetCustomBuilder(const RefPtr<NG::UINode>& customBuilder) override;
     // @deprecated
     void Pop() override {}
@@ -50,6 +50,11 @@ public:
     void SetShowTimeDistance(const Dimension& showTimeDistance) override {}
     void SetTextStyle(const TextStyle& textStyle) override {}
     void SetProgressBackgroundColor(const Color& backgroundColor) override {}
+
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void SetOnStateChange(FrameNode* frameNode, StateChangeEvent&& stateChange);
+    static void SetOnRefreshing(FrameNode* frameNode, RefreshingEvent&& refreshing);
+
 };
 } // namespace OHOS::Ace::NG
 

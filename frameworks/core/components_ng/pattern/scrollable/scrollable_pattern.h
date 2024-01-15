@@ -607,7 +607,7 @@ private:
     ModalSheetCoordinationMode CoordinateWithSheet(double& offset, int32_t source, bool isAtTop);
     bool NeedCoordinateScrollWithNavigation(double offset, int32_t source, const OverScrollOffset& overOffsets);
 
-    Axis axis_;
+    Axis axis_ = Axis::NONE;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
@@ -631,7 +631,10 @@ private:
     bool scrollAbort_ = false;
     bool animateOverScroll_ = false;
 
-    NestedScrollOptions nestedScroll_;
+    NestedScrollOptions nestedScroll_ = {
+        .forward = NestedScrollMode::SELF_ONLY,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
 
     // select with mouse
     enum SelectDirection { SELECT_DOWN, SELECT_UP, SELECT_NONE };

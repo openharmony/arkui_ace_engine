@@ -39,12 +39,14 @@ void MultiMenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     MinusPaddingToSize(padding, childConstraint.maxSize);
     if (layoutConstraint->selfIdealSize.Width().has_value()) {
         // when Menu is set self ideal width, make children node adaptively fill up.
-        if (layoutConstraint->selfIdealSize.Width().value() < MIN_MENU_WIDTH.ConvertToPx()) {
-            RefPtr<GridColumnInfo> columnInfo;
-            columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
-            columnInfo->GetParent()->BuildColumnWidth();
-            auto minWidth = static_cast<float>(columnInfo->GetWidth(MENU_MIN_GRID_COUNTS));
-            layoutConstraint->selfIdealSize.SetWidth(minWidth);
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            if (LessNotEqual(layoutConstraint->selfIdealSize.Width().value(), MIN_MENU_WIDTH.ConvertToPx())) {
+                RefPtr<GridColumnInfo> columnInfo;
+                columnInfo = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::MENU);
+                columnInfo->GetParent()->BuildColumnWidth();
+                auto minWidth = static_cast<float>(columnInfo->GetWidth(MENU_MIN_GRID_COUNTS));
+                layoutConstraint->selfIdealSize.SetWidth(minWidth);
+            }
         }
         auto idealWidth =
             std::max(layoutConstraint->minSize.Width(),

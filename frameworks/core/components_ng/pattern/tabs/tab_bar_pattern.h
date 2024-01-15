@@ -347,10 +347,21 @@ public:
     void DumpAdvanceInfo() override;
 
     std::optional<int32_t> GetAnimationDuration();
+
+    bool HasSurfaceChangedCallback()
+    {
+        return surfaceChangedCallbackId_.has_value();
+    }
+
+    void UpdateSurfaceChangedCallbackId(int32_t id)
+    {
+        surfaceChangedCallbackId_ = id;
+    }
     
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
+    void InitSurfaceChangedCallback();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
 
     void InitClick(const RefPtr<GestureEventHub>& gestureHub);
@@ -471,6 +482,9 @@ private:
     bool needSetCentered_ = false;
     float scrollMargin_ = 0.0f;
     bool isFirstLayout_ = true;
+    std::optional<int32_t> animationTargetIndex_;
+    std::optional<int32_t> surfaceChangedCallbackId_;
+    WindowSizeChangeReason windowSizeChangeReason_ = WindowSizeChangeReason::UNDEFINED;
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
 };
 } // namespace OHOS::Ace::NG

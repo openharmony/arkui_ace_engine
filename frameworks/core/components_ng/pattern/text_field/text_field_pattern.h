@@ -1073,6 +1073,8 @@ public:
         return lastClickTimeStamp_;
     }
 
+    void CheckTextAlignByDirection(TextAlign& textAlign, TextDirection direction);
+
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
 
@@ -1115,6 +1117,7 @@ private:
     void InitDragDropEvent();
     std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragStart();
     std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragDrop();
+    void ShowSelectAfterDragDrop();
     void ClearDragDropEvent();
     std::function<void(Offset)> GetThumbnailCallback();
     void HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
@@ -1408,6 +1411,7 @@ private:
     bool isTouchCaret_ = false;
     bool needSelectAll_ = false;
     bool isModifyDone_ = false;
+    bool initTextRect_ = false;
     Offset clickLocation_;
     MagnifierRect magnifierRect_;
     RefPtr<MagnifierController> magnifierController_;

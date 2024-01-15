@@ -35,6 +35,9 @@ namespace {
     void* data;                    \
     napi_get_cb_info(env, info, &argc, argv, &thisVar, &data)
 
+static constexpr uint32_t ON_SHOWN = 0;
+static constexpr uint32_t ON_HIDDEN = 1;
+
 bool MatchValueType(napi_env env, napi_value value, napi_valuetype targetType)
 {
     napi_valuetype valueType = napi_undefined;
@@ -170,9 +173,17 @@ napi_value ObserverOff(napi_env env, napi_callback_info info)
 static napi_value UIObserverExport(napi_env env, napi_value exports)
 {
     NG::UIObserverHandler::GetInstance().SetHandleNavigationChangeFunc(&UIObserver::HandleNavigationStateChange);
+    napi_value navDestinationState = nullptr;
+    napi_create_object(env, &navDestinationState);
+    napi_value prop = nullptr;
+    napi_create_uint32(env, ON_SHOWN, &prop);
+    napi_set_named_property(env, navDestinationState, "ON_SHOWN", prop);
+    napi_create_uint32(env, ON_HIDDEN, &prop);
+    napi_set_named_property(env, navDestinationState, "ON_HIDDEN", prop);
     napi_property_descriptor uiObserverDesc[] = {
         DECLARE_NAPI_FUNCTION("on", ObserverOn),
         DECLARE_NAPI_FUNCTION("off", ObserverOff),
+        DECLARE_NAPI_PROPERTY("NavDestinationState", navDestinationState),
     };
     NAPI_CALL(
         env, napi_define_properties(env, exports, sizeof(uiObserverDesc) / sizeof(uiObserverDesc[0]), uiObserverDesc));

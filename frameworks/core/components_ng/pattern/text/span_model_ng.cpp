@@ -32,7 +32,13 @@
         spanNode->Update##name(value);                                                                           \
         spanNode->AddPropertyInfo(flag);                                                                         \
     } while (false)
-
+#define ACE_UPDATE_NODE_SPAN_PROPERTY(name, value, flag, frameNode)                                              \
+    do {                                                                                                         \
+        auto spanNode = AceType::DynamicCast<SpanNode>(frameNode);                                               \
+        CHECK_NULL_VOID(spanNode);                                                                               \
+        spanNode->Update##name(value);                                                                           \
+        spanNode->AddPropertyInfo(flag);                                                                         \
+    } while (false)
 namespace OHOS::Ace::NG {
 
 void SpanModelNG::Create(const std::string& content)
@@ -139,6 +145,11 @@ void SpanModelNG::SetOnClick(std::function<void(const BaseEventInfo* info)>&& cl
 void SpanModelNG::ClearOnClick()
 {
     ACE_UPDATE_SPAN_PROPERTY(OnClickEvent, nullptr, PropertyInfo::NONE);
+}
+
+void SpanModelNG::InitSpan(FrameNode* frameNode, const std::string& content)
+{
+    ACE_UPDATE_NODE_SPAN_PROPERTY(Content, content, PropertyInfo::NONE, frameNode);
 }
 
 void SpanModelNG::SetFontWeight(FrameNode* frameNode, FontWeight value)

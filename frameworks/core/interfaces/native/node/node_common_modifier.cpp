@@ -14,9 +14,13 @@
  */
 #include "core/interfaces/native/node/node_common_modifier.h"
 
+#include <cstdint>
+
 #include "base/geometry/ng/vector.h"
+#include "base/memory/ace_type.h"
 #include "base/geometry/shape.h"
 #include "base/utils/system_properties.h"
+#include "core/animation/animation_pub.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/animation_option.h"
 #include "core/components/common/properties/decoration.h"
@@ -63,7 +67,10 @@ constexpr uint8_t DEFAULT_SAFE_AREA_EDGE = 0b1111;
 constexpr Dimension DEFAULT_FLEX_BASIS { 0.0, DimensionUnit::AUTO };
 constexpr int32_t DEFAULT_DISPLAY_PRIORITY = 0;
 constexpr int32_t DEFAULT_ID = 0;
-
+constexpr int32_t X_INDEX = 0;
+constexpr int32_t Y_INDEX = 1;
+constexpr int32_t Z_INDEX = 2;
+constexpr int32_t ARRAY_SIZE = 3;
 BorderStyle ConvertBorderStyle(int32_t value)
 {
     auto style = static_cast<BorderStyle>(value);
@@ -2865,6 +2872,77 @@ void SetClipPath(ArkUINodeHandle node, const char* type, double* attribute, cons
     path->SetValue(StringUtils::TrimStr(pathCommands));
     ViewAbstract::SetClipShape(frameNode, path);
 }
+
+void SetOpacityTransition(ArkUINodeHandle node, float value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    NG::TransitionOptions transitionOption;
+    transitionOption.Type = TransitionType::ALL;
+    double opacity = value;
+    if (opacity > 1.0 || LessNotEqual(opacity, 0.0)) {
+        opacity = 1.0;
+    }
+    transitionOption.UpdateOpacity(value);
+    ViewAbstractModel::GetInstance()->SetTransition(transitionOption);
+}
+
+void SetRotateTransition(ArkUINodeHandle node, float* arrayValue, int32_t length, float centerXValue,
+    int32_t centerXUnit, float centerYValue, int32_t centerYUnit, float centerZValue, int32_t centerZUnit,
+    float perspective, float angle)
+{
+    CHECK_NULL_VOID(arrayValue);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (length < ARRAY_SIZE) {
+        return;
+    }
+    Dimension centerXDimension(centerXValue, static_cast<DimensionUnit>(centerXUnit));
+    Dimension centerYDimension(centerYValue, static_cast<DimensionUnit>(centerYUnit));
+    Dimension centerZDimension(centerZValue, static_cast<DimensionUnit>(centerZUnit));
+    NG::RotateOptions rotate(arrayValue[X_INDEX], arrayValue[Y_INDEX], arrayValue[Z_INDEX], angle, centerXDimension,
+        centerYDimension, centerZDimension, perspective);
+
+    NG::TransitionOptions transitionOption;
+    transitionOption.Type = TransitionType::ALL;
+    transitionOption.UpdateRotate(rotate);
+    ViewAbstractModel::GetInstance()->SetTransition(transitionOption);
+}
+
+void SetScaleTransition(ArkUINodeHandle node, float* arrayValue, int32_t length, float centerX, int32_t centerXUnit,
+    float centerY, int32_t centerYUnit)
+{
+    CHECK_NULL_VOID(arrayValue);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (length < ARRAY_SIZE) {
+        return;
+    }
+
+    Dimension centerXDimension(centerX, static_cast<DimensionUnit>(centerXUnit));
+    Dimension centerYDimension(centerY, static_cast<DimensionUnit>(centerYUnit));
+    NG::ScaleOptions scale(
+        arrayValue[X_INDEX], arrayValue[Y_INDEX], arrayValue[Z_INDEX], centerXDimension, centerYDimension);
+    NG::TransitionOptions transitionOption;
+    transitionOption.Type = TransitionType::ALL;
+    transitionOption.UpdateScale(scale);
+    ViewAbstractModel::GetInstance()->SetTransition(transitionOption);
+}
+
+void SetTranslateTransition(ArkUINodeHandle node, float centerXValue, int32_t centerXUnit, float centerYValue,
+    int32_t centerYUnit, float centerZValue, int32_t centerZUnit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension centerXDimension(centerXValue, static_cast<DimensionUnit>(centerXUnit));
+    Dimension centerYDimension(centerYValue, static_cast<DimensionUnit>(centerYUnit));
+    Dimension centerZDimension(centerZValue, static_cast<DimensionUnit>(centerZUnit));
+    NG::TranslateOptions translate(centerXDimension, centerYDimension, centerZDimension);
+    NG::TransitionOptions transitionOption;
+    transitionOption.Type = TransitionType::ALL;
+    transitionOption.UpdateTranslate(translate);
+    ViewAbstractModel::GetInstance()->SetTransition(transitionOption);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -2900,9 +2978,39 @@ const ArkUICommonModifier* GetCommonModifier()
         ResetTabIndex, SetObscured, ResetObscured, SetResponseRegion, ResetResponseRegion, SetMouseResponseRegion,
         ResetMouseResponseRegion, SetEnabled, ResetEnabled, SetDraggable, ResetDraggable, SetAccessibilityGroup,
         ResetAccessibilityGroup, SetHoverEffect, ResetHoverEffect, SetClickEffect, ResetClickEffect,
-        SetKeyBoardShortCut, ResetKeyBoardShortCut, SetClip, SetClipShape, SetClipPath };
+        SetKeyBoardShortCut, ResetKeyBoardShortCut, SetClip, SetClipShape, SetClipPath, SetOpacityTransition,
+        SetRotateTransition, SetScaleTransition, SetTranslateTransition };
 
     return &modifier;
 }
+
+void SetOnFocus(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, eventId, extraParam]() {
+        ArkUINodeEvent event;
+        event.kind = ON_FOCUS;
+        event.eventId = eventId;
+        event.extraParam= extraParam;
+        SendArkUIAsyncEvent(&event);
+    };
+    ViewAbstract::SetOnFocus(frameNode, std::move(onEvent));
+}
+
+void SetOnBlur(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, eventId, extraParam]() {
+        ArkUINodeEvent event;
+        event.kind = ON_BLUR;
+        event.eventId = eventId;
+        event.extraParam= extraParam;
+        SendArkUIAsyncEvent(&event);
+    };
+    ViewAbstract::SetOnBlur(frameNode, std::move(onEvent));
+}
+
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

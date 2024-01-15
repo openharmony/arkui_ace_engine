@@ -2035,7 +2035,7 @@ class SubscribableHandler {
                 break;
             default:
                 const result = Reflect.get(target, property, receiver);
-                let propertyStr = property.toString();
+                let propertyStr = String(property);
                 if (this.readCbFunc_ && typeof result != "function") {
                     let isTracked = this.isPropertyTracked(target, propertyStr);
                     
@@ -2072,7 +2072,7 @@ class SubscribableHandler {
                     return true;
                 }
                 Reflect.set(target, property, newValue);
-                const propString = property.toString();
+                const propString = String(property);
                 if (TrackedObject.isCompatibilityMode(target)) {
                     
                     this.notifyObjectPropertyHasChanged(propString, newValue);
@@ -4952,6 +4952,7 @@ class ViewPU extends NativeViewPartialUpdate {
             this.localStorage_ = localStorage;
             
         }
+        this.isCompFreezeAllowed = this.isCompFreezeAllowed || (this.parent_ && this.parent_.isCompFreezeAllowed);
         SubscriberManager.Add(this);
         
     }
@@ -5177,7 +5178,7 @@ class ViewPU extends NativeViewPartialUpdate {
     initAllowComponentFreeze(freezeState) {
         // set to true if freeze parameter set for this @Component to true
         // otherwise inherit from parent @Component (if it exists).
-        this.isCompFreezeAllowed = freezeState || (this.parent_ && this.parent_.isCompFreezeAllowed);
+        this.isCompFreezeAllowed = freezeState || this.isCompFreezeAllowed;
         
     }
     /**

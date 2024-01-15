@@ -157,6 +157,10 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
         return;
     }
 
+    if (fingersId_.find(event.id) == fingersId_.end()) {
+        fingersId_.insert(event.id);
+    }
+
     deviceId_ = event.deviceId;
     deviceType_ = event.sourceType;
     lastTouchEvent_ = event;
@@ -220,6 +224,9 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
     if (currentFingers_ < fingers_) {
         return;
     }
+    if (fingersId_.find(event.id) != fingersId_.end()) {
+        fingersId_.erase(event.id);
+    }
     globalPoint_ = Point(event.x, event.y);
     lastTouchEvent_ = event;
 
@@ -243,6 +250,7 @@ void PanRecognizer::HandleTouchUpEvent(const TouchEvent& event)
             ResSchedReport::GetInstance().ResSchedDataReport("click");
             // last one to fire end.
             SendCallbackMsg(onActionEnd_);
+            averageDistance_.Reset();
         }
     }
 }

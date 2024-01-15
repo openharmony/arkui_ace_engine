@@ -957,6 +957,7 @@ void JsBindFormViews(BindingTarget globalObj, const std::unordered_set<std::stri
         JSDumpRegister::JSBind(globalObj);
         JSLocalStorage::JSBind(globalObj);
         JSStateMgmtProfiler::JSBind(globalObj);
+        JSCustomDialogController::JSBind(globalObj);
 
         JSEnvironment::JSBind(globalObj);
         JSViewContext::JSBind(globalObj);
@@ -968,6 +969,11 @@ void JsBindFormViews(BindingTarget globalObj, const std::unordered_set<std::stri
 
         JSProfiler::JSBind(globalObj);
         JSCommonView::JSBind(globalObj);
+        JSLinearGradient::JSBind(globalObj);
+        JSPath2D::JSBind(globalObj);
+        JSOffscreenRenderingContext::JSBind(globalObj);
+        JSRenderingContextSettings::JSBind(globalObj);
+        JSRenderingContext::JSBind(globalObj);
     }
 
     if (!formModuleList.empty()) {
@@ -1015,6 +1021,15 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     } else {
         RegisterAllModule(globalObj, nativeEngine);
     }
+}
+
+void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine)
+{
+    JSCanvasGradient::JSBind(globalObj);
+    JSCanvasPattern::JSBind(globalObj);
+    JSMatrix2d::JSBind(globalObj);
+    JSOffscreenCanvas::JSBind(globalObj, nativeEngine);
+    JSOffscreenRenderingContext::JSBind(globalObj);
 }
 
 } // namespace OHOS::Ace::Framework

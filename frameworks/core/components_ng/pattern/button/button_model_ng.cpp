@@ -124,6 +124,8 @@ void ButtonModelNG::SetControlSize(const std::optional<ControlSize>& controlSize
         PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
             CalcLength(padding.Top()), CalcLength(padding.Bottom()) };
         ACE_UPDATE_LAYOUT_PROPERTY(ButtonLayoutProperty, Padding, defaultPadding);
+        Dimension fontSize = buttonTheme->GetTextSize(controlSize.value());
+        SetFontSize(fontSize);
     }
 }
 
@@ -190,6 +192,24 @@ void ButtonModelNG::Create(const std::string& tagName)
     auto frameNode =
         FrameNode::GetOrCreateFrameNode(tagName, nodeId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     stack->Push(frameNode);
+}
+
+RefPtr<FrameNode> ButtonModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, nodeId, AceType::MakeRefPtr<ButtonPattern>());
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    CHECK_NULL_RETURN(layoutProperty, nullptr);
+    if (layoutProperty->GetPaddingProperty()) {
+        return frameNode;
+    }
+    auto buttonTheme = PipelineBase::GetCurrentContext()->GetTheme<ButtonTheme>();
+    CHECK_NULL_RETURN(buttonTheme, nullptr);
+    auto padding = buttonTheme->GetPadding();
+    PaddingProperty defaultPadding = { CalcLength(padding.Left()), CalcLength(padding.Right()),
+        CalcLength(padding.Top()), CalcLength(padding.Bottom()) };
+    layoutProperty->UpdatePadding(defaultPadding);
+    return frameNode;
 }
 
 void ButtonModelNG::Padding(const PaddingProperty& paddingNew, const Edge& paddingOld)
@@ -379,6 +399,18 @@ void ButtonModelNG::SetLableStyle(FrameNode* frameNode, const ButtonParameters& 
     }
     if (buttonParameters.fontStyle.has_value()) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ButtonLayoutProperty, FontStyle, buttonParameters.fontStyle.value(), frameNode);
+    }
+}
+
+void ButtonModelNG::SetSize(
+    FrameNode* frameNode, const std::optional<Dimension>& width, const std::optional<Dimension>& height)
+{
+    if (width.has_value()) {
+        NG::ViewAbstract::SetWidth(frameNode, NG::CalcLength(width.value()));
+    }
+
+    if (height.has_value()) {
+        NG::ViewAbstract::SetHeight(frameNode, NG::CalcLength(height.value()));
     }
 }
 } // namespace OHOS::Ace::NG

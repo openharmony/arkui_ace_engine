@@ -90,17 +90,21 @@ void TextFieldOverlayModifier::SetSecondHandleOffset(const OffsetF& offset)
 void TextFieldOverlayModifier::onDraw(DrawingContext& context)
 {
     auto& canvas = context.canvas;
-    canvas.Save();
-    RSRect clipRect;
-    std::vector<RSPoint> clipRadius;
-    GetFrameRectClip(clipRect, clipRadius);
-    canvas.ClipRoundRect(clipRect, clipRadius, true);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        canvas.Save();
+        RSRect clipRect;
+        std::vector<RSPoint> clipRadius;
+        GetFrameRectClip(clipRect, clipRadius);
+        canvas.ClipRoundRect(clipRect, clipRadius, true);
+    }
     PaintCursor(context);
     PaintSelection(context);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        canvas.Restore();
+    }
     PaintScrollBar(context);
     PaintEdgeEffect(frameSize_->Get(), context.canvas);
     PaintUnderline(context.canvas);
-    canvas.Restore();
     PaintMagnifier(context);
 }
 
@@ -293,8 +297,11 @@ void TextFieldOverlayModifier::PaintMagnifier(DrawingContext& context)
     std::vector<TextPoint> drawPathPoints =
         GetTextPoints(magnifierRect_.startX, magnifierRect_.startY, magnifierRect_.endX, magnifierRect_.endY, false);
     auto drawPath = GetPathByPoints(drawPathPoints);
-    canvas.DrawPath(*drawPath);
     PaintShadow(*drawPath, ShadowConfig::DefaultShadowM, canvas);
+    canvas.DrawPath(*drawPath);
+    brush.SetColor(magnifierRect_.bgColor);
+    canvas.AttachBrush(brush);
+    canvas.DrawPath(*drawPath);
     std::vector<TextPoint> clipPathPoints =
         GetTextPoints(magnifierRect_.startX, magnifierRect_.startY, magnifierRect_.endX, magnifierRect_.endY, false);
     auto clipPath = GetPathByPoints(clipPathPoints);

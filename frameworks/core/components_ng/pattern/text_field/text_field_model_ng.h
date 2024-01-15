@@ -125,8 +125,10 @@ public:
     static void SetShowError(FrameNode* frameNode, const std::string& errorText, bool visible);
     static void SetCounterType(FrameNode* frameNode, int32_t value);
     static void SetOnChange(FrameNode* frameNode, std::function<void(const std::string&)>&& func);
-    static void SetTextInputText(FrameNode* frameNode, const std::string& value);
-    static void SetTextInputPlaceHolder(FrameNode* frameNode, const std::string& placeholder);
+    static void SetTextFieldText(FrameNode* frameNode, const std::string& value);
+    static void SetTextFieldPlaceHolder(FrameNode* frameNode, const std::string& placeholder);
+    static void StopTextFieldEditing(FrameNode* frameNode);
+    static void SetOnSubmit(FrameNode* frameNode, std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func);
 private:
     void AddDragFrameNodeToManager() const;
     void SetDraggable(bool draggable);

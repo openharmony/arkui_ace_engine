@@ -806,11 +806,13 @@ void RosenRenderContext::OnPixelStretchEffectUpdate(const PixStretchEffectOption
         pixStretchVector.SetValues(static_cast<float>(option.left.Value()), static_cast<float>(option.top.Value()),
             static_cast<float>(option.right.Value()), static_cast<float>(option.bottom.Value()));
         rsNode_->SetPixelStretchPercent(pixStretchVector);
+        rsNode_->SetPixelStretch({ 0, 0, 0, 0 });
     } else {
         pixStretchVector.SetValues(static_cast<float>(option.left.ConvertToPx()),
             static_cast<float>(option.top.ConvertToPx()), static_cast<float>(option.right.ConvertToPx()),
             static_cast<float>(option.bottom.ConvertToPx()));
         rsNode_->SetPixelStretch(pixStretchVector);
+        rsNode_->SetPixelStretchPercent({ 0, 0, 0, 0 });
     }
     RequestNextFrame();
 }
@@ -3196,6 +3198,13 @@ void RosenRenderContext::OnFrontInvertUpdate(const InvertVariant& invert)
         invertVector.SetValues(option.low_, option.high_, option.threshold_, option.thresholdRange_);
         rsNode_->SetAiInvert(invertVector);
     }
+    RequestNextFrame();
+}
+
+void RosenRenderContext::OnSystemBarEffectUpdate(bool systemBarEffect)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetSystemBarEffect();
     RequestNextFrame();
 }
 

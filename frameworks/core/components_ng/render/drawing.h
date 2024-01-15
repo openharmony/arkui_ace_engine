@@ -46,15 +46,6 @@
 #endif
 
 #ifdef USE_ROSEN_DRAWING
-#include "recording/recording_canvas.h"
-#include "recording/recording_color_filter.h"
-#include "recording/recording_color_space.h"
-#include "recording/recording_image_filter.h"
-#include "recording/recording_mask_filter.h"
-#include "recording/recording_path_effect.h"
-#include "recording/recording_path.h"
-#include "recording/recording_region.h"
-#include "recording/recording_shader_effect.h"
 #include "pipeline/rs_recording_canvas.h"
 #endif
 #ifndef USE_GRAPHIC_TEXT_GINE
@@ -134,7 +125,7 @@ using RSRecordingImageFilter = Rosen::Drawing::ImageFilter;
 using RSRecordingMaskFilter = Rosen::Drawing::MaskFilter;
 using RSRecordingPath = Rosen::Drawing::Path;
 using RSRecordingPathEffect = Rosen::Drawing::PathEffect;
-using RSRecordingRegion = Rosen::Drawing::RecordingRegion;
+using RSRecordingRegion = Rosen::Drawing::Region;
 using RSRecordingShaderEffect = Rosen::Drawing::ShaderEffect;
 using RSSaveLayerOps = Rosen::Drawing::SaveLayerOps;
 using RSSize = Rosen::Drawing::Size;

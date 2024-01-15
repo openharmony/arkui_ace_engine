@@ -927,4 +927,23 @@ bool DragEventActuator::IsAllowedDrag()
     bool isAllowedDrag = gestureHub->IsAllowedDrag(eventHub);
     return isAllowedDrag;
 }
+
+void DragEventActuator::CopyDragEvent(const RefPtr<DragEventActuator>& dragEventActuator)
+{
+    userCallback_ = dragEventActuator->userCallback_;
+    customCallback_ = dragEventActuator->customCallback_;
+    panRecognizer_ = MakeRefPtr<PanRecognizer>(fingers_, direction_, distance_);
+    panRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, true));
+    longPressRecognizer_ = AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, fingers_, false, false);
+    longPressRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, true));
+    previewLongPressRecognizer_ =
+        AceType::MakeRefPtr<LongPressRecognizer>(PREVIEW_LONG_PRESS_RECONGNIZER, fingers_, false, false);
+    previewLongPressRecognizer_->SetGestureInfo(MakeRefPtr<GestureInfo>(GestureTypeName::DRAG, true));
+    isNotInPreviewState_ = false;
+    actionStart_ = dragEventActuator->actionStart_;
+    longPressUpdate_ = dragEventActuator->longPressUpdate_;
+    actionCancel_ = dragEventActuator->actionCancel_;
+    textDragCallback_ = dragEventActuator->textDragCallback_;
+    longPressInfo_ = dragEventActuator->longPressInfo_;
+}
 } // namespace OHOS::Ace::NG

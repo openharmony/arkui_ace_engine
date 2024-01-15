@@ -258,6 +258,16 @@ bool ImageModelNG::UpdateDragItemInfo(DragItemInfo &itemInfo)
     return false;
 }
 
+void ImageModelNG::InitImage(FrameNode *frameNode, std::string& src)
+{
+    std::string bundleName;
+    std::string moduleName;
+    RefPtr<OHOS::Ace::PixelMap> pixMapPtr;
+    auto srcInfo = CreateSourceInfo(src, pixMapPtr, bundleName, moduleName);
+    srcInfo.SetIsUriPureNumber(false);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageSourceInfo, srcInfo, frameNode);
+}
+
 void ImageModelNG::SetCopyOption(FrameNode *frameNode, CopyOptions copyOption)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>(frameNode);
@@ -365,6 +375,11 @@ void ImageModelNG::SetImageAnalyzerConfig(const ImageAnalyzerConfig& config)
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     pattern->SetImageAnalyzerConfig(config);
+}
+
+bool ImageModelNG::IsSrcSvgImage(FrameNode* frameNode)
+{
+    return false;
 }
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP
