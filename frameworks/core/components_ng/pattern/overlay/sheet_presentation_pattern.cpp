@@ -559,12 +559,23 @@ void SheetPresentationPattern::SheetInteractiveDismiss(bool isDragClose, float d
         }
         CallShouldDismiss();
     } else {
-        auto sheetType = GetSheetType();
-        if (sheetType == SheetType::SHEET_POPUP) {
-            BubbleStyleSheetTransition(false);
-        } else {
-            SheetTransition(false, dragVelocity);
-        }
+        DismissTransition(false, dragVelocity);
+    }
+}
+
+void SheetPresentationPattern::DismissTransition(bool isTransitionIn, float dragVelocity)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->ModalPageLostFocus(GetHost());
+
+    auto sheetType = GetSheetType();
+    if (sheetType == SheetType::SHEET_POPUP) {
+        BubbleStyleSheetTransition(isTransitionIn);
+    } else {
+        SheetTransition(isTransitionIn, dragVelocity);
     }
 }
 
