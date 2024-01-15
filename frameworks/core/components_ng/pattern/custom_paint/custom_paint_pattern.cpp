@@ -30,7 +30,6 @@
 namespace {} // namespace
 
 namespace OHOS::Ace::NG {
-#define NONESIZEF SizeF({ 0, 0 })
 class RosenRenderContext;
 void CustomPaintPattern::OnAttachToFrameNode()
 {
@@ -63,15 +62,9 @@ bool CustomPaintPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, false);
     SizeF currentPixelGridRoundSize = geometryNode->GetPixelGridRoundSize();
-
-    if (isVisible_ == Visible) {
-        pixelGridRoundSizeChange = currentPixelGridRoundSize != dirtyPixelGridRoundSize_;
-        dirtyPixelGridRoundSize_ = currentPixelGridRoundSize;
-        visiblePixelGridRoundSize_ = currentPixelGridRoundSize;
-        lastDirtyPixelGridRoundSize_ = dirtyPixelGridRoundSize_;
-    } else {
-        return false;
-    }
+    pixelGridRoundSizeChange = currentPixelGridRoundSize != dirtyPixelGridRoundSize_;
+    dirtyPixelGridRoundSize_ = currentPixelGridRoundSize;
+    lastDirtyPixelGridRoundSize_ = dirtyPixelGridRoundSize_;
 
     if (config.skipMeasure || dirty->SkipMeasureContent()) {
         return false;
@@ -930,73 +923,6 @@ void CustomPaintPattern::OnPixelRoundFinish(const SizeF& pixelGridRoundSize)
 {
     CHECK_NULL_VOID(paintMethod_);
     paintMethod_->UpdateRecordingCanvas(pixelGridRoundSize.Width(), pixelGridRoundSize.Height());
-}
-
-void CustomPaintPattern::OnVisibleChange(bool isVisible)
-{
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    SizeF currentPixelGridRoundSize = geometryNode->GetPixelGridRoundSize();
-
-    switch (isVisible_) {
-        case Unset:
-            isVisible == true ? isVisible_ = Visible : isVisible_ = Invisible;
-            return;
-        case Visible:
-            if (isVisible == false) {
-                isVisible_ = Invisible;
-            }
-            visiblePixelGridRoundSize_ = currentPixelGridRoundSize;
-            dirtyPixelGridRoundSize_ = currentPixelGridRoundSize;
-            return;
-        case Invisible:
-            if (isVisible == false) {
-                return;
-            } else if (isCanvasInit_ == false) {
-                isVisible_ = Visible;
-                if (currentPixelGridRoundSize == NONESIZEF) {
-                    return;
-                } else {
-                    isCanvasInit_ = false;
-                    visiblePixelGridRoundSize_ = currentPixelGridRoundSize;
-                    dirtyPixelGridRoundSize_ = currentPixelGridRoundSize;
-                }
-            } else if (isCanvasInit_ == true) {
-                isVisible_ = Visible;
-                if (currentPixelGridRoundSize == NONESIZEF) {
-                    return;
-                } else if (currentPixelGridRoundSize != visiblePixelGridRoundSize_) {
-                    isCanvasInit_ = false;
-                    visiblePixelGridRoundSize_ = currentPixelGridRoundSize;
-                    dirtyPixelGridRoundSize_ = currentPixelGridRoundSize;
-                } else {
-                    return;
-                }
-            }
-            break;
-        default:
-            break;
-    }
-
-    auto customPaintEventHub = GetEventHub<CustomPaintEventHub>();
-    CHECK_NULL_VOID(customPaintEventHub);
-
-    if (!isCanvasInit_) {
-        auto rosenRenderContext = AceType::DynamicCast<RosenRenderContext>(host->GetRenderContext());
-        std::shared_ptr<Rosen::RSNode> rsNode = rosenRenderContext->GetRSNode();
-        auto rsCanvasDrawingNode = Rosen::RSNode::ReinterpretCast<Rosen::RSCanvasDrawingNode>(rsNode);
-        rsCanvasDrawingNode->ResetSurface();
-
-        auto context = PipelineContext::GetCurrentContext();
-        if (context) {
-            context->AddAfterLayoutTask([customPaintEventHub]() {
-                    customPaintEventHub->FireReadyEvent();
-                });
-        }
-        isCanvasInit_ = true;
-    }
 }
 
 void CustomPaintPattern::DumpAdvanceInfo()
