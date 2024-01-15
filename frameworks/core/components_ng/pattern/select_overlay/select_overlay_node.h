@@ -55,7 +55,9 @@ public:
     static RefPtr<FrameNode> CreateSelectOverlayNode(const std::shared_ptr<SelectOverlayInfo>& info);
     RefPtr<FrameNode> CreateMoreSelectOverlayNode(const std::vector<MenuOptionsParam>& menuOptionItems, int32_t index);
 
-    void UpdateToolBar(bool menuItemChanged);
+    void UpdateToolBar(bool menuItemChanged, bool noAnimation = false);
+
+    void UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>& info);
 
     void SetSelectInfo(const std::string& selectInfo)
     {
@@ -109,6 +111,7 @@ private:
     void SetSelectMenuOpacity(float value);
     void SetExtensionMenuOpacity(float value);
     void SetBackButtonOpacity(float value);
+    void HideFrameNodeImmediately(FrameNodeType type);
     void CreateCustomSelectOverlay(const std::shared_ptr<SelectOverlayInfo>& info);
 
     void SetAnimationStatus(bool toDoAnimation)

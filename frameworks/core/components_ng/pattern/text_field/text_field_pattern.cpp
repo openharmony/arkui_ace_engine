@@ -4869,7 +4869,7 @@ bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
         if (scrollBar) {
             scrollBar->PlayScrollBarAppearAnimation();
         }
-        OnParentScrollStartOrEnd(false);
+        OnParentScrollStartOrEnd(false, true);
         return true;
     }
     if (IsReachedBoundary(offset)) {

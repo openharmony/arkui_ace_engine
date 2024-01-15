@@ -266,7 +266,7 @@ void SelectOverlayClient::StopListeningScrollableParent(const RefPtr<FrameNode>&
     context->GetSelectOverlayManager()->RemoveScrollCallback(host->GetId());
 }
 
-void SelectOverlayClient::OnParentScrollStartOrEnd(bool isEnd)
+void SelectOverlayClient::OnParentScrollStartOrEnd(bool isEnd, bool noAnimation)
 {
     if (!SelectOverlayIsOn()) {
         return;
@@ -274,7 +274,7 @@ void SelectOverlayClient::OnParentScrollStartOrEnd(bool isEnd)
     auto proxy = GetSelectOverlayProxy();
     CHECK_NULL_VOID(proxy);
     if (!isEnd) {
-        proxy->ShowOrHiddenMenu(true);
+        proxy->ShowOrHiddenMenu(true, noAnimation);
         return;
     }
     if (proxy->IsSingleHandle() && !proxy->IsSingleHandleMenuShow()) {
