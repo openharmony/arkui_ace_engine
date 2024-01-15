@@ -3417,7 +3417,7 @@ export class TreeViewInner extends ViewPU {
                     Column.create();
                     Column.opacity(this.listNodeDataSource.getListItemOpacity(ObservedObject.GetRawObject(this.item)));
                     Column.onHover((e => {
-                        if (e && (!this.item.getIsSelected())) {
+                        if (e && (!this.item.getIsSelected())){
                             this.item.setNodeColor({
                                 id: -1,
                                 type: 10001,
@@ -3425,7 +3425,7 @@ export class TreeViewInner extends ViewPU {
                                 bundleName: "",
                                 moduleName: ""
                             })
-                        } else if (!this.item.getIsSelected()) {
+                        } else if (!this.item.getIsSelected()){
                             this.item.setNodeColor({
                                 id: -1,
                                 type: 10001,
