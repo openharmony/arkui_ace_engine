@@ -100,36 +100,24 @@ std::string GetFontFamilyInJson(const std::optional<std::vector<std::string>>& v
 std::string GetSymbolRenderingStrategyInJson(const std::optional<uint32_t>& value)
 {
     std::string text;
-    switch (value.value_or(0)) {
-        case (if (value == 0) ):
-            text = "RenderingStrategy.SINGLE";
-            break;
-        case (if (value == 1) ):
-            text = "RenderingStrategy.MULTIPLE_COLOR";
-            break;
-        case (if (value == 2) ):
-            text = "RenderingStrategy.MULTIPLE_OPACITY";
-            break;
-        default:
-            text = "RenderingStrategy.SINGLE";
+    if (value == 1) {
+        text = "RenderingStrategy.MULTIPLE_COLOR";
+    } else if (value == 2) {
+        text = "RenderingStrategy.MULTIPLE_OPACITY";
+    } else {
+        text = "RenderingStrategy.SINGLE";
     }
     return text;
 }
 std::string GetSymbolEffectStrategyInJson(const std::optional<uint32_t>& value)
 {
     std::string text;
-    switch (value.value_or(0)) {
-        case (if (value == 0) ):
-            text = "EffectStrategy.NONE";
-            break;
-        case (if (value == 1) ):
-            text = "EffectStrategy.SCALE";
-            break;
-        case (if(value == 2)):
-            text = "EffectStrategy.HIERARCHICAL";
-            break;
-        default:
-            text = "EffectStrategy.NONE";
+    if (value == 1) {
+        text = "EffectStrategy.SCALE";
+    } else if (value == 2) {
+        text = "EffectStrategy.HIERARCHICAL";
+    } else {
+        text = "EffectStrategy.NONE";
     }
     return text;
 }
