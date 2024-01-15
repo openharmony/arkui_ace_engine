@@ -69,7 +69,7 @@ public:
     void SetRequestFrame(const std::function<void()>& requestFrame);
     void RequestNextFrame() const;
 
-    void SetHostNode(const WeakPtr<FrameNode>& host);
+    virtual void SetHostNode(const WeakPtr<FrameNode>& host);
     RefPtr<FrameNode> GetHost() const;
 
     virtual void SetNeedDebugBoundary(bool flag) {}
