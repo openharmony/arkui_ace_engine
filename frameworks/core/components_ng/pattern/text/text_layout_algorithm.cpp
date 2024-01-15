@@ -367,12 +367,10 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
         CHECK_NULL_RETURN(symbolSourceInfo, false);
         TextStyle symbolTextStyle = textStyle;
         symbolTextStyle.isSymbolGlyph_ = true;
-        if (symbolTextStyle.GetRenderStrategy() < 0) {
-            symbolTextStyle.SetRenderStrategy(0);
-        }
-        if (symbolTextStyle.GetEffectStrategy() < 0) {
-            symbolTextStyle.SetEffectStrategy(0);
-        }
+        symbolTextStyle.SetRenderStrategy(
+            symbolTextStyle.GetRenderStrategy() < 0 ? 0 : symbolTextStyle.GetRenderStrategy());
+        symbolTextStyle.SetEffectStrategy(
+            symbolTextStyle.GetEffectStrategy() < 0 ? 0 : symbolTextStyle.GetEffectStrategy());
         paragraph_->PushStyle(symbolTextStyle);
         paragraph_->AddSymbol(symbolSourceInfo->GetUnicode());
         paragraph_->PopStyle();
@@ -398,7 +396,21 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
         UpdateParagraph(layoutWrapper);
     }
     paragraph_->Build();
+    UpdateSymbolSpanEffect(frameNode);
     return true;
+}
+
+void TextLayoutAlgorithm::UpdateSymbolSpanEffect(RefPtr<FrameNode>& frameNode)
+{
+    for (const auto& child : spanItemChildren_) {
+        if (!child || child->unicode == 0) {
+            continue;
+        }
+        if (child->GetTextStyle()->GetEffectStrategy() > 0) {
+            paragraph_->SetParagraphSymbolAnimation(frameNode);
+            return;
+        }
+    }
 }
 
 void TextLayoutAlgorithm::CreateParagraphDrag(const TextStyle& textStyle, const std::vector<std::string>& contents,
