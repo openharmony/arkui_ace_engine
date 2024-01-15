@@ -76,16 +76,16 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
     TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
     const RefPtr<TargetComponent>& targetComponent)
 {
-    size_t idx = innerTargets.size();
-    size_t newIdx = 0;
     auto host = GetFrameNode();
     CHECK_NULL_RETURN(host, false);
     auto eventHub = eventHub_.Upgrade();
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
     if (scrollableActuator_) {
         scrollableActuator_->CollectTouchTarget(
-            coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, localPoint);
+            coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, localPoint, host, targetComponent);
     }
+    size_t idx = innerTargets.size();
+    size_t newIdx = 0;
     if (touchEventActuator_) {
         touchEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
     }

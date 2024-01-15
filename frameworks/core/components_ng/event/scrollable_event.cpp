@@ -50,19 +50,20 @@ bool ScrollableActuator::RemoveScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& 
 }
 
 void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const PointF& localPoint)
+    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const PointF& localPoint,
+    const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent)
 {
     for (const auto& [axis, event] : scrollableEvents_) {
         if (!event || !event->GetEnable()) {
             continue;
         }
         if (event->InBarRegion(localPoint, touchRestrict.sourceType)) {
-            event->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result);
+            event->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent);
         } else if (event->GetScrollable()) {
             const auto& scrollable = event->GetScrollable();
             scrollable->SetGetEventTargetImpl(getEventTargetImpl);
             scrollable->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
-            scrollable->OnCollectTouchTarget(result);
+            scrollable->OnCollectTouchTarget(result, frameNode, targetComponent);
         }
         if (event->IsHitTestBlock()) {
             if (!clickRecognizer_) {
@@ -70,6 +71,10 @@ void ScrollableActuator::CollectTouchTarget(const OffsetF& coordinateOffset, con
             }
             clickRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
             clickRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+            clickRecognizer_->AssignNodeId(frameNode->GetId());
+            clickRecognizer_->AttachFrameNode(frameNode);
+            clickRecognizer_->SetTargetComponent(targetComponent);
+            clickRecognizer_->SetIsSystemGesture(true);
             result.emplace_front(clickRecognizer_);
             break;
         }
