@@ -481,8 +481,7 @@ enum ArkUINodeType {
     ARKUI_GRID,
     ARKUI_XCOMPONENT,
     ARKUI_SIDEBAR,
-
-    ARKUI_MISC // Keep this item last
+    ARKUI_REFRESH
 };
 
 enum ArkUIEventCategory {
@@ -541,7 +540,7 @@ enum ArkUIAsyncEventKind {
     ON_SCROLL_FRAME_BEGIN,
     ON_SCROLL_START,
     ON_SCROLL_STOP,
-    ON_SCROLL_INDEX,
+    ON_SCROLL_EDGE,
 
     ON_TABS_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TABS,
     ON_NAVIGATOR_CLICK = ARKUI_MAX_EVENT_NUM * ARKUI_NAVIGATOR,
@@ -560,8 +559,8 @@ enum ArkUIAsyncEventKind {
     ON_XCOMPONENT_LOAD = ARKUI_MAX_EVENT_NUM * ARKUI_XCOMPONENT,
     ON_XCOMPONENT_DESTROY,
 
-    ON_REFRESH_STATE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_MISC,
-    ON_REFRESHING
+    ON_REFRESH_STATE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_REFRESH,
+    ON_REFRESH_REFRESHING
 };
 
 enum ArkUIAPIGestureAsyncEventSubKind {
@@ -671,7 +670,7 @@ struct ArkUIAPIEventGestureAsyncEvent {
 };
 
 struct ArkUINodeEvent {
-    ArkUI_Int32 kind; // Actually ArkUIEventCategory, but use int for fixed binary layout.
+    ArkUI_Int32 kind; // Actually ArkUIAsyncEventKind, but use int for fixed binary layout.
     ArkUI_Int32 eventId;
     void* extraParam;
     union {
@@ -1369,6 +1368,8 @@ struct ArkUIScrollModifier {
     void (*resetScrollEdgeEffect)(ArkUINodeHandle node);
     void (*setEnableScrollInteraction)(ArkUINodeHandle node, bool enableScrollInteraction);
     void (*resetEnableScrollInteraction)(ArkUINodeHandle node);
+    void (*setScrollTo)(ArkUINodeHandle node, ArkUI_Float64* values);
+    void (*setScrollEdge)(ArkUINodeHandle node, ArkUI_Int32 value);
 };
 
 struct ArkUIListItemModifier {
@@ -1548,6 +1549,9 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaFontSize)(ArkUINodeHandle node, const struct ArkUIResourceLength* size);
     void (*resetTextAreaFontSize)(ArkUINodeHandle node);
     void (*setCounterType)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*setTextAreaPlaceholderString)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*setTextAreaTextString)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*stopTextAreaTextEditing)(ArkUINodeHandle node);
 };
 
 struct ArkUITextInputModifier {
