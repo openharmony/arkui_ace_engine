@@ -462,7 +462,7 @@ private:
     DragEndForRefreshCallback dragEndCallback_;
     DragCancelRefreshCallback dragCancelCallback_;
     ContinuousSlidingCallback continuousSlidingCallback_;
-    Axis axis_ = Axis::NONE;
+    Axis axis_ = Axis::VERTICAL;
     // used for ng structure.
     RefPtr<NG::PanRecognizer> panRecognizerNG_;
 
