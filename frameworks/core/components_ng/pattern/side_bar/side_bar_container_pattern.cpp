@@ -23,6 +23,7 @@
 #include "core/common/ace_application_info.h"
 #include "core/common/container.h"
 #include "core/common/recorder/event_recorder.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components_ng/base/frame_node.h"
@@ -64,9 +65,12 @@ Dimension SIDEBAR_WIDTH_NEGATIVE = -1.0_vp;
 constexpr static Dimension DEFAULT_SIDE_BAR_WIDTH = 240.0_vp;
 constexpr int32_t DEFAULT_MIN_CHILDREN_SIZE_WITHOUT_BUTTON_AND_DIVIDER = 1;
 constexpr static int32_t DEFAULT_CONTROL_BUTTON_ZINDEX = 3;
-constexpr static int32_t DEFAULT_SIDE_BAR_ZINDEX = 0;
-constexpr static int32_t DEFAULT_DIVIDER_ZINDEX = 1;
-constexpr static int32_t DEFAULT_CONTENT_ZINDEX = 2;
+constexpr static int32_t DEFAULT_SIDE_BAR_ZINDEX_EMBED = 0;
+constexpr static int32_t DEFAULT_DIVIDER_ZINDEX_EMBED = 1;
+constexpr static int32_t DEFAULT_CONTENT_ZINDEX_EMBED = 2;
+constexpr static int32_t DEFAULT_SIDE_BAR_ZINDEX_OVERLAY = 2;
+constexpr static int32_t DEFAULT_DIVIDER_ZINDEX_OVERLAY = 0;
+constexpr static int32_t DEFAULT_CONTENT_ZINDEX_OVERLAY = 1;
 } // namespace
 
 void SideBarContainerPattern::OnAttachToFrameNode()
@@ -389,6 +393,7 @@ void SideBarContainerPattern::CreateAndMountNodes()
     }
 
     if (HasControlButton()) {
+        UpdateDividerShadow();
         return;
     }
 
@@ -431,26 +436,32 @@ void SideBarContainerPattern::UpdateDividerShadow() const
     CHECK_NULL_VOID(host);
     auto layoutProperty = host->GetLayoutProperty<SideBarContainerLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    if (!sidebarTheme->GetDividerShadowEnable() ||
-        SideBarContainerType::EMBED != layoutProperty->GetSideBarContainerType()) {
+    if (!sidebarTheme->GetDividerShadowEnable()) {
         return;
     }
-    
+
+    auto sideBarContainerType = layoutProperty->GetSideBarContainerType().value_or(SideBarContainerType::EMBED);
     auto sidebarNode = GetSideBarNode(host);
     if (sidebarNode) {
         auto renderContext = sidebarNode->GetRenderContext();
-        renderContext->UpdateZIndex(DEFAULT_SIDE_BAR_ZINDEX);
+        renderContext->UpdateZIndex(SideBarContainerType::EMBED == sideBarContainerType
+                                        ? DEFAULT_SIDE_BAR_ZINDEX_EMBED
+                                        : DEFAULT_SIDE_BAR_ZINDEX_OVERLAY);
     }
     auto dividerNode = GetDividerNode();
     if (dividerNode) {
         auto renderContext = dividerNode->GetRenderContext();
-        renderContext->UpdateZIndex(DEFAULT_DIVIDER_ZINDEX);
+        renderContext->UpdateZIndex(SideBarContainerType::EMBED == sideBarContainerType
+                                        ? DEFAULT_DIVIDER_ZINDEX_EMBED
+                                        : DEFAULT_DIVIDER_ZINDEX_OVERLAY);
         renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowXS);
     }
     auto contentNode = GetContentNode(host);
     if (contentNode) {
         auto renderContext = contentNode->GetRenderContext();
-        renderContext->UpdateZIndex(DEFAULT_CONTENT_ZINDEX);
+        renderContext->UpdateZIndex(SideBarContainerType::EMBED == sideBarContainerType
+                                        ? DEFAULT_CONTENT_ZINDEX_EMBED
+                                        : DEFAULT_CONTENT_ZINDEX_OVERLAY);
     }
     auto controlBtnNode = GetControlButtonNode();
     if (controlBtnNode) {
@@ -495,7 +506,7 @@ void SideBarContainerPattern::CreateAndMountDivider(const RefPtr<NG::FrameNode>&
     if (sideBarTheme->GetDividerShadowEnable()) {
         renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowXS);
     }
-    renderContext->UpdateZIndex(DEFAULT_DIVIDER_ZINDEX);
+    renderContext->UpdateZIndex(DEFAULT_DIVIDER_ZINDEX_EMBED);
     dividerNode->MountToParent(parentNode);
     dividerNode->MarkModifyDone();
 }
