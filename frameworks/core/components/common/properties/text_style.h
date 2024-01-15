@@ -109,14 +109,14 @@ enum class PlaceholderAlignment {
 
 enum RenderingStrategy {
     SINGLE = 0,
-    MULTIPLE_COLOR,
-    MULTIPLE_OPACITY,
+    MULTIPLECOLOR,
+    MULTIPLEOPACITY,
 };
 
 enum EffectStrategy {
-    NONE = 0,
-    SCALE,
-    HIERARCHICAL,
+    EFFNONE = 0,
+    EFFSCALE,
+    EFFHIERARCHICAL,
 };
 
 struct TextSizeGroup {
