@@ -137,6 +137,9 @@ void CheckBoxModifier::PaintCheckBox(RSCanvas& canvas, const OffsetF& paintOffse
 
 void CheckBoxModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& size, const OffsetF& offset) const
 {
+    if (HoverEffectType::NONE == hoverEffectType_) {
+        return;
+    }
     RSBrush brush;
     brush.SetColor(ToRSColor(animateTouchHoverColor_->Get()));
     brush.SetAntiAlias(true);
@@ -146,7 +149,7 @@ void CheckBoxModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& siz
     float endY = size.Height() + originY + CHECKBOX_DOUBLE_RATIO * hotZoneVerticalPadding_.ConvertToPx();
     auto rrect = RSRoundRect({ originX, originY, endX, endY }, hoverRadius_.ConvertToPx(), hoverRadius_.ConvertToPx());
     canvas.AttachBrush(brush);
-    if (HoverEffectType::NONE != hoverEffectType_ || TouchHoverAnimationType::PRESS == touchHoverType_ || 
+    if (TouchHoverAnimationType::PRESS == touchHoverType_ ||
         (TouchHoverAnimationType::HOVER != touchHoverType_ && TouchHoverAnimationType::NONE != touchHoverType_)) {
         if (CheckBoxStyle::SQUARE_STYLE == checkBoxStyle_) {
             canvas.DrawRoundRect(rrect);
