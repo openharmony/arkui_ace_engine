@@ -343,16 +343,16 @@ void JSText::SetMinFontSize(const JSCallbackInfo& info)
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
-    CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
-    if (!ParseJsDimensionFp(info[0], fontSize)) {
-        fontSize = theme->GetTextStyle().GetFontSize();
-        TextModel::GetInstance()->SetFontSize(fontSize);
+    CalcDimension minFontSize = theme->GetTextStyle().GetAdaptMinFontSize();
+    if (!ParseJsDimensionFpNG(info[0], minFontSize, false)) {
+        minFontSize = theme->GetTextStyle().GetAdaptMinFontSize();
+        TextModel::GetInstance()->SetAdaptMinFontSize(minFontSize);
         return;
     }
-    if (fontSize.IsNegative()) {
-        fontSize = theme->GetTextStyle().GetFontSize();
+    if (minFontSize.IsNegative()) {
+        minFontSize = theme->GetTextStyle().GetAdaptMinFontSize();
     }
-    TextModel::GetInstance()->SetAdaptMinFontSize(fontSize);
+    TextModel::GetInstance()->SetAdaptMinFontSize(minFontSize);
 }
 
 void JSText::SetMaxFontSize(const JSCallbackInfo& info)
@@ -364,16 +364,16 @@ void JSText::SetMaxFontSize(const JSCallbackInfo& info)
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
-    CalcDimension fontSize = theme->GetTextStyle().GetFontSize();
-    if (!ParseJsDimensionFp(info[0], fontSize)) {
-        fontSize = theme->GetTextStyle().GetFontSize();
-        TextModel::GetInstance()->SetFontSize(fontSize);
+    CalcDimension maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
+    if (!ParseJsDimensionFpNG(info[0], maxFontSize, false)) {
+        maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
+        TextModel::GetInstance()->SetAdaptMaxFontSize(maxFontSize);
         return;
     }
-    if (fontSize.IsNegative()) {
-        fontSize = theme->GetTextStyle().GetFontSize();
+    if (maxFontSize.IsNegative()) {
+        maxFontSize = theme->GetTextStyle().GetAdaptMaxFontSize();
     }
-    TextModel::GetInstance()->SetAdaptMaxFontSize(fontSize);
+    TextModel::GetInstance()->SetAdaptMaxFontSize(maxFontSize);
 }
 
 void JSText::SetLetterSpacing(const JSCallbackInfo& info)
