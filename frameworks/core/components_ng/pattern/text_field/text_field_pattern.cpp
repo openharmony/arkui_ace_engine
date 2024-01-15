@@ -2365,7 +2365,15 @@ void TextFieldPattern::ProcessOverlay(bool isUpdateMenu, bool animation, bool is
         isSingleHandle_ = true;
         selectController_->UpdateCaretIndex(selectController_->GetFirstHandleIndex());
         selectController_->UpdateCaretOffset();
+    } else if (!isSingleHandle_) {
+        auto rects = GetTextBoxes();
+        if (!rects.empty() && NearZero(rects[0].Width())) {
+            isSingleHandle_ = true;
+            selectController_->UpdateCaretIndex(selectController_->GetFirstHandleIndex());
+            selectController_->UpdateCaretOffset();
+        }
     }
+
     if (isSingleHandle_) {
         StartTwinkling();
         showOverlayParams.firstHandle = std::nullopt;
