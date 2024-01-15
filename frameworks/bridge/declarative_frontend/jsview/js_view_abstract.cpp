@@ -4230,7 +4230,8 @@ bool JSViewAbstract::ParseJsShadowColorStrategy(const JSRef<JSVal>& jsValue, Sha
     return false;
 }
 
-bool JSViewAbstract::ParseJsSymbolId(const JSRef<JSVal>& jsValue, std::uint32_t& symbolId)
+bool JSViewAbstract::ParseJsSymbolId(
+    const JSRef<JSVal>& jsValue, std::uint32_t& symbolId, RefPtr<ResourceObject>& symbolResourceObject)
 {
     if (jsValue->IsNull() || jsValue->IsUndefined()) {
         symbolId = 0;
@@ -4242,6 +4243,7 @@ bool JSViewAbstract::ParseJsSymbolId(const JSRef<JSVal>& jsValue, std::uint32_t&
         return false;
     }
     auto resourceObject = GetResourceObject(jsObj);
+    symbolResourceObject = resourceObject;
     if (!resourceObject) {
         return false;
     }

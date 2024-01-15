@@ -23,6 +23,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/common/ai/data_detector_mgr.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
@@ -196,6 +197,14 @@ public:
     {
         textStyle_ = textStyle;
     }
+    RefPtr<ResourceObject> GetResourceObject()
+    {
+        return resourceObject_;
+    }
+    void SetResourceObject(RefPtr<ResourceObject> resourceObject)
+    {
+        resourceObject_ = resourceObject;
+    }
     void MarkNeedRemoveNewLine(bool value)
     {
         needRemoveNewLine = value;
@@ -223,6 +232,7 @@ public:
 private:
     std::optional<TextStyle> textStyle_;
     bool isParentText = false;
+    RefPtr<ResourceObject> resourceObject_;
 };
 
 

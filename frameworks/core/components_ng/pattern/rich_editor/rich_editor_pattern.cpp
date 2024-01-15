@@ -587,6 +587,7 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
     auto spanItem = spanNode->GetSpanItem();
     spanItem->content = "  ";
     spanItem->SetTextStyle(options.style);
+    spanItem->SetResourceObject(options.resourceObject);
     AddSpanItem(spanItem, offset);
     if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
         SetCaretPosition(options.offset.value() + SYMBOL_SPAN_LENGTH + moveLength_);
