@@ -153,7 +153,12 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest003, TestSize.Level
     selectOverlayInfo.singleLineHeight = NODE_ID;
     auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
     auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
-    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
+    auto textFrameNode =
+        FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, 10, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    ASSERT_TRUE(textFrameNode);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_TRUE(textPattern);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, textPattern);
     ASSERT_TRUE(proxy);
     auto id = selectOverlayManager->selectOverlayInfo_.singleLineHeight;
     EXPECT_EQ(id, NODE_ID);
@@ -165,7 +170,7 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest003, TestSize.Level
      */
     SelectOverlayInfo selectOverlayInfo2;
     selectOverlayInfo2.singleLineHeight = NODE_ID_2;
-    auto proxy2 = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo2, nullptr);
+    auto proxy2 = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo2, textPattern);
     ASSERT_TRUE(proxy2);
     auto id2 = selectOverlayManager->selectOverlayInfo_.singleLineHeight;
     EXPECT_EQ(id2, NODE_ID_2);
@@ -176,7 +181,7 @@ HWTEST_F(SelectOverlayManagerTestNg, SelectOverlayManagerTest003, TestSize.Level
      */
     SelectOverlayInfo selectOverlayInfo3;
     selectOverlayInfo3.singleLineHeight = NODE_ID_3;
-    auto proxy3 = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo3, nullptr);
+    auto proxy3 = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo3, textPattern);
     ASSERT_TRUE(proxy3);
     auto id3 = selectOverlayManager->selectOverlayInfo_.singleLineHeight;
     EXPECT_EQ(id3, NODE_ID_3);
