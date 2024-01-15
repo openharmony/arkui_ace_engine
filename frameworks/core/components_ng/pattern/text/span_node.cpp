@@ -89,7 +89,6 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         json->Put("fontStyle", GetFontStyleInJson(fontStyle->GetItalicFontStyle()).c_str());
         json->Put("fontWeight", GetFontWeightInJson(fontStyle->GetFontWeight()).c_str());
         json->Put("fontFamily", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str());
-        json->Put("colorList", fontStyle->GetSymbolColorList().ColorToString().c_str());
         json->Put("renderingStrategy",
             GetSymbolRenderingStrategyInJson(fontStyle->GetSymbolRenderingStrategy()).c_str());
         json->Put("effectStrategy", GetSymbolEffectStrategyInJson(fontStyle->GetSymbolEffectStrategy()).c_str());
