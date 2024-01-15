@@ -17,6 +17,13 @@
 
 #include "core/components_ng/base/frame_node.h"
 
+namespace {
+constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_COLOR = 1;
+constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_OPACITY = 2;
+constexpr uint32_t EFFECTSTRATEGY_SCALE = 1;
+constexpr uint32_t EFFECTSTRATEGY_HIERARCHICAL = 2;
+};//namespace
+
 namespace OHOS::Ace::NG {
 #define UPDATE_TEXT_STYLE(group, name, func)             \
     do {                                                 \
@@ -100,9 +107,9 @@ std::string GetFontFamilyInJson(const std::optional<std::vector<std::string>>& v
 std::string GetSymbolRenderingStrategyInJson(const std::optional<uint32_t>& value)
 {
     std::string text;
-    if (value == MULTIPLECOLOR) {
+    if (value == RENDERINGSTRATEGY_MULTIPLE_COLOR) {
         text = "RenderingStrategy.MULTIPLE_COLOR";
-    } else if (value == MULTIPLEOPACITY) {
+    } else if (value == RENDERINGSTRATEGY_MULTIPLE_OPACITY) {
         text = "RenderingStrategy.MULTIPLE_OPACITY";
     } else {
         text = "RenderingStrategy.SINGLE";
@@ -112,9 +119,9 @@ std::string GetSymbolRenderingStrategyInJson(const std::optional<uint32_t>& valu
 std::string GetSymbolEffectStrategyInJson(const std::optional<uint32_t>& value)
 {
     std::string text;
-    if (value == EFFSCALE) {
+    if (value == EFFECTSTRATEGY_SCALE) {
         text = "EffectStrategy.SCALE";
-    } else if (value == EFFHIERARCHICAL) {
+    } else if (value == EFFECTSTRATEGY_HIERARCHICAL) {
         text = "EffectStrategy.HIERARCHICAL";
     } else {
         text = "EffectStrategy.NONE";
