@@ -1179,9 +1179,6 @@ void FocusHub::OnFocusNode()
         parentFocusHub->SetLastFocusNodeIndex(AceType::Claim(this));
     }
     HandleParentScroll(); // If current focus node has a scroll parent. Handle the scroll event.
-    if (isFocusActiveWhenFocused_) {
-        PaintFocusState(true, true);
-    }
     auto rootNode = pipeline->GetRootElement();
     auto rootFocusHub = rootNode ? rootNode->GetFocusHub() : nullptr;
     if (rootFocusHub && pipeline->GetIsFocusActive()) {
