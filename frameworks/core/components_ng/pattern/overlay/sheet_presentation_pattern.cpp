@@ -42,7 +42,7 @@ constexpr float SHEET_VISIABLE_ALPHA = 1.0f;
 constexpr float SHEET_INVISIABLE_ALPHA = 0.0f;
 constexpr int32_t SHEET_ENTRY_ANIMATION_DURATION = 250;
 constexpr int32_t SHEET_EXIT_ANIMATION_DURATION = 100;
-const Dimension SHEET_INVISIABLE_OFFSET = 8.0_px;
+constexpr float SHEET_INVISIABLE_OFFSET = 8.0;
 constexpr int32_t SHEET_HALF_HEIGHT = 2;
 constexpr Dimension ARROW_VERTICAL_P1_OFFSET_X = 8.0_vp;
 constexpr Dimension ARROW_VERTICAL_P2_OFFSET_X = 1.5_vp;
@@ -99,8 +99,12 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
         sheetMaxHeight_ = sheetLayoutAlgorithm->GetSheetMaxHeight() - statusBarHeight_;
         sheetMaxWidth_ = sheetLayoutAlgorithm->GetSheetMaxWidth();
         centerHeight_ = sheetLayoutAlgorithm->GetCenterHeight();
-        sheetOffsetX_ = sheetLayoutAlgorithm->GetSheetOffsetX();
-        sheetOffsetY_ = sheetLayoutAlgorithm->GetSheetOffsetY();
+        if (!NearEqual(sheetOffsetX_, sheetLayoutAlgorithm->GetSheetOffsetX()) ||
+            !NearEqual(sheetOffsetY_, sheetLayoutAlgorithm->GetSheetOffsetY())) {
+            sheetOffsetX_ = sheetLayoutAlgorithm->GetSheetOffsetX();
+            sheetOffsetY_ = sheetLayoutAlgorithm->GetSheetOffsetY();
+            windowChanged_ = true;
+        }
     }
     auto sheetType = GetSheetType();
     if ((sheetType == SheetType::SHEET_BOTTOM) || (sheetType == SheetType::SHEET_BOTTOMLANDSPACE)) {
@@ -756,7 +760,7 @@ void SheetPresentationPattern::CheckSheetHeightChange()
             if (sheetType_ == SheetType::SHEET_POPUP) {
                 auto renderContext = GetRenderContext();
                 CHECK_NULL_VOID(renderContext);
-                renderContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+                renderContext->OnTransformTranslateUpdate({ 0.0f, Dimension(sheetOffsetY_), 0.0f });
                 renderContext->UpdateOpacity(SHEET_VISIABLE_ALPHA);
             }
             overlayManager->PlaySheetTransition(host, true, false, true);
@@ -931,7 +935,7 @@ void SheetPresentationPattern::StartOffsetEnteringAnimation()
             CHECK_NULL_VOID(pattern);
             auto renderContext = pattern->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
-            renderContext->OnTransformTranslateUpdate({ 0.0f, 0.0f, 0.0f });
+            renderContext->OnTransformTranslateUpdate({ 0.0f, Dimension(pattern->sheetOffsetY_), 0.0f });
         },
         nullptr);
 }
@@ -975,7 +979,8 @@ void SheetPresentationPattern::StartOffsetExitingAnimation()
             CHECK_NULL_VOID(pattern);
             auto renderContext = pattern->GetRenderContext();
             CHECK_NULL_VOID(renderContext);
-            renderContext->OnTransformTranslateUpdate({ 0.0f, -SHEET_INVISIABLE_OFFSET, 0.0f });
+            renderContext->OnTransformTranslateUpdate(
+                { 0.0f, Dimension(pattern->sheetOffsetY_ - SHEET_INVISIABLE_OFFSET), 0.0f });
         },
         nullptr);
 }
@@ -1028,7 +1033,7 @@ void SheetPresentationPattern::ResetToInvisible()
     auto renderContext = GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->UpdateOpacity(SHEET_INVISIABLE_ALPHA);
-    renderContext->OnTransformTranslateUpdate({ 0.0f, -SHEET_INVISIABLE_OFFSET, 0.0f });
+    renderContext->OnTransformTranslateUpdate({ 0.0f, Dimension(sheetOffsetY_ - SHEET_INVISIABLE_OFFSET), 0.0f });
 }
 
 bool SheetPresentationPattern::IsFold()
@@ -1124,7 +1129,7 @@ void SheetPresentationPattern::OnWindowSizeChanged(int32_t width, int32_t height
         }
         TranslateTo(height_);
     }
-    if (type == WindowSizeChangeReason::ROTATION) {
+    if (type == WindowSizeChangeReason::ROTATION || type == WindowSizeChangeReason::UNDEFINED) {
         windowChanged_ = true;
     }
 }

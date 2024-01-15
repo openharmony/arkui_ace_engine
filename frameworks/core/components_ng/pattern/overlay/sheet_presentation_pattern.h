@@ -280,6 +280,11 @@ public:
         return sheetMaxWidth_;
     }
 
+    float GetSheetOffset()
+    {
+        return sheetOffsetY_;
+    }
+
     float GetFitContentHeight();
 
     void ProcessColumnRect(float height = 0.0f);
