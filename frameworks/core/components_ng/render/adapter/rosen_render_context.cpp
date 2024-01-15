@@ -4294,6 +4294,12 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
             false);
     } else {
         if (!transitionEffect_->HasDisappearTransition()) {
+            if (frameNode->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
+                auto frameParent = frameNode->GetAncestorNodeOfFrame();
+                CHECK_NULL_VOID(frameParent);
+                // for window surfaceNode, remove surfaceNode explicitly
+                frameParent->GetRenderContext()->RemoveChild(Claim(this));
+            }
             return;
         }
         // Re-use current implicit animation timing params, only replace the finish callback function.
