@@ -107,6 +107,7 @@ void JSFolderStack::SetAutoHalfFold(const JSCallbackInfo& info)
 {
     if (!info[0]->IsBoolean()) {
         FolderStackModel::GetInstance()->SetAutoHalfFold(true);
+        return;
     }
     auto IsAutoHalfFold = info[0]->ToBoolean();
     FolderStackModel::GetInstance()->SetAutoHalfFold(IsAutoHalfFold);
