@@ -637,8 +637,12 @@ void DotIndicatorModifier::PlayTouchBottomAnimation(const std::vector<std::pair<
         AnimationUtils::StartAnimation(optionBottom, [weak, longPointCenterX]() {
             auto modifier = weak.Upgrade();
             CHECK_NULL_VOID(modifier);
-            modifier->longPointLeftCenterX_->Set(longPointCenterX[1].first);
             modifier->longPointRightCenterX_->Set(longPointCenterX[1].second);
+            if (modifier->isCustomSize_) {
+                modifier->longPointLeftCenterX_->Set(longPointCenterX[1].second);
+            } else {
+                modifier->longPointLeftCenterX_->Set(longPointCenterX[1].first);
+            }
         }, [weak]() {
             auto modifier = weak.Upgrade();
             CHECK_NULL_VOID(modifier);
