@@ -14,9 +14,9 @@
  */
 
 var __decorate = this && this.__decorate || function (e, t, i, o) {
-    var s, a = arguments.length, d = a < 3 ? t : null === o ? o = Object.getOwnPropertyDescriptor(t, i) : o;
-    if ("object" == typeof Reflect && "function" == typeof Reflect.decorate) d = Reflect.decorate(e, t, i, o); else for (var r = e.length - 1;r >= 0; r--) (s = e[r]) && (d = (a < 3 ? s(d) : a > 3 ? s(t, i, d) : s(t, i)) || d);
-    return a > 3 && d && Object.defineProperty(t, i, d), d
+  var s, a = arguments.length, d = a < 3 ? t : null === o ? o = Object.getOwnPropertyDescriptor(t, i) : o;
+  if ("object" == typeof Reflect && "function" == typeof Reflect.decorate) d = Reflect.decorate(e, t, i, o); else for (var r = e.length - 1;r >= 0; r--) (s = e[r]) && (d = (a < 3 ? s(d) : a > 3 ? s(t, i, d) : s(t, i)) || d);
+  return a > 3 && d && Object.defineProperty(t, i, d), d
 };
 const IMAGE_NODE_HEIGHT = 24;
 const IMAGE_NODE_WIDTH = 24;
@@ -53,39 +53,39 @@ const MAX_WIDTH = "192vp";
 const TRANS_COLOR = "#00FFFFFF";
 
 const ARROW_DOWN = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAAIGNIUk0AAHomAACAhAAA+' +
-'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'
+  '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'
 
 const ARROW_DOWN_WITHE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAIGNIUk0AAHomAAC' +
-'AhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAl' +
-'wSFlzAAAOxAAADsQBlSsOGwAAAKVJREFUeNpjYBgFo2AU0Bww4pL4////diC1hZGRcSo+A4DqWIDUZCB+AVTbiC7PhEfvByCeAjQgn4Dhy4E' +
-'4BYgvYFODz4JYIF4DxBOwWYJkeAAQRwBdvxGbIcy4TG9sbPzX0NCwHsjUAuIiIPsDUOwkDsPXkhwHWFwaAsQlQAwyrJsYw4myAIslIPCHGMP' +
-'xBhGO4PoGxF+AOA9o+NbRTDgKRgFxAAAzj0Grm3RjyAAAAABJRU5ErkJggg=='
+  'AhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAl' +
+  'wSFlzAAAOxAAADsQBlSsOGwAAAKVJREFUeNpjYBgFo2AU0Bww4pL4////diC1hZGRcSo+A4DqWIDUZCB+AVTbiC7PhEfvByCeAjQgn4Dhy4E' +
+  '4BYgvYFODz4JYIF4DxBOwWYJkeAAQRwBdvxGbIcy4TG9sbPzX0NCwHsjUAuIiIPsDUOwkDsPXkhwHWFwaAsQlQAwyrJsYw4myAIslIPCHGMP' +
+  'xBhGO4PoGxF+AOA9o+NbRTDgKRgFxAAAzj0Grm3RjyAAAAABJRU5ErkJggg=='
 
 const ARROW_RIGHT = 'data:image/png;base64,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
-'+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'
+  '+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'
 
 const ARROW_RIGHT_WITHE = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAIGNIUk0AAHomAA' +
-'CAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAA' +
-'lwSFlzAAAOxAAADsQBlSsOGwAAAKFJREFUeNpjYBgFowAE/v//bwHEPOToZSJS3XIg3k6OJcRaUALEFuRYwkyMosbGxusNDQ3XgMwCIHYAsl' +
-'cDxX5RzQJKLGEmxbvkWMJEaqQxMjKuBVI5QGwDxOnUimR08AFK81DdAmAqArl8DhDfAOKpVLUAavh2IH4CxI7A4HpDMEgpMPwFUXFGS8NJCa' +
-'L55BgOAixEqqsB4oOkGj4KRggAAN4STB9zyhGzAAAAAElFTkSuQmCC'
+  'CAhAAA+gAAAIDoAAB1MAAA6mAAADqYAAAXcJy6UTwAAAAEZ0FNQQAAsY58+1GTAAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAA' +
+  'lwSFlzAAAOxAAADsQBlSsOGwAAAKFJREFUeNpjYBgFowAE/v//bwHEPOToZSJS3XIg3k6OJcRaUALEFuRYwkyMosbGxusNDQ3XgMwCIHYAsl' +
+  'cDxX5RzQJKLGEmxbvkWMJEaqQxMjKuBVI5QGwDxOnUimR08AFK81DdAmAqArl8DhDfAOKpVLUAavh2IH4CxI7A4HpDMEgpMPwFUXFGS8NJCa' +
+  'L55BgOAixEqqsB4oOkGj4KRggAAN4STB9zyhGzAAAAAElFTkSuQmCC'
 
 var Event;
 !function(e){
@@ -679,7 +679,7 @@ export var TreeView;
         }
 
         changeImageCollapseSource(e) {
-                e == NodeStatus.Expand ? this.imageCollapseSource = this.imageCollapseDownSource : e == NodeStatus.Collapse && (this.imageCollapseSource = this.imageCollapseRightSource)
+            e == NodeStatus.Expand ? this.imageCollapseSource = this.imageCollapseDownSource : e == NodeStatus.Collapse && (this.imageCollapseSource = this.imageCollapseRightSource)
         }
 
         setImageCollapseSource(e, t) {
@@ -763,38 +763,38 @@ export var TreeView;
 
         setMainTitleSelected(e) {
             this.mainTitleSetting = e ? {
-                                            fontColor: {
-                                                id: -1,
-                                                type: 10001,
-                                                params: ["sys.color.ohos_id_color_text_primary_activated"],
-                                                bundleName: "",
-                                                moduleName: ""
-                                            },
-                                            fontSize: {
-                                                id: -1,
-                                                type: 10002,
-                                                params: ["sys.float.ohos_id_text_size_body1"],
-                                                bundleName: "",
-                                                moduleName: ""
-                                            },
-                                            fontWeight: FontWeight.Regular
-                                        } : {
-                                                fontColor: {
-                                                    id: -1,
-                                                    type: 10001,
-                                                    params: ["sys.color.ohos_id_color_primary"],
-                                                    bundleName: "",
-                                                    moduleName: ""
-                                                },
-                                                fontSize: {
-                                                    id: -1,
-                                                    type: 10002,
-                                                    params: ["sys.float.ohos_id_text_size_body1"],
-                                                    bundleName: "",
-                                                    moduleName: ""
-                                                },
-                                                fontWeight: FontWeight.Normal
-                                            }
+                fontColor: {
+                    id: -1,
+                    type: 10001,
+                    params: ["sys.color.ohos_id_color_text_primary_activated"],
+                    bundleName: "",
+                    moduleName: ""
+                },
+                fontSize: {
+                    id: -1,
+                    type: 10002,
+                    params: ["sys.float.ohos_id_text_size_body1"],
+                    bundleName: "",
+                    moduleName: ""
+                },
+                fontWeight: FontWeight.Regular
+            } : {
+                fontColor: {
+                    id: -1,
+                    type: 10001,
+                    params: ["sys.color.ohos_id_color_primary"],
+                    bundleName: "",
+                    moduleName: ""
+                },
+                fontSize: {
+                    id: -1,
+                    type: 10002,
+                    params: ["sys.float.ohos_id_text_size_body1"],
+                    bundleName: "",
+                    moduleName: ""
+                },
+                fontWeight: FontWeight.Normal
+            }
         }
 
         set title(e) {
@@ -827,38 +827,38 @@ export var TreeView;
 
         setMainTitleHighLight(e) {
             this.mainTitleSetting = e ? {
-                                            fontColor: {
-                                                id: -1,
-                                                type: 10001,
-                                                params: ["sys.color.ohos_id_color_primary_contrary"],
-                                                bundleName: "",
-                                                moduleName: ""
-                                            },
-                                            fontSize: {
-                                                id: -1,
-                                                type: 10002,
-                                                params: ["sys.float.ohos_id_text_size_body1"],
-                                                bundleName: "",
-                                                moduleName: ""
-                                            },
-                                            fontWeight: FontWeight.Regular
-                                        } : {
-                                                fontColor: {
-                                                    id: -1,
-                                                    type: 10001,
-                                                    params: ["sys.color.ohos_id_color_primary"],
-                                                    bundleName: "",
-                                                    moduleName: ""
-                                                },
-                                                fontSize: {
-                                                    id: -1,
-                                                    type: 10002,
-                                                    params: ["sys.float.ohos_id_text_size_body1"],
-                                                    bundleName: "",
-                                                    moduleName: ""
-                                                },
-                                                fontWeight: FontWeight.Normal
-                                            }
+                fontColor: {
+                    id: -1,
+                    type: 10001,
+                    params: ["sys.color.ohos_id_color_primary_contrary"],
+                    bundleName: "",
+                    moduleName: ""
+                },
+                fontSize: {
+                    id: -1,
+                    type: 10002,
+                    params: ["sys.float.ohos_id_text_size_body1"],
+                    bundleName: "",
+                    moduleName: ""
+                },
+                fontWeight: FontWeight.Regular
+            } : {
+                fontColor: {
+                    id: -1,
+                    type: 10001,
+                    params: ["sys.color.ohos_id_color_primary"],
+                    bundleName: "",
+                    moduleName: ""
+                },
+                fontSize: {
+                    id: -1,
+                    type: 10002,
+                    params: ["sys.float.ohos_id_text_size_body1"],
+                    bundleName: "",
+                    moduleName: ""
+                },
+                fontWeight: FontWeight.Normal
+            }
         }
     }
 
@@ -1238,7 +1238,7 @@ export var TreeView;
                         n = e;
                         break
                     }
-                        o ? d.children.splice(n + 1, 0, r) : d.children.splice(n, 0, r)
+                    o ? d.children.splice(n + 1, 0, r) : d.children.splice(n, 0, r)
                 } else d.children.push(r);
                 d.getChildNodeInfo().isHasChildNode = !0;
                 d.getChildNodeInfo().childNum = d.children.length;
@@ -1796,7 +1796,7 @@ export var TreeView;
                         moduleName: ""
                     })
                 } else if (e === PopUpType.WARNINGS && null != s.getNodeItem().inputText) {
-                        t === InputError.INVALID_ERROR ? s.setPopUpText("invalid error") : t === InputError.LENGTH_ERROR && s.setPopUpText("length error");
+                    t === InputError.INVALID_ERROR ? s.setPopUpText("invalid error") : t === InputError.LENGTH_ERROR && s.setPopUpText("length error");
                     s.setPopUpEnableArrow(!0);
                     s.setPopUpColor({
                         id: -1,
@@ -2257,7 +2257,7 @@ export var TreeView;
                 if (e.currentNodeId >= 0) {
                     var o = new NodeInfo(e);
                     this.listNode.push(o);
-                        this.expandAndCollapseInfo.get(e.currentNodeId) == NodeStatus.Expand ? o.getNodeItem().imageCollapse.changeImageCollapseSource(NodeStatus.Expand) : this.expandAndCollapseInfo.get(e.currentNodeId) == NodeStatus.Collapse && o.getNodeItem().imageCollapse.changeImageCollapseSource(NodeStatus.Collapse);
+                    this.expandAndCollapseInfo.get(e.currentNodeId) == NodeStatus.Expand ? o.getNodeItem().imageCollapse.changeImageCollapseSource(NodeStatus.Expand) : this.expandAndCollapseInfo.get(e.currentNodeId) == NodeStatus.Collapse && o.getNodeItem().imageCollapse.changeImageCollapseSource(NodeStatus.Collapse);
                     for (let e = 0;e < t.length; e++) if (t[e].getCurrentNodeId() == o.getCurrentNodeId()) {
                         o.setNodeIsShow(t[e].getNodeIsShow());
                         o.setListItemHeight(t[e].getListItemHeight());
@@ -2655,7 +2655,7 @@ export var TreeView;
             this.observeComponentCreation(((t, i) => {
                 ViewStackProcessor.StartGetAccessRecordingFor(t);
                 If.create();
-                    e.getNodeItem().mainTitleNode && e.getIsShowTitle() ? this.ifElseBranchUpdateFunction(0, (() => {
+                e.getNodeItem().mainTitleNode && e.getIsShowTitle() ? this.ifElseBranchUpdateFunction(0, (() => {
                     this.observeComponentCreation(((t, i) => {
                         ViewStackProcessor.StartGetAccessRecordingFor(t);
                         Text.create(e.getNodeItem().mainTitleNode.title);
@@ -2964,7 +2964,7 @@ export var TreeView;
                             }));
                             this.observeComponentCreation(((e, i) => {
                                 ViewStackProcessor.StartGetAccessRecordingFor(e);
-                                    i ? ViewPU.create(new TreeViewInner(this, {
+                                i ? ViewPU.create(new TreeViewInner(this, {
                                     item: t,
                                     listNodeDataSource: this.listNodeDataSource,
                                     index: this.findIndex(t.getNodeCurrentNodeId())
@@ -3009,7 +3009,7 @@ export var TreeView;
                             }));
                             this.observeComponentCreation(((e, i) => {
                                 ViewStackProcessor.StartGetAccessRecordingFor(e);
-                                    i ? ViewPU.create(new TreeViewInner(this, {
+                                i ? ViewPU.create(new TreeViewInner(this, {
                                     item: t,
                                     listNodeDataSource: this.listNodeDataSource,
                                     index: this.findIndex(t.getNodeCurrentNodeId())
@@ -3019,7 +3019,7 @@ export var TreeView;
                             Row.pop();
                             ListItem.pop()
                         };
-                            e ? o() : s()
+                        e ? o() : s()
                     }
                 };
                 const t = e => JSON.stringify(e);
@@ -3417,23 +3417,23 @@ export class TreeViewInner extends ViewPU {
                     Column.create();
                     Column.opacity(this.listNodeDataSource.getListItemOpacity(ObservedObject.GetRawObject(this.item)));
                     Column.onHover((e => {
-                        if (e && (!this.item.getIsSelected())){
+                        if(e && (!this.item.getIsSelected())){
                             this.item.setNodeColor({
-                                id: -1,
-                                type: 10001,
-                                params: ["sys.color.ohos_id_color_hover"],
-                                bundleName: "",
-                                moduleName: ""
-                            })
-                        } else if (!this.item.getIsSelected()){
-                            this.item.setNodeColor({
-                                id: -1,
-                                type: 10001,
-                                params: ["sys.color.ohos_id_color_background_transparent"],
-                                bundleName: "",
-                                moduleName: ""
-                            })
-                        }
+                            id: -1,
+                            type: 10001,
+                            params: ["sys.color.ohos_id_color_hover"],
+                            bundleName: "",
+                            moduleName: ""
+                        })
+                    }else if(!this.item.getIsSelected()){
+                          this.item.setNodeColor({
+                            id: -1,
+                            type: 10001,
+                            params: ["sys.color.ohos_id_color_background_transparent"],
+                            bundleName: "",
+                            moduleName: ""
+                        })
+                    }
                     }));
                     Column.onTouch((e => {
                         this.count++;
@@ -3594,7 +3594,7 @@ export class TreeViewInner extends ViewPU {
                 this.observeComponentCreation(((e, t) => {
                     ViewStackProcessor.StartGetAccessRecordingFor(e);
                     If.create();
-                        this.item.getNodeItem().mainTitleNode && this.item.getIsShowTitle() ? this.ifElseBranchUpdateFunction(0, (() => {
+                    this.item.getNodeItem().mainTitleNode && this.item.getIsShowTitle() ? this.ifElseBranchUpdateFunction(0, (() => {
                         this.observeComponentCreation(((e, t) => {
                             ViewStackProcessor.StartGetAccessRecordingFor(e);
                             Text.create(this.item.getNodeItem().mainTitleNode.title);
@@ -3617,7 +3617,7 @@ export class TreeViewInner extends ViewPU {
                 this.observeComponentCreation(((e, t) => {
                     ViewStackProcessor.StartGetAccessRecordingFor(e);
                     If.create();
-                        this.item.getNodeItem().mainTitleNode && this.item.getNodeItem().inputText && this.item.getIsShowInputText() ? this.ifElseBranchUpdateFunction(0, (() => {
+                    this.item.getNodeItem().mainTitleNode && this.item.getNodeItem().inputText && this.item.getIsShowInputText() ? this.ifElseBranchUpdateFunction(0, (() => {
                         this.observeComponentCreation(((e, t) => {
                             ViewStackProcessor.StartGetAccessRecordingFor(e);
                             Row.create();
