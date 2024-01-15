@@ -1463,6 +1463,7 @@ void ListPattern::HandleScrollBarOutBoundary()
         return;
     }
     if (!IsOutOfBoundary(false) || !scrollable_) {
+        ScrollablePattern::HandleScrollBarOutBoundary(0);
         return;
     }
     float overScroll = 0.0f;
