@@ -90,24 +90,24 @@ void GridLayoutInfo::MoveItemsForward(int32_t from, int32_t to, int32_t itemInde
 void GridLayoutInfo::SwapItems(int32_t itemIndex, int32_t insertIndex)
 {
     currentMovingItemPosition_ = currentMovingItemPosition_ == -1 ? itemIndex : currentMovingItemPosition_;
-    auto insertPositon = insertIndex;
+    auto insertPosition = insertIndex;
     // drag from another grid
     if (itemIndex == -1) {
         if (currentMovingItemPosition_ == -1) {
-            MoveItemsBack(insertPositon, childrenCount_, itemIndex);
+            MoveItemsBack(insertPosition, childrenCount_, itemIndex);
             return;
         }
     } else {
-        insertPositon = GetPositionByItemIndex(insertIndex);
+        insertPosition = GetPositionByItemIndex(insertIndex);
     }
 
-    if (currentMovingItemPosition_ > insertPositon) {
-        MoveItemsBack(insertPositon, currentMovingItemPosition_, itemIndex);
+    if (currentMovingItemPosition_ > insertPosition) {
+        MoveItemsBack(insertPosition, currentMovingItemPosition_, itemIndex);
         return;
     }
 
-    if (insertPositon > currentMovingItemPosition_) {
-        MoveItemsForward(currentMovingItemPosition_, insertPositon, itemIndex);
+    if (insertPosition > currentMovingItemPosition_) {
+        MoveItemsForward(currentMovingItemPosition_, insertPosition, itemIndex);
     }
 }
 
@@ -184,7 +184,29 @@ float GridLayoutInfo::GetContentOffset(float mainGap) const
     if (itemCount >= (childrenCount_ - 1) || (fromStart && itemCount >= startIndex_)) {
         height = GetStartLineOffset(mainGap);
     }
+    LOGI("ZTE offset = %f", height);
     return height;
+}
+
+int32_t GridLayoutInfo::FindItemCount(int32_t startLine, int32_t endLine) const
+{
+    const auto firstLine = gridMatrix_.find(startLine);
+    const auto lastLine = gridMatrix_.find(endLine);
+    if (firstLine == gridMatrix_.end() || lastLine == gridMatrix_.end()) {
+        return -1;
+    }
+    if (firstLine->second.empty() || lastLine->second.empty()) {
+        return -1;
+    }
+
+    int32_t minIdx = firstLine->second.begin()->first;
+
+    int32_t maxIdx = 0;
+    // maxIdx might not be in the last position if hasBigItem_
+    for (auto it : lastLine->second) {
+        maxIdx = std::max(maxIdx, it.second);
+    }
+    return maxIdx - minIdx + 1;
 }
 
 float GridLayoutInfo::GetContentHeight(float mainGap) const
@@ -203,9 +225,10 @@ float GridLayoutInfo::GetContentHeight(float mainGap) const
         auto lastLine = lineHeightMap_.find(lines);
         return res + (lastLine != lineHeightMap_.end() ? lastLine->second : lineHeight);
     }
-    float heightSum = 0;
-    int32_t itemCount = 0;
-    float estimatedHeight = 0;
+    if (lineHeightMap_.empty()) {
+        return 0.0f;
+    }
+    float heightSum = 0.0f;
     for (const auto& item : lineHeightMap_) {
         auto line = gridMatrix_.find(item.first);
         if (line == gridMatrix_.end()) {
@@ -214,20 +237,19 @@ float GridLayoutInfo::GetContentHeight(float mainGap) const
         if (line->second.empty()) {
             continue;
         }
-        auto lineStart = line->second.begin()->second;
-        auto lineEnd = line->second.rbegin()->second;
-        itemCount += (lineEnd - lineStart + 1);
         heightSum += item.second + mainGap;
     }
-    if (itemCount == 0) {
-        return 0;
-    }
-    auto averageHeight = heightSum / itemCount;
-    if (itemCount >= (childrenCount_ - 1)) {
+    // assume lineHeightMap is continuous in range [begin, rbegin]
+    int32_t itemCount = FindItemCount(lineHeightMap_.begin()->first, lineHeightMap_.rbegin()->first);
+    float averageHeight = heightSum / itemCount;
+
+    float estimatedHeight = 0;
+    if (itemCount == childrenCount_) {
         estimatedHeight = heightSum - mainGap;
     } else {
         estimatedHeight = heightSum + (childrenCount_ - itemCount) * averageHeight;
     }
+    LOGI("ZTE estimated height = %f", estimatedHeight);
     return estimatedHeight;
 }
 
