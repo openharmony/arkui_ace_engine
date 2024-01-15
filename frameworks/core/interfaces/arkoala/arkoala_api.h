@@ -1079,7 +1079,7 @@ struct ArkUIButtonModifier {
 };
 
 struct ArkUIImageModifier {
-    void (*setImageSrc)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*setSrc)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*setCopyOption)(ArkUINodeHandle node, ArkUI_Int32 copyOption);
     void (*resetCopyOption)(ArkUINodeHandle node);
     void (*setAutoResize)(ArkUINodeHandle node, bool autoResize);
