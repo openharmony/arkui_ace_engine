@@ -107,6 +107,18 @@ enum class PlaceholderAlignment {
     MIDDLE,
 };
 
+enum RenderingStrategy {
+    SINGLE = 0,
+    MULTIPLE_COLOR,
+    MULTIPLE_OPACITY,
+};
+
+enum EffectStrategy {
+    NONE = 0,
+    SCALE,
+    HIERARCHICAL,
+};
+
 struct TextSizeGroup {
     Dimension fontSize = 14.0_px;
     uint32_t maxLines = INT32_MAX;
