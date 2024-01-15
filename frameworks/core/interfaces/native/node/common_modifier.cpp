@@ -2684,6 +2684,64 @@ void ResetResponseRegion(NodeHandle node)
     ViewAbstract::SetResponseRegion(frameNode, region);
 }
 
+void SetBackgroundEffect(NodeHandle node, const EffectOption &effectOption)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetBackgroundEffect(frameNode, effectOption);
+}
+
+void ResetBackgroundEffect(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension radius;
+    radius.SetValue(0.0f);
+    double saturation = 1.0f;
+    double brightness = 1.0f;
+    Color color = Color::TRANSPARENT;
+    color.SetValue(Color::TRANSPARENT.GetValue());
+    auto adaptiveColor = AdaptiveColor::DEFAULT;
+    BlurOption blurOption;
+    EffectOption effectOption = { radius, saturation, brightness, color, adaptiveColor, blurOption };
+    ViewAbstract::SetBackgroundEffect(frameNode, effectOption);
+}
+
+void SetBackgroundBrightness(NodeHandle node, float rate, float lightUpDegree)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDynamicLightUp(frameNode, rate, lightUpDegree);
+}
+
+void ResetBackgroundBrightness(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    double rate = 0.0;
+    double lightUpDegree = 0.0;
+    ViewAbstract::SetDynamicLightUp(frameNode, rate, lightUpDegree);
+}
+
+void SetDragPreviewOptions(NodeHandle node, int32_t dragPreviewMode)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (!(dragPreviewMode >= static_cast<int32_t>(NG::DragPreviewMode::AUTO) &&
+            dragPreviewMode <= static_cast<int32_t>(NG::DragPreviewMode::DISABLE_SCALE))) {
+        dragPreviewMode = static_cast<int32_t>(NG::DragPreviewMode::AUTO);
+    }
+    NG::DragPreviewOption option { static_cast<NG::DragPreviewMode>(dragPreviewMode) };
+    ViewAbstract::SetDragPreviewOptions(frameNode, option);
+}
+
+void ResetDragPreviewOptions(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetDragPreviewOptions(frameNode, { NG::DragPreviewMode::AUTO });
+}
+
 void SetMouseResponseRegion(NodeHandle node, const double* values, const int32_t* units, int32_t length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -3022,6 +3080,8 @@ ArkUICommonModifierAPI GetCommonModifier()
         SetFlexBasis, ResetFlexBasis, SetAlignRules, ResetAlignRules,
         SetAccessibilityDescription, ResetAccessibilityDescription, SetId, ResetId, SetKey, ResetKey, SetRestoreId,
         ResetRestoreId, SetTabIndex, ResetTabIndex, SetObscured, ResetObscured, SetResponseRegion, ResetResponseRegion,
+        SetBackgroundEffect, ResetBackgroundEffect, SetBackgroundBrightness, ResetBackgroundBrightness,
+        SetDragPreviewOptions, ResetDragPreviewOptions,
         SetMouseResponseRegion, ResetMouseResponseRegion, SetEnabled, ResetEnabled,
         SetDraggable, ResetDraggable, SetAccessibilityGroup, ResetAccessibilityGroup, SetHoverEffect, ResetHoverEffect,
         SetOutlineColor, ResetOutlineColor, SetOutlineRadius, ResetOutlineRadius,

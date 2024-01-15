@@ -1918,6 +1918,65 @@ class ObscuredModifier extends ModifierWithKey<Array<ObscuredReasons>> {
   }
 }
 
+class BackgroundEffectModifier extends ModifierWithKey<BackgroundEffectOptions> {
+  constructor(options: BackgroundEffectOptions) {
+    super(options);
+  }
+  static identity: Symbol = Symbol('backgroundEffect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBackgroundEffect(node);
+    } else {
+      getUINativeModule().common.setBackgroundEffect(node, this.value.radius, this.value.saturation,
+        this.value.brightness, this.value.color, this.value.adaptiveColor, this.value.blurOptions?.grayscale);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !(this.value.radius === this.stageValue.radius && this.value.saturation === this.stageValue.saturation &&
+      this.value.brightness === this.stageValue.brightness &&
+      isBaseOrResourceEqual(this.stageValue.color, this.value.color) &&
+      this.value.adaptiveColor === this.stageValue.adaptiveColor &&
+      this.value.blurOptions?.grayscale === this.stageValue.blurOptions?.grayscale);
+  }
+}
+
+class BackgroundBrightnessModifier extends ModifierWithKey<BackgroundBrightnessOptions> {
+  constructor(params: BackgroundBrightnessOptions) {
+    super(params);
+  }
+  static identity: Symbol = Symbol('backgroundBrightness');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBackgroundBrightness(node);
+    } else {
+      getUINativeModule().common.setBackgroundBrightness(node, this.value.rate, this.value.lightUpDegree);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !(this.value.rate === this.stageValue.rate && this.value.lightUpDegree === this.stageValue.lightUpDegree);
+  }
+}
+
+class DragPreviewOptionsModifier extends ModifierWithKey<DragPreviewOptions> {
+  constructor(value: DragPreviewOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('dragPreviewOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetDragPreviewOptions(node);
+    } else {
+      getUINativeModule().common.setDragPreviewOptions(node, this.value.mode);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !(this.value.mode === this.stageValue.mode);
+  }
+}
+
 class MouseResponseRegionModifier extends ModifierWithKey<Array<Rectangle> | Rectangle> {
   constructor(value: Array<Rectangle> | Rectangle) {
     super(value);
@@ -2391,6 +2450,24 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     } else {
       modifierWithKey(this._modifiersWithKeys, ExpandSafeAreaModifier.identity, ExpandSafeAreaModifier, opts);
     }
+    return this;
+  }
+
+  backgroundEffect(options: BackgroundEffectOptions): this {
+    modifierWithKey(this._modifiersWithKeys, BackgroundEffectModifier.identity,
+      BackgroundEffectModifier, options);
+    return this;
+  }
+
+  backgroundBrightness(params: BackgroundBrightnessOptions): this {
+    modifierWithKey(this._modifiersWithKeys, BackgroundBrightnessModifier.identity,
+      BackgroundBrightnessModifier, params);
+    return this;
+  }
+
+  dragPreviewOptions(value: DragPreviewOptions): this {
+    modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity,
+      DragPreviewOptionsModifier, value);
     return this;
   }
 
