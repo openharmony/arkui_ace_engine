@@ -2597,8 +2597,7 @@ class ObservedPropertyAbstract extends SubscribedAbstractProperty {
 class CustomDialogController extends NativeCustomDialogController {
     constructor(arg, view) {
         super(arg, view);
-        this.builder_ = arg.builder;
-        this.cancel_ = arg.cancel;
+        this.arg_ = arg;
         this.view_ = view;
     }
 }
