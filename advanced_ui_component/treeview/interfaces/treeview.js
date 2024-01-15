@@ -3417,16 +3417,16 @@ export class TreeViewInner extends ViewPU {
                     Column.create();
                     Column.opacity(this.listNodeDataSource.getListItemOpacity(ObservedObject.GetRawObject(this.item)));
                     Column.onHover((e => {
-                        if (e && (!this.item.getIsSelected())) {
-                            this.item.setNodeColor({
+            if (e && (!this.item.getIsSelected())) {
+              this.item.setNodeColor({
                                 id: -1,
                                 type: 10001,
                                 params: ["sys.color.ohos_id_color_hover"],
                                 bundleName: "",
                                 moduleName: ""
                             })
-                        } else if (!this.item.getIsSelected()) {
-                            this.item.setNodeColor({
+            } else if (!this.item.getIsSelected()) {
+              this.item.setNodeColor({
                                 id: -1,
                                 type: 10001,
                                 params: ["sys.color.ohos_id_color_background_transparent"],
