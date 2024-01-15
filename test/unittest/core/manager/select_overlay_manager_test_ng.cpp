@@ -31,7 +31,9 @@
 #include "core/components_ng/base/geometry_node.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_manager.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/text/text_base.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/property/property.h"
 
 using namespace testing;
@@ -471,7 +473,6 @@ HWTEST_F(SelectOverlayManagerTestNg, FindWindowScene001, TestSize.Level1)
  * @tc.desc: test HandleGlobalEvent
  * @tc.type: FUNC
  */
-
 HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent01, TestSize.Level1)
 {
     /**
@@ -502,7 +503,6 @@ HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent01, TestSize.Level1)
  * @tc.desc: test HandleGlobalEvent
  * @tc.type: FUNC
  */
-
 HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent02, TestSize.Level1)
 {
     /**
@@ -533,7 +533,6 @@ HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent02, TestSize.Level1)
  * @tc.desc: test HandleGlobalEvent
  * @tc.type: FUNC
  */
-
 HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent03, TestSize.Level1)
 {
     /**
@@ -564,7 +563,6 @@ HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent03, TestSize.Level1)
  * @tc.desc: test HandleGlobalEvent
  * @tc.type: FUNC
  */
-
 HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent04, TestSize.Level1)
 {
     /**
@@ -597,7 +595,6 @@ HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent04, TestSize.Level1)
  * @tc.desc: test HandleGlobalEvent
  * @tc.type: FUNC
  */
-
 HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent05, TestSize.Level1)
 {
     /**
@@ -634,7 +631,6 @@ HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent05, TestSize.Level1)
  * @tc.desc: test HandleGlobalEvent
  * @tc.type: FUNC
  */
-
 HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent06, TestSize.Level1)
 {
     /**
@@ -669,7 +665,6 @@ HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent06, TestSize.Level1)
  * @tc.desc: test HandleGlobalEvent
  * @tc.type: FUNC
  */
-
 HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent07, TestSize.Level1)
 {
     /**
@@ -702,7 +697,6 @@ HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent07, TestSize.Level1)
  * @tc.desc: test HandleGlobalEvent
  * @tc.type: FUNC
  */
-
 HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent08, TestSize.Level1)
 {
     /**
@@ -737,7 +731,6 @@ HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent08, TestSize.Level1)
  * @tc.desc: test HandleGlobalEvent
  * @tc.type: FUNC
  */
-
 HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent09, TestSize.Level1)
 {
     /**
@@ -773,7 +766,6 @@ HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent09, TestSize.Level1)
  * @tc.desc: test HandleGlobalEvent
  * @tc.type: FUNC
  */
-
 HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent10, TestSize.Level1)
 {
     /**
@@ -807,7 +799,6 @@ HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent10, TestSize.Level1)
  * @tc.desc: test HandleGlobalEvent
  * @tc.type: FUNC
  */
-
 HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent11, TestSize.Level1)
 {
     /**
@@ -840,7 +831,6 @@ HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent11, TestSize.Level1)
  * @tc.desc: test HandleGlobalEvent
  * @tc.type: FUNC
  */
-
 HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent12, TestSize.Level1)
 {
     /**
@@ -874,7 +864,6 @@ HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent12, TestSize.Level1)
  * @tc.desc: test HandleGlobalEvent
  * @tc.type: FUNC
  */
-
 HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent13, TestSize.Level1)
 {
     /**
@@ -906,7 +895,6 @@ HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent13, TestSize.Level1)
  * @tc.desc: test HandleGlobalEvent
  * @tc.type: FUNC
  */
-
 HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent14, TestSize.Level1)
 {
     /**
@@ -941,7 +929,6 @@ HWTEST_F(SelectOverlayManagerTestNg, HandleGlobalEvent14, TestSize.Level1)
  * @tc.desc: test NotifyOverlayClosed and IsTouchInCallerArea
  * @tc.type: FUNC
  */
-
 HWTEST_F(SelectOverlayManagerTestNg, IsTouchInCallerArea01, TestSize.Level1)
 {
     /**
@@ -963,5 +950,257 @@ HWTEST_F(SelectOverlayManagerTestNg, IsTouchInCallerArea01, TestSize.Level1)
      */
     selectOverlayManager->NotifyOverlayClosed(true);
     EXPECT_FALSE(result1);
+}
+
+/**
+ * @tc.name: NotifyOnScrollCallback01
+ * @tc.desc: test NotifyOnScrollCallback and RemoveScrollCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, NotifyOnScrollCallback01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateAndShowSelectOverlay
+     * @tc.expected: return true
+     */
+    Init();
+    SelectOverlayInfo selectOverlayInfo;
+    selectOverlayInfo.singleLineHeight = NODE_ID;
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
+    EXPECT_TRUE(proxy);
+    /**
+     * @tc.steps: step2. call NotifyOnScrollCallback and RemoveScrollCallback
+     * @tc.expected: return true
+     */
+    selectOverlayManager->NotifyOnScrollCallback(5, Axis::VERTICAL, 0.0, 0);
+    selectOverlayManager->RemoveScrollCallback(9);
+    EXPECT_TRUE(selectOverlayManager->parentScrollCallbacks_.empty());
+}
+
+/**
+ * @tc.name: NotifyOnScrollCallback02
+ * @tc.desc: test NotifyOnScrollCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, NotifyOnScrollCallback02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateAndShowSelectOverlay
+     * @tc.expected: return true
+     */
+    Init();
+    SelectOverlayInfo selectOverlayInfo;
+    selectOverlayInfo.singleLineHeight = NODE_ID;
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
+    EXPECT_TRUE(proxy);
+    /**
+     * @tc.steps: step2. Init func ScrollableParentCallback and insert toparentScrollCallbacks_
+     */
+    ScrollableParentCallback callback = [&](Axis axis, float value, int32_t id) {
+        axis = Axis::HORIZONTAL;
+        value = 0.0;
+        id = 5;
+    };
+    selectOverlayManager->RegisterScrollCallback(5, 5, std::move(callback));
+    /**
+     * @tc.steps: step3. call NotifyOnScrollCallback
+     * @tc.expected: return false
+     */
+    selectOverlayManager->NotifyOnScrollCallback(5, Axis::VERTICAL, 0.0, 0);
+    EXPECT_FALSE(selectOverlayManager->parentScrollCallbacks_.empty());
+}
+
+/**
+ * @tc.name: NotifyOnScrollCallback03
+ * @tc.desc: test NotifyOnScrollCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, NotifyOnScrollCallback03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateAndShowSelectOverlay
+     * @tc.expected: return true
+     */
+    Init();
+    SelectOverlayInfo selectOverlayInfo;
+    selectOverlayInfo.singleLineHeight = NODE_ID;
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
+    EXPECT_TRUE(proxy);
+    /**
+     * @tc.steps: step2. Init func ScrollableParentCallback and insert toparentScrollCallbacks_
+     */
+    ScrollableParentCallback callback = [&](Axis axis, float value, int32_t id) {
+        axis = Axis::HORIZONTAL;
+        value = 0.0;
+        id = 5;
+    };
+    selectOverlayManager->RegisterScrollCallback(0, 5, std::move(callback));
+    /**
+     * @tc.steps: step3. call NotifyOnScrollCallback
+     * @tc.expected: return false
+     */
+    selectOverlayManager->NotifyOnScrollCallback(5, Axis::VERTICAL, 0.0, 0);
+    EXPECT_FALSE(selectOverlayManager->parentScrollCallbacks_.empty());
+}
+
+/**
+ * @tc.name: RemoveScrollCallback01
+ * @tc.desc: test RemoveScrollCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, RemoveScrollCallback01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateAndShowSelectOverlay
+     * @tc.expected: return true
+     */
+    Init();
+    SelectOverlayInfo selectOverlayInfo;
+    selectOverlayInfo.singleLineHeight = NODE_ID;
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
+    EXPECT_TRUE(proxy);
+    /**
+     * @tc.steps: step2. Init func ScrollableParentCallback and insert toparentScrollCallbacks_
+     */
+    ScrollableParentCallback callback = [&](Axis axis, float value, int32_t id) {
+        axis = Axis::HORIZONTAL;
+        value = 0.0;
+        id = 5;
+    };
+    selectOverlayManager->RegisterScrollCallback(5, 5, std::move(callback));
+    /**
+     * @tc.steps: step3. call RemoveScrollCallback
+     * @tc.expected: return true
+     */
+    selectOverlayManager->RemoveScrollCallback(5);
+    EXPECT_TRUE(selectOverlayManager->parentScrollCallbacks_.empty());
+}
+
+/**
+ * @tc.name: RemoveScrollCallback02
+ * @tc.desc: test RemoveScrollCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, RemoveScrollCallback02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateAndShowSelectOverlay
+     * @tc.expected: return true
+     */
+    Init();
+    SelectOverlayInfo selectOverlayInfo;
+    selectOverlayInfo.singleLineHeight = NODE_ID;
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
+    EXPECT_TRUE(proxy);
+    /**
+     * @tc.steps: step2. Init func ScrollableParentCallback and insert toparentScrollCallbacks_
+     */
+    ScrollableParentCallback callback = [&](Axis axis, float value, int32_t id) {
+        axis = Axis::HORIZONTAL;
+        value = 0.0;
+        id = 5;
+    };
+    selectOverlayManager->RegisterScrollCallback(5, 5, std::move(callback));
+    /**
+     * @tc.steps: step3. call RemoveScrollCallback
+     * @tc.expected: return false
+     */
+    selectOverlayManager->RemoveScrollCallback(0);
+    EXPECT_FALSE(selectOverlayManager->parentScrollCallbacks_.empty());
+}
+
+/**
+ * @tc.name: RemoveScrollCallback03
+ * @tc.desc: test RemoveScrollCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, RemoveScrollCallback03, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call CreateAndShowSelectOverlay
+     * @tc.expected: return true
+     */
+    Init();
+    SelectOverlayInfo selectOverlayInfo;
+    selectOverlayInfo.singleLineHeight = NODE_ID;
+    auto root = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(root);
+    auto proxy = selectOverlayManager->CreateAndShowSelectOverlay(selectOverlayInfo, nullptr);
+    EXPECT_TRUE(proxy);
+    /**
+     * @tc.steps: step2. Init func ScrollableParentCallback and insert toparentScrollCallbacks_
+     */
+    ScrollableParentCallback callback = [&](Axis axis, float value, int32_t id) {
+        axis = Axis::HORIZONTAL;
+        value = 0.0;
+        id = 5;
+    };
+    selectOverlayManager->RegisterScrollCallback(5, 5, std::move(callback));
+    selectOverlayManager->RegisterScrollCallback(8, 5, std::move(callback));
+    /**
+     * @tc.steps: step3. call RemoveScrollCallback
+     * @tc.expected: return false
+     */
+    selectOverlayManager->RemoveScrollCallback(9);
+    EXPECT_FALSE(selectOverlayManager->parentScrollCallbacks_.empty());
+}
+
+/**
+ * @tc.name: UpdateShowingSelectOverlay01
+ * @tc.desc: test UpdateShowingSelectOverlay
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, UpdateShowingSelectOverlay01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init client and clientInfo
+     */
+    TextFieldPattern client;
+    ClientOverlayInfo clientInfo;
+    SelectHandleInfo handleInfo;
+    SelectHandleInfo secondInfo;
+    secondInfo.isShow = false;
+    clientInfo.isShowMouseMenu = false;
+    clientInfo.firstHandleInfo = handleInfo;
+    clientInfo.secondHandleInfo = secondInfo;
+
+    /**
+     * @tc.steps: step2.call UpdateShowingSelectOverlay
+     * @tc.expected: isUpdateMenu is true
+     */
+    client.UpdateShowingSelectOverlay(clientInfo);
+    EXPECT_TRUE(clientInfo.isUpdateMenu);
+}
+
+/**
+ * @tc.name: UpdateShowingSelectOverlay02
+ * @tc.desc: test UpdateShowingSelectOverlay
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectOverlayManagerTestNg, UpdateShowingSelectOverlay02, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init client and clientInfo
+     */
+    TextFieldPattern client;
+    ClientOverlayInfo clientInfo;
+    clientInfo.isShowMouseMenu = true;
+
+    /**
+     * @tc.steps: step2.call UpdateShowingSelectOverlay
+     * @tc.expected: isUpdateMenu is true
+     */
+    client.UpdateShowingSelectOverlay(clientInfo);
+    EXPECT_TRUE(clientInfo.isUpdateMenu);
 }
 } // namespace OHOS::Ace::NG
