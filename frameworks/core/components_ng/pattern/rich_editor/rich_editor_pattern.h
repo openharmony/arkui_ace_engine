@@ -607,6 +607,7 @@ private:
     TimeStamp lastClickTimeStamp_;
     TimeStamp lastAiPosTimeStamp_;
     bool adjusted_ = false;
+    Offset touchDownOffset_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };
 } // namespace OHOS::Ace::NG
