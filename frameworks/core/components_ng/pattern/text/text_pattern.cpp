@@ -410,7 +410,7 @@ std::string TextPattern::GetSelectedText(int32_t start, int32_t end) const
     std::string value;
     int32_t tag = 0;
     for (const auto& span : spans_) {
-        if (span->GetSymbolUnicode()! = 0) {
+        if (span->GetSymbolUnicode() != 0) {
             continue;
         }
         if (span->position - 1 >= start && span->placeholderIndex == -1 && span->position != -1) {
