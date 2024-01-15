@@ -2449,10 +2449,13 @@ float SwiperPattern::CalculateVisibleSize() const
 float SwiperPattern::GetItemSpace() const
 {
     auto swiperLayoutProperty = GetLayoutProperty<SwiperLayoutProperty>();
-    CHECK_NULL_RETURN(swiperLayoutProperty, 0);
+    CHECK_NULL_RETURN(swiperLayoutProperty, 0.0f);
+    if (swiperLayoutProperty->IgnoreItemSpace()) {
+        return 0.0f;
+    }
     return ConvertToPx(swiperLayoutProperty->GetItemSpace().value_or(0.0_vp),
-        swiperLayoutProperty->GetLayoutConstraint()->scaleProperty, 0)
-        .value_or(0);
+        swiperLayoutProperty->GetLayoutConstraint()->scaleProperty, 0.0f)
+        .value_or(0.0f);
 }
 
 float SwiperPattern::GetPrevMargin() const
