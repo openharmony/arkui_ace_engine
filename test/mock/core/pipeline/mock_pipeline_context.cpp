@@ -217,6 +217,8 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
 
 void PipelineContext::OnFoldStatusChange(FoldStatus foldStatus) {}
 
+void PipelineContext::OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) {}
+
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {}

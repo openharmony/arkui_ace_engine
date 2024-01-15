@@ -103,7 +103,7 @@ public:
     virtual void CloseCustomDialog(const int32_t dialogId) = 0;
     virtual const RefPtr<NG::OverlayManager> GetOverlayManager() = 0;
     virtual void RequestFocus() = 0;
-
+    virtual void ResizeWindowForFoldStatus() = 0;
 private:
     int32_t subwindowId_ = 0;
     bool isAboveApps_ = false;

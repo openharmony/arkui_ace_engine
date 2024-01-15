@@ -720,6 +720,11 @@ void PipelineBase::OnFoldStatusChanged(FoldStatus foldStatus)
     OnFoldStatusChange(foldStatus);
 }
 
+void PipelineBase::OnFoldDisplayModeChanged(FoldDisplayMode foldDisplayMode)
+{
+    OnFoldDisplayModeChange(foldDisplayMode);
+}
+
 double PipelineBase::ModifyKeyboardHeight(double keyboardHeight) const
 {
     auto windowRect = GetCurrentWindowRect();
