@@ -25,7 +25,7 @@ JankFrameReport& JankFrameReport::GetInstance()
 
 JankFrameReport::JankFrameReport() {}
 
-void JankFrameReport::JankFrameRecord(int64_t timeStampNanos) {}
+void JankFrameReport::JankFrameRecord(int64_t timeStampNanos, const std::string& windowName) {}
 
 void JankFrameReport::SetFrameJankFlag(JankFrameFlag flag) {}
 
@@ -48,7 +48,7 @@ void PerfMonitor::End(const std::string& sceneId, bool isJsApi) {}
 
 void PerfMonitor::SetPageUrl(const std::string& pageUrl) {}
 
-void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t durition, double jank) {}
+void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t durition, double jank, const std::string& windowName) {}
 
 void PerfMonitor::ReportJankFrameApp(double jank) {}
 
@@ -63,4 +63,8 @@ std::string PerfMonitor::GetPageUrl()
 {
     return "";
 }
+
+void PerfMonitor::SetAppForeground(bool isShow) {}
+
+void PerfMonitor::SetAppStartStatus() {}
 } // namespace OHOS::Ace

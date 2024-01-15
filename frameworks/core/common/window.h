@@ -144,6 +144,12 @@ public:
         return 0;
     };
 
+    virtual std::string GetWindowName() const
+    {
+        static std::string name;
+        return name;
+    };
+
     void SetCursor(MouseFormat cursor)
     {
         cursor_ = cursor;

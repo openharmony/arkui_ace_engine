@@ -32,6 +32,7 @@ constexpr int64_t SCENE_TIMEOUT = 10000000000;
 constexpr int64_t RESPONSE_TIMEOUT = 1000000000;
 constexpr float SINGLE_FRAME_TIME = 16600000;
 const int32_t JANK_SKIPPED_THRESHOLD = SystemProperties::GetJankFrameThreshold();
+const int32_t DEFAULT_JANK_REPORT_THRESHOLD = 3;
 
 static int64_t GetCurrentRealTimeNs()
 {
@@ -300,6 +301,7 @@ void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceTyp
             {
                 ACE_SCOPED_TRACE("RecordInputEvent: last_up=%lld(ns)", static_cast<long long>(time));
                 mInputTime[LAST_UP] = time;
+                isResponseExclusion = true;
                 break;
             }
         case FIRST_MOVE:
@@ -313,7 +315,7 @@ void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceTyp
     }
 }
 
-void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t duration, double jank)
+void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t duration, double jank, const std::string& windowName)
 {
     std::lock_guard<std::mutex> Lock(mMutex);
     mVsyncTime = vsyncTime;
@@ -332,6 +334,7 @@ void PerfMonitor::SetFrameTime(int64_t vsyncTime, int64_t duration, double jank)
         }
         it++;
     }
+    ProcessJank(jank, windowName);
 }
 
 void PerfMonitor::ReportJankFrameApp(double jank)
@@ -497,5 +500,71 @@ bool PerfMonitor::IsExceptResponseTime(int64_t time, const std::string& sceneId)
         return true;
     }
     return false;
+}
+
+// for jank frame app
+bool PerfMonitor::IsExclusionFrame()
+{
+    return isResponseExclusion || isStartAppFrame || isBackgroundApp;
+}
+
+void PerfMonitor::SetAppStartStatus()
+{
+    isStartAppFrame = true;
+    startAppTime = GetCurrentRealTimeNs();
+}
+
+void PerfMonitor::CheckInStartAppStatus()
+{
+    if (isStartAppFrame) {
+        int64_t curTime = GetCurrentRealTimeNs();
+        if (curTime - startAppTime >= RESPONSE_TIMEOUT) {
+            isStartAppFrame = false;
+            startAppTime = curTime;
+        }
+    }
+}
+
+void PerfMonitor::SetAppForeground(bool isShow)
+{
+    isBackgroundApp = !isShow;
+}
+
+void PerfMonitor::CheckExclusionWindow(const std::string& windowName)
+{
+    isExclusionWindow = false;
+    if (windowName == "softKeyboard1" ||
+        windowName == "SCBWallpaper1" ||
+        windowName == "SCBStatusBar15") {
+        isExclusionWindow = true;
+    }
+}
+
+void PerfMonitor::CheckResponseStatus()
+{
+    if (isResponseExclusion) {
+        isResponseExclusion = false;
+    }
+}
+
+void PerfMonitor::ProcessJank(double jank, const std::string& windowName)
+{
+    // single frame behavior report
+    CheckExclusionWindow(windowName);
+    ReportJankFrame(jank, windowName);
+    CheckInStartAppStatus();
+    CheckResponseStatus();
+}
+
+void PerfMonitor::ReportJankFrame(double jank, const std::string& windowName)
+{
+    if (jank >= static_cast<double>(DEFAULT_JANK_REPORT_THRESHOLD) && !IsExclusionFrame()) {
+        JankInfo jankInfo;
+        jankInfo.skippedFrameTime = static_cast<int64_t>(jank * SINGLE_FRAME_TIME);
+        jankInfo.windowName = windowName;
+        RecordBaseInfo(nullptr);
+        jankInfo.baseInfo = baseInfo;
+        EventReport::ReportJankFrame(jankInfo);
+    }
 }
 } // namespace OHOS::Ace

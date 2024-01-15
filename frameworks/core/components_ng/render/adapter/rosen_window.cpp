@@ -56,7 +56,7 @@ RosenWindow::RosenWindow(const OHOS::sptr<OHOS::Rosen::Window>& window, RefPtr<T
             auto pipeline = container->GetPipelineContext();
             CHECK_NULL_VOID(pipeline);
             pipeline->OnIdle(timeStampNanos + refreshPeriod);
-            JankFrameReport::GetInstance().JankFrameRecord(timeStampNanos);
+            JankFrameReport::GetInstance().JankFrameRecord(timeStampNanos, window->GetWindowName());
         };
         auto uiTaskRunner = SingleTaskExecutor::Make(taskExecutor, TaskExecutor::TaskType::UI);
         if (uiTaskRunner.IsRunOnCurrentThread()) {
@@ -209,6 +209,11 @@ int64_t RosenWindow::GetVSyncPeriod() const
 #else
     return rsWindow_->GetVSyncPeriod();
 #endif
+}
+
+std::string RosenWindow::GetWindowName() const
+{
+    return rsWindow_->GetWindowName();
 }
 
 } // namespace OHOS::Ace::NG
