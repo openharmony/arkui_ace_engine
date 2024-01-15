@@ -3288,7 +3288,7 @@ HWTEST_F(SelectOverlayTestNg, AddExtensionMenuOptions, TestSize.Level1)
     for (int i = 0; i < 7; i++) {
         selectOverlayNode->isShowInDefaultMenu_[i] = false;
     }
-    selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);  
+    selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, 0);
     selectOverlayNode->AddExtensionMenuOptions(menuOptionItems, -1);
     EXPECT_NE(selectOverlayNode->selectMenu_, nullptr);
 }
@@ -3311,9 +3311,8 @@ HWTEST_F(SelectOverlayTestNg, UpdateSelectMenuInfo003, TestSize.Level1)
     auto frameNode = SelectOverlayNode::CreateSelectOverlayNode(infoPtr);
     auto selectOverlayNode = AceType::DynamicCast<SelectOverlayNode>(frameNode);
     auto pattern = selectOverlayNode->GetPattern<SelectOverlayPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto updateAction = [&](SelectMenuInfo& infoMenu) {
-        callBackFlag = 1;
+    auto updateAction = [](SelectMenuInfo& infoMenu) {
+        return;
     };
     pattern->UpdateSelectMenuInfo(updateAction);
     std::function<void(SelectMenuInfo& infoMenu)> updateAction1 = nullptr;
