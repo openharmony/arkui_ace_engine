@@ -75,7 +75,7 @@ class BuilderNode {
     }
     postTouchEvent(touchEvent)
     {
-        this._JSBuilderNode.postTouchEvent(touchEvent);
+        return this._JSBuilderNode.postTouchEvent(touchEvent);
     }
 }
 class JSBuilderNode extends BaseNode {
