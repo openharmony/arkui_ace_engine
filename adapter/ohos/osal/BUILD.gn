@@ -69,7 +69,6 @@ template("ace_osal_ohos_source_set") {
       "image_analyzer_mgr.cpp",
       "layout_inspector.cpp",
       "log_wrapper.cpp",
-      "long_frame_report_impl.cpp",
       "modal_ui_extension_impl.cpp",
       "ressched_report.cpp",
       "socperf_client_impl.cpp",
@@ -81,7 +80,6 @@ template("ace_osal_ohos_source_set") {
 
     external_deps += [
       "ability_runtime:app_manager",
-      "ffrt:libffrt",
       "i18n:intl_util",
       "init:libbegetutil",
     ]
