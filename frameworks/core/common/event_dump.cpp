@@ -19,6 +19,7 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr size_t MAX_EVENT_TREE_RECORD_CNT = 5;
 constexpr size_t MAX_FRAME_NODE_CNT = 256;
+constexpr int32_t MAX_EVENT_TREE_TOUCH_DOWN_CNT = 10;
 } // end of namespace
 
 void FrameNodeSnapshot::Dump(std::list<std::pair<int32_t, std::string>>& dumpList, int32_t depth) const
@@ -65,7 +66,8 @@ void EventTreeRecord::AddTouchPoint(const TouchEvent& event)
     TouchType type = event.type;
     if (type == Ace::TouchType::DOWN) {
         // multi fingers touch down will be in one tree
-        if (eventTreeList.empty() || eventTreeList.back().touchDownCount <= 0) {
+        if (eventTreeList.empty() || eventTreeList.back().touchDownCount <= 0 ||
+            eventTreeList.back().touchDownCount >= MAX_EVENT_TREE_TOUCH_DOWN_CNT) {
             eventTreeList.emplace_back(EventTree());
             if (eventTreeList.size() > MAX_EVENT_TREE_RECORD_CNT) {
                 eventTreeList.erase(eventTreeList.begin());
@@ -78,7 +80,8 @@ void EventTreeRecord::AddTouchPoint(const TouchEvent& event)
         return;
     }
 
-    if (type == TouchType::UP || type == TouchType::CANCEL) {
+    if (type == TouchType::UP || type == TouchType::CANCEL || type == TouchType::PULL_UP ||
+        type == TouchType::PULL_OUT_WINDOW) {
         eventTreeList.back().touchDownCount--;
     }
     eventTreeList.back().touchPoints.emplace_back(TouchPointSnapshot(event));
