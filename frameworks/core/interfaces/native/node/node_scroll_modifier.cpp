@@ -21,6 +21,7 @@
 #include "core/interfaces/native/node/node_api.h"
 #include "frameworks/bridge/common/utils/utils.h"
 #include "core/components/scroll/scroll_position_controller.h"
+#include "core/animation/curves.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -38,7 +39,10 @@ constexpr int32_t SCROLL_TO_INDEX_3 = 3;
 constexpr int32_t SCROLL_TO_INDEX_4 = 4;
 constexpr int32_t SCROLL_TO_INDEX_5 = 5;
 constexpr int32_t SCROLL_TO_INDEX_6 = 6;
-const std::vector<std::string> ControllerCurves = {"ease", "ease-in", "ease-in-out", "ease-out", "friction", "linear"};
+const std::vector<RefPtr<Curve>> CurvesVector = { Curves::LINEAR, Curves::EASE, Curves::EASE_IN,
+    Curves::EASE_OUT, Curves::EASE_IN_OUT, Curves::FAST_OUT_SLOW_IN, Curves::LINEAR_OUT_SLOW_IN,
+    Curves::FAST_OUT_LINEAR_IN, Curves::EXTREME_DECELERATION, Curves::SHARP, Curves::RHYTHM,
+    Curves::SMOOTH, Curves::FRICTION };
 
 bool CheckSnapPagination(const std::vector<Dimension>& snapPagination)
 {
@@ -258,7 +262,7 @@ void SetScrollTo(ArkUINodeHandle node, ArkUI_Float64* values)
     Dimension xOffset(values[SCROLL_TO_INDEX_0], static_cast<OHOS::Ace::DimensionUnit>(values[SCROLL_TO_INDEX_1]));
     Dimension yOffset(values[SCROLL_TO_INDEX_2], static_cast<OHOS::Ace::DimensionUnit>(values[SCROLL_TO_INDEX_3]));
     float duration = values[SCROLL_TO_INDEX_4];
-    RefPtr<Curve> curve = Framework::CreateCurve(ControllerCurves[static_cast<int>(values[SCROLL_TO_INDEX_5])], false);
+    RefPtr<Curve> curve = CurvesVector[static_cast<int>(values[SCROLL_TO_INDEX_5])];
     auto smooth = static_cast<bool>(values[SCROLL_TO_INDEX_6]);
     auto direction = scrollControllerBase->GetScrollDirection();
     auto position = direction == Axis::VERTICAL ? yOffset : xOffset;
