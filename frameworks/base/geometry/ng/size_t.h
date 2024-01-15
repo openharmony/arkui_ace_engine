@@ -189,6 +189,13 @@ public:
 
     bool UpdateSizeWhenLarger(const SizeT& size)
     {
+        bool widthUpdated = UpdateWidthWhenLarger(size);
+        bool heightUpdated = UpdateHeightWhenLarger(size);
+        return widthUpdated || heightUpdated;
+    }
+
+    bool UpdateWidthWhenLarger(const SizeT& size)
+    {
         bool isModified = false;
         if (NonNegative(size.width_)) {
             auto temp = width_ > size.width_ ? width_ : size.width_;
@@ -197,6 +204,12 @@ public:
             }
             width_ = temp;
         }
+        return isModified;
+    }
+
+    bool UpdateHeightWhenLarger(const SizeT& size)
+    {
+        bool isModified = false;
         if (NonNegative(size.height_)) {
             auto temp = height_ > size.height_ ? height_ : size.height_;
             if (height_ != temp) {
@@ -209,6 +222,13 @@ public:
 
     bool UpdateSizeWhenSmaller(const SizeT& size)
     {
+        bool widthUpdated = UpdateWidthWhenSmaller(size);
+        bool heightUpdated = UpdateHeightWhenSmaller(size);
+        return widthUpdated || heightUpdated;
+    }
+
+    bool UpdateWidthWhenSmaller(const SizeT& size)
+    {
         bool isModified = false;
         if (NonNegative(size.width_)) {
             auto temp = width_ < size.width_ ? width_ : size.width_;
@@ -217,6 +237,12 @@ public:
             }
             width_ = temp;
         }
+        return isModified;
+    }
+
+    bool UpdateHeightWhenSmaller(const SizeT& size)
+    {
+        bool isModified = false;
         if (NonNegative(size.height_)) {
             auto temp = height_ < size.height_ ? height_ : size.height_;
             if (height_ != temp) {
@@ -580,6 +606,13 @@ public:
 
     bool UpdateSizeWhenLarger(const SizeT<T>& size)
     {
+        bool widthUpdated = UpdateWidthWhenLarger(size);
+        bool heightUpdated = UpdateHeightWhenLarger(size);
+        return widthUpdated || heightUpdated;
+    }
+
+    bool UpdateWidthWhenLarger(const SizeT<T>& size)
+    {
         bool isModified = false;
         if (NonNegative(size.Width()) && width_) {
             auto temp = width_.value_or(0) > size.Width() ? width_ : size.Width();
@@ -588,6 +621,12 @@ public:
             }
             width_ = temp;
         }
+        return isModified;
+    }
+
+    bool UpdateHeightWhenLarger(const SizeT<T>& size)
+    {
+        bool isModified = false;
         if (NonNegative(size.Height()) && height_) {
             auto temp = height_.value_or(0) > size.Height() ? height_ : size.Height();
             if (height_ != temp) {
@@ -600,6 +639,13 @@ public:
 
     bool UpdateSizeWhenSmaller(const SizeT<T>& size)
     {
+        bool widthUpdated = UpdateWidthWhenSmaller(size);
+        bool heightUpdated = UpdateHeightWhenSmaller(size);
+        return widthUpdated || heightUpdated;
+    }
+
+    bool UpdateWidthWhenSmaller(const SizeT<T>& size)
+    {
         bool isModified = false;
         if (NonNegative(size.Width())) {
             auto temp = width_.value_or(0) < size.Width() ? width_ : size.Width();
@@ -608,6 +654,12 @@ public:
             }
             width_ = temp;
         }
+        return isModified;
+    }
+
+    bool UpdateHeightWhenSmaller(const SizeT<T>& size)
+    {
+        bool isModified = false;
         if (NonNegative(size.Height())) {
             auto temp = height_.value_or(0) < size.Height() ? height_ : size.Height();
             if (height_ != temp) {
