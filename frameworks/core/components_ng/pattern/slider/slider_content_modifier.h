@@ -77,7 +77,7 @@ public:
     }
 
     void UpdateData(const Parameters& parameters);
-    void JudgeNeedAnimate(const RefPtr<SliderPaintProperty>& property);
+    void JudgeNeedAnimate(bool reverse);
 
     void SetTrackThickness(float trackThickness)
     {
