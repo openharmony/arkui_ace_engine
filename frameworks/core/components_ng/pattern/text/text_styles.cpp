@@ -112,9 +112,9 @@ std::string GetSymbolRenderingStrategyInJson(const std::optional<uint32_t>& valu
 std::string GetSymbolEffectStrategyInJson(const std::optional<uint32_t>& value)
 {
     std::string text;
-    if (value == EffectStrategy.SCALE) {
+    if (value == EffectStrategy.EFFSCALE) {
         text = "EffectStrategy.SCALE";
-    } else if (value == EffectStrategy.HIERARCHICAL) {
+    } else if (value == EffectStrategy.EFFHIERARCHICAL) {
         text = "EffectStrategy.HIERARCHICAL";
     } else {
         text = "EffectStrategy.NONE";
