@@ -56,4 +56,20 @@ void TextStyle::SetAdaptTextSize(
     adaptTextSize_ = true;
 }
 
+void TextBackgroundStyle::ToJsonValue(std::unique_ptr<JsonValue>& json, const std::optional<TextBackgroundStyle>& style)
+{
+    NG::BorderRadiusProperty defaultRadius;
+    TextBackgroundStyle exportStyle = { .backgroundColor = Color::TRANSPARENT, .backgroundRadius = defaultRadius };
+    if (style.has_value()) {
+        exportStyle.backgroundColor = style.value().backgroundColor.value_or(Color::TRANSPARENT);
+        exportStyle.backgroundRadius = style.value().backgroundRadius.value_or(defaultRadius);
+    }
+
+    auto styleJson = JsonUtil::Create(true);
+    styleJson->Put("color", exportStyle.backgroundColor->ColorToString().c_str());
+    auto radiusJson = JsonUtil::Create(true);
+    exportStyle.backgroundRadius->ToJsonValue(radiusJson, styleJson);
+
+    json->Put("textBackgroundStyle", styleJson);
+}
 } // namespace OHOS::Ace

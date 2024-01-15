@@ -48,6 +48,7 @@ TextBackgroundStyle JSContainerSpan::ParseTextBackgroundStyle(const JSCallbackIn
             radius.Reset();
         }
         textBackgroundStyle.backgroundRadius = { radius, radius, radius, radius };
+        textBackgroundStyle.backgroundRadius->multiValued = false;
     } else if (radiusValue->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(radiusValue);
         CalcDimension topLeft;
@@ -56,6 +57,7 @@ TextBackgroundStyle JSContainerSpan::ParseTextBackgroundStyle(const JSCallbackIn
         CalcDimension bottomRight;
         ParseAllBorderRadiuses(object, topLeft, topRight, bottomLeft, bottomRight);
         textBackgroundStyle.backgroundRadius = { topLeft, topRight, bottomRight, bottomLeft };
+        textBackgroundStyle.backgroundRadius->multiValued = true;
     }
     return textBackgroundStyle;
 }
