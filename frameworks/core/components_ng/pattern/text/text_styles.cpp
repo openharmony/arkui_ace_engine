@@ -112,7 +112,7 @@ std::string GetSymbolRenderingStrategyInJson(const std::optional<uint32_t>& valu
             text = "RenderingStrategy.MULTIPLE_OPACITY";
             break;
         default:
-            text = "RenderingStrategy.MULTIPLE_SINGLE";
+            text = "RenderingStrategy.SINGLE";
     }
     return text;
 }
