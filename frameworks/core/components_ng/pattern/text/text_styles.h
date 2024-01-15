@@ -101,7 +101,6 @@ std::string GetFontFamilyInJson(const std::optional<std::vector<std::string>>& v
 std::string GetFontStyleInJson(const std::optional<Ace::FontStyle>& value);
 std::string GetFontWeightInJson(const std::optional<FontWeight>& value);
 std::string GetFontSizeInJson(const std::optional<Dimension>& value);
-
 std::string GetSymbolRenderingStrategyInJson(const std::optional<uint32_t>& value);
 std::string GetSymbolEffectStrategyInJson(const std::optional<uint32_t>& value);
 } // namespace OHOS::Ace::NG
