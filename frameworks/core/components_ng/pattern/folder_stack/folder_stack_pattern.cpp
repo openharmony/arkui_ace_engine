@@ -97,11 +97,6 @@ void FolderStackPattern::RefreshStack(FoldStatus foldStatus)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    FolderEventInfo event(foldStatus);
-    auto eventHub = GetEventHub<FolderStackEventHub>();
-    if (eventHub) {
-        eventHub->OnFolderStateChange(event);
-    }
     currentFoldStatus_ = foldStatus;
     if (foldStatusDelayTask_) {
         foldStatusDelayTask_.Cancel();
@@ -126,10 +121,20 @@ void FolderStackPattern::RefreshStack(FoldStatus foldStatus)
         auto isLandscape = rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270;
         if (currentFoldStatus == displayInfo->GetFoldStatus() && isLandscape &&
             windowMode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+            pattern->OnFolderStateChangeSend(currentFoldStatus);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     });
     taskExecutor->PostDelayedTask(foldStatusDelayTask_, TaskExecutor::TaskType::UI, DELAY_TIME);
+}
+
+void FolderStackPattern::OnFolderStateChangeSend(FoldStatus foldStatus)
+{
+    FolderEventInfo event(foldStatus);
+    auto eventHub = GetEventHub<FolderStackEventHub>();
+    if (eventHub) {
+        eventHub->OnFolderStateChange(event);
+    }
 }
 
 bool FolderStackPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
