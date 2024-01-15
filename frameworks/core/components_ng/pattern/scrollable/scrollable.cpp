@@ -490,6 +490,7 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
     option.SetDuration(CUSTOM_SPRING_ANIMATION_DURATION);
     option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
     frictionOffsetProperty_->SetThresholdType(ThresholdType::LAYOUT);
+    frictionOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
     frictionOffsetProperty_->AnimateWithVelocity(option, finalPosition_, initVelocity_,
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
@@ -499,9 +500,6 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
             scroll->ProcessScrollMotionStop(true);
     });
     isFrictionAnimationStop_ = false;
-    if (scrollMotionFRCSceneCallback_) {
-        scrollMotionFRCSceneCallback_(initVelocity_, NG::SceneStatus::START);
-    }
 }
 
 void Scrollable::SetDelayedTask()
@@ -620,6 +618,7 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
     snapOffsetProperty_->Set(currentPos_);
     option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
     snapOffsetProperty_->SetThresholdType(ThresholdType::LAYOUT);
+    snapOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
     snapOffsetProperty_->AnimateWithVelocity(option, endPos_, scrollSnapVelocity,
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
@@ -631,9 +630,6 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
             }
     });
     isSnapScrollAnimationStop_ = false;
-    if (scrollMotionFRCSceneCallback_) {
-        scrollMotionFRCSceneCallback_(snapVelocity_, NG::SceneStatus::START);
-    }
 }
 
 void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scrollSnapVelocity)
@@ -652,6 +648,7 @@ void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scro
     snapOffsetProperty_->Set(currentPos_);
     option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
     snapOffsetProperty_->SetThresholdType(ThresholdType::LAYOUT);
+    snapOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
     snapOffsetProperty_->AnimateWithVelocity(option, endPos_, scrollSnapVelocity,
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
@@ -661,9 +658,6 @@ void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scro
             scroll->ProcessScrollMotionStop(false);
     });
     isSnapAnimationStop_ = false;
-    if (scrollMotionFRCSceneCallback_) {
-        scrollMotionFRCSceneCallback_(snapVelocity_, NG::SceneStatus::START);
-    }
 }
 
 void Scrollable::UpdateScrollSnapStartOffset(double offset)
@@ -676,9 +670,6 @@ void Scrollable::ProcessScrollSnapMotion(double position)
     TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Current Pos is %{public}lf, position is %{public}lf",
         currentPos_, position);
     currentVelocity_ = snapVelocity_;
-    if (scrollMotionFRCSceneCallback_) {
-        scrollMotionFRCSceneCallback_(currentVelocity_, NG::SceneStatus::RUNNING);
-    }
     if (NearEqual(currentPos_, position)) {
         UpdateScrollPosition(0.0, SCROLL_FROM_ANIMATION_SPRING);
     } else {
@@ -703,9 +694,6 @@ void Scrollable::ProcessScrollSnapMotion(double position)
 
 void Scrollable::ProcessScrollSnapStop()
 {
-    if (snapOffsetProperty_ && scrollMotionFRCSceneCallback_) {
-        scrollMotionFRCSceneCallback_(snapVelocity_, NG::SceneStatus::END);
-    }
     if (scrollPause_) {
         scrollPause_ = false;
         HandleOverScroll(currentVelocity_);
@@ -716,9 +704,6 @@ void Scrollable::ProcessScrollSnapStop()
 
 void Scrollable::OnAnimateStop()
 {
-    if (scrollMotionFRCSceneCallback_) {
-        scrollMotionFRCSceneCallback_(GetCurrentVelocity(), NG::SceneStatus::END);
-    }
     if (moved_) {
         HandleScrollEnd(std::nullopt);
     }
@@ -765,9 +750,6 @@ void Scrollable::StartSpringMotion(
         return;
     }
 
-    if (scrollMotionFRCSceneCallback_) {
-        scrollMotionFRCSceneCallback_(mainVelocity, NG::SceneStatus::START);
-    }
     if (!springOffsetProperty_) {
         GetSpringProperty();
     }
@@ -777,6 +759,7 @@ void Scrollable::StartSpringMotion(
     auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(DEFAULT_SPRING_RESPONSE, DEFAULT_SPRING_DAMP, 0.0f);
     option.SetCurve(curve);
     option.SetDuration(CUSTOM_SPRING_ANIMATION_DURATION);
+    springOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
     springOffsetProperty_->AnimateWithVelocity(
         option, finalPosition_, mainVelocity,
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
@@ -798,12 +781,6 @@ void Scrollable::StartSpringMotion(
 
 void Scrollable::ProcessScrollMotionStop(bool stopFriction)
 {
-    if (frictionOffsetProperty_ && stopFriction && scrollMotionFRCSceneCallback_) {
-        scrollMotionFRCSceneCallback_(frictionVelocity_, NG::SceneStatus::END);
-    }
-    if (snapOffsetProperty_ && !stopFriction && scrollMotionFRCSceneCallback_) {
-        scrollMotionFRCSceneCallback_(snapVelocity_, NG::SceneStatus::END);
-    }
     if (needScrollSnapChange_ && calePredictSnapOffsetCallback_ && frictionOffsetProperty_) {
         needScrollSnapChange_ = false;
         auto predictSnapOffset = calePredictSnapOffsetCallback_(GetFinalPosition() - currentPos_, 0.0f, 0.0f);
@@ -848,9 +825,6 @@ void Scrollable::ProcessSpringMotion(double position)
     uint64_t diff = currentVsync - lastVsyncTime_;
     if (diff < MAX_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
         currentVelocity_ = (position - currentPos_) / diff * MILLOS_PER_NANO_SECONDS;
-        if (scrollMotionFRCSceneCallback_) {
-            scrollMotionFRCSceneCallback_(currentVelocity_, NG::SceneStatus::RUNNING);
-        }
     }
     lastVsyncTime_ = currentVsync;
     if (NearEqual(currentPos_, position)) {
@@ -964,6 +938,7 @@ void Scrollable::UpdateScrollSnapEndWithOffset(double offset)
         endPos_ -= offset;
         option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
         snapOffsetProperty_->SetThresholdType(ThresholdType::LAYOUT);
+        snapOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
         AnimationUtils::StartAnimation(
             option,
             [weak = AceType::WeakClaim(this)]() {
@@ -1004,9 +979,6 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetFrictionProperty()
         uint64_t diff = currentVsync - scroll->lastVsyncTime_;
         if (diff < MAX_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
             scroll->frictionVelocity_ = (position - scroll->lastPosition_) / diff * MILLOS_PER_NANO_SECONDS;
-            if (scroll->scrollMotionFRCSceneCallback_) {
-                scroll->scrollMotionFRCSceneCallback_(scroll->frictionVelocity_, NG::SceneStatus::RUNNING);
-            }
             if (NearZero(scroll->frictionVelocity_, FRICTION_VELOCITY_THRESHOLD)) {
                 scroll->StopFrictionAnimation();
             }
@@ -1051,9 +1023,6 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSnapProperty()
         uint64_t diff = currentVsync - scroll->lastVsyncTime_;
         if (diff < MAX_VSYNC_DIFF_TIME && diff > MIN_DIFF_VSYNC) {
             scroll->snapVelocity_ = (position - scroll->currentPos_) / diff * MILLOS_PER_NANO_SECONDS;
-            if (scroll->scrollMotionFRCSceneCallback_) {
-                scroll->scrollMotionFRCSceneCallback_(scroll->snapVelocity_, NG::SceneStatus::RUNNING);
-            }
         }
         scroll->lastVsyncTime_ = currentVsync;
         if (!scroll->isSnapScrollAnimationStop_) {

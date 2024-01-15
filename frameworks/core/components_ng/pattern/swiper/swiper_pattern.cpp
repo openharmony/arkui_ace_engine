@@ -2347,7 +2347,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
         if (!swiper->isTouchDown_) {
             swiper->UpdateCurrentOffset(static_cast<float>(position) - swiper->currentOffset_);
         }
-    });
+    }, PropertyUnit::PIXEL_POSITION);
 
     host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, currentOffset_);
     auto delta = dragVelocity < 0.0f ? extentPair.Leading() : extentPair.Trailing();

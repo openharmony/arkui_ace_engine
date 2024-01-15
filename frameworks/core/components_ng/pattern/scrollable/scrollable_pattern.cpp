@@ -442,13 +442,6 @@ void ScrollablePattern::AddScrollEvent()
     };
     scrollable->SetDragFRCSceneCallback(std::move(dragFRCSceneCallback));
 
-    auto scrollMotionFRCSceneCallback = [weak = WeakClaim(this)](double velocity, SceneStatus sceneStatus) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        return pattern->NotifyFRCSceneInfo(SCROLLABLE_MOTION_SCENE, velocity, sceneStatus);
-    };
-    scrollable->SetScrollMotionFRCSceneCallback(std::move(scrollMotionFRCSceneCallback));
-
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(GetAxis());
     scrollableEvent_->SetScrollable(scrollable);
     gestureHub->AddScrollableEvent(scrollableEvent_);
