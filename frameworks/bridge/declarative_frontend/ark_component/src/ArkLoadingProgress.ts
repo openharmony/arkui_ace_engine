@@ -29,6 +29,11 @@ class ArkLoadingProgressComponent extends ArkComponent implements LoadingProgres
     modifierWithKey(this._modifiersWithKeys, LoadingProgressEnableLoadingModifier.identity, LoadingProgressEnableLoadingModifier, value);
     return this;
   }
+  foregroundColor(value: ResourceColor): this {
+    modifierWithKey(this._modifiersWithKeys, LoadingProgressForegroundColorModifier.identity,
+      LoadingProgressForegroundColorModifier, value);
+    return this;
+  }
 }
 
 class LoadingProgressColorModifier extends ModifierWithKey<ResourceColor> {
@@ -44,6 +49,23 @@ class LoadingProgressColorModifier extends ModifierWithKey<ResourceColor> {
     }
   }
 
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class LoadingProgressForegroundColorModifier extends ModifierWithKey<ResourceColor> {
+  constructor(value: ResourceColor) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('loadingProgressForegroundColor');
+  applyPeer(node: KNode, reset: boolean) {
+    if (reset) {
+      getUINativeModule().loadingProgress.resetForegroundColor(node);
+    } else {
+      getUINativeModule().loadingProgress.setForegroundColor(node, this.value);
+    }
+  }
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }

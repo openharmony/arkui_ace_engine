@@ -14,9 +14,11 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_video_bridge.h"
 
-#include "core/interfaces/native/node/api.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components/common/layout/constants.h"
+#include "core/interfaces/native/node/api.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t NUM_0 = 0;
@@ -149,6 +151,48 @@ ArkUINativeModuleValue VideoBridge::ResetMuted(ArkUIRuntimeCallInfo* runtimeCall
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetVideoModifier().ResetVideoMuted(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::SetOpacity(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> opacityArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    double opacity;
+    if (!ArkTSUtils::ParseJsDouble(vm, opacityArg, opacity)) {
+        GetArkUIInternalNodeAPI()->GetVideoModifier().ResetVideoOpacity(nativeNode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetVideoModifier().SetVideoOpacity(nativeNode, opacity);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::ResetOpacity(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    void *nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetVideoModifier().ResetVideoOpacity(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::SetTransition(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CommonBridge::SetTransitionPassThrough(runtimeCallInfo);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue VideoBridge::ResetTransition(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    CommonBridge::ResetTransitionPassThrough(runtimeCallInfo);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

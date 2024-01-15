@@ -298,6 +298,23 @@ class ListLanesModifier extends ModifierWithKey<ArkLanesOpt> {
   }
 }
 
+class ListClipModifier extends ModifierWithKey<boolean | object> {
+  constructor(value: boolean | object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('listClip');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetClipWithEdge(node);
+    } else {
+      getUINativeModule().common.setClipWithEdge(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return true;
+  }
+}
+
 class ArkListComponent extends ArkComponent implements ListAttribute {
   constructor(nativePtr: KNode) {
     super(nativePtr);
@@ -386,6 +403,10 @@ class ArkListComponent extends ArkComponent implements ListAttribute {
   }
   friction(value: any): this {
     modifierWithKey(this._modifiersWithKeys, ListFrictionModifier.identity, ListFrictionModifier, value);
+    return this;
+  }
+  clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
+    modifierWithKey(this._modifiersWithKeys, ListClipModifier.identity, ListClipModifier, value);
     return this;
   }
   onScroll(event: (scrollOffset: number, scrollState: ScrollState) => void): this {

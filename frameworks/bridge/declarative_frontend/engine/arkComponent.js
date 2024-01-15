@@ -8456,6 +8456,40 @@ class VideoMutedModifier extends ModifierWithKey {
   }
 }
 VideoMutedModifier.identity = Symbol('videoMuted');
+class VideoOpacityModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetOpacity(node);
+    }
+    else {
+      getUINativeModule().video.setOpacity(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+VideoOpacityModifier.identity = Symbol('videoOpacity');
+class VideoTransitionModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().video.resetTransition(node);
+    }
+    else {
+      getUINativeModule().video.setTransition(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return true;
+  }
+}
+VideoTransitionModifier.identity = Symbol('videoTransition');
 class ArkVideoComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
@@ -8478,6 +8512,14 @@ class ArkVideoComponent extends ArkComponent {
   }
   objectFit(value) {
     modifierWithKey(this._modifiersWithKeys, VideoObjectFitModifier.identity, VideoObjectFitModifier, value);
+    return this;
+  }
+  opacity(value) {
+    modifierWithKey(this._modifiersWithKeys, VideoOpacityModifier.identity, VideoOpacityModifier, value);
+    return this;
+  }
+  transition(value) {
+    modifierWithKey(this._modifiersWithKeys, VideoTransitionModifier.identity, VideoTransitionModifier, value);
     return this;
   }
   onStart(callback) {
@@ -9714,6 +9756,11 @@ class ArkLoadingProgressComponent extends ArkComponent {
     modifierWithKey(this._modifiersWithKeys, LoadingProgressEnableLoadingModifier.identity, LoadingProgressEnableLoadingModifier, value);
     return this;
   }
+  foregroundColor(value) {
+    modifierWithKey(this._modifiersWithKeys, LoadingProgressForegroundColorModifier.identity,
+      LoadingProgressForegroundColorModifier, value);
+    return this;
+  }
 }
 class LoadingProgressColorModifier extends ModifierWithKey {
   constructor(value) {
@@ -9732,6 +9779,23 @@ class LoadingProgressColorModifier extends ModifierWithKey {
   }
 }
 LoadingProgressColorModifier.identity = Symbol('loadingProgressColor');
+class LoadingProgressForegroundColorModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().loadingProgress.resetForegroundColor(node);
+    }
+    else {
+      getUINativeModule().loadingProgress.setForegroundColor(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+LoadingProgressForegroundColorModifier.identity = Symbol('loadingProgressForegroundColor');
 class LoadingProgressEnableLoadingModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -16790,6 +16854,23 @@ class ListLanesModifier extends ModifierWithKey {
   }
 }
 ListLanesModifier.identity = Symbol('listLanes');
+class ListClipModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetClipWithEdge(node);
+    }
+    else {
+      getUINativeModule().common.setClipWithEdge(node, this.value);
+    }
+  }
+  checkObjectDiff() {
+    return true;
+  }
+}
+ListClipModifier.identity = Symbol('listClip');
 class ArkListComponent extends ArkComponent {
   constructor(nativePtr) {
     super(nativePtr);
@@ -16880,6 +16961,10 @@ class ArkListComponent extends ArkComponent {
   }
   friction(value) {
     modifierWithKey(this._modifiersWithKeys, ListFrictionModifier.identity, ListFrictionModifier, value);
+    return this;
+  }
+  clip(value) {
+    modifierWithKey(this._modifiersWithKeys, ListClipModifier.identity, ListClipModifier, value);
     return this;
   }
   onScroll(event) {

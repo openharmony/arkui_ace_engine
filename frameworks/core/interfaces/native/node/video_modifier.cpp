@@ -99,10 +99,28 @@ void ResetVideoMuted(NodeHandle node)
     VideoModelNG::SetMuted(frameNode, DEFAULT_MUTED);
 }
 
+void SetVideoOpacity(NodeHandle node, double opacity)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    if ((LessNotEqual(opacity, 0.0)) || opacity > 1) {
+        opacity = 1.0f;
+    }
+    ViewAbstract::SetOpacity(frameNode, opacity);
+}
+
+void ResetVideoOpacity(NodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetOpacity(frameNode, 1.0f);
+}
+
 ArkUIVideoModifierAPI GetVideoModifier()
 {
     static const ArkUIVideoModifierAPI modifier = { SetAutoPlay, ResetAutoPlay, SetVideoObjectFit, ResetVideoObjectFit,
-        SetVideoControls, ResetVideoControls, SetVideoLoop, ResetVideoLoop, SetVideoMuted, ResetVideoMuted };
+        SetVideoControls, ResetVideoControls, SetVideoLoop, ResetVideoLoop, SetVideoMuted, ResetVideoMuted,
+        SetVideoOpacity, ResetVideoOpacity };
 
     return modifier;
 }
