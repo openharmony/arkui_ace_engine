@@ -186,6 +186,7 @@ void SearchPattern::OnModifyDone()
     InitTextFieldDragEvent();
     InitTextFieldClickEvent();
     InitButtonMouseAndTouchEvent();
+    HandleTouchableAndHitTestMode();
     auto focusHub = host->GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     InitOnKeyEvent(focusHub);
@@ -217,6 +218,32 @@ void SearchPattern::HandleEnabled()
     auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
     eventHub->SetEnabled(searchEventHub->IsEnabled()? true : false);
     textFieldFrameNode->MarkModifyDone();
+}
+
+void SearchPattern::HandleTouchableAndHitTestMode()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto searchEventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(searchEventHub);
+    auto searchGestureHub = searchEventHub->GetGestureEventHub();
+    CHECK_NULL_VOID(searchGestureHub);
+    bool searchTouchable = true;
+    HitTestMode searchHitTestMode = HitTestMode::HTMDEFAULT;
+    if (searchGestureHub) {
+        searchTouchable = searchGestureHub->GetTouchable();
+        searchHitTestMode = searchGestureHub->GetHitTestMode();
+    }
+    for (int32_t childIndex = TEXTFIELD_INDEX; childIndex < BUTTON_INDEX; childIndex++) {
+        auto childFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(childIndex));
+        CHECK_NULL_VOID(childFrameNode);
+        auto childEventHub = childFrameNode->GetEventHub<EventHub>();
+        auto childGestureHub = childEventHub->GetGestureEventHub();
+        CHECK_NULL_VOID(childGestureHub);
+        childGestureHub->SetTouchable(searchTouchable);
+        childGestureHub->SetHitTestMode(searchHitTestMode);
+        childFrameNode->MarkModifyDone();
+    }
 }
 
 void SearchPattern::InitButtonMouseAndTouchEvent()
