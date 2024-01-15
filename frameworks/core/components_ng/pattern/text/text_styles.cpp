@@ -22,7 +22,7 @@ constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_COLOR = 1;
 constexpr uint32_t RENDERINGSTRATEGY_MULTIPLE_OPACITY = 2;
 constexpr uint32_t EFFECTSTRATEGY_SCALE = 1;
 constexpr uint32_t EFFECTSTRATEGY_HIERARCHICAL = 2;
-};//namespace
+};
 
 namespace OHOS::Ace::NG {
 #define UPDATE_TEXT_STYLE(group, name, func)             \

@@ -90,7 +90,7 @@ void TextLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("fontStyle", GetFontStyleInJson(GetItalicFontStyle()).c_str());
     json->Put("fontWeight", GetFontWeightInJson(GetFontWeight()).c_str());
     json->Put("fontFamily", GetFontFamilyInJson(GetFontFamily()).c_str());
-    json->Put("colorList",GetSymbolColorList().ColorToString().c_str());
+    json->Put("colorList", GetSymbolColorList().ColorToString().c_str());
     json->Put("renderingStrategy", GetSymbolRenderingStrategyInJson(GetSymbolRenderingStrategy()).c_str());
     json->Put("effectStrategy", GetSymbolEffectStrategyInJson(GetSymbolEffectStrategy()).c_str());
 
