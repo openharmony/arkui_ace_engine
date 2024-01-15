@@ -100,7 +100,7 @@ std::string GetFontFamilyInJson(const std::optional<std::vector<std::string>>& v
 std::string GetSymbolRenderingStrategyInJson(const std::optional<uint32_t>& value)
 {
     std::string text;
-    switch( value.value_or(0)) {
+    switch (value.value_or(0)) {
         case 0:
             text = "RenderingStrategy.SINGLE";
             break;
@@ -118,7 +118,7 @@ std::string GetSymbolRenderingStrategyInJson(const std::optional<uint32_t>& valu
 std::string GetSymbolEffectStrategyInJson(const std::optional<uint32_t>& value)
 {
     std::string text;
-    switch( value.value_or(0)) {
+    switch (value.value_or(0)) {
         case 0:
             text = "EffectStrategy.NONE";
             break;
