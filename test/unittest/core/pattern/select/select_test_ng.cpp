@@ -1804,7 +1804,7 @@ HWTEST_F(SelectTestNg, SelectLayoutPropertyTest006, TestSize.Level1)
     auto frameNode = CreateSelect(CREATE_VALUE, testProperty);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     /**
-     * @tc.steps: step2. Get layoutWrapper and Call Measure when has no layoutConstraint.
+     * @tc.steps: step2. Get layoutWrapper and Call Measure.
      * @tc.expected: the function exits normally
      */
     auto layoutProperty = frameNode->GetLayoutProperty();
@@ -1826,7 +1826,6 @@ HWTEST_F(SelectTestNg, SelectLayoutPropertyTest006, TestSize.Level1)
     WeakPtr<LazyForEachNode> host(host_);
     RefPtr<LazyLayoutWrapperBuilder> wrapperBuilder = AceType::MakeRefPtr<LazyLayoutWrapperBuilder>(builder, host);
     layoutWrapper->layoutWrapperBuilder_ = wrapperBuilder;
-    layoutWrapper->GetLayoutProperty()->CreateContentConstraint();
     layoutAlgorithm->Measure(layoutWrapper);
     EXPECT_NE(layoutWrapper->GetOrCreateChildByIndex(0), nullptr);
 }
