@@ -373,6 +373,7 @@ public:
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
     void AddDirtyDefaultFocus(const RefPtr<FrameNode>& node);
+    void AddDirtyRequestFocus(const RefPtr<FrameNode>& node);
     void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
 
     void SetContainerWindow(bool isShow) override;
@@ -708,6 +709,7 @@ private:
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
     WeakPtr<FrameNode> dirtyDefaultFocusNode_;
+    WeakPtr<FrameNode> dirtyRequestFocusNode_;
     WeakPtr<FrameNode> screenNode_;
     uint32_t nextScheduleTaskId_ = 0;
     int32_t mouseStyleNodeId_ = -1;

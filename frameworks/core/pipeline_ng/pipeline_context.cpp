@@ -706,6 +706,20 @@ void PipelineContext::FlushFocus()
         dirtyFocusNode_.Reset();
         dirtyFocusScope_.Reset();
         dirtyDefaultFocusNode_.Reset();
+    }
+    auto requestFocusNode = dirtyRequestFocusNode_.Upgrade();
+    if (!requestFocusNode) {
+        dirtyRequestFocusNode_.Reset();
+    } else {
+        auto focusNodeHub = requestFocusNode->GetFocusHub();
+        if (focusNodeHub && !focusNodeHub->RequestFocusImmediately()) {
+            TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus by id on node: %{public}s/%{public}d return false",
+                requestFocusNode->GetTag().c_str(), requestFocusNode->GetId());
+        }
+        dirtyFocusNode_.Reset();
+        dirtyFocusScope_.Reset();
+        dirtyDefaultFocusNode_.Reset();
+        dirtyRequestFocusNode_.Reset();
         return;
     }
 
@@ -721,6 +735,7 @@ void PipelineContext::FlushFocus()
         dirtyFocusNode_.Reset();
         dirtyFocusScope_.Reset();
         dirtyDefaultFocusNode_.Reset();
+        dirtyRequestFocusNode_.Reset();
         return;
     }
     auto focusScope = dirtyFocusScope_.Upgrade();
@@ -735,6 +750,7 @@ void PipelineContext::FlushFocus()
         dirtyFocusNode_.Reset();
         dirtyFocusScope_.Reset();
         dirtyDefaultFocusNode_.Reset();
+        dirtyRequestFocusNode_.Reset();
         return;
     }
     auto rootFocusHub = rootNode_ ? rootNode_->GetFocusHub() : nullptr;
@@ -2140,6 +2156,14 @@ void PipelineContext::AddDirtyDefaultFocus(const RefPtr<FrameNode>& node)
     RequestFrame();
 }
 
+void PipelineContext::AddDirtyRequestFocus(const RefPtr<FrameNode>& node)
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(node);
+    dirtyRequestFocusNode_ = WeakPtr<FrameNode>(node);
+    RequestFrame();
+}
+
 void PipelineContext::RootLostFocus(BlurReason reason) const
 {
     CHECK_NULL_VOID(rootNode_);
@@ -2501,6 +2525,7 @@ void PipelineContext::Destroy()
     dirtyFocusScope_.Reset();
     needRenderNode_.clear();
     dirtyDefaultFocusNode_.Reset();
+    dirtyRequestFocusNode_.Reset();
 #ifdef WINDOW_SCENE_SUPPORTED
     uiExtensionManager_.Reset();
 #endif
