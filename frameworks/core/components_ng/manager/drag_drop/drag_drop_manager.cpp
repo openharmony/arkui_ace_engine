@@ -602,9 +602,11 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
     auto dragResult = event->GetResult();
     auto useCustomAnimation = event->IsUseCustomAnimation();
     auto windowId = container->GetWindowId();
-    pipeline->SetDragCleanTask([dragResult, useCustomAnimation, isMouseDragged = isMouseDragged_, windowId]() {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Stop drag, start do drop animation. UseCustomAnimation is %{public}d,"
-            "WindowId is %{public}d.", useCustomAnimation, windowId);
+    pipeline->AddAfterRenderTask([dragResult, useCustomAnimation, windowId]() {
+        TAG_LOGI(AceLogTag::ACE_DRAG,
+            "Stop drag, start do drop animation. UseCustomAnimation is %{public}d,"
+            "WindowId is %{public}d.",
+            useCustomAnimation, windowId);
         InteractionInterface::GetInstance()->SetDragWindowVisible(!useCustomAnimation);
         DragDropRet dragDropRet { dragResult, useCustomAnimation, windowId };
         InteractionInterface::GetInstance()->StopDrag(dragDropRet);

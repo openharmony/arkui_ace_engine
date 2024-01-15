@@ -874,13 +874,12 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     eventManager->SetIsDragging(true);
     if (info.GetInputEventType() != InputEventType::MOUSE_BUTTON && dragEventActuator_->GetIsNotInPreviewState()) {
         if (!dragDropManager->IsNeedScaleDragPreview()) {
-            InteractionInterface::GetInstance()->SetDragWindowVisible(true);
             overlayManager->RemovePixelMap();
-            pipeline->FlushPipelineImmediately();
+            pipeline->AddAfterRenderTask([]() { InteractionInterface::GetInstance()->SetDragWindowVisible(true); });
         }
     } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
         if (!dragDropManager->IsNeedScaleDragPreview()) {
-            InteractionInterface::GetInstance()->SetDragWindowVisible(true);
+            pipeline->AddAfterRenderTask([]() { InteractionInterface::GetInstance()->SetDragWindowVisible(true); });
         }
         dragDropManager->SetIsDragWindowShow(true);
     }
