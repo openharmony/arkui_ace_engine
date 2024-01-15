@@ -101,13 +101,13 @@ std::string GetSymbolRenderingStrategyInJson(const std::optional<uint32_t>& valu
 {
     std::string text;
     switch (value.value_or(0)) {
-        case 0:
+        case (if (value == 0) ):
             text = "RenderingStrategy.SINGLE";
             break;
-        case 1:
+        case (if (value == 1) ):
             text = "RenderingStrategy.MULTIPLE_COLOR";
             break;
-        case 2:
+        case (if (value == 2) ):
             text = "RenderingStrategy.MULTIPLE_OPACITY";
             break;
         default:
@@ -119,13 +119,13 @@ std::string GetSymbolEffectStrategyInJson(const std::optional<uint32_t>& value)
 {
     std::string text;
     switch (value.value_or(0)) {
-        case 0:
+        case (if (value == 0) ):
             text = "EffectStrategy.NONE";
             break;
-        case 1:
+        case (if (value == 1) ):
             text = "EffectStrategy.SCALE";
             break;
-        case 2:
+        case (if(value == 2)):
             text = "EffectStrategy.HIERARCHICAL";
             break;
         default:
