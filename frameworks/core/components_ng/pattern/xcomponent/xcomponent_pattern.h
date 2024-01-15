@@ -56,7 +56,7 @@ public:
 
     bool IsAtomicNode() const override
     {
-        return type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE;
+        return type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE || type_ == XComponentType::NODE;
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
