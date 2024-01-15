@@ -73,7 +73,7 @@ class ProgressColorModifier extends ModifierWithKey<ResourceColor | LinearGradie
 }
 
 class ProgressStyleModifier extends ModifierWithKey<ProgressStyleOptions | CapsuleStyleOptions |
-  RingStyleOptions | LinearStyleOptions | ScaleRingStyleOptions | EclipseStyleOptions> {
+RingStyleOptions | LinearStyleOptions | ScaleRingStyleOptions | EclipseStyleOptions> {
   static identity: Symbol = Symbol('style');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

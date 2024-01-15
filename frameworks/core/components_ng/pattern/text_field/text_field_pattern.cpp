@@ -3246,7 +3246,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     if (inputValue == DEFAULT_MODE) {
         originLength = originLength + ONE_CHARACTER;
     }
-    if (textFieldLayoutProperty->GetShowCounterValue(false) && originLength == maxlength &&
+    if (textFieldLayoutProperty->GetShowCounterValue(false) && originLength == static_cast<int32_t>(maxlength) &&
         inputValue == DEFAULT_MODE) {
         UpdateCounterBorderStyle(originLength, maxlength);
     }
@@ -3329,7 +3329,7 @@ void TextFieldPattern::UpdateCounterBorderStyle(int32_t& textLength, uint32_t& m
     auto showBorder = textFieldLayoutProperty->GetShowHighlightBorderValue(true);
     if (static_cast<uint32_t>(textLength) >= (maxLength - ONE_CHARACTER) && !IsTextArea() && showBorder == true) {
         SetUnderlineColor(theme->GetErrorUnderlineColor());
-    } else if (textLength >= maxLength && IsTextArea() && showBorder == true) {
+    } else if (textLength >= static_cast<int32_t>(maxLength) && IsTextArea() && showBorder == true) {
         HandleCounterBorder();
     }
     return;

@@ -410,7 +410,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     this.notifyTrackedObjectPropertyHasChanged(changedPropertyName);
   }
 
- /**
+  /**
   * event emitted by wrapped ObservedObject, when one of its property values changes
   * for class objects when in compatibility mode
   * for Array, Date instances always
