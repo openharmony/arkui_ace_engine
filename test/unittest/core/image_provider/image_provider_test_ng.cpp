@@ -1036,7 +1036,7 @@ HWTEST_F(ImageProviderTestNg, HandleCommand006, TestSize.Level1)
 }
 
 /**
- * @tc.name: HandleCommand006
+ * @tc.name: HandleCommand007
  * @tc.desc: Test HandleCommand.
  * @tc.type: FUNC
  */
