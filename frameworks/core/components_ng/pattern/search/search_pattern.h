@@ -176,6 +176,7 @@ private:
     void InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t childId);
     void HandleBackgroundColor();
     void HandleEnabled();
+    void HandleTouchableAndHitTestMode();
     void InitButtonMouseAndTouchEvent();
     void SetMouseStyle(MouseFormat format);
     void OnButtonTouchDown(int32_t childId);
