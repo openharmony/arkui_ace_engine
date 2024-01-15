@@ -15,11 +15,13 @@
 
 #include "adapter/ohos/osal/long_frame_report_impl.h"
 
+#include <unistd.h>
 #include "base/longframe/long_frame_report.h"
 #include "base/ressched/ressched_report.h"
 
 namespace OHOS::Ace {
 namespace {
+    constexpr char* LIBFFRT_LIB64_PATH = "/system/lib64/ndk/libffrt.z.so";
     constexpr int32_t LONG_FRAME_EVENT_DELAY = 10000;
 }
 LongFrameReportImpl::LongFrameReportImpl()
@@ -43,14 +45,28 @@ void LongFrameReportImpl::CancelEvent()
     }
 }
 
+ILongFrame::ILongFrame()
+{
+    if (access(LIBFFRT_LIB64_PATH, F_OK) == -1) {
+        return ;
+    }
+    is64BitSystem = true;
+}
+
 void ILongFrame::ReportStartEvent()
 {
+    if (!is64BitSystem) {
+        return ;
+    }
     reporter = new LongFrameReportImpl();
     static_cast<LongFrameReportImpl*>(reporter)->SubmitEvent();
 }
 
 void ILongFrame::ReportEndEvent()
 {
+    if (!is64BitSystem) {
+        return ;
+    }
     static_cast<LongFrameReportImpl*>(reporter)->CancelEvent();
     delete static_cast<LongFrameReportImpl*>(reporter);
 }
