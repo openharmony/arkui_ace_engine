@@ -99,7 +99,7 @@ std::string GetFontFamilyInJson(const std::optional<std::vector<std::string>>& v
 }
 std::string GetSymbolRenderingStrategyInJson(const std::optional<uint32_t>& value)
 {
-    std::text;
+    std::string text;
     switch(value.value_or(0))
     {
         case 0:
