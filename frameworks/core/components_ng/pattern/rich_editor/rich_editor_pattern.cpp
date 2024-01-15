@@ -1276,14 +1276,7 @@ std::vector<RefPtr<SpanNode>> RichEditorPattern::GetParagraphNodes(int32_t start
     int32_t length = GetParagraphLength(spans);
     std::vector<RefPtr<SpanNode>> res;
 
-    // start >= all content
     if (start >= length) {
-        for (const auto& span : spans) {
-            auto spanNode = DynamicCast<SpanNode>(span);
-            if (spanNode) {
-                res.emplace_back(spanNode);
-            }
-        }
         return res;
     }
 
