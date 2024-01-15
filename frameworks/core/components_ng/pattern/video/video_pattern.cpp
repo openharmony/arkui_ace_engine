@@ -67,6 +67,7 @@ constexpr uint32_t SLIDER_POS = 2;
 constexpr uint32_t DURATION_POS = 3;
 constexpr uint32_t FULL_SCREEN_POS = 4;
 constexpr int32_t AVERAGE_VALUE = 2;
+const Dimension LIFT_HEIGHT = 28.0_vp;
 
 // Default error, empty string.
 const std::string ERROR = "";
@@ -1038,6 +1039,15 @@ void VideoPattern::OnColorConfigurationUpdate()
     host->MarkDirtyNode();
 }
 
+bool VideoPattern::NeedLift() const
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, false);
+    return IsFullScreen() && renderContext->IsUniRenderEnabled();
+}
+
 RefPtr<FrameNode> VideoPattern::CreateControlBar(int32_t nodeId)
 {
     ContainerScope scope(instanceId_);
@@ -1077,6 +1087,11 @@ RefPtr<FrameNode> VideoPattern::CreateControlBar(int32_t nodeId)
     renderContext->UpdateBackgroundColor(videoTheme->GetBkgColor());
     auto controlBarLayoutProperty = controlBar->GetLayoutProperty<LinearLayoutProperty>();
     controlBarLayoutProperty->UpdateMainAxisAlign(FlexAlign::SPACE_BETWEEN);
+    if (NeedLift()) {
+        PaddingProperty padding;
+        padding.bottom = CalcLength(LIFT_HEIGHT);
+        controlBarLayoutProperty->UpdatePadding(padding);
+    }
     return controlBar;
 }
 
@@ -1575,7 +1590,7 @@ void VideoPattern::UpdateFsState()
     videoPattern->UpdateState();
 }
 
-bool VideoPattern::IsFullScreen()
+bool VideoPattern::IsFullScreen() const
 {
     return fullScreenNodeId_.has_value();
 }

@@ -70,7 +70,7 @@ public:
         return layoutProperty;
     }
 
-    bool IsFullScreen() override
+    bool IsFullScreen() const override
     {
         // full screen state check from origin video fullScreenNodeId_
         auto videoPattern = videoPattern_.Upgrade();
