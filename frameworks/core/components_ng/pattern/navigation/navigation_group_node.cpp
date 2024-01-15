@@ -106,9 +106,11 @@ void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t s
         contentNode = FrameNode::GetOrCreateFrameNode(
             V2::NAVBAR_CONTENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         navBar->SetNavBarContentNode(contentNode);
-        auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
         navBar->AddChild(contentNode);
+
+        auto navBarContentNode = AceType::DynamicCast<FrameNode>(contentNode);
+        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
+        navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
     contentNode->AddChild(child);
 }
