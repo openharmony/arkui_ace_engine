@@ -69,6 +69,7 @@ void SystemWindowScene::OnAttachToFrameNode()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    host->SetWindowBoundary();
     session_->SetUINodeId(host->GetAccessibilityId());
     auto context = AceType::DynamicCast<NG::RosenRenderContext>(host->GetRenderContext());
     CHECK_NULL_VOID(context);
