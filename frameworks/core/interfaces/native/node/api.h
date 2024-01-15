@@ -656,6 +656,8 @@ struct ArkUITimepickerModifierAPI {
     void (*ResetTimepickerTextStyle)(NodeHandle node);
     void (*ResetTimepickerSelectedTextStyle)(NodeHandle node);
     void (*ResetTimepickerBackgroundColor)(NodeHandle node);
+    void (*SetTimepickerUseMilitaryTime)(NodeHandle node, bool isUseMilitaryTime);
+    void (*ResetTimepickerUseMilitaryTime)(NodeHandle node);
 };
 
 struct ArkUIRowModifierAPI {
@@ -1215,6 +1217,8 @@ struct ArkUIStepperItemModifierAPI {
 struct ArkUIHyperlinkModifierAPI {
     void (*SetHyperlinkColor)(NodeHandle node, uint32_t color);
     void (*ResetHyperlinkColor)(NodeHandle node);
+    void (*SetHyperlinkDraggable)(NodeHandle node, bool draggable);
+    void (*ResetHyperlinkDraggable)(NodeHandle node);
 };
 
 struct ArkUIMenuItemModifierAPI {

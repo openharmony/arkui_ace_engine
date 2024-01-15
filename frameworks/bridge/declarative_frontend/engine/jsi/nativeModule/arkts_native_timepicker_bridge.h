@@ -29,6 +29,8 @@ public:
     static ArkUINativeModuleValue ResetSelectedTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetDisappearTextStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetTimepickerBackgroundColor(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetTimepickerUseMilitaryTime(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetTimepickerUseMilitaryTime(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 }
 

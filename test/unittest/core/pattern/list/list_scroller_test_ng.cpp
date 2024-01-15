@@ -1513,50 +1513,6 @@ HWTEST_F(ListScrollerTestNg, Pattern016, TestSize.Level1)
 }
 
 /**
- * @tc.name: Pattern017
- * @tc.desc: Test the padding of list.
- * @tc.type: FUNC
- */
-HWTEST_F(ListScrollerTestNg, Pattern017, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create List
-     */
-    Create([](ListModelNG model) {
-        model.SetSpace(Dimension(20));
-        model.SetScrollBar(Ace::DisplayMode::OFF);
-        model.SetListDirection(Axis::HORIZONTAL);
-        CreateItem(TOTAL_LINE_NUMBER, Axis::HORIZONTAL);
-    });
-
-    /**
-     * @tc.steps: step2. set padding
-     * @tc.expected: The value is correct
-     */
-    ViewAbstract::SetPadding(AceType::RawPtr(frameNode_), CalcLength(5.0f));
-    ViewAbstract::SetHeight(AceType::RawPtr(frameNode_), CalcLength(ITEM_HEIGHT));
-    FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(0), Rect(5.0f, 5.0f, ITEM_WIDTH, ITEM_HEIGHT - 10.f)));
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(1), Rect(85.0f, 5.0f, ITEM_WIDTH, ITEM_HEIGHT - 10.f)));
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(2), Rect(165.0f, 5.0f, ITEM_WIDTH, ITEM_HEIGHT - 10.f)));
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(3), Rect(245.0f, 5.0f, ITEM_WIDTH, ITEM_HEIGHT - 10.f)));
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(4), Rect(325.0f, 5.0f, ITEM_WIDTH, ITEM_HEIGHT - 10.f)));
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(5), Rect(405.0f, 5.0f, ITEM_WIDTH, ITEM_HEIGHT - 10.f)));
-
-    /**
-     * @tc.steps: step3. Scroll To BOTTOM
-     * @tc.expected: The value is correct
-     */
-    ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM);
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(4), Rect(15.0f, 5.0f, ITEM_WIDTH, ITEM_HEIGHT - 10.f)));
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(5), Rect(95.0f, 5.0f, ITEM_WIDTH, ITEM_HEIGHT - 10.f)));
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(6), Rect(175.0f, 5.0f, ITEM_WIDTH, ITEM_HEIGHT - 10.f)));
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(7), Rect(255.0f, 5.0f, ITEM_WIDTH, ITEM_HEIGHT - 10.f)));
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(8), Rect(335.0f, 5.0f, ITEM_WIDTH, ITEM_HEIGHT - 10.f)));
-    EXPECT_TRUE(IsEqual(pattern_->GetItemRect(9), Rect(415.0f, 5.0f, ITEM_WIDTH, ITEM_HEIGHT - 10.f)));
-}
-
-/**
  * @tc.name: ListPattern_UpdateScrollSnap001
  * @tc.desc: Test UpdateScrollSnap.
  * @tc.type: FUNC

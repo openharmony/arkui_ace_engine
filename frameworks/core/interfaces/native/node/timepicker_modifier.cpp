@@ -125,12 +125,26 @@ void ResetTimepickerDisappearTextStyle(NodeHandle node)
     TimePickerModelNG::SetDisappearTextStyle(frameNode, pickerTheme, pickerTextStyle);
 }
 
+void SetTimepickerUseMilitaryTime(NodeHandle node, bool isUseMilitaryTime)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetHour24(frameNode, isUseMilitaryTime);
+}
+
+void ResetTimepickerUseMilitaryTime(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TimePickerModelNG::SetHour24(frameNode, false);
+}
+
 ArkUITimepickerModifierAPI GetTimepickerModifier()
 {
     static const ArkUITimepickerModifierAPI modifier = { SetTimepickerBackgroundColor,
         SetTimepickerDisappearTextStyle, SetTimepickerTextStyle, SetTimepickerSelectedTextStyle,
         ResetTimepickerDisappearTextStyle, ResetTimepickerTextStyle, ResetTimepickerSelectedTextStyle,
-        ResetTimepickerBackgroundColor };
+        ResetTimepickerBackgroundColor, SetTimepickerUseMilitaryTime, ResetTimepickerUseMilitaryTime };
 
     return modifier;
 }

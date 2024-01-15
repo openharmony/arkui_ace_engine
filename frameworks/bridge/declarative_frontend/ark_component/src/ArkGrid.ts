@@ -139,6 +139,10 @@ class ArkGridComponent extends ArkComponent implements GridAttribute {
   monopolizeEvents(monopolize: boolean): this {
     throw new Error('Method not implemented.');
   }
+  clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
+    modifierWithKey(this._modifiersWithKeys, GridClipModifier.identity, GridClipModifier, value);
+    return this;
+  }
 }
 
 class GridColumnsTemplateModifier extends ModifierWithKey<string> {
@@ -424,6 +428,23 @@ class GridSupportAnimationModifier extends ModifierWithKey<boolean> {
     } else {
       getUINativeModule().grid.setSupportAnimation(node, this.value);
     }
+  }
+}
+
+class GridClipModifier extends ModifierWithKey<boolean | object> {
+  constructor(value: boolean | object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('gridClip');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetClipWithEdge(node);
+    } else {
+      getUINativeModule().common.setClipWithEdge(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return true;
   }
 }
 
