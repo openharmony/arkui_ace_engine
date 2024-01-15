@@ -1635,9 +1635,10 @@ var ContentTextStyle;
 })(ContentTextStyle || (ContentTextStyle = {}));
 
 class NavPathInfo {
-  constructor(name, param) {
+  constructor(name, param, onPop) {
     this.name = name;
     this.param = param;
+    this.onPop = onPop;
   }
 }
 
@@ -1664,10 +1665,18 @@ class NavPathStack {
   push(info, animated) {
     this.pushPath(info, animated);
   }
-  pushPathByName(name, param, animated) {
-    this.pathArray.push(new NavPathInfo(name, param));
+  pushPathByName(name, param, onPop, animated) {
+    if (onPop === undefined || typeof onPop === 'boolean') {
+      this.pathArray.push(new NavPathInfo(name, param));
+    } else {
+      this.pathArray.push(new NavPathInfo(name, param, onPop));
+    }
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
+    if (typeof onPop === 'boolean') {
+      this.animated = onPop;
+      return;
+    }
     if (animated === undefined) {
       this.animated = true;
       return;
@@ -1716,13 +1725,25 @@ class NavPathStack {
   setAnimated(value) {
     this.animated = value;
   }
-  pop(animated) {
+  pop(result, animated) {
     if (this.pathArray.length === 0) {
       return undefined;
     }
+    let currentPathInfo = this.pathArray[this.pathArray.length - 1];
     let pathInfo = this.pathArray.pop();
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
+    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop != undefined) {
+      let popInfo = {
+        info: currentPathInfo,
+        result: result,
+      };
+      currentPathInfo.onPop(popInfo);
+    }
+    if (typeof result === 'boolean') {
+      this.animated = result;
+      return pathInfo;
+    }
     if (animated === undefined) {
       this.animated = true;
       return pathInfo;
@@ -1733,14 +1754,26 @@ class NavPathStack {
   popTo(name, animated) {
     popToName(name, animated);
   }
-  popToName(name, animated) {
+  popToName(name, result, animated) {
     let index = this.pathArray.findIndex(element => element.name === name);
     if (index === -1) {
       return -1;
     }
+    let currentPathInfo = this.pathArray[this.pathArray.length - 1];
     this.pathArray.splice(index + 1);
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
+    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop != undefined) {
+      let popInfo = {
+        info: currentPathInfo,
+        result: result,
+      };
+      currentPathInfo.onPop(popInfo);
+    }
+    if (typeof result === 'boolean') {
+      this.animated = result;
+      return index;
+    }
     if (animated === undefined) {
       this.animated = true;
       return index;
@@ -1748,13 +1781,25 @@ class NavPathStack {
     this.animated = animated
     return index;
   }
-  popToIndex(index, animated) {
+  popToIndex(index, result, animated) {
     if (index >= this.pathArray.length) {
       return;
     }
+    let currentPathInfo = this.pathArray[this.pathArray.length - 1];
     this.pathArray.splice(index + 1);
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
+    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop != undefined) {
+      let popInfo = {
+        info: currentPathInfo,
+        result: result,
+      };
+      currentPathInfo.onPop(popInfo);
+    }
+    if (typeof result === 'boolean') {
+      this.animated = result;
+      return;
+    }
     if (animated === undefined) {
       this.animated = true;
       return;
