@@ -826,15 +826,16 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         RefPtr<FrameNode> imageNode = overlayManager->GetPixelMapContentNode();
         DragEventActuator::CreatePreviewNode(frameNode, imageNode);
         CHECK_NULL_VOID(imageNode);
-        auto window = SubwindowManager::GetInstance()->ShowPreviewNG();
-        CHECK_NULL_VOID(window);
-        overlayManager = window->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        DragEventActuator::MountPixelMap(overlayManager, eventHub->GetGestureEventHub(), imageNode);
-        dragDropManager->DoDragStartAnimation(overlayManager, info);
         scale = static_cast<float>(imageNode->GetPreviewScaleVal());
-        if (pixelMap_ != nullptr) {
-            pixelMap = pixelMap_;
+        auto window = SubwindowManager::GetInstance()->ShowPreviewNG();
+        if (window) {
+            overlayManager = window->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            DragEventActuator::MountPixelMap(overlayManager, eventHub->GetGestureEventHub(), imageNode);
+            dragDropManager->DoDragStartAnimation(overlayManager, info);
+            if (pixelMap_ != nullptr) {
+                pixelMap = pixelMap_;
+            }
         }
     }
     if (!overlayManager->GetIsOnAnimation()) {
