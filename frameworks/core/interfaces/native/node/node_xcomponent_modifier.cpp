@@ -95,7 +95,6 @@ const ArkUIXComponentModifier* GetXComponentModifier()
         nullptr, // loadXComponent
         nullptr, // setXComponentOptions
         nullptr, // getXComponentSurfaceId
-        nullptr, // setXComponentSurfaceSize
         nullptr, // getXComponentController
         SetXComponentBackgroundColor,
         ResetXComponentBackgroundColor,

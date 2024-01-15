@@ -2265,8 +2265,6 @@ struct ArkUIXComponentModifier {
                                     ArkUI_CharPtr libraryName, ArkUI_Int32 errorCallbackId);
     void (*setXComponentOptions)(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_CharPtr type, ArkUI_CharPtr libraryName);
     ArkUI_CharPtr (*getXComponentSurfaceId)(ArkUIXComponentControllerHandle controller);
-    void (*setXComponentSurfaceSize)(ArkUIXComponentControllerHandle controller, 
-                                     ArkUI_Int32 surfaceWidth, ArkUI_Int32 surfaceHeight);
     ArkUIXComponentControllerHandle (*getXComponentController)(ArkUINodeHandle node);
 
     void (*setXComponentBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
