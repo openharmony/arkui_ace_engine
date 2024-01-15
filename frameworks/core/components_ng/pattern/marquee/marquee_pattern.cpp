@@ -453,12 +453,10 @@ void MarqueePattern::RegistOritationListener()
 
 void MarqueePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    pipeline->RemoveWindowSizeChangeCallback(host->GetId());
-    pipeline->RemoveVisibleAreaChangeNode(host->GetId());
+    pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
+    pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
     isOritationListenerRegisted_ = false;
     isRegistedAreaCallback_ = false;
 }
