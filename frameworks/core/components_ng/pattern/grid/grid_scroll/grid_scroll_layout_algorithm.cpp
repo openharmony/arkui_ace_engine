@@ -506,7 +506,7 @@ void GridScrollLayoutAlgorithm::FillBlankAtEnd(
     while (LessNotEqual(mainLength, mainSize)) {
         float lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
         if (GreatOrEqual(lineHeight, 0.0)) {
-            mainLength += lineHeight;
+            mainLength += (lineHeight + mainGap_);
             continue;
         }
         gridLayoutInfo_.reachEnd_ = true;
