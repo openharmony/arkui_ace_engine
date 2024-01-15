@@ -177,7 +177,6 @@ void RichEditorPattern::HandleEnabled()
 
 void RichEditorPattern::BeforeCreateLayoutWrapper()
 {
-    moveLength_ = 0;
     TextPattern::PreCreateLayoutWrapper();
 }
 
@@ -362,6 +361,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     }
     if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
         SetCaretPosition(options.offset.value() + 1 + moveLength_);
+        moveLength_ = 0;
     } else {
         placeholderCount_++;
         SetCaretPosition(GetTextContentLength());
@@ -422,6 +422,7 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
     AddSpanItem(spanItem, offset);
     if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
         SetCaretPosition(options.offset.value() + 1 + moveLength_);
+        moveLength_ = 0;
     } else {
         placeholderCount_++;
         SetCaretPosition(GetTextContentLength());
@@ -519,6 +520,7 @@ int32_t RichEditorPattern::AddTextSpanOperation(
     if (updateCaretOPosition) {
         if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
             SetCaretPosition(options.offset.value() + 1 + moveLength_);
+            moveLength_ = 0;
         } else {
             SetCaretPosition(GetTextContentLength());
         }
@@ -588,6 +590,7 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
     AddSpanItem(spanItem, offset);
     if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
         SetCaretPosition(options.offset.value() + SYMBOL_SPAN_LENGTH + moveLength_);
+        moveLength_ = 0;
     } else {
         SetCaretPosition(GetTextContentLength());
     }
