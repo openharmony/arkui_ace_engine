@@ -100,9 +100,9 @@ std::string GetFontFamilyInJson(const std::optional<std::vector<std::string>>& v
 std::string GetSymbolRenderingStrategyInJson(const std::optional<uint32_t>& value)
 {
     std::string text;
-    if (value == RenderingStrategy.MULTIPLE_COLOR) {
+    if (value == MULTIPLE_COLOR) {
         text = "RenderingStrategy.MULTIPLE_COLOR";
-    } else if (value == RenderingStrategy.MULTIPLE_OPACITY) {
+    } else if (value == MULTIPLE_OPACITY) {
         text = "RenderingStrategy.MULTIPLE_OPACITY";
     } else {
         text = "RenderingStrategy.SINGLE";
@@ -112,9 +112,9 @@ std::string GetSymbolRenderingStrategyInJson(const std::optional<uint32_t>& valu
 std::string GetSymbolEffectStrategyInJson(const std::optional<uint32_t>& value)
 {
     std::string text;
-    if (value == EffectStrategy.EFFSCALE) {
+    if (value == SCALE) {
         text = "EffectStrategy.SCALE";
-    } else if (value == EffectStrategy.EFFHIERARCHICAL) {
+    } else if (value == HIERARCHICAL) {
         text = "EffectStrategy.HIERARCHICAL";
     } else {
         text = "EffectStrategy.NONE";

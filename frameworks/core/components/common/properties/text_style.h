@@ -114,9 +114,9 @@ enum RenderingStrategy {
 };
 
 enum EffectStrategy {
-    EFFNONE = 0,
-    EFFSCALE,
-    EFFHIERARCHICAL,
+    NONE = 0,
+    SCALE,
+    HIERARCHICAL,
 };
 
 struct TextSizeGroup {
