@@ -15,8 +15,12 @@
 
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
+#include <unistd.h>
+
 #include "base/log/frame_report.h"
+#ifdef FFRT_EXISTS
 #include "base/longframe/long_frame_report.h"
+#endif
 #include "base/memory/referenced.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
@@ -27,7 +31,18 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+    const char* LIBFFRT_LIB64_PATH = "/system/lib64/ndk/libffrt.z.so";
+}
 uint64_t UITaskScheduler::frameId_ = 0;
+
+UITaskScheduler::UITaskScheduler()
+{
+    if (access(LIBFFRT_LIB64_PATH, F_OK) == -1) {
+        return ;
+    }
+    is64BitSystem_ = true;
+}
 
 UITaskScheduler::~UITaskScheduler()
 {
@@ -90,9 +105,13 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
         abort();
     }
 
+#ifdef FFRT_EXISTS
     // Pause GC during long frame
     std::unique_ptr<ILongFrame> longFrame = std::make_unique<ILongFrame>();
-    longFrame->ReportStartEvent();
+    if (is64BitSystem_) {
+        longFrame->ReportStartEvent();
+    }
+#endif
 
     isLayouting_ = true;
     auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
@@ -114,7 +133,11 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
     }
     ExpandSafeArea();
 
-    longFrame->ReportEndEvent();
+#ifdef FFRT_EXISTS
+    if (is64BitSystem_) {
+        longFrame->ReportEndEvent();
+    }
+#endif
 
     isLayouting_ = false;
 }

@@ -15,6 +15,8 @@
 
 #include "adapter/ohos/osal/long_frame_report_impl.h"
 
+#include <unistd.h>
+
 #include "base/longframe/long_frame_report.h"
 #include "base/ressched/ressched_report.h"
 
@@ -22,35 +24,44 @@ namespace OHOS::Ace {
 namespace {
     constexpr int32_t LONG_FRAME_EVENT_DELAY = 10000;
 }
-LongFrameReportImpl::LongFrameReportImpl()
-{
-    ffrtTaskQueue = std::make_unique<ffrt::queue>("long_frame_report_ffrt_queue",
-        ffrt::queue_attr().qos(ffrt::qos_user_initiated));
-}
 
 void LongFrameReportImpl::SubmitEvent()
 {
-    ffrtTask = ffrtTaskQueue->submit_h([] {
+    ffrtTask = ffrt::submit_h([] {
         ResSchedReport::GetInstance().ResSchedDataReport("long_frame_start");
-    }, ffrt::task_attr().delay(LONG_FRAME_EVENT_DELAY));
+    }, {}, {}, ffrt::task_attr().delay(LONG_FRAME_EVENT_DELAY));
 }
 
 void LongFrameReportImpl::CancelEvent()
 {
-    if (ffrtTaskQueue->cancel(ffrtTask)) {
-        ffrtTaskQueue->wait(ffrtTask);
+    if (ffrt::skip(ffrtTask)) {
+        ffrt::wait({ffrtTask});
         ResSchedReport::GetInstance().ResSchedDataReport("long_frame_end");
     }
 }
 
+ILongFrame::ILongFrame()
+{
+    if (access(LIBFFRT_LIB64_PATH, F_OK) == -1) {
+        return ;
+    }
+    is64BitSystem_ = true;
+}
+
 void ILongFrame::ReportStartEvent()
 {
+    if (!is64BitSystem_) {
+        return ;
+    }
     reporter = new LongFrameReportImpl();
     static_cast<LongFrameReportImpl*>(reporter)->SubmitEvent();
 }
 
 void ILongFrame::ReportEndEvent()
 {
+    if (!is64BitSystem_) {
+        return ;
+    }
     static_cast<LongFrameReportImpl*>(reporter)->CancelEvent();
     delete static_cast<LongFrameReportImpl*>(reporter);
 }
