@@ -2262,18 +2262,20 @@ struct ArkUIXComponentModifier {
     // matching VM we're embedding into. errorCallbackId is invoked if operation
     // cannot be completed.
     ArkUIVMObject (*loadXComponent)(ArkUIVMContext vmContext, ArkUINodeHandle node, ArkUIVMKind vmKind,
-        ArkUI_CharPtr libraryName, ArkUI_Int32 errorCallbackId);
-    void (*setXComponentOptions)(
-        ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_CharPtr type, ArkUI_CharPtr libraryName);
+                                    ArkUI_CharPtr libraryName, ArkUI_Int32 errorCallbackId);
+    void (*setXComponentOptions)(ArkUINodeHandle node, ArkUI_CharPtr id, ArkUI_CharPtr type, ArkUI_CharPtr libraryName);
     ArkUI_CharPtr (*getXComponentSurfaceId)(ArkUIXComponentControllerHandle controller);
-    void (*setXComponentSurfaceSize)(
-        ArkUIXComponentControllerHandle controller, ArkUI_Int32 surfaceWidth, ArkUI_Int32 surfaceHeight);
+    void (*setXComponentSurfaceSize)(ArkUIXComponentControllerHandle controller, 
+                                     ArkUI_Int32 surfaceWidth, ArkUI_Int32 surfaceHeight);
     ArkUIXComponentControllerHandle (*getXComponentController)(ArkUINodeHandle node);
 
     void (*setXComponentBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*resetXComponentBackgroundColor)(ArkUINodeHandle node);
     void (*setXComponentOpacity)(ArkUINodeHandle node, ArkUI_Float64 opacity);
     void (*resetXComponentOpacity)(ArkUINodeHandle node);
+    void (*setXComponentId)(ArkUINodeHandle node, ArkUI_CharPtr id);
+    void (*setXComponentType)(ArkUINodeHandle node, ArkUI_Uint32 type);
+    void (*setXComponentSurfaceSize)(ArkUINodeHandle node, ArkUI_Uint32 width, ArkUI_Uint32 height);
 };
 
 struct ArkUIStateModifier {

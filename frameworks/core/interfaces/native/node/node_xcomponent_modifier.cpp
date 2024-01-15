@@ -92,9 +92,19 @@ namespace NodeModifier {
 const ArkUIXComponentModifier* GetXComponentModifier()
 {
     static const ArkUIXComponentModifier modifier = {
-        SetXComponentBackgroundColor, ResetXComponentBackgroundColor,
-        SetXComponentOpacity, ResetXComponentOpacity, SetXComponentId,
-        SetXComponentType, SetXComponentSurfaceSize, };
+        nullptr, // loadXComponent
+        nullptr, // setXComponentOptions
+        nullptr, // getXComponentSurfaceId
+        nullptr, // setXComponentSurfaceSize
+        nullptr, // getXComponentController
+        SetXComponentBackgroundColor,
+        ResetXComponentBackgroundColor,
+        SetXComponentOpacity,
+        ResetXComponentOpacity,
+        SetXComponentId,
+        SetXComponentType,
+        SetXComponentSurfaceSize,
+    };
 
     return &modifier;
 }
