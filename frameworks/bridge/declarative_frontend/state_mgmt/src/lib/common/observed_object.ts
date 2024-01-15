@@ -197,7 +197,7 @@ class SubscribableHandler {
       default:
         const result = Reflect.get(target, property, receiver);
         let propertyStr : string = String(property);
-        if (this.readCbFunc_ && typeof result != "function") {
+        if (this.readCbFunc_ && typeof result !== 'function') {
           let isTracked = this.isPropertyTracked(target, propertyStr);
           stateMgmtConsole.debug(`SubscribableHandler: get ObservedObject property '${isTracked ? "@Track " : ""}${propertyStr}' notifying read.`);
           this.readCbFunc_(receiver, propertyStr, isTracked);

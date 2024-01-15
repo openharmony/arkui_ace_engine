@@ -414,7 +414,7 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
         }
         placeholderSpanNode->MountToParent(host, offset);
     } else {
-        spanIndex = host->GetChildren().size();
+        spanIndex = static_cast<int32_t>(host->GetChildren().size());
         placeholderSpanNode->MountToParent(host);
     }
     auto spanItem = placeholderSpanNode->GetSpanItem();
@@ -474,7 +474,7 @@ int32_t RichEditorPattern::AddTextSpanOperation(
         spanNode->MountToParent(host, index);
         spanIndex = index;
     } else {
-        spanIndex = host->GetChildren().size();
+        spanIndex = static_cast<int32_t>(host->GetChildren().size());
         spanNode->MountToParent(host);
     }
     spanNode->UpdateContent(options.value);
@@ -567,7 +567,7 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
         spanNode->MountToParent(host, index);
         spanIndex = index;
     } else {
-        spanIndex = host->GetChildren().size();
+        spanIndex = static_cast<int32_t>(host->GetChildren().size());
         spanNode->MountToParent(host);
     }
     spanNode->UpdateContent(options.symbolId);
@@ -701,7 +701,7 @@ void RichEditorPattern::DeleteSpansByRange(
     }
 
     auto itStart = childrens.begin();
-    if (startInfo.spanIndex_ >= childrens.size()) {
+    if (startInfo.spanIndex_ >= static_cast<int32_t>(childrens.size())) {
         std::advance(itStart, childrens.size() - 1);
         TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "startInfo.spanIndex_ is larger than childrens size");
     } else {
