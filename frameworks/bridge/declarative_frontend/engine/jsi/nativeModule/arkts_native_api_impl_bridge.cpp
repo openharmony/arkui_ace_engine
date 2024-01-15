@@ -528,6 +528,18 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetEnabled));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnabled"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetEnabled));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setUseShadowBatching"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetUseShadowBatching));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetUseShadowBatching"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetUseShadowBatching));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBlendMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetBlendMode));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBlendMode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetBlendMode));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMonopolizeEvents"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetMonopolizeEvents));
+    common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMonopolizeEvents"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::ResetMonopolizeEvents));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDraggable"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CommonBridge::SetDraggable));
     common->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDraggable"),
@@ -2863,6 +2875,14 @@ void ArkUINativeModule::RegisterListAttributes(Local<panda::ObjectRef> object, E
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetScrollSnapAlign));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetScrollSnapAlign"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetScrollSnapAlign));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentStartOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetContentStartOffset));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContentStartOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetContentStartOffset));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentEndOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetContentEndOffset));
+    list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContentEndOffset"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::ResetContentEndOffset));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "setDivider"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), ListBridge::SetDivider));
     list->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDivider"),

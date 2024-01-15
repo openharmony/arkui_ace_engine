@@ -21,9 +21,6 @@ class ArkCanvasComponent extends ArkComponent implements CanvasAttribute {
   onReady(event: () => void): this {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
 }
 
 // @ts-ignore

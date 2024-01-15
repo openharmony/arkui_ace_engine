@@ -70,6 +70,34 @@ class ListScrollSnapAlignModifier extends ModifierWithKey<ScrollSnapAlign> {
   }
 }
 
+class ContentStartOffsetModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('contentStartOffset');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetContentStartOffset(node);
+    } else {
+      getUINativeModule().list.setContentStartOffset(node, this.value);
+    }
+  }
+}
+
+class ContentEndOffsetModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('contentEndOffset');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().list.resetContentEndOffset(node);
+    } else {
+      getUINativeModule().list.setContentEndOffset(node, this.value);
+    }
+  }
+}
+
 class ListDividerModifier extends ModifierWithKey<DividerStyle> {
   constructor(value: DividerStyle) {
     super(value);
@@ -309,10 +337,12 @@ class ArkListComponent extends ArkComponent implements ListAttribute {
     return this;
   }
   contentStartOffset(value: number): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ContentStartOffsetModifier.identity, ContentStartOffsetModifier, value);
+    return this;
   }
   contentEndOffset(value: number): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, ContentEndOffsetModifier.identity, ContentEndOffsetModifier, value);
+    return this;
   }
   divider(value: { strokeWidth: any; color?: any; startMargin?: any; endMargin?: any; } | null): this {
     modifierWithKey(this._modifiersWithKeys, ListDividerModifier.identity, ListDividerModifier, value);
@@ -398,9 +428,6 @@ class ArkListComponent extends ArkComponent implements ListAttribute {
     throw new Error('Method not implemented.');
   }
   onScrollFrameBegin(event: (offset: number, state: ScrollState) => { offsetRemain: number; }): this {
-    throw new Error('Method not implemented.');
-  }
-  monopolizeEvents(monopolize: boolean): this {
     throw new Error('Method not implemented.');
   }
 }

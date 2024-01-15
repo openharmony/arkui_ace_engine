@@ -28,9 +28,6 @@ class ArkStepperItemComponent extends ArkComponent implements StepperItemAttribu
   status(value?: ItemState | undefined): this {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
 }
 
 class NextLabelModifier extends ModifierWithKey<string> {

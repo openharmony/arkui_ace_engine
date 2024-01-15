@@ -112,9 +112,6 @@ class ArkMenuComponent extends ArkComponent implements MenuAttribute {
     modifierWithKey(this._modifiersWithKeys, RadiusModifier.identity, RadiusModifier, value);
     return this;
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
 }
 
 // @ts-ignore

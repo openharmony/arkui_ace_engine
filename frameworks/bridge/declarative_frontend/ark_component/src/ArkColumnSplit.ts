@@ -59,9 +59,6 @@ class ArkColumnSplitComponent extends ArkComponent implements CommonMethod<Colum
     modifierWithKey(this._modifiersWithKeys, ColumnSplitDividerModifier.identity, ColumnSplitDividerModifier, value);
     return this;
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
 }
 // @ts-ignore
 globalThis.ColumnSplit.attributeModifier = function (modifier) {

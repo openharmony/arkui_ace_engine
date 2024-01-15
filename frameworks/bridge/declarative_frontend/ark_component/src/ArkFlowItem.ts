@@ -18,9 +18,6 @@ class ArkFlowItemComponent extends ArkComponent implements FlowItemAttribute {
   constructor(nativePtr: KNode) {
     super(nativePtr);
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
 }
 
 // @ts-ignore

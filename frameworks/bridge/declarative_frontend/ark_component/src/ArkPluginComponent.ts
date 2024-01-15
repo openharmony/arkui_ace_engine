@@ -24,9 +24,6 @@ class ArkPluginComponent extends ArkComponent implements PluginComponentAttribut
   onError(callback: (info: { errcode: number; msg: string; }) => void): this {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
   size(value: SizeOptions): this {
     modifierWithKey(this._modifiersWithKeys, PluginSizeModifier.identity, PluginSizeModifier, value);
     return this;

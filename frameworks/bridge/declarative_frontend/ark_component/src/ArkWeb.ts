@@ -294,9 +294,6 @@ class ArkWebComponent extends ArkComponent implements WebAttribute {
   nestedScroll(value: NestedScrollOptions): this {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
 }
 
 // @ts-ignore
