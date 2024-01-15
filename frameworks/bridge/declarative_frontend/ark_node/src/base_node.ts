@@ -24,12 +24,16 @@ declare interface RenderOptions {
   surfaceId?: string
 }
 
+declare class DrawContext {}
+
 declare class __JSBaseNode__ {
   constructor(options?: RenderOptions);
   create(builder: (...args: Object[]) => void, params: Object): number | null;
   createRenderNode(): number | null;
   finishUpdateFunc(): void;
+  postTouchEvent(touchEvent: TouchEvent): boolean;
   reset(): void;
+  draw(drawContext: DrawContext): void;
 }
 
 class BaseNode extends __JSBaseNode__ {
