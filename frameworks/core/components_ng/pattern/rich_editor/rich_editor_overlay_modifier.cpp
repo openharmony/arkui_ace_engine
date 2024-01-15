@@ -122,7 +122,7 @@ void RichEditorOverlayModifier::PaintCaret(DrawingContext& drawingContext) const
     brush.SetColor(caretColor_->Get());
     drawingContext.canvas.AttachBrush(brush);
 
-    if (NearEqual(offset.GetX(), contentRect_.value().Right())) {
+    if (GreatOrEqual(offset.GetX() + caretWidth_->Get(), contentRect_.value().Right())) {
         drawingContext.canvas.DrawRect(RSRect(
             offset.GetX() - caretWidth_->Get(), offset.GetY(), offset.GetX(), offset.GetY() + caretHeight_->Get()));
     } else {
