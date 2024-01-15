@@ -93,13 +93,13 @@ struct GridLayoutInfo {
         return totalHeight - currentOffset_;
     }
 
-    float GetTotalLineHeight(float mainGap) const
+    float GetTotalLineHeight(float mainGap, bool removeLastGap = true) const
     {
         float totalHeight = 0.0f;
-        for (auto iter = lineHeightMap_.begin(); iter != lineHeightMap_.end(); ++iter) {
-            totalHeight += (iter->second + mainGap);
+        for (auto iter : lineHeightMap_) {
+            totalHeight += (iter.second + mainGap);
         }
-        return totalHeight - mainGap;
+        return (removeLastGap) ? totalHeight - mainGap : totalHeight;
     }
 
     /**
@@ -150,10 +150,11 @@ struct GridLayoutInfo {
 
     float GetContentOffset(float mainGap) const;
     /**
-     * @brief Get the total height of grid content. Use estimation when lineHeights are not available. Can handle bigItems.
-     * 
-     * @param mainGap 
-     * @return total height 
+     * @brief Get the total height of grid content. Use estimation when lineHeights are not available. Can handle
+     * bigItems.
+     *
+     * @param mainGap
+     * @return total height
      */
     float GetContentHeight(float mainGap) const;
     float GetContentOffset(const GridLayoutOptions& options, float mainGap) const;

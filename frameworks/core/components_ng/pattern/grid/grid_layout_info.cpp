@@ -154,38 +154,24 @@ float GridLayoutInfo::GetCurrentOffsetOfRegularGrid(float mainGap) const
 
 float GridLayoutInfo::GetContentOffset(float mainGap) const
 {
+    if (lineHeightMap_.empty()) {
+        return 0.0f;
+    }
     if (!hasBigItem_) {
         return GetCurrentOffsetOfRegularGrid(mainGap);
     }
-
-    float heightSum = 0;
-    int32_t itemCount = 0;
-    float height = 0;
-    auto fromStart = false;
-    for (const auto& item : lineHeightMap_) {
-        auto line = gridMatrix_.find(item.first);
-        if (line == gridMatrix_.end()) {
-            continue;
-        }
-        if (line->second.empty()) {
-            continue;
-        }
-        auto lineStart = line->second.begin()->second;
-        auto lineEnd = line->second.rbegin()->second;
-        itemCount += (lineEnd - lineStart + 1);
-        heightSum += item.second + mainGap;
-        fromStart = item.first == 0 ? true : fromStart;
+    // assume lineHeightMap is continuous in range [begin, rbegin].
+    int32_t itemCount = FindItemCount(lineHeightMap_.begin()->first, lineHeightMap_.rbegin()->first);
+    if (itemCount == childrenCount_ || (lineHeightMap_.begin()->first == 0 && itemCount >= startIndex_)) {
+        return GetStartLineOffset(mainGap);
     }
+    // begin estimation
+    float heightSum = GetTotalLineHeight(mainGap, false);
     if (itemCount == 0) {
-        return 0;
+        return 0.0f;
     }
     auto averageHeight = heightSum / itemCount;
-    height = startIndex_ * averageHeight - currentOffset_;
-    if (itemCount >= (childrenCount_ - 1) || (fromStart && itemCount >= startIndex_)) {
-        height = GetStartLineOffset(mainGap);
-    }
-    LOGI("ZTE offset = %f", height);
-    return height;
+    return startIndex_ * averageHeight - currentOffset_;
 }
 
 int32_t GridLayoutInfo::FindItemCount(int32_t startLine, int32_t endLine) const
@@ -199,7 +185,7 @@ int32_t GridLayoutInfo::FindItemCount(int32_t startLine, int32_t endLine) const
         return -1;
     }
 
-    int32_t minIdx = firstLine->second.begin()->first;
+    int32_t minIdx = firstLine->second.begin()->second;
 
     int32_t maxIdx = 0;
     // maxIdx might not be in the last position if hasBigItem_
@@ -228,29 +214,18 @@ float GridLayoutInfo::GetContentHeight(float mainGap) const
     if (lineHeightMap_.empty()) {
         return 0.0f;
     }
-    float heightSum = 0.0f;
-    for (const auto& item : lineHeightMap_) {
-        auto line = gridMatrix_.find(item.first);
-        if (line == gridMatrix_.end()) {
-            continue;
-        }
-        if (line->second.empty()) {
-            continue;
-        }
-        heightSum += item.second + mainGap;
-    }
+    float heightSum = GetTotalLineHeight(mainGap, false);
     // assume lineHeightMap is continuous in range [begin, rbegin]
     int32_t itemCount = FindItemCount(lineHeightMap_.begin()->first, lineHeightMap_.rbegin()->first);
-    float averageHeight = heightSum / itemCount;
-
-    float estimatedHeight = 0;
-    if (itemCount == childrenCount_) {
-        estimatedHeight = heightSum - mainGap;
-    } else {
-        estimatedHeight = heightSum + (childrenCount_ - itemCount) * averageHeight;
+    if (itemCount == 0) {
+        return 0.0f;
     }
-    LOGI("ZTE estimated height = %f", estimatedHeight);
-    return estimatedHeight;
+    float averageHeight = heightSum / itemCount;
+    
+    if (itemCount == childrenCount_) {
+        return heightSum - mainGap;
+    }
+    return heightSum + (childrenCount_ - itemCount) * averageHeight;
 }
 
 float GridLayoutInfo::GetContentOffset(const GridLayoutOptions& options, float mainGap) const

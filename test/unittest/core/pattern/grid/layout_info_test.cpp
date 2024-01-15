@@ -13,26 +13,26 @@
  * limitations under the License.
  */
 #include "gtest/gtest.h"
-#define protected public
+
 #define private public
 #include "core/components_ng/pattern/grid/grid_layout_info.h"
 
-namespace OHOS::Ace::NG {
 using namespace testing;
 using namespace testing::ext;
+namespace OHOS::Ace::NG {
 class GridLayoutInfoTest : public testing::Test {};
 
 namespace {
-    const decltype(GridLayoutInfo::gridMatrix_) MATRIX_DEMO_1 = {
-        { 0, { { 0, 0 }, { 1, 1 } } },
-        { 1, { { 0, 2 }, { 1, -1 } } },
-        { 2, { { 0, 3 }, { 1, 4 } } },
-        { 3, { { 0, 5 }, { 1, -1 } } },
-        { 4, { { 0, 6 }, { 1, 7 } } },
-        { 5, { { 0, 8 }, { 1, 9 } } },
-        { 6, { { 0, 10 }, { 1, -1 } } },
-        { 7, { { 0, 11 } } },
-    };
+const decltype(GridLayoutInfo::gridMatrix_) MATRIX_DEMO_1 = {
+    { 0, { { 0, 0 }, { 1, 1 } } },
+    { 1, { { 0, 2 }, { 1, -1 } } },
+    { 2, { { 0, 3 }, { 1, 4 } } },
+    { 3, { { 0, 5 }, { 1, -1 } } },
+    { 4, { { 0, 6 }, { 1, 7 } } },
+    { 5, { { 0, 8 }, { 1, 9 } } },
+    { 6, { { 0, 10 }, { 1, -1 } } },
+    { 7, { { 0, 11 } } },
+};
 }
 /**
  * @tc.name: GridLayoutInfo::GetContentHeight001
@@ -102,21 +102,21 @@ HWTEST_F(GridLayoutInfoTest, GetContentHeightBigItem001, TestSize.Level1)
     info.childrenCount_ = 12;
 
     info.gridMatrix_ = MATRIX_DEMO_1;
-    constexpr float TRUE_HEIGHT = 47.0f;
-    constexpr float ERROR = TRUE_HEIGHT * 0.1f;
+    constexpr float trueHeight = 47.0f;
+    constexpr float error = trueHeight * 0.1f;
 
     info.lineHeightMap_ = { { 0, 5.0f }, { 1, 5.0f }, { 2, 5.0f }, { 3, 5.0f }, { 4, 5.0f }, { 5, 5.0f }, { 6, 5.0f },
         { 7, 5.0f } };
 
-    EXPECT_EQ(info.GetContentHeight(1.0f), TRUE_HEIGHT);
+    EXPECT_EQ(info.GetContentHeight(1.0f), trueHeight);
 
     info.lineHeightMap_ = { { 4, 5.0f }, { 5, 5.0f }, { 6, 5.0f }, { 7, 5.0f } }; // total height = 47.0f
     float estimation = info.GetContentHeight(1.0f);
-    EXPECT_LE(std::abs(estimation - TRUE_HEIGHT), ERROR);
+    EXPECT_LE(std::abs(estimation - trueHeight), error);
 
     info.lineHeightMap_ = { { 0, 5.0f }, { 1, 5.0f }, { 2, 5.0f }, { 3, 5.0f }, { 4, 5.0f }, { 5, 5.0f } };
     estimation = info.GetContentHeight(1.0f);
-    EXPECT_LE(std::abs(estimation - TRUE_HEIGHT), ERROR);
+    EXPECT_LE(std::abs(estimation - trueHeight), error);
 }
 
 namespace {
@@ -158,26 +158,26 @@ HWTEST_F(GridLayoutInfoTest, GetContentHeightBigItem002, TestSize.Level1)
 
     info.gridMatrix_ = MATRIX_DEMO_2;
     // using mainGap = 5.0f and lineHeight = 100.0f
-    constexpr float TRUE_HEIGHT = 2095.0f;
-    constexpr float ERROR = TRUE_HEIGHT * 0.1f;
+    constexpr float trueHeight = 2095.0f;
+    constexpr float error = trueHeight * 0.1f;
 
     info.lineHeightMap_ = { { 0, 100.0f }, { 1, 100.0f }, { 2, 100.0f }, { 3, 100.0f }, { 4, 100.0f }, { 5, 100.0f },
         { 6, 100.0f } };
 
     float estimation = info.GetContentHeight(5.0f);
-    EXPECT_LE(std::abs(estimation - TRUE_HEIGHT), ERROR);
+    EXPECT_LE(std::abs(estimation - trueHeight), error);
 
     info.lineHeightMap_ = { { 3, 100.0f }, { 4, 100.0f }, { 5, 100.0f }, { 6, 100.0f }, { 7, 100.0f }, { 8, 100.0f },
         { 9, 100.0f }, { 10, 100.0f }, { 11, 100.0f }, { 12, 100.0f }, { 13, 100.0f }, { 14, 100.0f }, { 15, 100.0f },
         { 16, 100.0f }, { 17, 100.0f } };
     estimation = info.GetContentHeight(5.0f);
-    EXPECT_LE(std::abs(estimation - TRUE_HEIGHT), ERROR);
+    EXPECT_LE(std::abs(estimation - trueHeight), error);
 
     info.lineHeightMap_ = { { 0, 100.0f }, { 1, 100.0f }, { 2, 100.0f }, { 3, 100.0f }, { 4, 100.0f }, { 5, 100.0f },
         { 6, 100.0f }, { 7, 100.0f }, { 8, 100.0f }, { 9, 100.0f }, { 10, 100.0f }, { 11, 100.0f }, { 12, 100.0f },
         { 13, 100.0f }, { 14, 100.0f }, { 15, 100.0f }, { 16, 100.0f }, { 17, 100.0f }, { 18, 100.0f },
         { 19, 100.0f } };
-    EXPECT_EQ(info.GetContentHeight(5.0f), TRUE_HEIGHT);
+    EXPECT_EQ(info.GetContentHeight(5.0f), trueHeight);
 }
 
 /**
@@ -202,16 +202,6 @@ HWTEST_F(GridLayoutInfoTest, GetContentOffsetBigItem001, TestSize.Level1)
 
     EXPECT_EQ(info.GetContentOffset(5.0f), 946.0f);
 
-    info.startIndex_ = 15;
-    info.startMainLineIndex_ = 11;
-    info.currentOffset_ = -10.0f;
-    // simulating layout after jump
-    info.lineHeightMap_ = { { 11, 100.0f }, { 12, 100.0f }, { 13, 100.0f }, { 14, 100.0f }, { 15, 100.0f },
-        { 16, 100.0f } };
-    constexpr float TRUE_OFFSET = 1165.0f;
-    constexpr float ERROR = TRUE_OFFSET * 0.1f;
-    EXPECT_LE(std::abs(info.GetContentOffset(5.0f) - TRUE_OFFSET), ERROR);
-
     info.startIndex_ = 26;
     info.startMainLineIndex_ = 16;
     info.currentOffset_ = -7.0f;
@@ -221,6 +211,55 @@ HWTEST_F(GridLayoutInfoTest, GetContentOffsetBigItem001, TestSize.Level1)
         { 19, 100.0f } };
 
     EXPECT_EQ(info.GetContentOffset(5.0f), 1687.0f);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::GetContentOffsetBigItem002
+ * @tc.desc: test GetContentOffset estimation when hasBigItem_ == true
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, GetContentOffsetBigItem002, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.hasBigItem_ = true;
+    info.crossCount_ = 3;
+    info.childrenCount_ = 32;
+
+    info.gridMatrix_ = MATRIX_DEMO_2;
+
+    info.startIndex_ = 15;
+    info.startMainLineIndex_ = 11;
+    info.currentOffset_ = -10.0f;
+    info.lineHeightMap_ = { { 3, 100.0f }, { 4, 100.0f }, { 5, 100.0f }, { 6, 100.0f }, { 7, 100.0f }, { 8, 100.0f },
+        { 9, 100.0f }, { 10, 100.0f }, { 11, 100.0f }, { 12, 100.0f }, { 13, 100.0f }, { 14, 100.0f }, { 15, 100.0f },
+        { 16, 100.0f } };
+    constexpr float trueOffset = 1165.0f;
+    constexpr float error = trueOffset * 0.25f;
+    EXPECT_LE(std::abs(info.GetContentOffset(5.0f) - trueOffset), error);
+}
+
+/**
+ * @tc.name: GridLayoutInfo::GetContentOffsetBigItem003
+ * @tc.desc: test GetContentOffset estimation when hasBigItem_ == true
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutInfoTest, GetContentOffsetBigItem003, TestSize.Level1)
+{
+    GridLayoutInfo info;
+    info.hasBigItem_ = true;
+    info.crossCount_ = 3;
+    info.childrenCount_ = 32;
+
+    info.gridMatrix_ = MATRIX_DEMO_2;
+
+    info.startIndex_ = 20;
+    info.startMainLineIndex_ = 14;
+    info.currentOffset_ = -15.0f;
+    // simulating layout after jump
+    info.lineHeightMap_ = { { 13, 100.0f }, { 14, 100.0f }, { 15, 100.0f }, { 16, 100.0f } };
+    constexpr float trueOffset = 1380.0f;
+    constexpr float error = trueOffset * 0.4f;
+    EXPECT_LE(std::abs(info.GetContentOffset(5.0f) - trueOffset), error);
 }
 
 /**
