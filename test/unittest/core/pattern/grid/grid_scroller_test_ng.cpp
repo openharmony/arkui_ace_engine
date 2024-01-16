@@ -2267,12 +2267,9 @@ HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos001, TestSize.Level1)
 
     int32_t targetIndex = 20;
     ScrollAlign align = ScrollAlign::START;
-
-    float targetPos = 0.0f;
-    float mainGap = 5.0f;
-    auto sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
-        pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
-    EXPECT_TRUE(sucess);
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(pattern_->isSmoothScrolling_);
 }
 
 /**
@@ -2289,11 +2286,10 @@ HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos002, TestSize.Level1)
 
     int32_t targetIndex = 20;
     ScrollAlign align = ScrollAlign::CENTER;
-    float targetPos = 0.0f;
-    float mainGap = 5.0f;
-    auto sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
-        pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
-    EXPECT_TRUE(sucess);
+
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(pattern_->isSmoothScrolling_);
 }
 
 /**
@@ -2310,11 +2306,10 @@ HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos003, TestSize.Level1)
 
     int32_t targetIndex = 20;
     ScrollAlign align = ScrollAlign::END;
-    float targetPos = 0.0f;
-    float mainGap = 5.0f;
-    auto sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
-        pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
-    EXPECT_TRUE(sucess);
+
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(pattern_->isSmoothScrolling_);
 }
 
 /**
@@ -2334,21 +2329,18 @@ HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos004, TestSize.Level1)
 
     int32_t targetIndex = 60;
     ScrollAlign align = ScrollAlign::AUTO;
-    float targetPos = 0.0f;
-    float mainGap = 5.0f;
-    auto sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
-        pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
-    EXPECT_FALSE(sucess);
+
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
 
     targetIndex = 0;
-    sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
-        pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
-    EXPECT_FALSE(sucess);
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
 
     targetIndex = 10;
-    sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
-        pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
-    EXPECT_FALSE(sucess);
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FALSE(pattern_->isSmoothScrolling_);
 }
 
 /**
@@ -2363,30 +2355,23 @@ HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos005, TestSize.Level1)
         CreateRowItem(100);
     });
 
-    pattern_->ScrollToIndex(30, true, ScrollAlign::START);
-    AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
-
-    int32_t targetIndex = 60;
+    int32_t targetIndex = 30;
     ScrollAlign align = ScrollAlign::AUTO;
-    float targetPos = 0.0f;
-    float mainGap = 50.0f;
-    pattern_->ScrollToIndex(60, true, ScrollAlign::START);
-    auto sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
-        pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
-    EXPECT_FALSE(sucess);
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
+
+    targetIndex = 60;
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
 
     targetIndex = 0;
-    pattern_->ScrollToIndex(0, true, ScrollAlign::START);
-    sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
-        pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
-    EXPECT_FALSE(sucess);
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
 
     targetIndex = 300;
-    pattern_->ScrollToIndex(300, true, ScrollAlign::END);
-    pattern_->gridLayoutInfo_.endIndex_ = 10;
-    sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
-        pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
-    EXPECT_FALSE(sucess);
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FALSE(pattern_->isSmoothScrolling_);
 }
 
 /**
@@ -2403,14 +2388,10 @@ HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos006, TestSize.Level1)
 
     int32_t targetIndex = 0;
     ScrollAlign align = ScrollAlign::START;
-    float targetPos = 0.0f;
-    float mainGap = 1000.0f;
-    pattern_->ScrollToIndex(0, true, ScrollAlign::START);
-    pattern_->gridLayoutInfo_.startMainLineIndex_ = 0;
-    pattern_->gridLayoutInfo_.endMainLineIndex_ = 0;
-    auto sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
-        pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
-    EXPECT_TRUE(sucess);
+    targetIndex = 0;
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(pattern_->isSmoothScrolling_);
 }
 
 /**
@@ -2427,45 +2408,16 @@ HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos007, TestSize.Level1)
 
     int32_t targetIndex = 20;
     ScrollAlign align = ScrollAlign::AUTO;
-    float targetPos = 0.0f;
-    float mainGap = 1000.0f;
-    pattern_->gridLayoutInfo_.startMainLineIndex_ = 0;
-    pattern_->gridLayoutInfo_.endMainLineIndex_ = 0;
-    pattern_->gridLayoutInfo_.startIndex_ = 50;
-    pattern_->gridLayoutInfo_.endIndex_ = 100;
-    auto sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
-        pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
-    EXPECT_TRUE(sucess);
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
 
     targetIndex = 30;
-    sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
-        pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
-    EXPECT_TRUE(sucess);
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
 
     targetIndex = 10;
-    sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
-        pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
-    EXPECT_TRUE(sucess);
-}
-
-/**
- * @tc.name: AnimateToTarget001
- * @tc.desc: Test AnimateToTarget
- * @tc.type: FUNC
- */
-HWTEST_F(GridScrollerTestNg, AnimateToTarget001, TestSize.Level1)
-{
-    Create([](GridModelNG model) {
-        model.SetColumnsTemplate("1fr 1fr 1fr");
-        CreateRowItem(100);
-    });
-
-    pattern_->ScrollToIndex(60, true, ScrollAlign::AUTO);
-    auto layoutAlgWrap = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
-
-    ScrollAlign align = ScrollAlign::AUTO;
-    pattern_->AnimateToTarget(align, layoutAlgWrap);
-    auto hasValue = pattern_->targetIndex_.has_value();
-    EXPECT_FALSE(hasValue);
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
+    EXPECT_FALSE(pattern_->isSmoothScrolling_);
 }
 } // namespace OHOS::Ace::NG

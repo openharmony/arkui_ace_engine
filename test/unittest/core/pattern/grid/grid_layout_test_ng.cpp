@@ -2800,13 +2800,9 @@ HWTEST_F(GridLayoutTestNg, SupplyAllData2ZeroIndex001, TestSize.Level1)
         CreateColItem(30);
     });
 
-    float mainSize = 568.0f;
-    float corssSize = 648.0f;
     pattern_->ScrollToIndex(20, true, ScrollAlign::END);
-    auto layoutAlgWrap = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
-    auto gridAlgorithm = AceType::DynamicCast<GridScrollLayoutAlgorithm>(layoutAlgWrap->GetLayoutAlgorithm());
-    gridAlgorithm->FillGridViewportAndMeasureChildren(mainSize, corssSize, AceType::RawPtr(frameNode_));
-    
+    FlushLayoutTask(frameNode_);
+
     EXPECT_EQ(pattern_->GetGridLayoutInfo().gridMatrix_.size(), 4);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().lineHeightMap_.size(), 4);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().gridMatrix_.at(0).at(0), 0);
@@ -2825,14 +2821,15 @@ HWTEST_F(GridLayoutTestNg, SupplyAllData2ZeroIndex002, TestSize.Level1)
         CreateColItem(30);
     });
 
-    float mainSize  = 568.0f;
+    float mainSize = 568.0f;
     float corssSize = 648.0f;
-    pattern_->ScrollToIndex(20, true, ScrollAlign::END);
+    pattern_->ScrollToIndex(20, true, ScrollAlign::START);
     auto layoutAlgWrap = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
     auto gridAlgorithm = AceType::DynamicCast<GridScrollLayoutAlgorithm>(layoutAlgWrap->GetLayoutAlgorithm());
-    gridAlgorithm->ScrollToIndexStart(AceType::RawPtr(frameNode_), 10);
+    pattern_->ScrollToIndex(10, true, ScrollAlign::CENTER);
+    FlushLayoutTask(frameNode_);
     gridAlgorithm->SupplyAllData2ZeroIndex(mainSize, corssSize, AceType::RawPtr(frameNode_));
-    
+
     EXPECT_EQ(pattern_->GetGridLayoutInfo().gridMatrix_.size(), 4);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().lineHeightMap_.size(), 4);
     EXPECT_EQ(pattern_->GetGridLayoutInfo().gridMatrix_.at(0).at(0), 0);
