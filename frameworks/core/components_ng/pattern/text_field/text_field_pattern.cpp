@@ -1796,8 +1796,9 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
             ProcessOverlay(true, true, false);
         }
     }
-    auto hasRequestAutoFill = ProcessAutoFill();
-    if (!hasRequestAutoFill && RequestKeyboard(false, true, true)) {
+    if (ProcessAutoFill()) {
+        needToRequestKeyboardInner_ = false;
+    } else if (RequestKeyboard(false, true, true)) {
         NotifyOnEditChanged(true);
     }
     // emulate clicking bottom of the textField
