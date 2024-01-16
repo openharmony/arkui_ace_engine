@@ -539,7 +539,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // calculate menu main size
     auto childConstraint = CreateChildConstraint(layoutWrapper);
-    if (menuPattern->IsSelectMenu()) {
+    if (menuPattern->IsSelectMenu() && menuPattern->GetHasOptionWidth()) {
         auto selectMenuWidth = menuPattern->GetSelectMenuWidth();
         childConstraint.maxSize.SetWidth(selectMenuWidth);
         childConstraint.parentIdealSize.SetWidth(selectMenuWidth);

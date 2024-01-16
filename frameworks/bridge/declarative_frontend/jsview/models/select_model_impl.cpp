@@ -441,4 +441,6 @@ void SelectModelImpl::SetOptionWidth(const Dimension& value) {}
 void SelectModelImpl::SetOptionHeight(const Dimension& value) {}
 
 void SelectModelImpl::SetOptionWidthFitTrigger(bool isFitTrigger) {}
+
+void SelectModelImpl::SetHasOptionWidth(bool haveOptionWidth) {}
 } // namespace OHOS::Ace::Framework

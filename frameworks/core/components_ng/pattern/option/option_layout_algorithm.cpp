@@ -67,7 +67,7 @@ void OptionLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(optionNode);
     auto optionPattern = optionNode->GetPattern<OptionPattern>();
     CHECK_NULL_VOID(optionPattern);
-    if (optionPattern->IsSelectOption()) {
+    if (optionPattern->IsSelectOption() && optionPattern->GetHasOptionWidth()) {
         auto selectOptionWidth = optionPattern->GetSelectOptionWidth();
         idealSize.SetWidth(selectOptionWidth);
     }

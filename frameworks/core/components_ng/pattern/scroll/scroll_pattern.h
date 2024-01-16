@@ -272,6 +272,16 @@ public:
         return isSelectScroll_;
     }
 
+    void SetHasOptionWidth(bool hasOptionWidth)
+    {
+        hasOptionWidth_ = hasOptionWidth;
+    }
+
+    bool GetHasOptionWidth()
+    {
+        return hasOptionWidth_;
+    }
+
     void SetEnablePaging(ScrollPagingStatus status)
     {
         CHECK_NULL_VOID(enablePagingStatus_ != ScrollPagingStatus::INVALID);
@@ -339,6 +349,7 @@ private:
     
     bool isWidthModifiedBySelect_ = false;
     bool isSelectScroll_ = false;
+    bool hasOptionWidth_ = false;
     ScrollPagingStatus enablePagingStatus_ = ScrollPagingStatus::NONE;
 };
 
