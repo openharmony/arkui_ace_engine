@@ -596,14 +596,14 @@ void SetBorderWidth(ArkUINodeHandle node, const double* values, const int* units
     if (length != DEFAULT_LENGTH) {
         return;
     }
-    std::optional<CalcDimension> leftDimen;
-    std::optional<CalcDimension> rightDimen;
     std::optional<CalcDimension> topDimen;
+    std::optional<CalcDimension> rightDimen;
     std::optional<CalcDimension> bottomDimen;
+    std::optional<CalcDimension> leftDimen;
 
     if (values[NUM_0] != -1 &&
         static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]) != OHOS::Ace::DimensionUnit::INVALID) {
-        leftDimen = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
+        topDimen = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
     }
     if (values[NUM_1] != -1 &&
         static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]) != OHOS::Ace::DimensionUnit::INVALID) {
@@ -611,11 +611,11 @@ void SetBorderWidth(ArkUINodeHandle node, const double* values, const int* units
     }
     if (values[NUM_2] != -1 &&
         static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]) != OHOS::Ace::DimensionUnit::INVALID) {
-        topDimen = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
+        bottomDimen = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
     }
     if (values[NUM_3] != -1 &&
         static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]) != OHOS::Ace::DimensionUnit::INVALID) {
-        bottomDimen = Dimension(values[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]));
+        leftDimen = Dimension(values[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]));
     }
 
     NG::BorderWidthProperty borderWidth;

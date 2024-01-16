@@ -28,6 +28,7 @@
 #include "core/interfaces/native/node/node_text_modifier.h"
 #include "core/interfaces/native/node/node_text_modifier.h"
 #include "core/interfaces/native/node/node_toggle_modifier.h"
+#include "core/interfaces/native/node/node_swiper_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -95,7 +96,7 @@ const ArkUINodeModifiers impl = {
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
+    NodeModifier::GetSwiperModifier,
     nullptr,
     NodeModifier::GetListModifier,
     nullptr,
