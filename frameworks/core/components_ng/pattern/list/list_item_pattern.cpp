@@ -927,7 +927,7 @@ bool ListItemPattern::GetLayouted() const
     return isLayouted_;
 }
 
-float ListItemPattern::GetEstimateHeight(float estimateHeight) const
+float ListItemPattern::GetEstimateHeight(float estimateHeight, Axis axis) const
 {
     if (!isLayouted_) {
         return estimateHeight;
@@ -936,7 +936,7 @@ float ListItemPattern::GetEstimateHeight(float estimateHeight) const
     CHECK_NULL_RETURN(host, estimateHeight);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, estimateHeight);
-    return GetMainAxisSize(geometryNode->GetMarginFrameSize(), axis_);
+    return GetMainAxisSize(geometryNode->GetMarginFrameSize(), axis);
 }
 } // namespace OHOS::Ace::NG
 
