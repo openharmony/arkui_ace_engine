@@ -2252,4 +2252,223 @@ HWTEST_F(GridScrollerTestNg, ScrollBy001, TestSize.Level1)
     pattern_->AnimateTo(1.5, 1.f, Curves::LINEAR, false);
     EXPECT_TRUE(pattern_->isAnimationStop_);
 }
+
+/**
+ * @tc.name: GetGridItemAnimatePos001
+ * @tc.desc: Test GetGridItemAnimatePos
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        CreateRowItem(30);
+    });
+
+    int32_t targetIndex = 20;
+    ScrollAlign align = ScrollAlign::START;
+
+    float targetPos = 0.0f;
+    float mainGap = 5.0f;
+    auto sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
+        pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
+    EXPECT_TRUE(sucess);
+}
+
+/**
+ * @tc.name: GetGridItemAnimatePos002
+ * @tc.desc: Test GetGridItemAnimatePos
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos002, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        CreateRowItem(30);
+    });
+
+    int32_t targetIndex = 20;
+    ScrollAlign align = ScrollAlign::CENTER;
+    float targetPos = 0.0f;
+    float mainGap = 5.0f;
+    auto sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
+        pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
+    EXPECT_TRUE(sucess);
+}
+
+/**
+ * @tc.name: GetGridItemAnimatePos003
+ * @tc.desc: Test GetGridItemAnimatePos
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos003, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        CreateRowItem(30);
+    });
+
+    int32_t targetIndex = 20;
+    ScrollAlign align = ScrollAlign::END;
+    float targetPos = 0.0f;
+    float mainGap = 5.0f;
+    auto sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
+        pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
+    EXPECT_TRUE(sucess);
+}
+
+/**
+ * @tc.name: GetGridItemAnimatePos004
+ * @tc.desc: Test GetGridItemAnimatePos
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos004, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        CreateRowItem(100);
+    });
+
+    pattern_->ScrollToIndex(30, true, ScrollAlign::AUTO);
+    AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
+
+    int32_t targetIndex = 60;
+    ScrollAlign align = ScrollAlign::AUTO;
+    float targetPos = 0.0f;
+    float mainGap = 5.0f;
+    auto sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
+        pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
+    EXPECT_FALSE(sucess);
+
+    targetIndex = 0;
+    sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
+        pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
+    EXPECT_FALSE(sucess);
+
+    targetIndex = 10;
+    sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
+        pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
+    EXPECT_FALSE(sucess);
+}
+
+/**
+ * @tc.name: GetGridItemAnimatePos005
+ * @tc.desc: Test GetGridItemAnimatePos
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos005, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        CreateRowItem(100);
+    });
+
+    pattern_->ScrollToIndex(30, true, ScrollAlign::START);
+    AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
+
+    int32_t targetIndex = 60;
+    ScrollAlign align = ScrollAlign::AUTO;
+    float targetPos = 0.0f;
+    float mainGap = 50.0f;
+    pattern_->ScrollToIndex(60, true, ScrollAlign::START);
+    auto sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
+        pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
+    EXPECT_FALSE(sucess);
+
+    targetIndex = 0;
+    pattern_->ScrollToIndex(0, true, ScrollAlign::START);
+    sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
+        pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
+    EXPECT_FALSE(sucess);
+
+    targetIndex = 300;
+    pattern_->ScrollToIndex(300, true, ScrollAlign::END);
+    pattern_->gridLayoutInfo_.endIndex_ = 10;
+    sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
+        pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
+    EXPECT_FALSE(sucess);
+}
+
+/**
+ * @tc.name: GetGridItemAnimatePos006
+ * @tc.desc: Test GetGridItemAnimatePos
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos006, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        CreateRowItem(1);
+    });
+
+    int32_t targetIndex = 0;
+    ScrollAlign align = ScrollAlign::START;
+    float targetPos = 0.0f;
+    float mainGap = 1000.0f;
+    pattern_->ScrollToIndex(0, true, ScrollAlign::START);
+    pattern_->gridLayoutInfo_.startMainLineIndex_ = 0;
+    pattern_->gridLayoutInfo_.endMainLineIndex_ = 0;
+    auto sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
+        pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
+    EXPECT_TRUE(sucess);
+}
+
+/**
+ * @tc.name: GetGridItemAnimatePos007
+ * @tc.desc: Test GetGridItemAnimatePos
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos007, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        CreateRowItem(100);
+    });
+
+    int32_t targetIndex = 20;
+    ScrollAlign align = ScrollAlign::AUTO;
+    float targetPos = 0.0f;
+    float mainGap = 1000.0f;
+    //pattern_->ScrollToIndex(20, true, ScrollAlign::AUTO);
+    pattern_->gridLayoutInfo_.startMainLineIndex_ = 0;
+    pattern_->gridLayoutInfo_.endMainLineIndex_ = 0;
+    pattern_->gridLayoutInfo_.startIndex_ = 50;
+    pattern_->gridLayoutInfo_.endIndex_ = 100;
+    auto sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
+        pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
+    EXPECT_TRUE(sucess);
+
+    targetIndex = 30;
+    //pattern_->ScrollToIndex(30, true, ScrollAlign::AUTO);
+    sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
+        pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
+    EXPECT_TRUE(sucess);
+
+    targetIndex = 10;
+    //pattern_->ScrollToIndex(10, true, ScrollAlign::AUTO);
+    sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
+        pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
+    EXPECT_TRUE(sucess);
+}
+
+/**
+ * @tc.name: AnimateToTarget001
+ * @tc.desc: Test AnimateToTarget
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, AnimateToTarget001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        CreateRowItem(100);
+    });
+
+    pattern_->ScrollToIndex(60, true, ScrollAlign::AUTO);
+    auto layoutAlgWrap = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
+
+    ScrollAlign align = ScrollAlign::AUTO;
+    pattern_->AnimateToTarget(align, layoutAlgWrap);
+    auto hasValue = pattern_->targetIndex_.has_value();
+    EXPECT_FALSE(hasValue);
+}
 } // namespace OHOS::Ace::NG

@@ -2787,4 +2787,55 @@ HWTEST_F(GridLayoutTestNg, GridSCroll001, TestSize.Level1)
     auto gridItemPattern = frameNode_->GetPattern<GridItemPattern>();
     EXPECT_TRUE(gridItemPattern->isSelected_);
 }
+
+/**
+ * @tc.name: SupplyAllData2ZeroIndex001
+ * @tc.desc: Test GridScrollLayoutAlgorithm::SupplyAllData2ZeroIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, SupplyAllData2ZeroIndex001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        CreateColItem(30);
+    });
+
+    float mainSize = 568.0f;
+    float corssSize = 648.0f;
+    pattern_->ScrollToIndex(20, true, ScrollAlign::END);
+    auto layoutAlgWrap = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
+    auto gridAlgorithm = AceType::DynamicCast<GridScrollLayoutAlgorithm>(layoutAlgWrap->GetLayoutAlgorithm());
+    gridAlgorithm->FillGridViewportAndMeasureChildren(mainSize, corssSize, AceType::RawPtr(frameNode_));
+    
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().gridMatrix_.size(), 4);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().lineHeightMap_.size(), 4);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().gridMatrix_.at(0).at(0), 0);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().gridMatrix_.at(3).at(2), 11);
+}
+
+/**
+ * @tc.name: SupplyAllData2ZeroIndex002
+ * @tc.desc: Test GridScrollLayoutAlgorithm::SupplyAllData2ZeroIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridLayoutTestNg, SupplyAllData2ZeroIndex002, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        CreateColItem(30);
+    });
+
+    float mainSize  = 568.0f;
+    float corssSize = 648.0f;
+    pattern_->ScrollToIndex(20, true, ScrollAlign::END);
+    auto layoutAlgWrap = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
+    auto gridAlgorithm = AceType::DynamicCast<GridScrollLayoutAlgorithm>(layoutAlgWrap->GetLayoutAlgorithm());
+    gridAlgorithm->ScrollToIndexStart(AceType::RawPtr(frameNode_), 10);
+    gridAlgorithm->SupplyAllData2ZeroIndex(mainSize, corssSize, AceType::RawPtr(frameNode_));
+    
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().gridMatrix_.size(), 4);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().lineHeightMap_.size(), 4);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().gridMatrix_.at(0).at(0), 0);
+    EXPECT_EQ(pattern_->GetGridLayoutInfo().gridMatrix_.at(3).at(2), 11);
+}
 } // namespace OHOS::Ace::NG
