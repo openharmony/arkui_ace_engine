@@ -2350,7 +2350,7 @@ void SwiperPattern::PlaySpringAnimation(double dragVelocity)
     });
 
     host->UpdateAnimatablePropertyFloat(SPRING_PROPERTY_NAME, currentOffset_);
-    auto delta = dragVelocity < 0.0f ? extentPair.Leading() : extentPair.Trailing();
+    auto delta = currentOffset_ < 0.0f ? extentPair.Leading() : extentPair.Trailing();
 
     // spring curve: (velocity: 0.0, mass: 1.0, stiffness: 228.0, damping: 30.0)
     auto springCurve = MakeRefPtr<SpringCurve>(0.0f, 1.0f, 228.0f, 30.0f);
