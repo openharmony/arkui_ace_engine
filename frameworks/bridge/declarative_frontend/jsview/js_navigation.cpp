@@ -63,7 +63,6 @@ namespace OHOS::Ace::Framework {
 namespace {
 constexpr int32_t TITLE_MODE_RANGE = 2;
 constexpr int32_t NAVIGATION_MODE_RANGE = 2;
-constexpr int32_t PARAMETER_LENGTH_SECOND = 2;
 constexpr int32_t NAV_BAR_POSITION_RANGE = 1;
 constexpr int32_t DEFAULT_NAV_BAR_WIDTH = 240;
 constexpr Dimension DEFAULT_MIN_NAV_BAR_WIDTH = 240.0_vp;
@@ -278,7 +277,6 @@ void JSNavigation::JSBind(BindingTarget globalObj)
     JSClass<JSNavigation>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSNavigation>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSNavigation>::StaticMethod("customNavContentTransition", &JSNavigation::SetCustomNavContentTransition);
-    JSClass<JSNavigation>::StaticMethod("expandSafeArea", &JSNavigation::JsExpandSafeArea);
     JSClass<JSNavigation>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
@@ -735,38 +733,5 @@ void JSNavigation::SetCustomNavContentTransition(const JSCallbackInfo& info)
     };
     NavigationModel::GetInstance()->SetIsCustomAnimation(true);
     NavigationModel::GetInstance()->SetCustomTransition(onNavigationAnimation);
-}
-
-void JSNavigation::JsExpandSafeArea(const JSCallbackInfo& info)
-{
-    NG::SafeAreaExpandOpts opts { .type = NG::SAFE_AREA_TYPE_ALL, .edges = NG::SAFE_AREA_EDGE_ALL };
-    if (info.Length() >= 1 && info[0]->IsArray()) {
-        auto paramArray = JSRef<JSArray>::Cast(info[0]);
-        uint32_t safeAreaType = NG::SAFE_AREA_TYPE_NONE;
-        for (size_t i = 0; i < paramArray->Length(); ++i) {
-            if (!paramArray->GetValueAt(i)->IsNumber() ||
-                paramArray->GetValueAt(i)->ToNumber<uint32_t>() >= NG::SAFE_AREA_EDGE_START) {
-                safeAreaType = NG::SAFE_AREA_TYPE_ALL;
-                break;
-            }
-            safeAreaType |= (1 << paramArray->GetValueAt(i)->ToNumber<uint32_t>());
-        }
-        opts.type = NG::SAFE_AREA_TYPE_SYSTEM;
-    }
-    if (info.Length() >= PARAMETER_LENGTH_SECOND && info[1]->IsArray()) {
-        auto paramArray = JSRef<JSArray>::Cast(info[1]);
-        uint32_t safeAreaEdge = NG::SAFE_AREA_EDGE_NONE;
-        for (size_t i = 0; i < paramArray->Length(); ++i) {
-            if (!paramArray->GetValueAt(i)->IsNumber() ||
-                paramArray->GetValueAt(i)->ToNumber<uint32_t>() >= NG::SAFE_AREA_EDGE_START) {
-                safeAreaEdge = NG::SAFE_AREA_EDGE_ALL;
-                break;
-            }
-            safeAreaEdge |= (1 << paramArray->GetValueAt(i)->ToNumber<uint32_t>());
-        }
-        opts.edges =  NG::SAFE_AREA_EDGE_ALL;
-    }
-
-    ViewAbstractModel::GetInstance()->UpdateSafeAreaExpandOpts(opts);
 }
 } // namespace OHOS::Ace::Framework

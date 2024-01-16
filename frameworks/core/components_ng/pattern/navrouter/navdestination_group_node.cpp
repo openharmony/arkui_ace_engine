@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
+#include "core/common/container.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
-
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
@@ -54,9 +54,11 @@ void NavDestinationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32
         SetContentNode(contentNode);
         AddChild(contentNode);
 
-        auto navdestinationContentNode = AceType::DynamicCast<FrameNode>(contentNode);
-        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
-        navdestinationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            auto navdestinationContentNode = AceType::DynamicCast<FrameNode>(contentNode);
+            SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
+            navdestinationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+        }
     }
     contentNode->AddChild(child, slot);
 }
