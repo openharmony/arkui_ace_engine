@@ -47,7 +47,7 @@ public:
         if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
             SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
             host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
-        }   
+        }
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(NavigationContentPattern);
