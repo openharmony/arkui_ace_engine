@@ -428,6 +428,7 @@ private:
     void HandleDoubleClickOrLongPress(GestureEvent& info);
     std::string GetPositionSpansText(int32_t position, int32_t& startSpan);
     void FireOnSelect(int32_t selectStart, int32_t selectEnd);
+    void FireOnSelectionChange(int32_t selectStart, int32_t selectEnd);
     void MouseRightFocus(const MouseInfo& info);
     bool IsScrollBarPressed(const MouseInfo& info);
     void HandleMouseLeftButtonMove(const MouseInfo& info);

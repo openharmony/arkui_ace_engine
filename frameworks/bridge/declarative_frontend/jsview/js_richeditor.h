@@ -27,6 +27,7 @@ public:
     static void JSBind(BindingTarget globalObj);
     static void SetOnReady(const JSCallbackInfo& args);
     static void SetOnSelect(const JSCallbackInfo& args);
+    static void SetOnSelectionChange(const JSCallbackInfo& args);
     static void SetAboutToIMEInput(const JSCallbackInfo& args);
     static void SetOnIMEInputComplete(const JSCallbackInfo& args);
     static void SetAboutToDelete(const JSCallbackInfo& args);
@@ -45,6 +46,7 @@ public:
     static JSRef<JSVal> CreateJSTextCommonEvent(NG::TextCommonEvent& event);
     static JSRef<JSObject> CreateJSSpanResultObject(const ResultObject& resultObject);
     static JSRef<JSVal> CreateJSSelection(const SelectionInfo& selectInfo);
+    static JSRef<JSVal> CreateJSSelectionRange(const SelectionRangeInfo& selectRange);
     static JSRef<JSObject> CreateJSTextStyleResult(const TextStyleResult& textStyleResult);
     static JSRef<JSObject> CreateJSSymbolSpanStyleResult(const SymbolSpanStyle& symbolSpanStyle);
     static JSRef<JSObject> CreateJSValueResource(const RefPtr<ResourceObject>& valueResource);

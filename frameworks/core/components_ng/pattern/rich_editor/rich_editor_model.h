@@ -201,6 +201,7 @@ public:
     virtual RefPtr<RichEditorControllerBase> GetRichEditorController() = 0;
     virtual void SetOnReady(std::function<void()>&& func) = 0;
     virtual void SetOnSelect(std::function<void(const BaseEventInfo*)>&& func) = 0;
+    virtual void SetOnSelectionChange(std::function<void(const BaseEventInfo*)>&& func) = 0;
     virtual void SetAboutToIMEInput(std::function<bool(const NG::RichEditorInsertValue&)>&& func) = 0;
     virtual void SetOnIMEInputComplete(std::function<void(const NG::RichEditorAbstractSpanResult&)>&& func) = 0;
     virtual void SetAboutToDelete(std::function<bool(const NG::RichEditorDeleteValue&)>&& func) = 0;
