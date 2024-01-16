@@ -149,24 +149,21 @@ void CheckBoxModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& siz
     float endY = size.Height() + originY + CHECKBOX_DOUBLE_RATIO * hotZoneVerticalPadding_.ConvertToPx();
     auto rrect = RSRoundRect({ originX, originY, endX, endY }, hoverRadius_.ConvertToPx(), hoverRadius_.ConvertToPx());
     canvas.AttachBrush(brush);
-    if (TouchHoverAnimationType::PRESS == touchHoverType_ ||
-        (TouchHoverAnimationType::HOVER != touchHoverType_ && TouchHoverAnimationType::NONE != touchHoverType_)) {
-        if (CheckBoxStyle::SQUARE_STYLE == checkBoxStyle_) {
-            canvas.DrawRoundRect(rrect);
+    if (CheckBoxStyle::SQUARE_STYLE == checkBoxStyle_) {
+        canvas.DrawRoundRect(rrect);
+    } else {
+        RSScalar halfDenominator = 2.0f;
+        RSScalar radius = 0.0f;
+        RSRect rect = rrect.GetRect();
+        RSScalar x = (rect.GetLeft() + rect.GetRight()) / halfDenominator;
+        RSScalar y = (rect.GetTop() + rect.GetBottom()) / halfDenominator;
+        RSPoint centerPt(x, y);
+        if (rect.GetWidth() > rect.GetHeight()) {
+            radius = rect.GetHeight() / halfDenominator;
         } else {
-            RSScalar halfDenominator = 2.0f;
-            RSScalar radius = 0.0f;
-            RSRect rect = rrect.GetRect();
-            RSScalar x = (rect.GetLeft() + rect.GetRight()) / halfDenominator;
-            RSScalar y = (rect.GetTop() + rect.GetBottom()) / halfDenominator;
-            RSPoint centerPt(x, y);
-            if (rect.GetWidth() > rect.GetHeight()) {
-                radius = rect.GetHeight() / halfDenominator;
-            } else {
-                radius = rect.GetWidth() / halfDenominator;
-            }
-            canvas.DrawCircle(centerPt, radius);
+            radius = rect.GetWidth() / halfDenominator;
         }
+        canvas.DrawCircle(centerPt, radius);
     }
     canvas.DetachBrush();
 }
