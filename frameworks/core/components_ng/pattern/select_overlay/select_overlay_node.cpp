@@ -1122,26 +1122,23 @@ void SelectOverlayNode::UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>
     auto selectProperty = selectMenu_->GetLayoutProperty();
     CHECK_NULL_VOID(selectProperty);
     selectProperty->ClearUserDefinedIdealSize(true, false);
-    bool isDefaultOverMaxWidth = false;
     float allocatedSize = 0.0f;
     float maxWidth = 0.0f;
     GetDefaultButtonAndMenuWidth(maxWidth);
-    isDefaultOverMaxWidth = AddSystemDefaultOptions(maxWidth, allocatedSize);
+    bool isDefaultOverMaxWidth = AddSystemDefaultOptions(maxWidth, allocatedSize);
     auto itemNum = -1;
     auto extensionOptionStartIndex = -1;
-    if (!info->menuOptionItems.empty()) {
-        for (auto item : info->menuOptionItems) {
-            itemNum++;
-            float extensionOptionWidth = 0.0f;
-            auto button = BuildButton(item.content.value_or("null"), item.action, GetId(), extensionOptionWidth);
-            allocatedSize += extensionOptionWidth;
-            if (allocatedSize > maxWidth) {
-                button.Reset();
-                extensionOptionStartIndex = itemNum;
-                break;
-            }
-            button->MountToParent(selectMenuInner_);
+    for (auto item : info->menuOptionItems) {
+        itemNum++;
+        float extensionOptionWidth = 0.0f;
+        auto button = BuildButton(item.content.value_or("null"), item.action, GetId(), extensionOptionWidth);
+        allocatedSize += extensionOptionWidth;
+        if (allocatedSize > maxWidth) {
+            button.Reset();
+            extensionOptionStartIndex = itemNum;
+            break;
         }
+        button->MountToParent(selectMenuInner_);
     }
     if (backButton_) {
         isExtensionMenu_ = false;
@@ -1156,9 +1153,8 @@ void SelectOverlayNode::UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>
         auto backButton = BuildMoreOrBackButton(GetId(), true);
         backButton->MountToParent(selectMenuInner_);
         // add back button
-        auto id = GetId();
         if (!backButton_) {
-            backButton_ = BuildMoreOrBackButton(id, false);
+            backButton_ = BuildMoreOrBackButton(GetId(), false);
             CHECK_NULL_VOID(backButton_);
             backButton_->GetRenderContext()->UpdateOpacity(0.0);
             backButton_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
