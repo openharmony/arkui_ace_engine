@@ -83,6 +83,7 @@ public:
         const std::optional<BorderStyle>& styleTop, const std::optional<BorderStyle>& styleBottom) override {}
 
     void SetLayoutPriority(int32_t priority) override;
+    void SetPixelRound(uint8_t value) override;
     void SetLayoutWeight(int32_t value) override;
     void SetLayoutDirection(TextDirection value) override;
     void SetAspectRatio(float ratio) override;

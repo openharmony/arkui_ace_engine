@@ -400,6 +400,11 @@ public:
         ViewAbstract::SetLayoutWeight(value);
     }
 
+    void SetPixelRound(uint8_t value) override
+    {
+        ViewAbstract::SetPixelRound(value);
+    }
+
     void SetLayoutDirection(TextDirection value) override
     {
         ViewAbstract::SetLayoutDirection(value);

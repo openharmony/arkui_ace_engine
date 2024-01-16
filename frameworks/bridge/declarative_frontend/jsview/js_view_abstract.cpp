@@ -1738,6 +1738,53 @@ void JSViewAbstract::JsLayoutPriority(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetLayoutPriority(priority);
 }
 
+void JSViewAbstract::JsPixelRound(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
+    if (!CheckJSCallbackInfo("JsPixelRound", info, checkList)) {
+        return;
+    }
+    uint8_t value = 0;
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> jsStartValue = object->GetProperty("start");
+    if (jsStartValue->IsNumber()) {
+        int32_t startValue = jsStartValue->ToNumber<int32_t>();
+        if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(startValue)) {
+            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_START);
+        } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(startValue)) {
+            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START);
+        }
+    }
+    JSRef<JSVal> jsTopValue = object->GetProperty("top");
+    if (jsTopValue->IsNumber()) {
+        int32_t topValue = jsTopValue->ToNumber<int32_t>();
+        if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(topValue)) {
+            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
+        } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(topValue)) {
+            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP);
+        }
+    }
+    JSRef<JSVal> jsEndValue = object->GetProperty("end");
+    if (jsEndValue->IsNumber()) {
+        int32_t endValue = jsEndValue->ToNumber<int32_t>();
+        if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(endValue)) {
+            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END);
+        } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(endValue)) {
+            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_END);
+        }
+    }
+    JSRef<JSVal> jsBottomValue = object->GetProperty("bottom");
+    if (jsBottomValue->IsNumber()) {
+        int32_t bottomValue = jsBottomValue->ToNumber<int32_t>();
+        if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
+            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+        } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
+            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetPixelRound(value);
+}
+
 void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
 {
     int32_t value = 0.0;
@@ -6466,6 +6513,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("size", &JSViewAbstract::JsSize);
     JSClass<JSViewAbstract>::StaticMethod("constraintSize", &JSViewAbstract::JsConstraintSize);
     JSClass<JSViewAbstract>::StaticMethod("layoutPriority", &JSViewAbstract::JsLayoutPriority);
+    JSClass<JSViewAbstract>::StaticMethod("pixelRound", &JSViewAbstract::JsPixelRound);
     JSClass<JSViewAbstract>::StaticMethod("layoutWeight", &JSViewAbstract::JsLayoutWeight);
 
     JSClass<JSViewAbstract>::StaticMethod("margin", &JSViewAbstract::JsMargin);
