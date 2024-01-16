@@ -23,6 +23,7 @@
 #include "base/utils/measure_util.h"
 #include "base/utils/utils.h"
 #include "core/components/picker/picker_theme.h"
+#include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -49,6 +50,7 @@ const std::string REGULAR_FONT_FAMILY = "sans-serif";
 const std::string MEASURE_STRING = "TEST";
 const int32_t HALF_NUMBER = 2;
 const int32_t BUFFER_NODE_NUMBER = 2;
+constexpr char PICKER_DRAG_SCENE[] = "picker_drag_scene";
 } // namespace
 
 void TextPickerColumnPattern::OnAttachToFrameNode()
@@ -920,6 +922,9 @@ void TextPickerColumnPattern::HandleDragStart(const GestureEvent& event)
     toss->SetStart(offsetY);
     yLast_ = offsetY;
     pressed_ = true;
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, event.GetMainVelocity(), SceneStatus::START);
     // AccessibilityEventType::SCROLL_START
 }
 
@@ -944,6 +949,9 @@ void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
     }
     toss->SetEnd(offsetY);
     UpdateColumnChildPosition(offsetY);
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, event.GetMainVelocity(), SceneStatus::RUNNING);
 }
 
 void TextPickerColumnPattern::HandleDragEnd()
@@ -954,6 +962,7 @@ void TextPickerColumnPattern::HandleDragEnd()
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     if (!NotLoopOptions() && toss->Play()) {
+        frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, mainVelocity_, SceneStatus::END);
         // AccessibilityEventType::SCROLL_END
         return;
     }
@@ -973,6 +982,7 @@ void TextPickerColumnPattern::HandleDragEnd()
         scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (dir == ScrollDirection::UP ? -1 : 1);
     }
     CreateAnimation(scrollDelta_, 0.0);
+    frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, mainVelocity_, SceneStatus::END);
     // AccessibilityEventType::SCROLL_END
 }
 

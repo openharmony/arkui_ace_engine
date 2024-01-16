@@ -2360,7 +2360,8 @@ RefPtr<FrameNode> FrameNode::FindChildByName(const RefPtr<FrameNode>& parentNode
 }
 
 void FrameNode::CreateAnimatablePropertyFloat(
-    const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent)
+    const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent,
+    const PropertyUnit& propertyType)
 {
     auto context = GetRenderContext();
     CHECK_NULL_VOID(context);
@@ -2370,6 +2371,9 @@ void FrameNode::CreateAnimatablePropertyFloat(
     }
     auto property = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(value, std::move(onCallbackEvent));
     context->AttachNodeAnimatableProperty(property);
+    if (propertyType == PropertyUnit::PIXEL_POSITION) {
+        property->SetPropertyUnit(propertyType);
+    }
     nodeAnimatablePropertyMap_.emplace(propertyName, property);
 }
 

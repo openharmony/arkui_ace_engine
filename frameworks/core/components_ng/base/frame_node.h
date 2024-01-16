@@ -483,7 +483,8 @@ public:
     RefPtr<NodeAnimatablePropertyBase> GetAnimatablePropertyFloat(const std::string& propertyName) const;
     static RefPtr<FrameNode> FindChildByName(const RefPtr<FrameNode>& parentNode, const std::string& nodeName);
     void CreateAnimatablePropertyFloat(
-        const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent);
+        const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent,
+        const PropertyUnit& propertyType = PropertyUnit::UNKNOWN);
     void DeleteAnimatablePropertyFloat(const std::string& propertyName);
     void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value);
     void CreateAnimatableArithmeticProperty(const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value,

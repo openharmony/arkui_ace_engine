@@ -64,7 +64,6 @@ using CalePredictSnapOffsetCallback =
 using NeedScrollSnapToSideCallback = std::function<bool(float delta)>;
 using NestableScrollCallback = std::function<ScrollResult(float, int32_t, NestedState)>;
 using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
-using ScrollMotionFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
 
 class FrameNode;
 
@@ -399,11 +398,6 @@ public:
         dragFRCSceneCallback_ = std::move(dragFRCSceneCallback);
     }
 
-    void SetScrollMotionFRCSceneCallback(ScrollMotionFRCSceneCallback&& scrollMotionFRCSceneCallback)
-    {
-        scrollMotionFRCSceneCallback_ = std::move(scrollMotionFRCSceneCallback);
-    }
-
     float GetFinalPosition()
     {
         return finalPosition_;
@@ -514,7 +508,6 @@ private:
     GestureEventFunc actionEnd_;
 
     DragFRCSceneCallback dragFRCSceneCallback_;
-    ScrollMotionFRCSceneCallback scrollMotionFRCSceneCallback_;
 
     uint64_t lastVsyncTime_ = 0;
     RefPtr<NodeAnimatablePropertyFloat> frictionOffsetProperty_;
