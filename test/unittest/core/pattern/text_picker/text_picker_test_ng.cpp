@@ -334,7 +334,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp001, TestSi
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
     std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("1", content);
+    EXPECT_EQ("2", content);
 }
 
 /**
@@ -388,7 +388,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollDown001, Test
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
     std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("5", content);
+    EXPECT_EQ("4", content);
 }
 
 /**
@@ -1101,7 +1101,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollUp003, TestSi
     ASSERT_NE(textLayoutProperty, nullptr);
     ASSERT_TRUE(textLayoutProperty->HasContent());
     std::string content = textLayoutProperty->GetContent().value();
-    EXPECT_EQ("test2", content);
+    EXPECT_EQ("test3", content);
 }
 
 /**
@@ -1216,7 +1216,7 @@ HWTEST_F(TextPickerTestNg, TextPickerColumnPatternInnerHandleScrollDown003, Test
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     std::string content = textLayoutProperty->GetContent().value_or("");
-    EXPECT_EQ("test2", content);
+    EXPECT_EQ("test1", content);
     ASSERT_TRUE(textLayoutProperty->HasFontSize());
     double fontSize = textLayoutProperty->GetFontSize().value().Value();
     EXPECT_EQ(FONT_SIZE_5, fontSize);
