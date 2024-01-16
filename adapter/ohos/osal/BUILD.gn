@@ -137,6 +137,7 @@ template("ace_osal_ohos_source_set") {
       "download_manager_ohos_v2.cpp",
       "file_uri_helper_ohos.cpp",
       "image_source_ohos.cpp",
+      "input_manager.cpp",
       "mouse_style_ohos.cpp",
       "page_url_checker_ohos.cpp",
       "pixel_map_ohos.cpp",
