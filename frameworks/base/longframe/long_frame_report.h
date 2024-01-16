@@ -23,10 +23,11 @@ typedef void* EventReport;
 
 class ACE_EXPORT ILongFrame final {
 public:
-    ILongFrame() = default;
+    ILongFrame();
     ~ILongFrame() = default;
     void ReportStartEvent();
     void ReportEndEvent();
+    bool is64BitSystem = false;
     EventReport reporter = nullptr;
 };
 } // namespace OHOS::Ace

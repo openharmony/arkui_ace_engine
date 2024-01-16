@@ -16,6 +16,10 @@
 #include "base/longframe/long_frame_report.h"
 
 namespace OHOS::Ace {
+ILongFrame::ILongFrame()
+{
+}
+
 void ILongFrame::ReportStartEvent()
 {
 }
