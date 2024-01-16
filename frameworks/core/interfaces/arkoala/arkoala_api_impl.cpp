@@ -21,13 +21,13 @@
 extern "C" ACE_FORCE_EXPORT ArkUIAnyAPI* GetArkUINodeAPI(ArkUIAPIVariantKind kind, int version)
 {
     switch (kind) {
-        case ArkUIAPIVariantKind::Basic: {
+        case ArkUIAPIVariantKind::BASIC: {
             return nullptr;
         }
-        case ArkUIAPIVariantKind::Full: {
+        case ArkUIAPIVariantKind::FULL: {
             return nullptr;
         }
-        case ArkUIAPIVariantKind::Graphics: {
+        case ArkUIAPIVariantKind::GRAPHICS: {
             return nullptr;
         }
         default: {

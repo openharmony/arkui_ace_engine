@@ -30,10 +30,10 @@ extern "C" {
 #define ARKUI_NODE_MODIFIERS_API_VERSION 4
 
 enum ArkUIAPIVariantKind {
-    Basic = 1,
-    Full = 2,
-    Graphics = 3,
-    Count = Graphics + 1,
+    BASIC = 1,
+    FULL = 2,
+    GRAPHICS = 3,
+    COUNT = GRAPHICS + 1,
 };
 
 typedef int ArkUI_Bool;
@@ -485,14 +485,14 @@ enum ArkUINodeType {
 };
 
 enum ArkUIEventCategory {
-    Invalid,
-    SinglePointerInput,
-    MultiPointerInput,
-    Callback,
-    ComponentAsyncEvent,
-    TextInput,
-    GestureAsyncEvent,
-    StringEvent
+    INVALID,
+    SINGLE_POINTER_INPUT,
+    MULTI_POINTER_INPUT,
+    CALLBACK,
+    COMPONENT_ASYNC_EVENT,
+    TEXT_INPUT,
+    GESTURE_ASYNC_EVENT,
+    STRING_EVENT
 };
 
 #define ARKUI_MAX_EVENT_NUM 1000
@@ -564,11 +564,11 @@ enum ArkUIAsyncEventKind {
 };
 
 enum ArkUIAPIGestureAsyncEventSubKind {
-    OnAction = 0,
-    OnActionStart = 1,
-    OnActionUpdate = 2,
-    OnActionEnd = 3,
-    OnActionCancel = 4
+    ON_ACTION = 0,
+    ON_ACTION_START = 1,
+    ON_ACTION_UPDATE = 2,
+    ON_ACTION_END = 3,
+    ON_ACTION_CANCEL = 4
 };
 
 union ArkUIAPIValue {
@@ -579,22 +579,32 @@ union ArkUIAPIValue {
 };
 
 enum ArkUIAPIValueKind {
-    ValueKind_Int32 = 0,
-    ValueKind_Float32 = 1,
-    ValueKind_Int64 = 2,
-    ValueKind_Float64 = 3,
+    VALUE_KIND_INT32 = 0,
+    VALUE_KIND_FLOAT32 = 1,
+    VALUE_KIND_INT64 = 2,
+    VALUE_KIND_FLOAT64 = 3,
 };
 
-enum ArkUIAPIEventCallbackType { Void = 0, Int32 = 1, Float32 = 2, Int32Array = 3, Float32Array = 4 };
+enum ArkUIAPIEventCallbackType {
+    VOID = 0,
+    INT_32 = 1,
+    FLOAT_32 = 2,
+    INT_32_ARRAY = 3,
+    FLOAT_32_ARRAY = 4
+};
 
 enum ArkUIAPINodeFlags {
-    None = 0,
-    CustomMeasure = 1 << 0,
-    CustomLayout = 1 << 1,
-    CustomDraw = 1 << 2,
+    NONE = 0,
+    CUSTOM_MEASURE = 1 << 0,
+    CUSTOM_LAYOUT = 1 << 1,
+    CUSTOM_DRAW = 1 << 2,
 };
 
-enum ArkUIAPICustomOp { Measure = 1, Layout = 2, Draw = 3 };
+enum ArkUIAPICustomOp {
+    MEASURE = 1,
+    LAYOUT = 2,
+    DRAW = 3
+};
 
 enum ArkUIVMKind {
     VM_JS = 1,
