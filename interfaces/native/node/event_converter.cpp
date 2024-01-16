@@ -49,7 +49,7 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type)
             return ON_REFRESH_STATE_CHANGE;
         case NODE_REFRESH_ON_REFRESH:
             return ON_REFRESH_REFRESHING;
-        case NODE_SCROLL_EVENT_EDGE:
+        case NODE_SCROLL_EVENT_ON_SCROLL_EDGE:
             return ON_SCROLL_EDGE;
         case NODE_TOGGLE_ON_CHANGE:
             return ON_TOGGLE_CHANGE;
@@ -85,8 +85,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIAsyncEventKind type)
             return NODE_REFRESH_STATE_CHANGE;
         case ON_REFRESH_REFRESHING:
             return NODE_REFRESH_ON_REFRESH;
-        case NODE_SCROLL_EVENT_EDGE:
-            return ON_SCROLL_EDGE;
+        case ON_SCROLL_EDGE:
+            return NODE_SCROLL_EVENT_ON_SCROLL_EDGE;
         case ON_TOGGLE_CHANGE:
             return NODE_TOGGLE_ON_CHANGE;
         default:
