@@ -268,6 +268,15 @@ void NavigationGroupNode::SetBackButtonEvent(const RefPtr<NavDestinationGroupNod
         }
         auto navigation = navigationWeak.Upgrade();
         CHECK_NULL_RETURN(navigation, false);
+        // if set hideNavBar and stack size is one, return false
+        auto navigationLayoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(navigation->GetLayoutProperty());
+        auto pattern = AceType::DynamicCast<NavigationPattern>(navigation->GetPattern());
+        auto stack = pattern->GetNavigationStack();
+        CHECK_NULL_RETURN(stack, false);
+        if (navigationLayoutProperty->GetHideNavBarValue(false) && stack->Size() <= 1) {
+            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "set hideNavBar and stack size is no more than one");
+            return false;
+        }
         const auto& children = navigation->GetContentNode()->GetChildren();
         auto isLastChild = children.size() == 1;
         if (isOverride) {
