@@ -231,6 +231,7 @@ private:
     void OnScrollEndCallback() override;
 
     void OnModifyDone() override;
+    void ChangeAxis(RefPtr<UINode> node);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     float CalculateTargetPos(float startPos, float endPos);
 

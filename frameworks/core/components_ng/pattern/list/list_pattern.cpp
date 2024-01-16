@@ -65,7 +65,10 @@ void ListPattern::OnModifyDone()
     auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(listLayoutProperty);
     auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
-    SetAxis(axis);
+    if (axis != GetAxis()) {
+        SetAxis(axis);
+        ChangeAxis(GetHost());
+    }
     if (!GetScrollableEvent()) {
         InitScrollableEvent();
     }
@@ -92,6 +95,29 @@ void ListPattern::OnModifyDone()
     SetAccessibilityAction();
     if (IsNeedInitClickEventRecorder()) {
         Pattern::InitClickEventRecorder();
+    }
+}
+
+void ListPattern::ChangeAxis(RefPtr<UINode> node)
+{
+    CHECK_NULL_VOID(node);
+    auto children = node->GetChildren();
+    for (const auto& child : children) {
+        if (AceType::InstanceOf<FrameNode>(child)) {
+            auto frameNode = AceType::DynamicCast<FrameNode>(child);
+            CHECK_NULL_VOID(frameNode);
+            auto listItemPattern = frameNode->GetPattern<ListItemPattern>();
+            if (listItemPattern) {
+                listItemPattern->ChangeAxis(GetAxis());
+                return;
+            }
+            auto listItemGroupPattern = frameNode->GetPattern<ListItemGroupPattern>();
+            if (listItemGroupPattern) {
+                ChangeAxis(child);
+            }
+        } else {
+            ChangeAxis(child);
+        }
     }
 }
 
