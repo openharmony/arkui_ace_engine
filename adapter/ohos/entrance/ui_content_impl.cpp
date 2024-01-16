@@ -86,6 +86,11 @@
 #ifdef NG_BUILD
 #include "frameworks/bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 #endif
+#include "pipeline/rs_node_map.h"
+#include "transaction/rs_transaction_data.h"
+#include "ui/rs_node.h"
+
+#include "core/components_ng/render/adapter/rosen_render_context.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -182,6 +187,21 @@ extern "C" ACE_FORCE_EXPORT char* OHOS_ACE_GetCurrentUIStackInfo()
     std::replace(tmp.begin(), tmp.end(), '\\', '/');
     LOGI("UIContentImpl::GetCurrentExtraInfo:%{public}s", tmp.c_str());
     return tmp.data();
+}
+
+void AddAlarmLogFunc()
+{
+    std::function<void(uint64_t, int, int)> logFunc = [](uint64_t nodeId, int count, int num) {
+        auto rsNode = Rosen::RSNodeMap::Instance().GetNode<Rosen::RSNode>(nodeId);
+        auto frameNodeId = rsNode->GetFrameNodeId();
+        auto frameNodeTag = rsNode->GetFrameNodeTag();
+        auto frameNode = NG::FrameNode::GetFrameNode(frameNodeTag, frameNodeId);
+        LOGI("frameNodeId = %{public}d, rsNodeId = %{public}" PRId64 " send %{public}d commands, "
+            "the tag of corresponding frame node is %{public}s, total number of rsNode is %{public}d",
+            frameNodeId, nodeId, count, frameNodeTag.c_str(), num);
+    };
+
+    OHOS::Rosen::RSTransactionData::AddAlarmLog(logFunc);
 }
 
 class OccupiedAreaChangeListener : public OHOS::Rosen::IOccupiedAreaChangeListener {
@@ -1259,6 +1279,7 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     container->SetFilesDataPath(context->GetFilesDir());
     container->SetModuleName(hapModuleInfo->moduleName);
     container->SetIsModule(hapModuleInfo->compileMode == AppExecFwk::CompileMode::ES_MODULE);
+    
     // for atomic service
     container->SetInstallationFree(hapModuleInfo && hapModuleInfo->installationFree);
     if (hapModuleInfo->installationFree) {
@@ -1375,6 +1396,9 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     }
 
     LayoutInspector::SetCallback(instanceId_);
+
+    // setLogFunc of current app
+    AddAlarmLogFunc();
 }
 
 void UIContentImpl::InitializeSafeArea(const RefPtr<Platform::AceContainer>& container)

@@ -335,6 +335,7 @@ public:
     void SetFrame(float positionX, float positionY, float width, float height) override;
     void SetOpacity(float opacity) override;
     void SetTranslate(float translateX, float translateY, float translateZ) override;
+    void SetHostNode(const WeakPtr<FrameNode>& host) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -513,6 +514,7 @@ private:
     Matrix4 GetRevertMatrix();
     Matrix4 GetMatrix();
     bool IsUniRenderEnabled() override;
+    void AddFrameNodeInfoToRsNode();
 
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;
