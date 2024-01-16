@@ -3237,9 +3237,11 @@ void RichEditorPattern::CalcInsertValueObj(TextInsertValueInfo& info)
     }
     auto it = std::find_if(
         spans_.begin(), spans_.end(), [caretPosition = caretPosition_ + moveLength_](const RefPtr<SpanItem>& spanItem) {
-            return (spanItem->position - static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length()) <=
-                       caretPosition) &&
-                   (caretPosition < spanItem->position);
+            auto spanLength = static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length());
+            if (spanLength == 0) {
+                return spanItem->position == caretPosition;
+            }
+            return (spanItem->position - spanLength <= caretPosition) && (caretPosition < spanItem->position);
         });
     if (it != spans_.end() && (*it)->unicode != 0 && (*it)->position - caretPosition_ + moveLength_ == 1) {
         it++;
@@ -4084,7 +4086,7 @@ void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
         } else {
             auto imageNode = DynamicCast<FrameNode>(child);
             if (imageNode && caretSpanIndex_ == -1) {
-                caretSpanIndex_ = AddTextSpanOperation(options, true, info.GetSpanIndex());
+                caretSpanIndex_ = AddTextSpanOperation(options, true, info.GetSpanIndex(), false, false);
             } else {
                 caretSpanIndex_ = AddTextSpanOperation(options, true, caretSpanIndex_ + 1);
             }
