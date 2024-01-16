@@ -30,6 +30,7 @@
 #include "core/components/close_icon/close_icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/panel/sliding_panel_layout_property.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/property.h"
 #include "core/event/touch_event.h"
@@ -121,6 +122,15 @@ bool SlidingPanelPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& 
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
+
+    auto layoutProperty = AceType::DynamicCast<SlidingPanelLayoutProperty>(dirty->GetLayoutProperty());
+    CHECK_NULL_RETURN(layoutProperty, false);
+    auto layoutConstraint = layoutProperty->GetLayoutConstraint();
+    CHECK_NULL_RETURN(layoutConstraint, false);
+    if (layoutConstraint->maxSize.Width() == 0.0f && layoutConstraint->maxSize.Height() == 0.0f) {
+        return false;
+    }
+
     auto layoutAlgorithmWrapper = DynamicCast<LayoutAlgorithmWrapper>(dirty->GetLayoutAlgorithm());
     CHECK_NULL_RETURN(layoutAlgorithmWrapper, false);
     auto layoutAlgorithm = DynamicCast<SlidingPanelLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
