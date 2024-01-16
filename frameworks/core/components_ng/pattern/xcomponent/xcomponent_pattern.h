@@ -170,6 +170,8 @@ public:
         return globalPosition_;
     }
 
+    OffsetF GetOffsetRelativeToWindow();
+
     const RefPtr<RenderContext>& GetRenderContextForSurface()
     {
         return renderContextForSurface_;
