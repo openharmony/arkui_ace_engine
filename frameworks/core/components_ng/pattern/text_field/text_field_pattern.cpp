@@ -2017,6 +2017,10 @@ void TextFieldPattern::OnModifyDone()
     if (!preErrorState_ && !restoreMarginState_) {
         SavePasswordModeStates();
     }
+    // When switching between dark and light modes, you need to update the status of the passwordState
+    if (colorModeChange_ && !isModifyDone_) {
+        UpdatePasswordModeState();
+    }
     InitClickEvent();
     InitLongPressEvent();
     InitFocusEvent();
@@ -5848,6 +5852,7 @@ OffsetF TextFieldPattern::GetDragUpperLeftCoordinates()
 
 void TextFieldPattern::OnColorConfigurationUpdate()
 {
+    colorModeChange_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = PipelineContext::GetCurrentContext();
@@ -5856,7 +5861,11 @@ void TextFieldPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(theme);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (!paintProperty->GetTextColorFlagByUserValue(false)) {
+        layoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -6453,5 +6462,25 @@ void TextFieldPattern::GetCaretMetrics(CaretMetricsF& caretCaretMetric)
     auto textPaintOffset = host->GetPaintRectOffset();
     caretCaretMetric.offset = offset + textPaintOffset + OffsetF(width / 2.0f, 0.0f);
     caretCaretMetric.height = height;
+}
+
+void TextFieldPattern::UpdatePasswordModeState()
+{
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto textfieldTheme = GetTheme();
+    CHECK_NULL_VOID(textfieldTheme);
+    if (paintProperty->HasBackgroundColor()) {
+        passwordModeStyle_.bgColor = paintProperty->GetBackgroundColorValue();
+    } else {
+        passwordModeStyle_.bgColor = textfieldTheme->GetBgColor();
+    }
+    if (!paintProperty->GetTextColorFlagByUserValue(false)) {
+        passwordModeStyle_.textColor = textfieldTheme->GetTextColor();
+    } else {
+        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        passwordModeStyle_.textColor = layoutProperty->GetTextColorValue(textfieldTheme->GetTextColor());
+    }
 }
 } // namespace OHOS::Ace::NG
