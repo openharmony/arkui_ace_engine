@@ -1179,7 +1179,7 @@ void PipelineContext::StartFullToSplitAnimation(
     auto springMotion = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.5, 1, 0);
     option.SetCurve(springMotion);
     auto weak = WeakClaim(this);
-    Animate(option, curve, [width, height, weak]() {
+    Animate(option, springMotion, [width, height, weak]() {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
         pipeline->SetRootRect(width, height, 0.0);
@@ -1206,7 +1206,7 @@ void PipelineContext::StartFullToFloatingAnimation(
     auto springMotion = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.45, 0.75, 0);
     option.SetCurve(springMotion);
     auto weak = WeakClaim(this);
-    Animate(option, curve, [width, height, weak]() {
+    Animate(option, springMotion, [width, height, weak]() {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
         pipeline->SetRootRect(width, height, 0.0);
