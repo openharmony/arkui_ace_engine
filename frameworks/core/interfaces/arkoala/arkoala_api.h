@@ -2446,8 +2446,6 @@ struct ArkUINodeModifiers {
     const ArkUIFormComponentModifier* (*getFormComponentModifier)();
 };
 
-const ArkUINodeModifiers* GetArkUINodeModifiers();
-
 enum ArkUINodeDirtyFlag {
     NEED_MEASURE = 0,
     NEED_LAYOUT,
@@ -2509,10 +2507,6 @@ struct ArkUIFullNodeAPI {
 struct ArkUIAnyNodeAPI {
     ArkUI_Int32 version;
 };
-
-// use internal, not for export.
-const ArkUIFullNodeAPI* GetArkUIFullNodeAPI();
-void SendArkUIAsyncEvent(ArkUINodeEvent* event);
 
 #ifdef __cplusplus
 };
