@@ -5282,7 +5282,7 @@ void RichEditorPattern::ResetDragOption()
     CHECK_NULL_VOID(host);
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
-    if(gestureEventHub->GetIsTextDraggable()){
+    if (gestureEventHub->GetIsTextDraggable()) {
         CloseSelectOverlay();
         ResetSelection();
     }
