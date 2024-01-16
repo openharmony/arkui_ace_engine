@@ -2240,7 +2240,7 @@ HWTEST_F(GridScrollerTestNg, ScrollBy001, TestSize.Level1)
     pattern_->OutBoundaryCallback();
     EXPECT_FALSE(pattern_->IsOutOfBoundary());
 
-      /**
+    /**
      * @tc.steps: step2. DumpAdvanceInfo information function call
      */
     pattern_->DumpAdvanceInfo();
@@ -2251,5 +2251,173 @@ HWTEST_F(GridScrollerTestNg, ScrollBy001, TestSize.Level1)
      */
     pattern_->AnimateTo(1.5, 1.f, Curves::LINEAR, false);
     EXPECT_TRUE(pattern_->isAnimationStop_);
+}
+
+/**
+ * @tc.name: GetGridItemAnimatePos001
+ * @tc.desc: Test GetGridItemAnimatePos
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        CreateRowItem(30);
+    });
+
+    int32_t targetIndex = 20;
+    ScrollAlign align = ScrollAlign::START;
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->finalPosition_, 0.0f);
+}
+
+/**
+ * @tc.name: GetGridItemAnimatePos002
+ * @tc.desc: Test GetGridItemAnimatePos
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos002, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        CreateRowItem(30);
+    });
+
+    int32_t targetIndex = 20;
+    ScrollAlign align = ScrollAlign::CENTER;
+
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->finalPosition_, -400.0f);
+}
+
+/**
+ * @tc.name: GetGridItemAnimatePos003
+ * @tc.desc: Test GetGridItemAnimatePos
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos003, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        CreateRowItem(30);
+    });
+
+    int32_t targetIndex = 20;
+    ScrollAlign align = ScrollAlign::END;
+
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->finalPosition_, -800.0f);
+}
+
+/**
+ * @tc.name: GetGridItemAnimatePos004
+ * @tc.desc: Test GetGridItemAnimatePos
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos004, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        CreateRowItem(100);
+    });
+
+    pattern_->ScrollToIndex(30, true, ScrollAlign::AUTO);
+    AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
+
+    int32_t targetIndex = 60;
+    ScrollAlign align = ScrollAlign::AUTO;
+
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
+
+    targetIndex = 0;
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
+
+    targetIndex = 10;
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->finalPosition_, 0.0f);
+}
+
+/**
+ * @tc.name: GetGridItemAnimatePos005
+ * @tc.desc: Test GetGridItemAnimatePos
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos005, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        CreateRowItem(100);
+    });
+
+    int32_t targetIndex = 30;
+    ScrollAlign align = ScrollAlign::AUTO;
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
+
+    targetIndex = 60;
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
+
+    targetIndex = 0;
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
+
+    targetIndex = 300;
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->finalPosition_, 0.0f);
+}
+
+/**
+ * @tc.name: GetGridItemAnimatePos006
+ * @tc.desc: Test GetGridItemAnimatePos
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos006, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        CreateRowItem(1);
+    });
+
+    int32_t targetIndex = 0;
+    ScrollAlign align = ScrollAlign::START;
+    targetIndex = 0;
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->finalPosition_, 0.0f);
+}
+
+/**
+ * @tc.name: GetGridItemAnimatePos007
+ * @tc.desc: Test GetGridItemAnimatePos
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos007, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr");
+        CreateRowItem(100);
+    });
+
+    int32_t targetIndex = 20;
+    ScrollAlign align = ScrollAlign::AUTO;
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
+
+    targetIndex = 30;
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
+
+    targetIndex = 10;
+    pattern_->ScrollToIndex(targetIndex, true, align);
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->finalPosition_, 0.0f);
 }
 } // namespace OHOS::Ace::NG
