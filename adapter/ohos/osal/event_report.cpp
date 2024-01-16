@@ -416,7 +416,7 @@ void EventReport::ReportJankFrameApp(JankInfo& info)
     ACE_SCOPED_TRACE("JANK_FRAME_APP: skipppedFrameTime=%lld(ms)", static_cast<long long>(skippedFrameTime / NS_TO_MS));
 }
 
-void EventReport::ReportJankFrame(JankInfo& info)
+void EventReport::ReportJankFrameFiltered(JankInfo& info)
 {
     std::string eventName = "JANK_FRAME_FILTERED";
     const auto& bundleName = info.baseInfo.bundleName;
