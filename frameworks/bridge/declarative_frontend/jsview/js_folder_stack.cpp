@@ -65,6 +65,10 @@ void JSFolderStack::Create(const JSCallbackInfo& info)
     if (info[0]->IsObject()) {
         JSRef<JSArray> params = JSRef<JSArray>::Cast(info[0]);
         auto upperId = params->GetProperty("upperItems");
+        if (upperId->IsNull() || upperId->IsUndefined()) {
+            FolderStackModel::GetInstance()->Create();
+            return;
+        }
         auto upperIdParams = JSRef<JSArray>::Cast(upperId);
         auto upperItemLength = upperIdParams->Length();
         std::vector<std::string> upperItems(upperItemLength);
