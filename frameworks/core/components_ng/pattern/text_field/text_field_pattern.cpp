@@ -962,7 +962,7 @@ void TextFieldPattern::HandleBlurEvent()
     isLongPress_ = false;
     isFocusedBeforeClick_ = false;
     UpdateShowMagnifier();
-    CloseSelectOverlay(true);
+    CloseSelectOverlay(!isKeyboardClosedByUser_);
     StopTwinkling();
     if ((customKeyboardBuilder_ && isCustomKeyboardAttached_)) {
         CloseKeyboard(true);

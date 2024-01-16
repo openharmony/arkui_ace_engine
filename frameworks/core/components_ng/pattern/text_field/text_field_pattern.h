@@ -526,7 +526,9 @@ public:
     }
     void NotifyKeyboardClosedByUser() override
     {
+        isKeyboardClosedByUser_ = true;
         FocusHub::LostFocusToViewRoot();
+        isKeyboardClosedByUser_ = false;
     }
     std::u16string GetLeftTextOfCursor(int32_t number) override;
     std::u16string GetRightTextOfCursor(int32_t number) override;
@@ -1415,6 +1417,7 @@ private:
     Offset clickLocation_;
     MagnifierRect magnifierRect_;
     RefPtr<MagnifierController> magnifierController_;
+    bool isKeyboardClosedByUser_ = false;
 };
 } // namespace OHOS::Ace::NG
 
