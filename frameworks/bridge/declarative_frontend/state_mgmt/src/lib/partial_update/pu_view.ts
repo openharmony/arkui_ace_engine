@@ -432,7 +432,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     }
 
     stateMgmtConsole.debug(`${this.debugInfo()}: onInactiveInternal`);
-    for (const stateLinkProp of this.ownObservedPropertiesStore__) {
+    for (const stateLinkProp of this.ownObservedPropertiesStore_) {
       stateLinkProp.enableDelayedNotification();
     }
     // Add the inactive Components to Map for Dfx listing
@@ -677,7 +677,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
 
 
   private performDelayedUpdate(): void {
-    if (!this.ownObservedPropertiesStore__.size) {
+    if (!this.ownObservedPropertiesStore_.size) {
       return;
     }
     stateMgmtProfiler.begin("ViewPU.performDelayedUpdate");
@@ -685,7 +685,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
       stateMgmtConsole.debug(`${this.debugInfo()}: performDelayedUpdate start ...`);
       this.syncInstanceId();
 
-      for (const stateLinkPropVar of this.ownObservedPropertiesStore__) {
+      for (const stateLinkPropVar of this.ownObservedPropertiesStore_) {
         const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate();
         if (changedElmtIds) {
           const varName = stateLinkPropVar.info();

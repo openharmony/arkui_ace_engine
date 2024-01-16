@@ -5149,7 +5149,7 @@ class ViewPU extends NativeViewPartialUpdate {
             return;
         }
         
-        for (const stateLinkProp of this.ownObservedPropertiesStore__) {
+        for (const stateLinkProp of this.ownObservedPropertiesStore_) {
             stateLinkProp.enableDelayedNotification();
         }
         // Add the inactive Components to Map for Dfx listing
@@ -5367,14 +5367,14 @@ class ViewPU extends NativeViewPartialUpdate {
         
     }
     performDelayedUpdate() {
-        if (!this.ownObservedPropertiesStore__.size) {
+        if (!this.ownObservedPropertiesStore_.size) {
             return;
         }
         
         stateMgmtTrace.scopedTrace(() => {
             
             this.syncInstanceId();
-            for (const stateLinkPropVar of this.ownObservedPropertiesStore__) {
+            for (const stateLinkPropVar of this.ownObservedPropertiesStore_) {
                 const changedElmtIds = stateLinkPropVar.moveElmtIdsForDelayedUpdate();
                 if (changedElmtIds) {
                     const varName = stateLinkPropVar.info();
