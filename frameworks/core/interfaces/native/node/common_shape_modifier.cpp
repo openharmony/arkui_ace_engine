@@ -190,13 +190,62 @@ void ResetStrokeDashArray(NodeHandle node)
     ShapeModelNG::SetStrokeDashArray(frameNode, dashArray);
 }
 
+void SetShapeWidth(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ShapeModelNG::SetWidth(frameNode);
+}
+
+void ResetShapeWidth(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ShapeModelNG::SetWidth(frameNode);
+}
+
+void SetShapeHeight(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ShapeModelNG::SetHeight(frameNode);
+}
+
+void ResetShapeHeight(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ShapeModelNG::SetHeight(frameNode);
+}
+
+void SetShapeForegroundColor(NodeHandle node, bool isColor, uint32_t color)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (isColor) {
+        ShapeModelNG::SetFill(frameNode, Color(color));
+        ViewAbstract::SetForegroundColor(frameNode, Color(color));
+    } else {
+        ShapeModelNG::SetFill(frameNode, Color::FOREGROUND);
+        auto strategy = static_cast<ForegroundColorStrategy>(color);
+        ViewAbstract::SetForegroundColorStrategy(frameNode, strategy);
+    }
+}
+
+void ResetShapeForegroundColor(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+}
+
 ArkUICommonShapeModifierAPI GetCommonShapeModifier()
 {
-    static const ArkUICommonShapeModifierAPI modifier = { SetStrokeDashArray, ResetStrokeDashArray,
-        SetStrokeMiterLimit, ResetStrokeMiterLimit, SetFillOpacity, ResetFillOpacity, SetStrokeOpacity,
-        ResetStrokeOpacity, SetStrokeWidth, ResetStrokeWidth, SetAntiAlias, ResetAntiAlias, SetStroke, ResetStroke,
-        SetFill, ResetFill, SetStrokeDashOffset, ResetStrokeDashOffset, SetStrokeLineCap, ResetStrokeLineCap,
-        SetStrokeLineJoin, ResetStrokeLineJoin };
+    static const ArkUICommonShapeModifierAPI modifier = { SetStrokeDashArray, ResetStrokeDashArray, SetStrokeMiterLimit,
+        ResetStrokeMiterLimit, SetFillOpacity, ResetFillOpacity, SetStrokeOpacity, ResetStrokeOpacity, SetStrokeWidth,
+        ResetStrokeWidth, SetAntiAlias, ResetAntiAlias, SetStroke, ResetStroke, SetFill, ResetFill, SetStrokeDashOffset,
+        ResetStrokeDashOffset, SetStrokeLineCap, ResetStrokeLineCap, SetStrokeLineJoin, ResetStrokeLineJoin,
+        SetShapeHeight, ResetShapeHeight, SetShapeWidth, ResetShapeWidth, SetShapeForegroundColor,
+        ResetShapeForegroundColor };
     return modifier;
 }
 } // namespace OHOS::Ace::NG
