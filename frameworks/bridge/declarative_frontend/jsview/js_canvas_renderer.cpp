@@ -764,6 +764,7 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
     }
     JSRenderImage* jsImage = UnwrapNapiImage(info[0]);
     if (jsImage) {
+        isImage = true;
         pixelMap = jsImage->GetPixelMap();
     } else {
 #if !defined(PREVIEW)
@@ -786,7 +787,7 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
     imageInfo.imgWidth = imgWidth;
     imageInfo.imgHeight = imgHeight;
     imageInfo.pixelMap = pixelMap;
-    imageInfo.isImage = isImage;
+    imageInfo.isImage = false;
 
     CanvasRendererModel::GetInstance()->DrawImage(baseInfo, imageInfo);
 }
@@ -824,10 +825,12 @@ void JSCanvasRenderer::ExtractInfoToImage(CanvasImage& image, const JSCallbackIn
             JSViewAbstract::ParseJsDouble(info[6], image.dy);
             JSViewAbstract::ParseJsDouble(info[7], image.dWidth);
             JSViewAbstract::ParseJsDouble(info[8], image.dHeight);
-            image.sx = PipelineBase::Vp2PxWithCurrentDensity(image.sx);
-            image.sy = PipelineBase::Vp2PxWithCurrentDensity(image.sy);
-            image.sWidth = PipelineBase::Vp2PxWithCurrentDensity(image.sWidth);
-            image.sHeight = PipelineBase::Vp2PxWithCurrentDensity(image.sHeight);
+            if (isImage) {
+                image.sx = PipelineBase::Vp2PxWithCurrentDensity(image.sx);
+                image.sy = PipelineBase::Vp2PxWithCurrentDensity(image.sy);
+                image.sWidth = PipelineBase::Vp2PxWithCurrentDensity(image.sWidth);
+                image.sHeight = PipelineBase::Vp2PxWithCurrentDensity(image.sHeight);
+            }
             image.dx = PipelineBase::Vp2PxWithCurrentDensity(image.dx);
             image.dy = PipelineBase::Vp2PxWithCurrentDensity(image.dy);
             image.dWidth = PipelineBase::Vp2PxWithCurrentDensity(image.dWidth);
