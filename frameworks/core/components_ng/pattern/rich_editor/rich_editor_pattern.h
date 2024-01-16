@@ -381,6 +381,7 @@ public:
     void HandleOnCameraInput() override;
 
     RefPtr<FocusHub> GetFocusHub() const;
+    void ResetDragOption() override;
     bool NeedShowAIDetect() override;
 
     TextSpanType GetEditorType() const
