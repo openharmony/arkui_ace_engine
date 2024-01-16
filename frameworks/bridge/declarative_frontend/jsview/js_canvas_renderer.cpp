@@ -31,6 +31,7 @@
 #endif
 
 namespace OHOS::Ace {
+constexpr uint32_t PIXEL_SIZE = 4;
 std::unique_ptr<CanvasRendererModel> CanvasRendererModel::instance_ = nullptr;
 std::mutex CanvasRendererModel::mutex_;
 CanvasRendererModel* CanvasRendererModel::GetInstance()
@@ -876,27 +877,35 @@ void JSCanvasRenderer::JsCreatePattern(const JSCallbackInfo& info)
 
 void JSCanvasRenderer::JsCreateImageData(const JSCallbackInfo& info)
 {
-    double width = 0;
-    double height = 0;
+    double fWidth = 0.0;
+    double fHeight = 0.0;
+    uint32_t finalWidth = 0;
+    uint32_t finalHeight = 0;
+    int32_t width = 0;
+    int32_t height = 0;
 
     if (info.Length() == 2) {
-        JSViewAbstract::ParseJsDouble(info[0], width);
-        JSViewAbstract::ParseJsDouble(info[1], height);
-        width = PipelineBase::Vp2PxWithCurrentDensity(width);
-        height = PipelineBase::Vp2PxWithCurrentDensity(height);
+        JSViewAbstract::ParseJsDouble(info[0], fWidth);
+        JSViewAbstract::ParseJsDouble(info[1], fHeight);
+        fWidth = PipelineBase::Vp2PxWithCurrentDensity(fWidth);
+        fHeight = PipelineBase::Vp2PxWithCurrentDensity(fHeight);
     }
     if (info.Length() == 1 && info[0]->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
         JSRef<JSVal> widthValue = obj->GetProperty("width");
         JSRef<JSVal> heightValue = obj->GetProperty("height");
-        JSViewAbstract::ParseJsDouble(widthValue, width);
-        JSViewAbstract::ParseJsDouble(heightValue, height);
+        JSViewAbstract::ParseJsDouble(widthValue, fWidth);
+        JSViewAbstract::ParseJsDouble(heightValue, fHeight);
     }
 
-    JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(width * height * 4);
+    width = fWidth + DIFF;
+    height = fHeight + DIFF;
+    finalWidth = static_cast<uint32_t>(std::abs(width));
+    finalHeight = static_cast<uint32_t>(std::abs(height));
+    JSRef<JSArrayBuffer> arrayBuffer = JSRef<JSArrayBuffer>::New(finalWidth * finalHeight * PIXEL_SIZE);
     // return the black image
     auto* buffer = static_cast<uint32_t*>(arrayBuffer->GetBuffer());
-    for (uint32_t idx = 0; idx < width * height; ++idx) {
+    for (uint32_t idx = 0; idx < finalWidth * finalHeight; ++idx) {
         buffer[idx] = 0xffffffff;
     }
 
@@ -904,8 +913,8 @@ void JSCanvasRenderer::JsCreateImageData(const JSCallbackInfo& info)
         JSRef<JSUint8ClampedArray>::New(arrayBuffer->GetLocalHandle(), 0, arrayBuffer->ByteLength());
 
     auto retObj = JSRef<JSObject>::New();
-    retObj->SetProperty("width", width);
-    retObj->SetProperty("height", height);
+    retObj->SetProperty("width", finalWidth);
+    retObj->SetProperty("height", finalHeight);
     retObj->SetPropertyObject("data", colorArray);
     info.SetReturnValue(retObj);
 }
