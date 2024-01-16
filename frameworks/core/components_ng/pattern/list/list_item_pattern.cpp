@@ -338,6 +338,8 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
     }
     if (!springController_) {
         springController_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
+    } else {
+        springController_->Stop();
     }
 }
 
