@@ -45,6 +45,9 @@
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+#include "core/components_ng/syntax/lazy_for_each_model.h"
+#include "core/components_ng/syntax/lazy_for_each_node.h"
+#include "core/components_ng/syntax/lazy_layout_wrapper_builder.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1789,5 +1792,41 @@ HWTEST_F(SelectTestNg, ToJsonValue002, TestSize.Level1)
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     pattern->ToJsonValue(jsonValue);
     EXPECT_FALSE(pattern->options_.empty());
+}
+
+HWTEST_F(SelectTestNg, SelectLayoutPropertyTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Get frameNode and geometryNode.
+     */
+    TestProperty testProperty;
+    testProperty.FontSize = std::make_optional(FONT_SIZE_VALUE);
+    auto frameNode = CreateSelect(CREATE_VALUE, testProperty);
+    RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
+    /**
+     * @tc.steps: step2. Get layoutWrapper and Call Measure.
+     * @tc.expected: the function exits normally
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    LayoutWrapperNode* layoutWrapper = new LayoutWrapperNode(frameNode, geometryNode, layoutProperty);
+
+    auto text = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    RefPtr<GeometryNode> geometryNode2 = AceType::MakeRefPtr<GeometryNode>();
+    auto layoutWrapperNode = AceType::MakeRefPtr<LayoutWrapperNode>(text, geometryNode2, text->GetLayoutProperty());
+
+    auto layoutAlgorithm = AceType::MakeRefPtr<SelectLayoutAlgorithm>();
+    layoutWrapper->childrenMap_.insert({ 0, layoutWrapperNode });
+    layoutWrapper->childrenMap_.insert({ 1, layoutWrapperNode });
+    layoutWrapper->currentChildCount_ = layoutWrapper->childrenMap_.size();
+
+    RefPtr<LazyForEachActuator> actuator = AceType::MakeRefPtr<LazyForEachActuator>();
+    auto builder = AceType::DynamicCast<LazyForEachBuilder>(actuator);
+    constexpr int32_t NODE_ID_1 = 1;
+    RefPtr<LazyForEachNode> host_ = AceType::MakeRefPtr<LazyForEachNode>(NODE_ID_1, builder);
+    WeakPtr<LazyForEachNode> host(host_);
+    RefPtr<LazyLayoutWrapperBuilder> wrapperBuilder = AceType::MakeRefPtr<LazyLayoutWrapperBuilder>(builder, host);
+    layoutWrapper->layoutWrapperBuilder_ = wrapperBuilder;
+    layoutAlgorithm->Measure(layoutWrapper);
+    EXPECT_NE(layoutWrapper->GetOrCreateChildByIndex(0), nullptr);
 }
 } // namespace OHOS::Ace::NG

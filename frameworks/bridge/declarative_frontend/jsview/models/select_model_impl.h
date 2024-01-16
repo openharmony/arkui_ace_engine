@@ -63,6 +63,7 @@ public:
     void SetOptionWidth(const Dimension& value) override;
     void SetOptionHeight(const Dimension& value) override;
     void SetOptionWidthFitTrigger(bool isFitTrigger) override;
+    void SetHasOptionWidth(bool haveOptionWidth) override;
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_MODELS_SELECT_MODEL_IMPL_H

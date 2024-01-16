@@ -61,8 +61,8 @@ class TrackedObject {
     Object.keys(obj2Raw)
       .forEach(propName => {
         // Collect only @Track'ed changed properties
-        if (Reflect.has(obj1Raw, `${TrackedObject.___TRACKED_PREFIX}${propName}`)
-          && (Reflect.get(obj1Raw, propName) !== Reflect.get(obj2Raw, propName))) {
+        if (Reflect.has(obj1Raw, `${TrackedObject.___TRACKED_PREFIX}${propName}`) &&
+          (Reflect.get(obj1Raw, propName) !== Reflect.get(obj2Raw, propName))) {
           stateMgmtConsole.debug(`   ... '@Track ${propName}' value changed - notifying`);
           notifyTrackedPropertyChange(propName);
           shouldFakePropPropertyBeNotified = true;

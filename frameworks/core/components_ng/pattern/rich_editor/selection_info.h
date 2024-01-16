@@ -21,6 +21,7 @@
 #include "base/geometry/offset.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/ace_type.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/event/ace_events.h"
 #include "core/event/axis_event.h"
@@ -93,6 +94,7 @@ struct ResultObject {
     TextStyleResult textStyle;
     ImageStyleResult imageStyle;
     SymbolSpanStyle symbolSpanStyle;
+    RefPtr<ResourceObject> valueResource;
 };
 
 struct Selection {

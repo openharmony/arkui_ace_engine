@@ -270,6 +270,12 @@ void ListItemPattern::MarkDirtyNode()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void ListItemPattern::ChangeAxis(Axis axis)
+{
+    axis_ = axis;
+    InitSwiperAction(true);
+}
+
 void ListItemPattern::InitSwiperAction(bool axisChanged)
 {
     bool isPanInit = false;

@@ -252,9 +252,6 @@ class ArkImageAnimatorComponent extends ArkComponent implements CommonMethod<Ima
   onFinish(event: () => void): ImageAnimatorAttribute {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
 }
 // @ts-ignore
 globalThis.ImageAnimator.attributeModifier = function (modifier) {

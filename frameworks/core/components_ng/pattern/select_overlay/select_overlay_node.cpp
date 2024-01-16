@@ -80,11 +80,26 @@ constexpr Dimension MIN_DIAMETER = 1.5_vp;
 constexpr Dimension MIN_ARROWHEAD_DIAMETER = 2.0_vp;
 constexpr Dimension ANIMATION_TEXT_OFFSET = 12.0_vp;
 
+float MeasureTextWidth(const TextStyle& textStyle, const std::string& text)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    MeasureContext content;
+    content.textContent = text;
+    content.fontSize = textStyle.GetFontSize();
+    auto fontweight = StringUtils::FontWeightToString(textStyle.GetFontWeight());
+    content.fontWeight = fontweight;
+    return static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(content).Width());
+#else
+    return 0.0f;
+#endif
+}
+
 RefPtr<FrameNode> BuildPasteButton(const std::function<void()>& callback, int32_t overlayId,
     float& buttonWidth, bool isSelectAll = false)
 {
+    auto descriptionId = static_cast<int32_t>(PasteButtonPasteDescription::PASTE);
     auto pasteButton = PasteButtonModelNG::GetInstance()->CreateNode(
-        static_cast<int32_t>(PasteButtonPasteDescription::PASTE),
+        descriptionId,
         static_cast<int32_t>(PasteButtonIconStyle::ICON_NULL),
         static_cast<int32_t>(ButtonType::CAPSULE));
     CHECK_NULL_RETURN(pasteButton, nullptr);
@@ -109,8 +124,12 @@ RefPtr<FrameNode> BuildPasteButton(const std::function<void()>& callback, int32_
     const auto& padding = textOverlayTheme->GetMenuButtonPadding();
     buttonLayoutProperty->UpdateBackgroundLeftPadding(padding.Left());
     buttonLayoutProperty->UpdateBackgroundRightPadding(padding.Right());
+    std::string buttonContent;
+    PasteButtonModelNG::GetInstance()->GetTextResource(descriptionId, buttonContent);
+    buttonWidth = MeasureTextWidth(textStyle, buttonContent);
+    buttonWidth = buttonWidth + padding.Left().ConvertToPx() + padding.Right().ConvertToPx();
     buttonLayoutProperty->UpdateUserDefinedIdealSize(
-        { std::nullopt, std::optional<CalcLength>(textOverlayTheme->GetMenuButtonHeight()) });
+        { CalcLength(buttonWidth), std::optional<CalcLength>(textOverlayTheme->GetMenuButtonHeight()) });
     buttonPaintProperty->UpdateBackgroundColor(Color::TRANSPARENT);
     if (callback) {
         pasteButton->GetOrCreateGestureEventHub()->SetUserOnClick([callback](GestureEvent& /* info */) {
@@ -162,16 +181,7 @@ RefPtr<FrameNode> BuildButton(const std::string& data, const std::function<void(
     auto top = CalcLength(padding.Top().ConvertToPx());
     auto bottom = CalcLength(padding.Bottom().ConvertToPx());
     buttonLayoutProperty->UpdatePadding({ left, right, top, bottom });
-#ifdef ENABLE_ROSEN_BACKEND
-    MeasureContext content;
-    content.textContent = data;
-    content.fontSize = textStyle.GetFontSize();
-    auto fontweight = StringUtils::FontWeightToString(textStyle.GetFontWeight());
-    content.fontWeight = fontweight;
-    buttonWidth = static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(content).Width());
-#else
-    buttonWidth = 0.0f;
-#endif
+    buttonWidth = MeasureTextWidth(textStyle, data);
     // Calculate the width of default option include button padding.
     buttonWidth = buttonWidth + padding.Left().ConvertToPx() + padding.Right().ConvertToPx();
     buttonLayoutProperty->UpdateUserDefinedIdealSize(
@@ -231,18 +241,8 @@ RefPtr<FrameNode> BuildButton(
     textLayoutProperty->UpdateTextColor(textStyle.GetTextColor());
     textLayoutProperty->UpdateFontWeight(textStyle.GetFontWeight());
     text->MarkModifyDone();
-
-#ifdef ENABLE_ROSEN_BACKEND
     // Calculate the width of entension option include button padding.
-    MeasureContext content;
-    content.textContent = data;
-    content.fontSize = textStyle.GetFontSize();
-    auto fontweight = StringUtils::FontWeightToString(textStyle.GetFontWeight());
-    content.fontWeight = fontweight;
-    contentWidth = static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(content).Width());
-#else
-    contentWidth = 0.0f;
-#endif
+    contentWidth = MeasureTextWidth(textStyle, data);
     const auto& padding = textOverlayTheme->GetMenuButtonPadding();
     auto left = CalcLength(padding.Left().ConvertToPx());
     auto right = CalcLength(padding.Right().ConvertToPx());
@@ -1081,87 +1081,27 @@ bool SelectOverlayNode::AddSystemDefaultOptions(float maxWidth, float& allocated
     return false;
 }
 
-void SelectOverlayNode::UpdateToolBar(bool menuItemChanged)
+void SelectOverlayNode::UpdateToolBar(bool menuItemChanged, bool noAnimation)
 {
     auto info = GetPattern<SelectOverlayPattern>()->GetSelectOverlayInfo();
-    if (menuItemChanged && info->menuInfo.menuBuilder == nullptr && selectMenuInner_) {
-        selectMenuInner_->Clean();
-        selectMenuInner_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        if (isExtensionMenu_) {
-            MoreOrBackAnimation(false);
-        }
-        auto selectProperty = selectMenu_->GetLayoutProperty();
-        CHECK_NULL_VOID(selectProperty);
-        selectProperty->ClearUserDefinedIdealSize(true, false);
-        bool isDefaultOverMaxWidth = false;
-        float allocatedSize = 0.0f;
-        float maxWidth = 0.0f;
-        GetDefaultButtonAndMenuWidth(maxWidth);
-        isDefaultOverMaxWidth = AddSystemDefaultOptions(maxWidth, allocatedSize);
-        auto itemNum = -1;
-        auto extensionOptionStartIndex = -1;
-        if (!info->menuOptionItems.empty()) {
-            for (auto item : info->menuOptionItems) {
-                itemNum++;
-                float extensionOptionWidth = 0.0f;
-                auto button = BuildButton(item.content.value_or("null"), item.action, GetId(), extensionOptionWidth);
-                allocatedSize += extensionOptionWidth;
-                if (allocatedSize > maxWidth) {
-                    button.Reset();
-                    extensionOptionStartIndex = itemNum;
-                    break;
-                }
-                button->MountToParent(selectMenuInner_);
-            }
-        }
-        if (backButton_) {
-            isExtensionMenu_ = false;
-            RemoveChild(backButton_);
-            backButton_.Reset();
-        }
-        if (extensionMenu_) {
-            RemoveChild(extensionMenu_);
-            extensionMenu_.Reset();
-        }
-        if (extensionOptionStartIndex != -1 || isDefaultOverMaxWidth) {
-            auto backButton = BuildMoreOrBackButton(GetId(), true);
-            backButton->MountToParent(selectMenuInner_);
-            // add back button
-            auto id = GetId();
-            if (!backButton_) {
-                backButton_ = BuildMoreOrBackButton(id, false);
-                CHECK_NULL_VOID(backButton_);
-                backButton_->GetRenderContext()->UpdateOpacity(0.0);
-                backButton_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
-                backButton_->MountToParent(Claim(this));
-            }
-        }
-        AddExtensionMenuOptions(info->menuOptionItems, extensionOptionStartIndex);
+    if (menuItemChanged && info->menuInfo.menuBuilder == nullptr) {
+        UpdateMenuInner(info);
     }
-    if (info->menuInfo.menuDisable) {
-        ExecuteOverlayStatus(FrameNodeType::SELECTMENU, FrameNodeTrigger::HIDE);
-    } else if (info->menuInfo.menuIsShow) {
-        ExecuteOverlayStatus(FrameNodeType::SELECTMENU, FrameNodeTrigger::SHOW);
+    if (info->menuInfo.menuDisable || !info->menuInfo.menuIsShow) {
+        (noAnimation) ? HideFrameNodeImmediately(FrameNodeType::SELECTMENU)
+            : ExecuteOverlayStatus(FrameNodeType::SELECTMENU, FrameNodeTrigger::HIDE);
     } else {
-        ExecuteOverlayStatus(FrameNodeType::SELECTMENU, FrameNodeTrigger::HIDE);
+        ExecuteOverlayStatus(FrameNodeType::SELECTMENU, FrameNodeTrigger::SHOW);
     }
     selectMenu_->MarkModifyDone();
     if (isExtensionMenu_ && extensionMenu_) {
-        if (info->menuInfo.menuDisable) {
-            ExecuteOverlayStatus(FrameNodeType::EXTENSIONMENU, FrameNodeTrigger::HIDE);
-            if (backButton_) {
-                ExecuteOverlayStatus(FrameNodeType::BACKBUTTON, FrameNodeTrigger::HIDE);
-            }
-        } else if (info->menuInfo.menuIsShow) {
-            ExecuteOverlayStatus(FrameNodeType::EXTENSIONMENU, FrameNodeTrigger::SHOW);
-            if (backButton_) {
-                ExecuteOverlayStatus(FrameNodeType::BACKBUTTON, FrameNodeTrigger::SHOW);
-            }
-        } else {
-            ExecuteOverlayStatus(FrameNodeType::EXTENSIONMENU, FrameNodeTrigger::HIDE);
-            if (backButton_) {
-                ExecuteOverlayStatus(FrameNodeType::BACKBUTTON, FrameNodeTrigger::HIDE);
-            }
+        auto nodeTrigger = FrameNodeTrigger::SHOW;
+        if (info->menuInfo.menuDisable || !info->menuInfo.menuIsShow) {
+            nodeTrigger = FrameNodeTrigger::HIDE;
+        }
+        ExecuteOverlayStatus(FrameNodeType::EXTENSIONMENU, nodeTrigger);
+        if (backButton_) {
+            ExecuteOverlayStatus(FrameNodeType::BACKBUTTON, nodeTrigger);
         }
         extensionMenu_->MarkModifyDone();
         if (backButton_) {
@@ -1169,6 +1109,59 @@ void SelectOverlayNode::UpdateToolBar(bool menuItemChanged)
         }
     }
     MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void SelectOverlayNode::UpdateMenuInner(const std::shared_ptr<SelectOverlayInfo>& info)
+{
+    CHECK_NULL_VOID(selectMenuInner_);
+    selectMenuInner_->Clean();
+    selectMenuInner_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (isExtensionMenu_) {
+        MoreOrBackAnimation(false);
+    }
+    auto selectProperty = selectMenu_->GetLayoutProperty();
+    CHECK_NULL_VOID(selectProperty);
+    selectProperty->ClearUserDefinedIdealSize(true, false);
+    float allocatedSize = 0.0f;
+    float maxWidth = 0.0f;
+    GetDefaultButtonAndMenuWidth(maxWidth);
+    bool isDefaultOverMaxWidth = AddSystemDefaultOptions(maxWidth, allocatedSize);
+    auto itemNum = -1;
+    auto extensionOptionStartIndex = -1;
+    for (auto item : info->menuOptionItems) {
+        itemNum++;
+        float extensionOptionWidth = 0.0f;
+        auto button = BuildButton(item.content.value_or("null"), item.action, GetId(), extensionOptionWidth);
+        allocatedSize += extensionOptionWidth;
+        if (allocatedSize > maxWidth) {
+            button.Reset();
+            extensionOptionStartIndex = itemNum;
+            break;
+        }
+        button->MountToParent(selectMenuInner_);
+    }
+    if (backButton_) {
+        isExtensionMenu_ = false;
+        RemoveChild(backButton_);
+        backButton_.Reset();
+    }
+    if (extensionMenu_) {
+        RemoveChild(extensionMenu_);
+        extensionMenu_.Reset();
+    }
+    if (extensionOptionStartIndex != -1 || isDefaultOverMaxWidth) {
+        auto backButton = BuildMoreOrBackButton(GetId(), true);
+        backButton->MountToParent(selectMenuInner_);
+        // add back button
+        if (!backButton_) {
+            backButton_ = BuildMoreOrBackButton(GetId(), false);
+            CHECK_NULL_VOID(backButton_);
+            backButton_->GetRenderContext()->UpdateOpacity(0.0);
+            backButton_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+            backButton_->MountToParent(Claim(this));
+        }
+    }
+    AddExtensionMenuOptions(info->menuOptionItems, extensionOptionStartIndex);
 }
 
 RefPtr<FrameNode> SelectOverlayNode::CreateMenuNode(const std::shared_ptr<SelectOverlayInfo>& info)
@@ -1389,6 +1382,13 @@ void SelectOverlayNode::SetFrameNodeOpacity(FrameNodeType type, float opacity)
         default:
             break;
     }
+}
+
+void SelectOverlayNode::HideFrameNodeImmediately(FrameNodeType type)
+{
+    SetFrameNodeStatus(type, FrameNodeStatus::GONE);
+    SetFrameNodeVisibility(type, VisibleType::GONE);
+    SetFrameNodeOpacity(type, 0.0f);
 }
 
 void SelectOverlayNode::SetSelectMenuOpacity(float value)

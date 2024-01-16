@@ -160,8 +160,6 @@ public:
 
     void TriggerOnAreaChangeCallback(uint64_t nanoTimestamp);
 
-    OffsetF CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp);
-
     void OnConfigurationUpdate(const OnConfigurationChange& configurationChange) override;
 
     void AddVisibleAreaUserCallback(double ratio, const VisibleCallbackInfo& callback)
@@ -283,7 +281,7 @@ public:
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
-    RefPtr<FrameNode> GetAncestorNodeOfFrame() const;
+    RefPtr<FrameNode> GetAncestorNodeOfFrame(bool checkBoundary = false) const;
 
     std::string& GetNodeName()
     {
@@ -664,14 +662,14 @@ public:
 
     bool GetMonopolizeEvents() const;
 
-    const std::pair<uint64_t, OffsetF>& GetCachedGlobalOffset() const
+    bool IsWindowBoundary() const
     {
-        return cachedGlobalOffset_;
+        return isWindowBoundary_;
     }
 
-    void SetCachedGlobalOffset(const std::pair<uint64_t, OffsetF>& timestampOffset)
+    void SetWindowBoundary(bool isWindowBoundary = true)
     {
-        cachedGlobalOffset_ = timestampOffset;
+        isWindowBoundary_ = isWindowBoundary;
     }
 
     void InitLastArea();
@@ -740,6 +738,12 @@ private:
 
     void RecordExposureIfNeed(const std::string& inspectorId);
 
+    OffsetF CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp);
+
+    const std::pair<uint64_t, OffsetF>& GetCachedGlobalOffset() const;
+
+    void SetCachedGlobalOffset(const std::pair<uint64_t, OffsetF>& timestampOffset);
+
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
     RefPtr<GeometryNode> geometryNode_ = MakeRefPtr<GeometryNode>();
@@ -795,6 +799,7 @@ private:
     bool draggable_ = false;
     bool userSet_ = false;
     bool customerSet_ = false;
+    bool isWindowBoundary_ = false;
 
     std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
     Matrix4 localMat_ = Matrix4::CreateIdentity();

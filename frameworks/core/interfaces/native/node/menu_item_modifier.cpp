@@ -25,9 +25,6 @@
 namespace OHOS::Ace::NG {
 const char DELIMITER = '|';
 constexpr int32_t SIZE_OF_FONT_INFO = 3;
-const int POS_0 = 0;
-const int POS_1 = 1;
-const int POS_2 = 2;
 static const char* ERR_CODE = "-1";
 const std::string DEFAULT_FONT_WEIGHT = "normal";
 const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
@@ -89,13 +86,13 @@ void SetLabelFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
         return;
     }
     CalcDimension fontSize;
-    if (res[POS_0] != ERR_CODE) {
-        fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
+    if (res[0] != ERR_CODE) { // 0: position of font size data
+        fontSize = StringUtils::StringToCalcDimension(res[0], false, DimensionUnit::FP);
     }
     MenuItemModelNG::SetLabelFontSize(frameNode, fontSize);
 
-    if (res[POS_1] != ERR_CODE) {
-        MenuItemModelNG::SetLabelFontWeight(frameNode, Framework::ConvertStrToFontWeight(res[POS_1]));
+    if (res[1] != ERR_CODE) { // 1: position of font weight data
+        MenuItemModelNG::SetLabelFontWeight(frameNode, Framework::ConvertStrToFontWeight(res[1]));
     } else {
         MenuItemModelNG::SetLabelFontWeight(frameNode, FontWeight::NORMAL);
     }
@@ -106,8 +103,8 @@ void SetLabelFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
         MenuItemModelNG::SetLabelFontStyle(frameNode, DEFAULT_FONT_STYLE);
     }
 
-    if (res[POS_2] != ERR_CODE) {
-        MenuItemModelNG::SetLabelFontFamily(frameNode, Framework::ConvertStrToFontFamilies(res[POS_2]));
+    if (res[2] != ERR_CODE) { // 2: position of font family data
+        MenuItemModelNG::SetLabelFontFamily(frameNode, Framework::ConvertStrToFontFamilies(res[2]));
     } else {
         MenuItemModelNG::SetLabelFontFamily(frameNode, Framework::ConvertStrToFontFamilies(DEFAULT_FONT_FAMILY));
     }
@@ -138,13 +135,13 @@ void SetContentFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
     }
 
     CalcDimension fontSize;
-    if (res[POS_0] != ERR_CODE) {
-        fontSize = StringUtils::StringToCalcDimension(res[POS_0], false, DimensionUnit::FP);
+    if (res[0] != ERR_CODE) { // 0: position of font size data
+        fontSize = StringUtils::StringToCalcDimension(res[0], false, DimensionUnit::FP);
     }
     MenuItemModelNG::SetFontSize(frameNode, fontSize);
 
-    if (res[POS_1] != ERR_CODE) {
-        MenuItemModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(res[POS_1]));
+    if (res[1] != ERR_CODE) { // 1: position of font weight data
+        MenuItemModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(res[1]));
     } else {
         MenuItemModelNG::SetFontWeight(frameNode, FontWeight::NORMAL);
     }
@@ -155,8 +152,8 @@ void SetContentFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
         MenuItemModelNG::SetFontStyle(frameNode, DEFAULT_FONT_STYLE);
     }
 
-    if (res[POS_2] != ERR_CODE) {
-        MenuItemModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(res[POS_2]));
+    if (res[2] != ERR_CODE) { // 2: position of font family data
+        MenuItemModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(res[2]));
     } else {
         MenuItemModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(DEFAULT_FONT_FAMILY));
     }
@@ -174,11 +171,44 @@ void ResetContentFont(NodeHandle node)
     MenuItemModelNG::SetFontStyle(frameNode, DEFAULT_FONT_STYLE);
 }
 
+void SetSelectIcon(NodeHandle node, bool showIcon)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MenuItemModelNG::SetSelectIcon(frameNode, showIcon);
+}
+
+void ResetSelectIcon(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    MenuItemModelNG::SetSelectIcon(frameNode, false);
+}
+
+void SetSelectIconSrc(NodeHandle node, const char* iconSrc)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string iconPathStr;
+    if (iconSrc != nullptr) {
+        iconPathStr = iconSrc;
+    }
+    MenuItemModelNG::SetSelectIconSrc(frameNode, iconPathStr);
+}
+
+void ResetSelectIconSrc(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::string iconPathStr;
+    MenuItemModelNG::SetSelectIconSrc(frameNode, iconPathStr);
+}
+
 ArkUIMenuItemModifierAPI GetMenuItemModifier()
 {
     static const ArkUIMenuItemModifierAPI modifier = { SetMenuItemSelected, ResetMenuItemSelected, SetLabelFontColor,
         ResetLabelFontColor, SetContentFontColor, ResetContentFontColor, SetLabelFont, ResetLabelFont, SetContentFont,
-        ResetContentFont };
+        ResetContentFont, SetSelectIcon, ResetSelectIcon, SetSelectIconSrc, ResetSelectIconSrc};
 
     return modifier;
 }

@@ -105,6 +105,7 @@ constexpr Dimension AVOID_OFFSET = 24.0_vp;
 constexpr Dimension DEFAULT_FONT = Dimension(16, DimensionUnit::FP);
 constexpr Dimension COUNTER_BOTTOM = 22.0_vp;
 constexpr double BOTTOM_MARGIN = 22.0;
+constexpr float MARGIN_ZERO = 0.0f;
 constexpr int32_t ONE_CHARACTER = 1;
 constexpr int32_t ILLEGAL_VALUE = 0;
 // uncertainty range when comparing selectedTextBox to contentRect
@@ -1062,7 +1063,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
     selectController_->MoveSecondHandleToContentRect(textSize);
     StopTwinkling();
     showSelect_ = true;
-    if (isKeyEvent || inlineSelectAllFlag_) {
+    if (isKeyEvent || inlineSelectAllFlag_ || IsUsingMouse()) {
         CloseSelectOverlay(true);
         return;
     }
@@ -1104,6 +1105,7 @@ void TextFieldPattern::HandleOnCopy()
         selectController_->MoveCaretToContentRect(selectController_->GetSecondHandleIndex(), TextAffinity::UPSTREAM);
         StartTwinkling();
     }
+    CloseSelectOverlay(true);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
@@ -2365,7 +2367,15 @@ void TextFieldPattern::ProcessOverlay(bool isUpdateMenu, bool animation, bool is
         isSingleHandle_ = true;
         selectController_->UpdateCaretIndex(selectController_->GetFirstHandleIndex());
         selectController_->UpdateCaretOffset();
+    } else if (!isSingleHandle_) {
+        auto rects = GetTextBoxes();
+        if (!rects.empty() && NearZero(rects[0].Width())) {
+            isSingleHandle_ = true;
+            selectController_->UpdateCaretIndex(selectController_->GetFirstHandleIndex());
+            selectController_->UpdateCaretOffset();
+        }
     }
+
     if (isSingleHandle_) {
         StartTwinkling();
         showOverlayParams.firstHandle = std::nullopt;
@@ -3023,7 +3033,6 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
             CloseCustomKeyboard();
         }
         inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
-        UpdateKeyboardOffset(textConfig.positionY, textConfig.height);
 #else
         if (!HasConnection()) {
             TextInputConfiguration config;
@@ -3245,7 +3254,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     if (inputValue == DEFAULT_MODE) {
         originLength = originLength + ONE_CHARACTER;
     }
-    if (textFieldLayoutProperty->GetShowCounterValue(false) && originLength == maxlength &&
+    if (textFieldLayoutProperty->GetShowCounterValue(false) && originLength == static_cast<int32_t>(maxlength) &&
         inputValue == DEFAULT_MODE) {
         UpdateCounterBorderStyle(originLength, maxlength);
     }
@@ -3328,7 +3337,7 @@ void TextFieldPattern::UpdateCounterBorderStyle(int32_t& textLength, uint32_t& m
     auto showBorder = textFieldLayoutProperty->GetShowHighlightBorderValue(true);
     if (static_cast<uint32_t>(textLength) >= (maxLength - ONE_CHARACTER) && !IsTextArea() && showBorder == true) {
         SetUnderlineColor(theme->GetErrorUnderlineColor());
-    } else if (textLength >= maxLength && IsTextArea() && showBorder == true) {
+    } else if (textLength >= static_cast<int32_t>(maxLength) && IsTextArea() && showBorder == true) {
         HandleCounterBorder();
     }
     return;
@@ -3368,17 +3377,24 @@ void TextFieldPattern::UpdateCounterMargin()
         !IsShowPasswordIcon()) {
         MarginProperty margin;
         const auto& getMargin = layoutProperty->GetMarginProperty();
-        if (getMargin) {
-            auto systemMargin = getMargin->bottom->GetDimension();
-            Dimension marginProperty { BOTTOM_MARGIN, DimensionUnit::VP };
-            margin.bottom = CalcLength(marginProperty + systemMargin);
+        if (!getMargin || GetMarginBottom() == MARGIN_ZERO) {
+            margin.bottom = CalcLength(COUNTER_BOTTOM);
+            layoutProperty->UpdateMargin(margin);
+            return;
+        }
+        Dimension marginProperty { BOTTOM_MARGIN, DimensionUnit::VP };
+        auto systemMargin = getMargin->bottom->GetDimension();
+        if (systemMargin < marginProperty) {
+            margin.bottom = CalcLength(marginProperty);
             margin.left = CalcLength(getMargin->left->GetDimension());
             margin.top = CalcLength(getMargin->top->GetDimension());
             margin.right = CalcLength(getMargin->right->GetDimension());
             layoutProperty->UpdateMargin(margin);
-        }
-        if (!getMargin) {
-            margin.bottom = CalcLength(COUNTER_BOTTOM);
+        } else {
+            margin.bottom = CalcLength(systemMargin);
+            margin.left = CalcLength(getMargin->left->GetDimension());
+            margin.top = CalcLength(getMargin->top->GetDimension());
+            margin.right = CalcLength(getMargin->right->GetDimension());
             layoutProperty->UpdateMargin(margin);
         }
     }
@@ -4869,7 +4885,7 @@ bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
         if (scrollBar) {
             scrollBar->PlayScrollBarAppearAnimation();
         }
-        OnParentScrollStartOrEnd(false);
+        OnParentScrollStartOrEnd(false, true);
         return true;
     }
     if (IsReachedBoundary(offset)) {

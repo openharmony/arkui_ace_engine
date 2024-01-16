@@ -59,7 +59,7 @@ public:
     NG::RectF GetRect() override;
     void ShowMenu(const RefPtr<Component>& newComponent) override;
     void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset) override;
-    void ShowPreviewNG() override;
+    bool ShowPreviewNG() override;
     void HidePreviewNG() override;
     void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) override;
     void HideMenuNG(bool showPreviewAnimation, bool startDrag) override;

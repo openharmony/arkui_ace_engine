@@ -134,7 +134,7 @@ typedef enum {
     /**
      * @brief 通过<b>setAttribute</b>方法设置组件背景图片.
      *
-     * @note 入参:value: String("no-repeat", "x", "y", "xy" )。
+     * @note 入参格式为"图片地址 repeat参数"，repeat参数范围为：no-repeat, x, y, xy。
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_BACKGROUND_IMAGE, "/pages/common/icon.png no-repeat");
      * @endcode

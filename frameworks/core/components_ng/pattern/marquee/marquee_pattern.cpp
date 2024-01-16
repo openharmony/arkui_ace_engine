@@ -20,6 +20,8 @@
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/offset.h"
+#include "base/log/dump_log.h"
+#include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "core/animation/curves.h"
 #include "core/components/common/layout/constants.h"
@@ -116,6 +118,7 @@ void MarqueePattern::OnModifyDone()
 
 void MarqueePattern::StartMarqueeAnimation()
 {
+    TAG_LOGD(AceLogTag::ACE_MARQUEE, "Start Marquee Animation.");
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto geoNode = host->GetGeometryNode();
@@ -144,6 +147,10 @@ void MarqueePattern::StartMarqueeAnimation()
 
 void MarqueePattern::PlayMarqueeAnimation(float start, int32_t playCount, bool needSecondPlay)
 {
+    TAG_LOGD(AceLogTag::ACE_MARQUEE,
+        "Play Marquee Animation, startPosition is %{public}f, playCount is %{public}d, needSecondPlay is true ? "
+        "%{public}d.",
+        start, playCount, needSecondPlay);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto geoNode = host->GetGeometryNode();
@@ -172,6 +179,10 @@ void MarqueePattern::PlayMarqueeAnimation(float start, int32_t playCount, bool n
     } else {
         option.SetIteration(playCount);
     }
+    TAG_LOGD(AceLogTag::ACE_MARQUEE,
+        "Play Marquee Animation, marqueeNodeId is %{public}d, textNodeId is %{public}d, textWidth is %{public}f, "
+        "duration is %{public}d.",
+        host->GetId(), textNode->GetId(), textWidth, duration);
     SetTextOffset(start);
     animationId_++;
     animation_ = AnimationUtils::StartAnimation(
@@ -213,6 +224,7 @@ void MarqueePattern::OnAnimationFinish()
 
 void MarqueePattern::StopMarqueeAnimation(bool stopAndStart)
 {
+    TAG_LOGD(AceLogTag::ACE_MARQUEE, "Stop Marquee Animation.");
     animation_ = nullptr;
     animationId_++;
     SetTextOffset(FAKE_VALUE);
@@ -264,6 +276,9 @@ void MarqueePattern::SetTextOffset(float offsetX)
     CHECK_NULL_VOID(textNode);
     auto renderContext = textNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
+    TAG_LOGD(AceLogTag::ACE_MARQUEE,
+        "Marquee nodeId %{public}d, textNodeId %{public}d is setted text offsetX is %{public}f.", host->GetId(),
+        textNode->GetId(), offsetX);
     renderContext->UpdateTransformTranslate({ offsetX, 0.0f, 0.0f });
 }
 
@@ -453,12 +468,10 @@ void MarqueePattern::RegistOritationListener()
 
 void MarqueePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
-    pipeline->RemoveWindowSizeChangeCallback(host->GetId());
-    pipeline->RemoveVisibleAreaChangeNode(host->GetId());
+    pipeline->RemoveWindowSizeChangeCallback(frameNode->GetId());
+    pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
     isOritationListenerRegisted_ = false;
     isRegistedAreaCallback_ = false;
 }
@@ -481,5 +494,20 @@ void MarqueePattern::OnColorConfigurationUpdate()
     textLayoutProperty->UpdateTextColor(theme->GetTextColor());
     textChildNode->MarkModifyDone();
     textChildNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void MarqueePattern::DumpInfo()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto textChild = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_VOID(textChild);
+    auto textLayoutProperty = textChild->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(textLayoutProperty);
+    DumpLog::GetInstance().AddDesc(
+        std::string("Marquee text content: ").append(textLayoutProperty->GetContent().value_or("")));
+    DumpLog::GetInstance().AddDesc(std::string("Play status: ").append(std::to_string(playStatus_)));
+    DumpLog::GetInstance().AddDesc(std::string("loop: ").append(std::to_string(loop_)));
+    DumpLog::GetInstance().AddDesc(std::string("step: ").append(std::to_string(scrollAmount_)));
 }
 } // namespace OHOS::Ace::NG

@@ -38,10 +38,10 @@ void BorderStyleProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, std::uni
         res->Put("top", style[static_cast<int>(styleTop.value_or(BorderStyle::SOLID))]);
         res->Put("right", style[static_cast<int>(styleRight.value_or(BorderStyle::SOLID))]);
         res->Put("bottom", style[static_cast<int>(styleBottom.value_or(BorderStyle::SOLID))]);
-        json->Put("outlineStyle", res);
+        json->Put(isOutline ? "outlineStyle" : "borderStyle", res);
         borderJson->Put("style", res);
     } else {
-        json->Put("outlineStyle",
+        json->Put(isOutline ? "outlineStyle" : "borderStyle",
             style[static_cast<int>(styleLeft.value_or(BorderStyle::SOLID))]);
         borderJson->Put("style", style[static_cast<int>(styleLeft.value_or(BorderStyle::SOLID))]);
     }

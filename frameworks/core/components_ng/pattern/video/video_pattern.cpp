@@ -1491,6 +1491,7 @@ void VideoPattern::EnableDrag()
         CHECK_NULL_VOID(videoPattern);
         auto videoLayoutProperty = videoPattern->GetLayoutProperty<VideoLayoutProperty>();
         CHECK_NULL_VOID(videoLayoutProperty);
+        CHECK_NULL_VOID(event);
         auto unifiedData = event->GetData();
         std::string videoSrc;
         if (unifiedData != nullptr) {

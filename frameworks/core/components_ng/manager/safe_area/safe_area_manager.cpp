@@ -183,7 +183,7 @@ void SafeAreaManager::ExpandSafeArea()
         if (frameNode) {
             frameNode->SaveGeoState();
             frameNode->ExpandSafeArea(isFocusOnPage);
-            frameNode->SyncGeometryNode();
+            frameNode->ForceSyncGeometryNode();
         }
         ++iter;
     }

@@ -225,7 +225,7 @@ RefPtr<FrameNode> ScrollTestNg::GetContentChild(int32_t index)
 void ScrollTestNg::Touch(TouchLocationInfo locationInfo, SourceType sourceType)
 {
     auto touchEventHub = frameNode_->GetOrCreateGestureEventHub();
-    RefPtr<TouchEventImpl> touchEventImpl = touchEventHub->touchEventActuator_->touchEvents_.front();
+    RefPtr<TouchEventImpl> touchEventImpl = touchEventHub->touchEventActuator_->touchEvents_.back();
     auto touchEvent = touchEventImpl->GetTouchEventCallback();
     TouchEventInfo eventInfo("touch");
     eventInfo.SetSourceDevice(sourceType);
@@ -591,10 +591,12 @@ HWTEST_F(ScrollTestNg, Event004, TestSize.Level1)
      */
     bool isTrigger = false;
     CreateWithContent([&isTrigger](ScrollModelNG model) {
-        OnScrollStartEvent event = [&isTrigger]() { isTrigger = true; };
-        model.SetOnScrollStart(std::move(event));
-        model.SetOnScrollStop(std::move(event));
-        model.SetOnScrollEnd(std::move(event));
+        OnScrollStartEvent startEvent = [&isTrigger]() { isTrigger = true; };
+        model.SetOnScrollStart(std::move(startEvent));
+        OnScrollStopEvent stopEvent = [&isTrigger]() { isTrigger = true; };
+        model.SetOnScrollStop(std::move(stopEvent));
+        ScrollEndEvent endEvent = [&isTrigger]() { isTrigger = true; };
+        model.SetOnScrollEnd(std::move(endEvent));
     });
 
     /**
@@ -709,8 +711,7 @@ HWTEST_F(ScrollTestNg, Event006, TestSize.Level1)
      * @tc.expected: onScrollStop would not be trigger
      */
     float endValue = pattern_->GetFinalPosition();
-    pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue,
-            SCROLL_FROM_ANIMATION_CONTROLLER);
+    pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue, SCROLL_FROM_ANIMATION_CONTROLLER);
     // when out of scrollable distance, will trigger animator stop
     pattern_->UpdateCurrentOffset(-1, SCROLL_FROM_ANIMATION_CONTROLLER);
     if (pattern_->IsAtBottom()) {
@@ -1725,7 +1726,7 @@ HWTEST_F(ScrollTestNg, FadeController002, TestSize.Level1)
     fadeController->controller_->NotifyStopListener();
     fadeController->state_ = OverScrollState::PULL;
     fadeController->ProcessPull(1.0, 1.0, 1.0);
-    EXPECT_EQ(fadeController->state_, OverScrollState::PULL);
+    EXPECT_EQ(fadeController->state_, OverScrollState::RECEDE);
 
     /**
      * @tc.steps: step4. When OverScrollState is PULL, call the ProcessRecede function and callback function in
@@ -1734,7 +1735,7 @@ HWTEST_F(ScrollTestNg, FadeController002, TestSize.Level1)
      */
     fadeController->controller_ = nullptr;
     fadeController->ProcessRecede(10);
-    EXPECT_EQ(fadeController->state_, OverScrollState::PULL);
+    EXPECT_EQ(fadeController->state_, OverScrollState::RECEDE);
 
     /**
      * @tc.steps: step5. When OverScrollState is 0, call the Initialize function and callback function in
@@ -2165,9 +2166,7 @@ HWTEST_F(ScrollTestNg, ScrollBar006, TestSize.Level1)
      * @tc.steps: step1. Not set bar width
      * @tc.expected: It will be default
      */
-    CreateWithContent([](ScrollModelNG model) {
-        model.SetDisplayMode(static_cast<int>(DisplayMode::ON));
-    });
+    CreateWithContent([](ScrollModelNG model) { model.SetDisplayMode(static_cast<int>(DisplayMode::ON)); });
     EXPECT_EQ(pattern_->scrollBar_->activeRect_.Width(), NORMAL_WIDTH);
 
     /**
@@ -2217,7 +2216,7 @@ HWTEST_F(ScrollTestNg, ScrollBar007, TestSize.Level1)
             Dimension(20.f),
             Dimension(30.f),
         };
-        std::pair<bool, bool> enableSnapToSide = {true, true};
+        std::pair<bool, bool> enableSnapToSide = { true, true };
         model.SetScrollSnap(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
         OnScrollStartEvent event = [&isTrigger]() { isTrigger = true; };
         model.SetOnScrollStart(std::move(event));
@@ -2250,7 +2249,7 @@ HWTEST_F(ScrollTestNg, ScrollBar008, TestSize.Level1)
             Dimension(20.f),
             Dimension(30.f),
         };
-        std::pair<bool, bool> enableSnapToSide = {true, true};
+        std::pair<bool, bool> enableSnapToSide = { true, true };
         model.SetScrollSnap(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
         OnScrollStartEvent event = [&isTrigger]() { isTrigger = true; };
         model.SetOnScrollStart(std::move(event));
@@ -3479,12 +3478,10 @@ HWTEST_F(ScrollTestNg, EnablePaging001, TestSize.Level1)
     /**
      * @tc.steps: step1. Create scroll and initialize related properties.
      */
-    CreateWithContent([](ScrollModelNG model) {
-        model.SetEnablePaging(true);
-    });
+    CreateWithContent([](ScrollModelNG model) { model.SetEnablePaging(true); });
     auto viewPortLength = pattern_->GetMainContentSize();
     pattern_->scrollableDistance_ = viewPortLength * 10;
-    pattern_->currentOffset_ = - viewPortLength * 5 - 10.0f;
+    pattern_->currentOffset_ = -viewPortLength * 5 - 10.0f;
     SizeF viewPortExtent(SCROLL_WIDTH, viewPortLength * 11);
     pattern_->viewPortExtent_ = viewPortExtent;
     pattern_->SetIntervalSize(Dimension(static_cast<double>(viewPortLength)));
@@ -3496,8 +3493,7 @@ HWTEST_F(ScrollTestNg, EnablePaging001, TestSize.Level1)
      */
     auto dragDistance = viewPortLength * 0.5 - 1;
     auto dragSpeed = SCROLL_PAGING_SPEED_THRESHOLD - 1;
-    auto predictSnapOffset =
-                pattern_->CalePredictSnapOffset(0.f, dragDistance, dragSpeed);
+    auto predictSnapOffset = pattern_->CalePredictSnapOffset(0.f, dragDistance, dragSpeed);
     EXPECT_TRUE(predictSnapOffset.has_value());
     EXPECT_LT(predictSnapOffset.value(), 0);
 
@@ -3523,8 +3519,7 @@ HWTEST_F(ScrollTestNg, EnablePaging001, TestSize.Level1)
     EXPECT_LT(abs(predictSnapOffset.value()), viewPortLength);
     EXPECT_GT(predictSnapOffset.value(), 0);
 
-
-     /**
+    /**
      * @tc.steps: step5. dragDistance less than threshold and dragSpeed equals threshold
      * @tc.expected: the absolute value of predictSnapOffset.value() less than viewPortLength
      */
@@ -3547,9 +3542,7 @@ HWTEST_F(ScrollTestNg, EnablePaging002, TestSize.Level1)
      * @tc.steps: step1. Create scroll and set enablePaging.
      * @tc.expected: the value of GetEnablePaging() if VALID
      */
-    CreateWithContent([](ScrollModelNG model) {
-        model.SetEnablePaging(true);
-    });
+    CreateWithContent([](ScrollModelNG model) { model.SetEnablePaging(true); });
     EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::VALID);
 
     /**

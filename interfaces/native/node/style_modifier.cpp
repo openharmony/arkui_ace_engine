@@ -914,10 +914,13 @@ void SetResponseRegion(ArkUI_NodeHandle node, const char* value)
         std::vector<std::string> regionVal;
         // 取第一个值进行分解
         StringUtils::StringSplitter(regionArray[0], ' ', regionVal);
+        if (regionVal.size() < ALLOW_SIZE_4) {
+            return;
+        }
         for (int i = 0; i < regionVal.size(); i++) {
             valuesArray.push_back(StringToDouble(regionVal[i].c_str(), 0.0f));
-            // unit 1
-            unitsArray.push_back(1);
+            // unit 1 3
+            unitsArray.push_back(i > NUM_1 ? NUM_3 : NUM_1);
         }
     } else if (regionArray.size() > 1) {
         for (const std::string& region : regionArray) {
@@ -926,10 +929,13 @@ void SetResponseRegion(ArkUI_NodeHandle node, const char* value)
                 std::string regionString = region.substr(1, region.length() - ALLOW_SIZE_2);
                 std::vector<std::string> regionVal;
                 StringUtils::StringSplitter(regionString, ' ', regionVal);
+                if (regionVal.size() < ALLOW_SIZE_4) {
+                    return;
+                }
                 for (int i = 0; i < ALLOW_SIZE_4; i++) {
                     valuesArray.push_back(StringToDouble(regionVal[i].c_str(), 0.0f));
-                    // unit 1
-                    unitsArray.push_back(1);
+                    // unit 1 3
+                    unitsArray.push_back(i > NUM_1 ? NUM_3 : NUM_1);
                 }
             }
         }
@@ -1445,6 +1451,9 @@ void SetScrollNestedScroll(ArkUI_NodeHandle node, const char* value)
     std::vector<std::string> valueVal;
     StringUtils::StringSplitter(value, ' ', valueVal);
 
+    if (valueVal.size() < ALLOW_SIZE_2) {
+        return;
+    }
     std::vector<std::string> nestedScrollOptions = { "self-only", "self-first", "parent-first", "parallel" };
     // 组装对应的参数
     fullImpl->getNodeModifiers()->getScrollModifier()->setScrollNestedScroll(node->uiNodeHandle,

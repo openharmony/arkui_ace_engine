@@ -179,6 +179,15 @@ public:
         return isSelectOption_;
     }
 
+    void SetHasOptionWidth(bool hasOptionWidth)
+    {
+        hasOptionWidth_ = hasOptionWidth;
+    }
+
+    bool GetHasOptionWidth()
+    {
+        return hasOptionWidth_;
+    }
 private:
     void OnAttachToFrameNode() override;
     void OnModifyDone() override;
@@ -222,6 +231,7 @@ private:
     bool isHover_ = false;
     bool isWidthModifiedBySelect_ = false;
     bool isSelectOption_ = false;
+    bool hasOptionWidth_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(OptionPattern);
 };

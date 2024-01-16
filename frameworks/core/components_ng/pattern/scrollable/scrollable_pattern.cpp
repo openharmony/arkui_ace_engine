@@ -615,11 +615,12 @@ void ScrollablePattern::RegisterScrollBarEventTask()
             return scrollBar->InBarTouchRegion(Point(point.GetX(), point.GetY()));
         });
     scrollableEvent_->SetBarCollectTouchTargetCallback(
-        [weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_))](
-            const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) {
+        [weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_))](const OffsetF& coordinateOffset,
+            const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
+            const RefPtr<TargetComponent>& targetComponent) {
             auto scrollBar = weak.Upgrade();
             CHECK_NULL_VOID(scrollBar);
-            scrollBar->OnCollectTouchTarget(coordinateOffset, getEventTargetImpl, result);
+            scrollBar->OnCollectTouchTarget(coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent);
         });
 
     auto dragFRCSceneCallback = [weak = WeakClaim(this)](double velocity, SceneStatus sceneStatus) {

@@ -1343,6 +1343,7 @@ HWTEST_F(MenuTestNg, MenuPatternTestNg018, TestSize.Level1)
  */
 HWTEST_F(MenuTestNg, MenuPatternTestNg019, TestSize.Level1)
 {
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     MenuModelNG model;
     model.Create();
     auto multiMenu = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -1364,7 +1365,7 @@ HWTEST_F(MenuTestNg, MenuPatternTestNg019, TestSize.Level1)
     multiMenu->GetPattern()->BeforeCreateLayoutWrapper();
     // inner multi menu should have backgroundColor and padding set up
     ASSERT_NE(multiMenu->GetLayoutProperty()->GetPaddingProperty()->ToString(), PaddingProperty().ToString());
-    ASSERT_NE(multiMenu->GetRenderContext()->GetBackgroundColor(), std::nullopt);
+    ASSERT_NE(multiMenu->GetRenderContext()->GetBackgroundColor(), Color::TRANSPARENT);
     // inner menu should have no shadow
     ASSERT_EQ(multiMenu->GetRenderContext()->GetBackShadow(), ShadowConfig::NoneShadow);
 
@@ -7629,10 +7630,10 @@ HWTEST_F(MenuTestNg, SubMenuLayoutAlgorithmTestNg002, TestSize.Level1)
     auto selectTheme = MockPipelineContext::GetCurrent()->GetTheme<SelectTheme>();
     selectTheme->outPadding_ = 10.0_vp;
     algorithm->InitializePaddingAPI11(wrapper);
-    ASSERT_EQ(algorithm->paddingStart_, 0.0f);
-    ASSERT_EQ(algorithm->paddingEnd_, 0.0f);
-    ASSERT_EQ(algorithm->paddingTop_, 0.0f);
-    ASSERT_EQ(algorithm->paddingBottom_, 0.0f);
+    ASSERT_EQ(algorithm->paddingStart_, 10.0f);
+    ASSERT_EQ(algorithm->paddingEnd_, 10.0f);
+    ASSERT_EQ(algorithm->paddingTop_, 10.0f);
+    ASSERT_EQ(algorithm->paddingBottom_, 10.0f);
 }
 
 /**
@@ -7709,8 +7710,8 @@ HWTEST_F(MenuTestNg, SubMenuLayoutAlgorithmTestNg003, TestSize.Level1)
     selectTheme->defaultPaddingTop_ = 10.0_vp;
     selectTheme->defaultPaddingBottomFixed_ = 10.0_vp;
     algorithm->InitializePaddingAPI11(wrapper);
-    ASSERT_EQ(algorithm->paddingStart_, 0.0f);
-    ASSERT_EQ(algorithm->paddingEnd_, 0.0f);
+    ASSERT_EQ(algorithm->paddingStart_, 10.0f);
+    ASSERT_EQ(algorithm->paddingEnd_, 10.0f);
     ASSERT_EQ(algorithm->paddingTop_, 10.0f);
     ASSERT_EQ(algorithm->paddingBottom_, 10.0f);
 }

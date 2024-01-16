@@ -50,7 +50,7 @@ constexpr double VELOCITY_SCALE = 0.8;
 constexpr double ADJUSTABLE_VELOCITY = 0.0;
 #endif
 constexpr float FRICTION_SCALE = -4.2f;
-constexpr uint32_t CUSTOM_SPRING_ANIMATION_DURION = 1000;
+constexpr uint32_t CUSTOM_SPRING_ANIMATION_DURATION = 1000;
 constexpr uint64_t MILLOS_PER_NANO_SECONDS = 1000 * 1000 * 1000;
 constexpr uint64_t MIN_DIFF_VSYNC = 1000 * 1000; // min is 1ms
 constexpr float DEFAULT_THRESHOLD = 0.75f;
@@ -58,6 +58,7 @@ constexpr float DEFAULT_SPRING_RESPONSE = 0.416f;
 constexpr float DEFAULT_SPRING_DAMP = 0.99f;
 constexpr uint32_t MAX_VSYNC_DIFF_TIME = 100 * 1000 * 1000; // max 100 ms
 constexpr float FRICTION_VELOCITY_THRESHOLD = 42.0f;
+constexpr float SPRING_ACCURACY = 0.1;
 #ifdef OHOS_PLATFORM
 constexpr int64_t INCREASE_CPU_TIME_ONCE = 4000000000; // 4s(unit: ns)
 #endif
@@ -375,6 +376,10 @@ void Scrollable::HandleDragUpdate(const GestureEvent& info)
 
 void Scrollable::HandleDragEnd(const GestureEvent& info)
 {
+    ACE_FUNCTION_TRACE();
+    // avoid no render frame when drag end
+    HandleDragUpdate(info);
+
     TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "Scroll drag end, position is %{public}lf and %{public}lf, "
         "velocity is %{public}lf",
         info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY(), info.GetMainVelocity());
@@ -482,7 +487,7 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
     auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(response, 1.0f, 0.0f);
     AnimationOption option;
     option.SetCurve(curve);
-    option.SetDuration(CUSTOM_SPRING_ANIMATION_DURION);
+    option.SetDuration(CUSTOM_SPRING_ANIMATION_DURATION);
     option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
     frictionOffsetProperty_->SetThresholdType(ThresholdType::LAYOUT);
     frictionOffsetProperty_->AnimateWithVelocity(option, finalPosition_, initVelocity_,
@@ -606,7 +611,7 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
 {
     endPos_ = currentPos_ + predictSnapOffset;
     AnimationOption option;
-    option.SetDuration(CUSTOM_SPRING_ANIMATION_DURION);
+    option.SetDuration(CUSTOM_SPRING_ANIMATION_DURATION);
     auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(DEFAULT_SPRING_RESPONSE, DEFAULT_SPRING_DAMP, 0.0f);
     option.SetCurve(curve);
     if (!snapOffsetProperty_) {
@@ -638,7 +643,7 @@ void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scro
         scrollSnapDelta, scrollSnapVelocity);
     endPos_ = currentPos_ + scrollSnapDelta;
     AnimationOption option;
-    option.SetDuration(CUSTOM_SPRING_ANIMATION_DURION);
+    option.SetDuration(CUSTOM_SPRING_ANIMATION_DURATION);
     auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(DEFAULT_SPRING_RESPONSE, DEFAULT_SPRING_DAMP, 0.0f);
     option.SetCurve(curve);
     if (!snapOffsetProperty_) {
@@ -771,9 +776,7 @@ void Scrollable::StartSpringMotion(
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(DEFAULT_SPRING_RESPONSE, DEFAULT_SPRING_DAMP, 0.0f);
     option.SetCurve(curve);
-    option.SetDuration(CUSTOM_SPRING_ANIMATION_DURION);
-    option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
-    springOffsetProperty_->SetThresholdType(ThresholdType::LAYOUT);
+    option.SetDuration(CUSTOM_SPRING_ANIMATION_DURATION);
     springOffsetProperty_->AnimateWithVelocity(
         option, finalPosition_, mainVelocity,
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
@@ -951,7 +954,7 @@ void Scrollable::UpdateScrollSnapEndWithOffset(double offset)
 {
     if (!isSnapScrollAnimationStop_) {
         AnimationOption option;
-        option.SetDuration(CUSTOM_SPRING_ANIMATION_DURION);
+        option.SetDuration(CUSTOM_SPRING_ANIMATION_DURATION);
         auto curve = AceType::MakeRefPtr<ResponsiveSpringMotion>(DEFAULT_SPRING_RESPONSE, DEFAULT_SPRING_DAMP, 0.0f);
         option.SetCurve(curve);
         if (!snapOffsetProperty_) {
@@ -1022,7 +1025,12 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSpringProperty()
         auto scroll = weak.Upgrade();
         CHECK_NULL_VOID(scroll);
         if (!scroll->isSpringAnimationStop_) {
-            scroll->ProcessSpringMotion(position);
+            if (NearEqual(scroll->finalPosition_, position, SPRING_ACCURACY)) {
+                scroll->ProcessSpringMotion(scroll->finalPosition_);
+                scroll->StopSpringAnimation();
+            } else {
+                scroll->ProcessSpringMotion(position);
+            }
         }
     };
     springOffsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
@@ -1118,5 +1126,17 @@ void Scrollable::StopSnapAnimation()
 inline bool Scrollable::IsMouseWheelScroll(const GestureEvent& info)
 {
     return info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() != SourceTool::TOUCHPAD;
+}
+
+void Scrollable::OnCollectTouchTarget(
+    TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent)
+{
+    if (panRecognizerNG_) {
+        panRecognizerNG_->AssignNodeId(frameNode->GetId());
+        panRecognizerNG_->AttachFrameNode(frameNode);
+        panRecognizerNG_->SetTargetComponent(targetComponent);
+        panRecognizerNG_->SetIsSystemGesture(true);
+        result.emplace_back(panRecognizerNG_);
+    }
 }
 } // namespace OHOS::Ace::NG

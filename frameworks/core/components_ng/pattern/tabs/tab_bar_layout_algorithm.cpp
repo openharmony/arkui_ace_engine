@@ -753,9 +753,11 @@ void TabBarLayoutAlgorithm::LayoutChildren(
         childOffset += OffsetF(scrollMargin_, 0);
     }
 
+    std::vector<OffsetF> childOffsetDelta;
     for (int32_t index = 0; index < childCount; ++index) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         if (!childWrapper) {
+            childOffsetDelta.emplace_back(OffsetF());
             continue;
         }
         auto childGeometryNode = childWrapper->GetGeometryNode();
@@ -763,6 +765,7 @@ void TabBarLayoutAlgorithm::LayoutChildren(
         OffsetF centerOffset = (axis == Axis::HORIZONTAL)
                                    ? OffsetF(0, (frameSize.Height() - childFrameSize.Height()) / 2.0)
                                    : OffsetF((frameSize.Width() - childFrameSize.Width()) / 2.0, 0);
+        childOffsetDelta.emplace_back(childOffset + centerOffset - childGeometryNode->GetMarginFrameOffset());
         childGeometryNode->SetMarginFrameOffset(childOffset + centerOffset);
         childWrapper->Layout();
         tabItemOffset_.emplace_back(childOffset);
@@ -771,10 +774,10 @@ void TabBarLayoutAlgorithm::LayoutChildren(
             axis == Axis::HORIZONTAL ? OffsetF(childFrameSize.Width(), 0.0f) : OffsetF(0.0f, childFrameSize.Height());
     }
     tabItemOffset_.emplace_back(childOffset);
-    LayoutMask(layoutWrapper);
+    LayoutMask(layoutWrapper, childOffsetDelta);
 }
 
-void TabBarLayoutAlgorithm::LayoutMask(LayoutWrapper* layoutWrapper)
+void TabBarLayoutAlgorithm::LayoutMask(LayoutWrapper* layoutWrapper, const std::vector<OffsetF>& childOffsetDelta)
 {
     auto layoutProperty = AceType::DynamicCast<TabBarLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
@@ -793,11 +796,8 @@ void TabBarLayoutAlgorithm::LayoutMask(LayoutWrapper* layoutWrapper)
         if (currentMask < 0) {
             currentWrapper->GetGeometryNode()->SetFrameSize(SizeF());
         } else {
-            auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(currentMask);
-            CHECK_NULL_VOID(childWrapper);
-            auto childOffset = childWrapper->GetGeometryNode()->GetMarginFrameOffset();
             auto offset = currentWrapper->GetGeometryNode()->GetMarginFrameOffset();
-            currentWrapper->GetGeometryNode()->SetMarginFrameOffset(offset + childOffset);
+            currentWrapper->GetGeometryNode()->SetMarginFrameOffset(offset + childOffsetDelta[currentMask]);
             auto imageWrapper = currentWrapper->GetOrCreateChildByIndex(0);
             CHECK_NULL_VOID(imageWrapper);
             auto imageNode = imageWrapper->GetHostNode();

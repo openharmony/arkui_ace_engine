@@ -21,9 +21,6 @@ class ArkFlexComponent extends ArkComponent implements FlexAttribute {
   pointLight(value: PointLightStyle): this {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
 }
 
 // @ts-ignore

@@ -73,6 +73,18 @@ void DynamicComponentRendererImpl::CreateContent()
         renderer->AttachRenderContext();
         TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "foreground dynamic UI content");
         renderer->uiContent_->Foreground();
+
+        std::function<void()> contentReadyCallback;
+        {
+            std::lock_guard<std::mutex> lock(renderer->contentReadyMutex_);
+            renderer->contentReady_ = true;
+            if (renderer->contentReadyCallback_) {
+                contentReadyCallback = std::move(renderer->contentReadyCallback_);
+            }
+        }
+        if (contentReadyCallback) {
+            contentReadyCallback();
+        }
     });
 }
 
@@ -193,7 +205,7 @@ void DynamicComponentRendererImpl::UpdateViewportConfig(const ViewportConfig& co
     vpConfig.SetPosition(config.Left(), config.Top());
     vpConfig.SetOrientation(config.Orientation());
 
-    if (NearZero(config.Width()) && NearZero(config.Height()) && !adaptive_) {
+    if (config.Width() == 0 && config.Height() == 0 && !adaptive_) {
         TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "set adaptive size for dynamic component '%{public}d'",
             uiContent_->GetInstanceId());
         adaptive_ = true;
@@ -209,22 +221,32 @@ void DynamicComponentRendererImpl::UpdateViewportConfig(const ViewportConfig& co
         vpConfig.SetSize(config.Width(), config.Height());
     }
 
-    auto taskExecutor = GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(
-        [weak = WeakClaim(this), vpConfig, reason, rsTransaction]() {
-            auto renderer = weak.Upgrade();
-            CHECK_NULL_VOID(renderer);
-            CHECK_NULL_VOID(renderer->uiContent_);
-            ContainerScope scope(renderer->uiContent_->GetInstanceId());
-            auto width = vpConfig.Width();
-            auto height = vpConfig.Height();
-            renderer->uiContent_->SetFormWidth(width);
-            renderer->uiContent_->SetFormHeight(height);
-            renderer->uiContent_->OnFormSurfaceChange(width, height);
-            renderer->uiContent_->UpdateViewportConfig(vpConfig, reason, rsTransaction);
-        },
-        TaskExecutor::TaskType::UI);
+    auto task = [weak = WeakClaim(this), vpConfig, reason, rsTransaction]() {
+        auto renderer = weak.Upgrade();
+        CHECK_NULL_VOID(renderer);
+        auto uiContent = renderer->uiContent_;
+        CHECK_NULL_VOID(uiContent);
+        ContainerScope scope(uiContent->GetInstanceId());
+        auto width = vpConfig.Width();
+        auto height = vpConfig.Height();
+        uiContent->SetFormWidth(width);
+        uiContent->SetFormHeight(height);
+        uiContent->OnFormSurfaceChange(width, height);
+        uiContent->UpdateViewportConfig(vpConfig, reason, rsTransaction);
+    };
+    bool contentReady = false;
+    {
+        std::lock_guard<std::mutex> lock(contentReadyMutex_);
+        contentReady = contentReady_;
+        if (!contentReady) {
+            contentReadyCallback_ = std::move(task);
+        }
+    }
+    if (contentReady) {
+        auto taskExecutor = GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(std::move(task), TaskExecutor::TaskType::UI);
+    }
 }
 
 void DynamicComponentRendererImpl::DestroyContent()

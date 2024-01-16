@@ -858,7 +858,7 @@ bool FocusHub::RequestNextFocus(FocusStep moveStep, const RectF& rect)
         }
         if (!IsFocusStepTab(moveStep) && focusAlgorithm_.isVertical != IsFocusStepVertical(moveStep)) {
             TAG_LOGI(AceLogTag::ACE_FOCUS,
-                "Request next focus failed because direction of node(%{pubic}d) is different with step(%{public}d).",
+                "Request next focus failed because direction of node(%{public}d) is different with step(%{public}d).",
                 focusAlgorithm_.isVertical, moveStep);
             return false;
         }
@@ -1179,9 +1179,6 @@ void FocusHub::OnFocusNode()
         parentFocusHub->SetLastFocusNodeIndex(AceType::Claim(this));
     }
     HandleParentScroll(); // If current focus node has a scroll parent. Handle the scroll event.
-    if (isFocusActiveWhenFocused_) {
-        PaintFocusState(true, true);
-    }
     auto rootNode = pipeline->GetRootElement();
     auto rootFocusHub = rootNode ? rootNode->GetFocusHub() : nullptr;
     if (rootFocusHub && pipeline->GetIsFocusActive()) {
@@ -1843,7 +1840,9 @@ bool FocusHub::RequestFocusImmediatelyById(const std::string& id)
     }
     TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus immediately by id: %{public}s. The node is %{public}s/%{public}d.",
         id.c_str(), focusNode->GetFrameName().c_str(), focusNode->GetFrameId());
-    focusNode->RequestFocus();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    pipeline->AddDirtyRequestFocus(focusNode->GetFrameNode());
     return result;
 }
 

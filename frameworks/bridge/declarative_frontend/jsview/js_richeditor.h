@@ -47,6 +47,7 @@ public:
     static JSRef<JSVal> CreateJSSelection(const SelectionInfo& selectInfo);
     static JSRef<JSObject> CreateJSTextStyleResult(const TextStyleResult& textStyleResult);
     static JSRef<JSObject> CreateJSSymbolSpanStyleResult(const SymbolSpanStyle& symbolSpanStyle);
+    static JSRef<JSObject> CreateJSValueResource(const RefPtr<ResourceObject>& valueResource);
     static JSRef<JSObject> CreateJSImageStyleResult(const ImageStyleResult& imageStyleResult);
     static JSRef<JSObject> CreateParagraphStyleResult(const ParagraphInfo& info);
 

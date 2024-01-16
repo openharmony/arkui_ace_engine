@@ -82,7 +82,7 @@ void ScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto scrollNode = layoutWrapper->GetHostNode();
     CHECK_NULL_VOID(scrollNode);
     auto scrollPattern = scrollNode->GetPattern<ScrollPattern>();
-    if (scrollPattern->IsSelectScroll()) {
+    if (scrollPattern->IsSelectScroll() && scrollPattern->GetHasOptionWidth()) {
         auto selectScrollWidth = scrollPattern->GetSelectScrollWidth();
         selfSize.SetWidth(selectScrollWidth);
     }

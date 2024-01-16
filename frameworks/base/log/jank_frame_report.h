@@ -34,7 +34,7 @@ public:
     static JankFrameReport& GetInstance();
     JankFrameReport();
     ~JankFrameReport() = default;
-    void JankFrameRecord(int64_t timeStampNanos);
+    void JankFrameRecord(int64_t timeStampNanos, const std::string& windowName);
     void SetFrameJankFlag(JankFrameFlag flag);
     void ClearFrameJankFlag(JankFrameFlag flag);
     void StartRecord(const std::string& pageUrl);

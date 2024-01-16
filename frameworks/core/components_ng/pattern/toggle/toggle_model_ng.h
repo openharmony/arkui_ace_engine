@@ -40,6 +40,10 @@ public:
     static void SetSwitchPointColor(FrameNode* frameNode, const Color& switchPointColor);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
     static void OnChange(FrameNode* frameNode, ChangeEvent&& onChange);
+    static void SetHeight(FrameNode* frameNode, const Dimension& height);
+    static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
+    static void SetPadding(FrameNode* frameNode, const NG::PaddingPropertyF& args, const NG::PaddingProperty& newArgs);
+    static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);
 
 private:
     static void CreateCheckbox(int32_t nodeId);

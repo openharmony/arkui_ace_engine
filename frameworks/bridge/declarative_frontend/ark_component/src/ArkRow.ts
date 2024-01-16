@@ -63,9 +63,6 @@ class ArkRowComponent extends ArkComponent implements RowAttribute {
   pointLight(value: PointLightStyle): RowAttribute {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
 }
 
 // @ts-ignore

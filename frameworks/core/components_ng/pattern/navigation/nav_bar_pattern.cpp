@@ -667,6 +667,11 @@ void NavBarPattern::OnModifyDone()
     auto gesture = hostNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     InitPanEvent(gesture);
+
+    auto contentNode = hostNode->GetNavBarContentNode();
+    CHECK_NULL_VOID(contentNode);
+    auto navBarContentNode = AceType::DynamicCast<FrameNode>(contentNode);
+    navBarContentNode->MarkModifyDone();
 }
 
 void NavBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)

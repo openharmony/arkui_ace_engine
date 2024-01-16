@@ -23,6 +23,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/common/ai/data_detector_mgr.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/text_style.h"
@@ -196,6 +197,14 @@ public:
     {
         textStyle_ = textStyle;
     }
+    RefPtr<ResourceObject> GetResourceObject()
+    {
+        return resourceObject_;
+    }
+    void SetResourceObject(RefPtr<ResourceObject> resourceObject)
+    {
+        resourceObject_ = resourceObject;
+    }
     void MarkNeedRemoveNewLine(bool value)
     {
         needRemoveNewLine = value;
@@ -223,6 +232,7 @@ public:
 private:
     std::optional<TextStyle> textStyle_;
     bool isParentText = false;
+    RefPtr<ResourceObject> resourceObject_;
 };
 
 
@@ -257,7 +267,7 @@ public:
         textBackgroundStyle_ = style;
     }
 
-    const std::optional<TextBackgroundStyle> GetTextBackgroundStyle()
+    const std::optional<TextBackgroundStyle> GetTextBackgroundStyle() const
     {
         return textBackgroundStyle_;
     }
@@ -548,6 +558,8 @@ public:
 
     explicit ContainerSpanNode(int32_t nodeId) : UINode(V2::CONTAINER_SPAN_ETS_TAG, nodeId), BaseSpan(nodeId) {}
     ~ContainerSpanNode() override = default;
+
+    void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     bool IsAtomicNode() const override
     {

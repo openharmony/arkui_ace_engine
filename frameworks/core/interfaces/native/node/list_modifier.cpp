@@ -34,6 +34,7 @@ constexpr int32_t DEFAULT_EDGE_EFFECT = 0;
 constexpr int32_t CALL_STROKE_WIDTH = 0;
 constexpr int32_t CALL_START_MARGIN = 1;
 constexpr int32_t CALL_END_MARGIN = 2;
+constexpr float DEFAULT_OFFSET = 0.0f;
 
 void SetListLanes(NodeHandle node, int32_t lanesNum, const struct ArkUIDimensionType* minLengthType,
     const struct ArkUIDimensionType* maxLengthType, const struct ArkUIDimensionType* gutterType)
@@ -262,6 +263,34 @@ void ResetScrollSnapAlign(NodeHandle node)
     ListModelNG::SetScrollSnapAlign(frameNode, V2::ScrollSnapAlign::NONE);
 }
 
+void SetContentStartOffset(NodeHandle node, float startOffset)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetContentStartOffset(frameNode, startOffset);
+}
+
+void ResetContentStartOffset(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetContentStartOffset(frameNode, DEFAULT_OFFSET);
+}
+
+void SetContentEndOffset(NodeHandle node, float endOffset)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetContentEndOffset(frameNode, endOffset);
+}
+
+void ResetContentEndOffset(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetContentEndOffset(frameNode, DEFAULT_OFFSET);
+}
+
 void ListSetDivider(NodeHandle node, uint32_t color, const double* values, const int32_t* units, int32_t length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -336,8 +365,9 @@ ArkUIListModifierAPI GetListModifier()
         ResetCachedCount, SetEnableScrollInteraction, ResetEnableScrollInteraction, SetSticky, ResetSticky,
         SetListEdgeEffect, ResetListEdgeEffect, SetListDirection, ResetListDirection, SetListFriction,
         ResetListFriction, SetListNestedScroll, ResetListNestedScroll, SetListScrollBar, ResetListScrollBar,
-        SetAlignListItem, ResetAlignListItem, SetScrollSnapAlign, ResetScrollSnapAlign, ListSetDivider,
-        ListResetDivider, SetChainAnimationOptions, ResetChainAnimationOptions };
+        SetAlignListItem, ResetAlignListItem, SetScrollSnapAlign, ResetScrollSnapAlign,
+        SetContentStartOffset, ResetContentStartOffset, SetContentEndOffset, ResetContentEndOffset,
+        ListSetDivider, ListResetDivider, SetChainAnimationOptions, ResetChainAnimationOptions };
     return modifier;
 }
 } // namespace OHOS::Ace::NG

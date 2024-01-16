@@ -106,11 +106,12 @@ void JSBaseNode::CreateRenderNode(const JSCallbackInfo& info)
     void* ptr = AceType::RawPtr(viewNode_);
 
     EcmaVM* vm = info.GetVm();
-    auto object = info.This();
-    JSRef<JSVal> jsDrawFunc = object->GetProperty("draw");
+    auto object = info[0];
+    auto renderNode = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> jsDrawFunc = renderNode->GetProperty("draw");
     if (jsDrawFunc->IsFunction()) {
         auto jsFunc = JSRef<JSFunc>::Cast(jsDrawFunc);
-        RefPtr<JsFunction> jsDraw = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), jsFunc);
+        RefPtr<JsFunction> jsDraw = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(renderNode), jsFunc);
         auto pattern = frameNode->GetPattern<NG::RenderNodePattern>();
         pattern->SetDrawCallback(
             [func = std::move(jsDraw), execCtx = info.GetExecutionContext(), vm](NG::DrawingContext& context) -> void {

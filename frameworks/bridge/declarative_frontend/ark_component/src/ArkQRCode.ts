@@ -30,9 +30,6 @@ class ArkQRCodeComponent extends ArkComponent implements QRCodeAttribute {
     modifierWithKey(this._modifiersWithKeys, QRContentOpacityModifier.identity, QRContentOpacityModifier, value);
     return this;
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
 }
 
 class QRColorModifier extends ModifierWithKey<ResourceColor> {

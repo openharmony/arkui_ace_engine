@@ -823,6 +823,18 @@ class ArkKeyBoardShortCut {
   }
 }
 
+class ArkBlendMode {
+  blendMode: number;
+  blendApplyType: number;
+  constructor() {
+    this.blendMode = undefined;
+    this.blendApplyType = undefined;
+  }
+  isEqual(another: ArkBlendMode): boolean {
+    return (this.blendMode === another.blendMode) && (this.blendApplyType === another.blendApplyType);
+  }
+}
+
 class ArkAlignStyle {
   indexerAlign: number;
   offset?: number | string | undefined | Resource;

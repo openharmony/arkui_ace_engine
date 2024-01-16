@@ -177,7 +177,6 @@ void RichEditorPattern::HandleEnabled()
 
 void RichEditorPattern::BeforeCreateLayoutWrapper()
 {
-    moveLength_ = 0;
     TextPattern::PreCreateLayoutWrapper();
 }
 
@@ -362,6 +361,7 @@ int32_t RichEditorPattern::AddImageSpan(const ImageSpanOptions& options, bool is
     }
     if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
         SetCaretPosition(options.offset.value() + 1 + moveLength_);
+        moveLength_ = 0;
     } else {
         placeholderCount_++;
         SetCaretPosition(GetTextContentLength());
@@ -414,7 +414,7 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
         }
         placeholderSpanNode->MountToParent(host, offset);
     } else {
-        spanIndex = host->GetChildren().size();
+        spanIndex = static_cast<int32_t>(host->GetChildren().size());
         placeholderSpanNode->MountToParent(host);
     }
     auto spanItem = placeholderSpanNode->GetSpanItem();
@@ -422,6 +422,7 @@ int32_t RichEditorPattern::AddPlaceholderSpan(const RefPtr<UINode>& customNode, 
     AddSpanItem(spanItem, offset);
     if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
         SetCaretPosition(options.offset.value() + 1 + moveLength_);
+        moveLength_ = 0;
     } else {
         placeholderCount_++;
         SetCaretPosition(GetTextContentLength());
@@ -473,7 +474,7 @@ int32_t RichEditorPattern::AddTextSpanOperation(
         spanNode->MountToParent(host, index);
         spanIndex = index;
     } else {
-        spanIndex = host->GetChildren().size();
+        spanIndex = static_cast<int32_t>(host->GetChildren().size());
         spanNode->MountToParent(host);
     }
     spanNode->UpdateContent(options.value);
@@ -519,6 +520,7 @@ int32_t RichEditorPattern::AddTextSpanOperation(
     if (updateCaretOPosition) {
         if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
             SetCaretPosition(options.offset.value() + 1 + moveLength_);
+            moveLength_ = 0;
         } else {
             SetCaretPosition(GetTextContentLength());
         }
@@ -565,7 +567,7 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
         spanNode->MountToParent(host, index);
         spanIndex = index;
     } else {
-        spanIndex = host->GetChildren().size();
+        spanIndex = static_cast<int32_t>(host->GetChildren().size());
         spanNode->MountToParent(host);
     }
     spanNode->UpdateContent(options.symbolId);
@@ -585,9 +587,11 @@ int32_t RichEditorPattern::AddSymbolSpanOperation(const SymbolSpanOptions& optio
     auto spanItem = spanNode->GetSpanItem();
     spanItem->content = "  ";
     spanItem->SetTextStyle(options.style);
+    spanItem->SetResourceObject(options.resourceObject);
     AddSpanItem(spanItem, offset);
     if (options.offset.has_value() && options.offset.value() <= GetCaretPosition()) {
         SetCaretPosition(options.offset.value() + SYMBOL_SPAN_LENGTH + moveLength_);
+        moveLength_ = 0;
     } else {
         SetCaretPosition(GetTextContentLength());
     }
@@ -698,7 +702,7 @@ void RichEditorPattern::DeleteSpansByRange(
     }
 
     auto itStart = childrens.begin();
-    if (startInfo.spanIndex_ >= childrens.size()) {
+    if (startInfo.spanIndex_ >= static_cast<int32_t>(childrens.size())) {
         std::advance(itStart, childrens.size() - 1);
         TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "startInfo.spanIndex_ is larger than childrens size");
     } else {
@@ -1273,14 +1277,7 @@ std::vector<RefPtr<SpanNode>> RichEditorPattern::GetParagraphNodes(int32_t start
     int32_t length = GetParagraphLength(spans);
     std::vector<RefPtr<SpanNode>> res;
 
-    // start >= all content
     if (start >= length) {
-        for (const auto& span : spans) {
-            auto spanNode = DynamicCast<SpanNode>(span);
-            if (spanNode) {
-                res.emplace_back(spanNode);
-            }
-        }
         return res;
     }
 
@@ -2081,7 +2078,6 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard)
     }
 #endif
     inputMethod->Attach(richEditTextChangeListener_, needShowSoftKeyboard, textconfig);
-    UpdateKeyboardOffset(textconfig.positionY, textconfig.height);
     if (context) {
         inputMethod->SetCallingWindow(context->GetWindowId());
     }
@@ -3241,9 +3237,11 @@ void RichEditorPattern::CalcInsertValueObj(TextInsertValueInfo& info)
     }
     auto it = std::find_if(
         spans_.begin(), spans_.end(), [caretPosition = caretPosition_ + moveLength_](const RefPtr<SpanItem>& spanItem) {
-            return (spanItem->position - static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length()) <=
-                       caretPosition) &&
-                   (caretPosition < spanItem->position);
+            auto spanLength = static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length());
+            if (spanLength == 0) {
+                return spanItem->position == caretPosition;
+            }
+            return (spanItem->position - spanLength <= caretPosition) && (caretPosition < spanItem->position);
         });
     if (it != spans_.end() && (*it)->unicode != 0 && (*it)->position - caretPosition_ + moveLength_ == 1) {
         it++;
@@ -3884,6 +3882,7 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->HandleOnPaste();
+            pattern->CloseSelectOverlay();
         };
         selectInfo.menuCallback.onSelectAll = [weak, usingMouse]() {
             auto pattern = weak.Upgrade();
@@ -3978,7 +3977,6 @@ void RichEditorPattern::ResetAfterPaste()
     record.addText = pasteStr;
     SetCaretSpanIndex(-1);
     StartTwinkling();
-    CloseSelectOverlay();
     if (textSelector_.IsValid()) {
         SetCaretPosition(textSelector_.GetTextStart());
         record.beforeCaretPosition = caretPosition_;
@@ -4088,7 +4086,7 @@ void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
         } else {
             auto imageNode = DynamicCast<FrameNode>(child);
             if (imageNode && caretSpanIndex_ == -1) {
-                caretSpanIndex_ = AddTextSpanOperation(options, true, info.GetSpanIndex());
+                caretSpanIndex_ = AddTextSpanOperation(options, true, info.GetSpanIndex(), false, false);
             } else {
                 caretSpanIndex_ = AddTextSpanOperation(options, true, caretSpanIndex_ + 1);
             }

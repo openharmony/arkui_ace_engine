@@ -233,6 +233,7 @@ void RegisterOnEvent(void (*eventReceiver)(ArkUI_NodeEvent* event))
                 auto event = reinterpret_cast<ArkUI_NodeEvent*>(origin);
                 event->node = reinterpret_cast<ArkUI_NodeHandle>(origin->extraParam);
                 event->kind = ConvertToNodeEventType(static_cast<ArkUIAsyncEventKind>(origin->kind));
+                event->stringEvent.pStr = origin->stringAsyncEvent.pStr;
                 g_eventReceiver(event);
             }
         };

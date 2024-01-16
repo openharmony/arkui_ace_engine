@@ -2712,6 +2712,29 @@ void ViewAbstract::SetEnabled(FrameNode* frameNode, bool enabled)
     }
 }
 
+void ViewAbstract::SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(UseShadowBatching, useShadowBatching, frameNode);
+}
+
+void ViewAbstract::SetBlendMode(FrameNode* frameNode, BlendMode blendMode)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackBlendMode, blendMode, frameNode);
+}
+
+void ViewAbstract::SetBlendApplyType(FrameNode* frameNode, BlendApplyType blendApplyType)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackBlendApplyType, blendApplyType, frameNode);
+}
+
+void ViewAbstract::SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetMonopolizeEvents(monopolizeEvents);
+}
+
 void ViewAbstract::SetDraggable(FrameNode* frameNode, bool draggable)
 {
     CHECK_NULL_VOID(frameNode);

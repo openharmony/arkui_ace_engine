@@ -89,6 +89,8 @@ public:
     static void SetLaneGutter(FrameNode* frameNode, const Dimension& laneGutter);
     static void SetListItemAlign(FrameNode* frameNode, V2::ListItemAlign listItemAlign);
     static void SetScrollSnapAlign(FrameNode* frameNode, V2::ScrollSnapAlign scrollSnapAlign);
+    static void SetContentStartOffset(FrameNode* frameNode, float startOffset);
+    static void SetContentEndOffset(FrameNode* frameNode, float endOffset);
     static void SetDivider(FrameNode* frameNode, const V2::ItemDivider& divider);
     static void SetChainAnimationOptions(FrameNode* frameNode, const ChainAnimationOptions& options);
 

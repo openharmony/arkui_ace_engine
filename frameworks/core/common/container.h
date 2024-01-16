@@ -164,7 +164,7 @@ public:
 
     virtual RefPtr<DisplayInfo> GetDisplayInfo()
     {
-        return {};
+        return MakeRefPtr<DisplayInfo>();
     }
 
     virtual NG::SafeAreaInsets GetKeyboardSafeArea()

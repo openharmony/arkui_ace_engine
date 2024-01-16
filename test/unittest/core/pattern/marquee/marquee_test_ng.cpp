@@ -48,6 +48,7 @@ namespace {
 constexpr float MARQUEE_WIDTH_500 = 500.0f;
 constexpr float MARQUEE_HEIGHT_100 = 100.0f;
 constexpr float CHILD_WIDTH_600 = 600.0f;
+constexpr float CHILD_WIDTH_200 = 200.0f;
 constexpr float CHILD_HEIGHT_50 = 50.0f;
 constexpr float DEVICE_WIDTH = 720.0f;
 constexpr float DEVICE_HEIGHT = 1136.0f;
@@ -942,14 +943,14 @@ HWTEST_F(MarqueeTestNg, MarqueeTest012, TestSize.Level1)
      * @tc.expected: step7. return is equal with minSize.
      */
     LayoutConstraintF layoutConstraint;
-    layoutConstraint.minSize = SizeF(600, 200);
+    layoutConstraint.minSize = SizeF(CHILD_WIDTH_600, CHILD_WIDTH_200);
     layoutConstraint.maxSize = CONTAINER_SIZE;
     layoutConstraint.parentIdealSize.SetSize(SizeF(MARQUEE_WIDTH_500, MARQUEE_HEIGHT_100));
     layoutWrapper.layoutProperty_->layoutConstraint_ = layoutConstraint;
     marqueeLayoutAlgorithm->Measure(&layoutWrapper);
     oTemp = layoutWrapper.GetGeometryNode()->GetFrameSize();
-    EXPECT_EQ(oTemp.Width(), 600);
-    EXPECT_EQ(oTemp.Height(), 200);
+    EXPECT_EQ(oTemp.Width(), CHILD_WIDTH_600);
+    EXPECT_EQ(oTemp.Height(), CHILD_WIDTH_200);
 
     /**
      * @tc.steps: step8. set positionProperty_ and call Layout.

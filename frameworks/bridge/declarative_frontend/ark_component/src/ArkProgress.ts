@@ -37,11 +37,6 @@ class ArkProgressComponent extends ArkComponent implements ProgressAttribute {
     modifierWithKey(this._modifiersWithKeys, ProgressStyleModifier.identity, ProgressStyleModifier, value);
     return this;
   }
-  monopolizeEvents(monopolize: boolean): ProgressAttribute<keyof ProgressStyleMap, LinearStyleOptions |
-  ProgressStyleOptions | RingStyleOptions | EclipseStyleOptions | ScaleRingStyleOptions |
-  CapsuleStyleOptions> {
-    throw new Error('Method not implemented.');
-  }
   backgroundColor(value: ResourceColor): this {
     modifierWithKey(this._modifiersWithKeys, ProgressBackgroundColorModifier.identity, ProgressBackgroundColorModifier, value);
     return this;
@@ -78,7 +73,7 @@ class ProgressColorModifier extends ModifierWithKey<ResourceColor | LinearGradie
 }
 
 class ProgressStyleModifier extends ModifierWithKey<ProgressStyleOptions | CapsuleStyleOptions |
-  RingStyleOptions | LinearStyleOptions | ScaleRingStyleOptions | EclipseStyleOptions> {
+RingStyleOptions | LinearStyleOptions | ScaleRingStyleOptions | EclipseStyleOptions> {
   static identity: Symbol = Symbol('style');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {

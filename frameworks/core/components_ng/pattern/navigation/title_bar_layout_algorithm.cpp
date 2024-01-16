@@ -154,7 +154,8 @@ float TitleBarLayoutAlgorithm::GetTitleWidth(const RefPtr<TitleBarNode>& titleBa
     // left padding of full and free mode
     occupiedWidth = isCustom ? 0.0f : maxPaddingStart_.ConvertToPx();
     // right padding of full mode
-    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FULL) {
+    if (titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE) == NavigationTitleMode::FULL
+        || isCustom) {
         occupiedWidth += isCustom ? 0.0f : maxPaddingEnd_.ConvertToPx();
         return titleBarSize.Width() < occupiedWidth ? 0.0f : titleBarSize.Width() - occupiedWidth;
     }

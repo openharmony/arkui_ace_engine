@@ -461,6 +461,10 @@ public:
     static void SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMaskProperty>& progress);
     static void SetEnabled(FrameNode* frameNode, bool enabled);
+    static void SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching);
+    static void SetBlendMode(FrameNode* frameNode, BlendMode blendMode);
+    static void SetBlendApplyType(FrameNode* frameNode, BlendApplyType blendApplyType);
+    static void SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents);
     static void SetDraggable(FrameNode* frameNode, bool draggable);
     static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);
     static void SetClickEffectLevel(FrameNode* frameNode, const ClickEffectLevel& level, float scaleValue);

@@ -17,7 +17,12 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+const Offset LEFT_TOP = Offset(120.f, 150.f);
+const Offset LEFT_BOTTOM = Offset(120.f, 250.f);
+const Offset RIGHT_TOP = Offset(360.f, 150.f);
+const Offset RIGHT_BOTTOM = Offset(360.f, 250.f);
+} // namespace
 
 class ListCommonTestNg : public ListTestNg {
 public:
@@ -726,38 +731,38 @@ HWTEST_F(ListCommonTestNg, MouseSelect001, TestSize.Level1)
     CreateWithItem([](ListModelNG model) { model.SetMultiSelectable(true); });
 
     /**
-     * @tc.steps: step1. Select zone.
-     * @tc.expected: The 1st and 2nd items are selected.
+     * @tc.steps: step1. Select item(index:0)
+     * @tc.expected: The item(index:0) is selected
      */
     MouseSelect(Offset(0.f, 0.f), Offset(LIST_WIDTH, 50.f));
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 0)->IsSelected());
 
     /**
-     * @tc.steps: step2. Select from selected zone.
-     * @tc.expected: Selected items unchanged.
+     * @tc.steps: step2. Select from selected item(index:0) to item(index:1)
+     * @tc.expected: Selected items unchanged, item(index:0) is selected, item(index:1) is unselected
      */
     MouseSelect(Offset(0.f, 50.f), Offset(LIST_WIDTH, 150.f));
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 0)->IsSelected());
     EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, 1)->IsSelected());
 
     /**
-     * @tc.steps: step3. Select from unselected zone.
-     * @tc.expected: Selected items changed.
+     * @tc.steps: step3. Select from unselected item(index:1) to item(index:1)
+     * @tc.expected: Selected items changed, item(index:0) is unselected, item(index:1) is selected
      */
     MouseSelect(Offset(0.f, 150.f), Offset(LIST_WIDTH, 170.f));
     EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, 0)->IsSelected());
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 1)->IsSelected());
 
     /**
-     * @tc.steps: step4. Click selected zone.
-     * @tc.expected: Selected items unchanged.
+     * @tc.steps: step4. Click selected item(index:1)
+     * @tc.expected: Selected items unchanged, item(index:1) is selected
      */
     MouseSelect(Offset(LIST_WIDTH / 2, 150.f), Offset(LIST_WIDTH / 2, 150.f));
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 1)->IsSelected());
 
     /**
-     * @tc.steps: step5. Click unselected zone.
-     * @tc.expected: Each item not selected.
+     * @tc.steps: step5. Click unselected items(index:0)
+     * @tc.expected: Each item not selected, item(index:0) item(index:1) are unselected
      */
     MouseSelect(Offset(LIST_WIDTH / 2, 50.f), Offset(LIST_WIDTH / 2, 50.f));
     EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, 0)->IsSelected());
@@ -766,75 +771,135 @@ HWTEST_F(ListCommonTestNg, MouseSelect001, TestSize.Level1)
 
 /**
  * @tc.name: MouseSelect002
- * @tc.desc: Test mouse box selection, select from different directiong
+ * @tc.desc: Test mouse box selection in different direction and in VERTICAL layout
  * @tc.type: FUNC
  */
 HWTEST_F(ListCommonTestNg, MouseSelect002, TestSize.Level1)
 {
-    const Offset LEFT_TOP = Offset(120.f, 250.f);
-    const Offset LEFT_BOTTOM = Offset(120.f, 350.f);
-    const Offset RIGHT_TOP = Offset(360.f, 250.f);
-    const Offset RIGHT_BOTTOM = Offset(360.f, 350.f);
+    /**
+     * @tc.cases: Select from the item(index:1 LEFT_TOP) to the item(index:2 RIGHT_BOTTOM).
+     * @tc.expected: The items(index:1,2) are selected.
+     */
     CreateWithItem([](ListModelNG model) { model.SetMultiSelectable(true); });
-
-    /**
-     * @tc.steps: step1. Select from LEFT_TOP to RIGHT_BOTTOM
-     */
     MouseSelect(LEFT_TOP, RIGHT_BOTTOM);
+    EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 1)->IsSelected());
     EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 2)->IsSelected());
-    EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 3)->IsSelected());
-    pattern_->ClearMultiSelect(); // clear all selected
-    EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, 2)->IsSelected());
-    EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, 3)->IsSelected());
-
-    /**
-     * @tc.steps: step2. Select from RIGHT_TOP to LEFT_BOTTOM
-     */
-    MouseSelect(RIGHT_TOP, LEFT_BOTTOM);
-    EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 2)->IsSelected());
-    EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 3)->IsSelected());
-    pattern_->ClearMultiSelect();
-
-    /**
-     * @tc.steps: step3. Select from LEFT_BOTTOM to RIGHT_TOP
-     */
-    MouseSelect(LEFT_BOTTOM, RIGHT_TOP);
-    EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 2)->IsSelected());
-    EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 3)->IsSelected());
-    pattern_->ClearMultiSelect();
-
-    /**
-     * @tc.steps: step4. Select from RIGHT_BOTTOM to LEFT_TOP
-     */
-    MouseSelect(RIGHT_BOTTOM, LEFT_TOP);
-    EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 2)->IsSelected());
-    EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 3)->IsSelected());
 }
 
 /**
  * @tc.name: MouseSelect003
- * @tc.desc: Test listItem selectable property and onSelect callback
+ * @tc.desc: Test mouse box selection in different direction and in HORIZONTAL layout
  * @tc.type: FUNC
  */
 HWTEST_F(ListCommonTestNg, MouseSelect003, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create listItem and set an unselectable.
+     * @tc.cases: Select from the item(index:6 RIGHT_TOP) to the item(index:1 LEFT_BOTTOM).
+     * @tc.expected: The items(index:1,2,3,4,5,6) are selected.
+     */
+    Create([](ListModelNG model) {
+        model.SetMultiSelectable(true);
+        model.SetListDirection(Axis::HORIZONTAL);
+        CreateItem(VIEW_LINE_NUMBER, Axis::HORIZONTAL);
+    });
+    MouseSelect(RIGHT_TOP, LEFT_BOTTOM);
+    EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 1)->IsSelected());
+    EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 2)->IsSelected());
+    EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 3)->IsSelected());
+    EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 4)->IsSelected());
+    EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 5)->IsSelected());
+    EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 6)->IsSelected());
+}
+
+/**
+ * @tc.name: MouseSelect004
+ * @tc.desc: Test mouse box selection in different direction and in two lanes layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, MouseSelect004, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Select from the item(index:4 LEFT_BOTTOM) to the item(index:3 RIGHT_TOP).
+     * @tc.expected: The items(index:2,3,4,5) are selected.
+     */
+    Create([](ListModelNG model) {
+        model.SetLanes(2);
+        CreateItem(10, Axis::VERTICAL);
+    });
+    MouseSelect(LEFT_BOTTOM, RIGHT_TOP);
+    EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 2)->IsSelected());
+    EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 3)->IsSelected());
+    EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 4)->IsSelected());
+    EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 5)->IsSelected());
+}
+
+/**
+ * @tc.name: MouseSelect005
+ * @tc.desc: Test mouse box selection in different direction and in itemGroup lanes layout and between two itemGroup
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, MouseSelect005, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Select from the item(index:5 RIGHT_BOTTOM) to the item(index:2 LEFT_TOP).
+     * @tc.expected: The items(index:0,1,2,3,4,5) are selected.
+     */
+    Create([](ListModelNG model) {
+        model.SetLanes(2);
+        CreateGroup(2, Axis::VERTICAL);
+    });
+    MouseSelect(RIGHT_BOTTOM, LEFT_TOP);
+    std::vector<RefPtr<FrameNode>> listItems = GetALLItem(); // flat items
+    EXPECT_TRUE(listItems[2]->GetPattern<ListItemPattern>()->IsSelected());
+    EXPECT_TRUE(listItems[3]->GetPattern<ListItemPattern>()->IsSelected());
+    EXPECT_TRUE(listItems[4]->GetPattern<ListItemPattern>()->IsSelected());
+    EXPECT_TRUE(listItems[5]->GetPattern<ListItemPattern>()->IsSelected());
+}
+
+/**
+ * @tc.name: MouseSelect006
+ * @tc.desc: Test listItem selectable property and onSelect callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, MouseSelect006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set item(index:1) unselectable, set item(index:2) unenabled,
+     *                   set selectCallback for item(index:5)
      */
     CreateWithItem([](ListModelNG model) { model.SetMultiSelectable(true); });
-    bool isFifthItemSelected = false;
-    auto selectCallback = [&isFifthItemSelected](bool) { isFifthItemSelected = true; };
-    GetChildPattern<ListItemPattern>(frameNode_, 3)->SetSelectable(false);
-    GetChildFrameNode(frameNode_, 4)->GetEventHub<ListItemEventHub>()->SetOnSelect(std::move(selectCallback));
+    bool isSixthItemSelected = false;
+    auto selectCallback = [&isSixthItemSelected](bool) { isSixthItemSelected = true; };
+    GetChildPattern<ListItemPattern>(frameNode_, 1)->SetSelectable(false);
+    GetChildEventHub<ListItemEventHub>(frameNode_, 2)->SetEnabled(false);
+    GetChildEventHub<ListItemEventHub>(frameNode_, 5)->SetOnSelect(std::move(selectCallback));
 
     /**
-     * @tc.steps: step2. Select zone.
-     * @tc.expected: The 4th item is not selected but 5th item is selected.
+     * @tc.steps: step2. Select zone, include items(index:1,2,3,4,5).
+     * @tc.expected: The item(index:1) is not selected, item(index:2) is selected,
+     *               item(index:5) is selected, selectCallback is called.
      */
-    MouseSelect(Offset(120.f, 350.f), Offset(360.f, 450.f));
-    EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, 3)->IsSelected());
-    EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 4)->IsSelected());
-    EXPECT_TRUE(isFifthItemSelected);
+    MouseSelect(Offset(120.f, 150.f), Offset(360.f, 550.f));
+    EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, 1)->IsSelected());
+    EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 2)->IsSelected());
+    EXPECT_TRUE(GetChildPattern<ListItemPattern>(frameNode_, 5)->IsSelected());
+    EXPECT_TRUE(isSixthItemSelected);
+}
+
+/**
+ * @tc.name: MouseSelect007
+ * @tc.desc: Test select in other condition
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListCommonTestNg, MouseSelect007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Move distance < DEFAULT_PAN_DISTANCE
+     * @tc.expected: The item is not Selected
+     */
+    CreateWithItem([](ListModelNG model) { model.SetMultiSelectable(true); });
+    MouseSelect(Offset(0.f, 0.f), Offset(1.f, 1.f));
+    EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, 0)->IsSelected());
 }
 
 /**

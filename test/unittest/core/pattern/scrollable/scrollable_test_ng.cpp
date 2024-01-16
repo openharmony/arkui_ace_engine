@@ -1865,4 +1865,73 @@ HWTEST_F(ScrollableTestNg, NeedCoordinateScrollWithNavigation002, TestSize.Level
     result = scrollPn->NeedCoordinateScrollWithNavigation(0.0f, SCROLL_FROM_CHILD, overScrollOffset);
     EXPECT_TRUE(result);
 }
+
+/**
+ * @tc.name: NotifyMoved001
+ * @tc.desc: Test nested NotifyMoved failure status
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, NotifyMoved001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize ScrollablePattern type pointer
+     * @tc.expected: Pointer is not nullptr.
+     */
+    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
+    mockScroll_->pattern_ = mockPn;
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    EXPECT_TRUE(scrollPn);
+    scrollPn->parent_ = mockPn;
+
+    /**
+     * @tc.steps: step2. Call the NotifyMoved method
+     * @tc.expected: Scrollable is nullptr
+     */
+    scrollPn->scrollableEvent_ = AceType::MakeRefPtr<ScrollableEvent>(Axis::VERTICAL);
+    scrollPn->NotifyMoved(false);
+    EXPECT_FALSE(scrollPn->scrollableEvent_->GetScrollable());
+
+    /**
+     * @tc.steps: step3. Call the NotifyMoved method
+     * @tc.expected: Scrollable is not nullptr
+     */
+    auto scrollable =
+        AceType::MakeRefPtr<Scrollable>([](double, int32_t source) -> bool { return true; }, Axis::VERTICAL);
+    scrollPn->scrollableEvent_->SetScrollable(scrollable);
+    scrollPn->NotifyMoved(false);
+    EXPECT_TRUE(scrollPn->scrollableEvent_->GetScrollable());
+}
+
+/**
+ * @tc.name: NeedSplitScroll001
+ * @tc.desc: Test nested NeedSplitScroll failure status
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableTestNg, NeedSplitScroll001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize ScrollablePattern type pointer
+     * @tc.expected: Pointer is not nullptr.
+     */
+    auto mockPn = AceType::MakeRefPtr<FullyMockedScrollable>();
+    mockScroll_->pattern_ = mockPn;
+    auto scrollPn = scroll_->GetPattern<PartiallyMockedScrollable>();
+    EXPECT_TRUE(scrollPn);
+    scrollPn->parent_ = mockPn;
+
+    /**
+     * @tc.steps: step2. Call the NeedSplitScroll method
+     * @tc.expected: return false
+     */
+    OverScrollOffset overScrollOffset = {0.0f, 0.0f};
+    EXPECT_FALSE(scrollPn->NeedSplitScroll(overScrollOffset, SCROLL_FROM_UPDATE));
+    overScrollOffset = {0.0f, 0.1f};
+    EXPECT_FALSE(scrollPn->NeedSplitScroll(overScrollOffset, SCROLL_FROM_UPDATE));
+    scrollPn->refreshCoordination_ = nullptr;
+    EXPECT_FALSE(scrollPn->NeedSplitScroll(overScrollOffset, SCROLL_FROM_UPDATE));
+    auto pattern = AceType::MakeRefPtr<Pattern>();
+    auto scrollableNode = AceType::MakeRefPtr<FrameNode>("tag", 0, pattern);
+    scrollPn->refreshCoordination_ = AceType::MakeRefPtr<RefreshCoordination>(scrollableNode);
+    EXPECT_FALSE(scrollPn->NeedSplitScroll(overScrollOffset, SCROLL_FROM_UPDATE));
+}
 } // namespace OHOS::Ace::NG

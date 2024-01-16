@@ -375,6 +375,7 @@ public:
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
     void AddDirtyDefaultFocus(const RefPtr<FrameNode>& node);
+    void AddDirtyRequestFocus(const RefPtr<FrameNode>& node);
     void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
 
     void SetContainerWindow(bool isShow) override;
@@ -501,11 +502,6 @@ public:
     std::shared_ptr<NavigationController> GetNavigationController(const std::string& id) override;
     void AddOrReplaceNavigationNode(const std::string& id, const WeakPtr<FrameNode>& node);
     void DeleteNavigationNode(const std::string& id);
-
-    void SetDragCleanTask(std::function<void()>&& task)
-    {
-        dragCleanTask_ = std::move(task);
-    }
 
     void AddGestureTask(const DelayedTask& task)
     {
@@ -710,6 +706,7 @@ private:
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
     WeakPtr<FrameNode> dirtyDefaultFocusNode_;
+    WeakPtr<FrameNode> dirtyRequestFocusNode_;
     WeakPtr<FrameNode> screenNode_;
     uint32_t nextScheduleTaskId_ = 0;
     int32_t mouseStyleNodeId_ = -1;
@@ -742,7 +739,6 @@ private:
 
     std::list<FrameInfo> dumpFrameInfos_;
     std::list<std::function<void()>> animationClosuresList_;
-    std::function<void()> dragCleanTask_;
 
     std::map<int32_t, std::function<void(bool)>> isFocusActiveUpdateEvents_;
     std::map<int32_t, std::function<void(bool)>> onFormVisibleChangeEvents_;

@@ -410,6 +410,10 @@ std::string TextPattern::GetSelectedText(int32_t start, int32_t end) const
     std::string value;
     int32_t tag = 0;
     for (const auto& span : spans_) {
+        if (span->GetSymbolUnicode() != 0) {
+            tag = span->position == -1 ? tag + 1 : span->position;
+            continue;
+        }
         if (span->position - 1 >= start && span->placeholderIndex == -1 && span->position != -1) {
             auto wideString = StringUtils::ToWstring(span->GetSpanContent());
             auto max = std::min(span->position, end);
@@ -1616,6 +1620,7 @@ ResultObject TextPattern::GetSymbolSpanResultObject(RefPtr<UINode> uinode, int32
         resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = end - startPosition;
     }
     if (selectFlag) {
+        resultObject.valueResource = spanItem->GetResourceObject();
         resultObject.spanPosition.spanIndex = index;
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;

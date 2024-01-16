@@ -89,6 +89,9 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         json->Put("fontStyle", GetFontStyleInJson(fontStyle->GetItalicFontStyle()).c_str());
         json->Put("fontWeight", GetFontWeightInJson(fontStyle->GetFontWeight()).c_str());
         json->Put("fontFamily", GetFontFamilyInJson(fontStyle->GetFontFamily()).c_str());
+        json->Put("renderingStrategy",
+            GetSymbolRenderingStrategyInJson(fontStyle->GetSymbolRenderingStrategy()).c_str());
+        json->Put("effectStrategy", GetSymbolEffectStrategyInJson(fontStyle->GetSymbolEffectStrategy()).c_str());
 
         auto shadow = fontStyle->GetTextShadow().value_or(std::vector<Shadow> { Shadow() });
         // Determines if there are multiple textShadows
@@ -98,6 +101,7 @@ void SpanItem::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     if (textLineStyle) {
         json->Put("lineHeight", textLineStyle->GetLineHeight().value_or(Dimension()).ToString().c_str());
     }
+    TextBackgroundStyle::ToJsonValue(json, backgroundStyle);
 }
 
 RefPtr<SpanNode> SpanNode::GetOrCreateSpanNode(int32_t nodeId)
@@ -538,5 +542,10 @@ void BaseSpan::SetTextBackgroundStyle(const TextBackgroundStyle& style)
     textBackgroundStyle_->groupId = groupId_;
     SetHasTextBackgroundStyle(style.backgroundColor.has_value() || style.backgroundRadius.has_value());
     MarkTextDirty();
+}
+
+void ContainerSpanNode::ToJsonValue(std::unique_ptr<JsonValue>& json) const
+{
+    TextBackgroundStyle::ToJsonValue(json, GetTextBackgroundStyle());
 }
 } // namespace OHOS::Ace::NG

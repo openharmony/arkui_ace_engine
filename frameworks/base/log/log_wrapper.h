@@ -132,6 +132,7 @@ enum class AceLogTag : uint8_t {
     ACE_NODE_CONTAINER,       // C0393C
     ACE_NATIVE_NODE,          // C0393D
     ACE_DYNAMIC_COMPONENT,    // C0393E
+    ACE_MARQUEE,              // C0393F
 
     FORM_RENDER = 255, // C039FF FormRenderer
     END = 256,         // Last one, do not use

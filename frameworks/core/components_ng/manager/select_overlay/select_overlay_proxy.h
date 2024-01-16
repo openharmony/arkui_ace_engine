@@ -60,7 +60,7 @@ public:
     }
 
     void SetSelectInfo(const std::string& selectInfo) const;
-    void ShowOrHiddenMenu(bool isHidden);
+    void ShowOrHiddenMenu(bool isHidden, bool noAnimation = false);
     void DisableMenu(bool isDisabled);
     bool IsMenuShow();
     bool IsSingleHandleMenuShow();

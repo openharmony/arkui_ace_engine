@@ -128,6 +128,7 @@ public:
             HILOG_ERROR("Failed to get drawable info from resmgr");
             return nullptr;
         }
+        transform(type.begin(), type.end(), type.begin(), ::tolower);
         if (type == "json") {
             HILOG_DEBUG("Create LayeredDrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::LAYERED;
@@ -157,6 +158,7 @@ public:
             HILOG_ERROR("Failed to get drawable info from resmgr");
             return nullptr;
         }
+        transform(type.begin(), type.end(), type.begin(), ::tolower);
         if (type == "json") {
             HILOG_DEBUG("Create LayeredDrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::LAYERED;
@@ -173,6 +175,7 @@ public:
         state = Global::Resource::INVALID_FORMAT;
         return nullptr;
     }
+
     static std::unique_ptr<DrawableDescriptor> Create(std::tuple<int32_t, uint32_t, uint32_t>& drawableInfo,
         const std::shared_ptr<ResourceManager>& resourceMgr, RState& state, DrawableType& drawableType)
     {
@@ -189,6 +192,7 @@ public:
         std::string type = std::get<0>(info);
         size_t len = std::get<1>(info);
         std::string path = std::get<2>(info);
+        transform(type.begin(), type.end(), type.begin(), ::tolower);
         if (type == "json") {
             HILOG_DEBUG("Create LayeredDrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::LAYERED;
@@ -225,6 +229,7 @@ public:
         std::string type = std::get<0>(info);
         size_t len = std::get<1>(info);
         std::string path = std::get<2>(info);
+        transform(type.begin(), type.end(), type.begin(), ::tolower);
         if (type == "json") {
             HILOG_DEBUG("Create LayeredDrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::LAYERED;

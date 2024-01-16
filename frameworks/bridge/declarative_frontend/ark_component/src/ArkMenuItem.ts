@@ -116,6 +116,23 @@ class ContentFontModifier extends ModifierWithKey<Font> {
   }
 }
 
+class MenuItemSelectIconModifier extends ModifierWithKey<boolean | ResourceStr> {
+  constructor(value: boolean | ResourceStr) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('selectIcon');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset || !this.value) {
+      getUINativeModule().menuitem.resetSelectIcon(node);
+    } else {
+      getUINativeModule().menuitem.setSelectIcon(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
 class ArkMenuItemComponent extends ArkComponent implements MenuItemAttribute {
   constructor(nativePtr: KNode) {
     super(nativePtr);
@@ -124,10 +141,11 @@ class ArkMenuItemComponent extends ArkComponent implements MenuItemAttribute {
     modifierWithKey(this._modifiersWithKeys, MenuItemSelectedModifier.identity, MenuItemSelectedModifier, value);
     return this;
   }
-  selectIcon(value: any): MenuItemAttribute {
-    throw new Error('Method not implemented.');
+  selectIcon(value: boolean | ResourceStr): this {
+    modifierWithKey(this._modifiersWithKeys, MenuItemSelectIconModifier.identity, MenuItemSelectIconModifier, value);
+    return this;
   }
-  onChange(callback: (selected: boolean) => void): MenuItemAttribute {
+  onChange(callback: (selected: boolean) => void): this {
     throw new Error('Method not implemented.');
   }
   contentFont(value: Font): this {

@@ -91,6 +91,8 @@ void DotIndicatorPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         dotIndicatorModifier_->SetIsHover(false);
         dotIndicatorModifier_->SetIsPressed(false);
     }
+    dotIndicatorModifier_->UpdateVectorBlackPointCenterX(vectorBlackPointCenterX_);
+    dotIndicatorModifier_->UpdateLongPointCenterX(longPointCenterX_);
 }
 
 void DotIndicatorPaintMethod::GetLongPointAnimationStateSecondCenter(

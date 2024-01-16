@@ -118,7 +118,7 @@ public:
         return std::move(menuOptionItems_);
     }
 
-    virtual void OnParentScrollStartOrEnd(bool isEnd);
+    virtual void OnParentScrollStartOrEnd(bool isEnd, bool noAnimation = false);
 
     virtual void OnParentScrollCallback(Axis axis, int32_t offset) {};
 
