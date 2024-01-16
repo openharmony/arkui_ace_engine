@@ -5275,4 +5275,16 @@ void RichEditorPattern::GetCaretMetrics(CaretMetricsF& caretCaretMetric)
     caretCaretMetric.offset = caretOffset;
     caretCaretMetric.height = caretHeight;
 }
+
+void RichEditorPattern::ResetDragOption()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureEventHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureEventHub);
+    if(gestureEventHub->GetIsTextDraggable()){
+        CloseSelectOverlay();
+        ResetSelection();
+    }
+}
 } // namespace OHOS::Ace::NG
