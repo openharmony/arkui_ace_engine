@@ -1937,6 +1937,9 @@ void PipelineContext::FlushTouchEvents()
             idToTouchPoints[scalePoint.id].history.insert(idToTouchPoints[scalePoint.id].history.begin(), scalePoint);
             needInterpolation = iter->type != TouchType::MOVE ? false : true;
         }
+        if (focusWindowId_.has_value()) {
+            needInterpolation = false;
+        }
         if (needInterpolation) {
             auto targetTimeStamp = resampleTimeStamp_;
             for (const auto& idIter : idToTouchPoints) {
