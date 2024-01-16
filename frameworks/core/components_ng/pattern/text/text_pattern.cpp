@@ -412,6 +412,7 @@ std::string TextPattern::GetSelectedText(int32_t start, int32_t end) const
     for (const auto& span : spans_) {
         if (span->GetSymbolUnicode() != 0) {
             TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "SymbolUnicode: %{public}u", span->GetSymbolUnicode());
+            tag = span->position == -1 ? tag + 1 : span->position;
             continue;
         }
         if (span->position - 1 >= start && span->placeholderIndex == -1 && span->position != -1) {
