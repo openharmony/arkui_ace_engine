@@ -29,7 +29,7 @@ XComponentControllerErrorCode XComponentControllerNG::GetGlobalPosition(float& o
     if (pattern->GetType() != XComponentType::SURFACE) {
         return XCOMPONENT_CONTROLLER_TYPE_ERROR;
     }
-    auto globalPostion = pattern->GetGlobalPosition();
+    auto globalPostion = pattern->GetOffsetRelativeToWindow();
     offsetX = globalPostion.GetX();
     offsetY = globalPostion.GetY();
     return XCOMPONENT_CONTROLLER_NO_ERROR;

@@ -793,6 +793,13 @@ void XComponentPattern::SetHandlingRenderContextForSurface(const RefPtr<RenderCo
         localposition_.GetX(), localposition_.GetY(), drawSize_.Width(), drawSize_.Height());
 }
 
+OffsetF XComponentPattern::GetOffsetRelativeToWindow()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, OffsetF());
+    return host->GetTransformRelativeOffset();
+}
+
 void XComponentPattern::RestoreHandlingRenderContextForSurface()
 {
     SetHandlingRenderContextForSurface(renderContextForSurface_);
