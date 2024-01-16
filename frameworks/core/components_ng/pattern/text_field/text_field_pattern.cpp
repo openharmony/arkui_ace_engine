@@ -105,6 +105,7 @@ constexpr Dimension AVOID_OFFSET = 24.0_vp;
 constexpr Dimension DEFAULT_FONT = Dimension(16, DimensionUnit::FP);
 constexpr Dimension COUNTER_BOTTOM = 22.0_vp;
 constexpr double BOTTOM_MARGIN = 22.0;
+constexpr float MARGIN_ZERO = 0.0f;
 constexpr int32_t ONE_CHARACTER = 1;
 constexpr int32_t ILLEGAL_VALUE = 0;
 // uncertainty range when comparing selectedTextBox to contentRect
@@ -3377,17 +3378,24 @@ void TextFieldPattern::UpdateCounterMargin()
         !IsShowPasswordIcon()) {
         MarginProperty margin;
         const auto& getMargin = layoutProperty->GetMarginProperty();
-        if (getMargin) {
-            auto systemMargin = getMargin->bottom->GetDimension();
-            Dimension marginProperty { BOTTOM_MARGIN, DimensionUnit::VP };
-            margin.bottom = CalcLength(marginProperty + systemMargin);
+        if (!getMargin || GetMarginBottom() == MARGIN_ZERO) {
+            margin.bottom = CalcLength(COUNTER_BOTTOM);
+            layoutProperty->UpdateMargin(margin);
+            return;
+        }
+        Dimension marginProperty { BOTTOM_MARGIN, DimensionUnit::VP };
+        auto systemMargin = getMargin->bottom->GetDimension();
+        if (systemMargin < marginProperty) {
+            margin.bottom = CalcLength(marginProperty);
             margin.left = CalcLength(getMargin->left->GetDimension());
             margin.top = CalcLength(getMargin->top->GetDimension());
             margin.right = CalcLength(getMargin->right->GetDimension());
             layoutProperty->UpdateMargin(margin);
-        }
-        if (!getMargin) {
-            margin.bottom = CalcLength(COUNTER_BOTTOM);
+        } else {
+            margin.bottom = CalcLength(systemMargin);
+            margin.left = CalcLength(getMargin->left->GetDimension());
+            margin.top = CalcLength(getMargin->top->GetDimension());
+            margin.right = CalcLength(getMargin->right->GetDimension());
             layoutProperty->UpdateMargin(margin);
         }
     }
