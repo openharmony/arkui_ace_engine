@@ -915,6 +915,9 @@ export struct GridObjectSortComponent {
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .textAlign(TextAlign.Center)
           .maxLines(1)
+          .constraintSize({
+            maxWidth: 26
+          })
 
         if (this.gridComState && this.addIconShow && select.id === this.content.id) {
           Image($r("sys.media.ohos_ic_public_remove_filled"))

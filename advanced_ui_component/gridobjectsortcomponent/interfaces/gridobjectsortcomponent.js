@@ -1478,6 +1478,7 @@ export class GridObjectSortComponent extends ViewPU {
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.textAlign(TextAlign.Center);
             Text.maxLines(1)
+            Text.constraintSize({ maxWidth: 26 })
         }), Text);
         Text.pop();
         this.observeComponentCreation2(((t, i) => {
