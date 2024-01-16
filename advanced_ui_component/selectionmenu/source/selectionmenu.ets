@@ -260,7 +260,6 @@ struct SelectionMenuComponent {
       }
       if (this.controller) {
         this.controller.setCaretOffset(start + moveOffset)
-        this.controller.closeSelectionMenu()
       }
       if (start !== end && this.controller) {
         this.controller.deleteSpans({ start: start + moveOffset, end: end + moveOffset })
@@ -378,6 +377,7 @@ struct SelectionMenuComponent {
                     this.onPaste({ content: richEditorSelection })
                   } else {
                     this.popDataFromPasteboard(richEditorSelection)
+                    this.controller.closeSelectionMenu()
                   }
                 })
               MenuItem({ startIcon: this.theme.selectAllIcon, content: "全选", labelInfo: "Ctrl+A" })
