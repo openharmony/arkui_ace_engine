@@ -136,7 +136,7 @@ export interface PopupButtonOptions {
 }
 
 export interface PopupIconOptions {
-  image: PixelMap | ResourceStr | DrawableDescriptor;
+  image: ResourceStr;
   width?: Dimension;
   height?: Dimension;
   fillColor?: ResourceColor;
@@ -209,7 +209,7 @@ export struct PopupComponent {
       right: this.theme.icon.margin.right as number - (this.theme.button.margin.right as number / 2) }
   }
 
-  private getIconImage(): PixelMap | ResourceStr | DrawableDescriptor | undefined {
+  private getIconImage(): ResourceStr | undefined {
     return this.icon?.image
   }
 
@@ -249,7 +249,7 @@ export struct PopupComponent {
     return this.theme.closeButton.size.height
   }
 
-  private getCloseButtonImage(): PixelMap | ResourceStr | DrawableDescriptor {
+  private getCloseButtonImage(): ResourceStr {
     return this.theme.closeButton.image
   }
 
