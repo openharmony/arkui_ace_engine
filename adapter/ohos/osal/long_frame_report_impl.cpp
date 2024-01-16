@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace {
 namespace {
-    constexpr char* LIBFFRT_LIB64_PATH = "/system/lib64/ndk/libffrt.z.so";
+    const char* LIBFFRT_LIB64_PATH = "/system/lib64/ndk/libffrt.z.so";
     constexpr int32_t LONG_FRAME_EVENT_DELAY = 10000;
 }
 LongFrameReportImpl::LongFrameReportImpl()
