@@ -2240,7 +2240,7 @@ HWTEST_F(GridScrollerTestNg, ScrollBy001, TestSize.Level1)
     pattern_->OutBoundaryCallback();
     EXPECT_FALSE(pattern_->IsOutOfBoundary());
 
-      /**
+    /**
      * @tc.steps: step2. DumpAdvanceInfo information function call
      */
     pattern_->DumpAdvanceInfo();
@@ -2429,7 +2429,6 @@ HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos007, TestSize.Level1)
     ScrollAlign align = ScrollAlign::AUTO;
     float targetPos = 0.0f;
     float mainGap = 1000.0f;
-    //pattern_->ScrollToIndex(20, true, ScrollAlign::AUTO);
     pattern_->gridLayoutInfo_.startMainLineIndex_ = 0;
     pattern_->gridLayoutInfo_.endMainLineIndex_ = 0;
     pattern_->gridLayoutInfo_.startIndex_ = 50;
@@ -2439,13 +2438,11 @@ HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos007, TestSize.Level1)
     EXPECT_TRUE(sucess);
 
     targetIndex = 30;
-    //pattern_->ScrollToIndex(30, true, ScrollAlign::AUTO);
     sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
         pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
     EXPECT_TRUE(sucess);
 
     targetIndex = 10;
-    //pattern_->ScrollToIndex(10, true, ScrollAlign::AUTO);
     sucess = pattern_->gridLayoutInfo_.GetGridItemAnimatePos(
         pattern_->gridLayoutInfo_, targetIndex, align, mainGap, targetPos);
     EXPECT_TRUE(sucess);
