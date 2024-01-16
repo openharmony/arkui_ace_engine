@@ -761,6 +761,14 @@ void JSText::SetOnTextSelectionChange(const JSCallbackInfo& info)
     TextModel::GetInstance()->SetOnTextSelectionChange(std::move(callback));
 }
 
+void JSText::JsClip(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsClip(info);
+    if (info[0]->IsBoolean()) {
+        TextModel::GetInstance()->SetClipEdge();
+    }
+}
+
 void JSText::JSBind(BindingTarget globalObj)
 {
     JSClass<JSText>::Declare("Text");
@@ -813,6 +821,7 @@ void JSText::JSBind(BindingTarget globalObj)
     JSClass<JSText>::StaticMethod("dataDetectorConfig", &JSText::JsDataDetectorConfig);
     JSClass<JSText>::StaticMethod("bindSelectionMenu", &JSText::BindSelectionMenu);
     JSClass<JSText>::StaticMethod("onTextSelectionChange", &JSText::SetOnTextSelectionChange);
+    JSClass<JSText>::StaticMethod("clip", &JSText::JsClip);
     JSClass<JSText>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
