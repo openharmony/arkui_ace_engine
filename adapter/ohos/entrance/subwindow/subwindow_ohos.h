@@ -121,6 +121,7 @@ public:
     // Gets parent window's size and offset
     Rect GetParentWindowRect() const override;
 
+    bool IsFocused() override;
     void RequestFocus() override;
     const sptr<OHOS::Rosen::Window>& GetSubWindow() const
     {

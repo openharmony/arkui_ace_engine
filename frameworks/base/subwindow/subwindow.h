@@ -102,6 +102,7 @@ public:
     virtual void OpenCustomDialog(const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback) = 0;
     virtual void CloseCustomDialog(const int32_t dialogId) = 0;
     virtual const RefPtr<NG::OverlayManager> GetOverlayManager() = 0;
+    virtual bool IsFocused() = 0;
     virtual void RequestFocus() = 0;
 
 private:
