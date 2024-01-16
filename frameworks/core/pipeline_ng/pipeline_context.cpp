@@ -1715,9 +1715,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         }
         if (lastMoveEvent.has_value()) {
             eventManager_->SetLastMoveBeforeUp(scalePoint.sourceType == SourceType::MOUSE);
-            if (!focusWindowId_.has_value()) {
-                eventManager_->DispatchTouchEvent(lastMoveEvent.value());
-            }
+            eventManager_->DispatchTouchEvent(lastMoveEvent.value());
             eventManager_->SetLastMoveBeforeUp(false);
         }
     }

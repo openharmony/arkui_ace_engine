@@ -541,7 +541,8 @@ void PanRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& cal
         info.SetOffsetY(averageDistance_.GetY());
         TouchEvent touchPoint = {};
         if (!touchPoints_.empty()) {
-            touchPoint = touchPoints_.begin()->second;
+            touchPoint = touchPoints_.begin()->second.history.empty() ?
+                touchPoints_.begin()->second : touchPoints_.begin()->second.history.back();
         }
         info.SetPointerId(touchPoint.id);
         PointF localPoint(globalPoint_.GetX(), globalPoint_.GetY());
