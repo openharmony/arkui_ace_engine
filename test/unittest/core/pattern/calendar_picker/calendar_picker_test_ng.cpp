@@ -3151,7 +3151,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest028, TestSize.Level1)
      * @tc.steps: step5. test calendarDialogNode's RenderContext's BackgroundColorValue value.
      * @tc.expected: equal TRANSPARENT.
      */
-    EXPECT_EQ(calendarDialogNode->GetRenderContext()->GetBackgroundColorValue().ColorToString(),
+    EXPECT_EQ(calendarDialogNode->GetRenderContext()->GetBackgroundColorValue(Color::TRANSPARENT).ColorToString(),
         Color::TRANSPARENT.ColorToString());
     /**
      * @tc.steps: step6. mock PlatformVersion VERSION_TEN.
@@ -3163,7 +3163,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest028, TestSize.Level1)
      * @tc.expected: equal themeColor.
      */
     dialogPattern->UpdateDialogBackgroundColor();
-    EXPECT_EQ(calendarDialogNode->GetRenderContext()->GetBackgroundColorValue().ColorToString(),
+    EXPECT_EQ(calendarDialogNode->GetRenderContext()->GetBackgroundColorValue(Color::TRANSPARENT).ColorToString(),
         theme->GetDialogBackgroundColor().ColorToString());
 }
 
