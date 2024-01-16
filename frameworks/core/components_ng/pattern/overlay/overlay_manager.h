@@ -398,6 +398,8 @@ public:
         return rootNodeWeak_;
     }
 
+    void ModalPageLostFocus(const RefPtr<FrameNode>& node);
+
 private:
     void PopToast(int32_t targetId);
 
@@ -440,7 +442,6 @@ private:
     void PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
     void FireModalPageShow();
     void FireModalPageHide();
-    void ModalPageLostFocus(const RefPtr<FrameNode>& node);
 
     void SetSheetBackgroundBlurStyle(const RefPtr<FrameNode>& sheetNode, const BlurStyleOption& bgBlurStyle);
 
