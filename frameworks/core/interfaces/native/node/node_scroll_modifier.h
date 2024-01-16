@@ -20,9 +20,9 @@
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIScrollModifier* GetScrollModifier();
 
-void SetOnScroll(ArkUINodeHandle node, ArkUI_Int32 eventId);
-void SetOnScrollFrameBegin(ArkUINodeHandle node, ArkUI_Int32 eventId);
-void SetOnScrollStart(ArkUINodeHandle node, ArkUI_Int32 eventId);
-void SetOnScrollStop(ArkUINodeHandle node, ArkUI_Int32 eventId);
-
+void SetOnScroll(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
+void SetOnScrollFrameBegin(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
+void SetOnScrollStart(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
+void SetOnScrollStop(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
+void SetOnScrollEdge(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
 } // namespace OHOS::Ace::NG::NodeModifier

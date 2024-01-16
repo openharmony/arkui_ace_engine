@@ -2976,29 +2976,29 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args)
     } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         CalcDimension left;
-        if (ParseJsDimensionVp(object->GetProperty("left"), left) && left.IsNonNegative()) {
-            if (left.Unit() == DimensionUnit::PERCENT) {
+        if (ParseJsDimensionVp(object->GetProperty("left"), left)) {
+            if (left.Unit() == DimensionUnit::PERCENT || left.IsNegative()) {
                 left.Reset();
             }
             leftDimen = left;
         }
         CalcDimension right;
-        if (ParseJsDimensionVp(object->GetProperty("right"), right) && right.IsNonNegative()) {
-            if (right.Unit() == DimensionUnit::PERCENT) {
+        if (ParseJsDimensionVp(object->GetProperty("right"), right)) {
+            if (right.Unit() == DimensionUnit::PERCENT || right.IsNegative()) {
                 right.Reset();
             }
             rightDimen = right;
         }
         CalcDimension top;
-        if (ParseJsDimensionVp(object->GetProperty("top"), top) && top.IsNonNegative()) {
-            if (top.Unit() == DimensionUnit::PERCENT) {
+        if (ParseJsDimensionVp(object->GetProperty("top"), top)) {
+            if (top.Unit() == DimensionUnit::PERCENT || top.IsNegative()) {
                 top.Reset();
             }
             topDimen = top;
         }
         CalcDimension bottom;
-        if (ParseJsDimensionVp(object->GetProperty("bottom"), bottom) && bottom.IsNonNegative()) {
-            if (bottom.Unit() == DimensionUnit::PERCENT) {
+        if (ParseJsDimensionVp(object->GetProperty("bottom"), bottom)) {
+            if (bottom.Unit() == DimensionUnit::PERCENT || bottom.IsNegative()) {
                 bottom.Reset();
             }
             bottomDimen = bottom;
@@ -4230,7 +4230,8 @@ bool JSViewAbstract::ParseJsShadowColorStrategy(const JSRef<JSVal>& jsValue, Sha
     return false;
 }
 
-bool JSViewAbstract::ParseJsSymbolId(const JSRef<JSVal>& jsValue, std::uint32_t& symbolId)
+bool JSViewAbstract::ParseJsSymbolId(
+    const JSRef<JSVal>& jsValue, std::uint32_t& symbolId, RefPtr<ResourceObject>& symbolResourceObject)
 {
     if (jsValue->IsNull() || jsValue->IsUndefined()) {
         symbolId = 0;
@@ -4242,6 +4243,7 @@ bool JSViewAbstract::ParseJsSymbolId(const JSRef<JSVal>& jsValue, std::uint32_t&
         return false;
     }
     auto resourceObject = GetResourceObject(jsObj);
+    symbolResourceObject = resourceObject;
     if (!resourceObject) {
         return false;
     }
@@ -5475,6 +5477,11 @@ void JSViewAbstract::JsInvert(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetInvert(invert);
 }
 
+void JSViewAbstract::JsSystemBarEffect(const JSCallbackInfo& info)
+{
+    ViewAbstractModel::GetInstance()->SetSystemBarEffect(true);
+}
+
 void JSViewAbstract::JsHueRotate(const JSCallbackInfo& info)
 {
     std::optional<float> degree;
@@ -6579,6 +6586,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("saturate", &JSViewAbstract::JsSaturate);
     JSClass<JSViewAbstract>::StaticMethod("sepia", &JSViewAbstract::JsSepia);
     JSClass<JSViewAbstract>::StaticMethod("invert", &JSViewAbstract::JsInvert);
+    JSClass<JSViewAbstract>::StaticMethod("systemBarEffect", &JSViewAbstract::JsSystemBarEffect);
     JSClass<JSViewAbstract>::StaticMethod("hueRotate", &JSViewAbstract::JsHueRotate);
     JSClass<JSViewAbstract>::StaticMethod("clip", &JSViewAbstract::JsClip);
     JSClass<JSViewAbstract>::StaticMethod("mask", &JSViewAbstract::JsMask);

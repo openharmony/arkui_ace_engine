@@ -440,28 +440,31 @@ AssertionResult ListTestNg::IsEqualTotalOffset(float expectOffset)
 
 AssertionResult ListTestNg::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, float expectOffset)
 {
+    // After every call to ScrollToIndex(), reset currentDelta_
     float startOffset = pattern_->GetTotalOffset();
     pattern_->ScrollToIndex(index, smooth, align);
     FlushLayoutTask(frameNode_);
     if (smooth) {
-        // Straight to the end of the anmiation
-        // can not exceed scrollableDistance if is not spring
-        float endValue = pattern_->GetFinalPosition();
-        float scrollableDistance = pattern_->GetScrollableDistance();
-        float two = 2.f;
-        if (GreatNotEqual(endValue - startOffset * two, scrollableDistance)) {
-            endValue = scrollableDistance;
+        // Because can not get targetPos, use source code
+        auto iter = pattern_->itemPosition_.find(index);
+        float targetPos = 0.0f;
+        if (iter->second.isGroup) {
+            pattern_->GetListItemGroupAnimatePosWithoutIndexInGroup(index, iter->second.startPos,
+                iter->second.endPos, align, targetPos);
+        } else {
+            pattern_->GetListItemAnimatePos(iter->second.startPos, iter->second.endPos, align, targetPos);
         }
-        if (LessNotEqual(endValue, 0)) {
-            endValue = 0;
+        if (!NearZero(targetPos)) {
+            // Straight to the end of the anmiation, use ScrollTo replace AnimateTo
+            float finalPosition = pattern_->GetFinalPosition();
+            float totalHeight = pattern_->GetTotalHeight();
+            finalPosition = std::clamp(finalPosition, 0.f, totalHeight); // limit scrollDistance
+            pattern_->ScrollTo(finalPosition);
+            FlushLayoutTask(frameNode_);
         }
-        pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue,
-            SCROLL_FROM_ANIMATION_CONTROLLER);
-        FlushLayoutTask(frameNode_);
     }
     float currentOffset = pattern_->GetTotalOffset();
-    // reset offset before return
-    pattern_->ScrollTo(startOffset);
+    pattern_->ScrollTo(startOffset); // reset offset before return
     FlushLayoutTask(frameNode_);
     return IsEqual(currentOffset, expectOffset);
 }
@@ -473,24 +476,26 @@ AssertionResult ListTestNg::ScrollToItemInGroup(
     pattern_->ScrollToItemInGroup(index, indexInGroup, smooth, align);
     FlushLayoutTask(frameNode_);
     if (smooth) {
-        // Straight to the end of the anmiation
-        // can not exceed scrollableDistance if is not spring
-        float endValue = pattern_->GetFinalPosition();
-        float scrollableDistance = pattern_->GetScrollableDistance();
-        float two = 2.f;
-        if (GreatNotEqual(endValue - startOffset * two, scrollableDistance)) {
-            endValue = scrollableDistance;
+        // Because can not get targetPos, use source code
+        auto iter = pattern_->itemPosition_.find(index);
+        float targetPos = 0.0f;
+        if (iter->second.isGroup) {
+            pattern_->GetListItemGroupAnimatePosWithIndexInGroup(index, indexInGroup,
+                iter->second.startPos, align, targetPos);
+        } else {
+            pattern_->GetListItemAnimatePos(iter->second.startPos, iter->second.endPos, align, targetPos);
         }
-        if (LessNotEqual(endValue, 0)) {
-            endValue = 0;
+        if (!NearZero(targetPos)) {
+            // Straight to the end of the anmiation, use ScrollTo replace AnimateTo
+            float finalPosition = pattern_->GetFinalPosition();
+            float totalHeight = pattern_->GetTotalHeight();
+            finalPosition = std::clamp(finalPosition, 0.f, totalHeight); // limit scrollDistance
+            pattern_->ScrollTo(finalPosition);
+            FlushLayoutTask(frameNode_);
         }
-        pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue,
-            SCROLL_FROM_ANIMATION_CONTROLLER);
-        FlushLayoutTask(frameNode_);
     }
     float currentOffset = pattern_->GetTotalOffset();
-    // reset offset before return
-    pattern_->ScrollTo(startOffset);
+    pattern_->ScrollTo(startOffset); // reset offset before return
     FlushLayoutTask(frameNode_);
     return IsEqual(currentOffset, expectOffset);
 }

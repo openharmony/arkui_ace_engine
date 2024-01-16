@@ -98,6 +98,7 @@ private:
     virtual void ApplyIndent(const TextStyle& textStyle, double width);
     void FontRegisterCallback(const RefPtr<FrameNode>& frameNode, const TextStyle& textStyle);
     bool CreateParagraph(const TextStyle& textStyle, std::string content, LayoutWrapper* layoutWrapper);
+    void UpdateSymbolSpanEffect(RefPtr<FrameNode>& frameNode);
     void CreateParagraphDrag(const TextStyle& textStyle, const std::vector<std::string>& contents,
         const std::string content, LayoutWrapper* layoutWrapper);
     bool CreateParagraphAndLayout(const TextStyle& textStyle, const std::string& content,
@@ -139,6 +140,7 @@ private:
     void SetImageSpanTextStyleByLines(const TextStyle& textStyle,
         std::map<int32_t, std::pair<RectF, RefPtr<PlaceholderSpanItem>>>& placeholderSpanList,
         std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>>& spanContentLines);
+    int32_t GetFirstSpanStartPositon();
     void SetNodeForAnimation(const TextStyle& symbolTextStyle, RefPtr<FrameNode>& frameNode);
 
     std::list<RefPtr<SpanItem>> spanItemChildren_;

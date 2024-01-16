@@ -69,7 +69,7 @@ public:
     void SetRequestFrame(const std::function<void()>& requestFrame);
     void RequestNextFrame() const;
 
-    void SetHostNode(const WeakPtr<FrameNode>& host);
+    virtual void SetHostNode(const WeakPtr<FrameNode>& host);
     RefPtr<FrameNode> GetHost() const;
 
     virtual void SetNeedDebugBoundary(bool flag) {}
@@ -468,6 +468,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontSaturate, Dimension);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontSepia, Dimension);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontInvert, InvertVariant);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, SystemBarEffect, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontHueRotate, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontColorBlend, Color);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, LinearGradientBlur, NG::LinearGradientBlurPara);
@@ -645,6 +646,7 @@ protected:
     virtual void OnFrontSaturateUpdate(const Dimension& value) {}
     virtual void OnFrontSepiaUpdate(const Dimension& value) {}
     virtual void OnFrontInvertUpdate(const InvertVariant& value) {}
+    virtual void OnSystemBarEffectUpdate(bool systemBarEffect) {}
     virtual void OnFrontHueRotateUpdate(float value) {}
     virtual void OnFrontColorBlendUpdate(const Color& value) {}
     virtual void OnLinearGradientBlurUpdate(const NG::LinearGradientBlurPara& blurPara) {}

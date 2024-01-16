@@ -21,6 +21,8 @@
 #include "bridge/declarative_frontend/jsview/js_tabs_controller.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/tabs_model_impl.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
@@ -58,6 +60,22 @@ constexpr int32_t MD_COLUMN_NUM = 8;
 constexpr int32_t LG_COLUMN_NUM = 12;
 constexpr int32_t DEFAULT_CUSTOM_ANIMATION_TIMEOUT = 1000;
 const std::vector<BarPosition> BAR_POSITIONS = { BarPosition::START, BarPosition::END };
+
+const std::vector<BlurStyle> BAR_BLURSTYLE = {
+    BlurStyle::NO_MATERIAL,
+    BlurStyle::THIN,
+    BlurStyle::REGULAR,
+    BlurStyle::THICK,
+    BlurStyle::BACKGROUND_THIN,
+    BlurStyle::BACKGROUND_REGULAR,
+    BlurStyle::BACKGROUND_THICK,
+    BlurStyle::BACKGROUND_ULTRA_THICK,
+    BlurStyle::COMPONENT_ULTRA_THIN,
+    BlurStyle::COMPONENT_THIN,
+    BlurStyle::COMPONENT_REGULAR,
+    BlurStyle::COMPONENT_THICK,
+    BlurStyle::COMPONENT_ULTRA_THICK,
+};
 
 JSRef<JSVal> TabContentChangeEventToJSValue(const TabContentChangeEvent& eventInfo)
 {
@@ -372,6 +390,18 @@ void JSTabs::SetBarBackgroundColor(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetBarBackgroundColor(backgroundColor);
 }
 
+void JSTabs::SetBarBackgroundBlurStyle(const JSCallbackInfo& info)
+{
+    BlurStyle blurStyle = BlurStyle::NO_MATERIAL;
+    if (info.Length() > 0 && info[0]->IsNumber()) {
+        auto barBlurStyle = info[0]->ToNumber<int32_t>();
+        if (barBlurStyle >= 0 && barBlurStyle < static_cast<int32_t>(BAR_BLURSTYLE.size())) {
+            blurStyle = BAR_BLURSTYLE[barBlurStyle];
+        }
+    }
+    TabsModel::GetInstance()->SetBarBackgroundBlurStyle(blurStyle);
+}
+
 void JSTabs::SetDivider(const JSCallbackInfo& info)
 {
     TabsItemDivider divider;
@@ -558,6 +588,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("pop", &JSTabs::Pop);
     JSClass<JSTabs>::StaticMethod("vertical", &JSTabs::SetVertical);
     JSClass<JSTabs>::StaticMethod("barPosition", &JSTabs::SetBarPosition);
+    JSClass<JSTabs>::StaticMethod("barBackgroundBlurStyle", &JSTabs::SetBarBackgroundBlurStyle);
     JSClass<JSTabs>::StaticMethod("scrollable", &JSTabs::SetScrollable);
     JSClass<JSTabs>::StaticMethod("barMode", &JSTabs::SetBarMode);
     JSClass<JSTabs>::StaticMethod("barWidth", &JSTabs::SetBarWidth);

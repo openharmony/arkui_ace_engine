@@ -171,9 +171,9 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     returns dependentElementIds_ Set if changed. This Set is empty if variable is not used to construct the UI
   */
   public moveElmtIdsForDelayedUpdate(): Set<number> | undefined {
-    const result = (this.delayedNotification_ == ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending)
-      ? this.dependentElmtIdsByProperty_.getAllPropertyDependencies()
-      : undefined;
+    const result = (this.delayedNotification_ === ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.delay_notification_pending) ?
+      this.dependentElmtIdsByProperty_.getAllPropertyDependencies() :
+      undefined;
     stateMgmtConsole.debug(`${this.debugInfo()}: moveElmtIdsForDelayedUpdate: elmtIds that need delayed update \
                       ${result ? Array.from(result).toString() : 'no delayed notifications'} .`);
     this.delayedNotification_ = ObservedPropertyAbstractPU.DelayedNotifyChangesEnum.do_not_delay;
@@ -396,7 +396,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     }
 
     
- /**
+  /**
   * event emitted by wrapped ObservedObject, when one of its property values changes
   * for class objects when in compatibility mode
   * for Array, Date instances always
@@ -410,7 +410,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     this.notifyTrackedObjectPropertyHasChanged(changedPropertyName);
   }
 
- /**
+  /**
   * event emitted by wrapped ObservedObject, when one of its property values changes
   * for class objects when in compatibility mode
   * for Array, Date instances always

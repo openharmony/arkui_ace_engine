@@ -2698,7 +2698,12 @@ void OverlayManager::PlaySheetTransition(
 
     if (isTransitionIn) {
         sheetPattern->SetCurrentHeight(sheetHeight_);
-        auto offset = sheetMaxHeight - sheetHeight_;
+        float offset = 0.0f;
+        if (sheetPattern->GetSheetType() == SheetType::SHEET_POPUP) {
+            offset = sheetPattern->GetSheetOffset();
+        } else {
+            offset = sheetMaxHeight - sheetHeight_;
+        }
         if (isFirstTransition) {
             context->OnTransformTranslateUpdate({ 0.0f, sheetMaxHeight, 0.0f });
         }
@@ -3109,7 +3114,7 @@ void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bo
     option.SetFillMode(FillMode::FORWARDS);
     auto context = customKeyboard->GetRenderContext();
     CHECK_NULL_VOID(context);
-    auto pipeline = PipelineContext::GetCurrentContext();
+    auto pipeline = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipeline);
     auto pageNode = pipeline->GetStageManager()->GetLastPage();
     if (pageNode == nullptr) {
@@ -3151,14 +3156,17 @@ void OverlayManager::PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bo
     }
 }
 
-void OverlayManager::BindKeyboard(const std::function<void()>& keybordBuilder, int32_t targetId)
+void OverlayManager::BindKeyboard(const std::function<void()>& keyboardBuilder, int32_t targetId)
 {
     if (customKeyboardMap_.find(targetId) != customKeyboardMap_.end()) {
         return;
     }
     auto rootNode = rootNodeWeak_.Upgrade();
     CHECK_NULL_VOID(rootNode);
-    auto customKeyboard = KeyboardView::CreateKeyboard(targetId, keybordBuilder);
+    auto customKeyboard = KeyboardView::CreateKeyboard(targetId, keyboardBuilder);
+    if (!customKeyboard) {
+        return;
+    }
     customKeyboard->MountToParent(rootNode);
     rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     customKeyboardMap_[targetId] = customKeyboard;
@@ -3482,13 +3490,10 @@ void OverlayManager::RemoveEventColumn()
 }
 
 int32_t OverlayManager::CreateModalUIExtension(
-    const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, bool isProhibitBack)
+    const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, bool isProhibitBack, bool isAsyncModalBinding)
 {
     isProhibitBack_ = isProhibitBack;
-    ModalStyle modalStyle;
-    modalStyle.modalTransition = NG::ModalTransition::NONE;
-    modalStyle.isUIExtension = true;
-    auto uiExtNode = ModalUIExtension::Create(want, callbacks);
+    auto uiExtNode = ModalUIExtension::Create(want, callbacks, isAsyncModalBinding);
     auto layoutProperty = uiExtNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty, 0);
     auto full = CalcLength(Dimension(1.0, DimensionUnit::PERCENT));
@@ -3498,13 +3503,38 @@ int32_t OverlayManager::CreateModalUIExtension(
         return uiExtNode;
     };
     auto sessionId = ModalUIExtension::GetSessionId(uiExtNode);
-    // Convert the sessionId into a negative number to distinguish it from the targetId of other modal pages
-    BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, nullptr, -(sessionId));
+    if (!isAsyncModalBinding) {
+        ModalStyle modalStyle;
+        modalStyle.modalTransition = NG::ModalTransition::NONE;
+        modalStyle.isUIExtension = true;
+        // Convert the sessionId into a negative number to distinguish it from the targetId of other modal pages
+        BindContentCover(true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, nullptr, -(sessionId));
+    } else {
+        auto bindModalCallback = [weak = WeakClaim(this), buildNodeFunc, sessionId, id = Container::CurrentId()]() {
+            ContainerScope scope(id);
+            auto overlayManager = weak.Upgrade();
+            CHECK_NULL_VOID(overlayManager);
+            ModalStyle modalStyle;
+            modalStyle.modalTransition = NG::ModalTransition::NONE;
+            modalStyle.isUIExtension = true;
+            overlayManager->BindContentCover(
+                true, nullptr, std::move(buildNodeFunc), modalStyle, nullptr, nullptr, nullptr, -(sessionId));
+        };
+        ModalUIExtension::SetBindModalCallback(uiExtNode, std::move(bindModalCallback));
+        uiExtNodes_[sessionId] = WeakClaim(RawPtr(uiExtNode));
+    }
     return sessionId;
 }
 
 void OverlayManager::CloseModalUIExtension(int32_t sessionId)
 {
+    if (uiExtNodes_.find(sessionId) != uiExtNodes_.end()) {
+        auto uiExtNode = uiExtNodes_[sessionId].Upgrade();
+        if (uiExtNode) {
+            ModalUIExtension::SetBindModalCallback(uiExtNode, nullptr);
+        }
+        uiExtNodes_.erase(sessionId);
+    }
     ModalStyle modalStyle;
     modalStyle.modalTransition = NG::ModalTransition::NONE;
     BindContentCover(false, nullptr, nullptr, modalStyle, nullptr, nullptr, nullptr, -(sessionId));

@@ -34,9 +34,23 @@ void ResetColor(NodeHandle node)
     BlankModelNG::SetColor(frameNode, Color::TRANSPARENT);
 }
 
+void SetBlankHeight(NodeHandle node, double heightValue, int32_t heightUnit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    BlankModelNG::SetHeight(frameNode, CalcDimension(heightValue, (DimensionUnit)heightUnit));
+}
+
+void ResetBlankHeight(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ClearWidthOrHeight(frameNode, false);
+}
+
 ArkUIBlankModifierAPI GetBlankModifier()
 {
-    static const ArkUIBlankModifierAPI modifier = { SetColor, ResetColor };
+    static const ArkUIBlankModifierAPI modifier = { SetColor, ResetColor, SetBlankHeight, ResetBlankHeight };
     return modifier;
 }
 }

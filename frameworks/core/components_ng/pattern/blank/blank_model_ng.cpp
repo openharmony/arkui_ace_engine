@@ -82,4 +82,12 @@ void BlankModelNG::SetColor(FrameNode* frameNode, const Color& color)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(BlankPaintProperty, Color, color, frameNode);
 }
+
+void BlankModelNG::SetHeight(FrameNode* frameNode, const Dimension& height)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<BlankLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateHeight(height);
+}
 } // namespace OHOS::Ace::NG

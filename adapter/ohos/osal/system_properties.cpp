@@ -175,6 +175,11 @@ bool IsGridCacheEnabled()
     return (system::GetParameter("persist.ace.grid.cache.enabled", "0") == "1");
 }
 
+bool IsSideBarContainerBlurEnable()
+{
+    return (system::GetParameter("persist.ace.sidebar.blur.enabled", "0") == "1");
+}
+
 bool IsGpuUploadEnabled()
 {
     return (system::GetParameter("persist.ace.gpuupload.enabled", "0") == "1" ||
@@ -291,6 +296,7 @@ bool SystemProperties::enableScrollableItemPool_ = IsEnableScrollableItemPool();
 bool SystemProperties::resourceDecoupling_ = IsResourceDecoupling();
 bool SystemProperties::navigationBlurEnabled_ = IsNavigationBlurEnabled();
 bool SystemProperties::gridCacheEnabled_ = IsGridCacheEnabled();
+bool SystemProperties::sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
 
 bool SystemProperties::IsSyscapExist(const char* cap)
 {
@@ -415,6 +421,7 @@ void SystemProperties::InitDeviceInfo(
 
     navigationBlurEnabled_ = IsNavigationBlurEnabled();
     gridCacheEnabled_ = IsGridCacheEnabled();
+    sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
 
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
@@ -575,5 +582,10 @@ bool SystemProperties::GetNavigationBlurEnabled()
 bool SystemProperties::GetGridCacheEnabled()
 {
     return gridCacheEnabled_;
+}
+
+bool SystemProperties::GetSideBarContainerBlurEnable()
+{
+    return sideBarContainerBlurEnable_;
 }
 } // namespace OHOS::Ace

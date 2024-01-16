@@ -104,8 +104,9 @@ void JSSymbolSpan::SetSymbolEffect(const JSCallbackInfo& info)
 void JSSymbolSpan::Create(const JSCallbackInfo& info)
 {
     uint32_t symbolId = 0;
+    RefPtr<ResourceObject> resourceObject;
     if (info.Length() > 0) {
-        ParseJsSymbolId(info[0], symbolId);
+        ParseJsSymbolId(info[0], symbolId, resourceObject);
     }
 
     SymbolSpanModel::GetInstance()->Create(symbolId);

@@ -18,12 +18,12 @@ class FrameNode {
   private baseNode_ : BaseNode;
   protected nodePtr_ : number | null;
   constructor(uiContext: UIContext, type: string) {
-    this.renderNode_ = new RenderNode("FrameNode");
-    if (type == "BuilderNode") {
+    this.renderNode_ = new RenderNode('FrameNode');
+    if (type === 'BuilderNode') {
       return;
     }
     this.baseNode_ = new BaseNode(uiContext);
-    this.nodePtr_ =  this.baseNode_.createRenderNode();
+    this.nodePtr_ =  this.baseNode_.createRenderNode(this);
     this.renderNode_.setNodePtr(this.nodePtr_);
   }
   getRenderNode(): RenderNode | null {

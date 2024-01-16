@@ -3026,8 +3026,8 @@ HWTEST_F(TabsTestNg, TabBarPatternChangeMask001, TestSize.Level1)
     imageNode2->renderContext_ = mockRenderContext2;
     EXPECT_CALL(*mockRenderContext2, SetVisible(_)).Times(1);
 
-    tabBarPattern->ChangeMask(tabBarNode, 1.0f, tabBarOffset, 1.0f, TEST_MASK_MIDDLE_RADIUS_RATIO, true);
-    tabBarPattern->ChangeMask(tabBarNode, 1.0f, tabBarOffset, 0.99f, TEST_MASK_MIDDLE_RADIUS_RATIO, false);
+    tabBarPattern->ChangeMask(TEST_TAB_BAR_INDEX, 1.0f, tabBarOffset, 1.0f, TEST_MASK_MIDDLE_RADIUS_RATIO, true);
+    tabBarPattern->ChangeMask(TEST_TAB_BAR_INDEX, 1.0f, tabBarOffset, 0.99f, TEST_MASK_MIDDLE_RADIUS_RATIO, false);
     EXPECT_EQ(tabBarPattern->indicator_, 0);
 
     auto selectedmaskPosition = tabBarNode->GetChildren().size() - TEST_SELECTED_MASK_COUNT;
@@ -3113,6 +3113,7 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayoutMask001, TestSize.Level1)
     ASSERT_NE(tabBarLayoutProperty, nullptr);
     tabBarLayoutProperty->UpdateSelectedMask(0);
     tabBarLayoutProperty->UpdateUnselectedMask(1);
+    std::vector<OffsetF> childOffsetDelta = { OffsetF(), OffsetF() };
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode, geometryNode, tabBarLayoutProperty);
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabBarLayoutAlgorithm));
@@ -3141,7 +3142,7 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayoutMask001, TestSize.Level1)
      * @tc.steps: step3. call LayoutMask function.
      * @tc.expected: step3. expect The function is run ok.
      */
-    tabBarLayoutAlgorithm->LayoutMask(&layoutWrapper);
+    tabBarLayoutAlgorithm->LayoutMask(&layoutWrapper, childOffsetDelta);
     EXPECT_EQ(tabBarLayoutProperty->GetSelectedMask().value_or(-1), 0);
     EXPECT_EQ(tabBarLayoutProperty->GetUnselectedMask().value_or(-1), 1);
 }
@@ -3199,7 +3200,7 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayoutMask002, TestSize.Level1)
      * @tc.steps: step2. call LayoutMask function.
      * @tc.expected: step2. expect The function is run ok.
      */
-    tabBarLayoutAlgorithm->LayoutMask(&layoutWrapper);
+    tabBarLayoutAlgorithm->LayoutMask(&layoutWrapper, {});
     EXPECT_EQ(tabBarLayoutProperty->GetSelectedMask().value_or(-1), -1);
     EXPECT_EQ(tabBarLayoutProperty->GetUnselectedMask().value_or(-1), -1);
 }
@@ -3240,7 +3241,7 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayoutMask003, TestSize.Level1)
      * @tc.steps: step2. call LayoutMask function.
      * @tc.expected: step2. expect The function is run ok.
      */
-    tabBarLayoutAlgorithm->LayoutMask(&layoutWrapper);
+    tabBarLayoutAlgorithm->LayoutMask(&layoutWrapper, {});
 }
 
 /**
@@ -6660,6 +6661,7 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayoutMask004, TestSize.Level1)
     ASSERT_NE(tabBarLayoutProperty, nullptr);
     tabBarLayoutProperty->UpdateSelectedMask(0);
     tabBarLayoutProperty->UpdateUnselectedMask(1);
+    std::vector<OffsetF> childOffsetDelta = { OffsetF(), OffsetF() };
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     LayoutWrapperNode layoutWrapper = LayoutWrapperNode(tabBarNode, geometryNode, tabBarLayoutProperty);
     layoutWrapper.SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(tabBarLayoutAlgorithm));
@@ -6707,7 +6709,7 @@ HWTEST_F(TabsTestNg, TabBarLayoutAlgorithmLayoutMask004, TestSize.Level1)
     imageNode->renderContext_ = mockRenderContext;
     EXPECT_CALL(*mockRenderContext, SetVisible(_)).Times(1);
 
-    tabBarLayoutAlgorithm->LayoutMask(&layoutWrapper);
+    tabBarLayoutAlgorithm->LayoutMask(&layoutWrapper, childOffsetDelta);
     EXPECT_EQ(tabBarLayoutProperty->GetSelectedMask().value_or(-1), 0);
     EXPECT_EQ(tabBarLayoutProperty->GetUnselectedMask().value_or(-1), 1);
 }

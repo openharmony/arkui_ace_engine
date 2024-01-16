@@ -134,7 +134,7 @@ void WaterFlowLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             // jump to out of cache
         } else {
             JumpToTargetAlign(layoutInfo_.waterFlowItems_[crossIndex][layoutInfo_.jumpIndex_]);
-            layoutInfo_.align_ = ScrollAlign::AUTO;
+            layoutInfo_.align_ = ScrollAlign::START;
             layoutInfo_.jumpIndex_ = EMPTY_JUMP_INDEX;
         }
     } else {
@@ -378,7 +378,7 @@ void WaterFlowLayoutAlgorithm::FillViewport(float mainSize, LayoutWrapper* layou
             layoutInfo_.currentOffset_ += layoutInfo_.restoreOffset_;
             // restoreOffSet only be used once
             layoutInfo_.restoreOffset_ = 0.0f;
-            layoutInfo_.align_ = ScrollAlign::AUTO;
+            layoutInfo_.align_ = ScrollAlign::START;
             layoutInfo_.jumpIndex_ = EMPTY_JUMP_INDEX;
             layoutInfo_.itemStart_ = false;
         }

@@ -1324,6 +1324,8 @@ float GridScrollLayoutAlgorithm::FillNewLineBackward(
     cellAveLength_ = -1.0f;
     if (moveToEndLineIndex_ > 0 && gridLayoutInfo_.endIndex_ >= moveToEndLineIndex_) {
         TAG_LOGI(AceLogTag::ACE_GRID, "scroll to end line with index:%{public}d", moveToEndLineIndex_);
+        // scrollToIndex(AUTO) on first layout
+        moveToEndLineIndex_ = -1;
         return cellAveLength_;
     }
     auto currentIndex = gridLayoutInfo_.endIndex_ + 1;

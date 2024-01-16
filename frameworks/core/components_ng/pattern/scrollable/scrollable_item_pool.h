@@ -34,9 +34,9 @@ public:
     void Deallocate(ScrollableItem* obj);
 
 private:
-    explicit ScrollableItemPool(int32_t size) : size_(size) {}
+    explicit ScrollableItemPool(size_t size) : size_(size) {}
     std::unordered_map<std::string, std::vector<ScrollableItem*>> pool_;
-    int32_t size_;
+    size_t size_;
 };
 
 template<class T>

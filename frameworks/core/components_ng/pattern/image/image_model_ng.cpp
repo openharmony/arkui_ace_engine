@@ -376,5 +376,10 @@ void ImageModelNG::SetImageAnalyzerConfig(const ImageAnalyzerConfig& config)
     CHECK_NULL_VOID(pattern);
     pattern->SetImageAnalyzerConfig(config);
 }
+
+bool ImageModelNG::IsSrcSvgImage(FrameNode* frameNode)
+{
+    return false;
+}
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

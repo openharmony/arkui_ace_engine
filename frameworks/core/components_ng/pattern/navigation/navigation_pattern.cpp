@@ -175,7 +175,15 @@ void NavigationPattern::OnModifyDone()
     CHECK_NULL_VOID(hostNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
-    navBarNode->MarkModifyDone();
+    auto layoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
+    if (layoutProperty->GetHideNavBarValue(false)) {
+        navBarNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE, true);
+        navBarNode->SetActive(false);
+    } else {
+        navBarNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE, true);
+        navBarNode->SetActive(true);
+        navBarNode->MarkModifyDone();
+    }
     CHECK_NULL_VOID(navigationStack_);
     auto preTopNavPath = navigationStack_->GetPreTopNavPath();
     auto pathNames = navigationStack_->GetAllPathName();
@@ -222,6 +230,14 @@ void NavigationPattern::OnModifyDone()
     auto newTopNavPath = navigationStack_->GetTopNavPath();
     auto size = navigationStack_->Size();
     CheckTopNavPathChange(preTopNavPath, newTopNavPath, preSize > size);
+
+    /* if first navDestination is removed, the new one will be refreshed */
+    if (!navPathList.empty()) {
+        auto firstNavDesNode = AceType::DynamicCast<NavDestinationGroupNode>(
+            NavigationGroupNode::GetNavDestinationNode(navPathList.front().second));
+        CHECK_NULL_VOID(firstNavDesNode);
+        firstNavDesNode->MarkModifyDone();
+    }
 
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -347,6 +363,12 @@ void NavigationPattern::CheckTopNavPathChange(
             auto lastStandardIndex = hostNode->GetLastStandardIndex();
             isShow = (lastPreIndex != -1) && (lastPreIndex >= lastStandardIndex);
             hostNode->SetNeedSetInvisible(lastStandardIndex >= 0);
+            if (lastStandardIndex < 0) {
+                auto navBarNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarNode());
+                auto layoutProperty = navBarNode->GetLayoutProperty();
+                layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
+                navBarNode->SetActive(true);
+            }
         }
         auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(preTopNavDestination->GetPattern());
         CHECK_NULL_VOID(navDestinationPattern);
@@ -955,7 +977,7 @@ void NavigationPattern::OnHover(bool isHover)
     CHECK_NULL_VOID(layoutProperty);
     auto userSetMinNavBarWidthValue = layoutProperty->GetMinNavBarWidthValue(defaultValue);
     auto userSetMaxNavBarWidthValue = layoutProperty->GetMaxNavBarWidthValue(defaultValue);
-    if (userSetMinNavBarWidthValue == userSetMaxNavBarWidthValue && userSetNavBarRangeFlag_) {
+    if (userSetNavBarRangeFlag_ && userSetMinNavBarWidthValue == userSetMaxNavBarWidthValue) {
         return;
     }
     if (currentPointerStyle != static_cast<int32_t>(format)) {

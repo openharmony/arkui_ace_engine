@@ -57,6 +57,8 @@ public:
     static void SetViewPort(FrameNode* frameNode, const Dimension& dimLeft, const Dimension& dimTop,
         const Dimension& dimWidth, const Dimension& dimHeight);
     static void SetBitmapMesh(FrameNode* frameNode, std::vector<double>& mesh, int32_t column, int32_t row);
+    static void SetWidth(FrameNode* frameNode) {}
+    static void SetHeight(FrameNode* frameNode) {}
 };
 
 } // namespace OHOS::Ace::NG

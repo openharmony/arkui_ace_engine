@@ -56,7 +56,7 @@ public:
 
     bool IsAtomicNode() const override
     {
-        return type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE;
+        return type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE || type_ == XComponentType::NODE;
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
@@ -140,6 +140,11 @@ public:
         return id_;
     }
 
+    void SetId(const std::string& id)
+    {
+        id_ = id;
+    }
+
     const std::string& GetLibraryName() const
     {
         return libraryname_;
@@ -158,6 +163,11 @@ public:
     XComponentType GetType()
     {
         return type_;
+    }
+
+    void SetType(XComponentType type)
+    {
+        type_ = type;
     }
 
     SizeF GetDrawSize()
@@ -229,7 +239,7 @@ public:
     void SetExportTextureSurfaceId(const std::string& surfaceId);
     void FireExternalEvent(RefPtr<NG::PipelineContext> context,
         const std::string& componentId, const uint32_t nodeId, const bool isDestroy);
-
+    void SetSurfaceSize(uint32_t surfaceWidth, uint32_t surfaceHeight);
 private:
     void OnAttachToFrameNode() override;
     void OnDetachFromFrameNode(FrameNode* frameNode) override;

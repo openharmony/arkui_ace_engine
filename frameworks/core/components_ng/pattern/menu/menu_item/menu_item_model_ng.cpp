@@ -297,4 +297,15 @@ void MenuItemModelNG::SetFontStyle(FrameNode* frameNode, Ace::FontStyle style)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, ItalicFontStyle, style, frameNode);
 }
+
+void MenuItemModelNG::SetSelectIcon(FrameNode* frameNode, bool isShow)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, SelectIcon, isShow, frameNode);
+}
+
+void MenuItemModelNG::SetSelectIconSrc(FrameNode* frameNode, const std::string& src)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, SelectIconSrc, src, frameNode);
+}
+
 } // namespace OHOS::Ace::NG

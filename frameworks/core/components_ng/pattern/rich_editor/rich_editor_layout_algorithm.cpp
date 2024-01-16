@@ -30,10 +30,12 @@ RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>>
     while (it != spans.end()) {
         auto span = *it;
         // only checking the last char
-        std::wstring content = StringUtils::ToWstring(span->content);
-        if (content.back() == L'\n') {
-            bool needRemoveNewLine = content.length() > 1 && std::next(it) != spans.end();
-            span->MarkNeedRemoveNewLine(needRemoveNewLine);
+        if (StringUtils::ToWstring(span->content).back() == L'\n') {
+            if (std::next(it) != spans.end()) {
+                span->MarkNeedRemoveNewLine(true);
+            } else {
+                span->MarkNeedRemoveNewLine(false);
+            }
             std::list<RefPtr<SpanItem>> newGroup;
             newGroup.splice(newGroup.begin(), spans, spans.begin(), std::next(it));
             spans_.push_back(std::move(newGroup));
@@ -42,6 +44,12 @@ RichEditorLayoutAlgorithm::RichEditorLayoutAlgorithm(std::list<RefPtr<SpanItem>>
             continue;
         }
         span->MarkNeedRemoveNewLine(false);
+        // clear placeholder textstyle,it should be modified by text line
+        auto placeholderSpanItem = AceType::DynamicCast<PlaceholderSpanItem>(span);
+        if (placeholderSpanItem) {
+            TextStyle textStyle;
+            placeholderSpanItem->textStyle = textStyle;
+        }
         ++it;
     }
     if (!spans.empty()) {
@@ -81,6 +89,8 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
         if (!paragraph) {
             continue;
         }
+        float shadowOffset = GetShadowOffset(group);
+        res.AddHeight(shadowOffset);
         textHeight += paragraph->GetHeight();
         auto firstSpan = *group.begin();
         pManager_->AddParagraph({ .paragraph = paragraph,
@@ -109,6 +119,32 @@ std::optional<SizeF> RichEditorLayoutAlgorithm::MeasureContent(
         contentHeight = std::min(contentHeight, contentConstraint.maxSize.Height());
     }
     return SizeF(res.Width(), contentHeight);
+}
+
+float RichEditorLayoutAlgorithm::GetShadowOffset(const std::list<RefPtr<SpanItem>>& group)
+{
+    float shadowOffset = 0.0f;
+    for (auto& span: group) {
+        if (!span->fontStyle || !span->fontStyle->HasTextShadow()) {
+            continue;
+        }
+        auto shadows = span->fontStyle->GetTextShadowValue();
+        float upOffsetY = 0.0f;
+        float downOffsetY = 0.0f;
+        for (const auto& shadow : shadows) {
+            auto shadowBlurRadius = shadow.GetBlurRadius() * 2.0f;
+            auto shadowOffsetY = shadow.GetOffset().GetY();
+            if (LessOrEqual(shadowOffsetY, 0.0f) &&
+                LessNotEqual(shadowOffsetY, upOffsetY)) {
+                upOffsetY = shadowOffsetY - shadowBlurRadius;
+            } else if (GreatOrEqual(shadowOffsetY, 0.0f) &&
+                GreatNotEqual(shadowOffsetY + shadowBlurRadius, downOffsetY)) {
+                downOffsetY = shadowOffsetY + shadowBlurRadius;
+            }
+        }
+        shadowOffset = std::max(shadowOffset, downOffsetY - upOffsetY);
+    }
+    return shadowOffset;
 }
 
 void RichEditorLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)

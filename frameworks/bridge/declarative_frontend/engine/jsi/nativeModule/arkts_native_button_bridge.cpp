@@ -18,6 +18,7 @@
 #include "core/interfaces/native/node/api.h"
 #include "core/components/common/properties/text_style.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "core/components_ng/pattern/button/button_request_data.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
@@ -465,6 +466,81 @@ ArkUINativeModuleValue ButtonBridge::ResetButtonBorderRadius(ArkUIRuntimeCallInf
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonBorderRadius(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ButtonBridge::SetButtonBorder(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    CommonBridge::SetBorder(runtimeCallInfo);
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // 0:node info
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+
+    Local<JSValueRef> topLeftArgs = runtimeCallInfo->GetCallArgRef(9);      // 9:topLeft value
+    Local<JSValueRef> topRightArgs = runtimeCallInfo->GetCallArgRef(10);    // 10:topRight value
+    Local<JSValueRef> bottomLeftArgs = runtimeCallInfo->GetCallArgRef(11);  // 11:bottomLeft value
+    Local<JSValueRef> bottomRightArgs = runtimeCallInfo->GetCallArgRef(12); // 12:bottomRight value
+    if (topLeftArgs->IsUndefined() && topRightArgs->IsUndefined() && bottomLeftArgs->IsUndefined() &&
+        bottomRightArgs->IsUndefined()) {
+        GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonBorderRadius(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    std::optional<CalcDimension> radiusTopLeft;
+    std::optional<CalcDimension> radiusTopRight;
+    std::optional<CalcDimension> radiusBottomLeft;
+    std::optional<CalcDimension> radiusBottomRight;
+
+    ParseBorderRadius(vm, topLeftArgs, radiusTopLeft);
+    ParseBorderRadius(vm, topRightArgs, radiusTopRight);
+    ParseBorderRadius(vm, bottomLeftArgs, radiusBottomLeft);
+    ParseBorderRadius(vm, bottomRightArgs, radiusBottomRight);
+
+    std::vector<double> options;
+    PushBorderRadiusVector(radiusTopLeft, options);
+    PushBorderRadiusVector(radiusTopRight, options);
+    PushBorderRadiusVector(radiusBottomLeft, options);
+    PushBorderRadiusVector(radiusBottomRight, options);
+
+    GetArkUIInternalNodeAPI()->GetButtonModifier().SetButtonBorderRadius(nativeNode, options.data(), options.size());
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ButtonBridge::ResetButtonBorder(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // 0:node info
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBorder(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ButtonBridge::SetButtonSize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // 0:node info
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    Local<JSValueRef> widthArgs = runtimeCallInfo->GetCallArgRef(1); // 1:width value
+    Local<JSValueRef> heightArg = runtimeCallInfo->GetCallArgRef(2); // 2:height value
+    CalcDimension width;
+    ArkTSUtils::ParseJsDimensionVp(vm, widthArgs, width);
+    CalcDimension height;
+    ArkTSUtils::ParseJsDimensionVp(vm, heightArg, height);
+    GetArkUIInternalNodeAPI()->GetButtonModifier().SetButtonSize(nativeNode, width.Value(),
+        static_cast<int32_t>(width.Unit()), height.Value(), static_cast<int32_t>(height.Unit()));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ButtonBridge::ResetButtonSize(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // 0:node info
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetButtonModifier().ResetButtonSize(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

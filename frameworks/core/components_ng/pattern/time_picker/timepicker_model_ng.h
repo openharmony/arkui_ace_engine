@@ -43,6 +43,7 @@ public:
     static void SetSelectedTextStyle(
         FrameNode* frameNode, const RefPtr<PickerTheme>& theme, const PickerTextStyle& value);
     static void SetBackgroundColor(FrameNode* frameNode, const Color& color);
+    static void SetHour24(FrameNode* frameNode, bool isUseMilitaryTime);
 
 private:
     static RefPtr<FrameNode> CreateStackNode();

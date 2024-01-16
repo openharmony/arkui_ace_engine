@@ -2983,5 +2983,34 @@ const ArkUICommonModifier* GetCommonModifier()
 
     return &modifier;
 }
+
+void SetOnFocus(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, eventId, extraParam]() {
+        ArkUINodeEvent event;
+        event.kind = ON_FOCUS;
+        event.eventId = eventId;
+        event.extraParam= extraParam;
+        SendArkUIAsyncEvent(&event);
+    };
+    ViewAbstract::SetOnFocus(frameNode, std::move(onEvent));
+}
+
+void SetOnBlur(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, eventId, extraParam]() {
+        ArkUINodeEvent event;
+        event.kind = ON_BLUR;
+        event.eventId = eventId;
+        event.extraParam= extraParam;
+        SendArkUIAsyncEvent(&event);
+    };
+    ViewAbstract::SetOnBlur(frameNode, std::move(onEvent));
+}
+
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

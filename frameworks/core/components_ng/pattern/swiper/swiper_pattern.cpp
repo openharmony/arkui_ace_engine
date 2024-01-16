@@ -86,6 +86,27 @@ SwiperPattern::SwiperPattern()
     InitSwiperController();
 }
 
+bool SwiperPattern::IsMeasureBoundary() const
+{
+    auto props = GetLayoutProperty<SwiperLayoutProperty>();
+    CHECK_NULL_RETURN(props, false);
+    const auto& flexProp = props->GetFlexItemProperty();
+    /* Current layout algorithm can't handle constraint change and index translation within a single iteration.
+     * Because FlexGrow and FlexShrink causes frequent constraint change, Swiper can't correctly translate to
+     * targetIndex_. We set Swiper as MeasureBoundary in this scenario, so that Layout starts from Swiper itself, and we
+     * get a stable LayoutConstraint.
+     *
+     * Can be removed after the layout algorithm is improved.
+     */
+    if (flexProp && (flexProp->GetFlexGrow() || flexProp->GetFlexShrink())) {
+        // Swiper size is stable under Stretch mode
+        if (SwiperUtils::IsStretch(props)) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void SwiperPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -781,6 +802,9 @@ void SwiperPattern::FireAnimationStartEvent(
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     swiperEventHub->FireAnimationStartEvent(currentIndex, nextIndex, info);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
 }
 
 void SwiperPattern::FireAnimationEndEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const

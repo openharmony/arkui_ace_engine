@@ -286,6 +286,147 @@ class ImageBorderRadiusModifier extends ModifierWithKey<Length | BorderRadiuses>
     }
   }
 }
+class ImageBorderModifier extends ModifierWithKey<BorderOptions> {
+  constructor(value: BorderOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('imageBorder');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetImageBorder(node);
+    } else {
+      let widthLeft;
+      let widthRight;
+      let widthTop;
+      let widthBottom;
+      if (!isUndefined(this.value.width) && this.value.width != null) {
+        if (isNumber(this.value.width) || isString(this.value.width) || isResource(this.value.width)) {
+          widthLeft = this.value.width;
+          widthRight = this.value.width;
+          widthTop = this.value.width;
+          widthBottom = this.value.width;
+        } else {
+          widthLeft = (this.value.width as EdgeWidths).left;
+          widthRight = (this.value.width as EdgeWidths).right;
+          widthTop = (this.value.width as EdgeWidths).top;
+          widthBottom = (this.value.width as EdgeWidths).bottom;
+        }
+      }
+      let leftColor;
+      let rightColor;
+      let topColor;
+      let bottomColor;
+      if (!isUndefined(this.value.color) && this.value.color != null) {
+        if (isNumber(this.value.color) || isString(this.value.color) || isResource(this.value.color)) {
+          leftColor = this.value.color;
+          rightColor = this.value.color;
+          topColor = this.value.color;
+          bottomColor = this.value.color;
+        } else {
+          leftColor = (this.value.color as EdgeColors).left;
+          rightColor = (this.value.color as EdgeColors).right;
+          topColor = (this.value.color as EdgeColors).top;
+          bottomColor = (this.value.color as EdgeColors).bottom;
+        }
+      }
+      let topLeft;
+      let topRight;
+      let bottomLeft;
+      let bottomRight;
+      if (!isUndefined(this.value.radius) && this.value.radius != null) {
+        if (isNumber(this.value.radius) || isString(this.value.radius) || isResource(this.value.radius)) {
+          topLeft = this.value.radius;
+          topRight = this.value.radius;
+          bottomLeft = this.value.radius;
+          bottomRight = this.value.radius;
+        } else {
+          topLeft = (this.value.radius as BorderRadiuses).topLeft;
+          topRight = (this.value.radius as BorderRadiuses).topRight;
+          bottomLeft = (this.value.radius as BorderRadiuses).bottomLeft;
+          bottomRight = (this.value.radius as BorderRadiuses).bottomRight;
+        }
+      }
+      let styleTop;
+      let styleRight;
+      let styleBottom;
+      let styleLeft;
+      if (!isUndefined(this.value.style) && this.value.style != null) {
+        if (isNumber(this.value.style) || isString(this.value.style) || isResource(this.value.style)) {
+          styleTop = this.value.style;
+          styleRight = this.value.style;
+          styleBottom = this.value.style;
+          styleLeft = this.value.style;
+        } else {
+          styleTop = (this.value.style as EdgeStyles).top;
+          styleRight = (this.value.style as EdgeStyles).right;
+          styleBottom = (this.value.style as EdgeStyles).bottom;
+          styleLeft = (this.value.style as EdgeStyles).left;
+        }
+      }
+      getUINativeModule().image.setImageBorder(
+        node,
+        widthLeft,
+        widthRight,
+        widthTop,
+        widthBottom,
+        leftColor,
+        rightColor,
+        topColor,
+        bottomColor,
+        topLeft,
+        topRight,
+        bottomLeft,
+        bottomRight,
+        styleTop,
+        styleRight,
+        styleBottom,
+        styleLeft
+      );
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return (
+      !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
+      !isBaseOrResourceEqual(this.stageValue.color, this.value.color) ||
+      !isBaseOrResourceEqual(this.stageValue.radius, this.value.radius) ||
+      !isBaseOrResourceEqual(this.stageValue.style, this.value.style)
+    );
+  }
+}
+
+class ImageOpacityModifier extends ModifierWithKey<number | Resource> {
+  constructor(value: number | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('imageOpacity');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetImageOpacity(node);
+    } else {
+      getUINativeModule().image.setImageOpacity(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class ImageTransitionModifier extends ModifierWithKey<object> {
+  constructor(value: object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('imageTransition');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().image.resetImageTransition(node);
+    } else {
+      getUINativeModule().image.setImageTransition(node, this.value);
+    }
+  }
+}
+
 class ArkImageComponent extends ArkComponent implements ImageAttribute {
   constructor(nativePtr: KNode) {
     super(nativePtr);
@@ -389,6 +530,18 @@ class ArkImageComponent extends ArkComponent implements ImageAttribute {
   }
   onFinish(event: () => void): this {
     throw new Error('Method not implemented.');
+  }
+  border(value: BorderOptions): this {
+    modifierWithKey(this._modifiersWithKeys, ImageBorderModifier.identity, ImageBorderModifier, value);
+    return this;
+  }
+  opacity(value: number | Resource): this {
+    modifierWithKey(this._modifiersWithKeys, ImageOpacityModifier.identity, ImageOpacityModifier, value);
+    return this;
+  }
+  transition(value: TransitionOptions | TransitionEffect): this {
+    modifierWithKey(this._modifiersWithKeys, ImageTransitionModifier.identity, ImageTransitionModifier, value);
+    return this;
   }
 }
 // @ts-ignore

@@ -59,12 +59,7 @@ public:
         paintMethod->SetPointScale(pointScale_);
         paintMethod->SetRingPointScale(ringPointScale_);
         paintMethod->SetUIStatus(uiStatus_);
-        auto host = GetHost();
-        CHECK_NULL_RETURN(host, nullptr);
-        auto eventHub = host->GetEventHub<EventHub>();
-        CHECK_NULL_RETURN(eventHub, nullptr);
-        auto enabled = eventHub->IsEnabled();
-        paintMethod->SetEnabled(enabled);
+        paintMethod->SetEnabled(enabled_);
         paintMethod->SetIsOnAnimationFlag(isOnAnimationFlag_);
         paintMethod->SetTouchHoverAnimationType(touchHoverType_);
         paintMethod->SetIsFirstCreated(isFirstCreated_);
@@ -159,6 +154,7 @@ private:
     void OnTouchDown();
     void OnTouchUp();
     void CheckPageNode();
+    void HandleEnabled();
     void HandleMouseEvent(bool isHover);
     void UpdateUIStatus(bool check);
     // Init key event
@@ -195,6 +191,7 @@ private:
     bool isOnAnimationFlag_ = false;
     bool isUserSetResponseRegion_ = false;
     bool showHoverEffect_ = true;
+    bool enabled_ = true;
 
     RefPtr<RadioModifier> radioModifier_;
     ACE_DISALLOW_COPY_AND_MOVE(RadioPattern);

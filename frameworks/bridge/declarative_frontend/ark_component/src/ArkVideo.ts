@@ -95,6 +95,38 @@ class VideoMutedModifier extends ModifierWithKey<boolean> {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
   }
 }
+class VideoOpacityModifier extends ModifierWithKey<number | Resource> {
+  constructor(value: number | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('videoOpacity');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().video.resetOpacity(node);
+    } else {
+      getUINativeModule().video.setOpacity(node, this.value!);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+class VideoTransitionModifier extends ModifierWithKey<object> {
+  constructor(value: object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('videoTransition');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().video.resetTransition(node);
+    } else {
+      getUINativeModule().video.setTransition(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return true;
+  }
+}
 class ArkVideoComponent extends ArkComponent implements CommonMethod<VideoAttribute> {
   constructor(nativePtr: KNode) {
     super(nativePtr);
@@ -149,9 +181,6 @@ class ArkVideoComponent extends ArkComponent implements CommonMethod<VideoAttrib
     throw new Error('Method not implemented.');
   }
   onError(callback: () => void): VideoAttribute {
-    throw new Error('Method not implemented.');
-  }
-  monopolizeEvents(monopolize: boolean): this {
     throw new Error('Method not implemented.');
   }
 }

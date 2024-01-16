@@ -303,6 +303,21 @@ void RosenRenderContext::RemoveSurfaceChangedCallBack()
 #endif
 }
 
+void RosenRenderContext::AddFrameNodeInfoToRsNode()
+{
+    if (rsNode_) {
+        auto frameNodePtr = GetHost();
+        CHECK_NULL_VOID(frameNodePtr);
+        rsNode_->SetFrameNodeInfo(frameNodePtr->GetId(), frameNodePtr->GetTag());
+    }
+}
+
+void RosenRenderContext::SetHostNode(const WeakPtr<FrameNode>& host)
+{
+    RenderContext::SetHostNode(host);
+    AddFrameNodeInfoToRsNode();
+}
+
 void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextParam>& param)
 {
     // skip if node already created
@@ -310,9 +325,11 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
     auto isTextureExportNode = ViewStackProcessor::GetInstance()->IsExportTexture();
     if (isRoot) {
         rsNode_ = Rosen::RSRootNode::Create(false, isTextureExportNode);
+        AddFrameNodeInfoToRsNode();
         return;
     } else if (!param.has_value()) {
         rsNode_ = Rosen::RSCanvasNode::Create(false, isTextureExportNode);
+        AddFrameNodeInfoToRsNode();
         return;
     }
 
@@ -358,6 +375,8 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
         default:
             break;
     }
+
+    AddFrameNodeInfoToRsNode();
 }
 
 void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition, bool force)
@@ -3201,6 +3220,13 @@ void RosenRenderContext::OnFrontInvertUpdate(const InvertVariant& invert)
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnSystemBarEffectUpdate(bool systemBarEffect)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetSystemBarEffect();
+    RequestNextFrame();
+}
+
 void RosenRenderContext::OnFrontHueRotateUpdate(float hueRotate)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -3897,6 +3923,7 @@ void RosenRenderContext::SetRSNode(const std::shared_ptr<RSNode>& externalNode)
         return;
     }
     rsNode_ = externalNode;
+    AddFrameNodeInfoToRsNode();
 
     // TODO: need move property to new rs node.
     ResetTransform();
@@ -4287,6 +4314,12 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
             false);
     } else {
         if (!transitionEffect_->HasDisappearTransition()) {
+            if (frameNode->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
+                auto frameParent = frameNode->GetAncestorNodeOfFrame();
+                CHECK_NULL_VOID(frameParent);
+                // for window surfaceNode, remove surfaceNode explicitly
+                frameParent->GetRenderContext()->RemoveChild(Claim(this));
+            }
             return;
         }
         // Re-use current implicit animation timing params, only replace the finish callback function.

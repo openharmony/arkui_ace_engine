@@ -28,6 +28,12 @@ void MenuModelNG::Create()
         []() { return AceType::MakeRefPtr<InnerMenuPattern>(-1, V2::MENU_ETS_TAG, MenuType::MULTI_MENU); });
     CHECK_NULL_VOID(menuNode);
     ViewStackProcessor::GetInstance()->Push(menuNode);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        auto layoutProps = menuNode->GetLayoutProperty();
+        CHECK_NULL_VOID(layoutProps);
+        // default min width
+        layoutProps->UpdateCalcMinSize(CalcSize(CalcLength(MIN_MENU_WIDTH), std::nullopt));
+    }
 }
 
 void MenuModelNG::SetFontSize(const Dimension& fontSize)
@@ -148,5 +154,11 @@ void MenuModelNG::SetBorderRadius(FrameNode* frameNode, const std::optional<Dime
     borderRadius.radiusBottomRight = radiusBottomRight;
     borderRadius.multiValued = true;
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, BorderRadius, borderRadius, frameNode);
+}
+
+void MenuModelNG::SetWidth(FrameNode* frameNode, const Dimension& width)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuLayoutProperty, MenuWidth, width, frameNode);
+    ViewAbstract::SetWidth(frameNode, NG::CalcLength(width));
 }
 } // namespace OHOS::Ace::NG

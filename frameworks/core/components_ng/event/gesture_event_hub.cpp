@@ -76,16 +76,16 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
     TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
     const RefPtr<TargetComponent>& targetComponent)
 {
-    size_t idx = innerTargets.size();
-    size_t newIdx = 0;
     auto host = GetFrameNode();
     CHECK_NULL_RETURN(host, false);
     auto eventHub = eventHub_.Upgrade();
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
     if (scrollableActuator_) {
         scrollableActuator_->CollectTouchTarget(
-            coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, localPoint);
+            coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, localPoint, host, targetComponent);
     }
+    size_t idx = innerTargets.size();
+    size_t newIdx = 0;
     if (touchEventActuator_) {
         touchEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
     }
@@ -826,15 +826,16 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         RefPtr<FrameNode> imageNode = overlayManager->GetPixelMapContentNode();
         DragEventActuator::CreatePreviewNode(frameNode, imageNode);
         CHECK_NULL_VOID(imageNode);
-        auto window = SubwindowManager::GetInstance()->ShowPreviewNG();
-        CHECK_NULL_VOID(window);
-        overlayManager = window->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        DragEventActuator::MountPixelMap(overlayManager, eventHub->GetGestureEventHub(), imageNode);
-        dragDropManager->DoDragStartAnimation(overlayManager, info);
         scale = static_cast<float>(imageNode->GetPreviewScaleVal());
-        if (pixelMap_ != nullptr) {
-            pixelMap = pixelMap_;
+        auto window = SubwindowManager::GetInstance()->ShowPreviewNG();
+        if (window) {
+            overlayManager = window->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            DragEventActuator::MountPixelMap(overlayManager, eventHub->GetGestureEventHub(), imageNode);
+            dragDropManager->DoDragStartAnimation(overlayManager, info);
+            if (pixelMap_ != nullptr) {
+                pixelMap = pixelMap_;
+            }
         }
     }
     if (!overlayManager->GetIsOnAnimation()) {
@@ -873,13 +874,12 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     eventManager->SetIsDragging(true);
     if (info.GetInputEventType() != InputEventType::MOUSE_BUTTON && dragEventActuator_->GetIsNotInPreviewState()) {
         if (!dragDropManager->IsNeedScaleDragPreview()) {
-            InteractionInterface::GetInstance()->SetDragWindowVisible(true);
             overlayManager->RemovePixelMap();
-            pipeline->FlushPipelineImmediately();
+            pipeline->AddAfterRenderTask([]() { InteractionInterface::GetInstance()->SetDragWindowVisible(true); });
         }
     } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
         if (!dragDropManager->IsNeedScaleDragPreview()) {
-            InteractionInterface::GetInstance()->SetDragWindowVisible(true);
+            pipeline->AddAfterRenderTask([]() { InteractionInterface::GetInstance()->SetDragWindowVisible(true); });
         }
         dragDropManager->SetIsDragWindowShow(true);
     }
@@ -1245,12 +1245,14 @@ void GestureEventHub::ClearUserOnTouch()
 
 void GestureEventHub::CopyGestures(const RefPtr<GestureEventHub>& gestureEventHub)
 {
+    CHECK_NULL_VOID(gestureEventHub);
     gestures_ = gestureEventHub->backupGestures_;
     recreateGesture_ = true;
 }
 
 void GestureEventHub::CopyEvent(const RefPtr<GestureEventHub>& gestureEventHub)
 {
+    CHECK_NULL_VOID(gestureEventHub);
     auto originalTouchEventActuator = gestureEventHub->touchEventActuator_;
     if (originalTouchEventActuator) {
         touchEventActuator_ = MakeRefPtr<TouchEventActuator>();

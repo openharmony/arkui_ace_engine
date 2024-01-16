@@ -144,6 +144,12 @@ public:
         return 0;
     };
 
+    virtual std::string GetWindowName() const
+    {
+        static std::string name;
+        return name;
+    };
+
     void SetCursor(MouseFormat cursor)
     {
         cursor_ = cursor;
@@ -165,6 +171,11 @@ public:
     }
 
     virtual int32_t GetCurrentRefreshRateMode() const
+    {
+        return 0;
+    }
+
+    virtual int32_t GetAnimateExpectedRate() const
     {
         return 0;
     }

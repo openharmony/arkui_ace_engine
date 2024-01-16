@@ -56,6 +56,7 @@ public:
     using OnFormUninstallCallback = std::function<void(int64_t)>;
     using OnFormSurfaceNodeCallback = std::function<void(const std::shared_ptr<Rosen::RSSurfaceNode>&, bool)>;
     using OnFormSurfaceChangeCallback = std::function<void(float width, float height)>;
+    using OnFormSurfaceDetachCallback = std::function<void()>;
     using ActionEventHandle = std::function<void(const std::string&)>;
     using UnTrustFormCallback = std::function<void()>;
     using SnapshotCallback = std::function<void(const uint32_t&)>;
@@ -94,6 +95,7 @@ public:
     void AddFormUninstallCallback(const OnFormUninstallCallback& callback);
     void AddFormSurfaceNodeCallback(const OnFormSurfaceNodeCallback& callback);
     void AddFormSurfaceChangeCallback(OnFormSurfaceChangeCallback&& callback);
+    void AddFormSurfaceDetachCallback(OnFormSurfaceDetachCallback&& callback);
     void AddFormLinkInfoUpdateCallback(OnFormLinkInfoUpdateCallback&& callback);
     void AddActionEventHandle(const ActionEventHandle& callback);
     void AddUnTrustFormCallback(const UnTrustFormCallback& callback);
@@ -117,6 +119,7 @@ public:
     void OnSurfaceCreate(const AppExecFwk::FormJsInfo& formInfo,
         const std::shared_ptr<Rosen::RSSurfaceNode>& rsSurfaceNode, const AAFwk::Want& want);
     void OnFormSurfaceChange(float width, float height);
+    void OnFormSurfaceDetach();
     void ResetForm();
     void ReleaseForm();
     void NotifySurfaceChange(float width, float height);
@@ -150,6 +153,7 @@ private:
     OnFormUninstallCallback onFormUninstallCallback_;
     OnFormSurfaceNodeCallback onFormSurfaceNodeCallback_;
     OnFormSurfaceChangeCallback onFormSurfaceChangeCallback_;
+    OnFormSurfaceDetachCallback onFormSurfaceDetachCallback_;
     ActionEventHandle actionEventHandle_;
     UnTrustFormCallback unTrustFormCallback_;
     SnapshotCallback snapshotCallback_;

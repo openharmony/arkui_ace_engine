@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_render_image.h"
 
+#include "frameworks/core/common/container.h"
 #include "bridge/declarative_frontend/jsview/js_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "napi/native_api.h"
@@ -123,8 +124,8 @@ napi_value JSRenderImage::Constructor(napi_env env, napi_callback_info info)
         }
     }
     auto wrapper = new (std::nothrow) JSRenderImage();
-    wrapper->src_ = textString;
-    
+    wrapper->SetInstanceId(OHOS::Ace::Container::CurrentId());
+    wrapper->LoadImage(textString);
     napi_coerce_to_native_binding_object(env, thisVar, DetachImageBitmap, AttachImageBitmap, wrapper, nullptr);
     napi_wrap(
         env, thisVar, wrapper,
@@ -245,6 +246,55 @@ napi_value JSRenderImage::OnClose()
     width_ = 0;
     height_ = 0;
     return nullptr;
+}
+
+void JSRenderImage::OnImageDataReady()
+{
+    CHECK_NULL_VOID(loadingCtx_);
+    width_ = loadingCtx_->GetImageSize().Width();
+    height_ = loadingCtx_->GetImageSize().Height();
+    loadingCtx_->MakeCanvasImageIfNeed(loadingCtx_->GetImageSize(), true, ImageFit::NONE);
+}
+
+void JSRenderImage::OnImageLoadSuccess()
+{
+    CHECK_NULL_VOID(loadingCtx_);
+    image_ = loadingCtx_->MoveCanvasImage();
+    CHECK_NULL_VOID(image_);
+    pixelMap_ = image_->GetPixelMap();
+}
+
+void JSRenderImage::OnImageLoadFail(const std::string& errorMsg)
+{
+    width_ = 0;
+    height_ = 0;
+    pixelMap_ = nullptr;
+}
+
+void JSRenderImage::LoadImage(const std::string& src)
+{
+    src_ = src;
+    auto sourceInfo = ImageSourceInfo(src);
+    LoadImage(sourceInfo);
+}
+
+void JSRenderImage::LoadImage(const ImageSourceInfo& sourceInfo)
+{
+    auto dataReadyCallback = [jsRenderImage = this](const ImageSourceInfo& sourceInfo) {
+        CHECK_NULL_VOID(jsRenderImage);
+        jsRenderImage->OnImageDataReady();
+    };
+    auto loadSuccessCallback = [jsRenderImage = this](const ImageSourceInfo& sourceInfo) {
+        CHECK_NULL_VOID(jsRenderImage);
+        jsRenderImage->OnImageLoadSuccess();
+    };
+    auto loadFailCallback = [jsRenderImage = this](const ImageSourceInfo& sourceInfo, const std::string& errorMsg) {
+        CHECK_NULL_VOID(jsRenderImage);
+        jsRenderImage->OnImageLoadFail(errorMsg);
+    };
+    NG::LoadNotifier loadNotifier(dataReadyCallback, loadSuccessCallback, loadFailCallback);
+    loadingCtx_ = AceType::MakeRefPtr<NG::ImageLoadingContext>(sourceInfo, std::move(loadNotifier), true);
+    loadingCtx_->LoadImageData();
 }
 
 std::string JSRenderImage::GetSrc()

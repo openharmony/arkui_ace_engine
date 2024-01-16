@@ -115,7 +115,7 @@ public:
     void CloseCustomDialog(const int32_t dialogId);
     
     bool GetShown();
-
+    void ResizeWindow();
 private:
     RefPtr<Subwindow> GetOrCreateSubWindow();
 

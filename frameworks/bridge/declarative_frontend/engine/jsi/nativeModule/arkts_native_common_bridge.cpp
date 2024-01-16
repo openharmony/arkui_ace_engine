@@ -14,20 +14,21 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 
-#include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
-#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
-#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
-#include "core/interfaces/native/node/api.h"
+#include "bridge/declarative_frontend/engine/js_ref_ptr.h"
+#include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
+#include "core/components/common/properties/blend_mode.h"
+#include "core/interfaces/native/node/api.h"
 #include "frameworks/base/geometry/calc_dimension.h"
 #include "frameworks/base/geometry/dimension.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_value_conversions.h"
+#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 using namespace OHOS::Ace::Framework;
 
 namespace OHOS::Ace::NG {
@@ -59,6 +60,7 @@ constexpr double HALF_DIMENSION = 50.0;
 constexpr uint32_t DEFAULT_DURATION = 1000;
 constexpr int64_t MICROSEC_TO_MILLISEC = 1000;
 constexpr int32_t MAX_ALIGN_VALUE = 8;
+constexpr int32_t BACKWARD_COMPAT_MAGIC_NUMBER_OFFSCREEN = 1000;
 constexpr SharedTransitionEffectType DEFAULT_SHARED_EFFECT = SharedTransitionEffectType::SHARED_EFFECT_EXCHANGE;
 
 BorderStyle ConvertBorderStyle(int32_t value)
@@ -817,9 +819,8 @@ void PushOuterBordeDimensionVector(const std::optional<CalcDimension>& valueDime
 void ParseOuterBorder(EcmaVM* vm, const Local<JSValueRef>& args, std::optional<CalcDimension>& optionalDimention)
 {
     CalcDimension valueDimen;
-    if (!args->IsUndefined() && ArkTSUtils::ParseJsDimensionVp(vm, args, valueDimen, false) &&
-        valueDimen.IsNonNegative()) {
-        if (valueDimen.Unit() == DimensionUnit::PERCENT) {
+    if (!args->IsUndefined() && ArkTSUtils::ParseJsDimensionVp(vm, args, valueDimen, false)) {
+        if (valueDimen.IsNegative() || valueDimen.Unit() == DimensionUnit::PERCENT) {
             valueDimen.Reset();
         }
         optionalDimention = valueDimen;
@@ -1104,6 +1105,19 @@ bool ParseRotate(ArkUIRuntimeCallInfo *runtimeCallInfo, double values[], int uni
     values[NUM_6] = angle;
     values[NUM_7] = perspective;
     return true;
+}
+
+void ParseBlurOption(const EcmaVM* vm, const Local<JSValueRef> blurOptionsArg, BlurOption& blurOption)
+{
+    if (blurOptionsArg->IsArray(vm)) {
+        Local<panda::ArrayRef> params = static_cast<Local<panda::ArrayRef>>(blurOptionsArg);
+        auto grey1 = params->GetValueAt(vm, blurOptionsArg, 0)->Uint32Value(vm);
+        auto grey2 = params->GetValueAt(vm, blurOptionsArg, 1)->Uint32Value(vm);
+        std::vector<float> greyVec(2); // 2 number
+        greyVec[0] = grey1;
+        greyVec[1] = grey2;
+        blurOption.grayscale = greyVec;
+    }
 }
 
 bool ParseCalcDimension(const EcmaVM* vm,
@@ -4132,6 +4146,120 @@ ArkUINativeModuleValue CommonBridge::ResetObscured(ArkUIRuntimeCallInfo* runtime
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue CommonBridge::SetBackgroundEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);     // 0:index of parameter frameNode
+    Local<JSValueRef> radiusArg = runtimeCallInfo->GetCallArgRef(1);        // 1:index of parameter radius
+    Local<JSValueRef> saturationArg = runtimeCallInfo->GetCallArgRef(2);    // 2:index of parameter saturation
+    Local<JSValueRef> brightnessArg = runtimeCallInfo->GetCallArgRef(3);    // 3:index of parameter brightness
+    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(4);         // 4:index of parameter color
+    Local<JSValueRef> adaptiveColorArg = runtimeCallInfo->GetCallArgRef(5); // 5:index of parameter adaptiveColor
+    Local<JSValueRef> blurOptionsArg = runtimeCallInfo->GetCallArgRef(6);   // 6:index of parameter blurOptions
+    void* nativeNode = frameNodeArg->ToNativePointer(vm)->Value();
+    CalcDimension radius;
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, radiusArg, radius) || LessNotEqual(radius.Value(), 0.0f)) {
+        radius.SetValue(0.0f);
+    }
+    double saturation = 1.0f;
+    if (saturationArg->IsNumber()) {
+        saturation = saturationArg->ToNumber(vm)->Value();
+        saturation = (saturation > 0.0f || NearZero(saturation)) ? saturation : 1.0f;
+    }
+    double brightness = 1.0f;
+    if (brightnessArg->IsNumber()) {
+        brightness = brightnessArg->ToNumber(vm)->Value();
+        brightness = (brightness > 0.0f || NearZero(brightness)) ? brightness : 1.0f;
+    }
+    Color color = Color::TRANSPARENT;
+    if (!ArkTSUtils::ParseJsColor(vm, colorArg, color)) {
+        color.SetValue(Color::TRANSPARENT.GetValue());
+    }
+    auto adaptiveColorValue = static_cast<int32_t>(AdaptiveColor::DEFAULT);
+    auto adaptiveColor = AdaptiveColor::DEFAULT;
+    if (adaptiveColorArg->IsNumber()) {
+        adaptiveColorValue = adaptiveColorArg->Int32Value(vm);
+        if (adaptiveColorValue >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
+            adaptiveColorValue <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
+            adaptiveColor = static_cast<AdaptiveColor>(adaptiveColorValue);
+        }
+    }
+    BlurOption blurOption;
+    if (blurOptionsArg->IsArray(vm)) {
+        ParseBlurOption(vm, blurOptionsArg, blurOption);
+    }
+    EffectOption option = { radius, saturation, brightness, color, adaptiveColor, blurOption };
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetBackgroundEffect(nativeNode, option);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetBackgroundEffect(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBackgroundEffect(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetBackgroundBrightness(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);     // 0:index of parameter frameNode
+    Local<JSValueRef> ratedArg = runtimeCallInfo->GetCallArgRef(1);         // 1:index of parameter ratedArg
+    Local<JSValueRef> lightUpDegreeArg = runtimeCallInfo->GetCallArgRef(2); // 2:index of parameter lightUpDegreeArg
+    void* nativeNode = frameNodeArg->ToNativePointer(vm)->Value();
+    double rate = 0.0;
+    double lightUpDegree = 0.0;
+    if (!ArkTSUtils::ParseJsDouble(vm, ratedArg, rate)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (!ArkTSUtils::ParseJsDouble(vm, lightUpDegreeArg, lightUpDegree)) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    GetArkUIInternalNodeAPI()->GetCommonModifier().SetBackgroundBrightness(nativeNode, rate, lightUpDegree);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetBackgroundBrightness(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBackgroundBrightness(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetDragPreviewOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> mode = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = frameNodeArg->ToNativePointer(vm)->Value();
+    if (mode->IsNumber()) {
+        int32_t dragPreviewMode = mode->Int32Value(vm);
+        GetArkUIInternalNodeAPI()->GetCommonModifier().SetDragPreviewOptions(nativeNode, dragPreviewMode);
+    } else {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetDragPreviewOptions(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetDragPreviewOptions(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetDragPreviewOptions(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue CommonBridge::SetResponseRegion(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -4173,6 +4301,35 @@ ArkUINativeModuleValue CommonBridge::ResetTransition(ArkUIRuntimeCallInfo* runti
 }
 
 ArkUINativeModuleValue CommonBridge::SetTransition(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = firstArg->ToNativePointer(vm)->Value();
+    auto* frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    if (!info[1]->IsObject()) {
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto obj = Framework::JSRef<Framework::JSObject>::Cast(info[1]);
+    if (!obj->GetProperty("successor_")->IsUndefined()) {
+        auto chainedEffect = ParseChainedTransition(obj, info.GetExecutionContext());
+        ViewAbstract::SetChainedTransition(frameNode, chainedEffect);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    auto options = ParseJsTransition(info[1]);
+    ViewAbstract::SetTransition(frameNode, options);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetTransitionPassThrough(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetTransitionPassThrough(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
@@ -4384,6 +4541,101 @@ ArkUINativeModuleValue CommonBridge::ResetEnabled(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     GetArkUIInternalNodeAPI()->GetCommonModifier().ResetEnabled(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetUseShadowBatching(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> booleanArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = frameNodeArg->ToNativePointer(vm)->Value();
+    if (booleanArg->IsBoolean()) {
+        bool boolValue = booleanArg->ToBoolean(vm)->Value();
+        GetArkUIInternalNodeAPI()->GetCommonModifier().SetUseShadowBatching(nativeNode, boolValue);
+    } else {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetUseShadowBatching(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetUseShadowBatching(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = frameNodeArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetUseShadowBatching(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetBlendMode(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);      // 0: index of parameter frameNode
+    Local<JSValueRef> blendModeArg = runtimeCallInfo->GetCallArgRef(1);      // 1: index of parameter blendMode
+    Local<JSValueRef> blendApplyTypeArg = runtimeCallInfo->GetCallArgRef(2); // 2: index of parameter blendApplyType
+    void* nativeNode = frameNodeArg->ToNativePointer(vm)->Value();
+    int32_t blendModeValue = static_cast<int32_t>(OHOS::Ace::BlendMode::NONE);
+    int32_t blendApplyTypeValue = static_cast<int32_t>(OHOS::Ace::BlendApplyType::FAST);
+    if (blendModeArg->IsNumber()) {
+        int32_t blendModeNum = blendModeArg->Int32Value(vm);
+        if (blendModeNum >= static_cast<int32_t>(OHOS::Ace::BlendMode::NONE) &&
+            blendModeNum <= static_cast<int32_t>(OHOS::Ace::BlendMode::LUMINOSITY)) {
+            blendModeValue = blendModeNum;
+        } else if (blendModeNum == BACKWARD_COMPAT_MAGIC_NUMBER_OFFSCREEN) {
+            blendModeValue = static_cast<int32_t>(OHOS::Ace::BlendMode::SRC_OVER);
+            blendApplyTypeValue = static_cast<int32_t>(OHOS::Ace::BlendApplyType::OFFSCREEN);
+        }
+        if (blendApplyTypeArg->IsNumber()) {
+            int32_t blendApplyTypeNum = blendApplyTypeArg->Int32Value(vm);
+            if (blendApplyTypeNum >= static_cast<int>(OHOS::Ace::BlendApplyType::FAST) &&
+                blendApplyTypeNum <= static_cast<int>(OHOS::Ace::BlendApplyType::OFFSCREEN)) {
+                blendApplyTypeValue = blendApplyTypeNum;
+            }
+        }
+        GetArkUIInternalNodeAPI()->GetCommonModifier().SetBlendMode(nativeNode, blendModeValue, blendApplyTypeValue);
+    } else {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBlendMode(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetBlendMode(ArkUIRuntimeCallInfo *runtimeCallInfo)
+{
+    EcmaVM *vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    void *nativeNode = frameNodeArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetBlendMode(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::SetMonopolizeEvents(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> booleanArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = frameNodeArg->ToNativePointer(vm)->Value();
+    if (booleanArg->IsBoolean()) {
+        bool boolValue = booleanArg->ToBoolean(vm)->Value();
+        GetArkUIInternalNodeAPI()->GetCommonModifier().SetMonopolizeEvents(nativeNode, boolValue);
+    } else {
+        GetArkUIInternalNodeAPI()->GetCommonModifier().ResetMonopolizeEvents(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue CommonBridge::ResetMonopolizeEvents(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = frameNodeArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetCommonModifier().ResetMonopolizeEvents(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

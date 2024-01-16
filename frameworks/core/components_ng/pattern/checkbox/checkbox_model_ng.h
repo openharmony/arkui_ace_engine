@@ -38,6 +38,7 @@ public:
     void SetResponseRegion(const std::vector<DimensionRect>& responseRegion) override;
     void SetCheckboxStyle(CheckBoxStyle checkboxStyle) override;
     
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetSelect(FrameNode* frameNode, bool isSelected);
     static void SetSelectedColor(FrameNode* frameNode, const Color& color);
     static void SetUnSelectedColor(FrameNode* frameNode, const Color& color);

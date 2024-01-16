@@ -135,7 +135,9 @@ void SliderLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 
     auto contentRect = layoutWrapper->GetGeometryNode()->GetContentRect();
     auto axis = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL);
-    auto reverse = sliderLayoutProperty->GetReverseValue(false);
+    auto paintReverse = sliderLayoutProperty->GetReverseValue(false);
+    auto direction = sliderLayoutProperty->GetLayoutDirection();
+    auto reverse = direction == TextDirection::RTL ? !paintReverse : paintReverse;
     auto mode = sliderLayoutProperty->GetSliderMode().value_or(SliderModel::SliderMode::OUTSET);
     Dimension hotBlockShadowWidth = mode == SliderModel::SliderMode::OUTSET ? theme->GetOutsetHotBlockShadowWidth()
                                                                             : theme->GetInsetHotBlockShadowWidth();

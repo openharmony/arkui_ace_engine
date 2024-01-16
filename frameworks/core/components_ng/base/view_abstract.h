@@ -171,6 +171,7 @@ public:
     static void SetInvert(const InvertVariant &value);
     static void SetHueRotate(float value);
     static void SetColorBlend(const Color &value);
+    static void SetSystemBarEffect(bool systemBarEffect);
 
     // gradient
     static void SetLinearGradient(const NG::Gradient &gradient);
@@ -448,6 +449,9 @@ public:
     static void SetRestoreId(FrameNode* frameNode, int32_t restoreId);
     static void SetTabIndex(FrameNode* frameNode, int32_t index);
     static void SetObscured(FrameNode* frameNode, const std::vector<ObscuredReasons>& reasons);
+    static void SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption);
+    static void SetDynamicLightUp(FrameNode* frameNode, float rate, float lightUpDegree);
+    static void SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
     static void SetMouseResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& mouseResponseRegion);
     static void SetSharedTransition(
@@ -457,12 +461,18 @@ public:
     static void SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMaskProperty>& progress);
     static void SetEnabled(FrameNode* frameNode, bool enabled);
+    static void SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching);
+    static void SetBlendMode(FrameNode* frameNode, BlendMode blendMode);
+    static void SetBlendApplyType(FrameNode* frameNode, BlendApplyType blendApplyType);
+    static void SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents);
     static void SetDraggable(FrameNode* frameNode, bool draggable);
     static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);
     static void SetClickEffectLevel(FrameNode* frameNode, const ClickEffectLevel& level, float scaleValue);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction);
 
+    static void SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback);
+    static void SetOnBlur(FrameNode* frameNode, OnBlurFunc &&onBlurCallback);
 private:
     static void AddDragFrameNodeToManager();
 };

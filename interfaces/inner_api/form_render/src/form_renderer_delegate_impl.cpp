@@ -76,6 +76,17 @@ int32_t FormRendererDelegateImpl::OnSurfaceChange(float width, float height)
     return ERR_OK;
 }
 
+int32_t FormRendererDelegateImpl::OnSurfaceDetach(uint64_t surfaceId)
+{
+    HILOG_DEBUG("%{public}s called.", __func__);
+    if (!surfaceDetachEventHandler_) {
+        HILOG_ERROR("surfaceDetachEventHandler_ is null");
+        return ERR_INVALID_DATA;
+    }
+    surfaceDetachEventHandler_();
+    return ERR_OK;
+}
+
 int32_t FormRendererDelegateImpl::OnFormLinkInfoUpdate(const std::vector<std::string>& formLinkInfos)
 {
     HILOG_DEBUG("%{public}s called.", __func__);
@@ -108,6 +119,11 @@ void FormRendererDelegateImpl::SetErrorEventHandler(
 void FormRendererDelegateImpl::SetSurfaceChangeEventHandler(std::function<void(float width, float height)>&& listener)
 {
     surfaceChangeEventHandler_ = std::move(listener);
+}
+
+void FormRendererDelegateImpl::SetSurfaceDetachEventHandler(std::function<void()>&& listener)
+{
+    surfaceDetachEventHandler_ = std::move(listener);
 }
 
 void FormRendererDelegateImpl::SetFormLinkInfoUpdateHandler(

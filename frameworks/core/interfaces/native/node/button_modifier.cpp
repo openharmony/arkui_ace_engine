@@ -245,12 +245,6 @@ void ButtonCompleteParameters(ButtonParameters& buttonParameters)
     if (!buttonParameters.maxLines.has_value()) {
         buttonParameters.maxLines = buttonTheme->GetTextMaxLines();
     }
-    if (!buttonParameters.minFontSize.has_value()) {
-        buttonParameters.minFontSize = buttonTheme->GetMinFontSize();
-    }
-    if (!buttonParameters.maxFontSize.has_value()) {
-        buttonParameters.maxFontSize = buttonTheme->GetMaxFontSize();
-    }
     if (!buttonParameters.fontSize.has_value()) {
         buttonParameters.fontSize = textStyle.GetFontSize();
     }
@@ -445,13 +439,29 @@ void ResetButtonBorderRadius(NodeHandle node)
     ButtonModelNG::SetBorderRadius(frameNode, reset);
 }
 
+void SetButtonSize(NodeHandle node, double widthValue, int32_t widthUnit, double heightValue, int32_t heightUnit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ButtonModelNG::SetSize(frameNode, CalcDimension(widthValue, (DimensionUnit)widthUnit),
+        CalcDimension(heightValue, (DimensionUnit)heightUnit));
+}
+
+void ResetButtonSize(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CalcDimension value(0.0, DimensionUnit::VP);
+    ButtonModelNG::SetSize(frameNode, value, value);
+}
+
 ArkUIButtonModifierAPI GetButtonModifier()
 {
     static const ArkUIButtonModifierAPI modifier = { SetButtonType, ResetButtonType, SetButtonStateEffect,
         ResetButtonStateEffect, SetButtonFontColor, ResetButtonFontColor, SetButtonFontSize, ResetButtonFontSize,
         SetButtonFontWeight, ResetButtonFontWeight, SetButtonFontStyle, ResetButtonFontStyle, SetButtonFontFamily,
         ResetButtonFontFamily, SetButtonLabelStyle, ResetButtonLabelStyle, SetButtonBackgroundColor,
-        ResetButtonBackgroundColor, SetButtonBorderRadius, ResetButtonBorderRadius };
+        ResetButtonBackgroundColor, SetButtonBorderRadius, ResetButtonBorderRadius, SetButtonSize, ResetButtonSize };
 
     return modifier;
 }

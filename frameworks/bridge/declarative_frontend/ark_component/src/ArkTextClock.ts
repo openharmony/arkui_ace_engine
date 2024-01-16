@@ -51,9 +51,6 @@ class ArkTextClockComponent extends ArkComponent implements TextClockAttribute {
   fontFeature(value: string): this {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
 }
 
 class TextClockFormatModifier extends ModifierWithKey<string> {

@@ -36,6 +36,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/richeditor_model_impl.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
@@ -195,6 +196,18 @@ JSRef<JSObject> JSRichEditor::CreateJSSymbolSpanStyleResult(const SymbolSpanStyl
     return symbolSpanStyleObj;
 }
 
+JSRef<JSObject> JSRichEditor::CreateJSValueResource(const RefPtr<ResourceObject>& valueResource)
+{
+    JSRef<JSObject> valueResourceObj = JSRef<JSObject>::New();
+    valueResourceObj->SetProperty<std::string>("bundleName", valueResource->GetBundleName());
+    valueResourceObj->SetProperty<std::string>("moduleName", valueResource->GetModuleName());
+    valueResourceObj->SetProperty<uint32_t>("id", valueResource->GetId());
+    valueResourceObj->SetProperty<std::vector<ResourceObjectParams>>("params", valueResource->GetParams());
+    valueResourceObj->SetProperty<uint32_t>("type", valueResource->GetType());
+
+    return valueResourceObj;
+}
+
 JSRef<JSObject> JSRichEditor::CreateJSImageStyleResult(const ImageStyleResult& imageStyleResult)
 {
     JSRef<JSObject> imageSpanStyleObj = JSRef<JSObject>::New();
@@ -250,6 +263,7 @@ JSRef<JSObject> JSRichEditor::CreateJSSpanResultObject(const ResultObject& resul
     } else if (resultObject.type == SelectSpanType::TYPESYMBOLSPAN) {
         resultObj->SetProperty<std::string>("value", resultObject.valueString);
         resultObj->SetPropertyObject("symbolSpanStyle", CreateJSSymbolSpanStyleResult(resultObject.symbolSpanStyle));
+        resultObj->SetPropertyObject("valueResource", CreateJSValueResource(resultObject.valueResource));
     } else if (resultObject.type == SelectSpanType::TYPEIMAGE) {
         if (resultObject.valuePixelMap) {
 #ifdef PIXEL_MAP_SUPPORTED
@@ -1074,8 +1088,10 @@ void JSRichEditorController::AddSymbolSpan(const JSCallbackInfo& args)
     }
     SymbolSpanOptions options;
     uint32_t symbolId;
-    if (!args[0]->IsEmpty() && JSContainerBase::ParseJsSymbolId(args[0], symbolId)) {
+    RefPtr<ResourceObject> resourceObject;
+    if (!args[0]->IsEmpty() && JSContainerBase::ParseJsSymbolId(args[0], symbolId, resourceObject)) {
         options.symbolId = symbolId;
+        options.resourceObject = resourceObject;
     } else {
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(-1)));
         return;

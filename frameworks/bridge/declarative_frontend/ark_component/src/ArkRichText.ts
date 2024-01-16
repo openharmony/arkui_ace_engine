@@ -24,9 +24,6 @@ class ArkRichTextComponent extends ArkComponent implements CommonMethod<RichText
   onComplete(callback: () => void): RichTextAttribute {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize: boolean): RichTextAttribute {
-    throw new Error('Method not implemented.');
-  }
 }
 // @ts-ignore
 globalThis.RichText.attributeModifier = function (modifier) {

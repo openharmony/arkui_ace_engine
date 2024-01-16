@@ -222,6 +222,28 @@ void ScrollModelNG::SetDisplayMode(int value)
     ACE_UPDATE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, displayMode);
 }
 
+void ScrollModelNG::SetEnablePaging(bool enablePaging)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(pattern);
+    CHECK_NULL_VOID(pattern->GetEnablePaging() != ScrollPagingStatus::INVALID);
+    if (!enablePaging) {
+        pattern->SetEnablePaging(ScrollPagingStatus::NONE);
+        if (pattern->GetScrollSnapAlign() != ScrollSnapAlign::NONE) {
+            ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, ScrollSnapAlign::NONE);
+        }
+        return;
+    }
+    pattern->SetEnablePaging(ScrollPagingStatus::VALID);
+    // Reuse scrollSnap, and set intervalSize after layout.
+    if (pattern->GetScrollSnapAlign() != ScrollSnapAlign::START) {
+        ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, ScrollSnapAlign::START);
+    }
+    pattern->SetScrollSnapUpdate(true);
+}
+
 void ScrollModelNG::SetScrollBar(FrameNode* frameNode, DisplayMode barState)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarMode, barState, frameNode);
@@ -339,9 +361,8 @@ void ScrollModelNG::SetEdgeEffect(FrameNode* frameNode, const EdgeEffect& edgeEf
     ScrollableModelNG::SetEdgeEffect(frameNode, edgeEffect, alwaysEnabled);
 }
 
-void ScrollModelNG::SetEnablePaging(bool enablePaging)
+void ScrollModelNG::SetEnablePaging(FrameNode* frameNode, bool enablePaging)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
     CHECK_NULL_VOID(pattern);
@@ -349,15 +370,36 @@ void ScrollModelNG::SetEnablePaging(bool enablePaging)
     if (!enablePaging) {
         pattern->SetEnablePaging(ScrollPagingStatus::NONE);
         if (pattern->GetScrollSnapAlign() != ScrollSnapAlign::NONE) {
-            ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, ScrollSnapAlign::NONE);
+            ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, ScrollSnapAlign::NONE, frameNode);
         }
         return;
     }
     pattern->SetEnablePaging(ScrollPagingStatus::VALID);
     // Reuse scrollSnap, and set intervalSize after layout.
     if (pattern->GetScrollSnapAlign() != ScrollSnapAlign::START) {
-        ACE_UPDATE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, ScrollSnapAlign::START);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ScrollLayoutProperty, ScrollSnapAlign, ScrollSnapAlign::START, frameNode);
     }
     pattern->SetScrollSnapUpdate(true);
 }
+
+RefPtr<ScrollControllerBase> ScrollModelNG::GetOrCreateController(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<ScrollPattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    if (!pattern->GetScrollPositionController()) {
+        auto controller = AceType::MakeRefPtr<NG::ScrollableController>();
+        pattern->SetPositionController(controller);
+    }
+    return pattern->GetScrollPositionController();
+}
+
+void ScrollModelNG::SetOnScrollEdge(FrameNode* frameNode, NG::ScrollEdgeEvent&& event)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ScrollEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnScrollEdge(std::move(event));
+}
+
 } // namespace OHOS::Ace::NG

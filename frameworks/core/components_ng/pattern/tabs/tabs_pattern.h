@@ -139,7 +139,6 @@ private:
 
     bool isCustomAnimation_ = false;
     bool isDisableSwipe_ = false;
-    bool isBlurStyle_ = false;
 
     ChangeEventPtr onChangeEvent_;
     ChangeEventPtr onTabBarClickEvent_;

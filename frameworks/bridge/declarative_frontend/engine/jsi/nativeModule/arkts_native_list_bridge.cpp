@@ -459,6 +459,58 @@ ArkUINativeModuleValue ListBridge::ResetScrollSnapAlign(ArkUIRuntimeCallInfo* ru
     return panda::JSValueRef::Undefined(vm);
 }
 
+ArkUINativeModuleValue ListBridge::SetContentStartOffset(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> startOffsetArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = frameNodeArg->ToNativePointer(vm)->Value();
+    double startOffset = 0.0;
+    ArkTSUtils::ParseJsDouble(vm, startOffsetArg, startOffset);
+
+    GetArkUIInternalNodeAPI()->GetListModifier().SetContentStartOffset(nativeNode, startOffset);
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListBridge::ResetContentStartOffset(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = frameNodeArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetListModifier().ResetContentStartOffset(nativeNode);
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListBridge::SetContentEndOffset(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> endOffsetArg = runtimeCallInfo->GetCallArgRef(1);
+    void* nativeNode = frameNodeArg->ToNativePointer(vm)->Value();
+    double endOffset = 0.0;
+    ArkTSUtils::ParseJsDouble(vm, endOffsetArg, endOffset);
+
+    GetArkUIInternalNodeAPI()->GetListModifier().SetContentEndOffset(nativeNode, endOffset);
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue ListBridge::ResetContentEndOffset(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> frameNodeArg = runtimeCallInfo->GetCallArgRef(0);
+    void* nativeNode = frameNodeArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetListModifier().ResetContentEndOffset(nativeNode);
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
 ArkUINativeModuleValue ListBridge::SetDivider(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();

@@ -80,6 +80,7 @@ struct DataBase {
 
 struct JankInfo {
     int64_t skippedFrameTime {0};
+    std::string windowName {""};
     BaseInfo baseInfo;
 };
 
@@ -121,10 +122,12 @@ public:
     void End(const std::string& sceneId, bool isRsRender);
     void RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time);
     int64_t GetInputTime(const std::string& sceneId, PerfActionType type, const std::string& note);
-    void SetFrameTime(int64_t vsyncTime, int64_t duration, double jank);
+    void SetFrameTime(int64_t vsyncTime, int64_t duration, double jank, const std::string& windowName);
     void ReportJankFrameApp(double jank);
     void SetPageUrl(const std::string& pageUrl);
     std::string GetPageUrl();
+    void SetAppForeground(bool isShow);
+    void SetAppStartStatus();
     static PerfMonitor* GetPerfMonitor();
     static PerfMonitor* pMonitor;
 
@@ -144,6 +147,19 @@ private:
     BaseInfo baseInfo;
     mutable std::mutex mMutex;
     std::map<std::string, SceneRecord*> mRecords;
+
+    // for jank frame app
+    bool isResponseExclusion {false};
+    bool isStartAppFrame {false};
+    bool isBackgroundApp {false};
+    bool isExclusionWindow {false};
+    int64_t startAppTime {0};
+    bool IsExclusionFrame();
+    void CheckInStartAppStatus();
+    void CheckExclusionWindow(const std::string& windowName);
+    void CheckResponseStatus();
+    void ProcessJank(double jank, const std::string& windowName);
+    void ReportJankFrame(double jank, const std::string& windowName);
 };
 } // namespace OHOS::Ace
 #endif // ARKUI_PERF_MONITOR_H

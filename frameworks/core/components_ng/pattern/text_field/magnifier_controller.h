@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/render/drawing.h"
 #include "frameworks/base/memory/referenced.h"
 
 namespace OHOS::Ace::NG {
@@ -32,6 +33,7 @@ struct MagnifierRect {
     float startY = 0.0f;
     float endX = 0.0f;
     float endY = 0.0f;
+    RSColor bgColor = RSColor::COLOR_WHITE;
     OffsetF localOffset;
     OffsetF cursorOffset;
     SizeF contentSize;
@@ -52,6 +54,7 @@ public:
 
 private:
     void CreateMagnifierChildNode();
+    void SetMagnifierRect(const RefPtr<Pattern>& childPattern);
 
     bool haveChildNode_ = false;
     WeakPtr<Pattern> pattern_;

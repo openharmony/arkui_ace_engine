@@ -189,12 +189,12 @@ void GridEventHub::HandleOnItemDragUpdate(const GestureEvent& info)
 
 void GridEventHub::HandleOnItemDragEnd(const GestureEvent& info)
 {
-    if (!GetEditable()) {
-        return;
-    }
-
     CHECK_NULL_VOID(dragDropProxy_);
-    dragDropProxy_->OnItemDragEnd(info, draggedIndex_, DragType::GRID);
+    if (GetEditable()) {
+        dragDropProxy_->OnItemDragEnd(info, draggedIndex_, DragType::GRID);
+    } else {
+        dragDropProxy_->onItemDragCancel();
+    }
     dragDropProxy_->DestroyDragWindow();
     dragDropProxy_ = nullptr;
     draggedIndex_ = 0;

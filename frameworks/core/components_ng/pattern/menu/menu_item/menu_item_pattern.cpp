@@ -84,13 +84,10 @@ void UpdateFontColor(const RefPtr<FrameNode>& textNode, RefPtr<MenuLayoutPropert
     CHECK_NULL_VOID(renderContext);
     if (fontColor.has_value()) {
         textProperty->UpdateTextColor(fontColor.value());
-        renderContext->UpdateForegroundColor(fontColor.value());
     } else if (menuProperty && menuProperty->GetFontColor().has_value()) {
         textProperty->UpdateTextColor(menuProperty->GetFontColor().value());
-        renderContext->UpdateForegroundColor(menuProperty->GetFontColor().value());
     } else {
         textProperty->UpdateTextColor(defaultFontColor);
-        renderContext->UpdateForegroundColor(defaultFontColor);
     }
 }
 
@@ -723,8 +720,18 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     auto fontStyle = isLabel ? itemProperty->GetLabelItalicFontStyle() : itemProperty->GetItalicFontStyle();
     UpdateFontStyle(textProperty, menuProperty, fontStyle);
     auto fontColor = isLabel ? itemProperty->GetLabelFontColor() : itemProperty->GetFontColor();
+    auto menuItemNode = GetHost();
     UpdateFontColor(
         node, menuProperty, fontColor, isLabel ? theme->GetSecondaryFontColor() : theme->GetMenuFontColor());
+    if (!isLabel) {
+        auto menuItemRenderContext = menuItemNode->GetRenderContext();
+        CHECK_NULL_VOID(menuItemRenderContext);
+        auto renderContext = node->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        if (menuItemRenderContext->HasForegroundColor()) {
+            renderContext->UpdateForegroundColor(menuItemRenderContext->GetForegroundColorValue());
+        }
+    }
     auto fontFamily = isLabel ? itemProperty->GetLabelFontFamily() : itemProperty->GetFontFamily();
     UpdateFontFamily(textProperty, menuProperty, fontFamily);
     textProperty->UpdateContent(content);

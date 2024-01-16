@@ -106,9 +106,11 @@ void NavigationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t s
         contentNode = FrameNode::GetOrCreateFrameNode(
             V2::NAVBAR_CONTENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         navBar->SetNavBarContentNode(contentNode);
-        auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
         navBar->AddChild(contentNode);
+
+        auto navBarContentNode = AceType::DynamicCast<FrameNode>(contentNode);
+        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
+        navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
     contentNode->AddChild(child);
 }
@@ -294,18 +296,17 @@ bool NavigationGroupNode::CheckCanHandleBack()
 {
     auto navigation = AceType::WeakClaim(this).Upgrade();
     CHECK_NULL_RETURN(navigation, false);
-    if (navigation->isOnAnimation_) {
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation is onAnimation, back press is not support");
-        return true;
-    }
     auto navigationPattern = GetPattern<NavigationPattern>();
     CHECK_NULL_RETURN(navigationPattern, false);
-    const auto& children = contentNode_->GetChildren();
-    if (children.empty()) {
+
+    auto navigationStack = navigationPattern->GetNavigationStack();
+    CHECK_NULL_RETURN(navigationStack, false);
+    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(
+        NavigationGroupNode::GetNavDestinationNode(navigationStack->Get()));
+    if (!navDestination) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't find destination node to process back press");
         return false;
     }
-    auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(children.back());
-    CHECK_NULL_RETURN(navDestination, false);
     auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(navDestination->GetPattern());
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navDestination consume back button event: %{public}s",
         navDestinationPattern->GetName().c_str());
@@ -529,6 +530,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
                     preTitle->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
                 }
                 preNode->GetRenderContext()->UpdateTranslateInXY({ 0.0f, 0.0f });
+                preNode->GetRenderContext()->SetActualForegroundColor(DEFAULT_MASK_COLOR);
                 bool needSetInvisible = false;
                 if (isNavBar) {
                     needSetInvisible = AceType::DynamicCast<NavBarNode>(preNode)->GetTransitionType() ==
@@ -634,22 +636,6 @@ void NavigationGroupNode::MaskAnimation(const RefPtr<RenderContext>& transitionO
     maskOption.SetCurve(Curves::FRICTION);
     maskOption.SetDuration(MASK_DURATION);
     maskOption.SetFillMode(FillMode::FORWARDS);
-    maskOption.SetOnFinishEvent(
-        [transitionOutNodeContextWK = WeakPtr<RenderContext>(transitionOutNodeContext), id = Container::CurrentId()] {
-            ContainerScope scope(id);
-            auto context = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(context);
-            auto taskExecutor = context->GetTaskExecutor();
-            CHECK_NULL_VOID(taskExecutor);
-            taskExecutor->PostTask(
-                [transitionOutNodeContextWK]() {
-                    auto transitionOutNodeContext = transitionOutNodeContextWK.Upgrade();
-                    if (transitionOutNodeContext) {
-                        transitionOutNodeContext->SetActualForegroundColor(DEFAULT_MASK_COLOR);
-                    }
-                },
-                TaskExecutor::TaskType::UI);
-        });
     transitionOutNodeContext->SetActualForegroundColor(DEFAULT_MASK_COLOR);
     AnimationUtils::Animate(
         maskOption, [transitionOutNodeContext]() { transitionOutNodeContext->SetActualForegroundColor(MASK_COLOR); },

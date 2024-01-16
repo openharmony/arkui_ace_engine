@@ -227,4 +227,30 @@ ArkUINativeModuleValue TimepickerBridge::ResetDisappearTextStyle(ArkUIRuntimeCal
     GetArkUIInternalNodeAPI()->GetTimepickerModifier().ResetTimepickerDisappearTextStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
+
+ArkUINativeModuleValue TimepickerBridge::SetTimepickerUseMilitaryTime(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    Local<JSValueRef> useMilitaryArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    if (useMilitaryArg->IsBoolean()) {
+        bool value = useMilitaryArg->ToBoolean(vm)->Value();
+        GetArkUIInternalNodeAPI()->GetTimepickerModifier().SetTimepickerUseMilitaryTime(nativeNode, value);
+    } else {
+        GetArkUIInternalNodeAPI()->GetTimepickerModifier().ResetTimepickerUseMilitaryTime(nativeNode);
+    }
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue TimepickerBridge::ResetTimepickerUseMilitaryTime(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    GetArkUIInternalNodeAPI()->GetTimepickerModifier().ResetTimepickerUseMilitaryTime(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
 } // namespace OHOS::Ace::NG

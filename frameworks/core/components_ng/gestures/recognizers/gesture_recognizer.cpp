@@ -112,12 +112,15 @@ bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
         case TouchType::MOVE:
             HandleTouchMoveEvent(point);
             break;
-        case TouchType::DOWN:
+        case TouchType::DOWN: {
             deviceId_ = point.deviceId;
             deviceType_ = point.sourceType;
-            currentFingers_++;
-            HandleTouchDownEvent(point);
+            auto result = AboutToAddCurrentFingers(point.id);
+            if (result) {
+                HandleTouchDownEvent(point);
+            }
             break;
+        }
         case TouchType::UP:
             HandleTouchUpEvent(point);
             currentFingers_--;

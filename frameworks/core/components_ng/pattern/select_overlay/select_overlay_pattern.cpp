@@ -471,17 +471,17 @@ void SelectOverlayPattern::UpdateSelectMenuInfo(std::function<void(SelectMenuInf
     }
 }
 
-void SelectOverlayPattern::ShowOrHiddenMenu(bool isHidden)
+void SelectOverlayPattern::ShowOrHiddenMenu(bool isHidden, bool noAnimation)
 {
     auto host = DynamicCast<SelectOverlayNode>(GetHost());
     CHECK_NULL_VOID(host);
     if (info_->menuInfo.menuIsShow && isHidden) {
         info_->menuInfo.menuIsShow = false;
-        host->UpdateToolBar(false);
+        host->UpdateToolBar(false, noAnimation);
     } else if (!info_->menuInfo.menuIsShow && !isHidden &&
                (info_->firstHandle.isShow || info_->secondHandle.isShow || info_->isSelectRegionVisible)) {
         info_->menuInfo.menuIsShow = true;
-        host->UpdateToolBar(false);
+        host->UpdateToolBar(false, noAnimation);
     }
 }
 

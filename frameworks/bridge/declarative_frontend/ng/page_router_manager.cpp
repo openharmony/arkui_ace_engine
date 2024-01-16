@@ -24,6 +24,7 @@
 #include "base/memory/referenced.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "bridge/common/utils/source_map.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/ng/entry_page_info.h"
@@ -75,6 +76,7 @@ void PageRouterManager::LoadOhmUrl(const RouterPageInfo& target)
 
 void PageRouterManager::RunPage(const std::string& url, const std::string& params)
 {
+    PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
     ACE_SCOPED_TRACE("PageRouterManager::RunPage");
     CHECK_RUN_ON(JS);
     RouterPageInfo info { url, params };

@@ -25,6 +25,7 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components/text_field/textfield_theme.h"
 #include "core/interfaces/native/node/node_api.h"
+#include "core/components_ng/pattern/text_field/text_field_event_hub.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -526,7 +527,7 @@ void SetTextInputPlaceholderString(ArkUINodeHandle node, const char* value)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::string placeholderStr(value);
-    TextFieldModelNG::SetTextInputPlaceHolder(frameNode, placeholderStr);
+    TextFieldModelNG::SetTextFieldPlaceHolder(frameNode, placeholderStr);
 }
 
 void SetTextInputTextString(ArkUINodeHandle node, const char* value)
@@ -534,7 +535,7 @@ void SetTextInputTextString(ArkUINodeHandle node, const char* value)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     std::string textStr(value);
-    TextFieldModelNG::SetTextInputText(frameNode, textStr);
+    TextFieldModelNG::SetTextFieldText(frameNode, textStr);
 }
 } // namespace
 
@@ -598,18 +599,35 @@ const ArkUITextInputModifier* GetTextInputModifier()
     return &modifier;
 }
 
-void SetOnTextInputChange(ArkUINodeHandle node, ArkUI_Int32 eventId)
+void SetOnTextInputChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onChange = [node, eventId](const std::string& str) {
+    auto onChange = [node, eventId, extraParam](const std::string& str) {
         ArkUINodeEvent event;
         event.kind = ON_TEXTINPUT_CHANGE;
         event.eventId = eventId;
+        event.extraParam= extraParam;
         event.stringAsyncEvent.pStr = str.c_str();
         SendArkUIAsyncEvent(&event);
     };
     TextFieldModelNG::SetOnChange(frameNode, std::move(onChange));
 }
+
+void SetTextInputOnSubmit(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onEvent = [node, eventId, extraParam](int32_t value, NG::TextFieldCommonEvent& commonEvent) {
+        ArkUINodeEvent event;
+        event.kind = ON_TEXTINPUT_SUBMIT;
+        event.eventId = eventId;
+        event.extraParam= extraParam;
+        event.componentAsyncEvent.data[0].i32 = value;
+        SendArkUIAsyncEvent(&event);
+    };
+    TextFieldModelNG::SetOnSubmit(frameNode, std::move(onEvent));
+}
+
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

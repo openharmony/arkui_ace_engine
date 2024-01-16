@@ -22,6 +22,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/animation_pub.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -164,6 +165,17 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
 void TabsModelNG::SetTabBarPosition(BarPosition tabBarPosition)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, TabBarPosition, tabBarPosition);
+}
+
+void TabsModelNG::SetBarBackgroundBlurStyle(BlurStyle tabBarBlurStyle)
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
+    CHECK_NULL_VOID(tabBarPaintProperty);
+    tabBarPaintProperty->UpdateTabBarBlurStyle(tabBarBlurStyle);
 }
 
 void TabsModelNG::SetTabBarMode(TabBarMode tabBarMode)

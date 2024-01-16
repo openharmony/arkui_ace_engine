@@ -15,9 +15,6 @@
 
 /// <reference path='./import.ts' />
 class ArkRemoteWindowComponent extends ArkComponent implements RemoteWindowAttribute {
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
 }
 
 // @ts-ignore

@@ -700,7 +700,7 @@ bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM *vm, const Local<JSValueR
             return false;
         }
 
-        if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::RAWFILE)) {
+        if (resourceObject->GetType() == static_cast<uint32_t>(ResourceType::RAWFILE)) {
             auto args = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "params"));
             if (!args->IsArray(vm)) {
                 return false;
@@ -974,6 +974,19 @@ void ArkTSUtils::GetJsMediaBundleInfo(
             moduleName = module->ToString(vm)->ToString();
         }
     }
+}
+
+bool ArkTSUtils::ParseJsColorStrategy(
+    const EcmaVM* vm, const Local<JSValueRef>& value, ForegroundColorStrategy& strategy)
+{
+    if (value->IsString()) {
+        std::string colorStr = value->ToString(vm)->ToString();
+        if (colorStr.compare("invert") == 0) {
+            strategy = ForegroundColorStrategy::INVERT;
+            return true;
+        }
+    }
+    return false;
 }
 
 bool ArkTSUtils::GetJsPasswordIcon(const EcmaVM *vm, const Local<JSValueRef> &jsOnIconSrc,

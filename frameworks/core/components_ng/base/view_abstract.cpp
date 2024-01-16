@@ -1815,6 +1815,14 @@ void ViewAbstract::SetInvert(FrameNode *frameNode, const InvertVariant &invert)
     ACE_UPDATE_NODE_RENDER_CONTEXT(FrontInvert, invert, frameNode);
 }
 
+void ViewAbstract::SetSystemBarEffect(bool systemBarEffect)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_RENDER_CONTEXT(SystemBarEffect, systemBarEffect);
+}
+
 void ViewAbstract::SetHueRotate(float hueRotate)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -2626,6 +2634,33 @@ void ViewAbstract::SetObscured(FrameNode* frameNode, const std::vector<ObscuredR
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void ViewAbstract::SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->GetBackBlurRadius().has_value()) {
+            target->UpdateBackBlurRadius(Dimension());
+        }
+        if (target->GetBackBlurStyle().has_value()) {
+            target->UpdateBackBlurStyle(std::nullopt);
+        }
+        target->UpdateBackgroundEffect(effectOption);
+    }
+}
+
+void ViewAbstract::SetDynamicLightUp(FrameNode* frameNode, float rate, float lightUpDegree)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicLightUpRate, rate, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicLightUpDegree, lightUpDegree, frameNode);
+}
+
+void ViewAbstract::SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDragPreviewOptions(previewOption);
+}
+
 void ViewAbstract::SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion)
 {
     CHECK_NULL_VOID(frameNode);
@@ -2675,6 +2710,29 @@ void ViewAbstract::SetEnabled(FrameNode* frameNode, bool enabled)
     if (focusHub) {
         focusHub->SetEnabled(enabled);
     }
+}
+
+void ViewAbstract::SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(UseShadowBatching, useShadowBatching, frameNode);
+}
+
+void ViewAbstract::SetBlendMode(FrameNode* frameNode, BlendMode blendMode)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackBlendMode, blendMode, frameNode);
+}
+
+void ViewAbstract::SetBlendApplyType(FrameNode* frameNode, BlendApplyType blendApplyType)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackBlendApplyType, blendApplyType, frameNode);
+}
+
+void ViewAbstract::SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetMonopolizeEvents(monopolizeEvents);
 }
 
 void ViewAbstract::SetDraggable(FrameNode* frameNode, bool draggable)
@@ -2733,4 +2791,19 @@ void ViewAbstract::SetKeyboardShortcut(FrameNode* frameNode, const std::string& 
     eventHub->SetKeyboardShortcut(value, key, onKeyboardShortcutAction);
     eventManager->AddKeyboardShortcutNode(WeakPtr<NG::FrameNode>(frameNodeRef));
 }
+
+void ViewAbstract::SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    focusHub->SetOnFocusCallback(std::move(onFocusCallback));
+}
+
+void ViewAbstract::SetOnBlur(FrameNode* frameNode, OnBlurFunc &&onBlurCallback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusHub = frameNode->GetOrCreateFocusHub();
+    focusHub->SetOnBlurCallback(std::move(onBlurCallback));
+}
+
 } // namespace OHOS::Ace::NG

@@ -664,7 +664,7 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
         if (isClickOnAISpan && selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
             selectOverlayProxy_->DisableMenu(true);
         }
-        if (isClickOnSpan && textSelector_.IsValid() && !isMousePressed_) {
+        if (isClickOnSpan && textSelector_.IsValid() && mouseStatus_ != MouseStatus::MOVE) {
             ResetSelection();
         }
         return;
@@ -682,7 +682,7 @@ void TextPattern::HandleSingleClickEvent(GestureEvent& info)
             }
         }
     }
-    if (textSelector_.IsValid() && !isMousePressed_) {
+    if (textSelector_.IsValid() && mouseStatus_ != MouseStatus::MOVE) {
         CloseSelectOverlay(true);
         ResetSelection();
     }
@@ -1032,12 +1032,14 @@ void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offs
     }
 
     CHECK_NULL_VOID(paragraph_);
-    auto end = -1;
-    if (IsSelected() || textSelector_.baseOffset != -1) {
-        end = paragraph_->GetGlyphIndexByCoordinate(textOffset);
+    auto start = textSelector_.baseOffset;
+    auto end = textSelector_.destinationOffset;
+    if (!IsSelected()) {
+        start = -1;
+        end = -1;
     }
     if (isMousePressed_ || oldMouseStatus == MouseStatus::MOVE) {
-        HandleSelectionChange(textSelector_.baseOffset, end);
+        HandleSelectionChange(start, end);
     }
 
     if (IsSelected() && oldMouseStatus == MouseStatus::MOVE && IsSelectedBindSelectionMenu()) {
@@ -1359,16 +1361,18 @@ void TextPattern::UpdateSpanItemDragStatus(const std::list<ResultObject>& result
     }
 }
 
-void TextPattern::OnDragEnd()
+void TextPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
 {
     ResetDragRecordSize(-1);
     auto wk = WeakClaim(this);
     auto pattern = wk.Upgrade();
     CHECK_NULL_VOID(pattern);
-    pattern->showSelect_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    HandleSelectionChange(recoverStart_, recoverEnd_);
+    if (event && event->GetResult() != DragRet::DRAG_SUCCESS) {
+        HandleSelectionChange(recoverStart_, recoverEnd_);
+        pattern->showSelect_ = true;
+    }
     if (dragResultObjects_.empty()) {
         return;
     }
@@ -1378,19 +1382,21 @@ void TextPattern::OnDragEnd()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
-void TextPattern::OnDragEndNoChild()
+void TextPattern::OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event)
 {
     auto wk = WeakClaim(this);
     auto pattern = wk.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
-    HandleSelectionChange(recoverStart_, recoverEnd_);
     if (pattern->status_ == Status::DRAGGING) {
         pattern->status_ = Status::NONE;
         pattern->MarkContentChange();
         pattern->contentMod_->ChangeDragStatus();
-        pattern->showSelect_ = true;
+        if (event && event->GetResult() != DragRet::DRAG_SUCCESS) {
+            HandleSelectionChange(recoverStart_, recoverEnd_);
+            pattern->showSelect_ = true;
+        }
         auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     }
@@ -1446,9 +1452,9 @@ void TextPattern::InitDragEvent()
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (pattern->spans_.empty()) {
-            pattern->OnDragEndNoChild();
+            pattern->OnDragEndNoChild(event);
         } else {
-            pattern->OnDragEnd();
+            pattern->OnDragEnd(event);
         }
     };
     eventHub->SetOnDragEnd(std::move(onDragEnd));
@@ -1547,7 +1553,7 @@ ResultObject TextPattern::GetTextResultObject(RefPtr<UINode> uinode, int32_t ind
         return resultObject;
     }
     auto spanItem = DynamicCast<SpanNode>(uinode)->GetSpanItem();
-    int32_t itemLength = StringUtils::ToWstring(spanItem->content).length();
+    int32_t itemLength = static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length());
     int32_t endPosition = std::min(GetTextContentLength(), spanItem->position);
     int32_t startPosition = endPosition - itemLength;
 
@@ -1588,7 +1594,7 @@ ResultObject TextPattern::GetSymbolSpanResultObject(RefPtr<UINode> uinode, int32
         return resultObject;
     }
     auto spanItem = DynamicCast<SpanNode>(uinode)->GetSpanItem();
-    int32_t itemLength = StringUtils::ToWstring(spanItem->content).length();
+    int32_t itemLength = static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length());
     int32_t endPosition = std::min(GetTextContentLength(), spanItem->position);
     int32_t startPosition = endPosition - itemLength;
 
@@ -1610,6 +1616,7 @@ ResultObject TextPattern::GetSymbolSpanResultObject(RefPtr<UINode> uinode, int32
         resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = end - startPosition;
     }
     if (selectFlag) {
+        resultObject.valueResource = spanItem->GetResourceObject();
         resultObject.spanPosition.spanIndex = index;
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
@@ -2608,21 +2615,19 @@ void TextPattern::ProcessBoundRectByTextShadow(RectF& rect)
     float downOffsetY = 0.0f;
     for (const auto& shadow : shadows.value()) {
         auto shadowBlurRadius = shadow.GetBlurRadius() * 2.0f;
-        if (LessNotEqual(shadow.GetOffset().GetX(), 0.0f) && LessNotEqual(shadow.GetOffset().GetX(), leftOffsetX)) {
+        if (LessNotEqual(shadow.GetOffset().GetX() - shadowBlurRadius, leftOffsetX)) {
             leftOffsetX = shadow.GetOffset().GetX() - shadowBlurRadius;
         }
 
-        if (GreatNotEqual(shadow.GetOffset().GetX(), 0.0f) &&
-            GreatNotEqual(shadow.GetOffset().GetX() + shadowBlurRadius, rightOffsetX)) {
+        if (GreatNotEqual(shadow.GetOffset().GetX() + shadowBlurRadius, rightOffsetX)) {
             rightOffsetX = shadow.GetOffset().GetX() + shadowBlurRadius;
         }
 
-        if (LessNotEqual(shadow.GetOffset().GetY(), 0.0f) && LessNotEqual(shadow.GetOffset().GetY(), upOffsetY)) {
+        if (LessNotEqual(shadow.GetOffset().GetY() - shadowBlurRadius, upOffsetY)) {
             upOffsetY = shadow.GetOffset().GetY() - shadowBlurRadius;
         }
 
-        if (GreatNotEqual(shadow.GetOffset().GetY(), 0.0f) &&
-            GreatNotEqual(shadow.GetOffset().GetY() + shadowBlurRadius, downOffsetY)) {
+        if (GreatNotEqual(shadow.GetOffset().GetY() + shadowBlurRadius, downOffsetY)) {
             downOffsetY = shadow.GetOffset().GetY() + shadowBlurRadius;
         }
     }

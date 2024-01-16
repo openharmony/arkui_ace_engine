@@ -14,7 +14,7 @@
  */
 
 declare class UIContext {
-    instanceId_: number;
+  instanceId_: number;
 }
 
 declare interface TouchEvent {
@@ -23,39 +23,40 @@ declare interface TouchEvent {
 declare type UpdateFunc = (elmtId: number, isFirstRender: boolean, param?: Object) => void;
 
 interface UpdateFuncRecord {
-    updateFunc: UpdateFunc;
-    componentName: string;
-    node?: object;
+  updateFunc: UpdateFunc;
+  componentName: string;
+  node?: object;
 }
 
 declare function wrapBuilder<Args extends Object[]>(
-    builder: (...args: Args) => void
+  builder: (...args: Args) => void
 ): WrappedBuilder<Args>;
 
 declare class WrappedBuilder<Args extends Object[]> {
-    builder: (...args: Args) => void;
-    constructor(builder: (...args: Args) => void);
+  builder: (...args: Args) => void;
+  constructor(builder: (...args: Args) => void);
 }
 
 declare class __JSScopeUtil__ {
-    static syncInstanceId(instanceId: number): void;
-    static restoreInstanceId(): void;
+  static syncInstanceId(instanceId: number): void;
+  static restoreInstanceId(): void;
 }
 
 declare interface Size {
-    width: number;
-    height: number;
+  width: number;
+  height: number;
 }
 
 declare enum XComponentType {
-    SURFACE = 0,
-    COMPONENT,
-    TEXTURE
+  SURFACE = 0,
+  COMPONENT,
+  TEXTURE
 }
 
 declare abstract class ViewPU {
-    id__(): number;
-    aboutToUpdate?: (updateParams: Object) => void;
+  id__(): number;
+  aboutToUpdate?: (updateParams: Object) => void;
+  updateStateVars(params: {}): void;
 }
 
 /**
@@ -66,28 +67,28 @@ declare abstract class ViewPU {
  *
  */
 declare class WeakRef<T extends Object> {
-    constructor(o: T);
-    deref(): T;
+  constructor(o: T);
+  deref(): T;
 }
 
 type RemovedElementInfo = { elmtId: number, tag: string };
 
 declare class UINodeRegisterProxy {
-    public static instance_: UINodeRegisterProxy;
-    public removeElementsInfo_: Array<RemovedElementInfo>;
-    public static ElementIdToOwningViewPU_: Map<number, WeakRef<JSBuilderNode>>;
-    public unregisterElmtIdsFromViewPUs(): void;
-    private obtainDeletedElmtIds(): void;
-    public static unregisterElmtIdsFromViewPUs(): void;
-    public static obtainDeletedElmtIds(): void;
+  public static instance_: UINodeRegisterProxy;
+  public removeElementsInfo_: Array<RemovedElementInfo>;
+  public static ElementIdToOwningViewPU_: Map<number, WeakRef<JSBuilderNode>>;
+  public unregisterElmtIdsFromViewPUs(): void;
+  private obtainDeletedElmtIds(): void;
+  public static unregisterElmtIdsFromViewPUs(): void;
+  public static obtainDeletedElmtIds(): void;
 }
 
 declare interface RegisterParams {
-    name: string;
-    idOfNode: Symbol
+  name: string;
+  idOfNode: Symbol
 }
 
 declare class FinalizationRegistry {
-    constructor(fun: (arg0: RegisterParams) => void);
-    register(target: BuilderNode, heldValue: RegisterParams): undefined;
+  constructor(fun: (arg0: RegisterParams) => void);
+  register(target: BuilderNode, heldValue: RegisterParams): undefined;
 }

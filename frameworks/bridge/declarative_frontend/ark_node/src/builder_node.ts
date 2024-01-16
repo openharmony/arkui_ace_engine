@@ -38,6 +38,9 @@ class BuilderNode {
   public getFrameNode(): FrameNode {
     return this._JSBuilderNode.getFrameNode();
   }
+  public postTouchEvent(touchEvent: TouchEvent): boolean {
+    return this._JSBuilderNode.postTouchEvent(touchEvent);
+  }
 }
 
 class JSBuilderNode extends BaseNode {
@@ -84,7 +87,7 @@ class JSBuilderNode extends BaseNode {
     this.updateFuncByElmtId.clear();
     this.nodePtr_ = super.create(builder.builder, this.params_);
     if (this.frameNode_ === undefined || this.frameNode_ === null) {
-      this.frameNode_ = new FrameNode(this.uiContext_, "BuilderNode");
+      this.frameNode_ = new FrameNode(this.uiContext_, 'BuilderNode');
     }
     this.frameNode_.setNodePtr(this.nodePtr_);
     __JSScopeUtil__.restoreInstanceId();
@@ -101,8 +104,8 @@ class JSBuilderNode extends BaseNode {
   private UpdateElement(elmtId: number): void {
     // do not process an Element that has been marked to be deleted
     const obj: UpdateFunc | UpdateFuncRecord | undefined = this.updateFuncByElmtId.get(elmtId);
-    const updateFunc = (typeof obj === "object") ? obj.updateFunc : null;
-    if (typeof updateFunc === "function") {
+    const updateFunc = (typeof obj === 'object') ? obj.updateFunc : null;
+    if (typeof updateFunc === 'function') {
       updateFunc(elmtId, /* isFirstRender */ false);
       this.finishUpdateFunc();
     }
@@ -132,7 +135,7 @@ class JSBuilderNode extends BaseNode {
   }
 
   public observeComponentCreation(func: (arg0: number, arg1: boolean) => void) {
-    var elmId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
+    let elmId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
     UINodeRegisterProxy.ElementIdToOwningViewPU_.set(elmId, new WeakRef(this));
     try {
       func(elmId, true);
@@ -144,7 +147,7 @@ class JSBuilderNode extends BaseNode {
   }
 
   public observeComponentCreation2(compilerAssignedUpdateFunc: UpdateFunc, classObject: { prototype: Object; pop?: () => void }): void {
-    const _componentName: string = classObject && "name" in classObject ? (Reflect.get(classObject, "name") as string) : "unspecified UINode";
+    const _componentName: string = classObject && 'name' in classObject ? (Reflect.get(classObject, 'name') as string) : 'unspecified UINode';
     const _popFunc: () => void =
       classObject && "pop" in classObject ? classObject.pop! : () => { };
     const updateFunc = (elmtId: number, isFirstRender: boolean) => {
@@ -255,13 +258,13 @@ class JSBuilderNode extends BaseNode {
 
   public ifElseBranchUpdateFunction(branchId: number, branchfunc: () => void) {
     const oldBranchid = If.getBranchId();
-    if (branchId == oldBranchid) {
+    if (branchId === oldBranchid) {
       return;
     }
     // branchId identifies uniquely the if .. <1> .. else if .<2>. else .<3>.branch
     // ifElseNode stores the most recent branch, so we can compare
     // removedChildElmtIds will be filled with the elmtIds of all children and their children will be deleted in response to if .. else change
-    var removedChildElmtIds = new Array();
+    let removedChildElmtIds = new Array();
     If.branchId(branchId, removedChildElmtIds);
     this.purgeDeletedElmtIds();
 

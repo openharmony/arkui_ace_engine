@@ -1297,6 +1297,20 @@ class GeometryTransitionModifier extends ModifierWithKey<string> {
   }
 }
 
+class BlendModeModifier extends ModifierWithKey<ArkBlendMode> {
+  constructor(value: ArkBlendMode) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('blendMode');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBlendMode(node);
+    } else {
+      getUINativeModule().common.setBlendMode(node, this.value.blendMode, this.value.blendApplyType);
+    }
+  }
+}
+
 class ClipModifier extends ModifierWithKey<boolean | object> {
   constructor(value: boolean | object) {
     super(value);
@@ -1918,6 +1932,65 @@ class ObscuredModifier extends ModifierWithKey<Array<ObscuredReasons>> {
   }
 }
 
+class BackgroundEffectModifier extends ModifierWithKey<BackgroundEffectOptions> {
+  constructor(options: BackgroundEffectOptions) {
+    super(options);
+  }
+  static identity: Symbol = Symbol('backgroundEffect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBackgroundEffect(node);
+    } else {
+      getUINativeModule().common.setBackgroundEffect(node, this.value.radius, this.value.saturation,
+        this.value.brightness, this.value.color, this.value.adaptiveColor, this.value.blurOptions?.grayscale);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !(this.value.radius === this.stageValue.radius && this.value.saturation === this.stageValue.saturation &&
+      this.value.brightness === this.stageValue.brightness &&
+      isBaseOrResourceEqual(this.stageValue.color, this.value.color) &&
+      this.value.adaptiveColor === this.stageValue.adaptiveColor &&
+      this.value.blurOptions?.grayscale === this.stageValue.blurOptions?.grayscale);
+  }
+}
+
+class BackgroundBrightnessModifier extends ModifierWithKey<BackgroundBrightnessOptions> {
+  constructor(params: BackgroundBrightnessOptions) {
+    super(params);
+  }
+  static identity: Symbol = Symbol('backgroundBrightness');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetBackgroundBrightness(node);
+    } else {
+      getUINativeModule().common.setBackgroundBrightness(node, this.value.rate, this.value.lightUpDegree);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !(this.value.rate === this.stageValue.rate && this.value.lightUpDegree === this.stageValue.lightUpDegree);
+  }
+}
+
+class DragPreviewOptionsModifier extends ModifierWithKey<DragPreviewOptions> {
+  constructor(value: DragPreviewOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('dragPreviewOptions');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetDragPreviewOptions(node);
+    } else {
+      getUINativeModule().common.setDragPreviewOptions(node, this.value.mode);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !(this.value.mode === this.stageValue.mode);
+  }
+}
+
 class MouseResponseRegionModifier extends ModifierWithKey<Array<Rectangle> | Rectangle> {
   constructor(value: Array<Rectangle> | Rectangle) {
     super(value);
@@ -2142,6 +2215,36 @@ class EnabledModifier extends ModifierWithKey<boolean> {
 
     } else {
       getUINativeModule().common.setEnabled(node, this.value);
+    }
+  }
+}
+
+class UseShadowBatchingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('useShadowBatching');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetUseShadowBatching(node);
+
+    } else {
+      getUINativeModule().common.setUseShadowBatching(node, this.value);
+    }
+  }
+}
+
+class MonopolizeEventsModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('monopolizeEvents');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetMonopolizeEvents(node);
+
+    } else {
+      getUINativeModule().common.setMonopolizeEvents(node, this.value);
     }
   }
 }
@@ -2391,6 +2494,24 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     } else {
       modifierWithKey(this._modifiersWithKeys, ExpandSafeAreaModifier.identity, ExpandSafeAreaModifier, opts);
     }
+    return this;
+  }
+
+  backgroundEffect(options: BackgroundEffectOptions): this {
+    modifierWithKey(this._modifiersWithKeys, BackgroundEffectModifier.identity,
+      BackgroundEffectModifier, options);
+    return this;
+  }
+
+  backgroundBrightness(params: BackgroundBrightnessOptions): this {
+    modifierWithKey(this._modifiersWithKeys, BackgroundBrightnessModifier.identity,
+      BackgroundBrightnessModifier, params);
+    return this;
+  }
+
+  dragPreviewOptions(value: DragPreviewOptions): this {
+    modifierWithKey(this._modifiersWithKeys, DragPreviewOptionsModifier.identity,
+      DragPreviewOptionsModifier, value);
     return this;
   }
 
@@ -3003,6 +3124,16 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  useShadowBatching(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, UseShadowBatchingModifier.identity, UseShadowBatchingModifier, value);
+    return this;
+  }
+
+  monopolizeEvents(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, MonopolizeEventsModifier.identity, MonopolizeEventsModifier, value);
+    return this;
+  }
+
   useSizeType(value: {
     xs?: number | { span: number; offset: number };
     sm?: number | { span: number; offset: number };
@@ -3228,8 +3359,12 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     throw new Error('Method not implemented.');
   }
 
-  blendMode(value: BlendMode): this {
-    throw new Error('Method not implemented.');
+  blendMode(blendMode: BlendMode, blendApplyType?: BlendApplyType): this {
+    let arkBlendMode = new ArkBlendMode();
+    arkBlendMode.blendMode = blendMode;
+    arkBlendMode.blendApplyType = blendApplyType;
+    modifierWithKey(this._modifiersWithKeys, BlendModeModifier.identity, BlendModeModifier, arkBlendMode);
+    return this;
   }
 
   clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {

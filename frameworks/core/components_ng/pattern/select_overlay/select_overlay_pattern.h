@@ -135,7 +135,7 @@ public:
         }
     }
 
-    void ShowOrHiddenMenu(bool isHidden);
+    void ShowOrHiddenMenu(bool isHidden, bool noAnimation = false);
     void DisableMenu(bool isDisabled);
 
     void SetClosedByGlobalTouchEvent(bool closedByGlobalTouch)

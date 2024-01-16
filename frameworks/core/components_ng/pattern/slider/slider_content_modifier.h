@@ -27,6 +27,11 @@
 #include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace::NG {
+enum class SliderStatus : uint32_t {
+    DEFAULT,
+    CLICK,
+    MOVE,
+};
 class SliderContentModifier : public ContentModifier {
     DECLARE_ACE_TYPE(SliderContentModifier, ContentModifier);
 
@@ -72,7 +77,7 @@ public:
     }
 
     void UpdateData(const Parameters& parameters);
-    void JudgeNeedAnimate(const RefPtr<SliderPaintProperty>& property);
+    void JudgeNeedAnimate(bool reverse);
 
     void SetTrackThickness(float trackThickness)
     {
@@ -125,14 +130,9 @@ public:
         }
     }
 
-    void SetNotAnimated()
+    void SetAnimatorStatus(SliderStatus status)
     {
-        needAnimate_ = false;
-    }
-
-    void SetAnimated()
-    {
-        needAnimate_ = true;
+        animatorStatus_ = status;
     }
 
     void SetSliderMode(SliderModelNG::SliderMode sliderMode)
@@ -255,8 +255,8 @@ private:
     void DrawBlockShapeRect(DrawingContext& context, RefPtr<ShapeRect>& rect);
     void SetShapeRectRadius(RSRoundRect& roundRect, float borderWidth);
     void SetBlockClip(DrawingContext& context);
-    void StopSelectAnimation(const PointF& end);
-    void StopCircleCenterAnimation(const PointF& center);
+    void StopSelectAnimation();
+    void StopCircleCenterAnimation();
 
 private:
     std::function<void(float)> updateImageCenterX_;
@@ -314,7 +314,7 @@ private:
     bool mouseHoverFlag_ = false;
     bool mousePressedFlag_ = false;
     bool reverse_ = false;
-    bool needAnimate_ = false; // Translate Animation on-off
+    SliderStatus animatorStatus_ = SliderStatus::DEFAULT; // Translate Animation on-off
     float hotCircleShadowWidth_ = 0.0f;
     Color blockOuterEdgeColor_;
     Color blockShadowColor_;

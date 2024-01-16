@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/render/paragraph.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
 struct UserGestureOptions {
@@ -167,6 +168,7 @@ struct SymbolSpanOptions : SpanOptionBase {
     std::optional<int32_t> offset;
     uint32_t symbolId;
     std::optional<TextStyle> style;
+    RefPtr<ResourceObject> resourceObject;
 };
 
 class ACE_EXPORT RichEditorControllerBase : public AceType {

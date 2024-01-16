@@ -162,7 +162,7 @@ ArkUINativeModuleValue ProgressBridge::SetProgressColor(ArkUIRuntimeCallInfo* ru
             return panda::JSValueRef::Undefined(vm);
         }
 
-        for (int32_t i = 0; i < colorlength; i++) {
+        for (int32_t i = 0; i < static_cast<int32_t>(colorlength); i++) {
             colorValues.push_back(gradient.GetColors()[i].GetLinearColor().GetValue());
             offsetValues.push_back(ArkUILengthType { .number = gradient.GetColors()[i].GetDimension().Value(),
                 .unit = static_cast<int8_t>(gradient.GetColors()[i].GetDimension().Unit()) });

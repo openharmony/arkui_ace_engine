@@ -714,6 +714,11 @@ public:
         ViewAbstract::SetInvert(value);
     }
 
+    void SetSystemBarEffect(bool systemBarEffect) override
+    {
+        ViewAbstract::SetSystemBarEffect(systemBarEffect);
+    }
+
     void SetHueRotate(float value) override
     {
         ViewAbstract::SetHueRotate(value);
@@ -1084,6 +1089,22 @@ public:
     }
 
     static void SetAccessibilityGroup(FrameNode* frameNode, bool accessible);
+    static void SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching)
+    {
+        ViewAbstract::SetUseShadowBatching(frameNode, useShadowBatching);
+    }
+    static void SetBlendMode(FrameNode* frameNode, BlendMode blendMode)
+    {
+        ViewAbstract::SetBlendMode(frameNode, blendMode);
+    }
+    static void SetBlendApplyType(FrameNode* frameNode, BlendApplyType blendApplyType)
+    {
+        ViewAbstract::SetBlendApplyType(frameNode, blendApplyType);
+    }
+    static void SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents)
+    {
+        ViewAbstract::SetMonopolizeEvents(frameNode, monopolizeEvents);
+    }
 
     static void SetAccessibilityImportance(FrameNode* frameNode, const std::string& importance);
     static void SetAccessibilityDescription(FrameNode* frameNode, const std::string& description);

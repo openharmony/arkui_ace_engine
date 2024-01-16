@@ -354,7 +354,7 @@ void TextPickerColumnPattern::ResetOptionPropertyHeight()
             CHECK_NULL_VOID(pattern);
             pickerItemHeight =
                 pattern->GetResizeFlag() ? pattern->GetResizePickerItemHeight() : pattern->GetDefaultPickerItemHeight();
-            int32_t itemCounts = GetShowOptionCount();
+            int32_t itemCounts = static_cast<int32_t>(GetShowOptionCount());
             for (int32_t i = 0; i < itemCounts; i++) {
                 TextPickerOptionProperty& prop = optionProperties_[i];
                 prop.height = pickerItemHeight;
@@ -920,9 +920,7 @@ void TextPickerColumnPattern::HandleDragStart(const GestureEvent& event)
     toss->SetStart(offsetY);
     yLast_ = offsetY;
     pressed_ = true;
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
+    // AccessibilityEventType::SCROLL_START
 }
 
 void TextPickerColumnPattern::HandleDragMove(const GestureEvent& event)
@@ -956,7 +954,7 @@ void TextPickerColumnPattern::HandleDragEnd()
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     if (!NotLoopOptions() && toss->Play()) {
-        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        // AccessibilityEventType::SCROLL_END
         return;
     }
     yOffset_ = 0.0;
@@ -975,7 +973,7 @@ void TextPickerColumnPattern::HandleDragEnd()
         scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (dir == ScrollDirection::UP ? -1 : 1);
     }
     CreateAnimation(scrollDelta_, 0.0);
-    frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    // AccessibilityEventType::SCROLL_END
 }
 
 void TextPickerColumnPattern::CreateAnimation()
@@ -1363,9 +1361,7 @@ void TextPickerColumnPattern::SetAccessibilityAction()
         }
         pattern->InnerHandleScroll(true);
         pattern->CreateAnimation(0.0 - pattern->jumpInterval_, 0.0);
-        auto frameNode = pattern->GetHost();
-        CHECK_NULL_VOID(frameNode);
-        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        // AccessibilityEventType::SCROLL_END
     });
 
     accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
@@ -1377,9 +1373,7 @@ void TextPickerColumnPattern::SetAccessibilityAction()
         }
         pattern->InnerHandleScroll(false);
         pattern->CreateAnimation(pattern->jumpInterval_, 0.0);
-        auto frameNode = pattern->GetHost();
-        CHECK_NULL_VOID(frameNode);
-        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        // AccessibilityEventType::SCROLL_END
     });
 }
 
@@ -1414,7 +1408,7 @@ void TextPickerColumnPattern::OnAroundButtonClick(RefPtr<EventParam> param)
 void TextPickerColumnPattern::PlayResetAnimation()
 {
     ScrollDirection dir = scrollDelta_ > 0.0 ? ScrollDirection::DOWN : ScrollDirection::UP;
-    int32_t middleIndex = GetShowOptionCount() / HALF_NUMBER;
+    int32_t middleIndex = static_cast<int32_t>(GetShowOptionCount()) / HALF_NUMBER;
     double shiftDistance = (dir == ScrollDirection::UP) ? optionProperties_[middleIndex].prevDistance
                                                         : optionProperties_[middleIndex].nextDistance;
     double shiftThreshold = shiftDistance / HALF_NUMBER;

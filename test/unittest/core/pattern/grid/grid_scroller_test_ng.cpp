@@ -2215,4 +2215,41 @@ HWTEST_F(GridScrollerTestNg, HorizontalGridWithScrollBarWithAnimation002, TestSi
     EXPECT_TRUE(isOnScrollCallBack); EXPECT_TRUE(isOnScrollStartCallBack); EXPECT_TRUE(isOnScrollStopCallBack);
     EXPECT_FALSE(isOnReachStartCallBack); EXPECT_TRUE(isOnReachEndCallBack);
 }
+
+/**
+ * @tc.name: ScrollBy
+ * @tc.desc: Test ScrollBy
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, ScrollBy001, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr");
+        CreateColItem(10);
+    });
+
+    /**
+     * @tc.steps: step1. ScrollBy information function call
+     * @tc.expected: scroll to the node
+     */
+    pattern_->ScrollBy(1.2);
+    EXPECT_TRUE(pattern_->UpdateCurrentOffset(-1.2, 3));
+    pattern_->OnAnimateStop();
+    EXPECT_TRUE(pattern_->scrollStop_);
+
+    pattern_->OutBoundaryCallback();
+    EXPECT_FALSE(pattern_->IsOutOfBoundary());
+
+      /**
+     * @tc.steps: step2. DumpAdvanceInfo information function call
+     */
+    pattern_->DumpAdvanceInfo();
+
+    /**
+     * @tc.steps: step3. Test AnimateTo function
+     * @tc.expected: pattern_->isAnimationStop_ is true
+     */
+    pattern_->AnimateTo(1.5, 1.f, Curves::LINEAR, false);
+    EXPECT_TRUE(pattern_->isAnimationStop_);
+}
 } // namespace OHOS::Ace::NG

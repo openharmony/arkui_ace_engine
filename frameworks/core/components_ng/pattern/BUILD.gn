@@ -449,6 +449,7 @@ build_component_ng("pattern_ng") {
     "text/text_paint_method.cpp",
     "text/text_pattern.cpp",
     "text/text_styles.cpp",
+    "text/typed_text.cpp",
     "text_area/text_area_layout_algorithm.cpp",
     "text_clock/text_clock_accessibility_property.cpp",
     "text_clock/text_clock_layout_algorithm.cpp",

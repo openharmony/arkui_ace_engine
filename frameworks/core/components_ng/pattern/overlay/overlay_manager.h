@@ -357,15 +357,15 @@ public:
 
     void DeleteModal(int32_t targetId);
 
-    void BindKeyboard(const std::function<void()>& keybordBuilder, int32_t targetId);
+    void BindKeyboard(const std::function<void()>& keyboardBuilder, int32_t targetId);
     void CloseKeyboard(int32_t targetId);
     void DestroyKeyboard();
 
     RefPtr<UINode> FindWindowScene(RefPtr<FrameNode> targetNode);
 
     // ui extension
-    int32_t CreateModalUIExtension(
-        const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks, bool isProhibitBack);
+    int32_t CreateModalUIExtension(const AAFwk::Want& want, const ModalUIExtensionCallbacks& callbacks,
+        bool isProhibitBack, bool isAsyncModalBinding = false);
     void CloseModalUIExtension(int32_t sessionId);
 
     RefPtr<FrameNode> BindUIExtensionToMenu(const RefPtr<FrameNode>& uiExtNode,
@@ -397,6 +397,8 @@ public:
     {
         return rootNodeWeak_;
     }
+
+    void ModalPageLostFocus(const RefPtr<FrameNode>& node);
 
 private:
     void PopToast(int32_t targetId);
@@ -440,7 +442,6 @@ private:
     void PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
     void FireModalPageShow();
     void FireModalPageHide();
-    void ModalPageLostFocus(const RefPtr<FrameNode>& node);
 
     void SetSheetBackgroundBlurStyle(const RefPtr<FrameNode>& sheetNode, const BlurStyleOption& bgBlurStyle);
 
@@ -492,6 +493,8 @@ private:
 
     // native modal ui extension
     bool isProhibitBack_ = false;
+
+    std::unordered_map<int32_t, WeakPtr<FrameNode>> uiExtNodes_;
 
     ACE_DISALLOW_COPY_AND_MOVE(OverlayManager);
 };

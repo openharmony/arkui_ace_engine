@@ -40,9 +40,10 @@ public:
     };
     explicit SliderPaintMethod(const RefPtr<SliderContentModifier>& sliderContentModifier,
         const SliderContentModifier::Parameters& parameters, float sliderLength, float borderBlank,
-        const RefPtr<SliderTipModifier>& sliderTipModifier, const TipParameters& tipParameters)
+        const RefPtr<SliderTipModifier>& sliderTipModifier, const TipParameters& tipParameters,
+        TextDirection textDirection)
         : sliderContentModifier_(sliderContentModifier), parameters_(parameters), sliderTipModifier_(sliderTipModifier),
-          tipParameters_(tipParameters)
+          tipParameters_(tipParameters), textDirection_(textDirection)
     {}
     ~SliderPaintMethod() override = default;
 
@@ -68,6 +69,7 @@ private:
 
     RefPtr<SliderTipModifier> sliderTipModifier_;
     TipParameters tipParameters_;
+    TextDirection textDirection_;
     ACE_DISALLOW_COPY_AND_MOVE(SliderPaintMethod);
 };
 } // namespace OHOS::Ace::NG

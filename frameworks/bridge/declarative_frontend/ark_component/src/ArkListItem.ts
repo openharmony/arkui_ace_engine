@@ -59,9 +59,6 @@ class ArkListItemComponent extends ArkComponent implements ListItemAttribute {
   onSelect(event: (isSelected: boolean) => void): this {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
 }
 
 // @ts-ignore

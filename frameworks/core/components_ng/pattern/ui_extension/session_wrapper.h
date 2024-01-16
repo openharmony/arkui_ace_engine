@@ -59,7 +59,7 @@ public:
     virtual ~SessionWrapper() = default;
 
     // About session
-    virtual void CreateSession(const AAFwk::Want& want) = 0;
+    virtual void CreateSession(const AAFwk::Want& want, bool isAsyncModalBinding = false) = 0;
     virtual void DestroySession() = 0;
     virtual bool IsSessionValid() = 0;
     virtual int32_t GetSessionId() = 0;

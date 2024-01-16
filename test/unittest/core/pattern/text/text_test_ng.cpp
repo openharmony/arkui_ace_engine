@@ -4126,8 +4126,7 @@ HWTEST_F(TextTestNg, TextContentModifier004, TestSize.Level1)
     TextStyle textStyle;
     textStyle.SetFontSize(ADAPT_FONT_SIZE_VALUE);
     textStyle.SetTextColor(TEXT_COLOR_VALUE);
-    textContentModifier->SetDefaultFontSize(textStyle);
-    textContentModifier->SetDefaultTextColor(textStyle);
+    textContentModifier->SetDefaultAnimatablePropertyValue(textStyle);
     SizeF contentSize(TEXT_CONTENT_SIZE, TEXT_CONTENT_SIZE);
     textContentModifier->SetContentSize(contentSize);
     std::vector<RectF> drawObscuredRects;
@@ -5001,6 +5000,64 @@ HWTEST_F(TextTestNg, OnTextSelectionChange001, TestSize.Level1)
     pattern->ResetSelection();
     EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
     EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
+}
+
+/**
+ * @tc.name: OnTextSelectionChange002
+ * @tc.desc: Test onTextSelectionChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, OnTextSelectionChange002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    /**
+     * @tc.steps: step2. call SetTextSelection with CopyOptions::InApp
+     * @tc.expected: longPress/gesture/input will be regist when CopyOptions not none.
+     */
+    textModelNG.SetCopyOption(CopyOptions::InApp);
+    textModelNG.SetTextDetectEnable(true);
+    bool isSelectChanged = false;
+    auto onSelectionChanged = [&isSelectChanged](int32_t, int32_t) {
+        isSelectChanged = true;
+    };
+    textModelNG.SetOnTextSelectionChange(onSelectionChanged);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    frameNode->draggable_ = true;
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    EXPECT_NE(gestureEventHub->longPressEventActuator_->longPressEvent_, nullptr);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto inputHub = eventHub->GetOrCreateInputEventHub();
+    EXPECT_TRUE(!inputHub->mouseEventActuator_->inputEvents_.empty());
+    EXPECT_TRUE(!gestureEventHub->touchEventActuator_->touchEvents_.empty());
+
+    /**
+     * @tc.steps: step3. create paragraph
+     */
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    pattern->paragraph_ = paragraph;
+    EXPECT_CALL(*paragraph, GetGlyphIndexByCoordinate(_)).WillRepeatedly(Return(0));
+    EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _))
+        .WillRepeatedly(DoAll(SetArgReferee<1>(0), SetArgReferee<2>(2), Return(false)));
+    GestureEvent info;
+    info.localLocation_ = Offset(1, 2);
+    pattern->HandleLongPress(info);
+    EXPECT_EQ(isSelectChanged, true);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 1);
+
+    EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _))
+        .WillRepeatedly(DoAll(SetArgReferee<1>(0), SetArgReferee<2>(2), Return(true)));
+    pattern->HandleLongPress(info);
+    EXPECT_EQ(isSelectChanged, true);
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), 0);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), 2);
 }
 
 /**

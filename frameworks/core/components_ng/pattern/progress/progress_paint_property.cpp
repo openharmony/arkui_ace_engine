@@ -39,16 +39,16 @@ void ProgressPaintProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("value", std::to_string(GetValue().value_or(0.f)).c_str());
     json->Put("scaleCount", std::to_string(GetScaleCount().value_or(progressTheme->GetScaleNumber())).c_str());
     json->Put("scaleWidth", (GetScaleWidth().value_or(progressTheme->GetScaleWidth()).ToString()).c_str());
-    json->Put("color", (GetColor().value_or(progressTheme->GetTrackSelectedColor())).ColorToString().c_str());
-    Color defaultBackgroundColor;
+    Color defaultBackgroundColor = progressTheme->GetTrackBgColor();
+    Color defaultColor = progressTheme->GetTrackSelectedColor();
     ProgressType progressType = GetProgressType().value_or(ProgressType::LINEAR);
     if (progressType == ProgressType::CAPSULE) {
+        defaultColor = progressTheme->GetCapsuleSelectColor();
         defaultBackgroundColor = progressTheme->GetCapsuleBgColor();
     } else if (progressType == ProgressType::RING) {
         defaultBackgroundColor = progressTheme->GetRingProgressBgColor();
-    } else {
-        defaultBackgroundColor = progressTheme->GetTrackBgColor();
     }
+    json->Put("color", (GetColor().value_or(defaultColor)).ColorToString().c_str());
     json->Put("backgroundColor", (GetBackgroundColor().value_or(defaultBackgroundColor)).ColorToString().c_str());
     json->Put(
         "capsuleBorderColor", (GetBorderColor().value_or(progressTheme->GetBorderColor())).ColorToString().c_str());

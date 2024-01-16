@@ -17,12 +17,16 @@
 
 namespace OHOS::Ace::NG {
 
-namespace {} // namespace
+namespace {
+const Offset LEFT_TOP = Offset(ITEM_WIDTH * 0.5, ITEM_HEIGHT * 0.5); // (60, 100)
+const Offset LEFT_BOTTOM = Offset(ITEM_WIDTH * 0.5, ITEM_HEIGHT * 1.5); // (60, 300)
+const Offset RIGHT_TOP = Offset(ITEM_WIDTH * 1.5, ITEM_HEIGHT * 0.5); // (180, 100)
+const Offset RIGHT_BOTTOM = Offset(ITEM_WIDTH * 1.5, ITEM_HEIGHT * 1.5); // (180, 300)
+} // namespace
 
 class GridCommonTestNg : public GridTestNg {
 public:
     void MouseSelect(Offset start, Offset end);
-    void MouseSelectRelease();
     int32_t findFocusNodeIndex(RefPtr<FocusHub>& focusNode);
     AssertionResult IsEqualNextFocusNode(FocusStep step, int32_t currentIndex, int32_t expectNextIndex);
 };
@@ -40,13 +44,9 @@ void GridCommonTestNg::MouseSelect(Offset start, Offset end)
     pattern_->HandleDragStart(info);
     if (start != end) {
         info.SetLocalLocation(end);
+        info.SetGlobalLocation(end);
         pattern_->HandleDragUpdate(info);
     }
-}
-
-void GridCommonTestNg::MouseSelectRelease()
-{
-    GestureEvent info;
     pattern_->HandleDragEnd(info);
 }
 
@@ -77,43 +77,77 @@ AssertionResult GridCommonTestNg::IsEqualNextFocusNode(
 
 /**
  * @tc.name: KeyEvent001
- * @tc.desc: Test OnKeyEvent func.
+ * @tc.desc: Test OnKeyEvent func, will trigger ScrollPage
  * @tc.type: FUNC
  */
 HWTEST_F(GridCommonTestNg, KeyEvent001, TestSize.Level1)
 {
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateFixedItem(20);
+    });
+
     /**
-     * @tc.steps: step1. KeyAction::UNKNOWN.
-     * @tc.expected: Nothing changed.
+     * @tc.cases: Test invalid args KeyAction::UNKNOWN.
+     * @tc.expected: No scroll
+     */
+    pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_UNKNOWN, KeyAction::UNKNOWN));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+
+    /**
+     * @tc.cases: Test invalid args KeyAction::DOWN KeyCode::KEY_UNKNOWN
+     * @tc.expected: No scroll
+     */
+    pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_PAGE_UP, KeyAction::DOWN));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+}
+
+/**
+ * @tc.name: KeyEvent002
+ * @tc.desc: Test OnKeyEvent func, will trigger ScrollPage
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, KeyEvent002, TestSize.Level1)
+{
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateFixedItem(20);
+    });
+
+    /**
+     * @tc.cases: KeyAction::DOWN KeyCode::KEY_PAGE_DOWN.
+     * @tc.expected: Page jump down with Grid height.
+     */
+    pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_PAGE_DOWN, KeyAction::DOWN));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 200.f);
+
+    /**
+     * @tc.cases: KeyAction::DOWN KeyCode::KEY_PAGE_UP.
+     * @tc.expected: Page jump up with Grid height.
+     */
+    pattern_->OnKeyEvent(KeyEvent(KeyCode::KEY_PAGE_UP, KeyAction::DOWN));
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0.f);
+}
+
+/**
+ * @tc.name: KeyEvent003
+ * @tc.desc: Test HandleDirectionKey func
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, KeyEvent003, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Test HandleDirectionKey
+     * @tc.expected: Only KEY_DPAD_UP/KEY_DPAD_DOWN will return true
      */
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateColItem(20);
+        CreateFixedItem(20);
     });
-    KeyEvent event;
-    pattern_->OnKeyEvent(event);
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
-
-    /**
-     * @tc.steps: step2. KeyCode::KEY_PAGE_DOWN.
-     * @tc.expected: Page jump down width Grid height.
-     */
-    event.action = KeyAction::DOWN;
-    event.code = KeyCode::KEY_PAGE_DOWN;
-    pattern_->OnKeyEvent(event);
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -GRID_HEIGHT);
-
-    /**
-     * @tc.steps: step3. KeyCode::KEY_PAGE_UP.
-     * @tc.expected: Page jump up width Grid height.
-     */
-    event.code = KeyCode::KEY_PAGE_UP;
-    pattern_->OnKeyEvent(event);
-    EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0);
-
-    /**
-     * @tc.steps: step4. Test HandleDirectionKey().
-     */
     EXPECT_FALSE(pattern_->HandleDirectionKey(KeyCode::KEY_UNKNOWN));
     EXPECT_TRUE(pattern_->HandleDirectionKey(KeyCode::KEY_DPAD_UP));
     EXPECT_TRUE(pattern_->HandleDirectionKey(KeyCode::KEY_DPAD_DOWN));
@@ -121,7 +155,7 @@ HWTEST_F(GridCommonTestNg, KeyEvent001, TestSize.Level1)
 
 /**
  * @tc.name: MouseSelect001
- * @tc.desc: Test mouse click to select, only PRESS and RELEASE the mouse
+ * @tc.desc: Test mouse select
  * @tc.type: FUNC
  */
 HWTEST_F(GridCommonTestNg, MouseSelect001, TestSize.Level1)
@@ -129,154 +163,167 @@ HWTEST_F(GridCommonTestNg, MouseSelect001, TestSize.Level1)
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         model.SetMultiSelectable(true);
-        CreateColItem(8);
+        CreateFixedItem(8);
     });
 
     /**
-     * @tc.steps: step1. Click the (0, 0) point of firstItem.
-     * @tc.expected: item not selected on MouseAction::PRESS.
+     * @tc.steps: step1. Select item(index:0)
+     * @tc.expected: The item(index:0) is selected
      */
-    MouseSelect(Offset(0.f, 0.f), Offset(0.f, 0.f));
+    MouseSelect(Offset(0.f, 0.f), Offset(10.f, 10.f));
+    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 0)->IsSelected());
+
+    /**
+     * @tc.steps: step2. Select from selected item(index:0) to item(index:1)
+     * @tc.expected: Selected items unchanged, item(index:0) is selected, item(index:1) is unselected
+     */
+    MouseSelect(Offset(0.f, 0.f), Offset(ITEM_WIDTH * 1.5, 10.f));
+    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 0)->IsSelected());
+    EXPECT_FALSE(GetChildPattern<GridItemPattern>(frameNode_, 1)->IsSelected());
+
+    /**
+     * @tc.steps: step3. Select from unselected item(index:1) to item(index:1)
+     * @tc.expected: Selected items changed, item(index:0) is unselected, item(index:1) is selected
+     */
+    MouseSelect(Offset(ITEM_WIDTH * 1.5, 0.f), Offset(ITEM_WIDTH * 1.5 + 10.f, 10.f));
     EXPECT_FALSE(GetChildPattern<GridItemPattern>(frameNode_, 0)->IsSelected());
+    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 1)->IsSelected());
+
+    /**
+     * @tc.steps: step4. Click selected item(index:1)
+     * @tc.expected: Selected items unchanged, item(index:1) is selected
+     */
+    MouseSelect(Offset(ITEM_WIDTH * 1.5, 10.f), Offset(ITEM_WIDTH * 1.5, 10.f));
+    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 1)->IsSelected());
+
+    /**
+     * @tc.steps: step5. Click unselected items(index:0)
+     * @tc.expected: Each item not selected, item(index:0) item(index:1) are unselected
+     */
+    MouseSelect(Offset(10.f, 10.f), Offset(10.f, 10.f));
+    EXPECT_FALSE(GetChildPattern<GridItemPattern>(frameNode_, 0)->IsSelected());
+    EXPECT_FALSE(GetChildPattern<GridItemPattern>(frameNode_, 1)->IsSelected());
 }
 
 /**
  * @tc.name: MouseSelect002
- * @tc.desc: Test mouse box selection with VERTICAL
+ * @tc.desc: Test mouse box selection in different direction and in VERTICAL layout
  * @tc.type: FUNC
  */
 HWTEST_F(GridCommonTestNg, MouseSelect002, TestSize.Level1)
 {
-    float itemWidth = GRID_WIDTH / 4;
-    const Offset LEFT_TOP = Offset(itemWidth * 0.5, ITEM_HEIGHT * 0.5);
-    const Offset LEFT_BOTTOM = Offset(itemWidth * 0.5, ITEM_HEIGHT * 1.5);
-    const Offset RIGHT_TOP = Offset(itemWidth * 1.5, ITEM_HEIGHT * 0.5);
-    const Offset RIGHT_BOTTOM = Offset(itemWidth * 1.5, ITEM_HEIGHT * 1.5);
+    /**
+     * @tc.cases: Select from the item(index:0 LEFT_TOP) to the item(index:5 RIGHT_BOTTOM).
+     * @tc.expected: The items(index:0,1,4,5) are selected.
+     */
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         model.SetMultiSelectable(true);
-        CreateColItem(8);
+        CreateFixedItem(8);
     });
-
-    /**
-     * @tc.steps: step2. Select (90, 50) - (270, 150) zone, from the LEFT_TOP to the RIGHT_BOTTOM.
-     * @tc.expected: The 1st, 2nd, 5th, 6th are selected.
-     */
-    MouseSelect(Offset(0, 0), Offset(GRID_WIDTH, GRID_HEIGHT));
-    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 0)->IsSelected());
-    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 1)->IsSelected());
-    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 4)->IsSelected());
-    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 5)->IsSelected());
-    MouseSelectRelease();
-
-    /**
-     * @tc.steps: step3. Select (90, 50) - (270, 150) zone, from the RIGHT_TOP to the LEFT_BOTTOM.
-     * @tc.expected: The 1st, 2nd, 5th, 6th are selected.
-     */
-    MouseSelect(RIGHT_TOP, LEFT_BOTTOM);
-    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 0)->IsSelected());
-    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 1)->IsSelected());
-    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 4)->IsSelected());
-    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 5)->IsSelected());
-    MouseSelectRelease();
-
-    /**
-     * @tc.steps: step4. Select (90, 50) - (270, 150) zone, from the LEFT_BOTTOM to the RIGHT_TOP.
-     * @tc.expected: The 1st, 2nd, 5th, 6th are selected.
-     */
-    MouseSelect(LEFT_BOTTOM, RIGHT_TOP);
-    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 0)->IsSelected());
-    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 1)->IsSelected());
-    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 4)->IsSelected());
-    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 5)->IsSelected());
-    MouseSelectRelease();
-
-    /**
-     * @tc.steps: step5. Select (90, 50) - (270, 150) zone, from the RIGHT_BOTTOM to the LEFT_TOP.
-     * @tc.expected: The 1st, 2nd, 5th, 6th are selected.
-     */
-    MouseSelect(RIGHT_BOTTOM, LEFT_TOP);
-    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 0)->IsSelected());
-    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 1)->IsSelected());
-    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 4)->IsSelected());
-    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 5)->IsSelected());
-    MouseSelectRelease();
-}
-
-/**
- * @tc.name: MouseSelect003
- * @tc.desc: Test mouse box selection with HORIZONTAL
- * @tc.type: FUNC
- */
-HWTEST_F(GridCommonTestNg, MouseSelect003, TestSize.Level1)
-{
-    float itemHeight = GRID_HEIGHT / 4;
-    const Offset LEFT_TOP = Offset(ITEM_WIDTH * 0.5, itemHeight * 0.5);
-    const Offset LEFT_BOTTOM = Offset(ITEM_WIDTH * 0.5, itemHeight * 1.5);
-    const Offset RIGHT_TOP = Offset(ITEM_WIDTH * 1.5, itemHeight * 0.5);
-    const Offset RIGHT_BOTTOM = Offset(ITEM_WIDTH * 1.5, itemHeight * 1.5);
-    Create([](GridModelNG model) {
-        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        model.SetMultiSelectable(true);
-        CreateRowItem(8);
-    });
-
-    /**
-     * @tc.steps: step2. Select from the LEFT_TOP to the RIGHT_BOTTOM.
-     * @tc.expected: The 1st, 2nd, 5th, 6th are selected.
-     */
     MouseSelect(LEFT_TOP, RIGHT_BOTTOM);
     EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 0)->IsSelected());
     EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 1)->IsSelected());
     EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 4)->IsSelected());
     EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 5)->IsSelected());
-    MouseSelectRelease();
+}
 
+/**
+ * @tc.name: MouseSelect003
+ * @tc.desc: Test mouse box selection in different direction and in HORIZONTAL layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, MouseSelect003, TestSize.Level1)
+{
     /**
-     * @tc.steps: step3. Select from the RIGHT_TOP to the LEFT_BOTTOM.
-     * @tc.expected: The 1st, 2nd, 5th, 6th are selected.
+     * @tc.cases: Select from the item(index:4 RIGHT_TOP) to the item(index:1 LEFT_BOTTOM).
+     * @tc.expected: The items(index:0,1,4,5) are selected.
      */
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        model.SetMultiSelectable(true);
+        CreateFixedItem(8);
+    });
     MouseSelect(RIGHT_TOP, LEFT_BOTTOM);
     EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 0)->IsSelected());
     EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 1)->IsSelected());
     EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 4)->IsSelected());
     EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 5)->IsSelected());
-    MouseSelectRelease();
-
-    /**
-     * @tc.steps: step4. Select from the LEFT_BOTTOM to the RIGHT_TOP.
-     * @tc.expected: The 1st, 2nd, 5th, 6th are selected.
-     */
-    MouseSelect(LEFT_BOTTOM, RIGHT_TOP);
-    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 0)->IsSelected());
-    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 1)->IsSelected());
-    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 4)->IsSelected());
-    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 5)->IsSelected());
-    MouseSelectRelease();
-
-    /**
-     * @tc.steps: step5. Select from the RIGHT_BOTTOM to the LEFT_TOP.
-     * @tc.expected: The 1st, 2nd, 5th, 6th are selected.
-     */
-    MouseSelect(RIGHT_BOTTOM, LEFT_TOP);
-    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 0)->IsSelected());
-    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 1)->IsSelected());
-    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 4)->IsSelected());
-    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 5)->IsSelected());
-    MouseSelectRelease();
 }
 
 /**
  * @tc.name: MouseSelect004
- * @tc.desc: Test gridItem selectable property and onSelect callback
+ * @tc.desc: Test mouse box selection in different direction and in BigItem layout
  * @tc.type: FUNC
  */
 HWTEST_F(GridCommonTestNg, MouseSelect004, TestSize.Level1)
 {
+    /**
+     * @tc.cases: Select from the item(index:3 LEFT_BOTTOM) to the item(index:1 RIGHT_TOP).
+     * @tc.expected: The items(index:0,1,3) are selected.
+     */
+    Create([](GridModelNG model) {
+        model.SetRowsTemplate("1fr 1fr 1fr 1fr");
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        CreateBigItem(1, 2, 1, 2);
+        CreateBigItem(NULL_VALUE, NULL_VALUE, 1, 3);
+        CreateBigItem(1, 3, NULL_VALUE, NULL_VALUE);
+        CreateItem(7);
+    });
+    MouseSelect(LEFT_BOTTOM, RIGHT_TOP);
+    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 0)->IsSelected());
+    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 1)->IsSelected());
+    EXPECT_FALSE(GetChildPattern<GridItemPattern>(frameNode_, 2)->IsSelected());
+    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 3)->IsSelected());
+}
+
+/**
+ * @tc.name: MouseSelect005
+ * @tc.desc: Test mouse box selection in different direction and in LayoutOptions layout
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, MouseSelect005, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Select from the item(index:1 RIGHT_BOTTOM) to the item(index:0 LEFT_TOP).
+     * @tc.expected: The items(index:0,1) are selected.
+     */
+    GridLayoutOptions option;
+    option.irregularIndexes = { 6, 1, 3, 4, 5, 0 };
+    GetSizeByIndex onGetIrregularSizeByIndex = [](int32_t index) {
+        if (index == 3) {
+            return GridItemSize { 1, 2 };
+        }
+        return GridItemSize { 1, 4 };
+    };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+    Create([option](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetLayoutOptions(option);
+        CreateColItem(10);
+    });
+    MouseSelect(RIGHT_BOTTOM, LEFT_TOP);
+    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 0)->IsSelected());
+    EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 1)->IsSelected());
+    EXPECT_FALSE(GetChildPattern<GridItemPattern>(frameNode_, 2)->IsSelected());
+    EXPECT_FALSE(GetChildPattern<GridItemPattern>(frameNode_, 3)->IsSelected());
+}
+
+/**
+ * @tc.name: MouseSelect006
+ * @tc.desc: Test gridItem selectable property and onSelect callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridCommonTestNg, MouseSelect006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Set item(index:1) unselectable, set item(index:2) unenabled,
+     *                   set selectCallback for item(index:5)
+     */
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         model.SetMultiSelectable(true);
-        CreateColItem(10);
+        CreateFixedItem(10);
     });
     bool isSixthItemSelected = false;
     auto selectCallback = [&isSixthItemSelected](bool) { isSixthItemSelected = true; };
@@ -286,11 +333,11 @@ HWTEST_F(GridCommonTestNg, MouseSelect004, TestSize.Level1)
     FlushLayoutTask(frameNode_);
 
     /**
-     * @tc.steps: step2. Select zone, include 2nd, 3rd, 6th, 7th item.
-     * @tc.expected: The 2nd and 3rd item is not selected but 6th item is selected.
+     * @tc.steps: step2. Select zone, include items(index:1,2,5,6).
+     * @tc.expected: The item(index:1) and item(index:2) are not selected, item(index:5) is selected,
+     *               selectCallback is called.
      */
-    float itemWidth = GRID_WIDTH / 4;
-    MouseSelect(Offset(itemWidth * 1.5, ITEM_HEIGHT * 1.5), Offset(itemWidth * 2.5, ITEM_HEIGHT * 1.5));
+    MouseSelect(Offset(ITEM_WIDTH * 1.5, ITEM_HEIGHT * 1.5), Offset(ITEM_WIDTH * 2.5, ITEM_HEIGHT * 1.5));
     EXPECT_FALSE(GetChildPattern<GridItemPattern>(frameNode_, 1)->IsSelected());
     EXPECT_FALSE(GetChildPattern<GridItemPattern>(frameNode_, 2)->IsSelected());
     EXPECT_TRUE(GetChildPattern<GridItemPattern>(frameNode_, 5)->IsSelected());
@@ -298,22 +345,21 @@ HWTEST_F(GridCommonTestNg, MouseSelect004, TestSize.Level1)
 }
 
 /**
- * @tc.name: MouseSelect005
+ * @tc.name: MouseSelect007
  * @tc.desc: Test select in other condition
  * @tc.type: FUNC
  */
-HWTEST_F(GridCommonTestNg, MouseSelect005, TestSize.Level1)
+HWTEST_F(GridCommonTestNg, MouseSelect007, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. Move distance < DEFAULT_PAN_DISTANCE
+     * @tc.expected: The item is not Selected
+     */
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         model.SetMultiSelectable(true);
-        CreateColItem(8);
+        CreateFixedItem(8);
     });
-
-    /**
-     * @tc.steps: step1. Move distance < FRAME_SELECTION_DISTANCE
-     * @tc.expected: The item is not Selected
-     */
     MouseSelect(Offset(0.f, 0.f), Offset(1.f, 1.f));
     EXPECT_FALSE(GetChildPattern<GridItemPattern>(frameNode_, 0)->IsSelected());
 }
@@ -333,7 +379,7 @@ HWTEST_F(GridCommonTestNg, Drag001, TestSize.Level1)
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         model.SetEditable(true);
         model.SetOnItemDragStart(onItemDragStart);
-        CreateColItem(8);
+        CreateFixedItem(8);
     });
     eventHub_->onItemDragStart_ = onItemDragStart;
 
@@ -382,7 +428,7 @@ HWTEST_F(GridCommonTestNg, Drag002, TestSize.Level1)
         CreateBigColItem(2, 3);
         CreateBigColItem(0, 2);
         CreateBigColItem(2, 1);
-        CreateColItem(8);
+        CreateFixedItem(8);
     });
     auto onItemDragStart = [](const ItemDragInfo&, int32_t) {
         auto dragItem = AceType::MakeRefPtr<FrameNode>("test", 0, AceType::MakeRefPtr<Pattern>());
@@ -544,7 +590,7 @@ HWTEST_F(GridCommonTestNg, FocusStep001, TestSize.Level1)
 {
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateColItem(10);
+        CreateFixedItem(10);
     });
 
     /**
@@ -642,7 +688,7 @@ HWTEST_F(GridCommonTestNg, FocusStep002, TestSize.Level1)
 {
     Create([](GridModelNG model) {
         model.SetRowsTemplate("1fr 1fr 1fr 1fr");
-        CreateRowItem(10);
+        CreateFixedItem(10);
     });
 
     /**
@@ -842,7 +888,7 @@ HWTEST_F(GridCommonTestNg, FocusStep004, TestSize.Level1)
         CreateBigColItem(2, 3);
         CreateBigColItem(0, 2);
         CreateBigColItem(2, 1);
-        CreateColItem(7);
+        CreateFixedItem(7);
     });
 
     /**
@@ -943,7 +989,7 @@ HWTEST_F(GridCommonTestNg, FocusStep005, TestSize.Level1)
         CreateBigRowItem(1, 2);
         CreateBigRowItem(0, 2);
         CreateBigRowItem(2, 3);
-        CreateRowItem(7);
+        CreateFixedItem(7);
     });
 
     /**
@@ -1143,7 +1189,7 @@ HWTEST_F(GridCommonTestNg, FocusStep007, TestSize.Level1)
 {
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateColItem(10);
+        CreateFixedItem(10);
     });
 
     /**
@@ -1164,7 +1210,7 @@ HWTEST_F(GridCommonTestNg, FocusStep008, TestSize.Level1)
 {
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateColItem(24);
+        CreateFixedItem(24);
     });
 
     /**
@@ -1190,7 +1236,7 @@ HWTEST_F(GridCommonTestNg, FocusStep009, TestSize.Level1)
 {
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateColItem(24);
+        CreateFixedItem(24);
     });
 
     /**
@@ -1216,7 +1262,7 @@ HWTEST_F(GridCommonTestNg, Focus001, TestSize.Level1)
 {
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateColItem(18);
+        CreateFixedItem(18);
     });
 
     /**
@@ -1257,7 +1303,7 @@ HWTEST_F(GridCommonTestNg, GridAccessibilityTest001, TestSize.Level1)
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
         model.SetMultiSelectable(true);
         model.SetEditable(true);
-        CreateColItem(14);
+        CreateFixedItem(14);
     });
 
     /**
@@ -1309,7 +1355,7 @@ HWTEST_F(GridCommonTestNg, GridAccessibilityTest003, TestSize.Level1)
      */
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateColItem(24);
+        CreateFixedItem(24);
     });
     EXPECT_TRUE(pattern_->IsAtTop());
     EXPECT_FALSE(pattern_->IsAtBottom());
@@ -1345,7 +1391,7 @@ HWTEST_F(GridCommonTestNg, GridAccessibilityTest003, TestSize.Level1)
      * @tc.steps: step4. UnScrollable.
      */
     Create([](GridModelNG model) {
-        CreateColItem(14);
+        CreateFixedItem(14);
     });
     accessibilityProperty_->ResetSupportAction();
     uint64_t exptectActions_4 = 0;
@@ -1361,7 +1407,7 @@ HWTEST_F(GridCommonTestNg, GridAccessibilityTest007, TestSize.Level1)
 {
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateColItem(20);
+        CreateFixedItem(20);
     });
     auto itemAccessibility = GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 1);
 
@@ -1403,7 +1449,7 @@ HWTEST_F(GridCommonTestNg, GridAccessibilityTest008, TestSize.Level1)
         itemModel.SetColumnEnd(3);
         ViewAbstract::SetHeight(CalcLength(Dimension(ITEM_HEIGHT)));
         ViewStackProcessor::GetInstance()->Pop();
-        CreateColItem(10);
+        CreateFixedItem(10);
     });
 
     /**
@@ -1428,7 +1474,7 @@ HWTEST_F(GridCommonTestNg, EventHub001, TestSize.Level1)
 {
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateColItem(8);
+        CreateFixedItem(8);
     });
     RectF gridRect(0.f, 0.f, GRID_WIDTH, GRID_HEIGHT);
     auto mockRenderContext = AceType::DynamicCast<MockRenderContext>(frameNode_->renderContext_);
@@ -1461,7 +1507,7 @@ HWTEST_F(GridCommonTestNg, PerformActionTest001, TestSize.Level1)
 {
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateColItem(20);
+        CreateFixedItem(20);
     });
     auto gridItemPattern = GetChildPattern<GridItemPattern>(frameNode_, 0);
     auto gridItemAccessibilityProperty = GetChildAccessibilityProperty<GridItemAccessibilityProperty>(frameNode_, 0);
@@ -1500,7 +1546,7 @@ HWTEST_F(GridCommonTestNg, PerformActionTest002, TestSize.Level1)
      */
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateColItem(10);
+        CreateFixedItem(10);
     });
     accessibilityProperty_->ActActionScrollForward();
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, 0.f);
@@ -1513,7 +1559,7 @@ HWTEST_F(GridCommonTestNg, PerformActionTest002, TestSize.Level1)
      */
     Create([](GridModelNG model) {
         model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
-        CreateColItem(20);
+        CreateFixedItem(20);
     });
     accessibilityProperty_->ActActionScrollForward();
     EXPECT_EQ(pattern_->GetGridLayoutInfo().currentOffset_, -GRID_HEIGHT);

@@ -40,6 +40,11 @@ enum class ThresholdType {
     ZERO,    // 0.0f for noanimatable property
 };
 
+enum class PropertyUnit {
+    UNKNOWN,
+    PIXEL_POSITION, // animatable properties are related to position of the object, the unit is pixels
+};
+
 namespace OHOS::Ace::NG {
 class ACE_FORCE_EXPORT Modifier : public virtual AceType {
     DECLARE_ACE_TYPE(Modifier, AceType);
@@ -88,12 +93,14 @@ public:
 
     void SetUpCallbacks(std::function<T()>&& getFunc, std::function<void(const T&)>&& setFunc,
         std::function<T()>&& getStageFunc = nullptr,
-        std::function<void(ThresholdType)>&& setThresholdTypeFunc = nullptr)
+        std::function<void(ThresholdType)>&& setThresholdTypeFunc = nullptr,
+        std::function<void(PropertyUnit)>&& setPropertyUnitFunc = nullptr)
     {
         getFunc_ = std::move(getFunc);
         setFunc_ =  std::move(setFunc);
         getStageFunc_ =  std::move(getStageFunc);
         setThresholdTypeFunc_ = std::move(setThresholdTypeFunc);
+        setPropertyUnitFunc_ = std::move(setPropertyUnitFunc);
     }
 
     T Get()
@@ -109,6 +116,13 @@ public:
     {
         if (setThresholdTypeFunc_) {
             setThresholdTypeFunc_(type);
+        }
+    }
+
+    void SetPropertyUnit(PropertyUnit unit)
+    {
+        if (setPropertyUnitFunc_) {
+            setPropertyUnitFunc_(unit);
         }
     }
 
@@ -147,6 +161,7 @@ private:
     std::function<T()> getStageFunc_;
     std::function<void(const T&)> updateCallback_;
     std::function<void(ThresholdType)> setThresholdTypeFunc_;
+    std::function<void(PropertyUnit)> setPropertyUnitFunc_;
     ACE_DISALLOW_COPY_AND_MOVE(NormalProperty);
 };
 
@@ -332,6 +347,14 @@ public:
         auto property = AceType::DynamicCast<S>(GetProperty());
         if (property) {
             property->SetThresholdType(type);
+        }
+    }
+
+    void SetPropertyUnit(PropertyUnit unit)
+    {
+        auto property = AceType::DynamicCast<S>(GetProperty());
+        if (property) {
+            property->SetPropertyUnit(unit);
         }
     }
 

@@ -289,7 +289,7 @@ protected:
 
 private:
     // This will call after ModifyLayoutConstraint.
-    void CheckSelfIdealSize();
+    void CheckSelfIdealSize(const LayoutConstraintF& parentConstraint, const SizeF& originMax);
 
     void CheckAspectRatio();
     void CheckBorderAndPadding();

@@ -905,6 +905,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/text/text_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text/text_styles.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/text/typed_text.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_area/text_area_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_clock/text_clock_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_clock/text_clock_layout_algorithm.cpp",

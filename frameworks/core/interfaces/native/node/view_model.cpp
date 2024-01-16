@@ -35,6 +35,14 @@
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
+#include "core/components_ng/pattern/button/button_model_ng.h"
+#include "core/components_ng/pattern/progress/progress_model_ng.h"
+#include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
+#include "core/components_ng/pattern/linear_layout/column_model_ng.h"
+#include "core/components_ng/pattern/linear_layout/row_model_ng.h"
+#include "core/components_ng/pattern/flex/flex_model_ng.h"
+#include "core/components_ng/pattern/refresh/refresh_model_ng.h"
+#include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
 #include "core/interfaces/native/node/node_types.h"
 
@@ -117,6 +125,34 @@ void* createSwiperNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createTextAreaNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = TextFieldModelNG::CreateFrameNode(nodeId, "", "", true);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createButtonNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = ButtonModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createProgressNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = ProgressModelNG::CreateFrameNode(nodeId, 0, 100, NG::ProgressType::LINEAR);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createCheckBoxNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = CheckBoxModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 void* createColumnNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = ColumnModelNG::CreateFrameNode(nodeId);
@@ -131,6 +167,13 @@ void* createRowNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createFlexNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = FlexModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 void* createListItemNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = ListItemModelNG::CreateFrameNode(nodeId);
@@ -138,14 +181,52 @@ void* createListItemNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createRefreshode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = RefreshModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+#ifdef XCOMPONENT_SUPPORTED
+void* createXComponentNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = XComponentModelNG::CreateFrameNode(nodeId, "", XComponentType::SURFACE, "");
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+#endif
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 {
     static createArkUIFrameNode* createArkUIFrameNodes[] = {
-        nullptr, createTextNode, createSpanNode, createImageSpanNode, createImageNode, createToggleNode,
-        createLoadingProgress, createTextInputNode, createStackNode, createScrollNode, createListNode,
-        createSwiperNode, nullptr, nullptr, nullptr, nullptr, createColumnNode, createRowNode,
-        nullptr, createListItemNode
+        nullptr,
+        createTextNode,
+        createSpanNode,
+        createImageSpanNode,
+        createImageNode,
+        createToggleNode,
+        createLoadingProgress,
+        createTextInputNode,
+        createStackNode,
+        createScrollNode,
+        createListNode,
+        createSwiperNode,
+        createTextAreaNode,
+        createButtonNode,
+        createProgressNode,
+        createCheckBoxNode,
+        createColumnNode,
+        createRowNode,
+        createFlexNode,
+        createListItemNode,
+        createRefreshode,
+#ifdef XCOMPONENT_SUPPORTED
+        createXComponentNode,
+#else
+        nullptr,
+#endif
     };
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);

@@ -72,6 +72,9 @@ bool SecurityComponentHandler::GetWindowRect(RefPtr<FrameNode>& node,
 
 bool SecurityComponentHandler::CheckOpacity(const RefPtr<FrameNode>& node, const RefPtr<RenderContext>& renderContext)
 {
+    if (node->GetTag() == V2::MENU_WRAPPER_ETS_TAG) {
+        return false;
+    }
     if (renderContext->GetOpacity().has_value() &&
         !NearEqual(renderContext->GetOpacity().value(), 1.0f)) {
         LOGW("SecurityComponentCheckFail: Parent %{public}s opacity is set, security component is invalid",

@@ -849,7 +849,9 @@ void FrameNode::SwapDirtyLayoutWrapperOnMainThread(const RefPtr<LayoutWrapper>& 
         auto builderNode = builderFunc_();
         auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(true));
-        builderNode->MountToParent(columnNode);
+        if (builderNode) {
+            builderNode->MountToParent(columnNode);
+        }
         SetBackgroundLayoutConstraint(columnNode);
         renderContext_->CreateBackgroundPixelMap(columnNode);
         builderFunc_ = nullptr;
@@ -1371,8 +1373,11 @@ void FrameNode::MarkDirtyNode(PropertyChangeFlag extraFlag)
     MarkDirtyNode(IsMeasureBoundary(), IsRenderBoundary(), extraFlag);
 }
 
-RefPtr<FrameNode> FrameNode::GetAncestorNodeOfFrame() const
+RefPtr<FrameNode> FrameNode::GetAncestorNodeOfFrame(bool checkBoundary) const
 {
+    if (checkBoundary && IsWindowBoundary()) {
+        return nullptr;
+    }
     auto parent = GetParent();
     while (parent) {
         if (InstanceOf<FrameNode>(parent)) {
@@ -2031,7 +2036,7 @@ void FrameNode::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeCha
 OffsetF FrameNode::GetOffsetRelativeToWindow() const
 {
     auto offset = geometryNode_->GetFrameOffset();
-    auto parent = GetAncestorNodeOfFrame();
+    auto parent = GetAncestorNodeOfFrame(true);
     if (renderContext_ && renderContext_->GetPositionProperty()) {
         if (renderContext_->GetPositionProperty()->HasPosition()) {
             auto renderPosition =
@@ -2050,13 +2055,13 @@ OffsetF FrameNode::GetOffsetRelativeToWindow() const
                     parentRenderContext, parentLayoutProperty->GetLayoutConstraint()->percentReference);
                 offset.AddX(static_cast<float>(parentRenderContextPosition.first));
                 offset.AddY(static_cast<float>(parentRenderContextPosition.second));
-                parent = parent->GetAncestorNodeOfFrame();
+                parent = parent->GetAncestorNodeOfFrame(true);
                 continue;
             }
         }
 
         offset += parent->geometryNode_->GetFrameOffset();
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(true);
     }
 
     return offset;
@@ -2068,7 +2073,7 @@ RectF FrameNode::GetTransformRectRelativeToWindow() const
     CHECK_NULL_RETURN(context, RectF());
     RectF rect = context->GetPaintRectWithTransform();
     auto offset = rect.GetOffset();
-    auto parent = GetAncestorNodeOfFrame();
+    auto parent = GetAncestorNodeOfFrame(true);
     while (parent) {
         auto parentRenderContext = parent->GetRenderContext();
         CHECK_NULL_RETURN(parentRenderContext, rect);
@@ -2083,7 +2088,7 @@ RectF FrameNode::GetTransformRectRelativeToWindow() const
 
         offset += parentRenderContext->GetPaintRectWithTransform().GetOffset();
 
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(true);
     }
     rect.SetOffset(offset);
     return rect;
@@ -2094,12 +2099,12 @@ OffsetF FrameNode::GetTransformRelativeOffset() const
     auto context = GetRenderContext();
     CHECK_NULL_RETURN(context, OffsetF());
     auto offset = context->GetPaintRectWithTransform().GetOffset();
-    auto parent = GetAncestorNodeOfFrame();
+    auto parent = GetAncestorNodeOfFrame(true);
 
     while (parent) {
         auto parentRenderContext = parent->GetRenderContext();
         offset += parentRenderContext->GetPaintRectWithTransform().GetOffset();
-        parent = parent->GetAncestorNodeOfFrame();
+        parent = parent->GetAncestorNodeOfFrame(true);
     }
 
     return offset;
@@ -2823,7 +2828,9 @@ void FrameNode::SyncGeometryNode()
         auto builderNode = builderFunc_();
         auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
             AceType::MakeRefPtr<LinearLayoutPattern>(true));
-        builderNode->MountToParent(columnNode);
+        if (builderNode) {
+            builderNode->MountToParent(columnNode);
+        }
         SetBackgroundLayoutConstraint(columnNode);
         renderContext_->CreateBackgroundPixelMap(columnNode);
         builderFunc_ = nullptr;
@@ -3214,7 +3221,7 @@ OffsetF FrameNode::CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp)
         }
     }
 
-    auto parent = GetAncestorNodeOfFrame();
+    auto parent = GetAncestorNodeOfFrame(true);
     if (parent) {
         auto parentTimestampOffset = parent->GetCachedGlobalOffset();
         if (parentTimestampOffset.first == nanoTimestamp) {
@@ -3262,5 +3269,15 @@ bool FrameNode::SetParentLayoutConstraint(const SizeF& size) const
     layoutConstraint.UpdateIllegalParentIdealSizeWithCheck(OptionalSize(size));
     layoutProperty_->UpdateLayoutConstraint(layoutConstraint);
     return true;
+}
+
+const std::pair<uint64_t, OffsetF>& FrameNode::GetCachedGlobalOffset() const
+{
+    return cachedGlobalOffset_;
+}
+
+void FrameNode::SetCachedGlobalOffset(const std::pair<uint64_t, OffsetF>& timestampOffset)
+{
+    cachedGlobalOffset_ = timestampOffset;
 }
 } // namespace OHOS::Ace::NG

@@ -576,7 +576,7 @@ HWTEST_F(SliderTestNg, SliderTestNg007, TestSize.Level1)
      * @tc.cases: case4. InputEventType is not AXIS, direction is VERTICAL and revese is true.
      */
     sliderLayoutProperty->UpdateDirection(Axis::VERTICAL);
-    sliderPaintProperty->UpdateReverse(true);
+    sliderLayoutProperty->UpdateReverse(true);
     sliderPattern->HandlingGestureEvent(info);
     EXPECT_EQ(sliderPattern->value_, 62);
 }
@@ -1201,8 +1201,8 @@ HWTEST_F(SliderTestNg, SliderContentModifierTest001, TestSize.Level1)
     // set direction FREE
     sliderContentModifier.SetDirection(Axis::FREE);
     sliderContentModifier.SetCircleCenter(POINTF_CENTER);
-    // set needAnimate_ false
-    sliderContentModifier.SetNotAnimated();
+    // set animatorStatus default
+    sliderContentModifier.SetAnimatorStatus(SliderStatus::DEFAULT);
     sliderContentModifier.SetSelectSize(POINTF_START, POINTF_END);
     sliderContentModifier.SetCircleCenter(POINTF_CENTER);
     // set Axis HORIZONTAL
@@ -2440,21 +2440,21 @@ HWTEST_F(SliderTestNg, SliderPatternTest012, TestSize.Level1)
     /**
      * @tc.steps: step3. call event callback func.
      */
-    sliderPattern->sliderContentModifier_->needAnimate_ = false;
+    sliderPattern->sliderContentModifier_->animatorStatus_ = SliderStatus::DEFAULT;
     sliderPattern->panEvent_->actionStart_(info);
-    ASSERT_TRUE(sliderPattern->sliderContentModifier_->needAnimate_);
+    ASSERT_EQ(sliderPattern->sliderContentModifier_->animatorStatus_, SliderStatus::MOVE);
 
-    sliderPattern->sliderContentModifier_->needAnimate_ = false;
+    sliderPattern->sliderContentModifier_->animatorStatus_ = SliderStatus::DEFAULT;
     sliderPattern->panEvent_->actionUpdate_(info);
-    ASSERT_TRUE(sliderPattern->sliderContentModifier_->needAnimate_);
+    ASSERT_EQ(sliderPattern->sliderContentModifier_->animatorStatus_, SliderStatus::MOVE);
 
-    sliderPattern->sliderContentModifier_->needAnimate_ = true;
+    sliderPattern->sliderContentModifier_->animatorStatus_ = SliderStatus::MOVE;
     sliderPattern->panEvent_->actionEnd_(info);
-    ASSERT_FALSE(sliderPattern->sliderContentModifier_->needAnimate_);
+    ASSERT_EQ(sliderPattern->sliderContentModifier_->animatorStatus_, SliderStatus::DEFAULT);
 
-    sliderPattern->sliderContentModifier_->needAnimate_ = true;
+    sliderPattern->sliderContentModifier_->animatorStatus_ = SliderStatus::MOVE;
     sliderPattern->panEvent_->actionCancel_();
-    ASSERT_FALSE(sliderPattern->sliderContentModifier_->needAnimate_);
+    ASSERT_EQ(sliderPattern->sliderContentModifier_->animatorStatus_, SliderStatus::DEFAULT);
 }
 
 /**
@@ -2722,7 +2722,7 @@ HWTEST_F(SliderTestNg, SliderPaintMethodTest001, TestSize.Level1)
     auto sliderTipModifier = AceType::MakeRefPtr<SliderTipModifier>(nullptr);
     SliderPaintMethod::TipParameters tipParameters;
     SliderPaintMethod sliderPaintMethod(
-        sliderContentModifier, parameters, 1.0f, 1.0f, sliderTipModifier, tipParameters);
+        sliderContentModifier, parameters, 1.0f, 1.0f, sliderTipModifier, tipParameters, TextDirection::AUTO);
     /**
      * @tc.steps: step2. create paintWrapper.
      */
@@ -2774,7 +2774,7 @@ HWTEST_F(SliderTestNg, SliderPaintMethodTest002, TestSize.Level1)
     auto sliderTipModifier = AceType::MakeRefPtr<SliderTipModifier>(nullptr);
     SliderPaintMethod::TipParameters tipParameters;
     SliderPaintMethod sliderPaintMethod(
-        sliderContentModifier, parameters, 1.0f, 1.0f, sliderTipModifier, tipParameters);
+        sliderContentModifier, parameters, 1.0f, 1.0f, sliderTipModifier, tipParameters, TextDirection::AUTO);
     /**
      * @tc.steps: step2. create paintWrapper.
      */
@@ -2828,7 +2828,7 @@ HWTEST_F(SliderTestNg, SliderPaintMethodTest003, TestSize.Level1)
     auto sliderContentModifier =
         AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
     SliderPaintMethod sliderPaintMethod(sliderContentModifier, SliderContentModifier::Parameters(), 1.0f, 1.0f, nullptr,
-        SliderPaintMethod::TipParameters());
+        SliderPaintMethod::TipParameters(), TextDirection::AUTO);
     auto sliderPaintProperty = AceType::MakeRefPtr<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -2957,14 +2957,12 @@ HWTEST_F(SliderTestNg, SliderContentModifierTest014, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
 
-    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
-    ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
     SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
 
     sliderContentModifier.reverse_ = true;
-    sliderContentModifier.JudgeNeedAnimate(sliderPaintProperty);
-    EXPECT_FALSE(sliderContentModifier.needAnimate_);
+    sliderContentModifier.JudgeNeedAnimate(false);
+    EXPECT_EQ(sliderContentModifier.animatorStatus_, SliderStatus::DEFAULT);
     EXPECT_FALSE(sliderContentModifier.reverse_);
 }
 
@@ -2979,7 +2977,7 @@ HWTEST_F(SliderTestNg, SliderContentModifierTest015, TestSize.Level1)
     SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
     ASSERT_NE(sliderContentModifier.selectEnd_, nullptr);
 
-    sliderContentModifier.needAnimate_ = true;
+    sliderContentModifier.animatorStatus_ = SliderStatus::MOVE;
     sliderContentModifier.SetSelectSize(POINTF_START, POINTF_END);
     EXPECT_EQ(sliderContentModifier.selectEnd_->Get(), POINTF_END - PointF());
 }
@@ -2996,7 +2994,7 @@ HWTEST_F(SliderTestNg, SliderContentModifierTest016, TestSize.Level1)
     ASSERT_NE(sliderContentModifier.blockCenterX_, nullptr);
     ASSERT_NE(sliderContentModifier.blockCenterY_, nullptr);
 
-    sliderContentModifier.needAnimate_ = true;
+    sliderContentModifier.animatorStatus_ = SliderStatus::MOVE;
     PointF center(FRAME_WIDTH, FRAME_HEIGHT);
     sliderContentModifier.directionAxis_->Set(static_cast<int>(Axis::HORIZONTAL));
     sliderContentModifier.SetCircleCenter(center);
@@ -3067,20 +3065,20 @@ HWTEST_F(SliderTestNg, SliderContentModifierTest018, TestSize.Level1)
     sliderContentModifier.directionAxis_->Set(static_cast<int>(Axis::HORIZONTAL));
     sliderContentModifier.selectEnd_->Set(POINTF_CENTER - PointF());
     sliderContentModifier.targetSelectEnd_ = SELECT_START - PointF();
-    sliderContentModifier.StopSelectAnimation(SELECT_END);
+    sliderContentModifier.StopSelectAnimation();
     ASSERT_TRUE(set);
 
     sliderContentModifier.selectEnd_->Set(POINTF_CENTER - PointF());
     sliderContentModifier.targetSelectEnd_ = SELECT_END - PointF();
     set = false;
-    sliderContentModifier.StopSelectAnimation(SELECT_START);
+    sliderContentModifier.StopSelectAnimation();
     ASSERT_TRUE(set);
 
     sliderContentModifier.selectEnd_->Set(SELECT_END - PointF());
     sliderContentModifier.targetSelectEnd_ = POINTF_CENTER - PointF();
     set = false;
-    sliderContentModifier.StopSelectAnimation(SELECT_START);
-    ASSERT_FALSE(set);
+    sliderContentModifier.StopSelectAnimation();
+    ASSERT_TRUE(set);
 
     /**
      * @tc.cases: case2. when sliderPaintProperty's direction is VERTICAL.
@@ -3089,20 +3087,20 @@ HWTEST_F(SliderTestNg, SliderContentModifierTest018, TestSize.Level1)
     sliderContentModifier.selectEnd_->Set(POINTF_CENTER - PointF());
     sliderContentModifier.targetSelectEnd_ = SELECT_START - PointF();
     set = false;
-    sliderContentModifier.StopSelectAnimation(SELECT_END);
+    sliderContentModifier.StopSelectAnimation();
     ASSERT_TRUE(set);
 
     sliderContentModifier.selectEnd_->Set(POINTF_CENTER - PointF());
     sliderContentModifier.targetSelectEnd_ = SELECT_END - PointF();
     set = false;
-    sliderContentModifier.StopSelectAnimation(SELECT_START);
+    sliderContentModifier.StopSelectAnimation();
     ASSERT_TRUE(set);
 
     sliderContentModifier.selectEnd_->Set(SELECT_END - PointF());
     sliderContentModifier.targetSelectEnd_ = POINTF_CENTER - PointF();
     set = false;
-    sliderContentModifier.StopSelectAnimation(SELECT_START);
-    ASSERT_FALSE(set);
+    sliderContentModifier.StopSelectAnimation();
+    ASSERT_TRUE(set);
 }
 
 /**
@@ -3134,20 +3132,20 @@ HWTEST_F(SliderTestNg, SliderContentModifierTest019, TestSize.Level1)
     sliderContentModifier.directionAxis_->Set(static_cast<int>(Axis::HORIZONTAL));
     sliderContentModifier.blockCenterX_->Set(POINTF_CENTER.GetX());
     sliderContentModifier.targetCenter_ = POINTF_START;
-    sliderContentModifier.StopCircleCenterAnimation(POINTF_END);
+    sliderContentModifier.StopCircleCenterAnimation();
     ASSERT_TRUE(set);
 
     sliderContentModifier.blockCenterX_->Set(POINTF_CENTER.GetX());
     sliderContentModifier.targetCenter_ = POINTF_END;
     set = false;
-    sliderContentModifier.StopCircleCenterAnimation(SELECT_START);
+    sliderContentModifier.StopCircleCenterAnimation();
     ASSERT_TRUE(set);
 
     sliderContentModifier.blockCenterX_->Set(POINTF_END.GetX());
     sliderContentModifier.targetCenter_ = POINTF_CENTER;
     set = false;
-    sliderContentModifier.StopCircleCenterAnimation(SELECT_START);
-    ASSERT_FALSE(set);
+    sliderContentModifier.StopCircleCenterAnimation();
+    ASSERT_TRUE(set);
 
     /**
      * @tc.cases: case2. when sliderPaintProperty's direction is VERTICAL.
@@ -3162,20 +3160,20 @@ HWTEST_F(SliderTestNg, SliderContentModifierTest019, TestSize.Level1)
     sliderContentModifier.blockCenterY_->Set(POINTF_CENTER.GetY());
     sliderContentModifier.targetCenter_ = POINTF_START;
     set = false;
-    sliderContentModifier.StopCircleCenterAnimation(POINTF_END);
+    sliderContentModifier.StopCircleCenterAnimation();
     ASSERT_TRUE(set);
 
     sliderContentModifier.blockCenterY_->Set(POINTF_CENTER.GetY());
     sliderContentModifier.targetCenter_ = POINTF_END;
     set = false;
-    sliderContentModifier.StopCircleCenterAnimation(SELECT_START);
+    sliderContentModifier.StopCircleCenterAnimation();
     ASSERT_TRUE(set);
 
     sliderContentModifier.blockCenterY_->Set(POINTF_END.GetY());
     sliderContentModifier.targetCenter_ = POINTF_CENTER;
     set = false;
-    sliderContentModifier.StopCircleCenterAnimation(SELECT_START);
-    ASSERT_FALSE(set);
+    sliderContentModifier.StopCircleCenterAnimation();
+    ASSERT_TRUE(set);
 }
 
 /**

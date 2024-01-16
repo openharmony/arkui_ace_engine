@@ -152,8 +152,8 @@ private:
     RefPtr<CanvasPaintMethod> paintMethod_;
     std::optional<SizeF> canvasSize_;
     bool isCanvasInit_ = false;
-    SizeF oldPixelGridRoundSize_ = {-1, -1};
-    SizeF lastOldPixelGridRoundSize_ = {-1, -1};
+    SizeF dirtyPixelGridRoundSize_ = { -1, -1 };
+    SizeF lastDirtyPixelGridRoundSize_ = { -1, -1 };
     DirtySwapConfig recordConfig_;
 
     RefPtr<RenderingContext2DModifier> contentModifier_;

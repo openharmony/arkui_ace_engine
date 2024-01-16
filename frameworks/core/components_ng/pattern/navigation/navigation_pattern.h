@@ -77,6 +77,11 @@ public:
         return { FocusType::SCOPE, true };
     }
 
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
+    {
+        return { false, true, ScopeType::FLEX };
+    }
+
     void SetNavDestination(std::function<void(std::string)>&& builder)
     {
         builder_ = std::move(builder);

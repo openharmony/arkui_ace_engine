@@ -104,6 +104,8 @@ const std::map<AceLogTag, const char*> DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_WINDOW_SCENE, "WMSCom" },
     { AceLogTag::ACE_NODE_CONTAINER, "AceNodeContainer" },
     { AceLogTag::ACE_NATIVE_NODE, "AceNativeNode" },
+    { AceLogTag::ACE_DYNAMIC_COMPONENT, "AceDynamicComponent" },
+    { AceLogTag::ACE_MARQUEE, "AceMarquee" },
 };
 
 const char* APP_DOMAIN_CONTENT = "JSApp";

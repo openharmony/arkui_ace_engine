@@ -1287,4 +1287,9 @@ void SearchModelNG::SetRightIconSrcPath(FrameNode* frameNode, const std::string&
     imageFrameNode->MarkModifyDone();
     imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
+
+void SearchModelNG::SetHeight(FrameNode* frameNode, const Dimension& height)
+{
+    NG::ViewAbstract::SetHeight(frameNode, NG::CalcLength(height));
+}
 } // namespace OHOS::Ace::NG

@@ -737,9 +737,7 @@ void DatePickerColumnPattern::HandleDragStart(const GestureEvent& event)
     toss->SetStart(offsetY);
     yLast_ = offsetY;
     pressed_ = true;
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
+    // AccessibilityEventType::SCROLL_START
 }
 
 void DatePickerColumnPattern::HandleDragMove(const GestureEvent& event)
@@ -770,7 +768,7 @@ void DatePickerColumnPattern::HandleDragEnd()
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     if (!NotLoopOptions() && toss->Play()) {
-        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        // AccessibilityEventType::SCROLL_END
         return;
     }
     yOffset_ = 0.0;
@@ -790,7 +788,7 @@ void DatePickerColumnPattern::HandleDragEnd()
         scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (dir == DatePickerScrollDirection::UP ? -1 : 1);
     }
     CreateAnimation(scrollDelta_, 0.0);
-    frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    // AccessibilityEventType::SCROLL_END
 }
 
 void DatePickerColumnPattern::CreateAnimation()
@@ -1132,9 +1130,7 @@ void DatePickerColumnPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(pattern->animationCreated_);
         pattern->InnerHandleScroll(true);
         pattern->CreateAnimation(0.0 - pattern->jumpInterval_, 0.0);
-        auto frameNode = pattern->GetHost();
-        CHECK_NULL_VOID(frameNode);
-        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        // AccessibilityEventType::SCROLL_END
     });
 
     accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
@@ -1146,9 +1142,7 @@ void DatePickerColumnPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(pattern->animationCreated_);
         pattern->InnerHandleScroll(false);
         pattern->CreateAnimation(pattern->jumpInterval_, 0.0);
-        auto frameNode = pattern->GetHost();
-        CHECK_NULL_VOID(frameNode);
-        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        // AccessibilityEventType::SCROLL_END
     });
 }
 

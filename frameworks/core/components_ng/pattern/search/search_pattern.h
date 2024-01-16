@@ -165,7 +165,7 @@ private:
     // Init key event
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
-    void PaintFocusState();
+    void PaintFocusState(bool recoverFlag = false);
     void GetInnerFocusPaintRect(RoundRect& paintRect);
     void RequestKeyboard();
     // Init touch and hover event
@@ -176,6 +176,7 @@ private:
     void InitButtonMouseEvent(RefPtr<InputEvent>& inputEvent, int32_t childId);
     void HandleBackgroundColor();
     void HandleEnabled();
+    void HandleTouchableAndHitTestMode();
     void InitButtonMouseAndTouchEvent();
     void SetMouseStyle(MouseFormat format);
     void OnButtonTouchDown(int32_t childId);
@@ -192,7 +193,7 @@ private:
     void AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, float startOpacity, float endOpacity,
         int32_t duration, const RefPtr<Curve>& curve);
     void InitFocusEvent(const RefPtr<FocusHub>& focusHub);
-    void HandleFocusEvent(bool backwardFocusMovement);
+    void HandleFocusEvent(bool forwardFocusMovement, bool backwardFocusMovement);
     void HandleBlurEvent();
     void InitClickEvent();
     void HandleClickEvent(GestureEvent& info);
@@ -227,6 +228,8 @@ private:
     RefPtr<FrameNode> cancelButtonNode_;
     RefPtr<FrameNode> buttonNode_;
     RefPtr<FrameNode> textField_;
+
+    int32_t lastCaretIndex_ = 0;
 };
 
 } // namespace OHOS::Ace::NG

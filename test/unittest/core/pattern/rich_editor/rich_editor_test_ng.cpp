@@ -2106,7 +2106,7 @@ HWTEST_F(RichEditorTestNg, GetParagraphNodes001, TestSize.Level1)
     EXPECT_EQ(nodes[3]->GetId(), richEditorNode_->GetChildAtIndex(4)->GetId());
 
     nodes = richEditorPattern->GetParagraphNodes(400, 404);
-    EXPECT_EQ(nodes.size(), 7);
+    EXPECT_EQ(nodes.size(), 0);
 }
 
 /**
@@ -2157,7 +2157,7 @@ HWTEST_F(RichEditorTestNg, GetParagraphNodes003, TestSize.Level1)
     EXPECT_EQ(richEditorNode_->children_.size(), 4);
 
     auto nodes = richEditorPattern->GetParagraphNodes(50, 52);
-    EXPECT_EQ(nodes.size(), 3);
+    EXPECT_EQ(nodes.size(), 0);
 
     nodes = richEditorPattern->GetParagraphNodes(1, 2);
     EXPECT_EQ(nodes.size(), 2);

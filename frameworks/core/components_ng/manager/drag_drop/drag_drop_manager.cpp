@@ -436,6 +436,21 @@ void DragDropManager::PrintDragFrameNode(const Point& point, const RefPtr<FrameN
     }
 }
 
+void DragDropManager::TransDragWindowToDragFwk(int32_t windowContainerId)
+{
+    if (isDragFwkShow_) {
+        return;
+    }
+    InteractionInterface::GetInstance()->SetDragWindowVisible(true);
+    isDragFwkShow_ = true;
+    auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(windowContainerId);
+    CHECK_NULL_VOID(subwindow);
+    auto overlayManager = subwindow->GetOverlayManager();
+    overlayManager->RemovePixelMap();
+    SubwindowManager::GetInstance()->HidePreviewNG();
+    info_.scale = -1.0;
+}
+
 void DragDropManager::OnDragMoveOut(const PointerEvent& pointerEvent)
 {
     Point point = pointerEvent.GetPoint();
@@ -460,14 +475,7 @@ void DragDropManager::OnDragMoveOut(const PointerEvent& pointerEvent)
         preTargetFrameNode_ = nullptr;
     }
     if (IsNeedScaleDragPreview()) {
-        InteractionInterface::GetInstance()->SetDragWindowVisible(true);
-        auto containerId = Container::CurrentId();
-        auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(containerId);
-        CHECK_NULL_VOID(subwindow);
-        auto overlayManager = subwindow->GetOverlayManager();
-        overlayManager->RemovePixelMap();
-        SubwindowManager::GetInstance()->HidePreviewNG();
-        info_.scale = -1.0;
+        TransDragWindowToDragFwk(Container::CurrentId());
     }
 }
 
@@ -594,9 +602,11 @@ void DragDropManager::OnDragEnd(const PointerEvent& pointerEvent, const std::str
     auto dragResult = event->GetResult();
     auto useCustomAnimation = event->IsUseCustomAnimation();
     auto windowId = container->GetWindowId();
-    pipeline->SetDragCleanTask([dragResult, useCustomAnimation, isMouseDragged = isMouseDragged_, windowId]() {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Stop drag, start do drop animation. UseCustomAnimation is %{public}d,"
-            "WindowId is %{public}d.", useCustomAnimation, windowId);
+    pipeline->AddAfterRenderTask([dragResult, useCustomAnimation, windowId]() {
+        TAG_LOGI(AceLogTag::ACE_DRAG,
+            "Stop drag, start do drop animation. UseCustomAnimation is %{public}d,"
+            "WindowId is %{public}d.",
+            useCustomAnimation, windowId);
         InteractionInterface::GetInstance()->SetDragWindowVisible(!useCustomAnimation);
         DragDropRet dragDropRet { dragResult, useCustomAnimation, windowId };
         InteractionInterface::GetInstance()->StopDrag(dragDropRet);
@@ -1247,13 +1257,12 @@ void DragDropManager::DoDragMoveAnimate(const PointerEvent& pointerEvent)
     option.SetCurve(curve);
     option.SetDuration(animateDuration);
     auto distance = CalcDragPreviewDistanceWithPoint(preserveHeight, x, y, info_);
-    option.SetOnFinishEvent([distance, overlayManager, pipeline]() {
+    option.SetOnFinishEvent([distance, weakManager = WeakClaim(this), containerId]() {
         constexpr decltype(distance) MAX_DIS = 5.0;
         if (distance < MAX_DIS) {
-            InteractionInterface::GetInstance()->SetDragWindowVisible(true);
-            if (overlayManager->GetHasPixelMap()) {
-                SubwindowManager::GetInstance()->HidePreviewNG();
-                overlayManager->RemovePixelMap();
+            auto dragDropManager = weakManager.Upgrade();
+            if (dragDropManager) {
+                dragDropManager->TransDragWindowToDragFwk(containerId);
             }
         }
     });
@@ -1273,6 +1282,7 @@ void DragDropManager::DoDragStartAnimation(const RefPtr<OverlayManager>& overlay
     if (!(GetDragPreviewInfo(overlayManager, info_)) || !IsNeedScaleDragPreview()) {
         return;
     }
+    isDragFwkShow_ = false;
     Dimension preserveHeight = 8.0_vp;
     Offset newOffset = CalcDragMoveOffset(preserveHeight,
         static_cast<int32_t>(event.GetGlobalLocation().GetX()), static_cast<int32_t>(event.GetGlobalLocation().GetY()),

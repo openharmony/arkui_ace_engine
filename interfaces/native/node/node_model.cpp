@@ -110,11 +110,10 @@ ArkUIFullNodeAPI* GetFullImpl()
 
 ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
 {
-    static const ArkUINodeType nodes[] = {
-        ARKUI_TEXT, ARKUI_SPAN, ARKUI_IMAGE_SPAN, ARKUI_IMAGE, ARKUI_TOGGLE, ARKUI_LOADINGPROGRESS,
-        ARKUI_TEXTINPUT, ARKUI_STACK, ARKUI_SCROLL, ARKUI_LIST, ARKUI_SWIPER, ARKUI_TEXT_AREA,
-        ARKUI_BUTTON, ARKUI_PROGRESS, ARKUI_CHECKBOX, ARKUI_COLUMN, ARKUI_ROW, ARKUI_LIST_ITEM
-    };
+    static const ArkUINodeType nodes[] = { ARKUI_TEXT, ARKUI_SPAN, ARKUI_IMAGE_SPAN, ARKUI_IMAGE, ARKUI_TOGGLE,
+        ARKUI_LOADINGPROGRESS, ARKUI_TEXTINPUT, ARKUI_STACK, ARKUI_SCROLL, ARKUI_LIST, ARKUI_SWIPER, ARKUI_TEXTAREA,
+        ARKUI_BUTTON, ARKUI_PROGRESS, ARKUI_CHECKBOX, ARKUI_COLUMN, ARKUI_ROW, ARKUI_FLEX, ARKUI_LIST_ITEM,
+        ARKUI_REFRESH, ARKUI_XCOMPONENT };
     auto* impl = GetFullImpl();
     if (!impl) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get node impl");
@@ -211,7 +210,7 @@ void RegisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType, 
         return;
     }
     impl->getBasicAPI()->registerNodeAsyncEvent(
-        nodePtr->uiNodeHandle, static_cast<ArkUIAsyncEventKind>(originEventType), eventId);
+        nodePtr->uiNodeHandle, static_cast<ArkUIAsyncEventKind>(originEventType), eventId, nodePtr);
 }
 
 void UnregisterNodeEvent(ArkUI_NodeHandle nodePtr, ArkUI_NodeEventType eventType)
@@ -232,7 +231,9 @@ void RegisterOnEvent(void (*eventReceiver)(ArkUI_NodeEvent* event))
         auto innerReceiver = [](ArkUINodeEvent* origin) {
             if (g_eventReceiver) {
                 auto event = reinterpret_cast<ArkUI_NodeEvent*>(origin);
+                event->node = reinterpret_cast<ArkUI_NodeHandle>(origin->extraParam);
                 event->kind = ConvertToNodeEventType(static_cast<ArkUIAsyncEventKind>(origin->kind));
+                event->stringEvent.pStr = origin->stringAsyncEvent.pStr;
                 g_eventReceiver(event);
             }
         };

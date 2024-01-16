@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/bindings_defines.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/core/components_ng/image_provider/image_loading_context.h"
 
 namespace OHOS::Ace::Framework {
 class JSCanvasRenderer;
@@ -45,19 +46,45 @@ public:
     double GetHeight();
     std::string GetSrc();
     void SetCloseCallback(std::function<void()>&& callback);
+    RefPtr<PixelMap> GetPixelMap()
+    {
+        return pixelMap_;
+    }
+
+    void SetInstanceId(int32_t instanceId)
+    {
+        instanceId_ = instanceId;
+    }
+
+    int32_t GetInstanceId()
+    {
+        return instanceId_;
+    }
 
     ACE_DISALLOW_COPY_AND_MOVE(JSRenderImage);
-
 private:
     napi_value OnClose();
     napi_value OnGetWidth(napi_env env);
     napi_value OnGetHeight(napi_env env);
     napi_value OnSetWidth();
     napi_value OnSetHeight();
+
+    void LoadImage(const std::string& src);
+    void LoadImage(const ImageSourceInfo& src);
+    void OnImageDataReady();
+    void OnImageLoadFail(const std::string& errorMsg);
+    void OnImageLoadSuccess();
+
+    RefPtr<NG::CanvasImage> image_;
+    RefPtr<NG::ImageLoadingContext> loadingCtx_;
+    RefPtr<PixelMap> pixelMap_;
+    ImageSourceInfo sourfaceInfo_;
+
     std::string src_;
     std::list<std::function<void()>> closeCallbacks_;
     double width_ = 0;
     double height_ = 0;
+    int32_t instanceId_ = 0;
 };
 
 } // namespace OHOS::Ace::Framework

@@ -141,6 +141,8 @@ void SliderContentModifier::DrawBackground(DrawingContext& context)
     RSRoundRect roundRect(GetTrackRect(), trackBorderRadius, trackBorderRadius);
     canvas.DrawRoundRect(roundRect);
     canvas.DetachBrush();
+    canvas.Save();
+    canvas.ClipRoundRect(roundRect, RSClipOp::INTERSECT, true);
 }
 
 void SliderContentModifier::DrawStep(DrawingContext& context)
@@ -206,19 +208,19 @@ void SliderContentModifier::DrawSelect(DrawingContext& context)
         auto rect = GetTrackRect();
         auto insetOffset = .0f;
         if (sliderMode == SliderModelNG::SliderMode::INSET) {
-            insetOffset = trackThickness * HALF;
+            insetOffset = std::max(trackBorderRadius, trackThickness * HALF);
         }
         if (!reverse_) {
             if (direction == Axis::HORIZONTAL) {
-                rect.SetRight(blockCenter.GetX() + std::max(trackBorderRadius, insetOffset));
+                rect.SetRight(blockCenter.GetX() + insetOffset);
             } else {
-                rect.SetBottom(blockCenter.GetY() + std::max(trackBorderRadius, insetOffset));
+                rect.SetBottom(blockCenter.GetY() + insetOffset);
             }
         } else {
             if (direction == Axis::HORIZONTAL) {
-                rect.SetLeft(blockCenter.GetX() - std::max(trackBorderRadius, insetOffset));
+                rect.SetLeft(blockCenter.GetX() - insetOffset);
             } else {
-                rect.SetTop(blockCenter.GetY() - std::max(trackBorderRadius, insetOffset));
+                rect.SetTop(blockCenter.GetY() - insetOffset);
             }
         }
 
@@ -230,31 +232,36 @@ void SliderContentModifier::DrawSelect(DrawingContext& context)
         canvas.DrawRoundRect(RSRoundRect(rect, trackBorderRadius, trackBorderRadius));
         canvas.DetachBrush();
     }
+    canvas.Restore();
 }
 
 void SliderContentModifier::DrawDefaultBlock(DrawingContext& context)
 {
     auto& canvas = context.canvas;
     auto borderWidth = blockBorderWidth_->Get();
-
-    RSPen pen;
-    pen.SetAntiAlias(true);
-    pen.SetWidth(borderWidth);
-    pen.SetColor(ToRSColor(blockBorderColor_->Get()));
-    if (!NearEqual(borderWidth, .0f)) {
-        canvas.AttachPen(pen);
-    }
-    RSBrush brush;
-    brush.SetAntiAlias(true);
-    brush.SetColor(ToRSColor(blockColor_->Get()));
-    canvas.AttachBrush(brush);
-
     auto blockSize = blockSize_->Get();
     auto blockCenter = GetBlockCenter();
-    float radius = std::min(blockSize.Width(), blockSize.Height()) * HALF - borderWidth * HALF;
+    float blockRadius = std::min(blockSize.Width(), blockSize.Height()) * HALF;
+    float radius = blockRadius;
+    RSBrush brush;
+    brush.SetAntiAlias(true);
+    if (GreatOrEqual(borderWidth * HALF, radius)) {
+        brush.SetColor(ToRSColor(blockBorderColor_->Get()));
+    } else {
+        radius = std::min(blockSize.Width(), blockSize.Height()) * HALF - borderWidth * HALF;
+        brush.SetColor(ToRSColor(blockColor_->Get()));
+    }
+    canvas.AttachBrush(brush);
+    RSPen pen;
+    if (!NearEqual(borderWidth, .0f) && LessNotEqual(borderWidth * HALF, blockRadius)) {
+        pen.SetAntiAlias(true);
+        pen.SetWidth(borderWidth);
+        pen.SetColor(ToRSColor(blockBorderColor_->Get()));
+        canvas.AttachPen(pen);
+    }
     canvas.DrawCircle(ToRSPoint(PointF(blockCenter.GetX(), blockCenter.GetY())), radius);
     canvas.DetachBrush();
-    if (!NearEqual(borderWidth, .0f)) {
+    if (!NearEqual(borderWidth, .0f) && LessNotEqual(borderWidth * HALF, blockRadius)) {
         canvas.DetachPen();
     }
 }
@@ -335,42 +342,25 @@ void SliderContentModifier::UpdateData(const Parameters& parameters)
     hotCircleShadowWidth_ = parameters.hotCircleShadowWidth;
 }
 
-void SliderContentModifier::JudgeNeedAnimate(const RefPtr<SliderPaintProperty>& property)
+void SliderContentModifier::JudgeNeedAnimate(bool reverse)
 {
-    auto reverse = property->GetReverseValue(false);
     // when reverse is changed, slider block position changes do not animated.
     if (reverse_ != reverse) {
-        SetNotAnimated();
+        SetAnimatorStatus(SliderStatus::DEFAULT);
         reverse_ = reverse;
     }
 }
 
-void SliderContentModifier::StopSelectAnimation(const PointF& end)
+void SliderContentModifier::StopSelectAnimation()
 {
-    bool stop = false;
-    if (static_cast<Axis>(directionAxis_->Get()) == Axis::HORIZONTAL) {
-        auto current = selectEnd_->Get().GetX();
-        if ((LessNotEqual(targetSelectEnd_.GetX(), current) && GreatNotEqual(end.GetX(), current)) ||
-            (LessNotEqual(end.GetX(), current) && GreatNotEqual(targetSelectEnd_.GetX(), current))) {
-            stop = true;
+    AnimationOption option = AnimationOption();
+    option.SetCurve(Curves::LINEAR);
+    AnimationUtils::Animate(option, [this]() {
+        selectEnd_->Set(selectEnd_->Get());
+        if (animatorStatus_ == SliderStatus::MOVE) {
+            selectEnd_->Set(targetSelectEnd_);
         }
-    } else {
-        auto current = selectEnd_->Get().GetY();
-        if ((LessNotEqual(targetSelectEnd_.GetY(), current) && GreatNotEqual(end.GetY(), current)) ||
-            (LessNotEqual(end.GetY(), current) && GreatNotEqual(targetSelectEnd_.GetY(), current))) {
-            stop = true;
-        }
-    }
-    if (stop) {
-        AnimationOption option = AnimationOption();
-        AnimationUtils::Animate(option, [this]() {
-            if (static_cast<Axis>(directionAxis_->Get()) == Axis::HORIZONTAL) {
-                selectEnd_->Set(selectEnd_->Get());
-            } else {
-                selectEnd_->Set(selectEnd_->Get());
-            }
-        });
-    }
+    });
 }
 
 void SliderContentModifier::SetSelectSize(const PointF& start, const PointF& end)
@@ -379,8 +369,8 @@ void SliderContentModifier::SetSelectSize(const PointF& start, const PointF& end
         selectStart_->Set(start - PointF());
     }
     CHECK_NULL_VOID(selectEnd_);
-    if (needAnimate_ && isVisible_) {
-        StopSelectAnimation(end);
+    if (animatorStatus_ != SliderStatus::DEFAULT && isVisible_) {
+        StopSelectAnimation();
         AnimationOption option = AnimationOption();
         auto motion =
             AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_MOTION_RESPONSE, SPRING_MOTION_DAMPING_FRACTION);
@@ -392,32 +382,24 @@ void SliderContentModifier::SetSelectSize(const PointF& start, const PointF& end
     targetSelectEnd_ = end - PointF();
 }
 
-void SliderContentModifier::StopCircleCenterAnimation(const PointF& center)
+void SliderContentModifier::StopCircleCenterAnimation()
 {
-    bool stop = false;
-    if (static_cast<Axis>(directionAxis_->Get()) == Axis::HORIZONTAL) {
-        auto current = blockCenterX_->Get();
-        if ((LessNotEqual(targetCenter_.GetX(), current) && GreatNotEqual(center.GetX(), current)) ||
-            (LessNotEqual(center.GetX(), current) && GreatNotEqual(targetCenter_.GetX(), current))) {
-            stop = true;
+    AnimationOption option = AnimationOption();
+    option.SetCurve(Curves::LINEAR);
+    AnimationUtils::Animate(option, [this]() {
+        if (static_cast<Axis>(directionAxis_->Get()) == Axis::HORIZONTAL) {
+            blockCenterX_->Set(blockCenterX_->Get());
+        } else {
+            blockCenterY_->Set(blockCenterY_->Get());
         }
-    } else {
-        auto current = blockCenterY_->Get();
-        if ((LessNotEqual(targetCenter_.GetY(), current) && GreatNotEqual(center.GetY(), current)) ||
-            (LessNotEqual(center.GetY(), current) && GreatNotEqual(targetCenter_.GetY(), current))) {
-            stop = true;
-        }
-    }
-    if (stop) {
-        AnimationOption option = AnimationOption();
-        AnimationUtils::Animate(option, [this]() {
+        if (animatorStatus_ == SliderStatus::MOVE) {
             if (static_cast<Axis>(directionAxis_->Get()) == Axis::HORIZONTAL) {
-                blockCenterX_->Set(blockCenterX_->Get());
+                blockCenterX_->Set(targetCenter_.GetX());
             } else {
-                blockCenterY_->Set(blockCenterY_->Get());
+                blockCenterY_->Set(targetCenter_.GetY());
             }
-        });
-    }
+        }
+    });
 }
 
 void SliderContentModifier::SetCircleCenter(const PointF& center)
@@ -428,8 +410,8 @@ void SliderContentModifier::SetCircleCenter(const PointF& center)
 
     CHECK_NULL_VOID(blockCenterX_);
     CHECK_NULL_VOID(blockCenterY_);
-    if (needAnimate_ && isVisible_) {
-        StopCircleCenterAnimation(center);
+    if (animatorStatus_ != SliderStatus::DEFAULT && isVisible_) {
+        StopCircleCenterAnimation();
         AnimationOption option = AnimationOption();
         auto motion =
             AceType::MakeRefPtr<ResponsiveSpringMotion>(SPRING_MOTION_RESPONSE, SPRING_MOTION_DAMPING_FRACTION);
@@ -458,13 +440,29 @@ RSRect SliderContentModifier::GetTrackRect()
     auto backStart = backStart_->Get();
     auto backEnd = backEnd_->Get();
     auto trackThickness = trackThickness_->Get();
-
+    auto direction = static_cast<Axis>(directionAxis_->Get());
     RSRect rect;
-    rect.SetLeft(backStart.GetX() - trackThickness * HALF);
-    rect.SetRight(backEnd.GetX() + trackThickness * HALF);
-    rect.SetTop(backStart.GetY() - trackThickness * HALF);
-    rect.SetBottom(backEnd.GetY() + trackThickness * HALF);
-
+    if (direction == Axis::HORIZONTAL) {
+        if (sliderMode_->Get() == static_cast<int32_t>(SliderModel::SliderMode::OUTSET)) {
+            rect.SetLeft(backStart.GetX());
+            rect.SetRight(backEnd.GetX());
+        } else {
+            rect.SetLeft(backStart.GetX() - trackThickness * HALF);
+            rect.SetRight(backEnd.GetX() + trackThickness * HALF);
+        }
+        rect.SetTop(backStart.GetY() - trackThickness * HALF);
+        rect.SetBottom(backEnd.GetY() + trackThickness * HALF);
+    } else {
+        rect.SetLeft(backStart.GetX() - trackThickness * HALF);
+        rect.SetRight(backEnd.GetX() + trackThickness * HALF);
+        if (sliderMode_->Get() == static_cast<int32_t>(SliderModel::SliderMode::OUTSET)) {
+            rect.SetTop(backStart.GetY());
+            rect.SetBottom(backEnd.GetY());
+        } else {
+            rect.SetTop(backStart.GetY() - trackThickness * HALF);
+            rect.SetBottom(backEnd.GetY() + trackThickness * HALF);
+        }
+    }
     return rect;
 }
 

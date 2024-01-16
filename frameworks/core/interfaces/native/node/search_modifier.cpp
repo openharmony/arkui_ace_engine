@@ -285,34 +285,29 @@ void ResetSearchCopyOption(NodeHandle node)
     SearchModelNG::SetCopyOption(frameNode, copyOptions);
 }
 
+void SetSearchHeight(NodeHandle node, double heightValue, int32_t heightUnit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SearchModelNG::SetHeight(frameNode, CalcDimension(heightValue, (DimensionUnit)heightUnit));
+}
+
+void ResetSearchHeight(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::ClearWidthOrHeight(frameNode, false);
+}
+
 ArkUISearchModifierAPI GetSearchModifier()
 {
-    static const ArkUISearchModifierAPI modifier = {
-        SetSearchPlaceholderColor,
-        ResetSearchPlaceholderColor,
-        SetSearchTextFont,
-        ResetSearchTextFont,
-        SetSearchSelectionMenuHidden,
-        ResetSearchSelectionMenuHidden,
-        SetSearchCaretStyle,
-        ResetSearchCaretStyle,
-        SetSearchTextAlign,
-        ResetSearchTextAlign,
-        SetSearchCancelButton,
-        ResetSearchCancelButton,
-        SetSearchEnableKeyboardOnFocus,
-        ResetSearchEnableKeyboardOnFocus,
-        SetSearchPlaceholderFont,
-        ResetSearchPlaceholderFont,
-        SetSearchSearchIcon,
-        ResetSearchSearchIcon,
-        SetSearchSearchButton,
-        ResetSearchSearchButton,
-        SetSearchFontColor,
-        ResetSearchFontColor,
-        SetSearchCopyOption,
-        ResetSearchCopyOption
-    };
+    static const ArkUISearchModifierAPI modifier = { SetSearchPlaceholderColor, ResetSearchPlaceholderColor,
+        SetSearchTextFont, ResetSearchTextFont, SetSearchSelectionMenuHidden, ResetSearchSelectionMenuHidden,
+        SetSearchCaretStyle, ResetSearchCaretStyle, SetSearchTextAlign, ResetSearchTextAlign, SetSearchCancelButton,
+        ResetSearchCancelButton, SetSearchEnableKeyboardOnFocus, ResetSearchEnableKeyboardOnFocus,
+        SetSearchPlaceholderFont, ResetSearchPlaceholderFont, SetSearchSearchIcon, ResetSearchSearchIcon,
+        SetSearchSearchButton, ResetSearchSearchButton, SetSearchFontColor, ResetSearchFontColor, SetSearchCopyOption,
+        ResetSearchCopyOption, SetSearchHeight, ResetSearchHeight };
 
     return modifier;
 }

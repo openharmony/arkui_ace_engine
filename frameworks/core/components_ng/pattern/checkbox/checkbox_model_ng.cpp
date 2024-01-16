@@ -42,6 +42,13 @@ void CheckBoxModelNG::Create(
     }
 }
 
+RefPtr<FrameNode> CheckBoxModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::CHECK_BOX_ETS_TAG, nodeId, AceType::MakeRefPtr<CheckBoxPattern>());
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    return frameNode;
+}
+
 void CheckBoxModelNG::SetSelect(bool isSelected)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
