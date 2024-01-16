@@ -564,7 +564,7 @@ void PerfMonitor::ReportJankFrame(double jank, const std::string& windowName)
         jankInfo.windowName = windowName;
         RecordBaseInfo(nullptr);
         jankInfo.baseInfo = baseInfo;
-        EventReport::ReportJankFrame(jankInfo);
+        EventReport::ReportJankFrameFiltered(jankInfo);
     }
 }
 } // namespace OHOS::Ace

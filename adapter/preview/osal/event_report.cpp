@@ -63,7 +63,7 @@ void EventReport::ReportEventJankFrame(DataBase& data) {}
 
 void EventReport::ReportJankFrameApp(JankInfo& info) {}
 
-void EventReport::ReportJankFrame(JankInfo& info) {}
+void EventReport::ReportJankFrameFiltered(JankInfo& info) {}
 
 void EventReport::ReportDoubleClickTitle(int32_t stateChange) {}
 
