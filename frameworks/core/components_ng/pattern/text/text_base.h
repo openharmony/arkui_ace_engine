@@ -149,19 +149,6 @@ public:
 
     virtual void ScrollToSafeArea() const {}
 
-    static void UpdateKeyboardOffset(double positionY, double height)
-    {
-        auto container = Container::Current();
-        CHECK_NULL_VOID(container);
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        auto keyboardArea = container->GetKeyboardSafeArea();
-        auto keyboardLength = keyboardArea.bottom_.Length();
-        Rect keyboardRect;
-        keyboardRect.SetRect(0, keyboardArea.bottom_.start, 0, keyboardLength);
-        context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height);
-    }
-
     virtual void GetCaretMetrics(CaretMetricsF& caretCaretMetric) {}
     
 protected:
