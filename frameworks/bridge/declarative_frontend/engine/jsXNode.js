@@ -372,7 +372,7 @@ class FrameNode {
             return;
         }
         this.baseNode_ = new BaseNode(uiContext);
-        this.nodePtr_ = this.baseNode_.createRenderNode();
+        this.nodePtr_ = this.baseNode_.createRenderNode(this);
         this.renderNode_.setNodePtr(this.nodePtr_);
     }
     getRenderNode() {
@@ -432,7 +432,7 @@ class RenderNode {
         }
         this.baseNode_ = new __JSBaseNode__();
         this.baseNode_.draw = this.draw;
-        this.nodePtr = this.baseNode_.createRenderNode();
+        this.nodePtr = this.baseNode_.createRenderNode(this);
     }
     set backgroundColor(color) {
         this.backgroundColorValue = this.checkUndefinedOrNullWithDefaultValue(color, 0);
