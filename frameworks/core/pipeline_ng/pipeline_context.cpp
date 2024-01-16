@@ -1094,6 +1094,14 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
         return;
     }
     switch (type) {
+        case WindowSizeChangeReason::FULL_TO_SPLIT: {
+            StartFullToSplitAnimation(width, height, rsTransaction);
+            break;
+        }
+        case WindowSizeChangeReason::FULL_TO_FLOATING: {
+            StartFullToFloatingAnimation(width, height, rsTransaction);
+            break;
+        }
         case WindowSizeChangeReason::RECOVER:
         case WindowSizeChangeReason::MAXIMIZE: {
             StartWindowMaximizeAnimation(width, height, rsTransaction);
@@ -1143,6 +1151,60 @@ void PipelineContext::StartWindowMaximizeAnimation(
     option.SetDuration(duration);
     auto curve = Curves::EASE_OUT;
     option.SetCurve(curve);
+    auto weak = WeakClaim(this);
+    Animate(option, curve, [width, height, weak]() {
+        auto pipeline = weak.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SetRootRect(width, height, 0.0);
+        pipeline->FlushUITasks();
+    });
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        rsTransaction->Commit();
+    }
+#endif
+}
+
+void PipelineContext::StartFullToSplitAnimation(
+    int32_t width, int32_t height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+    LOGI("Root node start full-to-split animation, width = %{public}d, height = %{public}d", width, height);
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        FlushMessages();
+        rsTransaction->Begin();
+    }
+#endif
+    AnimationOption option;
+    auto springMotion = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.5, 1, 0);
+    option.SetCurve(springMotion);
+    auto weak = WeakClaim(this);
+    Animate(option, curve, [width, height, weak]() {
+        auto pipeline = weak.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SetRootRect(width, height, 0.0);
+        pipeline->FlushUITasks();
+    });
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        rsTransaction->Commit();
+    }
+#endif
+}
+
+void PipelineContext::StartFullToFloatingAnimation(
+    int32_t width, int32_t height, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+    LOGI("Root node start full-to-floating animation, width = %{public}d, height = %{public}d", width, height);
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        FlushMessages();
+        rsTransaction->Begin();
+    }
+#endif
+    AnimationOption option;
+    auto springMotion = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.45, 0.75, 0);
+    option.SetCurve(springMotion);
     auto weak = WeakClaim(this);
     Animate(option, curve, [width, height, weak]() {
         auto pipeline = weak.Upgrade();
