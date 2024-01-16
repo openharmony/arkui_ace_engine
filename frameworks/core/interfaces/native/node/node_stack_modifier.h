@@ -16,7 +16,7 @@
 #ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_STACK_MODIFIER_H
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_NODE_STACK_MODIFIER_H
 
-#include "core/interfaces/native/node/node_modifiers.h"
+#include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIStackModifier* GetStackModifier();

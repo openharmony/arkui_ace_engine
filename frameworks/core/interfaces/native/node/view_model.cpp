@@ -44,7 +44,7 @@
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 #include "core/interfaces/native/node/node_api.h"
-#include "core/interfaces/native/node/node_types.h"
+#include "core/interfaces/native/node/node_api.h"
 
 
 namespace OHOS::Ace::NG::ViewModel {

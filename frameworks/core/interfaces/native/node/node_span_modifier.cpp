@@ -192,7 +192,7 @@ void SetSpanLetterSpacing(ArkUINodeHandle node, const struct StringAndDouble* le
     SpanModelNG::SetLetterSpacing(frameNode, result);
 }
 
-void SetSpanLetterSpacing(ArkUINodeHandle node)
+void ResetSpanLetterSpacing(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -240,7 +240,7 @@ const ArkUISpanModifier* GetSpanModifier()
     static const ArkUISpanModifier modifier = { SetSpanContent, SetSpanTextCase, ResetSpanTextCase, SetSpanFontWeight,
         ResetSpanFontWeight, SetSpanLineHeight, ReSetSpanLineHeight, SetSpanFontStyle, ReSetSpanFontStyle,
         SetSpanFontSize, ResetSpanFontSize, SetSpanFontFamily, ResetSpanFontFamily, SetSpanDecoration,
-        ResetSpanDecoration, SetSpanFontColor, ResetSpanFontColor, SetSpanLetterSpacing, SetSpanLetterSpacing,
+        ResetSpanDecoration, SetSpanFontColor, ResetSpanFontColor, SetSpanLetterSpacing, ResetSpanLetterSpacing,
         SetSpanFont, ResetSpanFont };
     return &modifier;
 }
