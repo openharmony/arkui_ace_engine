@@ -1325,6 +1325,11 @@ void SubwindowOhos::RequestFocus()
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "subwindow id:%{public}u request focus successfully.", window_->GetWindowId());
 }
 
+bool SubwindowOhos::IsFocused()
+{
+    return window_->IsFocused();
+}
+
 void SubwindowOhos::HideFilter()
 {
     auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
