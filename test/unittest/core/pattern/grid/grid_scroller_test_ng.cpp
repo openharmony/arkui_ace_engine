@@ -2269,7 +2269,7 @@ HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos001, TestSize.Level1)
     ScrollAlign align = ScrollAlign::START;
     pattern_->ScrollToIndex(targetIndex, true, align);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(pattern_->isSmoothScrolling_);
+    EXPECT_EQ(pattern_->finalPosition_,0.0f);
 }
 
 /**
@@ -2289,7 +2289,7 @@ HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos002, TestSize.Level1)
 
     pattern_->ScrollToIndex(targetIndex, true, align);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(pattern_->isSmoothScrolling_);
+    EXPECT_EQ(pattern_->finalPosition_,-400.0f);
 }
 
 /**
@@ -2309,7 +2309,7 @@ HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos003, TestSize.Level1)
 
     pattern_->ScrollToIndex(targetIndex, true, align);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(pattern_->isSmoothScrolling_);
+    EXPECT_EQ(pattern_->finalPosition_,-800.0f);
 }
 
 /**
@@ -2340,7 +2340,7 @@ HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos004, TestSize.Level1)
     targetIndex = 10;
     pattern_->ScrollToIndex(targetIndex, true, align);
     FlushLayoutTask(frameNode_);
-    EXPECT_FALSE(pattern_->isSmoothScrolling_);
+    EXPECT_EQ(pattern_->finalPosition_,0.0f);
 }
 
 /**
@@ -2371,7 +2371,7 @@ HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos005, TestSize.Level1)
     targetIndex = 300;
     pattern_->ScrollToIndex(targetIndex, true, align);
     FlushLayoutTask(frameNode_);
-    EXPECT_FALSE(pattern_->isSmoothScrolling_);
+    EXPECT_EQ(pattern_->finalPosition_,0.0f);
 }
 
 /**
@@ -2391,7 +2391,7 @@ HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos006, TestSize.Level1)
     targetIndex = 0;
     pattern_->ScrollToIndex(targetIndex, true, align);
     FlushLayoutTask(frameNode_);
-    EXPECT_TRUE(pattern_->isSmoothScrolling_);
+    EXPECT_EQ(pattern_->finalPosition_,0.0f);
 }
 
 /**
@@ -2418,6 +2418,6 @@ HWTEST_F(GridScrollerTestNg, GetGridItemAnimatePos007, TestSize.Level1)
     targetIndex = 10;
     pattern_->ScrollToIndex(targetIndex, true, align);
     FlushLayoutTask(frameNode_);
-    EXPECT_FALSE(pattern_->isSmoothScrolling_);
+    EXPECT_EQ(pattern_->finalPosition_,0.0f);
 }
 } // namespace OHOS::Ace::NG
