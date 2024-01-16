@@ -42,8 +42,8 @@ void ScrollModelNG::Create()
         V2::SCROLL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ScrollPattern>(); });
     stack->Push(frameNode);
     auto pattern = frameNode->GetPattern<ScrollPattern>();
-    pattern->SetAlwaysEnabled(true);
     CHECK_NULL_VOID(pattern);
+    pattern->SetAlwaysEnabled(true);
     auto positionController = AceType::MakeRefPtr<NG::ScrollableController>();
     pattern->SetPositionController(positionController);
     positionController->SetScrollPattern(pattern);
