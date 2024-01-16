@@ -33,7 +33,6 @@ struct MagnifierRect {
     float startY = 0.0f;
     float endX = 0.0f;
     float endY = 0.0f;
-    RSColor bgColor = RSColor::COLOR_WHITE;
     OffsetF localOffset;
     OffsetF cursorOffset;
     SizeF contentSize;

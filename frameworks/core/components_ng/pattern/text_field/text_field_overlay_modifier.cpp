@@ -299,9 +299,6 @@ void TextFieldOverlayModifier::PaintMagnifier(DrawingContext& context)
     auto drawPath = GetPathByPoints(drawPathPoints);
     PaintShadow(*drawPath, ShadowConfig::DefaultShadowM, canvas);
     canvas.DrawPath(*drawPath);
-    brush.SetColor(magnifierRect_.bgColor);
-    canvas.AttachBrush(brush);
-    canvas.DrawPath(*drawPath);
     std::vector<TextPoint> clipPathPoints =
         GetTextPoints(magnifierRect_.startX, magnifierRect_.startY, magnifierRect_.endX, magnifierRect_.endY, false);
     auto clipPath = GetPathByPoints(clipPathPoints);
@@ -317,8 +314,9 @@ void TextFieldOverlayModifier::PaintMagnifier(DrawingContext& context)
     pixelMapImage.SetPaintConfig(magnifierPaintConfig);
 
     RectF dstRect;
-    dstRect.SetRect(localOffsetX - localOffsetX * magnifierGain,
-        magnifierRect_.startY - cursorOffsetY * magnifierGain + pixelMapImageOffset,
+    dstRect.SetRect(localOffsetX - localOffsetX * magnifierGain - pattern->GetTextPaintOffset().GetX() * magnifierGain,
+        magnifierRect_.startY - pattern->GetTextPaintOffset().GetY() * magnifierGain - cursorOffsetY * magnifierGain +
+            pixelMapImageOffset,
         pixelMap->GetWidth() * magnifierGain, pixelMap->GetHeight() * magnifierGain);
     pixelMapImage.DrawRect(canvas, ToRSRect(dstRect));
 
