@@ -6289,7 +6289,16 @@ void TextFieldPattern::ScrollToSafeArea() const
 
 RefPtr<PixelMap> TextFieldPattern::GetPixelMap()
 {
-    auto context = GetHost()->GetRenderContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, NULL);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, NULL);
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    CHECK_NULL_RETURN(rootUINode, NULL);
+    auto rootFrameNode = DynamicCast<FrameNode>(rootUINode);
+    CHECK_NULL_RETURN(rootFrameNode, NULL);
+
+    auto context = rootFrameNode->GetRenderContext();
     if (!context) {
         UpdateShowMagnifier();
     }
