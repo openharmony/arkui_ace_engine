@@ -154,7 +154,8 @@ void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     auto altLoadingCtx = altLoadingCtx_.Upgrade();
     if (altLoadingCtx) {
-        altLoadingCtx->MakeCanvasImageIfNeed(dstSize, true, imageFit, sourceSize, hasValidSlice);
+        altLoadingCtx->MakeCanvasImageIfNeed(dstSize, !altLoadingCtx->GetAutoResize(),
+            imageFit, sourceSize, hasValidSlice);
     } else {
         auto host = layoutWrapper->GetHostNode();
         if (host && host->GetPattern<ImagePattern>()) {
@@ -162,7 +163,8 @@ void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             altLoadingCtx_ = pattern->GetAltImageLoadingContext();
             auto ctx = altLoadingCtx_.Upgrade();
             if (ctx) {
-                ctx->MakeCanvasImageIfNeed(dstSize, true, imageFit, sourceSize, hasValidSlice);
+                ctx->MakeCanvasImageIfNeed(dstSize, !altLoadingCtx->GetAutoResize(),
+                    imageFit, sourceSize, hasValidSlice);
             }
         }
     }
