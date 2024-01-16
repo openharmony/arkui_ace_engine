@@ -3931,7 +3931,8 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
         return true;
     }
     if (jsValue->IsString()) {
-        return StringUtils::StringToCalcDimensionNG(jsValue->ToString(), result, false, defaultUnit);
+        result = StringUtils::StringToCalcDimension(jsValue->ToString(), false, defaultUnit);
+        return true;
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
