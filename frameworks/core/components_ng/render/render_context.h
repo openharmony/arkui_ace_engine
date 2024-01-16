@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_CONTEXT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PAINTS_RENDER_CONTEXT_H
 
+#include <cstdint>
 #include <functional>
 
 #include "base/geometry/dimension.h"
@@ -271,6 +272,12 @@ public:
     virtual void SetFrame(float positionX, float positionY, float width, float height) {}
     virtual void SetOpacity(float opacity) {}
     virtual void SetTranslate(float translateX, float translateY, float translateZ) {}
+
+    virtual void SetRectMask(float left, float top, float right, float bottom, uint32_t fillColor) {}
+    virtual void SetCircleMask(float centerX, float centerY, float radius, uint32_t fillColor) {}
+    virtual void SetRoundRectMask(const RoundRect& roundRect, uint32_t fillColor) {}
+    virtual void SetOvalMask(float left, float top, float right, float bottom, uint32_t fillColor) {}
+    virtual void SetCommandPathMask(const std::string& commands, uint32_t fillColor) {}
 
     virtual RectF GetPaintRectWithTransform()
     {

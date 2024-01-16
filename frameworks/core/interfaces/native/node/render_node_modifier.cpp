@@ -13,11 +13,20 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/render_node_modifier.h"
+#include <cstdint>
+#include <optional>
 
+#include "base/geometry/dimension.h"
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/color.h"
+#include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
+#include "core/components_ng/property/border_property.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/interfaces/native/node/api.h"
 
@@ -195,12 +204,123 @@ void SetTranslate(NodeHandle node, float translateX, float translateY, float tra
     renderContext->SetTranslate(translateX, translateY, translateZ);
 }
 
+void SetBorderStyle(NodeHandle node, BorderStyle left, BorderStyle top, BorderStyle right, BorderStyle bottom)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+    BorderStyleProperty borderStyleProperty {
+        .styleLeft = left,
+        .styleTop = top,
+        .styleRight = right,
+        .styleBottom = bottom,
+        .multiValued = true
+    };
+    renderContext->UpdateBorderStyle(borderStyleProperty);
+}
+
+void SetBorderWidth(NodeHandle node, float left, float top, float right, float bottom)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+    auto* frameNode = reinterpret_cast<FrameNode*>(currentNode);
+    auto layoutProperty = frameNode->GetLayoutProperty<LayoutProperty>();
+
+    BorderWidthProperty borderWidthProperty {
+        .leftDimen = Dimension(left, DimensionUnit::VP),
+        .topDimen = Dimension(top, DimensionUnit::VP),
+        .rightDimen = Dimension(right, DimensionUnit::VP),
+        .bottomDimen = Dimension(bottom, DimensionUnit::VP),
+        .multiValued = true
+    };
+    renderContext->UpdateBorderWidth(borderWidthProperty);
+    layoutProperty->UpdateBorderWidth(borderWidthProperty);
+}
+
+void SetBorderColor(NodeHandle node, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+
+    BorderColorProperty borderColorProperty {
+        .leftColor = Color(left),
+        .topColor = Color(top),
+        .rightColor = Color(right),
+        .bottomColor = Color(bottom),
+        .multiValued = true
+    };
+    renderContext->UpdateBorderColor(borderColorProperty);
+}
+
+void SetBorderRadius(NodeHandle node, double topLeft, double topRight, double bottomLeft, double bottomRight)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+
+    BorderRadiusProperty borderRadiusProperty(Dimension(topLeft, DimensionUnit::VP),
+        Dimension(topRight, DimensionUnit::VP), Dimension(bottomRight, DimensionUnit::VP),
+        Dimension(bottomLeft, DimensionUnit::VP));
+    renderContext->UpdateBorderRadius(borderRadiusProperty);
+}
+
+void SetRectMask(NodeHandle node, float left, float top, float right, float bottom, uint32_t fillColor)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetRectMask(left, top, right, bottom, fillColor);
+}
+
+void SetCircleMask(NodeHandle node, float centerX, float centerY, float radius, uint32_t fillColor)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetCircleMask(centerX, centerY, radius, fillColor);
+}
+
+void SetRoundRectMask(NodeHandle node, const RoundRect& roundRect, uint32_t fillColor)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetRoundRectMask(roundRect, fillColor);
+}
+
+void SetOvalMask(NodeHandle node, float left, float top, float right, float bottom, uint32_t fillColor)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetOvalMask(left, top, right, bottom, fillColor);
+}
+
+void SetCommandPathMask(NodeHandle node, const std::string& commands, uint32_t fillColor)
+{
+    auto* currentNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(currentNode);
+    auto renderContext = GetRenderContext(currentNode);
+    CHECK_NULL_VOID(renderContext);
+    renderContext->SetCommandPathMask(commands, fillColor);
+}
+
 ArkUIRenderNodeModifierAPI GetRenderNodeModifier()
 {
     static const ArkUIRenderNodeModifierAPI modifier = { AppendChild, InsertChildAfter, RemoveChild, ClearChildren,
         SetClipToFrame, SetRotation, SetShadowColor, SetShadowOffset, SetShadowAlpha, SetShadowElevation,
-        SetShadowRadius, Invalidate, SetScale, SetRenderNodeBackgroundColor, SetPivot, SetFrame, SetSize,
-        SetOpacity, SetTranslate };
+        SetShadowRadius, Invalidate, SetScale, SetRenderNodeBackgroundColor, SetPivot, SetFrame, SetSize, SetOpacity,
+        SetTranslate, SetBorderStyle, SetBorderWidth, SetBorderColor, SetBorderRadius, SetRectMask, SetCircleMask,
+        SetRoundRectMask, SetOvalMask, SetCommandPathMask };
 
     return modifier;
 }

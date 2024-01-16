@@ -50,6 +50,115 @@ type Transform = [
   number
 ];
 
+enum BorderStyle {
+  SOLID = 0,
+  DASHED,
+  DOTTED,
+  NONE
+}
+
+type EdgeStyles = {
+  top?: BorderStyle;
+  right?: BorderStyle;
+  bottom?: BorderStyle;
+  left?: BorderStyle;
+};
+
+interface Edges {
+  left: number,
+  right: number,
+  top: number,
+  bottom: number,
+}
+
+type EdgeWidths = Edges;
+
+type EdgeColors = Edges;
+
+interface Corners {
+  topLeft: number,
+  topRight: number,
+  bottomLeft: number,
+  bottomRight: number
+}
+
+type BorderRadiuses = Corners;
+
+interface Rect {
+  left: number,
+  right: number,
+  top: number,
+  bottom: number
+}
+
+interface CornerRadius {
+  topLeft: Vector2,
+  topRight: Vector2,
+  bottomLeft: Vector2,
+  bottomRight: Vector2
+}
+
+interface RoundRect {
+  rect: Rect,
+  corners: CornerRadius
+}
+
+interface Circle {
+  centerX: number,
+  centerY: number,
+  radius: number
+}
+
+interface CommandPath {
+  commands: string
+}
+
+class ShapeMask {
+  public rect: Rect | null = null;
+  public roundRect: RoundRect | null = null;
+  public circle: Circle | null = null;
+  public oval: Rect | null = null;
+  public path: CommandPath | null = null;
+  public fillColor: number = 0XFF000000;
+  public strokeColor: number = 0XFF000000;
+  public strokeWidth: number = 0;
+  setRectShape(rect: Rect) {
+    this.rect = rect;
+    this.roundRect = null;
+    this.circle = null;
+    this.oval = null;
+    this.path = null;
+  }
+  setRoundRectShape(roundRect: RoundRect) {
+    this.roundRect = roundRect;
+    this.rect = null;
+    this.circle = null;
+    this.oval = null;
+    this.path = null;
+  }
+  setCircleShape(circle: Circle) {
+    this.circle = circle;
+    this.rect = null;
+    this.roundRect = null;
+    this.oval = null;
+    this.path = null;
+  }
+  setOvalShape(oval: Rect) {
+    this.oval = oval;
+    this.rect = null;
+    this.circle = null;
+    this.roundRect = null;
+    this.path = null;
+  }
+  setCommandPath(path: CommandPath) {
+    this.path = path;
+    this.oval = null;
+    this.rect = null;
+    this.circle = null;
+    this.roundRect = null;
+  }
+}
+
 class RenderNode {
   private childrenList: Array<RenderNode>;
   private nodePtr: number | null;
@@ -69,6 +178,11 @@ class RenderNode {
   private transformValue: Transform;
   private translationValue: Vector2;
   private baseNode_ : __JSBaseNode__;
+  private borderStyleValue: EdgeStyles;
+  private borderWidthValue: EdgeWidths;
+  private borderColorValue: EdgeColors;
+  private borderRadiusValue: BorderRadiuses;
+  private shapeMaskValue: ShapeMask;
 
   constructor(type: string) {
     this.nodePtr = null;
@@ -369,4 +483,106 @@ class RenderNode {
   invalidate() {
     GetUINativeModule().renderNode.invalidate(this.nodePtr);
   }
+  set borderStyle(style: EdgeStyles) {
+    if (style === undefined || style === null) {
+      this.borderStyleValue = { left: BorderStyle.NONE, top: BorderStyle.NONE, right: BorderStyle.NONE, bottom: BorderStyle.NONE };
+    } else {
+      this.borderStyleValue = style;
+    }
+    GetUINativeModule().renderNode.setBorderStyle(this.nodePtr, this.borderStyleValue.left, this.borderStyleValue.top, this.borderStyleValue.right, this.borderStyleValue.bottom);
+  }
+  get borderStyle(): EdgeStyles {
+    return this.borderStyleValue;
+  }
+  set borderWidth(width: EdgeWidths) {
+    if (width === undefined || width === null) {
+      this.borderWidthValue = { left: 0, top: 0, right: 0, bottom: 0 };
+    } else {
+      this.borderWidthValue = width;
+    }
+    GetUINativeModule().renderNode.setBorderWidth(this.nodePtr, this.borderWidthValue.left, this.borderWidthValue.top, this.borderWidthValue.right, this.borderWidthValue.bottom);
+  }
+  get borderWidth(): EdgeWidths {
+    return this.borderWidthValue;
+  }
+  set borderColor(color: EdgeColors) {
+    if (color === undefined || color === null) {
+      this.borderColorValue = { left: 0XFF000000, top: 0XFF000000, right: 0XFF000000, bottom: 0XFF000000 };
+    } else {
+      this.borderColorValue = color;
+    }
+    GetUINativeModule().renderNode.setBorderColor(this.nodePtr, this.borderColorValue.left, this.borderColorValue.top, this.borderColorValue.right, this.borderColorValue.bottom);
+  }
+  get borderColor(): EdgeColors {
+    return this.borderColorValue;
+  }
+  set borderRadius(radius: BorderRadiuses) {
+    if (radius === undefined || radius === null) {
+      this.borderRadiusValue = { topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 };
+    } else {
+      this.borderRadiusValue = radius;
+    }
+    GetUINativeModule().renderNode.setBorderRadius(this.nodePtr, this.borderRadiusValue.topLeft, this.borderRadiusValue.topRight, this.borderRadiusValue.bottomLeft, this.borderRadiusValue.bottomRight);
+  }
+  get borderRadius(): BorderRadiuses {
+    return this.borderRadiusValue;
+  }
+  set shapeMask(shapeMask: ShapeMask) {
+    if (shapeMask === undefined || shapeMask === null) {
+      this.shapeMaskValue = new ShapeMask();
+    } else {
+      this.shapeMaskValue = shapeMask;
+    }
+    if (this.shapeMaskValue.rect !== null) {
+      const rectMask = this.shapeMaskValue.rect;
+      GetUINativeModule().renderNode.setRectMask(this.nodePtr, rectMask.left, rectMask.top, rectMask.right, rectMask.bottom, this.shapeMaskValue.fillColor);
+    } else if (this.shapeMaskValue.circle !== null) {
+      const circle = this.shapeMaskValue.circle;
+      GetUINativeModule().renderNode.setCircleMask(this.nodePtr, circle.centerX, circle.centerY, circle.radius, this.shapeMaskValue.fillColor);
+    } else if (this.shapeMaskValue.roundRect !== null) {
+      const reoundRect = this.shapeMask.roundRect;
+      const corners = reoundRect.corners;
+      const rect = reoundRect.rect;
+      GetUINativeModule().renderNode.setRoundRectMask(
+        this.nodePtr, 
+        corners.topLeft.x,
+        corners.topLeft.y, 
+        corners.topRight.x,
+        corners.topRight.y, 
+        corners.bottomLeft.x,
+        corners.bottomLeft.y, 
+        corners.bottomRight.x,
+        corners.bottomRight.y, 
+        rect.left, 
+        rect.top, 
+        rect.right, 
+        rect.bottom, 
+        this.shapeMaskValue.fillColor);
+    } else if (this.shapeMaskValue.oval !== null) {
+      const oval = this.shapeMaskValue.oval;
+      GetUINativeModule().renderNode.setOvalMask(this.nodePtr, oval.left, oval.top, oval.right, oval.bottom, this.shapeMaskValue.fillColor);
+    } else if (this.shapeMaskValue.path !== null) {
+      const path = this.shapeMaskValue.path;
+      GetUINativeModule().renderNode.setPath(this.nodePtr, path.commands, this.shapeMaskValue.fillColor);
+    }
+  }
+  get shapeMask(): ShapeMask {
+    return this.shapeMaskValue;
+  }
+}
+
+function edgeColors(all: number): EdgeColors {
+  return { left: all, top: all, right: all, bottom: all };
+}
+
+function edgeWidths(all: number): EdgeWidths {
+  return { left: all, top: all, right: all, bottom: all };
+}
+
+function borderStyles(all: BorderStyle): EdgeStyles {
+  return { left: all, top: all, right: all, bottom: all };
+}
+
+function borderRadiuses(all: number): BorderRadiuses {
+  return { topLeft: all, topRight: all, bottomLeft: all, bottomRight: all };
 }

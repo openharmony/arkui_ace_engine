@@ -338,6 +338,12 @@ public:
     void SetTranslate(float translateX, float translateY, float translateZ) override;
     void SetHostNode(const WeakPtr<FrameNode>& host) override;
 
+    void SetRectMask(float left, float top, float right, float bottom, uint32_t fillColor) override;
+    void SetCircleMask(float centerX, float centerY, float radius, uint32_t fillColor) override;
+    void SetRoundRectMask(const RoundRect& roundRect, uint32_t fillColor) override;
+    void SetOvalMask(float left, float top, float right, float bottom, uint32_t fillColor) override;
+    void SetCommandPathMask(const std::string& commands, uint32_t fillColor) override;
+
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
     void OnBackgroundImageRepeatUpdate(const ImageRepeat& imageRepeat) override;

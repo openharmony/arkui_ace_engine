@@ -21,10 +21,14 @@
 #include <memory>
 #include <string>
 
+#include "2d_graphics/include/draw/brush.h"
+#include "2d_graphics/include/draw/path.h"
+#include "common/rs_color.h"
 #include "common/rs_vector2.h"
 #include "include/utils/SkParsePath.h"
 #include "modifier/rs_property.h"
 #include "render_service_base/include/property/rs_properties_def.h"
+#include "render_service_base/include/render/rs_mask.h"
 #include "render_service_client/core/modifier/rs_property_modifier.h"
 #include "render_service_client/core/pipeline/rs_node_map.h"
 #include "render_service_client/core/transaction/rs_interfaces.h"
@@ -76,6 +80,7 @@
 #include "core/components_ng/render/adapter/pixelmap_image.h"
 #include "core/components_ng/render/adapter/rosen_modifier_adapter.h"
 #include "core/components_ng/render/adapter/rosen_transition_effect.h"
+#include "core/components_ng/render/drawing_forward.h"
 #if defined(ANDROID_PLATFORM) || defined(IOS_PLATFORM)
 #include "render_service_client/core/pipeline/rs_render_thread.h"
 #endif
@@ -4800,4 +4805,89 @@ void RosenRenderContext::SetTransitionOutCallback(std::function<void()>&& callba
     transitionOutCallback_ = std::move(callback);
 }
 
+void RosenRenderContext::SetRectMask(float left, float top, float right, float bottom, uint32_t fillColor)
+{
+    CHECK_NULL_VOID(rsNode_);
+    RSPath path;
+    path.AddRect(left, top, right, bottom);
+
+    RSColor color;
+    color.SetColorQuad(fillColor);
+    RSBrush brush(color);
+
+    std::shared_ptr<RSMask> mask = RSMask::CreatePathMask(path, brush);
+    rsNode_->SetMask(mask);
+}
+
+void RosenRenderContext::SetCircleMask(float centerX, float centerY, float radius, uint32_t fillColor)
+{
+    CHECK_NULL_VOID(rsNode_);
+    RSPath path;
+    path.AddCircle(centerX, centerY, radius);
+
+    RSColor color;
+    color.SetColorQuad(fillColor);
+    RSBrush brush(color);
+
+    std::shared_ptr<RSMask> mask = RSMask::CreatePathMask(path, brush);
+    rsNode_->SetMask(mask);
+}
+
+void RosenRenderContext::SetRoundRectMask(const RoundRect& roundRect, uint32_t fillColor)
+{
+    CHECK_NULL_VOID(rsNode_);
+    RSRoundRect rsRoundRect;
+
+    RSRect rsRect(roundRect.GetRect().Left(), roundRect.GetRect().Top(), roundRect.GetRect().Right(),
+        roundRect.GetRect().Bottom());
+    rsRoundRect.SetRect(rsRect);
+
+    EdgeF edge = roundRect.GetCornerRadius(RoundRect::TOP_LEFT_POS);
+    rsRoundRect.SetCornerRadius(RSRoundRect::TOP_LEFT_POS, edge.x, edge.y);
+    edge = roundRect.GetCornerRadius(RoundRect::TOP_RIGHT_POS);
+    rsRoundRect.SetCornerRadius(RSRoundRect::TOP_RIGHT_POS, edge.x, edge.y);
+    edge = roundRect.GetCornerRadius(RoundRect::BOTTOM_LEFT_POS);
+    rsRoundRect.SetCornerRadius(RSRoundRect::BOTTOM_LEFT_POS, edge.x, edge.y);
+    edge = roundRect.GetCornerRadius(RoundRect::BOTTOM_RIGHT_POS);
+    rsRoundRect.SetCornerRadius(RSRoundRect::BOTTOM_RIGHT_POS, edge.x, edge.y);
+
+    RSPath path;
+    path.AddRoundRect(rsRoundRect);
+
+    RSColor color;
+    color.SetColorQuad(fillColor);
+    RSBrush brush(color);
+
+    std::shared_ptr<RSMask> mask = Rosen::RSMask::CreatePathMask(path, brush);
+    rsNode_->SetMask(mask);
+}
+
+void RosenRenderContext::SetOvalMask(float left, float top, float right, float bottom, uint32_t fillColor)
+{
+    CHECK_NULL_VOID(rsNode_);
+    RSRect rect(left, top, right, bottom);
+    RSPath path;
+    path.AddOval(rect);
+
+    RSColor color;
+    color.SetColorQuad(fillColor);
+    RSBrush brush(color);
+
+    std::shared_ptr<RSMask> mask = RSMask::CreatePathMask(path, brush);
+    rsNode_->SetMask(mask);
+}
+
+void RosenRenderContext::SetCommandPathMask(const std::string& commands, uint32_t fillColor)
+{
+    CHECK_NULL_VOID(rsNode_);
+    RSPath path;
+    path.BuildFromSVGString(commands);
+
+    RSColor color;
+    color.SetColorQuad(fillColor);
+    RSBrush brush(color);
+
+    std::shared_ptr<RSMask> mask = RSMask::CreatePathMask(path, brush);
+    rsNode_->SetMask(mask);
+}
 } // namespace OHOS::Ace::NG

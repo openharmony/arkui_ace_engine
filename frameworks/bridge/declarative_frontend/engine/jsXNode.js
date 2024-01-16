@@ -20,13 +20,13 @@ var NodeRenderType;
 class BaseNode extends __JSBaseNode__ {
     constructor(uiContext, options) {
         super(options);
-        var instanceId = -1;
+        let instanceId = -1;
         if (uiContext === undefined) {
-            throw Error("Node constructor error, param uiContext error");
+            throw Error('Node constructor error, param uiContext error');
         }
         else {
             if (!(typeof uiContext === "object") || !("instanceId_" in uiContext)) {
-                throw Error("Node constructor error, param uiContext is invalid");
+                throw Error('Node constructor error, param uiContext is invalid');
             }
             instanceId = uiContext.instanceId_;
         }
@@ -114,7 +114,7 @@ class JSBuilderNode extends BaseNode {
         this.updateFuncByElmtId.clear();
         this.nodePtr_ = super.create(builder.builder, this.params_);
         if (this.frameNode_ === undefined || this.frameNode_ === null) {
-            this.frameNode_ = new FrameNode(this.uiContext_, "BuilderNode");
+            this.frameNode_ = new FrameNode(this.uiContext_, 'BuilderNode');
         }
         this.frameNode_.setNodePtr(this.nodePtr_);
         __JSScopeUtil__.restoreInstanceId();
@@ -131,8 +131,8 @@ class JSBuilderNode extends BaseNode {
     UpdateElement(elmtId) {
         // do not process an Element that has been marked to be deleted
         const obj = this.updateFuncByElmtId.get(elmtId);
-        const updateFunc = (typeof obj === "object") ? obj.updateFunc : null;
-        if (typeof updateFunc === "function") {
+        const updateFunc = (typeof obj === 'object') ? obj.updateFunc : null;
+        if (typeof updateFunc === 'function') {
             updateFunc(elmtId, /* isFirstRender */ false);
             this.finishUpdateFunc();
         }
@@ -157,7 +157,7 @@ class JSBuilderNode extends BaseNode {
         return null;
     }
     observeComponentCreation(func) {
-        var elmId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
+        let elmId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
         UINodeRegisterProxy.ElementIdToOwningViewPU_.set(elmId, new WeakRef(this));
         try {
             func(elmId, true);
@@ -169,7 +169,7 @@ class JSBuilderNode extends BaseNode {
         }
     }
     observeComponentCreation2(compilerAssignedUpdateFunc, classObject) {
-        const _componentName = classObject && "name" in classObject ? Reflect.get(classObject, "name") : "unspecified UINode";
+        const _componentName = classObject && 'name' in classObject ? Reflect.get(classObject, 'name') : 'unspecified UINode';
         const _popFunc = classObject && "pop" in classObject ? classObject.pop : () => { };
         const updateFunc = (elmtId, isFirstRender) => {
             __JSScopeUtil__.syncInstanceId(this.instanceId_);
@@ -264,13 +264,13 @@ class JSBuilderNode extends BaseNode {
     }
     ifElseBranchUpdateFunction(branchId, branchfunc) {
         const oldBranchid = If.getBranchId();
-        if (branchId == oldBranchid) {
+        if (branchId === oldBranchid) {
             return;
         }
         // branchId identifies uniquely the if .. <1> .. else if .<2>. else .<3>.branch
         // ifElseNode stores the most recent branch, so we can compare
         // removedChildElmtIds will be filled with the elmtIds of all children and their children will be deleted in response to if .. else change
-        var removedChildElmtIds = new Array();
+        let removedChildElmtIds = new Array();
         If.branchId(branchId, removedChildElmtIds);
         this.purgeDeletedElmtIds();
         branchfunc();
@@ -367,8 +367,8 @@ class NodeController {
  */
 class FrameNode {
     constructor(uiContext, type) {
-        this.renderNode_ = new RenderNode("FrameNode");
-        if (type == "BuilderNode") {
+        this.renderNode_ = new RenderNode('FrameNode');
+        if (type === 'BuilderNode') {
             return;
         }
         this.baseNode_ = new BaseNode(uiContext);
@@ -405,6 +405,60 @@ class FrameNode {
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+var BorderStyle;
+(function (BorderStyle) {
+    BorderStyle[BorderStyle["SOLID"] = 0] = "SOLID";
+    BorderStyle[BorderStyle["DASHED"] = 1] = "DASHED";
+    BorderStyle[BorderStyle["DOTTED"] = 2] = "DOTTED";
+    BorderStyle[BorderStyle["NONE"] = 3] = "NONE";
+})(BorderStyle || (BorderStyle = {}));
+class ShapeMask {
+    constructor() {
+        this.rect = null;
+        this.roundRect = null;
+        this.circle = null;
+        this.oval = null;
+        this.path = null;
+        this.fillColor = 0XFF000000;
+        this.strokeColor = 0XFF000000;
+        this.strokeWidth = 0;
+    }
+    setRectShape(rect) {
+        this.rect = rect;
+        this.roundRect = null;
+        this.circle = null;
+        this.oval = null;
+        this.path = null;
+    }
+    setRoundRectShape(roundRect) {
+        this.roundRect = roundRect;
+        this.rect = null;
+        this.circle = null;
+        this.oval = null;
+        this.path = null;
+    }
+    setCircleShape(circle) {
+        this.circle = circle;
+        this.rect = null;
+        this.roundRect = null;
+        this.oval = null;
+        this.path = null;
+    }
+    setOvalShape(oval) {
+        this.oval = oval;
+        this.rect = null;
+        this.circle = null;
+        this.roundRect = null;
+        this.path = null;
+    }
+    setCommandPath(path) {
+        this.path = path;
+        this.oval = null;
+        this.rect = null;
+        this.circle = null;
+        this.roundRect = null;
+    }
+}
 class RenderNode {
     constructor(type) {
         this.nodePtr = null;
@@ -427,7 +481,7 @@ class RenderNode {
             0, 0, 1, 0,
             0, 0, 0, 1];
         this.translationValue = { x: 0, y: 0 };
-        if (type === "FrameNode") {
+        if (type === 'FrameNode') {
             return;
         }
         this.baseNode_ = new __JSBaseNode__();
@@ -716,6 +770,99 @@ class RenderNode {
     invalidate() {
         GetUINativeModule().renderNode.invalidate(this.nodePtr);
     }
+    set borderStyle(style) {
+        if (style === undefined || style === null) {
+            this.borderStyleValue = { left: BorderStyle.NONE, top: BorderStyle.NONE, right: BorderStyle.NONE, bottom: BorderStyle.NONE };
+        }
+        else {
+            this.borderStyleValue = style;
+        }
+        GetUINativeModule().renderNode.setBorderStyle(this.nodePtr, this.borderStyleValue.left, this.borderStyleValue.top, this.borderStyleValue.right, this.borderStyleValue.bottom);
+    }
+    get borderStyle() {
+        return this.borderStyleValue;
+    }
+    set borderWidth(width) {
+        if (width === undefined || width === null) {
+            this.borderWidthValue = { left: 0, top: 0, right: 0, bottom: 0 };
+        }
+        else {
+            this.borderWidthValue = width;
+        }
+        GetUINativeModule().renderNode.setBorderWidth(this.nodePtr, this.borderWidthValue.left, this.borderWidthValue.top, this.borderWidthValue.right, this.borderWidthValue.bottom);
+    }
+    get borderWidth() {
+        return this.borderWidthValue;
+    }
+    set borderColor(color) {
+        if (color === undefined || color === null) {
+            this.borderColorValue = { left: 0XFF000000, top: 0XFF000000, right: 0XFF000000, bottom: 0XFF000000 };
+        }
+        else {
+            this.borderColorValue = color;
+        }
+        GetUINativeModule().renderNode.setBorderColor(this.nodePtr, this.borderColorValue.left, this.borderColorValue.top, this.borderColorValue.right, this.borderColorValue.bottom);
+    }
+    get borderColor() {
+        return this.borderColorValue;
+    }
+    set borderRadius(radius) {
+        if (radius === undefined || radius === null) {
+            this.borderRadiusValue = { topLeft: 0, topRight: 0, bottomLeft: 0, bottomRight: 0 };
+        }
+        else {
+            this.borderRadiusValue = radius;
+        }
+        GetUINativeModule().renderNode.setBorderRadius(this.nodePtr, this.borderRadiusValue.topLeft, this.borderRadiusValue.topRight, this.borderRadiusValue.bottomLeft, this.borderRadiusValue.bottomRight);
+    }
+    get borderRadius() {
+        return this.borderRadiusValue;
+    }
+    set shapeMask(shapeMask) {
+        if (shapeMask === undefined || shapeMask === null) {
+            this.shapeMaskValue = new ShapeMask();
+        }
+        else {
+            this.shapeMaskValue = shapeMask;
+        }
+        if (this.shapeMaskValue.rect !== null) {
+            const rectMask = this.shapeMaskValue.rect;
+            GetUINativeModule().renderNode.setRectMask(this.nodePtr, rectMask.left, rectMask.top, rectMask.right, rectMask.bottom, this.shapeMaskValue.fillColor);
+        }
+        else if (this.shapeMaskValue.circle !== null) {
+            const circle = this.shapeMaskValue.circle;
+            GetUINativeModule().renderNode.setCircleMask(this.nodePtr, circle.centerX, circle.centerY, circle.radius, this.shapeMaskValue.fillColor);
+        }
+        else if (this.shapeMaskValue.roundRect !== null) {
+            const reoundRect = this.shapeMask.roundRect;
+            const corners = reoundRect.corners;
+            const rect = reoundRect.rect;
+            GetUINativeModule().renderNode.setRoundRectMask(this.nodePtr, corners.topLeft.x, corners.topLeft.y, corners.topRight.x, corners.topRight.y, corners.bottomLeft.x, corners.bottomLeft.y, corners.bottomRight.x, corners.bottomRight.y, rect.left, rect.top, rect.right, rect.bottom, this.shapeMaskValue.fillColor);
+        }
+        else if (this.shapeMaskValue.oval !== null) {
+            const oval = this.shapeMaskValue.oval;
+            GetUINativeModule().renderNode.setOvalMask(this.nodePtr, oval.left, oval.top, oval.right, oval.bottom, this.shapeMaskValue.fillColor);
+        }
+        else if (this.shapeMaskValue.path !== null) {
+            const path = this.shapeMaskValue.path;
+            GetUINativeModule().renderNode.setPath(this.nodePtr, path.commands, this.shapeMaskValue.fillColor);
+        }
+    }
+    get shapeMask() {
+        return this.shapeMaskValue;
+    }
+}
+function edgeColors(all) {
+    return { left: all, top: all, right: all, bottom: all };
+}
+function edgeWidths(all) {
+    return { left: all, top: all, right: all, bottom: all };
+}
+function borderStyles(all) {
+    return { left: all, top: all, right: all, bottom: all };
+}
+function borderRadiuses(all) {
+    return { topLeft: all, topRight: all, bottomLeft: all, bottomRight: all };
 }
 /*
  * Copyright (c) 2023 Huawei Device Co., Ltd.
@@ -733,7 +880,7 @@ class RenderNode {
  */
 class XComponentNode extends FrameNode {
     constructor(uiContext, options, id, type, libraryname) {
-        super(uiContext, "XComponentNode");
+        super(uiContext, 'XComponentNode');
         const elmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
         this.xcomponentNode_ = GetUINativeModule().xcomponentNode;
         this.renderType_ = options.type;
@@ -760,4 +907,4 @@ class XComponentNode extends FrameNode {
     }
 }
 
-export default { NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, NodeRenderType, XComponentNode };
+export default { NodeController, BuilderNode, BaseNode, RenderNode, FrameNode, NodeRenderType, XComponentNode, ShapeMask, edgeColors, edgeWidths, borderStyles, borderRadiuses };
