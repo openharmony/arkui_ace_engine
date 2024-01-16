@@ -1650,6 +1650,11 @@ void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo)
         springAnimationIsRunning_ = false;
     }
 
+    AnimationUtils::PauseAnimation(fadeAnimation_);
+    if (fadeAnimationIsRunning_) {
+        fadeAnimationIsRunning_ = false;
+    }
+
     // Stop auto play when touch down.
     StopAutoPlay();
 }
@@ -1666,6 +1671,11 @@ void SwiperPattern::HandleTouchUp()
         isTouchDownSpringAnimation_ = false;
         springAnimationIsRunning_ = true;
         AnimationUtils::ResumeAnimation(springAnimation_);
+    }
+
+    if (!fadeAnimationIsRunning_) {
+        fadeAnimationIsRunning_ = true;
+        AnimationUtils::ResumeAnimation(fadeAnimation_);
     }
 
     if (!isDragging_) {
@@ -1701,6 +1711,7 @@ void SwiperPattern::HandleDragStart(const GestureEvent& info)
     mainDeltaSum_ = 0.0f;
     // in drag process, close lazy feature.
     SetLazyLoadFeature(false);
+    StopFadeAnimation();
 }
 
 void SwiperPattern::StopAnimationOnScrollStart(bool flushImmediately)
@@ -2297,7 +2308,7 @@ void SwiperPattern::PlayFadeAnimation()
     auto weak = AceType::WeakClaim(this);
     host->CreateAnimatablePropertyFloat(FADE_PROPERTY_NAME, 0, Animation<double>::ValueCallback([weak](float value) {
         auto swiper = weak.Upgrade();
-        if (swiper && swiper->GetHost()) {
+        if (swiper && swiper->GetHost() && !swiper->isTouchDown_) {
             swiper->fadeOffset_ = value;
             swiper->GetHost()->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
