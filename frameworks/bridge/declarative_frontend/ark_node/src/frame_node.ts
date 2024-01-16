@@ -23,7 +23,7 @@ class FrameNode {
       return;
     }
     this.baseNode_ = new BaseNode(uiContext);
-    this.nodePtr_ =  this.baseNode_.createRenderNode();
+    this.nodePtr_ =  this.baseNode_.createRenderNode(this);
     this.renderNode_.setNodePtr(this.nodePtr_);
   }
   getRenderNode(): RenderNode | null {

@@ -96,7 +96,7 @@ class RenderNode {
     }
     this.baseNode_ = new __JSBaseNode__();
     this.baseNode_.draw = this.draw;
-    this.nodePtr = this.baseNode_.createRenderNode();
+    this.nodePtr = this.baseNode_.createRenderNode(this);
   }
 
   set backgroundColor(color: number) {
