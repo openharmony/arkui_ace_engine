@@ -1204,7 +1204,7 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
             break;
         }
         if ((newTopNavDestination && preTopNavDestination && isPopPage) ||
-            (preTopNavDestination && !newTopNavDestination && navigationMode_ == NavigationMode::STACK)) {
+            (preTopNavDestination && !newTopNavDestination)) {
             PageTransitionType preNodeTransitionType = preTopNavDestination->GetTransitionType();
             if (preNodeTransitionType != PageTransitionType::EXIT_POP) {
                 TAG_LOGI(AceLogTag::ACE_NAVIGATION, "previous destination node is executing another transition");
