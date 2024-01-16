@@ -6053,14 +6053,17 @@ bool TextFieldPattern::IsShowCancelButtonMode() const
 
 void TextFieldPattern::ProcessResponseArea()
 {
-    if (cleanNodeResponseArea_) {
-        cleanNodeResponseArea_->ClearArea();
-        cleanNodeResponseArea_.Reset();
-    }
     if (IsShowCancelButtonMode()) {
-        cleanNodeResponseArea_ = AceType::MakeRefPtr<CleanNodeResponseArea>(WeakClaim(this));
-        cleanNodeResponseArea_->InitResponseArea();
-        UpdateCancelNode();
+        auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
+        if (cleanNodeResponseArea) {
+            cleanNodeResponseArea->Refresh();
+            cleanNodeResponseArea->UpdateCleanNode(cleanNodeResponseArea->IsShow());
+        } else {
+            cleanNodeResponseArea_ = AceType::MakeRefPtr<CleanNodeResponseArea>(WeakClaim(this));
+            cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
+            cleanNodeResponseArea->InitResponseArea();
+            UpdateCancelNode();
+        }
     }
 
     if (IsShowPasswordIcon()) {
