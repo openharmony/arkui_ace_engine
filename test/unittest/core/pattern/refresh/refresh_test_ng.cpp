@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/refresh/refresh_layout_property.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
+#include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "frameworks/core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
 #include "frameworks/core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
@@ -242,6 +243,75 @@ HWTEST_F(RefreshTestNg, AddCustomBuilderNode001, TestSize.Level1)
     builder = AceType::MakeRefPtr<FrameNode>("test", -1, AceType::MakeRefPtr<Pattern>());
     pattern_->AddCustomBuilderNode(builder);
     EXPECT_EQ(GetChildFrameNode(frameNode_, 0), builder);
+}
+
+/**
+ * @tc.name: AddCustomBuilderNode002
+ * @tc.desc: Test AddCustomBuilderNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshTestNg, AddCustomBuilderNode002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create refresh
+     * @tc.expected: init progress node.
+     */
+    Create([](RefreshModelNG model) { model.SetProgressColor(Color::BLUE); });
+    EXPECT_EQ(layoutProperty_->GetProgressColor(), Color::BLUE);
+    auto builder = CreateCustomNode();
+    pattern_->AddCustomBuilderNode(builder);
+    EXPECT_EQ(GetChildFrameNode(frameNode_, 0), builder);
+    EXPECT_NE(pattern_->progressChild_, nullptr);
+
+    /**
+     * @tc.steps: step2. init child node
+     * @tc.expected: remove progress child.
+     */
+    int32_t childrenSize = frameNode_->GetChildren().size();
+    pattern_->InitChildNode();
+    EXPECT_EQ(pattern_->progressChild_, nullptr);
+    EXPECT_EQ(frameNode_->GetChildren().size(), childrenSize - 1);
+
+    /**
+     * @tc.steps: step3. set null custom node
+     * @tc.expected: isCustomBuilderExist_ is false, customBuilder_ is nullptr.
+     */
+    pattern_->AddCustomBuilderNode(nullptr);
+    EXPECT_FALSE(pattern_->isCustomBuilderExist_);
+    EXPECT_EQ(pattern_->customBuilder_, nullptr);
+}
+
+/**
+ * @tc.name: AddCustomBuilderNode003
+ * @tc.desc: Test AddCustomBuilderNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshTestNg, AddCustomBuilderNode003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create refresh with child node
+     */
+    auto builder = CreateCustomNode();
+    RefreshModelNG model;
+    model.Create();
+    model.SetCustomBuilder(builder);
+    {
+        TextModelNG model;
+        model.Create("text");
+        ViewStackProcessor::GetInstance()->Pop();
+    }
+    GetInstance();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(frameNode_->TotalChildCount(), 2);
+
+    /**
+     * @tc.steps: step2. set isCustomBuilderExist_ = false
+     * @tc.expected: Check frameNode child node size.
+     */
+    pattern_->AddCustomBuilderNode(nullptr);
+    EXPECT_FALSE(pattern_->isCustomBuilderExist_);
+    pattern_->InitChildNode();
+    EXPECT_EQ(frameNode_->TotalChildCount(), 3);
 }
 
 /**
@@ -470,12 +540,15 @@ HWTEST_F(RefreshTestNg, VersionElevenDrag002, TestSize.Level1)
      * @tc.expected: RefreshStatus would change width action
      */
     pattern_->HandleDragStart();
+    EXPECT_FLOAT_EQ(pattern_->GetTargetOffset(), 0.0f);
     pattern_->HandleDragUpdate(lessThanOffset + greaterThanOffset);
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
     pattern_->HandleDragUpdate(greaterThanRefreshDistance + CUSTOM_NODE_HEIGHT / radio);
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::OVER_DRAG);
+    EXPECT_FLOAT_EQ(pattern_->GetTargetOffset(), TRIGGER_REFRESH_DISTANCE.ConvertToPx());
     pattern_->HandleDragEnd(0.0f);
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
+    EXPECT_FLOAT_EQ(pattern_->GetTargetOffset(), TRIGGER_REFRESH_DISTANCE.ConvertToPx());
     // The front end set isRefreshing to false
     layoutProperty_->UpdateIsRefreshing(false);
     // isRefreshing changed by front end, will trigger OnModifyDone
@@ -490,6 +563,8 @@ HWTEST_F(RefreshTestNg, VersionElevenDrag002, TestSize.Level1)
     pattern_->scrollOffset_ = 0.0f;
     pattern_->HandleDragStart();
     pattern_->HandleDragUpdate(lessThanOffset);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
+    pattern_->HandleDragUpdate(0.0f);
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
     pattern_->HandleDragEnd(0.0f);
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
