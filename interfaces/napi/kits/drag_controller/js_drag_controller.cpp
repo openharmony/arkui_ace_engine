@@ -928,7 +928,10 @@ bool GetPixelMapByCustom(DragControllerAsyncCtx* asyncCtx)
         return false;
     }
     auto callback = [asyncCtx](std::shared_ptr<Media::PixelMap> pixelMap, int32_t errCode,
-        std::function<void()>) {
+        std::function<void()> finishCallback) {
+        if (finishCallback) {
+            finishCallback();
+        }
         CHECK_NULL_VOID(pixelMap);
         CHECK_NULL_VOID(asyncCtx);
         asyncCtx->errCode = errCode;
@@ -938,7 +941,7 @@ bool GetPixelMapByCustom(DragControllerAsyncCtx* asyncCtx)
     auto builder = [build = asyncCtx->customBuilder, env = asyncCtx->env] {
         napi_call_function(env, nullptr, build, 0, nullptr, nullptr);
     };
-    delegate->CreateSnapshot(builder, callback, false);
+    delegate->CreateSnapshot(builder, callback, true);
     napi_close_escapable_handle_scope(asyncCtx->env, scope);
     return true;
 }
@@ -946,7 +949,6 @@ bool GetPixelMapByCustom(DragControllerAsyncCtx* asyncCtx)
 bool GetPixelMapArrayByCustom(DragControllerAsyncCtx* asyncCtx, napi_value customBuilder, int arrayLength)
 {
     CHECK_NULL_RETURN(asyncCtx, false);
-    asyncCtx->parseBuilderCount++;
     napi_escapable_handle_scope scope = nullptr;
     napi_open_escapable_handle_scope(asyncCtx->env, &scope);
 
@@ -956,20 +958,24 @@ bool GetPixelMapArrayByCustom(DragControllerAsyncCtx* asyncCtx, napi_value custo
         napi_close_escapable_handle_scope(asyncCtx->env, scope);
         return false;
     }
-    auto callback = [asyncCtx, arrayLength, count = asyncCtx->parseBuilderCount](
-        std::shared_ptr<Media::PixelMap> pixelMap, int32_t errCode, std::function<void()>) {
+    auto callback = [asyncCtx, arrayLength](
+        std::shared_ptr<Media::PixelMap> pixelMap, int32_t errCode, std::function<void()> finishCallback) {
+        if (finishCallback) {
+            finishCallback();
+        }
         CHECK_NULL_VOID(pixelMap);
         CHECK_NULL_VOID(asyncCtx);
         asyncCtx->errCode = errCode;
         asyncCtx->pixelMapList.push_back(std::move(pixelMap));
-        if (count == arrayLength) {
+        asyncCtx->parseBuilderCount++;
+        if (asyncCtx->parseBuilderCount == arrayLength) {
             OnMultipleComplete(asyncCtx);
         }
     };
     auto builder = [build = customBuilder, env = asyncCtx->env] {
         napi_call_function(env, nullptr, build, 0, nullptr, nullptr);
     };
-    delegate->CreateSnapshot(builder, callback, false);
+    delegate->CreateSnapshot(builder, callback, true);
     napi_close_escapable_handle_scope(asyncCtx->env, scope);
     return true;
 }
