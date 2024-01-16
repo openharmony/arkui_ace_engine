@@ -51,6 +51,10 @@ private:
     void AttachRenderContext();
     void RegisterSizeChangedCallback();
 
+    bool contentReady_ = false;
+    std::function<void()> contentReadyCallback_;
+    mutable std::mutex contentReadyMutex_;
+
     std::string hapPath_;
     std::string abcPath_;
     std::string entryPoint_;
