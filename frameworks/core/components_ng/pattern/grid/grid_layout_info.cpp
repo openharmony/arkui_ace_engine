@@ -237,7 +237,7 @@ float GridLayoutInfo::GetContentOffset(const GridLayoutOptions& options, float m
         return -currentOffset_;
     }
     if (options.irregularIndexes.empty() || startIndex_ < *(options.irregularIndexes.begin())) {
-        return GetCurrentOffsetOfRegularGrid(mainGap);
+        return GetContentOffset(mainGap);
     }
     if (options.getSizeByIndex) {
         return GetContentOffset(mainGap);
