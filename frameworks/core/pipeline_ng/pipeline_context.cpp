@@ -1715,9 +1715,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         }
         if (lastMoveEvent.has_value()) {
             eventManager_->SetLastMoveBeforeUp(scalePoint.sourceType == SourceType::MOUSE);
-            if (!focusWindowId_.has_value()) {
-                eventManager_->DispatchTouchEvent(lastMoveEvent.value());
-            }
+            eventManager_->DispatchTouchEvent(lastMoveEvent.value());
             eventManager_->SetLastMoveBeforeUp(false);
         }
     }
@@ -1938,6 +1936,9 @@ void PipelineContext::FlushTouchEvents()
             idToTouchPoints.emplace(scalePoint.id, scalePoint);
             idToTouchPoints[scalePoint.id].history.insert(idToTouchPoints[scalePoint.id].history.begin(), scalePoint);
             needInterpolation = iter->type != TouchType::MOVE ? false : true;
+        }
+        if (focusWindowId_.has_value()) {
+            needInterpolation = false;
         }
         if (needInterpolation) {
             auto targetTimeStamp = resampleTimeStamp_;
