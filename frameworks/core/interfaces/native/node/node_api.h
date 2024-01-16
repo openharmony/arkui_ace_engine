@@ -18,11 +18,18 @@
 
 #include "core/interfaces/arkoala/arkoala_api.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 const ArkUINodeModifiers* GetArkUINodeModifiers();
 
 // use internal, not for export.
 const ArkUIFullNodeAPI* GetArkUIFullNodeAPI();
 void SendArkUIAsyncEvent(ArkUINodeEvent* event);
 
+#ifdef __cplusplus
+};
+#endif
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NODE_API_H

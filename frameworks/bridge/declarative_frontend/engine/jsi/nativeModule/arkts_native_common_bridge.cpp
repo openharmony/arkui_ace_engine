@@ -1126,12 +1126,12 @@ bool ParseCalcDimension(const EcmaVM* vm,
     CHECK_NULL_RETURN(vm, false);
     bool undefined = value->IsUndefined();
     if (undefined) {
-        GetArkUIInternalNodeAPI()->GetCommonModifier().clearWidthOrHeight(node, isWidth);
+        GetArkUIInternalNodeAPI()->GetCommonModifier().ClearWidthOrHeight(node, isWidth);
         return true;
     }
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         if (!ArkTSUtils::ParseJsDimensionVpNG(vm, value, result)) {
-            GetArkUIInternalNodeAPI()->GetCommonModifier().clearWidthOrHeight(node, isWidth);
+            GetArkUIInternalNodeAPI()->GetCommonModifier().ClearWidthOrHeight(node, isWidth);
             return false;
         }
     } else if (!ArkTSUtils::ParseJsDimensionVp(vm, value, result)) {
