@@ -109,30 +109,33 @@ void JSNodeContainer::SetNodeController(const JSRef<JSObject>& object, JsiExecut
     }
 
     auto jsFunc = JSRef<JSFunc>::Cast(jsMakeNodeFunc);
+    auto containerId = Container::CurrentId();
     RefPtr<JsFunction> jsMake = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(object), jsFunc);
-    NodeContainerModel::GetInstance()->SetMakeFunction([func = std::move(jsMake), execCtx]() -> RefPtr<NG::UINode> {
-        JAVASCRIPT_EXECUTION_SCOPE(execCtx);
-        auto container = Container::Current();
-        CHECK_NULL_RETURN(container, nullptr);
-        auto frontend = container->GetFrontend();
-        CHECK_NULL_RETURN(frontend, nullptr);
-        auto context = frontend->GetContextValue();
-        auto jsVal = JsConverter::ConvertNapiValueToJsVal(context);
-        JSRef<JSVal> result = func->ExecuteJS(1, &jsVal);
-        if (result.IsEmpty() || !result->IsObject()) {
-            return nullptr;
-        }
-        JSRef<JSObject> obj = JSRef<JSObject>::Cast(result);
-        JSRef<JSVal> nodeptr = obj->GetProperty(NODEPTR_OF_UINODE);
-        if (nodeptr.IsEmpty()) {
-            return nullptr;
-        }
-        const auto* vm = nodeptr->GetEcmaVM();
-        auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
-        auto* uiNode = reinterpret_cast<NG::UINode*>(node);
-        CHECK_NULL_RETURN(uiNode, nullptr);
-        return AceType::Claim(uiNode);
-    });
+    NodeContainerModel::GetInstance()->SetMakeFunction(
+        [func = std::move(jsMake), containerId, execCtx]() -> RefPtr<NG::UINode> {
+            JAVASCRIPT_EXECUTION_SCOPE(execCtx);
+            ContainerScope scope(containerId);
+            auto container = Container::Current();
+            CHECK_NULL_RETURN(container, nullptr);
+            auto frontend = container->GetFrontend();
+            CHECK_NULL_RETURN(frontend, nullptr);
+            auto context = frontend->GetContextValue();
+            auto jsVal = JsConverter::ConvertNapiValueToJsVal(context);
+            JSRef<JSVal> result = func->ExecuteJS(1, &jsVal);
+            if (result.IsEmpty() || !result->IsObject()) {
+                return nullptr;
+            }
+            JSRef<JSObject> obj = JSRef<JSObject>::Cast(result);
+            JSRef<JSVal> nodeptr = obj->GetProperty(NODEPTR_OF_UINODE);
+            if (nodeptr.IsEmpty()) {
+                return nullptr;
+            }
+            const auto* vm = nodeptr->GetEcmaVM();
+            auto* node = nodeptr->GetLocalHandle()->ToNativePointer(vm)->Value();
+            auto* uiNode = reinterpret_cast<NG::UINode*>(node);
+            CHECK_NULL_RETURN(uiNode, nullptr);
+            return AceType::Claim(uiNode);
+        });
 
     SetOnAppearFunc(object, execCtx);
     SetOnDisappearFunc(object, execCtx);
