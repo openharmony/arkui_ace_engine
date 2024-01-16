@@ -152,10 +152,9 @@ public:
 
     void SetCurrentHeight(float currentHeight)
     {
-        if (height_ != currentHeight) {
-            height_ = currentHeight;
-            ChangeScrollHeight(height_);
-        }
+        height_ = currentHeight;
+        ProcessColumnRect(height_);
+        ChangeScrollHeight(height_);
     }
 
     void SetCurrentHeightToOverlay(float height)
