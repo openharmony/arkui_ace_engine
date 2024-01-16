@@ -3880,6 +3880,7 @@ void RichEditorPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF&
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->HandleOnPaste();
+            pattern->CloseSelectOverlay();
         };
         selectInfo.menuCallback.onSelectAll = [weak, usingMouse]() {
             auto pattern = weak.Upgrade();
@@ -3974,7 +3975,6 @@ void RichEditorPattern::ResetAfterPaste()
     record.addText = pasteStr;
     SetCaretSpanIndex(-1);
     StartTwinkling();
-    CloseSelectOverlay();
     if (textSelector_.IsValid()) {
         SetCaretPosition(textSelector_.GetTextStart());
         record.beforeCaretPosition = caretPosition_;
