@@ -122,6 +122,9 @@ void SubwindowOhos::InitContainer()
     }
     CHECK_NULL_VOID(container);
 
+    auto parentToken = parentContainer->GetToken();
+    container->SetToken(parentToken);
+    container->SetWindowId(window_->GetWindowId());
     container->SetParentId(parentContainerId_);
     container->GetSettings().SetUsingSharedRuntime(true);
     container->SetSharedRuntime(parentContainer->GetSharedRuntime());
