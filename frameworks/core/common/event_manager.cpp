@@ -509,6 +509,9 @@ bool EventManager::PostEventDispatchTouchEvent(const TouchEvent& event)
     ContainerScope scope(instanceId_);
     TouchEvent point = event;
     const auto iter = postEventTouchTestResults_.find(point.id);
+    if (iter == postEventTouchTestResults_.end()) {
+        return false;
+    }
     ACE_SCOPED_TRACE(
         "PostEventDispatchTouchEvent id:%d, pointX=%f pointY=%f type=%d", point.id, point.x, point.y, (int)point.type);
 
