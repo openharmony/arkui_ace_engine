@@ -1255,6 +1255,7 @@ private:
     void RecordSubmitEvent() const;
     void UpdateCancelNode();
     void RequestKeyboardAfterLongPress();
+    void UpdatePasswordModeState();
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1412,6 +1413,7 @@ private:
     bool needSelectAll_ = false;
     bool isModifyDone_ = false;
     bool initTextRect_ = false;
+    bool colorModeChange_ = false;
     Offset clickLocation_;
     MagnifierRect magnifierRect_;
     RefPtr<MagnifierController> magnifierController_;
