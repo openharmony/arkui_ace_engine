@@ -117,6 +117,7 @@ void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     ObscuredToJsonValue(json);
     json->Put("renderGroup", propRenderGroup_.value_or(false) ? "true" : "false");
     json->Put("renderFit", RenderFitToString(propRenderFit_.value_or(RenderFit::TOP_LEFT)).c_str());
+    json->Put("useShadowBatching", propUseShadowBatching_.value_or(false) ? "true" : "false");
 }
 
 void RenderContext::ObscuredToJsonValue(std::unique_ptr<JsonValue>& json) const
