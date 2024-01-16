@@ -2912,6 +2912,9 @@ bool RichEditorPattern::CursorMoveToParagraphBegin()
     CloseSelectOverlay();
     ResetSelection();
     auto newPos = GetParagraphBeginPosition(caretPosition_);
+    if (newPos == caretPosition_ && caretPosition_ > 0) {
+        newPos = GetParagraphBeginPosition(caretPosition_ - 1);
+    }
     if (newPos == caretPosition_) {
         return false;
     }
@@ -2929,6 +2932,9 @@ bool RichEditorPattern::CursorMoveToParagraphEnd()
     CloseSelectOverlay();
     ResetSelection();
     auto newPos = GetParagraphEndPosition(caretPosition_);
+    if (newPos == caretPosition_ && caretPosition_ < static_cast<int32_t>(GetTextContentLength())) {
+        newPos = GetParagraphEndPosition(caretPosition_ + 1);
+    }
     if (newPos == caretPosition_) {
         return false;
     }
@@ -2985,25 +2991,25 @@ int32_t RichEditorPattern::GetLeftWordPosition(int32_t caretPosition)
             continue;
         }
         int32_t position = span->position;
-        for (auto i = content.length() - 1; i >= 0; i--) {
+        for (auto iterContent = content.rbegin(); iterContent != content.rend(); iterContent++) {
             if (position-- > caretPosition) {
                 continue;
             }
-            if (content[i] != L' ' || span->placeholderIndex >= 0) {
+            if (*iterContent != L' ' || span->placeholderIndex >= 0) {
                 jumpSpace = false;
             }
             if (position + 1 == caretPosition) {
-                if (!(StringUtils::IsLetterOrNumberForWchar(content[i]) ||
-                        (content[i] == L' ' && span->placeholderIndex < 0))) {
+                if (!(StringUtils::IsLetterOrNumberForWchar(*iterContent) ||
+                        (*iterContent == L' ' && span->placeholderIndex < 0))) {
                     return std::clamp(caretPosition - 1, 0, static_cast<int32_t>(GetTextContentLength()));
                 }
             }
             if (!jumpSpace) {
-                if (!StringUtils::IsLetterOrNumberForWchar(content[i])) {
+                if (!StringUtils::IsLetterOrNumberForWchar(*iterContent)) {
                     return std::clamp(caretPosition - offset, 0, static_cast<int32_t>(GetTextContentLength()));
                 }
             } else {
-                if (content[i] == L' ' && span->placeholderIndex >= 0) {
+                if (*iterContent == L' ' && span->placeholderIndex >= 0) {
                     return std::clamp(caretPosition - offset, 0, static_cast<int32_t>(GetTextContentLength()));
                 }
             }
@@ -3024,27 +3030,27 @@ int32_t RichEditorPattern::GetRightWordPosition(int32_t caretPosition)
             continue;
         }
         int32_t position = span->position - static_cast<int32_t>(content.length());
-        for (size_t i = 0; i < content.length(); i++) {
+        for (auto iterContent = content.cbegin(); iterContent != content.cend(); iterContent++) {
             if (position++ < caretPosition) {
                 continue;
             }
-            if (content[i] == L' ' && span->placeholderIndex < 0) {
+            if (*iterContent == L' ' && span->placeholderIndex < 0) {
                 jumpSpace = true;
                 offset++;
                 continue;
             }
             if (position - 1 == caretPosition) {
-                if (!StringUtils::IsLetterOrNumberForWchar(content[i])) {
+                if (!StringUtils::IsLetterOrNumberForWchar(*iterContent)) {
                     return std::clamp(caretPosition + 1, 0, static_cast<int32_t>(GetTextContentLength()));
                 }
             }
             if (jumpSpace) {
-                if (content[i] != L' ' || span->placeholderIndex >= 0) {
+                if (*iterContent != L' ' || span->placeholderIndex >= 0) {
                     return std::clamp(caretPosition + offset, 0, static_cast<int32_t>(GetTextContentLength()));
                 }
             } else {
-                if (!(StringUtils::IsLetterOrNumberForWchar(content[i]) ||
-                        (content[i] == L' ' && span->placeholderIndex < 0))) {
+                if (!(StringUtils::IsLetterOrNumberForWchar(*iterContent) ||
+                        (*iterContent == L' ' && span->placeholderIndex < 0))) {
                     return std::clamp(caretPosition + offset, 0, static_cast<int32_t>(GetTextContentLength()));
                 }
             }
@@ -3064,11 +3070,11 @@ int32_t RichEditorPattern::GetParagraphBeginPosition(int32_t caretPosition)
             continue;
         }
         int32_t position = span->position;
-        for (auto i = content.length() - 1; i >= 0; i--) {
+        for (auto iterContent = content.rbegin(); iterContent != content.rend(); iterContent++) {
             if (position-- > caretPosition) {
                 continue;
             }
-            if (content[i] == L'\n') {
+            if (*iterContent == L'\n') {
                 return std::clamp(caretPosition - offset, 0, static_cast<int32_t>(GetTextContentLength()));
             }
             offset++;
@@ -3087,11 +3093,11 @@ int32_t RichEditorPattern::GetParagraphEndPosition(int32_t caretPosition)
             continue;
         }
         int32_t position = span->position - static_cast<int32_t>(content.length());
-        for (size_t i = 0; i < content.length(); i++) {
+        for (auto iterContent = content.cbegin(); iterContent != content.cend(); iterContent++) {
             if (position++ < caretPosition) {
                 continue;
             }
-            if (content[i] == L'\n') {
+            if (*iterContent == L'\n') {
                 return std::clamp(caretPosition + offset, 0, static_cast<int32_t>(GetTextContentLength()));
             }
             offset++;
