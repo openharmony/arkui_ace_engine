@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #include "base/i18n/localization.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
@@ -490,6 +491,11 @@ void MountTitleBar(const RefPtr<NavBarNode>& hostNode)
     } else {
         titleBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         titleBarNode->SetActive(true);
+
+        auto&& opts = navBarLayoutProperty->GetSafeAreaExpandOpts();
+        if (opts && opts->Expansive()) {
+            titleBarLayoutProperty->UpdateSafeAreaExpandOpts(*opts);
+        }
     }
     titleBarNode->MarkModifyDone();
 }
@@ -513,7 +519,13 @@ void MountToolBar(const RefPtr<NavBarNode>& hostNode)
         toolBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
     } else {
         toolBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+
+        auto&& opts = navBarLayoutProperty->GetSafeAreaExpandOpts();
+        if (opts && opts->Expansive()) {
+            toolBarLayoutProperty->UpdateSafeAreaExpandOpts(*opts);
+        }
     }
+    toolBarNode->MarkModifyDone();
 }
 } // namespace
 
@@ -523,14 +535,16 @@ void NavBarPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
-    SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL };
-    host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     pipelineContext->AddWindowSizeChangeCallback(host->GetId());
 
     auto theme = NavigationGetTheme();
     CHECK_NULL_VOID(theme);
     if (theme && theme->GetNavBarUnfocusEffectEnable()) {
         pipelineContext->AddWindowFocusChangedCallback(host->GetId());
+    }
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL };
+        host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
     }
 }
 
@@ -659,6 +673,14 @@ void NavBarPattern::OnModifyDone()
     MountToolBar(hostNode);
     auto navBarLayoutProperty = hostNode->GetLayoutProperty<NavBarLayoutProperty>();
     CHECK_NULL_VOID(navBarLayoutProperty);
+
+    auto&& opts = navBarLayoutProperty->GetSafeAreaExpandOpts();
+    auto navBarContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarContentNode());
+    if (opts && opts->Expansive() && navBarContentNode) {
+        navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+        navBarContentNode->MarkModifyDone();
+    }
+
     isHideToolbar_ = navBarLayoutProperty->GetHideToolBarValue(false);
     isHideTitlebar_ = navBarLayoutProperty->GetHideTitleBarValue(false);
     titleMode_ = navBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
@@ -667,11 +689,6 @@ void NavBarPattern::OnModifyDone()
     auto gesture = hostNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     InitPanEvent(gesture);
-
-    auto contentNode = hostNode->GetNavBarContentNode();
-    CHECK_NULL_VOID(contentNode);
-    auto navBarContentNode = AceType::DynamicCast<FrameNode>(contentNode);
-    navBarContentNode->MarkModifyDone();
 }
 
 void NavBarPattern::OnWindowSizeChanged(int32_t width, int32_t height, WindowSizeChangeReason type)

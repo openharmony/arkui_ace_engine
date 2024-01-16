@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/navigation/nav_bar_node.h"
 
 #include "base/memory/ace_type.h"
+#include "core/common/container.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
@@ -54,9 +55,11 @@ void NavBarNode::AddChildToGroup(const RefPtr<UINode>& child, int32_t slot)
         SetNavBarContentNode(contentNode);
         AddChild(contentNode);
 
-        auto navBarContentNode = AceType::DynamicCast<FrameNode>(contentNode);
-        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
-        navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            auto navBarContentNode = AceType::DynamicCast<FrameNode>(contentNode);
+            SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
+            navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+        }
     }
     contentNode->AddChild(child);
 }

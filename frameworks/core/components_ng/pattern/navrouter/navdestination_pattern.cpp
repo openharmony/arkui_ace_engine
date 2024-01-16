@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
-
+#include "core/common/container.h"
 #include "base/log/dump_log.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
@@ -158,6 +158,14 @@ void NavDestinationPattern::OnModifyDone()
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
+
+    auto&& opts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
+    auto navDestinationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
+    if (opts && opts->Expansive() && navDestinationContentNode) {
+        navDestinationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+        navDestinationContentNode->MarkModifyDone();
+    }
+
     if (navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) {
         titleBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
         titleBarNode->SetActive(false);
@@ -165,6 +173,10 @@ void NavDestinationPattern::OnModifyDone()
         titleBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         titleBarNode->SetActive(true);
         MountTitleBar(hostNode);
+        if (opts && opts->Expansive()) {
+            titleBarLayoutProperty->UpdateSafeAreaExpandOpts(*opts);
+        }
+        titleBarNode->MarkModifyDone();
     }
 
     auto navDesIndex = hostNode->GetIndex();
@@ -235,8 +247,10 @@ void NavDestinationPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
-    host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
+        host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+    }
 }
 
 void NavDestinationPattern::OnAttachToMainTree()

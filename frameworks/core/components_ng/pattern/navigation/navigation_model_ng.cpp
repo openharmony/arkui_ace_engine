@@ -639,8 +639,10 @@ bool NavigationModelNG::CreateNavBarNodeChildsIfNeeded(const RefPtr<NavBarNode>&
         navBarNode->AddChild(navBarContentNode);
         navBarNode->SetNavBarContentNode(navBarContentNode);
 
-        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
-        navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
+            navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+        }
     }
 
     // toolBar node
@@ -688,9 +690,11 @@ bool NavigationModelNG::CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNo
             V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
         navigationGroupNode->AddChild(dividerNode);
         navigationGroupNode->SetDividerNode(dividerNode);
-
-        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
-        dividerNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+        
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
+            dividerNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+        }
 
         auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
         CHECK_NULL_RETURN(dividerLayoutProperty, false);
