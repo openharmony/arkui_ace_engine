@@ -48,6 +48,17 @@ public:
         scrollSource_ = scrollSource;
     }
 
+    /**
+     * @brief Set enableSkipping_ parameter. When skip is enabled, the algorithm would skip measuring intermediate items
+     * when the offset change is large (larger than the whole viewport).
+     *
+     * @param skip
+     */
+    void SetLineSkipping(bool skip)
+    {
+        enableSkipping_ = skip;
+    }
+
     GridLayoutInfo GetScrollGridLayoutInfo()
     {
         return scrollGridLayoutInfo_;
@@ -179,11 +190,12 @@ private:
     float crossPaddingOffset_ = 0;
     int32_t lastCross_ = 0;
     bool isChildrenUpdated_ = false;
+    bool canOverScroll_ = false;
+    bool enableSkipping_ = true; // enables skipping lines on a large offset change.
     GridLayoutInfo scrollGridLayoutInfo_;
 
     // Map structure: [index, crossPosition], store cross position of each item.
     std::map<int32_t, float> itemsCrossPosition_;
-    bool canOverScroll_ = false;
     int32_t scrollSource_ = SCROLL_FROM_NONE;
     OffsetF childFrameOffset_;
     std::list<int32_t> predictBuildList_;

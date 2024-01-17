@@ -81,6 +81,9 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     }
     result->SetCanOverScroll(CanOverScroll(GetScrollSource()));
     result->SetScrollSource(GetScrollSource());
+    if (ScrollablePattern::AnimateRunning()) {
+        result->SetLineSkipping(false);
+    }
     return result;
 }
 
@@ -1607,7 +1610,6 @@ void GridPattern::DumpAdvanceInfo()
                                 : DumpLog::GetInstance().AddDesc("hasBigItem:false");
     gridLayoutInfo_.offsetUpdated_ ? DumpLog::GetInstance().AddDesc("offsetUpdated:true")
                                    : DumpLog::GetInstance().AddDesc("offsetUpdated:false");
-    DumpLog::GetInstance().AddDesc("animatorOffset:" + std::to_string(animatorOffset_));
     DumpLog::GetInstance().AddDesc("scrollStop:" + std::to_string(scrollStop_));
     DumpLog::GetInstance().AddDesc("prevHeight:" + std::to_string(prevHeight_));
     DumpLog::GetInstance().AddDesc("currentHeight:" + std::to_string(currentHeight_));
