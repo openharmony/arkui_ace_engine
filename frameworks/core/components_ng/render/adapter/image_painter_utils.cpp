@@ -70,10 +70,10 @@ std::unique_ptr<RSPoint[]> ImagePainterUtils::ToRSRadius(const BorderRadiusArray
         radii[RSRoundRect::TOP_RIGHT_POS] =
             RSPoint(static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::TOP_RIGHT_POS].GetX(), 0.0f)),
                 static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::TOP_RIGHT_POS].GetY(), 0.0f)));
-        radii[RSRoundRect::BOTTOM_RIGHT_POS] =
+        radii[RSRoundRect::BOTTOM_LEFT_POS] =
             RSPoint(static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::BOTTOM_RIGHT_POS].GetX(), 0.0f)),
                 static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::BOTTOM_RIGHT_POS].GetY(), 0.0f)));
-        radii[RSRoundRect::BOTTOM_LEFT_POS] =
+        radii[RSRoundRect::BOTTOM_RIGHT_POS] =
             RSPoint(static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::BOTTOM_LEFT_POS].GetX(), 0.0f)),
                 static_cast<RSScalar>(std::max(radiusXY[RSRoundRect::BOTTOM_LEFT_POS].GetY(), 0.0f)));
     }
