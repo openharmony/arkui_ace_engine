@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
-#include <cstdint>
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
@@ -1056,7 +1055,9 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     }
     if (!cacheValid) {
         info.ClearMapsToEnd(info.endMainLineIndex_ + 1);
-        info.ClearMapsFromStart(info.startMainLineIndex_);
+        // run out of reord, startMainLineIndex is larger by 1 than real start main line index, so reduce 1
+        info.ClearMapsFromStart(info.startMainLineIndex_ > info.endMainLineIndex_ ? info.startMainLineIndex_ - 1
+                                                                                  : info.startMainLineIndex_);
     }
     return runOutOfRecord;
 }
