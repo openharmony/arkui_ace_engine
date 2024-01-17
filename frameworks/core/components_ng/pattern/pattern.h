@@ -400,6 +400,8 @@ public:
     virtual void OnAttachToMainTree() {}
     virtual void OnAttachToBuilderNode(NodeStatus nodeStatus) {}
 
+    virtual void OnDetachFromMainTree() {}
+
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 
     virtual void OnAreaChangedInner() {}

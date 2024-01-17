@@ -766,6 +766,7 @@ void FrameNode::OnDetachFromMainTree(bool recursive)
     if (auto focusHub = GetFocusHub()) {
         focusHub->RemoveSelf();
     }
+    pattern_->OnDetachFromMainTree();
     eventHub_->FireOnDisappear();
     renderContext_->OnNodeDisappear(recursive);
 }
