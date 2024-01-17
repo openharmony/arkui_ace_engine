@@ -47,7 +47,6 @@ group("core_common_unittest") {
   testonly = true
   deps = [
     ":common_test",
-    "connect_server:ace_connect_server_manager_test",
     "form:form_manager_test",
     "plugin:plugin_manager_test",
     "task:thread_test",
