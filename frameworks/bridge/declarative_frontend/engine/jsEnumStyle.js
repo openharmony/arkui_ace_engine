@@ -223,6 +223,13 @@ var FlexAlign;
   FlexAlign[FlexAlign["SpaceEvenly"] = 8] = "SpaceEvenly";
 })(FlexAlign || (FlexAlign = {}));
 
+var PixelRoundCalcPolicy;
+(function (PixelRoundCalcPolicy) {
+  PixelRoundCalcPolicy[PixelRoundCalcPolicy["NO_FORCE_ROUND"] = 0] = "NO_FORCE_ROUND";
+  PixelRoundCalcPolicy[PixelRoundCalcPolicy["FORCE_CEIL"] = 1] = "FORCE_CEIL";
+  PixelRoundCalcPolicy[PixelRoundCalcPolicy["FORCE_FLOOR"] = 2] = "FORCE_FLOOR";
+})(PixelRoundCalcPolicy || (PixelRoundCalcPolicy = {}));
+
 var VerticalAlign;
 (function (VerticalAlign) {
   VerticalAlign[VerticalAlign["Top"] = 1] = "Top";

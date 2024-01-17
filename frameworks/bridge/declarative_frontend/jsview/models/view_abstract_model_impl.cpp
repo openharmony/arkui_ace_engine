@@ -559,6 +559,8 @@ void ViewAbstractModelImpl::SetLayoutPriority(int32_t priority)
     flex->SetDisplayIndex(priority);
 }
 
+void ViewAbstractModelImpl::SetPixelRound(uint8_t value) {}
+
 void ViewAbstractModelImpl::SetLayoutWeight(int32_t value)
 {
     auto flex = ViewStackProcessor::GetInstance()->GetFlexItemComponent();

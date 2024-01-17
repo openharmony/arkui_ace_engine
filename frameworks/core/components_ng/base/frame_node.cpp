@@ -2741,8 +2741,6 @@ void FrameNode::Layout()
     bool isFocusOnPage = pipeline->CheckPageFocus();
     AvoidKeyboard(isFocusOnPage);
     SyncGeometryNode();
-
-    UpdateParentAbsoluteOffset();
 }
 
 void FrameNode::SyncGeometryNode()
@@ -2805,7 +2803,7 @@ void FrameNode::SyncGeometryNode()
     } else if (frameSizeChange || frameOffsetChange || HasPositionProp() ||
                (pattern_->GetContextParam().has_value() && contentSizeChange)) {
         isLayoutComplete_ = true;
-        renderContext_->SyncGeometryProperties(RawPtr(geometryNode_), true);
+        renderContext_->SyncGeometryProperties(RawPtr(geometryNode_), true, layoutProperty_->GetPixelRound());
     }
 
     DirtySwapConfig config { frameSizeChange, frameOffsetChange, contentSizeChange, contentOffsetChange };
@@ -2857,17 +2855,6 @@ void FrameNode::SyncGeometryNode()
     layoutAlgorithm_.Reset();
 }
 
-void FrameNode::UpdateParentAbsoluteOffset()
-{
-    const auto& children = GetChildren();
-    for (const auto& child : children) {
-        auto frameNode = AceType::DynamicCast<FrameNode>(child);
-        CHECK_NULL_VOID(frameNode);
-        auto childNode = frameNode->GetGeometryNode();
-        CHECK_NULL_VOID(childNode);
-        childNode->SetParentAbsoluteOffset(geometryNode_->GetParentAbsoluteOffset() + GetOffsetRelativeToWindow());
-    }
-}
 
 RefPtr<LayoutWrapper> FrameNode::GetOrCreateChildByIndex(uint32_t index, bool addToRenderTree)
 {

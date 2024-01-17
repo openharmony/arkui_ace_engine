@@ -68,7 +68,7 @@ public:
 
     void InitContext(bool isRoot, const std::optional<ContextParam>& param) override;
 
-    void SyncGeometryProperties(GeometryNode* geometryNode, bool needRoundToPixelGrid = false) override;
+    void SyncGeometryProperties(GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0) override;
 
     void SyncGeometryProperties(const RectF& paintRect) override;
 
@@ -509,8 +509,8 @@ private:
 
     void SetContentRectToFrame(RectF rect) override;
 
-    float RoundValueToPixelGrid(float value, bool forceCeil, bool forceFloor);
-    void RoundToPixelGrid(float absoluteLeft, float absoluteTop);
+    float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);
+    void RoundToPixelGrid(bool isRound, uint8_t flag);
     Matrix4 GetRevertMatrix();
     Matrix4 GetMatrix();
     bool IsUniRenderEnabled() override;

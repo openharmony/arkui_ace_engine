@@ -96,7 +96,7 @@ public:
 
     virtual void MoveFrame(FrameNode* self, const RefPtr<FrameNode>& child, int32_t index) {}
 
-    virtual void SyncGeometryProperties(GeometryNode* geometryNode, bool needRoundToPixelGrid = false) {}
+    virtual void SyncGeometryProperties(GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0) {}
 
     virtual void SyncGeometryProperties(const RectF& rectF) {}
 

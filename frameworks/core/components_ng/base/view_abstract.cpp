@@ -382,6 +382,14 @@ void ViewAbstract::SetLayoutWeight(int32_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, LayoutWeight, static_cast<float>(value));
 }
 
+void ViewAbstract::SetPixelRound(uint8_t value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, PixelRound, value);
+}
+
 void ViewAbstract::SetLayoutDirection(TextDirection value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
