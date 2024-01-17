@@ -425,6 +425,7 @@ source_set("ace_components_mock") {
     "$ace_root/test/mock/adapter/mock_view_data_wrap_ohos.cpp",
     "$ace_root/test/mock/base/mock_ace_performance_check.cpp",
     "$ace_root/test/mock/base/mock_ace_trace.cpp",
+    "$ace_root/test/mock/base/mock_download_manager.cpp",
     "$ace_root/test/mock/base/mock_drag_window.cpp",
     "$ace_root/test/mock/base/mock_engine_helper.cpp",
     "$ace_root/test/mock/base/mock_event_report.cpp",
