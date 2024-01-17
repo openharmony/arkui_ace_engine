@@ -275,6 +275,10 @@ void JSTextField::SetEnterKeyType(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    if (info[0]->IsUndefined()) {
+        TextFieldModel::GetInstance()->SetEnterKeyType(TextInputAction::UNSPECIFIED);
+        return;
+    }
     if (!info[0]->IsNumber()) {
         return;
     }
