@@ -4407,6 +4407,9 @@ void RosenRenderContext::OnTransitionOutFinish()
     CHECK_NULL_VOID(parent);
     if (!host->IsVisible() && !host->IsDisappearing()) {
         // trigger transition through visibility
+        if (transitionOutCallback_) {
+            transitionOutCallback_();
+        }
         parent->MarkNeedSyncRenderTree();
         parent->RebuildRenderContextTree();
         return;
@@ -4775,4 +4778,10 @@ void RosenRenderContext::SetTranslate(float translateX, float translateY, float 
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetTranslate(translateX, translateY, translateZ);
 }
+
+void RosenRenderContext::SetTransitionOutCallback(std::function<void()>&& callback)
+{
+    transitionOutCallback_ = std::move(callback);
+}
+
 } // namespace OHOS::Ace::NG
