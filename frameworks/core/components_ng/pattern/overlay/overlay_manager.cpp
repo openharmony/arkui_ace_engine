@@ -577,7 +577,11 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
                 auto theme = pipeline->GetTheme<SelectTheme>();
                 CHECK_NULL_VOID(theme);
                 auto expandDisplay = theme->GetExpandDisplay();
-                if (((menuWrapperPattern && menuWrapperPattern->IsContextMenu()) || expandDisplay) &&
+                auto menuLayoutProp = menuPattern->GetLayoutProperty<MenuLayoutProperty>();
+                CHECK_NULL_VOID(menuLayoutProp);
+                bool isShowInSubWindow = menuLayoutProp->GetShowInSubWindowValue(true);
+                if (((menuWrapperPattern && menuWrapperPattern->IsContextMenu()) ||
+                        (isShowInSubWindow && expandDisplay)) &&
                     (menuPattern->GetTargetTag() != V2::SELECT_ETS_TAG)) {
                     SubwindowManager::GetInstance()->ClearMenuNG(id);
                     overlayManager->ResetContextMenuDragHideFinished();

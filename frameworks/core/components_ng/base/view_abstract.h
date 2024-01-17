@@ -79,6 +79,7 @@ struct MenuParam {
     std::optional<bool> enableArrow;
     std::optional<Dimension> arrowOffset;
     bool isAboveApps = false;
+    bool isShowInSubWindow = false;
     MenuType type = MenuType::MENU;
     MenuPreviewMode previewMode = MenuPreviewMode::NONE;
     MenuPreviewAnimationOptions previewAnimationOptions;
@@ -268,7 +269,8 @@ public:
         const NG::OffsetF &offset, const MenuParam &menuParam);
     static void BindMenuWithCustomNode(const RefPtr<UINode> &customNode, const RefPtr<FrameNode> &targetNode,
         const NG::OffsetF &offset, const MenuParam &menuParam, const RefPtr<UINode> &previewCustomNode = nullptr);
-    static void ShowMenu(int32_t targetId, const NG::OffsetF &offset, bool isContextMenu = false);
+    static void ShowMenu(
+        int32_t targetId, const NG::OffsetF& offset, bool isShowInSubWindow, bool isContextMenu = false);
     // inspector
     static void SetInspectorId(const std::string &inspectorId);
     // auto event param

@@ -1389,15 +1389,15 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam> &&params, const Re
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
-    if (expandDisplay && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
+    if (expandDisplay && menuParam.isShowInSubWindow && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset, menuParam.isAboveApps);
         return;
     }
     BindMenu(menuNode, targetNode->GetId(), offset);
 }
 
-void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode> &customNode, const RefPtr<FrameNode> &targetNode,
-    const NG::OffsetF &offset, const MenuParam &menuParam, const RefPtr<UINode> &previewCustomNode)
+void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, const RefPtr<FrameNode>& targetNode,
+    const NG::OffsetF& offset, const MenuParam& menuParam, const RefPtr<UINode>& previewCustomNode)
 {
     TAG_LOGD(AceLogTag::ACE_DIALOG, "bind menu with custom node enter");
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -1414,7 +1414,8 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode> &customNode, cons
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset, menuParam.isAboveApps);
         return;
     }
-    if (menuParam.type == MenuType::MENU && expandDisplay && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
+    if (menuParam.type == MenuType::MENU && expandDisplay && menuParam.isShowInSubWindow &&
+        targetNode->GetTag() != V2::SELECT_ETS_TAG) {
         bool isShown = SubwindowManager::GetInstance()->GetShown();
         if (!isShown) {
             SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset, menuParam.isAboveApps);
@@ -1426,7 +1427,7 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode> &customNode, cons
     BindMenu(menuNode, targetNode->GetId(), offset);
 }
 
-void ViewAbstract::ShowMenu(int32_t targetId, const NG::OffsetF &offset, bool isContextMenu)
+void ViewAbstract::ShowMenu(int32_t targetId, const NG::OffsetF &offset, bool isShowInSubWindow, bool isContextMenu)
 {
     TAG_LOGD(AceLogTag::ACE_DIALOG, "show menu enter");
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -1434,7 +1435,7 @@ void ViewAbstract::ShowMenu(int32_t targetId, const NG::OffsetF &offset, bool is
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
-    if (isContextMenu || expandDisplay) {
+    if (isContextMenu || (expandDisplay && isShowInSubWindow)) {
         SubwindowManager::GetInstance()->ShowMenuNG(nullptr, targetId, offset);
         return;
     }

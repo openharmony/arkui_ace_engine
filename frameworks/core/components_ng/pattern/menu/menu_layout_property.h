@@ -64,6 +64,7 @@ public:
         value->propSelectMenuAlignOption_ = CloneSelectMenuAlignOption();
         value->propBorderRadius_ = CloneBorderRadius();
         value->propMenuWidth_ = CloneMenuWidth();
+        value->propShowInSubWindow_ = CloneShowInSubWindow();
         return value;
     }
 
@@ -80,6 +81,7 @@ public:
         ResetSelectMenuAlignOption();
         ResetBorderRadius();
         ResetMenuWidth();
+        ResetShowInSubWindow();
     }
 
     // if is a rect in target frameNode
@@ -112,6 +114,8 @@ public:
     ACE_DEFINE_PROPERTY_GROUP(SelectMenuAlignOption, SelectMenuAlignOption);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SelectMenuAlignOption, AlignType, MenuAlignType, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(SelectMenuAlignOption, Offset, DimensionOffset, PROPERTY_UPDATE_MEASURE);
+
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ShowInSubWindow, bool, PROPERTY_UPDATE_MEASURE);
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
