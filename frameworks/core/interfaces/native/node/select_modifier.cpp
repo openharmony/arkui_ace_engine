@@ -366,37 +366,33 @@ void SetSelectOptionWidthFitTrigger(NodeHandle node, bool trigger)
     SelectModelNG::SetOptionWidthFitTrigger(frameNode, trigger);
 }
 
-void SetSelectOptionWidth(NodeHandle node, const char* width)
+void SetSelectOptionWidth(NodeHandle node, double value, int32_t unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Dimension optionHeight = Dimension::FromString(std::string(width));
-    SelectModelNG::SetOptionWidth(frameNode, optionHeight);
+    Dimension optionWidth = Dimension(value, static_cast<DimensionUnit>(unit));
+    SelectModelNG::SetHasOptionWidth(frameNode, true);
+    SelectModelNG::SetOptionWidth(frameNode, optionWidth);
 }
 
 void ResetSelectOptionWidth(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Dimension optionHeight;
-    SelectModelNG::SetOptionWidth(frameNode, optionHeight);
+    Dimension optionWidth;
+    SelectModelNG::SetHasOptionWidth(frameNode, false);
+    SelectModelNG::SetOptionWidth(frameNode, optionWidth);
 }
 
-void SetSelectOptionHeight(NodeHandle node, const char* height)
+void SetSelectOptionHeight(NodeHandle node, double value, int32_t unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    Dimension optionHeight = Dimension::FromString(std::string(height));
+    Dimension optionHeight = Dimension(value, static_cast<DimensionUnit>(unit));
     SelectModelNG::SetOptionHeight(frameNode, optionHeight);
 }
 
-void ResetSelectOptionHeight(NodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    Dimension optionHeight;
-    SelectModelNG::SetOptionHeight(frameNode, optionHeight);
-}
+void ResetSelectOptionHeight(NodeHandle node) {}
 
 void SetSelectWidth(NodeHandle node, double value, int32_t unit, const char* calcVlaue)
 {

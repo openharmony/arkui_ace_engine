@@ -477,8 +477,7 @@ ArkUINativeModuleValue SelectBridge::SetOptionWidth(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> optionWidthArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    CalcDimension value;
-    std::string width;
+    CalcDimension width;
     if (optionWidthArg->IsString()) {
         std::string modeFlag = optionWidthArg->ToString(vm)->ToString();
         if (modeFlag.compare("fit_content") == 0) {
@@ -490,21 +489,20 @@ ArkUINativeModuleValue SelectBridge::SetOptionWidth(ArkUIRuntimeCallInfo* runtim
         } else if (ArkTSUtils::IsPercentStr(modeFlag)) {
             return panda::JSValueRef::Undefined(vm);
         } else {
-            ArkTSUtils::ParseJsDimensionVpNG(vm, optionWidthArg, value);
-            if (value.IsNegative()) {
-                value.Reset();
+            ArkTSUtils::ParseJsDimensionVpNG(vm, optionWidthArg, width, false);
+            if (width.IsNegative()) {
+                width.Reset();
             }
-            width = value.ToString();
         }
     } else {
-        ArkTSUtils::ParseJsDimensionVpNG(vm, optionWidthArg, value);
-        if (value.IsNegative()) {
-            value.Reset();
+        ArkTSUtils::ParseJsDimensionVpNG(vm, optionWidthArg, width, false);
+        if (width.IsNegative()) {
+            width.Reset();
         }
-        width = value.ToString();
     }
 
-    GetArkUIInternalNodeAPI()->GetSelectModifier().SetOptionWidth(nativeNode, width.c_str());
+    GetArkUIInternalNodeAPI()->GetSelectModifier().SetSelectOptionWidth(
+        nativeNode, width.Value(), static_cast<int32_t>(width.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -514,7 +512,7 @@ ArkUINativeModuleValue SelectBridge::ResetOptionWidth(ArkUIRuntimeCallInfo* runt
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSelectModifier().ResetOptionWidth(nativeNode);
+    GetArkUIInternalNodeAPI()->GetSelectModifier().ResetSelectOptionWidth(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -525,8 +523,7 @@ ArkUINativeModuleValue SelectBridge::SetOptionHeight(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> optionHeightArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    CalcDimension value;
-    std::string height;
+    CalcDimension height;
     if (optionHeightArg->IsString()) {
         std::string modeFlag = optionHeightArg->ToString(vm)->ToString();
         if (ArkTSUtils::IsPercentStr(modeFlag)) {
@@ -534,16 +531,16 @@ ArkUINativeModuleValue SelectBridge::SetOptionHeight(ArkUIRuntimeCallInfo* runti
         }
     }
 
-    ArkTSUtils::ParseJsDimensionVpNG(vm, optionHeightArg, value);
-    if (value.IsNegative()) {
+    ArkTSUtils::ParseJsDimensionVpNG(vm, optionHeightArg, height, false);
+    if (height.IsNegative()) {
         return panda::JSValueRef::Undefined(vm);
-    } else if (NEAR_ZERO(value.Value())) {
+    }
+    if (NEAR_ZERO(height.Value())) {
         return panda::JSValueRef::Undefined(vm);
-    } else {
-        height = value.ToString();
     }
 
-    GetArkUIInternalNodeAPI()->GetSelectModifier().SetOptionHeight(nativeNode, height.c_str());
+    GetArkUIInternalNodeAPI()->GetSelectModifier().SetSelectOptionHeight(
+        nativeNode, height.Value(), static_cast<int32_t>(height.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -553,7 +550,7 @@ ArkUINativeModuleValue SelectBridge::ResetOptionHeight(ArkUIRuntimeCallInfo* run
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
-    GetArkUIInternalNodeAPI()->GetSelectModifier().ResetOptionHeight(nativeNode);
+    GetArkUIInternalNodeAPI()->GetSelectModifier().ResetSelectOptionHeight(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 

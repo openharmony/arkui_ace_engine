@@ -637,10 +637,10 @@ struct ArkUISelectModifierAPI {
     void (*SetSelectSize)(NodeHandle node, const double* number, const int8_t* unit, const char** calc);
     void (*ResetSelectSize)(NodeHandle node);
     void (*SetOptionWidthFitTrigger)(NodeHandle node, bool trigger);
-    void (*SetOptionWidth)(NodeHandle node, const char* width);
-    void (*ResetOptionWidth)(NodeHandle node);
-    void (*SetOptionHeight)(NodeHandle node, const char* height);
-    void (*ResetOptionHeight)(NodeHandle node);
+    void (*SetSelectOptionWidth)(NodeHandle node, double value, int32_t unit);
+    void (*ResetSelectOptionWidth)(NodeHandle node);
+    void (*SetSelectOptionHeight)(NodeHandle node, double value, int32_t unit);
+    void (*ResetSelectOptionHeight)(NodeHandle node);
 };
 
 struct ArkUICheckboxModifierAPI {
@@ -1263,7 +1263,7 @@ struct ArkUIMenuModifierAPI {
     void (*ResetFont)(NodeHandle node);
     void (*SetRadius)(NodeHandle node, const double* values, const int32_t* units);
     void (*ResetRadius)(NodeHandle node);
-    void (*SetMenuWidth)(NodeHandle node, const char* widthStr);
+    void (*SetMenuWidth)(NodeHandle node, double value, int32_t unit);
     void (*ResetMenuWidth)(NodeHandle node);
 };
 
