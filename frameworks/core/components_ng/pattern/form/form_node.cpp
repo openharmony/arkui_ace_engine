@@ -42,7 +42,7 @@ const std::unordered_map<TouchType, int32_t> TOUCH_TYPE_MAP = {
     { TouchType::PULL_OUT_WINDOW, MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW },
 };
 
-std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, const TouchEvent& point, const WeakPtr<FramaNode>& node)
+std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, const TouchEvent& point, const WeakPtr<FrameNode>& node)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
 
