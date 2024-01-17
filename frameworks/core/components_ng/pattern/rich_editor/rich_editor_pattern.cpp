@@ -2356,7 +2356,8 @@ void RichEditorPattern::InsertValueOperation(const std::string& insertValue, Ope
     }
     if (info.GetOffsetInSpan() == 0) {
         auto spanNodeBefore = DynamicCast<SpanNode>(host->GetChildAtIndex(info.GetSpanIndex() - 1));
-        if (spanNodeBefore != nullptr && !IsLineSeparatorInLast(spanNodeBefore)) {
+        if (spanNodeBefore != nullptr && !IsLineSeparatorInLast(spanNodeBefore) &&
+            spanNodeBefore->GetTag() == V2::SPAN_ETS_TAG) {
             InsertValueAfterBeforeSpan(spanNodeBefore, spanNode, info, insertValueTemp);
             return;
         }
@@ -4083,7 +4084,8 @@ void RichEditorPattern::InsertValueByPaste(const std::string& insertValue)
             auto spanNodeBefore = DynamicCast<SpanNode>(GetChildByIndex(info.GetSpanIndex() - 1));
             if (spanNodeBefore == nullptr) {
                 caretSpanIndex_ = AddTextSpanOperation(options, true);
-            } else if (typingStyle_.has_value() && !HasSameTypingStyle(spanNodeBefore)) {
+            } else if ((typingStyle_.has_value() && !HasSameTypingStyle(spanNodeBefore)) ||
+                spanNodeBefore->GetTag() != V2::SPAN_ETS_TAG) {
                 auto spanNode = DynamicCast<SpanNode>(child);
                 CreateTextSpanNode(spanNode, info, insertValue, false);
                 caretSpanIndex_ = info.GetSpanIndex();
