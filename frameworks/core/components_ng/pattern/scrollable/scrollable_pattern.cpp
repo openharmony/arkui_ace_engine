@@ -38,6 +38,7 @@ constexpr float CUSTOM_ANIMATION_DURATION = 1000.0;
 constexpr uint32_t MILLOS_PER_NANO_SECONDS = 1000 * 1000 * 1000;
 constexpr uint64_t MIN_DIFF_VSYNC = 1000 * 1000; // min is 1ms
 constexpr uint32_t MAX_VSYNC_DIFF_TIME = 100 * 1000 * 1000; //max 100ms
+constexpr float SPRING_ACCURACY = 0.1;
 const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
 const std::string SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
 const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
@@ -962,7 +963,6 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
             CHECK_NULL_RETURN(pattern, 0.0f);
             return pattern->GetCurrentVelocity();
         });
-        curveOffsetProperty_->SetThresholdType(ThresholdType::LAYOUT);
         isAnimationStop_ = false;
         curveOffsetProperty_->Set(GetTotalOffset());
         curveAnimation_ = AnimationUtils::StartAnimation(
@@ -1005,7 +1005,6 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<SpringCurve>(velocity, mass, stiffness, damping);
     InitOption(option, CUSTOM_ANIMATION_DURATION, curve);
-    springOffsetProperty_->SetThresholdType(ThresholdType::LAYOUT);
     isAnimationStop_ = false;
     springOffsetProperty_->Set(GetTotalOffset());
     springAnimation_ = AnimationUtils::StartAnimation(
@@ -1051,10 +1050,14 @@ void ScrollablePattern::InitSpringOffsetProperty()
             pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->currentVelocity_,
                 SceneStatus::RUNNING);
         }
+        auto stopAnimation = NearEqual(pattern->finalPosition_, offset, SPRING_ACCURACY);
+        if (stopAnimation) {
+            offset = pattern->finalPosition_;
+        }
         pattern->lastVsyncTime_ = currentVsync;
         pattern->lastPosition_ = offset;
         if (!pattern->UpdateCurrentOffset(pattern->GetTotalOffset() - offset,
-            SCROLL_FROM_ANIMATION_CONTROLLER)) {
+            SCROLL_FROM_ANIMATION_CONTROLLER) || stopAnimation) {
             pattern->StopAnimation(pattern->springAnimation_);
         }
     };
@@ -1083,12 +1086,17 @@ void ScrollablePattern::InitCurveOffsetProperty(float position)
             pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->currentVelocity_,
                 SceneStatus::RUNNING);
         }
+        auto stopAnimation = NearEqual(pattern->finalPosition_, offset, SPRING_ACCURACY);
+        if (stopAnimation) {
+            offset = pattern->finalPosition_;
+        }
         pattern->lastVsyncTime_ = currentVsync;
         pattern->lastPosition_ = offset;
         pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
             SceneStatus::RUNNING);
-        if (!pattern->UpdateCurrentOffset(pattern->GetTotalOffset() - offset, SCROLL_FROM_ANIMATION_CONTROLLER)) {
-            if ((pattern->IsAtTop() && LessOrEqual(position, pattern->GetTotalOffset())) ||
+        if (!pattern->UpdateCurrentOffset(pattern->GetTotalOffset() - offset, SCROLL_FROM_ANIMATION_CONTROLLER) ||
+            stopAnimation) {
+            if (stopAnimation || (pattern->IsAtTop() && LessOrEqual(position, pattern->GetTotalOffset())) ||
                 (pattern->IsAtBottom() && GreatOrEqual(position, pattern->GetTotalOffset()))) {
                 pattern->StopAnimation(pattern->curveAnimation_);
             }
@@ -1110,7 +1118,6 @@ void ScrollablePattern::InitOption(AnimationOption &option, float duration, cons
     } else {
         option.SetDuration(CUSTOM_ANIMATION_DURATION);
     }
-    option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
 }
 
 void ScrollablePattern::StopAnimation(std::shared_ptr<AnimationUtils::Animation> animation)
