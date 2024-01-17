@@ -171,12 +171,12 @@ ArkUINativeModuleValue MenuBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCallInf
     Local<JSValueRef> widthArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
     CalcDimension width;
-    if (!ArkTSUtils::ParseJsDimensionVp(vm, widthArg, width)) {
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, widthArg, width, false)) {
         GetArkUIInternalNodeAPI()->GetMenuModifier().ResetMenuWidth(nativeNode);
         return panda::JSValueRef::Undefined(vm);
     }
-    std::string widthStr = width.ToString();
-    GetArkUIInternalNodeAPI()->GetMenuModifier().SetMenuWidth(nativeNode, widthStr.c_str());
+    GetArkUIInternalNodeAPI()->GetMenuModifier().SetMenuWidth(
+        nativeNode, width.Value(), static_cast<int32_t>(width.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 

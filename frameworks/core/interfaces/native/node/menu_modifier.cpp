@@ -115,11 +115,11 @@ void ResetRadius(NodeHandle node)
     MenuModelNG::SetBorderRadius(frameNode, reset);
 }
 
-void SetMenuWidth(NodeHandle node, const char* widthStr)
+void SetMenuWidth(NodeHandle node, double value, int32_t unit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    OHOS::Ace::CalcDimension width = Dimension::FromString(widthStr);
+    Dimension width = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
     MenuModelNG::SetWidth(frameNode, width);
 }
 

@@ -85,6 +85,7 @@ public:
     static void SetSelectedOptionFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
     static void SetSelectedOptionItalicFontStyle(FrameNode* frameNode, const Ace::FontStyle& value);
     static void SetOptionWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetHasOptionWidth(FrameNode* frameNode, bool hasOptionWidth);
     static void SetOptionHeight(FrameNode* frameNode, const Dimension& value);
     static void SetOptionWidthFitTrigger(FrameNode* frameNode, bool isFitTrigger);
 };

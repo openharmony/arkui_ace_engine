@@ -393,8 +393,8 @@ class ShadowModifier extends ModifierWithKey {
         getUINativeModule().common.setShadow(node, this.value, undefined, undefined, undefined, undefined, undefined, undefined);
       }
       else {
-        getUINativeModule().common.setShadow(node, undefined, this.value.radius, 
-          this.value.type, this.value.color, 
+        getUINativeModule().common.setShadow(node, undefined, this.value.radius,
+          this.value.type, this.value.color,
           this.value.offsetX, this.value.offsetY, this.value.fill);
       }
     }
@@ -660,7 +660,7 @@ class SweepGradientModifier extends ModifierWithKey {
       getUINativeModule().common.resetSweepGradient(node);
     }
     else {
-      getUINativeModule().common.setSweepGradient(node, this.value.center, this.value.start, 
+      getUINativeModule().common.setSweepGradient(node, this.value.center, this.value.start,
         this.value.end, this.value.rotation, this.value.colors, this.value.repeating);
     }
   }
@@ -9347,7 +9347,7 @@ class ArkScrollSnapOptions {
 }
 
 /// <reference path='./import.ts' />
-/// <reference path="./ArkComponent.ts" />
+/// <reference path='./ArkComponent.ts' />
 const FontWeightMap = {
   0: 'lighter',
   1: 'normal',
@@ -10159,7 +10159,7 @@ class ArkScrollComponent extends ArkComponent {
   clip(value) {
     modifierWithKey(this._modifiersWithKeys, ScrollClipModifier.identity, ScrollClipModifier, value);
     return this;
-}
+  }
 }
 // @ts-ignore
 globalThis.Scroll.attributeModifier = function (modifier) {
@@ -12497,7 +12497,7 @@ class CheckboxGroupSizeModifier extends ModifierWithKey {
   }
   checkObjectDiff() {
     return !isBaseOrResourceEqual(this.stageValue.width, this.value.width) ||
-      !isBaseOrResourceEqual(this.stageValue.height, this.value.height);    
+      !isBaseOrResourceEqual(this.stageValue.height, this.value.height);
   }
 }
 CheckboxGroupSizeModifier.identity = Symbol('checkboxGroupSize');
@@ -16765,7 +16765,7 @@ class HyperlinkDraggableModifier extends ModifierWithKey {
     }
   }
 }
-HyperlinkDraggableModifier.identity = Symbol('hyperlinkDraggable')
+HyperlinkDraggableModifier.identity = Symbol('hyperlinkDraggable');
 // @ts-ignore
 globalThis.Hyperlink.attributeModifier = function (modifier) {
   const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
@@ -18311,7 +18311,7 @@ class TabContentSizeModifier extends ModifierWithKey {
     if (reset) {
       getUINativeModule().tabContent.resetTabContentSize(node);
     }
-      else {
+    else {
       getUINativeModule().tabContent.setTabContentSize(node, this.value.width, this.value.height);
     }
   }
@@ -19147,7 +19147,7 @@ globalThis.Path.attributeModifier = function (modifier) {
 };
 
 /// <reference path='./import.ts' />
-/// <reference path="./ArkCommonShape.ts" />
+/// <reference path='./ArkCommonShape.ts' />
 class RectRadiusWidthModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -19222,7 +19222,7 @@ globalThis.Rect.attributeModifier = function (modifier) {
 };
 
 /// <reference path='./import.ts' />
-/// <reference path="./ArkCommonShape.ts" />
+/// <reference path='./ArkCommonShape.ts' />
 class ShapeViewPortModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
