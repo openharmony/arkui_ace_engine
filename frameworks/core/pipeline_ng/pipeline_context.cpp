@@ -1165,7 +1165,7 @@ void PipelineContext::StartWindowMaximizeAnimation(
 void PipelineContext::StartFullToMultWindowAnimation(int32_t width, int32_t height,
     WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
-    LOGI("Root node start full to multiple window animation, type = %{public}d, width = %{public}d, height = %{public}d",
+    LOGI("Root node start multiple window animation, type = %{public}d, width = %{public}d, height = %{public}d",
         type, width, height);
 #ifdef ENABLE_ROSEN_BACKEND
     if (rsTransaction) {
