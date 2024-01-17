@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -478,7 +478,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     auto haveNewLineAtStart = FillBlankAtStart(mainSize, crossSize, layoutWrapper);
     if (gridLayoutInfo_.reachStart_) {
         auto offset = gridLayoutInfo_.currentOffset_;
-        if (!gridPattern->IsScrollableSpringMotionRunning() && !canOverScroll_) {
+        if (!canOverScroll_) {
             gridLayoutInfo_.currentOffset_ = 0.0;
             gridLayoutInfo_.prevOffset_ = 0.0;
         }
@@ -598,7 +598,7 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, 
     }
 
     // Step3. modify [currentOffset_]
-    if (!gridPattern->IsScrollableSpringMotionRunning() && !canOverScroll_) {
+    if (!canOverScroll_) {
         float realOffsetToMoveUp = lengthOfItemsInViewport - mainSize + gridLayoutInfo_.prevOffset_;
         gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.prevOffset_ - realOffsetToMoveUp;
         gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
