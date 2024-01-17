@@ -4261,14 +4261,7 @@ void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
     SizeF secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), endSelectHeight };
     OffsetF firstHandleOffset = startOffset + textPaintOffset - rootOffset;
     OffsetF secondHandleOffset = endOffset + textPaintOffset - rootOffset;
-    if (GetTextContentLength() == 0) {
-        float caretHeight = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretHeight();
-        secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretHeight / 2 };
-        secondHandleOffset = OffsetF(secondHandleOffset.GetX(), secondHandleOffset.GetY() + caretHeight / 2);
-        // only show the second handle.
-        firstHandlePaintSize = SizeF{};
-        firstHandleOffset = OffsetF{};
-    }
+    AdjustHandleRect(firstHandleOffset, secondHandleOffset, firstHandlePaintSize, secondHandlePaintSize);
     textSelector_.selectionBaseOffset = firstHandleOffset;
     textSelector_.selectionDestinationOffset = secondHandleOffset;
     RectF firstHandle;
@@ -4279,6 +4272,28 @@ void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
     secondHandle.SetOffset(secondHandleOffset);
     secondHandle.SetSize(secondHandlePaintSize);
     textSelector_.secondHandle = secondHandle;
+}
+
+void RichEditorPattern::AdjustHandleRect(
+    OffsetF& firstHandleOffset, OffsetF& secondHandleOffset, SizeF& firstHandlePaintSize, SizeF& secondHandlePaintSize)
+{
+    int32_t textContentLength = static_cast<int32_t>(GetTextContentLength());
+    if (textContentLength == 0) {
+        float caretHeight = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretHeight();
+        secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretHeight / 2 };
+        secondHandleOffset = OffsetF(secondHandleOffset.GetX(), secondHandleOffset.GetY() + caretHeight / 2);
+        // only show the second handle.
+        firstHandlePaintSize = SizeF {};
+        firstHandleOffset = OffsetF {};
+    } else if ((caretPosition_ == textContentLength || caretPosition_ == (textContentLength - 1)) &&
+               spans_.back()->content.back() == '\n') {
+        RectF visibleContentRect(contentRect_.GetOffset() + parentGlobalOffset_, contentRect_.GetSize());
+        auto targetHeight = contentRect_.Height() - (secondHandleOffset.GetY() - visibleContentRect.Top());
+        if (firstHandleOffset.GetX() == secondHandleOffset.GetX()) {
+            firstHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), targetHeight };
+        }
+        secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), targetHeight };
+    }
 }
 
 void RichEditorPattern::ResetSelection()
