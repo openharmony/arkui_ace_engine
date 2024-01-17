@@ -129,6 +129,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   private isActive_: boolean = true;
 
   private runReuse_: boolean = false;
+  private hasBeenRecycled_: boolean = false;
 
   private paramsGenerator_: () => Object;
 
@@ -982,6 +983,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     const newElmtId: number = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
     const oldElmtId: number = node.id__();
     this.recycleManager_.updateNodeId(oldElmtId, newElmtId);
+    this.hasBeenRecycled_ = true;
     recycleUpdateFunc(oldElmtId, /* is first render */ true, node);
   }
 
@@ -997,7 +999,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     this.updateDirtyElements();
     this.childrenWeakrefMap_.forEach((weakRefChild) => {
       const child = weakRefChild.deref();
-      if (child) {
+      if (child && !child.hasBeenRecycled_) {
         child.aboutToReuseInternal();
       }
     });
@@ -1011,7 +1013,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
     }, "aboutToRecycle", this.constructor.name);
     this.childrenWeakrefMap_.forEach((weakRefChild) => {
       const child = weakRefChild.deref();
-      if (child) {
+      if (child && !child.hasBeenRecycled_) {
         child.aboutToRecycleInternal();
       }
     });
@@ -1022,6 +1024,7 @@ abstract class ViewPU extends NativeViewPartialUpdate
   public recycleSelf(name: string): void {
     if (this.parent_ && !this.parent_.isDeleting_) {
       this.parent_.getOrCreateRecycleManager().pushRecycleNode(name, this);
+      this.hasBeenRecycled_ = true;
     } else {
       this.resetRecycleCustomNode();
       stateMgmtConsole.error(`${this.constructor.name}[${this.id__()}]: recycleNode must have a parent`);
