@@ -519,7 +519,7 @@ void PipelineContext::IsCloseSCBKeyboard()
 
     RefPtr<FrameNode> curFrameNode = HandleFocusNode();
     if (curFrameNode == nullptr) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "curFrameNode null.");
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "curFrameNode null.");
         return;
     }
     TAG_LOGD(AceLogTag::ACE_KEYBOARD, "LastFocusNode,(%{public}s/%{public}d).",
