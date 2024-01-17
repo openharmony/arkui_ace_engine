@@ -110,6 +110,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
     }
     if (downFingerIds_.empty() && refereeNG_->QueryAllDone()) {
         refereeNG_->ForceCleanGestureReferee();
+        CleanGestureEventHub();
     }
     if (frameNode->HaveSecurityComponent()) {
         std::vector<NG::RectF> rect;
@@ -131,6 +132,14 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         TouchTestResult prevHitTestResult = touchTestResults_[touchPoint.id];
         hitTestResult.splice(hitTestResult.end(), prevHitTestResult);
     }
+    std::list<RefPtr<NG::NGGestureRecognizer>> hitTestRecognizers;
+    for (const auto& item : hitTestResult) {
+        auto recognizer = AceType::DynamicCast<NG::NGGestureRecognizer>(item);
+        if (recognizer) {
+            hitTestRecognizers.emplace_back(recognizer);
+        }
+    }
+    SetHittedFrameNode(hitTestRecognizers);
     touchTestResults_[touchPoint.id] = std::move(hitTestResult);
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
@@ -1504,6 +1513,38 @@ void EventManager::AddGestureSnapshot(int32_t finger, int32_t depth, const RefPt
             AddGestureSnapshot(finger, depth + 1, child);
         }
     }
+}
+
+void EventManager::SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults)
+{
+    if (touchTestResults.empty()) {
+        return;
+    }
+    for (const auto& item : touchTestResults) {
+        auto node = item->GetAttachedNode().Upgrade();
+        if (node) {
+            hittedFrameNode_.emplace(node);
+        }
+        auto group = AceType::DynamicCast<NG::RecognizerGroup>(item);
+        if (group) {
+            auto groupRecognizers = group->GetGroupRecognizer();
+            SetHittedFrameNode(groupRecognizers);
+        }
+    }
+}
+
+void EventManager::CleanGestureEventHub()
+{
+    for (const auto& item : hittedFrameNode_) {
+        auto frameNode = item.Upgrade();
+        if (frameNode) {
+            auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+            if (gestureEventHub) {
+                gestureEventHub->CleanExternalRecognizers();
+            }
+        }
+    }
+    hittedFrameNode_.clear();
 }
 
 } // namespace OHOS::Ace
