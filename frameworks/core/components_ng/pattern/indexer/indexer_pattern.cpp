@@ -709,7 +709,7 @@ void IndexerPattern::ApplyIndexChanged(
 
 void IndexerPattern::ShowBubble()
 {
-    if (!NeedShowBubble()) {
+    if (!NeedShowBubble() || itemCount_ < 1) {
         return;
     }
     auto host = GetHost();
