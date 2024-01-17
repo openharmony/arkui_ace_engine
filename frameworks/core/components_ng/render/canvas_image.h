@@ -41,6 +41,7 @@ struct ImagePaintConfig {
     float smoothEdge_ = 0.0f;
     bool flipHorizontally_ = false;
     bool isSvg_ = false;
+    int32_t frameCount_ = 1;
     std::vector<ObscuredReasons> obscuredReasons_;
     ImageResizableSlice resizableSlice_;
 };
