@@ -495,4 +495,11 @@ RefPtr<TextControllerBase> TextModelNG::GetTextController()
     CHECK_NULL_RETURN(pattern, nullptr);
     return pattern->GetTextController();
 }
+
+void TextModelNG::SetClipEdge()
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
 } // namespace OHOS::Ace::NG

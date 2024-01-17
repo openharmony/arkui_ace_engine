@@ -97,6 +97,7 @@ public:
     {
         return nullptr;
     };
+    virtual void SetClipEdge() = 0;
 
 private:
     static std::unique_ptr<TextModel> instance_;
