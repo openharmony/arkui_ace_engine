@@ -59,12 +59,11 @@ void RichEditorPaintMethod::UpdateOverlayModifier(PaintWrapper* paintWrapper)
         OffsetF caretOffsetDown =
             richEditorPattern->CalcCursorOffsetByPosition(caretPosition, caretHeight, true, false);
         OffsetF lastClickOffset = richEditorPattern->GetLastClickOffset();
-        if (!NearEqual(lastClickOffset.GetX(), caretOffsetDown.GetX())) {
+        if (lastClickOffset.NonNegative() && !NearEqual(lastClickOffset.GetX(), caretOffsetDown.GetX())) {
             caretHeight = 0.0f;
             OffsetF caretOffsetUp =
                 richEditorPattern->CalcCursorOffsetByPosition(caretPosition, caretHeight, false, false);
             overlayMod->SetCaretOffsetAndHeight(caretOffsetUp, caretHeight);
-            richEditorPattern->ResetLastClickOffset();
         } else {
             overlayMod->SetCaretOffsetAndHeight(caretOffsetDown, caretHeight);
         }
