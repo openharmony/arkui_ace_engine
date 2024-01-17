@@ -457,8 +457,6 @@ void SuppressMockParagraph()
     EXPECT_CALL(*paragraph, GetMaxWidth()).WillRepeatedly(Return(0.f));
     EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(0.f));
     EXPECT_CALL(*paragraph, GetTextWidth()).WillRepeatedly(Return(0.f));
-    EXPECT_CALL(*paragraph, AddPlaceholder()).Times(AnyNumber()).WillRepeatedly(Return(0));
-    EXPECT_CALL(*paragraph, GetRectsForPlaceholders(_)).Times(AnyNumber());
     std::vector<RectF> rects;
     EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects)); // 2 means second paras
 }
