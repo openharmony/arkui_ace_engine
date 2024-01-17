@@ -93,13 +93,13 @@ struct GridLayoutInfo {
         return totalHeight - currentOffset_;
     }
 
-    float GetTotalLineHeight(float mainGap) const
+    float GetTotalLineHeight(float mainGap, bool removeLastGap = true) const
     {
         float totalHeight = 0.0f;
-        for (auto iter = lineHeightMap_.begin(); iter != lineHeightMap_.end(); ++iter) {
-            totalHeight += (iter->second + mainGap);
+        for (auto iter : lineHeightMap_) {
+            totalHeight += (iter.second + mainGap);
         }
-        return totalHeight - mainGap;
+        return (removeLastGap) ? totalHeight - mainGap : totalHeight;
     }
 
     /**
@@ -149,6 +149,13 @@ struct GridLayoutInfo {
     }
 
     float GetContentOffset(float mainGap) const;
+    /**
+     * @brief Get the total height of grid content. Use estimation when lineHeights are not available. Can handle
+     * bigItems.
+     *
+     * @param mainGap
+     * @return total height
+     */
     float GetContentHeight(float mainGap) const;
     float GetContentOffset(const GridLayoutOptions& options, float mainGap) const;
 
@@ -228,6 +235,15 @@ private:
     int32_t GetPositionByItemIndex(int32_t itemIndex);
     void MoveItemsBack(int32_t from, int32_t to, int32_t itemIndex);
     void MoveItemsForward(int32_t from, int32_t to, int32_t itemIndex);
+
+    /**
+     * @brief Find the number of GridItems in range [startLine, endLine].
+     *
+     * REQUIRES: gridMatrix_ is valid in range [startLine, endLine].
+     * @return number of GridItems
+     */
+    int32_t FindItemCount(int32_t startLine, int32_t endLine) const;
+
     int32_t currentMovingItemPosition_ = -1;
     std::map<int32_t, int32_t> positionItemIndexMap_;
 };
