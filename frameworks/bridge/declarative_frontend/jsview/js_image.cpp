@@ -363,7 +363,7 @@ void JSColorFilter::DestructorCallback(JSColorFilter* obj)
 
 void JSImage::SetColorFilter(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1 || !info[0]->IsObject()) {
+    if (info.Length() != 1 || !info[0]->IsArray()) {
         LOGE("The arg is wrong, it is supposed to have 1 arguments");
         return;
     }

@@ -72,7 +72,7 @@ void JSLine::Create(const JSCallbackInfo& info)
 
 void JSLine::SetStart(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
+    if (info.Length() < 1 || !info[0]->IsArray()) {
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }
@@ -84,7 +84,7 @@ void JSLine::SetStart(const JSCallbackInfo& info)
 
 void JSLine::SetEnd(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
+    if (info.Length() < 1 || !info[0]->IsArray()) {
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }

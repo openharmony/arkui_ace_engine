@@ -89,7 +89,7 @@ void JSVideoController::SetCurrentTime(const JSCallbackInfo& args)
     }
 
     SeekMode seekMode = SeekMode::SEEK_PREVIOUS_SYNC;
-    if (args.Length() > 1 && args[1]->IsNumber()) {
+    if (args.Length() > 1 && args[1]->IsNumber() && args[1]->ToNumber<uint32_t>() < SEEK_MODE.size()) {
         seekMode = SEEK_MODE[args[1]->ToNumber<int32_t>()];
     }
 

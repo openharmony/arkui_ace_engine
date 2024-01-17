@@ -48,7 +48,7 @@ void JSPolyline::JSBind(BindingTarget globalObj)
 
 void JSPolyline::JSPoints(const JSCallbackInfo& info)
 {
-    if (info.Length() < 1) {
+    if (info.Length() < 1 || !info[0]->IsArray()) {
         LOGE("The arg is wrong, it is supposed to have at least 1 arguments");
         return;
     }

@@ -549,7 +549,7 @@ void JSWebController::PostWebMessage(const JSCallbackInfo& args)
         LOGE("invalid message param");
         return;
     }
-    auto jsRes = JSRef<JSObject>::Cast(jsPorts)->Unwrap<JSWebMessageEvent>();
+    auto jsRes = Referenced::Claim(JSRef<JSObject>::Cast(jsPorts)->Unwrap<JSWebMessageEvent>());
     std::string eventData = jsRes->GetDataInternal();
     std::vector<RefPtr<JSWebMessagePort>> eventPorts = jsRes->GetPortsInternal();
     std::vector<RefPtr<WebMessagePort>> sendPorts;
@@ -956,8 +956,8 @@ void JSWebController::AddJavascriptInterface(const JSCallbackInfo& args)
     // options.methodList
     std::vector<std::string> methods;
     JSRef<JSVal> methodList = obj->GetProperty("methodList");
-    JSRef<JSArray> array = JSRef<JSArray>::Cast(methodList);
-    if (array->IsArray()) {
+    if (methodList->IsArray()) {
+        JSRef<JSArray> array = JSRef<JSArray>::Cast(methodList);
         for (size_t i = 0; i < array->Length(); i++) {
             JSRef<JSVal> method = array->GetValueAt(i);
             if (method->IsString()) {
@@ -965,7 +965,7 @@ void JSWebController::AddJavascriptInterface(const JSCallbackInfo& args)
             }
         }
     }
-
+    
     webController_->AddJavascriptInterface(objName, methods);
 }
 

@@ -110,7 +110,7 @@ void JSScrollBar::Create(const JSCallbackInfo& info)
 
         // Parse direction.
         auto directionValue = obj->GetProperty("direction");
-        if (directionValue->IsNumber()) {
+        if (directionValue->IsNumber() && directionValue->ToNumber<uint32_t>() < AXIS.size()) {
             scrollBarComponent->SetAxis(AXIS[directionValue->ToNumber<int32_t>()]);
         }
 
