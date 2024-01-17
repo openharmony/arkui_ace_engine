@@ -355,7 +355,7 @@ typedef enum {
      * "ellipse(10,10)"括号内分别为width、height; "path(10,10,M0 0 L600 0)"括号内分别为width、height、commands;
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_CLIP, "true");
-     * basicNodeApi->setAttribute(nodeHandle, NODE_CLIP, "rect(10 10 10)");
+     * basicNodeApi->setAttribute(nodeHandle, NODE_CLIP, "rect(10 10 10 10)");
      * @endcode
      *
      */
