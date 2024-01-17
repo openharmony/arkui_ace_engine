@@ -43,6 +43,7 @@ const std::string SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
 const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
 const std::string SCROLLABLE_MULTI_TASK_SCENE = "scrollable_multi_task_scene";
 const std::string SCROLL_IN_HOTZONE_SCENE = "scroll_in_hotzone_scene";
+const std::string CUSTOM_SCROLL_BAR_SCENE = "custom_scroll_bar_scene";
 } // namespace
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
@@ -782,9 +783,16 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
         CHECK_NULL_VOID(pattern);
         pattern->StartScrollSnapMotion(scrollSnapDelta, scrollSnapVelocity);
     };
+
+    auto scrollbarFRcallback = [weak = WeakClaim(this)](double velocity, SceneStatus sceneStatus) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        return pattern->NotifyFRCSceneInfo(CUSTOM_SCROLL_BAR_SCENE, velocity, sceneStatus);
+    };
+
     ScrollableNodeInfo nodeInfo = { AceType::WeakClaim(this), std::move(scrollFunction), std::move(scrollStartCallback),
         std::move(scrollEndCallback), std::move(calePredictSnapOffsetCallback),
-        std::move(startScrollSnapMotionCallback) };
+        std::move(startScrollSnapMotionCallback), std::move(scrollbarFRcallback) };
     scrollBarProxy->RegisterScrollableNode(nodeInfo);
     scrollBarProxy_ = scrollBarProxy;
 }
