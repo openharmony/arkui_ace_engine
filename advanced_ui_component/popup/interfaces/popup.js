@@ -190,13 +190,21 @@ export class PopupComponent extends ViewPU {
         if (typeof d1 === "function") {
             this.paramsGenerator_ = d1;
         }
+        this.onClose = noop;
         this.theme = defaultTheme;
         this.__icon = new SynchedPropertyObjectOneWayPU(a1.icon, this, "icon");
         this.__title = new SynchedPropertyObjectOneWayPU(a1.title, this, "title");
         this.__message = new SynchedPropertyObjectOneWayPU(a1.message, this, "message");
         this.__showClose = new SynchedPropertyObjectOneWayPU(a1.showClose, this, "showClose");
         this.__buttons = new SynchedPropertyObjectOneWayPU(a1.buttons, this, "buttons");
-        this.onClose = noop;
+        this.textHeight = 0;
+        this.__titleHeight = new ObservedPropertySimplePU(0, this, "titleHeight");
+        this.__applyHeight = new ObservedPropertySimplePU(0, this, "applyHeight");
+        this.__buttonHeight = new ObservedPropertySimplePU(0, this, "buttonHeight");
+        this.__messageMaxWeight = new ObservedPropertySimplePU(0, this, "messageMaxWeight");
+        this.__beforeScreenStatus = new ObservedPropertySimplePU(undefined, this, "beforeScreenStatus");
+        this.__currentScreenStatus = new ObservedPropertySimplePU(true, this, "currentScreenStatus");
+        this.__applySizeOptions = new ObservedPropertyObjectPU(undefined, this, "applySizeOptions");
         this.__closeButtonBackgroundColor = new ObservedPropertyObjectPU({
             "id": -1,
             "type": 10001,
@@ -218,18 +226,14 @@ export class PopupComponent extends ViewPU {
             "bundleName": "",
             "moduleName": ""
         }, this, "secondButtonBackgroundColor");
-        this.__textHeight = new ObservedPropertySimplePU(0, this, "textHeight");
-        this.__titleHeight = new ObservedPropertySimplePU(0, this, "titleHeight");
-        this.__applyHeight = new ObservedPropertySimplePU(0, this, "applyHeight");
-        this.__buttonHeight = new ObservedPropertySimplePU(0, this, "buttonHeight");
-        this.__scrollHeight = new ObservedPropertySimplePU(0, this, "scrollHeight");
-        this.__beforeScreenStatus = new ObservedPropertySimplePU(true, this, "beforeScreenStatus");
-        this.__currentScreenStatus = new ObservedPropertySimplePU(true, this, "currentScreenStatus");
         this.listener = mediaquery.matchMediaSync('(orientation: landscape)');
         this.setInitiallyProvidedValue(a1);
     }
 
     setInitiallyProvidedValue(a1) {
+        if (a1.onClose !== undefined) {
+            this.onClose = a1.onClose;
+        }
         if (a1.theme !== undefined) {
             this.theme = a1.theme;
         }
@@ -248,18 +252,6 @@ export class PopupComponent extends ViewPU {
         if (a1.buttons === undefined) {
             this.__buttons.set([{ text: '' }, { text: '' }]);
         }
-        if (a1.onClose !== undefined) {
-            this.onClose = a1.onClose;
-        }
-        if (a1.closeButtonBackgroundColor !== undefined) {
-            this.closeButtonBackgroundColor = a1.closeButtonBackgroundColor;
-        }
-        if (a1.firstButtonBackgroundColor !== undefined) {
-            this.firstButtonBackgroundColor = a1.firstButtonBackgroundColor;
-        }
-        if (a1.secondButtonBackgroundColor !== undefined) {
-            this.secondButtonBackgroundColor = a1.secondButtonBackgroundColor;
-        }
         if (a1.textHeight !== undefined) {
             this.textHeight = a1.textHeight;
         }
@@ -272,14 +264,26 @@ export class PopupComponent extends ViewPU {
         if (a1.buttonHeight !== undefined) {
             this.buttonHeight = a1.buttonHeight;
         }
-        if (a1.scrollHeight !== undefined) {
-            this.scrollHeight = a1.scrollHeight;
+        if (a1.messageMaxWeight !== undefined) {
+            this.messageMaxWeight = a1.messageMaxWeight;
         }
         if (a1.beforeScreenStatus !== undefined) {
             this.beforeScreenStatus = a1.beforeScreenStatus;
         }
         if (a1.currentScreenStatus !== undefined) {
             this.currentScreenStatus = a1.currentScreenStatus;
+        }
+        if (a1.applySizeOptions !== undefined) {
+            this.applySizeOptions = a1.applySizeOptions;
+        }
+        if (a1.closeButtonBackgroundColor !== undefined) {
+            this.closeButtonBackgroundColor = a1.closeButtonBackgroundColor;
+        }
+        if (a1.firstButtonBackgroundColor !== undefined) {
+            this.firstButtonBackgroundColor = a1.firstButtonBackgroundColor;
+        }
+        if (a1.secondButtonBackgroundColor !== undefined) {
+            this.secondButtonBackgroundColor = a1.secondButtonBackgroundColor;
         }
         if (a1.listener !== undefined) {
             this.listener = a1.listener;
@@ -300,16 +304,16 @@ export class PopupComponent extends ViewPU {
         this.__message.purgeDependencyOnElmtId(z);
         this.__showClose.purgeDependencyOnElmtId(z);
         this.__buttons.purgeDependencyOnElmtId(z);
-        this.__closeButtonBackgroundColor.purgeDependencyOnElmtId(z);
-        this.__firstButtonBackgroundColor.purgeDependencyOnElmtId(z);
-        this.__secondButtonBackgroundColor.purgeDependencyOnElmtId(z);
-        this.__textHeight.purgeDependencyOnElmtId(z);
         this.__titleHeight.purgeDependencyOnElmtId(z);
         this.__applyHeight.purgeDependencyOnElmtId(z);
         this.__buttonHeight.purgeDependencyOnElmtId(z);
-        this.__scrollHeight.purgeDependencyOnElmtId(z);
+        this.__messageMaxWeight.purgeDependencyOnElmtId(z);
         this.__beforeScreenStatus.purgeDependencyOnElmtId(z);
         this.__currentScreenStatus.purgeDependencyOnElmtId(z);
+        this.__applySizeOptions.purgeDependencyOnElmtId(z);
+        this.__closeButtonBackgroundColor.purgeDependencyOnElmtId(z);
+        this.__firstButtonBackgroundColor.purgeDependencyOnElmtId(z);
+        this.__secondButtonBackgroundColor.purgeDependencyOnElmtId(z);
     }
 
     aboutToBeDeleted() {
@@ -318,16 +322,16 @@ export class PopupComponent extends ViewPU {
         this.__message.aboutToBeDeleted();
         this.__showClose.aboutToBeDeleted();
         this.__buttons.aboutToBeDeleted();
-        this.__closeButtonBackgroundColor.aboutToBeDeleted();
-        this.__firstButtonBackgroundColor.aboutToBeDeleted();
-        this.__secondButtonBackgroundColor.aboutToBeDeleted();
-        this.__textHeight.aboutToBeDeleted();
         this.__titleHeight.aboutToBeDeleted();
         this.__applyHeight.aboutToBeDeleted();
         this.__buttonHeight.aboutToBeDeleted();
-        this.__scrollHeight.aboutToBeDeleted();
+        this.__messageMaxWeight.aboutToBeDeleted();
         this.__beforeScreenStatus.aboutToBeDeleted();
         this.__currentScreenStatus.aboutToBeDeleted();
+        this.__applySizeOptions.aboutToBeDeleted();
+        this.__closeButtonBackgroundColor.aboutToBeDeleted();
+        this.__firstButtonBackgroundColor.aboutToBeDeleted();
+        this.__secondButtonBackgroundColor.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -372,38 +376,6 @@ export class PopupComponent extends ViewPU {
         this.__buttons.set(y);
     }
 
-    get closeButtonBackgroundColor() {
-        return this.__closeButtonBackgroundColor.get();
-    }
-
-    set closeButtonBackgroundColor(y) {
-        this.__closeButtonBackgroundColor.set(y);
-    }
-
-    get firstButtonBackgroundColor() {
-        return this.__firstButtonBackgroundColor.get();
-    }
-
-    set firstButtonBackgroundColor(y) {
-        this.__firstButtonBackgroundColor.set(y);
-    }
-
-    get secondButtonBackgroundColor() {
-        return this.__secondButtonBackgroundColor.get();
-    }
-
-    set secondButtonBackgroundColor(y) {
-        this.__secondButtonBackgroundColor.set(y);
-    }
-
-    get textHeight() {
-        return this.__textHeight.get();
-    }
-
-    set textHeight(y) {
-        this.__textHeight.set(y);
-    }
-
     get titleHeight() {
         return this.__titleHeight.get();
     }
@@ -428,12 +400,12 @@ export class PopupComponent extends ViewPU {
         this.__buttonHeight.set(y);
     }
 
-    get scrollHeight() {
-        return this.__scrollHeight.get();
+    get messageMaxWeight() {
+        return this.__messageMaxWeight.get();
     }
 
-    set scrollHeight(y) {
-        this.__scrollHeight.set(y);
+    set messageMaxWeight(y) {
+        this.__messageMaxWeight.set(y);
     }
 
     get beforeScreenStatus() {
@@ -450,6 +422,38 @@ export class PopupComponent extends ViewPU {
 
     set currentScreenStatus(y) {
         this.__currentScreenStatus.set(y);
+    }
+
+    get applySizeOptions() {
+        return this.__applySizeOptions.get();
+    }
+
+    set applySizeOptions(y) {
+        this.__applySizeOptions.set(y);
+    }
+
+    get closeButtonBackgroundColor() {
+        return this.__closeButtonBackgroundColor.get();
+    }
+
+    set closeButtonBackgroundColor(y) {
+        this.__closeButtonBackgroundColor.set(y);
+    }
+
+    get firstButtonBackgroundColor() {
+        return this.__firstButtonBackgroundColor.get();
+    }
+
+    set firstButtonBackgroundColor(y) {
+        this.__firstButtonBackgroundColor.set(y);
+    }
+
+    get secondButtonBackgroundColor() {
+        return this.__secondButtonBackgroundColor.get();
+    }
+
+    set secondButtonBackgroundColor(y) {
+        this.__secondButtonBackgroundColor.set(y);
     }
 
     getIconWidth() {
@@ -588,8 +592,14 @@ export class PopupComponent extends ViewPU {
 
     getMessageMaxWeight() {
         let v = undefined;
+        let n = display.getDefaultDisplaySync();
         if (this.showClose || this.showClose === void (0)) {
-            v = 400;
+            if (px2vp(n.width) > 400) {
+                v = 400;
+            }
+            else {
+                v = px2vp(n.width) - 40 - 40;
+            }
             v -= (this.theme.windows.padding.left - (this.theme.button.margin.right / 2));
             v -= this.theme.windows.padding.right;
             v -= this.theme.button.margin.left / 2;
@@ -686,6 +696,7 @@ export class PopupComponent extends ViewPU {
     getScrollMaxHeight() {
         let t = undefined;
         if (this.currentScreenStatus !== this.beforeScreenStatus) {
+            this.applySizeOptions = this.getApplyMaxSize();
             this.beforeScreenStatus = this.currentScreenStatus;
             return t;
         }
@@ -725,19 +736,20 @@ export class PopupComponent extends ViewPU {
         let l = undefined;
         let m = undefined;
         let n = display.getDefaultDisplaySync();
-        if (n.width > 400) {
+        if (px2vp(n.width) > 400) {
             k = 400;
         }
         else {
-            k = n.width - 40 - 40;
+            k = px2vp(n.width) - 40 - 40;
         }
-        if (n.height > 480) {
+        if (px2vp(n.height) > 480) {
             l = 480;
         }
         else {
-            l = n.height - 40 - 40;
+            l = px2vp(n.height) - 40 - 40;
         }
         m = { maxWidth: k, maxHeight: l };
+        this.messageMaxWeight = this.getMessageMaxWeight();
         return m;
     }
 
@@ -746,7 +758,7 @@ export class PopupComponent extends ViewPU {
             Row.create();
             Row.alignItems(VerticalAlign.Top);
             Row.padding(this.getWindowsPadding());
-            Row.constraintSize(this.getApplyMaxSize());
+            Row.constraintSize(ObservedObject.GetRawObject(this.applySizeOptions));
             Row.onAreaChange((i, j) => {
                 this.applyHeight = j.height;
             });
@@ -850,19 +862,13 @@ export class PopupComponent extends ViewPU {
                         Scroll.scrollBar(BarState.Auto);
                         Scroll.scrollable(ScrollDirection.Vertical);
                         Scroll.constraintSize({ maxHeight: this.getScrollMaxHeight() });
-                        Scroll.onAreaChange((i, j) => {
-                            this.scrollHeight = j.height;
-                        });
                     }, Scroll);
                     this.observeComponentCreation2((b, c) => {
                         Text.create(this.getMessageText());
                         Text.fontSize(this.getMessageFontSize());
                         Text.fontColor(this.getMessageFontColor());
                         Text.fontWeight(this.getMessageFontWeight());
-                        Text.constraintSize({
-                            maxWidth: this.getMessageMaxWeight(),
-                            minHeight: this.getCloseButtonHeight()
-                        });
+                        Text.constraintSize({ minHeight: this.getCloseButtonHeight() });
                         Text.onAreaChange((i, j) => {
                             this.textHeight = j.height;
                         });
@@ -990,9 +996,6 @@ export class PopupComponent extends ViewPU {
                         Scroll.scrollBar(BarState.Auto);
                         Scroll.scrollable(ScrollDirection.Vertical);
                         Scroll.constraintSize({ maxHeight: this.getScrollMaxHeight() });
-                        Scroll.onAreaChange((i, j) => {
-                            this.scrollHeight = j.height;
-                        });
                     }, Scroll);
                     this.observeComponentCreation2((b, c) => {
                         Text.create(this.getMessageText());
@@ -1000,7 +1003,7 @@ export class PopupComponent extends ViewPU {
                         Text.fontColor(this.getMessageFontColor());
                         Text.fontWeight(this.getMessageFontWeight());
                         Text.constraintSize({
-                            maxWidth: this.getMessageMaxWeight(),
+                            maxWidth: this.messageMaxWeight,
                             minHeight: this.getCloseButtonHeight()
                         });
                         Text.onAreaChange((i, j) => {
