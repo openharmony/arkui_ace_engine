@@ -3155,9 +3155,6 @@ OnChildTouchTestFunc FrameNode::GetOnTouchTestFunc()
 void FrameNode::CollectTouchInfos(
     const PointF& globalPoint, const PointF& parentRevertPoint, std::vector<TouchTestInfo>& touchInfos)
 {
-    if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
-        return;
-    }
     if (GetOnTouchTestFunc() == nullptr) {
         return;
     }
@@ -3192,9 +3189,6 @@ void FrameNode::CollectTouchInfos(
 
 RefPtr<FrameNode> FrameNode::GetDispatchFrameNode(const TouchResult& touchRes)
 {
-    if (GetHitTestMode() == HitTestMode::HTMBLOCK) {
-        return nullptr;
-    }
     if (touchRes.strategy != TouchTestStrategy::FORWARD_COMPETITION &&
         touchRes.strategy != TouchTestStrategy::FORWARD) {
         return nullptr;
