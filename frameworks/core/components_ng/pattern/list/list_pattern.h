@@ -271,7 +271,7 @@ private:
 
     // multiSelectable
     void ClearMultiSelect() override;
-    bool IsItemSelected() override;
+    bool IsItemSelected(const GestureEvent& info) override;
     void MultiSelectWithoutKeyboard(const RectF& selectedZone) override;
     void HandleCardModeSelectedEvent(
         const RectF& selectedZone, const RefPtr<FrameNode>& itemGroupNode, float itemGroupTop);
