@@ -207,6 +207,9 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto frameNode = layoutWrapper->GetHostNode();
     const auto& layoutConstrain = layoutProperty->CreateChildConstraint();
+    auto placeHolderLayoutConstrain = layoutConstrain;
+    placeHolderLayoutConstrain.maxSize.SetHeight(Infinity<float>());
+    placeHolderLayoutConstrain.percentReference.SetHeight(0);
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
@@ -258,7 +261,7 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
             if (iterItems == children.end() || !(*iterItems)) {
                 continue;
             }
-            (*iterItems)->Measure(layoutConstrain);
+            (*iterItems)->Measure(placeHolderLayoutConstrain);
             auto geometryNode = (*iterItems)->GetGeometryNode();
             if (!geometryNode) {
                 iterItems++;
