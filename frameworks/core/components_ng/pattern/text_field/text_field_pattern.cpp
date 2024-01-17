@@ -4973,7 +4973,6 @@ void TextFieldPattern::ClearCounterNode()
 
 void TextFieldPattern::SetShowError()
 {
-    CHECK_NULL_VOID(!IsNormalInlineState());
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto passWordMode = IsInPasswordMode();
@@ -4983,48 +4982,32 @@ void TextFieldPattern::SetShowError()
     CHECK_NULL_VOID(tmpHost);
     auto renderContext = tmpHost->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto visible = layoutProperty->GetShowErrorTextValue(false);
+    auto isUnderLine = layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType();
     auto errorText = layoutProperty->GetErrorTextValue("");
-
-    if (visible && layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()
-        && !errorText.empty()) {
-        underlineColor_ = textFieldTheme->GetErrorUnderlineColor();
-        underlineWidth_ = ERROR_UNDERLINE_WIDTH;
-        preErrorState_ = true;
-    }
-    if (!visible && layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
+    auto preErrorState = preErrorState_;
+    preErrorState_ = layoutProperty->GetShowErrorTextValue(false) && !errorText.empty()
+                        && !IsNormalInlineState();
+    if (preErrorState_) { // update error state
+        if (isUnderLine) {
+            underlineColor_ = textFieldTheme->GetErrorUnderlineColor();
+            underlineWidth_ = ERROR_UNDERLINE_WIDTH;
+        } else if (passWordMode) {
+            BorderWidthProperty borderWidth;
+            BorderColorProperty borderColor;
+            borderWidth.SetBorderWidth(ERROR_BORDER_WIDTH);
+            layoutProperty->UpdateBorderWidth(borderWidth);
+            borderColor.SetColor(textFieldTheme->GetPasswordErrorBorderColor());
+            renderContext->UpdateBorderColor(borderColor);
+            renderContext->UpdateBackgroundColor(textFieldTheme->GetPasswordErrorInputColor());
+            layoutProperty->UpdateTextColor(textFieldTheme->GetPasswordErrorTextColor());
+        }
+    } else if (preErrorState) { // need to clean error state
         underlineColor_ = textFieldTheme->GetUnderlineColor();
         underlineWidth_ = UNDERLINE_WIDTH;
-        preErrorState_ = false;
-    }
-    if (visible && passWordMode && !errorText.empty()) {
-        BorderWidthProperty borderWidth;
-        BorderColorProperty borderColor;
-        preErrorState_ = true;
-        borderWidth.SetBorderWidth(ERROR_BORDER_WIDTH);
-        layoutProperty->UpdateBorderWidth(borderWidth);
-        borderColor.SetColor(textFieldTheme->GetPasswordErrorBorderColor());
-        renderContext->UpdateBorderColor(borderColor);
-        renderContext->UpdateBackgroundColor(textFieldTheme->GetPasswordErrorInputColor());
-        layoutProperty->UpdateTextColor(textFieldTheme->GetPasswordErrorTextColor());
-    }
-    if (!visible && passWordMode) {
         layoutProperty->UpdateBorderWidth(passwordModeStyle_.borderwidth);
         renderContext->UpdateBorderColor(passwordModeStyle_.borderColor);
         renderContext->UpdateBackgroundColor(passwordModeStyle_.bgColor);
         layoutProperty->UpdateTextColor(passwordModeStyle_.textColor);
-        preErrorState_ = false;
-    }
-    if (!visible && !passWordMode) {
-        renderContext->UpdateBorderColor(passwordModeStyle_.borderColor);
-        preErrorState_ = false;
-    }
-    if (visible && (!passWordMode || errorText.empty())) {
-        layoutProperty->UpdateBorderWidth(passwordModeStyle_.borderwidth);
-        renderContext->UpdateBorderColor(passwordModeStyle_.borderColor);
-        renderContext->UpdateBackgroundColor(passwordModeStyle_.bgColor);
-        layoutProperty->UpdateTextColor(passwordModeStyle_.textColor);
-        preErrorState_ = true;
     }
     UpdateErrorTextMargin();
 }

@@ -795,7 +795,7 @@ public:
     bool HandleOnTab(bool backward) override;
     void HandleOnEnter() override
     {
-        PerformAction(GetTextInputActionValue(TextInputAction::DONE), false);
+        PerformAction(GetTextInputActionValue(GetDefaultTextInputAction()), false);
     }
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;

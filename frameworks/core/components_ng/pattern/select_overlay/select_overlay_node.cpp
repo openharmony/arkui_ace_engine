@@ -1389,6 +1389,13 @@ void SelectOverlayNode::HideFrameNodeImmediately(FrameNodeType type)
     SetFrameNodeStatus(type, FrameNodeStatus::GONE);
     SetFrameNodeVisibility(type, VisibleType::GONE);
     SetFrameNodeOpacity(type, 0.0f);
+    if (type == FrameNodeType::SELECTMENU) { // select menu
+        auto pattern = GetPattern<SelectOverlayPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto overlayModifier = pattern->GetOverlayModifier();
+        CHECK_NULL_VOID(overlayModifier);
+        overlayModifier->SetCirclesAndBackArrowOpacity(0.0);
+    }
 }
 
 void SelectOverlayNode::SetSelectMenuOpacity(float value)
