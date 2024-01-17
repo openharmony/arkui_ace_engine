@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/water_flow_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 
 namespace OHOS::Ace {
@@ -77,6 +78,7 @@ void JSWaterFlow::Create(const JSCallbackInfo& args)
         if (scroller->IsObject()) {
             auto* jsScroller = JSRef<JSObject>::Cast(scroller)->Unwrap<JSScroller>();
             CHECK_NULL_VOID(jsScroller);
+            jsScroller->SetInstanceId(Container::CurrentId());
             auto positionController = WaterFlowModel::GetInstance()->CreateScrollController();
             jsScroller->SetController(positionController);
 

@@ -212,6 +212,7 @@ void JSGrid::Create(const JSCallbackInfo& info)
     if (info.Length() > 0 && info[0]->IsObject()) {
         JSScroller* jsScroller = JSRef<JSObject>::Cast(info[0])->Unwrap<JSScroller>();
         if (jsScroller) {
+            jsScroller->SetInstanceId(Container::CurrentId());
             positionController = GridModel::GetInstance()->CreatePositionController();
             jsScroller->SetController(positionController);
 
