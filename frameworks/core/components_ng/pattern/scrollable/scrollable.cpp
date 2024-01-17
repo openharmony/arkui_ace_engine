@@ -616,8 +616,6 @@ void Scrollable::StartScrollSnapMotion(float predictSnapOffset, float scrollSnap
         GetSnapProperty();
     }
     snapOffsetProperty_->Set(currentPos_);
-    option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
-    snapOffsetProperty_->SetThresholdType(ThresholdType::LAYOUT);
     snapOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
     snapOffsetProperty_->AnimateWithVelocity(option, endPos_, scrollSnapVelocity,
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
@@ -646,8 +644,6 @@ void Scrollable::ProcessScrollSnapSpringMotion(float scrollSnapDelta, float scro
         GetSnapProperty();
     }
     snapOffsetProperty_->Set(currentPos_);
-    option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
-    snapOffsetProperty_->SetThresholdType(ThresholdType::LAYOUT);
     snapOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
     snapOffsetProperty_->AnimateWithVelocity(option, endPos_, scrollSnapVelocity,
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
@@ -936,8 +932,6 @@ void Scrollable::UpdateScrollSnapEndWithOffset(double offset)
         }
         updateSnapAnimationCount_++;
         endPos_ -= offset;
-        option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
-        snapOffsetProperty_->SetThresholdType(ThresholdType::LAYOUT);
         snapOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
         AnimationUtils::StartAnimation(
             option,
@@ -1025,10 +1019,19 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSnapProperty()
             scroll->snapVelocity_ = (position - scroll->currentPos_) / diff * MILLOS_PER_NANO_SECONDS;
         }
         scroll->lastVsyncTime_ = currentVsync;
-        if (!scroll->isSnapScrollAnimationStop_) {
-            scroll->ProcessScrollSnapMotion(position);
-        } else if (!scroll->isSnapAnimationStop_) {
-            scroll->ProcessScrollMotion(position);
+        if (NearEqual(scroll->endPos_, position, SPRING_ACCURACY)) {
+            if (!scroll->isSnapScrollAnimationStop_) {
+                scroll->ProcessScrollSnapMotion(scroll->endPos_);
+            } else if (!scroll->isSnapAnimationStop_) {
+                scroll->ProcessScrollMotion(scroll->endPos_);
+            }
+            scroll->StopSnapAnimation();
+        } else {
+            if (!scroll->isSnapScrollAnimationStop_) {
+                scroll->ProcessScrollSnapMotion(position);
+            } else if (!scroll->isSnapAnimationStop_) {
+                scroll->ProcessScrollMotion(position);
+            }
         }
     };
     snapOffsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
