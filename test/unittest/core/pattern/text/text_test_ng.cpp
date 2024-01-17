@@ -225,6 +225,14 @@ struct TestProperty {
     std::optional<Ace::WordBreak> wordBreak = std::nullopt;
 };
 
+struct ImageSpanNodeProperty {
+    std::optional<std::string> imageSrc = std::nullopt;
+    std::optional<RefPtr<PixelMap>> pixelMap = std::nullopt;
+    std::optional<MarginPropertyF> margin = std::nullopt;
+    std::optional<ImageFit> imageFit = std::nullopt;
+    std::optional<VerticalAlign> verticalAlign = std::nullopt;
+};
+
 class TextTestNg : public testing::Test {
 public:
     static void SetUpTestSuite();
@@ -232,6 +240,7 @@ public:
     void SetUp() override;
     void TearDown() override;
     RefPtr<SpanNode> CreateSpanNodeWithSetDefaultProperty(const std::string& content);
+    RefPtr<ImageSpanNode> CreateImageSpanNode(const ImageSpanNodeProperty& property);
 
 protected:
     static RefPtr<FrameNode> CreateTextParagraph(const std::string& createValue, const TestProperty& testProperty);
@@ -278,6 +287,30 @@ RefPtr<SpanNode> TextTestNg::CreateSpanNodeWithSetDefaultProperty(const std::str
     spanModelNG.SetLetterSpacing(LETTER_SPACING);
     spanModelNG.SetLineHeight(LINE_HEIGHT_VALUE);
     return AceType::DynamicCast<SpanNode>(ViewStackProcessor::GetInstance()->Finish());
+}
+
+RefPtr<ImageSpanNode> TextTestNg::CreateImageSpanNode(const ImageSpanNodeProperty& property)
+{
+    auto imageSpanNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    auto imageLayoutProperty = AceType::DynamicCast<ImageLayoutProperty>(imageSpanNode->GetLayoutProperty());
+    if (property.imageSrc.has_value()) {
+        imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(property.imageSrc.value()));
+    }
+    if (property.pixelMap.has_value()) {
+        imageLayoutProperty->UpdateImageSourceInfo(ImageSourceInfo(property.pixelMap.value()));
+    }
+    if (property.imageFit.has_value()) {
+        imageLayoutProperty->UpdateImageFit(property.imageFit.value());
+    }
+    if (property.verticalAlign.has_value()) {
+        imageLayoutProperty->UpdateVerticalAlign(property.verticalAlign.value());
+    }
+    if (property.margin.has_value()) {
+        auto geometryNode = imageSpanNode->GetGeometryNode();
+        geometryNode->UpdateMargin(property.margin.value());
+    }
+    return imageSpanNode;
 }
 
 RefPtr<FrameNode> TextTestNg::CreateTextParagraph(const std::string& createValue, const TestProperty& testProperty)
@@ -408,6 +441,26 @@ std::pair<RefPtr<FrameNode>, RefPtr<TextPattern>> Init()
     auto clipboard = ClipboardProxy::GetInstance()->GetClipboard(pipeline->GetTaskExecutor());
     pattern->clipboard_ = clipboard;
     return { frameNode, pattern };
+}
+
+void SuppressMockParagraph()
+{
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, PushStyle(_)).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, AddText(_)).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, PopStyle()).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, Build()).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, Layout(_)).Times(AnyNumber());
+    EXPECT_CALL(*paragraph, GetAlphabeticBaseline()).WillRepeatedly(Return(0.f));
+    EXPECT_CALL(*paragraph, GetHeight()).WillRepeatedly(Return(0.f));
+    EXPECT_CALL(*paragraph, GetLongestLine()).WillRepeatedly(Return(0.f));
+    EXPECT_CALL(*paragraph, GetMaxWidth()).WillRepeatedly(Return(0.f));
+    EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(0.f));
+    EXPECT_CALL(*paragraph, GetTextWidth()).WillRepeatedly(Return(0.f));
+    EXPECT_CALL(*paragraph, AddPlaceholder()).Times(AnyNumber()).WillRepeatedly(Return(0));
+    EXPECT_CALL(*paragraph, GetRectsForPlaceholders(_)).Times(AnyNumber());
+    std::vector<RectF> rects;
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects)); // 2 means second paras
 }
 
 /**
@@ -1618,6 +1671,29 @@ HWTEST_F(TextTestNg, ToJsonValue006, TestSize.Level1)
     textLayoutProperty->UpdateTextBaseline(TextBaseline::HANGING);
     auto json = std::make_unique<JsonValue>();
     textLayoutProperty->ToJsonValue(json);
+}
+
+/**
+ * @tc.name: ToJsonValue007
+ * @tc.desc: Test textPattern ToJsonValue.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, ToJsonValue007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create("");
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    auto json = JsonUtil::Create(true);
+    /**
+     * @tc.steps: step2. expect default textDetectEnable_ false.
+     */
+    pattern->SetTextDetectEnable(true);
+    pattern->ToJsonValue(json);
+    EXPECT_EQ(json->GetString("enableDataDetector"), "true");
 }
 
 /**
@@ -3526,6 +3602,133 @@ HWTEST_F(TextTestNg, HandleMouseEvent004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleMouseEvent005
+ * @tc.desc: test test_pattern.h HandleMouseEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, HandleMouseEvent005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern, InitMouseEvent.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create("1234567890");
+    textModelNG.SetCopyOption(CopyOptions::InApp);
+    textModelNG.SetTextDetectEnable(true);
+    auto host = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pattern = host->GetPattern<TextPattern>();
+    auto inputHub = host->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
+    auto mouseEvent = inputHub->mouseEventActuator_->inputEvents_.back();
+
+    AISpan aiSpan1;
+    aiSpan1.start = AI_SPAN_START;
+    aiSpan1.end = AI_SPAN_END;
+    aiSpan1.content = SPAN_PHONE;
+    aiSpan1.type = TextDataDetectType::PHONE_NUMBER;
+    AISpan aiSpan2;
+    aiSpan2.start = AI_SPAN_START_II;
+    aiSpan2.end = AI_SPAN_END_II;
+    aiSpan2.content = SPAN_URL;
+    aiSpan2.type = TextDataDetectType::URL;
+    std::map<int32_t, AISpan> aiSpanMap;
+    aiSpanMap[AI_SPAN_START] = aiSpan1;
+    aiSpanMap[AI_SPAN_START_II] = aiSpan2;
+    pattern->aiSpanMap_ = aiSpanMap;
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> rects { RectF(0, 0, 40, 40) };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+    pattern->paragraph_ = paragraph;
+    pattern->CreateHandles();
+    pattern->textSelector_.Update(0, 20);
+
+    /**
+     * @tc.steps: step2. test text_pattern.h HandleMouseRightButton function.
+     * @tc.expect: MouseInfo localLocation is in GetRectsForRange region, expect MouseRightButton release event
+     *     captured by AISpan.
+     */
+    MouseInfo info;
+    info.button_ = MouseButton::LEFT_BUTTON;
+    info.action_ = MouseAction::PRESS;
+    (*mouseEvent)(info);
+    info.SetLocalLocation(Offset(5.f, 5.f));
+    info.button_ = MouseButton::RIGHT_BUTTON;
+    info.action_ = MouseAction::RELEASE;
+    (*mouseEvent)(info);
+    EXPECT_TRUE(pattern->hasClickedAISpan_);
+
+    /**
+     * @tc.steps: step3. test text_pattern.h HandleMouseRightButton function.
+     * @tc.expect: MouseInfo localLocation is not in GetRectsForRange region.
+     */
+    pattern->hasClickedAISpan_ = false;
+    info.SetLocalLocation(Offset(60.f, 60.f));
+    info.button_ = MouseButton::RIGHT_BUTTON;
+    info.action_ = MouseAction::RELEASE;
+    (*mouseEvent)(info);
+    EXPECT_TRUE(!pattern->hasClickedAISpan_);
+    EXPECT_EQ(pattern->textResponseType_, TextResponseType::RIGHT_CLICK);
+    EXPECT_EQ(pattern->selectedType_, TextSpanType::TEXT);
+}
+
+/**
+ * @tc.name: HandleMouseEvent006
+ * @tc.desc: test test_pattern.h HandleMouseEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, HandleMouseEvent006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern, add child imageSpanNode.
+     */
+    SuppressMockParagraph();
+    TextModelNG textModelNG;
+    textModelNG.Create("1234567890");
+    textModelNG.SetCopyOption(CopyOptions::InApp);
+    textModelNG.SetTextDetectEnable(true);
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = host->GetPattern<TextPattern>();
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> rects { RectF(0, 0, 40, 40) };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+    ImageSpanNodeProperty firstProperty {
+        .imageSrc = std::make_optional("image")
+    };
+    auto imageSpanNode = CreateImageSpanNode(firstProperty);
+    host->AddChild(imageSpanNode);
+    imageSpanNode->SetParent(host);
+    ImageSpanNodeProperty secondProperty {
+        .pixelMap = std::make_optional(PixelMap::CreatePixelMap(nullptr)),
+        .imageFit = std::make_optional(ImageFit::FILL)
+    };
+    imageSpanNode = CreateImageSpanNode(secondProperty);
+    host->AddChild(imageSpanNode);
+    imageSpanNode->SetParent(host);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    LayoutConstraintF layoutConstraintF;
+    frameNode->Measure(layoutConstraintF);
+    pattern->CreateHandles();
+
+    /**
+     * @tc.steps: step2. test text_pattern.h HandleMouseRightButton function.
+     * @tc.expect: expect selectedType_ IMAGE when mouse release offset not in textContentRect region.
+     */
+    pattern->paragraph_ = paragraph;
+    auto inputHub = host->GetEventHub<EventHub>()->GetOrCreateInputEventHub();
+    auto mouseEvent = inputHub->mouseEventActuator_->inputEvents_.back();
+    MouseInfo info;
+    info.button_ = MouseButton::LEFT_BUTTON;
+    info.action_ = MouseAction::PRESS;
+    (*mouseEvent)(info);
+    info.SetLocalLocation(Offset(40.f, 40.f));
+    info.button_ = MouseButton::RIGHT_BUTTON;
+    info.action_ = MouseAction::RELEASE;
+    pattern->contentRect_ = { 30, 30, 20, 20 };
+    (*mouseEvent)(info);
+    EXPECT_EQ(pattern->textResponseType_, TextResponseType::RIGHT_CLICK);
+    EXPECT_EQ(pattern->selectedType_, TextSpanType::IMAGE);
+}
+
+/**
  * @tc.name: HandleOnCopy001
  * @tc.desc: test test_pattern.h HandleOnCopy function
  * @tc.type: FUNC
@@ -5286,7 +5489,7 @@ HWTEST_F(TextTestNg, HandleSpanSingleClickEvent, TestSize.Level1)
     spanItemChild->position = StringUtils::ToWstring(spanItemChild->content).length();
     pattern->spans_.emplace_back(spanItemChild);
 
-    auto paragraph= MockParagraph::GetOrCreateMockParagraph();
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     std::vector<RectF> rects { RectF(0, 0, 20, 20) };
     EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
     pattern->paragraph_ = paragraph;
@@ -5376,8 +5579,468 @@ HWTEST_F(TextTestNg, ShowUIExtensionMenu, TestSize.Level1)
     menuOptionsMap["location"] = menuOptionsLocation;
     pattern->aiMenuOptionsMap_ = menuOptionsMap;
 
-
     EXPECT_TRUE(pattern->ShowUIExtensionMenu(aiSpan, nullptr, nullptr));
 }
 
+/**
+ * @tc.name: InitSpanItem001
+ * @tc.desc: test test_pattern.h InitSpanItem function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, InitSpanItem001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern
+     */
+    SuppressMockParagraph();
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    textModelNG.SetCopyOption(CopyOptions::InApp);
+    textModelNG.SetTextDetectEnable(true);
+    /**
+     * @tc.steps: step2. construct different child SpanNode.
+     */
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto childFrameNode =
+        FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, 2, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    host->AddChild(childFrameNode);
+    childFrameNode->SetParent(host);
+
+    auto spanNode = CreateSpanNodeWithSetDefaultProperty("spannode");
+    auto spanOnClickFunc = [](GestureEvent& info) {};
+    spanNode->UpdateOnClickEvent(std::move(spanOnClickFunc));
+    host->AddChild(spanNode);
+    spanNode->SetParent(host);
+
+    auto nodeId = ViewStackProcessor::GetInstance()->ClaimNodeId();
+    auto symbolSpanNode = SpanNode::GetOrCreateSpanNode(V2::SYMBOL_SPAN_ETS_TAG, nodeId);
+    host->AddChild(symbolSpanNode);
+    symbolSpanNode->SetParent(host);
+
+    auto imageSpanNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    host->AddChild(imageSpanNode);
+    imageSpanNode->SetParent(host);
+
+    auto placeholderSpanNode = PlaceholderSpanNode::GetOrCreateSpanNode(V2::PLACEHOLDER_SPAN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<PlaceholderSpanPattern>(); });
+    host->AddChild(placeholderSpanNode);
+    placeholderSpanNode->SetParent(host);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    /**
+     * @tc.steps: step3. textFrameNode Measure will call InitSpanItem/CollectSpanNodes.
+     * @tc.expect: expect childSpanNode MountToParagraph, add into TextPattern spans_.
+     */
+    LayoutConstraintF layoutConstraintF;
+    frameNode->Measure(layoutConstraintF);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    EXPECT_EQ(textPattern->spans_.size(), 5);
+    auto gesture = childFrameNode->GetOrCreateGestureEventHub();
+    EXPECT_EQ(gesture->GetHitTestMode(), HitTestMode::HTMNONE);
+}
+
+/**
+ * @tc.name: HandleDragEvent001
+ * @tc.desc: test test_pattern.h InitDragEvent without any childSpan, then eventHub call
+ *     OnDragStartNoChild/OnDragMove/OnDragEndNoChild.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, HandleDragEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern without childSpanNode, ViewStackProcessor Finish call
+     *     InitDragEvent to set onDragStart/OnDragMove/OnDragEnd callback function.
+     */
+    SuppressMockParagraph();
+    TextModelNG textModelNG;
+    textModelNG.Create("1234567890");
+    textModelNG.SetCopyOption(CopyOptions::InApp);
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    host->draggable_ = true;
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    LayoutConstraintF layoutConstraintF;
+    frameNode->Measure(layoutConstraintF);
+    auto pattern = host->GetPattern<TextPattern>();
+    pattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    pattern->textSelector_.Update(2, 6);
+
+    /**
+     * @tc.steps: step2. test text OnDragStart.
+     * @tc.expect: expect OnDragStart result return GetSelectedText range [2, 6], status: Status::DRAGGING
+     */
+    auto event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    EXPECT_TRUE(gesture->GetTextDraggable());
+    gesture->SetIsTextDraggable(true);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto onDragStart = eventHub->GetOnDragStart();
+    auto dragDropInfo = onDragStart(event, "");
+    EXPECT_EQ(dragDropInfo.extraInfo, "3456");
+    EXPECT_EQ(pattern->textSelector_.GetTextStart(), -1);
+    EXPECT_EQ(pattern->textSelector_.GetTextEnd(), -1);
+    EXPECT_EQ(pattern->status_, Status::DRAGGING);
+
+    /**
+     * @tc.steps: step3. test OnDragMove.
+     */
+    eventHub->FireOnDragMove(event, "");
+    EXPECT_EQ(pattern->showSelect_, false);
+    /**
+     * @tc.steps: step4. test text OnDragMoveEnd.
+     * @tc.expect: expect onDragEnd will set status None, showSelect_ is true.
+     */
+    auto onDragEnd = eventHub->GetOnDragEnd();
+    onDragEnd(event);
+    EXPECT_EQ(pattern->status_, Status::NONE);
+    EXPECT_EQ(pattern->showSelect_, true);
+}
+
+/**
+ * @tc.name: HandleDragEvent002
+ * @tc.desc: test test_pattern.h InitDragEvent with child spanNode, then eventHub call
+ *     OnDragStart/OnDragMove/OnDragEnd.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, HandleDragEvent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern with child span node.
+     */
+    SuppressMockParagraph();
+    TextModelNG textModelNG;
+    textModelNG.Create("1234567890abcdefghijklmnopqrstuvwxyz");
+    textModelNG.SetCopyOption(CopyOptions::InApp);
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    host->draggable_ = true;
+    auto pattern = host->GetPattern<TextPattern>();
+    pattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    auto childFrameNode =
+        FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, 2, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    // need set, otherwise will crash.
+    childFrameNode->SetLayoutProperty(AceType::MakeRefPtr<ImageLayoutProperty>());
+    host->AddChild(childFrameNode);
+    childFrameNode->SetParent(host);
+    auto spanNode = CreateSpanNodeWithSetDefaultProperty("spannode");
+    auto spanOnClickFunc = [](GestureEvent& info) {};
+    spanNode->UpdateOnClickEvent(std::move(spanOnClickFunc));
+    host->AddChild(spanNode);
+    spanNode->SetParent(host);
+    auto symbolSpanNode =
+        SpanNode::GetOrCreateSpanNode(V2::SYMBOL_SPAN_ETS_TAG, ViewStackProcessor::GetInstance()->ClaimNodeId());
+    host->AddChild(symbolSpanNode);
+    symbolSpanNode->SetParent(host);
+    auto imageSpanNode = ImageSpanNode::GetOrCreateSpanNode(V2::IMAGE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ImagePattern>(); });
+    host->AddChild(imageSpanNode);
+    imageSpanNode->SetParent(host);
+    auto placeholderSpanNode = PlaceholderSpanNode::GetOrCreateSpanNode(V2::PLACEHOLDER_SPAN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<PlaceholderSpanPattern>(); });
+    host->AddChild(placeholderSpanNode);
+    placeholderSpanNode->SetParent(host);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    LayoutConstraintF layoutConstraintF;
+    frameNode->Measure(layoutConstraintF);
+    pattern->textSelector_.Update(6, 15);
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    gesture->SetIsTextDraggable(true);
+
+    /**
+     * @tc.steps: step2. test textPattern OnDragStart.
+     * @tc.expect: expect childSpanNode selected add into dragResultObjects.
+     */
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto onDragStart = eventHub->GetOnDragStart();
+    auto dragDropInfo = onDragStart(dragEvent, "");
+    EXPECT_EQ(dragDropInfo.extraInfo, "");
+    EXPECT_TRUE(!pattern->dragResultObjects_.empty());
+
+    /**
+     * @tc.steps: step3. test get text onDragMove.
+     */
+    eventHub->FireOnDragMove(dragEvent, "");
+    EXPECT_EQ(pattern->showSelect_, true);
+
+    /**
+     * @tc.steps: step4. test textPattern onDragMove.
+     * @expect: expect dragResultObjects_ empty OnDragEnd.
+     */
+    auto onDragEnd = eventHub->GetOnDragEnd();
+    onDragEnd(dragEvent);
+    EXPECT_TRUE(pattern->dragResultObjects_.empty());
+}
+
+/**
+ * @tc.name: GetTextResultObject001
+ * @tc.desc: test test_pattern.h GetTextResultObject.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetTextResultObject001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern with two spanNodes,
+     *     firstChild is SPAN_URL, secondChild is SPAN_PHONE
+     */
+    SuppressMockParagraph();
+    TextModelNG textModelNG;
+    textModelNG.Create("");
+    textModelNG.SetCopyOption(CopyOptions::InApp);
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    host->draggable_ = true;
+    auto pattern = host->GetPattern<TextPattern>();
+    pattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    auto spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_URL);
+    host->AddChild(spanNode);
+    spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_PHONE);
+    host->AddChild(spanNode);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    LayoutConstraintF layoutConstraintF;
+    frameNode->Measure(layoutConstraintF);
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    gesture->SetIsTextDraggable(true);
+    EXPECT_TRUE(gesture->GetTextDraggable());
+    /**
+     * @tc.steps: step2. textSpanNode dragResultObject range as expected.
+     * @tc.expect: expect spanNode will be selected by drag, textSelector [0, 15] exceed the first spannode len,
+     *    SPAN_URL dragResult range [0, 13], the SPAN_PHONE dragResult range [0, 2]
+     */
+    pattern->textSelector_.Update(0, 15);
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto onDragStart = eventHub->GetOnDragStart();
+    auto dragDropInfo = onDragStart(dragEvent, "");
+    EXPECT_EQ(pattern->dragResultObjects_.back().valueString, SPAN_PHONE);
+    EXPECT_EQ(pattern->dragResultObjects_.back().offsetInSpan[RichEditorSpanRange::RANGEEND], 2);
+
+    /**
+     * @tc.steps: step2. update text selector and call OnDragStart.
+     * @tc.expect: expect spanNode will be selected, textSelector [0, 5] not exceed the first spannode len,
+     *     thus dragResultObject is [0, 5] and dragResult is SPAN_URL.
+     */
+    pattern->dragResultObjects_.clear();
+    pattern->textSelector_.Update(0, 5);
+    dragDropInfo = onDragStart(dragEvent, "");
+    EXPECT_EQ(pattern->dragResultObjects_.front().valueString, SPAN_URL);
+    EXPECT_EQ(pattern->dragResultObjects_.front().offsetInSpan[RichEditorSpanRange::RANGEEND], 5);
+
+    /**
+     * @tc.steps: step3. update text selector and call OnDragStart.
+     * @tc.expect: expect dragResultObject [SPAN_URL, SPAN_PHONE], SPAN_URL ranged [0, 13], .
+     */
+    pattern->dragResultObjects_.clear();
+    pattern->textSelector_.Update(8, 16);
+    dragDropInfo = onDragStart(dragEvent, "");
+    EXPECT_EQ(pattern->dragResultObjects_.back().valueString, SPAN_PHONE);
+    EXPECT_EQ(pattern->dragResultObjects_.front().offsetInSpan[RichEditorSpanRange::RANGEEND], SPAN_URL.size());
+    for (auto obj : pattern->dragResultObjects_) {
+        EXPECT_EQ(obj.type, SelectSpanType::TYPESPAN);
+    }
+}
+
+/**
+ * @tc.name: GetSymbolSpanResultObject001
+ * @tc.desc: test test_pattern.h GetSymbolSpanResultObject.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetSymbolSpanResultObject001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern with child symbolSpanNodes.
+     */
+    SuppressMockParagraph();
+    TextModelNG textModelNG;
+    textModelNG.Create("");
+    textModelNG.SetCopyOption(CopyOptions::InApp);
+    auto stack = ViewStackProcessor::GetInstance();
+    auto host = stack->GetMainFrameNode();
+    host->draggable_ = true;
+    auto pattern = host->GetPattern<TextPattern>();
+    pattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    std::vector<uint32_t> unicodes = { 0x4F60, 0x597D, 0xFF0C, 0x4E16, 0x754C, 0xFF01 };
+    for (auto code : unicodes) {
+        auto symbolSpanNode = SpanNode::GetOrCreateSpanNode(V2::SYMBOL_SPAN_ETS_TAG, stack->ClaimNodeId());
+        symbolSpanNode->UpdateContent(code);
+        host->AddChild(symbolSpanNode);
+        symbolSpanNode->SetParent(host);
+    }
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    // measure will call pattern InitDragEvent.
+    LayoutConstraintF layoutConstraintF;
+    frameNode->Measure(layoutConstraintF);
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    gesture->SetIsTextDraggable(true);
+
+    /**
+     * @tc.steps: step2. symbol spanNode drag select range as expected.
+     * @tc.expect: symbol spanNode len is 2, thus last dragResultObject is partial selected, range [0, 1]
+     */
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto onDragStart = eventHub->GetOnDragStart();
+    pattern->dragResultObjects_.clear();
+    pattern->textSelector_.Update(0, 5);
+    auto dragDropInfo = onDragStart(dragEvent, "");
+    EXPECT_TRUE(!pattern->dragResultObjects_.empty());
+    EXPECT_EQ(pattern->dragResultObjects_.front().valueString, "20320"); // "20320" means: unicode string
+    EXPECT_EQ(pattern->dragResultObjects_.back().offsetInSpan[RichEditorSpanRange::RANGEEND], 1);
+    for (auto obj : pattern->dragResultObjects_) {
+        EXPECT_EQ(obj.type, SelectSpanType::TYPESYMBOLSPAN);
+    }
+
+    /**
+     * @tc.steps: step3. text selectstr OnDragStart as expected.
+     * @tc.expect: expect dragResultObjects_ not empty.
+     */
+    pattern->dragResultObjects_.clear();
+    pattern->textSelector_.Update(8, 12);
+    dragDropInfo = onDragStart(dragEvent, "");
+    EXPECT_TRUE(!pattern->dragResultObjects_.empty());
+}
+
+/**
+ * @tc.name: GetImageResultObject001
+ * @tc.desc: test test_pattern.h GetImageResultObject.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, GetImageResultObject001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern with three child ImageSpanNodes.
+     */
+    SuppressMockParagraph();
+    TextModelNG textModelNG;
+    textModelNG.Create("");
+    textModelNG.SetCopyOption(CopyOptions::InApp);
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    host->draggable_ = true;
+    auto pattern = host->GetPattern<TextPattern>();
+    pattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+
+    MarginPropertyF margin { .left = 40.f, .right = 40.f, .top = 80.f, .bottom = 80.f };
+    ImageSpanNodeProperty firstProperty {
+        .imageSrc = std::make_optional("image"),
+        .margin = std::make_optional(margin),
+        .verticalAlign = std::make_optional(VerticalAlign::CENTER)
+    };
+    auto imageSpanNode = CreateImageSpanNode(firstProperty);
+    host->AddChild(imageSpanNode);
+
+    ImageSpanNodeProperty secondProperty {
+        .pixelMap = std::make_optional(PixelMap::CreatePixelMap(nullptr)),
+        .margin = std::make_optional(margin),
+        .imageFit = std::make_optional(ImageFit::FILL),
+        .verticalAlign = std::make_optional(VerticalAlign::CENTER)
+    };
+    imageSpanNode = CreateImageSpanNode(secondProperty);
+    host->AddChild(imageSpanNode);
+
+    ImageSpanNodeProperty thirdProperty {
+        .margin = std::make_optional(margin),
+        .imageFit = std::make_optional(ImageFit::FILL),
+        .verticalAlign = std::make_optional(VerticalAlign::CENTER)
+    };
+    imageSpanNode = CreateImageSpanNode(thirdProperty);
+    host->AddChild(imageSpanNode);
+
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    LayoutConstraintF layoutConstraintF;
+    frameNode->Measure(layoutConstraintF);
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    gesture->SetIsTextDraggable(true);
+
+    /**
+     * @tc.steps: step2. text selectstr OnDragStart as expected.
+     * @tc.expect expect non-null imagesrc & pixelMap in dragResultObjects, properties as expected,
+     *     dragResultObjects_ size is 2.
+     */
+    pattern->textSelector_.Update(0, 20);
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto onDragStart = eventHub->GetOnDragStart();
+    auto dragDropInfo = onDragStart(dragEvent, "");
+    EXPECT_EQ(pattern->dragResultObjects_.size(), 2); // 2 means result list size.
+    EXPECT_EQ(
+        pattern->dragResultObjects_.front().imageStyle.verticalAlign, static_cast<int32_t>(ImageFit::FILL));
+    EXPECT_EQ(pattern->dragResultObjects_.front().imageStyle.objectFit, static_cast<int32_t>(VerticalAlign::CENTER));
+    for (auto obj : pattern->dragResultObjects_) {
+        EXPECT_EQ(obj.type, SelectSpanType::TYPEIMAGE);
+    }
+}
+
+/**
+ * @tc.name: SetTextDetectTypes001
+ * @tc.desc: test test_pattern.h SetTextDetectTypes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SetTextDetectTypes001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern with child span node.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create("");
+    textModelNG.SetCopyOption(CopyOptions::InApp);
+    auto onResult = [](const std::string&) {};
+    textModelNG.SetTextDetectConfig("apple, orange, banana", std::move(onResult));
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    EXPECT_EQ(pattern->aiDetectTypesChanged_, true);
+    pattern->InitTextDetect(0, "orange");
+}
+
+/**
+ * @tc.name: InitPanEvent001
+ * @tc.desc: test test_pattern.h InitPanEvent, dragWindow will be create/destroy as expected.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, InitPanEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern, InitPanEvent.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create("012345678900000000000");
+    textModelNG.SetCopyOption(CopyOptions::Local);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    frameNode->eventHub_->SetOnDragStart(
+        [](const RefPtr<Ace::DragEvent>&, const std::string&) -> DragDropInfo { return {}; });
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    pattern->textSelector_.Update(0, 15);
+
+    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
+    ASSERT_NE(gestureEventHub, nullptr);
+    pattern->InitPanEvent(gestureEventHub);
+    EXPECT_EQ(pattern->dragWindow_, nullptr);
+
+    GestureEvent info;
+    info.SetLocalLocation(Offset(0, 10));
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    pattern->paragraph_ = paragraph;
+    std::vector<RectF> rects { RectF(0, 0, 20, 20) };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+    /**
+     * @tc.steps: step2. test HandlePanStart.
+     * @tc.expect: expect dragWindow created.
+     */
+    auto panEvent = gestureEventHub->panEventActuator_->panEvents_.back();
+    auto onPanStart = panEvent->GetActionStartEventFunc();
+    onPanStart(info);
+    EXPECT_NE(pattern->dragWindow_, nullptr);
+
+    /**
+     * @tc.steps: step3. test HandlePanUpdate.
+     */
+    auto onPanUpdate = panEvent->GetActionUpdateEventFunc();
+    onPanUpdate(info);
+
+    /**
+     * @tc.steps: step4. test HandlePanEnd.
+     * @tc.expect: expect dragWindow Destroyed.
+     */
+    auto onPanEnd = panEvent->GetActionEndEventFunc();
+    onPanEnd(info);
+    EXPECT_EQ(pattern->dragWindow_, nullptr);
+}
 } // namespace OHOS::Ace::NG
