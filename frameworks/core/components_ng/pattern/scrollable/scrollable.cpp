@@ -778,6 +778,7 @@ void Scrollable::StartSpringMotion(
             scroll->currentVelocity_ = 0.0;
             scroll->OnAnimateStop();
     });
+    ResSchedReport::GetInstance().ResSchedDataReport("slide_on");
     isSpringAnimationStop_ = false;
     skipRestartSpring_ = false;
 }
