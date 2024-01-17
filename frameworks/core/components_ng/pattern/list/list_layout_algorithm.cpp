@@ -1630,13 +1630,13 @@ int32_t ListLayoutAlgorithm::FindPredictSnapEndIndexInItemPositions(
             }
         }
     } else if (scrollSnapAlign == V2::ScrollSnapAlign::END) {
-        for (const auto& positionInfo : itemPosition_) {
-            startPos = totalOffset_ + positionInfo.second.endPos - itemHeight / 2.0f;
-            itemHeight = positionInfo.second.endPos - positionInfo.second.startPos + spaceWidth_;
-            endPos = totalOffset_ + positionInfo.second.endPos + itemHeight / 2.0f;
+        for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
+            endPos = totalOffset_ + pos->second.endPos + itemHeight / 2.0f;
+            itemHeight = pos->second.endPos - pos->second.startPos + spaceWidth_;
+            startPos = totalOffset_ + pos->second.endPos - itemHeight / 2.0f;
             if (GreatOrEqual(predictEndPos + stopOnScreen, startPos) &&
                 LessNotEqual(predictEndPos + stopOnScreen, endPos)) {
-                endIndex = positionInfo.first;
+                endIndex = pos->first;
                 break;
             }
         }
