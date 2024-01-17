@@ -2710,20 +2710,14 @@ void OverlayManager::PlaySheetTransition(
         }
         if (isFirstTransition) {
             context->OnTransformTranslateUpdate({ 0.0f, sheetMaxHeight, 0.0f });
+            if (NearZero(sheetHeight_)) {
+                return;
+            }
         }
         if (isModeChangeToAuto) {
             option.SetDuration(0);
             option.SetCurve(Curves::LINEAR);
         }
-        option.SetOnFinishEvent(
-            [sheetWK = WeakClaim(RawPtr(sheetNode)), height = sheetHeight_] {
-                auto sheet = sheetWK.Upgrade();
-                CHECK_NULL_VOID(sheet);
-                auto sheetPattern = sheet->GetPattern<SheetPresentationPattern>();
-                CHECK_NULL_VOID(sheetPattern);
-                sheetPattern->ProcessColumnRect(height);
-                sheetPattern->ChangeScrollHeight(height);
-        });
         AnimationUtils::Animate(
             option,
             [context, offset]() {
