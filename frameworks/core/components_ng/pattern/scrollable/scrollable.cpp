@@ -491,12 +491,15 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
     option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
     frictionOffsetProperty_->SetThresholdType(ThresholdType::LAYOUT);
     frictionOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
+    ACE_DEBUG_SCOPED_TRACE(
+        "Scrollable start friction animation, start:%f, end:%f, vel:%f", mainPosition, finalPosition_, initVelocity_);
     frictionOffsetProperty_->AnimateWithVelocity(option, finalPosition_, initVelocity_,
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
             auto scroll = weak.Upgrade();
             CHECK_NULL_VOID(scroll);
             scroll->isFrictionAnimationStop_ = true;
+            ACE_DEBUG_SCOPED_TRACE("Scrollable friction animation finish");
             scroll->ProcessScrollMotionStop(true);
     });
     isFrictionAnimationStop_ = false;
@@ -729,11 +732,9 @@ void Scrollable::OnAnimateStop()
 void Scrollable::StartSpringMotion(
     double mainPosition, double mainVelocity, const ExtentPair& extent, const ExtentPair& initExtent)
 {
-    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "position is %{public}lf, mainVelocity is %{public}lf, "
-        "minExtent is %{public}lf, maxExtent is %{public}lf, initMinExtent is %{public}lf, "
-        "initMaxExtent is %{public}lf",
+    TAG_LOGD(AceLogTag::ACE_SCROLLABLE, "position is %{public}lf, mainVelocity is %{public}lf, minExtent is "
+        "%{public}lf, maxExtent is %{public}lf, initMinExtent is %{public}lf, initMaxExtent is %{public}lf",
         mainPosition, mainVelocity, extent.Leading(), extent.Trailing(), initExtent.Leading(), initExtent.Trailing());
-    // skip repeat spring, and handle over scroll spring first, restart spring handle later
     if (!isSpringAnimationStop_ || (skipRestartSpring_ && NearEqual(mainVelocity, 0.0f, 0.001f))) {
         return;
     }
@@ -760,8 +761,9 @@ void Scrollable::StartSpringMotion(
     option.SetCurve(curve);
     option.SetDuration(CUSTOM_SPRING_ANIMATION_DURATION);
     springOffsetProperty_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
-    springOffsetProperty_->AnimateWithVelocity(
-        option, finalPosition_, mainVelocity,
+    ACE_DEBUG_SCOPED_TRACE(
+        "Scrollable start spring animation, start:%f, end:%f, vel:%f", mainPosition, finalPosition_, mainVelocity);
+    springOffsetProperty_->AnimateWithVelocity(option, finalPosition_, mainVelocity,
         [weak = AceType::WeakClaim(this), id = Container::CurrentId()]() {
             ContainerScope scope(id);
             auto scroll = weak.Upgrade();
@@ -771,6 +773,7 @@ void Scrollable::StartSpringMotion(
             if (scroll->springAnimationCount_ > 0) {
                 return;
             }
+            ACE_DEBUG_SCOPED_TRACE("Scrollable spring animation finish");
             scroll->isSpringAnimationStop_ = true;
             scroll->currentVelocity_ = 0.0;
             scroll->OnAnimateStop();
@@ -970,6 +973,7 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetFrictionProperty()
         if (scroll->isFrictionAnimationStop_ || scroll->isTouching_) {
             return;
         }
+        scroll->ProcessScrollMotion(position);
         if (NearEqual(scroll->finalPosition_, position, 1.0)) {
             scroll->StopFrictionAnimation();
         }
@@ -985,7 +989,6 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetFrictionProperty()
         }
         scroll->lastVsyncTime_ = currentVsync;
         scroll->lastPosition_ = position;
-        scroll->ProcessScrollMotion(position);
     };
     frictionOffsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0, std::move(propertyCallback));
     return frictionOffsetProperty_;
@@ -1038,6 +1041,7 @@ RefPtr<NodeAnimatablePropertyFloat> Scrollable::GetSnapProperty()
 void Scrollable::StopFrictionAnimation()
 {
     if (!isFrictionAnimationStop_) {
+        ACE_DEBUG_SCOPED_TRACE("Scrollable stop friction animation");
         isFrictionAnimationStop_ = true;
         AnimationOption option;
         option.SetCurve(Curves::EASE);
@@ -1056,6 +1060,7 @@ void Scrollable::StopFrictionAnimation()
 void Scrollable::StopSpringAnimation()
 {
     if (!isSpringAnimationStop_) {
+        ACE_DEBUG_SCOPED_TRACE("Scrollable stop spring animation");
         isSpringAnimationStop_ = true;
         AnimationOption option;
         option.SetCurve(Curves::EASE);
@@ -1065,7 +1070,8 @@ void Scrollable::StopSpringAnimation()
             [weak = AceType::WeakClaim(this)]() {
                 auto scroll = weak.Upgrade();
                 CHECK_NULL_VOID(scroll);
-                scroll->springOffsetProperty_->Set(0.0f);
+                //avoid top edge spring can not stop
+                scroll->springOffsetProperty_->Set(scroll->currentPos_);
             },
             nullptr);
         OnAnimateStop();
@@ -1076,6 +1082,7 @@ void Scrollable::StopSpringAnimation()
 void Scrollable::StopSnapAnimation()
 {
     if (!isSnapAnimationStop_ || !isSnapScrollAnimationStop_) {
+        ACE_DEBUG_SCOPED_TRACE("Scrollable stop snap animation");
         isSnapAnimationStop_ = true;
         isSnapScrollAnimationStop_ = true;
         AnimationOption option;
