@@ -149,8 +149,8 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
     CHECK_NULL_VOID(tabsPattern);
     if (tabsPattern->GetInterceptStatus()) {
-        auto interceptCallback = tabsPattern->GetOnContentWillChange();
-        if (!interceptCallback(preIndex, index)) {
+        auto ret = tabsPattern->OnContentWillChange(preIndex, index);
+        if (ret.has_value() && !ret.value()) {
             return;
         }
     }

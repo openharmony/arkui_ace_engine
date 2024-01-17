@@ -112,9 +112,13 @@ public:
         callback_ = callback;
     }
 
-    std::function<bool(int32_t, int32_t)> GetOnContentWillChange() const
+    std::optional<bool> OnContentWillChange(int32_t preIndex, int32_t index) const
     {
-        return callback_;
+        std::optional<bool> ret;
+        if (callback_) {
+            ret = callback_(preIndex, index);
+        }
+        return ret;
     }
 
     void SetInterceptStatus(bool status)

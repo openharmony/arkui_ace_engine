@@ -434,6 +434,11 @@ bool TabBarPattern::OnKeyEventWithoutClick(const KeyEvent& event)
         PaintFocusState();
         return true;
     }
+    return OnKeyEventWithoutClick(host, event);
+}
+
+bool TabBarPattern::OnKeyEventWithoutClick(const RefPtr<FrameNode>& host, const KeyEvent& event)
+{
     if (event.code == KeyCode::KEY_MOVE_HOME) {
         if (!ContentWillChange(0)) {
             return true;
@@ -763,6 +768,12 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
     if (!ContentWillChange(index)) {
         return;
     }
+    ClickTo(host, index);
+    layoutProperty->UpdateIndicator(index);
+}
+
+void TabBarPattern::ClickTo(const RefPtr<FrameNode>& host, int32_t index)
+{
     auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
     CHECK_NULL_VOID(tabsNode);
     auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
@@ -777,8 +788,6 @@ void TabBarPattern::HandleClick(const GestureEvent& info)
             swiperController_->SwipeToWithoutAnimation(index);
         }
     }
-
-    layoutProperty->UpdateIndicator(index);
 }
 
 void TabBarPattern::HandleBottomTabBarChange(int32_t index)
@@ -2288,8 +2297,8 @@ bool TabBarPattern::ContentWillChange(int32_t currentIndex, int32_t comingIndex)
     auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
     CHECK_NULL_RETURN(tabsPattern, true);
     if (tabsPattern->GetInterceptStatus()) {
-        auto interceptCallback = tabsPattern->GetOnContentWillChange();
-        return interceptCallback(currentIndex, comingIndex);
+        auto ret = tabsPattern->OnContentWillChange(currentIndex, comingIndex);
+        return ret.has_value() ? ret.value() : true;
     }
     return true;
 }

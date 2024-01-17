@@ -11065,18 +11065,17 @@ HWTEST_F(TabsTestNg, SetOnContentWillChangeTest001, TestSize.Level1)
     /**
      * @tc.steps: step4. Execute intercept callback.
      * @tc.expected:
-     *     interceptCallback(CURRENT_INDEX, BEGIN_INDEX) return true.
+     *     tabsPattern->OnContentWillChange(CURRENT_INDEX, BEGIN_INDEX) return true.
      *     swiperPattern->ContentWillChange(BEGIN_INDEX) return true.
      *     swiperPattern->ContentWillChange(CURRENT_INDEX, BEGIN_INDEX) return true.
      *     tabBarPattern->ContentWillChange(BEGIN_INDEX) return true.
      *     tabBarPattern->ContentWillChange(CURRENT_INDEX, BEGIN_INDEX) return true.
      */
-    auto interceptCallback = tabsPattern->GetOnContentWillChange();
-    EXPECT_EQ(interceptCallback(CURRENT_INDEX, BEGIN_INDEX), true);
+    auto ret = tabsPattern->OnContentWillChange(CURRENT_INDEX, BEGIN_INDEX);
+    EXPECT_EQ(ret.value(), true);
     EXPECT_EQ(swiperPattern->ContentWillChange(BEGIN_INDEX), true);
     EXPECT_EQ(swiperPattern->ContentWillChange(CURRENT_INDEX, BEGIN_INDEX), true);
     EXPECT_EQ(tabBarPattern->ContentWillChange(BEGIN_INDEX), true);
     EXPECT_EQ(tabBarPattern->ContentWillChange(CURRENT_INDEX, BEGIN_INDEX), true);
 }
-
 } // namespace OHOS::Ace::NG
