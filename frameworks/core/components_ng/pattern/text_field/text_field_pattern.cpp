@@ -3101,6 +3101,10 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
         .windowId = pipeline->GetFocusWindowId(),
         .positionY = positionY,
         .height = height };
+
+    if (keyboard_ == TextInputType::NUMBER_DECIMAL) {
+        textConfig.inputAttribute.inputPattern = (int32_t)TextInputType::NUMBER;
+    }
     return textConfig;
 }
 #endif
