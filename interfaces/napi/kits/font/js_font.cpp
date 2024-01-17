@@ -166,9 +166,9 @@ static napi_value JSgetFontByName(napi_env env, napi_callback_info info)
         &resultArray[FONT_INFO_INDEX_SUB_FAMILY]);
     napi_create_int32(env, fontInfo.weight, &resultArray[FONT_INFO_INDEX_WEIGHT]);
     napi_create_int32(env, fontInfo.width, &resultArray[FONT_INFO_INDEX_WIDTH]);
-    napi_create_int32(env, fontInfo.italic, &resultArray[FONT_INFO_INDEX_ITALIC]);
-    napi_create_int32(env, fontInfo.monoSpace, &resultArray[FONT_INFO_INDEX_MONOSPACE]);
-    napi_create_int32(env, fontInfo.symbolic, &resultArray[FONT_INFO_INDEX_SYMBOLIC]);
+    napi_get_boolean(env, fontInfo.italic, &resultArray[FONT_INFO_INDEX_ITALIC]);
+    napi_get_boolean(env, fontInfo.monoSpace, &resultArray[FONT_INFO_INDEX_MONOSPACE]);
+    napi_get_boolean(env, fontInfo.symbolic, &resultArray[FONT_INFO_INDEX_SYMBOLIC]);
 
     napi_value result = nullptr;
     napi_create_object(env, &result);
