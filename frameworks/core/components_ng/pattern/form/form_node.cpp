@@ -42,13 +42,14 @@ const std::unordered_map<TouchType, int32_t> TOUCH_TYPE_MAP = {
     { TouchType::PULL_OUT_WINDOW, MMI::PointerEvent::POINTER_ACTION_PULL_OUT_WINDOW },
 };
 
-std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, const TouchEvent& point)
+std::shared_ptr<MMI::PointerEvent> ConvertPointerEvent(const OffsetF offsetF, const TouchEvent& point, const WeakPtr<FramaNode>& node)
 {
     std::shared_ptr<MMI::PointerEvent> pointerEvent = MMI::PointerEvent::Create();
 
     OHOS::MMI::PointerEvent::PointerItem item;
-    item.SetWindowX(static_cast<int32_t>(point.x - offsetF.GetX()));
-    item.SetWindowY(static_cast<int32_t>(point.y - offsetF.GetY()));
+    PointF transformPoint(point.x, point.y);
+    item.SetWindowX(static_cast<int32_t>(transformPoint.GetX()));
+    item.SetWindowX(static_cast<int32_t>(transformPoint.GetY()));
     item.SetDisplayX(static_cast<int32_t>(point.screenX));
     item.SetDisplayY(static_cast<int32_t>(point.screenY));
     item.SetPointerId(point.id);
@@ -122,7 +123,7 @@ void FormNode::DispatchPointerEvent(const TouchEvent& touchEvent,
     auto pattern = GetPattern<FormPattern>();
     CHECK_NULL_VOID(pattern);
     auto selfGlobalOffset = GetFormOffset();
-    auto pointerEvent = ConvertPointerEvent(selfGlobalOffset, touchEvent);
+    auto pointerEvent = ConvertPointerEvent(selfGlobalOffset, touchEvent, WeakClaim(this));
     pattern->DispatchPointerEvent(pointerEvent, serializedGesture);
 }
 
