@@ -4915,6 +4915,7 @@ class ViewPU extends NativeViewPartialUpdate {
         // inActive means updates are delayed
         this.isActive_ = true;
         this.runReuse_ = false;
+        this.hasBeenRecycled_ = false;
         // flag if {aboutToBeDeletedInternal} is called and the instance of ViewPU has not been GC.
         this.isDeleting_ = false;
         this.watchedProps = new Map();
@@ -5642,6 +5643,7 @@ class ViewPU extends NativeViewPartialUpdate {
         const newElmtId = ViewStackProcessor.AllocateNewElmetIdForNextComponent();
         const oldElmtId = node.id__();
         this.recycleManager_.updateNodeId(oldElmtId, newElmtId);
+        this.hasBeenRecycled_ = true;
         recycleUpdateFunc(oldElmtId, /* is first render */ true, node);
     }
     aboutToReuseInternal() {
@@ -5656,7 +5658,7 @@ class ViewPU extends NativeViewPartialUpdate {
         this.updateDirtyElements();
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild.deref();
-            if (child) {
+            if (child && !child.hasBeenRecycled_) {
                 child.aboutToReuseInternal();
             }
         });
@@ -5669,7 +5671,7 @@ class ViewPU extends NativeViewPartialUpdate {
         }, "aboutToRecycle", this.constructor.name);
         this.childrenWeakrefMap_.forEach((weakRefChild) => {
             const child = weakRefChild.deref();
-            if (child) {
+            if (child && !child.hasBeenRecycled_) {
                 child.aboutToRecycleInternal();
             }
         });
@@ -5679,6 +5681,7 @@ class ViewPU extends NativeViewPartialUpdate {
     recycleSelf(name) {
         if (this.parent_ && !this.parent_.isDeleting_) {
             this.parent_.getOrCreateRecycleManager().pushRecycleNode(name, this);
+            this.hasBeenRecycled_ = true;
         }
         else {
             this.resetRecycleCustomNode();
