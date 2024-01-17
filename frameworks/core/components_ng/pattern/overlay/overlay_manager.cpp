@@ -31,6 +31,7 @@
 #include "core/animation/animation_pub.h"
 #include "core/animation/spring_curve.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/ace_engine.h"
 #include "core/common/container.h"
 #include "core/common/interaction/interaction_interface.h"
 #include "core/common/modal_ui_extension.h"
@@ -426,8 +427,6 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(theme);
-
-    ResetLowerNodeFocusable(node);
     SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_KEYBOARD };
     node->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
 
@@ -435,14 +434,12 @@ void OverlayManager::CloseDialogAnimation(const RefPtr<FrameNode>& node)
     AnimationOption option;
     option.SetFillMode(FillMode::FORWARDS);
     option.SetCurve(Curves::SHARP);
-
     option.SetDuration(theme->GetAnimationDurationOut());
     // get customized animation params
     auto dialogPattern = node->GetPattern<DialogPattern>();
     option = dialogPattern->GetCloseAnimation().value_or(option);
     option.SetIteration(1);
     option.SetAnimationDirection(AnimationDirection::NORMAL);
-
     option.SetOnFinishEvent([weak = WeakClaim(this), nodeWk = WeakPtr<FrameNode>(node), id = Container::CurrentId()] {
         ContainerScope scope(id);
         auto overlayManager = weak.Upgrade();
@@ -1672,6 +1669,22 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
         return;
     }
     dialogNode->MarkRemoving();
+
+    auto container = Container::Current();
+    auto currentId = Container::CurrentId();
+    CHECK_NULL_VOID(container);
+    if (container->IsSubContainer()) {
+        currentId = SubwindowManager::GetInstance()->GetParentContainerId(Container::CurrentId());
+        container = AceEngine::Get().GetContainer(currentId);
+    }
+    ContainerScope scope(currentId);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    CHECK_NULL_VOID(context);
+    auto overlayManager = context->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    overlayManager->ResetLowerNodeFocusable(dialogNode);
     CloseDialogAnimation(dialogNode);
     dialogCount_--;
     // set close button enable
