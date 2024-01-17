@@ -2192,7 +2192,8 @@ std::optional<int32_t> TabBarPattern::GetAnimationDuration()
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     CHECK_NULL_RETURN(swiperPaintProperty, duration);
     duration = static_cast<int32_t>(tabTheme->GetTabContentAnimationDuration());
-    if (std::count(tabBarStyles_.begin(), tabBarStyles_.end(), TabBarStyle::BOTTOMTABBATSTYLE)) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
+        std::count(tabBarStyles_.begin(), tabBarStyles_.end(), TabBarStyle::BOTTOMTABBATSTYLE)) {
         duration = 0;
     }
     SetAnimationDuration(duration.value());

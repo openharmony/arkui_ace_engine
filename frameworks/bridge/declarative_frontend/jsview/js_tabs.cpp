@@ -354,12 +354,14 @@ void JSTabs::SetIndex(int32_t index)
     TabsModel::GetInstance()->SetIndex(index);
 }
 
-void JSTabs::SetAnimationDuration(float value)
+void JSTabs::SetAnimationDuration(const JSCallbackInfo& info)
 {
-    if (std::isnan(value)) {
+    if (info.Length() <= 0 || (!info[0]->IsNull() && !info[0]->IsNumber()) ||
+        (info[0]->IsNull() && Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
         TabsModel::GetInstance()->SetAnimationDuration(-1);
         return;
     }
+    auto value = info[0]->IsNumber() ? info[0]->ToNumber<int32_t>() : 0;
     TabsModel::GetInstance()->SetAnimationDuration(value);
 }
 

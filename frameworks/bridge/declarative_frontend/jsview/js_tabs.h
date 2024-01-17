@@ -40,7 +40,7 @@ protected:
     static void SetOnAnimationStart(const JSCallbackInfo& info);
     static void SetOnAnimationEnd(const JSCallbackInfo& info);
     static void SetOnGestureSwipe(const JSCallbackInfo& info);
-    static void SetAnimationDuration(float value);
+    static void SetAnimationDuration(const JSCallbackInfo& info);
     static void SetFadingEdge(const JSCallbackInfo& info);
     static void SetDivider(const JSCallbackInfo& info);
     static void SetBarOverlap(const JSCallbackInfo& info);
