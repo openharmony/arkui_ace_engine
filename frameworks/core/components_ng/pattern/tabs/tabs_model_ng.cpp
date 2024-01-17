@@ -40,6 +40,7 @@
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -82,6 +83,8 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     swiperLayoutProperty->UpdateLoop(false);
     swiperLayoutProperty->UpdateCachedCount(0);
     swiperLayoutProperty->UpdateShowIndicator(false);
+    swiperLayoutProperty->UpdateSafeAreaExpandOpts(
+        { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP + SAFE_AREA_EDGE_BOTTOM });
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
     auto controller = swiperController ? swiperController : swiperPattern->GetSwiperController();
