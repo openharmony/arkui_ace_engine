@@ -499,6 +499,7 @@ void Scrollable::StartScrollAnimation(float mainPosition, float correctVelocity)
             auto scroll = weak.Upgrade();
             CHECK_NULL_VOID(scroll);
             scroll->isFrictionAnimationStop_ = true;
+            ACE_DEBUG_SCOPED_TRACE("Scrollable friction animation finish");
             scroll->ProcessScrollMotionStop(true);
     });
     isFrictionAnimationStop_ = false;
@@ -1069,8 +1070,7 @@ void Scrollable::StopSpringAnimation()
             [weak = AceType::WeakClaim(this)]() {
                 auto scroll = weak.Upgrade();
                 CHECK_NULL_VOID(scroll);
-                //when the upper boundary rebound animation is triggered,
-                //the page bounces because the screen is repeatedly touched.
+                //avoid top edge spring can not stop
                 scroll->springOffsetProperty_->Set(scroll->currentPos_);
             },
             nullptr);
