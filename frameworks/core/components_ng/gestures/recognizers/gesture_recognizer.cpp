@@ -206,6 +206,10 @@ void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode
             TAG_LOGD(AceLogTag::ACE_GESTURE, "need to break when inject WindowsScene, id:%{public}d", host->GetId());
             break;
         }
+        if (host->GetTag() == "NodeContainer") {
+            TAG_LOGD(AceLogTag::ACE_GESTURE, "need to break when used in NodeContainer, id:%{public}d", host->GetId());
+            break;
+        }
         host = host->GetAncestorNodeOfFrame();
     }
 
