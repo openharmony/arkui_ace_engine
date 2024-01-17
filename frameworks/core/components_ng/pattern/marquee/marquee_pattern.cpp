@@ -24,6 +24,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/utils/utils.h"
 #include "core/animation/curves.h"
+#include "core/common/container_scope.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components/common/properties/animation_option.h"
@@ -192,7 +193,9 @@ void MarqueePattern::PlayMarqueeAnimation(float start, int32_t playCount, bool n
             CHECK_NULL_VOID(pattern);
             pattern->SetTextOffset(end);
         },
-        [weak = AceType::WeakClaim(this), animationId = animationId_, needSecondPlay, playCount]() {
+        [weak = AceType::WeakClaim(this), animationId = animationId_, needSecondPlay, playCount,
+            id = Container::CurrentId()]() {
+            ContainerScope scope(id);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             if (animationId != pattern->animationId_) {
@@ -238,7 +241,9 @@ void MarqueePattern::StopMarqueeAnimation(bool stopAndStart)
             CHECK_NULL_VOID(pattern);
             pattern->SetTextOffset(0.0f);
         },
-        [weak = AceType::WeakClaim(this), restart = stopAndStart, animationId = animationId_]() {
+        [weak = AceType::WeakClaim(this), restart = stopAndStart, animationId = animationId_,
+            id = Container::CurrentId()]() {
+            ContainerScope scope(id);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             if (restart && animationId == pattern->animationId_) {
