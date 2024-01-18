@@ -50,6 +50,7 @@ namespace OHOS::Ace::Framework {
 void JSMenuItem::Create(const JSCallbackInfo& info)
 {
     if (info.Length() < 1 || (!info[0]->IsObject() && !info[0]->IsFunction())) {
+        MenuItemModel::GetInstance()->Create(nullptr);
         return;
     }
     // custom menu item
@@ -127,7 +128,7 @@ void JSMenuItem::JSBind(BindingTarget globalObj)
     JSClass<JSMenuItem>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSMenuItem>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSMenuItem>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSMenuItem>::InheritAndBind<JSViewAbstract>(globalObj);
+    JSClass<JSMenuItem>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void ParseIsSelectedObject(const JSCallbackInfo& info, const JSRef<JSVal>& changeEventVal)
