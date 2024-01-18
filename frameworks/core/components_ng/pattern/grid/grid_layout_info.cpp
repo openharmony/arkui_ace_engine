@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -138,6 +138,18 @@ void GridLayoutInfo::UpdateEndIndex(float overScrollOffset, float mainSize, floa
             break;
         }
     }
+}
+
+bool GridLayoutInfo::IsOutOfStart() const
+{
+    return reachStart_ && Positive(currentOffset_);
+}
+
+bool GridLayoutInfo::IsOutOfEnd() const
+{
+    auto atOrOutofStart = reachStart_ && NonNegative(currentOffset_);
+    auto endPos = currentOffset_ + totalHeightOfItemsInView_;
+    return !atOrOutofStart && (endIndex_ == childrenCount_ - 1) && LessNotEqual(endPos, lastMainSize_);
 }
 
 float GridLayoutInfo::GetCurrentOffsetOfRegularGrid(float mainGap) const
