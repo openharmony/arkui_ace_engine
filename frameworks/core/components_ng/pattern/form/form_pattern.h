@@ -118,6 +118,7 @@ private:
     void HandleFormComponent(const RequestFormInfo& info);
     void AddFormComponent(const RequestFormInfo& info);
     void UpdateFormComponent(const RequestFormInfo& info);
+    void UpdateFormComponentSize(const RequestFormInfo& info);
 
     void HandleSnapshot(uint32_t delayTime);
     void TakeSurfaceCaptureForUI();
@@ -127,6 +128,7 @@ private:
     void RemoveFrsNode();
     void ReleaseRenderer();
     void DeleteImageNode();
+    RefPtr<FrameNode> GetImageNode();
     void HandleStaticFormEvent(const PointF& touchPoint);
     void RegistVisibleAreaChangeCallback();
     void OnVisibleAreaChange(bool visible);
