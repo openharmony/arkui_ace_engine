@@ -1523,7 +1523,7 @@ void ResetBorder(ArkUINodeHandle node)
 }
 
 void SetBackgroundImagePosition(
-    ArkUINodeHandle node, const double* values, const int32_t* types, bool isAlign, int size)
+    ArkUINodeHandle node, const double* values, const int32_t* types, ArkUI_Bool isAlign, int size)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1903,7 +1903,7 @@ void ResetSphericalEffect(ArkUINodeHandle node)
     ViewAbstract::SetSphericalEffect(frameNode, 0.0);
 }
 
-void SetRenderGroup(ArkUINodeHandle node, bool isRenderGroup)
+void SetRenderGroup(ArkUINodeHandle node, ArkUI_Bool isRenderGroup)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1936,7 +1936,7 @@ void ResetRenderFit(ArkUINodeHandle node)
     ViewAbstract::SetRenderFit(frameNode, RenderFit::TOP_LEFT);
 }
 
-void SetUseEffect(ArkUINodeHandle node, bool useEffect)
+void SetUseEffect(ArkUINodeHandle node, ArkUI_Bool useEffect)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1950,7 +1950,7 @@ void ResetUseEffect(ArkUINodeHandle node)
     ViewAbstract::SetUseEffect(frameNode, false);
 }
 
-void SetForegroundColor(ArkUINodeHandle node, bool isColor, uint32_t color)
+void SetForegroundColor(ArkUINodeHandle node, ArkUI_Bool isColor, uint32_t color)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1968,7 +1968,7 @@ void ResetForegroundColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
 }
 
-void SetMotionPath(ArkUINodeHandle node, const char* path, float from, float to, bool rotatable)
+void SetMotionPath(ArkUINodeHandle node, const char* path, float from, float to, ArkUI_Bool rotatable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1989,7 +1989,7 @@ void ResetMotionPath(ArkUINodeHandle node)
     ViewAbstract::SetMotionPath(frameNode, motionPathOption);
 }
 
-void SetGroupDefaultFocus(ArkUINodeHandle node, bool groupDefaultFocus)
+void SetGroupDefaultFocus(ArkUINodeHandle node, ArkUI_Bool groupDefaultFocus)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2004,7 +2004,7 @@ void ResetGroupDefaultFocus(ArkUINodeHandle node)
     ViewAbstract::SetGroupDefaultFocus(frameNode, groupDefaultFocus);
 }
 
-void SetFocusOnTouch(ArkUINodeHandle node, bool focusOnTouch)
+void SetFocusOnTouch(ArkUINodeHandle node, ArkUI_Bool focusOnTouch)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2018,7 +2018,7 @@ void ResetFocusOnTouch(ArkUINodeHandle node)
     bool focusOnTouch = false;
     ViewAbstract::SetFocusOnTouch(frameNode, focusOnTouch);
 }
-void SetFocusable(ArkUINodeHandle node, bool focusable)
+void SetFocusable(ArkUINodeHandle node, ArkUI_Bool focusable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2033,7 +2033,7 @@ void ResetFocusable(ArkUINodeHandle node)
     ViewAbstract::SetFocusable(frameNode, focusable);
 }
 
-void SetTouchable(ArkUINodeHandle node, bool touchable)
+void SetTouchable(ArkUINodeHandle node, ArkUI_Bool touchable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2048,7 +2048,7 @@ void ResetTouchable(ArkUINodeHandle node)
     ViewAbstract::SetTouchable(frameNode, touchable);
 }
 
-void SetDefaultFocus(ArkUINodeHandle node, bool defaultFocus)
+void SetDefaultFocus(ArkUINodeHandle node, ArkUI_Bool defaultFocus)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2328,7 +2328,7 @@ void ResetSize(ArkUINodeHandle node)
     ViewAbstract::SetHeight(frameNode, CalcLength(0.0, DimensionUnit::VP));
 }
 
-void ClearWidthOrHeight(ArkUINodeHandle node, bool isWidth)
+void ClearWidthOrHeight(ArkUINodeHandle node, ArkUI_Bool isWidth)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2724,7 +2724,7 @@ void ResetMouseResponseRegion(ArkUINodeHandle node)
     ViewAbstract::SetMouseResponseRegion(frameNode, region);
 }
 
-void SetEnabled(ArkUINodeHandle node, bool value)
+void SetEnabled(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2738,7 +2738,7 @@ void ResetEnabled(ArkUINodeHandle node)
     ViewAbstract::SetEnabled(frameNode, true);
 }
 
-void SetDraggable(ArkUINodeHandle node, bool value)
+void SetDraggable(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -2752,7 +2752,7 @@ void ResetDraggable(ArkUINodeHandle node)
     ViewAbstract::SetDraggable(frameNode, false);
 }
 
-void SetAccessibilityGroup(ArkUINodeHandle node, bool value)
+void SetAccessibilityGroup(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
