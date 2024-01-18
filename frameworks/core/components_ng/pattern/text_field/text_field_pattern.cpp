@@ -1430,14 +1430,11 @@ void TextFieldPattern::InitDragEvent()
     if (!IsInPasswordMode() && layoutProperty->GetCopyOptionsValue(CopyOptions::Local) != CopyOptions::None &&
         host->IsDraggable()) {
         InitDragDropEvent();
-        AddDragFrameNodeToManager(host);
-        auto gestureEventHub = host->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(gestureEventHub);
-        gestureEventHub->SetTextDraggable(true);
     } else {
         ClearDragDropEvent();
-        RemoveDragFrameNodeFromManager(host);
+        InitDragDropEventWithOutDragStart();
     }
+    AddDragFrameNodeToManager(host);
 }
 
 std::function<void(Offset)> TextFieldPattern::GetThumbnailCallback()
@@ -1577,6 +1574,18 @@ void TextFieldPattern::ShowSelectAfterDragDrop()
     ProcessOverlay(false, false, false, false);
 }
 
+void TextFieldPattern::InitDragDropEventWithOutDragStart()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->InitDragDropEvent();
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    InitDragDropCallBack();
+}
+
 void TextFieldPattern::InitDragDropEvent()
 {
     auto host = GetHost();
@@ -1593,7 +1602,16 @@ void TextFieldPattern::InitDragDropEvent()
     } else if (gestureHub->GetTextDraggable()) {
         gestureHub->SetTextDraggable(false);
     }
+    InitDragDropCallBack();
+    gestureHub->SetTextDraggable(true);
+}
 
+void TextFieldPattern::InitDragDropCallBack()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
     auto onDragEnter = [weakPtr = WeakClaim(this)](
                            const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
