@@ -43,6 +43,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/log/frame_report.h"
+#include "base/log/jank_frame_report.h"
 #include "base/log/log.h"
 #include "base/log/log_wrapper.h"
 #include "base/subwindow/subwindow_manager.h"
@@ -606,6 +607,9 @@ void AceContainer::OnInactive(int32_t instanceId)
                 return;
             }
             pipelineContext->WindowFocus(false);
+            if (container->IsScenceBoardWindow()) {
+                JankFrameReport::GetInstance().FlushRecord();
+            }
         },
         TaskExecutor::TaskType::UI);
 }
@@ -777,6 +781,14 @@ void AceContainer::InitializeCallback()
                                     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction) {
         ContainerScope scope(id);
         ACE_SCOPED_TRACE("ViewChangeCallback(%d, %d)", width, height);
+
+        if (type != WindowSizeChangeReason::ROTATION) {
+            context->SetSurfaceChangeMsg(width, height, type, rsTransaction);
+            context->RequestFrame();
+            return;
+        }
+        context->ResetSurfaceChangeMsg();
+
         auto callback = [context, width, height, type, rsTransaction, id]() {
             context->OnSurfaceChanged(width, height, type, rsTransaction);
             if (type == WindowSizeChangeReason::ROTATION) {
@@ -2135,6 +2147,7 @@ RefPtr<DisplayInfo> AceContainer::GetDisplayInfo()
             }
         }
     }
+    displayInfo_->SetDisplayId(displayManager->GetId());
     displayInfo_->SetIsFoldable(isFoldable);
     displayInfo_->SetFoldStatus(static_cast<FoldStatus>(static_cast<uint32_t>(dmFoldStatus)));
     displayInfo_->SetRotation(static_cast<Rotation>(static_cast<uint32_t>(dmRotation)));
@@ -2288,7 +2301,7 @@ void AceContainer::SearchElementInfoByAccessibilityIdNG(
     std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     CHECK_NULL_VOID(taskExecutor_);
-    taskExecutor_->PostSyncTask(
+    taskExecutor_->PostSyncTaskTimeout(
         [weak = WeakClaim(this), elementId, mode, baseParent, &output]() {
             auto container = weak.Upgrade();
             CHECK_NULL_VOID(container);
@@ -2302,7 +2315,7 @@ void AceContainer::SearchElementInfoByAccessibilityIdNG(
             accessibilityManager->SearchElementInfoByAccessibilityIdNG(
                 elementId, mode, output, ngPipeline, baseParent);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, 1500);
 }
 
 void AceContainer::SearchElementInfosByTextNG(
@@ -2310,7 +2323,7 @@ void AceContainer::SearchElementInfosByTextNG(
     std::list<Accessibility::AccessibilityElementInfo>& output)
 {
     CHECK_NULL_VOID(taskExecutor_);
-    taskExecutor_->PostSyncTask(
+    taskExecutor_->PostSyncTaskTimeout(
         [weak = WeakClaim(this), elementId, &text, baseParent, &output]() {
             auto container = weak.Upgrade();
             CHECK_NULL_VOID(container);
@@ -2324,7 +2337,7 @@ void AceContainer::SearchElementInfosByTextNG(
             accessibilityManager->SearchElementInfosByTextNG(
                 elementId, text, output, ngPipeline, baseParent);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, 1500);
 }
 
 void AceContainer::FindFocusedElementInfoNG(
@@ -2332,7 +2345,7 @@ void AceContainer::FindFocusedElementInfoNG(
     Accessibility::AccessibilityElementInfo& output)
 {
     CHECK_NULL_VOID(taskExecutor_);
-    taskExecutor_->PostSyncTask(
+    taskExecutor_->PostSyncTaskTimeout(
         [weak = WeakClaim(this), elementId, focusType, baseParent, &output]() {
             auto container = weak.Upgrade();
             CHECK_NULL_VOID(container);
@@ -2346,7 +2359,7 @@ void AceContainer::FindFocusedElementInfoNG(
             accessibilityManager->FindFocusedElementInfoNG(
                 elementId, focusType, output, ngPipeline, baseParent);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, 1500);
 }
 
 void AceContainer::FocusMoveSearchNG(
@@ -2354,7 +2367,7 @@ void AceContainer::FocusMoveSearchNG(
     Accessibility::AccessibilityElementInfo& output)
 {
     CHECK_NULL_VOID(taskExecutor_);
-    taskExecutor_->PostSyncTask(
+    taskExecutor_->PostSyncTaskTimeout(
         [weak = WeakClaim(this), elementId, direction, baseParent, &output]() {
             auto container = weak.Upgrade();
             CHECK_NULL_VOID(container);
@@ -2367,7 +2380,7 @@ void AceContainer::FocusMoveSearchNG(
             CHECK_NULL_VOID(accessibilityManager);
             accessibilityManager->FocusMoveSearchNG(elementId, direction, output, ngPipeline, baseParent);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, 1500);
 }
 
 bool AceContainer::NotifyExecuteAction(
@@ -2376,7 +2389,7 @@ bool AceContainer::NotifyExecuteAction(
 {
     bool IsExecuted = false;
     CHECK_NULL_RETURN(taskExecutor_, IsExecuted);
-    taskExecutor_->PostSyncTask(
+    taskExecutor_->PostSyncTaskTimeout(
         [weak = WeakClaim(this), elementId, &actionArguments, action, offset, &IsExecuted]() {
             auto container = weak.Upgrade();
             CHECK_NULL_VOID(container);
@@ -2390,7 +2403,7 @@ bool AceContainer::NotifyExecuteAction(
             IsExecuted = accessibilityManager->ExecuteExtensionActionNG(
                 elementId, actionArguments, action, ngPipeline, offset);
         },
-        TaskExecutor::TaskType::UI);
+        TaskExecutor::TaskType::UI, 1500);
     return IsExecuted;
 }
 

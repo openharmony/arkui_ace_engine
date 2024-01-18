@@ -648,9 +648,9 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
         .title = dialogAttr.title,
         .content = dialogAttr.message,
         .autoCancel = dialogAttr.autoCancel,
+        .buttons = buttons,
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
-        .buttons = buttons,
         .maskRect = dialogAttr.maskRect,
     };
     if (dialogAttr.alignment.has_value()) {
@@ -671,9 +671,9 @@ void FrontendDelegateDeclarativeNG::ShowDialog(const PromptDialogAttr& dialogAtt
         .title = dialogAttr.title,
         .content = dialogAttr.message,
         .autoCancel = dialogAttr.autoCancel,
+        .buttons = buttons,
         .isShowInSubWindow = dialogAttr.showInSubWindow,
         .isModal = dialogAttr.isModal,
-        .buttons = buttons,
         .onStatusChanged = std::move(onStatusChanged),
         .maskRect = dialogAttr.maskRect,
     };

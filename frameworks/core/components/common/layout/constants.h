@@ -318,7 +318,7 @@ enum class BorderImageDirection {
     BOTTOM,
 };
 
-enum class TimePickerDisplayedComponents {
+enum class TimePickerFormat {
     HOUR_MINUTE,
     HOUR_MINUTE_SECOND
 };
@@ -368,6 +368,23 @@ enum class KeyDirection {
     DOWN,
     LEFT,
     RIGHT,
+};
+
+enum class PixelRoundPolicy {
+    FORCE_CEIL_START = 1,
+    FORCE_FLOOR_START = 1 << 1,
+    FORCE_CEIL_TOP = 1 << 2,
+    FORCE_FLOOR_TOP = 1 << 3,
+    FORCE_CEIL_END = 1 << 4,
+    FORCE_FLOOR_END = 1 << 5,
+    FORCE_CEIL_BOTTOM = 1 << 6,
+    FORCE_FLOOR_BOTTOM = 1 << 7,
+};
+
+enum class PixelRoundCalcPolicy {
+    NO_FORCE_ROUND = 0,
+    FORCE_CEIL = 1,
+    FORCE_FLOOR = 2,
 };
 
 const ImageRepeat IMAGE_REPEATS[] = {

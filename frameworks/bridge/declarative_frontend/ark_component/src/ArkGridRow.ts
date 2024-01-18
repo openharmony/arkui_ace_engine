@@ -41,9 +41,6 @@ class ArkGridRowComponent extends ArkComponent implements CommonMethod<GridRowAt
     modifierWithKey(this._modifiersWithKeys, GridRowAlignItemsModifier.identity, GridRowAlignItemsModifier, value);
     return this;
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
 }
 // @ts-ignore
 globalThis.GridRow.attributeModifier = function (modifier) {

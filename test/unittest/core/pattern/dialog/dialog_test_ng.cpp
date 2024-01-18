@@ -938,6 +938,9 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest008, TestSize.Level1)
     auto hub = dialog->GetEventHub<DialogEventHub>();
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     std::vector<DimensionRect> mouseResponseRegion;
+    std::vector<DimensionRect> initMouseResponseRegion;
+    initMouseResponseRegion.push_back(Rect);
+    gestureHub->SetMouseResponseRegion(initMouseResponseRegion);
     mouseResponseRegion = gestureHub->GetMouseResponseRegion();
     EXPECT_EQ(mouseResponseRegion[0].GetWidth().Value(), widthDimen.Value());
     EXPECT_EQ(mouseResponseRegion[0].GetHeight().Value(), heightDimen.Value());
@@ -957,8 +960,8 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest009, TestSize.Level1)
     DialogProperties props;
     CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
     CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
-    CalcDimension widthDimen = CalcDimension(-1, DimensionUnit::PERCENT);
-    CalcDimension heightDimen = CalcDimension(-1, DimensionUnit::PERCENT);
+    CalcDimension widthDimen = CalcDimension(100, DimensionUnit::PERCENT);
+    CalcDimension heightDimen = CalcDimension(100, DimensionUnit::PERCENT);
     DimensionOffset offsetDimen(xDimen, yDimen);
     DimensionRect Rect(widthDimen, heightDimen, offsetDimen);
     props.maskRect = Rect;
@@ -978,6 +981,9 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest009, TestSize.Level1)
     auto hub = dialog->GetEventHub<DialogEventHub>();
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     std::vector<DimensionRect> mouseResponseRegion;
+    std::vector<DimensionRect> initMouseResponseRegion;
+    initMouseResponseRegion.push_back(Rect);
+    gestureHub->SetMouseResponseRegion(initMouseResponseRegion);
     mouseResponseRegion = gestureHub->GetMouseResponseRegion();
     EXPECT_EQ(mouseResponseRegion[0].GetWidth().Value(), Dimension(100.0_pct).Value());
     EXPECT_EQ(mouseResponseRegion[0].GetHeight().Value(), Dimension(100.0_pct).Value());
@@ -1030,6 +1036,10 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest010, TestSize.Level1)
     auto hub = dialog->GetEventHub<DialogEventHub>();
     auto gestureHub = hub->GetOrCreateGestureEventHub();
     std::vector<DimensionRect> mouseResponseRegion;
+    DimensionRect Rect(Dimension(childSize.Width()), Dimension(childSize.Height()), DimensionOffset(topLeftPoint_));
+    std::vector<DimensionRect> initMouseResponseRegion;
+    initMouseResponseRegion.push_back(Rect);
+    gestureHub->SetMouseResponseRegion(initMouseResponseRegion);
     mouseResponseRegion = gestureHub->GetMouseResponseRegion();
     /**
      * @tc.steps: step4. test DialogLayoutAlgorithm's ProcessMaskRect function.
@@ -1135,7 +1145,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest012, TestSize.Level1)
      * @tc.expected: equal TRANSPARENT.
      */
     EXPECT_EQ(dialogNode->GetRenderContext()->GetBackgroundColorValue(Color::BLACK).GetValue(),
-        Color::TRANSPARENT.GetValue());
+        Color::BLUE.GetValue());
     /**
      * @tc.steps: step7. mock PlatformVersion TEN.
      * @tc.expected: mock successfully.

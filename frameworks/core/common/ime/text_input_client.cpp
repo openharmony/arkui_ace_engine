@@ -59,7 +59,7 @@ std::map<KeyComb, std::function<void(TextInputClient*)>> TextInputClient::keyboa
     { KeyComb(KeyCode::KEY_DEL), [](tic* c) -> void { c->HandleOnDelete(true); } },
     { KeyComb(KeyCode::KEY_FORWARD_DEL), [](tic* c) -> void { c->HandleOnDelete(false); } },
     { KeyComb(KeyCode::KEY_INSERT, KEY_CTRL), &tic::HandleOnCopy },
-    { KeyComb(KeyCode::KEY_INSERT, KEY_CTRL), &tic::HandleOnPaste },
+    { KeyComb(KeyCode::KEY_INSERT, KEY_SHIFT), &tic::HandleOnPaste },
     { KeyComb(KeyCode::KEY_F10, KEY_SHIFT), &tic::HandleOnShowMenu },
     { KeyComb(KeyCode::KEY_MENU), &tic::HandleOnShowMenu },
     { KeyComb(KeyCode::KEY_ENTER), &tic::HandleOnEnter },

@@ -12,12 +12,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "gtest/gtest.h"
 #include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 #include "base/utils/utils.h"
 #define protected public
 #define private public
+#include "test/mock/core/rosen/mock_canvas.h"
+
 #include "core/components_ng/render/border_image_painter.h"
 
 #undef private
@@ -29,9 +31,9 @@ using namespace testing::ext;
 namespace OHOS::Ace {
 namespace {
 const NG::BorderWidthProperty BORDER_WIDTH_TEST = { 1.0_vp, 1.0_vp, 1.0_vp, 1.0_vp };
-const NG::SizeF PAINTSIZE = {5.0, 10.0};
-const NG::SizeF TEST_SIZE = {100.0, 200.0};
-const NG::OffsetF OFFSET_F = {1.0, 2.0};
+const NG::SizeF PAINTSIZE = { 5.0, 10.0 };
+const NG::SizeF TEST_SIZE = { 100.0, 200.0 };
+const NG::OffsetF OFFSET_F = { 1.0, 2.0 };
 
 const double DIPSCALE = 10.0;
 const double FIVE = 5.0;
@@ -68,7 +70,7 @@ BorderImage* MakeBorderImage()
     testImage->SetEdgeOutset(DIRECTION_BOTTOM, DIMENSION_OUTSET);
     return testImage;
 };
-}
+} // namespace
 
 class BorderImagePainterTestNg : public testing::Test {};
 
@@ -85,7 +87,7 @@ HWTEST_F(BorderImagePainterTestNg, BorderImagePainter001, TestSize.Level1)
      */
     NG::BorderImageProperty borderImageProperty;
     RSImage image;
-    std::unique_ptr<NG::BorderWidthProperty> widthProp {std::make_unique<NG::BorderWidthProperty>(BORDER_WIDTH_TEST)};
+    std::unique_ptr<NG::BorderWidthProperty> widthProp { std::make_unique<NG::BorderWidthProperty>(BORDER_WIDTH_TEST) };
     NG::BorderImagePainter borderImagePainter(borderImageProperty, widthProp, PAINTSIZE, image, DIPSCALE);
 
     /**
@@ -167,8 +169,8 @@ HWTEST_F(BorderImagePainterTestNg, BorderImagePainter003, TestSize.Level1)
      */
     NG::BorderImageProperty borderImageProperty;
     RSImage image;
-    RSCanvas canvas;
-    std::unique_ptr<NG::BorderWidthProperty> widthProp {std::make_unique<NG::BorderWidthProperty>(BORDER_WIDTH_TEST)};
+    Testing::MockCanvas canvas;
+    std::unique_ptr<NG::BorderWidthProperty> widthProp { std::make_unique<NG::BorderWidthProperty>(BORDER_WIDTH_TEST) };
     NG::BorderImagePainter borderImagePainter(borderImageProperty, widthProp, PAINTSIZE, image, DIPSCALE);
 
     /**
@@ -214,7 +216,7 @@ HWTEST_F(BorderImagePainterTestNg, BorderImagePainter004, TestSize.Level1)
      */
     NG::BorderImageProperty borderImageProperty;
     RSImage image;
-    std::unique_ptr<NG::BorderWidthProperty> widthProp {std::make_unique<NG::BorderWidthProperty>(BORDER_WIDTH_TEST)};
+    std::unique_ptr<NG::BorderWidthProperty> widthProp { std::make_unique<NG::BorderWidthProperty>(BORDER_WIDTH_TEST) };
     NG::BorderImagePainter borderImagePainter(borderImageProperty, widthProp, PAINTSIZE, image, DIPSCALE);
 
     /**
@@ -259,7 +261,7 @@ HWTEST_F(BorderImagePainterTestNg, BorderImagePainter005, TestSize.Level1)
      */
     NG::BorderImageProperty borderImageProperty;
     RSImage image;
-    std::unique_ptr<NG::BorderWidthProperty> widthProp {std::make_unique<NG::BorderWidthProperty>(BORDER_WIDTH_TEST)};
+    std::unique_ptr<NG::BorderWidthProperty> widthProp { std::make_unique<NG::BorderWidthProperty>(BORDER_WIDTH_TEST) };
     NG::BorderImagePainter borderImagePainter(borderImageProperty, widthProp, PAINTSIZE, image, DIPSCALE);
 
     /**
@@ -345,7 +347,7 @@ HWTEST_F(BorderImagePainterTestNg, BorderImagePainter007, TestSize.Level1)
      */
     NG::BorderImageProperty borderImageProperty;
     RSImage image;
-    RSCanvas canvas;
+    Testing::MockCanvas canvas;
     std::unique_ptr<NG::BorderWidthProperty> widthProp;
     NG::BorderImagePainter borderImagePainter(borderImageProperty, widthProp, PAINTSIZE, image, DIPSCALE);
 
@@ -382,8 +384,8 @@ HWTEST_F(BorderImagePainterTestNg, BorderImagePainter008, TestSize.Level1)
      */
     NG::BorderImageProperty borderImageProperty;
     RSImage image;
-    RSCanvas canvas;
-    std::unique_ptr<NG::BorderWidthProperty> widthProp {std::make_unique<NG::BorderWidthProperty>(BORDER_WIDTH_TEST)};
+    Testing::MockCanvas canvas;
+    std::unique_ptr<NG::BorderWidthProperty> widthProp { std::make_unique<NG::BorderWidthProperty>(BORDER_WIDTH_TEST) };
     NG::BorderImagePainter borderImagePainter(borderImageProperty, widthProp, PAINTSIZE, image, DIPSCALE);
 
     /**
@@ -427,8 +429,8 @@ HWTEST_F(BorderImagePainterTestNg, BorderImagePainter009, TestSize.Level1)
      */
     NG::BorderImageProperty borderImageProperty;
     RSImage image;
-    RSCanvas canvas;
-    std::unique_ptr<NG::BorderWidthProperty> widthProp {std::make_unique<NG::BorderWidthProperty>(BORDER_WIDTH_TEST)};
+    Testing::MockCanvas canvas;
+    std::unique_ptr<NG::BorderWidthProperty> widthProp { std::make_unique<NG::BorderWidthProperty>(BORDER_WIDTH_TEST) };
     NG::BorderImagePainter borderImagePainter(borderImageProperty, widthProp, PAINTSIZE, image, DIPSCALE);
 
     /**
@@ -470,8 +472,8 @@ HWTEST_F(BorderImagePainterTestNg, BorderImagePainter010, TestSize.Level1)
      */
     NG::BorderImageProperty borderImageProperty;
     RSImage image;
-    RSCanvas canvas;
-    std::unique_ptr<NG::BorderWidthProperty> widthProp {std::make_unique<NG::BorderWidthProperty>(BORDER_WIDTH_TEST)};
+    Testing::MockCanvas canvas;
+    std::unique_ptr<NG::BorderWidthProperty> widthProp { std::make_unique<NG::BorderWidthProperty>(BORDER_WIDTH_TEST) };
     NG::BorderImagePainter borderImagePainter(borderImageProperty, widthProp, PAINTSIZE, image, DIPSCALE);
 
     /**
@@ -511,8 +513,8 @@ HWTEST_F(BorderImagePainterTestNg, BorderImagePainter011, TestSize.Level1)
      */
     NG::BorderImageProperty borderImageProperty;
     RSImage image;
-    RSCanvas canvas;
-    std::unique_ptr<NG::BorderWidthProperty> widthProp {std::make_unique<NG::BorderWidthProperty>(BORDER_WIDTH_TEST)};
+    Testing::MockCanvas canvas;
+    std::unique_ptr<NG::BorderWidthProperty> widthProp { std::make_unique<NG::BorderWidthProperty>(BORDER_WIDTH_TEST) };
     NG::BorderImagePainter borderImagePainter(borderImageProperty, widthProp, PAINTSIZE, image, DIPSCALE);
 
     /**

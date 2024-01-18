@@ -532,13 +532,20 @@ public:
         return hasBackwardMovement_;
     }
 
-    void ClearBackwardFocusMovementFlag()
+    bool HasForwardFocusMovement() const
+    {
+        return hasForwardMovement_;
+    }
+
+    void ClearFocusMovementFlags()
     {
         hasBackwardMovement_ = false;
+        hasForwardMovement_ = false;
     }
 
     bool HasBackwardFocusMovementInChildren();
-    void ClearBackwardFocusMovementFlagInChildren();
+    bool HasForwardFocusMovementInChildren();
+    void ClearFocusMovementFlagsInChildren();
 
     Dimension GetFocusPadding() const
     {
@@ -1043,6 +1050,7 @@ private:
     bool isFocusUnit_ { false };
     bool isViewRootScopeFocused_ { true };
     bool isViewHasFocused_ { false };
+    bool hasForwardMovement_ { false };
     bool hasBackwardMovement_ { false };
     bool isFocusActiveWhenFocused_ { false };
 

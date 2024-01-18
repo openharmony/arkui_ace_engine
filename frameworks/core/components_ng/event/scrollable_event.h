@@ -21,6 +21,7 @@
 
 #include "base/geometry/axis.h"
 #include "base/memory/referenced.h"
+#include "core/components_ng/event/target_component.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/event/gesture_event_actuator.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
@@ -32,7 +33,8 @@ constexpr float HTMBLOCK_VELOCITY = 200;
 
 class GestureEventHub;
 
-using BarCollectTouchTargetCallback = std::function<void(const OffsetF&, const GetEventTargetImpl&, TouchTestResult&)>;
+using BarCollectTouchTargetCallback = std::function<void(const OffsetF&, const GetEventTargetImpl&, TouchTestResult&,
+    const RefPtr<FrameNode>&, const RefPtr<TargetComponent>&)>;
 using InBarRegionCallback = std::function<bool(const PointF&, SourceType source)>;
 using GetAnimateVelocityCallback = std::function<double()>;
 
@@ -110,11 +112,11 @@ public:
         return inBarRegionCallback_ && barCollectTouchTarget_ && inBarRegionCallback_(localPoint, source);
     }
 
-    void BarCollectTouchTarget(const OffsetF& coordinateOffset,
-        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
+    void BarCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent)
     {
         if (barCollectTouchTarget_) {
-            barCollectTouchTarget_(coordinateOffset, getEventTargetImpl, result);
+            barCollectTouchTarget_(coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent);
         }
     }
 
@@ -171,7 +173,8 @@ public:
     bool RemoveScrollEdgeEffect(const RefPtr<ScrollEdgeEffect>& effect);
 
     void CollectTouchTarget(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
-        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const PointF& localPoint);
+        const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const PointF& localPoint,
+        const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent);
 
 private:
     void InitializeScrollable(RefPtr<ScrollableEvent> event);

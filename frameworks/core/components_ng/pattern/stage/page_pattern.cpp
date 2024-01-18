@@ -52,11 +52,16 @@ void PagePattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    host->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    MeasureType measureType = MeasureType::MATCH_PARENT;
+    auto container = Container::Current();
+    if (container && container->IsDynamicRender()) {
+        measureType = MeasureType::MATCH_CONTENT;
+    }
+    host->GetLayoutProperty()->UpdateMeasureType(measureType);
     host->GetLayoutProperty()->UpdateAlignment(Alignment::TOP_LEFT);
 }
 
-bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*wrapper*/, const DirtySwapConfig& /*config*/)
+bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& /* config */)
 {
     if (isFirstLoad_) {
         isFirstLoad_ = false;
@@ -64,6 +69,11 @@ bool PagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& /*wrappe
             firstBuildCallback_();
             firstBuildCallback_ = nullptr;
         }
+    }
+    if (dynamicPageSizeCallback_) {
+        auto node = wrapper->GetGeometryNode();
+        CHECK_NULL_RETURN(node, false);
+        dynamicPageSizeCallback_(node->GetFrameSize());
     }
     return false;
 }

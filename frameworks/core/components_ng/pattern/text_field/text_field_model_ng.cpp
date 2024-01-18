@@ -349,6 +349,7 @@ void TextFieldModelNG::SetTextColor(const Color& value)
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColor, value);
     ACE_RESET_RENDER_CONTEXT(RenderContext, ForegroundColorStrategy);
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
+    ACE_UPDATE_PAINT_PROPERTY(TextFieldPaintProperty, TextColorFlagByUser, true);
 }
 void TextFieldModelNG::SetFontStyle(Ace::FontStyle value)
 {
@@ -938,7 +939,7 @@ void TextFieldModelNG::SetOnChange(FrameNode* frameNode, std::function<void(cons
     eventHub->SetOnChange(std::move(func));
 }
 
-void TextFieldModelNG::SetTextInputText(FrameNode* frameNode, const std::string& value)
+void TextFieldModelNG::SetTextFieldText(FrameNode* frameNode, const std::string& value)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
@@ -948,10 +949,27 @@ void TextFieldModelNG::SetTextInputText(FrameNode* frameNode, const std::string&
     }
 }
 
-void TextFieldModelNG::SetTextInputPlaceHolder(FrameNode* frameNode, const std::string& placeholder)
+void TextFieldModelNG::SetTextFieldPlaceHolder(FrameNode* frameNode, const std::string& placeholder)
 {
     CHECK_NULL_VOID(frameNode);
     auto textFieldLayoutProperty = frameNode->GetLayoutProperty<TextFieldLayoutProperty>();
     textFieldLayoutProperty->UpdatePlaceholder(placeholder);
+}
+
+void TextFieldModelNG::StopTextFieldEditing(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    if (pattern) {
+        pattern->StopEditing();
+    }
+}
+
+void TextFieldModelNG::SetOnSubmit(FrameNode* frameNode, std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<TextFieldEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSubmit(std::move(func));
 }
 } // namespace OHOS::Ace::NG

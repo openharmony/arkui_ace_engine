@@ -117,7 +117,7 @@ JankFrameReport::JankFrameReport()
     jsAnimationDelayJank_ = 0;
 }
 
-void JankFrameReport::JankFrameRecord(int64_t timeStampNanos)
+void JankFrameReport::JankFrameRecord(int64_t timeStampNanos, const std::string& windowName)
 {
     if (refreshPeriod_ <= 0) {
         return;
@@ -126,7 +126,7 @@ void JankFrameReport::JankFrameRecord(int64_t timeStampNanos)
     int64_t duration = now - std::max(timeStampNanos, prevEndTimeStamp_);
     double jank = double(duration) / refreshPeriod_;
     // perf monitor jank frame
-    PerfMonitor::GetPerfMonitor()->SetFrameTime(timeStampNanos, duration, jank);
+    PerfMonitor::GetPerfMonitor()->SetFrameTime(timeStampNanos, duration, jank, windowName);
     RecordJankStatus(jank);
     prevFrameUpdateCount_ = currentFrameUpdateCount_;
     RecordPreviousEnd();

@@ -79,6 +79,19 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
     }
 }
 
+RefPtr<FrameNode> ProgressModelNG::CreateFrameNode(int32_t nodeId, double value, double max, NG::ProgressType type)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::PROGRESS_ETS_TAG, nodeId, AceType::MakeRefPtr<ProgressPattern>());
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto progressPaintProperty = frameNode->GetPaintProperty<NG::ProgressPaintProperty>();
+    progressPaintProperty->UpdateValue(value);
+    progressPaintProperty->UpdateMaxValue(max);
+    progressPaintProperty->UpdateProgressType(type);
+    auto progressLayoutProperty = frameNode->GetLayoutProperty<NG::ProgressLayoutProperty>();
+    progressLayoutProperty->UpdateType(type);
+    return frameNode;
+}
+
 void ProgressModelNG::SetValue(double value)
 {
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();

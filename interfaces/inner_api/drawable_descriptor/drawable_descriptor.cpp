@@ -23,6 +23,7 @@
 #include "include/core/SkSamplingOptions.h"
 
 #include "base/utils/string_utils.h"
+#include "base/utils/utils.h"
 #ifndef PREVIEW
 #include "image_source.h"
 #endif
@@ -64,6 +65,74 @@ const static size_t MAX_PATH_LEN = 255;
 #endif
 } // namespace
 
+DrawableItem LayeredDrawableDescriptor::PreGetDrawableItem(
+    const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, const char* item)
+{
+    std::string itemStr = item;
+    std::string idStr = itemStr.substr(itemStr.find(':') + 1);
+    DrawableItem resItem;
+    if (!StringUtils::IsNumber(idStr)) {
+        return resItem;
+    }
+
+    std::tuple<std::string, size_t, std::string> info;
+    auto state = resourceMgr->GetDrawableInfoById(
+        static_cast<uint32_t>(std::stoul(idStr)), info, resItem.data_, iconType_, density_);
+    resItem.len_ = std::get<1>(info);
+    resItem.state_ = state;
+    return resItem;
+}
+
+bool LayeredDrawableDescriptor::PreGetPixelMapFromJsonBuf(
+    const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, bool isBackground)
+{
+#ifndef PREVIEW
+    cJSON* roots = cJSON_ParseWithLength(reinterpret_cast<const char*>(jsonBuf_.get()), len_);
+
+    if (roots == nullptr) {
+        return false;
+    }
+
+    cJSON* item = nullptr;
+    if (isBackground) {
+        item = cJSON_GetObjectItem(roots->child, DRAWABLEDESCRIPTOR_JSON_KEY_BACKGROUND);
+    } else {
+        item = cJSON_GetObjectItem(roots->child, DRAWABLEDESCRIPTOR_JSON_KEY_FOREGROUND);
+    }
+    if (item == nullptr) {
+        cJSON_Delete(roots);
+        HILOG_ERROR("GetObjectItem from json buffer failed");
+        return false;
+    }
+    if (cJSON_IsString(item)) {
+        DrawableItem& drawableiItem = isBackground ? backgroundItem_ : foregroundItem_;
+        drawableiItem = PreGetDrawableItem(resourceMgr, item->valuestring);
+    } else {
+        cJSON_Delete(roots);
+        return false;
+    }
+    cJSON_Delete(roots);
+    return true;
+#else
+    return false;
+#endif
+}
+
+void LayeredDrawableDescriptor::InitialResource(const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr)
+{
+    CHECK_NULL_VOID(resourceMgr);
+    // preprocess get default mask
+    const std::string defaultMaskName = "ohos_icon_mask";
+    resourceMgr->GetMediaDataByName(defaultMaskName.c_str(), defaultMaskDataLength_, defaultMaskData_);
+    // preprocess get background and foreground
+    if (!PreGetPixelMapFromJsonBuf(resourceMgr, true)) {
+        HILOG_ERROR("Create background Item imageSource from json buffer failed");
+    }
+    if (!PreGetPixelMapFromJsonBuf(resourceMgr, false)) {
+        HILOG_ERROR("Create foreground Item imageSource from json buffer failed");
+    }
+}
+
 bool DrawableDescriptor::GetPixelMapFromBuffer()
 {
     Media::SourceOptions opts;
@@ -100,55 +169,30 @@ std::shared_ptr<Media::PixelMap> DrawableDescriptor::GetPixelMap()
     return nullptr;
 }
 
-std::unique_ptr<Media::ImageSource> LayeredDrawableDescriptor::CreateImageSource(const char* item, uint32_t& errorCode)
+std::unique_ptr<Media::ImageSource> LayeredDrawableDescriptor::CreateImageSource(
+    DrawableItem& drawableItem, uint32_t& errorCode)
 {
-    std::string itemStr = item;
-    std::string idStr = itemStr.substr(itemStr.find(':') + 1);
-    if (!StringUtils::IsNumber(idStr)) {
-        return nullptr;
-    }
-
-    std::unique_ptr<uint8_t[]> data;
-    std::tuple<std::string, size_t, std::string> info;
-    auto state = resourceMgr_->GetDrawableInfoById(static_cast<uint32_t>(std::stoul(idStr)), info, data, iconType_,
-        density_);
-    size_t len = std::get<1>(info);
-    if (state != Global::Resource::SUCCESS) {
+    if (drawableItem.state_ != Global::Resource::SUCCESS) {
         HILOG_ERROR("GetDrawableInfoById failed");
         return nullptr;
     }
 
     Media::SourceOptions opts;
-    return Media::ImageSource::CreateImageSource(data.get(), len, opts, errorCode);
+    return Media::ImageSource::CreateImageSource(drawableItem.data_.get(), drawableItem.len_, opts, errorCode);
 }
 
 bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
 {
 #ifndef PREVIEW
-    cJSON* roots = cJSON_ParseWithLength(reinterpret_cast<const char*>(jsonBuf_.get()), len_);
-
-    if (roots == nullptr) {
-        return false;
+    if ((isBackground && background_.has_value()) || (!isBackground && foreground_.has_value())) {
+        return true;
     }
-
-    uint32_t errorCode = 0;
-    cJSON* item = nullptr;
-    if (isBackground) {
-        item = cJSON_GetObjectItem(roots->child, DRAWABLEDESCRIPTOR_JSON_KEY_BACKGROUND);
-    } else {
-        item = cJSON_GetObjectItem(roots->child, DRAWABLEDESCRIPTOR_JSON_KEY_FOREGROUND);
-    }
-    if (item == nullptr) {
-        cJSON_Delete(roots);
-        HILOG_ERROR("GetObjectItem from json buffer failed");
-        return false;
-    }
-
-    if (cJSON_IsString(item)) {
+    if ((isBackground && backgroundItem_.state_ == Global::Resource::SUCCESS) ||
+        (!isBackground && foregroundItem_.state_ == Global::Resource::SUCCESS)) {
+        uint32_t errorCode = 0;
         std::unique_ptr<Media::ImageSource> imageSource =
-            LayeredDrawableDescriptor::CreateImageSource(item->valuestring, errorCode);
+            LayeredDrawableDescriptor::CreateImageSource(isBackground ? backgroundItem_ : foregroundItem_, errorCode);
         if (errorCode != 0) {
-            cJSON_Delete(roots);
             HILOG_ERROR("CreateImageSource from json buffer failed");
             return false;
         }
@@ -157,7 +201,6 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
         if (imageSource) {
             auto pixelMapPtr = imageSource->CreatePixelMap(decodeOpts, errorCode);
             if (errorCode != 0) {
-                cJSON_Delete(roots);
                 HILOG_ERROR("Get PixelMap from json buffer failed");
                 return false;
             }
@@ -169,11 +212,9 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
             }
         }
     } else {
-        cJSON_Delete(roots);
         HILOG_ERROR("Get background from json buffer failed");
         return false;
     }
-    cJSON_Delete(roots);
     return true;
 #else
     return false;
@@ -182,14 +223,11 @@ bool LayeredDrawableDescriptor::GetPixelMapFromJsonBuf(bool isBackground)
 
 bool LayeredDrawableDescriptor::GetDefaultMask()
 {
-    const std::string name = "ohos_icon_mask";
-    size_t len = 0;
-    std::unique_ptr<uint8_t[]> data;
-    resourceMgr_->GetMediaDataByName(name.c_str(), len, data);
     Media::SourceOptions opts;
     uint32_t errorCode = 0;
     std::unique_ptr<Media::ImageSource> imageSource =
-        Media::ImageSource::CreateImageSource(data.get(), len, opts, errorCode);
+        Media::ImageSource::CreateImageSource(
+            defaultMaskData_.get(), defaultMaskDataLength_, opts, errorCode);
     Media::DecodeOptions decodeOpts;
     decodeOpts.desiredPixelFormat = Media::PixelFormat::BGRA_8888;
     if (imageSource) {
@@ -201,24 +239,6 @@ bool LayeredDrawableDescriptor::GetDefaultMask()
         return false;
     }
     return true;
-}
-
-void LayeredDrawableDescriptor::SetMaskPath(std::string& path)
-{
-    HILOG_DEBUG("SetMaskPath:%{public}s", path.c_str());
-    maskPath_ = path;
-}
-
-void LayeredDrawableDescriptor::SetIconType(uint32_t iconType)
-{
-    HILOG_DEBUG("SetIconType");
-    iconType_ = iconType;
-}
-
-void LayeredDrawableDescriptor::SetDensity(uint32_t density)
-{
-    HILOG_DEBUG("SetDensity");
-    density_ = density;
 }
 
 void LayeredDrawableDescriptor::InitLayeredParam(std::pair<std::unique_ptr<uint8_t[]>, size_t> &foregroundInfo,
@@ -267,11 +287,12 @@ bool LayeredDrawableDescriptor::GetMaskByPath()
     return true;
 }
 
-bool LayeredDrawableDescriptor::GetMaskByName(const std::string& name)
+bool LayeredDrawableDescriptor::GetMaskByName(
+    std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, const std::string& name)
 {
     size_t len = 0;
     std::unique_ptr<uint8_t[]> data;
-    resourceMgr_->GetMediaDataByName(name.c_str(), len, data);
+    resourceMgr->GetMediaDataByName(name.c_str(), len, data);
     Media::SourceOptions opts;
     uint32_t errorCode = 0;
     std::unique_ptr<Media::ImageSource> imageSource =
@@ -312,7 +333,7 @@ std::unique_ptr<DrawableDescriptor> LayeredDrawableDescriptor::GetBackground()
     if (GetPixelMapFromJsonBuf(true)) {
         return std::make_unique<DrawableDescriptor>(background_.value());
     }
-    HILOG_ERROR("GetForeground failed");
+    HILOG_ERROR("GetBackground failed");
     return nullptr;
 }
 

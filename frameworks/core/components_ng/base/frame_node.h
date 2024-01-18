@@ -160,8 +160,6 @@ public:
 
     void TriggerOnAreaChangeCallback(uint64_t nanoTimestamp);
 
-    OffsetF CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp);
-
     void OnConfigurationUpdate(const OnConfigurationChange& configurationChange) override;
 
     void AddVisibleAreaUserCallback(double ratio, const VisibleCallbackInfo& callback)
@@ -283,7 +281,7 @@ public:
 
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
 
-    RefPtr<FrameNode> GetAncestorNodeOfFrame() const;
+    RefPtr<FrameNode> GetAncestorNodeOfFrame(bool checkBoundary = false) const;
 
     std::string& GetNodeName()
     {
@@ -485,7 +483,8 @@ public:
     RefPtr<NodeAnimatablePropertyBase> GetAnimatablePropertyFloat(const std::string& propertyName) const;
     static RefPtr<FrameNode> FindChildByName(const RefPtr<FrameNode>& parentNode, const std::string& nodeName);
     void CreateAnimatablePropertyFloat(
-        const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent);
+        const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent,
+        const PropertyUnit& propertyType = PropertyUnit::UNKNOWN);
     void DeleteAnimatablePropertyFloat(const std::string& propertyName);
     void UpdateAnimatablePropertyFloat(const std::string& propertyName, float value);
     void CreateAnimatableArithmeticProperty(const std::string& propertyName, RefPtr<CustomAnimatableArithmetic>& value,
@@ -664,14 +663,14 @@ public:
 
     bool GetMonopolizeEvents() const;
 
-    const std::pair<uint64_t, OffsetF>& GetCachedGlobalOffset() const
+    bool IsWindowBoundary() const
     {
-        return cachedGlobalOffset_;
+        return isWindowBoundary_;
     }
 
-    void SetCachedGlobalOffset(const std::pair<uint64_t, OffsetF>& timestampOffset)
+    void SetWindowBoundary(bool isWindowBoundary = true)
     {
-        cachedGlobalOffset_ = timestampOffset;
+        isWindowBoundary_ = isWindowBoundary;
     }
 
     void InitLastArea();
@@ -733,12 +732,17 @@ private:
     void GetPercentSensitive();
     void UpdatePercentSensitive();
 
-    void UpdateParentAbsoluteOffset();
     void AddFrameNodeSnapshot(bool isHit, int32_t parentId, std::vector<RectF> responseRegionList);
 
     int32_t GetNodeExpectedRate();
 
     void RecordExposureIfNeed(const std::string& inspectorId);
+
+    OffsetF CalculateOffsetRelativeToWindow(uint64_t nanoTimestamp);
+
+    const std::pair<uint64_t, OffsetF>& GetCachedGlobalOffset() const;
+
+    void SetCachedGlobalOffset(const std::pair<uint64_t, OffsetF>& timestampOffset);
 
     // sort in ZIndex.
     std::multiset<WeakPtr<FrameNode>, ZIndexComparator> frameChildren_;
@@ -795,6 +799,7 @@ private:
     bool draggable_ = false;
     bool userSet_ = false;
     bool customerSet_ = false;
+    bool isWindowBoundary_ = false;
 
     std::map<std::string, RefPtr<NodeAnimatablePropertyBase>> nodeAnimatablePropertyMap_;
     Matrix4 localMat_ = Matrix4::CreateIdentity();

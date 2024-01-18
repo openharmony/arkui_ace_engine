@@ -69,7 +69,7 @@ public:
     void SetRequestFrame(const std::function<void()>& requestFrame);
     void RequestNextFrame() const;
 
-    void SetHostNode(const WeakPtr<FrameNode>& host);
+    virtual void SetHostNode(const WeakPtr<FrameNode>& host);
     RefPtr<FrameNode> GetHost() const;
 
     virtual void SetNeedDebugBoundary(bool flag) {}
@@ -96,7 +96,7 @@ public:
 
     virtual void MoveFrame(FrameNode* self, const RefPtr<FrameNode>& child, int32_t index) {}
 
-    virtual void SyncGeometryProperties(GeometryNode* geometryNode, bool needRoundToPixelGrid = false) {}
+    virtual void SyncGeometryProperties(GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0) {}
 
     virtual void SyncGeometryProperties(const RectF& rectF) {}
 
@@ -197,6 +197,14 @@ public:
 
     virtual void UpdateTransition(const TransitionOptions& options) {}
     virtual void UpdateChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect) {}
+    const RefPtr<OneCenterTransitionOptionType>& GetOneCenterTransitionOption()
+    {
+        return oneCenterTransition_;
+    }
+    void UpdateOneCenterTransitionOption(const RefPtr<OneCenterTransitionOptionType>& value)
+    {
+        oneCenterTransition_ = value;
+    }
     virtual void OnNodeDisappear(bool recursive) {}
     virtual void OnNodeAppear(bool recursive) {}
     virtual bool HasTransitionOutAnimation() const
@@ -309,6 +317,8 @@ public:
 
     // update translateXY in backend.
     virtual void UpdateTranslateInXY(const OffsetF& offset) {}
+
+    virtual void SetTransitionOutCallback(std::function<void()>&& callback) {}
 
     virtual void ToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
@@ -468,6 +478,7 @@ public:
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontSaturate, Dimension);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontSepia, Dimension);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontInvert, InvertVariant);
+    ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, SystemBarEffect, bool);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontHueRotate, float);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, FrontColorBlend, Color);
     ACE_DEFINE_PROPERTY_FUNC_WITH_GROUP(Graphics, LinearGradientBlur, NG::LinearGradientBlurPara);
@@ -645,6 +656,7 @@ protected:
     virtual void OnFrontSaturateUpdate(const Dimension& value) {}
     virtual void OnFrontSepiaUpdate(const Dimension& value) {}
     virtual void OnFrontInvertUpdate(const InvertVariant& value) {}
+    virtual void OnSystemBarEffectUpdate(bool systemBarEffect) {}
     virtual void OnFrontHueRotateUpdate(float value) {}
     virtual void OnFrontColorBlendUpdate(const Color& value) {}
     virtual void OnLinearGradientBlurUpdate(const NG::LinearGradientBlurPara& blurPara) {}
@@ -665,7 +677,7 @@ private:
     friend class ViewAbstract;
     std::function<void()> requestFrame_;
     WeakPtr<FrameNode> host_;
-
+    RefPtr<OneCenterTransitionOptionType> oneCenterTransition_;
     ACE_DISALLOW_COPY_AND_MOVE(RenderContext);
 };
 } // namespace OHOS::Ace::NG

@@ -225,7 +225,7 @@ RefPtr<FrameNode> ScrollTestNg::GetContentChild(int32_t index)
 void ScrollTestNg::Touch(TouchLocationInfo locationInfo, SourceType sourceType)
 {
     auto touchEventHub = frameNode_->GetOrCreateGestureEventHub();
-    RefPtr<TouchEventImpl> touchEventImpl = touchEventHub->touchEventActuator_->touchEvents_.front();
+    RefPtr<TouchEventImpl> touchEventImpl = touchEventHub->touchEventActuator_->touchEvents_.back();
     auto touchEvent = touchEventImpl->GetTouchEventCallback();
     TouchEventInfo eventInfo("touch");
     eventInfo.SetSourceDevice(sourceType);
@@ -591,10 +591,12 @@ HWTEST_F(ScrollTestNg, Event004, TestSize.Level1)
      */
     bool isTrigger = false;
     CreateWithContent([&isTrigger](ScrollModelNG model) {
-        OnScrollStartEvent event = [&isTrigger]() { isTrigger = true; };
-        model.SetOnScrollStart(std::move(event));
-        model.SetOnScrollStop(std::move(event));
-        model.SetOnScrollEnd(std::move(event));
+        OnScrollStartEvent startEvent = [&isTrigger]() { isTrigger = true; };
+        model.SetOnScrollStart(std::move(startEvent));
+        OnScrollStopEvent stopEvent = [&isTrigger]() { isTrigger = true; };
+        model.SetOnScrollStop(std::move(stopEvent));
+        ScrollEndEvent endEvent = [&isTrigger]() { isTrigger = true; };
+        model.SetOnScrollEnd(std::move(endEvent));
     });
 
     /**
@@ -709,8 +711,7 @@ HWTEST_F(ScrollTestNg, Event006, TestSize.Level1)
      * @tc.expected: onScrollStop would not be trigger
      */
     float endValue = pattern_->GetFinalPosition();
-    pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue,
-            SCROLL_FROM_ANIMATION_CONTROLLER);
+    pattern_->UpdateCurrentOffset(pattern_->GetTotalOffset() - endValue, SCROLL_FROM_ANIMATION_CONTROLLER);
     // when out of scrollable distance, will trigger animator stop
     pattern_->UpdateCurrentOffset(-1, SCROLL_FROM_ANIMATION_CONTROLLER);
     if (pattern_->IsAtBottom()) {
@@ -957,7 +958,7 @@ HWTEST_F(ScrollTestNg, ScrollPositionControlle003, TestSize.Level1)
  */
 HWTEST_F(ScrollTestNg, ScrollBarAnimation001, TestSize.Level1)
 {
-    RSCanvas canvas;
+    Testing::MockCanvas canvas;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
 
@@ -1024,7 +1025,7 @@ HWTEST_F(ScrollTestNg, ScrollBarAnimation001, TestSize.Level1)
  */
 HWTEST_F(ScrollTestNg, ScrollBarAnimation002, TestSize.Level1)
 {
-    RSCanvas canvas;
+    Testing::MockCanvas canvas;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
 
@@ -1081,7 +1082,7 @@ HWTEST_F(ScrollTestNg, ScrollBarAnimation002, TestSize.Level1)
  */
 HWTEST_F(ScrollTestNg, ScrollBarAnimation003, TestSize.Level1)
 {
-    RSCanvas canvas;
+    Testing::MockCanvas canvas;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
 
@@ -1725,7 +1726,7 @@ HWTEST_F(ScrollTestNg, FadeController002, TestSize.Level1)
     fadeController->controller_->NotifyStopListener();
     fadeController->state_ = OverScrollState::PULL;
     fadeController->ProcessPull(1.0, 1.0, 1.0);
-    EXPECT_EQ(fadeController->state_, OverScrollState::PULL);
+    EXPECT_EQ(fadeController->state_, OverScrollState::RECEDE);
 
     /**
      * @tc.steps: step4. When OverScrollState is PULL, call the ProcessRecede function and callback function in
@@ -1734,7 +1735,7 @@ HWTEST_F(ScrollTestNg, FadeController002, TestSize.Level1)
      */
     fadeController->controller_ = nullptr;
     fadeController->ProcessRecede(10);
-    EXPECT_EQ(fadeController->state_, OverScrollState::PULL);
+    EXPECT_EQ(fadeController->state_, OverScrollState::RECEDE);
 
     /**
      * @tc.steps: step5. When OverScrollState is 0, call the Initialize function and callback function in
@@ -2165,9 +2166,7 @@ HWTEST_F(ScrollTestNg, ScrollBar006, TestSize.Level1)
      * @tc.steps: step1. Not set bar width
      * @tc.expected: It will be default
      */
-    CreateWithContent([](ScrollModelNG model) {
-        model.SetDisplayMode(static_cast<int>(DisplayMode::ON));
-    });
+    CreateWithContent([](ScrollModelNG model) { model.SetDisplayMode(static_cast<int>(DisplayMode::ON)); });
     EXPECT_EQ(pattern_->scrollBar_->activeRect_.Width(), NORMAL_WIDTH);
 
     /**
@@ -2217,7 +2216,7 @@ HWTEST_F(ScrollTestNg, ScrollBar007, TestSize.Level1)
             Dimension(20.f),
             Dimension(30.f),
         };
-        std::pair<bool, bool> enableSnapToSide = {true, true};
+        std::pair<bool, bool> enableSnapToSide = { true, true };
         model.SetScrollSnap(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
         OnScrollStartEvent event = [&isTrigger]() { isTrigger = true; };
         model.SetOnScrollStart(std::move(event));
@@ -2250,7 +2249,7 @@ HWTEST_F(ScrollTestNg, ScrollBar008, TestSize.Level1)
             Dimension(20.f),
             Dimension(30.f),
         };
-        std::pair<bool, bool> enableSnapToSide = {true, true};
+        std::pair<bool, bool> enableSnapToSide = { true, true };
         model.SetScrollSnap(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
         OnScrollStartEvent event = [&isTrigger]() { isTrigger = true; };
         model.SetOnScrollStart(std::move(event));
@@ -2986,7 +2985,7 @@ HWTEST_F(ScrollTestNg, ScrollSetFrictionTest001, TestSize.Level1)
     scrollModelNG_1.SetFriction(friction);
     GetInstance();
     FlushLayoutTask(frameNode_);
-    EXPECT_DOUBLE_EQ(pattern_->GetFriction(), DEFAULT_FRICTION);
+    EXPECT_DOUBLE_EQ(pattern_->GetFriction(), NEW_DEFAULT_FRICTION);
 
     /**
      * @tc.steps: step1. set friction more than 0
@@ -3479,12 +3478,10 @@ HWTEST_F(ScrollTestNg, EnablePaging001, TestSize.Level1)
     /**
      * @tc.steps: step1. Create scroll and initialize related properties.
      */
-    CreateWithContent([](ScrollModelNG model) {
-        model.SetEnablePaging(true);
-    });
+    CreateWithContent([](ScrollModelNG model) { model.SetEnablePaging(true); });
     auto viewPortLength = pattern_->GetMainContentSize();
     pattern_->scrollableDistance_ = viewPortLength * 10;
-    pattern_->currentOffset_ = - viewPortLength * 5 - 10.0f;
+    pattern_->currentOffset_ = -viewPortLength * 5 - 10.0f;
     SizeF viewPortExtent(SCROLL_WIDTH, viewPortLength * 11);
     pattern_->viewPortExtent_ = viewPortExtent;
     pattern_->SetIntervalSize(Dimension(static_cast<double>(viewPortLength)));
@@ -3496,8 +3493,7 @@ HWTEST_F(ScrollTestNg, EnablePaging001, TestSize.Level1)
      */
     auto dragDistance = viewPortLength * 0.5 - 1;
     auto dragSpeed = SCROLL_PAGING_SPEED_THRESHOLD - 1;
-    auto predictSnapOffset =
-                pattern_->CalePredictSnapOffset(0.f, dragDistance, dragSpeed);
+    auto predictSnapOffset = pattern_->CalePredictSnapOffset(0.f, dragDistance, dragSpeed);
     EXPECT_TRUE(predictSnapOffset.has_value());
     EXPECT_LT(predictSnapOffset.value(), 0);
 
@@ -3523,8 +3519,7 @@ HWTEST_F(ScrollTestNg, EnablePaging001, TestSize.Level1)
     EXPECT_LT(abs(predictSnapOffset.value()), viewPortLength);
     EXPECT_GT(predictSnapOffset.value(), 0);
 
-
-     /**
+    /**
      * @tc.steps: step5. dragDistance less than threshold and dragSpeed equals threshold
      * @tc.expected: the absolute value of predictSnapOffset.value() less than viewPortLength
      */
@@ -3547,9 +3542,7 @@ HWTEST_F(ScrollTestNg, EnablePaging002, TestSize.Level1)
      * @tc.steps: step1. Create scroll and set enablePaging.
      * @tc.expected: the value of GetEnablePaging() if VALID
      */
-    CreateWithContent([](ScrollModelNG model) {
-        model.SetEnablePaging(true);
-    });
+    CreateWithContent([](ScrollModelNG model) { model.SetEnablePaging(true); });
     EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::VALID);
 
     /**
@@ -3599,5 +3592,280 @@ HWTEST_F(ScrollTestNg, EnablePaging002, TestSize.Level1)
         model.SetEnablePaging(true);
     });
     EXPECT_EQ(pattern_->GetEnablePaging(), ScrollPagingStatus::VALID);
+}
+
+/**
+ * @tc.name: SetMainModeSize001
+ * @tc.desc: Test SetMainModeSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, SetMainModeSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBarOverlayModifier, set positionMode_ is BOTTOM
+     * @tc.expected: modifer's barWidth_ is equal to the width of size
+     */
+    ScrollBarOverlayModifier modifer;
+    modifer.SetPositionMode(PositionMode::BOTTOM);
+    auto width = 1.0;
+    auto hight = 1.0;
+    modifer.SetMainModeSize(Size(width, hight));
+    EXPECT_EQ(modifer.barWidth_, width);
+}
+
+/**
+ * @tc.name: SetCrossModeSize001
+ * @tc.desc: Test SetCrossModeSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, SetCrossModeSize001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBarOverlayModifier, set positionMode_ is BOTTOM
+     * @tc.expected: modifer's barHeight_ is equal to the hight of size
+     */
+    ScrollBarOverlayModifier modifer;
+    modifer.SetPositionMode(PositionMode::BOTTOM);
+    auto width = 1.0;
+    auto hight = 1.0;
+    modifer.SetCrossModeSize(Size(width, hight));
+    EXPECT_EQ(modifer.barHeight_, hight);
+}
+
+/**
+ * @tc.name: SetCrossModeSize002
+ * @tc.desc: Test SetCrossModeSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, SetCrossModeSize002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBarOverlayModifier, set positionMode_ is not BOTTOM
+     * @tc.expected: modifer's barWidth_ is equal to the width of size
+     */
+    auto width = 1.0;
+    auto hight = 1.0;
+    ScrollBarOverlayModifier modifer;
+    modifer.SetPositionMode(PositionMode::LEFT);
+    modifer.SetCrossModeSize(Size(width, hight));
+    EXPECT_EQ(modifer.barWidth_, width);
+}
+
+/**
+ * @tc.name: SetMainModeOffset001
+ * @tc.desc: Test SetMainModeOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, SetMainModeOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBarOverlayModifier, set positionMode_ is BOTTOM
+     * @tc.expected: modifer's barX_ is equal to the width of x
+     */
+    auto x = 1.f;
+    auto y = 2.f;
+    ScrollBarOverlayModifier modifer;
+    modifer.SetPositionMode(PositionMode::BOTTOM);
+    modifer.SetMainModeOffset(Offset(x, y));
+    EXPECT_EQ(modifer.barX_, x);
+}
+
+/**
+ * @tc.name: SetCrossModeOffset001
+ * @tc.desc: Test SetCrossModeOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, SetCrossModeOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBarOverlayModifier, set positionMode_ is BOTTOM
+     * @tc.expected: modifer's barY_ is equal to the y of Offset
+     */
+    auto x = 1.f;
+    auto y = 1.f;
+    ScrollBarOverlayModifier modifer;
+    modifer.SetPositionMode(PositionMode::BOTTOM);
+    modifer.SetCrossModeOffset(Offset(x, y));
+    EXPECT_EQ(modifer.barY_, y);
+}
+
+/**
+ * @tc.name: StopAdaptAnimation001
+ * @tc.desc: Test StopAdaptAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, StopAdaptAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBarOverlayModifier, start adapt animation
+     * @tc.expected: Change modifer's MainModeSize to the initial value
+     */
+    double x = 1.00;
+    double y = 1.25;
+    double width = 1.00;
+    double height = 2.00;
+    Rect rect(x, y, width, height);
+    bool needAdaptAnimation = true;
+    ScrollBarOverlayModifier modifer;
+    AnimationOption option;
+    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.314f, 0.95f);
+    option.SetCurve(motion);
+    std::shared_ptr<AnimationUtils::Animation> adaptAnimation_ = AnimationUtils::StartAnimation(option, [&]() {});
+    modifer.StartAdaptAnimation(rect, needAdaptAnimation);
+    modifer.StopAdaptAnimation();
+    EXPECT_NE(adaptAnimation_, nullptr);
+}
+
+/**
+ * @tc.name: StartHoverAnimation001
+ * @tc.desc: Test StartHoverAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, StartHoverAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBarOverlayModifier, set hoverAnimationType is GROW
+     * @tc.expected: modifer's hoverAnimatingType_ is equal to the hoverType
+     */
+    ScrollBarOverlayModifier modifer;
+    auto hoverType = HoverAnimationType::GROW;
+    double x = 1.00;
+    double y = 1.25;
+    double width = 1.00;
+    double height = 2.00;
+    Rect rect(x, y, width, height);
+    modifer.StartHoverAnimation(rect, HoverAnimationType::GROW);
+    EXPECT_EQ(modifer.hoverAnimatingType_, hoverType);
+}
+
+/**
+ * @tc.name: StartHoverAnimation002
+ * @tc.desc: Test StartHoverAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, StartHoverAnimation002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBarOverlayModifier, set hoverAnimationType is GROW
+     * @tc.expected: modifer's hoverAnimatingType_ is equal to the hoverType
+     */
+    ScrollBarOverlayModifier modifer;
+    auto hoverType = HoverAnimationType::SHRINK;
+    double x = 1.00;
+    double y = 1.25;
+    double width = 1.00;
+    double height = 2.00;
+    Rect rect(x, y, width, height);
+    modifer.StartHoverAnimation(rect, HoverAnimationType::SHRINK);
+    EXPECT_EQ(modifer.hoverAnimatingType_, hoverType);
+}
+
+/**
+ * @tc.name: StopHoverAnimation001
+ * @tc.desc: Test StopHoverAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, StopHoverAnimation001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBarOverlayModifier, start hover animation
+     * @tc.expected: modifer's hoverAnimation_ is initialized and stopped
+     */
+    ScrollBarOverlayModifier modifer;
+    AnimationOption option;
+    auto motion = AceType::MakeRefPtr<ResponsiveSpringMotion>(0.314f, 0.95f);
+    option.SetCurve(motion);
+    std::shared_ptr<AnimationUtils::Animation> hoverAnimation_ = AnimationUtils::StartAnimation(option, [&]() {});
+    double x = 1.00;
+    double y = 1.25;
+    double width = 1.00;
+    double height = 2.00;
+    Rect rect(x, y, width, height);
+    modifer.StartHoverAnimation(rect, HoverAnimationType::SHRINK);
+    modifer.StopHoverAnimation();
+    EXPECT_NE(modifer.hoverAnimation_, nullptr);
+}
+
+/**
+ * @tc.name: GetHoverOffset001
+ * @tc.desc: Test GetHoverOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, GetHoverOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBarOverlayModifier, set positionMode_ is RIGHT
+     * @tc.expected: modifer's Offset is assigned a correlation value
+     */
+    auto width = 1.0;
+    auto hight = 1.0;
+    ScrollBarOverlayModifier modifer;
+    modifer.SetPositionMode(PositionMode::RIGHT);
+    auto result = modifer.GetHoverOffset(Size(width, hight));
+    auto offsetResult = width - modifer.barWidth_->Get();
+    EXPECT_EQ(result, Offset(offsetResult, 0.f));
+}
+
+/**
+ * @tc.name: GetHoverOffset002
+ * @tc.desc: Test GetHoverOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, GetHoverOffset002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBarOverlayModifier, set positionMode_ is BOTTOM
+     * @tc.expected: modifer's Offset is assigned a correlation value
+     */
+    auto width = 1.0;
+    auto hight = 1.0;
+    ScrollBarOverlayModifier modifer;
+    modifer.SetPositionMode(PositionMode::BOTTOM);
+    modifer.GetHoverOffset(Size(width, hight));
+    auto result = modifer.GetHoverOffset(Size(width, hight));
+    auto offsetResult = hight - modifer.barHeight_->Get();
+    EXPECT_EQ(result, Offset(0.f, offsetResult));
+}
+
+/**
+ * @tc.name: SetGestureEvent001
+ * @tc.desc: Test GestureEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, SetGestureEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBar, touchEvent_
+     * @tc.expected: touchEvent_ is initialized correctly
+     */
+    CreateWithContent();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollPaintMethod>(paint);
+    auto scrollBar = scrollPaint->scrollBar_.Upgrade();
+    auto touchCallback = [](const TouchEventInfo& info) {};
+    RefPtr<TouchEventImpl> touchEvent_ = AccessibilityManager::MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
+    scrollBar->SetGestureEvent();
+    EXPECT_NE(touchEvent_, nullptr);
+}
+
+/**
+ * @tc.name: SetSetMouseEvent001
+ * @tc.desc: Test SetMouseEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollTestNg, SetMouseEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBar, mouseEvent_
+     * @tc.expected: mouseEvent_ is initialized correctly
+     */
+    CreateWithContent();
+    auto paint = pattern_->CreateNodePaintMethod();
+    auto scrollPaint = AceType::DynamicCast<ScrollPaintMethod>(paint);
+    auto scrollBar = scrollPaint->scrollBar_.Upgrade();
+    auto mouseTask = [](MouseInfo& info) {};
+    RefPtr<InputEvent> mouseEvent_ = AccessibilityManager::MakeRefPtr<InputEvent>(std::move(mouseTask));
+    scrollBar->SetMouseEvent();
+    EXPECT_NE(mouseEvent_, nullptr);
 }
 } // namespace OHOS::Ace::NG

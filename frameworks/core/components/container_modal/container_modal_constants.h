@@ -24,7 +24,7 @@ namespace OHOS::Ace {
 const Dimension CONTAINER_INNER_RADIUS = 14.0_vp;
 const Dimension CONTAINER_OUTER_RADIUS = 16.0_vp;
 const Dimension CONTAINER_BORDER_WIDTH = 1.0_vp;
-const Dimension CONTAINER_TITLE_HEIGHT = 48.0_vp;
+const Dimension CONTAINER_TITLE_HEIGHT = 37.0_vp;
 const Dimension TITLE_PADDING_START = 20.0_vp;
 const Dimension TITLE_PADDING_END = 20.0_vp;
 const Dimension ZERO_PADDING = 0.0_vp;

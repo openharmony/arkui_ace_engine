@@ -619,7 +619,6 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
         auto jsView = weak.Upgrade();
         CHECK_NULL_VOID(jsView);
         ContainerScope scope(jsView->GetInstanceId());
-        recycleNode->ResetRecycle();
         auto name = jsView->GetRecycleCustomNodeName();
         if (name.empty()) {
             return;
@@ -629,6 +628,7 @@ RefPtr<AceType> JSViewPartialUpdate::CreateViewNode(bool isTitleNode)
         if (!recycleNode->HasRecycleRenderFunc()) {
             jsView->jsViewFunction_->ExecuteAboutToRecycle();
         }
+        recycleNode->ResetRecycle();
         jsView->jsViewFunction_->ExecuteRecycle(jsView->GetRecycleCustomNodeName());
     };
 

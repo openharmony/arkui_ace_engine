@@ -18,6 +18,9 @@
 #include "base/utils/utils.h"
 #define protected public
 #define private public
+#include "test/mock/core/render/mock_canvas_image.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
 #include "base/geometry/ng/point_t.h"
 #include "core/components/common/properties/paint_state.h"
 #include "core/components_ng/pattern/image/image_paint_method.h"
@@ -26,7 +29,6 @@
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
 #include "core/components_ng/render/image_painter.h"
-#include "test/mock/core/render/mock_canvas_image.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 #undef private
@@ -37,7 +39,7 @@ using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace {
-Testing::TestingCanvas testingCanvas;
+Testing::MockCanvas testingCanvas;
 
 const NG::OffsetF& OFFSETF { 1, 1 };
 const NG::SizeF& SIZE { 10, 10 };

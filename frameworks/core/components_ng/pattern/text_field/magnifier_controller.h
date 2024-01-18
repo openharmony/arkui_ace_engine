@@ -22,6 +22,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/render/drawing.h"
 #include "frameworks/base/memory/referenced.h"
 
 namespace OHOS::Ace::NG {
@@ -52,6 +53,7 @@ public:
 
 private:
     void CreateMagnifierChildNode();
+    void SetMagnifierRect(const RefPtr<Pattern>& childPattern);
 
     bool haveChildNode_ = false;
     WeakPtr<Pattern> pattern_;

@@ -20,6 +20,7 @@
 #include "testing_brush.h"
 #include "testing_color.h"
 #include "testing_image.h"
+#include "testing_matrix.h"
 #include "testing_path.h"
 #include "testing_pen.h"
 #include "testing_point.h"
@@ -27,6 +28,7 @@
 #include "testing_rect.h"
 #include "testing_round_rect.h"
 #include "testing_sampling_options.h"
+#include "testing_save_layer_ops.h"
 #include "testing_shadowflags.h"
 
 namespace OHOS::Ace::Testing {
@@ -95,7 +97,7 @@ public:
     virtual void DrawCircle(const TestingPoint& center, float radius) {}
     virtual void DrawRoundRect(const TestingRoundRect& roundRect) {}
     virtual void DrawBackground(const TestingBrush& brush) {}
-    virtual void ClipRect(const TestingRect& rect, ClipOp op) {}
+    virtual void ClipRect(const TestingRect& rect, ClipOp op = ClipOp::INTERSECT, bool doAntiAlias = false) {}
     virtual void Scale(float sx, float sy) {}
     virtual void ClipPath(const TestingPath& path, ClipOp op, bool doAntiAlias) {}
     virtual void DrawOval(const TestingRect& oval) {}
@@ -106,6 +108,15 @@ public:
         const TestingSamplingOptions& sampling,
         SrcRectConstraint constraint = SrcRectConstraint::STRICT_SRC_RECT_CONSTRAINT)
     {}
+    virtual void SaveLayer(const TestingSaveLayerOps& saveLayerOps) {}
+    virtual uint32_t GetSaveCount() const
+    {
+        return 0;
+    }
+
+    virtual void RestoreToCount(uint32_t count) {}
+
+    virtual void ConcatMatrix(const TestingMatrix& matrix) {}
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_CANVAS_H

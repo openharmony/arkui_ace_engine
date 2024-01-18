@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -241,7 +241,7 @@ void SetTextMinFontSize(ArkUINodeHandle node, const ArkUI_Float64 number, const 
     TextModelNG::SetAdaptMinFontSize(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
 }
 
-void ReSetTextMinFontSize(ArkUINodeHandle node)
+void ResetTextMinFontSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -460,7 +460,7 @@ void ResetTextFont(ArkUINodeHandle node)
     font.fontFamilies = families;
     TextModelNG::SetFont(frameNode, font);
 }
-}
+} // namespace
 
 namespace NodeModifier {
 const ArkUITextModifier* GetTextModifier()
@@ -469,7 +469,7 @@ const ArkUITextModifier* GetTextModifier()
         ResetFontStyle, SetTextAlign, ResetTextAlign, SetFontColor, ResetFontColor, SetFontSize, ResetFontSize,
         SetTextLineHeight, ResetTextLineHeight, SetTextTextOverflow, ResetTextTextOverflow, SetTextDecoration,
         ResetTextDecoration, SetTextTextCase, ResetTextTextCase, SetTextMaxLines, ResetTextMaxLines, SetTextMinFontSize,
-        ReSetTextMinFontSize, SetTextDraggable, ResetTextDraggable, SetTextMaxFontSize, ResetTextMaxFontSize,
+        ResetTextMinFontSize, SetTextDraggable, ResetTextDraggable, SetTextMaxFontSize, ResetTextMaxFontSize,
         SetTextFontFamily, ResetTextFontFamily, SetTextCopyOption, ResetTextCopyOption, SetTextTextShadow,
         ResetTextTextShadow, SetTextHeightAdaptivePolicy, ResetTextHeightAdaptivePolicy, SetTextTextIndent,
         ResetTextTextIndent, SetTextBaselineOffset, ResetTextBaselineOffset, SetTextLetterSpacing,

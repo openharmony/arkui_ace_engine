@@ -18,6 +18,8 @@
 #include <memory>
 
 #include "gtest/gtest.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
 #include "core/components/scroll/scroll_controller_base.h"
 
 #define protected public
@@ -36,13 +38,13 @@
 #include "base/utils/utils.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/waterflow/water_flow_accessibility_property.h"
 #include "core/components_ng/pattern/waterflow/water_flow_event_hub.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
@@ -1234,7 +1236,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowContentModifier_onDraw001, TestSize.Level1)
     pattern_->CreateNodePaintMethod();
     auto contentModifier = pattern_->contentModifier_;
     ASSERT_NE(contentModifier, nullptr);
-    RSCanvas canvas;
+    Testing::MockCanvas canvas;
     DrawingContext context = { canvas, 1, 1 };
     /**
      * @tc.steps: step2. test function.
@@ -1473,7 +1475,7 @@ HWTEST_F(WaterFlowTestNg, WaterFlowGetItemRectTest001, TestSize.Level1)
  */
 HWTEST_F(WaterFlowTestNg, MeasureForAnimation001, TestSize.Level1)
 {
-     /**
+    /**
      * @tc.steps: step1. Create WithItem to test MeaseForAnimation for node creation .
      * @tc.expected: pattern_->layoutInfo_ There is corresponding index information in it.
      */
@@ -1482,7 +1484,7 @@ HWTEST_F(WaterFlowTestNg, MeasureForAnimation001, TestSize.Level1)
         CreateItem(TOTAL_LINE_NUMBER * 2);
     });
     pattern_->ScrollToIndex(15, true);
-    
+
     /**
      * @tc.steps: step2. Get value from  pattern_ -> LayoutInfo_ .
      * @tc.expected: return value(crossIndex) is not -1.
@@ -1531,7 +1533,7 @@ HWTEST_F(WaterFlowTestNg, ScrollToIndex002, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, 0);
     EXPECT_EQ(pattern_->layoutInfo_.currentOffset_, -1100);
 
-    pattern_->ScrollToIndex(LAST_ITEM, false, ScrollAlign::START);
+    pattern_->ScrollToIndex(LAST_ITEM);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->layoutInfo_.startIndex_, 19);
     EXPECT_EQ(pattern_->layoutInfo_.storedOffset_, -100);

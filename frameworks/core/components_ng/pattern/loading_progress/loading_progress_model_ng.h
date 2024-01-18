@@ -30,6 +30,7 @@ public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetColor(FrameNode* frameNode, const Color& value);
     static void SetEnableLoading(FrameNode* frameNode, bool enable);
+    static void SetForegroundColor(FrameNode* frameNode, const Color& value);
 };
 
 } // namespace OHOS::Ace::NG

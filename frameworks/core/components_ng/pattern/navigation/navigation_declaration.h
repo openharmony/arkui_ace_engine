@@ -52,8 +52,8 @@ constexpr float SINGLE_PAGE_MAXIMUM_WIDTH = 720.0f;
 constexpr Dimension MAX_TITLE_FONT_SIZE = 30.0_vp;
 constexpr Dimension MIN_TITLE_FONT_SIZE = 20.0_vp;
 constexpr Dimension MIN_ADAPT_TITLE_FONT_SIZE = 14.0_vp;
-const std::string TITLE_MAIN = "MainOnly";
-const std::string TITLE_MAIN_WITH_SUB = "MainWithSub";
+constexpr const char* TITLE_MAIN = "MainOnly";
+constexpr const char* TITLE_MAIN_WITH_SUB = "MainWithSub";
 
 // subtitle
 constexpr Dimension SUBTITLE_FONT_SIZE = 14.0_vp; // ohos_id_text_size_sub_title3
@@ -99,6 +99,9 @@ constexpr Dimension BUTTON_RADIUS_SIZE = 5.0_vp;
 constexpr Dimension MAX_OVER_DRAG_OFFSET = 180.0_vp;
 constexpr Dimension DEFAULT_MIN_NAV_BAR_WIDTH = 240.0_vp;
 constexpr Dimension DEFAULT_MAX_NAV_BAR_WIDTH = 432.0_vp;
+constexpr Dimension MAX_MENU_CHANGE_SIZE = 600.0_vp;
+constexpr int8_t MAX_MENU_NUM_SMALL = 3;
+const int8_t MAX_MENU_NUM_LARGE = 5;
 constexpr float MAX_NAV_BAR_WIDTH_SCALE = 0.4f;
 
 // more button

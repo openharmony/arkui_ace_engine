@@ -67,6 +67,8 @@ public:
 
     void RefreshStack(FoldStatus foldStatus);
 
+    void OnFolderStateChangeSend(FoldStatus foldStatus);
+
     void UpdateFoldStatusChangedCallbackId(std::optional<int32_t> id)
     {
         foldStatusChangedCallbackId_ = id;

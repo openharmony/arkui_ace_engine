@@ -16,6 +16,7 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 #include "base/log/frame_report.h"
+#include "base/longframe/long_frame_report.h"
 #include "base/memory/referenced.h"
 #include "base/utils/time_util.h"
 #include "base/utils/utils.h"
@@ -88,6 +89,11 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
         LOGF("you are already in flushing layout!");
         abort();
     }
+
+    // Pause GC during long frame
+    std::unique_ptr<ILongFrame> longFrame = std::make_unique<ILongFrame>();
+    longFrame->ReportStartEvent();
+
     isLayouting_ = true;
     auto dirtyLayoutNodes = std::move(dirtyLayoutNodes_);
     PageDirtySet dirtyLayoutNodesSet(dirtyLayoutNodes.begin(), dirtyLayoutNodes.end());
@@ -107,6 +113,9 @@ void UITaskScheduler::FlushLayoutTask(bool forceUseMainThread)
         }
     }
     ExpandSafeArea();
+
+    longFrame->ReportEndEvent();
+
     isLayouting_ = false;
 }
 

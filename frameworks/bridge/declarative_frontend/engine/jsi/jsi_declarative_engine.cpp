@@ -368,7 +368,6 @@ bool JsiDeclarativeEngineInstance::InitJsEnv(bool debuggerMode,
             PreloadPerfutil(runtime_, global);
             PreloadExports(runtime_, global);
             PreloadRequireNative(runtime_, global);
-            PreloadJsEnums(runtime_);
             PreloadStateManagement(runtime_);
             PreloadUIContent(runtime_);
             PreloadArkComponent(runtime_);
@@ -437,12 +436,14 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleWorker(void* runtime)
     if (!arkRuntime->InitializeFromExistVM(vm)) {
         return;
     }
+    localRuntime_ = arkRuntime;
     LocalScope scope(vm);
+
+    // preload js views
+    JsRegisterWorkerViews(JSNApi::GetGlobalObject(vm), runtime);
 
     // preload js enums
     PreloadJsEnums(arkRuntime);
-
-    localRuntime_ = arkRuntime;
 }
 
 extern "C" ACE_FORCE_EXPORT void OHOS_ACE_PreloadAceModule(void* runtime)
@@ -1236,7 +1237,7 @@ bool JsiDeclarativeEngine::ExecuteDynamicAbc(const std::string& fileName, const 
     panda::TryCatch trycatch(vm);
 
     char* entry = entryPoint.empty() ? nullptr : const_cast<char*>(entryPoint.c_str());
-    [[maybe_unused]] napi_value result = engine->RunScript(fileName.c_str(), entry);
+    [[maybe_unused]] napi_value result = engine->RunScriptForAbc(fileName.c_str(), entry);
     if (!trycatch.HasCaught()) {
         return true;
     } else {

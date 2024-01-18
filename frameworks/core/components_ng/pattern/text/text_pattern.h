@@ -310,8 +310,8 @@ public:
     void UpdateSpanItemDragStatus(const std::list<ResultObject>& resultObjects, bool IsDragging);
     virtual std::function<void(Offset)> GetThumbnailCallback();
     std::list<ResultObject> dragResultObjects_;
-    void OnDragEnd();
-    void OnDragEndNoChild();
+    void OnDragEnd(const RefPtr<Ace::DragEvent>& event);
+    void OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event);
     void CloseOperate();
     void OnDragMove(const RefPtr<Ace::DragEvent>& event);
 
@@ -512,6 +512,8 @@ public:
         selectionMenuMap_.clear();
     }
 
+    virtual const std::list<RefPtr<UINode>>& GetAllChildren() const;
+
 protected:
     void OnAfterModifyDone() override;
     virtual void HandleOnCopy();
@@ -674,6 +676,7 @@ private:
     std::optional<TextResponseType> textResponseType_;
     RefPtr<TextController> textController_;
     TextSpanType oldSelectedType_ = TextSpanType::NONE;
+    mutable std::list<RefPtr<UINode>> childNodes_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG

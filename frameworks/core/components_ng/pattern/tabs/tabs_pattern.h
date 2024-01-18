@@ -107,6 +107,30 @@ public:
         isDisableSwipe_ = isDisableSwipe;
     }
 
+    void SetOnContentWillChange(std::function<bool(int32_t, int32_t)>&& callback)
+    {
+        callback_ = callback;
+    }
+
+    std::optional<bool> OnContentWillChange(int32_t preIndex, int32_t index) const
+    {
+        std::optional<bool> ret;
+        if (callback_) {
+            ret = callback_(preIndex, index);
+        }
+        return ret;
+    }
+
+    void SetInterceptStatus(bool status)
+    {
+        interceptStatus_ = status;
+    }
+
+    bool GetInterceptStatus() const
+    {
+        return interceptStatus_;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     void OnAfterModifyDone() override;
@@ -119,13 +143,14 @@ private:
 
     bool isCustomAnimation_ = false;
     bool isDisableSwipe_ = false;
-    bool isBlurStyle_ = false;
 
     ChangeEventPtr onChangeEvent_;
     ChangeEventPtr onTabBarClickEvent_;
     ChangeEventPtr onIndexChangeEvent_;
     AnimationStartEventPtr animationStartEvent_;
     AnimationEndEventPtr animationEndEvent_;
+    std::function<bool(int32_t, int32_t)> callback_;
+    bool interceptStatus_ = false;
 };
 
 } // namespace OHOS::Ace::NG

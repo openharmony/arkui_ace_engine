@@ -428,6 +428,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest005, TestSize.Level1)
     ASSERT_NE(scrollBarPatternRaw1, nullptr);
     scrollBarProxy->RegisterScrollBar(AceType::WeakClaim(scrollBarPatternRaw1));
     EXPECT_EQ(scrollBarProxy->scrollBars_.size(), 1);
+    scrollBarProxy->NotifyScrollBar(nullptr);
+    EXPECT_EQ(pattern_->currentOffset_, 0.0f);
     scrollBarProxy->NotifyScrollBar(AceType::WeakClaim(scrollRaw));
     EXPECT_EQ(pattern_->currentOffset_, 0.0f);
 
@@ -837,7 +839,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest012, TestSize.Level1)
     const int32_t size = result.size();
     EXPECT_EQ(pattern_->scrollableEvent_->InBarRegion(localPoint, source), true);
 
-    pattern_->scrollableEvent_->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result);
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::LIST_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    pattern_->scrollableEvent_->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result, frameNode, nullptr);
     EXPECT_FLOAT_EQ(pattern_->panRecognizer_->GetCoordinateOffset().GetX(), coordinateOffset.GetX());
     EXPECT_FLOAT_EQ(pattern_->panRecognizer_->GetCoordinateOffset().GetY(), coordinateOffset.GetY());
     EXPECT_EQ(result.size(), size + 1);
@@ -847,7 +850,7 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest012, TestSize.Level1)
     EXPECT_EQ(pattern_->scrollableEvent_->InBarRegion(localPoint, source), false);
 
     pattern_->panRecognizer_ = nullptr;
-    pattern_->scrollableEvent_->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result);
+    pattern_->scrollableEvent_->BarCollectTouchTarget(coordinateOffset, getEventTargetImpl, result, frameNode, nullptr);
     EXPECT_EQ(result.size(), size + 1);
 }
 
@@ -960,5 +963,239 @@ HWTEST_F(ScrollBarTestNg, ScrollBarTest015, TestSize.Level1)
     frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->opacity_, UINT8_MAX);
+}
+
+/**
+ * @tc.name: ScrollBarTest016
+ * @tc.desc: Test scrollbar NotifySnapScroll in the scrollbar proxy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBar and initialize related properties.
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    CreateScrollBar(true, false, static_cast<int>(Axis::VERTICAL), -1, layoutConstraint);
+
+    /**
+     * @tc.steps: step2. Create scrollbar proxy and verify the RegisterScrollableNode function and
+     * NotifySnapScroll function.
+     * @tc.expected: step3. Check whether relevant parameters are correct.
+     */
+    RefPtr<ScrollProxy> ScrollProxy = AceType::MakeRefPtr<ScrollBarProxy>();
+    ASSERT_NE(ScrollProxy, nullptr);
+    auto distance = -1.0;
+    auto source = SCROLL_FROM_START;
+    auto scrollStartCallback = [&distance, &source](double parameter1, int32_t parameter2) {
+        distance = parameter1;
+        source = parameter2;
+        return true;
+    };
+    auto scrollEndCallback = [&distance, &source]() {
+        distance = -2.0;
+        source = SCROLL_FROM_BAR_FLING;
+        return true;
+    };
+
+    // no ScrollableNode
+    auto scrollBarProxy = AceType::DynamicCast<ScrollBarProxy>(ScrollProxy);
+    EXPECT_NE(scrollBarProxy, nullptr);
+    EXPECT_EQ(scrollBarProxy->scrollableNodes_.size(), 0);
+    scrollBarProxy->NotifyScrollStart();
+    EXPECT_EQ(distance, -1.0);
+    EXPECT_EQ(source, SCROLL_FROM_START);
+    scrollBarProxy->NotifyScrollStop();
+    EXPECT_EQ(distance, -1.0);
+    EXPECT_EQ(source, SCROLL_FROM_START);
+
+    // one ScrollableNode
+    auto scrollPattern1 = AceType::MakeRefPtr<ScrollPattern>();
+    EXPECT_NE(scrollPattern1, nullptr);
+    auto* scrollRaw1 = AceType::RawPtr(scrollPattern1);
+    EXPECT_NE(scrollRaw1, nullptr);
+    scrollBarProxy->RegisterScrollableNode(
+        { AceType::WeakClaim(scrollRaw1), nullptr, std::move(scrollStartCallback), std::move(scrollEndCallback) });
+    EXPECT_EQ(scrollBarProxy->scrollableNodes_.size(), 1);
+    scrollBarProxy->NotifyScrollStart();
+    EXPECT_EQ(distance, 0.0);
+    EXPECT_EQ(source, SCROLL_FROM_BAR);
+    scrollBarProxy->NotifyScrollStop();
+    EXPECT_EQ(distance, -2.0);
+    EXPECT_EQ(source, SCROLL_FROM_BAR_FLING);
+}
+
+/**
+ * @tc.name: ScrollBarTest017
+ * @tc.desc: Test scrollbar NotifySnapScroll in the scrollbar proxy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBar and initialize related properties.
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    CreateScrollBar(true, false, static_cast<int>(Axis::VERTICAL), -1, layoutConstraint);
+
+    /**
+     * @tc.steps: step2. Create scrollbar proxy and verify the RegisterScrollableNode function and
+     * NotifySnapScroll function.
+     * @tc.expected: Check whether relevant parameters are correct.
+     */
+    RefPtr<ScrollProxy> ScrollProxy = AceType::MakeRefPtr<ScrollBarProxy>();
+    ASSERT_NE(ScrollProxy, nullptr);
+    auto distance = -1.0;
+    auto source = SCROLL_FROM_START;
+    auto scrollStartCallback = [&distance, &source](double parameter1, int32_t parameter2) {
+        distance = parameter1;
+        source = parameter2;
+        return true;
+    };
+    auto scrollEndCallback = [&distance, &source]() {
+        distance = -2.0;
+        source = SCROLL_FROM_BAR_FLING;
+        return true;
+    };
+
+    // one ScrollableNode
+    auto scrollBarProxy = AceType::DynamicCast<ScrollBarProxy>(ScrollProxy);
+    auto scrollPattern1 = AceType::MakeRefPtr<ScrollPattern>();
+    EXPECT_NE(scrollPattern1, nullptr);
+    auto* scrollRaw1 = AceType::RawPtr(scrollPattern1);
+    EXPECT_NE(scrollRaw1, nullptr);
+    scrollBarProxy->RegisterScrollableNode(
+        { AceType::WeakClaim(scrollRaw1), nullptr, std::move(scrollStartCallback), std::move(scrollEndCallback) });
+
+    // two ScrollableNode (the last node callback func is null)
+    distance = -1.0;
+    source = SCROLL_FROM_START;
+    auto scrollPattern2 = AceType::MakeRefPtr<ScrollPattern>();
+    EXPECT_NE(scrollPattern2, nullptr);
+    auto* scrollRaw2 = AceType::RawPtr(scrollPattern2);
+    EXPECT_NE(scrollRaw2, nullptr);
+    scrollBarProxy->RegisterScrollableNode({ AceType::WeakClaim(scrollRaw2), nullptr, nullptr, nullptr });
+    EXPECT_EQ(scrollBarProxy->scrollableNodes_.size(), 2);
+    scrollBarProxy->NotifyScrollStart();
+    EXPECT_EQ(distance, 0.0);
+    EXPECT_EQ(source, SCROLL_FROM_BAR);
+    scrollBarProxy->NotifyScrollStop();
+    EXPECT_EQ(distance, -2.0);
+    EXPECT_EQ(source, SCROLL_FROM_BAR_FLING);
+}
+
+/**
+ * @tc.name: ScrollBarTest018
+ * @tc.desc: Test scrollbar NotifySnapScroll in the scrollbar proxy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBar and initialize related properties.
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    CreateScrollBar(true, false, static_cast<int>(Axis::VERTICAL), -1, layoutConstraint);
+
+    /**
+     * @tc.steps: step2. Create scrollbar proxy and verify the RegisterScrollableNode function and
+     * NotifySnapScroll function.
+     * @tc.expected: Check whether relevant parameters are correct.
+     */
+    RefPtr<ScrollProxy> ScrollProxy = AceType::MakeRefPtr<ScrollBarProxy>();
+    ASSERT_NE(ScrollProxy, nullptr);
+    float scrollSnapDelta = 0;
+    float scrollSnapVelocity = 0;
+    auto startScrollSnapMotionCallback = [&scrollSnapDelta, &scrollSnapVelocity](float parameter1, float parameter2) {
+        scrollSnapDelta = parameter1;
+        scrollSnapVelocity = parameter2;
+    };
+    CalePredictSnapOffsetCallback calePredictSnapOffsetCallback = [](float delta, float dragDistance, float velocity) {
+        return (delta + dragDistance + velocity);
+    };
+    // no ScrollableNode
+    auto scrollBarProxy = AceType::DynamicCast<ScrollBarProxy>(ScrollProxy);
+    EXPECT_NE(scrollBarProxy, nullptr);
+    EXPECT_EQ(scrollBarProxy->scrollableNodes_.size(), 0);
+    scrollBarProxy->NotifySnapScroll(10.0f, 10.0f, 1.0f, 1.0f);
+    EXPECT_EQ(scrollSnapDelta, 0);
+    EXPECT_EQ(scrollSnapVelocity, 0);
+
+    // one ScrollableNode
+    auto scrollPattern1 = AceType::MakeRefPtr<ScrollPattern>();
+    EXPECT_NE(scrollPattern1, nullptr);
+    auto* scrollRaw1 = AceType::RawPtr(scrollPattern1);
+    EXPECT_NE(scrollRaw1, nullptr);
+    scrollPattern1->scrollableDistance_ = SCROLL_BAR_FLOAT_100;
+    scrollBarProxy->RegisterScrollableNode({ AceType::WeakClaim(scrollRaw1), nullptr, nullptr, nullptr,
+        std::move(calePredictSnapOffsetCallback), std::move(startScrollSnapMotionCallback) });
+    EXPECT_EQ(scrollBarProxy->scrollableNodes_.size(), 1);
+    scrollBarProxy->NotifySnapScroll(10.0f, 10.0f, 1.0f, 1.0f);
+    EXPECT_EQ(scrollSnapDelta, -10.0);
+    EXPECT_EQ(scrollSnapVelocity, 10.0);
+}
+
+/**
+ * @tc.name: ScrollBarTest019
+ * @tc.desc: Test scrollbar NotifySnapScroll in the scrollbar proxy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, ScrollBarTest019, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create scrollBar and initialize related properties.
+     */
+    LayoutConstraintF layoutConstraint;
+    layoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutConstraint.parentIdealSize.SetSize(CONTAINER_SIZE);
+    CreateScrollBar(true, false, static_cast<int>(Axis::VERTICAL), -1, layoutConstraint);
+
+    /**
+     * @tc.steps: step2. Create scrollbar proxy and verify the RegisterScrollableNode function and
+     * NotifySnapScroll function.
+     * @tc.expected: step3. Check whether relevant parameters are correct.
+     */
+    RefPtr<ScrollProxy> ScrollProxy = AceType::MakeRefPtr<ScrollBarProxy>();
+    ASSERT_NE(ScrollProxy, nullptr);
+    float scrollSnapDelta = 0;
+    float scrollSnapVelocity = 0;
+    auto startScrollSnapMotionCallback = [&scrollSnapDelta, &scrollSnapVelocity](float parameter1, float parameter2) {
+        scrollSnapDelta = parameter1;
+        scrollSnapVelocity = parameter2;
+    };
+    CalePredictSnapOffsetCallback calePredictSnapOffsetCallback = [](float delta, float dragDistance, float velocity) {
+        return (delta + dragDistance + velocity);
+    };
+
+    // one ScrollableNode calePredictSnapOffsetCallback/startScrollSnapMotionCallback
+    auto scrollBarProxy = AceType::DynamicCast<ScrollBarProxy>(ScrollProxy);
+    auto scrollPattern1 = AceType::MakeRefPtr<ScrollPattern>();
+    auto* scrollRaw1 = AceType::RawPtr(scrollPattern1);
+    scrollBarProxy->RegisterScrollableNode({ AceType::WeakClaim(scrollRaw1), nullptr, nullptr, nullptr,
+        std::move(calePredictSnapOffsetCallback), std::move(startScrollSnapMotionCallback) });
+    // two ScrollableNode calePredictSnapOffsetCallback/nullptr
+    auto scrollPattern2 = AceType::MakeRefPtr<ScrollPattern>();
+    auto* scrollRaw2 = AceType::RawPtr(scrollPattern2);
+    scrollBarProxy->RegisterScrollableNode({ AceType::WeakClaim(scrollRaw2), nullptr, nullptr, nullptr,
+        std::move(calePredictSnapOffsetCallback), nullptr });
+    // three ScrollableNode nullptr/startScrollSnapMotionCallback
+    scrollSnapDelta = 0;
+    scrollSnapVelocity = 0;
+    auto scrollPattern3 = AceType::MakeRefPtr<ScrollPattern>();
+    auto* scrollRaw3 = AceType::RawPtr(scrollPattern3);
+    EXPECT_NE(scrollRaw3, nullptr);
+    scrollPattern3->scrollableDistance_ = SCROLL_BAR_FLOAT_100;
+    scrollBarProxy->RegisterScrollableNode({ AceType::WeakClaim(scrollRaw3), nullptr, nullptr, nullptr, nullptr,
+        std::move(startScrollSnapMotionCallback) });
+    EXPECT_EQ(scrollBarProxy->scrollableNodes_.size(), 3);
+    scrollBarProxy->NotifySnapScroll(10.0f, 10.0f, 1.0f, 1.0f);
+    EXPECT_EQ(scrollSnapDelta, -10.0);
+    EXPECT_EQ(scrollSnapVelocity, 10.0);
 }
 } // namespace OHOS::Ace::NG

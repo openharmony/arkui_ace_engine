@@ -59,7 +59,7 @@ public:
     NG::RectF GetRect() override;
     void ShowMenu(const RefPtr<Component>& newComponent) override;
     void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset) override;
-    void ShowPreviewNG() override;
+    bool ShowPreviewNG() override;
     void HidePreviewNG() override;
     void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) override;
     void HideMenuNG(bool showPreviewAnimation, bool startDrag) override;
@@ -121,12 +121,13 @@ public:
     // Gets parent window's size and offset
     Rect GetParentWindowRect() const override;
 
+    bool IsFocused() override;
     void RequestFocus() override;
     const sptr<OHOS::Rosen::Window>& GetSubWindow() const
     {
         return window_;
     }
-
+    void ResizeWindowForFoldStatus() override;
 private:
     RefPtr<StackElement> GetStack();
     void AddMenu(const RefPtr<Component>& newComponent);

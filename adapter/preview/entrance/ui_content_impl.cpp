@@ -321,6 +321,8 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     auto pipelineContext = container->GetPipelineContext();
     if (pipelineContext) {
         pipelineContext->SetMinPlatformVersion(compatibleVersion_);
+        pipelineContext->SetDisplayWindowRectInfo(
+            Rect(Offset(0.0f, 0.0f), Size(deviceWidth_, deviceHeight_)));
     }
     container->InitializeAppConfig(assetPath_, bundleName_, moduleName_, compileMode_);
     AceContainer::AddRouterChangeCallback(instanceId_, onRouterChange_);

@@ -526,7 +526,9 @@ public:
     }
     void NotifyKeyboardClosedByUser() override
     {
+        isKeyboardClosedByUser_ = true;
         FocusHub::LostFocusToViewRoot();
+        isKeyboardClosedByUser_ = false;
     }
     std::u16string GetLeftTextOfCursor(int32_t number) override;
     std::u16string GetRightTextOfCursor(int32_t number) override;
@@ -793,7 +795,7 @@ public:
     bool HandleOnTab(bool backward) override;
     void HandleOnEnter() override
     {
-        PerformAction(GetTextInputActionValue(TextInputAction::DONE), false);
+        PerformAction(GetTextInputActionValue(GetDefaultTextInputAction()), false);
     }
     void HandleOnUndoAction() override;
     void HandleOnRedoAction() override;
@@ -1073,6 +1075,8 @@ public:
         return lastClickTimeStamp_;
     }
 
+    void CheckTextAlignByDirection(TextAlign& textAlign, TextDirection direction);
+
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
 
@@ -1115,6 +1119,7 @@ private:
     void InitDragDropEvent();
     std::function<DragDropInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragStart();
     std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> OnDragDrop();
+    void ShowSelectAfterDragDrop();
     void ClearDragDropEvent();
     std::function<void(Offset)> GetThumbnailCallback();
     void HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& notifyDragEvent);
@@ -1252,6 +1257,7 @@ private:
     void RecordSubmitEvent() const;
     void UpdateCancelNode();
     void RequestKeyboardAfterLongPress();
+    void UpdatePasswordModeState();
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1408,9 +1414,12 @@ private:
     bool isTouchCaret_ = false;
     bool needSelectAll_ = false;
     bool isModifyDone_ = false;
+    bool initTextRect_ = false;
+    bool colorModeChange_ = false;
     Offset clickLocation_;
     MagnifierRect magnifierRect_;
     RefPtr<MagnifierController> magnifierController_;
+    bool isKeyboardClosedByUser_ = false;
 };
 } // namespace OHOS::Ace::NG
 

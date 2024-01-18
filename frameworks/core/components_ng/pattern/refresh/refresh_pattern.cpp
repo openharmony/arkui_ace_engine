@@ -277,9 +277,7 @@ void RefreshPattern::HandleDragStart(bool isDrag, float mainSpeed)
     } else {
         HandleDragStartLowVersion();
     }
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
+    // AccessibilityEventType::SCROLL_START
 }
 
 void RefreshPattern::HandleDragUpdate(float delta, float mainSpeed)
@@ -540,7 +538,7 @@ void RefreshPattern::UpdateBuilderHeight(float builderHeight)
     auto layoutProperty = GetLayoutProperty<RefreshLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     builderMeasureBaseHeight_ = builderHeight;
-    host->MarkForceMeasure();
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 void RefreshPattern::UpdateLoadingProgressTranslate(float scrollOffset)
@@ -764,9 +762,7 @@ void RefreshPattern::HandleDragEndLowVersion()
         SwitchToFinish();
         LoadingProgressExit();
     }
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    // AccessibilityEventType::SCROLL_END
 }
 
 void RefreshPattern::LoadingProgressRefreshingAnimation(bool isDrag)

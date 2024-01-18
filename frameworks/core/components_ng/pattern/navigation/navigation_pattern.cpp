@@ -156,8 +156,11 @@ void NavigationPattern::OnAttachToFrameNode()
     if (theme && theme->GetNavBarUnfocusEffectEnable()) {
         pipelineContext->AddWindowFocusChangedCallback(host->GetId());
     }
-    SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
-    host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
+        host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+    }
 }
 
 void NavigationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -223,6 +226,14 @@ void NavigationPattern::OnModifyDone()
     auto size = navigationStack_->Size();
     CheckTopNavPathChange(preTopNavPath, newTopNavPath, preSize > size);
 
+    /* if first navDestination is removed, the new one will be refreshed */
+    if (!navPathList.empty()) {
+        auto firstNavDesNode = AceType::DynamicCast<NavDestinationGroupNode>(
+            NavigationGroupNode::GetNavDestinationNode(navPathList.front().second));
+        CHECK_NULL_VOID(firstNavDesNode);
+        firstNavDesNode->MarkModifyDone();
+    }
+
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto currentPlatformVersion = pipeline->GetMinPlatformVersion();
@@ -236,6 +247,22 @@ void NavigationPattern::OnModifyDone()
         auto inputHub = dividerNode->GetOrCreateInputEventHub();
         CHECK_NULL_VOID(inputHub);
         InitDividerMouseEvent(inputHub);
+    }
+
+    auto&& opts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
+    if (opts && opts->Expansive()) {
+        navBarNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+        navBarNode->MarkModifyDone();
+
+        auto navigationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
+        CHECK_NULL_VOID(navigationContentNode);
+        navigationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+        navigationContentNode->MarkModifyDone();
+
+        auto dividerNode = AceType::DynamicCast<FrameNode>(hostNode->GetDividerNode());
+        CHECK_NULL_VOID(dividerNode);
+        dividerNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+        dividerNode->MarkModifyDone();
     }
 }
 
@@ -347,6 +374,12 @@ void NavigationPattern::CheckTopNavPathChange(
             auto lastStandardIndex = hostNode->GetLastStandardIndex();
             isShow = (lastPreIndex != -1) && (lastPreIndex >= lastStandardIndex);
             hostNode->SetNeedSetInvisible(lastStandardIndex >= 0);
+            if (lastStandardIndex < 0) {
+                auto navBarNode = AceType::DynamicCast<FrameNode>(hostNode->GetNavBarNode());
+                auto layoutProperty = navBarNode->GetLayoutProperty();
+                layoutProperty->UpdateVisibility(VisibleType::VISIBLE, true);
+                navBarNode->SetActive(true);
+            }
         }
         auto navDestinationPattern = AceType::DynamicCast<NavDestinationPattern>(preTopNavDestination->GetPattern());
         CHECK_NULL_VOID(navDestinationPattern);
@@ -865,8 +898,7 @@ void NavigationPattern::HandleDragUpdate(float xOffset)
 
     float minNavBarWidthPx = minNavBarWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
     float maxNavBarWidthPx = maxNavBarWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
-    float minContentWidthPx = userSetMinContentFlag_ && !userSetNavBarRangeFlag_ ?
-        minContentWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f)) : 0.0f;
+    float minContentWidthPx = minContentWidthValue_.ConvertToPxWithSize(parentSize.Width().value_or(0.0f));
     auto dividerWidth = static_cast<float>(DIVIDER_WIDTH.ConvertToPx());
 
     auto navigationPosition = navigationLayoutProperty->GetNavBarPosition().value_or(NavBarPosition::START);
@@ -956,7 +988,7 @@ void NavigationPattern::OnHover(bool isHover)
     CHECK_NULL_VOID(layoutProperty);
     auto userSetMinNavBarWidthValue = layoutProperty->GetMinNavBarWidthValue(defaultValue);
     auto userSetMaxNavBarWidthValue = layoutProperty->GetMaxNavBarWidthValue(defaultValue);
-    if (userSetMinNavBarWidthValue == userSetMaxNavBarWidthValue && userSetNavBarRangeFlag_) {
+    if (userSetNavBarRangeFlag_ && userSetMinNavBarWidthValue == userSetMaxNavBarWidthValue) {
         return;
     }
     if (currentPointerStyle != static_cast<int32_t>(format)) {
@@ -1191,7 +1223,7 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
             break;
         }
         if ((newTopNavDestination && preTopNavDestination && isPopPage) ||
-            (preTopNavDestination && !newTopNavDestination && navigationMode_ == NavigationMode::STACK)) {
+            (preTopNavDestination && !newTopNavDestination)) {
             PageTransitionType preNodeTransitionType = preTopNavDestination->GetTransitionType();
             if (preNodeTransitionType != PageTransitionType::EXIT_POP) {
                 TAG_LOGI(AceLogTag::ACE_NAVIGATION, "previous destination node is executing another transition");

@@ -1306,7 +1306,7 @@ export class AlertDialog extends ViewPU {
         left: 24,
         right: 24,
         top: 24,
-        bottom: this.secondaryButton.value && this.primaryButton.value ? 0 : 24
+        bottom: this.secondaryButton.value || this.primaryButton.value ? 0 : 24
       });
       o || Row.pop();
       ViewStackProcessor.StopGetAccessRecording();

@@ -105,6 +105,7 @@ void TextPickerTossAnimationController::StartSpringMotion()
     CreatePropertyCallback();
     CHECK_NULL_VOID(property_);
     renderContext->AttachNodeAnimatableProperty(property_);
+    property_->SetPropertyUnit(PropertyUnit::PIXEL_POSITION);
     auto finishCallback = [weak, column]() {
         auto ref = weak.Upgrade();
         CHECK_NULL_VOID(ref);

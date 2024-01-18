@@ -28,7 +28,6 @@
 namespace OHOS::Ace::NG {
 void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
 {
-    CHECK_NULL_VOID(customNode);
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::MENU_ITEM_ETS_TAG, nodeId);
@@ -51,6 +50,7 @@ void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
     border.SetRadius(theme->GetInnerBorderRadius());
     renderContext->UpdateBorderRadius(border);
 
+    CHECK_NULL_VOID(customNode);
     menuItem->AddChild(customNode);
 }
 
@@ -297,4 +297,15 @@ void MenuItemModelNG::SetFontStyle(FrameNode* frameNode, Ace::FontStyle style)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, ItalicFontStyle, style, frameNode);
 }
+
+void MenuItemModelNG::SetSelectIcon(FrameNode* frameNode, bool isShow)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, SelectIcon, isShow, frameNode);
+}
+
+void MenuItemModelNG::SetSelectIconSrc(FrameNode* frameNode, const std::string& src)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(MenuItemLayoutProperty, SelectIconSrc, src, frameNode);
+}
+
 } // namespace OHOS::Ace::NG

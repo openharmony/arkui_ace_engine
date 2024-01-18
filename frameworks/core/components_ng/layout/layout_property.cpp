@@ -235,6 +235,7 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
         MinusPaddingToSize(margin, layoutConstraint_->selfIdealSize);
         MinusPaddingToSize(margin, layoutConstraint_->parentIdealSize);
     }
+    auto originMax = layoutConstraint_->maxSize;
     if (calcLayoutConstraint_) {
         if (calcLayoutConstraint_->maxSize.has_value()) {
             layoutConstraint_->UpdateMaxSizeWithCheck(ConvertToSize(calcLayoutConstraint_->maxSize.value(),
@@ -251,7 +252,7 @@ void LayoutProperty::UpdateLayoutConstraint(const LayoutConstraintF& parentConst
         }
     }
 
-    CheckSelfIdealSize();
+    CheckSelfIdealSize(parentConstraint, originMax);
     CheckBorderAndPadding();
     CheckAspectRatio();
 }
@@ -376,7 +377,7 @@ bool LayoutProperty::UpdateGridOffset(const RefPtr<FrameNode>& host)
     return true;
 }
 
-void LayoutProperty::CheckSelfIdealSize()
+void LayoutProperty::CheckSelfIdealSize(const LayoutConstraintF& parentConstraint, const SizeF& originMax)
 {
     if (measureType_ == MeasureType::MATCH_PARENT) {
         layoutConstraint_->UpdateIllegalSelfIdealSizeWithCheck(layoutConstraint_->parentIdealSize);
@@ -384,14 +385,34 @@ void LayoutProperty::CheckSelfIdealSize()
     if (!calcLayoutConstraint_) {
         return;
     }
+    SizeF minSize(-1.0f, -1.0f);
+    SizeF maxSize(-1.0f, -1.0f);
     if (calcLayoutConstraint_->maxSize.has_value()) {
-        layoutConstraint_->selfIdealSize.UpdateSizeWhenSmaller(ConvertToSize(calcLayoutConstraint_->maxSize.value(),
-            layoutConstraint_->scaleProperty, layoutConstraint_->percentReference));
+        maxSize = ConvertToSize(calcLayoutConstraint_->maxSize.value(), layoutConstraint_->scaleProperty,
+            layoutConstraint_->percentReference);
     }
     if (calcLayoutConstraint_->minSize.has_value()) {
-        layoutConstraint_->selfIdealSize.UpdateSizeWhenLarger(ConvertToSize(calcLayoutConstraint_->minSize.value(),
-            layoutConstraint_->scaleProperty, layoutConstraint_->percentReference));
+        minSize = ConvertToSize(calcLayoutConstraint_->minSize.value(), layoutConstraint_->scaleProperty,
+            layoutConstraint_->percentReference);
     }
+    if (calcLayoutConstraint_->maxSize.has_value()) {
+        if (GreatNotEqual(maxSize.Width(), 0.0f) && GreatNotEqual(minSize.Width(), 0.0f) &&
+            GreatNotEqual(maxSize.Width(), minSize.Width())) {
+            layoutConstraint_->UpdateMaxWidthWithCheck(maxSize);
+            layoutConstraint_->selfIdealSize.UpdateWidthWhenSmaller(maxSize);
+        } else {
+            layoutConstraint_->maxSize.SetWidth(originMax.Width());
+        }
+        if (GreatNotEqual(maxSize.Height(), 0.0f) && GreatNotEqual(minSize.Height(), 0.0f) &&
+            GreatNotEqual(maxSize.Height(), minSize.Height())) {
+            layoutConstraint_->UpdateMaxHeightWithCheck(maxSize);
+            layoutConstraint_->selfIdealSize.UpdateHeightWhenSmaller(maxSize);
+        } else {
+            layoutConstraint_->maxSize.SetHeight(originMax.Height());
+        }
+    }
+    layoutConstraint_->UpdateMinSizeWithCheck(minSize);
+    layoutConstraint_->selfIdealSize.UpdateSizeWhenLarger(minSize);
 }
 
 LayoutConstraintF LayoutProperty::CreateChildConstraint() const

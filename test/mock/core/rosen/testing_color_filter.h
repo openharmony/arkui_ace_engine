@@ -30,6 +30,26 @@ public:
     {
         return std::make_shared<TestingColorFilter>();
     }
+
+    static std::shared_ptr<TestingColorFilter> CreateSrgbGammaToLinear()
+    {
+        return std::make_shared<TestingColorFilter>();
+    }
+
+    static std::shared_ptr<TestingColorFilter> CreateLinearToSrgbGamma()
+    {
+        return std::make_shared<TestingColorFilter>();
+    }
+
+    static std::shared_ptr<TestingColorFilter> CreateLumaColorFilter()
+    {
+        return std::make_shared<TestingColorFilter>();
+    }
+
+    static std::shared_ptr<TestingColorFilter> CreateComposeColorFilter(TestingColorFilter& f1, TestingColorFilter& f2)
+    {
+        return std::make_shared<TestingColorFilter>();
+    }
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_COLOR_FILTER_H

@@ -52,6 +52,7 @@ public:
 
     void OnSurfaceCreate(const OHOS::AppExecFwk::FormJsInfo& formJsInfo, bool isRecoverFormToHandleClickEvent);
     void OnSurfaceReuse(const OHOS::AppExecFwk::FormJsInfo& formJsInfo);
+    void OnSurfaceDetach();
     void OnActionEvent(const std::string& action);
     void OnError(const std::string& code, const std::string& msg);
     void OnSurfaceChange(float width, float height);

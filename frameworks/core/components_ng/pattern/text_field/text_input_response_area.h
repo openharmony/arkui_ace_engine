@@ -174,10 +174,14 @@ public:
 
     void ClearArea() override;
 
+    void Refresh() override;
+
 private:
     void InitClickEvent(const RefPtr<FrameNode>& frameNode);
     void OnCleanNodeClicked();
     RefPtr<FrameNode> CreateNode();
+    void LoadingImageProperty();
+    ImageSourceInfo CreateImageSourceInfo();
     RefPtr<FrameNode> cleanNode_;
     CalcDimension iconSize_ = 0.0_px;
     std::string iconSrc_;

@@ -63,7 +63,7 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest002, TestSize.Level1)
      */
     std::unique_ptr<uint8_t[]> jsonBuf;
     size_t len = 0;
-    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr;
+    std::shared_ptr<Global::Resource::ResourceManager> resourceMgr(Global::Resource::CreateResourceManager());
     auto layeredDrawableDescriptor = Napi::LayeredDrawableDescriptor(std::move(jsonBuf), len, std::move(resourceMgr));
     auto res = layeredDrawableDescriptor.GetPixelMap();
     EXPECT_EQ(res, nullptr);
@@ -189,25 +189,17 @@ HWTEST_F(DrawableDescriptorTest, DrawableDescTest005, TestSize.Level1)
     std::unique_ptr<uint8_t[]> jsonBuf;
     size_t len = 0;
     std::shared_ptr<Global::Resource::ResourceManager> resourceMgr;
-    auto layeredDrawableDescriptor = Napi::LayeredDrawableDescriptor(std::move(jsonBuf), len, std::move(resourceMgr));
     std::string path = "path";
-    layeredDrawableDescriptor.SetMaskPath(path);
-    EXPECT_EQ(layeredDrawableDescriptor.maskPath_, path);
-
-    /**
-     * @tc.steps: step2. call SetIconType
-     * @tc.expected: return iconType
-     */
     uint32_t iconType = 1;
-    layeredDrawableDescriptor.SetIconType(iconType);
-    EXPECT_EQ(layeredDrawableDescriptor.iconType_, iconType);
+    uint32_t density = 2;
+    auto layeredDrawableDescriptor = Napi::LayeredDrawableDescriptor(
+        std::move(jsonBuf), len, std::move(resourceMgr), path, iconType, density);
 
     /**
-     * @tc.steps: step3. call SetDensity
-     * @tc.expected: return density
+     * @tc.steps: step2. check
      */
-    uint32_t density = 2;
-    layeredDrawableDescriptor.SetDensity(density);
+    EXPECT_EQ(layeredDrawableDescriptor.maskPath_, path);
+    EXPECT_EQ(layeredDrawableDescriptor.iconType_, iconType);
     EXPECT_EQ(layeredDrawableDescriptor.density_, density);
 }
 } // namespace OHOS::Ace

@@ -25,7 +25,9 @@ class ArkTimePickerComponent extends ArkComponent implements TimePickerAttribute
     throw new Error('Method not implemented.');
   }
   useMilitaryTime(value: boolean): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, TimepickerUseMilitaryTimeModifier.identity,
+      TimepickerUseMilitaryTimeModifier, value);
+    return this;
   }
   disappearTextStyle(value: PickerTextStyle): this {
     modifierWithKey(this._modifiersWithKeys, TimepickerDisappearTextStyleModifier.identity,
@@ -133,6 +135,20 @@ class TimepickerDisappearTextStyleModifier extends ModifierWithKey<PickerTextSty
       return !isBaseOrResourceEqual(this.stageValue?.color, this.value?.color) ||
         !isBaseOrResourceEqual(this.stageValue?.font?.size, this.value?.font?.size) ||
         !isBaseOrResourceEqual(this.stageValue?.font?.family, this.value?.font?.family);
+    }
+  }
+}
+
+class TimepickerUseMilitaryTimeModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('timepickerUseMilitaryTime');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().timepicker.resetTimepickerUseMilitaryTime(node);
+    } else {
+      getUINativeModule().timepicker.setTimepickerUseMilitaryTime(node, this.value);
     }
   }
 }

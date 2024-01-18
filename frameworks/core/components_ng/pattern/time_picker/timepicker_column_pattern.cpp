@@ -25,6 +25,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/picker/picker_base_component.h"
+#include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
@@ -52,6 +53,7 @@ constexpr float FONT_SIZE_PERCENT = 0.9f;
 constexpr char MEASURE_SIZE_STRING[] = "TEST";
 constexpr int32_t HOT_ZONE_HEIGHT_CANDIDATE = 2;
 constexpr int32_t HOT_ZONE_HEIGHT_DISAPPEAR = 4;
+constexpr char PICKER_DRAG_SCENE[] = "picker_drag_scene";
 } // namespace
 
 void TimePickerColumnPattern::OnAttachToFrameNode()
@@ -716,7 +718,8 @@ void TimePickerColumnPattern::HandleDragStart(const GestureEvent& event)
     pressed_ = true;
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
-    frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
+    frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, event.GetMainVelocity(), SceneStatus::START);
+    // AccessibilityEventType::SCROLL_START
 }
 
 void TimePickerColumnPattern::HandleDragMove(const GestureEvent& event)
@@ -737,6 +740,9 @@ void TimePickerColumnPattern::HandleDragMove(const GestureEvent& event)
     }
     toss->SetEnd(offsetY);
     UpdateColumnChildPosition(offsetY);
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, event.GetMainVelocity(), SceneStatus::RUNNING);
 }
 
 void TimePickerColumnPattern::HandleDragEnd()
@@ -748,7 +754,8 @@ void TimePickerColumnPattern::HandleDragEnd()
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     if (!NotLoopOptions() && toss->Play()) {
-        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, mainVelocity_, SceneStatus::END);
+        // AccessibilityEventType::SCROLL_END
         return;
     }
     yOffset_ = 0.0;
@@ -769,7 +776,8 @@ void TimePickerColumnPattern::HandleDragEnd()
         scrollDelta_ = scrollDelta_ - std::abs(shiftDistance) * (dir == TimePickerScrollDirection::UP ? -1 : 1);
     }
     CreateAnimation(scrollDelta_, 0.0);
-    frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+    frameNode->AddFRCSceneInfo(PICKER_DRAG_SCENE, mainVelocity_, SceneStatus::END);
+    // AccessibilityEventType::SCROLL_END
 }
 
 void TimePickerColumnPattern::CreateAnimation()
@@ -1183,9 +1191,7 @@ void TimePickerColumnPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(pattern->animationCreated_);
         pattern->InnerHandleScroll(true);
         pattern->CreateAnimation(0.0 - pattern->jumpInterval_, 0.0);
-        auto frameNode = pattern->GetHost();
-        CHECK_NULL_VOID(frameNode);
-        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        // AccessibilityEventType::SCROLL_END
     });
 
     accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
@@ -1197,9 +1203,7 @@ void TimePickerColumnPattern::SetAccessibilityAction()
         CHECK_NULL_VOID(pattern->animationCreated_);
         pattern->InnerHandleScroll(false);
         pattern->CreateAnimation(pattern->jumpInterval_, 0.0);
-        auto frameNode = pattern->GetHost();
-        CHECK_NULL_VOID(frameNode);
-        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        // AccessibilityEventType::SCROLL_END
     });
 }
 

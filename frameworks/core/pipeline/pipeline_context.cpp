@@ -41,6 +41,7 @@
 #include "base/log/dump_log.h"
 #include "base/log/event_report.h"
 #include "base/log/frame_report.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "base/log/log.h"
 #include "base/ressched/ressched_report.h"
 #include "base/thread/task_executor.h"
@@ -2629,6 +2630,7 @@ void PipelineContext::OnShow()
 {
     onShow_ = true;
     SetWindowOnShow();
+    PerfMonitor::GetPerfMonitor()->SetAppForeground(true);
     auto multiModalScene = multiModalManager_->GetCurrentMultiModalScene();
     if (multiModalScene) {
         multiModalScene->Resume();
@@ -2667,6 +2669,7 @@ void PipelineContext::OnHide()
 {
     onShow_ = false;
     SetWindowOnHide();
+    PerfMonitor::GetPerfMonitor()->SetAppForeground(false);
     auto multiModalScene = multiModalManager_->GetCurrentMultiModalScene();
     if (multiModalScene) {
         multiModalScene->Hide();

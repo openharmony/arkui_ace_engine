@@ -57,6 +57,7 @@ public:
         std::unordered_map<int32_t, std::function<void(int32_t, int32_t, int32_t, int32_t, WindowSizeChangeReason)>>;
     using SurfacePositionChangedCallbackMap = std::unordered_map<int32_t, std::function<void(int32_t, int32_t)>>;
     using FoldStatusChangedCallbackMap = std::unordered_map<int32_t, std::function<void(FoldStatus)>>;
+    using FoldDisplayModeChangedCallbackMap = std::unordered_map<int32_t, std::function<void(FoldDisplayMode)>>;
     using PredictTask = std::function<void(int64_t, bool)>;
     PipelineContext(std::shared_ptr<Window> window, RefPtr<TaskExecutor> taskExecutor,
         RefPtr<AssetManager> assetManager, RefPtr<PlatformResRegister> platformResRegister,
@@ -80,6 +81,8 @@ public:
     // handle close keyboard
     RefPtr<FrameNode> HandleFocusNode();
     void IsCloseSCBKeyboard();
+    void IsSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode);
+    void IsNotSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode);
     void SetNeedSoftKeyboard(std::optional<bool> flag)
     {
         needSoftKeyboard_ = flag;
@@ -373,6 +376,7 @@ public:
     bool RequestFocus(const std::string& targetNodeId) override;
     void AddDirtyFocus(const RefPtr<FrameNode>& node);
     void AddDirtyDefaultFocus(const RefPtr<FrameNode>& node);
+    void AddDirtyRequestFocus(const RefPtr<FrameNode>& node);
     void RootLostFocus(BlurReason reason = BlurReason::FOCUS_SWITCH) const;
 
     void SetContainerWindow(bool isShow) override;
@@ -432,6 +436,20 @@ public:
     void UnRegisterFoldStatusChangedCallback(int32_t callbackId)
     {
         foldStatusChangedCallbackMap_.erase(callbackId);
+    }
+
+    int32_t RegisterFoldDisplayModeChangedCallback(std::function<void(FoldDisplayMode)>&& callback)
+    {
+        if (callback) {
+            foldDisplayModeChangedCallbackMap_.emplace(++callbackId_, std::move(callback));
+            return callbackId_;
+        }
+        return 0;
+    }
+
+    void UnRegisterFoldDisplayModeChangedCallback(int32_t callbackId)
+    {
+        foldDisplayModeChangedCallbackMap_.erase(callbackId);
     }
 
     int32_t RegisterSurfacePositionChangedCallback(std::function<void(int32_t, int32_t)>&& callback)
@@ -500,11 +518,6 @@ public:
     void AddOrReplaceNavigationNode(const std::string& id, const WeakPtr<FrameNode>& node);
     void DeleteNavigationNode(const std::string& id);
 
-    void SetDragCleanTask(std::function<void()>&& task)
-    {
-        dragCleanTask_ = std::move(task);
-    }
-
     void AddGestureTask(const DelayedTask& task)
     {
         delayedTasks_.emplace_back(task);
@@ -551,6 +564,7 @@ public:
     void RestoreDefault() override;
 
     void OnFoldStatusChange(FoldStatus foldStatus) override;
+    void OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) override;
 
     // for frontend animation interface.
     void OpenFrontendAnimation(
@@ -685,6 +699,7 @@ private:
     SurfaceChangedCallbackMap surfaceChangedCallbackMap_;
     SurfacePositionChangedCallbackMap surfacePositionChangedCallbackMap_;
     FoldStatusChangedCallbackMap foldStatusChangedCallbackMap_;
+    FoldDisplayModeChangedCallbackMap foldDisplayModeChangedCallbackMap_;
 
     std::unordered_set<int32_t> onAreaChangeNodeIds_;
     std::unordered_set<int32_t> onVisibleAreaChangeNodeIds_;
@@ -708,6 +723,7 @@ private:
     WeakPtr<FrameNode> dirtyFocusNode_;
     WeakPtr<FrameNode> dirtyFocusScope_;
     WeakPtr<FrameNode> dirtyDefaultFocusNode_;
+    WeakPtr<FrameNode> dirtyRequestFocusNode_;
     WeakPtr<FrameNode> screenNode_;
     uint32_t nextScheduleTaskId_ = 0;
     int32_t mouseStyleNodeId_ = -1;
@@ -740,7 +756,6 @@ private:
 
     std::list<FrameInfo> dumpFrameInfos_;
     std::list<std::function<void()>> animationClosuresList_;
-    std::function<void()> dragCleanTask_;
 
     std::map<int32_t, std::function<void(bool)>> isFocusActiveUpdateEvents_;
     std::map<int32_t, std::function<void(bool)>> onFormVisibleChangeEvents_;
@@ -750,6 +765,8 @@ private:
     RefPtr<PostEventManager> postEventManager_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
+
+    int32_t preNodeId_ = -1;
 };
 } // namespace OHOS::Ace::NG
 

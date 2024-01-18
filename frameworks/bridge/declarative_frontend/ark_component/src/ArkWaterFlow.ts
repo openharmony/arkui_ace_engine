@@ -247,9 +247,6 @@ class ArkWaterFlowComponent extends ArkComponent implements WaterFlowAttribute {
   onScrollFrameBegin(event: (offset: number, state: ScrollState) => { offsetRemain: number; }): this {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
   clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
     modifierWithKey(this._modifiersWithKeys, WaterFlowClipModifier.identity, WaterFlowClipModifier, value);
     return this;

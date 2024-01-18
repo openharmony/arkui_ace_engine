@@ -250,6 +250,28 @@ void ToggleModelNG::OnChange(ChangeEvent&& onChange)
     eventHub->SetOnChange(std::move(onChange));
 }
 
+void ToggleModelNG::OnChange(FrameNode* frameNode, ChangeEvent&& onChange)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto checkboxPattern = AceType::DynamicCast<CheckBoxPattern>(frameNode->GetPattern());
+    if (checkboxPattern) {
+        auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetOnChange(std::move(onChange));
+        return;
+    }
+    auto buttonPattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
+    if (buttonPattern) {
+        auto eventHub = frameNode->GetEventHub<ToggleButtonEventHub>();
+        CHECK_NULL_VOID(eventHub);
+        eventHub->SetOnChange(std::move(onChange));
+        return;
+    }
+    auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChange(std::move(onChange));
+}
+
 void ToggleModelNG::SetWidth(const Dimension& width)
 {
     NG::ViewAbstract::SetWidth(NG::CalcLength(width));
@@ -460,5 +482,38 @@ void ToggleModelNG::SetSwitchPointColor(FrameNode* frameNode, const Color& switc
 void ToggleModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
 {
     ToggleButtonModelNG::SetBackgroundColor(frameNode, color);
+}
+
+void ToggleModelNG::SetHeight(FrameNode* frameNode, const Dimension& height)
+{
+    NG::ViewAbstract::SetHeight(frameNode, NG::CalcLength(height));
+}
+
+void ToggleModelNG::SetPadding(
+    FrameNode* frameNode, const NG::PaddingPropertyF& /*args*/, const NG::PaddingProperty& newArgs)
+{
+    NG::ViewAbstract::SetPadding(frameNode, newArgs);
+}
+
+void ToggleModelNG::SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion)
+{
+    CHECK_NULL_VOID(frameNode);
+    NG::ViewAbstract::SetResponseRegion(frameNode, responseRegion);
+    auto pattern = frameNode->GetPattern<SwitchPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsUserSetResponseRegion(true);
+}
+
+void ToggleModelNG::SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwitchPattern>();
+    if (pattern) {
+        pattern->SetShowHoverEffect(hoverEffect != HoverEffectType::NONE);
+    }
+    if (hoverEffect == HoverEffectType::BOARD) {
+        return;
+    }
+    NG::ViewAbstract::SetHoverEffect(frameNode, hoverEffect);
 }
 } // namespace OHOS::Ace::NG

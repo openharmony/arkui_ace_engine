@@ -489,7 +489,108 @@ void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& co
         txtStyle.font_features = features;
     }
 }
+
+void ConvertTxtStyle(const TextStyle& textStyle, txt::TextStyle& txtStyle) {}
 #else
+double NormalizeToPx(const Dimension& dimension)
+{
+    if ((dimension.Unit() == DimensionUnit::VP) || (dimension.Unit() == DimensionUnit::FP)) {
+        return (dimension.Value() * SystemProperties::GetResolution());
+    }
+    return dimension.Value();
+}
+
+void ConvertTxtStyle(const TextStyle& textStyle, Rosen::TextStyle& txtStyle)
+{
+    txtStyle.color = ConvertSkColor(textStyle.GetTextColor());
+    txtStyle.fontWeight = ConvertTxtFontWeight(textStyle.GetFontWeight());
+
+    txtStyle.fontSize = NormalizeToPx(textStyle.GetFontSize());
+
+    txtStyle.fontStyle = ConvertTxtFontStyle(textStyle.GetFontStyle());
+
+    if (textStyle.GetWordSpacing().Unit() == DimensionUnit::PERCENT) {
+        txtStyle.wordSpacing = textStyle.GetWordSpacing().Value() * txtStyle.fontSize;
+    } else {
+        txtStyle.wordSpacing = NormalizeToPx(textStyle.GetWordSpacing());
+    }
+
+    txtStyle.letterSpacing = NormalizeToPx(textStyle.GetLetterSpacing());
+
+    if (textStyle.isSymbolGlyph_) {
+        txtStyle.isSymbolGlyph = true;
+        const std::vector<Color>& symbolColor = textStyle.GetSymbolColorList();
+        std::vector<Rosen::Drawing::Color> symbolColors;
+        for (size_t i = 0; i < symbolColor.size(); i++) {
+            symbolColors.emplace_back(ConvertSkColor(symbolColor[i]));
+        }
+        txtStyle.symbol.SetRenderColor(symbolColors);
+        txtStyle.symbol.SetRenderMode(textStyle.GetRenderStrategy());
+        txtStyle.symbol.SetSymbolEffect(textStyle.GetEffectStrategy());
+    }
+    txtStyle.baseline = ConvertTxtTextBaseline(textStyle.GetTextBaseline());
+    txtStyle.decoration = ConvertTxtTextDecoration(textStyle.GetTextDecoration());
+    txtStyle.decorationColor = ConvertSkColor(textStyle.GetTextDecorationColor());
+    txtStyle.fontFamilies = textStyle.GetFontFamilies();
+    txtStyle.locale = Localization::GetInstance()->GetFontLocale();
+    txtStyle.halfLeading = textStyle.GetHalfLeading();
+
+    for (auto& spanShadow : textStyle.GetTextShadows()) {
+        Rosen::TextShadow txtShadow;
+        txtShadow.color = spanShadow.GetColor().GetValue();
+        txtShadow.offset.SetX(spanShadow.GetOffset().GetX());
+        txtShadow.offset.SetY(spanShadow.GetOffset().GetY());
+        txtShadow.blurRadius = spanShadow.GetBlurRadius();
+        txtStyle.shadows.emplace_back(txtShadow);
+    }
+
+    if (textStyle.GetLineHeight().Unit() == DimensionUnit::PERCENT) {
+        txtStyle.heightOnly = true;
+        txtStyle.heightScale = textStyle.GetLineHeight().Value();
+    } else {
+        double fontSize = txtStyle.fontSize;
+        double lineHeight = textStyle.GetLineHeight().Value();
+
+        lineHeight = NormalizeToPx(textStyle.GetLineHeight());
+
+        txtStyle.heightOnly = textStyle.HasHeightOverride();
+        if (!NearEqual(lineHeight, fontSize) && (lineHeight > 0.0) && (!NearZero(fontSize))) {
+            txtStyle.heightScale = lineHeight / fontSize;
+        } else {
+            txtStyle.heightScale = 1;
+            if (NearZero(lineHeight) || NearEqual(lineHeight, fontSize)) {
+                txtStyle.heightOnly = false;
+            }
+        }
+    }
+
+    // set font variant
+    auto fontFeatures = textStyle.GetFontFeatures();
+    if (!fontFeatures.empty()) {
+        Rosen::FontFeatures features;
+        for (auto iter = fontFeatures.begin(); iter != fontFeatures.end(); ++iter) {
+            features.SetFeature(iter->first, iter->second);
+        }
+        txtStyle.fontFeatures = features;
+    }
+    auto textBackgroundStyle = textStyle.GetTextBackgroundStyle();
+    CHECK_NULL_VOID(textBackgroundStyle.has_value());
+    txtStyle.styleId = textBackgroundStyle->groupId;
+    if (textBackgroundStyle->backgroundColor.has_value()) {
+        txtStyle.backgroundRect.color = textBackgroundStyle->backgroundColor.value().GetValue();
+    }
+    auto radius = textBackgroundStyle->backgroundRadius;
+    CHECK_NULL_VOID(radius.has_value());
+    auto radiusConverter = [](const std::optional<Dimension>& radius) -> double {
+        CHECK_NULL_RETURN(radius.has_value(), 0);
+        return NormalizeToPx(radius.value());
+    };
+    txtStyle.backgroundRect.leftTopRadius = radiusConverter(radius->radiusTopLeft);
+    txtStyle.backgroundRect.rightTopRadius = radiusConverter(radius->radiusTopRight);
+    txtStyle.backgroundRect.leftBottomRadius = radiusConverter(radius->radiusBottomLeft);
+    txtStyle.backgroundRect.rightBottomRadius = radiusConverter(radius->radiusBottomRight);
+}
+
 void ConvertTxtStyle(const TextStyle& textStyle, const WeakPtr<PipelineBase>& context, Rosen::TextStyle& txtStyle)
 {
     txtStyle.color = ConvertSkColor(textStyle.GetTextColor());

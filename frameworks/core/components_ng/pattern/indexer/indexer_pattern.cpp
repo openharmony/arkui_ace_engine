@@ -709,7 +709,7 @@ void IndexerPattern::ApplyIndexChanged(
 
 void IndexerPattern::ShowBubble()
 {
-    if (!NeedShowBubble()) {
+    if (!NeedShowBubble() || itemCount_ < 1) {
         return;
     }
     auto host = GetHost();
@@ -851,7 +851,7 @@ void IndexerPattern::UpdateBubbleSize()
     auto columnCalcOffset = autoCollapse_ ? 0 : 1;
     auto columnCalcSize = CalcSize(
         CalcLength(bubbleSize),
-        CalcLength(bubbleSize * (listActualSize + columnCalcOffset)));
+        CalcLength(bubbleSize * (static_cast<int32_t>(listActualSize) + columnCalcOffset)));
     columnLayoutProperty->UpdateUserDefinedIdealSize(columnCalcSize);
     popupNode_->MarkDirtyNode();
 }

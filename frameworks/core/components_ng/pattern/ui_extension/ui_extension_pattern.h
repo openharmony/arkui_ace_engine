@@ -57,7 +57,8 @@ class UIExtensionPattern : public Pattern {
     DECLARE_ACE_TYPE(UIExtensionPattern, Pattern);
 
 public:
-    explicit UIExtensionPattern(bool isTransferringCaller = false, bool isModal = false);
+    explicit UIExtensionPattern(bool isTransferringCaller = false, bool isModal = false,
+        bool isAsyncModalBinding = false);
     ~UIExtensionPattern() override;
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
@@ -76,10 +77,16 @@ public:
         const std::string& hapPath, const std::string& abcPath, const std::string& entryPoint, void* runtime);
     bool OnDirtyLayoutWrapperSwapForDynamicComponent(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config);
 
-    // The uiextension needs inputmethod by default, and is processed by its internal actual focus node.
-    bool NeedSoftKeyboard() const override
+    void OnSizeChanged(int32_t width, int32_t height)
     {
-        return true;
+        if (onSizeChanged_) {
+            onSizeChanged_(width, height);
+        }
+    }
+
+    void SetOnSizeChangedCallback(std::function<void(int32_t, int32_t)>&& callback)
+    {
+        onSizeChanged_ = std::move(callback);
     }
 
     void OnConnect();
@@ -106,6 +113,8 @@ public:
     void FireSyncCallbacks();
     void SetAsyncCallbacks(const std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>>&& callbackList);
     void FireAsyncCallbacks();
+    void SetBindModalCallback(const std::function<void()>&& callback);
+    void FireBindModalCallback();
 
     void NotifyForeground();
     void NotifyBackground();
@@ -194,6 +203,7 @@ private:
     std::function<void(int32_t code, const std::string& name, const std::string& message)> onErrorCallback_;
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onSyncOnCallbackList_;
     std::list<std::function<void(const RefPtr<UIExtensionProxy>&)>> onAsyncOnCallbackList_;
+    std::function<void()> bindModalCallback_;
 
     RefPtr<FrameNode> contentNode_;
     RefPtr<SessionWrapper> sessionWrapper_;
@@ -203,11 +213,13 @@ private:
     bool isTransferringCaller_ = false;
     bool isVisible_ = true;
     bool isModal_ = false;
+    bool isAsyncModalBinding_ = false;
     int32_t uiExtensionId_ = 0;
 
     // for DynamicComponent
     ComponentType componentType_ = ComponentType::UI_EXTENSION;
-    std::shared_ptr<DynamicComponentRenderer> dynamicComponentRenderer_;
+    RefPtr<DynamicComponentRenderer> dynamicComponentRenderer_;
+    std::function<void(int32_t, int32_t)> onSizeChanged_;
 
     ACE_DISALLOW_COPY_AND_MOVE(UIExtensionPattern);
 };

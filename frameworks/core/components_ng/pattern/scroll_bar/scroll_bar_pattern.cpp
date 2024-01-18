@@ -71,7 +71,7 @@ void ScrollBarPattern::OnModifyDone()
         CHECK_NULL_RETURN(pattern, false);
         if (source == SCROLL_FROM_START) {
             pattern->StopDisappearAnimator();
-            pattern->SendAccessibilityEvent(AccessibilityEventType::SCROLL_START);
+            // AccessibilityEventType::SCROLL_START
             return true;
         }
         return pattern->UpdateCurrentOffset(offset, source);
@@ -82,7 +82,7 @@ void ScrollBarPattern::OnModifyDone()
         if (pattern->GetDisplayMode() == DisplayMode::AUTO) {
             pattern->StartDisappearAnimator();
         }
-        pattern->SendAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        // AccessibilityEventType::SCROLL_END
     };
 
     auto hub = host->GetEventHub<EventHub>();
@@ -100,13 +100,14 @@ void ScrollBarPattern::OnModifyDone()
             return scrollBar->childRect_.IsInRegion(point);
         }
     );
-    scrollableEvent_->SetBarCollectTouchTargetCallback([weak = AceType::WeakClaim(this)]
-        (const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) {
+    scrollableEvent_->SetBarCollectTouchTargetCallback(
+        [weak = AceType::WeakClaim(this)](const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+            TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
+            const RefPtr<TargetComponent>& targetComponent) {
             auto scrollBar = weak.Upgrade();
             CHECK_NULL_VOID(scrollBar);
-            scrollBar->OnCollectTouchTarget(coordinateOffset, getEventTargetImpl, result);
-        }
-    );
+            scrollBar->OnCollectTouchTarget(coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent);
+        });
     gestureHub->AddScrollableEvent(scrollableEvent_);
     SetAccessibilityAction();
     if (!panRecognizer_) {
@@ -259,9 +260,7 @@ void ScrollBarPattern::SetAccessibilityAction()
         }
         auto source = pattern->GetCurrentPosition();
         pattern->UpdateCurrentOffset(pattern->GetChildOffset(), source);
-        auto frameNode = pattern->GetHost();
-        CHECK_NULL_VOID(frameNode);
-        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        // AccessibilityEventType::SCROLL_END
     });
 
     accessibilityProperty->SetActionScrollBackward([weakPtr = WeakClaim(this)]() {
@@ -272,9 +271,7 @@ void ScrollBarPattern::SetAccessibilityAction()
         }
         auto source = pattern->GetCurrentPosition();
         pattern->UpdateCurrentOffset(-pattern->GetChildOffset(), source);
-        auto frameNode = pattern->GetHost();
-        CHECK_NULL_VOID(frameNode);
-        frameNode->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        // AccessibilityEventType::SCROLL_END
     });
 }
 
@@ -393,11 +390,16 @@ void ScrollBarPattern::ProcessFrictionMotionStop()
 }
 
 void ScrollBarPattern::OnCollectTouchTarget(const OffsetF& coordinateOffset,
-    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
+    const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
+    const RefPtr<TargetComponent>& targetComponent)
 {
     if (panRecognizer_) {
         panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
         panRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+        panRecognizer_->AssignNodeId(frameNode->GetId());
+        panRecognizer_->AttachFrameNode(frameNode);
+        panRecognizer_->SetTargetComponent(targetComponent);
+        panRecognizer_->SetIsSystemGesture(true);
         result.emplace_front(panRecognizer_);
     }
 }

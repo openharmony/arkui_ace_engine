@@ -450,6 +450,13 @@ void SelectModelNG::SetOptionWidthFitTrigger(bool isFitTrigger)
     pattern->SetOptionWidthFitTrigger(isFitTrigger);
 }
 
+void SelectModelNG::SetHasOptionWidth(bool hasOptionWidth)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHasOptionWidth(hasOptionWidth);
+}
+
 void SelectModelNG::SetArrowPosition(FrameNode* frameNode, const ArrowPosition value)
 {
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
@@ -623,5 +630,12 @@ void SelectModelNG::SetOptionWidthFitTrigger(FrameNode* frameNode, bool isFitTri
     auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
     CHECK_NULL_VOID(pattern);
     pattern->SetOptionWidthFitTrigger(isFitTrigger);
+}
+
+void SelectModelNG::SetHasOptionWidth(FrameNode* frameNode, bool hasOptionWidth)
+{
+    auto pattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<SelectPattern>(frameNode);
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHasOptionWidth(hasOptionWidth);
 }
 } // namespace OHOS::Ace::NG

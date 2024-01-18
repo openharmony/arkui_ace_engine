@@ -21,6 +21,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/tabs/tab_bar_layout_property.h"
@@ -38,6 +39,7 @@ public:
     void Pop() override;
     void SetIndex(int32_t index) override;
     void SetTabBarPosition(BarPosition tabBarPosition) override;
+    void SetBarBackgroundBlurStyle(BlurStyle tabBarBlurStyle) override;
     void SetTabBarMode(TabBarMode tabBarMode) override;
     void SetTabBarWidth(const Dimension& tabBarWidth) override;
     void SetTabBarHeight(const Dimension& tabBarHeight) override;
@@ -60,6 +62,7 @@ public:
     void SetBarGridAlign(const BarGridColumnOptions& BarGridColumnOptions) override;
     void SetIsCustomAnimation(bool isCustom) override;
     void SetOnCustomAnimation(TabsCustomAnimationEvent&& onCustomAnimation) override;
+    void SetOnContentWillChange(std::function<bool(int32_t, int32_t)>&& callback) override;
     static RefPtr<TabsNode> GetOrCreateTabsNode(
         const std::string& tag, int32_t nodeId, const std::function<RefPtr<Pattern>(void)>& patternCreator);
     static void SetTabBarMode(FrameNode* frameNode, TabBarMode tabBarMode);

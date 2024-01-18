@@ -20,6 +20,17 @@
 
 namespace OHOS::Ace {
 /**
+ * souce is Rosen::FoldDisplayMode
+ */
+enum class FoldDisplayMode: uint32_t {
+    UNKNOWN = 0,
+    FULL = 1,   // EXPAND
+    MAIN = 2,   // FOLDED
+    SUB = 3,
+    COORDINATION = 4,
+};
+
+/**
  * souce is Rosen::FoldStatus
  */
 enum class FoldStatus : uint32_t {
@@ -86,11 +97,22 @@ public:
         currentFoldCreaseRegion_ = currentFoldCreaseRegion;
     }
 
+    uint64_t GetDisplayId()
+    {
+        return displayId_;
+    }
+
+    void SetDisplayId(uint64_t displayId)
+    {
+        displayId_ = displayId;
+    }
+
 private:
     FoldStatus foldStatus_ = FoldStatus::UNKNOWN;
     bool isFoldable_ = false;
     Rotation rotation_ = Rotation::ROTATION_0;
     std::vector<Rect> currentFoldCreaseRegion_;
+    uint64_t displayId_ = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_DISPLAY_INFO_H

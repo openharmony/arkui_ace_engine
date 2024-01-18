@@ -416,6 +416,31 @@ void EventReport::ReportJankFrameApp(JankInfo& info)
     ACE_SCOPED_TRACE("JANK_FRAME_APP: skipppedFrameTime=%lld(ms)", static_cast<long long>(skippedFrameTime / NS_TO_MS));
 }
 
+void EventReport::ReportJankFrameFiltered(JankInfo& info)
+{
+    std::string eventName = "JANK_FRAME_FILTERED";
+    const auto& bundleName = info.baseInfo.bundleName;
+    const auto& processName = info.baseInfo.processName;
+    const auto& abilityName = info.baseInfo.abilityName;
+    const auto& pageUrl = info.baseInfo.pageUrl;
+    const auto& versionCode = info.baseInfo.versionCode;
+    const auto& versionName = info.baseInfo.versionName;
+    const auto& skippedFrameTime = info.skippedFrameTime;
+    const auto& windowName = info.windowName;
+    HiSysEventWrite(OHOS::HiviewDFX::HiSysEvent::Domain::ACE, eventName,
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        EVENT_KEY_PROCESS_NAME, processName,
+        EVENT_KEY_MODULE_NAME, bundleName,
+        EVENT_KEY_ABILITY_NAME, abilityName,
+        EVENT_KEY_PAGE_URL, pageUrl,
+        EVENT_KEY_VERSION_CODE, versionCode,
+        EVENT_KEY_VERSION_NAME, versionName,
+        EVENT_KEY_SKIPPED_FRAME_TIME, static_cast<uint64_t>(skippedFrameTime));
+    ACE_SCOPED_TRACE("JANK_FRAME_FILTERED: skipppedFrameTime=%lld(ms), windowName=%s",
+        static_cast<long long>(skippedFrameTime / NS_TO_MS), windowName.c_str());
+}
+
+
 void EventReport::ReportDoubleClickTitle(int32_t stateChange)
 {
     auto packageName = AceApplicationInfo::GetInstance().GetPackageName();

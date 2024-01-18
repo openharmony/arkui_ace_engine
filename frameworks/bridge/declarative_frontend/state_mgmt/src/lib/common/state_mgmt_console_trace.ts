@@ -22,65 +22,65 @@
 */
 
 class stateMgmtConsole {
-    public static log (...args : any) : void {
-        aceConsole.log(...args);
-    }
-    public static debug(...args : any) : void {
-        aceConsole.debug(...args);
-    }
-    public static info (...args : any) : void {
-        aceConsole.info(...args);
-    }
-    public static warn (...args : any) : void  {
-        aceConsole.warn(...args);
-    }
-    public static error (...args : any) : void {
-        aceConsole.error(...args);
-    }
-    public static propertyAccess (...args : any) : void {
-        // enable for fine grain debugging variable observation
-        // aceConsole debug (...args)
-    }
-    public static applicationError (...args : any) : void {
-        aceConsole.error(`FIX THIS APPLICATION ERROR \n`, ...args);
-    }
+  public static log(...args: any): void {
+    aceConsole.log(...args);
+  }
+  public static debug(...args: any): void {
+    aceConsole.debug(...args);
+  }
+  public static info(...args: any): void {
+    aceConsole.info(...args);
+  }
+  public static warn(...args: any): void {
+    aceConsole.warn(...args);
+  }
+  public static error(...args: any): void {
+    aceConsole.error(...args);
+  }
+  public static propertyAccess(...args: any): void {
+    // enable for fine grain debugging variable observation
+    // aceConsole debug (...args)
+  }
+  public static applicationError(...args: any): void {
+    aceConsole.error(`FIX THIS APPLICATION ERROR \n`, ...args);
+  }
 }
 
 type TraceArgs = string | number | boolean;
 
 class stateMgmtTrace {
-    public static scopedTrace<T>(codeBlock: () => T, arg1: string, ...args: TraceArgs[]): T{
-        aceTrace.begin(arg1, ...args);
-        let result: T = codeBlock();
-        aceTrace.end();
-        return result;
-    }
+  public static scopedTrace<T>(codeBlock: () => T, arg1: string, ...args: TraceArgs[]): T {
+    aceTrace.begin(arg1, ...args);
+    let result: T = codeBlock();
+    aceTrace.end();
+    return result;
+  }
 }
 
 class errorReport {
-    public static varValueCheckFailed<T>(params : { customComponent : string, variableDeco: string, variableName: string, expectedType: string, value : T }) : void {
-        let msg = `@Component '${params.customComponent}': Illegal variable value error with decorated variable ${params.variableDeco} '${params.variableName}': `;
-        msg += `failed validation: '${params.expectedType}`;
-        try {
-            msg += `, attempt to assign value type: '${typeof params.value}'`;
-            msg += `, value: '${JSON.stringify(params.value, null, 4)}'`;
-        } catch(e) {}
-        
-        msg += "!";
-        throw new TypeError(msg);
-    }
+  public static varValueCheckFailed<T>(params: { customComponent: string, variableDeco: string, variableName: string, expectedType: string, value: T }): void {
+    let msg = `@Component '${params.customComponent}': Illegal variable value error with decorated variable ${params.variableDeco} '${params.variableName}': `;
+    msg += `failed validation: '${params.expectedType}`;
+    try {
+      msg += `, attempt to assign value type: '${typeof params.value}'`;
+      msg += `, value: '${JSON.stringify(params.value, null, 4)}'`;
+    } catch (e) { }
 
-    public static varObservationFailed<T>(params : { customComponent : string, variableDeco: string, variableName: string, value: T  }) : void {
-        let msg = `@Component '${params.customComponent}': decorated variable ${params.variableDeco} '${params.variableName}': `;
-        msg += `its class is neither decorated with '@Observed' nor it is an instance of 'SubscribableAbstract'`;
+    msg += "!";
+    throw new TypeError(msg);
+  }
 
-        try {
-            msg += `, attempt to assign value type: '${typeof params.value}'`;
-            msg += `, value: '${JSON.stringify(params.value, null, 4)}'`;
-        } catch(e) {}
-        
-        msg += "!";
+  public static varObservationFailed<T>(params: { customComponent: string, variableDeco: string, variableName: string, value: T }): void {
+    let msg = `@Component '${params.customComponent}': decorated variable ${params.variableDeco} '${params.variableName}': `;
+    msg += `its class is neither decorated with '@Observed' nor it is an instance of 'SubscribableAbstract'`;
 
-        throw new TypeError(msg);
-    }
+    try {
+      msg += `, attempt to assign value type: '${typeof params.value}'`;
+      msg += `, value: '${JSON.stringify(params.value, null, 4)}'`;
+    } catch (e) { }
+
+    msg += "!";
+
+    throw new TypeError(msg);
+  }
 }

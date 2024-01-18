@@ -27,23 +27,28 @@
 #include "test/mock/core/rosen/testing_data.h"
 #include "test/mock/core/rosen/testing_draw_cmd_list.h"
 #include "test/mock/core/rosen/testing_filter.h"
+#include "test/mock/core/rosen/testing_font.h"
 #include "test/mock/core/rosen/testing_font_collection.h"
 #include "test/mock/core/rosen/testing_image.h"
-#include "test/mock/core/rosen/testing_image_info.h"
 #include "test/mock/core/rosen/testing_image_filter.h"
+#include "test/mock/core/rosen/testing_image_info.h"
 #include "test/mock/core/rosen/testing_mask_filter.h"
 #include "test/mock/core/rosen/testing_path.h"
 #include "test/mock/core/rosen/testing_path_effect.h"
 #include "test/mock/core/rosen/testing_pen.h"
+#include "test/mock/core/rosen/testing_picture.h"
 #include "test/mock/core/rosen/testing_point.h"
 #include "test/mock/core/rosen/testing_point3.h"
 #include "test/mock/core/rosen/testing_recording_canvas.h"
 #include "test/mock/core/rosen/testing_recording_path_effect.h"
 #include "test/mock/core/rosen/testing_sampling_options.h"
+#include "test/mock/core/rosen/testing_save_layer_ops.h"
 #include "test/mock/core/rosen/testing_scalar.h"
 #include "test/mock/core/rosen/testing_shader_effect.h"
 #include "test/mock/core/rosen/testing_shadowflags.h"
+#include "test/mock/core/rosen/testing_text_blob.h"
 #include "test/mock/core/rosen/testing_text_style.h"
+#include "test/mock/core/rosen/testing_typeface.h"
 #include "test/mock/core/rosen/testing_typography.h"
 #include "test/mock/core/rosen/testing_typography_create.h"
 #include "test/mock/core/rosen/testing_typography_style.h"
@@ -107,6 +112,17 @@ using RSDrawCmdList = Testing::TestingDrawCmdList;
 using RSRecordingPath = Testing::TestingPath;
 using RSImageInfo = Testing::TestingImageInfo;
 using RSRecordingPathEffect = Testing::TestingRecordingPathEffect;
+using RSTypeface = Testing::TestingTypeface;
+using RSTextBlob = Testing::TestingTextBlob;
+using RSFont = Testing::TestingFont;
+using RSTextEncoding = Testing::TestingTextEncoding;
+#ifdef USE_ROSEN_DRAWING
+using RSRecordingColorFilter = Testing::TestingColorFilter;
+using RSRecordingImageFilter = Testing::TestingImageFilter;
+using RSSaveLayerOps = Testing::TestingSaveLayerOps;
+using RSRecordingShaderEffect = Testing::TestingShaderEffect;
+using RSPicture = Testing::TestingPicture;
+#endif
 #ifdef USE_GRAPHIC_TEXT_GINE
 using RSTextRectHeightStyle = Testing::TestingTypographyProperties::TextRectHeightStyle;
 using RSTextRectWidthStyle = Testing::TestingTypographyProperties::TextRectWidthStyle;

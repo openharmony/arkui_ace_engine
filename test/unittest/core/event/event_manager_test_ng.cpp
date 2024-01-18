@@ -2117,4 +2117,230 @@ HWTEST_F(EventManagerTestNg, HasDifferentDirectionGesture001, TestSize.Level1)
     eventManager->axisTouchTestResults_[MOUSE_BASE_ID] = std::move(hitTestResult);
     EXPECT_TRUE(eventManager->HasDifferentDirectionGesture());
 }
+
+/**
+ * @tc.name: EventManagerTest038
+ * @tc.desc: Test DispatchRotationEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest038, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Call DispatchRotationEvent.
+     * @tc.expected: ret is false.
+     */
+    RotationEvent event;
+    event.value = 0.1;
+    auto animatablePoperties = AceType::MakeRefPtr<OHOS::Ace::AnimatableProperties>();
+    auto renderNode = AceType::DynamicCast<RenderNode>(animatablePoperties);
+    const RefPtr<RenderNode> requestNode = nullptr;
+    auto ret = eventManager->DispatchRotationEvent(event, renderNode, requestNode);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: EventManagerTest039
+ * @tc.desc: Test PostEventDispatchTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest039, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    AceEngine& aceEngine = AceEngine::Get();
+    aceEngine.AddContainer(CONTAINER_INSTANCE_ID, MockContainer::container_);
+
+    /**
+     * @tc.steps: step2. Call PostEventDispatchTouchEvent with event.
+     * @tc.expected: ret is true
+     */
+    TouchEvent event;
+    event.type = TouchType::DOWN;
+    TouchTestResult touchTestResults;
+    auto eventTarget = AceType::MakeRefPtr<MockTouchEventTarget>();
+    touchTestResults.push_back(eventTarget);
+    eventManager->postEventTouchTestResults_.emplace(event.id, touchTestResults);
+    auto ret = eventManager->PostEventDispatchTouchEvent(event);
+    EXPECT_TRUE(ret);
+
+    /**
+    * @tc.steps: step3. Call PostEventDispatchTouchEvent event.
+    * @tc.expected: ret is true
+    */
+    event.type = TouchType::UP;
+    touchTestResults.push_back(eventTarget);
+    eventManager->postEventTouchTestResults_.emplace(event.id, touchTestResults);
+    ret = eventManager->PostEventDispatchTouchEvent(event);
+    EXPECT_TRUE(ret);
+
+    /**
+    * @tc.steps: step4. Call PostEventDispatchTouchEvent event.
+    * @tc.expected: ret is true
+    */
+    event.type = TouchType::CANCEL;
+    touchTestResults.push_back(eventTarget);
+    eventManager->postEventTouchTestResults_.emplace(event.id, touchTestResults);
+    ret = eventManager->PostEventDispatchTouchEvent(event);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: EventManagerTest040
+ * @tc.desc: Test DispatchMouseEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest040, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Call DispatchMouseEvent.
+     * @tc.expected: retFlag is true.
+     */
+    MouseEvent event;
+    event.action = MouseAction::MOVE;
+    bool retFlag = eventManager->DispatchMouseEvent(event);
+    ASSERT_TRUE(retFlag);
+}
+
+/**
+ * @tc.name: EventManagerTest041
+ * @tc.desc: Test HandleGlobalEventNG
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest041, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Create FrameNode and Call TouchTest to add touchTestResults_[touchPoint.id].
+     * @tc.expected: touchTestResults_ has the touchPoint.id of instance.
+     */
+    TouchEvent touchPoint;
+    touchPoint.id = 1000;
+    touchPoint.type = TouchType::DOWN;
+
+    const int nodeId = 10003;
+    auto frameNode = FrameNode::GetOrCreateFrameNode(V2::LOCATION_BUTTON_ETS_TAG, nodeId, nullptr);
+    TouchRestrict touchRestrict;
+    Offset offset;
+
+    eventManager->TouchTest(touchPoint, frameNode, touchRestrict, offset, 0, true);
+    EXPECT_GT(eventManager->touchTestResults_.count(touchPoint.id), 0);
+    TouchTestResult touchTestResults;
+    auto eventTarget = AceType::MakeRefPtr<MockTouchEventTarget>();
+    touchTestResults.push_back(eventTarget);
+    eventManager->touchTestResults_.emplace(touchPoint.id, touchTestResults);
+
+    /**
+     * @tc.steps: step3. Create FrameNode and Call HandleGlobalEventNG.
+     * @tc.expected: touchTestResults_.size() is equal to 1.
+     */
+    auto selectOverlayManager = AceType::MakeRefPtr<SelectOverlayManager>(frameNode);
+    NG::OffsetF rootOffset;
+    eventManager->HandleGlobalEventNG(touchPoint, selectOverlayManager, rootOffset);
+    EXPECT_EQ(eventManager->touchTestResults_.size(), 1);
+}
+
+/**
+ * @tc.name: EventManagerTest042
+ * @tc.desc: Test DispatchMouseHoverAnimation in MouseButton::NONE_BUTTON branches
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest042, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    /**
+     * @tc.steps: step2. Call DispatchMouseHoverAnimation with event.
+     * @tc.expected: hoverNodeCur is null.
+     */
+    MouseEvent event;
+    event.button = MouseButton::NONE_BUTTON;
+    eventManager->DispatchMouseHoverAnimation(event);
+    auto hoverNodeCur = eventManager->mouseHoverNode_.Upgrade();
+    EXPECT_EQ(hoverNodeCur, nullptr);
+}
+
+/**
+ * @tc.name: EventManagerTest043
+ * @tc.desc: Test DispatchTouchEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest043, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventManager.
+     * @tc.expected: eventManager is not null.
+     */
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+    AceEngine& aceEngine = AceEngine::Get();
+    aceEngine.AddContainer(CONTAINER_INSTANCE_ID, MockContainer::container_);
+
+    /**
+     * @tc.steps: step2. Call DispatchTouchEvent with TouchType::DOWN.
+     * @tc.expected: ret is false.
+     */
+    TouchEvent event;
+    event.type = TouchType::DOWN;
+    auto ret = eventManager->DispatchTouchEvent(event);
+    EXPECT_FALSE(ret);
+
+    /**
+     * @tc.steps: step3. Call DispatchTouchEvent with TouchType::DOWN and
+                        touchTestResults_ has element;
+     * @tc.expected: ret is true
+     */
+    TouchTestResult touchTestResults;
+    auto eventTarget = AceType::MakeRefPtr<MockTouchEventTarget>();
+    touchTestResults.push_back(eventTarget);
+    eventManager->touchTestResults_.emplace(event.id, touchTestResults);
+    ret = eventManager->DispatchTouchEvent(event);
+    EXPECT_TRUE(ret);
+
+    /**
+     * @tc.steps: step4. Call DispatchTouchEvent with TouchType::PULL_MOVE and
+                        touchTestResults_ has element;
+     * @tc.expected: ret is true
+     */
+    event.type = TouchType::PULL_MOVE;
+    ret = eventManager->DispatchTouchEvent(event);
+    EXPECT_TRUE(ret);
+
+    /**
+     * @tc.steps: step5. Call DispatchTouchEvent with TouchType::PULL_MOVE and
+                        touchTestResults_ has element;
+     * @tc.expected: ret is false.
+     */
+    event.pullType  = TouchType::PULL_MOVE;
+    ret = eventManager->DispatchTouchEvent(event);
+    EXPECT_FALSE(ret);
+}
 } // namespace OHOS::Ace::NG

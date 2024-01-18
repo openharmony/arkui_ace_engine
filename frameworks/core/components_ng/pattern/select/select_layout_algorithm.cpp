@@ -29,8 +29,6 @@ namespace {
 } // namespace
 void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    CHECK_NULL_VOID(layoutWrapper);
-
     auto layoutProps = layoutWrapper->GetLayoutProperty();
     CHECK_NULL_VOID(layoutProps);
     auto childConstraint = layoutProps->CreateChildConstraint();
@@ -64,6 +62,7 @@ void SelectLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (isTextMin || childConstraint.parentIdealSize.Width().has_value()) {
         textLayoutProperty->UpdateMarginSelfIdealSize(textSize);
         textLayoutConstraint.selfIdealSize = OptionalSize<float>(textSize.Width(), textSize.Height());
+        textLayoutConstraint.maxSize.SetSizeT(textSize);
         textWrapper->Measure(textLayoutConstraint);
     }
     

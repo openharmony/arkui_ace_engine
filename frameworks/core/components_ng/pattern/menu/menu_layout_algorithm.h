@@ -46,10 +46,10 @@ public:
     }
 
     bool hierarchicalParameters_ = false;
-    void InitHierarchicalParameters();
+    void InitHierarchicalParameters(bool isShowInSubWindow);
 
 protected:
-    float VerticalLayout(const SizeF& size, float clickPosition);
+    float VerticalLayout(const SizeF& size, float clickPosition, bool IsContextMenu = false);
     float HorizontalLayout(const SizeF& size, float clickPosition, bool IsSelectMenu = false);
 
     RefPtr<MenuPaintProperty> GetPaintProperty(const LayoutWrapper* layoutWrapper);

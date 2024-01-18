@@ -183,6 +183,7 @@ RefPtr<Frontend> PipelineBase::GetFrontend() const
 
 void PipelineBase::ClearImageCache()
 {
+    std::lock_guard<std::shared_mutex> lock(imageMtx_);
     if (imageCache_) {
         imageCache_->Clear();
     }
@@ -652,6 +653,11 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint32_t frameCount)
         gsVsyncCallback_();
     }
 
+    if (delaySurfaceChange_) {
+        delaySurfaceChange_ = false;
+        OnSurfaceChanged(width_, height_, type_, rsTransaction_);
+    }
+
     FlushVsync(nanoTimestamp, frameCount);
     if (onVsyncProfiler_) {
         onVsyncProfiler_(AceTracker::Stop());
@@ -698,7 +704,7 @@ void PipelineBase::OnVirtualKeyboardAreaChange(
     auto currentContainer = Container::Current();
     if (currentContainer && !currentContainer->IsSubContainer()) {
         auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(currentContainer->GetInstanceId());
-        if (subwindow && subwindow->GetShown()) {
+        if (subwindow && subwindow->GetShown() && subwindow->IsFocused()) {
             // subwindow is shown, main window no need to handle the keyboard event
             return;
         }
@@ -713,6 +719,11 @@ void PipelineBase::OnVirtualKeyboardAreaChange(
 void PipelineBase::OnFoldStatusChanged(FoldStatus foldStatus)
 {
     OnFoldStatusChange(foldStatus);
+}
+
+void PipelineBase::OnFoldDisplayModeChanged(FoldDisplayMode foldDisplayMode)
+{
+    OnFoldDisplayModeChange(foldDisplayMode);
 }
 
 double PipelineBase::ModifyKeyboardHeight(double keyboardHeight) const

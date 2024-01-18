@@ -93,7 +93,27 @@ public:
         float boundsRectHeight = size.Height() + 2 * verticalPadding;
         RectF boundsRect(boundsRectOriginX, boundsRectOriginY, boundsRectWidth, boundsRectHeight);
         checkboxGroupModifier_->SetBoundsRect(boundsRect);
+        SetHoverEffectType(paintProperty);
         checkboxGroupModifier_->SetInactivePointColor(checkboxTheme->GetInactivePointColor());
+    }
+
+    void SetHoverEffectType(const RefPtr<CheckBoxGroupPaintProperty>& checkBoxgroupPaintProperty)
+    {
+        auto host = checkBoxgroupPaintProperty->GetHost();
+        CHECK_NULL_VOID(host);
+        auto eventHub = host->GetEventHub<EventHub>();
+        CHECK_NULL_VOID(eventHub);
+        auto inputEventHub = eventHub->GetInputEventHub();
+        HoverEffectType hoverEffectType = HoverEffectType::AUTO;
+        if (inputEventHub) {
+            hoverEffectType = inputEventHub->GetHoverEffect();
+            if (HoverEffectType::UNKNOWN == hoverEffectType || HoverEffectType::OPACITY == hoverEffectType) {
+                hoverEffectType = HoverEffectType::AUTO;
+            }
+            if (checkboxGroupModifier_) {
+                checkboxGroupModifier_->SetHoverEffectType(hoverEffectType);
+            }
+        }
     }
 
     void SetEnabled(bool enabled)

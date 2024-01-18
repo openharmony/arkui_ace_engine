@@ -38,7 +38,6 @@ public:
     static napi_value JsGetHeight(napi_env env, napi_callback_info info);
     static napi_value JsSetHeight(napi_env env, napi_callback_info info);
     static napi_value JsSetWidth(napi_env env, napi_callback_info info);
-    static double ConvertToPxValue(Dimension dimension);
     napi_value OnGetWidth(napi_env env);
     napi_value OnGetHeight(napi_env env);
 
@@ -177,7 +176,6 @@ private:
     double height_ = 0.0f;
     int32_t instanceId_ = -1;
     ContextType contextType_;
-    static double dipScale_;
 };
 
 } // namespace OHOS::Ace::Framework

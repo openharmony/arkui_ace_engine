@@ -76,7 +76,7 @@ const Dimension MENU_CONTAINER_HEIGHT_HIDE = 96.0_vp;
 const Dimension MENU_CONTAINER_DIVIDER_HEIGHT = 9.0_vp;
 const Dimension MENU_CONTAINER_DIVIDER_STROKE_HEIGHT = 1.0_vp;
 const Dimension MENU_ITEM_RADIUS = 8.0_vp;
-const Dimension MENU_ITEM_WIDTH = 232.0_vp;
+const Dimension MENU_ITEM_WIDTH = 240.0_vp;
 const Dimension MENU_ITEM_HEIGHT = 48.0_vp;
 const Dimension MENU_ITEM_LEFT_PADDING = 12.0_vp;
 const Dimension MENU_ITEM_TEXT_WIDTH = 144.0_vp;
@@ -379,9 +379,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildMaximizeMenuItem()
     auto maximizeRow = BuildMenuItem(maximizeTitle, InternalResource::ResourceId::IC_WINDOW_MENU_MAXIMIZE,
         maximizeEvent, windowManager->GetWindowMaximizeMode() == MaximizeMode::MODE_AVOID_SYSTEM_BAR);
     maximizeRow->UpdateInspectorId("EnhanceMenuMaximizeRow");
-    PaddingProperty pad;
-    pad.left = CalcLength(CONTENT_PADDING);
-    return BuildMenuItemPadding(pad, maximizeRow);
+    return maximizeRow;
 }
 
 RefPtr<FrameNode> ContainerModalViewEnhance::BuildFullScreenMenuItem()
@@ -419,9 +417,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildFullScreenMenuItem()
     auto fullScreenRow = BuildMenuItem(fullScreenTitle, InternalResource::ResourceId::IC_WINDOW_MENU_FULLSCREEN,
         fullScreenEvent, windowManager->GetWindowMaximizeMode() == MaximizeMode::MODE_FULL_FILL);
     fullScreenRow->UpdateInspectorId("EnhanceMenuFullScreenRow");
-    PaddingProperty pad;
-    pad.left = CalcLength(CONTENT_PADDING);
-    return BuildMenuItemPadding(pad, fullScreenRow);
+    return fullScreenRow;
 }
 
 RefPtr<FrameNode> ContainerModalViewEnhance::BuildDividerMenuItem()
@@ -432,9 +428,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildDividerMenuItem()
     dividerLayout->UpdateStrokeWidth(MENU_CONTAINER_DIVIDER_STROKE_HEIGHT);
     dividerLayout->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(MENU_CONTAINER_WIDTH), CalcLength(MENU_CONTAINER_DIVIDER_HEIGHT)));
-    PaddingProperty pad;
-    pad.left = CalcLength(CONTENT_PADDING);
-    return BuildMenuItemPadding(pad, divider);
+    return divider;
 }
 
 RefPtr<FrameNode> ContainerModalViewEnhance::BuildLeftSplitMenuItem()
@@ -456,9 +450,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildLeftSplitMenuItem()
     auto screenLeftRow = BuildMenuItem(Localization::GetInstance()->GetEntryLetters("window.leftSide"),
         InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_L, leftSplitEvent, false);
     screenLeftRow->UpdateInspectorId("EnhanceMenuScreenLeftRow");
-    PaddingProperty pad;
-    pad.left = CalcLength(CONTENT_PADDING);
-    return BuildMenuItemPadding(pad, screenLeftRow);
+    return screenLeftRow;
 }
 
 RefPtr<FrameNode> ContainerModalViewEnhance::BuildRightSplitMenuItem()
@@ -480,9 +472,7 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildRightSplitMenuItem()
     auto screenRightRow = BuildMenuItem(Localization::GetInstance()->GetEntryLetters("window.rightSide"),
         InternalResource::ResourceId::IC_WINDOW_MENU_SCREEN_N, rightSplitEvent, false);
     screenRightRow->UpdateInspectorId("EnhanceMenuScreenRightRow");
-    PaddingProperty pad;
-    pad.left = CalcLength(CONTENT_PADDING);
-    return BuildMenuItemPadding(pad, screenRightRow);
+    return screenRightRow;
 }
 
 RefPtr<FrameNode> ContainerModalViewEnhance::BuildMenuItem(
@@ -511,8 +501,6 @@ RefPtr<FrameNode> ContainerModalViewEnhance::BuildMenuItem(
     layoutProperty->UpdatePadding(rowLeftPadding);
 
     auto leftIcon = BuildMenuItemIcon(resourceId);
-    containerTitleRow->AddChild(leftIcon);
-
     // text 144 22  padding 8vp
     auto titleLabel = FrameNode::CreateFrameNode(
         V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());

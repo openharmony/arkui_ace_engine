@@ -52,6 +52,7 @@
 #include "core/components/common/properties/blend_mode.h"
 #include "core/components/common/properties/blur_parameter.h"
 #include "core/components/common/properties/decoration.h"
+#include "core/components/common/layout/constants.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/blur_style_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -303,6 +304,21 @@ void RosenRenderContext::RemoveSurfaceChangedCallBack()
 #endif
 }
 
+void RosenRenderContext::AddFrameNodeInfoToRsNode()
+{
+    if (rsNode_) {
+        auto frameNodePtr = GetHost();
+        CHECK_NULL_VOID(frameNodePtr);
+        rsNode_->SetFrameNodeInfo(frameNodePtr->GetId(), frameNodePtr->GetTag());
+    }
+}
+
+void RosenRenderContext::SetHostNode(const WeakPtr<FrameNode>& host)
+{
+    RenderContext::SetHostNode(host);
+    AddFrameNodeInfoToRsNode();
+}
+
 void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextParam>& param)
 {
     // skip if node already created
@@ -310,9 +326,11 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
     auto isTextureExportNode = ViewStackProcessor::GetInstance()->IsExportTexture();
     if (isRoot) {
         rsNode_ = Rosen::RSRootNode::Create(false, isTextureExportNode);
+        AddFrameNodeInfoToRsNode();
         return;
     } else if (!param.has_value()) {
         rsNode_ = Rosen::RSCanvasNode::Create(false, isTextureExportNode);
+        AddFrameNodeInfoToRsNode();
         return;
     }
 
@@ -358,6 +376,8 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
         default:
             break;
     }
+
+    AddFrameNodeInfoToRsNode();
 }
 
 void RosenRenderContext::SetSandBox(const std::optional<OffsetF>& parentPosition, bool force)
@@ -391,7 +411,7 @@ void RosenRenderContext::SetFrameWithoutAnimation(const RectF& paintRect)
         [&]() { rsNode_->SetFrame(paintRect.GetX(), paintRect.GetY(), paintRect.Width(), paintRect.Height()); });
 }
 
-void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, bool needRoundToPixelGrid)
+void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, bool isRound, uint8_t flag)
 {
     CHECK_NULL_VOID(rsNode_);
     auto host = GetHost();
@@ -399,11 +419,8 @@ void RosenRenderContext::SyncGeometryProperties(GeometryNode* /*geometryNode*/, 
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto paintRect = AdjustPaintRect();
-
-    if (needRoundToPixelGrid) {
-        RoundToPixelGrid(0, 0);
-        paintRect.SetRect(geometryNode->GetPixelGridRoundOffset(), geometryNode->GetPixelGridRoundSize());
-    }
+    RoundToPixelGrid(isRound, flag);
+    paintRect.SetRect(geometryNode->GetPixelGridRoundOffset(), geometryNode->GetPixelGridRoundSize());
     SyncGeometryProperties(paintRect);
     host->OnPixelRoundFinish(geometryNode->GetPixelGridRoundSize());
 }
@@ -431,7 +448,6 @@ void RosenRenderContext::SyncGeometryProperties(const RectF& paintRect)
             OnBorderRadiusUpdate(borderRadius.value());
         }
     }
-
     if (firstTransitionIn_) {
         // need to perform transitionIn early so not influence the following SetPivot
         NotifyTransitionInner(paintRect.GetSize(), true);
@@ -2277,71 +2293,69 @@ RectF RosenRenderContext::AdjustPaintRect()
     return rect;
 }
 
-float RosenRenderContext::RoundValueToPixelGrid(float value, bool forceCeil, bool forceFloor)
+float RosenRenderContext::RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor)
 {
-    float scaledValue = value;
-    float fractials = fmod(scaledValue, 1.0f);
+    float fractials = fmod(value, 1.0f);
     if (fractials < 0.0f) {
         ++fractials;
     }
-    if (NearEqual(fractials, 0.0f)) {
-        scaledValue = scaledValue - fractials;
-    } else if (NearEqual(fractials, 1.0f)) {
-        scaledValue = scaledValue - fractials + 1.0f;
-    } else {
-        if (GreatOrEqual(fractials, 0.75f)) {
-            scaledValue = scaledValue - fractials + 1.0f;
-        } else if (GreatOrEqual(fractials, 0.25f)) {
-            scaledValue = scaledValue - fractials + 0.5f;
+    if (forceCeil) {
+        return (value - fractials + 1.0f);
+    } else if (forceFloor) {
+        return (value - fractials);
+    } else if (isRound) {
+        if (NearEqual(fractials, 1.0f) || GreatOrEqual(fractials, 0.75f)) {
+            return (value - fractials + 1.0f);
+        } else if (NearEqual(fractials, 0.0f) || !GreatOrEqual(fractials, 0.25f)) {
+            return (value - fractials);
         } else {
-            scaledValue = scaledValue - fractials;
+            return (value - fractials + 0.5f);
         }
     }
-    return scaledValue;
+    return value;
 }
 
-void RosenRenderContext::RoundToPixelGrid(float absoluteLeft, float absoluteTop)
+void RosenRenderContext::RoundToPixelGrid(bool isRound, uint8_t flag)
 {
     CHECK_NULL_VOID(rsNode_);
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
     auto geometryNode = frameNode->GetGeometryNode();
-    bool textRounding = false;
-    float nodeRelativedLeft = geometryNode->GetPixelGridRoundOffset().GetX();
-    float nodeRelativedTop = geometryNode->GetPixelGridRoundOffset().GetY();
+    float relativeLeft = geometryNode->GetPixelGridRoundOffset().GetX();
+    float relativeTop = geometryNode->GetPixelGridRoundOffset().GetY();
     float nodeWidth = geometryNode->GetFrameSize().Width();
     float nodeHeight = geometryNode->GetFrameSize().Height();
-    float absoluteNodeLeft = absoluteLeft + nodeRelativedLeft;
-    float absoluteNodeTop = absoluteTop + nodeRelativedTop;
-    float absoluteNodeRight = absoluteNodeLeft + nodeWidth;
-    float absoluteNodeBottom = absoluteNodeTop + nodeHeight;
-    bool hasFractionalWidth = !NearEqual(fmod(nodeWidth, 1.0f), 0.0f) && !NearEqual(fmod(nodeWidth, 1.0f), 1.0f);
-    bool hasFractionalHeight = !NearEqual(fmod(nodeHeight, 1.0f), 0.0f) && !NearEqual(fmod(nodeHeight, 1.0f), 1.0f);
-    float nodeLeftI = RoundValueToPixelGrid(nodeRelativedLeft, false, textRounding);
-    float nodeTopI = RoundValueToPixelGrid(nodeRelativedTop, false, textRounding);
-    geometryNode->SetPixelGridRoundOffset(OffsetF(nodeLeftI, nodeTopI));
+    float absoluteRight = relativeLeft + nodeWidth;
+    float absoluteBottom = relativeTop + nodeHeight;
+    bool ceilLeft = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_START);
+    bool floorLeft = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START);
+    bool ceilTop = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
+    bool floorTop = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP);
+    bool ceilRight = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END);
+    bool floorRight = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_END);
+    bool ceilBottom = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+    bool floorBottom = flag & static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
     // round node
-    float nodeWidthI = RoundValueToPixelGrid(
-        absoluteNodeRight, (textRounding && hasFractionalWidth), (textRounding && !hasFractionalWidth)) -
-            RoundValueToPixelGrid(absoluteNodeLeft, false, textRounding);
-    float nodeHeightI = RoundValueToPixelGrid(
-        absoluteNodeBottom, (textRounding && hasFractionalHeight), (textRounding && !hasFractionalHeight)) -
-            RoundValueToPixelGrid(absoluteNodeTop, false, textRounding);
+    float nodeLeftI = RoundValueToPixelGrid(relativeLeft, isRound, ceilLeft, floorLeft);
+    float nodeTopI = RoundValueToPixelGrid(relativeTop, isRound, ceilTop, floorTop);
+    geometryNode->SetPixelGridRoundOffset(OffsetF(nodeLeftI, nodeTopI));
+    float nodeWidthI = RoundValueToPixelGrid(absoluteRight, isRound, ceilRight, floorRight) -
+        RoundValueToPixelGrid(relativeLeft, isRound, ceilLeft, floorLeft);
+    float nodeHeightI = RoundValueToPixelGrid(absoluteBottom, isRound, ceilBottom, floorBottom) -
+        RoundValueToPixelGrid(relativeTop, isRound, ceilTop, floorTop);
     geometryNode->SetPixelGridRoundSize(SizeF(nodeWidthI, nodeHeightI));
     // round inner
-    float innerLeft = absoluteNodeLeft + borderWidth_[0];
-    float innerRight = absoluteNodeLeft + nodeWidth - borderWidth_[2];
-    float innerTop = absoluteNodeTop + borderWidth_[1];
-    float innerBottom = absoluteNodeTop + nodeHeight - borderWidth_[3];
-    float innerWidthI = RoundValueToPixelGrid(
-        innerRight, (textRounding && hasFractionalWidth), (textRounding && !hasFractionalWidth)) -
-            RoundValueToPixelGrid(innerLeft, false, textRounding);
-    float innerHeightI = RoundValueToPixelGrid(
-        innerBottom, (textRounding && hasFractionalHeight), (textRounding && !hasFractionalHeight)) -
-            RoundValueToPixelGrid(innerTop, false, textRounding);
+    float innerLeft = relativeLeft + borderWidth_[0];
+    float innerRight = relativeLeft + nodeWidth - borderWidth_[2];
+    float innerTop = relativeTop + borderWidth_[1];
+    float innerBottom = relativeTop + nodeHeight - borderWidth_[3];
+    float innerWidthI = RoundValueToPixelGrid(innerRight, isRound, ceilRight, floorRight) -
+        RoundValueToPixelGrid(innerLeft, isRound, ceilLeft, floorLeft);
+    float innerHeightI = RoundValueToPixelGrid(innerBottom, isRound, ceilBottom, floorBottom) -
+        RoundValueToPixelGrid(innerTop, isRound, ceilTop, floorTop);
     // update border
-    float borderLeftI = RoundValueToPixelGrid(borderWidth_[0], false, false);
-    float borderTopI = RoundValueToPixelGrid(borderWidth_[1], false, false);
+    float borderLeftI = RoundValueToPixelGrid(borderWidth_[0], isRound, ceilLeft, floorLeft);
+    float borderTopI = RoundValueToPixelGrid(borderWidth_[1], isRound, ceilTop, floorTop);
     float borderRightI = nodeWidthI - innerWidthI - borderLeftI;
     float borderBottomI = nodeHeightI - innerHeightI - borderTopI;
     BorderWidthPropertyF borderWidthPropertyF;
@@ -3201,6 +3215,13 @@ void RosenRenderContext::OnFrontInvertUpdate(const InvertVariant& invert)
     RequestNextFrame();
 }
 
+void RosenRenderContext::OnSystemBarEffectUpdate(bool systemBarEffect)
+{
+    CHECK_NULL_VOID(rsNode_);
+    rsNode_->SetSystemBarEffect();
+    RequestNextFrame();
+}
+
 void RosenRenderContext::OnFrontHueRotateUpdate(float hueRotate)
 {
     CHECK_NULL_VOID(rsNode_);
@@ -3897,6 +3918,7 @@ void RosenRenderContext::SetRSNode(const std::shared_ptr<RSNode>& externalNode)
         return;
     }
     rsNode_ = externalNode;
+    AddFrameNodeInfoToRsNode();
 
     // TODO: need move property to new rs node.
     ResetTransform();
@@ -4287,6 +4309,12 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
             false);
     } else {
         if (!transitionEffect_->HasDisappearTransition()) {
+            if (frameNode->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
+                auto frameParent = frameNode->GetAncestorNodeOfFrame();
+                CHECK_NULL_VOID(frameParent);
+                // for window surfaceNode, remove surfaceNode explicitly
+                frameParent->GetRenderContext()->RemoveChild(Claim(this));
+            }
             return;
         }
         // Re-use current implicit animation timing params, only replace the finish callback function.
@@ -4394,6 +4422,9 @@ void RosenRenderContext::OnTransitionOutFinish()
     CHECK_NULL_VOID(parent);
     if (!host->IsVisible() && !host->IsDisappearing()) {
         // trigger transition through visibility
+        if (transitionOutCallback_) {
+            transitionOutCallback_();
+        }
         parent->MarkNeedSyncRenderTree();
         parent->RebuildRenderContextTree();
         return;
@@ -4762,4 +4793,10 @@ void RosenRenderContext::SetTranslate(float translateX, float translateY, float 
     CHECK_NULL_VOID(rsNode_);
     rsNode_->SetTranslate(translateX, translateY, translateZ);
 }
+
+void RosenRenderContext::SetTransitionOutCallback(std::function<void()>&& callback)
+{
+    transitionOutCallback_ = std::move(callback);
+}
+
 } // namespace OHOS::Ace::NG

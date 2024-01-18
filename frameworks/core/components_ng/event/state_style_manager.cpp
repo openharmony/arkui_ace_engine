@@ -82,7 +82,8 @@ const RefPtr<TouchEventImpl>& StateStyleManager::GetPressedListener()
 
 void StateStyleManager::HandleTouchDown()
 {
-    if (!HandleScrollingParent()) {
+    HandleScrollingParent();
+    if (!hasScrollingParent_) {
         UpdateCurrentUIState(UI_STATE_PRESSED);
     } else {
         if (IsPressedCancelStatePending()) {
@@ -103,6 +104,9 @@ void StateStyleManager::HandleTouchUp()
         PendingCancelPressedState();
     } else if (!IsPressedCancelStatePending()) {
         ResetPressedState();
+    }
+    if (hasScrollingParent_) {
+        CleanScrollingParentListener();
     }
 }
 
@@ -193,10 +197,10 @@ void StateStyleManager::PostPressCancelStyleTask(uint32_t delayTime)
     taskExecutor->PostDelayedTask(pressCancelStyleTask_, TaskExecutor::TaskType::UI, delayTime);
 }
 
-bool StateStyleManager::HandleScrollingParent()
+void StateStyleManager::HandleScrollingParent()
 {
     auto node = host_.Upgrade();
-    CHECK_NULL_RETURN(node, false);
+    CHECK_NULL_VOID(node);
 
     auto scrollingEventCallback = [weak = WeakClaim(this)]() {
         auto stateStyleMgr = weak.Upgrade();
@@ -211,19 +215,32 @@ bool StateStyleManager::HandleScrollingParent()
 
     auto scrollingListener = MakeRefPtr<ScrollingListener>(std::move(scrollingEventCallback));
 
-    bool hasScrollingParent = false;
     auto parent = node->GetAncestorNodeOfFrame();
     while (parent) {
         auto pattern = parent->GetPattern();
-        CHECK_NULL_RETURN(pattern, false);
+        CHECK_NULL_VOID(pattern);
         if (pattern->ShouldDelayChildPressedState()) {
-            hasScrollingParent = true;
+            hasScrollingParent_ = true;
             pattern->RegisterScrollingListener(scrollingListener);
         }
         parent = parent->GetAncestorNodeOfFrame();
     }
+}
 
-    return hasScrollingParent;
+void StateStyleManager::CleanScrollingParentListener()
+{
+    auto node = host_.Upgrade();
+    CHECK_NULL_VOID(node);
+
+    auto parent = node->GetAncestorNodeOfFrame();
+    while (parent) {
+        auto pattern = parent->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (pattern->ShouldDelayChildPressedState()) {
+            pattern->CleanScrollingListener();
+        }
+        parent = parent->GetAncestorNodeOfFrame();
+    }
 }
 
 void StateStyleManager::Transform(PointF& localPointF, const WeakPtr<FrameNode>& node) const

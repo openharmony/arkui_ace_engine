@@ -34,10 +34,12 @@ void SubMenuLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
+    auto props = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(props);
+    auto isShowInSubWindow = props->GetShowInSubWindowValue(false);
     auto parentMenuItem = menuPattern->GetParentMenuItem();
     CHECK_NULL_VOID(parentMenuItem);
-
-    InitHierarchicalParameters();
+    InitHierarchicalParameters(isShowInSubWindow);
     auto pipelineContext = PipelineContext::GetMainPipelineContext();
     CHECK_NULL_VOID(pipelineContext);
     InitializePadding(layoutWrapper);
@@ -151,14 +153,14 @@ float SubMenuLayoutAlgorithm::VerticalLayoutSubMenuHalfScreen(
     float bottomSpace = wrapperSize_.Height() - (position_.GetY() - windowsOffsetY) - margin_ * 2.0f;
     // line up top of subMenu with top of the menuItem
     if (bottomSpace >= size.Height()) {
-        return windowsOffsetY + position;
+        return position;
     }
     // line up bottom of menu with bottom of the screen
     if (size.Height() < wrapperHeight) {
-        return windowsOffsetY + wrapperHeight - size.Height();
+        return wrapperHeight - size.Height();
     }
     // can't fit in screen, line up with top of the screen
-    return windowsOffsetY;
+    return 0.0f;
 }
 
 // return submenu vertical offset

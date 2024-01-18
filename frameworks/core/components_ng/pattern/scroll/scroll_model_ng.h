@@ -52,6 +52,7 @@ public:
     void SetFriction(double friction) override;
     void SetScrollSnap(ScrollSnapAlign scrollSnapAlign, const Dimension& intervalSize,
         const std::vector<Dimension>& snapPaginations, const std::pair<bool, bool>& enableSnapToSide) override;
+    void SetEnablePaging(bool enablePaging) override;
 
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetScrollController(
@@ -66,11 +67,14 @@ public:
     static void SetScrollBarColor(FrameNode* frameNode, const Color& color);
     static void SetScrollBarWidth(FrameNode* frameNode, const Dimension& dimension);
     static void SetEdgeEffect(FrameNode* frameNode, const EdgeEffect& edgeEffect, bool alwaysEnabled);
+    static void SetEnablePaging(FrameNode* frameNode, bool enablePaging);
     static void SetOnScroll(FrameNode* frameNode, NG::ScrollEvent&& event);
     static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& event);
     static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& event);
     static void SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& event);
-    void SetEnablePaging(bool enablePaging) override;
+
+    static RefPtr<ScrollControllerBase> GetOrCreateController(FrameNode* frameNode);
+    static void SetOnScrollEdge(FrameNode* frameNode, NG::ScrollEdgeEvent&& event);
 };
 
 } // namespace OHOS::Ace::NG

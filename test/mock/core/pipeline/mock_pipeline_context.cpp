@@ -217,6 +217,8 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
 
 void PipelineContext::OnFoldStatusChange(FoldStatus foldStatus) {}
 
+void PipelineContext::OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) {}
+
 void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSizeChangeReason type,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {}
@@ -299,6 +301,8 @@ bool PipelineContext::OnBackPressed()
 void PipelineContext::AddDirtyFocus(const RefPtr<FrameNode>& node) {}
 
 void PipelineContext::AddDirtyDefaultFocus(const RefPtr<FrameNode>& node) {}
+
+void PipelineContext::AddDirtyRequestFocus(const RefPtr<FrameNode>& node) {}
 
 // core/pipeline_ng/pipeline_context.h depends on the specific impl
 void UITaskScheduler::FlushTask() {}

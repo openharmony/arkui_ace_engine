@@ -93,7 +93,7 @@ private:
 
 using TransitionFunc = std::function<void(const RefPtr<TabContentTransitionProxy>&)>;
 struct TabContentAnimatedTransition {
-    int32_t timeout;
+    int32_t timeout = 0;
     TransitionFunc transition;
 };
 

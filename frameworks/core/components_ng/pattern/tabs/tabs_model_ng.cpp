@@ -22,6 +22,7 @@
 #include "base/utils/utils.h"
 #include "core/animation/animation_pub.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components/common/properties/decoration.h"
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -39,6 +40,7 @@
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
@@ -81,6 +83,8 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     swiperLayoutProperty->UpdateLoop(false);
     swiperLayoutProperty->UpdateCachedCount(0);
     swiperLayoutProperty->UpdateShowIndicator(false);
+    swiperLayoutProperty->UpdateSafeAreaExpandOpts(
+        { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP + SAFE_AREA_EDGE_BOTTOM });
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
     auto controller = swiperController ? swiperController : swiperPattern->GetSwiperController();
@@ -145,6 +149,14 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     }
     auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
     auto preIndex = tabsLayoutProperty->GetIndexValue(0);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    if (tabsPattern->GetInterceptStatus()) {
+        auto ret = tabsPattern->OnContentWillChange(preIndex, index);
+        if (ret.has_value() && !ret.value()) {
+            return;
+        }
+    }
     if ((index != preIndex) && (index >= 0)) {
         SetIndex(index);
         auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
@@ -156,6 +168,17 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
 void TabsModelNG::SetTabBarPosition(BarPosition tabBarPosition)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TabsLayoutProperty, TabBarPosition, tabBarPosition);
+}
+
+void TabsModelNG::SetBarBackgroundBlurStyle(BlurStyle tabBarBlurStyle)
+{
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    CHECK_NULL_VOID(tabsNode);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetTabBar());
+    CHECK_NULL_VOID(tabBarNode);
+    auto tabBarPaintProperty = tabBarNode->GetPaintProperty<TabBarPaintProperty>();
+    CHECK_NULL_VOID(tabBarPaintProperty);
+    tabBarPaintProperty->UpdateTabBarBlurStyle(tabBarBlurStyle);
 }
 
 void TabsModelNG::SetTabBarMode(TabBarMode tabBarMode)
@@ -882,5 +905,15 @@ void TabsModelNG::SetClipEdge(FrameNode* frameNode, bool clipEdge)
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateClipEdge(clipEdge);
     }
+}
+
+void TabsModelNG::SetOnContentWillChange(std::function<bool(int32_t, int32_t)>&& callback)
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetInterceptStatus(true);
+    tabPattern->SetOnContentWillChange(std::move(callback));
 }
 } // namespace OHOS::Ace::NG

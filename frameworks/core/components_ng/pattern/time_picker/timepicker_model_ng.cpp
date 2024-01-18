@@ -382,4 +382,12 @@ void TimePickerModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& co
     CHECK_NULL_VOID(timePickerRowPattern);
     timePickerRowPattern->SetBackgroundColor(color);
 }
+
+void TimePickerModelNG::SetHour24(FrameNode* frameNode, bool isUseMilitaryTime)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TimePickerLayoutProperty, IsUseMilitaryTime, isUseMilitaryTime, frameNode);
+    CHECK_NULL_VOID(frameNode);
+    auto timePickerRowPattern = frameNode->GetPattern<TimePickerRowPattern>();
+    timePickerRowPattern->ClearOptionsHour();
+}
 } // namespace OHOS::Ace::NG

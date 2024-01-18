@@ -128,9 +128,6 @@ class ArkCalendarPickerComponent extends ArkComponent implements CalendarPickerA
   onChange(callback: (value: Date) => void): this {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
   padding(value: Padding | Length): this {
     let arkValue = new ArkPadding();
     if (value !== null && value !== undefined) {

@@ -48,7 +48,7 @@ ArkUI_BasicNodeAPI basicImpl_11 = {
 extern "C" {
 #endif
 
-ArkUI_AnyNodeAPI* OH_ArkUI_GetBasicNodeAPI(ArkUI_NodeAPIFamilyType type, int32_t version)
+ArkUI_AnyNodeAPI* OH_ArkUI_GetNativeNodeAPI(ArkUI_NodeAPIFamilyType type, int32_t version)
 {
     switch (type) {
         case NODE_BASIC_FAMILY: {

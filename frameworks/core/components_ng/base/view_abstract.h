@@ -79,6 +79,7 @@ struct MenuParam {
     std::optional<bool> enableArrow;
     std::optional<Dimension> arrowOffset;
     bool isAboveApps = false;
+    bool isShowInSubWindow = false;
     MenuType type = MenuType::MENU;
     MenuPreviewMode previewMode = MenuPreviewMode::NONE;
     MenuPreviewAnimationOptions previewAnimationOptions;
@@ -102,6 +103,7 @@ public:
     static void SetAspectRatio(float ratio);
     static void ResetAspectRatio();
     static void SetLayoutWeight(int32_t value);
+    static void SetPixelRound(uint8_t value);
     static void SetLayoutDirection(TextDirection value);
 
     static void SetBackgroundColor(const Color &color);
@@ -171,6 +173,7 @@ public:
     static void SetInvert(const InvertVariant &value);
     static void SetHueRotate(float value);
     static void SetColorBlend(const Color &value);
+    static void SetSystemBarEffect(bool systemBarEffect);
 
     // gradient
     static void SetLinearGradient(const NG::Gradient &gradient);
@@ -267,7 +270,8 @@ public:
         const NG::OffsetF &offset, const MenuParam &menuParam);
     static void BindMenuWithCustomNode(const RefPtr<UINode> &customNode, const RefPtr<FrameNode> &targetNode,
         const NG::OffsetF &offset, const MenuParam &menuParam, const RefPtr<UINode> &previewCustomNode = nullptr);
-    static void ShowMenu(int32_t targetId, const NG::OffsetF &offset, bool isContextMenu = false);
+    static void ShowMenu(
+        int32_t targetId, const NG::OffsetF& offset, bool isShowInSubWindow, bool isContextMenu = false);
     // inspector
     static void SetInspectorId(const std::string &inspectorId);
     // auto event param
@@ -448,6 +452,9 @@ public:
     static void SetRestoreId(FrameNode* frameNode, int32_t restoreId);
     static void SetTabIndex(FrameNode* frameNode, int32_t index);
     static void SetObscured(FrameNode* frameNode, const std::vector<ObscuredReasons>& reasons);
+    static void SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption);
+    static void SetDynamicLightUp(FrameNode* frameNode, float rate, float lightUpDegree);
+    static void SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption);
     static void SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion);
     static void SetMouseResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& mouseResponseRegion);
     static void SetSharedTransition(
@@ -457,12 +464,18 @@ public:
     static void SetMask(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape);
     static void SetProgressMask(FrameNode* frameNode, const RefPtr<ProgressMaskProperty>& progress);
     static void SetEnabled(FrameNode* frameNode, bool enabled);
+    static void SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching);
+    static void SetBlendMode(FrameNode* frameNode, BlendMode blendMode);
+    static void SetBlendApplyType(FrameNode* frameNode, BlendApplyType blendApplyType);
+    static void SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents);
     static void SetDraggable(FrameNode* frameNode, bool draggable);
     static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);
     static void SetClickEffectLevel(FrameNode* frameNode, const ClickEffectLevel& level, float scaleValue);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction);
 
+    static void SetOnFocus(FrameNode* frameNode, OnFocusFunc &&onFocusCallback);
+    static void SetOnBlur(FrameNode* frameNode, OnBlurFunc &&onBlurCallback);
 private:
     static void AddDragFrameNodeToManager();
 };

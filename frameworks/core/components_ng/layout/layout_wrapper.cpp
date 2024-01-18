@@ -98,6 +98,10 @@ void LayoutWrapper::AvoidKeyboard(bool isFocusOnPage)
             return;
         }
         auto safeArea = manager->GetSafeArea();
+        if (manager->IsAtomicService()) {
+            GetGeometryNode()->SetFrameOffset(OffsetF(0, manager->GetKeyboardOffset()));
+            return;
+        }
         GetGeometryNode()->SetFrameOffset(OffsetF(0, safeArea.top_.Length() + manager->GetKeyboardOffset()));
     }
 }

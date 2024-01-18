@@ -31,9 +31,14 @@ void RenderNodeLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             child->Measure(layoutConstraint);
         }
     }
-    const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetLayoutConstraint();
+    const auto& layoutConstraint = layoutWrapper->GetLayoutProperty()->GetCalcLayoutConstraint();
     OptionalSizeF frameSize;
-    frameSize.UpdateSizeWithCheck(layoutConstraint->selfIdealSize);
+    if (layoutConstraint && layoutConstraint->selfIdealSize && layoutConstraint->selfIdealSize->IsValid()) {
+        auto selfIdealSize = layoutConstraint->selfIdealSize;
+        frameSize.UpdateSizeWithCheck(
+            OptionalSizeF(selfIdealSize->Width().value_or(CalcLength(0)).GetDimension().ConvertToPx(),
+                selfIdealSize->Height().value_or(CalcLength(0)).GetDimension().ConvertToPx()));
+    }
     frameSize.UpdateIllegalSizeWithCheck(SizeF { 0.0f, 0.0f });
     layoutWrapper->GetGeometryNode()->SetFrameSize(frameSize.ConvertToSizeT());
 }

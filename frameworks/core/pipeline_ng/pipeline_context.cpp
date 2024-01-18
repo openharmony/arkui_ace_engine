@@ -462,6 +462,52 @@ RefPtr<FrameNode> PipelineContext::HandleFocusNode()
     return curFrameNode;
 }
 
+#ifdef WINDOW_SCENE_SUPPORTED
+void PipelineContext::IsSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode)
+{
+    // Frame other window to SCB window Or inSCB window changes,hide keyboard.
+    if ((windowFocus_.has_value() && windowFocus_.value()) ||
+        curFocusNode_ != curFrameNode) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SCB Windowfocus first, ready to hide keyboard.");
+        windowFocus_.reset();
+        curFocusNode_ = curFrameNode;
+        WindowSceneHelper::IsWindowSceneCloseKeyboard(curFrameNode);
+        return;
+    }
+    // In windowscene, focus change, need close keyboard.
+    if (needSoftKeyboard_.has_value() && !needSoftKeyboard_.value()) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SCB WindowscenePage ready to close keyboard.");
+        WindowSceneHelper::IsCloseKeyboard(curFrameNode);
+        needSoftKeyboard_ = std::nullopt;
+    }
+}
+
+void PipelineContext::IsNotSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode)
+{
+    if ((windowFocus_.has_value() && windowFocus_.value()) ||
+        (windowShow_.has_value() && windowShow_.value())) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nomal Window focus first, set focusflag to window.");
+        windowFocus_.reset();
+        windowShow_.reset();
+        focusOnNodeCallback_();
+        preNodeId_ = curFrameNode->GetId();
+        return;
+    }
+
+    if (preNodeId_ != -1 && preNodeId_ == curFrameNode->GetId()) {
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "FocusNode not change.");
+        return;
+    }
+    preNodeId_ = -1;
+
+    if (needSoftKeyboard_.has_value() && !needSoftKeyboard_.value()) {
+        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nomal WindowPage ready to close keyboard.");
+        FocusHub::IsCloseKeyboard(curFrameNode);
+        needSoftKeyboard_ = std::nullopt;
+    }
+}
+#endif
+
 void PipelineContext::IsCloseSCBKeyboard()
 {
     auto container = Container::Current();
@@ -473,7 +519,7 @@ void PipelineContext::IsCloseSCBKeyboard()
 
     RefPtr<FrameNode> curFrameNode = HandleFocusNode();
     if (curFrameNode == nullptr) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "curFrameNode null.");
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "curFrameNode null.");
         return;
     }
     TAG_LOGD(AceLogTag::ACE_KEYBOARD, "LastFocusNode,(%{public}s/%{public}d).",
@@ -482,36 +528,9 @@ void PipelineContext::IsCloseSCBKeyboard()
 #ifdef WINDOW_SCENE_SUPPORTED
     auto isSystem = WindowSceneHelper::IsWindowScene(curFrameNode);
     if (isSystem) {
-        // Frame other window to SCB window Or inSCB window changes,hide keyboard.
-        if ((windowFocus_.has_value() && windowFocus_.value()) ||
-            curFocusNode_ != curFrameNode) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SCB Windowfocus first, ready to hide keyboard.");
-            windowFocus_.reset();
-            curFocusNode_ = curFrameNode;
-            WindowSceneHelper::IsWindowSceneCloseKeyboard(curFrameNode);
-            return;
-        }
-        // In windowscene, focus change, need close keyboard.
-        if (needSoftKeyboard_.has_value() && !needSoftKeyboard_.value()) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SCB WindowscenePage ready to close keyboard.");
-            WindowSceneHelper::IsCloseKeyboard(curFrameNode);
-            needSoftKeyboard_ = std::nullopt;
-        }
+        IsSCBWindowKeyboard(curFrameNode);
     } else {
-        if ((windowFocus_.has_value() && windowFocus_.value()) ||
-            (windowShow_.has_value() && windowShow_.value())) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nomal Window focus first, set focusflag to window.");
-            windowFocus_.reset();
-            windowShow_.reset();
-            focusOnNodeCallback_();
-            return;
-        }
-
-        if (needSoftKeyboard_.has_value() && !needSoftKeyboard_.value()) {
-            TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nomal WindowPage ready to close keyboard.");
-            FocusHub::IsCloseKeyboard(curFrameNode);
-            needSoftKeyboard_ = std::nullopt;
-        }
+        IsNotSCBWindowKeyboard(curFrameNode);
     }
 #else
     FocusHub::IsCloseKeyboard(curFrameNode);
@@ -578,10 +597,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     window_->FlushModifier();
     FlushFrameRate();
     FlushMessages();
-    if (dragCleanTask_) {
-        dragCleanTask_();
-        dragCleanTask_ = nullptr;
-    }
     InspectDrew();
     if (!isFormRender_ && onShow_ && onFocus_) {
         FlushFocus();
@@ -706,6 +721,20 @@ void PipelineContext::FlushFocus()
         dirtyFocusNode_.Reset();
         dirtyFocusScope_.Reset();
         dirtyDefaultFocusNode_.Reset();
+    }
+    auto requestFocusNode = dirtyRequestFocusNode_.Upgrade();
+    if (!requestFocusNode) {
+        dirtyRequestFocusNode_.Reset();
+    } else {
+        auto focusNodeHub = requestFocusNode->GetFocusHub();
+        if (focusNodeHub && !focusNodeHub->RequestFocusImmediately()) {
+            TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus by id on node: %{public}s/%{public}d return false",
+                requestFocusNode->GetTag().c_str(), requestFocusNode->GetId());
+        }
+        dirtyFocusNode_.Reset();
+        dirtyFocusScope_.Reset();
+        dirtyDefaultFocusNode_.Reset();
+        dirtyRequestFocusNode_.Reset();
         return;
     }
 
@@ -721,6 +750,7 @@ void PipelineContext::FlushFocus()
         dirtyFocusNode_.Reset();
         dirtyFocusScope_.Reset();
         dirtyDefaultFocusNode_.Reset();
+        dirtyRequestFocusNode_.Reset();
         return;
     }
     auto focusScope = dirtyFocusScope_.Upgrade();
@@ -735,6 +765,7 @@ void PipelineContext::FlushFocus()
         dirtyFocusNode_.Reset();
         dirtyFocusScope_.Reset();
         dirtyDefaultFocusNode_.Reset();
+        dirtyRequestFocusNode_.Reset();
         return;
     }
     auto rootFocusHub = rootNode_ ? rootNode_->GetFocusHub() : nullptr;
@@ -766,6 +797,7 @@ void PipelineContext::FlushPipelineWithoutAnimation()
 
 void PipelineContext::FlushFrameRate()
 {
+    frameRateManager_->SetAnimateRate(window_->GetAnimateExpectedRate());
     if (frameRateManager_->IsRateChanged()) {
         auto rate = frameRateManager_->GetExpectedRate();
         ACE_SCOPED_TRACE("FlushFrameRate Expected frameRate = %d", rate);
@@ -974,6 +1006,7 @@ void PipelineContext::OnSurfaceChanged(int32_t width, int32_t height, WindowSize
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
     CHECK_RUN_ON(UI);
+    ACE_FUNCTION_TRACE();
     if (NearEqual(rootWidth_, width) && NearEqual(rootHeight_, height) &&
         type == WindowSizeChangeReason::CUSTOM_ANIMATION && !isDensityChanged_) {
         TryCallNextFrameLayoutCallback();
@@ -1048,6 +1081,15 @@ void PipelineContext::OnFoldStatusChange(FoldStatus foldStatus)
     for (auto&& [id, callback] : foldStatusChangedCallbackMap_) {
         if (callback) {
             callback(foldStatus);
+        }
+    }
+}
+
+void PipelineContext::OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode)
+{
+    for (auto&& [id, callback] : foldDisplayModeChangedCallbackMap_) {
+        if (callback) {
+            callback(foldDisplayMode);
         }
     }
 }
@@ -1682,9 +1724,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         }
         if (lastMoveEvent.has_value()) {
             eventManager_->SetLastMoveBeforeUp(scalePoint.sourceType == SourceType::MOUSE);
-            if (!focusWindowId_.has_value()) {
-                eventManager_->DispatchTouchEvent(lastMoveEvent.value());
-            }
+            eventManager_->DispatchTouchEvent(lastMoveEvent.value());
             eventManager_->SetLastMoveBeforeUp(false);
         }
     }
@@ -1905,6 +1945,9 @@ void PipelineContext::FlushTouchEvents()
             idToTouchPoints.emplace(scalePoint.id, scalePoint);
             idToTouchPoints[scalePoint.id].history.insert(idToTouchPoints[scalePoint.id].history.begin(), scalePoint);
             needInterpolation = iter->type != TouchType::MOVE ? false : true;
+        }
+        if (focusWindowId_.has_value()) {
+            needInterpolation = false;
         }
         if (needInterpolation) {
             auto targetTimeStamp = resampleTimeStamp_;
@@ -2136,6 +2179,14 @@ void PipelineContext::AddDirtyDefaultFocus(const RefPtr<FrameNode>& node)
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(node);
     dirtyDefaultFocusNode_ = WeakPtr<FrameNode>(node);
+    RequestFrame();
+}
+
+void PipelineContext::AddDirtyRequestFocus(const RefPtr<FrameNode>& node)
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(node);
+    dirtyRequestFocusNode_ = WeakPtr<FrameNode>(node);
     RequestFrame();
 }
 
@@ -2500,6 +2551,7 @@ void PipelineContext::Destroy()
     dirtyFocusScope_.Reset();
     needRenderNode_.clear();
     dirtyDefaultFocusNode_.Reset();
+    dirtyRequestFocusNode_.Reset();
 #ifdef WINDOW_SCENE_SUPPORTED
     uiExtensionManager_.Reset();
 #endif

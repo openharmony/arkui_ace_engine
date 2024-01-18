@@ -759,6 +759,7 @@ bool JSSelect::IsPercentStr(std::string& percent)
 
 void JSSelect::SetOptionWidth(const JSCallbackInfo& info)
 {
+    SelectModel::GetInstance()->SetHasOptionWidth(true);
     CalcDimension value;
     if (info[0]->IsUndefined()) {
         LOGE("OptionWidth is undefined");

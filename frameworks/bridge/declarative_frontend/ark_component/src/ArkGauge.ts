@@ -49,9 +49,6 @@ class ArkGaugeComponent extends ArkComponent implements GaugeAttribute {
     modifierWithKey(this._modifiersWithKeys, GaugeIndicatorModifier.identity, GaugeIndicatorModifier, value);
     return this;
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
 }
 
 class GaugeIndicatorModifier extends ModifierWithKey<GaugeIndicatorOptions> {

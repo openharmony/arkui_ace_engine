@@ -38,11 +38,13 @@ constexpr float CUSTOM_ANIMATION_DURATION = 1000.0;
 constexpr uint32_t MILLOS_PER_NANO_SECONDS = 1000 * 1000 * 1000;
 constexpr uint64_t MIN_DIFF_VSYNC = 1000 * 1000; // min is 1ms
 constexpr uint32_t MAX_VSYNC_DIFF_TIME = 100 * 1000 * 1000; //max 100ms
+constexpr float SPRING_ACCURACY = 0.1;
 const std::string SCROLLABLE_DRAG_SCENE = "scrollable_drag_scene";
 const std::string SCROLL_BAR_DRAG_SCENE = "scrollBar_drag_scene";
 const std::string SCROLLABLE_MOTION_SCENE = "scrollable_motion_scene";
 const std::string SCROLLABLE_MULTI_TASK_SCENE = "scrollable_multi_task_scene";
 const std::string SCROLL_IN_HOTZONE_SCENE = "scroll_in_hotzone_scene";
+const std::string CUSTOM_SCROLL_BAR_SCENE = "custom_scroll_bar_scene";
 } // namespace
 using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
@@ -76,6 +78,7 @@ void ScrollablePattern::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     } else {
         json->Put("edgeEffect", "EdgeEffect.None");
     }
+    json->Put("flingSpeedLimit", Dimension(maxFlingVelocity_, DimensionUnit::PX).ToString().c_str());
     auto JsonEdgeEffectOptions = JsonUtil::Create(true);
     JsonEdgeEffectOptions->Put("alwaysEnabled", GetAlwaysEnabled());
     json->Put("edgeEffectOptions", JsonEdgeEffectOptions);
@@ -441,13 +444,6 @@ void ScrollablePattern::AddScrollEvent()
     };
     scrollable->SetDragFRCSceneCallback(std::move(dragFRCSceneCallback));
 
-    auto scrollMotionFRCSceneCallback = [weak = WeakClaim(this)](double velocity, SceneStatus sceneStatus) {
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        return pattern->NotifyFRCSceneInfo(SCROLLABLE_MOTION_SCENE, velocity, sceneStatus);
-    };
-    scrollable->SetScrollMotionFRCSceneCallback(std::move(scrollMotionFRCSceneCallback));
-
     scrollableEvent_ = MakeRefPtr<ScrollableEvent>(GetAxis());
     scrollableEvent_->SetScrollable(scrollable);
     gestureHub->AddScrollableEvent(scrollableEvent_);
@@ -614,11 +610,12 @@ void ScrollablePattern::RegisterScrollBarEventTask()
             return scrollBar->InBarTouchRegion(Point(point.GetX(), point.GetY()));
         });
     scrollableEvent_->SetBarCollectTouchTargetCallback(
-        [weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_))](
-            const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result) {
+        [weak = AceType::WeakClaim(AceType::RawPtr(scrollBar_))](const OffsetF& coordinateOffset,
+            const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result, const RefPtr<FrameNode>& frameNode,
+            const RefPtr<TargetComponent>& targetComponent) {
             auto scrollBar = weak.Upgrade();
             CHECK_NULL_VOID(scrollBar);
-            scrollBar->OnCollectTouchTarget(coordinateOffset, getEventTargetImpl, result);
+            scrollBar->OnCollectTouchTarget(coordinateOffset, getEventTargetImpl, result, frameNode, targetComponent);
         });
 
     auto dragFRCSceneCallback = [weak = WeakClaim(this)](double velocity, SceneStatus sceneStatus) {
@@ -787,9 +784,16 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
         CHECK_NULL_VOID(pattern);
         pattern->StartScrollSnapMotion(scrollSnapDelta, scrollSnapVelocity);
     };
+
+    auto scrollbarFRcallback = [weak = WeakClaim(this)](double velocity, SceneStatus sceneStatus) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        return pattern->NotifyFRCSceneInfo(CUSTOM_SCROLL_BAR_SCENE, velocity, sceneStatus);
+    };
+
     ScrollableNodeInfo nodeInfo = { AceType::WeakClaim(this), std::move(scrollFunction), std::move(scrollStartCallback),
         std::move(scrollEndCallback), std::move(calePredictSnapOffsetCallback),
-        std::move(startScrollSnapMotionCallback) };
+        std::move(startScrollSnapMotionCallback), std::move(scrollbarFRcallback) };
     scrollBarProxy->RegisterScrollableNode(nodeInfo);
     scrollBarProxy_ = scrollBarProxy;
 }
@@ -959,7 +963,6 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
             CHECK_NULL_RETURN(pattern, 0.0f);
             return pattern->GetCurrentVelocity();
         });
-        curveOffsetProperty_->SetThresholdType(ThresholdType::LAYOUT);
         isAnimationStop_ = false;
         curveOffsetProperty_->Set(GetTotalOffset());
         curveAnimation_ = AnimationUtils::StartAnimation(
@@ -1002,7 +1005,6 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
     AnimationOption option;
     auto curve = AceType::MakeRefPtr<SpringCurve>(velocity, mass, stiffness, damping);
     InitOption(option, CUSTOM_ANIMATION_DURATION, curve);
-    springOffsetProperty_->SetThresholdType(ThresholdType::LAYOUT);
     isAnimationStop_ = false;
     springOffsetProperty_->Set(GetTotalOffset());
     springAnimation_ = AnimationUtils::StartAnimation(
@@ -1048,10 +1050,14 @@ void ScrollablePattern::InitSpringOffsetProperty()
             pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->currentVelocity_,
                 SceneStatus::RUNNING);
         }
+        auto stopAnimation = NearEqual(pattern->finalPosition_, offset, SPRING_ACCURACY);
+        if (stopAnimation) {
+            offset = pattern->finalPosition_;
+        }
         pattern->lastVsyncTime_ = currentVsync;
         pattern->lastPosition_ = offset;
         if (!pattern->UpdateCurrentOffset(pattern->GetTotalOffset() - offset,
-            SCROLL_FROM_ANIMATION_CONTROLLER)) {
+            SCROLL_FROM_ANIMATION_CONTROLLER) || stopAnimation) {
             pattern->StopAnimation(pattern->springAnimation_);
         }
     };
@@ -1080,12 +1086,17 @@ void ScrollablePattern::InitCurveOffsetProperty(float position)
             pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->currentVelocity_,
                 SceneStatus::RUNNING);
         }
+        auto stopAnimation = NearEqual(pattern->finalPosition_, offset, SPRING_ACCURACY);
+        if (stopAnimation) {
+            offset = pattern->finalPosition_;
+        }
         pattern->lastVsyncTime_ = currentVsync;
         pattern->lastPosition_ = offset;
         pattern->NotifyFRCSceneInfo(SCROLLABLE_MULTI_TASK_SCENE, pattern->GetCurrentVelocity(),
             SceneStatus::RUNNING);
-        if (!pattern->UpdateCurrentOffset(pattern->GetTotalOffset() - offset, SCROLL_FROM_ANIMATION_CONTROLLER)) {
-            if ((pattern->IsAtTop() && LessOrEqual(position, pattern->GetTotalOffset())) ||
+        if (!pattern->UpdateCurrentOffset(pattern->GetTotalOffset() - offset, SCROLL_FROM_ANIMATION_CONTROLLER) ||
+            stopAnimation) {
+            if (stopAnimation || (pattern->IsAtTop() && LessOrEqual(position, pattern->GetTotalOffset())) ||
                 (pattern->IsAtBottom() && GreatOrEqual(position, pattern->GetTotalOffset()))) {
                 pattern->StopAnimation(pattern->curveAnimation_);
             }
@@ -1107,7 +1118,6 @@ void ScrollablePattern::InitOption(AnimationOption &option, float duration, cons
     } else {
         option.SetDuration(CUSTOM_ANIMATION_DURATION);
     }
-    option.SetFinishCallbackType(FinishCallbackType::LOGICALLY);
 }
 
 void ScrollablePattern::StopAnimation(std::shared_ptr<AnimationUtils::Animation> animation)
@@ -1871,6 +1881,11 @@ void ScrollablePattern::FireAndCleanScrollingListener()
     scrollingListener_.clear();
 }
 
+void ScrollablePattern::CleanScrollingListener()
+{
+    scrollingListener_.clear();
+}
+
 float ScrollablePattern::GetMainContentSize() const
 {
     auto host = GetHost();
@@ -1912,6 +1927,7 @@ void ScrollablePattern::FireOnScrollStart()
     CHECK_NULL_VOID(host);
     auto hub = host->GetEventHub<ScrollableEventHub>();
     CHECK_NULL_VOID(hub);
+    host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_START);
     auto onScrollStart = hub->GetOnScrollStart();
     CHECK_NULL_VOID(onScrollStart);
     onScrollStart();
@@ -1941,6 +1957,10 @@ void ScrollablePattern::OnScrollStop(const OnScrollStopEvent& onScrollStop)
 {
     if (scrollStop_) {
         if (!GetScrollAbort()) {
+            auto host = GetHost();
+            if (host != nullptr) {
+                host->OnAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+            }
             if (onScrollStop) {
                 SetScrollSource(SCROLL_FROM_NONE);
                 onScrollStop();

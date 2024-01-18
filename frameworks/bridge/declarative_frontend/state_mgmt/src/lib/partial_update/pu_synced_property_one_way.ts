@@ -72,7 +72,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
   private source_: ObservedPropertyAbstract<C>;
   // true for @Prop code path, 
   // false for @(Local)StorageProp
-  private sourceIsOwnObject : boolean;
+  private sourceIsOwnObject: boolean;
 
   constructor(source: ObservedPropertyAbstract<C> | C,
     owningChildView: IPropertySubscriber,
@@ -117,24 +117,24 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
   aboutToBeDeleted() {
     if (this.source_) {
       this.source_.removeSubscriber(this);
-      if (this.sourceIsOwnObject == true && this.source_.numberOfSubscrbers()==0){
+      if (this.sourceIsOwnObject == true && this.source_.numberOfSubscrbers() == 0) {
         stateMgmtConsole.debug(`${this.debugInfo()}: aboutToBeDeleted. owning source_ ObservedPropertySimplePU, calling its aboutToBeDeleted`);
         this.source_.aboutToBeDeleted();
-     }
+      }
 
       this.source_ = undefined;
     }
     super.aboutToBeDeleted();
   }
 
-  public debugInfoDecorator() : string {
+  public debugInfoDecorator(): string {
     return `@Prop (class SynchedPropertyOneWayPU)`;
   }
 
   // sync peer can be 
   // 1. the embedded ObservedPropertyPU, followed by a reset when the owning ViewPU received a local update in parent 
   // 2. a @Link or @Consume that uses this @Prop as a source.  FIXME is this possible? - see the if (eventSource && this.source_ == eventSource) {
-  public syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>) : void{
+  public syncPeerHasChanged(eventSource: ObservedPropertyAbstractPU<C>): void {
     stateMgmtProfiler.begin("SyncedPropertyOneWayPU.syncPeerHasChanged");
     if (this.source_ == undefined) {
       stateMgmtConsole.error(`${this.debugInfo()}: syncPeerHasChanged from peer ${eventSource && eventSource.debugInfo && eventSource.debugInfo()}. source_ undefined. Internal error.`);
@@ -158,7 +158,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
   }
 
 
-  public syncPeerTrackedPropertyHasChanged(eventSource: ObservedPropertyAbstractPU<C>, changedPropertyName) : void{
+  public syncPeerTrackedPropertyHasChanged(eventSource: ObservedPropertyAbstractPU<C>, changedPropertyName): void {
     stateMgmtProfiler.begin("SyncedPropertyOneWayPU.syncPeerTrackedPropertyHasChanged");
     if (this.source_ == undefined) {
       stateMgmtConsole.error(`${this.debugInfo()}: syncPeerTrackedPropertyHasChanged from peer ${eventSource && eventSource.debugInfo && eventSource.debugInfo()}. source_ undefined. Internal error.`);
@@ -213,7 +213,7 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     stateMgmtConsole.propertyAccess(`${this.debugInfo()}: set: value about to change.`);
     const oldValue = this.localCopyObservedObject_;
     if (this.resetLocalValue(newValue, /* needCopyObject */ false)) {
-      TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.localCopyObservedObject_, 
+      TrackedObject.notifyObjectValueAssignment(/* old value */ oldValue, /* new value */ this.localCopyObservedObject_,
         this.notifyPropertyHasChangedPU.bind(this),
         this.notifyTrackedObjectPropertyHasChanged.bind(this));
     }
@@ -264,54 +264,54 @@ class SynchedPropertyOneWayPU<C> extends ObservedPropertyAbstractPU<C>
     Therefore, conditionally wrap the object, then subscribe
     return value true only if localCopyObservedObject_ has been changed
   */
-    private resetLocalValue(newObservedObjectValue: C, needCopyObject : boolean): boolean {
-      // note: We can not test for newObservedObjectValue == this.localCopyObservedObject_
-      // here because the object might still be the same, but some property of it has changed
-  
-      if(!this.checkIsSupportedValue(newObservedObjectValue)) {
-        return;
-      }
-      // unsubscribe from old local copy 
+  private resetLocalValue(newObservedObjectValue: C, needCopyObject: boolean): boolean {
+    // note: We can not test for newObservedObjectValue == this.localCopyObservedObject_
+    // here because the object might still be the same, but some property of it has changed
+
+    if (!this.checkIsSupportedValue(newObservedObjectValue)) {
+      return;
+    }
+    // unsubscribe from old local copy 
+    if (this.localCopyObservedObject_ instanceof SubscribableAbstract) {
+      (this.localCopyObservedObject_ as SubscribableAbstract).removeOwningProperty(this);
+    } else {
+      ObservedObject.removeOwningProperty(this.localCopyObservedObject_, this);
+
+      // make sure the ObservedObject no longer has a read callback function
+      // assigned to it
+      ObservedObject.unregisterPropertyReadCb(this.localCopyObservedObject_);
+    }
+
+    // shallow/deep copy value 
+    // needed whenever newObservedObjectValue comes from source
+    // not needed on a local set (aka when called from set() method)
+    if (needCopyObject) {
+      ViewPU.pauseRendering();
+      this.localCopyObservedObject_ = this.copyObject(newObservedObjectValue, this.info_);
+      ViewPU.restoreRendering();
+    } else {
+      this.localCopyObservedObject_ = newObservedObjectValue;
+    }
+
+    if (typeof this.localCopyObservedObject_ == "object") {
       if (this.localCopyObservedObject_ instanceof SubscribableAbstract) {
-        (this.localCopyObservedObject_ as SubscribableAbstract).removeOwningProperty(this);
+        // deep copy will copy Set of subscribers as well. But local copy only has its own subscribers 
+        // not those of its parent value.
+        (this.localCopyObservedObject_ as unknown as SubscribableAbstract).clearOwningProperties();
+        (this.localCopyObservedObject_ as unknown as SubscribableAbstract).addOwningProperty(this);
+      } else if (ObservedObject.IsObservedObject(this.localCopyObservedObject_)) {
+        // case: new ObservedObject
+        ObservedObject.addOwningProperty(this.localCopyObservedObject_, this);
+        this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.localCopyObservedObject_);
       } else {
-        ObservedObject.removeOwningProperty(this.localCopyObservedObject_, this);
-
-        // make sure the ObservedObject no longer has a read callback function
-        // assigned to it
-        ObservedObject.unregisterPropertyReadCb(this.localCopyObservedObject_);
+        // wrap newObservedObjectValue raw object as ObservedObject and subscribe to it
+        stateMgmtConsole.propertyAccess(`${this.debugInfo()}: Provided source object's is not proxied (is not a ObservedObject). Wrapping it inside ObservedObject.`);
+        this.localCopyObservedObject_ = ObservedObject.createNew(this.localCopyObservedObject_, this);
+        this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.localCopyObservedObject_);
       }
-
-      // shallow/deep copy value 
-      // needed whenever newObservedObjectValue comes from source
-      // not needed on a local set (aka when called from set() method)
-      if (needCopyObject) {
-        ViewPU.pauseRendering();
-        this.localCopyObservedObject_ = this.copyObject(newObservedObjectValue, this.info_);
-        ViewPU.restoreRendering();
-      } else {
-        this.localCopyObservedObject_ = newObservedObjectValue;
-      }
-
-      if (typeof this.localCopyObservedObject_ == "object") {
-        if (this.localCopyObservedObject_ instanceof SubscribableAbstract) {
-          // deep copy will copy Set of subscribers as well. But local copy only has its own subscribers 
-          // not those of its parent value.
-          (this.localCopyObservedObject_ as unknown as SubscribableAbstract).clearOwningProperties();
-          (this.localCopyObservedObject_ as unknown as SubscribableAbstract).addOwningProperty(this);
-        } else if (ObservedObject.IsObservedObject(this.localCopyObservedObject_)) {
-          // case: new ObservedObject
-          ObservedObject.addOwningProperty(this.localCopyObservedObject_, this);
-          this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.localCopyObservedObject_);
-        } else {
-          // wrap newObservedObjectValue raw object as ObservedObject and subscribe to it
-          stateMgmtConsole.propertyAccess(`${this.debugInfo()}: Provided source object's is not proxied (is not a ObservedObject). Wrapping it inside ObservedObject.`);
-          this.localCopyObservedObject_ = ObservedObject.createNew(this.localCopyObservedObject_, this);
-          this.shouldInstallTrackedObjectReadCb = TrackedObject.needsPropertyReadCb(this.localCopyObservedObject_);
-        }
-        stateMgmtConsole.propertyAccess("end of reset shouldInstallTrackedObjectReadCb=" + this.shouldInstallTrackedObjectReadCb);
-      }
-      return true;
+      stateMgmtConsole.propertyAccess("end of reset shouldInstallTrackedObjectReadCb=" + this.shouldInstallTrackedObjectReadCb);
+    }
+    return true;
   }
 
   private copyObject(value: C, propName: string): C {

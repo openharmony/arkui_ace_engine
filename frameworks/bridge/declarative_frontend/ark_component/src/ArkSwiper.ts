@@ -119,9 +119,6 @@ class ArkSwiperComponent extends ArkComponent implements SwiperAttribute {
   nestedScroll(value: SwiperNestedScrollMode): this {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
 }
 class SwiperNextMarginModifier extends ModifierWithKey<Length> {
   static identity: Symbol = Symbol('swiperNextMargin');

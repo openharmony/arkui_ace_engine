@@ -116,10 +116,9 @@ float LayoutDivider(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNo
     OffsetT<float> dividerOffset;
     if (position == NavBarPosition::END) {
         dividerOffset = OffsetT<float>(
-            navigationGeometryNode->GetFrameSize().Width() - geometryNode->GetFrameSize().Width() - navBarWidth,
-            geometryNode->GetFrameOffset().GetY());
+            navigationGeometryNode->GetFrameSize().Width() - geometryNode->GetFrameSize().Width() - navBarWidth, 0.0f);
     } else {
-        dividerOffset = OffsetT<float>(navBarWidth, geometryNode->GetFrameOffset().GetY());
+        dividerOffset = OffsetT<float>(navBarWidth, 0.0f);
     }
     const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
     dividerOffset.AddX(padding.left.value_or(0));
@@ -151,11 +150,11 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
     // 1. displaying content pages in STACK mode
     // 2. placing navBar at the end
     // 3. hiding navBar in SPLIT mode
+    auto contentOffset = OffsetT<float>(0.0f, 0.0f);
     if ((contentChildSize != 0 && navigationLayoutAlgorithm->GetNavigationMode() == NavigationMode::STACK) ||
         position == NavBarPosition::END ||
         (navigationLayoutProperty->GetHideNavBar().value_or(false) &&
             navigationLayoutAlgorithm->GetNavigationMode() == NavigationMode::SPLIT)) {
-        auto contentOffset = OffsetT<float>(0.0f, 0.0f);
         const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
         contentOffset.AddX(padding.left.value_or(0));
         contentOffset.AddY(padding.top.value_or(0));
@@ -163,7 +162,7 @@ void LayoutContent(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNod
         contentWrapper->Layout();
         return;
     }
-    auto contentOffset = OffsetT<float>(navBarWidth + dividerWidth, geometryNode->GetFrameOffset().GetY());
+    contentOffset = OffsetT<float>(navBarWidth + dividerWidth, 0.0f);
     const auto& padding = navigationLayoutProperty->CreatePaddingAndBorder();
     contentOffset.AddX(padding.left.value_or(0));
     contentOffset.AddY(padding.top.value_or(0));
@@ -379,8 +378,6 @@ void NavigationLayoutAlgorithm::CheckSizeInSplit(
         }
     } else if (!userSetNavBarRangeFlag_ && !userSetMinContentFlag_ && userSetNavBarWidthFlag_) {
         realNavBarWidth_ = userSetNavBarWidth;
-        realContentWidth_ = frameWidth - realNavBarWidth_ - dividerWidth;
-    } else if (userSetNavBarRangeFlag_) {
         realContentWidth_ = frameWidth - realNavBarWidth_ - dividerWidth;
     } else {
         float remainingSpace = frameWidth - realNavBarWidth_ - dividerWidth;

@@ -39,7 +39,7 @@ public:
     virtual NG::RectF GetRect() = 0;
     virtual void ShowMenu(const RefPtr<Component>& newComponent) = 0;
     virtual void ShowMenuNG(const RefPtr<NG::FrameNode> menuNode, int32_t targetId, const NG::OffsetF& offset) = 0;
-    virtual void ShowPreviewNG() = 0;
+    virtual bool ShowPreviewNG() = 0;
     virtual void HidePreviewNG() = 0;
     virtual void HideMenuNG(const RefPtr<NG::FrameNode>& menu, int32_t targetId) = 0;
     virtual void HideMenuNG(bool showPreviewAnimation = true, bool startDrag = false) = 0;
@@ -102,8 +102,9 @@ public:
     virtual void OpenCustomDialog(const PromptDialogAttr& dialogAttr, std::function<void(int32_t)>&& callback) = 0;
     virtual void CloseCustomDialog(const int32_t dialogId) = 0;
     virtual const RefPtr<NG::OverlayManager> GetOverlayManager() = 0;
+    virtual bool IsFocused() = 0;
     virtual void RequestFocus() = 0;
-
+    virtual void ResizeWindowForFoldStatus() = 0;
 private:
     int32_t subwindowId_ = 0;
     bool isAboveApps_ = false;

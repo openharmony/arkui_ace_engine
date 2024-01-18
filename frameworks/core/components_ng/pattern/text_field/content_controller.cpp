@@ -20,6 +20,7 @@
 
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/text/typed_text.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -45,15 +46,15 @@ std::string ContentController::PreprocessString(int32_t startIndex, int32_t endI
     auto selectValue = GetSelectedValue(startIndex, endIndex);
     if (property->GetTextInputType().has_value() &&
         (property->GetTextInputType().value() == TextInputType::NUMBER_DECIMAL ||
-        property->GetTextInputType().value() == TextInputType::EMAIL_ADDRESS)) {
-        char specialChar = property->GetTextInputType().value() == TextInputType::NUMBER_DECIMAL ?
-            '.' : '@';
+            property->GetTextInputType().value() == TextInputType::EMAIL_ADDRESS)) {
+        char specialChar = property->GetTextInputType().value() == TextInputType::NUMBER_DECIMAL ? '.' : '@';
         if (content_.find(specialChar) != std::string::npos && value.find(specialChar) != std::string::npos &&
             GetSelectedValue(startIndex, endIndex).find(specialChar) == std::string::npos) {
             tmp.erase(
                 std::remove_if(tmp.begin(), tmp.end(), [&specialChar](char c) { return c == specialChar; }), tmp.end());
         }
     }
+    FilterValueType(tmp);
     auto wideText = GetWideText();
     auto wideTmp = StringUtils::ToWstring(tmp);
     auto maxLength = static_cast<uint32_t>(textField->GetMaxLength());
@@ -143,9 +144,11 @@ void ContentController::FilterTextInputStyle(bool& textChanged, std::string& res
             textChanged |= FilterWithAscii(result);
             break;
         }
-        case TextInputType::NUMBER_DECIMAL:
+        case TextInputType::NUMBER_DECIMAL: {
             textChanged |= FilterWithEvent(DIGIT_DECIMAL_WHITE_LIST, result);
             textChanged |= FilterWithDecimal(result);
+            break;
+        }
         default: {
             break;
         }
@@ -162,8 +165,8 @@ void ContentController::FilterValue()
     CHECK_NULL_VOID(textField);
     auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
 
-    bool hasInputFilter = property->GetInputFilter().has_value() &&
-        !property->GetInputFilter().value().empty() && !content_.empty();
+    bool hasInputFilter =
+        property->GetInputFilter().has_value() && !property->GetInputFilter().value().empty() && !content_.empty();
     if (!hasInputFilter) {
         FilterTextInputStyle(textChanged, result);
     } else {
@@ -182,6 +185,31 @@ void ContentController::FilterValue()
         content_ = StringUtils::ToString(GetWideText().substr(0, maxLength));
     }
     textField->ContentFireOnChangeEvent();
+}
+
+void ContentController::FilterValueType(std::string& value)
+{
+    bool textChanged = false;
+    auto result = value;
+    auto pattern = pattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textField = DynamicCast<TextFieldPattern>(pattern);
+    CHECK_NULL_VOID(textField);
+    auto property = textField->GetLayoutProperty<TextFieldLayoutProperty>();
+
+    bool hasInputFilter =
+        property->GetInputFilter().has_value() && !property->GetInputFilter().value().empty() && !content_.empty();
+    if (!hasInputFilter) {
+        FilterTextInputStyle(textChanged, result);
+    } else {
+        textChanged |= FilterWithEvent(property->GetInputFilter().value(), result);
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            FilterTextInputStyle(textChanged, result);
+        }
+    }
+    if (textChanged) {
+        value = result;
+    }
 }
 
 std::string ContentController::RemoveErrorTextFromValue(const std::string& value, const std::string& errorText)
@@ -303,6 +331,9 @@ bool ContentController::FilterWithEvent(const std::string& filter, std::string& 
 
 void ContentController::erase(int32_t startIndex, int32_t length)
 {
+    if (EraseEmoji()) {
+        return;
+    }
     auto wideText = GetWideText().erase(startIndex, length);
     content_ = StringUtils::ToString(wideText);
     auto pattern = pattern_.Upgrade();
@@ -329,5 +360,22 @@ std::string ContentController::GetSelectedLimitValue(int32_t& index, int32_t& st
     FormatIndex(startIndex, endIndex);
     index = index - startIndex;
     return GetSelectedValue(startIndex, endIndex);
-};
+}
+
+bool ContentController::EraseEmoji()
+{
+    bool emojiFlag = false;
+    uint32_t startIndex = 0;
+    uint32_t endIndex = 0;
+    while (startIndex < content_.length()) {
+        auto unicode = TypedText::GetUTF8Next(content_.c_str(), startIndex, endIndex);
+        if (TypedText::IsEmoji(unicode)) {
+            content_.erase(startIndex, endIndex - startIndex);
+            emojiFlag = true;
+            continue;
+        }
+        startIndex = endIndex;
+    }
+    return emojiFlag;
+}
 } // namespace OHOS::Ace::NG

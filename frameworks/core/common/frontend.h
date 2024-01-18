@@ -61,6 +61,15 @@ struct WindowConfig {
         }
         return designWidthScale;
     }
+
+    void UpdateDesignWidthScale(const double viewWidth)
+    {
+        if (designWidth <= 0) {
+            LOGI("designWidth <= 0");
+            designWidth = DEFAULT_DESIGN_WIDTH;
+        }
+        designWidthScale = viewWidth / designWidth;
+    }
 };
 
 enum class FrontendType { JSON, JS, JS_CARD, DECLARATIVE_JS, JS_PLUGIN, ETS_CARD };

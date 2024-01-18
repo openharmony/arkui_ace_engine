@@ -39,6 +39,7 @@ public:
     std::string GetValueAfterIndex(int32_t index);
     void erase(int32_t startIndex, int32_t length);
     void FilterValue();
+    void FilterValueType(std::string& value);
     std::string GetSelectedLimitValue(int32_t& index, int32_t& startIndex);
 
     std::wstring GetWideText()
@@ -79,6 +80,7 @@ public:
     }
 
 private:
+    bool EraseEmoji();
     void FormatIndex(int32_t& startIndex, int32_t& endIndex);
     void FilterTextInputStyle(bool& textChanged, std::string& result);
     bool FilterWithEvent(const std::string& filter, std::string& result);

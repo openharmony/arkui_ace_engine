@@ -223,6 +223,13 @@ var FlexAlign;
   FlexAlign[FlexAlign["SpaceEvenly"] = 8] = "SpaceEvenly";
 })(FlexAlign || (FlexAlign = {}));
 
+var PixelRoundCalcPolicy;
+(function (PixelRoundCalcPolicy) {
+  PixelRoundCalcPolicy[PixelRoundCalcPolicy["NO_FORCE_ROUND"] = 0] = "NO_FORCE_ROUND";
+  PixelRoundCalcPolicy[PixelRoundCalcPolicy["FORCE_CEIL"] = 1] = "FORCE_CEIL";
+  PixelRoundCalcPolicy[PixelRoundCalcPolicy["FORCE_FLOOR"] = 2] = "FORCE_FLOOR";
+})(PixelRoundCalcPolicy || (PixelRoundCalcPolicy = {}));
+
 var VerticalAlign;
 (function (VerticalAlign) {
   VerticalAlign[VerticalAlign["Top"] = 1] = "Top";
@@ -821,11 +828,11 @@ var DatePickerType;
   DatePickerType[DatePickerType["Date"] = 1] = "Date";
 })(DatePickerType || (DatePickerType = {}));
 
-var DisplayedComponentType;
-(function (DisplayedComponentType) {
-  DisplayedComponentType[DisplayedComponentType["HOUR_MINUTE"] = 0] = "HOUR_MINUTE";
-  DisplayedComponentType[DisplayedComponentType["HOUR_MINUTE_SECOND"] = 1] = "HOUR_MINUTE_SECOND";
-})(DisplayedComponentType || (DisplayedComponentType = {}));
+var TimePickerFormat;
+(function (TimePickerFormat) {
+  TimePickerFormat[TimePickerFormat["HOUR_MINUTE"] = 0] = "HOUR_MINUTE";
+  TimePickerFormat[TimePickerFormat["HOUR_MINUTE_SECOND"] = 1] = "HOUR_MINUTE_SECOND";
+})(TimePickerFormat || (TimePickerFormat = {}));
 
 var InputType;
 (function (InputType) {
@@ -1837,18 +1844,29 @@ class NavPathStack {
     }
     this.animated = animated;
   }
-  removeName(name) {
-    let removed = false;
-    for (let i = 0; i < this.pathArray.length; i++) {
-      if (this.pathArray[i].name === name) {
-        this.pathArray.splice(i, 1);
-        removed = true;
-      }
+  removeByIndexes(indexes) {
+    if (!Array.isArray(indexes) || indexes.length === 0) {
+      return 0;
     }
-    if (removed) {
+    let originLength = this.pathArray.length;
+    this.pathArray = this.pathArray.filter((item, index) => {
+      return item && !indexes.includes(index) });
+    let cnt = originLength - this.pathArray.length;
+    if (cnt > 0) {
       this.changeFlag = this.changeFlag + 1;
       this.isReplace = 0;
     }
+    return cnt;
+  }
+  removeByName(name) {
+    let originLength = this.pathArray.length;
+    this.pathArray = this.pathArray.filter(item => { return name !== item.name });
+    let cnt = originLength - this.pathArray.length;
+    if (cnt > 0) {
+      this.changeFlag = this.changeFlag + 1;
+      this.isReplace = 0;
+    }
+    return cnt;
   }
   removeIndex(index) {
     if (index >= this.pathArray.length) {

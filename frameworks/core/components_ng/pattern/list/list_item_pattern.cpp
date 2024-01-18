@@ -270,6 +270,12 @@ void ListItemPattern::MarkDirtyNode()
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
+void ListItemPattern::ChangeAxis(Axis axis)
+{
+    axis_ = axis;
+    InitSwiperAction(true);
+}
+
 void ListItemPattern::InitSwiperAction(bool axisChanged)
 {
     bool isPanInit = false;
@@ -332,6 +338,8 @@ void ListItemPattern::InitSwiperAction(bool axisChanged)
     }
     if (!springController_) {
         springController_ = CREATE_ANIMATOR(PipelineBase::GetCurrentContext());
+    } else {
+        springController_->Stop();
     }
 }
 
@@ -899,22 +907,21 @@ void ListItemPattern::InitDisableEvent()
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<ListItemTheme>();
     CHECK_NULL_VOID(theme);
-    auto UserDefineOpacity = renderContext->GetOpacityValue(1.0);
+    auto userDefineOpacity = renderContext->GetOpacityValue(1.0);
 
     if (!eventHub->IsDeveloperEnabled()) {
         if (selectable_) {
             selectable_ = false;
         }
         enableOpacity_ = renderContext->GetOpacityValue(1.0);
-        renderContext->UpdateOpacity(theme->GetItemDisabledAlpha());
+        lastOpacity_ = enableOpacity_.value() * theme->GetItemDisabledAlpha();
+    } else if (enableOpacity_.has_value() && userDefineOpacity == lastOpacity_) {
+        lastOpacity_ = enableOpacity_.value();
+        enableOpacity_.reset();
     } else {
-        if (enableOpacity_.has_value()) {
-            renderContext->UpdateOpacity(enableOpacity_.value());
-            enableOpacity_.reset();
-        } else {
-            renderContext->UpdateOpacity(UserDefineOpacity);
-        }
+        lastOpacity_ = userDefineOpacity;
     }
+    renderContext->UpdateOpacity(lastOpacity_);
 }
 
 bool ListItemPattern::GetLayouted() const
@@ -922,7 +929,7 @@ bool ListItemPattern::GetLayouted() const
     return isLayouted_;
 }
 
-float ListItemPattern::GetEstimateHeight(float estimateHeight) const
+float ListItemPattern::GetEstimateHeight(float estimateHeight, Axis axis) const
 {
     if (!isLayouted_) {
         return estimateHeight;
@@ -931,7 +938,7 @@ float ListItemPattern::GetEstimateHeight(float estimateHeight) const
     CHECK_NULL_RETURN(host, estimateHeight);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, estimateHeight);
-    return GetMainAxisSize(geometryNode->GetMarginFrameSize(), axis_);
+    return GetMainAxisSize(geometryNode->GetMarginFrameSize(), axis);
 }
 } // namespace OHOS::Ace::NG
 

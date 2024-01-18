@@ -275,6 +275,10 @@ void JSTextField::SetEnterKeyType(const JSCallbackInfo& info)
     if (info.Length() < 1) {
         return;
     }
+    if (info[0]->IsUndefined()) {
+        TextFieldModel::GetInstance()->SetEnterKeyType(TextInputAction::UNSPECIFIED);
+        return;
+    }
     if (!info[0]->IsNumber()) {
         return;
     }
@@ -1065,7 +1069,8 @@ void JSTextField::SetShowCounter(const JSCallbackInfo& info)
             TextFieldModel::GetInstance()->SetCounterType(DEFAULT_MODE);
             return;
         }
-        if (inputNumber < MINI_VAILD_VALUE || inputNumber > MAX_VAILD_VALUE) {
+        if (static_cast<uint32_t>(inputNumber) < MINI_VAILD_VALUE ||
+            static_cast<uint32_t>(inputNumber) > MAX_VAILD_VALUE) {
             LOGI("The info is wrong, it is supposed to be a right number");
             TextFieldModel::GetInstance()->SetCounterType(ILLEGAL_VALUE);
             TextFieldModel::GetInstance()->SetShowCounter(false);

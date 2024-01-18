@@ -84,13 +84,10 @@ void UpdateFontColor(const RefPtr<FrameNode>& textNode, RefPtr<MenuLayoutPropert
     CHECK_NULL_VOID(renderContext);
     if (fontColor.has_value()) {
         textProperty->UpdateTextColor(fontColor.value());
-        renderContext->UpdateForegroundColor(fontColor.value());
     } else if (menuProperty && menuProperty->GetFontColor().has_value()) {
         textProperty->UpdateTextColor(menuProperty->GetFontColor().value());
-        renderContext->UpdateForegroundColor(menuProperty->GetFontColor().value());
     } else {
         textProperty->UpdateTextColor(defaultFontColor);
-        renderContext->UpdateForegroundColor(defaultFontColor);
     }
 }
 
@@ -291,6 +288,9 @@ void MenuItemPattern::ShowSubMenu()
     auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
     bool isSelectOverlayMenu = IsSelectOverlayMenu();
     MenuParam param;
+    auto layoutProps = focusMenu->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(layoutProps);
+    param.isShowInSubWindow = layoutProps->GetShowInSubWindowValue(false);
     param.type = isSelectOverlayMenu ? MenuType::SELECT_OVERLAY_SUB_MENU : MenuType::SUB_MENU;
     auto subMenu = MenuView::Create(customNode, host->GetId(), host->GetTag(), param);
     CHECK_NULL_VOID(subMenu);
@@ -723,8 +723,18 @@ void MenuItemPattern::UpdateText(RefPtr<FrameNode>& row, RefPtr<MenuLayoutProper
     auto fontStyle = isLabel ? itemProperty->GetLabelItalicFontStyle() : itemProperty->GetItalicFontStyle();
     UpdateFontStyle(textProperty, menuProperty, fontStyle);
     auto fontColor = isLabel ? itemProperty->GetLabelFontColor() : itemProperty->GetFontColor();
+    auto menuItemNode = GetHost();
     UpdateFontColor(
         node, menuProperty, fontColor, isLabel ? theme->GetSecondaryFontColor() : theme->GetMenuFontColor());
+    if (!isLabel) {
+        auto menuItemRenderContext = menuItemNode->GetRenderContext();
+        CHECK_NULL_VOID(menuItemRenderContext);
+        auto renderContext = node->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        if (menuItemRenderContext->HasForegroundColor()) {
+            renderContext->UpdateForegroundColor(menuItemRenderContext->GetForegroundColorValue());
+        }
+    }
     auto fontFamily = isLabel ? itemProperty->GetLabelFontFamily() : itemProperty->GetFontFamily();
     UpdateFontFamily(textProperty, menuProperty, fontFamily);
     textProperty->UpdateContent(content);

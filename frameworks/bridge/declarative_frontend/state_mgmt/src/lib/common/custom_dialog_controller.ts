@@ -13,14 +13,15 @@
  * limitations under the License.
  */
 class CustomDialogController extends NativeCustomDialogController {
-  private builder_: () => void; // hold builder to kill root (builder) cycle dependency (view-->controller-->builder-->view)
-  private cancel_?: () => void;
+  // hold arg so NativeCustomDialogController can make use of the functions
+  // contained in it without root (global) cycle dependency problems. like
+  // builder, cancel, openAnimation::onFinish, closeAnimation::onFinish, etc.
+  private arg_: CustomDialogControllerConstructorArg;
   private view_: ViewPU;
 
   constructor(arg: CustomDialogControllerConstructorArg, view: ViewPU) {
     super(arg, view);
-    this.builder_ = arg.builder;
-    this.cancel_ = arg.cancel;
+    this.arg_ = arg;
     this.view_ = view;
   }
 }

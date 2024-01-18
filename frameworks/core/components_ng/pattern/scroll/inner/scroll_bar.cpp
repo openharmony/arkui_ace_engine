@@ -595,12 +595,16 @@ void ScrollBar::ProcessFrictionMotionStop()
     isDriving_ = false;
 }
 
-void ScrollBar::OnCollectTouchTarget(
-    const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result)
+void ScrollBar::OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
+    TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent)
 {
     if (panRecognizer_ && isScrollable_) {
         panRecognizer_->SetCoordinateOffset(Offset(coordinateOffset.GetX(), coordinateOffset.GetY()));
         panRecognizer_->SetGetEventTargetImpl(getEventTargetImpl);
+        panRecognizer_->AssignNodeId(frameNode->GetId());
+        panRecognizer_->AttachFrameNode(frameNode);
+        panRecognizer_->SetTargetComponent(targetComponent);
+        panRecognizer_->SetIsSystemGesture(true);
         result.emplace_front(panRecognizer_);
     }
 }

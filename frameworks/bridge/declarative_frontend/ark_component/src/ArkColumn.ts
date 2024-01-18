@@ -63,9 +63,6 @@ class ArkColumnComponent extends ArkComponent implements CommonMethod<ColumnAttr
   pointLight(value: PointLightStyle): ColumnAttribute {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
 }
 // @ts-ignore
 globalThis.Column.attributeModifier = function (modifier) {

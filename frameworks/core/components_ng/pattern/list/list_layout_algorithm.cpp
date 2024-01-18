@@ -306,14 +306,14 @@ void ListLayoutAlgorithm::HandleJumpAuto(LayoutWrapper* layoutWrapper,
             scrollAutoType_ = ScrollAutoType::END;
             if (!isSmoothJump) {
                 jumpIndex_ = GetLanesCeil(layoutWrapper, jumpIndex_.value());
-                startPos = contentMainSize_;
+                startPos = contentMainSize_ - contentEndOffset_;
                 BeginLayoutBackward(startPos, layoutWrapper);
             }
         } else if (jumpIndex <= tempStartIndex) {
             scrollAutoType_ = ScrollAutoType::START;
             if (!isSmoothJump) {
                 jumpIndex_ = GetLanesFloor(layoutWrapper, jumpIndex_.value());
-                startPos = 0.0f;
+                startPos = contentStartOffset_;
                 BeginLayoutForward(startPos, layoutWrapper);
             }
         }
@@ -333,13 +333,13 @@ void ListLayoutAlgorithm::HandleJumpAuto(LayoutWrapper* layoutWrapper,
         if (GreatNotEqual(contentMainSize_, mainLen)) {
             scrollAutoType_ = ScrollAutoType::START;
             if (!isSmoothJump) {
-                startPos = 0.0f;
+                startPos = contentStartOffset_;
                 BeginLayoutForward(startPos, layoutWrapper);
             }
         } else {
             scrollAutoType_ = ScrollAutoType::END;
             if (!isSmoothJump) {
-                startPos = contentMainSize_;
+                startPos = contentMainSize_ - contentEndOffset_;
                 BeginLayoutBackward(startPos, layoutWrapper);
             }
         }
@@ -351,13 +351,13 @@ void ListLayoutAlgorithm::HandleJumpAuto(LayoutWrapper* layoutWrapper,
         if (GreatOrEqual(mainLen, contentMainSize_)) {
             scrollAutoType_ = ScrollAutoType::START;
             if (!isSmoothJump) {
-                startPos = 0.0f;
+                startPos = contentStartOffset_;
                 BeginLayoutForward(startPos, layoutWrapper);
             }
         } else {
             scrollAutoType_ = ScrollAutoType::END;
             if (!isSmoothJump) {
-                startPos = contentMainSize_;
+                startPos = contentMainSize_ - contentEndOffset_;
                 BeginLayoutBackward(startPos, layoutWrapper);
             }
         }
@@ -457,10 +457,10 @@ bool ListLayoutAlgorithm::CheckNoNeedJumpListItem(LayoutWrapper* layoutWrapper,
     if (tempJumpIndex == tempStartIndex && tempJumpIndex == tempEndIndex) {
         return true;
     }
-    if ((tempJumpIndex == tempStartIndex) && GreatOrEqual(startPos, 0.0f)) {
+    if ((tempJumpIndex == tempStartIndex) && GreatOrEqual(startPos, contentStartOffset_)) {
         return true;
     }
-    if ((tempJumpIndex == tempEndIndex) && LessOrEqual(endPos, contentMainSize_)) {
+    if ((tempJumpIndex == tempEndIndex) && LessOrEqual(endPos, contentMainSize_ - contentEndOffset_)) {
         return true;
     }
     return false;
@@ -493,8 +493,8 @@ bool ListLayoutAlgorithm::CheckNoNeedJumpListItemGroup(LayoutWrapper* layoutWrap
     if (jumpIndex >= startIndex && jumpIndex <= endIndex) {
         auto it = groupItemPosition.find(jumpIndexInGroup);
         if (it != groupItemPosition.end()) {
-            auto topPos = jumpIndexStartPos + it->second.first;
-            auto bottomPos = jumpIndexStartPos + it->second.second;
+            auto topPos = jumpIndexStartPos + it->second.first - contentStartOffset_;
+            auto bottomPos = jumpIndexStartPos + it->second.second + contentEndOffset_;
             if (JudgeInOfScreenScrollAutoType(wrapper, listLayoutProperty, topPos, bottomPos)) {
                 return true;
             }
@@ -526,7 +526,8 @@ bool ListLayoutAlgorithm::JudgeInOfScreenScrollAutoType(const RefPtr<LayoutWrapp
     float footerMainSize = 0.0f;
     if (stickyStyle == V2::StickyStyle::BOTH || stickyStyle == V2::StickyStyle::HEADER) {
         headerMainSize = groupPattern->GetHeaderMainSize();
-    } else if (stickyStyle == V2::StickyStyle::BOTH || stickyStyle == V2::StickyStyle::FOOTER) {
+    }
+    if (stickyStyle == V2::StickyStyle::BOTH || stickyStyle == V2::StickyStyle::FOOTER) {
         footerMainSize = groupPattern->GetFooterMainSize();
     }
 
@@ -1629,13 +1630,13 @@ int32_t ListLayoutAlgorithm::FindPredictSnapEndIndexInItemPositions(
             }
         }
     } else if (scrollSnapAlign == V2::ScrollSnapAlign::END) {
-        for (const auto& positionInfo : itemPosition_) {
-            startPos = totalOffset_ + positionInfo.second.endPos - itemHeight / 2.0f;
-            itemHeight = positionInfo.second.endPos - positionInfo.second.startPos + spaceWidth_;
-            endPos = totalOffset_ + positionInfo.second.endPos + itemHeight / 2.0f;
+        for (auto pos = itemPosition_.rbegin(); pos != itemPosition_.rend(); ++pos) {
+            endPos = totalOffset_ + pos->second.endPos + itemHeight / 2.0f;
+            itemHeight = pos->second.endPos - pos->second.startPos + spaceWidth_;
+            startPos = totalOffset_ + pos->second.endPos - itemHeight / 2.0f;
             if (GreatOrEqual(predictEndPos + stopOnScreen, startPos) &&
                 LessNotEqual(predictEndPos + stopOnScreen, endPos)) {
-                endIndex = positionInfo.first;
+                endIndex = pos->first;
                 break;
             }
         }

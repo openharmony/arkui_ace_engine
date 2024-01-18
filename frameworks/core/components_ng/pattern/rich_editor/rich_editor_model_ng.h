@@ -26,6 +26,7 @@ public:
     RefPtr<RichEditorControllerBase> GetRichEditorController() override;
     void SetOnReady(std::function<void()>&& func) override;
     void SetOnSelect(std::function<void(const BaseEventInfo*)>&& func) override;
+    void SetOnSelectionChange(std::function<void(const BaseEventInfo*)>&& func) override;
     void SetAboutToIMEInput(std::function<bool(const RichEditorInsertValue&)>&& func) override;
     void SetOnIMEInputComplete(std::function<void(const RichEditorAbstractSpanResult&)>&& func) override;
     void SetAboutToDelete(std::function<bool(const RichEditorDeleteValue&)>&& func) override;

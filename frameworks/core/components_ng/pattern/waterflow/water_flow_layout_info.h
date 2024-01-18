@@ -72,7 +72,7 @@ public:
 
     int32_t jumpIndex_ = EMPTY_JUMP_INDEX;
 
-    ScrollAlign align_;
+    ScrollAlign align_ = ScrollAlign::START;
 
     int32_t startIndex_ = 0;
     int32_t endIndex_ = 0;

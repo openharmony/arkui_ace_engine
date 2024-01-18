@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -96,6 +96,7 @@ public:
 
     void RegisterScrollingListener(const RefPtr<ScrollingListener> listener) override;
     void FireAndCleanScrollingListener() override;
+    void CleanScrollingListener() override;
 
     void SetAxis(Axis axis);
     virtual bool UpdateCurrentOffset(float delta, int32_t source) = 0;
@@ -312,7 +313,7 @@ public:
     bool CanOverScroll(int32_t source)
     {
         return (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR &&
-            source != SCROLL_FROM_NONE && IsScrollable() && (!ScrollableIdle() || animateOverScroll_));
+                IsScrollable() && (!ScrollableIdle() || animateOverScroll_));
     }
     void MarkSelectedItems();
     bool ShouldSelectScrollBeStopped();
@@ -607,7 +608,7 @@ private:
     ModalSheetCoordinationMode CoordinateWithSheet(double& offset, int32_t source, bool isAtTop);
     bool NeedCoordinateScrollWithNavigation(double offset, int32_t source, const OverScrollOffset& overOffsets);
 
-    Axis axis_;
+    Axis axis_ = Axis::VERTICAL;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
@@ -631,7 +632,10 @@ private:
     bool scrollAbort_ = false;
     bool animateOverScroll_ = false;
 
-    NestedScrollOptions nestedScroll_;
+    NestedScrollOptions nestedScroll_ = {
+        .forward = NestedScrollMode::SELF_ONLY,
+        .backward = NestedScrollMode::SELF_ONLY,
+    };
 
     // select with mouse
     enum SelectDirection { SELECT_DOWN, SELECT_UP, SELECT_NONE };

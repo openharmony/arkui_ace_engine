@@ -24,5 +24,6 @@ ace_unittest("grid_test_ng") {
     "grid_layout_test_ng.cpp",
     "grid_scroller_test_ng.cpp",
     "grid_test_ng.cpp",
+    "layout_info_test.cpp",
   ]
 }

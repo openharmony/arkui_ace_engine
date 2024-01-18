@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_TITLE_BAR_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_TITLE_BAR_PATTERN_H
 
+#include "core/common/container.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_accessibility_property.h"
@@ -110,11 +111,9 @@ public:
     {
         isInitialSubtitle_ = isInitialSubtitle;
     }
-    bool ProcessTitleAssociatedUpdate(float offset);
     void ProcessTitleDragStart(float offset);
-    void SetTitleStyleByOffset(float offset);
+    void ProcessTitleDragUpdate(float offset);
 
-    void ProcessTitleDragUpdate(float offset, float dragOffsetY);
     void ProcessTitleDragEnd();
     
     void OnColorConfigurationUpdate() override;
@@ -139,8 +138,7 @@ public:
         if (NearZero(tempTitleBarHeight_)) {
             return true;
         }
-        return GreatNotEqual(tempTitleBarHeight_, static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx())) ?
-            true : false;
+        return GreatNotEqual(tempTitleBarHeight_, static_cast<float>(SINGLE_LINE_TITLEBAR_HEIGHT.ConvertToPx()));
     }
 
     bool IsTitleFullStatus() const
@@ -149,7 +147,7 @@ public:
             return true;
         }
         GetMaxTitleBarHeight();
-        return GreatOrEqual(tempTitleBarHeight_, maxTitleBarHeight_) ? true : false;
+        return GreatOrEqual(tempTitleBarHeight_, maxTitleBarHeight_);
     }
 
     bool IsMinTitle() const
@@ -215,8 +213,6 @@ private:
 
     void OnAttachToFrameNode() override;
 
-    // Init pan recognizer to move items when drag update, play translate animation when drag end.
-    void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(double dragVelocity);
@@ -229,8 +225,6 @@ private:
     void SetDefaultSubtitleOpacity();
 
     float GetTitleHeight();
-    float GetTitleOffsetY();
-    float GetSubTitleHeight();
     float GetSubTitleOffsetY();
     void UpdateTitleFontSize(const Dimension& tempTitleFontSize);
     void UpdateSubTitleOpacity(const double &value);
@@ -280,7 +274,6 @@ private:
     bool isInitialSubtitle_ = true;
     float minTitleHeight_ = 0.0f;
     bool CanOverDrag_ = true;
-    bool isOverDrag_ = true;
     bool isTitleScaleChange_ = true;
     NavigationTitleMode titleMode_ = NavigationTitleMode::FREE;
 
@@ -288,6 +281,10 @@ private:
 
     float coordScrollOffset_ = 0.0f;
     float coordScrollFinalOffset_ = 0.0f;
+
+    // the value before title bar expand safe area
+    float currentTitleOffsetY_ = 0.0f;
+    float currentTitleBarHeight_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG

@@ -127,6 +127,7 @@ public:
     // layout
     virtual void SetLayoutPriority(int32_t priority) = 0;
     virtual void SetLayoutWeight(int32_t value) = 0;
+    virtual void SetPixelRound(uint8_t value) = 0;
     virtual void SetLayoutDirection(TextDirection value) = 0;
     virtual void SetAspectRatio(float ratio) = 0;
     virtual void ResetAspectRatio() = 0;
@@ -202,6 +203,7 @@ public:
     virtual void SetSaturate(const Dimension& value) = 0;
     virtual void SetSepia(const Dimension& value) = 0;
     virtual void SetInvert(const InvertVariant& value) = 0;
+    virtual void SetSystemBarEffect(bool systemBarEffect) = 0;
     virtual void SetHueRotate(float value) = 0;
     virtual void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue) = 0;
     virtual void SetUseEffect(bool useEffect) = 0;

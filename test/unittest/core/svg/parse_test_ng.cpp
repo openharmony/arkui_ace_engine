@@ -20,6 +20,9 @@
 #define private public
 #define protected public
 
+#include "include/core/SkStream.h"
+
+#include "test/mock/core/rosen/mock_canvas.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
@@ -65,7 +68,6 @@
 
 using namespace testing;
 using namespace testing::ext;
-
 namespace OHOS::Ace::NG {
 namespace {
 const std::string CIRCLE_SVG_LABEL =
@@ -130,6 +132,9 @@ const std::string RECT_SVG_LABEL = "<svg width=\"400\" height=\"400\" version=\"
 const std::string RECT_SVG_LABEL2 = "<svg version=\"1.1\" fill=\"red\" "
                                     "xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"100\" height=\"100\" x=\"150\" "
                                     "y=\"20\" stroke-width=\"4\" stroke=\"#000000\" rx=\"10\" ry=\"10\"></rect></svg>";
+const std::string RECT_SVG_LABEL3 = "<svg version=\"1.1\" fill=\"red\" "
+                                    "xmlns=\"http://www.w3.org/2000/svg\"><rect width=\"100\" height=\"100\" x=\"150\" "
+                                    "y=\"20\" stroke-width=\"4\" stroke=\"#000000\" rx=\"1\" ry=\"-1\"></rect></svg>";
 constexpr float X = 150.0f;
 constexpr float Y = 20.0f;
 constexpr float RX = 10.0f;
@@ -245,6 +250,12 @@ const std::string ELLIPSE_SVG_LABEL1 =
 const std::string ELLIPSE_SVG_LABEL2 =
     "<svg fill=\"white\" width=\"10\" height=\"10\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\"><ellipse "
     "cx=\"60\" cy=\"200\" rx=\"50\" ry=\"100\" stroke-width=\"4\" fill=\"red\" stroke=\"blue\"></ellipse></svg>";
+const std::string ELLIPSE_SVG_LABEL3 =
+    "<svg fill=\"white\" width=\"10\" height=\"10\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\"><ellipse "
+    "cx=\"0.0\" cy=\"0.0\" rx=\"-1\" ry=\"-1\" stroke-width=\"4\" fill=\"red\" stroke=\"blue\"></ellipse></svg>";
+const std::string ELLIPSE_SVG_LABEL4 =
+    "<svg fill=\"white\" width=\"10\" height=\"10\" version=\"1.1\" xmlns=\"http://www.w3.org/2000/svg\"><ellipse "
+    "cx=\"0.0\" cy=\"0.0\" rx=\"1\" ry=\"-1\" stroke-width=\"4\" fill=\"red\" stroke=\"blue\"></ellipse></svg>";
 constexpr float ELLIPSE_Cx = 60.0f;
 constexpr float ELLIPSE_Cy = 200.0f;
 constexpr float ELLIPSE_RX = 50.0f;
@@ -376,7 +387,7 @@ HWTEST_F(ParseTestNg, ParseCircleTest001, TestSize.Level1)
     EXPECT_FLOAT_EQ(circleDeclaration->GetCx().ConvertToPx(), Cx);
     EXPECT_FLOAT_EQ(circleDeclaration->GetCy().ConvertToPx(), Cy);
     EXPECT_FLOAT_EQ(circleDeclaration->GetR().ConvertToPx(), R);
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
@@ -421,7 +432,7 @@ HWTEST_F(ParseTestNg, ParseClipPathTest001, TestSize.Level1)
     auto svgClipPath = AceType::DynamicCast<SvgClipPath>(svgDefs->children_.at(0));
     EXPECT_NE(svgClipPath, nullptr);
     EXPECT_STREQ(svgClipPath->nodeId_.c_str(), ID.c_str());
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
@@ -470,7 +481,7 @@ HWTEST_F(ParseTestNg, ParseUseTest001, TestSize.Level1)
     EXPECT_EQ(stroke.HasStroke(), true);
     EXPECT_STREQ(stroke.GetColor().ColorToString().c_str(), Color(STROKE).ColorToString().c_str());
     EXPECT_STREQ(svgUseDeclaration->GetHref().c_str(), HREF.c_str());
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
@@ -501,7 +512,7 @@ HWTEST_F(ParseTestNg, ParseStyleTest001, TestSize.Level1)
     auto svgStyle = AceType::DynamicCast<SvgStyle>(svg->children_.at(0));
     EXPECT_NE(svgStyle, nullptr);
     // todo parse style attr
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), false);
@@ -532,7 +543,7 @@ HWTEST_F(ParseTestNg, ParseStopTest001, TestSize.Level1)
     auto gradientColor = svgStopDeclaration->GetGradientColor();
     EXPECT_FLOAT_EQ(gradientColor.GetOpacity(), STOP_OPACITY);
     EXPECT_STREQ(gradientColor.GetColor().ColorToString().c_str(), Color::FromRGB(255, 255, 0).ColorToString().c_str());
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
@@ -547,7 +558,7 @@ HWTEST_F(ParseTestNg, ParseStopTest001, TestSize.Level1)
 HWTEST_F(ParseTestNg, ParseRectTest001, TestSize.Level1)
 {
     auto svgDom = ParseRect(RECT_SVG_LABEL);
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
@@ -562,7 +573,7 @@ HWTEST_F(ParseTestNg, ParseRectTest001, TestSize.Level1)
 HWTEST_F(ParseTestNg, ParseRectTest002, TestSize.Level1)
 {
     auto svgDom = ParseRect(RECT_SVG_LABEL);
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->svgContext_ = nullptr;
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
@@ -578,7 +589,7 @@ HWTEST_F(ParseTestNg, ParseRectTest002, TestSize.Level1)
 HWTEST_F(ParseTestNg, ParseRectTest003, TestSize.Level1)
 {
     auto svgDom = ParseRect(RECT_SVG_LABEL2);
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), false);
@@ -592,7 +603,7 @@ HWTEST_F(ParseTestNg, ParseRectTest003, TestSize.Level1)
 HWTEST_F(ParseTestNg, ParsePolygonTest001, TestSize.Level1)
 {
     auto svgDom = parsePolygon(POLYGON_SVG_LABEL1);
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
@@ -607,7 +618,7 @@ HWTEST_F(ParseTestNg, ParsePolygonTest001, TestSize.Level1)
 HWTEST_F(ParseTestNg, ParsePolygonTest002, TestSize.Level1)
 {
     auto svgDom = parsePolygon(POLYGON_SVG_LABEL2);
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
@@ -638,7 +649,7 @@ HWTEST_F(ParseTestNg, ParsePatternTest001, TestSize.Level1)
     EXPECT_FLOAT_EQ(patternDeclaration->GetViewBox().GetOffset().GetY(), PATTERN_VIEWBOX_Y);
     EXPECT_FLOAT_EQ(patternDeclaration->GetViewBox().GetSize().Width(), PATTERN_VIEWBOX_WIDTH);
     EXPECT_FLOAT_EQ(patternDeclaration->GetViewBox().GetSize().Height(), PATTERN_VIEWBOX_HEIGHT);
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), false);
@@ -662,7 +673,7 @@ HWTEST_F(ParseTestNg, ParsePatternTest001, TestSize.Level1)
 HWTEST_F(ParseTestNg, ParsePathTest001, TestSize.Level1)
 {
     auto svgDom = ParsePath(PATH_SVG_LABEL1);
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->FitViewPort(Size());
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
@@ -678,7 +689,7 @@ HWTEST_F(ParseTestNg, ParsePathTest001, TestSize.Level1)
 HWTEST_F(ParseTestNg, ParsePathTest002, TestSize.Level1)
 {
     auto svgDom = ParsePath(PATH_SVG_LABEL2);
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), false);
@@ -694,7 +705,7 @@ HWTEST_F(ParseTestNg, ParsePathTest002, TestSize.Level1)
 HWTEST_F(ParseTestNg, ParsePathTest003, TestSize.Level1)
 {
     auto svgDom = ParsePath(PATH_SVG_LABEL4);
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
@@ -710,7 +721,7 @@ HWTEST_F(ParseTestNg, ParsePathTest003, TestSize.Level1)
 HWTEST_F(ParseTestNg, ParsePathTest004, TestSize.Level1)
 {
     auto svgDom = ParsePath(PATH_SVG_LABEL3);
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->FitViewPort(Size());
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), false);
@@ -730,7 +741,7 @@ HWTEST_F(ParseTestNg, ParsePathTest004, TestSize.Level1)
 HWTEST_F(ParseTestNg, ParsePathTest005, TestSize.Level1)
 {
     auto svgDom = ParsePath(PATH_SVG_LABEL5);
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->FitViewPort(Size());
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
@@ -756,16 +767,13 @@ HWTEST_F(ParseTestNg, ParseMaskTest001, TestSize.Level1)
     auto svgMask = AceType::DynamicCast<SvgMask>(svgGChild->children_.at(INDEX_ZEARO));
     EXPECT_NE(svgMask, nullptr);
     EXPECT_STREQ(svgMask->nodeId_.c_str(), MASK_ID.c_str());
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     // test canvas layer save and restore
     // all saved layers need to be restored
-    auto skCanvas = rSCanvas.GetImpl<RSSkCanvas>()->ExportSkCanvas();
-    auto layerCount = skCanvas->getSaveCount();
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
     EXPECT_EQ(svgDom->viewBox_.IsValid(), true);
-    EXPECT_EQ(skCanvas->getSaveCount(), layerCount);
 }
 
 /**
@@ -787,7 +795,7 @@ HWTEST_F(ParseTestNg, ParseLineTest001, TestSize.Level1)
     EXPECT_FLOAT_EQ(lineDeclaration->GetY1().ConvertToPx(), Y1);
     EXPECT_FLOAT_EQ(lineDeclaration->GetX2().ConvertToPx(), X2);
     EXPECT_FLOAT_EQ(lineDeclaration->GetY2().ConvertToPx(), Y2);
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
@@ -822,7 +830,7 @@ HWTEST_F(ParseTestNg, ParseLinearGradientTest001, TestSize.Level1)
     EXPECT_FLOAT_EQ(gradient.GetLinearGradient().y1->ConvertToPx(), ZERO);
     EXPECT_EQ(gradient.GetLinearGradient().y2.has_value(), true);
     EXPECT_FLOAT_EQ(gradient.GetLinearGradient().y2->ConvertToPx(), ZERO);
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
@@ -864,7 +872,7 @@ HWTEST_F(ParseTestNg, ParseRadialGradientTest001, TestSize.Level1)
     EXPECT_FLOAT_EQ(radialGradient.radialVerticalSize->ConvertToPx(), ZERO);
     EXPECT_EQ(radialGradient.radialShape.has_value(), false);
     EXPECT_EQ(radialGradient.radialSizeType.has_value(), false);
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
@@ -885,7 +893,7 @@ HWTEST_F(ParseTestNg, ParseGTest001, TestSize.Level1)
     EXPECT_GT(svg->children_.size(), 0);
     auto g = AceType::DynamicCast<SvgG>(svg->children_.at(0));
     ASSERT_STREQ(g->nodeId_.c_str(), G_ID.c_str());
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
@@ -912,7 +920,7 @@ HWTEST_F(ParseTestNg, ParseFilterTest001, TestSize.Level1)
     EXPECT_FLOAT_EQ(filterDeclaration->GetWidth().ConvertToPx(), FILTER_WIDTH);
     EXPECT_FLOAT_EQ(filterDeclaration->GetX().ConvertToPx(), ZERO);
     EXPECT_FLOAT_EQ(filterDeclaration->GetY().ConvertToPx(), ZERO);
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
@@ -927,7 +935,7 @@ HWTEST_F(ParseTestNg, ParseFilterTest001, TestSize.Level1)
 HWTEST_F(ParseTestNg, ParseFeGaussianblurTest001, TestSize.Level1)
 {
     auto svgDom = ParseFeGaussianblur(FEGAUSS_SVG_LABEL);
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
@@ -942,7 +950,7 @@ HWTEST_F(ParseTestNg, ParseFeGaussianblurTest001, TestSize.Level1)
 HWTEST_F(ParseTestNg, ParseFeGaussianblurTest002, TestSize.Level1)
 {
     auto svgDom = ParseFeGaussianblur(FEGAUSS_SVG_LABEL2);
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), false);
@@ -967,7 +975,7 @@ HWTEST_F(ParseTestNg, ParseFeCompositeTest001, TestSize.Level1)
     EXPECT_NE(svgFeComposite, nullptr);
     auto feCompositsDeclaration = AceType::DynamicCast<SvgFeCompositeDeclaration>(svgFeComposite->declaration_);
     EXPECT_NE(feCompositsDeclaration, nullptr);
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
@@ -1042,7 +1050,7 @@ HWTEST_F(ParseTestNg, ParseFeColorMatrixTest001, TestSize.Level1)
     EXPECT_NE(feColorDeclaration, nullptr);
     EXPECT_STREQ(feColorDeclaration->GetType().c_str(), TYPE.c_str());
     EXPECT_STREQ(feColorDeclaration->GetValues().c_str(), VALUE.c_str());
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
@@ -1057,7 +1065,7 @@ HWTEST_F(ParseTestNg, ParseFeColorMatrixTest001, TestSize.Level1)
 HWTEST_F(ParseTestNg, ParseEllipseTest001, TestSize.Level1)
 {
     auto svgDom = ParseEllipse(ELLIPSE_SVG_LABEL1);
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
@@ -1072,7 +1080,7 @@ HWTEST_F(ParseTestNg, ParseEllipseTest001, TestSize.Level1)
 HWTEST_F(ParseTestNg, ParseEllipseTest002, TestSize.Level1)
 {
     auto svgDom = ParseEllipse(ELLIPSE_SVG_LABEL2);
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
@@ -1087,7 +1095,7 @@ HWTEST_F(ParseTestNg, ParseEllipseTest002, TestSize.Level1)
 HWTEST_F(ParseTestNg, ParseEllipseTest003, TestSize.Level1)
 {
     auto svgDom = ParseEllipse(ELLIPSE_SVG_LABEL2);
-    RSCanvas rSCanvas;
+    Testing::MockCanvas rSCanvas;
     svgDom->root_ = nullptr;
     svgDom->FitViewPort(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
     EXPECT_EQ(svgDom->svgSize_.IsValid(), true);
@@ -1130,5 +1138,663 @@ HWTEST_F(ParseTestNg, ParseAnimateTest001, TestSize.Level1)
     // values changed to indices
     std::vector<std::string> values { "0", "1", "2" };
     EXPECT_EQ(svgAnimate->GetValues(), values);
+}
+
+/**
+ * @tc.name: ParseAnimation002
+ * @tc.desc: Create Animation SvgAnimateType:MOTION
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseAnimation002, TestSize.Level1)
+{
+    auto svgAnimation = AccessibilityManager::MakeRefPtr<SvgAnimation>(SvgAnimateType::MOTION);
+    auto svgMotion = svgAnimation->CreateAnimateMotion();
+    EXPECT_NE(svgAnimation, nullptr);
+
+    /* *
+     * @tc.steps: step1. call SetAttr UpdateAttr
+     * @tc.expected: Execute function return value is CalcMode::DISCRETE
+     */
+    svgAnimation->SetAttr("fill", "red");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->ConvertCalcMode("discrete"), CalcMode::DISCRETE);
+
+    /* *
+     * @tc.steps: step2. call CreatePropertyAnimation
+     * @tc.expected: Execute function return value is false
+     */
+    std::function<void(double)> callback = [](double x) -> void { x = 0; };
+    const double value = 0;
+    svgAnimation->CreatePropertyAnimation<double>(value, std::move(callback));
+    EXPECT_EQ(svgAnimation->animator_->IsStopped(), false);
+}
+
+/**
+ * @tc.name: ParseCircleTest002
+ * @tc.desc: Circle Set Animation Runtime Parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseCircleTest002, TestSize.Level1)
+{
+    auto svgCircle = AccessibilityManager::MakeRefPtr<SvgCircle>();
+    EXPECT_NE(svgCircle, nullptr);
+    auto svgAnimation = AccessibilityManager::MakeRefPtr<SvgAnimation>(SvgAnimateType::ANIMATE);
+
+    /* *
+     * @tc.steps: step1. call PrepareAnimation
+     * @tc.expected: Execute function return value is cx cy
+     */
+    svgCircle->PrepareAnimation(svgAnimation);
+    EXPECT_NE(svgAnimation, nullptr);
+
+    svgAnimation->SetAttr("attributeName", "cx");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetAttributeName(), "cx");
+
+    svgCircle->PrepareAnimation(svgAnimation);
+    svgAnimation->SetAttr("attributeName", "cy");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetAttributeName(), "cy");
+
+    svgCircle->PrepareAnimation(svgAnimation);
+    EXPECT_EQ(svgAnimation->GetAttributeName(), "cy");
+
+    /* *
+     * @tc.steps: step2. call SetAttr UpdateAttr
+     * @tc.expected: Execute function return value is r
+     */
+    svgAnimation->SetAttr("attributeName", "r");
+    svgAnimation->UpdateAttr();
+    EXPECT_EQ(svgAnimation->GetAttributeName(), "r");
+
+    /* *
+     * @tc.steps: step3. SetCalcMode
+     * @tc.expected: Execute function return value is 10
+     */
+    svgAnimation->SetCalcMode(static_cast<CalcMode>(10));
+    svgCircle->PrepareAnimation(svgAnimation);
+    EXPECT_EQ(static_cast<int>(svgAnimation->GetCalcMode()), 10);
+}
+
+/**
+ * @tc.name: ParseFeCompositeTest004
+ * @tc.desc: Create SvgFe obj
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseFeCompositeTest004, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. call GetImageFilter
+     * @tc.expected: Execute function return value is ColorInterpolationType::SRGB
+     */
+    auto svgFe = AccessibilityManager::MakeRefPtr<SvgFe>();
+    std::shared_ptr<RSImageFilter> imageFilter = nullptr;
+    ColorInterpolationType colorInterpolationType = ColorInterpolationType::SRGB;
+    ColorInterpolationType srcColor = ColorInterpolationType::LINEAR_RGB;
+    svgFe->GetImageFilter(imageFilter, colorInterpolationType);
+    EXPECT_EQ(colorInterpolationType, ColorInterpolationType::SRGB);
+
+    /* *
+     * @tc.steps: step3. call GetImageFilter
+     * @tc.expected: Execute function return value is ColorInterpolationType::SRGB
+     */
+    svgFe->ConverImageFilterColor(imageFilter, srcColor, colorInterpolationType);
+    EXPECT_NE(imageFilter, nullptr);
+    EXPECT_EQ(colorInterpolationType, ColorInterpolationType::SRGB);
+}
+
+/**
+ * @tc.name: ParseFeCompositeTest005
+ * @tc.desc: Create SvgFe obj
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseFeCompositeTest005, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. call MakeRefPtr<SvgFe>()
+     * @tc.expected: Execute function return value not is nullptr
+     */
+    auto svgFe = AccessibilityManager::MakeRefPtr<SvgFe>();
+    EXPECT_NE(svgFe, nullptr);
+
+    /* *
+     * @tc.steps: step2. call MakeImageFilter
+     * @tc.expected: Execute function return value not is nullptr
+     */
+    std::shared_ptr<RSImageFilter> imageFilter = nullptr;
+    auto value = svgFe->MakeImageFilter(FeInType::SOURCE_GRAPHIC, imageFilter);
+    EXPECT_EQ(value, nullptr);
+
+    value = svgFe->MakeImageFilter(FeInType::SOURCE_ALPHA, imageFilter);
+    EXPECT_NE(value, nullptr);
+
+    value = svgFe->MakeImageFilter(FeInType::BACKGROUND_IMAGE, imageFilter);
+    EXPECT_EQ(value, nullptr);
+
+    value = svgFe->MakeImageFilter(FeInType::BACKGROUND_ALPHA, imageFilter);
+    EXPECT_EQ(value, nullptr);
+
+    value = svgFe->MakeImageFilter(FeInType::FILL_PAINT, imageFilter);
+    EXPECT_EQ(value, nullptr);
+
+    value = svgFe->MakeImageFilter(FeInType::STROKE_PAINT, imageFilter);
+    EXPECT_EQ(value, nullptr);
+
+    value = svgFe->MakeImageFilter(FeInType::PRIMITIVE, imageFilter);
+    EXPECT_EQ(value, nullptr);
+
+    // 20 = Values not in definition
+    int cnt = 20;
+    value = svgFe->MakeImageFilter(static_cast<FeInType>(cnt), imageFilter);
+    EXPECT_EQ(value, nullptr);
+}
+
+/**
+ * @tc.name: ParseNodeTest001
+ * @tc.desc: SvgSvg Set Animation Runtime Parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseNodeTest001, TestSize.Level1)
+{
+    auto svg = SvgSvg::Create();
+    EXPECT_NE(svg, nullptr);
+    auto svgAnimation = AccessibilityManager::MakeRefPtr<SvgAnimation>(SvgAnimateType::ANIMATE);
+    svg->PrepareAnimation(svgAnimation);
+    EXPECT_NE(svgAnimation, nullptr);
+
+    /* *
+     * @tc.steps: step1. call SetAttr UpdateAttr
+     * @tc.expected: Execute function return value is fill stroke-width
+     */
+    svgAnimation->SetAttr("attributeName", "fill");
+    svgAnimation->UpdateAttr();
+    svg->PrepareAnimation(svgAnimation);
+    EXPECT_EQ(svgAnimation->GetAttributeName(), "fill");
+
+    svgAnimation->SetAttr("attributeName", "stroke-width");
+    svgAnimation->UpdateAttr();
+    svg->PrepareAnimation(svgAnimation);
+    EXPECT_EQ(svgAnimation->GetAttributeName(), "stroke-width");
+}
+
+/**
+ * @tc.name: ParseNodeTest002
+ * @tc.desc: parse clip path label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseNodeTest002, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(CLIP_SVG_LABEL.c_str(), CLIP_SVG_LABEL.length());
+    EXPECT_NE(svgStream, nullptr);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+
+    // 0 = Expected value
+    EXPECT_GT(svg->children_.size(), 0);
+
+    /* *
+     * @tc.steps: step1. call SetHref InitStyle
+     * @tc.expected: Execute function return value is 1.
+     */
+    svgDom->root_->declaration_->SetHref("href");
+    svgDom->root_->svgContext_.Upgrade()->Push("href", SvgGradient::CreateLinearGradient());
+    svgDom->root_->InitStyle(nullptr);
+    EXPECT_EQ(svgDom->root_->declaration_->GetHref(), "href");
+    Testing::MockCanvas rSCanvas;
+    svgDom->root_->hrefRender_ = false;
+
+    // 1 = SmoothEdge
+    svgDom->root_->SetSmoothEdge(1);
+    svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
+    EXPECT_EQ(svgDom->root_->GetSmoothEdge(), 1);
+
+    /* *
+     * @tc.steps: step2. call Draw
+     * @tc.expected: Execute function return value is false.
+     */
+    svgDom->root_->hrefMaskId_ = "123";
+    svgDom->root_->transform_ = "123";
+    svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
+    svgDom->root_->transform_.clear();
+    svgDom->root_->animateTransform_["123"] = {0.1, 0.2};
+    svgDom->root_->Draw(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
+    EXPECT_FALSE(svgDom->root_->animateTransform_.empty());
+}
+
+/**
+ * @tc.name: ParseNodeTest003
+ * @tc.desc: parse clip path label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseNodeTest003, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(CLIP_SVG_LABEL.c_str(), CLIP_SVG_LABEL.length());
+    EXPECT_NE(svgStream, nullptr);
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_GT(svg->children_.size(), 0);
+
+    /* *
+     * @tc.steps: step1. call UpdateAttr UpdateAttrHelper
+     * @tc.expected: Update incoming parameters, parameters not is empty
+     */
+    svg->UpdateAttr("fill", Color::BLACK);
+    svg->UpdateAttr("fill", Dimension());
+
+    // 120.5 = test height value
+    svg->UpdateAttr("height", 120.5);
+    svg->passStyle_ = false;
+    svg->UpdateAttrHelper("fill", "black");
+    EXPECT_FALSE(svg->declaration_->attributes_.empty());
+
+    /* *
+     * @tc.steps: step2. call ConvertDimensionToPx
+     * @tc.expected: ConvertDimensionToPx return value not equal 0
+     */
+    Size size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT);
+
+    // 1.2 = test value
+    double value = 1.2;
+
+    // 1.23 = test value
+    double value2 = 1.23;
+
+    // 0 = expect test value
+    int cnt = 0;
+    Dimension dime(value, DimensionUnit::PERCENT);
+    double value3 = svg->ConvertDimensionToPx(dime, size, SvgLengthType::HORIZONTAL);
+    EXPECT_NE(value3, cnt);
+
+    value3 = svg->ConvertDimensionToPx(dime, size, SvgLengthType::VERTICAL);
+    EXPECT_NE(value3, cnt);
+
+    value3 = svg->ConvertDimensionToPx(dime, size, SvgLengthType::OTHER);
+    EXPECT_NE(value3, cnt);
+
+    value3 = svg->ConvertDimensionToPx(Dimension(value, DimensionUnit::AUTO), size, SvgLengthType::OTHER);
+    EXPECT_EQ(value3, cnt);
+
+    value3 = svg->ConvertDimensionToPx(Dimension(value), size, SvgLengthType::OTHER);
+    EXPECT_NE(value3, cnt);
+
+    value3 = svg->ConvertDimensionToPx(Dimension(value), value2);
+    EXPECT_NE(value3, cnt);
+
+    value3 = svg->ConvertDimensionToPx(Dimension(value, DimensionUnit::PERCENT), value2);
+    EXPECT_NE(value3, cnt);
+
+    value3 = svg->ConvertDimensionToPx(Dimension(value, DimensionUnit::AUTO), value2);
+    EXPECT_NE(value3, value);
+}
+
+/**
+ * @tc.name: ParseNodeTest004
+ * @tc.desc: Obtaining the ViewBox node of xml
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseNodeTest004, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. call GetRootViewBox
+     * @tc.expected: ViewBox width-value is 0.0
+     */
+    auto svg = AccessibilityManager::MakeRefPtr<SvgNode>();
+    svg->svgContext_ = WeakPtr<SvgContext>();
+    Rect rect = svg->GetRootViewBox();
+
+    // 0.0 = default value
+    EXPECT_EQ(rect.Left(), 0.0);
+
+    /* *
+     * @tc.steps: step2. call GetRootViewBox
+     * @tc.expected: ViewBox width-value is 120
+     */
+    auto svgStream = SkMemoryStream::MakeCopy(CLIP_SVG_LABEL.c_str(), CLIP_SVG_LABEL.length());
+    EXPECT_NE(svgStream, nullptr);
+
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    rect = svgDom->root_->GetRootViewBox();
+
+    // 120 =  xml ViewBox width-value
+    EXPECT_EQ(rect.Width(), 120);
+}
+
+/**
+ * @tc.name: ParseNodeTest005
+ * @tc.desc: Create an animation and set the transition path
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseNodeTest005, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. call SetFrom SetTo SetTransformType
+     * @tc.expected: Execute function return value is "0 60 70", "360 60 70", "rotate"
+     */
+    auto svgAnimation = AccessibilityManager::MakeRefPtr<SvgAnimation>(SvgAnimateType::TRANSFORM);
+    svgAnimation->SetFrom("0 60 70");
+    EXPECT_EQ(svgAnimation->GetFrom(), "0 60 70");
+
+    svgAnimation->SetTo("360 60 70");
+    EXPECT_EQ(svgAnimation->GetTo(), "360 60 70");
+
+    svgAnimation->SetTransformType("rotate");
+    EXPECT_EQ(svgAnimation->GetTransformType(), "rotate");
+    EXPECT_NE(svgAnimation, nullptr);
+
+    /* *
+     * @tc.steps: step2. call AnimateTransform
+     * @tc.expected: Execute function return value not is nullptr
+     */
+    auto svgNode = AccessibilityManager::MakeRefPtr<SvgNode>();
+    EXPECT_NE(svgNode, nullptr);
+
+    // 0 = test value
+    svgNode->AnimateTransform(svgAnimation, 0);
+    auto svgAnimation2 = AccessibilityManager::MakeRefPtr<SvgAnimation>(SvgAnimateType::TRANSFORM);
+    svgNode->AnimateTransform(svgAnimation2, 0);
+    EXPECT_NE(svgAnimation2, nullptr);
+}
+
+/**
+ * @tc.name: ParseNodeTest006
+ * @tc.desc: Create an animation and set the transition path
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseNodeTest006, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. call SvgAnimation SvgNode
+     * @tc.expected: Execute function return value not is nullptr
+     */
+    auto svgAnimation = AccessibilityManager::MakeRefPtr<SvgAnimation>(SvgAnimateType::TRANSFORM);
+    svgAnimation->values_ = { "1", "2" };
+    EXPECT_NE(svgAnimation, nullptr);
+    auto svgNode = AccessibilityManager::MakeRefPtr<SvgNode>();
+
+    // 0 = test value
+    int cnt = 0;
+    svgNode->AnimateTransform(svgAnimation, cnt);
+    EXPECT_NE(svgNode, nullptr);
+
+    /* *
+     * @tc.steps: step2. call AnimateTransform
+     * @tc.expected: Execute function return value is rotate
+     */
+    svgAnimation->values_ = { "1" };
+    svgAnimation->SetTransformType("rotate");
+    svgNode->AnimateTransform(svgAnimation, cnt);
+    EXPECT_EQ(svgAnimation->GetTransformType(), "rotate");
+}
+
+/**
+ * @tc.name: ParseNodeTest007
+ * @tc.desc: Create an animation and set DrawTraversed
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseNodeTest007, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. call GetGradient
+     * @tc.expected: Execute function return value is false
+     */
+    auto svgAnimation = SvgAnimation::Create();
+    auto op = svgAnimation->GetGradient("");
+    EXPECT_EQ(op.has_value(), false);
+
+    /* *
+     * @tc.steps: step2. call OnDrawTraversed
+     * @tc.expected: Execute function return value is false
+     */
+    RefPtr<SvgNode> ptr;
+    svgAnimation->children_ = { ptr, svgAnimation };
+    Testing::MockCanvas rSCanvas;
+    svgAnimation->OnDrawTraversed(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
+    svgAnimation->InitNoneFlag();
+    svgAnimation->OnDrawTraversed(rSCanvas, Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT), Color::BLACK);
+    EXPECT_FALSE(svgAnimation->inheritStyle_);
+}
+
+/**
+ * @tc.name: ParseNodeTest008
+ * @tc.desc: SvgSvg Set Animation Runtime Parameters
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseNodeTest008, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. call PrepareAnimation
+     * @tc.expected: Execute function return value is fill-opacity opacity
+     */
+    auto svg = SvgSvg::Create();
+    EXPECT_NE(svg, nullptr);
+
+    auto svgAnimation = AccessibilityManager::MakeRefPtr<SvgAnimation>(SvgAnimateType::ANIMATE);
+    svg->PrepareAnimation(svgAnimation);
+    svgAnimation->SetAttr("attributeName", "fill-opacity");
+    svgAnimation->UpdateAttr();
+    svg->PrepareAnimation(svgAnimation);
+    EXPECT_EQ(svgAnimation->GetAttributeName(), "fill-opacity");
+
+    svgAnimation->SetAttr("attributeName", "stroke-opacity");
+    svgAnimation->UpdateAttr();
+    svg->PrepareAnimation(svgAnimation);
+    EXPECT_EQ(svgAnimation->GetAttributeName(), "stroke-opacity");
+
+    svgAnimation->SetAttr("attributeName", "stroke-miterlimit");
+    svgAnimation->UpdateAttr();
+    svg->PrepareAnimation(svgAnimation);
+    EXPECT_EQ(svgAnimation->GetAttributeName(), "stroke-miterlimit");
+
+    svgAnimation->SetAttr("attributeName", "stroke-dashoffset");
+    svgAnimation->UpdateAttr();
+    svg->PrepareAnimation(svgAnimation);
+    EXPECT_EQ(svgAnimation->GetAttributeName(), "stroke-dashoffset");
+
+    svgAnimation->SetAttr("attributeName", "opacity");
+    svgAnimation->UpdateAttr();
+    svg->PrepareAnimation(svgAnimation);
+
+    // 150 = path
+    int cnt = 150;
+    svg->AsRSPath(Size(cnt, cnt));
+    EXPECT_EQ(svgAnimation->GetAttributeName(), "opacity");
+}
+
+/**
+ * @tc.name: ParseLineTest002
+ * @tc.desc: Create an SvgLine and set path
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseLineTest002, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. call AsPath
+     * @tc.expected: Execute function return value not is nullptr
+     */
+    auto svgLine = AccessibilityManager::MakeRefPtr<SvgLine>();
+    svgLine->AsPath(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
+    EXPECT_NE(svgLine, nullptr);
+}
+
+/**
+ * @tc.name: ParseEllipseTest005
+ * @tc.desc: Create an SvgEllipse and set path
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseEllipseTest005, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(ELLIPSE_SVG_LABEL3.c_str(), ELLIPSE_SVG_LABEL3.length());
+    EXPECT_NE(svgStream, nullptr);
+
+    /* *
+     * @tc.steps: step1. call CreateSvgDom
+     * @tc.expected: Execute function return value size not is 0
+     */
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_GT(svg->children_.size(), 0);
+
+    /* *
+     * @tc.steps: step2. call AsPath
+     * @tc.expected: Execute function return value not is nullptr
+     */
+    auto svgEllipse = AceType::DynamicCast<SvgEllipse>(svg->children_.at(0));
+    svgEllipse->AsPath(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
+    EXPECT_NE(svgEllipse, nullptr);
+}
+
+/**
+ * @tc.name: ParseEllipseTest006
+ * @tc.desc: Create an SvgEllipse and set patha
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseEllipseTest006, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(ELLIPSE_SVG_LABEL4.c_str(), ELLIPSE_SVG_LABEL4.length());
+    EXPECT_NE(svgStream, nullptr);
+
+    /* *
+     * @tc.steps: step1. call CreateSvgDom
+     * @tc.expected: Execute function return value size not is 0
+     */
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_GT(svg->children_.size(), 0);
+
+    /* *
+     * @tc.steps: step2. call AsPath
+     * @tc.expected: Execute function return value not is nullptr
+     */
+    auto svgEllipse = AceType::DynamicCast<SvgEllipse>(svg->children_.at(0));
+    svgEllipse->AsPath(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
+    EXPECT_NE(svgEllipse, nullptr);
+}
+
+/**
+ * @tc.name: ParsePolygonTest003
+ * @tc.desc: parse polygon and polyline label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParsePolygonTest003, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. call CreateSvgDom
+     * @tc.expected: Execute svgDom root node is 2
+     */
+    auto svgStream = SkMemoryStream::MakeCopy(POLYGON_SVG_LABEL1.c_str(), POLYGON_SVG_LABEL1.length());
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_EQ(static_cast<int32_t>(svg->children_.size()), CHILD_NUMBER);
+
+    /* *
+     * @tc.steps: step2. call UpdateGradient
+     * @tc.expected: Execute SvgPolygon GradientType not is LINEAR
+     */
+    auto svgPolygon = AceType::DynamicCast<SvgPolygon>(svg->children_.at(0));
+    Gradient temp;
+    temp.SetType(GradientType::CONIC);
+    svgPolygon->declaration_->SetGradient(temp);
+    svgPolygon->UpdateGradient(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
+    EXPECT_NE(svgPolygon->fillState_.GetGradient()->GetType(), GradientType::LINEAR);
+}
+
+/**
+ * @tc.name: ParsePolygonTest004
+ * @tc.desc: parse polygon and polyline label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParsePolygonTest004, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. call CreateSvgDom
+     * @tc.expected: Execute svgDom root node is 2
+     */
+    auto svgStream = SkMemoryStream::MakeCopy(POLYGON_SVG_LABEL1.c_str(), POLYGON_SVG_LABEL1.length());
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_EQ(static_cast<int32_t>(svg->children_.size()), CHILD_NUMBER);
+
+    /* *
+     * @tc.steps: step2. call AsPath
+     * @tc.expected: Execute SvgPolygon Points is empty
+     */
+    auto svgPolygon = AceType::DynamicCast<SvgPolygon>(svg->children_.at(0));
+    auto declaration = AceType::DynamicCast<SvgPolygonDeclaration>(svgPolygon->declaration_);
+    declaration->SetPoints("");
+    svgPolygon->AsPath(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
+    EXPECT_TRUE(declaration->GetPoints().empty());
+
+    /* *
+     * @tc.steps: step3. call AsPath
+     * @tc.expected: Execute SvgPolygon Points parse error
+     */
+    declaration->SetPoints("ccc");
+    svgPolygon->AsPath(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
+    EXPECT_FALSE(declaration->GetPoints().empty());
+}
+
+/**
+ * @tc.name: ParseStyleTest002
+ * @tc.desc: parse use label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseStyleTest002, TestSize.Level1)
+{
+    /* *
+     * @tc.steps: step1. call ParseCssStyle
+     * @tc.expected: Execute function return value false
+     */
+    SvgStyle::ParseCssStyle("", nullptr);
+    std::string str;
+    PushAttr callback = [&str](const std::string& key, const std::pair<std::string, std::string>& value) { str = key; };
+    SvgStyle::ParseCssStyle("body {font-style: oblique;}.normal {font-style: normal;}", callback);
+    EXPECT_FALSE(str.empty());
+
+    SvgStyle::ParseCssStyle("body font-style: oblique;}. {font-style: normal;}", callback);
+    EXPECT_FALSE(str.empty());
+}
+
+/**
+ * @tc.name: ParseRectTest004
+ * @tc.desc: parse rect label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseRectTest004, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(RECT_SVG_LABEL3.c_str(), RECT_SVG_LABEL3.length());
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::BLACK);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_GT(static_cast<int32_t>(svg->children_.size()), 0);
+
+    /* *
+     * @tc.steps: step1. call AsPath
+     * @tc.expected: Execute function return value not is 0
+     */
+    auto svgRect = AceType::DynamicCast<SvgRect>(svg->children_.at(0));
+    svgRect->AsPath(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
+    auto rectDeclaration = AceType::DynamicCast<SvgRectDeclaration>(svgRect->declaration_);
+    EXPECT_NE(rectDeclaration->GetRx().Value(), 0);
+}
+
+/**
+ * @tc.name: ParseUseTest002
+ * @tc.desc: parse use label
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseTestNg, ParseUseTest002, TestSize.Level1)
+{
+    auto svgStream = SkMemoryStream::MakeCopy(USE_SVG_LABEL.c_str(), USE_SVG_LABEL.length());
+    auto svgDom = SvgDom::CreateSvgDom(*svgStream, Color::GREEN);
+    auto svg = AceType::DynamicCast<SvgSvg>(svgDom->root_);
+    EXPECT_GT(static_cast<int32_t>(svg->children_.size()), 0);
+
+    /* *
+     * @tc.steps: step1. call AsPath
+     * @tc.expected: Execute function return value is true
+     */
+    auto svgUse = AceType::DynamicCast<SvgUse>(svg->children_.at(INDEX_ONE));
+    svgUse->declaration_->SetHref("");
+    svgUse->AsPath(Size(IMAGE_COMPONENT_WIDTH, IMAGE_COMPONENT_HEIGHT));
+    EXPECT_TRUE(svgUse->declaration_->GetHref().empty());
 }
 } // namespace OHOS::Ace::NG

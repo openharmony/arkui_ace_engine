@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/utils.h"
 #include "core/common/container.h"
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
@@ -659,6 +660,7 @@ void ContainerModalPattern::CallButtonsRectChange()
 void ContainerModalPattern::InitTitle()
 {
     auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
     auto themeManager = pipeline->GetThemeManager();
     CHECK_NULL_VOID(themeManager);
     auto themeConstants = themeManager->GetThemeConstants();
@@ -684,22 +686,21 @@ void ContainerModalPattern::Init()
 void ContainerModalPattern::InitLayoutProperty()
 {
     auto containerModal = GetHost();
-    containerModal->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-
     auto column = GetColumnNode();
-    column->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-
+    auto stack = GetStackNode();
     auto content = GetContentNode();
+    CHECK_NULL_VOID(content);
+    auto buttonsRow = GetControlButtonRow();
+    CHECK_NULL_VOID(buttonsRow);
     auto contentProperty = content->GetLayoutProperty();
+    auto buttonsRowProperty = buttonsRow->GetLayoutProperty<LinearLayoutProperty>();
+
+    containerModal->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    column->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
+    stack->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
     contentProperty->UpdateMeasureType(MeasureType::MATCH_CONTENT);
     contentProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(1.0, DimensionUnit::PERCENT)));
-
-    auto stack = GetStackNode();
-    stack->GetLayoutProperty()->UpdateMeasureType(MeasureType::MATCH_PARENT);
-
-    auto buttonsRow = GetControlButtonRow();
-    auto buttonsRowProperty = buttonsRow->GetLayoutProperty<LinearLayoutProperty>();
     buttonsRowProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     buttonsRowProperty->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(CONTAINER_TITLE_HEIGHT)));
@@ -714,6 +715,7 @@ void ContainerModalPattern::InitLayoutProperty()
 
 void ContainerModalPattern::InitTitleRowLayoutProperty(RefPtr<FrameNode> titleRow)
 {
+    CHECK_NULL_VOID(titleRow);
     auto titleRowProperty = titleRow->GetLayoutProperty<LinearLayoutProperty>();
     titleRowProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     titleRowProperty->UpdateUserDefinedIdealSize(

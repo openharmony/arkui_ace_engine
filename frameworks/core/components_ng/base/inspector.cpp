@@ -93,9 +93,11 @@ void DumpElementTree(
 
 TouchEvent GetUpPoint(const TouchEvent& downPoint)
 {
-    return {
-        .x = downPoint.x, .y = downPoint.y, .type = TouchType::UP, .time = std::chrono::high_resolution_clock::now()
-    };
+    return { .x = downPoint.x,
+        .y = downPoint.y,
+        .type = TouchType::UP,
+        .time = std::chrono::high_resolution_clock::now(),
+        .sourceType = SourceType::TOUCH };
 }
 #ifdef PREVIEW
 void GetFrameNodeChildren(const RefPtr<NG::UINode>& uiNode, std::vector<RefPtr<NG::UINode>>& children, int32_t pageId)
@@ -645,7 +647,8 @@ bool Inspector::SendEventByKey(const std::string& key, int action, const std::st
             TouchEvent point { .x = (rect.Left() + rect.Width() / 2),
                 .y = (rect.Top() + rect.Height() / 2),
                 .type = TouchType::DOWN,
-                .time = std::chrono::high_resolution_clock::now() };
+                .time = std::chrono::high_resolution_clock::now(),
+                .sourceType = SourceType::TOUCH };
             context->OnTouchEvent(point.UpdatePointers());
 
             switch (action) {

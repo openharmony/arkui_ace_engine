@@ -187,4 +187,26 @@ void ToastPattern::OnColorConfigurationUpdate()
     textLayoutProperty->UpdateTextColor(textColor);
     host->SetNeedCallChildrenUpdate(false);
 }
+
+void ToastPattern::OnAttachToFrameNode()
+{
+    auto pipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    auto callbackId = pipeline->RegisterFoldDisplayModeChangedCallback([](FoldDisplayMode foldDisplayMode) {
+        if (foldDisplayMode == FoldDisplayMode::FULL || foldDisplayMode == FoldDisplayMode::MAIN) {
+            TAG_LOGI(AceLogTag::ACE_OVERLAY, "Window status changes, displayMode is %{public}d", foldDisplayMode);
+            SubwindowManager::GetInstance()->ResizeWindowForFoldStatus();
+        }
+    });
+    UpdateFoldDisplayModeChangedCallbackId(callbackId);
+}
+
+void ToastPattern::OnDetachFromFrameNode(FrameNode* node)
+{
+    auto pipeline = PipelineContext::GetMainPipelineContext();
+    CHECK_NULL_VOID(pipeline);
+    if (HasFoldDisplayModeChangedCallbackId()) {
+        pipeline->UnRegisterFoldDisplayModeChangedCallback(foldDisplayModeChangedCallbackId_.value_or(-1));
+    }
+}
 } // namespace OHOS::Ace::NG

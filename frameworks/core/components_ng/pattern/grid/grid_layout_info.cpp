@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -90,24 +90,24 @@ void GridLayoutInfo::MoveItemsForward(int32_t from, int32_t to, int32_t itemInde
 void GridLayoutInfo::SwapItems(int32_t itemIndex, int32_t insertIndex)
 {
     currentMovingItemPosition_ = currentMovingItemPosition_ == -1 ? itemIndex : currentMovingItemPosition_;
-    auto insertPositon = insertIndex;
+    auto insertPosition = insertIndex;
     // drag from another grid
     if (itemIndex == -1) {
         if (currentMovingItemPosition_ == -1) {
-            MoveItemsBack(insertPositon, childrenCount_, itemIndex);
+            MoveItemsBack(insertPosition, childrenCount_, itemIndex);
             return;
         }
     } else {
-        insertPositon = GetPositionByItemIndex(insertIndex);
+        insertPosition = GetPositionByItemIndex(insertIndex);
     }
 
-    if (currentMovingItemPosition_ > insertPositon) {
-        MoveItemsBack(insertPositon, currentMovingItemPosition_, itemIndex);
+    if (currentMovingItemPosition_ > insertPosition) {
+        MoveItemsBack(insertPosition, currentMovingItemPosition_, itemIndex);
         return;
     }
 
-    if (insertPositon > currentMovingItemPosition_) {
-        MoveItemsForward(currentMovingItemPosition_, insertPositon, itemIndex);
+    if (insertPosition > currentMovingItemPosition_) {
+        MoveItemsForward(currentMovingItemPosition_, insertPosition, itemIndex);
     }
 }
 
@@ -140,6 +140,18 @@ void GridLayoutInfo::UpdateEndIndex(float overScrollOffset, float mainSize, floa
     }
 }
 
+bool GridLayoutInfo::IsOutOfStart() const
+{
+    return reachStart_ && Positive(currentOffset_);
+}
+
+bool GridLayoutInfo::IsOutOfEnd() const
+{
+    auto atOrOutofStart = reachStart_ && NonNegative(currentOffset_);
+    auto endPos = currentOffset_ + totalHeightOfItemsInView_;
+    return !atOrOutofStart && (endIndex_ == childrenCount_ - 1) && LessNotEqual(endPos, lastMainSize_);
+}
+
 float GridLayoutInfo::GetCurrentOffsetOfRegularGrid(float mainGap) const
 {
     float defaultHeight = GetCurrentLineHeight();
@@ -154,37 +166,45 @@ float GridLayoutInfo::GetCurrentOffsetOfRegularGrid(float mainGap) const
 
 float GridLayoutInfo::GetContentOffset(float mainGap) const
 {
+    if (lineHeightMap_.empty()) {
+        return 0.0f;
+    }
     if (!hasBigItem_) {
         return GetCurrentOffsetOfRegularGrid(mainGap);
     }
-
-    float heightSum = 0;
-    int32_t itemCount = 0;
-    float height = 0;
-    auto fromStart = false;
-    for (const auto& item : lineHeightMap_) {
-        auto line = gridMatrix_.find(item.first);
-        if (line == gridMatrix_.end()) {
-            continue;
-        }
-        if (line->second.empty()) {
-            continue;
-        }
-        auto lineStart = line->second.begin()->second;
-        auto lineEnd = line->second.rbegin()->second;
-        itemCount += (lineEnd - lineStart + 1);
-        heightSum += item.second + mainGap;
-        fromStart = item.first == 0 ? true : fromStart;
+    // assume lineHeightMap is continuous in range [begin, rbegin].
+    int32_t itemCount = FindItemCount(lineHeightMap_.begin()->first, lineHeightMap_.rbegin()->first);
+    if (itemCount == childrenCount_ || (lineHeightMap_.begin()->first == 0 && itemCount >= startIndex_)) {
+        return GetStartLineOffset(mainGap);
     }
+    // begin estimation
+    float heightSum = GetTotalLineHeight(mainGap, false);
     if (itemCount == 0) {
-        return 0;
+        return 0.0f;
     }
     auto averageHeight = heightSum / itemCount;
-    height = startIndex_ * averageHeight - currentOffset_;
-    if (itemCount >= (childrenCount_ - 1) || (fromStart && itemCount >= startIndex_)) {
-        height = GetStartLineOffset(mainGap);
+    return startIndex_ * averageHeight - currentOffset_;
+}
+
+int32_t GridLayoutInfo::FindItemCount(int32_t startLine, int32_t endLine) const
+{
+    const auto firstLine = gridMatrix_.find(startLine);
+    const auto lastLine = gridMatrix_.find(endLine);
+    if (firstLine == gridMatrix_.end() || lastLine == gridMatrix_.end()) {
+        return -1;
     }
-    return height;
+    if (firstLine->second.empty() || lastLine->second.empty()) {
+        return -1;
+    }
+
+    int32_t minIdx = firstLine->second.begin()->second;
+
+    int32_t maxIdx = 0;
+    // maxIdx might not be in the last position if hasBigItem_
+    for (auto it : lastLine->second) {
+        maxIdx = std::max(maxIdx, it.second);
+    }
+    return maxIdx - minIdx + 1;
 }
 
 float GridLayoutInfo::GetContentHeight(float mainGap) const
@@ -203,32 +223,21 @@ float GridLayoutInfo::GetContentHeight(float mainGap) const
         auto lastLine = lineHeightMap_.find(lines);
         return res + (lastLine != lineHeightMap_.end() ? lastLine->second : lineHeight);
     }
-    float heightSum = 0;
-    int32_t itemCount = 0;
-    float estimatedHeight = 0;
-    for (const auto& item : lineHeightMap_) {
-        auto line = gridMatrix_.find(item.first);
-        if (line == gridMatrix_.end()) {
-            continue;
-        }
-        if (line->second.empty()) {
-            continue;
-        }
-        auto lineStart = line->second.begin()->second;
-        auto lineEnd = line->second.rbegin()->second;
-        itemCount += (lineEnd - lineStart + 1);
-        heightSum += item.second + mainGap;
+    if (lineHeightMap_.empty()) {
+        return 0.0f;
     }
+    float heightSum = GetTotalLineHeight(mainGap, false);
+    // assume lineHeightMap is continuous in range [begin, rbegin]
+    int32_t itemCount = FindItemCount(lineHeightMap_.begin()->first, lineHeightMap_.rbegin()->first);
     if (itemCount == 0) {
-        return 0;
+        return 0.0f;
     }
-    auto averageHeight = heightSum / itemCount;
-    if (itemCount >= (childrenCount_ - 1)) {
-        estimatedHeight = heightSum - mainGap;
-    } else {
-        estimatedHeight = heightSum + (childrenCount_ - itemCount) * averageHeight;
+    float averageHeight = heightSum / itemCount;
+    
+    if (itemCount == childrenCount_) {
+        return heightSum - mainGap;
     }
-    return estimatedHeight;
+    return heightSum + (childrenCount_ - itemCount) * averageHeight;
 }
 
 float GridLayoutInfo::GetContentOffset(const GridLayoutOptions& options, float mainGap) const
@@ -237,7 +246,7 @@ float GridLayoutInfo::GetContentOffset(const GridLayoutOptions& options, float m
         return -currentOffset_;
     }
     if (options.irregularIndexes.empty() || startIndex_ < *(options.irregularIndexes.begin())) {
-        return GetCurrentOffsetOfRegularGrid(mainGap);
+        return GetContentOffset(mainGap);
     }
     if (options.getSizeByIndex) {
         return GetContentOffset(mainGap);

@@ -1438,9 +1438,11 @@ HWTEST_F(VideoTestNg, VideoPatternTest020, TestSize.Level1)
     videoPattern->EnableDrag();
     auto eventHub = frameNode->GetEventHub<EventHub>();
     ASSERT_NE(eventHub, nullptr);
+    RefPtr<OHOS::Ace::DragEvent> dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    RefPtr<OHOS::Ace::UnifiedData>  unifiedData;
     auto dragEnd = eventHub->onDrop_;
     std::string extraParams;
-    dragEnd(nullptr, extraParams);
+    dragEnd(dragEvent, extraParams);
 
     /**
      * @tc.steps: step2. Call dragEnd in different wrong situation.
@@ -1448,23 +1450,24 @@ HWTEST_F(VideoTestNg, VideoPatternTest020, TestSize.Level1)
      */
     auto json = JsonUtil::Create(true);
     json->Put(EXTRA_INFO_KEY.c_str(), "");
-    dragEnd(nullptr, json->ToString());
+    dragEnd(dragEvent, json->ToString());
     json->Delete(EXTRA_INFO_KEY.c_str());
     json->Put(EXTRA_INFO_KEY.c_str(), "test");
-    dragEnd(nullptr, json->ToString());
+    dragEnd(dragEvent, json->ToString());
     json->Delete(EXTRA_INFO_KEY.c_str());
     json->Put(EXTRA_INFO_KEY.c_str(), "test::");
-    dragEnd(nullptr, json->ToString());
+    dragEnd(dragEvent, json->ToString());
     json->Delete(EXTRA_INFO_KEY.c_str());
     json->Put(EXTRA_INFO_KEY.c_str(), "::test");
-    dragEnd(nullptr, json->ToString());
+    dragEnd(dragEvent, json->ToString());
 
+    dragEvent->SetData(unifiedData);
     videoPattern->isInitialState_ = false;
     json->Delete(EXTRA_INFO_KEY.c_str());
     json->Put(EXTRA_INFO_KEY.c_str(), "test::test");
-    dragEnd(nullptr, json->ToString());
+    dragEnd(dragEvent, json->ToString());
     videoPattern->isInitialState_ = true;
-    dragEnd(nullptr, json->ToString());
+    dragEnd(dragEvent, json->ToString());
 
     /**
      * @tc.steps: step3. Call dragEnd while use new video src.
@@ -1474,8 +1477,8 @@ HWTEST_F(VideoTestNg, VideoPatternTest020, TestSize.Level1)
     json->Put(EXTRA_INFO_KEY.c_str(), "test::newTest");
     videoPattern->SetIsStop(false);
     videoPattern->isInitialState_ = false;
-    dragEnd(nullptr, json->ToString());
-    EXPECT_TRUE(videoPattern->isStop_);
+    dragEnd(dragEvent, json->ToString());
+    EXPECT_FALSE(videoPattern->isStop_);
 }
 
 /**

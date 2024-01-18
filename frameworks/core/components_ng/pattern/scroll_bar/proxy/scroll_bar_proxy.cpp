@@ -94,6 +94,9 @@ void ScrollBarProxy::NotifyScrollableNode(float distance, const WeakPtr<ScrollBa
         }
         float value = CalcPatternOffset(GetScrollableDistance(scrollable), controlDistance, distance);
         node.onPositionChanged(value, SCROLL_FROM_BAR);
+        if (node.scrollbarFRcallback) {
+            node.scrollbarFRcallback(0, SceneStatus::RUNNING);
+        }
     }
 }
 
@@ -104,6 +107,9 @@ void ScrollBarProxy::NotifyScrollStart() const
             continue;
         }
         node.scrollStartCallback(0, SCROLL_FROM_BAR);
+        if (node.scrollbarFRcallback) {
+            node.scrollbarFRcallback(0, SceneStatus::RUNNING);
+        }
     }
 }
 
@@ -114,6 +120,9 @@ void ScrollBarProxy::NotifyScrollStop() const
             continue;
         }
         node.scrollEndCallback();
+        if (node.scrollbarFRcallback) {
+            node.scrollbarFRcallback(0, SceneStatus::RUNNING);
+        }
     }
 }
 
@@ -150,7 +159,7 @@ void ScrollBarProxy::StartScrollBarAnimator() const
         if (scrollBar->GetDisplayMode() == DisplayMode::AUTO) {
             scrollBar->StartDisappearAnimator();
         }
-        scrollBar->SendAccessibilityEvent(AccessibilityEventType::SCROLL_END);
+        // AccessibilityEventType::SCROLL_END
     }
 }
 
@@ -163,7 +172,7 @@ void ScrollBarProxy::StopScrollBarAnimator() const
         }
         scrollBar->StopDisappearAnimator();
         scrollBar->StopMotion();
-        scrollBar->SendAccessibilityEvent(AccessibilityEventType::SCROLL_START);
+        // AccessibilityEventType::SCROLL_START
     }
 }
 

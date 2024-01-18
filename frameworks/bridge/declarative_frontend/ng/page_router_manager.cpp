@@ -24,6 +24,7 @@
 #include "base/memory/referenced.h"
 #include "base/ressched/ressched_report.h"
 #include "base/utils/utils.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "bridge/common/utils/source_map.h"
 #include "bridge/common/utils/utils.h"
 #include "bridge/declarative_frontend/ng/entry_page_info.h"
@@ -75,6 +76,7 @@ void PageRouterManager::LoadOhmUrl(const RouterPageInfo& target)
 
 void PageRouterManager::RunPage(const std::string& url, const std::string& params)
 {
+    PerfMonitor::GetPerfMonitor()->SetAppStartStatus();
     ACE_SCOPED_TRACE("PageRouterManager::RunPage");
     CHECK_RUN_ON(JS);
     RouterPageInfo info { url, params };
@@ -405,19 +407,26 @@ bool PageRouterManager::StartPop()
         return false;
     }
 
+    // pop top page in page stack
     auto topNode = pageRouterStack_.back();
     pageRouterStack_.pop_back();
-    if (!OnPopPage(true, true)) {
-        pageRouterStack_.emplace_back(topNode);
-        return false;
-    }
+
+    //clean prev top page params
     currentPage = pageRouterStack_.empty() ? nullptr : pageRouterStack_.back().Upgrade();
     CHECK_NULL_RETURN(currentPage, false);
     pagePattern = currentPage->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
     pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
     CHECK_NULL_RETURN(pageInfo, false);
+    std::string params = pageInfo->GetPageParams();
     pageInfo->ReplacePageParams("");
+
+    //do pop page
+    if (!OnPopPage(true, true)) {
+        pageRouterStack_.emplace_back(topNode);
+        pageInfo->ReplacePageParams(params);
+        return false;
+    }
     return true;
 }
 

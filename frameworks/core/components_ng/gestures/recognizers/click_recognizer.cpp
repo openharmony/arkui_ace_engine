@@ -56,13 +56,11 @@ bool ClickRecognizer::IsPointInRegion(const TouchEvent& event)
     if (!frameNode.Invalid()) {
         auto host = frameNode.Upgrade();
         CHECK_NULL_RETURN(host, false);
-        if (!IsPostEventResult()) {
-            NGGestureRecognizer::Transform(localPoint, frameNode);
-            auto renderContext = host->GetRenderContext();
-            CHECK_NULL_RETURN(renderContext, false);
-            auto paintRect = renderContext->GetPaintRectWithoutTransform();
-            localPoint = localPoint + paintRect.GetOffset();
-        }
+        NGGestureRecognizer::Transform(localPoint, frameNode);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_RETURN(renderContext, false);
+        auto paintRect = renderContext->GetPaintRectWithoutTransform();
+        localPoint = localPoint + paintRect.GetOffset();
         if (!host->InResponseRegionList(localPoint, responseRegionBuffer_)) {
             TAG_LOGI(AceLogTag::ACE_GESTURE, "This MOVE/UP event is out of region, try to reject click gesture");
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
@@ -294,11 +292,6 @@ void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleOverdueDeadline()
 {
-    auto attachedNode = GetAttachedNode();
-    if (attachedNode.Invalid()) {
-        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-        return;
-    }
     if (currentTouchPointsNum_ < fingers_ || tappedCount_ < count_) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
     }

@@ -465,7 +465,7 @@ public:
     void FlushBarWidth();
     void CalcReservedHeight();
     void OnCollectTouchTarget(const OffsetF& coordinateOffset, const GetEventTargetImpl& getEventTargetImpl,
-        TouchTestResult& result);
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent);
     void ScheduleDisappearDelayTask();
 
     void SetDragFRCSceneCallback(DragFRCSceneCallback&& dragFRCSceneCallback)

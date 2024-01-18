@@ -2155,12 +2155,10 @@ HWTEST_F(ProgressTestNg, RingProgressModifier003, TestSize.Level1)
      */
     Testing::MockCanvas canvas;
     DrawingContext context { canvas, CONTEXT_WIDTH, CONTEXT_HEIGHT };
-    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, AttachPen(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachPen()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
-    EXPECT_CALL(canvas, DrawCircle(_, _)).Times(AtLeast(1));
-    EXPECT_CALL(canvas, Translate(_, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, Rotate(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(canvas, DrawPath(_)).Times(AtLeast(1));
     EXPECT_CALL(canvas, Save()).Times(AtLeast(1));
     EXPECT_CALL(canvas, Restore()).Times(AtLeast(1));
 
@@ -2492,7 +2490,7 @@ HWTEST_F(ProgressTestNg, ProgressSetValue002, TestSize.Level1)
     testProperty.showText = std::make_optional(true);
 
     creatProperty.progressType = std::make_optional(PROGRESS_TYPE_CAPSULE);
-    creatProperty.maxValue = std::make_optional(0.0);
+    creatProperty.maxValue = std::make_optional(100.0);
     auto frameNode = CreateProgressParagraph(testProperty);
     auto paintProperty = frameNode->GetPaintProperty<ProgressPaintProperty>();
     EXPECT_FALSE(paintProperty->HasColor());
@@ -2514,12 +2512,12 @@ HWTEST_F(ProgressTestNg, ProgressSetValue002, TestSize.Level1)
     stack->Push(frameNode);
     pattern->SetTextFromUser(true);
     progressModel.SetValue(10.0);
-    EXPECT_DOUBLE_EQ(paintProperty->GetValueValue(0.0), 0.0);
+    EXPECT_DOUBLE_EQ(paintProperty->GetValueValue(0.0), 10.0);
 
     pattern->SetTextFromUser(false);
     progressModel.SetValue(10.0);
-    EXPECT_EQ(textLayoutProperty->GetContentValue(""), "0%");
-    EXPECT_EQ(paintProperty->GetTextValue(""), "0%");
+    EXPECT_EQ(textLayoutProperty->GetContentValue(""), "10%");
+    EXPECT_EQ(paintProperty->GetTextValue(""), "10%");
     progressModel.SetTextDefaultStyle(textNode, VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS);
     EXPECT_EQ(paintProperty->GetTextValue(""), textLayoutProperty->GetContentValue(""));
 

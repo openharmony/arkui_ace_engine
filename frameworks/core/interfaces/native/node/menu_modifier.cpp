@@ -14,10 +14,8 @@
  */
 #include "core/interfaces/native/node/menu_modifier.h"
 
-#include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/menu/menu_model_ng.h"
 #include "core/pipeline/base/element_register.h"
 #include "frameworks/bridge/common/utils/utils.h"
@@ -25,10 +23,6 @@
 namespace OHOS::Ace::NG {
 const char DELIMITER = '|';
 constexpr int32_t SIZE_OF_FONT_INFO = 3;
-const int NUM_0 = 0;
-const int NUM_1 = 1;
-const int NUM_2 = 2;
-const int NUM_3 = 3;
 static const char* ERR_CODE = "-1";
 const std::string DEFAULT_FONT_WEIGHT = "normal";
 const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
@@ -40,6 +34,7 @@ void SetMenuFontColor(NodeHandle node, uint32_t color)
     CHECK_NULL_VOID(frameNode);
     MenuModelNG::SetFontColor(frameNode, Color(color));
 }
+
 void ResetMenuFontColor(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -47,6 +42,7 @@ void ResetMenuFontColor(NodeHandle node)
     std::optional<Color> color = std::nullopt;
     MenuModelNG::SetFontColor(frameNode, color);
 }
+
 void SetMenuFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -60,13 +56,13 @@ void SetMenuFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
     }
 
     CalcDimension fontSize;
-    if (res[NUM_0] != ERR_CODE) {
-        fontSize = StringUtils::StringToCalcDimension(res[NUM_0], false, DimensionUnit::FP);
+    if (res[0] != ERR_CODE) { // 0: index of font size data
+        fontSize = StringUtils::StringToCalcDimension(res[0], false, DimensionUnit::FP);
     }
     MenuModelNG::SetFontSize(frameNode, fontSize);
 
-    if (res[NUM_1] != ERR_CODE) {
-        MenuModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(res[NUM_1]));
+    if (res[1] != ERR_CODE) { // 1: index of font weight data
+        MenuModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(res[1]));
     } else {
         MenuModelNG::SetFontWeight(frameNode, FontWeight::NORMAL);
     }
@@ -77,12 +73,13 @@ void SetMenuFont(NodeHandle node, const char* fontInfo, int32_t styleVal)
         MenuModelNG::SetFontStyle(frameNode, DEFAULT_FONT_STYLE);
     }
 
-    if (res[NUM_2] != ERR_CODE) {
-        MenuModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(res[NUM_2]));
+    if (res[2] != ERR_CODE) { // 2: index of font family data
+        MenuModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(res[2]));
     } else {
         MenuModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(DEFAULT_FONT_FAMILY));
     }
 }
+
 void ResetMenuFont(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -94,16 +91,22 @@ void ResetMenuFont(NodeHandle node)
     MenuModelNG::SetFontStyle(frameNode, DEFAULT_FONT_STYLE);
     MenuModelNG::SetFontFamily(frameNode, Framework::ConvertStrToFontFamilies(DEFAULT_FONT_FAMILY));
 }
-void SetRadius(NodeHandle node, const double* values, const int* units)
+
+void SetRadius(NodeHandle node, const double* values, const int32_t* units)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto topLeft = Dimension(values[NUM_0], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_0]));
-    auto topRight = Dimension(values[NUM_1], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_1]));
-    auto bottomLeft = Dimension(values[NUM_2], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_2]));
-    auto bottomRight = Dimension(values[NUM_3], static_cast<OHOS::Ace::DimensionUnit>(units[NUM_3]));
+    auto topLeft =
+        Dimension(values[0], static_cast<OHOS::Ace::DimensionUnit>(units[0])); // 0: index of top left value
+    auto topRight =
+        Dimension(values[1], static_cast<OHOS::Ace::DimensionUnit>(units[1])); // 1: index of top right value
+    auto bottomLeft =
+        Dimension(values[2], static_cast<OHOS::Ace::DimensionUnit>(units[2])); // 2: index of bottom left value
+    auto bottomRight =
+        Dimension(values[3], static_cast<OHOS::Ace::DimensionUnit>(units[3])); // 3: index of bottom right value
     MenuModelNG::SetBorderRadius(frameNode, topLeft, topRight, bottomLeft, bottomRight);
 }
+
 void ResetRadius(NodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -111,10 +114,27 @@ void ResetRadius(NodeHandle node)
     OHOS::Ace::CalcDimension reset;
     MenuModelNG::SetBorderRadius(frameNode, reset);
 }
+
+void SetMenuWidth(NodeHandle node, double value, int32_t unit)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension width = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    MenuModelNG::SetWidth(frameNode, width);
+}
+
+void ResetMenuWidth(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    OHOS::Ace::CalcDimension reset;
+    MenuModelNG::SetWidth(frameNode, reset);
+}
+
 ArkUIMenuModifierAPI GetMenuModifier()
 {
     static const ArkUIMenuModifierAPI modifier = { SetMenuFontColor, ResetMenuFontColor, SetMenuFont, ResetMenuFont,
-        SetRadius, ResetRadius };
+        SetRadius, ResetRadius, SetMenuWidth, ResetMenuWidth };
 
     return modifier;
 }

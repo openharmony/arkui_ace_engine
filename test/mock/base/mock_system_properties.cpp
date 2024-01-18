@@ -50,6 +50,8 @@ int32_t SystemProperties::devicePhysicalWidth_ = 0;
 int32_t SystemProperties::devicePhysicalHeight_ = 0;
 bool SystemProperties::enableScrollableItemPool_ = false;
 bool SystemProperties::navigationBlurEnabled_ = false;
+bool SystemProperties::gridCacheEnabled_ = false;
+bool SystemProperties::sideBarContainerBlurEnable_ = false;
 
 float SystemProperties::GetFontWeightScale()
 {
@@ -64,7 +66,7 @@ DeviceType SystemProperties::GetDeviceType()
 
 bool SystemProperties::GetDebugEnabled()
 {
-    return false;
+    return debugEnabled_;
 }
 
 float SystemProperties::GetAnimationScale()
@@ -121,5 +123,15 @@ bool SystemProperties::GetNavigationBlurEnabled()
 bool SystemProperties::GetLayoutTraceEnabled()
 {
     return false;
+}
+
+bool SystemProperties::GetGridCacheEnabled()
+{
+    return gridCacheEnabled_;
+}
+
+bool SystemProperties::GetSideBarContainerBlurEnable()
+{
+    return sideBarContainerBlurEnable_;
 }
 } // namespace OHOS::Ace

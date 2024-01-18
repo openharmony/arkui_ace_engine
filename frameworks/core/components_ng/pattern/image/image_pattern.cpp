@@ -204,7 +204,7 @@ void ImagePattern::OnImageLoadSuccess()
         eventHub->FireCompleteEvent(event);
     }
 
-    SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo().IsSvg());
+    SetImagePaintConfig(image_, srcRect_, dstRect_, loadingCtx_->GetSourceInfo().IsSvg(), loadingCtx_->GetFrameCount());
     PrepareAnimation(image_);
     if (host->IsDraggable()) {
         EnableDrag();
@@ -252,7 +252,8 @@ void ImagePattern::OnImageLoadFail(const std::string& errorMsg)
 }
 
 void ImagePattern::SetImagePaintConfig(
-    const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect, bool isSvg)
+    const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect,
+    const RectF& dstRect, bool isSvg, int32_t frameCount)
 {
     auto layoutProps = GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(layoutProps);
@@ -263,6 +264,7 @@ void ImagePattern::SetImagePaintConfig(
     };
     config.imageFit_ = layoutProps->GetImageFit().value_or(ImageFit::COVER);
     config.isSvg_ = isSvg;
+    config.frameCount_ = frameCount;
     auto host = GetHost();
     if (!host) {
         canvasImage->SetPaintConfig(config);
@@ -306,7 +308,19 @@ bool ImagePattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, 
         auto renderProp = GetPaintProperty<ImageRenderProperty>();
         if (renderProp && renderProp->HasImageResizableSlice() && image_) {
             loadingCtx_->ResizableCalcDstSize();
-            SetImagePaintConfig(image_, loadingCtx_->GetSrcRect(), loadingCtx_->GetDstRect(), false);
+            SetImagePaintConfig(
+                image_, loadingCtx_->GetSrcRect(), loadingCtx_->GetDstRect(),
+                loadingCtx_->GetSrc().IsSvg(), loadingCtx_->GetFrameCount());
+        }
+    }
+
+    if (altLoadingCtx_) {
+        auto renderProp = GetPaintProperty<ImageRenderProperty>();
+        if (renderProp && renderProp->HasImageResizableSlice() && altImage_) {
+            altLoadingCtx_->ResizableCalcDstSize();
+            SetImagePaintConfig(
+                altImage_, altLoadingCtx_->GetSrcRect(), altLoadingCtx_->GetDstRect(),
+                altLoadingCtx_->GetSrc().IsSvg(), altLoadingCtx_->GetFrameCount());
         }
     }
 
@@ -508,7 +522,7 @@ LoadSuccessNotifyTask ImagePattern::CreateLoadSuccessCallbackForAlt()
         pattern->altSrcRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetSrcRect());
         pattern->altDstRect_ = std::make_unique<RectF>(pattern->altLoadingCtx_->GetDstRect());
         pattern->SetImagePaintConfig(pattern->altImage_, *pattern->altSrcRect_, *pattern->altDstRect_,
-            pattern->altLoadingCtx_->GetSourceInfo().IsSvg());
+            pattern->altLoadingCtx_->GetSourceInfo().IsSvg(), pattern->altLoadingCtx_->GetFrameCount());
 
         pattern->PrepareAnimation(pattern->altImage_);
 
@@ -1046,13 +1060,20 @@ void ImagePattern::UpdateAnalyzerUIConfig(const RefPtr<GeometryNode>& geometryNo
     auto renderContext = frameNode->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
 
-    auto centerPos = renderContext->GetTransformCenterValue(DimensionOffset(0.5_pct, 0.5_pct));
-    auto scale = renderContext->GetTransformScaleValue(VectorF(1.0f, 1.0f));
-    Matrix4 localMat = Matrix4::CreateTranslate(centerPos.GetX().Value(), centerPos.GetY().Value(), 0) *
-                       Matrix4::CreateScale(scale.x, scale.y, 1.0f) *
-                       Matrix4::CreateTranslate(-centerPos.GetX().Value(), -centerPos.GetY().Value(), 0);
-    if (!(analyzerUIConfig_.transformMat == localMat)) {
-        analyzerUIConfig_.transformMat = localMat;
+    auto localCenter = renderContext->GetTransformCenterValue(DimensionOffset(0.5_pct, 0.5_pct));
+    auto localScale = renderContext->GetTransformScaleValue(VectorF(1.0f, 1.0f));
+    Matrix4 localScaleMat = Matrix4::CreateTranslate(localCenter.GetX().Value(), localCenter.GetY().Value(), 0) *
+                            Matrix4::CreateScale(localScale.x, localScale.y, 1.0f) *
+                            Matrix4::CreateTranslate(-localCenter.GetX().Value(), -localCenter.GetY().Value(), 0);
+
+    auto transformMat = renderContext->GetTransformMatrixValue(Matrix4::CreateIdentity());
+    VectorF transCenter(transformMat.Get(0, 3), transformMat.Get(1, 3));
+    Matrix4 transScaleMat = Matrix4::CreateTranslate(transCenter.x, transCenter.y, 0) *
+                            Matrix4::CreateScale(transformMat.GetScaleX(), transformMat.GetScaleY(), 1.0f) *
+                            Matrix4::CreateTranslate(-transCenter.x, -transCenter.y, 0);
+    Matrix4 scaleMat = localScaleMat * transScaleMat;
+    if (!(analyzerUIConfig_.transformMat == scaleMat)) {
+        analyzerUIConfig_.transformMat = scaleMat;
         isUIConfigUpdate = true;
     }
 

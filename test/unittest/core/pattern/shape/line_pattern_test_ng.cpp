@@ -15,6 +15,7 @@
 
 #include "base_shape_pattern_test_ng.h"
 #include "gtest/gtest.h"
+#include "test/mock/core/rosen/mock_canvas.h"
 
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
@@ -70,8 +71,7 @@ public:
         EXPECT_EQ(paintWrapper == nullptr, false);
         auto contentDraw = paintMethod->GetContentDrawFunction(AceType::RawPtr(paintWrapper));
         EXPECT_EQ(contentDraw == nullptr, false);
-        std::shared_ptr<SkCanvas> canvas = std::make_shared<SkCanvas>();
-        RSCanvas rsCavas(&canvas);
+        Testing::MockCanvas rsCavas;
         contentDraw(rsCavas);
     }
 

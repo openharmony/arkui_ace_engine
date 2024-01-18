@@ -113,19 +113,19 @@ bool CreateSpringCurve(const shared_ptr<JsRuntime>& runtime, const shared_ptr<Js
     }
     if (argv[1]->IsNumber(runtime)) {
         mass = argv[1]->ToDouble(runtime);
-        if (LessNotEqual(mass, 0)) {
+        if (LessOrEqual(mass, 0.0)) {
             mass = 1.0;
         }
     }
     if (argv[2]->IsNumber(runtime)) {
         stiffness = argv[2]->ToDouble(runtime);
-        if (LessNotEqual(stiffness, 0)) {
+        if (LessOrEqual(stiffness, 0.0)) {
             stiffness = 1.0;
         }
     }
     if (argv[3]->IsNumber(runtime)) {
         damping = argv[3]->ToDouble(runtime);
-        if (LessNotEqual(damping, 0)) {
+        if (LessOrEqual(damping, 0.0)) {
             damping = 1.0;
         }
     }

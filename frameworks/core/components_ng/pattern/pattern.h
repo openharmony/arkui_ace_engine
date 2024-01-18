@@ -443,6 +443,7 @@ public:
 
     virtual void RegisterScrollingListener(const RefPtr<ScrollingListener> listener) {}
     virtual void FireAndCleanScrollingListener() {}
+    virtual void CleanScrollingListener() {}
     virtual void ResetDragOption() {}
 
     virtual int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId)

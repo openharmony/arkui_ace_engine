@@ -286,6 +286,13 @@ public:
     }
 
     virtual void ForceCleanRecognizer() {};
+
+    virtual bool AboutToAddCurrentFingers(int32_t touchId)
+    {
+        currentFingers_++;
+        return true;
+    }
+
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {

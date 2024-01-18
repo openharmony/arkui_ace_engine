@@ -68,7 +68,7 @@ public:
 
     void InitContext(bool isRoot, const std::optional<ContextParam>& param) override;
 
-    void SyncGeometryProperties(GeometryNode* geometryNode, bool needRoundToPixelGrid = false) override;
+    void SyncGeometryProperties(GeometryNode* geometryNode, bool isRound = true, uint8_t flag = 0) override;
 
     void SyncGeometryProperties(const RectF& paintRect) override;
 
@@ -200,6 +200,7 @@ public:
     }
     void OnNodeAppear(bool recursive) override;
     void OnNodeDisappear(bool recursive) override;
+    void SetTransitionOutCallback(std::function<void()>&& callback) override;
     void ClipWithRect(const RectF& rectF) override;
     void ClipWithRRect(const RectF& rectF, const RadiusF& radiusF) override;
 
@@ -335,6 +336,7 @@ public:
     void SetFrame(float positionX, float positionY, float width, float height) override;
     void SetOpacity(float opacity) override;
     void SetTranslate(float translateX, float translateY, float translateZ) override;
+    void SetHostNode(const WeakPtr<FrameNode>& host) override;
 
 private:
     void OnBackgroundImageUpdate(const ImageSourceInfo& src) override;
@@ -385,6 +387,7 @@ private:
     void OnFrontSaturateUpdate(const Dimension& saturate) override;
     void OnFrontSepiaUpdate(const Dimension& sepia) override;
     void OnFrontInvertUpdate(const InvertVariant& invert) override;
+    void OnSystemBarEffectUpdate(bool systemBarEffect) override;
     void OnFrontHueRotateUpdate(float hueRotate) override;
     void OnFrontColorBlendUpdate(const Color& colorBlend) override;
     void OnLinearGradientBlurUpdate(const NG::LinearGradientBlurPara& blurPara) override;
@@ -507,11 +510,12 @@ private:
 
     void SetContentRectToFrame(RectF rect) override;
 
-    float RoundValueToPixelGrid(float value, bool forceCeil, bool forceFloor);
-    void RoundToPixelGrid(float absoluteLeft, float absoluteTop);
+    float RoundValueToPixelGrid(float value, bool isRound, bool forceCeil, bool forceFloor);
+    void RoundToPixelGrid(bool isRound, uint8_t flag);
     Matrix4 GetRevertMatrix();
     Matrix4 GetMatrix();
     bool IsUniRenderEnabled() override;
+    void AddFrameNodeInfoToRsNode();
 
     RefPtr<ImageLoadingContext> bgLoadingCtx_;
     RefPtr<CanvasImage> bgImage_;
@@ -539,6 +543,7 @@ private:
     Color hoveredColor_ = Color::TRANSPARENT;
 
     RefPtr<RosenTransitionEffect> transitionEffect_;
+    std::function<void()> transitionOutCallback_;
     std::shared_ptr<DebugBoundaryModifier> debugBoundaryModifier_;
     std::shared_ptr<BackgroundModifier> backgroundModifier_;
     std::shared_ptr<BorderImageModifier> borderImageModifier_;

@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 #include "gtest/gtest.h"
+#include "test/mock/core/rosen/mock_canvas.h"
 
 #include "base/utils/utils.h"
 #define protected public
 #define private public
-#include "core/components_ng/render/line_painter.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/shape/line_paint_property.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/components_ng/render/line_painter.h"
 #include "core/components_ng/render/shape_painter.h"
 
 #undef private
@@ -34,11 +35,11 @@ namespace OHOS::Ace {
 namespace {
 const double START_VALUE = 10.0;
 const double END_VALUE = 30.0;
-const Dimension TEST {0.0, DimensionUnit::PX};
-const NG::OffsetF OFFSET_TEST {1, 1};
+const Dimension TEST { 0.0, DimensionUnit::PX };
+const NG::OffsetF OFFSET_TEST { 1, 1 };
 static constexpr NG::ShapePoint START_POINT = ShapePoint(10.0, 10.0);
 static constexpr NG::ShapePoint END_POINT = ShapePoint(30.0, 30.0);
-}
+} // namespace
 
 class LinePainterTestNg : public testing::Test {};
 
@@ -52,7 +53,7 @@ HWTEST_F(LinePainterTestNg, LinePainterTestNg001, TestSize.Level1)
     /**
      * @tc.steps1: create canvas pen and linePaintProperty object.
      */
-    RSCanvas canvas;
+    Testing::MockCanvas canvas;
     RSPen pen;
     NG::LinePaintProperty linePaintProperty;
 

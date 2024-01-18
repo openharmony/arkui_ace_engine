@@ -851,7 +851,7 @@ HWTEST_F(RatingTestNg, RatingPaintPropertyTest001, TestSize.Level1)
     EXPECT_CALL(mockCanvas, Save()).Times(AtLeast(RATING_SAVE_TIMES));
     EXPECT_CALL(mockCanvas, ClipRoundRectImpl(_, _, _)).Times(RATING_CLIP_ROUND_RECT_TIMES);
     EXPECT_CALL(mockCanvas, Restore()).Times(AtLeast(RATING_RESTORE_TIMES));
-    EXPECT_CALL(mockCanvas, ClipRect(_, _)).Times(RATING_CLIP_CLIP_RECT_TIMES);
+    EXPECT_CALL(mockCanvas, ClipRect(_, _, _)).Times(RATING_CLIP_CLIP_RECT_TIMES);
     ratingPaintMethod->ratingModifier_->onDraw(context);
 
     /**
@@ -870,7 +870,7 @@ HWTEST_F(RatingTestNg, RatingPaintPropertyTest001, TestSize.Level1)
 
     EXPECT_CALL(mockCanvas2, Save()).Times(AtLeast(RATING_SAVE_TIMES_1));
     EXPECT_CALL(mockCanvas2, Restore()).Times(AtLeast(RATING_RESTORE_TIMES_1));
-    EXPECT_CALL(mockCanvas2, ClipRect(_, _)).Times(RATING_CLIP_CLIP_RECT_TIMES_1);
+    EXPECT_CALL(mockCanvas2, ClipRect(_, _, _)).Times(RATING_CLIP_CLIP_RECT_TIMES_1);
     ratingPaintMethod->ratingModifier_->onDraw(context2);
 
     /**
@@ -886,7 +886,7 @@ HWTEST_F(RatingTestNg, RatingPaintPropertyTest001, TestSize.Level1)
     DrawingContext context3 = { mockCanvas3, 10.0f, 10.0f };
     EXPECT_CALL(mockCanvas3, Save()).Times(AtLeast(RATING_SAVE_TIMES_1));
     EXPECT_CALL(mockCanvas3, Restore()).Times(AtLeast(RATING_RESTORE_TIMES_1));
-    EXPECT_CALL(mockCanvas3, ClipRect(_, _)).Times(RATING_CLIP_CLIP_RECT_TIMES_1);
+    EXPECT_CALL(mockCanvas3, ClipRect(_, _, _)).Times(RATING_CLIP_CLIP_RECT_TIMES_1);
     ratingPaintMethod->ratingModifier_->onDraw(context3);
 }
 

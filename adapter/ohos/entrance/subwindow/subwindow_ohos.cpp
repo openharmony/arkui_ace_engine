@@ -26,6 +26,7 @@
 #include "core/components/root/root_element.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/ui_node.h"
+#include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #if defined(ENABLE_ROSEN_BACKEND) and !defined(UPLOAD_GPU_DISABLED)
 #include "adapter/ohos/entrance/ace_rosen_sync_task.h"
@@ -121,6 +122,9 @@ void SubwindowOhos::InitContainer()
     }
     CHECK_NULL_VOID(container);
 
+    auto parentToken = parentContainer->GetToken();
+    container->SetToken(parentToken);
+    container->SetWindowId(window_->GetWindowId());
     container->SetParentId(parentContainerId_);
     container->GetSettings().SetUsingSharedRuntime(true);
     container->SetSharedRuntime(parentContainer->GetSharedRuntime());
@@ -372,7 +376,8 @@ void SubwindowOhos::HideWindow()
     CHECK_NULL_VOID(context);
     auto rootNode = context->GetRootElement();
     CHECK_NULL_VOID(rootNode);
-    if (!rootNode->GetChildren().empty()) {
+    if (!rootNode->GetChildren().empty() &&
+        !(rootNode->GetChildren().size() == 1 && rootNode->GetLastChild()->GetTag() == V2::KEYBOARD_ETS_TAG)) {
         auto lastChildId = rootNode->GetLastChild()->GetId();
         if (hotAreasMap_.find(lastChildId) != hotAreasMap_.end()) {
             auto hotAreaRect = hotAreasMap_[lastChildId];
@@ -393,7 +398,8 @@ void SubwindowOhos::HideWindow()
         CHECK_NULL_VOID(context);
         auto rootNode = context->GetRootElement();
         CHECK_NULL_VOID(rootNode);
-        if (!rootNode->GetChildren().empty()) {
+        if (!rootNode->GetChildren().empty() &&
+            !(rootNode->GetChildren().size() == 1 && rootNode->GetLastChild()->GetTag() == V2::KEYBOARD_ETS_TAG)) {
             auto lastChildId = rootNode->GetLastChild()->GetId();
             if (hotAreasMap_.find(lastChildId) != hotAreasMap_.end()) {
                 auto hotAreaRect = hotAreasMap_[lastChildId];
@@ -417,16 +423,7 @@ void SubwindowOhos::HideWindow()
     }
 #endif
 
-    if (window_->IsFocused()) {
-        auto parentContainer = Platform::AceContainer::GetContainer(parentContainerId_);
-        CHECK_NULL_VOID(parentContainer);
-        if (!parentContainer->IsScenceBoardWindow()) {
-            auto parentWindowName = parentContainer->GetWindowName();
-            sptr<OHOS::Rosen::Window> parentWindow = OHOS::Rosen::Window::Find(parentWindowName);
-            CHECK_NULL_VOID(parentWindow);
-            parentWindow->RequestFocus();
-        }
-    } else {
+    if (!window_->IsFocused()) {
         ContainerModalUnFocus();
     }
 
@@ -501,11 +498,13 @@ void SubwindowOhos::ClearMenu()
 #endif
 }
 
-void SubwindowOhos::ShowPreviewNG()
+bool SubwindowOhos::ShowPreviewNG()
 {
+    CHECK_NULL_RETURN(window_, false);
     ShowWindow();
     ResizeWindow();
     window_->SetTouchable(false);
+    return true;
 }
 
 void SubwindowOhos::HidePreviewNG()
@@ -899,7 +898,7 @@ void SubwindowOhos::ClearToast()
 {
     TAG_LOGD(AceLogTag::ACE_SUB_WINDOW, "clear toast enter");
     if (!IsToastWindow()) {
-        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "clear toast failed.");
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "default toast needs not to be clear");
         return;
     }
     auto aceContainer = Platform::AceContainer::GetContainer(childContainerId_);
@@ -1329,6 +1328,11 @@ void SubwindowOhos::RequestFocus()
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "subwindow id:%{public}u request focus successfully.", window_->GetWindowId());
 }
 
+bool SubwindowOhos::IsFocused()
+{
+    return window_->IsFocused();
+}
+
 void SubwindowOhos::HideFilter()
 {
     auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
@@ -1367,5 +1371,20 @@ void SubwindowOhos::HideEventColumn()
     CHECK_NULL_VOID(manager);
     ContainerScope scope(parentContainerId_);
     manager->RemoveEventColumn();
+}
+
+void SubwindowOhos::ResizeWindowForFoldStatus()
+{
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplaySync();
+    CHECK_NULL_VOID(defaultDisplay);
+    auto ret = window_->Resize(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+    if (ret != Rosen::WMError::WM_OK) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Resize window by default display failed with errCode: %{public}d",
+            static_cast<int32_t>(ret));
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
+        "SubwindowOhos window rect is resized to x: %{public}d, y: %{public}d, width: %{public}u, height: %{public}u",
+        window_->GetRect().posX_, window_->GetRect().posY_, window_->GetRect().width_, window_->GetRect().height_);
 }
 } // namespace OHOS::Ace

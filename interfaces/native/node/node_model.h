@@ -17,6 +17,7 @@
 
 #include "basic_node.h"
 #include "common.h"
+#include "frameworks/core/interfaces/native/node/node_api.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -24,7 +25,7 @@ extern "C" {
 
 struct ArkUI_Node {
     ArkUI_NodeType type;
-    void* uiNodeHandle = nullptr;
+    ArkUINodeHandle uiNodeHandle = nullptr;
 };
 
 #ifdef __cplusplus

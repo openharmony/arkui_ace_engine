@@ -42,6 +42,7 @@ struct ImageInfo {
     double imgHeight;
     RefPtr<PixelMap> pixelMap;
     bool isImage;
+    int32_t instanceId = 0;
 };
 
 struct ImageSize {

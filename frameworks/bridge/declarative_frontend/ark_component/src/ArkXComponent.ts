@@ -94,13 +94,19 @@ class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
     return this;
   }
   backgroundImage(src: ResourceStr, repeat?: ImageRepeat): this {
-    throw new Error('Method not implemented.');
+    let arkBackgroundImage = new ArkBackgroundImage();
+    arkBackgroundImage.src = src;
+    arkBackgroundImage.repeat = repeat;
+    modifierWithKey(this._modifiersWithKeys, XComponentBackgroundImageModifier.identity, XComponentBackgroundImageModifier, arkBackgroundImage);
+    return this;
   }
   backgroundImageSize(value: SizeOptions | ImageSize): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentBackgroundImageSizeModifier.identity, XComponentBackgroundImageSizeModifier, value);
+    return this;
   }
   backgroundImagePosition(value: Alignment | Position): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentBackgroundImagePositionModifier.identity, XComponentBackgroundImagePositionModifier, value);
+    return this;
   }
   backgroundBlurStyle(value: BlurStyle, options?: BackgroundBlurStyleOptions): this {
     throw new Error('Method not implemented.');
@@ -188,40 +194,61 @@ class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
     throw new Error('Method not implemented.');
   }
   blur(value: number): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentBlurModifier.identity, XComponentBlurModifier, value);
+    return this;
   }
   linearGradientBlur(value: number, options: LinearGradientBlurOptions): this {
-    throw new Error('Method not implemented.');
+    if (isUndefined(value) || isNull(value) || isUndefined(options) || isNull(options)) {
+      modifierWithKey(this._modifiersWithKeys, XComponentLinearGradientBlurModifier.identity, XComponentLinearGradientBlurModifier,
+        undefined);
+      return this;
+    }
+    let arkLinearGradientBlur = new ArkLinearGradientBlur();
+    arkLinearGradientBlur.blurRadius = value;
+    arkLinearGradientBlur.fractionStops = options.fractionStops;
+    arkLinearGradientBlur.direction = options.direction;
+    modifierWithKey(this._modifiersWithKeys, XComponentLinearGradientBlurModifier.identity, XComponentLinearGradientBlurModifier,
+      arkLinearGradientBlur);
+    return this;
   }
   brightness(value: number): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentBrightnessModifier.identity, XComponentBrightnessModifier, value);
+    return this;
   }
   contrast(value: number): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentContrastModifier.identity, XComponentContrastModifier, value);
+    return this;
   }
   grayscale(value: number): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentGrayscaleModifier.identity, XComponentGrayscaleModifier, value);
+    return this;
   }
   colorBlend(value: string | Resource | Color): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentColorBlendModifier.identity, XComponentColorBlendModifier, value);
+    return this;
   }
   saturate(value: number): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentSaturateModifier.identity, XComponentSaturateModifier, value);
+    return this;
   }
   sepia(value: number): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentSepiaModifier.identity, XComponentSepiaModifier, value);
+    return this;
   }
   invert(value: number): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentInvertModifier.identity, XComponentInvertModifier, value);
+    return this;
   }
   hueRotate(value: string | number): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentHueRotateModifier.identity, XComponentHueRotateModifier, value);
+    return this;
   }
   useEffect(value: boolean): this {
     throw new Error('Method not implemented.');
   }
   backdropBlur(value: number): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentBackdropBlurModifier.identity, XComponentBackdropBlurModifier, value);
+    return this;
   }
   renderGroup(value: boolean): this {
     throw new Error('Method not implemented.');
@@ -410,13 +437,16 @@ class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
     throw new Error('Method not implemented.');
   }
   sphericalEffect(value: number): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentSphericalEffectModifier.identity, XComponentSphericalEffectModifier, value);
+    return this;
   }
   lightUpEffect(value: number): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentLightUpEffectModifier.identity, XComponentLightUpEffectModifier, value);
+    return this;
   }
   pixelStretchEffect(options: PixelStretchEffectOptions): this {
-    throw new Error('Method not implemented.');
+    modifierWithKey(this._modifiersWithKeys, XComponentPixelStretchEffectModifier.identity, XComponentPixelStretchEffectModifier, options);
+    return this;
   }
   keyboardShortcut(value: string | FunctionKey, keys: ModifierKey[], action?: () => void): this {
     throw new Error('Method not implemented.');
@@ -451,7 +481,6 @@ class ArkXComponentComponent implements CommonMethod<XComponentAttribute> {
   onLoad(callback: (event?: object) => void): this {
     throw new Error('Method not implemented.');
   }
-
   onDestroy(event: () => void): this {
     throw new Error('Method not implemented.');
   }
@@ -502,5 +531,280 @@ class XComponentBackgroundColorModifier extends ModifierWithKey<ResourceColor> {
 
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class XComponentBackgroundImageModifier extends ModifierWithKey<ArkBackgroundImage> {
+  constructor(value: ArkBackgroundImage) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentBackgroundImage');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetBackgroundImage(node);
+    } else {
+      getUINativeModule().xComponent.setBackgroundImage(node, this.value.src, this.value.repeat);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !((this.stageValue as ArkBackgroundImage).src === (this.value as ArkBackgroundImage).src &&
+      (this.stageValue as ArkBackgroundImage).repeat === (this.value as ArkBackgroundImage).repeat);
+  }
+}
+
+class XComponentBackgroundImageSizeModifier extends ModifierWithKey<SizeOptions | ImageSize> {
+  constructor(value: SizeOptions | ImageSize) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentBackgroundImageSize');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetBackgroundImageSize(node);
+    } else {
+      if (isNumber(this.value)) {
+        getUINativeModule().xComponent.setBackgroundImageSize(node, this.value, undefined, undefined);
+      } else {
+        getUINativeModule().xComponent.setBackgroundImageSize(node, undefined, (this.value as SizeOptions)?.width, (this.value as SizeOptions)?.height);
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !((this.value as SizeOptions).width === (this.stageValue as SizeOptions).width &&
+      (this.value as SizeOptions).height === (this.stageValue as SizeOptions).height);
+  }
+}
+
+class XComponentBackgroundImagePositionModifier extends ModifierWithKey<Position | Alignment> {
+  constructor(value: Position | Alignment) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentBackgroundImagePosition');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetBackgroundImagePosition(node);
+    } else {
+      if (isNumber(this.value)) {
+        getUINativeModule().xComponent.setBackgroundImagePosition(node, this.value, undefined, undefined);
+      } else {
+        getUINativeModule().xComponent.setBackgroundImagePosition(node, undefined, (this.value as Position)?.x, (this.value as Position)?.y);
+      }
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !((this.value as Position)?.x === (this.stageValue as Position)?.x &&
+      (this.value as Position)?.y === (this.stageValue as Position)?.y);
+  }
+}
+
+class XComponentBlurModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentBlur');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetBlur(node);
+    } else {
+      getUINativeModule().xComponent.setBlur(node, this.value);
+    }
+  }
+}
+
+class XComponentBackdropBlurModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentBackdropBlur');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetBackdropBlur(node);
+    } else {
+      getUINativeModule().xComponent.setBackdropBlur(node, this.value);
+    }
+  }
+}
+
+class XComponentGrayscaleModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentGrayscale');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetGrayscale(node);
+    } else {
+      getUINativeModule().xComponent.setGrayscale(node, this.value);
+    }
+  }
+}
+
+class XComponentBrightnessModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentBrightness');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetBrightness(node);
+    } else {
+      getUINativeModule().xComponent.setBrightness(node, this.value);
+    }
+  }
+}
+
+class XComponentSaturateModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentSaturate');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetSaturate(node);
+    } else {
+      getUINativeModule().xComponent.setSaturate(node, this.value);
+    }
+  }
+}
+
+class XComponentContrastModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentContrast');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetContrast(node);
+    } else {
+      getUINativeModule().xComponent.setContrast(node, this.value);
+    }
+  }
+}
+
+class XComponentInvertModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentInvert');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetInvert(node);
+    } else {
+      getUINativeModule().xComponent.setInvert(node, this.value);
+    }
+  }
+}
+
+class XComponentSepiaModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentSepia');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetSepia(node);
+    } else {
+      getUINativeModule().xComponent.setSepia(node, this.value);
+    }
+  }
+}
+
+class XComponentHueRotateModifier extends ModifierWithKey<number | string> {
+  constructor(value: number | string) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentHueRotate');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetHueRotate(node);
+    } else {
+      getUINativeModule().xComponent.setHueRotate(node, this.value);
+    }
+  }
+}
+
+class XComponentColorBlendModifier extends ModifierWithKey<Color | string | Resource> {
+  constructor(value: Color | string | Resource) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentColorBlend');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetColorBlend(node);
+    } else {
+      getUINativeModule().xComponent.setColorBlend(node, this.value);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class XComponentSphericalEffectModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentSphericalEffect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetSphericalEffect(node);
+    } else {
+      getUINativeModule().xComponent.setSphericalEffect(node, this.value);
+    }
+  }
+}
+
+class XComponentLightUpEffectModifier extends ModifierWithKey<number> {
+  constructor(value: number) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentLightUpEffect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetLightUpEffect(node);
+    } else {
+      getUINativeModule().xComponent.setLightUpEffect(node, this.value);
+    }
+  }
+}
+
+class XComponentPixelStretchEffectModifier extends ModifierWithKey<PixelStretchEffectOptions> {
+  constructor(value: PixelStretchEffectOptions) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentPixelStretchEffect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetPixelStretchEffect(node);
+    } else {
+      getUINativeModule().xComponent.setPixelStretchEffect(node,
+        this.value.top, this.value.right, this.value.bottom, this.value.left);
+    }
+  }
+
+  checkObjectDiff(): boolean {
+    return !((this.stageValue as PixelStretchEffectOptions).left === (this.value as PixelStretchEffectOptions).left &&
+      (this.stageValue as PixelStretchEffectOptions).right === (this.value as PixelStretchEffectOptions).right &&
+      (this.stageValue as PixelStretchEffectOptions).top === (this.value as PixelStretchEffectOptions).top &&
+      (this.stageValue as PixelStretchEffectOptions).bottom === (this.value as PixelStretchEffectOptions).bottom);
+  }
+}
+
+class XComponentLinearGradientBlurModifier extends ModifierWithKey<ArkLinearGradientBlur> {
+  constructor(value: ArkLinearGradientBlur) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('xComponentlinearGradientBlur');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().xComponent.resetLinearGradientBlur(node);
+    } else {
+      getUINativeModule().xComponent.setLinearGradientBlur(node,
+        this.value.blurRadius, this.value.fractionStops, this.value.direction);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !this.value.isEqual(this.stageValue);
   }
 }

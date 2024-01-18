@@ -1738,6 +1738,53 @@ void JSViewAbstract::JsLayoutPriority(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetLayoutPriority(priority);
 }
 
+void JSViewAbstract::JsPixelRound(const JSCallbackInfo& info)
+{
+    std::vector<JSCallbackInfoType> checkList { JSCallbackInfoType::OBJECT };
+    if (!CheckJSCallbackInfo("JsPixelRound", info, checkList)) {
+        return;
+    }
+    uint8_t value = 0;
+    JSRef<JSObject> object = JSRef<JSObject>::Cast(info[0]);
+    JSRef<JSVal> jsStartValue = object->GetProperty("start");
+    if (jsStartValue->IsNumber()) {
+        int32_t startValue = jsStartValue->ToNumber<int32_t>();
+        if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(startValue)) {
+            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_START);
+        } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(startValue)) {
+            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_START);
+        }
+    }
+    JSRef<JSVal> jsTopValue = object->GetProperty("top");
+    if (jsTopValue->IsNumber()) {
+        int32_t topValue = jsTopValue->ToNumber<int32_t>();
+        if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(topValue)) {
+            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_TOP);
+        } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(topValue)) {
+            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_TOP);
+        }
+    }
+    JSRef<JSVal> jsEndValue = object->GetProperty("end");
+    if (jsEndValue->IsNumber()) {
+        int32_t endValue = jsEndValue->ToNumber<int32_t>();
+        if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(endValue)) {
+            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_END);
+        } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(endValue)) {
+            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_END);
+        }
+    }
+    JSRef<JSVal> jsBottomValue = object->GetProperty("bottom");
+    if (jsBottomValue->IsNumber()) {
+        int32_t bottomValue = jsBottomValue->ToNumber<int32_t>();
+        if (PixelRoundCalcPolicy::FORCE_CEIL == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
+            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_CEIL_BOTTOM);
+        } else if (PixelRoundCalcPolicy::FORCE_FLOOR == static_cast<PixelRoundCalcPolicy>(bottomValue)) {
+            value |= static_cast<uint8_t>(PixelRoundPolicy::FORCE_FLOOR_BOTTOM);
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetPixelRound(value);
+}
+
 void JSViewAbstract::JsLayoutWeight(const JSCallbackInfo& info)
 {
     int32_t value = 0.0;
@@ -2546,6 +2593,16 @@ void ParseMenuArrowParam(const JSRef<JSObject>& menuOptions, NG::MenuParam& menu
     }
 }
 
+void GetMenuShowInSubwindow(NG::MenuParam& menuParam)
+{
+    menuParam.isShowInSubWindow = false;
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<SelectTheme>();
+    CHECK_NULL_VOID(theme);
+    menuParam.isShowInSubWindow = theme->GetExpandDisplay();
+}
+
 void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
     auto offsetVal = menuOptions->GetProperty("offset");
@@ -2640,6 +2697,14 @@ void ParseMenuParam(const JSCallbackInfo& info, const JSRef<JSObject>& menuOptio
         };
         menuParam.aboutToDisappear = std::move(aboutToDisappear);
     }
+
+    JSRef<JSVal> showInSubWindowValue = menuOptions->GetProperty("showInSubWindow");
+    GetMenuShowInSubwindow(menuParam);
+    if (menuParam.isShowInSubWindow) {
+        if (showInSubWindowValue->IsBoolean()) {
+            menuParam.isShowInSubWindow = showInSubWindowValue->ToBoolean();
+        }
+    }
     ParseMenuArrowParam(menuOptions, menuParam);
 }
 
@@ -2721,6 +2786,7 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
         menuParam.placement = Placement::BOTTOM_LEFT;
     }
     size_t builderIndex = 0;
+    GetMenuShowInSubwindow(menuParam);
     if (info.Length() > PARAMETER_LENGTH_FIRST) {
         if (info[0]->IsBoolean()) {
             menuParam.isShow = info[0]->ToBoolean();
@@ -2753,7 +2819,6 @@ void JSViewAbstract::JsBindMenu(const JSCallbackInfo& info)
             }
         }
     }
-
     if (info[builderIndex]->IsArray()) {
         std::vector<NG::OptionParam> optionsParam = ParseBindOptionParam(info, builderIndex);
         ViewAbstractModel::GetInstance()->BindMenu(std::move(optionsParam), nullptr, menuParam);
@@ -2976,29 +3041,29 @@ void JSViewAbstract::ParseBorderWidth(const JSRef<JSVal>& args)
     } else if (args->IsObject()) {
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
         CalcDimension left;
-        if (ParseJsDimensionVp(object->GetProperty("left"), left) && left.IsNonNegative()) {
-            if (left.Unit() == DimensionUnit::PERCENT) {
+        if (ParseJsDimensionVp(object->GetProperty("left"), left)) {
+            if (left.Unit() == DimensionUnit::PERCENT || left.IsNegative()) {
                 left.Reset();
             }
             leftDimen = left;
         }
         CalcDimension right;
-        if (ParseJsDimensionVp(object->GetProperty("right"), right) && right.IsNonNegative()) {
-            if (right.Unit() == DimensionUnit::PERCENT) {
+        if (ParseJsDimensionVp(object->GetProperty("right"), right)) {
+            if (right.Unit() == DimensionUnit::PERCENT || right.IsNegative()) {
                 right.Reset();
             }
             rightDimen = right;
         }
         CalcDimension top;
-        if (ParseJsDimensionVp(object->GetProperty("top"), top) && top.IsNonNegative()) {
-            if (top.Unit() == DimensionUnit::PERCENT) {
+        if (ParseJsDimensionVp(object->GetProperty("top"), top)) {
+            if (top.Unit() == DimensionUnit::PERCENT || top.IsNegative()) {
                 top.Reset();
             }
             topDimen = top;
         }
         CalcDimension bottom;
-        if (ParseJsDimensionVp(object->GetProperty("bottom"), bottom) && bottom.IsNonNegative()) {
-            if (bottom.Unit() == DimensionUnit::PERCENT) {
+        if (ParseJsDimensionVp(object->GetProperty("bottom"), bottom)) {
+            if (bottom.Unit() == DimensionUnit::PERCENT || bottom.IsNegative()) {
                 bottom.Reset();
             }
             bottomDimen = bottom;
@@ -3931,7 +3996,8 @@ bool JSViewAbstract::ParseJsDimension(const JSRef<JSVal>& jsValue, CalcDimension
         return true;
     }
     if (jsValue->IsString()) {
-        return StringUtils::StringToCalcDimensionNG(jsValue->ToString(), result, false, defaultUnit);
+        result = StringUtils::StringToCalcDimension(jsValue->ToString(), false, defaultUnit);
+        return true;
     }
     JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(jsValue);
     CompleteResourceObject(jsObj);
@@ -4230,7 +4296,8 @@ bool JSViewAbstract::ParseJsShadowColorStrategy(const JSRef<JSVal>& jsValue, Sha
     return false;
 }
 
-bool JSViewAbstract::ParseJsSymbolId(const JSRef<JSVal>& jsValue, std::uint32_t& symbolId)
+bool JSViewAbstract::ParseJsSymbolId(
+    const JSRef<JSVal>& jsValue, std::uint32_t& symbolId, RefPtr<ResourceObject>& symbolResourceObject)
 {
     if (jsValue->IsNull() || jsValue->IsUndefined()) {
         symbolId = 0;
@@ -4242,6 +4309,7 @@ bool JSViewAbstract::ParseJsSymbolId(const JSRef<JSVal>& jsValue, std::uint32_t&
         return false;
     }
     auto resourceObject = GetResourceObject(jsObj);
+    symbolResourceObject = resourceObject;
     if (!resourceObject) {
         return false;
     }
@@ -5475,6 +5543,11 @@ void JSViewAbstract::JsInvert(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetInvert(invert);
 }
 
+void JSViewAbstract::JsSystemBarEffect(const JSCallbackInfo& info)
+{
+    ViewAbstractModel::GetInstance()->SetSystemBarEffect(true);
+}
+
 void JSViewAbstract::JsHueRotate(const JSCallbackInfo& info)
 {
     std::optional<float> degree;
@@ -6461,6 +6534,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("size", &JSViewAbstract::JsSize);
     JSClass<JSViewAbstract>::StaticMethod("constraintSize", &JSViewAbstract::JsConstraintSize);
     JSClass<JSViewAbstract>::StaticMethod("layoutPriority", &JSViewAbstract::JsLayoutPriority);
+    JSClass<JSViewAbstract>::StaticMethod("pixelRound", &JSViewAbstract::JsPixelRound);
     JSClass<JSViewAbstract>::StaticMethod("layoutWeight", &JSViewAbstract::JsLayoutWeight);
 
     JSClass<JSViewAbstract>::StaticMethod("margin", &JSViewAbstract::JsMargin);
@@ -6579,6 +6653,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("saturate", &JSViewAbstract::JsSaturate);
     JSClass<JSViewAbstract>::StaticMethod("sepia", &JSViewAbstract::JsSepia);
     JSClass<JSViewAbstract>::StaticMethod("invert", &JSViewAbstract::JsInvert);
+    JSClass<JSViewAbstract>::StaticMethod("systemBarEffect", &JSViewAbstract::JsSystemBarEffect);
     JSClass<JSViewAbstract>::StaticMethod("hueRotate", &JSViewAbstract::JsHueRotate);
     JSClass<JSViewAbstract>::StaticMethod("clip", &JSViewAbstract::JsClip);
     JSClass<JSViewAbstract>::StaticMethod("mask", &JSViewAbstract::JsMask);

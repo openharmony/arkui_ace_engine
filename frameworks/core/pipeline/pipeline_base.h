@@ -792,6 +792,8 @@ public:
         foldStatusChangedCallback_.emplace_back(std::move(listener));
     }
 
+    void OnFoldDisplayModeChanged(FoldDisplayMode foldDisplayMode);
+
     using virtualKeyBoardCallback = std::function<bool(int32_t, int32_t, double)>;
     void SetVirtualKeyBoardCallback(virtualKeyBoardCallback&& listener)
     {
@@ -958,6 +960,7 @@ public:
     virtual void SetIsNeedAvoidWindow(bool isLayoutFullScreen) {}
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) {}
     virtual void OnFoldStatusChange(FoldStatus foldStatus) {}
+    virtual void OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) {}
 
     void SetIsAppWindow(bool isAppWindow)
     {
@@ -1038,6 +1041,22 @@ public:
         return onFocus_;
     }
 
+    void SetSurfaceChangeMsg(int32_t width, int32_t height,
+                                WindowSizeChangeReason type,
+                                const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+    {
+        width_ = width;
+        height_ = height;
+        type_ = type;
+        rsTransaction_ = rsTransaction;
+        delaySurfaceChange_ = true;
+    }
+
+    void ResetSurfaceChangeMsg()
+    {
+        delaySurfaceChange_ = false;
+    }
+
     uint64_t GetVsyncTime() const
     {
         return vsyncTime_;
@@ -1084,7 +1103,7 @@ public:
     {
         return serializedGesture_;
     }
-    
+
     virtual bool PrintVsyncInfoIfNeed() const
     {
         return false;
@@ -1247,6 +1266,12 @@ private:
     bool isFormAnimation_ = false;
     bool halfLeading_ = false;
     uint64_t vsyncTime_ = 0;
+
+    bool delaySurfaceChange_ = false;
+    int32_t width_ = -1;
+    int32_t height_ = -1;
+    WindowSizeChangeReason type_ = WindowSizeChangeReason::UNDEFINED;
+    std::shared_ptr<Rosen::RSTransaction> rsTransaction_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };

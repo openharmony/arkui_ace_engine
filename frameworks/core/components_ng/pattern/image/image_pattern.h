@@ -138,6 +138,16 @@ public:
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
 
+    WeakPtr<ImageLoadingContext> GetImageLoadingContext()
+    {
+        return WeakClaim(AceType::RawPtr(loadingCtx_));
+    }
+
+    WeakPtr<ImageLoadingContext> GetAltImageLoadingContext()
+    {
+        return WeakClaim(AceType::RawPtr(altLoadingCtx_));
+    }
+
 private:
     class ObscuredImage : public CanvasImage {
         void DrawToRSCanvas(
@@ -169,7 +179,8 @@ private:
     void OnImageLoadFail(const std::string& errorMsg);
     void OnImageLoadSuccess();
     void SetImagePaintConfig(
-        const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect, const RectF& dstRect, bool isSvg);
+        const RefPtr<CanvasImage>& canvasImage, const RectF& srcRect,
+        const RectF& dstRect, bool isSvg, int32_t frameCount = 1);
     void UpdateInternalResource(ImageSourceInfo& sourceInfo);
 
     void PrepareAnimation(const RefPtr<CanvasImage>& image);

@@ -207,6 +207,9 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(layoutProperty);
     auto frameNode = layoutWrapper->GetHostNode();
     const auto& layoutConstrain = layoutProperty->CreateChildConstraint();
+    auto placeHolderLayoutConstrain = layoutConstrain;
+    placeHolderLayoutConstrain.maxSize.SetHeight(Infinity<float>());
+    placeHolderLayoutConstrain.percentReference.SetHeight(0);
     const auto& children = layoutWrapper->GetAllChildrenWithBuild();
     auto pattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(pattern);
@@ -258,7 +261,7 @@ void TextLayoutAlgorithm::UpdateParagraph(LayoutWrapper* layoutWrapper)
             if (iterItems == children.end() || !(*iterItems)) {
                 continue;
             }
-            (*iterItems)->Measure(layoutConstrain);
+            (*iterItems)->Measure(placeHolderLayoutConstrain);
             auto geometryNode = (*iterItems)->GetGeometryNode();
             if (!geometryNode) {
                 iterItems++;
@@ -367,12 +370,10 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
         CHECK_NULL_RETURN(symbolSourceInfo, false);
         TextStyle symbolTextStyle = textStyle;
         symbolTextStyle.isSymbolGlyph_ = true;
-        if (symbolTextStyle.GetRenderStrategy() < 0) {
-            symbolTextStyle.SetRenderStrategy(0);
-        }
-        if (symbolTextStyle.GetEffectStrategy() < 0) {
-            symbolTextStyle.SetEffectStrategy(0);
-        }
+        symbolTextStyle.SetRenderStrategy(
+            symbolTextStyle.GetRenderStrategy() < 0 ? 0 : symbolTextStyle.GetRenderStrategy());
+        symbolTextStyle.SetEffectStrategy(
+            symbolTextStyle.GetEffectStrategy() < 0 ? 0 : symbolTextStyle.GetEffectStrategy());
         paragraph_->PushStyle(symbolTextStyle);
         paragraph_->AddSymbol(symbolSourceInfo->GetUnicode());
         paragraph_->PopStyle();
@@ -398,7 +399,21 @@ bool TextLayoutAlgorithm::CreateParagraph(const TextStyle& textStyle, std::strin
         UpdateParagraph(layoutWrapper);
     }
     paragraph_->Build();
+    UpdateSymbolSpanEffect(frameNode);
     return true;
+}
+
+void TextLayoutAlgorithm::UpdateSymbolSpanEffect(RefPtr<FrameNode>& frameNode)
+{
+    for (const auto& child : spanItemChildren_) {
+        if (!child || child->unicode == 0) {
+            continue;
+        }
+        if (child->GetTextStyle()->GetEffectStrategy() > 0) {
+            paragraph_->SetParagraphSymbolAnimation(frameNode);
+            return;
+        }
+    }
 }
 
 void TextLayoutAlgorithm::CreateParagraphDrag(const TextStyle& textStyle, const std::vector<std::string>& contents,
@@ -408,17 +423,7 @@ void TextLayoutAlgorithm::CreateParagraphDrag(const TextStyle& textStyle, const 
     Color color = textStyle.GetTextColor().ChangeAlpha(DRAGGED_TEXT_TRANSPARENCY);
     dragTextStyle.SetTextColor(color);
     std::vector<TextStyle> textStyles { textStyle, dragTextStyle, textStyle };
-    auto style = textStyles.begin();
-    ParagraphStyle paraStyle { .direction = GetTextDirection(content, layoutWrapper),
-        .maxLines = style->GetMaxLines(),
-        .align = style->GetTextAlign(),
-        .fontLocale = Localization::GetInstance()->GetFontLocale(),
-        .wordBreak = style->GetWordBreak(),
-        .textOverflow = style->GetTextOverflow(),
-        .fontSize = style->GetFontSize().ConvertToPx() };
 
-    paragraph_ = Paragraph::Create(paraStyle, FontCollection::Current());
-    CHECK_NULL_VOID(paragraph_);
     for (size_t i = 0; i < contents.size(); i++) {
         std::string splitStr = contents[i];
         auto& style = textStyles[i];
@@ -738,7 +743,6 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
     // create a paragraph with all text in 1 line
     textStyle.SetTextOverflow(TextOverflow::CLIP);
     textStyle.SetMaxLines(1);
-    textStyle.SetTextAlign(TextAlign::START);
     if (!CreateParagraph(textStyle, layoutProperty->GetContent().value_or(""), layoutWrapper)) {
         return std::nullopt;
     }
@@ -748,8 +752,13 @@ std::optional<SizeF> TextLayoutAlgorithm::BuildTextRaceParagraph(TextStyle& text
 
     // layout the paragraph to the width of text
     paragraph_->Layout(std::numeric_limits<float>::max());
-    float paragraphWidth = paragraph_->GetMaxWidth();
-    paragraph_->Layout(paragraphWidth);
+    float paragraphWidth = GetTextWidth();
+    if (contentConstraint.selfIdealSize.Width().has_value()) {
+        paragraphWidth = std::max(contentConstraint.selfIdealSize.Width().value(), paragraphWidth);
+    } else {
+        paragraphWidth = std::max(contentConstraint.maxSize.Width(), paragraphWidth);
+    }
+    paragraph_->Layout(std::ceil(paragraphWidth));
 
     textStyle_ = textStyle;
 
@@ -984,7 +993,7 @@ void TextLayoutAlgorithm::SplitSpanContentByLines(const TextStyle& textStyle,
     std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>>& spanContentLines)
 {
     int32_t currentLine = 0;
-    size_t currentLength = 0;
+    int32_t start = GetFirstSpanStartPositon();
     for (const auto& child : spanList) {
         if (!child) {
             continue;
@@ -992,10 +1001,10 @@ void TextLayoutAlgorithm::SplitSpanContentByLines(const TextStyle& textStyle,
         std::string textValue = child->content;
         std::vector<RectF> selectedRects;
         if (!textValue.empty()) {
-            paragraph_->GetRectsForRange(currentLength, currentLength + textValue.size(), selectedRects);
+            paragraph_->GetRectsForRange(child->position - StringUtils::ToWstring(textValue).length() - start,
+                child->position - start, selectedRects);
         }
-        currentLength += textValue.size();
-        RectF currentRect;
+        RectF currentRect = RectF(0, -1, 0, 0);
         auto preLinetLastSpan = spanContentLines.rbegin();
         double preLineFontSize = textStyle.GetFontSize().Value();
         if (preLinetLastSpan != spanContentLines.rend()) {
@@ -1032,6 +1041,18 @@ void TextLayoutAlgorithm::SplitSpanContentByLines(const TextStyle& textStyle,
     }
 }
 
+int32_t TextLayoutAlgorithm::GetFirstSpanStartPositon()
+{
+    int32_t start = 0;
+    if (!spanItemChildren_.empty()) {
+        auto firstSpan = spanItemChildren_.front();
+        if (firstSpan) {
+            start = firstSpan->position - StringUtils::ToWstring(firstSpan->content).length();
+        }
+    }
+    return start;
+}
+
 void TextLayoutAlgorithm::SetImageSpanTextStyleByLines(const TextStyle& textStyle,
     std::map<int32_t, std::pair<RectF, RefPtr<PlaceholderSpanItem>>>& placeholderSpanList,
     std::map<int32_t, std::pair<RectF, std::list<RefPtr<SpanItem>>>>& spanContentLines)
@@ -1046,14 +1067,17 @@ void TextLayoutAlgorithm::SetImageSpanTextStyleByLines(const TextStyle& textStyl
             if (!placeholder) {
                 continue;
             }
-            placeholder->textStyle = textStyle;
-
             auto offset = placeholderItem->second.first.GetOffset();
+            auto spanItemRect = spanItem->second.first;
+            if (GreatOrEqual(offset.GetY(), spanItemRect.Bottom())) {
+                break;
+            }
             auto placeholderItemRect = placeholderItem->second.first;
-            placeholderItemRect.SetOffset(OffsetF(spanItem->second.first.GetOffset().GetX(), offset.GetY()));
+            placeholderItemRect.SetOffset(OffsetF(spanItemRect.GetOffset().GetX(), offset.GetY()));
             bool isIntersectWith = spanItem->second.first.IsIntersectWith(placeholderItemRect);
             if (!isIntersectWith) {
-                break;
+                placeholderItem++;
+                continue;
             }
             Dimension maxFontSize;
             TextStyle spanTextStyle = textStyle;

@@ -14,8 +14,9 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_textpicker_bridge.h"
 
-#include "core/interfaces/native/node/api.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "core/interfaces/native/node/api.h"
 
 namespace OHOS::Ace::NG {
 const std::string FORMAT_FONT = "%s|%s|%s";
@@ -31,6 +32,7 @@ ArkUINativeModuleValue TextpickerBridge::SetBackgroundColor(ArkUIRuntimeCallInfo
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(1);
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    CommonBridge::SetBackgroundColor(runtimeCallInfo);
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color)) {
         GetArkUIInternalNodeAPI()->GetTextpickerModifier().ResetTextpickerBackgroundColor(nativeNode);
@@ -46,6 +48,7 @@ ArkUINativeModuleValue TextpickerBridge::ResetBackgroundColor(ArkUIRuntimeCallIn
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
+    CommonBridge::ResetBackgroundColor(runtimeCallInfo);
     GetArkUIInternalNodeAPI()->GetTextpickerModifier().ResetTextpickerBackgroundColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -142,8 +145,8 @@ ArkUINativeModuleValue TextpickerBridge::SetTextStyle(ArkUIRuntimeCallInfo* runt
         styleVal = fontStyleArg->Int32Value(vm);
     }
     std::string fontSizeStr = size.ToString();
-    std::string fontInfo = StringUtils::FormatString(
-        FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
+    std::string fontInfo =
+        StringUtils::FormatString(FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
     GetArkUIInternalNodeAPI()->GetTextpickerModifier().SetTextpickerTextStyle(
         nativeNode, textColor.GetValue(), fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
@@ -191,8 +194,8 @@ ArkUINativeModuleValue TextpickerBridge::SetSelectedTextStyle(ArkUIRuntimeCallIn
         styleVal = fontStyleArg->Int32Value(vm);
     }
     std::string fontSizeStr = size.ToString();
-    std::string fontInfo = StringUtils::FormatString(
-        FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
+    std::string fontInfo =
+        StringUtils::FormatString(FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
     GetArkUIInternalNodeAPI()->GetTextpickerModifier().SetTextpickerSelectedTextStyle(
         nativeNode, textColor.GetValue(), fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);
@@ -240,8 +243,8 @@ ArkUINativeModuleValue TextpickerBridge::SetDisappearTextStyle(ArkUIRuntimeCallI
         styleVal = fontStyleArg->Int32Value(vm);
     }
     std::string fontSizeStr = size.ToString();
-    std::string fontInfo = StringUtils::FormatString(
-        FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
+    std::string fontInfo =
+        StringUtils::FormatString(FORMAT_FONT.c_str(), fontSizeStr.c_str(), weight.c_str(), fontFamily.c_str());
     GetArkUIInternalNodeAPI()->GetTextpickerModifier().SetTextpickerDisappearTextStyle(
         nativeNode, textColor.GetValue(), fontInfo.c_str(), styleVal);
     return panda::JSValueRef::Undefined(vm);

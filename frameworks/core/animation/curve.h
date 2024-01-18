@@ -182,7 +182,7 @@ public:
             return fractionMax;
         }
         auto currentStep = static_cast<int32_t>(time * steps_);
-        if (position_ == StepsCurvePosition::START) {
+        if (position_ == StepsCurvePosition::START && currentStep < steps_) {
             currentStep++;
         }
         return static_cast<float>(currentStep) / steps_;

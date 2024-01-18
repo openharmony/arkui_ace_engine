@@ -182,6 +182,20 @@ class ScrollScrollBarColorModifier extends ModifierWithKey<ResourceColor> {
   }
 }
 
+class ScrollEnablePagingModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('scrollEnablePaging');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().scroll.resetEnablePaging(node);
+    } else {
+      getUINativeModule().scroll.setEnablePaging(node, this.value);
+    }
+  }
+}
+
 class ScrollClipModifier extends ModifierWithKey<boolean | object> {
   constructor(value: boolean | object) {
     super(value);
@@ -226,6 +240,10 @@ class ArkScrollComponent extends ArkComponent implements ScrollAttribute {
   }
   onScrollStop(event: () => void): this {
     throw new Error('Method not implemented.');
+  }
+  enablePaging(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, ScrollEnablePagingModifier.identity, ScrollEnablePagingModifier, value);
+    return this;
   }
   scrollBar(value: BarState): this {
     if (value in BarState) {

@@ -194,6 +194,64 @@ protected:
     RefPtr<ChainedTransitionEffect> next_;
 };
 
+class OneCenterTransitionOptionType : public AceType {
+    DECLARE_ACE_TYPE(OneCenterTransitionOptionType, AceType);
+
+public:
+    OneCenterTransitionOptionType() = default;
+    ~OneCenterTransitionOptionType() = default;
+    Dimension& GetCenterX()
+    {
+        return centerX_;
+    }
+    Dimension& GetCenterY()
+    {
+        return centerY_;
+    }
+    Dimension& GetCenterZ()
+    {
+        return centerZ_;
+    }
+    RefPtr<NG::ChainedTransitionEffect> GetTransitionEffect()
+    {
+        return effect_;
+    }
+    void SetCenterX(const Dimension& centerX)
+    {
+        centerX_ = centerX;
+    }
+    void SetCenterY(const Dimension& centerY)
+    {
+        centerY_ = centerY;
+    }
+    void SetCenterZ(const Dimension& centerZ)
+    {
+        centerZ_ = centerZ;
+    }
+    void SetTransitionEffect(const RefPtr<NG::ChainedTransitionEffect>& effect)
+    {
+        effect_ = effect;
+    }
+    bool operator==(const OneCenterTransitionOptionType& other) const
+    {
+        return false;
+    }
+    OneCenterTransitionOptionType& operator=(OneCenterTransitionOptionType& other)
+    {
+        centerX_ = other.GetCenterX();
+        centerY_ = other.GetCenterY();
+        centerZ_ = other.GetCenterZ();
+        effect_ = other.GetTransitionEffect();
+        return *this;
+    }
+
+private:
+    Dimension centerX_;
+    Dimension centerY_;
+    Dimension centerZ_;
+    RefPtr<NG::ChainedTransitionEffect> effect_;
+};
+
 class ChainedTranslateEffect final : public ChainedTransitionEffect {
     DECLARE_ACE_TYPE(ChainedTranslateEffect, ChainedTransitionEffect);
 
@@ -205,6 +263,10 @@ public:
     const TranslateOptions& GetEffect() const
     {
         return effect_;
+    }
+    void SetTranslateEffect(const TranslateOptions& effect)
+    {
+        effect_ = effect;
     }
     std::string ToString() override
     {
@@ -231,6 +293,12 @@ public:
     {
         return effect_;
     }
+
+    void SetRotateEffect(const RotateOptions& effect)
+    {
+        effect_ = effect;
+    }
+
     std::string ToString() override
     {
         std::string ans = "{type: rotate";
@@ -255,6 +323,10 @@ public:
     const ScaleOptions& GetEffect() const
     {
         return effect_;
+    }
+    void SetScaleEffect(const ScaleOptions& effect)
+    {
+        effect_ = effect;
     }
     std::string ToString() override
     {
@@ -281,6 +353,12 @@ public:
     {
         return opacity_;
     }
+
+    void SetOpacity(float opacity)
+    {
+        opacity_ = opacity;
+    }
+
     std::string ToString() override
     {
         std::string ans = "{type: opacity";

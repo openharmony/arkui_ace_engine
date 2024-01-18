@@ -37,6 +37,8 @@ FormRendererDelegateStub::FormRendererDelegateStub()
         &FormRendererDelegateStub::HandleOnSurfaceChange;
     memberFuncMap_[static_cast<uint32_t>(IFormRendererDelegate::Message::ON_FORM_LINK_INFO_UPDATE)] =
         &FormRendererDelegateStub::HandleOnFormLinkInfoUpdate;
+    memberFuncMap_[static_cast<uint32_t>(IFormRendererDelegate::Message::ON_FORMSURFACE_DETACH)] =
+        &FormRendererDelegateStub::HandleOnSurfaceDetach;
 }
 
 FormRendererDelegateStub::~FormRendererDelegateStub()
@@ -126,6 +128,18 @@ int32_t FormRendererDelegateStub::HandleOnSurfaceReuse(MessageParcel& data, Mess
     }
 
     int32_t errCode = OnSurfaceCreate(surfaceNode, *formJsInfo, *want);
+    reply.WriteInt32(errCode);
+    return ERR_OK;
+}
+
+int32_t FormRendererDelegateStub::HandleOnSurfaceDetach(MessageParcel& data, MessageParcel& reply)
+{
+    uint64_t id = UINT64_MAX;
+    data.ReadUint64(id);
+
+    HILOG_INFO("Stub detach surfaceNode:%{public}s", std::to_string(id).c_str());
+
+    int32_t errCode = OnSurfaceDetach(id);
     reply.WriteInt32(errCode);
     return ERR_OK;
 }

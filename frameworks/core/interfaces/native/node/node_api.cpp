@@ -24,7 +24,12 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_text_input_modifier.h"
+#include "core/interfaces/native/node/node_text_area_modifier.h"
+#include "core/interfaces/native/node/node_toggle_modifier.h"
 #include "core/interfaces/native/node/view_model.h"
+#include "core/interfaces/native/node/node_common_modifier.h"
+#include "core/interfaces/native/node/node_refresh_modifier.h"
+#include "frameworks/core/common/container.h"
 
 namespace OHOS::Ace::NG {
 
@@ -55,7 +60,7 @@ namespace {
 
 ArkUINodeHandle CreateNode(ArkUINodeType type, int peerId, ArkUI_Int32 /*flags*/)
 {
-    return ViewModel::CreateNode(type, peerId);
+    return reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
 }
 
 void DisposeNode(ArkUINodeHandle node)
@@ -78,11 +83,11 @@ void InsertChildAfter(ArkUINodeHandle parent, ArkUINodeHandle child, ArkUINodeHa
     ViewModel::InsertChildAfter(parent, child, sibling);
 }
 
-typedef void (*ComponentAsyncEventHandler)(ArkUINodeHandle node, ArkUI_Int32 eventId);
+typedef void (*ComponentAsyncEventHandler)(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extraParam);
 
 /**
  * IMPORTANT!!!
- * the order of declaring the handler must be same as the ArkUIAPIComponentAsyncEventSubKind did
+ * the order of declaring the handler must be same as the ArkUIAsyncEventKind did
  */
 /* clang-format off */
 const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
@@ -91,28 +96,46 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     nullptr,
     nullptr,
     nullptr,
+    NodeModifier::SetOnBlur,
     nullptr,
     nullptr,
     nullptr,
     nullptr,
     nullptr,
+    NodeModifier::SetOnFocus,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnScroll,
     NodeModifier::SetOnScrollFrameBegin,
     NodeModifier::SetOnScrollStart,
-    NodeModifier::SetOnScrollStop
+    NodeModifier::SetOnScrollStop,
+    NodeModifier::SetOnScrollEdge,
 };
 
 const ComponentAsyncEventHandler textInputNodeAsyncEventHandlers[] = {
     nullptr,
-    nullptr,
+    NodeModifier::SetTextInputOnSubmit,
     NodeModifier::SetOnTextInputChange,
 };
 
+const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
+    nullptr,
+    nullptr,
+    NodeModifier::SetOnTextAreaChange,
+};
+
+const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
+    NodeModifier::SetRefreshOnStateChange,
+    NodeModifier::SetOnRefreshing,
+};
+
+const ComponentAsyncEventHandler TOGGLE_NODE_ASYNC_EVENT_HANDLERS[] = {
+    NodeModifier::SetOnToggleChange,
+};
+
 /* clang-format on */
-void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, ArkUI_Int32 eventId)
+void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, ArkUI_Int32 eventId, void* extraParam)
 {
     unsigned int subClassType = kind / ARKUI_MAX_EVENT_NUM;
     unsigned int subKind = kind % ARKUI_MAX_EVENT_NUM;
@@ -145,12 +168,39 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, A
             eventHandle = textInputNodeAsyncEventHandlers[subKind];
             break;
         }
+        case ARKUI_TEXTAREA: {
+            // textarea event type.
+            if (subKind >= sizeof(textAreaNodeAsyncEventHandlers) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = textAreaNodeAsyncEventHandlers[subKind];
+            break;
+        }
+        case ARKUI_REFRESH: {
+            // refresh event type.
+            if (subKind >= sizeof(refreshNodeAsyncEventHandlers) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = refreshNodeAsyncEventHandlers[subKind];
+            break;
+        }
+        case ARKUI_TOGGLE: {
+            // toggle event type.
+            if (subKind >= sizeof(TOGGLE_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
+                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
+                return;
+            }
+            eventHandle = TOGGLE_NODE_ASYNC_EVENT_HANDLERS[subKind];
+            break;
+        }
         default: {
             TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
         }
     }
     if (eventHandle) {
-        eventHandle(node, eventId);
+        eventHandle(node, eventId, extraParam);
     } else {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d EMPTY IMPLEMENT", kind);
     }
@@ -207,6 +257,8 @@ ArkUIFullNodeAPI impl = {
     ARKUI_NODE_API_VERSION,
     GetBasicAPI,
     GetArkUINodeModifiers,
+    nullptr,
+    nullptr,
     nullptr,
 };
 /* clang-format on */

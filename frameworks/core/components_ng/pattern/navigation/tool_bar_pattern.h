@@ -47,8 +47,10 @@ public:
     {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
-        host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
+            host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+        }
 
         SetBackgroundAndBlur();
     }
