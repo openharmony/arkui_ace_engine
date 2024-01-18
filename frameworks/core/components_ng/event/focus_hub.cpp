@@ -1192,6 +1192,8 @@ void FocusHub::OnFocusNode()
     if (frameNode->GetFocusType() == FocusType::NODE) {
         pipeline->SetFocusNode(frameNode);
     }
+
+    pipeline->RequestFrame();
 }
 
 void FocusHub::OnBlurNode()
@@ -1228,6 +1230,8 @@ void FocusHub::OnBlurNode()
     if (frameNode->GetFocusType() == FocusType::NODE && frameNode == pipeline->GetFocusNode()) {
         pipeline->SetFocusNode(nullptr);
     }
+
+    pipeline->RequestFrame();
 }
 
 void FocusHub::CheckFocusStateStyle(bool onFocus)
