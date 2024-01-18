@@ -535,10 +535,10 @@ class RenderNode {
     }
     if (this.shapeMaskValue.rect !== null) {
       const rectMask = this.shapeMaskValue.rect;
-      GetUINativeModule().renderNode.setRectMask(this.nodePtr, rectMask.left, rectMask.top, rectMask.right, rectMask.bottom, this.shapeMaskValue.fillColor);
+      GetUINativeModule().renderNode.setRectMask(this.nodePtr, rectMask.left, rectMask.top, rectMask.right, rectMask.bottom, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
     } else if (this.shapeMaskValue.circle !== null) {
       const circle = this.shapeMaskValue.circle;
-      GetUINativeModule().renderNode.setCircleMask(this.nodePtr, circle.centerX, circle.centerY, circle.radius, this.shapeMaskValue.fillColor);
+      GetUINativeModule().renderNode.setCircleMask(this.nodePtr, circle.centerX, circle.centerY, circle.radius, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
     } else if (this.shapeMaskValue.roundRect !== null) {
       const reoundRect = this.shapeMask.roundRect;
       const corners = reoundRect.corners;
@@ -552,18 +552,20 @@ class RenderNode {
         corners.bottomLeft.x,
         corners.bottomLeft.y, 
         corners.bottomRight.x,
-        corners.bottomRight.y, 
-        rect.left, 
-        rect.top, 
-        rect.right, 
-        rect.bottom, 
-        this.shapeMaskValue.fillColor);
+        corners.bottomRight.y,
+        rect.left,
+        rect.top,
+        rect.right,
+        rect.bottom,
+        this.shapeMaskValue.fillColor,
+        this.shapeMaskValue.strokeColor,
+        this.shapeMaskValue.strokeWidth);
     } else if (this.shapeMaskValue.oval !== null) {
       const oval = this.shapeMaskValue.oval;
-      GetUINativeModule().renderNode.setOvalMask(this.nodePtr, oval.left, oval.top, oval.right, oval.bottom, this.shapeMaskValue.fillColor);
+      GetUINativeModule().renderNode.setOvalMask(this.nodePtr, oval.left, oval.top, oval.right, oval.bottom, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
     } else if (this.shapeMaskValue.path !== null) {
       const path = this.shapeMaskValue.path;
-      GetUINativeModule().renderNode.setPath(this.nodePtr, path.commands, this.shapeMaskValue.fillColor);
+      GetUINativeModule().renderNode.setPath(this.nodePtr, path.commands, this.shapeMaskValue.fillColor, this.shapeMaskValue.strokeColor, this.shapeMaskValue.strokeWidth);
     }
   }
   get shapeMask(): ShapeMask {

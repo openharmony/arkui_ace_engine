@@ -31,6 +31,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shared_transition_option.h"
 #include "core/components_ng/base/modifier.h"
+#include "core/components_ng/pattern/render_node/render_node_properties.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/property/overlay_property.h"
 #include "core/components_ng/property/particle_property.h"
@@ -41,7 +42,6 @@
 #include "core/components_ng/render/animation_utils.h"
 #include "core/components_ng/render/drawing_forward.h"
 #include "core/components_ng/render/render_property.h"
-#include "core/pipeline/base/constants.h"
 
 namespace OHOS::Rosen {
 class DrawCmdList;
@@ -140,8 +140,7 @@ public:
         std::optional<std::string> surfaceName;
         PatternType patternType = PatternType::DEFAULT;
     };
-    virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param)
-    {}
+    virtual void InitContext(bool isRoot, const std::optional<ContextParam>& param) {}
 
     virtual void SetSurfaceChangedCallBack(
         const std::function<void(float, float, float, float)>& callback) {}
@@ -273,11 +272,11 @@ public:
     virtual void SetOpacity(float opacity) {}
     virtual void SetTranslate(float translateX, float translateY, float translateZ) {}
 
-    virtual void SetRectMask(float left, float top, float right, float bottom, uint32_t fillColor) {}
-    virtual void SetCircleMask(float centerX, float centerY, float radius, uint32_t fillColor) {}
-    virtual void SetRoundRectMask(const RoundRect& roundRect, uint32_t fillColor) {}
-    virtual void SetOvalMask(float left, float top, float right, float bottom, uint32_t fillColor) {}
-    virtual void SetCommandPathMask(const std::string& commands, uint32_t fillColor) {}
+    virtual void SetRectMask(const RectF& rect, const ShapeMaskProperty& property) {}
+    virtual void SetCircleMask(const Circle& circle, const ShapeMaskProperty& property) {}
+    virtual void SetRoundRectMask(const RoundRect& roundRect, const ShapeMaskProperty& property) {}
+    virtual void SetOvalMask(const RectF& rect, const ShapeMaskProperty& property) {}
+    virtual void SetCommandPathMask(const std::string& commands, const ShapeMaskProperty& property) {}
 
     virtual RectF GetPaintRectWithTransform()
     {

@@ -21,11 +21,13 @@
 #include "interfaces/inner_api/ace/macros.h"
 
 #include "base/geometry/ng/rect_t.h"
+#include "base/geometry/shape.h"
 #include "base/memory/ace_type.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/progress/progress_date.h"
+#include "core/components_ng/pattern/render_node/render_node_properties.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/event/mouse_event.h"
 
@@ -1706,11 +1708,16 @@ struct ArkUIRenderNodeModifierAPI {
     void (*SetBorderWidth)(NodeHandle node, float left, float top, float right, float bottom);
     void (*SetBorderColor)(NodeHandle node, uint32_t left, uint32_t top, uint32_t right, uint32_t bottom);
     void (*SetBorderRadius)(NodeHandle node, double topLeft, double topRight, double bottomLeft, double bottomRight);
-    void (*SetRectMask)(NodeHandle node, float left, float top, float right, float bottom, uint32_t fillColor);
-    void (*SetCircleMask)(NodeHandle node, float centerX, float centerY, float radius, uint32_t fillColor);
-    void (*SetRoundRectMask)(NodeHandle node, const OHOS::Ace::NG::RoundRect& roundRect, uint32_t fillColor);
-    void (*SetOvalMask)(NodeHandle node, float left, float top, float right, float bottom, uint32_t fillColor);
-    void (*SetCommandPathMask)(NodeHandle node, const std::string& commands, uint32_t fillColor);
+    void (*SetRectMask)(
+        NodeHandle node, const OHOS::Ace::NG::RectF& rect, const OHOS::Ace::NG::ShapeMaskProperty& property);
+    void (*SetCircleMask)(
+        NodeHandle node, const OHOS::Ace::Circle& circle, const OHOS::Ace::NG::ShapeMaskProperty& property);
+    void (*SetRoundRectMask)(
+        NodeHandle node, const OHOS::Ace::NG::RoundRect& roundRect, const OHOS::Ace::NG::ShapeMaskProperty& property);
+    void (*SetOvalMask)(
+        NodeHandle node, const OHOS::Ace::NG::RectF& rect, const OHOS::Ace::NG::ShapeMaskProperty& property);
+    void (*SetCommandPathMask)(
+        NodeHandle node, const std::string& commands, const OHOS::Ace::NG::ShapeMaskProperty& property);
 };
 
 struct ArkUINodeAPI {

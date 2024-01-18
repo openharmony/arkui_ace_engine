@@ -100,6 +100,30 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_form_component_bridge.h"
 #endif
 namespace OHOS::Ace::NG {
+namespace {
+void RegisterRenderNodeBorderAndMaskAttributes(Local<panda::ObjectRef> renderNode, EcmaVM* vm)
+{
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorderStyle"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetBorderStyle));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorderWidth"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetBorderWidth));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorderColor"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetBorderColor));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorderRadius"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetBorderRadius));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRectMask"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetRectMask));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCircleMask"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetCircleMask));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRoundRectMask"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetRoundRectMask));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOvalMask"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetOvalMask));
+    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPath"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetCommandPathMask));
+}
+} // namespace
+
 ArkUINativeModuleValue ArkUINativeModule::GetFrameNodeById(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -2030,24 +2054,7 @@ void ArkUINativeModule::RegisterRenderNodeAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetOpacity));
     renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTranslate"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetTranslate));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorderStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetBorderStyle));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorderWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetBorderWidth));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorderColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetBorderColor));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBorderRadius"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetBorderRadius));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRectMask"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetRectMask));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCircleMask"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetCircleMask));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRoundRectMask"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetRoundRectMask));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOvalMask"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetOvalMask));
-    renderNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPath"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RenderNodeBridge::SetCommandPathMask));
+    RegisterRenderNodeBorderAndMaskAttributes(renderNode, vm);
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "renderNode"), renderNode);
 }
 

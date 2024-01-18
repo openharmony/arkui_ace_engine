@@ -17,8 +17,11 @@
 
 #include <cstdint>
 
+#include "base/geometry/dimension.h"
 #include "base/geometry/ng/rect_t.h"
+#include "base/geometry/shape.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/pattern/render_node/render_node_properties.h"
 #include "core/interfaces/native/node/api.h"
 
 namespace OHOS::Ace::NG {
@@ -360,29 +363,17 @@ ArkUINativeModuleValue RenderNodeBridge::SetBorderStyle(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    Local<JSValueRef> leftStyle = runtimeCallInfo->GetCallArgRef(1);
-    BorderStyle leftStyleValue = BorderStyle::NONE;
-    if (leftStyle->IsNumber()) {
-        leftStyleValue = static_cast<BorderStyle>(leftStyle->Uint32Value(vm));
-    }
+    auto leftStyle = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 1);
+    auto leftStyleValue = static_cast<BorderStyle>(leftStyle);
 
-    Local<JSValueRef> topStyle = runtimeCallInfo->GetCallArgRef(2);
-    BorderStyle topStyleValue = BorderStyle::NONE;
-    if (topStyle->IsNumber()) {
-        topStyleValue = static_cast<BorderStyle>(topStyle->Uint32Value(vm));
-    }
+    auto topStyle = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 2);
+    auto topStyleValue = static_cast<BorderStyle>(topStyle);
 
-    Local<JSValueRef> rightStyle = runtimeCallInfo->GetCallArgRef(3);
-    BorderStyle rightStyleValue = BorderStyle::NONE;
-    if (rightStyle->IsNumber()) {
-        rightStyleValue = static_cast<BorderStyle>(rightStyle->Uint32Value(vm));
-    }
+    auto rightStyle = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 3);
+    auto rightStyleValue = static_cast<BorderStyle>(rightStyle);
 
-    Local<JSValueRef> bottomStyle = runtimeCallInfo->GetCallArgRef(4);
-    BorderStyle bottomStyleValue = BorderStyle::NONE;
-    if (bottomStyle->IsNumber()) {
-        bottomStyleValue = static_cast<BorderStyle>(bottomStyle->Uint32Value(vm));
-    }
+    auto bottomStyle = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 4);
+    auto bottomStyleValue = static_cast<BorderStyle>(bottomStyle);
 
     GetArkUIInternalNodeAPI()->GetRenderNodeModifier().SetBorderStyle(
         nativeNode, leftStyleValue, topStyleValue, rightStyleValue, bottomStyleValue);
@@ -396,29 +387,10 @@ ArkUINativeModuleValue RenderNodeBridge::SetBorderWidth(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    Local<JSValueRef> leftWidth = runtimeCallInfo->GetCallArgRef(1);
-    float leftWidthValue = 0;
-    if (leftWidth->IsNumber()) {
-        leftWidthValue = leftWidth->ToNumber(vm)->Value();
-    }
-
-    Local<JSValueRef> topWidth = runtimeCallInfo->GetCallArgRef(2);
-    float topWidthValue = 0;
-    if (topWidth->IsNumber()) {
-        topWidthValue = topWidth->ToNumber(vm)->Value();
-    }
-
-    Local<JSValueRef> rightWidth = runtimeCallInfo->GetCallArgRef(3);
-    float rightWidthValue = 0;
-    if (rightWidth->IsNumber()) {
-        rightWidthValue = rightWidth->ToNumber(vm)->Value();
-    }
-
-    Local<JSValueRef> bottomWidth = runtimeCallInfo->GetCallArgRef(4);
-    float bottomWidthValue = 0;
-    if (bottomWidth->IsNumber()) {
-        bottomWidthValue = bottomWidth->ToNumber(vm)->Value();
-    }
+    auto leftWidthValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 1);
+    auto topWidthValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 2);
+    auto rightWidthValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 3);
+    auto bottomWidthValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 4);
 
     GetArkUIInternalNodeAPI()->GetRenderNodeModifier().SetBorderWidth(
         nativeNode, leftWidthValue, topWidthValue, rightWidthValue, bottomWidthValue);
@@ -432,29 +404,10 @@ ArkUINativeModuleValue RenderNodeBridge::SetBorderColor(ArkUIRuntimeCallInfo* ru
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    Local<JSValueRef> leftColor = runtimeCallInfo->GetCallArgRef(1);
-    uint32_t leftColorValue = 0;
-    if (leftColor->IsNumber()) {
-        leftColorValue = leftColor->Uint32Value(vm);
-    }
-
-    Local<JSValueRef> topColor = runtimeCallInfo->GetCallArgRef(2);
-    uint32_t topColorValue = 0;
-    if (topColor->IsNumber()) {
-        topColorValue = topColor->Uint32Value(vm);
-    }
-
-    Local<JSValueRef> rightColor = runtimeCallInfo->GetCallArgRef(3);
-    uint32_t rightColorValue = 0;
-    if (rightColor->IsNumber()) {
-        rightColorValue = rightColor->Uint32Value(vm);
-    }
-
-    Local<JSValueRef> bottomColor = runtimeCallInfo->GetCallArgRef(4);
-    uint32_t bottomColorValue = 0;
-    if (bottomColor->IsNumber()) {
-        bottomColorValue = bottomColor->Uint32Value(vm);
-    }
+    auto leftColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 1);
+    auto topColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 2);
+    auto rightColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 3);
+    auto bottomColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 4);
 
     GetArkUIInternalNodeAPI()->GetRenderNodeModifier().SetBorderColor(
         nativeNode, leftColorValue, topColorValue, rightColorValue, bottomColorValue);
@@ -468,29 +421,10 @@ ArkUINativeModuleValue RenderNodeBridge::SetBorderRadius(ArkUIRuntimeCallInfo* r
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    Local<JSValueRef> topLeftRadius = runtimeCallInfo->GetCallArgRef(1);
-    double topLeftRadiusValue = 0;
-    if (topLeftRadius->IsNumber()) {
-        topLeftRadiusValue = topLeftRadius->ToNumber(vm)->Value();
-    }
-
-    Local<JSValueRef> topRightRadius = runtimeCallInfo->GetCallArgRef(2);
-    double topRightRadiusValue = 0;
-    if (topRightRadius->IsNumber()) {
-        topRightRadiusValue = topRightRadius->ToNumber(vm)->Value();
-    }
-
-    Local<JSValueRef> bottomLeftRadius = runtimeCallInfo->GetCallArgRef(3);
-    double bottomLeftRadiusValue = 0;
-    if (bottomLeftRadius->IsNumber()) {
-        bottomLeftRadiusValue = bottomLeftRadius->ToNumber(vm)->Value();
-    }
-
-    Local<JSValueRef> bottomRightRadius = runtimeCallInfo->GetCallArgRef(4);
-    double bottomRightRadiusValue = 0;
-    if (bottomRightRadius->IsNumber()) {
-        bottomRightRadiusValue = bottomRightRadius->ToNumber(vm)->Value();
-    }
+    auto topLeftRadiusValue = RenderNodeBridge::GetNumber<double>(vm, runtimeCallInfo, 1);
+    auto topRightRadiusValue = RenderNodeBridge::GetNumber<double>(vm, runtimeCallInfo, 2);
+    auto bottomLeftRadiusValue = RenderNodeBridge::GetNumber<double>(vm, runtimeCallInfo, 3);
+    auto bottomRightRadiusValue = RenderNodeBridge::GetNumber<double>(vm, runtimeCallInfo, 4);
 
     GetArkUIInternalNodeAPI()->GetRenderNodeModifier().SetBorderRadius(
         nativeNode, topLeftRadiusValue, topRightRadiusValue, bottomLeftRadiusValue, bottomRightRadiusValue);
@@ -504,38 +438,19 @@ ArkUINativeModuleValue RenderNodeBridge::SetRectMask(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    Local<JSValueRef> left = runtimeCallInfo->GetCallArgRef(1);
-    float leftValue = 0;
-    if (left->IsNumber()) {
-        leftValue = left->ToNumber(vm)->Value();
-    }
+    auto leftValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 1);
+    auto topValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 2);
+    auto rightValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 3);
+    auto bottomValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 4);
+    auto fillColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 5);
+    auto strokeColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 6);
+    auto strokeWidthValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 7);
 
-    Local<JSValueRef> top = runtimeCallInfo->GetCallArgRef(2);
-    float topValue = 0;
-    if (top->IsNumber()) {
-        topValue = top->ToNumber(vm)->Value();
-    }
-
-    Local<JSValueRef> right = runtimeCallInfo->GetCallArgRef(3);
-    float rightValue = 0;
-    if (right->IsNumber()) {
-        rightValue = right->ToNumber(vm)->Value();
-    }
-
-    Local<JSValueRef> bottom = runtimeCallInfo->GetCallArgRef(4);
-    float bottomValue = 0;
-    if (bottom->IsNumber()) {
-        bottomValue = bottom->ToNumber(vm)->Value();
-    }
-
-    Local<JSValueRef> fillColor = runtimeCallInfo->GetCallArgRef(5);
-    uint32_t fillColorValue = 0;
-    if (fillColor->IsNumber()) {
-        fillColorValue = fillColor->Uint32Value(vm);
-    }
+    RectF rect(leftValue, topValue, rightValue - leftValue, bottomValue - topValue);
+    ShapeMaskProperty property { fillColorValue, strokeColorValue, strokeWidthValue };
 
     GetArkUIInternalNodeAPI()->GetRenderNodeModifier().SetRectMask(
-        nativeNode, leftValue, topValue, rightValue, bottomValue, fillColorValue);
+        nativeNode, rect, property);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -546,32 +461,25 @@ ArkUINativeModuleValue RenderNodeBridge::SetCircleMask(ArkUIRuntimeCallInfo* run
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    Local<JSValueRef> centerX = runtimeCallInfo->GetCallArgRef(1);
-    float centerXValue = 0;
-    if (centerX->IsNumber()) {
-        centerXValue = centerX->ToNumber(vm)->Value();
-    }
+    auto centerXValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 1);
+    auto centerYValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 2);
+    auto radiusValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 3);
+    auto fillColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 4);
+    auto strokeColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 5);
+    auto strokeWidthValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 6);
 
-    Local<JSValueRef> centerY = runtimeCallInfo->GetCallArgRef(2);
-    float centerYValue = 0;
-    if (centerY->IsNumber()) {
-        centerYValue = centerY->ToNumber(vm)->Value();
-    }
+    Circle circle;
+    Dimension centerX(centerXValue, DimensionUnit::VP);
+    circle.SetAxisX(centerX);
+    Dimension centerY(centerYValue, DimensionUnit::VP);
+    circle.SetAxisY(centerY);
+    Dimension radius(radiusValue, DimensionUnit::VP);
+    circle.SetRadius(radius);
 
-    Local<JSValueRef> radius = runtimeCallInfo->GetCallArgRef(3);
-    float radiusValue = 0;
-    if (radius->IsNumber()) {
-        radiusValue = radius->ToNumber(vm)->Value();
-    }
-
-    Local<JSValueRef> fillColor = runtimeCallInfo->GetCallArgRef(4);
-    uint32_t fillColorValue = 0;
-    if (fillColor->IsNumber()) {
-        fillColorValue = fillColor->Uint32Value(vm);
-    }
+    ShapeMaskProperty property { fillColorValue, strokeColorValue, strokeWidthValue };
 
     GetArkUIInternalNodeAPI()->GetRenderNodeModifier().SetCircleMask(
-        nativeNode, centerXValue, centerYValue, radiusValue, fillColorValue);
+        nativeNode, circle, property);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -583,87 +491,38 @@ ArkUINativeModuleValue RenderNodeBridge::SetRoundRectMask(ArkUIRuntimeCallInfo* 
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
     RoundRect roundRect;
-    Local<JSValueRef> topLeftX = runtimeCallInfo->GetCallArgRef(1);
-    float topLeftXValue = 0;
-    if (topLeftX->IsNumber()) {
-        topLeftXValue = topLeftX->ToNumber(vm)->Value();
-    }
-    Local<JSValueRef> topLeftY = runtimeCallInfo->GetCallArgRef(2);
-    float topLeftYValue = 0;
-    if (topLeftY->IsNumber()) {
-        topLeftYValue = topLeftY->ToNumber(vm)->Value();
-    }
+    auto topLeftXValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 1);
+    auto topLeftYValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 2);
     roundRect.SetCornerRadius(RoundRect::CornerPos::TOP_LEFT_POS, topLeftXValue, topLeftYValue);
 
-    Local<JSValueRef> topRightX = runtimeCallInfo->GetCallArgRef(3);
-    float topRightXValue = 0;
-    if (topRightX->IsNumber()) {
-        topRightXValue = topRightX->ToNumber(vm)->Value();
-    }
-    Local<JSValueRef> topRightY = runtimeCallInfo->GetCallArgRef(4);
-    float topRightYValue = 0;
-    if (topRightY->IsNumber()) {
-        topRightYValue = topRightY->ToNumber(vm)->Value();
-    }
+    auto topRightXValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 3);
+    auto topRightYValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 4);
     roundRect.SetCornerRadius(RoundRect::CornerPos::TOP_RIGHT_POS, topRightXValue, topRightYValue);
 
-    Local<JSValueRef> bottomLeftX = runtimeCallInfo->GetCallArgRef(5);
-    float bottomLeftXValue = 0;
-    if (bottomLeftX->IsNumber()) {
-        bottomLeftXValue = bottomLeftX->ToNumber(vm)->Value();
-    }
-    Local<JSValueRef> bottomLeftY = runtimeCallInfo->GetCallArgRef(6);
-    float bottomLeftYValue = 0;
-    if (bottomLeftY->IsNumber()) {
-        bottomLeftYValue = bottomLeftY->ToNumber(vm)->Value();
-    }
+    auto bottomLeftXValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 5);
+    auto bottomLeftYValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 6);
     roundRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_LEFT_POS, bottomLeftXValue, bottomLeftYValue);
 
-    Local<JSValueRef> bottomRightX = runtimeCallInfo->GetCallArgRef(7);
-    float bottomRightXValue = 0;
-    if (bottomRightX->IsNumber()) {
-        bottomRightXValue = bottomRightX->ToNumber(vm)->Value();
-    }
-    Local<JSValueRef> bottomRightY = runtimeCallInfo->GetCallArgRef(8);
-    float bottomRightYValue = 0;
-    if (bottomRightY->IsNumber()) {
-        bottomRightYValue = bottomRightY->ToNumber(vm)->Value();
-    }
+    auto bottomRightXValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 7);
+    auto bottomRightYValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 8);
     roundRect.SetCornerRadius(RoundRect::CornerPos::BOTTOM_RIGHT_POS, bottomRightXValue, bottomRightYValue);
 
-    Local<JSValueRef> left = runtimeCallInfo->GetCallArgRef(9);
-    float leftValue = 0;
-    if (left->IsNumber()) {
-        leftValue = left->ToNumber(vm)->Value();
-    }
+    auto leftValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 9);
+    auto topValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 10);
+    auto rightValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 11);
+    auto bottomValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 12);
 
-    Local<JSValueRef> top = runtimeCallInfo->GetCallArgRef(10);
-    float topValue = 0;
-    if (top->IsNumber()) {
-        topValue = top->ToNumber(vm)->Value();
-    }
+    auto fillColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 13);
+    auto strokeColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 14);
+    auto strokeWidthValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 15);
 
-    Local<JSValueRef> right = runtimeCallInfo->GetCallArgRef(11);
-    float rightValue = 0;
-    if (right->IsNumber()) {
-        rightValue = right->ToNumber(vm)->Value();
-    }
-
-    Local<JSValueRef> bottom = runtimeCallInfo->GetCallArgRef(12);
-    float bottomValue = 0;
-    if (bottom->IsNumber()) {
-        bottomValue = bottom->ToNumber(vm)->Value();
-    }
-
-    Local<JSValueRef> fillColor = runtimeCallInfo->GetCallArgRef(13);
-    uint32_t fillColorValue = 0;
-    if (fillColor->IsNumber()) {
-        fillColorValue = fillColor->Uint32Value(vm);
-    }
     RectF rect(leftValue, topValue, rightValue - leftValue, bottomValue - topValue);
     roundRect.SetRect(rect);
 
-    GetArkUIInternalNodeAPI()->GetRenderNodeModifier().SetRoundRectMask(nativeNode, roundRect, fillColorValue);
+    ShapeMaskProperty property { fillColorValue, strokeColorValue, strokeWidthValue };
+
+    GetArkUIInternalNodeAPI()->GetRenderNodeModifier().SetRoundRectMask(
+        nativeNode, roundRect, property);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -674,38 +533,20 @@ ArkUINativeModuleValue RenderNodeBridge::SetOvalMask(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    Local<JSValueRef> left = runtimeCallInfo->GetCallArgRef(1);
-    float leftValue = 0;
-    if (left->IsNumber()) {
-        leftValue = left->ToNumber(vm)->Value();
-    }
+    auto leftValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 1);
+    auto topValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 2);
+    auto rightValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 3);
+    auto bottomValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 4);
+    RectF rect(leftValue, topValue, rightValue - leftValue, bottomValue - topValue);
 
-    Local<JSValueRef> top = runtimeCallInfo->GetCallArgRef(2);
-    float topValue = 0;
-    if (top->IsNumber()) {
-        topValue = top->ToNumber(vm)->Value();
-    }
+    auto fillColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 5);
+    auto strokeColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 6);
+    auto strokeWidthValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 7);
 
-    Local<JSValueRef> right = runtimeCallInfo->GetCallArgRef(3);
-    float rightValue = 0;
-    if (right->IsNumber()) {
-        rightValue = right->ToNumber(vm)->Value();
-    }
-
-    Local<JSValueRef> bottom = runtimeCallInfo->GetCallArgRef(4);
-    float bottomValue = 0;
-    if (bottom->IsNumber()) {
-        bottomValue = bottom->ToNumber(vm)->Value();
-    }
-
-    Local<JSValueRef> fillColor = runtimeCallInfo->GetCallArgRef(5);
-    uint32_t fillColorValue = 0;
-    if (fillColor->IsNumber()) {
-        fillColorValue = fillColor->Uint32Value(vm);
-    }
+    ShapeMaskProperty property { fillColorValue, strokeColorValue, strokeWidthValue };
 
     GetArkUIInternalNodeAPI()->GetRenderNodeModifier().SetOvalMask(
-        nativeNode, leftValue, topValue, rightValue, bottomValue, fillColorValue);
+        nativeNode, rect, property);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -722,13 +563,14 @@ ArkUINativeModuleValue RenderNodeBridge::SetCommandPathMask(ArkUIRuntimeCallInfo
         pathValue = path->ToString(vm)->ToString();
     }
 
-    Local<JSValueRef> fillColor = runtimeCallInfo->GetCallArgRef(2);
-    uint32_t fillColorValue = 0;
-    if (fillColor->IsNumber()) {
-        fillColorValue = fillColor->Uint32Value(vm);
-    }
+    auto fillColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 2);
+    auto strokeColorValue = RenderNodeBridge::GetNumber<uint32_t>(vm, runtimeCallInfo, 3);
+    auto strokeWidthValue = RenderNodeBridge::GetNumber<float>(vm, runtimeCallInfo, 4);
 
-    GetArkUIInternalNodeAPI()->GetRenderNodeModifier().SetCommandPathMask(nativeNode, pathValue, fillColorValue);
+    ShapeMaskProperty property { fillColorValue, strokeColorValue, strokeWidthValue };
+
+    GetArkUIInternalNodeAPI()->GetRenderNodeModifier().SetCommandPathMask(
+        nativeNode, pathValue, property);
     return panda::JSValueRef::Undefined(vm);
 }
 

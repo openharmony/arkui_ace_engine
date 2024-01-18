@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 #include "core/interfaces/native/node/render_node_modifier.h"
+
 #include <cstdint>
 #include <optional>
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/rect_t.h"
+#include "base/geometry/shape.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/components/common/layout/constants.h"
@@ -26,6 +28,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/layout/layout_property.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
+#include "core/components_ng/pattern/render_node/render_node_properties.h"
 #include "core/components_ng/property/border_property.h"
 #include "core/components_ng/render/render_context.h"
 #include "core/interfaces/native/node/api.h"
@@ -269,49 +272,51 @@ void SetBorderRadius(NodeHandle node, double topLeft, double topRight, double bo
     renderContext->UpdateBorderRadius(borderRadiusProperty);
 }
 
-void SetRectMask(NodeHandle node, float left, float top, float right, float bottom, uint32_t fillColor)
+void SetRectMask(NodeHandle node, const RectF& rect, const ShapeMaskProperty& property)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(currentNode);
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
-    renderContext->SetRectMask(left, top, right, bottom, fillColor);
+    renderContext->SetRectMask(rect, property);
 }
 
-void SetCircleMask(NodeHandle node, float centerX, float centerY, float radius, uint32_t fillColor)
+void SetCircleMask(NodeHandle node, const Circle& circle, const ShapeMaskProperty& property)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(currentNode);
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
-    renderContext->SetCircleMask(centerX, centerY, radius, fillColor);
+    renderContext->SetCircleMask(circle, property);
 }
 
-void SetRoundRectMask(NodeHandle node, const RoundRect& roundRect, uint32_t fillColor)
+void SetRoundRectMask(
+    NodeHandle node, const RoundRect& roundRect, const ShapeMaskProperty& property)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(currentNode);
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
-    renderContext->SetRoundRectMask(roundRect, fillColor);
+    renderContext->SetRoundRectMask(roundRect, property);
 }
 
-void SetOvalMask(NodeHandle node, float left, float top, float right, float bottom, uint32_t fillColor)
+void SetOvalMask(NodeHandle node, const RectF& rect, const ShapeMaskProperty& property)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(currentNode);
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
-    renderContext->SetOvalMask(left, top, right, bottom, fillColor);
+    renderContext->SetOvalMask(rect, property);
 }
 
-void SetCommandPathMask(NodeHandle node, const std::string& commands, uint32_t fillColor)
+void SetCommandPathMask(
+    NodeHandle node, const std::string& commands, const ShapeMaskProperty& property)
 {
     auto* currentNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(currentNode);
     auto renderContext = GetRenderContext(currentNode);
     CHECK_NULL_VOID(renderContext);
-    renderContext->SetCommandPathMask(commands, fillColor);
+    renderContext->SetCommandPathMask(commands, property);
 }
 
 ArkUIRenderNodeModifierAPI GetRenderNodeModifier()
