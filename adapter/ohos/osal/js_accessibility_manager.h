@@ -59,6 +59,7 @@ public:
     void SetCardViewParams(const std::string& key, bool focus) override;
     void HandleComponentPostBinding() override;
     void RegisterSubWindowInteractionOperation(int windowId) override;
+    void SetPipelineContext(const RefPtr<PipelineBase>& context) override;
 
     void UpdateViewScale();
 
@@ -188,18 +189,20 @@ private:
     class JsAccessibilityStateObserver : public Accessibility::AccessibilityStateObserver {
     public:
         void OnStateChanged(const bool state) override;
-        void SetHandler(const WeakPtr<JsAccessibilityManager>& js)
+        void SetAccessibilityManager(const WeakPtr<JsAccessibilityManager>& accessibilityManager)
         {
-            js_ = js;
+            accessibilityManager_ = accessibilityManager;
         }
 
-        const WeakPtr<JsAccessibilityManager>& GetHandler() const
+        void SetPipeline(const WeakPtr<PipelineBase>& pipeline)
         {
-            return js_;
+            pipeline_ = pipeline;
         }
 
     private:
-        WeakPtr<JsAccessibilityManager> js_;
+        // Do not upgrade accessibilityManager_ on async thread, destructor might cause freeze
+        WeakPtr<JsAccessibilityManager> accessibilityManager_;
+        WeakPtr<PipelineBase> pipeline_;
     };
 
     bool AccessibilityActionEvent(const Accessibility::ActionType& action,
