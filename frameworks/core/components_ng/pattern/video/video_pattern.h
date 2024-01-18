@@ -98,7 +98,7 @@ public:
         return loop_;
     }
 
-    virtual bool IsFullScreen();
+    virtual bool IsFullScreen() const;
 
     void OnColorConfigurationUpdate() override;
     void UpdateProgressRate(double progressRate)
@@ -201,6 +201,8 @@ public:
     void OnFullScreenChange(bool isFullScreen);
 
     void RecoverState(const RefPtr<VideoPattern>& videoPattern);
+
+    bool NeedLift() const;
 
     RefPtr<FrameNode> GetFullScreenNode() const
     {
