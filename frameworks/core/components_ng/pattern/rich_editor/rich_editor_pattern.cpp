@@ -1765,7 +1765,7 @@ bool RichEditorPattern::JudgeDraggable(GestureEvent& info)
         bool isDraggable = false;
         for (const auto& resultObj : resultObjects) {
             if (resultObject.isDraggable) {
-                isDraggable=true;
+                isDraggable = true;
                 break;
             }
         }
