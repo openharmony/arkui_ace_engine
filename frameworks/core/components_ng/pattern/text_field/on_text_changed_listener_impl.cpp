@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/text_field/on_text_changed_listener_impl.h"
 
+#include "base/input_manager/input_manager.h"
 #include "core/common/container_scope.h"
 #include "core/common/ime/text_input_client.h"
 #include "core/event/key_event.h"
@@ -301,7 +302,7 @@ void OnTextChangedListenerImpl::PostTaskToUI(const std::function<void()>& task)
 
 void OnTextChangedListenerImpl::NotifyPanelStatusInfo(const MiscServices::PanelStatusInfo& info)
 {
-    bool isHardKeyboardConnected = false;
+    bool isHardKeyboardConnected = InputManager::IsKeyboardConnected();
     MiscServices::PanelType panelType = info.panelInfo.panelType;
     bool panelVisible = info.visible;
     MiscServices::Trigger triggerFrom = info.trigger;
