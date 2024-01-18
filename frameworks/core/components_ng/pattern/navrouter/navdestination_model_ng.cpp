@@ -139,7 +139,7 @@ void NavDestinationModelNG::CreateBackButton(const RefPtr<NavDestinationGroupNod
     titleBarLayoutProperty->UpdateTitleBarParentType(TitleBarParentType::NAV_DESTINATION);
 }
 
-void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc)
+void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc, RefPtr<NG::NavDestinationContext> context)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     // navDestination node
@@ -160,8 +160,10 @@ void NavDestinationModelNG::Create(std::function<void()>&& deepRenderFunc)
     };
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId);
     auto navDestinationNode = NavDestinationGroupNode::GetOrCreateGroupNode(V2::NAVDESTINATION_VIEW_ETS_TAG, nodeId,
-        [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender))]() {
-            return AceType::MakeRefPtr<NavDestinationPattern>(shallowBuilder);
+        [shallowBuilder = AceType::MakeRefPtr<ShallowBuilder>(std::move(deepRender)), context]() {
+            auto pattern = AceType::MakeRefPtr<NavDestinationPattern>(shallowBuilder);
+            pattern->SetNavDestinationContext(context);
+            return pattern;
         });
     if (!navDestinationNode->GetTitleBarNode()) {
         if (Container::LessThanAPIVersion(PlatformVersion::VERSION_TEN)) {
@@ -387,6 +389,14 @@ void NavDestinationModelNG::SetOnBackPressed(std::function<bool()>&& onBackPress
     auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
     CHECK_NULL_VOID(navDestinationEventHub);
     navDestinationEventHub->SetOnBackPressed(onBackPressed);
+}
+
+void NavDestinationModelNG::SetOnReady(std::function<void(RefPtr<NavDestinationContext>)>&& onReady)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navDestinationEventHub = AceType::DynamicCast<NavDestinationEventHub>(frameNode->GetEventHub<EventHub>());
+    CHECK_NULL_VOID(navDestinationEventHub);
+    navDestinationEventHub->SetOnReady(onReady);
 }
 
 RefPtr<AceType> NavDestinationModelNG::CreateEmpty()

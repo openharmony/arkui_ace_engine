@@ -18,6 +18,8 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
+#include "bridge/declarative_frontend/jsview/js_nav_path_stack.h"
+#include "bridge/declarative_frontend/jsview/js_navdestination_context.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/custom/custom_node.h"
@@ -192,7 +194,14 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index)
     if (node == nullptr) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "router map is invalid, current path name is %{public}s", name.c_str());
     }
-    if (CheckNavDestinationNodeInUINode(node)) {
+    RefPtr<NG::NavDestinationGroupNode> desNode;
+    if (GetNavDestinationNodeInUINode(node, desNode)) {
+        auto pattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
+        if (pattern) {
+            auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param);
+            pattern->SetNavPathInfo(pathInfo);
+            pattern->SetNavigationStack(WeakClaim(this));
+        }
         return node;
     }
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't find target destination by index, create empty node");
@@ -214,7 +223,14 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByRouteInfo(const RefPtr<NG::Rou
     if (node == nullptr) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "create destination by builder failed");
     }
-    if (CheckNavDestinationNodeInUINode(node)) {
+    RefPtr<NG::NavDestinationGroupNode> desNode;
+    if (GetNavDestinationNodeInUINode(node, desNode)) {
+        auto pattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
+        if (pattern) {
+            auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param);
+            pattern->SetNavPathInfo(pathInfo);
+            pattern->SetNavigationStack(WeakClaim(this));
+        }
         return node;
     }
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "can't find navDestination by route info, create empty node");
@@ -247,7 +263,8 @@ JSRef<JSVal> JSNavigationStack::GetParamByIndex(int32_t index) const
     return func->Call(dataSourceObj_, 1, params);
 }
 
-bool JSNavigationStack::CheckNavDestinationNodeInUINode(RefPtr<NG::UINode> node)
+bool JSNavigationStack::GetNavDestinationNodeInUINode(
+    RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode)
 {
     while (node) {
         if (node->GetTag() == V2::JS_VIEW_ETS_TAG) {
@@ -257,6 +274,7 @@ bool JSNavigationStack::CheckNavDestinationNodeInUINode(RefPtr<NG::UINode> node)
             // render, and find deep further
             customNode->Render();
         } else if (node->GetTag() == V2::NAVDESTINATION_VIEW_ETS_TAG) {
+            desNode = AceType::DynamicCast<NG::NavDestinationGroupNode>(node);
             return true;
         }
         auto children = node->GetChildren();

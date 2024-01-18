@@ -16,6 +16,7 @@
 #include "core/common/container.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/navrouter/navdestination_context.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -91,6 +92,11 @@ void NavDestinationGroupNode::ProcessShallowBuilder()
     CHECK_NULL_VOID(navDestinationPattern);
     auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
     if (shallowBuilder && !shallowBuilder->IsExecuteDeepRenderDone()) {
+        auto eventHub = GetEventHub<NavDestinationEventHub>();
+        if (eventHub) {
+            auto ctx = navDestinationPattern->GetNavDestinationContext();
+            eventHub->FireOnReady(ctx);
+        }
         shallowBuilder->ExecuteDeepRender();
         GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
         AceType::DynamicCast<FrameNode>(contentNode_)

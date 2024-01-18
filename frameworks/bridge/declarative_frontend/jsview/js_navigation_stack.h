@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
+#include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -83,7 +84,7 @@ protected:
 private:
     std::string GetNameByIndex(int32_t index);
     JSRef<JSVal> GetParamByIndex(int32_t index) const;
-    bool CheckNavDestinationNodeInUINode(RefPtr<NG::UINode> node);
+    bool GetNavDestinationNodeInUINode(RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode);
     int32_t GetSize() const;
     static std::string ConvertParamToString(const JSRef<JSVal>& param);
     static void ParseJsObject(std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj, int32_t depthLimit);

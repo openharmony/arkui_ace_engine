@@ -167,6 +167,8 @@ void NavRouterGroupNode::AddNavDestinationToNavigation()
         if (destinationContent && navRouteMode != NavRouteMode::PUSH) {
             destinationContent->Clean();
         }
+        WeakPtr<NavigationStack> stack = navigationPattern->GetNavigationStack();
+        navDestinationPattern->SetNavigationStack(stack);
         name = navDestinationPattern->GetName();
         navigationPattern->RemoveIfNeeded(name, navDestination);
         navigationPattern->AddNavDestinationNode(name, navDestination, navRouteMode);
