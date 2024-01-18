@@ -207,7 +207,7 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
     auto contentRenderContext = contentNode->GetRenderContext();
     CHECK_NULL_VOID(contentRenderContext);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-        contentRenderContext->IsUniRenderEnabled()) {
+        contentRenderContext->IsUniRenderEnabled() && props.isSysBlurStyle) {
         BlurStyleOption styleOption;
         styleOption.blurStyle = static_cast<BlurStyle>(
             props.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
