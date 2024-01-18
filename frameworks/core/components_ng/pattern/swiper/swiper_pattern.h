@@ -798,6 +798,8 @@ private:
     void UpdateIndexOnAnimationStop();
     void UpdateIndexOnSwipePageStop();
 
+    int32_t CheckTargetIndex(int32_t targetIndex);
+
     WeakPtr<NestableScrollContainer> parent_;
     /**
      *  ============================================================

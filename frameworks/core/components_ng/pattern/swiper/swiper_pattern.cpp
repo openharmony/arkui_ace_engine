@@ -914,6 +914,31 @@ void SwiperPattern::SwipeTo(int32_t index)
     MarkDirtyNodeSelf();
 }
 
+int32_t SwiperPattern::CheckTargetIndex(int32_t targetIndex)
+{
+    if (!IsAutoLinear()) {
+        return targetIndex;
+    }
+    while (GetLoopIndex(targetIndex) != GetLoopIndex(currentIndex_)) {
+        auto currentFrameNode = GetCurrentFrameNode(GetLoopIndex(targetIndex));
+        CHECK_NULL_RETURN(currentFrameNode, targetIndex);
+        auto swiperLayoutProperty = currentFrameNode->GetLayoutProperty<LayoutProperty>();
+        CHECK_NULL_RETURN(swiperLayoutProperty, targetIndex);
+        if (swiperLayoutProperty->GetVisibility().value_or(VisibleType::VISIBLE) != VisibleType::GONE) {
+            return targetIndex;
+        }
+        if (currentIndex_ < targetIndex) {
+            ++targetIndex;
+        } else {
+            --targetIndex;
+        }
+        if (!IsLoop() && (targetIndex < 0 || targetIndex >= TotalCount())) {
+            return currentIndex_;
+        }
+    }
+    return targetIndex;
+}
+
 void SwiperPattern::ShowNext()
 {
     if (IsVisibleChildrenSizeLessThanSwiper()) {
@@ -950,7 +975,7 @@ void SwiperPattern::ShowNext()
 
     auto stepItems = IsSwipeByGroup() ? GetDisplayCount() : 1;
     if (isVisible_) {
-        targetIndex_ = currentIndex_ + stepItems;
+        targetIndex_ = CheckTargetIndex(currentIndex_ + stepItems);
         preTargetIndex_ = targetIndex_;
         MarkDirtyNodeSelf();
         auto pipeline = PipelineContext::GetCurrentContext();
@@ -1006,7 +1031,7 @@ void SwiperPattern::ShowPrevious()
 
     auto stepItems = IsSwipeByGroup() ? GetDisplayCount() : 1;
     if (isVisible_) {
-        targetIndex_ = currentIndex_ - stepItems;
+        targetIndex_ = CheckTargetIndex(currentIndex_ - stepItems);
         preTargetIndex_ = targetIndex_;
         MarkDirtyNodeSelf();
         auto pipeline = PipelineContext::GetCurrentContext();
@@ -1595,7 +1620,7 @@ void SwiperPattern::CheckMarkDirtyNodeForRenderIndicator(float additionalOffset)
 void SwiperPattern::UpdateAnimationProperty(float velocity)
 {
     if (isDragging_ || childScrolling_) {
-        targetIndex_ = ComputeNextIndexByVelocity(velocity);
+        targetIndex_ = CheckTargetIndex(ComputeNextIndexByVelocity(velocity));
         velocity_ = velocity;
     } else {
         targetIndex_ = pauseTargetIndex_;
@@ -3007,9 +3032,8 @@ void SwiperPattern::PostTranslateTask(uint32_t delayTime)
             if (!swiper->IsLoop() && swiper->GetLoopIndex(swiper->currentIndex_) + 1 > (childrenSize - displayCount)) {
                 return;
             }
-
             auto stepItems = swiper->IsSwipeByGroup() ? displayCount : 1;
-            swiper->targetIndex_ = swiper->currentIndex_ + stepItems;
+            swiper->targetIndex_ = swiper->CheckTargetIndex(swiper->currentIndex_ + stepItems);
             swiper->MarkDirtyNodeSelf();
             auto pipeline = PipelineContext::GetCurrentContext();
             if (pipeline) {
