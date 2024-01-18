@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 
-CanvasDrawFunction SwiperPaintMethod::GetForegroundDrawFunction(PaintWrapper* paintWrapper)
+CanvasDrawFunction SwiperPaintMethod::GetOverlayDrawFunction(PaintWrapper* paintWrapper)
 {
     auto paintFunc = [weak = WeakClaim(this), paintWrapper](RSCanvas& canvas) {
         auto swiper = weak.Upgrade();
