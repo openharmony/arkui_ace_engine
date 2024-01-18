@@ -1237,6 +1237,10 @@ void ScrollablePattern::HandleDragUpdate(const GestureEvent& info)
     if (!mousePressed_ || !canMultiSelect_) {
         return;
     }
+    if (info.GetInputEventType() != InputEventType::MOUSE_BUTTON) {
+        HandleDragEnd(info);
+        return;
+    }
     lastMouseMove_ = info;
     auto delta = OffsetF(mouseOffsetX, mouseOffsetY) - mousePressOffset_;
     if (Offset(delta.GetX(), delta.GetY()).GetDistance() > DEFAULT_PAN_DISTANCE.ConvertToPx()) {
