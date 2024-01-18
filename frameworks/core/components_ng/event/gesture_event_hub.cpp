@@ -701,13 +701,15 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         frameNodeOffset_ = hostPattern->GetDragUpperLeftCoordinates();
         frameNodeSize_ = SizeF(0.0f, 0.0f);
     } else {
-        frameNodeOffset_ = frameNode->GetOffsetRelativeToWindow();
         auto geometryNode = frameNode->GetGeometryNode();
         if (geometryNode) {
             frameNodeSize_ = geometryNode->GetFrameSize();
         } else {
             frameNodeSize_ = SizeF(0.0f, 0.0f);
         }
+        auto rectCenter = frameNode->GetPaintRectCenter();
+        frameNodeOffset_ = OffsetF(rectCenter.GetX() - frameNodeSize_.Width() / 2.0f,
+            rectCenter.GetY() - frameNodeSize_.Height() / 2.0f);
     }
     /*
      * Users may remove frameNode in the js callback function "onDragStart "triggered below,
