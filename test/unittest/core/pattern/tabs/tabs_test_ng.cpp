@@ -11023,4 +11023,59 @@ HWTEST_F(TabsTestNg, CustomAnimationTest002, TestSize.Level1)
 
     EXPECT_EQ(swiperPattern->IsDisableSwipe(), false);
 }
+
+/**
+ * @tc.name: SetOnContentWillChangeTest001
+ * @tc.desc: test onContentWillChange
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsTestNg, SetOnContentWillChangeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: steps1. Create tabsModel
+     */
+    TabsModelNG tabsModel;
+    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+
+    /**
+     * @tc.steps: steps2. Get frameNode and pattern.
+     * @tc.expected: tabsNode, tabsPattern, swiperNode, swiperPattern, tabBarNode, tabBarPattern not null.
+     */
+    auto tabsNode = AceType::DynamicCast<TabsNode>(ViewStackProcessor::GetInstance()->GetMainElementNode());
+    ASSERT_NE(tabsNode, nullptr);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    ASSERT_NE(tabsPattern, nullptr);
+    auto swiperNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_SWIPER_INDEX));
+    ASSERT_NE(swiperNode, nullptr);
+    auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto tabBarNode = AceType::DynamicCast<FrameNode>(tabsNode->GetChildAtIndex(TEST_TAB_BAR_INDEX));
+    ASSERT_NE(tabBarNode, nullptr);
+    auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
+    ASSERT_NE(tabBarPattern, nullptr);
+
+    /**
+     * @tc.steps: step3. Set onContentWillChange callback.
+     * @tc.expected: tabsPattern->GetInterceptStatus() is true.
+     */
+    auto callback = [](int32_t currentIndex, int32_t comingIndex) -> bool { return true; };
+    tabsModel.SetOnContentWillChange(std::move(callback));
+    EXPECT_EQ(tabsPattern->GetInterceptStatus(), true);
+
+    /**
+     * @tc.steps: step4. Execute intercept callback.
+     * @tc.expected:
+     *     tabsPattern->OnContentWillChange(CURRENT_INDEX, BEGIN_INDEX) return true.
+     *     swiperPattern->ContentWillChange(BEGIN_INDEX) return true.
+     *     swiperPattern->ContentWillChange(CURRENT_INDEX, BEGIN_INDEX) return true.
+     *     tabBarPattern->ContentWillChange(BEGIN_INDEX) return true.
+     *     tabBarPattern->ContentWillChange(CURRENT_INDEX, BEGIN_INDEX) return true.
+     */
+    auto ret = tabsPattern->OnContentWillChange(CURRENT_INDEX, BEGIN_INDEX);
+    EXPECT_EQ(ret.value(), true);
+    EXPECT_EQ(swiperPattern->ContentWillChange(BEGIN_INDEX), true);
+    EXPECT_EQ(swiperPattern->ContentWillChange(CURRENT_INDEX, BEGIN_INDEX), true);
+    EXPECT_EQ(tabBarPattern->ContentWillChange(BEGIN_INDEX), true);
+    EXPECT_EQ(tabBarPattern->ContentWillChange(CURRENT_INDEX, BEGIN_INDEX), true);
+}
 } // namespace OHOS::Ace::NG

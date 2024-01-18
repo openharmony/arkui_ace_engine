@@ -149,6 +149,14 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     }
     auto tabsLayoutProperty = tabsNode->GetLayoutProperty<TabsLayoutProperty>();
     auto preIndex = tabsLayoutProperty->GetIndexValue(0);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabsPattern);
+    if (tabsPattern->GetInterceptStatus()) {
+        auto ret = tabsPattern->OnContentWillChange(preIndex, index);
+        if (ret.has_value() && !ret.value()) {
+            return;
+        }
+    }
     if ((index != preIndex) && (index >= 0)) {
         SetIndex(index);
         auto tabBarPattern = tabBarNode->GetPattern<TabBarPattern>();
@@ -897,5 +905,15 @@ void TabsModelNG::SetClipEdge(FrameNode* frameNode, bool clipEdge)
         CHECK_NULL_VOID(renderContext);
         renderContext->UpdateClipEdge(clipEdge);
     }
+}
+
+void TabsModelNG::SetOnContentWillChange(std::function<bool(int32_t, int32_t)>&& callback)
+{
+    auto tabsNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(tabsNode);
+    auto tabPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_VOID(tabPattern);
+    tabPattern->SetInterceptStatus(true);
+    tabPattern->SetOnContentWillChange(std::move(callback));
 }
 } // namespace OHOS::Ace::NG

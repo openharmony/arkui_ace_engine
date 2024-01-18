@@ -581,6 +581,14 @@ public:
         tabsPaddingAndBorder_ = tabsPaddingAndBorder;
     }
 
+    bool ContentWillChange(int32_t comingIndex);
+    bool ContentWillChange(int32_t currentIndex, int32_t comingIndex);
+    bool CheckSwiperPanEvent(const GestureEvent& info);
+    void InitIndexCanChangeMap()
+    {
+        indexCanChangeMap_.clear();
+    }
+
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -591,6 +599,8 @@ private:
 
     // Init pan recognizer to move items when drag update, play translate animation when drag end.
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void AddPanEvent(const RefPtr<GestureEventHub>& gestureHub, GestureEventFunc && actionStart,
+        GestureEventFunc && actionUpdate, GestureEventFunc && actionEnd, GestureEventNoParameter && actionCancel);
 
     // Init touch event, stop animation when touch down.
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
@@ -918,6 +928,7 @@ private:
     std::optional<int32_t> customAnimationToIndex_;
     RefPtr<TabContentTransitionProxy> currentProxyInAnimation_;
     PaddingPropertyF tabsPaddingAndBorder_;
+    std::map<int32_t, bool> indexCanChangeMap_;
 };
 } // namespace OHOS::Ace::NG
 

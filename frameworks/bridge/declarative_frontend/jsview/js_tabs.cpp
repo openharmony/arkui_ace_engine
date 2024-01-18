@@ -560,6 +560,26 @@ void JSTabs::SetCustomContentTransition(const JSCallbackInfo& info)
     TabsModel::GetInstance()->SetOnCustomAnimation(std::move(onCustomAnimation));
 }
 
+void JSTabs::SetOnContentWillChange(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+
+    auto handler = AceType::MakeRefPtr<JsTabsFunction>(JSRef<JSFunc>::Cast(info[0]));
+    auto callback = [execCtx = info.GetExecutionContext(), func = std::move(handler)]
+        (int32_t currentIndex, int32_t comingIndex) -> bool {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx, true);
+        ACE_SCORING_EVENT("Tabs.onContentWillChange");
+        auto ret = func->Execute(currentIndex, comingIndex);
+        if (!ret->IsBoolean()) {
+            return true;
+        }
+        return ret->ToBoolean();
+    };
+    TabsModel::GetInstance()->SetOnContentWillChange(std::move(callback));
+}
+
 void JSTabs::JSBind(BindingTarget globalObj)
 {
     JsTabContentTransitionProxy::JSBind(globalObj);
@@ -595,6 +615,7 @@ void JSTabs::JSBind(BindingTarget globalObj)
     JSClass<JSTabs>::StaticMethod("clip", &JSTabs::SetClip);
     JSClass<JSTabs>::StaticMethod("barGridAlign", &JSTabs::SetBarGridAlign);
     JSClass<JSTabs>::StaticMethod("customContentTransition", &JSTabs::SetCustomContentTransition);
+    JSClass<JSTabs>::StaticMethod("onContentWillChange", &JSTabs::SetOnContentWillChange);
 
     JSClass<JSTabs>::InheritAndBind<JSContainerBase>(globalObj);
 }

@@ -40,6 +40,8 @@
 #include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_arrow_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_pattern.h"
+#include "core/components_ng/pattern/tabs/tabs_node.h"
+#include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/syntax/for_each_node.h"
@@ -62,6 +64,7 @@ constexpr Dimension SWIPER_GUTTER = 16.0_vp;
 constexpr float PX_EPSILON = 0.01f;
 constexpr float FADE_DURATION = 500.0f;
 constexpr float SPEING_DURATION = 600.0f;
+constexpr int32_t INDEX_DIFF_TWO = 2;
 const std::string SWIPER_DRAG_SCENE = "swiper_drag_scene";
 const std::string FADE_PROPERTY_NAME = "fade";
 const std::string SPRING_PROPERTY_NAME = "spring";
@@ -868,6 +871,9 @@ void SwiperPattern::SwipeTo(int32_t index)
 {
     auto targetIndex = IsLoop() ? index : (index < 0 || index > (TotalCount() - 1)) ? 0 : index;
     targetIndex = IsLoop() ? targetIndex : std::clamp(targetIndex, 0, TotalCount() - GetDisplayCount());
+    if (!ContentWillChange(targetIndex)) {
+        return;
+    }
 
     if (IsUseCustomAnimation()) {
         OnCustomContentTransition(targetIndex);
@@ -939,6 +945,9 @@ void SwiperPattern::ShowNext()
     if (preIndex) {
         isUserFinish_ = false;
         FinishAnimation();
+        if (!ContentWillChange(currentIndex_ + 1)) {
+            return;
+        }
     }
     moveDirection_ = true;
 
@@ -991,6 +1000,9 @@ void SwiperPattern::ShowPrevious()
     if (preIndex) {
         isUserFinish_ = false;
         FinishAnimation();
+        if (!ContentWillChange(currentIndex_ - 1)) {
+            return;
+        }
     }
     moveDirection_ = false;
 
@@ -1187,6 +1199,7 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
+        pattern->InitIndexCanChangeMap();
         if (pattern) {
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
                 return;
@@ -1202,6 +1215,9 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
+        if (!pattern->CheckSwiperPanEvent(info)) {
+            return;
+        }
         if (pattern) {
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
                 if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
@@ -1217,6 +1233,10 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
+        if (!pattern->CheckSwiperPanEvent(info)) {
+            pattern->HandleDragEnd(0.0);
+            return;
+        }
         if (pattern) {
             if (info.GetInputEventType() == InputEventType::AXIS && info.GetSourceTool() == SourceTool::MOUSE) {
                 return;
@@ -1234,6 +1254,13 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         }
     };
 
+    AddPanEvent(gestureHub, std::move(actionStartTask), std::move(actionUpdateTask),
+        std::move(actionEndTask), std::move(actionCancelTask));
+}
+
+void SwiperPattern::AddPanEvent(const RefPtr<GestureEventHub>& gestureHub, GestureEventFunc&& actionStart,
+    GestureEventFunc&& actionUpdate, GestureEventFunc&& actionEnd, GestureEventNoParameter&& actionCancel)
+{
     if (GetDirection() == Axis::VERTICAL) {
         panDirection_.type = PanDirection::VERTICAL;
     } else {
@@ -1244,7 +1271,7 @@ void SwiperPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
     }
 
     panEvent_ = MakeRefPtr<PanEvent>(
-        std::move(actionStartTask), std::move(actionUpdateTask), std::move(actionEndTask), std::move(actionCancelTask));
+        std::move(actionStart), std::move(actionUpdate), std::move(actionEnd), std::move(actionCancel));
     gestureHub->AddPanEvent(panEvent_, panDirection_, 1, DEFAULT_PAN_DISTANCE);
 }
 
@@ -4084,5 +4111,44 @@ void SwiperPattern::ProcessDelta(float& delta, float mainSize, float deltaSum)
         delta = GreatNotEqual((deltaSum + delta), 0) ? (mainSize - deltaSum) :
             (-deltaSum - mainSize);
     }
+}
+
+bool SwiperPattern::ContentWillChange(int32_t comingIndex)
+{
+    return ContentWillChange(GetCurrentIndex(), comingIndex);
+}
+
+bool SwiperPattern::ContentWillChange(int32_t currentIndex, int32_t comingIndex)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, true);
+    auto tabsNode = AceType::DynamicCast<TabsNode>(host->GetParent());
+    CHECK_NULL_RETURN(tabsNode, true);
+    auto tabsPattern = tabsNode->GetPattern<TabsPattern>();
+    CHECK_NULL_RETURN(tabsPattern, true);
+    if (tabsPattern->GetInterceptStatus()) {
+        auto ret = tabsPattern->OnContentWillChange(currentIndex, comingIndex);
+        return ret.has_value() ? ret.value() : true;
+    }
+    return true;
+}
+
+bool SwiperPattern::CheckSwiperPanEvent(const GestureEvent& info)
+{
+    int32_t currentIndex = GetCurrentIndex();
+    int32_t comingIndex = currentIndex;
+    if (GreatNotEqual(info.GetMainDelta(), 0.0)) {
+        comingIndex = comingIndex < 1 ? 0 : comingIndex - 1;
+    } else if (LessNotEqual(info.GetMainDelta(), 0.0)) {
+        comingIndex = comingIndex > TotalCount() - INDEX_DIFF_TWO ? TotalCount() - 1 : comingIndex + 1;
+    }
+
+    auto iter = indexCanChangeMap_.find(comingIndex);
+    if (iter != indexCanChangeMap_.end()) {
+        return iter->second;
+    }
+    bool ret = ContentWillChange(currentIndex, comingIndex);
+    indexCanChangeMap_.emplace(comingIndex, ret);
+    return ret;
 }
 } // namespace OHOS::Ace::NG
