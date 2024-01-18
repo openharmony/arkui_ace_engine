@@ -392,7 +392,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             CHECK_NULL_VOID(taskExecutor);
             // animation finish event should be posted to UI thread
             auto onFinishCallback = [weakPreNode, weakPreTitle, weakNavigation, weakPreBackIcon]() {
-                TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation end");
+                TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation pop animation end");
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
                 auto navigation = weakNavigation.Upgrade();
                 if (navigation) {
@@ -455,7 +455,7 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
         callback);
     AnimationUtils::Animate(option, [preNode, preTitleNode, preFrameSize, curNode, curTitleNode]() {
         PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
-        TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation start");
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation pop animation start");
         /* preNode */
         preNode->GetRenderContext()->ClipWithRRect(
             RectF(preFrameSize.Width() * HALF, 0.0f, preFrameSize.Width(), preFrameSize.Height()),
@@ -532,6 +532,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
             // animation finish event should be posted to UI thread
             auto onFinishCallback = [weakPreNode, weakPreTitle, weakCurNode, weakNavigation, isNavBar] {
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::ABILITY_OR_PAGE_SWITCH, true);
+                TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation push animation end");
                 auto navigation = weakNavigation.Upgrade();
                 CHECK_NULL_VOID(navigation);
                 auto preNode = weakPreNode.Upgrade();
@@ -599,7 +600,7 @@ void NavigationGroupNode::TransitionWithPush(const RefPtr<FrameNode>& preNode, c
     AnimationUtils::Animate(option, [preNode, preTitleNode, curNode, curTitleNode, preFrameSize, curFrameSize,
         mode]() {
         PerfMonitor::GetPerfMonitor()->Start(PerfConstants::ABILITY_OR_PAGE_SWITCH, PerfActionType::LAST_UP, "");
-        TAG_LOGD(AceLogTag::ACE_NAVIGATION, "navigation animation start");
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "navigation push animation start");
         // preNode
         preNode->GetRenderContext()->UpdateTranslateInXY({ -preFrameSize.Width() * PARENT_PAGE_OFFSET, 0.0f });
         preTitleNode->GetRenderContext()->UpdateTranslateInXY({ preFrameSize.Width() * PARENT_TITLE_OFFSET, 0.0f });
