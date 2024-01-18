@@ -381,6 +381,16 @@ void EventManager::FlushTouchEventsEnd(const std::list<TouchEvent>& touchEvents)
     }
 }
 
+void EventManager::PostEventFlushTouchEventEnd(const TouchEvent& touchEvent)
+{
+    const auto result = postEventTouchTestResults_.find(touchEvent.id);
+    if (result != postEventTouchTestResults_.end()) {
+        for (auto entry = result->second.rbegin(); entry != result->second.rend(); ++entry) {
+            (*entry)->OnFlushTouchEventsEnd();
+        }
+    }
+}
+
 void EventManager::CheckTouchEvent(TouchEvent touchEvent)
 {
     auto touchEventFindResult = downFingerIds_.find(touchEvent.id);
