@@ -60,7 +60,6 @@ private:
     static NG::OffsetF CalculateStackAlignment(
         const NG::SizeF& parentSize, const NG::SizeF& childSize, const Alignment& alignment);
     void AdjustNodeTree(const RefPtr<FolderStackGroupNode>& hostNode);
-    void PerformLayout(const RefPtr<FolderStackGroupNode>& hostNode, const Alignment align);
     bool IsIntoFolderStack(SizeF& frameSize, const RefPtr<FolderStackLayoutProperty>& folderStackLayoutProperty,
         LayoutWrapper* layoutWrapper);
     ACE_DISALLOW_COPY_AND_MOVE(FolderStackLayoutAlgorithm);

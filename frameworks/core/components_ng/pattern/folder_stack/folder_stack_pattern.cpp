@@ -22,11 +22,13 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/folder_stack/control_parts_stack_node.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_event_hub.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_group_node.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_layout_algorithm.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_layout_property.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_pattern.h"
+#include "core/components_ng/pattern/folder_stack/hover_stack_node.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/pipeline/pipeline_base.h"
@@ -185,6 +187,7 @@ RefPtr<RenderContext> FolderStackPattern::GetRenderContext()
 void FolderStackPattern::BeforeCreateLayoutWrapper()
 {
     Pattern::BeforeCreateLayoutWrapper();
+    UpdateChildAlignment();
     SetAutoRotate();
 }
 
@@ -222,6 +225,29 @@ void FolderStackPattern::RestoreScreenState()
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
         container->SetOrientation(lastOrientation_);
+    }
+}
+
+void FolderStackPattern::UpdateChildAlignment()
+{
+    auto hostNode = AceType::DynamicCast<FolderStackGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto folderStackLayoutProperty = GetLayoutProperty<FolderStackLayoutProperty>();
+    CHECK_NULL_VOID(folderStackLayoutProperty);
+    auto align = Alignment::CENTER;
+    if (folderStackLayoutProperty->GetPositionProperty()) {
+        align = folderStackLayoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER);
+    }
+    auto controlPartsStackNode = AceType::DynamicCast<ControlPartsStackNode>(hostNode->GetControlPartsStackNode());
+    if (controlPartsStackNode) {
+        auto controlPartsLayoutProperty =
+            AceType::DynamicCast<LayoutProperty>(controlPartsStackNode->GetLayoutProperty());
+        controlPartsLayoutProperty->UpdateAlignment(align);
+    }
+    auto hoverStackNode = AceType::DynamicCast<HoverStackNode>(hostNode->GetHoverNode());
+    if (hoverStackNode) {
+        auto hoverLayoutProperty = AceType::DynamicCast<LayoutProperty>(hoverStackNode->GetLayoutProperty());
+        hoverLayoutProperty->UpdateAlignment(align);
     }
 }
 } // namespace OHOS::Ace::NG

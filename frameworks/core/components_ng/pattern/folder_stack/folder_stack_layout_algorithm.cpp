@@ -52,7 +52,6 @@ void FolderStackLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (folderStackLayoutProperty->GetPositionProperty()) {
         align = folderStackLayoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER);
     }
-    PerformLayout(hostNode, align);
     if (!isIntoFolderStack_) {
         auto childLayoutProperty = AceType::DynamicCast<StackLayoutProperty>(layoutWrapper->GetLayoutProperty());
         if (childLayoutProperty->GetPositionProperty()) {
@@ -121,7 +120,6 @@ void FolderStackLayoutAlgorithm::LayoutControlPartsStack(LayoutWrapper* layoutWr
     auto geometryNode = controlPartsStackWrapper->GetGeometryNode();
     auto controlPartsStackRect = GetControlPartsStackRect();
     geometryNode->SetMarginFrameOffset(controlPartsStackRect);
-    
     controlPartsStackWrapper->Layout();
 }
 
@@ -192,7 +190,6 @@ void FolderStackLayoutAlgorithm::MeasureControlPartsStack(LayoutWrapper* layoutW
     CHECK_NULL_VOID(controlPartsWrapper);
     auto constraint = foldStackLayoutProperty->CreateChildConstraint();
     constraint.selfIdealSize = OptionalSizeF(size.Width(), preControlPartsStackHeight_);
-    
     const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorder();
     PaddingProperty controlPartsPadding;
     controlPartsPadding.left = CalcLength(padding.left.value_or(0));
@@ -224,7 +221,6 @@ void FolderStackLayoutAlgorithm::RangeCalculation(const RefPtr<FolderStackGroupN
         creaseY = static_cast<int32_t>(foldCrease.Bottom() - foldCrease.Height());
         creaseHeight = static_cast<int32_t>(foldCrease.Height());
     }
-    
     preHoverStackHeight_ = static_cast<float>(creaseY - length);
     preControlPartsStackHeight_ = static_cast<float>(size.Height() - creaseHeight - preHoverStackHeight_);
     controlPartsStackRect_ = OffsetF(0.0f, creaseY - length + creaseHeight);
@@ -287,21 +283,6 @@ NG::OffsetF FolderStackLayoutAlgorithm::CalculateStackAlignment(
     offset.SetX((OFFSET_VALUE + alignment.GetHorizontal()) * (parentSize.Width() - childSize.Width()) / OFFSET_DIVISOR);
     offset.SetY((OFFSET_VALUE + alignment.GetVertical()) * (parentSize.Height() - childSize.Height()) / OFFSET_DIVISOR);
     return offset;
-}
-
-void FolderStackLayoutAlgorithm::PerformLayout(const RefPtr<FolderStackGroupNode>& hostNode, const Alignment align)
-{
-    auto controlPartsStackNode = AceType::DynamicCast<ControlPartsStackNode>(hostNode->GetControlPartsStackNode());
-    if (controlPartsStackNode) {
-        auto controlPartsLayoutProperty =
-            AceType::DynamicCast<LayoutProperty>(controlPartsStackNode->GetLayoutProperty());
-        controlPartsLayoutProperty->UpdateAlignment(align);
-    }
-    auto hoverStackNode = AceType::DynamicCast<HoverStackNode>(hostNode->GetHoverNode());
-    if (hoverStackNode) {
-        auto hoverLayoutProperty = AceType::DynamicCast<LayoutProperty>(hoverStackNode->GetLayoutProperty());
-        hoverLayoutProperty->UpdateAlignment(align);
-    }
 }
 
 bool FolderStackLayoutAlgorithm::IsIntoFolderStack(
