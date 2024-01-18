@@ -159,7 +159,7 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, A
             eventHandle = scrollNodeAsyncEventHandlers[subKind];
             break;
         }
-        case ARKUI_TEXTINPUT: {
+        case ARKUI_TEXT_INPUT: {
             // textinput event type.
             if (subKind >= sizeof(textInputNodeAsyncEventHandlers) / sizeof(ComponentAsyncEventHandler)) {
                 TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);

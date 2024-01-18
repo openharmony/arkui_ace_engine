@@ -458,8 +458,8 @@ enum ArkUINodeType {
     ARKUI_IMAGE_SPAN,
     ARKUI_IMAGE,
     ARKUI_TOGGLE,
-    ARKUI_LOADINGPROGRESS,
-    ARKUI_TEXTINPUT,
+    ARKUI_LOADING_PROGRESS,
+    ARKUI_TEXT_INPUT,
     ARKUI_STACK,
     ARKUI_SCROLL,
     ARKUI_LIST,
@@ -505,10 +505,10 @@ enum ArkUIAsyncEventKind {
     ON_CLICK = 3,
     ON_HOVER = 4,
     ON_BLUR = 5,
-    ON_KEYEVENT = 6,
+    ON_KEY_EVENT = 6,
     ON_MOUSE = 7,
     ON_AREA_CHANGE = 8,
-    ON_VISIBLEAREA_CHANGE = 9,
+    ON_VISIBLE_AREA_CHANGE = 9,
     ON_GESTURE = 10,
     ON_FOCUS = 11,
 
@@ -520,9 +520,9 @@ enum ArkUIAsyncEventKind {
 
     ON_TOGGLE_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TOGGLE,
 
-    ON_TEXTINPUT_EDIT_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXTINPUT,
-    ON_TEXTINPUT_SUBMIT,
-    ON_TEXTINPUT_CHANGE,
+    ON_TEXT_INPUT_EDIT_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXT_INPUT,
+    ON_TEXT_INPUT_SUBMIT,
+    ON_TEXT_INPUT_CHANGE,
 
     ON_TEXTAREA_EDIT_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_TEXTAREA,
     ON_TEXTAREA_SUBMIT,
@@ -548,13 +548,13 @@ enum ArkUIAsyncEventKind {
     ON_SLIDER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_SLIDER,
     ON_CANVAS_READY = ARKUI_MAX_EVENT_NUM * ARKUI_CANVAS,
 
-    ON_RADIO_CNANGE = ARKUI_MAX_EVENT_NUM * ARKUI_RADIO,
+    ON_RADIO_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_RADIO,
     
     ON_GRID_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_GRID,
     ON_GRID_START,
     ON_GRID_STOP,
 
-    ON_SIDEBAR_CNANGE = ARKUI_MAX_EVENT_NUM * ARKUI_SIDEBAR,
+    ON_SIDEBAR_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_SIDEBAR,
 
     ON_XCOMPONENT_LOAD = ARKUI_MAX_EVENT_NUM * ARKUI_XCOMPONENT,
     ON_XCOMPONENT_DESTROY,
@@ -1402,7 +1402,7 @@ struct ArkUIScrollerModifier {
     ArkUINodeHandle (*getScrollerProxy)(ArkUINodeHandle node);
     void (*setScrollToIndex)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*scrollBy)(ArkUINodeHandle node, ArkUI_Float32* values, ArkUI_Int32* units);
-    void (*getCurrentOffset)(ArkUINodeHandle controlle, ArkUI_Float32* out);
+    void (*getCurrentOffset)(ArkUINodeHandle controller, ArkUI_Float32* out);
 };
 
 struct ArkUITabsModifier {
@@ -2403,7 +2403,7 @@ struct ArkUINodeModifiers {
     const ArkUINavDestinationModifier* (*getNavDestinationModifier)();
     const ArkUIGridModifier* (*getGridModifier)();
     const ArkUIGridColModifier* (*getGridColModifier)();
-    const ArkUIGridRowModifier* (*getGridRowModifArkUIBasicNodeier)();
+    const ArkUIGridRowModifier* (*getGridRowModifierArkUIBasicNode)();
     const ArkUIPanelModifier* (*getPanelModifier)();
     const ArkUITextAreaModifier* (*getTextAreaModifier)();
     const ArkUINavigationModifier* (*getNavigationModifier)();
