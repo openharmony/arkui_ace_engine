@@ -197,6 +197,14 @@ public:
 
     virtual void UpdateTransition(const TransitionOptions& options) {}
     virtual void UpdateChainedTransition(const RefPtr<NG::ChainedTransitionEffect>& effect) {}
+    const RefPtr<OneCenterTransitionOptionType>& GetOneCenterTransitionOption()
+    {
+        return oneCenterTransition_;
+    }
+    void UpdateOneCenterTransitionOption(const RefPtr<OneCenterTransitionOptionType>& value)
+    {
+        oneCenterTransition_ = value;
+    }
     virtual void OnNodeDisappear(bool recursive) {}
     virtual void OnNodeAppear(bool recursive) {}
     virtual bool HasTransitionOutAnimation() const
@@ -669,7 +677,7 @@ private:
     friend class ViewAbstract;
     std::function<void()> requestFrame_;
     WeakPtr<FrameNode> host_;
-
+    RefPtr<OneCenterTransitionOptionType> oneCenterTransition_;
     ACE_DISALLOW_COPY_AND_MOVE(RenderContext);
 };
 } // namespace OHOS::Ace::NG
