@@ -32,7 +32,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-    constexpr char LIBFFRT_LIB64_PATH[] = "/system/lib64/ndk/libffrt.z.so";
+constexpr char LIBFFRT_LIB64_PATH[] = "/system/lib64/ndk/libffrt.z.so";
 }
 uint64_t UITaskScheduler::frameId_ = 0;
 
