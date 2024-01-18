@@ -14,6 +14,7 @@
  */
 #include "core/interfaces/native/node/node_list_modifier.h"
 
+#include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -165,6 +166,13 @@ void ResetSticky(ArkUINodeHandle node)
     ListModelNG::SetSticky(frameNode, DEFAULT_STICKY_STYLE);
 }
 
+void SetListSpace(ArkUINodeHandle node, ArkUI_Float64 space)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetListSpace(frameNode, Dimension(space, DimensionUnit::VP));
+}
+
 void SetListEdgeEffect(ArkUINodeHandle node, int32_t edgeEffect, ArkUI_Bool alwaysEnabled)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -242,6 +250,22 @@ void ResetListScrollBar(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ListModelNG::SetListScrollBar(frameNode, DEFAULT_SCROLL_BAR);
+}
+
+void SetListScrollBarWidth(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    CHECK_NULL_VOID(value);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetListScrollBarWidth(frameNode, value);
+}
+
+void SetListScrollBarColor(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    CHECK_NULL_VOID(value);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetListScrollBarColor(frameNode, value);
 }
 
 void SetAlignListItem(ArkUINodeHandle node, int32_t listItemAlign)
@@ -348,8 +372,10 @@ const ArkUIListModifier* GetListModifier()
         ResetCachedCount, SetEnableScrollInteraction, ResetEnableScrollInteraction, SetSticky, ResetSticky,
         SetListEdgeEffect, ResetListEdgeEffect, SetListDirection, ResetListDirection, SetListFriction,
         ResetListFriction, SetListNestedScroll, ResetListNestedScroll, SetListScrollBar, ResetListScrollBar,
-        SetAlignListItem, ResetAlignListItem, SetScrollSnapAlign, ResetScrollSnapAlign, ListSetDivider,
-        ListResetDivider, SetChainAnimationOptions, ResetChainAnimationOptions };
+        SetListScrollBarWidth, SetListScrollBarColor, SetAlignListItem, ResetAlignListItem, SetScrollSnapAlign,
+        ResetScrollSnapAlign, ListSetDivider, ListResetDivider, SetChainAnimationOptions, ResetChainAnimationOptions,
+        SetListSpace
+    };
     return &modifier;
 }
 }

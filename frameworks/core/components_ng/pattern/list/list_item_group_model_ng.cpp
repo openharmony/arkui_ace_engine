@@ -38,6 +38,13 @@ void ListItemGroupModelNG::Create(V2::ListItemGroupStyle listItemGroupStyle)
     stack->Push(frameNode);
 }
 
+RefPtr<FrameNode> ListItemGroupModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::LIST_ITEM_GROUP_ETS_TAG, nodeId,
+        AceType::MakeRefPtr<ListItemGroupPattern>(nullptr, V2::ListItemGroupStyle::NONE));
+    return frameNode;
+}
+
 void ListItemGroupModelNG::SetSpace(const Dimension& space)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Space, space);
@@ -84,4 +91,23 @@ void ListItemGroupModelNG::SetDivider(FrameNode* frameNode, const V2::ItemDivide
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemGroupLayoutProperty, Divider, divider, frameNode);
 }
+
+void ListItemGroupModelNG::SetHeader(FrameNode* frameNode, FrameNode* headerNode)
+{
+    CHECK_NULL_VOID(headerNode);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddHeader(AceType::Claim<UINode>(headerNode));
+}
+
+void ListItemGroupModelNG::SetFooter(FrameNode* frameNode, FrameNode* footerNode)
+{
+    CHECK_NULL_VOID(footerNode);
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AddFooter(AceType::Claim<UINode>(footerNode));
+}
+
 } // namespace OHOS::Ace::NG

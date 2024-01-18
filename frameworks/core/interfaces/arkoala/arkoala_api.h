@@ -487,6 +487,7 @@ enum ArkUINodeType {
     ARKUI_COMPONENT_ROOT,
     ARKUI_CUSTOM,
     ARKUI_CUSTOM_CONTAINER,
+    ARKUI_LIST_ITEM_GROUP,
 };
 
 enum ArkUIEventCategory {
@@ -1205,6 +1206,8 @@ struct ArkUIListModifier {
     void (*resetListNestedScroll)(ArkUINodeHandle node);
     void (*setListScrollBar)(ArkUINodeHandle node, ArkUI_Int32 barState);
     void (*resetListScrollBar)(ArkUINodeHandle node);
+    void (*setListScrollBarWidth)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*setListScrollBarColor)(ArkUINodeHandle node, ArkUI_CharPtr value);
     void (*setAlignListItem)(ArkUINodeHandle node, ArkUI_Int32 listItemAlign);
     void (*resetAlignListItem)(ArkUINodeHandle node);
     void (*setScrollSnapAlign)(ArkUINodeHandle node, ArkUI_Int32 scrollSnapAlign);
@@ -1215,6 +1218,7 @@ struct ArkUIListModifier {
     void (*setChainAnimationOptions)(
         ArkUINodeHandle node, const struct ArkUIChainAnimationOptionsType* chainAnimationOptions);
     void (*resetChainAnimationOptions)(ArkUINodeHandle node);
+    void (*setListSpace)(ArkUINodeHandle node, ArkUI_Float64 space);
 };
 
 struct ArkUIListItemGroupModifier {
@@ -1222,6 +1226,8 @@ struct ArkUIListItemGroupModifier {
         ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float64* values,
         const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*listItemGroupResetDivider)(ArkUINodeHandle node);
+    void (*listItemGroupSetHeader)(ArkUINodeHandle node, ArkUINodeHandle header);
+    void (*listItemGroupSetFooter)(ArkUINodeHandle node, ArkUINodeHandle footer);
 };
 
 struct ArkUISwiperModifier {

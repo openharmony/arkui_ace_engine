@@ -92,6 +92,8 @@ typedef enum {
     ARKUI_NODE_REFRESH,
     /** XComponent */
     ARKUI_NODE_XCOMPONENT,
+    /** 列表item分组 */
+    ARKUI_NODE_LIST_ITEM_GROUP,
 } ArkUI_NodeType;
 
 #define MAX_NODE_SCOPE_NUM 1000
@@ -1004,7 +1006,7 @@ typedef enum {
     /**
      * @brief 通过<b>setAttribute</b>方法设置滚动条的宽度.
      *
-     * @note 入参 srcollBarWidth:double(单位vp) , 格式字符串，如 "2"
+     * @note 入参滚动条宽度，数字类型，单位vp，格式字符串，如 "2"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_BAR_WIDTH, "2");
      * @endcode
@@ -1014,7 +1016,7 @@ typedef enum {
     /**
      * @brief 通过<b>setAttribute</b>方法设置滚动条的颜色.
      *
-     * @note 入参color: #argb类型，格式字符串，如"#ffffffff"
+     * @note 入参滚动条颜色，#argb类型，格式字符串，如"#ffffffff"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_BAR_COLOR, "#ffffffff");
      * @endcode
@@ -1129,25 +1131,35 @@ typedef enum {
     NODE_SCROLL_EDGE,
 
     /**
-     * @brief 通过<b>setAttribute</b>方法设置列表中ListItem/ListItemGroup的预加载数量，只在LazyForEach中生效.
+     * @brief 通过<b>setAttribute</b>方法设置列表滚动条状态。
      *
-     * @note 入参cachedCount: int, 格式字符串，如"5"
-     * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_CACHED_COUNT, "5");
-     * @endcode
-     *
-     */
-    NODE_LIST_CACHED_COUNT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LIST,
-    /**
-     * @brief 通过<b>setAttribute</b>方法设置滚动条状态.
-     *
-     * @note 入参 displayMode:String("off","auto","on") ，格式字符串，如 "on"
+     * @note 入参滚动条状态，类型字符串枚举("off","auto","on") ，格式字符串，如 "on" 。
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_BAR, "on");
      * @endcode
      *
      */
     NODE_LIST_SCROLL_BAR = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LIST,
+    /**
+     * @brief 通过<b>setAttribute</b>方法设置列表滚动条的宽度。
+     *
+     * @note 入参滚动条宽度，数字类型，单位vp，格式字符串，如 "2" 。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_SCROLL_BAR_WIDTH, "2");
+     * @endcode
+     *
+     */
+    NODE_LIST_SCROLL_BAR_WIDTH,
+    /**
+     * @brief 通过<b>setAttribute</b>方法设置列表滚动条的颜色。
+     *
+     * @note 入参滚动条颜色，#argb类型，格式字符串，如 "#ffffffff" 。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_SCROLL_BAR_COLOR, "#ffffffff");
+     * @endcode
+     *
+     */
+    NODE_LIST_SCROLL_BAR_COLOR,
     /**
      * @brief 通过<b>setAttribute</b>方法设置List组件排列方向.
      *
@@ -1159,9 +1171,9 @@ typedef enum {
      */
     NODE_LIST_LIST_DIRECTION,
     /**
-     * @brief 通过<b>setAttribute</b>方法配合ListItemGroup组件使用，设置ListItemGroup中header和footer是否要吸顶或吸底.
+     * @brief 通过<b>setAttribute</b>方法配合ListItemGroup组件使用，设置 ListItemGroup 中 header 和 footer 是否要吸顶或吸底.
      *
-     * @note 入参 stickyStyle:String("none","header","footer","both")，格式字符串，如 "header"
+     * @note 入参是否要吸顶或吸底，类型字符串枚举("none","header","footer","both")，格式字符串，如 "header"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_STICKY, "header");
      * @endcode
@@ -1192,15 +1204,25 @@ typedef enum {
     NODE_LIST_ENABLE_SCROLL_INTERACTION,
     /**
      * @brief
-     * 通过<b>setAttribute</b>方法设置摩擦系数，手动划动滚动区域时生效，只对惯性滚动过程有影响，对惯性滚动过程中的链式效果有间接影响.
+     * 通过<b>setAttribute</b>方法设置摩擦系数，手动划动滚动区域时生效，只对惯性滚动过程有影响，对惯性滚动过程中的链式效果有间接影响。
      *
-     * @note 入参fiction: float, 格式为字符串，如"0.6"
+     * @note 入参摩擦系数，数字类型，单位vp，格式为字符串，如 "0.6"。
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_FRICTION, "0.6");
      * @endcode
      *
      */
     NODE_LIST_FRICTION,
+    /**
+     * @brief 通过<b>setAttribute</b>方法设置列表项间距。
+     *
+     * @note 入参列表项间距，数字类型，单位vp，格式字符串，如 "20" 。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_LIST_SPACE, "20");
+     * @endcode
+     *
+     */
+    NODE_LIST_SPACE,
 
     /**
      * @brief 通过<b>setAttribute</b>方法设置是否开启循环.
@@ -1426,6 +1448,47 @@ typedef enum {
      * @endcode
      */
     NODE_XCOMPONENT_SURFACE_SIZE,
+
+    /**
+     * @brief 通过{@link setAttribute}方法设置 ListItemGroup 头部组件。
+     *
+     * @note 入参头部组件地址，地址类型，格式字符串, 如
+     *       auto header = nodeAPI->createNode(ARKUI_NODE_TEXT);
+     *       std::to_string(reinterpret_cast<unsigned long long>(header)).c_str() 。
+     * @code {.c}
+     * auto header = nodeAPI->createNode(ARKUI_NODE_TEXT);
+     * basicNodeApi->setAttribute(nodeHandle, NODE_XCOMPONENT_SURFACE_SIZE,
+     *     std::to_string(reinterpret_cast<unsigned long long>(header)).c_str());
+     * @endcode
+     */
+    NODE_LIST_ITEM_GROUP_SET_HEADER = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LIST_ITEM_GROUP,
+    /**
+     * @brief 通过{@link setAttribute}方法设置 ListItemGroup 尾部组件。
+     *
+     * @note 入参头部组件地址，地址类型，格式字符串, 如
+     *       auto footer = nodeAPI->createNode(ARKUI_NODE_TEXT);
+     *       std::to_string(reinterpret_cast<unsigned long long>(footer)).c_str() 。
+     * @code {.c}
+     * auto footer = nodeAPI->createNode(ARKUI_NODE_TEXT);
+     * basicNodeApi->setAttribute(nodeHandle, NODE_XCOMPONENT_SURFACE_SIZE,
+     *     std::to_string(reinterpret_cast<unsigned long long>(footer)).c_str());
+     * @endcode
+     */
+    NODE_LIST_ITEM_GROUP_SET_FOOTER,
+    /**
+     * @brief 通过{@link setAttribute}方法设置ListItem分割线样式，默认无分割线。
+     *
+     * @note 入参4个，格式字符串，以空格分割：
+     *       入参1: 颜色，#argb类型；
+     *       入参2：分割线宽，数字类型，单位vp；
+     *       入参3：分割线距离列表侧边起始端的距离，数字类型，单位vp；
+     *       入参4：分割线距离列表侧边结束端的距离，数字类型，单位vp；
+     *       如 "#FF0000FF 1 0 0" 。
+     * @code {.c}
+     * basicNodeApi->setAttribute(nodeHandle, NODE_XCOMPONENT_SURFACE_SIZE, "#FF0000FF 1 0 0");
+     * @endcode
+     */
+    NODE_LIST_ITEM_GROUP_SET_DIVIDER,
 } ArkUI_NodeAttributeType;
 
 /**
