@@ -26,7 +26,7 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type)
 {
     switch (type) {
         case NODE_TEXT_INPUT_ON_CHANGE:
-            return ON_TEXTINPUT_CHANGE;
+            return ON_TEXT_INPUT_CHANGE;
         case NODE_SCROLL_EVENT_ON_SCROLL:
             return ON_SCROLL;
         case NODE_SCROLL_EVENT_ON_SCROLL_FRAME_BEGIN:
@@ -44,7 +44,7 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type)
         case NODE_ON_BLUR:
             return ON_BLUR;
         case NODE_TEXT_INPUT_ON_SUBMIT:
-            return ON_TEXTINPUT_SUBMIT;
+            return ON_TEXT_INPUT_SUBMIT;
         case NODE_REFRESH_STATE_CHANGE:
             return ON_REFRESH_STATE_CHANGE;
         case NODE_REFRESH_ON_REFRESH:
@@ -61,7 +61,7 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type)
 ArkUI_Int32 ConvertToNodeEventType(ArkUIAsyncEventKind type)
 {
     switch (type) {
-        case ON_TEXTINPUT_CHANGE:
+        case ON_TEXT_INPUT_CHANGE:
             return NODE_TEXT_INPUT_ON_CHANGE;
         case ON_SCROLL:
             return NODE_SCROLL_EVENT_ON_SCROLL;
@@ -79,7 +79,7 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIAsyncEventKind type)
             return NODE_ON_FOCUS;
         case ON_BLUR:
             return NODE_ON_BLUR;
-        case ON_TEXTINPUT_SUBMIT:
+        case ON_TEXT_INPUT_SUBMIT:
             return NODE_TEXT_INPUT_ON_SUBMIT;
         case ON_REFRESH_STATE_CHANGE:
             return NODE_REFRESH_STATE_CHANGE;

@@ -2197,7 +2197,7 @@ void SetTextOverflow(ArkUI_NodeHandle node, const char* value)
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
         return;
     }
-    fullImpl->getNodeModifiers()->getTextModifier()->setTextTextOverflow(
+    fullImpl->getNodeModifiers()->getTextModifier()->setTextOverflow(
         node->uiNodeHandle, StringToEnumInt(value, FONT_OVERFLOW_ARRAY, 0));
 }
 
@@ -2305,7 +2305,7 @@ void SetTextCase(ArkUI_NodeHandle node, const char* value)
                 node->uiNodeHandle, StringToEnumInt(value, TEXT_CASE_ARRAY, 0));
             break;
         case ARKUI_NODE_TEXT:
-            fullImpl->getNodeModifiers()->getTextModifier()->setTextTextCase(
+            fullImpl->getNodeModifiers()->getTextModifier()->setTextCase(
                 node->uiNodeHandle, StringToEnumInt(value, TEXT_CASE_ARRAY, 0));
         default:
             break;
