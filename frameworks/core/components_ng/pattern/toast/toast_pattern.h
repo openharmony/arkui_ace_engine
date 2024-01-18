@@ -78,14 +78,14 @@ public:
         return IsDefaultToast();
     }
 
-    void UpdateFoldStatusChangedCallbackId(std::optional<int32_t> id)
+    void UpdateFoldDisplayModeChangedCallbackId(std::optional<int32_t> id)
     {
-        foldStatusChangedCallbackId_ = id;
+        foldDisplayModeChangedCallbackId_ = id;
     }
 
-    bool HasFoldStatusChangedCallbackId()
+    bool HasFoldDisplayModeChangedCallbackId()
     {
-        return foldStatusChangedCallbackId_.has_value();
+        return foldDisplayModeChangedCallbackId_.has_value();
     }
 private:
     void BeforeCreateLayoutWrapper() override;
@@ -95,7 +95,7 @@ private:
     double GetBottomValue(const RefPtr<LayoutWrapper>& layoutWrapper);
 
     RefPtr<FrameNode> textNode_;
-    std::optional<int32_t> foldStatusChangedCallbackId_;
+    std::optional<int32_t> foldDisplayModeChangedCallbackId_;
     ACE_DISALLOW_COPY_AND_MOVE(ToastPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -792,6 +792,8 @@ public:
         foldStatusChangedCallback_.emplace_back(std::move(listener));
     }
 
+    void OnFoldDisplayModeChanged(FoldDisplayMode foldDisplayMode);
+
     using virtualKeyBoardCallback = std::function<bool(int32_t, int32_t, double)>;
     void SetVirtualKeyBoardCallback(virtualKeyBoardCallback&& listener)
     {
@@ -958,6 +960,7 @@ public:
     virtual void SetIsNeedAvoidWindow(bool isLayoutFullScreen) {}
     virtual void SetIgnoreViewSafeArea(bool ignoreViewSafeArea) {}
     virtual void OnFoldStatusChange(FoldStatus foldStatus) {}
+    virtual void OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode) {}
 
     void SetIsAppWindow(bool isAppWindow)
     {

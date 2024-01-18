@@ -102,6 +102,7 @@ public:
     MOCK_METHOD4(OnVirtualKeyboardHeightChange, void(float keyboardHeight, double positionY, double height,
                                                     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction));
     MOCK_METHOD1(OnFoldStatusChange, void(FoldStatus foldStatus));
+    MOCK_METHOD1(OnFoldDisplayModeChange, void(FoldDisplayMode foldDisplayMode));
     MOCK_METHOD1(SetContainerWindow, void(bool isShow));
     MOCK_METHOD1(SetTouchPipeline, void(const WeakPtr<PipelineBase>& context));
     MOCK_METHOD2(AddEtsCardTouchEventCallback, void(int32_t ponitId, EtsCardTouchEventCallback&& callback));
