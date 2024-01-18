@@ -21,6 +21,7 @@
 #include "session/host/include/extension_session.h"
 #include "want.h"
 
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_pattern.h"
@@ -77,7 +78,7 @@ public:
 
     // The interface to control the display area
     std::shared_ptr<Rosen::RSSurfaceNode> GetSurfaceNode() const override;
-    void RefreshDisplayArea(float left, float top, float width, float height) override;
+    void RefreshDisplayArea(const RectF& displayArea) override;
 
     // The interface to send the data for ArkTS
     void SendDataAsync(const AAFwk::WantParams& params) const override;
@@ -91,7 +92,7 @@ private:
     void InitAllCallback();
     sptr<Rosen::ExtensionSession> session_;
     WeakPtr<UIExtensionPattern> hostPattern_;
-    Rosen::WSRect windowRect_;
+    RectF displayArea_;
     bool isNotifyOccupiedAreaChange_ = false;
     int32_t instanceId_;
     bool isTransferringCaller_;

@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/ui_extension/session_wrapper_impl.h"
 
+#include <cmath>
 #include <memory>
 
 #include "accessibility_event_info.h"
@@ -91,8 +92,7 @@ public:
             TaskExecutor::TaskType::UI);
     }
 
-    void OnAccessibilityEvent(
-        const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset) override
+    void OnAccessibilityEvent(const Accessibility::AccessibilityEventInfo& info, int64_t uiExtensionOffset) override
     {
         ContainerScope scope(instanceId_);
         auto pipeline = PipelineBase::GetCurrentContext();
@@ -366,7 +366,7 @@ void SessionWrapperImpl::NotifyCreate() {}
 
 void SessionWrapperImpl::NotifyForeground()
 {
-    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Foreground: session = %{public}s", session_ ? "non-null" : "null");
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Foreground: session is %{public}s", session_ ? "valid" : "invalid");
     CHECK_NULL_VOID(session_);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -377,14 +377,14 @@ void SessionWrapperImpl::NotifyForeground()
 
 void SessionWrapperImpl::NotifyBackground()
 {
-    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Background: session = %{public}s", session_ ? "non-null" : "null");
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Background: session is %{public}s", session_ ? "valid" : "invalid");
     CHECK_NULL_VOID(session_);
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionBackground(
         session_, std::move(backgroundCallback_));
 }
 void SessionWrapperImpl::NotifyDestroy()
 {
-    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Destroy: session = %{public}s", session_ ? "non-null" : "null");
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Destroy: session is %{public}s", session_ ? "valid" : "invalid");
     CHECK_NULL_VOID(session_);
     Rosen::ExtensionSessionManager::GetInstance().RequestExtensionSessionDestruction(
         session_, std::move(destructionCallback_));
@@ -436,32 +436,34 @@ std::shared_ptr<Rosen::RSSurfaceNode> SessionWrapperImpl::GetSurfaceNode() const
     return session_ ? session_->GetSurfaceNode() : nullptr;
 }
 
-void SessionWrapperImpl::RefreshDisplayArea(float left, float top, float width, float height)
+void SessionWrapperImpl::RefreshDisplayArea(const RectF& displayArea)
 {
     CHECK_NULL_VOID(session_);
     ContainerScope scope(instanceId_);
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto curWindow = pipeline->GetCurrentWindowRect();
-    windowRect_.posX_ = std::round(left + curWindow.Left());
-    windowRect_.posY_ = std::round(top + curWindow.Top());
-    windowRect_.width_ = std::round(width);
-    windowRect_.height_ = std::round(height);
-    session_->UpdateRect(windowRect_, Rosen::SizeChangeReason::UNDEFINED);
+    auto curDisplayArea = displayArea + OffsetF(curWindow.Left(), curWindow.Top());
+    if (curDisplayArea != displayArea_) {
+        displayArea_ = curDisplayArea;
+        session_->UpdateRect({ std::round(curDisplayArea.Left()), std::round(curDisplayArea.Top()),
+                                 std::round(curDisplayArea.Width()), std::round(curDisplayArea.Height()) },
+            Rosen::SizeChangeReason::UNDEFINED);
+    }
 }
 /************************************************ End: The interface to control the display area **********************/
 
 /************************************************ Begin: The interface to send the data for ArkTS *********************/
 void SessionWrapperImpl::SendDataAsync(const AAFwk::WantParams& params) const
 {
-    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Sync: session = %{public}s", session_ ? "non-null" : "null");
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Async: session is %{public}s", session_ ? "valid" : "invalid");
     CHECK_NULL_VOID(session_);
     session_->TransferComponentData(params);
 }
 
 int32_t SessionWrapperImpl::SendDataSync(const AAFwk::WantParams& wantParams, AAFwk::WantParams& reWantParams) const
 {
-    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Async: session = %{public}s", session_ ? "non-null" : "null");
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "Sync: session is %{public}s", session_ ? "valid" : "invalid");
     Rosen::WSErrorCode transferCode = Rosen::WSErrorCode::WS_ERROR_TRANSFER_DATA_FAILED;
     if (session_) {
         transferCode = session_->TransferComponentDataSync(wantParams, reWantParams);
@@ -473,7 +475,7 @@ int32_t SessionWrapperImpl::SendDataSync(const AAFwk::WantParams& wantParams, AA
 /************************************************ Begin: The interface to control the avoid area **********************/
 void SessionWrapperImpl::NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea, uint32_t type) const
 {
-    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "AvoidArea: session = %{public}s", session_ ? "non-null" : "null");
+    TAG_LOGI(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "AvoidArea: session is %{public}s", session_ ? "valid" : "invalid");
     CHECK_NULL_VOID(session_);
     session_->UpdateAvoidArea(sptr<Rosen::AvoidArea>::MakeSptr(avoidArea), static_cast<Rosen::AvoidAreaType>(type));
 }
@@ -489,7 +491,7 @@ bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(sptr<Rosen::OccupiedAreaCh
         auto pipeline = PipelineBase::GetCurrentContext();
         CHECK_NULL_RETURN(pipeline, false);
         auto curWindow = pipeline->GetCurrentWindowRect();
-        int32_t spaceWindow = std::max(curWindow.Bottom() - windowRect_.posY_ - windowRect_.height_, .0);
+        int32_t spaceWindow = std::max(curWindow.Bottom() - displayArea_.Bottom(), .0);
         keyboardHeight = std::max(keyboardHeight - spaceWindow, 0);
     }
     info->rect_.height_ = keyboardHeight;
