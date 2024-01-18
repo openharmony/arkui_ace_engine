@@ -28,7 +28,6 @@
 namespace OHOS::Ace::NG {
 void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
 {
-    CHECK_NULL_VOID(customNode);
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::MENU_ITEM_ETS_TAG, nodeId);
@@ -51,6 +50,7 @@ void MenuItemModelNG::Create(const RefPtr<UINode>& customNode)
     border.SetRadius(theme->GetInnerBorderRadius());
     renderContext->UpdateBorderRadius(border);
 
+    CHECK_NULL_VOID(customNode);
     menuItem->AddChild(customNode);
 }
 
