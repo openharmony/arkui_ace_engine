@@ -40,28 +40,14 @@ void LongFrameReportImpl::CancelEvent()
     }
 }
 
-ILongFrame::ILongFrame()
-{
-    if (access(LIBFFRT_LIB64_PATH, F_OK) == -1) {
-        return ;
-    }
-    is64BitSystem_ = true;
-}
-
 void ILongFrame::ReportStartEvent()
 {
-    if (!is64BitSystem_) {
-        return ;
-    }
     reporter = new LongFrameReportImpl();
     static_cast<LongFrameReportImpl*>(reporter)->SubmitEvent();
 }
 
 void ILongFrame::ReportEndEvent()
 {
-    if (!is64BitSystem_) {
-        return ;
-    }
     static_cast<LongFrameReportImpl*>(reporter)->CancelEvent();
     delete static_cast<LongFrameReportImpl*>(reporter);
 }
