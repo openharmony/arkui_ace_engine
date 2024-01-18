@@ -103,9 +103,14 @@ void BubblePattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(targetNode);
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    OnAreaChangedFunc onAreaChangedFunc = [popupNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
-                                              const OffsetF& /* oldOrigin */, const RectF& /* rect */,
+    OnAreaChangedFunc onAreaChangedFunc = [popupNodeWk = WeakPtr<FrameNode>(host)](const RectF& oldRect,
+                                              const OffsetF& oldOrigin, const RectF& /* rect */,
                                               const OffsetF& /* origin */) {
+        // Not handle first change
+        if (oldRect.IsEmpty() && oldOrigin.NonOffset()) {
+            return;
+        }
+
         auto pipelineContext = PipelineContext::GetCurrentContext();
         AnimationOption option;
         option.SetCurve(pipelineContext->GetSafeAreaManager()->GetSafeAreaCurve());
