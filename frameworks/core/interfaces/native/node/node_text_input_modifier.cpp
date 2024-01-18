@@ -605,7 +605,7 @@ void SetOnTextInputChange(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extra
     CHECK_NULL_VOID(frameNode);
     auto onChange = [node, eventId, extraParam](const std::string& str) {
         ArkUINodeEvent event;
-        event.kind = ON_TEXTINPUT_CHANGE;
+        event.kind = ON_TEXT_INPUT_CHANGE;
         event.eventId = eventId;
         event.extraParam= extraParam;
         event.stringAsyncEvent.pStr = str.c_str();
@@ -620,7 +620,7 @@ void SetTextInputOnSubmit(ArkUINodeHandle node, ArkUI_Int32 eventId, void* extra
     CHECK_NULL_VOID(frameNode);
     auto onEvent = [node, eventId, extraParam](int32_t value, NG::TextFieldCommonEvent& commonEvent) {
         ArkUINodeEvent event;
-        event.kind = ON_TEXTINPUT_SUBMIT;
+        event.kind = ON_TEXT_INPUT_SUBMIT;
         event.eventId = eventId;
         event.extraParam= extraParam;
         event.componentAsyncEvent.data[0].i32 = value;

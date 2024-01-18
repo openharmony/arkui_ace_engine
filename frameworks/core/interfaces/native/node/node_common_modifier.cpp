@@ -666,8 +666,8 @@ void ResetTransform(ArkUINodeHandle node)
                        matrix[NUM_3], matrix[NUM_7], matrix[NUM_11], matrix[NUM_15]));
 }
 
-void SetBorderColor(ArkUINodeHandle node, const uint32_t& leftColorInt, const uint32_t& rightColorInt,
-    const uint32_t& topColorInt, const uint32_t& bottomColorInt)
+void SetBorderColor(ArkUINodeHandle node, uint32_t leftColorInt, uint32_t rightColorInt,
+    uint32_t topColorInt, uint32_t bottomColorInt)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

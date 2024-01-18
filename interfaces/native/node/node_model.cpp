@@ -73,7 +73,7 @@ ArkUIFullNodeAPI* impl = nullptr;
 ArkUIFullNodeAPI* GetAnyFullNodeImpl(int version)
 {
     if (!impl) {
-        typedef ArkUIAnyNodeAPI* (*GetAPI_t)(int);
+        typedef ArkUIAnyAPI* (*GetAPI_t)(int);
         GetAPI_t getAPI = nullptr;
         void* module = FindModule();
         if (module == nullptr) {

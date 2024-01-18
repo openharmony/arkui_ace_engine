@@ -275,11 +275,11 @@ ArkUIFullNodeAPI impl = {
 } // namespace OHOS::Ace::NG
 
 extern "C" {
-ACE_FORCE_EXPORT ArkUIAnyNodeAPI* GetArkUIAnyFullNodeAPI(int version)
+ACE_FORCE_EXPORT ArkUIAnyAPI* GetArkUIAnyFullNodeAPI(int version)
 {
     switch (version) {
         case ARKUI_NODE_API_VERSION:
-            return reinterpret_cast<ArkUIAnyNodeAPI*>(&OHOS::Ace::NG::impl);
+            return reinterpret_cast<ArkUIAnyAPI*>(&OHOS::Ace::NG::impl);
         default: {
             TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
                 "Requested version %{public}d is not supported, we're version %{public}d", version,

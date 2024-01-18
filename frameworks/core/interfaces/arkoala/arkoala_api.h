@@ -37,7 +37,7 @@ enum ArkUIAPIVariantKind {
     COUNT = GRAPHICS + 1,
 };
 
-typedef int ArkUI_Bool;
+typedef bool ArkUI_Bool;
 typedef int ArkUI_Int32;
 typedef unsigned int ArkUI_Uint32;
 typedef long long ArkUI_Int64;
