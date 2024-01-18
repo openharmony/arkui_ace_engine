@@ -41,7 +41,6 @@ public:
         value->propPopupSelectedColor_ = ClonePopupSelectedColor();
         value->propPopupUnselectedColor_ = ClonePopupUnselectedColor();
         value->propPopupItemBackground_ = ClonePopupItemBackground();
-        value->propPopupHorizontalSpace_ = ClonePopupHorizontalSpace();
 
         return value;
     }
@@ -54,7 +53,6 @@ public:
         ResetPopupSelectedColor();
         ResetPopupUnselectedColor();
         ResetPopupItemBackground();
-        ResetPopupHorizontalSpace();
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -73,8 +71,6 @@ public:
             propPopupUnselectedColor_.value_or(indexerTheme->GetPopupUnselectedTextColor()).ColorToString().c_str());
         json->Put("popupItemBackground",
             propPopupItemBackground_.value_or(indexerTheme->GetPopupBackgroundColor()).ColorToString().c_str());
-        json->Put("popupHorizontalSpace", propPopupHorizontalSpace_.value_or(
-            Dimension(NG::INDEXER_BUBBLE_INVALID_SPACE, DimensionUnit::VP)).ToString().c_str());
     }
 
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupSelectedColor, Color, PROPERTY_UPDATE_RENDER);
@@ -82,7 +78,6 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SelectedBackgroundColor, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupBackground, Color, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupItemBackground, Color, PROPERTY_UPDATE_RENDER);
-    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(PopupHorizontalSpace, Dimension, PROPERTY_UPDATE_RENDER);
 };
 } // namespace OHOS::Ace::NG
 
