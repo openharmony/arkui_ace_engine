@@ -1881,6 +1881,11 @@ void ScrollablePattern::FireAndCleanScrollingListener()
     scrollingListener_.clear();
 }
 
+void ScrollablePattern::CleanScrollingListener()
+{
+    scrollingListener_.clear();
+}
+
 float ScrollablePattern::GetMainContentSize() const
 {
     auto host = GetHost();

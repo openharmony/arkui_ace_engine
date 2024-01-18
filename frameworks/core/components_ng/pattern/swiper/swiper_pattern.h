@@ -65,6 +65,7 @@ public:
 
     void RegisterScrollingListener(const RefPtr<ScrollingListener> listener) override;
     void FireAndCleanScrollingListener() override;
+    void CleanScrollingListener() override;
 
     bool UsResRegion() override
     {

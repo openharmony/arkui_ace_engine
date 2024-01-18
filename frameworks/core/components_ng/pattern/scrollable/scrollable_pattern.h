@@ -96,6 +96,7 @@ public:
 
     void RegisterScrollingListener(const RefPtr<ScrollingListener> listener) override;
     void FireAndCleanScrollingListener() override;
+    void CleanScrollingListener() override;
 
     void SetAxis(Axis axis);
     virtual bool UpdateCurrentOffset(float delta, int32_t source) = 0;

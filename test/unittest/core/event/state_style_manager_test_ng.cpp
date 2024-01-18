@@ -194,7 +194,8 @@ HWTEST_F(StateStyleManagerTestNg, StateStyleTest003, TestSize.Level1)
     EXPECT_NE(frameNode, nullptr);
     auto stateStyleMgr = AceType::MakeRefPtr<StateStyleManager>(frameNode);
     EXPECT_NE(stateStyleMgr, nullptr);
-    bool hasScrollingParent = stateStyleMgr->HandleScrollingParent();
+    stateStyleMgr->HandleScrollingParent();
+    bool hasScrollingParent = stateStyleMgr->GetHasScrollingParent();
     EXPECT_EQ(false, hasScrollingParent);
 
     /**
@@ -205,7 +206,8 @@ HWTEST_F(StateStyleManagerTestNg, StateStyleTest003, TestSize.Level1)
     auto parent = AceType::MakeRefPtr<FrameNode>(V2::LIST_ETS_TAG, -1, AceType::MakeRefPtr<ListPattern>());
     EXPECT_NE(parent, nullptr);
     frameNode->SetParent(parent);
-    hasScrollingParent = stateStyleMgr->HandleScrollingParent();
+    stateStyleMgr->HandleScrollingParent();
+    hasScrollingParent = stateStyleMgr->GetHasScrollingParent();
     EXPECT_EQ(true, hasScrollingParent);
 }
 

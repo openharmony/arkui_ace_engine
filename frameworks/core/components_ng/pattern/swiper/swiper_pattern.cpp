@@ -3881,6 +3881,11 @@ void SwiperPattern::FireAndCleanScrollingListener()
     scrollingListener_.clear();
 }
 
+void SwiperPattern::CleanScrollingListener()
+{
+    scrollingListener_.clear();
+}
+
 void SwiperPattern::StopIndicatorAnimation()
 {
     AnimationUtils::StopAnimation(indicatorAnimation_);
