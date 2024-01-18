@@ -226,6 +226,21 @@ public:
         return needUnmountIndexs_;
     }
 
+    void SetSwipeByGroup(bool swipeByGroup)
+    {
+        swipeByGroup_ = swipeByGroup;
+    }
+
+    void SetRealTotalCount(int32_t realTotalCount)
+    {
+        realTotalCount_ = realTotalCount;
+    }
+
+    void SetPlaceItemWidth(float placeItemWidth)
+    {
+        placeItemWidth_ = placeItemWidth;
+    }
+
 private:
     void MeasureSwiper(LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis);
     void MeasureCustomAnimation(LayoutWrapper* layoutWrapper);
@@ -239,6 +254,10 @@ private:
     void ArrowLayout(
         LayoutWrapper* layoutWrapper, const RefPtr<LayoutWrapper>& arrowWrapper, const PaddingPropertyF padding) const;
     void ResetOffscreenItemPosition(LayoutWrapper* layoutWrapper, int32_t index, bool isForward, Axis axis) const;
+    int32_t GetDisplayCount(LayoutWrapper* layoutWrapper) const;
+    void SetInactiveOnForward(LayoutWrapper* layoutWrapper, Axis axis);
+    void SetInactiveOnBackward(LayoutWrapper* layoutWrapper, Axis axis);
+
     bool isLoop_ = true;
     float prevMargin_ = 0.0f;
     float nextMargin_ = 0.0f;
@@ -275,6 +294,9 @@ private:
     bool useCustomAnimation_ = false;
     std::set<int32_t> indexsInAnimation_;
     std::set<int32_t> needUnmountIndexs_;
+    bool swipeByGroup_ = false;
+    int32_t realTotalCount_ = 0;
+    float placeItemWidth_ = 0.0f;
 };
 
 } // namespace OHOS::Ace::NG

@@ -589,6 +589,11 @@ public:
         indexCanChangeMap_.clear();
     }
 
+    int32_t RealTotalCount() const;
+    bool IsSwipeByGroup() const;
+    int32_t GetDisplayCount() const;
+    int32_t GetCachedCount() const;
+
 private:
     void OnModifyDone() override;
     void OnAfterModifyDone() override;
@@ -662,7 +667,6 @@ private:
     float GetNextMargin() const;
     float CalculateVisibleSize() const;
     int32_t CurrentIndex() const;
-    int32_t GetDisplayCount() const;
     int32_t CalculateDisplayCount() const;
     int32_t CalculateCount(
         float contentWidth, float minSize, float margin, float gutter, float swiperPadding = 0.0f) const;
@@ -723,6 +727,7 @@ private:
     bool AutoLinearAnimationNeedReset(float translate) const;
     void OnAnimationTranslateZero(int32_t nextIndex, bool stopAutoPlay);
     void UpdateDragFRCSceneInfo(float speed, SceneStatus sceneStatus);
+    void AdjustCurrentIndexOnSwipePage(int32_t index);
     void TriggerCustomContentTransitionEvent(int32_t fromIndex, int32_t toIndex);
     /**
      * @brief Preprocess drag delta when received from DragUpdate event.
@@ -790,6 +795,10 @@ private:
     void StopIndicatorAnimation();
     RefPtr<FrameNode> GetCurrentFrameNode(int32_t currentIndex) const;
     bool FadeOverScroll(float offset);
+    int32_t ComputeSwipePageNextIndex(float velocity, bool onlyDistance = false) const;
+    int32_t ComputePageIndex(int32_t index) const;
+    void UpdateIndexOnAnimationStop();
+    void UpdateIndexOnSwipePageStop();
 
     WeakPtr<NestableScrollContainer> parent_;
     /**
@@ -892,6 +901,7 @@ private:
     std::optional<int32_t> preTargetIndex_;
     std::optional<int32_t> pauseTargetIndex_;
     std::optional<int32_t> oldChildrenSize_;
+    float placeItemWidth_ = 0.0f;
     float currentDelta_ = 0.0f;
     // cumulated delta in a single drag event
     float mainDeltaSum_ = 0.0f;
