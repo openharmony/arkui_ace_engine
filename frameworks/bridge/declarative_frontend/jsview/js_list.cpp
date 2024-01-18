@@ -22,6 +22,7 @@
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/list_model_impl.h"
+#include "core/common/container.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/list/list_model.h"
@@ -156,6 +157,7 @@ void JSList::Create(const JSCallbackInfo& args)
         if (scrollerValue->IsObject()) {
             void* scroller = JSRef<JSObject>::Cast(scrollerValue)->Unwrap<JSScroller>();
             RefPtr<JSScroller> jsScroller = Referenced::Claim(reinterpret_cast<JSScroller*>(scroller));
+            jsScroller->SetInstanceId(Container::CurrentId());
             SetScroller(jsScroller);
         }
     }
@@ -735,6 +737,7 @@ void JSListScroller::GetItemRectInGroup(const JSCallbackInfo& args)
     }
     auto scrollController = GetController().Upgrade();
     if (scrollController) {
+        ContainerScope scope(GetInstanceId());
         auto rectObj = CreateRectangle(scrollController->GetItemRectInGroup(index, indexInGroup));
         JSRef<JSVal> rect = JSRef<JSObject>::Cast(rectObj);
         args.SetReturnValue(rect);
@@ -794,6 +797,7 @@ void JSListScroller::ScrollToItemInGroup(const JSCallbackInfo& args)
         }
     }
 
+    ContainerScope scope(GetInstanceId());
     scrollController->JumpToItemInGroup(index, indexInGroup, smooth, align, SCROLL_FROM_JUMP);
 }
 
@@ -830,6 +834,7 @@ void JSListScroller::CloseAllSwipeActions(const JSCallbackInfo& args)
         JSException::Throw(ERROR_CODE_NAMED_ROUTE_ERROR, "%s", "Controller not bound to component.");
         return;
     }
+    ContainerScope scope(GetInstanceId());
     scrollController->CloseAllSwipeActions(std::move(onFinishCallBack));
 }
 } // namespace OHOS::Ace::Framework
