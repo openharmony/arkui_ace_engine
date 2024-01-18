@@ -207,7 +207,7 @@ void DialogPattern::UpdateContentRenderContext(const RefPtr<FrameNode>& contentN
     auto contentRenderContext = contentNode->GetRenderContext();
     CHECK_NULL_VOID(contentRenderContext);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) &&
-        contentRenderContext->IsUniRenderEnabled()) {
+        contentRenderContext->IsUniRenderEnabled() && props.isSysBlurStyle) {
         BlurStyleOption styleOption;
         styleOption.blurStyle = static_cast<BlurStyle>(
             props.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
@@ -943,15 +943,7 @@ void DialogPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(context);
     auto dialogTheme = context->GetTheme<DialogTheme>();
     CHECK_NULL_VOID(dialogTheme);
-    if (!GetDialogProperties().customStyle) {
-        auto col = DynamicCast<FrameNode>(host->GetChildAtIndex(START_CHILD_INDEX));
-        CHECK_NULL_VOID(col);
-        auto colContext = col->GetContext();
-        CHECK_NULL_VOID(colContext);
-        auto colRenderContext = col->GetRenderContext();
-        CHECK_NULL_VOID(colRenderContext);
-        colRenderContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
-    }
+    UpdateWrapperBackgroundStyle(host, dialogTheme);
     CHECK_NULL_VOID(buttonContainer_);
     int32_t btnIndex = 0;
     for (const auto& buttonNode : buttonContainer_->GetChildren()) {
@@ -990,5 +982,25 @@ void DialogPattern::SetButtonEnabled(const RefPtr<FrameNode>& buttonNode, bool e
     CHECK_NULL_VOID(buttonButtonEvent);
     buttonButtonEvent->SetEnabled(enabled);
     buttonNode->GetOrCreateFocusHub()->SetFocusable(enabled);
+}
+
+void DialogPattern::UpdateWrapperBackgroundStyle(const RefPtr<FrameNode>& host, const RefPtr<DialogTheme>& dialogTheme)
+{
+    auto col = DynamicCast<FrameNode>(host->GetChildAtIndex(START_CHILD_INDEX));
+    CHECK_NULL_VOID(col);
+    auto colContext = col->GetContext();
+    CHECK_NULL_VOID(colContext);
+    auto colRenderContext = col->GetRenderContext();
+    CHECK_NULL_VOID(colRenderContext);
+    if (!GetDialogProperties().customStyle) {
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !colRenderContext->IsUniRenderEnabled()) {
+            colRenderContext->UpdateBackgroundColor(dialogTheme->GetBackgroundColor());
+        } else if (!GetDialogProperties().isSysBlurStyle) {
+            colRenderContext->UpdateBackBlurStyle(colRenderContext->GetBackBlurStyle());
+        }
+    }
+    if (colRenderContext->GetBackBlurStyle().has_value()) {
+        colRenderContext->UpdateBackBlurStyle(colRenderContext->GetBackBlurStyle());
+    }
 }
 } // namespace OHOS::Ace::NG
