@@ -89,12 +89,6 @@ public:
         onSizeChanged_ = std::move(callback);
     }
 
-    // The uiextension needs inputmethod by default, and is processed by its internal actual focus node.
-    bool NeedSoftKeyboard() const override
-    {
-        return true;
-    }
-
     void OnConnect();
     void OnDisconnect();
     void OnExtensionDied();
