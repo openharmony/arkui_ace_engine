@@ -573,7 +573,9 @@ void SearchPattern::OnClickCancelButton()
     textFieldLayoutProperty->UpdateValue("");
     auto eventHub = textFieldFrameNode->GetEventHub<TextFieldEventHub>();
     eventHub->FireOnChange("");
-    textFieldPattern->StartTwinkling();
+    auto focusHub = host->GetOrCreateFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    focusHub->RequestFocusImmediately();
     host->MarkModifyDone();
     textFieldFrameNode->MarkModifyDone();
 }
