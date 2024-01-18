@@ -163,7 +163,7 @@ void FolderStackPattern::StartOffsetEnteringAnimation()
     }
     AnimationOption optionPosition;
     optionPosition.SetDuration(ANIMATION_TIME);
-    optionPosition.SetCurve(Curves::FRICTION);
+    optionPosition.SetCurve(Curves::ELASTICS);
     auto renderContext = GetRenderContext();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
