@@ -258,6 +258,11 @@ void PixelMapImage::DrawToRSCanvas(
         static_cast<int32_t>(config.imageRepeat_), { pointRadius[0], pointRadius[1], pointRadius[2], pointRadius[3] },
         1.0, 0, 0, 0 };
     recordingCanvas.AttachBrush(brush);
+    if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "pixmap, width=%{public}d * height=%{public}d", pixmap->GetWidth(),
+            pixmap->GetHeight());
+        pixmap->SavePixelMapToFile("_ToRS_");
+    }
     recordingCanvas.DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options);
     recordingCanvas.DetachBrush();
 #endif

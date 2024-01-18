@@ -205,6 +205,8 @@ void ImageLoadingContext::DownloadImage()
     downloadCallback.successCallback = [weak = AceType::WeakClaim(this)](const std::string&& imageData) {
         auto ctx = weak.Upgrade();
         CHECK_NULL_VOID(ctx);
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "DownLoad src=%{public}s, ImageData length=%{public}zu",
+            ctx->GetSourceInfo().ToString().c_str(), imageData.size());
         auto data = ImageData::MakeFromDataWithCopy(imageData.data(), imageData.size());
         // if downloading is necessary, cache object, data to file
         RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(ctx->GetSourceInfo(), data);
@@ -483,4 +485,5 @@ int32_t ImageLoadingContext::GetFrameCount() const
 {
     return imageObj_ ? imageObj_->GetFrameCount() : 0;
 }
+
 } // namespace OHOS::Ace::NG

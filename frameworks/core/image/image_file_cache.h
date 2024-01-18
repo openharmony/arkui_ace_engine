@@ -64,12 +64,12 @@ public:
     void WriteCacheFile(
         const std::string& url, const void* data, size_t size, const std::string& suffix = std::string());
     void ClearCacheFile(const std::vector<std::string>& removeFiles);
+    std::string ConstructCacheFilePath(const std::string& fileName);
     void DumpCacheInfo();
 private:
     void SaveCacheInner(const std::string& cacheKey, const std::string& suffix, size_t cacheSize,
         std::vector<std::string>& removeVector);
     std::string GetCacheFilePathInner(const std::string& url, const std::string& suffix);
-    std::string ConstructCacheFilePath(const std::string& fileName);
 
     std::shared_mutex cacheFilePathMutex_;
     std::string cacheFilePath_;

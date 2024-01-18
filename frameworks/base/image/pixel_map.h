@@ -16,6 +16,10 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_IMAGE_ACE_PIXEL_MAP_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_IMAGE_ACE_PIXEL_MAP_H
 
+#include <chrono>
+#include <fstream>
+#include <string>
+
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 
@@ -117,6 +121,7 @@ public:
     static void* GetReleaseContext(const RefPtr<PixelMap>& pixelMap);
     // passed to SkImage to release PixelMap shared_ptr
     static void ReleaseProc(const void* /* pixels */, void* context);
+    virtual void SavePixelMapToFile(const std::string& dst) const = 0;
 };
 
 } // namespace Ace
