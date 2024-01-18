@@ -86,6 +86,16 @@ public:
 
     void DumpInfo() override;
 
+    bool GetNeedCallBack()
+    {
+        return needCallBack_;
+    }
+
+    void SetNeedCallBack(bool needCallBack)
+    {
+        needCallBack_ = needCallBack;
+    }
+
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
     void RegisterFoldStatusListener();
@@ -105,6 +115,7 @@ private:
     bool isAppearCallback_ = false;
     RefPtr<DisplayInfo> displayInfo_;
     bool hasInHoverMode_ = false;
+    bool needCallBack_ = false;
     FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;
     CancelableCallback<void()> foldStatusDelayTask_;
 };

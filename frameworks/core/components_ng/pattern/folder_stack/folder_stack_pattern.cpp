@@ -133,6 +133,7 @@ void FolderStackPattern::OnFolderStateChangeSend(FoldStatus foldStatus)
     FolderEventInfo event(foldStatus);
     auto eventHub = GetEventHub<FolderStackEventHub>();
     if (eventHub) {
+        needCallBack_ = true;
         eventHub->OnFolderStateChange(event);
     }
 }
