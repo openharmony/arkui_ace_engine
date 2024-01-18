@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/paragraph.h"
+#include "core/common/container.h"
 
 namespace OHOS::Ace::NG {
 using ParagraphT = std::variant<std::shared_ptr<RSParagraph>, RefPtr<Paragraph>>;
@@ -148,6 +149,25 @@ public:
     }
 
     virtual void ScrollToSafeArea() const {}
+
+    static void UpdateKeyboardOffset(double positionY, double height)
+    {
+        auto container = Container::Current();
+        CHECK_NULL_VOID(container);
+        auto context = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(context);
+#ifdef WINDOW_SCENE_SUPPORTED
+        auto uiExtMgr = context->GetUIExtensionManager();
+        if (uiExtMgr) {
+            return;
+        }
+#endif
+        auto keyboardArea = container->GetKeyboardSafeArea();
+        auto keyboardLength = keyboardArea.bottom_.Length();
+        Rect keyboardRect;
+        keyboardRect.SetRect(0, keyboardArea.bottom_.start, 0, keyboardLength);
+        context->OnVirtualKeyboardAreaChange(keyboardRect, positionY, height);
+    }
 
     virtual void GetCaretMetrics(CaretMetricsF& caretCaretMetric) {}
     
