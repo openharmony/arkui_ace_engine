@@ -3696,7 +3696,11 @@ bool TextFieldPattern::CursorMoveToParagraphBegin()
         return true;
     }
     auto originCaretPosition = selectController_->GetCaretIndex();
-    UpdateCaretPositionWithClamp(GetLineBeginPosition(originCaretPosition, false));
+    auto newPos = GetLineBeginPosition(originCaretPosition, false);
+    if (newPos == originCaretPosition && originCaretPosition > 0) {
+        newPos = GetLineBeginPosition(originCaretPosition - 1, false);
+    }
+    UpdateCaretPositionWithClamp(newPos);
     OnCursorMoveDone(TextAffinity::DOWNSTREAM);
     return originCaretPosition != selectController_->GetCaretIndex();
 }
@@ -3790,7 +3794,11 @@ bool TextFieldPattern::CursorMoveToParagraphEnd()
         return true;
     }
     auto originCaretPosition = selectController_->GetCaretIndex();
-    UpdateCaretPositionWithClamp(GetLineEndPosition(originCaretPosition, false));
+    auto newPos = GetLineEndPosition(originCaretPosition, false);
+    if (newPos == originCaretPosition && originCaretPosition > 0) {
+        newPos = GetLineEndPosition(originCaretPosition + 1, false);
+    }
+    UpdateCaretPositionWithClamp(newPos);
     OnCursorMoveDone(TextAffinity::DOWNSTREAM);
     return originCaretPosition != selectController_->GetCaretIndex();
 }
