@@ -30,6 +30,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components/theme/shadow_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/event/event_hub.h"
@@ -626,6 +627,9 @@ void SelectOverlayNode::MoreAnimation()
     auto textOverlayTheme = pipeline->GetTheme<TextOverlayTheme>();
     CHECK_NULL_VOID(textOverlayTheme);
 
+    auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
+    CHECK_NULL_VOID(shadowTheme);
+
     isDoingAnimation_ = true;
     isExtensionMenu_ = true;
 
@@ -638,11 +642,12 @@ void SelectOverlayNode::MoreAnimation()
     auto frameSize = CalcSize(CalcLength(toolbarHeight.ConvertToPx()), CalcLength(toolbarHeight.ConvertToPx()));
 
     AnimationUtils::Animate(
-        extensionOption, [extensionContext, selectMenuInnerContext, id = Container::CurrentId()]() {
+        extensionOption, [extensionContext, selectMenuInnerContext, id = Container::CurrentId(), shadowTheme]() {
         ContainerScope scope(id);
         extensionContext->UpdateOpacity(1.0);
         extensionContext->UpdateTransformTranslate({ 0.0f, 0.0f, 0.0f });
-        extensionContext->UpdateBackShadow(ShadowConfig::DefaultShadowM);
+        auto colorMode = SystemProperties::GetColorMode();
+        extensionContext->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
         selectMenuInnerContext->UpdateOpacity(0.0);
     });
     modifier->SetOtherPointRadius(MIN_DIAMETER / 2.0f);
@@ -938,7 +943,10 @@ void SelectOverlayNode::CreateToolBar()
     selectMenuInner_->MountToParent(selectMenu_);
     selectMenuInner_->GetOrCreateGestureEventHub()->MarkResponseRegion(true);
 
-    selectMenu_->GetRenderContext()->UpdateBackShadow(ShadowConfig::DefaultShadowM);
+    auto shadowTheme = pipeline->GetTheme<ShadowTheme>();
+    CHECK_NULL_VOID(shadowTheme);
+    auto colorMode = SystemProperties::GetColorMode();
+    selectMenu_->GetRenderContext()->UpdateBackShadow(shadowTheme->GetShadow(ShadowStyle::OuterDefaultMD, colorMode));
     selectMenu_->MountToParent(Claim(this));
     selectMenu_->GetOrCreateGestureEventHub()->MarkResponseRegion(true);
     selectMenu_->MarkModifyDone();
