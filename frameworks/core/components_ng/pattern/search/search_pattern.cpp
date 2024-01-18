@@ -234,7 +234,7 @@ void SearchPattern::HandleTouchableAndHitTestMode()
         searchTouchable = searchGestureHub->GetTouchable();
         searchHitTestMode = searchGestureHub->GetHitTestMode();
     }
-    for (int32_t childIndex = TEXTFIELD_INDEX; childIndex < BUTTON_INDEX; childIndex++) {
+    for (int32_t childIndex = TEXTFIELD_INDEX; childIndex <= BUTTON_INDEX; childIndex++) {
         auto childFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(childIndex));
         CHECK_NULL_VOID(childFrameNode);
         auto childEventHub = childFrameNode->GetEventHub<EventHub>();
