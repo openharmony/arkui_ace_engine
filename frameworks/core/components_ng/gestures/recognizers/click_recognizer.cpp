@@ -294,11 +294,6 @@ void ClickRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void ClickRecognizer::HandleOverdueDeadline()
 {
-    auto attachedNode = GetAttachedNode();
-    if (attachedNode.Invalid()) {
-        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-        return;
-    }
     if (currentTouchPointsNum_ < fingers_ || tappedCount_ < count_) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
     }
