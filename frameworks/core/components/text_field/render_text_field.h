@@ -171,7 +171,6 @@ public:
     bool IsSelected() const;
     void DeleteLeft();
     void DeleteRight();
-    bool HandleShiftPressedEvent(const KeyEvent& event);
     void InsertValueDone(const std::string& appendElement);
 
     void SetInputFilter(const std::string& inputFilter)
