@@ -17,6 +17,9 @@
 #include "gtest/gtest.h"
 #define private public
 #define protected public
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
 #include "core/components/common/layout/constants.h"
@@ -29,15 +32,14 @@
 #include "core/components_ng/pattern/side_bar/side_bar_container_layout_algorithm.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_layout_property.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_model_ng.h"
+#include "core/components_ng/pattern/side_bar/side_bar_container_paint_method.h"
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
+#include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_property.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_ng/property/measure_utils.h"
 #include "core/components_v2/inspector/inspector_constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "frameworks/base/geometry/ng/size_t.h"
 #include "frameworks/core/components_ng/property/property.h"
-#include "core/components_ng/pattern/side_bar/side_bar_container_paint_method.h"
-#include "core/components_ng/pattern/swiper_indicator/dot_indicator/dot_indicator_paint_property.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -1182,7 +1184,7 @@ HWTEST_F(SideBarLayoutTestNg, SideBarLayoutTestNg027, TestSize.Level1)
     auto renderContext = frameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
     PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
-    RSCanvas canvas;
+    Testing::MockCanvas canvas;
     SideBarContainerPaintMethodInstance.ClipPadding(&paintWrapper, canvas);
     EXPECT_EQ(SideBarContainerPaintMethodInstance.needClipPadding_, false);
     SideBarContainerPaintMethodInstance.needClipPadding_ = true;

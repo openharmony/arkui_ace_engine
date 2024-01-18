@@ -19,12 +19,12 @@
 
 #define protected public
 #define private public
-
-#include "core/components_ng/render/ellipse_painter.h"
+#include "test/mock/core/rosen/mock_canvas.h"
 
 #include "base/geometry/ng/rect_t.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
+#include "core/components_ng/render/ellipse_painter.h"
 #include "core/components_ng/render/shape_painter.h"
 
 #undef private
@@ -35,9 +35,9 @@ using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace {
-const Dimension STROKE_WIDTH {0.0, DimensionUnit::PX};
-const NG::RectF TEST_RECT {10.0f, 20.0f, 15.0f, 15.0f};
-}
+const Dimension STROKE_WIDTH { 0.0, DimensionUnit::PX };
+const NG::RectF TEST_RECT { 10.0f, 20.0f, 15.0f, 15.0f };
+} // namespace
 
 class EllipsePainterTestNg : public testing::Test {};
 
@@ -51,7 +51,7 @@ HWTEST_F(EllipsePainterTestNg, EllipsePainterTestNg001, TestSize.Level1)
     /**
      * @tc.steps1: create canvas and shapePaintProperty object.
      */
-    RSCanvas canvas;
+    Testing::MockCanvas canvas;
     NG::ShapePaintProperty shapePaintProperty;
 
     /**

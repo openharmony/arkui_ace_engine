@@ -154,10 +154,8 @@ constexpr int32_t AI_SPAN_START = 7;
 constexpr int32_t AI_SPAN_END = 18;
 constexpr int32_t AI_SPAN_START_II = 24;
 constexpr int32_t AI_SPAN_END_II = 37;
-const struct TextDataDetectResult TEXT_DATA_DETECT_RESULT = {
-    0,
-    "{\"phoneNum\":[{\"charOffset\":7,\"number\":\"18888888888\",\"oriText\":\"18888888888\",\"type\":1}]}",
-    "0",
+const struct TextDataDetectResult TEXT_DATA_DETECT_RESULT = { 0,
+    "{\"phoneNum\":[{\"charOffset\":7,\"number\":\"18888888888\",\"oriText\":\"18888888888\",\"type\":1}]}", "0",
     "{\"phoneNum\":[{\"option\":\"呼叫\"},{\"option\":\"发送信息\"},\
         {\"option\":\"新建联系人\"},{\"option\":\"复制\"},{\"option\":\"选择文本\"}],\
         \"url\":[{\"option\":\"打开\"},{\"option\":\"复制\"},{\"option\":\"选择文本\"}],\
@@ -165,8 +163,7 @@ const struct TextDataDetectResult TEXT_DATA_DETECT_RESULT = {
         {\"option\":\"新建联系人\"},{\"option\":\"复制\"},{\"option\":\"选择文本\"}],\
         \"location\":[{\"option\":\"导航至该位置\"},{\"option\":\"在地图中打开\"},\
         {\"option\":\"复制\"},{\"option\":\"选择文本\"}]}",
-    "{\"bundlename\":\"com.XXXXXX.hmsapp.hiai\",\"abilityname\":\"EntityMenuUIExtensionAbility\"}"
-};
+    "{\"bundlename\":\"com.XXXXXX.hmsapp.hiai\",\"abilityname\":\"EntityMenuUIExtensionAbility\"}" };
 
 using OnClickCallback = std::function<void(const BaseEventInfo* info)>;
 using DragDropBaseCallback = std::function<DragDropBaseInfo(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)>;
@@ -2148,7 +2145,7 @@ HWTEST_F(TextTestNg, TextContentModifier001, TestSize.Level1)
     textContentModifier.SetBaselineOffset(BASELINE_OFFSET_VALUE);
     MockPipelineContext::SetUp();
     Testing::MockCanvas canvas;
-    EXPECT_CALL(canvas, ClipRect(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, ClipRect(_, _, _)).WillRepeatedly(Return());
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
     textContentModifier.SetParagraph(paragraph);
     // call onDraw function(textRacing_ = true)
@@ -4233,7 +4230,7 @@ HWTEST_F(TextTestNg, TextContentModifier003, TestSize.Level1)
      * @tc.steps: step2. set context.
      */
     Testing::MockCanvas canvas;
-    EXPECT_CALL(canvas, ClipRect(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, ClipRect(_, _, _)).WillRepeatedly(Return());
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
 
     /**
@@ -4317,7 +4314,7 @@ HWTEST_F(TextTestNg, TextContentModifier004, TestSize.Level1)
      *                   push one rect to drawObscuredRects and set drawObscuredRects_ to drawObscuredRects.
      */
     Testing::MockCanvas canvas;
-    EXPECT_CALL(canvas, ClipRect(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, ClipRect(_, _, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     DrawingContext context { canvas, CONTEXT_WIDTH_VALUE, CONTEXT_HEIGHT_VALUE };
@@ -5293,7 +5290,7 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest009, TestSize.Level1)
         .fontLocale = "zh-CN",
         .wordBreak = textStyle.GetWordBreak(),
         .textOverflow = textStyle.GetTextOverflow() };
-    auto paragraph= MockParagraph::GetOrCreateMockParagraph();
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
 
     AISpan aiSpan1;
     aiSpan1.start = AI_SPAN_START;
@@ -5335,7 +5332,7 @@ HWTEST_F(TextTestNg, ParseAIJson001, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
-    
+
     /**
      * @tc.steps: step2. Parse to JsonObject.
      * @tc.expected: parseSuccess phoneNum is not Empty.
@@ -5357,7 +5354,7 @@ HWTEST_F(TextTestNg, ParseAIJson001, TestSize.Level1)
     EXPECT_FALSE(textPattern->aiSpanMap_.empty());
 }
 
-    /**
+/**
  * @tc.name: ParseAIJson002
  * @tc.desc: Test TextPattern: new method ParseAIJson for methodOption
  * @tc.type: FUNC
@@ -5371,7 +5368,7 @@ HWTEST_F(TextTestNg, ParseAIJson002, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
-    
+
     /**
      * @tc.steps: step2. call ParseAIResult function.
      * @tc.expected: parseSuccess any element is not Empty.
@@ -5411,7 +5408,7 @@ HWTEST_F(TextTestNg, ParseAIResult001, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
-    
+
     /**
      * @tc.steps: step2. call ParseAIResult function.
      * @tc.expected: parseSuccess aiSpanMap_ is not Empty.
@@ -5443,7 +5440,7 @@ HWTEST_F(TextTestNg, ParseAIResult002, TestSize.Level1)
     ASSERT_NE(textFrameNode, nullptr);
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
     ASSERT_NE(textPattern, nullptr);
-    
+
     /**
      * @tc.steps: step2. call ParseAIResult function.
      * @tc.expected: parseSuccess aiSpanMap_ is not Empty.
@@ -5466,7 +5463,7 @@ HWTEST_F(TextTestNg, ParseAIResult002, TestSize.Level1)
     EXPECT_FALSE(textPattern->aiSpanMap_.empty());
 }
 
-    /**
+/**
  * @tc.name: HandleSpanSingleClickEvent
  * @tc.desc: test test_pattern.h HandleSpanSingleClickEvent function with valid textSelector
  * @tc.type: FUNC
@@ -5530,7 +5527,7 @@ HWTEST_F(TextTestNg, HandleSpanSingleClickEvent, TestSize.Level1)
     info.localLocation_ = Offset(3.0f, 3.0f);
 
     PointF textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
-    info.GetLocalLocation().GetY() - textContentRect.GetY() };
+        info.GetLocalLocation().GetY() - textContentRect.GetY() };
 
     bool isClickOnSpan = false;
     bool isClickOnAISpan = false;

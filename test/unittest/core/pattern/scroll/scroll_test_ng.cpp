@@ -958,7 +958,7 @@ HWTEST_F(ScrollTestNg, ScrollPositionControlle003, TestSize.Level1)
  */
 HWTEST_F(ScrollTestNg, ScrollBarAnimation001, TestSize.Level1)
 {
-    RSCanvas canvas;
+    Testing::MockCanvas canvas;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
 
@@ -1025,7 +1025,7 @@ HWTEST_F(ScrollTestNg, ScrollBarAnimation001, TestSize.Level1)
  */
 HWTEST_F(ScrollTestNg, ScrollBarAnimation002, TestSize.Level1)
 {
-    RSCanvas canvas;
+    Testing::MockCanvas canvas;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
 
@@ -1082,7 +1082,7 @@ HWTEST_F(ScrollTestNg, ScrollBarAnimation002, TestSize.Level1)
  */
 HWTEST_F(ScrollTestNg, ScrollBarAnimation003, TestSize.Level1)
 {
-    RSCanvas canvas;
+    Testing::MockCanvas canvas;
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     PaintWrapper paintWrapper(nullptr, geometryNode, paintProperty_);
 

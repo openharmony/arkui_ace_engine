@@ -1,4 +1,4 @@
-# Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2022-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -30,6 +30,7 @@ config("config_svg_parse_test") {
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
     "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src/drawing/engine_adapter",
+    "//foundation/graphic/graphic_2d/rosen/modules/render_service_base/include",
     "//third_party/skia",
     "$ace_root",
     "$ace_root/frameworks",
@@ -44,30 +45,107 @@ config("config_svg_parse_test") {
 
 ohos_unittest("parse_test_ng") {
   module_out_path = svg_test_output_path
-
-  sources = [ "parse_test_ng.cpp" ]
-
+  sources = [
+    "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
+    "$ace_root/frameworks/bridge/common/utils/utils.cpp",
+    "$ace_root/frameworks/bridge/js_frontend/engine/common/js_constants.cpp",
+    "$ace_root/frameworks/core/animation/svg_animate.cpp",
+    "$ace_root/frameworks/core/components/declaration/common/declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/common/declaration_constants.cpp",
+    "$ace_root/frameworks/core/components/declaration/common/event.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_animate_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_base_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_circle_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_ellipse_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_fe_colormatrix_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_fe_component_transfer_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_fe_composite_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_fe_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_fe_flood_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_fe_func_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_fe_gaussianblur_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_fe_merge_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_fe_offset_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_filter_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_gradient_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_line_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_mask_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_path_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_pattern_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_polygon_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_rect_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_stop_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_text_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_text_path_declaration.cpp",
+    "$ace_root/frameworks/core/components/svg/svg_transform.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_animation.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_circle.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_clip_path.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_ellipse.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_fe.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_fe_color_matrix.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_fe_composite.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_fe_gaussian_blur.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_fe_offset.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_filter.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_g.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_gradient.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_graphic.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_line.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_mask.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_node.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_path.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_polygon.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_rect.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_stop.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_style.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_svg.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_use.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/svg_context.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/svg_dom.cpp",
+    "$ace_root/test/mock/core/svg/mock_image_painter_utils.cpp",
+    "$ace_root/test/mock/core/svg/mock_rosen_svg_painter.cpp",
+    "$ace_root/test/mock/core/svg/mock_shared_transition_effect.cpp",
+    "parse_test_ng.cpp",
+  ]
+  defines = [ "USE_ROSEN_DRAWING" ]
   if (ace_use_rosen_drawing) {
-    defines = [
+    defines += [
       "ACE_ENABLE_GPU",
       "NEW_SKIA",
     ]
     include_dirs = [ "//third_party/skia" ]
   }
 
+  configs = [
+    ":config_svg_parse_test",
+    "$ace_root/test/unittest:ace_unittest_config",
+  ]
+
+  external_deps = [
+    "eventhandler:libeventhandler",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:rosen_text",
+  ]
+
   deps = [
-    "$ace_root/build:ace_ohos_unittest_base",
-    "$ace_root/frameworks/core/components_ng/base:ace_core_components_base_ng_ohos",
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_components_base",
+    "$ace_root/test/unittest:ace_components_mock",
+    "$ace_root/test/unittest:ace_components_render",
+    "$ace_root/test/unittest:ace_core_animation",
+    "$ace_root/test/unittest:ace_core_extra",
+    "$skia_root_new:skia_ohos",
+    "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/googletest:gmock",
     "//third_party/googletest:gtest_main",
   ]
 
-  configs = [
-    ":config_svg_parse_test",
-    "$ace_root:ace_config",
-  ]
-
   if (ability_runtime_graphics) {
-    external_deps = [
+    external_deps += [
       "ability_runtime:runtime",
       "image_framework:image_native",
       "window_manager:libdm",
@@ -79,25 +157,96 @@ ohos_unittest("svg_dom_test_ng") {
   module_out_path = svg_test_output_path
 
   sources = [
-    "$ace_root/frameworks/core/common/container_scope.cpp",
-    "$ace_root/frameworks/core/components_ng/render/adapter/image_painter_utils.cpp",
+    "$ace_root/frameworks/bridge/common/dom/dom_type.cpp",
+    "$ace_root/frameworks/bridge/common/utils/utils.cpp",
+    "$ace_root/frameworks/bridge/js_frontend/engine/common/js_constants.cpp",
+    "$ace_root/frameworks/core/animation/svg_animate.cpp",
+    "$ace_root/frameworks/core/components/declaration/common/declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/common/declaration_constants.cpp",
+    "$ace_root/frameworks/core/components/declaration/common/event.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_animate_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_base_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_circle_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_ellipse_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_fe_colormatrix_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_fe_component_transfer_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_fe_composite_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_fe_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_fe_flood_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_fe_func_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_fe_gaussianblur_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_fe_merge_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_fe_offset_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_filter_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_gradient_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_line_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_mask_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_path_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_pattern_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_polygon_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_rect_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_stop_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_text_declaration.cpp",
+    "$ace_root/frameworks/core/components/declaration/svg/svg_text_path_declaration.cpp",
+    "$ace_root/frameworks/core/components/svg/svg_transform.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_animation.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_circle.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_clip_path.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_ellipse.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_fe.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_fe_color_matrix.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_fe_composite.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_fe_gaussian_blur.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_fe_offset.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_filter.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_g.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_gradient.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_graphic.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_line.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_mask.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_node.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_path.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_pattern.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_polygon.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_rect.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_stop.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_style.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_svg.cpp",
+    "$ace_root/frameworks/core/components_ng/svg/parse/svg_use.cpp",
     "$ace_root/frameworks/core/components_ng/svg/svg_context.cpp",
     "$ace_root/frameworks/core/components_ng/svg/svg_dom.cpp",
-    "$ace_root/test/mock/core/animation/mock_animator.cpp",
+    "$ace_root/test/mock/core/svg/mock_image_painter_utils.cpp",
+    "$ace_root/test/mock/core/svg/mock_rosen_svg_painter.cpp",
+    "$ace_root/test/mock/core/svg/mock_shared_transition_effect.cpp",
     "svg_dom_test_ng.cpp",
   ]
 
-  deps = [
-    "$ace_root/frameworks/base:ace_memory_monitor_ohos",
-    "$ace_root/test/unittest:ace_unittest_log",
-    "$ace_root/test/unittest:ace_unittest_trace",
-    "$cjson_root:cjson_static",
-    "//third_party/googletest:gmock_main",
-  ]
+  defines = [ "USE_ROSEN_DRAWING" ]
 
   configs = [
-    "$ace_root/test/unittest:ace_unittest_config",
     ":config_svg_parse_test",
+    "$ace_root/test/unittest:ace_unittest_config",
+  ]
+
+  external_deps = [
+    "eventhandler:libeventhandler",
+    "graphic_2d:librender_service_base",
+    "graphic_2d:librender_service_client",
+    "graphic_2d:rosen_text",
+  ]
+
+  deps = [
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_components_base",
+    "$ace_root/test/unittest:ace_components_mock",
+    "$ace_root/test/unittest:ace_components_render",
+    "$ace_root/test/unittest:ace_core_animation",
+    "$ace_root/test/unittest:ace_core_extra",
+    "$skia_root_new:skia_ohos",
+    "//third_party/bounds_checking_function:libsec_static",
+    "//third_party/googletest:gmock",
+    "//third_party/googletest:gtest_main",
   ]
 }
 
