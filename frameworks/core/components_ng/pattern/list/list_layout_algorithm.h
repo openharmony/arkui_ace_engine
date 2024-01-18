@@ -187,9 +187,9 @@ public:
         return spaceWidth_;
     }
 
-    std::optional<float> GetEstimateOffset() const
+    bool NeedEstimateOffset() const
     {
-        return estimateOffset_;
+        return needEstimateOffset_;
     }
 
     void SetContentStartOffset(float startOffset)
@@ -360,8 +360,6 @@ private:
     void MeasureList(LayoutWrapper* layoutWrapper);
     void CheckJumpToIndex();
 
-    void CalculateEstimateOffset(ScrollAlign align);
-
     std::pair<int32_t, float> RequestNewItemsForward(LayoutWrapper* layoutWrapper,
         const LayoutConstraintF& layoutConstraint, int32_t startIndex, float startPos, Axis axis);
 
@@ -414,7 +412,7 @@ private:
 
     V2::ListItemAlign listItemAlign_ = V2::ListItemAlign::START;
 
-    std::optional<float> estimateOffset_;
+    bool needEstimateOffset_ = false;
 
     bool mainSizeIsDefined_ = false;
     bool crossMatchChild_ = false;

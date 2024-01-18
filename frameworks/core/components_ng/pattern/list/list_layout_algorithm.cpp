@@ -186,54 +186,6 @@ float ListLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Ax
     return maxCrossSize;
 }
 
-void ListLayoutAlgorithm::CalculateEstimateOffset(ScrollAlign align)
-{
-    if (itemPosition_.empty()) {
-        estimateOffset_ = 0.0f;
-        return;
-    }
-    float itemsHeight = (itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos) + spaceWidth_;
-    auto lines = static_cast<int32_t>(itemPosition_.size());
-    if (GetLanes() > 1) {
-        lines = (lines / GetLanes()) + (lines % GetLanes() > 0 ? 1 : 0);
-    }
-    if (lines > 0) {
-        float averageHeight = itemsHeight / static_cast<float>(lines);
-        switch (align) {
-            case ScrollAlign::START:
-            case ScrollAlign::NONE:
-                estimateOffset_ = averageHeight * static_cast<float>(jumpIndex_.value() / GetLanes()) -
-                    contentStartOffset_;
-                break;
-            case ScrollAlign::CENTER:
-                estimateOffset_ = averageHeight * static_cast<float>(jumpIndex_.value() / GetLanes()) -
-                    contentMainSize_ / 2.0f + (averageHeight - spaceWidth_) / 2.0f;
-                break;
-            case ScrollAlign::END:
-                estimateOffset_ = averageHeight * static_cast<float>(jumpIndex_.value() / GetLanes() + 1) -
-                    spaceWidth_ - contentMainSize_ + contentEndOffset_;
-                break;
-            case ScrollAlign::AUTO:
-                switch (scrollAutoType_) {
-                    case ScrollAutoType::NOT_CHANGE:
-                        estimateOffset_ = averageHeight * static_cast<float>(itemPosition_.begin()->first /
-                            GetLanes()) - itemPosition_.begin()->second.startPos;
-                        break;
-                    case ScrollAutoType::START:
-                        estimateOffset_ = averageHeight * static_cast<float>(jumpIndex_.value() / GetLanes());
-                        break;
-                    case ScrollAutoType::END:
-                        estimateOffset_ = averageHeight * static_cast<float>(jumpIndex_.value() / GetLanes() + 1) -
-                            spaceWidth_ - contentMainSize_;
-                        break;
-                }
-                break;
-        }
-    } else {
-        estimateOffset_ = 0.0f;
-    }
-}
-
 void ListLayoutAlgorithm::ClearAllItemPosition(LayoutWrapper* layoutWrapper)
 {
     for (auto& pos : itemPosition_) {
@@ -763,7 +715,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
                 HandleJumpAuto(layoutWrapper, startIndex, endIndex, startPos, endPos);
                 break;
         }
-        CalculateEstimateOffset(scrollAlign_);
+        needEstimateOffset_ = true;
     } else if (targetIndex_.has_value()) {
         if (LessOrEqual(startIndex, targetIndex_.value())) {
             LayoutForward(layoutWrapper, startIndex, startPos);
