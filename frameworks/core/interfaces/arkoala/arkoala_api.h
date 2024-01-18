@@ -2304,7 +2304,7 @@ struct ArkUIXComponentModifier {
     void (*resetXComponentOpacity)(ArkUINodeHandle node);
     void (*setXComponentId)(ArkUINodeHandle node, ArkUI_CharPtr id);
     void (*setXComponentType)(ArkUINodeHandle node, ArkUI_Uint32 type);
-    void (*setXComponentSurfaceSize)(ArkUIXComponentControllerHandle node, ArkUI_Uint32 width, ArkUI_Uint32 height);
+    void (*setXComponentSurfaceSize)(ArkUINodeHandle node, ArkUI_Uint32 width, ArkUI_Uint32 height);
 };
 
 struct ArkUIStateModifier {
