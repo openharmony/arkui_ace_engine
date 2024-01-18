@@ -1830,7 +1830,7 @@ bool OverlayManager::RemoveModalInOverlay()
         auto modalTransition = modalPattern->GetType();
         if (modalTransition == ModalTransition::NONE || builder->GetRenderContext()->HasDisappearTransition()) {
             // Fire shown event of navdestination under the disappeared modal
-            FireNavigationStateChange(rootNode, true);
+            FireNavigationStateChange(true);
         }
     }
 
@@ -1868,7 +1868,7 @@ bool OverlayManager::RemoveAllModalInOverlay()
             auto modalTransition = modalPattern->GetType();
             if (modalTransition == ModalTransition::NONE || builder->GetRenderContext()->HasDisappearTransition()) {
                 // Fire shown event of navdestination under the disappeared modal
-                FireNavigationStateChange(rootNode, true);
+                FireNavigationStateChange(true);
             }
         }
         auto sheetPattern = topModalNode->GetPattern<SheetPresentationPattern>();
@@ -1893,7 +1893,7 @@ bool OverlayManager::ModalExitProcess(const RefPtr<FrameNode>& topModalNode)
             if (!topModalNode->GetPattern<ModalPresentationPattern>()->IsExecuteOnDisappear()) {
                 topModalNode->GetPattern<ModalPresentationPattern>()->OnDisappear();
                 // Fire hidden event of navdestination on the disappeared modal
-                FireNavigationStateChange(rootNode, false, topModalNode);
+                FireNavigationStateChange(false, topModalNode);
             }
             topModalNode->Clean(false, true);
             topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1905,7 +1905,7 @@ bool OverlayManager::ModalExitProcess(const RefPtr<FrameNode>& topModalNode)
         } else if (!builder->GetRenderContext()->HasDisappearTransition()) {
             topModalNode->GetPattern<ModalPresentationPattern>()->OnDisappear();
             // Fire hidden event of navdestination on the disappeared modal
-            FireNavigationStateChange(rootNode, false, topModalNode);
+            FireNavigationStateChange(false, topModalNode);
             rootNode->RemoveChild(topModalNode);
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         }
@@ -2119,7 +2119,7 @@ void OverlayManager::SaveLastModalNode()
     }
 }
 
-void OverlayManager::FireNavigationStateChange(const RefPtr<UINode>& root, bool show, const RefPtr<UINode>& node)
+void OverlayManager::FireNavigationStateChange(bool show, const RefPtr<UINode>& node)
 {
     if (!show && node) {
         // Only check node When it is appointed
@@ -2138,15 +2138,8 @@ void OverlayManager::FireNavigationStateChange(const RefPtr<UINode>& root, bool 
         return;
     }
 
-    const auto& children = root->GetChildren();
-    for (auto iter = children.begin(); iter != children.end(); ++iter) {
-        auto& child = *iter;
-        if (!show && child == topModalNode) {
-            // Do not check top modal if firing hidden event
-            continue;
-        }
-        NavigationPattern::FireNavigationStateChange(child, show);
-    }
+    auto lastPage = GetLastPage();
+    NavigationPattern::FireNavigationStateChange(lastPage, show);
 }
 
 RefPtr<FrameNode> OverlayManager::GetModalNodeInStack(std::stack<WeakPtr<FrameNode>>& stack)
@@ -2218,7 +2211,7 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
             onAppear();
         }
         // Fire hidden event of navdestination under the appeared modal
-        FireNavigationStateChange(rootNode, false);
+        FireNavigationStateChange(false);
         if (modalTransition == ModalTransition::DEFAULT) {
             PlayDefaultModalTransition(modalNode, true);
         } else if (modalTransition == ModalTransition::ALPHA) {
@@ -2245,7 +2238,7 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
             if (!topModalNode->GetPattern<ModalPresentationPattern>()->IsExecuteOnDisappear()) {
                 topModalNode->GetPattern<ModalPresentationPattern>()->OnDisappear();
                 // Fire hidden event of navdestination on the disappeared modal
-                FireNavigationStateChange(rootNode, false, topModalNode);
+                FireNavigationStateChange(false, topModalNode);
             }
             topModalNode->Clean(false, true);
             topModalNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -2263,7 +2256,7 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
             if (!modalPresentationPattern->IsExecuteOnDisappear()) {
                 modalPresentationPattern->OnDisappear();
                 // Fire hidden event of navdestination on the disappeared modal
-                FireNavigationStateChange(rootNode, false, topModalNode);
+                FireNavigationStateChange(false, topModalNode);
             }
             rootNode->RemoveChild(topModalNode);
             rootNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -2274,7 +2267,7 @@ void OverlayManager::BindContentCover(bool isShow, std::function<void(const std:
         }
         if (modalTransition == ModalTransition::NONE || builder->GetRenderContext()->HasDisappearTransition()) {
             // Fire shown event of navdestination under the disappeared modal
-            FireNavigationStateChange(rootNode, true);
+            FireNavigationStateChange(true);
         }
         FireModalPageHide();
         SaveLastModalNode();
@@ -2375,12 +2368,12 @@ void OverlayManager::PlayDefaultModalTransition(const RefPtr<FrameNode>& modalNo
                         if (!modal->GetPattern<ModalPresentationPattern>()->IsExecuteOnDisappear()) {
                             modal->GetPattern<ModalPresentationPattern>()->OnDisappear();
                             // Fire hidden event of navdestination on the disappeared modal
-                            overlayManager->FireNavigationStateChange(root, false, modal);
+                            overlayManager->FireNavigationStateChange(false, modal);
                         }
                         root->RemoveChild(modal);
                         root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                         // Fire shown event of navdestination under the disappeared modal
-                        overlayManager->FireNavigationStateChange(root, true);
+                        overlayManager->FireNavigationStateChange(true);
                     },
                     TaskExecutor::TaskType::UI);
             });
@@ -2440,12 +2433,12 @@ void OverlayManager::PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode
                         if (!modal->GetPattern<ModalPresentationPattern>()->IsExecuteOnDisappear()) {
                             modal->GetPattern<ModalPresentationPattern>()->OnDisappear();
                             // Fire hidden event of navdestination on the disappeared modal
-                            overlayManager->FireNavigationStateChange(root, false, modal);
+                            overlayManager->FireNavigationStateChange(false, modal);
                         }
                         root->RemoveChild(modal);
                         root->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
                         // Fire shown event of navdestination under the disappeared modal
-                        overlayManager->FireNavigationStateChange(root, true);
+                        overlayManager->FireNavigationStateChange(true);
                     },
                     TaskExecutor::TaskType::UI);
             });
@@ -3056,7 +3049,7 @@ void OverlayManager::DeleteModal(int32_t targetId)
                 modalNode->GetPattern<ModalPresentationPattern>()->OnDisappear();
                 modalNode->GetPattern<ModalPresentationPattern>()->FireCallback("false");
                 // Fire hidden event of navdestination on the disappeared modal
-                FireNavigationStateChange(rootNode, false, modalNode);
+                FireNavigationStateChange(false, modalNode);
                 rootNode->RemoveChild(modalNode);
             } else {
                 modalNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
