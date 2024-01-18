@@ -199,7 +199,7 @@ RefPtr<NodePaintMethod> RatingPattern::CreateNodePaintMethod()
             foregroundConfig_, secondaryConfig_, backgroundConfig_);
     }
     if (!(foregroundImageCanvas_->IsStatic() && secondaryImageCanvas_->IsStatic() &&
-            secondaryImageCanvas_->IsStatic())) {
+            backgroundImageCanvas_->IsStatic())) {
         ratingModifier_->SetNeedDraw(true);
     }
     auto reverse = ratingLayoutProperty->GetLayoutDirection() == TextDirection::RTL;
