@@ -23,7 +23,7 @@ typedef void* EventReport;
 
 class ACE_EXPORT ILongFrame final {
 public:
-    ILongFrame();
+    ILongFrame() = default;
     ~ILongFrame() = default;
     void ReportStartEvent();
     void ReportEndEvent();
