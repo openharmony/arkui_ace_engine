@@ -407,19 +407,26 @@ bool PageRouterManager::StartPop()
         return false;
     }
 
+    // pop top page in page stack
     auto topNode = pageRouterStack_.back();
     pageRouterStack_.pop_back();
-    if (!OnPopPage(true, true)) {
-        pageRouterStack_.emplace_back(topNode);
-        return false;
-    }
+
+    //clean prev top page params
     currentPage = pageRouterStack_.empty() ? nullptr : pageRouterStack_.back().Upgrade();
     CHECK_NULL_RETURN(currentPage, false);
     pagePattern = currentPage->GetPattern<PagePattern>();
     CHECK_NULL_RETURN(pagePattern, false);
     pageInfo = DynamicCast<EntryPageInfo>(pagePattern->GetPageInfo());
     CHECK_NULL_RETURN(pageInfo, false);
+    std::string params = pageInfo->GetPageParams();
     pageInfo->ReplacePageParams("");
+
+    //do pop page
+    if (!OnPopPage(true, true)) {
+        pageRouterStack_.emplace_back(topNode);
+        pageInfo->ReplacePageParams(params);
+        return false;
+    }
     return true;
 }
 
