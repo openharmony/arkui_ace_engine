@@ -78,6 +78,7 @@ build_component_ng("pattern_ng") {
     "counter/counter_model_ng.cpp",
     "counter/counter_node.cpp",
     "custom/custom_measure_layout_node.cpp",
+    "custom/custom_measure_layout_param.cpp",
     "custom/custom_node.cpp",
     "custom/custom_node_base.cpp",
     "custom/custom_node_layout_algorithm.cpp",

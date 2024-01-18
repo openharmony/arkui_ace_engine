@@ -20,9 +20,48 @@
 
 #include "base/memory/ace_type.h"
 #include "core/components_ng/layout/layout_wrapper.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_param.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 
 namespace OHOS::Ace::Framework {
+
+// used for deprecated ets interface onMeasure and onLayout
+class JSMeasureLayoutParam : public NG::MeasureLayoutParam {
+    DECLARE_ACE_TYPE(JSMeasureLayoutParam, NG::MeasureLayoutParam);
+public:
+    JSMeasureLayoutParam(NG::LayoutWrapper* layoutWrapper);
+    JSRef<JSObject> GetConstraint();
+    JSRef<JSArray> GetChildArray()
+    {
+        return childArray_;
+    }
+    void Init() override;
+    void Update(NG::LayoutWrapper* layoutWrapper) override;
+    static RefPtr<JSMeasureLayoutParam> GetInstance(NG::LayoutWrapper* layoutWrapper);
+private:
+    void GenChildArray(int32_t start, int32_t end);
+    JSRef<JSArray> childArray_;
+};
+
+// used for ets interface onMeasureSize and onPlaceChildren
+class JSMeasureLayoutParamNG : public NG::MeasureLayoutParam {
+    DECLARE_ACE_TYPE(JSMeasureLayoutParamNG, NG::MeasureLayoutParam);
+public:
+    JSMeasureLayoutParamNG(NG::LayoutWrapper* layoutWrapper);
+    JSRef<JSObject> GetConstraint();
+    JSRef<JSArray> GetChildArray()
+    {
+        return childArray_;
+    }
+    void Init() override;
+    JSRef<JSObject> GetSelfLayoutInfo();
+    void UpdateSize(int32_t index, const NG::SizeF& size) override;
+    void Update(NG::LayoutWrapper* layoutWrapper) override;
+    static RefPtr<JSMeasureLayoutParamNG> GetInstance(NG::LayoutWrapper* layoutWrapper);
+private:
+    void GenChildArray(int32_t start, int32_t end);
+    JSRef<JSArray> childArray_;
+};
 
 class ACE_EXPORT ViewMeasureLayout : AceType {
     DECLARE_ACE_TYPE(ViewMeasureLayout, AceType);
@@ -35,30 +74,6 @@ public:
     static panda::Local<panda::JSValueRef> JSMeasure(panda::JsiRuntimeCallInfo* info);
     static panda::Local<panda::JSValueRef> JSLayout(panda::JsiRuntimeCallInfo* info);
     static panda::Local<panda::JSValueRef> JSPlaceChildren(panda::JsiRuntimeCallInfo* info);
-
-    static void SetMeasureChildren(std::list<RefPtr<NG::LayoutWrapper>> children)
-    {
-        measureChildren_ = std::move(children);
-        iterMeasureChildren_ = measureChildren_.begin();
-    }
-
-    static void SetLayoutChildren(std::list<RefPtr<NG::LayoutWrapper>> children)
-    {
-        layoutChildren_ = std::move(children);
-        iterLayoutChildren_ = layoutChildren_.begin();
-    }
-
-    static void SetDefaultMeasureConstraint(NG::LayoutConstraintF constraint)
-    {
-        measureDefaultConstraint_ = constraint;
-    }
-
-private:
-    static thread_local std::list<RefPtr<NG::LayoutWrapper>> measureChildren_;
-    static thread_local std::list<RefPtr<NG::LayoutWrapper>>::iterator iterMeasureChildren_;
-    static thread_local std::list<RefPtr<NG::LayoutWrapper>> layoutChildren_;
-    static thread_local std::list<RefPtr<NG::LayoutWrapper>>::iterator iterLayoutChildren_;
-    static thread_local NG::LayoutConstraintF measureDefaultConstraint_;
 #endif
 };
 

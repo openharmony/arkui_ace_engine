@@ -197,6 +197,12 @@ size_t JsiArray::Length() const
     return length;
 }
 
+void JsiArray::SetLength(size_t length) const
+{
+    auto stringRef = panda::StringRef::NewFromUtf8(GetEcmaVM(), "length");
+    GetHandle()->Set(GetEcmaVM(), stringRef, JsiValueConvertor::toJsiValueWithVM<size_t>(GetEcmaVM(), length));
+}
+
 bool JsiArray::IsArray() const
 {
     if (GetHandle().IsEmpty()) {
