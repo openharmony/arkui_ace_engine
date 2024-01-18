@@ -212,15 +212,16 @@ void PageRouterManager::PushNamedRoute(const RouterPageInfo& target)
     }
     CleanPageOverlay();
     if (target.routerMode == RouterMode::SINGLE) {
-        auto pageInfo = FindPageInStack(target.url);
+        auto getPageInfoByUrl = FindPageInStack(target.url);
         auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(target.url);
-        if (!pagePath.empty()) {
-            pageInfo = FindPageInStack(pagePath);
-        }
-        if (pageInfo.second) {
-            // find page in stack, move postion and update params.
-            MovePageToFront(pageInfo.first, pageInfo.second, target, true);
+        auto getPageInfoByPagePath = FindPageInStack(pagePath);
+        if (getPageInfoByUrl.second) {
+            // get PageInfo by url, find page in stack, move postion and update params.
+            MovePageToFront(getPageInfoByUrl.first, getPageInfoByUrl.second, target, true);
             return;
+        } else if (getPageInfoByPagePath.second) {
+            // get PageInfo by pagePath, find page in stack, move postion and update params.
+            MovePageToFront(getPageInfoByPagePath.first, getPageInfoByPagePath.second, target, true);
         }
     }
     RouterPageInfo info = target;
