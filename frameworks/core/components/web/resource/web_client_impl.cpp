@@ -133,8 +133,9 @@ void DownloadListenerImpl::OnDownloadStart(const std::string& url, const std::st
 void AccessibilityEventListenerImpl::OnAccessibilityEvent(int64_t accessibilityId, uint32_t eventType)
 {
     ContainerScope scope(instanceId_);
-    CHECK_NULL_VOID(webDelegate_);
-    webDelegate_->OnAccessibilityEvent(accessibilityId, static_cast<AccessibilityEventType>(eventType));
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnAccessibilityEvent(accessibilityId, static_cast<AccessibilityEventType>(eventType));
 }
 
 void FindListenerImpl::OnFindResultReceived(
