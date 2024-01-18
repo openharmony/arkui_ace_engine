@@ -90,13 +90,13 @@ ArkUINativeModuleValue GridBridge::SetColumnsGap(ArkUIRuntimeCallInfo* runtimeCa
         GetArkUIInternalNodeAPI()->GetGridModifier().ResetGridColumnsGap(nativeNode);
     } else {
         if (size.Unit() == DimensionUnit::CALC) {
-            columnGap.Uint = static_cast<int32_t>(DimensionUnit::CALC);
+            columnGap.unit = static_cast<int32_t>(DimensionUnit::CALC);
             calcStr = size.CalcValue();
             columnGap.string = calcStr.c_str();
             GetArkUIInternalNodeAPI()->GetGridModifier().SetGridColumnsGap(nativeNode, &columnGap);
         } else {
             columnGap.value = size.Value();
-            columnGap.Uint = static_cast<int32_t>(size.Unit());
+            columnGap.unit = static_cast<int32_t>(size.Unit());
             columnGap.string = calcStr.c_str();
             GetArkUIInternalNodeAPI()->GetGridModifier().SetGridColumnsGap(nativeNode, &columnGap);
         }
@@ -129,13 +129,13 @@ ArkUINativeModuleValue GridBridge::SetRowsGap(ArkUIRuntimeCallInfo* runtimeCallI
         GetArkUIInternalNodeAPI()->GetGridModifier().ResetGridRowsGap(nativeNode);
     } else {
         if (size.Unit() == DimensionUnit::CALC) {
-            rowsGap.Uint = static_cast<int32_t>(DimensionUnit::CALC);
+            rowsGap.unit = static_cast<int32_t>(DimensionUnit::CALC);
             calcStr = size.CalcValue();
             rowsGap.string = calcStr.c_str();
             GetArkUIInternalNodeAPI()->GetGridModifier().SetGridRowsGap(nativeNode, &rowsGap);
         } else {
             rowsGap.value = size.Value();
-            rowsGap.Uint = static_cast<int32_t>(size.Unit());
+            rowsGap.unit = static_cast<int32_t>(size.Unit());
             rowsGap.string = calcStr.c_str();
             GetArkUIInternalNodeAPI()->GetGridModifier().SetGridRowsGap(nativeNode, &rowsGap);
         }

@@ -138,7 +138,7 @@ struct ArkUIFontStruct {
 
 struct ArkUIResourceLength {
     double value;
-    int32_t Uint;
+    int32_t unit;
     const char* string;
 };
 
