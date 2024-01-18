@@ -49,7 +49,6 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/base/mock_image_source.cpp",
     "$ace_root/test/mock/base/mock_jank_frame_report.cpp",
     "$ace_root/test/mock/base/mock_localization.cpp",
-    "$ace_root/test/mock/base/mock_long_frame_report.cpp",
     "$ace_root/test/mock/base/mock_mouse_style.cpp",
     "$ace_root/test/mock/base/mock_pixel_map.cpp",
     "$ace_root/test/mock/base/mock_socperf_client_impl.cpp",
@@ -89,4 +88,8 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/unittest/core/pattern/text/mock/mock_text_layout_adapter.cpp",
     "pipeline_context_test_ng.cpp",
   ]
+
+  if (defined(resourceschedule_ffrt_support) && resourceschedule_ffrt_support) {
+    sources += [ "$ace_root/test/mock/base/mock_long_frame_report.cpp" ]
+  }
 }

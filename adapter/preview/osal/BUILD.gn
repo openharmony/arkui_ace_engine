@@ -73,7 +73,6 @@ ohos_source_set("preview_osal_source") {
       "file_uri_helper_preview.cpp",
       "frame_report.cpp",
       "image_source_preview.cpp",
-      "long_frame_report_impl.cpp",
       "modal_ui_extension_impl.cpp",
       "mouse_style_ohos.cpp",
       "pixel_map_preview.cpp",
@@ -87,6 +86,11 @@ ohos_source_set("preview_osal_source") {
       "trace_id_impl.cpp",
       "view_data_wrap_impl.cpp",
     ]
+
+    if (defined(resourceschedule_ffrt_support) &&
+        resourceschedule_ffrt_support) {
+      sources += [ "long_frame_report_impl.cpp" ]
+    }
 
     cflags_cc = [
       "-DNAME_MAX=128",

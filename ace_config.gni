@@ -234,6 +234,14 @@ if (!defined(global_parts_info) ||
   security_component_enable = false
 }
 
+if (defined(global_parts_info) &&
+    defined(global_parts_info.resourceschedule_ffrt)) {
+  ace_common_defines += [ "FFRT_EXISTS" ]
+  resourceschedule_ffrt_support = true
+} else {
+  resourceschedule_ffrt_support = false
+}
+
 ace_platforms = []
 
 _ace_adapter_dir = rebase_path("$ace_root/adapter", root_build_dir)

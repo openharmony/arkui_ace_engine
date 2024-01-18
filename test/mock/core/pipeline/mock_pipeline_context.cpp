@@ -307,6 +307,8 @@ void PipelineContext::AddDirtyRequestFocus(const RefPtr<FrameNode>& node) {}
 // core/pipeline_ng/pipeline_context.h depends on the specific impl
 void UITaskScheduler::FlushTask() {}
 
+UITaskScheduler::UITaskScheduler() {}
+
 UITaskScheduler::~UITaskScheduler() = default;
 
 void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty) {}
