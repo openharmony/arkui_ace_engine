@@ -228,7 +228,8 @@ void ApplyModifierFinish(ArkUINodeHandle nodePtr)
 
 static ArkUIAPICallbackMethod* callbacks = nullptr;
 
-static void SetCallbackMethod(ArkUIAPICallbackMethod* method) {
+static void SetCallbackMethod(ArkUIAPICallbackMethod* method)
+{
     callbacks = method;
 }
 
