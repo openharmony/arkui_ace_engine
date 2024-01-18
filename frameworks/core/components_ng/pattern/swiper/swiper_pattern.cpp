@@ -3485,6 +3485,10 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
         isFinishAnimation_ = false;
     } else {
         UpdateCurrentIndex(nextIndex);
+        if (currentFocusIndex_ < GetLoopIndex(currentIndex_) ||
+            currentFocusIndex_ >= GetLoopIndex(currentIndex_) + GetDisplayCount()) {
+            currentFocusIndex_ = GetLoopIndex(currentIndex_);
+        }
         do {
             auto curChildFrame = GetCurrentFrameNode(currentFocusIndex_);
             if (!curChildFrame) {
