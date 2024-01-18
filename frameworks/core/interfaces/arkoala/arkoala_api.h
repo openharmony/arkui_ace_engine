@@ -34,6 +34,7 @@ enum ArkUIAPIVariantKind {
     BASIC = 1,
     FULL = 2,
     GRAPHICS = 3,
+    EXTENDED = 4,
     COUNT = GRAPHICS + 1,
 };
 
@@ -554,7 +555,7 @@ enum ArkUIAsyncEventKind {
     ON_CANVAS_READY = ARKUI_MAX_EVENT_NUM * ARKUI_CANVAS,
 
     ON_RADIO_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_RADIO,
-    
+
     ON_GRID_SCROLL = ARKUI_MAX_EVENT_NUM * ARKUI_GRID,
     ON_GRID_START,
     ON_GRID_STOP,
@@ -2606,6 +2607,7 @@ struct ArkUIExtendedNodeAPI {
     /// Continuations on native side.
     void (*callContinuation)(ArkUI_Int32 continuationId, ArkUI_Int32 argCount,
                              ArkUIEventCallbackArg *args);
+    void (*setChildTotalCuunt)(ArkUINodeHandle node, ArkUI_Int32 totalCount);
 };
 
 /**

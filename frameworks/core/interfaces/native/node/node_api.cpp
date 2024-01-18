@@ -225,7 +225,6 @@ void ApplyModifierFinish(ArkUINodeHandle nodePtr)
     }
 }
 
-
 static ArkUIAPICallbackMethod* callbacks = nullptr;
 
 static void SetCallbackMethod(ArkUIAPICallbackMethod* method)
@@ -233,54 +232,170 @@ static void SetCallbackMethod(ArkUIAPICallbackMethod* method)
     callbacks = method;
 }
 
-/* clang-format off */
-const struct ArkUIBasicAPI basicImpl = {
-    CreateNode,
-    DisposeNode,
-    nullptr,
-    nullptr,
-    AddChild,
-    RemoveChild,
-    InsertChildAfter,
-    nullptr,
-    nullptr,
-    nullptr,
-    NotifyComponentAsyncEvent,
-    NotifyResetComponentAsyncEvent,
-    RegisterNodeAsyncEventReceiver,
-    nullptr,
-    nullptr,
-    ApplyModifierFinish,
-    nullptr,
-};
-/* clang-format on */
+const ArkUIBasicAPI* GetBasicAPI() {
+    /* clang-format off */
+    static const ArkUIBasicAPI basicImpl = {
+        CreateNode,
+        DisposeNode,
+        nullptr,
+        nullptr,
 
-const ArkUIBasicAPI* GetBasicAPI()
-{
+        AddChild,
+        RemoveChild,
+        InsertChildAfter,
+        nullptr,
+        nullptr,
+        nullptr,
+
+        // TODO: why the below two names don't match Arkoala?
+        NotifyComponentAsyncEvent,
+        NotifyResetComponentAsyncEvent,
+        RegisterNodeAsyncEventReceiver,
+        nullptr,
+
+        nullptr,
+
+        ApplyModifierFinish,
+        nullptr,
+    };
+    /* clang-format on */
+
     return &basicImpl;
 }
 
 /* clang-format off */
-ArkUIFullNodeAPI impl = {
+ArkUIExtendedNodeAPI impl_extended = {
+    ARKUI_EXTENDED_API_VERSION,
+
+    nullptr,
+    nullptr,
+
+    SetCallbackMethod,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+};
+/* clang-format on */
+
+void CanvasDrawRect(ArkUICanvasHandle canvas,
+    ArkUI_Float64 left, ArkUI_Float64 top, ArkUI_Float64 right, ArkUI_Float64 bottom, ArkUIPaintHandle paint) {
+        TAG_LOGI(AceLogTag::ACE_NATIVE_NODE, "DrawRect canvas=%{public}p [%{public}f, %{public}f, %{public}f, %{public}f]\n", canvas, left, top, right, bottom);
+    }
+
+const ArkUIGraphicsCanvas* GetCanvasAPI() {
+    static const ArkUIGraphicsCanvas modifier = {
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        CanvasDrawRect,
+        nullptr
+    };
+    return &modifier;
+}
+
+struct DummyPaint {
+    ArkUI_Int32 color;
+};
+
+ArkUIPaintHandle PaintMake() {
+    return reinterpret_cast<ArkUIPaintHandle>(new DummyPaint());
+}
+
+void PaintFinalize(ArkUIPaintHandle paintPtr) {
+    auto* paint = reinterpret_cast<DummyPaint*>(paintPtr);
+    delete paint;
+}
+
+const ArkUIGraphicsPaint* GetPaintAPI() {
+    static const ArkUIGraphicsPaint modifier = {
+        PaintMake,
+        PaintFinalize,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr
+    };
+    return &modifier;
+}
+
+const ArkUIGraphicsFont* GetFontAPI() {
+    static const ArkUIGraphicsFont modifier = {
+        nullptr,
+    };
+    return &modifier;
+}
+
+const ArkUIGraphicsAPI* GetGraphicsAPI() {
+    static const ArkUIGraphicsAPI api = {
+        ARKUI_NODE_GRAPHICS_API_VERSION,
+        SetCallbackMethod,
+        GetCanvasAPI,
+        GetPaintAPI,
+        GetFontAPI
+    };
+    return &api;
+}
+
+const ArkUIAnimation* GetAnimationAPI() {
+    static const ArkUIAnimation modifier = {
+        nullptr,
+        nullptr,
+        nullptr,
+    };
+    return &modifier;
+}
+
+const ArkUINavigation* GetNavigationAPI() {
+    static const ArkUINavigation modifier = {
+        nullptr,
+        nullptr,
+    };
+    return &modifier;
+}
+
+
+/* clang-format off */
+ArkUIFullNodeAPI impl_full = {
     ARKUI_NODE_API_VERSION,
     SetCallbackMethod,      // CallbackMethod
     GetBasicAPI,            // BasicAPI
     GetArkUINodeModifiers,  // NodeModifiers
-    nullptr,                // Animation
-    nullptr,                // Navigation
-    nullptr,                // GraphicsAPI
+    GetAnimationAPI,        // Animation
+    GetNavigationAPI,       // Navigation
+    GetGraphicsAPI,         // Graphics
 };
 /* clang-format on */
 } // namespace
 
 } // namespace OHOS::Ace::NG
 
+
 extern "C" {
+
 ACE_FORCE_EXPORT ArkUIAnyAPI* GetArkUIAnyFullNodeAPI(int version)
 {
     switch (version) {
         case ARKUI_NODE_API_VERSION:
-            return reinterpret_cast<ArkUIAnyAPI*>(&OHOS::Ace::NG::impl);
+            return reinterpret_cast<ArkUIAnyAPI*>(&OHOS::Ace::NG::impl_full);
         default: {
             TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
                 "Requested version %{public}d is not supported, we're version %{public}d", version,
@@ -292,11 +407,82 @@ ACE_FORCE_EXPORT ArkUIAnyAPI* GetArkUIAnyFullNodeAPI(int version)
 
 const ArkUIFullNodeAPI* GetArkUIFullNodeAPI()
 {
-    return &OHOS::Ace::NG::impl;
+    return &OHOS::Ace::NG::impl_full;
 }
 
 void SendArkUIAsyncEvent(ArkUINodeEvent* event)
 {
     OHOS::Ace::NG::NodeEvent::SendArkUIAsyncEvent(event);
 }
+
+ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUINodeAPI(ArkUIAPIVariantKind kind, ArkUI_Int32 version)
+{
+    switch (kind) {
+        case ArkUIAPIVariantKind::BASIC: {
+            switch (version) {
+                case ARKUI_BASIC_API_VERSION:
+                    return reinterpret_cast<const ArkUIAnyAPI*>(OHOS::Ace::NG::GetBasicAPI());
+                default: {
+                    TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
+                    "Requested basic version %{public}d is not supported, we're version %{public}d\n", version, ARKUI_BASIC_API_VERSION);
+                    return nullptr;
+                }
+            }
+        }
+        case ArkUIAPIVariantKind::FULL: {
+            switch (version) {
+                case ARKUI_FULL_API_VERSION:
+                    return reinterpret_cast<const ArkUIAnyAPI*>(&OHOS::Ace::NG::impl_full);
+                default: {
+                    TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
+                    "Requested full version %{public}d is not supported, we're version %{public}d\n", version, ARKUI_FULL_API_VERSION);
+                    return nullptr;
+                }
+            }
+        }
+        case ArkUIAPIVariantKind::GRAPHICS: {
+            switch (version) {
+                case ARKUI_NODE_GRAPHICS_API_VERSION:
+                    return reinterpret_cast<const ArkUIAnyAPI*>(OHOS::Ace::NG::GetGraphicsAPI());
+                default: {
+                    TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
+                    "Requested graphics version %{public}d is not supported, we're version %{public}d\n", version, ARKUI_NODE_GRAPHICS_API_VERSION);
+                    return nullptr;
+                }
+            }
+        }
+        case ArkUIAPIVariantKind::EXTENDED: {
+            switch (version) {
+                case ARKUI_EXTENDED_API_VERSION:
+                    return reinterpret_cast<const ArkUIAnyAPI*>(&OHOS::Ace::NG::impl_extended);
+                default: {
+                    TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
+                    "Requested extended version %{public}d is not supported, we're version %{public}d\n", version, ARKUI_EXTENDED_API_VERSION);
+                    return nullptr;
+                }
+            }
+        }
+        default: {
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "API kind %{public}d is not supported\n", static_cast<int>(kind));
+            return nullptr;
+        }
+    }
+}
+
+__attribute__((constructor)) static void provideEntryPoint(void)
+{
+#ifdef WINDOWS_PLATFORM
+    // mingw has no setenv :(.
+    static char entryPointString[64];
+    snprintf(entryPointString, sizeof entryPointString, "__LIBACE_ENTRY_POINT=%llx",
+        static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(&GetArkUINodeAPI)));
+    putenv(entryPointString);
+#else
+    char entryPointString[64];
+    snprintf(entryPointString, sizeof entryPointString, "%llx",
+        static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(&GetArkUINodeAPI)));
+    setenv("__LIBACE_ENTRY_POINT", entryPointString, 1);
+#endif
+}
+
 }
