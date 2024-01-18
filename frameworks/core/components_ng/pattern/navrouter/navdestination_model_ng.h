@@ -23,7 +23,8 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT NavDestinationModelNG : public OHOS::Ace::NavDestinationModel {
 public:
     void Create() override;
-    void Create(std::function<void()>&& deepRenderFunc) override;
+    void Create(std::function<void()>&& deepRenderFunc,
+        RefPtr<NG::NavDestinationContext> context = nullptr) override;
     void SetHideTitleBar(bool hideTitleBar) override;
     void SetTitle(const std::string& title, bool hasSubTitle) override;
     void SetBackButtonIcon(const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap,
@@ -35,6 +36,7 @@ public:
     void SetOnShown(std::function<void()>&& onShow) override;
     void SetOnHidden(std::function<void()>&& onHidden) override;
     void SetOnBackPressed(std::function<bool()>&& onBackPressed) override;
+    void SetOnReady(std::function<void(RefPtr<NavDestinationContext>)>&& onReady) override;
     RefPtr<AceType> CreateEmpty() override;
     static void SetHideTitleBar(FrameNode* frameNode, bool hideTitleBar);
     void SetNavDestinationMode(NavDestinationMode mode) override;

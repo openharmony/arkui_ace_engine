@@ -21,6 +21,7 @@
 #include "core/components_ng/base/observer_handler.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/gesture_event_hub.h"
+#include "core/components_ng/pattern/navrouter/navdestination_context.h"
 
 namespace OHOS::Ace::NG {
 using OnStateChangeEvent = std::function<void(bool)>;
@@ -114,6 +115,23 @@ public:
         return false;
     }
 
+    void SetOnReady(const std::function<void(RefPtr<NavDestinationContext>)>& onReady)
+    {
+        onReadyEvent_ = onReady;
+    }
+
+    std::function<void(RefPtr<NavDestinationContext>)> GetOnReady() const
+    {
+        return onReadyEvent_;
+    }
+
+    void FireOnReady(RefPtr<NavDestinationContext> context)
+    {
+        if (onReadyEvent_) {
+            onReadyEvent_(context);
+        }
+    }
+
 private:
     WeakPtr<AceType> GetNavDestinationPattern() const
     {
@@ -126,6 +144,7 @@ private:
     std::function<void()> onShownEvent_;
     std::function<void()> onHiddenEvent_;
     std::function<bool()> onBackPressedEvent_;
+    std::function<void(RefPtr<NavDestinationContext>)> onReadyEvent_;
 
     bool isActivated_ = false;
 };
