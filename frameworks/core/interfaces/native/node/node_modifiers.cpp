@@ -74,6 +74,7 @@ const ArkUINodeModifiers impl = {
     nullptr,
     nullptr,
     nullptr,
+    nullptr,
     NodeModifier::GetSpanModifier,
     nullptr,
     nullptr,
@@ -120,6 +121,23 @@ const ArkUINodeModifiers impl = {
 #else
     nullptr,
 #endif
+    nullptr, // FlexModifier
+    nullptr, // ScrollBarModifier
+    nullptr, // ScrollerModifier
+    nullptr, // TabContentModifier
+    nullptr, // TabsControllerModifier
+    nullptr, // GestureModifier
+    nullptr, // BadgeModifier
+    nullptr, // WebModifier
+    nullptr, // RefreshModifier
+    nullptr, // MenuItemGroupModifier
+    nullptr, // SearchControllerModifier
+    nullptr, // SideBarModifier
+    nullptr, // PatternLockControllerModifier
+    nullptr, // TextTimerControllerModifier
+    nullptr, // TextClockControllerModifier
+    nullptr, // RichEditorControllerModifier
+    nullptr, // TextAreaControllerModifier
 };
 
 } // namespace

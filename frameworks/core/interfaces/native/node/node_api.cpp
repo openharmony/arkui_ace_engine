@@ -225,6 +225,13 @@ void ApplyModifierFinish(ArkUINodeHandle nodePtr)
     }
 }
 
+
+static ArkUIAPICallbackMethod* callbacks = nullptr;
+
+static void SetCallbackMethod(ArkUIAPICallbackMethod* method) {
+    callbacks = method;
+}
+
 /* clang-format off */
 const struct ArkUIBasicAPI basicImpl = {
     CreateNode,
@@ -255,11 +262,12 @@ const ArkUIBasicAPI* GetBasicAPI()
 /* clang-format off */
 ArkUIFullNodeAPI impl = {
     ARKUI_NODE_API_VERSION,
-    GetBasicAPI,
-    GetArkUINodeModifiers,
-    nullptr,
-    nullptr,
-    nullptr,
+    SetCallbackMethod,      // CallbackMethod
+    GetBasicAPI,            // BasicAPI
+    GetArkUINodeModifiers,  // NodeModifiers
+    nullptr,                // Animation
+    nullptr,                // Navigation
+    nullptr,                // GraphicsAPI
 };
 /* clang-format on */
 } // namespace

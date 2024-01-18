@@ -65,7 +65,7 @@ void SetGridColumnsGap(NodeHandle node, const struct ArkUIResourceLength* column
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(columnsGap->Uint);
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(columnsGap->unit);
     Dimension gap;
     if (unitEnum == DimensionUnit::CALC) {
         gap = CalcDimension(columnsGap->string, DimensionUnit::CALC);
@@ -89,7 +89,7 @@ void SetGridRowsGap(NodeHandle node, const struct ArkUIResourceLength* rowsGap)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(rowsGap->Uint);
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(rowsGap->unit);
     Dimension gap;
     if (unitEnum == DimensionUnit::CALC) {
         gap = CalcDimension(rowsGap->string, DimensionUnit::CALC);
