@@ -4502,9 +4502,9 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Set caret position to %{public}d", position);
     selectController_->MoveCaretToContentRect(position, TextAffinity::DOWNSTREAM);
-    FireOnSelectionChange(position, position);
     if (HasFocus() && !GetShowMagnifier()) {
         StartTwinkling();
+        FireOnSelectionChange(position, position);
     }
     CloseSelectOverlay();
     auto tmpHost = GetHost();
