@@ -65,6 +65,7 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/test/mock/core/common/mock_image_analyzer_mgr.cpp",
     "$ace_root/test/mock/core/common/mock_interaction.cpp",
     "$ace_root/test/mock/core/common/mock_layout_inspector.cpp",
+    "$ace_root/test/mock/core/common/mock_raw_recognizer.cpp",
     "$ace_root/test/mock/core/common/mock_theme_constants.cpp",
     "$ace_root/test/mock/core/common/mock_udmf.cpp",
     "$ace_root/test/mock/core/common/mock_window.cpp",
