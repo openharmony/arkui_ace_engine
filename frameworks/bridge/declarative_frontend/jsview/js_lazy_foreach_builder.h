@@ -60,6 +60,17 @@ public:
         }
     }
 
+    void NotifyDataAdded(size_t index) override
+    {
+        if (updateChangedNodeFlag_) {
+            decltype(changedLazyForEachNodes_) temp(std::move(changedLazyForEachNodes_));
+            for (auto& [oldindex, child] : temp) {
+                changedLazyForEachNodes_.try_emplace(
+                    index > static_cast<size_t>(oldindex) ? oldindex : oldindex + 1, std::move(child));
+            }
+        }
+    }
+
     void NotifyDataChanged(size_t index, RefPtr<NG::UINode>& lazyForEachNode, bool isRebuild) override
     {
         if (updateChangedNodeFlag_ && !isRebuild) {
@@ -67,9 +78,16 @@ public:
         }
     }
 
-    void NotifyDataDeleted(RefPtr<NG::UINode>& lazyForEachNode) override
+    void NotifyDataDeleted(RefPtr<NG::UINode>& lazyForEachNode, size_t index) override
     {
         if (updateChangedNodeFlag_) {
+            decltype(changedLazyForEachNodes_) temp(std::move(changedLazyForEachNodes_));
+            for (auto& [oldindex, child] : temp) {
+                if (static_cast<size_t>(oldindex) != index) {
+                    changedLazyForEachNodes_.try_emplace(
+                        index > static_cast<size_t>(oldindex) ? oldindex : oldindex - 1, std::move(child));
+                }
+            }
             dependElementIds_.erase(lazyForEachNode);
         }
     }

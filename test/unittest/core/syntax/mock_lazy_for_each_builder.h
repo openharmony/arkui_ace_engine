@@ -45,7 +45,8 @@ protected:
     }
     void OnExpandChildrenOnInitialInNG() override {}
     void NotifyDataChanged(size_t index, RefPtr<NG::UINode>& lazyForEachNode, bool isRebuild = true) override {};
-    void NotifyDataDeleted(RefPtr<NG::UINode>& lazyForEachNode) override {};
+    void NotifyDataDeleted(RefPtr<NG::UINode>& lazyForEachNode, size_t index) override {};
+    void NotifyDataAdded(size_t index) override {};
 };
 } // namespace OHOS::Ace::Framework
 
