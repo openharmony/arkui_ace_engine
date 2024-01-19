@@ -134,8 +134,10 @@ void IndexerPattern::OnModifyDone()
             auto indexerPattern = weak.Upgrade();
             CHECK_NULL_VOID(indexerPattern);
             if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+                indexerPattern->isTouch_ = true;
                 indexerPattern->OnTouchDown(info);
             } else if (info.GetTouches().front().GetTouchType() == TouchType::UP) {
+                indexerPattern->isTouch_ = false;
                 indexerPattern->OnTouchUp(info);
             }
         };
@@ -732,6 +734,10 @@ void IndexerPattern::ShowBubble()
     }
     UpdateBubbleView();
     StartBubbleAppearAnimation();
+    delayTask_.Cancel();
+    if (!isTouch_) {
+        StartDelayTask(INDEXER_BUBBLE_ENTER_DURATION + INDEXER_BUBBLE_WAIT_DURATION);
+    }
 }
 
 RefPtr<FrameNode> IndexerPattern::CreatePopupNode()
@@ -1061,8 +1067,13 @@ void IndexerPattern::AddPopupTouchListener(RefPtr<FrameNode> popupNode)
     auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto indexerPattern = weak.Upgrade();
         CHECK_NULL_VOID(indexerPattern);
-        if (info.GetTouches().front().GetTouchType() == TouchType::DOWN) {
+        auto touchType = info.GetTouches().front().GetTouchType();
+        if (touchType == TouchType::DOWN) {
+            indexerPattern->isTouch_ = true;
             indexerPattern->OnPopupTouchDown(info);
+        } else if (touchType == TouchType::UP || touchType == TouchType::CANCEL) {
+            indexerPattern->isTouch_ = false;
+            indexerPattern->StartDelayTask();
         }
     };
     gesture->AddTouchEvent(MakeRefPtr<TouchEventImpl>(std::move(touchCallback)));
@@ -1106,6 +1117,7 @@ void IndexerPattern::ClearClickStatus()
 void IndexerPattern::OnPopupTouchDown(const TouchEventInfo& info)
 {
     if (NeedShowPopupView()) {
+        delayTask_.Cancel();
         StartBubbleAppearAnimation();
     }
 }
@@ -1295,41 +1307,55 @@ void IndexerPattern::StartBubbleAppearAnimation()
     UpdatePopupVisibility(VisibleType::VISIBLE);
     AnimationOption option;
     option.SetCurve(Curves::SHARP);
-    option.SetDuration(INDEXER_BUBBLE_APPEAR_DURATION);
-    auto startTimeRatio = 1.0f * INDEXER_BUBBLE_ENTER_DURATION / INDEXER_BUBBLE_APPEAR_DURATION;
-    auto middleTimeRatio =
-        1.0f * (INDEXER_BUBBLE_WAIT_DURATION + INDEXER_BUBBLE_ENTER_DURATION) / INDEXER_BUBBLE_APPEAR_DURATION;
-    AnimationUtils::OpenImplicitAnimation(option, Curves::SHARP,
-        [id = Container::CurrentId(), weak = AceType::WeakClaim(this), animationId = animationId_]() {
-            ContainerScope scope(id);
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            if (pattern->animationId_ == animationId) {
-                pattern->UpdatePopupVisibility(VisibleType::GONE);
-            }
-        });
-    AnimationUtils::AddKeyFrame(
-        startTimeRatio, Curves::SHARP, [id = Container::CurrentId(), weak = AceType::WeakClaim(this)]() {
+    option.SetDuration(INDEXER_BUBBLE_ENTER_DURATION);
+    AnimationUtils::Animate(
+        option,
+        [id = Container::CurrentId(), weak = AceType::WeakClaim(this)]() {
             ContainerScope scope(id);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->UpdatePopupOpacity(1.0f);
             pattern->UpdateBubbleSize();
         });
-    AnimationUtils::AddKeyFrame(
-        middleTimeRatio, Curves::LINEAR, [id = Container::CurrentId(), weak = AceType::WeakClaim(this)]() {
+}
+
+void IndexerPattern::StartDelayTask(uint32_t duration)
+{
+    auto context = UINode::GetContext();
+    CHECK_NULL_VOID(context);
+    CHECK_NULL_VOID(context->GetTaskExecutor());
+    delayTask_.Reset([weak = AceType::WeakClaim(this)] {
+        auto pattern = weak.Upgrade();
+        pattern->StartBubbleDisappearAnimation();
+        });
+    context->GetTaskExecutor()->PostDelayedTask(
+        delayTask_, TaskExecutor::TaskType::UI, duration);
+}
+
+void IndexerPattern::StartBubbleDisappearAnimation()
+{
+    AnimationOption option;
+    option.SetCurve(Curves::SHARP);
+    option.SetDuration(INDEXER_BUBBLE_EXIT_DURATION);
+    AnimationUtils::Animate(
+        option,
+        [id = Container::CurrentId(), weak = AceType::WeakClaim(this)]() {
             ContainerScope scope(id);
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->UpdatePopupOpacity(1.0f);
+            pattern->UpdatePopupOpacity(0.0f);
+        },
+        [id = Container::CurrentId(), weak = AceType::WeakClaim(this)]() {
+            ContainerScope scope(id);
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            CHECK_NULL_VOID(pattern->popupNode_);
+            auto rendercontext = pattern->popupNode_->GetRenderContext();
+            CHECK_NULL_VOID(rendercontext);
+            if (NearZero(rendercontext->GetOpacityValue(0.0f))) {
+                pattern->UpdatePopupVisibility(VisibleType::GONE);
+            }
         });
-    AnimationUtils::AddKeyFrame(1.0f, Curves::SHARP, [id = Container::CurrentId(), weak = AceType::WeakClaim(this)]() {
-        ContainerScope scope(id);
-        auto pattern = weak.Upgrade();
-        CHECK_NULL_VOID(pattern);
-        pattern->UpdatePopupOpacity(0.0f);
-    });
-    AnimationUtils::CloseImplicitAnimation();
 }
 
 void IndexerPattern::UpdatePopupOpacity(float ratio)
