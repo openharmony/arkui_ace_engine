@@ -3815,7 +3815,7 @@ bool TextFieldPattern::CursorMoveUpOperation()
         selectController_->UpdateCaretIndex(
             static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(Offset(offsetX, verticalOffset))));
     }
-    OnCursorMoveDone();
+    OnCursorMoveDone(TextAffinity::DOWNSTREAM);
     return originCaretPosition != selectController_->GetCaretIndex();
 }
 
@@ -3844,7 +3844,7 @@ bool TextFieldPattern::CursorMoveDownOperation()
         selectController_->UpdateCaretIndex(
             static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(Offset(offsetX, verticalOffset))));
     }
-    OnCursorMoveDone();
+    OnCursorMoveDone(TextAffinity::DOWNSTREAM);
     return originCaretPosition != selectController_->GetCaretIndex();
 }
 
