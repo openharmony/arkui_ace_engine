@@ -184,6 +184,20 @@ int32_t ListLanesLayoutAlgorithm::LayoutALineBackward(LayoutWrapper* layoutWrapp
     return cnt;
 }
 
+void ListLanesLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount)
+{
+    bool hasGroup = false;
+    auto itemPosition = GetItemPosition();
+    for (auto &pos : itemPosition) {
+        if (pos.second.isGroup) {
+            hasGroup = true;
+            break;
+        }
+    }
+    int32_t count = hasGroup ? cacheCount : cacheCount * lanes_;
+    layoutWrapper->SetCacheCount(count);
+}
+
 int32_t ListLanesLayoutAlgorithm::CalculateLanesParam(std::optional<float>& minLaneLength,
     std::optional<float>& maxLaneLength, int32_t lanes, std::optional<float> crossSizeOptional, float laneGutter)
 {

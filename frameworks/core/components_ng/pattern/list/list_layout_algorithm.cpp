@@ -155,7 +155,12 @@ void ListLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     layoutWrapper->GetGeometryNode()->SetFrameSize(size);
 
     // set list cache info.
-    layoutWrapper->SetCacheCount(listLayoutProperty->GetCachedCountValue(1) * GetLanes());
+    SetCacheCount(layoutWrapper, listLayoutProperty->GetCachedCountValue(1));
+}
+
+void ListLayoutAlgorithm::SetCacheCount(LayoutWrapper* layoutWrapper, int32_t cacheCount)
+{
+    layoutWrapper->SetCacheCount(cacheCount);
 }
 
 float ListLayoutAlgorithm::GetChildMaxCrossSize(LayoutWrapper* layoutWrapper, Axis axis) const
@@ -1326,13 +1331,21 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
     itemGroup->SetListMainSize(startMainPos_, endMainPos_, referencePos, forwardLayout);
     itemGroup->SetListLayoutProperty(layoutProperty);
     itemGroup->SetContentOffset(contentStartOffset_, contentEndOffset_);
-    if (jumpIndex_.has_value() && (!jumpIndexInGroup_.has_value())) {
-        if (forwardLayout&& (scrollAlign_ == ScrollAlign::START ||
-            (scrollAlign_ == ScrollAlign::AUTO && scrollAutoType_ == ScrollAutoType::START))) {
-            jumpIndexInGroup_ = 0;
-        } else if (!forwardLayout && (scrollAlign_ == ScrollAlign::END ||
-            (scrollAlign_ == ScrollAlign::AUTO && scrollAutoType_ == ScrollAutoType::END))) {
-            jumpIndexInGroup_ = LAST_ITEM;
+    if (jumpIndex_.has_value() && jumpIndex_.value() == index) {
+        if (!jumpIndexInGroup_.has_value()) {
+            if (forwardLayout && (scrollAlign_ == ScrollAlign::START ||
+                (scrollAlign_ == ScrollAlign::AUTO && scrollAutoType_ == ScrollAutoType::START))) {
+                jumpIndexInGroup_ = 0;
+            } else if (!forwardLayout && (scrollAlign_ == ScrollAlign::END ||
+                (scrollAlign_ == ScrollAlign::AUTO && scrollAutoType_ == ScrollAutoType::END))) {
+                jumpIndexInGroup_ = LAST_ITEM;
+            }
+        }
+
+        if (jumpIndexInGroup_.has_value()) {
+            itemGroup->SetJumpIndex(jumpIndexInGroup_.value());
+            itemGroup->SetScrollAlign(scrollAlign_);
+            jumpIndexInGroup_.reset();
         }
     }
 
@@ -1347,12 +1360,6 @@ void ListLayoutAlgorithm::SetListItemGroupParam(const RefPtr<LayoutWrapper>& lay
             groupItemPosition.begin()->first == 0))) {
             itemGroup->SetNeedAllLayout();
         }
-    }
-
-    if (jumpIndexInGroup_.has_value()) {
-        itemGroup->SetJumpIndex(jumpIndexInGroup_.value());
-        itemGroup->SetScrollAlign(scrollAlign_);
-        jumpIndexInGroup_.reset();
     }
     layoutWrapper->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE_SELF);
 }
