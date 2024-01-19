@@ -1486,6 +1486,24 @@ void WebPattern::OnNativeEmbedModeEnabledUpdate(bool value)
     }
 }
 
+bool WebPattern::IsRootNeedExportTexture()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    bool isNeedExportTexture = false;
+    for (auto parent = host->GetParent(); parent != nullptr; parent = parent->GetParent()) {
+        RefPtr<FrameNode> frameNode = AceType::DynamicCast<FrameNode>(parent);
+        if (!frameNode) {
+            continue;
+        }
+        isNeedExportTexture = frameNode->IsNeedExportTexture();
+        if (isNeedExportTexture) {
+            return isNeedExportTexture;
+        }
+    }
+    return isNeedExportTexture;
+}
+
 void WebPattern::OnScrollBarColorUpdate(const std::string& value)
 {
     if (delegate_) {
@@ -1642,6 +1660,16 @@ void WebPattern::OnModifyDone()
         };
         PostTaskToUI(std::move(task));
     }
+
+    auto embedEnabledTask = [weak = AceType::WeakClaim(this)]() {
+        auto webPattern = weak.Upgrade();
+        CHECK_NULL_VOID(webPattern);
+        if (webPattern->IsRootNeedExportTexture() && webPattern->delegate_) {
+            webPattern->delegate_->UpdateNativeEmbedModeEnabled(false);
+        }
+    };
+    PostTaskToUI(std::move(embedEnabledTask));
+
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->AddOnAreaChangeNode(host->GetId());
