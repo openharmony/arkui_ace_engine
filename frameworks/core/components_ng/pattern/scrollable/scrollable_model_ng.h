@@ -39,6 +39,8 @@ public:
 
     static void SetEdgeEffect(FrameNode* frameNode, EdgeEffect edgeEffect, bool alwaysEnabled);
     static void SetScrollBarMode(FrameNode* frameNode, int32_t displayNumber);
+    static void SetScrollBarWidth(FrameNode* frameNode, const std::string& value);
+    static void SetScrollBarColor(FrameNode* frameNode, const std::string& value);
     static void SetMaxFlingSpeed(double max);
 };
 } // namespace OHOS::Ace::NG

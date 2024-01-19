@@ -67,6 +67,7 @@ template("ace_core_interfaces_native_node") {
       "node/node_container_modifier.cpp",
       "node/node_image_modifier.cpp",
       "node/node_image_span_modifier.cpp",
+      "node/node_list_item_group_modifier.cpp",
       "node/node_list_modifier.cpp",
       "node/node_loading_progress_modifier.cpp",
       "node/node_modifiers.cpp",

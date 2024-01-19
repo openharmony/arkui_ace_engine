@@ -18,6 +18,7 @@
 #include "core/interfaces/native/node/node_image_span_modifier.h"
 #include "core/interfaces/native/node/node_image_modifier.h"
 #include "core/interfaces/native/node/node_list_modifier.h"
+#include "core/interfaces/native/node/node_list_item_group_modifier.h"
 #include "core/interfaces/native/node/node_loading_progress_modifier.h"
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_span_modifier.h"
@@ -100,7 +101,7 @@ const ArkUINodeModifiers impl = {
     NodeModifier::GetSwiperModifier,
     nullptr,
     NodeModifier::GetListModifier,
-    nullptr,
+    NodeModifier::GetListItemGroupModifier,
     nullptr,
     NodeModifier::GetLoadingProgressModifier,
     nullptr,
