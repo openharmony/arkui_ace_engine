@@ -55,8 +55,16 @@ public:
     std::pair<std::string, RefPtr<UINode>> GetChildByIndex(int32_t index, bool needBuild)
     {
         auto iter = cachedItems_.find(index);
-        if (iter != cachedItems_.end() && iter->second.second) {
-            return iter->second;
+        if (iter != cachedItems_.end()) {
+            if (iter->second.second) {
+                return iter->second;
+            }
+            auto keyIter = expiringItem_.find(iter->second.first);
+            if (keyIter != expiringItem_.end() && keyIter->second.second) {
+                iter->second.second = keyIter->second.second;
+                expiringItem_.erase(keyIter);
+                return iter->second;
+            }
         }
 
         if (needBuild) {
@@ -68,16 +76,6 @@ public:
             }
             return itemInfo;
         }
-
-        if (iter != cachedItems_.end()) {
-            auto keyIter = expiringItem_.find(iter->second.first);
-            if (keyIter != expiringItem_.end() && keyIter->second.second) {
-                iter->second.second = keyIter->second.second;
-                expiringItem_.erase(keyIter);
-                return iter->second;
-            }
-        }
-
         return {};
     }
 
