@@ -415,7 +415,7 @@ void SendArkUIAsyncEvent(ArkUINodeEvent* event)
     OHOS::Ace::NG::NodeEvent::SendArkUIAsyncEvent(event);
 }
 
-ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUINodeAPI(ArkUIAPIVariantKind kind, ArkUI_Int32 version)
+ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_Int32 version)
 {
     switch (kind) {
         case ArkUIAPIVariantKind::BASIC: {
@@ -475,12 +475,12 @@ __attribute__((constructor)) static void provideEntryPoint(void)
     // mingw has no setenv :(.
     static char entryPointString[64];
     snprintf(entryPointString, sizeof entryPointString, "__LIBACE_ENTRY_POINT=%llx",
-        static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(&GetArkUINodeAPI)));
+        static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(&GetArkUIAPI)));
     putenv(entryPointString);
 #else
     char entryPointString[64];
     snprintf(entryPointString, sizeof entryPointString, "%llx",
-        static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(&GetArkUINodeAPI)));
+        static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(&GetArkUIAPI)));
     setenv("__LIBACE_ENTRY_POINT", entryPointString, 1);
 #endif
 }
