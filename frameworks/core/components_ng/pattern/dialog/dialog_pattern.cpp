@@ -988,8 +988,6 @@ void DialogPattern::UpdateWrapperBackgroundStyle(const RefPtr<FrameNode>& host, 
 {
     auto col = DynamicCast<FrameNode>(host->GetChildAtIndex(START_CHILD_INDEX));
     CHECK_NULL_VOID(col);
-    auto colContext = col->GetContext();
-    CHECK_NULL_VOID(colContext);
     auto colRenderContext = col->GetRenderContext();
     CHECK_NULL_VOID(colRenderContext);
     if (!GetDialogProperties().customStyle) {
