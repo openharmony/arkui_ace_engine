@@ -516,10 +516,12 @@ void SwiperLayoutAlgorithm::LayoutForward(LayoutWrapper* layoutWrapper, const La
     if (LessNotEqual(currentEndPos, endMainPos_) && !itemPosition_.empty()) {
         auto firstItemTop = itemPosition_.begin()->second.startPos;
         auto itemTotalSize = currentEndPos - firstItemTop;
-        if (!canOverScroll_ && LessOrEqual(itemTotalSize, contentMainSize_) && (itemPosition_.begin()->first == 0)) {
+        if (LessOrEqual(itemTotalSize, contentMainSize_) && (itemPosition_.begin()->first == 0)) {
             // all items size is less than swiper.
-            currentOffset_ = firstItemTop;
-            startMainPos_ = currentOffset_;
+            if (!canOverScroll_) {
+                currentOffset_ = firstItemTop;
+                startMainPos_ = currentOffset_;
+            }
             if (!mainSizeIsDefined_) {
                 // adapt child size.
                 contentMainSize_ = itemTotalSize;
