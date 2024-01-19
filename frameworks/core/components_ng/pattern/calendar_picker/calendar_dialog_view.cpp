@@ -66,22 +66,6 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
     padding.top = CalcLength(theme->GetCalendarTitleRowTopPadding());
     padding.bottom = CalcLength(theme->GetCalendarTitleRowTopPadding() - CALENDAR_DISTANCE_ADJUST_FOCUSED_EVENT);
     layoutProperty->UpdatePadding(padding);
-    auto renderContext = contentColumn->GetRenderContext();
-    CHECK_NULL_RETURN(renderContext, nullptr);
-    if (dialogProperties.customStyle) {
-        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(DIALOG_WIDTH), std::nullopt));
-        BorderRadiusProperty radius;
-        radius.SetRadius(theme->GetDialogBorderRadius());
-        renderContext->UpdateBorderRadius(radius);
-        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
-            BlurStyleOption styleOption;
-            styleOption.blurStyle = static_cast<BlurStyle>(
-                dialogProperties.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
-            renderContext->UpdateBackBlurStyle(styleOption);
-            renderContext->UpdateBackgroundColor(dialogProperties.backgroundColor.value_or(Color::TRANSPARENT));
-        }
-    }
-    renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowS);
 
     auto calendarNode = CreateCalendarNode(contentColumn, settingData, dialogEvent);
     CHECK_NULL_RETURN(calendarNode, nullptr);
@@ -93,6 +77,18 @@ RefPtr<FrameNode> CalendarDialogView::Show(const DialogProperties& dialogPropert
     auto dialogNode = DialogView::CreateDialogNode(dialogProperties, contentColumn);
     CHECK_NULL_RETURN(dialogNode, nullptr);
 
+    auto childNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
+    CHECK_NULL_RETURN(childNode, nullptr);
+    auto renderContext = childNode->GetRenderContext();
+    CHECK_NULL_RETURN(renderContext, nullptr);
+    if (dialogProperties.customStyle) {
+        layoutProperty->UpdateUserDefinedIdealSize(CalcSize(NG::CalcLength(DIALOG_WIDTH), std::nullopt));
+        BorderRadiusProperty radius;
+        radius.SetRadius(theme->GetDialogBorderRadius());
+        renderContext->UpdateBorderRadius(radius);
+    }
+    renderContext->UpdateBackShadow(ShadowConfig::DefaultShadowS);
+    UpdateBackgroundStyle(renderContext, dialogProperties);
     if (!settingData.entryNode.Upgrade()) {
         auto contentRow = CreateOptionsNode(dialogNode, calendarNode, dialogEvent, std::move(dialogCancelEvent));
         contentRow->MountToParent(contentColumn);
@@ -587,5 +583,17 @@ void CalendarDialogView::OnSelectedChangeEvent(int32_t calendarNodeId, const std
     auto eventHub = entryNode->GetEventHub<CalendarPickerEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->UpdateOnChangeEvent(callbackInfo);
+}
+
+void CalendarDialogView::UpdateBackgroundStyle(
+    const RefPtr<RenderContext>& renderContext, const DialogProperties& dialogProperties)
+{
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
+        BlurStyleOption styleOption;
+        styleOption.blurStyle = static_cast<BlurStyle>(
+            dialogProperties.backgroundBlurStyle.value_or(static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)));
+        renderContext->UpdateBackBlurStyle(styleOption);
+        renderContext->UpdateBackgroundColor(dialogProperties.backgroundColor.value_or(Color::TRANSPARENT));
+    }
 }
 } // namespace OHOS::Ace::NG

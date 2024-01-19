@@ -877,7 +877,10 @@ void TextPickerPattern::OnColorConfigurationUpdate()
     if (contentRowNode) {
         auto layoutRenderContext = contentRowNode->GetRenderContext();
         CHECK_NULL_VOID(layoutRenderContext);
-        layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
+            !layoutRenderContext->IsUniRenderEnabled()) {
+            layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
+        }
     }
     auto frameNode = DynamicCast<FrameNode>(host);
     CHECK_NULL_VOID(frameNode);
