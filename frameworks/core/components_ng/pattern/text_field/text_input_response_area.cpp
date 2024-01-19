@@ -412,6 +412,7 @@ RefPtr<FrameNode> CleanNodeResponseArea::CreateNode()
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(cleanNode, nullptr);
     cleanNode->SetDraggable(false);
+    cleanNode_ = stackNode;
     auto info = CreateImageSourceInfo();
     auto imageLayoutProperty = cleanNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
@@ -421,7 +422,6 @@ RefPtr<FrameNode> CleanNodeResponseArea::CreateNode()
     cleanNode->MarkModifyDone();
     cleanNode->MountToParent(stackNode);
     InitClickEvent(stackNode);
-    cleanNode_ = stackNode;
     return stackNode;
 }
 
@@ -505,6 +505,7 @@ void CleanNodeResponseArea::Refresh()
 {
     LoadingImageProperty();
     auto info = CreateImageSourceInfo();
+    CHECK_NULL_VOID(cleanNode_);
     auto imageNode = cleanNode_->GetFirstChild();
     CHECK_NULL_VOID(imageNode);
     auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
@@ -543,6 +544,7 @@ ImageSourceInfo CleanNodeResponseArea::CreateImageSourceInfo()
     }
     if (info.IsSvg()) {
         info.SetFillColor(iconColor_);
+        CHECK_NULL_RETURN(cleanNode_, info);
         auto imageNode = cleanNode_->GetFirstChild();
         CHECK_NULL_RETURN(imageNode, info);
         auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
