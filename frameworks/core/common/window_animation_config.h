@@ -30,6 +30,10 @@ enum class WindowSizeChangeReason : uint32_t {
     HIDE,
     TRANSFORM,
     CUSTOM_ANIMATION,
+    FULL_TO_SPLIT,
+    SPLIT_TO_FULL,
+    FULL_TO_FLOATING,
+    FLOATING_TO_FULL,
 };
 } // namespace OHOS::Ace
 
