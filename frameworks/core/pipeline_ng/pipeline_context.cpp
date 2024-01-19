@@ -170,12 +170,10 @@ void PipelineContext::AddDirtyCustomNode(const RefPtr<UINode>& dirtyNode)
     auto customNode = DynamicCast<CustomNode>(dirtyNode);
     if (customNode && !dirtyNode->GetInspectorIdValue("").empty()) {
         ACE_LAYOUT_SCOPED_TRACE("AddDirtyCustomNode[%s][self:%d][parent:%d][key:%s]",
-            customNode->GetJSViewName().c_str(),
-            dirtyNode->GetId(), dirtyNode->GetParent() ? dirtyNode->GetParent()->GetId() : 0,
-            dirtyNode->GetInspectorIdValue("").c_str());
+            customNode->GetJSViewName().c_str(), dirtyNode->GetId(),
+            dirtyNode->GetParent() ? dirtyNode->GetParent()->GetId() : 0, dirtyNode->GetInspectorIdValue("").c_str());
     } else if (customNode) {
-        ACE_LAYOUT_SCOPED_TRACE("AddDirtyCustomNode[%s][self:%d][parent:%d]",
-            customNode->GetJSViewName().c_str(),
+        ACE_LAYOUT_SCOPED_TRACE("AddDirtyCustomNode[%s][self:%d][parent:%d]", customNode->GetJSViewName().c_str(),
             dirtyNode->GetId(), dirtyNode->GetParent() ? dirtyNode->GetParent()->GetId() : 0);
     }
     dirtyNodes_.emplace(dirtyNode);
@@ -188,13 +186,12 @@ void PipelineContext::AddDirtyLayoutNode(const RefPtr<FrameNode>& dirty)
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(dirty);
     if (!dirty->GetInspectorIdValue("").empty()) {
-        ACE_LAYOUT_SCOPED_TRACE("AddDirtyLayoutNode[%s][self:%d][parent:%d][key:%s]",
-            dirty->GetTag().c_str(),
+        ACE_LAYOUT_SCOPED_TRACE("AddDirtyLayoutNode[%s][self:%d][parent:%d][key:%s]", dirty->GetTag().c_str(),
             dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0,
             dirty->GetInspectorIdValue("").c_str());
     } else {
-        ACE_LAYOUT_SCOPED_TRACE("AddDirtyLayoutNode[%s][self:%d][parent:%d]", dirty->GetTag().c_str(),
-            dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0);
+        ACE_LAYOUT_SCOPED_TRACE("AddDirtyLayoutNode[%s][self:%d][parent:%d]", dirty->GetTag().c_str(), dirty->GetId(),
+            dirty->GetParent() ? dirty->GetParent()->GetId() : 0);
     }
     taskScheduler_->AddDirtyLayoutNode(dirty);
     ForceLayoutForImplicitAnimation();
@@ -220,8 +217,8 @@ void PipelineContext::AddDirtyRenderNode(const RefPtr<FrameNode>& dirty)
             dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0,
             dirty->GetInspectorIdValue("").c_str());
     } else {
-        ACE_LAYOUT_SCOPED_TRACE("AddDirtyRenderNode[%s][self:%d][parent:%d]", dirty->GetTag().c_str(),
-            dirty->GetId(), dirty->GetParent() ? dirty->GetParent()->GetId() : 0);
+        ACE_LAYOUT_SCOPED_TRACE("AddDirtyRenderNode[%s][self:%d][parent:%d]", dirty->GetTag().c_str(), dirty->GetId(),
+            dirty->GetParent() ? dirty->GetParent()->GetId() : 0);
     }
     taskScheduler_->AddDirtyRenderNode(dirty);
     ForceRenderForImplicitAnimation();
@@ -466,8 +463,7 @@ RefPtr<FrameNode> PipelineContext::HandleFocusNode()
 void PipelineContext::IsSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode)
 {
     // Frame other window to SCB window Or inSCB window changes,hide keyboard.
-    if ((windowFocus_.has_value() && windowFocus_.value()) ||
-        curFocusNode_ != curFrameNode) {
+    if ((windowFocus_.has_value() && windowFocus_.value()) || curFocusNode_ != curFrameNode) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SCB Windowfocus first, ready to hide keyboard.");
         windowFocus_.reset();
         curFocusNode_ = curFrameNode;
@@ -484,8 +480,7 @@ void PipelineContext::IsSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode)
 
 void PipelineContext::IsNotSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode)
 {
-    if ((windowFocus_.has_value() && windowFocus_.value()) ||
-        (windowShow_.has_value() && windowShow_.value())) {
+    if ((windowFocus_.has_value() && windowFocus_.value()) || (windowShow_.has_value() && windowShow_.value())) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "Nomal Window focus first, set focusflag to window.");
         windowFocus_.reset();
         windowShow_.reset();
@@ -522,8 +517,8 @@ void PipelineContext::IsCloseSCBKeyboard()
         TAG_LOGD(AceLogTag::ACE_KEYBOARD, "curFrameNode null.");
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_KEYBOARD, "LastFocusNode,(%{public}s/%{public}d).",
-        curFrameNode->GetTag().c_str(), curFrameNode->GetId());
+    TAG_LOGD(AceLogTag::ACE_KEYBOARD, "LastFocusNode,(%{public}s/%{public}d).", curFrameNode->GetTag().c_str(),
+        curFrameNode->GetId());
 
 #ifdef WINDOW_SCENE_SUPPORTED
     auto isSystem = WindowSceneHelper::IsWindowScene(curFrameNode);
@@ -1688,8 +1683,8 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
                 recognizer->BeginReferee(scalePoint.id, true);
                 std::list<RefPtr<NGGestureRecognizer>> combined;
                 combined.emplace_back(recognizer);
-                for (auto iter = touchTestResults_[point.id].begin();
-                    iter != touchTestResults_[point.id].end(); iter++) {
+                for (auto iter = touchTestResults_[point.id].begin(); iter != touchTestResults_[point.id].end();
+                     iter++) {
                     auto outRecognizer = AceType::DynamicCast<NGGestureRecognizer>(*iter);
                     if (outRecognizer) {
                         combined.emplace_back(outRecognizer);
@@ -2036,6 +2031,17 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         // Mouse left button press event will set focus inactive in touch process.
         SetIsFocusActive(false);
     }
+
+    auto manager = GetDragDropManager();
+    CHECK_NULL_VOID(manager);
+
+    if (event.button == MouseButton::RIGHT_BUTTON &&
+        (event.action == MouseAction::PRESS || event.action == MouseAction::PULL_UP)) {
+        manager->SetIsDragCancel(true);
+    } else {
+        manager->SetIsDragCancel(false);
+    }
+
     auto container = Container::Current();
     if ((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
             event.action == MouseAction::MOVE) &&
@@ -2677,19 +2683,19 @@ void PipelineContext::AddNavigationStateCallback(
     if (isOnShow) {
         auto it = pageIdOnShowMap_.find(pageId);
         if (it != pageIdOnShowMap_.end()) {
-            it->second.push_back({nodeId, callback});
+            it->second.push_back({ nodeId, callback });
         } else {
             std::list<std::pair<int32_t, std::function<void()>>> callbacks;
-            callbacks.push_back({nodeId, callback});
+            callbacks.push_back({ nodeId, callback });
             pageIdOnShowMap_[pageId] = std::move(callbacks);
         }
     } else {
         auto it = pageIdOnHideMap_.find(pageId);
         if (it != pageIdOnHideMap_.end()) {
-            it->second.push_back({nodeId, callback});
+            it->second.push_back({ nodeId, callback });
         } else {
             std::list<std::pair<int32_t, std::function<void()>>> callbacks;
-            callbacks.push_back({nodeId, callback});
+            callbacks.push_back({ nodeId, callback });
             pageIdOnHideMap_[pageId] = std::move(callbacks);
         }
     }
