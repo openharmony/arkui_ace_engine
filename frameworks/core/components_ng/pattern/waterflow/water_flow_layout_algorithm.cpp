@@ -454,9 +454,9 @@ void WaterFlowLayoutAlgorithm::JumpToTargetAlign(const std::pair<float, float>& 
             layoutInfo_.currentOffset_ = mainSize_ - (item.first + item.second);
             break;
         case ScrollAlign::AUTO:
-            if (layoutInfo_.currentOffset_ + item.first + item.second < 0) {
+            if (layoutInfo_.currentOffset_ + item.first < 0) {
                 layoutInfo_.currentOffset_ = -item.first;
-            } else if (layoutInfo_.currentOffset_ + item.first > mainSize_) {
+            } else if (layoutInfo_.currentOffset_ + item.first + item.second > mainSize_) {
                 layoutInfo_.currentOffset_ = mainSize_ - (item.first + item.second);
             }
             break;
