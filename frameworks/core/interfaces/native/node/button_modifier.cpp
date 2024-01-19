@@ -439,12 +439,22 @@ void ResetButtonBorderRadius(NodeHandle node)
     ButtonModelNG::SetBorderRadius(frameNode, reset);
 }
 
-void SetButtonSize(NodeHandle node, double widthValue, int32_t widthUnit, double heightValue, int32_t heightUnit)
+void SetButtonSize(
+    NodeHandle node, const char* widthValue, int32_t widthUnit, const char* heightValue, int32_t heightUnit)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ButtonModelNG::SetSize(frameNode, CalcDimension(widthValue, (DimensionUnit)widthUnit),
-        CalcDimension(heightValue, (DimensionUnit)heightUnit));
+    std::string widthValueStr = std::string(widthValue);
+    std::string heightValueStr = std::string(heightValue);
+    std::optional<CalcDimension> widthInfo;
+    std::optional<CalcDimension> heightInfo;
+    if (widthValueStr != "undefined") {
+        widthInfo = CalcDimension(StringUtils::StringToDouble(widthValueStr), (DimensionUnit)widthUnit);
+    }
+    if (heightValueStr != "undefined") {
+        heightInfo = CalcDimension(StringUtils::StringToDouble(heightValueStr), (DimensionUnit)heightUnit);
+    }
+    ButtonModelNG::SetSize(frameNode, widthInfo, heightInfo);
 }
 
 void ResetButtonSize(NodeHandle node)
