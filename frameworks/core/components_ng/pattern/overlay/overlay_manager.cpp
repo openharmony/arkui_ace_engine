@@ -2705,6 +2705,7 @@ void OverlayManager::PlaySheetTransition(
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_VOID(sheetPattern);
     auto sheetMaxHeight = sheetPattern->GetSheetMaxHeight();
+    auto sheetParent = DynamicCast<FrameNode>(sheetNode->GetParent());
 
     if (isTransitionIn) {
         sheetPattern->SetCurrentHeight(sheetHeight_);
@@ -2724,6 +2725,7 @@ void OverlayManager::PlaySheetTransition(
             option.SetDuration(0);
             option.SetCurve(Curves::LINEAR);
         }
+        sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMDEFAULT);
         AnimationUtils::Animate(
             option,
             [context, offset]() {
@@ -2760,6 +2762,7 @@ void OverlayManager::PlaySheetTransition(
                     },
                     TaskExecutor::TaskType::UI);
             });
+        sheetParent->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
         AnimationUtils::Animate(
             option,
             [context, sheetMaxHeight]() {
@@ -2829,6 +2832,7 @@ void OverlayManager::PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool is
     auto context = maskNode->GetRenderContext();
     CHECK_NULL_VOID(context);
     if (isTransitionIn) {
+        maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMDEFAULT);
         context->OpacityAnimation(option, 0.0, 1.0);
     } else {
         if (sheetMaskClickEvent_) {
@@ -2858,6 +2862,7 @@ void OverlayManager::PlaySheetMaskTransition(RefPtr<FrameNode> maskNode, bool is
                     },
                     TaskExecutor::TaskType::UI);
             });
+        maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(HitTestMode::HTMTRANSPARENT);
         context->OpacityAnimation(option, 1.0, 0.0);
     }
 }
