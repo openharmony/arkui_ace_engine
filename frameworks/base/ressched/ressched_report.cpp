@@ -27,7 +27,9 @@ constexpr uint32_t RES_TYPE_SLIDE           = 11;
 constexpr uint32_t RES_TYPE_POP_PAGE        = 28;
 constexpr uint32_t RES_TYPE_WEB_GESTURE     = 29;
 constexpr uint32_t RES_TYPE_LOAD_PAGE       = 34;
+#ifdef FFRT_EXISTS
 constexpr uint32_t RES_TYPE_LONG_FRAME     = 71;
+#endif
 constexpr int32_t TOUCH_EVENT               = 1;
 constexpr int32_t CLICK_EVENT               = 2;
 constexpr int32_t SLIDE_OFF_EVENT = 0;
@@ -35,8 +37,10 @@ constexpr int32_t SLIDE_ON_EVENT = 1;
 constexpr int32_t PUSH_PAGE_START_EVENT = 0;
 constexpr int32_t PUSH_PAGE_COMPLETE_EVENT = 1;
 constexpr int32_t POP_PAGE_EVENT = 0;
+#ifdef FFRT_EXISTS
 constexpr int32_t LONG_FRAME_START_EVENT = 0;
 constexpr int32_t LONG_FRAME_END_EVENT = 1;
+#endif
 constexpr char NAME[] = "name";
 constexpr char PID[] = "pid";
 constexpr char UID[] = "uid";
@@ -50,8 +54,10 @@ constexpr char SLIDE_OFF[] = "slide_off";
 constexpr char TOUCH[] = "touch";
 constexpr char WEB_GESTURE[] = "web_gesture";
 constexpr char LOAD_PAGE[] = "load_page";
+#ifdef FFRT_EXISTS
 constexpr char LONG_FRAME_START[] = "long_frame_start";
 constexpr char LONG_FRAME_END[] = "long_frame_end";
+#endif
 
 void LoadAceApplicationContext(std::unordered_map<std::string, std::string>& payload)
 {
@@ -107,6 +113,7 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
                     reportDataFunc_(RES_TYPE_WEB_GESTURE, 0, payload);
                 }
             },
+#ifdef FFRT_EXISTS
             { LONG_FRAME_START,
                 [this](std::unordered_map<std::string, std::string>& payload) {
                     LoadAceApplicationContext(payload);
@@ -119,6 +126,7 @@ void ResSchedReport::ResSchedDataReport(const char* name, const std::unordered_m
                     reportDataFunc_(RES_TYPE_LONG_FRAME, LONG_FRAME_END_EVENT, payload);
                 }
             },
+#endif
         };
     auto it = functionMap.find(name);
     if (it == functionMap.end()) {

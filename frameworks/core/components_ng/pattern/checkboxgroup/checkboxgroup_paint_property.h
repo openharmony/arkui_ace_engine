@@ -27,10 +27,22 @@ namespace OHOS::Ace::NG {
 
 class CheckBoxGroupPaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(CheckBoxGroupPaintProperty, PaintProperty)
+private:
+    WeakPtr<FrameNode> host_;
 
 public:
     CheckBoxGroupPaintProperty() = default;
     ~CheckBoxGroupPaintProperty() override = default;
+    
+    void SetHost(const WeakPtr<FrameNode>& host)
+    {
+        host_ = host;
+    }
+
+    RefPtr<FrameNode> GetHost() const
+    {
+        return host_.Upgrade();
+    }
 
     RefPtr<PaintProperty> Clone() const override
     {
@@ -43,7 +55,7 @@ public:
         paintProperty->propCheckBoxGroupCheckMarkSize_ = CloneCheckBoxGroupCheckMarkSize();
         paintProperty->propCheckBoxGroupCheckMarkWidth_ = CloneCheckBoxGroupCheckMarkWidth();
         paintProperty->propStatus_ = propStatus_;
-
+        paintProperty->SetHost(this->GetHost());
         return paintProperty;
     }
 

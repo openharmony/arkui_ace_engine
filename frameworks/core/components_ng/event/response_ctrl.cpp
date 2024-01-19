@@ -22,11 +22,6 @@
 namespace OHOS::Ace::NG {
 bool ResponseCtrl::ShouldResponse(const WeakPtr<NG::FrameNode>& frameNode)
 {
-    // gesture in invalid frame node should not response event
-    auto node = frameNode.Upgrade();
-    if (!node) {
-        return false;
-    }
     if (state_ != MonopolizeState::ON) {
         return true;
     }
@@ -39,9 +34,7 @@ void ResponseCtrl::TrySetFirstResponse(const WeakPtr<NG::FrameNode>& frameNode)
         return;
     }
     auto node = frameNode.Upgrade();
-    if (!node) {
-        state_ = MonopolizeState::OFF;
-    } else {
+    if (node) {
         state_ = node->GetMonopolizeEvents() ? MonopolizeState::ON : MonopolizeState::OFF;
         firstResponseNode_ = frameNode;
         if (state_ == MonopolizeState::ON) {

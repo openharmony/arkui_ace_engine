@@ -400,6 +400,8 @@ public:
     virtual void OnAttachToMainTree() {}
     virtual void OnAttachToBuilderNode(NodeStatus nodeStatus) {}
 
+    virtual void OnDetachFromMainTree() {}
+
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 
     virtual void OnAreaChangedInner() {}
@@ -443,6 +445,7 @@ public:
 
     virtual void RegisterScrollingListener(const RefPtr<ScrollingListener> listener) {}
     virtual void FireAndCleanScrollingListener() {}
+    virtual void CleanScrollingListener() {}
     virtual void ResetDragOption() {}
 
     virtual int64_t WrapExtensionAbilityId(int64_t extensionOffset, int64_t abilityId)

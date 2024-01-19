@@ -69,7 +69,6 @@ template("ace_osal_ohos_source_set") {
       "image_analyzer_mgr.cpp",
       "layout_inspector.cpp",
       "log_wrapper.cpp",
-      "long_frame_report_impl.cpp",
       "modal_ui_extension_impl.cpp",
       "ressched_report.cpp",
       "socperf_client_impl.cpp",
@@ -81,7 +80,6 @@ template("ace_osal_ohos_source_set") {
 
     external_deps += [
       "ability_runtime:app_manager",
-      "ffrt:libffrt",
       "i18n:intl_util",
       "init:libbegetutil",
     ]
@@ -99,6 +97,12 @@ template("ace_osal_ohos_source_set") {
           defined(global_parts_info.resourceschedule_soc_perf)) {
         external_deps += [ "soc_perf:socperf_client" ]
         defines += [ "SOC_PERF_ENABLE" ]
+      }
+
+      if (defined(resourceschedule_ffrt_support) &&
+          resourceschedule_ffrt_support) {
+        sources += [ "long_frame_report_impl.cpp" ]
+        external_deps += [ "ffrt:libffrt" ]
       }
 
       external_deps += [
@@ -137,6 +141,7 @@ template("ace_osal_ohos_source_set") {
       "download_manager_ohos_v2.cpp",
       "file_uri_helper_ohos.cpp",
       "image_source_ohos.cpp",
+      "input_manager.cpp",
       "mouse_style_ohos.cpp",
       "page_url_checker_ohos.cpp",
       "pixel_map_ohos.cpp",

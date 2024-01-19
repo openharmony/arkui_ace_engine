@@ -639,8 +639,10 @@ bool NavigationModelNG::CreateNavBarNodeChildsIfNeeded(const RefPtr<NavBarNode>&
         navBarNode->AddChild(navBarContentNode);
         navBarNode->SetNavBarContentNode(navBarContentNode);
 
-        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
-        navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
+            navBarContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+        }
     }
 
     // toolBar node
@@ -688,9 +690,11 @@ bool NavigationModelNG::CreateDividerNodeIfNeeded(const RefPtr<NavigationGroupNo
             V2::DIVIDER_ETS_TAG, dividerNodeId, []() { return AceType::MakeRefPtr<DividerPattern>(); });
         navigationGroupNode->AddChild(dividerNode);
         navigationGroupNode->SetDividerNode(dividerNode);
-
-        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
-        dividerNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+        
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
+            dividerNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+        }
 
         auto dividerLayoutProperty = dividerNode->GetLayoutProperty<DividerLayoutProperty>();
         CHECK_NULL_RETURN(dividerLayoutProperty, false);
@@ -1236,8 +1240,10 @@ void NavigationModelNG::SetToolbarConfiguration(std::vector<NG::BarItem>&& toolB
         CHECK_NULL_VOID(barItemLayoutProperty);
         barItemLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
         BuildToolbarMoreItemNode(barItemNode);
-        auto barMenuNode =
-            MenuView::Create(std::move(params), barItemNodeId, V2::BAR_ITEM_ETS_TAG, MenuType::NAVIGATION_MENU);
+        MenuParam menuParam;
+        menuParam.isShowInSubWindow = false;
+        auto barMenuNode = MenuView::Create(
+            std::move(params), barItemNodeId, V2::BAR_ITEM_ETS_TAG, MenuType::NAVIGATION_MENU, menuParam);
         auto toolBarItemNode = CreateToolbarMoreMenuNode(barItemNode);
         CHECK_NULL_VOID(toolBarItemNode);
         BuildToolbarMoreMenuNodeAction(barItemNode, barMenuNode, toolBarItemNode);

@@ -201,8 +201,12 @@ void AceEngine::TriggerGarbageCollection()
 void AceEngine::NotifyContainers(const std::function<void(const RefPtr<Container>&)>& callback)
 {
     CHECK_NULL_VOID(callback);
-    std::shared_lock<std::shared_mutex> lock(mutex_);
-    for (const auto& [first, second] : containerMap_) {
+    std::unordered_map<int32_t, RefPtr<Container>> copied;
+    {
+        std::shared_lock<std::shared_mutex> lock(mutex_);
+        copied = containerMap_;
+    }
+    for (const auto& [first, second] : copied) {
         // first = container ID
         ContainerScope scope(first);
         callback(second);

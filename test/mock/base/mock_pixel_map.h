@@ -36,6 +36,7 @@ public:
     MOCK_METHOD(std::string, GetId, (), (override));
     MOCK_METHOD(std::string, GetModifyId, (), (override));
     MOCK_METHOD0(GetPixelMapSharedPtr, std::shared_ptr<Media::PixelMap>());
+    MOCK_METHOD(void, SavePixelMapToFile, (const std::string& dst), (const override));
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_TEST_MOCK_BASE_MOCK_PIXEL_MAP_H

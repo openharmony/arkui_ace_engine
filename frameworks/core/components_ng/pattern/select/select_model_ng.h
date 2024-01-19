@@ -60,6 +60,7 @@ public:
     void SetOptionWidth(const Dimension& value) override;
     void SetOptionHeight(const Dimension& value) override;
     void SetOptionWidthFitTrigger(bool isFitTrigger) override;
+    void SetHasOptionWidth(bool hasOptionWidth) override;
 
     static void SetArrowPosition(FrameNode* frameNode, const ArrowPosition value);
     static void SetSpace(FrameNode* frameNode, const Dimension& value);
@@ -84,6 +85,7 @@ public:
     static void SetSelectedOptionFontFamily(FrameNode* frameNode, const std::vector<std::string>& value);
     static void SetSelectedOptionItalicFontStyle(FrameNode* frameNode, const Ace::FontStyle& value);
     static void SetOptionWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetHasOptionWidth(FrameNode* frameNode, bool hasOptionWidth);
     static void SetOptionHeight(FrameNode* frameNode, const Dimension& value);
     static void SetOptionWidthFitTrigger(FrameNode* frameNode, bool isFitTrigger);
 };

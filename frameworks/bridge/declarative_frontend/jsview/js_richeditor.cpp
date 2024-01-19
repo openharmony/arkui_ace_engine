@@ -36,6 +36,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/models/richeditor_model_impl.h"
+#include "core/common/resource/resource_object.h"
 #include "core/components/text/text_theme.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
@@ -195,6 +196,18 @@ JSRef<JSObject> JSRichEditor::CreateJSSymbolSpanStyleResult(const SymbolSpanStyl
     return symbolSpanStyleObj;
 }
 
+JSRef<JSObject> JSRichEditor::CreateJSValueResource(const RefPtr<ResourceObject>& valueResource)
+{
+    JSRef<JSObject> valueResourceObj = JSRef<JSObject>::New();
+    valueResourceObj->SetProperty<std::string>("bundleName", valueResource->GetBundleName());
+    valueResourceObj->SetProperty<std::string>("moduleName", valueResource->GetModuleName());
+    valueResourceObj->SetProperty<uint32_t>("id", valueResource->GetId());
+    valueResourceObj->SetProperty<std::vector<ResourceObjectParams>>("params", valueResource->GetParams());
+    valueResourceObj->SetProperty<uint32_t>("type", valueResource->GetType());
+
+    return valueResourceObj;
+}
+
 JSRef<JSObject> JSRichEditor::CreateJSImageStyleResult(const ImageStyleResult& imageStyleResult)
 {
     JSRef<JSObject> imageSpanStyleObj = JSRef<JSObject>::New();
@@ -250,6 +263,7 @@ JSRef<JSObject> JSRichEditor::CreateJSSpanResultObject(const ResultObject& resul
     } else if (resultObject.type == SelectSpanType::TYPESYMBOLSPAN) {
         resultObj->SetProperty<std::string>("value", resultObject.valueString);
         resultObj->SetPropertyObject("symbolSpanStyle", CreateJSSymbolSpanStyleResult(resultObject.symbolSpanStyle));
+        resultObj->SetPropertyObject("valueResource", CreateJSValueResource(resultObject.valueResource));
     } else if (resultObject.type == SelectSpanType::TYPEIMAGE) {
         if (resultObject.valuePixelMap) {
 #ifdef PIXEL_MAP_SUPPORTED
@@ -302,6 +316,36 @@ void JSRichEditor::SetOnSelect(const JSCallbackInfo& args)
     };
     NG::RichEditorModelNG::GetInstance()->SetOnSelect(std::move(onSelect));
 }
+
+JSRef<JSVal> JSRichEditor::CreateJSSelectionRange(const SelectionRangeInfo& selectRange)
+{
+    JSRef<JSObject> selectionRangeObject = JSRef<JSObject>::New();
+
+    JSRef<JSVal> start = JSRef<JSVal>::Make(ToJSValue(selectRange.start_));
+    JSRef<JSVal> end = JSRef<JSVal>::Make(ToJSValue(selectRange.end_));
+
+    selectionRangeObject->SetPropertyObject("start", start);
+    selectionRangeObject->SetPropertyObject("end", end);
+    return JSRef<JSVal>::Cast(selectionRangeObject);
+}
+
+void JSRichEditor::SetOnSelectionChange(const JSCallbackInfo& args)
+{
+    if (args.Length() < 1 || !args[0]->IsFunction()) {
+        return;
+    }
+    auto jsSelectFunc =
+        AceType::MakeRefPtr<JsEventFunction<SelectionRangeInfo, 1>>(JSRef<JSFunc>::Cast(args[0]),
+        CreateJSSelectionRange);
+    auto onSelectionChange =
+        [execCtx = args.GetExecutionContext(), func = std::move(jsSelectFunc)](const BaseEventInfo* info) {
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        const auto* eventInfo = TypeInfoHelper::DynamicCast<SelectionRangeInfo>(info);
+        func->Execute(*eventInfo);
+    };
+    NG::RichEditorModelNG::GetInstance()->SetOnSelectionChange(std::move(onSelectionChange));
+}
+
 void JSRichEditor::SetAboutToIMEInput(const JSCallbackInfo& args)
 {
     if (!args[0]->IsFunction()) {
@@ -642,6 +686,7 @@ void JSRichEditor::JSBind(BindingTarget globalObj)
     JSClass<JSRichEditor>::StaticMethod("create", &JSRichEditor::Create);
     JSClass<JSRichEditor>::StaticMethod("onReady", &JSRichEditor::SetOnReady);
     JSClass<JSRichEditor>::StaticMethod("onSelect", &JSRichEditor::SetOnSelect);
+    JSClass<JSRichEditor>::StaticMethod("onSelectionChange", &JSRichEditor::SetOnSelectionChange);
     JSClass<JSRichEditor>::StaticMethod("aboutToIMEInput", &JSRichEditor::SetAboutToIMEInput);
     JSClass<JSRichEditor>::StaticMethod("onIMEInputComplete", &JSRichEditor::SetOnIMEInputComplete);
     JSClass<JSRichEditor>::StaticMethod("aboutToDelete", &JSRichEditor::SetAboutToDelete);
@@ -1074,8 +1119,10 @@ void JSRichEditorController::AddSymbolSpan(const JSCallbackInfo& args)
     }
     SymbolSpanOptions options;
     uint32_t symbolId;
-    if (!args[0]->IsEmpty() && JSContainerBase::ParseJsSymbolId(args[0], symbolId)) {
+    RefPtr<ResourceObject> resourceObject;
+    if (!args[0]->IsEmpty() && JSContainerBase::ParseJsSymbolId(args[0], symbolId, resourceObject)) {
         options.symbolId = symbolId;
+        options.resourceObject = resourceObject;
     } else {
         args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(-1)));
         return;

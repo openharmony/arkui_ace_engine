@@ -89,6 +89,8 @@ public:
     static bool ParseJsResource(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result);
     static void GetJsMediaBundleInfo(
         const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& bundleName, std::string& moduleName);
+    static bool ParseJsColorStrategy(
+        const EcmaVM* vm, const Local<JSValueRef>& value, ForegroundColorStrategy& strategy);
     static bool GetJsPasswordIcon(const EcmaVM *vm, const Local<JSValueRef> &jsOnIconSrc,
         const Local<JSValueRef> &jsOffIconSrc, PasswordIcon& result);
     static void ParsePadding(

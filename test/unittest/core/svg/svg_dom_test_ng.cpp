@@ -16,7 +16,6 @@
 #include <string>
 
 #include "gtest/gtest.h"
-
 #include "test/mock/core/rosen/mock_canvas.h"
 #include "test/mock/core/rosen/testing_rect.h"
 
@@ -51,7 +50,7 @@ HWTEST_F(SvgDomTestNg, SvgDom001, TestSize.Level1)
     Testing::MockCanvas canvas;
     float layoutScale = LAYOUT.Width() / SVG_SIZE.Width();
     float viewBoxScale = SVG_SIZE.Width() / VIEW_BOX.Width();
-    float tx = 4.0f * viewBoxScale * layoutScale ;
+    float tx = 4.0f * viewBoxScale * layoutScale;
     float ty = 10.0f * viewBoxScale * layoutScale;
 
     ty += (LAYOUT.Height() - SVG_SIZE.Height() * layoutScale) / 2;
@@ -59,7 +58,7 @@ HWTEST_F(SvgDomTestNg, SvgDom001, TestSize.Level1)
     EXPECT_CALL(canvas, Translate(FloatNear(tx, EPSILON), FloatNear(ty, EPSILON)));
     EXPECT_CALL(canvas, Scale(layoutScale * viewBoxScale, layoutScale * viewBoxScale));
     auto clipRect = Testing::TestingRect(0, 0, LAYOUT.Width(), LAYOUT.Height());
-    EXPECT_CALL(canvas, ClipRect(_, _));
+    EXPECT_CALL(canvas, ClipRect(_, _, _));
     svgDom->FitImage(canvas, ImageFit::CONTAIN, LAYOUT);
 }
 } // namespace OHOS::Ace::NG

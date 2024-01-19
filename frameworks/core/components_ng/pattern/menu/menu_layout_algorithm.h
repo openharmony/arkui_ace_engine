@@ -46,7 +46,7 @@ public:
     }
 
     bool hierarchicalParameters_ = false;
-    void InitHierarchicalParameters();
+    void InitHierarchicalParameters(bool isShowInSubWindow);
 
 protected:
     float VerticalLayout(const SizeF& size, float clickPosition, bool IsContextMenu = false);

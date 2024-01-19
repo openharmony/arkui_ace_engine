@@ -965,7 +965,9 @@ void TimePickerRowPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(contentRowNode);
     auto layoutRenderContext = contentRowNode->GetRenderContext();
     CHECK_NULL_VOID(layoutRenderContext);
-    layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) || !layoutRenderContext->IsUniRenderEnabled()) {
+        layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
+    }
     host->MarkModifyDone();
 }
 } // namespace OHOS::Ace::NG

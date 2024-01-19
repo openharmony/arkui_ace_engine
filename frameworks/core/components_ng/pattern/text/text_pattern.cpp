@@ -232,8 +232,7 @@ SelectionInfo TextPattern::GetSpansInfo(int32_t start, int32_t end, GetSpansMeth
         selection.SetResultObjectList(resultObjects);
         return selection;
     }
-    auto host = GetHost();
-    const auto& children = host->GetChildren();
+    auto children = GetAllChildren();
     for (const auto& uinode : children) {
         if (uinode->GetTag() == V2::IMAGE_ETS_TAG) {
             ResultObject resultObject = GetImageResultObject(uinode, index, realStart, realEnd);
@@ -410,6 +409,10 @@ std::string TextPattern::GetSelectedText(int32_t start, int32_t end) const
     std::string value;
     int32_t tag = 0;
     for (const auto& span : spans_) {
+        if (span->GetSymbolUnicode() != 0) {
+            tag = span->position == -1 ? tag + 1 : span->position;
+            continue;
+        }
         if (span->position - 1 >= start && span->placeholderIndex == -1 && span->position != -1) {
             auto wideString = StringUtils::ToWstring(span->GetSpanContent());
             auto max = std::min(span->position, end);
@@ -483,9 +486,7 @@ void TextPattern::SetTextSelection(int32_t selectionStart, int32_t selectionEnd)
                 textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE) {
                 return;
             }
-            auto host = textPattern->GetHost();
-            CHECK_NULL_VOID(host);
-            if ((!host->GetChildren().empty() || !ifHaveObscured) && eventHub->IsEnabled()) {
+            if ((!textPattern->GetAllChildren().empty() || !ifHaveObscured) && eventHub->IsEnabled()) {
                 textPattern->ActSetSelection(selectionStart, selectionEnd);
             }
         });
@@ -879,7 +880,11 @@ bool TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandl
 
 void TextPattern::HandleDoubleClickEvent(GestureEvent& info)
 {
-    if (copyOption_ == CopyOptions::None || textForDisplay_.empty() || hasClickedAISpan_) {
+    if (hasClickedAISpan_) {
+        return;
+    }
+    CheckOnClickEvent(info);
+    if (copyOption_ == CopyOptions::None || textForDisplay_.empty()) {
         return;
     }
     auto host = GetHost();
@@ -901,6 +906,31 @@ void TextPattern::HandleDoubleClickEvent(GestureEvent& info)
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextPattern::CheckOnClickEvent(GestureEvent& info)
+{
+    bool isClickOnSpan = false;
+    bool isClickOnAISpan = false;
+    RectF textContentRect = contentRect_;
+    textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
+    textContentRect.SetHeight(contentRect_.Height() - std::max(baselineOffset_, 0.0f));
+    PointF textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
+        info.GetLocalLocation().GetY() - textContentRect.GetY() };
+    HandleSpanSingleClickEvent(info, textContentRect, textOffset, isClickOnSpan, isClickOnAISpan);
+    if (NeedShowAIDetect() && spans_.empty() && paragraph_) {
+        for (const auto& kv : aiSpanMap_) {
+            if (isClickOnAISpan) {
+                break;
+            }
+            auto aiSpan = kv.second;
+            isClickOnAISpan = ClickAISpan(textOffset, aiSpan);
+        }
+    }
+    if (onClick_ && !isClickOnSpan && !isClickOnAISpan) {
+        auto onClick = onClick_;
+        onClick(info);
+    }
 }
 
 void TextPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -1466,8 +1496,7 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
         auto pattern = wk.Upgrade();
         CHECK_NULL_VOID(pattern);
         if (pattern->BetweenSelectedPosition(point)) {
-            auto host = pattern->GetHost();
-            auto children = host->GetChildren();
+            auto children = pattern->GetAllChildren();
             std::list<RefPtr<FrameNode>> imageChildren;
             for (const auto& child : children) {
                 auto node = DynamicCast<FrameNode>(child);
@@ -1479,10 +1508,27 @@ std::function<void(Offset)> TextPattern::GetThumbnailCallback()
                     imageChildren.emplace_back(node);
                 }
             }
-            pattern->dragNode_ = RichEditorDragPattern::CreateDragNode(host, imageChildren);
+            pattern->dragNode_ = RichEditorDragPattern::CreateDragNode(pattern->GetHost(), imageChildren);
             FrameNode::ProcessOffscreenNode(pattern->dragNode_);
         }
     };
+}
+
+const std::list<RefPtr<UINode>>& TextPattern::GetAllChildren() const
+{
+    childNodes_.clear();
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, childNodes_);
+    const auto& children = host->GetChildren();
+    for (const auto& child : children) {
+        if (child->GetTag() == V2::CONTAINER_SPAN_ETS_TAG) {
+            auto spanChildren = child->GetChildren();
+            childNodes_.insert(childNodes_.end(), spanChildren.begin(), spanChildren.end());
+        } else {
+            childNodes_.push_back(child);
+        }
+    }
+    return childNodes_;
 }
 
 std::string TextPattern::GetSelectedSpanText(std::wstring value, int32_t start, int32_t end) const
@@ -1523,8 +1569,7 @@ TextStyleResult TextPattern::GetTextStyleObject(const RefPtr<SpanNode>& node)
 
 RefPtr<UINode> TextPattern::GetChildByIndex(int32_t index) const
 {
-    auto host = GetHost();
-    const auto& children = host->GetChildren();
+    const auto& children = GetAllChildren();
     int32_t size = static_cast<int32_t>(children.size());
     if (index < 0 || index >= size) {
         return nullptr;
@@ -1590,6 +1635,7 @@ ResultObject TextPattern::GetSymbolSpanResultObject(RefPtr<UINode> uinode, int32
 {
     bool selectFlag = false;
     ResultObject resultObject;
+    resultObject.isDraggable = false;
     if (!DynamicCast<SpanNode>(uinode)) {
         return resultObject;
     }
@@ -1616,6 +1662,7 @@ ResultObject TextPattern::GetSymbolSpanResultObject(RefPtr<UINode> uinode, int32
         resultObject.offsetInSpan[RichEditorSpanRange::RANGEEND] = end - startPosition;
     }
     if (selectFlag) {
+        resultObject.valueResource = spanItem->GetResourceObject();
         resultObject.spanPosition.spanIndex = index;
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGESTART] = startPosition;
         resultObject.spanPosition.spanRange[RichEditorSpanRange::RANGEEND] = endPosition;
@@ -1767,8 +1814,7 @@ void TextPattern::OnModifyDone()
     } else {
         copyOption_ = textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
     }
-
-    if (host->GetChildren().empty()) {
+    if (GetAllChildren().empty()) {
         auto obscuredReasons = renderContext->GetObscured().value_or(std::vector<ObscuredReasons>());
         bool ifHaveObscured = std::any_of(obscuredReasons.begin(), obscuredReasons.end(),
             [](const auto& reason) { return reason == ObscuredReasons::PLACEHOLDER; });
@@ -2923,6 +2969,7 @@ ResultObject TextPattern::GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t 
 {
     int32_t itemLength = 1;
     ResultObject resultObject;
+    resultObject.isDraggable = false;
     if (!DynamicCast<FrameNode>(uiNode) || !GetSpanItemByIndex(index)) {
         return resultObject;
     }

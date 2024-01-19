@@ -1163,6 +1163,25 @@ void SelectPattern::SetOptionWidthFitTrigger(bool isFitTrigger)
     isFitTrigger_ = isFitTrigger;
 }
 
+void SelectPattern::SetHasOptionWidth(bool hasOptionWidth)
+{
+    auto menu = GetMenuNode();
+    CHECK_NULL_VOID(menu);
+    auto menuPattern = menu->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    menuPattern->SetHasOptionWidth(true);
+    auto scroll = DynamicCast<FrameNode>(menu->GetFirstChild());
+    CHECK_NULL_VOID(scroll);
+    auto scrollPattern = scroll->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(scrollPattern);
+    scrollPattern->SetHasOptionWidth(true);
+    for (size_t i = 0; i < options_.size(); ++i) {
+        auto optionPattern = options_[i]->GetPattern<OptionPattern>();
+        CHECK_NULL_VOID(optionPattern);
+        optionPattern->SetHasOptionWidth(true);
+    }
+}
+
 void SelectPattern::SetOptionHeight(const Dimension& value)
 {
     auto menuMaxHeight = value.ConvertToPx();

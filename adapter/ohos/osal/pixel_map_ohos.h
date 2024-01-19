@@ -45,6 +45,7 @@ public:
     void* GetWritablePixels() const override;
     void Scale(float xAxis, float yAxis) override;
     void Scale(float xAxis, float yAxis, const AceAntiAliasingOption &option) override;
+    void SavePixelMapToFile(const std::string& dst) const override;
 
 private:
     std::shared_ptr<Media::PixelMap> pixmap_;

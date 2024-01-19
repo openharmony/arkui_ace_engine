@@ -60,7 +60,7 @@ namespace {
 
 ArkUINodeHandle CreateNode(ArkUINodeType type, int peerId, ArkUI_Int32 /*flags*/)
 {
-    return ViewModel::CreateNode(type, peerId);
+    return reinterpret_cast<ArkUINodeHandle>(ViewModel::CreateNode(type, peerId));
 }
 
 void DisposeNode(ArkUINodeHandle node)
@@ -87,7 +87,7 @@ typedef void (*ComponentAsyncEventHandler)(ArkUINodeHandle node, ArkUI_Int32 eve
 
 /**
  * IMPORTANT!!!
- * the order of declaring the handler must be same as the ArkUIAPIComponentAsyncEventSubKind did
+ * the order of declaring the handler must be same as the ArkUIAsyncEventKind did
  */
 /* clang-format off */
 const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
@@ -159,7 +159,7 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIAsyncEventKind kind, A
             eventHandle = scrollNodeAsyncEventHandlers[subKind];
             break;
         }
-        case ARKUI_TEXTINPUT: {
+        case ARKUI_TEXT_INPUT: {
             // textinput event type.
             if (subKind >= sizeof(textInputNodeAsyncEventHandlers) / sizeof(ComponentAsyncEventHandler)) {
                 TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
@@ -225,6 +225,14 @@ void ApplyModifierFinish(ArkUINodeHandle nodePtr)
     }
 }
 
+
+static ArkUIAPICallbackMethod* callbacks = nullptr;
+
+static void SetCallbackMethod(ArkUIAPICallbackMethod* method)
+{
+    callbacks = method;
+}
+
 /* clang-format off */
 const struct ArkUIBasicAPI basicImpl = {
     CreateNode,
@@ -255,9 +263,12 @@ const ArkUIBasicAPI* GetBasicAPI()
 /* clang-format off */
 ArkUIFullNodeAPI impl = {
     ARKUI_NODE_API_VERSION,
-    GetBasicAPI,
-    GetArkUINodeModifiers,
-    nullptr,
+    SetCallbackMethod,      // CallbackMethod
+    GetBasicAPI,            // BasicAPI
+    GetArkUINodeModifiers,  // NodeModifiers
+    nullptr,                // Animation
+    nullptr,                // Navigation
+    nullptr,                // GraphicsAPI
 };
 /* clang-format on */
 } // namespace
@@ -265,11 +276,11 @@ ArkUIFullNodeAPI impl = {
 } // namespace OHOS::Ace::NG
 
 extern "C" {
-ACE_FORCE_EXPORT ArkUIAnyNodeAPI* GetArkUIAnyFullNodeAPI(int version)
+ACE_FORCE_EXPORT ArkUIAnyAPI* GetArkUIAnyFullNodeAPI(int version)
 {
     switch (version) {
         case ARKUI_NODE_API_VERSION:
-            return reinterpret_cast<ArkUIAnyNodeAPI*>(&OHOS::Ace::NG::impl);
+            return reinterpret_cast<ArkUIAnyAPI*>(&OHOS::Ace::NG::impl);
         default: {
             TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
                 "Requested version %{public}d is not supported, we're version %{public}d", version,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,7 +14,6 @@
  */
 
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_layout_algorithm.h"
-#include <cstdint>
 
 #include "base/geometry/axis.h"
 #include "base/geometry/ng/offset_t.h"
@@ -437,7 +436,9 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
         SupplyAllData2ZeroIndex(mainSize, crossSize, layoutWrapper);
         gridLayoutInfo_.targetIndex_.reset();
     }
-    SkipLargeOffset(mainSize, layoutWrapper);
+    if (enableSkipping_) {
+        SkipLargeOffset(mainSize, layoutWrapper);
+    }
 
     if (!gridLayoutInfo_.lastCrossCount_) {
         gridLayoutInfo_.lastCrossCount_ = crossCount_;
@@ -478,7 +479,7 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     auto haveNewLineAtStart = FillBlankAtStart(mainSize, crossSize, layoutWrapper);
     if (gridLayoutInfo_.reachStart_) {
         auto offset = gridLayoutInfo_.currentOffset_;
-        if (!gridPattern->IsScrollableSpringMotionRunning() && !canOverScroll_) {
+        if (!canOverScroll_) {
             gridLayoutInfo_.currentOffset_ = 0.0;
             gridLayoutInfo_.prevOffset_ = 0.0;
         }
@@ -598,7 +599,7 @@ void GridScrollLayoutAlgorithm::ModifyCurrentOffsetWhenReachEnd(float mainSize, 
     }
 
     // Step3. modify [currentOffset_]
-    if (!gridPattern->IsScrollableSpringMotionRunning() && !canOverScroll_) {
+    if (!canOverScroll_) {
         float realOffsetToMoveUp = lengthOfItemsInViewport - mainSize + gridLayoutInfo_.prevOffset_;
         gridLayoutInfo_.currentOffset_ = gridLayoutInfo_.prevOffset_ - realOffsetToMoveUp;
         gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
@@ -649,7 +650,7 @@ void GridScrollLayoutAlgorithm::FillBlankAtEnd(
     while (LessNotEqual(mainLength, mainSize)) {
         float lineHeight = FillNewLineBackward(crossSize, mainSize, layoutWrapper, false);
         if (GreatOrEqual(lineHeight, 0.0)) {
-            mainLength += lineHeight;
+            mainLength += (lineHeight + mainGap_);
             continue;
         }
         gridLayoutInfo_.reachEnd_ = true;
@@ -1056,7 +1057,9 @@ bool GridScrollLayoutAlgorithm::UseCurrentLines(
     }
     if (!cacheValid) {
         info.ClearMapsToEnd(info.endMainLineIndex_ + 1);
-        info.ClearMapsFromStart(info.startMainLineIndex_);
+        // run out of reord, startMainLineIndex is larger by 1 than real start main line index, so reduce 1
+        info.ClearMapsFromStart(info.startMainLineIndex_ > info.endMainLineIndex_ ? info.startMainLineIndex_ - 1
+                                                                                  : info.startMainLineIndex_);
     }
     return runOutOfRecord;
 }

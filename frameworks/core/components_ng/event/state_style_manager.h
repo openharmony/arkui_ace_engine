@@ -109,6 +109,11 @@ public:
         }
     }
 
+    bool GetHasScrollingParent() const
+    {
+        return hasScrollingParent_;
+    }
+
     const RefPtr<TouchEventImpl>& GetPressedListener();
     void HandleTouchDown();
     void HandleTouchUp();
@@ -119,7 +124,7 @@ private:
     void PostPressStyleTask(uint32_t delayTime);
     void PostPressCancelStyleTask(uint32_t delayTime);
 
-    bool HandleScrollingParent();
+    void HandleScrollingParent();
 
     void DeletePressStyleTask()
     {
@@ -182,6 +187,7 @@ private:
     bool IsOutOfPressedRegionWithoutClip(RefPtr<FrameNode> node, int32_t sourceType,
         const Offset& location) const;
     void Transform(PointF& localPointF, const WeakPtr<FrameNode>& node) const;
+    void CleanScrollingParentListener();
 
     WeakPtr<FrameNode> host_;
     RefPtr<TouchEventImpl> pressedFunc_;
@@ -194,6 +200,7 @@ private:
     CancelableCallback<void()> pressCancelStyleTask_;
     bool pressedPendingState_ = false;
     bool pressedCancelPendingState_ = false;
+    bool hasScrollingParent_ = false;
 
     ACE_DISALLOW_COPY_AND_MOVE(StateStyleManager);
 };

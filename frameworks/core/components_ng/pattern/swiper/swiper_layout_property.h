@@ -64,6 +64,7 @@ public:
         value->propArrowColor_ = CloneArrowColor();
         value->propLoop_ = CloneLoop();
         value->propDisableSwipe_ = CloneDisableSwipe();
+        value->ignoreItemSpace_ = ignoreItemSpace_;
         return value;
     }
 
@@ -95,6 +96,7 @@ public:
         ResetArrowColor();
         ResetLoop();
         ResetDisableSwipe();
+        ignoreItemSpace_ = false;
     }
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override
@@ -166,6 +168,21 @@ public:
         }
     }
 
+    void ResetIgnoreItemSpace()
+    {
+        ignoreItemSpace_ = false;
+    }
+
+    void MarkIgnoreItemSpace()
+    {
+        ignoreItemSpace_ = true;
+    }
+
+    bool IgnoreItemSpace() const
+    {
+        return ignoreItemSpace_;
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Direction, Axis, PROPERTY_UPDATE_MEASURE);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Index, int32_t, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ItemSpace, Dimension, PROPERTY_UPDATE_MEASURE);
@@ -192,6 +209,11 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(Loop, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(IsCustomAnimation, bool, PROPERTY_UPDATE_MEASURE_SELF);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(DisableSwipe, bool, PROPERTY_UPDATE_MEASURE);
+    ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(SwipeByGroup, bool, PROPERTY_UPDATE_MEASURE_SELF);
+
+private:
+    bool ignoreItemSpace_ = false; // displayCount and prevMargin/nextMargin have higher priorities, so itemSpace might
+                                   // be ignored in some situations.
 };
 } // namespace OHOS::Ace::NG
 

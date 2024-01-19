@@ -70,7 +70,7 @@ private:
 class ACE_EXPORT UITaskScheduler final {
 public:
     using PredictTask = std::function<void(int64_t, bool)>;
-    UITaskScheduler() = default;
+    UITaskScheduler();
     ~UITaskScheduler();
 
     // Called on Main Thread.
@@ -163,6 +163,7 @@ private:
     std::list<std::function<void()>> persistAfterLayoutTasks_;
 
     uint32_t currentPageId_ = 0;
+    bool is64BitSystem_ = false;
     bool isLayouting_ = false;
 
     FrameInfo* frameInfo_ = nullptr;

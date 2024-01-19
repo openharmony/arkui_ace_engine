@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_TITLE_BAR_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_TITLE_BAR_PATTERN_H
 
+#include "core/common/container.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/navigation/title_bar_accessibility_property.h"

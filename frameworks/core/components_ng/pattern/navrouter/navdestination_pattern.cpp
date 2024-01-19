@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
-
+#include "core/common/container.h"
 #include "base/log/dump_log.h"
 #include "core/components/theme/app_theme.h"
 #include "core/components_ng/pattern/navigation/title_bar_layout_property.h"
@@ -118,46 +118,72 @@ void NavDestinationPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto hostNode = AceType::DynamicCast<NavDestinationGroupNode>(GetHost());
     CHECK_NULL_VOID(hostNode);
-    auto navDestinationPattern = hostNode->GetPattern<NavDestinationPattern>();
-    if (navDestinationPattern->GetName().empty()) {
-        if (hostNode->GetInspectorId().has_value()) {
-            navDestinationPattern->SetName(hostNode->GetInspectorIdValue());
-        } else {
-            auto id = GetHost()->GetId();
-            navDestinationPattern->SetName(std::to_string(id));
-        }
+    UpdateNameIfNeeded(hostNode);
+    UpdateBackgroundColorIfNeeded(hostNode);
+    UpdateTitlebarVisibility(hostNode);
+}
+
+void NavDestinationPattern::UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode)
+{
+    if (!name_.empty()) {
+        return;
     }
+
+    if (hostNode->GetInspectorId().has_value()) {
+        name_ = hostNode->GetInspectorIdValue();
+    } else {
+        name_ = std::to_string(GetHost()->GetId());
+    }
+    auto pathInfo = GetNavPathInfo();
+    if (pathInfo) {
+        pathInfo->SetName(name_);
+    }
+}
+
+void NavDestinationPattern::UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode)
+{
     auto renderContext = hostNode->GetRenderContext();
-    do {
-        if (renderContext->GetBackgroundColor().has_value()) {
-            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Background already has color: %{public}s",
-                renderContext->GetBackgroundColor()->ColorToString().c_str());
-            break;
-        }
-        if (hostNode->GetNavDestinationMode() == NavDestinationMode::DIALOG) {
-            renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-            TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set dialog background color: %{public}s",
-                renderContext->GetBackgroundColor()->ColorToString().c_str());
-            break;
-        }
-        auto pipelineContext = PipelineContext::GetCurrentContext();
-        if (!pipelineContext) {
-            break;
-        }
-        auto theme = pipelineContext->GetTheme<AppTheme>();
-        if (!theme) {
-            break;
-        }
-        renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set default background color: %{public}s",
+    CHECK_NULL_VOID(renderContext);
+    if (renderContext->GetBackgroundColor().has_value()) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Background already has color: %{public}s",
             renderContext->GetBackgroundColor()->ColorToString().c_str());
-    } while (false);
+        return;
+    }
+    if (hostNode->GetNavDestinationMode() == NavDestinationMode::DIALOG) {
+        renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set dialog background color: %{public}s",
+            renderContext->GetBackgroundColor()->ColorToString().c_str());
+        return;
+    }
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    if (!pipelineContext) {
+        return;
+    }
+    auto theme = pipelineContext->GetTheme<AppTheme>();
+    if (!theme) {
+        return;
+    }
+    renderContext->UpdateBackgroundColor(theme->GetBackgroundColor());
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Set default background color: %{public}s",
+        renderContext->GetBackgroundColor()->ColorToString().c_str());
+}
+
+void NavDestinationPattern::UpdateTitlebarVisibility(RefPtr<NavDestinationGroupNode>& hostNode)
+{
     auto navDestinationLayoutProperty = hostNode->GetLayoutProperty<NavDestinationLayoutProperty>();
     CHECK_NULL_VOID(navDestinationLayoutProperty);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(hostNode->GetTitleBarNode());
     CHECK_NULL_VOID(titleBarNode);
     auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
     CHECK_NULL_VOID(titleBarLayoutProperty);
+
+    auto&& opts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
+    auto navDestinationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
+    if (opts && opts->Expansive() && navDestinationContentNode) {
+        navDestinationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+        navDestinationContentNode->MarkModifyDone();
+    }
+
     if (navDestinationLayoutProperty->GetHideTitleBar().value_or(false)) {
         titleBarLayoutProperty->UpdateVisibility(VisibleType::GONE);
         titleBarNode->SetActive(false);
@@ -165,6 +191,10 @@ void NavDestinationPattern::OnModifyDone()
         titleBarLayoutProperty->UpdateVisibility(VisibleType::VISIBLE);
         titleBarNode->SetActive(true);
         MountTitleBar(hostNode);
+        if (opts && opts->Expansive()) {
+            titleBarLayoutProperty->UpdateSafeAreaExpandOpts(*opts);
+        }
+        titleBarNode->MarkModifyDone();
     }
 
     auto navDesIndex = hostNode->GetIndex();
@@ -235,8 +265,10 @@ void NavDestinationPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
-    host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
+        host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+    }
 }
 
 void NavDestinationPattern::OnAttachToMainTree()

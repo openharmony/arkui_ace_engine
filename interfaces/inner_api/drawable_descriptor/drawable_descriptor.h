@@ -46,6 +46,13 @@
 
 namespace OHOS::Ace::Napi {
 using OptionalPixelMap = std::optional<std::shared_ptr<Media::PixelMap>>;
+struct DrawableItem {
+    using RState = Global::Resource::RState;
+    std::unique_ptr<uint8_t[]> data_;
+    size_t len_ = 0;
+    RState state_ = Global::Resource::ERROR;
+};
+
 class ACE_EXPORT DrawableDescriptor {
 public:
     enum class DrawableType {
@@ -69,27 +76,49 @@ private:
 
 class ACE_EXPORT LayeredDrawableDescriptor : public DrawableDescriptor {
 public:
-    LayeredDrawableDescriptor(
-        std::unique_ptr<uint8_t[]> jsonBuf, size_t len, std::shared_ptr<Global::Resource::ResourceManager> resourceMgr)
-        : jsonBuf_(std::move(jsonBuf)), len_(len), resourceMgr_(std::move(resourceMgr)) {};
+    LayeredDrawableDescriptor(std::unique_ptr<uint8_t[]> jsonBuf, size_t len,
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr)
+        : jsonBuf_(std::move(jsonBuf)), len_(len)
+    {
+        InitialResource(resourceMgr);
+    };
+    LayeredDrawableDescriptor(std::unique_ptr<uint8_t[]> jsonBuf, size_t len,
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, std::string path, uint32_t iconType,
+        uint32_t density)
+        : jsonBuf_(std::move(jsonBuf)), len_(len), maskPath_(std::move(path)), iconType_(iconType), density_(density)
+    {
+        InitialResource(resourceMgr);
+    };
+    LayeredDrawableDescriptor(std::unique_ptr<uint8_t[]> jsonBuf, size_t len,
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, std::string path, uint32_t iconType,
+        std::pair<std::unique_ptr<uint8_t[]>, size_t>& foregroundInfo,
+        std::pair<std::unique_ptr<uint8_t[]>, size_t>& backgroundInfo)
+        : jsonBuf_(std::move(jsonBuf)), len_(len), maskPath_(std::move(path)), iconType_(iconType)
+    {
+        InitLayeredParam(foregroundInfo, backgroundInfo);
+        InitialResource(resourceMgr);
+    };
+
     ~LayeredDrawableDescriptor() override = default;
     std::unique_ptr<DrawableDescriptor> GetForeground();
     std::unique_ptr<DrawableDescriptor> GetBackground();
     std::unique_ptr<DrawableDescriptor> GetMask();
     std::shared_ptr<Media::PixelMap> GetPixelMap() override;
     static std::string GetStaticMaskClipPath();
-    void SetMaskPath(std::string& path);
-    void SetIconType(uint32_t iconType);
-    void SetDensity(uint32_t density);
     void InitLayeredParam(std::pair<std::unique_ptr<uint8_t[]>, size_t> &foregroundInfo,
         std::pair<std::unique_ptr<uint8_t[]>, size_t> &backgroundInfo);
 
 private:
     friend class ImageConverter;
-    std::unique_ptr<Media::ImageSource> CreateImageSource(const char* item, uint32_t& errorCode);
+    void InitialResource(const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr);
+    bool PreGetPixelMapFromJsonBuf(
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, bool isBackground);
+    DrawableItem PreGetDrawableItem(
+        const std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, const char* item);
+    std::unique_ptr<Media::ImageSource> CreateImageSource(DrawableItem& drawableItem, uint32_t& errorCode);
     bool GetPixelMapFromJsonBuf(bool isBackground);
     bool GetDefaultMask();
-    bool GetMaskByName(const std::string& name);
+    bool GetMaskByName(std::shared_ptr<Global::Resource::ResourceManager>& resourceMgr, const std::string& name);
     bool CreatePixelMap();
     bool GetMaskByPath();
 #ifndef USE_ROSEN_DRAWING
@@ -100,12 +129,15 @@ private:
         float width, float height, Rosen::Drawing::Canvas& canvas);
 #endif
 
+    std::unique_ptr<uint8_t[]> defaultMaskData_;
+    size_t defaultMaskDataLength_ = 0;
+    DrawableItem backgroundItem_;
+    DrawableItem foregroundItem_;
     std::unique_ptr<uint8_t[]> jsonBuf_;
     size_t len_ = 0;
     std::string maskPath_;
     uint32_t iconType_ = 0;
     uint32_t density_ = 0;
-    const std::shared_ptr<Global::Resource::ResourceManager> resourceMgr_;
     OptionalPixelMap foreground_;
     OptionalPixelMap background_;
     OptionalPixelMap mask_;
@@ -128,6 +160,7 @@ public:
             HILOG_ERROR("Failed to get drawable info from resmgr");
             return nullptr;
         }
+        transform(type.begin(), type.end(), type.begin(), ::tolower);
         if (type == "json") {
             HILOG_DEBUG("Create LayeredDrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::LAYERED;
@@ -157,6 +190,7 @@ public:
             HILOG_ERROR("Failed to get drawable info from resmgr");
             return nullptr;
         }
+        transform(type.begin(), type.end(), type.begin(), ::tolower);
         if (type == "json") {
             HILOG_DEBUG("Create LayeredDrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::LAYERED;
@@ -173,6 +207,7 @@ public:
         state = Global::Resource::INVALID_FORMAT;
         return nullptr;
     }
+
     static std::unique_ptr<DrawableDescriptor> Create(std::tuple<int32_t, uint32_t, uint32_t>& drawableInfo,
         const std::shared_ptr<ResourceManager>& resourceMgr, RState& state, DrawableType& drawableType)
     {
@@ -189,14 +224,13 @@ public:
         std::string type = std::get<0>(info);
         size_t len = std::get<1>(info);
         std::string path = std::get<2>(info);
+        transform(type.begin(), type.end(), type.begin(), ::tolower);
         if (type == "json") {
             HILOG_DEBUG("Create LayeredDrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::LAYERED;
             auto layeredDrawableDescriptor =
-                std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), len, resourceMgr);
-            layeredDrawableDescriptor->SetMaskPath(path);
-            layeredDrawableDescriptor->SetDensity(density);
-            layeredDrawableDescriptor->SetIconType(iconType);
+                std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), len, resourceMgr,
+                    path, iconType, density);
             return layeredDrawableDescriptor;
         }
         if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp") {
@@ -225,14 +259,12 @@ public:
         std::string type = std::get<0>(info);
         size_t len = std::get<1>(info);
         std::string path = std::get<2>(info);
+        transform(type.begin(), type.end(), type.begin(), ::tolower);
         if (type == "json") {
             HILOG_DEBUG("Create LayeredDrawableDescriptor object");
             drawableType = DrawableDescriptor::DrawableType::LAYERED;
-            auto layeredDrawableDescriptor =
-                std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), len, resourceMgr);
-            layeredDrawableDescriptor->SetMaskPath(path);
-            layeredDrawableDescriptor->SetDensity(density);
-            layeredDrawableDescriptor->SetIconType(iconType);
+            auto layeredDrawableDescriptor = std::make_unique<LayeredDrawableDescriptor>(
+                std::move(jsonBuf), len, resourceMgr, path, iconType, density);
             return layeredDrawableDescriptor;
         }
         if (type == "png" || type == "jpg" || type == "bmp" || type == "svg" || type == "gif" || type == "webp") {
@@ -251,11 +283,8 @@ public:
     {
         std::unique_ptr<uint8_t[]> jsonBuf;
         drawableType = DrawableDescriptor::DrawableType::LAYERED;
-        auto layeredDrawableDescriptor = std::make_unique<LayeredDrawableDescriptor>(std::move(jsonBuf), 0,
-            resourceMgr);
-        layeredDrawableDescriptor->SetMaskPath(path);
-        layeredDrawableDescriptor->SetIconType(1);
-        layeredDrawableDescriptor->InitLayeredParam(foregroundInfo, backgroundInfo);
+        auto layeredDrawableDescriptor = std::make_unique<LayeredDrawableDescriptor>(
+            std::move(jsonBuf), 0, resourceMgr, path, 1, foregroundInfo, backgroundInfo);
         return layeredDrawableDescriptor;
     }
 };

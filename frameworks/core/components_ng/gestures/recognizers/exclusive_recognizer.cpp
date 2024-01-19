@@ -242,7 +242,7 @@ void ExclusiveRecognizer::HandleAcceptDisposal(const RefPtr<NGGestureRecognizer>
         return;
     }
 
-    if (CheckNeedBlocked(recognizer)) {
+    if (recognizer->GetRefereeState() != RefereeState::PENDING && CheckNeedBlocked(recognizer)) {
         recognizer->OnBlocked();
         return;
     }

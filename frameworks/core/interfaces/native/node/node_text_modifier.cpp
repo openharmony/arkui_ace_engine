@@ -241,7 +241,7 @@ void SetTextMinFontSize(ArkUINodeHandle node, const ArkUI_Float64 number, const 
     TextModelNG::SetAdaptMinFontSize(frameNode, Dimension(number, static_cast<DimensionUnit>(unit)));
 }
 
-void ReSetTextMinFontSize(ArkUINodeHandle node)
+void ResetTextMinFontSize(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -469,7 +469,7 @@ const ArkUITextModifier* GetTextModifier()
         ResetFontStyle, SetTextAlign, ResetTextAlign, SetFontColor, ResetFontColor, SetFontSize, ResetFontSize,
         SetTextLineHeight, ResetTextLineHeight, SetTextTextOverflow, ResetTextTextOverflow, SetTextDecoration,
         ResetTextDecoration, SetTextTextCase, ResetTextTextCase, SetTextMaxLines, ResetTextMaxLines, SetTextMinFontSize,
-        ReSetTextMinFontSize, SetTextDraggable, ResetTextDraggable, SetTextMaxFontSize, ResetTextMaxFontSize,
+        ResetTextMinFontSize, SetTextDraggable, ResetTextDraggable, SetTextMaxFontSize, ResetTextMaxFontSize,
         SetTextFontFamily, ResetTextFontFamily, SetTextCopyOption, ResetTextCopyOption, SetTextTextShadow,
         ResetTextTextShadow, SetTextHeightAdaptivePolicy, ResetTextHeightAdaptivePolicy, SetTextTextIndent,
         ResetTextTextIndent, SetTextBaselineOffset, ResetTextBaselineOffset, SetTextLetterSpacing,

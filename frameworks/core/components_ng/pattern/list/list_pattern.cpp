@@ -65,7 +65,10 @@ void ListPattern::OnModifyDone()
     auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
     CHECK_NULL_VOID(listLayoutProperty);
     auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
-    SetAxis(axis);
+    if (axis != GetAxis()) {
+        SetAxis(axis);
+        ChangeAxis(GetHost());
+    }
     if (!GetScrollableEvent()) {
         InitScrollableEvent();
     }
@@ -92,6 +95,29 @@ void ListPattern::OnModifyDone()
     SetAccessibilityAction();
     if (IsNeedInitClickEventRecorder()) {
         Pattern::InitClickEventRecorder();
+    }
+}
+
+void ListPattern::ChangeAxis(RefPtr<UINode> node)
+{
+    CHECK_NULL_VOID(node);
+    auto children = node->GetChildren();
+    for (const auto& child : children) {
+        if (AceType::InstanceOf<FrameNode>(child)) {
+            auto frameNode = AceType::DynamicCast<FrameNode>(child);
+            CHECK_NULL_VOID(frameNode);
+            auto listItemPattern = frameNode->GetPattern<ListItemPattern>();
+            if (listItemPattern) {
+                listItemPattern->ChangeAxis(GetAxis());
+                return;
+            }
+            auto listItemGroupPattern = frameNode->GetPattern<ListItemGroupPattern>();
+            if (listItemGroupPattern) {
+                ChangeAxis(child);
+            }
+        } else {
+            ChangeAxis(child);
+        }
     }
 }
 
@@ -233,16 +259,16 @@ ScrollAlign ListPattern::GetScrollAlignByScrollSnapAlign() const
 
 float ListPattern::CalculateTargetPos(float startPos, float endPos)
 {
-    float topOffset = startPos;
-    float bottomOffset = endPos - contentMainSize_;
-    if (GreatOrEqual(startPos, 0.0f) && LessOrEqual(endPos, contentMainSize_)) {
+    float topOffset = startPos - contentStartOffset_;
+    float bottomOffset = endPos - contentMainSize_ + contentEndOffset_;
+    if (GreatOrEqual(topOffset, 0.0f) && LessOrEqual(bottomOffset, 0.0f)) {
         return 0.0f;
     }
-    if ((NearEqual(startPos, 0.0f) && GreatNotEqual(endPos, contentMainSize_)) ||
-        (LessNotEqual(startPos, 0.0f) && NearEqual(endPos, contentMainSize_))) {
+    if ((NearEqual(topOffset, 0.0f) && GreatNotEqual(bottomOffset, 0.0f)) ||
+        (LessNotEqual(topOffset, 0.0f) && NearEqual(bottomOffset, 0.0f))) {
         return 0.0f;
     }
-    if (LessNotEqual(startPos, 0.0f) && GreatNotEqual(endPos, contentMainSize_)) {
+    if (LessNotEqual(topOffset, 0.0f) && GreatNotEqual(bottomOffset, 0.0f)) {
         if (GreatOrEqual(std::abs(topOffset), std::abs(bottomOffset))) {
             return bottomOffset;
         } else {
@@ -254,7 +280,7 @@ float ListPattern::CalculateTargetPos(float startPos, float endPos)
     } else if (LessNotEqual(std::abs(topOffset), std::abs(bottomOffset))) {
         return topOffset;
     } else {
-        if (LessNotEqual(startPos, 0.0f)) {
+        if (LessNotEqual(topOffset, 0.0f)) {
             return topOffset;
         } else {
             return bottomOffset;
@@ -1275,11 +1301,6 @@ bool ListPattern::GetListItemAnimatePos(float startPos, float endPos, ScrollAlig
             break;
         case ScrollAlign::AUTO:
             targetPos = CalculateTargetPos(startPos, endPos);
-            if (Negative(targetPos)) {
-                targetPos -= contentStartOffset_;
-            } else {
-                targetPos += contentEndOffset_;
-            }
             break;
     }
     return true;
@@ -1329,11 +1350,6 @@ bool ListPattern::GetListItemGroupAnimatePosWithoutIndexInGroup(int32_t index, f
         case ScrollAlign::AUTO:
             if (targetIndex_.has_value()) {
                 targetPos = CalculateTargetPos(startPos, endPos);
-                if (Negative(targetPos)) {
-                    targetPos -= contentStartOffset_;
-                } else {
-                    targetPos += contentEndOffset_;
-                }
                 return true;
             }
             return false;
@@ -1404,11 +1420,6 @@ bool ListPattern::GetListItemGroupAnimatePosWithIndexInGroup(int32_t index, int3
                 itemEndPos += groupPattern->GetFooterMainSize();
             }
             targetPos = CalculateTargetPos(itemStartPos, itemEndPos);
-            if (Negative(targetPos)) {
-                targetPos -= contentStartOffset_;
-            } else {
-                targetPos += contentEndOffset_;
-            }
             break;
     }
     return true;
@@ -1478,6 +1489,7 @@ void ListPattern::HandleScrollBarOutBoundary()
         return;
     }
     if (!IsOutOfBoundary(false) || !scrollable_) {
+        ScrollablePattern::HandleScrollBarOutBoundary(0);
         return;
     }
     float overScroll = 0.0f;
@@ -1559,7 +1571,7 @@ void ListPattern::UpdateScrollBarOffset()
     if (lanes_ == 1) {
         const auto& begin = *itemPosition_.begin();
         auto calculate = ListHeightOffsetCalculator(
-            begin.first, {begin.second.startPos, begin.second.endPos}, spaceWidth_);
+            begin.first, { begin.second.startPos, begin.second.endPos }, spaceWidth_, GetAxis());
         calculate.SetEstimatedItemHeight(itemsSize / itemPosition_.size() - spaceWidth_);
         if (calculate.GetEstimateHeightAndOffset(GetHost())) {
             currentOffset = calculate.GetEstimateOffset();

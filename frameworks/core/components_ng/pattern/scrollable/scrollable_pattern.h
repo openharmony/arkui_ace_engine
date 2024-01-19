@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,6 +64,7 @@ public:
     ~ScrollablePattern()
     {
         UnRegister2DragDropManager();
+        UnRegisterWindowStateChangedCallback();
         if (scrollBarProxy_) {
             scrollBarProxy_->UnRegisterScrollableNode(AceType::WeakClaim(this));
         }
@@ -77,6 +78,7 @@ public:
     RefPtr<PaintProperty> CreatePaintProperty() override;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void OnWindowHide() override;
 
     // scrollable
     Axis GetAxis() const override
@@ -96,6 +98,7 @@ public:
 
     void RegisterScrollingListener(const RefPtr<ScrollingListener> listener) override;
     void FireAndCleanScrollingListener() override;
+    void CleanScrollingListener() override;
 
     void SetAxis(Axis axis);
     virtual bool UpdateCurrentOffset(float delta, int32_t source) = 0;
@@ -312,7 +315,7 @@ public:
     bool CanOverScroll(int32_t source)
     {
         return (IsScrollableSpringEffect() && source != SCROLL_FROM_AXIS && source != SCROLL_FROM_BAR &&
-            source != SCROLL_FROM_NONE && IsScrollable() && (!ScrollableIdle() || animateOverScroll_));
+                IsScrollable() && (!ScrollableIdle() || animateOverScroll_));
     }
     void MarkSelectedItems();
     bool ShouldSelectScrollBeStopped();
@@ -443,6 +446,11 @@ public:
         return false;
     }
 
+    void SetNeedLinked(bool needLinked)
+    {
+        needLinked_ = needLinked;
+    }
+
 protected:
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const
     {
@@ -535,6 +543,8 @@ private:
     void OnAttachToFrameNode() override;
     void AttachAnimatableProperty(RefPtr<Scrollable> scrollable);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void RegisterWindowStateChangedCallback();
+    void UnRegisterWindowStateChangedCallback();
 
     // select with mouse
     virtual void MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
@@ -607,7 +617,7 @@ private:
     ModalSheetCoordinationMode CoordinateWithSheet(double& offset, int32_t source, bool isAtTop);
     bool NeedCoordinateScrollWithNavigation(double offset, int32_t source, const OverScrollOffset& overOffsets);
 
-    Axis axis_ = Axis::NONE;
+    Axis axis_ = Axis::VERTICAL;
     RefPtr<ScrollableEvent> scrollableEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<ScrollEdgeEffect> scrollEffect_;
@@ -655,6 +665,7 @@ private:
 
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     bool edgeEffectAlwaysEnabled_ = false;
+    bool needLinked_ = true;
 
     RefPtr<NodeAnimatablePropertyFloat> springOffsetProperty_;
     RefPtr<NodeAnimatablePropertyFloat> curveOffsetProperty_;

@@ -140,6 +140,15 @@ public:
 
     void UpdateLayoutWeight(float value);
 
+    void UpdatePixelRound(uint8_t value)
+    {
+        pixelRoundFlag_ = value;
+    }
+
+    uint8_t GetPixelRound() const {
+        return pixelRoundFlag_;
+    }
+
     void UpdateLayoutDirection(TextDirection value);
 
     void UpdateGeometryTransition(const std::string& id, bool followWithoutTransition = false);
@@ -289,7 +298,7 @@ protected:
 
 private:
     // This will call after ModifyLayoutConstraint.
-    void CheckSelfIdealSize();
+    void CheckSelfIdealSize(const LayoutConstraintF& parentConstraint, const SizeF& originMax);
 
     void CheckAspectRatio();
     void CheckBorderAndPadding();
@@ -320,6 +329,8 @@ private:
     WeakPtr<FrameNode> host_;
 
     bool usingPosition_ = true;
+
+    uint8_t pixelRoundFlag_  = 0;
 
     bool isOverlayNode_ = false;
     Dimension overlayOffsetX_;

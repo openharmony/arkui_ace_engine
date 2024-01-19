@@ -54,6 +54,8 @@ public:
     {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, nullptr);
+        auto paintProperty = host->GetPaintProperty<CheckBoxGroupPaintProperty>();
+        paintProperty->SetHost(host);
         auto eventHub = host->GetEventHub<EventHub>();
         CHECK_NULL_RETURN(eventHub, nullptr);
         auto enabled = eventHub->IsEnabled();

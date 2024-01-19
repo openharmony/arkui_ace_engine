@@ -221,6 +221,11 @@ public:
         }
     }
 
+    void SetHoverEffectType(HoverEffectType hoverEffectType)
+    {
+        hoverEffectType_ = hoverEffectType;
+    }
+
 private:
     RefPtr<AnimatablePropertyColor> activeColor_;
     RefPtr<AnimatablePropertyColor> pointColor_;
@@ -229,6 +234,7 @@ private:
     RefPtr<AnimatablePropertyFloat> checkStroke_;
     RefPtr<AnimatablePropertyColor> animateTouchHoverColor_;
     TouchHoverAnimationType touchHoverType_ = TouchHoverAnimationType::NONE;
+    HoverEffectType hoverEffectType_ = HoverEffectType::AUTO;
     RefPtr<PropertyBool> enabled_;
     RefPtr<PropertyInt> uiStatus_;
     RefPtr<PropertyInt> status_;

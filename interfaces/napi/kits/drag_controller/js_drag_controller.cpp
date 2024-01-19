@@ -90,6 +90,7 @@ struct DragControllerAsyncCtx {
     int32_t globalY = -1;
     uint64_t displayId = 0;
     int32_t sourceType = 0;
+    float windowScale = 1.0f;
     int parseBuilderCount = 0;
     std::mutex dragStateMutex;
     DragState dragState = DragState::PENDING;
@@ -600,6 +601,7 @@ void GetShadowInfoArray(DragControllerAsyncCtx* asyncCtx,
     std::vector<Msdp::DeviceStatus::ShadowInfo>& shadowInfos)
 {
     for (const auto& pixelMap: asyncCtx->pixelMapList) {
+        pixelMap->scale(asyncCtx->windowScale, asyncCtx->windowScale, Media::AntiAliasingOption::HIGH);
         int32_t width = pixelMap->GetWidth();
         int32_t height = pixelMap->GetHeight();
         double x = ConvertToPx(asyncCtx, asyncCtx->touchPoint.GetX(), width);
@@ -723,6 +725,8 @@ void OnMultipleComplete(DragControllerAsyncCtx* asyncCtx)
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    auto windowScale = container->GetWindowScale();
+    asyncCtx->windowScale = windowScale;
     taskExecutor->PostTask(
         [asyncCtx]() {
             CHECK_NULL_VOID(asyncCtx);
@@ -752,6 +756,8 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
     CHECK_NULL_VOID(container);
     auto taskExecutor = container->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
+    auto windowScale = container->GetWindowScale();
+    asyncCtx->windowScale = windowScale;
     asyncCtx->displayId = container->GetDisplayInfo()->GetDisplayId();
     taskExecutor->PostTask(
         [asyncCtx]() {
@@ -788,6 +794,7 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
                 }
                 dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
             }
+            asyncCtx->pixelMap->scale(asyncCtx->windowScale, asyncCtx->windowScale, Media::AntiAliasingOption::HIGH);
             int32_t width = asyncCtx->pixelMap->GetWidth();
             int32_t height = asyncCtx->pixelMap->GetHeight();
             double x = ConvertToPx(asyncCtx, asyncCtx->touchPoint.GetX(), width);
@@ -928,7 +935,10 @@ bool GetPixelMapByCustom(DragControllerAsyncCtx* asyncCtx)
         return false;
     }
     auto callback = [asyncCtx](std::shared_ptr<Media::PixelMap> pixelMap, int32_t errCode,
-        std::function<void()>) {
+        std::function<void()> finishCallback) {
+        if (finishCallback) {
+            finishCallback();
+        }
         CHECK_NULL_VOID(pixelMap);
         CHECK_NULL_VOID(asyncCtx);
         asyncCtx->errCode = errCode;
@@ -938,7 +948,7 @@ bool GetPixelMapByCustom(DragControllerAsyncCtx* asyncCtx)
     auto builder = [build = asyncCtx->customBuilder, env = asyncCtx->env] {
         napi_call_function(env, nullptr, build, 0, nullptr, nullptr);
     };
-    delegate->CreateSnapshot(builder, callback, false);
+    delegate->CreateSnapshot(builder, callback, true);
     napi_close_escapable_handle_scope(asyncCtx->env, scope);
     return true;
 }
@@ -946,7 +956,6 @@ bool GetPixelMapByCustom(DragControllerAsyncCtx* asyncCtx)
 bool GetPixelMapArrayByCustom(DragControllerAsyncCtx* asyncCtx, napi_value customBuilder, int arrayLength)
 {
     CHECK_NULL_RETURN(asyncCtx, false);
-    asyncCtx->parseBuilderCount++;
     napi_escapable_handle_scope scope = nullptr;
     napi_open_escapable_handle_scope(asyncCtx->env, &scope);
 
@@ -956,20 +965,24 @@ bool GetPixelMapArrayByCustom(DragControllerAsyncCtx* asyncCtx, napi_value custo
         napi_close_escapable_handle_scope(asyncCtx->env, scope);
         return false;
     }
-    auto callback = [asyncCtx, arrayLength, count = asyncCtx->parseBuilderCount](
-        std::shared_ptr<Media::PixelMap> pixelMap, int32_t errCode, std::function<void()>) {
+    auto callback = [asyncCtx, arrayLength](
+        std::shared_ptr<Media::PixelMap> pixelMap, int32_t errCode, std::function<void()> finishCallback) {
+        if (finishCallback) {
+            finishCallback();
+        }
         CHECK_NULL_VOID(pixelMap);
         CHECK_NULL_VOID(asyncCtx);
         asyncCtx->errCode = errCode;
         asyncCtx->pixelMapList.push_back(std::move(pixelMap));
-        if (count == arrayLength) {
+        asyncCtx->parseBuilderCount++;
+        if (asyncCtx->parseBuilderCount == arrayLength) {
             OnMultipleComplete(asyncCtx);
         }
     };
     auto builder = [build = customBuilder, env = asyncCtx->env] {
         napi_call_function(env, nullptr, build, 0, nullptr, nullptr);
     };
-    delegate->CreateSnapshot(builder, callback, false);
+    delegate->CreateSnapshot(builder, callback, true);
     napi_close_escapable_handle_scope(asyncCtx->env, scope);
     return true;
 }

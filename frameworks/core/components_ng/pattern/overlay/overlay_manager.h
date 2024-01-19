@@ -398,6 +398,8 @@ public:
         return rootNodeWeak_;
     }
 
+    void ModalPageLostFocus(const RefPtr<FrameNode>& node);
+
 private:
     void PopToast(int32_t targetId);
 
@@ -440,7 +442,6 @@ private:
     void PlayAlphaModalTransition(const RefPtr<FrameNode>& modalNode, bool isTransitionIn);
     void FireModalPageShow();
     void FireModalPageHide();
-    void ModalPageLostFocus(const RefPtr<FrameNode>& node);
 
     void SetSheetBackgroundBlurStyle(const RefPtr<FrameNode>& sheetNode, const BlurStyleOption& bgBlurStyle);
 
@@ -450,7 +451,7 @@ private:
     void RemoveDialogFromMap(const RefPtr<FrameNode>& node);
     bool DialogInMapHoldingFocus();
     void PlayKeyboardTransition(RefPtr<FrameNode> customKeyboard, bool isTransitionIn);
-    void FireNavigationStateChange(const RefPtr<UINode>& root, bool show, const RefPtr<UINode>& node = nullptr);
+    void FireNavigationStateChange(bool show, const RefPtr<UINode>& node = nullptr);
     RefPtr<FrameNode> GetModalNodeInStack(std::stack<WeakPtr<FrameNode>>& stack);
     void PlayBubbleStyleSheetTransition(RefPtr<FrameNode> sheetNode, bool isTransitionIn);
 

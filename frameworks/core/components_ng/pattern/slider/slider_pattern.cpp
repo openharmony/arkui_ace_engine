@@ -38,6 +38,13 @@ constexpr float SLIDER_MIN = .0f;
 constexpr float SLIDER_MAX = 100.0f;
 constexpr Dimension BUBBLE_TO_SLIDER_DISTANCE = 10.0_vp;
 constexpr double STEP_OFFSET = 50.0;
+
+bool GetReverseValue(RefPtr<SliderLayoutProperty> layoutProperty)
+{
+    auto reverse = layoutProperty->GetReverseValue(false);
+    auto direction = layoutProperty->GetLayoutDirection();
+    return direction == TextDirection::RTL ? !reverse : reverse;
+}
 } // namespace
 
 void SliderPattern::OnModifyDone()
@@ -302,10 +309,8 @@ void SliderPattern::HandlingGestureStart(const GestureEvent& info)
 
 void SliderPattern::HandlingGestureEvent(const GestureEvent& info)
 {
-    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
     if (info.GetInputEventType() == InputEventType::AXIS) {
-        auto reverse = paintProperty->GetReverseValue(false);
+        auto reverse = GetReverseValue(GetLayoutProperty<SliderLayoutProperty>());
         if (info.GetSourceTool() == SourceTool::MOUSE) {
             auto offset = NearZero(info.GetOffsetX()) ? info.GetOffsetY() : info.GetOffsetX();
             if (direction_ == Axis::HORIZONTAL) {
@@ -384,8 +389,8 @@ void SliderPattern::UpdateValueByLocalLocation(const std::optional<Offset>& loca
     float length = sliderLayoutProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL
                        ? static_cast<float>(localLocation->GetX() - contentOffset.GetX())
                        : static_cast<float>(localLocation->GetY() - contentOffset.GetY());
-    float touchLength = sliderPaintProperty->GetReverse().value_or(false) ? borderBlank_ + sliderLength_ - length
-                                                                          : length - borderBlank_;
+    float touchLength =
+        GetReverseValue(sliderLayoutProperty) ? borderBlank_ + sliderLength_ - length : length - borderBlank_;
     float min = sliderPaintProperty->GetMin().value_or(0.0f);
     float max = sliderPaintProperty->GetMax().value_or(100.0f);
     touchLength = std::clamp(touchLength, 0.0f, sliderLength_);
@@ -420,8 +425,9 @@ void SliderPattern::UpdateCircleCenterOffset()
     auto sliderPaintProperty = host->GetPaintProperty<SliderPaintProperty>();
     CHECK_NULL_VOID(sliderPaintProperty);
     auto touchLength = valueRatio_ * sliderLength_;
-    auto touchOffset = sliderPaintProperty->GetReverse().value_or(false) ? sliderLength_ - touchLength + borderBlank_
-                                                                         : touchLength + borderBlank_;
+    auto touchOffset = GetReverseValue(GetLayoutProperty<SliderLayoutProperty>())
+                           ? sliderLength_ - touchLength + borderBlank_
+                           : touchLength + borderBlank_;
     if (sliderPaintProperty->GetDirection().value_or(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
         circleCenter_.SetX(touchOffset);
         circleCenter_.SetY(contentSize->Height() * HALF);
@@ -638,9 +644,7 @@ void SliderPattern::PaintFocusState()
 
 bool SliderPattern::OnKeyEvent(const KeyEvent& event)
 {
-    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_RETURN(paintProperty, false);
-    auto reverse = paintProperty->GetReverseValue(false);
+    auto reverse = GetReverseValue(GetLayoutProperty<SliderLayoutProperty>());
     if (event.action == KeyAction::DOWN) {
         if ((direction_ == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_LEFT) ||
             (direction_ == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP)) {
@@ -821,12 +825,10 @@ SliderContentModifier::Parameters SliderPattern::UpdateContentParameters()
 void SliderPattern::GetSelectPosition(
     SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset)
 {
-    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
     float sliderSelectLength = std::clamp(sliderLength_ * valueRatio_, 0.0f, sliderLength_);
     PointF start;
     PointF end;
-    if (!paintProperty->GetReverseValue(false)) {
+    if (!GetReverseValue(GetLayoutProperty<SliderLayoutProperty>())) {
         start = direction_ == Axis::HORIZONTAL ? PointF(offset.GetX() + borderBlank_, offset.GetY() + centerWidth)
                                                : PointF(offset.GetX() + centerWidth, offset.GetY() + borderBlank_);
         end = direction_ == Axis::HORIZONTAL
@@ -863,10 +865,8 @@ void SliderPattern::GetCirclePosition(
     SliderContentModifier::Parameters& parameters, float centerWidth, const OffsetF& offset)
 {
     float sliderSelectLength = std::clamp(sliderLength_ * valueRatio_, 0.0f, sliderLength_);
-    auto paintProperty = GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
     PointF center;
-    if (!paintProperty->GetReverseValue(false)) {
+    if (!GetReverseValue(GetLayoutProperty<SliderLayoutProperty>())) {
         center = direction_ == Axis::HORIZONTAL
                      ? PointF(offset.GetX() + borderBlank_ + sliderSelectLength, offset.GetY() + centerWidth)
                      : PointF(offset.GetX() + centerWidth, offset.GetY() + borderBlank_ + sliderSelectLength);

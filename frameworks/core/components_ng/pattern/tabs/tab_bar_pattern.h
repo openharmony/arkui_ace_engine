@@ -358,6 +358,9 @@ public:
         surfaceChangedCallbackId_ = id;
     }
     
+    bool ContentWillChange(int32_t comingIndex);
+    bool ContentWillChange(int32_t currentIndex, int32_t comingIndex);
+
 private:
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
@@ -377,12 +380,14 @@ private:
     void InitOnKeyEvent(const RefPtr<FocusHub>& focusHub);
     bool OnKeyEvent(const KeyEvent& event);
     bool OnKeyEventWithoutClick(const KeyEvent& event);
+    bool OnKeyEventWithoutClick(const RefPtr<FrameNode>& host, const KeyEvent& event);
     void HandleClick(const GestureEvent& info);
+    void ClickTo(const RefPtr<FrameNode>& host, int32_t index);
     void HandleTouchEvent(const TouchLocationInfo& info);
     void HandleSubTabBarClick(const RefPtr<TabBarLayoutProperty>& layoutProperty, int32_t index);
     void HandleBottomTabBarClick(int32_t selectedIndex, int32_t unselectedIndex);
-    static void ChangeMask(const RefPtr<FrameNode>& host, float imageSize,
-        const OffsetF& originalSelectedMaskOffset, float opacity, float radiusRatio, bool isSelected);
+    void ChangeMask(int32_t index, float imageSize, const OffsetF& originalMaskOffset, float opacity,
+        float radiusRatio, bool isSelected);
     void PlayMaskAnimation(float selectedImageSize, const OffsetF& originalSelectedMaskOffset, int32_t selectedIndex,
         float unselectedImageSize, const OffsetF& originalUnselectedMaskOffset, int32_t unselectedIndex);
     static void MaskAnimationFinish(const RefPtr<FrameNode>& host, int32_t selectedIndex, bool isSelected);

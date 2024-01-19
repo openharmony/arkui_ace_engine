@@ -38,6 +38,9 @@ class BuilderNode {
   public getFrameNode(): FrameNode {
     return this._JSBuilderNode.getFrameNode();
   }
+  public postTouchEvent(touchEvent: TouchEvent): boolean {
+    return this._JSBuilderNode.postTouchEvent(touchEvent);
+  }
 }
 
 class JSBuilderNode extends BaseNode {

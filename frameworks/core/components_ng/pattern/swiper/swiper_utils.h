@@ -46,6 +46,9 @@ public:
 
     static float GetItemSpace(const RefPtr<SwiperLayoutProperty>& property)
     {
+        if (property->IgnoreItemSpace()) {
+            return 0.0f;
+        }
         auto scale = property->GetLayoutConstraint()->scaleProperty;
         return ConvertToPx(property->GetItemSpace().value_or(0.0_px), scale).value_or(0);
     }
@@ -60,6 +63,8 @@ public:
             return layoutConstraint;
         }
         auto axis = property->GetDirection().value_or(Axis::HORIZONTAL);
+        // re-determine ignoreItemSpace_ based on child calc length
+        property->ResetIgnoreItemSpace();
         auto itemSpace = GetItemSpace(property);
         auto parentMainSize = idealSize.MainSize(axis);
         if (parentMainSize.has_value() && itemSpace > parentMainSize.value()) {
@@ -78,10 +83,9 @@ public:
             childCalcIdealLength = (length - itemSpace * itemSpaceCount -
                                         static_cast<float>(prevMargin + nextMargin)) / displayCount;
             if (LessNotEqual(childCalcIdealLength, 0.0)) {
-                itemSpace = 0.0f;
-                childCalcIdealLength = (length - itemSpace * itemSpaceCount -
-                                    static_cast<float>(prevMargin + nextMargin)) / displayCount;
-                property->UpdateItemSpace(Dimension(0.0));
+                // prioritize margin and displayCount, ignore itemSpace to create a positive idealLength.
+                property->MarkIgnoreItemSpace();
+                childCalcIdealLength = (length - static_cast<float>(prevMargin + nextMargin)) / displayCount;
             }
             if (CheckMarginPropertyExceed(property, childCalcIdealLength)) {
                 prevMargin = 0.0;
@@ -89,8 +93,8 @@ public:
                 itemSpaceCount = CaculateDisplayItemSpaceCount(property, prevMargin, nextMargin);
                 childCalcIdealLength = (length - itemSpace * itemSpaceCount) / displayCount;
             }
-            axis == Axis::HORIZONTAL ? childSelfIdealSize.SetWidth(childCalcIdealLength) :
-                childSelfIdealSize.SetHeight(childCalcIdealLength);
+            axis == Axis::HORIZONTAL ? childSelfIdealSize.SetWidth(childCalcIdealLength)
+                                     : childSelfIdealSize.SetHeight(childCalcIdealLength);
         }
 
         layoutConstraint.selfIdealSize = childSelfIdealSize;
@@ -110,6 +114,24 @@ public:
         } else {
             return count;
         }
+    }
+
+    static int32_t ComputePageIndex(int32_t index, int32_t displayCount)
+    {
+        if (displayCount <= 0) {
+            return index;
+        }
+
+        return static_cast<int32_t>(std::floor(index / displayCount)) * displayCount;
+    }
+
+    static int32_t ComputePageEndIndex(int32_t index, int32_t displayCount)
+    {
+        if (displayCount <= 0) {
+            return index;
+        }
+
+        return (index / displayCount) * displayCount + displayCount - 1;
     }
 
 private:

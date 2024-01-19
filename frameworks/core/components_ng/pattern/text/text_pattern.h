@@ -512,6 +512,8 @@ public:
         selectionMenuMap_.clear();
     }
 
+    virtual const std::list<RefPtr<UINode>>& GetAllChildren() const;
+
 protected:
     void OnAfterModifyDone() override;
     virtual void HandleOnCopy();
@@ -531,6 +533,7 @@ protected:
     void HandleSpanSingleClickEvent(
         GestureEvent& info, RectF textContentRect, PointF textOffset, bool& isClickOnSpan, bool& isClickOnAISpan);
     void HandleDoubleClickEvent(GestureEvent& info);
+    void CheckOnClickEvent(GestureEvent& info);
     void InitTextDetect(int32_t startPos, std::string detectText);
     bool ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc = nullptr,
         const ShowSelectOverlayFunc& showSelectOverlayFunc = nullptr);
@@ -674,6 +677,7 @@ private:
     std::optional<TextResponseType> textResponseType_;
     RefPtr<TextController> textController_;
     TextSpanType oldSelectedType_ = TextSpanType::NONE;
+    mutable std::list<RefPtr<UINode>> childNodes_;
     ACE_DISALLOW_COPY_AND_MOVE(TextPattern);
 };
 } // namespace OHOS::Ace::NG

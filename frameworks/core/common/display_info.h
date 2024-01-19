@@ -20,6 +20,17 @@
 
 namespace OHOS::Ace {
 /**
+ * souce is Rosen::FoldDisplayMode
+ */
+enum class FoldDisplayMode: uint32_t {
+    UNKNOWN = 0,
+    FULL = 1,   // EXPAND
+    MAIN = 2,   // FOLDED
+    SUB = 3,
+    COORDINATION = 4,
+};
+
+/**
  * souce is Rosen::FoldStatus
  */
 enum class FoldStatus : uint32_t {

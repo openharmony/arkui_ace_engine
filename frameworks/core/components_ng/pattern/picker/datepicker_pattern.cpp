@@ -226,7 +226,10 @@ void DatePickerPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(buttonTitleNode);
     auto titleLayoutRenderContext = buttonTitleNode->GetRenderContext();
     CHECK_NULL_VOID(titleLayoutRenderContext);
-    titleLayoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
+        !titleLayoutRenderContext->IsUniRenderEnabled()) {
+        titleLayoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
+    }
     auto childButton = buttonTitleNode->GetFirstChild();
     CHECK_NULL_VOID(childButton);
     auto ButtonNode = DynamicCast<FrameNode>(childButton);

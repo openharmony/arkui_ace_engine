@@ -71,6 +71,8 @@ void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
     json->Put("popupItemFontWeight",
         V2::ConvertWrapFontWeightToStirng(propFontWeight_.value_or(defaultFontWeight)).c_str());
     json->Put("autoCollapse", propAutoCollapse_.value_or(false) ? "true" : "false");
+    json->Put("popupHorizontalSpace", propPopupHorizontalSpace_.value_or(
+        Dimension(NG::INDEXER_BUBBLE_INVALID_SPACE, DimensionUnit::VP)).ToString().c_str());
 }
 
 std::unique_ptr<JsonValue> IndexerLayoutProperty::ToJsonObjectValue(const TextStyle& textStyle)

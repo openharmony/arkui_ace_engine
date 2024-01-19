@@ -174,7 +174,7 @@ void SliderTestNg::MockCanvasFunction(Testing::MockCanvas& canvas)
     EXPECT_CALL(canvas, Scale(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, Translate(_, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, Restore()).WillRepeatedly(Return());
-    EXPECT_CALL(canvas, ClipRect(_, _)).WillRepeatedly(Return());
+    EXPECT_CALL(canvas, ClipRect(_, _, _)).WillRepeatedly(Return());
     EXPECT_CALL(canvas, DrawPath(_)).WillRepeatedly(Return());
 }
 
@@ -576,7 +576,7 @@ HWTEST_F(SliderTestNg, SliderTestNg007, TestSize.Level1)
      * @tc.cases: case4. InputEventType is not AXIS, direction is VERTICAL and revese is true.
      */
     sliderLayoutProperty->UpdateDirection(Axis::VERTICAL);
-    sliderPaintProperty->UpdateReverse(true);
+    sliderLayoutProperty->UpdateReverse(true);
     sliderPattern->HandlingGestureEvent(info);
     EXPECT_EQ(sliderPattern->value_, 62);
 }
@@ -2722,7 +2722,7 @@ HWTEST_F(SliderTestNg, SliderPaintMethodTest001, TestSize.Level1)
     auto sliderTipModifier = AceType::MakeRefPtr<SliderTipModifier>(nullptr);
     SliderPaintMethod::TipParameters tipParameters;
     SliderPaintMethod sliderPaintMethod(
-        sliderContentModifier, parameters, 1.0f, 1.0f, sliderTipModifier, tipParameters);
+        sliderContentModifier, parameters, 1.0f, 1.0f, sliderTipModifier, tipParameters, TextDirection::AUTO);
     /**
      * @tc.steps: step2. create paintWrapper.
      */
@@ -2774,7 +2774,7 @@ HWTEST_F(SliderTestNg, SliderPaintMethodTest002, TestSize.Level1)
     auto sliderTipModifier = AceType::MakeRefPtr<SliderTipModifier>(nullptr);
     SliderPaintMethod::TipParameters tipParameters;
     SliderPaintMethod sliderPaintMethod(
-        sliderContentModifier, parameters, 1.0f, 1.0f, sliderTipModifier, tipParameters);
+        sliderContentModifier, parameters, 1.0f, 1.0f, sliderTipModifier, tipParameters, TextDirection::AUTO);
     /**
      * @tc.steps: step2. create paintWrapper.
      */
@@ -2828,7 +2828,7 @@ HWTEST_F(SliderTestNg, SliderPaintMethodTest003, TestSize.Level1)
     auto sliderContentModifier =
         AceType::MakeRefPtr<SliderContentModifier>(SliderContentModifier::Parameters(), nullptr, nullptr);
     SliderPaintMethod sliderPaintMethod(sliderContentModifier, SliderContentModifier::Parameters(), 1.0f, 1.0f, nullptr,
-        SliderPaintMethod::TipParameters());
+        SliderPaintMethod::TipParameters(), TextDirection::AUTO);
     auto sliderPaintProperty = AceType::MakeRefPtr<SliderPaintProperty>();
     ASSERT_NE(sliderPaintProperty, nullptr);
     auto geometryNode = AceType::MakeRefPtr<GeometryNode>();
@@ -2957,13 +2957,11 @@ HWTEST_F(SliderTestNg, SliderContentModifierTest014, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
 
-    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
-    ASSERT_NE(sliderPaintProperty, nullptr);
     SliderContentModifier::Parameters parameters;
     SliderContentModifier sliderContentModifier(parameters, nullptr, nullptr);
 
     sliderContentModifier.reverse_ = true;
-    sliderContentModifier.JudgeNeedAnimate(sliderPaintProperty);
+    sliderContentModifier.JudgeNeedAnimate(false);
     EXPECT_EQ(sliderContentModifier.animatorStatus_, SliderStatus::DEFAULT);
     EXPECT_FALSE(sliderContentModifier.reverse_);
 }

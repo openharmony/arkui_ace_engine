@@ -51,8 +51,14 @@ private:
         LayoutWrapper* layoutWrapper, const std::string& nodeName);
     void CalcVerticalLayoutParam(AlignDirection alignDirection, const AlignRule& alignRule,
         LayoutWrapper* layoutWrapper, const std::string& nodeName);
+    float CalcHorizontalOffsetAlignLeft(const HorizontalAlign& alignRule, float& anchorWidth);
+    float CalcHorizontalOffsetAlignMiddle(const HorizontalAlign& alignRule, float& anchorWidth, float& flexItemWidth);
+    float CalcHorizontalOffsetAlignRight(const HorizontalAlign& alignRule, float& anchorWidth, float& flexItemWidth);
     float CalcHorizontalOffset(
         AlignDirection alignDirection, const AlignRule& alignRule, float containerWidth, const std::string& nodeName);
+    float CalcVerticalOffsetAlignTop(const VerticalAlign& alignRule, float& anchorHeight);
+    float CalcVerticalOffsetAlignCenter(const VerticalAlign& alignRule, float& anchorHeight, float& flexItemHeight);
+    float CalcVerticalOffsetAlignBottom(const VerticalAlign& alignRule, float& anchorHeight, float& flexItemHeight);
     float CalcVerticalOffset(
         AlignDirection alignDirection, const AlignRule& alignRule, float containerHeight, const std::string& nodeName);
 
@@ -62,6 +68,12 @@ private:
     std::pair<TwoAlignedValues, TwoAlignedValues> GetFirstTwoAlignValues(const RefPtr<LayoutWrapper>& childWrapper,
         const std::unique_ptr<FlexItemProperty>& flexItemProperty, const ChildIdealSize& childIdealSize);
 
+    float GetVerticalAlignTopValue(std::string& anchor, std::optional<float>& marginTop);
+    float GetVerticalAlignCenterValue(std::string& anchor, std::optional<float>& marginTop);
+    float GetVerticalAlignBottomValue(std::string& anchor, std::optional<float>& marginTop);
+    float GetHorizontalAlignStartValue(std::string& anchor, std::optional<float>& marginLeft);
+    float GetHorizontalAlignCenterValue(std::string& anchor, std::optional<float>& marginLeft);
+    float GetHorizontalAlignEndValue(std::string& anchor, std::optional<float>& marginLeft);
     void UpdateVerticalTwoAlignValues(TwoAlignedValues& twoAlignedValues, AlignRule alignRule);
     void UpdateHorizontalTwoAlignValues(TwoAlignedValues& twoAlignedValues, AlignRule alignRule);
     void UpdateSizeWhenChildrenEmpty(LayoutWrapper* layoutWrapper);

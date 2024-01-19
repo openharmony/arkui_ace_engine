@@ -56,10 +56,23 @@ void ResetEnableLoading(NodeHandle node)
     LoadingProgressModelNG::SetEnableLoading(frameNode, true);
 }
 
+void SetLoadingProgressForegroundColor(NodeHandle node, uint32_t colorValue)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    LoadingProgressModelNG::SetForegroundColor(frameNode, Color(colorValue));
+}
+
+void ResetLoadingProgressForegroundColor(NodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+}
+
 ArkUILoadingProgressModifierAPI GetLoadingProgressModifier()
 {
     static const ArkUILoadingProgressModifierAPI modifier = { SetLoadingProgressColor, ResetLoadingProgressColor,
-        SetEnableLoading, ResetEnableLoading };
+        SetEnableLoading, ResetEnableLoading, SetLoadingProgressForegroundColor, ResetLoadingProgressForegroundColor };
 
     return modifier;
 }

@@ -210,7 +210,8 @@ void PixelMapImage::DrawToRSCanvas(
 
 #ifdef ENABLE_ROSEN_BACKEND
 #ifndef USE_ROSEN_DRAWING
-    if (config.resizableSlice_.Valid() && DrawImageNine(canvas, srcRect, dstRect, radiusXY)) {
+    if (config.frameCount_ == 1 && config.resizableSlice_.Valid() &&
+        DrawImageNine(canvas, srcRect, dstRect, radiusXY)) {
         return;
     }
     auto rsCanvas = canvas.GetImpl<RSSkCanvas>();
@@ -231,7 +232,8 @@ void PixelMapImage::DrawToRSCanvas(
         static_cast<int>(config.imageFit_), static_cast<int>(config.imageRepeat_), radii.get(), 1.0, 0, 0, 0);
     recordingCanvas->DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options, paint);
 #else
-    if (config.resizableSlice_.Valid() && DrawImageNine(canvas, srcRect, dstRect, radiusXY)) {
+    if (config.frameCount_ == 1 &&config.resizableSlice_.Valid() &&
+        DrawImageNine(canvas, srcRect, dstRect, radiusXY)) {
         return;
     }
     RSBrush brush;
@@ -241,7 +243,7 @@ void PixelMapImage::DrawToRSCanvas(
     auto& recordingCanvas = static_cast<Rosen::ExtendRecordingCanvas&>(canvas);
     std::vector<RSPoint> radius;
     for (int ii = 0; ii < 4; ii++) {
-        RSPoint point(radiusXY[ii].GetX(), radiusXY[ii].GetY());
+        RSPoint point(radii[ii].GetX(), radii[ii].GetY());
         radius.emplace_back(point);
     }
     recordingCanvas.ClipAdaptiveRoundRect(radius);
@@ -256,6 +258,11 @@ void PixelMapImage::DrawToRSCanvas(
         static_cast<int32_t>(config.imageRepeat_), { pointRadius[0], pointRadius[1], pointRadius[2], pointRadius[3] },
         1.0, 0, 0, 0 };
     recordingCanvas.AttachBrush(brush);
+    if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "pixmap, width=%{public}d * height=%{public}d", pixmap->GetWidth(),
+            pixmap->GetHeight());
+        pixmap->SavePixelMapToFile("_ToRS_");
+    }
     recordingCanvas.DrawPixelMapWithParm(pixmap->GetPixelMapSharedPtr(), rsImageInfo, options);
     recordingCanvas.DetachBrush();
 #endif

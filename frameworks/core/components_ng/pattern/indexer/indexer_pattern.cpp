@@ -121,6 +121,7 @@ void IndexerPattern::OnModifyDone()
     auto indexerSizeChanged = (itemCountChanged || !NearEqual(itemSize, lastItemSize_));
     lastItemSize_ = itemSize;
     auto needMarkDirty = (layoutProperty->GetPropertyChangeFlag() == PROPERTY_UPDATE_NORMAL);
+    layoutProperty->UpdateIsPopup(false);
     ApplyIndexChanged(needMarkDirty, initialized_ && selectChanged_, false, indexerSizeChanged);
     auto gesture = host->GetOrCreateGestureEventHub();
     if (gesture) {
@@ -624,9 +625,13 @@ void IndexerPattern::ApplyIndexChanged(
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
     int32_t index = 0;
+    auto total = host->GetTotalChildCount();
     auto childrenNode = host->GetChildren();
-    for (auto& iter : childrenNode) {
-        auto childNode = AceType::DynamicCast<FrameNode>(iter);
+    if (layoutProperty->GetIsPopupValue(false)) {
+        total -= 1;
+    }
+    for (int32_t i = 0; i < total; i++) {
+        auto childNode = host->GetChildByIndex(i)->GetHostNode();
         UpdateChildBoundary(childNode);
         auto nodeLayoutProperty = childNode->GetLayoutProperty<TextLayoutProperty>();
         auto childRenderContext = childNode->GetRenderContext();
@@ -709,59 +714,24 @@ void IndexerPattern::ApplyIndexChanged(
 
 void IndexerPattern::ShowBubble()
 {
-    if (!NeedShowBubble()) {
+    if (!NeedShowBubble() || itemCount_ < 1) {
         return;
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
+    auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
     if (!popupNode_) {
         popupNode_ = CreatePopupNode();
         AddPopupTouchListener(popupNode_);
         UpdatePopupOpacity(0.0f);
     }
-    overlayManager->ShowIndexerPopup(host->GetId(), popupNode_);
+    if (!layoutProperty->GetIsPopupValue(false)) {
+        popupNode_->MountToParent(host);
+        layoutProperty->UpdateIsPopup(true);
+    }
     UpdateBubbleView();
     StartBubbleAppearAnimation();
-}
-
-void IndexerPattern::SetPositionOfPopupNode(RefPtr<FrameNode>& customNode)
-{
-    CHECK_NULL_VOID(customNode);
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto paintProperty = host->GetPaintProperty<IndexerPaintProperty>();
-    CHECK_NULL_VOID(paintProperty);
-    auto geometryNode = host->GetGeometryNode();
-    CHECK_NULL_VOID(geometryNode);
-    auto indexerWidth = geometryNode->GetFrameSize().Width();
-    auto alignMent = layoutProperty->GetAlignStyle().value_or(NG::AlignStyle::RIGHT);
-    auto userDefinePositionX =
-        layoutProperty->GetPopupPositionX().value_or(Dimension(NG::BUBBLE_POSITION_X, DimensionUnit::VP)).ConvertToPx();
-    auto userDefinePositionY =
-        layoutProperty->GetPopupPositionY().value_or(Dimension(NG::BUBBLE_POSITION_Y, DimensionUnit::VP)).ConvertToPx();
-    auto zeroPositionX = host->GetOffsetRelativeToWindow().GetX() + indexerWidth / 2;
-    auto zeroPosiitonY = host->GetOffsetRelativeToWindow().GetY();
-    auto renderContext = customNode->GetRenderContext();
-    auto userDefineSpace = paintProperty->GetPopupHorizontalSpace();
-    if (userDefineSpace) {
-        userDefinePositionX = userDefineSpace.value().ConvertToPx();
-    }
-    if (alignMent == NG::AlignStyle::LEFT) {
-        auto xPos = userDefineSpace ? (zeroPositionX + indexerWidth / 2) : zeroPositionX;
-        renderContext->UpdatePosition(
-            OffsetT<Dimension>(Dimension(xPos + userDefinePositionX), Dimension(zeroPosiitonY + userDefinePositionY)));
-    } else {
-        auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
-        auto xPos = (userDefineSpace ? (zeroPositionX - indexerWidth / 2) : zeroPositionX) - bubbleSize;
-        renderContext->UpdatePosition(
-            OffsetT<Dimension>(Dimension(xPos - userDefinePositionX), Dimension(zeroPosiitonY + userDefinePositionY)));
-    }
 }
 
 RefPtr<FrameNode> IndexerPattern::CreatePopupNode()
@@ -817,7 +787,6 @@ void IndexerPattern::UpdateBubbleView()
             Color(INDEXER_POPUP_SHADOW_BG_COLOR),
             ShadowStyle::OuterDefaultLG));
     columnRenderContext->SetClipToBounds(true);
-    SetPositionOfPopupNode(popupNode_);
     popupNode_->MarkModifyDone();
     popupNode_->MarkDirtyNode();
 }
@@ -919,6 +888,8 @@ void IndexerPattern::UpdateBubbleListView(std::vector<std::string>& currentListD
     CHECK_NULL_VOID(pipeline);
     auto indexerTheme = pipeline->GetTheme<IndexerTheme>();
     CHECK_NULL_VOID(indexerTheme);
+    auto listPattern = DynamicCast<ListPattern>(listNode->GetPattern());
+    listPattern->SetNeedLinked(false);
 
     currentPopupIndex_ = childPressIndex_ >= 0 ? childPressIndex_ : selected_;
     auto popupSize = autoCollapse_ ? currentListData.size() + 1 : currentListData.size();
@@ -1483,11 +1454,10 @@ void IndexerPattern::RemoveBubble()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
-    auto overlayManager = context->GetOverlayManager();
-    CHECK_NULL_VOID(overlayManager);
-    overlayManager->RemoveIndexerPopupById(host->GetId());
+    host->RemoveChild(popupNode_);
+    auto layoutProperty = host->GetLayoutProperty<IndexerLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    layoutProperty->UpdateIsPopup(false);
     popupNode_ = nullptr;
     lastPopupIndex_ = -1;
 }

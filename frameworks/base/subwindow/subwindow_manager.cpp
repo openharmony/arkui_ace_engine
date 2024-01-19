@@ -189,7 +189,9 @@ RefPtr<Subwindow> SubwindowManager::ShowPreviewNG()
         subwindow->InitContainer();
         AddSubwindow(containerId, subwindow);
     }
-    subwindow->ShowPreviewNG();
+    if (!subwindow->ShowPreviewNG()) {
+        return nullptr;
+    }
     return subwindow;
 }
 
@@ -734,7 +736,7 @@ bool SubwindowManager::GetShown()
     return subwindow->GetShown();
 }
 
-void SubwindowManager::ResizeWindow()
+void SubwindowManager::ResizeWindowForFoldStatus()
 {
     auto containerId = Container::CurrentId();
     auto subwindow = GetSubwindow(containerId);
@@ -742,6 +744,6 @@ void SubwindowManager::ResizeWindow()
         TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Get Subwindow error, containerId = %{public}d.", containerId);
         return;
     }
-    subwindow->ResizeWindow();
+    subwindow->ResizeWindowForFoldStatus();
 }
 } // namespace OHOS::Ace

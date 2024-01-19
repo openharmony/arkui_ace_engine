@@ -260,7 +260,6 @@ private:
     double GetNearestDistanceFromChildToCurFocusItemInCrossAxis(int32_t targetIndex, GridItemIndexInfo itemIndexInfo);
     void ResetAllDirectionsStep();
 
-    float animatorOffset_ = 0.0f;
     float prevHeight_ = 0;
     float currentHeight_ = 0;
 

@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include "core/interfaces/native/node/node_modifiers.h"
+#include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUICommonModifier* GetCommonModifier();

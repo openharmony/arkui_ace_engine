@@ -22,11 +22,13 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/layout/layout_property.h"
+#include "core/components_ng/pattern/folder_stack/control_parts_stack_node.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_event_hub.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_group_node.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_layout_algorithm.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_layout_property.h"
 #include "core/components_ng/pattern/folder_stack/folder_stack_pattern.h"
+#include "core/components_ng/pattern/folder_stack/hover_stack_node.h"
 #include "core/components_ng/property/property.h"
 #include "core/components_ng/render/paint_property.h"
 #include "core/pipeline/pipeline_base.h"
@@ -97,11 +99,6 @@ void FolderStackPattern::RefreshStack(FoldStatus foldStatus)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    FolderEventInfo event(foldStatus);
-    auto eventHub = GetEventHub<FolderStackEventHub>();
-    if (eventHub) {
-        eventHub->OnFolderStateChange(event);
-    }
     currentFoldStatus_ = foldStatus;
     if (foldStatusDelayTask_) {
         foldStatusDelayTask_.Cancel();
@@ -126,10 +123,21 @@ void FolderStackPattern::RefreshStack(FoldStatus foldStatus)
         auto isLandscape = rotation == Rotation::ROTATION_90 || rotation == Rotation::ROTATION_270;
         if (currentFoldStatus == displayInfo->GetFoldStatus() && isLandscape &&
             windowMode == WindowMode::WINDOW_MODE_FULLSCREEN) {
+            pattern->OnFolderStateChangeSend(currentFoldStatus);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     });
     taskExecutor->PostDelayedTask(foldStatusDelayTask_, TaskExecutor::TaskType::UI, DELAY_TIME);
+}
+
+void FolderStackPattern::OnFolderStateChangeSend(FoldStatus foldStatus)
+{
+    FolderEventInfo event(foldStatus);
+    auto eventHub = GetEventHub<FolderStackEventHub>();
+    if (eventHub) {
+        needCallBack_ = true;
+        eventHub->OnFolderStateChange(event);
+    }
 }
 
 bool FolderStackPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool skipLayout)
@@ -158,7 +166,7 @@ void FolderStackPattern::StartOffsetEnteringAnimation()
     }
     AnimationOption optionPosition;
     optionPosition.SetDuration(ANIMATION_TIME);
-    optionPosition.SetCurve(Curves::FRICTION);
+    optionPosition.SetCurve(Curves::ELASTICS);
     auto renderContext = GetRenderContext();
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
@@ -180,6 +188,7 @@ RefPtr<RenderContext> FolderStackPattern::GetRenderContext()
 void FolderStackPattern::BeforeCreateLayoutWrapper()
 {
     Pattern::BeforeCreateLayoutWrapper();
+    UpdateChildAlignment();
     SetAutoRotate();
 }
 
@@ -217,6 +226,29 @@ void FolderStackPattern::RestoreScreenState()
         auto container = Container::Current();
         CHECK_NULL_VOID(container);
         container->SetOrientation(lastOrientation_);
+    }
+}
+
+void FolderStackPattern::UpdateChildAlignment()
+{
+    auto hostNode = AceType::DynamicCast<FolderStackGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    auto folderStackLayoutProperty = GetLayoutProperty<FolderStackLayoutProperty>();
+    CHECK_NULL_VOID(folderStackLayoutProperty);
+    auto align = Alignment::CENTER;
+    if (folderStackLayoutProperty->GetPositionProperty()) {
+        align = folderStackLayoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER);
+    }
+    auto controlPartsStackNode = AceType::DynamicCast<ControlPartsStackNode>(hostNode->GetControlPartsStackNode());
+    if (controlPartsStackNode) {
+        auto controlPartsLayoutProperty =
+            AceType::DynamicCast<LayoutProperty>(controlPartsStackNode->GetLayoutProperty());
+        controlPartsLayoutProperty->UpdateAlignment(align);
+    }
+    auto hoverStackNode = AceType::DynamicCast<HoverStackNode>(hostNode->GetHoverNode());
+    if (hoverStackNode) {
+        auto hoverLayoutProperty = AceType::DynamicCast<LayoutProperty>(hoverStackNode->GetLayoutProperty());
+        hoverLayoutProperty->UpdateAlignment(align);
     }
 }
 } // namespace OHOS::Ace::NG

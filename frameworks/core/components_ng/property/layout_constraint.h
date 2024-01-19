@@ -126,6 +126,22 @@ struct LayoutConstraintT {
         return maxSize.UpdateSizeWhenSmaller(size);
     }
 
+    bool UpdateMaxWidthWithCheck(const SizeT<T>& size)
+    {
+        if (maxSize == size) {
+            return false;
+        }
+        return maxSize.UpdateWidthWhenSmaller(size);
+    }
+
+    bool UpdateMaxHeightWithCheck(const SizeT<T>& size)
+    {
+        if (maxSize == size) {
+            return false;
+        }
+        return maxSize.UpdateHeightWhenSmaller(size);
+    }
+
     bool UpdateMinSizeWithCheck(const SizeT<T>& size)
     {
         if (minSize == size) {

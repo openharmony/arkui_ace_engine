@@ -127,6 +127,7 @@ public:
     // layout
     virtual void SetLayoutPriority(int32_t priority) = 0;
     virtual void SetLayoutWeight(int32_t value) = 0;
+    virtual void SetPixelRound(uint8_t value) = 0;
     virtual void SetLayoutDirection(TextDirection value) = 0;
     virtual void SetAspectRatio(float ratio) = 0;
     virtual void ResetAspectRatio() = 0;

@@ -136,7 +136,7 @@ export interface PopupButtonOptions {
 }
 
 export interface PopupIconOptions {
-  image: PixelMap | ResourceStr | DrawableDescriptor;
+  image: ResourceStr;
   width?: Dimension;
   height?: Dimension;
   fillColor?: ResourceColor;
@@ -169,23 +169,24 @@ export function Popup(options: PopupOptions) {
 
 @Component
 export struct PopupComponent {
+  private onClose: () => void = noop;
   private theme: PopupTheme = defaultTheme;
   @Prop icon: PopupIconOptions = { image: '' };
   @Prop title: PopupTextOptions = { text: '' };
   @Prop message: PopupTextOptions = { text: '' };
   @Prop showClose: boolean | Resource = true;
   @Prop buttons: [PopupButtonOptions?, PopupButtonOptions?] = [{ text: '' }, { text: '' }];
-  private onClose: () => void = noop;
-  @State closeButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
-  @State firstButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
-  @State secondButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
-  @State textHeight: number = 0;
+  textHeight: number = 0;
   @State titleHeight: number = 0;
   @State applyHeight: number = 0;
   @State buttonHeight: number = 0;
-  @State scrollHeight: number = 0;
-  @State beforeScreenStatus: boolean = true;
+  @State messageMaxWeight: number = 0;
+  @State beforeScreenStatus: boolean = undefined;
   @State currentScreenStatus: boolean = true;
+  @State applySizeOptions : ConstraintSizeOptions = undefined;
+  @State closeButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
+  @State firstButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
+  @State secondButtonBackgroundColor: ResourceColor = $r('sys.color.ohos_id_color_background_transparent');
   private listener = mediaquery.matchMediaSync('(orientation: landscape)')
 
   private getIconWidth(): Dimension {
@@ -209,7 +210,7 @@ export struct PopupComponent {
       right: this.theme.icon.margin.right as number - (this.theme.button.margin.right as number / 2) }
   }
 
-  private getIconImage(): PixelMap | ResourceStr | DrawableDescriptor | undefined {
+  private getIconImage(): ResourceStr | undefined {
     return this.icon?.image
   }
 
@@ -249,7 +250,7 @@ export struct PopupComponent {
     return this.theme.closeButton.size.height
   }
 
-  private getCloseButtonImage(): PixelMap | ResourceStr | DrawableDescriptor {
+  private getCloseButtonImage(): ResourceStr {
     return this.theme.closeButton.image
   }
 
@@ -310,10 +311,15 @@ export struct PopupComponent {
     return padding
   }
 
-  private getMessageMaxWeight(): number {
+  private getMessageMaxWeight(): number | undefined {
     let textMaxWeight: number = undefined
+    let defaultDisplaySync: display.Display = display.getDefaultDisplaySync()
     if (this.showClose || this.showClose === void (0)) {
-      textMaxWeight = 400
+      if (px2vp(defaultDisplaySync.width) > 400) {
+        textMaxWeight = 400
+      } else {
+        textMaxWeight = px2vp(defaultDisplaySync.width) - 40 - 40
+      }
       textMaxWeight -= (this.theme.windows.padding.left as number - (this.theme.button.margin.right as number / 2))
       textMaxWeight -= this.theme.windows.padding.right as number
       textMaxWeight -= this.theme.button.margin.left as number / 2
@@ -404,6 +410,7 @@ export struct PopupComponent {
   getScrollMaxHeight(): number {
     let scrollMaxHeight: number = undefined
     if (this.currentScreenStatus !== this.beforeScreenStatus) {
+      this.applySizeOptions = this.getApplyMaxSize();
       this.beforeScreenStatus = this.currentScreenStatus
       return scrollMaxHeight;
     }
@@ -440,17 +447,18 @@ export struct PopupComponent {
     let applyMaxHeight: number = undefined
     let applyMaxSize: ConstraintSizeOptions = undefined
     let defaultDisplaySync: display.Display = display.getDefaultDisplaySync()
-    if (defaultDisplaySync.width > 400) {
+    if (px2vp(defaultDisplaySync.width) > 400) {
       applyMaxWidth = 400
     } else {
-      applyMaxWidth = defaultDisplaySync.width - 40 - 40
+      applyMaxWidth = px2vp(defaultDisplaySync.width) - 40 - 40
     }
-    if (defaultDisplaySync.height > 480) {
+    if (px2vp(defaultDisplaySync.height) > 480) {
       applyMaxHeight = 480
     } else {
-      applyMaxHeight = defaultDisplaySync.height - 40 - 40
+      applyMaxHeight = px2vp(defaultDisplaySync.height) - 40 - 40
     }
     applyMaxSize = { maxWidth: applyMaxWidth, maxHeight: applyMaxHeight }
+    this.messageMaxWeight = this.getMessageMaxWeight()
     return applyMaxSize
   }
 
@@ -516,7 +524,7 @@ export struct PopupComponent {
               .fontSize(this.getMessageFontSize())
               .fontColor(this.getMessageFontColor())
               .fontWeight(this.getMessageFontWeight())
-              .constraintSize({ maxWidth: this.getMessageMaxWeight(), minHeight: this.getCloseButtonHeight() })
+              .constraintSize({ minHeight: this.getCloseButtonHeight() })
               .onAreaChange((_, rect) => {
                 this.textHeight = rect.height as number
               })
@@ -527,9 +535,6 @@ export struct PopupComponent {
           .scrollBar(BarState.Auto)
           .scrollable(ScrollDirection.Vertical)
           .constraintSize({ maxHeight: this.getScrollMaxHeight() })
-          .onAreaChange((_, rect) => {
-            this.scrollHeight = rect.height as number
-          })
 
           Flex({ wrap: FlexWrap.Wrap }) {
             if (this.buttons?.[0]?.text !== '' && this.buttons?.[0]?.text !== void (0)) {
@@ -605,7 +610,7 @@ export struct PopupComponent {
                 .fontSize(this.getMessageFontSize())
                 .fontColor(this.getMessageFontColor())
                 .fontWeight(this.getMessageFontWeight())
-                .constraintSize({ maxWidth: this.getMessageMaxWeight(), minHeight: this.getCloseButtonHeight() })
+                .constraintSize({ maxWidth: this.messageMaxWeight, minHeight: this.getCloseButtonHeight() })
                 .onAreaChange((_, rect) => {
                   this.textHeight = rect.height as number
                 })
@@ -616,9 +621,6 @@ export struct PopupComponent {
             .scrollBar(BarState.Auto)
             .scrollable(ScrollDirection.Vertical)
             .constraintSize({ maxHeight: this.getScrollMaxHeight() })
-            .onAreaChange((_, rect) => {
-              this.scrollHeight = rect.height as number
-            })
 
             if (this.showClose || this.showClose === void (0)) {
               Button() {
@@ -719,7 +721,7 @@ export struct PopupComponent {
     }
     .alignItems(VerticalAlign.Top)
     .padding(this.getWindowsPadding())
-    .constraintSize(this.getApplyMaxSize())
+    .constraintSize(this.applySizeOptions)
     .onAreaChange((_, rect) => {
       this.applyHeight = rect.height as number
     })

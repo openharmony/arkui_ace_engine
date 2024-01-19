@@ -520,14 +520,15 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuNode);
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
-    InitHierarchicalParameters();
+    auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    CHECK_NULL_VOID(menuLayoutProperty);
+    auto isShowInSubWindow = menuLayoutProperty->GetShowInSubWindowValue(true);
+    InitHierarchicalParameters(isShowInSubWindow);
     if (!targetTag_.empty()) {
         InitTargetSizeAndPosition(layoutWrapper, menuPattern->IsContextMenu(), menuPattern);
     }
     Initialize(layoutWrapper);
 
-    auto menuLayoutProperty = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
-    CHECK_NULL_VOID(menuLayoutProperty);
     const auto& constraint = menuLayoutProperty->GetLayoutConstraint();
     if (!constraint) {
         return;
@@ -539,7 +540,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 
     // calculate menu main size
     auto childConstraint = CreateChildConstraint(layoutWrapper);
-    if (menuPattern->IsSelectMenu()) {
+    if (menuPattern->IsSelectMenu() && menuPattern->GetHasOptionWidth()) {
         auto selectMenuWidth = menuPattern->GetSelectMenuWidth();
         childConstraint.maxSize.SetWidth(selectMenuWidth);
         childConstraint.parentIdealSize.SetWidth(selectMenuWidth);
@@ -1491,11 +1492,12 @@ OffsetF MenuLayoutAlgorithm::MenuLayoutAvoidAlgorithm(const RefPtr<MenuLayoutPro
     } else {
         x = HorizontalLayout(size, position_.GetX(), menuPattern->IsSelectMenu()) + positionOffset_.GetX();
         y = VerticalLayout(size, position_.GetY(), menuPattern->IsContextMenu()) + positionOffset_.GetY();
-        x = std::clamp(x, paddingStart_, wrapperSize_.Width() - size.Width() - paddingEnd_);
-        float yMinAvoid = wrapperRect_.Top() + paddingTop_;
-        float yMaxAvoid = wrapperRect_.Bottom() - paddingBottom_ - size.Height();
-        y = std::clamp(y, yMinAvoid, yMaxAvoid);
     }
+    x = std::clamp(static_cast<double>(x), static_cast<double>(paddingStart_),
+        static_cast<double>(wrapperRect_.Right() - size.Width() - paddingEnd_));
+    float yMinAvoid = wrapperRect_.Top() + paddingTop_;
+    float yMaxAvoid = wrapperRect_.Bottom() - paddingBottom_ - size.Height();
+    y = std::clamp(y, yMinAvoid, yMaxAvoid);
     return { x, y };
 }
 
@@ -1542,17 +1544,10 @@ void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, L
         auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
         auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
         auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
-#if defined(PREVIEW)
-        if (menuPattern->IsSelectOverlayCustomMenu()) {
-            windowGlobalRect.SetHeight(constraint.maxSize.Height());
-        }
-#endif
         maxAvailableHeight = windowGlobalRect.Height() - top - bottom;
     }
-    float maxSpaceHeight = maxAvailableHeight;
+    float maxSpaceHeight = maxAvailableHeight * HEIGHT_CONSTRAINT_FACTOR;
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        maxSpaceHeight = maxAvailableHeight * HEIGHT_CONSTRAINT_FACTOR;
-    
         if (menuPattern->IsHeightModifiedBySelect()) {
             auto menuLayoutProps = AceType::DynamicCast<MenuLayoutProperty>(layoutWrapper->GetLayoutProperty());
             auto selectModifiedHeight = menuLayoutProps->GetSelectModifiedHeight().value();
@@ -2191,13 +2186,17 @@ OffsetF MenuLayoutAlgorithm::GetPositionWithPlacementRightBottom(
     return childPosition;
 }
 
-void MenuLayoutAlgorithm::InitHierarchicalParameters()
+void MenuLayoutAlgorithm::InitHierarchicalParameters(bool isShowInSubWindow)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
+    if (expandDisplay && !isShowInSubWindow) {
+        hierarchicalParameters_ = false;
+        return;
+    }
     hierarchicalParameters_ = expandDisplay;
 }
 

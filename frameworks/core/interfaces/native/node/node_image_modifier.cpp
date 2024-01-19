@@ -61,7 +61,7 @@ void ResetCopyOption(ArkUINodeHandle node)
     ImageModelNG::SetCopyOption(frameNode, DEFAULT_IMAGE_COPYOPTION);
 }
 
-void SetAutoResize(ArkUINodeHandle node, bool autoResize)
+void SetAutoResize(ArkUINodeHandle node, ArkUI_Bool autoResize)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -111,7 +111,7 @@ void ResetRenderMode(ArkUINodeHandle node)
     ImageModelNG::SetImageRenderMode(frameNode, ImageRenderMode::ORIGINAL);
 }
 
-void SetSyncLoad(ArkUINodeHandle node, bool syncLoadValue)
+void SetSyncLoad(ArkUINodeHandle node, ArkUI_Bool syncLoadValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -143,7 +143,7 @@ void ResetObjectFit(ArkUINodeHandle node)
     ImageModelNG::SetImageFit(frameNode, DEFAULT_OBJECT_FIT_VALUE);
 }
 
-void SetFitOriginalSize(ArkUINodeHandle node, bool fitOriginalSizeValue)
+void SetFitOriginalSize(ArkUINodeHandle node, ArkUI_Bool fitOriginalSizeValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -257,7 +257,7 @@ void ResetColorFilter(ArkUINodeHandle node)
     ImageModelNG::SetColorFilterMatrix(frameNode, DEFAULT_COLOR_FILTER);
 }
 
-void SetImageSyncLoad(ArkUINodeHandle node, bool syncLoadValue)
+void SetImageSyncLoad(ArkUINodeHandle node, ArkUI_Bool syncLoadValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -286,7 +286,7 @@ void ResetImageObjectFit(ArkUINodeHandle node)
     ImageModelNG::SetImageFit(frameNode, DEFAULT_OBJECT_FIT_VALUE);
 }
 
-void SetImageFitOriginalSize(ArkUINodeHandle node, bool fitOriginalSizeValue)
+void SetImageFitOriginalSize(ArkUINodeHandle node, ArkUI_Bool fitOriginalSizeValue)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -300,7 +300,7 @@ void ResetImageFitOriginalSize(ArkUINodeHandle node)
     ImageModelNG::SetFitOriginSize(frameNode, DEFAULT_FIT_ORIGINAL_SIZE);
 }
 
-void SetImageDraggable(ArkUINodeHandle node, bool value)
+void SetImageDraggable(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

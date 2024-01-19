@@ -33,9 +33,6 @@ class ArkStepperComponent extends ArkComponent implements StepperAttribute {
   onPrevious(callback: (index: number, pendingIndex: number) => void): this {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
 }
 
 // @ts-ignore

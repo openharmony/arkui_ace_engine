@@ -2009,13 +2009,11 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogViewTest008, TestSize.Level1)
      */
     auto contentNode = AceType::DynamicCast<FrameNode>(dialogNode->GetFirstChild());
     ASSERT_NE(contentNode, nullptr);
-    auto contentNodeChild = AceType::DynamicCast<FrameNode>(contentNode->GetFirstChild());
-    ASSERT_NE(contentNodeChild, nullptr);
     /**
      * @tc.steps: step5. test dialogNode's RenderContext's BackBlurStyle value.
      * @tc.expected: equal COMPONENT_ULTRA_THICK.
      */
-    EXPECT_EQ(contentNodeChild->GetRenderContext()->GetBackBlurStyle()->blurStyle, BlurStyle::COMPONENT_ULTRA_THICK);
+    EXPECT_EQ(contentNode->GetRenderContext()->GetBackBlurStyle()->blurStyle, BlurStyle::COMPONENT_ULTRA_THICK);
 }
 
 /**
@@ -3131,7 +3129,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest028, TestSize.Level1)
     EXPECT_EQ(element->GetTag(), V2::CALENDAR_PICKER_ETS_TAG);
     auto dialogNode = CalendarDialogShow(AceType::DynamicCast<FrameNode>(element));
     EXPECT_EQ(dialogNode->GetTag(), V2::DIALOG_ETS_TAG);
-    auto contentWrapper = dialogNode->GetChildAtIndex(0);
+    auto contentWrapper = AceType::DynamicCast<FrameNode>(dialogNode->GetChildAtIndex(0));
     ASSERT_NE(contentWrapper, nullptr);
     auto calendarDialogNode = AceType::DynamicCast<FrameNode>(contentWrapper->GetChildAtIndex(0));
     ASSERT_NE(calendarDialogNode, nullptr);
@@ -3151,7 +3149,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest028, TestSize.Level1)
      * @tc.steps: step5. test calendarDialogNode's RenderContext's BackgroundColorValue value.
      * @tc.expected: equal TRANSPARENT.
      */
-    EXPECT_EQ(calendarDialogNode->GetRenderContext()->GetBackgroundColorValue().ColorToString(),
+    EXPECT_EQ(contentWrapper->GetRenderContext()->GetBackgroundColorValue(Color::TRANSPARENT).ColorToString(),
         Color::TRANSPARENT.ColorToString());
     /**
      * @tc.steps: step6. mock PlatformVersion VERSION_TEN.
@@ -3163,7 +3161,7 @@ HWTEST_F(CalendarPickerTestNg, CalendarDialogPatternTest028, TestSize.Level1)
      * @tc.expected: equal themeColor.
      */
     dialogPattern->UpdateDialogBackgroundColor();
-    EXPECT_EQ(calendarDialogNode->GetRenderContext()->GetBackgroundColorValue().ColorToString(),
+    EXPECT_EQ(contentWrapper->GetRenderContext()->GetBackgroundColorValue(Color::TRANSPARENT).ColorToString(),
         theme->GetDialogBackgroundColor().ColorToString());
 }
 

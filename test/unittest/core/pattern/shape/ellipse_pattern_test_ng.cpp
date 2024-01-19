@@ -15,7 +15,7 @@
 
 #include "base_shape_pattern_test_ng.h"
 #include "gtest/gtest.h"
-#include "include/core/SkCanvas.h"
+#include "test/mock/core/rosen/mock_canvas.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/shape/ellipse_model_ng.h"
@@ -64,7 +64,7 @@ public:
         auto contentDraw = paintMethod->GetContentDrawFunction(AceType::RawPtr(paintWrapper));
         EXPECT_EQ(contentDraw == nullptr, false);
         std::shared_ptr<SkCanvas> canvas = std::make_shared<SkCanvas>();
-        RSCanvas rsCavas(&canvas);
+        Testing::MockCanvas rsCavas(&canvas);
         contentDraw(rsCavas);
     }
 };

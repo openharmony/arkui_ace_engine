@@ -89,6 +89,7 @@ void RadioPattern::OnModifyDone()
     layoutProperty->UpdateMargin(margin);
     hotZoneHorizontalPadding_ = radioTheme->GetHotZoneHorizontalPadding();
     hotZoneVerticalPadding_ = radioTheme->GetHotZoneVerticalPadding();
+    HandleEnabled();
     InitClickEvent();
     InitTouchEvent();
     InitMouseEvent();
@@ -525,5 +526,20 @@ void RadioPattern::OnRestoreInfo(const std::string& restoreInfo)
     auto jsonChecked = info->GetValue("checked");
     radioPaintProperty->UpdateRadioCheck(jsonChecked->GetBool());
     OnModifyDone();
+}
+
+void RadioPattern::HandleEnabled()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto enabled = eventHub->IsEnabled();
+    if (enabled_ != enabled) {
+        enabled_ = enabled;
+        auto paintProperty = GetPaintProperty<RadioPaintProperty>();
+        CHECK_NULL_VOID(paintProperty);
+        paintProperty->UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
+    }
 }
 } // namespace OHOS::Ace::NG

@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "core/interfaces/native/node/node_modifiers.h"
+#include "core/interfaces/native/node/node_api.h"
 
 #include "core/interfaces/native/node/node_common_modifier.h"
 #include "core/interfaces/native/node/node_image_span_modifier.h"
@@ -28,6 +28,7 @@
 #include "core/interfaces/native/node/node_text_modifier.h"
 #include "core/interfaces/native/node/node_text_modifier.h"
 #include "core/interfaces/native/node/node_toggle_modifier.h"
+#include "core/interfaces/native/node/node_swiper_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -73,6 +74,7 @@ const ArkUINodeModifiers impl = {
     nullptr,
     nullptr,
     nullptr,
+    nullptr,
     NodeModifier::GetSpanModifier,
     nullptr,
     nullptr,
@@ -95,7 +97,7 @@ const ArkUINodeModifiers impl = {
     nullptr,
     nullptr,
     nullptr,
-    nullptr,
+    NodeModifier::GetSwiperModifier,
     nullptr,
     NodeModifier::GetListModifier,
     nullptr,
@@ -119,6 +121,23 @@ const ArkUINodeModifiers impl = {
 #else
     nullptr,
 #endif
+    nullptr, // FlexModifier
+    nullptr, // ScrollBarModifier
+    nullptr, // ScrollerModifier
+    nullptr, // TabContentModifier
+    nullptr, // TabsControllerModifier
+    nullptr, // GestureModifier
+    nullptr, // BadgeModifier
+    nullptr, // WebModifier
+    nullptr, // RefreshModifier
+    nullptr, // MenuItemGroupModifier
+    nullptr, // SearchControllerModifier
+    nullptr, // SideBarModifier
+    nullptr, // PatternLockControllerModifier
+    nullptr, // TextTimerControllerModifier
+    nullptr, // TextClockControllerModifier
+    nullptr, // RichEditorControllerModifier
+    nullptr, // TextAreaControllerModifier
 };
 
 } // namespace

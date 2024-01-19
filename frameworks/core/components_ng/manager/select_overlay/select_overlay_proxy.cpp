@@ -119,11 +119,11 @@ void SelectOverlayProxy::SetSelectInfo(const std::string& selectInfo) const
     pattern->SetSelectInfo(selectInfo);
 }
 
-void SelectOverlayProxy::ShowOrHiddenMenu(bool isHidden)
+void SelectOverlayProxy::ShowOrHiddenMenu(bool isHidden, bool noAnimation)
 {
     auto pattern = GetSelectOverlayPattern(selectOverlayId_);
     CHECK_NULL_VOID(pattern);
-    pattern->ShowOrHiddenMenu(isHidden);
+    pattern->ShowOrHiddenMenu(isHidden, noAnimation);
 }
 
 void SelectOverlayProxy::DisableMenu(bool isDisabled)

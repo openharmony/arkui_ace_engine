@@ -87,7 +87,7 @@ public:
     virtual void SetOptionWidth(const Dimension& value);
     virtual void SetOptionHeight(const Dimension& value);
     virtual void SetOptionWidthFitTrigger(bool isFitTrigger);
-
+    virtual void SetHasOptionWidth(bool hasOptionWidth);
 private:
     static std::unique_ptr<SelectModel> instance_;
     static std::mutex mutex_;

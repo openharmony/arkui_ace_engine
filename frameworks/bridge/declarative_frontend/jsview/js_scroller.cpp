@@ -138,14 +138,10 @@ void JSScroller::ScrollTo(const JSCallbackInfo& args)
     if (!scrollController) {
         return;
     }
+    ContainerScope scope(instanceId_);
     auto direction = scrollController->GetScrollDirection();
     auto position = direction == Axis::VERTICAL ? yOffset : xOffset;
-    if (instanceId_.has_value()) {
-        ContainerScope scope(instanceId_.value());
-        scrollController->AnimateTo(position, static_cast<float>(duration), curve, smooth);
-    } else {
-        scrollController->AnimateTo(position, static_cast<float>(duration), curve, smooth);
-    }
+    scrollController->AnimateTo(position, static_cast<float>(duration), curve, smooth);
 }
 
 void JSScroller::ParseCurveParams(RefPtr<Curve>& curve, const JSRef<JSVal>& jsValue)
@@ -175,6 +171,7 @@ void JSScroller::ScrollEdge(const JSCallbackInfo& args)
         return;
     }
     ScrollEdgeType edgeType = EDGE_TYPE_TABLE[static_cast<int32_t>(edge)];
+    ContainerScope scope(instanceId_);
     scrollController->ScrollToEdge(edgeType, true);
 }
 
@@ -198,6 +195,7 @@ void JSScroller::ScrollToIndex(const JSCallbackInfo& args)
     if (args.Length() == 3) {
         ConvertFromJSValue(args[2], ALIGN_TABLE, align);
     }
+    ContainerScope scope(instanceId_);
     scrollController->JumpTo(index, smooth, align, SCROLL_FROM_JUMP);
 }
 
@@ -219,6 +217,7 @@ void JSScroller::ScrollPage(const JSCallbackInfo& args)
     if (!scrollController) {
         return;
     }
+    ContainerScope scope(instanceId_);
     scrollController->ScrollPage(!next, true);
 }
 
@@ -229,6 +228,7 @@ void JSScroller::CurrentOffset(const JSCallbackInfo& args)
         return;
     }
     auto retObj = JSRef<JSObject>::New();
+    ContainerScope scope(instanceId_);
     auto offset = scrollController->GetCurrentOffset();
     retObj->SetProperty("xOffset", offset.GetX());
     retObj->SetProperty("yOffset", offset.GetY());
@@ -268,6 +268,7 @@ void JSScroller::ScrollBy(const JSCallbackInfo& args)
     }
     auto scrollController = controllerWeak_.Upgrade();
     if (scrollController) {
+        ContainerScope scope(instanceId_);
         scrollController->ScrollBy(deltaX, deltaY, false);
     }
 }
@@ -278,6 +279,7 @@ void JSScroller::IsAtEnd(const JSCallbackInfo& args)
     if (!scrollController) {
         return;
     }
+    ContainerScope scope(instanceId_);
     bool isAtEnd = scrollController->IsAtEnd();
     auto retVal = JSRef<JSVal>::Make(ToJSValue(isAtEnd));
     args.SetReturnValue(retVal);
@@ -292,6 +294,7 @@ void JSScroller::GetItemRect(const JSCallbackInfo& args)
     }
     auto scrollController = controllerWeak_.Upgrade();
     if (scrollController) {
+        ContainerScope scope(instanceId_);
         auto rectObj = CreateRectangle(scrollController->GetItemRect(index));
         JSRef<JSVal> rect = JSRef<JSObject>::Cast(rectObj);
         args.SetReturnValue(rect);

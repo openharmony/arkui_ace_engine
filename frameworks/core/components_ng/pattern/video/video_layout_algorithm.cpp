@@ -28,7 +28,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-float CalControlBarHeight()
+const Dimension LIFT_HEIGHT = 28.0_vp;
+float CalControlBarHeight(bool needLift = false)
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_RETURN(pipelineContext, 0.0f);
@@ -38,6 +39,9 @@ float CalControlBarHeight()
         pipelineContext->NormalizeToPx(Dimension(videoTheme->GetBtnSize().Height(), DimensionUnit::VP));
     controlsHeight += pipelineContext->NormalizeToPx(videoTheme->GetBtnEdge().Top());
     controlsHeight += pipelineContext->NormalizeToPx(videoTheme->GetBtnEdge().Bottom());
+    if (needLift) {
+        controlsHeight += LIFT_HEIGHT.ConvertToPx();
+    }
     return static_cast<float>(controlsHeight);
 }
 } // namespace
@@ -47,11 +51,15 @@ void VideoLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     BoxLayoutAlgorithm::PerformLayout(layoutWrapper);
     auto contentOffset = layoutWrapper->GetGeometryNode()->GetContentOffset();
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = DynamicCast<VideoPattern>(host->GetPattern());
+    CHECK_NULL_VOID(pattern);
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         if (child->GetHostTag() == V2::IMAGE_ETS_TAG) {
             child->GetGeometryNode()->SetMarginFrameOffset({ contentOffset.GetX(), contentOffset.GetY() });
         } else if (child->GetHostTag() == V2::ROW_ETS_TAG) {
-            auto controlBarHeight = CalControlBarHeight();
+            auto controlBarHeight = CalControlBarHeight(pattern->NeedLift());
             auto contentSize = layoutWrapper->GetGeometryNode()->GetContentSize();
             child->GetGeometryNode()->SetMarginFrameOffset(
                 { contentOffset.GetX(), contentOffset.GetY() + contentSize.Height() - controlBarHeight });
@@ -67,6 +75,10 @@ void VideoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     auto layoutConstraint = layoutWrapper->GetLayoutProperty()->CreateChildConstraint();
     auto contentSize = layoutWrapper->GetGeometryNode()->GetContentSize();
     auto layoutProperty = DynamicCast<VideoLayoutProperty>(layoutWrapper->GetLayoutProperty());
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = DynamicCast<VideoPattern>(host->GetPattern());
+    CHECK_NULL_VOID(pattern);
     for (auto&& child : layoutWrapper->GetAllChildrenWithBuild()) {
         if (child->GetHostTag() == V2::IMAGE_ETS_TAG) {
             auto layoutConstraintForImage = layoutConstraint;
@@ -75,7 +87,7 @@ void VideoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             layoutConstraintForImage.UpdateMinSizeWithCheck(contentSize);
             child->Measure(layoutConstraintForImage);
         } else if (child->GetHostTag() == V2::ROW_ETS_TAG && layoutProperty->GetControlsValue(true)) {
-            auto controlBarHeight = CalControlBarHeight();
+            auto controlBarHeight = CalControlBarHeight(pattern->NeedLift());
             SizeF controlBarSize(contentSize.Width(), controlBarHeight);
             auto layoutConstraintForControlBar = layoutConstraint;
             layoutConstraintForControlBar.UpdateSelfMarginSizeWithCheck(OptionalSizeF(controlBarSize));
@@ -91,10 +103,6 @@ void VideoLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
         }
     }
 
-    auto host = layoutWrapper->GetHostNode();
-    CHECK_NULL_VOID(host);
-    auto pattern = DynamicCast<VideoPattern>(host->GetPattern());
-    CHECK_NULL_VOID(pattern);
     if (pattern->IsFullScreen()) {
         SizeF fullSize = { PipelineContext::GetCurrentRootWidth(), PipelineContext::GetCurrentRootHeight() };
         layoutWrapper->GetGeometryNode()->SetFrameSize(fullSize);

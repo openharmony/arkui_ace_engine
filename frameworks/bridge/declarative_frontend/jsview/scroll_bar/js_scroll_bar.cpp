@@ -17,6 +17,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "bridge/declarative_frontend/jsview/models/scroll_bar_model_impl.h"
+#include "core/common/container.h"
 #include "core/components_ng/pattern/scroll_bar/scroll_bar_model_ng.h"
 
 #define AXIS_SIZE 3
@@ -76,6 +77,7 @@ void JSScrollBar::Create(const JSCallbackInfo& info)
         auto scrollerValue = obj->GetProperty("scroller");
         if (scrollerValue->IsObject() && JSRef<JSObject>::Cast(scrollerValue)->Unwrap<JSScroller>()) {
             auto jsScroller = JSRef<JSObject>::Cast(scrollerValue)->Unwrap<JSScroller>();
+            jsScroller->SetInstanceId(Container::CurrentId());
             auto scrollBarProxy = jsScroller->GetScrollBarProxy();
             proxyFlag = true;
             proxy = ScrollBarModel::GetInstance()->GetScrollBarProxy(scrollBarProxy);

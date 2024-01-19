@@ -16,7 +16,6 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SCROLLER_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SCROLLER_H
 
-#include <optional>
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
 #include "core/components/scroll/scroll_controller_base.h"
@@ -68,6 +67,12 @@ public:
     {
         instanceId_ = instanceId;
     }
+
+    int32_t GetInstanceId()
+    {
+        return instanceId_;
+    }
+
 private:
     void ParseCurveParams(RefPtr<Curve>& curve, const JSRef<JSVal>& jsValue);
 
@@ -76,7 +81,7 @@ private:
 
     ACE_DISALLOW_COPY_AND_MOVE(JSScroller);
 
-    std::optional<int32_t> instanceId_;
+    int32_t instanceId_ = -1;
 };
 
 } // namespace OHOS::Ace::Framework

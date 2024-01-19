@@ -382,6 +382,14 @@ void ViewAbstract::SetLayoutWeight(int32_t value)
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, LayoutWeight, static_cast<float>(value));
 }
 
+void ViewAbstract::SetPixelRound(uint8_t value)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
+    ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, PixelRound, value);
+}
+
 void ViewAbstract::SetLayoutDirection(TextDirection value)
 {
     if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
@@ -1389,15 +1397,15 @@ void ViewAbstract::BindMenuWithItems(std::vector<OptionParam> &&params, const Re
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
-    if (expandDisplay && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
+    if (expandDisplay && menuParam.isShowInSubWindow && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset, menuParam.isAboveApps);
         return;
     }
     BindMenu(menuNode, targetNode->GetId(), offset);
 }
 
-void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode> &customNode, const RefPtr<FrameNode> &targetNode,
-    const NG::OffsetF &offset, const MenuParam &menuParam, const RefPtr<UINode> &previewCustomNode)
+void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode>& customNode, const RefPtr<FrameNode>& targetNode,
+    const NG::OffsetF& offset, const MenuParam& menuParam, const RefPtr<UINode>& previewCustomNode)
 {
     TAG_LOGD(AceLogTag::ACE_DIALOG, "bind menu with custom node enter");
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -1414,7 +1422,8 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode> &customNode, cons
         SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset, menuParam.isAboveApps);
         return;
     }
-    if (menuParam.type == MenuType::MENU && expandDisplay && targetNode->GetTag() != V2::SELECT_ETS_TAG) {
+    if (menuParam.type == MenuType::MENU && expandDisplay && menuParam.isShowInSubWindow &&
+        targetNode->GetTag() != V2::SELECT_ETS_TAG) {
         bool isShown = SubwindowManager::GetInstance()->GetShown();
         if (!isShown) {
             SubwindowManager::GetInstance()->ShowMenuNG(menuNode, targetNode->GetId(), offset, menuParam.isAboveApps);
@@ -1426,7 +1435,7 @@ void ViewAbstract::BindMenuWithCustomNode(const RefPtr<UINode> &customNode, cons
     BindMenu(menuNode, targetNode->GetId(), offset);
 }
 
-void ViewAbstract::ShowMenu(int32_t targetId, const NG::OffsetF &offset, bool isContextMenu)
+void ViewAbstract::ShowMenu(int32_t targetId, const NG::OffsetF &offset, bool isShowInSubWindow, bool isContextMenu)
 {
     TAG_LOGD(AceLogTag::ACE_DIALOG, "show menu enter");
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -1434,7 +1443,7 @@ void ViewAbstract::ShowMenu(int32_t targetId, const NG::OffsetF &offset, bool is
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
-    if (isContextMenu || expandDisplay) {
+    if (isContextMenu || (expandDisplay && isShowInSubWindow)) {
         SubwindowManager::GetInstance()->ShowMenuNG(nullptr, targetId, offset);
         return;
     }
@@ -2634,6 +2643,33 @@ void ViewAbstract::SetObscured(FrameNode* frameNode, const std::vector<ObscuredR
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void ViewAbstract::SetBackgroundEffect(FrameNode* frameNode, const EffectOption &effectOption)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto target = frameNode->GetRenderContext();
+    if (target) {
+        if (target->GetBackBlurRadius().has_value()) {
+            target->UpdateBackBlurRadius(Dimension());
+        }
+        if (target->GetBackBlurStyle().has_value()) {
+            target->UpdateBackBlurStyle(std::nullopt);
+        }
+        target->UpdateBackgroundEffect(effectOption);
+    }
+}
+
+void ViewAbstract::SetDynamicLightUp(FrameNode* frameNode, float rate, float lightUpDegree)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicLightUpRate, rate, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(DynamicLightUpDegree, lightUpDegree, frameNode);
+}
+
+void ViewAbstract::SetDragPreviewOptions(FrameNode* frameNode, const DragPreviewOption& previewOption)
+{
+    CHECK_NULL_VOID(frameNode);
+    frameNode->SetDragPreviewOptions(previewOption);
+}
+
 void ViewAbstract::SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion)
 {
     CHECK_NULL_VOID(frameNode);
@@ -2683,6 +2719,29 @@ void ViewAbstract::SetEnabled(FrameNode* frameNode, bool enabled)
     if (focusHub) {
         focusHub->SetEnabled(enabled);
     }
+}
+
+void ViewAbstract::SetUseShadowBatching(FrameNode* frameNode, bool useShadowBatching)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(UseShadowBatching, useShadowBatching, frameNode);
+}
+
+void ViewAbstract::SetBlendMode(FrameNode* frameNode, BlendMode blendMode)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackBlendMode, blendMode, frameNode);
+}
+
+void ViewAbstract::SetBlendApplyType(FrameNode* frameNode, BlendApplyType blendApplyType)
+{
+    ACE_UPDATE_NODE_RENDER_CONTEXT(BackBlendApplyType, blendApplyType, frameNode);
+}
+
+void ViewAbstract::SetMonopolizeEvents(FrameNode* frameNode, bool monopolizeEvents)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->SetMonopolizeEvents(monopolizeEvents);
 }
 
 void ViewAbstract::SetDraggable(FrameNode* frameNode, bool draggable)

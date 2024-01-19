@@ -95,7 +95,7 @@ void ViewAbstractModelNG::BindMenu(
                 info.GetGlobalLocation().GetY() + menuParam.positionOffset.GetY() };
             // menu already created
             if (params.empty()) {
-                NG::ViewAbstract::ShowMenu(targetNode->GetId(), menuPosition);
+                NG::ViewAbstract::ShowMenu(targetNode->GetId(), menuPosition, menuParam.isShowInSubWindow);
                 return;
             }
             NG::ViewAbstract::BindMenuWithItems(std::move(params), targetNode, menuPosition, menuParam);
@@ -122,6 +122,9 @@ void ViewAbstractModelNG::BindMenu(
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
+    if (!menuParam.isShowInSubWindow && expandDisplay) {
+        expandDisplay = false;
+    }
     if (!expandDisplay) {
         auto destructor = [id = targetNode->GetId()]() {
             auto pipeline = NG::PipelineContext::GetCurrentContext();

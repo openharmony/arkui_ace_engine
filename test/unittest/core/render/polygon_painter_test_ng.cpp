@@ -17,12 +17,13 @@
 #include "base/utils/utils.h"
 #define protected public
 #define private public
-#include "core/components_ng/render/polygon_painter.h"
+#include "test/mock/core/rosen/mock_canvas.h"
 
 #include "core/components_ng/pattern/shape/polygon_paint_property.h"
 #include "core/components_ng/pattern/shape/shape_paint_property.h"
 #include "core/components_ng/render/drawing.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/components_ng/render/polygon_painter.h"
 #include "core/components_ng/render/shape_painter.h"
 
 #undef private
@@ -33,12 +34,12 @@ using namespace testing::ext;
 
 namespace OHOS::Ace {
 namespace {
-const Dimension TEST {0.0, DimensionUnit::PX};
-const std::pair<Dimension, Dimension> START_POINT = {10.0_vp, 10.0_vp};
-const std::pair<Dimension, Dimension> END_POINT = {30.0_vp, 30.0_vp};
+const Dimension TEST { 0.0, DimensionUnit::PX };
+const std::pair<Dimension, Dimension> START_POINT = { 10.0_vp, 10.0_vp };
+const std::pair<Dimension, Dimension> END_POINT = { 30.0_vp, 30.0_vp };
 
 std::vector<ShapePoint> shape_Point;
-}
+} // namespace
 
 class PolygonPainterTestNg : public testing::Test {};
 
@@ -52,7 +53,7 @@ HWTEST_F(PolygonPainterTestNg, PolygonPainterTestNg001, TestSize.Level1)
     /**
      * @tc.steps1: create canvas and polygonPaintProperty object.
      */
-    RSCanvas canvas;
+    Testing::MockCanvas canvas;
     NG::PolygonPaintProperty polygonPaintProperty;
 
     /**
@@ -82,7 +83,7 @@ HWTEST_F(PolygonPainterTestNg, PolygonPainterTestNg002, TestSize.Level1)
     /**
      * @tc.steps1: create canvas and polygonPaintProperty object.
      */
-    RSCanvas canvas;
+    Testing::MockCanvas canvas;
     NG::PolygonPaintProperty polygonPaintProperty;
 
     /**

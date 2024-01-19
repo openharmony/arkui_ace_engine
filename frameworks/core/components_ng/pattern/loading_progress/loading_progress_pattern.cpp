@@ -43,6 +43,15 @@ void LoadingProgressPattern::OnAttachToFrameNode()
     RegisterVisibleAreaChange();
 }
 
+void LoadingProgressPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
+    pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
+    hasVisibleChangeRegistered_ = false;
+}
+
 void LoadingProgressPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -105,9 +114,7 @@ void LoadingProgressPattern::RegisterVisibleAreaChange()
     };
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    pipeline->RemoveVisibleAreaChangeNode(host->GetId());
     pipeline->AddVisibleAreaChangeNode(host, 0.0f, callback, false);
-
     pipeline->AddWindowStateChangedCallback(host->GetId());
     hasVisibleChangeRegistered_ = true;
 }

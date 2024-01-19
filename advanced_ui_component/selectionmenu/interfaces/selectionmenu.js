@@ -363,7 +363,6 @@ class SelectionMenuComponent extends ViewPU {
             }
             if (this.controller) {
                 this.controller.setCaretOffset(t + n);
-                this.controller.closeSelectionMenu()
             }
             t !== o && this.controller && this.controller.deleteSpans({ start: t + n, end: o + n })
         }))
@@ -501,7 +500,12 @@ class SelectionMenuComponent extends ViewPU {
                             MenuItem.onClick((() => {
                                 if (!this.controller) return;
                                 let e = this.controller.getSelection();
-                                this.onPaste ? this.onPaste({ content: e }) : this.popDataFromPasteboard(e)
+                                if (this.onPaste) {
+                                    this.onPaste({ content: e });
+                                } else {
+                                    this.popDataFromPasteboard(e);
+                                    this.controller.closeSelectionMenu();
+                                }
                             }))
                         }), MenuItem);
                         MenuItem.pop();

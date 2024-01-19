@@ -66,6 +66,10 @@ public:
     void SetImageFit(ImageFit imageFit);
     void SetAutoResize(bool needResize);
     void SetSourceSize(const std::optional<SizeF>& sourceSize = std::nullopt);
+    const ImageSourceInfo GetSrc() const
+    {
+        return src_;
+    }
 
     // callbacks that will be called by ImageProvider when load process finishes
     void DataReadyCallback(const RefPtr<ImageObject>& imageObj);

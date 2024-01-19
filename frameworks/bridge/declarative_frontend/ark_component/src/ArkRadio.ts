@@ -208,13 +208,15 @@ class RadioPaddingModifier extends ModifierWithKey<Padding | Length> {
   }
 
   checkObjectDiff(): boolean {
-    if (isLengthType(this.value) || isResource(this.value)) {
-      return !isBaseOrResourceEqual(this.stageValue, this.value);
+    if (isResource(this.stageValue) && isResource(this.value)) {
+      return !isResourceEqual(this.stageValue, this.value);
+    } else if (!isResource(this.stageValue) && !isResource(this.value)) {
+      return !((this.stageValue as Padding).left === (this.value as Padding).left &&
+        (this.stageValue as Padding).right === (this.value as Padding).right &&
+        (this.stageValue as Padding).top === (this.value as Padding).top &&
+        (this.stageValue as Padding).bottom === (this.value as Padding).bottom);
     } else {
-      return !isBaseOrResourceEqual((<Padding> this.stageValue).top, (<Padding> this.value).top) ||
-      !isBaseOrResourceEqual((<Padding> this.stageValue).right, (<Padding> this.value).right) ||
-      !isBaseOrResourceEqual((<Padding> this.stageValue).bottom, (<Padding> this.value).bottom) ||
-      !isBaseOrResourceEqual((<Padding> this.stageValue).left, (<Padding> this.value).left);
+      return true;
     }
   }
 }

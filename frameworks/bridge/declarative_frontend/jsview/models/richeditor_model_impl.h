@@ -23,6 +23,7 @@ class ACE_EXPORT RichEditorModelImpl : public RichEditorModel {
     RefPtr<RichEditorControllerBase> GetRichEditorController() override;
     void SetOnReady(std::function<void()>&& func) override;
     void SetOnSelect(std::function<void(const BaseEventInfo*)>&& func) override;
+    void SetOnSelectionChange(std::function<void(const BaseEventInfo*)>&& func) override;
     void SetAboutToIMEInput(std::function<bool(const NG::RichEditorInsertValue&)>&& func) override;
     void SetOnIMEInputComplete(std::function<void(const NG::RichEditorAbstractSpanResult&)>&& func) override;
     void SetAboutToDelete(std::function<bool(const NG::RichEditorDeleteValue&)>&& func) override;

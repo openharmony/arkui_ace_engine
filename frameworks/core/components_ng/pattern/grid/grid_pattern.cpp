@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,6 +81,9 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     }
     result->SetCanOverScroll(CanOverScroll(GetScrollSource()));
     result->SetScrollSource(GetScrollSource());
+    if (ScrollablePattern::AnimateRunning()) {
+        result->SetLineSkipping(false);
+    }
     return result;
 }
 
@@ -845,9 +848,9 @@ WeakPtr<FocusHub> GridPattern::SearchIrregularFocusableChild(int32_t tarMainInde
 
         auto childMainIndex = childItemProperty->GetMainIndex().value_or(-1);
         auto childCrossIndex = childItemProperty->GetCrossIndex().value_or(-1);
-        auto chidlMainStart = hasIrregularItemInfo ? irregularInfo.value().mainStart
+        auto childMainStart = hasIrregularItemInfo ? irregularInfo.value().mainStart
                                                    : childItemProperty->GetMainStart(gridLayoutInfo_.axis_);
-        auto chidlMainEnd =
+        auto childMainEnd =
             hasIrregularItemInfo ? irregularInfo.value().mainEnd : childItemProperty->GetMainEnd(gridLayoutInfo_.axis_);
         auto chidCrossStart = hasIrregularItemInfo ? irregularInfo.value().crossStart
                                                    : childItemProperty->GetCrossStart(gridLayoutInfo_.axis_);
@@ -861,8 +864,8 @@ WeakPtr<FocusHub> GridPattern::SearchIrregularFocusableChild(int32_t tarMainInde
         GridItemIndexInfo childInfo;
         childInfo.mainIndex = childMainIndex;
         childInfo.crossIndex = childCrossIndex;
-        childInfo.mainStart = chidlMainStart;
-        childInfo.mainEnd = chidlMainEnd;
+        childInfo.mainStart = childMainStart;
+        childInfo.mainEnd = childMainEnd;
         childInfo.crossStart = chidCrossStart;
         childInfo.crossEnd = chidCrossEnd;
 
@@ -886,7 +889,7 @@ WeakPtr<FocusHub> GridPattern::SearchIrregularFocusableChild(int32_t tarMainInde
             }
         } else if ((isUpStep_ && childMainIndex == tarMainIndex) ||
                    (isDownStep_ && ((childMainIndex == tarMainIndex && childMainSpan == 1) ||
-                                       (chidlMainStart >= 0 && chidlMainStart == tarMainIndex)))) {
+                                       (childMainStart >= 0 && childMainStart == tarMainIndex)))) {
             double nearestDistance = GetNearestDistanceFromChildToCurFocusItemInCrossAxis(tarMainIndex, childInfo);
             int32_t intersectAreaSize = CalcIntersectAreaInTargetDirectionShadow(childInfo, false);
             if (LessNotEqual(nearestDistance, minDistance) ||
@@ -900,7 +903,7 @@ WeakPtr<FocusHub> GridPattern::SearchIrregularFocusableChild(int32_t tarMainInde
             }
         } else if ((isLeftEndStep_ || isRightEndStep_) &&
                    ((tarMainIndex == childMainIndex && tarCrossIndex == childCrossIndex) ||
-                       (chidlMainStart >= 0 && chidlMainStart <= tarMainIndex && tarMainIndex <= childMainIndex &&
+                       (childMainStart >= 0 && childMainStart <= tarMainIndex && tarMainIndex <= childMainIndex &&
                            tarCrossIndex == childCrossIndex))) {
             targetFocusHubWeak = AceType::WeakClaim(AceType::RawPtr(childFocus));
         }
@@ -1287,10 +1290,9 @@ float GridPattern::EstimateHeight() const
     }
     // During the scrolling animation, the exact current position is used. Other times use the estimated location
     if (isSmoothScrolling_) {
-        auto lineIndex = 0;
-        scrollGridLayoutInfo_.GetLineIndexByIndex(gridLayoutInfo_.startIndex_, lineIndex);
-        return scrollGridLayoutInfo_.GetTotalHeightFromZeroIndex(lineIndex, GetMainGap()) +
-               std::abs(gridLayoutInfo_.currentOffset_);
+        // startMainLineIndex corresponds with currentOffset_, but startIndex_ might not if hasBigItem_ is true
+        return scrollGridLayoutInfo_.GetTotalHeightFromZeroIndex(gridLayoutInfo_.startMainLineIndex_, GetMainGap()) -
+               gridLayoutInfo_.currentOffset_;
     } else {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, 0.0);
@@ -1476,14 +1478,10 @@ void GridPattern::MoveItems(int32_t itemIndex, int32_t insertIndex)
 
 bool GridPattern::IsOutOfBoundary(bool useCurrentDelta)
 {
-    bool outOfStart = gridLayoutInfo_.reachStart_ && Positive(gridLayoutInfo_.currentOffset_);
-    float endPos = gridLayoutInfo_.currentOffset_ + gridLayoutInfo_.totalHeightOfItemsInView_;
-    bool outOfEnd = (gridLayoutInfo_.endIndex_ == gridLayoutInfo_.childrenCount_ - 1) &&
-                    LessNotEqual(endPos, gridLayoutInfo_.lastMainSize_);
-    bool scrollable = GetAlwaysEnabled() || (gridLayoutInfo_.startIndex_ > 0) ||
+    auto scrollable = GetAlwaysEnabled() || (gridLayoutInfo_.startIndex_ > 0) ||
                       (gridLayoutInfo_.endIndex_ < gridLayoutInfo_.childrenCount_ - 1) ||
                       GreatNotEqual(gridLayoutInfo_.totalHeightOfItemsInView_, gridLayoutInfo_.lastMainSize_);
-    return (outOfStart || outOfEnd) && scrollable;
+    return scrollable && (gridLayoutInfo_.IsOutOfStart() || gridLayoutInfo_.IsOutOfEnd());
 }
 
 float GridPattern::GetEndOffset()
@@ -1608,7 +1606,6 @@ void GridPattern::DumpAdvanceInfo()
                                 : DumpLog::GetInstance().AddDesc("hasBigItem:false");
     gridLayoutInfo_.offsetUpdated_ ? DumpLog::GetInstance().AddDesc("offsetUpdated:true")
                                    : DumpLog::GetInstance().AddDesc("offsetUpdated:false");
-    DumpLog::GetInstance().AddDesc("animatorOffset:" + std::to_string(animatorOffset_));
     DumpLog::GetInstance().AddDesc("scrollStop:" + std::to_string(scrollStop_));
     DumpLog::GetInstance().AddDesc("prevHeight:" + std::to_string(prevHeight_));
     DumpLog::GetInstance().AddDesc("currentHeight:" + std::to_string(currentHeight_));

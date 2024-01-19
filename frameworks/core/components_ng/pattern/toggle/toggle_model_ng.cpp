@@ -483,4 +483,37 @@ void ToggleModelNG::SetBackgroundColor(FrameNode* frameNode, const Color& color)
 {
     ToggleButtonModelNG::SetBackgroundColor(frameNode, color);
 }
+
+void ToggleModelNG::SetHeight(FrameNode* frameNode, const Dimension& height)
+{
+    NG::ViewAbstract::SetHeight(frameNode, NG::CalcLength(height));
+}
+
+void ToggleModelNG::SetPadding(
+    FrameNode* frameNode, const NG::PaddingPropertyF& /*args*/, const NG::PaddingProperty& newArgs)
+{
+    NG::ViewAbstract::SetPadding(frameNode, newArgs);
+}
+
+void ToggleModelNG::SetResponseRegion(FrameNode* frameNode, const std::vector<DimensionRect>& responseRegion)
+{
+    CHECK_NULL_VOID(frameNode);
+    NG::ViewAbstract::SetResponseRegion(frameNode, responseRegion);
+    auto pattern = frameNode->GetPattern<SwitchPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetIsUserSetResponseRegion(true);
+}
+
+void ToggleModelNG::SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwitchPattern>();
+    if (pattern) {
+        pattern->SetShowHoverEffect(hoverEffect != HoverEffectType::NONE);
+    }
+    if (hoverEffect == HoverEffectType::BOARD) {
+        return;
+    }
+    NG::ViewAbstract::SetHoverEffect(frameNode, hoverEffect);
+}
 } // namespace OHOS::Ace::NG

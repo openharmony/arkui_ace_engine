@@ -114,9 +114,6 @@ class ArkGridItemComponent extends ArkComponent implements GridItemAttribute {
   onSelect(event: (isSelected: boolean) => void): this {
     throw new Error('Method not implemented.');
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
 }
 
 // @ts-ignore

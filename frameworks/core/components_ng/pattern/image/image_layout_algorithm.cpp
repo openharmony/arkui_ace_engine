@@ -21,6 +21,7 @@
 #include "core/common/container.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/image/image_render_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -140,10 +141,32 @@ void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     auto loadingCtx = loadingCtx_.Upgrade();
     if (loadingCtx) {
         loadingCtx->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
+    } else {
+        auto host = layoutWrapper->GetHostNode();
+        if (host && host->GetPattern<ImagePattern>()) {
+            auto pattern = host->GetPattern<ImagePattern>();
+            loadingCtx_ = pattern->GetImageLoadingContext();
+            auto ctx = loadingCtx_.Upgrade();
+            if (ctx) {
+                ctx->MakeCanvasImageIfNeed(dstSize, autoResize, imageFit, sourceSize, hasValidSlice);
+            }
+        }
     }
     auto altLoadingCtx = altLoadingCtx_.Upgrade();
     if (altLoadingCtx) {
-        altLoadingCtx->MakeCanvasImageIfNeed(dstSize, true, imageFit, sourceSize, hasValidSlice);
+        altLoadingCtx->MakeCanvasImageIfNeed(dstSize, !altLoadingCtx->GetAutoResize(),
+            imageFit, sourceSize, hasValidSlice);
+    } else {
+        auto host = layoutWrapper->GetHostNode();
+        if (host && host->GetPattern<ImagePattern>()) {
+            auto pattern = host->GetPattern<ImagePattern>();
+            altLoadingCtx_ = pattern->GetAltImageLoadingContext();
+            auto ctx = altLoadingCtx_.Upgrade();
+            if (ctx) {
+                ctx->MakeCanvasImageIfNeed(dstSize, !altLoadingCtx->GetAutoResize(),
+                    imageFit, sourceSize, hasValidSlice);
+            }
+        }
     }
 }
 

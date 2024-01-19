@@ -221,12 +221,12 @@ ArkUINativeModuleValue TextAreaBridge::SetPlaceholderFont(ArkUIRuntimeCallInfo *
     std::string calcStr;
     if (ArkTSUtils::ParseJsDimensionNG(vm, fontSzieArg, size, DimensionUnit::FP, false)) {
         if (size.Unit() == DimensionUnit::CALC) {
-            fontSize.Uint = static_cast<int32_t>(DimensionUnit::CALC);
+            fontSize.unit = static_cast<int32_t>(DimensionUnit::CALC);
             calcStr = size.CalcValue();
             fontSize.string = calcStr.c_str();
         } else {
             fontSize.value = size.Value();
-            fontSize.Uint = static_cast<int32_t>(size.Unit());
+            fontSize.unit = static_cast<int32_t>(size.Unit());
             fontSize.string = calcStr.c_str();
         }
     }
@@ -535,13 +535,13 @@ ArkUINativeModuleValue TextAreaBridge::SetFontSize(ArkUIRuntimeCallInfo *runtime
         GetArkUIInternalNodeAPI()->GetTextAreaModifier().ResetTextAreaFontSize(nativeNode);
     } else {
         if (size.Unit() == DimensionUnit::CALC) {
-            fontSize.Uint = static_cast<int32_t>(DimensionUnit::CALC);
+            fontSize.unit = static_cast<int32_t>(DimensionUnit::CALC);
             calcStr = size.CalcValue();
             fontSize.string = calcStr.c_str();
             GetArkUIInternalNodeAPI()->GetTextAreaModifier().SetTextAreaFontSize(nativeNode, &fontSize);
         } else {
             fontSize.value = size.Value();
-            fontSize.Uint = static_cast<int32_t>(size.Unit());
+            fontSize.unit = static_cast<int32_t>(size.Unit());
             fontSize.string = calcStr.c_str();
             GetArkUIInternalNodeAPI()->GetTextAreaModifier().SetTextAreaFontSize(nativeNode, &fontSize);
         }

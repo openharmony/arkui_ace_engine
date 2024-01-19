@@ -304,6 +304,8 @@ public:
     std::function<void(Offset)> GetThumbnailCallback() override;
     void HandleOnDragStatusCallback(
         const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent) override;
+    void AdjustHandleRect(OffsetF& firstHandleOffset, OffsetF& secondHandleOffset, SizeF& firstHandlePaintSize,
+        SizeF& secondHandlePaintSize);
     void ResetSelection();
     bool BetweenSelectedPosition(const Offset& globalOffset) override;
     void HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight) override;
@@ -381,6 +383,7 @@ public:
     void HandleOnCameraInput() override;
 
     RefPtr<FocusHub> GetFocusHub() const;
+    void ResetDragOption() override;
     bool NeedShowAIDetect() override;
 
     TextSpanType GetEditorType() const
@@ -392,6 +395,13 @@ public:
     void SetShowSelect(bool isShowSelect)
     {
         showSelect_ = isShowSelect;
+    }
+
+    const std::list<RefPtr<UINode>>& GetAllChildren() const override
+    {
+        auto host = GetHost();
+        CHECK_NULL_RETURN(host, TextPattern::GetAllChildren());
+        return host->GetChildren();
     }
 
 protected:
@@ -428,6 +438,7 @@ private:
     void HandleDoubleClickOrLongPress(GestureEvent& info);
     std::string GetPositionSpansText(int32_t position, int32_t& startSpan);
     void FireOnSelect(int32_t selectStart, int32_t selectEnd);
+    void FireOnSelectionChange(int32_t selectStart, int32_t selectEnd);
     void MouseRightFocus(const MouseInfo& info);
     bool IsScrollBarPressed(const MouseInfo& info);
     void HandleMouseLeftButtonMove(const MouseInfo& info);
@@ -535,6 +546,7 @@ private:
     bool NeedAiAnalysis(
         const CaretUpdateType targeType, const int32_t pos, const int32_t& spanStart, const std::string& content);
     void AdjustCursorPosition(int32_t& pos);
+    void AdjustImageSelection(int32_t& start, int32_t& end, const Offset& pos);
     bool AdjustWordSelection(int32_t& start, int32_t& end);
     bool IsClickBoundary(const int32_t position);
 
@@ -607,6 +619,7 @@ private:
     TimeStamp lastClickTimeStamp_;
     TimeStamp lastAiPosTimeStamp_;
     bool adjusted_ = false;
+    Offset touchDownOffset_;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };
 } // namespace OHOS::Ace::NG

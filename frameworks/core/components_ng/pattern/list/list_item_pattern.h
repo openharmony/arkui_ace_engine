@@ -123,6 +123,8 @@ public:
 
     Axis GetAxis() const;
 
+    void ChangeAxis(Axis axis);
+
     void SetSwiperItemForList();
 
     void SwiperReset(bool isCloseSwipeAction = false);
@@ -196,7 +198,7 @@ public:
     }
 
     bool GetLayouted() const;
-    float GetEstimateHeight(float estimateHeight) const;
+    float GetEstimateHeight(float estimateHeight, Axis axis) const;
 
 protected:
     void OnModifyDone() override;

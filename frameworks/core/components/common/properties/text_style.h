@@ -136,6 +136,8 @@ struct TextBackgroundStyle {
     std::optional<NG::BorderRadiusProperty> backgroundRadius;
     int32_t groupId = 0;
 
+    static void ToJsonValue(std::unique_ptr<JsonValue>& json, const std::optional<TextBackgroundStyle>& style);
+
     bool operator==(const TextBackgroundStyle& value) const
     {
         return backgroundColor == value.backgroundColor && backgroundRadius == value.backgroundRadius &&

@@ -28,6 +28,22 @@ class RowSplitResizeableModifier extends ModifierWithKey<boolean> {
     }
   }
 }
+class RowSplitClipModifier extends ModifierWithKey<boolean | object> {
+  constructor(value: boolean | object) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('rowSplitClip');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetClipWithEdge(node);
+    } else {
+      getUINativeModule().common.setClipWithEdge(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return true;
+  }
+}
 
 class ArkRowSplitComponent extends ArkComponent implements RowSplitAttribute {
   constructor(nativePtr: KNode) {
@@ -37,8 +53,9 @@ class ArkRowSplitComponent extends ArkComponent implements RowSplitAttribute {
     modifierWithKey(this._modifiersWithKeys, RowSplitResizeableModifier.identity, RowSplitResizeableModifier, value);
     return this;
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
+  clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
+    modifierWithKey(this._modifiersWithKeys, RowSplitClipModifier.identity, RowSplitClipModifier, value);
+    return this;
   }
 }
 // @ts-ignore

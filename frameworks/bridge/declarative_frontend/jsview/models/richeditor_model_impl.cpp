@@ -29,6 +29,8 @@ void RichEditorModelImpl::SetOnReady(std::function<void()>&& func) {}
 
 void RichEditorModelImpl::SetOnSelect(std::function<void(const BaseEventInfo*)>&& func) {}
 
+void RichEditorModelImpl::SetOnSelectionChange(std::function<void(const BaseEventInfo*)>&& func) {}
+
 void RichEditorModelImpl::SetAboutToIMEInput(std::function<bool(const NG::RichEditorInsertValue&)>&& func) {}
 
 void RichEditorModelImpl::SetOnIMEInputComplete(std::function<void(const NG::RichEditorAbstractSpanResult&)>&& func) {}

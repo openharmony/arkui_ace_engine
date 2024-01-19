@@ -62,5 +62,7 @@ void MenuLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json) const
         jsonDashArray->Put(std::to_string(index++).c_str(), jsonValue);
     }
     json->Put("bindMenu", jsonDashArray);
+
+    json->Put("showInSubWindow", propShowInSubWindow_.value_or(false) ? "true" : "false");
 }
 } // namespace OHOS::Ace::NG

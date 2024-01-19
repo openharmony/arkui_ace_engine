@@ -17,6 +17,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_ng/render/drawing_prop_convertor.h"
+#include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
 
@@ -27,23 +28,20 @@ void MagnifierController::OpenMagnifier()
     auto textFieldpattern = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textFieldpattern);
     auto magnifierRect = textFieldpattern->GetMagnifierRect();
-    auto host = textFieldpattern->GetHost();
-    CHECK_NULL_VOID(host);
 
     if (!haveChildNode_) {
         CreateMagnifierChildNode();
     }
 
-    auto rootId = host->GetRootId();
-    auto parent = host->GetParent();
-    CHECK_NULL_VOID(parent);
-    while (!parent->IsRootNode() || parent->GetId() != rootId) {
-        parent = parent->GetParent();
-        CHECK_NULL_VOID(parent);
-    }
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    CHECK_NULL_VOID(rootUINode);
 
-    auto index = parent->GetChildIndexById(magnifierRect.childNodeId);
-    auto childUINode = parent->GetChildAtIndex(index);
+    auto index = rootUINode->GetChildIndexById(magnifierRect.childNodeId);
+    auto childUINode = rootUINode->GetChildAtIndex(index);
     CHECK_NULL_VOID(childUINode);
     auto childNode = AceType::DynamicCast<FrameNode>(childUINode);
     CHECK_NULL_VOID(childNode);
@@ -72,20 +70,18 @@ void MagnifierController::CloseMagnifier()
     auto textFieldpattern = DynamicCast<TextFieldPattern>(pattern);
     CHECK_NULL_VOID(textFieldpattern);
     auto magnifierRect = textFieldpattern->GetMagnifierRect();
-    auto host = textFieldpattern->GetHost();
-    CHECK_NULL_VOID(host);
-    auto parent = host->GetParent();
-    CHECK_NULL_VOID(parent);
-    auto rootId = host->GetRootId();
-    while (!parent->IsRootNode() || parent->GetId() != rootId) {
-        parent = parent->GetParent();
-        CHECK_NULL_VOID(parent);
-    }
-    auto index = parent->GetChildIndexById(magnifierRect.childNodeId);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    CHECK_NULL_VOID(rootUINode);
+    auto index = rootUINode->GetChildIndexById(magnifierRect.childNodeId);
     if (index != -1) {
-        auto child = parent->GetChildAtIndex(index);
+        auto child = rootUINode->GetChildAtIndex(index);
         CHECK_NULL_VOID(child);
-        parent->RemoveChild(child);
+        rootUINode->RemoveChild(child);
     }
     haveChildNode_ = false;
 }
@@ -108,15 +104,14 @@ void MagnifierController::CreateMagnifierChildNode()
         V2::TEXTINPUT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     CHECK_NULL_VOID(childNode);
 
-    auto rootId = host->GetRootId();
-    auto parent = host->GetParent();
-    CHECK_NULL_VOID(parent);
-    while (!parent->IsRootNode() || parent->GetId() != rootId) {
-        parent = parent->GetParent();
-        CHECK_NULL_VOID(parent);
-    }
-    if (parent->GetChildIndexById(childNode->GetId()) == -1) {
-        childNode->MountToParent(parent);
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_VOID(overlayManager);
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    CHECK_NULL_VOID(rootUINode);
+    if (rootUINode->GetChildIndexById(childNode->GetId()) == -1) {
+        childNode->MountToParent(rootUINode);
     }
     haveChildNode_ = true;
 
@@ -148,8 +143,6 @@ void MagnifierController::SetMagnifierRect(const RefPtr<Pattern>& childTextField
     CHECK_NULL_VOID(textFieldTheme);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto bgColor = renderContext->GetBackgroundColor().value_or(textFieldTheme->GetBgColor());
-    magnifierRect.bgColor = ToRSColor(bgColor);
     magnifierRect.localOffset = textFieldpattern->GetLocalOffset();
     magnifierRect.pixelMap = textFieldpattern->GetPixelMap();
     magnifierRect.cursorOffset = textFieldpattern->GetCaretOffset();

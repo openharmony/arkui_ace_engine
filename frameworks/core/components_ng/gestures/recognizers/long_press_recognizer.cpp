@@ -208,11 +208,6 @@ void LongPressRecognizer::HandleTouchCancelEvent(const TouchEvent& event)
 
 void LongPressRecognizer::HandleOverdueDeadline(bool isCatchMode)
 {
-    auto attachedNode = GetAttachedNode();
-    if (attachedNode.Invalid()) {
-        Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
-        return;
-    }
     if (refereeState_ != RefereeState::DETECTING) {
         return;
     }

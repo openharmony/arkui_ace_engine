@@ -122,6 +122,9 @@ void SubwindowOhos::InitContainer()
     }
     CHECK_NULL_VOID(container);
 
+    auto parentToken = parentContainer->GetToken();
+    container->SetToken(parentToken);
+    container->SetWindowId(window_->GetWindowId());
     container->SetParentId(parentContainerId_);
     container->GetSettings().SetUsingSharedRuntime(true);
     container->SetSharedRuntime(parentContainer->GetSharedRuntime());
@@ -495,11 +498,13 @@ void SubwindowOhos::ClearMenu()
 #endif
 }
 
-void SubwindowOhos::ShowPreviewNG()
+bool SubwindowOhos::ShowPreviewNG()
 {
+    CHECK_NULL_RETURN(window_, false);
     ShowWindow();
     ResizeWindow();
     window_->SetTouchable(false);
+    return true;
 }
 
 void SubwindowOhos::HidePreviewNG()
@@ -1323,6 +1328,11 @@ void SubwindowOhos::RequestFocus()
     TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "subwindow id:%{public}u request focus successfully.", window_->GetWindowId());
 }
 
+bool SubwindowOhos::IsFocused()
+{
+    return window_->IsFocused();
+}
+
 void SubwindowOhos::HideFilter()
 {
     auto parentAceContainer = Platform::AceContainer::GetContainer(parentContainerId_);
@@ -1361,5 +1371,20 @@ void SubwindowOhos::HideEventColumn()
     CHECK_NULL_VOID(manager);
     ContainerScope scope(parentContainerId_);
     manager->RemoveEventColumn();
+}
+
+void SubwindowOhos::ResizeWindowForFoldStatus()
+{
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDefaultDisplaySync();
+    CHECK_NULL_VOID(defaultDisplay);
+    auto ret = window_->Resize(defaultDisplay->GetWidth(), defaultDisplay->GetHeight());
+    if (ret != Rosen::WMError::WM_OK) {
+        TAG_LOGW(AceLogTag::ACE_SUB_WINDOW, "Resize window by default display failed with errCode: %{public}d",
+            static_cast<int32_t>(ret));
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_SUB_WINDOW,
+        "SubwindowOhos window rect is resized to x: %{public}d, y: %{public}d, width: %{public}u, height: %{public}u",
+        window_->GetRect().posX_, window_->GetRect().posY_, window_->GetRect().width_, window_->GetRect().height_);
 }
 } // namespace OHOS::Ace

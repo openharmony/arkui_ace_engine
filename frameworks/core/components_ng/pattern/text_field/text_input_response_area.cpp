@@ -373,19 +373,7 @@ void CleanNodeResponseArea::InitResponseArea()
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
-    auto textFieldLayoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
-    CHECK_NULL_VOID(textFieldLayoutProperty);
-    if (textFieldLayoutProperty->HasIconSize()) {
-        iconSize_ = textFieldLayoutProperty->GetIconSizeValue();
-    }
-
-    if (textFieldLayoutProperty->HasIconSrc()) {
-        iconSrc_ = textFieldLayoutProperty->GetIconSrcValue();
-    }
-
-    if (textFieldLayoutProperty->HasIconColor()) {
-        iconColor_ = textFieldLayoutProperty->GetIconColorValue();
-    }
+    LoadingImageProperty();
     auto cleanNode = CreateNode();
     CHECK_NULL_VOID(cleanNode);
     cleanNode->MountToParent(host);
@@ -424,18 +412,8 @@ RefPtr<FrameNode> CleanNodeResponseArea::CreateNode()
         V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(cleanNode, nullptr);
     cleanNode->SetDraggable(false);
-    ImageSourceInfo info;
-    if (iconSrc_.empty()) {
-        info.SetResourceId(InternalResource::ResourceId::CLOSE_SVG);
-    } else {
-        info.SetSrc(iconSrc_);
-    }
-    if (info.IsSvg()) {
-        info.SetFillColor(iconColor_);
-        auto imageRenderProperty = cleanNode->GetPaintProperty<ImageRenderProperty>();
-        CHECK_NULL_RETURN(imageRenderProperty, nullptr);
-        imageRenderProperty->UpdateSvgFillColor(iconColor_);
-    }
+    cleanNode_ = stackNode;
+    auto info = CreateImageSourceInfo();
     auto imageLayoutProperty = cleanNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_RETURN(imageLayoutProperty, nullptr);
     imageLayoutProperty->UpdateImageSourceInfo(info);
@@ -444,7 +422,6 @@ RefPtr<FrameNode> CleanNodeResponseArea::CreateNode()
     cleanNode->MarkModifyDone();
     cleanNode->MountToParent(stackNode);
     InitClickEvent(stackNode);
-    cleanNode_ = stackNode;
     return stackNode;
 }
 
@@ -522,5 +499,60 @@ void CleanNodeResponseArea::ClearArea()
     CHECK_NULL_VOID(cleanNode_);
     host->RemoveChildAndReturnIndex(cleanNode_);
     cleanNode_.Reset();
+}
+
+void CleanNodeResponseArea::Refresh()
+{
+    LoadingImageProperty();
+    auto info = CreateImageSourceInfo();
+    CHECK_NULL_VOID(cleanNode_);
+    auto imageNode = cleanNode_->GetFirstChild();
+    CHECK_NULL_VOID(imageNode);
+    auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
+    CHECK_NULL_VOID(imageFrameNode);
+    auto imageLayoutProperty = imageFrameNode->GetLayoutProperty<ImageLayoutProperty>();
+    CHECK_NULL_VOID(imageLayoutProperty);
+    imageLayoutProperty->UpdateImageSourceInfo(info);
+    imageFrameNode->MarkModifyDone();
+    imageFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void CleanNodeResponseArea::LoadingImageProperty()
+{
+    auto pattern = hostPattern_.Upgrade();
+    CHECK_NULL_VOID(pattern);
+    auto textFieldLayoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(textFieldLayoutProperty);
+    if (textFieldLayoutProperty->HasIconSize()) {
+        iconSize_ = textFieldLayoutProperty->GetIconSizeValue();
+    }
+    if (textFieldLayoutProperty->HasIconSrc()) {
+        iconSrc_ = textFieldLayoutProperty->GetIconSrcValue();
+    }
+    if (textFieldLayoutProperty->HasIconColor()) {
+        iconColor_ = textFieldLayoutProperty->GetIconColorValue();
+    }
+}
+
+ImageSourceInfo CleanNodeResponseArea::CreateImageSourceInfo()
+{
+    ImageSourceInfo info;
+    if (iconSrc_.empty()) {
+        info.SetResourceId(InternalResource::ResourceId::CLOSE_SVG);
+    } else {
+        info.SetSrc(iconSrc_);
+    }
+    if (info.IsSvg()) {
+        info.SetFillColor(iconColor_);
+        CHECK_NULL_RETURN(cleanNode_, info);
+        auto imageNode = cleanNode_->GetFirstChild();
+        CHECK_NULL_RETURN(imageNode, info);
+        auto imageFrameNode = AceType::DynamicCast<FrameNode>(imageNode);
+        CHECK_NULL_RETURN(imageFrameNode, info);
+        auto imageRenderProperty = imageFrameNode->GetPaintProperty<ImageRenderProperty>();
+        CHECK_NULL_RETURN(imageRenderProperty, info);
+        imageRenderProperty->UpdateSvgFillColor(iconColor_);
+    }
+    return info;
 }
 } // namespace OHOS::Ace::NG

@@ -94,6 +94,9 @@ void ScrollBarProxy::NotifyScrollableNode(float distance, const WeakPtr<ScrollBa
         }
         float value = CalcPatternOffset(GetScrollableDistance(scrollable), controlDistance, distance);
         node.onPositionChanged(value, SCROLL_FROM_BAR);
+        if (node.scrollbarFRcallback) {
+            node.scrollbarFRcallback(0, SceneStatus::RUNNING);
+        }
     }
 }
 
@@ -104,6 +107,9 @@ void ScrollBarProxy::NotifyScrollStart() const
             continue;
         }
         node.scrollStartCallback(0, SCROLL_FROM_BAR);
+        if (node.scrollbarFRcallback) {
+            node.scrollbarFRcallback(0, SceneStatus::RUNNING);
+        }
     }
 }
 
@@ -114,6 +120,9 @@ void ScrollBarProxy::NotifyScrollStop() const
             continue;
         }
         node.scrollEndCallback();
+        if (node.scrollbarFRcallback) {
+            node.scrollbarFRcallback(0, SceneStatus::RUNNING);
+        }
     }
 }
 

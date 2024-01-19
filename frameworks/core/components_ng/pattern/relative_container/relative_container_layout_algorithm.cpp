@@ -40,6 +40,56 @@ inline bool IsAnchorContainer(const std::string& anchor)
 }
 } // namespace
 
+float RelativeContainerLayoutAlgorithm::GetVerticalAlignTopValue(
+    std::string& anchor, std::optional<float>& marginTop)
+{
+    auto result = 0.0f;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        result = IsAnchorContainer(anchor) ? 0.0f : recordOffsetMap_[anchor].GetY();
+    } else {
+        result = IsAnchorContainer(anchor)
+                 ? 0.0f
+                 : recordOffsetMap_[anchor].GetY() + marginTop.value_or(0);
+    }
+    return result;
+}
+
+float RelativeContainerLayoutAlgorithm::GetVerticalAlignCenterValue(
+    std::string& anchor, std::optional<float>& marginTop)
+{
+    auto result = 0.0f;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        result = IsAnchorContainer(anchor)
+                 ? containerSizeWithoutPaddingBorder_.Height() / 2.0f
+                 : idNodeMap_[anchor]->GetGeometryNode()->GetMarginFrameSize().Height() / 2.0f +
+                    recordOffsetMap_[anchor].GetY();
+    } else {
+        result = IsAnchorContainer(anchor)
+                 ? containerSizeWithoutPaddingBorder_.Height() / 2.0f
+                 : idNodeMap_[anchor]->GetGeometryNode()->GetFrameSize().Height() / 2.0f +
+                    recordOffsetMap_[anchor].GetY() + marginTop.value_or(0);
+    }
+    return result;
+}
+
+float RelativeContainerLayoutAlgorithm::GetVerticalAlignBottomValue(
+    std::string& anchor, std::optional<float>& marginTop)
+{
+    auto result = 0.0f;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        result = IsAnchorContainer(anchor)
+                 ? containerSizeWithoutPaddingBorder_.Height()
+                 : idNodeMap_[anchor]->GetGeometryNode()->GetMarginFrameSize().Height() +
+                    recordOffsetMap_[anchor].GetY();
+    } else {
+        result = IsAnchorContainer(anchor)
+                 ? containerSizeWithoutPaddingBorder_.Height()
+                 : idNodeMap_[anchor]->GetGeometryNode()->GetFrameSize().Height() +
+                    recordOffsetMap_[anchor].GetY() + marginTop.value_or(0);
+    }
+    return result;
+}
+
 void RelativeContainerLayoutAlgorithm::UpdateVerticalTwoAlignValues(
     TwoAlignedValues& twoAlignedValues, AlignRule alignRule)
 {
@@ -54,21 +104,13 @@ void RelativeContainerLayoutAlgorithm::UpdateVerticalTwoAlignValues(
     }
     switch (alignRule.vertical) {
         case VerticalAlign::TOP:
-            result = IsAnchorContainer(alignRule.anchor)
-                         ? 0.0f
-                         : recordOffsetMap_[alignRule.anchor].GetY() + marginTop.value_or(0);
+            result = GetVerticalAlignTopValue(alignRule.anchor, marginTop);
             break;
         case VerticalAlign::CENTER:
-            result = IsAnchorContainer(alignRule.anchor)
-                         ? containerSizeWithoutPaddingBorder_.Height() / 2.0f
-                         : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetFrameSize().Height() / 2.0f +
-                               recordOffsetMap_[alignRule.anchor].GetY() + marginTop.value_or(0);
+            result = GetVerticalAlignCenterValue(alignRule.anchor, marginTop);
             break;
         case VerticalAlign::BOTTOM:
-            result = IsAnchorContainer(alignRule.anchor)
-                         ? containerSizeWithoutPaddingBorder_.Height()
-                         : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetFrameSize().Height() +
-                               recordOffsetMap_[alignRule.anchor].GetY() + marginTop.value_or(0);
+            result = GetVerticalAlignBottomValue(alignRule.anchor, marginTop);
             break;
         default:
             break;
@@ -80,6 +122,56 @@ void RelativeContainerLayoutAlgorithm::UpdateVerticalTwoAlignValues(
     if (!twoAlignedValues.second.has_value()) {
         twoAlignedValues.second = result;
     }
+}
+
+float RelativeContainerLayoutAlgorithm::GetHorizontalAlignStartValue(
+    std::string& anchor, std::optional<float>& marginLeft)
+{
+    auto result = 0.0f;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        result = IsAnchorContainer(anchor) ? 0.0f : recordOffsetMap_[anchor].GetX();
+    } else {
+        result = IsAnchorContainer(anchor)
+                 ? 0.0f
+                 : recordOffsetMap_[anchor].GetX() + marginLeft.value_or(0);
+    }
+    return result;
+}
+
+float RelativeContainerLayoutAlgorithm::GetHorizontalAlignCenterValue(
+    std::string& anchor, std::optional<float>& marginLeft)
+{
+    auto result = 0.0f;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        result = IsAnchorContainer(anchor)
+                 ? containerSizeWithoutPaddingBorder_.Width() / 2.0f
+                 : idNodeMap_[anchor]->GetGeometryNode()->GetMarginFrameSize().Width() / 2.0f +
+                    recordOffsetMap_[anchor].GetX();
+    } else {
+        result = IsAnchorContainer(anchor)
+                 ? containerSizeWithoutPaddingBorder_.Width() / 2.0f
+                 : idNodeMap_[anchor]->GetGeometryNode()->GetFrameSize().Width() / 2.0f +
+                    recordOffsetMap_[anchor].GetX() + marginLeft.value_or(0);
+    }
+    return result;
+}
+
+float RelativeContainerLayoutAlgorithm::GetHorizontalAlignEndValue(
+    std::string& anchor, std::optional<float>& marginLeft)
+{
+    auto result = 0.0f;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        result = IsAnchorContainer(anchor)
+                 ? containerSizeWithoutPaddingBorder_.Width()
+                 : idNodeMap_[anchor]->GetGeometryNode()->GetMarginFrameSize().Width() +
+                    recordOffsetMap_[anchor].GetX();
+    } else {
+        result = IsAnchorContainer(anchor)
+                 ? containerSizeWithoutPaddingBorder_.Width()
+                 : idNodeMap_[anchor]->GetGeometryNode()->GetFrameSize().Width() +
+                    recordOffsetMap_[anchor].GetX() + marginLeft.value_or(0);
+    }
+    return result;
 }
 
 void RelativeContainerLayoutAlgorithm::UpdateHorizontalTwoAlignValues(
@@ -96,21 +188,13 @@ void RelativeContainerLayoutAlgorithm::UpdateHorizontalTwoAlignValues(
     }
     switch (alignRule.horizontal) {
         case HorizontalAlign::START:
-            result = IsAnchorContainer(alignRule.anchor)
-                         ? 0.0f
-                         : recordOffsetMap_[alignRule.anchor].GetX() + marginLeft.value_or(0);
+            result = GetHorizontalAlignStartValue(alignRule.anchor, marginLeft);
             break;
         case HorizontalAlign::CENTER:
-            result = IsAnchorContainer(alignRule.anchor)
-                         ? containerSizeWithoutPaddingBorder_.Width() / 2.0f
-                         : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetFrameSize().Width() / 2.0f +
-                               recordOffsetMap_[alignRule.anchor].GetX() + marginLeft.value_or(0);
+            result = GetHorizontalAlignCenterValue(alignRule.anchor, marginLeft);
             break;
         case HorizontalAlign::END:
-            result = IsAnchorContainer(alignRule.anchor)
-                         ? containerSizeWithoutPaddingBorder_.Width()
-                         : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetFrameSize().Width() +
-                               recordOffsetMap_[alignRule.anchor].GetX() + marginLeft.value_or(0);
+            result = GetHorizontalAlignEndValue(alignRule.anchor, marginLeft);
             break;
         default:
             break;
@@ -755,6 +839,66 @@ void RelativeContainerLayoutAlgorithm::CalcVerticalLayoutParam(AlignDirection al
     }
 }
 
+float RelativeContainerLayoutAlgorithm::CalcHorizontalOffsetAlignLeft(
+    const HorizontalAlign& alignRule, float& anchorWidth)
+{
+    float offsetX = 0.0f;
+    switch (alignRule) {
+        case HorizontalAlign::START:
+            offsetX = 0.0f;
+            break;
+        case HorizontalAlign::CENTER:
+            offsetX = anchorWidth / 2.0f;
+            break;
+        case HorizontalAlign::END:
+            offsetX = anchorWidth;
+            break;
+        default:
+            break;
+    }
+    return offsetX;
+}
+
+float RelativeContainerLayoutAlgorithm::CalcHorizontalOffsetAlignMiddle(
+    const HorizontalAlign& alignRule, float& anchorWidth, float& flexItemWidth)
+{
+    float offsetX = 0.0f;
+    switch (alignRule) {
+        case HorizontalAlign::START:
+            offsetX = (-1) * flexItemWidth / 2.0f;
+            break;
+        case HorizontalAlign::CENTER:
+            offsetX = (anchorWidth - flexItemWidth) / 2.0f;
+            break;
+        case HorizontalAlign::END:
+            offsetX = anchorWidth - flexItemWidth / 2.0f;
+            break;
+        default:
+            break;
+    }
+    return offsetX;
+}
+
+float RelativeContainerLayoutAlgorithm::CalcHorizontalOffsetAlignRight(
+    const HorizontalAlign& alignRule, float& anchorWidth, float& flexItemWidth)
+{
+    float offsetX = 0.0f;
+    switch (alignRule) {
+        case HorizontalAlign::START:
+            offsetX = (-1) * flexItemWidth;
+            break;
+        case HorizontalAlign::CENTER:
+            offsetX = anchorWidth / 2.0f - flexItemWidth;
+            break;
+        case HorizontalAlign::END:
+            offsetX = anchorWidth - flexItemWidth;
+            break;
+        default:
+            break;
+    }
+    return offsetX;
+}
+
 float RelativeContainerLayoutAlgorithm::CalcHorizontalOffset(
     AlignDirection alignDirection, const AlignRule& alignRule, float containerWidth, const std::string& nodeName)
 {
@@ -762,9 +906,16 @@ float RelativeContainerLayoutAlgorithm::CalcHorizontalOffset(
     auto childWrapper = idNodeMap_[nodeName];
 
     float flexItemWidth = childWrapper->GetGeometryNode()->GetMarginFrameSize().Width();
-    float anchorWidth = IsAnchorContainer(alignRule.anchor)
+    float anchorWidth;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        anchorWidth = IsAnchorContainer(alignRule.anchor)
+                            ? containerWidth
+                            : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetMarginFrameSize().Width();
+    } else {
+        anchorWidth = IsAnchorContainer(alignRule.anchor)
                             ? containerWidth
                             : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetFrameSize().Width();
+    }
     std::optional<float> marginLeft;
     if (!IsAnchorContainer(alignRule.anchor)) {
         auto anchorWrapper = idNodeMap_[alignRule.anchor];
@@ -772,56 +923,85 @@ float RelativeContainerLayoutAlgorithm::CalcHorizontalOffset(
     }
     switch (alignDirection) {
         case AlignDirection::LEFT:
-            switch (alignRule.horizontal) {
-                case HorizontalAlign::START:
-                    offsetX = 0.0f;
-                    break;
-                case HorizontalAlign::CENTER:
-                    offsetX = anchorWidth / 2.0f;
-                    break;
-                case HorizontalAlign::END:
-                    offsetX = anchorWidth;
-                    break;
-                default:
-                    break;
-            }
+            offsetX = CalcHorizontalOffsetAlignLeft(alignRule.horizontal, anchorWidth);
             break;
         case AlignDirection::MIDDLE:
-            switch (alignRule.horizontal) {
-                case HorizontalAlign::START:
-                    offsetX = (-1) * flexItemWidth / 2.0f;
-                    break;
-                case HorizontalAlign::CENTER:
-                    offsetX = (anchorWidth - flexItemWidth) / 2.0f;
-                    break;
-                case HorizontalAlign::END:
-                    offsetX = anchorWidth - flexItemWidth / 2.0f;
-                    break;
-                default:
-                    break;
-            }
+            offsetX = CalcHorizontalOffsetAlignMiddle(alignRule.horizontal, anchorWidth, flexItemWidth);
             break;
         case AlignDirection::RIGHT:
-            switch (alignRule.horizontal) {
-                case HorizontalAlign::START:
-                    offsetX = (-1) * flexItemWidth;
-                    break;
-                case HorizontalAlign::CENTER:
-                    offsetX = anchorWidth / 2.0f - flexItemWidth;
-                    break;
-                case HorizontalAlign::END:
-                    offsetX = anchorWidth - flexItemWidth;
-                    break;
-                default:
-                    break;
-            }
+            offsetX = CalcHorizontalOffsetAlignRight(alignRule.horizontal, anchorWidth, flexItemWidth);
             break;
         default:
             break;
     }
-    offsetX +=
-        IsAnchorContainer(alignRule.anchor) ? 0.0f : recordOffsetMap_[alignRule.anchor].GetX() + marginLeft.value_or(0);
+
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        offsetX += IsAnchorContainer(alignRule.anchor) ? 0.0f : recordOffsetMap_[alignRule.anchor].GetX();
+    } else {
+        offsetX += IsAnchorContainer(alignRule.anchor)
+                    ? 0.0f
+                    : recordOffsetMap_[alignRule.anchor].GetX() + marginLeft.value_or(0);
+    }
     return offsetX;
+}
+
+float RelativeContainerLayoutAlgorithm::CalcVerticalOffsetAlignTop(const VerticalAlign& alignRule, float& anchorHeight)
+{
+    float offsetY = 0.0f;
+    switch (alignRule) {
+        case VerticalAlign::TOP:
+            offsetY = 0.0f;
+            break;
+        case VerticalAlign::CENTER:
+            offsetY = anchorHeight / 2.0f;
+            break;
+        case VerticalAlign::BOTTOM:
+            offsetY = anchorHeight;
+            break;
+        default:
+            break;
+    }
+    return offsetY;
+}
+
+float RelativeContainerLayoutAlgorithm::CalcVerticalOffsetAlignCenter(
+    const VerticalAlign& alignRule, float& anchorHeight, float& flexItemHeight)
+{
+    float offsetY = 0.0f;
+    switch (alignRule) {
+        case VerticalAlign::TOP:
+            offsetY = (-1) * flexItemHeight / 2.0f;
+            break;
+        case VerticalAlign::CENTER:
+            offsetY = (anchorHeight - flexItemHeight) / 2.0f;
+            break;
+        case VerticalAlign::BOTTOM:
+            offsetY = anchorHeight - flexItemHeight / 2.0f;
+            break;
+        default:
+            break;
+    }
+    return offsetY;
+}
+
+float RelativeContainerLayoutAlgorithm::CalcVerticalOffsetAlignBottom(
+    const VerticalAlign& alignRule, float& anchorHeight, float& flexItemHeight)
+{
+    float offsetY = 0.0f;
+    switch (alignRule) {
+        case VerticalAlign::TOP:
+            offsetY = (-1) * flexItemHeight;
+            break;
+        case VerticalAlign::CENTER:
+            offsetY = anchorHeight / 2.0f - flexItemHeight;
+            break;
+        case VerticalAlign::BOTTOM:
+            offsetY = anchorHeight - flexItemHeight;
+            break;
+        default:
+            break;
+    }
+    return offsetY;
 }
 
 float RelativeContainerLayoutAlgorithm::CalcVerticalOffset(
@@ -831,9 +1011,16 @@ float RelativeContainerLayoutAlgorithm::CalcVerticalOffset(
     auto childWrapper = idNodeMap_[nodeName];
 
     float flexItemHeight = childWrapper->GetGeometryNode()->GetMarginFrameSize().Height();
-    float anchorHeight = IsAnchorContainer(alignRule.anchor)
+    float anchorHeight;
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        anchorHeight = IsAnchorContainer(alignRule.anchor)
+                             ? containerHeight
+                             : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetMarginFrameSize().Height();
+    } else {
+        anchorHeight = IsAnchorContainer(alignRule.anchor)
                              ? containerHeight
                              : idNodeMap_[alignRule.anchor]->GetGeometryNode()->GetFrameSize().Height();
+    }
     std::optional<float> marginTop;
     if (!IsAnchorContainer(alignRule.anchor)) {
         auto anchorWrapper = idNodeMap_[alignRule.anchor];
@@ -841,55 +1028,24 @@ float RelativeContainerLayoutAlgorithm::CalcVerticalOffset(
     }
     switch (alignDirection) {
         case AlignDirection::TOP:
-            switch (alignRule.vertical) {
-                case VerticalAlign::TOP:
-                    offsetY = 0.0f;
-                    break;
-                case VerticalAlign::CENTER:
-                    offsetY = anchorHeight / 2.0f;
-                    break;
-                case VerticalAlign::BOTTOM:
-                    offsetY = anchorHeight;
-                    break;
-                default:
-                    break;
-            }
+            offsetY = CalcVerticalOffsetAlignTop(alignRule.vertical, anchorHeight);
             break;
         case AlignDirection::CENTER:
-            switch (alignRule.vertical) {
-                case VerticalAlign::TOP:
-                    offsetY = (-1) * flexItemHeight / 2.0f;
-                    break;
-                case VerticalAlign::CENTER:
-                    offsetY = (anchorHeight - flexItemHeight) / 2.0f;
-                    break;
-                case VerticalAlign::BOTTOM:
-                    offsetY = anchorHeight - flexItemHeight / 2.0f;
-                    break;
-                default:
-                    break;
-            }
+            offsetY = CalcVerticalOffsetAlignCenter(alignRule.vertical, anchorHeight, flexItemHeight);
             break;
         case AlignDirection::BOTTOM:
-            switch (alignRule.vertical) {
-                case VerticalAlign::TOP:
-                    offsetY = (-1) * flexItemHeight;
-                    break;
-                case VerticalAlign::CENTER:
-                    offsetY = anchorHeight / 2.0f - flexItemHeight;
-                    break;
-                case VerticalAlign::BOTTOM:
-                    offsetY = anchorHeight - flexItemHeight;
-                    break;
-                default:
-                    break;
-            }
+            offsetY = CalcVerticalOffsetAlignBottom(alignRule.vertical, anchorHeight, flexItemHeight);
             break;
         default:
             break;
     }
-    offsetY +=
-        IsAnchorContainer(alignRule.anchor) ? 0.0f : recordOffsetMap_[alignRule.anchor].GetY() + marginTop.value_or(0);
+    if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        offsetY += IsAnchorContainer(alignRule.anchor) ? 0.0f : recordOffsetMap_[alignRule.anchor].GetY();
+    } else {
+        offsetY += IsAnchorContainer(alignRule.anchor)
+                    ? 0.0f
+                    : recordOffsetMap_[alignRule.anchor].GetY() + marginTop.value_or(0);
+    }
     return offsetY;
 }
 

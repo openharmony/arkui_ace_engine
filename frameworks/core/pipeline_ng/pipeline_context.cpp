@@ -519,7 +519,7 @@ void PipelineContext::IsCloseSCBKeyboard()
 
     RefPtr<FrameNode> curFrameNode = HandleFocusNode();
     if (curFrameNode == nullptr) {
-        TAG_LOGI(AceLogTag::ACE_KEYBOARD, "curFrameNode null.");
+        TAG_LOGD(AceLogTag::ACE_KEYBOARD, "curFrameNode null.");
         return;
     }
     TAG_LOGD(AceLogTag::ACE_KEYBOARD, "LastFocusNode,(%{public}s/%{public}d).",
@@ -597,10 +597,6 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint32_t frameCount)
     window_->FlushModifier();
     FlushFrameRate();
     FlushMessages();
-    if (dragCleanTask_) {
-        dragCleanTask_();
-        dragCleanTask_ = nullptr;
-    }
     InspectDrew();
     if (!isFormRender_ && onShow_ && onFocus_) {
         FlushFocus();
@@ -725,6 +721,20 @@ void PipelineContext::FlushFocus()
         dirtyFocusNode_.Reset();
         dirtyFocusScope_.Reset();
         dirtyDefaultFocusNode_.Reset();
+    }
+    auto requestFocusNode = dirtyRequestFocusNode_.Upgrade();
+    if (!requestFocusNode) {
+        dirtyRequestFocusNode_.Reset();
+    } else {
+        auto focusNodeHub = requestFocusNode->GetFocusHub();
+        if (focusNodeHub && !focusNodeHub->RequestFocusImmediately()) {
+            TAG_LOGI(AceLogTag::ACE_FOCUS, "Request focus by id on node: %{public}s/%{public}d return false",
+                requestFocusNode->GetTag().c_str(), requestFocusNode->GetId());
+        }
+        dirtyFocusNode_.Reset();
+        dirtyFocusScope_.Reset();
+        dirtyDefaultFocusNode_.Reset();
+        dirtyRequestFocusNode_.Reset();
         return;
     }
 
@@ -740,6 +750,7 @@ void PipelineContext::FlushFocus()
         dirtyFocusNode_.Reset();
         dirtyFocusScope_.Reset();
         dirtyDefaultFocusNode_.Reset();
+        dirtyRequestFocusNode_.Reset();
         return;
     }
     auto focusScope = dirtyFocusScope_.Upgrade();
@@ -754,6 +765,7 @@ void PipelineContext::FlushFocus()
         dirtyFocusNode_.Reset();
         dirtyFocusScope_.Reset();
         dirtyDefaultFocusNode_.Reset();
+        dirtyRequestFocusNode_.Reset();
         return;
     }
     auto rootFocusHub = rootNode_ ? rootNode_->GetFocusHub() : nullptr;
@@ -1073,6 +1085,15 @@ void PipelineContext::OnFoldStatusChange(FoldStatus foldStatus)
     }
 }
 
+void PipelineContext::OnFoldDisplayModeChange(FoldDisplayMode foldDisplayMode)
+{
+    for (auto&& [id, callback] : foldDisplayModeChangedCallbackMap_) {
+        if (callback) {
+            callback(foldDisplayMode);
+        }
+    }
+}
+
 void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
     const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
@@ -1082,6 +1103,11 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
         return;
     }
     switch (type) {
+        case WindowSizeChangeReason::FULL_TO_SPLIT:
+        case WindowSizeChangeReason::FULL_TO_FLOATING: {
+            StartFullToMultWindowAnimation(width, height, type, rsTransaction);
+            break;
+        }
         case WindowSizeChangeReason::RECOVER:
         case WindowSizeChangeReason::MAXIMIZE: {
             StartWindowMaximizeAnimation(width, height, rsTransaction);
@@ -1133,6 +1159,40 @@ void PipelineContext::StartWindowMaximizeAnimation(
     option.SetCurve(curve);
     auto weak = WeakClaim(this);
     Animate(option, curve, [width, height, weak]() {
+        auto pipeline = weak.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SetRootRect(width, height, 0.0);
+        pipeline->FlushUITasks();
+    });
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        rsTransaction->Commit();
+    }
+#endif
+}
+
+void PipelineContext::StartFullToMultWindowAnimation(int32_t width, int32_t height,
+    WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+    LOGI("Root node start multiple window animation, type = %{public}d, width = %{public}d, height = %{public}d",
+        type, width, height);
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        FlushMessages();
+        rsTransaction->Begin();
+    }
+#endif
+    float response = 0.5f;
+    float dampingFraction = 1.0f;
+    AnimationOption option;
+    if (type == WindowSizeChangeReason::FULL_TO_FLOATING) {
+        response = 0.45f;
+        dampingFraction = 0.75f;
+    }
+    auto springMotion = AceType::MakeRefPtr<ResponsiveSpringMotion>(response, dampingFraction, 0);
+    option.SetCurve(springMotion);
+    auto weak = WeakClaim(this);
+    Animate(option, springMotion, [width, height, weak]() {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
         pipeline->SetRootRect(width, height, 0.0);
@@ -1703,9 +1763,7 @@ void PipelineContext::OnTouchEvent(const TouchEvent& point, const RefPtr<FrameNo
         }
         if (lastMoveEvent.has_value()) {
             eventManager_->SetLastMoveBeforeUp(scalePoint.sourceType == SourceType::MOUSE);
-            if (!focusWindowId_.has_value()) {
-                eventManager_->DispatchTouchEvent(lastMoveEvent.value());
-            }
+            eventManager_->DispatchTouchEvent(lastMoveEvent.value());
             eventManager_->SetLastMoveBeforeUp(false);
         }
     }
@@ -1926,6 +1984,9 @@ void PipelineContext::FlushTouchEvents()
             idToTouchPoints.emplace(scalePoint.id, scalePoint);
             idToTouchPoints[scalePoint.id].history.insert(idToTouchPoints[scalePoint.id].history.begin(), scalePoint);
             needInterpolation = iter->type != TouchType::MOVE ? false : true;
+        }
+        if (focusWindowId_.has_value()) {
+            needInterpolation = false;
         }
         if (needInterpolation) {
             auto targetTimeStamp = resampleTimeStamp_;
@@ -2157,6 +2218,14 @@ void PipelineContext::AddDirtyDefaultFocus(const RefPtr<FrameNode>& node)
     CHECK_RUN_ON(UI);
     CHECK_NULL_VOID(node);
     dirtyDefaultFocusNode_ = WeakPtr<FrameNode>(node);
+    RequestFrame();
+}
+
+void PipelineContext::AddDirtyRequestFocus(const RefPtr<FrameNode>& node)
+{
+    CHECK_RUN_ON(UI);
+    CHECK_NULL_VOID(node);
+    dirtyRequestFocusNode_ = WeakPtr<FrameNode>(node);
     RequestFrame();
 }
 
@@ -2521,6 +2590,7 @@ void PipelineContext::Destroy()
     dirtyFocusScope_.Reset();
     needRenderNode_.clear();
     dirtyDefaultFocusNode_.Reset();
+    dirtyRequestFocusNode_.Reset();
 #ifdef WINDOW_SCENE_SUPPORTED
     uiExtensionManager_.Reset();
 #endif

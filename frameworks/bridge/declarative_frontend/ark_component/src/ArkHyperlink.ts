@@ -23,6 +23,10 @@ class ArkHyperlinkComponent extends ArkComponent implements HyperlinkAttribute {
     modifierWithKey(this._modifiersWithKeys, HyperlinkColorModifier.identity, HyperlinkColorModifier, value);
     return this;
   }
+  draggable(value: boolean): this {
+    modifierWithKey(this._modifiersWithKeys, HyperlinkDraggableModifier.identity, HyperlinkDraggableModifier, value);
+    return this;
+  }
 }
 
 class HyperlinkColorModifier extends ModifierWithKey<ResourceColor> {
@@ -40,6 +44,20 @@ class HyperlinkColorModifier extends ModifierWithKey<ResourceColor> {
 
   checkObjectDiff(): boolean {
     return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
+
+class HyperlinkDraggableModifier extends ModifierWithKey<boolean> {
+  constructor(value: boolean) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('hyperlinkDraggable');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().hyperlink.resetDraggable(node);
+    } else {
+      getUINativeModule().hyperlink.setDraggable(node, this.value);
+    }
   }
 }
 

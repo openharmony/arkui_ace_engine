@@ -98,7 +98,7 @@ public:
         return loop_;
     }
 
-    virtual bool IsFullScreen();
+    virtual bool IsFullScreen() const;
 
     void OnColorConfigurationUpdate() override;
     void UpdateProgressRate(double progressRate)
@@ -202,6 +202,8 @@ public:
 
     void RecoverState(const RefPtr<VideoPattern>& videoPattern);
 
+    bool NeedLift() const;
+
     RefPtr<FrameNode> GetFullScreenNode() const
     {
         if (!fullScreenNodeId_.has_value()) {
@@ -248,6 +250,7 @@ protected:
 
 private:
     void OnAttachToFrameNode() override;
+    void OnDetachFromMainTree() override;
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnRebuildFrame() override;

@@ -119,6 +119,8 @@ void ShapeModelNG::SetStroke(FrameNode* frameNode, const Color& color)
 void ShapeModelNG::SetFill(FrameNode* frameNode, const Color& color)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, Fill, color, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColor, color, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(ForegroundColorFlag, true, frameNode);
 }
 
 void ShapeModelNG::SetStrokeDashOffset(FrameNode* frameNode, const Ace::Dimension& dashOffset)

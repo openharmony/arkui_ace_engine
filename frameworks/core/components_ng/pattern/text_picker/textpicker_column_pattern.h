@@ -440,7 +440,7 @@ private:
 
     int32_t halfDisplayCounts_ = 0;
 
-    float mainVelocity_ = 0.0f;
+    double mainVelocity_ = 0.0;
     float offsetCurSet_ = 0.0f;
     float distancePercent_ = 0.0f;
     bool isTossStatus_ = false;

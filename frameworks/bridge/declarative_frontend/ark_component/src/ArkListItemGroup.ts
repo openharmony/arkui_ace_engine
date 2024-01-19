@@ -43,9 +43,6 @@ class ArkListItemGroupComponent extends ArkComponent implements ListItemGroupAtt
     modifierWithKey(this._modifiersWithKeys, ListItemGroupDividerModifier.identity, ListItemGroupDividerModifier, value);
     return this;
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
 }
 
 // @ts-ignore

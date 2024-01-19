@@ -67,6 +67,8 @@ public:
 
     void RefreshStack(FoldStatus foldStatus);
 
+    void OnFolderStateChangeSend(FoldStatus foldStatus);
+
     void UpdateFoldStatusChangedCallbackId(std::optional<int32_t> id)
     {
         foldStatusChangedCallbackId_ = id;
@@ -84,6 +86,16 @@ public:
 
     void DumpInfo() override;
 
+    bool GetNeedCallBack()
+    {
+        return needCallBack_;
+    }
+
+    void SetNeedCallBack(bool needCallBack)
+    {
+        needCallBack_ = needCallBack;
+    }
+
 private:
     void OnDetachFromFrameNode(FrameNode* node) override;
     void RegisterFoldStatusListener();
@@ -96,6 +108,7 @@ private:
     void InitFolderStackPatternAppearCallback();
     void RestoreScreenState();
     void SetAutoRotate();
+    void UpdateChildAlignment();
     std::optional<int32_t> foldStatusChangedCallbackId_;
     bool isScreenRotationLocked_ = false;
     Orientation lastOrientation_ = Orientation::UNSPECIFIED;
@@ -103,6 +116,7 @@ private:
     bool isAppearCallback_ = false;
     RefPtr<DisplayInfo> displayInfo_;
     bool hasInHoverMode_ = false;
+    bool needCallBack_ = false;
     FoldStatus currentFoldStatus_ = FoldStatus::UNKNOWN;
     CancelableCallback<void()> foldStatusDelayTask_;
 };

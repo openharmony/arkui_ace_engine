@@ -23,6 +23,7 @@
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "bridge/declarative_frontend/jsview/js_navdestination_context.h"
 #include "bridge/declarative_frontend/jsview/js_navigation.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -86,7 +87,10 @@ void JSNavDestination::Create(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE(context)
         JSRef<JSFunc>::Cast(builder)->Call(JSRef<JSObject>());
     };
-    NavDestinationModel::GetInstance()->Create(std::move(builderFunc));
+    auto ctx = AceType::MakeRefPtr<JSNavDestinationContext>();
+    auto navPathInfo = AceType::MakeRefPtr<JSNavPathInfo>();
+    ctx->SetNavPathInfo(navPathInfo);
+    NavDestinationModel::GetInstance()->Create(std::move(builderFunc), std::move(ctx));
 }
 
 void JSNavDestination::SetHideTitleBar(bool hide)
@@ -217,6 +221,26 @@ void JSNavDestination::SetOnBackPressed(const JSCallbackInfo& info)
     info.ReturnSelf();
 }
 
+void JSNavDestination::SetOnReady(const JSCallbackInfo& info)
+{
+    if (!info[0]->IsFunction()) {
+        return;
+    }
+    auto onReadyCallback = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
+    auto onReady = [execCtx = info.GetExecutionContext(),
+        func = std::move(onReadyCallback)](RefPtr<NG::NavDestinationContext> context) {
+        auto jsContext = AceType::DynamicCast<JSNavDestinationContext>(context);
+        CHECK_NULL_VOID(jsContext);
+        JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
+        ACE_SCORING_EVENT("NavDestination.onReady");
+        JSRef<JSVal> params[1];
+        params[0] = jsContext->CreateJSObject();
+        func->ExecuteJS(1, params);
+    };
+    NavDestinationModel::GetInstance()->SetOnReady(std::move(onReady));
+    info.ReturnSelf();
+}
+
 void JSNavDestination::SetMode(const JSCallbackInfo& info)
 {
     if (!info[0]->IsNumber()) {
@@ -238,12 +262,12 @@ void JSNavDestination::JSBind(BindingTarget globalObj)
     JSClass<JSNavDestination>::StaticMethod("onShown", &JSNavDestination::SetOnShown);
     JSClass<JSNavDestination>::StaticMethod("onHidden", &JSNavDestination::SetOnHidden);
     JSClass<JSNavDestination>::StaticMethod("onBackPressed", &JSNavDestination::SetOnBackPressed);
+    JSClass<JSNavDestination>::StaticMethod("onReady", &JSNavDestination::SetOnReady);
     JSClass<JSNavDestination>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSNavDestination>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSNavDestination>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
     JSClass<JSNavDestination>::StaticMethod("id", &JSViewAbstract::JsId);
     JSClass<JSNavDestination>::StaticMethod("mode", &JSNavDestination::SetMode);
-    JSClass<JSNavDestination>::StaticMethod("expandSafeArea", &JSNavigation::JsExpandSafeArea);
     JSClass<JSNavDestination>::InheritAndBind<JSContainerBase>(globalObj);
 }
 

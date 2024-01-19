@@ -270,6 +270,7 @@ private:
         RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams);
     void NotifyDragFrameNode(
         const Point& point, const DragEventType& dragEventType, const DragRet& dragRet = DragRet::DRAG_DEFAULT);
+    void TransDragWindowToDragFwk(int32_t windowContainerId);
 
     std::map<int32_t, WeakPtr<FrameNode>> dragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
@@ -306,6 +307,7 @@ private:
     DragDropMgrState dragDropState_ = DragDropMgrState::IDLE;
     Rect previewRect_ { -1, -1, -1, -1 };
     DragPreviewInfo info_;
+    bool isDragFwkShow_ { false };
 
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
 };

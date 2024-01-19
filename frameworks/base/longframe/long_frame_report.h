@@ -27,6 +27,8 @@ public:
     ~ILongFrame() = default;
     void ReportStartEvent();
     void ReportEndEvent();
+
+private:
     EventReport reporter = nullptr;
 };
 } // namespace OHOS::Ace

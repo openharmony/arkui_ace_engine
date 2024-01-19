@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 
 #include "testing_point.h"
 #include "testing_rect.h"
+#include "testing_round_rect.h"
 
 namespace OHOS::Ace::Testing {
 enum class TestingPathDirection {
@@ -42,6 +43,10 @@ enum class TestingPathOp {
     REVERSE_DIFFERENCE,
 };
 
+enum class PathDirection {
+    CW_DIRECTION,
+    CCW_DIRECTION,
+};
 class TestingPath {
 public:
     TestingPath() = default;
@@ -57,6 +62,8 @@ public:
     virtual void AddRoundRect(const TestingRect& rect, float xRadius, float yRadius,
         TestingPathDirection dir = TestingPathDirection::CW_DIRECTION)
     {}
+
+    virtual void AddRoundRect(const TestingRoundRect& roundRect, PathDirection dir = PathDirection::CW_DIRECTION) {}
 
     virtual void AddPath(const TestingPath& src) {}
 
@@ -78,6 +85,7 @@ public:
     {
         return true;
     }
+    virtual void AddOval(const TestingRect& oval, PathDirection dir = PathDirection::CW_DIRECTION) {}
 
     virtual bool BuildFromSVGString(const std::string& str)
     {
@@ -89,6 +97,22 @@ public:
         return {};
     }
     virtual void SetFillStyle(TestingPathFillType fillStyle) {}
+
+    virtual bool IsValid() const
+    {
+        return false;
+    }
+
+    virtual float GetLength(bool forceClosed) const
+    {
+        return 0;
+    }
+
+    virtual bool GetPositionAndTangent(
+        float distance, TestingPoint& position, TestingPoint& tangent, bool forceClosed) const
+    {
+        return false;
+    }
 };
 } // namespace OHOS::Ace::Testing
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ROSEN_TEST_TESTING_PATH_H

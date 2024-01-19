@@ -24,7 +24,6 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-enum VisibleState { Unset, Visible, Invisible };
 class CanvasPaintMethod;
 class OffscreenCanvasPattern;
 class RenderingContext2DModifier;
@@ -143,7 +142,6 @@ public:
     void SetTextDirection(TextDirection direction);
     void SetFilterParam(const std::string& filterStr);
     TransformParam GetTransform() const;
-    void OnVisibleChange(bool isVisible) override;
 
     void DumpAdvanceInfo() override;
 
@@ -154,10 +152,8 @@ private:
     RefPtr<CanvasPaintMethod> paintMethod_;
     std::optional<SizeF> canvasSize_;
     bool isCanvasInit_ = false;
-    enum VisibleState isVisible_ = Unset;
     SizeF dirtyPixelGridRoundSize_ = { -1, -1 };
     SizeF lastDirtyPixelGridRoundSize_ = { -1, -1 };
-    SizeF visiblePixelGridRoundSize_ = { -1, -1 };
     DirtySwapConfig recordConfig_;
 
     RefPtr<RenderingContext2DModifier> contentModifier_;

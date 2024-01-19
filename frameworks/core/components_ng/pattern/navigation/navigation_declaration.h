@@ -52,8 +52,8 @@ constexpr float SINGLE_PAGE_MAXIMUM_WIDTH = 720.0f;
 constexpr Dimension MAX_TITLE_FONT_SIZE = 30.0_vp;
 constexpr Dimension MIN_TITLE_FONT_SIZE = 20.0_vp;
 constexpr Dimension MIN_ADAPT_TITLE_FONT_SIZE = 14.0_vp;
-const std::string TITLE_MAIN = "MainOnly";
-const std::string TITLE_MAIN_WITH_SUB = "MainWithSub";
+constexpr const char* TITLE_MAIN = "MainOnly";
+constexpr const char* TITLE_MAIN_WITH_SUB = "MainWithSub";
 
 // subtitle
 constexpr Dimension SUBTITLE_FONT_SIZE = 14.0_vp; // ohos_id_text_size_sub_title3

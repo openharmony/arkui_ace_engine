@@ -65,43 +65,83 @@ void IndexerLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     for (int32_t index = 0; index < itemCount_; index++) {
         auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(index);
         CHECK_NULL_VOID(childWrapper);
-        auto childLayoutProperty = AceType::DynamicCast<TextLayoutProperty>(childWrapper->GetLayoutProperty());
-        CHECK_NULL_VOID(childLayoutProperty);
         childLayoutConstraint.UpdateSelfMarginSizeWithCheck(OptionalSizeF(itemWidth_, itemSizeRender_));
         childWrapper->Measure(childLayoutConstraint);
     }
+    if (indexerLayoutProperty->GetIsPopupValue(false)) {
+        auto childCount = layoutWrapper->GetTotalChildCount();
+        auto childWrapper = layoutWrapper->GetOrCreateChildByIndex(childCount - 1);
+        CHECK_NULL_VOID(childWrapper);
+        auto childLayoutProperty = AceType::DynamicCast<LinearLayoutProperty>(childWrapper->GetLayoutProperty());
+        CHECK_NULL_VOID(childLayoutProperty);
+        auto layoutConstraint = childLayoutProperty->GetLayoutConstraint();
+        layoutConstraint->Reset();
+        childWrapper->Measure(layoutConstraint);
+    }
+    
     layoutWrapper->GetGeometryNode()->SetFrameSize(SizeF(actualWidth, actualHeight_));
 }
 
 void IndexerLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
 {
     CHECK_NULL_VOID(layoutWrapper);
-    auto layoutProperty = layoutWrapper->GetLayoutProperty();
+    auto layoutProperty = DynamicCast<IndexerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     CHECK_NULL_VOID(layoutProperty);
     auto size = layoutWrapper->GetGeometryNode()->GetFrameSize();
     auto defaultHorizontalPadding = Dimension(INDEXER_PADDING_LEFT, DimensionUnit::VP).ConvertToPx();
     auto defaultVerticalPadding = Dimension(INDEXER_PADDING_TOP, DimensionUnit::VP).ConvertToPx();
-    const auto& padding = layoutWrapper->GetLayoutProperty()->CreatePaddingAndBorderWithDefault(
+    const auto& padding = layoutProperty->CreatePaddingAndBorderWithDefault(
         static_cast<float>(defaultHorizontalPadding), static_cast<float>(defaultVerticalPadding), 0, 0);
     MinusPaddingToSize(padding, size);
     auto left = padding.left.value_or(0);
     auto top = padding.top.value_or(0);
     auto paddingOffset = OffsetF(left, top);
     auto align = Alignment::CENTER;
-    if (layoutWrapper->GetLayoutProperty()->GetPositionProperty()) {
-        align = layoutWrapper->GetLayoutProperty()->GetPositionProperty()->GetAlignment().value_or(align);
+    if (layoutProperty->GetPositionProperty()) {
+        align = layoutProperty->GetPositionProperty()->GetAlignment().value_or(align);
     }
     SizeF contentSize;
-    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+    auto childCount = layoutWrapper->GetTotalChildCount();
+    if (layoutProperty->GetIsPopupValue(false)) {
+        const auto& child = layoutWrapper->GetChildByIndex(childCount - 1);
+        auto offset = GetPositionOfPopupNode(layoutProperty, size.Width());
+        child->GetHostNode()->GetRenderContext()->UpdatePosition(offset);
+        child->Layout();
+        childCount -= 1;
+    }
+    for (int32_t i = 0; i < childCount; i++) {
+        const auto& child = layoutWrapper->GetChildByIndex(i);
         SizeF childSize = child->GetGeometryNode()->GetMarginFrameSize();
         contentSize += childSize;
     }
-    int32_t index = 0;
-    for (const auto& child : layoutWrapper->GetAllChildrenWithBuild()) {
+    for (int32_t i = 0; i < childCount; i++) {
+        const auto& child = layoutWrapper->GetChildByIndex(i);
         auto translate = Alignment::GetAlignPosition(size, contentSize, align);
         child->GetGeometryNode()->SetMarginFrameOffset(
-            translate + paddingOffset + OffsetF(0, itemSizeRender_ * index++));
+            translate + paddingOffset + OffsetF(0, itemSizeRender_ * i));
         child->Layout();
+    }
+}
+
+OffsetT<Dimension> IndexerLayoutAlgorithm::GetPositionOfPopupNode(
+    const RefPtr<IndexerLayoutProperty>& layoutProperty, float indexerWidth)
+{
+    auto alignMent = layoutProperty->GetAlignStyle().value_or(NG::AlignStyle::RIGHT);
+    auto userDefinePositionX =
+        layoutProperty->GetPopupPositionX().value_or(Dimension(NG::BUBBLE_POSITION_X, DimensionUnit::VP)).ConvertToPx();
+    auto userDefinePositionY =
+        layoutProperty->GetPopupPositionY().value_or(Dimension(NG::BUBBLE_POSITION_Y, DimensionUnit::VP)).ConvertToPx();
+    auto userDefineSpace = layoutProperty->GetPopupHorizontalSpace();
+
+    if (alignMent == NG::AlignStyle::LEFT) {
+        auto xPos = userDefineSpace ? userDefineSpace.value().ConvertToPx() + indexerWidth
+                                    : userDefinePositionX + indexerWidth / 2;
+        return OffsetT<Dimension>(Dimension(xPos), Dimension(userDefinePositionY));
+    } else {
+        auto bubbleSize = Dimension(BUBBLE_BOX_SIZE, DimensionUnit::VP).ConvertToPx();
+        auto xPos = (userDefineSpace ? -userDefineSpace.value().ConvertToPx()
+                                    : -userDefinePositionX + indexerWidth / 2) - bubbleSize;
+        return OffsetT<Dimension>(Dimension(xPos), Dimension(userDefinePositionY));
     }
 }
 } // namespace OHOS::Ace::NG

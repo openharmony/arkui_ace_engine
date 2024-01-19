@@ -30,7 +30,8 @@ void SliderPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
     auto sliderTheme = pipeline->GetTheme<SliderTheme>();
     CHECK_NULL_VOID(sliderTheme);
     sliderContentModifier_->UpdateData(parameters_);
-    sliderContentModifier_->JudgeNeedAnimate(paintProperty);
+    auto reverse = paintProperty->GetReverseValue(false);
+    sliderContentModifier_->JudgeNeedAnimate(textDirection_ == TextDirection::RTL ? !reverse : reverse);
     sliderContentModifier_->SetBackgroundSize(parameters_.backStart, parameters_.backEnd);
     sliderContentModifier_->SetSelectSize(parameters_.selectStart, parameters_.selectEnd);
     sliderContentModifier_->SetCircleCenter(parameters_.circleCenter);

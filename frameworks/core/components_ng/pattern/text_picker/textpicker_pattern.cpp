@@ -877,7 +877,10 @@ void TextPickerPattern::OnColorConfigurationUpdate()
     if (contentRowNode) {
         auto layoutRenderContext = contentRowNode->GetRenderContext();
         CHECK_NULL_VOID(layoutRenderContext);
-        layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
+        if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) ||
+            !layoutRenderContext->IsUniRenderEnabled()) {
+            layoutRenderContext->UpdateBackgroundColor(dialogTheme->GetButtonBackgroundColor());
+        }
     }
     auto frameNode = DynamicCast<FrameNode>(host);
     CHECK_NULL_VOID(frameNode);
@@ -916,6 +919,6 @@ void TextPickerPattern::CheckAndUpdateColumnSize(SizeF& size)
     MinusPaddingToSize(padding, pickerContentSize);
 
     size.SetWidth(pickerContentSize.Width() / std::max(childCount, 1.0f));
-    size.SetHeight(std::min(size.Height(), pickerContentSize.Height()));
+    size.SetHeight(pickerContentSize.Height());
 }
 } // namespace OHOS::Ace::NG

@@ -64,7 +64,8 @@ using CalePredictSnapOffsetCallback =
 using NeedScrollSnapToSideCallback = std::function<bool(float delta)>;
 using NestableScrollCallback = std::function<ScrollResult(float, int32_t, NestedState)>;
 using DragFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
-using ScrollMotionFRCSceneCallback = std::function<void(double velocity, NG::SceneStatus sceneStatus)>;
+
+class FrameNode;
 
 class Scrollable : public TouchEventTarget {
     DECLARE_ACE_TYPE(Scrollable, TouchEventTarget);
@@ -120,12 +121,8 @@ public:
         }
     }
 
-    void OnCollectTouchTarget(TouchTestResult& result)
-    {
-        if (panRecognizerNG_) {
-            result.emplace_back(panRecognizerNG_);
-        }
-    }
+    void OnCollectTouchTarget(
+        TouchTestResult& result, const RefPtr<FrameNode>& frameNode, const RefPtr<TargetComponent>& targetComponent);
 
     void SetDragTouchRestrict(const TouchRestrict& touchRestrict)
     {
@@ -401,11 +398,6 @@ public:
         dragFRCSceneCallback_ = std::move(dragFRCSceneCallback);
     }
 
-    void SetScrollMotionFRCSceneCallback(ScrollMotionFRCSceneCallback&& scrollMotionFRCSceneCallback)
-    {
-        scrollMotionFRCSceneCallback_ = std::move(scrollMotionFRCSceneCallback);
-    }
-
     float GetFinalPosition()
     {
         return finalPosition_;
@@ -464,7 +456,7 @@ private:
     DragEndForRefreshCallback dragEndCallback_;
     DragCancelRefreshCallback dragCancelCallback_;
     ContinuousSlidingCallback continuousSlidingCallback_;
-    Axis axis_ = Axis::NONE;
+    Axis axis_ = Axis::VERTICAL;
     // used for ng structure.
     RefPtr<NG::PanRecognizer> panRecognizerNG_;
 
@@ -516,7 +508,6 @@ private:
     GestureEventFunc actionEnd_;
 
     DragFRCSceneCallback dragFRCSceneCallback_;
-    ScrollMotionFRCSceneCallback scrollMotionFRCSceneCallback_;
 
     uint64_t lastVsyncTime_ = 0;
     RefPtr<NodeAnimatablePropertyFloat> frictionOffsetProperty_;

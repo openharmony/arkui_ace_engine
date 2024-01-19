@@ -15,9 +15,6 @@
 
 /// <reference path='./import.ts' />
 class ArkEffectComponentComponent extends ArkComponent implements EffectComponentAttribute {
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
 }
 
 // @ts-ignore

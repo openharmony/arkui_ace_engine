@@ -78,7 +78,7 @@ void ResetListLanes(ArkUINodeHandle node)
     ListModelNG::SetLaneGutter(frameNode, Dimension(0));
 }
 
-void SetEditMode(ArkUINodeHandle node, bool editMode)
+void SetEditMode(ArkUINodeHandle node, ArkUI_Bool editMode)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -92,7 +92,7 @@ void ResetEditMode(ArkUINodeHandle node)
     ListModelNG::SetEditMode(frameNode, false);
 }
 
-void SetMultiSelectable(ArkUINodeHandle node, bool selectable)
+void SetMultiSelectable(ArkUINodeHandle node, ArkUI_Bool selectable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -106,7 +106,7 @@ void ResetMultiSelectable(ArkUINodeHandle node)
     ListModelNG::SetMultiSelectable(frameNode, false);
 }
 
-void SetChainAnimation(ArkUINodeHandle node, bool chainAnimation)
+void SetChainAnimation(ArkUINodeHandle node, ArkUI_Bool chainAnimation)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -137,7 +137,7 @@ void ResetCachedCount(ArkUINodeHandle node)
     ListModelNG::SetCachedCount(frameNode, DEFAULT_CACHED_COUNT);
 }
 
-void SetEnableScrollInteraction(ArkUINodeHandle node, bool enableScrollInteraction)
+void SetEnableScrollInteraction(ArkUINodeHandle node, ArkUI_Bool enableScrollInteraction)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -165,7 +165,7 @@ void ResetSticky(ArkUINodeHandle node)
     ListModelNG::SetSticky(frameNode, DEFAULT_STICKY_STYLE);
 }
 
-void SetListEdgeEffect(ArkUINodeHandle node, int32_t edgeEffect, bool alwaysEnabled)
+void SetListEdgeEffect(ArkUINodeHandle node, int32_t edgeEffect, ArkUI_Bool alwaysEnabled)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

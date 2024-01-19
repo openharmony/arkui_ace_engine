@@ -255,6 +255,7 @@ public:
     static void JsSize(const JSCallbackInfo& info);
     static void JsConstraintSize(const JSCallbackInfo& info);
     static void JsLayoutPriority(const JSCallbackInfo& info);
+    static void JsPixelRound(const JSCallbackInfo& info);
     static void JsLayoutWeight(const JSCallbackInfo& info);
 
     static void JsAlign(const JSCallbackInfo& info);
@@ -500,7 +501,8 @@ public:
     static bool CheckColor(const JSRef<JSVal>& jsValue, Color& result, const char* componentName, const char* propName);
     static bool CheckLength(
         const JSRef<JSVal>& jsValue, CalcDimension& result, const char* componentName, const char* propName);
-    static bool ParseJsSymbolId(const JSRef<JSVal>& jsValue, uint32_t& symbolId);
+    static bool ParseJsSymbolId(
+        const JSRef<JSVal>& jsValue, uint32_t& symbolId, RefPtr<ResourceObject>& symbolResourceObject);
     static bool ParseJsSymbolColor(const JSRef<JSVal>& jsValue, std::vector<Color>& result);
 };
 } // namespace OHOS::Ace::Framework

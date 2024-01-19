@@ -101,10 +101,6 @@ bool NGGestureRecognizer::ShouldResponse()
 
 bool NGGestureRecognizer::HandleEvent(const TouchEvent& point)
 {
-    auto attachedNode = GetAttachedNode();
-    if (attachedNode.Invalid()) {
-        return true;
-    }
     if (!ShouldResponse()) {
         return true;
     }
@@ -204,6 +200,10 @@ void NGGestureRecognizer::Transform(PointF& localPointF, const WeakPtr<FrameNode
         //when the InjectPointerEvent is invoked, need to enter the lowest windowscene.
         if (host->GetTag() == V2::WINDOW_SCENE_ETS_TAG) {
             TAG_LOGD(AceLogTag::ACE_GESTURE, "need to break when inject WindowsScene, id:%{public}d", host->GetId());
+            break;
+        }
+        if (host->GetTag() == "NodeContainer") {
+            TAG_LOGD(AceLogTag::ACE_GESTURE, "need to break when used in NodeContainer, id:%{public}d", host->GetId());
             break;
         }
         host = host->GetAncestorNodeOfFrame();

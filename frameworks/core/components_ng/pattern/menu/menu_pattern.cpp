@@ -166,20 +166,36 @@ void MenuPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(targetNode);
     auto eventHub = targetNode->GetEventHub<EventHub>();
     CHECK_NULL_VOID(eventHub);
-    OnAreaChangedFunc onAreaChangedFunc = [menuNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
-                                              const OffsetF& /* oldOrigin */, const RectF& /* rect */,
+    OnAreaChangedFunc onAreaChangedFunc = [menuNodeWk = WeakPtr<FrameNode>(host)](const RectF& oldRect,
+                                              const OffsetF& oldOrigin, const RectF& /* rect */,
                                               const OffsetF& /* origin */) {
-        auto menuNode = menuNodeWk.Upgrade();
-        CHECK_NULL_VOID(menuNode);
-        auto menuPattern = menuNode->GetPattern<MenuPattern>();
-        CHECK_NULL_VOID(menuPattern);
-        auto menuWarpper = menuPattern->GetMenuWrapper();
-        CHECK_NULL_VOID(menuWarpper);
-        auto warpperPattern = menuWarpper->GetPattern<MenuWrapperPattern>();
-        CHECK_NULL_VOID(warpperPattern);
-        if (!warpperPattern->IsHided()) {
-            menuNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        // Not handle first change
+        if (oldRect.IsEmpty() && oldOrigin.NonOffset()) {
+            return;
         }
+
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        AnimationOption option;
+        option.SetCurve(pipelineContext->GetSafeAreaManager()->GetSafeAreaCurve());
+        AnimationUtils::Animate(
+            option,
+            [weakPipeline = WeakPtr<PipelineContext>(pipelineContext), weakMenu = menuNodeWk]() {
+                auto menu = weakMenu.Upgrade();
+                CHECK_NULL_VOID(menu);
+                auto menuPattern = menu->GetPattern<MenuPattern>();
+                CHECK_NULL_VOID(menuPattern);
+                auto menuWarpper = menuPattern->GetMenuWrapper();
+                CHECK_NULL_VOID(menuWarpper);
+                auto warpperPattern = menuWarpper->GetPattern<MenuWrapperPattern>();
+                CHECK_NULL_VOID(warpperPattern);
+                if (!warpperPattern->IsHided()) {
+                    auto pipeline = weakPipeline.Upgrade();
+                    CHECK_NULL_VOID(pipeline);
+                    menu->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+                    pipeline->FlushUITasks();
+                }
+            });
+        pipelineContext->FlushPipelineImmediately();
     };
     eventHub->AddInnerOnAreaChangedCallback(host->GetId(), std::move(onAreaChangedFunc));
 }
@@ -402,12 +418,20 @@ void MenuPattern::HideMenu(bool isMenuOnTouch) const
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     auto expandDisplay = theme->GetExpandDisplay();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto rootMenuPattern = AceType::DynamicCast<MenuPattern>(host->GetPattern());
+    CHECK_NULL_VOID(rootMenuPattern);
+    // copy menu pattern properties to rootMenu
+    auto layoutProperty = rootMenuPattern->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    bool isShowInSubWindow = layoutProperty->GetShowInSubWindowValue(true);
     auto wrapper = GetMenuWrapper();
     CHECK_NULL_VOID(wrapper);
     if (wrapper->GetTag() == V2::SELECT_OVERLAY_ETS_TAG) {
         return;
     }
-    if (((IsContextMenu() || expandDisplay)) && (targetTag_ != V2::SELECT_ETS_TAG)) {
+    if (((IsContextMenu() || (expandDisplay && isShowInSubWindow))) && (targetTag_ != V2::SELECT_ETS_TAG)) {
         SubwindowManager::GetInstance()->HideMenuNG(wrapper, targetId_);
         return;
     }

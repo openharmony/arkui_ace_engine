@@ -156,8 +156,11 @@ void NavigationPattern::OnAttachToFrameNode()
     if (theme && theme->GetNavBarUnfocusEffectEnable()) {
         pipelineContext->AddWindowFocusChangedCallback(host->GetId());
     }
-    SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
-    host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_ALL};
+        host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+    }
 }
 
 void NavigationPattern::OnDetachFromFrameNode(FrameNode* frameNode)
@@ -244,6 +247,22 @@ void NavigationPattern::OnModifyDone()
         auto inputHub = dividerNode->GetOrCreateInputEventHub();
         CHECK_NULL_VOID(inputHub);
         InitDividerMouseEvent(inputHub);
+    }
+
+    auto&& opts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
+    if (opts && opts->Expansive()) {
+        navBarNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+        navBarNode->MarkModifyDone();
+
+        auto navigationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
+        CHECK_NULL_VOID(navigationContentNode);
+        navigationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+        navigationContentNode->MarkModifyDone();
+
+        auto dividerNode = AceType::DynamicCast<FrameNode>(hostNode->GetDividerNode());
+        CHECK_NULL_VOID(dividerNode);
+        dividerNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+        dividerNode->MarkModifyDone();
     }
 }
 
@@ -1204,7 +1223,7 @@ void NavigationPattern::OnCustomAnimationFinish(const RefPtr<NavDestinationGroup
             break;
         }
         if ((newTopNavDestination && preTopNavDestination && isPopPage) ||
-            (preTopNavDestination && !newTopNavDestination && navigationMode_ == NavigationMode::STACK)) {
+            (preTopNavDestination && !newTopNavDestination)) {
             PageTransitionType preNodeTransitionType = preTopNavDestination->GetTransitionType();
             if (preNodeTransitionType != PageTransitionType::EXIT_POP) {
                 TAG_LOGI(AceLogTag::ACE_NAVIGATION, "previous destination node is executing another transition");

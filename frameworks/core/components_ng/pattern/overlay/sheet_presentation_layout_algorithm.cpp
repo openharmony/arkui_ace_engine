@@ -124,7 +124,7 @@ void SheetPresentationLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     OffsetF positionOffset;
     positionOffset.SetX(sheetOffsetX_);
-    positionOffset.SetY(sheetOffsetY_);
+    positionOffset.SetY(0.0f);
     auto geometryNode = layoutWrapper->GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     geometryNode->SetMarginFrameOffset(positionOffset);

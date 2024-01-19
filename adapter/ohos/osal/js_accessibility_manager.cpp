@@ -1059,6 +1059,7 @@ static void UpdateAccessibilityElementInfo(const RefPtr<NG::FrameNode>& node, Ac
     nodeInfo.SetPassword(accessibilityProperty->IsPassword());
     nodeInfo.SetPluraLineSupported(accessibilityProperty->IsMultiLine());
     nodeInfo.SetHinting(accessibilityProperty->IsHint());
+    nodeInfo.SetDescriptionInfo(accessibilityProperty->GetAccessibilityDescription());
     nodeInfo.SetCurrentIndex(accessibilityProperty->GetCurrentIndex());
     nodeInfo.SetBeginIndex(accessibilityProperty->GetBeginIndex());
     nodeInfo.SetEndIndex(accessibilityProperty->GetEndIndex());

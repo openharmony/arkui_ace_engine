@@ -115,12 +115,7 @@ public:
 
     void DismissSheet()
     {
-        auto sheetType = GetSheetType();
-        if (sheetType == SheetType::SHEET_POPUP) {
-            BubbleStyleSheetTransition(false);
-        } else {
-            SheetTransition(false);
-        }
+        DismissTransition(false);
     }
 
     void InitialLayoutProps();
@@ -157,10 +152,9 @@ public:
 
     void SetCurrentHeight(float currentHeight)
     {
-        if (height_ != currentHeight) {
-            height_ = currentHeight;
-            ChangeScrollHeight(height_);
-        }
+        height_ = currentHeight;
+        ProcessColumnRect(height_);
+        ChangeScrollHeight(height_);
     }
 
     void SetCurrentHeightToOverlay(float height)
@@ -280,6 +274,11 @@ public:
         return sheetMaxWidth_;
     }
 
+    float GetSheetOffset()
+    {
+        return sheetOffsetY_;
+    }
+
     float GetFitContentHeight();
 
     void ProcessColumnRect(float height = 0.0f);
@@ -313,6 +312,7 @@ private:
     std::string MoveTo(double x, double y);
     std::string LineTo(double x, double y);
     std::string ArcTo(double rx, double ry, double rotation, int32_t arc_flag, double x, double y);
+    void DismissTransition(bool isTransitionIn, float dragVelocity = 0.0f);
     uint32_t keyboardHeight_ = 0;
     int32_t targetId_ = -1;
     std::optional<int32_t> titleId_;

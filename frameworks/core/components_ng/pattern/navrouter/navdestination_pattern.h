@@ -21,6 +21,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/navigation/navigation_event_hub.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
+#include "core/components_ng/pattern/navrouter/navdestination_context.h"
 #include "core/components_ng/pattern/navrouter/navdestination_event_hub.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_algorithm.h"
@@ -79,6 +80,40 @@ public:
         return name_;
     }
 
+    void SetNavPathInfo(const RefPtr<NavPathInfo>& pathInfo)
+    {
+        if (navDestinationContext_) {
+            navDestinationContext_->SetNavPathInfo(pathInfo);
+        }
+    }
+
+    RefPtr<NavPathInfo> GetNavPathInfo() const
+    {
+        return navDestinationContext_ ? navDestinationContext_->GetNavPathInfo() : nullptr;
+    }
+
+    void SetNavigationStack(const WeakPtr<NavigationStack>& stack)
+    {
+        if (navDestinationContext_) {
+            navDestinationContext_->SetNavigationStack(stack);
+        }
+    }
+
+    WeakPtr<NavigationStack> GetNavigationStack() const
+    {
+        return navDestinationContext_ ? navDestinationContext_->GetNavigationStack() : nullptr;
+    }
+
+    void SetNavDestinationContext(const RefPtr<NavDestinationContext>& context)
+    {
+        navDestinationContext_ = context;
+    }
+
+    RefPtr<NavDestinationContext> GetNavDestinationContext() const
+    {
+        return navDestinationContext_;
+    }
+
     void SetNavDestinationNode(const RefPtr<UINode>& navDestinationNode)
     {
         navDestinationNode_ = navDestinationNode;
@@ -116,8 +151,13 @@ public:
     void DumpInfo() override;
 
 private:
+    void UpdateNameIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
+    void UpdateBackgroundColorIfNeeded(RefPtr<NavDestinationGroupNode>& hostNode);
+    void UpdateTitlebarVisibility(RefPtr<NavDestinationGroupNode>& hostNode);
+
     RefPtr<ShallowBuilder> shallowBuilder_;
     std::string name_;
+    RefPtr<NavDestinationContext> navDestinationContext_;
     WeakPtr<UINode> navDestinationNode_;
     WeakPtr<UINode> navigationNode_;
     bool isOnShow_ = false;

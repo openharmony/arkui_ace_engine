@@ -80,6 +80,13 @@ void RichEditorModelNG::SetOnSelect(std::function<void(const BaseEventInfo*)>&& 
     eventHub->SetOnSelect(std::move(func));
 }
 
+void RichEditorModelNG::SetOnSelectionChange(std::function<void(const BaseEventInfo*)>&& func)
+{
+    auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnSelectionChange(std::move(func));
+}
+
 void RichEditorModelNG::SetAboutToIMEInput(std::function<bool(const RichEditorInsertValue&)>&& func)
 {
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeEventHub<RichEditorEventHub>();

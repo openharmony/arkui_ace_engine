@@ -15,9 +15,6 @@
 
 /// <reference path='./import.ts' />
 class ArkEllipseComponent extends ArkCommonShapeComponent implements EllipseAttribute {
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
-  }
 }
 
 // @ts-ignore

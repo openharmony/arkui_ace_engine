@@ -105,6 +105,7 @@ constexpr Dimension AVOID_OFFSET = 24.0_vp;
 constexpr Dimension DEFAULT_FONT = Dimension(16, DimensionUnit::FP);
 constexpr Dimension COUNTER_BOTTOM = 22.0_vp;
 constexpr double BOTTOM_MARGIN = 22.0;
+constexpr float MARGIN_ZERO = 0.0f;
 constexpr int32_t ONE_CHARACTER = 1;
 constexpr int32_t ILLEGAL_VALUE = 0;
 // uncertainty range when comparing selectedTextBox to contentRect
@@ -961,7 +962,7 @@ void TextFieldPattern::HandleBlurEvent()
     isLongPress_ = false;
     isFocusedBeforeClick_ = false;
     UpdateShowMagnifier();
-    CloseSelectOverlay(true);
+    CloseSelectOverlay(!isKeyboardClosedByUser_);
     StopTwinkling();
     if ((customKeyboardBuilder_ && isCustomKeyboardAttached_)) {
         CloseKeyboard(true);
@@ -1062,7 +1063,7 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle)
     selectController_->MoveSecondHandleToContentRect(textSize);
     StopTwinkling();
     showSelect_ = true;
-    if (isKeyEvent || inlineSelectAllFlag_) {
+    if (isKeyEvent || inlineSelectAllFlag_ || IsUsingMouse()) {
         CloseSelectOverlay(true);
         return;
     }
@@ -1104,6 +1105,7 @@ void TextFieldPattern::HandleOnCopy()
         selectController_->MoveCaretToContentRect(selectController_->GetSecondHandleIndex(), TextAffinity::UPSTREAM);
         StartTwinkling();
     }
+    CloseSelectOverlay(true);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<TextFieldEventHub>();
@@ -1629,7 +1631,6 @@ void TextFieldPattern::InitDragDropEvent()
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->showSelect_ = false;
-        pattern->ProcessOverlay(false, false, false, true);
         pattern->dragRecipientStatus_ = DragStatus::NONE;
     };
     eventHub->SetOnDragLeave(std::move(onDragLeave));
@@ -1797,8 +1798,9 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info)
             ProcessOverlay(true, true, false);
         }
     }
-    auto hasRequestAutoFill = ProcessAutoFill();
-    if (!hasRequestAutoFill && RequestKeyboard(false, true, true)) {
+    if (ProcessAutoFill()) {
+        needToRequestKeyboardInner_ = false;
+    } else if (RequestKeyboard(false, true, true)) {
         NotifyOnEditChanged(true);
     }
     // emulate clicking bottom of the textField
@@ -2014,6 +2016,10 @@ void TextFieldPattern::OnModifyDone()
     isTransparent_ = renderContext->GetOpacityValue(1.0f) == 0.0f;
     if (!preErrorState_ && !restoreMarginState_) {
         SavePasswordModeStates();
+    }
+    // When switching between dark and light modes, you need to update the status of the passwordState
+    if (colorModeChange_ && !isModifyDone_) {
+        UpdatePasswordModeState();
     }
     InitClickEvent();
     InitLongPressEvent();
@@ -2365,7 +2371,15 @@ void TextFieldPattern::ProcessOverlay(bool isUpdateMenu, bool animation, bool is
         isSingleHandle_ = true;
         selectController_->UpdateCaretIndex(selectController_->GetFirstHandleIndex());
         selectController_->UpdateCaretOffset();
+    } else if (!isSingleHandle_) {
+        auto rects = GetTextBoxes();
+        if (!rects.empty() && NearZero(rects[0].Width())) {
+            isSingleHandle_ = true;
+            selectController_->UpdateCaretIndex(selectController_->GetFirstHandleIndex());
+            selectController_->UpdateCaretOffset();
+        }
     }
+
     if (isSingleHandle_) {
         StartTwinkling();
         showOverlayParams.firstHandle = std::nullopt;
@@ -3023,7 +3037,6 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
             CloseCustomKeyboard();
         }
         inputMethod->Attach(textChangeListener_, needShowSoftKeyboard, textConfig);
-        UpdateKeyboardOffset(textConfig.positionY, textConfig.height);
 #else
         if (!HasConnection()) {
             TextInputConfiguration config;
@@ -3087,6 +3100,10 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
         .windowId = pipeline->GetFocusWindowId(),
         .positionY = positionY,
         .height = height };
+
+    if (keyboard_ == TextInputType::NUMBER_DECIMAL) {
+        textConfig.inputAttribute.inputPattern = (int32_t)TextInputType::NUMBER;
+    }
     return textConfig;
 }
 #endif
@@ -3245,7 +3262,7 @@ void TextFieldPattern::InsertValue(const std::string& insertValue)
     if (inputValue == DEFAULT_MODE) {
         originLength = originLength + ONE_CHARACTER;
     }
-    if (textFieldLayoutProperty->GetShowCounterValue(false) && originLength == maxlength &&
+    if (textFieldLayoutProperty->GetShowCounterValue(false) && originLength == static_cast<int32_t>(maxlength) &&
         inputValue == DEFAULT_MODE) {
         UpdateCounterBorderStyle(originLength, maxlength);
     }
@@ -3328,7 +3345,7 @@ void TextFieldPattern::UpdateCounterBorderStyle(int32_t& textLength, uint32_t& m
     auto showBorder = textFieldLayoutProperty->GetShowHighlightBorderValue(true);
     if (static_cast<uint32_t>(textLength) >= (maxLength - ONE_CHARACTER) && !IsTextArea() && showBorder == true) {
         SetUnderlineColor(theme->GetErrorUnderlineColor());
-    } else if (textLength >= maxLength && IsTextArea() && showBorder == true) {
+    } else if (textLength >= static_cast<int32_t>(maxLength) && IsTextArea() && showBorder == true) {
         HandleCounterBorder();
     }
     return;
@@ -3368,17 +3385,24 @@ void TextFieldPattern::UpdateCounterMargin()
         !IsShowPasswordIcon()) {
         MarginProperty margin;
         const auto& getMargin = layoutProperty->GetMarginProperty();
-        if (getMargin) {
-            auto systemMargin = getMargin->bottom->GetDimension();
-            Dimension marginProperty { BOTTOM_MARGIN, DimensionUnit::VP };
-            margin.bottom = CalcLength(marginProperty + systemMargin);
+        if (!getMargin || GetMarginBottom() == MARGIN_ZERO) {
+            margin.bottom = CalcLength(COUNTER_BOTTOM);
+            layoutProperty->UpdateMargin(margin);
+            return;
+        }
+        Dimension marginProperty { BOTTOM_MARGIN, DimensionUnit::VP };
+        auto systemMargin = getMargin->bottom->GetDimension();
+        if (systemMargin < marginProperty) {
+            margin.bottom = CalcLength(marginProperty);
             margin.left = CalcLength(getMargin->left->GetDimension());
             margin.top = CalcLength(getMargin->top->GetDimension());
             margin.right = CalcLength(getMargin->right->GetDimension());
             layoutProperty->UpdateMargin(margin);
-        }
-        if (!getMargin) {
-            margin.bottom = CalcLength(COUNTER_BOTTOM);
+        } else {
+            margin.bottom = CalcLength(systemMargin);
+            margin.left = CalcLength(getMargin->left->GetDimension());
+            margin.top = CalcLength(getMargin->top->GetDimension());
+            margin.right = CalcLength(getMargin->right->GetDimension());
             layoutProperty->UpdateMargin(margin);
         }
     }
@@ -3671,7 +3695,11 @@ bool TextFieldPattern::CursorMoveToParagraphBegin()
         return true;
     }
     auto originCaretPosition = selectController_->GetCaretIndex();
-    UpdateCaretPositionWithClamp(GetLineBeginPosition(originCaretPosition, false));
+    auto newPos = GetLineBeginPosition(originCaretPosition, false);
+    if (newPos == originCaretPosition && originCaretPosition > 0) {
+        newPos = GetLineBeginPosition(originCaretPosition - 1, false);
+    }
+    UpdateCaretPositionWithClamp(newPos);
     OnCursorMoveDone(TextAffinity::DOWNSTREAM);
     return originCaretPosition != selectController_->GetCaretIndex();
 }
@@ -3765,7 +3793,11 @@ bool TextFieldPattern::CursorMoveToParagraphEnd()
         return true;
     }
     auto originCaretPosition = selectController_->GetCaretIndex();
-    UpdateCaretPositionWithClamp(GetLineEndPosition(originCaretPosition, false));
+    auto newPos = GetLineEndPosition(originCaretPosition, false);
+    if (newPos == originCaretPosition && originCaretPosition > 0) {
+        newPos = GetLineEndPosition(originCaretPosition + 1, false);
+    }
+    UpdateCaretPositionWithClamp(newPos);
     OnCursorMoveDone(TextAffinity::DOWNSTREAM);
     return originCaretPosition != selectController_->GetCaretIndex();
 }
@@ -4469,6 +4501,7 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Set caret position to %{public}d", position);
     selectController_->MoveCaretToContentRect(position, TextAffinity::DOWNSTREAM);
+    FireOnSelectionChange(position, position);
     if (HasFocus() && !GetShowMagnifier()) {
         StartTwinkling();
     }
@@ -4869,7 +4902,7 @@ bool TextFieldPattern::OnScrollCallback(float offset, int32_t source)
         if (scrollBar) {
             scrollBar->PlayScrollBarAppearAnimation();
         }
-        OnParentScrollStartOrEnd(false);
+        OnParentScrollStartOrEnd(false, true);
         return true;
     }
     if (IsReachedBoundary(offset)) {
@@ -4947,7 +4980,6 @@ void TextFieldPattern::ClearCounterNode()
 
 void TextFieldPattern::SetShowError()
 {
-    CHECK_NULL_VOID(!IsNormalInlineState());
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto passWordMode = IsInPasswordMode();
@@ -4957,48 +4989,32 @@ void TextFieldPattern::SetShowError()
     CHECK_NULL_VOID(tmpHost);
     auto renderContext = tmpHost->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    auto visible = layoutProperty->GetShowErrorTextValue(false);
+    auto isUnderLine = layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType();
     auto errorText = layoutProperty->GetErrorTextValue("");
-
-    if (visible && layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()
-        && !errorText.empty()) {
-        underlineColor_ = textFieldTheme->GetErrorUnderlineColor();
-        underlineWidth_ = ERROR_UNDERLINE_WIDTH;
-        preErrorState_ = true;
-    }
-    if (!visible && layoutProperty->GetShowUnderlineValue(false) && IsUnspecifiedOrTextType()) {
+    auto preErrorState = preErrorState_;
+    preErrorState_ = layoutProperty->GetShowErrorTextValue(false) && !errorText.empty()
+                        && !IsNormalInlineState();
+    if (preErrorState_) { // update error state
+        if (isUnderLine) {
+            underlineColor_ = textFieldTheme->GetErrorUnderlineColor();
+            underlineWidth_ = ERROR_UNDERLINE_WIDTH;
+        } else if (passWordMode) {
+            BorderWidthProperty borderWidth;
+            BorderColorProperty borderColor;
+            borderWidth.SetBorderWidth(ERROR_BORDER_WIDTH);
+            layoutProperty->UpdateBorderWidth(borderWidth);
+            borderColor.SetColor(textFieldTheme->GetPasswordErrorBorderColor());
+            renderContext->UpdateBorderColor(borderColor);
+            renderContext->UpdateBackgroundColor(textFieldTheme->GetPasswordErrorInputColor());
+            layoutProperty->UpdateTextColor(textFieldTheme->GetPasswordErrorTextColor());
+        }
+    } else if (preErrorState) { // need to clean error state
         underlineColor_ = textFieldTheme->GetUnderlineColor();
         underlineWidth_ = UNDERLINE_WIDTH;
-        preErrorState_ = false;
-    }
-    if (visible && passWordMode && !errorText.empty()) {
-        BorderWidthProperty borderWidth;
-        BorderColorProperty borderColor;
-        preErrorState_ = true;
-        borderWidth.SetBorderWidth(ERROR_BORDER_WIDTH);
-        layoutProperty->UpdateBorderWidth(borderWidth);
-        borderColor.SetColor(textFieldTheme->GetPasswordErrorBorderColor());
-        renderContext->UpdateBorderColor(borderColor);
-        renderContext->UpdateBackgroundColor(textFieldTheme->GetPasswordErrorInputColor());
-        layoutProperty->UpdateTextColor(textFieldTheme->GetPasswordErrorTextColor());
-    }
-    if (!visible && passWordMode) {
         layoutProperty->UpdateBorderWidth(passwordModeStyle_.borderwidth);
         renderContext->UpdateBorderColor(passwordModeStyle_.borderColor);
         renderContext->UpdateBackgroundColor(passwordModeStyle_.bgColor);
         layoutProperty->UpdateTextColor(passwordModeStyle_.textColor);
-        preErrorState_ = false;
-    }
-    if (!visible && !passWordMode) {
-        renderContext->UpdateBorderColor(passwordModeStyle_.borderColor);
-        preErrorState_ = false;
-    }
-    if (visible && (!passWordMode || errorText.empty())) {
-        layoutProperty->UpdateBorderWidth(passwordModeStyle_.borderwidth);
-        renderContext->UpdateBorderColor(passwordModeStyle_.borderColor);
-        renderContext->UpdateBackgroundColor(passwordModeStyle_.bgColor);
-        layoutProperty->UpdateTextColor(passwordModeStyle_.textColor);
-        preErrorState_ = true;
     }
     UpdateErrorTextMargin();
 }
@@ -5831,6 +5847,7 @@ OffsetF TextFieldPattern::GetDragUpperLeftCoordinates()
 
 void TextFieldPattern::OnColorConfigurationUpdate()
 {
+    colorModeChange_ = true;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto context = PipelineContext::GetCurrentContext();
@@ -5839,7 +5856,11 @@ void TextFieldPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(theme);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    layoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (!paintProperty->GetTextColorFlagByUserValue(false)) {
+        layoutProperty->UpdateTextColor(theme->GetTextStyle().GetTextColor());
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
@@ -6036,14 +6057,17 @@ bool TextFieldPattern::IsShowCancelButtonMode() const
 
 void TextFieldPattern::ProcessResponseArea()
 {
-    if (cleanNodeResponseArea_) {
-        cleanNodeResponseArea_->ClearArea();
-        cleanNodeResponseArea_.Reset();
-    }
     if (IsShowCancelButtonMode()) {
-        cleanNodeResponseArea_ = AceType::MakeRefPtr<CleanNodeResponseArea>(WeakClaim(this));
-        cleanNodeResponseArea_->InitResponseArea();
-        UpdateCancelNode();
+        auto cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
+        if (cleanNodeResponseArea) {
+            cleanNodeResponseArea->Refresh();
+            cleanNodeResponseArea->UpdateCleanNode(cleanNodeResponseArea->IsShow());
+        } else {
+            cleanNodeResponseArea_ = AceType::MakeRefPtr<CleanNodeResponseArea>(WeakClaim(this));
+            cleanNodeResponseArea = AceType::DynamicCast<CleanNodeResponseArea>(cleanNodeResponseArea_);
+            cleanNodeResponseArea->InitResponseArea();
+            UpdateCancelNode();
+        }
     }
 
     if (IsShowPasswordIcon()) {
@@ -6280,7 +6304,16 @@ void TextFieldPattern::ScrollToSafeArea() const
 
 RefPtr<PixelMap> TextFieldPattern::GetPixelMap()
 {
-    auto context = GetHost()->GetRenderContext();
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipeline, NULL);
+    auto overlayManager = pipeline->GetOverlayManager();
+    CHECK_NULL_RETURN(overlayManager, NULL);
+    auto rootUINode = overlayManager->GetRootNode().Upgrade();
+    CHECK_NULL_RETURN(rootUINode, NULL);
+    auto rootFrameNode = DynamicCast<FrameNode>(rootUINode);
+    CHECK_NULL_RETURN(rootFrameNode, NULL);
+
+    auto context = rootFrameNode->GetRenderContext();
     if (!context) {
         UpdateShowMagnifier();
     }
@@ -6427,5 +6460,25 @@ void TextFieldPattern::GetCaretMetrics(CaretMetricsF& caretCaretMetric)
     auto textPaintOffset = host->GetPaintRectOffset();
     caretCaretMetric.offset = offset + textPaintOffset + OffsetF(width / 2.0f, 0.0f);
     caretCaretMetric.height = height;
+}
+
+void TextFieldPattern::UpdatePasswordModeState()
+{
+    auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    auto textfieldTheme = GetTheme();
+    CHECK_NULL_VOID(textfieldTheme);
+    if (paintProperty->HasBackgroundColor()) {
+        passwordModeStyle_.bgColor = paintProperty->GetBackgroundColorValue();
+    } else {
+        passwordModeStyle_.bgColor = textfieldTheme->GetBgColor();
+    }
+    if (!paintProperty->GetTextColorFlagByUserValue(false)) {
+        passwordModeStyle_.textColor = textfieldTheme->GetTextColor();
+    } else {
+        auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+        CHECK_NULL_VOID(layoutProperty);
+        passwordModeStyle_.textColor = layoutProperty->GetTextColorValue(textfieldTheme->GetTextColor());
+    }
 }
 } // namespace OHOS::Ace::NG

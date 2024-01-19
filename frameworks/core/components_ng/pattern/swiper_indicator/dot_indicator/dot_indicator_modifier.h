@@ -122,9 +122,6 @@ public:
     void UpdateAllPointCenterXAnimation(GestureState gestureState, const LinearVector<float>& vectorBlackPointCenterX,
         const std::pair<float, float>& longPointCenterX);
 
-    void UpdateLongPointLeftCenterX(float longPointLeftCenterX, bool isAnimation);
-    void UpdateLongPointRightCenterX(float longPointRightCenterX, bool isAnimation);
-
     // Touch bottom animation
     void UpdateTouchBottomAnimation(TouchBottomType touchBottomType, const LinearVector<float>& vectorBlackPointCenterX,
         const std::pair<float, float>& longPointCenterX, float touchBottomRate);
@@ -258,6 +255,17 @@ public:
     {
         headCurve_ = curve;
         motionVelocity_ = motionVelocity;
+    }
+
+    inline void UpdateVectorBlackPointCenterX(const LinearVector<float>& value)
+    {
+        vectorBlackPointCenterX_->Set(value);
+    }
+
+    inline void UpdateLongPointCenterX(const std::pair<float, float>& value)
+    {
+        longPointLeftCenterX_->Set(value.first);
+        longPointRightCenterX_->Set(value.second);
     }
 
 private:

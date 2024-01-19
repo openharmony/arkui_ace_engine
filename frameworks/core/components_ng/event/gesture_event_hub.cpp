@@ -76,16 +76,16 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
     TouchTestResult& innerTargets, TouchTestResult& finalResult, int32_t touchId, const PointF& localPoint,
     const RefPtr<TargetComponent>& targetComponent)
 {
-    size_t idx = innerTargets.size();
-    size_t newIdx = 0;
     auto host = GetFrameNode();
     CHECK_NULL_RETURN(host, false);
     auto eventHub = eventHub_.Upgrade();
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
     if (scrollableActuator_) {
         scrollableActuator_->CollectTouchTarget(
-            coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, localPoint);
+            coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets, localPoint, host, targetComponent);
     }
+    size_t idx = innerTargets.size();
+    size_t newIdx = 0;
     if (touchEventActuator_) {
         touchEventActuator_->OnCollectTouchTarget(coordinateOffset, touchRestrict, getEventTargetImpl, innerTargets);
     }
@@ -701,13 +701,15 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
         frameNodeOffset_ = hostPattern->GetDragUpperLeftCoordinates();
         frameNodeSize_ = SizeF(0.0f, 0.0f);
     } else {
-        frameNodeOffset_ = frameNode->GetOffsetRelativeToWindow();
         auto geometryNode = frameNode->GetGeometryNode();
         if (geometryNode) {
             frameNodeSize_ = geometryNode->GetFrameSize();
         } else {
             frameNodeSize_ = SizeF(0.0f, 0.0f);
         }
+        auto rectCenter = frameNode->GetPaintRectCenter();
+        frameNodeOffset_ = OffsetF(rectCenter.GetX() - frameNodeSize_.Width() / 2.0f,
+            rectCenter.GetY() - frameNodeSize_.Height() / 2.0f);
     }
     /*
      * Users may remove frameNode in the js callback function "onDragStart "triggered below,
@@ -826,15 +828,16 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         RefPtr<FrameNode> imageNode = overlayManager->GetPixelMapContentNode();
         DragEventActuator::CreatePreviewNode(frameNode, imageNode);
         CHECK_NULL_VOID(imageNode);
-        auto window = SubwindowManager::GetInstance()->ShowPreviewNG();
-        CHECK_NULL_VOID(window);
-        overlayManager = window->GetOverlayManager();
-        CHECK_NULL_VOID(overlayManager);
-        DragEventActuator::MountPixelMap(overlayManager, eventHub->GetGestureEventHub(), imageNode);
-        dragDropManager->DoDragStartAnimation(overlayManager, info);
         scale = static_cast<float>(imageNode->GetPreviewScaleVal());
-        if (pixelMap_ != nullptr) {
-            pixelMap = pixelMap_;
+        auto window = SubwindowManager::GetInstance()->ShowPreviewNG();
+        if (window) {
+            overlayManager = window->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            DragEventActuator::MountPixelMap(overlayManager, eventHub->GetGestureEventHub(), imageNode);
+            dragDropManager->DoDragStartAnimation(overlayManager, info);
+            if (pixelMap_ != nullptr) {
+                pixelMap = pixelMap_;
+            }
         }
     }
     if (!overlayManager->GetIsOnAnimation()) {
@@ -873,13 +876,12 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     eventManager->SetIsDragging(true);
     if (info.GetInputEventType() != InputEventType::MOUSE_BUTTON && dragEventActuator_->GetIsNotInPreviewState()) {
         if (!dragDropManager->IsNeedScaleDragPreview()) {
-            InteractionInterface::GetInstance()->SetDragWindowVisible(true);
             overlayManager->RemovePixelMap();
-            pipeline->FlushPipelineImmediately();
+            pipeline->AddAfterRenderTask([]() { InteractionInterface::GetInstance()->SetDragWindowVisible(true); });
         }
     } else if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON) {
         if (!dragDropManager->IsNeedScaleDragPreview()) {
-            InteractionInterface::GetInstance()->SetDragWindowVisible(true);
+            pipeline->AddAfterRenderTask([]() { InteractionInterface::GetInstance()->SetDragWindowVisible(true); });
         }
         dragDropManager->SetIsDragWindowShow(true);
     }

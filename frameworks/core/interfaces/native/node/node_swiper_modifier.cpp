@@ -439,7 +439,7 @@ void ResetSwiperCurve(ArkUINodeHandle node)
     SwiperModelNG::SetCurve(frameNode, curve);
 }
 
-void SetSwiperDisableSwipe(ArkUINodeHandle node, bool disableSwipe)
+void SetSwiperDisableSwipe(ArkUINodeHandle node, ArkUI_Bool disableSwipe)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -520,7 +520,7 @@ void ResetSwiperItemSpace(ArkUINodeHandle node)
     SwiperModelNG::SetItemSpace(frameNode, value);
 }
 
-void SetSwiperVertical(ArkUINodeHandle node, bool isVertical)
+void SetSwiperVertical(ArkUINodeHandle node, ArkUI_Bool isVertical)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -534,7 +534,7 @@ void ResetSwiperVertical(ArkUINodeHandle node)
     SwiperModelNG::SetDirection(frameNode, Axis::HORIZONTAL);
 }
 
-void SetSwiperLoop(ArkUINodeHandle node, bool loop)
+void SetSwiperLoop(ArkUINodeHandle node, ArkUI_Bool loop)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -565,7 +565,7 @@ void ResetSwiperInterval(ArkUINodeHandle node)
     SwiperModelNG::SetAutoPlayInterval(frameNode, DEFAULT_INTERVAL);
 }
 
-void SetSwiperAutoPlay(ArkUINodeHandle node, bool autoPlay)
+void SetSwiperAutoPlay(ArkUINodeHandle node, ArkUI_Bool autoPlay)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

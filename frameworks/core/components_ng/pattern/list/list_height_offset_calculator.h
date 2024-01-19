@@ -27,8 +27,9 @@ constexpr float DEFAULT_ITEM_HEIGHT = 64.f;
 }
 class ListHeightOffsetCalculator {
 public:
-    ListHeightOffsetCalculator(int32_t index, std::pair<float, float> pos, float space)
+    ListHeightOffsetCalculator(int32_t index, std::pair<float, float> pos, float space, Axis axis)
     {
+        axis_ = axis;
         targetPos_ = pos;
         targetIndex_ = index;
         spaceWidth_ = space;
@@ -45,7 +46,7 @@ public:
             if (currentIndex_ == targetIndex_) {
                 estimateOffset_ = estimateHeight_ - targetPos_.first;
             }
-            float height = listItemPatten->GetEstimateHeight(GetAverageItemHeight());
+            float height = listItemPatten->GetEstimateHeight(GetAverageItemHeight(), axis_);
             estimateHeight_ += height;
             currentIndex_++;
             if (listItemPatten->GetLayouted()) {
@@ -108,6 +109,7 @@ private:
         return estimateItemHeight_;
     }
 
+    Axis axis_ = Axis::VERTICAL;
     int32_t currentIndex_ = 0;
     int32_t targetIndex_ = 0;
     std::pair<float, float> targetPos_ = { 0.0f, 0.0f };

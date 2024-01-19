@@ -47,6 +47,22 @@ class ColumnSplitResizeableModifier extends ModifierWithKey<boolean> {
     return this.stageValue !== this.value;
   }
 }
+class ColumnSplitClipModifier extends ModifierWithKey<boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute> {
+  constructor(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('columnSplitClip');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetClipWithEdge(node);
+    } else {
+      getUINativeModule().common.setClipWithEdge(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return true;
+  }
+}
 class ArkColumnSplitComponent extends ArkComponent implements CommonMethod<ColumnSplitAttribute> {
   constructor(nativePtr: KNode) {
     super(nativePtr);
@@ -59,8 +75,9 @@ class ArkColumnSplitComponent extends ArkComponent implements CommonMethod<Colum
     modifierWithKey(this._modifiersWithKeys, ColumnSplitDividerModifier.identity, ColumnSplitDividerModifier, value);
     return this;
   }
-  monopolizeEvents(monopolize: boolean): this {
-    throw new Error('Method not implemented.');
+  clip(value: boolean | CircleAttribute | EllipseAttribute | PathAttribute | RectAttribute): this {
+    modifierWithKey(this._modifiersWithKeys, ColumnSplitClipModifier.identity, ColumnSplitClipModifier, value);
+    return this;
   }
 }
 // @ts-ignore

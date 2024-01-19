@@ -145,6 +145,8 @@ private:
     void ParseButtonFontColorAndBgColor(
         const ButtonInfo& params, std::string& textColor, std::optional<Color>& bgColor);
     void SetButtonEnabled(const RefPtr<FrameNode>& buttonNode, bool enabled);
+    // update wrapperNode background style
+    void UpdateWrapperBackgroundStyle(const RefPtr<FrameNode>& host, const RefPtr<DialogTheme>& dialogTheme);
     RefPtr<FrameNode> BuildTitle(const DialogProperties& dialogProperties);
     RefPtr<FrameNode> BuildContent(const DialogProperties& dialogProperties);
     RefPtr<FrameNode> CreateDialogScroll(const DialogProperties& dialogProps);

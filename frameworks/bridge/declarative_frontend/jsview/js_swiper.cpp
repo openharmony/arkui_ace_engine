@@ -194,6 +194,14 @@ void JSSwiper::SetDisplayCount(const JSCallbackInfo& info)
         return;
     }
 
+    if (info.Length() == 2) {
+        if (info[1]->IsBoolean()) {
+            SwiperModel::GetInstance()->SetSwipeByGroup(info[1]->ToBoolean());
+        } else {
+            SwiperModel::GetInstance()->SetSwipeByGroup(false);
+        }
+    }
+
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
         if (info[0]->IsString() && info[0]->ToString() == "auto") {
             SwiperModel::GetInstance()->SetDisplayMode(SwiperDisplayMode::AUTO_LINEAR);

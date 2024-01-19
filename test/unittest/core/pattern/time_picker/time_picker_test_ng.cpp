@@ -2412,7 +2412,7 @@ HWTEST_F(TimePickerPatternTestNg, TimePickerColumnPattern021, TestSize.Level1)
      */
     minuteColumnPattern->scrollDelta_ = 20;
     minuteColumnPattern->PlayRestAnimation();
-    EXPECT_EQ(5.0f, minuteColumnPattern->scrollDelta_);
+    EXPECT_EQ(10.0f, minuteColumnPattern->scrollDelta_);
 }
 
 /**

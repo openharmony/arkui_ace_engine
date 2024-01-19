@@ -256,6 +256,9 @@ void CheckBoxGroupModifier::DrawPart(RSCanvas& canvas, const OffsetF& origin, RS
 
 void CheckBoxGroupModifier::DrawTouchAndHoverBoard(RSCanvas& canvas, const SizeF& size, const OffsetF& offset) const
 {
+    if (HoverEffectType::NONE == hoverEffectType_) {
+        return;
+    }
     RSBrush brush;
     brush.SetColor(ToRSColor(animateTouchHoverColor_->Get()));
     brush.SetAntiAlias(true);

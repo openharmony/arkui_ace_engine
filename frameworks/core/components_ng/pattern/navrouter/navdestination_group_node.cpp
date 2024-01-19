@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
+#include "core/common/container.h"
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
-
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/navrouter/navdestination_context.h"
 #include "core/components_ng/pattern/navrouter/navdestination_layout_property.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -52,9 +53,13 @@ void NavDestinationGroupNode::AddChildToGroup(const RefPtr<UINode>& child, int32
         contentNode = FrameNode::GetOrCreateFrameNode(V2::NAVDESTINATION_CONTENT_ETS_TAG, nodeId,
             []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
         SetContentNode(contentNode);
-        auto layoutProperty = GetLayoutProperty<NavDestinationLayoutProperty>();
-        CHECK_NULL_VOID(layoutProperty);
         AddChild(contentNode);
+
+        if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+            auto navdestinationContentNode = AceType::DynamicCast<FrameNode>(contentNode);
+            SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_BOTTOM};
+            navdestinationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
+        }
     }
     contentNode->AddChild(child, slot);
 }
@@ -87,6 +92,11 @@ void NavDestinationGroupNode::ProcessShallowBuilder()
     CHECK_NULL_VOID(navDestinationPattern);
     auto shallowBuilder = navDestinationPattern->GetShallowBuilder();
     if (shallowBuilder && !shallowBuilder->IsExecuteDeepRenderDone()) {
+        auto eventHub = GetEventHub<NavDestinationEventHub>();
+        if (eventHub) {
+            auto ctx = navDestinationPattern->GetNavDestinationContext();
+            eventHub->FireOnReady(ctx);
+        }
         shallowBuilder->ExecuteDeepRender();
         GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_MEASURE);
         AceType::DynamicCast<FrameNode>(contentNode_)
