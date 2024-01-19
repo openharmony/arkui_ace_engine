@@ -2097,7 +2097,9 @@ void ScrollablePattern::HotZoneScroll(const float offsetPct)
         // Variable speed rolling
         // When the drag point is in the hot zone, and the hot zone offset changes.
         // Then need to modify the offset percent
-        velocityMotion_->Reset(offsetPct);
+        if (velocityMotion_) {
+            velocityMotion_->Reset(offsetPct);
+        }
         return;
     }
 
