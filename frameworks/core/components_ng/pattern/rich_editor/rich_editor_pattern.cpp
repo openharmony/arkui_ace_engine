@@ -1485,6 +1485,7 @@ void RichEditorPattern::HandleDoubleClickEvent(OHOS::Ace::GestureEvent& info)
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "in double HandleDoubleClickEvent,use mouse:%{public}d", info.GetSourceDevice());
     caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
     HandleDoubleClickOrLongPress(info);
+    caretUpdateType_ = CaretUpdateType::NONE;
 }
 
 bool RichEditorPattern::HandleUserGestureEvent(
@@ -1776,11 +1777,14 @@ void RichEditorPattern::HandleLongPress(GestureEvent& info)
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "handle long press!");
     caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
     HandleDoubleClickOrLongPress(info);
+    caretUpdateType_ = CaretUpdateType::NONE;
 }
 
 void RichEditorPattern::HandleDoubleClickOrLongPress(GestureEvent& info)
 {
-    HandleUserLongPressEvent(info);
+    if (caretUpdateType_ == CaretUpdateType::LONG_PRESSED) {
+        HandleUserLongPressEvent(info);
+    }
     if (JudgeDraggable(info) || isMousePressed_) {
         return;
     }
