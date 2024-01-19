@@ -755,7 +755,7 @@ void RefreshPattern::HandleDragEndLowVersion()
         HandleCustomBuilderDragEndStage();
         return;
     }
-    if (GreatOrEqual(scrollOffset_, static_cast<float>(TRIGGER_REFRESH_DISTANCE.ConvertToPx()))) {
+    if (refreshStatus_ == RefreshStatus::OVER_DRAG) {
         UpdateRefreshStatus(RefreshStatus::REFRESH);
         LoadingProgressRefreshingAnimation(true);
     } else {
@@ -873,7 +873,7 @@ void RefreshPattern::HandleCustomBuilderDragUpdateStage()
 
 void RefreshPattern::HandleCustomBuilderDragEndStage()
 {
-    if (GreatNotEqual(static_cast<double>(customBuilderOffset_), TRIGGER_REFRESH_DISTANCE.ConvertToPx())) {
+    if (refreshStatus_ == RefreshStatus::OVER_DRAG) {
         UpdateRefreshStatus(RefreshStatus::REFRESH);
         CustomBuilderRefreshingAnimation(true);
     } else {

@@ -88,7 +88,7 @@ void JSRefresh::JSBind(BindingTarget globalObj)
     JSClass<JSRefresh>::StaticMethod("onAppear", &JSInteractableView::JsOnAppear);
     JSClass<JSRefresh>::StaticMethod("onDisAppear", &JSInteractableView::JsOnDisAppear);
     JSClass<JSRefresh>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
-    JSClass<JSRefresh>::InheritAndBind<JSViewAbstract>(globalObj);
+    JSClass<JSRefresh>::InheritAndBind<JSContainerBase>(globalObj);
 }
 
 void JSRefresh::Create(const JSCallbackInfo& info)
