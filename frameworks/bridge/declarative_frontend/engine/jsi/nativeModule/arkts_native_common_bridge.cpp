@@ -316,7 +316,7 @@ bool ParseBorderImageRepeat(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t& off
 }
 
 bool ParseBorderImageFill(ArkUIRuntimeCallInfo* runtimeCallInfo, uint32_t& offset,
-    std::vector<StringAndDouble>& options)
+    std::vector<ArkUIStringAndFloat>& options)
 {
     auto argsNumber = runtimeCallInfo->GetArgsNumber();
     if ((offset + NUM_1) > argsNumber) {

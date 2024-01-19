@@ -80,7 +80,7 @@ void ResetMinSideBarWidth(NodeHandle node)
     SideBarContainerModelNG::SetMinSideBarWidth(frameNode, DEFAULT_MIN_SIDE_BAR_WIDTH);
 }
 
-void SetControlButton(NodeHandle node, double* values, int32_t valueLength, const struct IconsStruct* iconsStruct)
+void SetControlButton(NodeHandle node, double* values, int32_t valueLength, const struct ArkUIIconsStruct* iconsStruct)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

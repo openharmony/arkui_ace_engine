@@ -1574,7 +1574,7 @@ void SetTextBaselineOffset(ArkUI_NodeHandle node, const char* value)
 {
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-    struct StringAndDouble offset = { 0.0, nullptr };
+    struct ArkUIStringAndFloat offset = { 0.0, nullptr };
 
     std::string valueString = std::string(value);
     if (std::regex_match(valueString, FLOAT_MAGIC)) {
@@ -1591,11 +1591,11 @@ void SetTextTextShadow(ArkUI_NodeHandle node, const char* value)
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
 
-    std::vector<struct TextShadowStruct> shadows;
+    std::vector<struct ArkUITextShadowStruct> shadows;
     std::vector<std::string> values;
     StringUtils::StringSplitter(value, ',', values);
     for (auto& items : values) {
-        struct TextShadowStruct shadow;
+        struct ArkUITextShadowStruct shadow;
         std::vector<std::string> item;
         StringUtils::StringSplitter(items.c_str(), ' ', item);
         size_t length = item.size();
@@ -2121,7 +2121,7 @@ void SetLetterSpacing(ArkUI_NodeHandle node, const char* value)
 {
     // already check in entry point.
     auto* fullImpl = GetFullImpl();
-    StringAndDouble letterSpacingValue = { 0.0, value };
+    ArkUIStringAndFloat letterSpacingValue = { 0.0, value };
     switch (node->type) {
         case ARKUI_NODE_SPAN:
             fullImpl->getNodeModifiers()->getSpanModifier()->setSpanLetterSpacing(

@@ -46,7 +46,7 @@ static OHOS::Ace::RefPtr<T> GetTheme()
     return themeManager->GetTheme<T>();
 }
 
-void SetListLanes(ArkUINodeHandle node, int32_t lanesNum, const struct ArkUIDimensionType* minLengthType,
+void SetListLanes(ArkUINodeHandle node, ArkUI_Int32 lanesNum, const struct ArkUIDimensionType* minLengthType,
     const struct ArkUIDimensionType* maxLengthType, const struct ArkUIDimensionType* gutterType)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -121,7 +121,7 @@ void ResetChainAnimation(ArkUINodeHandle node)
     ListModelNG::SetChainAnimation(frameNode, false);
 }
 
-void SetCachedCount(ArkUINodeHandle node, int32_t cachedCount)
+void SetCachedCount(ArkUINodeHandle node, ArkUI_Int32 cachedCount)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -152,7 +152,7 @@ void ResetEnableScrollInteraction(ArkUINodeHandle node)
     ListModelNG::SetScrollEnabled(frameNode, DEFAULT_SCROLL_ENABLE);
 }
 
-void SetSticky(ArkUINodeHandle node, int32_t stickyStyle)
+void SetSticky(ArkUINodeHandle node, ArkUI_Int32 stickyStyle)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -173,7 +173,7 @@ void SetListSpace(ArkUINodeHandle node, ArkUI_Float64 space)
     ListModelNG::SetListSpace(frameNode, Dimension(space, DimensionUnit::VP));
 }
 
-void SetListEdgeEffect(ArkUINodeHandle node, int32_t edgeEffect, ArkUI_Bool alwaysEnabled)
+void SetListEdgeEffect(ArkUINodeHandle node, ArkUI_Int32 edgeEffect, ArkUI_Bool alwaysEnabled)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -187,7 +187,7 @@ void ResetListEdgeEffect(ArkUINodeHandle node)
     ListModelNG::SetEdgeEffect(frameNode, DEFAULT_EDGE_EFFECT, false);
 }
 
-void SetListDirection(ArkUINodeHandle node, int32_t axis)
+void SetListDirection(ArkUINodeHandle node, ArkUI_Int32 axis)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -201,7 +201,7 @@ void ResetListDirection(ArkUINodeHandle node)
     ListModelNG::SetListDirection(frameNode, DEFAULT_DIRECTION);
 }
 
-void SetListFriction(ArkUINodeHandle node, double friction)
+void SetListFriction(ArkUINodeHandle node, ArkUI_Float32 friction)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -216,7 +216,7 @@ void ResetListFriction(ArkUINodeHandle node)
     ListModelNG::SetListFriction(frameNode, friction);
 }
 
-void SetListNestedScroll(ArkUINodeHandle node, int32_t forward, int32_t backward)
+void SetListNestedScroll(ArkUINodeHandle node, ArkUI_Int32 forward, ArkUI_Int32 backward)
 {
     NestedScrollOptions opt = {
         .forward = static_cast<NestedScrollMode>(forward),
@@ -238,7 +238,7 @@ void ResetListNestedScroll(ArkUINodeHandle node)
     ListModelNG::SetListNestedScroll(frameNode, nestedOpt);
 }
 
-void SetListScrollBar(ArkUINodeHandle node, int32_t barState)
+void SetListScrollBar(ArkUINodeHandle node, ArkUI_Int32 barState)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -268,7 +268,7 @@ void SetListScrollBarColor(ArkUINodeHandle node, ArkUI_CharPtr value)
     ListModelNG::SetListScrollBarColor(frameNode, value);
 }
 
-void SetAlignListItem(ArkUINodeHandle node, int32_t listItemAlign)
+void SetAlignListItem(ArkUINodeHandle node, ArkUI_Int32 listItemAlign)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -282,7 +282,7 @@ void ResetAlignListItem(ArkUINodeHandle node)
     ListModelNG::SetListItemAlign(frameNode, V2::ListItemAlign::START);
 }
 
-void SetScrollSnapAlign(ArkUINodeHandle node, int32_t scrollSnapAlign)
+void SetScrollSnapAlign(ArkUINodeHandle node, ArkUI_Int32 scrollSnapAlign)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -296,7 +296,7 @@ void ResetScrollSnapAlign(ArkUINodeHandle node)
     ListModelNG::SetScrollSnapAlign(frameNode, V2::ScrollSnapAlign::NONE);
 }
 
-void ListSetDivider(ArkUINodeHandle node, uint32_t color, const double* values, const int32_t* units, int32_t length)
+void ListSetDivider(ArkUINodeHandle node, ArkUI_Uint32 color, const ArkUI_Float32* values, const int32_t* units, ArkUI_Int32 length)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
