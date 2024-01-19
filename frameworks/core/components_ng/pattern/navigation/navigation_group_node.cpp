@@ -710,7 +710,6 @@ void NavigationGroupNode::TransitionWithReplace(
             TaskExecutor::TaskType::UI);
     });
     preNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
-    curNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
     curNode->GetRenderContext()->UpdateOpacity(0.0f);
     if (!isNavBar) {
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
