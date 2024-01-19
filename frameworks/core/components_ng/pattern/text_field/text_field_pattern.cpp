@@ -680,7 +680,7 @@ void TextFieldPattern::HandleFocusEvent()
         if (contentController_->IsEmpty()) {
             StartTwinkling();
         } else {
-            inlineSelectAllFlag_ = true;
+            inlineSelectAllFlag_ = blurReason_ != BlurReason::WINDOW_BLUR;
         }
     } else {
         StartTwinkling();
@@ -922,6 +922,13 @@ bool TextFieldPattern::CheckBlurReason()
     return false;
 }
 
+void TextFieldPattern::UpdateBlurReason()
+{
+    auto focusHub = GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    blurReason_ = focusHub->GetBlurReason();
+}
+
 void TextFieldPattern::HandleBlurEvent()
 {
     auto host = GetHost();
@@ -929,6 +936,7 @@ void TextFieldPattern::HandleBlurEvent()
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextField %{public}d OnBlur", host->GetId());
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
+    UpdateBlurReason();
     if (!context->GetOnFoucs()) {
         return;
     }

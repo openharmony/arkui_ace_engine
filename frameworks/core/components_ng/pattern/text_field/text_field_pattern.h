@@ -1260,6 +1260,7 @@ private:
     void UpdatePasswordModeState();
     void InitDragDropCallBack();
     void InitDragDropEventWithOutDragStart();
+    void UpdateBlurReason();
 
     RectF frameRect_;
     RectF contentRect_;
@@ -1384,6 +1385,7 @@ private:
     bool imeAttached_ = false;
     bool imeShown_ = false;
 #endif
+    BlurReason blurReason_ = BlurReason::FOCUS_SWITCH;
     bool isFocusedBeforeClick_ = false;
     bool isCustomKeyboardAttached_ = false;
     std::function<void()> customKeyboardBuilder_;
