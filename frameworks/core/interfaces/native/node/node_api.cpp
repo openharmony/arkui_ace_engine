@@ -232,7 +232,8 @@ static void SetCallbackMethod(ArkUIAPICallbackMethod* method)
     callbacks = method;
 }
 
-const ArkUIBasicAPI* GetBasicAPI() {
+const ArkUIBasicAPI* GetBasicAPI()
+{
     /* clang-format off */
     static const ArkUIBasicAPI basicImpl = {
         CreateNode,
@@ -247,7 +248,6 @@ const ArkUIBasicAPI* GetBasicAPI() {
         nullptr,
         nullptr,
 
-        // TODO: why the below two names don't match Arkoala?
         NotifyComponentAsyncEvent,
         NotifyResetComponentAsyncEvent,
         RegisterNodeAsyncEventReceiver,
@@ -296,10 +296,13 @@ ArkUIExtendedNodeAPI impl_extended = {
 
 void CanvasDrawRect(ArkUICanvasHandle canvas,
     ArkUI_Float64 left, ArkUI_Float64 top, ArkUI_Float64 right, ArkUI_Float64 bottom, ArkUIPaintHandle paint) {
-        TAG_LOGI(AceLogTag::ACE_NATIVE_NODE, "DrawRect canvas=%{public}p [%{public}f, %{public}f, %{public}f, %{public}f]\n", canvas, left, top, right, bottom);
+        TAG_LOGI(AceLogTag::ACE_NATIVE_NODE,
+            "DrawRect canvas=%{public}p [%{public}f, %{public}f, %{public}f, %{public}f]\n",
+            canvas, left, top, right, bottom);
     }
 
-const ArkUIGraphicsCanvas* GetCanvasAPI() {
+const ArkUIGraphicsCanvas* GetCanvasAPI()
+{
     static const ArkUIGraphicsCanvas modifier = {
         nullptr,
         nullptr,
@@ -316,16 +319,19 @@ struct DummyPaint {
     ArkUI_Int32 color;
 };
 
-ArkUIPaintHandle PaintMake() {
+ArkUIPaintHandle PaintMake()
+{
     return reinterpret_cast<ArkUIPaintHandle>(new DummyPaint());
 }
 
-void PaintFinalize(ArkUIPaintHandle paintPtr) {
+void PaintFinalize(ArkUIPaintHandle paintPtr)
+{
     auto* paint = reinterpret_cast<DummyPaint*>(paintPtr);
     delete paint;
 }
 
-const ArkUIGraphicsPaint* GetPaintAPI() {
+const ArkUIGraphicsPaint* GetPaintAPI()
+{
     static const ArkUIGraphicsPaint modifier = {
         PaintMake,
         PaintFinalize,
@@ -337,14 +343,16 @@ const ArkUIGraphicsPaint* GetPaintAPI() {
     return &modifier;
 }
 
-const ArkUIGraphicsFont* GetFontAPI() {
+const ArkUIGraphicsFont* GetFontAPI()
+{
     static const ArkUIGraphicsFont modifier = {
         nullptr,
     };
     return &modifier;
 }
 
-const ArkUIGraphicsAPI* GetGraphicsAPI() {
+const ArkUIGraphicsAPI* GetGraphicsAPI()
+{
     static const ArkUIGraphicsAPI api = {
         ARKUI_NODE_GRAPHICS_API_VERSION,
         SetCallbackMethod,
@@ -355,7 +363,8 @@ const ArkUIGraphicsAPI* GetGraphicsAPI() {
     return &api;
 }
 
-const ArkUIAnimation* GetAnimationAPI() {
+const ArkUIAnimation* GetAnimationAPI()
+{
     static const ArkUIAnimation modifier = {
         nullptr,
         nullptr,
@@ -364,7 +373,8 @@ const ArkUIAnimation* GetAnimationAPI() {
     return &modifier;
 }
 
-const ArkUINavigation* GetNavigationAPI() {
+const ArkUINavigation* GetNavigationAPI()
+{
     static const ArkUINavigation modifier = {
         nullptr,
         nullptr,
@@ -424,7 +434,9 @@ ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_
                     return reinterpret_cast<const ArkUIAnyAPI*>(OHOS::Ace::NG::GetBasicAPI());
                 default: {
                     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
-                    "Requested basic version %{public}d is not supported, we're version %{public}d\n", version, ARKUI_BASIC_API_VERSION);
+                        "Requested basic version %{public}d is not supported, we're version %{public}d\n",
+                        version, ARKUI_BASIC_API_VERSION);
+
                     return nullptr;
                 }
             }
@@ -435,7 +447,9 @@ ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_
                     return reinterpret_cast<const ArkUIAnyAPI*>(&OHOS::Ace::NG::impl_full);
                 default: {
                     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
-                    "Requested full version %{public}d is not supported, we're version %{public}d\n", version, ARKUI_FULL_API_VERSION);
+                        "Requested full version %{public}d is not supported, we're version %{public}d\n",
+                        version, ARKUI_FULL_API_VERSION);
+
                     return nullptr;
                 }
             }
@@ -446,7 +460,9 @@ ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_
                     return reinterpret_cast<const ArkUIAnyAPI*>(OHOS::Ace::NG::GetGraphicsAPI());
                 default: {
                     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
-                    "Requested graphics version %{public}d is not supported, we're version %{public}d\n", version, ARKUI_NODE_GRAPHICS_API_VERSION);
+                        "Requested graphics version %{public}d is not supported, we're version %{public}d\n",
+                        version, ARKUI_NODE_GRAPHICS_API_VERSION);
+
                     return nullptr;
                 }
             }
@@ -457,13 +473,18 @@ ACE_FORCE_EXPORT const ArkUIAnyAPI* GetArkUIAPI(ArkUIAPIVariantKind kind, ArkUI_
                     return reinterpret_cast<const ArkUIAnyAPI*>(&OHOS::Ace::NG::impl_extended);
                 default: {
                     TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
-                    "Requested extended version %{public}d is not supported, we're version %{public}d\n", version, ARKUI_EXTENDED_API_VERSION);
+                        "Requested extended version %{public}d is not supported, we're version %{public}d\n",
+                        version, ARKUI_EXTENDED_API_VERSION);
+
                     return nullptr;
                 }
             }
         }
         default: {
-            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE, "API kind %{public}d is not supported\n", static_cast<int>(kind));
+            TAG_LOGE(OHOS::Ace::AceLogTag::ACE_NATIVE_NODE,
+                "API kind %{public}d is not supported\n",
+                static_cast<int>(kind));
+
             return nullptr;
         }
     }
@@ -474,15 +495,14 @@ __attribute__((constructor)) static void provideEntryPoint(void)
 #ifdef WINDOWS_PLATFORM
     // mingw has no setenv :(.
     static char entryPointString[64];
-    snprintf(entryPointString, sizeof entryPointString, "__LIBACE_ENTRY_POINT=%llx",
+    (void)snprintf(entryPointString, sizeof entryPointString, "__LIBACE_ENTRY_POINT=%llx",
         static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(&GetArkUIAPI)));
     putenv(entryPointString);
 #else
     char entryPointString[64];
-    snprintf(entryPointString, sizeof entryPointString, "%llx",
+    (void)snprintf(entryPointString, sizeof entryPointString, "%llx",
         static_cast<unsigned long long>(reinterpret_cast<uintptr_t>(&GetArkUIAPI)));
     setenv("__LIBACE_ENTRY_POINT", entryPointString, 1);
 #endif
 }
-
 }
