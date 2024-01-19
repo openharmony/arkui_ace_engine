@@ -880,7 +880,11 @@ bool TextPattern::ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandl
 
 void TextPattern::HandleDoubleClickEvent(GestureEvent& info)
 {
-    if (copyOption_ == CopyOptions::None || textForDisplay_.empty() || hasClickedAISpan_) {
+    if (hasClickedAISpan_) {
+        return;
+    }
+    CheckOnClickEvent(info);
+    if (copyOption_ == CopyOptions::None || textForDisplay_.empty()) {
         return;
     }
     auto host = GetHost();
@@ -902,6 +906,31 @@ void TextPattern::HandleDoubleClickEvent(GestureEvent& info)
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, true);
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextPattern::CheckOnClickEvent(GestureEvent& info)
+{
+    bool isClickOnSpan = false;
+    bool isClickOnAISpan = false;
+    RectF textContentRect = contentRect_;
+    textContentRect.SetTop(contentRect_.GetY() - std::min(baselineOffset_, 0.0f));
+    textContentRect.SetHeight(contentRect_.Height() - std::max(baselineOffset_, 0.0f));
+    PointF textOffset = { info.GetLocalLocation().GetX() - textContentRect.GetX(),
+        info.GetLocalLocation().GetY() - textContentRect.GetY() };
+    HandleSpanSingleClickEvent(info, textContentRect, textOffset, isClickOnSpan, isClickOnAISpan);
+    if (NeedShowAIDetect() && spans_.empty() && paragraph_) {
+        for (const auto& kv : aiSpanMap_) {
+            if (isClickOnAISpan) {
+                break;
+            }
+            auto aiSpan = kv.second;
+            isClickOnAISpan = ClickAISpan(textOffset, aiSpan);
+        }
+    }
+    if (onClick_ && !isClickOnSpan && !isClickOnAISpan) {
+        auto onClick = onClick_;
+        onClick(info);
+    }
 }
 
 void TextPattern::InitClickEvent(const RefPtr<GestureEventHub>& gestureHub)
