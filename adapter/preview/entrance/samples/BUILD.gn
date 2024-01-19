@@ -51,8 +51,12 @@ foreach(device, ace_devices) {
       "$ace_root/frameworks",
       "$flutter_root/glfw/include",
       "//foundation/window/window_manager",
+      "//ide/tools/previewer",
     ]
-    deps += [ ":copy_preview_shared_library" ]
+    deps += [
+      ":copy_preview_shared_library",
+      "//third_party/glfw:glfw",
+    ]
     sources = [
       "ace_${device}_test.cpp",
       "event_adapter.cpp",
@@ -60,6 +64,7 @@ foreach(device, ace_devices) {
 
     external_deps = [
       "graphic_2d:librender_service_client",
+      "previewer:ide_extension",
       "window_manager:previewer_window",
     ]
 
@@ -131,11 +136,6 @@ if (is_mingw || is_mac) {
       part_name = "ability_runtime"
     },
     {
-      label = "//foundation/ability/ability_runtime/frameworks/simulator/common:ability_simulator_common"
-      subsystem_name = "ability"
-      part_name = "ability_runtime"
-    },
-    {
       label = "//foundation/ability/ability_base:string_utils"
       subsystem_name = "ability"
       part_name = "ability_base"
@@ -183,7 +183,7 @@ if (is_mingw || is_mac) {
           part_name = "ability_runtime"
         },
         {
-          label = "//foundation/ability/ability_runtime/frameworks/simulator/napi_module/ability_constant:abilityconstant_napi"
+          label = "//foundation/ability/ability_runtime/frameworks/simulator/napi_module/ability_constant:abilityconstant"
           subsystem_name = "ability"
           part_name = "ability_runtime"
         },
@@ -193,12 +193,12 @@ if (is_mingw || is_mac) {
           part_name = "ability_runtime"
         },
         {
-          label = "//foundation/ability/ability_runtime/frameworks/simulator/napi_module/ability_stage:ability_stage_napi"
+          label = "//foundation/ability/ability_runtime/frameworks/simulator/napi_module/ability_stage:abilitystage"
           subsystem_name = "ability"
           part_name = "ability_runtime"
         },
         {
-          label = "//foundation/ability/ability_runtime/frameworks/simulator/napi_module/ability_stage_context:ability_stage_context_napi"
+          label = "//foundation/ability/ability_runtime/frameworks/simulator/napi_module/ability_stage_context:abilitystagecontext_napi"
           subsystem_name = "ability"
           part_name = "ability_runtime"
         },
@@ -223,7 +223,7 @@ if (is_mingw || is_mac) {
           part_name = "ability_runtime"
         },
         {
-          label = "//foundation/ability/ability_runtime/frameworks/simulator/napi_module/configuration_constant:configurationconstant_napi"
+          label = "//foundation/ability/ability_runtime/frameworks/simulator/napi_module/configuration_constant:configurationconstant"
           subsystem_name = "ability"
           part_name = "ability_runtime"
         },
