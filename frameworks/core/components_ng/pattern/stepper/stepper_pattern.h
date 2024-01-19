@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,7 @@ public:
     {
         return false;
     }
- 
+
     bool UsResRegion() override
     {
         return false;
@@ -118,31 +118,19 @@ private:
     void CreateArrowRightButtonNode(int32_t index, bool isDisabled);
     void CreateArrowlessRightButtonNode(int32_t index, const std::string& defaultContent);
     void CreateWaitingRightButtonNode();
-    void UpdateRightButtonNode(int32_t index);
     void InitButtonClickEvent();
     void HandlingLeftButtonClickEvent();
     void HandlingRightButtonClickEvent();
-    void InitButtonOnHoverEvent(RefPtr<FrameNode> buttonNode, bool isLeft);
-    void ButtonOnHover(RefPtr<FrameNode> buttonNode, bool isHover, bool isLeft);
-    void ButtonHoverInAnimation(RefPtr<FrameNode> buttonNode);
-    void ButtonHoverOutAnimation(RefPtr<FrameNode> buttonNode);
-    void InitButtonTouchEvent(RefPtr<FrameNode> buttonNode);
-    void ButtonOnTouch(RefPtr<FrameNode> buttonNode, TouchType touchType);
-    void ButtonTouchDownAnimation(RefPtr<FrameNode> buttonNode);
-    void ButtonTouchUpAnimation(RefPtr<FrameNode> buttonNode);
     void SetAccessibilityAction();
-    void ButtonSkipColorConfigurationUpdate(RefPtr<FrameNode> buttonNode);
+    static void ButtonSkipColorConfigurationUpdate(const RefPtr<FrameNode>& buttonNode);
     WeakPtr<FocusHub> GetFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
 
     int32_t index_ = 0;
     int32_t maxIndex_ = 0;
     std::shared_ptr<ChangeEvent> swiperChangeEvent_;
-    RefPtr<InputEvent> buttonOnHoverListenr_;
-    RefPtr<TouchEventImpl> buttonTouchListenr_;
-    bool leftIsHover_ = false;
-    bool rightIsHover_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(StepperPattern);
     bool isRightLabelDisable_ = false;
+    bool isLoadingButton_ = false;
     RefPtr<FocusHub> leftFocusHub_ = nullptr;
 };
 
