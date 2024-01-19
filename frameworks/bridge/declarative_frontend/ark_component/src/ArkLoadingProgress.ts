@@ -41,7 +41,7 @@ class LoadingProgressColorModifier extends ModifierWithKey<ResourceColor> {
     super(value);
   }
   static identity: Symbol = Symbol('loadingProgressColor');
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().loadingProgress.resetColor(node);
     } else {
@@ -59,7 +59,7 @@ class LoadingProgressForegroundColorModifier extends ModifierWithKey<ResourceCol
     super(value);
   }
   static identity: Symbol = Symbol('loadingProgressForegroundColor');
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().loadingProgress.resetForegroundColor(node);
     } else {
@@ -76,7 +76,7 @@ class LoadingProgressEnableLoadingModifier extends ModifierWithKey<boolean> {
     super(value);
   }
   static identity: Symbol = Symbol('loadingProgressEnableLoading');
-  applyPeer(node: KNode, reset: boolean) {
+  applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().loadingProgress.resetEnableLoading(node);
     } else {
