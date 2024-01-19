@@ -220,8 +220,7 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupSize(ArkUIRuntimeCal
     Local<JSValueRef> heightArg = runtimeCallInfo->GetCallArgRef(2); // 2: index of parameter CheckboxGroup height
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     CalcDimension height;
-    ArkTSUtils::ParseJsDimensionVp(vm, heightArg, height);
-    if (!height.IsValid()) {
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, heightArg, height) || height.IsNegative()) {
         GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().ResetCheckboxGroupHeight(nativeNode);
     } else {
         GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().SetCheckboxGroupHeight(
@@ -229,8 +228,7 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupSize(ArkUIRuntimeCal
     }
 
     CalcDimension width;
-    ArkTSUtils::ParseJsDimensionVp(vm, widthArg, width);
-    if (!width.IsValid()) {
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, widthArg, width) || width.IsNegative()) {
         GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().ResetCheckboxGroupWidth(nativeNode);
     } else {
         GetArkUIInternalNodeAPI()->GetCheckboxGroupModifier().SetCheckboxGroupWidth(
