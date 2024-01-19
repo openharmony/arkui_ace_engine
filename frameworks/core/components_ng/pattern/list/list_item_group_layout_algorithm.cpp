@@ -800,6 +800,7 @@ void ListItemGroupLayoutAlgorithm::LayoutHeaderFooter(LayoutWrapper* layoutWrapp
         headerMainSize = wrapper->GetGeometryNode()->GetFrameSize().MainSize(axis_);
         float headerPos = 0.0f;
         if ((sticky == V2::StickyStyle::BOTH || sticky == V2::StickyStyle::HEADER) && !itemPosition_.empty()) {
+            contentStartOffset_ = std::max(contentStartOffset_, 0.0f);
             float stickyPos = contentStartOffset_ - mainPos;
             if (GetEndIndex() == totalItemCount_ - 1) {
                 stickyPos = std::min(stickyPos, GetEndPosition() - headerMainSize);
