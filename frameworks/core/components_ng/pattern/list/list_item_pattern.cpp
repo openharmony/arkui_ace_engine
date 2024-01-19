@@ -835,10 +835,10 @@ void ListItemPattern::InitHoverEvent()
     CHECK_NULL_VOID(eventHub);
     auto inputHub = eventHub->GetOrCreateInputEventHub();
     CHECK_NULL_VOID(inputHub);
-    auto hoverTask = [weak = WeakClaim(this), host](bool isHover) {
+    auto hoverTask = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
         if (pattern) {
-            pattern->HandleHoverEvent(isHover, host);
+            pattern->HandleHoverEvent(isHover, pattern->GetHost());
         }
     };
     hoverEvent_ = MakeRefPtr<InputEvent>(std::move(hoverTask));
@@ -869,12 +869,12 @@ void ListItemPattern::InitPressEvent()
     CHECK_NULL_VOID(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
-    auto touchCallback = [weak = WeakClaim(this), host](const TouchEventInfo& info) {
+    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto touchType = info.GetTouches().front().GetTouchType();
         if (touchType == TouchType::DOWN || touchType == TouchType::UP) {
-            pattern->HandlePressEvent(touchType == TouchType::DOWN, host);
+            pattern->HandlePressEvent(touchType == TouchType::DOWN, pattern->GetHost());
         }
     };
     auto touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
