@@ -901,7 +901,7 @@ export struct GridObjectSortComponent {
             y: -this.addItemMoveY
           } : this.clickAddBtn ? {
            x: this.getCoveringGridPositionBottom(index).x,
-           y: this.getCoveringGridPositionBottom(index).Y
+           y: this.getCoveringGridPositionBottom(index).y
           } : {
             x: 0,
             y: 0
@@ -978,7 +978,7 @@ export struct GridObjectSortComponent {
             y: this.editItemMoveY
           } : this.clickRemoveBtn ? {
             x: this.getCoveringGridPosition(index).x,
-            y: this.getCoveringGridPosition(index).Y
+            y: this.getCoveringGridPosition(index).y
           } : { x: 0, y: 0 })
           .animation({
             curve: this.isStartDrag ? DRAG_SPRING : index === this.selectedIndex ?  REMOVE_ADD_SPRING : DRAG_SPRING,
