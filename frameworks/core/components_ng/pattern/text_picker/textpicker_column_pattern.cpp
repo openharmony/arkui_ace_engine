@@ -710,7 +710,7 @@ void TextPickerColumnPattern::UpdateSelectedTextProperties(const RefPtr<PickerTh
 void TextPickerColumnPattern::AddAnimationTextProperties(
     uint32_t currentIndex, const RefPtr<TextLayoutProperty>& textLayoutProperty)
 {
-    TextProperties properties;
+    TextProperties properties{};
     if (textLayoutProperty->HasFontSize()) {
         MeasureContext measureContext;
         measureContext.textContent = MEASURE_STRING;
