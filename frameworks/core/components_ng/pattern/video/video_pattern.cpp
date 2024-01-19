@@ -725,6 +725,14 @@ void VideoPattern::OnAttachToFrameNode()
     renderContext->SetClipToBounds(true);
 }
 
+void VideoPattern::OnDetachFromMainTree()
+{
+    auto host = GetHost();
+    if (host && host->GetNodeStatus() == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
+        Pause();
+    }
+}
+
 void VideoPattern::RegisterRenderContextCallBack()
 {
 #ifndef VIDEO_TEXTURE_SUPPORTED
