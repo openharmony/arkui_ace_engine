@@ -1258,6 +1258,8 @@ private:
     void UpdateCancelNode();
     void RequestKeyboardAfterLongPress();
     void UpdatePasswordModeState();
+    void InitDragDropCallBack();
+    void InitDragDropEventWithOutDragStart();
 
     RectF frameRect_;
     RectF contentRect_;
