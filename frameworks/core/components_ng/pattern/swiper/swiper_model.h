@@ -126,6 +126,7 @@ public:
     virtual void SetDisplayArrow(bool displayArrow) {}
     virtual void SetHoverShow(bool hoverShow) {}
     virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) {}
+    virtual void SetSwipeByGroup(bool swipeByGroup) {}
 private:
     static std::unique_ptr<SwiperModel> instance_;
     static std::mutex mutex_;

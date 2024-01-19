@@ -19,6 +19,7 @@
 #include "base/utils/utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
+#include "core/components_ng/pattern/swiper/swiper_utils.h"
 #include "core/event/ace_events.h"
 #include "core/event/mouse_event.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -150,6 +151,17 @@ void SwiperIndicatorPattern::HandleMouseClick(const GestureEvent& /* info */)
     CHECK_NULL_VOID(swiperNode);
     auto swiperPattern = swiperNode->GetPattern<SwiperPattern>();
     CHECK_NULL_VOID(swiperPattern);
+
+    if (swiperPattern->IsSwipeByGroup()) {
+        auto clickPageIndex = SwiperUtils::ComputePageIndex(mouseClickIndex_.value(), swiperPattern->GetDisplayCount());
+        if (clickPageIndex == swiperPattern->GetCurrentIndex()) {
+            mouseClickIndex_ = std::nullopt;
+            return;
+        }
+
+        mouseClickIndex_ = clickPageIndex;
+    }
+
     swiperPattern->SwipeTo(mouseClickIndex_.value());
     auto host = GetHost();
     CHECK_NULL_VOID(host);

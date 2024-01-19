@@ -116,6 +116,24 @@ public:
         }
     }
 
+    static int32_t ComputePageIndex(int32_t index, int32_t displayCount)
+    {
+        if (displayCount <= 0) {
+            return index;
+        }
+
+        return static_cast<int32_t>(std::floor(index / displayCount)) * displayCount;
+    }
+
+    static int32_t ComputePageEndIndex(int32_t index, int32_t displayCount)
+    {
+        if (displayCount <= 0) {
+            return index;
+        }
+
+        return (index / displayCount) * displayCount + displayCount - 1;
+    }
+
 private:
     static bool CheckMarginPropertyExceed(
         const RefPtr<SwiperLayoutProperty>& property, float childCalcIdealLength)
