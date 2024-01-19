@@ -165,6 +165,16 @@ void PagePattern::ProcessShowState()
     parent->RebuildRenderContextTree();
 }
 
+void PagePattern::OnAttachToMainTree()
+{
+    state_ = RouterPageState::ABOUT_TO_APPEAR;
+}
+
+void PagePattern::OnDetachFromMainTree()
+{
+    state_ = RouterPageState::ABOUT_TO_DISAPPEAR;
+}
+
 void PagePattern::OnShow()
 {
     // Do not invoke onPageShow unless the initialRender function has been executed.
@@ -172,6 +182,7 @@ void PagePattern::OnShow()
     CHECK_NULL_VOID(!isOnShow_);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
+    state_ = RouterPageState::ON_PAGE_SHOW;
     if (pageInfo_) {
         context->FirePageChanged(pageInfo_->GetPageId(), true);
     }
@@ -210,6 +221,7 @@ void PagePattern::OnHide()
     JankFrameReport::GetInstance().FlushRecord();
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
+    state_ = RouterPageState::ON_PAGE_HIDE;
     if (pageInfo_) {
         context->FirePageChanged(pageInfo_->GetPageId(), false);
     }
@@ -236,6 +248,19 @@ void PagePattern::OnHide()
         }
         Recorder::EventRecorder::Get().OnPageHide(pageInfo_->GetPageUrl(), duration);
     }
+}
+
+bool PagePattern::OnBackPressed()
+{
+    if (isPageInTransition_) {
+        return true;
+    }
+    // if in page transition, do not set to ON_BACK_PRESS
+    state_ = RouterPageState::ON_BACK_PRESS;
+    if (OnBackPressed_) {
+        return OnBackPressed_();
+    }
+    return false;
 }
 
 void PagePattern::BuildSharedTransitionMap()

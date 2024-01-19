@@ -38,6 +38,26 @@ struct NavDestinationInfo {
     {}
 };
 
+struct AbilityContextInfo {
+    std::string name = "";
+    std::string bundleName = "";
+    std::string moduleName = "";
+
+    bool IsEqual(AbilityContextInfo& info)
+    {
+        if (info.name != name) {
+            return false;
+        }
+        if (info.bundleName != bundleName) {
+            return false;
+        }
+        if (info.moduleName != moduleName) {
+            return false;
+        }
+        return true;
+    }
+};
+
 class ACE_FORCE_EXPORT UIObserverHandler {
 public:
     UIObserverHandler() = default;
