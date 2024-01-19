@@ -686,7 +686,7 @@ void ListLayoutAlgorithm::MeasureList(LayoutWrapper* layoutWrapper)
     int32_t startIndex = 0;
     int32_t endIndex = 0;
     int32_t midIndex = 0;
-    float midItemMidPos = 0.0f;
+    float midItemMidPos = contentMainSize_ / 2.0f;
     float startPos = 0.0f;
     float endPos = 0.0f;
     float jumpIndexStartPos = 0.0f;
