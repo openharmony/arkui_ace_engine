@@ -118,6 +118,7 @@ public:
 
 protected:
     static float fontWeightScale_;
+    static bool isDefaultFontChanged_;
 
 private:
     std::list<RefPtr<FontLoader>> fontLoaders_;
@@ -127,7 +128,6 @@ private:
     // Render nodes need to layout when wght scale is changed.
     std::set<WeakPtr<RenderNode>> variationNodes_;
     std::set<WeakPtr<NG::UINode>> variationNodesNG_;
-    bool isDefaultFontChanged_ = false;
 };
 
 } // namespace OHOS::Ace

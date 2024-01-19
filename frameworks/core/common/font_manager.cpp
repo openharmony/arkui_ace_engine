@@ -30,6 +30,7 @@
 namespace OHOS::Ace {
 
 float FontManager::fontWeightScale_ = 1.0f;
+bool FontManager::isDefaultFontChanged_ = false;
 
 void FontManager::RegisterFont(const std::string& familyName, const std::string& familySrc,
     const RefPtr<PipelineBase>& context, const std::string& bundleName, const std::string& moduleName)
@@ -57,9 +58,9 @@ void FontManager::RegisterFont(const std::string& familyName, const std::string&
 
 void FontManager::SetFontFamily(const char* familyName, const char* familySrc)
 {
+    isDefaultFontChanged_ = true;
     RefPtr<FontLoader> fontLoader = FontLoader::Create(familyName, familySrc);
     fontLoader->SetDefaultFontFamily(familyName, familySrc);
-    isDefaultFontChanged_ = true;
 }
 
 bool FontManager::IsDefaultFontChanged()
