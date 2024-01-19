@@ -220,7 +220,7 @@ void FolderStackLayoutAlgorithm::RangeCalculation(const RefPtr<FolderStackGroupN
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto safeArea = pipeline->GetSafeArea();
-    auto length = safeArea.top_.Length();
+    int32_t length = static_cast<int32_t>(safeArea.top_.Length());
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto displayInfo = container->GetDisplayInfo();

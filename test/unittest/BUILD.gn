@@ -396,6 +396,7 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/utils.cpp",
     "$ace_root/frameworks/core/event/back_end_event_manager.cpp",
+    "$ace_root/frameworks/core/event/key_event.cpp",
     "$ace_root/frameworks/core/gestures/drag_event.cpp",
     "$ace_root/frameworks/core/gestures/velocity_tracker.cpp",
     "$ace_root/frameworks/core/pipeline/base/constants.cpp",

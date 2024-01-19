@@ -82,12 +82,15 @@ public:
     static void SetListFriction(FrameNode* frameNode, double friction);
     static void SetListNestedScroll(FrameNode* frameNode, const NestedScrollOptions& nestedOpt);
     static void SetListScrollBar(FrameNode* frameNode, int32_t barState);
+    static void SetListScrollBarWidth(FrameNode* frameNode, const std::string& value);
+    static void SetListScrollBarColor(FrameNode* frameNode, const std::string& value);
     static void SetLanes(FrameNode* frameNode, int32_t lanes);
     static void SetLaneConstrain(FrameNode* frameNode, const Dimension& laneMinLength, const Dimension& laneMaxLength);
     static void SetLaneMinLength(FrameNode* frameNode, const Dimension& laneMinLength);
     static void SetLaneMaxLength(FrameNode* frameNode, const Dimension& laneMaxLength);
     static void SetLaneGutter(FrameNode* frameNode, const Dimension& laneGutter);
     static void SetListItemAlign(FrameNode* frameNode, V2::ListItemAlign listItemAlign);
+    static void SetListSpace(FrameNode* frameNode, const Dimension& space);
     static void SetScrollSnapAlign(FrameNode* frameNode, V2::ScrollSnapAlign scrollSnapAlign);
     static void SetContentStartOffset(FrameNode* frameNode, float startOffset);
     static void SetContentEndOffset(FrameNode* frameNode, float endOffset);

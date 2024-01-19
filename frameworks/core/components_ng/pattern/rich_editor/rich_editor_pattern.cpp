@@ -4211,6 +4211,7 @@ void RichEditorPattern::CreateHandles()
     textSelector_.secondHandleOffset_ = secondHandleOffset;
     SizeF firstHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), startSelectHeight };
     SizeF secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), endSelectHeight };
+    AdjustHandleRect(firstHandleOffset, secondHandleOffset, firstHandlePaintSize, secondHandlePaintSize);
     RectF firstHandle = RectF(firstHandleOffset, firstHandlePaintSize);
     textSelector_.firstHandle = firstHandle;
     RectF secondHandle = RectF(secondHandleOffset, secondHandlePaintSize);
@@ -4284,6 +4285,11 @@ void RichEditorPattern::AdjustHandleRect(
     OffsetF& firstHandleOffset, OffsetF& secondHandleOffset, SizeF& firstHandlePaintSize, SizeF& secondHandlePaintSize)
 {
     int32_t textContentLength = static_cast<int32_t>(GetTextContentLength());
+    auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
+    auto selectedRects = paragraphs_.GetRects(textSelector_.GetStart(), textSelector_.GetEnd());
+    if (!selectedRects.empty() && !spans_.empty()) {
+        return;
+    }
     if (textContentLength == 0) {
         float caretHeight = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretHeight();
         secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretHeight / 2 };
@@ -4291,8 +4297,7 @@ void RichEditorPattern::AdjustHandleRect(
         // only show the second handle.
         firstHandlePaintSize = SizeF {};
         firstHandleOffset = OffsetF {};
-    } else if ((caretPosition_ == textContentLength || caretPosition_ == (textContentLength - 1)) &&
-               spans_.back()->content.back() == '\n') {
+    } else if (selectEnd == textContentLength && spans_.back()->content.back() == '\n') {
         RectF visibleContentRect(contentRect_.GetOffset() + parentGlobalOffset_, contentRect_.GetSize());
         auto targetHeight = contentRect_.Height() - (secondHandleOffset.GetY() - visibleContentRect.Top());
         if (firstHandleOffset.GetX() == secondHandleOffset.GetX()) {

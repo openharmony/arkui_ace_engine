@@ -228,6 +228,8 @@ private:
     float paddingEnd_ = 0.0f;
     float paddingTop_ = 0.0f;
     float paddingBottom_ = 0.0f;
+    float top_ = 0.0f;
+    float bottom_ = 0.0f;
     bool bHorizontal_ = false;
     bool bVertical_ = false;
     std::unordered_set<Placement> setHorizontal_;

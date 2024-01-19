@@ -1515,7 +1515,10 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
         CHECK_NULL_VOID(host);
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        if (layoutProperty->GetIsDisabledValue(false) || pattern->IsNormalInlineState()) {
+        auto focusHub = host->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        if (layoutProperty->GetIsDisabledValue(false) || pattern->IsNormalInlineState() ||
+            !focusHub->IsCurrentFocus()) {
             return;
         }
         if (extraParams.empty()) {
@@ -2306,6 +2309,11 @@ void TextFieldPattern::InitLongPressEvent()
 
 void TextFieldPattern::HandleLongPress(GestureEvent& info)
 {
+    auto focusHub = GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (!focusHub->IsFocusable()) {
+        return;
+    }
     isTouchCaret_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2327,7 +2335,6 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     }
     gestureHub->SetIsTextDraggable(false);
     isLongPress_ = true;
-    auto focusHub = GetFocusHub();
     if (!focusHub->IsCurrentFocus()) {
         focusHub->RequestFocusImmediately();
     }
@@ -6360,8 +6367,10 @@ void TextFieldPattern::HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& no
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
-    isCursorAlwaysDisplayed_ = true;
-    StartTwinkling();
+    if (focusHub->IsCurrentFocus()) {
+        isCursorAlwaysDisplayed_ = true;
+        StartTwinkling();
+    }
 };
 
 void TextFieldPattern::HandleCursorOnDragLeaved(const RefPtr<NotifyDragEvent>& notifyDragEvent)

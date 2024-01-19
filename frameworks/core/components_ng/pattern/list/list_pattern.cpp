@@ -137,16 +137,18 @@ bool ListPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     float relativeOffset = listLayoutAlgorithm->GetCurrentOffset();
     auto predictSnapOffset = listLayoutAlgorithm->GetPredictSnapOffset();
     auto predictSnapEndPos = listLayoutAlgorithm->GetPredictSnapEndPosition();
-    if (listLayoutAlgorithm->GetEstimateOffset().has_value()) {
-        float absoluteOffset = listLayoutAlgorithm->GetEstimateOffset().value_or(currentOffset_);
-        relativeOffset += absoluteOffset - currentOffset_;
+    if (listLayoutAlgorithm->NeedEstimateOffset()) {
+        auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, GetAxis());
+        calculate.GetEstimateHeightAndOffset(GetHost());
+        currentOffset_ = calculate.GetEstimateOffset();
         isJump = true;
-    }
-    // correct the currentOffset when the startIndex is 0.
-    if (listLayoutAlgorithm->GetStartIndex() == 0) {
-        currentOffset_ = -itemPosition_.begin()->second.startPos;
     } else {
-        currentOffset_ = currentOffset_ + relativeOffset;
+        // correct the currentOffset when the startIndex is 0.
+        if (listLayoutAlgorithm->GetStartIndex() == 0) {
+            currentOffset_ = -itemPosition_.begin()->second.startPos;
+        } else {
+            currentOffset_ = currentOffset_ + relativeOffset;
+        }
     }
     if (targetIndex_) {
         AnimateToTarget(targetIndex_.value(), targetIndexInGroup_, scrollAlign_);
@@ -1565,19 +1567,10 @@ void ListPattern::UpdateScrollBarOffset()
     if (!GetScrollBar() && !GetScrollBarProxy()) {
         return;
     }
-    float itemsSize = itemPosition_.rbegin()->second.endPos - itemPosition_.begin()->second.startPos + spaceWidth_;
-    float currentOffset = itemsSize / itemPosition_.size() * itemPosition_.begin()->first - startMainPos_;
-    auto estimatedHeight = itemsSize / itemPosition_.size() * (maxListItemIndex_ + 1) - spaceWidth_;
-    if (lanes_ == 1) {
-        const auto& begin = *itemPosition_.begin();
-        auto calculate = ListHeightOffsetCalculator(
-            begin.first, { begin.second.startPos, begin.second.endPos }, spaceWidth_, GetAxis());
-        calculate.SetEstimatedItemHeight(itemsSize / itemPosition_.size() - spaceWidth_);
-        if (calculate.GetEstimateHeightAndOffset(GetHost())) {
-            currentOffset = calculate.GetEstimateOffset();
-            estimatedHeight = calculate.GetEstimateHeight();
-        }
-    }
+    auto calculate = ListHeightOffsetCalculator(itemPosition_, spaceWidth_, lanes_, GetAxis());
+    calculate.GetEstimateHeightAndOffset(GetHost());
+    float currentOffset = calculate.GetEstimateOffset();
+    float estimatedHeight = calculate.GetEstimateHeight();
     if (GetAlwaysEnabled()) {
         estimatedHeight = estimatedHeight - spaceWidth_;
     }

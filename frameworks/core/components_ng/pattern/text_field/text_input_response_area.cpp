@@ -318,7 +318,6 @@ bool PasswordResponseArea::IsShowPasswordIcon()
 // UnitResponseArea begin
 void UnitResponseArea::InitResponseArea()
 {
-    ClearArea();
     auto pattern = hostPattern_.Upgrade();
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();

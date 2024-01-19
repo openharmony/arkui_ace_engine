@@ -461,6 +461,16 @@ void ListModelNG::SetListScrollBar(FrameNode* frameNode, int32_t barState)
     ScrollableModelNG::SetScrollBarMode(frameNode, displayNumber);
 }
 
+void ListModelNG::SetListScrollBarWidth(FrameNode* frameNode, const std::string& value)
+{
+    ScrollableModelNG::SetScrollBarWidth(frameNode, value);
+}
+
+void ListModelNG::SetListScrollBarColor(FrameNode* frameNode, const std::string& value)
+{
+    ScrollableModelNG::SetScrollBarColor(frameNode, value);
+}
+
 void ListModelNG::SetLanes(FrameNode* frameNode, int32_t lanes)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Lanes, lanes, frameNode);
@@ -498,6 +508,11 @@ void ListModelNG::SetLaneGutter(FrameNode* frameNode, const Dimension& laneGutte
 void ListModelNG::SetListItemAlign(FrameNode* frameNode, V2::ListItemAlign listItemAlign)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ListItemAlign, listItemAlign, frameNode);
+}
+
+void ListModelNG::SetListSpace(FrameNode* frameNode, const Dimension& space)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, Space, space, frameNode);
 }
 
 void ListModelNG::SetScrollSnapAlign(FrameNode* frameNode, V2::ScrollSnapAlign scrollSnapAlign)

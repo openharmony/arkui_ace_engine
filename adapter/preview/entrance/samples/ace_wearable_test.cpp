@@ -28,6 +28,7 @@
 #include "base/log/log.h"
 #include "base/utils/device_config.h"
 #include "base/utils/utils.h"
+#include "adapter/preview/entrance/ace_preview_helper.h"
 
 namespace {
 
@@ -83,7 +84,10 @@ int main(int argc, const char* argv[])
     }
     ctx->CreateGlfwWindow(args.deviceWidth, args.deviceHeight, true);
     OHOS::Ace::Sample::EventAdapter::GetInstance().Initialize(ctx);
-
+    OHOS::Ace::Platform::AcePreviewHelper::GetInstance()->
+        SetCallbackOfPostTask(OHOS::AppExecFwk::EventHandler::PostTask);
+    OHOS::Ace::Platform::AcePreviewHelper::GetInstance()->
+        SetCallbackOfIsCurrentRunnerThread(OHOS::AppExecFwk::EventHandler::IsCurrentRunnerThread);
     // Create the ace ability
     auto ability = OHOS::Ace::Platform::AceAbility::CreateInstance(args);
     CHECK_NULL_RETURN(ability, -1);

@@ -29,6 +29,7 @@
 #include "bridge/common/utils/utils.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/node/node_api.h"
 namespace OHOS::Ace::NodeModel {
 namespace {
@@ -1531,6 +1532,37 @@ void SetListScrollBar(ArkUI_NodeHandle node, const char* value)
     fullImpl->getNodeModifiers()->getListModifier()->setListScrollBar(node->uiNodeHandle, attrVal);
 }
 
+void SetListScrollBarWidth(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
+
+    auto width = std::string(value) + "vp";
+    fullImpl->getNodeModifiers()->getListModifier()->setListScrollBarWidth(node->uiNodeHandle, width.c_str());
+}
+
+void SetListScrollBarColor(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
+
+    fullImpl->getNodeModifiers()->getListModifier()->setListScrollBarColor(node->uiNodeHandle, value);
+}
+
 void SetListListDirection(ArkUI_NodeHandle node, const char* value)
 {
     auto fullImpl = GetFullImpl();
@@ -1604,6 +1636,37 @@ void SetListEdgeEffect(ArkUI_NodeHandle node, const char* value)
     auto attrVal = StringToEnumInt(value, SCROLL_EDGE_EFFECT, NUM_2);
     alwaysEnabled = (size > NUM_1) ? StringToBoolInt(params[NUM_1].c_str()) : true;
     fullImpl->getNodeModifiers()->getListModifier()->setListEdgeEffect(node->uiNodeHandle, attrVal, alwaysEnabled);
+}
+
+void SetListFriction(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
+
+    fullImpl->getNodeModifiers()->getListModifier()->setListFriction(
+        node->uiNodeHandle, StringToFloat(value));
+}
+
+void SetListSpace(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
+
+    fullImpl->getNodeModifiers()->getListModifier()->setListSpace(node->uiNodeHandle, StringToFloat(value));
 }
 
 void SetTextAreaPlaceholderFont(ArkUI_NodeHandle node, const char* value)
@@ -2481,6 +2544,71 @@ void SetColorFilter(ArkUI_NodeHandle node, const char* value)
     }
 }
 
+// ListItemGroup
+void SetListItemGroupHeader(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
+
+    auto headerNodeHandle = reinterpret_cast<ArkUI_NodeHandle>(std::stoull(value));
+    fullImpl->getNodeModifiers()->getListItemGroupModifier()->listItemGroupSetHeader(node->uiNodeHandle,
+        headerNodeHandle->uiNodeHandle);
+}
+
+void SetListItemGroupFooter(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
+
+    auto footerNodeHandle = reinterpret_cast<ArkUI_NodeHandle>(std::stoull(value));
+    fullImpl->getNodeModifiers()->getListItemGroupModifier()->listItemGroupSetFooter(node->uiNodeHandle,
+        footerNodeHandle->uiNodeHandle);
+}
+
+void SetListItemGroupDivider(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
+
+    std::vector<std::string> params;
+    StringUtils::StringSplitter(value, ' ', params);
+    if (params.size() != NUM_4) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "params are invalid");
+        return;
+    }
+
+    auto color = StringToColorInt(params[NUM_0].c_str());
+    ArkUI_Float64 values[NUM_3];
+    ArkUI_Int32 units[NUM_3] = { UNIT_VP, UNIT_VP, UNIT_VP };
+    for (int i = 0; i < NUM_3; ++i) {
+        values[i] = StringUtils::StringToDouble(params[i]);
+    }
+
+    fullImpl->getNodeModifiers()->getListItemGroupModifier()->listItemGroupSetDivider(node->uiNodeHandle,
+        color, values, units, NUM_3);
+}
+
 using Setter = void(ArkUI_NodeHandle node, const char* value);
 void SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const char* value)
 {
@@ -2586,8 +2714,8 @@ void SetScrollAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const char* va
 
 void SetListAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const char* value)
 {
-    static Setter* setters[] = { SetListScrollBar, SetListListDirection, SetListListSticky, SetListEdgeEffect,
-        SetListEnableScrollInteraction };
+    static Setter* setters[] = { SetListScrollBar, SetListScrollBarWidth, SetListScrollBarColor, SetListListDirection,
+        SetListListSticky, SetListEdgeEffect, SetListEnableScrollInteraction, SetListFriction, SetListSpace };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "list node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -2641,6 +2769,16 @@ void SetLoadingProgressAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const
     }
     setters[subTypeId](node, value);
 }
+
+void SetListItemGroupAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const char* value)
+{
+    static Setter* setters[] = { SetListItemGroupHeader, SetListItemGroupFooter, SetListItemGroupDivider };
+    if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "listitemgroup node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        return;
+    }
+    setters[subTypeId](node, value);
+}
 } // namespace
 
 void SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, const char* value)
@@ -2669,6 +2807,7 @@ void SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, const
         nullptr,
         nullptr,
         SetXComponentAttribute,
+        SetListItemGroupAttribute,
     };
     int32_t subTypeClass = type / MAX_NODE_SCOPE_NUM;
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;

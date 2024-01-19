@@ -114,6 +114,17 @@ void ScrollableModelNG::SetScrollBarMode(FrameNode* frameNode, int32_t displayNu
         static_cast<DisplayMode>(displayNumber), frameNode);
 }
 
+void ScrollableModelNG::SetScrollBarWidth(FrameNode* frameNode, const std::string& value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarWidth,
+        StringUtils::StringToDimensionWithUnit(value), frameNode);
+}
+
+void ScrollableModelNG::SetScrollBarColor(FrameNode* frameNode, const std::string& value)
+{
+    ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollablePaintProperty, ScrollBarColor, Color::FromString(value), frameNode);
+}
+
 void ScrollableModelNG::SetMaxFlingSpeed(double max)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
