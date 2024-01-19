@@ -35,7 +35,7 @@ enum ArkUIAPIVariantKind {
     FULL = 2,
     GRAPHICS = 3,
     EXTENDED = 4,
-    COUNT = GRAPHICS + 1,
+    COUNT = EXTENDED + 1,
 };
 
 typedef int ArkUI_Bool;
