@@ -214,12 +214,13 @@ void PageRouterManager::PushNamedRoute(const RouterPageInfo& target)
     if (target.routerMode == RouterMode::SINGLE) {
         auto PageInfoByUrl = FindPageInStack(target.url);
         auto pagePath = Framework::JsiDeclarativeEngine::GetPagePath(target.url);
-        auto PageInfoByPagePath = FindPageInStack(pagePath);
         if (PageInfoByUrl.second) {
             // get PageInfo by url, find page in stack, move postion and update params.
             MovePageToFront(PageInfoByUrl.first, PageInfoByUrl.second, target, true);
             return;
-        } else if (PageInfoByPagePath.second) {
+        }
+        auto PageInfoByPagePath = FindPageInStack(pagePath);
+        if (PageInfoByPagePath.second) {
             // get PageInfo by pagePath, find page in stack, move postion and update params.
             MovePageToFront(PageInfoByPagePath.first, PageInfoByPagePath.second, target, true);
             return;
