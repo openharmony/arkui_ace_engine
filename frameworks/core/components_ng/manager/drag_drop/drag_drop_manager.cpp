@@ -47,10 +47,10 @@ RefPtr<DragDropProxy> DragDropManager::CreateAndShowDragWindow(
     SetIsDragged(true);
     isDragCancel_ = false;
 #if !defined(PREVIEW)
+    auto windowScale = GetWindowScale();
+    pixelMap->Scale(windowScale, windowScale, AceAntiAliasingOption::HIGH);
     CreateDragWindow(info, pixelMap->GetWidth(), pixelMap->GetHeight());
-    if (!dragWindow_) {
-        return nullptr;
-    }
+    CHECK_NULL_RETURN(dragWindow_, nullptr);
     dragWindow_->DrawPixelMap(pixelMap);
 #endif
     currentId_ = ++g_proxyId;
