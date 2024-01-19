@@ -506,73 +506,7 @@ HWTEST_F(StepperTestNg, StepperPatternCreateWaitingRightButtonNode001, TestSize.
     ASSERT_NE(loadingProgressNode, nullptr);
     EXPECT_EQ(loadingProgressNode->GetParent(), hostNode);
 }
-/**
- * @tc.name: StepperPatternButtonOnHover001
- * @tc.desc: test Stepper pattern ButtonOnHover.
- * @tc.type: FUNC
- */
-HWTEST_F(StepperTestNg, StepperPatternButtonOnHover001, TestSize.Level1)
-{
-    auto frameNode = StepperNode::GetOrCreateStepperNode(STEPPER_ITEM_TAG,
-        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<StepperPattern>(); });
-    ASSERT_NE(frameNode, nullptr);
-    auto stepperPattern = frameNode->GetPattern<StepperPattern>();
-    ASSERT_NE(stepperPattern, nullptr);
-    stepperPattern->CreateLeftButtonNode();
-    auto hostNode = AceType::DynamicCast<StepperNode>(stepperPattern->GetHost());
-    ASSERT_NE(hostNode, nullptr);
-    auto buttonId = hostNode->GetLeftButtonId();
-    auto buttonNode = FrameNode::GetOrCreateFrameNode(
-        V2::BUTTON_ETS_TAG, buttonId, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    ASSERT_NE(buttonNode, nullptr);
-    EXPECT_FALSE(stepperPattern->leftIsHover_);
-    stepperPattern->ButtonOnHover(buttonNode, true, true);
-    EXPECT_TRUE(stepperPattern->leftIsHover_);
-    stepperPattern->ButtonOnHover(buttonNode, true, true);
-    EXPECT_TRUE(stepperPattern->leftIsHover_);
-    stepperPattern->ButtonOnHover(buttonNode, false, true);
-    EXPECT_FALSE(stepperPattern->leftIsHover_);
-    EXPECT_FALSE(stepperPattern->rightIsHover_);
-    stepperPattern->ButtonOnHover(buttonNode, true, false);
-    EXPECT_TRUE(stepperPattern->rightIsHover_);
-    stepperPattern->ButtonOnHover(buttonNode, true, false);
-    EXPECT_TRUE(stepperPattern->rightIsHover_);
-    stepperPattern->ButtonOnHover(buttonNode, false, false);
-    EXPECT_FALSE(stepperPattern->rightIsHover_);
-}
-/**
- * @tc.name: StepperPatternClickEvent001
- * @tc.desc: test Stepper pattern button click event.
- * @tc.type: FUNC
- */
-HWTEST_F(StepperTestNg, StepperPatternClickEvent001, TestSize.Level1)
-{
-    auto frameNode = StepperNode::GetOrCreateStepperNode(STEPPER_ITEM_TAG,
-        ViewStackProcessor::GetInstance()->ClaimNodeId(), []() { return AceType::MakeRefPtr<StepperPattern>(); });
-    ASSERT_NE(frameNode, nullptr);
-    auto stepperPattern = frameNode->GetPattern<StepperPattern>();
-    ASSERT_NE(stepperPattern, nullptr);
-    stepperPattern->CreateLeftButtonNode();
-    auto hostNode = AceType::DynamicCast<StepperNode>(stepperPattern->GetHost());
-    ASSERT_NE(hostNode, nullptr);
-    auto leftButtonNode = FrameNode::GetOrCreateFrameNode(
-        V2::BUTTON_ETS_TAG, hostNode->GetLeftButtonId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    ASSERT_NE(leftButtonNode, nullptr);
-    hostNode->AddChild(leftButtonNode);
-    auto rightButtonNode = FrameNode::GetOrCreateFrameNode(
-        V2::BUTTON_ETS_TAG, hostNode->GetRightButtonId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
-    ASSERT_NE(rightButtonNode, nullptr);
-    hostNode->AddChild(rightButtonNode);
-    stepperPattern->ButtonOnTouch(leftButtonNode, TouchType::DOWN);
-    stepperPattern->ButtonOnTouch(leftButtonNode, TouchType::UP);
-    auto leftGestureHub = leftButtonNode->GetOrCreateGestureEventHub();
-    auto rightGestureHub = rightButtonNode->GetOrCreateGestureEventHub();
-    EXPECT_FALSE(leftGestureHub->IsClickable());
-    EXPECT_FALSE(rightGestureHub->IsClickable());
-    stepperPattern->InitButtonClickEvent();
-    EXPECT_TRUE(leftGestureHub->IsClickable());
-    EXPECT_TRUE(rightGestureHub->IsClickable());
-}
+
 /**
  * @tc.name: StepperPatternHandleClickEvent001
  * @tc.desc: test Stepper pattern handle button click event.
