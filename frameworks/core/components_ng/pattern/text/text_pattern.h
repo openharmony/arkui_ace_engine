@@ -531,6 +531,7 @@ protected:
     void HandleSpanSingleClickEvent(
         GestureEvent& info, RectF textContentRect, PointF textOffset, bool& isClickOnSpan, bool& isClickOnAISpan);
     void HandleDoubleClickEvent(GestureEvent& info);
+    void CheckOnClickEvent(GestureEvent& info);
     void InitTextDetect(int32_t startPos, std::string detectText);
     bool ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc = nullptr,
         const ShowSelectOverlayFunc& showSelectOverlayFunc = nullptr);
