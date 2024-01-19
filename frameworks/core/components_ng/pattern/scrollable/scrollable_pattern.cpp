@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1019,8 +1019,7 @@ void ScrollablePattern::AnimateTo(float position, float duration, const RefPtr<C
     FireOnScrollStart();
 }
 
-void ScrollablePattern::PlaySpringAnimation(float position, float velocity, float mass, float stiffness,
-    float damping)
+void ScrollablePattern::PlaySpringAnimation(float position, float velocity, float mass, float stiffness, float damping)
 {
     if (!springOffsetProperty_) {
         InitSpringOffsetProperty();
@@ -1032,7 +1031,7 @@ void ScrollablePattern::PlaySpringAnimation(float position, float velocity, floa
     });
 
     AnimationOption option;
-    auto curve = AceType::MakeRefPtr<SpringCurve>(velocity, mass, stiffness, damping);
+    auto curve = AceType::MakeRefPtr<InterpolatingSpring>(velocity, mass, stiffness, damping);
     InitOption(option, CUSTOM_ANIMATION_DURATION, curve);
     isAnimationStop_ = false;
     springOffsetProperty_->Set(GetTotalOffset());
