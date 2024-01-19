@@ -151,7 +151,7 @@ export struct GridObjectSortComponent {
     this.editGridDataLength = this.selected.length;
     this.imageText = this.options.type === GridObjectSortComponentType.IMAGE_TEXT;
     this.colNum = this.imageText ? COL_IMAGE_TEXT : COL_TEXT;
-    setTimeOut(() => {
+    setTimeout(() => {
       this.firstIn = false
     }, 500)
   }
