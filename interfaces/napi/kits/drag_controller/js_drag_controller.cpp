@@ -671,8 +671,8 @@ void EnvelopedDragData(DragControllerAsyncCtx* asyncCtx, std::optional<Msdp::Dev
         dataSize = static_cast<int32_t>(asyncCtx->unifiedData->GetSize());
     }
     dragData = { shadowInfos, {}, udKey, asyncCtx->extraParams, "", asyncCtx->sourceType,
-        dataSize != 0 ? dataSize : shadowInfos.size(), pointerId, asyncCtx->globalX, asyncCtx->globalY, 0, true, false,
-        summary };
+        dataSize != 0 ? dataSize : shadowInfos.size(), pointerId, asyncCtx->globalX, asyncCtx->globalY,
+        asyncCtx->displayId, true, false, summary };
 }
 
 void StartDragService(DragControllerAsyncCtx* asyncCtx)
