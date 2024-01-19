@@ -359,6 +359,21 @@ void ListTestNg::HandleDragEnd(int32_t index, float mainVelocity)
     FlushLayoutTask(frameNode_);
 }
 
+void ListTestNg::ScrollSnap(float offset, float velocity)
+{
+    pattern_->OnScrollSnapCallback(offset, velocity);
+    FlushLayoutTask(frameNode_);
+    // StartScrollSnapMotion, for condition that equal item height
+    float endValue = pattern_->scrollableEvent_->GetScrollable()->GetSnapFinalPosition();
+    pattern_->ScrollBy(-endValue);
+    pattern_->scrollableTouchEvent_->isSnapScrollAnimationStop_ = false; // for UpdateScrollSnapEndWithOffset
+    FlushLayoutTask(frameNode_);
+    // UpdateScrollSnapEndWithOffset, for condition that different item height
+    endValue -= pattern_->scrollableEvent_->GetScrollable()->GetSnapFinalPosition();
+    pattern_->ScrollBy(endValue);
+    FlushLayoutTask(frameNode_);
+}
+
 AssertionResult ListTestNg::VerifyPosition(
     const RefPtr<FrameNode>& frameNode, int32_t viewItemNumber, int32_t lanes, float space, float startOffset)
 {
