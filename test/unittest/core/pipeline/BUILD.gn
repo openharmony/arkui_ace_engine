@@ -30,7 +30,6 @@ ace_unittest("pipeline_context_test_ng") {
     "$ace_root/frameworks/base/log/ace_tracker.cpp",
     "$ace_root/frameworks/base/ressched/ressched_report.cpp",
     "$ace_root/frameworks/core/animation/animation_util.cpp",
-    "$ace_root/frameworks/core/event/key_event.cpp",
     "$ace_root/frameworks/core/event/mouse_event.cpp",
     "$ace_root/frameworks/core/gestures/gesture_referee.cpp",
     "$ace_root/frameworks/core/pipeline/pipeline_base.cpp",

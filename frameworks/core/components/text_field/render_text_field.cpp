@@ -2626,6 +2626,7 @@ RefPtr<StackElement> RenderTextField::GetLastStack() const
 bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
 {
     std::string appendElement;
+    const static size_t maxKeySizes = 2;
     if (event.action == KeyAction::DOWN) {
         if (event.code == KeyCode::KEY_ENTER || event.code == KeyCode::KEY_NUMPAD_ENTER ||
             event.code == KeyCode::KEY_DPAD_CENTER) {
@@ -2635,9 +2636,9 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
                 // normal enter should trigger onSubmit
                 PerformAction(action_, true);
             }
-        } else if (HandleShiftPressedEvent(event)) {
-            return true;
-        } else if (event.IsNumberKey()) {
+        } else if (event.pressedCodes.size() == 1 || (event.pressedCodes.size() == maxKeySizes &&
+                                                         (event.pressedCodes[0] == KeyCode::KEY_SHIFT_LEFT ||
+                                                             event.pressedCodes[0] == KeyCode::KEY_SHIFT_RIGHT))) {
             appendElement = event.ConvertCodeToString();
         } else if (event.IsLetterKey()) {
             if (event.IsKey({ KEY_META_OR_CTRL_LEFT, KeyCode::KEY_SHIFT_LEFT, KeyCode::KEY_Z }) ||
@@ -2671,37 +2672,6 @@ bool RenderTextField::HandleKeyEvent(const KeyEvent& event)
     if (appendElement.empty()) {
         return false;
     }
-    InsertValueDone(appendElement);
-    return true;
-}
-
-bool RenderTextField::HandleShiftPressedEvent(const KeyEvent& event)
-{
-    const static size_t maxKeySizes = 2;
-    char keyChar;
-    auto iterCode = KEYBOARD_SYMBOLS.find(event.code);
-    if (event.pressedCodes.size() == 1 && iterCode != KEYBOARD_SYMBOLS.end()) {
-        if (iterCode != KEYBOARD_SYMBOLS.end()) {
-            keyChar = iterCode->second;
-        } else {
-            return false;
-        }
-    } else if (event.pressedCodes.size() == maxKeySizes && (event.pressedCodes[0] == KeyCode::KEY_SHIFT_LEFT ||
-                                                               event.pressedCodes[0] == KeyCode::KEY_SHIFT_RIGHT)) {
-        iterCode = SHIFT_KEYBOARD_SYMBOLS.find(event.code);
-        if (iterCode != SHIFT_KEYBOARD_SYMBOLS.end()) {
-            keyChar = iterCode->second;
-        } else if (KeyCode::KEY_A <= event.code && event.code <= KeyCode::KEY_Z) {
-            keyChar = static_cast<char>(event.code) - static_cast<char>(KeyCode::KEY_A) + UPPER_CASE_A;
-        } else if (KeyCode::KEY_0 <= event.code && event.code <= KeyCode::KEY_9) {
-            keyChar = NUM_SYMBOLS[static_cast<int32_t>(event.code) - static_cast<int32_t>(KeyCode::KEY_0)];
-        } else {
-            return false;
-        }
-    } else {
-        return false;
-    }
-    std::string appendElement(1, keyChar);
     InsertValueDone(appendElement);
     return true;
 }
