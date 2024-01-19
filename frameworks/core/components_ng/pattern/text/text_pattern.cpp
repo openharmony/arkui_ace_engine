@@ -1606,6 +1606,7 @@ ResultObject TextPattern::GetSymbolSpanResultObject(RefPtr<UINode> uinode, int32
 {
     bool selectFlag = false;
     ResultObject resultObject;
+    resultObject.isDraggable = false;
     if (!DynamicCast<SpanNode>(uinode)) {
         return resultObject;
     }
@@ -2939,6 +2940,7 @@ ResultObject TextPattern::GetBuilderResultObject(RefPtr<UINode> uiNode, int32_t 
 {
     int32_t itemLength = 1;
     ResultObject resultObject;
+    resultObject.isDraggable = false;
     if (!DynamicCast<FrameNode>(uiNode) || !GetSpanItemByIndex(index)) {
         return resultObject;
     }

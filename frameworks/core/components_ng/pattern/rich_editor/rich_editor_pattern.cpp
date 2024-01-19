@@ -1758,7 +1758,13 @@ bool RichEditorPattern::JudgeDraggable(GestureEvent& info)
     if (BetweenSelectedPosition(info.GetGlobalLocation())) {
         dragBoxes_ = GetTextBoxes();
         // prevent long press event from being triggered when dragging
-        gestureHub->SetIsTextDraggable(true);
+        auto selectStart = textSelector_.GetTextStart();
+        auto selectEnd = textSelector_.GetTextEnd();
+        auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
+        auto resultObjects = textSelectInfo.GetSelection().resultObjects;
+        auto iter =
+            std::find_if(resultObjects.begin(), resultObjects.end(), [](ResultObject& obj) { return obj.isDraggable; });
+        gestureHub->SetIsTextDraggable(iter != resultObjects.end());
         return true;
     }
     gestureHub->SetIsTextDraggable(false);
