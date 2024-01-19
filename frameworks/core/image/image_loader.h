@@ -24,6 +24,7 @@
 
 #include "base/geometry/size.h"
 #include "base/memory/ace_type.h"
+#include "base/network/download_manager.h"
 #include "base/resource/internal_resource.h"
 #include "base/resource/shared_image_manager.h"
 #include "core/components/common/layout/constants.h"
@@ -31,7 +32,6 @@
 #ifdef USE_ROSEN_DRAWING
 #include "core/components_ng/render/drawing_forward.h"
 #endif
-#include "base/network/download_manager_v2.h"
 #include "core/image/image_source_info.h"
 #include "core/pipeline/pipeline_base.h"
 namespace OHOS::Ace {
@@ -116,6 +116,7 @@ public:
 #endif
     RefPtr<NG::ImageData> LoadDecodedImageData(
         const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr) override;
+
 private:
     static std::string GetThumbnailOrientation(const ImageSourceInfo& src);
 };
@@ -241,6 +242,7 @@ public:
 #endif
     RefPtr<NG::ImageData> LoadDecodedImageData(
         const ImageSourceInfo& imageSourceInfo, const WeakPtr<PipelineBase>& context = nullptr) override;
+
 private:
     static std::string GetThumbnailOrientation(const ImageSourceInfo& src);
 };

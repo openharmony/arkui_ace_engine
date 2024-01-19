@@ -75,7 +75,7 @@ void RosenFontLoader::LoadFromNetwork(const RefPtr<PipelineBase>& context)
             }
             std::vector<uint8_t> fontData;
             TAG_LOGI(AceLogTag::ACE_FONT, "begin to load font from network.");
-            if (!DownloadManager::GetInstance().Download(fontLoader->familySrc_, fontData) || fontData.empty()) {
+            if (!DownloadManager::GetInstance()->Download(fontLoader->familySrc_, fontData) || fontData.empty()) {
                 return;
             }
             fontLoader->PostLoadFontTask(std::move(fontData), context);
