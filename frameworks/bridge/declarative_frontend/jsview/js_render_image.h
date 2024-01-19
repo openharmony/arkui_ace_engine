@@ -16,8 +16,10 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_RENDER_IMAGE_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_RENDER_IMAGE_H
 
+#include "base/geometry/ng/size_t.h"
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/bindings_defines.h"
+#include "core/components_ng/image_provider/svg_dom_base.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "frameworks/core/components_ng/image_provider/image_loading_context.h"
 
@@ -51,6 +53,11 @@ public:
         return pixelMap_;
     }
 
+    RefPtr<NG::SvgDomBase> GetSvgDom()
+    {
+        return svgDom_;
+    }
+
     void SetInstanceId(int32_t instanceId)
     {
         instanceId_ = instanceId;
@@ -59,6 +66,21 @@ public:
     int32_t GetInstanceId()
     {
         return instanceId_;
+    }
+
+    bool IsSvg()
+    {
+        return sourceInfo_.IsSvg();
+    }
+
+    ImageFit GetImageFit()
+    {
+        return imageFit_;
+    }
+
+    NG::SizeF GetImageSize()
+    {
+        return imageSize_;
     }
 
     ACE_DISALLOW_COPY_AND_MOVE(JSRenderImage);
@@ -76,9 +98,13 @@ private:
     void OnImageLoadSuccess();
 
     RefPtr<NG::CanvasImage> image_;
+    RefPtr<NG::ImageObject> imageObj_;
     RefPtr<NG::ImageLoadingContext> loadingCtx_;
     RefPtr<PixelMap> pixelMap_;
-    ImageSourceInfo sourfaceInfo_;
+    RefPtr<NG::SvgDomBase> svgDom_;
+    ImageSourceInfo sourceInfo_;
+    ImageFit imageFit_;
+    NG::SizeF imageSize_;
 
     std::string src_;
     std::list<std::function<void()>> closeCallbacks_;

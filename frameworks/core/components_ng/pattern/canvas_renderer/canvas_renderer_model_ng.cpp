@@ -17,6 +17,7 @@
 
 #include "securec.h"
 
+#include "core/components/common/properties/paint_state.h"
 #include "frameworks/core/components_ng/pattern/custom_paint/custom_paint_pattern.h"
 #include "frameworks/core/components_ng/pattern/custom_paint/offscreen_canvas_pattern.h"
 
@@ -306,6 +307,10 @@ void CanvasRendererModelNG::DrawImage(const BaseInfo& baseInfo, const ImageInfo&
             offscreenPattern->DrawImage(imageInfo.image, imageInfo.imgWidth, imageInfo.imgHeight);
             return;
         }
+        if (imageInfo.isSvg) {
+            offscreenPattern->DrawSvgImage(imageInfo.svgDom, imageInfo.image, imageInfo.imageFit);
+            return;
+        }
         offscreenPattern->DrawPixelMap(imageInfo.pixelMap, imageInfo.image);
         return;
     }
@@ -315,6 +320,10 @@ void CanvasRendererModelNG::DrawImage(const BaseInfo& baseInfo, const ImageInfo&
         CHECK_NULL_VOID(canvasPattern);
         if (imageInfo.isImage) {
             canvasPattern->DrawImage(imageInfo.image, imageInfo.imgWidth, imageInfo.imgHeight);
+            return;
+        }
+        if (imageInfo.isSvg) {
+            canvasPattern->DrawSvgImage(imageInfo.svgDom, imageInfo.image, imageInfo.imageFit);
             return;
         }
         canvasPattern->DrawPixelMap(imageInfo.pixelMap, imageInfo.image);

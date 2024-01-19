@@ -322,6 +322,11 @@ RefPtr<CanvasImage> ImageLoadingContext::MoveCanvasImage()
     return std::move(canvasImage_);
 }
 
+RefPtr<ImageObject> ImageLoadingContext::MoveImageObject()
+{
+    return std::move(imageObj_);
+}
+
 void ImageLoadingContext::LoadImageData()
 {
     stateManager_->HandleCommand(ImageLoadingCommand::LOAD_DATA);

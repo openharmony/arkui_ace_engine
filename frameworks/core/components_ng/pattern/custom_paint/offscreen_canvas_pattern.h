@@ -18,6 +18,7 @@
 
 #include "base/memory/referenced.h"
 #include "core/components/common/properties/paint_state.h"
+#include "core/components_ng/image_provider/svg_dom_base.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -60,6 +61,7 @@ public:
     TextMetrics MeasureTextMetrics(const std::string& text, const PaintState& state);
     
     void DrawImage(const Ace::CanvasImage& image, double width, double height);
+    void DrawSvgImage(RefPtr<SvgDomBase> svgDom, const Ace::CanvasImage& image, const ImageFit& imageFit);
     void DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& image);
     std::unique_ptr<Ace::ImageData> GetImageData(double left, double top, double width, double height);
     void GetImageData(const std::shared_ptr<Ace::ImageData>& imageData);
