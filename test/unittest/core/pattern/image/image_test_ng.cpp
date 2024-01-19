@@ -1546,7 +1546,9 @@ HWTEST_F(ImageTestNg, ImageLayoutFunction001, TestSize.Level1)
      */
     auto loadingCtx =
         AceType::MakeRefPtr<ImageLoadingContext>(ImageSourceInfo(), LoadNotifier(nullptr, nullptr, nullptr));
-    auto imageLayoutAlgorithm = AceType::MakeRefPtr<ImageLayoutAlgorithm>(loadingCtx, loadingCtx);
+    auto altLoadingCtx =
+        AceType::MakeRefPtr<ImageLoadingContext>(ImageSourceInfo(), LoadNotifier(nullptr, nullptr, nullptr));
+    auto imageLayoutAlgorithm = AceType::MakeRefPtr<ImageLayoutAlgorithm>(loadingCtx, altLoadingCtx);
     imageLayoutAlgorithm->Layout(&layoutWrapper);
     /**
      * @tc.cases: case2. layoutWrapper->GetGeometryNode()->GetContent() is true, func success.
