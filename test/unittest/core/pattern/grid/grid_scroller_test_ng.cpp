@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -327,6 +327,78 @@ HWTEST_F(GridScrollerTestNg, DISABLED_ScrollToIndex011, TestSize.Level1)
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, ITEM_HEIGHT * 5.5 + ROW_GAP * 4));
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::END, ITEM_HEIGHT + ROW_GAP * 3));
     EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, ITEM_HEIGHT + ROW_GAP * 3));
+}
+
+/**
+ * @tc.name: ScrollToIndex012
+ * @tc.desc: Test ScrollToIndex with big gap(lineHeight + gap > mainSize)
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, ScrollToIndex012, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Set BIG_ROW_GAP, ScrollTo index:10, text ScrollAlign::AUTO
+     * @tc.expected: Each test scroll the correct distance
+     */
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetRowsGap(Dimension(BIG_ROW_GAP));
+        CreateColItem(30);
+    });
+    int32_t index = 10;
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, ITEM_HEIGHT * 3 + BIG_ROW_GAP * 2 - GRID_HEIGHT));
+    /**
+     * @tc.cases: use ScrollTo to make item 10 in the last line, ScrollTo index:10, text ScrollAlign::AUTO
+     * @tc.expected: scrollToIndex don't change grid offset
+     */
+    auto autoPosition = ITEM_HEIGHT * 3 + BIG_ROW_GAP * 2 - GRID_HEIGHT + ITEM_HEIGHT;
+    pattern_->ScrollTo(autoPosition);
+    FlushLayoutTask(frameNode_);
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, autoPosition));
+}
+
+/**
+ * @tc.name: ScrollToIndex013
+ * @tc.desc: Test ScrollToIndex with big gap(lineHeight + gap > mainSize)
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, ScrollToIndex013, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Set BIG_ROW_GAP, ScrollTo index:11, text each ScrollAlign::CENTER
+     * @tc.expected: Each test scroll the correct distance
+     */
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetRowsGap(Dimension(BIG_ROW_GAP));
+        CreateColItem(30);
+    });
+    int32_t index = 11;
+    auto enddPosition = ITEM_HEIGHT * 3 + BIG_ROW_GAP * 2 - GRID_HEIGHT;
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::CENTER, enddPosition + (GRID_HEIGHT - ITEM_HEIGHT) / 2));
+}
+
+/**
+ * @tc.name: ScrollToIndex014
+ * @tc.desc: Test ScrollToIndex with medium gap(3*lineHeight + 3*gap > mainSize)
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridScrollerTestNg, ScrollToIndex014, TestSize.Level1)
+{
+    /**
+     * @tc.cases: Set MEDIUM_ROW_GAP and scroll to specified position, ScrollTo index:12, text each ScrollAlign::AUTO
+     * @tc.expected: Each test scroll the correct distance
+     */
+    Create([](GridModelNG model) {
+        model.SetColumnsTemplate("1fr 1fr 1fr 1fr");
+        model.SetRowsGap(Dimension(MEDIUM_ROW_GAP));
+        CreateColItem(30);
+    });
+    auto position = ITEM_HEIGHT + 5 * COL_GAP;
+    pattern_->ScrollTo(position);
+    FlushLayoutTask(frameNode_);
+    int32_t index = 12;
+    EXPECT_TRUE(ScrollToIndex(index, false, ScrollAlign::AUTO, position));
 }
 
 /**
