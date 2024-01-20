@@ -4435,6 +4435,9 @@ void RichEditorPattern::InitSelection(const Offset& pos)
     adjusted_ = AdjustWordSelection(currentPosition, nextPosition);
     textSelector_.Update(currentPosition, nextPosition);
     auto selectedRects = paragraphs_.GetRects(currentPosition, nextPosition);
+    if (selectedRects.empty() || (selectedRects.size() == 1 && NearZero((selectedRects[0].Width())))) {
+        textSelector_.Update(currentPosition, currentPosition);
+    }
     if (selectedRects.empty() && !spans_.empty()) {
         auto it = std::find_if(
             spans_.begin(), spans_.end(), [caretPosition = currentPosition](const RefPtr<SpanItem>& spanItem) {
