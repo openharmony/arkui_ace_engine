@@ -81,6 +81,8 @@ public:
     RefPtr<NG::UINode> CreateNodeByRouteInfo(const RefPtr<NG::RouteInfo>& routeInfo) override;
     void SetJSExecutionContext(const JSExecutionContext& context);
     std::string GetRouteParam() const override;
+    void OnAttachToParent(RefPtr<NG::NavigationStack> parent) override;
+    void OnDetachFromParent() override;
 
 protected:
     JSRef<JSObject> dataSourceObj_;
@@ -94,6 +96,7 @@ private:
     JSRef<JSVal> GetOnPopByIndex(int32_t index) const;
     bool GetNavDestinationNodeInUINode(RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode);
     int32_t GetSize() const;
+    void SetJSParentStack(JSRef<JSVal> parent);
     static std::string ConvertParamToString(const JSRef<JSVal>& param);
     static void ParseJsObject(std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj, int32_t depthLimit);
     static void UpdateOnStateChangedCallback(JSRef<JSObject> obj, std::function<void()> callback);

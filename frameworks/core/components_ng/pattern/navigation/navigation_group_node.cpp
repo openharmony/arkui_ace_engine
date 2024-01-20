@@ -871,4 +871,24 @@ NavigationMode NavigationGroupNode::GetNavigationMode()
     CHECK_NULL_RETURN(navigationPattern, NavigationMode::AUTO);
     return navigationPattern->GetNavigationMode();
 }
+
+void NavigationGroupNode::OnDetachFromMainTree(bool recursive)
+{
+    auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
+    if (pattern) {
+        pattern->DetachNavigationStackFromParent();
+    }
+
+    GroupNode::OnDetachFromMainTree(recursive);
+}
+
+void NavigationGroupNode::OnAttachToMainTree(bool recursive)
+{
+    GroupNode::OnAttachToMainTree(recursive);
+
+    auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
+    if (pattern) {
+        pattern->AttachNavigationStackToParent();
+    }
+}
 } // namespace OHOS::Ace::NG

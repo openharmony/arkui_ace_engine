@@ -1701,12 +1701,20 @@ class NavPathStack {
     this.animated = true;
     // native nav path stack, implement in cpp
     this.nativeStack = undefined;
+    // parent stack
+    this.parentStack = undefined;
   }
   setNativeStack(stack) {
     this.nativeStack = stack;
   }
   getNativeStack() {
     return this.nativeStack;
+  }
+  setParent(parent) {
+    this.parentStack = parent;
+  }
+  getParent() {
+    return this.parentStack;
   }
   pushName(name, param) {
     this.pathArray.push(new NavPathInfo(name, param));

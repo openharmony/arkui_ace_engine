@@ -1434,4 +1434,38 @@ void NavigationPattern::SetNavigationStack(const RefPtr<NavigationStack>& naviga
         navigationStack_->SetOnStateChangedCallback(callback);
     }
 }
+
+RefPtr<NavigationPattern> NavigationPattern::GetParentNavigationPattern()
+{
+    RefPtr<UINode> node = GetHost();
+    CHECK_NULL_RETURN(node, nullptr);
+    node = node->GetParent();
+    while (node) {
+        if (node->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
+            break;
+        }
+        node = node->GetParent();
+    }
+    auto groupNode = AceType::DynamicCast<NavigationGroupNode>(node);
+    CHECK_NULL_RETURN(groupNode, nullptr);
+    return AceType::DynamicCast<NavigationPattern>(groupNode->GetPattern());
+}
+
+void NavigationPattern::AttachNavigationStackToParent()
+{
+    CHECK_NULL_VOID(navigationStack_);
+    auto parentPattern = GetParentNavigationPattern();
+    CHECK_NULL_VOID(parentPattern);
+    auto parentStack = parentPattern->GetNavigationStack();
+    if (parentStack) {
+        navigationStack_->OnAttachToParent(parentStack);
+    }
+}
+
+void NavigationPattern::DetachNavigationStackFromParent()
+{
+    if (navigationStack_) {
+        navigationStack_->OnDetachFromParent();
+    }
+}
 } // namespace OHOS::Ace::NG
