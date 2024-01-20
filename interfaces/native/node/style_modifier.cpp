@@ -999,6 +999,22 @@ void SetOverlay(ArkUI_NodeHandle node, const char* value)
         node->uiNodeHandle, valueVal[0].c_str(), values, ALLOW_SIZE_10);
 }
 
+void SetBackgroundImagePosition(ArkUI_NodeHandle node, const char* value)
+{
+    auto* fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+
+    std::vector<std::string> positions;
+    StringUtils::StringSplitter(value, ' ', positions);
+    if (positions.size() != NUM_2) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "positions are invalid");
+        return;
+    }
+}
+
 // TextInput Arttributes functions
 void SetFontColor(ArkUI_NodeHandle node, const char* value)
 {
@@ -1513,6 +1529,19 @@ void SetScrollEdge(ArkUI_NodeHandle node, const char* value)
     std::vector<std::string> edge = { "top", "center", "bottom", "baseline", "start", "middle", "end" };
     fullImpl->getNodeModifiers()->getScrollModifier()->setScrollEdge(
         node->uiNodeHandle, StringToEnumInt(value, edge, 0));
+}
+
+void SetScrollEnablePaging(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
 }
 
 // List Attributes functions
@@ -2609,6 +2638,238 @@ void SetListItemGroupDivider(ArkUI_NodeHandle node, const char* value)
         color, values, units, NUM_3);
 }
 
+// datepicker
+void SetDatePickerLunar(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
+}
+
+void SetDatePickerStart(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
+
+    std::vector<std::string> date;
+    StringUtils::StringSplitter(std::string(value), '-', date);
+    if (date.size() != NUM_3) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "date is valid");
+        return;
+    }
+}
+
+void SetDatePickerEnd(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
+
+    std::vector<std::string> date;
+    StringUtils::StringSplitter(std::string(value), '-', date);
+    if (date.size() != NUM_3) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "date is valid");
+        return;
+    }
+}
+
+void SetDatePickerSelected(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
+
+    std::vector<std::string> date;
+    StringUtils::StringSplitter(std::string(value), '-', date);
+    if (date.size() != NUM_3) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "date is valid");
+        return;
+    }
+}
+
+void SetDatePickerDisappearTextStyle(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
+}
+
+void SetDatePickerTextStyle(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
+}
+
+void SetDatePickerSelectedTextStyle(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
+}
+
+// timepicker
+void SetTimePickerSelected(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
+}
+
+void SetTimeUseMilitaryTime(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
+}
+
+void SetTimePickerDisappearTextStyle(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
+}
+
+void SetTimePickerTextStyle(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
+}
+
+void SetTimePickerSelectedTextStyle(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
+}
+
+// TextPicker
+void SetTextPickerDisappearTextStyle(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
+}
+
+void SetTextPickerTextStyle(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
+}
+
+void SetTextPickerSelectedTextStyle(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
+}
+
+void SetTextPickerSelectedIndex(ArkUI_NodeHandle node, const char* value)
+{
+    auto fullImpl = GetFullImpl();
+    if (!fullImpl) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get full impl");
+        return;
+    }
+    if (!value) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "value is nullptr");
+        return;
+    }
+}
+
 using Setter = void(ArkUI_NodeHandle node, const char* value);
 void SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const char* value)
 {
@@ -2618,7 +2879,8 @@ void SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const char* va
         SetZIndex, SetVisibility, SetClip, SetTransform, SetHitTestBehavior, SetPosition, SetShadow,
         SetBackgroundImageSize, SetBackgroundBlurStyle, SetTransitionCenter, SetOpacityTransition, SetRotateTransition,
         SetScaleTransition, SetTranslateTransition, SetFocusable, SetAccessibilityGroup, SetAccessibilityText,
-        SetAccessibilityLevel, SetAccessibilityDescription, SetDefaultFocus, SetResponseRegion, SetOverlay };
+        SetAccessibilityLevel, SetAccessibilityDescription, SetDefaultFocus, SetResponseRegion, SetOverlay,
+        SetBackgroundImagePosition };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "common node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -2704,7 +2966,7 @@ void SetScrollAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const char* va
 {
     static Setter* setters[] = { SetScrollScrollBar, SetScrollScrollBarWidth, SetScrollScrollBarColor,
         SetScrollScrollable, SetScrollEdgeEffect, SetScrollEnableScrollInteraction, SetScrollFriction,
-        SetScrollScrollSnap, SetScrollNestedScroll, SetScrollTo, SetScrollEdge };
+        SetScrollScrollSnap, SetScrollNestedScroll, SetScrollTo, SetScrollEdge, SetScrollEnablePaging };
     if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "scroll node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -2779,6 +3041,46 @@ void SetListItemGroupAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const c
     }
     setters[subTypeId](node, value);
 }
+
+void SetDatePickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const char* value)
+{
+    static Setter* setters[] = {
+        SetDatePickerLunar, SetDatePickerStart, SetDatePickerEnd, SetDatePickerSelected,
+        SetDatePickerDisappearTextStyle, SetDatePickerTextStyle, SetDatePickerSelectedTextStyle
+    };
+    if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "datepicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        return;
+    }
+    setters[subTypeId](node, value);
+}
+
+void SetTimePickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const char* value)
+{
+    static Setter* setters[] = {
+        SetTimePickerSelected, SetTimeUseMilitaryTime, SetTimePickerDisappearTextStyle, SetTimePickerTextStyle,
+        SetTimePickerSelectedTextStyle
+    };
+    if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "timepicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        return;
+    }
+    setters[subTypeId](node, value);
+}
+
+void SetTextPickerAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const char* value)
+{
+    static Setter* setters[] = {
+        SetTextPickerDisappearTextStyle, SetTextPickerTextStyle, SetTextPickerSelectedTextStyle,
+        SetTextPickerSelectedIndex
+    };
+    if (subTypeId >= sizeof(setters) / sizeof(Setter*)) {
+        TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textpicker node attribute: %{public}d NOT IMPLEMENT", subTypeId);
+        return;
+    }
+    setters[subTypeId](node, value);
+}
+
 } // namespace
 
 void SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, const char* value)
@@ -2808,6 +3110,9 @@ void SetNodeAttribute(ArkUI_NodeHandle node, ArkUI_NodeAttributeType type, const
         nullptr,
         SetXComponentAttribute,
         SetListItemGroupAttribute,
+        SetDatePickerAttribute,
+        SetTimePickerAttribute,
+        SetTextPickerAttribute
     };
     int32_t subTypeClass = type / MAX_NODE_SCOPE_NUM;
     int32_t subTypeId = type % MAX_NODE_SCOPE_NUM;
