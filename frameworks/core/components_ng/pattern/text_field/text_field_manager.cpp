@@ -76,15 +76,20 @@ void TextFieldManagerNG::ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bot
     CHECK_NULL_VOID(scrollableRect.Top() < bottomInset.start);
 
     auto caretRect = textBase->GetCaretRect() + frameNode->GetOffsetRelativeToWindow();
-    // caret above scroll's content region
     auto diffTop = caretRect.Top() - scrollableRect.Top();
+    // caret height larger scroll's content region
+    if (diffTop <= 0 && LessNotEqual(bottomInset.start, caretRect.Bottom())) {
+        return;
+    }
+
+    // caret above scroll's content region
     if (diffTop < 0) {
-        scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() + diffTop - caretRect.Height() * 2);
+        scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() + diffTop);
         return;
     }
 
     // caret below safeArea
-    auto diffBot = bottomInset.start - (caretRect.Bottom() + caretRect.Height() * 2);
+    auto diffBot = bottomInset.start - caretRect.Bottom();
     CHECK_NULL_VOID(diffBot < 0);
     scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() - diffBot);
 }
