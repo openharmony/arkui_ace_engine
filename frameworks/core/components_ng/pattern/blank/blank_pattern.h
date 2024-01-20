@@ -50,6 +50,14 @@ public:
         return MakeRefPtr<BlankPaintMethod>();
     }
 
+    bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, bool skipMeasure, bool /*skipLayout*/) override
+    {
+        if (skipMeasure || dirty->SkipMeasureContent()) {
+            return false;
+        }
+        return true;
+    }
+
 private:
     RefPtr<FrameNode> GetParentFrameNode(RefPtr<FrameNode> node);
 };
