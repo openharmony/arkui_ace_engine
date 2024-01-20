@@ -74,8 +74,7 @@ group("core_property_unittest") {
     ":border_property_test_ng",
     ":calc_length_test_ng",
     ":gradient_property_test_ng",
-
-    # ":grid_property_test_ng",
+    ":grid_property_test_ng",
     ":layout_constraint_test_ng",
     ":measure_utils_test_ng",
     ":property_test_ng",

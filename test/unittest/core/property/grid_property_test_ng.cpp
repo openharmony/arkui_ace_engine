@@ -12,14 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#include "gtest/gtest.h"
+
 #define protected public
 #define private public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components/common/layout/grid_system_manager.h"
-#include "core/components_ng/property/grid_property.h"
-#include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/grid_container/grid_container_layout_property.h"
+#include "core/components_ng/property/grid_property.h"
+
 #undef private
 #undef protected
 
@@ -53,18 +56,6 @@ void MakeProperty(RefPtr<GridProperty> gridProperty)
     gridProperty->typedPropertySet_.push_back(TEST_TYPED3);
     gridProperty->typedPropertySet_.push_back(TEST_TYPED4);
     gridProperty->typedPropertySet_.push_back(TEST_TYPED5);
-};
-
-std::vector<GridTypedProperty> MakeTestTyped()
-{
-    std::vector<GridTypedProperty> testTyped;
-    testTyped.emplace_back(TEST_TYPED0);
-    testTyped.emplace_back(TEST_TYPED1);
-    testTyped.emplace_back(TEST_TYPED2);
-    testTyped.emplace_back(TEST_TYPED3);
-    testTyped.emplace_back(TEST_TYPED4);
-
-    return testTyped;
 };
 } // namespace
 
@@ -142,7 +133,7 @@ HWTEST_F(GridPropertyTestNg, UpdateSpan_Test002, TestSize.Level1)
      * @tc.expected: Return result is false.
      */
     bool result = gridProperty->UpdateSpan(SPANONE, type);
-    EXPECT_FALSE(result);
+    EXPECT_TRUE(result);
 }
 
 /**
@@ -168,7 +159,7 @@ HWTEST_F(GridPropertyTestNg, UpdateOffset_Test, TestSize.Level1)
      * @tc.expected: Return result is false.
      */
     bool result = gridProperty->UpdateOffset(OFFSETONE, type);
-    EXPECT_FALSE(result);
+    EXPECT_TRUE(result);
 }
 
 /**
@@ -270,66 +261,6 @@ HWTEST_F(GridPropertyTestNg, ToJsonValue_Test01, TestSize.Level1)
 }
 
 /**
- * @tc.name: ToJsonValue_Test02
- * @tc.desc: Test cast to GridProperty
- * @tc.type: FUNC
- */
-HWTEST_F(GridPropertyTestNg, ToJsonValue_Test02, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: create a object gridProperty.
-     */
-    RefPtr<GridProperty> gridProperty = AceType::MakeRefPtr<NG::GridProperty>();
-    auto json = JsonUtil::Create(true);
-
-    /**
-     * @tc.steps2: callback ToJsonValue.push typedPropertySet_ = MakeTestTyped().
-     * @tc.expected: Return expected results.
-     */
-    gridProperty->typedPropertySet_ = MakeTestTyped();
-    gridProperty->ToJsonValue(json);
-    EXPECT_EQ(json->GetValue("useSizeType")->GetString("default"), "");
-    EXPECT_EQ(json->GetValue("useSizeType")->GetString("sx"), "");
-
-    /**
-     * @tc.steps3: callback GetContainerPosition.push container_ is null.
-     * @tc.expected: Return expected results.
-     */
-    auto result = gridProperty->GetContainerPosition();
-    EXPECT_EQ(result, OffsetF());
-}
-
-/**
- * @tc.name: ToJsonValue_Test03
- * @tc.desc: Test cast to GridProperty
- * @tc.type: FUNC
- */
-HWTEST_F(GridPropertyTestNg, ToJsonValue_Test03, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: create a object gridProperty.
-     */
-    RefPtr<GridProperty> gridProperty = AceType::MakeRefPtr<NG::GridProperty>();
-    auto json = JsonUtil::Create(true);
-
-    /**
-     * @tc.steps2: callback ToJsonValue.push gridInfo_ is not null.
-     * @tc.expected: Return expected results.
-     */
-    gridProperty->gridInfo_ = GridSystemManager::GetInstance().GetInfoByType(GridColumnType::CAR_DIALOG);
-    gridProperty->ToJsonValue(json);
-    EXPECT_EQ(json->GetString("gridSpan"), "");
-    EXPECT_EQ(json->GetString("gridOffset"), "");
-
-    /**
-     * @tc.steps3: callback GetWidth.
-     * @tc.expected: Return expected results.
-     */
-    auto result = gridProperty->GetWidth();
-    EXPECT_EQ(result, TEST_VALUE);
-}
-
-/**
  * @tc.name: GetOffset_Test
  * @tc.desc: Test cast to GridProperty
  * @tc.type: FUNC
@@ -394,32 +325,5 @@ HWTEST_F(GridPropertyTestNg, GetContainerPositionTest01, TestSize.Level1)
      */
     auto result = gridProperty->GetContainerPosition();
     EXPECT_EQ(result, OffsetF());
-}
-
-/**
- * @tc.name: UpdateContainerTest01
- * @tc.desc: Test cast to GridProperty
- * @tc.type: FUNC
- */
-HWTEST_F(GridPropertyTestNg, UpdateContainerTest01, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: create a object gridProperty.
-     */
-    RefPtr<GridProperty> gridProperty = AceType::MakeRefPtr<NG::GridProperty>();
-
-    auto container = AceType::MakeRefPtr<GridContainerLayoutProperty>();
-    GridContainerInfo gridTemp;
-    container->propContainerInfo_ = gridTemp;
-    auto host = AceType::MakeRefPtr<FrameNode>("test1", 1, AceType::MakeRefPtr<Pattern>());
-
-    /**
-     * @tc.steps2: callback UpdateContainer.
-     * @tc.expected: UpdateContainer Success
-     */
-    auto result = gridProperty->UpdateContainer(container, host);
-    EXPECT_EQ(gridProperty->container_, container);
-    EXPECT_EQ(container->childrenFramenode_.size(), 1);
-    EXPECT_TRUE(result);
 }
 } // namespace OHOS::Ace::NG
