@@ -49,7 +49,7 @@ constexpr int32_t HOVER_ANIMATION_DURATION = 250;
 constexpr int32_t PRESS_ANIMATION_DURATION = 100;
 constexpr int32_t CLICK_ANIMATION_DURATION = 300;
 constexpr float FONTWEIGHT = 0.5f;
-constexpr float FONT_SIZE_PERCENT = 0.9f;
+constexpr float FONT_SIZE_PERCENT = 1.0f;
 constexpr char MEASURE_SIZE_STRING[] = "TEST";
 constexpr int32_t HOT_ZONE_HEIGHT_CANDIDATE = 2;
 constexpr int32_t HOT_ZONE_HEIGHT_DISAPPEAR = 4;
@@ -636,9 +636,6 @@ void TimePickerColumnPattern::TextPropertiesLinearAnimation(
 
 void TimePickerColumnPattern::UpdateTextPropertiesLinear(bool isDown, double scale)
 {
-    if (scale > 1) {
-        return;
-    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     uint32_t showCount = GetShowCount();
