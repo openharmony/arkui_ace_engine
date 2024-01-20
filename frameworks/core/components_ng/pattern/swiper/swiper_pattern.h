@@ -799,6 +799,8 @@ private:
     void UpdateIndexOnSwipePageStop();
     void AdjustCurrentFocusIndex();
 
+    int32_t CheckTargetIndex(int32_t targetIndex);
+
     WeakPtr<NestableScrollContainer> parent_;
     /**
      *  ============================================================
