@@ -25,6 +25,7 @@
 #include "core/common/recorder/event_recorder.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/base/observer_handler.h"
 
 namespace OHOS::Ace::NG {
 
@@ -168,11 +169,13 @@ void PagePattern::ProcessShowState()
 void PagePattern::OnAttachToMainTree()
 {
     state_ = RouterPageState::ABOUT_TO_APPEAR;
+    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
 }
 
 void PagePattern::OnDetachFromMainTree()
 {
     state_ = RouterPageState::ABOUT_TO_DISAPPEAR;
+    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
 }
 
 void PagePattern::OnShow()
@@ -183,6 +186,7 @@ void PagePattern::OnShow()
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     state_ = RouterPageState::ON_PAGE_SHOW;
+    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
     if (pageInfo_) {
         context->FirePageChanged(pageInfo_->GetPageId(), true);
     }
@@ -222,6 +226,7 @@ void PagePattern::OnHide()
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     state_ = RouterPageState::ON_PAGE_HIDE;
+    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
     if (pageInfo_) {
         context->FirePageChanged(pageInfo_->GetPageId(), false);
     }
@@ -257,6 +262,7 @@ bool PagePattern::OnBackPressed()
     }
     // if in page transition, do not set to ON_BACK_PRESS
     state_ = RouterPageState::ON_BACK_PRESS;
+    UIObserverHandler::GetInstance().NotifyRouterPageStateChange(GetPageInfo(), state_);
     if (OnBackPressed_) {
         return OnBackPressed_();
     }
