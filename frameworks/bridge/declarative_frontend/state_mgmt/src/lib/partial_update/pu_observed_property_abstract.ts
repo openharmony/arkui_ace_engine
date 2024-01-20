@@ -76,7 +76,7 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   }
 
   public debugInfoOwningView() : string {
-    return `${this.owningView_ ? this.owningView_.debugInfo() : "owning @Component UNKNOWN"}`;
+    return `${this.owningView_ ? this.owningView_.debugInfo__() : "owning @Component UNKNOWN"}`;
   }
 
   // dump info about owning view and subscribers (PU ones only)
