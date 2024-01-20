@@ -29,6 +29,7 @@ ohos_shared_library("ace_network") {
     "//third_party/curl:curl_shared",
   ]
   external_deps = [
+    "hilog:libhilog",
     "netmanager_base:net_conn_manager_if",
     "netmanager_base:net_conn_parcel",
     "netstack:http_client",

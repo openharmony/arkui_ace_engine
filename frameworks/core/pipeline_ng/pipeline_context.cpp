@@ -1166,11 +1166,11 @@ void PipelineContext::StartWindowMaximizeAnimation(
 #endif
 }
 
-void PipelineContext::StartFullToMultWindowAnimation(int32_t width, int32_t height,
-    WindowSizeChangeReason type, const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+void PipelineContext::StartFullToMultWindowAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
 {
-    LOGI("Root node start multiple window animation, type = %{public}d, width = %{public}d, height = %{public}d",
-        type, width, height);
+    LOGI("Root node start multiple window animation, type = %{public}d, width = %{public}d, height = %{public}d", type,
+        width, height);
 #ifdef ENABLE_ROSEN_BACKEND
     if (rsTransaction) {
         FlushMessages();
@@ -1496,11 +1496,6 @@ bool PipelineContext::OnBackPressed()
         return true;
     }
 
-    auto textfieldManager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
-    if (textfieldManager && textfieldManager->OnBackPressed()) {
-        return true;
-    }
-
     // if has popup, back press would hide popup and not trigger page back
     auto hasOverlay = false;
     taskExecutor_->PostSyncTask(
@@ -1516,6 +1511,11 @@ bool PipelineContext::OnBackPressed()
         },
         TaskExecutor::TaskType::UI);
     if (hasOverlay) {
+        return true;
+    }
+
+    auto textfieldManager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
+    if (textfieldManager && textfieldManager->OnBackPressed()) {
         return true;
     }
 
