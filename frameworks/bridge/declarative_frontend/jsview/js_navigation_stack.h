@@ -16,6 +16,7 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_NAVIGATION_STACK_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_NAVIGATION_STACK_H
 
+#include <functional>
 #include <stdint.h>
 
 #include "bridge/declarative_frontend/engine/js_types.h"
@@ -46,6 +47,11 @@ class JSNavigationStack : public NG::NavigationStack {
 public:
     JSNavigationStack() = default;
     ~JSNavigationStack() override = default;
+
+    void SetOnStateChangedCallback(std::function<void()> callback) override
+    {
+        onStateChangedCallback_ = callback;
+    }
 
     void UpdateStackInfo(const RefPtr<NavigationStack>& newStack) override
     {
@@ -80,14 +86,17 @@ protected:
     JSRef<JSObject> dataSourceObj_;
     JSRef<JSFunc> navDestBuilderFunc_;
     JSExecutionContext executionContext_;
+    std::function<void()> onStateChangedCallback_;
 
 private:
     std::string GetNameByIndex(int32_t index);
     JSRef<JSVal> GetParamByIndex(int32_t index) const;
+    JSRef<JSVal> GetOnPopByIndex(int32_t index) const;
     bool GetNavDestinationNodeInUINode(RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode);
     int32_t GetSize() const;
     static std::string ConvertParamToString(const JSRef<JSVal>& param);
     static void ParseJsObject(std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj, int32_t depthLimit);
+    static void UpdateOnStateChangedCallback(JSRef<JSObject> obj, std::function<void()> callback);
 };
 } // namespace OHOS::Ace::Framework
 

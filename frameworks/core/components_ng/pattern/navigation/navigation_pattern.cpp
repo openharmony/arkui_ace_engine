@@ -187,11 +187,58 @@ void NavigationPattern::OnModifyDone()
         navBarNode->SetActive(true);
         navBarNode->MarkModifyDone();
     }
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto currentPlatformVersion = pipeline->GetMinPlatformVersion();
+
+    if (currentPlatformVersion >= PLATFORM_VERSION_TEN) {
+        auto dividerNode = GetDividerNode();
+        CHECK_NULL_VOID(dividerNode);
+        auto gestureHub = dividerNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        InitDragEvent(gestureHub);
+        auto inputHub = dividerNode->GetOrCreateInputEventHub();
+        CHECK_NULL_VOID(inputHub);
+        InitDividerMouseEvent(inputHub);
+    }
+
+    auto&& opts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
+    if (opts && opts->Expansive()) {
+        navBarNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+        navBarNode->MarkModifyDone();
+
+        auto navigationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
+        CHECK_NULL_VOID(navigationContentNode);
+        navigationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+        navigationContentNode->MarkModifyDone();
+
+        auto dividerNode = AceType::DynamicCast<FrameNode>(hostNode->GetDividerNode());
+        CHECK_NULL_VOID(dividerNode);
+        dividerNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
+        dividerNode->MarkModifyDone();
+    }
+}
+
+void NavigationPattern::SyncWithJsStackIfNeeded()
+{
+    if (!needSyncWithJsStack_) {
+        return;
+    }
+
+    needSyncWithJsStack_ = false;
+    UpdateNavPathList();
+    RefreshNavDestination();
+}
+
+void NavigationPattern::UpdateNavPathList()
+{
     CHECK_NULL_VOID(navigationStack_);
     auto preTopNavPath = navigationStack_->GetPreTopNavPath();
     auto pathNames = navigationStack_->GetAllPathName();
-    auto preSize = navigationStack_->PreSize();
     auto cacheNodes = navigationStack_->GetAllCacheNodes();
+    preTopNavPath_ = preTopNavPath;
+    preStackSize_ = navigationStack_->PreSize();
     NavPathList navPathList;
     auto replaceValue = navigationStack_->GetReplaceValue();
     for (size_t i = 0; i < pathNames.size(); ++i) {
@@ -228,6 +275,15 @@ void NavigationPattern::OnModifyDone()
     }
 
     navigationStack_->SetNavPathList(navPathList);
+}
+
+void NavigationPattern::RefreshNavDestination()
+{
+    auto hostNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
+    CHECK_NULL_VOID(hostNode);
+    int32_t preSize = preStackSize_;
+    auto preTopNavPath = std::move(preTopNavPath_);
+    auto& navPathList = navigationStack_->GetAllNavDestinationNodes();
     hostNode->UpdateNavDestinationNodeWithoutMarkDirty(
         preTopNavPath.has_value() ? preTopNavPath->second : nullptr, navigationModeChange_);
     auto newTopNavPath = navigationStack_->GetTopNavPath();
@@ -242,36 +298,7 @@ void NavigationPattern::OnModifyDone()
         firstNavDesNode->MarkModifyDone();
     }
 
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto currentPlatformVersion = pipeline->GetMinPlatformVersion();
-
-    if (currentPlatformVersion >= PLATFORM_VERSION_TEN) {
-        auto dividerNode = GetDividerNode();
-        CHECK_NULL_VOID(dividerNode);
-        auto gestureHub = dividerNode->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(gestureHub);
-        InitDragEvent(gestureHub);
-        auto inputHub = dividerNode->GetOrCreateInputEventHub();
-        CHECK_NULL_VOID(inputHub);
-        InitDividerMouseEvent(inputHub);
-    }
-
-    auto&& opts = hostNode->GetLayoutProperty()->GetSafeAreaExpandOpts();
-    if (opts && opts->Expansive()) {
-        navBarNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
-        navBarNode->MarkModifyDone();
-
-        auto navigationContentNode = AceType::DynamicCast<FrameNode>(hostNode->GetContentNode());
-        CHECK_NULL_VOID(navigationContentNode);
-        navigationContentNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
-        navigationContentNode->MarkModifyDone();
-
-        auto dividerNode = AceType::DynamicCast<FrameNode>(hostNode->GetDividerNode());
-        CHECK_NULL_VOID(dividerNode);
-        dividerNode->GetLayoutProperty()->UpdateSafeAreaExpandOpts(*opts);
-        dividerNode->MarkModifyDone();
-    }
+    preStackSize_ = 0;
 }
 
 void NavigationPattern::CheckTopNavPathChange(
@@ -1374,6 +1401,37 @@ void NavigationPattern::UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNav
         auto context = PipelineContext::GetCurrentContext();
         CHECK_NULL_VOID(context);
         context->RequestFrame();
+    }
+}
+
+void NavigationPattern::SetNavigationStack(const RefPtr<NavigationStack>& navigationStack)
+{
+    if (navigationStack_) {
+        navigationStack_->SetOnStateChangedCallback(nullptr);
+    }
+    navigationStack_ = navigationStack;
+    if (navigationStack_) {
+        auto callback = [weakPattern = WeakClaim(this)]() {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            if (pattern->NeedSyncWithJsStackMarked()) {
+                return;
+            }
+
+            pattern->MarkNeedSyncWithJsStack();
+            auto context = NG::PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            context->AddBuildFinishCallBack([weakPattern]() {
+                auto pattern = weakPattern.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->SyncWithJsStackIfNeeded();
+                auto host = pattern->GetHost();
+                CHECK_NULL_VOID(host);
+                host->MarkDirtyNode();
+            });
+            context->RequestFrame();
+        };
+        navigationStack_->SetOnStateChangedCallback(callback);
     }
 }
 } // namespace OHOS::Ace::NG

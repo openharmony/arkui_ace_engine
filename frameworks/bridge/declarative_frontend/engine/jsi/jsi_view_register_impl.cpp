@@ -98,6 +98,7 @@
 #include "bridge/declarative_frontend/jsview/js_menu_item.h"
 #include "bridge/declarative_frontend/jsview/js_menu_item_group.h"
 #include "bridge/declarative_frontend/jsview/js_dynamic_component.h"
+#include "bridge/declarative_frontend/jsview/js_nav_path_stack.h"
 #include "bridge/declarative_frontend/jsview/js_navdestination.h"
 #include "bridge/declarative_frontend/jsview/js_navigation.h"
 #include "bridge/declarative_frontend/jsview/js_navigator.h"
@@ -584,6 +585,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Panel", JSSlidingPanel::JSBind },
     { "NavDestination", JSNavDestination::JSBind },
     { "Navigation", JSNavigation::JSBind },
+    { "NativeNavPathStack", JSNavPathStack::JSBind },
     { "Navigator", JSNavigator::JSBind },
     { "NavRouter", JSNavRouter::JSBind },
     { "ColumnSplit", JSColumnSplit::JSBind },
