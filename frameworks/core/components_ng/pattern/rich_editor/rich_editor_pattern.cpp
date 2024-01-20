@@ -4260,10 +4260,14 @@ void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
     auto textPaintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     float startSelectHeight = 0.0f;
     float endSelectHeight = 0.0f;
+    int32_t baseOffset = std::min(textSelector_.baseOffset, GetTextContentLength());
     int32_t destinationOffset = std::min(textSelector_.destinationOffset, GetTextContentLength());
-    auto startOffset = CalcCursorOffsetByPosition(textSelector_.baseOffset, startSelectHeight, true, false);
+    auto startOffset = CalcCursorOffsetByPosition(baseOffset, startSelectHeight, true, false);
     auto endOffset =
         CalcCursorOffsetByPosition(destinationOffset, endSelectHeight, false, false);
+    if (baseOffset == destinationOffset && NearEqual(startOffset.GetX(), endOffset.GetX())) {
+        endOffset = CalcCursorOffsetByPosition(destinationOffset, endSelectHeight, true, false);
+    }
     SizeF firstHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), startSelectHeight };
     SizeF secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), endSelectHeight };
     OffsetF firstHandleOffset = startOffset + textPaintOffset - rootOffset;
