@@ -23,6 +23,7 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
 
@@ -43,6 +44,7 @@ public:
     virtual bool ParseCommonTitle(
         bool hasSubTitle, bool hasMainTitle, const std::string& subtitle, const std::string& title) = 0;
     virtual void SetTitle(const std::string& title, bool hasSubTitle = false) = 0;
+    virtual void SetTitlebarOptions(NG::NavigationTitlebarOptions&& opt) {}
     virtual void SetCustomTitle(const RefPtr<AceType>& customNode) = 0;
     virtual void SetTitleHeight(const Dimension& height, bool isValid = true) = 0;
     virtual void SetTitleMode(NG::NavigationTitleMode mode) = 0;
@@ -58,6 +60,7 @@ public:
     virtual void SetToolBarItems(std::vector<NG::BarItem>&& toolBarItems) = 0;
     virtual void SetToolbarConfiguration(std::vector<NG::BarItem>&& toolBarItems) = 0;
     virtual void GetToolBarItems(std::list<RefPtr<AceType>>& items) {};
+    virtual void SetToolbarOptions(NG::NavigationToolbarOptions&& opt) {}
     virtual void SetMenuItems(std::vector<NG::BarItem>&& menuItems) = 0;
     virtual void GetMenuItems(std::list<RefPtr<AceType>>& items) {};
     virtual void SetCustomMenu(const RefPtr<AceType>& customNode) = 0;
