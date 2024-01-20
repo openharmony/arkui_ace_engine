@@ -354,7 +354,8 @@ void RosenRenderContext::InitContext(bool isRoot, const std::optional<ContextPar
                 .isTextureExportNode = isTextureExportNode };
             auto surfaceNode = Rosen::RSSurfaceNode::Create(surfaceNodeConfig, false);
             if (surfaceNode) {
-                surfaceNode->SetHardwareEnabled(true);
+                surfaceNode->SetHardwareEnabled(true, param->patternType == PatternType::VIDEO ?
+                    SelfDrawingNodeType::VIDEO : SelfDrawingNodeType::DEFAULT);
             }
 #else
             Rosen::RSSurfaceNodeConfig surfaceNodeConfig = { .SurfaceNodeName = param->surfaceName.value_or(""),
