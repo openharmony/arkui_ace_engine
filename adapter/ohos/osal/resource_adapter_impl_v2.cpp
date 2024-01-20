@@ -161,6 +161,22 @@ ResourceAdapterImplV2::ResourceAdapterImplV2(std::shared_ptr<Global::Resource::R
     sysResourceManager_ = resourceManager;
 }
 
+ResourceAdapterImplV2::ResourceAdapterImplV2(
+    std::shared_ptr<Global::Resource::ResourceManager> resourceManager, const ResourceInfo& resourceInfo)
+{
+    std::string resPath = resourceInfo.GetPackagePath();
+    std::string hapPath = resourceInfo.GetHapPath();
+    std::string resIndexPath = hapPath.empty() ? (resPath + "resources.index") : hapPath;
+    packagePathStr_ = (hapPath.empty() || IsDirExist(resPath)) ? resPath : std::string();
+
+    auto resConfig = ConvertConfigToGlobal(resourceInfo.GetResourceConfiguration());
+    sysResourceManager_ = resourceManager;
+    if (resConfig != nullptr) {
+        sysResourceManager_->UpdateResConfig(*resConfig);
+    }
+    resConfig_ = resConfig;
+}
+
 void ResourceAdapterImplV2::Init(const ResourceInfo& resourceInfo)
 {
     std::string resPath = resourceInfo.GetPackagePath();
