@@ -1854,6 +1854,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
     auto parent = parent_.Upgrade();
     if (!IsLoop() && parent && NearZero(GetDistanceToEdge())) {
         parent->HandleScrollVelocity(dragVelocity);
+        StartAutoPlay();
     } else {
         UpdateAnimationProperty(static_cast<float>(dragVelocity));
         NotifyParentScrollEnd();
