@@ -894,29 +894,33 @@ void TextPickerPattern::CheckAndUpdateColumnSize(SizeF& size)
     CHECK_NULL_VOID(host);
     auto pickerNode = DynamicCast<FrameNode>(host);
     CHECK_NULL_VOID(pickerNode);
+    auto stackNode = DynamicCast<FrameNode>(pickerNode->GetFirstChild());
+    CHECK_NULL_VOID(stackNode);
 
-    auto layoutProperty = pickerNode->GetLayoutProperty<TextPickerLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
+    auto pickerLayoutProperty = pickerNode->GetLayoutProperty();
+    CHECK_NULL_VOID(pickerLayoutProperty);
+    auto pickerLayoutConstraint = pickerLayoutProperty->GetLayoutConstraint();
 
-    auto layoutConstraint = layoutProperty->GetLayoutConstraint();
-    auto layoutSize = layoutConstraint->selfIdealSize;
+    auto stackLayoutProperty = stackNode->GetLayoutProperty();
+    CHECK_NULL_VOID(stackLayoutProperty);
+    auto stackLayoutConstraint = stackLayoutProperty->GetLayoutConstraint();
 
-    PaddingPropertyF padding = layoutProperty->CreatePaddingAndBorder();
     auto childCount = static_cast<float>(pickerNode->GetChildren().size());
     auto pickerContentSize = SizeF(size.Width() * childCount, size.Height());
-    AddPaddingToSize(padding, pickerContentSize);
-
-    if (layoutSize.Width().has_value()) {
-        pickerContentSize.SetWidth(layoutSize.Width().value());
+    auto parentIdealSize = stackLayoutConstraint->parentIdealSize;
+    if (parentIdealSize.Width().has_value()) {
+        pickerContentSize.SetWidth(parentIdealSize.Width().value());
     }
-    if (layoutSize.Height().has_value()) {
-        pickerContentSize.SetHeight(layoutSize.Height().value());
+    if (parentIdealSize.Height().has_value()) {
+        pickerContentSize.SetHeight(parentIdealSize.Height().value());
     }
 
+    PaddingPropertyF padding = pickerLayoutProperty->CreatePaddingAndBorder();
+    auto minSize = SizeF(pickerLayoutConstraint->minSize.Width(), pickerLayoutConstraint->minSize.Height());
+    MinusPaddingToSize(padding, minSize);
     auto version10OrLarger =
         PipelineBase::GetCurrentContext() && PipelineBase::GetCurrentContext()->GetMinPlatformVersion() > 9;
-    pickerContentSize.Constrain(layoutConstraint->minSize, layoutConstraint->maxSize, version10OrLarger);
-    MinusPaddingToSize(padding, pickerContentSize);
+    pickerContentSize.Constrain(minSize, stackLayoutConstraint->maxSize, version10OrLarger);
 
     size.SetWidth(pickerContentSize.Width() / std::max(childCount, 1.0f));
     size.SetHeight(pickerContentSize.Height());
