@@ -1733,7 +1733,7 @@ class NavPathStack {
     let pathInfo = this.pathArray.pop();
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
-    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop != undefined) {
+    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop !== undefined) {
       let popInfo = {
         info: currentPathInfo,
         result: result,
@@ -1763,7 +1763,7 @@ class NavPathStack {
     this.pathArray.splice(index + 1);
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
-    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop != undefined) {
+    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop !== undefined) {
       let popInfo = {
         info: currentPathInfo,
         result: result,
@@ -1789,7 +1789,7 @@ class NavPathStack {
     this.pathArray.splice(index + 1);
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
-    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop != undefined) {
+    if (result !== undefined && typeof result !== 'boolean' && currentPathInfo.onPop !== undefined) {
       let popInfo = {
         info: currentPathInfo,
         result: result,
