@@ -217,6 +217,9 @@ void SwiperLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             }
         }
     }
+    if (swiperLayoutProperty->GetFlexItemProperty()) {
+        measured_ = true;
+    }
 }
 
 void SwiperLayoutAlgorithm::MeasureCustomAnimation(
@@ -285,6 +288,13 @@ float SwiperLayoutAlgorithm::GetChildMaxSize(LayoutWrapper* layoutWrapper, Axis 
 void SwiperLayoutAlgorithm::MeasureSwiper(
     LayoutWrapper* layoutWrapper, const LayoutConstraintF& layoutConstraint, Axis axis)
 {
+    if (layoutWrapper->GetLayoutProperty()->GetFlexItemProperty() && measured_) {
+        // flex property causes Swiper to be measured twice, and itemPosition_ would
+        // reset after the first measure. Restore to that on second measure.
+        itemPosition_ = prevItemPosition_;
+        // targetIndex_ has also been reset during the first measure.
+        targetIndex_ = currentTargetIndex_;
+    }
     int32_t startIndex = 0;
     int32_t endIndex = 0;
     float startPos = 0.0f;

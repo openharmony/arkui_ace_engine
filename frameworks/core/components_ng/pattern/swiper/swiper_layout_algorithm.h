@@ -282,6 +282,7 @@ private:
 
     bool mainSizeIsMeasured_ = false;
     bool crossMatchChild_ = false;
+    bool measured_ = false; // to distinguish first and second measure in flex layout
 
     std::optional<int32_t> jumpIndex_;
     std::optional<int32_t> targetIndex_;
