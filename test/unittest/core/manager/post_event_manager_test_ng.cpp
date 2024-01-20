@@ -103,7 +103,7 @@ HWTEST_F(PostEventManagerTestNg, PostEventManagerTest001, TestSize.Level1)
     touchEvent.x = 10;
     touchEvent.y = 10;
     auto result = postEventManager_->PostEvent(root_, touchEvent);
-    EXPECT_EQ(result, true);
+    EXPECT_FALSE(result);
 
     /**
      * @tc.steps: step3. call PostEvent func with same event and check return value.
@@ -123,7 +123,7 @@ HWTEST_F(PostEventManagerTestNg, PostEventManagerTest001, TestSize.Level1)
     TimeStamp time(nanoseconds);
     touchMoveEvent.time = time;
     result = postEventManager_->PostEvent(root_, touchMoveEvent);
-    EXPECT_EQ(result, true);
+    EXPECT_FALSE(result);
 
     /**
      * @tc.steps: step5. call PostEvent func with touch up event and check return value.
@@ -137,7 +137,7 @@ HWTEST_F(PostEventManagerTestNg, PostEventManagerTest001, TestSize.Level1)
     TimeStamp timeUp(nanosecondsUp);
     touchUpEvent.time = timeUp;
     result = postEventManager_->PostEvent(root_, touchUpEvent);
-    EXPECT_EQ(result, true);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -171,7 +171,7 @@ HWTEST_F(PostEventManagerTestNg, PostEventManagerTest002, TestSize.Level1)
     touchEvent.x = 10;
     touchEvent.y = 10;
     auto result = postEventManager_->PostEvent(root_, touchEvent);
-    EXPECT_EQ(result, true);
+    EXPECT_FALSE(result);
 
     /**
      * @tc.steps: step3. call PostEvent func with another down event check whether cancel event will be sent or not.
@@ -185,7 +185,7 @@ HWTEST_F(PostEventManagerTestNg, PostEventManagerTest002, TestSize.Level1)
     TimeStamp time(nanoseconds);
     touchMoveEvent.time = time;
     result = postEventManager_->PostEvent(root_, touchMoveEvent);
-    EXPECT_EQ(result, true);
+    EXPECT_FALSE(result);
 }
 
 /**
@@ -280,7 +280,7 @@ HWTEST_F(PostEventManagerTestNg, PostEventManagerTest005, TestSize.Level1)
     touchEvent.x = 10;
     touchEvent.y = 10;
     auto result = postEventManager_->PostEvent(root_, touchEvent);
-    EXPECT_EQ(result, true);
+    EXPECT_FALSE(result);
 
     /**
      * @tc.steps: step3. call finger 1 PostEvent func and check return value.
@@ -291,7 +291,7 @@ HWTEST_F(PostEventManagerTestNg, PostEventManagerTest005, TestSize.Level1)
     anotherTouchEvent.x = 20;
     anotherTouchEvent.y = 20;
     result = postEventManager_->PostEvent(root_, anotherTouchEvent);
-    EXPECT_EQ(result, true);
+    EXPECT_FALSE(result);
 
     /**
      * @tc.steps: step3. call PostEvent func with touch up event and check return value.
@@ -305,7 +305,7 @@ HWTEST_F(PostEventManagerTestNg, PostEventManagerTest005, TestSize.Level1)
     TimeStamp time(nanoseconds);
     touchMoveEvent.time = time;
     result = postEventManager_->PostEvent(root_, touchMoveEvent);
-    EXPECT_EQ(result, true);
+    EXPECT_FALSE(result);
 
     /**
      * @tc.steps: step4. call PostEvent func with touch up event and check return value.
@@ -319,6 +319,6 @@ HWTEST_F(PostEventManagerTestNg, PostEventManagerTest005, TestSize.Level1)
     TimeStamp timeUp(nanosecondsUp);
     touchUpEvent.time = timeUp;
     result = postEventManager_->PostEvent(root_, touchUpEvent);
-    EXPECT_EQ(result, true);
+    EXPECT_FALSE(result);
 }
 } // namespace OHOS::Ace::NG

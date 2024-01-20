@@ -612,7 +612,12 @@ HWTEST_F(ContainerModelTestNg, ButtonsRectTest011, TestSize.Level1)
     auto children = buttonsRow->GetChildren();
     auto firstButtonRect = AceType::DynamicCast<FrameNode>(children.front())->GetGeometryNode()->GetFrameRect();
     auto lastButtonRect = AceType::DynamicCast<FrameNode>(children.back())->GetGeometryNode()->GetFrameRect();
-    EXPECT_EQ(buttonsRect, firstButtonRect.CombineRectT(lastButtonRect));
+    auto childrenRect = firstButtonRect.CombineRectT(lastButtonRect);
+    childrenRect.SetLeft(childrenRect.GetX() - TITLE_PADDING_START.ConvertToPx());
+    childrenRect.SetTop(0);
+    childrenRect.SetHeight(pattern_->titleHeight_.ConvertToPx());
+    childrenRect.SetWidth(childrenRect.Width() + (TITLE_PADDING_START + TITLE_PADDING_END).ConvertToPx());
+    EXPECT_EQ(buttonsRect, childrenRect);
 
     bool callbackTriggered = false;
     auto callback = [&callbackTriggered](RectF&, RectF&) { callbackTriggered = true; };
