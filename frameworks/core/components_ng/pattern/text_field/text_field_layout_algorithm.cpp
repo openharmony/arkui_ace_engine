@@ -120,12 +120,13 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(
 
     textRect_.SetSize(SizeF(GetVisualTextWidth(), paragraph_->GetHeight()));
 
-    auto inlineIdealHieght = contentConstraint.maxSize.Height();
+    auto inlineIdealHeight = contentConstraint.maxSize.Height();
     if (pattern->HasFocus() && paragraph_->GetLineCount() != 0) {
         pattern->SetSingleLineHeight(paragraph_->GetHeight() / paragraph_->GetLineCount());
         // The maximum height of the inline mode defaults to a maximum of three rows.
-        inlineIdealHieght =
+        inlineIdealHeight =
             pattern->GetSingleLineHeight() * textFieldLayoutProperty->GetMaxViewLinesValue(INLINE_DEFAULT_VIEW_MAXLINE);
+        inlineMeasureItem_.inlineSizeHeight = inlineIdealHeight;
     } else {
         // calc inline status in advance
         inlineMeasureItem_.inlineSizeHeight = inlineParagraph_->GetHeight() / inlineParagraph_->GetLineCount()
@@ -140,7 +141,7 @@ std::optional<SizeF> TextFieldLayoutAlgorithm::InlineMeasureContent(
     auto contentHeight = GreatNotEqual(paragraph_->GetLongestLine(), 0.0)
         ? paragraph_->GetHeight() : std::max(preferredHeight_, paragraph_->GetHeight());
 
-    return SizeF(contentWidth, std::min(inlineIdealHieght, contentHeight));
+    return SizeF(contentWidth, std::min(inlineIdealHeight, contentHeight));
 }
 
 float TextFieldLayoutAlgorithm::ConstraintWithMinWidth(
