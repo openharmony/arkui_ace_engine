@@ -863,6 +863,12 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
         TAG_LOGW(AceLogTag::ACE_DRAG, "Start drag failed, return value is %{public}d", ret);
         return;
     }
+    if (info.GetInputEventType() == InputEventType::MOUSE_BUTTON && IsPixelMapNeedScale()) {
+        ret = RegisterCoordinationListener(pipeline);
+        if (ret != 0) {
+            TAG_LOGW(AceLogTag::ACE_DRAG, "Register coordination listener failed, error is %{public}d", ret);
+        }
+    }
     dragDropManager->UpdateDragStyle();
     dragDropManager->SetDraggingPointer(info.GetPointerId());
     dragDropManager->SetPreviewRect(Rect(pixelMapOffset.GetX(), pixelMapOffset.GetY(), width, height));
@@ -887,6 +893,25 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     dragDropProxy_ = dragDropManager->CreateFrameworkDragDropProxy();
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->OnDragStart(info, extraInfoLimited, GetFrameNode());
+}
+
+int32_t GestureEventHub::RegisterCoordinationListener(const RefPtr<PipelineBase>& context)
+{
+    auto pipeline = AceType::DynamicCast<PipelineContext>(context);
+    CHECK_NULL_RETURN(pipeline, -1);
+    auto callback = [id = Container::CurrentId(), weak = WeakClaim(RawPtr(pipeline))]() {
+        ContainerScope scope(id);
+        auto context = weak.Upgrade();
+        CHECK_NULL_VOID(context);
+        auto dragDropManager = context->GetDragDropManager();
+        CHECK_NULL_VOID(dragDropManager);
+        auto taskScheduler = context->GetTaskExecutor();
+        CHECK_NULL_VOID(taskScheduler);
+        taskScheduler->PostTask([dragDropManager]() {
+            dragDropManager->HideDragPreviewOverlay();
+        }, TaskExecutor::TaskType::UI);
+    };
+    return InteractionInterface::GetInstance()->RegisterCoordinationListener(callback);
 }
 
 void GestureEventHub::HandleOnDragUpdate(const GestureEvent& info)
@@ -1180,6 +1205,10 @@ OnDragCallbackCore GestureEventHub::GetDragCallback(const RefPtr<PipelineBase>& 
                 dragDropManager->SetIsDragged(false);
                 dragDropManager->ResetDragging();
                 dragDropManager->SetDraggingPointer(-1);
+                auto ret = InteractionInterface::GetInstance()->UnRegisterCoordinationListener();
+                if (ret != 0) {
+                    TAG_LOGW(AceLogTag::ACE_DRAG, "Unregister coordination listener failed, error is %{public}d", ret);
+                }
                 if (eventManager) {
                     eventManager->DoMouseActionRelease();
                 }

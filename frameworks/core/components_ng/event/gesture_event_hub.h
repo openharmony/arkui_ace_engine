@@ -582,6 +582,8 @@ public:
 
     void CopyEvent(const RefPtr<GestureEventHub>& gestureEventHub);
 
+    int32_t RegisterCoordinationListener(const RefPtr<PipelineBase>& context);
+
 private:
     void ProcessTouchTestHierarchy(const OffsetF& coordinateOffset, const TouchRestrict& touchRestrict,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, TouchTestResult& finalResult, int32_t touchId,
