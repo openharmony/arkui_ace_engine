@@ -178,7 +178,15 @@ void NavigationPattern::OnModifyDone()
     CHECK_NULL_VOID(hostNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(hostNode->GetNavBarNode());
     CHECK_NULL_VOID(navBarNode);
-    navBarNode->MarkModifyDone();
+    auto layoutProperty = AceType::DynamicCast<NavigationLayoutProperty>(hostNode->GetLayoutProperty());
+    if (layoutProperty->GetHideNavBarValue(false)) {
+        navBarNode->GetLayoutProperty()->UpdateVisibility(VisibleType::INVISIBLE, true);
+        navBarNode->SetActive(false);
+    } else {
+        navBarNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE, true);
+        navBarNode->SetActive(true);
+        navBarNode->MarkModifyDone();
+    }
     CHECK_NULL_VOID(navigationStack_);
     auto preTopNavPath = navigationStack_->GetPreTopNavPath();
     auto pathNames = navigationStack_->GetAllPathName();
