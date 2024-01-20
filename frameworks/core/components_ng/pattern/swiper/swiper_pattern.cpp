@@ -602,6 +602,20 @@ int32_t SwiperPattern::GetLoopIndex(int32_t originalIndex) const
     return loopIndex;
 }
 
+void SwiperPattern::AdjustCurrentFocusIndex()
+{
+    if (GetDisplayCount() <= 1) {
+        currentFocusIndex_ = currentIndex_;
+        return;
+    }
+
+    if (currentFocusIndex_ >= currentIndex_ && currentFocusIndex_ < currentIndex_ + GetDisplayCount()) {
+        return;
+    }
+
+    currentFocusIndex_ = currentIndex_;
+}
+
 bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     if (!isDragging_) {
@@ -657,12 +671,12 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (jumpIndex_) {
         isJump = true;
         UpdateCurrentIndex(swiperLayoutAlgorithm->GetCurrentIndex());
-        auto curChild = dirty->GetOrCreateChildByIndex(GetLoopIndex(currentIndex_));
+        AdjustCurrentFocusIndex();
+        auto curChild = dirty->GetOrCreateChildByIndex(GetLoopIndex(currentFocusIndex_));
         if (curChild) {
             auto curChildFrame = curChild->GetHostNode();
             CHECK_NULL_RETURN(curChildFrame, false);
             FlushFocus(curChildFrame);
-            currentFocusIndex_ = GetLoopIndex(currentIndex_);
         }
         currentIndexOffset_ = 0.0f;
         if (isNotInit) {
@@ -1331,11 +1345,11 @@ bool SwiperPattern::OnKeyEvent(const KeyEvent& event)
         (GetDirection() == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP)) {
         auto onlyFlushFocus = GetDisplayCount() > 1 && currentFocusIndex_ > GetLoopIndex(currentIndex_);
         if (onlyFlushFocus) {
-            currentFocusIndex_ = GetLoopIndex(currentFocusIndex_ - 1);
+            currentFocusIndex_ = currentFocusIndex_ - 1;
             FlushFocus(GetCurrentFrameNode(currentFocusIndex_));
         } else {
             ShowPrevious();
-            currentFocusIndex_ = GetLoopIndex(currentFocusIndex_ - 1);
+            currentFocusIndex_ = currentFocusIndex_ - 1;
         }
 
         return true;
@@ -1345,11 +1359,11 @@ bool SwiperPattern::OnKeyEvent(const KeyEvent& event)
         auto onlyFlushFocus =
             GetDisplayCount() > 1 && currentFocusIndex_ < GetLoopIndex(currentIndex_ + GetDisplayCount() - 1);
         if (onlyFlushFocus) {
-            currentFocusIndex_ = GetLoopIndex(currentFocusIndex_ + 1);
+            currentFocusIndex_ = currentFocusIndex_ + 1;
             FlushFocus(GetCurrentFrameNode(currentFocusIndex_));
         } else {
             ShowNext();
-            currentFocusIndex_ = GetLoopIndex(currentFocusIndex_ + 1);
+            currentFocusIndex_ = currentFocusIndex_ + 1;
         }
 
         return true;
@@ -1830,7 +1844,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
                     break;
                 }
                 FlushFocus(curChildFrame);
-                currentFocusIndex_ = GetLoopIndex(currentIndex_);
+                currentFocusIndex_ = currentIndex_;
             } while (0);
             OnIndexChange();
             oldIndex_ = currentIndex_;
@@ -2337,7 +2351,7 @@ void SwiperPattern::OnSpringAndFadeAnimationFinish()
                 break;
             }
             FlushFocus(curChildFrame);
-            currentFocusIndex_ = GetLoopIndex(currentIndex_);
+            currentFocusIndex_ = currentIndex_;
         } while (0);
         OnIndexChange();
         oldIndex_ = currentIndex_;
@@ -3151,7 +3165,7 @@ void SwiperPattern::TriggerAnimationEndOnForceStop()
                 break;
             }
             FlushFocus(curChildFrame);
-            currentFocusIndex_ = GetLoopIndex(currentIndex_);
+            currentFocusIndex_ = currentIndex_;
         } while (0);
 
         OnIndexChange();
@@ -3637,9 +3651,8 @@ void SwiperPattern::ResetAndUpdateIndexOnAnimationEnd(int32_t nextIndex)
         isFinishAnimation_ = false;
     } else {
         UpdateCurrentIndex(nextIndex);
-        if (currentFocusIndex_ < GetLoopIndex(currentIndex_) ||
-            currentFocusIndex_ >= GetLoopIndex(currentIndex_) + GetDisplayCount()) {
-            currentFocusIndex_ = GetLoopIndex(currentIndex_);
+        if (currentFocusIndex_ < currentIndex_ || currentFocusIndex_ >= currentIndex_ + GetDisplayCount()) {
+            currentFocusIndex_ = currentIndex_;
         }
         do {
             auto curChildFrame = GetCurrentFrameNode(currentFocusIndex_);
