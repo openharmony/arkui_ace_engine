@@ -273,7 +273,7 @@ void NavigationPattern::UpdateNavPathList()
         uiNode = GenerateUINodeByIndex(static_cast<int32_t>(i));
         navPathList.emplace_back(std::make_pair(pathName, uiNode));
     }
-
+    navigationStack_->ClearPreBuildNodeList();
     navigationStack_->SetNavPathList(navPathList);
 }
 
