@@ -89,7 +89,7 @@ void TextFieldManagerNG::ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bot
     }
 
     // caret inner scroll's content region
-    if(LessNotEqual(caretRect.Bottom(), bottomInset.start)) {
+    if (LessNotEqual(caretRect.Bottom(), bottomInset.start)) {
         return;
     }
 
