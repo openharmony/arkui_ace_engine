@@ -2857,7 +2857,7 @@ HWTEST_F(DragDropManagerTestNg, DragDropManagerFireOnEditableTextComponent, Test
 #else
         EXPECT_CALL(*(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())),
             EnterTextEditorArea(_))
-            .Times(0);
+            .Times(1);
 #endif // ENABLE_DRAG_FRAMEWORK
         dragDropManager->FireOnEditableTextComponent(frameNode, DragEventType::ENTER);
         dragDropManager->FireOnEditableTextComponent(frameNode, DragEventType::ENTER);

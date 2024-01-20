@@ -483,6 +483,7 @@ void DragDropManager::OnDragMove(const PointerEvent& pointerEvent, const std::st
 {
     Point point = pointerEvent.GetPoint();
     auto container = Container::Current();
+    CHECK_NULL_VOID(container);
     if (container && container->IsScenceBoardWindow()) {
         if (IsDragged() && IsWindowConsumed()) {
             SetIsWindowConsumed(false);
