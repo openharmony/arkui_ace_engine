@@ -407,7 +407,7 @@ HWTEST_F(GridLayoutTestNg, GridItemDisableEventTest001, TestSize.Level1)
     gridItemPattern->InitDisableStyle();
     gridItemEventHub->SetEnabled(true);
     gridItemPattern->InitDisableStyle();
-    EXPECT_EQ(gridItemPattern->enableOpacity_, 1.0);
+    EXPECT_FALSE(gridItemPattern->enableOpacity_.has_value());
 }
 
 /**

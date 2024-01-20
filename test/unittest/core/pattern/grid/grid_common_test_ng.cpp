@@ -36,6 +36,7 @@ void GridCommonTestNg::MouseSelect(Offset start, Offset end)
     GestureEvent info;
     info.SetInputEventType(InputEventType::MOUSE_BUTTON);
     info.SetLocalLocation(start);
+    info.SetGlobalLocation(start);
     pattern_->HandleDragStart(info);
     if (start != end) {
         info.SetLocalLocation(end);
