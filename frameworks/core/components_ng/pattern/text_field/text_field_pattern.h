@@ -1239,6 +1239,7 @@ private:
     void CleanNodeResponseKeyEvent();
     void PasswordResponseKeyEvent();
     void UnitResponseKeyEvent();
+    void ProcNormalInlineStateInBlurEvent();
 #if defined(ENABLE_STANDARD_INPUT)
     std::optional<MiscServices::TextConfig> GetMiscTextConfig() const;
 #endif
