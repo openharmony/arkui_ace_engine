@@ -66,10 +66,7 @@ void GridScrollLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     if (!NearEqual(mainSize, gridLayoutInfo_.lastMainSize_)) {
         gridLayoutInfo_.ResetPositionFlags();
         UpdateOffsetOnVirtualKeyboardHeightChange(layoutWrapper, mainSize);
-        // If only the height of the Grid is changed, keep the prevOffset_ and currentOffset_ equal.
-        if (scrollSource_ == SCROLL_FROM_NONE) {
-            gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
-        }
+        UpdateOffsetOnHeightChangeDuringAnimation(layoutWrapper, mainSize);
     }
     FillGridViewportAndMeasureChildren(mainSize, crossSize, layoutWrapper);
 
@@ -162,6 +159,21 @@ void GridScrollLayoutAlgorithm::AdaptToChildMainSize(LayoutWrapper* layoutWrappe
         }
         gridLayoutInfo_.lastMainSize_ = gridMainSize;
         TAG_LOGI(AceLogTag::ACE_GRID, "gridMainSize:%{public}f", gridMainSize);
+    }
+}
+
+void GridScrollLayoutAlgorithm::UpdateOffsetOnHeightChangeDuringAnimation(LayoutWrapper* layoutWrapper, float mainSize)
+{
+    // If only the height of the Grid is changed, keep the prevOffset_ and currentOffset_ equal.
+    if (scrollSource_ == SCROLL_FROM_NONE) {
+        gridLayoutInfo_.prevOffset_ = gridLayoutInfo_.currentOffset_;
+    }
+    auto host = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(host);
+    auto pattern = host->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    if (pattern->IsScrollableSpringMotionRunning()) {
+        gridLayoutInfo_.currentOffset_ += (mainSize - gridLayoutInfo_.lastMainSize_);
     }
 }
 
