@@ -288,6 +288,7 @@ public:
     virtual TextInputAction GetDefaultTextInputAction() const;
     bool RequestKeyboard(bool isFocusViewChanged, bool needStartTwinkling, bool needShowSoftKeyboard);
     bool CloseKeyboard(bool forceClose) override;
+    bool CloseKeyboard(bool forceClose, bool isStopTwinkling);
 
     FocusPattern GetFocusPattern() const override
     {
