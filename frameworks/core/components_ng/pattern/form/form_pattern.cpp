@@ -304,6 +304,18 @@ RefPtr<FrameNode> FormPattern::CreateImageNode()
     return imageNode;
 }
 
+RefPtr<FrameNode> FormPattern::GetImageNode()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, nullptr);
+    auto child = host->GetLastChild();
+    CHECK_NULL_RETURN(child, nullptr);
+    if (child->GetTag() == V2::IMAGE_ETS_TAG) {
+        return AceType::DynamicCast<FrameNode>(child);
+    }
+    return nullptr;
+}
+
 void FormPattern::UpdateImageNode()
 {
     ContainerScope scope(scopeId_);
@@ -504,24 +516,7 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
     }
 
     if (cardInfo_.width != info.width || cardInfo_.height != info.height) {
-        TAG_LOGI(AceLogTag::ACE_FORM, "update size, width: %{public}f   height: %{public}f",
-            info.width.Value(), info.height.Value());
-        cardInfo_.width = info.width;
-        cardInfo_.height = info.height;
-        if (formManagerBridge_) {
-            formManagerBridge_->NotifySurfaceChange(info.width.Value(), info.height.Value());
-        }
-        if (info.dimension == static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_1)) {
-            BorderRadiusProperty borderRadius;
-            Dimension diameter = std::min(info.width, info.height);
-            borderRadius.SetRadius(diameter / ARC_RADIUS_TO_DIAMETER);
-            host->GetRenderContext()->UpdateBorderRadius(borderRadius);
-        }
-        if (subContainer_) {
-            subContainer_->SetFormPattern(WeakClaim(this));
-            subContainer_->UpdateRootElementSize();
-            subContainer_->UpdateSurfaceSizeWithAnimathion();
-        }
+        UpdateFormComponentSize(info);
     }
     if (isLoaded_) {
         auto visible = layoutProperty->GetVisibleType().value_or(VisibleType::VISIBLE);
@@ -538,6 +533,41 @@ void FormPattern::UpdateFormComponent(const RequestFormInfo& info)
         }
     }
     UpdateConfiguration();
+}
+
+void FormPattern::UpdateFormComponentSize(const RequestFormInfo& info)
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "update size, width: %{public}f   height: %{public}f",
+        info.width.Value(), info.height.Value());
+    cardInfo_.width = info.width;
+    cardInfo_.height = info.height;
+
+    if (formManagerBridge_) {
+        formManagerBridge_->NotifySurfaceChange(info.width.Value(), info.height.Value());
+    }
+    if (isSnapshot_) {
+        auto imageNode = GetImageNode();
+        if (imageNode != nullptr) {
+            auto width = static_cast<float>(info.width.Value());
+            auto height = static_cast<float>(info.height.Value());
+            CalcSize idealSize = { CalcLength(width), CalcLength(height) };
+            MeasureProperty layoutConstraint;
+            layoutConstraint.selfIdealSize = idealSize;
+            layoutConstraint.maxSize = idealSize;
+            imageNode->UpdateLayoutConstraint(layoutConstraint);
+        }
+    }
+    if (info.dimension == static_cast<int32_t>(OHOS::AppExecFwk::Constants::Dimension::DIMENSION_1_1)) {
+        BorderRadiusProperty borderRadius;
+        Dimension diameter = std::min(info.width, info.height);
+        borderRadius.SetRadius(diameter / ARC_RADIUS_TO_DIAMETER);
+        GetHost()->GetRenderContext()->UpdateBorderRadius(borderRadius);
+    }
+    if (subContainer_) {
+        subContainer_->SetFormPattern(WeakClaim(this));
+        subContainer_->UpdateRootElementSize();
+        subContainer_->UpdateSurfaceSizeWithAnimathion();
+    }
 }
 
 void FormPattern::InitFormManagerDelegate()
