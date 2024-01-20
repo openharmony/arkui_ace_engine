@@ -575,6 +575,13 @@ public:
     virtual RefPtr<NGGestureRecognizer> PackInnerRecognizer(const Offset& offset,
         std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, int32_t touchId,
         const RefPtr<TargetComponent>& targetComponent);
+
+    void CleanExternalRecognizers()
+    {
+        externalParallelRecognizer_.clear();
+        externalExclusiveRecognizer_.clear();
+    }
+
     bool parallelCombineClick = false;
     RefPtr<ParallelRecognizer> innerParallelRecognizer_;
 

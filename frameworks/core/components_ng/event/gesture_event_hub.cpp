@@ -301,14 +301,6 @@ void GestureEventHub::ProcessTouchTestHierarchy(const OffsetF& coordinateOffset,
         }
     }
 
-    if (exclusiveIndex != static_cast<int32_t>(externalExclusiveRecognizer_.size())) {
-        externalExclusiveRecognizer_.resize(exclusiveIndex);
-    }
-
-    if (parallelIndex != static_cast<int32_t>(externalParallelRecognizer_.size())) {
-        externalParallelRecognizer_.resize(parallelIndex);
-    }
-
     if (current) {
         finalResult.emplace_back(std::move(current));
     }
