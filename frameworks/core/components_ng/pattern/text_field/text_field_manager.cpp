@@ -88,6 +88,11 @@ void TextFieldManagerNG::ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bot
         return;
     }
 
+    // caret inner scroll's content region
+    if(LessNotEqual(caretRect.Bottom(), bottomInset.start)) {
+        return;
+    }
+
     // caret below safeArea
     auto diffBot = bottomInset.start - caretRect.Bottom();
     CHECK_NULL_VOID(diffBot < 0);
