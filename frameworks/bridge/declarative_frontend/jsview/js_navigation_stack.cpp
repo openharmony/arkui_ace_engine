@@ -31,6 +31,7 @@ namespace OHOS::Ace::Framework {
 namespace {
 constexpr int32_t MAX_PARSE_DEPTH = 3;
 constexpr char JS_NAV_PATH_STACK_GETNATIVESTACK_FUNC[] = "getNativeStack";
+constexpr char JS_NAV_PATH_STACK_SETPARENT_FUNC[] = "setParent";
 }
 
 std::string JSRouteInfo::GetName()
@@ -461,5 +462,38 @@ void JSNavigationStack::UpdateOnStateChangedCallback(JSRef<JSObject> obj, std::f
     stack->SetOnStateChangedCallback(callback);
     // When switching the navigation stack, it is necessary to immediately trigger a refresh
     stack->OnStateChanged();
+}
+
+void JSNavigationStack::OnAttachToParent(RefPtr<NG::NavigationStack> parent)
+{
+    auto parentStack = AceType::DynamicCast<JSNavigationStack>(parent);
+    if (!parentStack) {
+        return;
+    }
+
+    SetJSParentStack(JSRef<JSVal>::Cast(parentStack->GetDataSourceObj()));
+}
+
+void JSNavigationStack::OnDetachFromParent()
+{
+    JSRef<JSVal> undefined(JSVal::Undefined());
+    SetJSParentStack(undefined);
+}
+
+void JSNavigationStack::SetJSParentStack(JSRef<JSVal> parent)
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return;
+    }
+
+    auto property = dataSourceObj_->GetProperty(JS_NAV_PATH_STACK_SETPARENT_FUNC);
+    if (!property->IsFunction()) {
+        return;
+    }
+
+    auto func = JSRef<JSFunc>::Cast(property);
+    JSRef<JSVal> params[1];
+    params[0] = parent;
+    func->Call(dataSourceObj_, 1, params);
 }
 } // namespace OHOS::Ace::Framework

@@ -330,6 +330,9 @@ public:
 
     void SyncWithJsStackIfNeeded();
 
+    void AttachNavigationStackToParent();
+    void DetachNavigationStackFromParent();
+
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath, bool isPopPage);
@@ -363,6 +366,7 @@ private:
         const RefPtr<FrameNode> &newTopNavDestination);
     void UpdateNavPathList();
     void RefreshNavDestination();
+    RefPtr<NavigationPattern> GetParentNavigationPattern();
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;

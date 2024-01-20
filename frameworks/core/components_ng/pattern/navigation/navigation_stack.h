@@ -145,6 +145,9 @@ public:
         return "";
     }
 
+    virtual void OnAttachToParent(RefPtr<NavigationStack> parent) {}
+    virtual void OnDetachFromParent() {}
+
 private:
     void MoveToTop(const std::string& name, const RefPtr<UINode>& navDestinationNode);
     void AddForDefault(const std::string& name, const RefPtr<UINode>& navDestinationNode,
