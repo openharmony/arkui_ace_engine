@@ -1534,18 +1534,7 @@ void MenuLayoutAlgorithm::UpdateConstraintHeight(LayoutWrapper* layoutWrapper, L
     auto menuPattern = layoutWrapper->GetHostNode()->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
 
-    float maxAvailableHeight = 0;
-    if (hierarchicalParameters_) {
-        auto displayAvailableRect = pipelineContext->GetDisplayAvailableRect();
-        maxAvailableHeight = displayAvailableRect.Height();
-    } else {
-        auto safeAreaManager = pipelineContext->GetSafeAreaManager();
-        CHECK_NULL_VOID(safeAreaManager);
-        auto top = safeAreaManager->GetSystemSafeArea().top_.Length();
-        auto bottom = safeAreaManager->GetSystemSafeArea().bottom_.Length();
-        auto windowGlobalRect = pipelineContext->GetDisplayWindowRectInfo();
-        maxAvailableHeight = windowGlobalRect.Height() - top - bottom;
-    }
+    float maxAvailableHeight = wrapperRect_.Height();
     float maxSpaceHeight = maxAvailableHeight * HEIGHT_CONSTRAINT_FACTOR;
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         if (menuPattern->IsHeightModifiedBySelect()) {
