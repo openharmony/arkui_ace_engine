@@ -1682,6 +1682,8 @@ class NavPathInfo {
     this.name = name;
     this.param = param;
     this.onPop = onPop;
+    // index that if check navdestination exists first
+    this.flag = false;
   }
 }
 
@@ -1742,6 +1744,35 @@ class NavPathStack {
     }
     this.nativeStack?.onStateChanged();
   }
+  pushDestinationByName(name, param, onPop, animated) {
+    let info = undefined;
+    if (onPop === undefined || typeof onPop === 'boolean') {
+      info = new NavPathInfo(name, param);
+    } else {
+      info = new NavPathInfo(name, param, onPop);
+    }
+    info.flag = true;
+    this.pathArray.push(info);
+    this.changeFlag = this.changeFlag + 1;
+    this.isReplace = 0;
+    if (typeof onPop === 'boolean') {
+      this.animated = onPop;
+    } else if (animated === undefined) {
+      this.animated = true;
+    } else {
+      this.animated = animated;
+    }
+  
+    let promise = this.nativeStack?.onPushDestination(info);
+    if (!promise) {
+      this.pathArray.pop();
+      return new Promise((resolve, reject)=>{
+        reject({ message: "Internal error.", code: 100001 });
+      })
+    }
+    this.nativeStack?.onStateChanged();
+    return promise;
+  }
   pushPath(info, animated) {
     this.pathArray.push(info);
     this.changeFlag = this.changeFlag + 1;
@@ -1752,6 +1783,26 @@ class NavPathStack {
       this.animated = animated;
     }
     this.nativeStack?.onStateChanged();
+  }
+  pushDestination(info, animated) {
+    info.flag = true;
+    this.pathArray.push(info);
+    this.changeFlag = this.changeFlag + 1;
+    this.isReplace = 0;
+    if (animated === undefined) {
+      this.animated = true;
+    } else {
+      this.animated = animated;
+    }
+    let promise = this.nativeStack?.onPushDestination(info);
+    if (!promise) {
+      this.pathArray.pop();
+      promise = new Promise((resolve, reject)=>{
+        reject({ message: "Internal error.", code: 100001 });
+      })
+    }
+    this.nativeStack?.onStateChanged();
+    return promise;
   }
   replacePath(info, animated) {
     if (this.pathArray.length !== 0) {
@@ -1945,6 +1996,14 @@ class NavPathStack {
     this.changeFlag = this.changeFlag + 1;
     this.isReplace = 0;
     this.nativeStack?.onStateChanged();
+  }
+  removeInvalidPage(name, param) {
+    for (let i = 0; i < this.pathArray.length; i++) {
+      if (this.pathArray[i].flag && this.pathArray[i].name === name && this.pathArray[i].param === param) {
+        this.pathArray.splice(i, 1);
+        return;
+      }
+    }
   }
   getAllPathName() {
     let array = this.pathArray.flatMap(element => element.name);
