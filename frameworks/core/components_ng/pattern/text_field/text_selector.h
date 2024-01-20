@@ -111,6 +111,13 @@ struct TextSelector {
         destinationOffset = both;
     }
 
+    void ReverseTextSelector()
+    {
+        if (baseOffset > destinationOffset) {
+            Update(destinationOffset, baseOffset);
+        }
+    }
+
     bool operator==(const TextSelector& other) const
     {
         return baseOffset == other.baseOffset && destinationOffset == other.destinationOffset;
