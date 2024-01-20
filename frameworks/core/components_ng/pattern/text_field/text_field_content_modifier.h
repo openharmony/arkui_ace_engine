@@ -60,6 +60,7 @@ public:
     void SetShowUnderlineState(bool value);
     void SetFontReady(bool value);
     void SetTextOverflow(const TextOverflow value);
+    void ContentChange();
 
 private:
     void SetDefaultFontSize(const TextStyle& textStyle);
@@ -95,6 +96,7 @@ private:
     RefPtr<PropertyInt> textAlign_;
     RefPtr<PropertyBool> showErrorState_;
     RefPtr<PropertyBool> showUnderline_;
+    RefPtr<PropertyBool> contentChange_;
     RefPtr<PropertyInt> fontStyle_;
     RefPtr<PropertyBool> fontReady_;
     RefPtr<PropertyInt> textOverflow_;
