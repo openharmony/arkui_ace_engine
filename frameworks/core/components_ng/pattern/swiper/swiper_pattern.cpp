@@ -2152,7 +2152,8 @@ RefPtr<Curve> SwiperPattern::GetCurveIncludeMotion() const
             auto springCurve = DynamicCast<SpringCurve>(curve);
             // check velocity to judge if this current velocity.
             if (springCurve->GetCurrentVelocity() < 0) {
-                springCurve->UpdateVelocity(motionVelocity_);
+                return AceType::MakeRefPtr<SpringCurve>(
+                    motionVelocity_, springCurve->GetMass(), springCurve->GetStiffness(), springCurve->GetDamping());
             }
         }
         if (InstanceOf<InterpolatingSpring>(curve)) {

@@ -47,7 +47,6 @@ namespace OHOS::Ace::NG {
 namespace {
 constexpr Dimension BAR_BLUR_RADIUS = 200.0_vp;
 constexpr Dimension BAR_SATURATE = 1.3_vp;
-const uint8_t PIXEL_ROUND = 18;
 } // namespace
 
 void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<TabController>& /*tabController*/,
@@ -102,10 +101,6 @@ void TabsModelNG::Create(BarPosition barPosition, int32_t index, const RefPtr<Ta
     auto tabBarNode = FrameNode::GetOrCreateFrameNode(
         V2::TAB_BAR_ETS_TAG, tabBarId, [controller]() { return AceType::MakeRefPtr<TabBarPattern>(controller); });
 
-    auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty();
-    CHECK_NULL_VOID(tabBarLayoutProperty);
-    tabBarLayoutProperty->UpdatePixelRound(PIXEL_ROUND);
-    
     auto selectedMaskNode = FrameNode::GetOrCreateFrameNode(
         V2::COLUMN_ETS_TAG, selectedMaskId, []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
 

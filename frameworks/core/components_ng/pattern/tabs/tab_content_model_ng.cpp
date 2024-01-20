@@ -33,9 +33,6 @@
 #include "core/components_v2/inspector/inspector_constants.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-const uint8_t PIXEL_ROUND = 18;
-}
 
 void TabContentModelNG::Create(std::function<void()>&& deepRenderFunc)
 {
@@ -136,7 +133,6 @@ void TabContentModelNG::AddTabBarItem(const RefPtr<UINode>& tabContent, int32_t 
     linearLayoutProperty->UpdateMainAxisAlign(FlexAlign::CENTER);
     linearLayoutProperty->UpdateCrossAxisAlign(FlexAlign::CENTER);
     linearLayoutProperty->UpdateSpace(tabTheme->GetBottomTabBarSpace());
-    linearLayoutProperty->UpdatePixelRound(PIXEL_ROUND);
     auto columnRenderContext = columnNode->GetRenderContext();
     CHECK_NULL_VOID(columnRenderContext);
     columnRenderContext->UpdateClipEdge(true);
