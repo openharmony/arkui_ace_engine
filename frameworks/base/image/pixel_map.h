@@ -103,6 +103,7 @@ public:
     virtual const uint8_t* GetPixels() const = 0;
     virtual PixelFormat GetPixelFormat() const = 0;
     virtual AlphaType GetAlphaType() const = 0;
+    virtual int32_t GetRowStride() const = 0;
     virtual int32_t GetRowBytes() const = 0;
     virtual int32_t GetByteCount() const = 0;
     virtual void* GetPixelManager() const = 0;

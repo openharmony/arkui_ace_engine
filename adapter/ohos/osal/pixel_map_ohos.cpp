@@ -130,6 +130,12 @@ AlphaType PixelMapOhos::GetAlphaType() const
     return AlphaTypeConverter(pixmap_->GetAlphaType());
 }
 
+int32_t PixelMapOhos::GetRowStride() const
+{
+    CHECK_NULL_RETURN(pixmap_, 0);
+    return pixmap_->GetRowStride();
+}
+
 int32_t PixelMapOhos::GetRowBytes() const
 {
     CHECK_NULL_RETURN(pixmap_, 0);
