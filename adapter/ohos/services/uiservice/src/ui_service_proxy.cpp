@@ -35,7 +35,7 @@ void UIServiceProxy::OnPushCallBack(const AAFwk::Want& want, const std::string& 
 
     OHOS::MessageParcel dataParcel;
     OHOS::MessageParcel reply;
-    OHOS::MessageOption option;
+    OHOS::MessageOption option(MessageOption::TF_ASYNC);
 
     if (!dataParcel.WriteInterfaceToken(UIServiceProxy::GetDescriptor())) {
         HILOG_WARN("%{public}s dataParcel.WriteInterfaceToken(GetDescriptor()) return false",
@@ -76,7 +76,7 @@ void UIServiceProxy::OnRequestCallBack(const AAFwk::Want& want, const std::strin
 
     OHOS::MessageParcel dataParcel;
     OHOS::MessageParcel reply;
-    OHOS::MessageOption option;
+    OHOS::MessageOption option(MessageOption::TF_ASYNC);
 
     if (!dataParcel.WriteInterfaceToken(UIServiceProxy::GetDescriptor())) {
         HILOG_WARN("%{public}s dataParcel.WriteInterfaceToken(GetDescriptor()) return false",
@@ -112,7 +112,7 @@ void UIServiceProxy::OnReturnRequest(
 
     OHOS::MessageParcel dataParcel;
     OHOS::MessageParcel reply;
-    OHOS::MessageOption option;
+    OHOS::MessageOption option(MessageOption::TF_ASYNC);
 
     if (!dataParcel.WriteInterfaceToken(UIServiceProxy::GetDescriptor())) {
         HILOG_WARN("%{public}s dataParcel.WriteInterfaceToken(GetDescriptor()) return false",

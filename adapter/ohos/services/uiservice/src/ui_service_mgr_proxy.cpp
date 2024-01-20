@@ -35,7 +35,7 @@ int32_t UIServiceMgrProxy::RegisterCallBack(const AAFwk::Want& want, const sptr<
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!WriteInterfaceToken(data)) {
         return UI_SERVICE_PROXY_INNER_ERR;
     }
@@ -60,7 +60,7 @@ int32_t UIServiceMgrProxy::UnregisterCallBack(const AAFwk::Want& want)
 {
     MessageParcel data;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
 
     if (!WriteInterfaceToken(data)) {
         return UI_SERVICE_PROXY_INNER_ERR;
@@ -79,7 +79,7 @@ int32_t UIServiceMgrProxy::Push(const AAFwk::Want& want, const std::string& name
 {
     MessageParcel dataParcel;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
     if (!WriteInterfaceToken(dataParcel)) {
         return UI_SERVICE_PROXY_INNER_ERR;
     }
@@ -107,7 +107,7 @@ int32_t UIServiceMgrProxy::Request(const AAFwk::Want& want, const std::string& n
 {
     MessageParcel dataParcel;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
 
     if (!WriteInterfaceToken(dataParcel)) {
         return UI_SERVICE_PROXY_INNER_ERR;
@@ -134,7 +134,7 @@ int32_t UIServiceMgrProxy::ReturnRequest(
 {
     MessageParcel dataParcel;
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option(MessageOption::TF_ASYNC);
 
     if (!WriteInterfaceToken(dataParcel)) {
         return UI_SERVICE_PROXY_INNER_ERR;
