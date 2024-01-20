@@ -1404,7 +1404,7 @@ void NavigationModelNG::SetNavigationMode(NavigationMode mode)
     ACE_UPDATE_LAYOUT_PROPERTY(NavigationLayoutProperty, NavigationMode, mode);
 }
 
-void NavigationModelNG::SetNavigationStack(RefPtr<NG::NavigationStack>&& navigationStack)
+void NavigationModelNG::SetNavigationStack(const RefPtr<NG::NavigationStack>& navigationStack)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
@@ -1415,8 +1415,25 @@ void NavigationModelNG::SetNavigationStack(RefPtr<NG::NavigationStack>&& navigat
     if (stack) {
         stack->UpdateStackInfo(navigationStack);
     } else {
-        pattern->SetNavigationStack(std::move(navigationStack));
+        pattern->SetNavigationStack(navigationStack);
     }
+}
+
+void NavigationModelNG::SetNavigationStackWithCreatorAndUpdater(
+    std::function<RefPtr<NG::NavigationStack>()> creator,
+    std::function<void(RefPtr<NG::NavigationStack>)> updater)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto pattern = navigationGroupNode->GetPattern<NavigationPattern>();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<NavigationStack> stack = pattern->GetNavigationStack();
+    if (!stack) {
+        stack = creator();
+        pattern->SetNavigationStack(stack);
+    }
+    updater(stack);
 }
 
 void NavigationModelNG::SetNavigationStack()
@@ -1429,7 +1446,7 @@ void NavigationModelNG::SetNavigationStack()
     auto navigationStack = pattern->GetNavigationStack();
     if (!navigationStack) {
         auto navigationStack = AceType::MakeRefPtr<NavigationStack>();
-        pattern->SetNavigationStack(std::move(navigationStack));
+        pattern->SetNavigationStack(navigationStack);
     }
 }
 

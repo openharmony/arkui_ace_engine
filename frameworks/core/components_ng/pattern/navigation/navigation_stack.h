@@ -17,6 +17,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_STACK_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_STACK_H
 
+#include <functional>
 #include <optional>
 
 #include "base/memory/referenced.h"
@@ -50,6 +51,8 @@ public:
     {
         return navPathList_;
     }
+
+    virtual void SetOnStateChangedCallback(std::function<void()> callback) {}
 
     void SetNavPathList(const NavPathList& navPathList)
     {

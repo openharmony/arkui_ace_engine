@@ -97,10 +97,7 @@ public:
         navigationMode_ = navigationMode;
     }
 
-    void SetNavigationStack(RefPtr<NavigationStack>&& navigationStack)
-    {
-        navigationStack_ = std::move(navigationStack);
-    }
+    void SetNavigationStack(const RefPtr<NavigationStack>& navigationStack);
 
     const RefPtr<NavigationStack>& GetNavigationStack()
     {
@@ -321,6 +318,18 @@ public:
         onTransition_ = std::move(navigationAnimation);
     }
 
+    bool NeedSyncWithJsStackMarked() const
+    {
+        return needSyncWithJsStack_;
+    }
+
+    void MarkNeedSyncWithJsStack()
+    {
+        needSyncWithJsStack_ = true;
+    }
+
+    void SyncWithJsStackIfNeeded();
+
 private:
     void CheckTopNavPathChange(const std::optional<std::pair<std::string, RefPtr<UINode>>>& preTopNavPath,
         const std::optional<std::pair<std::string, RefPtr<UINode>>>& newTopNavPath, bool isPopPage);
@@ -352,6 +361,9 @@ private:
     int32_t FireNavDestinationStateChange(bool show);
     void UpdatePreNavDesZIndex(const RefPtr<FrameNode> &preTopNavDestination,
         const RefPtr<FrameNode> &newTopNavDestination);
+    void UpdateNavPathList();
+    void RefreshNavDestination();
+
     NavigationMode navigationMode_ = NavigationMode::AUTO;
     std::function<void(std::string)> builder_;
     RefPtr<NavigationStack> navigationStack_;
@@ -379,6 +391,9 @@ private:
     std::shared_ptr<NavigationController> navigationController_;
     std::map<int32_t, std::function<void(bool)>> onStateChangeMap_;
     OnNavigationAnimation onTransition_;
+    bool needSyncWithJsStack_ = false;
+    std::optional<std::pair<std::string, RefPtr<UINode>>> preTopNavPath_;
+    int32_t preStackSize_ = 0;
 };
 
 } // namespace OHOS::Ace::NG

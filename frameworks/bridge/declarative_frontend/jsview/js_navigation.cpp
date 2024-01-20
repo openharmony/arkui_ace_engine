@@ -23,6 +23,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_navigation_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
+#include "bridge/declarative_frontend/jsview/js_nav_path_stack.h"
 #include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
@@ -225,25 +226,44 @@ bool JSNavigation::ParseCommonTitle(const JSRef<JSVal>& jsValue)
 
 void JSNavigation::Create(const JSCallbackInfo& info)
 {
-    if (info.Length() <= 0) {
-        NavigationModel::GetInstance()->Create();
-        NavigationModel::GetInstance()->SetNavigationStack();
-        return;
-    }
-    if (!info[0]->IsObject()) {
-        return;
-    }
-    auto obj = JSRef<JSObject>::Cast(info[0]);
-    auto value = obj->GetProperty("type");
-    if (value->ToString() != "NavPathStack") {
-        return;
+    JSRef<JSObject> newObj;
+    if (info.Length() > 0) {
+        if (!info[0]->IsObject()) {
+            return;
+        }
+        newObj = JSRef<JSObject>::Cast(info[0]);
+        auto value = newObj->GetProperty("type");
+        if (value->ToString() != "NavPathStack") {
+            return;
+        }
     }
 
     NavigationModel::GetInstance()->Create();
-    auto navigationStack = AceType::MakeRefPtr<JSNavigationStack>();
-    navigationStack->SetDataSourceObj(obj);
-    NavigationModel::GetInstance()->SetNavigationStackProvided(true);
-    NavigationModel::GetInstance()->SetNavigationStack(std::move(navigationStack));
+    auto stackCreator = []() -> RefPtr<JSNavigationStack> {
+        return AceType::MakeRefPtr<JSNavigationStack>();
+    };
+    auto stackUpdater = [&newObj, &info](RefPtr<NG::NavigationStack> stack) {
+        NavigationModel::GetInstance()->SetNavigationStackProvided(!newObj->IsEmpty());
+        auto jsStack = AceType::DynamicCast<JSNavigationStack>(stack);
+        CHECK_NULL_VOID(jsStack);
+
+        if (newObj->IsEmpty()) {
+            newObj = JSNavPathStack::CreateNewNavPathStackJSObject();
+        }
+        const auto& oldObj = jsStack->GetDataSourceObj();
+        auto objStrictEqual = [](const JSRef<JSVal>& obja, const JSRef<JSVal>& objb) -> bool {
+            return (obja->IsEmpty() && objb->IsEmpty()) ||
+                (obja->GetLocalHandle()->IsStrictEquals(obja->GetEcmaVM(), objb->GetLocalHandle()));
+        };
+        if (objStrictEqual(newObj, oldObj)) {
+            return;
+        }
+
+        auto nativeObj = JSClass<JSNavPathStack>::NewInstance();
+        JSNavPathStack::SetNativeNavPathStack(newObj, nativeObj);
+        jsStack->SetDataSourceObj(newObj);
+    };
+    NavigationModel::GetInstance()->SetNavigationStackWithCreatorAndUpdater(stackCreator, stackUpdater);
 }
 
 void JSNavigation::JSBind(BindingTarget globalObj)

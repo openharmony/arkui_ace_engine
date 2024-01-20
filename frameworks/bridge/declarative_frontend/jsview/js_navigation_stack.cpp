@@ -28,7 +28,10 @@
 #include "frameworks/base/json/json_util.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
 constexpr int32_t MAX_PARSE_DEPTH = 3;
+constexpr char JS_NAV_PATH_STACK_GETNATIVESTACK_FUNC[] = "getNativeStack";
+}
 
 std::string JSRouteInfo::GetName()
 {
@@ -52,7 +55,11 @@ JSRef<JSVal> JSRouteInfo::GetParam() const
 
 void JSNavigationStack::SetDataSourceObj(const JSRef<JSObject>& dataSourceObj)
 {
+    // clean callback from old JSNavPathStack
+    UpdateOnStateChangedCallback(dataSourceObj_, nullptr);
     dataSourceObj_ = dataSourceObj;
+    // add callback to new JSNavPathStack
+    UpdateOnStateChangedCallback(dataSourceObj_, onStateChangedCallback_);
 }
 
 const JSRef<JSObject>& JSNavigationStack::GetDataSourceObj()
@@ -198,7 +205,8 @@ RefPtr<NG::UINode> JSNavigationStack::CreateNodeByIndex(int32_t index)
     if (GetNavDestinationNodeInUINode(node, desNode)) {
         auto pattern = AceType::DynamicCast<NG::NavDestinationPattern>(desNode->GetPattern());
         if (pattern) {
-            auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param);
+            auto onPop = GetOnPopByIndex(index);
+            auto pathInfo = AceType::MakeRefPtr<JSNavPathInfo>(name, param, onPop);
             pattern->SetNavPathInfo(pathInfo);
             pattern->SetNavigationStack(WeakClaim(this));
         }
@@ -258,6 +266,17 @@ JSRef<JSVal> JSNavigationStack::GetParamByIndex(int32_t index) const
         return JSRef<JSVal>::Make();
     }
     auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("getParamByIndex"));
+    JSRef<JSVal> params[1];
+    params[0] = JSRef<JSVal>::Make(ToJSValue(index));
+    return func->Call(dataSourceObj_, 1, params);
+}
+
+JSRef<JSVal> JSNavigationStack::GetOnPopByIndex(int32_t index) const
+{
+    if (dataSourceObj_->IsEmpty()) {
+        return JSRef<JSVal>::Make();
+    }
+    auto func = JSRef<JSFunc>::Cast(dataSourceObj_->GetProperty("getOnPopByIndex"));
     JSRef<JSVal> params[1];
     params[0] = JSRef<JSVal>::Make(ToJSValue(index));
     return func->Call(dataSourceObj_, 1, params);
@@ -417,5 +436,30 @@ void JSNavigationStack::ParseJsObject(std::unique_ptr<JsonValue>& json, const JS
             json->Put(key, childJson);
         }
     }
+}
+
+void JSNavigationStack::UpdateOnStateChangedCallback(JSRef<JSObject> obj, std::function<void()> callback)
+{
+    if (obj->IsEmpty()) {
+        return;
+    }
+
+    auto property = obj->GetProperty(JS_NAV_PATH_STACK_GETNATIVESTACK_FUNC);
+    if (!property->IsFunction()) {
+        return;
+    }
+
+    auto getNativeStackFunc = JSRef<JSFunc>::Cast(property);
+    auto nativeStack = getNativeStackFunc->Call(obj);
+    if (nativeStack->IsEmpty() || !nativeStack->IsObject()) {
+        return;
+    }
+
+    auto nativeStackObj = JSRef<JSObject>::Cast(nativeStack);
+    JSNavPathStack* stack = nativeStackObj->Unwrap<JSNavPathStack>();
+    CHECK_NULL_VOID(stack);
+    stack->SetOnStateChangedCallback(callback);
+    // When switching the navigation stack, it is necessary to immediately trigger a refresh
+    stack->OnStateChanged();
 }
 } // namespace OHOS::Ace::Framework

@@ -25,7 +25,9 @@ class ACE_EXPORT NavigationModelNG : public OHOS::Ace::NavigationModel {
 public:
     void Create() override;
     void SetNavigationStack() override;
-    void SetNavigationStack(RefPtr<NG::NavigationStack>&& navigationStack) override;
+    void SetNavigationStack(const RefPtr<NG::NavigationStack>& navigationStack) override;
+    void SetNavigationStackWithCreatorAndUpdater(std::function<RefPtr<NG::NavigationStack>()> creator,
+        std::function<void(RefPtr<NG::NavigationStack>)> updater) override;
     void SetNavigationStackProvided(bool provided) override;
     bool ParseCommonTitle(bool hasSubTitle, bool hasMainTitle, const std::string& subtitle,
         const std::string& title) override;

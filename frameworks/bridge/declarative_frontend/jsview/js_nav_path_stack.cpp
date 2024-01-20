@@ -31,13 +31,13 @@
 namespace OHOS::Ace::Framework {
 namespace {
 constexpr char JS_NAV_PATH_STACK_CLASS_NAME[] = "NavPathStack";
-constexpr char JS_SET_NATIVESTACK_IFNEEDED_FUNC[] = "setNativeStackIfNeeded";
+constexpr char JS_SET_NATIVESTACK_FUNC[] = "setNativeStack";
 }
 
 void JSNavPathStack::JSBind(BindingTarget globalObj)
 {
     JSClass<JSNavPathStack>::Declare("NativeNavPathStack");
-    JSClass<JSNavPathStack>::CustomMethod("onStateChanged", &JSNavPathStack::OnStateChanged);
+    JSClass<JSNavPathStack>::Method("onStateChanged", &JSNavPathStack::OnStateChanged);
     JSClass<JSNavPathStack>::Bind(globalObj, &JSNavPathStack::Constructor, &JSNavPathStack::Destructor);
 }
 
@@ -95,7 +95,7 @@ void JSNavPathStack::SetNativeNavPathStack(JSRef<JSObject> jsStack, JSRef<JSObje
         return;
     }
 
-    auto property = jsStack->GetProperty(JS_SET_NATIVESTACK_IFNEEDED_FUNC);
+    auto property = jsStack->GetProperty(JS_SET_NATIVESTACK_FUNC);
     if (!property->IsFunction()) {
         return;
     }

@@ -34,7 +34,7 @@ public:
 
     static void JSBind(BindingTarget globalObj);
 
-    void OnStateChanged(const JSCallbackInfo& info)
+    void OnStateChanged()
     {
         if (onStateChangedCallback_) {
             onStateChangedCallback_();

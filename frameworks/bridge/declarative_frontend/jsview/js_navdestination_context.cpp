@@ -32,11 +32,16 @@ JSRef<JSObject> JSNavDestinationContext::CreateJSNavPathInfo() const
     obj->SetProperty<std::string>("name", pathInfo_->GetName());
     auto jsInfo = AceType::DynamicCast<JSNavPathInfo>(pathInfo_);
     JSRef<JSVal> param;
+    JSRef<JSVal> onPop;
     if (jsInfo) {
         param = jsInfo->GetParam();
+        onPop = jsInfo->GetOnPop();
     }
     if (!param->IsEmpty()) {
         obj->SetPropertyObject("param", param);
+    }
+    if (!onPop->IsEmpty()) {
+        obj->SetPropertyObject("onPop", onPop);
     }
     return obj;
 }
