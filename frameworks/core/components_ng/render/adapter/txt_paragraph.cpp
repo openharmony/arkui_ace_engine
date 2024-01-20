@@ -331,7 +331,7 @@ bool TxtParagraph::CalCulateAndCheckPreIsPlaceholder(int32_t index, int32_t& ext
     for (auto placeholderIndex : placeholderPosition_) {
         if (placeholderIndex == static_cast<size_t>(index)) {
             return true;
-        } else if (placeholderIndex < static_cast<size_t>(extent)) {
+        } else if (placeholderIndex < static_cast<size_t>(index)) {
             extent--;
         }
     }
