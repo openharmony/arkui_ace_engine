@@ -194,6 +194,7 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     showErrorState_ = AceType::MakeRefPtr<PropertyBool>(false);
     fontFamilyString_ = AceType::MakeRefPtr<PropertyString>("");
     fontReady_ = AceType::MakeRefPtr<PropertyBool>(false);
+    contentChange_ = AceType::MakeRefPtr<PropertyBool>(false);
     AttachProperty(contentOffset_);
     AttachProperty(contentSize_);
     AttachProperty(textValue_);
@@ -208,6 +209,7 @@ void TextFieldContentModifier::SetDefaultPropertyValue()
     AttachProperty(showUnderline_);
     AttachProperty(fontFamilyString_);
     AttachProperty(fontReady_);
+    AttachProperty(contentChange_);
 }
 
 void TextFieldContentModifier::SetDefaultFontSize(const TextStyle& textStyle)
@@ -409,6 +411,12 @@ void TextFieldContentModifier::SetFontReady(bool value)
     if (fontReady_) {
         fontReady_->Set(value);
     }
+}
+
+void TextFieldContentModifier::ContentChange()
+{
+    CHECK_NULL_VOID(contentChange_);
+    contentChange_->Set(!contentChange_->Get());
 }
 
 bool TextFieldContentModifier::NeedMeasureUpdate(PropertyChangeFlag& flag)
