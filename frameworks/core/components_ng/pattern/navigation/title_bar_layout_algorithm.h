@@ -33,16 +33,6 @@ public:
     void Measure(LayoutWrapper* layoutWrapper) override;
     void Layout(LayoutWrapper* layoutWrapper) override;
 
-    float GetCurrentTitleOffsetY() const
-    {
-        return currentTitleOffsetY_;
-    }
-
-    float GetCurrentTitleBarHeight() const
-    {
-        return currentTitleBarHeight_;
-    }
-
     float GetInitialTitleOffsetY() const
     {
         return initialTitleOffsetY_;
@@ -131,10 +121,6 @@ private:
 
     float menuHeight_ = 0.0f;
     float initialTitleOffsetY_ = 0.0f;
-
-    // the value before title bar expand safe area
-    float currentTitleOffsetY_ = 0.0f;
-    float currentTitleBarHeight_ = 0.0f;
 
     bool isInitialTitle_ = true;
     float initialSubtitleOffsetY_ = 0.0f;

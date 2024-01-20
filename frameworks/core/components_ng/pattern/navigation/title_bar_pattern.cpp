@@ -652,8 +652,6 @@ bool TitleBarPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirt
     CHECK_NULL_RETURN(titleBarLayoutAlgorithm, false);
     UpdateTitleModeChange();
 
-    currentTitleOffsetY_ = titleBarLayoutAlgorithm->GetCurrentTitleOffsetY();
-    currentTitleBarHeight_ = titleBarLayoutAlgorithm->GetCurrentTitleBarHeight();
     initialTitleOffsetY_ = titleBarLayoutAlgorithm->GetInitialTitleOffsetY();
     isInitialTitle_ = titleBarLayoutAlgorithm->IsInitialTitle();
     initialSubtitleOffsetY_ = titleBarLayoutAlgorithm->GetInitialSubtitleOffsetY();
