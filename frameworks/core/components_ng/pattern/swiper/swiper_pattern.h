@@ -797,6 +797,7 @@ private:
     int32_t ComputePageIndex(int32_t index) const;
     void UpdateIndexOnAnimationStop();
     void UpdateIndexOnSwipePageStop();
+    void AdjustCurrentFocusIndex();
 
     WeakPtr<NestableScrollContainer> parent_;
     /**
