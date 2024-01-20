@@ -16,11 +16,12 @@
 #include "core/components_ng/pattern/custom/custom_node_pattern.h"
 
 #include "base/utils/utils.h"
+#include "core/components_ng/pattern/custom/custom_measure_layout_node.h"
 
 namespace OHOS::Ace::NG {
 
 bool CustomNodePattern::OnDirtyLayoutWrapperSwap(
-    const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& /*config*/)
+    const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config)
 {
     CHECK_NULL_RETURN(dirty, false);
     auto host = GetHost();
