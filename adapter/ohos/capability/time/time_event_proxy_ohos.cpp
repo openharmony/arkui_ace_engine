@@ -96,9 +96,6 @@ void TimeEventProxyOhos::OnTimeChange()
             ++it;
         } else {
             it = listeners_.erase(it);
-            if (listeners_.empty()) {
-                CommonEventManager::UnSubscribeCommonEvent(eventFwkSubscriber_);
-            }
         }
     }
 }
