@@ -1255,6 +1255,7 @@ bool JsiDeclarativeEngine::UpdateRootComponent()
         JsiDeclarativeEngine::obj_.Empty();
         return true;
     }
+    LOGI("global object is empty");
     return false;
 }
 

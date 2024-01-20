@@ -948,6 +948,7 @@ void PageRouterManager::LoadPage(int32_t pageId, const RouterPageInfo& target, b
     }
 
     if (!result) {
+        LOGI("Update RootComponent Failed or LoadNamedRouter Failed");
         pageRouterStack_.pop_back();
         return;
     }
