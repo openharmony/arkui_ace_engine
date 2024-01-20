@@ -15,12 +15,20 @@
 
 #include "ui_observer.h"
 
+#include "bridge/common/utils/engine_helper.h"
+
 #include <algorithm>
 
 namespace OHOS::Ace::Napi {
 std::list<std::shared_ptr<UIObserverListener>> UIObserver::unspecifiedNavigationListeners_;
 std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::specifiedCNavigationListeners_;
+
+std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
+    UIObserver::abilityContextRouterPageListeners_;
+std::unordered_map<uint32_t, std::list<std::shared_ptr<UIObserverListener>>>
+    UIObserver::specifiedRouterPageListeners_;
+std::unordered_map<napi_ref, NG::AbilityContextInfo> UIObserver::infos_;
 
 // UIObserver.on(type: "navDestinationUpdate", callback)
 // register a global listener without options
@@ -109,5 +117,42 @@ void UIObserver::HandleNavigationStateChange(std::string navigationId, std::stri
     for (const auto& listener : holder) {
         listener->OnNavigationStateChange(navigationId, navDestinationName, state);
     }
+}
+
+void UIObserver::GetAbilityInfos(napi_env env, napi_value abilityContext, NG::AbilityContextInfo& info)
+{
+    if (!env || !abilityContext) {
+        return;
+    }
+    napi_value napiInfo = nullptr;
+    napi_get_named_property(env, abilityContext, "abilityInfo", &napiInfo);
+    CHECK_NULL_VOID(napiInfo);
+    napi_value name = nullptr;
+    napi_get_named_property(env, napiInfo, "name", &name);
+    ParseStringFromNapi(env, name, info.name);
+    napi_get_named_property(env, napiInfo, "bundleName", &name);
+    ParseStringFromNapi(env, name, info.bundleName);
+    napi_get_named_property(env, napiInfo, "moduleName", &name);
+    ParseStringFromNapi(env, name, info.moduleName);
+}
+
+bool UIObserver::ParseStringFromNapi(napi_env env, napi_value val, std::string& str)
+{
+    if (!val || !MatchValueType(env, val, napi_string)) {
+        return false;
+    }
+    size_t len = 0;
+    napi_get_value_string_utf8(env, val, nullptr, 0, &len);
+    std::unique_ptr<char[]> result = std::make_unique<char[]>(len + 1);
+    napi_get_value_string_utf8(env, val, result.get(), len + 1, &len);
+    str = result.get();
+    return true;
+}
+
+bool UIObserver::MatchValueType(napi_env env, napi_value value, napi_valuetype targetType)
+{
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, value, &valueType);
+    return valueType == targetType;
 }
 } // namespace OHOS::Ace::Napi

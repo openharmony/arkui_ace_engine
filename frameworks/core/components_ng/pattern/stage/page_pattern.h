@@ -35,6 +35,14 @@ using JSAnimatorMap = std::unordered_map<std::string, RefPtr<Framework::Animator
 
 using DynamicPageSizeCallback = std::function<void(SizeF size)>;
 
+enum class RouterPageState {
+    ABOUT_TO_APPEAR = 0,
+    ABOUT_TO_DISAPPEAR = 1,
+    ON_PAGE_SHOW = 2,
+    ON_PAGE_HIDE = 3,
+    ON_BACK_PRESS = 4,
+};
+
 // PagePattern is the base class for page root render node.
 class ACE_EXPORT PagePattern : public ContentRootPattern {
     DECLARE_ACE_TYPE(PagePattern, ContentRootPattern);
@@ -67,15 +75,11 @@ public:
 
     void OnHide();
 
-    bool OnBackPressed() const
+    bool OnBackPressed();
+
+    RouterPageState GetPageState() const
     {
-        if (isPageInTransition_) {
-            return true;
-        }
-        if (OnBackPressed_) {
-            return OnBackPressed_();
-        }
-        return false;
+        return state_;
     }
 
     void SetOnPageShow(std::function<void()>&& onPageShow)
@@ -183,6 +187,9 @@ private:
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& wrapper, const DirtySwapConfig& config) override;
     void FirePageTransitionFinish();
 
+    void OnAttachToMainTree() override;
+    void OnDetachFromMainTree() override;
+
     bool AvoidKeyboard() const override;
     bool AvoidTop() const override
     {
@@ -209,6 +216,7 @@ private:
 
     SharedTransitionMap sharedTransitionMap_;
     JSAnimatorMap jsAnimatorMap_;
+    RouterPageState state_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PagePattern);
 };
