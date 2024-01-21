@@ -95,6 +95,13 @@ public:
     {
         isUIExtension_ = isUIExtension;
     }
+
+    bool AvoidBottom() const override
+    {
+        // If UIExtensionComponent uses ModalPage, ModalPage will not avoid bottom.
+        return !isUIExtension_;
+    }
+
 private:
     void OnAttachToFrameNode() override;
     bool isUIExtension_ = false;
