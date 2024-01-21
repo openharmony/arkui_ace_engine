@@ -18,11 +18,11 @@
 #include <cstdint>
 #include <list>
 
-#include "base/image/image_source.h"
 #include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/subwindow/subwindow_manager.h"
 #include "base/utils/time_util.h"
+#include "base/image/image_source.h"
 #include "core/common/container.h"
 #include "core/common/interaction/interaction_data.h"
 #include "core/common/interaction/interaction_interface.h"
@@ -176,8 +176,8 @@ void GestureEventHub::OnModifyDone()
     }
 }
 
-RefPtr<NGGestureRecognizer> GestureEventHub::PackInnerRecognizer(const Offset& offset,
-    std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, int32_t touchId,
+RefPtr<NGGestureRecognizer> GestureEventHub::PackInnerRecognizer(
+    const Offset& offset, std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, int32_t touchId,
     const RefPtr<TargetComponent>& targetComponent)
 {
     RefPtr<NGGestureRecognizer> current;
@@ -689,7 +689,7 @@ void GestureEventHub::HandleOnDragStart(const GestureEvent& info)
     auto frameTag = frameNode->GetTag();
     auto hostPattern = frameNode->GetPattern<TextDragBase>();
     if (hostPattern && (frameTag == V2::RICH_EDITOR_ETS_TAG || frameTag == V2::TEXT_ETS_TAG ||
-                           frameTag == V2::TEXTINPUT_ETS_TAG || frameTag == V2::SEARCH_Field_ETS_TAG)) {
+                        frameTag == V2::TEXTINPUT_ETS_TAG || frameTag == V2::SEARCH_Field_ETS_TAG)) {
         frameNodeOffset_ = hostPattern->GetDragUpperLeftCoordinates();
         frameNodeSize_ = SizeF(0.0f, 0.0f);
     } else {
