@@ -3159,8 +3159,15 @@ AceAutoFillType TextFieldPattern::ConvertToAceAutoFillType(TextInputType type)
 
 bool TextFieldPattern::CloseKeyboard(bool forceClose)
 {
+    return CloseKeyboard(forceClose, forceClose);
+}
+
+bool TextFieldPattern::CloseKeyboard(bool forceClose, bool isStopTwinkling)
+{
     if (forceClose) {
-        StopTwinkling();
+        if (isStopTwinkling) {
+            StopTwinkling();
+        }
         CloseSelectOverlay(true);
         if (customKeyboardBuilder_ && isCustomKeyboardAttached_) {
             return CloseCustomKeyboard();
@@ -4066,7 +4073,9 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     if (event.IsKeepEditable()) {
         return;
     }
-    CloseKeyboard(forceCloseKeyboard);
+    // LostFocusToViewRoot may not cause current lost focus, only stop twinkling when it is truly lost focus,
+    // which will call StopTwinkling on HandleBlurEvent method.
+    CloseKeyboard(forceCloseKeyboard, false);
     FocusHub::LostFocusToViewRoot();
 }
 
