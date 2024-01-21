@@ -973,20 +973,15 @@ void FrameNode::TriggerVisibleAreaChangeCallback(bool forceDisappear)
     auto frameRect = GetTransformRectRelativeToWindow();
     auto visibleRect = frameRect;
     RectF parentRect;
-    auto parentUi = GetParent();
+    auto parentUi = GetAncestorNodeOfFrame(true);
     if (!parentUi) {
         visibleRect.SetWidth(0.0f);
         visibleRect.SetHeight(0.0f);
     }
     while (parentUi) {
-        auto parentFrame = AceType::DynamicCast<FrameNode>(parentUi);
-        if (!parentFrame) {
-            parentUi = parentUi->GetParent();
-            continue;
-        }
-        parentRect = parentFrame->GetTransformRectRelativeToWindow();
+        parentRect = parentUi->GetTransformRectRelativeToWindow();
         visibleRect = visibleRect.Constrain(parentRect);
-        parentUi = parentUi->GetParent();
+        parentUi = parentUi->GetAncestorNodeOfFrame(true);
     }
 
     double currentVisibleRatio =
