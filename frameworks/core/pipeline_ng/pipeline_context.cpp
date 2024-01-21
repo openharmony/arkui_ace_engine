@@ -1342,7 +1342,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
 {
     CHECK_RUN_ON(UI);
     // prevent repeated trigger with same keyboardHeight
-    if (keyboardHeight == safeAreaManager_->GetKeyboardInset().Length()) {
+    if (NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length())) {
         return;
     }
 
@@ -1417,7 +1417,7 @@ void PipelineContext::OnVirtualKeyboardHeightChange(
     CHECK_RUN_ON(UI);
     // prevent repeated trigger with same keyboardHeight
     CHECK_NULL_VOID(safeAreaManager_);
-    if (keyboardHeight == safeAreaManager_->GetKeyboardInset().Length()) {
+    if (NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length())) {
         return;
     }
 

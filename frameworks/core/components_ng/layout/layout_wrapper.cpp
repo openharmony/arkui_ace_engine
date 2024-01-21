@@ -33,6 +33,13 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+bool IsSyntaxNode(const std::string& tag)
+{
+    return tag == V2::JS_VIEW_ETS_TAG || tag == V2::JS_IF_ELSE_ETS_TAG || tag == V2::JS_FOR_EACH_ETS_TAG ||
+           tag == V2::JS_LAZY_FOR_EACH_ETS_TAG;
+}
+} // namespace
 
 bool LayoutWrapper::SkipMeasureContent() const
 {
@@ -182,15 +189,26 @@ void LayoutWrapper::ExpandSafeArea(bool isFocusOnPage)
 void LayoutWrapper::AdjustChildren(const OffsetF& offset)
 {
     for (const auto& childUI : GetHostNode()->GetChildren()) {
-        auto child = DynamicCast<FrameNode>(childUI);
-        if (!child) {
-            continue;
-        }
-        auto childGeo = child->GetGeometryNode();
-        child->SaveGeoState();
-        childGeo->SetFrameOffset(childGeo->GetFrameOffset() + offset);
-        child->ForceSyncGeometryNode();
+        AdjustChild(childUI, offset);
     }
+}
+
+void LayoutWrapper::AdjustChild(RefPtr<UINode> childUI, const OffsetF& offset)
+{
+    auto child = DynamicCast<FrameNode>(childUI);
+    if (!child) {
+        if (!IsSyntaxNode(childUI->GetTag())) {
+            return;
+        }
+        for (const auto& syntaxChild : childUI->GetChildren()) {
+            AdjustChild(syntaxChild, offset);
+        }
+        return;
+    }
+    auto childGeo = child->GetGeometryNode();
+    child->SaveGeoState();
+    childGeo->SetFrameOffset(childGeo->GetFrameOffset() + offset);
+    child->ForceSyncGeometryNode();
 }
 
 void LayoutWrapper::ExpandIntoKeyboard()
