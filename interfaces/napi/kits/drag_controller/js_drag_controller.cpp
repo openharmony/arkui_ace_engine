@@ -646,7 +646,9 @@ void EnvelopedDragData(DragControllerAsyncCtx* asyncCtx, std::optional<Msdp::Dev
 {
     auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
     CHECK_NULL_VOID(container);
-    asyncCtx->displayId = container->GetDisplayInfo()->GetDisplayId();
+    auto displayInfo = container->GetDisplayInfo();
+    CHECK_NULL_VOID(displayInfo);
+    asyncCtx->displayId = displayInfo->GetDisplayId();
     std::vector<Msdp::DeviceStatus::ShadowInfo> shadowInfos;
     GetShadowInfoArray(asyncCtx, shadowInfos);
     if (shadowInfos.empty()) {
@@ -761,7 +763,9 @@ void OnComplete(DragControllerAsyncCtx* asyncCtx)
     CHECK_NULL_VOID(taskExecutor);
     auto windowScale = container->GetWindowScale();
     asyncCtx->windowScale = windowScale;
-    asyncCtx->displayId = container->GetDisplayInfo()->GetDisplayId();
+    auto displayInfo = container->GetDisplayInfo();
+    CHECK_NULL_VOID(displayInfo);
+    asyncCtx->displayId = displayInfo->GetDisplayId();
     taskExecutor->PostTask(
         [asyncCtx]() {
             CHECK_NULL_VOID(asyncCtx);
