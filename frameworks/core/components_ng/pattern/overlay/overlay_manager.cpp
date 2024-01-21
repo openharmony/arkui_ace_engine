@@ -596,31 +596,7 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
             },
             TaskExecutor::TaskType::UI);
     });
-    auto context = menu->GetRenderContext();
-    CHECK_NULL_VOID(context);
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
-    CHECK_NULL_VOID(menuWrapperPattern);
-    auto menuAnimationOffset = menuWrapperPattern->GetAnimationOffset();
-    if (menuWrapperPattern->GetPreviewMode() != MenuPreviewMode::NONE) {
-        if (!showPreviewAnimation) {
-            CleanPreviewInSubWindow();
-        } else {
-            ShowPreviewDisappearAnimation(menuWrapperPattern);
-        }
-        ShowContextMenuDisappearAnimation(option, menuWrapperPattern, startDrag);
-    } else {
-        AnimationUtils::Animate(
-            option,
-            [context, menuAnimationOffset]() {
-                context->UpdateOpacity(0.0);
-                context->UpdateOffset(menuAnimationOffset);
-            },
-            option.GetOnFinishEvent());
-    }
-    // start animation immediately
-    pipeline->RequestFrame();
+    ShowMenuClearAnimation(menu, option, showPreviewAnimation, startDrag);
 }
 
 void OverlayManager::ClearMenuAnimation(const RefPtr<FrameNode>& menu, bool showPreviewAnimation, bool startDrag)
@@ -1321,15 +1297,6 @@ void OverlayManager::CleanMenuInSubWindowWithAnimation()
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
     menuWrapperPattern->SetMenuHide();
-    if (menuWrapperPattern->GetPreviewMode() == MenuPreviewMode::NONE) {
-        CleanMenuInSubWindow();
-        menuWrapperPattern->CallMenuDisappearCallback();
-        auto mainPipeline = PipelineContext::GetMainPipelineContext();
-        if (mainPipeline && menuWrapperPattern->GetMenuDisappearCallback()) {
-            mainPipeline->FlushPipelineImmediately();
-        }
-        return;
-    }
     ClearMenuAnimation(menu);
 }
 
