@@ -731,13 +731,13 @@ RefPtr<NG::ImageData> DecodedDataProviderImageLoader::LoadDecodedImageData(
 
     void* pixmapMediaUniquePtr = dataProvider->GetDataProviderThumbnailResFromUri(src.GetSrc());
     auto pixmap = PixelMap::CreatePixelMapFromDataAbility(pixmapMediaUniquePtr);
+    CHECK_NULL_RETURN(pixmap, nullptr);
     TAG_LOGI(AceLogTag::ACE_IMAGE,
         "src=%{public}s, pixmap from Media width*height=%{public}d*%{public}d, ByteCount=%{public}d",
         src.ToString().c_str(), pixmap->GetWidth(), pixmap->GetHeight(), pixmap->GetByteCount());
     if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
         pixmap->SavePixelMapToFile("_fromMedia_");
     }
-    CHECK_NULL_RETURN(pixmap, nullptr);
 
     auto cache = pipeline->GetImageCache();
     if (cache) {
