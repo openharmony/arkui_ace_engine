@@ -842,7 +842,6 @@ void OverlayManager::ClearToast()
     for (auto [id, toastNodeWeak] : toastMap_) {
         PopToast(id);
     }
-    toastMap_.clear();
 }
 
 void OverlayManager::ShowPopup(int32_t targetId, const PopupInfo& popupInfo)
