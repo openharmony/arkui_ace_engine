@@ -536,6 +536,11 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
     ResetLowerNodeFocusable(menu);
     ResetContextMenuDragHideFinished();
 
+    auto menuNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
+    CHECK_NULL_VOID(menuNode);
+    auto eventHub = menuNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetEnabledInternal(false);
     auto menuWrapper = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapper);
     menuWrapper->CallMenuAboutToDisappearCallback();
@@ -556,6 +561,9 @@ void OverlayManager::PopMenuAnimation(const RefPtr<FrameNode>& menu, bool showPr
                 CHECK_NULL_VOID(menu);
                 auto menuNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
                 CHECK_NULL_VOID(menuNode);
+                auto eventHub = menuNode->GetEventHub<EventHub>();
+                CHECK_NULL_VOID(eventHub);
+                eventHub->SetEnabledInternal(true);
                 auto menuPattern = menuNode->GetPattern<MenuPattern>();
                 CHECK_NULL_VOID(menuPattern);
                 auto root = rootWeak.Upgrade();
