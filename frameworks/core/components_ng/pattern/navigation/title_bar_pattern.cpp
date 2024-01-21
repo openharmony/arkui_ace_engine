@@ -688,8 +688,6 @@ void TitleBarPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(host);
     host->GetRenderContext()->SetClipToFrame(true);
 
-    SetBackgroundAndBlur();
-
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         SafeAreaExpandOpts opts = {.type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP};
         host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
@@ -825,8 +823,6 @@ void TitleBarPattern::SetTitleStyleByCoordScrollOffset(float offset)
 
 void TitleBarPattern::OnColorConfigurationUpdate()
 {
-    SetBackgroundAndBlur();
-
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(GetHost());
     CHECK_NULL_VOID(titleBarNode);
     auto backButton = AceType::DynamicCast<FrameNode>(titleBarNode->GetBackButton());
@@ -905,21 +901,28 @@ float TitleBarPattern::CalculateHandledOffsetBetweenMinAndMaxTitle(float offset,
     return offsetHandled;
 }
 
-void TitleBarPattern::SetBackgroundAndBlur()
+void TitleBarPattern::SetTitlebarOptions(NavigationTitlebarOptions&& opt)
 {
-    if (SystemProperties::GetNavigationBlurEnabled() &&
-        Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        auto theme = NavigationGetTheme();
-        CHECK_NULL_VOID(theme);
-        renderContext->UpdateBackgroundColor(theme->GetBackgroundBlurColor());
+    if (opt == options_) {
+        return;
+    }
 
+    options_ = std::move(opt);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (options_.bgOptions.color.has_value()) {
+        renderContext->UpdateBackgroundColor(options_.bgOptions.color.value());
+    } else {
+        renderContext->ResetBackgroundColor();
+    }
+    if (options_.bgOptions.blurStyle.has_value()) {
         BlurStyleOption blur;
-        blur.blurStyle = BlurStyle::COMPONENT_THICK;
+        blur.blurStyle = options_.bgOptions.blurStyle.value();
         renderContext->UpdateBackBlurStyle(blur);
+    } else {
+        renderContext->ResetBackBlurStyle();
     }
 }
 } // namespace OHOS::Ace::NG

@@ -21,6 +21,7 @@
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
+#include "core/components_ng/pattern/navigation/navigation_options.h"
 #include "core/components_ng/pattern/navigation/tool_bar_layout_algorithm.h"
 #include "core/components_ng/pattern/pattern.h"
 
@@ -52,34 +53,20 @@ public:
             host->GetLayoutProperty()->UpdateSafeAreaExpandOpts(opts);
         }
 
-        SetBackgroundAndBlur();
+        SetDefaultBackgroundColorIfNeeded();
     }
 
     void OnColorConfigurationUpdate() override
     {
-        SetBackgroundAndBlur();
+        SetDefaultBackgroundColorIfNeeded();
     }
+
+    void SetToolbarOptions(NavigationToolbarOptions&& opt);
 
 private:
-    void SetBackgroundAndBlur()
-    {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        auto theme = NavigationGetTheme();
-        CHECK_NULL_VOID(theme);
-        if (SystemProperties::GetNavigationBlurEnabled() &&
-            Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
-            renderContext->UpdateBackgroundColor(theme->GetBackgroundBlurColor());
+    void SetDefaultBackgroundColorIfNeeded();
 
-            BlurStyleOption blur;
-            blur.blurStyle = BlurStyle::COMPONENT_THICK;
-            renderContext->UpdateBackBlurStyle(blur);
-        } else {
-            renderContext->UpdateBackgroundColor(theme->GetToolBarBgColor());
-        }
-    }
+    NavigationToolbarOptions options_;
 };
 } // namespace OHOS::Ace::NG
 

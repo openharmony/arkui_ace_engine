@@ -1798,4 +1798,32 @@ void NavigationModelNG::SetCustomTransition(NavigationTransitionEvent&& customTr
     CHECK_NULL_VOID(pattern);
     pattern->SetNavigationTransition(std::move(customTransition));
 }
+
+void NavigationModelNG::SetTitlebarOptions(NavigationTitlebarOptions&& opt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navBarNode->GetTitleBarNode());
+    CHECK_NULL_VOID(titleBarNode);
+    auto titleBarPattern = titleBarNode->GetPattern<TitleBarPattern>();
+    CHECK_NULL_VOID(titleBarPattern);
+    titleBarPattern->SetTitlebarOptions(std::move(opt));
+}
+
+void NavigationModelNG::SetToolbarOptions(NavigationToolbarOptions&& opt)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto navigationGroupNode = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    CHECK_NULL_VOID(navigationGroupNode);
+    auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
+    CHECK_NULL_VOID(navBarNode);
+    auto toolBarNode = AceType::DynamicCast<NavToolbarNode>(navBarNode->GetToolBarNode());
+    CHECK_NULL_VOID(toolBarNode);
+    auto toolBarPattern = toolBarNode->GetPattern<NavToolbarPattern>();
+    CHECK_NULL_VOID(toolBarPattern);
+    toolBarPattern->SetToolbarOptions(std::move(opt));
+}
 } // namespace OHOS::Ace::NG

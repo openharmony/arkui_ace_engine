@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
+#include "core/components_ng/pattern/navigation/navigation_options.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<NavigationModel> NavigationModel::instance_ = nullptr;
@@ -68,11 +69,36 @@ constexpr int32_t NAV_BAR_POSITION_RANGE = 1;
 constexpr int32_t DEFAULT_NAV_BAR_WIDTH = 240;
 constexpr Dimension DEFAULT_MIN_NAV_BAR_WIDTH = 240.0_vp;
 constexpr Dimension DEFAULT_MIN_CONTENT_WIDTH = 360.0_vp;
+constexpr char BACKGROUND_COLOR_PROPERTY[] = "backgroundColor";
+constexpr char BACKGROUND_BLUR_STYLE_PROPERTY[] = "backgroundBlurStyle";
 
 JSRef<JSVal> TitleModeChangeEventToJSValue(const NavigationTitleModeChangeEvent& eventInfo)
 {
     return JSRef<JSVal>::Make(ToJSValue(eventInfo.IsMiniBar() ? static_cast<int32_t>(NavigationTitleMode::MINI)
                                                               : static_cast<int32_t>(NavigationTitleMode::FULL)));
+}
+
+void ParseBackgroundOptions(const JSRef<JSVal>& obj, NG::NavigationBackgroundOptions& options)
+{
+    options.color.reset();
+    options.blurStyle.reset();
+    if (!obj->IsObject()) {
+        return;
+    }
+    auto optObj = JSRef<JSObject>::Cast(obj);
+    auto colorProperty = optObj->GetProperty(BACKGROUND_COLOR_PROPERTY);
+    Color color;
+    if (JSViewAbstract::ParseJsColor(colorProperty, color)) {
+        options.color = color;
+    }
+    auto blurProperty = optObj->GetProperty(BACKGROUND_BLUR_STYLE_PROPERTY);
+    if (blurProperty->IsNumber()) {
+        auto blurStyle = blurProperty->ToNumber<int32_t>();
+        if (blurStyle >= static_cast<int>(BlurStyle::NO_MATERIAL) &&
+            blurStyle <= static_cast<int>(BlurStyle::COMPONENT_ULTRA_THICK)) {
+            options.blurStyle = static_cast<BlurStyle>(blurStyle);
+        }
+    }
 }
 
 } // namespace
@@ -354,6 +380,12 @@ void JSNavigation::SetTitle(const JSCallbackInfo& info)
     } else {
         NavigationModel::GetInstance()->SetTitle("");
     }
+
+    NG::NavigationTitlebarOptions options;
+    if (info.Length() > 1) {
+        ParseBackgroundOptions(info[1], options.bgOptions);
+    }
+    NavigationModel::GetInstance()->SetTitlebarOptions(std::move(options));
 }
 
 void JSNavigation::SetTitleMode(int32_t value)
@@ -455,11 +487,11 @@ void JSNavigation::SetToolbarConfiguration(const JSCallbackInfo& info)
                 ParseToolbarItemsConfiguration(info, JSRef<JSArray>::Cast(info[0]), toolbarItems);
             }
             NavigationModel::GetInstance()->SetToolbarConfiguration(std::move(toolbarItems));
-            return;
+        } else {
+            std::list<RefPtr<AceType>> items;
+            NavigationModel::GetInstance()->GetToolBarItems(items);
+            ParseToolBarItems(JSRef<JSArray>::Cast(info[0]), items);
         }
-        std::list<RefPtr<AceType>> items;
-        NavigationModel::GetInstance()->GetToolBarItems(items);
-        ParseToolBarItems(JSRef<JSArray>::Cast(info[0]), items);
     } else if (info[0]->IsObject()) {
         auto builderFuncParam = JSRef<JSObject>::Cast(info[0])->GetProperty("builder");
         if (builderFuncParam->IsFunction()) {
@@ -470,6 +502,12 @@ void JSNavigation::SetToolbarConfiguration(const JSCallbackInfo& info)
             NavigationModel::GetInstance()->SetCustomToolBar(customNode);
         }
     }
+
+    NG::NavigationToolbarOptions options;
+    if (info.Length() > 1) {
+        ParseBackgroundOptions(info[1], options.bgOptions);
+    }
+    NavigationModel::GetInstance()->SetToolbarOptions(std::move(options));
 }
 
 void JSNavigation::SetMenus(const JSCallbackInfo& info)
