@@ -40,7 +40,6 @@ namespace OHOS::Ace {
 struct DragNotifyMsg;
 class UnifiedData;
 }
-// namespace OHOS::Ace
 
 enum class MenuPreviewMode {
     NONE,
@@ -82,7 +81,11 @@ enum class HitTestMode {
     HTMTRANSPARENT_SELF,
 };
 
-enum class TouchTestStrategy { DEFAULT = 0, FORWARD_COMPETITION, FORWARD };
+enum class TouchTestStrategy {
+    DEFAULT = 0,
+    FORWARD_COMPETITION,
+    FORWARD
+};
 
 struct TouchTestInfo {
     PointF windowPoint;
@@ -572,8 +575,8 @@ public:
     bool GetMonopolizeEvents() const;
 
     void SetMonopolizeEvents(bool monopolizeEvents);
-    virtual RefPtr<NGGestureRecognizer> PackInnerRecognizer(const Offset& offset,
-        std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, int32_t touchId,
+    virtual RefPtr<NGGestureRecognizer> PackInnerRecognizer(
+        const Offset& offset, std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, int32_t touchId,
         const RefPtr<TargetComponent>& targetComponent);
 
     void CleanExternalRecognizers()
