@@ -4083,7 +4083,7 @@ void RosenRenderContext::DumpInfo()
         if (!(NearEqual(scale[0], 1) && NearEqual(scale[1], 1))) {
             DumpLog::GetInstance().AddDesc(
                 std::string("scale(x,y): ")
-                    .append(std::to_string(translate[0]).append(",").append(std::to_string(translate[1]))));
+                    .append(std::to_string(scale[0]).append(",").append(std::to_string(scale[1]))));
         }
         auto rect = GetPaintRectWithoutTransform();
         if (HasTransformTranslate()) {
