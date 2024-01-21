@@ -26,7 +26,7 @@ std::unordered_map<std::string, std::list<std::shared_ptr<UIObserverListener>>>
 
 std::unordered_map<napi_ref, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::abilityContextRouterPageListeners_;
-std::unordered_map<uint32_t, std::list<std::shared_ptr<UIObserverListener>>>
+std::unordered_map<int32_t, std::list<std::shared_ptr<UIObserverListener>>>
     UIObserver::specifiedRouterPageListeners_;
 std::unordered_map<napi_ref, NG::AbilityContextInfo> UIObserver::infos_;
 
@@ -100,7 +100,7 @@ void UIObserver::UnRegisterNavigationCallback(std::string navigationId, napi_val
     );
 }
 
-void UIObserver::HandleNavigationStateChange(std::string navigationId, std::string navDestinationName,
+void UIObserver::HandleNavigationStateChange(const std::string& navigationId, const std::string& navDestinationName,
                                              NG::NavDestinationState state)
 {
     for (const auto& listener : unspecifiedNavigationListeners_) {
@@ -116,6 +116,140 @@ void UIObserver::HandleNavigationStateChange(std::string navigationId, std::stri
 
     for (const auto& listener : holder) {
         listener->OnNavigationStateChange(navigationId, navDestinationName, state);
+    }
+}
+
+// UIObserver.on(type: "routerPageUpdate", UIAbilityContext, callback)
+// register a listener on current page
+void UIObserver::RegisterRouterPageCallback(
+    napi_env env, napi_value uiAbilityContext, const std::shared_ptr<UIObserverListener>& listener)
+{
+    NG::AbilityContextInfo info;
+    GetAbilityInfos(env, uiAbilityContext, info);
+    for (auto listenerPair : abilityContextRouterPageListeners_) {
+        auto ref = listenerPair.first;
+        auto localInfo = infos_[ref];
+        if (info.IsEqual(localInfo)) {
+            auto& holder = abilityContextRouterPageListeners_[ref];
+            if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+                return;
+            }
+            holder.emplace_back(listener);
+            return;
+        }
+    }
+    napi_ref newRef = nullptr;
+    napi_create_reference(env, uiAbilityContext, 1, &newRef);
+    abilityContextRouterPageListeners_[newRef] = std::list<std::shared_ptr<UIObserverListener>>({ listener });
+    infos_[newRef] = info;
+}
+
+// UIObserver.on(type: "routerPageUpdate", uiContext | null, callback)
+// register a listener on current page
+void UIObserver::RegisterRouterPageCallback(
+    int32_t uiContextInstanceId, const std::shared_ptr<UIObserverListener>& listener)
+{
+    if (uiContextInstanceId == 0) {
+        uiContextInstanceId = Container::CurrentId();
+    }
+    if (specifiedRouterPageListeners_.find(uiContextInstanceId) == specifiedRouterPageListeners_.end()) {
+        specifiedRouterPageListeners_[uiContextInstanceId] =
+            std::list<std::shared_ptr<UIObserverListener>>({ listener });
+        return;
+    }
+    auto& holder = specifiedRouterPageListeners_[uiContextInstanceId];
+    if (std::find(holder.begin(), holder.end(), listener) != holder.end()) {
+        return;
+    }
+    holder.emplace_back(listener);
+}
+
+// UIObserver.off(type: "routerPageUpdate", uiAbilityContext, callback)
+void UIObserver::UnRegisterRouterPageCallback(napi_env env, napi_value uiAbilityContext, napi_value callback)
+{
+    NG::AbilityContextInfo info;
+    GetAbilityInfos(env, uiAbilityContext, info);
+    for (auto listenerPair : abilityContextRouterPageListeners_) {
+        auto ref = listenerPair.first;
+        auto localInfo = infos_[ref];
+        if (info.IsEqual(localInfo)) {
+            auto& holder = abilityContextRouterPageListeners_[listenerPair.first];
+            if (callback == nullptr) {
+                holder.clear();
+            } else {
+                holder.erase(
+                    std::remove_if(
+                        holder.begin(),
+                        holder.end(),
+                        [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                            return registeredListener->NapiEqual(callback);
+                        }
+                    ),
+                    holder.end()
+                );
+            }
+            if (holder.empty()) {
+                infos_.erase(ref);
+                abilityContextRouterPageListeners_.erase(ref);
+                napi_delete_reference(env, ref);
+            }
+            return;
+        }
+    }
+}
+
+// UIObserver.off(type: "routerPageUpdate", uiContext | null, callback)
+void UIObserver::UnRegisterRouterPageCallback(int32_t uiContextInstanceId, napi_value callback)
+{
+    if (uiContextInstanceId == 0) {
+        uiContextInstanceId = Container::CurrentId();
+    }
+    if (specifiedRouterPageListeners_.find(uiContextInstanceId) == specifiedRouterPageListeners_.end()) {
+        return;
+    }
+    auto& holder = specifiedRouterPageListeners_[uiContextInstanceId];
+    if (callback == nullptr) {
+        holder.clear();
+        return;
+    }
+    holder.erase(
+        std::remove_if(
+            holder.begin(),
+            holder.end(),
+            [callback](const std::shared_ptr<UIObserverListener>& registeredListener) {
+                return registeredListener->NapiEqual(callback);
+            }
+        ),
+        holder.end()
+    );
+}
+
+void UIObserver::HandleRouterPageStateChange(NG::AbilityContextInfo& info, napi_value context, int32_t index,
+    const std::string& name, const std::string& path, NG::RouterPageState state)
+{
+    for (auto listenerPair : abilityContextRouterPageListeners_) {
+        auto ref = listenerPair.first;
+        auto localInfo = infos_[ref];
+        if (info.IsEqual(localInfo)) {
+            auto env = GetCurrentNapiEnv();
+            napi_value abilityContext = nullptr;
+            napi_get_reference_value(env, ref, &abilityContext);
+
+            auto& holder = abilityContextRouterPageListeners_[ref];
+            for (const auto& listener : holder) {
+                listener->OnRouterPageStateChange(abilityContext, index, name, path, state);
+            }
+            break;
+        }
+    }
+
+    auto currentId = Container::CurrentId();
+    if (specifiedRouterPageListeners_.find(currentId) == specifiedRouterPageListeners_.end()) {
+        return;
+    }
+    auto& holder = specifiedRouterPageListeners_[currentId];
+    for (const auto& listener : holder) {
+        listener->OnRouterPageStateChange(context, index, name, path, state);
     }
 }
 
@@ -154,5 +288,14 @@ bool UIObserver::MatchValueType(napi_env env, napi_value value, napi_valuetype t
     napi_valuetype valueType = napi_undefined;
     napi_typeof(env, value, &valueType);
     return valueType == targetType;
+}
+
+napi_env UIObserver::GetCurrentNapiEnv()
+{
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, nullptr);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, nullptr);
+    return reinterpret_cast<napi_env>(nativeEngine);
 }
 } // namespace OHOS::Ace::Napi

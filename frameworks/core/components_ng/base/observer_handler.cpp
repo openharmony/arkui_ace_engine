@@ -46,8 +46,24 @@ void UIObserverHandler::NotifyNavigationStateChange(const WeakPtr<AceType>& weak
     CHECK_NULL_VOID(pattern);
     std::string navigationId = GetNavigationId(pattern);
     std::string navDestinationName = pattern->GetName();
-    CHECK_NULL_VOID(handleFunc_);
-    handleFunc_(navigationId, navDestinationName, state);
+    CHECK_NULL_VOID(navigationHandleFunc_);
+    navigationHandleFunc_(navigationId, navDestinationName, state);
+}
+
+void UIObserverHandler::NotifyRouterPageStateChange(const RefPtr<PageInfo>& pageInfo, RouterPageState state)
+{
+    CHECK_NULL_VOID(pageInfo);
+    CHECK_NULL_VOID(routerPageHandleFunc_);
+    napi_value context = GetUIContextValue();
+    AbilityContextInfo info = {
+        AceApplicationInfo::GetInstance().GetAbilityName(),
+        AceApplicationInfo::GetInstance().GetProcessName(),
+        Container::Current()->GetModuleName()
+    };
+    int32_t index = pageInfo->GetPageId();
+    std::string name = pageInfo->GetPageUrl();
+    std::string path = pageInfo->GetPagePath();
+    routerPageHandleFunc_(info, context, index, name, path, state);
 }
 
 std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const RefPtr<AceType>& node)
@@ -71,8 +87,46 @@ std::shared_ptr<NavDestinationInfo> UIObserverHandler::GetNavigationState(const 
         pattern->GetIsOnShow() ? NavDestinationState::ON_SHOWN : NavDestinationState::ON_HIDDEN);
 }
 
-void UIObserverHandler::SetHandleNavigationChangeFunc(HandleFunc func)
+std::shared_ptr<RouterPageInfoNG> UIObserverHandler::GetRouterPageState(const RefPtr<AceType>& node)
 {
-    handleFunc_ = func;
+    CHECK_NULL_RETURN(node, nullptr);
+    auto current = AceType::DynamicCast<UINode>(node);
+    while (current) {
+        if (current->GetTag() == V2::PAGE_ETS_TAG) {
+            break;
+        }
+        current = current->GetParent();
+    }
+    CHECK_NULL_RETURN(current, nullptr);
+    auto routerPage = AceType::DynamicCast<FrameNode>(current);
+    CHECK_NULL_RETURN(routerPage, nullptr);
+    auto pattern = routerPage->GetPattern<PagePattern>();
+    CHECK_NULL_RETURN(pattern, nullptr);
+    auto pageInfo = pattern->GetPageInfo();
+    return std::make_shared<RouterPageInfoNG>(
+        GetUIContextValue(),
+        pageInfo->GetPageId(),
+        pageInfo->GetPageUrl(),
+        pageInfo->GetPagePath(),
+        RouterPageState(pattern->GetPageState()));
+}
+
+void UIObserverHandler::SetHandleNavigationChangeFunc(NavigationHandleFunc func)
+{
+    navigationHandleFunc_ = func;
+}
+
+void UIObserverHandler::SetHandleRouterPageChangeFunc(RouterPageHandleFunc func)
+{
+    routerPageHandleFunc_ = func;
+}
+
+napi_value UIObserverHandler::GetUIContextValue()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, nullptr);
+    return frontend->GetContextValue();
 }
 } // namespace OHOS::Ace::NG

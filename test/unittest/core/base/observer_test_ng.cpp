@@ -54,11 +54,11 @@ HWTEST_F(ObserverTestNg, ObserverTestNg001, TestSize.Level1)
     auto pattern = contentNode->GetPattern<NavDestinationPattern>();
     UIObserverHandler::GetInstance().NotifyNavigationStateChange(AceType::WeakClaim(Referenced::RawPtr(pattern)),
                                                                  NavDestinationState::ON_SHOWN);
-    ASSERT_EQ(UIObserverHandler::GetInstance().handleFunc_, nullptr);
+    ASSERT_EQ(UIObserverHandler::GetInstance().navigationHandleFunc_, nullptr);
     auto pattern1 = navigation->GetPattern<NavigationPattern>();
     UIObserverHandler::GetInstance().NotifyNavigationStateChange(AceType::WeakClaim(Referenced::RawPtr(pattern1)),
                                                                  NavDestinationState::ON_SHOWN);
-    ASSERT_EQ(UIObserverHandler::GetInstance().handleFunc_, nullptr);
+    ASSERT_EQ(UIObserverHandler::GetInstance().navigationHandleFunc_, nullptr);
 }
 
 /**
