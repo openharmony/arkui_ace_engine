@@ -417,7 +417,9 @@ std::string TextPattern::GetSelectedText(int32_t start, int32_t end) const
             auto wideString = StringUtils::ToWstring(span->GetSpanContent());
             auto max = std::min(span->position, end);
             auto min = std::max(start, tag);
-            value += StringUtils::ToString(wideString.substr(min - tag, max - min));
+            value += StringUtils::ToString(
+                wideString.substr(std::clamp((min - tag), 0, static_cast<int32_t>(wideString.length())),
+                    std::clamp((max - min), 0, static_cast<int32_t>(wideString.length()))));
         }
         tag = span->position == -1 ? tag + 1 : span->position;
         if (span->position >= end) {

@@ -2228,6 +2228,8 @@ HWTEST_F(TextTestNg, TextContentModifier002, TestSize.Level1)
  */
 HWTEST_F(TextTestNg, TextLayoutAlgorithmTest006, TestSize.Level1)
 {
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetTextWidth).WillOnce(Return(100.0f));
     /**
      * @tc.steps: step1. create textFrameNode.
      */
