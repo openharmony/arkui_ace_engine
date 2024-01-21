@@ -156,6 +156,7 @@ protected:
 
 private:
     void AdjustChildren(const OffsetF& offset);
+    void AdjustChild(RefPtr<UINode> node, const OffsetF& offset);
 
     ACE_DISALLOW_COPY_AND_MOVE(LayoutWrapper);
 };
