@@ -209,8 +209,15 @@ void ImageLoadingContext::DownloadImage()
             [result = std::move(result), state, weak]() {
                 auto ctx = weak.Upgrade();
                 CHECK_NULL_VOID(ctx);
+                TAG_LOGI(AceLogTag::ACE_IMAGE, "DownLoad src=%{public}s, result length=%{public}zu",
+                    ctx->GetSourceInfo().ToString().c_str(), result.size());
                 if (state == DownloadState::SUCCESS) {
                     auto data = ImageData::MakeFromDataWithCopy(result.data(), result.size());
+                    if (!Positive(result.size())) {
+                        ctx->FailCallback(
+                            "DownloadImage successfully, but the length of imageData from netStack is not positive");
+                        return;
+                    }
                     // if downloading is necessary, cache object, data to file
                     RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(ctx->GetSourceInfo(), data);
                     if (!imageObj) {
