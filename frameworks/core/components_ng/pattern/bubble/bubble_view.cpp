@@ -341,9 +341,86 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
     return popupNode;
 }
 
+void BubbleView::UpdateBubbleButtons(std::list<RefPtr<UINode>>& buttons, const RefPtr<PopupParam>& param)
+{
+    auto primaryButton = param->GetPrimaryButtonProperties();
+    auto secondaryButton = param->GetSecondaryButtonProperties();
+    if (primaryButton.showButton) {
+        auto button = AceType::DynamicCast<FrameNode>(buttons.front());
+        buttons.pop_front();
+        auto textNode = AceType::DynamicCast<FrameNode>(button->GetFirstChild());
+        auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        layoutProperty->UpdateContent(primaryButton.value);
+        textNode->MarkModifyDone();
+        auto buttonEventHub = button->GetOrCreateGestureEventHub();
+        if (primaryButton.action) {
+            buttonEventHub->AddClickEvent(primaryButton.action);
+        }
+    }
+    if (secondaryButton.showButton) {
+        auto button = AceType::DynamicCast<FrameNode>(buttons.front());
+        buttons.pop_front();
+        auto textNode = AceType::DynamicCast<FrameNode>(button->GetFirstChild());
+        auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        layoutProperty->UpdateContent(secondaryButton.value);
+        textNode->MarkModifyDone();
+        auto buttonEventHub = button->GetOrCreateGestureEventHub();
+        if (secondaryButton.action) {
+            buttonEventHub->AddClickEvent(secondaryButton.action);
+        }
+    }
+}
+
+void BubbleView::UpdateBubbleContent(int32_t popupId, const RefPtr<PopupParam>& param)
+{
+    auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupId);
+    CHECK_NULL_VOID(popupNode);
+    auto message = param->GetMessage();
+    auto primaryButton = param->GetPrimaryButtonProperties();
+    auto secondaryButton = param->GetSecondaryButtonProperties();
+    auto columnNode = popupNode->GetFirstChild();
+    if (primaryButton.showButton || secondaryButton.showButton) {
+        CHECK_NULL_VOID(columnNode);
+        auto combinedChild = columnNode->GetFirstChild();
+        CHECK_NULL_VOID(combinedChild);
+        const auto& children = combinedChild->GetChildren();
+        for (const auto& child: children) {
+            if (child->GetTag() == V2::TEXT_ETS_TAG) {  // API10
+                auto textNode = AceType::DynamicCast<FrameNode>(child);
+                auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+                layoutProperty->UpdateContent(message);
+                UpdateTextProperties(param, layoutProperty);
+                textNode->MarkModifyDone();
+            } else if (child->GetTag() == V2::SCROLL_ETS_TAG) {
+                auto textNode = AceType::DynamicCast<FrameNode>(child->GetFirstChild());
+                auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+                layoutProperty->UpdateContent(message);
+                UpdateTextProperties(param, layoutProperty);
+                textNode->MarkModifyDone();
+            } else {
+                auto buttons = child->GetChildren();
+                UpdateBubbleButtons(buttons, param);
+            }
+        }
+    } else {
+        CHECK_NULL_VOID(columnNode);
+        auto childNode = columnNode->GetFirstChild();
+        if (!(Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN))) {
+            childNode = childNode->GetFirstChild();
+        }
+        auto textNode = AceType::DynamicCast<FrameNode>(childNode);
+        CHECK_NULL_VOID(textNode);
+        auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+        layoutProperty->UpdateContent(message);
+        UpdateTextProperties(param, layoutProperty);
+        textNode->MarkModifyDone();
+    }
+}
+
 void BubbleView::UpdatePopupParam(int32_t popupId, const RefPtr<PopupParam>& param, const RefPtr<FrameNode>& targetNode)
 {
     UpdateCommonParam(popupId, param, false);
+    UpdateBubbleContent(popupId, param);
     auto popupNode = FrameNode::GetFrameNode(V2::POPUP_ETS_TAG, popupId);
     CHECK_NULL_VOID(popupNode);
     auto popupProp = AceType::DynamicCast<BubbleLayoutProperty>(popupNode->GetLayoutProperty());

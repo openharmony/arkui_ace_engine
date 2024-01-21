@@ -29,8 +29,8 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-constexpr int32_t HOVER_TO_TOUCH_DURATION = 100;
-constexpr int32_t TOUCH_DURATION = 250;
+constexpr int32_t TOUCH_DURATION = 100;
+constexpr int32_t MOUSE_HOVER_DURATION = 250;
 constexpr int32_t TYPE_TOUCH = 0;
 constexpr int32_t TYPE_HOVER = 1;
 constexpr int32_t TYPE_CANCEL = 2;
@@ -244,8 +244,7 @@ void ButtonPattern::OnTouchDown()
         // for system default
         auto isNeedToHandleHoverOpacity = IsNeedToHandleHoverOpacity();
         AnimateTouchAndHover(renderContext, isNeedToHandleHoverOpacity ? TYPE_HOVER : TYPE_CANCEL, TYPE_TOUCH,
-            isNeedToHandleHoverOpacity ? HOVER_TO_TOUCH_DURATION : TOUCH_DURATION,
-            isNeedToHandleHoverOpacity ? Curves::SHARP : Curves::FRICTION);
+            TOUCH_DURATION, isNeedToHandleHoverOpacity ? Curves::SHARP : Curves::FRICTION);
     }
 }
 
@@ -268,8 +267,7 @@ void ButtonPattern::OnTouchUp()
         if (buttonEventHub->IsEnabled()) {
             auto isNeedToHandleHoverOpacity = IsNeedToHandleHoverOpacity();
             AnimateTouchAndHover(renderContext, TYPE_TOUCH, isNeedToHandleHoverOpacity ? TYPE_HOVER : TYPE_CANCEL,
-                isNeedToHandleHoverOpacity ? HOVER_TO_TOUCH_DURATION : TOUCH_DURATION,
-                isNeedToHandleHoverOpacity ? Curves::SHARP : Curves::FRICTION);
+                TOUCH_DURATION, isNeedToHandleHoverOpacity ? Curves::SHARP : Curves::FRICTION);
         } else {
             AnimateTouchAndHover(renderContext, TYPE_TOUCH, TYPE_CANCEL, TOUCH_DURATION, Curves::FRICTION);
         }
@@ -290,7 +288,7 @@ void ButtonPattern::HandleHoverEvent(bool isHover)
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
         AnimateTouchAndHover(renderContext, isHover ? TYPE_CANCEL : TYPE_HOVER, isHover ? TYPE_HOVER : TYPE_CANCEL,
-            TOUCH_DURATION, Curves::FRICTION);
+            MOUSE_HOVER_DURATION, Curves::FRICTION);
     }
 }
 

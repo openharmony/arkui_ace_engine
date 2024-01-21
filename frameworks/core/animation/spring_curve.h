@@ -42,6 +42,21 @@ public:
         return velocity_;
     }
 
+    float GetMass() const
+    {
+        return mass_;
+    }
+
+    float GetStiffness() const
+    {
+        return stiffness_;
+    }
+
+    float GetDamping() const
+    {
+        return damping_;
+    }
+
 private:
     void SetEndPosition(float endPosition, float startVelocity);
     void InitEstimateDuration();

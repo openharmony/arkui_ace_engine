@@ -15,6 +15,7 @@
 
 #include "core/components_ng/image_provider/image_loading_context.h"
 
+#include "base/network/download_manager.h"
 #include "base/thread/background_task_executor.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
@@ -196,37 +197,38 @@ bool ImageLoadingContext::NotifyReadyIfCacheHit()
 
 void ImageLoadingContext::DownloadImage()
 {
-    auto pipeline = PipelineBase::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    DownloadCallback downloadCallback;
     if (NotifyReadyIfCacheHit()) {
         return;
     }
-    downloadCallback.successCallback = [weak = AceType::WeakClaim(this)](const std::string&& imageData) {
-        auto ctx = weak.Upgrade();
-        CHECK_NULL_VOID(ctx);
-        TAG_LOGI(AceLogTag::ACE_IMAGE, "DownLoad src=%{public}s, ImageData length=%{public}zu",
-            ctx->GetSourceInfo().ToString().c_str(), imageData.size());
-        auto data = ImageData::MakeFromDataWithCopy(imageData.data(), imageData.size());
-        // if downloading is necessary, cache object, data to file
-        RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(ctx->GetSourceInfo(), data);
-        if (!imageObj) {
-            ctx->FailCallback("ImageObject null");
-            return;
-        }
-        ImageProvider::CacheImageObject(imageObj);
-        ImageLoader::CacheImageData(ctx->GetSourceInfo().GetKey(), data);
-        ImageLoader::WriteCacheToFile(ctx->GetSourceInfo().GetSrc(), imageData);
-        ctx->DataReadyCallback(imageObj);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    DownloadCallback downloadCallback = [taskExecutor, weak = AceType::WeakClaim(this)](
+                                            const std::string&& result, DownloadState state) {
+        taskExecutor->PostTask(
+            [result = std::move(result), state, weak]() {
+                auto ctx = weak.Upgrade();
+                CHECK_NULL_VOID(ctx);
+                if (state == DownloadState::SUCCESS) {
+                    auto data = ImageData::MakeFromDataWithCopy(result.data(), result.size());
+                    // if downloading is necessary, cache object, data to file
+                    RefPtr<ImageObject> imageObj = ImageProvider::BuildImageObject(ctx->GetSourceInfo(), data);
+                    if (!imageObj) {
+                        ctx->FailCallback("ImageObject null");
+                        return;
+                    }
+                    ImageProvider::CacheImageObject(imageObj);
+                    ImageLoader::CacheImageData(ctx->GetSourceInfo().GetKey(), data);
+                    ImageLoader::WriteCacheToFile(ctx->GetSourceInfo().GetSrc(), result);
+                    ctx->DataReadyCallback(imageObj);
+                } else {
+                    TAG_LOGI(AceLogTag::ACE_DOWNLOAD_MANAGER, "Download image failed! The error Message is %{public}s",
+                        result.c_str());
+                    ctx->FailCallback(result);
+                }
+            },
+            TaskExecutor::TaskType::UI);
     };
-    downloadCallback.failCallback = [weak = AceType::WeakClaim(this)](std::string errorMsg) {
-        auto ctx = weak.Upgrade();
-        CHECK_NULL_VOID(ctx);
-        TAG_LOGI(AceLogTag::ACE_DOWNLOAD_MANAGER,
-            "Download image failed! The error Message is %{public}s", errorMsg.c_str());
-        ctx->FailCallback(errorMsg);
-    };
-    downloadCallback.cancelCallback = downloadCallback.failCallback;
     NetworkImageLoader::DownloadImage(std::move(downloadCallback), src_.GetSrc(), syncLoad_);
 }
 

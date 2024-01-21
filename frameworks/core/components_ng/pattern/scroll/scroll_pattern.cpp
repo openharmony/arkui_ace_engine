@@ -17,6 +17,8 @@
 
 #include "base/geometry/axis.h"
 #include "base/geometry/dimension.h"
+#include "base/perfmonitor/perf_constants.h"
+#include "base/perfmonitor/perf_monitor.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/pattern/scrollable/scrollable.h"
 #include "core/components_ng/pattern/scroll/scroll_edge_effect.h"
@@ -413,6 +415,10 @@ void ScrollPattern::HandleCrashBottom() const
 
 bool ScrollPattern::UpdateCurrentOffset(float delta, int32_t source)
 {
+    bool flag = GreatOrEqual(delta, 0.75) || LessOrEqual(delta, -0.75);
+    if (!flag) {
+        PerfMonitor::GetPerfMonitor()->Start(PerfConstants::TRAILING_ANIMATION, PerfActionType::FIRST_MOVE, "");
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     for (auto listenerItem : listenerVector_) {

@@ -14,6 +14,8 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_button_bridge.h"
 
+#include <string>
+
 #include "base/geometry/dimension.h"
 #include "core/interfaces/native/node/api.h"
 #include "core/components/common/properties/text_style.h"
@@ -524,13 +526,25 @@ ArkUINativeModuleValue ButtonBridge::SetButtonSize(ArkUIRuntimeCallInfo* runtime
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0); // 0:node info
     void* nativeNode = nodeArg->ToNativePointer(vm)->Value();
     Local<JSValueRef> widthArgs = runtimeCallInfo->GetCallArgRef(1); // 1:width value
-    Local<JSValueRef> heightArg = runtimeCallInfo->GetCallArgRef(2); // 2:height value
+    Local<JSValueRef> heightArgs = runtimeCallInfo->GetCallArgRef(2); // 2:height value
     CalcDimension width;
-    ArkTSUtils::ParseJsDimensionVp(vm, widthArgs, width);
+    std::string widthStr;
+    if (widthArgs->IsUndefined() || widthArgs->IsNull()) {
+        widthStr = "undefined";
+    } else {
+        ArkTSUtils::ParseJsDimensionVp(vm, widthArgs, width);
+        widthStr = std::to_string(width.Value());
+    }
     CalcDimension height;
-    ArkTSUtils::ParseJsDimensionVp(vm, heightArg, height);
-    GetArkUIInternalNodeAPI()->GetButtonModifier().SetButtonSize(nativeNode, width.Value(),
-        static_cast<int32_t>(width.Unit()), height.Value(), static_cast<int32_t>(height.Unit()));
+    std::string heightStr;
+    if (heightArgs->IsUndefined() || heightArgs->IsNull()) {
+        heightStr = "undefined";
+    } else {
+        ArkTSUtils::ParseJsDimensionVp(vm, heightArgs, height);
+        heightStr = std::to_string(height.Value());
+    }
+    GetArkUIInternalNodeAPI()->GetButtonModifier().SetButtonSize(nativeNode, widthStr.c_str(),
+        static_cast<int32_t>(width.Unit()), heightStr.c_str(), static_cast<int32_t>(height.Unit()));
     return panda::JSValueRef::Undefined(vm);
 }
 

@@ -1758,7 +1758,13 @@ bool RichEditorPattern::JudgeDraggable(GestureEvent& info)
     if (BetweenSelectedPosition(info.GetGlobalLocation())) {
         dragBoxes_ = GetTextBoxes();
         // prevent long press event from being triggered when dragging
-        gestureHub->SetIsTextDraggable(true);
+        auto selectStart = textSelector_.GetTextStart();
+        auto selectEnd = textSelector_.GetTextEnd();
+        auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
+        auto resultObjects = textSelectInfo.GetSelection().resultObjects;
+        auto iter =
+            std::find_if(resultObjects.begin(), resultObjects.end(), [](ResultObject& obj) { return obj.isDraggable; });
+        gestureHub->SetIsTextDraggable(iter != resultObjects.end());
         return true;
     }
     gestureHub->SetIsTextDraggable(false);
@@ -4195,16 +4201,18 @@ void RichEditorPattern::CreateHandles()
     CHECK_NULL_VOID(host);
     float startSelectHeight = 0.0f;
     float endSelectHeight = 0.0f;
-    auto firstHandlePosition = CalcCursorOffsetByPosition(textSelector_.GetStart(), startSelectHeight, true);
+    textSelector_.ReverseTextSelector();
+    auto firstHandlePosition = CalcCursorOffsetByPosition(textSelector_.GetStart(), startSelectHeight, true, false);
     OffsetF firstHandleOffset(firstHandlePosition.GetX() + parentGlobalOffset_.GetX(),
         firstHandlePosition.GetY() + parentGlobalOffset_.GetY());
     textSelector_.firstHandleOffset_ = firstHandleOffset;
-    auto secondHandlePosition = CalcCursorOffsetByPosition(textSelector_.GetEnd(), endSelectHeight);
+    auto secondHandlePosition = CalcCursorOffsetByPosition(textSelector_.GetEnd(), endSelectHeight, false, false);
     OffsetF secondHandleOffset(secondHandlePosition.GetX() + parentGlobalOffset_.GetX(),
         secondHandlePosition.GetY() + parentGlobalOffset_.GetY());
     textSelector_.secondHandleOffset_ = secondHandleOffset;
     SizeF firstHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), startSelectHeight };
     SizeF secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), endSelectHeight };
+    AdjustHandleRect(firstHandleOffset, secondHandleOffset, firstHandlePaintSize, secondHandlePaintSize);
     RectF firstHandle = RectF(firstHandleOffset, firstHandlePaintSize);
     textSelector_.firstHandle = firstHandle;
     RectF secondHandle = RectF(secondHandleOffset, secondHandlePaintSize);
@@ -4253,10 +4261,15 @@ void RichEditorPattern::CalculateHandleOffsetAndShowOverlay(bool isUsingMouse)
     auto textPaintOffset = offset - OffsetF(0.0, std::min(baselineOffset_, 0.0f));
     float startSelectHeight = 0.0f;
     float endSelectHeight = 0.0f;
+    textSelector_.ReverseTextSelector();
+    int32_t baseOffset = std::min(textSelector_.baseOffset, GetTextContentLength());
     int32_t destinationOffset = std::min(textSelector_.destinationOffset, GetTextContentLength());
-    auto startOffset = CalcCursorOffsetByPosition(textSelector_.baseOffset, startSelectHeight, true, false);
+    auto startOffset = CalcCursorOffsetByPosition(baseOffset, startSelectHeight, true, false);
     auto endOffset =
         CalcCursorOffsetByPosition(destinationOffset, endSelectHeight, false, false);
+    if (baseOffset == destinationOffset && NearEqual(startOffset.GetX(), endOffset.GetX())) {
+        endOffset = CalcCursorOffsetByPosition(destinationOffset, endSelectHeight, true, false);
+    }
     SizeF firstHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), startSelectHeight };
     SizeF secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), endSelectHeight };
     OffsetF firstHandleOffset = startOffset + textPaintOffset - rootOffset;
@@ -4278,6 +4291,11 @@ void RichEditorPattern::AdjustHandleRect(
     OffsetF& firstHandleOffset, OffsetF& secondHandleOffset, SizeF& firstHandlePaintSize, SizeF& secondHandlePaintSize)
 {
     int32_t textContentLength = static_cast<int32_t>(GetTextContentLength());
+    auto selectEnd = std::max(textSelector_.baseOffset, textSelector_.destinationOffset);
+    auto selectedRects = paragraphs_.GetRects(textSelector_.GetStart(), textSelector_.GetEnd());
+    if (!selectedRects.empty() && !spans_.empty()) {
+        return;
+    }
     if (textContentLength == 0) {
         float caretHeight = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretHeight();
         secondHandlePaintSize = { SelectHandleInfo::GetDefaultLineWidth().ConvertToPx(), caretHeight / 2 };
@@ -4285,8 +4303,7 @@ void RichEditorPattern::AdjustHandleRect(
         // only show the second handle.
         firstHandlePaintSize = SizeF {};
         firstHandleOffset = OffsetF {};
-    } else if ((caretPosition_ == textContentLength || caretPosition_ == (textContentLength - 1)) &&
-               spans_.back()->content.back() == '\n') {
+    } else if (selectEnd == textContentLength && spans_.back()->content.back() == '\n') {
         RectF visibleContentRect(contentRect_.GetOffset() + parentGlobalOffset_, contentRect_.GetSize());
         auto targetHeight = contentRect_.Height() - (secondHandleOffset.GetY() - visibleContentRect.Top());
         if (firstHandleOffset.GetX() == secondHandleOffset.GetX()) {
@@ -4420,6 +4437,9 @@ void RichEditorPattern::InitSelection(const Offset& pos)
     adjusted_ = AdjustWordSelection(currentPosition, nextPosition);
     textSelector_.Update(currentPosition, nextPosition);
     auto selectedRects = paragraphs_.GetRects(currentPosition, nextPosition);
+    if (selectedRects.empty() || (selectedRects.size() == 1 && NearZero((selectedRects[0].Width())))) {
+        textSelector_.Update(currentPosition, currentPosition);
+    }
     if (selectedRects.empty() && !spans_.empty()) {
         auto it = std::find_if(
             spans_.begin(), spans_.end(), [caretPosition = currentPosition](const RefPtr<SpanItem>& spanItem) {

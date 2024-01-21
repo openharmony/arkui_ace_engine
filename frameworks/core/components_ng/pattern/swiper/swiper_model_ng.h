@@ -70,6 +70,7 @@ public:
     void SetDisplayArrow(bool displayArrow) override;
     void SetHoverShow(bool hoverShow) override;
     void SetNestedScroll(const NestedScrollOptions& nestedOpt) override;
+    void SetSwipeByGroup(bool swipeByGroup) override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin);
     static void SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin);

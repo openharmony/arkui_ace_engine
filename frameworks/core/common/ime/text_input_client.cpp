@@ -109,9 +109,12 @@ bool TextInputClient::HandleKeyEvent(const KeyEvent& keyEvent)
         (keyEvent.HasKey(KeyCode::KEY_SHIFT_LEFT) || keyEvent.HasKey(KeyCode::KEY_SHIFT_RIGHT) ? KEY_SHIFT : KEY_NULL) |
         (keyEvent.HasKey(KeyCode::KEY_CTRL_LEFT) || keyEvent.HasKey(KeyCode::KEY_CTRL_RIGHT) ? KEY_CTRL : KEY_NULL) |
         (keyEvent.HasKey(KeyCode::KEY_META_LEFT) || keyEvent.HasKey(KeyCode::KEY_META_RIGHT) ? KEY_META : KEY_NULL);
-    if ((modKeyFlags == KEY_NULL || modKeyFlags == KEY_SHIFT) && keyEvent.IsCharKey()) {
-        InsertValue(keyEvent.ConvertCodeToString());
-        return true;
+    if (modKeyFlags == KEY_NULL || modKeyFlags == KEY_SHIFT) {
+        auto value = keyEvent.ConvertCodeToString();
+        if (value != "") {
+            InsertValue(value);
+            return true;
+        }
     }
     auto iterFunctionKeys = functionKeys_.find(KeyComb(keyEvent.code, modKeyFlags));
     if (iterFunctionKeys != functionKeys_.end()) {

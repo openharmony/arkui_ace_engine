@@ -138,7 +138,7 @@ struct ArkUIFontStruct {
 
 struct ArkUIResourceLength {
     double value;
-    int32_t Uint;
+    int32_t unit;
     const char* string;
 };
 
@@ -503,7 +503,7 @@ struct ArkUIButtonModifierAPI {
     void (*SetButtonBorderRadius)(NodeHandle node, const double* values, int32_t valuesSize);
     void (*ResetButtonBorderRadius)(NodeHandle node);
     void (*SetButtonSize)(
-        NodeHandle node, double widthValue, int32_t widthUnit, double heightValue, int32_t heightUnit);
+        NodeHandle node, const char* widthValue, int32_t widthUnit, const char* heightValue, int32_t heightUnit);
     void (*ResetButtonSize)(NodeHandle node);
 };
 

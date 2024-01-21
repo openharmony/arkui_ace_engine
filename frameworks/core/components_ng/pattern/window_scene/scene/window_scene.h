@@ -46,6 +46,7 @@ protected:
     void OnDisconnect() override;
 
 private:
+    std::shared_ptr<Rosen::RSSurfaceNode> CreateSurfaceNode();
     void BufferAvailableCallback();
     void OnBoundsChanged(const Rosen::Vector4f& bounds);
     void RegisterFocusCallback();

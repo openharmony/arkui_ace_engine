@@ -131,6 +131,7 @@ public:
     void SetValueAt(size_t index, JsiRef<JsiValue> value) const;
     JsiRef<JsiValue> GetProperty(const char* prop) const;
     size_t Length() const;
+    void SetLength(size_t length) const;
     bool IsArray() const;
     FAKE_PTR_FOR_FUNCTION_ACCESS(JsiArray)
 };

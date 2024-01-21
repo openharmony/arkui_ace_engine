@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,6 +64,8 @@ constexpr Dimension GRIDITEM_FOCUS_INTERVAL = 3.0_vp;
 constexpr Dimension BORDER_RADIUS = 8.0_vp;
 constexpr float COL_GAP = 10.f;
 constexpr float ROW_GAP = 5.f;
+constexpr float BIG_ROW_GAP = 700.f;
+constexpr float MEDIUM_ROW_GAP = 75.f;
 } // namespace
 
 class GridTestNg : public TestNG {

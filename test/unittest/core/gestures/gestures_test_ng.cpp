@@ -1132,7 +1132,7 @@ HWTEST_F(GesturesTestNg, SequencedRecognizerBatchAdjudicateTest001, TestSize.Lev
     sequencedRecognizer.refereeState_ = RefereeState::PENDING;
     sequencedRecognizer.currentIndex_ = -9;
     sequencedRecognizer.BatchAdjudicate(clickRecognizerPtr, GestureDisposal::ACCEPT);
-    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::PENDING);
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::SUCCEED);
 
     /**
      * @tc.steps: step2. call GestureDisposal function and compare result.
@@ -1143,7 +1143,7 @@ HWTEST_F(GesturesTestNg, SequencedRecognizerBatchAdjudicateTest001, TestSize.Lev
     clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
     sequencedRecognizer.currentIndex_ = -10;
     sequencedRecognizer.BatchAdjudicate(clickRecognizerPtr, GestureDisposal::ACCEPT);
-    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::PENDING);
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::SUCCEED);
 
     /**
      * @tc.steps: step2. call GestureDisposal function and compare result.
@@ -2055,19 +2055,19 @@ HWTEST_F(GesturesTestNg, GestureRecognizerTest001, TestSize.Level1)
     AxisEvent axisEvent;
     axisEvent.action = AxisAction::BEGIN;
     clickRecognizer->HandleEvent(axisEvent);
-    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::SUCCEED);
 
     axisEvent.action = AxisAction::UPDATE;
     clickRecognizer->HandleEvent(axisEvent);
-    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::SUCCEED);
 
     axisEvent.action = AxisAction::END;
     clickRecognizer->HandleEvent(axisEvent);
-    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::SUCCEED);
 
     axisEvent.action = AxisAction::NONE;
     clickRecognizer->HandleEvent(axisEvent);
-    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::SUCCEED);
 }
 
 /**
@@ -2818,7 +2818,7 @@ HWTEST_F(GesturesTestNg, PanRecognizerTest002, TestSize.Level1)
      */
     panRecognizer.fingers_ = FINGER_NUMBER;
     panRecognizer.HandleTouchDownEvent(touchEvent);
-    EXPECT_EQ(panRecognizer.refereeState_, RefereeState::DETECTING);
+    EXPECT_EQ(panRecognizer.refereeState_, RefereeState::PENDING);
 
     /**
      * @tc.steps: step2. call HandleTouchDown function and compare result.
@@ -2827,7 +2827,7 @@ HWTEST_F(GesturesTestNg, PanRecognizerTest002, TestSize.Level1)
      */
     panRecognizer.fingers_ = 1;
     panRecognizer.HandleTouchDownEvent(touchEvent);
-    EXPECT_EQ(panRecognizer.refereeState_, RefereeState::DETECTING);
+    EXPECT_EQ(panRecognizer.refereeState_, RefereeState::PENDING);
 
     /**
      * @tc.steps: step2. call HandleTouchDown function and compare result.
@@ -2895,7 +2895,7 @@ HWTEST_F(GesturesTestNg, PanRecognizerHandleTouchDownEventTest001, TestSize.Leve
      */
     panRecognizer.fingers_ = FINGER_NUMBER;
     panRecognizer.HandleTouchDownEvent(touchEvent);
-    EXPECT_EQ(panRecognizer.refereeState_, RefereeState::DETECTING);
+    EXPECT_EQ(panRecognizer.refereeState_, RefereeState::PENDING);
 
     /**
      * @tc.steps: step2. call HandleTouchDown function and compare result.
@@ -2904,7 +2904,7 @@ HWTEST_F(GesturesTestNg, PanRecognizerHandleTouchDownEventTest001, TestSize.Leve
      */
     panRecognizer.fingers_ = 1;
     panRecognizer.HandleTouchDownEvent(touchEvent);
-    EXPECT_EQ(panRecognizer.refereeState_, RefereeState::DETECTING);
+    EXPECT_EQ(panRecognizer.refereeState_, RefereeState::PENDING);
 
     /**
      * @tc.steps: step2. call HandleTouchDown function and compare result.
@@ -4172,7 +4172,7 @@ HWTEST_F(GesturesTestNg, ParallelRecognizerTest003, TestSize.Level1)
     clickRecognizerPtr->refereeState_ = RefereeState::PENDING;
     parallelRecognizer.refereeState_ = RefereeState::SUCCEED;
     parallelRecognizer.BatchAdjudicate(clickRecognizerPtr, GestureDisposal::ACCEPT);
-    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::PENDING);
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::SUCCEED);
 
     /**
      * @tc.steps: step2. call HandleEvent function and compare result.
@@ -6072,7 +6072,7 @@ HWTEST_F(GesturesTestNg, SequencedRecognizerTest001, TestSize.Level1)
     sequencedRecognizer.recognizers_.push_back(clickRecognizerPtr);
     sequencedRecognizer.OnAccepted();
     EXPECT_EQ(sequencedRecognizer.refereeState_, RefereeState::SUCCEED);
-    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::READY);
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::SUCCEED);
 }
 
 /**
@@ -6161,7 +6161,7 @@ HWTEST_F(GesturesTestNg, SequencedRecognizerTest003, TestSize.Level1)
     sequencedRecognizer.recognizers_.push_back(clickRecognizerPtr);
     sequencedRecognizer.OnPending();
     EXPECT_EQ(sequencedRecognizer.refereeState_, RefereeState::PENDING);
-    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::READY);
+    EXPECT_EQ(clickRecognizerPtr->refereeState_, RefereeState::SUCCEED);
 
     /**
      * @tc.steps: step2. call OnPending function and compare result.
@@ -11405,7 +11405,7 @@ HWTEST_F(GesturesTestNg, LongPressRecognizerTestGetLongPressActionFunc005, TestS
      */
     click = longPressRecognizer->GetLongPressActionFunc();
     click(info);
-    EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::SUCCEED);
 
     auto onActionStart = [](GestureEvent& info) { return true; };
     auto onActionUpdate = [](GestureEvent& info) { return true; };
@@ -11415,7 +11415,7 @@ HWTEST_F(GesturesTestNg, LongPressRecognizerTestGetLongPressActionFunc005, TestS
     longPressRecognizer->SetOnActionEnd(onActionEnd);
     click = longPressRecognizer->GetLongPressActionFunc();
     click(info);
-    EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::SUCCEED);
 }
 
 /**
@@ -11699,7 +11699,7 @@ HWTEST_F(GesturesTestNg, LongPressRecognizerTestGetLongPressActionFunc008, TestS
      */
     click = longPressRecognizer->GetLongPressActionFunc();
     click(info);
-    EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::SUCCEED);
 
     auto onActionStart = [](GestureEvent& info) { return true; };
     auto onActionUpdate = [](GestureEvent& info) { return true; };
@@ -11709,7 +11709,7 @@ HWTEST_F(GesturesTestNg, LongPressRecognizerTestGetLongPressActionFunc008, TestS
     longPressRecognizer->SetOnActionEnd(onActionEnd);
     click = longPressRecognizer->GetLongPressActionFunc();
     click(info);
-    EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::FAIL);
+    EXPECT_EQ(longPressRecognizer->refereeState_, RefereeState::SUCCEED);
 }
 
 /**
@@ -12400,7 +12400,7 @@ HWTEST_F(GesturesTestNg, LongPressRecognizerHandleOverdueDeadlineTest002, TestSi
     longPressRecognizerPtr->refereeState_ = RefereeState::DETECTING;
     guestureEventHub->dragEventActuator_->isDragUserReject_ = false;
     longPressRecognizerPtr->HandleOverdueDeadline(true);
-    EXPECT_FALSE(guestureEventHub->dragEventActuator_->isDragUserReject_);
+    EXPECT_TRUE(guestureEventHub->dragEventActuator_->isDragUserReject_);
 }
 
 /**

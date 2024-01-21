@@ -758,7 +758,7 @@ void FrameNode::OnVisibleChange(bool isVisible)
 {
     pattern_->OnVisibleChange(isVisible);
     UpdateChildrenVisible(isVisible);
-    TriggerVisibleAreaChangeCallback(true);
+    TriggerVisibleAreaChangeCallback(!isVisible);
 }
 
 void FrameNode::OnDetachFromMainTree(bool recursive)
@@ -766,6 +766,7 @@ void FrameNode::OnDetachFromMainTree(bool recursive)
     if (auto focusHub = GetFocusHub()) {
         focusHub->RemoveSelf();
     }
+    pattern_->OnDetachFromMainTree();
     eventHub_->FireOnDisappear();
     renderContext_->OnNodeDisappear(recursive);
 }

@@ -174,10 +174,14 @@ void PanRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
     auto fingerNum = static_cast<int32_t>(touchPoints_.size());
 
-    if ((fingerNum == fingers_) || ((fingerNum > fingers_) && (refereeState_ == RefereeState::READY))) {
-        velocityTracker_.Reset();
-        UpdateTouchPointInVelocityTracker(event);
-        refereeState_ = RefereeState::DETECTING;
+    if (fingerNum >= fingers_) {
+        if (refereeState_ == RefereeState::READY) {
+            velocityTracker_.Reset();
+            UpdateTouchPointInVelocityTracker(event);
+            refereeState_ = RefereeState::DETECTING;
+        } else {
+            TAG_LOGI(AceLogTag::ACE_GESTURE, "Pan gesture refereeState is not READY");
+        }
     }
 }
 

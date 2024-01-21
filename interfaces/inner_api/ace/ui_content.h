@@ -349,7 +349,7 @@ public:
         return true;
     };
 
-    virtual void UpdateTransform(const OHOS::Rosen::Transform& transform) = 0;
+    virtual void UpdateTransform(const OHOS::Rosen::Transform& transform) {};
 };
 
 } // namespace OHOS::Ace

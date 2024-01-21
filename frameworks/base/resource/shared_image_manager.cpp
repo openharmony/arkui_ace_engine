@@ -57,8 +57,12 @@ void SharedImageManager::PostDelayedTaskToClearImageData(const std::string& name
     std::lock_guard<std::mutex> lockCancelableCallbackMap_(cancelableCallbackMapMutex_);
     auto& cancelableCallback = cancelableCallbackMap_[name];
     cancelableCallback.Reset(GenerateClearImageDataCallback(name, dataSize));
-    taskExecutor->PostDelayedTask(cancelableCallback, TaskExecutor::TaskType::BACKGROUND,
-        DELAY_TIME_FOR_IMAGE_DATA_CLEAN);
+    auto bkTask = [wp = taskExecutor_, cancelableCallback]() {
+        auto taskExecutor = wp.Upgrade();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(cancelableCallback, TaskExecutor::TaskType::BACKGROUND);
+    };
+    taskExecutor->PostDelayedTask(bkTask, TaskExecutor::TaskType::UI, DELAY_TIME_FOR_IMAGE_DATA_CLEAN);
 }
 
 void SharedImageManager::AddSharedImage(const std::string& name, SharedImage&& sharedImage)

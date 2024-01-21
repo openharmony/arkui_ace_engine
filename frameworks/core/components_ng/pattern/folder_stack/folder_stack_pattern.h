@@ -108,6 +108,7 @@ private:
     void InitFolderStackPatternAppearCallback();
     void RestoreScreenState();
     void SetAutoRotate();
+    void UpdateChildAlignment();
     std::optional<int32_t> foldStatusChangedCallbackId_;
     bool isScreenRotationLocked_ = false;
     Orientation lastOrientation_ = Orientation::UNSPECIFIED;

@@ -234,7 +234,7 @@ void SearchPattern::HandleTouchableAndHitTestMode()
         searchTouchable = searchGestureHub->GetTouchable();
         searchHitTestMode = searchGestureHub->GetHitTestMode();
     }
-    for (int32_t childIndex = TEXTFIELD_INDEX; childIndex < BUTTON_INDEX; childIndex++) {
+    for (int32_t childIndex = TEXTFIELD_INDEX; childIndex <= BUTTON_INDEX; childIndex++) {
         auto childFrameNode = DynamicCast<FrameNode>(host->GetChildAtIndex(childIndex));
         CHECK_NULL_VOID(childFrameNode);
         auto childEventHub = childFrameNode->GetEventHub<EventHub>();
@@ -576,6 +576,7 @@ void SearchPattern::OnClickCancelButton()
     auto focusHub = host->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
+    textFieldPattern->HandleFocusEvent();
     host->MarkModifyDone();
     textFieldFrameNode->MarkModifyDone();
 }
@@ -766,11 +767,7 @@ void SearchPattern::PaintFocusState(bool recoverFlag)
     CHECK_NULL_VOID(textFieldPattern);
 
     if (focusChoice_ == SearchPattern::FocusChoice::SEARCH) {
-        if (recoverFlag) {
-            // recover to last state when no factical focus movement in initialization
-            textFieldPattern->HandleFocusEvent(); // Show caret
-            textFieldPattern->GetTextSelectController()->UpdateCaretIndex(lastCaretIndex_);
-        } else {
+        if (!recoverFlag) {
             if (!textFieldPattern->GetTextValue().empty()) {
                 textFieldPattern->HandleOnSelectAll(true); // Select all text
                 textFieldPattern->StopTwinkling();         // Hide caret
@@ -1066,7 +1063,6 @@ void SearchPattern::HandleBlurEvent()
     CHECK_NULL_VOID(textFieldFrameNode);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
-    lastCaretIndex_ = textFieldPattern->GetCaretIndex();
     textFieldPattern->HandleBlurEvent();
 }
 

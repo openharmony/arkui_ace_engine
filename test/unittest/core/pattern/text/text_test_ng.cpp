@@ -2234,15 +2234,11 @@ HWTEST_F(TextTestNg, TextLayoutAlgorithmTest006, TestSize.Level1)
      * @tc.steps: step1. create textFrameNode.
      */
     auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(textFrameNode, nullptr);
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
-    ASSERT_NE(geometryNode, nullptr);
     RefPtr<LayoutWrapperNode> layoutWrapper =
         AceType::MakeRefPtr<LayoutWrapperNode>(textFrameNode, geometryNode, textFrameNode->GetLayoutProperty());
     auto textPattern = textFrameNode->GetPattern<TextPattern>();
-    ASSERT_NE(textPattern, nullptr);
     auto textLayoutProperty = textPattern->GetLayoutProperty<TextLayoutProperty>();
-    ASSERT_NE(textLayoutProperty, nullptr);
 
     /**
      * @tc.steps: step2. set textLayoutProperty.
@@ -3685,16 +3681,12 @@ HWTEST_F(TextTestNg, HandleMouseEvent006, TestSize.Level1)
     auto paragraph = MockParagraph::GetOrCreateMockParagraph();
     std::vector<RectF> rects { RectF(0, 0, 40, 40) };
     EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
-    ImageSpanNodeProperty firstProperty {
-        .imageSrc = std::make_optional("image")
-    };
+    ImageSpanNodeProperty firstProperty { .imageSrc = std::make_optional("image") };
     auto imageSpanNode = CreateImageSpanNode(firstProperty);
     host->AddChild(imageSpanNode);
     imageSpanNode->SetParent(host);
-    ImageSpanNodeProperty secondProperty {
-        .pixelMap = std::make_optional(PixelMap::CreatePixelMap(nullptr)),
-        .imageFit = std::make_optional(ImageFit::FILL)
-    };
+    ImageSpanNodeProperty secondProperty { .pixelMap = std::make_optional(PixelMap::CreatePixelMap(nullptr)),
+        .imageFit = std::make_optional(ImageFit::FILL) };
     imageSpanNode = CreateImageSpanNode(secondProperty);
     host->AddChild(imageSpanNode);
     imageSpanNode->SetParent(host);
@@ -5219,9 +5211,7 @@ HWTEST_F(TextTestNg, OnTextSelectionChange002, TestSize.Level1)
     textModelNG.SetCopyOption(CopyOptions::InApp);
     textModelNG.SetTextDetectEnable(true);
     bool isSelectChanged = false;
-    auto onSelectionChanged = [&isSelectChanged](int32_t, int32_t) {
-        isSelectChanged = true;
-    };
+    auto onSelectionChanged = [&isSelectChanged](int32_t, int32_t) { isSelectChanged = true; };
     textModelNG.SetOnTextSelectionChange(onSelectionChanged);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     frameNode->draggable_ = true;
@@ -5618,8 +5608,7 @@ HWTEST_F(TextTestNg, InitSpanItem001, TestSize.Level1)
     imageSpanNode->SetParent(host);
 
     auto placeholderSpanNode = PlaceholderSpanNode::GetOrCreateSpanNode(V2::PLACEHOLDER_SPAN_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<PlaceholderSpanPattern>(); });
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<PlaceholderSpanPattern>(); });
     host->AddChild(placeholderSpanNode);
     placeholderSpanNode->SetParent(host);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -5730,8 +5719,7 @@ HWTEST_F(TextTestNg, HandleDragEvent002, TestSize.Level1)
     host->AddChild(imageSpanNode);
     imageSpanNode->SetParent(host);
     auto placeholderSpanNode = PlaceholderSpanNode::GetOrCreateSpanNode(V2::PLACEHOLDER_SPAN_ETS_TAG,
-        ElementRegister::GetInstance()->MakeUniqueId(),
-        []() { return AceType::MakeRefPtr<PlaceholderSpanPattern>(); });
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<PlaceholderSpanPattern>(); });
     host->AddChild(placeholderSpanNode);
     placeholderSpanNode->SetParent(host);
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
@@ -5914,28 +5902,22 @@ HWTEST_F(TextTestNg, GetImageResultObject001, TestSize.Level1)
     pattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
 
     MarginPropertyF margin { .left = 40.f, .right = 40.f, .top = 80.f, .bottom = 80.f };
-    ImageSpanNodeProperty firstProperty {
-        .imageSrc = std::make_optional("image"),
+    ImageSpanNodeProperty firstProperty { .imageSrc = std::make_optional("image"),
         .margin = std::make_optional(margin),
-        .verticalAlign = std::make_optional(VerticalAlign::CENTER)
-    };
+        .verticalAlign = std::make_optional(VerticalAlign::CENTER) };
     auto imageSpanNode = CreateImageSpanNode(firstProperty);
     host->AddChild(imageSpanNode);
 
-    ImageSpanNodeProperty secondProperty {
-        .pixelMap = std::make_optional(PixelMap::CreatePixelMap(nullptr)),
+    ImageSpanNodeProperty secondProperty { .pixelMap = std::make_optional(PixelMap::CreatePixelMap(nullptr)),
         .margin = std::make_optional(margin),
         .imageFit = std::make_optional(ImageFit::FILL),
-        .verticalAlign = std::make_optional(VerticalAlign::CENTER)
-    };
+        .verticalAlign = std::make_optional(VerticalAlign::CENTER) };
     imageSpanNode = CreateImageSpanNode(secondProperty);
     host->AddChild(imageSpanNode);
 
-    ImageSpanNodeProperty thirdProperty {
-        .margin = std::make_optional(margin),
+    ImageSpanNodeProperty thirdProperty { .margin = std::make_optional(margin),
         .imageFit = std::make_optional(ImageFit::FILL),
-        .verticalAlign = std::make_optional(VerticalAlign::CENTER)
-    };
+        .verticalAlign = std::make_optional(VerticalAlign::CENTER) };
     imageSpanNode = CreateImageSpanNode(thirdProperty);
     host->AddChild(imageSpanNode);
 
@@ -5956,8 +5938,7 @@ HWTEST_F(TextTestNg, GetImageResultObject001, TestSize.Level1)
     auto onDragStart = eventHub->GetOnDragStart();
     auto dragDropInfo = onDragStart(dragEvent, "");
     EXPECT_EQ(pattern->dragResultObjects_.size(), 2); // 2 means result list size.
-    EXPECT_EQ(
-        pattern->dragResultObjects_.front().imageStyle.verticalAlign, static_cast<int32_t>(ImageFit::FILL));
+    EXPECT_EQ(pattern->dragResultObjects_.front().imageStyle.verticalAlign, static_cast<int32_t>(ImageFit::FILL));
     EXPECT_EQ(pattern->dragResultObjects_.front().imageStyle.objectFit, static_cast<int32_t>(VerticalAlign::CENTER));
     for (auto obj : pattern->dragResultObjects_) {
         EXPECT_EQ(obj.type, SelectSpanType::TYPEIMAGE);

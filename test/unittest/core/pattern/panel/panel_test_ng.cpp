@@ -2483,6 +2483,11 @@ HWTEST_F(PanelTestNg, PanelTestNg0044, TestSize.Level1)
     panelPattern->isFirstLayout_ = false;
     panelPattern->MarkDirtyNode(PROPERTY_UPDATE_LAYOUT);
     bool flag = panelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
+    EXPECT_TRUE(flag == false);
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+    layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(parentLayoutConstraint);
+    flag = panelPattern->OnDirtyLayoutWrapperSwap(layoutWrapper, config);
     EXPECT_TRUE(flag == true);
 }
 

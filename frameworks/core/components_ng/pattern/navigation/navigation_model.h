@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_MODEL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_NAVIGATION_NAVIGATION_MODEL_H
 
+#include <functional>
 #include <mutex>
 #include <string>
 
@@ -35,7 +36,9 @@ public:
 
     virtual void Create() = 0;
     virtual void SetNavigationStack() = 0;
-    virtual void SetNavigationStack(RefPtr<NG::NavigationStack>&& navigationStack) = 0;
+    virtual void SetNavigationStack(const RefPtr<NG::NavigationStack>& navigationStack) = 0;
+    virtual void SetNavigationStackWithCreatorAndUpdater(std::function<RefPtr<NG::NavigationStack>()> creator,
+        std::function<void(RefPtr<NG::NavigationStack>)> updater) {};
     virtual void SetNavigationStackProvided(bool provided) = 0;
     virtual bool ParseCommonTitle(
         bool hasSubTitle, bool hasMainTitle, const std::string& subtitle, const std::string& title) = 0;

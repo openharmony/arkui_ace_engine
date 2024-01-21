@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_NAVIGATION_STACK_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_NAVIGATION_STACK_H
 
+#include <functional>
 #include <stdint.h>
 
 #include "bridge/declarative_frontend/engine/js_types.h"
@@ -24,6 +24,18 @@
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 
 namespace OHOS::Ace::Framework {
+
+struct NavPathInfoUINode {
+    NavPathInfoUINode(const std::string& name, const JSRef<JSVal>& param, RefPtr<NG::UINode>& uiNode)
+    {
+        this->name = name;
+        this->param = param;
+        this->uiNode = uiNode;
+    }
+    std::string name;
+    JSRef<JSVal> param;
+    RefPtr<NG::UINode> uiNode;
+};
 
 class JSRouteInfo : public NG::RouteInfo {
     DECLARE_ACE_TYPE(JSRouteInfo, NG::RouteInfo)
@@ -47,6 +59,11 @@ public:
     JSNavigationStack() = default;
     ~JSNavigationStack() override = default;
 
+    void SetOnStateChangedCallback(std::function<void()> callback) override
+    {
+        onStateChangedCallback_ = callback;
+    }
+
     void UpdateStackInfo(const RefPtr<NavigationStack>& newStack) override
     {
         auto newJsStack = AceType::DynamicCast<JSNavigationStack>(newStack);
@@ -64,6 +81,7 @@ public:
     void PushName(const std::string& name, const JSRef<JSVal>& param);
     void RemoveName(const std::string& name) override;
     void RemoveIndex(int32_t index) override;
+    void RemoveInvalidPage(const JSRef<JSObject>& info);
     void Clear() override;
     int32_t GetReplaceValue() const override;
     void UpdateReplaceValue(int32_t isReplace) const override;
@@ -75,19 +93,35 @@ public:
     RefPtr<NG::UINode> CreateNodeByRouteInfo(const RefPtr<NG::RouteInfo>& routeInfo) override;
     void SetJSExecutionContext(const JSExecutionContext& context);
     std::string GetRouteParam() const override;
+    void OnAttachToParent(RefPtr<NG::NavigationStack> parent) override;
+    void OnDetachFromParent() override;
+    int32_t CheckNavDestinationExists(const JSRef<JSObject>& navPathInfo);
+    void ClearPreBuildNodeList() override;
 
 protected:
     JSRef<JSObject> dataSourceObj_;
     JSRef<JSFunc> navDestBuilderFunc_;
     JSExecutionContext executionContext_;
+    std::function<void()> onStateChangedCallback_;
 
 private:
     std::string GetNameByIndex(int32_t index);
     JSRef<JSVal> GetParamByIndex(int32_t index) const;
+    JSRef<JSVal> GetOnPopByIndex(int32_t index) const;
     bool GetNavDestinationNodeInUINode(RefPtr<NG::UINode> node, RefPtr<NG::NavDestinationGroupNode>& desNode);
     int32_t GetSize() const;
+    void SetJSParentStack(JSRef<JSVal> parent);
     static std::string ConvertParamToString(const JSRef<JSVal>& param);
     static void ParseJsObject(std::unique_ptr<JsonValue>& json, const JSRef<JSObject>& obj, int32_t depthLimit);
+    static void UpdateOnStateChangedCallback(JSRef<JSObject> obj, std::function<void()> callback);
+    static void UpdateCheckNavDestinationExistsFunc(JSRef<JSObject> obj,
+        std::function<int32_t(JSRef<JSObject>)> checkFunc);
+    bool GetFlagByIndex(int32_t index) const;
+    void SaveNodeToPreBuildList(const std::string& name, const JSRef<JSVal>& param, RefPtr<NG::UINode>& node);
+    RefPtr<NG::UINode> GetNodeFromPreBuildList(const std::string& name, const JSRef<JSVal>& param);
+
+private:
+    std::vector<NavPathInfoUINode> preBuildNodeList_;
 };
 } // namespace OHOS::Ace::Framework
 

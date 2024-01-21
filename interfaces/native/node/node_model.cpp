@@ -73,7 +73,7 @@ ArkUIFullNodeAPI* impl = nullptr;
 ArkUIFullNodeAPI* GetAnyFullNodeImpl(int version)
 {
     if (!impl) {
-        typedef ArkUIAnyNodeAPI* (*GetAPI_t)(int);
+        typedef ArkUIAnyAPI* (*GetAPI_t)(int);
         GetAPI_t getAPI = nullptr;
         void* module = FindModule();
         if (module == nullptr) {
@@ -111,9 +111,9 @@ ArkUIFullNodeAPI* GetFullImpl()
 ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
 {
     static const ArkUINodeType nodes[] = { ARKUI_TEXT, ARKUI_SPAN, ARKUI_IMAGE_SPAN, ARKUI_IMAGE, ARKUI_TOGGLE,
-        ARKUI_LOADINGPROGRESS, ARKUI_TEXTINPUT, ARKUI_STACK, ARKUI_SCROLL, ARKUI_LIST, ARKUI_SWIPER, ARKUI_TEXTAREA,
+        ARKUI_LOADING_PROGRESS, ARKUI_TEXT_INPUT, ARKUI_STACK, ARKUI_SCROLL, ARKUI_LIST, ARKUI_SWIPER, ARKUI_TEXTAREA,
         ARKUI_BUTTON, ARKUI_PROGRESS, ARKUI_CHECKBOX, ARKUI_COLUMN, ARKUI_ROW, ARKUI_FLEX, ARKUI_LIST_ITEM,
-        ARKUI_REFRESH, ARKUI_XCOMPONENT };
+        ARKUI_REFRESH, ARKUI_XCOMPONENT, ARKUI_LIST_ITEM_GROUP };
     auto* impl = GetFullImpl();
     if (!impl) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get node impl");

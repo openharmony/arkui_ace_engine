@@ -43,6 +43,7 @@ void LinearSplitPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandlePanStart(info);
+        pattern->UpdateDragFRCSceneInfo(info, SceneStatus::START);
     };
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
@@ -53,8 +54,15 @@ void LinearSplitPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->HandlePanEnd(info);
+        pattern->UpdateDragFRCSceneInfo(info, SceneStatus::END);
     };
-    auto actionCancelTask = [weak = WeakClaim(this)]() {};
+    auto actionCancelTask = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        host->AddFRCSceneInfo(SPLIT_DRAG_SCENE, 0.0f, SceneStatus::END);
+    };
     if (panEvent_) {
         gestureHub->RemovePanEvent(panEvent_);
     }
@@ -101,10 +109,6 @@ void LinearSplitPattern::HandlePanStart(const GestureEvent& info)
     } else {
         preOffset_ = yOffset;
         childrenDragPos_[dragedSplitIndex_ + 1] += yOffset;
-    }
-
-    if (!ConstrainDragRange()) {
-        UpdateDragFRCSceneInfo(info, SceneStatus::START);
     }
 }
 
@@ -160,8 +164,6 @@ void LinearSplitPattern::HandlePanStartBeforeAPI10(const GestureEvent& info)
     } else {
         dragSplitOffset_[dragedSplitIndex_] = dragSplitOffset_[dragedSplitIndex_];
     }
-
-    UpdateDragFRCSceneInfo(info, SceneStatus::START);
 }
 
 float LinearSplitPattern::GetMinPosFromIndex(std::size_t index)
@@ -347,10 +349,6 @@ void LinearSplitPattern::HandlePanUpdateBeforeAPI10(const GestureEvent& info)
 
 void LinearSplitPattern::HandlePanEnd(const GestureEvent& info)
 {
-    if (isDragedMoving_) {
-        UpdateDragFRCSceneInfo(info, SceneStatus::END);
-    }
-
     isDragedMoving_ = false;
     isDraged_ = false;
     dragedSplitIndex_ = DEFAULT_DRAG_INDEX;

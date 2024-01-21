@@ -45,7 +45,7 @@ bool MatchValueType(napi_env env, napi_value value, napi_valuetype targetType)
     return valueType == targetType;
 }
 
-bool PargeStringFromNapi(napi_env env, napi_value val, std::string& str)
+bool ParseStringFromNapi(napi_env env, napi_value val, std::string& str)
 {
     if (!val || !MatchValueType(env, val, napi_string)) {
         return false;
@@ -65,7 +65,7 @@ bool ParseNavigationId(napi_env env, napi_value obj, std::string& navigationStr)
     if (!MatchValueType(env, navigationId, napi_string)) {
         return false;
     }
-    return PargeStringFromNapi(env, navigationId, navigationStr);
+    return ParseStringFromNapi(env, navigationId, navigationStr);
 }
 } // namespace
 
@@ -91,7 +91,7 @@ napi_value ObserverProcess::ProcessRegister(napi_env env, napi_callback_info inf
     NAPI_ASSERT(env, (argc >= 2 && thisVar != nullptr), "Invalid arguments");
     std::string type;
     napi_value result = nullptr;
-    if (!PargeStringFromNapi(env, argv[0], type)) {
+    if (!ParseStringFromNapi(env, argv[0], type)) {
         return result;
     }
     return (this->*registerProcess_[type])(env, info);
@@ -102,7 +102,7 @@ napi_value ObserverProcess::ProcessUnRegister(napi_env env, napi_callback_info i
     GET_PARAMS(env, info, 3);
     NAPI_ASSERT(env, (argc >= 1 && thisVar != nullptr), "Invalid arguments");
     std::string type;
-    if (!PargeStringFromNapi(env, argv[0], type)) {
+    if (!ParseStringFromNapi(env, argv[0], type)) {
         napi_value result = nullptr;
         return result;
     }

@@ -228,8 +228,6 @@ private:
     RefPtr<FrameNode> cancelButtonNode_;
     RefPtr<FrameNode> buttonNode_;
     RefPtr<FrameNode> textField_;
-
-    int32_t lastCaretIndex_ = 0;
 };
 
 } // namespace OHOS::Ace::NG

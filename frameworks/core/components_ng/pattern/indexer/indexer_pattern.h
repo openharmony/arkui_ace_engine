@@ -111,7 +111,6 @@ private:
     void OnSelect(bool changed = false);
     int32_t GetSkipChildIndex(int32_t step);
     int32_t GetFocusChildIndex(const std::string& searchStr);
-    void SetPositionOfPopupNode(RefPtr<FrameNode>& customNode);
 
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void InitInputEvent();

@@ -3364,6 +3364,9 @@ void OverlayManager::RemovePixelMapAnimation(bool startDrag, double x, double y)
         taskScheduler->PostTask(
             [overlayManager = AceType::Claim(this)]() {
                 CHECK_NULL_VOID(overlayManager);
+                if (overlayManager->hasEvent_) {
+                    overlayManager->RemoveEventColumn();
+                }
                 overlayManager->RemovePixelMap();
             },
             TaskExecutor::TaskType::UI);

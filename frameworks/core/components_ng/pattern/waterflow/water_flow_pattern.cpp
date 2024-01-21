@@ -275,9 +275,9 @@ bool WaterFlowPattern::ScrollToTargrtIndex(int32_t index)
             targetPosition = -(layoutInfo_.lastMainSize_ - (item.first + item.second));
             break;
         case ScrollAlign::AUTO:
-            if (layoutInfo_.currentOffset_ + item.first + item.second < 0) {
+            if (layoutInfo_.currentOffset_ + item.first < 0) {
                 targetPosition = item.first;
-            } else if (layoutInfo_.currentOffset_ + item.first > layoutInfo_.lastMainSize_) {
+            } else if (layoutInfo_.currentOffset_ + item.first + item.second > layoutInfo_.lastMainSize_) {
                 targetPosition = -(layoutInfo_.lastMainSize_ - (item.first + item.second));
             } else {
                 targetPosition = -layoutInfo_.currentOffset_;

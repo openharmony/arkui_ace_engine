@@ -229,8 +229,7 @@ RefPtr<NG::ImageData> ImageLoader::LoadImageDataFromFileCache(const std::string&
 }
 
 // NG ImageLoader entrance
-RefPtr<NG::ImageData> ImageLoader::GetImageData(
-    const ImageSourceInfo& src, const WeakPtr<PipelineBase>& context)
+RefPtr<NG::ImageData> ImageLoader::GetImageData(const ImageSourceInfo& src, const WeakPtr<PipelineBase>& context)
 {
     ACE_FUNCTION_TRACE();
     bool queryCache = !src.GetIsOnSystemColorChange();
@@ -269,9 +268,8 @@ RefPtr<NG::ImageData> ImageLoader::GetImageData(
 // NG ImageLoader entrance
 bool NetworkImageLoader::DownloadImage(DownloadCallback&& downloadCallback, const std::string& src, bool sync)
 {
-    auto container = Container::Current();
-    return sync ? DownloadManagerV2::DownloadSync(std::move(downloadCallback), src)
-                : DownloadManagerV2::DownloadAsync(std::move(downloadCallback), src, Container::CurrentId());
+    return sync ? DownloadManager::GetInstance()->DownloadSync(std::move(downloadCallback), src)
+                : DownloadManager::GetInstance()->DownloadAsync(std::move(downloadCallback), src);
 }
 
 #ifndef USE_ROSEN_DRAWING
@@ -481,7 +479,7 @@ std::shared_ptr<RSData> NetworkImageLoader::LoadImageData(
 
     // 2. if not found. download it.
     std::vector<uint8_t> imageData;
-    if (!DownloadManager::GetInstance().Download(uri, imageData) || imageData.empty()) {
+    if (!DownloadManager::GetInstance()->Download(uri, imageData) || imageData.empty()) {
         TAG_LOGW(AceLogTag::ACE_IMAGE, "Download network image %{private}s failed!", uri.c_str());
         return nullptr;
     }
@@ -733,13 +731,13 @@ RefPtr<NG::ImageData> DecodedDataProviderImageLoader::LoadDecodedImageData(
 
     void* pixmapMediaUniquePtr = dataProvider->GetDataProviderThumbnailResFromUri(src.GetSrc());
     auto pixmap = PixelMap::CreatePixelMapFromDataAbility(pixmapMediaUniquePtr);
+    CHECK_NULL_RETURN(pixmap, nullptr);
     TAG_LOGI(AceLogTag::ACE_IMAGE,
         "src=%{public}s, pixmap from Media width*height=%{public}d*%{public}d, ByteCount=%{public}d",
         src.ToString().c_str(), pixmap->GetWidth(), pixmap->GetHeight(), pixmap->GetByteCount());
     if (SystemProperties::GetDebugPixelMapSaveEnabled()) {
         pixmap->SavePixelMapToFile("_fromMedia_");
     }
-    CHECK_NULL_RETURN(pixmap, nullptr);
 
     auto cache = pipeline->GetImageCache();
     if (cache) {

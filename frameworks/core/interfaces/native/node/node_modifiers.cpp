@@ -18,6 +18,7 @@
 #include "core/interfaces/native/node/node_image_span_modifier.h"
 #include "core/interfaces/native/node/node_image_modifier.h"
 #include "core/interfaces/native/node/node_list_modifier.h"
+#include "core/interfaces/native/node/node_list_item_group_modifier.h"
 #include "core/interfaces/native/node/node_loading_progress_modifier.h"
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_span_modifier.h"
@@ -74,6 +75,7 @@ const ArkUINodeModifiers impl = {
     nullptr,
     nullptr,
     nullptr,
+    nullptr,
     NodeModifier::GetSpanModifier,
     nullptr,
     nullptr,
@@ -99,7 +101,7 @@ const ArkUINodeModifiers impl = {
     NodeModifier::GetSwiperModifier,
     nullptr,
     NodeModifier::GetListModifier,
-    nullptr,
+    NodeModifier::GetListItemGroupModifier,
     nullptr,
     NodeModifier::GetLoadingProgressModifier,
     nullptr,
@@ -120,6 +122,23 @@ const ArkUINodeModifiers impl = {
 #else
     nullptr,
 #endif
+    nullptr, // FlexModifier
+    nullptr, // ScrollBarModifier
+    nullptr, // ScrollerModifier
+    nullptr, // TabContentModifier
+    nullptr, // TabsControllerModifier
+    nullptr, // GestureModifier
+    nullptr, // BadgeModifier
+    nullptr, // WebModifier
+    nullptr, // RefreshModifier
+    nullptr, // MenuItemGroupModifier
+    nullptr, // SearchControllerModifier
+    nullptr, // SideBarModifier
+    nullptr, // PatternLockControllerModifier
+    nullptr, // TextTimerControllerModifier
+    nullptr, // TextClockControllerModifier
+    nullptr, // RichEditorControllerModifier
+    nullptr, // TextAreaControllerModifier
 };
 
 } // namespace

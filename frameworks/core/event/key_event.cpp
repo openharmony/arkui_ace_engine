@@ -96,4 +96,71 @@ std::string KeyEvent::ConvertInputCodeToString() const
     return "";
 }
 
+std::string KeyEvent::ConvertCodeToString() const
+{
+    static const std::string NUM_SYMBOLS = ")!@#$%^&*(";
+    static const std::unordered_map<KeyCode, char> KEYBOARD_SYMBOLS = {
+        { KeyCode::KEY_GRAVE, '`' },
+        { KeyCode::KEY_MINUS, '-' },
+        { KeyCode::KEY_EQUALS, '=' },
+        { KeyCode::KEY_LEFT_BRACKET, '[' },
+        { KeyCode::KEY_RIGHT_BRACKET, ']' },
+        { KeyCode::KEY_BACKSLASH, '\\' },
+        { KeyCode::KEY_SEMICOLON, ';' },
+        { KeyCode::KEY_APOSTROPHE, '\'' },
+        { KeyCode::KEY_COMMA, ',' },
+        { KeyCode::KEY_PERIOD, '.' },
+        { KeyCode::KEY_SLASH, '/' },
+        { KeyCode::KEY_SPACE, ' ' },
+        { KeyCode::KEY_NUMPAD_DIVIDE, '/' },
+        { KeyCode::KEY_NUMPAD_MULTIPLY, '*' },
+        { KeyCode::KEY_NUMPAD_SUBTRACT, '-' },
+        { KeyCode::KEY_NUMPAD_ADD, '+' },
+        { KeyCode::KEY_NUMPAD_DOT, '.' },
+        { KeyCode::KEY_NUMPAD_COMMA, ',' },
+        { KeyCode::KEY_NUMPAD_EQUALS, '=' },
+    };
+    static const std::unordered_map<KeyCode, char> SHIFT_KEYBOARD_SYMBOLS = {
+        { KeyCode::KEY_GRAVE, '~' },
+        { KeyCode::KEY_MINUS, '_' },
+        { KeyCode::KEY_EQUALS, '+' },
+        { KeyCode::KEY_LEFT_BRACKET, '{' },
+        { KeyCode::KEY_RIGHT_BRACKET, '}' },
+        { KeyCode::KEY_BACKSLASH, '|' },
+        { KeyCode::KEY_SEMICOLON, ':' },
+        { KeyCode::KEY_APOSTROPHE, '\"' },
+        { KeyCode::KEY_COMMA, '<' },
+        { KeyCode::KEY_PERIOD, '>' },
+        { KeyCode::KEY_SLASH, '?' },
+    };
+    if (KeyCode::KEY_0 <= code && code <= KeyCode::KEY_9) {
+        if (IsShiftWith(code)) {
+            return std::string(1, NUM_SYMBOLS[static_cast<int32_t>(code) - static_cast<int32_t>(KeyCode::KEY_0)]);
+        }
+        return std::to_string(static_cast<int32_t>(code) - static_cast<int32_t>(KeyCode::KEY_0));
+    }
+    if (KeyCode::KEY_NUMPAD_0 <= code && code <= KeyCode::KEY_NUMPAD_9) {
+        return std::to_string(static_cast<int32_t>(code) - static_cast<int32_t>(KeyCode::KEY_NUMPAD_0));
+    }
+    if (IsLetterKey()) {
+        int32_t codeValue = static_cast<int32_t>(code) - static_cast<int32_t>(KeyCode::KEY_A);
+        auto shiftWithLetter = IsShiftWith(code);
+        if ((shiftWithLetter || enableCapsLock) && !(shiftWithLetter && enableCapsLock)) {
+            return std::string(1, static_cast<char>(codeValue + ASCII_START_UPPER_CASE_LETTER));
+        }
+        return std::string(1, static_cast<char>(codeValue + ASCII_START_LOWER_CASE_LETTER));
+    }
+    if (IsShiftWith(code)) {
+        auto iterCode = SHIFT_KEYBOARD_SYMBOLS.find(code);
+        if (iterCode != SHIFT_KEYBOARD_SYMBOLS.end()) {
+            return std::string(1, iterCode->second);
+        }
+    }
+    auto iterCode = KEYBOARD_SYMBOLS.find(code);
+    if (iterCode != KEYBOARD_SYMBOLS.end()) {
+        return std::string(1, iterCode->second);
+    }
+    return "";
+}
+
 } // namespace OHOS::Ace

@@ -21,6 +21,7 @@
 #include <map>
 #include <memory>
 
+#include "base/geometry/ng/rect_t.h"
 #include "base/memory/ace_type.h"
 
 namespace OHOS {
@@ -102,7 +103,7 @@ public:
 
     // The interface to control the display area
     virtual std::shared_ptr<Rosen::RSSurfaceNode> GetSurfaceNode() const = 0;
-    virtual void RefreshDisplayArea(float left, float top, float width, float height) = 0;
+    virtual void RefreshDisplayArea(const RectF& displayArea) = 0;
 
     // The interface to send the data for ArkTS
     virtual void SendDataAsync(const AAFwk::WantParams& params) const = 0;

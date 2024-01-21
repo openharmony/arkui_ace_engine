@@ -32,21 +32,16 @@ public:
 
 void ListCommonTestNg::MouseSelect(Offset start, Offset end)
 {
-    MouseInfo infoMouse;
-    infoMouse.SetButton(MouseButton::LEFT_BUTTON);
-    infoMouse.SetAction(MouseAction::PRESS);
     GestureEvent info;
     info.SetInputEventType(InputEventType::MOUSE_BUTTON);
-    infoMouse.SetLocalLocation(start);
-    infoMouse.SetGlobalLocation(start);
-    pattern_->HandleMouseEventWithoutKeyboard(infoMouse);
+    info.SetLocalLocation(start);
+    info.SetGlobalLocation(start);
     pattern_->HandleDragStart(info);
     if (start != end) {
         info.SetLocalLocation(end);
         info.SetGlobalLocation(end);
         pattern_->HandleDragUpdate(info);
     }
-    pattern_->HandleMouseEventWithoutKeyboard(infoMouse);
     pattern_->HandleDragEnd(info);
 }
 
@@ -900,27 +895,6 @@ HWTEST_F(ListCommonTestNg, MouseSelect007, TestSize.Level1)
     CreateWithItem([](ListModelNG model) { model.SetMultiSelectable(true); });
     MouseSelect(Offset(0.f, 0.f), Offset(1.f, 1.f));
     EXPECT_FALSE(GetChildPattern<ListItemPattern>(frameNode_, 0)->IsSelected());
-}
-
-/**
- * @tc.name: MouseSelect004
- * @tc.desc: Test listItem selectable about special condition
- * @tc.type: FUNC
- */
-HWTEST_F(ListTestNg, MouseSelect004, TestSize.Level1)
-{
-    CreateWithItem([](ListModelNG model) { model.SetMultiSelectable(true); });
-
-    /**
-     * @tc.steps: step1. Use RIGHT_BUTTON to select.
-     * @tc.expected: reject record startOffset.
-     */
-    MouseInfo info;
-    info.SetButton(MouseButton::RIGHT_BUTTON);
-    info.SetAction(MouseAction::PRESS);
-    info.SetLocalLocation(Offset(200.f, 100.f));
-    pattern_->HandleMouseEventWithoutKeyboard(info);
-    EXPECT_EQ(pattern_->mouseStartOffset_.GetX(), 0.f);
 }
 
 /**

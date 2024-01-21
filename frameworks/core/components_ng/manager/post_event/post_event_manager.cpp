@@ -114,6 +114,7 @@ void PostEventManager::HandlePostEvent(const RefPtr<NG::UINode>& targetNode, con
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto eventManager = pipelineContext->GetEventManager();
+    eventManager->PostEventFlushTouchEventEnd(touchEvent);
     eventManager->PostEventDispatchTouchEvent(touchEvent);
     // when receive UP event, clear DispatchAction which is same targetNode and same id
     CheckAndClearPostEventAction(targetNode, touchEvent.id);

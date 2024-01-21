@@ -238,7 +238,7 @@ RefPtr<DisplaySyncData> UIDisplaySync::GetDisplaySyncData() const
 
 bool UIDisplaySync::IsCommonDivisor(int32_t expectedRate, int32_t vsyncRate)
 {
-    if (expectedRate == 0) {
+    if (expectedRate == 0 || vsyncRate == 0) {
         return false;
     }
 

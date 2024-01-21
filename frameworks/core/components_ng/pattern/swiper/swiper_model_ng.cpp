@@ -319,6 +319,11 @@ void SwiperModelNG::SetNestedScroll(const NestedScrollOptions& nestedOpt)
     pattern->SetNestedScroll(nestedOpt);
 }
 
+void SwiperModelNG::SetSwipeByGroup(bool swipeByGroup)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(SwiperLayoutProperty, SwipeByGroup, swipeByGroup);
+}
+
 void SwiperModelNG::SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin, frameNode);

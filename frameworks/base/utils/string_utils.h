@@ -366,6 +366,16 @@ inline bool StringToCalcDimensionNG(
     }
 }
 
+inline std::string ReplaceChar(std::string str, char old_char, char new_char)
+{
+    for (char& it : str) {
+        if (it == old_char) {
+            it = new_char;
+        }
+    }
+    return str;
+}
+
 inline double StringToDegree(const std::string& value)
 {
     // https://developer.mozilla.org/zh-CN/docs/Web/CSS/angle

@@ -381,6 +381,10 @@ bool TextFieldPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     paragraphWidth_ = paragraphWidth;
     textRect_ = textRect;
 
+    if (textFieldContentModifier_) {
+        textFieldContentModifier_->ContentChange();
+    }
+
     parentGlobalOffset_ = textFieldLayoutAlgorithm->GetParentGlobalOffset();
     inlineMeasureItem_ = textFieldLayoutAlgorithm->GetInlineMeasureItem();
     auto isEditorValueChanged = FireOnTextChangeEvent();
@@ -680,7 +684,7 @@ void TextFieldPattern::HandleFocusEvent()
         if (contentController_->IsEmpty()) {
             StartTwinkling();
         } else {
-            inlineSelectAllFlag_ = true;
+            inlineSelectAllFlag_ = blurReason_ != BlurReason::WINDOW_BLUR;
         }
     } else {
         StartTwinkling();
@@ -922,6 +926,13 @@ bool TextFieldPattern::CheckBlurReason()
     return false;
 }
 
+void TextFieldPattern::UpdateBlurReason()
+{
+    auto focusHub = GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    blurReason_ = focusHub->GetBlurReason();
+}
+
 void TextFieldPattern::HandleBlurEvent()
 {
     auto host = GetHost();
@@ -929,6 +940,7 @@ void TextFieldPattern::HandleBlurEvent()
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextField %{public}d OnBlur", host->GetId());
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
+    UpdateBlurReason();
     if (!context->GetOnFoucs()) {
         return;
     }
@@ -1430,14 +1442,11 @@ void TextFieldPattern::InitDragEvent()
     if (!IsInPasswordMode() && layoutProperty->GetCopyOptionsValue(CopyOptions::Local) != CopyOptions::None &&
         host->IsDraggable()) {
         InitDragDropEvent();
-        AddDragFrameNodeToManager(host);
-        auto gestureEventHub = host->GetOrCreateGestureEventHub();
-        CHECK_NULL_VOID(gestureEventHub);
-        gestureEventHub->SetTextDraggable(true);
     } else {
         ClearDragDropEvent();
-        RemoveDragFrameNodeFromManager(host);
+        InitDragDropEventWithOutDragStart();
     }
+    AddDragFrameNodeToManager(host);
 }
 
 std::function<void(Offset)> TextFieldPattern::GetThumbnailCallback()
@@ -1515,7 +1524,10 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
         CHECK_NULL_VOID(host);
         auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
         CHECK_NULL_VOID(layoutProperty);
-        if (layoutProperty->GetIsDisabledValue(false) || pattern->IsNormalInlineState()) {
+        auto focusHub = host->GetFocusHub();
+        CHECK_NULL_VOID(focusHub);
+        if (layoutProperty->GetIsDisabledValue(false) || pattern->IsNormalInlineState() ||
+            !focusHub->IsCurrentFocus()) {
             return;
         }
         if (extraParams.empty()) {
@@ -1577,6 +1589,18 @@ void TextFieldPattern::ShowSelectAfterDragDrop()
     ProcessOverlay(false, false, false, false);
 }
 
+void TextFieldPattern::InitDragDropEventWithOutDragStart()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto gestureHub = host->GetOrCreateGestureEventHub();
+    CHECK_NULL_VOID(gestureHub);
+    gestureHub->InitDragDropEvent();
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    InitDragDropCallBack();
+}
+
 void TextFieldPattern::InitDragDropEvent()
 {
     auto host = GetHost();
@@ -1593,7 +1617,16 @@ void TextFieldPattern::InitDragDropEvent()
     } else if (gestureHub->GetTextDraggable()) {
         gestureHub->SetTextDraggable(false);
     }
+    InitDragDropCallBack();
+    gestureHub->SetTextDraggable(true);
+}
 
+void TextFieldPattern::InitDragDropCallBack()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto eventHub = host->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
     auto onDragEnter = [weakPtr = WeakClaim(this)](
                            const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams) {
         auto pattern = weakPtr.Upgrade();
@@ -1631,7 +1664,6 @@ void TextFieldPattern::InitDragDropEvent()
         auto pattern = weakPtr.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->showSelect_ = false;
-        pattern->ProcessOverlay(false, false, false, true);
         pattern->dragRecipientStatus_ = DragStatus::NONE;
     };
     eventHub->SetOnDragLeave(std::move(onDragLeave));
@@ -2307,6 +2339,11 @@ void TextFieldPattern::InitLongPressEvent()
 
 void TextFieldPattern::HandleLongPress(GestureEvent& info)
 {
+    auto focusHub = GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (!focusHub->IsFocusable()) {
+        return;
+    }
     isTouchCaret_ = false;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
@@ -2328,7 +2365,6 @@ void TextFieldPattern::HandleLongPress(GestureEvent& info)
     }
     gestureHub->SetIsTextDraggable(false);
     isLongPress_ = true;
-    auto focusHub = GetFocusHub();
     if (!focusHub->IsCurrentFocus()) {
         focusHub->RequestFocusImmediately();
     }
@@ -3831,7 +3867,7 @@ bool TextFieldPattern::CursorMoveUpOperation()
         selectController_->UpdateCaretIndex(
             static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(Offset(offsetX, verticalOffset))));
     }
-    OnCursorMoveDone();
+    OnCursorMoveDone(TextAffinity::DOWNSTREAM);
     return originCaretPosition != selectController_->GetCaretIndex();
 }
 
@@ -3860,7 +3896,7 @@ bool TextFieldPattern::CursorMoveDownOperation()
         selectController_->UpdateCaretIndex(
             static_cast<int32_t>(paragraph_->GetGlyphIndexByCoordinate(Offset(offsetX, verticalOffset))));
     }
-    OnCursorMoveDone();
+    OnCursorMoveDone(TextAffinity::DOWNSTREAM);
     return originCaretPosition != selectController_->GetCaretIndex();
 }
 
@@ -4502,9 +4538,9 @@ void TextFieldPattern::SetCaretPosition(int32_t position)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Set caret position to %{public}d", position);
     selectController_->MoveCaretToContentRect(position, TextAffinity::DOWNSTREAM);
-    FireOnSelectionChange(position, position);
     if (HasFocus() && !GetShowMagnifier()) {
         StartTwinkling();
+        FireOnSelectionChange(position, position);
     }
     CloseSelectOverlay();
     auto tmpHost = GetHost();
@@ -6361,8 +6397,10 @@ void TextFieldPattern::HandleCursorOnDragMoved(const RefPtr<NotifyDragEvent>& no
     auto focusHub = GetFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
-    isCursorAlwaysDisplayed_ = true;
-    StartTwinkling();
+    if (focusHub->IsCurrentFocus()) {
+        isCursorAlwaysDisplayed_ = true;
+        StartTwinkling();
+    }
 };
 
 void TextFieldPattern::HandleCursorOnDragLeaved(const RefPtr<NotifyDragEvent>& notifyDragEvent)

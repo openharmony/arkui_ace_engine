@@ -175,6 +175,10 @@ public:
 
     float GetEstimateOffset(float height, const std::pair<float, float>& targetPos) const;
     float GetEstimateHeight(float& averageHeight) const;
+    bool HasLayoutedItem() const
+    {
+        return layouted_ && (layoutedItemInfo_.has_value() || itemTotalCount_ == 0);
+    }
 
 private:
     bool IsNeedInitClickEventRecorder() const override
@@ -201,6 +205,7 @@ private:
     float_t footerMainSize_ = 0.0f;
 
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
+    bool layouted_ = false;
 
     ListItemGroupLayoutAlgorithm::PositionMap itemPosition_;
     float spaceWidth_ = 0.0f;

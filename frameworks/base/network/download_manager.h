@@ -16,25 +16,39 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BASE_NETWORK_DOWNLOAD_MANAGER_H
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_NETWORK_DOWNLOAD_MANAGER_H
 
+#include <condition_variable>
 #include <cstdint>
+#include <functional>
+#include <mutex>
+#include <optional>
 #include <string>
-#include <vector>
 
 namespace OHOS::Ace {
+enum class DownloadState { SUCCESS = 0, FAILED = 1, CANCEL = 2 };
+
+using DownloadCallback = std::function<void(const std::string&&, DownloadState)>;
+
+struct DownloadCondition {
+    std::condition_variable cv;
+    std::string dataOut;
+    std::mutex downloadMutex;
+    std::string errorMsg;
+    std::optional<bool> downloadSuccess;
+};
 
 class DownloadManager {
 public:
-    static DownloadManager& GetInstance();
+    static DownloadManager* GetInstance();
 
     virtual ~DownloadManager() = default;
-    virtual bool Download(const std::string& url, std::vector<uint8_t>& dataOut) = 0;
 
-    struct ProxyInfo {
-        std::string host;
-        int32_t port = 0;
-        std::string exclusions;
-    };
-    static bool GetProxy(ProxyInfo& proxy);
+    virtual bool Download(const std::string& url, std::vector<uint8_t>& dataOut);
+    virtual bool DownloadAsync(DownloadCallback&& downloadCallback, const std::string& url);
+    virtual bool DownloadSync(DownloadCallback&& downloadCallback, const std::string& url);
+
+private:
+    static std::unique_ptr<DownloadManager> instance_;
+    static std::mutex mutex_;
 };
 
 } // namespace OHOS::Ace

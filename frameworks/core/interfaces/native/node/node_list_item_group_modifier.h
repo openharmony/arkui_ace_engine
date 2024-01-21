@@ -12,18 +12,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef FRAMEWORKS_INTERFACE_INNER_API_ARKTS_NATIVE_NODE_LIST_ITEM_GROUP_BRIDGE_MODIFIER_H
+#define FRAMEWORKS_INTERFACE_INNER_API_ARKTS_NATIVE_NODE_LIST_ITEM_GROUP_BRIDGE_MODIFIER_H
 
-#include "base/network/download_manager_v2.h"
-namespace OHOS::Ace {
+#include "core/interfaces/native/node/node_api.h"
 
-bool DownloadManagerV2::DownloadAsync(DownloadCallback&& downloadCallback, const std::string& url, int32_t instanceId)
-{
-    return false;
+namespace OHOS::Ace::NG::NodeModifier {
+const ArkUIListItemGroupModifier* GetListItemGroupModifier();
 }
 
-bool DownloadManagerV2::DownloadSync(DownloadCallback&& downloadCallback, const std::string& url)
-{
-    return false;
-}
-
-} // namespace OHOS::Ace
+#endif // FRAMEWORKS_INTERFACE_INNER_API_ARKTS_NATIVE_NODE_LIST_ITEM_GROUP_BRIDGE_MODIFIER_H

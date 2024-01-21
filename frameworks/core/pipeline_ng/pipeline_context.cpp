@@ -1103,6 +1103,11 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
         return;
     }
     switch (type) {
+        case WindowSizeChangeReason::FULL_TO_SPLIT:
+        case WindowSizeChangeReason::FULL_TO_FLOATING: {
+            StartFullToMultWindowAnimation(width, height, type, rsTransaction);
+            break;
+        }
         case WindowSizeChangeReason::RECOVER:
         case WindowSizeChangeReason::MAXIMIZE: {
             StartWindowMaximizeAnimation(width, height, rsTransaction);
@@ -1154,6 +1159,40 @@ void PipelineContext::StartWindowMaximizeAnimation(
     option.SetCurve(curve);
     auto weak = WeakClaim(this);
     Animate(option, curve, [width, height, weak]() {
+        auto pipeline = weak.Upgrade();
+        CHECK_NULL_VOID(pipeline);
+        pipeline->SetRootRect(width, height, 0.0);
+        pipeline->FlushUITasks();
+    });
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        rsTransaction->Commit();
+    }
+#endif
+}
+
+void PipelineContext::StartFullToMultWindowAnimation(int32_t width, int32_t height, WindowSizeChangeReason type,
+    const std::shared_ptr<Rosen::RSTransaction>& rsTransaction)
+{
+    LOGI("Root node start multiple window animation, type = %{public}d, width = %{public}d, height = %{public}d", type,
+        width, height);
+#ifdef ENABLE_ROSEN_BACKEND
+    if (rsTransaction) {
+        FlushMessages();
+        rsTransaction->Begin();
+    }
+#endif
+    float response = 0.5f;
+    float dampingFraction = 1.0f;
+    AnimationOption option;
+    if (type == WindowSizeChangeReason::FULL_TO_FLOATING) {
+        response = 0.45f;
+        dampingFraction = 0.75f;
+    }
+    auto springMotion = AceType::MakeRefPtr<ResponsiveSpringMotion>(response, dampingFraction, 0);
+    option.SetCurve(springMotion);
+    auto weak = WeakClaim(this);
+    Animate(option, springMotion, [width, height, weak]() {
         auto pipeline = weak.Upgrade();
         CHECK_NULL_VOID(pipeline);
         pipeline->SetRootRect(width, height, 0.0);
@@ -1462,11 +1501,6 @@ bool PipelineContext::OnBackPressed()
         return true;
     }
 
-    auto textfieldManager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
-    if (textfieldManager && textfieldManager->OnBackPressed()) {
-        return true;
-    }
-
     // if has popup, back press would hide popup and not trigger page back
     auto hasOverlay = false;
     taskExecutor_->PostSyncTask(
@@ -1482,6 +1516,11 @@ bool PipelineContext::OnBackPressed()
         },
         TaskExecutor::TaskType::UI);
     if (hasOverlay) {
+        return true;
+    }
+
+    auto textfieldManager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
+    if (textfieldManager && textfieldManager->OnBackPressed()) {
         return true;
     }
 
@@ -1997,6 +2036,17 @@ void PipelineContext::OnMouseEvent(const MouseEvent& event, const RefPtr<FrameNo
         // Mouse left button press event will set focus inactive in touch process.
         SetIsFocusActive(false);
     }
+
+    auto manager = GetDragDropManager();
+    CHECK_NULL_VOID(manager);
+
+    if (event.button == MouseButton::RIGHT_BUTTON &&
+        (event.action == MouseAction::PRESS || event.action == MouseAction::PULL_UP)) {
+        manager->SetIsDragCancel(true);
+    } else {
+        manager->SetIsDragCancel(false);
+    }
+
     auto container = Container::Current();
     if ((event.action == MouseAction::RELEASE || event.action == MouseAction::PRESS ||
             event.action == MouseAction::MOVE) &&

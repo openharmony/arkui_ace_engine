@@ -97,7 +97,7 @@ public:
         currentFoldCreaseRegion_ = currentFoldCreaseRegion;
     }
 
-    uint64_t GetDisplayId()
+    uint64_t GetDisplayId() const
     {
         return displayId_;
     }

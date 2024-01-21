@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,25 +13,47 @@
  * limitations under the License.
  */
 
-#include "http_proxy.h"
-#include "net_conn_client.h"
+#include <dlfcn.h>
 
+#include "base/log/log.h"
+#include "base/log/log_wrapper.h"
 #include "base/network/download_manager.h"
-namespace OHOS::Ace {
-bool DownloadManager::GetProxy(ProxyInfo& proxy)
-{
-    NetManagerStandard::HttpProxy httpProxy;
-    NetManagerStandard::NetConnClient::GetInstance().GetDefaultHttpProxy(httpProxy);
-    proxy.host = httpProxy.GetHost();
-    proxy.port = httpProxy.GetPort();
 
-    auto exclusionList = httpProxy.GetExclusionList();
-    for (auto&& ex: exclusionList) {
-        proxy.exclusions.append(ex);
-        if (ex != exclusionList.back()) {
-            proxy.exclusions.append(",");
+namespace OHOS::Ace {
+using CreateDownloadManagerFunc = DownloadManager* (*)();
+std::unique_ptr<DownloadManager> DownloadManager::instance_ = nullptr;
+std::mutex DownloadManager::mutex_;
+constexpr char CREATE_DOWNLOAD_MANAGER_FUNC[] = "OHOS_ACE_CreateDownloadManager";
+constexpr char ACE_NET_WORK_NAME[] = "libace_network.z.so";
+
+DownloadManager* CreateDownloadManager()
+{
+    void* handle = dlopen(ACE_NET_WORK_NAME, RTLD_LAZY | RTLD_LOCAL);
+    if (handle == nullptr) {
+        TAG_LOGW(AceLogTag::ACE_DOWNLOAD_MANAGER, "load libace_network failed");
+        return nullptr;
+    }
+
+    auto entry = reinterpret_cast<CreateDownloadManagerFunc>(dlsym(handle, CREATE_DOWNLOAD_MANAGER_FUNC));
+    if (entry == nullptr) {
+        dlclose(handle);
+        return nullptr;
+    }
+
+    auto* manager = entry();
+    return manager;
+}
+
+DownloadManager* DownloadManager::GetInstance()
+{
+    TAG_LOGI(AceLogTag::ACE_DOWNLOAD_MANAGER, "DownloadManager GetInstance");
+    if (!instance_) {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (!instance_) {
+            auto* manager = CreateDownloadManager();
+            instance_.reset(manager);
         }
     }
-    return true;
+    return instance_.get();
 }
 } // namespace OHOS::Ace

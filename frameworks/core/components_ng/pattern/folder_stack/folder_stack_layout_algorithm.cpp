@@ -52,7 +52,6 @@ void FolderStackLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     if (folderStackLayoutProperty->GetPositionProperty()) {
         align = folderStackLayoutProperty->GetPositionProperty()->GetAlignment().value_or(Alignment::CENTER);
     }
-    PerformLayout(hostNode, align);
     if (!isIntoFolderStack_) {
         auto childLayoutProperty = AceType::DynamicCast<StackLayoutProperty>(layoutWrapper->GetLayoutProperty());
         if (childLayoutProperty->GetPositionProperty()) {
@@ -221,7 +220,7 @@ void FolderStackLayoutAlgorithm::RangeCalculation(const RefPtr<FolderStackGroupN
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto safeArea = pipeline->GetSafeArea();
-    auto length = safeArea.top_.Length();
+    int32_t length = static_cast<int32_t>(safeArea.top_.Length());
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto displayInfo = container->GetDisplayInfo();
@@ -294,21 +293,6 @@ NG::OffsetF FolderStackLayoutAlgorithm::CalculateStackAlignment(
     offset.SetX((OFFSET_VALUE + alignment.GetHorizontal()) * (parentSize.Width() - childSize.Width()) / OFFSET_DIVISOR);
     offset.SetY((OFFSET_VALUE + alignment.GetVertical()) * (parentSize.Height() - childSize.Height()) / OFFSET_DIVISOR);
     return offset;
-}
-
-void FolderStackLayoutAlgorithm::PerformLayout(const RefPtr<FolderStackGroupNode>& hostNode, const Alignment align)
-{
-    auto controlPartsStackNode = AceType::DynamicCast<ControlPartsStackNode>(hostNode->GetControlPartsStackNode());
-    if (controlPartsStackNode) {
-        auto controlPartsLayoutProperty =
-            AceType::DynamicCast<LayoutProperty>(controlPartsStackNode->GetLayoutProperty());
-        controlPartsLayoutProperty->UpdateAlignment(align);
-    }
-    auto hoverStackNode = AceType::DynamicCast<HoverStackNode>(hostNode->GetHoverNode());
-    if (hoverStackNode) {
-        auto hoverLayoutProperty = AceType::DynamicCast<LayoutProperty>(hoverStackNode->GetLayoutProperty());
-        hoverLayoutProperty->UpdateAlignment(align);
-    }
 }
 
 bool FolderStackLayoutAlgorithm::IsIntoFolderStack(

@@ -14,6 +14,7 @@
  */
 #include "core/interfaces/native/node/node_list_modifier.h"
 
+#include "base/geometry/dimension.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/base/frame_node.h"
@@ -78,7 +79,7 @@ void ResetListLanes(ArkUINodeHandle node)
     ListModelNG::SetLaneGutter(frameNode, Dimension(0));
 }
 
-void SetEditMode(ArkUINodeHandle node, bool editMode)
+void SetEditMode(ArkUINodeHandle node, ArkUI_Bool editMode)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -92,7 +93,7 @@ void ResetEditMode(ArkUINodeHandle node)
     ListModelNG::SetEditMode(frameNode, false);
 }
 
-void SetMultiSelectable(ArkUINodeHandle node, bool selectable)
+void SetMultiSelectable(ArkUINodeHandle node, ArkUI_Bool selectable)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -106,7 +107,7 @@ void ResetMultiSelectable(ArkUINodeHandle node)
     ListModelNG::SetMultiSelectable(frameNode, false);
 }
 
-void SetChainAnimation(ArkUINodeHandle node, bool chainAnimation)
+void SetChainAnimation(ArkUINodeHandle node, ArkUI_Bool chainAnimation)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -137,7 +138,7 @@ void ResetCachedCount(ArkUINodeHandle node)
     ListModelNG::SetCachedCount(frameNode, DEFAULT_CACHED_COUNT);
 }
 
-void SetEnableScrollInteraction(ArkUINodeHandle node, bool enableScrollInteraction)
+void SetEnableScrollInteraction(ArkUINodeHandle node, ArkUI_Bool enableScrollInteraction)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -165,7 +166,14 @@ void ResetSticky(ArkUINodeHandle node)
     ListModelNG::SetSticky(frameNode, DEFAULT_STICKY_STYLE);
 }
 
-void SetListEdgeEffect(ArkUINodeHandle node, int32_t edgeEffect, bool alwaysEnabled)
+void SetListSpace(ArkUINodeHandle node, ArkUI_Float64 space)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetListSpace(frameNode, Dimension(space, DimensionUnit::VP));
+}
+
+void SetListEdgeEffect(ArkUINodeHandle node, int32_t edgeEffect, ArkUI_Bool alwaysEnabled)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -242,6 +250,22 @@ void ResetListScrollBar(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ListModelNG::SetListScrollBar(frameNode, DEFAULT_SCROLL_BAR);
+}
+
+void SetListScrollBarWidth(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    CHECK_NULL_VOID(value);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetListScrollBarWidth(frameNode, value);
+}
+
+void SetListScrollBarColor(ArkUINodeHandle node, ArkUI_CharPtr value)
+{
+    CHECK_NULL_VOID(value);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ListModelNG::SetListScrollBarColor(frameNode, value);
 }
 
 void SetAlignListItem(ArkUINodeHandle node, int32_t listItemAlign)
@@ -348,8 +372,10 @@ const ArkUIListModifier* GetListModifier()
         ResetCachedCount, SetEnableScrollInteraction, ResetEnableScrollInteraction, SetSticky, ResetSticky,
         SetListEdgeEffect, ResetListEdgeEffect, SetListDirection, ResetListDirection, SetListFriction,
         ResetListFriction, SetListNestedScroll, ResetListNestedScroll, SetListScrollBar, ResetListScrollBar,
-        SetAlignListItem, ResetAlignListItem, SetScrollSnapAlign, ResetScrollSnapAlign, ListSetDivider,
-        ListResetDivider, SetChainAnimationOptions, ResetChainAnimationOptions };
+        SetListScrollBarWidth, SetListScrollBarColor, SetAlignListItem, ResetAlignListItem, SetScrollSnapAlign,
+        ResetScrollSnapAlign, ListSetDivider, ListResetDivider, SetChainAnimationOptions, ResetChainAnimationOptions,
+        SetListSpace
+    };
     return &modifier;
 }
 }

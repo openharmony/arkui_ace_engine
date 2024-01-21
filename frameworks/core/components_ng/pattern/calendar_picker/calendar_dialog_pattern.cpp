@@ -62,10 +62,12 @@ void CalendarDialogPattern::UpdateDialogBackgroundColor()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    auto wrapperNode = AceType::DynamicCast<FrameNode>(host->GetParent());
+    CHECK_NULL_VOID(wrapperNode);
     auto pipelineContext = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     RefPtr<CalendarTheme> theme = pipelineContext->GetTheme<CalendarTheme>();
-    auto contentRenderContext = host->GetRenderContext();
+    auto contentRenderContext = wrapperNode->GetRenderContext();
     CHECK_NULL_VOID(contentRenderContext);
     if (Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         contentRenderContext->UpdateBackgroundColor(theme->GetDialogBackgroundColor());

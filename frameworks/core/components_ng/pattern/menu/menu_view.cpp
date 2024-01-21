@@ -537,6 +537,9 @@ RefPtr<FrameNode> MenuView::Create(
         AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto menuPattern = menuNode->GetPattern<MenuPattern>();
     CHECK_NULL_RETURN(menuPattern, nullptr);
+    auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
+    CHECK_NULL_RETURN(menuProperty, nullptr);
+    menuProperty->UpdateShowInSubWindow(false);
     for (size_t i = 0; i < params.size(); ++i) {
         auto optionNode = OptionView::CreateSelectOption(params[i].first, params[i].second, i);
         auto optionPattern = optionNode->GetPattern<OptionPattern>();

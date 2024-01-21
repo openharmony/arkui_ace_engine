@@ -710,7 +710,6 @@ void NavigationGroupNode::TransitionWithReplace(
             TaskExecutor::TaskType::UI);
     });
     preNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
-    curNode->GetEventHub<EventHub>()->SetEnabledInternal(false);
     curNode->GetRenderContext()->UpdateOpacity(0.0f);
     if (!isNavBar) {
         auto navDestination = AceType::DynamicCast<NavDestinationGroupNode>(preNode);
@@ -871,5 +870,25 @@ NavigationMode NavigationGroupNode::GetNavigationMode()
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
     CHECK_NULL_RETURN(navigationPattern, NavigationMode::AUTO);
     return navigationPattern->GetNavigationMode();
+}
+
+void NavigationGroupNode::OnDetachFromMainTree(bool recursive)
+{
+    auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
+    if (pattern) {
+        pattern->DetachNavigationStackFromParent();
+    }
+
+    GroupNode::OnDetachFromMainTree(recursive);
+}
+
+void NavigationGroupNode::OnAttachToMainTree(bool recursive)
+{
+    GroupNode::OnAttachToMainTree(recursive);
+
+    auto pattern = AceType::DynamicCast<NavigationPattern>(GetPattern());
+    if (pattern) {
+        pattern->AttachNavigationStackToParent();
+    }
 }
 } // namespace OHOS::Ace::NG

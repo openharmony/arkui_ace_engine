@@ -2950,6 +2950,8 @@ HWTEST_F(NavigationTestNg, NavigationStackTest001, TestSize.Level1)
     stack->Add("A", frameNode);
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
     auto targetNode = navigationPattern->GetNavigationStack()->Get();
     ASSERT_EQ(frameNode, targetNode);
 
@@ -2960,6 +2962,8 @@ HWTEST_F(NavigationTestNg, NavigationStackTest001, TestSize.Level1)
     stack->Pop();
     stack->Add("C", replaceNode);
     navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
     ASSERT_EQ(replaceNode, stack->Get());
 }
 
@@ -2985,6 +2989,8 @@ HWTEST_F(NavigationTestNg, NavigationStackTest002, TestSize.Level1)
     stack->Add("A", frameNode);
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
     ASSERT_EQ(stack->Size(), 1);
 
     /**
@@ -2994,6 +3000,8 @@ HWTEST_F(NavigationTestNg, NavigationStackTest002, TestSize.Level1)
     stack->Remove();
     stack->Add("B", replaceNode);
     navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
     ASSERT_EQ(stack->Size(), 1);
 
     /**
@@ -3001,6 +3009,8 @@ HWTEST_F(NavigationTestNg, NavigationStackTest002, TestSize.Level1)
      */
     stack->Add("C", frameNode);
     navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
     ASSERT_EQ(stack->Size(), 2);
 }
 
@@ -3029,6 +3039,8 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest001, TestSize.Level1)
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     navigationPattern->SetNavigationMode(NavigationMode::STACK);
     navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
     ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
@@ -3040,6 +3052,8 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest001, TestSize.Level1)
     stack->UpdateReplaceValue(1);
     ASSERT_EQ(stack->GetReplaceValue(), 1);
     navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
     ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
@@ -3047,6 +3061,8 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest001, TestSize.Level1)
      */
     stack->Add("C", frameNode);
     navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
     ASSERT_EQ(stack->GetReplaceValue(), 0);
 }
 
@@ -3076,6 +3092,8 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest002, TestSize.Level1)
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     navigationPattern->SetNavigationMode(NavigationMode::STACK);
     navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
     ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
@@ -3087,6 +3105,8 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest002, TestSize.Level1)
     stack->UpdateReplaceValue(1);
     ASSERT_EQ(stack->GetReplaceValue(), 1);
     navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
     ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
@@ -3094,6 +3114,8 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest002, TestSize.Level1)
      */
     stack->Remove();
     navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
     ASSERT_EQ(stack->GetReplaceValue(), 0);
 }
 
@@ -3123,6 +3145,8 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest003, TestSize.Level1)
     auto navigationPattern = AceType::DynamicCast<NavigationPattern>(navigationNode->GetPattern());
     navigationPattern->SetNavigationMode(NavigationMode::STACK);
     navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
     ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
@@ -3134,6 +3158,8 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest003, TestSize.Level1)
     stack->UpdateReplaceValue(1);
     ASSERT_EQ(stack->GetReplaceValue(), 1);
     navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
     ASSERT_EQ(stack->GetReplaceValue(), 0);
 
     /**
@@ -3141,6 +3167,8 @@ HWTEST_F(NavigationTestNg, NavigationReplaceTest003, TestSize.Level1)
      */
     stack->Clear();
     navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
     ASSERT_EQ(stack->GetReplaceValue(), 0);
 }
 
@@ -3233,6 +3261,8 @@ HWTEST_F(NavigationTestNg, NavDestinationDialogTest001, TestSize.Level1)
     EXPECT_NE(pattern, nullptr);
     pattern->SetNavigationMode(NavigationMode::STACK);
     pattern->OnModifyDone();
+    pattern->MarkNeedSyncWithJsStack();
+    pattern->SyncWithJsStackIfNeeded();
     auto destinationProperty = AceType::DynamicCast<NavDestinationLayoutProperty>(navDestination->GetLayoutProperty());
     EXPECT_TRUE(destinationProperty != nullptr);
     destinationProperty->UpdateHideTitleBar(true);
@@ -3251,6 +3281,8 @@ HWTEST_F(NavigationTestNg, NavDestinationDialogTest001, TestSize.Level1)
     navDestinationB->SetNavDestinationMode(NavDestinationMode::DIALOG);
     navigationStack->Add("B", navDestinationB);
     pattern->OnModifyDone();
+    pattern->MarkNeedSyncWithJsStack();
+    pattern->SyncWithJsStackIfNeeded();
     auto layoutPropertyB = AceType::DynamicCast<NavDestinationLayoutProperty>(navDestinationB->GetLayoutProperty());
     EXPECT_NE(layoutPropertyB, nullptr);
     layoutPropertyB->UpdateHideTitleBar(true);
@@ -3271,6 +3303,8 @@ HWTEST_F(NavigationTestNg, NavDestinationDialogTest001, TestSize.Level1)
 
     navigationStack->Add("C", navDestinationC);
     pattern->OnModifyDone();
+    pattern->MarkNeedSyncWithJsStack();
+    pattern->SyncWithJsStackIfNeeded();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     auto layoutWrapper =
@@ -3322,6 +3356,8 @@ HWTEST_F(NavigationTestNg, NavDestinationDialogTest002, TestSize.Level1)
     navDestinationB->SetNavDestinationMode(NavDestinationMode::DIALOG);
     navigationStack->Add("B", navDestinationB);
     navigationPattern->OnModifyDone();
+    navigationPattern->MarkNeedSyncWithJsStack();
+    navigationPattern->SyncWithJsStackIfNeeded();
     RefPtr<GeometryNode> geometryNode = AceType::MakeRefPtr<GeometryNode>();
     ASSERT_NE(geometryNode, nullptr);
     auto layoutWrapper =

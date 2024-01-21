@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,29 +14,30 @@
  */
 
 #include "base/network/download_manager.h"
-#include "base/utils/singleton.h"
 
 namespace OHOS::Ace {
-namespace {
-class MockDownloadManager final : public DownloadManager, public Singleton<MockDownloadManager> {
-    DECLARE_SINGLETON(MockDownloadManager);
-    ACE_DISALLOW_MOVE(MockDownloadManager);
-
+class MockDownloadManager final : public DownloadManager {
 public:
-    bool Download(const std::string& /*url*/, std::vector<uint8_t>& /*dataOut*/) override
+    MockDownloadManager() = default;
+    ~MockDownloadManager() = default;
+
+    bool Download(const std::string& /* url */, std::vector<uint8_t>& /* dataOut */) override
+    {
+        return false;
+    }
+    bool DownloadAsync(DownloadCallback&& /* downloadCallback */, const std::string& /* url */) override
+    {
+        return false;
+    }
+    bool DownloadSync(DownloadCallback&& /* downloadCallback */, const std::string& /* url */) override
     {
         return false;
     }
 };
 
-MockDownloadManager::MockDownloadManager() = default;
-
-MockDownloadManager::~MockDownloadManager() = default;
-
-} // namespace
-
-DownloadManager& DownloadManager::GetInstance()
+DownloadManager* DownloadManager::GetInstance()
 {
-    return Singleton<MockDownloadManager>::GetInstance();
+    static MockDownloadManager manager;
+    return &manager;
 }
 } // namespace OHOS::Ace

@@ -24,6 +24,7 @@
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
+#include "core/components_ng/pattern/list/list_item_group_model_ng.h"
 #include "core/components_ng/pattern/scroll/scroll_model_ng.h"
 #include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/text_field/text_field_model_ng.h"
@@ -197,6 +198,13 @@ void* createXComponentNode(ArkUI_Int32 nodeId)
 }
 #endif
 
+void* createListItemGroupNode(ArkUI_Int32 nodeId)
+{
+    auto frameNode = ListItemGroupModelNG::CreateFrameNode(nodeId);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
 {
@@ -221,12 +229,25 @@ void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)
         createRowNode,
         createFlexNode,
         createListItemNode,
-        createRefreshode,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
 #ifdef XCOMPONENT_SUPPORTED
         createXComponentNode,
 #else
         nullptr,
 #endif
+        nullptr,
+        createRefreshode,
+        nullptr,
+        nullptr,
+        nullptr,
+        nullptr,
+        createListItemGroupNode,
     };
     if (tag >= sizeof(createArkUIFrameNodes) / sizeof(createArkUIFrameNode*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to create %{public}d type of node", tag);

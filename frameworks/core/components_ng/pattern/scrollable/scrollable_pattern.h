@@ -64,6 +64,7 @@ public:
     ~ScrollablePattern()
     {
         UnRegister2DragDropManager();
+        UnRegisterWindowStateChangedCallback();
         if (scrollBarProxy_) {
             scrollBarProxy_->UnRegisterScrollableNode(AceType::WeakClaim(this));
         }
@@ -77,6 +78,7 @@ public:
     RefPtr<PaintProperty> CreatePaintProperty() override;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
+    void OnWindowHide() override;
 
     // scrollable
     Axis GetAxis() const override
@@ -444,6 +446,11 @@ public:
         return false;
     }
 
+    void SetNeedLinked(bool needLinked)
+    {
+        needLinked_ = needLinked;
+    }
+
 protected:
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const
     {
@@ -496,7 +503,6 @@ protected:
     bool multiSelectable_ = false;
     bool isMouseEventInit_ = false;
     OffsetF mouseStartOffset_;
-    OffsetF mouseStartOffsetGlobal_;
     float totalOffsetOfMousePressed_ = 0.0f;
     std::unordered_map<int32_t, ItemSelectedStatus> itemToBeSelected_;
 
@@ -536,17 +542,18 @@ private:
     void OnAttachToFrameNode() override;
     void AttachAnimatableProperty(RefPtr<Scrollable> scrollable);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void RegisterWindowStateChangedCallback();
+    void UnRegisterWindowStateChangedCallback();
 
     // select with mouse
     virtual void MultiSelectWithoutKeyboard(const RectF& selectedZone) {};
     virtual void ClearMultiSelect() {};
-    virtual bool IsItemSelected()
+    virtual bool IsItemSelected(const GestureEvent& info)
     {
         return false;
     }
     void ClearInvisibleItemsSelectedStatus();
     void HandleInvisibleItemsSelectedStatus(const RectF& selectedZone);
-    void HandleMouseEventWithoutKeyboard(const MouseInfo& info);
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(const GestureEvent& info);
@@ -648,7 +655,6 @@ private:
     GestureEvent lastMouseMove_;
     RefPtr<SelectMotion> selectMotion_;
     RefPtr<PanEvent> boxSelectPanEvent_;
-    RefPtr<InputEvent> mouseEvent_;
 
     RefPtr<NavBarPattern> navBarPattern_;
     RefPtr<SheetPresentationPattern> sheetPattern_;
@@ -656,6 +662,7 @@ private:
 
     EdgeEffect edgeEffect_ = EdgeEffect::NONE;
     bool edgeEffectAlwaysEnabled_ = false;
+    bool needLinked_ = true;
 
     RefPtr<NodeAnimatablePropertyFloat> springOffsetProperty_;
     RefPtr<NodeAnimatablePropertyFloat> curveOffsetProperty_;
