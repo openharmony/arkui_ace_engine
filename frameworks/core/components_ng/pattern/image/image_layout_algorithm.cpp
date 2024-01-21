@@ -68,7 +68,13 @@ std::optional<SizeF> ImageLayoutAlgorithm::MeasureContent(
         return std::nullopt;
     }
     // if image data is valid, use image source, or use altImage data
-    auto rawImageSize = loadingCtx ? loadingCtx->GetImageSize() : altLoadingCtx->GetImageSize();
+    auto rawImageSize = SizeF(-1.0, -1.0);
+    if (loadingCtx) {
+        rawImageSize = loadingCtx->GetImageSize();
+    }
+    if (rawImageSize.IsNegative() && altLoadingCtx) {
+        rawImageSize = altLoadingCtx->GetImageSize();
+    }
     SizeF size(rawImageSize);
     do {
         auto aspectRatio = static_cast<float>(Size::CalcRatio(rawImageSize));
