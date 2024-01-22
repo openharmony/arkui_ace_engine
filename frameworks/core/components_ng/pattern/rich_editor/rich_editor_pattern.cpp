@@ -1188,6 +1188,16 @@ void RichEditorPattern::UpdateImageStyle(RefPtr<FrameNode>& imageNode, const Ima
     host->MarkModifyDone();
 }
 
+bool RichEditorPattern::SymbolSpanUpdateStyle(
+    RefPtr<SpanNode>& spanNode, struct UpdateSpanStyle updateSpanStyle, TextStyle textStyle)
+{
+    if (spanNode->GetTag() == V2::SYMBOL_SPAN_ETS_TAG) {
+        UpdateSymbolStyle(spanNode, updateSpanStyle_, textStyle);
+        return true;
+    }
+    return false;
+}
+
 void RichEditorPattern::UpdateSpanStyle(
     int32_t start, int32_t end, const TextStyle& textStyle, const ImageSpanAttribute& imageStyle)
 {
@@ -1222,9 +1232,15 @@ void RichEditorPattern::UpdateSpanStyle(
                 break;
             }
         } else if (spanStart < start && start < spanEnd) {
+            if (SymbolSpanUpdateStyle(spanNode, updateSpanStyle_, textStyle)) {
+                continue;
+            }
             TextSpanSplit(start, true);
             --it;
         } else if (spanStart < end && end < spanEnd) {
+            if (SymbolSpanUpdateStyle(spanNode, updateSpanStyle_, textStyle)) {
+                continue;
+            }
             TextSpanSplit(end, true);
             --(--it);
         } else if (spanStart >= end) {
