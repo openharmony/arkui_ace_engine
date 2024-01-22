@@ -467,10 +467,10 @@ void PipelineContext::IsSCBWindowKeyboard(RefPtr<FrameNode> curFrameNode)
 {
     // Frame other window to SCB window Or inSCB window changes,hide keyboard.
     if ((windowFocus_.has_value() && windowFocus_.value()) ||
-        curFocusNode_ != curFrameNode) {
+        curFocusNodeId_ != curFrameNode->GetId()) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SCB Windowfocus first, ready to hide keyboard.");
         windowFocus_.reset();
-        curFocusNode_ = curFrameNode;
+        curFocusNodeId_ = curFrameNode->GetId();
         WindowSceneHelper::IsWindowSceneCloseKeyboard(curFrameNode);
         return;
     }
