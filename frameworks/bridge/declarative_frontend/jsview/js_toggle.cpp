@@ -184,7 +184,7 @@ void JSToggle::JsHeight(const JSRef<JSVal>& jsValue)
     auto height = defaultHeight - verticalPadding * 2;
     CalcDimension value(height);
     if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_TEN)) {
-        if (!ParseJsDimensionVpNG(jsValue, value)) {
+        if (!ParseJsDimensionVpNG(jsValue, value) || value.IsNegative()) {
             value = height;
         }
     } else {
