@@ -4985,6 +4985,111 @@ HWTEST_F(TextTestNg, HandleDoubleClickEvent001, TestSize.Level1)
     EXPECT_FALSE(pattern->hasClicked_);
 }
 
+
+/**
+ * @tc.name: HandleDoubleClickEvent002
+ * @tc.desc: test test_pattern.h HandleDoubleClickEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, HandleDoubleClickEvent002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern without any spanNodes.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    textModelNG.SetCopyOption(CopyOptions::Local);
+    std::function<void()> buildFunc = []() {};
+    SelectMenuParam memuParam {
+        .onAppear = [](int32_t, int32_t) {},
+        .onDisappear = []() {}
+    };
+    TextSpanType textSpanType = TextSpanType::TEXT;
+    TextResponseType textResponseType = TextResponseType::LONG_PRESS;
+    textModelNG.BindSelectionMenu(textSpanType, textResponseType, buildFunc, memuParam);
+    auto spanNode = CreateSpanNodeWithSetDefaultProperty("Hello World");
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    host->AddChild(spanNode);
+    spanNode->SetParent(host);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    frameNode->Measure(LayoutConstraintF());
+
+    /**
+     * @tc.steps: step2. test Gesture double click.
+     * @tc.expected: expect pattern isDoubleClick_ true, textResponseType_ NONE, textSelector valid,
+     *     showOverlay selectInfo string not empty.
+     */
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    pattern->paragraph_ = paragraph;
+    EXPECT_CALL(*paragraph, GetWordBoundary(_, _, _))
+        .WillRepeatedly(DoAll(SetArgReferee<1>(0), SetArgReferee<2>(5), Return(true)));
+
+    EXPECT_EQ(pattern->selectOverlayProxy_, nullptr);
+    pattern->isMousePressed_ = false;
+    GestureEvent info;
+    info.localLocation_ = Offset(0, 0);
+    pattern->HandleClickEvent(info);
+    info.localLocation_ = Offset(0, 10);
+    pattern->HandleClickEvent(info);
+    EXPECT_TRUE(pattern->isDoubleClick_);
+    EXPECT_EQ(pattern->textResponseType_, TextResponseType::NONE);
+    EXPECT_TRUE(pattern->textSelector_.IsValid());
+    EXPECT_NE(pattern->selectOverlayProxy_, nullptr);
+}
+
+/**
+ * @tc.name: HandleClickEventTest001
+ * @tc.desc: test test_pattern.h HandleClickEvent function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, HandleClickEventTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern with two  child spanNodes.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    textModelNG.SetCopyOption(CopyOptions::Local);
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = host->GetPattern<TextPattern>();
+    bool isSpanPhoneClicked = false;
+    auto spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_URL);
+    host->AddChild(spanNode);
+    spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_PHONE);
+    spanNode->UpdateOnClickEvent([&isSpanPhoneClicked](GestureEvent& info) { isSpanPhoneClicked = true; });
+    host->AddChild(spanNode);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    frameNode->GetRenderContext()->UpdateClipEdge(false);
+
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> rects { RectF(0, 0, 20, 20), RectF(30, 30, 20, 20) };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+    EXPECT_CALL(*paragraph, GetLongestLine).WillRepeatedly(Return(100.f));
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(100.f));
+    pattern->paragraph_ = paragraph;
+    //set text component frame size [180, 60].
+    LayoutConstraintF layoutConstraintF {
+        .selfIdealSize = OptionalSizeF(180.f, 60.f)
+    };
+    frameNode->Measure(layoutConstraintF);
+    //set boundsRect (0.00, 0.00) - [180.00 x 100.00]
+    pattern->CreateNodePaintMethod();
+    pattern->textSelector_.Update(0, 20);
+
+    /**
+     * @tc.steps: step2. Test HandleClickEvent.
+     * @tc.expect: expect click event captured by spanNode, onClickEvent will be called,
+     *     reset pattern textSelector.
+     */
+    GestureEvent info;
+    // info location in region boundsRect.
+    info.localLocation_ = Offset(10, 10);
+    pattern->HandleClickEvent(info);
+    EXPECT_TRUE(isSpanPhoneClicked);
+    EXPECT_TRUE(!pattern->textSelector_.IsValid());
+}
+
 /**
  * @tc.name: SetTextSelection001
  * @tc.desc: test test_pattern.h SetTextSelection function.
@@ -6018,5 +6123,441 @@ HWTEST_F(TextTestNg, InitPanEvent001, TestSize.Level1)
     auto onPanEnd = panEvent->GetActionEndEventFunc();
     onPanEnd(info);
     EXPECT_EQ(pattern->dragWindow_, nullptr);
+}
+
+/**
+ * @tc.name: CreateNodePaintMethod001
+ * @tc.desc: test text_pattern.h CreateNodePaintMethod function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, CreateNodePaintMethod001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    Shadow textShadow;
+    textShadow.SetBlurRadius(3.f); // 3.f means BlurRadius.
+    textShadow.SetOffsetX(ADAPT_OFFSETX_VALUE);
+    textShadow.SetOffsetY(ADAPT_OFFSETY_VALUE);
+    textModelNG.SetTextShadow({ textShadow });
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    frameNode->GetRenderContext()->UpdateClipEdge(false);
+    LayoutConstraintF layoutConstraintF {
+        .selfIdealSize = OptionalSizeF(240.f, 60.f)
+    };
+    frameNode->Measure(layoutConstraintF);
+    frameNode->Layout();
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetLongestLine).WillRepeatedly(Return(200.f));
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(80.f));
+    pattern->paragraph_ = paragraph;
+
+    /**
+     * @tc.steps: step2. test CreateNodePaintMethod.
+     * @tc.expect: expect overlayModifier BoundsRect width std::max(frameWith, paragraph->GetLongestLine),
+     *     GestureHub ResponseRegion list not empty.
+     */
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    EXPECT_TRUE(gestureHub->GetResponseRegion().empty());
+    pattern->CreateNodePaintMethod();
+    EXPECT_EQ(pattern->overlayMod_->GetBoundsRect().Width(), 240.f);
+    EXPECT_EQ(pattern->overlayMod_->GetBoundsRect().Height(), 92.f);
+    EXPECT_TRUE(!gestureHub->GetResponseRegion().empty());
+}
+
+/**
+ * @tc.name: CreateNodePaintMethod002
+ * @tc.desc: test text_pattern.h CreateNodePaintMethod function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, CreateNodePaintMethod002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    MockPipelineContext::GetCurrent()->SetMinPlatformVersion(10); // 10 means min platformVersion.
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    LayoutConstraintF layoutConstraintF {
+        .selfIdealSize = OptionalSizeF(240.f, 60.f)
+    };
+    frameNode->Measure(layoutConstraintF);
+    frameNode->Layout();
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    EXPECT_CALL(*paragraph, GetLongestLine).WillRepeatedly(Return(200.f));
+    EXPECT_CALL(*paragraph, GetHeight).WillRepeatedly(Return(80.f));
+    pattern->paragraph_ = paragraph;
+
+    /**
+     * @tc.steps: step2. test CreateNodePaintMethod.
+     * @tc.expect: RenderContext ClipEdge is true, expect gestureHub ResponseRegion list is empty.
+     */
+    auto gestureHub = frameNode->GetOrCreateGestureEventHub();
+    pattern->CreateNodePaintMethod();
+    EXPECT_TRUE(gestureHub->GetResponseRegion().empty());
+}
+
+/**
+ * @tc.name: SurfaceChangeEvent001
+ * @tc.desc: test text_pattern.h CreateNodePaintMethod function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SurfaceChangeEvent001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto pattern = frameNode->GetPattern<TextPattern>();
+
+    /**
+     * @tc.steps: step2. expect.
+     */
+    EXPECT_TRUE(pattern->surfaceChangedCallbackId_.has_value());
+    EXPECT_TRUE(pattern->surfacePositionChangedCallbackId_.has_value());
+    MockPipelineContext::GetCurrent()->OnSurfacePositionChanged(10, 10);
+}
+
+/**
+ * @tc.name: TextModelNgProperty001
+ * @tc.desc: test text_model_ng.h static functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextModelNgProperty001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = TextModelNG::CreateFrameNode(ViewStackProcessor::GetInstance()->ClaimNodeId(), V2::TEXT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    auto layoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+    auto node = frameNode.rawPtr_;
+    std::string str = "Hello, World!";
+    Font font;
+    TextModelNG::SetFont(node, font);
+    TextModelNG::InitText(node, str);
+    TextModelNG::SetFontWeight(node, Ace::FontWeight::BOLDER);
+    TextModelNG::SetItalicFontStyle(node, Ace::FontStyle::ITALIC);
+    TextModelNG::SetTextAlign(node, Ace::TextAlign::CENTER);
+    TextModelNG::SetTextColor(node, Color::RED);
+    TextModelNG::SetFontSize(node, FONT_SIZE_VALUE);
+    TextModelNG::SetLineHeight(node, ADAPT_LINE_HEIGHT_VALUE);
+    TextModelNG::SetTextOverflow(node, TextOverflow::ELLIPSIS);
+    TextModelNG::SetTextDecoration(node, TextDecoration::UNDERLINE);
+    TextModelNG::SetTextDecorationColor(node, Color::BLACK);
+    TextModelNG::SetTextDecorationStyle(node, TextDecorationStyle::SOLID);
+    TextModelNG::SetTextCase(node, TextCase::UPPERCASE);
+    TextModelNG::SetMaxLines(node, 10); // 10 means maxlines.
+
+    /**
+     * @tc.steps: step2. test property.
+     * @tc.expect： expect property as expect.
+     */
+    EXPECT_EQ(layoutProperty->GetFontWeight().value(), Ace::FontWeight::BOLDER);
+    EXPECT_EQ(layoutProperty->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
+    EXPECT_EQ(layoutProperty->GetTextAlign().value(), Ace::TextAlign::CENTER);
+    EXPECT_EQ(layoutProperty->GetTextColor().value(), Color::RED);
+    EXPECT_EQ(layoutProperty->GetFontSize().value(), FONT_SIZE_VALUE);
+    EXPECT_EQ(layoutProperty->GetLineHeight().value(), ADAPT_LINE_HEIGHT_VALUE);
+    EXPECT_EQ(layoutProperty->GetTextOverflow().value(), TextOverflow::ELLIPSIS);
+    EXPECT_EQ(layoutProperty->GetTextDecoration().value(), TextDecoration::UNDERLINE);
+    EXPECT_EQ(layoutProperty->GetTextDecorationColor().value(), Color::BLACK);
+    EXPECT_EQ(layoutProperty->GetTextDecorationStyle().value(), TextDecorationStyle::SOLID);
+    EXPECT_EQ(layoutProperty->GetTextCase().value(), TextCase::UPPERCASE);
+    EXPECT_EQ(layoutProperty->GetMaxLines().value(), 10);
+}
+
+/**
+ * @tc.name: TextModelNgProperty002
+ * @tc.desc: test text_model_ng.h static functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextModelNgProperty002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = TextModelNG::CreateFrameNode(ViewStackProcessor::GetInstance()->ClaimNodeId(), V2::TEXT_ETS_TAG);
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    auto layoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+    auto node = frameNode.rawPtr_;
+    TextModelNG::SetAdaptMinFontSize(node, ADAPT_MIN_FONT_SIZE_VALUE);
+    TextModelNG::SetDraggable(node, true);
+    TextModelNG::SetAdaptMaxFontSize(node, ADAPT_MAX_FONT_SIZE_VALUE);
+    TextModelNG::SetFontFamily(node, FONT_FAMILY_VALUE);
+    TextModelNG::SetCopyOption(node, CopyOptions::Distributed);
+    std::vector<Shadow> textShadows;
+    TextModelNG::SetTextShadow(node, textShadows);
+    TextModelNG::SetHeightAdaptivePolicy(node, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+    TextModelNG::SetTextIndent(node, TEXT_INDENT);
+    TextModelNG::SetBaselineOffset(node, BASELINE_OFFSET_VALUE);
+    TextModelNG::SetLetterSpacing(node, LETTER_SPACING);
+    Font font;
+    font.fontSize = FONT_SIZE_VALUE;
+    font.fontWeight = FontWeight::BOLD;
+    font.fontFamilies = FONT_FAMILY_VALUE;
+    font.fontStyle = ITALIC_FONT_STYLE_VALUE;
+    TextModelNG::SetFont(node, font);
+    TextModelNG::SetWordBreak(node, WordBreak::BREAK_ALL);
+
+    /**
+     * @tc.steps: step2. test property.
+     * @tc.expect： expect property as expect.
+     */
+    EXPECT_EQ(layoutProperty->GetAdaptMinFontSize().value(), ADAPT_MIN_FONT_SIZE_VALUE);
+    EXPECT_EQ(layoutProperty->GetAdaptMaxFontSize().value(), ADAPT_MAX_FONT_SIZE_VALUE);
+    EXPECT_EQ(layoutProperty->GetFontFamily().value(), FONT_FAMILY_VALUE);
+    EXPECT_EQ(layoutProperty->GetCopyOption().value(), CopyOptions::Distributed);
+    EXPECT_EQ(layoutProperty->GetHeightAdaptivePolicy().value(), TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST);
+    EXPECT_EQ(layoutProperty->GetTextIndent().value(), TEXT_INDENT);
+    EXPECT_EQ(layoutProperty->GetBaselineOffset().value(), BASELINE_OFFSET_VALUE);
+    EXPECT_EQ(layoutProperty->GetLetterSpacing().value(), LETTER_SPACING);
+    EXPECT_EQ(layoutProperty->GetFontSize().value(), FONT_SIZE_VALUE);
+    EXPECT_EQ(layoutProperty->GetFontWeight().value(), FontWeight::BOLD);
+    EXPECT_EQ(layoutProperty->GetFontFamily().value(), FONT_FAMILY_VALUE);
+    EXPECT_EQ(layoutProperty->GetItalicFontStyle().value(), ITALIC_FONT_STYLE_VALUE);
+    EXPECT_EQ(layoutProperty->GetWordBreak().value(), WordBreak::BREAK_ALL);
+}
+
+/**
+ * @tc.name: DumpInfoTest001
+ * @tc.desc: test text_pattern.h DumpInfo/DumpAdvanceInfo function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, DumpInfoTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto pattern = frameNode->GetPattern<TextPattern>();
+
+    /**
+     * @tc.steps: step2. expect pattern DumpInfo/DumpAdvanceInfo function run normally.
+     */
+    pattern->DumpInfo();
+    SystemProperties::debugEnabled_ = true;
+    pattern->DumpAdvanceInfo();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: TextLayoutAlgorithmLayout001
+ * @tc.desc: test text_pattern.h TextLayoutAlgorithm::Layout function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, TextLayoutAlgorithmLayout001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern with imageSpanNode&PlaceholderSpanNode.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = host->GetPattern<TextPattern>();
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    std::vector<RectF> selectedRects { RectF(0, 0, 20, 20), RectF(30, 30, 20, 20), RectF(60, 60, 20, 20) };
+    EXPECT_CALL(*paragraph, GetRectsForPlaceholders(_)).WillRepeatedly(SetArgReferee<0>(selectedRects));
+    pattern->paragraph_ = paragraph;
+    auto placeholderSpanNode = PlaceholderSpanNode::GetOrCreateSpanNode(V2::PLACEHOLDER_SPAN_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<PlaceholderSpanPattern>(); });
+    host->AddChild(placeholderSpanNode);
+    placeholderSpanNode->SetParent(host);
+
+    MarginPropertyF margin { .left = 40.f, .right = 40.f, .top = 80.f, .bottom = 80.f };
+    ImageSpanNodeProperty firstProperty {
+        .imageSrc = std::make_optional("image"),
+        .margin = std::make_optional(margin),
+        .verticalAlign = std::make_optional(VerticalAlign::CENTER)
+    };
+    auto imageSpanNode = CreateImageSpanNode(firstProperty);
+    host->AddChild(imageSpanNode);
+    imageSpanNode->SetParent(host);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+
+    /**
+     * @tc.steps: step2. test textLayoutAlgorithm with imageSpanNode & PlaceholderSpanNode
+     *     layout function run normally.
+     * @tc.expect: expect layoutAlgorithm_ spanItemChildSize number 2.
+     */
+    LayoutConstraintF layoutConstraintF {
+        .selfIdealSize = OptionalSizeF(240.f, 60.f)
+    };
+    frameNode->Measure(layoutConstraintF);
+    pattern->paragraph_ = paragraph;
+    frameNode->Layout();
+
+    auto layoutWrapper = frameNode->GetLayoutAlgorithm();
+    ASSERT_NE(layoutWrapper, nullptr);
+    auto textLayoutAlgorithm =
+        AceType::DynamicCast<TextLayoutAlgorithm>(layoutWrapper->GetLayoutAlgorithm());
+    ASSERT_NE(textLayoutAlgorithm, nullptr);
+    EXPECT_EQ(textLayoutAlgorithm->spanItemChildren_.size(), 2); // 2 means:two child spannode
+}
+
+/**
+ * @tc.name: CreateParagphTest001
+ * @tc.desc: test text_layout_algorithm.h CreateParagraph function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, CreateParagphTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    auto frameNode = FrameNode::CreateFrameNode(V2::SYMBOL_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    auto pattern = frameNode->GetPattern<TextPattern>();
+    auto layoutProperty = pattern->GetLayoutProperty<TextLayoutProperty>();
+    layoutProperty->UpdateSymbolSourceInfo(SymbolSourceInfo(0x4F60));
+    /**
+     * @tc.steps: step2. test CreateParagraph.
+     * @tc.expect: expect SYMBOL_ETS_TAG CreateParagraph run Normally.
+     */
+    LayoutConstraintF layoutConstraintF {
+        .selfIdealSize = OptionalSizeF(240.f, 60.f)
+    };
+    frameNode->Measure(layoutConstraintF);
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    pattern->paragraph_ = paragraph;
+    frameNode->Layout();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: CreateParagphDragTest001
+ * @tc.desc: test text_layout_algorithm.h CreateParagraphDrag function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, CreateParagphDragTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create("1234567890");
+    textModelNG.SetCopyOption(CopyOptions::Local);
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    host->draggable_ = true;
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    frameNode->Measure(LayoutConstraintF());
+    auto pattern = host->GetPattern<TextPattern>();
+    pattern->contentMod_ = AceType::MakeRefPtr<TextContentModifier>(std::optional<TextStyle>(TextStyle()));
+    pattern->textSelector_.Update(2, 6);
+
+    /**
+     * @tc.steps: step2. test text OnDragStart.
+     * @tc.expect: expect createParagraphDrag run normally.
+     */
+    auto event = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    auto gesture = frameNode->GetOrCreateGestureEventHub();
+    EXPECT_TRUE(gesture->GetTextDraggable());
+    gesture->SetIsTextDraggable(true);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    auto onDragStart = eventHub->GetOnDragStart();
+    auto dragDropInfo = onDragStart(event, "");
+    EXPECT_EQ(pattern->status_, Status::DRAGGING);
+    frameNode->Measure(LayoutConstraintF());
+    EXPECT_EQ(pattern->GetDragContents().size(), 3);
+}
+
+/**
+ * @tc.name: AdaptMaxTextSizeTest001
+ * @tc.desc: test text_layout_algorithm.h AdaptMaxTextSize function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, AdaptMaxTextSizeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create("1234567890");
+    textModelNG.SetAdaptMinFontSize(ADAPT_MIN_FONT_SIZE_VALUE);
+    textModelNG.SetAdaptMaxFontSize(ADAPT_MAX_FONT_SIZE_VALUE_S);
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = host->GetPattern<TextPattern>();
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    pattern->paragraph_ = paragraph;
+    EXPECT_CALL(*paragraph, GetLongestLine()).WillRepeatedly(Return(0.f));
+    EXPECT_CALL(*paragraph, GetLineCount()).WillRepeatedly(Return(1));
+    EXPECT_CALL(*paragraph, DidExceedMaxLines).WillRepeatedly(Return(false));
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    LayoutConstraintF layoutConstraintF {
+        .selfIdealSize = OptionalSizeF(240.f, 60.f)
+    };
+    frameNode->Measure(layoutConstraintF);
+    frameNode->Layout();
+
+    /**
+     * @tc.steps: step2. test textLayoutAlgorithm MeasureContent function.
+     * @tc.expect: expect textLayoutAlgorithm::AdaptMaxTextSize run normally.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    layoutProperty->UpdateHeightAdaptivePolicy(TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST);
+    frameNode->Measure(layoutConstraintF);
+    frameNode->Layout();
+    auto geometryNode = frameNode->GetGeometryNode();
+    EXPECT_EQ(geometryNode->GetFrameRect().Width(), 240.f);
+    EXPECT_EQ(geometryNode->GetFrameRect().Height(), 60.f);
+}
+
+/**
+ * @tc.name: SetImageSpanTextStyleTest001
+ * @tc.desc: test text_layout_algorithm.h SetImageSpanTextStyle function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNg, SetImageSpanTextStyleTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode and pattern with ImageSpanNodes.
+     */
+    TextModelNG textModelNG;
+    textModelNG.Create(CREATE_VALUE);
+    auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto pattern = host->GetPattern<TextPattern>();
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    pattern->paragraph_ = paragraph;
+    std::vector<RectF> rects { RectF(0, 0, 20, 20), RectF(20, 20, 20, 20),
+        RectF(40, 40, 20, 20), RectF(60, 60, 20, 20) };
+    EXPECT_CALL(*paragraph, GetRectsForPlaceholders(_)).WillRepeatedly(SetArgReferee<0>(rects));
+    std::vector<RectF> selctRects { RectF(0, 0, 20, 20), RectF(0, 0, 30, 30)  };
+    EXPECT_CALL(*paragraph, GetRectsForRange(_, _, _)).WillRepeatedly(SetArgReferee<2>(rects));
+    MarginPropertyF margin { .left = 40.f, .right = 40.f, .top = 80.f, .bottom = 80.f };
+    std::vector<std::string> placeHolderStrings { "please", "input", "text" };
+    for (auto str : placeHolderStrings) {
+        auto placeholderSpanNode = PlaceholderSpanNode::GetOrCreateSpanNode(V2::PLACEHOLDER_SPAN_ETS_TAG,
+            ElementRegister::GetInstance()->MakeUniqueId(),
+            []() { return AceType::MakeRefPtr<PlaceholderSpanPattern>(); });
+        placeholderSpanNode->GetSpanItem()->content = str;
+        host->AddChild(placeholderSpanNode);
+        ImageSpanNodeProperty firstProperty { .imageSrc = std::make_optional("image"),
+            .margin = std::make_optional(margin) };
+        auto imageSpanNode = CreateImageSpanNode(firstProperty);
+        imageSpanNode->GetSpanItem()->content = str;
+        host->AddChild(imageSpanNode);
+    }
+    auto spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_URL);
+    host->AddChild(spanNode);
+    spanNode = CreateSpanNodeWithSetDefaultProperty(SPAN_PHONE);
+    host->AddChild(spanNode);
+
+    /**
+     * @tc.steps: step2. test textLayoutAlgorithm SetImageSpanTextStyle function.
+     * @tc.expect: expect textLayoutAlgorithm::SetImageSpanTextStyle run normally.
+     */
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    LayoutConstraintF layoutConstraintF {
+        .selfIdealSize = OptionalSizeF(240.f, 60.f)
+    };
+    frameNode->Measure(layoutConstraintF);
+    auto geometryNode = frameNode->GetGeometryNode();
+    EXPECT_EQ(geometryNode->GetFrameRect().Width(), 240.f);
+    EXPECT_EQ(geometryNode->GetFrameRect().Height(), 60.f);
 }
 } // namespace OHOS::Ace::NG
