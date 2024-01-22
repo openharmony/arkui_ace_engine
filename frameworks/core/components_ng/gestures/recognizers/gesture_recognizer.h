@@ -276,6 +276,11 @@ public:
         return gestureInfo_;
     }
 
+    void SetSysGestureJudge(const GestureJudgeFunc& sysJudge)
+    {
+        sysJudge_ = sysJudge;
+    }
+
     void SetIsSystemGesture(bool isSystemGesture)
     {
         if (gestureInfo_) {
@@ -342,7 +347,7 @@ protected:
 
     int32_t currentFingers_ = 0;
     RefPtr<GestureInfo> gestureInfo_;
-
+    GestureJudgeFunc sysJudge_ = nullptr;
 private:
     WeakPtr<NGGestureRecognizer> gestureGroup_;
 };
