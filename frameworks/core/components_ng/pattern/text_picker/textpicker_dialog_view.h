@@ -57,7 +57,7 @@ public:
         const RefPtr<FrameNode>& textPickerNode);
 
 private:
-    static RefPtr<FrameNode> CreateStackNode();
+    static RefPtr<FrameNode> CreateStackNode(RefPtr<PickerTheme> pickerTheme);
     static RefPtr<FrameNode> CreateButtonNode();
     static RefPtr<FrameNode> CreateColumnNode(uint32_t columnKind,
         uint32_t showCount, RefPtr<PickerTheme> pickerTheme);
