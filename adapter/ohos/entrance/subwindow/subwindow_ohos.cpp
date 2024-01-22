@@ -501,7 +501,7 @@ void SubwindowOhos::ClearMenu()
 bool SubwindowOhos::ShowPreviewNG()
 {
     CHECK_NULL_RETURN(window_, false);
-    ShowWindow();
+    ShowWindow(false);
     ResizeWindow();
     window_->SetTouchable(false);
     return true;
