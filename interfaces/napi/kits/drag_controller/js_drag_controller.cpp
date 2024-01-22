@@ -174,7 +174,7 @@ public:
     static napi_value On(napi_env env, napi_callback_info info)
     {
         LOGI("NAPI DragAction On called");
-        auto jsEngine = EngineHelper::GetCurrentEngine();
+        auto jsEngine = EngineHelper::GetCurrentEngineWithoutScope();
         CHECK_NULL_RETURN(jsEngine, nullptr);
 
         napi_handle_scope scope = nullptr;
@@ -240,7 +240,7 @@ public:
     static napi_value StartDrag(napi_env env, napi_callback_info info)
     {
         LOGI("NAPI DragAction StartDrag called");
-        auto jsEngine = EngineHelper::GetCurrentEngine();
+        auto jsEngine = EngineHelper::GetCurrentEngineWithoutScope();
         CHECK_NULL_RETURN(jsEngine, nullptr);
 
         napi_escapable_handle_scope scope = nullptr;
@@ -574,7 +574,7 @@ void HandleFail(DragControllerAsyncCtx* asyncCtx, int32_t errorCode, const std::
 void HandleOnDragStart(DragControllerAsyncCtx* asyncCtx)
 {
     ContainerScope scope(asyncCtx->instanceId);
-    auto container = Container::Current();
+    auto container = Container::CurrentWithoutScope();
     if (!container) {
         LOGW("container is null");
         return;
@@ -921,7 +921,7 @@ bool GetPixelMapByCustom(DragControllerAsyncCtx* asyncCtx)
     CHECK_NULL_RETURN(asyncCtx, false);
     napi_escapable_handle_scope scope = nullptr;
     napi_open_escapable_handle_scope(asyncCtx->env, &scope);
-    auto delegate = EngineHelper::GetCurrentDelegate();
+    auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
     if (!delegate) {
         NapiThrow(asyncCtx->env, "ace engine delegate is null", Framework::ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(asyncCtx->env, scope);
@@ -952,7 +952,7 @@ bool GetPixelMapArrayByCustom(DragControllerAsyncCtx* asyncCtx, napi_value custo
     napi_escapable_handle_scope scope = nullptr;
     napi_open_escapable_handle_scope(asyncCtx->env, &scope);
 
-    auto delegate = EngineHelper::GetCurrentDelegate();
+    auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
     if (!delegate) {
         NapiThrow(asyncCtx->env, "ace engine delegate is null", Framework::ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(asyncCtx->env, scope);
@@ -1200,7 +1200,7 @@ void InitializeDragControllerCtx(napi_env env, napi_callback_info info, DragCont
     CHECK_NULL_VOID(asyncCtx);
     napi_value thisVar = nullptr;
     void* data = nullptr;
-    asyncCtx->instanceId = Container::CurrentId();
+    asyncCtx->instanceId = Container::CurrentIdWithoutScope();
     asyncCtx->env = env;
     // get arguments from JS
     napi_get_cb_info(asyncCtx->env, info, &(asyncCtx->argc), asyncCtx->argv, &thisVar, &data);

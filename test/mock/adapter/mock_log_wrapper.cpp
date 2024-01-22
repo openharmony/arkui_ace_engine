@@ -31,5 +31,10 @@ int32_t LogWrapper::GetId()
 {
     return 0;
 }
+
+const char* LogWrapper::GetIdMethod()
+{
+    return "";
+}
 #endif
 } // namespace OHOS::Ace

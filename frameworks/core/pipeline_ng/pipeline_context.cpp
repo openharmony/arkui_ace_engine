@@ -115,6 +115,13 @@ RefPtr<PipelineContext> PipelineContext::GetCurrentContext()
     return DynamicCast<PipelineContext>(currentContainer->GetPipelineContext());
 }
 
+RefPtr<PipelineContext> PipelineContext::GetCurrentContextWithoutScope()
+{
+    auto currentContainer = Container::CurrentWithoutScope();
+    CHECK_NULL_RETURN(currentContainer, nullptr);
+    return DynamicCast<PipelineContext>(currentContainer->GetPipelineContext());
+}
+
 RefPtr<PipelineContext> PipelineContext::GetMainPipelineContext()
 {
     auto pipeline = PipelineBase::GetMainPipelineContext();

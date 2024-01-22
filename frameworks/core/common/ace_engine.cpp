@@ -130,6 +130,22 @@ void AceEngine::RemoveContainer(int32_t instanceId)
     }
 }
 
+int32_t AceEngine::SingletonId() const
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    uint32_t containerCount = 0;
+    for (auto containerPair : containerMap_) {
+        int32_t instanceId = containerPair.first;
+        if (instanceId / CONTAINER_ID_DIVIDE_SIZE == ContainerType::STAGE_CONTAINER) {
+            containerCount++;
+        }
+    }
+    if (containerCount != 1) {
+        return INSTANCE_ID_UNDEFINED;
+    }
+    return containerMap_.begin()->first;
+}
+
 RefPtr<Container> AceEngine::GetContainer(int32_t instanceId)
 {
 #ifdef PLUGIN_COMPONENT_SUPPORTED

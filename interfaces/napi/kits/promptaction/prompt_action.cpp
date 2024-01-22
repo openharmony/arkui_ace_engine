@@ -40,7 +40,7 @@ const std::vector<DialogAlignment> DIALOG_ALIGNMENT = { DialogAlignment::TOP, Di
 #ifdef OHOS_STANDARD_SYSTEM
 bool ContainerIsService()
 {
-    auto containerId = Container::CurrentId();
+    auto containerId = Container::CurrentIdWithoutScope();
     // Get active container when current instanceid is less than 0
     if (containerId < 0) {
         auto container = Container::GetActive();
@@ -54,7 +54,7 @@ bool ContainerIsService()
 
 bool ContainerIsScenceBoard()
 {
-    auto container = Container::Current();
+    auto container = Container::CurrentWithoutScope();
     if (!container) {
         container = Container::GetActive();
     }
@@ -192,7 +192,7 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
 #ifdef OHOS_STANDARD_SYSTEM
     if ((SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) && !ContainerIsScenceBoard() &&
         showMode == NG::ToastShowMode::DEFAULT) {
-        auto delegate = EngineHelper::GetCurrentDelegate();
+        auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
         if (!delegate) {
             NapiThrow(env, "Can not get delegate.", Framework::ERROR_CODE_INTERNAL_ERROR);
             return nullptr;
@@ -204,7 +204,7 @@ napi_value JSPromptShowToast(napi_env env, napi_callback_info info)
         SubwindowManager::GetInstance()->ShowToast(messageString, duration, bottomString, showMode);
     }
 #else
-    auto delegate = EngineHelper::GetCurrentDelegate();
+    auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
     if (!delegate) {
         NapiThrow(env, "UI execution context not found.", Framework::ERROR_CODE_INTERNAL_ERROR);
         return nullptr;
@@ -473,7 +473,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
 
     auto asyncContext = std::make_shared<PromptAsyncContext>();
     asyncContext->env = env;
-    asyncContext->instanceId = Container::CurrentId();
+    asyncContext->instanceId = Container::CurrentIdWithoutScope();
 
     std::optional<DialogAlignment> alignment;
     std::optional<DimensionOffset> offset;
@@ -622,7 +622,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
 #ifdef OHOS_STANDARD_SYSTEM
     // NG
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
-        auto delegate = EngineHelper::GetCurrentDelegate();
+        auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
         if (delegate) {
             delegate->ShowDialog(promptDialogAttr, asyncContext->buttons, std::move(callBack), asyncContext->callbacks);
         } else {
@@ -651,7 +651,7 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
             promptDialogAttr, asyncContext->buttons, std::move(callBack), asyncContext->callbacks);
     }
 #else
-    auto delegate = EngineHelper::GetCurrentDelegate();
+    auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
     if (delegate) {
         delegate->ShowDialog(promptDialogAttr, asyncContext->buttons, std::move(callBack), asyncContext->callbacks);
     } else {
@@ -704,7 +704,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
 
     auto asyncContext = std::make_shared<PromptAsyncContext>();
     asyncContext->env = env;
-    asyncContext->instanceId = Container::CurrentId();
+    asyncContext->instanceId = Container::CurrentIdWithoutScope();
     for (size_t i = 0; i < argc; i++) {
         napi_valuetype valueType = napi_undefined;
         napi_typeof(env, argv[i], &valueType);
@@ -835,7 +835,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
     };
 #ifdef OHOS_STANDARD_SYSTEM
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
-        auto delegate = EngineHelper::GetCurrentDelegate();
+        auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
         if (delegate) {
             delegate->ShowActionMenu(promptDialogAttr, asyncContext->buttons, std::move(callBack));
         } else {
@@ -863,7 +863,7 @@ napi_value JSPromptShowActionMenu(napi_env env, napi_callback_info info)
             asyncContext->titleString, asyncContext->buttons, std::move(callBack));
     }
 #else
-    auto delegate = EngineHelper::GetCurrentDelegate();
+    auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
     if (delegate) {
         delegate->ShowActionMenu(promptDialogAttr, asyncContext->buttons, std::move(callBack));
     } else {
@@ -904,7 +904,7 @@ napi_value JSPromptOpenCustomDialog(napi_env env, napi_callback_info info)
 
     auto asyncContext = std::make_shared<PromptAsyncContext>();
     asyncContext->env = env;
-    asyncContext->instanceId = Container::CurrentId();
+    asyncContext->instanceId = Container::CurrentIdWithoutScope();
 
     std::optional<DialogAlignment> alignment;
     std::optional<DimensionOffset> offset;
@@ -983,7 +983,7 @@ napi_value JSPromptOpenCustomDialog(napi_env env, napi_callback_info info)
 #ifdef OHOS_STANDARD_SYSTEM
     // NG
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
-        auto delegate = EngineHelper::GetCurrentDelegate();
+        auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
         if (delegate) {
             delegate->OpenCustomDialog(promptDialogAttr, std::move(callBack));
         } else {
@@ -995,7 +995,7 @@ napi_value JSPromptOpenCustomDialog(napi_env env, napi_callback_info info)
         SubwindowManager::GetInstance()->OpenCustomDialog(promptDialogAttr, std::move(callBack));
     }
 #else
-    auto delegate = EngineHelper::GetCurrentDelegate();
+    auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
     if (delegate) {
         promptDialogAttr.showInSubWindow = false;
         delegate->OpenCustomDialog(promptDialogAttr, std::move(callBack));
@@ -1032,7 +1032,7 @@ napi_value JSPromptCloseCustomDialog(napi_env env, napi_callback_info info)
 #ifdef OHOS_STANDARD_SYSTEM
     // NG
     if (SystemProperties::GetExtSurfaceEnabled() || !ContainerIsService()) {
-        auto delegate = EngineHelper::GetCurrentDelegate();
+        auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
         if (delegate) {
             delegate->CloseCustomDialog(dialogId);
         } else {
@@ -1047,7 +1047,7 @@ napi_value JSPromptCloseCustomDialog(napi_env env, napi_callback_info info)
         SubwindowManager::GetInstance()->CloseCustomDialog(dialogId);
     }
 #else
-    auto delegate = EngineHelper::GetCurrentDelegate();
+    auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
     if (delegate) {
         delegate->CloseCustomDialog(dialogId);
     } else {

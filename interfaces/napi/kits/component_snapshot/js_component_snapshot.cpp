@@ -166,7 +166,7 @@ auto JsComponentSnapshot::CreateCallback(napi_value* result)
     }
 
     asyncCtx->env = env_;
-    asyncCtx->instanceId = Container::CurrentId();
+    asyncCtx->instanceId = Container::CurrentIdWithoutScope();
 
     return [asyncCtx](std::shared_ptr<Media::PixelMap> pixmap, int32_t errCode, std::function<void()> finishCallback) {
         asyncCtx->pixmap = std::move(pixmap);
@@ -202,7 +202,7 @@ static napi_value JSSnapshotGet(napi_env env, napi_callback_info info)
     napi_valuetype valueType = napi_null;
     GetNapiString(env, helper.GetArgv(0), componentId, valueType);
 
-    auto delegate = EngineHelper::GetCurrentDelegate();
+    auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
     if (!delegate) {
         NapiThrow(env, "ace engine delegate is null", Framework::ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(env, scope);
@@ -227,7 +227,7 @@ static napi_value JSSnapshotFromBuilder(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
-    auto delegate = EngineHelper::GetCurrentDelegate();
+    auto delegate = EngineHelper::GetCurrentDelegateWithoutScope();
     if (!delegate) {
         NapiThrow(env, "ace engine delegate is null", Framework::ERROR_CODE_INTERNAL_ERROR);
         napi_close_escapable_handle_scope(env, scope);
