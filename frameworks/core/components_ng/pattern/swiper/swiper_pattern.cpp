@@ -104,6 +104,7 @@ void SwiperPattern::OnDetachFromFrameNode(FrameNode* node)
     if (HasSurfaceChangedCallback()) {
         pipeline->UnregisterSurfaceChangedCallback(surfaceChangedCallbackId_.value_or(-1));
     }
+    pipeline->RemoveWindowStateChangedCallback(node->GetId());
 }
 
 RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
