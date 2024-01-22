@@ -1881,6 +1881,7 @@ void SwiperPattern::HandleDragEnd(double dragVelocity)
             if (parent) {
                 parent->HandleScrollVelocity(dragVelocity);
             }
+            StartAutoPlay();
             UpdateItemRenderGroup(false);
             return;
         }
