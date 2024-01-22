@@ -373,6 +373,18 @@ void CustomPaintPattern::DrawImage(const Ace::CanvasImage& image, double width, 
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
+void CustomPaintPattern::DrawSvgImage(
+    RefPtr<SvgDomBase> svgDom, const Ace::CanvasImage& image, const ImageFit& imageFit)
+{
+    auto task = [svgDom, image, imageFit](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {
+        paintMethod.DrawSvgImage(paintWrapper, svgDom, image, imageFit);
+    };
+    paintMethod_->PushTask(task);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
 void CustomPaintPattern::DrawPixelMap(RefPtr<PixelMap> pixelMap, const Ace::CanvasImage& image)
 {
     auto task = [pixelMap, image](CanvasPaintMethod& paintMethod, PaintWrapper* paintWrapper) {

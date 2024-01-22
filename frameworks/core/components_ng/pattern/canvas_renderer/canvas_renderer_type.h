@@ -16,10 +16,14 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CANVAS_RENDERER_CANVAS_RENDERER_TYPE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_CANVAS_RENDERER_CANVAS_RENDERER_TYPE_H
 
+#include "base/geometry/ng/size_t.h"
 #include "frameworks/base/memory/ace_type.h"
 #include "frameworks/core/components/common/properties/paint_state.h"
 #include "frameworks/core/components/common/properties/text_style.h"
 
+namespace OHOS::Ace::NG {
+class SvgDomBase;
+}
 namespace OHOS::Ace {
 struct BaseInfo {
     bool isOffscreen;
@@ -41,7 +45,11 @@ struct ImageInfo {
     double imgWidth;
     double imgHeight;
     RefPtr<PixelMap> pixelMap;
+    RefPtr<NG::SvgDomBase> svgDom;
     bool isImage;
+    bool isSvg;
+    NG::SizeF imageSize;
+    ImageFit imageFit;
     int32_t instanceId = 0;
 };
 

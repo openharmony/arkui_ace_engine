@@ -23,6 +23,7 @@
 #include "bridge/declarative_frontend/jsview/js_offscreen_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/models/canvas_renderer_model_impl.h"
+#include "core/components/common/properties/paint_state.h"
 #include "core/components_ng/pattern/canvas_renderer/canvas_renderer_model_ng.h"
 
 #ifdef PIXEL_MAP_SUPPORTED
@@ -756,25 +757,42 @@ JSRenderImage* JSCanvasRenderer::UnwrapNapiImage(const JSRef<JSObject> jsObject)
 void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
 {
     CanvasImage image;
+    ImageInfo imageInfo;
     double imgWidth = 0.0;
     double imgHeight = 0.0;
     RefPtr<PixelMap> pixelMap = nullptr;
+    RefPtr<NG::SvgDomBase> svgDom = nullptr;
     bool isImage = false;
     if (!info[0]->IsObject()) {
         return;
     }
+
     JSRenderImage* jsImage = UnwrapNapiImage(info[0]);
-    if (jsImage) {
+
+    if ((jsImage && jsImage->IsSvg())) {
+        svgDom = jsImage->GetSvgDom();
+        if (!svgDom) {
+            return;
+        }
+        ImageFit imageFit = jsImage->GetImageFit();
         isImage = true;
-        pixelMap = jsImage->GetPixelMap();
+        imageInfo.svgDom = svgDom;
+        imageInfo.isSvg = jsImage->IsSvg();
+        imageInfo.imageFit = imageFit;
     } else {
+        if (jsImage) {
+            isImage = true;
+            pixelMap = jsImage->GetPixelMap();
+        } else {
 #if !defined(PREVIEW)
-        pixelMap = CreatePixelMapFromNapiValue(info[0]);
+            pixelMap = CreatePixelMapFromNapiValue(info[0]);
 #endif
+        }
+        if (!pixelMap) {
+            return;
+        }
     }
-    if (!pixelMap) {
-        return;
-    }
+
     ExtractInfoToImage(image, info, isImage);
     image.instanceId = jsImage ? jsImage->GetInstanceId() : 0;
 
@@ -783,7 +801,6 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
     baseInfo.offscreenPattern = offscreenPattern_;
     baseInfo.isOffscreen = isOffscreen_;
 
-    ImageInfo imageInfo;
     imageInfo.image = image;
     imageInfo.imgWidth = imgWidth;
     imageInfo.imgHeight = imgHeight;

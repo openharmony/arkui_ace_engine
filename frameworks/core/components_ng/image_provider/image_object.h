@@ -19,6 +19,7 @@
 #include "base/utils/noncopyable.h"
 #include "core/components_ng/image_provider/image_data.h"
 #include "core/components_ng/image_provider/image_provider.h"
+#include "core/components_ng/image_provider/svg_dom_base.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/image/image_source_info.h"
 
@@ -43,6 +44,11 @@ public:
     void SetImageSize(const SizeF& imageSize);
     virtual void ClearData();
     void SetFrameCount(int32_t frameCount);
+
+    virtual RefPtr<SvgDomBase> GetSVGDom() const
+    {
+        return nullptr;
+    }
 
     virtual RefPtr<ImageObject> Clone() = 0;
 

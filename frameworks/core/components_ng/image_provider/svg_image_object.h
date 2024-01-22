@@ -29,7 +29,7 @@ public:
     ~SvgImageObject() override = default;
 
     static RefPtr<SvgImageObject> Create(const ImageSourceInfo& src, const RefPtr<ImageData>& data);
-    const RefPtr<SvgDomBase>& GetSVGDom() const;
+    RefPtr<SvgDomBase> GetSVGDom() const override;
 
     RefPtr<ImageObject> Clone() override
     {

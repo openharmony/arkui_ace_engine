@@ -262,7 +262,12 @@ void JSRenderImage::OnImageLoadSuccess()
     CHECK_NULL_VOID(loadingCtx_);
     image_ = loadingCtx_->MoveCanvasImage();
     CHECK_NULL_VOID(image_);
+    imageObj_ = loadingCtx_->MoveImageObject();
+    CHECK_NULL_VOID(imageObj_);
     pixelMap_ = image_->GetPixelMap();
+    svgDom_ = imageObj_->GetSVGDom();
+    imageFit_ = loadingCtx_->GetImageFit();
+    imageSize_ = loadingCtx_->GetImageSize();
 }
 
 void JSRenderImage::OnImageLoadFail(const std::string& errorMsg)
@@ -270,12 +275,14 @@ void JSRenderImage::OnImageLoadFail(const std::string& errorMsg)
     width_ = 0;
     height_ = 0;
     pixelMap_ = nullptr;
+    svgDom_ = nullptr;
 }
 
 void JSRenderImage::LoadImage(const std::string& src)
 {
     src_ = src;
     auto sourceInfo = ImageSourceInfo(src);
+    sourceInfo_ = sourceInfo;
     LoadImage(sourceInfo);
 }
 
