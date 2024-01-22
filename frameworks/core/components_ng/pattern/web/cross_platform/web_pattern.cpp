@@ -52,6 +52,7 @@ constexpr double DEFAULT_AXIS_RATIO = -0.06;
 constexpr uint32_t DEFAULT_WEB_DRAW_HEIGHT = 4000;
 const std::string PATTERN_TYPE_WEB = "WEBPATTERN";
 constexpr int32_t SURFACE_QUEUE_SIZE = 8;
+constexpr int32_t SIZE_GAP = 2;
 // web feature params
 const std::string VISIBLE_ACTIVE_ENABLE = "persist.web.visible_active_enable";
 const std::string MEMORY_LEVEL_ENABEL = "persist.web.memory_level_enable";
@@ -93,8 +94,8 @@ void WebPattern::OnAttachToFrameNode()
         CHECK_NULL_VOID(host);
         auto renderContext = host->GetRenderContext();
         CHECK_NULL_VOID(renderContext);
-        renderContext->SetContentRectToFrame(
-            RectF(offset.GetX(), offset.GetY(), webPattern->drawSize_.Width(), webPattern->drawSize_.Height()));
+        renderContext->SetContentRectToFrame(RectF(offset.GetX(), offset.GetY(),
+            webPattern->drawSize_.Width() - SIZE_GAP, webPattern->drawSize_.Height() - SIZE_GAP));
     };
     host->GetRenderContext()->SetSurfaceChangedCallBack(OnAreaChangedCallBack);
 }
