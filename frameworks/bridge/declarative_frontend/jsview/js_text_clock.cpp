@@ -59,21 +59,27 @@ namespace OHOS::Ace::Framework {
 
 namespace {
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
-const int32_t TWENTY_FOUR_HOUR_BASE = 24;
 const std::string DEFAULT_FORMAT = "hms";
 constexpr int32_t HOURS_WEST_LOWER_LIMIT = -14;
 constexpr int32_t HOURS_WEST_UPPER_LIMIT = 12;
-constexpr int32_t HOURS_WEST_GEOGRAPHICAL_LOWER_LIMIT = -12;
+constexpr float HOURS_WEST[] = { 9.5f, 3.5f, -3.5f, -4.5f, -5.5f, -5.75f, -6.5f, -9.5f, -10.5f, -12.75f };
 
 bool HoursWestIsValid(int32_t hoursWest)
 {
-    if (hoursWest < HOURS_WEST_LOWER_LIMIT || hoursWest > HOURS_WEST_UPPER_LIMIT) {
-        return false;
+    return !(hoursWest < HOURS_WEST_LOWER_LIMIT || hoursWest > HOURS_WEST_UPPER_LIMIT);
+}
+
+float GetHoursWest(float hoursWest)
+{
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        for (float i : HOURS_WEST) {
+            if (NearEqual(hoursWest, i)) {
+                return hoursWest;
+            }
+        }
     }
-    if (hoursWest < HOURS_WEST_GEOGRAPHICAL_LOWER_LIMIT) {
-        hoursWest += TWENTY_FOUR_HOUR_BASE;
-    }
-    return true;
+
+    return int32_t(hoursWest);
 }
 } // namespace
 
@@ -87,9 +93,10 @@ void JSTextClock::Create(const JSCallbackInfo& info)
     JSRef<JSObject> optionsObject = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> hourWestVal = optionsObject->GetProperty("timeZoneOffset");
     if (hourWestVal->IsNumber() && HoursWestIsValid(hourWestVal->ToNumber<int32_t>())) {
-        TextClockModel::GetInstance()->SetHoursWest(hourWestVal->ToNumber<int32_t>());
+        float hourWest = GetHoursWest(hourWestVal->ToNumber<float>());
+        TextClockModel::GetInstance()->SetHoursWest(hourWest);
     } else {
-        TextClockModel::GetInstance()->SetHoursWest(INT_MAX);
+        TextClockModel::GetInstance()->SetHoursWest(NAN);
     }
     auto controllerObj = optionsObject->GetProperty("controller");
     if (!controllerObj->IsUndefined() && !controllerObj->IsNull() && controllerObj->IsObject()) {

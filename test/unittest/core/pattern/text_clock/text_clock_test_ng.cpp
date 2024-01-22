@@ -300,7 +300,7 @@ HWTEST_F(TextClockTestNG, TextClockTest004, TestSize.Level1)
      */
     auto pattern = frameNode->GetPattern<TextClockPattern>();
     ASSERT_NE(pattern, nullptr);
-    EXPECT_EQ(pattern->GetHoursWest(), INT_MAX);
+    EXPECT_EQ(std::isnan(pattern->GetHoursWest()), true);
     textClockLayoutProperty->UpdateHoursWest(HOURS_WEST);
     EXPECT_EQ(pattern->GetHoursWest(), HOURS_WEST);
 }
