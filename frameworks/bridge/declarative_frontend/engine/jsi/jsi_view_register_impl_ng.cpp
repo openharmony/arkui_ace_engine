@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -165,6 +165,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_video_controller.h"
 #endif
 #ifdef WINDOW_SCENE_SUPPORTED
+#include "frameworks/bridge/declarative_frontend/jsview/js_embedded_component.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_ui_extension.h"
 #endif
 #ifdef ABILITY_COMPONENT_SUPPORTED
@@ -448,6 +449,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine)
     JSSceneView::JSBind(globalObj);
 #endif
 #if defined(WINDOW_SCENE_SUPPORTED)
+    JSEmbeddedComponent::JSBind(globalObj);
     JSWindowScene::JSBind(globalObj);
     JSRootScene::JSBind(globalObj);
     JSScreen::JSBind(globalObj);

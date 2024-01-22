@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -237,6 +237,7 @@
 #endif
 
 #if defined(WINDOW_SCENE_SUPPORTED)
+#include "bridge/declarative_frontend/jsview/js_embedded_component.h"
 #include "bridge/declarative_frontend/jsview/js_ui_extension.h"
 #include "bridge/declarative_frontend/jsview/window_scene/js_root_scene.h"
 #include "bridge/declarative_frontend/jsview/window_scene/js_screen.h"
@@ -754,6 +755,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Component3D", JSSceneView::JSBind },
 #endif
 #if defined(WINDOW_SCENE_SUPPORTED)
+    { "EmbeddedComponent", JSEmbeddedComponent::JSBind },
     { "RootScene", JSRootScene::JSBind },
     { "Screen", JSScreen::JSBind },
     { "UIExtensionComponent", JSUIExtension::JSBind },

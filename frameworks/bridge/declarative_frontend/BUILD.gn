@@ -603,6 +603,7 @@ template("declarative_js_engine") {
 
       if (defined(config.window_scene_support) && config.window_scene_support) {
         sources += [
+          "jsview/js_embedded_component.cpp",
           "jsview/js_ui_extension.cpp",
           "jsview/window_scene/js_root_scene.cpp",
           "jsview/window_scene/js_screen.cpp",
@@ -841,6 +842,7 @@ template("declarative_js_engine_ng") {
 
     if (defined(config.window_scene_support) && config.window_scene_support) {
       sources += [
+        "jsview/js_embedded_component.cpp",
         "jsview/js_ui_extension.cpp",
         "jsview/window_scene/js_root_scene.cpp",
         "jsview/window_scene/js_screen.cpp",
