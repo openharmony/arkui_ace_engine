@@ -14,10 +14,10 @@
  */
 
 /**
- * @addtogroup ArkUI_NativeNode
+ * @addtogroup ArkUI_NativeModule
  * @{
  *
- * @brief 提供ArkUI在Native侧的UI组件能力，如组件创建销毁、树节点操作，属性设置，事件监听等。
+ * @brief 提供ArkUI在Native侧的UI能力，如UI组件创建销毁、树节点操作，属性设置，事件监听等。
  *
  * @since 12
  */
@@ -48,13 +48,13 @@ extern "C" {
  * @since 12
  */
 typedef enum {
-    /** 不支持的工具类型 */
+    /** 不支持的工具类型。 */
     NODE_TOOL_TYPE_UNKNOWN = -1,
 
-    /** 手指 */
+    /** 手指。 */
     NODE_TOOL_TYPE_FINGER = 0,
 
-    /** 笔 */
+    /** 笔。 */
     NODE_TOOL_TYPE_PEN = 1,
 } ArkUI_NodeToolType;
 
@@ -64,13 +64,13 @@ typedef enum {
  * @since 12
  */
 typedef enum {
-    /** 不支持的来源类型 */
+    /** 不支持的来源类型。 */
     NODE_SOURCE_TYPE_UNKNOWN = -1,
-    /** 触摸屏 */
+    /** 触摸屏。 */
     NODE_SOURCE_TYPE_TOUCH_SCREEN = 0,
-    /** 手写笔 */
+    /** 手写笔。 */
     NODE_SOURCE_TYPE_PEN = 1,
-    /** 触控板 */
+    /** 触控板。 */
     NODE_SOURCE_TYPE_TOUCH_PAD = 2,
 } ArkUI_NodeSourceType;
 
@@ -189,18 +189,18 @@ typedef struct {
     ArkUI_NodeTouchPoint actionTouch;
 
     /**
-     * @brief 返回此事件发生时所有屏幕接触点信息.
-     * @param points 用来接受数据的指针对象.
-     * @return 屏幕接触点数量.
+     * @brief 返回此事件发生时所有屏幕接触点信息。
+     * @param points 用来接受数据的指针对象。
+     * @return 屏幕接触点数据数组元素数量。
      * @note
-     * 框架会在该函数调用时创建触控点信息数组的堆内存对象并返回指针，开发者需要在使用完成后调用delete[]手动释放内存。
+     * ArkUI会在该函数调用时创建触控点信息数组的堆内存对象并返回指针，开发者需要在使用完成后调用delete[]手动释放内存。
      */
     int32_t (*getTouches)(ArkUI_NodeTouchPoint** points);
 
     /**
-     * @brief 返回此事件中的历史点信息。这些是在此事件和上一个事件之间发生的运动.
-     * @param points 用来接受数据的指针对象.
-     * @return 历史点数量.
+     * @brief 返回此事件中的历史点信息。这些是在此事件和上一个事件之间发生的运动。
+     * @param points 用来接受数据的指针对象。
+     * @return 历史点数据数组元素数量。
      * @note
      * 框架会在该函数调用时创建历史点数据数组的堆内存对象并返回指针，开发者需要在使用完成后调用delete[]手动释放内存。
      */
