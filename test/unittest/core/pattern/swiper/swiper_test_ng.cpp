@@ -9819,6 +9819,8 @@ HWTEST_F(SwiperTestNg, SwiperPaintMethodPaintFade002, TestSize.Level1)
     auto renderContext = frameNode_->GetRenderContext();
     PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
     Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     paintWrapper.paintProperty_ = AceType::MakeRefPtr<SwiperPaintProperty>();
 
     /**
@@ -9929,6 +9931,8 @@ HWTEST_F(SwiperTestNg, SwiperPaintMethodPaintFade003, TestSize.Level1)
     auto renderContext = frameNode_->GetRenderContext();
     PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
     Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     paintWrapper.paintProperty_ = AceType::MakeRefPtr<SwiperPaintProperty>();
 
     /**
@@ -9963,6 +9967,8 @@ HWTEST_F(SwiperTestNg, SwiperPaintMethodPaintFade004, TestSize.Level1)
     auto renderContext = frameNode_->GetRenderContext();
     PaintWrapper paintWrapper(renderContext, geometryNode, paintProperty);
     Testing::MockCanvas canvas;
+    EXPECT_CALL(canvas, AttachBrush(_)).WillRepeatedly(ReturnRef(canvas));
+    EXPECT_CALL(canvas, DetachBrush()).WillRepeatedly(ReturnRef(canvas));
     paintWrapper.paintProperty_ = AceType::MakeRefPtr<SwiperPaintProperty>();
     ASSERT_NE(paintWrapper.paintProperty_, nullptr);
     auto frameSize = paintWrapper.GetGeometryNode()->GetFrameSize();
