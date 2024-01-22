@@ -3472,7 +3472,7 @@ void TextFieldPattern::UpdateEditingValueToRecord()
 
 float TextFieldPattern::PreferredTextHeight(bool isPlaceholder, bool isAlgorithmMeasure)
 {
-    if (!isAlgorithmMeasure && paragraph_ && paragraph_->GetHeight() != 0.0f) {
+    if (!isAlgorithmMeasure && paragraph_ && paragraph_->GetHeight() != 0.0f && paragraph_->GetLineCount() > 0) {
         return paragraph_->GetHeight() / paragraph_->GetLineCount();
     }
     RefPtr<Paragraph> paragraph;
