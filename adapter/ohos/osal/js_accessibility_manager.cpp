@@ -1943,7 +1943,8 @@ bool JsAccessibilityManager::SubscribeStateObserver(int eventType)
         stateObserver_ = std::make_shared<JsAccessibilityStateObserver>();
     }
 
-    stateObserver_->SetHandler(WeakClaim(this));
+    stateObserver_->SetAccessibilityManager(WeakClaim(this));
+    stateObserver_->SetPipeline(context_);
 
     auto instance = AccessibilitySystemAbilityClient::GetInstance();
     CHECK_NULL_RETURN(instance, false);
@@ -3455,6 +3456,14 @@ void JsAccessibilityManager::DeregisterInteractionOperation()
     }
 }
 
+void JsAccessibilityManager::SetPipelineContext(const RefPtr<PipelineBase>& context)
+{
+    context_ = context;
+    if (stateObserver_ != nullptr) {
+        stateObserver_->SetPipeline(context_);
+    }
+}
+
 #ifdef WEB_SUPPORTED
 void JsAccessibilityManager::SetWebAccessibilityState(bool state)
 {
@@ -3475,12 +3484,11 @@ void JsAccessibilityManager::SetWebAccessibilityState(bool state)
 void JsAccessibilityManager::JsAccessibilityStateObserver::OnStateChanged(const bool state)
 {
     TAG_LOGI(AceLogTag::ACE_ACCESSIBILITY, "accessibility state changed:%{public}d", state);
-    auto jsAccessibilityManager = GetHandler().Upgrade();
-    CHECK_NULL_VOID(jsAccessibilityManager);
-    auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
-    CHECK_NULL_VOID(context);
-    context->GetTaskExecutor()->PostTask(
-        [weak = GetHandler(), state]() {
+    // Do not upgrade jsAccessibilityManager on async thread, destructor will cause freeze
+    auto pipelineRef = pipeline_.Upgrade();
+    CHECK_NULL_VOID(pipelineRef);
+    pipelineRef->GetTaskExecutor()->PostTask(
+        [weak = accessibilityManager_, state]() {
             auto jsAccessibilityManager = weak.Upgrade();
             CHECK_NULL_VOID(jsAccessibilityManager);
             if (state) {

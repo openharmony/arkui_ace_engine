@@ -51,7 +51,7 @@ public:
     // AccessibilityNodeManager functions.
     virtual void InitializeCallback();
     virtual void RegisterSubWindowInteractionOperation(int windowId);
-    void SetPipelineContext(const RefPtr<PipelineBase>& context);
+    virtual void SetPipelineContext(const RefPtr<PipelineBase>& context);
     void AddSubPipelineContext(const RefPtr<PipelineBase>& context);
     void SetRunningPage(const RefPtr<JsAcePage>& page);
     std::string GetNodeChildIds(const RefPtr<AccessibilityNode>& node);
