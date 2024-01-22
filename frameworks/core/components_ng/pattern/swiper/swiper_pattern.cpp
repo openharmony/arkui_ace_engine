@@ -1369,13 +1369,15 @@ bool SwiperPattern::OnKeyEvent(const KeyEvent& event)
     }
     if ((GetDirection() == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_LEFT) ||
         (GetDirection() == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_UP)) {
-        auto onlyFlushFocus = GetDisplayCount() > 1 && currentFocusIndex_ > GetLoopIndex(currentIndex_);
+        auto onlyFlushFocus = GetDisplayCount() > 1 && currentFocusIndex_ > currentIndex_;
         if (onlyFlushFocus) {
-            currentFocusIndex_ = currentFocusIndex_ - 1;
+            currentFocusIndex_ = IsLoop() ? currentFocusIndex_ - 1 :
+                                            std::clamp(currentFocusIndex_ - 1, 0, TotalCount() - 1);
             FlushFocus(GetCurrentFrameNode(currentFocusIndex_));
         } else {
             ShowPrevious();
-            currentFocusIndex_ = currentFocusIndex_ - 1;
+            currentFocusIndex_ = IsLoop() ? currentFocusIndex_ - 1 :
+                                            std::clamp(currentFocusIndex_ - 1, 0, TotalCount() - 1);
         }
 
         return true;
@@ -1383,13 +1385,15 @@ bool SwiperPattern::OnKeyEvent(const KeyEvent& event)
     if ((GetDirection() == Axis::HORIZONTAL && event.code == KeyCode::KEY_DPAD_RIGHT) ||
         (GetDirection() == Axis::VERTICAL && event.code == KeyCode::KEY_DPAD_DOWN)) {
         auto onlyFlushFocus =
-            GetDisplayCount() > 1 && currentFocusIndex_ < GetLoopIndex(currentIndex_ + GetDisplayCount() - 1);
+            GetDisplayCount() > 1 && currentFocusIndex_ < currentIndex_ + GetDisplayCount() - 1;
         if (onlyFlushFocus) {
-            currentFocusIndex_ = currentFocusIndex_ + 1;
+            currentFocusIndex_ = IsLoop() ? currentFocusIndex_ + 1 :
+                                            std::clamp(currentFocusIndex_ + 1, 0, TotalCount() - 1);
             FlushFocus(GetCurrentFrameNode(currentFocusIndex_));
         } else {
             ShowNext();
-            currentFocusIndex_ = currentFocusIndex_ + 1;
+            currentFocusIndex_ = IsLoop() ? currentFocusIndex_ + 1 :
+                                            std::clamp(currentFocusIndex_ + 1, 0, TotalCount() - 1);
         }
 
         return true;
