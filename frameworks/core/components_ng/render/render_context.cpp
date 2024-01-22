@@ -61,6 +61,36 @@ RefPtr<FrameNode> RenderContext::GetHost() const
     return host_.Upgrade();
 }
 
+void RenderContext::SetSharedTransitionOptions(const std::shared_ptr<SharedTransitionOption>& option)
+{
+    sharedTransitionOption_ = option;
+}
+
+const std::shared_ptr<SharedTransitionOption>& RenderContext::GetSharedTransitionOption() const
+{
+    return sharedTransitionOption_;
+}
+
+void RenderContext::SetShareId(const ShareId& shareId)
+{
+    shareId_ = shareId;
+}
+
+const ShareId& RenderContext::GetShareId() const
+{
+    return shareId_;
+}
+
+bool RenderContext::HasSharedTransition() const
+{
+    return !shareId_.empty();
+}
+
+bool RenderContext::HasSharedTransitionOption() const
+{
+    return sharedTransitionOption_ != nullptr;
+}
+
 void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const
 {
     ACE_PROPERTY_TO_JSON_VALUE(propBorder_, BorderProperty);

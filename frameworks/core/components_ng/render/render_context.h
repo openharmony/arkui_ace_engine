@@ -340,30 +340,12 @@ public:
 
     void ObscuredToJsonValue(std::unique_ptr<JsonValue>& json) const;
 
-    void SetSharedTransitionOptions(const std::shared_ptr<SharedTransitionOption>& option)
-    {
-        sharedTransitionOption_ = option;
-    }
-    const std::shared_ptr<SharedTransitionOption>& GetSharedTransitionOption() const
-    {
-        return sharedTransitionOption_;
-    }
-    void SetShareId(const ShareId& shareId)
-    {
-        shareId_ = shareId;
-    }
-    const ShareId& GetShareId() const
-    {
-        return shareId_;
-    }
-    bool HasSharedTransition() const
-    {
-        return !shareId_.empty();
-    }
-    bool HasSharedTransitionOption() const
-    {
-        return sharedTransitionOption_ != nullptr;
-    }
+    void SetSharedTransitionOptions(const std::shared_ptr<SharedTransitionOption>& option);
+    const std::shared_ptr<SharedTransitionOption>& GetSharedTransitionOption() const;
+    void SetShareId(const ShareId& shareId);
+    const ShareId& GetShareId() const;
+    bool HasSharedTransition() const;
+    bool HasSharedTransitionOption() const;
 
     void SetIsModalRootNode(bool isModalRootNode)
     {
