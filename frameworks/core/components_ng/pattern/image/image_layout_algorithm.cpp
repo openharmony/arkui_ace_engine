@@ -163,7 +163,7 @@ void ImageLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
             altLoadingCtx_ = pattern->GetAltImageLoadingContext();
             auto ctx = altLoadingCtx_.Upgrade();
             if (ctx) {
-                ctx->MakeCanvasImageIfNeed(dstSize, !altLoadingCtx->GetAutoResize(),
+                ctx->MakeCanvasImageIfNeed(dstSize, !ctx->GetAutoResize(),
                     imageFit, sourceSize, hasValidSlice);
             }
         }
