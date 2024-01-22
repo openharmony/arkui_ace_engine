@@ -20,13 +20,9 @@
 #include "core/components_ng/pattern/list/list_item_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
-#include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-#if defined(PIXEL_MAP_SUPPORTED)
-constexpr int32_t CREATE_PIXELMAP_TIME = 80;
-#endif
 
 void ListEventHub::InitItemDragEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
@@ -79,40 +75,11 @@ void ListEventHub::HandleOnItemDragStart(const GestureEvent& info)
     itemDragInfo.SetY(pipeline->ConvertPxToVp(Dimension(globalY, DimensionUnit::PX)));
     auto customNode = FireOnItemDragStart(itemDragInfo, draggedIndex_);
     CHECK_NULL_VOID(customNode);
-#if defined(PIXEL_MAP_SUPPORTED)
-    auto callback = [id = Container::CurrentId(), pipeline, info, host, weak = WeakClaim(this)](
-                        std::shared_ptr<Media::PixelMap> mediaPixelMap, int32_t /*arg*/,
-                        const std::function<void()>& /*unused*/) {
-        ContainerScope scope(id);
-        if (!mediaPixelMap) {
-            TAG_LOGE(AceLogTag::ACE_DRAG, "listItem drag start failed, custom component screenshot is empty.");
-            return;
-        }
-        auto pixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&mediaPixelMap));
-        CHECK_NULL_VOID(pixelMap);
-        auto taskScheduler = pipeline->GetTaskExecutor();
-        CHECK_NULL_VOID(taskScheduler);
-        taskScheduler->PostTask(
-            [weak, pipeline, info, pixelMap, host]() {
-                auto eventHub = weak.Upgrade();
-                CHECK_NULL_VOID(eventHub);
-                auto manager = pipeline->GetDragDropManager();
-                CHECK_NULL_VOID(manager);
-                eventHub->dragDropProxy_ = manager->CreateAndShowDragWindow(pixelMap, info);
-                CHECK_NULL_VOID(eventHub->dragDropProxy_);
-                eventHub->dragDropProxy_->OnItemDragStart(info, host);
-            },
-            TaskExecutor::TaskType::UI);
-    };
-    auto frameNode = AceType::DynamicCast<FrameNode>(customNode);
-    NG::ComponentSnapshot::Create(frameNode, std::move(callback), false, CREATE_PIXELMAP_TIME);
-#else
     auto manager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(manager);
     dragDropProxy_ = manager->CreateAndShowDragWindow(customNode, info);
     CHECK_NULL_VOID(dragDropProxy_);
     dragDropProxy_->OnItemDragStart(info, GetFrameNode());
-#endif
 }
 
 void ListEventHub::HandleOnItemDragUpdate(const GestureEvent& info)
