@@ -67,7 +67,7 @@ void JSLocalStorage::RemoveStorage(int32_t key)
 
 void JSLocalStorage::GetShared(const JSCallbackInfo& info)
 {
-    int32_t currentInstance = Container::CurrentId();
+    int32_t currentInstance = Container::CurrentIdWithoutScope();
     if (currentInstance >= MIN_SUBCONTAINER_ID && currentInstance < MIN_PLUGIN_SUBCONTAINER_ID) {
         currentInstance = SubwindowManager::GetInstance()->GetParentContainerId(currentInstance);
     }

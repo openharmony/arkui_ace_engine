@@ -1041,7 +1041,7 @@ void JSTextPickerDialog::JSBind(BindingTarget globalObj)
 
 void JSTextPickerDialog::Show(const JSCallbackInfo& info)
 {
-    auto scopedDelegate = EngineHelper::GetCurrentDelegate();
+    auto scopedDelegate = EngineHelper::GetCurrentDelegateWithoutScope();
     CHECK_NULL_VOID(scopedDelegate);
     if (!info[0]->IsObject()) {
         return;
@@ -1191,7 +1191,7 @@ void JSTextPickerDialog::TextPickerDialogShow(const JSRef<JSObject>& paramObj,
     const std::map<std::string, NG::DialogTextEvent>& dialogEvent,
     const std::map<std::string, NG::DialogGestureEvent>& dialogCancelEvent)
 {
-    auto container = Container::Current();
+    auto container = Container::CurrentWithoutScope();
     if (!container) {
         return;
     }

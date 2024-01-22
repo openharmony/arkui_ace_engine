@@ -15,13 +15,21 @@
 
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CONTAINER_SCOPE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_CONTAINER_SCOPE_H
-
+#include <array>
+#include <atomic>
 #include <cinttypes>
 
 #include "base/utils/macros.h"
 #include "base/utils/noncopyable.h"
 
 namespace OHOS::Ace {
+
+enum class ID_GENERATE_METHOD {
+    SCOPE = 0,
+    RECENT,
+    SINGLETON,
+    UNDEFINED
+};
 
 class ACE_EXPORT ContainerScope {
 public:
@@ -36,9 +44,18 @@ public:
     }
 
     static int32_t CurrentId();
+    static int32_t SingletonId();
+    static int32_t RecentActiveId();
+    static const char* CurrentIdGenerateMethod();
+
+    static void AddCount();
+    static void MinusCount();
+    static uint32_t ContainerCount();
 
     static void UpdateCurrent(int32_t id);
-
+    static void UpdateSingleton(int32_t id);
+    static void UpdateRecentActive(int32_t id);
+    static void UpdateIdGenerateMethod(ID_GENERATE_METHOD method);
 private:
     int32_t restoreId_ = CurrentId();
 

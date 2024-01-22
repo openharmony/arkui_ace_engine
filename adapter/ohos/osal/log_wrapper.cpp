@@ -151,6 +151,11 @@ int32_t LogWrapper::GetId()
 {
     return ContainerScope::CurrentId();
 }
+
+const char* LogWrapper::GetIdMethod()
+{
+    return ContainerScope::CurrentIdGenerateMethod();
+}
 #endif
 
 } // namespace OHOS::Ace

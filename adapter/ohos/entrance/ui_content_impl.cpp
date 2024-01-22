@@ -1275,6 +1275,10 @@ void UIContentImpl::CommonInitialize(OHOS::Rosen::Window* window, const std::str
     // Mark the relationship between windowId and containerId, it is 1:1
     SubwindowManager::GetInstance()->AddContainerId(window->GetWindowId(), instanceId_);
     AceEngine::Get().AddContainer(instanceId_, container);
+    ContainerScope::AddCount();
+    if (ContainerScope::ContainerCount() == 1) {
+        ContainerScope::UpdateSingleton(instanceId_);
+    }
     if (runtime_) {
         container->GetSettings().SetUsingSharedRuntime(true);
         container->SetSharedRuntime(runtime_);
@@ -1508,6 +1512,7 @@ void UIContentImpl::Focus()
 {
     LOGI("%{public}s window focus", bundleName_.c_str());
     Platform::AceContainer::OnActive(instanceId_);
+    ContainerScope::UpdateRecentActive(instanceId_);
     CHECK_NULL_VOID(window_);
     std::string windowName = window_->GetWindowName();
     Recorder::EventRecorder::Get().SetFocusContainerInfo(windowName, instanceId_);
@@ -1517,6 +1522,9 @@ void UIContentImpl::UnFocus()
 {
     LOGI("%{public}s window unfocus", bundleName_.c_str());
     Platform::AceContainer::OnInactive(instanceId_);
+    if (ContainerScope::RecentActiveId() == instanceId_) {
+        ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+    }
 }
 
 void UIContentImpl::Destroy()
@@ -1530,6 +1538,13 @@ void UIContentImpl::Destroy()
         Platform::DialogContainer::DestroyContainer(instanceId_);
     } else {
         Platform::AceContainer::DestroyContainer(instanceId_);
+    }
+    if (ContainerScope::RecentActiveId() == instanceId_) {
+        ContainerScope::UpdateRecentActive(INSTANCE_ID_UNDEFINED);
+    }
+    ContainerScope::MinusCount();
+    if (ContainerScope::ContainerCount() == 1) {
+        ContainerScope::UpdateSingleton(AceEngine::Get().SingletonId());
     }
 }
 

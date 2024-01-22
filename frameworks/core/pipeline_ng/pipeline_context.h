@@ -70,6 +70,8 @@ public:
 
     static RefPtr<PipelineContext> GetCurrentContext();
 
+    static RefPtr<PipelineContext> GetCurrentContextWithoutScope();
+
     static RefPtr<PipelineContext> GetMainPipelineContext();
 
     static RefPtr<PipelineContext> GetContextByContainerId(int32_t containerId);

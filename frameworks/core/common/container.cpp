@@ -29,9 +29,34 @@ int32_t Container::CurrentId()
     return ContainerScope::CurrentId();
 }
 
+int32_t Container::CurrentIdWithoutScope()
+{
+    int32_t currentId = ContainerScope::CurrentId();
+    if (currentId != INSTANCE_ID_UNDEFINED) {
+        ContainerScope::UpdateIdGenerateMethod(ID_GENERATE_METHOD::SCOPE);
+        return currentId;
+    }
+    uint32_t containerCount = ContainerScope::ContainerCount();
+    if (containerCount == 0) {
+        ContainerScope::UpdateIdGenerateMethod(ID_GENERATE_METHOD::UNDEFINED);
+        return INSTANCE_ID_UNDEFINED;
+    }
+    if (containerCount == 1) {
+        ContainerScope::UpdateIdGenerateMethod(ID_GENERATE_METHOD::SINGLETON);
+        return ContainerScope::SingletonId();
+    }
+    ContainerScope::UpdateIdGenerateMethod(ID_GENERATE_METHOD::RECENT);
+    return ContainerScope::RecentActiveId();
+}
+
 RefPtr<Container> Container::Current()
 {
     return AceEngine::Get().GetContainer(ContainerScope::CurrentId());
+}
+
+RefPtr<Container> Container::CurrentWithoutScope()
+{
+    return AceEngine::Get().GetContainer(Container::CurrentIdWithoutScope());
 }
 
 RefPtr<Container> Container::GetContainer(int32_t containerId)

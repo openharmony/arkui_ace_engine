@@ -21,10 +21,18 @@ namespace OHOS::Ace {
 namespace {
 // preview not support multi-instance, always using default instance id 0.
 #if defined(PREVIEW)
-thread_local int32_t currentId_ = 0;
+constexpr int32_t DEFAULT_ID = 0;
 #else
-thread_local int32_t currentId_ = INSTANCE_ID_UNDEFINED;
+constexpr int32_t DEFAULT_ID = INSTANCE_ID_UNDEFINED;
 #endif
+
+const std::array<const char*, 4> ID_GENERATE_METHODS { "scope", "recent", "singelton", "undefined" };
+
+std::atomic<uint32_t> containerCount_(0);
+thread_local int32_t currentId_(DEFAULT_ID);
+std::atomic<int32_t> singletonId_(DEFAULT_ID);
+std::atomic<int32_t> recentActiveId_(DEFAULT_ID);
+std::atomic<uint32_t> idGenerateMethod_(static_cast<uint32_t>(ID_GENERATE_METHOD::SCOPE));
 }
 
 int32_t ContainerScope::CurrentId()
@@ -32,9 +40,54 @@ int32_t ContainerScope::CurrentId()
     return currentId_;
 }
 
+const char* ContainerScope::CurrentIdGenerateMethod()
+{
+    return ID_GENERATE_METHODS[idGenerateMethod_.load(std::memory_order_relaxed)];
+}
+
+void ContainerScope::UpdateIdGenerateMethod(ID_GENERATE_METHOD method)
+{
+    idGenerateMethod_.store(static_cast<uint32_t>(method), std::memory_order_relaxed);
+}
+
+int32_t ContainerScope::SingletonId()
+{
+    return singletonId_.load(std::memory_order_relaxed);
+}
+
+int32_t ContainerScope::RecentActiveId()
+{
+    return recentActiveId_.load(std::memory_order_relaxed);
+}
+
 void ContainerScope::UpdateCurrent(int32_t id)
 {
     currentId_ = id;
+}
+
+void ContainerScope::UpdateSingleton(int32_t id)
+{
+    singletonId_.store(id, std::memory_order_relaxed);
+}
+
+void ContainerScope::UpdateRecentActive(int32_t id)
+{
+    recentActiveId_.store(id, std::memory_order_relaxed);
+}
+
+uint32_t ContainerScope::ContainerCount()
+{
+    return containerCount_.load(std::memory_order_relaxed);
+}
+
+void ContainerScope::AddCount()
+{
+    containerCount_.fetch_add(1, std::memory_order_relaxed);
+}
+
+void ContainerScope::MinusCount()
+{
+    containerCount_.fetch_sub(1, std::memory_order_relaxed);
 }
 
 } // namespace OHOS::Ace
