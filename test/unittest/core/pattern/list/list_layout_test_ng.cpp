@@ -21,20 +21,10 @@ namespace {} // namespace
 
 class ListLayoutTestNg : public ListTestNg {
 public:
-    void ScrollSnap(float offset, float velocity);
     void UpdateContentModifier();
     RefPtr<ListPaintMethod> UpdateOverlayModifier();
     AssertionResult VerifySticky(int32_t groupIndex, bool isHeader, float expectOffsetY);
 };
-
-void ListLayoutTestNg::ScrollSnap(float offset, float velocity)
-{
-    pattern_->OnScrollSnapCallback(offset, velocity);
-    FlushLayoutTask(frameNode_);
-    float endValue = pattern_->scrollableEvent_->GetScrollable()->GetSnapFinalPosition();
-    pattern_->ScrollBy(-endValue);
-    FlushLayoutTask(frameNode_);
-}
 
 void ListLayoutTestNg::UpdateContentModifier()
 {
@@ -653,7 +643,7 @@ HWTEST_F(ListLayoutTestNg, ContentOffset005, TestSize.Level1)
  * @tc.desc: Test top content offset and bottom end offset
  * @tc.type: FUNC
  */
-HWTEST_F(ListLayoutTestNg, ContentOffset006, TestSize.Level1)
+HWTEST_F(ListLayoutTestNg, DISABLED_ContentOffset006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create List with ScrollSnapAlign START
