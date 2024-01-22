@@ -299,7 +299,6 @@ class CommonShapeWidthModifier extends ModifierWithKey<Length> {
   }
 }
 
-
 class CommonShapeForegroundColorModifier extends ModifierWithKey<string | number | Resource | Color> {
   constructor(value: string | number | Resource | Color) {
     super(value);

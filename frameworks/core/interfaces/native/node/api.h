@@ -1604,9 +1604,9 @@ struct ArkUICommonShapeModifierAPI {
     void (*ResetStrokeLineCap)(NodeHandle node);
     void (*SetStrokeLineJoin)(NodeHandle node, const int lineJoinStyle);
     void (*ResetStrokeLineJoin)(NodeHandle node);
-    void (*SetShapeWidth)(NodeHandle node);
+    void (*SetShapeWidth)(NodeHandle node, const double value, const int32_t unit);
     void (*ResetShapeWidth)(NodeHandle node);
-    void (*SetShapeHeight)(NodeHandle node);
+    void (*SetShapeHeight)(NodeHandle node, const double value, const int32_t unit);
     void (*ResetShapeHeight)(NodeHandle node);
     void (*SetShapeForegroundColor)(NodeHandle node, bool isColor, uint32_t color);
     void (*ResetShapeForegroundColor)(NodeHandle node);
