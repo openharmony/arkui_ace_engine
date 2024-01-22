@@ -491,7 +491,7 @@ void TabBarPattern::FocusIndexChange(int32_t index)
         PaintFocusState();
     }
 
-    UpdateTextColor(index);
+    UpdateTextColorAndFontWeight(index);
 }
 
 void TabBarPattern::GetInnerFocusPaintRect(RoundRect& paintRect)
@@ -1295,7 +1295,7 @@ void TabBarPattern::UpdateGradientRegions(bool needMarkDirty)
     }
 }
 
-void TabBarPattern::UpdateTextColor(int32_t indicator)
+void TabBarPattern::UpdateTextColorAndFontWeight(int32_t indicator)
 {
     auto tabBarNode = GetHost();
     CHECK_NULL_VOID(tabBarNode);
@@ -1311,20 +1311,35 @@ void TabBarPattern::UpdateTextColor(int32_t indicator)
     CHECK_NULL_VOID(pipelineContext);
     auto tabTheme = pipelineContext->GetTheme<TabTheme>();
     CHECK_NULL_VOID(tabTheme);
+    int32_t index = 0;
     for (const auto& columnNode : tabBarNode->GetChildren()) {
         CHECK_NULL_VOID(columnNode);
         auto textNode = AceType::DynamicCast<FrameNode>(columnNode->GetChildren().back());
         CHECK_NULL_VOID(textNode);
         auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        if (columnNode->GetId() == selectedColumnId) {
-            textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOnColor());
-        } else {
-            textLayoutProperty->UpdateTextColor(tabTheme->GetSubTabTextOffColor());
+        auto isSelected = columnNode->GetId() == selectedColumnId;
+        textLayoutProperty->UpdateTextColor(isSelected ? tabTheme->GetActiveIndicatorColor()
+                                                       : tabTheme->GetSubTabTextOffColor());
+        if (IsNeedUpdateFontWeight(index)) {
+            textLayoutProperty->UpdateFontWeight(isSelected ? FontWeight::MEDIUM : FontWeight::NORMAL);
         }
         textNode->MarkModifyDone();
         textNode->MarkDirtyNode();
+        index++;
     }
+}
+
+bool TabBarPattern::IsNeedUpdateFontWeight(int32_t index)
+{
+    if (index < 0 || index >= static_cast<int32_t>(tabBarStyles_.size()) ||
+        tabBarStyles_[index] != TabBarStyle::SUBTABBATSTYLE) {
+        return false;
+    }
+    if (index >= static_cast<int32_t>(labelStyles_.size()) || labelStyles_[index].fontWeight.has_value()) {
+        return false;
+    }
+    return true;
 }
 
 void TabBarPattern::UpdateImageColor(int32_t indicator)
@@ -1443,7 +1458,7 @@ void TabBarPattern::TriggerTranslateAnimation(
             targetPaintRect.GetX() + targetPaintRect.Width() / 2, targetOffset);
     }
     animationTargetIndex_ = index;
-    UpdateTextColor(index);
+    UpdateTextColorAndFontWeight(index);
 }
 
 void TabBarPattern::PlayTranslateAnimation(float startPos, float endPos, float targetCurrentOffset)
@@ -2072,9 +2087,9 @@ void TabBarPattern::ApplyTurnPageRateToIndicator(float turnPageRate)
         turnPageRate_ = 0.0f;
     } else {
         if (turnPageRate_ <= TEXT_COLOR_THREDHOLD && turnPageRate > TEXT_COLOR_THREDHOLD) {
-            UpdateTextColor(index);
+            UpdateTextColorAndFontWeight(index);
         } else if (turnPageRate <= 1.0f - TEXT_COLOR_THREDHOLD && turnPageRate_ > 1.0f - TEXT_COLOR_THREDHOLD) {
-            UpdateTextColor(swiperStartIndex_);
+            UpdateTextColorAndFontWeight(swiperStartIndex_);
         }
         turnPageRate_ = turnPageRate;
     }

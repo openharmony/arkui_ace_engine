@@ -396,12 +396,8 @@ void JSTabContent::CompleteParameters(LabelStyle& labelStyle, bool isSubTabStyle
             labelStyle.fontSize = tabTheme->GetBottomTabTextSize();
         }
     }
-    if (!labelStyle.fontWeight.has_value()) {
-        if (isSubTabStyle) {
-            labelStyle.fontWeight = FontWeight::NORMAL;
-        } else {
-            labelStyle.fontWeight = FontWeight::MEDIUM;
-        }
+    if (!labelStyle.fontWeight.has_value() && !isSubTabStyle) {
+        labelStyle.fontWeight = FontWeight::MEDIUM;
     }
     if (!labelStyle.fontStyle.has_value()) {
         labelStyle.fontStyle = FontStyle::NORMAL;
