@@ -27,6 +27,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
 #include "base/utils/utils.h"
+#include "core/common/ai/data_detector_adapter.h"
 #include "core/components_ng/event/long_press_event.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/rich_editor/paragraph_manager.h"
@@ -48,7 +49,7 @@
 #include "core/pipeline_ng/ui_task_scheduler.h"
 
 namespace OHOS::Ace::NG {
-enum class Status {DRAGGING, ON_DROP, NONE };
+enum class Status { DRAGGING, ON_DROP, NONE };
 using CalculateHandleFunc = std::function<void()>;
 using ShowSelectOverlayFunc = std::function<void(const RectF&, const RectF&)>;
 struct SpanNodeInfo {
@@ -172,57 +173,53 @@ public:
         menuOptionItems_ = std::move(menuOptionItems);
     }
 
+    const std::vector<MenuOptionsParam>&& GetMenuOptionItems() const
+    {
+        return std::move(menuOptionItems_);
+    }
+
     void SetTextDetectEnable(bool enable)
     {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        dataDetectorAdapter_->frameNode_ = host;
         bool cache = textDetectEnable_;
         textDetectEnable_ = enable;
         if (cache != textDetectEnable_) {
-            auto host = GetHost();
-            CHECK_NULL_VOID(host);
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         }
     }
-
     bool GetTextDetectEnable()
     {
         return textDetectEnable_;
     }
-
-    void SetTextDetectTypes(const std::string& types);
-
+    void SetTextDetectTypes(const std::string& types)
+    {
+        dataDetectorAdapter_->SetTextDetectTypes(types);
+    }
     std::string GetTextDetectTypes()
     {
-        return textDetectTypes_;
+        return dataDetectorAdapter_->textDetectTypes_;
     }
-
+    RefPtr<DataDetectorAdapter> GetDataDetectorAdapter()
+    {
+        return dataDetectorAdapter_;
+    }
+    const std::map<int32_t, AISpan>& GetAISpanMap()
+    {
+        return dataDetectorAdapter_->aiSpanMap_;
+    }
+    const std::string& GetTextForAI()
+    {
+        return dataDetectorAdapter_->textForAI_;
+    }
     void SetOnResult(std::function<void(const std::string&)>&& onResult)
     {
-        onResult_ = std::move(onResult);
+        dataDetectorAdapter_->onResult_ = std::move(onResult);
     }
-
-    void FireOnResult(const TextDataDetectResult& result)
-    {
-        if (onResult_) {
-            auto resultJson = JsonUtil::Create(true);
-            resultJson->Put("code", std::to_string(result.code).c_str());
-            resultJson->Put("entity", result.entity.c_str());
-            onResult_(resultJson->ToString());
-        }
-    }
-
-    void SetTextDetectResult(const TextDataDetectResult result)
-    {
-        textDetectResult_ = result;
-    }
-
     std::optional<TextDataDetectResult> GetTextDetectResult()
     {
-        return textDetectResult_;
-    }
-
-    const std::vector<MenuOptionsParam>&& GetMenuOptionItems() const
-    {
-        return std::move(menuOptionItems_);
+        return dataDetectorAdapter_->textDetectResult_;
     }
 
     void OnVisibleChange(bool isVisible) override;
@@ -469,16 +466,6 @@ public:
 
     virtual void UpdateScrollBarOffset() override {}
 
-    const std::map<int32_t, AISpan>& GetAISpanMap()
-    {
-        return aiSpanMap_;
-    }
-
-    const std::string& GetTextForAI()
-    {
-        return textForAI_;
-    }
-
     void ResetDragOption() override
     {
         CloseSelectOverlay();
@@ -522,8 +509,6 @@ public:
 
 protected:
     void OnAfterModifyDone() override;
-    void ClickAISpanOfSpan(std::map<int, OHOS::Ace::AISpan>::iterator& aiSpanIterator,
-        const OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem>& item, PointF textOffset, bool& isClickOnAISpan);
     virtual bool ClickAISpan(const PointF& textOffset, const AISpan& aiSpan);
     void InitMouseEvent();
     void ResetSelection();
@@ -532,26 +517,17 @@ protected:
     virtual void HandleOnCameraInput() {};
     void InitSelection(const Offset& pos);
     void HandleLongPress(GestureEvent& info);
-    void HandleMouseEventOfAISpan(const MouseInfo& info, PointF textOffset, bool& isClickOnAISpan);
     void HandleClickEvent(GestureEvent& info);
     void HandleSingleClickEvent(GestureEvent& info);
+    void HandleClickAISpanEvent(const PointF& info);
     void HandleSpanSingleClickEvent(
-        GestureEvent& info, RectF textContentRect, PointF textOffset, bool& isClickOnSpan, bool& isClickOnAISpan);
+        GestureEvent& info, RectF textContentRect, PointF textOffset, bool& isClickOnSpan);
     void HandleDoubleClickEvent(GestureEvent& info);
     void CheckOnClickEvent(GestureEvent& info);
-    void InitTextDetect(int32_t startPos, std::string detectText);
     bool ShowUIExtensionMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc = nullptr,
         const ShowSelectOverlayFunc& showSelectOverlayFunc = nullptr);
     void SetOnClickMenu(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc,
         const ShowSelectOverlayFunc& showSelectOverlayFunc);
-    void ParseAIResult(const TextDataDetectResult& result, int32_t startPos);
-    void ParseAIJson(const std::unique_ptr<JsonValue>& jsonValue, TextDataDetectType type, int32_t startPos,
-        bool isMenuOption = false);
-    void StartAITask();
-    void CancelAITask()
-    {
-        aiDetectDelayTask_.Cancel();
-    }
     bool IsDraggable(const Offset& localOffset);
     virtual void InitClickEvent(const RefPtr<GestureEventHub>& gestureHub);
     void CalculateHandleOffsetAndShowOverlay(bool isUsingMouse = false);
@@ -573,7 +549,7 @@ protected:
 
     virtual bool CanStartAITask()
     {
-        return true;
+        return copyOption_ != CopyOptions::None && textDetectEnable_ && enabled_ && dataDetectorAdapter_;
     };
 
     Status status_ = Status::NONE;
@@ -603,23 +579,12 @@ protected:
     int32_t placeholderCount_ = 0;
     SelectMenuInfo selectMenuInfo_;
     std::vector<RectF> dragBoxes_;
+    std::map<std::pair<TextSpanType, TextResponseType>, std::shared_ptr<SelectionMenuParams>> selectionMenuMap_;
+    std::optional<TextSpanType> selectedType_;
 
     // properties for AI
     bool textDetectEnable_ = false;
-    bool aiDetectInitialized_ = false;
-    bool aiDetectTypesChanged_ = false;
-    bool hasClickedAISpan_ = false;
-    std::string textDetectTypes_;
-    std::set<std::string> textDetectTypesSet_;
-    std::string textForAI_;
-    std::optional<TextDataDetectResult> textDetectResult_;
-    std::unordered_map<std::string, std::vector<std::string>> aiMenuOptionsMap_;
-    std::function<void(const std::string&)> onResult_;
-    std::function<void(const std::string&)> onClickMenu_;
-    std::map<int32_t, AISpan> aiSpanMap_;
-    CancelableCallback<void()> aiDetectDelayTask_;
-    std::map<std::pair<TextSpanType, TextResponseType>, std::shared_ptr<SelectionMenuParams>> selectionMenuMap_;
-    std::optional<TextSpanType> selectedType_;
+    RefPtr<DataDetectorAdapter> dataDetectorAdapter_ = MakeRefPtr<DataDetectorAdapter>();
 
 private:
     void HandleOnCopy();
