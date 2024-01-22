@@ -161,6 +161,18 @@ BorderWidthPropertyF ConvertToBorderWidthPropertyF(
     auto right = ConvertToPx(borderWidth.rightDimen, scaleProperty, percentReference);
     auto top = ConvertToPx(borderWidth.topDimen, scaleProperty, percentReference);
     auto bottom = ConvertToPx(borderWidth.bottomDimen, scaleProperty, percentReference);
+    if (left.has_value()) {
+        left = floor(left.value());
+    }
+    if (right.has_value()) {
+        right = floor(right.value());
+    }
+    if (top.has_value()) {
+        top = floor(top.value());
+    }
+    if (bottom.has_value()) {
+        bottom = floor(bottom.value());
+    }
     return BorderWidthPropertyF { left, top, right, bottom };
 }
 
