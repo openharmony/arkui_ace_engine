@@ -550,7 +550,7 @@ ArkUINativeModuleValue TextBridge::SetTextShadow(ArkUIRuntimeCallInfo* runtimeCa
         !offsetYParseResult || !fillParseResult || !typeParseResult) {
         return panda::JSValueRef::Undefined(vm);
     }
-    auto textShadowArray = std::make_unique<TextShadowStruct[]>(length);
+    auto textShadowArray = std::make_unique<ArkUITextShadowStruct[]>(length);
     CHECK_NULL_RETURN(textShadowArray.get(), panda::JSValueRef::Undefined(vm));
     for (uint32_t i = 0; i < length; i++) {
         textShadowArray[i].radius = radiusArray[i];
@@ -609,7 +609,7 @@ ArkUINativeModuleValue TextBridge::SetTextIndent(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    struct StringAndDouble textIndentStruct = { 0.0, nullptr };
+    struct ArkUIStringAndFloat textIndentStruct = { 0.0, nullptr };
     std::string str;
     if (secondArg->IsNumber()) {
         textIndentStruct.value = secondArg->ToNumber(vm)->Value();
@@ -641,7 +641,7 @@ ArkUINativeModuleValue TextBridge::SetBaselineOffset(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
-    struct StringAndDouble offset = { 0.0, nullptr };
+    struct ArkUIStringAndFloat offset = { 0.0, nullptr };
     std::string str;
     if (secondArg->IsNumber()) {
         offset.value = secondArg->ToNumber(vm)->Value();
@@ -674,7 +674,7 @@ ArkUINativeModuleValue TextBridge::SetLetterSpacing(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     void* nativeNode = firstArg->ToNativePointer(vm)->Value();
 
-    struct StringAndDouble letterSpacing = { 0.0, nullptr };
+    struct ArkUIStringAndFloat letterSpacing = { 0.0, nullptr };
     std::string str;
     if (secondArg->IsNumber()) {
         letterSpacing.value = secondArg->ToNumber(vm)->Value();
