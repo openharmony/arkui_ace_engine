@@ -546,7 +546,7 @@ private:
     bool NeedAiAnalysis(
         const CaretUpdateType targeType, const int32_t pos, const int32_t& spanStart, const std::string& content);
     void AdjustCursorPosition(int32_t& pos);
-    void AdjustImageSelection(int32_t& start, int32_t& end, const Offset& pos);
+    void AdjustPlaceholderSelection(int32_t& start, int32_t& end, const Offset& pos);
     bool AdjustWordSelection(int32_t& start, int32_t& end);
     bool IsClickBoundary(const int32_t position);
 

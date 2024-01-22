@@ -4433,29 +4433,13 @@ void RichEditorPattern::InitSelection(const Offset& pos)
     currentPosition = std::min(currentPosition, GetTextContentLength());
     int32_t nextPosition = currentPosition + GetGraphemeClusterLength(GetWideText(), currentPosition);
     nextPosition = std::min(nextPosition, GetTextContentLength());
-    AdjustImageSelection(currentPosition, nextPosition, pos);
+    AdjustPlaceholderSelection(currentPosition, nextPosition, pos);
     adjusted_ = AdjustWordSelection(currentPosition, nextPosition);
     textSelector_.Update(currentPosition, nextPosition);
     auto selectedRects = paragraphs_.GetRects(currentPosition, nextPosition);
     if (selectedRects.empty() || (selectedRects.size() == 1 && NearZero((selectedRects[0].Width())))) {
         textSelector_.Update(currentPosition, currentPosition);
     }
-    if (selectedRects.empty() && !spans_.empty()) {
-        auto it = std::find_if(
-            spans_.begin(), spans_.end(), [caretPosition = currentPosition](const RefPtr<SpanItem>& spanItem) {
-                int32_t startPosition =
-                    spanItem->position - static_cast<int32_t>(StringUtils::ToWstring(spanItem->content).length());
-                return (startPosition <= caretPosition) && (caretPosition < spanItem->position);
-            });
-        auto spanIndex = std::distance(spans_.begin(), it);
-        auto spanNode = DynamicCast<FrameNode>(GetChildByIndex(spanIndex - 1));
-        if (spanNode &&
-            (spanNode->GetTag() == V2::IMAGE_ETS_TAG || spanNode->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG)) {
-            textSelector_.Update(currentPosition - 1, currentPosition);
-            return;
-        }
-    }
-
     if (adjusted_) {
         return;
     }
@@ -5114,7 +5098,7 @@ bool RichEditorPattern::AdjustWordSelection(int32_t& start, int32_t& end)
     return false;
 }
 
-void RichEditorPattern::AdjustImageSelection(int32_t& start, int32_t& end, const Offset& touchPos)
+void RichEditorPattern::AdjustPlaceholderSelection(int32_t& start, int32_t& end, const Offset& touchPos)
 {
     CHECK_NULL_VOID(!spans_.empty());
     float selectLineHeight = 0.0f;
@@ -5128,13 +5112,14 @@ void RichEditorPattern::AdjustImageSelection(int32_t& start, int32_t& end, const
         return startPosition == start;
     });
     if (it != spans_.end()) {
-        // adjust selection if touch right of image
+        // adjust selection if touch right of image or placeholder
         auto spanIndex = std::distance(spans_.begin(), it);
         auto spanNodeBefore = DynamicCast<FrameNode>(GetChildByIndex(spanIndex - 1));
-        if (spanNodeBefore && spanNodeBefore->GetTag() == V2::IMAGE_ETS_TAG) {
+        if (spanNodeBefore && (spanNodeBefore->GetTag() == V2::IMAGE_ETS_TAG ||
+            spanNodeBefore->GetTag() == V2::PLACEHOLDER_SPAN_ETS_TAG)) {
             end = start;
             --start;
-            TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "get image selector [%{public}d--%{public}d", start, end);
+            TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "get placeholder selector [%{public}d--%{public}d", start, end);
         }
     }
 }
