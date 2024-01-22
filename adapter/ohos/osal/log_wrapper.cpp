@@ -101,7 +101,7 @@ const std::map<AceLogTag, const char*> DOMAIN_CONTENTS_MAP = {
     { AceLogTag::ACE_SIDEBAR, "AceSideBarContainer" },
     { AceLogTag::ACE_GEOMETRY_TRANSITION, "AceGeometryTransition" },
     { AceLogTag::ACE_DOWNLOAD_MANAGER, "DownloadManager" },
-    { AceLogTag::ACE_WINDOW_SCENE, "WMSCom" },
+    { AceLogTag::ACE_WINDOW_SCENE, "AceWindowScene" },
     { AceLogTag::ACE_NODE_CONTAINER, "AceNodeContainer" },
     { AceLogTag::ACE_NATIVE_NODE, "AceNativeNode" },
     { AceLogTag::ACE_DYNAMIC_COMPONENT, "AceDynamicComponent" },
