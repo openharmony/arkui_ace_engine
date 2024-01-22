@@ -220,6 +220,7 @@ napi_value JSRenderImage::OnGetHeight(napi_env env)
 {
     double height = 0.0;
     height = height_;
+    height = PipelineBase::Px2VpWithCurrentDensity(height);
     napi_value jsHeight = nullptr;
     napi_create_double(env, height, &jsHeight);
     return jsHeight;
