@@ -930,7 +930,6 @@ void TabBarPattern::PlayMaskAnimation(float selectedImageSize,
             CHECK_NULL_VOID(host);
             MaskAnimationFinish(host, selectedIndex, true);
             MaskAnimationFinish(host, unselectedIndex, false);
-            tabBar->UpdateImageColor(selectedIndex);
         }
     });
 
