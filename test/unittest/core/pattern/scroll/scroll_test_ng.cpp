@@ -2123,7 +2123,7 @@ HWTEST_F(ScrollTestNg, ScrollBar005, TestSize.Level1)
 {
     CreateWithContent();
     auto pipelineContext = PipelineContext::GetCurrentContext();
-    pipelineContext->SetMinPlatformVersion(PLATFORM_VERSION_TEN + 1);
+    pipelineContext->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_ELEVEN));
     auto scrollBar = pattern_->GetScrollBar();
 
     scrollBar->SetPositionMode(PositionMode::LEFT);

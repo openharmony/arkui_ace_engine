@@ -13,65 +13,9 @@
  * limitations under the License.
  */
 
-#include "gtest/gtest.h"
-
-#include "base/geometry/dimension.h"
-#include "base/geometry/ng/offset_t.h"
-#include "base/memory/ace_type.h"
-#include "base/memory/referenced.h"
-#define private public
-#define protected public
-#include "test/mock/core/common/mock_theme_manager.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/render/mock_render_context.h"
-#include "test/unittest/core/pattern/test_ng.h"
-
-#include "core/components/common/layout/constants.h"
-#include "core/components/refresh/refresh_theme.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components_ng/layout/layout_property.h"
-#include "core/components_ng/pattern/refresh/refresh_event_hub.h"
-#include "core/components_ng/pattern/refresh/refresh_layout_property.h"
-#include "core/components_ng/pattern/refresh/refresh_model_ng.h"
-#include "core/components_ng/pattern/refresh/refresh_pattern.h"
-#include "core/components_ng/pattern/text/text_model_ng.h"
-#include "core/components_v2/inspector/inspector_constants.h"
-#include "frameworks/core/components_ng/pattern/loading_progress/loading_progress_paint_property.h"
-#include "frameworks/core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
-#include "frameworks/core/components_ng/pattern/text/text_pattern.h"
-
-using namespace testing;
-using namespace testing::ext;
+#include "refresh_test_ng.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-constexpr float CUSTOM_NODE_WIDTH = 100.f;
-constexpr float CUSTOM_NODE_HEIGHT = 10.f;
-constexpr float REFRESH_HEIGHT = 400.f;
-constexpr Dimension DEFAULT_INDICATOR_OFFSET = 16.0_vp;
-constexpr int32_t DEFAULT_FRICTION_RATIO = 62;
-constexpr float PERCENT = 0.01; // Percent
-constexpr Dimension TRIGGER_REFRESH_DISTANCE = 64.0_vp;
-} // namespace
-class RefreshTestNg : public TestNG {
-public:
-    static void SetUpTestSuite();
-    static void TearDownTestSuite();
-    void SetUp() override;
-    void TearDown() override;
-    void GetInstance();
-
-    void Create(const std::function<void(RefreshModelNG)>& callback = nullptr);
-    static RefPtr<FrameNode> CreateCustomNode();
-    void VersionElevenHandleDragEnd(float speed, float targetOffsetY);
-
-    RefPtr<FrameNode> frameNode_;
-    RefPtr<RefreshPattern> pattern_;
-    RefPtr<RefreshEventHub> eventHub_;
-    RefPtr<RefreshLayoutProperty> layoutProperty_;
-    RefPtr<RefreshAccessibilityProperty> accessibilityProperty_;
-};
-
 void RefreshTestNg::SetUpTestSuite()
 {
     TestNG::SetUpTestSuite();
@@ -89,7 +33,7 @@ void RefreshTestNg::SetUp() {}
 
 void RefreshTestNg::TearDown()
 {
-    MockPipelineContext::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_TEN);
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
     frameNode_ = nullptr;
     pattern_ = nullptr;
     eventHub_ = nullptr;
@@ -129,7 +73,7 @@ RefPtr<FrameNode> RefreshTestNg::CreateCustomNode()
 
 /**
  * @tc.name: Drag001
- * @tc.desc: Test drag low version
+ * @tc.desc: Test drag low version, test whole refresh movement
  * @tc.type: FUNC
  */
 HWTEST_F(RefreshTestNg, Drag001, TestSize.Level1)
@@ -142,82 +86,169 @@ HWTEST_F(RefreshTestNg, Drag001, TestSize.Level1)
         model.SetOnRefreshing(std::move(onRefreshing));
         model.SetOnStateChange(std::move(onStateChange));
     });
-    const float radio = DEFAULT_FRICTION_RATIO * PERCENT;
-    const float lessThanOffset = DEFAULT_INDICATOR_OFFSET.ConvertToPx() / radio;
-    const float greaterThanOffset = 1 / radio;
-    const float greaterThanRefreshDistance = TRIGGER_REFRESH_DISTANCE.ConvertToPx() / radio - lessThanOffset;
 
     /**
-     * @tc.steps: step1. HandleDrag to refresh, and set IsRefreshing to false by front end
-     * @tc.expected: RefreshStatus would change width action
+     * @tc.steps: step1. HandleDragStart
+     * @tc.expected: scrollOffset_ default is 0.f, refreshStatus_ default is 0.f INACTIVE
      */
     pattern_->HandleDragStart();
-    EXPECT_EQ(pattern_->scrollOffset_, 0.0f);
-    pattern_->HandleDragUpdate(lessThanOffset + greaterThanOffset);
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+
+    /**
+     * @tc.steps: step2. HandleDragUpdate, the delta less than TRIGGER_LOADING_DISTANCE
+     * @tc.expected: scrollOffset_ is 1.f, onStateChange event triggered and refreshStatus is DRAG
+     */
+    pattern_->HandleDragUpdate(1.f / RADIO);
+    EXPECT_EQ(pattern_->scrollOffset_, 1.f);
     EXPECT_EQ(refreshStatus, RefreshStatus::DRAG);
-    pattern_->HandleDragUpdate(greaterThanRefreshDistance);
+
+    /**
+     * @tc.steps: step3. HandleDragUpdate, the delta less than TRIGGER_REFRESH_DISTANCE
+     * @tc.expected: scrollOffset_ is 16.f(Plus previous delta), onStateChange event is not triggered
+     */
+    refreshStatus = RefreshStatus::INACTIVE; // for verify onStateChange event
+    pattern_->HandleDragUpdate((TRIGGER_LOADING_DISTANCE.ConvertToPx() - 1.f) / RADIO);
+    EXPECT_EQ(pattern_->scrollOffset_, TRIGGER_LOADING_DISTANCE.ConvertToPx());
+    EXPECT_EQ(refreshStatus, RefreshStatus::INACTIVE);
+
+    /**
+     * @tc.steps: step4. HandleDragUpdate, the delta greater than TRIGGER_REFRESH_DISTANCE
+     * @tc.expected: scrollOffset_ is 64.f(Plus previous delta),
+     *               onStateChange event triggered and refreshStatus is OVER_DRAG
+     */
+    pattern_->HandleDragUpdate((TRIGGER_REFRESH_DISTANCE - TRIGGER_LOADING_DISTANCE).ConvertToPx() / RADIO);
+    EXPECT_EQ(pattern_->scrollOffset_, TRIGGER_REFRESH_DISTANCE.ConvertToPx());
     EXPECT_EQ(refreshStatus, RefreshStatus::OVER_DRAG);
-    pattern_->HandleDragEnd(0.0f);
+
+    /**
+     * @tc.steps: step5. HandleDragEnd
+     * @tc.expected: onStateChange event triggered and refreshStatus is REFRESH, onRefreshing event triggered
+     */
+    EXPECT_FALSE(isRefreshTrigger); // no trigger refresh before
+    pattern_->HandleDragEnd(0.f);
     EXPECT_EQ(refreshStatus, RefreshStatus::REFRESH);
     EXPECT_TRUE(isRefreshTrigger);
-    // The front end set isRefreshing to false
-    layoutProperty_->UpdateIsRefreshing(false);
-    // isRefreshing changed by front end, will trigger OnModifyDone
-    pattern_->OnModifyDone();
-    EXPECT_EQ(refreshStatus, RefreshStatus::DONE);
 
     /**
-     * @tc.steps: step2. HandleDrag distance < triggerRefreshDistance
-     * @tc.expected: would not trigger refresh
+     * @tc.steps: step6. The front end set isRefreshing to false
+     * @tc.expected: onStateChange event triggered and refreshStatus is REFRESH, onRefreshing event triggered
      */
-    pattern_->HandleDragStart();
-    EXPECT_EQ(pattern_->scrollOffset_, 0.0f);
-    pattern_->HandleDragUpdate(lessThanOffset);
-    EXPECT_EQ(refreshStatus, RefreshStatus::DRAG);
-    pattern_->HandleDragEnd(0.0f);
-    EXPECT_EQ(refreshStatus, RefreshStatus::INACTIVE);
+    layoutProperty_->UpdateIsRefreshing(false);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(refreshStatus, RefreshStatus::DONE);
 }
 
 /**
  * @tc.name: Drag002
- * @tc.desc: Test drag with customBuilder_ low version
+ * @tc.desc: Test drag low version, test cancel refresh
  * @tc.type: FUNC
  */
 HWTEST_F(RefreshTestNg, Drag002, TestSize.Level1)
 {
-    Create([](RefreshModelNG model) { model.SetCustomBuilder(CreateCustomNode()); });
-    const float radio = DEFAULT_FRICTION_RATIO * PERCENT;
-    const float lessThanOffset = DEFAULT_INDICATOR_OFFSET.ConvertToPx() / radio;
-    const float greaterThanOffset = 1 / radio;
-    const float greaterThanRefreshDistance = TRIGGER_REFRESH_DISTANCE.ConvertToPx() / radio - lessThanOffset;
+    /**
+     * @tc.cases: HandleDrag delta less than TRIGGER_REFRESH_DISTANCE
+     * @tc.expected: Would not trigger refresh
+     */
+    Create([](RefreshModelNG model) {});
+    pattern_->HandleDragStart();
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+    pattern_->HandleDragUpdate(TRIGGER_REFRESH_DISTANCE.ConvertToPx() - 1.f);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
+    pattern_->HandleDragEnd(0.f);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+}
+
+/**
+ * @tc.name: CustomDrag001
+ * @tc.desc: Test drag with customBuilder_ low version
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshTestNg, DISABLED_CustomDrag001, TestSize.Level1)
+{
+    bool isRefreshTrigger = false;
+    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
+    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
+    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
+    Create([onRefreshing, onStateChange](RefreshModelNG model) {
+        model.SetOnRefreshing(std::move(onRefreshing));
+        model.SetOnStateChange(std::move(onStateChange));
+        model.SetCustomBuilder(CreateCustomNode());
+    });
 
     /**
-     * @tc.steps: step1. HandleDrag to refresh, and set IsRefreshing to false by front end
-     * @tc.expected: RefreshStatus would change width action
+     * @tc.steps: step1. HandleDragStart
+     * @tc.expected: scrollOffset_ default is 0.f, refreshStatus_ default is 0.f INACTIVE
      */
     pattern_->HandleDragStart();
-    EXPECT_EQ(pattern_->scrollOffset_, 0.0f);
-    pattern_->HandleDragUpdate(lessThanOffset + greaterThanOffset);
-    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
-    pattern_->HandleDragUpdate(greaterThanRefreshDistance + CUSTOM_NODE_HEIGHT / radio);
-    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::OVER_DRAG);
-    pattern_->HandleDragEnd(0.0f);
-    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
-    // The front end set isRefreshing to false
+    EXPECT_EQ(pattern_->scrollOffset_, 0.f);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+
+    /**
+     * @tc.steps: step2. HandleDragUpdate, the delta less than TRIGGER_LOADING_DISTANCE
+     * @tc.expected: scrollOffset_ is 1.f, onStateChange event triggered and refreshStatus is DRAG
+     */
+    pattern_->HandleDragUpdate(1.f / RADIO);
+    EXPECT_EQ(pattern_->scrollOffset_, 1.f);
+    EXPECT_EQ(refreshStatus, RefreshStatus::DRAG);
+
+    /**
+     * @tc.steps: step3. HandleDragUpdate, the delta less than TRIGGER_REFRESH_DISTANCE
+     * @tc.expected: scrollOffset_ is 16.f(Plus previous delta), onStateChange event is not triggered
+     */
+    refreshStatus = RefreshStatus::INACTIVE; // for verify onStateChange event
+    pattern_->HandleDragUpdate((TRIGGER_LOADING_DISTANCE.ConvertToPx() - 1.f) / RADIO);
+    EXPECT_EQ(pattern_->scrollOffset_, TRIGGER_LOADING_DISTANCE.ConvertToPx());
+    EXPECT_EQ(refreshStatus, RefreshStatus::INACTIVE);
+
+    /**
+     * @tc.steps: step4. HandleDragUpdate, the delta greater than TRIGGER_REFRESH_DISTANCE
+     * @tc.expected: scrollOffset_ is 64.f(Plus previous delta),
+     *               onStateChange event triggered and refreshStatus is OVER_DRAG
+     */
+    pattern_->HandleDragUpdate(((TRIGGER_REFRESH_DISTANCE - TRIGGER_LOADING_DISTANCE).ConvertToPx()) / RADIO);
+    EXPECT_EQ(pattern_->scrollOffset_, TRIGGER_REFRESH_DISTANCE.ConvertToPx());
+    EXPECT_EQ(refreshStatus, RefreshStatus::OVER_DRAG);
+
+    /**
+     * @tc.steps: step5. HandleDragEnd
+     * @tc.expected: onStateChange event triggered and refreshStatus is REFRESH, onRefreshing event triggered
+     */
+    EXPECT_FALSE(isRefreshTrigger); // no trigger refresh before
+    pattern_->HandleDragEnd(0.f);
+    EXPECT_EQ(refreshStatus, RefreshStatus::REFRESH);
+    EXPECT_TRUE(isRefreshTrigger);
+
+    /**
+     * @tc.steps: step6. The front end set isRefreshing to false
+     * @tc.expected: onStateChange event triggered and refreshStatus is REFRESH, onRefreshing event triggered
+     */
     layoutProperty_->UpdateIsRefreshing(false);
-    // isRefreshing changed by front end, will trigger OnModifyDone
-    pattern_->OnModifyDone();
-    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DONE);
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
+    EXPECT_EQ(refreshStatus, RefreshStatus::DONE);
+}
 
+/**
+ * @tc.name: CustomDrag002
+ * @tc.desc: Test drag with customBuilder_ low version, test cancel refresh
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshTestNg, CustomDrag002, TestSize.Level1)
+{
     /**
-     * @tc.steps: step2. HandleDrag distance < triggerRefreshDistance
-     * @tc.expected: would not trigger refresh
+     * @tc.cases: HandleDrag delta less than TRIGGER_REFRESH_DISTANCE
+     * @tc.expected: Would not trigger refresh
      */
+    Create([](RefreshModelNG model) {
+        model.SetCustomBuilder(CreateCustomNode());
+    });
     pattern_->HandleDragStart();
-    EXPECT_EQ(pattern_->scrollOffset_, 0.0f);
-    pattern_->HandleDragUpdate(lessThanOffset);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+    pattern_->HandleDragUpdate(TRIGGER_REFRESH_DISTANCE.ConvertToPx() - 1.f);
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
-    pattern_->HandleDragEnd(0.0f);
+    pattern_->HandleDragEnd(0.f);
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
 }
 
@@ -330,7 +361,8 @@ HWTEST_F(RefreshTestNg, AttrRefreshing001, TestSize.Level1)
      * @tc.expected: refreshStatus_ == INACTIVE
      */
     layoutProperty_->UpdateIsRefreshing(false);
-    pattern_->OnModifyDone();
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
 
     /**
@@ -338,7 +370,8 @@ HWTEST_F(RefreshTestNg, AttrRefreshing001, TestSize.Level1)
      * @tc.expected: refreshStatus_ == REFRESH
      */
     layoutProperty_->UpdateIsRefreshing(true);
-    pattern_->OnModifyDone();
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
 }
 
@@ -356,7 +389,8 @@ HWTEST_F(RefreshTestNg, AttrRefreshing002, TestSize.Level1)
      * @tc.expected: refreshStatus_ == INACTIVE
      */
     layoutProperty_->UpdateIsRefreshing(false);
-    pattern_->OnModifyDone();
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
 
     /**
@@ -364,7 +398,8 @@ HWTEST_F(RefreshTestNg, AttrRefreshing002, TestSize.Level1)
      * @tc.expected: refreshStatus_ == REFRESH
      */
     layoutProperty_->UpdateIsRefreshing(true);
-    pattern_->OnModifyDone();
+    frameNode_->MarkModifyDone();
+    FlushLayoutTask(frameNode_);
     EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
 }
 
@@ -473,160 +508,6 @@ HWTEST_F(RefreshTestNg, OnKeyEvent002, TestSize.Level1)
 }
 
 /**
- * @tc.name: VersionElevenDrag001
- * @tc.desc: Test Drag
- * @tc.type: FUNC
- */
-HWTEST_F(RefreshTestNg, VersionElevenDrag001, TestSize.Level1)
-{
-    MockPipelineContext::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
-    bool isRefreshTrigger = false;
-    RefreshStatus refreshStatus = RefreshStatus::INACTIVE;
-    auto onRefreshing = [&isRefreshTrigger]() { isRefreshTrigger = true; };
-    auto onStateChange = [&refreshStatus](const int32_t param) { refreshStatus = static_cast<RefreshStatus>(param); };
-    Create([onRefreshing, onStateChange](RefreshModelNG model) {
-        model.SetOnRefreshing(std::move(onRefreshing));
-        model.SetOnStateChange(std::move(onStateChange));
-    });
-    const float radio = DEFAULT_FRICTION_RATIO * PERCENT;
-    const float lessThanOffset = DEFAULT_INDICATOR_OFFSET.ConvertToPx() / radio;
-    const float greaterThanOffset = 1 / radio;
-    const float greaterThanRefreshDistance = TRIGGER_REFRESH_DISTANCE.ConvertToPx() / radio - lessThanOffset;
-
-    /**
-     * @tc.steps: step1. HandleDrag to refresh, and set IsRefreshing to false by front end
-     * @tc.expected: RefreshStatus would change width action
-     */
-    pattern_->HandleDragStart();
-    pattern_->HandleDragUpdate(lessThanOffset + greaterThanOffset);
-    EXPECT_EQ(refreshStatus, RefreshStatus::DRAG);
-    pattern_->HandleDragUpdate(greaterThanRefreshDistance);
-    EXPECT_EQ(refreshStatus, RefreshStatus::OVER_DRAG);
-    pattern_->HandleDragEnd(0.0f);
-    EXPECT_EQ(refreshStatus, RefreshStatus::REFRESH);
-    EXPECT_TRUE(isRefreshTrigger);
-    // The front end set isRefreshing to false
-    layoutProperty_->UpdateIsRefreshing(false);
-    // isRefreshing changed by front end, will trigger OnModifyDone
-    pattern_->OnModifyDone();
-    EXPECT_EQ(refreshStatus, RefreshStatus::DONE);
-
-    /**
-     * @tc.steps: step2. HandleDrag distance < triggerRefreshDistance
-     * @tc.expected: would not trigger refresh
-     */
-    pattern_->scrollOffset_ = 0.0f;
-    pattern_->HandleDragStart();
-    pattern_->HandleDragUpdate(lessThanOffset);
-    EXPECT_EQ(refreshStatus, RefreshStatus::DRAG);
-    pattern_->HandleDragEnd(0.0f);
-    EXPECT_EQ(refreshStatus, RefreshStatus::INACTIVE);
-}
-
-/**
- * @tc.name: VersionElevenDrag002
- * @tc.desc: Test Drag with customBuilder_
- * @tc.type: FUNC
- */
-HWTEST_F(RefreshTestNg, VersionElevenDrag002, TestSize.Level1)
-{
-    MockPipelineContext::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
-    Create([](RefreshModelNG model) { model.SetCustomBuilder(CreateCustomNode()); });
-    const float radio = DEFAULT_FRICTION_RATIO * PERCENT;
-    const float lessThanOffset = DEFAULT_INDICATOR_OFFSET.ConvertToPx() / radio;
-    const float greaterThanOffset = 1 / radio;
-    const float greaterThanRefreshDistance = TRIGGER_REFRESH_DISTANCE.ConvertToPx() / radio - lessThanOffset;
-
-    /**
-     * @tc.steps: step1. HandleDrag to refresh, and set IsRefreshing to false by front end
-     * @tc.expected: RefreshStatus would change width action
-     */
-    pattern_->HandleDragStart();
-    EXPECT_FLOAT_EQ(pattern_->GetTargetOffset(), 0.0f);
-    pattern_->HandleDragUpdate(lessThanOffset + greaterThanOffset);
-    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
-    pattern_->HandleDragUpdate(greaterThanRefreshDistance + CUSTOM_NODE_HEIGHT / radio);
-    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::OVER_DRAG);
-    EXPECT_FLOAT_EQ(pattern_->GetTargetOffset(), TRIGGER_REFRESH_DISTANCE.ConvertToPx());
-    pattern_->HandleDragEnd(0.0f);
-    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
-    EXPECT_FLOAT_EQ(pattern_->GetTargetOffset(), TRIGGER_REFRESH_DISTANCE.ConvertToPx());
-    // The front end set isRefreshing to false
-    layoutProperty_->UpdateIsRefreshing(false);
-    // isRefreshing changed by front end, will trigger OnModifyDone
-    pattern_->OnModifyDone();
-    // the mock AnimationUtils::Animate will trigger finishCallback
-    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DONE);
-
-    /**
-     * @tc.steps: step2. HandleDrag distance < triggerRefreshDistance
-     * @tc.expected: would not trigger refresh
-     */
-    pattern_->scrollOffset_ = 0.0f;
-    pattern_->HandleDragStart();
-    pattern_->HandleDragUpdate(lessThanOffset);
-    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
-    pattern_->HandleDragUpdate(0.0f);
-    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
-    pattern_->HandleDragEnd(0.0f);
-    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
-}
-
-/**
- * @tc.name: VersionElevenAttrRefreshing001
- * @tc.desc: Test attr refreshing with custom node
- * @tc.type: FUNC
- */
-HWTEST_F(RefreshTestNg, VersionElevenAttrRefreshing001, TestSize.Level1)
-{
-    MockPipelineContext::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
-    Create([](RefreshModelNG model) { model.SetCustomBuilder(CreateCustomNode()); });
-
-    /**
-     * @tc.steps: step1. IsRefreshing: true -> false
-     * @tc.expected: refreshStatus_ == INACTIVE
-     */
-    layoutProperty_->UpdateIsRefreshing(false);
-    pattern_->OnModifyDone();
-    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
-
-    /**
-     * @tc.steps: step2. IsRefreshing: false -> true
-     * @tc.expected: refreshStatus_ == REFRESH
-     */
-    layoutProperty_->UpdateIsRefreshing(true);
-    pattern_->OnModifyDone();
-    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
-}
-
-/**
- * @tc.name: VersionElevenAttrRefreshing002
- * @tc.desc: Test attr refreshing
- * @tc.type: FUNC
- */
-HWTEST_F(RefreshTestNg, VersionElevenAttrRefreshing002, TestSize.Level1)
-{
-    MockPipelineContext::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_ELEVEN);
-    Create();
-
-    /**
-     * @tc.steps: step1. IsRefreshing: true -> false
-     * @tc.expected: refreshStatus_ == INACTIVE
-     */
-    layoutProperty_->UpdateIsRefreshing(false);
-    pattern_->OnModifyDone();
-    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
-
-    /**
-     * @tc.steps: step2. IsRefreshing: false -> true
-     * @tc.expected: refreshStatus_ == REFRESH
-     */
-    layoutProperty_->UpdateIsRefreshing(true);
-    pattern_->OnModifyDone();
-    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
-}
-
-/**
  * @tc.name: Frame Scene TEST
  * @tc.desc: Test frame ratio
  * @tc.type: FUNC
@@ -640,5 +521,21 @@ HWTEST_F(RefreshTestNg, RefreshDragFrameRatio001, TestSize.Level1)
     pattern_->HandleDragStart();
     pattern_->HandleDragUpdate(0.0f);
     pattern_->HandleDragEnd(0.0f);
+}
+
+/**
+ * @tc.name: GetTargetOffset001
+ * @tc.desc: Test frame ratio
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshTestNg, GetTargetOffset001, TestSize.Level1)
+{
+    Create([](RefreshModelNG model) {});
+    pattern_->HandleDragStart();
+    EXPECT_FLOAT_EQ(pattern_->GetTargetOffset(), 0.f);
+    pattern_->HandleDragUpdate(TRIGGER_REFRESH_DISTANCE.ConvertToPx() / RADIO);
+    EXPECT_FLOAT_EQ(pattern_->GetTargetOffset(), TRIGGER_REFRESH_DISTANCE.ConvertToPx());
+    pattern_->HandleDragEnd(0.f);
+    EXPECT_FLOAT_EQ(pattern_->GetTargetOffset(), TRIGGER_REFRESH_DISTANCE.ConvertToPx());
 }
 } // namespace OHOS::Ace::NG

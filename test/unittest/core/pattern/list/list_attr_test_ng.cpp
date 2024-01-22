@@ -423,7 +423,7 @@ HWTEST_F(ListAttrTestNg, AttrScrollBar001, TestSize.Level1)
      * @tc.steps: step1. Set scrollBar, set api version >= 10
      * @tc.expected: the default value is auto
      */
-    MockPipelineContext::pipeline_->SetMinPlatformVersion(PLATFORM_VERSION_TEN);
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TEN));
     CreateWithItem([](ListModelNG model) {});
     EXPECT_EQ(pattern_->GetScrollBar()->GetDisplayMode(), DisplayMode::AUTO);
 }
