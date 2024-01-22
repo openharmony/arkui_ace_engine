@@ -735,13 +735,9 @@ void ScrollPattern::CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign)
     auto start = 0.0f;
     auto end = -scrollableDistance_;
     auto snapOffset = 0.0f;
-    auto intervalSize = 0.0f;
     auto sizeDelta = 0.0f;
-    if (intervalSize_.Unit() == DimensionUnit::PERCENT) {
-        intervalSize = intervalSize_.Value() * mainSize;
-    } else {
-        intervalSize = intervalSize_.ConvertToPx();
-    }
+    auto intervalSize = intervalSize_.Unit() == DimensionUnit::PERCENT ?
+                        intervalSize_.Value() * mainSize : intervalSize_.ConvertToPx();
     float temp = static_cast<int32_t>(extentMainSize / intervalSize) * intervalSize;
     switch (scrollSnapAlign) {
         case ScrollSnapAlign::START:
@@ -773,8 +769,12 @@ void ScrollPattern::CaleSnapOffsetsByInterval(ScrollSnapAlign scrollSnapAlign)
     if (GreatNotEqual(end, -scrollableDistance_)) {
         snapOffsets_.emplace_back(end);
     }
-    if (enablePagingStatus_ == ScrollPagingStatus::VALID &&
-        !snapOffsets_.empty() && !NearEqual(*(snapOffsets_.rbegin()), -scrollableDistance_)) {
+    if (enablePagingStatus_ == ScrollPagingStatus::VALID) {
+        if (NearEqual(snapOffset + intervalSize, -scrollableDistance_)) {
+            lastPageLength_ = 0.f;
+            return;
+        }
+        lastPageLength_ = scrollableDistance_ + snapOffset + intervalSize;
         snapOffsets_.emplace_back(-scrollableDistance_);
     }
 }
@@ -887,34 +887,46 @@ float ScrollPattern::GetSelectScrollWidth()
 
 float ScrollPattern::GetPagingOffset(float delta, float dragDistance, float velocity)  const
 {
+    // handle last page
+    auto currentOffset = currentOffset_;
+    if (GreatNotEqual(lastPageLength_, 0.f) &&
+        LessNotEqual(currentOffset - dragDistance, -scrollableDistance_ + lastPageLength_)) {
+        if (LessOrEqual(dragDistance, lastPageLength_)) {
+            return currentOffset - dragDistance + GetPagingDelta(dragDistance, velocity, lastPageLength_);
+        }
+        if (GreatNotEqual(dragDistance, lastPageLength_)) {
+            dragDistance -= lastPageLength_;
+        }
+    }
+    // handle other pages
     float head = 0.0f;
     float tail = -scrollableDistance_;
-    auto pagingPosition = currentOffset_ + GetPagingDelta(dragDistance, velocity);
-    auto finalPosition = currentOffset_ + delta;
+    dragDistance = fmod(dragDistance, viewPortLength_);
+    auto pagingPosition = currentOffset - dragDistance + GetPagingDelta(dragDistance, velocity, viewPortLength_);
+    auto finalPosition = currentOffset + delta;
     auto useFinalPosition = (GreatOrEqual(pagingPosition, head) && !GreatOrEqual(finalPosition, head)) ||
                       (LessOrEqual(pagingPosition, tail) && !LessOrEqual(finalPosition, tail));
     return useFinalPosition ? finalPosition : pagingPosition;
 }
 
-float ScrollPattern::GetPagingDelta(float dragDistance, float velocity)  const
+float ScrollPattern::GetPagingDelta(float dragDistance, float velocity, float pageLength)  const
 {
-    auto dragDistanceThreshold = viewPortLength_ * 0.5f;
-    dragDistance = fmod(dragDistance, viewPortLength_);
+    auto dragDistanceThreshold = pageLength * 0.5f;
     // dragDistance and velocity have not reached the threshold
     if (LessNotEqual(std::abs(dragDistance), dragDistanceThreshold) &&
         LessNotEqual(std::abs(velocity), SCROLL_PAGING_SPEED_THRESHOLD)) {
-        return - dragDistance;
+        return 0.f;
     }
     // The direction of dragDistance is the same as the direction of velocity
     if (GreatOrEqual(dragDistance * velocity, 0.f)) {
         auto direction = NearZero(dragDistance) ? velocity : dragDistance;
-        return - dragDistance + (GreatNotEqual(direction, 0.f) ? viewPortLength_ : -viewPortLength_);
+        return GreatNotEqual(direction, 0.f) ? pageLength : -pageLength;
     }
     // The direction of dragDistance is opposite to the direction of velocity
     if (GreatOrEqual(std::abs(dragDistance), dragDistanceThreshold) &&
         LessNotEqual(std::abs(velocity), SCROLL_PAGING_SPEED_THRESHOLD)) {
-        return - dragDistance + (GreatNotEqual(dragDistance, 0.f) ? viewPortLength_ : -viewPortLength_);
+        return GreatNotEqual(dragDistance, 0.f) ? pageLength : -pageLength;
     }
-    return - dragDistance;
+    return 0.f;
 }
 } // namespace OHOS::Ace::NG

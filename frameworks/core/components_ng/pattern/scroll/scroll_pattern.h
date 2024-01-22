@@ -325,8 +325,6 @@ private:
     void ScrollSnapTrigger();
     void CheckScrollable();
     OffsetF GetOffsetToScroll(const RefPtr<FrameNode>& childFrame) const;
-    float GetPagingOffset(float delta, float dragDistance, float velocity)  const;
-    float GetPagingDelta(float dragDistance, float velocity) const;
 
     float currentOffset_ = 0.0f;
     float lastOffset_ = 0.0f;
@@ -350,7 +348,12 @@ private:
     bool isWidthModifiedBySelect_ = false;
     bool isSelectScroll_ = false;
     bool hasOptionWidth_ = false;
+
+    // enablePaging
     ScrollPagingStatus enablePagingStatus_ = ScrollPagingStatus::NONE;
+    float lastPageLength_ = 0.0f;
+    float GetPagingOffset(float delta, float dragDistance, float velocity)  const;
+    float GetPagingDelta(float dragDistance, float velocity, float pageLength) const;
 };
 
 } // namespace OHOS::Ace::NG
