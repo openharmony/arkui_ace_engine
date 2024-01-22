@@ -945,6 +945,7 @@ void OverlayManager::HidePopup(int32_t targetId, const PopupInfo& popupInfo)
         (!Container::LessThanAPIVersion(PlatformVersion::VERSION_ELEVEN) && isUseCustom && focusable)) {
         ResetLowerNodeFocusable(popupNode);
     }
+    CheckReturnFocus(popupNode);
     // detach popupNode after exiting animation
     popupMap_[targetId].isCurrentOnShow = false;
     popupPattern->StartExitingAnimation(
@@ -3635,5 +3636,18 @@ float OverlayManager::GetRootHeight() const
     CHECK_NULL_RETURN(rootGeometryNode, 0.0);
     auto rootHeight = rootGeometryNode->GetFrameSize().Height();
     return rootHeight;
+}
+
+void OverlayManager::CheckReturnFocus(RefPtr<FrameNode> node)
+{
+    auto focusHub = node->GetFocusHub();
+    CHECK_NULL_VOID(focusHub);
+    if (focusHub->IsCurrentFocus()) {
+        auto pageNode = GetLastPage();
+        CHECK_NULL_VOID(pageNode);
+        auto pageFocusHub = pageNode->GetFocusHub();
+        CHECK_NULL_VOID(pageFocusHub);
+        pageFocusHub->RequestFocusWithDefaultFocusFirstly();
+    }
 }
 } // namespace OHOS::Ace::NG
