@@ -119,6 +119,10 @@ RefPtr<PipelineBase> PipelineBase::GetCurrentContext()
 double PipelineBase::GetCurrentDensity()
 {
     auto pipelineContext = PipelineContext::GetCurrentContext();
+    if (pipelineContext) {
+        auto container = Container::GetActive();
+        pipelineContext = container ? container->GetPipelineContext() : nullptr;
+    }
     return pipelineContext ? pipelineContext->GetDensity() : SystemProperties::GetResolution();
 }
 
