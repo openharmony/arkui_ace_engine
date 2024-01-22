@@ -37,6 +37,10 @@ SafeAreaInsets ContentRootPattern::CreateSafeAreaInsets() const
 
     auto inset = pipeline->GetSafeArea();
 
+    if (!AvoidBottom()) {
+        inset.bottom_ = { 0, 0 };
+    }
+
     if (AvoidKeyboard()) {
         auto manager = pipeline->GetSafeAreaManager();
         inset.bottom_ = inset.bottom_.Combine(manager->GetKeyboardInset());

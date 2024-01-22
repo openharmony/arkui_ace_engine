@@ -33,6 +33,7 @@ protected:
 
     virtual bool AvoidKeyboard() const = 0;
     virtual bool AvoidTop() const = 0;
+    virtual bool AvoidBottom() const = 0;
 
 private:
     SafeAreaInsets CreateSafeAreaInsets() const;
