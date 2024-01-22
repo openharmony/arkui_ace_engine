@@ -3042,6 +3042,7 @@ void OverlayManager::DeleteModal(int32_t targetId)
                 FireNavigationStateChange(false, modalNode);
                 rootNode->RemoveChild(modalNode);
             } else {
+                RemoveSheetMask(modalNode, rootNode);
                 modalNode->GetPattern<SheetPresentationPattern>()->OnDisappear();
                 modalNode->GetPattern<SheetPresentationPattern>()->FireCallback("false");
                 sheetMap_.erase(targetId);
@@ -3061,6 +3062,14 @@ void OverlayManager::DeleteModal(int32_t targetId)
             modalStack_.push(*modal);
         }
         SaveLastModalNode();
+    }
+}
+
+void OverlayManager::RemoveSheetMask(RefPtr<FrameNode>& sheetNode, RefPtr<UINode>& rootNode)
+{
+    auto maskNode = GetSheetMask(sheetNode);
+    if (maskNode) {
+        rootNode->RemoveChild(maskNode);
     }
 }
 

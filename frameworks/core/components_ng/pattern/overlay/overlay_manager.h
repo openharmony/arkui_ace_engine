@@ -356,6 +356,8 @@ public:
     RefPtr<FrameNode> GetSheetMask(const RefPtr<FrameNode>& sheetNode);
 
     void DeleteModal(int32_t targetId);
+    
+    void RemoveSheetMask(RefPtr<FrameNode>& sheetNode, RefPtr<UINode>& rootNode);
 
     void BindKeyboard(const std::function<void()>& keyboardBuilder, int32_t targetId);
     void CloseKeyboard(int32_t targetId);
