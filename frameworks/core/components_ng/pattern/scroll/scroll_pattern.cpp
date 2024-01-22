@@ -514,7 +514,7 @@ void ScrollPattern::ScrollTo(float position)
 void ScrollPattern::DoJump(float position, int32_t source)
 {
     float setPosition = (GetAxis() == Axis::HORIZONTAL && IsRowReverse()) ? -position : position;
-    if (!NearEqual(currentOffset_, setPosition)) {
+    if (!NearEqual(currentOffset_, setPosition) && GreatOrEqual(scrollableDistance_, 0.0f)) {
         UpdateCurrentOffset(setPosition - currentOffset_, source);
     }
 }
