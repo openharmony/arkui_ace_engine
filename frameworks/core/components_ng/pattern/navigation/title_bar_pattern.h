@@ -116,7 +116,7 @@ public:
     void ProcessTitleDragUpdate(float offset);
 
     void ProcessTitleDragEnd();
-    
+
     void OnColorConfigurationUpdate() override;
 
     float GetCurrentOffset()
@@ -133,7 +133,7 @@ public:
     {
         return overDragOffset_;
     }
-    
+
     bool IsTitleDraggedDown() const
     {
         if (NearZero(tempTitleBarHeight_)) {
@@ -195,6 +195,16 @@ public:
     void SetTitleScaleChange(bool isTitleScaleChange)
     {
         isTitleScaleChange_ = isTitleScaleChange;
+    }
+
+    void SetCurrentTitleOffsetY(float currentTitleOffsetY)
+    {
+        currentTitleOffsetY_ = currentTitleOffsetY;
+    }
+
+    void SetCurrentTitleBarHeight(float currentTitleBarHeight)
+    {
+        currentTitleBarHeight_ = currentTitleBarHeight;
     }
 
     void OnCoordScrollStart();
