@@ -26,6 +26,7 @@ public:
     MOCK_METHOD(const uint8_t*, GetPixels, (), (const override));
     MOCK_METHOD(PixelFormat, GetPixelFormat, (), (const override));
     MOCK_METHOD(AlphaType, GetAlphaType, (), (const override));
+    MOCK_METHOD(int32_t, GetRowStride, (), (const override));
     MOCK_METHOD(int32_t, GetRowBytes, (), (const override));
     MOCK_METHOD(int32_t, GetByteCount, (), (const override));
     MOCK_METHOD(void*, GetPixelManager, (), (const override));

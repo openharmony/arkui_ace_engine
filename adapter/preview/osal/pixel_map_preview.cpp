@@ -66,6 +66,11 @@ AlphaType PixelMapPreview::GetAlphaType() const
     return AlphaType::IMAGE_ALPHA_TYPE_UNKNOWN;
 }
 
+int32_t PixelMapPreview::GetRowStride() const
+{
+    return 0;
+}
+
 int32_t PixelMapPreview::GetRowBytes() const
 {
     return 0;
