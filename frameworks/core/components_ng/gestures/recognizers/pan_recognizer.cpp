@@ -589,7 +589,7 @@ GestureJudgeResult PanRecognizer::TriggerGestureJudgeCallback()
     CHECK_NULL_RETURN(targetComponent, GestureJudgeResult::CONTINUE);
     auto callback = targetComponent->GetOnGestureJudgeBeginCallback();
     auto callbackNative = targetComponent->GetOnGestureJudgeNativeBeginCallback();
-    if (!callback && !callbackNative) {
+    if (!callback && !callbackNative && !sysJudge_) {
         return GestureJudgeResult::CONTINUE;
     }
     auto info = std::make_shared<PanGestureEvent>();
@@ -629,6 +629,8 @@ GestureJudgeResult PanRecognizer::TriggerGestureJudgeCallback()
         return GestureJudgeResult::REJECT;
     } else if (callbackNative && callbackNative(gestureInfo_, info) == GestureJudgeResult::REJECT) {
         // If outer callback doesn't exit or accept, check inner callback. If inner reject, return reject.
+        return GestureJudgeResult::REJECT;
+    } else if (sysJudge_ && sysJudge_(gestureInfo_, info) == GestureJudgeResult::REJECT) {
         return GestureJudgeResult::REJECT;
     }
     return GestureJudgeResult::CONTINUE;
