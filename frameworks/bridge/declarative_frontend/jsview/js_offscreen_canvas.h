@@ -157,6 +157,21 @@ public:
         return context;
     }
 
+    void SetDetachStatus(bool isDetached)
+    {
+        isDetached_ = isDetached;
+    }
+
+    bool IsDetached() const
+    {
+        return isDetached_;
+    }
+
+    bool IsGetContext() const
+    {
+        return isGetContext_;
+    }
+
     enum class ContextType {
         CONTEXT_2D = 0,
     };
@@ -176,6 +191,8 @@ private:
     double height_ = 0.0f;
     int32_t instanceId_ = -1;
     ContextType contextType_;
+    bool isGetContext_ = false;
+    bool isDetached_ = false;
 };
 
 } // namespace OHOS::Ace::Framework
