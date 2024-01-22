@@ -277,142 +277,251 @@ typedef enum {
      */
     NODE_ALIGN,
     /**
-     * @brief 通过<b>setAttribute</b>方法设置透明度.
+     * @brief 通过{@link setAttributr}方法设置透明度。
      *
-     * @note 入参格式为数字类型字符串,取值范围为0到1.
+     * {@link ArkUI_AttributeItem}入参格式:
+     * .value[0].f32：透明度数值，取值范围为0到1。
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_OPACITY, "1");
+     * ArkUI_NumberValue value[] = { 0.5 };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_OPACITY, &item);
      * @endcode
      *
      */
     NODE_OPACITY,
     /**
-     * @brief 通过<b>setAttribute</b>方法设置元素的边框的宽度.
+     * @brief 通过{@link setAttributr}方法设置元素的边框宽度。
      *
-     * @note 入参格式入参格式为数字类型字符串或4个数字类型字符串分别对应上、右、下、左，使用空格隔开,
-     * 如"1"或"1 1 2 2"，单位为vp;
+     * {@link ArkUI_AttributeItem}入参格式支持两输入方式，
+     * 1: .value[0].f32：统一设置四条边的边框宽度。
+     * .value[1]?.i32：可选值，数值单位{@link ArkUI_DimensionUnit}，默认值为ARKUI_UNIT_VP。
+     * 2: .value[0].f32：设置上边框的边框宽度。
+     * .value[1].f32：设置右边框的边框宽度。
+     * .value[2].f32：设置下边框的边框宽度。
+     * .value[3].f32：设置左边框的边框宽度。
+     * .value[4]?.f32：可选值，上边框的数值单位{@link ArkUI_DimensionUnit}，默认值为ARKUI_UNIT_VP。
+     * .value[5]?.f32：可选值，右边框的数值单位{@link ArkUI_DimensionUnit}，默认值为ARKUI_UNIT_VP。
+     * .value[6]?.f32：可选值，下边框的数值单位{@link ArkUI_DimensionUnit}，默认值为ARKUI_UNIT_VP。
+     * .value[7]?.f32：可选值，左边框的数值单位{@link ArkUI_DimensionUnit}，默认值为ARKUI_UNIT_VP。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_BORDER_WIDTH, "1");
-     * basicNodeApi->setAttribute(nodeHandle, NODE_BORDER_WIDTH, "1 1 2 2");
+     * ArkUI_NumberValue value[] = { 5 };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_BORDER_WIDTH, &item);
+     * ArkUI_NumberValue value[] = { 5, 5, 10, 10 };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_BORDER_WIDTH, &item);
      * @endcode
      *
      */
     NODE_BORDER_WIDTH,
     /**
-     * @brief 通过<b>setAttribute</b>方法设置元素的边框的圆角.
+     * @brief 通过{@link setAttributr}方法设置元素的边框圆角。
      *
-     * @note 入参格式为数字类型字符或4个数字类型字符串分别对应左上、右上、左下、右下，使用空格隔开, 如"1"或"1 1 2
-     * 2"，单位为vp;
+     * {@link ArkUI_AttributeItem}入参格式支持两输入方式，
+     * 1: .value[0].f32：统一设置四条边的边框圆角。
+     * .value[1]?.i32：可选值，数值单位{@link ArkUI_DimensionUnit}，默认值为ARKUI_UNIT_VP。
+     * 2: .value[0].f32：设置左上角圆角半径。
+     * .value[1].f32：设置右上角圆角半径。
+     * .value[2].f32：设置左下角圆角半径。
+     * .value[3].f32：设置右下角圆角半径。
+     * .value[4]?.f32：可选值，左上角圆角半径的数值单位{@link ArkUI_DimensionUnit}，默认值为ARKUI_UNIT_VP。
+     * .value[5]?.f32：可选值，右上角圆角半径的数值单位{@link ArkUI_DimensionUnit}，默认值为ARKUI_UNIT_VP。
+     * .value[6]?.f32：可选值，左下角圆角半径的数值单位{@link ArkUI_DimensionUnit}，默认值为ARKUI_UNIT_VP。
+     * .value[7]?.f32：可选值，右下角圆角半径的数值单位{@link ArkUI_DimensionUnit}，默认值为ARKUI_UNIT_VP。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_BORDER_RADIUS, "1");
-     * basicNodeApi->setAttribute(nodeHandle, NODE_BORDER_RADIUS, "1 1 2 2");
+     * ArkUI_NumberValue value[] = { 5 };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_BORDER_RADIUS, &item);
+     * ArkUI_NumberValue value[] = { 5, 5, 10, 10 };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_BORDER_RADIUS, &item);
      * @endcode
      *
      */
     NODE_BORDER_RADIUS,
     /**
-     * @brief 通过<b>setAttribute</b>方法设置元素的边框的颜色.
+     * @brief 通过{@link setAttributr}方法设置元素的边框颜色。
      *
-     * @note 入参格式#argb类型字符或4个#argb类型字符串分别对应上、右、下、左，使用空格隔开, 如"#FF1122FF"或"#FF1122FF
-     * #FF1122FF #FFFFFFF #FFFFFFF";
+     * {@link ArkUI_AttributeItem}入参格式支持两输入方式，
+     * 1: .value[0].i32：统一设置四条边的边框颜色，使用0xargb表示，如0xFFFF11FF。
+     * 2: .value[0].i32：设置上侧边框颜色，使用0xargb表示，如0xFFFF11FF。
+     * .value[1].i32：设置右侧边框颜色，使用0xargb表示，如0xFFFF11FF。
+     * .value[2].i32：设置下侧边框颜色，使用0xargb表示，如0xFFFF11FF。
+     * .value[3].i32：设置左侧边框颜色，使用0xargb表示，如0xFFFF11FF。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_BORDER_COLOR, "#FF1122FF");
-     * basicNodeApi->setAttribute(nodeHandle, NODE_BORDER_COLOR, "#FF1122FF #FF1122FF #FFFFFFF #FFFFFFF");
+     * ArkUI_NumberValue value[] = { {.i32 = 0xFFFF11FF} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_BORDER_COLOR, &item);
+     * ArkUI_NumberValue value[] = { {.i32 = 0xFFFF11FF}, {.i32 = 0xFFFF11FF}, {.i32 = 0xFFFFFFFF}, {.i32 = 0x000000} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_BORDER_COLOR, &item);
      * @endcode
      *
      */
     NODE_BORDER_COLOR,
     /**
-     * @brief 通过<b>setAttribute</b>方法设置元素的边框线条样式.
+     * @brief 通过{@link setAttributr}方法设置元素的边框线条样式。
      *
-     * @note
-     * 入参格式"dotted"、"dashed"或"solid"或4个使用"dotted"、"dashed"或"solid"的字符串分别对应上、右、下、左，使用空格隔开,
-     * 如"dotted"或"dotted dashed dashed solid";
+     * {@link ArkUI_AttributeItem}入参格式支持两输入方式，
+     * 1: .value[0].i32：统一设置四条边的边框线条样式，参数类型{@link
+     * ArkUI_BorderStyle}，默认值为ARKUI_BORDER_STYLE_SOLID。 2: .value[0].i32：设置上侧边框线条样式，参数类型{@link
+     * ArkUI_BorderStyle}，默认值为ARKUI_BORDER_STYLE_SOLID。 .value[1].i32：设置右侧边框线条样式，参数类型{@link
+     * ArkUI_BorderStyle}，默认值为ARKUI_BORDER_STYLE_SOLID。 .value[2].i32：设置下侧边框线条样式，参数类型{@link
+     * ArkUI_BorderStyle}，默认值为ARKUI_BORDER_STYLE_SOLID。 .value[3].i32：设置左侧边框线条样式，参数类型{@link
+     * ArkUI_BorderStyle}，默认值为ARKUI_BORDER_STYLE_SOLID。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_BORDER_STYLE, "dotted");
-     * basicNodeApi->setAttribute(nodeHandle, NODE_BORDER_STYLE, "dotted dashed dashed solid");
+     * ArkUI_NumberValue value[] = { {.i32 = ARKUI_BORDER_STYLE_DOTTED} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_BORDER_STYLE, &item);
+     * ArkUI_NumberValue value[] = { {.i32 = ARKUI_BORDER_STYLE_DOTTED}, {.i32 = ARKUI_BORDER_STYLE_SOLID},
+     * {.i32 = ARKUI_BORDER_STYLE_SOLID}, {.i32 = ARKUI_BORDER_STYLE_DOTTED} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_BORDER_STYLE, &item);
      * @endcode
      *
      */
     NODE_BORDER_STYLE,
     /**
-     * @brief 通过<b>setAttribute</b>方法设置组件的堆叠顺序.
+     * @brief 通过{@link setAttributr}方法设置组件的堆叠顺序。
      *
-     * @note 入参格式为数字类型字符串.
+     * {@link ArkUI_AttributeItem}入参格式:
+     * .value[0].f32：堆叠顺序数值。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_ZINDEX, "1");
+     * ArkUI_NumberValue value[] = { 2 };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_ZINDEX, &item);
      * @endcode
      *
      */
     NODE_ZINDEX,
     /**
-     * @brief 通过<b>setAttribute</b>方法设置组件是否可见.
+     * @brief 通过{@link setAttributr}方法设置组件是否可见。
      *
-     * @note 入参格式为"visible"、"hidden"与"none".
+     * {@link ArkUI_AttributeItem}入参格式:
+     * .value[0].i32：控制当前组件显示或隐藏，参数类型{@link ARKUI_Visibility}，默认值为ARKUI_VISIBILITY_VISIBLE。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_VISIBILITY, "visible");
+     * ArkUI_NumberValue value[] = { {.i32=ARKUI_VISIBILITY_NONE} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_VISIBILITY, &item);
      * @endcode
      *
      */
     NODE_VISIBILITY,
     /**
-     * @brief 通过<b>setAttribute</b>方法设置组件进行裁剪、遮罩处理.
+     * @brief 通过{@link setAttributr}方法设置组件进行裁剪、遮罩处理。
      *
-     * @note 入参格式为"true"、"false"，或为特定格式的字符串
-     * 如"rect(10,10,10,10)"括号内分别为width、height、radiusWidth与radiusHeight";"circle(10,10)"括号内分别为width、height;
-     * "ellipse(10,10)"括号内分别为width、height; "path(10,10,M0 0 L600 0)"括号内分别为width、height、commands;
+     * @note {@link ArkUI_AttributeItem}入参格式:
+     * .value[0].i32：控制是否按照父容器边缘轮廓进行裁剪，0表示不裁切，1表示裁切。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_CLIP, "true");
-     * basicNodeApi->setAttribute(nodeHandle, NODE_CLIP, "rect(10 10 10 10)");
+     * ArkUI_NumberValue value[] = { {.i32 = 0} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_CLIP, &item);
      * @endcode
      *
      */
     NODE_CLIP,
     /**
-     * @brief 通过<b>setAttribute</b>方法设置矩阵变换功能，可对图形进行平移、旋转和缩放等.
+     * @brief 通过{@link setAttributr}方法设置组件进行裁剪、遮罩处理。
      *
-     * @note 入参格式为16个数字类型字符串,用空格隔开，如""1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1".
+     * @note {@link ArkUI_AttributeItem}入参格式:
+     * .string:形状描述，可选：
+     * "rect(10,10,10,10)"括号内分别为width、height、radiusWidth与radiusHeight";
+     * "circle(10,10)"括号内分别为width、height;
+     * "ellipse(10,10)"括号内分别为width、height;
+     * "path(10,10,M0 0 L600 0)"括号内分别为width、height、commands;
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_TRANSFORM, "1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1");
+     * ArkUI_AttributeItem item = { .string = "rect(10,10,10,10)" };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_CLIP_SHAPE, &item);
+     * @endcode
+     *
+     */
+    NODE_CLIP_SHAPE,
+    /**
+     * @brief 通过{@link setAttributr}方法设置矩阵变换功能，可对图形进行平移、旋转和缩放等.
+     *
+     * @note {@link ArkUI_AttributeItem}入参格式:
+     * .data[0...15].f32: 16个浮点数字。
+     *
+     * @code {.c}
+     * ArkUI_AttributeItem item = { {.f32 = 1}, {.f32 = 0}, {.f32 = 0}, {.f32 = 0}, {.f32 = 0}, {.f32 = 0}, {.f32 = 0},
+     * {.f32 = 0}, {.f32 = 0}, {.f32 = 1}, {.f32 = 0}, {.f32 = 0}, {.f32 = 0}, {.f32 = 0}, {.f32 = 0}, {.f32 = 1}  };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_TRANSFORM, &item);
      * @endcode
      *
      */
     NODE_TRANSFORM,
     /**
-     * @brief 通过<b>setAttribute</b>方法设置组件的触摸测试类型.
+     * @brief 通过{@link setAttributr}方法设置组件的触摸测试类型。
      *
-     * @note 入参格式为"default"、"block"、"transparent"与"none".
+     * {@link ArkUI_AttributeItem}入参格式:
+     * .value[0].i32：控制当前组件显示或隐藏，参数类型{@link ARKUI_HitTestMode}，默认值为ARKUI_HIT_TEST_MODE_DEFAULT。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_HIT_TEST_BEHAVIOR, "default");
+     * ArkUI_NumberValue value[] = { {.i32=ARKUI_HIT_TEST_MODE_BLOCK} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_HIT_TEST_BEHAVIOR, &item);
      * @endcode
      *
      */
     NODE_HIT_TEST_BEHAVIOR,
     /**
-     * @brief 通过<b>setAttribute</b>方法设置元素左上角相对于父容器左上角偏移位置.
+     * @brief 通过{@link setAttribute}方法设置元素左上角相对于父容器左上角偏移位置。
      *
-     * @note 入参格式为数字类型字符串,需传入x与y两个偏移量，用空格隔开，如"50 100",单位为vp.
+     * {@link ArkUI_AttributeItem}入参格式:
+     * .value[0].f32：x轴坐标。
+     * .value[1].f32: y轴坐标。
+     * .value[2]?.i32：可选值，x轴坐标数值单位{@link ArkUI_DimensionUnit}，默认值为ARKUI_UNIT_VP。
+     * .value[3]?.i32：可选值，y轴坐标数值单位{@link ArkUI_DimensionUnit}，默认值为ARKUI_UNIT_VP。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_POSITION, "50 100");
+     * ArkUI_NumberValue value[] = { 50, 50 };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_POSITION, &item);
      * @endcode
      *
      */
     NODE_POSITION,
     /**
-     * @brief 通过<b>setAttribute</b>方法设置组件添加阴影效果.
+     * @brief 通过{@link setAttribute}方法设置组件添加阴影效果。
      *
-     * @note
-     * 入参格式为"outer-default-xs"、"outer-default-sm"、"outer-default-md"、"outer-default-lg"、"outer-floating-sm"、
-     * "outer-floating-md"与"none"字符串,或为6个字符串分别对应radius、offsetX、offsetY、type、color与IsFilled
-     * type支持color与blur，color支持#argb类型字符与智能取色的枚举字符串invert、average与primary用空格隔开，
-     * 如"5 10 10 color #FF1122FF true".
+     * {@link ArkUI_AttributeItem}入参格式:
+     * .value[0].i32：设置当前组件阴影效果，参数类型{@link ArkUI_ShadowStyle}。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SHADOW, "outer-default-md");
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SHADOW, "5 10 10 Color #FF1122FF true");
+     * ArkUI_NumberValue value[] = { {.i32 = ARKUI_SHADOW_STYLE_OUTER_DEFAULT_XS} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SHADOW, &item);
      * @endcode
      *
      */
     NODE_SHADOW,
+    /**
+     * @brief 通过{@link setAttribute}方法设置组件添加阴影效果。
+     *
+     * {@link ArkUI_AttributeItem}入参格式:
+     * .string: 字符串组合参数，入参6个，以分号分割：
+     * 入参1：阴影模糊半径。
+     * 入参2：阴影的X轴偏移量。
+     * 入参3：阴影的Y轴偏移量。
+     * 入参4：阴影类型。
+     * 入参5：阴影的颜色。
+     * 入参6：阴影是否内部填充。
+     *
+     * @code {.c}
+     * ArkUI_AttributeItem item = { .string = "5; 10; 10; COLOR; 0xACCCCC; true" };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_CUSTOM_SHADOW, &item);
+     * @endcode
+     *
+     */
+    NODE_CUSTOM_SHADOW,
     /**
      * @brief 通过<b>setAttribute</b>方法设置组件背景图片的宽高。
      *
@@ -637,7 +746,7 @@ typedef enum {
      * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_CONTENT , "一段文本。");
      * @endcode
      */
-    
+
     NODE_TEXT_CONTENT = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT,
     /**
      * @brief 通过<b>setAttribute</b>方法设置组件字体颜色，只针对包含文本元素的组件.
@@ -756,7 +865,7 @@ typedef enum {
     /**
      * @brief 通过<b>setAttribute</b>方法设置文本基线的偏移量.
      * @note 入参格式为数字类型字符串，如"20"，单位为fp.
-     * 
+     *
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_TEXT_BASELINE_OFFSET, "20");
      * @endcode
@@ -764,7 +873,7 @@ typedef enum {
     NODE_TEXT_BASELINE_OFFSET,
     /**
      * @brief 通过<b>setAttribute</b>方法设置文字阴影效果.
-     * 
+     *
      * @note 入参格式为按照阴影模糊半径、阴影类型、阴影的颜色、阴影的X轴偏移量、阴影的Y轴偏移量顺序设置的字符串，\n
      *  如"10 blur #FFFFFF00 10 10"，输入参数不足时，按照指定顺序填充，最多只识别前五个参数；\n
      *  其中阴影类型可选范围为[color, blur]，如"color";
@@ -840,10 +949,10 @@ typedef enum {
      * @endcode
      */
     NODE_IMAGE_COLOR_FILTER,
-    
+
     /**
      * @brief 通过<b>setAttribute</b>方法设置组件打开状态的背景颜色.
-     * 
+     *
      * @note 入参格式为#argb类型字符串，如"#FF008000".
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_TOGGLE_SELECTED_COLOR, "#FF008000");
@@ -852,7 +961,7 @@ typedef enum {
     NODE_TOGGLE_SELECTED_COLOR = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TOGGLE,
     /**
      * @brief 通过<b>setAttribute</b>方法设置Switch类型的圆形滑块颜色.
-     * 
+     *
      * @note 入参格式为#argb类型字符串，如"#FFFFFF00".
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_TOGGLE_SWITCH_POINT_COLOR, "#FFFFFF00");
@@ -862,7 +971,7 @@ typedef enum {
 
     /**
      * @brief 通过<b>setAttribute</b>方法设置加载进度条前景色.
-     * 
+     *
      * @note 入参格式为#argb类型字符串，如"#99666666".
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_LOADING_PROGRESS_COLOR, "#99666666");
@@ -871,7 +980,7 @@ typedef enum {
     NODE_LOADING_PROGRESS_COLOR = MAX_NODE_SCOPE_NUM * ARKUI_NODE_LOADING_PROGRESS,
     /**
      * @brief 通过<b>setAttribute</b>方法设置LoadingProgress动画显示或者不显示.
-     * 
+     *
      * @note 入参格式为bool类型字符串，如"true".
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_LOADING_PROGRESS_ENABLE_LOADING, "true");
@@ -1085,8 +1194,9 @@ typedef enum {
     /**
      * @brief 通过<b>setAttribute</b>方法设置Scroll组件的限位滚动模式.
      *
-     * @note 入参 snapAlign:String("none","start","center","end") pagination1:double(单位vp),pagination2:double(单位vp),...
-     *            enableSnapToStart:Boolean enableSnapToEnd:Boolean", 格式字符串，如 "start 0,500,1000,1500 true true"
+     * @note 入参 snapAlign:String("none","start","center","end")
+     * pagination1:double(单位vp),pagination2:double(单位vp),... enableSnapToStart:Boolean enableSnapToEnd:Boolean",
+     * 格式字符串，如 "start 0,500,1000,1500 true true"
      * @code {.c}
      * basicNodeApi->setAttribute(nodeHandle, NODE_SCROLL_SCROLL_SNAP, "none 0,500,1000,1500 true true");
      * @endcode
@@ -1094,8 +1204,9 @@ typedef enum {
      */
     NODE_SCROLL_SCROLL_SNAP,
 
-     /**
-     * @brief 通过{@link setAttribute}方法设置嵌套滚动选项。设置向前向后两个方向上的嵌套滚动模式，实现与父组件的滚动联动.
+    /**
+     * @brief 通过{@link
+     * setAttribute}方法设置嵌套滚动选项。设置向前向后两个方向上的嵌套滚动模式，实现与父组件的滚动联动.
      *
      * @note NestedScrollMode:String("self-only","self-first","parent-first","parallel")
      *       格式字符串 可以设置2个参数 用空格隔开。
@@ -1199,7 +1310,8 @@ typedef enum {
      */
     NODE_LIST_LIST_DIRECTION,
     /**
-     * @brief 通过<b>setAttribute</b>方法配合ListItemGroup组件使用，设置 ListItemGroup 中 header 和 footer 是否要吸顶或吸底.
+     * @brief 通过<b>setAttribute</b>方法配合ListItemGroup组件使用，设置 ListItemGroup 中 header 和 footer
+     * 是否要吸顶或吸底.
      *
      * @note 入参是否要吸顶或吸底，类型字符串枚举("none","header","footer","both")，格式字符串，如 "header"
      * @code {.c}
@@ -1253,133 +1365,179 @@ typedef enum {
     NODE_LIST_SPACE,
 
     /**
-     * @brief 通过<b>setAttribute</b>方法设置是否开启循环.
+     * @brief 通过{@link setAttributr}方法设置是否开启循环。
      *
-     * @note 入参isLoop: Boolean, 格式字符串，如"true"
+     * @note {@link ArkUI_AttributeItem}入参格式:
+     * .value[0].i32：控制是否开启循环，0表示不循环，1表示循环，默认值为1。
+
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_LOOP, "true");
+     * ArkUI_NumberValue value[] = { {.i32 = 0} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_LOOP, &item);
      * @endcode
      *
      */
     NODE_SWIPER_LOOP = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SWIPER,
-
     /**
-     * @brief 通过<b>setAttribute</b>方法设置子组件是否自动播放.
+     * @brief 通过{@link setAttributr}方法设置子组件是否自动播放。
      *
-     * @note 入参格式为内容为true或false的字符串，不区分大小写.
+     * @note {@link ArkUI_AttributeItem}入参格式:
+     * .value[0].i32：控制子组件是否自动播放，0表示不自动播放，1表示自动播放，默认值为0。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_AUTO_PLAY, "false");
+     * ArkUI_NumberValue value[] = { {.i32 = 1} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_AUTO_PLAY, &item);
      * @endcode
      *
      */
     NODE_SWIPER_AUTO_PLAY,
-
     /**
-     * @brief 通过<b>setAttribute</b>方法设置Swiper是否显示导航点指示器.
+     * @brief 通过{@link setAttributr}方法设置Swiper是否显示导航点指示器。
      *
-     * @note 入参格式为内容为true或false的字符串，不区分大小写.
+     * @note {@link ArkUI_AttributeItem}入参格式:
+     * .value[0].i32：是否显示导航点指示器，0表示不显示导航点指示器，1表示显示导航点指示器，默认值为1。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_SHOW_INDICATOR, true);
+     * ArkUI_NumberValue value[] = { {.i32 = 0} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_SHOW_INDICATOR, &item);
      * @endcode
      *
      */
     NODE_SWIPER_SHOW_INDICATOR,
-
     /**
-     * @brief 通过<b>setAttribute</b>方法设置自动播放时播放的时间间隔.
+     * @brief 通过{@link setAttributr}方法设置自动播放时播放的时间间隔。
      *
-     * @note 入参格式为数字类型字符串，单位为毫秒.
+     * {@link ArkUI_AttributeItem}入参格式:
+     * .value[0].f32：使用自动播放时播放的时间间隔，单位为毫秒。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_INTERVAL, "3000");
+     * ArkUI_NumberValue value[] = { 3000 };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_INTERVAL, &item);
      * @endcode
      *
      */
     NODE_SWIPER_INTERVAL,
-
     /**
-     * @brief 通过<b>setAttribute</b>方法设置是否为纵向滑动.
+     * @brief 通过{@link setAttributr}方法设置是否为纵向滑动。
      *
-     * @note 入参格式为内容为true或false的字符串，不区分大小写.
+     * @note {@link ArkUI_AttributeItem}入参格式:
+     * .value[0].i32：是否为纵向滑动，0表示横向滑动，1表示纵向滑动，默认值为0。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_VERTICAL, "false");
+     * ArkUI_NumberValue value[] = { {.i32 = 1} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_VERTICAL, &item);
      * @endcode
      *
      */
     NODE_SWIPER_VERTICAL,
 
     /**
-     * @brief 通过<b>setAttribute</b>方法设置子组件切换的动画时长.
+     * @brief 通过{@link setAttributr}方法设置子组件切换的动画时长。
      *
-     * @note 入参格式为数字类型字符串，单位为毫秒.
+     * {@link ArkUI_AttributeItem}入参格式:
+     * .value[0].f32：子组件切换的动画时长，单位为毫秒, 默认值为400。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_DURATION, "400");
+     * ArkUI_NumberValue value[] = { 1000 };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_DURATION, &item);
      * @endcode
      *
      */
     NODE_SWIPER_DURATION,
 
     /**
-     * @brief 通过<b>setAttribute</b>方法设置Swiper的动画曲线.
+     * @brief 通过{@link setAttributr}方法设置Swiper的动画曲线。
      *
-     * @note 入参格式为"linear"、"ease"、"easeIn"、"easeOut"、"easeInOut"、
-     * "fastOutSlowIn"、"linearOutSlowIn"、"fastOutLinearIn"、"extremeDeceleration"、"sharp"、"rhythm"、"smooth"与"friction".
+     * {@link ArkUI_AttributeItem}入参格式:
+     * .value[0].i32：设置动画曲线参数，参数类型{@link ARKUI_AnimationCurve}，默认值为ARKUI_CURVE_LINEAR。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_CURVE, "linear");
+     * ArkUI_NumberValue value[] = { {.i32 = ARKUI_CURVE_SHARP} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_CURVE, &item);
      * @endcode
      *
      */
     NODE_SWIPER_CURVE,
 
     /**
-     * @brief 通过<b>setAttribute</b>方法设置子组件与子组件之间间隙.
+     * @brief 通过{@link setAttribute}方法设置子组件与子组件之间间隙。
      *
-     * @note 入参格式为数字类型字符串，单位为vp.
+     * {@link ArkUI_AttributeItem}入参格式:
+     * .value[0].f32：子组件与子组件之间间隙数值。
+     * .value[1]?.i32：可选值，数值单位{@link ArkUI_DimensionUnit}，默认值为ARKUI_UNIT_VP。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_ITEM_SPACE, "50");
+     * ArkUI_NumberValue value[] = { 10 };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_ITEM_SPACE, &item);
      * @endcode
      *
      */
     NODE_SWIPER_ITEM_SPACE,
 
     /**
-     * @brief 通过<b>setAttribute</b>方法设置当前在容器中显示的子组件的索引值.
+     * @brief 通过{@link setAttribute}方法设置当前在容器中显示的子组件的索引值。
      *
-     * @note 入参格式为数字类型字符串.
+     * {@link ArkUI_AttributeItem}入参格式:
+     * .value[0].i32：子组件的索引值。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_INDEX, "2");
+     * ArkUI_NumberValue value[] = { {i32 = 3} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_INDEX, &item);
      * @endcode
      *
      */
     NODE_SWIPER_INDEX,
 
     /**
-     * @brief 通过<b>setAttribute</b>方法设置一页内元素显示个数.
+     * @brief 通过{@link setAttribute}方法设置一页内元素显示个数。
      *
-     * @note 入参格式为数字类型字符串或为"auto"字符串.
+     * {@link ArkUI_AttributeItem}入参格式:
+     * .value[0].i32：子组件的索引值。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_DISPLAY_COUNT, "2");
+     * ArkUI_NumberValue value[] = { {i32 = 3} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_DISPLAY_COUNT, &item);
      * @endcode
      *
      */
     NODE_SWIPER_DISPLAY_COUNT,
 
     /**
-     * @brief 通过<b>setAttribute</b>方法设置禁用组件滑动切换功能.
+     * @brief 通过{@link setAttributr}方法设置禁用组件滑动切换功能。
      *
-     * @note 入参格式为内容为true或false的字符串，不区分大小写.
+     * @note {@link ArkUI_AttributeItem}入参格式:
+     * .value[0].i32：是否禁用组件滑动切换功能，0表示不禁用滑动切换功能，1表示禁用滑动切换功能，默认值为0。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_DISABLE_SWIPE, "false");
+     * ArkUI_NumberValue value[] = { {.i32 = 1} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_DISABLE_SWIPE, &item);
      * @endcode
      *
      */
     NODE_SWIPER_DISABLE_SWIPE,
 
     /**
-     * @brief 通过<b>setAttribute</b>方法设置是否显示导航点箭头.
+     * @brief 通过{@link setAttributr}方法设置是否显示导航点箭头。
      *
-     * @note 入参格式为"true"、"false"与"showOnHover".
+     * @note {@link ArkUI_AttributeItem}入参格式:
+     * .value[0].i32：设置是否显示导航点箭头，参数类型{@link ARKUI_ShowDisplayArrow}，
+     * 默认值为ARKUI_SHOW_DISPLAY_ARROW_SHOW_ON_HOVER。
+     *
      * @code {.c}
-     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_SHOW_DISPLAY_ARROW, true");
+     * ArkUI_NumberValue value[] = { {.i32 = ARKUI_SHOW_DISPLAY_ARROW_SHOW_ON_HOVER} };
+     * ArkUI_AttributeItem item = { value, sizeof(value)/sizeof(ArkUI_NumberValue) };
+     * basicNodeApi->setAttribute(nodeHandle, NODE_SWIPER_SHOW_DISPLAY_ARROW, &item);
      * @endcode
      *
      */
@@ -1570,7 +1728,8 @@ typedef enum {
      */
     NODE_DATE_PICKER_DISAPPEAR_TEXT_STYLE,
     /**
-     * @brief 通过{@link setAttribute}方法设置日期选择器组件的所有选项中除了最上、最下及选中项以外的文本颜色、字号、字体粗细。
+     * @brief 通过{@link
+     * setAttribute}方法设置日期选择器组件的所有选项中除了最上、最下及选中项以外的文本颜色、字号、字体粗细。
      *
      * @note 入参5个，格式为字符串，以 ';' 分割：
      *       入参1： 文本颜色，#argb类型
@@ -1637,7 +1796,8 @@ typedef enum {
      */
     NODE_TIME_PICKER_DISAPPEAR_TEXT_STYLE,
     /**
-     * @brief 通过{@link setAttribute}方法设置时间选择组件所有选项中除了最上、最下及选中项以外的文本颜色、字号、字体粗细。
+     * @brief 通过{@link
+     * setAttribute}方法设置时间选择组件所有选项中除了最上、最下及选中项以外的文本颜色、字号、字体粗细。
      *
      * @note 入参5个，格式为字符串，以 ';' 分割：
      *       入参1： 文本颜色，#argb类型
@@ -1669,7 +1829,8 @@ typedef enum {
      */
     NODE_TIME_PICKER_SELECTED_TEXT_STYLE,
     /**
-     * @brief 通过{@link setAttribute}方法设置滑动选择文本内容的组件所有选项中最上和最下两个选项的文本颜色、字号、字体粗细。
+     * @brief 通过{@link
+     * setAttribute}方法设置滑动选择文本内容的组件所有选项中最上和最下两个选项的文本颜色、字号、字体粗细。
      *
      * @note 入参5个，格式为字符串，以 ';' 分割：
      *       入参1： 文本颜色，#argb类型
@@ -1686,7 +1847,8 @@ typedef enum {
     NODE_TEXT_PICKER_DISAPPEAR_TEXT_STYLE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_PICKER,
 
     /**
-     * @brief 通过{@link setAttribute}方法设置滑动选择文本内容的组件所有选项中除了最上、最下及选中项以外的文本颜色、字号、字体粗细。
+     * @brief 通过{@link
+     * setAttribute}方法设置滑动选择文本内容的组件所有选项中除了最上、最下及选中项以外的文本颜色、字号、字体粗细。
      *
      * @note 入参5个，格式为字符串，以 ';' 分割：
      *       入参1： 文本颜色，#argb类型
@@ -1718,7 +1880,8 @@ typedef enum {
      */
     NODE_TEXT_PICKER_SELECTED_TEXT_STYLE,
     /**
-     * @brief 通过{@link setAttribute}方法设置滑动选择文本内容的组件默认选中项在数组中的索引值，优先级高于 options 中的选中值。
+     * @brief 通过{@link setAttribute}方法设置滑动选择文本内容的组件默认选中项在数组中的索引值，优先级高于 options
+     * 中的选中值。
      *
      * @note 入参索引列表，数字类型数组，格式字符串，以空格分割，如 "0 1" 。
      * @code {.c}
@@ -1783,7 +1946,7 @@ typedef enum {
      * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
      * @note <b>::ArkUI_NodeComponentEvent</b>中不包含参数\n
      * <b>ArkUI_NodeComponent.data[0].i32</b>表示开关状态，为0代表状态从开切换为关，为1代表状态从关切换为开\n
-    */
+     */
     NODE_EVENT_ON_APPEAR,
     /**
      * @brief 组件区域变化事件
@@ -1793,17 +1956,25 @@ typedef enum {
      * @note <b>::ArkUI_NodeComponentEvent</b>中包含12个参数\n
      * <b>ArkUI_NodeComponent.data[0].f32</b>表示 old Area 目标元素的宽度，类型为number，单位vp。\n
      * <b>ArkUI_NodeComponent.data[1].f32</b>表示 old Area 目标元素的高度，类型为number，单位vp。\n
-     * <b>ArkUI_NodeComponent.data[2].f32</b>表示 old Area 目标元素左上角相对父元素左上角的位置的x轴坐标，类型为number，单位vp。\n
-     * <b>ArkUI_NodeComponent.data[3].f32</b>表示 old Area 目标元素左上角相对父元素左上角的位置的y轴坐标，类型为number，单位vp。\n
-     * <b>ArkUI_NodeComponent.data[4].f32</b>表示 old Area 目标元素目标元素左上角相对页面左上角的位置的x轴坐标，类型为number，单位vp。\n
-     * <b>ArkUI_NodeComponent.data[5].f32</b>表示 old Area 目标元素目标元素左上角相对页面左上角的位置的y轴坐标，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[2].f32</b>表示 old Area
+     * 目标元素左上角相对父元素左上角的位置的x轴坐标，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[3].f32</b>表示 old Area
+     * 目标元素左上角相对父元素左上角的位置的y轴坐标，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[4].f32</b>表示 old Area
+     * 目标元素目标元素左上角相对页面左上角的位置的x轴坐标，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[5].f32</b>表示 old Area
+     * 目标元素目标元素左上角相对页面左上角的位置的y轴坐标，类型为number，单位vp。\n
      * <b>ArkUI_NodeComponent.data[6].f32</b>表示 new Area 目标元素的宽度，类型为number，单位vp。\n
      * <b>ArkUI_NodeComponent.data[7].f32</b>表示 new Area 目标元素的高度，类型为number，单位vp。\n
-     * <b>ArkUI_NodeComponent.data[8].f32</b>表示 new Area 目标元素左上角相对父元素左上角的位置的x轴坐标，类型为number，单位vp。\n
-     * <b>ArkUI_NodeComponent.data[9].f32</b>表示 new Area 目标元素左上角相对父元素左上角的位置的y轴坐标，类型为number，单位vp。\n
-     * <b>ArkUI_NodeComponent.data[10].f32</b>表示 new Area 目标元素目标元素左上角相对页面左上角的位置的x轴坐标，类型为number，单位vp。\n
-     * <b>ArkUI_NodeComponent.data[11].f32</b>表示 new Area 目标元素目标元素左上角相对页面左上角的位置的y轴坐标，类型为number，单位vp。\n
-    */
+     * <b>ArkUI_NodeComponent.data[8].f32</b>表示 new Area
+     * 目标元素左上角相对父元素左上角的位置的x轴坐标，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[9].f32</b>表示 new Area
+     * 目标元素左上角相对父元素左上角的位置的y轴坐标，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[10].f32</b>表示 new Area
+     * 目标元素目标元素左上角相对页面左上角的位置的x轴坐标，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[11].f32</b>表示 new Area
+     * 目标元素目标元素左上角相对页面左上角的位置的y轴坐标，类型为number，单位vp。\n
+     */
     NODE_EVENT_ON_ON_AREA_CHANGE,
     NODE_ON_FOCUS,
     NODE_ON_BLUR,
