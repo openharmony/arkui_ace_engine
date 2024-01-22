@@ -4322,21 +4322,10 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
                 transitionEffect_->Appear();
                 ++appearingTransitionCount_;
             },
-            [weakThis = WeakClaim(this), nodeId = frameNode->GetId(), id = Container::CurrentId()]() {
+            [weakThis = WeakClaim(this)]() {
                 auto context = weakThis.Upgrade();
                 CHECK_NULL_VOID(context);
-                ContainerScope scope(id);
-                auto pipeline = PipelineBase::GetCurrentContext();
-                CHECK_NULL_VOID(pipeline);
-                auto taskExecutor = pipeline->GetTaskExecutor();
-                CHECK_NULL_VOID(taskExecutor);
-                taskExecutor->PostTask(
-                    [weakThis]() {
-                        auto context = weakThis.Upgrade();
-                        CHECK_NULL_VOID(context);
-                        context->OnTransitionInFinish();
-                    },
-                    TaskExecutor::TaskType::UI);
+                context->OnTransitionInFinish();
             },
             false);
     } else {
@@ -4367,20 +4356,8 @@ void RosenRenderContext::NotifyTransition(bool isTransitionIn)
             [weakThis = WeakClaim(this), nodeId = frameNode->GetId(), id = Container::CurrentId()]() {
                 auto context = weakThis.Upgrade();
                 CHECK_NULL_VOID(context);
-                ContainerScope scope(id);
-                auto pipeline = PipelineBase::GetCurrentContext();
-                CHECK_NULL_VOID(pipeline);
-                auto taskExecutor = pipeline->GetTaskExecutor();
-                CHECK_NULL_VOID(taskExecutor);
-                taskExecutor->PostTask(
-                    [id, nodeId, weakThis]() {
-                        auto context = weakThis.Upgrade();
-                        CHECK_NULL_VOID(context);
-                        ContainerScope scope(id);
-                        // update transition out count
-                        context->OnTransitionOutFinish();
-                    },
-                    TaskExecutor::TaskType::UI);
+                // update transition out count
+                context->OnTransitionOutFinish();
             },
             false);
     }

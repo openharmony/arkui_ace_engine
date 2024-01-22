@@ -2084,17 +2084,11 @@ void SwiperPattern::PlayPropertyTranslateAnimation(
             return;
         }
     }
-    auto finishCallback = [id = Container::CurrentId(), weak = WeakClaim(this), offset]() {
-        ContainerScope scope(id);
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        auto task = [weak, offset]() {
-            auto swiper = weak.Upgrade();
-            CHECK_NULL_VOID(swiper);
-            swiper->targetIndex_.reset();
-            swiper->OnPropertyTranslateAnimationFinish(offset);
-        };
-        context->PostSyncEvent(task);
+    auto finishCallback = [weak = WeakClaim(this), offset]() {
+        auto swiper = weak.Upgrade();
+        CHECK_NULL_VOID(swiper);
+        swiper->targetIndex_.reset();
+        swiper->OnPropertyTranslateAnimationFinish(offset);
     };
     // initial translate info.
     for (auto& item : itemPosition_) {

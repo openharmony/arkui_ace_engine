@@ -442,8 +442,7 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateOpacity(VISIABLE_ALPHA);
         },
-        [weak = WeakClaim(this), finish, id = Container::CurrentId()]() {
-            ContainerScope scope(id);
+        [weak = WeakClaim(this), finish]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             if (pattern->transitionStatus_ != TransitionStatus::ENTERING) {
@@ -451,10 +450,7 @@ void BubblePattern::StartAlphaEnteringAnimation(std::function<void()> finish)
             }
             pattern->transitionStatus_ = TransitionStatus::NORMAL;
             if (finish) {
-                pattern->PostTask([finish, id = Container::CurrentId()]() {
-                    ContainerScope scope(id);
-                    finish();
-                });
+                finish();
             }
         });
 }
@@ -498,8 +494,7 @@ void BubblePattern::StartAlphaExitingAnimation(std::function<void()> finish)
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateOpacity(INVISIABLE_ALPHA);
         },
-        [weak = WeakClaim(this), finish, id = Container::CurrentId()]() {
-            ContainerScope scope(id);
+        [weak = WeakClaim(this), finish]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             if (pattern->transitionStatus_ != TransitionStatus::EXITING) {
@@ -507,10 +502,7 @@ void BubblePattern::StartAlphaExitingAnimation(std::function<void()> finish)
             }
             pattern->transitionStatus_ = TransitionStatus::INVISIABLE;
             if (finish) {
-                pattern->PostTask([finish, id = Container::CurrentId()]() {
-                    ContainerScope scope(id);
-                    finish();
-                });
+                finish();
             }
         });
 }

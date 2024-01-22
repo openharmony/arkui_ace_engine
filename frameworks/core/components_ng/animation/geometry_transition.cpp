@@ -359,21 +359,13 @@ void GeometryTransition::SyncGeometry(bool isNodeIn)
             renderContext->SetSandBox(parentPos);
         }
     };
-    auto finishCallback = [id = Container::CurrentId(), nodeWeak = WeakClaim(RawPtr(self)),
-        executorWeak = WeakClaim(RawPtr(taskExecutor))]() {
-        ContainerScope scope(id);
-        auto taskExecutor = executorWeak.Upgrade();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
-            [id, nodeWeak]() {
-                ContainerScope scope(id);
-                auto node = nodeWeak.Upgrade();
-                CHECK_NULL_VOID(node);
-                auto renderContext = node->GetRenderContext();
-                CHECK_NULL_VOID(renderContext);
-                renderContext->SetSandBox(std::nullopt);
-                TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node %{public}d animation completed", node->GetId());
-            }, TaskExecutor::TaskType::UI);
+    auto finishCallback = [nodeWeak = WeakClaim(RawPtr(self))]() {
+        auto node = nodeWeak.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto renderContext = node->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->SetSandBox(std::nullopt);
+        TAG_LOGI(AceLogTag::ACE_GEOMETRY_TRANSITION, "node %{public}d animation completed", node->GetId());
     };
     bool isCurrentOptionValid = AnimationUtils::IsImplicitAnimationOpen();
     if (!isNodeIn && inNodeAbsRect_) {

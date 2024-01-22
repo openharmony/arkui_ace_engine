@@ -516,38 +516,29 @@ void SheetPresentationPattern::SheetTransition(bool isTransitionIn, float dragVe
             overlayManager->PlaySheetMaskTransition(maskNode, false);
         }
     }
-    option.SetOnFinishEvent([weak = AceType::WeakClaim(this), id = Container::CurrentId(), isTransitionIn]() {
-        ContainerScope scope(id);
-        auto context = PipelineContext::GetCurrentContext();
-        CHECK_NULL_VOID(context);
-        auto taskExecutor = context->GetTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostTask(
-            [weak, id, isTransitionIn]() {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                if (isTransitionIn) {
-                    if (!pattern->GetAnimationBreak()) {
-                        pattern->SetCurrentOffset(0.0f);
-                        pattern->ProcessColumnRect(pattern->height_);
-                        pattern->ChangeScrollHeight(pattern->height_);
-                        pattern->SetAnimationProcess(false);
-                    } else {
-                        pattern->isAnimationBreak_ = false;
-                    }
-                } else {
-                    pattern->SetAnimationProcess(false);
-                    auto context = PipelineContext::GetCurrentContext();
-                    CHECK_NULL_VOID(context);
-                    auto overlayManager = context->GetOverlayManager();
-                    CHECK_NULL_VOID(overlayManager);
-                    auto host = pattern->GetHost();
-                    CHECK_NULL_VOID(host);
-                    overlayManager->DestroySheet(host, pattern->GetTargetId());
-                    pattern->FireCallback("false");
-                }
-            },
-            TaskExecutor::TaskType::UI);
+    option.SetOnFinishEvent([weak = AceType::WeakClaim(this), isTransitionIn]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        if (isTransitionIn) {
+            if (!pattern->GetAnimationBreak()) {
+                pattern->SetCurrentOffset(0.0f);
+                pattern->ProcessColumnRect(pattern->height_);
+                pattern->ChangeScrollHeight(pattern->height_);
+                pattern->SetAnimationProcess(false);
+            } else {
+                pattern->isAnimationBreak_ = false;
+            }
+        } else {
+            pattern->SetAnimationProcess(false);
+            auto context = PipelineContext::GetCurrentContext();
+            CHECK_NULL_VOID(context);
+            auto overlayManager = context->GetOverlayManager();
+            CHECK_NULL_VOID(overlayManager);
+            auto host = pattern->GetHost();
+            CHECK_NULL_VOID(host);
+            overlayManager->DestroySheet(host, pattern->GetTargetId());
+            pattern->FireCallback("false");
+        }
     });
     StartSheetTransitionAnimation(option, isTransitionIn, offset);
 }
@@ -968,17 +959,7 @@ void SheetPresentationPattern::StartAlphaEnteringAnimation(std::function<void()>
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateOpacity(SHEET_VISIABLE_ALPHA);
         },
-        [weak = WeakClaim(this), finish, id = Container::CurrentId()]() {
-            ContainerScope scope(id);
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            if (finish) {
-                pattern->PostTask([finish, id = Container::CurrentId()]() {
-                    ContainerScope scope(id);
-                    finish();
-                });
-            }
-        });
+        finish);
 }
 
 void SheetPresentationPattern::StartOffsetExitingAnimation()
@@ -1013,17 +994,7 @@ void SheetPresentationPattern::StartAlphaExitingAnimation(std::function<void()> 
             CHECK_NULL_VOID(renderContext);
             renderContext->UpdateOpacity(SHEET_INVISIABLE_ALPHA);
         },
-        [weak = WeakClaim(this), finish, id = Container::CurrentId()]() {
-            ContainerScope scope(id);
-            auto pattern = weak.Upgrade();
-            CHECK_NULL_VOID(pattern);
-            if (finish) {
-                pattern->PostTask([finish, id = Container::CurrentId()]() {
-                    ContainerScope scope(id);
-                    finish();
-                });
-            }
-        });
+        finish);
 }
 
 RefPtr<RenderContext> SheetPresentationPattern::GetRenderContext()

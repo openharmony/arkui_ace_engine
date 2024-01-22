@@ -90,25 +90,17 @@ bool PagePattern::TriggerPageTransition(PageTransitionType type, const std::func
     }
     auto effect = FindPageTransitionEffect(type);
     pageTransitionFinish_ = std::make_shared<std::function<void()>>(onFinish);
-    auto wrappedOnFinish = [weak = WeakClaim(this), sharedFinish = pageTransitionFinish_,
-                               instanceId = Container::CurrentId()]() {
-        ContainerScope scope(instanceId);
-        auto taskExecutor = Container::CurrentTaskExecutor();
-        CHECK_NULL_VOID(taskExecutor);
-        taskExecutor->PostSyncTask(
-            [weak, sharedFinish] {
-                auto pattern = weak.Upgrade();
-                CHECK_NULL_VOID(pattern);
-                auto host = pattern->GetHost();
-                CHECK_NULL_VOID(host);
-                if (sharedFinish == pattern->pageTransitionFinish_) {
-                    // ensure this is exactly the finish callback saved in pagePattern,
-                    // otherwise means new pageTransition started
-                    pattern->FirePageTransitionFinish();
-                    host->DeleteAnimatablePropertyFloat(KEY_PAGE_TRANSITION_PROPERTY);
-                }
-            },
-            TaskExecutor::TaskType::UI);
+    auto wrappedOnFinish = [weak = WeakClaim(this), sharedFinish = pageTransitionFinish_]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        auto host = pattern->GetHost();
+        CHECK_NULL_VOID(host);
+        if (sharedFinish == pattern->pageTransitionFinish_) {
+            // ensure this is exactly the finish callback saved in pagePattern,
+            // otherwise means new pageTransition started
+            pattern->FirePageTransitionFinish();
+            host->DeleteAnimatablePropertyFloat(KEY_PAGE_TRANSITION_PROPERTY);
+        }
     };
     if (effect && effect->GetUserCallback()) {
         RouteType routeType = (type == PageTransitionType::ENTER_POP || type == PageTransitionType::EXIT_POP)
