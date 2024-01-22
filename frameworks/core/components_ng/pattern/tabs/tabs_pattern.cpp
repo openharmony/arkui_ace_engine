@@ -81,7 +81,7 @@ void TabsPattern::SetOnChangeEvent(std::function<void(const BaseEventInfo*)>&& e
         tabBarPattern->SetMaskAnimationByCreate(false);
         tabBarPattern->SetIndicator(index);
         tabBarPattern->UpdateIndicator(index);
-        tabBarPattern->UpdateTextColor(index);
+        tabBarPattern->UpdateTextColorAndFontWeight(index);
         if (tabBarLayoutProperty->GetTabBarMode().value_or(TabBarMode::FIXED) == TabBarMode::SCROLLABLE) {
             if (tabBarPattern->GetTabBarStyle() == TabBarStyle::SUBTABBATSTYLE &&
                 tabBarLayoutProperty->GetAxisValue(Axis::HORIZONTAL) == Axis::HORIZONTAL) {
@@ -451,7 +451,7 @@ void TabsPattern::BeforeCreateLayoutWrapper()
     auto tabBarLayoutProperty = tabBarNode->GetLayoutProperty<TabBarLayoutProperty>();
     CHECK_NULL_VOID(tabBarLayoutProperty);
     tabBarLayoutProperty->UpdateIndicator(index);
-    tabBarPattern->UpdateTextColor(index);
+    tabBarPattern->UpdateTextColorAndFontWeight(index);
     tabBarPattern->UpdateImageColor(index);
     auto swiperLayoutProperty = swiperNode->GetLayoutProperty<SwiperLayoutProperty>();
     CHECK_NULL_VOID(swiperLayoutProperty);

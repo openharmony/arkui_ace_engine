@@ -180,7 +180,7 @@ public:
 
     void UpdateIndicator(int32_t indicator);
 
-    void UpdateTextColor(int32_t indicator);
+    void UpdateTextColorAndFontWeight(int32_t indicator);
 
     void UpdateImageColor(int32_t indicator);
 
@@ -266,6 +266,15 @@ public:
             bottomTabBarStyles_.emplace_back(bottomTabBarStyle);
         } else {
             bottomTabBarStyles_[position] = bottomTabBarStyle;
+        }
+    }
+
+    void SetLabelStyle(const LabelStyle& labelStyle, uint32_t position)
+    {
+        if (labelStyles_.size() == position) {
+            labelStyles_.emplace_back(labelStyle);
+        } else {
+            labelStyles_[position] = labelStyle;
         }
     }
 
@@ -431,6 +440,7 @@ private:
     void TriggerTranslateAnimation(
         const RefPtr<TabBarLayoutProperty>& layoutProperty, int32_t index, int32_t indicator);
     void UpdatePaintIndicator(int32_t indicator, bool needMarkDirty);
+    bool IsNeedUpdateFontWeight(int32_t index);
 
     RefPtr<ClickEvent> clickEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -473,6 +483,7 @@ private:
     std::vector<SelectedMode> selectedModes_;
     std::vector<IndicatorStyle> indicatorStyles_;
     std::vector<TabBarStyle> tabBarStyles_;
+    std::vector<LabelStyle> labelStyles_;
     bool isFirstFocus_ = true;
     bool isTouchingSwiper_ = false;
     float turnPageRate_ = 0.0f;
