@@ -985,9 +985,7 @@ OffsetF RichEditorPattern::CalcCursorOffsetByPosition(
     auto children = host->GetChildren();
     if (NearZero(selectLineHeight)) {
         if (children.empty() || GetTextContentLength() == 0) {
-            CHECK_NULL_RETURN(overlayMod_, OffsetF(0, 0));
-            float caretHeight = DynamicCast<RichEditorOverlayModifier>(overlayMod_)->GetCaretHeight();
-            return textPaintOffset - rootOffset - OffsetF(0.0f, caretHeight / 2.0f);
+            return textPaintOffset - rootOffset;
         }
         if (std::all_of(children.begin(), children.end(), [](RefPtr<UINode>& node) {
                 CHECK_NULL_RETURN(node, false);
