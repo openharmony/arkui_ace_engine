@@ -1573,7 +1573,7 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
                 pattern->selectController_->UpdateCaretIndex(current - (dragTextEnd - dragTextStart));
                 pattern->InsertValue(str);
             } else {
-                pattern->ShowSelectAfterDragDrop();
+                pattern->ShowSelectAfterDragEvent();
             }
             pattern->dragStatus_ = DragStatus::NONE;
             pattern->MarkContentChange();
@@ -1582,11 +1582,15 @@ std::function<void(const RefPtr<OHOS::Ace::DragEvent>&, const std::string&)> Tex
     };
 }
 
-void TextFieldPattern::ShowSelectAfterDragDrop()
+void TextFieldPattern::ShowSelectAfterDragEvent()
 {
     selectController_->UpdateHandleIndex(dragTextStart_, dragTextEnd_);
     showSelect_ = true;
-    ProcessOverlay(false, false, false, false);
+    processOverlayDelayTask_ = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->ProcessOverlay(false, false, false, false);
+    };
 }
 
 void TextFieldPattern::InitDragDropEventWithOutDragStart()
@@ -1681,11 +1685,7 @@ void TextFieldPattern::InitDragDropCallBack()
 
             // Except for DRAG_SUCCESS, all of rest need to show
             if (event != nullptr && event->GetResult() != DragRet::DRAG_SUCCESS) {
-                auto dragTextStart = pattern->dragTextStart_;
-                auto dragTextEnd = pattern->dragTextEnd_;
-                pattern->selectController_->UpdateHandleIndex(dragTextStart, dragTextEnd);
-                pattern->showSelect_ = true;
-                pattern->ProcessOverlay(false, false, false, false);
+                pattern->ShowSelectAfterDragEvent();
             }
             auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
