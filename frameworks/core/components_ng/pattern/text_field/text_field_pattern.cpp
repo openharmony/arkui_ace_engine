@@ -933,6 +933,21 @@ void TextFieldPattern::UpdateBlurReason()
     blurReason_ = focusHub->GetBlurReason();
 }
 
+void TextFieldPattern::ProcNormalInlineStateInBlurEvent()
+{
+    auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    if (IsNormalInlineState()) {
+        if (IsTextArea() && isTextInput_) {
+            layoutProperty->UpdateMaxLines(1);
+            layoutProperty->UpdatePlaceholderMaxLines(1);
+        }
+        inlineSelectAllFlag_ = false;
+        inlineFocusState_ = false;
+        RestorePreInlineStates();
+    }
+}
+
 void TextFieldPattern::HandleBlurEvent()
 {
     auto host = GetHost();
@@ -942,6 +957,7 @@ void TextFieldPattern::HandleBlurEvent()
     CHECK_NULL_VOID(context);
     UpdateBlurReason();
     if (!context->GetOnFoucs()) {
+        StopTwinkling();
         return;
     }
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
@@ -961,15 +977,7 @@ void TextFieldPattern::HandleBlurEvent()
     }
     auto paintProperty = GetPaintProperty<TextFieldPaintProperty>();
     CHECK_NULL_VOID(paintProperty);
-    if (IsNormalInlineState()) {
-        if (IsTextArea() && isTextInput_) {
-            layoutProperty->UpdateMaxLines(1);
-            layoutProperty->UpdatePlaceholderMaxLines(1);
-        }
-        inlineSelectAllFlag_ = false;
-        inlineFocusState_ = false;
-        RestorePreInlineStates();
-    }
+    ProcNormalInlineStateInBlurEvent();
     needToRequestKeyboardInner_ = false;
     isLongPress_ = false;
     isFocusedBeforeClick_ = false;
