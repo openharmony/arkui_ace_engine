@@ -458,6 +458,7 @@ private:
     void onDragDropAndLeave();
     void ClearDragDropEvent();
     void OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event);
+    void OnDragEnd(const RefPtr<Ace::DragEvent>& event);
     void ToJsonValue(std::unique_ptr<JsonValue>& json) const override;
 
     void AddDragFrameNodeToManager(const RefPtr<FrameNode>& frameNode)
@@ -622,6 +623,7 @@ private:
     TimeStamp lastAiPosTimeStamp_;
     bool adjusted_ = false;
     Offset touchDownOffset_;
+    bool isShowMenu_ = true;
     ACE_DISALLOW_COPY_AND_MOVE(RichEditorPattern);
 };
 } // namespace OHOS::Ace::NG

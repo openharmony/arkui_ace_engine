@@ -510,7 +510,7 @@ void TextPattern::ShowSelectOverlay(const RectF& firstHandle, const RectF& secon
     ShowSelectOverlay(firstHandle, secondHandle, false);
 }
 void TextPattern::ShowSelectOverlay(
-    const RectF& firstHandle, const RectF& secondHandle, bool animation, bool isUsingMouse)
+    const RectF& firstHandle, const RectF& secondHandle, bool animation, bool isUsingMouse, bool isShowMenu)
 {
     SelectOverlayInfo selectInfo;
     selectInfo.firstHandle.paintRect = firstHandle;
@@ -527,7 +527,7 @@ void TextPattern::ShowSelectOverlay(
     };
     selectInfo.rightClickOffset = GetRightClickOffset();
     selectInfo.isUsingMouse = isUsingMouse;
-    selectInfo.menuInfo.menuIsShow = selectInfo.firstHandle.isShow || selectInfo.secondHandle.isShow;
+    selectInfo.menuInfo.menuIsShow = isShowMenu && (selectInfo.firstHandle.isShow || selectInfo.secondHandle.isShow);
     selectInfo.menuInfo.showCut = false;
     selectInfo.menuInfo.showCopy = textSelector_.IsValid() && !textSelector_.StartEqualToDest();
     selectInfo.menuInfo.showPaste = false;
@@ -1274,6 +1274,7 @@ NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, c
     auto textSelectInfo = GetSpansInfo(selectStart, selectEnd, GetSpansMethod::ONSELECT);
     dragResultObjects_ = textSelectInfo.GetSelection().resultObjects;
     ResetDragRecordSize(dragResultObjects_.empty() ? -1 : 1);
+    status_ = Status::DRAGGING;
     if (dragResultObjects_.empty() || !gestureHub->GetIsTextDraggable()) {
         return itemInfo;
     }
@@ -1314,6 +1315,7 @@ NG::DragDropInfo TextPattern::OnDragStart(const RefPtr<Ace::DragEvent>& event, c
 void TextPattern::CloseOperate()
 {
     UpdateSpanItemDragStatus(dragResultObjects_, true);
+    recoverDragResultObjects_ = dragResultObjects_;
     AceEngineExt::GetInstance().DragStartExt();
     CloseKeyboard(true);
     CloseSelectOverlay();
@@ -1401,16 +1403,21 @@ void TextPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
     CHECK_NULL_VOID(pattern);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    if (event && event->GetResult() != DragRet::DRAG_SUCCESS) {
-        HandleSelectionChange(recoverStart_, recoverEnd_);
-        pattern->showSelect_ = true;
+    if (status_ == Status::DRAGGING) {
+        status_ = Status::NONE;
     }
     if (dragResultObjects_.empty()) {
         return;
     }
-    CloseSelectOverlay();
     UpdateSpanItemDragStatus(dragResultObjects_, false);
     dragResultObjects_.clear();
+    if (event && event->GetResult() != DragRet::DRAG_SUCCESS) {
+        HandleSelectionChange(recoverStart_, recoverEnd_);
+        showSelect_ = true;
+        isShowMenu_ = false;
+        CalculateHandleOffsetAndShowOverlay();
+        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, false, false, false);
+    }
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
@@ -1428,6 +1435,9 @@ void TextPattern::OnDragEndNoChild(const RefPtr<Ace::DragEvent>& event)
         if (event && event->GetResult() != DragRet::DRAG_SUCCESS) {
             HandleSelectionChange(recoverStart_, recoverEnd_);
             pattern->showSelect_ = true;
+            isShowMenu_ = false;
+            CalculateHandleOffsetAndShowOverlay();
+            ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle, false, false, false);
         }
         auto layoutProperty = host->GetLayoutProperty<TextLayoutProperty>();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -1766,6 +1776,10 @@ OffsetF TextPattern::GetParentGlobalOffset() const
 
 void TextPattern::CreateHandles()
 {
+    if (IsDragging()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT, "do not show handles when dragging");
+        return;
+    }
     ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
 }
 
@@ -2137,6 +2151,11 @@ void TextPattern::UpdateSelectOverlayOrCreate(SelectOverlayInfo selectInfo, bool
 
 void TextPattern::RedisplaySelectOverlay()
 {
+    if (!isShowMenu_) {
+        TAG_LOGD(AceLogTag::ACE_TEXT, "Do not redisplaySelectOverlay when drag failed");
+        isShowMenu_ = true;
+        return;
+    }
     if (selectOverlayProxy_ && !selectOverlayProxy_->IsClosed()) {
         CalculateHandleOffsetAndShowOverlay();
         if (selectOverlayProxy_->IsMenuShow()) {

@@ -209,10 +209,11 @@ bool RichEditorPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& di
     }
     MoveCaretAfterTextChange();
     MoveCaretToContentRect();
-    if (textSelector_.baseOffset != -1 && textSelector_.destinationOffset != -1 && SelectOverlayIsOn()) {
+    if (textSelector_.IsValid() && SelectOverlayIsOn() && isShowMenu_) {
         CalculateHandleOffsetAndShowOverlay();
         ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
     }
+    isShowMenu_ = true;
     UpdateCaretInfoToController();
     auto host = GetHost();
     CHECK_NULL_RETURN(host, ret);
@@ -2007,6 +2008,29 @@ void RichEditorPattern::OnDragMove(const RefPtr<OHOS::Ace::DragEvent>& event)
     AutoScrollParam param = { .autoScrollEvent = AutoScrollEvent::DRAG, .showScrollbar = true };
     auto localOffset = OffsetF(touchX, touchY) - parentGlobalOffset_;
     AutoScrollByEdgeDetection(param, localOffset, EdgeDetectionStrategy::IN_BOUNDARY);
+}
+
+void RichEditorPattern::OnDragEnd(const RefPtr<Ace::DragEvent>& event)
+{
+    ResetDragRecordSize(-1);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    if (status_ == Status::DRAGGING) {
+        status_ = Status::NONE;
+    }
+    if (recoverDragResultObjects_.empty()) {
+        return;
+    }
+    UpdateSpanItemDragStatus(recoverDragResultObjects_, false);
+    recoverDragResultObjects_.clear();
+    if (event && event->GetResult() != DragRet::DRAG_SUCCESS) {
+        HandleSelectionChange(recoverStart_, recoverEnd_);
+        showSelect_ = true;
+        isShowMenu_ = false;
+        CalculateHandleOffsetAndShowOverlay();
+        ShowSelectOverlay(textSelector_.firstHandle, textSelector_.secondHandle);
+    }
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 }
 
 bool RichEditorPattern::SelectOverlayIsOn()
@@ -4608,7 +4632,7 @@ void RichEditorPattern::UpdateSelectMenuInfo(bool hasData, SelectOverlayInfo& se
         inputMethod && inputMethod->IsInputTypeSupported(MiscServices::InputType::CAMERA_INPUT);
 #endif
     selectInfo.menuInfo.showCameraInput = !IsSelected() && isSupportCameraInput && !customKeyboardBuilder_;
-    selectInfo.menuInfo.menuIsShow = hasValue || hasData || selectInfo.menuInfo.showCameraInput;
+    selectInfo.menuInfo.menuIsShow = isShowMenu_ && (hasValue || hasData || selectInfo.menuInfo.showCameraInput);
     selectMenuInfo_ = selectInfo.menuInfo;
 }
 
