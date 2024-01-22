@@ -2226,6 +2226,12 @@ void RichEditorPattern::InsertValueToSpanNode(
     CHECK_NULL_VOID(spanItem);
     auto text = spanItem->content;
     std::wstring textTemp = StringUtils::ToWstring(text);
+    auto textTempSize = static_cast<int32_t>(textTemp.size());
+    if (textTempSize < info.GetOffsetInSpan()) {
+        TAG_LOGW(AceLogTag::ACE_RICH_TEXT, "InsertValue error, offsetInSpan is greater than the size of spanItem, "
+            "spanItemSize = %{public}d, offsetInSpan = %{public}d", textTempSize, info.GetOffsetInSpan());
+        return;
+    }
     std::wstring insertValueTemp = StringUtils::ToWstring(insertValue);
     textTemp.insert(info.GetOffsetInSpan(), insertValueTemp);
     text = StringUtils::ToString(textTemp);
