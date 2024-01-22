@@ -358,9 +358,11 @@ void TextPattern::OnHandleMoveDone(const RectF& handleRect, bool isFirstHandle)
         SelectHandleInfo handleInfo;
         if (isFirstHandle) {
             handleInfo.paintRect = textSelector_.firstHandle;
+            CheckHandles(handleInfo);
             selectOverlayProxy_->UpdateFirstSelectHandleInfo(handleInfo);
         } else {
             handleInfo.paintRect = textSelector_.secondHandle;
+            CheckHandles(handleInfo);
             selectOverlayProxy_->UpdateSecondSelectHandleInfo(handleInfo);
         }
         if (IsSelectAll() && selectMenuInfo_.showCopyAll == true) {
@@ -577,23 +579,21 @@ void TextPattern::HandleOnSelectAll()
 
 void TextPattern::CheckHandles(SelectHandleInfo& handleInfo)
 {
-    auto frameNode = GetHost();
-    CHECK_NULL_VOID(frameNode);
-    auto renderContext = frameNode->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (renderContext->GetClipEdge().value_or(true) == false) {
-        return;
-    }
-
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto offset = host->GetPaintRectOffset() + contentRect_.GetOffset() - pipeline->GetRootRect().GetOffset();
-    RectF contentGlobalRect(offset, contentRect_.GetSize());
-    contentGlobalRect = GetVisibleContentRect(host->GetAncestorNodeOfFrame(), contentGlobalRect);
-    auto handleOffset = handleInfo.paintRect.GetOffset();
-    handleInfo.isShow = contentGlobalRect.IsInRegion(PointF(handleOffset.GetX(), handleOffset.GetY() + BOX_EPSILON));
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    if (!renderContext->GetClipEdge().value_or(true)) {
+        return;
+    }
+    // use global offset.
+    RectF visibleContentRect(contentRect_.GetOffset() + parentGlobalOffset_, contentRect_.GetSize());
+    auto parent = host->GetAncestorNodeOfFrame();
+    visibleContentRect = GetVisibleContentRect(parent, visibleContentRect);
+    auto paintRect = handleInfo.paintRect;
+    PointF bottomPoint = { paintRect.Left(), paintRect.Bottom() - BOX_EPSILON };
+    PointF topPoint = { paintRect.Left(), paintRect.Top() + BOX_EPSILON };
+    handleInfo.isShow = visibleContentRect.IsInRegion(bottomPoint) && visibleContentRect.IsInRegion(topPoint);
 }
 
 void TextPattern::InitLongPressEvent(const RefPtr<GestureEventHub>& gestureHub)
