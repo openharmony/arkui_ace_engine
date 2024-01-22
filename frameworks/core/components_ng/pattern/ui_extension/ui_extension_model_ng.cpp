@@ -91,7 +91,10 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, int
         [embeddedType]() { return AceType::MakeRefPtr<UIExtensionPattern>(false, false, false, embeddedType); });
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->UpdateWant(wantWrap);
+    pattern->SetWantWrap(wantWrap);
+    if (frameNode->GetNodeStatus() == NodeStatus::NORMAL_NODE) {
+        pattern->UpdateWant(wantWrap);
+    }
     stack->Push(frameNode);
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);

@@ -41,6 +41,8 @@ constexpr int32_t ERROR_CODE_DESTINATION_NOT_FOUND = 100006;           // navDes
 constexpr int32_t ERROR_CODE_UIEXTENSION_NOT_REGISTER_SYNC_CALLBACK = 100011;
 // Transferring data failed
 constexpr int32_t ERROR_CODE_UIEXTENSION_TRANSFER_DATA_FAILED = 100012;
+// Forbid cascade uiextension
+constexpr int32_t ERROR_CODE_UIEXTENSION_FORBID_CASCADE = 100013;
 
 // C-API errors
 constexpr int32_t ERROR_CODE_NATIVE_IMPL_LIBRARY_NOT_FOUND = 106101;
