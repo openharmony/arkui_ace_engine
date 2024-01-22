@@ -37,6 +37,8 @@ const std::regex COLOR_WITH_MAGIC("#[0-9A-Fa-f]{8}");
 const std::regex BRACKETS("\\(.*?\\)");
 const std::regex FLOAT_MAGIC("^[0-9]+(\\.[0-9]+)?$");
 const std::regex SIZE_TYPE_MAGIC("([0-9]+)([a-z]+)");
+constexpr char PARAMS_SEPARATOR_LEVEL1 = ';';
+constexpr char PARAMS_SEPARATOR_LEVEL2 = ',';
 constexpr int DEFAULT_ANGLE = 180;
 constexpr ArkUI_Float64 DEFAULT_Z_SCALE = 1.0;
 constexpr int UNIT_VP = 1;
@@ -365,7 +367,7 @@ void SetTranslate(ArkUI_NodeHandle node, const char* value)
     }
 
     std::vector<std::string> valuesSrc;
-    StringUtils::StringSplitter(value, ',', valuesSrc);
+    StringUtils::StringSplitter(value, PARAMS_SEPARATOR_LEVEL1, valuesSrc);
     auto size = valuesSrc.size();
     if (size <= 0) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "valuesSrc is empty");
@@ -1345,13 +1347,13 @@ void SetScrollScrollSnap(ArkUI_NodeHandle node, const char* value)
         return;
     }
     std::vector<std::string> params;
-    StringUtils::StringSplitter(value, ' ', params);
+    StringUtils::StringSplitter(value, PARAMS_SEPARATOR_LEVEL1, params);
     if (params.size() != NUM_4) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "params are invalid");
         return;
     }
     std::vector<std::string> paginationsSrc;
-    StringUtils::StringSplitter(value, ',', paginationsSrc);
+    StringUtils::StringSplitter(value, PARAMS_SEPARATOR_LEVEL2, paginationsSrc);
     auto size = paginationsSrc.size();
     if (paginationsSrc.empty()) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "paginationsSrc is empty");
