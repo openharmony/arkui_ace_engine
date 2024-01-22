@@ -4352,7 +4352,7 @@ bool RichEditorPattern::BetweenSelectedPosition(const Offset& globalOffset)
 void RichEditorPattern::HandleSurfaceChanged(int32_t newWidth, int32_t newHeight, int32_t prevWidth, int32_t prevHeight)
 {
     if (newWidth != prevWidth || newHeight != prevHeight) {
-        TextPattern::CloseSelectOverlay();
+        TextPattern::HandleSurfaceChanged(newWidth, newHeight, prevWidth, prevHeight);
     }
     UpdateCaretInfoToController();
 }
