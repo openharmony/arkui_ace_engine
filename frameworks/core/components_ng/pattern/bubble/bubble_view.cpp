@@ -305,7 +305,12 @@ RefPtr<FrameNode> BubbleView::CreateCustomBubbleNode(
 
     auto columnNode = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
-    customNode->MountToParent(columnNode);
+    auto columnNodeClip = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<LinearLayoutPattern>(false));
+    auto clipContext = columnNodeClip->GetRenderContext();
+    clipContext->SetClipToBounds(true);
+    customNode->MountToParent(columnNodeClip);
+    columnNodeClip->MountToParent(columnNode);
     auto columnRenderContext = columnNode->GetRenderContext();
     auto columnLayoutProperty = columnNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_RETURN(columnLayoutProperty, nullptr);
