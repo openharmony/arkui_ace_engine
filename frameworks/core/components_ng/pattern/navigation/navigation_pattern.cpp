@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include <string>
 
+#include "base/geometry/dimension.h"
 #include "base/log/dump_log.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "base/perfmonitor/perf_constants.h"
@@ -916,6 +917,15 @@ void NavigationPattern::InitDividerMouseEvent(const RefPtr<InputEventHub>& input
 void NavigationPattern::HandleDragStart()
 {
     preNavBarWidth_ = realNavBarWidth_;
+    if (!isDividerDraggable_) {
+        return;
+    }
+    isInDividerDrag_ = true;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowId = pipeline->GetWindowId();
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), MouseFormat::RESIZE_LEFT_RIGHT);
 }
 
 void NavigationPattern::HandleDragUpdate(float xOffset)
@@ -978,6 +988,15 @@ void NavigationPattern::HandleDragUpdate(float xOffset)
 void NavigationPattern::HandleDragEnd()
 {
     preNavBarWidth_ = realNavBarWidth_;
+    if (!isDividerDraggable_) {
+        return;
+    }
+    isInDividerDrag_ = false;
+    auto pipeline = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto windowId = pipeline->GetWindowId();
+    auto mouseStyle = MouseStyle::CreateMouseStyle();
+    mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), MouseFormat::DEFAULT);
 }
 
 void NavigationPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
@@ -1011,23 +1030,29 @@ void NavigationPattern::InitDragEvent(const RefPtr<GestureEventHub>& gestureHub)
 
 void NavigationPattern::OnHover(bool isHover)
 {
+    if (isInDividerDrag_) {
+        return;
+    }
     MouseFormat format = isHover ? MouseFormat::RESIZE_LEFT_RIGHT : MouseFormat::DEFAULT;
     auto pipeline = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto windowId = pipeline->GetWindowId();
     auto mouseStyle = MouseStyle::CreateMouseStyle();
     int32_t currentPointerStyle = 0;
-    mouseStyle->GetPointerStyle(windowId, currentPointerStyle);
-    auto defaultValue = Dimension(0.0);
+    mouseStyle->GetPointerStyle(static_cast<int32_t>(windowId), currentPointerStyle);
     auto layoutProperty = GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto userSetMinNavBarWidthValue = layoutProperty->GetMinNavBarWidthValue(defaultValue);
-    auto userSetMaxNavBarWidthValue = layoutProperty->GetMaxNavBarWidthValue(defaultValue);
-    if (userSetNavBarRangeFlag_ && userSetMinNavBarWidthValue == userSetMaxNavBarWidthValue) {
+    auto userSetMinNavBarWidthValue = layoutProperty->GetMinNavBarWidthValue(Dimension(0.0));
+    auto userSetMaxNavBarWidthValue = layoutProperty->GetMaxNavBarWidthValue(Dimension(0.0));
+    bool navBarWidthRangeEqual = userSetMinNavBarWidthValue.Value() >= userSetMaxNavBarWidthValue.Value();
+    if ((userSetNavBarWidthFlag_ && !userSetNavBarRangeFlag_) ||
+        (userSetNavBarRangeFlag_ && navBarWidthRangeEqual)) {
+        isDividerDraggable_ = false;
         return;
     }
+    isDividerDraggable_ = true;
     if (currentPointerStyle != static_cast<int32_t>(format)) {
-        mouseStyle->SetPointerStyle(windowId, format);
+        mouseStyle->SetPointerStyle(static_cast<int32_t>(windowId), format);
     }
 }
 
