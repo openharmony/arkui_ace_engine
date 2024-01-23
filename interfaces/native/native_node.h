@@ -32,8 +32,8 @@
  * @since 12
  */
 
-#ifndef ARKUI_NATIVE_NODE
-#define ARKUI_NATIVE_NODE
+#ifndef ARKUI_NATIVE_NODE_H
+#define ARKUI_NATIVE_NODE_H
 
 #include "native_event.h"
 #include "native_type.h"
@@ -94,6 +94,14 @@ typedef enum {
     ARKUI_NODE_REFRESH,
     /** XComponent。 */
     ARKUI_NODE_XCOMPONENT,
+    /** 列表item分组 */
+    ARKUI_NODE_LIST_ITEM_GROUP,
+    /** 日期选择器组件 */
+    ARKUI_NODE_DATE_PICKER,
+    /** 时间选择组件 */
+    ARKUI_NODE_TIME_PICKER,
+    /** 滑动选择文本内容的组件 */
+    ARKUI_NODE_TEXT_PICKER,
 } ArkUI_NodeType;
 
 /**
@@ -110,7 +118,7 @@ typedef struct {
     const char* string;
     /** 对象类型。*/
     void* object;
-} ARKUI_AttributeItem;
+} ArkUI_AttributeItem;
 
 /**
  * @brief 定义ArkUI在Native侧可以设置的属性样式集合。
@@ -627,8 +635,7 @@ typedef enum {
      *
      * {@link ArkUI_AttributeItem}参数类型：\n
      * .string：遮罩文本内容 。\n
-     * .value[0]?.i32：设置浮层组件相对于被遮罩组件的方位，类型为{@link
-     * ArkUI_Alignment}，默认值为ARKUI_ALIGNMENT_TOP_START。 \n
+     * .value[0]?.i32：设置浮层组件相对于被遮罩组件的方位，类型为{@link ArkUI_Alignment}，默认值为ARKUI_ALIGNMENT_TOP_START。 \n
      * .value[1]?.f32：浮层文字相对浮层组件自身左上角的偏移量X，单位为vp。\n
      * .value[2]?.f32：浮层文字相对浮层组件自身左上角的偏移量Y，单位为vp。
      *
@@ -1516,40 +1523,135 @@ typedef enum {
      */
     NODE_TOUCH_EVENT = 0,
 
+    /**
+     * @brief 挂载事件。
+     *
+     * 触发该事件的条件 ：组件挂载显示时触发此回调。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * {@link ArkUI_NodeComponentEvent}中不包含参数。
+     */
     NODE_EVENT_ON_APPEAR,
 
     /**
-     * @brief 定义ARKUI_NODE_TOGGLE 开关状态切换时需要触发的事件。
+     * @brief 组件区域变化事件
      *
+     * 触发该事件的条件 ：组件区域变化时触发该回调。\n
      * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
-     * <b>ArkUI_NodeComponent.data[0].i32</b>表示开关状态，为0代表状态从开切换为关，为1代表状态从关切换为开。\n
+     * @note <b>::ArkUI_NodeComponentEvent</b>中包含12个参数\n
+     * <b>ArkUI_NodeComponent.data[0].f32</b>表示 old Area 目标元素的宽度，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[1].f32</b>表示 old Area 目标元素的高度，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[2].f32</b>表示 old Area
+     * 目标元素左上角相对父元素左上角的位置的x轴坐标，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[3].f32</b>表示 old Area
+     * 目标元素左上角相对父元素左上角的位置的y轴坐标，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[4].f32</b>表示 old Area
+     * 目标元素目标元素左上角相对页面左上角的位置的x轴坐标，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[5].f32</b>表示 old Area
+     * 目标元素目标元素左上角相对页面左上角的位置的y轴坐标，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[6].f32</b>表示 new Area 目标元素的宽度，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[7].f32</b>表示 new Area 目标元素的高度，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[8].f32</b>表示 new Area 目标元素左上角相对父元素左上角的位置的x轴坐标，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[9].f32</b>表示 new Area 目标元素左上角相对父元素左上角的位置的y轴坐标，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[10].f32</b>表示 new Area 目标元素目标元素左上角相对页面左上角的位置的x轴坐标，类型为number，单位vp。\n
+     * <b>ArkUI_NodeComponent.data[11].f32</b>表示 new Area 目标元素目标元素左上角相对页面左上角的位置的y轴坐标，类型为number，单位vp。\n
      */
+    NODE_EVENT_ON_ON_AREA_CHANGE,
+    NODE_ON_FOCUS,
+    NODE_ON_BLUR,
+
     NODE_TOGGLE_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TOGGLE,
 
-    /**
-     * @brief 定义ARKUI_NODE_TEXT_INPUT 单行文本输入框组件的事件枚举值。
-     *
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_StringAsyncEvent}。\n
-     * <b>ArkUI_StringAsync.pStr</b>表示变化后的文本信息。\n
-     */
     NODE_TEXT_INPUT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_INPUT,
+    NODE_TEXT_INPUT_ON_SUBMIT,
 
     /**
      * @brief 定义ARKUI_NODE_SCROLL滚动组件的滚动事件枚举值。
      *
+     * 触发该事件的条件 ：\n
+     * 1、滚动组件触发滚动时触发，支持键鼠操作等其他触发滚动的输入设置。\n
+     * 2、通过滚动控制器API接口调用。\n
+     * 3、越界回弹。\n
      * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * <b>::ArkUI_NodeComponentEvent</b>中包含2个参数
      * <b>ArkUI_NodeComponent.data[0].f32</b>表示距离上一次事件触发的X轴增量。\n
      * <b>ArkUI_NodeComponent.data[1].f32</b>表示距离上一次事件触发的Y轴增量。\n
      */
     NODE_SCROLL_EVENT_ON_SCROLL = MAX_NODE_SCOPE_NUM * ARKUI_NODE_SCROLL,
+    /**
+     * @brief 定义ARKUI_NODE_SCROLL滚动组件的滚动帧始事件枚举值
+     *
+     * 触发该事件的条件 ：\n
+     * 1、滚动组件触发滚动时触发，包括键鼠操作等其他触发滚动的输入设置。\n
+     * 2、调用控制器接口时不触发。\n
+     * 3、越界回弹不触发。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * <b>::ArkUI_NodeComponentEvent</b>中包含2个参数\n
+     * <b>ArkUI_NodeComponent.data[0].f32</b>表示即将发生的滚动量。\n
+     * <b>ArkUI_NodeComponent.data[1].i32</b>表示当前滚动状态。\n
+     * <b>::ArkUI_NodeComponentEvent</b>中包含1个返回值\n
+     * <b>ArkUI_NodeComponent.data[0].f32</b>事件处理函数中可根据应用场景计算实际需要的滚动量并存于data[0].f32中，Scroll将按照返回值的实际滚动量进行滚动\n
+     */
+    NODE_SCROLL_EVENT_ON_SCROLL_FRAME_BEGIN,
+    /**
+     * @brief 定义ARKUI_NODE_SCROLL滚动组件的滚动开始事件枚举值。
+     *
+     * 触发该事件的条件 ：\n
+     * 1、滚动组件开始滚动时触发，支持键鼠操作等其他触发滚动的输入设置。\n
+     * 2、通过滚动控制器API接口调用后开始，带过渡动效。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * <b>::ArkUI_NodeComponentEvent</b>中不包含参数。\n
+     */
+    NODE_SCROLL_EVENT_ON_SCROLL_START,
+    /**
+     * @brief 定义ARKUI_NODE_SCROLL滚动组件的滚动停止事件枚举值。
+     *
+     * 触发该事件的条件 ：\n
+     * 1、滚动组件触发滚动后停止，支持键鼠操作等其他触发滚动的输入设置。\n
+     * 2、通过滚动控制器API接口调用后停止，带过渡动效。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * <b>::ArkUI_NodeComponentEvent</b>中不包含参数。\n
+     */
+    NODE_SCROLL_EVENT_ON_SCROLL_STOP,
+    /**
+     * @brief 定义ARKUI_NODE_SCROLL滚动组件的滚动边缘事件枚举值。
+     *
+     * 触发该事件的条件 ：\n
+     * 1、滚动组件滚动到边缘时触发，支持键鼠操作等其他触发滚动的输入设置。\n
+     * 2、通过滚动控制器API接口调用。\n
+     * 3、越界回弹。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * <b>::ArkUI_NodeComponentEvent</b>中包含1个参数。\n
+     * <b>ArkUI_NodeComponent.data[0].i32</b>表示当前碰到的是上下左右哪个边。\n
+     */
+    NODE_SCROLL_EVENT_ON_SCROLL_EDGE,
+
+    NODE_TEXT_AREA_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_AREA,
+
+    NODE_REFRESH_STATE_CHANGE = 1000 * ARKUI_NODE_REFRESH + 1,
+    NODE_REFRESH_ON_REFRESH,
 
     /**
-     * @brief 定义ARKUI_NODE_TEXT_AREA 多行文本输入框组件的事件枚举值。
+     * @brief 定义ARKUI_NODE_DATE_PICKER 列表组件的滚动触摸事件枚举值。
      *
-     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_StringAsyncEvent}。\n
-     * <b>ArkUI_StringAsync.pStr</b>表示变化后的文本信息。\n
+     * 触发该事件的条件 ：选择日期时触发该事件。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * <b>::ArkUI_NodeComponentEvent</b>中包含3个参数。\n
+     * <b>ArkUI_NodeComponent.data[0].i32</b>表示 选中时间的年。\n
+     * <b>ArkUI_NodeComponent.data[1].i32</b>表示 选中时间的月，取值范围：[0-11]。\n
+     * <b>ArkUI_NodeComponent.data[2].i32</b>表示 选中时间的天。\n
      */
-    NODE_TEXT_AREA_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TEXT_AREA,
+    NODE_DATE_PICKER_EVENT_ON_DATE_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_DATE_PICKER,
+
+    /**
+     * @brief 定义ARKUI_NODE_TIME_PICKER 列表组件的滚动触摸事件枚举值。
+     *
+     * 触发该事件的条件 ：选择时间时触发该事件。\n
+     * 事件回调发生时，事件参数{@link ArkUI_NodeEvent}对象中的联合体类型为{@link ArkUI_NodeComponentEvent}。\n
+     * <b>::ArkUI_NodeComponentEvent</b>中包含2个参数。\n
+     * <b>ArkUI_NodeComponent.data[0].i32</b>表示 选中时间的时，取值范围：[0-23]。\n
+     * <b>ArkUI_NodeComponent.data[1].i32</b>表示 选中时间的分，取值范围：[0-59]。\n
+     */
+    NODE_TIME_PICKER_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_TIME_PICKER,
 } ArkUI_NodeEventType;
 
 /**
@@ -1678,10 +1780,12 @@ typedef struct {
      * @param node 需要设置属性的节点对象。
      * @param attribute 需要设置的属性类型。
      * @param item 需要设置的属性值。
-     * @return 返回函数调用结果，错误码参考{@link ArkUI_ErrorCode}定义。
+     * @return 0 - 成功。
+     *         401 - 函数参数异常。
+     *         106101 - 系统中未找到Native接口的动态实现库。
      */
-    ArkUI_ErrorCode (*setAttribute)(
-        ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const ARKUI_AttributeItem* item);
+    int32_t (*setAttribute)(
+        ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute, const ArkUI_AttributeItem* item);
 
     /**
      * @brief 属性获取函数。
@@ -1692,7 +1796,7 @@ typedef struct {
      * @param attribute 需要获取的属性类型。
      * @return 当前属性类型的属性值，失败返回空指针。
      */
-    const ARKUI_AttributeItem* (*getAttribute)(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute);
+    const ArkUI_AttributeItem* (*getAttribute)(ArkUI_NodeHandle node, ArkUI_NodeAttributeType attribute);
 
     /**
      * @brief 重置属性函数。
@@ -1708,9 +1812,11 @@ typedef struct {
      * @param node 需要注册事件的节点对象。
      * @param eventType 需要注册的事件类型。
      * @param eventId 自定义事件ID，当事件触发时在回调参数<@link ArkUI_NodeEvent>中携带回来。
-     * @return 函数执行结果，错误码参考{@link ArkUI_ErrorCode}定义。
+     * @return 0 - 成功。
+     *         401 - 函数参数异常。
+     *         106101 - 系统中未找到Native接口的动态实现库。
      */
-    ArkUI_ErrorCode (*registerNodeEvent)(ArkUI_NodeHandle node, ArkUI_NodeEventType eventType, int32_t eventId);
+    int32_t (*registerNodeEvent)(ArkUI_NodeHandle node, ArkUI_NodeEventType eventType, int32_t eventId);
 
     /**
      * @brief 反注册节点事件函数。
@@ -1751,5 +1857,5 @@ typedef struct {
 };
 #endif
 
-#endif // ARKUI_NATIVE_NODE
+#endif // ARKUI_NATIVE_NODE_H
 /** @}*/
