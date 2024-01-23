@@ -64,7 +64,6 @@ public:
     ~ScrollablePattern()
     {
         UnRegister2DragDropManager();
-        UnRegisterWindowStateChangedCallback();
         if (scrollBarProxy_) {
             scrollBarProxy_->UnRegisterScrollableNode(AceType::WeakClaim(this));
         }
@@ -452,6 +451,7 @@ public:
     }
 
 protected:
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     virtual DisplayMode GetDefaultScrollBarDisplayMode() const
     {
         return DisplayMode::AUTO;
@@ -543,7 +543,6 @@ private:
     void AttachAnimatableProperty(RefPtr<Scrollable> scrollable);
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
     void RegisterWindowStateChangedCallback();
-    void UnRegisterWindowStateChangedCallback();
 
     // select with mouse
     virtual void MultiSelectWithoutKeyboard(const RectF& selectedZone) {};

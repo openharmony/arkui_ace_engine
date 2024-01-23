@@ -494,13 +494,11 @@ void ScrollablePattern::RegisterWindowStateChangedCallback()
     context->AddWindowStateChangedCallback(host->GetId());
 }
 
-void ScrollablePattern::UnRegisterWindowStateChangedCallback()
+void ScrollablePattern::OnDetachFromFrameNode(FrameNode* frameNode)
 {
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto context = NG::PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
-    context->RemoveWindowStateChangedCallback(host->GetId());
+    context->RemoveWindowStateChangedCallback(frameNode->GetId());
 }
 
 void ScrollablePattern::OnWindowHide()
