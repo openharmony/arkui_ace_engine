@@ -110,6 +110,8 @@ protected:
     int32_t ConvertTouchOffsetToCaretPosition(const Offset& localOffset);
     void UpdateUnitLayout(LayoutWrapper* layoutWrapper);
     ParagraphStyle GetParagraphStyle(const TextStyle& textStyle, const std::string& content) const;
+    void GetInlineMeasureItem(
+        const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper, float* inlineIdealHeight);
     float ConstraintWithMinWidth(
         const LayoutConstraintF& contentConstraint, LayoutWrapper* layoutWrapper,
         RefPtr<Paragraph>& paragraph, float removeValue = 0.0f);
